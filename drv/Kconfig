@@ -1,0 +1,12 @@
+#
+# LiDbg configuration
+#
+
+menu "LiDbg Driver"
+comment "2011 Flyaudio"
+config LIDBG
+	tristate "Select To Support LiDbg"
+	default m
+	help
+            By lsw
+endmenu
