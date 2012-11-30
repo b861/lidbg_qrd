@@ -337,7 +337,7 @@ int rmi_unregister_sensors(struct rmi_phys_driver *rpd)
      */
 
     mutex_lock(&sensor_drivers_mutex);
-    // list_del(&rpd->sensor->sensor_drivers);
+   // list_del(&rpd->sensor->sensor_drivers);
     mutex_unlock(&sensor_drivers_mutex);
 
     return 0;
@@ -483,30 +483,30 @@ static int __init rmi_bus_init(void)
 {
     int status;
     status = 0;
-
+	
     printk(KERN_INFO "%s: RMI Bus Driver Init", __func__);
-    //111111111111111111111111111111111111
+//111111111111111111111111111111111111
 #if 0
-    i2c_register_board_info(MSM_GSBI1_QUP_I2C_BUS_ID, qcomnewtouch, ARRAY_SIZE(qcomnewtouch));
+	i2c_register_board_info(MSM_GSBI1_QUP_I2C_BUS_ID, qcomnewtouch, ARRAY_SIZE(qcomnewtouch));
 #else
-    {
-        struct i2c_adapter *i2c_adap;
-        //struct i2c_board_info i2c_info;
-        void *act_client = NULL;
+{
+	struct i2c_adapter *i2c_adap;  
+	//struct i2c_board_info i2c_info;  
+	void *act_client = NULL;
 
-        i2c_adap = i2c_get_adapter(MSM_GSBI1_QUP_I2C_BUS_ID);
+	i2c_adap = i2c_get_adapter(MSM_GSBI1_QUP_I2C_BUS_ID);	
 
-        act_client = i2c_new_device(i2c_adap, qcomnewtouch);
-        if (!act_client)
-            printk(KERN_INFO "i2c_new_device fail!");
-
-
-        i2c_put_adapter(i2c_adap);
+	act_client = i2c_new_device(i2c_adap, qcomnewtouch);
+	if (!act_client)
+		printk(KERN_INFO "i2c_new_device fail!");
 
 
-    }
+	i2c_put_adapter(i2c_adap);
+
+
+}
 #endif
-
+	
 
     /* Register the rmi bus */
     rmi_bus_type.name = busname;

@@ -163,7 +163,7 @@ void FN_11_inthandler(struct rmi_function_info *rmifninfo,
     int finger;
     struct rmi_function_device *function_device;
     struct f11_instance_data *instanceData;
-    int X = 0, Y = 0, Ycheck = 0, Z = 0, Wy = 0, Wx = 0;
+	int X = 0, Y = 0, Ycheck = 0, Z = 0, Wy = 0, Wx = 0;
 
     instanceData = (struct f11_instance_data *) rmifninfo->fndata;
 
@@ -271,81 +271,85 @@ void FN_11_inthandler(struct rmi_function_info *rmifninfo,
                 Apps that don't support Multi-touch will still
                 function.
                 */
-                Ycheck = 1647 - Y;
-                if(Ycheck <= 1547)
+ Ycheck=1647-Y;
+    if(Ycheck<=1547)
+    	{
+                if (fingerDownCount == 1)
                 {
-                    if (fingerDownCount == 1)
-                    {
-                        instanceData->oldX = X;
-                        instanceData->oldY = Y;
-                        input_report_abs(function_device->input, ABS_X, X);
-                        input_report_abs(function_device->input, ABS_Y, Ycheck);
-                        input_report_abs(function_device->input, ABS_PRESSURE, Z);
-                        input_report_abs(function_device->input, ABS_TOOL_WIDTH, max(Wx, Wy));
-                    }
-                    else
-                    {
-                        /* TODO generate non MT events for multifinger situation. */
-                    }
+                    instanceData->oldX = X;
+                    instanceData->oldY = Y;
+                    input_report_abs(function_device->input, ABS_X, X);
+                    input_report_abs(function_device->input, ABS_Y, Ycheck);
+                    input_report_abs(function_device->input, ABS_PRESSURE, Z);
+                    input_report_abs(function_device->input, ABS_TOOL_WIDTH,max(Wx, Wy));
+                }
+                else
+                {
+                    /* TODO generate non MT events for multifinger situation. */
+                }
 #ifdef CONFIG_SYNA_MULTI_TOUCH
-                    /* Report Multi-Touch events for each finger */
-                    /* major axis of touch area ellipse */
+                /* Report Multi-Touch events for each finger */
+                /* major axis of touch area ellipse */
 #if 0
-                    input_report_abs(function_device->input, ABS_MT_TOUCH_MAJOR, Z);
-                    /* minor axis of touch area ellipse */
-                    input_report_abs(function_device->input, ABS_MT_WIDTH_MAJOR,
-                                     max(Wx, Wy));
-                    /* Currently only 2 supported - 1 or 0 */
-                    input_report_abs(function_device->input, ABS_MT_ORIENTATION,
-                                     (Wx > Wy ? 1 : 0));
-                    input_report_abs(function_device->input, ABS_MT_POSITION_X, X);
-                    input_report_abs(function_device->input, ABS_MT_POSITION_Y, 1647 - Y);
-                    printk("=x.y==%d[%d.%d]fingerDownCount[%d]\n", finger, X, 1647 - Y, fingerDownCount);
-                    /* TODO: Tracking ID needs to be reported but not used yet. */
-                    /* Could be formed by keeping an id per position and assiging */
-                    /* a new id when fingerStatus changes for that position.*/
-                    input_report_abs(function_device->input, ABS_MT_TRACKING_ID,
-                                     finger + 1);
+                input_report_abs(function_device->input, ABS_MT_TOUCH_MAJOR, Z);
+                /* minor axis of touch area ellipse */
+                input_report_abs(function_device->input, ABS_MT_WIDTH_MAJOR,
+                                 max(Wx, Wy));
+                /* Currently only 2 supported - 1 or 0 */
+                input_report_abs(function_device->input, ABS_MT_ORIENTATION,
+                                 (Wx > Wy ? 1 : 0));
+                input_report_abs(function_device->input, ABS_MT_POSITION_X, X);
+                input_report_abs(function_device->input, ABS_MT_POSITION_Y, 1647-Y);
+                printk("=x.y==%d[%d.%d]fingerDownCount[%d]\n", finger, X, 1647 - Y, fingerDownCount);
+                /* TODO: Tracking ID needs to be reported but not used yet. */
+                /* Could be formed by keeping an id per position and assiging */
+                /* a new id when fingerStatus changes for that position.*/
+                input_report_abs(function_device->input, ABS_MT_TRACKING_ID,
+                                 finger + 1);
 
-                    /* MT sync between fingers */
-                    input_mt_sync(function_device->input);
+                /* MT sync between fingers */
+                input_mt_sync(function_device->input);
+				#endif
+				//////////11111111111//
+		input_report_abs(function_device->input, ABS_MT_POSITION_X,X);
+		input_report_abs(function_device->input, ABS_MT_POSITION_Y,Ycheck);
+		input_report_abs(function_device->input, ABS_MT_PRESSURE,15);
+		input_report_abs(function_device->input, ABS_MT_TRACKING_ID,finger + 1);
+		input_report_abs(function_device->input, ABS_MT_TOUCH_MAJOR,Z);
+		input_mt_sync(function_device->input);
+		input_report_key(function_device->input, BTN_TOUCH, !!fingerDownCount);
+		//input_sync(function_device->input);
+		
 #endif
-                    //////////11111111111//
-                    input_report_abs(function_device->input, ABS_MT_POSITION_X, X);
-                    input_report_abs(function_device->input, ABS_MT_POSITION_Y, Ycheck);
-                    input_report_abs(function_device->input, ABS_MT_PRESSURE, 15);
-                    input_report_abs(function_device->input, ABS_MT_TRACKING_ID, finger + 1);
-                    input_report_abs(function_device->input, ABS_MT_TOUCH_MAJOR, Z);
-                    input_mt_sync(function_device->input);
-                    input_report_key(function_device->input, BTN_TOUCH, !!fingerDownCount);
-                    //input_sync(function_device->input);
-
-#endif
-                }
-                else if(key_back_press == 0 && finger == 0)
+        }
+		else
+	if(key_back_press==0&&finger==0)
+			{
+			key_back_press=1;
+			if(X<220)
+				{
+				input_report_key(function_device->input, KEY_MENU, KEY_PRESS);
+				printk(KERN_DEBUG "%s: KEY_MENU_ PRESS.\n", __func__);
+				}
+			else 
+			if(X<430)
                 {
-                    key_back_press = 1;
-                    if(X < 220)
-                    {
-                        input_report_key(function_device->input, KEY_MENU, KEY_PRESS);
-                        printk(KERN_DEBUG "%s: KEY_MENU_ PRESS.\n", __func__);
-                    }
-                    else if(X < 430)
-                    {
-                        input_report_key(function_device->input, KEY_HOME, KEY_PRESS);
-                        printk(KERN_DEBUG "%s: KEY_HOME PRESS.\n", __func__);
-                    }
-                    else if(X < 630)
-                    {
-                        input_report_key(function_device->input,  KEY_SEARCH, KEY_PRESS);
-                        printk(KERN_DEBUG "%s: KEY_SEARCH PRESS.\n", __func__);
-                    }
-                    else if(X > 630)
-                    {
-                        input_report_key(function_device->input, KEY_BACK, KEY_PRESS);
-                        printk(KERN_DEBUG "%s: KEY_BACK PRESS.\n", __func__);
-                    }
-                }
+                input_report_key(function_device->input, KEY_HOME, KEY_PRESS);
+				printk(KERN_DEBUG "%s: KEY_HOME PRESS.\n", __func__);
+				}
+		else 
+			if(X<630)
+                {
+                input_report_key(function_device->input,  KEY_SEARCH, KEY_PRESS);
+				printk(KERN_DEBUG "%s: KEY_SEARCH PRESS.\n", __func__);
+				}
+		else 
+			if(X>630)
+                {
+                input_report_key(function_device->input, KEY_BACK, KEY_PRESS);
+				printk(KERN_DEBUG "%s: KEY_BACK PRESS.\n", __func__);
+				}
+		    }
                 //				printk(KERN_INFO "%s: X: %d Y: %d", __func__, X, Y);
             }
         }
@@ -368,20 +372,20 @@ void FN_11_inthandler(struct rmi_function_info *rmifninfo,
         input_report_abs(function_device->input, ABS_X, instanceData->oldX);
         input_report_abs(function_device->input, ABS_Y, instanceData->oldY);
         instanceData->oldX = instanceData->oldY = 0;
-        input_report_key(function_device->input, KEY_MENU, KEY_RELEASE);
-        input_report_key(function_device->input, KEY_HOME, KEY_RELEASE);
-        input_report_key(function_device->input, KEY_SEARCH, KEY_RELEASE);
-        input_report_key(function_device->input, KEY_BACK, KEY_RELEASE);
+		input_report_key(function_device->input, KEY_MENU, KEY_RELEASE);
+		input_report_key(function_device->input, KEY_HOME, KEY_RELEASE);
+		input_report_key(function_device->input, KEY_SEARCH, KEY_RELEASE);
+		input_report_key(function_device->input, KEY_BACK, KEY_RELEASE);
 
-        input_sync(function_device->input);
-        //printk("\n================  KEY_RELEASE \n");
-        key_back_press = 0;
+		input_sync(function_device->input);
+		//printk("\n================  KEY_RELEASE \n");
+		key_back_press = 0;
         //printk(KERN_DEBUG "%s: Finger up.\n", __func__);
     }
 
     FN_11_relreport(rmifninfo);
     input_sync(function_device->input); /* sync after groups of events */
-    //printk("=x.y==%d[%d.%d]\n", finger, X, 1647-Y);
+	//printk("=x.y==%d[%d.%d]\n", finger, X, 1647-Y);
 
 }
 
