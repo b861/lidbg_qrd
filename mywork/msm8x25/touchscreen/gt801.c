@@ -85,7 +85,11 @@ int g_New_PosX[5] = {0};
 int g_New_PosY[5] = {0};
 uint8_t  point_data[35] = { 0 }, finger = 0;
 unsigned int pressure[MAX_FINGER_NUM] = {0};
-unsigned int FLAG_FOR_15S_OFF ;
+
+extern  unsigned int FLAG_FOR_15S_OFF;
+extern  bool is_ts_load;
+extern void SOC_Log_Dump(int cmd);
+
 static struct workqueue_struct *goodix_wq;
 int lidbg_i2c_running;
 
@@ -324,6 +328,12 @@ static void goodix_ts_work_func(struct work_struct *work)
 
     //printk("\nfinger=[%d]\n",finger);
     //return 0;
+if(finger==3)
+    	{SOC_Key_Report(KEY_BACK,KEY_PRESSED_RELEASED);}
+if (finger==4) {printk("SOC_Log_Dump\n");SOC_Log_Dump(LOG_DMESG);}
+if(finger==5)
+    	{SOC_Key_Report(KEY_MENU,KEY_PRESSED_RELEASED);}
+
 
     switch(finger)
     {
@@ -823,15 +833,10 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
 #ifdef GOODIX_MULTI_TOUCH
 
     //  set_bit(BTN_2, ts->input_dev->keybit);
-
-
-
 #define 	RESOLUTION_X	(800)
 #define 	RESOLUTION_Y	(480)
 #define GOODIX_TOUCH_WEIGHT_MAX 		(150)
-
 #endif
-
     input_set_abs_params(ts->input_dev, ABS_MT_WIDTH_MAJOR, 0, 255, 0, 0);
     input_set_abs_params(ts->input_dev, ABS_MT_TOUCH_MAJOR, 0, 255, 0, 0);
     input_set_abs_params(ts->input_dev, ABS_MT_POSITION_X, 0, 1024  , 0, 0); //ts->abs_y_max
@@ -1109,6 +1114,7 @@ static int __devinit goodix_ts_init(void)
     int ret = 0;
     unsigned int flag_irq = 0;
     uint8_t device_check[2] = {0x55};
+	is_ts_load=1;
     printk("==================touch INFO=======================\n");
 
 

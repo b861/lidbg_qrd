@@ -551,9 +551,9 @@ static int ft5x06_ts_probe(struct i2c_client *client,
 	__set_bit(BTN_TOUCH, input_dev->keybit);
 
 	input_set_abs_params(input_dev, ABS_MT_POSITION_X, 0,
-			     /*pdata->x_max*/1024, 0, 0);
+			     /*pdata->x_max*/800, 0, 0);
 	input_set_abs_params(input_dev, ABS_MT_POSITION_Y, 0,
-			     /*pdata->y_max*/600, 0, 0);
+			     /*pdata->y_max*/480, 0, 0);
 	input_set_abs_params(input_dev, ABS_MT_TRACKING_ID, 0,
 			     CFG_MAX_TOUCH_POINTS, 0, 0);
 	input_set_abs_params(input_dev, ABS_MT_TOUCH_MAJOR, 0, FT_PRESS, 0, 0);
