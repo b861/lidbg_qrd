@@ -247,6 +247,7 @@ int main(int argc , char **argv)
     system("insmod /system/lib/modules/out/lidbg_ad.ko");
     system("insmod /system/lib/modules/out/lidbg_fly_soc.ko");
     system("insmod /system/lib/modules/out/lidbg_soc_devices.ko");
+    system("insmod /system/lib/modules/out/lidbg_videoin.ko");
     system("insmod /system/lib/modules/out/lidbg_main.ko");
     system("insmod /system/lib/modules/out/lidbg_ts_probe.ko");
     system("insmod /system/lib/modules/out/lidbg_ts_to_recov.ko");
