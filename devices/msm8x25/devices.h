@@ -83,8 +83,6 @@ enum
     							DVD_RESET_HIGH;\
     							}while(0)
 
-#define USB_HUB_RST_HIGH  do{SOC_IO_Output(0, 35, 1); }while(0)
-#define USB_HUB_RST_LOW   do{SOC_IO_Output(0, 35, 0); }while(0)
 
 
 #endif
@@ -95,8 +93,8 @@ enum
 #define DVD_RESET_HIGH
 #define DVD_RESET_LOW
 #define DVD_RESET
-#define USB_HUB_RST_HIGH
-#define USB_HUB_RST_LOW
+//#define USB_HUB_RST_HIGH
+//#define USB_HUB_RST_LOW
 
 #endif
 
@@ -189,8 +187,11 @@ enum
 								SOC_IO_Output(0, 34, 0);\
 							}while(0)
 
-#define USB_SWITCH_DISCONNECT   do{SOC_IO_Output(0, 15, 1); }while(0)
-#define USB_SWITCH_CONNECT  do{SOC_IO_Output(0, 15, 0); }while(0)
+#define USB_SWITCH_DISCONNECT   do{SOC_IO_Output(0, 43, 1); }while(0)
+#define USB_SWITCH_CONNECT  do{SOC_IO_Output(0, 43, 0); }while(0)
 
+#define USB_HUB_RST_HIGH  do{SOC_IO_Output(0, 35, 1); }while(0)
+#define USB_HUB_RST_LOW   do{SOC_IO_Output(0, 35, 0); }while(0)
+#define USB_HUB_RST do{USB_HUB_RST_LOW;msleep(500);USB_HUB_RST_HIGH;}while(0);
 
 #endif

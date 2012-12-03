@@ -565,12 +565,12 @@ static int thread_resume(void *data)
 {
 
 	DUMP_FUN;
-	msleep(5000);
+	msleep(3000);
 	lidbg("set usb mode host\n");
 	USB_ID_LOW_HOST;
-	USB_HUB_RST_HIGH;
 	msleep(2000);
 	USB_SWITCH_CONNECT;
+	USB_HUB_RST;
 	return 0;
 
 
@@ -613,10 +613,9 @@ static int soc_dev_resume(struct platform_device *pdev)
         SOC_IO_ISR_Enable(BUTTON_RIGHT_2);
 #endif
 
-#if 1
+#ifdef FLY_DEBUG
         // lidbg_key_report(KEY_END, KEY_PRESSED_RELEASED);
         SOC_Key_Report(KEY_HOME, KEY_PRESSED_RELEASED);
-
 #endif
 
         lidbg("turn lcd on!\n");
@@ -827,9 +826,9 @@ void fly_devices_init(void)
     {
     
 		PWR_EN_ON;
-		USB_HUB_RST_HIGH;
 		USB_ID_LOW_HOST;
 		USB_SWITCH_CONNECT;
+		USB_HUB_RST;
 #ifdef DEBUG_TVP5150
 			lidbg("tvp5150 pwr on\n");
 			TVP5150_RESET_HIGH;  //tvp5150 reset
