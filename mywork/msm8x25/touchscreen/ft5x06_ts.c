@@ -190,7 +190,7 @@ static void ft5x06_report_value(struct ft5x06_ts_data *data)
 	int i;
 	int fingerdown = 0;
 
-#ifdef FLY_DEBUG
+#if 1
 
 	if(event->touch_point == 3)
 		SOC_Key_Report(KEY_BACK,KEY_PRESSED_RELEASED);
