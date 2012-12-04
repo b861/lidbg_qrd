@@ -35,7 +35,10 @@
 #include <linux/i2c.h>
 #include <linux/spi/spi.h>
 
-//#include <linux/smp_lock.h>
+
+#ifdef CONFIG_HAS_EARLYSUSPEND
+#include <linux/earlysuspend.h>
+#endif
 
 
 #include <asm/uaccess.h>

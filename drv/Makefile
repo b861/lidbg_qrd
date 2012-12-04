@@ -26,6 +26,10 @@ lidbg_main-objs := lidbg.o
 EXTRA_CFLAGS := -I$(DBG_DRV_PATH)/inc  -I$(DBG_DRV_PATH)/$(DBG_SOC)/inc  -I$(DBG_DEV_PATH)/$(DBG_SOC)
 include $(DBG_DRV_PATH)/$(DBG_SOC)/drv_$(DBG_SOC).mk
 
+ifdef DBG_DBG
+EXTRA_CFLAGS += -DFLY_DEBUG
+endif
+
 modules:
 	#env
 	$(MAKE) -C $(KERNELDIR) M=$(PWD) modules

@@ -24,6 +24,12 @@ struct platform_devices_resource devices_resource;
 bool suspend_pending = 0;
 bool suspend_test = 0;
 
+#ifdef CONFIG_HAS_EARLYSUSPEND
+static void devices_early_suspend(struct early_suspend *handler);
+static void devices_late_resume(struct early_suspend *handler);
+struct early_suspend early_suspend;
+
+#endif
 
 
 
@@ -110,8 +116,9 @@ void pwr_key_scan(void)
 		suspend_pending = 1;
 #ifdef DEBUG_UMOUNT_USB
 		 k2u_write(UMOUNT_USB);
-#endif
 		msleep(1000);
+#endif
+		
 		SOC_PWR_ShutDown();
 
 
@@ -235,14 +242,14 @@ find_key:
 		static bool usb_id_host = 1;
 		if(usb_id_host)
 		{
-			USB_HUB_RST_LOW;
+			USB_HUB_DISABLE;
 			USB_ID_HIGH_DEV;
 			usb_id_host = 0;
 			lidbg("usb_id change to dev\n");
 		}
 		else
 		{
-			USB_HUB_RST_HIGH;
+			USB_HUB_ENABLE;
 			USB_ID_LOW_HOST;
 			usb_id_host = 1;
 			lidbg("usb_id change to host\n");
@@ -492,9 +499,21 @@ static int soc_dev_probe(struct platform_device *pdev)
         wake_up_process(pwr_task);
 #endif
 
-
     }
-    return 0;
+
+
+#ifdef CONFIG_HAS_EARLYSUSPEND
+{
+		
+
+		early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN + 1;
+		early_suspend.suspend = devices_early_suspend;
+		early_suspend.resume = devices_late_resume;
+		register_early_suspend(&early_suspend);
+}
+#endif
+
+	return 0;
 
 }
 static int soc_dev_remove(struct platform_device *pdev)
@@ -524,6 +543,59 @@ static int soc_dev_remove(struct platform_device *pdev)
     return 0;
 
 }
+
+#ifdef CONFIG_PM
+
+
+#ifdef CONFIG_HAS_EARLYSUSPEND
+static void devices_early_suspend(struct early_suspend *handler)
+{
+	DUMP_FUN_ENTER;
+	LCD_OFF;
+	
+#ifdef DEBUG_UMOUNT_USB
+	k2u_write(UMOUNT_USB);
+#endif
+	//LPCControlPWRDisenable();
+
+	USB_HUB_DISABLE;
+	USB_SWITCH_DISCONNECT;
+	USB_ID_HIGH_DEV;
+
+	DUMP_FUN_LEAVE;
+
+}
+
+static void devices_late_resume(struct early_suspend *handler)
+{
+	int err;
+
+	DUMP_FUN_ENTER;
+
+	lidbg("create thread_resume!\n");
+	
+	BL_SET(BL_MAX / 2);
+	
+	resume_task = kthread_create(thread_resume, NULL, "dev_resume_task");
+	if(IS_ERR(resume_task))
+	{
+		lidbg("Unable to start kernel thread.\n");
+		err = PTR_ERR(resume_task);
+		resume_task = NULL;
+		//return err;
+		//exit;
+	}
+	wake_up_process(resume_task);
+
+	
+	DUMP_FUN_LEAVE;
+}
+#endif
+
+
+
+
+
 static int  soc_dev_suspend(struct platform_device *pdev, pm_message_t state)
 {
     lidbg("soc_dev_suspend\n");
@@ -532,11 +604,6 @@ static int  soc_dev_suspend(struct platform_device *pdev, pm_message_t state)
     if(platform_id ==  PLATFORM_FLY)
     {
         lidbg("turn lcd off!\n");
-        LCD_OFF;
-		//disable usb
-		USB_SWITCH_DISCONNECT;
-		USB_HUB_RST_LOW;
-		USB_ID_HIGH_DEV;
 		
 #ifdef DEBUG_LPC
         LPCSuspend();
@@ -564,13 +631,16 @@ static int  soc_dev_suspend(struct platform_device *pdev, pm_message_t state)
 static int thread_resume(void *data)
 {
 
-	DUMP_FUN;
+	DUMP_FUN_ENTER;
 	msleep(3000);
-	lidbg("set usb mode host\n");
+
+	
+	lidbg("usb enable\n");
 	USB_ID_LOW_HOST;
 	msleep(2000);
 	USB_SWITCH_CONNECT;
 	USB_HUB_RST;
+	DUMP_FUN_LEAVE;
 	return 0;
 
 
@@ -580,7 +650,6 @@ static int thread_resume(void *data)
 static int soc_dev_resume(struct platform_device *pdev)
 {
 	static u32 resume_count = 0;
-	int err;
 
     lidbg("soc_dev_resume:%d\n",++resume_count);
 	
@@ -595,7 +664,7 @@ static int soc_dev_resume(struct platform_device *pdev)
     if(platform_id ==  PLATFORM_FLY)
     {
     //disable usb first
-    	USB_HUB_RST_LOW;
+    	USB_HUB_DISABLE;
 		USB_ID_HIGH_DEV;
 		USB_SWITCH_DISCONNECT;
 		
@@ -646,28 +715,14 @@ static int soc_dev_resume(struct platform_device *pdev)
         LPCNoReset();
         LPCBackLightOn();
 #endif
-		//USB_HUB_RST_HIGH;
+		//USB_HUB_ENABLE;
 	    //USB_ID_LOW_HOST;
-		lidbg("create thread_resume!\n");
-
-		resume_task = kthread_create(thread_resume, NULL, "dev_resume_task");
-		if(IS_ERR(resume_task))
-		{
-			lidbg("Unable to start kernel thread.\n");
-			err = PTR_ERR(resume_task);
-			resume_task = NULL;
-			//return err;
-			//exit;
-		}
-		wake_up_process(resume_task);
-
-
-
 
     }
     return 0;
 
 }
+#endif
 
 static struct platform_driver soc_devices_driver =
 {
@@ -678,7 +733,10 @@ static struct platform_driver soc_devices_driver =
     .driver = {
         .name = "soc_devices",
         .owner = THIS_MODULE,
+
     },
+
+
 };
 
 
@@ -847,7 +905,7 @@ void fly_devices_init(void)
 
         lidbg("turn lcd on!\n");
         LCD_ON;
-        SOC_BL_Set(BL_MAX / 2);
+        BL_SET(BL_MAX / 2);
 
         //#ifdef FLY_BOARD_3ST
         //wifi
