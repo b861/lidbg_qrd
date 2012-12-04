@@ -9,6 +9,8 @@
 #define DEBUG_LED
 
 #define FLY_BOARD_1ST
+//#define CONFIG_PM
+//#define CONFIG_HAS_EARLYSUSPEND
 
 //#define DEBUG_UMOUNT_USB
 
@@ -83,6 +85,7 @@ enum
     							DVD_RESET_HIGH;\
     							}while(0)
 
+#define BL_SET(x) SOC_BL_Set(x)
 
 
 #endif
@@ -93,8 +96,10 @@ enum
 #define DVD_RESET_HIGH
 #define DVD_RESET_LOW
 #define DVD_RESET
-//#define USB_HUB_RST_HIGH
-//#define USB_HUB_RST_LOW
+#define BL_SET(x)
+
+//#define USB_HUB_ENABLE
+//#define USB_HUB_DISABLE
 
 #endif
 
@@ -179,19 +184,19 @@ enum
 #define PWR_EN_OFF  do{SOC_IO_Output(0, 23, 0); }while(0)
 
 #define USB_ID_HIGH_DEV do{\
-								SOC_IO_Config(34,GPIO_CFG_INPUT,GPIO_CFG_PULL_UP,GPIO_CFG_8MA);\
-								SOC_IO_Input(0,34,GPIO_CFG_PULL_UP);\
+								SOC_IO_Config(33,GPIO_CFG_INPUT,GPIO_CFG_PULL_UP,GPIO_CFG_8MA);\
+								SOC_IO_Input(0,33,GPIO_CFG_PULL_UP);\
 							}while(0)
 #define USB_ID_LOW_HOST do{  \
-								SOC_IO_Config(34,GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_16MA);\
-								SOC_IO_Output(0, 34, 0);\
+								SOC_IO_Config(33,GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_16MA);\
+								SOC_IO_Output(0, 33, 0);\
 							}while(0)
 
-#define USB_SWITCH_DISCONNECT   do{SOC_IO_Output(0, 43, 1); }while(0)
-#define USB_SWITCH_CONNECT  do{SOC_IO_Output(0, 43, 0); }while(0)
+#define USB_SWITCH_DISCONNECT   do{SOC_IO_Output(0, 15, 1); }while(0)
+#define USB_SWITCH_CONNECT  do{SOC_IO_Output(0, 15, 0); }while(0)
 
-#define USB_HUB_RST_HIGH  do{SOC_IO_Output(0, 35, 1); }while(0)
-#define USB_HUB_RST_LOW   do{SOC_IO_Output(0, 35, 0); }while(0)
-#define USB_HUB_RST do{USB_HUB_RST_LOW;msleep(500);USB_HUB_RST_HIGH;}while(0);
+#define USB_HUB_ENABLE  do{SOC_IO_Output(0, 35, 1); }while(0)
+#define USB_HUB_DISABLE do{SOC_IO_Output(0, 35, 0); }while(0)
+#define USB_HUB_RST do{USB_HUB_DISABLE;msleep(500);USB_HUB_ENABLE;}while(0);
 
 #endif

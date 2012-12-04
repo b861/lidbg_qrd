@@ -188,17 +188,12 @@ static void LPCdealReadFromMCUAll(BYTE *p, UINT length)
 	            if(suspend_pending == 0)
 	            {
 	            	suspend_pending = 1;
-#ifdef DEBUG_UMOUNT_USB
-					k2u_write(UMOUNT_USB);
-#endif
-					msleep(3000);
-					lidbg("LPCControlPWRDisenable!\n");
-					LPCControlPWRDisenable();
-					msleep(5000);
+
+					msleep(100);
+					
 	                lidbg("Ready ACC OFF!\n");
 	                msleep(100);
 	                LPCControlToSleep();
-	                //msleep(100);
 	                SOC_PWR_ShutDown();
 	            }
 				else

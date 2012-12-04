@@ -232,12 +232,18 @@ int SOC_BL_Set( u32 bl_level)
 
 
 
+//#ifndef  FLY_DEBUG
 #if 0
 void SOC_PWR_ShutDown(void)
 {
-    lidbg("SOC_PWR_ShutDown!\n");
-    //  lidbg_key_report(KEY_END, KEY_PRESSED_RELEASED);
-    lidbg_key_report(KEY_POWER, KEY_PRESSED_RELEASED);
+		lidbg("SOC_Fast_Boot!\n");
+#ifdef DEBUG_UMOUNT_USB
+		 k2u_write(UMOUNT_USB);
+#endif
+		USB_HUB_DISABLE;
+	
+		USB_SWITCH_DISCONNECT;
+		USB_ID_HIGH_DEV;
 
 }
 #else
@@ -246,12 +252,6 @@ void SOC_PWR_ShutDown(void)
 
 //	return;
     lidbg("SOC_Fast_Boot!\n");
-	USB_SWITCH_DISCONNECT;
-	msleep(100);
-	USB_HUB_RST_LOW;
-	msleep(1000);
-	USB_ID_HIGH_DEV;
-    SOC_BL_Set(0);
 
     lidbg_key_report(KEY_POWER, KEY_PRESSED);
     msleep(2000);
@@ -272,9 +272,7 @@ void SOC_PWR_ShutDown(void)
     lidbg_key_report(KEY_ENTER, KEY_PRESSED_RELEASED);
 	//msleep(500);
 
-#ifdef DEBUG_UMOUNT_USB
-			 k2u_write(UMOUNT_USB);
-#endif
+
 #endif
 
 }

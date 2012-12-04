@@ -56,6 +56,8 @@ typedef unsigned int			uchar;
 #define FUNCTION_OUT    do{lidbg("%d: %s() Out", __LINE__, __FUNCTION__);}while(0)
 #define DUMP_BUILD_TIME    do{ lidbg( "Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);}while(0)
 #define DUMP_FUN     do{lidbg( "%s+\n", __FUNCTION__);}while(0)
+#define DUMP_FUN_ENTER     DUMP_FUN
+#define DUMP_FUN_LEAVE     do{lidbg( "%s-\n", __FUNCTION__);}while(0)
 
 
 #define HIGH			(1)

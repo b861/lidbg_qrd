@@ -329,14 +329,14 @@ static int i2c_api_do_xfer(int bus_id, char chip_addr, unsigned int sub_addr, in
     case I2C_API_XFER_MODE_RECV_TEF7000:
     {
         struct i2c_adapter *adap = i2c_api->client->adapter;
-        struct i2c_msg msg[4];
+        struct i2c_msg msg[2];
         char SubAddr[3];
-        char SubAddr_TEF7000;
+        //char SubAddr_TEF7000;
         SubAddr[0] = 0x00;
         SubAddr[1] = 0xff;
         SubAddr[2] = 0xff;
 
-        SubAddr_TEF7000 = sub_addr & 0xff;
+        //SubAddr_TEF7000 = sub_addr & 0xff;
 
         msg[0].addr = (SAF7741_I2C_ADDR_FOR_TEF7000 >> 1);
         msg[0].flags = 0;
@@ -344,21 +344,23 @@ static int i2c_api_do_xfer(int bus_id, char chip_addr, unsigned int sub_addr, in
         msg[0].buf = SubAddr;
 
         msg[1].addr = i2c_api->client->addr;
-        msg[1].flags = 0;
-        msg[1].len = 1;
-        msg[1].buf = &SubAddr_TEF7000;
+        msg[1].flags = I2C_M_RD;
+        msg[1].len = size;
+        msg[1].buf = buf;
 
-        msg[2].addr = (SAF7741_I2C_ADDR_FOR_TEF7000 >> 1);
-        msg[2].flags = 0;
-        msg[2].len = 3;
-        msg[2].buf = SubAddr;
+		/*TEF7000 i2c READ no sub Addr*/
 
-        msg[3].addr = i2c_api->client->addr;
-        msg[3].flags = I2C_M_RD;
-        msg[3].len = size;
-        msg[3].buf = buf;
+        //msg[2].addr = (SAF7741_I2C_ADDR_FOR_TEF7000 >> 1);
+        //msg[2].flags = 0;
+        //msg[2].len = 3;
+        //msg[2].buf = SubAddr;
 
-        ret = i2c_transfer(adap, msg, 4);
+        //msg[3].addr = i2c_api->client->addr;
+        //msg[3].flags = I2C_M_RD;
+        //msg[3].len = size;
+        //msg[3].buf = buf;
+
+        ret = i2c_transfer(adap, msg, 2);
         break;
 
     }
