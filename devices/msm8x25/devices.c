@@ -608,6 +608,10 @@ static int  soc_dev_suspend(struct platform_device *pdev, pm_message_t state)
 #ifdef DEBUG_LPC
         LPCSuspend();
 #endif
+//disable i2c_c
+		lidbg("disable i2c_c!\n");
+
+		SOC_IO_ISR_Disable(MCU_IIC_REQ_ISR);
 
 
 #ifdef DEBUG_BUTTON
