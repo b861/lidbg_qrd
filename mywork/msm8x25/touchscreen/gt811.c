@@ -310,7 +310,7 @@ static int goodix_init_panel(struct goodix_ts_data *ts)
 	ts->max_touch_num = config_info[60];
 	ts->int_trigger_type = ((config_info[57]>>3)&0x01);
 	printk( "GT811 init info:X_MAX=%d,Y_MAX=%d,TRIG_MODE=%s\n",	ts->abs_x_max, ts->abs_y_max, ts->int_trigger_type?"RISING EDGE":"FALLING EDGE");
-	printk("\nleave from goodix_init_panel==================futengfei=\n");
+	printk("leave from goodix_init_panel==================futengfei=\n");
 	return 0;
 }
 
@@ -795,13 +795,12 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
 {
 	int ret = 0;
 	int retry=0;
-    char test_data = 1;
+   	char test_data = 1;
 	const char irq_table[2] = {IRQ_TYPE_EDGE_FALLING,IRQ_TYPE_EDGE_RISING};
 	struct goodix_ts_data *ts;
-
 	struct goodix_i2c_rmi_platform_data *pdata;
-    printk("\n2:come into %s====================futengfei=====\n",__func__);
-	printk("Install gt811 driver.\n");
+	
+   	 printk("2:come into %s====================futengfei=====\n",__func__);
 
 	if (!i2c_check_functionality(client->adapter, I2C_FUNC_I2C)) 
 	{
@@ -845,7 +844,6 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
 		goto err_i2c_failed;
 	}	
  */   
- 	//INIT_WORK(&goodix_work, goodix_ts_work_func);
 	INIT_WORK(&ts->work, goodix_ts_work_func);		//init work_struct
 	ts->client = client;
 	ts->client->addr = 0x5d;
@@ -896,7 +894,7 @@ err_gpio_request_failed:
 		msleep(2);
 		if(ret != 0)	//Initiall failed
 			{
-				printk("goodix_init_panel:Initiall failed============");
+				printk("goodix_init_panel:Initiall ============failed");
 				continue;
 			}
 			
@@ -905,7 +903,7 @@ err_gpio_request_failed:
 	}
 	if(ret != 0) 
 	{
-		printk("goodix_init_panel:Initiall failed============");
+		printk("goodix_init_panel:============Initiall failed");
 		ts->bad_data=1;
 		//goto err_init_godix_ts;
 	}
@@ -933,14 +931,16 @@ err_gpio_request_failed:
 	input_set_abs_params(ts->input_dev, ABS_X, 0,  ts->abs_x_max, 0, 0);
 	input_set_abs_params(ts->input_dev, ABS_Y, 0, ts->abs_y_max, 0, 0);
 	input_set_abs_params(ts->input_dev, ABS_PRESSURE, 0, 255, 0, 0);
-	
+#define SCREEN_X (800)
+#define SCREEN_Y (480)
+
 #ifdef GOODIX_MULTI_TOUCH
 	input_set_abs_params(ts->input_dev, ABS_MT_WIDTH_MAJOR, 0, 255, 0, 0);
 	input_set_abs_params(ts->input_dev, ABS_MT_TOUCH_MAJOR, 0, 255, 0, 0);
-	input_set_abs_params(ts->input_dev, ABS_MT_POSITION_X, 0,800  , 0, 0);//ts->abs_y_max
-	input_set_abs_params(ts->input_dev, ABS_MT_POSITION_Y, 0,480 , 0, 0);	//ts->abs_x_max
+	input_set_abs_params(ts->input_dev, ABS_MT_POSITION_X, 0,SCREEN_X  , 0, 0);//ts->abs_y_max
+	input_set_abs_params(ts->input_dev, ABS_MT_POSITION_Y, 0,SCREEN_Y , 0, 0);	//ts->abs_x_max
 #endif	
-printk("check your screen [%d*%d]=================futengfei===\n",ts->abs_x_max,ts->abs_y_max);
+printk("check your screen [%d*%d]=================futengfei===\n",SCREEN_X,SCREEN_Y);
 
 	sprintf(ts->phys, "input/ts");
 	ts->input_dev->name = s3c_ts_name;
@@ -1000,8 +1000,7 @@ printk("check your screen [%d*%d]=================futengfei===\n",ts->abs_x_max,
 	goodix_read_version(ts);
 #endif	
 
-//#ifdef CONFIG_HAS_EARLYSUSPEND
-#if 1
+#ifdef CONFIG_HAS_EARLYSUSPEND
 	ts->early_suspend.level = EARLY_SUSPEND_LEVEL_DISABLE_FB;//EARLY_SUSPEND_LEVEL_BLANK_SCREEN +1;
 	ts->early_suspend.suspend = goodix_ts_early_suspend;
 	ts->early_suspend.resume = goodix_ts_late_resume;
@@ -1039,7 +1038,7 @@ if(ret==0)
 ts->use_irq=1;
 ts->client->irq = GPIOEIT;
 //SOC_IO_ISR_Enable(GPIOEIT);
-printk("\n[futengfei]2:leave====%s===============\n",__func__);
+printk("=OUT==============touch INFO==================%s\n\n",__func__);
 return 0;
 
 err_init_godix_ts:
@@ -1088,7 +1087,7 @@ static int goodix_ts_remove(struct i2c_client *client)
 
 	
 #ifdef CONFIG_HAS_EARLYSUSPEND
-	unregister_early_suspend(&ts->early_suspend);
+	//unregister_early_suspend(&ts->early_suspend);
 #endif
 /////////////////////////////// UPDATE STEP 3 START/////////////////////////////////////////////////////////////////
 #ifdef CONFIG_TOUCHSCREEN_GOODIX_IAP
@@ -1120,7 +1119,7 @@ static int goodix_ts_suspend(struct i2c_client *client, pm_message_t mesg)
 	int ret;
 	struct goodix_ts_data *ts = i2c_get_clientdata(client);
 	
-	printk("\n\n\n\n\ncome into [%s]========futengfei=======\n\n\n\n\n",__func__);
+	printk(" [%s]========futengfei=======\n\n\n",__func__);
 /*
 	if (ts->use_irq)
 		//disable_irq(client->irq);
@@ -1151,25 +1150,26 @@ static int goodix_ts_suspend(struct i2c_client *client, pm_message_t mesg)
 
 static int goodix_ts_resume(struct i2c_client *client)
 {
-	int ret=0,retry=0;
+	int ret=0,retry=0,init_err=0;
 	uint8_t GT811_check[6] = {0x55};
 	struct goodix_ts_data *ts = i2c_get_clientdata(client);
-	printk("\n\n\n\n\ncome into [%s]========futengfei======0829forGT811 RESUME RESET [futengfei]=\n\n\n\n\n",__func__);
+	printk("come into [%s]========futengfei======0829forGT811 RESUME RESET [futengfei]=\n",__func__);
 	printk(KERN_INFO "Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);
 	
 for(retry=0; retry<10; retry++)
 	{
 		goodix_init_panel(ts);
-		i2c_api_do_recv(1,0x5d,0x68,GT811_check, 6 );
+		init_err=i2c_api_do_recv(1,0x5d,0x68,GT811_check, 6 );
 		ret = 0;
-	if( GT811_check[0] == 0xff&&GT811_check[1] == 0xff&&GT811_check[2] == 0xff&&GT811_check[3] == 0xff&&GT811_check[4] == 0xff&&GT811_check[5] == 0xff)
-		{			
+	//if( GT811_check[0] == 0xff&&GT811_check[1] == 0xff&&GT811_check[2] == 0xff&&GT811_check[3] == 0xff&&GT811_check[4] == 0xff&&GT811_check[5] == 0xff)
+	if(init_err<0)
+	{			
 			printk("[futengfei]goodix_init_panel:goodix_init_panel failed====retry=[%d]\n",retry);
 			ret = 1;
 		}
 	else
 		{
-			printk("[futengfei]goodix_init_panel:goodix_init_panel success====retry=[%d]\n",retry);
+			printk("[futengfei]goodix_init_panel:goodix_init_panel success====retry=[%d]\n\n\n",retry);
 			ret = 0;
 		}
 	
@@ -1177,9 +1177,9 @@ for(retry=0; retry<10; retry++)
 		if(ret != 0)	//Initiall failed
 			{
 				printk("[futengfei]goodix_init_panel:goodix_init_panel failed=========retry=[%d]===ret[%d]\n",retry,ret);
-				SOC_IO_Output(1,18,0);
+				SOC_IO_Output(0,26,0);
 				msleep(300);
-				SOC_IO_Output(1,18,1);
+				SOC_IO_Output(0,26,1);
 				msleep(700);
 				continue;
 			}
@@ -1223,7 +1223,7 @@ static void goodix_ts_early_suspend(struct early_suspend *h)
 {
 	struct goodix_ts_data *ts;
 	
-	printk("come into [%s]",__func__);
+	printk("\n\n\n[futengfei]come into================ [%s]\n",__func__);
 	ts = container_of(h, struct goodix_ts_data, early_suspend);
 	goodix_ts_suspend(ts->client, PMSG_SUSPEND);
 }
@@ -1231,7 +1231,7 @@ static void goodix_ts_early_suspend(struct early_suspend *h)
 static void goodix_ts_late_resume(struct early_suspend *h)
 {
 	struct goodix_ts_data *ts;
-	printk("come into [%s]",__func__);
+	printk("\n\n\n[futengfei]come into================ [%s]\n",__func__);
 
 	ts = container_of(h, struct goodix_ts_data, early_suspend);
 	goodix_ts_resume(ts->client);
@@ -2193,8 +2193,7 @@ static const struct i2c_device_id goodix_ts_id[] = {
 static struct i2c_driver goodix_ts_driver = {
 	.probe		= goodix_ts_probe,
 	.remove		= goodix_ts_remove,
-//#ifndef CONFIG_HAS_EARLYSUSPEND
-#if 1
+#ifndef CONFIG_HAS_EARLYSUSPEND
 	.suspend	= goodix_ts_suspend,
 	.resume		= goodix_ts_resume,
 #endif
@@ -2233,12 +2232,9 @@ static int __devinit goodix_ts_init(void)
 {
 	int ret=0;
 	is_ts_load=1;
-    printk("\n=800=7==rst==1130=%s======touch INFO=================for resume rst=\n",__TIME__);
-    printk("\n1:come into %s=================futengfei======\n",__func__);
-	//SOC_IO_Output(1,18,1);
-	//msleep(200);
-	//printk("TS_RESET\n");
-	//TS_RESET;
+	printk("\n\n=IN=1205=============touch INFO==================%s\n",__func__);
+	printk("1: goodix_ts_init :installing=>gt811.ko --------------------->futengfei\n");
+
 #if 0
 	{
 		struct i2c_adapter *i2c_adap;  
@@ -2282,22 +2278,12 @@ again:	i2c_api_do_recv(1, 0x5d, 0x68, device_check, 6 );
 		}
 #endif
 	
-		printk("Now is 7cun_gt811_devices:installing=>gt811.ko _futengfei--------------------->\n");
-
 		goodix_wq = create_workqueue("goodix_wq");		//create a work queue and worker thread
 		if (!goodix_wq) {
 			printk("creat workqueue faiked\n");
 			return -ENOMEM;
 		}
-		#if 0 //qcom
-		tcc_gpio_config(TCC_GPB(31), GPIO_FN(0) | GPIO_PULLUP);
-		gpio_request(TCC_GPB(31), "NULL");
-		gpio_direction_input(TCC_GPB(31));
-		#endif
 		
-
-
-
 		ret=i2c_add_driver(&goodix_ts_driver);
 		return ret; 
 }
