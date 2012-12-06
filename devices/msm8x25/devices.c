@@ -21,7 +21,8 @@ int platform_id;
 
 struct platform_devices_resource devices_resource;
 
-bool suspend_pending = 0;
+//bool suspend_pending = 0;
+
 bool suspend_test = 0;
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
@@ -550,7 +551,11 @@ static int soc_dev_remove(struct platform_device *pdev)
 #ifdef CONFIG_HAS_EARLYSUSPEND
 static void devices_early_suspend(struct early_suspend *handler)
 {
+	static u32 early_suspend_count = 0;
+
 	DUMP_FUN_ENTER;
+    lidbg("ount=%d\n",++early_suspend_count);
+	suspend_pending = 1;
 	LCD_OFF;
 	
 #ifdef DEBUG_UMOUNT_USB
@@ -571,6 +576,7 @@ static void devices_late_resume(struct early_suspend *handler)
 	int err;
 
 	DUMP_FUN_ENTER;
+	suspend_pending = 0;
 
 	lidbg("create thread_resume!\n");
 	
@@ -609,9 +615,9 @@ static int  soc_dev_suspend(struct platform_device *pdev, pm_message_t state)
         LPCSuspend();
 #endif
 //disable i2c_c
-		lidbg("disable i2c_c!\n");
+		//lidbg("disable i2c_c!\n");
 
-		SOC_IO_ISR_Disable(MCU_IIC_REQ_ISR);
+		//SOC_IO_ISR_Disable(MCU_IIC_REQ_ISR);
 
 
 #ifdef DEBUG_BUTTON
