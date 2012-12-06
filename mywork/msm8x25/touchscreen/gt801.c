@@ -840,8 +840,8 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
 #ifdef GOODIX_MULTI_TOUCH
 
     //  set_bit(BTN_2, ts->input_dev->keybit);
-#define 	RESOLUTION_X	(1024)
-#define 	RESOLUTION_Y	(600)
+#define 	RESOLUTION_X	(800)  //this
+#define 	RESOLUTION_Y	(480)
 #define GOODIX_TOUCH_WEIGHT_MAX 		(150)
 #endif
     input_set_abs_params(ts->input_dev, ABS_MT_WIDTH_MAJOR, 0, 255, 0, 0);
