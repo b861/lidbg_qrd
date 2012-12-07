@@ -61,8 +61,6 @@ enum
 //#define DEBUG_TVP5150
 //#define DEBUG_USB_RST
 
-#define USB_RST_ACK (88)
-
 #ifdef FLY_BOARD_1ST
 //lcd
 //LCD_IDLE,  PANNE_PEN , PWM
