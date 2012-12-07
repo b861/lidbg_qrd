@@ -8,7 +8,7 @@
 #include <termios.h>
 #include <stdlib.h>
 #include <pthread.h>
-
+#include <utils/Log.h>
 
 //mount yaffs2 mtd@system /system rw remount
 //...
@@ -43,7 +43,7 @@
 
 
 #define UMOUNT_USB (80)
-
+//#define  DEBUG_USB_RST
 
 
 pthread_t ntid;
@@ -349,12 +349,80 @@ open_dev:
 
 #endif
 
+#ifdef DEBUG_USB_RST	
+{
+
+		int err = 0;
+		int errsd = 0;
+		int retry=0;
+		int tell_usb_rst=88;
+		int print_count =0;
+		static unsigned int usb_rst_count =0;
+		char path[50];
+		
+		memset(path,0,50);
+		sleep(60);
+    while(1)
+    {
+        sleep(2);
+        if(retry<50)
+        	{
+			err = access("/mnt/usbdisk/text1" , F_OK); 
+				if ( err !=0 )
+					{
+						 LOGW("[futengfei]  makedir usb");
+						 mkdir("/mnt/usbdisk/text1", 0777);
+					}
+				else 
+					{ 
+						 LOGW("[futengfei]  notmake usb");
+					}   
+			err = access("/mnt/sdcard/text1" , F_OK); 
+				if ( err !=0 )
+					{
+						 LOGW("[futengfei]  makedir sdc");
+						 mkdir("/mnt/sdcard/text1", 0777);
+					}
+				else 
+					{ 
+						 LOGW("[futengfei]  notmake sdc");
+					}   
+			sprintf(path,"%s","/mnt/usbdisk/text1");
+			err = access (path,R_OK);
+			sprintf(path,"%s","/mnt/sdcard/text1");
+			errsd=access (path,R_OK);
+				if(err == 0&&errsd == 0)
+					{						
+						write(fd, &tell_usb_rst, 4);
+						retry=0;
+						usb_rst_count++;
+						LOGW("S[access] read file ok!sucess:=============111111111111111111111==================[%d]times ",usb_rst_count);
+					}
+				else  
+					{
+						retry++;
+						LOGW("F[access] read file no!false::======22222====retry=[%d] err=[%d],errsd=[%d]",retry,err,errsd);
+					}
+
+				
+		}	
+	else
+		{
+		print_count++;//less than 10 times print
+		if(print_count<10)
+		LOGW("F[futengfei]==can't read file  stop and wait;==========222222222222222222=============sucess:[%d]times ",usb_rst_count);
+		}
+	}
+}
+#else
+
     while(1)
     {
         sleep(60);
 
     }
 
+#endif	
 
     return 0;
 }

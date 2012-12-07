@@ -59,7 +59,7 @@ enum
 //#define DEBUG_CS42L52
 //#define DEBUG_TDA7419
 //#define DEBUG_TVP5150
-
+//#define DEBUG_USB_RST
 
 #ifdef FLY_BOARD_1ST
 //lcd
@@ -120,6 +120,7 @@ enum
 //ad
 #define AD_KEY_PORT   (0xff)
 #define AD_KEY_READ_POLLING_TIME   (100)
+#define   USB_REC_POLLING_TIME (300)
 
 //platform
 #define GPIO_PLATFORM_DET  (49)

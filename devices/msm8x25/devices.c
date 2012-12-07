@@ -13,6 +13,7 @@ int thread_dev_init(void *data);
 int thread_led(void *data);
 int thread_key(void *data);
 int thread_pwr(void *data);
+int thread_usb(void *data);
 static int thread_resume(void *data);
 
 void fly_devices_init(void);
@@ -416,6 +417,38 @@ int thread_key(void *data)
 
 
 
+int thread_usb(void *data)
+{
+	int usb_rst_enable=0;
+    
+    while(1)
+    {
+        set_current_state(TASK_UNINTERRUPTIBLE);
+        if(kthread_should_stop()) break;
+        if(1) //条件为真
+        {
+		usb_rst_enable=u2k_read();
+	if(usb_rst_enable==USB_RST_ACK)
+		{
+			
+			USB_SWITCH_DISCONNECT;
+			msleep(7000);
+			USB_SWITCH_CONNECT;
+			USB_HUB_RST;
+			msleep(3000);
+			printk("  ........................rstUSBover...................................over. \n");
+		}
+            msleep(USB_REC_POLLING_TIME);
+        }
+        else 
+        {
+            schedule_timeout(HZ);
+        }
+    }
+    return 0;
+}
+
+
 
 struct platform_device soc_devices =
 {
@@ -500,6 +533,17 @@ static int soc_dev_probe(struct platform_device *pdev)
         wake_up_process(pwr_task);
 #endif
 
+#ifdef DEBUG_USB_RST
+        pwr_task = kthread_create(thread_usb, NULL, "usb_rst_task");
+        if(IS_ERR(pwr_task))
+        {
+            lidbg("Unable to start kernel thread.\n");
+            err = PTR_ERR(pwr_task);
+            pwr_task = NULL;
+
+        }
+        wake_up_process(pwr_task);
+#endif
     }
 
 

@@ -173,15 +173,6 @@ void SOC_PWR_ShutDown(void);//power-down
 
 
 
-
-#define LOG_DVD_RESET (64)
-#define LOG_CAP_TS_GT811 (65)
-#define LOG_CAP_TS_FT5X06 (66)
-#define LOG_CAP_TS_FT5X06_SKU7 (67)
-#define LOG_CAP_TS_RMI (68)
-#define LOG_CAP_TS_GT801 (69)
-#define UMOUNT_USB (80)
-
 #ifndef SOC_COMPILE
 
 //LOG
@@ -190,6 +181,7 @@ void SOC_PWR_ShutDown(void);//power-down
 #define LOG_LOGCAT (2)
 #define LOG_ALL    (3)
 #define LOG_CONT    (4)
+
 
 #endif
 
