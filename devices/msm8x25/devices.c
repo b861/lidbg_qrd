@@ -692,9 +692,13 @@ static int soc_dev_resume(struct platform_device *pdev)
         SOC_IO_ISR_Enable(BUTTON_RIGHT_2);
 #endif
 
-#ifdef FLY_DEBUG
+#if 1//def FLY_DEBUG
+		lidbg("kernel on!\n");
         // lidbg_key_report(KEY_END, KEY_PRESSED_RELEASED);
         SOC_Key_Report(KEY_HOME, KEY_PRESSED_RELEASED);
+#define WAKEUP_KERNEL (10)
+		k2u_write(WAKEUP_KERNEL);
+
 #endif
 
         lidbg("turn lcd on!\n");

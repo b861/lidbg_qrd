@@ -32,6 +32,7 @@
 #define LOG_ALL (3)
 #define LOG_CONT    (4)
 
+#define WAKEUP_KERNEL (10)
 
 #define LOG_DVD_RESET (64)
 #define LOG_CAP_TS_GT811 (65)
@@ -42,6 +43,7 @@
 
 
 #define UMOUNT_USB (80)
+
 
 
 pthread_t ntid;
@@ -215,7 +217,15 @@ void  servicer_handler(int signum)
 			break;
 
 		}
-			  
+		case WAKEUP_KERNEL:
+		{
+			system("su");
+			system("echo on > /sys/power/state");
+			break;
+
+		}
+
+	  
         }
     }
 
