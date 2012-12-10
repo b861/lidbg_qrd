@@ -36,8 +36,15 @@ struct platform_devices_resource
 
 };
 
-
-
+#define TOTAL_LOGS 100UL
+#define LOG_BYTES 20UL
+typedef struct
+{
+int start_pos;
+int end_pos;
+char log[TOTAL_LOGS][LOG_BYTES];
+u8 write_flag[TOTAL_LOGS];
+}smem_log_deep;
 
 enum
 {
@@ -46,6 +53,8 @@ enum
     PLATFORM_FLY,
 };
 
+#define DEBUG_BP_MSG
+//up always online
 
 #ifdef FLY_DEBUG
 #define DEBUG_AD_KEY
@@ -60,6 +69,7 @@ enum
 //#define DEBUG_TDA7419
 //#define DEBUG_TVP5150
 //#define DEBUG_USB_RST
+
 
 #ifdef FLY_BOARD_1ST
 //lcd
@@ -121,6 +131,7 @@ enum
 #define AD_KEY_PORT   (0xff)
 #define AD_KEY_READ_POLLING_TIME   (100)
 #define   USB_REC_POLLING_TIME (300)
+#define 	BP_MSG_POLLING_TIME	(300)
 
 //platform
 #define GPIO_PLATFORM_DET  (49)
