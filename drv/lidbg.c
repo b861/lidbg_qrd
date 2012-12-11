@@ -131,7 +131,7 @@ static ssize_t lidbg_write(struct file *filp, const char __user *buf,
     //int ret = size;
     int i = 0;
     char *pt;
-    char *argv[10] = {NULL};
+    char *argv[32] = {NULL};
     struct lidbg_dev *dev = filp->private_data; /*获得设备结构体指针*/
 #if 0
     /*分析和获取有效的写长度*/

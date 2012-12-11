@@ -22,11 +22,13 @@ int platform_id;
 
 struct platform_devices_resource devices_resource;
 
-//bool suspend_pending = 0;
+//int suspend_pending = 0;
 
 bool suspend_test = 0;
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
+static struct wake_lock flywakelock;
+
 static void devices_early_suspend(struct early_suspend *handler);
 static void devices_late_resume(struct early_suspend *handler);
 struct early_suspend early_suspend;
@@ -115,9 +117,8 @@ void pwr_key_scan(void)
 		
         lidbg("pwr_key_scan goto sleep !\n");
 
-		suspend_pending = 1;
 #ifdef DEBUG_UMOUNT_USB
-		 k2u_write(UMOUNT_USB);
+		k2u_write(UMOUNT_USB);
 		msleep(1000);
 #endif
 		
@@ -342,11 +343,7 @@ void led_on(void)
         LED_ON;
         led_status = 0;
     }
-#ifdef DEBUG_UMOUNT_USB
 
-	if(suspend_pending == 1)
-				 k2u_write(UMOUNT_USB);
-#endif
 #endif
 }
 
@@ -549,12 +546,14 @@ static int soc_dev_probe(struct platform_device *pdev)
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
 {
+		wake_lock_init(&flywakelock, WAKE_LOCK_SUSPEND,"flyaudio_wake_lock");
 		
-
-		early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN + 1;
+		//\u5728suspend\u7684\u65f6\u5019\u5148\u6267\u884c\u4f18\u5148\u7b49\u7ea7\u4f4e\u7684handler\uff0c\u5728resume\u7684\u65f6\u5019\u5219\u5148\u6267\u884c\u7b49\u7ea7\u9ad8\u7684handler
+		early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN;//EARLY_SUSPEND_LEVEL_BLANK_SCREEN + 1;
 		early_suspend.suspend = devices_early_suspend;
 		early_suspend.resume = devices_late_resume;
 		register_early_suspend(&early_suspend);
+		wake_lock(&flywakelock);
 }
 #endif
 
@@ -598,19 +597,32 @@ static void devices_early_suspend(struct early_suspend *handler)
 	static u32 early_suspend_count = 0;
 
 	DUMP_FUN_ENTER;
-    lidbg("ount=%d\n",++early_suspend_count);
-	suspend_pending = 1;
-	LCD_OFF;
-	
+    lidbg("count=%d\n",++early_suspend_count);
+    if(platform_id ==  PLATFORM_FLY)
+    {
+
+		if(PM_STATUS_EARLY_SUSPEND_PENDING != suspend_pending)
+		{
+			printk("\n\n\n\n\n\n\n\n\n");
+			lidbg("errlsw:call devices_early_suspend when suspend_pending != PM_STATUS_EARLY_SUSPEND_PENDING");
+			printk("\n\n\n\n\n\n\n\n\n");
+
+		}
+
+		LCD_OFF;
+		
 #ifdef DEBUG_UMOUNT_USB
-	k2u_write(UMOUNT_USB);
+		k2u_write(UMOUNT_USB);
 #endif
-	//LPCControlPWRDisenable();
+		//LPCControlPWRDisenable();
 
-	USB_HUB_DISABLE;
-	USB_SWITCH_DISCONNECT;
-	USB_ID_HIGH_DEV;
+		USB_HUB_DISABLE;
+		USB_SWITCH_DISCONNECT;
+		USB_ID_HIGH_DEV;
 
+		
+		wake_unlock(&flywakelock);
+   	}
 	DUMP_FUN_LEAVE;
 
 }
@@ -620,24 +632,27 @@ static void devices_late_resume(struct early_suspend *handler)
 	int err;
 
 	DUMP_FUN_ENTER;
-	suspend_pending = 0;
+    if(platform_id ==  PLATFORM_FLY)
+    {
 
-	lidbg("create thread_resume!\n");
-	
-	BL_SET(BL_MAX / 2);
-	
-	resume_task = kthread_create(thread_resume, NULL, "dev_resume_task");
-	if(IS_ERR(resume_task))
-	{
-		lidbg("Unable to start kernel thread.\n");
-		err = PTR_ERR(resume_task);
-		resume_task = NULL;
-		//return err;
-		//exit;
-	}
-	wake_up_process(resume_task);
+		lidbg("create thread_resume!\n");
+		
+		BL_SET(BL_MAX / 2);
+		
+		resume_task = kthread_create(thread_resume, NULL, "dev_resume_task");
+		if(IS_ERR(resume_task))
+		{
+			lidbg("Unable to start kernel thread.\n");
+			err = PTR_ERR(resume_task);
+			resume_task = NULL;
+			//return err;
+			//exit;
+		}
+		wake_up_process(resume_task);
 
-	
+		
+		suspend_pending = PM_STATUS_ON;
+    }
 	DUMP_FUN_LEAVE;
 }
 #endif
@@ -649,10 +664,19 @@ static void devices_late_resume(struct early_suspend *handler)
 static int  soc_dev_suspend(struct platform_device *pdev, pm_message_t state)
 {
     lidbg("soc_dev_suspend\n");
-	suspend_pending = 1;
+
 
     if(platform_id ==  PLATFORM_FLY)
     {
+
+	
+		if(PM_STATUS_SUSPEND_PENDING != suspend_pending)
+		{
+			printk("\n\n\n\n\n\n\n\n\n");
+			lidbg("errlsw:call soc_dev_suspend when suspend_pending != PM_STATUS_EARLY_SUSPEND_PENDING");
+			printk("\n\n\n\n\n\n\n\n\n");
+
+		}
         lidbg("turn lcd off!\n");
 		
 #ifdef DEBUG_LPC
@@ -713,7 +737,7 @@ static int soc_dev_resume(struct platform_device *pdev)
 		//suspend_test = 0;
 	}
 	
-	suspend_pending = 0;
+	//suspend_pending = PM_STATUS_ON;
 
     if(platform_id ==  PLATFORM_FLY)
     {
@@ -736,7 +760,7 @@ static int soc_dev_resume(struct platform_device *pdev)
         SOC_IO_ISR_Enable(BUTTON_RIGHT_2);
 #endif
 
-#if 1//def FLY_DEBUG
+#if 0//def FLY_DEBUG
 		lidbg("kernel on!\n");
         // lidbg_key_report(KEY_END, KEY_PRESSED_RELEASED);
         SOC_Key_Report(KEY_HOME, KEY_PRESSED_RELEASED);
@@ -777,6 +801,10 @@ static int soc_dev_resume(struct platform_device *pdev)
 	    //USB_ID_LOW_HOST;
 
     }
+	suspend_pending = PM_STATUS_ON;
+	wake_lock(&flywakelock);
+
+
     return 0;
 
 }
@@ -937,6 +965,7 @@ void fly_devices_init(void)
 {
     lidbg("fly_devices_init\n");
 
+	suspend_pending = PM_STATUS_ON;
 
     if(platform_id ==  PLATFORM_FLY)
     {

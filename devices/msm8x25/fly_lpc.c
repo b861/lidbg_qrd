@@ -185,10 +185,8 @@ static void LPCdealReadFromMCUAll(BYTE *p, UINT length)
             switch (p[2])
             {
             case 0x00://ACC OFF
-	            if(suspend_pending == 0)
+	            if(suspend_pending == PM_STATUS_ON)
 	            {
-	            	suspend_pending = 1;
-
 					msleep(100);
 					
 	                lidbg("Ready ACC OFF!\n");

@@ -146,6 +146,15 @@ struct io_int_config
 
 #define LIDBG_GPIO_PULLUP  GPIO_CFG_PULL_UP
 
+//suspend_pending
+#define PM_STATUS_ON                    0
+#define PM_STATUS_EARLY_SUSPEND_PENDING 1
+#define PM_STATUS_SUSPEND_PENDING       2
+//#define PM_STATU_RESUME        3
+//#define PM_STATU_LATE_RESUME   4
+
+
+
 
 #define WAIT_KERNEL_BOOT_UP_TIME 0//(1000*15)
 

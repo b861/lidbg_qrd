@@ -23,7 +23,7 @@
 #include "tvp5150.h"
 #endif
 
-extern bool suspend_pending;
+extern int suspend_pending;
 
 void lidbg_device_main(int argc, char **argv);
 

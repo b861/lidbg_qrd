@@ -127,7 +127,11 @@ bool SOC_IO_Input(u32 group, u32 index, u32 pull)
 
 bool SOC_ADC_Get (u32 channel , u32 *value)
 {
-    *value = soc_ad_read(channel);
+
+	*value = 0xffffffff;
+		
+	if(PM_STATUS_ON == suspend_pending)
+    	*value = soc_ad_read(channel);
 
     if(*value == 0xffffffff)
         return 0;
@@ -236,9 +240,22 @@ int SOC_BL_Set( u32 bl_level)
 void SOC_PWR_ShutDown(void)
 {
 
-//	return;
-    lidbg("SOC_Fast_Boot!\n");
-	suspend_pending = 1;
+
+	static u32 pwr_down_count = 0;
+
+	DUMP_FUN_ENTER;
+    lidbg("pwr_down_count=%d\n",++pwr_down_count);
+
+	
+	if(PM_STATUS_ON != suspend_pending)
+	{
+		printk("\n\n\n\n\n\n\n\n\n");
+		lidbg("errlsw:call SOC_PWR_ShutDown when suspend_pending != PM_STATUS_ON :%d",suspend_pending);
+		printk("\n\n\n\n\n\n\n\n\n");
+
+	}
+	 
+	suspend_pending = PM_STATUS_EARLY_SUSPEND_PENDING;
 
 #ifdef  FLY_DEBUG
 
