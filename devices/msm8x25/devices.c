@@ -8,13 +8,13 @@ static struct task_struct *key_task;
 static struct task_struct *pwr_task;
 static struct task_struct *dev_init_task;
 static struct task_struct *resume_task;
+static struct task_struct *usb_rst_task;
 
 int thread_dev_init(void *data);
 int thread_led(void *data);
 int thread_key(void *data);
 int thread_pwr(void *data);
 int thread_usb(void *data);
-int thread_bp_msg(void *data);
 static int thread_resume(void *data);
 
 void fly_devices_init(void);
@@ -26,9 +26,7 @@ struct platform_devices_resource devices_resource;
 //int suspend_pending = 0;
 
 bool suspend_test = 0;
-int start_index=0;
-int end_index=0;
-smem_log_deep *smem_log_temp=NULL;
+
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
 static struct wake_lock flywakelock;
@@ -450,52 +448,6 @@ int thread_usb(void *data)
 }
 
 
-
-
-int thread_bp_msg(void *data)
-{
-	int usb_rst_enable=0;
-    while(1)
-    {
-        set_current_state(TASK_UNINTERRUPTIBLE);
-        if(kthread_should_stop()) break;
-     	if(1) 
-	        {
-		    start_index = smem_log_temp->start_pos;
-		    end_index = smem_log_temp->end_pos;
-		    if((end_index + 1) % 100 != start_index)
-		    {
-		        if((end_index + 1) < TOTAL_LOGS)
-		        {
-		            printk("%s\n", smem_log_temp->log[end_index]);
-		            //memset(smem_log_temp->log[end_index], 0, 20);
-		            smem_log_temp->end_pos++;
-		        }
-		        else if((end_index + 1) == TOTAL_LOGS)
-		        {
-		            smem_log_temp->end_pos = 0;
-		            printk("%s\n", smem_log_temp->log[end_index]);
-		            //memset(smem_log_temp->log[end_index], 0, 20);
-		            smem_log_temp->end_pos++;
-		        }
-		        msleep(50);
-		    }
-		    else
-		    {
-		        msleep(BP_MSG_POLLING_TIME);
-		    }
-
-
-	}
-        else 
-        {
-            schedule_timeout(HZ);
-        }
-    }
-    return 0;
-}
-
-
 struct platform_device soc_devices =
 {
     .name			= "soc_devices",
@@ -580,31 +532,17 @@ static int soc_dev_probe(struct platform_device *pdev)
 #endif
 
 #ifdef DEBUG_USB_RST
-        pwr_task = kthread_create(thread_usb, NULL, "usb_rst_task");
-        if(IS_ERR(pwr_task))
+        usb_rst_task = kthread_create(thread_usb, NULL, "usb_rst_task");
+        if(IS_ERR(usb_rst_task))
         {
             lidbg("Unable to start kernel thread.\n");
-            err = PTR_ERR(pwr_task);
-            pwr_task = NULL;
+            err = PTR_ERR(usb_rst_task);
+            usb_rst_task = NULL;
 
         }
-        wake_up_process(pwr_task);
+        wake_up_process(usb_rst_task);
 #endif
 
-#ifdef DEBUG_BP_MSG
-{
-smem_log_temp = (smem_log_deep *)smem_alloc(SMEM_ID_VENDOR1, sizeof(smem_log_deep));
-        pwr_task = kthread_create(thread_bp_msg, NULL, "bp_msg_task");
-        if(IS_ERR(pwr_task))
-        {
-            lidbg("Unable to start kernel thread.\n");
-            err = PTR_ERR(pwr_task);
-            pwr_task = NULL;
-
-        }
-        wake_up_process(pwr_task);
-}
-#endif
 
     }
 
@@ -646,6 +584,13 @@ static int soc_dev_remove(struct platform_device *pdev)
     {
         kthread_stop(pwr_task);
         pwr_task = NULL;
+    }
+#endif
+#ifdef DEBUG_USB_RST
+    if(usb_rst_task)
+    {
+        kthread_stop(usb_rst_task);
+        usb_rst_task = NULL;
     }
 #endif
 

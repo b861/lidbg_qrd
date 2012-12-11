@@ -36,15 +36,6 @@ struct platform_devices_resource
 
 };
 
-#define TOTAL_LOGS 100UL
-#define LOG_BYTES 20UL
-typedef struct
-{
-int start_pos;
-int end_pos;
-char log[TOTAL_LOGS][LOG_BYTES];
-u8 write_flag[TOTAL_LOGS];
-}smem_log_deep;
 
 enum
 {
@@ -53,7 +44,6 @@ enum
     PLATFORM_FLY,
 };
 
-#define DEBUG_BP_MSG
 //up always online
 
 #ifdef FLY_DEBUG
