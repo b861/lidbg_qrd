@@ -6,6 +6,11 @@
 #include "fly_soc.h"
 
 
+#ifndef USU_EXTERNEL_SUSPEND_PENDING
+int suspend_pending = 0;
+#endif
+
+
 struct platform_device fly_soc_device =
 {
     .name			= "fly_socs",

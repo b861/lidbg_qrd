@@ -1,6 +1,13 @@
 #include "lidbg.h"
 #include "fly_lpc.h"
 
+
+
+#ifndef USU_EXTERNEL_SUSPEND_PENDING
+static int suspend_pending = 0;
+#endif
+
+
 struct fly_hardware_info GlobalHardwareInfo;
 struct fly_hardware_info *pGlobalHardwareInfo;
 

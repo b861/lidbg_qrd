@@ -23,7 +23,9 @@ int platform_id;
 
 struct platform_devices_resource devices_resource;
 
-//int suspend_pending = 0;
+#ifndef USU_EXTERNEL_SUSPEND_PENDING
+static int suspend_pending = 0;
+#endif
 
 bool suspend_test = 0;
 

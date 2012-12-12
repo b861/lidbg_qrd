@@ -14,6 +14,8 @@
 
 //#define DEBUG_UMOUNT_USB
 
+#define USU_EXTERNEL_SUSPEND_PENDING
+
 
 #ifdef DEBUG_CS42L52
 #include "cs42l52.h"
@@ -23,7 +25,10 @@
 #include "tvp5150.h"
 #endif
 
+#ifdef USU_EXTERNEL_SUSPEND_PENDING
 extern int suspend_pending;
+#endif
+
 
 void lidbg_device_main(int argc, char **argv);
 
@@ -185,6 +190,7 @@ enum
 #define PWR_EN_ON   do{SOC_IO_Output(0, 23, 1); }while(0)
 #define PWR_EN_OFF  do{SOC_IO_Output(0, 23, 0); }while(0)
 
+#if 0
 #define USB_ID_HIGH_DEV do{\
 								SOC_IO_Config(33,GPIO_CFG_INPUT,GPIO_CFG_PULL_UP,GPIO_CFG_8MA);\
 								SOC_IO_Input(0,33,GPIO_CFG_PULL_UP);\
@@ -193,6 +199,10 @@ enum
 								SOC_IO_Config(33,GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_16MA);\
 								SOC_IO_Output(0, 33, 0);\
 							}while(0)
+#else
+#define USB_ID_HIGH_DEV
+#define USB_ID_LOW_HOST
+#endif
 
 #define USB_SWITCH_DISCONNECT   do{SOC_IO_Output(0, 15, 1); }while(0)
 #define USB_SWITCH_CONNECT  do{SOC_IO_Output(0, 15, 0); }while(0)
