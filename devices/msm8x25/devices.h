@@ -176,6 +176,7 @@ enum
 
 //gpio return keys
 #define GPIO_SCAN_KEY_RETURN  (33)
+#if 0
 
 #define TELL_LPC_PWR_OFF   do{  lidbg("tell lpc ready to power off!\n");\
 								SOC_IO_Config(MCU_IIC_REQ_I,GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_16MA);\
@@ -186,11 +187,15 @@ enum
 								SOC_IO_Config(MCU_IIC_REQ_I,GPIO_CFG_INPUT,GPIO_CFG_PULL_UP,GPIO_CFG_8MA);\
 								SOC_IO_Input(0,MCU_IIC_REQ_I,GPIO_CFG_PULL_UP);\
 							}while(0)
+#else
+#define TELL_LPC_PWR_OFF
+#define TELL_LPC_PWR_ON
+#endif
 
 #define PWR_EN_ON   do{SOC_IO_Output(0, 23, 1); }while(0)
 #define PWR_EN_OFF  do{SOC_IO_Output(0, 23, 0); }while(0)
 
-#if 0
+
 #define USB_ID_HIGH_DEV do{\
 								SOC_IO_Config(33,GPIO_CFG_INPUT,GPIO_CFG_PULL_UP,GPIO_CFG_8MA);\
 								SOC_IO_Input(0,33,GPIO_CFG_PULL_UP);\
@@ -199,10 +204,7 @@ enum
 								SOC_IO_Config(33,GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_16MA);\
 								SOC_IO_Output(0, 33, 0);\
 							}while(0)
-#else
-#define USB_ID_HIGH_DEV
-#define USB_ID_LOW_HOST
-#endif
+
 
 #define USB_SWITCH_DISCONNECT   do{SOC_IO_Output(0, 15, 1); }while(0)
 #define USB_SWITCH_CONNECT  do{SOC_IO_Output(0, 15, 0); }while(0)
