@@ -12,3 +12,4 @@ adb remount
 adb push /home/swlee/work/flyaudio/lidbg_qrd/out /system/lib/modules/out
 adb reboot
 
+

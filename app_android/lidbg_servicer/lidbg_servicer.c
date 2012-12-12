@@ -278,7 +278,7 @@ int main(int argc , char **argv)
     system("insmod /flysystem/lib/out/lidbg_soc_devices.ko");
     system("insmod /flysystem/lib/out/lidbg_main.ko");
     system("insmod /flysystem/lib/out/lidbg_ts_probe.ko");
-    system("insmod /system/lib/modules/out/lidbg_to_bpmsg.ko");
+    system("insmod /flysystem/lib/out/lidbg_to_bpmsg.ko");
 
 
     sleep(1);

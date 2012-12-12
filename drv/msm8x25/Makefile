@@ -11,7 +11,7 @@ CC = $(CROSS_COMPILE)gcc
 obj-m	+= lidbg_soc_$(DBG_SOC).o
 obj-m	+= lidbg_fly_soc.o
 obj-m	+= lidbg_rpc.o
-obj-m	+= lidbg_to_bpmsg.o
+#obj-m	+= lidbg_to_bpmsg.o
 lidbg_soc_$(DBG_SOC)-objs := m_$(DBG_SOC).o lidbg_io_$(DBG_SOC).o  lidbg_ad_$(DBG_SOC).o lidbg_pwm_$(DBG_SOC).o lidbg_init_$(DBG_SOC).o lidbg_serial_$(DBG_SOC).o 
 
 lidbg_fly_soc-objs :=fly_soc.o
