@@ -24,14 +24,12 @@ int thread_bp_msg(void *data)
 		        if((end_index + 1) < TOTAL_LOGS)
 		        {
 		            printk("%s\n", smem_log_temp->log[end_index]);
-		            //memset(smem_log_temp->log[end_index], 0, 20);
 		            smem_log_temp->end_pos++;
 		        }
 		        else if((end_index + 1) == TOTAL_LOGS)
 		        {
 		            smem_log_temp->end_pos = 0;
 		            printk("%s\n", smem_log_temp->log[end_index]);
-		            //memset(smem_log_temp->log[end_index], 0, 20);
 		            smem_log_temp->end_pos++;
 		        }
 		        msleep(50);
@@ -56,6 +54,10 @@ int thread_bp_msg(void *data)
 int bp_msg_init(void)
 {
 	int err;
+
+#ifdef FLY_DEBUG
+	lidbg("debug:bp_msg_init do notthing");
+#else
 	printk("\n[futengfei]  =bp_msg_init=IN===============================\n");
 	smem_log_temp = (smem_log_deep *)smem_alloc(SMEM_ID_VENDOR1, sizeof(smem_log_deep));
         bp_msg_task = kthread_create(thread_bp_msg, NULL, "bp_msg_task");
@@ -68,6 +70,7 @@ int bp_msg_init(void)
         }
         wake_up_process(bp_msg_task);
 	printk("[futengfei]  =bp_msg_init=OUT===============================\n");
+#endif
     return 0;
 }
 

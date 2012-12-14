@@ -143,17 +143,7 @@ enum
 #define BL_MAX (255)
 
 
-#if 0
-#define PLATFORM_GET do{ \
-						if(SOC_IO_Input(0, GPIO_PLATFORM_DET, GPIO_CFG_NO_PULL) == 1)		 \
-						platform_id =  PLATFORM_FLY;		 \
-						else							 \
-						platform_id =  PLATFORM_SKU7;	 \
-					}while(0)
-#else
-//#define PLATFORM_GET do{ platform_id = PLATFORM_FLY;}while(0)
-//#define PLATFORM_GET do{ platform_id = PLATFORM_SKU7;}while(0)
-#if 1
+#ifdef FLY_DEBUG
 //sku7: find <4> i2c_devices:0xe, 0x18, 0x1c, 0x2c
 #define PLATFORM_GET do{ \
 						u8 i2c_devices_found[32],i; \
@@ -169,14 +159,15 @@ enum
 							}\
 						}\
 					}while(0)
-#endif
+					
 
-
+#else
+#define PLATFORM_GET do{platform_id=PLATFORM_FLY;}while(0)
 #endif
 
 //gpio return keys
 #define GPIO_SCAN_KEY_RETURN  (33)
-#if 0
+#ifdef FLY_DEBUG
 #define TELL_LPC_PWR_OFF   do{  lidbg("tell lpc ready to power off!\n");\
 								SOC_IO_Config(MCU_IIC_REQ_I,GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_16MA);\
 								SOC_IO_Output(0, MCU_IIC_REQ_ISR, 0);\

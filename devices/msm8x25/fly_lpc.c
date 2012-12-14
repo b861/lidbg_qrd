@@ -220,7 +220,7 @@ static void LPCdealReadFromMCUAll(BYTE *p, UINT length)
             case 0x00://ACC OFF
             	if (bResumeError)
             	{
-            		printk("JQilin Resume Error And Block...\n");
+            		lidbg("JQilin Resume Error And Block...\n");
 					return;
             	}
 				
