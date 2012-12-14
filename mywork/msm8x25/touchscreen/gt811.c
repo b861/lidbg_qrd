@@ -641,7 +641,7 @@ if(finger==0)
 #endif		
 
 
-#if 1
+#ifdef FLY_DEBUG
 {
 	static int key = 0;
 	if(finger == 3)

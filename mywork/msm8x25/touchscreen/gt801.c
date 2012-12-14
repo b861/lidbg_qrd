@@ -329,12 +329,13 @@ static void goodix_ts_work_func(struct work_struct *work)
 
     //printk("\nfinger=[%d]\n",finger);
     //return 0;
+#ifdef FLY_DEBUG
 if(finger==3)
     	{SOC_Key_Report(KEY_BACK,KEY_PRESSED_RELEASED);}
 if (finger==4) {printk("SOC_Log_Dump\n");SOC_Log_Dump(LOG_DMESG);}
 if(finger==5)
     	{SOC_Key_Report(KEY_MENU,KEY_PRESSED_RELEASED);}
-
+#endif
 
     switch(finger)
     {
