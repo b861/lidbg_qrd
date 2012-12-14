@@ -11,6 +11,22 @@ static int suspend_pending = 0;
 struct fly_hardware_info GlobalHardwareInfo;
 struct fly_hardware_info *pGlobalHardwareInfo;
 
+UINT32 iDriverResumeTime = 0;
+BOOL bResumeError = FALSE;
+
+UINT32 GetTickCount(void)
+
+{
+
+	struct timespec t_now;
+
+	do_posix_clock_monotonic_gettime(&t_now);
+
+	monotonic_to_bootbased(&t_now);  
+
+	return t_now.tv_sec * 1000 + t_now.tv_nsec / 1000000;
+
+}
 
 void LPCCombinDataStream(BYTE *p, UINT len)
 {
@@ -173,6 +189,16 @@ static void LPCdealReadFromMCUAll(BYTE *p, UINT length)
 #if 1
     u32 i;
 
+	if (iDriverResumeTime)
+	{
+		if (GetTickCount() - iDriverResumeTime >= 6000)
+		{
+			bResumeError = TRUE;
+			printk("JQilin Resume Error...\n");
+		}
+	}
+	iDriverResumeTime = 0;
+	
     lidbg("From LPC:");//mode ,command,para
     for(i = 0; i < length; i++)
     {
@@ -192,6 +218,12 @@ static void LPCdealReadFromMCUAll(BYTE *p, UINT length)
             switch (p[2])
             {
             case 0x00://ACC OFF
+            	if (bResumeError)
+            	{
+            		printk("JQilin Resume Error And Block...\n");
+					return;
+            	}
+				
 	            if(suspend_pending == PM_STATUS_ON)
 	            {
 					msleep(100);
@@ -356,6 +388,8 @@ void LPCResume(void)
 {
 
     SOC_IO_ISR_Enable(MCU_IIC_REQ_ISR);
+
+	iDriverResumeTime = GetTickCount();
 }
 
 
