@@ -57,7 +57,7 @@ int bp_msg_init(void)
 {
 	int err;
 
-#if 1//def FLY_DEBUG
+#ifdef FLY_DEBUG
 	lidbg("debug:bp_msg_init do nothing");
 #else
 	printk("\n[futengfei]  =bp_msg_init=IN===============================\n");
