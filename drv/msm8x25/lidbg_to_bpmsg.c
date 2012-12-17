@@ -55,8 +55,8 @@ int bp_msg_init(void)
 {
 	int err;
 
-#ifdef FLY_DEBUG
-	lidbg("debug:bp_msg_init do notthing");
+#if 1//def FLY_DEBUG
+	lidbg("debug:bp_msg_init do nothing");
 #else
 	printk("\n[futengfei]  =bp_msg_init=IN===============================\n");
 	smem_log_temp = (smem_log_deep *)smem_alloc(SMEM_ID_VENDOR1, sizeof(smem_log_deep));

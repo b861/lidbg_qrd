@@ -167,7 +167,7 @@ enum
 
 //gpio return keys
 #define GPIO_SCAN_KEY_RETURN  (33)
-#ifdef FLY_DEBUG
+#if 1//def FLY_DEBUG
 #define TELL_LPC_PWR_OFF   do{  lidbg("tell lpc ready to power off!\n");\
 								SOC_IO_Config(MCU_IIC_REQ_I,GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_16MA);\
 								SOC_IO_Output(0, MCU_IIC_REQ_ISR, 0);\
@@ -179,7 +179,10 @@ enum
 							}while(0)
 #else
 #define TELL_LPC_PWR_OFF
-#define TELL_LPC_PWR_ON
+#define TELL_LPC_PWR_ON do{\
+								SOC_IO_Config(MCU_IIC_REQ_I,GPIO_CFG_INPUT,GPIO_CFG_PULL_UP,GPIO_CFG_8MA);\
+								SOC_IO_Input(0,MCU_IIC_REQ_I,GPIO_CFG_PULL_UP);\
+							}while(0)
 #endif
 
 #define PWR_EN_ON   do{SOC_IO_Output(0, 23, 1); }while(0)

@@ -1,6 +1,7 @@
 #include "lidbg.h"
 #include "fly_lpc.h"
 
+//#define LPC_DEBUG_LOG
 
 
 #ifndef USU_EXTERNEL_SUSPEND_PENDING
@@ -13,6 +14,10 @@ struct fly_hardware_info *pGlobalHardwareInfo;
 
 UINT32 iDriverResumeTime = 0;
 BOOL bResumeError = FALSE;
+
+
+static struct task_struct *lpc_task;
+int thread_lpc(void *data);
 
 UINT32 GetTickCount(void)
 
@@ -56,9 +61,9 @@ void LPCCombinDataStream(BYTE *p, UINT len)
     }
 
     buf[3+i] = checksum;
-
+#ifdef LPC_DEBUG_LOG
     lidbg("ToMCU:%x %x %x\n", p[0], p[1], p[2]);
-
+#endif
     SOC_I2C_Send(I2_0_ID, MCU_ADDR_W >> 1, buf, 3 + i + 1);
 
 
@@ -102,7 +107,7 @@ void LPCPowerOnOK(void)
 {
     BYTE buff[] = {0x00, 0x00, 0x00};
 
-    DBG0("\nControl To MCU Power On######################");
+    DBG0("Control To MCU Power On######################");
     LPCCombinDataStream(buff, 3);
 }
 
@@ -183,22 +188,23 @@ void controlToMCUPing(BOOL bWork)
     LPCCombinDataStream(buff, 3);
 }
 
+extern bool late_resume_ok;
 
 static void LPCdealReadFromMCUAll(BYTE *p, UINT length)
 {
 #if 1
     u32 i;
-
+	static u32 acc_off_count = 0;
 	if (iDriverResumeTime)
 	{
-		if (GetTickCount() - iDriverResumeTime >= 6000)
+		if (GetTickCount() - iDriverResumeTime >= 6*1000)
 		{
 			bResumeError = TRUE;
 			printk("JQilin Resume Error...\n");
 		}
 	}
 	iDriverResumeTime = 0;
-	
+#ifdef LPC_DEBUG_LOG
     lidbg("From LPC:");//mode ,command,para
     for(i = 0; i < length; i++)
     {
@@ -206,7 +212,7 @@ static void LPCdealReadFromMCUAll(BYTE *p, UINT length)
 
     }
     printk("\n");
-
+#endif
 
     switch (p[0])
     {
@@ -223,8 +229,14 @@ static void LPCdealReadFromMCUAll(BYTE *p, UINT length)
             		lidbg("JQilin Resume Error And Block...\n");
 					return;
             	}
+				else
+				{
+					acc_off_count++;
+					lidbg("AccOff Count:%d\n",acc_off_count);
+
+				}
 				
-	            if(suspend_pending == PM_STATUS_ON)
+	            if((suspend_pending == PM_STATUS_ON)&&(late_resume_ok == 1))
 	            {
 					msleep(100);
 					
@@ -236,6 +248,8 @@ static void LPCdealReadFromMCUAll(BYTE *p, UINT length)
 				else
 				{
 					lidbg("suspend_pending...\n");
+					if(late_resume_ok == 0)
+						lidbg("late_resume_ok == 0...\n");
 
 				}
 	                break;
@@ -323,7 +337,10 @@ BOOL actualReadFromMCU(BYTE *p, UINT length)
     SOC_I2C_Rec_Simple(I2_0_ID, MCU_ADDR_R >> 1, p, length);
     if (readFromMCUProcessor(p, length))
     {
+    
+#ifdef LPC_DEBUG_LOG
         DBG0("More ");
+#endif
         return TRUE;
     }
     else
@@ -358,8 +375,44 @@ static void workFlyMCUIIC(struct work_struct *work)
 	//SOC_IO_ISR_Enable(MCU_IIC_REQ_ISR);
 }
 
+int thread_lpc(void *data)
+{
+
+
+	BYTE buff[] = {0x00,0x96,0x00,0x00,0x00,0x00};
+	BYTE iRandom = 0;
+	buff[5] = iRandom;
+	buff[4] = iRandom;
+	buff[3] = iRandom;
+	buff[2] = iRandom;
+
+    while(1)
+    {
+        set_current_state(TASK_UNINTERRUPTIBLE);
+        if(kthread_should_stop()) break;
+        if(1)
+        {
+        
+			if(1 == late_resume_ok)
+				LPCCombinDataStream(buff, SIZE_OF_ARRAY(buff));
+			
+			msleep(2000);
+        }
+        else
+        {
+            schedule_timeout(HZ);
+        }
+    }
+
+	return 0;
+
+}
+
+
+
 void mcuFirstInit(void)
 {
+	int err;
     pGlobalHardwareInfo = &GlobalHardwareInfo;
     INIT_WORK(&pGlobalHardwareInfo->FlyIICInfo.iic_work, workFlyMCUIIC);
 
@@ -374,6 +427,19 @@ void mcuFirstInit(void)
     //SOC_IO_Input(0, MCU_IIC_REQ_I, GPIO_CFG_PULL_UP);
     SOC_IO_ISR_Add(MCU_IIC_REQ_ISR, IRQF_TRIGGER_FALLING | IRQF_ONESHOT, MCUIIC_isr, pGlobalHardwareInfo);
 
+#ifdef FLY_DEBUG
+	lpc_task = kthread_create(thread_lpc, NULL, "lpc_task");
+	if(IS_ERR(lpc_task))
+	{
+		lidbg("Unable to start kernel thread.\n");
+		err = PTR_ERR(lpc_task);
+		lpc_task = NULL;
+
+	}
+	wake_up_process(lpc_task);
+#endif
+
+
 }
 
 
@@ -386,10 +452,20 @@ void LPCSuspend(void)
 
 void LPCResume(void)
 {
+    BYTE buff[16];
+    BYTE iReadLen = 12;
 
     SOC_IO_ISR_Enable(MCU_IIC_REQ_ISR);
 
+
 	iDriverResumeTime = GetTickCount();
+
+		//clear lpc i2c buffer
+    while (!SOC_IO_Input(MCU_IIC_REQ_G, MCU_IIC_REQ_I, 0))
+    {
+        actualReadFromMCU(buff, iReadLen);
+        iReadLen = 16;
+    }
 }
 
 

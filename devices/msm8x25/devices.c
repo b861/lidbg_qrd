@@ -28,6 +28,7 @@ static int suspend_pending = 0;
 #endif
 
 bool suspend_test = 0;
+bool late_resume_ok = 1;
 
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
@@ -607,6 +608,7 @@ static int soc_dev_remove(struct platform_device *pdev)
 static void devices_early_suspend(struct early_suspend *handler)
 {
 	static u32 early_suspend_count = 0;
+	late_resume_ok = 0;
 
 	DUMP_FUN_ENTER;
     lidbg("count=%d\n",++early_suspend_count);
@@ -650,6 +652,14 @@ static void devices_late_resume(struct early_suspend *handler)
 		lidbg("create thread_resume!\n");
 		
 		BL_SET(BL_MAX / 2);
+
+#ifdef DEBUG_LPC
+		LPCResume();
+		LPCPowerOnOK();
+		LPCNoReset();
+		LPCBackLightOn();
+#endif
+
 		
 		resume_task = kthread_create(thread_resume, NULL, "dev_resume_task");
 		if(IS_ERR(resume_task))
@@ -666,6 +676,7 @@ static void devices_late_resume(struct early_suspend *handler)
 		suspend_pending = PM_STATUS_ON;
     }
 	DUMP_FUN_LEAVE;
+	late_resume_ok = 1;
 }
 #endif
 
@@ -761,9 +772,8 @@ static int soc_dev_resume(struct platform_device *pdev)
         TELL_LPC_PWR_ON;
         PWR_EN_ON;
 
-#ifdef DEBUG_LPC
-        LPCResume();
-#endif
+
+
 
 #ifdef DEBUG_BUTTON
         SOC_IO_ISR_Enable(BUTTON_LEFT_1);
@@ -804,11 +814,11 @@ static int soc_dev_resume(struct platform_device *pdev)
         video_codec_init();
 #endif
 
-#ifdef DEBUG_LPC
-        LPCPowerOnOK();
-        LPCNoReset();
-        LPCBackLightOn();
-#endif
+//#ifdef DEBUG_LPC
+//        LPCPowerOnOK();
+//        LPCNoReset();
+//        LPCBackLightOn();
+//#endif
 		//USB_HUB_ENABLE;
 	    //USB_ID_LOW_HOST;
 

@@ -10,13 +10,14 @@
 
 struct fly_smem *p_fly_smem = NULL;
 
-
+#define DEBUG_USE_SMEM
 
 
 int msm8x25_init(void)
 {
     lidbg("msm8x25_init\n");
 
+#ifdef DEBUG_USE_SMEM
     lidbg( "SMEM_FLY_READ_ADC = %d\n", SMEM_ID_VENDOR0);
     p_fly_smem = (struct fly_smem *)smem_alloc(SMEM_ID_VENDOR0, sizeof(struct fly_smem));
 
@@ -25,7 +26,11 @@ int msm8x25_init(void)
         printk( "smem_alloc fail!\n");
         return 0;
     }
+#else 
+	p_fly_smem = (struct fly_smem *)kmalloc(sizeof(struct fly_smem), GFP_KERNEL);
+	memset(p_fly_smem, 0, sizeof(struct fly_smem));
 
+#endif
 
 
     soc_io_init();
