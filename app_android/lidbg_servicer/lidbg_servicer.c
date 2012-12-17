@@ -40,7 +40,7 @@
 #define LOG_CAP_TS_FT5X06_SKU7 (67)
 #define LOG_CAP_TS_RMI (68)
 #define LOG_CAP_TS_GT801 (69)
-
+#define  CMD_FAST_POWER_OFF (70)
 
 #define UMOUNT_USB (80)
 //#define  DEBUG_USB_RST
@@ -62,7 +62,8 @@ int  servicer_handler(int signum)
 
 
     readlen = read(fd, &cmd, 4);
-    //printf("fd=%x,readlen=%d,cmd=%d\n",fd,readlen,cmd);
+	//printf("fd=%x,readlen=%d,cmd=%d\n",fd,readlen,cmd);
+    LOGW("[futengfei]  fd=%x,readlen=%d,cmd=%d",fd,readlen,cmd);
     if(cmd != SERVICER_DONOTHING)
 
     {
@@ -150,6 +151,7 @@ int  servicer_handler(int signum)
         case LOG_CAP_TS_FT5X06:
         case LOG_CAP_TS_RMI:
 		case LOG_CAP_TS_GT801:
+		case CMD_FAST_POWER_OFF :
         {
             if(LOG_CAP_TS_GT811 == cmd)
 
@@ -201,7 +203,10 @@ int  servicer_handler(int signum)
                 system("insmod /flysystem/lib/out/gt801.ko");
 
             }
-
+            else if ( CMD_FAST_POWER_OFF == cmd)
+            {
+                system("am broadcast -a android.intent.action.FAST_BOOT_START");
+            }
 			
             //sleep(10);//delay to mount sdcard
             //system("dmesg > /sdcard/log_cap_ts_dmesg.txt");
@@ -247,7 +252,6 @@ int main(int argc , char **argv)
     //sleep(5);
 
     system("insmod /system/lib/modules/out/lidbg_ts_to_recov.ko");
-
     system("insmod /system/lib/modules/out/lidbg_common.ko");
     system("insmod /system/lib/modules/out/lidbg_servicer.ko");
     system("insmod /system/lib/modules/out/lidbg_touch.ko");
@@ -260,13 +264,10 @@ int main(int argc , char **argv)
     system("insmod /system/lib/modules/out/lidbg_soc_devices.ko");
     system("insmod /system/lib/modules/out/lidbg_videoin.ko");
     system("insmod /system/lib/modules/out/lidbg_main.ko");
-    system("insmod /system/lib/modules/out/lidbg_ts_probe.ko");
-    system("insmod /system/lib/modules/out/lidbg_ts_to_recov.ko");
     system("insmod /system/lib/modules/out/lidbg_to_bpmsg.ko");
 
     //for flycar
     system("insmod /flysystem/lib/out/lidbg_ts_to_recov.ko");
-
     system("insmod /flysystem/lib/out/lidbg_common.ko");
     system("insmod /flysystem/lib/out/lidbg_servicer.ko");
     system("insmod /flysystem/lib/out/lidbg_touch.ko");
@@ -278,7 +279,6 @@ int main(int argc , char **argv)
     system("insmod /flysystem/lib/out/lidbg_fly_soc.ko");
     system("insmod /flysystem/lib/out/lidbg_soc_devices.ko");
     system("insmod /flysystem/lib/out/lidbg_main.ko");
-    system("insmod /flysystem/lib/out/lidbg_ts_probe.ko");
     system("insmod /flysystem/lib/out/lidbg_to_bpmsg.ko");
 
 
@@ -315,6 +315,7 @@ open_dev:
 
 #endif
 
+
 	//clear fifo
 	while(1)
 	{
@@ -322,9 +323,8 @@ open_dev:
 			break;
 	}
 
-
-	
-
+    system("insmod /system/lib/modules/out/lidbg_ts_probe.ko");
+    system("insmod /flysystem/lib/out/lidbg_ts_probe.ko");
 #if 1
     //for flycar
     sleep(1);
