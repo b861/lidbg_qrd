@@ -181,7 +181,7 @@ ssize_t  servicer_read(struct file *filp, char __user *buffer, size_t size, loff
 
     int cmd ;
     cmd = k2u_read();
-    //lidbg("cmd = %d\n",cmd);
+    lidbg("servicer_read:cmd = %d\n",cmd);
     if (copy_to_user(buffer, &cmd, 4))
     {
         // ret =  - EFAULT;

@@ -263,25 +263,28 @@ void SOC_PWR_ShutDown(void)
 	suspend_pending = PM_STATUS_EARLY_SUSPEND_PENDING;
 
 #ifdef  FLY_DEBUG
-
+#if 0
     lidbg_key_report(KEY_POWER, KEY_PRESSED);
     msleep(2000);
     lidbg_key_report(KEY_POWER, KEY_RELEASED);
-	msleep(250);
+    msleep(250);
 
-#if 1
-    lidbg_key_report(KEY_DOWN, KEY_PRESSED_RELEASED);
-	msleep(150);
-    lidbg_key_report(KEY_DOWN, KEY_PRESSED_RELEASED);
-	msleep(150);
-    lidbg_key_report(KEY_DOWN, KEY_PRESSED_RELEASED);
-	msleep(150);
-    lidbg_key_report(KEY_DOWN, KEY_PRESSED_RELEASED);
-	msleep(150);
-    lidbg_key_report(KEY_UP, KEY_PRESSED_RELEASED);
-    msleep(200);
-    lidbg_key_report(KEY_ENTER, KEY_PRESSED_RELEASED);
-	//msleep(500);
+	#if 1
+	    lidbg_key_report(KEY_DOWN, KEY_PRESSED_RELEASED);
+		msleep(150);
+	    lidbg_key_report(KEY_DOWN, KEY_PRESSED_RELEASED);
+		msleep(150);
+	    lidbg_key_report(KEY_DOWN, KEY_PRESSED_RELEASED);
+		msleep(150);
+	    lidbg_key_report(KEY_DOWN, KEY_PRESSED_RELEASED);
+		msleep(150);
+	    lidbg_key_report(KEY_UP, KEY_PRESSED_RELEASED);
+	    msleep(200);
+	    lidbg_key_report(KEY_ENTER, KEY_PRESSED_RELEASED);
+		//msleep(500);
+	#endif
+#else
+ 	k2u_write(CMD_FAST_POWER_OFF);
 #endif
 
 
