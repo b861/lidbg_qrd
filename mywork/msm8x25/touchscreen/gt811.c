@@ -931,8 +931,8 @@ err_gpio_request_failed:
 	input_set_abs_params(ts->input_dev, ABS_X, 0,  ts->abs_x_max, 0, 0);
 	input_set_abs_params(ts->input_dev, ABS_Y, 0, ts->abs_y_max, 0, 0);
 	input_set_abs_params(ts->input_dev, ABS_PRESSURE, 0, 255, 0, 0);
-#define SCREEN_X (800)
-#define SCREEN_Y (480)
+#define SCREEN_X (1024)
+#define SCREEN_Y (600)
 
 #ifdef GOODIX_MULTI_TOUCH
 	input_set_abs_params(ts->input_dev, ABS_MT_WIDTH_MAJOR, 0, 255, 0, 0);
