@@ -93,8 +93,14 @@ int k2u_read(void)
     int ret;
 
     spin_lock_irqsave(&fifo_k2u_lock, flags_k2u);
-    //ret=cmd2app;
-    kfifo_out(&k2u_fifo, &ret, sizeof(int));
+	if(kfifo_is_empty(&k2u_fifo))
+	{
+       ret = 0xffffffff;
+	}
+	else
+  	{
+    	kfifo_out(&k2u_fifo, &ret, sizeof(int));
+  	}
     spin_unlock_irqrestore(&fifo_k2u_lock, flags_k2u);
     return ret;
 

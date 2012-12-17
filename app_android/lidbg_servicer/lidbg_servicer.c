@@ -50,7 +50,7 @@ pthread_t ntid;
 int fd = 0;
 
 
-void  servicer_handler(int signum)
+int  servicer_handler(int signum)
 {
 
     int cmd = 0;
@@ -230,6 +230,7 @@ void  servicer_handler(int signum)
     }
 
     printf("servicer_handler-\n");
+	return cmd;
 }
 
 
@@ -314,7 +315,15 @@ open_dev:
 
 #endif
 
+	//clear fifo
+	while(1)
+	{
+		if(servicer_handler(0) == 0xffffffff)
+			break;
+	}
 
+
+	
 
 #if 1
     //for flycar
