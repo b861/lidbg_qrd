@@ -113,7 +113,7 @@ MODULE_AUTHOR("Flyaudio Inc.");
 EXPORT_SYMBOL(mod_cmn_main);
 EXPORT_SYMBOL(GetNsCount);
 
-
-
+struct lidbg_dev *lidbg_devp; /*设备结构体指针*/
+EXPORT_SYMBOL(lidbg_devp);
 
 

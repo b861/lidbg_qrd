@@ -4,7 +4,7 @@
 #include "lidbg.h"
 #define DEVICE_NAME "lidbg_servicer"
 
-#define FIFO_SIZE (16)
+#define FIFO_SIZE (64)
 struct kfifo k2u_fifo;
 struct kfifo u2k_fifo;
 

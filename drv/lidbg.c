@@ -8,7 +8,6 @@
 #include "lidbg.h"
 
 
-#define LIDBG_SIZE	MEM_SIZE_4_KB	/*全局内存最大1K字节*/
 #define MEM_CLEAR 0x1  /*清0全局内存*/
 #define GET_GLOBAL 0x2
 
@@ -22,16 +21,15 @@ struct class *my_class;
 
 
 static lidbg_major = LIDBG_MAJOR;
-/*lidbg设备结构体*/
-struct lidbg_dev
-{
-    struct cdev cdev; /*cdev结构体*/
-    unsigned char mem[LIDBG_SIZE]; /*全局内存*/
-};
 
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,36)
+DECLARE_MUTEX(lidbg_lock);
+#else
+DEFINE_SEMAPHORE(lidbg_lock);
+#endif
 
-struct lidbg_dev *lidbg_devp; /*设备结构体指针*/
+
 
 //#define LIDBG_IOCTL (0x38)
 
@@ -41,8 +39,20 @@ struct lidbg_dev *lidbg_devp; /*设备结构体指针*/
 /*文件打开函数*/
 int lidbg_open(struct inode *inode, struct file *filp)
 {
+    DUMP_FUN;
     /*将设备结构体指针赋值给文件私有数据指针*/
     filp->private_data = lidbg_devp;
+    if (filp->f_flags & O_NONBLOCK)    // \u963b\u585e
+    {
+        if (down_trylock(&lidbg_lock))  // \u5982\u679c\u83b7\u53d6\u4e0d\u5230\u4fe1\u53f7\u91cf\uff0c\u5219\u7acb\u5373\u8fd4\u56de\u3002
+
+            return -EBUSY;
+    }                                  
+    else                               // \u975e\u963b\u585e
+    {
+        /* \u83b7\u53d6\u4fe1\u53f7\u91cf */
+        down(&lidbg_lock);    // \u7b2c\u4e8c\u6b21\u83b7\u53d6\u4fe1\u53f7\u91cf\u65f6\u4f1a\u8fdb\u5165\u4f11\u7720\uff0c\u7b2c\u4e00\u4e2a\u5e94\u7528\u7a0b\u5e8f\u91ca\u653e\u540e\u624d\u4f1a\u88ab\u5524\u9192\u3002
+    }
     return 0;
 }
 
@@ -51,6 +61,8 @@ int lidbg_open(struct inode *inode, struct file *filp)
 /*文件释放函数*/
 int lidbg_release(struct inode *inode, struct file *filp)
 {
+    DUMP_FUN;
+    up(&lidbg_lock); 
     return 0;
 }
 
@@ -82,7 +94,7 @@ static int lidbg_ioctl(struct inode *inodep, struct file *filp, unsigned
 static ssize_t lidbg_read(struct file *filp, char __user *buf, size_t size,
                           loff_t *ppos)
 {
-#if 1
+#if 0
     unsigned long p =  *ppos;
     unsigned int count = size;
     int ret = 0;
@@ -114,7 +126,21 @@ static ssize_t lidbg_read(struct file *filp, char __user *buf, size_t size,
     return ret;
 #else
 
+    unsigned int count = size;
+    int ret = 0;
+    struct lidbg_dev *dev = filp->private_data; /*获得设备结构体指针*/
 
+    /*内核空间->用户空间*/
+    if (copy_to_user(buf, (void *)(dev->mem), count))
+    {
+        ret =  - EFAULT;
+    }
+    else
+    {
+        ret = count;
+    }
+	
+    return count;
 
 #endif
 
@@ -255,6 +281,14 @@ static ssize_t lidbg_write(struct file *filp, const char __user *buf,
         new_argc = argc - 2;
         new_argv = argv + 2;
 
+        if(!strcmp(argv[1], "get_lidbg"))
+        {
+        	lidbg("lidbg_devp addr = %x",(u32)lidbg_devp);
+			*(u32 *)(lidbg_devp->mem) = (u32)lidbg_devp;
+		   
+        }
+
+
         if(!strcmp(argv[1], "mem"))
         {
             lidbg_mem_main(new_argc, new_argv);
@@ -394,7 +428,15 @@ static void lidbg_setup_cdev(struct lidbg_dev *dev, int index)
         lidbg(KERN_NOTICE "Error %d adding LED%d", err, index);
 }
 
-
+void set_func_tbl(void)
+{
+//io
+	lidbg_devp->soc_func_tbl.SOC_IO_Output = SOC_IO_Output;
+	lidbg_devp->soc_func_tbl.SOC_IO_Input = SOC_IO_Input;
+//i2c
+	lidbg_devp->soc_func_tbl.SOC_I2C_Send = SOC_I2C_Send;
+	lidbg_devp->soc_func_tbl.SOC_I2C_Rec = SOC_I2C_Rec;
+}
 
 
 void lidbg_create_proc(void);
@@ -453,7 +495,7 @@ int lidbg_init(void)
     /*\u521b\u5efa/proc/hello\u6587\u4ef6*/
     lidbg_create_proc();
 
-
+	set_func_tbl();
 
     lidbg_soc_init();
 

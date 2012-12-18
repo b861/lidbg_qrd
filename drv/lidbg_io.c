@@ -92,6 +92,8 @@ void mod_io_main(int argc, char **argv)
 
 #endif
         lidbg("read: %x\n", status);
+	    *(bool *)(lidbg_devp->mem) = (bool)status;
+
 
     }
     else if(!strcmp(argv[0], "w"))
