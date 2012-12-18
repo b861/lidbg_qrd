@@ -1,8 +1,5 @@
 /*======================================================================
-    A lidbg driver as an example of char device drivers
 
-    The initial developer of the original code is Baohua Song
-    <author@linuxdriver.cn>. All Rights Reserved.
 ======================================================================*/
 // http://blog.csdn.net/luoshengyang/article/details/6568411
 #include "lidbg.h"

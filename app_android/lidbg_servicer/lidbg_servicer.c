@@ -78,11 +78,6 @@ inline void lidbg_call(char *cmd,int cmd_size,void *buf,int size)
 	 {\
 	 	read(fd, buf, ret_bytes);\
 	 }\
-	 else\
-	 {\
-	 	int tmp;\
-	 	read(fd, &tmp, 0);\
-	 }\
 	close(fd);\
 }while(0)
 

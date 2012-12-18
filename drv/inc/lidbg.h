@@ -57,15 +57,13 @@
 #include <asm/uaccess.h>
 #include <linux/kfifo.h>
 
-///////////
-#define BEGIN_KMEM do{old_fs = get_fs();set_fs(get_ds());}while(0)
-#define END_KMEM   do{set_fs(old_fs);}while(0)
 
 //#define KERN_CRIT       "<2>"    /* critical conditions */
 #define lidbg(msg...)  do { printk( KERN_CRIT "lidbg: " msg); }while(0)
 
-
 ////////////
+
+#include "lidbg_enter.h"
 #include "lidbg_io.h"
 #include "lidbg_key.h"
 #include "lidbg_touch.h"
@@ -89,25 +87,6 @@
 #include "devices.h"
 
 
-struct lidbg_fn_t {
-//io
-	void (*SOC_IO_Output) (u32 group, u32 index, bool status);
-	bool (*SOC_IO_Input) (u32 group, u32 index, u32 pull);
-	
-//i2c
-	int (*SOC_I2C_Send) (int bus_id, char chip_addr, char *buf, unsigned int size);
-	int (*SOC_I2C_Rec)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
-
-};
-#define LIDBG_SIZE	MEM_SIZE_4_KB	/*全局内存最大1K字节*/
-
-/*lidbg设备结构体*/
-struct lidbg_dev
-{
-    struct cdev cdev; /*cdev结构体*/
-    unsigned char mem[LIDBG_SIZE]; /*全局内存*/
-    struct lidbg_fn_t soc_func_tbl;
-};
 
 #endif
 
