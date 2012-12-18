@@ -15,7 +15,7 @@ int thread_bp_msg(void *data)
     {
         set_current_state(TASK_UNINTERRUPTIBLE);
         if(kthread_should_stop()) break;
-     	if(1) 
+     	if(0) 
 	        {
 		    start_index = smem_log_temp->start_pos;
 		    end_index = smem_log_temp->end_pos;
@@ -45,7 +45,20 @@ int thread_bp_msg(void *data)
 	}
         else 
         {
-            schedule_timeout(HZ);
+			start_index =smem_log_temp->start_pos;
+			end_index =smem_log_temp->end_pos;
+	
+			if(start_index != end_index)
+				{
+					printk("%s\n",smem_log_temp->log[end_index]);
+					smem_log_temp->end_pos = (end_index + 1)  % TOTAL_LOGS;
+					msleep(50);
+				}
+			  else
+				{
+					msleep(BP_MSG_POLLING_TIME);
+				}
+ 	
         }
     }
     return 0;
