@@ -62,6 +62,7 @@
 
 
 #endif
+struct lidbg_dev *lidbg_devp=NULL; 
 
 
 
@@ -482,48 +483,6 @@ void key_scan(void)
 
 int thread_key_xxx(void *data)
 {
-    // int i;
-    //struct timeval timeval ;
-    //  timeval.tv_usec = 0;
-    //timeval.tv_sec = (unsigned long) mktime (2011, 11, 11, 11, 11, 11);
-    //do_settimeofday (&timeval);
-    int argc = 0;
-    //int ret = size;
-    int i = 0;
-    char *pt;
-    char *argv[10] = {NULL};
-
-		if(1)
-		{
-
-			struct file *file = NULL;
-			mm_segment_t old_fs;
-			ssize_t result;
-			ssize_t ret;
-			char buf[512];
-			memset(buf, 0x56, 512);
-	
-			file = filp_open("/dev/mlidbg0",  O_RDWR, 0);
-			if(IS_ERR(file))
-			{
-				lidbg("open device io error");
-			}
-
-			BEGIN_KMEM;
-	
-			{
-				result = file->f_op->read(file, &argv[3], argc - 3, &file->f_pos);
-			}
-	
-			//set_fs(old_fs);
-			END_KMEM;
-			filp_close(file, 0);
-	
-		}
-	   
-
-
-
 
 	
     while(1)
@@ -533,12 +492,20 @@ int thread_key_xxx(void *data)
         if(1)
         {
             //key_scan();
+			
+again:	LIDBG_GET(lidbg_devp);
+		if(lidbg_devp == NULL )
+			{
+			printk("[futengfei]   lidbg_devp == NULL\n");
+			goto again;
+		}
+			
             while(1)
             {
-                msleep(15000);
-
-                SOC_PWR_ShutDown();
-
+			msleep(3000);
+			lidbg_devp->soc_func_tbl.SOC_IO_Output(0, 33, 1);
+			msleep(3000);
+			lidbg_devp->soc_func_tbl.SOC_IO_Output(0, 33, 0);
 
             }
         }

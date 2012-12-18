@@ -74,7 +74,7 @@ inline void lidbg_call(char *cmd,int cmd_size,void *buf,int size)
 	int fd;\
 	 fd = open("/dev/mlidbg0", O_RDWR);\
 	 write(fd, cmd, sizeof(cmd));\
-	 if((buf)&&(ret_bytes))\
+	 if((buf != NULL)&&(ret_bytes))\
 	 {\
 	 	read(fd, buf, ret_bytes);\
 	 }\
@@ -466,9 +466,15 @@ open_dev:
 
     while(1)
     {
-        sleep(60);
+	sleep(60);	
 
-    }
+/*
+		int  ret=3;
+		LIDBG_CALL("c io r 33",&ret,sizeof(int));
+		LOGW("[futengfei]==========111111=============ret=[%d] ",ret);
+		sleep(1);	
+*/
+	}
 
 #endif	
 

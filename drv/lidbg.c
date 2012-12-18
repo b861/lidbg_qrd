@@ -128,6 +128,8 @@ static ssize_t lidbg_read(struct file *filp, char __user *buf, size_t size,
     struct lidbg_dev *dev = filp->private_data; /*获得设备结构体指针*/
 
     /*内核空间->用户空间*/
+	//memcpy(&use, (void *)(dev->mem), sizeof(int));
+	//printk("[futengfei]  lidbg_read==========use=%d\n",use);
     if (copy_to_user(buf, (void *)(dev->mem), count))
     {
         ret =  - EFAULT;
