@@ -11,6 +11,8 @@ smem_log_deep *smem_log_temp=NULL;
 
 int thread_bp_msg(void *data)
 {
+	smem_log_temp->write_flag=1;
+
     while(1)
     {
         set_current_state(TASK_UNINTERRUPTIBLE);
@@ -52,11 +54,11 @@ int thread_bp_msg(void *data)
 				{
 					printk("%s\n",smem_log_temp->log[end_index]);
 					smem_log_temp->end_pos = (end_index + 1)  % TOTAL_LOGS;
-					msleep(50);
+					msleep(20);
 				}
 			  else
 				{
-					msleep(BP_MSG_POLLING_TIME);
+					msleep(20);
 				}
  	
         }
