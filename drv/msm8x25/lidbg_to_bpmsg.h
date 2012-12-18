@@ -3,14 +3,14 @@
 
 //up always online
 
-#define TOTAL_LOGS 100UL
-#define LOG_BYTES 20UL
+#define TOTAL_LOGS 1000UL
+#define LOG_BYTES  32UL
 typedef struct
 {
 int start_pos;
 int end_pos;
 char log[TOTAL_LOGS][LOG_BYTES];
-u8 write_flag[TOTAL_LOGS];
+u8 write_flag;
 }smem_log_deep;
 
 
