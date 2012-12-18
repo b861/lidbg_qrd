@@ -56,12 +56,18 @@ int thread_bp_msg(void *data)
 int bp_msg_init(void)
 {
 	int err;
-
+	DUMP_FUN;
 #ifdef FLY_DEBUG
 	lidbg("debug:bp_msg_init do nothing");
 #else
 	printk("\n[futengfei]  =bp_msg_init=IN===============================\n");
 	smem_log_temp = (smem_log_deep *)smem_alloc(SMEM_ID_VENDOR1, sizeof(smem_log_deep));
+	if(smem_log_temp == NULL)
+	{
+		   lidbg("smem_alloc fail!\n");
+		   return 0;
+	}
+	
         bp_msg_task = kthread_create(thread_bp_msg, NULL, "bp_msg_task");
         if(IS_ERR(bp_msg_task))
         {
