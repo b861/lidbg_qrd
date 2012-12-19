@@ -215,7 +215,7 @@ static ssize_t lidbg_write(struct file *filp, const char __user *buf,
     //lidbg("argc=%d\n", argc);
 
     i = 0;
-    lidbg("cmd -");
+    lidbg("cmd:");
     while(i < argc)
     {
         printk("%s ", argv[i]);
@@ -278,7 +278,7 @@ static ssize_t lidbg_write(struct file *filp, const char __user *buf,
         new_argc = argc - 2;
         new_argv = argv + 2;
 
-        if(!strcmp(argv[1], "get_lidbg"))
+        if(!strcmp(argv[1], "lidbg_get"))
         {
         	lidbg("lidbg_devp addr = %x",(u32)lidbg_devp);
 			*(u32 *)(lidbg_devp->mem) = (u32)lidbg_devp;

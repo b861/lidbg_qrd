@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <utils/Log.h>
+#include "lidbg_servicer.h"
 
 //mount yaffs2 mtd@system /system rw remount
 //...
@@ -48,45 +49,6 @@
 
 pthread_t ntid;
 int fd = 0;
-
-
-#if 0
-inline void lidbg_call(char *cmd,int cmd_size,void *buf,int size)
-{
-
-	int fd;
-	
-	 fd = open("/dev/mlidbg0", O_RDWR);
-	 write(fd, cmd, cmd_size);
-	 if((buf)&&(size))
-	 {
-	 	read(fd, buf, size);
-	 }
-	 else
-	 {
-	 	int tmp;
-	 	read(fd, &tmp, 0);
-	 }
-	close(fd);
-}
-#else
-#define LIDBG_CALL(cmd,buf,ret_bytes) do{\
-	int fd;\
-	 fd = open("/dev/mlidbg0", O_RDWR);\
-	 write(fd, cmd, sizeof(cmd));\
-	 if((buf)&&(ret_bytes))\
-	 {\
-	 	read(fd, buf, ret_bytes);\
-	 }\
-	close(fd);\
-}while(0)
-
-//LIDBG_CALL("c io w 33 1",NULL,0);
-
-//bool ret;
-//LIDBG_CALL("c io r 33",&ret,sizeof(bool));
-
-#endif
 
 
 int  servicer_handler(int signum)

@@ -2,7 +2,6 @@
 #ifndef _FLY_SOC__
 #define _FLY_SOC__
 
-#define SOC_COMPILE
 
 #ifdef SOC_COMPILE
 #include "lidbg.h"
