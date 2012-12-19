@@ -62,7 +62,7 @@
 
 
 #endif
-struct lidbg_dev *lidbg_devp=NULL; 
+struct lidbg_dev *lidbg_devpm=NULL; 
 
 
 
@@ -493,19 +493,21 @@ int thread_key_xxx(void *data)
         {
             //key_scan();
 			
-again:	LIDBG_GET(lidbg_devp);
-		if(lidbg_devp == NULL )
+again:	LIDBG_GET(lidbg_devpm);
+		printk("[futengfei]   lidbg_devpm =%x\n",(u32)lidbg_devpm);
+		if(lidbg_devpm == NULL )
 			{
-			printk("[futengfei]   lidbg_devp == NULL\n");
+			//printk("[futengfei]   lidbg_devpm == NULL\n");
+			msleep(1000);
 			goto again;
 		}
 			
             while(1)
             {
 			msleep(3000);
-			lidbg_devp->soc_func_tbl.SOC_IO_Output(0, 33, 1);
+			lidbg_devpm->soc_func_tbl.SOC_IO_Output(0, 33, 1);
 			msleep(3000);
-			lidbg_devp->soc_func_tbl.SOC_IO_Output(0, 33, 0);
+			lidbg_devpm->soc_func_tbl.SOC_IO_Output(0, 33, 0);
 
             }
         }

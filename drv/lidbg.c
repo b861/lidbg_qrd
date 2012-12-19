@@ -124,12 +124,12 @@ static ssize_t lidbg_read(struct file *filp, char __user *buf, size_t size,
 #else
 
     unsigned int count = size;
-    int ret = 0;
+    int ret = 0,use=0;
     struct lidbg_dev *dev = filp->private_data; /*获得设备结构体指针*/
 
     /*内核空间->用户空间*/
-	//memcpy(&use, (void *)(dev->mem), sizeof(int));
-	//printk("[futengfei]  lidbg_read==========use=%d\n",use);
+	memcpy(&use, (void *)(dev->mem), 4);
+	printk("[futengfei]  lidbg_read==========use=%x,count=%d\n",(u32)use,count);
     if (copy_to_user(buf, (void *)(dev->mem), count))
     {
         ret =  - EFAULT;
@@ -280,7 +280,7 @@ static ssize_t lidbg_write(struct file *filp, const char __user *buf,
         new_argc = argc - 2;
         new_argv = argv + 2;
 
-        if(!strcmp(argv[1], "get_lidbg"))
+        if(!strcmp(argv[1], "lidbg_get"))
         {
         	lidbg("lidbg_devp addr = %x",(u32)lidbg_devp);
 			*(u32 *)(lidbg_devp->mem) = (u32)lidbg_devp;

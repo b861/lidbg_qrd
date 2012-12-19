@@ -34,7 +34,7 @@ struct lidbg_dev
 	 fd = filp_open("/dev/mlidbg0", O_RDWR, 0);\
 	 BEGIN_KMEM;\
 	 fd->f_op->write(fd, "c lidbg_get", sizeof("c lidbg_get"), &fd->f_pos);\
-	 fd->f_op->read(fd, buf, 4 ,&fd->f_pos);\
+	 fd->f_op->read(fd, &buf, 4 ,&fd->f_pos);\
 	 END_KMEM;\
 	filp_close(fd,0);\
 }while(0)
