@@ -58,7 +58,7 @@ enum
 
 //#define SOC_VIN_DETECT
 //#define DEBUG_GPIO_RETURN_KEY
-#define DEBUG_POWER_KEY
+//#define DEBUG_POWER_KEY
 //#define DEBUG_POWER_UP
 //#define DEBUG_CS42L52
 //#define DEBUG_TDA7419
