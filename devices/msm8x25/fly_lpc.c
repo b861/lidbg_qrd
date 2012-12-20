@@ -14,7 +14,7 @@ struct fly_hardware_info *pGlobalHardwareInfo;
 
 UINT32 iDriverResumeTime = 0;
 BOOL bResumeError = FALSE;
-
+u32 lpc_send_rec_count = 0;
 
 static struct task_struct *lpc_task;
 int thread_lpc(void *data);
@@ -255,7 +255,17 @@ static void LPCdealReadFromMCUAll(BYTE *p, UINT length)
 	                break;
 	        }
         }
-    default:
+       case 0x96:
+			switch (p[2])
+			{
+				case 0x7f:
+#ifdef LPC_DEBUG_LOG			
+				 lidbg("LPC ping return!\n");
+#endif
+				 lpc_send_rec_count--;
+				 break;
+			}
+	default:
         break;
     }
 #endif
@@ -385,18 +395,32 @@ int thread_lpc(void *data)
 	buff[4] = iRandom;
 	buff[3] = iRandom;
 	buff[2] = iRandom;
-
+	static u32 re_sleep_count = 0;
+	msleep(10*1000);
     while(1)
     {
         set_current_state(TASK_UNINTERRUPTIBLE);
         if(kthread_should_stop()) break;
         if(1)
         {
-        
-			if(1 == late_resume_ok)
+  			if((1 == late_resume_ok)&&(suspend_pending == PM_STATUS_ON))
+			{
+#ifdef LPC_DEBUG_LOG
+				lidbg("lpc_send_rec_count=%d\n",re_sleep_count);
+#endif	
+				if(lpc_send_rec_count >= 3)
+				{
+					re_sleep_count++;
+					lidbg("\n\n\nerrlsw:lpc_send_rec_count > 3 ,do SOC_PWR_ShutDown again! %d\n\n\n",re_sleep_count);
+					SOC_PWR_ShutDown();
+					lpc_send_rec_count=0;
+
+				}
+
 				LPCCombinDataStream(buff, SIZE_OF_ARRAY(buff));
-			
-			msleep(2000);
+				lpc_send_rec_count ++;
+				}
+				msleep(2000);
         }
         else
         {
@@ -457,6 +481,7 @@ void LPCResume(void)
 
     SOC_IO_ISR_Enable(MCU_IIC_REQ_ISR);
 
+	lpc_send_rec_count=0;
 
 	iDriverResumeTime = GetTickCount();
 
