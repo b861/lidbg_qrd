@@ -6,7 +6,7 @@
 
 //#define FLY_DEBUG  //no use here now
 
-#define DEBUG_LED
+//#define DEBUG_LED
 
 #define FLY_BOARD_1ST
 //#define CONFIG_PM

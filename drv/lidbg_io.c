@@ -92,7 +92,7 @@ void mod_io_main(int argc, char **argv)
 
 #endif
         lidbg("read: %x\n", status);
-	    *(bool *)(lidbg_devp->mem) = (bool)status;
+	    *(int *)(lidbg_devp->mem) = (int)status;
 
 
     }

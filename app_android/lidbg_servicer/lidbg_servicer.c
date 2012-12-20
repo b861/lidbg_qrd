@@ -428,9 +428,15 @@ open_dev:
 
     while(1)
     {
-        sleep(60);
+	sleep(60);	
 
-    }
+/*
+		int  ret=3;
+		LIDBG_CALL("c io r 33",&ret,sizeof(int));
+		LOGW("[futengfei]==========111111=============ret=[%d] ",ret);
+		sleep(1);	
+*/
+	}
 
 #endif	
 

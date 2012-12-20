@@ -5,6 +5,5 @@ int x;
 int y;
 int pressed;
 }touch_t;
-
 extern void set_touch_pos(touch_t *t);
 #endif
