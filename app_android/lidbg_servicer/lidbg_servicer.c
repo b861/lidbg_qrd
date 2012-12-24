@@ -206,6 +206,8 @@ int  servicer_handler(int signum)
             }
             else if ( CMD_FAST_POWER_OFF == cmd)
             {
+            	//system("setprop fly.fastboot.accoff 1");
+            	property_set("fly.fastboot.accoff","1");
                 system("am broadcast -a android.intent.action.FAST_BOOT_START");
             }
 			
@@ -227,6 +229,8 @@ int  servicer_handler(int signum)
 		{
 			system("su");
 			system("echo on > /sys/power/state");
+			//system("setprop fly.fastboot.accoff 0");
+			property_set("fly.fastboot.accoff","0");
 			break;
 
 		}

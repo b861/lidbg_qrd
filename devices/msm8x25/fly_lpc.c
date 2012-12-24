@@ -199,7 +199,7 @@ static void LPCdealReadFromMCUAll(BYTE *p, UINT length)
 	{
 		if (GetTickCount() - iDriverResumeTime >= 6*1000)
 		{
-			bResumeError = TRUE;
+			//bResumeError = TRUE;
 			printk("JQilin Resume Error...\n");
 		}
 	}
