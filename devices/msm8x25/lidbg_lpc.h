@@ -48,8 +48,8 @@ struct fly_hardware_info
 
 #define  MCU_IIC_REQ_G (30)
 #define  MCU_IIC_REQ_I (30)
-
 #define  MCU_IIC_REQ_ISR  (30)
+
 #define  MCU_ADDR_W  0xA0
 #define  MCU_ADDR_R  0xA1
 
@@ -68,6 +68,23 @@ void LPCControlSupendTestStop(void);
 void LPCControlPWREnable(void);
 void LPCControlPWRDisenable(void);
 
+#if 1//def FLY_DEBUG
+#define TELL_LPC_PWR_OFF   do{  lidbg("tell lpc ready to power off!\n");\
+								SOC_IO_Config(MCU_IIC_REQ_ISR,GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_16MA);\
+								SOC_IO_Output(0, MCU_IIC_REQ_ISR, 0);\
+							}while(0)
+
+#define TELL_LPC_PWR_ON   do{\
+								SOC_IO_Config(MCU_IIC_REQ_ISR,GPIO_CFG_INPUT,GPIO_CFG_PULL_UP,GPIO_CFG_8MA);\
+								SOC_IO_Input(0,MCU_IIC_REQ_ISR,GPIO_CFG_PULL_UP);\
+							}while(0)
+#else
+#define TELL_LPC_PWR_OFF
+#define TELL_LPC_PWR_ON do{\
+								SOC_IO_Config(MCU_IIC_REQ_I,GPIO_CFG_INPUT,GPIO_CFG_PULL_UP,GPIO_CFG_8MA);\
+								SOC_IO_Input(0,MCU_IIC_REQ_I,GPIO_CFG_PULL_UP);\
+							}while(0)
+#endif
 
 
 

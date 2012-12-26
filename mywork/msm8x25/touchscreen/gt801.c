@@ -12,6 +12,22 @@
  * GNU General Public License for more details.
  *111
  */
+//#define SOC_COMPILE
+
+#ifdef SOC_COMPILE
+#include "lidbg.h"
+#include "fly_soc.h"
+	 
+#else
+#include "lidbg_def.h"
+	 
+#include "lidbg_enter.h"
+	 
+	 LIDBG_DEFINE;
+#endif
+
+
+ 
 #include <linux/kernel.h>
 #include <linux/device.h>
 #include <linux/hrtimer.h>
@@ -34,9 +50,6 @@
 
 
 #include <mach/irqs.h>
-
-#include "lidbg.h"
-#include "fly_soc.h"
 
 
 
@@ -250,8 +263,8 @@ static int goodix_init_panel(struct goodix_ts_data *ts)
 #endif
 #endif
     //printk("start to send ---------->35\n");
-
-    ret = i2c_api_do_send(1, 0x55, config_info[0], config_info, 54 ); /*How many bytes to write 减去dev_addr和reg地址后*/
+//lsw
+    ret = SOC_I2C_Send(1, 0x55, /*config_info[0],*/ config_info, 54 ); /*How many bytes to write 减去dev_addr和reg地址后*/
     //i2c_api_do_send(1, 0x55, &config_info[53], &config_info[54],2); /*How many bytes to write 减去dev_addr和reg地址后*/
 
     //ret=i2c_write_bytes(ts->client,config_info,54);
@@ -1039,7 +1052,7 @@ static int goodix_ts_resume(struct i2c_client *client)
 for(retry=0; retry<10; retry++)
 	{
 		goodix_init_panel(ts);
-		init_err=i2c_api_do_recv(1,0x55,0x68,GT811_check, 6 );
+		init_err=SOC_I2C_Rec(1,0x55,0x68,GT811_check, 6 );
 		ret = 0;
 	//if( GT811_check[0] == 0xff&&GT811_check[1] == 0xff&&GT811_check[2] == 0xff&&GT811_check[3] == 0xff&&GT811_check[4] == 0xff&&GT811_check[5] == 0xff)
 	if(init_err<0)
@@ -1149,6 +1162,11 @@ static int __devinit goodix_ts_init(void)
     int ret = 0;
     unsigned int flag_irq = 0;
     uint8_t device_check[2] = {0x55};
+
+
+#ifndef SOC_COMPILE
+		 LIDBG_GET;
+#endif
 	is_ts_load=1;
     printk("\n\n==in=GT801.KO===============touch INFO=======================1205=futengfei\n");
 

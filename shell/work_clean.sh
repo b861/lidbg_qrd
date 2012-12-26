@@ -7,3 +7,4 @@ source ./env_entry.sh
 cd $DBG_WORK_PATH/$DBG_SOC/test && make clean
 cd $DBG_WORK_PATH/$DBG_SOC/touchscreen && make clean
 cd $DBG_WORK_PATH/$DBG_SOC/videoin && make clean
+cd $DBG_WORK_PATH/$DBG_SOC/fastboot && make clean

@@ -22,9 +22,9 @@ make modules -j4 > build_log
 
 if [ "$?" = "0" ]; then
 	echo -e "\033[42;37m Make  Successful\033[0m"
-        echo "run copy_rel.sh"
+#        echo "run copy_rel.sh"
 	cd  $DBG_SHELL_PATH ; pwd
-	sh ./copy_rel.sh > copy_log
+#	sh ./copy_rel.sh > copy_log
 else
 	echo -e "\033[41;37m +++++++++ test error codes +++++++++ \033[0m"
 	make modules 2 &> err_log # 错误信息ID 2

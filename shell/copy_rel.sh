@@ -53,6 +53,14 @@ echo "Work/videoin Modules Copy Start!"
 cp -u $src_dir/*.ko               $dest_dir/
 echo "Work/videoin Modules Copy Finish!"
 
+src_dir=$DBG_WORK_PATH/$DBG_SOC/fastboot
+echo "from" $src_dir 
+echo "to" $dest_dir
+
+echo "Work/fastboot Modules Copy Start!"
+cp -u $src_dir/*.ko               $dest_dir/
+echo "Work/fastboot Modules Copy Finish!"
+
 src_dir=$DBG_DEV_PATH/$DBG_SOC
 echo "from" $src_dir 
 echo "to" $dest_dir

@@ -28,8 +28,51 @@ DEFINE_SEMAPHORE(lidbg_lock);
 
 
 
-//#define LIDBG_IOCTL (0x38)
+static struct task_struct *msg_task;
+static int thread_msg(void *data);
 
+#define TOTAL_LOGS 100
+#define LOG_BYTES  64
+
+typedef struct
+{
+int w_pos;
+int r_pos;
+char log[TOTAL_LOGS][LOG_BYTES];
+}lidbg_msg;
+
+lidbg_msg *plidbg_msg=NULL;
+
+
+int thread_msg(void *data)
+{
+	int start_index=0;
+	int end_index=0;
+	return 0;
+	plidbg_msg = (struct lidbg_msg *)kmalloc(sizeof( lidbg_msg), GFP_KERNEL);
+
+    while(1)
+    {
+        set_current_state(TASK_UNINTERRUPTIBLE);
+        if(kthread_should_stop()) break;
+        if(1)
+        {
+			start_index =plidbg_msg->w_pos;
+			end_index =plidbg_msg->r_pos;
+	
+			if(start_index != end_index)
+			{
+				printk("%s\n",plidbg_msg->log[end_index]);
+				plidbg_msg->r_pos = (end_index + 1)  % TOTAL_LOGS;
+			}
+        }
+        else
+        {
+            schedule_timeout(HZ);
+        }
+    }
+    return 0;
+}
 
 
 
@@ -124,12 +167,12 @@ static ssize_t lidbg_read(struct file *filp, char __user *buf, size_t size,
 #else
 
     unsigned int count = size;
-    int ret = 0,use=0;
+    int ret = 0,read_value=0;
     struct lidbg_dev *dev = filp->private_data; /*获得设备结构体指针*/
 
     /*内核空间->用户空间*/
-	memcpy(&use, (void *)(dev->mem), 4);
-	printk("[futengfei]  lidbg_read==========use=%x,count=%d\n",(u32)use,count);
+	memcpy(&read_value, (void *)(dev->mem), 4);
+	printk("lidbg_read:read_value=%x,read_count=%d\n",(u32)read_value,count);
     if (copy_to_user(buf, (void *)(dev->mem), count))
     {
         ret =  - EFAULT;
@@ -282,7 +325,7 @@ static ssize_t lidbg_write(struct file *filp, const char __user *buf,
 
         if(!strcmp(argv[1], "lidbg_get"))
         {
-        	lidbg("lidbg_devp addr = %x",(u32)lidbg_devp);
+        	lidbg("lidbg_devp addr = %x\n",(u32)lidbg_devp);
 			*(u32 *)(lidbg_devp->mem) = (u32)lidbg_devp;
 		   
         }
@@ -332,7 +375,7 @@ static ssize_t lidbg_write(struct file *filp, const char __user *buf,
 
         else if(!strcmp(argv[1], "device"))
         {
-            lidbg_device_main(new_argc, new_argv);
+          //  lidbg_device_main(new_argc, new_argv);
         }
 
         else if(!strcmp(argv[1], "servicer"))
@@ -346,14 +389,13 @@ static ssize_t lidbg_write(struct file *filp, const char __user *buf,
         }
 #endif
 
+	else if (!strcmp(argv[0], "msg"))
+	{
+		memcpy(plidbg_msg->w_pos, dev->mem, size);
+		
 
+	}
 
-#if 0
-        else if(!strcmp(argv[1], "i2c_rk"))
-        {
-            // i2c_write_legacy(0x12, 0x34);
-        }
-#endif
     }
 
     return size;//若不为size则重复执行
@@ -427,15 +469,7 @@ static void lidbg_setup_cdev(struct lidbg_dev *dev, int index)
         lidbg(KERN_NOTICE "Error %d adding LED%d", err, index);
 }
 
-void set_func_tbl(void)
-{
-//io
-	lidbg_devp->soc_func_tbl.SOC_IO_Output = SOC_IO_Output;
-	lidbg_devp->soc_func_tbl.SOC_IO_Input = SOC_IO_Input;
-//i2c
-	lidbg_devp->soc_func_tbl.SOC_I2C_Send = SOC_I2C_Send;
-	lidbg_devp->soc_func_tbl.SOC_I2C_Rec = SOC_I2C_Rec;
-}
+
 
 
 void lidbg_create_proc(void);
@@ -444,7 +478,7 @@ void lidbg_remove_proc(void);
 /*设备驱动模块加载函数*/
 int lidbg_init(void)
 {
-    int result;
+    int result,err;
     dev_t devno = MKDEV(lidbg_major, 0);
     lidbg("lidbg_init\n");
     //dump_build_time();
@@ -459,7 +493,7 @@ int lidbg_init(void)
     }
     if (result < 0)
         return result;
-
+#if 0
     /* 动态申请设备结构体的内存*/
     lidbg_devp = kmalloc(sizeof(struct lidbg_dev), GFP_KERNEL);
 
@@ -469,7 +503,7 @@ int lidbg_init(void)
         goto fail_malloc;
     }
     memset(lidbg_devp, 0, sizeof(struct lidbg_dev));
-
+#endif
     lidbg_setup_cdev(lidbg_devp, 0);
 
 
@@ -494,13 +528,23 @@ int lidbg_init(void)
     /*\u521b\u5efa/proc/hello\u6587\u4ef6*/
     lidbg_create_proc();
 
-	set_func_tbl();
+	//set_func_tbl();
 
     lidbg_soc_init();
 
     lidbg_board_init();
 
-    // lidbg_key_init();
+
+	msg_task = kthread_create(thread_msg, NULL, "msg_task");
+	if(IS_ERR(msg_task))
+	{
+		lidbg("Unable to start kernel thread.\n");
+		err = PTR_ERR(msg_task);
+		msg_task = NULL;
+
+	}
+	wake_up_process(msg_task);
+
     return 0;
 
 fail_malloc:

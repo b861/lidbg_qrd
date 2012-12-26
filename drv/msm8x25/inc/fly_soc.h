@@ -64,7 +64,7 @@
 //IO
 
 /*
-/ GPIO TLMM: Pullup/Pulldown /
+ GPIO TLMM: Pullup/Pulldown 
 enum {
 	GPIO_CFG_NO_PULL,
 	GPIO_CFG_PULL_DOWN,
@@ -72,7 +72,7 @@ enum {
 	GPIO_CFG_PULL_UP,
 };
 
-/GPIO TLMM: Drive Strength /
+GPIO TLMM: Drive Strength 
 enum {
 	GPIO_CFG_2MA,
 	GPIO_CFG_4MA,
@@ -86,10 +86,10 @@ enum {
 
 */
 
-void  SOC_IO_Output(u32 group, u32 index, bool status);
-bool  SOC_IO_Input(u32 group, u32 index, u32 pull);
-void SOC_IO_Output_Ext(u32 group, u32 index, bool status, u32 pull, u32 drive_strength);
-bool SOC_IO_Config(u32 index, bool direction, u32 pull, u32 drive_strength);
+void  SOC_IO_Output(unsigned int group, unsigned int index, bool status);
+bool  SOC_IO_Input(unsigned int group, unsigned int index, unsigned int pull);
+void SOC_IO_Output_Ext(unsigned int group, unsigned int index, bool status, unsigned int pull, unsigned int drive_strength);
+bool SOC_IO_Config(unsigned int index, bool direction, unsigned int pull, unsigned int drive_strength);
 
 
 //IO_IRQ
@@ -109,10 +109,10 @@ typedef irqreturn_t (*pinterrupt_isr)(int irq, void *dev_id);
 
 */
 
-bool SOC_IO_ISR_Add(u32 irq, u32 interrupt_type, pinterrupt_isr func, void *dev);//set port as input first
-bool SOC_IO_ISR_Enable(u32 irq);
-bool SOC_IO_ISR_Disable(u32 irq);
-bool SOC_IO_ISR_Del (u32 irq);
+bool SOC_IO_ISR_Add(unsigned int irq, unsigned int interrupt_type, pinterrupt_isr func, void *dev);//set port as input first
+bool SOC_IO_ISR_Enable(unsigned int irq);
+bool SOC_IO_ISR_Disable(unsigned int irq);
+bool SOC_IO_ISR_Del (unsigned int irq);
 
 
 //AD
@@ -123,7 +123,7 @@ bool SOC_IO_ISR_Del (u32 irq);
 // 3-REM1
 // 4-REM2
 //#define ADC_MAX_CH (8)
-bool SOC_ADC_Get (u32 channel , u32 *value);
+bool SOC_ADC_Get (unsigned int channel , unsigned int *value);
 
 
 //KEY
@@ -142,7 +142,7 @@ KEY_MENU,   KEY_HOME,  KEY_BACK,
 #define KEY_PRESSED      (1)
 #define KEY_PRESSED_RELEASED   ( 2)
 #endif
-        void SOC_Key_Report(u32 key_value, u32 type);
+        void SOC_Key_Report(unsigned int key_value, unsigned int type);
 
 
 
@@ -164,11 +164,12 @@ int SOC_I2C_Rec_TEF7000(int bus_id, char chip_addr, unsigned int sub_addr, char 
 
 //BL
 //level : 0~255   0-dim, 255-bright
-int SOC_BL_Set( u32 level);
+int SOC_BL_Set( unsigned int level);
 
 
 //PWR
 void SOC_PWR_ShutDown(void);//power-down
+int SOC_PWR_GetStatus(void);
 
 
 
@@ -184,8 +185,8 @@ void SOC_PWR_ShutDown(void);//power-down
 
 #endif
 
-void SOC_Log_Dump(int cmd );
+void SOC_Write_Servicer(int cmd );
+void SOC_Log_Dump(int cmd);
 void SOC_Capts_Insmod(int cmd);
-
 
 #endif

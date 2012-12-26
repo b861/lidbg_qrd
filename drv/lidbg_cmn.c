@@ -3,6 +3,7 @@
 
 #include "lidbg.h"
 #define DEVICE_NAME "mlidbg_cmn"
+struct lidbg_dev *lidbg_devp; /*设备结构体指针*/
 
 
 
@@ -72,6 +73,13 @@ static struct miscdevice misc =
     .fops = &dev_fops,
 
 };
+
+void soc_func_tbl_default()
+{
+	lidbg("soc_func_tbl_default:this func not ready!\n");
+
+}
+
 static int __init dev_init(void)
 {
     int ret;
@@ -94,6 +102,31 @@ static int __init dev_init(void)
 
     }
 #endif
+    /* 动态申请设备结构体的内存*/
+    lidbg_devp = kmalloc(sizeof(struct lidbg_dev), GFP_KERNEL);
+
+    if (!lidbg_devp)    /*申请失败*/
+    {
+        //result =  - ENOMEM;
+        //goto fail_malloc;
+        lidbg ("kmalloc fail\n");
+        return -1;
+    }
+    memset(lidbg_devp, 0, sizeof(struct lidbg_dev));
+    //memset(&lidbg_devp->soc_func_tbl, soc_func_tbl_default, sizeof(struct lidbg_fn_t));
+    {
+    	int i;
+		for(i=0;i<sizeof(lidbg_devp->soc_func_tbl)/4;i++)
+		{
+			((int*)&(lidbg_devp->soc_func_tbl))[i]=soc_func_tbl_default;
+
+		}
+		//fot test
+		(lidbg_devp->soc_func_tbl.pfnSOC_Write_Servicer)(i);
+
+
+	}
+
     return ret;
 }
 
@@ -113,7 +146,6 @@ MODULE_AUTHOR("Flyaudio Inc.");
 EXPORT_SYMBOL(mod_cmn_main);
 EXPORT_SYMBOL(GetNsCount);
 
-struct lidbg_dev *lidbg_devp; /*设备结构体指针*/
 EXPORT_SYMBOL(lidbg_devp);
 
 

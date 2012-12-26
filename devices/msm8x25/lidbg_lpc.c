@@ -1,11 +1,33 @@
+
+
+//#define SOC_COMPILE
+
+
+#ifdef SOC_COMPILE
 #include "lidbg.h"
-#include "fly_lpc.h"
+#include "fly_soc.h"
+
+#else
+#include "lidbg_def.h"
+
+#include "lidbg_enter.h"
+
+LIDBG_DEFINE;
+#endif
+
+
+#include "lidbg_lpc.h"
+
 
 //#define LPC_DEBUG_LOG
 
 
-#ifndef USU_EXTERNEL_SUSPEND_PENDING
-static int suspend_pending = 0;
+
+#ifdef CONFIG_HAS_EARLYSUSPEND
+static void lpc_early_suspend(struct early_suspend *handler);
+static void lpc_late_resume(struct early_suspend *handler);
+struct early_suspend early_suspend;
+
 #endif
 
 
@@ -236,7 +258,7 @@ static void LPCdealReadFromMCUAll(BYTE *p, UINT length)
 
 				}
 				
-	            if((suspend_pending == PM_STATUS_ON)&&(late_resume_ok == 1))
+	            if(SOC_PWR_GetStatus() == PM_STATUS_LATE_RESUME_OK)
 	            {
 					msleep(100);
 					
@@ -248,8 +270,6 @@ static void LPCdealReadFromMCUAll(BYTE *p, UINT length)
 				else
 				{
 					lidbg("suspend_pending...\n");
-					if(late_resume_ok == 0)
-						lidbg("late_resume_ok == 0...\n");
 
 				}
 	                break;
@@ -403,7 +423,7 @@ int thread_lpc(void *data)
         if(kthread_should_stop()) break;
         if(1)
         {
-  			if((1 == late_resume_ok)&&(suspend_pending == PM_STATUS_ON))
+			if(SOC_PWR_GetStatus() == PM_STATUS_LATE_RESUME_OK)
 			{
 #ifdef LPC_DEBUG_LOG
 				lidbg("lpc_send_rec_count=%d\n",re_sleep_count);
@@ -492,5 +512,132 @@ void LPCResume(void)
         iReadLen = 16;
     }
 }
+
+
+
+
+static int  lpc_probe(struct platform_device *pdev)
+{
+	
+		lidbg("lpc communication+\n");
+		mcuFirstInit();
+		LPCPowerOnOK();
+		LPCNoReset();
+		LPCBackLightOn();
+		lidbg("lpc communication-\n");
+
+#ifdef CONFIG_HAS_EARLYSUSPEND
+		early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN;
+		early_suspend.suspend = lpc_early_suspend;
+		early_suspend.resume = lpc_late_resume;
+		register_early_suspend(&early_suspend);
+#endif
+
+	return 0;
+}
+
+
+
+static int  lpc_remove(struct platform_device *pdev)
+{
+
+
+	return 0;
+}
+
+
+#ifdef CONFIG_HAS_EARLYSUSPEND
+static void lpc_early_suspend(struct early_suspend *handler)
+{
+
+
+}
+static void lpc_late_resume(struct early_suspend *handler)
+{
+
+	LPCResume();
+	LPCPowerOnOK();
+	LPCNoReset();
+	LPCBackLightOn();
+
+}
+
+#endif
+
+
+
+
+
+
+#ifdef CONFIG_PM
+static int lpc_suspend(struct device *dev)
+{
+	LPCSuspend();
+	
+	TELL_LPC_PWR_OFF;
+	return 0;
+}
+
+static int lpc_resume(struct device *dev)
+{
+
+    TELL_LPC_PWR_ON;
+
+
+	return 0;
+}
+
+static struct dev_pm_ops lpc_pm_ops = {
+	.suspend	= lpc_suspend,
+	.resume		= lpc_resume,
+};
+#endif
+
+
+
+
+static struct platform_device lidbg_lpc = {
+	.name               = "lidbg_lpc",
+	.id                 = -1,
+};
+
+static struct platform_driver lpc_driver = {
+	.probe		= lpc_probe,
+	.remove     = lpc_remove,
+	.driver         = {
+		.name = "lidbg_lpc",
+		.owner = THIS_MODULE,
+#ifdef CONFIG_PM
+		.pm = &lpc_pm_ops,
+#endif
+	},
+};
+
+static int __init lpc_init(void)
+{
+	DUMP_BUILD_TIME;
+#ifndef SOC_COMPILE
+		LIDBG_GET;
+#endif
+   // set_func_tbl();
+    platform_device_register(&lidbg_lpc);
+    platform_driver_register(&lpc_driver);
+
+	return 0;
+}
+
+static void __exit lpc_exit(void)
+{
+	platform_driver_unregister(&lpc_driver);
+}
+
+
+module_init(lpc_init);
+module_exit(lpc_exit);
+
+
+MODULE_LICENSE("GPL");
+
+MODULE_DESCRIPTION("lidbg lpc driver");
 
 

@@ -9,6 +9,8 @@
 #define LOG_LOGCAT (2)
 #define LOG_ALL (3)
 #define LOG_CONT    (4)
+#define WAKEUP_KERNEL (10)
+#define SUSPEND_KERNEL (11)
 
 #define USB_RST_ACK (88)
 

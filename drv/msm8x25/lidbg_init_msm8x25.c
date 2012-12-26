@@ -8,7 +8,6 @@ static struct task_struct *pwr_up_task;
 
 int thread_pwr_up(void *data)
 {
-    msleep(WAIT_KERNEL_BOOT_UP_TIME);
     lidbg("thread_pwr_up!\n");
 
 

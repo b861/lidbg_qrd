@@ -10,12 +10,13 @@ CC = $(CROSS_COMPILE)gcc
 
 
 obj-m	+= lidbg_soc_devices.o
+obj-m	+= lidbg_lpc.o
 
-lidbg_soc_devices-objs :=devices.o tvp5150.o cs42l52.o mipi.o fly_lpc.o
+lidbg_soc_devices-objs :=devices.o
 
 EXTRA_CFLAGS := -I$(DBG_DRV_PATH)/inc  -I$(DBG_DRV_PATH)/$(DBG_SOC)/inc  -I$(DBG_DEV_PATH)/$(DBG_SOC)
 
-include $(DBG_DRV_PATH)/$(DBG_SOC)/drv_$(DBG_SOC).mk
+# include $(DBG_DRV_PATH)/$(DBG_SOC)/drv_$(DBG_SOC).mk
 ifdef DBG_DBG
 EXTRA_CFLAGS += -DFLY_DEBUG
 endif

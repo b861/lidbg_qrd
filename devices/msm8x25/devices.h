@@ -4,30 +4,10 @@
 #define _DEV_SOC__
 
 
-//#define FLY_DEBUG  //no use here now
-
-//#define DEBUG_LED
+#define DEBUG_LED
 
 #define FLY_BOARD_1ST
-//#define CONFIG_PM
-//#define CONFIG_HAS_EARLYSUSPEND
 
-//#define DEBUG_UMOUNT_USB
-
-#define USU_EXTERNEL_SUSPEND_PENDING
-
-
-#ifdef DEBUG_CS42L52
-#include "cs42l52.h"
-#endif
-
-#ifdef DEBUG_TVP5150
-#include "tvp5150.h"
-#endif
-
-#ifdef USU_EXTERNEL_SUSPEND_PENDING
-extern int suspend_pending;
-#endif
 
 
 void lidbg_device_main(int argc, char **argv);
@@ -53,17 +33,12 @@ enum
 
 #ifdef FLY_DEBUG
 #define DEBUG_AD_KEY
-#define DEBUG_LPC
 #define DEBUG_BUTTON
 
 //#define SOC_VIN_DETECT
 //#define DEBUG_GPIO_RETURN_KEY
 //#define DEBUG_POWER_KEY
 //#define DEBUG_POWER_UP
-//#define DEBUG_CS42L52
-//#define DEBUG_TDA7419
-//#define DEBUG_TVP5150
-//#define DEBUG_USB_RST
 
 
 #ifdef FLY_BOARD_1ST
@@ -103,8 +78,6 @@ enum
 #define DVD_RESET
 #define BL_SET(x)
 
-//#define USB_HUB_ENABLE
-//#define USB_HUB_DISABLE
 
 #endif
 
@@ -126,7 +99,6 @@ enum
 #define AD_KEY_PORT   (0xff)
 #define AD_KEY_READ_POLLING_TIME   (100)
 #define   USB_REC_POLLING_TIME (300)
-#define 	BP_MSG_POLLING_TIME	(300)
 
 //platform
 #define GPIO_PLATFORM_DET  (49)
@@ -138,6 +110,7 @@ enum
 #define BUTTON_RIGHT_1 (44)//k1
 #define BUTTON_RIGHT_2 (49)//k2
 
+#define  MCU_IIC_REQ_ISR  (30)
 
 
 #define BL_MAX (255)
@@ -167,23 +140,6 @@ enum
 
 //gpio return keys
 #define GPIO_SCAN_KEY_RETURN  (33)
-#if 1//def FLY_DEBUG
-#define TELL_LPC_PWR_OFF   do{  lidbg("tell lpc ready to power off!\n");\
-								SOC_IO_Config(MCU_IIC_REQ_I,GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_16MA);\
-								SOC_IO_Output(0, MCU_IIC_REQ_ISR, 0);\
-							}while(0)
-
-#define TELL_LPC_PWR_ON   do{\
-								SOC_IO_Config(MCU_IIC_REQ_I,GPIO_CFG_INPUT,GPIO_CFG_PULL_UP,GPIO_CFG_8MA);\
-								SOC_IO_Input(0,MCU_IIC_REQ_I,GPIO_CFG_PULL_UP);\
-							}while(0)
-#else
-#define TELL_LPC_PWR_OFF
-#define TELL_LPC_PWR_ON do{\
-								SOC_IO_Config(MCU_IIC_REQ_I,GPIO_CFG_INPUT,GPIO_CFG_PULL_UP,GPIO_CFG_8MA);\
-								SOC_IO_Input(0,MCU_IIC_REQ_I,GPIO_CFG_PULL_UP);\
-							}while(0)
-#endif
 
 #define PWR_EN_ON   do{SOC_IO_Output(0, 23, 1); }while(0)
 #define PWR_EN_OFF  do{SOC_IO_Output(0, 23, 0); }while(0)

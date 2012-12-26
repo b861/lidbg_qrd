@@ -26,14 +26,14 @@ int thread_bp_msg(void *data)
 		        if((end_index + 1) < TOTAL_LOGS)
 		        {
 		            printk("%s\n", smem_log_temp->log[end_index]);
-				smem_log_temp->log[end_index][0]='\0';
+					smem_log_temp->log[end_index][0]='\0';
 		            smem_log_temp->end_pos++;
 		        }
 		        else if((end_index + 1) == TOTAL_LOGS)
 		        {
 		            smem_log_temp->end_pos = 0;
 		            printk("%s\n", smem_log_temp->log[end_index]);
-				smem_log_temp->log[end_index][0]='\0';
+					smem_log_temp->log[end_index][0]='\0';
 		            smem_log_temp->end_pos++;
 		        }
 		        msleep(50);

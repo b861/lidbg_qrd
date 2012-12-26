@@ -5,11 +5,8 @@
 
 #include "fly_soc.h"
 
-
-#ifndef USU_EXTERNEL_SUSPEND_PENDING
-int suspend_pending = 0;
-#endif
-
+//int fastboot_get_status(void);
+//void fastboot_pwroff(void);
 
 struct platform_device fly_soc_device =
 {
@@ -135,7 +132,6 @@ bool SOC_ADC_Get (u32 channel , u32 *value)
 
 	*value = 0xffffffff;
 		
-	if(PM_STATUS_ON == suspend_pending)
     	*value = soc_ad_read(channel);
 
     if(*value == 0xffffffff)
@@ -239,73 +235,24 @@ int SOC_BL_Set( u32 bl_level)
 
 }
 
-
-
-
-void SOC_PWR_ShutDown(void)
+void SOC_Write_Servicer(int cmd)
 {
 
-
-	static u32 pwr_down_count = 0;
-
-	DUMP_FUN_ENTER;
-    lidbg("pwr_down_count=%d\n",++pwr_down_count);
-
-	
-	if(PM_STATUS_ON != suspend_pending)
-	{
-		printk("\n\n\n\n\n\n\n\n\n");
-		lidbg("errlsw:call SOC_PWR_ShutDown when suspend_pending != PM_STATUS_ON :%d",suspend_pending);
-		printk("\n\n\n\n\n\n\n\n\n");
-
-	}
-	 
-	suspend_pending = PM_STATUS_EARLY_SUSPEND_PENDING;
-
-#ifdef  FLY_DEBUG
-#if 0
-    lidbg_key_report(KEY_POWER, KEY_PRESSED);
-    msleep(2000);
-    lidbg_key_report(KEY_POWER, KEY_RELEASED);
-    msleep(250);
-
-	#if 1
-	    lidbg_key_report(KEY_DOWN, KEY_PRESSED_RELEASED);
-		msleep(150);
-	    lidbg_key_report(KEY_DOWN, KEY_PRESSED_RELEASED);
-		msleep(150);
-	    lidbg_key_report(KEY_DOWN, KEY_PRESSED_RELEASED);
-		msleep(150);
-	    lidbg_key_report(KEY_DOWN, KEY_PRESSED_RELEASED);
-		msleep(150);
-	    lidbg_key_report(KEY_UP, KEY_PRESSED_RELEASED);
-	    msleep(200);
-	    lidbg_key_report(KEY_ENTER, KEY_PRESSED_RELEASED);
-		//msleep(500);
-	#endif
-#else
- 	k2u_write(CMD_FAST_POWER_OFF);
-#endif
-
-
-#endif
-
+	k2u_write(cmd);
 }
 
 
 void SOC_Log_Dump(int cmd)
 {
-    //switch(cmd)
-    {
 
-    //case LOG_DMESG:
-    //case LOG_LOGCAT:
-    {
-        k2u_write(cmd);
-        //break;
+	k2u_write(cmd);
+}
 
-    }
-    }
+
+void SOC_Capts_Insmod(int cmd)
+{
+
+	k2u_write(cmd);
 }
 
 #if 0
@@ -326,22 +273,63 @@ void SOC_LED_Trigger()
 #endif
 
 
-void SOC_Capts_Insmod(int cmd)
-{
 
-    k2u_write(cmd);
+int SOC_PWR_GetStatus(void)
+{
+	
+	return  (lidbg_devp->soc_func_tbl.pfnSOC_PWR_GetStatus)();
 
 }
 
+void SOC_PWR_ShutDown(void)
+{
 
+	//fastboot_pwroff();
+	(lidbg_devp->soc_func_tbl.pfnSOC_PWR_ShutDown)();
+}
+
+static void set_func_tbl(void)
+{
+//io
+	lidbg_devp->soc_func_tbl.pfnSOC_IO_Output = SOC_IO_Output;
+	lidbg_devp->soc_func_tbl.pfnSOC_IO_Input = SOC_IO_Input;
+	lidbg_devp->soc_func_tbl.pfnSOC_IO_Output_Ext = SOC_IO_Output_Ext;
+	lidbg_devp->soc_func_tbl.pfnSOC_IO_Config = SOC_IO_Config;
+//i2c
+	lidbg_devp->soc_func_tbl.pfnSOC_I2C_Send = SOC_I2C_Send;
+	lidbg_devp->soc_func_tbl.pfnSOC_I2C_Rec = SOC_I2C_Rec;
+	lidbg_devp->soc_func_tbl.pfnSOC_I2C_Rec_Simple = SOC_I2C_Rec_Simple;
+
+//io-irq
+	lidbg_devp->soc_func_tbl.pfnSOC_IO_ISR_Add = SOC_IO_ISR_Add;
+	lidbg_devp->soc_func_tbl.pfnSOC_IO_ISR_Enable = SOC_IO_ISR_Enable;
+	lidbg_devp->soc_func_tbl.pfnSOC_IO_ISR_Disable = SOC_IO_ISR_Disable;
+	lidbg_devp->soc_func_tbl.pfnSOC_IO_ISR_Del = SOC_IO_ISR_Del;
+
+//ad
+	lidbg_devp->soc_func_tbl.pfnSOC_ADC_Get = SOC_ADC_Get;
+
+//key
+	lidbg_devp->soc_func_tbl.pfnSOC_Key_Report = SOC_Key_Report;
+
+//bl
+	lidbg_devp->soc_func_tbl.pfnSOC_BL_Set = SOC_BL_Set;
+
+//
+	lidbg_devp->soc_func_tbl.pfnSOC_Write_Servicer = SOC_Write_Servicer;
+
+}
 
 
 int fly_soc_init(void)
 {
     lidbg("fly_soc_init\n");
     DUMP_FUN;
+    set_func_tbl();
+	
     platform_device_register(&fly_soc_device);
     platform_driver_register(&fly_soc_driver);
+
 
     //  fly_devices_init();
     return 0;
@@ -379,15 +367,16 @@ EXPORT_SYMBOL(SOC_I2C_Rec_2B_SubAddr);
 EXPORT_SYMBOL(SOC_I2C_Rec_3B_SubAddr);
 EXPORT_SYMBOL(SOC_BL_Set);
 EXPORT_SYMBOL(SOC_PWR_ShutDown);
-EXPORT_SYMBOL(SOC_Log_Dump);
-EXPORT_SYMBOL(SOC_Capts_Insmod);
+EXPORT_SYMBOL(SOC_PWR_GetStatus);
 
 
 
 EXPORT_SYMBOL(SOC_I2C_Rec_SAF7741);
 EXPORT_SYMBOL(SOC_I2C_Send_TEF7000);
 EXPORT_SYMBOL(SOC_I2C_Rec_TEF7000);
-
+EXPORT_SYMBOL(SOC_Write_Servicer);
+EXPORT_SYMBOL(SOC_Log_Dump);
+EXPORT_SYMBOL(SOC_Capts_Insmod);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Flyaudad Inc.");

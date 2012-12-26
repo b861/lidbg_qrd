@@ -1,3 +1,5 @@
+#ifndef _LIDBG_BP_
+#define _LIDBG_BP_
 
 //futengfei add for bpmsg_to_ap_print  2012.12.12.12:00
 
@@ -12,5 +14,6 @@ int end_pos;
 char log[TOTAL_LOGS][LOG_BYTES];
 u8 write_flag;
 }smem_log_deep;
+#define 	BP_MSG_POLLING_TIME	(300)
 
-
+#endif

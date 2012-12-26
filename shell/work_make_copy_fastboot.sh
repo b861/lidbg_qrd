@@ -6,7 +6,7 @@
 
 source ./env_entry.sh
 
-dir=$DBG_WORK_PATH/$DBG_SOC/videoin
+dir=$DBG_WORK_PATH/$DBG_SOC/fastboot
 
 
 clear
@@ -16,20 +16,20 @@ clear
 #sh ./Syn_file_XP2Li.sh
 #fi
 
-echo -e "\033[44;37m ----build videoin ko---- \033[0m"
+echo -e "\033[44;37m ----build fastboot ko---- \033[0m"
 cd  $dir ; pwd          # ";"  do when ok or not   "&&" do when first no err
 make modules -j4 > build_log
 
 if [ "$?" = "0" ]; then
 	echo -e "\033[42;37m Make  Successful\033[0m"
- #       echo "run copy_rel.sh"
+#        echo "run copy_rel.sh"
 	cd  $DBG_SHELL_PATH ; pwd
 #	sh ./copy_rel.sh > copy_log
 else
-	echo -e "\033[41;37m +++++++++ videoin error codes +++++++++ \033[0m"
+	echo -e "\033[41;37m +++++++++ fastboot error codes +++++++++ \033[0m"
 	make modules 2 &> err_log # 错误信息ID 2
 	grep -C 1 "error:" err_log
-	echo -e "\033[41;37m --------- videoin error codes --------- \033[0m"
+	echo -e "\033[41;37m --------- fastboot error codes --------- \033[0m"
 	read get_key
 fi
 

@@ -63,7 +63,7 @@
 
 ////////////
 
-#include "lidbg_enter.h"
+
 #include "lidbg_io.h"
 #include "lidbg_key.h"
 #include "lidbg_touch.h"
@@ -82,9 +82,10 @@
 
 ////////////
 #include "lidbg_soc.h"
-#include "fly_soc.h"
+//#include "fly_soc.h"
+#include "lidbg_enter.h"
 
-#include "devices.h"
+//#include "devices.h"
 
 
 

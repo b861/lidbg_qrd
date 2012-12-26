@@ -29,9 +29,11 @@
 #include <linux/regulator/consumer.h>
 #include <linux/input/ft5x06_ts.h>
 #else
+#define SOC_COMPILE
 
 #include "lidbg.h"
 #include <linux/input/ft5x06_ts.h>
+#include "fly_soc.h"
 
 
 #endif

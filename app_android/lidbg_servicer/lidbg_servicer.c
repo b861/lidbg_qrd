@@ -34,6 +34,7 @@
 #define LOG_CONT    (4)
 
 #define WAKEUP_KERNEL (10)
+#define SUSPEND_KERNEL (11)
 
 #define LOG_DVD_RESET (64)
 #define LOG_CAP_TS_GT811 (65)
@@ -234,6 +235,14 @@ int  servicer_handler(int signum)
 			break;
 
 		}
+		case SUSPEND_KERNEL:
+		{
+			system("su");
+			property_set("fly.fastboot.accoff","1");
+			system("echo mem > /sys/power/state");
+			break;
+
+		}
 
 	  
         }
@@ -265,11 +274,16 @@ int main(int argc , char **argv)
     system("insmod /system/lib/modules/out/lidbg_soc_msm8x25.ko");
     system("insmod /system/lib/modules/out/lidbg_io.ko");
     system("insmod /system/lib/modules/out/lidbg_ad.ko");
-    system("insmod /system/lib/modules/out/lidbg_fly_soc.ko");
+	system("insmod /system/lib/modules/out/lidbg_main.ko");
+	
+	system("insmod /system/lib/modules/out/lidbg_fly_soc.ko");
+	
+	system("insmod /system/lib/modules/out/lidbg_fastboot.ko");
+	system("insmod /system/lib/modules/out/lidbg_lpc.ko");
     system("insmod /system/lib/modules/out/lidbg_soc_devices.ko");
     system("insmod /system/lib/modules/out/lidbg_videoin.ko");
-    system("insmod /system/lib/modules/out/lidbg_main.ko");
     system("insmod /system/lib/modules/out/lidbg_to_bpmsg.ko");
+	
 
     //for flycar
     system("insmod /flysystem/lib/out/lidbg_ts_to_recov.ko");
@@ -281,10 +295,14 @@ int main(int argc , char **argv)
     system("insmod /flysystem/lib/out/lidbg_soc_msm8x25.ko");
     system("insmod /flysystem/lib/out/lidbg_io.ko");
     system("insmod /flysystem/lib/out/lidbg_ad.ko");
-    system("insmod /flysystem/lib/out/lidbg_fly_soc.ko");
-    system("insmod /flysystem/lib/out/lidbg_soc_devices.ko");
-    system("insmod /flysystem/lib/out/lidbg_main.ko");
+	system("insmod /flysystem/lib/out/lidbg_main.ko");
+	system("insmod /flysystem/lib/out/lidbg_fly_soc.ko");
+	system("insmod /flysystem/lib/out/lidbg_fastboot.ko");
+	//system("insmod /flysystem/lib/out/lidbg_lpc.ko");
+    // system("insmod /flysystem/lib/out/lidbg_soc_devices.ko");
+	system("insmod /flysystem/lib/out/lidbg_videoin.ko");
     system("insmod /flysystem/lib/out/lidbg_to_bpmsg.ko");
+ 
 
 
     sleep(1);

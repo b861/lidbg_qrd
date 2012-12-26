@@ -15,6 +15,18 @@
  *Any problem,please contact andrew@goodix.com,+86 755-33338828
  *
  */
+//#define SOC_COMPILE
+#ifdef SOC_COMPILE
+#include "lidbg.h"
+#include "fly_soc.h"
+	 
+#else
+#include "lidbg_def.h"
+	 
+#include "lidbg_enter.h"
+	 
+	 LIDBG_DEFINE;
+#endif
 
 #include <linux/kernel.h>
 #include <linux/device.h>
@@ -38,10 +50,6 @@
 
 
 #include <mach/irqs.h>
-
-#include "lidbg.h"
-#include "fly_soc.h"
-
 
 
 #include <linux/kernel.h>
@@ -1159,7 +1167,7 @@ static int goodix_ts_resume(struct i2c_client *client)
 for(retry=0; retry<10; retry++)
 	{
 		goodix_init_panel(ts);
-		init_err=i2c_api_do_recv(1,0x5d,0x68,GT811_check, 6 );
+		init_err=SOC_I2C_Rec(1,0x5d,0x68,GT811_check, 6 );
 		ret = 0;
 	//if( GT811_check[0] == 0xff&&GT811_check[1] == 0xff&&GT811_check[2] == 0xff&&GT811_check[3] == 0xff&&GT811_check[4] == 0xff&&GT811_check[5] == 0xff)
 	if(init_err<0)
@@ -2232,6 +2240,9 @@ static int __devinit goodix_ts_init(void)
 {
 	int ret=0;
 	is_ts_load=1;
+#ifndef SOC_COMPILE
+		 LIDBG_GET;
+#endif
 	printk("\n\n=IN=1205=============touch INFO==================%s\n",__func__);
 	printk("1: goodix_ts_init :installing=>gt811.ko --------------------->futengfei\n");
 

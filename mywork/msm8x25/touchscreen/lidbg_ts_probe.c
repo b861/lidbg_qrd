@@ -1,4 +1,17 @@
+
+
+#ifdef SOC_COMPILE
 #include "lidbg.h"
+#include "fly_soc.h"
+
+#else
+#include "lidbg_def.h"
+
+#include "lidbg_enter.h"
+
+LIDBG_DEFINE;
+#endif
+
 
 #define SCAN_TIME (500)
 #define TS_I2C_BUS (1)
@@ -52,7 +65,8 @@ void ts_scan(void)
 			lidbg("i2c_addr 0x%x found!\n",ts_probe_dev[i].chip_addr);
 			scan_on=0;
 			SOC_I2C_Rec(TS_I2C_BUS,0x12,0x00,&tmp, 1 );//let i2c bus release
-			SOC_Capts_Insmod(ts_probe_dev[i].cmd);
+			//SOC_Capts_Insmod(ts_probe_dev[i].cmd);
+			SOC_Write_Servicer(ts_probe_dev[i].cmd);
 			break;
 		}
 	}
@@ -98,6 +112,9 @@ static int ts_probe_init(void)
 	static struct task_struct *scan_task;
 	DUMP_BUILD_TIME;
 	 
+#ifndef SOC_COMPILE
+		 LIDBG_GET;
+#endif
 	scan_task = kthread_create(ts_probe_thread, NULL, "ts_scan_task");
        wake_up_process(scan_task);
 	return 0;

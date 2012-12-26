@@ -1,7 +1,21 @@
+
+//#define SOC_COMPILE
+
+#ifdef SOC_COMPILE
 #include "lidbg.h"
-#include "fly_lpc.h"
+#include "fly_soc.h"
+
+#else
+#include "lidbg_def.h"
+
+#include "lidbg_enter.h"
+
+LIDBG_DEFINE;
+#endif
+#include "devices.h"
 
 
+#define LIDBG_GPIO_PULLUP  GPIO_CFG_PULL_UP
 
 static struct task_struct *led_task;
 static struct task_struct *key_task;
@@ -23,24 +37,15 @@ int platform_id;
 
 struct platform_devices_resource devices_resource;
 
-#ifndef USU_EXTERNEL_SUSPEND_PENDING
-static int suspend_pending = 0;
-#endif
-
-bool suspend_test = 0;
-bool late_resume_ok = 1;
-
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
-static struct wake_lock flywakelock;
-
 static void devices_early_suspend(struct early_suspend *handler);
 static void devices_late_resume(struct early_suspend *handler);
 struct early_suspend early_suspend;
 
 #endif
 
-
+bool suspend_test = 0;
 
 int i2c_devices_probe(int i2c_bus, unsigned char *i2c_devices_list)
 {
@@ -123,7 +128,7 @@ void pwr_key_scan(void)
         lidbg("pwr_key_scan goto sleep !\n");
 
 #ifdef DEBUG_UMOUNT_USB
-		k2u_write(UMOUNT_USB);
+		SOC_Write_Servicer(UMOUNT_USB);
 		msleep(1000);
 #endif
 		
@@ -356,8 +361,6 @@ void led_on(void)
 int thread_dev_init(void *data)
 {
 
-    msleep(WAIT_KERNEL_BOOT_UP_TIME);
-
     fly_devices_init();
 
 	while(1)//for polling test
@@ -418,7 +421,7 @@ int thread_key(void *data)
 }
 
 
-
+#ifdef DEBUG_USB_RST
 int thread_usb(void *data)
 {
 	int usb_rst_enable=0;
@@ -449,7 +452,7 @@ int thread_usb(void *data)
     }
     return 0;
 }
-
+#endif
 
 struct platform_device soc_devices =
 {
@@ -552,14 +555,13 @@ static int soc_dev_probe(struct platform_device *pdev)
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
 {
-		wake_lock_init(&flywakelock, WAKE_LOCK_SUSPEND,"flyaudio_wake_lock");
 		
 		//\u5728suspend\u7684\u65f6\u5019\u5148\u6267\u884c\u4f18\u5148\u7b49\u7ea7\u4f4e\u7684handler\uff0c\u5728resume\u7684\u65f6\u5019\u5219\u5148\u6267\u884c\u7b49\u7ea7\u9ad8\u7684handler
 		early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN;//EARLY_SUSPEND_LEVEL_BLANK_SCREEN + 1;
 		early_suspend.suspend = devices_early_suspend;
 		early_suspend.resume = devices_late_resume;
 		register_early_suspend(&early_suspend);
-		wake_lock(&flywakelock);
+		
 }
 #endif
 
@@ -607,26 +609,14 @@ static int soc_dev_remove(struct platform_device *pdev)
 #ifdef CONFIG_HAS_EARLYSUSPEND
 static void devices_early_suspend(struct early_suspend *handler)
 {
-	static u32 early_suspend_count = 0;
-	late_resume_ok = 0;
 
 	DUMP_FUN_ENTER;
-    lidbg("count=%d\n",++early_suspend_count);
     if(platform_id ==  PLATFORM_FLY)
     {
-
-		if(PM_STATUS_EARLY_SUSPEND_PENDING != suspend_pending)
-		{
-			printk("\n\n\n\n\n\n\n\n\n");
-			lidbg("errlsw:call devices_early_suspend when suspend_pending != PM_STATUS_EARLY_SUSPEND_PENDING");
-			printk("\n\n\n\n\n\n\n\n\n");
-
-		}
-
 		LCD_OFF;
 		
 #ifdef DEBUG_UMOUNT_USB
-		k2u_write(UMOUNT_USB);
+		SOC_Write_Servicer(UMOUNT_USB);
 #endif
 		//LPCControlPWRDisenable();
 
@@ -635,7 +625,6 @@ static void devices_early_suspend(struct early_suspend *handler)
 		USB_ID_HIGH_DEV;
 
 		
-		wake_unlock(&flywakelock);
    	}
 	DUMP_FUN_LEAVE;
 
@@ -653,13 +642,6 @@ static void devices_late_resume(struct early_suspend *handler)
 		
 		BL_SET(BL_MAX / 2);
 
-#ifdef DEBUG_LPC
-		LPCResume();
-		LPCPowerOnOK();
-		LPCNoReset();
-		LPCBackLightOn();
-#endif
-
 		
 		resume_task = kthread_create(thread_resume, NULL, "dev_resume_task");
 		if(IS_ERR(resume_task))
@@ -673,10 +655,8 @@ static void devices_late_resume(struct early_suspend *handler)
 		wake_up_process(resume_task);
 
 		
-		suspend_pending = PM_STATUS_ON;
     }
 	DUMP_FUN_LEAVE;
-	late_resume_ok = 1;
 }
 #endif
 
@@ -690,26 +670,8 @@ static int  soc_dev_suspend(struct platform_device *pdev, pm_message_t state)
 
 
     if(platform_id ==  PLATFORM_FLY)
-    {
-
-	
-		if(PM_STATUS_SUSPEND_PENDING != suspend_pending)
-		{
-			printk("\n\n\n\n\n\n\n\n\n");
-			lidbg("errlsw:call soc_dev_suspend when suspend_pending != PM_STATUS_EARLY_SUSPEND_PENDING");
-			printk("\n\n\n\n\n\n\n\n\n");
-
-		}
+    {	
         lidbg("turn lcd off!\n");
-		
-#ifdef DEBUG_LPC
-        LPCSuspend();
-#endif
-//disable i2c_c
-		//lidbg("disable i2c_c!\n");
-
-		//SOC_IO_ISR_Disable(MCU_IIC_REQ_ISR);
-
 
 #ifdef DEBUG_BUTTON
         SOC_IO_ISR_Disable(BUTTON_LEFT_1);
@@ -720,7 +682,6 @@ static int  soc_dev_suspend(struct platform_device *pdev, pm_message_t state)
         
         PWR_EN_OFF;
 
-		TELL_LPC_PWR_OFF;
     }
 
 
@@ -750,30 +711,19 @@ static int thread_resume(void *data)
 
 static int soc_dev_resume(struct platform_device *pdev)
 {
-	static u32 resume_count = 0;
 
-    lidbg("soc_dev_resume:%d\n",++resume_count);
-	
-	if(resume_count == 400)
-	{
-    	lidbg("suspend test finish!!!\n");
-		//suspend_test = 0;
-	}
-	
-	//suspend_pending = PM_STATUS_ON;
+    lidbg("soc_dev_resume\n");
+		
 
     if(platform_id ==  PLATFORM_FLY)
     {
     //disable usb first
     	USB_HUB_DISABLE;
-		USB_ID_HIGH_DEV;
-		USB_SWITCH_DISCONNECT;
+	USB_ID_HIGH_DEV;
+	USB_SWITCH_DISCONNECT;
 		
-        TELL_LPC_PWR_ON;
+    
         PWR_EN_ON;
-
-
-
 
 #ifdef DEBUG_BUTTON
         SOC_IO_ISR_Enable(BUTTON_LEFT_1);
@@ -782,49 +732,11 @@ static int soc_dev_resume(struct platform_device *pdev)
         SOC_IO_ISR_Enable(BUTTON_RIGHT_2);
 #endif
 
-#if 1//def FLY_DEBUG
-		lidbg("call kernel on!\n");
-        // lidbg_key_report(KEY_END, KEY_PRESSED_RELEASED);
-        // SOC_Key_Report(KEY_HOME, KEY_PRESSED_RELEASED);
-#define WAKEUP_KERNEL (10)
-		k2u_write(WAKEUP_KERNEL);
-
-#endif
 
         lidbg("turn lcd on!\n");
         LCD_ON;
 
-        //#ifdef FLY_BOARD_3ST
-        //wifi
-        //reset
-        // WIFI_RESET_HIGH;  //G10
-        //power
-        // WIFI_POWER_UP;
-
-        //gps
-        // GPS_POWER_UP;
-        //#endif
-
-
-#ifdef DEBUG_CS42L52
-        audio_codec_init();
-#endif
-
-#ifdef DEBUG_TVP5150
-        video_codec_init();
-#endif
-
-//#ifdef DEBUG_LPC
-//        LPCPowerOnOK();
-//        LPCNoReset();
-//        LPCBackLightOn();
-//#endif
-		//USB_HUB_ENABLE;
-	    //USB_ID_LOW_HOST;
-
     }
-	suspend_pending = PM_STATUS_ON;
-	wake_lock(&flywakelock);
 
 
     return 0;
@@ -906,7 +818,7 @@ static void work_right_button1_fn(struct work_struct *work)
 				LCD_OFF;
 				msleep(500);
 				LCD_ON;
-				LPCControlSupendTestStop();
+				//LPCControlSupendTestStop();
 				usb_test=0;
 				
 			}
@@ -916,7 +828,7 @@ static void work_right_button1_fn(struct work_struct *work)
 				LCD_OFF;
 				msleep(500);
 				LCD_ON;
-				LPCControlSupendTestStart();
+				//LPCControlSupendTestStart();
 				usb_test=1;
 			}	
 		}
@@ -987,7 +899,6 @@ void fly_devices_init(void)
 {
     lidbg("fly_devices_init\n");
 
-	suspend_pending = PM_STATUS_ON;
 
     if(platform_id ==  PLATFORM_FLY)
     {
@@ -996,58 +907,11 @@ void fly_devices_init(void)
 		USB_ID_LOW_HOST;
 		USB_SWITCH_CONNECT;
 		USB_HUB_RST;
-#ifdef DEBUG_TVP5150
-			lidbg("tvp5150 pwr on\n");
-			TVP5150_RESET_HIGH;  //tvp5150 reset
-			//SOC_IO_Output(5, 11, 1); //tvp5150 pwr on first, for i2c
-#endif
 
-#ifdef DEBUG_LPC
-
-        lidbg("lpc communication+\n");
-        mcuFirstInit();
-        LPCPowerOnOK();
-        LPCNoReset();
-        LPCBackLightOn();
-        lidbg("lpc communication-\n");
-#endif
 
         lidbg("turn lcd on!\n");
         LCD_ON;
         BL_SET(BL_MAX / 2);
-
-        //#ifdef FLY_BOARD_3ST
-        //wifi
-        //reset
-        //WIFI_RESET_HIGH;  //G10
-        //power
-        //WIFI_POWER_UP;
-
-        //gps
-        // GPS_POWER_UP;
-
-        //#endif
-
-#ifdef DEBUG_TVP5150
-        video_codec_init();
-#endif
-
-
-#ifdef DEBUG_CS42L52
-        audio_codec_init();
-#if 1
-        SOC_Key_Report(KEY_VOLUMEUP, KEY_PRESSED_RELEASED);
-        SOC_Key_Report(KEY_VOLUMEUP, KEY_PRESSED_RELEASED);
-        SOC_Key_Report(KEY_VOLUMEUP, KEY_PRESSED_RELEASED);
-        SOC_Key_Report(KEY_VOLUMEUP, KEY_PRESSED_RELEASED);
-        SOC_Key_Report(KEY_VOLUMEUP, KEY_PRESSED_RELEASED);
-#endif
-#endif
-
-#ifdef DEBUG_TDA7419
-        audio_7419_init();
-#endif
-
 
 #ifdef DEBUG_BUTTON
 
@@ -1084,6 +948,9 @@ int dev_init(void)
     lidbg("release version\n");
 #endif
 
+#ifndef SOC_COMPILE
+	LIDBG_GET;
+#endif
 #if 0
     PWR_EN_ON;
 
