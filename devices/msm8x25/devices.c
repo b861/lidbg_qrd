@@ -489,12 +489,7 @@ static int soc_dev_probe(struct platform_device *pdev)
     if(IS_ERR(led_task))
     {
         lidbg("Unable to start kernel thread.\n");
-        err = PTR_ERR(led_task);
-        led_task = NULL;
-        //return err;
-        //exit;
-    }
-    wake_up_process(led_task);
+    }else wake_up_process(led_task);
 #endif
 
 
@@ -504,12 +499,8 @@ static int soc_dev_probe(struct platform_device *pdev)
         if(IS_ERR(dev_init_task))
         {
             lidbg("Unable to start kernel thread.\n");
-            err = PTR_ERR(dev_init_task);
-            dev_init_task = NULL;
-            //return err;
-            //exit;
-        }
-        wake_up_process(dev_init_task);
+
+        }else wake_up_process(dev_init_task);
 
 
 #ifdef DEBUG_AD_KEY
@@ -517,12 +508,7 @@ static int soc_dev_probe(struct platform_device *pdev)
         if(IS_ERR(key_task))
         {
             lidbg("Unable to start kernel thread.\n");
-            err = PTR_ERR(key_task);
-            key_task = NULL;
-            //return err;
-            //exit;
-        }
-        wake_up_process(key_task);
+        }else wake_up_process(key_task);
 #endif
 
 #ifdef DEBUG_POWER_KEY
@@ -530,11 +516,8 @@ static int soc_dev_probe(struct platform_device *pdev)
         if(IS_ERR(pwr_task))
         {
             lidbg("Unable to start kernel thread.\n");
-            err = PTR_ERR(pwr_task);
-            pwr_task = NULL;
 
-        }
-        wake_up_process(pwr_task);
+        }else  wake_up_process(pwr_task);
 #endif
 
 #ifdef DEBUG_USB_RST
@@ -542,11 +525,8 @@ static int soc_dev_probe(struct platform_device *pdev)
         if(IS_ERR(usb_rst_task))
         {
             lidbg("Unable to start kernel thread.\n");
-            err = PTR_ERR(usb_rst_task);
-            usb_rst_task = NULL;
 
-        }
-        wake_up_process(usb_rst_task);
+        }else wake_up_process(usb_rst_task);
 #endif
 
 
@@ -648,11 +628,7 @@ static void devices_late_resume(struct early_suspend *handler)
 		{
 			lidbg("Unable to start kernel thread.\n");
 			err = PTR_ERR(resume_task);
-			resume_task = NULL;
-			//return err;
-			//exit;
-		}
-		wake_up_process(resume_task);
+		}else wake_up_process(resume_task);
 
 		
     }

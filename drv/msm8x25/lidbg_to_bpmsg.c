@@ -87,11 +87,7 @@ int bp_msg_init(void)
         if(IS_ERR(bp_msg_task))
         {
             lidbg("Unable to start kernel thread.bp_msg_task\n");
-            err = PTR_ERR(bp_msg_task);
-            bp_msg_task = NULL;
-
-        }
-        wake_up_process(bp_msg_task);
+        }else wake_up_process(bp_msg_task);
 	printk("[futengfei]  =bp_msg_init=OUT===============================\n");
 #endif
     return 0;

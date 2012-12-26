@@ -20,8 +20,50 @@ LIDBG_DEFINE;
 
 #include "lidbg_fastboot.h"
 
+static DECLARE_COMPLETION(suspend_start);
 
+static struct task_struct *pwroff_task;
 
+static int thread_pwroff(void *data)
+{
+	int time_count;
+
+    while(1)
+    {
+        set_current_state(TASK_UNINTERRUPTIBLE);
+        if(kthread_should_stop()) break;
+        if(1)
+        {
+        	time_count=0;
+			wait_for_completion(&suspend_start);
+			while(1)
+			{
+				msleep(1000);
+				time_count++;
+				if(fastboot_get_status() == PM_STATUS_EARLY_SUSPEND_PENDING)
+				{
+       	    		if(time_count >= 10)
+       	    		{
+       	    			lidbgerr("thread_pwroff wait suspend timeout!\n");
+						SOC_Write_Servicer(SUSPEND_KERNEL);
+						break;
+					}
+				}
+				else
+				{
+					lidbg("thread_pwroff wait time_count=%d\n",time_count);
+					break;
+
+				}
+			}
+        }
+        else
+        {
+            schedule_timeout(HZ);
+        }
+    }
+    return 0;
+}
 
 
 struct fastboot_data {
@@ -50,7 +92,7 @@ void fastboot_pwroff(void)
 
 	if(PM_STATUS_LATE_RESUME_OK != fb_data->suspend_pending)
 	{
-		lidbg("errlsw:call SOC_PWR_ShutDown when suspend_pending != PM_STATUS_LATE_RESUME_OK :%d\n",fb_data->suspend_pending);
+		lidbgerr("Call SOC_PWR_ShutDown when suspend_pending != PM_STATUS_LATE_RESUME_OK :%d\n",fb_data->suspend_pending);
 
 	}
 	 
@@ -61,6 +103,7 @@ void fastboot_pwroff(void)
  	SOC_Write_Servicer(CMD_FAST_POWER_OFF);
 
 #endif
+	complete(&suspend_start);
 
 }
 
@@ -84,7 +127,7 @@ static void fastboot_early_suspend(struct early_suspend *h)
 {
 	if(PM_STATUS_EARLY_SUSPEND_PENDING != fb_data->suspend_pending)
 	{
-		lidbg("errlsw:call devices_early_suspend when suspend_pending != PM_STATUS_EARLY_SUSPEND_PENDING\n");
+		lidbgerr("Call devices_early_suspend when suspend_pending != PM_STATUS_EARLY_SUSPEND_PENDING\n");
 
 	}
 	wake_unlock(&(fb_data->flywakelock));
@@ -121,6 +164,19 @@ static int  fastboot_probe(struct platform_device *pdev)
 	register_early_suspend(&fb_data->early_suspend);
 	wake_lock(&(fb_data->flywakelock));
 #endif
+
+
+	INIT_COMPLETION(suspend_start);
+
+	pwroff_task = kthread_create(thread_pwroff, NULL, "pwroff_task");
+	if(IS_ERR(pwroff_task))
+	{
+		lidbg("Unable to start kernel thread.\n");
+
+	}else wake_up_process(pwroff_task);
+
+
+
 	return 0;
 
 fail_mem:
@@ -144,7 +200,7 @@ static int fastboot_suspend(struct device *dev)
 {
 	if(PM_STATUS_SUSPEND_PENDING != fb_data->suspend_pending)
 	{
-		lidbg("errlsw:call fastboot_suspend when suspend_pending != PM_STATUS_EARLY_SUSPEND_PENDING\n");
+		lidbgerr("Call fastboot_suspend when suspend_pending != PM_STATUS_EARLY_SUSPEND_PENDING\n");
 
 	}
 
@@ -191,11 +247,10 @@ static struct platform_device lidbg_fastboot_device = {
 static int __init fastboot_init(void)
 {
 	DUMP_BUILD_TIME;
-	DUMP_FUN;
+	
 #ifndef SOC_COMPILE
 		LIDBG_GET;
 		set_func_tbl();
-
 #endif
 
     platform_device_register(&lidbg_fastboot_device);

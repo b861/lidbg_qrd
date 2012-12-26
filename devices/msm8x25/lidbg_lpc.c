@@ -476,11 +476,7 @@ void mcuFirstInit(void)
 	if(IS_ERR(lpc_task))
 	{
 		lidbg("Unable to start kernel thread.\n");
-		err = PTR_ERR(lpc_task);
-		lpc_task = NULL;
-
-	}
-	wake_up_process(lpc_task);
+	}else wake_up_process(lpc_task);
 #endif
 
 

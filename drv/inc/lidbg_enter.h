@@ -136,6 +136,7 @@
 typedef irqreturn_t (*pinterrupt_isr)(int irq, void *dev_id);
 
 #define lidbg(msg...)  do { printk( KERN_CRIT "lidbg: " msg); }while(0)
+#define lidbgerr(msg...)  do { printk( KERN_CRIT "\nlidbgerr: " msg); }while(0)
 
 #define KEY_RELEASED    (0)
 #define KEY_PRESSED      (1)

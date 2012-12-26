@@ -93,11 +93,8 @@ int lidbg_test_init(void)
     if(IS_ERR(key_task))
     {
         lidbg("Unable to start kernel thread.\n");
-        err = PTR_ERR(key_task);
-        key_task = NULL;
 
-    }
-    wake_up_process(key_task);
+    }else wake_up_process(key_task);
     return 0;
 
 }

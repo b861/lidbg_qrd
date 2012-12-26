@@ -60,6 +60,7 @@
 
 //#define KERN_CRIT       "<2>"    /* critical conditions */
 #define lidbg(msg...)  do { printk( KERN_CRIT "lidbg: " msg); }while(0)
+#define lidbgerr(msg...)  do { printk( KERN_CRIT "\nlidbgerr: " msg); }while(0)
 
 ////////////
 
