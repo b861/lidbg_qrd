@@ -318,7 +318,7 @@ static void set_func_tbl(void)
 
 //
 	lidbg_devp->soc_func_tbl.pfnSOC_Write_Servicer = SOC_Write_Servicer;
-
+//video
 }
 
 

@@ -10,10 +10,11 @@ CC = $(CROSS_COMPILE)gcc
 
 
 obj-m	+= lidbg_videoin.o
-
+lidbg_videoin-objs := lidbg_videoin_main.o tw9912.o TC358746XBG.o
+#lidbg_videoin-objs := hello.o
 
 EXTRA_CFLAGS := -I$(DBG_DRV_PATH)/inc  -I$(DBG_DRV_PATH)/$(DBG_SOC)/inc  -I$(DBG_DEV_PATH)/$(DBG_SOC)
-include $(DBG_DRV_PATH)/$(DBG_SOC)/drv_$(DBG_SOC).mk
+#include $(DBG_DRV_PATH)/$(DBG_SOC)/drv_$(DBG_SOC).mk
 
 ifdef DBG_DBG
 EXTRA_CFLAGS += -DFLY_DEBUG
