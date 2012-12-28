@@ -1,3 +1,6 @@
+/* Copyright (c) 2012, swlee
+ *
+ */
 
 //#define SOC_COMPILE
 
@@ -9,9 +12,13 @@
 #include "lidbg_def.h"
 
 #include "lidbg_enter.h"
-
+#if 0
+LIDBG_THREAD_DEFINE;
+#else
 LIDBG_DEFINE;
 #endif
+#endif
+
 #include "devices.h"
 
 
@@ -121,6 +128,7 @@ void pwr_key_scan(void)
 
 		while(SOC_IO_Input(PWR_SLEEP_PORT, PWR_SLEEP_INDEX, LIDBG_GPIO_PULLUP)==0)
 		{
+			WHILE_ENTER;
 			msleep(100);
 
 		}
@@ -598,8 +606,6 @@ static void devices_early_suspend(struct early_suspend *handler)
 #ifdef DEBUG_UMOUNT_USB
 		SOC_Write_Servicer(UMOUNT_USB);
 #endif
-		//LPCControlPWRDisenable();
-
 		USB_HUB_DISABLE;
 		USB_SWITCH_DISCONNECT;
 		USB_ID_HIGH_DEV;
@@ -656,7 +662,6 @@ static int  soc_dev_suspend(struct platform_device *pdev, pm_message_t state)
         SOC_IO_ISR_Disable(BUTTON_RIGHT_2);
 #endif
         
-        PWR_EN_OFF;
 
     }
 
@@ -695,8 +700,8 @@ static int soc_dev_resume(struct platform_device *pdev)
     {
     //disable usb first
     	USB_HUB_DISABLE;
-	USB_ID_HIGH_DEV;
-	USB_SWITCH_DISCONNECT;
+		USB_ID_HIGH_DEV;
+		USB_SWITCH_DISCONNECT;
 		
     
         PWR_EN_ON;
@@ -925,7 +930,11 @@ int dev_init(void)
 #endif
 
 #ifndef SOC_COMPILE
+#if 0
+	LIDBG_GET_THREAD;
+#else
 	LIDBG_GET;
+#endif
 #endif
 #if 0
     PWR_EN_ON;

@@ -327,7 +327,7 @@ static struct miscdevice misc =
 
 };
 #endif
-static int __init dev_init(void)
+static int __init io_init(void)
 {
     int ret = 0;
     dbg (DEVICE_NAME"io_dev_init\n");
@@ -343,7 +343,7 @@ static int __init dev_init(void)
 
 }
 
-static void __exit dev_exit(void)
+static void __exit io_exit(void)
 {
 #if 1
     misc_deregister(&misc);
@@ -351,8 +351,8 @@ static void __exit dev_exit(void)
     dbg (DEVICE_NAME"dev_exit\n");
 }
 
-module_init(dev_init);
-module_exit(dev_exit);
+module_init(io_init);
+module_exit(io_exit);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Flyaudio Inc.");

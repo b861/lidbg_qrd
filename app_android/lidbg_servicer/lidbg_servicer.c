@@ -232,12 +232,14 @@ int  servicer_handler(int signum)
 			system("echo on > /sys/power/state");
 			//system("setprop fly.fastboot.accoff 0");
 			property_set("fly.fastboot.accoff","0");
+			//system("echo host > /mnt/debugfs/otg/mode");
 			break;
 
 		}
 		case SUSPEND_KERNEL:
 		{
 			system("su");
+			//system("echo peripheral > /mnt/debugfs/otg/mode");
 			property_set("fly.fastboot.accoff","1");
 			system("echo mem > /sys/power/state");
 			break;

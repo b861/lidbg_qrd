@@ -1,3 +1,7 @@
+/* Copyright (c) 2012, swlee
+ *
+ */
+
 
 
 //#define SOC_COMPILE
@@ -397,8 +401,9 @@ static void workFlyMCUIIC(struct work_struct *work)
     //DBG("ThreadFlyMCUIIC running\n");
 	//SOC_IO_ISR_Disable(MCU_IIC_REQ_ISR);
 
-    while (!SOC_IO_Input(MCU_IIC_REQ_G, MCU_IIC_REQ_I, 0))
+    while (SOC_IO_Input(MCU_IIC_REQ_G, MCU_IIC_REQ_I, 0)==0)
     {
+    	//WHILE_ENTER;
         actualReadFromMCU(buff, iReadLen);
         iReadLen = 16;
     }
@@ -436,10 +441,11 @@ int thread_lpc(void *data)
 					lpc_send_rec_count=0;
 
 				}
+				//lidbg("thread_lpc:LPCCombinDataStream\n");
 
 				LPCCombinDataStream(buff, SIZE_OF_ARRAY(buff));
 				lpc_send_rec_count ++;
-				}
+			}
 				msleep(2000);
         }
         else
@@ -464,6 +470,7 @@ void mcuFirstInit(void)
     while (SOC_IO_Input(0, MCU_IIC_REQ_I, GPIO_CFG_PULL_UP)==0)
     {
     	u8 buff[32];
+		WHILE_ENTER;
         actualReadFromMCU(buff, 32);
        
     }
@@ -502,8 +509,9 @@ void LPCResume(void)
 	iDriverResumeTime = GetTickCount();
 
 		//clear lpc i2c buffer
-    while (!SOC_IO_Input(MCU_IIC_REQ_G, MCU_IIC_REQ_I, 0))
+    while (SOC_IO_Input(MCU_IIC_REQ_G, MCU_IIC_REQ_I, 0) == 0)
     {
+    	WHILE_ENTER;
         actualReadFromMCU(buff, iReadLen);
         iReadLen = 16;
     }
@@ -515,6 +523,7 @@ void LPCResume(void)
 static int  lpc_probe(struct platform_device *pdev)
 {
 	
+		DUMP_FUN;
 		lidbg("lpc communication+\n");
 		mcuFirstInit();
 		LPCPowerOnOK();
@@ -545,16 +554,19 @@ static int  lpc_remove(struct platform_device *pdev)
 #ifdef CONFIG_HAS_EARLYSUSPEND
 static void lpc_early_suspend(struct early_suspend *handler)
 {
+	DUMP_FUN;
+	LPCSuspend();
 
 
 }
 static void lpc_late_resume(struct early_suspend *handler)
 {
-
+	DUMP_FUN_ENTER;
 	LPCResume();
 	LPCPowerOnOK();
 	LPCNoReset();
 	LPCBackLightOn();
+	DUMP_FUN_LEAVE;
 
 }
 
@@ -563,19 +575,19 @@ static void lpc_late_resume(struct early_suspend *handler)
 
 
 
-
-
 #ifdef CONFIG_PM
 static int lpc_suspend(struct device *dev)
 {
-	LPCSuspend();
+	DUMP_FUN;
 	
 	TELL_LPC_PWR_OFF;
+	
 	return 0;
 }
 
 static int lpc_resume(struct device *dev)
 {
+	DUMP_FUN;
 
     TELL_LPC_PWR_ON;
 

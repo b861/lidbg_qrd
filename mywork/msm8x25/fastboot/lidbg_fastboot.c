@@ -86,17 +86,25 @@ int fastboot_get_status(void)
 
 }
 
+
+int fastboot_set_status(LIDBG_FAST_PWROFF_STATUS status)
+{
+	lidbg("fastboot_set_status:%d\n",status);
+	fb_data->suspend_pending = status;
+
+}
+
 void fastboot_pwroff(void)
 {
 	DUMP_FUN_ENTER;
 
-	if(PM_STATUS_LATE_RESUME_OK != fb_data->suspend_pending)
+	if(PM_STATUS_LATE_RESUME_OK != fastboot_get_status())
 	{
-		lidbgerr("Call SOC_PWR_ShutDown when suspend_pending != PM_STATUS_LATE_RESUME_OK :%d\n",fb_data->suspend_pending);
+		lidbgerr("Call SOC_PWR_ShutDown when suspend_pending != PM_STATUS_LATE_RESUME_OK :%d\n",fastboot_get_status());
 
 	}
 	 
-	fb_data->suspend_pending = PM_STATUS_EARLY_SUSPEND_PENDING;
+	fastboot_set_status(PM_STATUS_EARLY_SUSPEND_PENDING);
 
 #ifdef  FLY_DEBUG
 
@@ -116,6 +124,7 @@ static void set_func_tbl(void)
 //pwr
 	plidbg_dev->soc_func_tbl.pfnSOC_PWR_ShutDown = fastboot_pwroff;
 	plidbg_dev->soc_func_tbl.pfnSOC_PWR_GetStatus = fastboot_get_status;
+	plidbg_dev->soc_func_tbl.pfnSOC_PWR_SetStatus = fastboot_set_status;
 
 
 }
@@ -125,7 +134,8 @@ static void set_func_tbl(void)
 #ifdef CONFIG_HAS_EARLYSUSPEND
 static void fastboot_early_suspend(struct early_suspend *h)
 {
-	if(PM_STATUS_EARLY_SUSPEND_PENDING != fb_data->suspend_pending)
+	DUMP_FUN;
+	if(PM_STATUS_EARLY_SUSPEND_PENDING != fastboot_get_status())
 	{
 		lidbgerr("Call devices_early_suspend when suspend_pending != PM_STATUS_EARLY_SUSPEND_PENDING\n");
 
@@ -137,7 +147,8 @@ static void fastboot_early_suspend(struct early_suspend *h)
 
 static void fastboot_late_resume(struct early_suspend *h)
 {
-		fb_data->suspend_pending = PM_STATUS_LATE_RESUME_OK;
+		DUMP_FUN;
+		fastboot_set_status(PM_STATUS_LATE_RESUME_OK);
 
 }
 #endif
@@ -145,6 +156,7 @@ static void fastboot_late_resume(struct early_suspend *h)
 static int  fastboot_probe(struct platform_device *pdev)
 {
 	int ret;
+	DUMP_FUN_ENTER;
 
 	fb_data = kmalloc(sizeof(struct fastboot_data), GFP_KERNEL);
 	if (!fb_data) {
@@ -154,7 +166,7 @@ static int  fastboot_probe(struct platform_device *pdev)
 	mutex_init(&fb_data->lock);
 	wake_lock_init(&(fb_data->flywakelock), WAKE_LOCK_SUSPEND,"lidbg_wake_lock");
 
-	fb_data->suspend_pending = PM_STATUS_LATE_RESUME_OK;
+	fastboot_set_status(PM_STATUS_LATE_RESUME_OK);
 	fb_data->resume_count = 0;
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
@@ -175,6 +187,7 @@ static int  fastboot_probe(struct platform_device *pdev)
 
 	}else wake_up_process(pwroff_task);
 
+	DUMP_FUN_LEAVE;
 
 
 	return 0;
@@ -198,7 +211,8 @@ static int  fastboot_remove(struct platform_device *pdev)
 #ifdef CONFIG_PM
 static int fastboot_suspend(struct device *dev)
 {
-	if(PM_STATUS_SUSPEND_PENDING != fb_data->suspend_pending)
+	DUMP_FUN;
+	if(PM_STATUS_SUSPEND_PENDING != fastboot_get_status())
 	{
 		lidbgerr("Call fastboot_suspend when suspend_pending != PM_STATUS_EARLY_SUSPEND_PENDING\n");
 
@@ -209,11 +223,11 @@ static int fastboot_suspend(struct device *dev)
 
 static int fastboot_resume(struct device *dev)
 {
-
+	DUMP_FUN;
     lidbg("fastboot_resume:%d\n",++fb_data->resume_count);
 	lidbg("call kernel on!\n");
 
-	fb_data->suspend_pending = PM_STATUS_RESUME_OK;
+	fastboot_set_status(PM_STATUS_RESUME_OK);
 	wake_lock(&(fb_data->flywakelock));
 	SOC_Write_Servicer(WAKEUP_KERNEL);
 
@@ -266,9 +280,6 @@ static void __exit fastboot_exit(void)
 module_init(fastboot_init);
 module_exit(fastboot_exit);
 
-
-//EXPORT_SYMBOL(fastboot_get_status);
-//EXPORT_SYMBOL(fastboot_pwroff);
 
 
 MODULE_LICENSE("GPL");

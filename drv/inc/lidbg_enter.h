@@ -6,7 +6,6 @@
 #include "lidbg.h"
 #else
 #include <linux/miscdevice.h>
-#include <linux/delay.h>
 #include <asm/irq.h>
 #include <linux/kernel.h>
 #include <linux/module.h>
@@ -22,23 +21,13 @@
 #include <linux/cdev.h>
 #include <linux/string.h>
 #include <linux/list.h>
-#include <linux/pci.h>
 #include <linux/gpio.h>
 #include <linux/io.h>
-#include <linux/version.h>
 #include <linux/platform_device.h>
 #include <linux/syscalls.h>
 #include <asm/system.h>
-#include <linux/time.h>
-#include <linux/pwm.h>
-#include <linux/hrtimer.h>
 
 #include <linux/stat.h>
-
-
-#include <linux/i2c.h>
-#include <linux/spi/spi.h>
-
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
 #include <linux/earlysuspend.h>
@@ -46,88 +35,9 @@
 
 
 #include <asm/uaccess.h>
-#include <asm/atomic.h>
-#include <asm/unistd.h>
-
-#include <linux/types.h>
-
-#include <linux/sched.h>   //wake_up_process()
 #include <linux/kthread.h> //kthread_create()¡¢kthread_run()
 #include <linux/input.h>
-
-
-#include <linux/proc_fs.h>
-#include <linux/device.h>
-#include <asm/uaccess.h>
-#include <linux/kfifo.h>
-
-
-#include <linux/init.h>
-#include <linux/module.h>
-#include <linux/kernel.h>
-#include <linux/err.h>
-#include <linux/delay.h>
-#include <linux/platform_device.h>
-#include <linux/debugfs.h>
-#include <linux/fb.h>
-
-
-#include "mach/hardware.h"
-#include "mach/irqs.h"
-
-
-
-#include <linux/module.h>
-#include <linux/init.h>
-#include <linux/gpio.h>
-#include <linux/interrupt.h>
-#include <linux/irq.h>
-#include <linux/i2c.h>
-#include <linux/i2c/pca953x.h>
-#include <linux/slab.h>
-#include <linux/of_platform.h>
-#include <linux/of_gpio.h>
-
-//msm8x25
-#include <linux/kernel.h>
-#include <linux/init.h>
-#include <linux/gpio_event.h>
-#include <linux/usb/android.h>
-#include <linux/platform_device.h>
-#include <linux/io.h>
-#include <linux/gpio.h>
-#include <linux/mtd/nand.h>
-#include <linux/mtd/partitions.h>
-#include <linux/i2c.h>
-#include <linux/android_pmem.h>
-#include <linux/bootmem.h>
-#include <linux/mfd/marimba.h>
-#include <linux/power_supply.h>
-#include <linux/regulator/consumer.h>
-#include <linux/memblock.h>
-#include <asm/mach/mmc.h>
-#include <asm/mach-types.h>
-#include <asm/mach/arch.h>
-#include <asm/hardware/gic.h>
-#include <mach/board.h>
-#include <mach/msm_iomap.h>
-#include <mach/msm_hsusb.h>
-#include <mach/rpc_hsusb.h>
-#include <mach/rpc_pmapp.h>
-#include <mach/usbdiag.h>
-#include <mach/msm_memtypes.h>
-#include <mach/msm_serial_hs.h>
-#include <mach/pmic.h>
-#include <mach/socinfo.h>
-#include <mach/vreg.h>
-#include <mach/rpc_pmapp.h>
-//#include <mach/msm_battery.h>
-#include <mach/rpc_server_handset.h>
-#include <mach/socinfo.h>
-#include <mach/msm_smsm.h>
-
-#include <mach/msm_rpcrouter.h>
-
+#include <linux/wakelock.h>
 
 #endif
 
@@ -135,8 +45,6 @@
 
 typedef irqreturn_t (*pinterrupt_isr)(int irq, void *dev_id);
 
-#define lidbg(msg...)  do { printk( KERN_CRIT "lidbg: " msg); }while(0)
-#define lidbgerr(msg...)  do { printk( KERN_CRIT "\nlidbgerr: " msg); }while(0)
 
 #define KEY_RELEASED    (0)
 #define KEY_PRESSED      (1)
@@ -174,7 +82,7 @@ typedef enum
   PM_STATUS_SUSPEND_PENDING,
   PM_STATUS_RESUME_OK,
   PM_STATUS_LATE_RESUME_OK,
-}FAST_PWROFF_STATUS;
+}LIDBG_FAST_PWROFF_STATUS;
 
 
 #define BEGIN_KMEM do{old_fs = get_fs();set_fs(get_ds());}while(0)
@@ -211,6 +119,7 @@ struct lidbg_fn_t {
 //pwr
 	void (*pfnSOC_PWR_ShutDown)(void);
 	int (*pfnSOC_PWR_GetStatus)(void);
+	void (*pfnSOC_PWR_SetStatus)(LIDBG_FAST_PWROFF_STATUS status);
 
 //
 	void (*pfnSOC_Write_Servicer)(int cmd );
@@ -228,6 +137,7 @@ struct lidbg_dev
     unsigned char mem[LIDBG_SIZE]; /*È«¾ÖÄÚ´æ*/
 	unsigned char lidbg_smem[LIDBG_SIZE/4]; // 1k
     struct lidbg_fn_t soc_func_tbl;
+    unsigned char reserve[128];
 };
 
 #if 1
@@ -238,21 +148,44 @@ struct lidbg_dev
  	do{\
 	 mm_segment_t old_fs;\
 	 struct file *fd = NULL;\
+	 printk("lidbg:call LIDBG_GET by %s\n",__FUNCTION__);\
 	 while(1){\
 	 	printk("lidbg:try open mlidbg0!\n");\
 	 	fd = filp_open("/dev/mlidbg0", O_RDWR, 0);\
-	    if((fd == 0xffffffff) || (fd == 0))msleep(50);\
+	 	printk("lidbg:get fd=%x\n",(int)fd);\
+	    if((fd == NULL)||((int)fd == 0xfffffffe)){printk("lidbg:get fd fail!\n");msleep(500);}\
 	    else break;\
 	 }\
 	 BEGIN_KMEM;\
 	 fd->f_op->write(fd, "c lidbg_get", sizeof("c lidbg_get"), &fd->f_pos);\
-	 fd->f_op->read(fd, &plidbg_dev, 4 ,&fd->f_pos);\
+	 fd->f_op->read(fd, (void*)&plidbg_dev, 4 ,&fd->f_pos);\
 	 END_KMEM;\
 	filp_close(fd,0);\
 	if(plidbg_dev == NULL)\
 	{\
 		printk("LIDBG_GET fail!\n");\
 	}\
+}while(0)
+
+
+#define LIDBG_THREAD_DEFINE   \
+    struct lidbg_dev *plidbg_dev = NULL;\
+	static struct task_struct *getlidbg_task;\
+	static int thread_getlidbg(void *data);\
+	int thread_getlidbg(void *data)\
+	{\
+		LIDBG_GET;\
+		return 0;\
+	}
+
+
+
+#define LIDBG_GET_THREAD  do{\
+	getlidbg_task = kthread_create(thread_getlidbg, NULL, "getlidbg_task");\
+	if(IS_ERR(getlidbg_task))\
+	{\
+		printk("Unable to start kernel thread.\n");\
+	}else wake_up_process(getlidbg_task);\
 }while(0)
 
 

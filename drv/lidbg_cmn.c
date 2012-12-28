@@ -1,3 +1,6 @@
+/* Copyright (c) 2012, swlee
+ *
+ */
 
 
 
@@ -76,11 +79,11 @@ static struct miscdevice misc =
 
 void soc_func_tbl_default()
 {
-	lidbg("soc_func_tbl_default:this func not ready!\n");
+	lidbgerr("soc_func_tbl_default:this func not ready!\n");
 
 }
 
-static int __init dev_init(void)
+static int __init cmn_init(void)
 {
     int ret;
 
@@ -122,7 +125,7 @@ static int __init dev_init(void)
 
 		}
 		//fot test
-		(lidbg_devp->soc_func_tbl.pfnSOC_Write_Servicer)(i);
+		//(lidbg_devp->soc_func_tbl.pfnSOC_Write_Servicer)(i);
 
 
 	}
@@ -130,14 +133,14 @@ static int __init dev_init(void)
     return ret;
 }
 
-static void __exit dev_exit(void)
+static void __exit cmn_exit(void)
 {
     misc_deregister(&misc);
     dbg (DEVICE_NAME"cmn  dev_exit\n");
 }
 
-module_init(dev_init);
-module_exit(dev_exit);
+module_init(cmn_init);
+module_exit(cmn_exit);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Flyaudio Inc.");

@@ -52,12 +52,17 @@ typedef unsigned int			uchar;
 #define MSG_ERROR        (1)
 #define MSG_DEBUG        (1)
 
+#define lidbg(msg...)  do { printk( KERN_CRIT "lidbg: " msg); }while(0)
+#define lidbgerr(msg...)  do { printk( KERN_CRIT "\nlidbgerr: " msg); }while(0)
+
+
 #define FUNCTION_IN       do{lidbg("%d: %s() In", __LINE__, __FUNCTION__);}while(0)
 #define FUNCTION_OUT    do{lidbg("%d: %s() Out", __LINE__, __FUNCTION__);}while(0)
 #define DUMP_BUILD_TIME    do{ lidbg( "Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);}while(0)
 #define DUMP_FUN     do{lidbg( "%s+\n", __FUNCTION__);}while(0)
 #define DUMP_FUN_ENTER     DUMP_FUN
 #define DUMP_FUN_LEAVE     do{lidbg( "%s-\n", __FUNCTION__);}while(0)
+#define WHILE_ENTER     do{lidbg( "%s:while blocking...\n", __FUNCTION__);}while(0)
 
 
 #define HIGH			(1)

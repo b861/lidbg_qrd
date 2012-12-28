@@ -285,7 +285,7 @@ static struct miscdevice misc =
     .fops = &dev_fops,
 
 };
-static int __init dev_init(void)
+static int __init servicer_init(void)
 {
     int ret;
 
@@ -329,14 +329,14 @@ static int __init dev_init(void)
     return ret;
 }
 
-static void __exit dev_exit(void)
+static void __exit servicer_exit(void)
 {
     misc_deregister(&misc);
     dbg (DEVICE_NAME"servicer  dev_exit\n");
 }
 
-module_init(dev_init);
-module_exit(dev_exit);
+module_init(servicer_init);
+module_exit(servicer_exit);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Flyaudio Inc.");

@@ -116,7 +116,7 @@ enum
 #define BL_MAX (255)
 
 
-#ifdef FLY_DEBUG
+#if 0//def FLY_DEBUG
 //sku7: find <4> i2c_devices:0xe, 0x18, 0x1c, 0x2c
 #define PLATFORM_GET do{ \
 						u8 i2c_devices_found[32],i; \
@@ -146,12 +146,12 @@ enum
 
 
 #define USB_ID_HIGH_DEV do{\
-								SOC_IO_Config(33,GPIO_CFG_INPUT,GPIO_CFG_PULL_UP,GPIO_CFG_8MA);\
-								SOC_IO_Input(0,33,GPIO_CFG_PULL_UP);\
+								SOC_IO_Config(34,GPIO_CFG_INPUT,GPIO_CFG_PULL_UP,GPIO_CFG_8MA);\
+								SOC_IO_Input(0,34,GPIO_CFG_PULL_UP);\
 							}while(0)
 #define USB_ID_LOW_HOST do{  \
-								SOC_IO_Config(33,GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_16MA);\
-								SOC_IO_Output(0, 33, 0);\
+								SOC_IO_Config(34,GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_16MA);\
+								SOC_IO_Output(0, 34, 0);\
 							}while(0)
 
 
