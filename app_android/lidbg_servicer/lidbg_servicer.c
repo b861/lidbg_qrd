@@ -267,49 +267,49 @@ int main(int argc , char **argv)
     printf("lidbg_servicer start\n");
     //sleep(5);
 
-    system("insmod /system/lib/modules/out/lidbg_ts_to_recov.ko");
-    system("insmod /system/lib/modules/out/lidbg_common.ko");
-    system("insmod /system/lib/modules/out/lidbg_servicer.ko");
-    system("insmod /system/lib/modules/out/lidbg_touch.ko");
-    system("insmod /system/lib/modules/out/lidbg_key.ko");
-    system("insmod /system/lib/modules/out/lidbg_i2c.ko");
-    system("insmod /system/lib/modules/out/lidbg_soc_msm8x25.ko");
-    system("insmod /system/lib/modules/out/lidbg_io.ko");
-    system("insmod /system/lib/modules/out/lidbg_ad.ko");
+	system("insmod /system/lib/modules/out/lidbg_ts_to_recov.ko");
+	system("insmod /system/lib/modules/out/lidbg_common.ko");
+	system("insmod /system/lib/modules/out/lidbg_servicer.ko");
+	system("insmod /system/lib/modules/out/lidbg_touch.ko");
+	system("insmod /system/lib/modules/out/lidbg_key.ko");
+	system("insmod /system/lib/modules/out/lidbg_i2c.ko");
+	system("insmod /system/lib/modules/out/lidbg_soc_msm8x25.ko");
+	system("insmod /system/lib/modules/out/lidbg_io.ko");
+	system("insmod /system/lib/modules/out/lidbg_ad.ko");
 	system("insmod /system/lib/modules/out/lidbg_main.ko");
-	
+
 	system("insmod /system/lib/modules/out/lidbg_fly_soc.ko");
-	
+
 	system("insmod /system/lib/modules/out/lidbg_fastboot.ko");
 	system("insmod /system/lib/modules/out/lidbg_lpc.ko");
-    system("insmod /system/lib/modules/out/lidbg_soc_devices.ko");
-    system("insmod /system/lib/modules/out/lidbg_videoin.ko");
-    system("insmod /system/lib/modules/out/lidbg_to_bpmsg.ko");
-	
+	system("insmod /system/lib/modules/out/lidbg_soc_devices.ko");
+	system("insmod /system/lib/modules/out/lidbg_videoin.ko");
+	system("insmod /system/lib/modules/out/lidbg_to_bpmsg.ko");
 
-    //for flycar
-    system("insmod /flysystem/lib/out/lidbg_ts_to_recov.ko");
-    system("insmod /flysystem/lib/out/lidbg_common.ko");
-    system("insmod /flysystem/lib/out/lidbg_servicer.ko");
-    system("insmod /flysystem/lib/out/lidbg_touch.ko");
-    system("insmod /flysystem/lib/out/lidbg_key.ko");
-    system("insmod /flysystem/lib/out/lidbg_i2c.ko");
-    system("insmod /flysystem/lib/out/lidbg_soc_msm8x25.ko");
-    system("insmod /flysystem/lib/out/lidbg_io.ko");
-    system("insmod /flysystem/lib/out/lidbg_ad.ko");
+
+	//for flycar
+	system("insmod /flysystem/lib/out/lidbg_ts_to_recov.ko");
+	system("insmod /flysystem/lib/out/lidbg_common.ko");
+	system("insmod /flysystem/lib/out/lidbg_servicer.ko");
+	system("insmod /flysystem/lib/out/lidbg_touch.ko");
+	system("insmod /flysystem/lib/out/lidbg_key.ko");
+	system("insmod /flysystem/lib/out/lidbg_i2c.ko");
+	system("insmod /flysystem/lib/out/lidbg_soc_msm8x25.ko");
+	system("insmod /flysystem/lib/out/lidbg_io.ko");
+	system("insmod /flysystem/lib/out/lidbg_ad.ko");
 	system("insmod /flysystem/lib/out/lidbg_main.ko");
 	system("insmod /flysystem/lib/out/lidbg_fly_soc.ko");
 	system("insmod /flysystem/lib/out/lidbg_fastboot.ko");
 	//system("insmod /flysystem/lib/out/lidbg_lpc.ko");
-    // system("insmod /flysystem/lib/out/lidbg_soc_devices.ko");
+	// system("insmod /flysystem/lib/out/lidbg_soc_devices.ko");
 	system("insmod /flysystem/lib/out/lidbg_videoin.ko");
-    system("insmod /flysystem/lib/out/lidbg_to_bpmsg.ko");
- 
+	system("insmod /flysystem/lib/out/lidbg_to_bpmsg.ko");
 
 
-    sleep(1);
-    system("chmod 0777 /dev/mlidbg0");
-    system("chmod 0777 /dev/lidbg_servicer");
+
+	sleep(1);
+	system("chmod 0777 /dev/mlidbg0");
+	system("chmod 0777 /dev/lidbg_servicer");
 
 open_dev:
     fd = open("/dev/lidbg_servicer", O_RDWR);

@@ -82,7 +82,7 @@ int lidbg_open(struct inode *inode, struct file *filp)
 {
     DUMP_FUN;
     /*将设备结构体指针赋值给文件私有数据指针*/
-    filp->private_data = lidbg_devp;
+    filp->private_data = (struct lidbg_dev *)global_lidbg_devp;
     if (filp->f_flags & O_NONBLOCK)    // \u963b\u585e
     {
         if (down_trylock(&lidbg_lock))  // \u5982\u679c\u83b7\u53d6\u4e0d\u5230\u4fe1\u53f7\u91cf\uff0c\u5219\u7acb\u5373\u8fd4\u56de\u3002
@@ -326,8 +326,8 @@ static ssize_t lidbg_write(struct file *filp, const char __user *buf,
 
         if(!strcmp(argv[1], "lidbg_get"))
         {
-        	lidbg("lidbg_devp addr = %x\n",(u32)lidbg_devp);
-			*(u32 *)(lidbg_devp->mem) = (u32)lidbg_devp;
+        	lidbg("lidbg_devp addr = %x\n",(u32)(struct lidbg_dev *)global_lidbg_devp);
+			*(u32 *)(((struct lidbg_dev *)global_lidbg_devp)->mem) = (u32)(struct lidbg_dev *)global_lidbg_devp;
 		   
         }
 
@@ -386,8 +386,8 @@ static ssize_t lidbg_write(struct file *filp, const char __user *buf,
 #if 1
         else if(!strcmp(argv[1], "video"))
         {
-      	  if(lidbg_devp!=NULL)
-         	  lidbg_devp->soc_func_tbl.pfnlidbg_video_main(new_argc, new_argv);
+      	  if(((struct lidbg_dev *)global_lidbg_devp)!=NULL)
+         	 ((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnlidbg_video_main(new_argc, new_argv);
         }
 #endif
 
@@ -506,7 +506,7 @@ int lidbg_init(void)
     }
     memset(lidbg_devp, 0, sizeof(struct lidbg_dev));
 #endif
-    lidbg_setup_cdev(lidbg_devp, 0);
+    lidbg_setup_cdev((struct lidbg_dev *)global_lidbg_devp, 0);
 
 
     lidbg("creating mlidbg class.\n");
@@ -556,8 +556,8 @@ void lidbg_exit(void)
 {
     lidbg("mlidbg_exit\n");
 
-    cdev_del(&lidbg_devp->cdev);   /*注销cdev*/
-    kfree(lidbg_devp);     /*释放设备结构体内存*/
+    cdev_del(&((struct lidbg_dev *)global_lidbg_devp)->cdev);   /*注销cdev*/
+    kfree(((struct lidbg_dev *)global_lidbg_devp));     /*释放设备结构体内存*/
 
 
     // class_device_destroy(my_class, MKDEV(LIDBG_MAJOR, LIDBG_MINOR));
@@ -595,7 +595,7 @@ ssize_t lidbg_proc_write(struct file *filp, const char __user *buff, unsigned lo
 {
     lidbg("lidbg_proc_write\n");
 
-    filp->private_data = lidbg_devp;
+    filp->private_data = (struct lidbg_dev *)global_lidbg_devp;
     lidbg_write(filp, buff, len, 0);
     return len;
 }
