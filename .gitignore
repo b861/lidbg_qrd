@@ -38,7 +38,8 @@ copy_log
 build_log
 git_log
 dbg_cfg.sh
-
+push-kejing.sh
+key_hkjing.sh
 
 tmp/
 out/
@@ -49,6 +50,8 @@ soc/
 collect/
 notes/
 other/
+
+
 
 
 

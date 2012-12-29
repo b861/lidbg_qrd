@@ -1,25 +1,7 @@
-
-
 #include "lidbg.h"
-
-
-
-
-
-
-
-void lidbg_video_main(int argc, char **argv)
-{
-
-
-}
-
-
-
 int lidbg_video_init(void)
 {
-	return 0;
-
+	printk("lidbg_video_init modules ismod\n");
 }
 
 int lidbg_video_deinit(void)
@@ -37,6 +19,4 @@ EXPORT_SYMBOL(lidbg_video_main);
 
 module_init(lidbg_video_init);
 module_exit(lidbg_video_deinit);
-
-
 
