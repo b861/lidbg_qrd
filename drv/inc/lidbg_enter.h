@@ -147,7 +147,6 @@ struct lidbg_fn_t {
         void (*pfnflyVideoTestSignalPin)(u8 Channel);
         void (*pfnflyVideoImageQualityConfig)(u8 cmd ,u8 valu);
 	void (*pfnvideo_init_config)(Vedio_Format config_pramat);
-	
 };
 
 #define LIDBG_SIZE	0x00001000 //MEM_SIZE_4_KB	/*全局内存最大1K字节*/

@@ -9,6 +9,6 @@ cp debug.sh version.sh
 ./all_make.sh
 #adb wait-for-device remount
 adb remount
-adb push /home/swlee/work/flyaudio/lidbg_qrd/out /system/lib/modules/out
+adb push ./out /system/lib/modules/out
 adb reboot
 
