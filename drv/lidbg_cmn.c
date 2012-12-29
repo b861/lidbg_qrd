@@ -7,7 +7,7 @@
 #include "lidbg.h"
 #define DEVICE_NAME "mlidbg_cmn"
 struct lidbg_dev *lidbg_devp; /*设备结构体指针*/
-
+void *global_lidbg_devp;
 
 
 u32 GetNsCount(void)
@@ -107,7 +107,7 @@ static int __init cmn_init(void)
 #endif
     /* 动态申请设备结构体的内存*/
     lidbg_devp = kmalloc(sizeof(struct lidbg_dev), GFP_KERNEL);
-
+   global_lidbg_devp= lidbg_devp;
     if (!lidbg_devp)    /*申请失败*/
     {
         //result =  - ENOMEM;
@@ -149,6 +149,6 @@ MODULE_AUTHOR("Flyaudio Inc.");
 EXPORT_SYMBOL(mod_cmn_main);
 EXPORT_SYMBOL(GetNsCount);
 
-EXPORT_SYMBOL(lidbg_devp);
+EXPORT_SYMBOL(global_lidbg_devp);
 
 
