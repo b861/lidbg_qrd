@@ -71,10 +71,27 @@ typedef irqreturn_t (*pinterrupt_isr)(int irq, void *dev_id);
 #define CMD_FAST_POWER_OFF (70)
 #define UMOUNT_USB (80)
 
-
-
 #endif
 
+typedef enum 
+{
+	YIN0=0,//now is use Progressive Yin
+	YIN1,//not use
+	YIN2,// now is use Y of SEPARATION / DVD_CVBS
+	YIN3,//now is use AUX/BACK_CVBS
+	SEPARATION,//Progressive
+	NOTONE,
+}Vedio_Channel;
+typedef enum 
+{
+	NTSC_I=1,
+	PAL_I,
+	NTSC_P,
+	PAL_P,
+	STOP_VIDEO,
+	COLORBAR,
+	OTHER,
+}Vedio_Format;
 
 typedef enum
 {
@@ -123,9 +140,14 @@ struct lidbg_fn_t {
 
 //
 	void (*pfnSOC_Write_Servicer)(int cmd );
-
-
-
+//video
+        void (*pfnlidbg_video_main)(int argc, char **argv);
+        void (*pfnvideo_io_i2c_init)(void);
+        void (*pfnflyVideoInitall)(u8 Channel);
+        void (*pfnflyVideoTestSignalPin)(u8 Channel);
+        void (*pfnflyVideoImageQualityConfig)(u8 cmd ,u8 valu);
+	void (*pfnvideo_init_config)(Vedio_Format config_pramat);
+	
 };
 
 #define LIDBG_SIZE	0x00001000 //MEM_SIZE_4_KB	/*全局内存最大1K字节*/
