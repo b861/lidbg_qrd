@@ -590,7 +590,7 @@ static int lpc_resume(struct device *dev)
 	DUMP_FUN;
 
     TELL_LPC_PWR_ON;
-
+	msleep(200);
 
 	return 0;
 }

@@ -91,10 +91,10 @@ typedef enum
 
 struct lidbg_fn_t {
 //io
-	void (*pfnSOC_IO_Output) (u32 group, u32 index, bool status);
-	bool (*pfnSOC_IO_Input) (u32 group, u32 index, u32 pull);
-	void (*pfnSOC_IO_Output_Ext)(u32 group, u32 index, bool status, u32 pull, u32 drive_strength);
-	bool (*pfnSOC_IO_Config)(u32 index, bool direction, u32 pull, u32 drive_strength);
+	void (*pfnSOC_IO_Output) (unsigned int group, unsigned int index, bool status);
+	bool (*pfnSOC_IO_Input) (unsigned int group, unsigned int index, unsigned int pull);
+	void (*pfnSOC_IO_Output_Ext)(unsigned int group, unsigned int index, bool status, unsigned int pull, unsigned int drive_strength);
+	bool (*pfnSOC_IO_Config)(unsigned int index, bool direction, unsigned int pull, unsigned int drive_strength);
 	
 //i2c
 	int (*pfnSOC_I2C_Send) (int bus_id, char chip_addr, char *buf, unsigned int size);
@@ -102,19 +102,19 @@ struct lidbg_fn_t {
 	int (*pfnSOC_I2C_Rec_Simple)(int bus_id, char chip_addr, char *buf, unsigned int size);
 	
 //io-irq
-	bool (*pfnSOC_IO_ISR_Add)(u32 irq, u32 interrupt_type, pinterrupt_isr func, void *dev);
-	bool (*pfnSOC_IO_ISR_Enable)(u32 irq);
-	bool (*pfnSOC_IO_ISR_Disable)(u32 irq);
-	bool (*pfnSOC_IO_ISR_Del )(u32 irq);
+	bool (*pfnSOC_IO_ISR_Add)(unsigned int irq, unsigned int interrupt_type, pinterrupt_isr func, void *dev);
+	bool (*pfnSOC_IO_ISR_Enable)(unsigned int irq);
+	bool (*pfnSOC_IO_ISR_Disable)(unsigned int irq);
+	bool (*pfnSOC_IO_ISR_Del )(unsigned int irq);
 
 //ad
-	bool (*pfnSOC_ADC_Get)(u32 channel , u32 *value);
+	bool (*pfnSOC_ADC_Get)(unsigned int channel , unsigned int *value);
 
 
 //key
-	 void (*pfnSOC_Key_Report)(u32 key_value, u32 type);
+	 void (*pfnSOC_Key_Report)(unsigned int key_value, unsigned int type);
 //bl
-	int (*pfnSOC_BL_Set)( u32 level);
+	int (*pfnSOC_BL_Set)( unsigned int level);
 
 //pwr
 	void (*pfnSOC_PWR_ShutDown)(void);
