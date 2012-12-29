@@ -213,7 +213,7 @@ static struct TC358_register_struct lingceng_init_tab[]=
 
 	{0x0008,0x60,register_value_width_16},
 	{0x0022,0x5a0,register_value_width_16},
-//Colorbar Logics		
+//COLORBAR Logics		
 	{0x00e0,0x8200,register_value_width_16},
 	{0x00e2,0x600,register_value_width_16},
 	{0x00e4,0x40,register_value_width_16},

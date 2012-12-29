@@ -23,22 +23,22 @@
 /*
 typedef enum 
 {
-	Yin0=0,//not use
-	Yin1,//not use
-	Yin2,// now is use Y of YUV / DVD_CVBS
-	Yin3,//now is use AUX/BACK_CVBS
-	Yuv,//Progressive
-	Notone,
+	YIN0=0,//not use
+	YIN1,//not use
+	YIN2,// now is use Y of SEPARATION / DVD_CVBS
+	YIN3,//now is use AUX/BACK_CVBS
+	SEPARATION,//Progressive
+	NOTONE,
 }Vedio_Channel;
 typedef enum 
 {
-	NTSC_i=1,
-	PAL_i,
-	NTSC_p,
-	PAL_p,
-	STOP_Vedio,
-	Colorbar,
-	Other,
+	NTSC_I=1,
+	PAL_I,
+	NTSC_P,
+	PAL_P,
+	STOP_VIDEO,
+	COLORBAR,
+	OTHER,
 }Vedio_Format;
 */
 typedef enum 
@@ -89,7 +89,7 @@ typedef struct
 /**************************/
 int Tw9912_init_PALi(void);
 int Tw9912_init(Vedio_Format config_pramat,Vedio_Channel Channel);
-void Tw9912_hwo_input(void);
+
 int Tw9912_appoint_pin_testing_video_signal(Vedio_Channel Channel);
 int testing_video_signal(Vedio_Channel Channel);
 int Tw9912_init_NTSCp(void);

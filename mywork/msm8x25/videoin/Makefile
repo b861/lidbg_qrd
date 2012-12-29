@@ -10,7 +10,7 @@ CC = $(CROSS_COMPILE)gcc
 
 
 obj-m	+= lidbg_videoin.o
-lidbg_videoin-objs := lidbg_videoin_main.o tw9912.o TC358746XBG.o
+lidbg_videoin-objs := lidbg_videoin_main.o tw9912.o TC358746XBG.o i2c_io.o video_init_config.o
 #lidbg_videoin-objs := hello.o
 
 EXTRA_CFLAGS := -I$(DBG_DRV_PATH)/inc  -I$(DBG_DRV_PATH)/$(DBG_SOC)/inc  -I$(DBG_DEV_PATH)/$(DBG_SOC)

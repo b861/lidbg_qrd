@@ -469,10 +469,6 @@ i2c_ack i2c_read_2byte(int bus_id, char chip_addr, unsigned int sub_addr, char *
 	mutex_unlock(&io_i2c_lock);
 	return ACK;
 }
-EXPORT_SYMBOL(i2c_read_byte);
-EXPORT_SYMBOL(i2c_write_byte);
-EXPORT_SYMBOL(i2c_write_2byte);
-EXPORT_SYMBOL(i2c_read_2byte);
 #endif //end I2C_IO_IMITATION
 
 /* end of file */

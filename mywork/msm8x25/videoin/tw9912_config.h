@@ -190,7 +190,7 @@ u8 TW9912_testing_signal[]=
 ,0xfe,
 };
 
- u8 TW9912_INIT_NTSC_progressive_input[]=
+ u8 TW9912_INIT_NTSC_Progressive_input[]=
 {
 0x02,0x60
 ,0x03,0x20
@@ -382,7 +382,7 @@ u8 TW9912_INIT_PAL_Interlaced_input[]=
 ,0xfe,
 };
 
-u8 TW9912_INIT_PAL_progressive_input[]=
+u8 TW9912_INIT_PAL_Progressive_input[]=
 {
 0x02,0x60
 ,0x03,0x20

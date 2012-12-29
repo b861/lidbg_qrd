@@ -1,7 +1,7 @@
 #include "video_init_config.h"
 static int flag_io_config=0;
-static Vedio_Channel info_Vedio_Channel = Notone;
-static Vedio_Channel info_com_top_Channel = Yin3;
+static Vedio_Channel info_Vedio_Channel = NOTONE;
+static Vedio_Channel info_com_top_Channel = YIN3;
 extern TW9912_Signal signal_is_how[5];
 spinlock_t spin_chipe_config_lock;
 void video_io_i2c_init_in(void)
@@ -29,32 +29,32 @@ spin_lock(&spin_chipe_config_lock);
 	switch (Channel)
 	{
 		case 0:
-			info_com_top_Channel = Yin0;
-			init_tw9912_ent(Yin0);
-			printk("TW9912:Channel selet Yin0\n");
+			info_com_top_Channel = YIN0;
+			init_tw9912_ent(YIN0);
+			printk("TW9912:Channel selet YIN0\n");
 			break;
 		case 1:
-			info_com_top_Channel = Yin1;
-			init_tw9912_ent(Yin1);
-			printk("TW9912:Channel selet Yin1\n");
+			info_com_top_Channel = YIN1;
+			init_tw9912_ent(YIN1);
+			printk("TW9912:Channel selet YIN1\n");
 			break;
 		case 2:
-			info_com_top_Channel = Yin2;
-			init_tw9912_ent(Yin2);
-			printk("TW9912:Channel selet Yin2\n");
+			info_com_top_Channel = YIN2;
+			init_tw9912_ent(YIN2);
+			printk("TW9912:Channel selet YIN2\n");
 			break;
 		case 3:
-			info_com_top_Channel = Yin3;
-			init_tw9912_ent(Yin3);
-			printk("TW9912:Channel selet Yin3\n");
+			info_com_top_Channel = YIN3;
+			init_tw9912_ent(YIN3);
+			printk("TW9912:Channel selet YIN3\n");
 			break;
 		case 4:
-			info_com_top_Channel = Yuv;
-			init_tw9912_ent(Yuv);
-			printk("TW9912:Channel selet Yuv\n");
+			info_com_top_Channel = SEPARATION;
+			init_tw9912_ent(SEPARATION);
+			printk("TW9912:Channel selet SEPARATION\n");
 			break;
 		default :
-			info_com_top_Channel = Notone;
+			info_com_top_Channel = NOTONE;
 			Tw9912_init_PALi();
 			printk("%s: you input TW9912 Channel=%d error!\n",__FUNCTION__,Channel);
 			break;
@@ -68,30 +68,30 @@ int init_tw9912_ent(Vedio_Channel Channel)
 int ret=-1 ;
 	switch (Channel)
 	{
-		case Yin0:
-			info_Vedio_Channel = Yin0;
-			ret = Tw9912_init(PAL_i,Yin0);
-			printk("TW9912:Channel selet Yin0\n");
+		case YIN0:
+			info_Vedio_Channel = YIN0;
+			ret = Tw9912_init(PAL_I,YIN0);
+			printk("TW9912:Channel selet YIN0\n");
 			break;
-		case Yin1:
-			info_Vedio_Channel = Yin1;
-			ret = Tw9912_init(PAL_i,Yin1);
-			printk("TW9912:Channel selet Yin1\n");
+		case YIN1:
+			info_Vedio_Channel = YIN1;
+			ret = Tw9912_init(PAL_I,YIN1);
+			printk("TW9912:Channel selet YIN1\n");
 			break;
-		case Yin2:
-			info_Vedio_Channel = Yin2;
-			ret = Tw9912_init(PAL_i,Yin2);
-			printk("TW9912:Channel selet Yin2\n");
+		case YIN2:
+			info_Vedio_Channel = YIN2;
+			ret = Tw9912_init(PAL_I,YIN2);
+			printk("TW9912:Channel selet YIN2\n");
 			break;
-		case Yin3:
-			info_Vedio_Channel = Yin3;
-			ret = Tw9912_init(PAL_i,Yin3);
-			printk("TW9912:Channel selet Yin3\n");
+		case YIN3:
+			info_Vedio_Channel = YIN3;
+			ret = Tw9912_init(PAL_I,YIN3);
+			printk("TW9912:Channel selet YIN3\n");
 			break;
-		case Yuv:
-			info_Vedio_Channel = Yuv;
-			ret = Tw9912_init(NTSC_p,Yuv);
-			printk("TW9912:Channel selet Yuv\n");
+		case SEPARATION:
+			info_Vedio_Channel = SEPARATION;
+			ret = Tw9912_init(NTSC_P,SEPARATION);
+			printk("TW9912:Channel selet SEPARATION\n");
 			break;
 		default :
 			printk("%s: you input TW9912 Channel=%d error!\n",__FUNCTION__,Channel);
@@ -101,32 +101,32 @@ return ret;
 //success return 1 fail return -1
 }
 int flyVideoTestSignalPin_in(u8 Channel)
-{int ret= Notone;
+{int ret= NOTONE;
 spin_lock(&spin_chipe_config_lock);
 	switch (Channel)
 	{
 		case 0: 
-			info_Vedio_Channel = Yin0;
-			ret=  testing_video_signal(Yin0);	
+			info_Vedio_Channel = YIN0;
+			ret=  testing_video_signal(YIN0);	
 			break;
 		case 1:
-			info_Vedio_Channel = Yin1;
-			ret=  testing_video_signal(Yin1);
+			info_Vedio_Channel = YIN1;
+			ret=  testing_video_signal(YIN1);
 			break;
 		case 2:
-			info_Vedio_Channel = Yin2;
-			ret=  testing_video_signal(Yin2);
+			info_Vedio_Channel = YIN2;
+			ret=  testing_video_signal(YIN2);
 			break;
 		case 3:
-			info_Vedio_Channel = Yin3;
-			ret=  testing_video_signal(Yin3);
+			info_Vedio_Channel = YIN3;
+			ret=  testing_video_signal(YIN3);
 			break;
 		case 4:
-			info_Vedio_Channel = Yuv;
-			ret=  testing_video_signal(Yuv);
+			info_Vedio_Channel = SEPARATION;
+			ret=  testing_video_signal(SEPARATION);
 			break;
 		default :
-			info_Vedio_Channel = Notone;
+			info_Vedio_Channel = NOTONE;
 			printk("%s:you input TW9912 Channel=%d error!\n",__FUNCTION__,Channel);
 			break;
 	}
@@ -136,12 +136,12 @@ return ret;
 void video_init_config_in(Vedio_Format config_pramat)
 {
 spin_lock(&spin_chipe_config_lock);
-	if(config_pramat != STOP_Vedio)
+	if(config_pramat != STOP_VIDEO)
 	{	
-		if(info_com_top_Channel == Notone)
+		if(info_com_top_Channel == NOTONE)
 		{
 		Tw9912_init_PALi();
-		printk("TW9912:warning -->info_com_top_Channel == Notone,Tw9912 Ignore\n");
+		printk("TW9912:warning -->info_com_top_Channel == NOTONE,Tw9912 Ignore\n");
 		}
 	    	else
 		init_tw9912_ent(info_com_top_Channel);
@@ -152,37 +152,37 @@ spin_lock(&spin_chipe_config_lock);
 		printk("TW9912:signal_is_how[%d].Format=%d\n",info_Vedio_Channel,signal_is_how[info_Vedio_Channel].Format);
 		printk("TW9912:signal_is_how[%d].vedio_source=%d\n",info_Vedio_Channel,signal_is_how[info_Vedio_Channel].vedio_source);
 	
-		if(info_Vedio_Channel<=Yuv)
+		if(info_Vedio_Channel<=SEPARATION)
 		{
 
 				//switch (flyVedioTestSignalPin(info_Vedio_Channel))
 				switch (signal_is_how[info_Vedio_Channel].Format)
 				{
-				case NTSC_i: TC358_init(NTSC_i);
+				case NTSC_I: TC358_init(NTSC_I);
 					   //TC358_init(PAL_Interlace);
 					break;
-				case PAL_i: TC358_init(PAL_i);
+				case PAL_I: TC358_init(PAL_I);
 					break;
-				case NTSC_p: TC358_init(NTSC_p);
+				case NTSC_P: TC358_init(NTSC_P);
 					break;
-				case PAL_p: TC358_init(PAL_p);
+				case PAL_P: TC358_init(PAL_P);
 					break;
 				default :printk("video not signal input\n"); 
-					    TC358_init(Colorbar);
+					    TC358_init(COLORBAR);
 					break;
 				}
 			
-		}//if(info_Vedio_Channel<=Yuv)
+		}//if(info_Vedio_Channel<=SEPARATION)
 		else
 		{
 			printk("Video_init_config:TW9912 not config!\n"); 
-			 TC358_init(Colorbar);
+			 TC358_init(COLORBAR);
 		}
 		
 	}
 	else
 	{
-	   ;//TC358_init(STOP_Vedio);
+	   ;//TC358_init(STOP_VIDEO);
 	}
 spin_unlock(&spin_chipe_config_lock);
 }

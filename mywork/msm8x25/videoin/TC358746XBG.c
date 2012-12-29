@@ -198,24 +198,24 @@ void TC358_init(Vedio_Format flag)
 	tc358746_dbg("flag= %d\n",flag);
 	Power_contorl();
 	TC358_id();
-    if(flag <= Colorbar){
+    if(flag <= COLORBAR){
 					switch (flag)
 					{   
-						case NTSC_i: 
-						case NTSC_p: TC358_Register_config(NTSCp_init_tab);
+						case NTSC_I: 
+						case NTSC_P: TC358_Register_config(NTSCp_init_tab);
 						printk("\n\nTC358746:parameter is NTSCp_init_tab!\n\n");
 							break;
 							
-						case PAL_i:
-						case PAL_p: TC358_Register_config(PALp_init_tab);
+						case PAL_I:
+						case PAL_P: TC358_Register_config(PALp_init_tab);
 						printk("\n\nTC358746:parameter is PALp_init_tab!\n\n");
 							break;
 							
-						case STOP_Vedio: TC358_Register_config(Stop_tab);
+						case STOP_VIDEO: TC358_Register_config(Stop_tab);
 						printk("\n\nTC358746:parameter is is Stop_tab!\n\n");
 							break;
-						case Colorbar: colorbar_init();
-						printk("\n\nTC358746:parameter is is Colorbar!\n\n");
+						case COLORBAR: colorbar_init();
+						printk("\n\nTC358746:parameter is is COLORBAR!\n\n");
 							break;
 						default : colorbar_init();
 						printk("\n\nTC358746:parameter is default NTSCi_init_tab!\n\n");

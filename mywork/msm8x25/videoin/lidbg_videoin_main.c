@@ -30,46 +30,42 @@ printk("In lidbg_video_main()\n");
 
 	if(!strcmp(argv[1], "channelhow0"))
 		{
-			Tw9912_appoint_pin_testing_video_signal(Yin0);
+			Tw9912_appoint_pin_testing_video_signal(YIN0);
 		}
 	if(!strcmp(argv[1], "channelhow3"))
 		{
-			Tw9912_appoint_pin_testing_video_signal(Yin3);
-		}
-	if(!strcmp(argv[1], "how"))
-		{
-		Tw9912_hwo_input();
+			Tw9912_appoint_pin_testing_video_signal(YIN3);
 		}
 	if(!strcmp(argv[1], "initPp"))
 		{
-		Tw9912_init(PAL_p,Yin3);
+		Tw9912_init(PAL_P,YIN3);
 		}	
 	if(!strcmp(argv[1], "initNp"))
 		{
-		Tw9912_init(NTSC_p,Yin3);
+		Tw9912_init(NTSC_P,YIN3);
 		}	
 	if(!strcmp(argv[1], "initNi"))
 		{
-		if(!strcmp(argv[2], "Yin0"))
-			Tw9912_init(NTSC_i,Yin0);
-		if(!strcmp(argv[2], "Yin1"))
-			Tw9912_init(PAL_i,Yin1);
-		if(!strcmp(argv[2], "Yin2"))
-			Tw9912_init(PAL_i,Yin2);
-		if(!strcmp(argv[2], "Yin3"))
-			Tw9912_init(PAL_i,Yin3);
+		if(!strcmp(argv[2], "YIN0"))
+			Tw9912_init(NTSC_I,YIN0);
+		if(!strcmp(argv[2], "YIN1"))
+			Tw9912_init(PAL_I,YIN1);
+		if(!strcmp(argv[2], "YIN2"))
+			Tw9912_init(PAL_I,YIN2);
+		if(!strcmp(argv[2], "YIN3"))
+			Tw9912_init(PAL_I,YIN3);
 		}	
 	if(!strcmp(argv[1], "initPi"))
 		{
 			printk("In initPi\n");
-			if(!strcmp(argv[2], "Yin0"))
-				Tw9912_init(PAL_i,Yin0);
-			if(!strcmp(argv[2], "Yin1"))
-				Tw9912_init(PAL_i,Yin1);
-			if(!strcmp(argv[2], "Yin2"))
-				Tw9912_init(PAL_i,Yin2);
-			if(!strcmp(argv[2], "Yin3"))
-				Tw9912_init(PAL_i,Yin3);
+			if(!strcmp(argv[2], "YIN0"))
+				Tw9912_init(PAL_I,YIN0);
+			if(!strcmp(argv[2], "YIN1"))
+				Tw9912_init(PAL_I,YIN1);
+			if(!strcmp(argv[2], "YIN2"))
+				Tw9912_init(PAL_I,YIN2);
+			if(!strcmp(argv[2], "YIN3"))
+				Tw9912_init(PAL_I,YIN3);
 		}	
 		if(!strcmp(argv[1], "write"))
 		{
@@ -139,12 +135,12 @@ printk("In lidbg_video_main()\n");
 		if(!strcmp(argv[1], "pp"))
 		{
 				printk("TC358_init(PAL_Progressive);\n\n");
-				TC358_init(PAL_p);
+				TC358_init(PAL_P);
 		}
 		if(!strcmp(argv[1], "np"))
 		{
 				printk("TC358_init(PAL_Progressive);\n\n");
-				TC358_init(NTSC_p);
+				TC358_init(NTSC_P);
 		}
 		if(!strcmp(argv[1], "exit"))
 		{
@@ -157,30 +153,30 @@ printk("In lidbg_video_main()\n");
 	else if(!strcmp(argv[0], "ResetNTSCi"))
 		{
 				printk("Reset Vedio NTSCi\n\n");
-				video_config_init(NTSC_i,Yin3);
+				video_config_init(NTSC_I,YIN3);
 		}
 	else if(!strcmp(argv[0], "ResetPALi"))
 		{
 				printk("Reset Vedio PALi\n\n");
-				video_config_init(PAL_i,Yin3);
+				video_config_init(PAL_I,YIN3);
 
 		}
 	else if(!strcmp(argv[0], "ResetNTSCp"))
 		{
 				printk("Reset Vedio NTSCp\n\n");
-				video_config_init(NTSC_p,Yin3);
+				video_config_init(NTSC_P,YIN3);
 
 		}
 	else if(!strcmp(argv[0], "ResetPALp"))
 		{
 				printk("Reset Vedio PALp\n\n");
-				video_config_init(PAL_p,Yin3);
+				video_config_init(PAL_P,YIN3);
 
 		}
 	else if(!strcmp(argv[0], "StopVedio"))
 		{
 				printk("StopVedio\n\n");
-				video_config_init(STOP_Vedio,Yin3);
+				video_config_init(STOP_VIDEO,YIN3);
 		}
 	else if(!strcmp(argv[0], "Reset720*480"))
 		{
@@ -219,7 +215,9 @@ int lidbg_video_init(void)
 	LIDBG_GET;
 	set_func_tbl();
 	video_io_i2c_init();
-	flyVedioInitall(Yin3);
+	flyVedioInitall(YIN3);
+	    return 0;
+
 }
 
 int lidbg_video_deinit(void)

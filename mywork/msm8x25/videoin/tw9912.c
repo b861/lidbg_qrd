@@ -1,19 +1,18 @@
 
-
 #include "i2c_io.h"
 #include "tw9912.h"
 #include "tw9912_config.h"
 #define TW9912_I2C_ChipAdd 0x44 //SIAD = 0-->0x44  SIAD =1-->0x45
 TW9912_input_info tw9912_input_information;
 TW9912_Signal signal_is_how[5]={//用于记录四个通道的信息
-							{Notone,Other,source_other},//Yin0
-							{Notone,Other,source_other},//Yin1
-							{Notone,Other,source_other},//Yin2
-							{Notone,Other,source_other},//Yin3
-							{Notone,Other,source_other},//Yuv
+							{NOTONE,OTHER,source_other},//YIN0
+							{NOTONE,OTHER,source_other},//YIN1
+							{NOTONE,OTHER,source_other},//YIN2
+							{NOTONE,OTHER,source_other},//YIN3
+							{NOTONE,OTHER,source_other},//SEPARATION
 							};
-TW9912_initall_status tw9912_status={TW9912_initall_not,Notone,Other};
-Last_config_t the_last_config ={Notone,Other};
+TW9912_initall_status tw9912_status={TW9912_initall_not,NOTONE,OTHER};
+Last_config_t the_last_config ={NOTONE,OTHER};
 i2c_ack read_tw9912(unsigned int sub_addr, char *buf )
 {
 	i2c_ack ret;
@@ -61,8 +60,8 @@ void Tw9912_analysis_input_signal(TW9912_input_info *input_information,Vedio_Cha
 u8 channel_1;
 u8 format_1;
 
-	signal_is_how[channel].Channel =Notone;
-	signal_is_how[channel].Format = Other;
+	signal_is_how[channel].Channel =NOTONE;
+	signal_is_how[channel].Format = OTHER;
 	signal_is_how[channel].vedio_source =source_other;
 	
 	if(input_information->chip_status1.valu & 0x08 )//bit3=1 Vertical logi is locked to the incoming video soruce
@@ -71,25 +70,25 @@ u8 format_1;
 		if(input_information->chip_status1.valu & 0x01) signal_is_how[channel].vedio_source=source_50Hz;
 		else signal_is_how[channel].vedio_source=source_60Hz;
 
-		if(channel <= Yuv)
+		if(channel <= SEPARATION)
 		signal_is_how[channel].Channel =channel;
 		else
-		printk("tw9912:error channal>>>>>>>>>>>>>>>>>>>More than Yuv\n");
+		printk("tw9912:error channal>>>>>>>>>>>>>>>>>>>More than SEPARATION\n");
 		
 		read_tw9912(0x02,&channel_1);//register 0x02 channel selete
 		channel_1 =(channel_1&0x0c) >>2 ;
-		if(channel_1 == channel ||channel == Yuv)
+		if(channel_1 == channel ||channel == SEPARATION)
 		{
-			if(channel != Yuv)
+			if(channel != SEPARATION)
 			{
 				format_1=input_information->component_video_format.valu & 0x70;
 				if(format_1 == 0x00)
 					{
-					 signal_is_how[channel].Format = NTSC_i;
+					 signal_is_how[channel].Format = NTSC_I;
 					}
 				else if(format_1 == 0x10)
 					{
-					signal_is_how[channel].Format = PAL_i;
+					signal_is_how[channel].Format = PAL_I;
 					}
 			}
 			else
@@ -97,13 +96,13 @@ u8 format_1;
 				format_1=input_information->input_detection.valu&0x07;
 				if(format_1 == 0x2)
 					{
-					signal_is_how[channel].Format = NTSC_p;
-					 signal_is_how[channel].Channel =Yuv;
+					signal_is_how[channel].Format = NTSC_P;
+					 signal_is_how[channel].Channel =SEPARATION;
 					}
 				else if(format_1 == 0x3)
 					{
-					signal_is_how[channel].Format = PAL_p;
-					 signal_is_how[channel].Channel =Yuv;
+					signal_is_how[channel].Format = PAL_P;
+					 signal_is_how[channel].Channel =SEPARATION;
 					}
 				else
 					{
@@ -115,8 +114,8 @@ u8 format_1;
 		else
 		{
 			printk("tw9912:testing channal and config channal >>>>>>>>>>>>not the same");
-			signal_is_how[channel].Format = Other;
-			signal_is_how[channel].Channel =Notone;
+			signal_is_how[channel].Format = OTHER;
+			signal_is_how[channel].Channel =NOTONE;
 			signal_is_how[channel].vedio_source=source_other;
 		}
 	}
@@ -134,41 +133,41 @@ tw9912_dbg("\n\r\r\r\r\r\n");
 
 		switch(i)
 			{
-					case Yin0:  tw9912_dbg("\n\nYin0\n");
+					case YIN0:  tw9912_dbg("\n\nYIN0\n");
 						break;
-					case Yin1:  tw9912_dbg("\n\nYin1\n");
+					case YIN1:  tw9912_dbg("\n\nYIN1\n");
 						break;
-					case Yin2: tw9912_dbg("\n\nYin2\n");
+					case YIN2: tw9912_dbg("\n\nYIN2\n");
 						break;
-					case Yin3: tw9912_dbg("\n\nYin3\n");
+					case YIN3: tw9912_dbg("\n\nYIN3\n");
 						break;
-					case Yuv: tw9912_dbg("\n\nYuv\n");
+					case SEPARATION: tw9912_dbg("\n\nSEPARATION\n");
 						break;
 			}
 		switch(signal_is_how[i].Channel)
 			{
-					case Yin0: tw9912_dbg("signal_is_how.Channel =Yin0\n");
+					case YIN0: tw9912_dbg("signal_is_how.Channel =YIN0\n");
 						break;
-					case Yin1: tw9912_dbg("signal_is_how.Channel =Yin1\n");
+					case YIN1: tw9912_dbg("signal_is_how.Channel =YIN1\n");
 						break;
-					case Yin2: tw9912_dbg("signal_is_how.Channel =Yin2\n");
+					case YIN2: tw9912_dbg("signal_is_how.Channel =YIN2\n");
 						break;
-					case Yin3: tw9912_dbg("signal_is_how.Channel =Yin3\n");
+					case YIN3: tw9912_dbg("signal_is_how.Channel =YIN3\n");
 						break;
-					case Yuv: tw9912_dbg("signal_is_how.Channel =Yuv\n");
+					case SEPARATION: tw9912_dbg("signal_is_how.Channel =SEPARATION\n");
 						break;
-					default : tw9912_dbg("signal_is_how.Channel =Notonein\n");
+					default : tw9912_dbg("signal_is_how.Channel =NOTONEin\n");
 						break;
 			}
 		switch(signal_is_how[i].Format)
 			{
-					case PAL_p : tw9912_dbg("signal_is_how.Format = PAL_p\n");
+					case PAL_P : tw9912_dbg("signal_is_how.Format = PAL_P\n");
 						break;
-					case PAL_i: tw9912_dbg("signal_is_how.Format = PAL_i\n");
+					case PAL_I: tw9912_dbg("signal_is_how.Format = PAL_I\n");
 						break;
-					case NTSC_p: tw9912_dbg("ignal_is_how.Format = NTSC_p\n");
+					case NTSC_P: tw9912_dbg("ignal_is_how.Format = NTSC_P\n");
 						break;
-					case NTSC_i: tw9912_dbg("signal_is_how.Format = NTSC_i\n");
+					case NTSC_I: tw9912_dbg("signal_is_how.Format = NTSC_I\n");
 						break;
 					default: tw9912_dbg("signal_is_how.Format = other\n");
 						break;
@@ -216,21 +215,21 @@ TW9912_input_info tw9912_input_information_1;
 
 	 tw9912_dbg("testing_signal!\n");
 
-		signal_is_how_1.Channel =Notone;
-		signal_is_how_1.Format = Other;
+		signal_is_how_1.Channel =NOTONE;
+		signal_is_how_1.Format = OTHER;
 		signal_is_how_1.vedio_source =source_other;
 	
 	read_tw9912(0x02,&channel_1);//register 0x02 channel selete
 	channel_1 =(channel_1&0x0c) >>2 ;//read back now config Channel
-	if( (( (channel_1 != Channel ) && Channel != Notone) \
+	if( (( (channel_1 != Channel ) && Channel != NOTONE) \
 		|| (tw9912_status.flag != TW9912_initall_yes)) \
-		&& Channel !=Yuv)//if now config Channel is not testing Channel
+		&& Channel !=SEPARATION)//if now config Channel is not testing Channel
 																// or tw9912 is not have initall
 		{
 		if(tw9912_status.flag == TW9912_initall_not)
 			{
 				tw9912_status.flag = TW9912_initall_yes;
-				tw9912_status.format = PAL_i;
+				tw9912_status.format = PAL_I;
 				tw9912_status.Channel = Channel;
 				tw9912_dbg("first initalll!\n");
 				Tw9912_init_PALi();//initall all register 
@@ -243,7 +242,7 @@ TW9912_input_info tw9912_input_information_1;
 					if(write_tw9912(Tw9912_input_pin_selet)==NACK) goto CONFIG_not_ack_fail;
 					break;
 				case 1: //	 YIN1
-					Tw9912_input_pin_selet[1]=0x44;//register valu selete Yin1
+					Tw9912_input_pin_selet[1]=0x44;//register valu selete YIN1
 					if(write_tw9912(Tw9912_input_pin_selet)==NACK) goto CONFIG_not_ack_fail;
 					break;
 				case 2: //	 YIN2
@@ -265,7 +264,7 @@ TW9912_input_info tw9912_input_information_1;
 			}
 			msleep(400);//Wait for video Stability
 		}
-		else if( (Channel == Yuv ) && the_last_config.Channel !=Yuv )
+		else if( (Channel == SEPARATION ) && the_last_config.Channel !=SEPARATION )
 		{
 			Tw9912_init_NTSCp();//initall all register 
 			msleep(400);
@@ -278,13 +277,13 @@ TW9912_input_info tw9912_input_information_1;
 
 		switch (Channel)//bit[3:2]
 		{
-			case 0: signal_is_how_1.Channel =Yin0;
+			case 0: signal_is_how_1.Channel =YIN0;
 				break;
-			case 1: signal_is_how_1.Channel =Yin1;
+			case 1: signal_is_how_1.Channel =YIN1;
 				break;
-			case 2: signal_is_how_1.Channel =Yin2;
+			case 2: signal_is_how_1.Channel =YIN2;
 				break;
-			case 3: signal_is_how_1.Channel =Yin3;
+			case 3: signal_is_how_1.Channel =YIN3;
 				break;
 			default :
 				printk("tw9912:*****");
@@ -298,41 +297,41 @@ TW9912_input_info tw9912_input_information_1;
 				format_1=tw9912_input_information_1.component_video_format.valu & 0x70;
 				if(format_1 == 0x00)
 					{
-					signal_is_how_1.Format = NTSC_i;
+					signal_is_how_1.Format = NTSC_I;
 					}
 				else if(format_1 == 0x10)
 					{
-					signal_is_how_1.Format = PAL_i;
+					signal_is_how_1.Format = PAL_I;
 					}
 				else if(format_1 == 0x20)
 					{
-					signal_is_how_1.Format = NTSC_p;
-					signal_is_how_1.Channel =Yuv;
+					signal_is_how_1.Format = NTSC_P;
+					signal_is_how_1.Channel =SEPARATION;
 					}
 				else if(format_1 == 0x30)
 					{
-					signal_is_how_1.Format = PAL_p;
-					signal_is_how_1.Channel =Yuv;
+					signal_is_how_1.Format = PAL_P;
+					signal_is_how_1.Channel =SEPARATION;
 					}
 
 			}
 			else
 			{
-				signal_is_how_1.Format = Other;
-				signal_is_how_1.Channel =Notone;
+				signal_is_how_1.Format = OTHER;
+				signal_is_how_1.Channel =NOTONE;
 				signal_is_how_1.vedio_source=source_other;
 			}
 		}
  	switch(signal_is_how_1.Format)
  		{
-			case NTSC_i:   ret =1;
+			case NTSC_I:   ret =1;
 				break;
-			case PAL_i:      ret =2;
+			case PAL_I:      ret =2;
 				break;
 				
-			case NTSC_p:  ret =3;
+			case NTSC_P:  ret =3;
 				break;
-			case PAL_p:     ret =4;
+			case PAL_P:     ret =4;
 				break;
 				
 			default:     ret =5;
@@ -352,11 +351,11 @@ u8 Tw9912_input_pin_selet[]={0x02,0x40,};//default input pin selet YIN0
 u8 manually_initiate_auto_format_detection[]={0x1d,0xff,};//default input pin selet YIN0
 tw9912_dbg("Tw9912_appoint_pin_testing_video_signal!\n");
 
-	if(Channel !=Yuv)
+	if(Channel !=SEPARATION)
 	{
 		read_tw9912(0x02,&channel_1);//register 0x02 channel selete
 		channel_1 =(channel_1&0x0c) >>2 ;//read back now config Channel
-		if( ( (channel_1 != Channel ) && Channel != Notone) \
+		if( ( (channel_1 != Channel ) && Channel != NOTONE) \
 			|| (tw9912_status.flag != TW9912_initall_yes) )//if now config Channel is not testing Channel
 																	// or tw9912 is not have initall
 			{
@@ -364,7 +363,7 @@ tw9912_dbg("Tw9912_appoint_pin_testing_video_signal!\n");
 					{
 						tw9912_status.flag = TW9912_initall_yes;
 						tw9912_status.Channel = Channel;
-						tw9912_status.format = PAL_i;
+						tw9912_status.format = PAL_I;
 						tw9912_dbg("first initalll!\n");
 						Tw9912_init_PALi();//initall all register 
 					}
@@ -372,19 +371,19 @@ tw9912_dbg("Tw9912_appoint_pin_testing_video_signal!\n");
 			the_last_config.Channel =Channel;	
 			switch(Channel)//Independent testing
 				{
-					case Yin0: 	//	 YIN0
+					case YIN0: 	//	 YIN0
 						if(write_tw9912(Tw9912_input_pin_selet)==NACK) goto CONFIG_not_ack_fail;
 						break;
-					case  Yin1: //	 YIN1
-						Tw9912_input_pin_selet[1]=0x44;//register valu selete Yin1
+					case  YIN1: //	 YIN1
+						Tw9912_input_pin_selet[1]=0x44;//register valu selete YIN1
 						if(write_tw9912(Tw9912_input_pin_selet)==NACK) goto CONFIG_not_ack_fail;
 						break;
-					case  Yin2: //	 YIN2
+					case  YIN2: //	 YIN2
 						Tw9912_input_pin_selet[1]=0x48;
 						if(write_tw9912(Tw9912_input_pin_selet)==NACK) goto CONFIG_not_ack_fail;
 
 						break;
-					case  Yin3: //	 YIN3
+					case  YIN3: //	 YIN3
 						Tw9912_input_pin_selet[1]=0x4c;
 						if(write_tw9912(Tw9912_input_pin_selet)==NACK) goto CONFIG_not_ack_fail;
 						
@@ -400,15 +399,15 @@ tw9912_dbg("Tw9912_appoint_pin_testing_video_signal!\n");
 				msleep(400);//Wait for video Stability
 			}
 	}
-	//else if( the_last_config.Channel !=Yuv )
+	//else if( the_last_config.Channel !=SEPARATION )
 	else
 	{
 		printk("\r\r\n\n");
 		printk("tw9912:testing NTSCp\n");
 		Tw9912_init_NTSCp();//initall all register 
 		tw9912_status.flag = TW9912_initall_yes;
-		tw9912_status.Channel = Yuv;
-		tw9912_status.format = NTSC_p;
+		tw9912_status.Channel = SEPARATION;
+		tw9912_status.format = NTSC_P;
 		msleep(400);
 	}
 	write_tw9912(manually_initiate_auto_format_detection);
@@ -418,14 +417,14 @@ tw9912_dbg("Tw9912_appoint_pin_testing_video_signal!\n");
  	display_tw9912_info();
  	switch(signal_is_how[Channel].Format)
  		{
-			case NTSC_i:   ret =1;
+			case NTSC_I:   ret =1;
 				break;
-			case PAL_i:      ret =2;
+			case PAL_I:      ret =2;
 				break;
 				
-			case NTSC_p:  ret =3;
+			case NTSC_P:  ret =3;
 				break;
-			case PAL_p:     ret =4;
+			case PAL_P:     ret =4;
 				break;
 				
 		 default:     ret =5;
@@ -458,9 +457,9 @@ int Tw9912_init_NTSCp(void)
 	TC9912_id();
 	tw9912_RESX_DOWN;
 	tw9912_RESX_UP;   
-	the_last_config.Channel =Yuv;
-	the_last_config.format = NTSC_p;
-	config_pramat_piont=TW9912_INIT_NTSC_progressive_input; 
+	the_last_config.Channel =SEPARATION;
+	the_last_config.format = NTSC_P;
+	config_pramat_piont=TW9912_INIT_NTSC_Progressive_input; 
 	while(TW9912_INIT_Public[i*2] != 0xfe)
 		{    
 			if(write_tw9912(&TW9912_INIT_Public[i*2])==NACK) goto CONFIG_not_ack_fail;
@@ -474,7 +473,7 @@ int Tw9912_init_NTSCp(void)
 	}
 	tw9912_dbg("Tw9912_init_NTSCp initall tw9912-\n");
 //msleep(400);
-//Tw9912_appoint_pin_testing_video_signal(Yuv);
+//Tw9912_appoint_pin_testing_video_signal(SEPARATION);
    return 1;
 CONFIG_not_ack_fail:
 	tw9912_dbg("%s:have NACK error!\n",__FUNCTION__);
@@ -488,8 +487,8 @@ int Tw9912_init_PALi(void)
 	TC9912_id();
 	tw9912_RESX_DOWN;
 	tw9912_RESX_UP;   
-	the_last_config.Channel =Yin3;
-	the_last_config.format = PAL_i;
+	the_last_config.Channel =YIN3;
+	the_last_config.format = PAL_I;
 	config_pramat_piont=TW9912_INIT_PAL_Interlaced_input; 
 	while(TW9912_INIT_Public[i*2] != 0xfe)
 		{    
@@ -518,13 +517,13 @@ int Tw9912_init(Vedio_Format config_pramat,Vedio_Channel Channel)
 	printk("tw9912: init+\n");
 	printk("\r\r\n\n");
 	TC9912_id();
-	//if(Channel == Notone&&tw9912_status.flag == TW9912_initall_not)
-	if(Channel == Notone)
+	//if(Channel == NOTONE&&tw9912_status.flag == TW9912_initall_not)
+	if(Channel == NOTONE)
 	{ //随便初始一下，防止i2c由于tw9912不工作影响通信。
 	Tw9912_init_PALi();//initall all register
 	//神码情况
 	}
-	else if(config_pramat != STOP_Vedio)
+	else if(config_pramat != STOP_VIDEO)
 	{
 		ret = Tw9912_appoint_pin_testing_video_signal(Channel);//bad
 		if(ret==5)//the channel is not signal input
@@ -534,17 +533,17 @@ int Tw9912_init(Vedio_Format config_pramat,Vedio_Channel Channel)
 
 		switch(ret)
 		{
-			case NTSC_i:
-				printk("tw9912:testing NTSC_i\n");
+			case NTSC_I:
+				printk("tw9912:testing NTSC_I\n");
 				break;
-			case NTSC_p:
-				printk("tw9912:testing NTSC_p\n");
+			case NTSC_P:
+				printk("tw9912:testing NTSC_P\n");
 				break;
-			case PAL_i:
-				printk("tw9912:testing PAL_i\n");
+			case PAL_I:
+				printk("tw9912:testing PAL_I\n");
 				break;
-			case PAL_p:
-				printk("tw9912:testing PAL_p\n");
+			case PAL_P:
+				printk("tw9912:testing PAL_P\n");
 				break;
 			default:
 				;
@@ -560,36 +559,36 @@ goto CONFIG_is_old;
 		tw9912_RESX_UP;   
 		switch(signal_is_how[Channel].Format)
 		{
-			case NTSC_i:
+			case NTSC_I:
 				tw9912_status.flag = TW9912_initall_yes;
 				tw9912_status.Channel = Channel;
-				tw9912_status.format = NTSC_i;
+				tw9912_status.format = NTSC_I;
 				config_pramat_piont=TW9912_INIT_NTSC_Interlaced_input; 
 				//config_pramat_piont=TW9912_INIT_PAL_Interlaced_input; 
 				tw9912_dbg("%s:config_pramat->NTSC_Interlace\n",__func__);
 				break;
 			
-			case PAL_i:
+			case PAL_I:
 				tw9912_status.flag = TW9912_initall_yes;
 				tw9912_status.Channel = Channel;
-				tw9912_status.format = PAL_i;
+				tw9912_status.format = PAL_I;
 				config_pramat_piont=TW9912_INIT_PAL_Interlaced_input; 
 				printk("%s:config_pramat->PAL_Interlace\n",__func__);
 				break;
 			
-			case NTSC_p:
+			case NTSC_P:
 				tw9912_status.flag = TW9912_initall_yes;
 				tw9912_status.Channel = Channel;
-				tw9912_status.format = NTSC_p;
-				config_pramat_piont=TW9912_INIT_NTSC_progressive_input;
+				tw9912_status.format = NTSC_P;
+				config_pramat_piont=TW9912_INIT_NTSC_Progressive_input;
 				printk("%s:config_pramat->NTSC_Progressive\n",__func__);
 				break;
 			
-			case PAL_p:
+			case PAL_P:
 				tw9912_status.flag = TW9912_initall_yes;
 				tw9912_status.Channel = Channel;
-				tw9912_status.format = PAL_p;
-				config_pramat_piont=TW9912_INIT_PAL_progressive_input;
+				tw9912_status.format = PAL_P;
+				config_pramat_piont=TW9912_INIT_PAL_Progressive_input;
 				printk("%s:config_pramat->PAL_Progressive\n",__func__);
 				break;
 			default:
@@ -615,7 +614,7 @@ goto CONFIG_is_old;
 				i++;
 			}
 		
-			if(signal_is_how[Channel].Format ==PAL_i ||signal_is_how[Channel].Format == NTSC_i)
+			if(signal_is_how[Channel].Format ==PAL_I ||signal_is_how[Channel].Format == NTSC_I)
 			{
 				switch(Channel)//Independent testing
 					{
@@ -623,7 +622,7 @@ goto CONFIG_is_old;
 							if(write_tw9912(Tw9912_input_pin_selet)==NACK) goto CONFIG_not_ack_fail;
 							break;
 						case 1: //	 YIN1
-							Tw9912_input_pin_selet[1]=0x44;//register valu selete Yin1
+							Tw9912_input_pin_selet[1]=0x44;//register valu selete YIN1
 							if(write_tw9912(Tw9912_input_pin_selet)==NACK) goto CONFIG_not_ack_fail;
 							break;
 						case 2: //	 YIN2
@@ -635,7 +634,7 @@ goto CONFIG_is_old;
 							Tw9912_input_pin_selet[1]=0x4c;
 							if(write_tw9912(Tw9912_input_pin_selet)==NACK) goto CONFIG_not_ack_fail;
 				
-							Tw9912_input_pin_selet[0]=0xe8;//only selet Yin3 neet set
+							Tw9912_input_pin_selet[0]=0xe8;//only selet YIN3 neet set
 							Tw9912_input_pin_selet[1]=0x3f;//disable YOUT buffer
 							if(write_tw9912(Tw9912_input_pin_selet)==NACK) goto CONFIG_not_ack_fail;
 							break;
@@ -649,10 +648,10 @@ goto CONFIG_is_old;
 	/*else
 	{
 		tw9912_status.flag = TW9912_initall_not;
-		tw9912_status.Channel = Notone;
-		tw9912_status.format = Other;
+		tw9912_status.Channel = NOTONE;
+		tw9912_status.format = OTHER;
 		config_pramat_piont=TW9912_Stop;
-		tw9912_dbg("%s:config_pramat->STOP_Vedio\n",__func__);
+		tw9912_dbg("%s:config_pramat->STOP_VIDEO\n",__func__);
 	}
 	*/
 #ifdef DEBUG_PLOG_TW9912

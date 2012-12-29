@@ -383,10 +383,11 @@ static ssize_t lidbg_write(struct file *filp, const char __user *buf,
         {
             lidbg_servicer_main(new_argc, new_argv);
         }
-#if 0
+#if 1
         else if(!strcmp(argv[1], "video"))
         {
-            lidbg_video_main(new_argc, new_argv);
+      	  if(lidbg_devp!=NULL)
+         	  lidbg_devp->soc_func_tbl.pfnlidbg_video_main(new_argc, new_argv);
         }
 #endif
 

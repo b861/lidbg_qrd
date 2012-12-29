@@ -75,22 +75,22 @@ typedef irqreturn_t (*pinterrupt_isr)(int irq, void *dev_id);
 
 typedef enum 
 {
-	Yin0=0,//not use
-	Yin1,//not use
-	Yin2,// now is use Y of YUV / DVD_CVBS
-	Yin3,//now is use AUX/BACK_CVBS
-	Yuv,//Progressive
-	Notone,
+	YIN0=0,//now is use Progressive Yin
+	YIN1,//not use
+	YIN2,// now is use Y of SEPARATION / DVD_CVBS
+	YIN3,//now is use AUX/BACK_CVBS
+	SEPARATION,//Progressive
+	NOTONE,
 }Vedio_Channel;
 typedef enum 
 {
-	NTSC_i=1,
-	PAL_i,
-	NTSC_p,
-	PAL_p,
-	STOP_Vedio,
-	Colorbar,
-	Other,
+	NTSC_I=1,
+	PAL_I,
+	NTSC_P,
+	PAL_P,
+	STOP_VIDEO,
+	COLORBAR,
+	OTHER,
 }Vedio_Format;
 
 typedef enum
