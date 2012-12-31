@@ -27,6 +27,8 @@ DECLARE_MUTEX(lidbg_lock);
 DEFINE_SEMAPHORE(lidbg_lock);
 #endif
 
+static DECLARE_COMPLETION(msg_ready);
+
 
 
 static struct task_struct *msg_task;
@@ -49,7 +51,7 @@ int thread_msg(void *data)
 {
 	int start_index=0;
 	int end_index=0;
-	return 0;
+	//return 0;
 	plidbg_msg = (struct lidbg_msg *)kmalloc(sizeof( lidbg_msg), GFP_KERNEL);
 
     while(1)
@@ -58,6 +60,7 @@ int thread_msg(void *data)
         if(kthread_should_stop()) break;
         if(1)
         {
+        		wait_for_completion(&msg_ready);
 			start_index =plidbg_msg->w_pos;
 			end_index =plidbg_msg->r_pos;
 	
@@ -391,10 +394,12 @@ static ssize_t lidbg_write(struct file *filp, const char __user *buf,
         }
 #endif
 
-	else if (!strcmp(argv[0], "msg"))
+	else if (!strcmp(argv[0], "lidbg_msg:"))
 	{
+	
 		memcpy(plidbg_msg->w_pos, dev->mem, size);
-		
+		complete(&msg_ready);
+
 
 	}
 
@@ -536,6 +541,7 @@ int lidbg_init(void)
 
     lidbg_board_init();
 
+	INIT_COMPLETION(msg_ready);
 
 	msg_task = kthread_create(thread_msg, NULL, "msg_task");
 	if(IS_ERR(msg_task))

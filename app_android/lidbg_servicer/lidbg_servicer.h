@@ -11,4 +11,18 @@
 	 }\
 	close(fd);\
 }while(0)
+
+#if 1
+#define LIDBG_PRINT(msg...) do{\
+	int fd;\
+	char * s;\
+	sprintf(s, "lidbg_msg: " msg);\
+	 fd = open("/dev/mlidbg0", O_RDWR);\
+	 write(fd, s, 64);\
+	 close(fd);\
+}while(0)
+#endif
+
+
+
 #endif

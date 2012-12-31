@@ -608,6 +608,7 @@ static void devices_early_suspend(struct early_suspend *handler)
 #endif
 		USB_HUB_DISABLE;
 		USB_SWITCH_DISCONNECT;
+		msleep(1000);
 		USB_ID_HIGH_DEV;
 
 		

@@ -52,6 +52,8 @@ pthread_t ntid;
 int fd = 0;
 
 
+#undef printf
+#define printf  LIDBG_PRINT 
 int  servicer_handler(int signum)
 {
 
