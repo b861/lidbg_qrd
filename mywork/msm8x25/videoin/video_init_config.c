@@ -3,21 +3,25 @@ static int flag_io_config=0;
 static Vedio_Channel info_Vedio_Channel = NOTONE;
 static Vedio_Channel info_com_top_Channel = YIN3;
 extern TW9912_Signal signal_is_how[5];
-spinlock_t spin_chipe_config_lock;
+//spinlock_t spin_chipe_config_lock;
+struct mutex lock_chipe_config;
 void video_io_i2c_init_in(void)
 {
 	if (!flag_io_config)
 	{	
-		spin_lock_init(&spin_chipe_config_lock);
+		//spin_lock_init(&spin_chipe_config_lock);
+		mutex_init(&lock_chipe_config);
 		i2c_io_config_init();
 		flag_io_config=1;
 	}
 }
 int flyVideoImageQualityConfig_in(u8 cmd ,u8 valu)
 {
-spin_lock(&spin_chipe_config_lock);
+//spin_lock(&spin_chipe_config_lock);
+mutex_lock(&lock_chipe_config);
 	if(cmd ==0) return valu;
-spin_unlock(&spin_chipe_config_lock);
+//spin_unlock(&spin_chipe_config_lock);
+mutex_unlock(&lock_chipe_config);
 	return 0;
 }
 int init_tw9912_ent(Vedio_Channel Channel);
@@ -25,7 +29,8 @@ int flyVideoInitall_in(u8 Channel)
 {
 
 int ret=1 ;
-spin_lock(&spin_chipe_config_lock);
+//spin_lock(&spin_chipe_config_lock);
+mutex_lock(&lock_chipe_config);
 	switch (Channel)
 	{
 		case 0:
@@ -59,7 +64,8 @@ spin_lock(&spin_chipe_config_lock);
 			printk("%s: you input TW9912 Channel=%d error!\n",__FUNCTION__,Channel);
 			break;
 	}
-spin_unlock(&spin_chipe_config_lock);
+//spin_unlock(&spin_chipe_config_lock);
+mutex_unlock(&lock_chipe_config);
 return ret;
 //success return 1 fail return -1
 }
@@ -102,7 +108,8 @@ return ret;
 }
 int flyVideoTestSignalPin_in(u8 Channel)
 {int ret= NOTONE;
-spin_lock(&spin_chipe_config_lock);
+//spin_lock(&spin_chipe_config_lock);
+mutex_lock(&lock_chipe_config);
 	switch (Channel)
 	{
 		case 0: 
@@ -130,12 +137,14 @@ spin_lock(&spin_chipe_config_lock);
 			printk("%s:you input TW9912 Channel=%d error!\n",__FUNCTION__,Channel);
 			break;
 	}
-spin_unlock(&spin_chipe_config_lock);
+//spin_unlock(&spin_chipe_config_lock);
+mutex_unlock(&lock_chipe_config);
 return ret;
 }
 void video_init_config_in(Vedio_Format config_pramat)
 {
-spin_lock(&spin_chipe_config_lock);
+//spin_lock(&spin_chipe_config_lock);
+mutex_lock(&lock_chipe_config);
 	if(config_pramat != STOP_VIDEO)
 	{	
 		if(info_com_top_Channel == NOTONE)
@@ -184,5 +193,6 @@ spin_lock(&spin_chipe_config_lock);
 	{
 	   ;//TC358_init(STOP_VIDEO);
 	}
-spin_unlock(&spin_chipe_config_lock);
+//spin_unlock(&spin_chipe_config_lock);
+mutex_unlock(&lock_chipe_config);
 }
