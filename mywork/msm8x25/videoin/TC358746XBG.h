@@ -2,6 +2,7 @@
 #define __SOC_TC358746XBG__
 #include "tw9912.h"
 #include "i2c_io.h"
+#define DEBUG_TC358
 #define TC358746XBG_RESET 28
 #define register_value_width_32 32
 #define register_value_width_16 16

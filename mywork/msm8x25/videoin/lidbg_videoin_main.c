@@ -24,50 +24,31 @@ printk("In lidbg_video_main()\n");
 	{
 		;
 	}
+  if(!strcmp(argv[0], "checkoutYin3"))
+	{
+	 flyVideoInitall_in(YIN3);
+	}
+  if(!strcmp(argv[0], "checkoutYin0"))
+	{
+	 flyVideoInitall_in(YIN0);
+	}
+    if(!strcmp(argv[0], "checkoutYuv"))
+	{
+	 flyVideoInitall_in(SEPARATION);
+	}
  #ifdef DEBUG_TW9912
 	else if(!strcmp(argv[0], "TW9912"))
 	{
 
-	if(!strcmp(argv[1], "channelhow0"))
+	if(!strcmp(argv[1], "testingyin0"))
 		{
 			Tw9912_appoint_pin_testing_video_signal(YIN0);
 		}
-	if(!strcmp(argv[1], "channelhow3"))
+	if(!strcmp(argv[1], "testingyin3"))
 		{
 			Tw9912_appoint_pin_testing_video_signal(YIN3);
 		}
-	if(!strcmp(argv[1], "initPp"))
-		{
-		Tw9912_init(PAL_P,YIN3);
-		}	
-	if(!strcmp(argv[1], "initNp"))
-		{
-		Tw9912_init(NTSC_P,YIN3);
-		}	
-	if(!strcmp(argv[1], "initNi"))
-		{
-		if(!strcmp(argv[2], "YIN0"))
-			Tw9912_init(NTSC_I,YIN0);
-		if(!strcmp(argv[2], "YIN1"))
-			Tw9912_init(PAL_I,YIN1);
-		if(!strcmp(argv[2], "YIN2"))
-			Tw9912_init(PAL_I,YIN2);
-		if(!strcmp(argv[2], "YIN3"))
-			Tw9912_init(PAL_I,YIN3);
-		}	
-	if(!strcmp(argv[1], "initPi"))
-		{
-			printk("In initPi\n");
-			if(!strcmp(argv[2], "YIN0"))
-				Tw9912_init(PAL_I,YIN0);
-			if(!strcmp(argv[2], "YIN1"))
-				Tw9912_init(PAL_I,YIN1);
-			if(!strcmp(argv[2], "YIN2"))
-				Tw9912_init(PAL_I,YIN2);
-			if(!strcmp(argv[2], "YIN3"))
-				Tw9912_init(PAL_I,YIN3);
-		}	
-		if(!strcmp(argv[1], "write"))
+	if(!strcmp(argv[1], "write"))
 		{
 		u8 buf[2];
 		
@@ -95,43 +76,6 @@ printk("In lidbg_video_main()\n");
 #ifdef DEBUG_TC358
 	else if (!strcmp(argv[0], "TC358"))
 	{
-		if(!strcmp(argv[1], "read_all_register")) Read_Tc358746xbg_all_register();
-		
-		if(!strcmp(argv[1], "write"))
-		{
-		u8 buf[4],flag;
-		u16 dev_addr;
-		u32 valu;
-			dev_addr = simple_strtoul(argv[2], 0, 0);
-			valu = simple_strtoul(argv[3], 0, 0);
-			flag= simple_strtoul(argv[4], 0, 0);
-			TC358_Register_Write(&dev_addr,&valu,flag);
-			TC358_Register_Read(dev_addr,buf,flag);//\u5199\u5b8c\u5c31\u8bfb\u53d6
-			if(flag==32)
-				printk("read com valu=0x%02x%02x%02x%02x\n",buf[2],buf[3],buf[0],buf[1]);
-			if(flag==16)
-				printk("read com valu=0x%02x%02x\n",buf[0],buf[1]);
-		}	
-		
-		if(!strcmp(argv[1], "Read"))
-		{
-		 char buf_huang[4]={0,0,0,0};
-		 u16 add=simple_strtoul(argv[2], 0, 16);
-		 u8 valu_width_flag=simple_strtoul(argv[3], 0, 10);
-			printk("call TC358_Register_Read();\n");
-			TC358_Register_Read(add,buf_huang,valu_width_flag); \
-				//void TC358_Register_Read(u16 add,char *buf,u8 flag);
-			if(valu_width_flag == 32)
-				{			
-					printk("TC358_Register_Read(0x%x,buf_huang,%d)=0x%.2x%.2x%.2x%.2x\n",\
-						add,valu_width_flag,buf_huang[0],buf_huang[1],buf_huang[2],buf_huang[3]);
-				}
-			else
-				{
-					 printk("TC358_Register_Read(0x%x,buf_huang,%d)=0x%.2x%.2x\n",\
-					 	add,valu_width_flag,buf_huang[0],buf_huang[1]);
-				}
-		}
 		if(!strcmp(argv[1], "pp"))
 		{
 				printk("TC358_init(PAL_Progressive);\n\n");
@@ -142,12 +86,6 @@ printk("In lidbg_video_main()\n");
 				printk("TC358_init(PAL_Progressive);\n\n");
 				TC358_init(NTSC_P);
 		}
-		if(!strcmp(argv[1], "exit"))
-		{
-				printk("call TC358_exit();\n\n");
-				TC358_exit();
-		}
-		
 	}
 
 	else if(!strcmp(argv[0], "ResetNTSCi"))
