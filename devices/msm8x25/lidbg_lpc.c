@@ -44,6 +44,7 @@ u32 lpc_send_rec_count = 0;
 
 static struct task_struct *lpc_task;
 int thread_lpc(void *data);
+bool lpc_work_en=0;
 
 UINT32 GetTickCount(void)
 
@@ -428,7 +429,7 @@ int thread_lpc(void *data)
         if(kthread_should_stop()) break;
         if(1)
         {
-			if(SOC_PWR_GetStatus() == PM_STATUS_LATE_RESUME_OK)
+			if((SOC_PWR_GetStatus() == PM_STATUS_LATE_RESUME_OK)&&(lpc_work_en==1))
 			{
 #ifdef LPC_DEBUG_LOG
 				lidbg("lpc_send_rec_count=%d\n",re_sleep_count);
@@ -530,6 +531,7 @@ static int  lpc_probe(struct platform_device *pdev)
 		LPCNoReset();
 		LPCBackLightOn();
 		lidbg("lpc communication-\n");
+		lpc_work_en=1;
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
 		early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN;
@@ -555,6 +557,7 @@ static int  lpc_remove(struct platform_device *pdev)
 static void lpc_early_suspend(struct early_suspend *handler)
 {
 	DUMP_FUN;
+	lpc_work_en=0;
 	LPCSuspend();
 
 
@@ -566,6 +569,7 @@ static void lpc_late_resume(struct early_suspend *handler)
 	LPCPowerOnOK();
 	LPCNoReset();
 	LPCBackLightOn();
+	lpc_work_en=1;
 	DUMP_FUN_LEAVE;
 
 }
