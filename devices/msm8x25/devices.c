@@ -429,38 +429,7 @@ int thread_key(void *data)
 }
 
 
-#ifdef DEBUG_USB_RST
-int thread_usb(void *data)
-{
-	int usb_rst_enable=0;
-    
-    while(1)
-    {
-        set_current_state(TASK_UNINTERRUPTIBLE);
-        if(kthread_should_stop()) break;
-        if(1) //条件为真
-        {
-		usb_rst_enable=u2k_read();
-	if(usb_rst_enable==USB_RST_ACK)
-		{
-			
-			USB_SWITCH_DISCONNECT;
-			msleep(7000);
-			USB_SWITCH_CONNECT;
-			USB_HUB_RST;
-			msleep(3000);
-			printk("  ........................rstUSBover...................................over. \n");
-		}
-            msleep(USB_REC_POLLING_TIME);
-        }
-        else 
-        {
-            schedule_timeout(HZ);
-        }
-    }
-    return 0;
-}
-#endif
+
 
 struct platform_device soc_devices =
 {
@@ -528,14 +497,6 @@ static int soc_dev_probe(struct platform_device *pdev)
         }else  wake_up_process(pwr_task);
 #endif
 
-#ifdef DEBUG_USB_RST
-        usb_rst_task = kthread_create(thread_usb, NULL, "usb_rst_task");
-        if(IS_ERR(usb_rst_task))
-        {
-            lidbg("Unable to start kernel thread.\n");
-
-        }else wake_up_process(usb_rst_task);
-#endif
 
 
     }
@@ -577,13 +538,6 @@ static int soc_dev_remove(struct platform_device *pdev)
     {
         kthread_stop(pwr_task);
         pwr_task = NULL;
-    }
-#endif
-#ifdef DEBUG_USB_RST
-    if(usb_rst_task)
-    {
-        kthread_stop(usb_rst_task);
-        usb_rst_task = NULL;
     }
 #endif
 

@@ -18,6 +18,7 @@ obj-m	+= lidbg_key.o
 obj-m	+= lidbg_touch.o
 obj-m	+= lidbg_common.o
 obj-m	+= lidbg_servicer.o
+obj-m	+= lidbg_msg.o
 obj-m	+= lidbg_main.o
 
 lidbg_common-objs :=  lidbg_cmn.o  lidbg_mem.o lidbg_display.o

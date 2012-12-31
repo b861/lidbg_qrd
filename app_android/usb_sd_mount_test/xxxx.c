@@ -45,14 +45,15 @@
 #define  CMD_FAST_POWER_OFF (70)
 
 #define UMOUNT_USB (80)
+//#define  DEBUG_USB_RST
 
 
 pthread_t ntid;
 int fd = 0;
 
 
-#undef printf
-#define printf  LIDBG_PRINT 
+//#undef printf
+//#define printf  LIDBG_PRINT 
 int  servicer_handler(int signum)
 {
 
@@ -70,6 +71,8 @@ int  servicer_handler(int signum)
     if(cmd != SERVICER_DONOTHING)
 
     {
+
+
 
         printf("cmd = %d\n", cmd);
 
@@ -316,7 +319,7 @@ int main(int argc , char **argv)
 open_dev:
     fd = open("/dev/lidbg_servicer", O_RDWR);
     //printf("fd = %x\n",fd);
-    if((fd == 0xfffffffe) || (fd == 0) || (fd == 0xffffffff))
+    if((fd == 0xffffffff) || (fd == 0))
     {
         printf("open lidbg_servicer fail\n");
         sleep(1);//delay wait for /dev/lidbg_servicer to creat
@@ -385,10 +388,163 @@ open_dev:
 
 #endif
 
+#ifdef DEBUG_USB_RST	
+{
+
+		int err = 0;
+		int errsd = 0;
+		int retry=0;
+		int tell_usb_rst=88;
+		int print_count =0;
+		static unsigned int usb_rst_count =0;
+		char path[50];
+		
+		memset(path,0,50);
+		sleep(60);
     while(1)
     {
-		sleep(60);
+        sleep(2);
+        if(retry<50)
+        	{
+			err = access("/mnt/usbdisk/text1" , F_OK); 
+				if ( err !=0 )
+					{
+						 LOGW("[futengfei]  makedir usb");
+						 mkdir("/mnt/usbdisk/text1", 0777);
+					}
+				else 
+					{ 
+						 LOGW("[futengfei]  notmake usb");
+					}   
+			err = access("/mnt/sdcard/text1" , F_OK); 
+				if ( err !=0 )
+					{
+						 LOGW("[futengfei]  makedir sdc");
+						 mkdir("/mnt/sdcard/text1", 0777);
+					}
+				else 
+					{ 
+						 LOGW("[futengfei]  notmake sdc");
+					}   
+			sprintf(path,"%s","/mnt/usbdisk/text1");
+			err = access (path,R_OK);
+			sprintf(path,"%s","/mnt/sdcard/text1");
+			errsd=access (path,R_OK);
+				if(err == 0&&errsd == 0)
+					{						
+						write(fd, &tell_usb_rst, 4);
+						retry=0;
+						usb_rst_count++;
+						LOGW("S[access] read file ok!sucess:=============111111111111111111111==================[%d]times ",usb_rst_count);
+					}
+				else  
+					{
+						retry++;
+						LOGW("F[access] read file no!false::======22222====retry=[%d] err=[%d],errsd=[%d]",retry,err,errsd);
+					}
+
+				
+		}	
+	else
+		{
+		print_count++;//less than 10 times print
+		if(print_count<10)
+		LOGW("F[futengfei]==can't read file  stop and wait;==========222222222222222222=============sucess:[%d]times ",usb_rst_count);
+		}
 	}
+}
+#else
+
+    while(1)
+    {
+    
+	sleep(1);
+	
+	LIDBG_PRINT("count:%d",count++);
+	count++;
+
+/*
+		int  ret=3;
+		LIDBG_CALL("c io r 33",&ret,sizeof(int));
+		LOGW("[futengfei]==========111111=============ret=[%d] ",ret);
+		sleep(1);	
+*/
+	}
+
+#endif	
+
+
+#ifdef DEBUG_USB_RST
+int thread_usb(void *data)
+{
+	int usb_rst_enable=0;
+    
+    while(1)
+    {
+        set_current_state(TASK_UNINTERRUPTIBLE);
+        if(kthread_should_stop()) break;
+        if(1) //Ìõ¼þÎªÕæ
+        {
+		usb_rst_enable=u2k_read();
+	if(usb_rst_enable==USB_RST_ACK)
+		{
+			
+			USB_SWITCH_DISCONNECT;
+			msleep(7000);
+			USB_SWITCH_CONNECT;
+			USB_HUB_RST;
+			msleep(3000);
+			printk("  ........................rstUSBover...................................over. \n");
+		}
+            msleep(USB_REC_POLLING_TIME);
+        }
+        else 
+        {
+            schedule_timeout(HZ);
+        }
+    }
+    return 0;
+}
+#endif
+
+
+
+#ifdef DEBUG_USB_RST
+        usb_rst_task = kthread_create(thread_usb, NULL, "usb_rst_task");
+        if(IS_ERR(usb_rst_task))
+        {
+            lidbg("Unable to start kernel thread.\n");
+
+        }else wake_up_process(usb_rst_task);
+#endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

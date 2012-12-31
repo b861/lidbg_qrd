@@ -27,56 +27,8 @@ DECLARE_MUTEX(lidbg_lock);
 DEFINE_SEMAPHORE(lidbg_lock);
 #endif
 
-static DECLARE_COMPLETION(msg_ready);
 
 
-
-static struct task_struct *msg_task;
-static int thread_msg(void *data);
-
-#define TOTAL_LOGS 100
-#define LOG_BYTES  64
-
-typedef struct
-{
-int w_pos;
-int r_pos;
-char log[TOTAL_LOGS][LOG_BYTES];
-}lidbg_msg;
-
-lidbg_msg *plidbg_msg=NULL;
-
-
-int thread_msg(void *data)
-{
-	int start_index=0;
-	int end_index=0;
-	//return 0;
-	plidbg_msg = (struct lidbg_msg *)kmalloc(sizeof( lidbg_msg), GFP_KERNEL);
-
-    while(1)
-    {
-        set_current_state(TASK_UNINTERRUPTIBLE);
-        if(kthread_should_stop()) break;
-        if(1)
-        {
-        		wait_for_completion(&msg_ready);
-			start_index =plidbg_msg->w_pos;
-			end_index =plidbg_msg->r_pos;
-	
-			if(start_index != end_index)
-			{
-				printk("%s\n",plidbg_msg->log[end_index]);
-				plidbg_msg->r_pos = (end_index + 1)  % TOTAL_LOGS;
-			}
-        }
-        else
-        {
-            schedule_timeout(HZ);
-        }
-    }
-    return 0;
-}
 
 
 
@@ -393,17 +345,7 @@ static ssize_t lidbg_write(struct file *filp, const char __user *buf,
          	 ((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnlidbg_video_main(new_argc, new_argv);
         }
 #endif
-
-	else if (!strcmp(argv[0], "lidbg_msg:"))
-	{
-	
-		memcpy(plidbg_msg->w_pos, dev->mem, size);
-		complete(&msg_ready);
-
-
-	}
-
-    }
+    	}
 
     return size;//若不为size则重复执行
 }
@@ -540,15 +482,6 @@ int lidbg_init(void)
     lidbg_soc_init();
 
     lidbg_board_init();
-
-	INIT_COMPLETION(msg_ready);
-
-	msg_task = kthread_create(thread_msg, NULL, "msg_task");
-	if(IS_ERR(msg_task))
-	{
-		lidbg("Unable to start kernel thread.\n");
-
-	}else wake_up_process(msg_task);
 
     return 0;
 
