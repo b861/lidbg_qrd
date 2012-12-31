@@ -4,6 +4,7 @@
 #define LIDBG_CALL(cmd,buf,ret_bytes) do{\
 	int fd;\
 	 fd = open("/dev/mlidbg0", O_RDWR);\
+	 if((fd == 0)||((int)fd == 0xfffffffe))break;\
 	 write(fd, cmd, sizeof(cmd));\
 	 if((buf != NULL)&&(ret_bytes))\
 	 {\
@@ -18,6 +19,7 @@
 	char * s;\
 	sprintf(s, "lidbg_msg: " msg);\
 	 fd = open("/dev/mlidbg0", O_RDWR);\
+	 if((fd == 0)||((int)fd == 0xfffffffe))break;\
 	 write(fd, s, 64);\
 	 close(fd);\
 }while(0)
