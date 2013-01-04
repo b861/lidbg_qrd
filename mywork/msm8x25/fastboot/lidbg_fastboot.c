@@ -88,11 +88,10 @@ int fastboot_get_status(void)
 }
 
 
-int fastboot_set_status(LIDBG_FAST_PWROFF_STATUS status)
+void fastboot_set_status(LIDBG_FAST_PWROFF_STATUS status)
 {
     lidbg("fastboot_set_status:%d\n", status);
     fb_data->suspend_pending = status;
-
 }
 
 void fastboot_pwroff(void)
