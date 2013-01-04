@@ -164,7 +164,7 @@ mutex_lock(&lock_chipe_config);
 		if(info_Vedio_Channel<=SEPARATION)
 		{
 
-				//switch (flyVedioTestSignalPin(info_Vedio_Channel))
+				//switch (flyVideoSignalPinTest(info_Vedio_Channel))
 				switch (signal_is_how[info_Vedio_Channel].Format)
 				{
 				case NTSC_I: TC358_init(NTSC_I);
