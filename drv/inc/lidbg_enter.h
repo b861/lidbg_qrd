@@ -147,9 +147,9 @@ when err , <0
     int (*pfnSOC_I2C_Rec)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
     int (*pfnSOC_I2C_Rec_Simple)(int bus_id, char chip_addr, char *buf, unsigned int size);
 
-    int (*SOC_I2C_Rec_SAF7741)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
-    int (*SOC_I2C_Send_TEF7000)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
-    int (*SOC_I2C_Rec_TEF7000)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
+    int (*pfnSOC_I2C_Rec_SAF7741)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
+    int (*pfnSOC_I2C_Send_TEF7000)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
+    int (*pfnSOC_I2C_Rec_TEF7000)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
 
 
     //io-irq
@@ -220,9 +220,12 @@ struct lidbg_dev
     unsigned char reserve[128];
 };
 
-#if 1
 
+#ifdef LIDBG_FIRST_DEF
 #define LIDBG_DEFINE  struct lidbg_dev *plidbg_dev = NULL
+#else
+#define LIDBG_DEFINE  extern struct lidbg_dev *plidbg_dev
+#endif
 
 #define LIDBG_GET  \
  	do{\
@@ -269,7 +272,6 @@ struct lidbg_dev
 }while(0)
 
 
-#endif
 
 #ifndef SOC_COMPILE
 #include "lidbg_func_def.h"

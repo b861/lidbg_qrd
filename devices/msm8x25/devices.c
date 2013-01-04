@@ -10,6 +10,7 @@
 
 #else
 #include "lidbg_def.h"
+#define LIDBG_FIRST_DEF
 
 #include "lidbg_enter.h"
 #if 0

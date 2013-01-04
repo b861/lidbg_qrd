@@ -1,3 +1,5 @@
+#define LIDBG_FIRST_DEF
+
 #include "lidbg_enter.h"
 #include "video_init_config.h"
 

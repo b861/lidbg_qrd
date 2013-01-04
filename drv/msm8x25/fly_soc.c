@@ -301,6 +301,10 @@ static void set_func_tbl(void)
     ((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_I2C_Rec = SOC_I2C_Rec;
     ((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_I2C_Rec_Simple = SOC_I2C_Rec_Simple;
 
+    ((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_I2C_Rec_SAF7741 = SOC_I2C_Rec_SAF7741;
+    ((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_I2C_Send_TEF7000 = SOC_I2C_Send_TEF7000;
+    ((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_I2C_Rec_TEF7000 = SOC_I2C_Rec_TEF7000;
+
     //io-irq
     ((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_IO_ISR_Add = SOC_IO_ISR_Add;
     ((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_IO_ISR_Enable = SOC_IO_ISR_Enable;
