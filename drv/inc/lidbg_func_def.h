@@ -47,6 +47,6 @@ static inline int check_pt(void)
 #define flyVideoChannelInitall  (check_pt()?:(plidbg_dev->soc_func_tbl.pfnflyVideoInitall))
 #define flyVideoSignalPinTest  (check_pt()?:(plidbg_dev->soc_func_tbl.pfnflyVideoTestSignalPin))
 #define flyVideoImageQualityConfig  (check_pt()?:(plidbg_dev->soc_func_tbl.pfnflyVideoImageQualityConfig))
-#define video_init_config (check_pt()?:(plidbg_dev->soc_func_tbl.pfnvideo_init_config))
+#define video_init_config check_pt()?:(plidbg_dev->soc_func_tbl.pfnvideo_init_config)
 #endif
 
