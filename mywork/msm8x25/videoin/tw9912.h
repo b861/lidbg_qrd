@@ -91,6 +91,6 @@ int Tw9912_init_PALi(void);
 int Tw9912_init(Vedio_Format config_pramat,Vedio_Channel Channel);
 
 int Tw9912_appoint_pin_testing_video_signal(Vedio_Channel Channel);
-int testing_video_signal(Vedio_Channel Channel);
+Vedio_Format testing_video_signal(Vedio_Channel Channel);
 int Tw9912_init_NTSCp(void);
 #endif

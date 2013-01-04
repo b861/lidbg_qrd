@@ -1,7 +1,7 @@
 #include "video_init_config.h"
 static int flag_io_config=0;
 static Vedio_Channel info_Vedio_Channel = NOTONE;
-static Vedio_Channel info_com_top_Channel = SEPARATION;
+static Vedio_Channel info_com_top_Channel = YIN3;
 extern TW9912_Signal signal_is_how[5];
 //spinlock_t spin_chipe_config_lock;
 struct mutex lock_chipe_config;

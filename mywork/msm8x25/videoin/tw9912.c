@@ -2,6 +2,7 @@
 #include "i2c_io.h"
 #include "tw9912.h"
 #include "tw9912_config.h"
+#include "lidbg_enter.h"
 #define TW9912_I2C_ChipAdd 0x44 //SIAD = 0-->0x44  SIAD =1-->0x45
 TW9912_input_info tw9912_input_information;
 TW9912_Signal signal_is_how[5]={//用于记录四个通道的信息
@@ -225,9 +226,9 @@ tw9912_dbg("\n\r\r\r\r\r\n");
 
 }
 
-int testing_video_signal(Vedio_Channel Channel)
+Vedio_Format testing_video_signal(Vedio_Channel Channel)
 {
-int ret =-1;
+Vedio_Format ret =OTHER;
 u8 channel_1;
 u8 format_1;
 u8 Tw9912_input_pin_selet[]={0x02,0x40,};//default input pin selet YIN0
@@ -343,25 +344,10 @@ TW9912_input_info tw9912_input_information_1;
 				signal_is_how_1.vedio_source=source_other;
 			}
 		}
- 	switch(signal_is_how_1.Format)
- 		{
-			case NTSC_I:   ret =1;
-				break;
-			case PAL_I:      ret =2;
-				break;
-				
-			case NTSC_P:  ret =3;
-				break;
-			case PAL_P:     ret =4;
-				break;
-				
-			default:     ret =5;
-				break;
-		}
-	return ret;
+	return signal_is_how_1.Format;
 CONFIG_not_ack_fail:
 	tw9912_dbg("testing_video_signal()--->NACK error\n");
-	ret =-1;
+	ret =OTHER;
 	return ret;
 }
 int Tw9912_appoint_pin_testing_video_signal(Vedio_Channel Channel)
