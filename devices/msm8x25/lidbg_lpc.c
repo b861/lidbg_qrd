@@ -220,7 +220,6 @@ extern bool late_resume_ok;
 static void LPCdealReadFromMCUAll(BYTE *p, UINT length)
 {
 #if 1
-    u32 i;
     static u32 acc_off_count = 0;
     if (iDriverResumeTime)
     {
@@ -417,11 +416,12 @@ int thread_lpc(void *data)
 
     BYTE buff[] = {0x00, 0x96, 0x00, 0x00, 0x00, 0x00};
     BYTE iRandom = 0;
+	
+    static u32 re_sleep_count = 0;
     buff[5] = iRandom;
     buff[4] = iRandom;
     buff[3] = iRandom;
     buff[2] = iRandom;
-    static u32 re_sleep_count = 0;
     msleep(10 * 1000);
     while(1)
     {
@@ -463,7 +463,6 @@ int thread_lpc(void *data)
 
 void mcuFirstInit(void)
 {
-    int err;
     pGlobalHardwareInfo = &GlobalHardwareInfo;
     INIT_WORK(&pGlobalHardwareInfo->FlyIICInfo.iic_work, workFlyMCUIIC);
 

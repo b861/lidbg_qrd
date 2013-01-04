@@ -31,7 +31,7 @@
 *.gitk*
 *.lib
 *.orig
-
+*.tmp
 
 err_log
 copy_log

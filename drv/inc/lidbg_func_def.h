@@ -42,8 +42,8 @@ static inline int check_pt(void)
 //pwr
 #define SOC_PWR_ShutDown  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_PWR_ShutDown))
 //for kernel build
-#define SOC_PWR_GetStatus  check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_PWR_GetStatus)
-#define SOC_PWR_SetStatus  check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_PWR_SetStatus)
+#define SOC_PWR_GetStatus  check_pt()?:(plidbg_dev->soc_func_tbl.pfnSOC_PWR_GetStatus)
+#define SOC_PWR_SetStatus  check_pt()?:(plidbg_dev->soc_func_tbl.pfnSOC_PWR_SetStatus)
 
 //
 #define SOC_Write_Servicer  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_Write_Servicer))

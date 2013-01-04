@@ -146,8 +146,8 @@ enum
 
 
 #define USB_ID_HIGH_DEV do{\
-								SOC_IO_Config(34,GPIO_CFG_INPUT,GPIO_CFG_PULL_UP,GPIO_CFG_8MA);\
-								SOC_IO_Input(0,34,GPIO_CFG_PULL_UP);\
+								SOC_IO_Config(33,GPIO_CFG_INPUT,GPIO_CFG_PULL_UP,GPIO_CFG_8MA);\
+								SOC_IO_Input(0,33,GPIO_CFG_PULL_UP);\
 							}while(0)
 #define USB_ID_LOW_HOST do{  \
 								SOC_IO_Config(34,GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_16MA);\

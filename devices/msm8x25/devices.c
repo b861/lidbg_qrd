@@ -26,10 +26,11 @@ LIDBG_DEFINE;
 
 static struct task_struct *led_task;
 static struct task_struct *key_task;
+#ifdef DEBUG_POWER_KEY
 static struct task_struct *pwr_task;
+#endif
 static struct task_struct *dev_init_task;
 static struct task_struct *resume_task;
-static struct task_struct *usb_rst_task;
 
 int thread_dev_init(void *data);
 int thread_led(void *data);
@@ -57,14 +58,14 @@ bool suspend_test = 0;
 int i2c_devices_probe(int i2c_bus, unsigned char *i2c_devices_list)
 {
     int rc, i, j = 0;
-    u8 *i2c_devices;
+  //  u8 *i2c_devices;
     u8 tmp[8];
 
 #define I2C_PROBE_INTERVAL_TIME (10)
 
     for(i = 1; i<(0xff >> 1); i++)
     {
-        rc = SOC_I2C_Rec(i2c_bus, i, 0, &tmp, 1 );
+        rc = SOC_I2C_Rec(i2c_bus,(char)i,0,(char *)&tmp,1);
 
         if (rc >= 0)
         {
@@ -444,7 +445,6 @@ struct platform_device soc_devices =
 static int soc_dev_probe(struct platform_device *pdev)
 {
 
-    int err;
 
     lidbg("soc_dev_probe\n");
 
