@@ -79,7 +79,8 @@ u8 format_1;
 		channel_1 =(channel_1&0x0c) >>2 ;
 		if(channel_1 == channel ||channel == SEPARATION)
 		{
-			if(channel != SEPARATION)
+			//if(channel != SEPARATION)
+			if(1)
 			{
 				format_1=input_information->component_video_format.valu & 0x70;
 				if(format_1 == 0x00)
@@ -89,6 +90,21 @@ u8 format_1;
 				else if(format_1 == 0x10)
 					{
 					signal_is_how[channel].Format = PAL_I;
+					}
+				else if(format_1 == 0x20)
+					{
+						signal_is_how[channel].Format = NTSC_P;
+					 signal_is_how[channel].Channel =SEPARATION;
+					}
+				else if(format_1 == 0x30)
+					{
+					signal_is_how[channel].Format = PAL_P;
+					 signal_is_how[channel].Channel =SEPARATION;
+					}
+				else
+					{
+					signal_is_how[channel].Format = OTHER;
+					 signal_is_how[channel].Channel =NOTONE;
 					}
 			}
 			else
