@@ -1,7 +1,7 @@
 #include "video_init_config.h"
 static int flag_io_config=0;
 static Vedio_Channel info_Vedio_Channel = NOTONE;
-static Vedio_Channel info_com_top_Channel = YIN3;
+static Vedio_Channel info_com_top_Channel = SEPARATION;
 extern TW9912_Signal signal_is_how[5];
 //spinlock_t spin_chipe_config_lock;
 struct mutex lock_chipe_config;
@@ -164,7 +164,7 @@ mutex_lock(&lock_chipe_config);
 		if(info_Vedio_Channel<=SEPARATION)
 		{
 
-				//switch (flyVedioTestSignalPin(info_Vedio_Channel))
+				//switch (flyVideoSignalPinTest(info_Vedio_Channel))
 				switch (signal_is_how[info_Vedio_Channel].Format)
 				{
 				case NTSC_I: TC358_init(NTSC_I);
