@@ -118,6 +118,11 @@ struct lidbg_fn_t {
 	int (*pfnSOC_I2C_Rec)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
 	int (*pfnSOC_I2C_Rec_Simple)(int bus_id, char chip_addr, char *buf, unsigned int size);
 	
+	int (*SOC_I2C_Rec_SAF7741)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
+	int (*SOC_I2C_Send_TEF7000)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
+	int (*SOC_I2C_Rec_TEF7000)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
+
+	
 //io-irq
 	bool (*pfnSOC_IO_ISR_Add)(unsigned int irq, unsigned int interrupt_type, pinterrupt_isr func, void *dev);
 	bool (*pfnSOC_IO_ISR_Enable)(unsigned int irq);
@@ -147,6 +152,11 @@ struct lidbg_fn_t {
         void (*pfnflyVideoTestSignalPin)(u8 Channel);
         void (*pfnflyVideoImageQualityConfig)(u8 cmd ,u8 valu);
 	void (*pfnvideo_init_config)(Vedio_Format config_pramat);
+
+
+
+
+	
 };
 
 #define LIDBG_SIZE	0x00001000 //MEM_SIZE_4_KB	/*全局内存最大1K字节*/

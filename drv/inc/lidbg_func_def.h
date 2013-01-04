@@ -21,6 +21,13 @@ static inline int check_pt(void)
 #define SOC_I2C_Send  (check_pt()?:(plidbg_dev->soc_func_tbl.pfnSOC_I2C_Send))
 #define SOC_I2C_Rec   (check_pt()?:(plidbg_dev->soc_func_tbl.pfnSOC_I2C_Rec))
 #define SOC_I2C_Rec_Simple   (check_pt()?:(plidbg_dev->soc_func_tbl.pfnSOC_I2C_Rec_Simple))
+
+#define SOC_I2C_Rec_SAF7741  (check_pt()?:(plidbg_dev->soc_func_tbl.pfnSOC_I2C_Rec_SAF7741))
+#define SOC_I2C_Send_TEF7000   (check_pt()?:(plidbg_dev->soc_func_tbl.pfnSOC_I2C_Send_TEF7000))
+#define SOC_I2C_Rec_TEF7000   (check_pt()?:(plidbg_dev->soc_func_tbl.pfnSOC_I2C_Rec_TEF7000))
+
+
+
 //io-irq
 #define SOC_IO_ISR_Add  (check_pt()?:(plidbg_dev->soc_func_tbl.pfnSOC_IO_ISR_Add))
 #define SOC_IO_ISR_Enable   (check_pt()?:(plidbg_dev->soc_func_tbl.pfnSOC_IO_ISR_Enable))
