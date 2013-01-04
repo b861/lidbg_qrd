@@ -57,7 +57,8 @@ void lidbg_board_init(void)
     if(IS_ERR(pwr_up_task))
     {
         lidbg("Unable to start kernel thread.\n");
-    }else  wake_up_process(pwr_up_task);
+    }
+    else  wake_up_process(pwr_up_task);
 #endif
 
 

@@ -53,7 +53,7 @@ int fd = 0;
 
 
 //#undef printf
-//#define printf  LIDBG_PRINT 
+//#define printf  LIDBG_PRINT
 int  servicer_handler(int signum)
 {
 
@@ -66,8 +66,8 @@ int  servicer_handler(int signum)
 
 
     readlen = read(fd, &cmd, 4);
-	//printf("fd=%x,readlen=%d,cmd=%d\n",fd,readlen,cmd);
-    LOGW("[futengfei]  fd=%x,readlen=%d,cmd=%d",fd,readlen,cmd);
+    //printf("fd=%x,readlen=%d,cmd=%d\n",fd,readlen,cmd);
+    LOGW("[futengfei]  fd=%x,readlen=%d,cmd=%d", fd, readlen, cmd);
     if(cmd != SERVICER_DONOTHING)
 
     {
@@ -82,15 +82,15 @@ int  servicer_handler(int signum)
         {
         case LOG_DMESG:
         case LOG_LOGCAT:
-		case LOG_ALL:
-		case LOG_CONT:
+        case LOG_ALL:
+        case LOG_CONT:
         {
             if(count == 0)
 
             {
                 system("date > /sdcard/log_logcat.txt");
                 system("date > /sdcard/log_dmesg.txt");
-				system("date > /sdcard/all_mesg.txt");
+                system("date > /sdcard/all_mesg.txt");
                 //system("date > /sdcard/log_dmesg_lidbg.txt");
 
                 //system("date > /sdcard/tflash/log_dmesg.txt");
@@ -107,15 +107,15 @@ int  servicer_handler(int signum)
             if(LOG_ALL == cmd)
             {
                 system("date >> /sdcard/all_mesg.txt");
-				system("logcat -f /dev/kmsg & dmesg >/sdcard/all_mesg.txt");
+                system("logcat -f /dev/kmsg & dmesg >/sdcard/all_mesg.txt");
 
-			}
+            }
             if(LOG_CONT == cmd)
             {
-                
-				system("logcat -f /dev/kmsg & cat /proc/kmsg >/sdcard/all_mesg.txt");
 
-			}
+                system("logcat -f /dev/kmsg & cat /proc/kmsg >/sdcard/all_mesg.txt");
+
+            }
 
             if(LOG_DMESG == cmd)
             {
@@ -154,8 +154,8 @@ int  servicer_handler(int signum)
         case LOG_CAP_TS_FT5X06_SKU7:
         case LOG_CAP_TS_FT5X06:
         case LOG_CAP_TS_RMI:
-		case LOG_CAP_TS_GT801:
-		case CMD_FAST_POWER_OFF :
+        case LOG_CAP_TS_GT801:
+        case CMD_FAST_POWER_OFF :
         {
             if(LOG_CAP_TS_GT811 == cmd)
 
@@ -209,11 +209,11 @@ int  servicer_handler(int signum)
             }
             else if ( CMD_FAST_POWER_OFF == cmd)
             {
-            	//system("setprop fly.fastboot.accoff 1");
-            	property_set("fly.fastboot.accoff","1");
+                //system("setprop fly.fastboot.accoff 1");
+                property_set("fly.fastboot.accoff", "1");
                 system("am broadcast -a android.intent.action.FAST_BOOT_START");
             }
-			
+
             //sleep(10);//delay to mount sdcard
             //system("dmesg > /sdcard/log_cap_ts_dmesg.txt");
 
@@ -221,39 +221,39 @@ int  servicer_handler(int signum)
 
         }
 
-		case UMOUNT_USB:
-		{
+        case UMOUNT_USB:
+        {
 
-			system("umount /mnt/usbdisk");
-			break;
+            system("umount /mnt/usbdisk");
+            break;
 
-		}
-		case WAKEUP_KERNEL:
-		{
-			system("su");
-			system("echo on > /sys/power/state");
-			//system("setprop fly.fastboot.accoff 0");
-			property_set("fly.fastboot.accoff","0");
-			//system("echo host > /mnt/debugfs/otg/mode");
-			break;
+        }
+        case WAKEUP_KERNEL:
+        {
+            system("su");
+            system("echo on > /sys/power/state");
+            //system("setprop fly.fastboot.accoff 0");
+            property_set("fly.fastboot.accoff", "0");
+            //system("echo host > /mnt/debugfs/otg/mode");
+            break;
 
-		}
-		case SUSPEND_KERNEL:
-		{
-			system("su");
-			//system("echo peripheral > /mnt/debugfs/otg/mode");
-			property_set("fly.fastboot.accoff","1");
-			system("echo mem > /sys/power/state");
-			break;
+        }
+        case SUSPEND_KERNEL:
+        {
+            system("su");
+            //system("echo peripheral > /mnt/debugfs/otg/mode");
+            property_set("fly.fastboot.accoff", "1");
+            system("echo mem > /sys/power/state");
+            break;
 
-		}
+        }
 
-	  
+
         }
     }
 
     printf("servicer_handler-\n");
-	return cmd;
+    return cmd;
 }
 
 
@@ -269,52 +269,52 @@ int main(int argc , char **argv)
     printf("lidbg_servicer start\n");
     //sleep(5);
 
-	system("insmod /system/lib/modules/out/lidbg_ts_to_recov.ko");
-	system("insmod /system/lib/modules/out/lidbg_msg.ko");
-	system("insmod /system/lib/modules/out/lidbg_common.ko");
-	system("insmod /system/lib/modules/out/lidbg_servicer.ko");
-	system("insmod /system/lib/modules/out/lidbg_touch.ko");
-	system("insmod /system/lib/modules/out/lidbg_key.ko");
-	system("insmod /system/lib/modules/out/lidbg_i2c.ko");
-	system("insmod /system/lib/modules/out/lidbg_soc_msm8x25.ko");
-	system("insmod /system/lib/modules/out/lidbg_io.ko");
-	system("insmod /system/lib/modules/out/lidbg_ad.ko");
-	system("insmod /system/lib/modules/out/lidbg_main.ko");
+    system("insmod /system/lib/modules/out/lidbg_ts_to_recov.ko");
+    system("insmod /system/lib/modules/out/lidbg_msg.ko");
+    system("insmod /system/lib/modules/out/lidbg_common.ko");
+    system("insmod /system/lib/modules/out/lidbg_servicer.ko");
+    system("insmod /system/lib/modules/out/lidbg_touch.ko");
+    system("insmod /system/lib/modules/out/lidbg_key.ko");
+    system("insmod /system/lib/modules/out/lidbg_i2c.ko");
+    system("insmod /system/lib/modules/out/lidbg_soc_msm8x25.ko");
+    system("insmod /system/lib/modules/out/lidbg_io.ko");
+    system("insmod /system/lib/modules/out/lidbg_ad.ko");
+    system("insmod /system/lib/modules/out/lidbg_main.ko");
 
-	system("insmod /system/lib/modules/out/lidbg_fly_soc.ko");
+    system("insmod /system/lib/modules/out/lidbg_fly_soc.ko");
 
-	system("insmod /system/lib/modules/out/lidbg_fastboot.ko");
-	system("insmod /system/lib/modules/out/lidbg_lpc.ko");
-	system("insmod /system/lib/modules/out/lidbg_soc_devices.ko");
-	system("insmod /system/lib/modules/out/lidbg_videoin.ko");
-	system("insmod /system/lib/modules/out/lidbg_to_bpmsg.ko");
-
-
-	//for flycar
-	system("insmod /flysystem/lib/out/lidbg_ts_to_recov.ko");
-	system("insmod /flysystem/lib/out/lidbg_msg.ko");
-	system("insmod /flysystem/lib/out/lidbg_common.ko");
-	system("insmod /flysystem/lib/out/lidbg_servicer.ko");
-	system("insmod /flysystem/lib/out/lidbg_touch.ko");
-	system("insmod /flysystem/lib/out/lidbg_key.ko");
-	system("insmod /flysystem/lib/out/lidbg_i2c.ko");
-	system("insmod /flysystem/lib/out/lidbg_soc_msm8x25.ko");
-	system("insmod /flysystem/lib/out/lidbg_io.ko");
-	system("insmod /flysystem/lib/out/lidbg_ad.ko");
-	system("insmod /flysystem/lib/out/lidbg_main.ko");
-	system("insmod /flysystem/lib/out/lidbg_fly_soc.ko");
-	system("insmod /flysystem/lib/out/lidbg_fastboot.ko");
-	//system("insmod /flysystem/lib/out/lidbg_lpc.ko");
-	// system("insmod /flysystem/lib/out/lidbg_soc_devices.ko");
-	system("insmod /flysystem/lib/out/lidbg_videoin.ko");
-	system("insmod /flysystem/lib/out/lidbg_to_bpmsg.ko");
+    system("insmod /system/lib/modules/out/lidbg_fastboot.ko");
+    system("insmod /system/lib/modules/out/lidbg_lpc.ko");
+    system("insmod /system/lib/modules/out/lidbg_soc_devices.ko");
+    system("insmod /system/lib/modules/out/lidbg_videoin.ko");
+    system("insmod /system/lib/modules/out/lidbg_to_bpmsg.ko");
 
 
+    //for flycar
+    system("insmod /flysystem/lib/out/lidbg_ts_to_recov.ko");
+    system("insmod /flysystem/lib/out/lidbg_msg.ko");
+    system("insmod /flysystem/lib/out/lidbg_common.ko");
+    system("insmod /flysystem/lib/out/lidbg_servicer.ko");
+    system("insmod /flysystem/lib/out/lidbg_touch.ko");
+    system("insmod /flysystem/lib/out/lidbg_key.ko");
+    system("insmod /flysystem/lib/out/lidbg_i2c.ko");
+    system("insmod /flysystem/lib/out/lidbg_soc_msm8x25.ko");
+    system("insmod /flysystem/lib/out/lidbg_io.ko");
+    system("insmod /flysystem/lib/out/lidbg_ad.ko");
+    system("insmod /flysystem/lib/out/lidbg_main.ko");
+    system("insmod /flysystem/lib/out/lidbg_fly_soc.ko");
+    system("insmod /flysystem/lib/out/lidbg_fastboot.ko");
+    //system("insmod /flysystem/lib/out/lidbg_lpc.ko");
+    // system("insmod /flysystem/lib/out/lidbg_soc_devices.ko");
+    system("insmod /flysystem/lib/out/lidbg_videoin.ko");
+    system("insmod /flysystem/lib/out/lidbg_to_bpmsg.ko");
 
-	sleep(1);
-	system("chmod 0777 /dev/mlidbg0");
-	system("chmod 0777 /dev/lidbg_servicer");
-	system("chmod 0777 /dev/lidbg_msg");
+
+
+    sleep(1);
+    system("chmod 0777 /dev/mlidbg0");
+    system("chmod 0777 /dev/lidbg_servicer");
+    system("chmod 0777 /dev/lidbg_msg");
 
 open_dev:
     fd = open("/dev/lidbg_servicer", O_RDWR);
@@ -346,12 +346,12 @@ open_dev:
 #endif
 
 
-	//clear fifo
-	while(1)
-	{
-		if(servicer_handler(0) == 0xffffffff)
-			break;
-	}
+    //clear fifo
+    while(1)
+    {
+        if(servicer_handler(0) == 0xffffffff)
+            break;
+    }
 
     system("insmod /system/lib/modules/out/lidbg_ts_probe.ko");
     system("insmod /flysystem/lib/out/lidbg_ts_probe.ko");
@@ -388,134 +388,135 @@ open_dev:
 
 #endif
 
-#ifdef DEBUG_USB_RST	
-{
-
-		int err = 0;
-		int errsd = 0;
-		int retry=0;
-		int tell_usb_rst=88;
-		int print_count =0;
-		static unsigned int usb_rst_count =0;
-		char path[50];
-		
-		memset(path,0,50);
-		sleep(60);
-    while(1)
+#ifdef DEBUG_USB_RST
     {
-        sleep(2);
-        if(retry<50)
-        	{
-			err = access("/mnt/usbdisk/text1" , F_OK); 
-				if ( err !=0 )
-					{
-						 LOGW("[futengfei]  makedir usb");
-						 mkdir("/mnt/usbdisk/text1", 0777);
-					}
-				else 
-					{ 
-						 LOGW("[futengfei]  notmake usb");
-					}   
-			err = access("/mnt/sdcard/text1" , F_OK); 
-				if ( err !=0 )
-					{
-						 LOGW("[futengfei]  makedir sdc");
-						 mkdir("/mnt/sdcard/text1", 0777);
-					}
-				else 
-					{ 
-						 LOGW("[futengfei]  notmake sdc");
-					}   
-			sprintf(path,"%s","/mnt/usbdisk/text1");
-			err = access (path,R_OK);
-			sprintf(path,"%s","/mnt/sdcard/text1");
-			errsd=access (path,R_OK);
-				if(err == 0&&errsd == 0)
-					{						
-						write(fd, &tell_usb_rst, 4);
-						retry=0;
-						usb_rst_count++;
-						LOGW("S[access] read file ok!sucess:=============111111111111111111111==================[%d]times ",usb_rst_count);
-					}
-				else  
-					{
-						retry++;
-						LOGW("F[access] read file no!false::======22222====retry=[%d] err=[%d],errsd=[%d]",retry,err,errsd);
-					}
 
-				
-		}	
-	else
-		{
-		print_count++;//less than 10 times print
-		if(print_count<10)
-		LOGW("F[futengfei]==can't read file  stop and wait;==========222222222222222222=============sucess:[%d]times ",usb_rst_count);
-		}
-	}
-}
+        int err = 0;
+        int errsd = 0;
+        int retry = 0;
+        int tell_usb_rst = 88;
+        int print_count = 0;
+        static unsigned int usb_rst_count = 0;
+        char path[50];
+
+        memset(path, 0, 50);
+        sleep(60);
+        while(1)
+        {
+            sleep(2);
+            if(retry < 50)
+            {
+                err = access("/mnt/usbdisk/text1" , F_OK);
+                if ( err != 0 )
+                {
+                    LOGW("[futengfei]  makedir usb");
+                    mkdir("/mnt/usbdisk/text1", 0777);
+                }
+                else
+                {
+                    LOGW("[futengfei]  notmake usb");
+                }
+                err = access("/mnt/sdcard/text1" , F_OK);
+                if ( err != 0 )
+                {
+                    LOGW("[futengfei]  makedir sdc");
+                    mkdir("/mnt/sdcard/text1", 0777);
+                }
+                else
+                {
+                    LOGW("[futengfei]  notmake sdc");
+                }
+                sprintf(path, "%s", "/mnt/usbdisk/text1");
+                err = access (path, R_OK);
+                sprintf(path, "%s", "/mnt/sdcard/text1");
+                errsd = access (path, R_OK);
+                if(err == 0 && errsd == 0)
+                {
+                    write(fd, &tell_usb_rst, 4);
+                    retry = 0;
+                    usb_rst_count++;
+                    LOGW("S[access] read file ok!sucess:=============111111111111111111111==================[%d]times ", usb_rst_count);
+                }
+                else
+                {
+                    retry++;
+                    LOGW("F[access] read file no!false::======22222====retry=[%d] err=[%d],errsd=[%d]", retry, err, errsd);
+                }
+
+
+            }
+            else
+            {
+                print_count++;//less than 10 times print
+                if(print_count < 10)
+                    LOGW("F[futengfei]==can't read file  stop and wait;==========222222222222222222=============sucess:[%d]times ", usb_rst_count);
+            }
+        }
+    }
 #else
 
     while(1)
     {
-    
-	sleep(1);
-	
-	LIDBG_PRINT("count:%d",count++);
-	count++;
 
-/*
-		int  ret=3;
-		LIDBG_CALL("c io r 33",&ret,sizeof(int));
-		LOGW("[futengfei]==========111111=============ret=[%d] ",ret);
-		sleep(1);	
-*/
-	}
+        sleep(1);
 
-#endif	
+        LIDBG_PRINT("count:%d", count++);
+        count++;
+
+        /*
+        		int  ret=3;
+        		LIDBG_CALL("c io r 33",&ret,sizeof(int));
+        		LOGW("[futengfei]==========111111=============ret=[%d] ",ret);
+        		sleep(1);
+        */
+    }
+
+#endif
 
 
 #ifdef DEBUG_USB_RST
-int thread_usb(void *data)
-{
-	int usb_rst_enable=0;
-    
-    while(1)
+    int thread_usb(void * data)
     {
-        set_current_state(TASK_UNINTERRUPTIBLE);
-        if(kthread_should_stop()) break;
-        if(1) //Ìõ¼þÎªÕæ
+        int usb_rst_enable = 0;
+
+        while(1)
         {
-		usb_rst_enable=u2k_read();
-	if(usb_rst_enable==USB_RST_ACK)
-		{
-			
-			USB_SWITCH_DISCONNECT;
-			msleep(7000);
-			USB_SWITCH_CONNECT;
-			USB_HUB_RST;
-			msleep(3000);
-			printk("  ........................rstUSBover...................................over. \n");
-		}
-            msleep(USB_REC_POLLING_TIME);
+            set_current_state(TASK_UNINTERRUPTIBLE);
+            if(kthread_should_stop()) break;
+            if(1) //Ìõ¼þÎªÕæ
+            {
+                usb_rst_enable = u2k_read();
+                if(usb_rst_enable == USB_RST_ACK)
+                {
+
+                    USB_SWITCH_DISCONNECT;
+                    msleep(7000);
+                    USB_SWITCH_CONNECT;
+                    USB_HUB_RST;
+                    msleep(3000);
+                    printk("  ........................rstUSBover...................................over. \n");
+                }
+                msleep(USB_REC_POLLING_TIME);
+            }
+            else
+            {
+                schedule_timeout(HZ);
+            }
         }
-        else 
-        {
-            schedule_timeout(HZ);
-        }
+        return 0;
     }
-    return 0;
-}
 #endif
 
 
 
 #ifdef DEBUG_USB_RST
-        usb_rst_task = kthread_create(thread_usb, NULL, "usb_rst_task");
-        if(IS_ERR(usb_rst_task))
-        {
-            lidbg("Unable to start kernel thread.\n");
+    usb_rst_task = kthread_create(thread_usb, NULL, "usb_rst_task");
+    if(IS_ERR(usb_rst_task))
+    {
+        lidbg("Unable to start kernel thread.\n");
 
-        }else wake_up_process(usb_rst_task);
+    }
+    else wake_up_process(usb_rst_task);
 #endif
 
 

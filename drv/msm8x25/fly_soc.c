@@ -131,9 +131,9 @@ bool SOC_IO_Input(u32 group, u32 index, u32 pull)
 bool SOC_ADC_Get (u32 channel , u32 *value)
 {
 
-	*value = 0xffffffff;
-		
-    	*value = soc_ad_read(channel);
+    *value = 0xffffffff;
+
+    *value = soc_ad_read(channel);
 
     if(*value == 0xffffffff)
         return 0;
@@ -239,27 +239,27 @@ int SOC_BL_Set( u32 bl_level)
 void SOC_Write_Servicer(int cmd)
 {
 
-	k2u_write(cmd);
+    k2u_write(cmd);
 }
 
 
 void SOC_Log_Dump(int cmd)
 {
 
-	k2u_write(cmd);
+    k2u_write(cmd);
 }
 
 
 void SOC_Capts_Insmod(int cmd)
 {
 
-	k2u_write(cmd);
+    k2u_write(cmd);
 }
 
 #if 0
 void SOC_LED_Trigger()
 {
-	static int led_status = 0;
+    static int led_status = 0;
     if(led_status == 0)
     {
         LED_OFF;
@@ -277,48 +277,48 @@ void SOC_LED_Trigger()
 
 int SOC_PWR_GetStatus(void)
 {
-	
-	//return  (((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_PWR_GetStatus)();
+
+    //return  (((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_PWR_GetStatus)();
 
 }
 
 void SOC_PWR_ShutDown(void)
 {
 
-	//fastboot_pwroff();
-	//(((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_PWR_ShutDown)();
+    //fastboot_pwroff();
+    //(((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_PWR_ShutDown)();
 }
 
 static void set_func_tbl(void)
 {
-//io
-	((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_IO_Output = SOC_IO_Output;
-	((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_IO_Input = SOC_IO_Input;
-	((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_IO_Output_Ext = SOC_IO_Output_Ext;
-	((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_IO_Config = SOC_IO_Config;
-//i2c
-	((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_I2C_Send = SOC_I2C_Send;
-	((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_I2C_Rec = SOC_I2C_Rec;
-	((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_I2C_Rec_Simple = SOC_I2C_Rec_Simple;
+    //io
+    ((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_IO_Output = SOC_IO_Output;
+    ((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_IO_Input = SOC_IO_Input;
+    ((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_IO_Output_Ext = SOC_IO_Output_Ext;
+    ((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_IO_Config = SOC_IO_Config;
+    //i2c
+    ((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_I2C_Send = SOC_I2C_Send;
+    ((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_I2C_Rec = SOC_I2C_Rec;
+    ((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_I2C_Rec_Simple = SOC_I2C_Rec_Simple;
 
-//io-irq
-	((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_IO_ISR_Add = SOC_IO_ISR_Add;
-	((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_IO_ISR_Enable = SOC_IO_ISR_Enable;
-	((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_IO_ISR_Disable = SOC_IO_ISR_Disable;
-	((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_IO_ISR_Del = SOC_IO_ISR_Del;
+    //io-irq
+    ((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_IO_ISR_Add = SOC_IO_ISR_Add;
+    ((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_IO_ISR_Enable = SOC_IO_ISR_Enable;
+    ((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_IO_ISR_Disable = SOC_IO_ISR_Disable;
+    ((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_IO_ISR_Del = SOC_IO_ISR_Del;
 
-//ad
-	((struct lidbg_dev *)global_lidbg_devp) ->soc_func_tbl.pfnSOC_ADC_Get = SOC_ADC_Get;
+    //ad
+    ((struct lidbg_dev *)global_lidbg_devp) ->soc_func_tbl.pfnSOC_ADC_Get = SOC_ADC_Get;
 
-//key
-	((struct lidbg_dev *)global_lidbg_devp) ->soc_func_tbl.pfnSOC_Key_Report = SOC_Key_Report;
+    //key
+    ((struct lidbg_dev *)global_lidbg_devp) ->soc_func_tbl.pfnSOC_Key_Report = SOC_Key_Report;
 
-//bl
-	((struct lidbg_dev *)global_lidbg_devp) ->soc_func_tbl.pfnSOC_BL_Set = SOC_BL_Set;
+    //bl
+    ((struct lidbg_dev *)global_lidbg_devp) ->soc_func_tbl.pfnSOC_BL_Set = SOC_BL_Set;
 
-//
-	((struct lidbg_dev *)global_lidbg_devp) ->soc_func_tbl.pfnSOC_Write_Servicer = SOC_Write_Servicer;
-//video
+    //
+    ((struct lidbg_dev *)global_lidbg_devp) ->soc_func_tbl.pfnSOC_Write_Servicer = SOC_Write_Servicer;
+    //video
 }
 
 
@@ -327,7 +327,7 @@ int fly_soc_init(void)
     lidbg("fly_soc_init\n");
     DUMP_FUN;
     set_func_tbl();
-	
+
     platform_device_register(&fly_soc_device);
     platform_driver_register(&fly_soc_driver);
 

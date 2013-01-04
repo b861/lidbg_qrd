@@ -63,25 +63,26 @@
 #include "touch.h"
 
 #define DEVICE_NAME "fenzhi"
-static touch_t touch={0,0,0};
+static touch_t touch = {0, 0, 0};
 
-struct test_input_dev{
-	char*name;
-	struct input_dev *input_dev;
-	struct timer_list timer;
-	unsigned int counter;
-	struct miscdevice *miscdev;
+struct test_input_dev
+{
+    char *name;
+    struct input_dev *input_dev;
+    struct timer_list timer;
+    unsigned int counter;
+    struct miscdevice *miscdev;
 };
 
 void set_touch_pos(touch_t *t)
 {
 #if 0
-	int i=0;
-	i=touch.x;
-	touch.x=touch.y;
-	touch.y=i;
+    int i = 0;
+    i = touch.x;
+    touch.x = touch.y;
+    touch.y = i;
 #endif
-	memcpy( &touch,t,sizeof(touch_t) );
+    memcpy( &touch, t, sizeof(touch_t) );
 }
 
 EXPORT_SYMBOL_GPL(set_touch_pos);
@@ -89,14 +90,14 @@ EXPORT_SYMBOL_GPL(set_touch_pos);
 //global variable
 struct test_input_dev *dev;
 int fenzhi_major;
-int data=8;
+int data = 8;
 static void dev_timer_func(unsigned long arg)
 {
-    mod_timer(&dev->timer,jiffies+HZ);
-	(dev->counter)++;
-	if(dev->counter>60)dev->counter=0;
-	printk("touch.x:%d touch.y:%d touch.press:[%d]\n", touch.x,touch.y,touch.pressed);
-	//printk("second%d\n", dev->counter);
+    mod_timer(&dev->timer, jiffies + HZ);
+    (dev->counter)++;
+    if(dev->counter > 60)dev->counter = 0;
+    printk("touch.x:%d touch.y:%d touch.press:[%d]\n", touch.x, touch.y, touch.pressed);
+    //printk("second%d\n", dev->counter);
     //input_report_abs(dev->input_dev, ABS_X, dev->counter);
     //input_report_abs(dev->input_dev, ABS_Y, dev->counter);
     //input_sync(dev->input_dev);
@@ -105,8 +106,8 @@ static void dev_timer_func(unsigned long arg)
 
 int fenzhi_open (struct inode *inode, struct file *filp)
 {
-	//do nothing
-	return 0;          /* success */
+    //do nothing
+    return 0;          /* success */
 }
 
 
@@ -114,85 +115,88 @@ int fenzhi_open (struct inode *inode, struct file *filp)
 /*
  * Data management: read and write
  */
-static status=0;
-ssize_t fenzhi_read (struct file *filp, char __user *buf, size_t count,loff_t *f_pos)
+static status = 0;
+ssize_t fenzhi_read (struct file *filp, char __user *buf, size_t count, loff_t *f_pos)
 {
-	struct test_input_dev *dev = filp->private_data;
-	
-	if(sizeof(touch_t)>count)return 0;
-	
-	if( !(touch.x||touch.y) )return 0;
+    struct test_input_dev *dev = filp->private_data;
 
-	copy_to_user(buf,&touch,sizeof(touch_t));
-	
-	return sizeof(touch_t);
+    if(sizeof(touch_t) > count)return 0;
+
+    if( !(touch.x || touch.y) )return 0;
+
+    copy_to_user(buf, &touch, sizeof(touch_t));
+
+    return sizeof(touch_t);
 }
 
 
 
 ssize_t fenzhi_write (struct file *filp, const char __user *buf, size_t count,
-                loff_t *f_pos)
+                      loff_t *f_pos)
 {
-	struct test_input_dev *dev = filp->private_data;
-	
-	return 0;
+    struct test_input_dev *dev = filp->private_data;
+
+    return 0;
 }
 
-struct file_operations fenzhi_fops = {
-	.owner =     THIS_MODULE,
-	.read =	     fenzhi_read,
-	.write =     fenzhi_write,
-	.open =	     fenzhi_open,
+struct file_operations fenzhi_fops =
+{
+    .owner =     THIS_MODULE,
+    .read =	     fenzhi_read,
+    .write =     fenzhi_write,
+    .open =	     fenzhi_open,
 };
 
-static struct miscdevice misc = {
-	.minor = MISC_DYNAMIC_MINOR,
-	.name = DEVICE_NAME,
-	.fops = &fenzhi_fops,
+static struct miscdevice misc =
+{
+    .minor = MISC_DYNAMIC_MINOR,
+    .name = DEVICE_NAME,
+    .fops = &fenzhi_fops,
 };
 
-//static int __devinit 
+//static int __devinit
 //static int initialized = 0;
 
 static  int my_input_driver_init(void)
 {
-	int ret;
+    int ret;
 
-	//printk("my_input_driver_init,write by hujian 2012/2/8 16:45");
-	printk("lidbg_ts_to_recov.ko  my_input_driver_init. \n");
-	dev = (struct test_input_dev *)kmalloc( sizeof(struct test_input_dev),GFP_KERNEL );
-	if (dev == NULL)
+    //printk("my_input_driver_init,write by hujian 2012/2/8 16:45");
+    printk("lidbg_ts_to_recov.ko  my_input_driver_init. \n");
+    dev = (struct test_input_dev *)kmalloc( sizeof(struct test_input_dev), GFP_KERNEL );
+    if (dev == NULL)
     {
         ret = -ENOMEM;
         printk(KERN_ERR "%s: Failed to allocate input device\n", __func__);
         return ret;
     }
-    
-	//miscdev
-	dev->miscdev=&misc;
-	
+
+    //miscdev
+    dev->miscdev = &misc;
+
     ret = misc_register(&misc);
-    if(ret<0 ){
-    kfree(dev);
-    return ret;
+    if(ret < 0 )
+    {
+        kfree(dev);
+        return ret;
     }
-	
- #if 0
+
+#if 0
     init_timer(&dev->timer);
     dev->timer.data = (unsigned long)dev;
     dev->timer.function = dev_timer_func;
-	dev->timer.expires = jiffies + HZ;
+    dev->timer.expires = jiffies + HZ;
 
-	add_timer(&dev->timer);
+    add_timer(&dev->timer);
     printk("\n\nTest input driver has launch successfully!\n\n");
-#else 
+#else
     printk("\n\nTest input driver has launch successfully!_delete the time ==futengfei=1025\n\n");
 #endif
     return 0;
 
 }
 
-//void __exit 
+//void __exit
 static void my_input_driver_exit(void)
 {
     misc_deregister(&misc);

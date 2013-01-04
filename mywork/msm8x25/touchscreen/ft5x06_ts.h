@@ -18,14 +18,15 @@
 #ifndef __LINUX_FT5X06_TS_H__
 #define __LINUX_FT5X06_TS_H__
 
-struct ft5x06_ts_platform_data {
-	unsigned long irqflags;
-	u32 x_max;
-	u32 y_max;
-	u32 irq_gpio;
-	u32 reset_gpio;
-	int (*power_init) (bool);
-	int (*power_on) (bool);
+struct ft5x06_ts_platform_data
+{
+    unsigned long irqflags;
+    u32 x_max;
+    u32 y_max;
+    u32 irq_gpio;
+    u32 reset_gpio;
+    int (*power_init) (bool);
+    int (*power_on) (bool);
 };
 
 #endif

@@ -43,7 +43,7 @@ int lidbg_open(struct inode *inode, struct file *filp)
         if (down_trylock(&lidbg_lock))  // \u5982\u679c\u83b7\u53d6\u4e0d\u5230\u4fe1\u53f7\u91cf\uff0c\u5219\u7acb\u5373\u8fd4\u56de\u3002
 
             return -EBUSY;
-    }                                  
+    }
     else                               // \u975e\u963b\u585e
     {
         /* \u83b7\u53d6\u4fe1\u53f7\u91cf */
@@ -58,7 +58,7 @@ int lidbg_open(struct inode *inode, struct file *filp)
 int lidbg_release(struct inode *inode, struct file *filp)
 {
     DUMP_FUN;
-    up(&lidbg_lock); 
+    up(&lidbg_lock);
     return 0;
 }
 
@@ -123,12 +123,12 @@ static ssize_t lidbg_read(struct file *filp, char __user *buf, size_t size,
 #else
 
     unsigned int count = size;
-    int ret = 0,read_value=0;
+    int ret = 0, read_value = 0;
     struct lidbg_dev *dev = filp->private_data; /*获得设备结构体指针*/
 
     /*内核空间->用户空间*/
-	memcpy(&read_value, (void *)(dev->mem), 4);
-	printk("lidbg_read:read_value=%x,read_count=%d\n",(u32)read_value,count);
+    memcpy(&read_value, (void *)(dev->mem), 4);
+    printk("lidbg_read:read_value=%x,read_count=%d\n", (u32)read_value, count);
     if (copy_to_user(buf, (void *)(dev->mem), count))
     {
         ret =  - EFAULT;
@@ -137,7 +137,7 @@ static ssize_t lidbg_read(struct file *filp, char __user *buf, size_t size,
     {
         ret = count;
     }
-	
+
     return count;
 
 #endif
@@ -281,9 +281,9 @@ static ssize_t lidbg_write(struct file *filp, const char __user *buf,
 
         if(!strcmp(argv[1], "lidbg_get"))
         {
-        	lidbg("lidbg_devp addr = %x\n",(u32)(struct lidbg_dev *)global_lidbg_devp);
-			*(u32 *)(((struct lidbg_dev *)global_lidbg_devp)->mem) = (u32)(struct lidbg_dev *)global_lidbg_devp;
-		   
+            lidbg("lidbg_devp addr = %x\n", (u32)(struct lidbg_dev *)global_lidbg_devp);
+            *(u32 *)(((struct lidbg_dev *)global_lidbg_devp)->mem) = (u32)(struct lidbg_dev *)global_lidbg_devp;
+
         }
 
 
@@ -331,7 +331,7 @@ static ssize_t lidbg_write(struct file *filp, const char __user *buf,
 
         else if(!strcmp(argv[1], "device"))
         {
-          //  lidbg_device_main(new_argc, new_argv);
+            //  lidbg_device_main(new_argc, new_argv);
         }
 
         else if(!strcmp(argv[1], "servicer"))
@@ -341,11 +341,11 @@ static ssize_t lidbg_write(struct file *filp, const char __user *buf,
 #if 1
         else if(!strcmp(argv[1], "video"))
         {
-      	  if(((struct lidbg_dev *)global_lidbg_devp)!=NULL)
-         	 ((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnlidbg_video_main(new_argc, new_argv);
+            if(((struct lidbg_dev *)global_lidbg_devp) != NULL)
+                ((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnlidbg_video_main(new_argc, new_argv);
         }
 #endif
-    	}
+    }
 
     return size;//若不为size则重复执行
 }
@@ -427,7 +427,7 @@ void lidbg_remove_proc(void);
 /*设备驱动模块加载函数*/
 int lidbg_init(void)
 {
-    int result,err;
+    int result, err;
     dev_t devno = MKDEV(lidbg_major, 0);
     lidbg("lidbg_init\n");
     //dump_build_time();
@@ -477,7 +477,7 @@ int lidbg_init(void)
     /*\u521b\u5efa/proc/hello\u6587\u4ef6*/
     lidbg_create_proc();
 
-	//set_func_tbl();
+    //set_func_tbl();
 
     lidbg_soc_init();
 

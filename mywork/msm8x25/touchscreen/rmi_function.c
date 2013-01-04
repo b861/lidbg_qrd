@@ -70,12 +70,13 @@ static DEFINE_MUTEX(fns_mutex);
  */
 /* TODO: This will eventually go away, and each function will be an independent
  * module. */
- const uint16_t touch_key_array[]={
-								  KEY_MENU, 			//MENU
-								  KEY_HOME,
-								  KEY_BACK, 			
-								  KEY_SEARCH		
-								 }; 
+const uint16_t touch_key_array[] =
+{
+    KEY_MENU, 			//MENU
+    KEY_HOME,
+    KEY_BACK,
+    KEY_SEARCH
+};
 #define MAX_KEY_NUM  (sizeof(touch_key_array)/sizeof(touch_key_array[0]))
 
 static struct rmi_functions_data
@@ -211,7 +212,7 @@ EXPORT_SYMBOL(rmi_function_unregister_driver);
 int rmi_function_register_device(struct rmi_function_device *function_device, int fnNumber)
 {
     struct input_dev *input;
-    int retval,err;
+    int retval, err;
 
     printk(KERN_INFO "%s: Registering function device for F%02x.\n", __func__, fnNumber);
 
@@ -229,15 +230,15 @@ int rmi_function_register_device(struct rmi_function_device *function_device, in
     }
 
     input = input_allocate_device();
-	
+
     if (!input)
     {
         printk(KERN_ERR "%s:  ----------Failed to allocate memory for a new input device.\n",
                __func__);
         return -ENOMEM;
     }
-	
-	//input->id.bustype = BUS_I2C;
+
+    //input->id.bustype = BUS_I2C;
 
     input->name = dev_name(&function_device->dev);
     input->phys = "rmi_function";
@@ -246,14 +247,14 @@ int rmi_function_register_device(struct rmi_function_device *function_device, in
 #if 1
     /* init any input specific params for this function */
     function_device->rmi_funcs->init(function_device);
-	__set_bit(EV_KEY, input->evbit);
-	__set_bit(EV_ABS, input->evbit);
-	__set_bit(BTN_TOUCH, input->keybit);
-	for(err = 0; err < MAX_KEY_NUM; err++)
-	{
-		input_set_capability(input,EV_KEY,touch_key_array[err]);	
-	}
-	err = 0;
+    __set_bit(EV_KEY, input->evbit);
+    __set_bit(EV_ABS, input->evbit);
+    __set_bit(BTN_TOUCH, input->keybit);
+    for(err = 0; err < MAX_KEY_NUM; err++)
+    {
+        input_set_capability(input, EV_KEY, touch_key_array[err]);
+    }
+    err = 0;
     input_set_abs_params(input, ABS_MT_POSITION_X, 0, 1019, 0, 0);
     input_set_abs_params(input, ABS_MT_POSITION_Y, 0, 1547, 0, 0);
     input_set_abs_params(input, ABS_MT_TRACKING_ID, 0, 5, 0, 0);

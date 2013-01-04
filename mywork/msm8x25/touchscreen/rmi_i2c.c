@@ -490,9 +490,9 @@ static int rmi_i2c_probe(struct i2c_client *client, const struct i2c_device_id *
     struct rmi_i2c_platformdata *platformdata;
     struct rmi_sensordata *sensordata;
 
-	
+
     printk("[futengfei] come into11 ---------------------------->[%s]\n", __func__);
-	//msleep(8000);
+    //msleep(8000);
     if (client == NULL)
     {
         printk( "%s: Invalid NULL client received.\n", __func__);
@@ -771,15 +771,15 @@ static struct i2c_driver rmi_i2c_driver =
  * Register ourselves with i2c Chip Driver.
  *
  */
- extern bool is_ts_load;
+extern bool is_ts_load;
 //bool is_ts_load;
 int rmi_phys_i2c_init(void)
 {
     printk("[futengfei] come into ---------------------------->[%s]\n", __func__);
-	
-	is_ts_load=1;
 
-	return i2c_add_driver(&rmi_i2c_driver);
+    is_ts_load = 1;
+
+    return i2c_add_driver(&rmi_i2c_driver);
 }
 
 /*

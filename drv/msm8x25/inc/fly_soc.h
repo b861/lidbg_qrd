@@ -64,7 +64,7 @@
 //IO
 
 /*
- GPIO TLMM: Pullup/Pulldown 
+ GPIO TLMM: Pullup/Pulldown
 enum {
 	GPIO_CFG_NO_PULL,
 	GPIO_CFG_PULL_DOWN,
@@ -72,7 +72,7 @@ enum {
 	GPIO_CFG_PULL_UP,
 };
 
-GPIO TLMM: Drive Strength 
+GPIO TLMM: Drive Strength
 enum {
 	GPIO_CFG_2MA,
 	GPIO_CFG_4MA,

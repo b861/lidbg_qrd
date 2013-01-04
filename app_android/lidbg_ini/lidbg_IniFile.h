@@ -118,9 +118,9 @@ char *_get_value(const char *sec, const char *key,		// return data and comment
  *	purpose:
  */
 int set_value  (const char *sec, const char *key,		// will auto replace
-                 const char *value);
+                const char *value);
 int _set_value (const char *sec, const char *key,		// select replace or not replace
-                 const char *value, const char *comment, REPLACE_FLAG flag);
+                const char *value, const char *comment, REPLACE_FLAG flag);
 
 int  remove_sel (const char *sec, char *key);
 int  remove_all (const char *sec);				// remove all record in section

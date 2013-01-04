@@ -118,29 +118,29 @@ void pwr_key_scan(void)
 {
 #if 1
     bool val;
-	if(suspend_test == 0)
-		return;
+    if(suspend_test == 0)
+        return;
 
     val = SOC_IO_Input(PWR_SLEEP_PORT, PWR_SLEEP_INDEX, LIDBG_GPIO_PULLUP);
 
     if(val == 0)
     {
 
-		while(SOC_IO_Input(PWR_SLEEP_PORT, PWR_SLEEP_INDEX, LIDBG_GPIO_PULLUP)==0)
-		{
-			WHILE_ENTER;
-			msleep(100);
+        while(SOC_IO_Input(PWR_SLEEP_PORT, PWR_SLEEP_INDEX, LIDBG_GPIO_PULLUP) == 0)
+        {
+            WHILE_ENTER;
+            msleep(100);
 
-		}
-		
+        }
+
         lidbg("pwr_key_scan goto sleep !\n");
 
 #ifdef DEBUG_UMOUNT_USB
-		SOC_Write_Servicer(UMOUNT_USB);
-		msleep(1000);
+        SOC_Write_Servicer(UMOUNT_USB);
+        msleep(1000);
 #endif
-		
-		SOC_PWR_ShutDown();
+
+        SOC_PWR_ShutDown();
 
 
     }
@@ -151,8 +151,8 @@ void pwr_key_scan(void)
 
 int thread_pwr(void *data)
 {
-	//msleep(PWR_SLEEP_TEST_TIME_DELAY);
-	//LPCControlSupendTestStart();
+    //msleep(PWR_SLEEP_TEST_TIME_DELAY);
+    //LPCControlSupendTestStart();
     while(1)
     {
         set_current_state(TASK_UNINTERRUPTIBLE);
@@ -160,11 +160,11 @@ int thread_pwr(void *data)
         if(1)
         {
             pwr_key_scan();
-			
-			if(suspend_test == 1)
-            	msleep(PWR_SLEEP_PORT_POLLING_TIME);
-			else
-				msleep(1000);
+
+            if(suspend_test == 1)
+                msleep(PWR_SLEEP_PORT_POLLING_TIME);
+            else
+                msleep(1000);
         }
         else
         {
@@ -202,7 +202,7 @@ static struct ad_key_remap ad_key[] =
     //left button
     //{2, 3055, KEY_POWER},
     //right button
-   // {1, 3055, KEY_MUTE},
+    // {1, 3055, KEY_MUTE},
 
 };
 #define AD_OFFSET  (100)
@@ -223,12 +223,12 @@ int find_ad_key(u32 ch)
             if((val > ad_key[i].ad_value - AD_OFFSET) && (val < ad_key[i].ad_value + AD_OFFSET))
             {
                 //SOC_Key_Report(ad_key[i].key, KEY_PRESSED_RELEASED);
-                lidbg("find_ad_key:ch%d=%d,key_id=%d,sendkey=%d\n", ch, val, i,ad_key[i].key);
+                lidbg("find_ad_key:ch%d=%d,key_id=%d,sendkey=%d\n", ch, val, i, ad_key[i].key);
                 return i;
             }
     }
 
-	return 0xff;
+    return 0xff;
 
 
 }
@@ -246,84 +246,87 @@ void key_scan(void)
 
     }
 #else
-	static int old_key = 0xff;
-	int key = 0xff;
-    key=find_ad_key(0);if(key != 0xff) goto find_key;
-    key=find_ad_key(1);if(key != 0xff) goto find_key;
-    key=find_ad_key(2);if(key != 0xff) goto find_key;
+    static int old_key = 0xff;
+    int key = 0xff;
+    key = find_ad_key(0);
+    if(key != 0xff) goto find_key;
+    key = find_ad_key(1);
+    if(key != 0xff) goto find_key;
+    key = find_ad_key(2);
+    if(key != 0xff) goto find_key;
 
 find_key:
 
-	if((old_key != 0xff)&&(key == 0xff))
-	{
-		SOC_Key_Report(ad_key[old_key].key, KEY_PRESSED_RELEASED);
+    if((old_key != 0xff) && (key == 0xff))
+    {
+        SOC_Key_Report(ad_key[old_key].key, KEY_PRESSED_RELEASED);
 
-	if(old_key == 0)
-	{
-		static bool usb_id_host = 1;
-		if(usb_id_host)
-		{
-			USB_HUB_DISABLE;
-			USB_ID_HIGH_DEV;
-			usb_id_host = 0;
-			lidbg("usb_id change to dev\n");
-		}
-		else
-		{
-			USB_HUB_ENABLE;
-			USB_ID_LOW_HOST;
-			usb_id_host = 1;
-			lidbg("usb_id change to host\n");
-	
-		}
-	}
+        if(old_key == 0)
+        {
+            static bool usb_id_host = 1;
+            if(usb_id_host)
+            {
+                USB_HUB_DISABLE;
+                USB_ID_HIGH_DEV;
+                usb_id_host = 0;
+                lidbg("usb_id change to dev\n");
+            }
+            else
+            {
+                USB_HUB_ENABLE;
+                USB_ID_LOW_HOST;
+                usb_id_host = 1;
+                lidbg("usb_id change to host\n");
+
+            }
+        }
 
 #if 0
 
-	if(old_key == 0)
-	{
-		SOC_Log_Dump(LOG_DMESG);
+        if(old_key == 0)
+        {
+            SOC_Log_Dump(LOG_DMESG);
 
-	}
-	else if(old_key == 1)
-	{
-		SOC_Log_Dump(LOG_LOGCAT);
+        }
+        else if(old_key == 1)
+        {
+            SOC_Log_Dump(LOG_LOGCAT);
 
-	}
-	else if(old_key == 2)
-	{
-		SOC_Log_Dump(LOG_ALL);
+        }
+        else if(old_key == 2)
+        {
+            SOC_Log_Dump(LOG_ALL);
 
-	}
-	else if(old_key == 4)
-	{
-		static bool pwr_en=1;
-		if(pwr_en)
-		{
-			lidbg("LPCControlPWRDisenable\n");
-			LPCControlPWRDisenable();
-			pwr_en=0;
-			
-		}
-		else
-		{
-			lidbg("LPCControlPWREnable\n");
-			LPCControlPWREnable();
-			pwr_en=1;
-		}
+        }
+        else if(old_key == 4)
+        {
+            static bool pwr_en = 1;
+            if(pwr_en)
+            {
+                lidbg("LPCControlPWRDisenable\n");
+                LPCControlPWRDisenable();
+                pwr_en = 0;
 
-	}
+            }
+            else
+            {
+                lidbg("LPCControlPWREnable\n");
+                LPCControlPWREnable();
+                pwr_en = 1;
+            }
+
+        }
 
 #endif
 
 
 
 
-	}
+    }
 
 
 
-	old_key = key;
+    old_key = key;
 
 
 #endif
@@ -371,11 +374,11 @@ int thread_dev_init(void *data)
 
     fly_devices_init();
 
-	while(1)//for polling test
-	{
-		msleep(10*1000);
+    while(1)//for polling test
+    {
+        msleep(10 * 1000);
 
-	}
+    }
     return 0;
 }
 
@@ -444,7 +447,7 @@ static int soc_dev_probe(struct platform_device *pdev)
     int err;
 
     lidbg("soc_dev_probe\n");
-	
+
     PWR_EN_ON;
 
     get_platform();
@@ -466,7 +469,8 @@ static int soc_dev_probe(struct platform_device *pdev)
     if(IS_ERR(led_task))
     {
         lidbg("Unable to start kernel thread.\n");
-    }else wake_up_process(led_task);
+    }
+    else wake_up_process(led_task);
 #endif
 
 
@@ -477,7 +481,8 @@ static int soc_dev_probe(struct platform_device *pdev)
         {
             lidbg("Unable to start kernel thread.\n");
 
-        }else wake_up_process(dev_init_task);
+        }
+        else wake_up_process(dev_init_task);
 
 
 #ifdef DEBUG_AD_KEY
@@ -485,7 +490,8 @@ static int soc_dev_probe(struct platform_device *pdev)
         if(IS_ERR(key_task))
         {
             lidbg("Unable to start kernel thread.\n");
-        }else wake_up_process(key_task);
+        }
+        else wake_up_process(key_task);
 #endif
 
 #ifdef DEBUG_POWER_KEY
@@ -494,7 +500,8 @@ static int soc_dev_probe(struct platform_device *pdev)
         {
             lidbg("Unable to start kernel thread.\n");
 
-        }else  wake_up_process(pwr_task);
+        }
+        else  wake_up_process(pwr_task);
 #endif
 
 
@@ -503,18 +510,18 @@ static int soc_dev_probe(struct platform_device *pdev)
 
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
-{
-		
-		//\u5728suspend\u7684\u65f6\u5019\u5148\u6267\u884c\u4f18\u5148\u7b49\u7ea7\u4f4e\u7684handler\uff0c\u5728resume\u7684\u65f6\u5019\u5219\u5148\u6267\u884c\u7b49\u7ea7\u9ad8\u7684handler
-		early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN;//EARLY_SUSPEND_LEVEL_BLANK_SCREEN + 1;
-		early_suspend.suspend = devices_early_suspend;
-		early_suspend.resume = devices_late_resume;
-		register_early_suspend(&early_suspend);
-		
-}
+    {
+
+        //\u5728suspend\u7684\u65f6\u5019\u5148\u6267\u884c\u4f18\u5148\u7b49\u7ea7\u4f4e\u7684handler\uff0c\u5728resume\u7684\u65f6\u5019\u5219\u5148\u6267\u884c\u7b49\u7ea7\u9ad8\u7684handler
+        early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN;//EARLY_SUSPEND_LEVEL_BLANK_SCREEN + 1;
+        early_suspend.suspend = devices_early_suspend;
+        early_suspend.resume = devices_late_resume;
+        register_early_suspend(&early_suspend);
+
+    }
 #endif
 
-	return 0;
+    return 0;
 
 }
 static int soc_dev_remove(struct platform_device *pdev)
@@ -552,48 +559,49 @@ static int soc_dev_remove(struct platform_device *pdev)
 static void devices_early_suspend(struct early_suspend *handler)
 {
 
-	DUMP_FUN_ENTER;
+    DUMP_FUN_ENTER;
     if(platform_id ==  PLATFORM_FLY)
     {
-		LCD_OFF;
-		
-#ifdef DEBUG_UMOUNT_USB
-		SOC_Write_Servicer(UMOUNT_USB);
-#endif
-		USB_HUB_DISABLE;
-		USB_SWITCH_DISCONNECT;
-		msleep(1000);
-		USB_ID_HIGH_DEV;
+        LCD_OFF;
 
-		
-   	}
-	DUMP_FUN_LEAVE;
+#ifdef DEBUG_UMOUNT_USB
+        SOC_Write_Servicer(UMOUNT_USB);
+#endif
+        USB_HUB_DISABLE;
+        USB_SWITCH_DISCONNECT;
+        msleep(1000);
+        USB_ID_HIGH_DEV;
+
+
+    }
+    DUMP_FUN_LEAVE;
 
 }
 
 static void devices_late_resume(struct early_suspend *handler)
 {
-	int err;
+    int err;
 
-	DUMP_FUN_ENTER;
+    DUMP_FUN_ENTER;
     if(platform_id ==  PLATFORM_FLY)
     {
 
-		lidbg("create thread_resume!\n");
-		
-		BL_SET(BL_MAX / 2);
+        lidbg("create thread_resume!\n");
 
-		
-		resume_task = kthread_create(thread_resume, NULL, "dev_resume_task");
-		if(IS_ERR(resume_task))
-		{
-			lidbg("Unable to start kernel thread.\n");
-			err = PTR_ERR(resume_task);
-		}else wake_up_process(resume_task);
+        BL_SET(BL_MAX / 2);
 
-		
+
+        resume_task = kthread_create(thread_resume, NULL, "dev_resume_task");
+        if(IS_ERR(resume_task))
+        {
+            lidbg("Unable to start kernel thread.\n");
+            err = PTR_ERR(resume_task);
+        }
+        else wake_up_process(resume_task);
+
+
     }
-	DUMP_FUN_LEAVE;
+    DUMP_FUN_LEAVE;
 }
 #endif
 
@@ -607,7 +615,7 @@ static int  soc_dev_suspend(struct platform_device *pdev, pm_message_t state)
 
 
     if(platform_id ==  PLATFORM_FLY)
-    {	
+    {
         lidbg("turn lcd off!\n");
 
 #ifdef DEBUG_BUTTON
@@ -616,7 +624,7 @@ static int  soc_dev_suspend(struct platform_device *pdev, pm_message_t state)
         SOC_IO_ISR_Disable(BUTTON_RIGHT_1);
         SOC_IO_ISR_Disable(BUTTON_RIGHT_2);
 #endif
-        
+
 
     }
 
@@ -629,17 +637,17 @@ static int  soc_dev_suspend(struct platform_device *pdev, pm_message_t state)
 static int thread_resume(void *data)
 {
 
-	DUMP_FUN_ENTER;
-	msleep(3000);
+    DUMP_FUN_ENTER;
+    msleep(3000);
 
-	
-	lidbg("usb enable\n");
-	USB_ID_LOW_HOST;
-	msleep(2000);
-	USB_SWITCH_CONNECT;
-	USB_HUB_RST;
-	DUMP_FUN_LEAVE;
-	return 0;
+
+    lidbg("usb enable\n");
+    USB_ID_LOW_HOST;
+    msleep(2000);
+    USB_SWITCH_CONNECT;
+    USB_HUB_RST;
+    DUMP_FUN_LEAVE;
+    return 0;
 
 
 }
@@ -649,16 +657,16 @@ static int soc_dev_resume(struct platform_device *pdev)
 {
 
     lidbg("soc_dev_resume\n");
-		
+
 
     if(platform_id ==  PLATFORM_FLY)
     {
-    //disable usb first
-    	USB_HUB_DISABLE;
-		USB_ID_HIGH_DEV;
-		USB_SWITCH_DISCONNECT;
-		
-    
+        //disable usb first
+        USB_HUB_DISABLE;
+        USB_ID_HIGH_DEV;
+        USB_SWITCH_DISCONNECT;
+
+
         PWR_EN_ON;
 
 #ifdef DEBUG_BUTTON
@@ -700,39 +708,39 @@ struct work_struct work_left_button1;
 static void work_left_button1_fn(struct work_struct *work)
 {
 
-	
-#ifdef DEBUG_POWER_KEY
-	static int count = 0;
-	count++;
-	lidbg("work_left_button1_fn %d\n",count);
-	if(count%40 == 0)
-	{
-		if(suspend_test)
-		{
-			printk("\n\n");
-			lidbg("LPCControlSupendTestStop\n");
-			printk("\n\n");
-			LCD_OFF;
-			msleep(500);
-			LCD_ON;
-			suspend_test = 0;
-			LPCControlSupendTestStop();
-			
-		}
-		else
-		{
-			printk("\n\n");
-			lidbg("LPCControlSupendTestStart\n");
-			printk("\n\n");
-			LCD_OFF;
-			msleep(500);
-			LCD_ON;
-			suspend_test = 1;
-			LPCControlSupendTestStart();
-			//SOC_Log_Dump(LOG_CONT);
-		}
 
-	}
+#ifdef DEBUG_POWER_KEY
+    static int count = 0;
+    count++;
+    lidbg("work_left_button1_fn %d\n", count);
+    if(count % 40 == 0)
+    {
+        if(suspend_test)
+        {
+            printk("\n\n");
+            lidbg("LPCControlSupendTestStop\n");
+            printk("\n\n");
+            LCD_OFF;
+            msleep(500);
+            LCD_ON;
+            suspend_test = 0;
+            LPCControlSupendTestStop();
+
+        }
+        else
+        {
+            printk("\n\n");
+            lidbg("LPCControlSupendTestStart\n");
+            printk("\n\n");
+            LCD_OFF;
+            msleep(500);
+            LCD_ON;
+            suspend_test = 1;
+            LPCControlSupendTestStart();
+            //SOC_Log_Dump(LOG_CONT);
+        }
+
+    }
 #endif
 }
 
@@ -741,33 +749,33 @@ static void work_right_button1_fn(struct work_struct *work)
 {
 
 #if 1
-		static int count = 0;
-		count++;
-		lidbg("work_left_button1_fn %d\n",count);
-		if(count%40 == 0)
-		{
+    static int count = 0;
+    count++;
+    lidbg("work_left_button1_fn %d\n", count);
+    if(count % 40 == 0)
+    {
 
-			static bool usb_test=0;
-			if(usb_test)
-			{
-				lidbg("LPCControlUSBTestStop\n");
-				LCD_OFF;
-				msleep(500);
-				LCD_ON;
-				//LPCControlSupendTestStop();
-				usb_test=0;
-				
-			}
-			else
-			{
-				lidbg("LPCControlUSBTestStart\n");
-				LCD_OFF;
-				msleep(500);
-				LCD_ON;
-				//LPCControlSupendTestStart();
-				usb_test=1;
-			}	
-		}
+        static bool usb_test = 0;
+        if(usb_test)
+        {
+            lidbg("LPCControlUSBTestStop\n");
+            LCD_OFF;
+            msleep(500);
+            LCD_ON;
+            //LPCControlSupendTestStop();
+            usb_test = 0;
+
+        }
+        else
+        {
+            lidbg("LPCControlUSBTestStart\n");
+            LCD_OFF;
+            msleep(500);
+            LCD_ON;
+            //LPCControlSupendTestStart();
+            usb_test = 1;
+        }
+    }
 #endif
 
 
@@ -789,8 +797,8 @@ irqreturn_t irq_left_button1(int irq, void *dev_id)
     lidbg("irq_left_button1: %d, bl=%d\n", irq, bl & BL_MAX);
 #else
 
-   lidbg("irq_left_button1: %d\n", irq);
-   schedule_work(&work_left_button1);
+    lidbg("irq_left_button1: %d\n", irq);
+    schedule_work(&work_left_button1);
 
 #endif
     return IRQ_HANDLED;
@@ -802,7 +810,7 @@ irqreturn_t irq_left_button2(int irq, void *dev_id)
 {
 
 
-	lidbg("irq_left_button2: %d\n", irq);
+    lidbg("irq_left_button2: %d\n", irq);
 
 
     return IRQ_HANDLED;
@@ -815,7 +823,7 @@ irqreturn_t irq_right_button1(int irq, void *dev_id)
 
     lidbg("irq_right_button1: %d\n", irq);
     //led_on();
-	schedule_work(&work_right_button1);
+    schedule_work(&work_right_button1);
 
     return IRQ_HANDLED;
 
@@ -838,11 +846,11 @@ void fly_devices_init(void)
 
     if(platform_id ==  PLATFORM_FLY)
     {
-    
-		PWR_EN_ON;
-		USB_ID_LOW_HOST;
-		USB_SWITCH_CONNECT;
-		USB_HUB_RST;
+
+        PWR_EN_ON;
+        USB_ID_LOW_HOST;
+        USB_SWITCH_CONNECT;
+        USB_HUB_RST;
 
 
         lidbg("turn lcd on!\n");
@@ -851,8 +859,8 @@ void fly_devices_init(void)
 
 #ifdef DEBUG_BUTTON
 
-		INIT_WORK(&work_left_button1, work_left_button1_fn);
-		INIT_WORK(&work_right_button1, work_right_button1_fn);
+        INIT_WORK(&work_left_button1, work_left_button1_fn);
+        INIT_WORK(&work_right_button1, work_right_button1_fn);
 
         SOC_IO_Input(BUTTON_LEFT_1, BUTTON_LEFT_1, GPIO_CFG_PULL_UP);
         SOC_IO_Input(BUTTON_LEFT_2, BUTTON_LEFT_2, GPIO_CFG_PULL_UP);
@@ -886,9 +894,9 @@ int dev_init(void)
 
 #ifndef SOC_COMPILE
 #if 0
-	LIDBG_GET_THREAD;
+    LIDBG_GET_THREAD;
 #else
-	LIDBG_GET;
+    LIDBG_GET;
 #endif
 #endif
 #if 0

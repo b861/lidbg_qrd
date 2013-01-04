@@ -26,9 +26,9 @@ int msm8x25_init(void)
         printk( "smem_alloc fail!\n");
         return 0;
     }
-#else 
-	p_fly_smem = (struct fly_smem *)kmalloc(sizeof(struct fly_smem), GFP_KERNEL);
-	memset(p_fly_smem, 0, sizeof(struct fly_smem));
+#else
+    p_fly_smem = (struct fly_smem *)kmalloc(sizeof(struct fly_smem), GFP_KERNEL);
+    memset(p_fly_smem, 0, sizeof(struct fly_smem));
 
 #endif
 

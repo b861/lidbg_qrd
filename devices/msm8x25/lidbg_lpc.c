@@ -44,19 +44,19 @@ u32 lpc_send_rec_count = 0;
 
 static struct task_struct *lpc_task;
 int thread_lpc(void *data);
-bool lpc_work_en=0;
+bool lpc_work_en = 0;
 
 UINT32 GetTickCount(void)
 
 {
 
-	struct timespec t_now;
+    struct timespec t_now;
 
-	do_posix_clock_monotonic_gettime(&t_now);
+    do_posix_clock_monotonic_gettime(&t_now);
 
-	monotonic_to_bootbased(&t_now);  
+    monotonic_to_bootbased(&t_now);
 
-	return t_now.tv_sec * 1000 + t_now.tv_nsec / 1000000;
+    return t_now.tv_sec * 1000 + t_now.tv_nsec / 1000000;
 
 }
 
@@ -221,16 +221,16 @@ static void LPCdealReadFromMCUAll(BYTE *p, UINT length)
 {
 #if 1
     u32 i;
-	static u32 acc_off_count = 0;
-	if (iDriverResumeTime)
-	{
-		if (GetTickCount() - iDriverResumeTime >= 6*1000)
-		{
-			//bResumeError = TRUE;
-			printk("JQilin Resume Error...\n");
-		}
-	}
-	iDriverResumeTime = 0;
+    static u32 acc_off_count = 0;
+    if (iDriverResumeTime)
+    {
+        if (GetTickCount() - iDriverResumeTime >= 6 * 1000)
+        {
+            //bResumeError = TRUE;
+            printk("JQilin Resume Error...\n");
+        }
+    }
+    iDriverResumeTime = 0;
 #ifdef LPC_DEBUG_LOG
     lidbg("From LPC:");//mode ,command,para
     for(i = 0; i < length; i++)
@@ -247,50 +247,50 @@ static void LPCdealReadFromMCUAll(BYTE *p, UINT length)
         switch (p[1])
         {
         case 0x01://ACC OFF/ON
-        //case 0x09:
+            //case 0x09:
             switch (p[2])
             {
             case 0x00://ACC OFF
-            	if (bResumeError)
-            	{
-            		lidbg("JQilin Resume Error And Block...\n");
-					return;
-            	}
-				else
-				{
-					acc_off_count++;
-					lidbg("AccOff Count:%d\n",acc_off_count);
+                if (bResumeError)
+                {
+                    lidbg("JQilin Resume Error And Block...\n");
+                    return;
+                }
+                else
+                {
+                    acc_off_count++;
+                    lidbg("AccOff Count:%d\n", acc_off_count);
 
-				}
-				
-	            if(SOC_PWR_GetStatus() == PM_STATUS_LATE_RESUME_OK)
-	            {
-					msleep(100);
-					
-	                lidbg("Ready ACC OFF!\n");
-	                msleep(100);
-	                LPCControlToSleep();
-	                SOC_PWR_ShutDown();
-	            }
-				else
-				{
-					lidbg("suspend_pending...\n");
+                }
 
-				}
-	                break;
-	        }
+                if(SOC_PWR_GetStatus() == PM_STATUS_LATE_RESUME_OK)
+                {
+                    msleep(100);
+
+                    lidbg("Ready ACC OFF!\n");
+                    msleep(100);
+                    LPCControlToSleep();
+                    SOC_PWR_ShutDown();
+                }
+                else
+                {
+                    lidbg("suspend_pending...\n");
+
+                }
+                break;
+            }
         }
-       case 0x96:
-			switch (p[2])
-			{
-				case 0x7f:
-#ifdef LPC_DEBUG_LOG			
-				 lidbg("LPC ping return!\n");
+    case 0x96:
+        switch (p[2])
+        {
+        case 0x7f:
+#ifdef LPC_DEBUG_LOG
+            lidbg("LPC ping return!\n");
 #endif
-				 lpc_send_rec_count--;
-				 break;
-			}
-	default:
+            lpc_send_rec_count--;
+            break;
+        }
+    default:
         break;
     }
 #endif
@@ -372,7 +372,7 @@ BOOL actualReadFromMCU(BYTE *p, UINT length)
     SOC_I2C_Rec_Simple(I2_0_ID, MCU_ADDR_R >> 1, p, length);
     if (readFromMCUProcessor(p, length))
     {
-    
+
 #ifdef LPC_DEBUG_LOG
         DBG0("More ");
 #endif
@@ -388,7 +388,7 @@ BOOL actualReadFromMCU(BYTE *p, UINT length)
 irqreturn_t MCUIIC_isr(int irq, void *dev_id)
 {
 
-	//lidbg(".\n");
+    //lidbg(".\n");
     schedule_work(&pGlobalHardwareInfo->FlyIICInfo.iic_work);
     return IRQ_HANDLED;
 }
@@ -400,54 +400,54 @@ static void workFlyMCUIIC(struct work_struct *work)
 
 
     //DBG("ThreadFlyMCUIIC running\n");
-	//SOC_IO_ISR_Disable(MCU_IIC_REQ_ISR);
+    //SOC_IO_ISR_Disable(MCU_IIC_REQ_ISR);
 
-    while (SOC_IO_Input(MCU_IIC_REQ_G, MCU_IIC_REQ_I, 0)==0)
+    while (SOC_IO_Input(MCU_IIC_REQ_G, MCU_IIC_REQ_I, 0) == 0)
     {
-    	//WHILE_ENTER;
+        //WHILE_ENTER;
         actualReadFromMCU(buff, iReadLen);
         iReadLen = 16;
     }
-	//SOC_IO_ISR_Enable(MCU_IIC_REQ_ISR);
+    //SOC_IO_ISR_Enable(MCU_IIC_REQ_ISR);
 }
 
 int thread_lpc(void *data)
 {
 
 
-	BYTE buff[] = {0x00,0x96,0x00,0x00,0x00,0x00};
-	BYTE iRandom = 0;
-	buff[5] = iRandom;
-	buff[4] = iRandom;
-	buff[3] = iRandom;
-	buff[2] = iRandom;
-	static u32 re_sleep_count = 0;
-	msleep(10*1000);
+    BYTE buff[] = {0x00, 0x96, 0x00, 0x00, 0x00, 0x00};
+    BYTE iRandom = 0;
+    buff[5] = iRandom;
+    buff[4] = iRandom;
+    buff[3] = iRandom;
+    buff[2] = iRandom;
+    static u32 re_sleep_count = 0;
+    msleep(10 * 1000);
     while(1)
     {
         set_current_state(TASK_UNINTERRUPTIBLE);
         if(kthread_should_stop()) break;
         if(1)
         {
-			if((SOC_PWR_GetStatus() == PM_STATUS_LATE_RESUME_OK)&&(lpc_work_en==1))
-			{
+            if((SOC_PWR_GetStatus() == PM_STATUS_LATE_RESUME_OK) && (lpc_work_en == 1))
+            {
 #ifdef LPC_DEBUG_LOG
-				lidbg("lpc_send_rec_count=%d\n",re_sleep_count);
-#endif	
-				if(lpc_send_rec_count >= 3)
-				{
-					re_sleep_count++;
-					lidbg("\n\n\nerrlsw:lpc_send_rec_count > 3 ,do SOC_PWR_ShutDown again! %d\n\n\n",re_sleep_count);
-					SOC_PWR_ShutDown();
-					lpc_send_rec_count=0;
+                lidbg("lpc_send_rec_count=%d\n", re_sleep_count);
+#endif
+                if(lpc_send_rec_count >= 3)
+                {
+                    re_sleep_count++;
+                    lidbg("\n\n\nerrlsw:lpc_send_rec_count > 3 ,do SOC_PWR_ShutDown again! %d\n\n\n", re_sleep_count);
+                    SOC_PWR_ShutDown();
+                    lpc_send_rec_count = 0;
 
-				}
-				//lidbg("thread_lpc:LPCCombinDataStream\n");
+                }
+                //lidbg("thread_lpc:LPCCombinDataStream\n");
 
-				LPCCombinDataStream(buff, SIZE_OF_ARRAY(buff));
-				lpc_send_rec_count ++;
-			}
-				msleep(2000);
+                LPCCombinDataStream(buff, SIZE_OF_ARRAY(buff));
+                lpc_send_rec_count ++;
+            }
+            msleep(2000);
         }
         else
         {
@@ -455,7 +455,7 @@ int thread_lpc(void *data)
         }
     }
 
-	return 0;
+    return 0;
 
 }
 
@@ -463,28 +463,29 @@ int thread_lpc(void *data)
 
 void mcuFirstInit(void)
 {
-	int err;
+    int err;
     pGlobalHardwareInfo = &GlobalHardwareInfo;
     INIT_WORK(&pGlobalHardwareInfo->FlyIICInfo.iic_work, workFlyMCUIIC);
 
-	//let i2c_c high
-    while (SOC_IO_Input(0, MCU_IIC_REQ_I, GPIO_CFG_PULL_UP)==0)
+    //let i2c_c high
+    while (SOC_IO_Input(0, MCU_IIC_REQ_I, GPIO_CFG_PULL_UP) == 0)
     {
-    	u8 buff[32];
-		WHILE_ENTER;
+        u8 buff[32];
+        WHILE_ENTER;
         actualReadFromMCU(buff, 32);
-       
+
     }
 
     //SOC_IO_Input(0, MCU_IIC_REQ_I, GPIO_CFG_PULL_UP);
     SOC_IO_ISR_Add(MCU_IIC_REQ_ISR, IRQF_TRIGGER_FALLING | IRQF_ONESHOT, MCUIIC_isr, pGlobalHardwareInfo);
 
 #ifdef FLY_DEBUG
-	lpc_task = kthread_create(thread_lpc, NULL, "lpc_task");
-	if(IS_ERR(lpc_task))
-	{
-		lidbg("Unable to start kernel thread.\n");
-	}else wake_up_process(lpc_task);
+    lpc_task = kthread_create(thread_lpc, NULL, "lpc_task");
+    if(IS_ERR(lpc_task))
+    {
+        lidbg("Unable to start kernel thread.\n");
+    }
+    else wake_up_process(lpc_task);
 #endif
 
 
@@ -505,14 +506,14 @@ void LPCResume(void)
 
     SOC_IO_ISR_Enable(MCU_IIC_REQ_ISR);
 
-	lpc_send_rec_count=0;
+    lpc_send_rec_count = 0;
 
-	iDriverResumeTime = GetTickCount();
+    iDriverResumeTime = GetTickCount();
 
-		//clear lpc i2c buffer
+    //clear lpc i2c buffer
     while (SOC_IO_Input(MCU_IIC_REQ_G, MCU_IIC_REQ_I, 0) == 0)
     {
-    	WHILE_ENTER;
+        WHILE_ENTER;
         actualReadFromMCU(buff, iReadLen);
         iReadLen = 16;
     }
@@ -523,24 +524,24 @@ void LPCResume(void)
 
 static int  lpc_probe(struct platform_device *pdev)
 {
-	
-		DUMP_FUN;
-		lidbg("lpc communication+\n");
-		mcuFirstInit();
-		LPCPowerOnOK();
-		LPCNoReset();
-		LPCBackLightOn();
-		lidbg("lpc communication-\n");
-		lpc_work_en=1;
+
+    DUMP_FUN;
+    lidbg("lpc communication+\n");
+    mcuFirstInit();
+    LPCPowerOnOK();
+    LPCNoReset();
+    LPCBackLightOn();
+    lidbg("lpc communication-\n");
+    lpc_work_en = 1;
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
-		early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN;
-		early_suspend.suspend = lpc_early_suspend;
-		early_suspend.resume = lpc_late_resume;
-		register_early_suspend(&early_suspend);
+    early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN;
+    early_suspend.suspend = lpc_early_suspend;
+    early_suspend.resume = lpc_late_resume;
+    register_early_suspend(&early_suspend);
 #endif
 
-	return 0;
+    return 0;
 }
 
 
@@ -549,28 +550,28 @@ static int  lpc_remove(struct platform_device *pdev)
 {
 
 
-	return 0;
+    return 0;
 }
 
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
 static void lpc_early_suspend(struct early_suspend *handler)
 {
-	DUMP_FUN;
-	lpc_work_en=0;
-	LPCSuspend();
+    DUMP_FUN;
+    lpc_work_en = 0;
+    LPCSuspend();
 
 
 }
 static void lpc_late_resume(struct early_suspend *handler)
 {
-	DUMP_FUN_ENTER;
-	LPCResume();
-	LPCPowerOnOK();
-	LPCNoReset();
-	LPCBackLightOn();
-	lpc_work_en=1;
-	DUMP_FUN_LEAVE;
+    DUMP_FUN_ENTER;
+    LPCResume();
+    LPCPowerOnOK();
+    LPCNoReset();
+    LPCBackLightOn();
+    lpc_work_en = 1;
+    DUMP_FUN_LEAVE;
 
 }
 
@@ -582,65 +583,68 @@ static void lpc_late_resume(struct early_suspend *handler)
 #ifdef CONFIG_PM
 static int lpc_suspend(struct device *dev)
 {
-	DUMP_FUN;
-	
-	TELL_LPC_PWR_OFF;
-	
-	return 0;
+    DUMP_FUN;
+
+    TELL_LPC_PWR_OFF;
+
+    return 0;
 }
 
 static int lpc_resume(struct device *dev)
 {
-	DUMP_FUN;
+    DUMP_FUN;
 
     TELL_LPC_PWR_ON;
-	msleep(200);
+    msleep(200);
 
-	return 0;
+    return 0;
 }
 
-static struct dev_pm_ops lpc_pm_ops = {
-	.suspend	= lpc_suspend,
-	.resume		= lpc_resume,
+static struct dev_pm_ops lpc_pm_ops =
+{
+    .suspend	= lpc_suspend,
+    .resume		= lpc_resume,
 };
 #endif
 
 
 
 
-static struct platform_device lidbg_lpc = {
-	.name               = "lidbg_lpc",
-	.id                 = -1,
+static struct platform_device lidbg_lpc =
+{
+    .name               = "lidbg_lpc",
+    .id                 = -1,
 };
 
-static struct platform_driver lpc_driver = {
-	.probe		= lpc_probe,
-	.remove     = lpc_remove,
-	.driver         = {
-		.name = "lidbg_lpc",
-		.owner = THIS_MODULE,
+static struct platform_driver lpc_driver =
+{
+    .probe		= lpc_probe,
+    .remove     = lpc_remove,
+    .driver         = {
+        .name = "lidbg_lpc",
+        .owner = THIS_MODULE,
 #ifdef CONFIG_PM
-		.pm = &lpc_pm_ops,
+        .pm = &lpc_pm_ops,
 #endif
-	},
+    },
 };
 
 static int __init lpc_init(void)
 {
-	DUMP_BUILD_TIME;
+    DUMP_BUILD_TIME;
 #ifndef SOC_COMPILE
-		LIDBG_GET;
+    LIDBG_GET;
 #endif
-   // set_func_tbl();
+    // set_func_tbl();
     platform_device_register(&lidbg_lpc);
     platform_driver_register(&lpc_driver);
 
-	return 0;
+    return 0;
 }
 
 static void __exit lpc_exit(void)
 {
-	platform_driver_unregister(&lpc_driver);
+    platform_driver_unregister(&lpc_driver);
 }
 
 

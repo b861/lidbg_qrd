@@ -132,7 +132,7 @@ enum
 							}\
 						}\
 					}while(0)
-					
+
 
 #else
 #define PLATFORM_GET do{platform_id=PLATFORM_FLY;}while(0)

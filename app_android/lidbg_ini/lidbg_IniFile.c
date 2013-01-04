@@ -57,29 +57,29 @@ int main(int argc , char **argv)
 {
 
     char *buffer;
-	unsigned int value;
+    unsigned int value;
     if(!ini_start("/mnt/sdcard/lidbg_cfg.txt"))
     {
-		 if(!ini_start("/mnt/usbdisk/lidbg_cfg.txt"))
-		 {
-			printf("read ini file fail!\n");
-			return 0;
-		 }
+        if(!ini_start("/mnt/usbdisk/lidbg_cfg.txt"))
+        {
+            printf("read ini file fail!\n");
+            return 0;
+        }
     }
-	else
-	{
-		printf("read ini file ok!\n");
+    else
+    {
+        printf("read ini file ok!\n");
 
-	}
-	
+    }
+
     value = get_value_num("test", "test1");
     printf("test1 : %d\n", value);
-	
+
     buffer = get_value("test", "test2");
     printf("test2 : %s\n", buffer);
 
     ini_end();
-	return 0;
+    return 0;
 }
 
 #endif
@@ -280,38 +280,38 @@ char *get_value(const char *sec, const char *key)
         return "";
 }
 #if 1
-int str2dec(char *s)  
-{  
-    int Ret, Flag = 0;  
-    Ret = 0;  
-    if(*s == '-')  
-    {  
-        Flag = 1;  
-        s++;  
-    }  
-    while(*s)  
-    {  
-        if((*s < '0') || (*s > '9'))  
-            return 0;  
-        Ret = Ret * 10 + (int)(*s - '0');  
-        s++;  
-    }  
-    if(Flag)  
-        Ret *= -1;  
-    return Ret;  
-}  
+int str2dec(char *s)
+{
+    int Ret, Flag = 0;
+    Ret = 0;
+    if(*s == '-')
+    {
+        Flag = 1;
+        s++;
+    }
+    while(*s)
+    {
+        if((*s < '0') || (*s > '9'))
+            return 0;
+        Ret = Ret * 10 + (int)(*s - '0');
+        s++;
+    }
+    if(Flag)
+        Ret *= -1;
+    return Ret;
+}
 
 
 static inline unsigned char str2hexnum(unsigned char c)
 {
-	if (c >= '0' && c <= '9')
-		return c - '0';
-	if (c >= 'a' && c <= 'f')
-		return c - 'a' + 10;
-	if (c >= 'A' && c <= 'F')
-		return c - 'A' + 10;
+    if (c >= '0' && c <= '9')
+        return c - '0';
+    if (c >= 'a' && c <= 'f')
+        return c - 'a' + 10;
+    if (c >= 'A' && c <= 'F')
+        return c - 'A' + 10;
 
-	return 0; /* foo */
+    return 0; /* foo */
 }
 
 
@@ -319,14 +319,15 @@ static inline unsigned char str2hexnum(unsigned char c)
 
 static  unsigned int str2hex( char *str)
 {
-	int value = 0;
+    int value = 0;
 
-	while (*str) {
-		value = value << 4;
-		value |= str2hexnum(*str++);
-	}
+    while (*str)
+    {
+        value = value << 4;
+        value |= str2hexnum(*str++);
+    }
 
-	return value;
+    return value;
 }
 #endif
 U32 ini_str2num(char *src)
@@ -344,7 +345,7 @@ U32 ini_str2num(char *src)
         if(p[i] == 'd')
         {
             temp[i] = '\0';
-            tmp = str2dec((char*)temp);
+            tmp = str2dec((char *)temp);
             break;
         }
 

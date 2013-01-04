@@ -73,90 +73,91 @@ typedef irqreturn_t (*pinterrupt_isr)(int irq, void *dev_id);
 
 #endif
 
-typedef enum 
+typedef enum
 {
-	YIN0=0,//now is use Progressive Yin
-	YIN1,//not use
-	YIN2,// now is use Y of SEPARATION / DVD_CVBS
-	YIN3,//now is use AUX/BACK_CVBS
-	SEPARATION,//Progressive
-	NOTONE,
-}Vedio_Channel;
-typedef enum 
+    YIN0 = 0, //now is use Progressive Yin
+    YIN1,//not use
+    YIN2,// now is use Y of SEPARATION / DVD_CVBS
+    YIN3,//now is use AUX/BACK_CVBS
+    SEPARATION,//Progressive
+    NOTONE,
+} Vedio_Channel;
+typedef enum
 {
-	NTSC_I=1,
-	PAL_I,
-	NTSC_P,
-	PAL_P,
-	STOP_VIDEO,
-	COLORBAR,
-	OTHER,
-}Vedio_Format;
+    NTSC_I = 1,
+    PAL_I,
+    NTSC_P,
+    PAL_P,
+    STOP_VIDEO,
+    COLORBAR,
+    OTHER,
+} Vedio_Format;
 
 typedef enum
 {
-  PM_STATUS_EARLY_SUSPEND_PENDING,
-  PM_STATUS_SUSPEND_PENDING,
-  PM_STATUS_RESUME_OK,
-  PM_STATUS_LATE_RESUME_OK,
-}LIDBG_FAST_PWROFF_STATUS;
+    PM_STATUS_EARLY_SUSPEND_PENDING,
+    PM_STATUS_SUSPEND_PENDING,
+    PM_STATUS_RESUME_OK,
+    PM_STATUS_LATE_RESUME_OK,
+} LIDBG_FAST_PWROFF_STATUS;
 
 
 #define BEGIN_KMEM do{old_fs = get_fs();set_fs(get_ds());}while(0)
 #define END_KMEM   do{set_fs(old_fs);}while(0)
 
 
-struct lidbg_fn_t {
-//io
-	void (*pfnSOC_IO_Output) (unsigned int group, unsigned int index, bool status);
-	bool (*pfnSOC_IO_Input) (unsigned int group, unsigned int index, unsigned int pull);
-	void (*pfnSOC_IO_Output_Ext)(unsigned int group, unsigned int index, bool status, unsigned int pull, unsigned int drive_strength);
-	bool (*pfnSOC_IO_Config)(unsigned int index, bool direction, unsigned int pull, unsigned int drive_strength);
-	
-//i2c
-	int (*pfnSOC_I2C_Send) (int bus_id, char chip_addr, char *buf, unsigned int size);
-	int (*pfnSOC_I2C_Rec)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
-	int (*pfnSOC_I2C_Rec_Simple)(int bus_id, char chip_addr, char *buf, unsigned int size);
-	
-	int (*SOC_I2C_Rec_SAF7741)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
-	int (*SOC_I2C_Send_TEF7000)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
-	int (*SOC_I2C_Rec_TEF7000)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
+struct lidbg_fn_t
+{
+    //io
+    void (*pfnSOC_IO_Output) (unsigned int group, unsigned int index, bool status);
+    bool (*pfnSOC_IO_Input) (unsigned int group, unsigned int index, unsigned int pull);
+    void (*pfnSOC_IO_Output_Ext)(unsigned int group, unsigned int index, bool status, unsigned int pull, unsigned int drive_strength);
+    bool (*pfnSOC_IO_Config)(unsigned int index, bool direction, unsigned int pull, unsigned int drive_strength);
 
-	
-//io-irq
-	bool (*pfnSOC_IO_ISR_Add)(unsigned int irq, unsigned int interrupt_type, pinterrupt_isr func, void *dev);
-	bool (*pfnSOC_IO_ISR_Enable)(unsigned int irq);
-	bool (*pfnSOC_IO_ISR_Disable)(unsigned int irq);
-	bool (*pfnSOC_IO_ISR_Del )(unsigned int irq);
+    //i2c
+    int (*pfnSOC_I2C_Send) (int bus_id, char chip_addr, char *buf, unsigned int size);
+    int (*pfnSOC_I2C_Rec)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
+    int (*pfnSOC_I2C_Rec_Simple)(int bus_id, char chip_addr, char *buf, unsigned int size);
 
-//ad
-	bool (*pfnSOC_ADC_Get)(unsigned int channel , unsigned int *value);
+    int (*SOC_I2C_Rec_SAF7741)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
+    int (*SOC_I2C_Send_TEF7000)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
+    int (*SOC_I2C_Rec_TEF7000)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
 
 
-//key
-	 void (*pfnSOC_Key_Report)(unsigned int key_value, unsigned int type);
-//bl
-	int (*pfnSOC_BL_Set)( unsigned int level);
+    //io-irq
+    bool (*pfnSOC_IO_ISR_Add)(unsigned int irq, unsigned int interrupt_type, pinterrupt_isr func, void *dev);
+    bool (*pfnSOC_IO_ISR_Enable)(unsigned int irq);
+    bool (*pfnSOC_IO_ISR_Disable)(unsigned int irq);
+    bool (*pfnSOC_IO_ISR_Del )(unsigned int irq);
 
-//pwr
-	void (*pfnSOC_PWR_ShutDown)(void);
-	int (*pfnSOC_PWR_GetStatus)(void);
-	void (*pfnSOC_PWR_SetStatus)(LIDBG_FAST_PWROFF_STATUS status);
-
-//
-	void (*pfnSOC_Write_Servicer)(int cmd );
-//video
-        void (*pfnlidbg_video_main)(int argc, char **argv);
-        void (*pfnvideo_io_i2c_init)(void);
-        void (*pfnflyVideoInitall)(u8 Channel);
-        void (*pfnflyVideoTestSignalPin)(u8 Channel);
-        void (*pfnflyVideoImageQualityConfig)(u8 cmd ,u8 valu);
-	void (*pfnvideo_init_config)(Vedio_Format config_pramat);
+    //ad
+    bool (*pfnSOC_ADC_Get)(unsigned int channel , unsigned int *value);
 
 
+    //key
+    void (*pfnSOC_Key_Report)(unsigned int key_value, unsigned int type);
+    //bl
+    int (*pfnSOC_BL_Set)( unsigned int level);
+
+    //pwr
+    void (*pfnSOC_PWR_ShutDown)(void);
+    int (*pfnSOC_PWR_GetStatus)(void);
+    void (*pfnSOC_PWR_SetStatus)(LIDBG_FAST_PWROFF_STATUS status);
+
+    //
+    void (*pfnSOC_Write_Servicer)(int cmd );
+    //video
+    void (*pfnlidbg_video_main)(int argc, char **argv);
+    void (*pfnvideo_io_i2c_init)(void);
+    void (*pfnflyVideoInitall)(u8 Channel);
+    void (*pfnflyVideoTestSignalPin)(u8 Channel);
+    void (*pfnflyVideoImageQualityConfig)(u8 cmd , u8 valu);
+    void (*pfnvideo_init_config)(Vedio_Format config_pramat);
 
 
-	
+
+
+
 };
 
 #define LIDBG_SIZE	0x00001000 //MEM_SIZE_4_KB	/*全局内存最大1K字节*/
@@ -166,7 +167,7 @@ struct lidbg_dev
 {
     struct cdev cdev; /*cdev结构体*/
     unsigned char mem[LIDBG_SIZE]; /*全局内存*/
-	unsigned char lidbg_smem[LIDBG_SIZE/4]; // 1k
+    unsigned char lidbg_smem[LIDBG_SIZE/4]; // 1k
     struct lidbg_fn_t soc_func_tbl;
     unsigned char reserve[128];
 };

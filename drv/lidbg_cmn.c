@@ -79,7 +79,7 @@ static struct miscdevice misc =
 
 void soc_func_tbl_default()
 {
-	lidbgerr("soc_func_tbl_default:this func not ready!\n");
+    lidbgerr("soc_func_tbl_default:this func not ready!\n");
 
 }
 
@@ -107,7 +107,7 @@ static int __init cmn_init(void)
 #endif
     /* 动态申请设备结构体的内存*/
     lidbg_devp = kmalloc(sizeof(struct lidbg_dev), GFP_KERNEL);
-   global_lidbg_devp= lidbg_devp;
+    global_lidbg_devp = lidbg_devp;
     if (!lidbg_devp)    /*申请失败*/
     {
         //result =  - ENOMEM;
@@ -118,17 +118,17 @@ static int __init cmn_init(void)
     memset(lidbg_devp, 0, sizeof(struct lidbg_dev));
     //memset(&lidbg_devp->soc_func_tbl, soc_func_tbl_default, sizeof(struct lidbg_fn_t));
     {
-    	int i;
-		for(i=0;i<sizeof(lidbg_devp->soc_func_tbl)/4;i++)
-		{
-			((int*)&(lidbg_devp->soc_func_tbl))[i]=soc_func_tbl_default;
+        int i;
+        for(i = 0; i < sizeof(lidbg_devp->soc_func_tbl) / 4; i++)
+        {
+            ((int *)&(lidbg_devp->soc_func_tbl))[i] = soc_func_tbl_default;
 
-		}
-		//fot test
-		//(lidbg_devp->soc_func_tbl.pfnSOC_Write_Servicer)(i);
+        }
+        //fot test
+        //(lidbg_devp->soc_func_tbl.pfnSOC_Write_Servicer)(i);
 
 
-	}
+    }
 
     return ret;
 }

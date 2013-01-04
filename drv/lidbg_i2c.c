@@ -348,7 +348,7 @@ static int i2c_api_do_xfer(int bus_id, char chip_addr, unsigned int sub_addr, in
         msg[1].len = size;
         msg[1].buf = buf;
 
-		/*TEF7000 i2c READ no sub Addr*/
+        /*TEF7000 i2c READ no sub Addr*/
 
         //msg[2].addr = (SAF7741_I2C_ADDR_FOR_TEF7000 >> 1);
         //msg[2].flags = 0;

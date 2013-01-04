@@ -12,12 +12,12 @@ unsigned int   soc_bl_set(u32 bl_level)
     if(1)//flycar
     {
 
-		
-		if (p_fly_smem == NULL)
-		{
-			printk( "p_fly_smem == NULL\n");
-			return 0;
-		}
+
+        if (p_fly_smem == NULL)
+        {
+            printk( "p_fly_smem == NULL\n");
+            return 0;
+        }
         p_fly_smem->bl_value = (int)bl_level;
     }
     else//sku7

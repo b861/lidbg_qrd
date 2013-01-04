@@ -93,14 +93,14 @@ int k2u_read(void)
     int ret;
 
     spin_lock_irqsave(&fifo_k2u_lock, flags_k2u);
-	if(kfifo_is_empty(&k2u_fifo))
-	{
-       ret = 0xffffffff;
-	}
-	else
-  	{
-    	kfifo_out(&k2u_fifo, &ret, sizeof(int));
-  	}
+    if(kfifo_is_empty(&k2u_fifo))
+    {
+        ret = 0xffffffff;
+    }
+    else
+    {
+        kfifo_out(&k2u_fifo, &ret, sizeof(int));
+    }
     spin_unlock_irqrestore(&fifo_k2u_lock, flags_k2u);
     return ret;
 
@@ -187,7 +187,7 @@ ssize_t  servicer_read(struct file *filp, char __user *buffer, size_t size, loff
 
     int cmd ;
     cmd = k2u_read();
-    lidbg("servicer_read:cmd = %d\n",cmd);
+    lidbg("servicer_read:cmd = %d\n", cmd);
     if (copy_to_user(buffer, &cmd, 4))
     {
         // ret =  - EFAULT;

@@ -13,20 +13,20 @@ static struct task_struct *key_task;
 int thread_key_xxx(void *data)
 {
 
-	
+
     while(1)
     {
         set_current_state(TASK_UNINTERRUPTIBLE);
         if(kthread_should_stop()) break;
         if(1)
         {
-			
+
             while(1)
             {
-			msleep(3000);
-			SOC_IO_Output(0, 33, 1);
-			msleep(3000);
-			SOC_IO_Output(0, 33, 0);
+                msleep(3000);
+                SOC_IO_Output(0, 33, 1);
+                msleep(3000);
+                SOC_IO_Output(0, 33, 0);
 
             }
         }
@@ -44,7 +44,7 @@ int lidbg_test_init(void)
 {
     int err, times = 0;
     lidbg("lidbg_test_init.\n");
-	LIDBG_GET;
+    LIDBG_GET;
 
 
     key_task = kthread_create(thread_key_xxx, NULL, "key_task");
@@ -52,7 +52,8 @@ int lidbg_test_init(void)
     {
         lidbg("Unable to start kernel thread.\n");
 
-    }else wake_up_process(key_task);
+    }
+    else wake_up_process(key_task);
     return 0;
 
 }

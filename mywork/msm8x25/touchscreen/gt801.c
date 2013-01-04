@@ -17,17 +17,17 @@
 #ifdef SOC_COMPILE
 #include "lidbg.h"
 #include "fly_soc.h"
-	 
+
 #else
 #include "lidbg_def.h"
-	 
+
 #include "lidbg_enter.h"
-	 
-	 LIDBG_DEFINE;
+
+LIDBG_DEFINE;
 #endif
 
 
- 
+
 #include <linux/kernel.h>
 #include <linux/device.h>
 #include <linux/hrtimer.h>
@@ -191,12 +191,12 @@ static int goodix_init_panel(struct goodix_ts_data *ts)
     //#define GUITAR_CONFIG_43
 #ifdef GUITAR_CONFIG_43
     uint8_t config_info[54] = {0x30,
-    				0x19, 0x05, 0x06, 0x28, 0x02, 0x14, 0x14, 0x10, 0x28, 0xB0, 
-    				0x14, 0x00, 0x1E, 0x00, 0x01, 0x23,0x45, 0x67, 0x89, 0xAB, 
-    				0xCD, 0xE1, 0x00, 0x00, 0x00, 0x00, 0x1D, 0xCF, 0x20, 0x0B, 
-    				0x0B, 0x8B, 0x50, 0x3C, 0x1E, 0x28, 0x00, 0x00, 0x00, 0x00, 
-    				0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-    				0x00, 0x00, 0x01
+                               0x19, 0x05, 0x06, 0x28, 0x02, 0x14, 0x14, 0x10, 0x28, 0xB0,
+                               0x14, 0x00, 0x1E, 0x00, 0x01, 0x23, 0x45, 0x67, 0x89, 0xAB,
+                               0xCD, 0xE1, 0x00, 0x00, 0x00, 0x00, 0x1D, 0xCF, 0x20, 0x0B,
+                               0x0B, 0x8B, 0x50, 0x3C, 0x1E, 0x28, 0x00, 0x00, 0x00, 0x00,
+                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                               0x00, 0x00, 0x01
                               };
 #else //TCL_5.0 inch
     /*
@@ -253,17 +253,18 @@ static int goodix_init_panel(struct goodix_ts_data *ts)
                               };
 #else
 
-    uint8_t config_info[] = {0x30, 
-    0x0F, 0x05, 0x06, 0x28, 0x02, 0x14, 0x14, 0x10, 0x37, 0xB2,
-    0x02, 0x58, 0x04, 0x00, 0x01, 0x23, 0x45, 0x67, 0x89, 0xAB,
-    0xCD, 0xE0, 0x00, 0x00, 0x00, 0x00, 0x4D, 0xC1, 0x20, 0x01,
-    0x01, 0x83, 0x64, 0x3C, 0x1E, 0x28, 0x0E, 0x00, 0x00, 0x00,
-    0x00, 0x50, 0x3C, 0x32, 0x71, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x01};
+    uint8_t config_info[] = {0x30,
+                             0x0F, 0x05, 0x06, 0x28, 0x02, 0x14, 0x14, 0x10, 0x37, 0xB2,
+                             0x02, 0x58, 0x04, 0x00, 0x01, 0x23, 0x45, 0x67, 0x89, 0xAB,
+                             0xCD, 0xE0, 0x00, 0x00, 0x00, 0x00, 0x4D, 0xC1, 0x20, 0x01,
+                             0x01, 0x83, 0x64, 0x3C, 0x1E, 0x28, 0x0E, 0x00, 0x00, 0x00,
+                             0x00, 0x50, 0x3C, 0x32, 0x71, 0x00, 0x00, 0x00, 0x00, 0x00,
+                             0x00, 0x00, 0x01
+                            };
 #endif
 #endif
     //printk("start to send ---------->35\n");
-//lsw
+    //lsw
     ret = SOC_I2C_Send(1, 0x55, /*config_info[0],*/ config_info, 54 ); /*How many bytes to write 减去dev_addr和reg地址后*/
     //i2c_api_do_send(1, 0x55, &config_info[53], &config_info[54],2); /*How many bytes to write 减去dev_addr和reg地址后*/
 
@@ -323,7 +324,7 @@ static void goodix_ts_work_func(struct work_struct *work)
         finger = 0;
         if(point_data[0] == 0x00)
         {
-        finger=0;
+            finger = 0;
             goto up;
         }
         if((point_data[0] && 0x01) == 0x01)
@@ -343,11 +344,19 @@ static void goodix_ts_work_func(struct work_struct *work)
     //printk("\nfinger=[%d]\n",finger);
     //return 0;
 #ifdef FLY_DEBUG
-if(finger==3)
-    	{SOC_Key_Report(KEY_BACK,KEY_PRESSED_RELEASED);}
-if (finger==4) {printk("SOC_Log_Dump\n");SOC_Log_Dump(LOG_DMESG);}
-if(finger==5)
-    	{SOC_Key_Report(KEY_MENU,KEY_PRESSED_RELEASED);}
+    if(finger == 3)
+    {
+        SOC_Key_Report(KEY_BACK, KEY_PRESSED_RELEASED);
+    }
+    if (finger == 4)
+    {
+        printk("SOC_Log_Dump\n");
+        SOC_Log_Dump(LOG_DMESG);
+    }
+    if(finger == 5)
+    {
+        SOC_Key_Report(KEY_MENU, KEY_PRESSED_RELEASED);
+    }
 #endif
 
     switch(finger)
@@ -409,21 +418,21 @@ if(finger==5)
         g_New_PosY[0] = ((( point_data[4]) << 8 ) + point_data[5]  );
         if(g_New_PosY[0] != 0 && g_New_PosX[0] != 0)
         {
-		input_report_abs(ts->input_dev, ABS_MT_POSITION_X, g_New_PosY[0]);
-		input_report_abs(ts->input_dev, ABS_MT_POSITION_Y, g_New_PosX[0]);
-		input_report_abs(ts->input_dev, ABS_MT_TOUCH_MAJOR, 255);
-		input_report_abs(ts->input_dev, ABS_MT_TRACKING_ID, 0);
-		input_mt_sync(ts->input_dev);
-		input_report_key(ts->input_dev, BTN_TOUCH, 1);
-		input_sync(ts->input_dev);
+            input_report_abs(ts->input_dev, ABS_MT_POSITION_X, g_New_PosY[0]);
+            input_report_abs(ts->input_dev, ABS_MT_POSITION_Y, g_New_PosX[0]);
+            input_report_abs(ts->input_dev, ABS_MT_TOUCH_MAJOR, 255);
+            input_report_abs(ts->input_dev, ABS_MT_TRACKING_ID, 0);
+            input_mt_sync(ts->input_dev);
+            input_report_key(ts->input_dev, BTN_TOUCH, 1);
+            input_sync(ts->input_dev);
             //  input_sync(dev);
-        touch_cnt++;
-	if (touch_cnt>50)
-		{
-		touch_cnt=0;
-		printk("[%d,%d]\n", g_New_PosY[0], g_New_PosX[0]);
-		}
-            
+            touch_cnt++;
+            if (touch_cnt > 50)
+            {
+                touch_cnt = 0;
+                printk("[%d,%d]\n", g_New_PosY[0], g_New_PosX[0]);
+            }
+
         }
 
         FLAG_FOR_15S_OFF++;
@@ -451,17 +460,17 @@ if(finger==5)
 up:
         //input_report_key(dev, BTN_TOUCH, 0);
         //input_report_key(dev, BTN_2, 0);
-        finger=0;
-	input_report_abs(ts->input_dev, ABS_MT_TOUCH_MAJOR, 0);
-	input_mt_sync(ts->input_dev);
-	input_report_key(ts->input_dev, BTN_TOUCH,0);
-	input_sync(ts->input_dev);
+        finger = 0;
+        input_report_abs(ts->input_dev, ABS_MT_TOUCH_MAJOR, 0);
+        input_mt_sync(ts->input_dev);
+        input_report_key(ts->input_dev, BTN_TOUCH, 0);
+        input_sync(ts->input_dev);
         //input_report_abs(dev, ABS_MT_WIDTH_MAJOR, 0);
         //input_report_abs(dev, ABS_MT_POSITION_X, 0);
         // input_report_abs(dev, ABS_MT_POSITION_Y, 0);
         // input_mt_sync(dev);
         // input_sync(dev);
-       // printk("finger up\n");
+        // printk("finger up\n");
 #ifdef RECORVERY_MODULE
         {
             touch.pressed = 0;
@@ -864,7 +873,7 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     input_set_abs_params(ts->input_dev, ABS_MT_POSITION_Y, 0, RESOLUTION_Y , 0, 0);	//ts->abs_x_max
 
     //	sprintf(ts->phys, "input/ts)");
-	printk("check your screen [%d*%d]=================futengfei===\n",RESOLUTION_X,RESOLUTION_Y);
+    printk("check your screen [%d*%d]=================futengfei===\n", RESOLUTION_X, RESOLUTION_Y);
 
     sprintf(ts->phys, "input/ts");
     ts->input_dev->name = s3c_ts_name;
@@ -970,7 +979,7 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     register_early_suspend(&ts->early_suspend);
 #endif
 
-    dev_dbg(&client->dev, "Start  %s in %s mode\n",ts->input_dev->name, ts->use_irq ? "Interrupt" : "Polling\n");
+    dev_dbg(&client->dev, "Start  %s in %s mode\n", ts->input_dev->name, ts->use_irq ? "Interrupt" : "Polling\n");
     printk(  " out goodix_ts_probe---futengfei\n\n");
     return 0;
 
@@ -1034,98 +1043,98 @@ static int goodix_ts_remove(struct i2c_client *client)
 //鍋滅敤璁惧
 static int goodix_ts_suspend(struct i2c_client *client, pm_message_t mesg)
 {
-	int ret = 0;
-	struct goodix_ts_data *ts = i2c_get_clientdata(client);
-	printk(" [%s]========futengfei=======\n\n\n",__func__);
+    int ret = 0;
+    struct goodix_ts_data *ts = i2c_get_clientdata(client);
+    printk(" [%s]========futengfei=======\n\n\n", __func__);
 
-	return 0;
+    return 0;
 }
 //閲嶆柊鍞ら啋
 static int goodix_ts_resume(struct i2c_client *client)
 {
-	int ret=0,retry=0,init_err=0;
-	uint8_t GT811_check[6] = {0x55};
-	struct goodix_ts_data *ts = i2c_get_clientdata(client);
-	printk("come into [%s]========futengfei====== [futengfei]=\n",__func__);
-	printk(KERN_INFO "Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);
-	
-for(retry=0; retry<10; retry++)
-	{
-		goodix_init_panel(ts);
-		init_err=SOC_I2C_Rec(1,0x55,0x68,GT811_check, 6 );
-		ret = 0;
-	//if( GT811_check[0] == 0xff&&GT811_check[1] == 0xff&&GT811_check[2] == 0xff&&GT811_check[3] == 0xff&&GT811_check[4] == 0xff&&GT811_check[5] == 0xff)
-	if(init_err<0)
-	{			
-			printk("[futengfei]goodix_init_panel:goodix_init_panel failed====retry=[%d] init_err=%d\n",retry,init_err);
-			ret = 1;
-		}
-	else
-		{
-			printk("[futengfei]goodix_init_panel:goodix_init_panel success====retry=[%d] init_err=%d\n\n\n",retry,init_err);
-			ret = 0;
-		}
-	
-		msleep(8);
-		if(ret != 0)	//Initiall failed
-			{
-				printk("[futengfei]goodix_init_panel:goodix_init_panel failed=========retry=[%d]===ret[%d]\n",retry,ret);
-				SOC_IO_Output(0,26,0);
-				msleep(300);
-				SOC_IO_Output(0,26,1);
-				msleep(700);
-				continue;
-			}
-			
-		else
-			break;
-		
-		printk("[futengfei] goodix_ts_resume:if this is appear ,that is say the continue no goto for directly!\n");
-		
-	}
+    int ret = 0, retry = 0, init_err = 0;
+    uint8_t GT811_check[6] = {0x55};
+    struct goodix_ts_data *ts = i2c_get_clientdata(client);
+    printk("come into [%s]========futengfei====== [futengfei]=\n", __func__);
+    printk(KERN_INFO "Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);
 
-	if(ret != 0) 
-	{
-		printk("goodix_init_panel:Initiall failed============");
-		ts->bad_data=1;
-		//goto err_init_godix_ts;
-	}
+    for(retry = 0; retry < 10; retry++)
+    {
+        goodix_init_panel(ts);
+        init_err = SOC_I2C_Rec(1, 0x55, 0x68, GT811_check, 6 );
+        ret = 0;
+        //if( GT811_check[0] == 0xff&&GT811_check[1] == 0xff&&GT811_check[2] == 0xff&&GT811_check[3] == 0xff&&GT811_check[4] == 0xff&&GT811_check[5] == 0xff)
+        if(init_err < 0)
+        {
+            printk("[futengfei]goodix_init_panel:goodix_init_panel failed====retry=[%d] init_err=%d\n", retry, init_err);
+            ret = 1;
+        }
+        else
+        {
+            printk("[futengfei]goodix_init_panel:goodix_init_panel success====retry=[%d] init_err=%d\n\n\n", retry, init_err);
+            ret = 0;
+        }
 
-/*	
-	if (ts->power) {
-		ret = ts->power(ts, 1);
-		if (ret < 0)
-			printk("goodix_ts_resume power on failed\n");
-	}
+        msleep(8);
+        if(ret != 0)	//Initiall failed
+        {
+            printk("[futengfei]goodix_init_panel:goodix_init_panel failed=========retry=[%d]===ret[%d]\n", retry, ret);
+            SOC_IO_Output(0, 26, 0);
+            msleep(300);
+            SOC_IO_Output(0, 26, 1);
+            msleep(700);
+            continue;
+        }
 
-	if (ts->use_irq)
-		//enable_irq(client->irq);
-#ifndef STOP_IRQ_TYPE
-		gt811_irq_enable(ts);     //KT ADD 1202
-#elif
-		enable_irq(client->irq);
-#endif
-	else
-		hrtimer_start(&ts->timer, ktime_set(1, 0), HRTIMER_MODE_REL);
-*/
-	return 0;
+        else
+            break;
+
+        printk("[futengfei] goodix_ts_resume:if this is appear ,that is say the continue no goto for directly!\n");
+
+    }
+
+    if(ret != 0)
+    {
+        printk("goodix_init_panel:Initiall failed============");
+        ts->bad_data = 1;
+        //goto err_init_godix_ts;
+    }
+
+    /*
+    	if (ts->power) {
+    		ret = ts->power(ts, 1);
+    		if (ret < 0)
+    			printk("goodix_ts_resume power on failed\n");
+    	}
+
+    	if (ts->use_irq)
+    		//enable_irq(client->irq);
+    #ifndef STOP_IRQ_TYPE
+    		gt811_irq_enable(ts);     //KT ADD 1202
+    #elif
+    		enable_irq(client->irq);
+    #endif
+    	else
+    		hrtimer_start(&ts->timer, ktime_set(1, 0), HRTIMER_MODE_REL);
+    */
+    return 0;
 }
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
 static void goodix_ts_early_suspend(struct early_suspend *h)
 {
-	struct goodix_ts_data *ts;
-	printk("\n\n\n[futengfei]come into================ [%s]\n",__func__);
-	ts = container_of(h, struct goodix_ts_data, early_suspend);
-	goodix_ts_suspend(ts->client, PMSG_SUSPEND);
+    struct goodix_ts_data *ts;
+    printk("\n\n\n[futengfei]come into================ [%s]\n", __func__);
+    ts = container_of(h, struct goodix_ts_data, early_suspend);
+    goodix_ts_suspend(ts->client, PMSG_SUSPEND);
 }
 
 static void goodix_ts_late_resume(struct early_suspend *h)
 {
-	struct goodix_ts_data *ts;
-	printk("\n\n\n[futengfei]come into================ [%s]\n",__func__);
-	ts = container_of(h, struct goodix_ts_data, early_suspend);
-	goodix_ts_resume(ts->client);
+    struct goodix_ts_data *ts;
+    printk("\n\n\n[futengfei]come into================ [%s]\n", __func__);
+    ts = container_of(h, struct goodix_ts_data, early_suspend);
+    goodix_ts_resume(ts->client);
 }
 #endif
 
@@ -1165,9 +1174,9 @@ static int __devinit goodix_ts_init(void)
 
 
 #ifndef SOC_COMPILE
-		 LIDBG_GET;
+    LIDBG_GET;
 #endif
-	is_ts_load=1;
+    is_ts_load = 1;
     printk("\n\n==in=GT801.KO===============touch INFO=======================1205=futengfei\n");
 
 

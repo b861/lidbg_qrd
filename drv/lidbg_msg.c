@@ -17,19 +17,19 @@ static int thread_msg(void *data);
 
 typedef struct
 {
-int w_pos;
-int r_pos;
-char log[TOTAL_LOGS][LOG_BYTES];
-}lidbg_msg;
+    int w_pos;
+    int r_pos;
+    char log[TOTAL_LOGS][LOG_BYTES];
+} lidbg_msg;
 
-lidbg_msg *plidbg_msg=NULL;
+lidbg_msg *plidbg_msg = NULL;
 
 
 
 int thread_msg(void *data)
 {
-	plidbg_msg = (struct lidbg_msg *)kmalloc(sizeof( lidbg_msg), GFP_KERNEL);
-	plidbg_msg->w_pos=plidbg_msg->r_pos=0;
+    plidbg_msg = (struct lidbg_msg *)kmalloc(sizeof( lidbg_msg), GFP_KERNEL);
+    plidbg_msg->w_pos = plidbg_msg->r_pos = 0;
 
     while(1)
     {
@@ -37,11 +37,11 @@ int thread_msg(void *data)
         if(kthread_should_stop()) break;
         if(1)
         {
-        	wait_for_completion(&msg_ready);
-			
-			printk("%s",plidbg_msg->log[plidbg_msg->r_pos]);
-			plidbg_msg->r_pos = (plidbg_msg->r_pos + 1)  % TOTAL_LOGS;
-			
+            wait_for_completion(&msg_ready);
+
+            printk("%s", plidbg_msg->log[plidbg_msg->r_pos]);
+            plidbg_msg->r_pos = (plidbg_msg->r_pos + 1)  % TOTAL_LOGS;
+
         }
         else
         {
@@ -67,11 +67,11 @@ ssize_t  msg_write(struct file *filp, const char __user *buffer, size_t size, lo
 {
     int cmd ;
 
-		copy_from_user(&(plidbg_msg->log[plidbg_msg->w_pos]), buffer,size>LOG_BYTES?LOG_BYTES:size);
-		plidbg_msg->w_pos = (plidbg_msg->w_pos + 1)  % TOTAL_LOGS;
-		complete(&msg_ready);
+    copy_from_user(&(plidbg_msg->log[plidbg_msg->w_pos]), buffer, size > LOG_BYTES ? LOG_BYTES : size);
+    plidbg_msg->w_pos = (plidbg_msg->w_pos + 1)  % TOTAL_LOGS;
+    complete(&msg_ready);
 
-    
+
 
     return size;
 }
@@ -114,15 +114,16 @@ static int __init msg_init(void)
 
     ret = misc_register(&misc);
 
-	
-	INIT_COMPLETION(msg_ready);
 
-	msg_task = kthread_create(thread_msg, NULL, "msg_task");
-	if(IS_ERR(msg_task))
-	{
-		lidbg("Unable to start kernel thread.\n");
+    INIT_COMPLETION(msg_ready);
 
-	}else wake_up_process(msg_task);
+    msg_task = kthread_create(thread_msg, NULL, "msg_task");
+    if(IS_ERR(msg_task))
+    {
+        lidbg("Unable to start kernel thread.\n");
+
+    }
+    else wake_up_process(msg_task);
 
 
 

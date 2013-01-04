@@ -63,8 +63,8 @@ int  servicer_handler(int signum)
 
 
     readlen = read(fd, &cmd, 4);
-	//printf("fd=%x,readlen=%d,cmd=%d\n",fd,readlen,cmd);
-    LOGW("[futengfei]  fd=%x,readlen=%d,cmd=%d",fd,readlen,cmd);
+    //printf("fd=%x,readlen=%d,cmd=%d\n",fd,readlen,cmd);
+    LOGW("[futengfei]  fd=%x,readlen=%d,cmd=%d", fd, readlen, cmd);
     if(cmd != SERVICER_DONOTHING)
 
     {
@@ -77,15 +77,15 @@ int  servicer_handler(int signum)
         {
         case LOG_DMESG:
         case LOG_LOGCAT:
-		case LOG_ALL:
-		case LOG_CONT:
+        case LOG_ALL:
+        case LOG_CONT:
         {
             if(count == 0)
 
             {
                 system("date > /sdcard/log_logcat.txt");
                 system("date > /sdcard/log_dmesg.txt");
-				system("date > /sdcard/all_mesg.txt");
+                system("date > /sdcard/all_mesg.txt");
                 //system("date > /sdcard/log_dmesg_lidbg.txt");
 
                 //system("date > /sdcard/tflash/log_dmesg.txt");
@@ -102,15 +102,15 @@ int  servicer_handler(int signum)
             if(LOG_ALL == cmd)
             {
                 system("date >> /sdcard/all_mesg.txt");
-				system("logcat -f /dev/kmsg & dmesg >/sdcard/all_mesg.txt");
+                system("logcat -f /dev/kmsg & dmesg >/sdcard/all_mesg.txt");
 
-			}
+            }
             if(LOG_CONT == cmd)
             {
-                
-				system("logcat -f /dev/kmsg & cat /proc/kmsg >/sdcard/all_mesg.txt");
 
-			}
+                system("logcat -f /dev/kmsg & cat /proc/kmsg >/sdcard/all_mesg.txt");
+
+            }
 
             if(LOG_DMESG == cmd)
             {
@@ -149,8 +149,8 @@ int  servicer_handler(int signum)
         case LOG_CAP_TS_FT5X06_SKU7:
         case LOG_CAP_TS_FT5X06:
         case LOG_CAP_TS_RMI:
-		case LOG_CAP_TS_GT801:
-		case CMD_FAST_POWER_OFF :
+        case LOG_CAP_TS_GT801:
+        case CMD_FAST_POWER_OFF :
         {
             if(LOG_CAP_TS_GT811 == cmd)
 
@@ -204,11 +204,11 @@ int  servicer_handler(int signum)
             }
             else if ( CMD_FAST_POWER_OFF == cmd)
             {
-            	//system("setprop fly.fastboot.accoff 1");
-            	property_set("fly.fastboot.accoff","1");
+                //system("setprop fly.fastboot.accoff 1");
+                property_set("fly.fastboot.accoff", "1");
                 system("am broadcast -a android.intent.action.FAST_BOOT_START");
             }
-			
+
             //sleep(10);//delay to mount sdcard
             //system("dmesg > /sdcard/log_cap_ts_dmesg.txt");
 
@@ -216,39 +216,39 @@ int  servicer_handler(int signum)
 
         }
 
-		case UMOUNT_USB:
-		{
+        case UMOUNT_USB:
+        {
 
-			system("umount /mnt/usbdisk");
-			break;
+            system("umount /mnt/usbdisk");
+            break;
 
-		}
-		case WAKEUP_KERNEL:
-		{
-			system("su");
-			system("echo on > /sys/power/state");
-			//system("setprop fly.fastboot.accoff 0");
-			property_set("fly.fastboot.accoff","0");
-			//system("echo host > /mnt/debugfs/otg/mode");
-			break;
+        }
+        case WAKEUP_KERNEL:
+        {
+            system("su");
+            system("echo on > /sys/power/state");
+            //system("setprop fly.fastboot.accoff 0");
+            property_set("fly.fastboot.accoff", "0");
+            //system("echo host > /mnt/debugfs/otg/mode");
+            break;
 
-		}
-		case SUSPEND_KERNEL:
-		{
-			system("su");
-			//system("echo peripheral > /mnt/debugfs/otg/mode");
-			property_set("fly.fastboot.accoff","1");
-			system("echo mem > /sys/power/state");
-			break;
+        }
+        case SUSPEND_KERNEL:
+        {
+            system("su");
+            //system("echo peripheral > /mnt/debugfs/otg/mode");
+            property_set("fly.fastboot.accoff", "1");
+            system("echo mem > /sys/power/state");
+            break;
 
-		}
+        }
 
-	  
+
         }
     }
 
     printf("servicer_handler-\n");
-	return cmd;
+    return cmd;
 }
 
 
@@ -264,52 +264,52 @@ int main(int argc , char **argv)
     printf("lidbg_servicer start\n");
     //sleep(5);
 
-	system("insmod /system/lib/modules/out/lidbg_ts_to_recov.ko");
-	system("insmod /system/lib/modules/out/lidbg_msg.ko");
-	system("insmod /system/lib/modules/out/lidbg_common.ko");
-	system("insmod /system/lib/modules/out/lidbg_servicer.ko");
-	system("insmod /system/lib/modules/out/lidbg_touch.ko");
-	system("insmod /system/lib/modules/out/lidbg_key.ko");
-	system("insmod /system/lib/modules/out/lidbg_i2c.ko");
-	system("insmod /system/lib/modules/out/lidbg_soc_msm8x25.ko");
-	system("insmod /system/lib/modules/out/lidbg_io.ko");
-	system("insmod /system/lib/modules/out/lidbg_ad.ko");
-	system("insmod /system/lib/modules/out/lidbg_main.ko");
+    system("insmod /system/lib/modules/out/lidbg_ts_to_recov.ko");
+    system("insmod /system/lib/modules/out/lidbg_msg.ko");
+    system("insmod /system/lib/modules/out/lidbg_common.ko");
+    system("insmod /system/lib/modules/out/lidbg_servicer.ko");
+    system("insmod /system/lib/modules/out/lidbg_touch.ko");
+    system("insmod /system/lib/modules/out/lidbg_key.ko");
+    system("insmod /system/lib/modules/out/lidbg_i2c.ko");
+    system("insmod /system/lib/modules/out/lidbg_soc_msm8x25.ko");
+    system("insmod /system/lib/modules/out/lidbg_io.ko");
+    system("insmod /system/lib/modules/out/lidbg_ad.ko");
+    system("insmod /system/lib/modules/out/lidbg_main.ko");
 
-	system("insmod /system/lib/modules/out/lidbg_fly_soc.ko");
+    system("insmod /system/lib/modules/out/lidbg_fly_soc.ko");
 
-	system("insmod /system/lib/modules/out/lidbg_fastboot.ko");
-	system("insmod /system/lib/modules/out/lidbg_lpc.ko");
-	system("insmod /system/lib/modules/out/lidbg_soc_devices.ko");
-	system("insmod /system/lib/modules/out/lidbg_videoin.ko");
-	system("insmod /system/lib/modules/out/lidbg_to_bpmsg.ko");
-
-
-	//for flycar
-	system("insmod /flysystem/lib/out/lidbg_ts_to_recov.ko");
-	system("insmod /flysystem/lib/out/lidbg_msg.ko");
-	system("insmod /flysystem/lib/out/lidbg_common.ko");
-	system("insmod /flysystem/lib/out/lidbg_servicer.ko");
-	system("insmod /flysystem/lib/out/lidbg_touch.ko");
-	system("insmod /flysystem/lib/out/lidbg_key.ko");
-	system("insmod /flysystem/lib/out/lidbg_i2c.ko");
-	system("insmod /flysystem/lib/out/lidbg_soc_msm8x25.ko");
-	system("insmod /flysystem/lib/out/lidbg_io.ko");
-	system("insmod /flysystem/lib/out/lidbg_ad.ko");
-	system("insmod /flysystem/lib/out/lidbg_main.ko");
-	system("insmod /flysystem/lib/out/lidbg_fly_soc.ko");
-	system("insmod /flysystem/lib/out/lidbg_fastboot.ko");
-	//system("insmod /flysystem/lib/out/lidbg_lpc.ko");
-	// system("insmod /flysystem/lib/out/lidbg_soc_devices.ko");
-	system("insmod /flysystem/lib/out/lidbg_videoin.ko");
-	system("insmod /flysystem/lib/out/lidbg_to_bpmsg.ko");
+    system("insmod /system/lib/modules/out/lidbg_fastboot.ko");
+    system("insmod /system/lib/modules/out/lidbg_lpc.ko");
+    system("insmod /system/lib/modules/out/lidbg_soc_devices.ko");
+    system("insmod /system/lib/modules/out/lidbg_videoin.ko");
+    system("insmod /system/lib/modules/out/lidbg_to_bpmsg.ko");
 
 
+    //for flycar
+    system("insmod /flysystem/lib/out/lidbg_ts_to_recov.ko");
+    system("insmod /flysystem/lib/out/lidbg_msg.ko");
+    system("insmod /flysystem/lib/out/lidbg_common.ko");
+    system("insmod /flysystem/lib/out/lidbg_servicer.ko");
+    system("insmod /flysystem/lib/out/lidbg_touch.ko");
+    system("insmod /flysystem/lib/out/lidbg_key.ko");
+    system("insmod /flysystem/lib/out/lidbg_i2c.ko");
+    system("insmod /flysystem/lib/out/lidbg_soc_msm8x25.ko");
+    system("insmod /flysystem/lib/out/lidbg_io.ko");
+    system("insmod /flysystem/lib/out/lidbg_ad.ko");
+    system("insmod /flysystem/lib/out/lidbg_main.ko");
+    system("insmod /flysystem/lib/out/lidbg_fly_soc.ko");
+    system("insmod /flysystem/lib/out/lidbg_fastboot.ko");
+    //system("insmod /flysystem/lib/out/lidbg_lpc.ko");
+    // system("insmod /flysystem/lib/out/lidbg_soc_devices.ko");
+    system("insmod /flysystem/lib/out/lidbg_videoin.ko");
+    system("insmod /flysystem/lib/out/lidbg_to_bpmsg.ko");
 
-	sleep(1);
-	system("chmod 0777 /dev/mlidbg0");
-	system("chmod 0777 /dev/lidbg_servicer");
-	system("chmod 0777 /dev/lidbg_msg");
+
+
+    sleep(1);
+    system("chmod 0777 /dev/mlidbg0");
+    system("chmod 0777 /dev/lidbg_servicer");
+    system("chmod 0777 /dev/lidbg_msg");
 
 open_dev:
     fd = open("/dev/lidbg_servicer", O_RDWR);
@@ -341,12 +341,12 @@ open_dev:
 #endif
 
 
-	//clear fifo
-	while(1)
-	{
-		if(servicer_handler(0) == 0xffffffff)
-			break;
-	}
+    //clear fifo
+    while(1)
+    {
+        if(servicer_handler(0) == 0xffffffff)
+            break;
+    }
 
     system("insmod /system/lib/modules/out/lidbg_ts_probe.ko");
     system("insmod /flysystem/lib/out/lidbg_ts_probe.ko");
@@ -385,8 +385,8 @@ open_dev:
 
     while(1)
     {
-		sleep(60);
-	}
+        sleep(60);
+    }
 
 
 

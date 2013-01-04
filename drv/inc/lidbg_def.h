@@ -16,7 +16,7 @@ typedef unsigned char			U8;
 typedef unsigned short int		U16;
 typedef unsigned int			U32;
 typedef unsigned int			uchar;
- 
+
 //#define uchar unsigned char
 
 //typedef unsigned int			*PU32;
