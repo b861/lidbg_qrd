@@ -1,7 +1,7 @@
 #include "video_init_config.h"
 static int flag_io_config = 0;
 static Vedio_Channel info_Vedio_Channel = NOTONE;
-static Vedio_Channel info_com_top_Channel = YIN3;
+static Vedio_Channel info_com_top_Channel = SEPARATION;
 extern TW9912_Signal signal_is_how[5];
 //spinlock_t spin_chipe_config_lock;
 struct mutex lock_chipe_config;
@@ -144,61 +144,56 @@ int flyVideoTestSignalPin_in(u8 Channel)
 }
 void video_init_config_in(Vedio_Format config_pramat)
 {
-    //spin_lock(&spin_chipe_config_lock);
-    mutex_lock(&lock_chipe_config);
-    if(config_pramat != STOP_VIDEO)
-    {
-        if(info_com_top_Channel == NOTONE)
-        {
-            Tw9912_init_PALi();
-            printk("TW9912:warning -->info_com_top_Channel == NOTONE,Tw9912 Ignore\n");
-        }
-        else
-            init_tw9912_ent(info_com_top_Channel);
+//spin_lock(&spin_chipe_config_lock);
+mutex_lock(&lock_chipe_config);
+	if(config_pramat != STOP_VIDEO)
+	{	
+		if(info_com_top_Channel == NOTONE)
+		{
+		Tw9912_init_PALi();
+		printk("TW9912:warning -->info_com_top_Channel == NOTONE,Tw9912 Ignore\n");
+		}
+	    	else
+		init_tw9912_ent(info_com_top_Channel);
+	
+		printk("\r\n");
+		printk("TW9912:info_Vedio_Channel=%d\n",info_Vedio_Channel);
+		printk("TW9912:signal_is_how[%d].Channel=%d\n",info_Vedio_Channel,signal_is_how[info_Vedio_Channel].Channel);
+		printk("TW9912:signal_is_how[%d].Format=%d\n",info_Vedio_Channel,signal_is_how[info_Vedio_Channel].Format);
+		printk("TW9912:signal_is_how[%d].vedio_source=%d\n",info_Vedio_Channel,signal_is_how[info_Vedio_Channel].vedio_source);
+	
+		if(info_Vedio_Channel<=SEPARATION)
+		{
 
-        printk("\r\n");
-        printk("TW9912:info_Vedio_Channel=%d\n", info_Vedio_Channel);
-        printk("TW9912:signal_is_how[%d].Channel=%d\n", info_Vedio_Channel, signal_is_how[info_Vedio_Channel].Channel);
-        printk("TW9912:signal_is_how[%d].Format=%d\n", info_Vedio_Channel, signal_is_how[info_Vedio_Channel].Format);
-        printk("TW9912:signal_is_how[%d].vedio_source=%d\n", info_Vedio_Channel, signal_is_how[info_Vedio_Channel].vedio_source);
-
-        if(info_Vedio_Channel <= SEPARATION)
-        {
-
-            //switch (flyVedioTestSignalPin(info_Vedio_Channel))
-            switch (signal_is_how[info_Vedio_Channel].Format)
-            {
-            case NTSC_I:
-                TC358_init(NTSC_I);
-                //TC358_init(PAL_Interlace);
-                break;
-            case PAL_I:
-                TC358_init(PAL_I);
-                break;
-            case NTSC_P:
-                TC358_init(NTSC_P);
-                break;
-            case PAL_P:
-                TC358_init(PAL_P);
-                break;
-            default :
-                printk("video not signal input\n");
-                TC358_init(COLORBAR);
-                break;
-            }
-
-        }//if(info_Vedio_Channel<=SEPARATION)
-        else
-        {
-            printk("Video_init_config:TW9912 not config!\n");
-            TC358_init(COLORBAR);
-        }
-
-    }
-    else
-    {
-        ;//TC358_init(STOP_VIDEO);
-    }
-    //spin_unlock(&spin_chipe_config_lock);
-    mutex_unlock(&lock_chipe_config);
+				//switch (flyVideoSignalPinTest(info_Vedio_Channel))
+				switch (signal_is_how[info_Vedio_Channel].Format)
+				{
+				case NTSC_I: TC358_init(NTSC_I);
+					   //TC358_init(PAL_Interlace);
+					break;
+				case PAL_I: TC358_init(PAL_I);
+					break;
+				case NTSC_P: TC358_init(NTSC_P);
+					break;
+				case PAL_P: TC358_init(PAL_P);
+					break;
+				default :printk("video not signal input\n"); 
+					    TC358_init(COLORBAR);
+					break;
+				}
+			
+		}//if(info_Vedio_Channel<=SEPARATION)
+		else
+		{
+			printk("Video_init_config:TW9912 not config!\n"); 
+			 TC358_init(COLORBAR);
+		}
+		
+	}
+	else
+	{
+	   ;//TC358_init(STOP_VIDEO);
+	}
+//spin_unlock(&spin_chipe_config_lock);
+mutex_unlock(&lock_chipe_config);
 }

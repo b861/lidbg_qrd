@@ -137,24 +137,24 @@ void lidbg_video_main_in(int argc, char **argv)
 
 static void set_func_tbl(void)
 {
-    //video
-    plidbg_dev->soc_func_tbl.pfnlidbg_video_main = lidbg_video_main_in;
-    plidbg_dev->soc_func_tbl.pfnvideo_io_i2c_init = video_io_i2c_init_in;
-    plidbg_dev->soc_func_tbl.pfnflyVideoInitall = flyVideoInitall_in;
-    plidbg_dev->soc_func_tbl.pfnflyVideoTestSignalPin = flyVideoTestSignalPin_in;
-    plidbg_dev->soc_func_tbl.pfnflyVideoImageQualityConfig = flyVideoImageQualityConfig_in;
-    plidbg_dev->soc_func_tbl.pfnvideo_init_config = video_init_config_in;
+//video
+	plidbg_dev->soc_func_tbl.pfnlidbg_video_main = lidbg_video_main_in;
+	plidbg_dev->soc_func_tbl.pfnvideo_io_i2c_init = video_io_i2c_init_in;
+	plidbg_dev->soc_func_tbl.pfnflyVideoInitall = flyVideoInitall_in;
+	plidbg_dev->soc_func_tbl.pfnflyVideoTestSignalPin = flyVideoTestSignalPin_in;
+	plidbg_dev->soc_func_tbl.pfnflyVideoImageQualityConfig = flyVideoImageQualityConfig_in;
+	plidbg_dev->soc_func_tbl.pfnvideo_init_config = video_init_config_in;
 }
 
 
 int lidbg_video_init(void)
 {
-    printk("lidbg_video_init modules ismod\n");
-    LIDBG_GET;
-    set_func_tbl();
-    video_io_i2c_init();
-    flyVedioInitall(YIN3);
-    return 0;
+	printk("lidbg_video_init modules ismod\n");
+	LIDBG_GET;
+	set_func_tbl();
+	video_io_i2c_init();
+	flyVideoChannelInitall(YIN3);
+	    return 0;
 
 }
 
