@@ -434,10 +434,10 @@ int thread_lpc(void *data)
 #ifdef LPC_DEBUG_LOG
                 lidbg("lpc_send_rec_count=%d\n", re_sleep_count);
 #endif
-                if(lpc_send_rec_count >= 3)
+                if(lpc_send_rec_count >= 5)
                 {
                     re_sleep_count++;
-                    lidbg("\n\n\nerrlsw:lpc_send_rec_count > 3 ,do SOC_PWR_ShutDown again! %d\n\n\n", re_sleep_count);
+                    lidbg("\n\n\nerrlsw:lpc_send_rec_count > 5 ,do SOC_PWR_ShutDown again! %d\n\n\n", re_sleep_count);
                     SOC_PWR_ShutDown();
                     lpc_send_rec_count = 0;
 
@@ -631,12 +631,19 @@ static struct platform_driver lpc_driver =
 static int __init lpc_init(void)
 {
     DUMP_BUILD_TIME;
+
+	
+#ifndef FLY_DEBUG
+		lidbg("lpc_init do nothing");
+#else
 #ifndef SOC_COMPILE
     LIDBG_GET;
+// set_func_tbl();
+
 #endif
-    // set_func_tbl();
     platform_device_register(&lidbg_lpc);
     platform_driver_register(&lpc_driver);
+#endif
 
     return 0;
 }

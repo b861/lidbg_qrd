@@ -297,10 +297,12 @@ int main(int argc , char **argv)
     system("insmod /flysystem/lib/out/lidbg_io.ko");
     system("insmod /flysystem/lib/out/lidbg_ad.ko");
     system("insmod /flysystem/lib/out/lidbg_main.ko");
+	
     system("insmod /flysystem/lib/out/lidbg_fly_soc.ko");
+	
     system("insmod /flysystem/lib/out/lidbg_fastboot.ko");
-    //system("insmod /flysystem/lib/out/lidbg_lpc.ko");
-    // system("insmod /flysystem/lib/out/lidbg_soc_devices.ko");
+    system("insmod /flysystem/lib/out/lidbg_lpc.ko");
+    system("insmod /flysystem/lib/out/lidbg_soc_devices.ko");
     system("insmod /flysystem/lib/out/lidbg_videoin.ko");
     system("insmod /flysystem/lib/out/lidbg_to_bpmsg.ko");
 

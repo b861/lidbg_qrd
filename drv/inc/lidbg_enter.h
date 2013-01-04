@@ -109,12 +109,40 @@ typedef enum
 struct lidbg_fn_t
 {
     //io
+/*
+ GPIO TLMM: Pullup/Pulldown
+enum {
+	GPIO_CFG_NO_PULL,
+	GPIO_CFG_PULL_DOWN,
+	GPIO_CFG_KEEPER,
+	GPIO_CFG_PULL_UP,
+};
+
+GPIO TLMM: Drive Strength
+enum {
+	GPIO_CFG_2MA,
+	GPIO_CFG_4MA,
+	GPIO_CFG_6MA,
+	GPIO_CFG_8MA,
+	GPIO_CFG_10MA,
+	GPIO_CFG_12MA,
+	GPIO_CFG_14MA,
+	GPIO_CFG_16MA,
+};
+
+*/
     void (*pfnSOC_IO_Output) (unsigned int group, unsigned int index, bool status);
     bool (*pfnSOC_IO_Input) (unsigned int group, unsigned int index, unsigned int pull);
     void (*pfnSOC_IO_Output_Ext)(unsigned int group, unsigned int index, bool status, unsigned int pull, unsigned int drive_strength);
     bool (*pfnSOC_IO_Config)(unsigned int index, bool direction, unsigned int pull, unsigned int drive_strength);
 
     //i2c
+/*
+7bit i2c sub_addr
+bus_id : 0/1
+return how many bytes read/write
+when err , <0
+*/
     int (*pfnSOC_I2C_Send) (int bus_id, char chip_addr, char *buf, unsigned int size);
     int (*pfnSOC_I2C_Rec)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
     int (*pfnSOC_I2C_Rec_Simple)(int bus_id, char chip_addr, char *buf, unsigned int size);
@@ -125,18 +153,38 @@ struct lidbg_fn_t
 
 
     //io-irq
+    //interrupt_type
+
+/*
+
+#define IRQF_TRIGGER_RISING	0x00000001
+#define IRQF_TRIGGER_FALLING	0x00000002
+#define IRQF_TRIGGER_HIGH	0x00000004
+#define IRQF_TRIGGER_LOW	0x00000008
+
+*/
     bool (*pfnSOC_IO_ISR_Add)(unsigned int irq, unsigned int interrupt_type, pinterrupt_isr func, void *dev);
     bool (*pfnSOC_IO_ISR_Enable)(unsigned int irq);
     bool (*pfnSOC_IO_ISR_Disable)(unsigned int irq);
     bool (*pfnSOC_IO_ISR_Del )(unsigned int irq);
 
     //ad
+/*
+ return 0 when err
+// 0-AIN2
+// 1-AIN3
+// 2-AIN4
+// 3-REM1
+// 4-REM2
+//#define ADC_MAX_CH (8)
+*/
     bool (*pfnSOC_ADC_Get)(unsigned int channel , unsigned int *value);
 
 
     //key
     void (*pfnSOC_Key_Report)(unsigned int key_value, unsigned int type);
     //bl
+    /*level : 0~255   0-dim, 255-bright*/
     int (*pfnSOC_BL_Set)( unsigned int level);
 
     //pwr
