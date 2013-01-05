@@ -276,7 +276,7 @@ static void LPCdealReadFromMCUAll(BYTE *p, UINT length)
                 }
                 else
                 {
-                    lidbg("suspend_pending...\n");
+                    lidbg("PM_STATUS_LATE_RESUME_OK not ready...\n");
 
                 }
                 break;
