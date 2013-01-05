@@ -221,6 +221,8 @@ struct lidbg_dev
 };
 
 
+#define LIDBG_DEV_CHECK_READY  (plidbg_dev != NULL)  
+
 #define LIDBG_DEFINE  struct lidbg_dev *plidbg_dev = NULL
 
 #define LIDBG_GET  \

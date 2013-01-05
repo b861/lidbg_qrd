@@ -44,7 +44,7 @@ static int thread_pwroff(void *data)
                 time_count++;
                 if(fastboot_get_status() == PM_STATUS_EARLY_SUSPEND_PENDING)
                 {
-                    if(time_count >= 10)
+                    if(time_count >= 20)
                     {
                         lidbgerr("thread_pwroff wait suspend timeout!\n");
                         SOC_Write_Servicer(SUSPEND_KERNEL);
@@ -120,9 +120,10 @@ void fastboot_pwroff(void)
 {
     DUMP_FUN_ENTER;
 
-    if(PM_STATUS_LATE_RESUME_OK != fastboot_get_status())
+    while(PM_STATUS_LATE_RESUME_OK != fastboot_get_status())
     {
         lidbgerr("Call SOC_PWR_ShutDown when suspend_pending != PM_STATUS_LATE_RESUME_OK :%d\n", fastboot_get_status());
+		msleep(200);
 
     }
 

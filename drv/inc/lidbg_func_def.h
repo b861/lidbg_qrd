@@ -8,7 +8,7 @@ static inline int check_pt(void)
     while (plidbg_dev==NULL)
     {
         printk("lidbg:check_pt-plidbg_dev==NULL\n");
-        msleep(100);
+        msleep(200);
     }
     return 0;
 }
