@@ -566,7 +566,7 @@ static void devices_early_suspend(struct early_suspend *handler)
 
 #ifdef DEBUG_UMOUNT_USB
         SOC_Write_Servicer(UMOUNT_USB);
-		msleep(4000);
+		msleep(3000);
 
 #endif
         USB_HUB_DISABLE;
