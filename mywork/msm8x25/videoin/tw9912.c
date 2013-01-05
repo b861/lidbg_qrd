@@ -356,7 +356,7 @@ int ret =-1;
 u8 channel_1;
 u8 Tw9912_input_pin_selet[]={0x02,0x40,};//default input pin selet YIN0
 u8 manually_initiate_auto_format_detection[]={0x1d,0xff,};//default input pin selet YIN0
-tw9912_dbg("Tw9912_appoint_pin_testing_video_signal!\n");
+tw9912_dbg("@@@@@Tw9912_appoint_pin_testing_video_signal!\n");
 
 	if(Channel !=SEPARATION)
 	{
@@ -531,7 +531,7 @@ int Tw9912_init(Vedio_Format config_pramat,Vedio_Channel Channel)
 	//神码情况
 	}
 	else if(config_pramat != STOP_VIDEO)
-	{
+	{printk("tw9912:Tw9912_init()-->Tw9912_appoint_pin_testing_video_signal()\n");
 		ret = Tw9912_appoint_pin_testing_video_signal(Channel);//bad
 		if(ret==5)//the channel is not signal input
 			goto NOT_signal_input;

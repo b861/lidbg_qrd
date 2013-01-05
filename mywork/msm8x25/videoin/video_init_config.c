@@ -1,7 +1,7 @@
 #include "video_init_config.h"
 static int flag_io_config=0;
 static Vedio_Channel info_Vedio_Channel = NOTONE;
-static Vedio_Channel info_com_top_Channel = YIN3;
+static Vedio_Channel info_com_top_Channel = YIN2;
 extern TW9912_Signal signal_is_how[5];
 //spinlock_t spin_chipe_config_lock;
 struct mutex lock_chipe_config;
@@ -17,6 +17,7 @@ void video_io_i2c_init_in(void)
 }
 int flyVideoImageQualityConfig_in(u8 cmd ,u8 valu)
 {
+printk("tw9912:@@@@@flyVideoImageQualityConfig_in(cmd =%d,valu=%d)\n",cmd,valu);
 //spin_lock(&spin_chipe_config_lock);
 mutex_lock(&lock_chipe_config);
 	if(cmd ==0) return valu;
@@ -30,37 +31,33 @@ int flyVideoInitall_in(u8 Channel)
 
 int ret=1 ;
 //spin_lock(&spin_chipe_config_lock);
+printk("tw9912:@@@@@flyVideoInitall_in(Channel=%d)\n",Channel);
 mutex_lock(&lock_chipe_config);
 	switch (Channel)
 	{
 		case 0:
 			info_com_top_Channel = YIN0;
-			init_tw9912_ent(YIN0);
-			printk("TW9912:Channel selet YIN0\n");
+			//init_tw9912_ent(YIN0);
 			break;
 		case 1:
 			info_com_top_Channel = YIN1;
-			init_tw9912_ent(YIN1);
-			printk("TW9912:Channel selet YIN1\n");
+			//init_tw9912_ent(YIN1);
 			break;
 		case 2:
 			info_com_top_Channel = YIN2;
-			init_tw9912_ent(YIN2);
-			printk("TW9912:Channel selet YIN2\n");
+			//init_tw9912_ent(YIN2);
 			break;
 		case 3:
 			info_com_top_Channel = YIN3;
-			init_tw9912_ent(YIN3);
-			printk("TW9912:Channel selet YIN3\n");
+			//init_tw9912_ent(YIN3);
 			break;
 		case 4:
 			info_com_top_Channel = SEPARATION;
-			init_tw9912_ent(SEPARATION);
-			printk("TW9912:Channel selet SEPARATION\n");
+			//init_tw9912_ent(SEPARATION);
 			break;
 		default :
 			info_com_top_Channel = NOTONE;
-			Tw9912_init_PALi();
+			//Tw9912_init_PALi();
 			printk("%s: you input TW9912 Channel=%d error!\n",__FUNCTION__,Channel);
 			break;
 	}
@@ -72,6 +69,8 @@ return ret;
 int init_tw9912_ent(Vedio_Channel Channel)
 {
 int ret=-1 ;
+printk("tw9912:@@@@@init_tw9912_ent(Channel=%d)\n",Channel);
+printk("tw9912:init_tw9912_ent()-->Tw9912_init()\n");
 	switch (Channel)
 	{
 		case YIN0:
@@ -108,6 +107,7 @@ return ret;
 }
 int flyVideoTestSignalPin_in(u8 Channel)
 {int ret= NOTONE;
+printk("tw9912:@@@@@flyVideoTestSignalPin_in(Channel=%d)\n",Channel);
 //spin_lock(&spin_chipe_config_lock);
 mutex_lock(&lock_chipe_config);
 	switch (Channel)
@@ -143,6 +143,7 @@ return ret;
 }
 void video_init_config_in(Vedio_Format config_pramat)
 {
+printk("tw9912:@@@@@video_init_config_in(config_pramat=%d)\n",config_pramat);
 //spin_lock(&spin_chipe_config_lock);
 mutex_lock(&lock_chipe_config);
 	if(config_pramat != STOP_VIDEO)
@@ -153,7 +154,11 @@ mutex_lock(&lock_chipe_config);
 		printk("TW9912:warning -->info_com_top_Channel == NOTONE,Tw9912 Ignore\n");
 		}
 	    	else
+	    	{
+	    	printk("tw9912:video_init_config_in()-->init_tw9912_ent()\n");
 		init_tw9912_ent(info_com_top_Channel);
+		}
+	
 	
 		printk("\r\n");
 		printk("TW9912:info_Vedio_Channel=%d\n",info_Vedio_Channel);
