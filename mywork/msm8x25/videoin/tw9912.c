@@ -654,6 +654,7 @@ goto CONFIG_is_old;
 			else if (signal_is_how[Channel].Format ==NTSC_P )
 			{ u8 Tw9912_input_pin_selet[]={0x02,0x60,};
 				if(write_tw9912(Tw9912_input_pin_selet)==NACK) goto CONFIG_not_ack_fail;
+				msleep(400);//wait for vedio signal Stable 
 			}
 		//	msleep(400);//wait for vedio signal Stable 
 	}
