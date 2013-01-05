@@ -13,7 +13,6 @@
 
 #else
 #include "lidbg_def.h"
-#define LIDBG_FIRST_DEF
 
 #include "lidbg_enter.h"
 
@@ -42,6 +41,9 @@ struct fly_hardware_info *pGlobalHardwareInfo;
 UINT32 iDriverResumeTime = 0;
 BOOL bResumeError = FALSE;
 u32 lpc_send_rec_count = 0;
+
+u32 resume_count = 0;
+
 
 static struct task_struct *lpc_task;
 int thread_lpc(void *data);
@@ -439,7 +441,8 @@ int thread_lpc(void *data)
                 {
                     re_sleep_count++;
                     lidbg("\n\n\nerrlsw:lpc_send_rec_count > 5 ,do SOC_PWR_ShutDown again! %d\n\n\n", re_sleep_count);
-                    SOC_PWR_ShutDown();
+					if(resume_count > 0)
+                    	SOC_PWR_ShutDown();
                     lpc_send_rec_count = 0;
 
                 }
@@ -596,6 +599,7 @@ static int lpc_resume(struct device *dev)
 
     TELL_LPC_PWR_ON;
     msleep(200);
+	resume_count++;
 
     return 0;
 }

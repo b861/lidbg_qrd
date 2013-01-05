@@ -221,11 +221,7 @@ struct lidbg_dev
 };
 
 
-#ifdef LIDBG_FIRST_DEF
 #define LIDBG_DEFINE  struct lidbg_dev *plidbg_dev = NULL
-#else
-#define LIDBG_DEFINE  extern struct lidbg_dev *plidbg_dev
-#endif
 
 #define LIDBG_GET  \
  	do{\
