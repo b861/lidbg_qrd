@@ -772,30 +772,6 @@ up_irq:
 	id：设备ID
 return�?	执行结果码，0表示正常执行
 ********************************************************/
-void  get_screen_xy(int *lscreen_x, int *lscreen_y)
-{
-
-	int fbidx;
-	struct fb_var_screeninfo fb_varinfo;
-	printk("\num_registered_fb = %d \n", num_registered_fb);
-
-    for(fbidx = 0; fbidx < num_registered_fb; fbidx++)
-		{
-			struct fb_info *info = registered_fb[fbidx];
-			memcpy(&fb_varinfo, &(info->var), sizeof(fb_varinfo));
-
-			printk("xres=%d\n", fb_varinfo.xres);
-			printk("yres=%d\n", fb_varinfo.yres);
-
-			printk("\n\n");
-		}
-	if(fb_varinfo.xres==1024||fb_varinfo.xres==800)
-	{
-		*lscreen_x=fb_varinfo.xres;
-		*lscreen_y=fb_varinfo.yres;
-	}
-
-}
 static int screen_x=0;
 static int screen_y=0;
 static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id *id)
@@ -893,7 +869,7 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
 #define GOODIX_TOUCH_WEIGHT_MAX 		(150)
 screen_x=RESOLUTION_X;
 screen_y=RESOLUTION_Y;
-get_screen_xy(&screen_x, &screen_y);
+SOC_Display_Get_Res(&screen_x, &screen_y);
 #endif
     input_set_abs_params(ts->input_dev, ABS_MT_WIDTH_MAJOR, 0, 255, 0, 0);
     input_set_abs_params(ts->input_dev, ABS_MT_TOUCH_MAJOR, 0, 255, 0, 0);

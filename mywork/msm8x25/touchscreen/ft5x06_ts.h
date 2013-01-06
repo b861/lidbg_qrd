@@ -21,10 +21,10 @@
 struct ft5x06_ts_platform_data
 {
     unsigned long irqflags;
-    u32 x_max;
-    u32 y_max;
-    u32 irq_gpio;
-    u32 reset_gpio;
+    unsigned int x_max;
+    unsigned int y_max;
+    unsigned int irq_gpio;
+    unsigned int reset_gpio;
     int (*power_init) (bool);
     int (*power_on) (bool);
 };

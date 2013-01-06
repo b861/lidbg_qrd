@@ -17,7 +17,7 @@
  * GNU General Public License for more details.
  *
  */
-#if 0
+
 #include <linux/i2c.h>
 #include <linux/input.h>
 #include <linux/slab.h>
@@ -27,16 +27,14 @@
 #include <linux/module.h>
 #include <linux/gpio.h>
 #include <linux/regulator/consumer.h>
-#include <linux/input/ft5x06_ts.h>
-#else
-#define SOC_COMPILE
 
-#include "lidbg.h"
-#include <linux/input/ft5x06_ts.h>
-#include "fly_soc.h"
+#include "lidbg_def.h"
+#include "ft5x06_ts.h"
 
+#include "lidbg_enter.h"
 
-#endif
+LIDBG_DEFINE;
+
 
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
@@ -524,32 +522,6 @@ static const struct dev_pm_ops ft5x06_ts_pm_ops =
 #endif
 };
 #endif
-
-
-void  get_screen_xy(int *lscreen_x, int *lscreen_y)
-{
-
-	int fbidx;
-	struct fb_var_screeninfo fb_varinfo;
-	printk("\num_registered_fb = %d \n", num_registered_fb);
-
-    for(fbidx = 0; fbidx < num_registered_fb; fbidx++)
-		{
-			struct fb_info *info = registered_fb[fbidx];
-			memcpy(&fb_varinfo, &(info->var), sizeof(fb_varinfo));
-
-			printk("xres=%d\n", fb_varinfo.xres);
-			printk("yres=%d\n", fb_varinfo.yres);
-
-			printk("\n\n");
-		}
-	if(fb_varinfo.xres==1024||fb_varinfo.xres==800)
-	{
-		*lscreen_x=fb_varinfo.xres;
-		*lscreen_y=fb_varinfo.yres;
-	}
-
-}
 static int screen_x=0;
 static int screen_y=0;
 static int ft5x06_ts_probe(struct i2c_client *client,
@@ -615,7 +587,7 @@ static int ft5x06_ts_probe(struct i2c_client *client,
 #define SCREEN_Y (600)
 screen_x=SCREEN_X;
 screen_y=SCREEN_Y;
-get_screen_xy(&screen_x, &screen_y);
+SOC_Display_Get_Res(&screen_x, &screen_y);
     input_set_abs_params(input_dev, ABS_MT_POSITION_X, 0,
                          /*pdata->x_max*/screen_x, 0, 0);
     input_set_abs_params(input_dev, ABS_MT_POSITION_Y, 0,
@@ -831,6 +803,7 @@ static struct i2c_driver ft5x06_ts_driver =
 
 static int __init ft5x06_ts_init(void)
 {
+	LIDBG_GET;
 
     is_ts_load = 1;
     printk( "=====800====================futengfei==============ft5x06_ts_init=========1012======== \n");

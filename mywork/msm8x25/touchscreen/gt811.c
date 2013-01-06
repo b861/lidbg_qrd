@@ -810,30 +810,7 @@ Parameters:
 return:
 	Results of the implementation code, 0 for normal execution
 ********************************************************/
-void  get_screen_xy(int *lscreen_x, int *lscreen_y)
-{
 
-	int fbidx;
-	struct fb_var_screeninfo fb_varinfo;
-	printk("\num_registered_fb = %d \n", num_registered_fb);
-
-    for(fbidx = 0; fbidx < num_registered_fb; fbidx++)
-		{
-			struct fb_info *info = registered_fb[fbidx];
-			memcpy(&fb_varinfo, &(info->var), sizeof(fb_varinfo));
-
-			printk("xres=%d\n", fb_varinfo.xres);
-			printk("yres=%d\n", fb_varinfo.yres);
-
-			printk("\n\n");
-		}
-	if(fb_varinfo.xres==1024||fb_varinfo.xres==800)
-	{
-		*lscreen_x=fb_varinfo.xres;
-		*lscreen_y=fb_varinfo.yres;
-	}
-
-}
 static int screen_x=0;
 static int screen_y=0;
 static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id *id)
@@ -981,7 +958,7 @@ err_gpio_request_failed:
 #define SCREEN_Y (600)
 screen_x=SCREEN_X;
 screen_y=SCREEN_Y;
-get_screen_xy(&screen_x, &screen_y);
+SOC_Display_Get_Res(&screen_x, &screen_y);
 #ifdef GOODIX_MULTI_TOUCH
     input_set_abs_params(ts->input_dev, ABS_MT_WIDTH_MAJOR, 0, 255, 0, 0);
     input_set_abs_params(ts->input_dev, ABS_MT_TOUCH_MAJOR, 0, 255, 0, 0);

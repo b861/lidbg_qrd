@@ -55,5 +55,10 @@ static inline int check_pt(void)
 #define flyVideoSignalPinTest  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnflyVideoTestSignalPin))
 #define flyVideoImageQualityConfig  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnflyVideoImageQualityConfig))
 #define video_init_config check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnvideo_init_config)
+
+//display/touch
+
+#define SOC_Display_Get_Res  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_Display_Get_Res))
+
 #endif
 
