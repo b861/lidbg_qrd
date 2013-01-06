@@ -618,6 +618,9 @@ goto CONFIG_is_old;
 			{    
 				if(write_tw9912(&config_pramat_piont[i*2])==NACK) goto CONFIG_not_ack_fail;
 				tw9912_dbg("w a=%x,v=%x\n",config_pramat_piont[i*2],config_pramat_piont[i*2+1]);
+				if(signal_is_how[Channel].Format == NTSC_P \
+					&& config_pramat_piont[i*2] >0x1f\
+					&& config_pramat_piont[i*2] < 0x2f) usleep(100);
 				i++;
 			}
 		

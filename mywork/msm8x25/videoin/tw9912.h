@@ -8,7 +8,7 @@
 #define TW9912_RESET 43
 #define Progressive_Output_CLKx2 0x49  
 #define Interlaced_Output_CLKx1  0x05
-#if 1
+#if 0
 #define tw9912_dbg(msg...)  do { printk( KERN_CRIT "TW9912: " msg); }while(0)
 #else
 #define tw9912_dbg(msg...)  do {}while(0)
