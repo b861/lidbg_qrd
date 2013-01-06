@@ -105,8 +105,8 @@ printk("tw9912:init_tw9912_ent()-->Tw9912_init()\n");
 return ret;
 //success return 1 fail return -1
 }
-int flyVideoTestSignalPin_in(u8 Channel)
-{int ret= NOTONE;
+Vedio_Format flyVideoTestSignalPin_in(u8 Channel)
+{Vedio_Format ret= NOTONE;
 printk("tw9912:@@@@@flyVideoTestSignalPin_in(Channel=%d)\n",Channel);
 //spin_lock(&spin_chipe_config_lock);
 mutex_lock(&lock_chipe_config);

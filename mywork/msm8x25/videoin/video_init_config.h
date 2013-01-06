@@ -7,7 +7,7 @@
 void video_init_config_in(Vedio_Format config_pramat);
 void video_io_i2c_init_in(void);
 int flyVideoInitall_in(u8 Channel);
-int flyVideoTestSignalPin_in(u8 Channel);
+Vedio_Format flyVideoTestSignalPin_in(u8 Channel);
 int flyVideoImageQualityConfig_in(u8 cmd ,u8 valu);
 #endif
 
