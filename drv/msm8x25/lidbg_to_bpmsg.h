@@ -5,7 +5,7 @@
 
 //up always online
 
-#define TOTAL_LOGS 1000UL
+#define TOTAL_LOGS 500UL
 #define LOG_BYTES  32UL
 typedef struct
 {
