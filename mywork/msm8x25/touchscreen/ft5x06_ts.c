@@ -525,6 +525,33 @@ static const struct dev_pm_ops ft5x06_ts_pm_ops =
 };
 #endif
 
+
+void  get_screen_xy(int *lscreen_x, int *lscreen_y)
+{
+
+	int fbidx;
+	struct fb_var_screeninfo fb_varinfo;
+	printk("\num_registered_fb = %d \n", num_registered_fb);
+
+    for(fbidx = 0; fbidx < num_registered_fb; fbidx++)
+		{
+			struct fb_info *info = registered_fb[fbidx];
+			memcpy(&fb_varinfo, &(info->var), sizeof(fb_varinfo));
+
+			printk("xres=%d\n", fb_varinfo.xres);
+			printk("yres=%d\n", fb_varinfo.yres);
+
+			printk("\n\n");
+		}
+	if(fb_varinfo.xres==1024||fb_varinfo.xres==800)
+	{
+		*lscreen_x=fb_varinfo.xres;
+		*lscreen_y=fb_varinfo.yres;
+	}
+
+}
+static int screen_x=0;
+static int screen_y=0;
 static int ft5x06_ts_probe(struct i2c_client *client,
                            const struct i2c_device_id *id)
 {
@@ -584,16 +611,21 @@ static int ft5x06_ts_probe(struct i2c_client *client,
     __set_bit(EV_KEY, input_dev->evbit);
     __set_bit(EV_ABS, input_dev->evbit);
     __set_bit(BTN_TOUCH, input_dev->keybit);
-
+#define SCREEN_X (1024)
+#define SCREEN_Y (600)
+screen_x=SCREEN_X;
+screen_y=SCREEN_Y;
+get_screen_xy(&screen_x, &screen_y);
     input_set_abs_params(input_dev, ABS_MT_POSITION_X, 0,
-                         /*pdata->x_max*/1024, 0, 0);
+                         /*pdata->x_max*/screen_x, 0, 0);
     input_set_abs_params(input_dev, ABS_MT_POSITION_Y, 0,
-                         /*pdata->y_max*/600, 0, 0);
+                         /*pdata->y_max*/screen_y, 0, 0);
     input_set_abs_params(input_dev, ABS_MT_TRACKING_ID, 0,
                          CFG_MAX_TOUCH_POINTS, 0, 0);
     input_set_abs_params(input_dev, ABS_MT_TOUCH_MAJOR, 0, FT_PRESS, 0, 0);
     input_set_abs_params(input_dev, ABS_MT_PRESSURE, 0, FT_PRESS, 0, 0);
 
+    printk("check your screen [%d*%d]=================futengfei===\n", screen_x, screen_y);
     err = input_register_device(input_dev);
     if (err)
     {

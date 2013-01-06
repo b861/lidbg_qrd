@@ -26,7 +26,7 @@
 #include <linux/platform_device.h>
 #include <linux/syscalls.h>
 #include <asm/system.h>
-
+#include <linux/fb.h>
 #include <linux/stat.h>
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
