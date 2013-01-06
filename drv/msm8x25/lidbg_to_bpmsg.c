@@ -40,7 +40,7 @@ int thread_bp_msg(void *data)
             }
             else
             {
-                msleep(BP_MSG_POLLING_TIME);
+                msleep(50);
             }
 
 
