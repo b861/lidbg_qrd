@@ -620,7 +620,7 @@ goto CONFIG_is_old;
 				tw9912_dbg("w a=%x,v=%x\n",config_pramat_piont[i*2],config_pramat_piont[i*2+1]);
 				if(signal_is_how[Channel].Format == NTSC_P \
 					&& config_pramat_piont[i*2] >0x24\
-					&& config_pramat_piont[i*2] < 0x2f) usleep(100);
+					&& config_pramat_piont[i*2] < 0x2d) usleep(100);
 				i++;
 			}
 		
@@ -657,7 +657,7 @@ goto CONFIG_is_old;
 			else if (signal_is_how[Channel].Format ==NTSC_P )
 			{ u8 Tw9912_input_pin_selet[]={0x02,0x60,};
 				if(write_tw9912(Tw9912_input_pin_selet)==NACK) goto CONFIG_not_ack_fail;
-				msleep(400);//wait for vedio signal Stable 
+				//msleep(400);//wait for vedio signal Stable 
 			}
 		//	msleep(400);//wait for vedio signal Stable 
 	}
