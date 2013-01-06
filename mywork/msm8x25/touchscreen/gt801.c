@@ -772,6 +772,8 @@ up_irq:
 	id：设备ID
 return�?	执行结果码，0表示正常执行
 ********************************************************/
+static int screen_x=0;
+static int screen_y=0;
 static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id *id)
 //static int goodix_ts_probe()//lsw
 {
@@ -780,7 +782,6 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     struct goodix_i2c_rmi_platform_data *pdata;
 
     printk(  " come into goodix_ts_probe---futengfei\n");
-
 
     //Check I2C function
 
@@ -866,14 +867,17 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
 #define 	RESOLUTION_X	(1024)  //this
 #define 	RESOLUTION_Y	(600)
 #define GOODIX_TOUCH_WEIGHT_MAX 		(150)
+screen_x=RESOLUTION_X;
+screen_y=RESOLUTION_Y;
+SOC_Display_Get_Res(&screen_x, &screen_y);
 #endif
     input_set_abs_params(ts->input_dev, ABS_MT_WIDTH_MAJOR, 0, 255, 0, 0);
     input_set_abs_params(ts->input_dev, ABS_MT_TOUCH_MAJOR, 0, 255, 0, 0);
-    input_set_abs_params(ts->input_dev, ABS_MT_POSITION_X, 0, RESOLUTION_X  , 0, 0); //ts->abs_y_max
-    input_set_abs_params(ts->input_dev, ABS_MT_POSITION_Y, 0, RESOLUTION_Y , 0, 0);	//ts->abs_x_max
+    input_set_abs_params(ts->input_dev, ABS_MT_POSITION_X, 0, screen_x  , 0, 0); //ts->abs_y_max
+    input_set_abs_params(ts->input_dev, ABS_MT_POSITION_Y, 0, screen_y, 0, 0);	//ts->abs_x_max
 
     //	sprintf(ts->phys, "input/ts)");
-    printk("check your screen [%d*%d]=================futengfei===\n", RESOLUTION_X, RESOLUTION_Y);
+    printk("check your screen [%d*%d]=================futengfei===\n", screen_x, screen_y);
 
     sprintf(ts->phys, "input/ts");
     ts->input_dev->name = s3c_ts_name;

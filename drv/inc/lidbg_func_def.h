@@ -8,7 +8,7 @@ static inline int check_pt(void)
     while (plidbg_dev==NULL)
     {
         printk("lidbg:check_pt-plidbg_dev==NULL\n");
-        msleep(100);
+        msleep(200);
     }
     return 0;
 }
@@ -55,5 +55,10 @@ static inline int check_pt(void)
 #define flyVideoSignalPinTest  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnflyVideoTestSignalPin))
 #define flyVideoImageQualityConfig  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnflyVideoImageQualityConfig))
 #define video_init_config check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnvideo_init_config)
+
+//display/touch
+
+#define SOC_Display_Get_Res  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_Display_Get_Res))
+
 #endif
 

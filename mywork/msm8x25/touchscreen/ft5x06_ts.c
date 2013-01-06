@@ -17,7 +17,7 @@
  * GNU General Public License for more details.
  *
  */
-#if 0
+
 #include <linux/i2c.h>
 #include <linux/input.h>
 #include <linux/slab.h>
@@ -27,16 +27,14 @@
 #include <linux/module.h>
 #include <linux/gpio.h>
 #include <linux/regulator/consumer.h>
-#include <linux/input/ft5x06_ts.h>
-#else
-#define SOC_COMPILE
 
-#include "lidbg.h"
-#include <linux/input/ft5x06_ts.h>
-#include "fly_soc.h"
+#include "lidbg_def.h"
+#include "ft5x06_ts.h"
 
+#include "lidbg_enter.h"
 
-#endif
+LIDBG_DEFINE;
+
 
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
@@ -524,7 +522,8 @@ static const struct dev_pm_ops ft5x06_ts_pm_ops =
 #endif
 };
 #endif
-
+static int screen_x=0;
+static int screen_y=0;
 static int ft5x06_ts_probe(struct i2c_client *client,
                            const struct i2c_device_id *id)
 {
@@ -584,16 +583,21 @@ static int ft5x06_ts_probe(struct i2c_client *client,
     __set_bit(EV_KEY, input_dev->evbit);
     __set_bit(EV_ABS, input_dev->evbit);
     __set_bit(BTN_TOUCH, input_dev->keybit);
-
+#define SCREEN_X (1024)
+#define SCREEN_Y (600)
+screen_x=SCREEN_X;
+screen_y=SCREEN_Y;
+SOC_Display_Get_Res(&screen_x, &screen_y);
     input_set_abs_params(input_dev, ABS_MT_POSITION_X, 0,
-                         /*pdata->x_max*/1024, 0, 0);
+                         /*pdata->x_max*/screen_x, 0, 0);
     input_set_abs_params(input_dev, ABS_MT_POSITION_Y, 0,
-                         /*pdata->y_max*/600, 0, 0);
+                         /*pdata->y_max*/screen_y, 0, 0);
     input_set_abs_params(input_dev, ABS_MT_TRACKING_ID, 0,
                          CFG_MAX_TOUCH_POINTS, 0, 0);
     input_set_abs_params(input_dev, ABS_MT_TOUCH_MAJOR, 0, FT_PRESS, 0, 0);
     input_set_abs_params(input_dev, ABS_MT_PRESSURE, 0, FT_PRESS, 0, 0);
 
+    printk("check your screen [%d*%d]=================futengfei===\n", screen_x, screen_y);
     err = input_register_device(input_dev);
     if (err)
     {
@@ -799,6 +803,7 @@ static struct i2c_driver ft5x06_ts_driver =
 
 static int __init ft5x06_ts_init(void)
 {
+	LIDBG_GET;
 
     is_ts_load = 1;
     printk( "=====800====================futengfei==============ft5x06_ts_init=========1012======== \n");

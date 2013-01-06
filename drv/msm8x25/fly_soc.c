@@ -289,6 +289,30 @@ void SOC_PWR_ShutDown(void)
     //(((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_PWR_ShutDown)();
 }
 
+
+
+int SOC_Display_Get_Res(u32 *screen_x, u32 *screen_y)
+{
+#if 0
+	u32 x,y;
+	int ret = soc_get_screen_res(&x,&y);
+	if(ret)
+	{
+		if(x==1024||x==800)
+		{
+			*screen_x=x;
+			*screen_y=y;
+			
+		}
+	}
+	return ret;
+#else
+	return soc_get_screen_res(screen_x,screen_y);
+
+#endif
+}
+
+
 static void set_func_tbl(void)
 {
     //io
@@ -323,6 +347,14 @@ static void set_func_tbl(void)
     //
     ((struct lidbg_dev *)global_lidbg_devp) ->soc_func_tbl.pfnSOC_Write_Servicer = SOC_Write_Servicer;
     //video
+
+
+
+	//display/touch
+    ((struct lidbg_dev *)global_lidbg_devp) ->soc_func_tbl.pfnSOC_Display_Get_Res = SOC_Display_Get_Res;
+
+
+	
 }
 
 

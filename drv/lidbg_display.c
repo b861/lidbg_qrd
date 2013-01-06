@@ -843,7 +843,45 @@ void lidbg_display_main(int argc, char **argv)
 
 }
 
+
+
+
+int  soc_get_screen_res(u32 *screen_x, u32 *screen_y)
+{
+
+	int fbidx;
+	struct fb_var_screeninfo fb_varinfo;
+	lidbg("num_registered_fb = %d \n", num_registered_fb);
+
+    for(fbidx = 0; fbidx < num_registered_fb; fbidx++)
+	{
+		struct fb_info *info = registered_fb[fbidx];
+		memcpy(&fb_varinfo, &(info->var), sizeof(fb_varinfo));
+
+		lidbg("xres=%d\n", fb_varinfo.xres);
+		lidbg("yres=%d\n", fb_varinfo.yres);
+
+		lidbg("\n");
+	}
+	if((fb_varinfo.xres==0)||(fb_varinfo.yres==0))
+	{
+		lidbg("soc_get_screen_res fail!!\n");
+		return 0;
+	}
+	else
+	{
+		*screen_x = fb_varinfo.xres;
+		*screen_y = fb_varinfo.yres;
+
+	}
+	return 1;
+
+}
+
+
+
 EXPORT_SYMBOL(lidbg_display_main);
+EXPORT_SYMBOL(soc_get_screen_res);
 
 
 

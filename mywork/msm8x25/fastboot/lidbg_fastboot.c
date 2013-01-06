@@ -21,8 +21,10 @@ LIDBG_DEFINE;
 #include "lidbg_fastboot.h"
 
 static DECLARE_COMPLETION(suspend_start);
+static DECLARE_COMPLETION(resume_ok);
 
 static struct task_struct *pwroff_task;
+static struct task_struct *resume_task;
 
 static int thread_pwroff(void *data)
 {
@@ -42,7 +44,7 @@ static int thread_pwroff(void *data)
                 time_count++;
                 if(fastboot_get_status() == PM_STATUS_EARLY_SUSPEND_PENDING)
                 {
-                    if(time_count >= 10)
+                    if(time_count >= 20)
                     {
                         lidbgerr("thread_pwroff wait suspend timeout!\n");
                         SOC_Write_Servicer(SUSPEND_KERNEL);
@@ -61,6 +63,26 @@ static int thread_pwroff(void *data)
         {
             schedule_timeout(HZ);
         }
+    }
+    return 0;
+}
+
+void fastboot_set_status(LIDBG_FAST_PWROFF_STATUS status);
+
+static int thread_lpc_resume(void *data)
+{
+    while(1)
+    {
+        set_current_state(TASK_UNINTERRUPTIBLE);
+        if(kthread_should_stop()) break;
+		
+		wait_for_completion(&resume_ok);
+	    DUMP_FUN_ENTER;
+	    msleep(4000);
+		SOC_Write_Servicer(WAKEUP_KERNEL);
+		msleep(1000);
+		fastboot_set_status(PM_STATUS_LATE_RESUME_OK);
+	    DUMP_FUN_LEAVE;
     }
     return 0;
 }
@@ -98,9 +120,10 @@ void fastboot_pwroff(void)
 {
     DUMP_FUN_ENTER;
 
-    if(PM_STATUS_LATE_RESUME_OK != fastboot_get_status())
+    while(PM_STATUS_LATE_RESUME_OK != fastboot_get_status())
     {
         lidbgerr("Call SOC_PWR_ShutDown when suspend_pending != PM_STATUS_LATE_RESUME_OK :%d\n", fastboot_get_status());
+		msleep(200);
 
     }
 
@@ -148,7 +171,8 @@ static void fastboot_early_suspend(struct early_suspend *h)
 static void fastboot_late_resume(struct early_suspend *h)
 {
     DUMP_FUN;
-    fastboot_set_status(PM_STATUS_LATE_RESUME_OK);
+    //fastboot_set_status(PM_STATUS_LATE_RESUME_OK);
+	complete(&resume_ok);
 
 }
 #endif
@@ -180,7 +204,6 @@ static int  fastboot_probe(struct platform_device *pdev)
 
 
     INIT_COMPLETION(suspend_start);
-
     pwroff_task = kthread_create(thread_pwroff, NULL, "pwroff_task");
     if(IS_ERR(pwroff_task))
     {
@@ -188,6 +211,17 @@ static int  fastboot_probe(struct platform_device *pdev)
 
     }
     else wake_up_process(pwroff_task);
+
+	
+	INIT_COMPLETION(resume_ok);
+    resume_task = kthread_create(thread_lpc_resume, NULL, "pwroff_task");
+    if(IS_ERR(resume_task))
+    {
+        lidbg("Unable to start kernel thread.\n");
+
+    }
+    else wake_up_process(resume_task);
+
 
     DUMP_FUN_LEAVE;
 

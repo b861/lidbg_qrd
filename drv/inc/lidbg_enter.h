@@ -26,7 +26,7 @@
 #include <linux/platform_device.h>
 #include <linux/syscalls.h>
 #include <asm/system.h>
-
+#include <linux/fb.h>
 #include <linux/stat.h>
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
@@ -194,15 +194,17 @@ when err , <0
 
     //
     void (*pfnSOC_Write_Servicer)(int cmd );
+	
     //video
     void (*pfnlidbg_video_main)(int argc, char **argv);
     void (*pfnvideo_io_i2c_init)(void);
-    int (*pfnflyVideoInitall)(u8 Channel);
-    Vedio_Format (*pfnflyVideoTestSignalPin)(u8 Channel);
-    int (*pfnflyVideoImageQualityConfig)(u8 cmd , u8 valu);
+    int (*pfnflyVideoInitall)(unsigned char  Channel);
+    Vedio_Format (*pfnflyVideoTestSignalPin)(unsigned char  Channel);
+    int (*pfnflyVideoImageQualityConfig)(unsigned char cmd , unsigned char  valu);
     void (*pfnvideo_init_config)(Vedio_Format config_pramat);
 
-
+	//display/touch
+	int (*pfnSOC_Display_Get_Res)(unsigned int *screen_x, unsigned int *screen_y);
 
 
 
@@ -220,6 +222,8 @@ struct lidbg_dev
     unsigned char reserve[128];
 };
 
+
+#define LIDBG_DEV_CHECK_READY  (plidbg_dev != NULL)  
 
 #define LIDBG_DEFINE  struct lidbg_dev *plidbg_dev = NULL
 

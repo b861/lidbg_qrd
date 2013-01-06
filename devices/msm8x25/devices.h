@@ -162,4 +162,7 @@ enum
 #define USB_HUB_DISABLE do{SOC_IO_Output(0, 35, 0); }while(0)
 #define USB_HUB_RST do{USB_HUB_DISABLE;msleep(500);USB_HUB_ENABLE;}while(0);
 
+
+#define DEBUG_UMOUNT_USB
+
 #endif

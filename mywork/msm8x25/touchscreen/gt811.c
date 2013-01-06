@@ -810,6 +810,9 @@ Parameters:
 return:
 	Results of the implementation code, 0 for normal execution
 ********************************************************/
+
+static int screen_x=0;
+static int screen_y=0;
 static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id *id)
 {
     int ret = 0;
@@ -953,14 +956,16 @@ err_gpio_request_failed:
     input_set_abs_params(ts->input_dev, ABS_PRESSURE, 0, 255, 0, 0);
 #define SCREEN_X (1024)
 #define SCREEN_Y (600)
-
+screen_x=SCREEN_X;
+screen_y=SCREEN_Y;
+SOC_Display_Get_Res(&screen_x, &screen_y);
 #ifdef GOODIX_MULTI_TOUCH
     input_set_abs_params(ts->input_dev, ABS_MT_WIDTH_MAJOR, 0, 255, 0, 0);
     input_set_abs_params(ts->input_dev, ABS_MT_TOUCH_MAJOR, 0, 255, 0, 0);
-    input_set_abs_params(ts->input_dev, ABS_MT_POSITION_X, 0, SCREEN_X  , 0, 0); //ts->abs_y_max
-    input_set_abs_params(ts->input_dev, ABS_MT_POSITION_Y, 0, SCREEN_Y , 0, 0);	//ts->abs_x_max
+    input_set_abs_params(ts->input_dev, ABS_MT_POSITION_X, 0, screen_x  , 0, 0); //ts->abs_y_max
+    input_set_abs_params(ts->input_dev, ABS_MT_POSITION_Y, 0, screen_y , 0, 0);	//ts->abs_x_max
 #endif
-    printk("check your screen [%d*%d]=================futengfei===\n", SCREEN_X, SCREEN_Y);
+    printk("check your screen [%d*%d]=================futengfei===\n", screen_x, screen_y);
 
     sprintf(ts->phys, "input/ts");
     ts->input_dev->name = s3c_ts_name;
