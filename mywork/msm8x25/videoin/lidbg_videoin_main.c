@@ -155,7 +155,7 @@ int lidbg_video_init(void)
 	LIDBG_GET;
 	set_func_tbl();
 	video_io_i2c_init();
-	flyVideoChannelInitall(SEPARATION);
+	flyVideoChannelInitall(YIN3);
 	    return 0;
 
 }
