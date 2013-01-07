@@ -206,8 +206,9 @@ when err , <0
 	//display/touch
 	int (*pfnSOC_Display_Get_Res)(unsigned int *screen_x, unsigned int *screen_y);
 
-
-
+    //video
+    Vedio_Format (*pfncamera_open_video_signal_test)(void);
+    void (*pfncamera_open_video_color)(void);
 };
 
 #define LIDBG_SIZE	0x00001000 //MEM_SIZE_4_KB	/*全局内存最大1K字节*/

@@ -225,6 +225,54 @@ tw9912_dbg("\n\r\r\r\r\r\n");
 /**/
 
 }
+Vedio_Format camera_open_video_signal_test_in_2(void)
+{
+Vedio_Format ret =OTHER;
+u8 channel_1;
+u8 format_1;
+u8 Tw9912_input_pin_selet[]={0x02,0x40,};//default input pin selet YIN0
+TW9912_Signal signal_is_how_1={NOTONE,OTHER,source_other};
+TW9912_input_info tw9912_input_information_1;
+
+		 tw9912_dbg("camera_open_video_signal_test()!\n");
+		 
+		tw9912_get_input_info(&tw9912_input_information_1);
+		if(tw9912_input_information_1.chip_status1.valu & 0x08 )//bit3=1 Vertical logi is locked to the incoming video soruce
+		{
+			if(tw9912_input_information_1.chip_status1.valu & 0x01)  signal_is_how_1.vedio_source=source_50Hz;
+			else signal_is_how_1.vedio_source=source_60Hz;
+
+			read_tw9912(0x02,&channel_1);//register 0x02 channel selete
+			channel_1 =(channel_1&0x0c) >>2 ;
+			if(channel_1 == tw9912_status.Channel)
+			{
+					format_1=tw9912_input_information_1.component_video_format.valu & 0x70;
+					if(format_1 == 0x00)
+						{
+							signal_is_how_1.Format = NTSC_I;
+						}
+					else if(format_1 == 0x10)
+						{
+							signal_is_how_1.Format = PAL_I;
+						}
+					else if(format_1 == 0x20)
+						{
+							signal_is_how_1.Format = NTSC_P;
+						}
+					else if(format_1 == 0x30)
+						{
+							signal_is_how_1.Format = PAL_P;
+						}
+
+			}
+			else
+			{
+				signal_is_how_1.Format = OTHER;
+			}
+		}
+		
+return signal_is_how_1.Format;
+}
 
 Vedio_Format testing_video_signal(Vedio_Channel Channel)
 {
@@ -329,9 +377,9 @@ TW9912_input_info tw9912_input_information_1;
 		}
 	return signal_is_how_1.Format;
 CONFIG_not_ack_fail:
-	tw9912_dbg("testing_video_signal()--->NACK error\n");
+	tw9912_dbg("tw9912:testing_video_signal()--->NACK error\n");
 CHANNAL_ERROR:
-	tw9912_dbg("testing_video_signal()--->Channel input error\n");
+	tw9912_dbg("tw9912:testing_video_signal()--->Channel input error\n");
 	ret =OTHER;
 	return ret;
 }

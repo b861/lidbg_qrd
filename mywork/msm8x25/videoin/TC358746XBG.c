@@ -192,6 +192,7 @@ void colorbar_init(void)
 
 
 }
+
 void TC358_init(Vedio_Format flag)
 {
 	printk("Now inital TC358\n");
