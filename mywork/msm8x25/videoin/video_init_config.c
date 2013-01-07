@@ -17,15 +17,58 @@ void video_io_i2c_init_in(void)
 		flag_io_config=1;
 	}
 }
-int flyVideoImageQualityConfig_in(u8 cmd ,u8 valu)
+int flyVideoImageQualityConfig_in(Vedio_Effect cmd ,u8 valu)
 {
-printk("tw9912:@@@@@flyVideoImageQualityConfig_in(cmd =%d,valu=%d)\n",cmd,valu);
-//spin_lock(&spin_chipe_config_lock);
+int ret;
+u8 Tw9912_image[2]={0,0,};//default input pin selet YIN0ss
+
+	printk("tw9912:@@@@@flyVideoImageQualityConfig_in(cmd =%d,valu=%d)\n",cmd,valu);
+	//spin_lock(&spin_chipe_config_lock);
 mutex_lock(&lock_chipe_config);
 	if(cmd ==0) return valu;
+	switch (cmd)
+	{
+		case BRIGHTNESS :
+			Tw9912_image[0]=0x10;
+			Tw9912_image[1]=valu;
+			printk("cmd = %d, valu = %d",cmd,valu);
+			ret = write_tw9912(&Tw9912_image);
+			break;
+		case CONTRAST :
+			Tw9912_image[0]=0x11;
+			Tw9912_image[1]=valu;
+			printk("cmd = %d, valu = %d",cmd,valu);
+			ret = write_tw9912(&Tw9912_image);
+			break;
+		case SHARPNESS :
+			Tw9912_image[0]=0x12;
+			Tw9912_image[1]=valu;
+			printk("cmd = %d, valu = %d",cmd,valu);
+			ret = write_tw9912(&Tw9912_image);
+			break;
+		case CHROMA_U :
+			Tw9912_image[0]=0x13;
+			Tw9912_image[1]=valu;
+			printk("cmd = %d, valu = %d",cmd,valu);
+			ret = write_tw9912(&Tw9912_image);
+			break;
+		case CHROMA_V :
+			Tw9912_image[0]=0x14;
+			Tw9912_image[1]=valu;
+			printk("cmd = %d, valu = %d",cmd,valu);
+			ret = write_tw9912(&Tw9912_image);
+			break;
+		case HUE :
+			Tw9912_image[0]=0x15;
+			Tw9912_image[1]=valu;
+			printk("cmd = %d, valu = %d",cmd,valu);
+			ret = write_tw9912(&Tw9912_image);
+			break;
+	}
+	
 //spin_unlock(&spin_chipe_config_lock);
 mutex_unlock(&lock_chipe_config);
-	return 0;
+	return ret;
 }
 int init_tw9912_ent(Vedio_Channel Channel);
 int flyVideoInitall_in(u8 Channel)

@@ -36,6 +36,48 @@ return 0;
 void lidbg_video_main_in(int argc, char **argv)
 {
 printk("In lidbg_video_main()\n");
+
+	 if(!strcmp(argv[0], "image"))
+	{
+		u32 valu;
+	    if(!strcmp(argv[1], "BRIGHTNESS"))
+	    	{
+			valu = simple_strtoul(argv[2], 0, 0);
+			flyVideoImageQualityConfig_in(BRIGHTNESS,valu);
+			printk("BRIGHTNESS valu=%d",valu);
+		}
+	    if(!strcmp(argv[1], "CONTRAST"))
+	    	{
+			valu = simple_strtoul(argv[2], 0, 0);
+			flyVideoImageQualityConfig_in(CONTRAST,valu);
+			printk("CONTRAST valu=%d",valu);
+		}
+	    if(!strcmp(argv[1], "SHARPNESS"))
+	    	{
+			valu = simple_strtoul(argv[2], 0, 0);
+			flyVideoImageQualityConfig_in(SHARPNESS,valu);
+			printk("SHARPNESS valu=%d",valu);
+		}
+	   if(!strcmp(argv[1], "CHROMA_U"))
+	    	{
+			valu = simple_strtoul(argv[2], 0, 0);
+			flyVideoImageQualityConfig_in(CHROMA_U,valu);
+			printk("CHROMA_U valu=%d",valu);
+		}
+           if(!strcmp(argv[1], "CHROMA_V"))
+	    	{
+			valu = simple_strtoul(argv[2], 0, 0);
+			flyVideoImageQualityConfig_in(CHROMA_V,valu);
+			printk("CHROMA_V valu=%d",valu);
+		}
+           if(!strcmp(argv[1], "HUE"))
+	    	{
+			valu = simple_strtoul(argv[2], 0, 0);
+			flyVideoImageQualityConfig_in(HUE,valu);
+			printk("HUE valu=%d",valu);
+		}
+
+	}
  if(!strcmp(argv[0], "test"))
 	{
 	printk("tw9912:test test back format :%d", camera_open_video_signal_test());

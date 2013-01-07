@@ -92,7 +92,16 @@ typedef enum
     COLORBAR,
     OTHER,
 } Vedio_Format;
-
+typedef enum
+{
+    BRIGHTNESS = 1,
+    CONTRAST,
+    SHARPNESS,
+    CHROMA_U,
+    CHROMA_V,
+    HUE,//Positive value results in red hue and negative value gives green hue.
+    	   //These bits control the color hue. It is in 2\u201fs complement form with 0 being the center 00 value. 
+} Vedio_Effect;
 typedef enum
 {
     PM_STATUS_EARLY_SUSPEND_PENDING,
@@ -200,7 +209,7 @@ when err , <0
     void (*pfnvideo_io_i2c_init)(void);
     int (*pfnflyVideoInitall)(unsigned char  Channel);
     Vedio_Format (*pfnflyVideoTestSignalPin)(unsigned char  Channel);
-    int (*pfnflyVideoImageQualityConfig)(unsigned char cmd , unsigned char  valu);
+    int (*pfnflyVideoImageQualityConfig)(Vedio_Effect cmd , unsigned char  valu);
     void (*pfnvideo_init_config)(Vedio_Format config_pramat);
 
 	//display/touch

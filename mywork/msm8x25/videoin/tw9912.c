@@ -26,7 +26,6 @@ i2c_ack ret;
 		ret=i2c_write_byte(1, TW9912_I2C_ChipAdd,buf, 2);
 return ret;
 }
-
 void tw9912_get_input_info(TW9912_input_info *input_information)
 {
 	
