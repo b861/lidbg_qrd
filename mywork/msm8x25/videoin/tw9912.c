@@ -232,14 +232,16 @@ Vedio_Format ret =OTHER;
 u8 channel_1;
 u8 format_1;
 u8 Tw9912_input_pin_selet[]={0x02,0x40,};//default input pin selet YIN0
-TW9912_Signal signal_is_how_1;
+TW9912_Signal signal_is_how_1={NOTONE,OTHER,source_other};
 TW9912_input_info tw9912_input_information_1;
 
 	 tw9912_dbg("testing_signal!\n");
-
-		signal_is_how_1.Channel =NOTONE;
-		signal_is_how_1.Format = OTHER;
-		signal_is_how_1.vedio_source =source_other;
+	 
+	if(Channel >SEPARATION) goto CHANNAL_ERROR;
+	signal_is_how_1.Channel =Channel;
+	
+	signal_is_how_1.Format = OTHER;
+	signal_is_how_1.vedio_source =source_other;
 	
 	read_tw9912(0x02,&channel_1);//register 0x02 channel selete
 	channel_1 =(channel_1&0x0c) >>2 ;//read back now config Channel
@@ -297,21 +299,6 @@ TW9912_input_info tw9912_input_information_1;
 		if(tw9912_input_information_1.chip_status1.valu & 0x01)  signal_is_how_1.vedio_source=source_50Hz;
 		else signal_is_how_1.vedio_source=source_60Hz;
 
-		switch (Channel)//bit[3:2]
-		{
-			case 0: signal_is_how_1.Channel =YIN0;
-				break;
-			case 1: signal_is_how_1.Channel =YIN1;
-				break;
-			case 2: signal_is_how_1.Channel =YIN2;
-				break;
-			case 3: signal_is_how_1.Channel =YIN3;
-				break;
-			default :
-				printk("tw9912:*****");
-				break;
-			
-		}
 		read_tw9912(0x02,&channel_1);//register 0x02 channel selete
 		channel_1 =(channel_1&0x0c) >>2 ;
 		if(channel_1 == Channel)
@@ -328,25 +315,23 @@ TW9912_input_info tw9912_input_information_1;
 				else if(format_1 == 0x20)
 					{
 					signal_is_how_1.Format = NTSC_P;
-					signal_is_how_1.Channel =SEPARATION;
 					}
 				else if(format_1 == 0x30)
 					{
 					signal_is_how_1.Format = PAL_P;
-					signal_is_how_1.Channel =SEPARATION;
 					}
 
 			}
 			else
 			{
 				signal_is_how_1.Format = OTHER;
-				signal_is_how_1.Channel =NOTONE;
-				signal_is_how_1.vedio_source=source_other;
 			}
 		}
 	return signal_is_how_1.Format;
 CONFIG_not_ack_fail:
 	tw9912_dbg("testing_video_signal()--->NACK error\n");
+CHANNAL_ERROR:
+	tw9912_dbg("testing_video_signal()--->Channel input error\n");
 	ret =OTHER;
 	return ret;
 }

@@ -26,6 +26,19 @@ printk("In lidbg_video_main()\n");
 	{
 		;
 	}
+   if(!strcmp(argv[0], "testYin3"))
+	{
+	printk("tw9912:test Yin3 back format :%d", flyVideoTestSignalPin_in(YIN3));
+	}
+  if(!strcmp(argv[0], "testYin0"))
+	{
+	printk("tw9912:test Yin3 back format :%d", flyVideoTestSignalPin_in(YIN0));
+	}
+    if(!strcmp(argv[0], "testYuv"))
+	{
+	printk("tw9912:test Yin3 back format :%d", flyVideoTestSignalPin_in(SEPARATION));
+	}
+	
   if(!strcmp(argv[0], "checkoutYin3"))
 	{
 	 flyVideoInitall_in(YIN3);
