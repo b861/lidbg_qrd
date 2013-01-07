@@ -206,6 +206,8 @@ when err , <0
 	//display/touch
 	int (*pfnSOC_Display_Get_Res)(unsigned int *screen_x, unsigned int *screen_y);
 
+	//lpc
+	void (*pfnSOC_LPC_Send)(unsigned char *p, unsigned int len);
 
 
 };

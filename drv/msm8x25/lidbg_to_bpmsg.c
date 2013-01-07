@@ -17,8 +17,8 @@ int thread_bp_msg(void *data)
     {
         set_current_state(TASK_UNINTERRUPTIBLE);
         if(kthread_should_stop()) break;
-        if(0)
-        {
+#if 0        
+{
             start_index = smem_log_temp->start_pos;
             end_index = smem_log_temp->end_pos;
             if((end_index + 1) % 100 != start_index)
@@ -45,7 +45,7 @@ int thread_bp_msg(void *data)
 
 
         }
-        else
+#endif
         {
             start_index = smem_log_temp->start_pos;
             end_index = smem_log_temp->end_pos;
@@ -54,11 +54,11 @@ int thread_bp_msg(void *data)
             {
                 printk("%s\n", smem_log_temp->log[end_index]);
                 smem_log_temp->end_pos = (end_index + 1)  % TOTAL_LOGS;
-                msleep(20);
+                msleep(50);
             }
             else
             {
-                msleep(20);
+                msleep(50);
             }
 
         }
@@ -72,7 +72,7 @@ int bp_msg_init(void)
 {
     int err;
     DUMP_FUN;
-#ifdef FLY_DEBUG
+#if 0//def FLY_DEBUG
     lidbg("debug:bp_msg_init do nothing");
 #else
     printk("\n[futengfei]  =bp_msg_init=IN===============================\n");

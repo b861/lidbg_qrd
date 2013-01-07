@@ -450,6 +450,13 @@ static int soc_dev_probe(struct platform_device *pdev)
 
     PWR_EN_ON;
 
+	
+	{
+		u8 buff[] = {0x00, 0x05, 0x01};//LPCControlPWREnable
+		lidbg("LPCControlPWREnable\n");
+		SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
+	}
+
     get_platform();
 
     if(platform_id ==  PLATFORM_FLY)
@@ -563,12 +570,13 @@ static void devices_early_suspend(struct early_suspend *handler)
     if(platform_id ==  PLATFORM_FLY)
     {
         LCD_OFF;
-
+		
 #ifdef DEBUG_UMOUNT_USB
-        SOC_Write_Servicer(UMOUNT_USB);
-		msleep(3000);
-
+		SOC_Write_Servicer(UMOUNT_USB);
+		
 #endif
+
+
         USB_HUB_DISABLE;
         USB_SWITCH_DISCONNECT;
         msleep(1000);
@@ -588,11 +596,16 @@ static void devices_late_resume(struct early_suspend *handler)
     if(platform_id ==  PLATFORM_FLY)
     {
 
-        lidbg("create thread_resume!\n");
 
         BL_SET(BL_MAX / 2);
 
-
+		{
+		u8 buff[] = {0x00, 0x05, 0x01};//LPCControlPWREnable
+		lidbg("LPCControlPWREnable\n");
+		SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
+		}
+		
+        lidbg("create thread_resume!\n");
         resume_task = kthread_create(thread_resume, NULL, "dev_resume_task");
         if(IS_ERR(resume_task))
         {
@@ -626,6 +639,8 @@ static int  soc_dev_suspend(struct platform_device *pdev, pm_message_t state)
         SOC_IO_ISR_Disable(BUTTON_RIGHT_1);
         SOC_IO_ISR_Disable(BUTTON_RIGHT_2);
 #endif
+
+		PWR_EN_OFF;
 
 
     }

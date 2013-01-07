@@ -234,6 +234,8 @@ static void LPCdealReadFromMCUAll(BYTE *p, UINT length)
     }
     iDriverResumeTime = 0;
 #ifdef LPC_DEBUG_LOG
+{
+	u32 i;
     lidbg("From LPC:");//mode ,command,para
     for(i = 0; i < length; i++)
     {
@@ -241,7 +243,9 @@ static void LPCdealReadFromMCUAll(BYTE *p, UINT length)
 
     }
     printk("\n");
+}
 #endif
+	lpc_send_rec_count = 0;
 
     switch (p[0])
     {
@@ -289,6 +293,7 @@ static void LPCdealReadFromMCUAll(BYTE *p, UINT length)
 #ifdef LPC_DEBUG_LOG
             lidbg("LPC ping return!\n");
 #endif
+		if(lpc_send_rec_count > 0)
             lpc_send_rec_count--;
             break;
         }
@@ -435,7 +440,7 @@ int thread_lpc(void *data)
             if((SOC_PWR_GetStatus() == PM_STATUS_LATE_RESUME_OK) && (lpc_work_en == 1))
             {
 #ifdef LPC_DEBUG_LOG
-                lidbg("lpc_send_rec_count=%d\n", re_sleep_count);
+                lidbg("lpc_send_rec_count=%d\n", lpc_send_rec_count);
 #endif
                 if(lpc_send_rec_count >= 5)
                 {
@@ -633,18 +638,25 @@ static struct platform_driver lpc_driver =
     },
 };
 
+
+static void set_func_tbl(void)
+{
+    //lpc
+    ((struct lidbg_dev *)plidbg_dev)->soc_func_tbl.pfnSOC_LPC_Send = LPCCombinDataStream;
+
+}
+
 static int __init lpc_init(void)
 {
     DUMP_BUILD_TIME;
 
 	
 #ifndef FLY_DEBUG
-		lidbg("lpc_init do nothing");
+	lidbg("lpc_init do nothing");
 #else
 #ifndef SOC_COMPILE
     LIDBG_GET;
-// set_func_tbl();
-
+    set_func_tbl();
 #endif
     platform_device_register(&lidbg_lpc);
     platform_driver_register(&lpc_driver);

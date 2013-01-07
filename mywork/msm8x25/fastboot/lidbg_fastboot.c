@@ -119,22 +119,45 @@ void fastboot_set_status(LIDBG_FAST_PWROFF_STATUS status)
 void fastboot_pwroff(void)
 {
     DUMP_FUN_ENTER;
-
+	
     while(PM_STATUS_LATE_RESUME_OK != fastboot_get_status())
     {
         lidbgerr("Call SOC_PWR_ShutDown when suspend_pending != PM_STATUS_LATE_RESUME_OK :%d\n", fastboot_get_status());
 		msleep(200);
 
     }
-
+	
     fastboot_set_status(PM_STATUS_EARLY_SUSPEND_PENDING);
 
-#ifdef  FLY_DEBUG
 
-    SOC_Write_Servicer(CMD_FAST_POWER_OFF);
 
+
+	
+#define DEBUG_UMOUNT_USB
+	
+#ifdef DEBUG_UMOUNT_USB
+			SOC_Write_Servicer(UMOUNT_USB);
+			msleep(1000);
 #endif
-    complete(&suspend_start);
+	
+		{
+			u8 buff[] = {0x00, 0x05, 0x00};//LPCControlPWRDisenable
+			lidbg("LPCControlPWRDisenable\n");
+			SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
+			msleep(3000);
+		}
+
+
+#ifdef  FLY_DEBUG
+    SOC_Write_Servicer(CMD_FAST_POWER_OFF);
+#endif
+
+
+
+
+
+	complete(&suspend_start);
+
 
 }
 

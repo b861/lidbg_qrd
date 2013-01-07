@@ -68,7 +68,7 @@ void LPCControlSupendTestStop(void);
 void LPCControlPWREnable(void);
 void LPCControlPWRDisenable(void);
 
-#if 1//def FLY_DEBUG
+#if 0//def FLY_DEBUG
 #define TELL_LPC_PWR_OFF   do{  lidbg("tell lpc ready to power off!\n");\
 								SOC_IO_Config(MCU_IIC_REQ_ISR,GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_16MA);\
 								SOC_IO_Output(0, MCU_IIC_REQ_ISR, 0);\

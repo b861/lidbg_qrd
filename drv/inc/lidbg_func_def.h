@@ -60,5 +60,9 @@ static inline int check_pt(void)
 
 #define SOC_Display_Get_Res  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_Display_Get_Res))
 
+
+//lpc
+#define  SOC_LPC_Send  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_LPC_Send))
+
 #endif
 
