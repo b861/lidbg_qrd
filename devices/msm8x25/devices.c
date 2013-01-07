@@ -450,13 +450,14 @@ static int soc_dev_probe(struct platform_device *pdev)
 
     PWR_EN_ON;
 
+#ifdef FLY_DEBUG
 	
 	{
 		u8 buff[] = {0x00, 0x05, 0x01};//LPCControlPWREnable
 		lidbg("LPCControlPWREnable\n");
 		SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
 	}
-
+#endif
     get_platform();
 
     if(platform_id ==  PLATFORM_FLY)
@@ -598,13 +599,14 @@ static void devices_late_resume(struct early_suspend *handler)
 
 
         BL_SET(BL_MAX / 2);
+#ifdef FLY_DEBUG
 
 		{
 		u8 buff[] = {0x00, 0x05, 0x01};//LPCControlPWREnable
 		lidbg("LPCControlPWREnable\n");
 		SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
 		}
-		
+#endif		
         lidbg("create thread_resume!\n");
         resume_task = kthread_create(thread_resume, NULL, "dev_resume_task");
         if(IS_ERR(resume_task))

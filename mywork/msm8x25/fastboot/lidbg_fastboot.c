@@ -139,7 +139,9 @@ void fastboot_pwroff(void)
 			SOC_Write_Servicer(UMOUNT_USB);
 			msleep(1000);
 #endif
-	
+
+
+#ifdef FLY_DEBUG
 		{
 			u8 buff[] = {0x00, 0x05, 0x00};//LPCControlPWRDisenable
 			lidbg("LPCControlPWRDisenable\n");
@@ -147,8 +149,6 @@ void fastboot_pwroff(void)
 			msleep(3000);
 		}
 
-
-#ifdef  FLY_DEBUG
     SOC_Write_Servicer(CMD_FAST_POWER_OFF);
 #endif
 
