@@ -698,6 +698,9 @@ static int soc_dev_resume(struct platform_device *pdev)
 
         lidbg("turn lcd on!\n");
         LCD_ON;
+		
+		//reconfig led
+		SOC_IO_Config(devices_resource.led_gpio,GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_8MA);
 
     }
 
