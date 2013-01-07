@@ -209,6 +209,9 @@ when err , <0
 	//lpc
 	void (*pfnSOC_LPC_Send)(unsigned char *p, unsigned int len);
 
+    //video
+    Vedio_Format (*pfncamera_open_video_signal_test)(void);
+    void (*pfncamera_open_video_color)(void);
 
 };
 

@@ -2,7 +2,7 @@
 
 #include "lidbg_enter.h"
 #include "video_init_config.h"
-
+static struct task_struct * Vedio_Signal_Test = NULL; 
 LIDBG_DEFINE;
 static void video_config_init(Vedio_Format config_pramat,u8 Channal)
 {
@@ -19,12 +19,34 @@ static void video_config_init(Vedio_Format config_pramat,u8 Channal)
 
 
 }
+static int thread_vedio_signal_test(void *data)  
+{int i=0;
+  long int timeout;
+	while(!kthread_should_stop())
+	{
+	        timeout=100;
+		while(timeout > 0) 
+		{ //delay
+			timeout = schedule_timeout(timeout); 
+		} 
+		printk("thread_vedio_signal_test()=%d\n",i++);
+	}
+return 0;
+}
 void lidbg_video_main_in(int argc, char **argv)
 {
 printk("In lidbg_video_main()\n");
- if(!strcmp(argv[0], "xxx"))
+ if(!strcmp(argv[0], "test"))
 	{
-		;
+	printk("tw9912:test test back format :%d", camera_open_video_signal_test());
+	}
+ if(!strcmp(argv[0], "on"))
+	{
+		  Vedio_Signal_Test = kthread_run(thread_vedio_signal_test,NULL,"flyvideo");  
+	}
+  if(!strcmp(argv[0], "off"))
+	{
+		   kthread_stop(Vedio_Signal_Test);  
 	}
    if(!strcmp(argv[0], "testYin3"))
 	{
@@ -159,6 +181,8 @@ static void set_func_tbl(void)
 	plidbg_dev->soc_func_tbl.pfnflyVideoTestSignalPin = flyVideoTestSignalPin_in;
 	plidbg_dev->soc_func_tbl.pfnflyVideoImageQualityConfig = flyVideoImageQualityConfig_in;
 	plidbg_dev->soc_func_tbl.pfnvideo_init_config = video_init_config_in;
+	plidbg_dev->soc_func_tbl.pfncamera_open_video_signal_test = camera_open_video_signal_test_in;
+	plidbg_dev->soc_func_tbl.pfncamera_open_video_color = Video_Show_Output_Color;
 }
 
 
