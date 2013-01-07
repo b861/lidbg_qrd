@@ -206,12 +206,12 @@ when err , <0
 	//display/touch
 	int (*pfnSOC_Display_Get_Res)(unsigned int *screen_x, unsigned int *screen_y);
 
-    //video
-    Vedio_Format (*pfncamera_open_video_signal_test)(void);
-    void (*pfncamera_open_video_color)(void);
 	//lpc
 	void (*pfnSOC_LPC_Send)(unsigned char *p, unsigned int len);
 
+    //video
+    Vedio_Format (*pfncamera_open_video_signal_test)(void);
+    void (*pfncamera_open_video_color)(void);
 
 };
 
