@@ -1,6 +1,7 @@
 #ifndef __i2c_io_H__
 #define __i2c_io_H__
 #include <asm/atomic.h>
+#include <linux/semaphore.h>
 #include "lidbg_enter.h"
 //#define GPIO_I2C_SCL   43 //tw9912 reset
 //#define GPIO_I2C_SDA   15//tp0708

@@ -60,7 +60,9 @@ static inline int check_pt(void)
 
 #define SOC_Display_Get_Res  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_Display_Get_Res))
 
-
+//video 
+#define camera_open_video_signal_test check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfncamera_open_video_signal_test)
+#define camera_open_video_color check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfncamera_open_video_color)
 //lpc
 #define  SOC_LPC_Send  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_LPC_Send))
 
