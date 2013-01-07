@@ -65,6 +65,6 @@ static inline int check_pt(void)
 #define camera_open_video_color check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfncamera_open_video_color)
 //lpc
 #define  SOC_LPC_Send  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_LPC_Send))
-
+#define global_video_format_flag  (plidbg_dev->soc_func_tbl.pfnglobal_video_format_flag)
 #endif
 
