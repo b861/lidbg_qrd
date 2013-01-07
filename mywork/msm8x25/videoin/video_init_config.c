@@ -146,6 +146,7 @@ mutex_lock(&lock_chipe_config);
 	}
 //spin_unlock(&spin_chipe_config_lock);
 mutex_unlock(&lock_chipe_config);
+global_video_format_flag=ret;
 return ret;
 }
 void video_init_config_in(Vedio_Format config_pramat)

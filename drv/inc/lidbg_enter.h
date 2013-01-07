@@ -212,6 +212,7 @@ when err , <0
     //video
     Vedio_Format (*pfncamera_open_video_signal_test)(void);
     void (*pfncamera_open_video_color)(void);
+    Vedio_Format pfnglobal_video_format_flag;
 
 };
 
