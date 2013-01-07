@@ -25,47 +25,122 @@ u8 Tw9912_image[2]={0,0,};//default input pin selet YIN0ss
 	printk("tw9912:@@@@@flyVideoImageQualityConfig_in(cmd =%d,valu=%d)\n",cmd,valu);
 	//spin_lock(&spin_chipe_config_lock);
 mutex_lock(&lock_chipe_config);
-	if(cmd ==0) return valu;
+	
+	if(valu >10)
+		{
+			printk("tw9912:flyVideoImageQualityConfig_in() input valu is bad 10 errror");
+			mutex_unlock(&lock_chipe_config);
+			return -1;
+		}
 	switch (cmd)
 	{
-		case BRIGHTNESS :
+		case BRIGHTNESS ://ok
 			Tw9912_image[0]=0x10;
+		//	if(global_video_format_flag = NTSC_I)
+			{
+				if(valu==5)
+				{
+					valu = 0;
+				}
+				else if(valu > 5)
+				{
+					if(valu == 10)
+					valu =0x7f;
+					else
+					valu = ( 10 - valu  ) * 0x19;//valu = ( 10-valu ) * ( 0x7f/5 );
+				}
+				else 
+				{
+					valu = valu *  0x19  + 0x80;//valu = valu * ( (0xff-0x80)/5) + 0x80;
+				}
+
+			}
 			Tw9912_image[1]=valu;
 			printk("cmd = %d, valu = %d",cmd,valu);
 			ret = write_tw9912(&Tw9912_image);
 			break;
-		case CONTRAST :
+		case CONTRAST ://ok
 			Tw9912_image[0]=0x11;
+			//if(global_video_format_flag = NTSC_I)
+			{
+				if(valu==5)
+				{
+					valu = 0x50;
+				}
+				else if(valu > 5)
+				{
+					if(valu == 10)
+					valu =0xff;
+					else
+					valu = ( 10 - valu  ) * 0x23 + 0x50;//valu = ( 10-valu ) * ( (0xff-0x50)/5 ) + 0x50;
+				}
+				else 
+				{
+					valu = valu * 0x10 ;//valu = valu * 0x50/5;
+				}
+			}
 			Tw9912_image[1]=valu;
 			printk("cmd = %d, valu = %d",cmd,valu);
 			ret = write_tw9912(&Tw9912_image);
 			break;
-		case SHARPNESS :
-			Tw9912_image[0]=0x12;
-			Tw9912_image[1]=valu;
-			printk("cmd = %d, valu = %d",cmd,valu);
-			ret = write_tw9912(&Tw9912_image);
-			break;
+		case SHARPNESS ://bad
 		case CHROMA_U :
+		case CHROMA_V :
+			Tw9912_image[0]=0x14;
+			//if(global_video_format_flag = NTSC_I)
+			{
+				if(valu==5)
+				{
+					valu = 0x80;
+				}
+				else if(valu > 5)
+				{
+					if(valu == 10)
+					valu =0xff;
+					else
+					valu = ( 10 - valu  ) * 0xe6 + 0x80;//valu = ( 10-valu ) * ( (0xff-0x80)/5 ) + 0x80;
+				}
+				else 
+				{
+					valu = valu * 0x19 ;//valu = valu * 0x80/5;
+				}
+			}
+			Tw9912_image[1]=valu;
+			printk("cmd = %d, valu = %d",cmd,valu);
+			ret = write_tw9912(&Tw9912_image);
+			break;
+		case HUE ://bad
+		//	if(global_video_format_flag = NTSC_I)
+			{
+				if(valu==5)
+				{
+					valu = 0x80;
+				}
+				else if(valu > 5)
+				{
+					if(valu == 10)
+					valu =0xff;
+					else
+					valu = ( 10 - valu  ) * 0xe6 + 0x80;//valu = ( 10-valu ) * ( (0xff-0x80)/5 ) + 0x80;
+				}
+				else 
+				{
+					valu = valu * 0x19 ;//valu = valu * 0x80/5;
+				}
+			}
 			Tw9912_image[0]=0x13;
 			Tw9912_image[1]=valu;
 			printk("cmd = %d, valu = %d",cmd,valu);
 			ret = write_tw9912(&Tw9912_image);
-			break;
-		case CHROMA_V :
+
 			Tw9912_image[0]=0x14;
-			Tw9912_image[1]=valu;
-			printk("cmd = %d, valu = %d",cmd,valu);
-			ret = write_tw9912(&Tw9912_image);
-			break;
-		case HUE :
-			Tw9912_image[0]=0x15;
-			Tw9912_image[1]=valu;
-			printk("cmd = %d, valu = %d",cmd,valu);
-			ret = write_tw9912(&Tw9912_image);
-			break;
-	}
 	
+			Tw9912_image[1]=valu;
+			printk("cmd = %d, valu = %d",cmd,valu);
+			ret = write_tw9912(&Tw9912_image);
+			break;
+
+	}
 //spin_unlock(&spin_chipe_config_lock);
 mutex_unlock(&lock_chipe_config);
 	return ret;

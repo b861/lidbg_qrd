@@ -94,12 +94,13 @@ typedef enum
 } Vedio_Format;
 typedef enum
 {
-    BRIGHTNESS = 1,
-    CONTRAST,
+    BRIGHTNESS = 1,//ok
+    CONTRAST,//ok
     SHARPNESS,
     CHROMA_U,
     CHROMA_V,
-    HUE,//Positive value results in red hue and negative value gives green hue.
+    HUE,//ok
+    //Positive value results in red hue and negative value gives green hue.
     	   //These bits control the color hue. It is in 2\u201fs complement form with 0 being the center 00 value. 
 } Vedio_Effect;
 typedef enum
