@@ -26,6 +26,20 @@ i2c_ack ret;
 		ret=i2c_write_byte(1, TW9912_I2C_ChipAdd,buf, 2);
 return ret;
 }
+i2c_ack Correction_Parameter_fun(Vedio_Format format)
+{
+i2c_ack ret;
+u8 Tw9912_Parameter[]={0,0,};
+
+	if( format == PAL_I )
+	{
+		Tw9912_Parameter[0]=0x0a;
+		Tw9912_Parameter[1]=0x09;
+		ret = write_tw9912(Tw9912_Parameter);
+	}
+return ret;
+}
+						
 void tw9912_get_input_info(TW9912_input_info *input_information)
 {
 	
@@ -713,7 +727,7 @@ goto CONFIG_is_old;
 	}
 #endif
 	printk("tw9912: init-\n");
-
+Correction_Parameter_fun(signal_is_how[Channel].Format);
 //CONFIG_is_old:
     return 1;
 CONFIG_not_ack_fail:

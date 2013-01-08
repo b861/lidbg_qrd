@@ -225,7 +225,7 @@ static void set_func_tbl(void)
 	plidbg_dev->soc_func_tbl.pfnvideo_init_config = video_init_config_in;
 	plidbg_dev->soc_func_tbl.pfncamera_open_video_signal_test = camera_open_video_signal_test_in;
 	plidbg_dev->soc_func_tbl.pfncamera_open_video_color = Video_Show_Output_Color;
-	global_video_format_flag = PAL_I;
+	global_video_format_flag = NTSC_I;
 }
 
 
