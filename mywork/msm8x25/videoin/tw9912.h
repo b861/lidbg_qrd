@@ -94,4 +94,5 @@ Vedio_Format camera_open_video_signal_test_in_2(void);
 int Tw9912_appoint_pin_testing_video_signal(Vedio_Channel Channel);
 Vedio_Format testing_video_signal(Vedio_Channel Channel);
 int Tw9912_init_NTSCp(void);
+i2c_ack write_tw9912(char *buf );
 #endif
