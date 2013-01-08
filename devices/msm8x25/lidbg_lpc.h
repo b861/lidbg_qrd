@@ -81,12 +81,14 @@ void LPCControlPWRDisenable(void);
 #else
 #define TELL_LPC_PWR_OFF
 #define TELL_LPC_PWR_ON do{\
+								lidbg("tell lpc power on ok!\n");\
 								SOC_IO_Config(MCU_IIC_REQ_I,GPIO_CFG_INPUT,GPIO_CFG_PULL_UP,GPIO_CFG_8MA);\
 								SOC_IO_Input(0,MCU_IIC_REQ_I,GPIO_CFG_PULL_UP);\
 							}while(0)
 #endif
 
 
+#define AUTO_SLEEP_WHEN_WAKEUP_NOT_BY_LPC
 
 
 #endif

@@ -580,8 +580,9 @@ static void devices_early_suspend(struct early_suspend *handler)
 
         USB_HUB_DISABLE;
         USB_SWITCH_DISCONNECT;
-        msleep(1000);
-        USB_ID_HIGH_DEV;
+        //msleep(1000);
+        //USB_ID_HIGH_DEV;
+		USB_ID_LOW_HOST;
 
 
     }
@@ -599,7 +600,12 @@ static void devices_late_resume(struct early_suspend *handler)
 
 
         BL_SET(BL_MAX / 2);
+		
+		
 #ifdef FLY_DEBUG
+		USB_HUB_DISABLE;
+        USB_ID_HIGH_DEV;
+        USB_SWITCH_DISCONNECT;
 
 		{
 		u8 buff[] = {0x00, 0x05, 0x01};//LPCControlPWREnable

@@ -83,8 +83,8 @@ enum
 
 
 //led
-#define LED_ON  do{SOC_IO_Output(0, devices_resource.led_gpio, 0); }while(0)
-#define LED_OFF  do{SOC_IO_Output(0, devices_resource.led_gpio, 1); }while(0)
+#define LED_ON  do{/*SOC_IO_Config(devices_resource.led_gpio,GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_8MA);*/SOC_IO_Output(0, devices_resource.led_gpio, 0); }while(0)
+#define LED_OFF  do{/*SOC_IO_Config(devices_resource.led_gpio,GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_8MA);*/SOC_IO_Output(0, devices_resource.led_gpio, 1); }while(0)
 
 #define GPIO_LED_FLY (33)
 #define GPIO_LED_SKU7 (108)
@@ -141,8 +141,8 @@ enum
 //gpio return keys
 #define GPIO_SCAN_KEY_RETURN  (33)
 
-#define PWR_EN_ON   do{SOC_IO_Output(0, 23, 1); }while(0)
-#define PWR_EN_OFF  do{SOC_IO_Output(0, 23, 0); }while(0)
+#define PWR_EN_ON   do{SOC_IO_Config(23,GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_8MA);SOC_IO_Output(0, 23, 1); }while(0)
+#define PWR_EN_OFF  do{SOC_IO_Config(23,GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_8MA);SOC_IO_Output(0, 23, 0); }while(0)
 
 
 #define USB_ID_HIGH_DEV do{\
@@ -155,11 +155,11 @@ enum
 							}while(0)
 
 
-#define USB_SWITCH_DISCONNECT   do{SOC_IO_Output(0, 15, 1); }while(0)
-#define USB_SWITCH_CONNECT  do{SOC_IO_Output(0, 15, 0); }while(0)
+#define USB_SWITCH_DISCONNECT   do{SOC_IO_Config(15,GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_8MA);SOC_IO_Output(0, 15, 1); }while(0)
+#define USB_SWITCH_CONNECT  do{SOC_IO_Config(15,GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_8MA);SOC_IO_Output(0, 15, 0); }while(0)
 
-#define USB_HUB_ENABLE  do{SOC_IO_Output(0, 35, 1); }while(0)
-#define USB_HUB_DISABLE do{SOC_IO_Output(0, 35, 0); }while(0)
+#define USB_HUB_ENABLE  do{SOC_IO_Config(35,GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_8MA);SOC_IO_Output(0, 35, 1); }while(0)
+#define USB_HUB_DISABLE do{SOC_IO_Config(35,GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_8MA);SOC_IO_Output(0, 35, 0); }while(0)
 #define USB_HUB_RST do{USB_HUB_DISABLE;msleep(500);USB_HUB_ENABLE;}while(0);
 
 
