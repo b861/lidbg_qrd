@@ -578,13 +578,6 @@ static void devices_early_suspend(struct early_suspend *handler)
 #endif
 
 
-        USB_HUB_DISABLE;
-        USB_SWITCH_DISCONNECT;
-        //msleep(1000);
-        //USB_ID_HIGH_DEV;
-		USB_ID_LOW_HOST;
-
-
     }
     DUMP_FUN_LEAVE;
 
@@ -603,16 +596,16 @@ static void devices_late_resume(struct early_suspend *handler)
 		
 		
 #ifdef FLY_DEBUG
-		USB_HUB_DISABLE;
-        USB_ID_HIGH_DEV;
-        USB_SWITCH_DISCONNECT;
 
+		
+		if(0)
 		{
-		u8 buff[] = {0x00, 0x05, 0x01};//LPCControlPWREnable
-		lidbg("LPCControlPWREnable\n");
-		SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
+			u8 buff[] = {0x00, 0x05, 0x01};//LPCControlPWREnable
+			lidbg("LPCControlPWREnable\n");
+			SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
 		}
-#endif		
+
+
         lidbg("create thread_resume!\n");
         resume_task = kthread_create(thread_resume, NULL, "dev_resume_task");
         if(IS_ERR(resume_task))
@@ -621,6 +614,7 @@ static void devices_late_resume(struct early_suspend *handler)
             err = PTR_ERR(resume_task);
         }
         else wake_up_process(resume_task);
+#endif		
 
 
     }
@@ -663,19 +657,46 @@ static int thread_resume(void *data)
 {
 
     DUMP_FUN_ENTER;
+	
     msleep(3000);
-
-
     lidbg("usb enable\n");
-    USB_ID_LOW_HOST;
-    msleep(2000);
-    USB_SWITCH_CONNECT;
-    USB_HUB_RST;
+	USB_WORK_ENABLE;
+
     DUMP_FUN_LEAVE;
     return 0;
 
 
 }
+
+static void soc_dev_suspend_prepare(void)
+{
+	
+#ifdef DEBUG_UMOUNT_USB
+			SOC_Write_Servicer(UMOUNT_USB);
+#ifdef FLY_DEBUG
+			msleep(1000);
+#endif
+#endif
+
+		
+
+#ifdef FLY_DEBUG
+		if(0)
+		{
+			u8 buff[] = {0x00, 0x05, 0x00};//LPCControlPWRDisenable
+			lidbg("LPCControlPWRDisenable\n");
+			SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
+			msleep(3000);
+		}
+
+    //disable usb first
+    USB_WORK_DISENABLE;
+	msleep(3000);
+#endif
+
+
+}
+
 
 
 static int soc_dev_resume(struct platform_device *pdev)
@@ -687,12 +708,9 @@ static int soc_dev_resume(struct platform_device *pdev)
     if(platform_id ==  PLATFORM_FLY)
     {
     	TELL_LPC_PWR_ON;
-        //disable usb first
-        USB_HUB_DISABLE;
-        USB_ID_HIGH_DEV;
-        USB_SWITCH_DISCONNECT;
 
-
+		USB_WORK_DISENABLE;
+        
         PWR_EN_ON;
 
 #ifdef DEBUG_BUTTON
@@ -877,10 +895,7 @@ void fly_devices_init(void)
     {
 
         PWR_EN_ON;
-        USB_ID_LOW_HOST;
-        USB_SWITCH_CONNECT;
-        USB_HUB_RST;
-
+		USB_WORK_ENABLE;
 
         lidbg("turn lcd on!\n");
         LCD_ON;
@@ -910,6 +925,14 @@ void fly_devices_init(void)
 }
 
 
+static void set_func_tbl(void)
+{
+    //lpc
+    ((struct lidbg_dev *)plidbg_dev)->soc_func_tbl.pfnSOC_Dev_Suspend_Prepare = soc_dev_suspend_prepare;
+
+}
+
+
 int dev_init(void)
 {
 
@@ -926,6 +949,8 @@ int dev_init(void)
     LIDBG_GET_THREAD;
 #else
     LIDBG_GET;
+	set_func_tbl();
+
 #endif
 #endif
 #if 0

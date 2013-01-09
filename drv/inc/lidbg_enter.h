@@ -225,6 +225,10 @@ when err , <0
     Vedio_Format pfnglobal_video_format_flag;
     Vedio_Channel pfnglobal_video_channel_flag;
 
+
+	//soc
+	 void (*pfnSOC_Dev_Suspend_Prepare)(void);
+
 };
 
 #define LIDBG_SIZE	0x00001000 //MEM_SIZE_4_KB	/*全局内存最大1K字节*/

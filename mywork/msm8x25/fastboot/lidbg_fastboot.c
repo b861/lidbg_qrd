@@ -69,7 +69,7 @@ static int thread_pwroff(void *data)
 
 void fastboot_set_status(LIDBG_FAST_PWROFF_STATUS status);
 
-static int thread_lpc_resume(void *data)
+static int thread_fastboot_resume(void *data)
 {
     while(1)
     {
@@ -78,9 +78,9 @@ static int thread_lpc_resume(void *data)
 		
 		wait_for_completion(&resume_ok);
 	    DUMP_FUN_ENTER;
-	    msleep(4000);
+	    msleep(3000);
 		SOC_Write_Servicer(WAKEUP_KERNEL);
-		msleep(1000);
+		msleep(2000);
 		fastboot_set_status(PM_STATUS_LATE_RESUME_OK);
 	    DUMP_FUN_LEAVE;
     }
@@ -127,34 +127,16 @@ void fastboot_pwroff(void)
 
     }
 	
+	
+	SOC_Dev_Suspend_Prepare();
+
+	
     fastboot_set_status(PM_STATUS_EARLY_SUSPEND_PENDING);
 
-
-
-
 	
-#define DEBUG_UMOUNT_USB
-	
-#ifdef DEBUG_UMOUNT_USB
-			SOC_Write_Servicer(UMOUNT_USB);
-			msleep(1000);
-#endif
-
-
 #ifdef FLY_DEBUG
-		{
-			u8 buff[] = {0x00, 0x05, 0x00};//LPCControlPWRDisenable
-			lidbg("LPCControlPWRDisenable\n");
-			SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
-			msleep(3000);
-		}
-
     SOC_Write_Servicer(CMD_FAST_POWER_OFF);
 #endif
-
-
-
-
 
 	complete(&suspend_start);
 
@@ -237,7 +219,7 @@ static int  fastboot_probe(struct platform_device *pdev)
 
 	
 	INIT_COMPLETION(resume_ok);
-    resume_task = kthread_create(thread_lpc_resume, NULL, "pwroff_task");
+    resume_task = kthread_create(thread_fastboot_resume, NULL, "pwroff_task");
     if(IS_ERR(resume_task))
     {
         lidbg("Unable to start kernel thread.\n");

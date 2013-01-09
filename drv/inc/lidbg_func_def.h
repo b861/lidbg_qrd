@@ -67,5 +67,9 @@ static inline int check_pt(void)
 #define  SOC_LPC_Send  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_LPC_Send))
 #define global_video_format_flag  (plidbg_dev->soc_func_tbl.pfnglobal_video_format_flag)
 #define global_video_channel_flag  (plidbg_dev->soc_func_tbl.pfnglobal_video_channel_flag)
+
+//dev
+#define SOC_Dev_Suspend_Prepare (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_Dev_Suspend_Prepare))
+
 #endif
 

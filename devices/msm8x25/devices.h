@@ -172,6 +172,23 @@ enum
 								SOC_IO_Input(0,MCU_IIC_REQ_I,GPIO_CFG_PULL_UP);\
 							}while(0)
 
+#define USB_WORK_ENABLE do{\
+				lidbg("USB_WORK_ENABLE\n");\
+    			USB_ID_LOW_HOST;\
+    			USB_SWITCH_CONNECT;\
+    			USB_HUB_RST;\
+			}while(0)				
+							
+
+
+#define USB_WORK_DISENABLE  do{\
+			lidbg("USB_WORK_DISENABLE\n");\
+			USB_SWITCH_DISCONNECT;\
+			USB_HUB_DISABLE;\
+			USB_ID_LOW_HOST;\
+	}while(0)
+
+
 #define DEBUG_UMOUNT_USB
 
 #endif
