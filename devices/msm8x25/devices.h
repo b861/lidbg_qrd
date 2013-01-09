@@ -163,6 +163,15 @@ enum
 #define USB_HUB_RST do{USB_HUB_DISABLE;msleep(500);USB_HUB_ENABLE;}while(0);
 
 
+#define  MCU_IIC_REQ_I (30)
+
+#define TELL_LPC_PWR_OFF
+#define TELL_LPC_PWR_ON do{\
+								lidbg("tell lpc power on ok!\n");\
+								SOC_IO_Config(MCU_IIC_REQ_I,GPIO_CFG_INPUT,GPIO_CFG_PULL_UP,GPIO_CFG_8MA);\
+								SOC_IO_Input(0,MCU_IIC_REQ_I,GPIO_CFG_PULL_UP);\
+							}while(0)
+
 #define DEBUG_UMOUNT_USB
 
 #endif

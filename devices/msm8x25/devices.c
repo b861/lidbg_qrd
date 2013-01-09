@@ -686,6 +686,7 @@ static int soc_dev_resume(struct platform_device *pdev)
 
     if(platform_id ==  PLATFORM_FLY)
     {
+    	TELL_LPC_PWR_ON;
         //disable usb first
         USB_HUB_DISABLE;
         USB_ID_HIGH_DEV;
