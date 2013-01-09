@@ -537,6 +537,8 @@ static int  lpc_probe(struct platform_device *pdev)
 {
 
     DUMP_FUN;
+#ifdef FLY_DEBUG
+	
     lidbg("lpc communication+\n");
     mcuFirstInit();
     LPCPowerOnOK();
@@ -544,6 +546,7 @@ static int  lpc_probe(struct platform_device *pdev)
     LPCBackLightOn();
     lidbg("lpc communication-\n");
     lpc_work_en = 1;
+#endif
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
     early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN;
@@ -653,17 +656,12 @@ static int __init lpc_init(void)
 {
     DUMP_BUILD_TIME;
 
-	
-#ifndef FLY_DEBUG
-	lidbg("lpc_init do nothing");
-#else
 #ifndef SOC_COMPILE
     LIDBG_GET;
     set_func_tbl();
 #endif
     platform_device_register(&lidbg_lpc);
     platform_driver_register(&lpc_driver);
-#endif
 
     return 0;
 }
