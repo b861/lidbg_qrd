@@ -153,14 +153,28 @@ int ret=1 ;
 //spin_lock(&spin_chipe_config_lock);
 printk("tw9912:@@@@@flyVideoInitall_in(Channel=%d)\n",Channel);
 mutex_lock(&lock_chipe_config);
+if (Channel>=YIN0 &&Channel<=NOTONE)
+{
+info_com_top_Channel = Channel;
+global_video_channel_flag = Channel;
+}
+else
+{
+info_com_top_Channel = NOTONE;
+global_video_channel_flag = NOTONE;
+printk("%s: you input TW9912 Channel=%d error!\n",__FUNCTION__,Channel);
+}
+/*
 	switch (Channel)
 	{
 		case 0:
 			info_com_top_Channel = YIN0;
+			global_video_channel_flag = YIN0;
 			//init_tw9912_ent(YIN0);
 			break;
 		case 1:
 			info_com_top_Channel = YIN1;
+			global_video_channel_flag = YIN0;
 			//init_tw9912_ent(YIN1);
 			break;
 		case 2:
@@ -181,6 +195,7 @@ mutex_lock(&lock_chipe_config);
 			printk("%s: you input TW9912 Channel=%d error!\n",__FUNCTION__,Channel);
 			break;
 	}
+*/
 //spin_unlock(&spin_chipe_config_lock);
 mutex_unlock(&lock_chipe_config);
 return ret;
