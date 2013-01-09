@@ -65,14 +65,14 @@ mutex_lock(&lock_chipe_config);
 			{
 				if(valu==5)
 				{
-					valu = 0x50;
+					valu = 0x37;
 				}
 				else if(valu > 5)
 				{
 					if(valu == 10)
 					valu =0xff;
 					else
-					valu = ( 10 - valu  ) * 0x23 + 0x50;//valu = ( 10-valu ) * ( (0xff-0x50)/5 ) + 0x50;
+					valu = ( 10 - valu  ) * 0x28 + 0x50;//valu = ( 10-valu ) * ( (0xff-0x37)/5 ) + 0x50;
 				}
 				else 
 				{

@@ -32,9 +32,9 @@ i2c_ack ret;
 u8 Tw9912_Parameter[]={0,0,};
 
 	if( format == PAL_I )
-	{
+	{msleep(100);
 		Tw9912_Parameter[0]=0x0a;
-		Tw9912_Parameter[1]=0x09;
+		Tw9912_Parameter[1]=0x0c;
 		ret = write_tw9912(Tw9912_Parameter);
 	}
 return ret;
