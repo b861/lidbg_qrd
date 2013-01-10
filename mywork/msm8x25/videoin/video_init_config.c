@@ -247,7 +247,7 @@ return camera_open_video_signal_test_in_2();
 }
 Vedio_Format flyVideoTestSignalPin_in(u8 Channel)
 {Vedio_Format ret= NOTONE;
-printk("tw9912:@@@@@flyVideoTestSignalPin_in(Channel=%d)\n",Channel);
+printk("tw9912:flyVideoTestSignalPin_in(Channel=%d)",Channel);
 //spin_lock(&spin_chipe_config_lock);
 mutex_lock(&lock_chipe_config);
 	switch (Channel)
@@ -277,6 +277,7 @@ mutex_lock(&lock_chipe_config);
 			printk("%s:you input TW9912 Channel=%d error!\n",__FUNCTION__,Channel);
 			break;
 	}
+printk(" back %d\n",ret);
 //spin_unlock(&spin_chipe_config_lock);
 mutex_unlock(&lock_chipe_config);
 global_video_format_flag=ret;
@@ -300,7 +301,7 @@ mutex_lock(&lock_chipe_config);
 		init_tw9912_ent(info_com_top_Channel);
 		}
 	
-	
+	msleep(190);//wait for video wen ding
 		printk("\r\n");
 		printk("TW9912:info_Vedio_Channel=%d\n",info_Vedio_Channel);
 		printk("TW9912:signal_is_how[%d].Channel=%d\n",info_Vedio_Channel,signal_is_how[info_Vedio_Channel].Channel);
