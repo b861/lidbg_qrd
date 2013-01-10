@@ -446,7 +446,7 @@ static int soc_dev_probe(struct platform_device *pdev)
 {
 
 
-    lidbg("soc_dev_probe\n");
+    DUMP_FUN;
 
     PWR_EN_ON;
 
@@ -572,12 +572,6 @@ static void devices_early_suspend(struct early_suspend *handler)
     {
         LCD_OFF;
 		
-#ifdef DEBUG_UMOUNT_USB
-		SOC_Write_Servicer(UMOUNT_USB);
-		
-#endif
-
-
     }
     DUMP_FUN_LEAVE;
 
@@ -671,6 +665,8 @@ static int thread_resume(void *data)
 static void soc_dev_suspend_prepare(void)
 {
 	
+    DUMP_FUN;
+	
 #ifdef DEBUG_UMOUNT_USB
 			SOC_Write_Servicer(UMOUNT_USB);
 #ifdef FLY_DEBUG
@@ -708,10 +704,9 @@ static int soc_dev_resume(struct platform_device *pdev)
     if(platform_id ==  PLATFORM_FLY)
     {
     	TELL_LPC_PWR_ON;
-
-		USB_WORK_DISENABLE;
-        
         PWR_EN_ON;
+		
+		USB_SWITCH_DISCONNECT;        
 
 #ifdef DEBUG_BUTTON
         SOC_IO_ISR_Enable(BUTTON_LEFT_1);

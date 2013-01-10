@@ -73,8 +73,8 @@ static int thread_fastboot_resume(void *data)
 {
     while(1)
     {
-        set_current_state(TASK_UNINTERRUPTIBLE);
-        if(kthread_should_stop()) break;
+       // set_current_state(TASK_UNINTERRUPTIBLE);
+       // if(kthread_should_stop()) break;
 		
 		wait_for_completion(&resume_ok);
 	    DUMP_FUN_ENTER;

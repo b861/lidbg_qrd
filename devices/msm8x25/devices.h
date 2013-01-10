@@ -183,8 +183,9 @@ enum
 
 #define USB_WORK_DISENABLE  do{\
 			lidbg("USB_WORK_DISENABLE\n");\
-			USB_SWITCH_DISCONNECT;\
 			USB_HUB_DISABLE;\
+			msleep(100);\
+			USB_SWITCH_DISCONNECT;\
 			USB_ID_LOW_HOST;\
 	}while(0)
 
