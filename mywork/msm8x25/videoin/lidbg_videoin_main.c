@@ -111,6 +111,10 @@ printk("In lidbg_video_main()\n");
 	{
 	 flyVideoInitall_in(YIN0);
 	}
+    if(!strcmp(argv[0], "checkoutYin2"))
+	{
+	 flyVideoInitall_in(YIN2);
+	}
     if(!strcmp(argv[0], "checkoutYuv"))
 	{
 	 flyVideoInitall_in(SEPARATION);
