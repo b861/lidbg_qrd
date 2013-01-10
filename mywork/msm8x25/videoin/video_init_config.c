@@ -65,14 +65,14 @@ mutex_lock(&lock_chipe_config);
 			{
 				if(valu==5)
 				{
-					valu = 0x37;
+					valu = 0x5d;
 				}
 				else if(valu > 5)
 				{
 					if(valu == 10)
 					valu =0xff;
 					else
-					valu = ( 10 - valu  ) * 0x28 + 0x50;//valu = ( 10-valu ) * ( (0xff-0x37)/5 ) + 0x50;
+					valu = ( 10 - valu  ) * 0x20 + 0x50;//valu = ( 10-valu ) * ( (0xff-0x5d)/5 ) + 0x50;
 				}
 				else 
 				{
@@ -301,7 +301,7 @@ mutex_lock(&lock_chipe_config);
 		init_tw9912_ent(info_com_top_Channel);
 		}
 	
-	msleep(190);//wait for video wen ding
+	msleep(190);//wait for video Steady display
 		printk("\r\n");
 		printk("TW9912:info_Vedio_Channel=%d\n",info_Vedio_Channel);
 		printk("TW9912:signal_is_how[%d].Channel=%d\n",info_Vedio_Channel,signal_is_how[info_Vedio_Channel].Channel);
