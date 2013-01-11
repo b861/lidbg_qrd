@@ -44,7 +44,11 @@ static int thread_pwroff(void *data)
                 time_count++;
                 if(fastboot_get_status() == PM_STATUS_EARLY_SUSPEND_PENDING)
                 {
-                    if(time_count >= 20)
+#ifdef FLY_DEBUG
+                    if(time_count >= 10)
+#else
+					if(time_count >= 20)
+#endif
                     {
                         lidbgerr("thread_pwroff wait suspend timeout!\n");
                         SOC_Write_Servicer(SUSPEND_KERNEL);
@@ -80,6 +84,12 @@ static int thread_fastboot_resume(void *data)
 	    DUMP_FUN_ENTER;
 	    msleep(3000);
 		SOC_Write_Servicer(WAKEUP_KERNEL);
+
+#ifdef FLY_DEBUG   
+			SOC_Key_Report(KEY_HOME, KEY_PRESSED_RELEASED);
+			SOC_Key_Report(KEY_BACK, KEY_PRESSED_RELEASED);
+#endif	
+
 		msleep(2000);
 		fastboot_set_status(PM_STATUS_LATE_RESUME_OK);
 	    DUMP_FUN_LEAVE;
@@ -162,7 +172,8 @@ static void set_func_tbl(void)
 #ifdef CONFIG_HAS_EARLYSUSPEND
 static void fastboot_early_suspend(struct early_suspend *h)
 {
-    DUMP_FUN;
+	
+    lidbg("fastboot_early_suspend:%d\n", fb_data->resume_count);
     if(PM_STATUS_EARLY_SUSPEND_PENDING != fastboot_get_status())
     {
         lidbgerr("Call devices_early_suspend when suspend_pending != PM_STATUS_EARLY_SUSPEND_PENDING\n");
@@ -177,6 +188,10 @@ static void fastboot_late_resume(struct early_suspend *h)
 {
     DUMP_FUN;
     //fastboot_set_status(PM_STATUS_LATE_RESUME_OK);
+#ifdef FLY_DEBUG   
+	SOC_Key_Report(KEY_HOME, KEY_PRESSED_RELEASED);
+	SOC_Key_Report(KEY_BACK, KEY_PRESSED_RELEASED);
+#endif	
 	complete(&resume_ok);
 
 }

@@ -31,5 +31,26 @@
 #endif
 
 
+//java
+/*
+import java.io.FileOutputStream;
+
+private void LIDBG_PRINT(String msg)
+{
+	final String LOG_E = "LIDBG_PRINT";
+	msg = "JAVA:" + msg;
+	byte b[] = msg.getBytes();
+	FileOutputStream stateOutputMsg;
+	try {
+	stateOutputMsg = new FileOutputStream("/dev/lidbg_msg", true);
+	stateOutputMsg.write(b);
+	} catch (Exception e ) {
+		Log.e(LOG_E, "Failed to set the fastboot state");
+	}
+}
+LIDBG_PRINT("hello world\n");
+
+
+*/
 
 #endif
