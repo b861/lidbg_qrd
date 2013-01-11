@@ -32,9 +32,9 @@ i2c_ack ret;
 u8 Tw9912_Parameter[]={0,0,};
 
 	if( format == PAL_I )
-	{
+	{msleep(100);
 		Tw9912_Parameter[0]=0x0a;
-		Tw9912_Parameter[1]=0x09;
+		Tw9912_Parameter[1]=0x0c;
 		ret = write_tw9912(Tw9912_Parameter);
 	}
 return ret;
@@ -296,7 +296,6 @@ u8 Tw9912_input_pin_selet[]={0x02,0x40,};//default input pin selet YIN0
 TW9912_Signal signal_is_how_1={NOTONE,OTHER,source_other};
 TW9912_input_info tw9912_input_information_1;
 
-	 tw9912_dbg("testing_signal!\n");
 	 
 	if(Channel >SEPARATION) goto CHANNAL_ERROR;
 	signal_is_how_1.Channel =Channel;
@@ -382,12 +381,14 @@ TW9912_input_info tw9912_input_information_1;
 					signal_is_how_1.Format = PAL_P;
 					}
 
-			}
-			else
-			{
-				signal_is_how_1.Format = OTHER;
-			}
 		}
+		else
+		{
+			signal_is_how_1.Format = OTHER;
+		}
+	}
+	
+tw9912_dbg("testing_signal(): back %d",signal_is_how_1.Format);
 	return signal_is_how_1.Format;
 CONFIG_not_ack_fail:
 	tw9912_dbg("tw9912:testing_video_signal()--->NACK error\n");

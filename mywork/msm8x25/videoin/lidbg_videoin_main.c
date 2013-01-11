@@ -111,6 +111,10 @@ printk("In lidbg_video_main()\n");
 	{
 	 flyVideoInitall_in(YIN0);
 	}
+    if(!strcmp(argv[0], "checkoutYin2"))
+	{
+	 flyVideoInitall_in(YIN2);
+	}
     if(!strcmp(argv[0], "checkoutYuv"))
 	{
 	 flyVideoInitall_in(SEPARATION);
@@ -226,7 +230,7 @@ static void set_func_tbl(void)
 	plidbg_dev->soc_func_tbl.pfncamera_open_video_signal_test = camera_open_video_signal_test_in;
 	plidbg_dev->soc_func_tbl.pfncamera_open_video_color = Video_Show_Output_Color;
 	global_video_format_flag = NTSC_I;
-	global_video_channel_flag = YIN3;
+	global_video_channel_flag = YIN0;
 
 }
 
@@ -237,7 +241,7 @@ int lidbg_video_init(void)
 	LIDBG_GET;
 	set_func_tbl();
 	video_io_i2c_init();
-	flyVideoChannelInitall(YIN3);
+	flyVideoChannelInitall(YIN0);
 	    return 0;
 
 }

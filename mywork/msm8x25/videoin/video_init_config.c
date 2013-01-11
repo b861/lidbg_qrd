@@ -3,6 +3,20 @@ static int flag_io_config=0;
 static Vedio_Channel info_Vedio_Channel = NOTONE;
 static Vedio_Channel info_com_top_Channel = YIN2;
 extern TW9912_Signal signal_is_how[5];
+u8 Image_Config[4][11]={
+						/*0*/	/*1*/	/*2*/	/*3*/	/*4*/	/*5*/	/*6*/	/*7*/	/*8*/	/*9*/	/*10*/
+					{	0x90,		0Xa0,	0xa5,		0xb5,		0xc5,		0xf0,		0xfa,		0x0,		0x10,		0x20,		0x30,	}, //BRIGHTNESS
+					{	0x20,		0x28,		0x38,		0x48,		0x58,		0x68,		0x78,		0x88	,	0x98,		0x9F,		0xB3,},//CONTRAST
+					{	0x0,		0x15,		0x30,		0x45,		0x65,		0x80,		0x95,		0xa5	,	0xd5,		0xe0,		0xff,},//HUE
+					{	0x0,		0x15,		0x30,		0x45,		0x65,		0x80,		0x95,		0xa5	,	0xd5,		0xe0,		0xff,},//SHARPNESS
+					   };
+static u8 Tw9912_image_global[4][2]={
+									{0x10,0xf0},//BRIGHTNESS
+									{0x11,0x68},//CONTRAST
+																	
+									{0x13,0x80},//HUE
+									{0x14,0x80},//SHARPNESS
+								};
 //spinlock_t spin_chipe_config_lock;
 struct mutex lock_chipe_config;
 struct semaphore sem;
@@ -17,18 +31,27 @@ void video_io_i2c_init_in(void)
 		flag_io_config=1;
 	}
 }
+int static VideoImage(void)
+{int ret;
+ int i=0;
+ printk("\ntw9912:@@@@@VideoImage()\n");
+ 	for(i=0;i<4;i++)
+ 		{
+		ret = write_tw9912(&Tw9912_image_global[i]);
+		}
+return ret;
+}
 int flyVideoImageQualityConfig_in(Vedio_Effect cmd ,u8 valu)
 {
 int ret;
 u8 Tw9912_image[2]={0,0,};//default input pin selet YIN0ss
-
-	printk("tw9912:@@@@@flyVideoImageQualityConfig_in(cmd =%d,valu=%d)\n",cmd,valu);
+	printk("\ntw9912:@@@@@flyVideoImageQualityConfig_in(cmd =%d,valu=%d)\n",cmd,valu);
 	//spin_lock(&spin_chipe_config_lock);
 mutex_lock(&lock_chipe_config);
 	
 	if(valu >10)
 		{
-			printk("tw9912:flyVideoImageQualityConfig_in() input valu is bad 10 errror");
+			printk("\ntw9912:flyVideoImageQualityConfig_in() input valu is bad 10 errror\n\n");
 			mutex_unlock(&lock_chipe_config);
 			return -1;
 		}
@@ -36,107 +59,41 @@ mutex_lock(&lock_chipe_config);
 	{
 		case BRIGHTNESS ://ok
 			Tw9912_image[0]=0x10;
-		//	if(global_video_format_flag = NTSC_I)
-			{
-				if(valu==5)
-				{
-					valu = 0;
-				}
-				else if(valu > 5)
-				{
-					if(valu == 10)
-					valu =0x7f;
-					else
-					valu = ( 10 - valu  ) * 0x19;//valu = ( 10-valu ) * ( 0x7f/5 );
-				}
-				else 
-				{
-					valu = valu *  0x19  + 0x80;//valu = valu * ( (0xff-0x80)/5) + 0x80;
-				}
-
-			}
-			Tw9912_image[1]=valu;
-			printk("cmd = %d, valu = %d",cmd,valu);
+			Tw9912_image[1]=Image_Config[0][valu];
+			
+			Tw9912_image_global[0][1]=Image_Config[0][valu];//remember
 			ret = write_tw9912(&Tw9912_image);
 			break;
 		case CONTRAST ://ok
 			Tw9912_image[0]=0x11;
 			//if(global_video_format_flag = NTSC_I)
 			{
-				if(valu==5)
-				{
-					valu = 0x50;
-				}
-				else if(valu > 5)
-				{
-					if(valu == 10)
-					valu =0xff;
-					else
-					valu = ( 10 - valu  ) * 0x23 + 0x50;//valu = ( 10-valu ) * ( (0xff-0x50)/5 ) + 0x50;
-				}
-				else 
-				{
-					valu = valu * 0x10 ;//valu = valu * 0x50/5;
-				}
+				Tw9912_image[1]=Image_Config[1][10-valu];
+				Tw9912_image_global[1][1]=Image_Config[1][valu];
 			}
-			Tw9912_image[1]=valu;
-			printk("cmd = %d, valu = %d",cmd,valu);
+			ret = write_tw9912(&Tw9912_image);
+			break;
+		case HUE ://bad
+			Tw9912_image[0]=0x14;
+			//if(global_video_format_flag = NTSC_I)
+			{
+				Tw9912_image[1]=Image_Config[2][valu];
+				Tw9912_image_global[2][1]=Image_Config[2][valu];
+			}
 			ret = write_tw9912(&Tw9912_image);
 			break;
 		case SHARPNESS ://bad
 		case CHROMA_U :
 		case CHROMA_V :
-			Tw9912_image[0]=0x14;
 			//if(global_video_format_flag = NTSC_I)
 			{
-				if(valu==5)
-				{
-					valu = 0x80;
-				}
-				else if(valu > 5)
-				{
-					if(valu == 10)
-					valu =0xff;
-					else
-					valu = ( 10 - valu  ) * 0xe6 + 0x80;//valu = ( 10-valu ) * ( (0xff-0x80)/5 ) + 0x80;
-				}
-				else 
-				{
-					valu = valu * 0x19 ;//valu = valu * 0x80/5;
-				}
-			}
-			Tw9912_image[1]=valu;
-			printk("cmd = %d, valu = %d",cmd,valu);
-			ret = write_tw9912(&Tw9912_image);
-			break;
-		case HUE ://bad
-		//	if(global_video_format_flag = NTSC_I)
-			{
-				if(valu==5)
-				{
-					valu = 0x80;
-				}
-				else if(valu > 5)
-				{
-					if(valu == 10)
-					valu =0xff;
-					else
-					valu = ( 10 - valu  ) * 0xe6 + 0x80;//valu = ( 10-valu ) * ( (0xff-0x80)/5 ) + 0x80;
-				}
-				else 
-				{
-					valu = valu * 0x19 ;//valu = valu * 0x80/5;
-				}
+				Tw9912_image[1]=Image_Config[3][valu];
+				Tw9912_image_global[3][1]=Image_Config[3][valu];
 			}
 			Tw9912_image[0]=0x13;
-			Tw9912_image[1]=valu;
-			printk("cmd = %d, valu = %d",cmd,valu);
 			ret = write_tw9912(&Tw9912_image);
 
 			Tw9912_image[0]=0x14;
-	
-			Tw9912_image[1]=valu;
-			printk("cmd = %d, valu = %d",cmd,valu);
 			ret = write_tw9912(&Tw9912_image);
 			break;
 
@@ -247,7 +204,7 @@ return camera_open_video_signal_test_in_2();
 }
 Vedio_Format flyVideoTestSignalPin_in(u8 Channel)
 {Vedio_Format ret= NOTONE;
-printk("tw9912:@@@@@flyVideoTestSignalPin_in(Channel=%d)\n",Channel);
+printk("tw9912:flyVideoTestSignalPin_in(Channel=%d)",Channel);
 //spin_lock(&spin_chipe_config_lock);
 mutex_lock(&lock_chipe_config);
 	switch (Channel)
@@ -277,13 +234,14 @@ mutex_lock(&lock_chipe_config);
 			printk("%s:you input TW9912 Channel=%d error!\n",__FUNCTION__,Channel);
 			break;
 	}
+printk(" back %d\n",ret);
 //spin_unlock(&spin_chipe_config_lock);
 mutex_unlock(&lock_chipe_config);
 global_video_format_flag=ret;
 return ret;
 }
 void video_init_config_in(Vedio_Format config_pramat)
-{
+{int i,j;
 printk("tw9912:@@@@@video_init_config_in(config_pramat=%d)\n",config_pramat);
 //spin_lock(&spin_chipe_config_lock);
 mutex_lock(&lock_chipe_config);
@@ -299,8 +257,16 @@ mutex_lock(&lock_chipe_config);
 	    	printk("tw9912:video_init_config_in()-->init_tw9912_ent()\n");
 		init_tw9912_ent(info_com_top_Channel);
 		}
-	
-	
+	VideoImage();
+/*
+	for(i=0;i<4;i++)
+		{
+		for(j=0;j<11;j++)
+			printk("Image_Config[%d][%d]=0x%.2x\n",i,j,Image_Config[i][j]);
+			printk("\n\n",i,j,Image_Config[i][j]);
+		}
+*/
+	msleep(190);//wait for video Steady display
 		printk("\r\n");
 		printk("TW9912:info_Vedio_Channel=%d\n",info_Vedio_Channel);
 		printk("TW9912:signal_is_how[%d].Channel=%d\n",info_Vedio_Channel,signal_is_how[info_Vedio_Channel].Channel);

@@ -97,7 +97,7 @@ typedef enum
     BRIGHTNESS = 1,//ok
     CONTRAST,//ok
     SHARPNESS,
-    CHROMA_U,
+    CHROMA_U,//ok
     CHROMA_V,
     HUE,//ok
     //Positive value results in red hue and negative value gives green hue.
