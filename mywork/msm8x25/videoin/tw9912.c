@@ -627,6 +627,7 @@ goto CONFIG_is_old;
 				tw9912_status.Channel = Channel;
 				tw9912_status.format = PAL_I;
 				config_pramat_piont=TW9912_INIT_PAL_Interlaced_input; 
+				//config_pramat_piont=TW9912_INIT_NTSC_Interlaced_input; 
 				printk("%s:config_pramat->PAL_Interlace\n",__func__);
 				break;
 			
