@@ -71,5 +71,8 @@ static inline int check_pt(void)
 //dev
 #define SOC_Dev_Suspend_Prepare (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_Dev_Suspend_Prepare))
 
+
+#define SOC_PWR_Ignore_Wakelock   (plidbg_dev->soc_func_tbl.pfnSOC_PWR_Ignore_Wakelock)
+
 #endif
 

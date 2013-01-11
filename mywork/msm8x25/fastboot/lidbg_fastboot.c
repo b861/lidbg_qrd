@@ -21,10 +21,35 @@ LIDBG_DEFINE;
 #include "lidbg_fastboot.h"
 
 static DECLARE_COMPLETION(suspend_start);
+static DECLARE_COMPLETION(early_suspend_start);
+
 static DECLARE_COMPLETION(resume_ok);
 
+
+
+struct fastboot_data
+{
+    int suspend_pending;
+    u32 resume_count;
+    struct mutex lock;
+#if defined(CONFIG_HAS_EARLYSUSPEND)
+    struct wake_lock flywakelock;
+    struct early_suspend early_suspend;
+#endif
+
+};
+
+struct fastboot_data *fb_data;
+
+
+
 static struct task_struct *pwroff_task;
+static struct task_struct *suspend_task;
 static struct task_struct *resume_task;
+
+bool ignore_wakelock = 0;
+
+
 
 static int thread_pwroff(void *data)
 {
@@ -37,12 +62,12 @@ static int thread_pwroff(void *data)
         if(1)
         {
             time_count = 0;
-            wait_for_completion(&suspend_start);
+            wait_for_completion(&early_suspend_start);
             while(1)
             {
                 msleep(1000);
                 time_count++;
-                if(fastboot_get_status() == PM_STATUS_EARLY_SUSPEND_PENDING)
+                if(fastboot_get_status() == PM_STATUS_READY_TO_PWROFF)
                 {
 #ifdef FLY_DEBUG
                     if(time_count >= 10)
@@ -50,7 +75,7 @@ static int thread_pwroff(void *data)
 					if(time_count >= 20)
 #endif
                     {
-                        lidbgerr("thread_pwroff wait suspend timeout!\n");
+                        lidbgerr("thread_pwroff wait early suspend timeout!\n");
                         SOC_Write_Servicer(SUSPEND_KERNEL);
                         break;
                     }
@@ -71,6 +96,62 @@ static int thread_pwroff(void *data)
     return 0;
 }
 
+
+
+static int thread_fastboot_suspend(void *data)
+{
+    int time_count;
+
+    while(1)
+    {
+        set_current_state(TASK_UNINTERRUPTIBLE);
+        if(kthread_should_stop()) break;
+        if(1)
+        {
+            time_count = 0;
+            wait_for_completion(&suspend_start);
+            while(1)
+            {
+                msleep(1000);
+                time_count++;
+                if(fastboot_get_status() == PM_STATUS_EARLY_SUSPEND_PENDING)
+                {
+#ifdef FLY_DEBUG
+					if(time_count >= 15)
+#else
+					if(time_count >= 25)
+#endif
+                    {
+                        lidbgerr("thread_fastboot_suspend wait suspend timeout!\n");
+                        //SOC_Write_Servicer(LOG_DMESG);
+						//msleep(10000);//wait for write log finish
+						ignore_wakelock = 1;
+						wake_lock(&(fb_data->flywakelock));
+						wake_unlock(&(fb_data->flywakelock));
+                        break;
+                    }
+                }
+                else
+                {
+                    lidbg("thread_fastboot_suspend wait time_count=%d\n", time_count);
+                    break;
+
+                }
+            }
+        }
+        else
+        {
+            schedule_timeout(HZ);
+        }
+    }
+    return 0;
+}
+
+
+
+
+
+
 void fastboot_set_status(LIDBG_FAST_PWROFF_STATUS status);
 
 static int thread_fastboot_resume(void *data)
@@ -85,10 +166,8 @@ static int thread_fastboot_resume(void *data)
 	    msleep(3000);
 		SOC_Write_Servicer(WAKEUP_KERNEL);
 
-#ifdef FLY_DEBUG   
-			SOC_Key_Report(KEY_HOME, KEY_PRESSED_RELEASED);
-			SOC_Key_Report(KEY_BACK, KEY_PRESSED_RELEASED);
-#endif	
+		SOC_Key_Report(KEY_HOME, KEY_PRESSED_RELEASED);
+		SOC_Key_Report(KEY_BACK, KEY_PRESSED_RELEASED);
 
 		msleep(2000);
 		fastboot_set_status(PM_STATUS_LATE_RESUME_OK);
@@ -98,20 +177,8 @@ static int thread_fastboot_resume(void *data)
 }
 
 
-struct fastboot_data
-{
-    int suspend_pending;
-    u32 resume_count;
-    struct mutex lock;
-#if defined(CONFIG_HAS_EARLYSUSPEND)
-    struct wake_lock flywakelock;
-    struct early_suspend early_suspend;
-#endif
-
-};
 
 
-struct fastboot_data *fb_data ;
 
 int fastboot_get_status(void)
 {
@@ -128,11 +195,19 @@ void fastboot_set_status(LIDBG_FAST_PWROFF_STATUS status)
 
 void fastboot_pwroff(void)
 {
+	u32 err_count = 0;
     DUMP_FUN_ENTER;
 	
     while(PM_STATUS_LATE_RESUME_OK != fastboot_get_status())
     {
         lidbgerr("Call SOC_PWR_ShutDown when suspend_pending != PM_STATUS_LATE_RESUME_OK :%d\n", fastboot_get_status());
+		err_count++;
+		
+		if(err_count > 50)//10s
+		{
+        	lidbgerr("err_count > 50,force fastboot_pwroff!\n");
+			break;
+		}
 		msleep(200);
 
     }
@@ -141,17 +216,28 @@ void fastboot_pwroff(void)
 	SOC_Dev_Suspend_Prepare();
 
 	
-    fastboot_set_status(PM_STATUS_EARLY_SUSPEND_PENDING);
+    fastboot_set_status(PM_STATUS_READY_TO_PWROFF);
 
 	
 #ifdef FLY_DEBUG
     SOC_Write_Servicer(CMD_FAST_POWER_OFF);
 #endif
 
-	complete(&suspend_start);
+	complete(&early_suspend_start);
 
 
 }
+
+
+
+bool fastboot_is_ignore_wakelock(void)
+{
+	return ignore_wakelock;
+
+}
+
+
+
 
 
 #ifndef SOC_COMPILE
@@ -163,6 +249,7 @@ static void set_func_tbl(void)
     plidbg_dev->soc_func_tbl.pfnSOC_PWR_ShutDown = fastboot_pwroff;
     plidbg_dev->soc_func_tbl.pfnSOC_PWR_GetStatus = fastboot_get_status;
     plidbg_dev->soc_func_tbl.pfnSOC_PWR_SetStatus = fastboot_set_status;
+    plidbg_dev->soc_func_tbl.pfnSOC_PWR_Ignore_Wakelock = fastboot_is_ignore_wakelock;
 
 
 }
@@ -176,10 +263,11 @@ static void fastboot_early_suspend(struct early_suspend *h)
     lidbg("fastboot_early_suspend:%d\n", fb_data->resume_count);
     if(PM_STATUS_EARLY_SUSPEND_PENDING != fastboot_get_status())
     {
-        lidbgerr("Call devices_early_suspend when suspend_pending != PM_STATUS_EARLY_SUSPEND_PENDING\n");
+        lidbgerr("Call devices_early_suspend when suspend_pending != PM_STATUS_READY_TO_PWROFF\n");
 
     }
     wake_unlock(&(fb_data->flywakelock));
+	complete(&suspend_start);
 
 
 }
@@ -187,12 +275,17 @@ static void fastboot_early_suspend(struct early_suspend *h)
 static void fastboot_late_resume(struct early_suspend *h)
 {
     DUMP_FUN;
-    //fastboot_set_status(PM_STATUS_LATE_RESUME_OK);
-#ifdef FLY_DEBUG   
+
+#ifdef FLY_DEBUG
 	SOC_Key_Report(KEY_HOME, KEY_PRESSED_RELEASED);
 	SOC_Key_Report(KEY_BACK, KEY_PRESSED_RELEASED);
-#endif	
 	complete(&resume_ok);
+#else
+	fastboot_set_status(PM_STATUS_LATE_RESUME_OK);
+#endif	
+
+
+
 
 }
 #endif
@@ -223,7 +316,7 @@ static int  fastboot_probe(struct platform_device *pdev)
 #endif
 
 
-    INIT_COMPLETION(suspend_start);
+    INIT_COMPLETION(early_suspend_start);
     pwroff_task = kthread_create(thread_pwroff, NULL, "pwroff_task");
     if(IS_ERR(pwroff_task))
     {
@@ -231,6 +324,18 @@ static int  fastboot_probe(struct platform_device *pdev)
 
     }
     else wake_up_process(pwroff_task);
+
+
+
+	INIT_COMPLETION(suspend_start);
+    suspend_task = kthread_create(thread_fastboot_suspend, NULL, "suspend_task");
+    if(IS_ERR(suspend_task))
+    {
+        lidbg("Unable to start kernel thread.\n");
+
+    }
+    else wake_up_process(suspend_task);
+
 
 	
 	INIT_COMPLETION(resume_ok);
@@ -270,7 +375,7 @@ static int fastboot_suspend(struct device *dev)
     DUMP_FUN;
     if(PM_STATUS_SUSPEND_PENDING != fastboot_get_status())
     {
-        lidbgerr("Call fastboot_suspend when suspend_pending != PM_STATUS_EARLY_SUSPEND_PENDING\n");
+        lidbgerr("Call fastboot_suspend when suspend_pending != PM_STATUS_SUSPEND_PENDING\n");
 
     }
 
@@ -287,6 +392,7 @@ static int fastboot_resume(struct device *dev)
     wake_lock(&(fb_data->flywakelock));
     SOC_Write_Servicer(WAKEUP_KERNEL);
 
+	ignore_wakelock = 0;
 
     return 0;
 }

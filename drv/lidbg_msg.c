@@ -34,6 +34,8 @@ lidbg_msg *plidbg_msg = NULL;
 int thread_msg(void *data)
 {
     plidbg_msg = (struct lidbg_msg *)kmalloc(sizeof( lidbg_msg), GFP_KERNEL);
+
+    memset(plidbg_msg->log, '\0', sizeof( lidbg_msg));
     plidbg_msg->w_pos = plidbg_msg->r_pos = 0;
 
     while(1)

@@ -109,6 +109,9 @@ typedef enum
     PM_STATUS_SUSPEND_PENDING,
     PM_STATUS_RESUME_OK,
     PM_STATUS_LATE_RESUME_OK,
+	PM_STATUS_READY_TO_PWROFF,
+
+	
 } LIDBG_FAST_PWROFF_STATUS;
 
 
@@ -226,8 +229,13 @@ when err , <0
     Vedio_Channel pfnglobal_video_channel_flag;
 
 
-	//soc
+	//dev
 	 void (*pfnSOC_Dev_Suspend_Prepare)(void);
+
+	//wakelock
+	bool (*pfnSOC_PWR_Ignore_Wakelock)(void);
+
+
 
 };
 
