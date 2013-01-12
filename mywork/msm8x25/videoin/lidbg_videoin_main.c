@@ -29,8 +29,9 @@ static int thread_vedio_signal_test(void *data)
 		{ //delay
 			timeout = schedule_timeout(timeout); 
 		} 
-		printk("tw9912:test Yin3 back format :%d", flyVideoTestSignalPin_in(YIN2));
-		printk("thread_vedio_signal_test()=%d\n",i++);
+		printk("tw9912:test Yin3 back format :%d\n", flyVideoTestSignalPin_in(YIN2));
+		printk("tw9912:global_video_format_flag :%d",	global_video_format_flag);
+		printk("  %d\n",i++);
 	}
 return 0;
 }
