@@ -57,18 +57,18 @@ mutex_lock(&lock_chipe_config);
 		}
 	switch (cmd)
 	{
-		case BRIGHTNESS ://ok
+		case CONTRAST ://ok
 			Tw9912_image[0]=0x10;
 			Tw9912_image[1]=Image_Config[0][valu];
 			
 			Tw9912_image_global[0][1]=Image_Config[0][valu];//remember
 			ret = write_tw9912(&Tw9912_image);
 			break;
-		case CONTRAST ://ok
+		case BRIGHTNESS ://ok
 			Tw9912_image[0]=0x11;
 			//if(global_video_format_flag = NTSC_I)
 			{
-				Tw9912_image[1]=Image_Config[1][10-valu];
+				Tw9912_image[1]=Image_Config[1][valu];
 				Tw9912_image_global[1][1]=Image_Config[1][valu];
 			}
 			ret = write_tw9912(&Tw9912_image);
@@ -78,7 +78,7 @@ mutex_lock(&lock_chipe_config);
 			//if(global_video_format_flag = NTSC_I)
 			{
 				Tw9912_image[1]=Image_Config[2][valu];
-				Tw9912_image_global[2][1]=Image_Config[2][valu];
+				Tw9912_image_global[3][1]=Image_Config[2][valu];
 			}
 			ret = write_tw9912(&Tw9912_image);
 			break;
@@ -88,7 +88,7 @@ mutex_lock(&lock_chipe_config);
 			//if(global_video_format_flag = NTSC_I)
 			{
 				Tw9912_image[1]=Image_Config[3][valu];
-				Tw9912_image_global[3][1]=Image_Config[3][valu];
+				Tw9912_image_global[2][1]=Image_Config[3][valu];
 			}
 			Tw9912_image[0]=0x13;
 			ret = write_tw9912(&Tw9912_image);
