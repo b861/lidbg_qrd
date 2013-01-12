@@ -16,7 +16,7 @@ TW9912_initall_status tw9912_status={TW9912_initall_not,NOTONE,OTHER};
 Last_config_t the_last_config ={NOTONE,OTHER};
 i2c_ack read_tw9912(unsigned int sub_addr, char *buf )
 {
-	i2c_ack ret;
+	i2c_ack ret;   
 	ret=i2c_read_byte(1,TW9912_I2C_ChipAdd, sub_addr, buf,1);
 return ret;
 }
@@ -32,9 +32,12 @@ i2c_ack ret;
 u8 Tw9912_Parameter[]={0,0,};
 
 	if( format == PAL_I )
-	{msleep(100);
+	{//msleep(100);
 		Tw9912_Parameter[0]=0x0a;
-		Tw9912_Parameter[1]=0x0c;
+		Tw9912_Parameter[1]=0x1b;
+		ret = write_tw9912(Tw9912_Parameter);
+		Tw9912_Parameter[0]=0x09;
+		Tw9912_Parameter[1]=0x27;
 		ret = write_tw9912(Tw9912_Parameter);
 	}
 return ret;

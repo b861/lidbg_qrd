@@ -45,6 +45,8 @@
 #define  CMD_FAST_POWER_OFF (70)
 
 #define UMOUNT_USB (80)
+#define VIDEO_SET_PAL (81)
+#define VIDEO_SET_NTSC (82)
 
 
 pthread_t ntid;
@@ -243,7 +245,21 @@ int  servicer_handler(int signum)
 
         }
 
+	case VIDEO_SET_PAL:
+        {
+	    printf("<<<<< now get QCamera set pal\n");
+            property_set("tcc.fly.vin.pal", "1");// 1 is pal 0 is ntsc
+            break;
 
+        }
+      case VIDEO_SET_NTSC:
+        {
+	    printf("<<<<< now get QCamera set ntsc\n");
+            property_set("tcc.fly.vin.pal", "0");// 1 is pal 0 is ntsc
+            break;
+
+        }
+	
         }
     }
 

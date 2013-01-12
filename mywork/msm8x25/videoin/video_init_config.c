@@ -204,7 +204,6 @@ return camera_open_video_signal_test_in_2();
 }
 Vedio_Format flyVideoTestSignalPin_in(u8 Channel)
 {Vedio_Format ret= NOTONE;
-
 //spin_lock(&spin_chipe_config_lock);
 mutex_lock(&lock_chipe_config);
 	switch (Channel)
@@ -237,7 +236,7 @@ mutex_lock(&lock_chipe_config);
 printk("tw9912:flyVideoTestSignalPin_in(Channel=%d) back %d\n",Channel,ret);
 //spin_unlock(&spin_chipe_config_lock);
 mutex_unlock(&lock_chipe_config);
-global_video_format_flag=ret;
+//global_video_format_flag=ret;//Transmitted Jiang  Control
 return ret;
 }
 void video_init_config_in(Vedio_Format config_pramat)
