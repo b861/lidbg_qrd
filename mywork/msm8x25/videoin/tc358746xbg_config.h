@@ -34,7 +34,7 @@ static struct TC358_register_struct PALp_init_tab[]=
 
 {	0x0008	,	96 	,	register_value_width_16		},   //	0060
 
-{	0x0022	,	1440 	,	register_value_width_16		},   //	5A0
+{	0x0022	,	1500 	,	register_value_width_16		},   //	5A0
 
 {0x0100,0x203,register_value_width_32},//clck current 
 {0x0104,0x203,register_value_width_32},//lane0 current 

@@ -57,18 +57,18 @@ mutex_lock(&lock_chipe_config);
 		}
 	switch (cmd)
 	{
-		case BRIGHTNESS ://ok
+		case CONTRAST ://ok
 			Tw9912_image[0]=0x10;
 			Tw9912_image[1]=Image_Config[0][valu];
 			
 			Tw9912_image_global[0][1]=Image_Config[0][valu];//remember
 			ret = write_tw9912(&Tw9912_image);
 			break;
-		case CONTRAST ://ok
+		case BRIGHTNESS ://ok
 			Tw9912_image[0]=0x11;
 			//if(global_video_format_flag = NTSC_I)
 			{
-				Tw9912_image[1]=Image_Config[1][10-valu];
+				Tw9912_image[1]=Image_Config[1][valu];
 				Tw9912_image_global[1][1]=Image_Config[1][valu];
 			}
 			ret = write_tw9912(&Tw9912_image);
@@ -78,7 +78,7 @@ mutex_lock(&lock_chipe_config);
 			//if(global_video_format_flag = NTSC_I)
 			{
 				Tw9912_image[1]=Image_Config[2][valu];
-				Tw9912_image_global[2][1]=Image_Config[2][valu];
+				Tw9912_image_global[3][1]=Image_Config[2][valu];
 			}
 			ret = write_tw9912(&Tw9912_image);
 			break;
@@ -88,7 +88,7 @@ mutex_lock(&lock_chipe_config);
 			//if(global_video_format_flag = NTSC_I)
 			{
 				Tw9912_image[1]=Image_Config[3][valu];
-				Tw9912_image_global[3][1]=Image_Config[3][valu];
+				Tw9912_image_global[2][1]=Image_Config[3][valu];
 			}
 			Tw9912_image[0]=0x13;
 			ret = write_tw9912(&Tw9912_image);
@@ -204,7 +204,6 @@ return camera_open_video_signal_test_in_2();
 }
 Vedio_Format flyVideoTestSignalPin_in(u8 Channel)
 {Vedio_Format ret= NOTONE;
-printk("tw9912:flyVideoTestSignalPin_in(Channel=%d)",Channel);
 //spin_lock(&spin_chipe_config_lock);
 mutex_lock(&lock_chipe_config);
 	switch (Channel)
@@ -234,10 +233,10 @@ mutex_lock(&lock_chipe_config);
 			printk("%s:you input TW9912 Channel=%d error!\n",__FUNCTION__,Channel);
 			break;
 	}
-printk(" back %d\n",ret);
+printk("tw9912:flyVideoTestSignalPin_in(Channel=%d) back %d\n",Channel,ret);
 //spin_unlock(&spin_chipe_config_lock);
 mutex_unlock(&lock_chipe_config);
-global_video_format_flag=ret;
+//global_video_format_flag=ret;//Transmitted Jiang  Control
 return ret;
 }
 void video_init_config_in(Vedio_Format config_pramat)
@@ -266,7 +265,7 @@ mutex_lock(&lock_chipe_config);
 			printk("\n\n",i,j,Image_Config[i][j]);
 		}
 */
-	msleep(190);//wait for video Steady display
+	msleep(300);//wait for video Steady display
 		printk("\r\n");
 		printk("TW9912:info_Vedio_Channel=%d\n",info_Vedio_Channel);
 		printk("TW9912:signal_is_how[%d].Channel=%d\n",info_Vedio_Channel,signal_is_how[info_Vedio_Channel].Channel);

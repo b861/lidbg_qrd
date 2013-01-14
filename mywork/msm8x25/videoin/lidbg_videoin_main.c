@@ -29,7 +29,9 @@ static int thread_vedio_signal_test(void *data)
 		{ //delay
 			timeout = schedule_timeout(timeout); 
 		} 
-		printk("thread_vedio_signal_test()=%d\n",i++);
+		printk("tw9912:test Yin3 back format :%d\n", flyVideoTestSignalPin_in(YIN2));
+		printk("tw9912:global_video_format_flag :%d",	global_video_format_flag);
+		printk("  %d\n",i++);
 	}
 return 0;
 }
@@ -229,8 +231,8 @@ static void set_func_tbl(void)
 	plidbg_dev->soc_func_tbl.pfnvideo_init_config = video_init_config_in;
 	plidbg_dev->soc_func_tbl.pfncamera_open_video_signal_test = camera_open_video_signal_test_in;
 	plidbg_dev->soc_func_tbl.pfncamera_open_video_color = Video_Show_Output_Color;
-	global_video_format_flag = NTSC_I;
-	global_video_channel_flag = YIN0;
+	global_video_format_flag = PAL_I;
+	global_video_channel_flag = YIN2;//DVD
 
 }
 
@@ -241,7 +243,7 @@ int lidbg_video_init(void)
 	LIDBG_GET;
 	set_func_tbl();
 	video_io_i2c_init();
-	flyVideoChannelInitall(YIN0);
+	flyVideoChannelInitall(YIN2); // DVD
 	    return 0;
 
 }
