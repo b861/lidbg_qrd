@@ -235,6 +235,8 @@ when err , <0
 	//wakelock
 	bool (*pfnSOC_PWR_Ignore_Wakelock)(void);
 
+	//mic
+	void (*pfnSOC_Mic_Enable)(bool enable);
 
 
 };

@@ -313,6 +313,13 @@ int SOC_Display_Get_Res(u32 *screen_x, u32 *screen_y)
 }
 
 
+void SOC_Mic_Enable( bool enable)
+{
+
+
+
+}
+
 static void set_func_tbl(void)
 {
     //io
@@ -354,7 +361,8 @@ static void set_func_tbl(void)
     ((struct lidbg_dev *)global_lidbg_devp) ->soc_func_tbl.pfnSOC_Display_Get_Res = SOC_Display_Get_Res;
 
 
-	
+	//mic
+    ((struct lidbg_dev *)global_lidbg_devp) ->soc_func_tbl.pfnSOC_Mic_Enable = SOC_Mic_Enable;
 }
 
 
