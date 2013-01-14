@@ -254,7 +254,8 @@ mutex_lock(&lock_chipe_config);
 	    	else
 	    	{
 	    	printk("tw9912:video_init_config_in()-->init_tw9912_ent()\n");
-		init_tw9912_ent(info_com_top_Channel);
+		//init_tw9912_ent(info_com_top_Channel);
+		Tw9912_init_NTSCp();
 		}
 	VideoImage();
 /*
@@ -271,7 +272,7 @@ mutex_lock(&lock_chipe_config);
 		printk("TW9912:signal_is_how[%d].Channel=%d\n",info_Vedio_Channel,signal_is_how[info_Vedio_Channel].Channel);
 		printk("TW9912:signal_is_how[%d].Format=%d\n",info_Vedio_Channel,signal_is_how[info_Vedio_Channel].Format);
 		printk("TW9912:signal_is_how[%d].vedio_source=%d\n",info_Vedio_Channel,signal_is_how[info_Vedio_Channel].vedio_source);
-	
+	signal_is_how[info_Vedio_Channel].Format = NTSC_I;
 		if(info_Vedio_Channel<=SEPARATION)
 		{
 

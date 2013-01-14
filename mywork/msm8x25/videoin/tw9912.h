@@ -1,14 +1,14 @@
 #ifndef __TW9912_H__
 #define __TW9912_H__
 #define DEBUG_TW9912
-//#define DEBUG_PLOG_TW9912
+#define DEBUG_PLOG_TW9912
 #define I2C_US_IO_1
 #define Progressive_Output_Format 0x12
 #define Interlaced_Output_Format 0x02 
 #define TW9912_RESET 43
 #define Progressive_Output_CLKx2 0x49  
 #define Interlaced_Output_CLKx1  0x05
-#if 0
+#if 1
 #define tw9912_dbg(msg...)  do { printk( KERN_CRIT "TW9912: " msg); }while(0)
 #else
 #define tw9912_dbg(msg...)  do {}while(0)

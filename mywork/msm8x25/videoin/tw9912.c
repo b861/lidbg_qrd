@@ -509,7 +509,7 @@ u8 valu;
 int Tw9912_init_NTSCp(void)
 {
     u32 i = 0;
-    u8 *config_pramat_piont=NULL;
+    u8 *config_pramat_piont=NULL;   
 	tw9912_dbg("Tw9912_init_NTSCp initall tw9912+\n");
 	TC9912_id();
 	tw9912_RESX_DOWN;
@@ -528,6 +528,17 @@ int Tw9912_init_NTSCp(void)
 		tw9912_dbg("w a=%x,v=%x\n",config_pramat_piont[i*2],config_pramat_piont[i*2+1]);
 		i++;
 	}
+
+	#ifdef DEBUG_PLOG_TW9912
+	i=0;
+	while(config_pramat_piont[i*2] != 0xfe)
+	{  u8 data = 0;
+		data = 0xff;
+		read_tw9912(config_pramat_piont[i*2], &data);
+		tw9912_dbg("r a=%x ,v= %x\n",config_pramat_piont[i*2] , data);
+		i++;
+	}
+#endif
 	tw9912_dbg("Tw9912_init_NTSCp initall tw9912-\n");
 //msleep(400);
 //Tw9912_appoint_pin_testing_video_signal(SEPARATION);
