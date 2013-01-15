@@ -33,8 +33,8 @@
 #define GPIOEIT (48)
 //#define DEBUG
 //define resolution of the touchscreen
-#define TOUCH_MAX_HEIGHT 	800
-#define TOUCH_MAX_WIDTH		480
+#define TOUCH_MAX_HEIGHT 	600
+#define TOUCH_MAX_WIDTH	1024
 //#define STOP_IRQ_TYPE                     // if define then   no stop irq in irq_handle   kuuga add 1202S
 #define REFRESH 0     //0~0x64   Scan rate = 10000/(100+REFRESH)//define resolution of the LCD
 
