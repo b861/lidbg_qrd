@@ -49,6 +49,41 @@ static struct task_struct *resume_task;
 
 bool ignore_wakelock = 0;
 
+static int soc_task_kill(char *task_name)
+{
+	struct task_struct *p;
+	struct task_struct *selected = NULL;
+	DUMP_FUN_ENTER;
+
+	//read_lock(&tasklist_lock);
+	for_each_process(p) {
+		struct mm_struct *mm;
+		struct signal_struct *sig;
+
+		task_lock(p);
+		mm = p->mm;
+		sig = p->signal;
+		task_unlock(p);
+		
+		selected = p;
+		printk( "process %d (%s)\n",
+			     p->pid, p->comm);
+
+		if(!strcmp(p->comm, task_name))
+		{
+			lidbg("find %s to kill\n",task_name);
+			
+			if (selected) {
+				force_sig(SIGKILL, selected);
+			break;
+		}
+
+	}
+	//read_unlock(&tasklist_lock);
+		}
+	DUMP_FUN_LEAVE;
+	return 1;
+}
 
 
 static int thread_pwroff(void *data)
@@ -212,7 +247,8 @@ void fastboot_pwroff(void)
 
     }
 	
-	
+	soc_task_kill("mediaserver");
+	// soc_task_kill("mediaserver");
 	SOC_Dev_Suspend_Prepare();
 
 	
