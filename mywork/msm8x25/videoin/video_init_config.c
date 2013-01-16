@@ -105,54 +105,21 @@ mutex_unlock(&lock_chipe_config);
 int init_tw9912_ent(Vedio_Channel Channel);
 int flyVideoInitall_in(u8 Channel)
 {
-
 int ret=1 ;
 //spin_lock(&spin_chipe_config_lock);
-printk("tw9912:@@@@@flyVideoInitall_in(Channel=%d)\n",Channel);
 mutex_lock(&lock_chipe_config);
-if (Channel>=YIN0 &&Channel<=NOTONE)
-{
-info_com_top_Channel = Channel;
-global_video_channel_flag = Channel;
-}
-else
-{
-info_com_top_Channel = NOTONE;
-global_video_channel_flag = NOTONE;
-printk("%s: you input TW9912 Channel=%d error!\n",__FUNCTION__,Channel);
-}
-/*
-	switch (Channel)
-	{
-		case 0:
-			info_com_top_Channel = YIN0;
-			global_video_channel_flag = YIN0;
-			//init_tw9912_ent(YIN0);
-			break;
-		case 1:
-			info_com_top_Channel = YIN1;
-			global_video_channel_flag = YIN0;
-			//init_tw9912_ent(YIN1);
-			break;
-		case 2:
-			info_com_top_Channel = YIN2;
-			//init_tw9912_ent(YIN2);
-			break;
-		case 3:
-			info_com_top_Channel = YIN3;
-			//init_tw9912_ent(YIN3);
-			break;
-		case 4:
-			info_com_top_Channel = SEPARATION;
-			//init_tw9912_ent(SEPARATION);
-			break;
-		default :
-			info_com_top_Channel = NOTONE;
-			//Tw9912_init_PALi();
-			printk("%s: you input TW9912 Channel=%d error!\n",__FUNCTION__,Channel);
-			break;
+printk("tw9912:@@@@@flyVideoInitall_in(Channel=%d)\n",Channel);
+	if (Channel>=YIN0 &&Channel<=NOTONE)
+	{//Channel = SEPARATION;
+		info_com_top_Channel = Channel;
+		global_video_channel_flag = Channel;
 	}
-*/
+	else
+	{
+		info_com_top_Channel = NOTONE;
+		global_video_channel_flag = NOTONE;
+		printk("%s: you input TW9912 Channel=%d error!\n",__FUNCTION__,Channel);
+	}
 //spin_unlock(&spin_chipe_config_lock);
 mutex_unlock(&lock_chipe_config);
 return ret;
@@ -254,25 +221,17 @@ mutex_lock(&lock_chipe_config);
 	    	else
 	    	{
 	    	printk("tw9912:video_init_config_in()-->init_tw9912_ent()\n");
-		//init_tw9912_ent(info_com_top_Channel);
-		Tw9912_init_NTSCp();
+		init_tw9912_ent(info_com_top_Channel);
 		}
 	VideoImage();
+msleep(300);//wait for video Steady display
 /*
-	for(i=0;i<4;i++)
-		{
-		for(j=0;j<11;j++)
-			printk("Image_Config[%d][%d]=0x%.2x\n",i,j,Image_Config[i][j]);
-			printk("\n\n",i,j,Image_Config[i][j]);
-		}
-*/
-	msleep(300);//wait for video Steady display
 		printk("\r\n");
 		printk("TW9912:info_Vedio_Channel=%d\n",info_Vedio_Channel);
 		printk("TW9912:signal_is_how[%d].Channel=%d\n",info_Vedio_Channel,signal_is_how[info_Vedio_Channel].Channel);
 		printk("TW9912:signal_is_how[%d].Format=%d\n",info_Vedio_Channel,signal_is_how[info_Vedio_Channel].Format);
 		printk("TW9912:signal_is_how[%d].vedio_source=%d\n",info_Vedio_Channel,signal_is_how[info_Vedio_Channel].vedio_source);
-	signal_is_how[info_Vedio_Channel].Format = NTSC_I;
+*/
 		if(info_Vedio_Channel<=SEPARATION)
 		{
 
@@ -317,5 +276,6 @@ printk("tw9912:error ******************************\n");
 printk("tw9912:error Video_Show_Output_Color()\n");
 Tw9912_init_PALi();
 TC358_init(COLORBAR);
+//colorbar_init_blue();
 mutex_unlock(&lock_chipe_config);
 }

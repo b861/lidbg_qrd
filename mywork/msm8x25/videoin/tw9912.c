@@ -461,11 +461,14 @@ tw9912_dbg("@@@@@Tw9912_appoint_pin_testing_video_signal!\n");
 	{
 		printk("\r\r\n\n");
 		printk("tw9912:testing NTSCp\n");
-		Tw9912_init_NTSCp();//initall all register 
+		//	Tw9912_init_NTSCp();//initall all register 
 		tw9912_status.flag = TW9912_initall_yes;
 		tw9912_status.Channel = SEPARATION;
 		tw9912_status.format = NTSC_P;
-		msleep(1000);
+		//	msleep(1000);
+		signal_is_how[SEPARATION].Format = NTSC_P;
+	ret =NTSC_P;
+	goto TEST_NTSCp;
 	}
 	write_tw9912(manually_initiate_auto_format_detection);
 	msleep(100);
@@ -484,9 +487,10 @@ tw9912_dbg("@@@@@Tw9912_appoint_pin_testing_video_signal!\n");
 			case PAL_P:     ret =4;
 				break;
 				
-		 default:     ret =5;
+			default:     	ret =5;
 				break;
 		}
+TEST_NTSCp:
 	return ret;
 CONFIG_not_ack_fail:
 	tw9912_dbg("Tw9912_appoint_pin_testing_video_signal()--->NACK error\n");
@@ -577,7 +581,6 @@ CONFIG_not_ack_fail:
 }
 int Tw9912_init(Vedio_Format config_pramat,Vedio_Channel Channel)
 {   
-
     u32 i = 0;
     int ret=0;
     u8 *config_pramat_piont=NULL;
@@ -592,7 +595,7 @@ int Tw9912_init(Vedio_Format config_pramat,Vedio_Channel Channel)
 	//神码情况
 	}
 	else if(config_pramat != STOP_VIDEO)
-	{printk("tw9912:Tw9912_init()-->Tw9912_appoint_pin_testing_video_signal()\n");
+	{printk("tw9912:Tw9912_init()-->Tw9912_appoint_pin_testing_video_signal(%d)\n",Channel);
 		ret = Tw9912_appoint_pin_testing_video_signal(Channel);//bad
 		if(ret==5)//the channel is not signal input
 			goto NOT_signal_input;
@@ -633,7 +636,7 @@ goto CONFIG_is_old;
 				tw9912_status.format = NTSC_I;
 				config_pramat_piont=TW9912_INIT_NTSC_Interlaced_input; 
 				//config_pramat_piont=TW9912_INIT_PAL_Interlaced_input; 
-				tw9912_dbg("%s:config_pramat->NTSC_Interlace\n",__func__);
+				printk("tw9912:%s:config_pramat->NTSC_Interlace\n",__func__);
 				break;
 			
 			case PAL_I:
@@ -642,7 +645,7 @@ goto CONFIG_is_old;
 				tw9912_status.format = PAL_I;
 				config_pramat_piont=TW9912_INIT_PAL_Interlaced_input; 
 				//config_pramat_piont=TW9912_INIT_NTSC_Interlaced_input; 
-				printk("%s:config_pramat->PAL_Interlace\n",__func__);
+				printk("tw9912:%s:config_pramat->PAL_Interlace\n",__func__);
 				break;
 			
 			case NTSC_P:
@@ -650,7 +653,7 @@ goto CONFIG_is_old;
 				tw9912_status.Channel = Channel;
 				tw9912_status.format = NTSC_P;
 				config_pramat_piont=TW9912_INIT_NTSC_Progressive_input;
-				printk("%s:config_pramat->NTSC_Progressive\n",__func__);
+				printk("tw9912:%s:config_pramat->NTSC_Progressive\n",__func__);
 				break;
 			
 			case PAL_P:
@@ -658,11 +661,12 @@ goto CONFIG_is_old;
 				tw9912_status.Channel = Channel;
 				tw9912_status.format = PAL_P;
 				config_pramat_piont=TW9912_INIT_PAL_Progressive_input;
-				printk("%s:config_pramat->PAL_Progressive\n",__func__);
+				printk("tw9912:%s:config_pramat->PAL_Progressive\n",__func__);
 				break;
+				
 			default:
 				printk("Format is Invalid ******\n");
-				printk("%s:signal_is_how[Channel].Format=%d\n",__func__,signal_is_how[Channel].Format);
+				printk("tw9912:%s:signal_is_how[Channel].Format=%d\n",__func__,signal_is_how[Channel].Format);
 				goto NOT_signal_input;
 				break;
 		}
@@ -682,13 +686,55 @@ goto CONFIG_is_old;
 				tw9912_dbg("w a=%x,v=%x\n",config_pramat_piont[i*2],config_pramat_piont[i*2+1]);
 				if(signal_is_how[Channel].Format == NTSC_P \
 					&& config_pramat_piont[i*2] >0x24\
-					&& config_pramat_piont[i*2] < 0x2d) usleep(100);
+					&& config_pramat_piont[i*2] < 0x2d) 
+					usleep(100);
 				i++;
 			}
-		
-			if(signal_is_how[Channel].Format ==PAL_I ||signal_is_how[Channel].Format == NTSC_I)
+		if(Channel == NTSC_P)
 			{
-				switch(Channel)//Independent testing
+				u8 manually_initiate_auto_format_detection[]={0x1d,0x89,};//bit7 
+															      //Writing 1 to this bit will manually initiate the auto format detection process
+															      //bit3 and bit0
+															      //only  enable recognition of NTSC
+				TW9912_input_info tw9912_input_information_NTSCp;
+				write_tw9912(manually_initiate_auto_format_detection);
+				msleep(100);
+				tw9912_get_input_info(&tw9912_input_information_NTSCp);
+				if(tw9912_input_information_NTSCp.input_detection.valu & 0x04)//Composite Sync detection status 
+				{
+				unsigned char Input_source_format;//Register 0xc1 bit[1:0]
+					/*
+						input source format detection in the case of composite sync. 
+						0 = 480i 
+						1 = 576i 
+						2 = 480p 
+						3 = 576p 
+						4 = 1080i 
+						5 = 720p 
+						6 = 1080p 7 = none of above 
+					*/
+						Input_source_format = tw9912_input_information_NTSCp.input_detection.valu & 0x03 ;//bit[1:0]
+						switch (Input_source_format)
+						{
+							case 0x2://480p
+							printk("tw9912 initall NTSCp config is dong and find NTSCp signal\n");	
+								break;
+							case 0x0://480i
+							case 0x1://567i
+							case 0x3://576p
+							case 0x4://1080i
+							case 0x5://720p
+							case 0x6://1080p
+							case 0x7://none of above
+								goto NOT_signal_input;
+								break;
+						}
+				}
+
+			}
+		else if(signal_is_how[Channel].Format ==PAL_I ||signal_is_how[Channel].Format == NTSC_I)//Set channel 
+			{
+				switch(Channel)
 					{
 						case 0: 	//	 YIN0
 							if(write_tw9912(Tw9912_input_pin_selet)==NACK) goto CONFIG_not_ack_fail;
@@ -716,22 +762,9 @@ goto CONFIG_is_old;
 					}
 				
 			}
-			else if (signal_is_how[Channel].Format ==NTSC_P )
-			{ u8 Tw9912_input_pin_selet[]={0x02,0x60,};
-				if(write_tw9912(Tw9912_input_pin_selet)==NACK) goto CONFIG_not_ack_fail;
-				//msleep(400);//wait for vedio signal Stable 
-			}
-		//	msleep(400);//wait for vedio signal Stable 
+		
 	}
-	/*else
-	{
-		tw9912_status.flag = TW9912_initall_not;
-		tw9912_status.Channel = NOTONE;
-		tw9912_status.format = OTHER;
-		config_pramat_piont=TW9912_Stop;
-		tw9912_dbg("%s:config_pramat->STOP_VIDEO\n",__func__);
-	}
-	*/
+
 #ifdef DEBUG_PLOG_TW9912
 	i=0;
 	while(config_pramat_piont[i*2] != 0xfe)

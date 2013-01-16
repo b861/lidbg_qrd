@@ -169,6 +169,24 @@ u8 valu[4];
 	}
 	
 }
+
+void colorbar_init_blue(void)
+{
+  u16 add_reg_1;
+  u32 add_val_1;
+  u8 i,j;
+		TC358_Register_config(lingceng_init_tab);printk("\n\nTC358746:parameter is lingceng_init_tab!\n");
+			for(j=360;j>0;j--)
+			{
+				TC358_Register_Write(&(colorbar_init_tab[2].add_reg),&(colorbar_init_tab[2].add_val),colorbar_init_tab[2].registet_width);
+				TC358_Register_Write(&(colorbar_init_tab[3].add_reg),&(colorbar_init_tab[3].add_val),colorbar_init_tab[3].registet_width);
+			}
+		add_reg_1=0x00e0;//Ê¹ÄÜcolobar
+		add_val_1=0xc1df;
+		TC358_Register_Write(&add_reg_1,&add_val_1,register_value_width_16);
+
+
+}
 void colorbar_init(void)
 {
   u16 add_reg_1;
