@@ -174,6 +174,9 @@ u32 read_virt_addr(u32 phy_addr)
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Flyaudad Inc.");
 
+
+#ifndef _LIGDBG_SHARE__
+
 EXPORT_SYMBOL(read_virt_addr);
 EXPORT_SYMBOL(write_virt_addr);
 
@@ -184,5 +187,5 @@ EXPORT_SYMBOL(write_phy_addr_bit);
 EXPORT_SYMBOL(read_phy_addr_bit);
 
 EXPORT_SYMBOL(lidbg_mem_main);
-
+#endif
 

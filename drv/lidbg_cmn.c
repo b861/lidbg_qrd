@@ -6,9 +6,119 @@
 
 #include "lidbg.h"
 #define DEVICE_NAME "mlidbg_cmn"
-struct lidbg_dev *lidbg_devp; /*设备结构体指针*/
-void *global_lidbg_devp;
 
+#ifdef _LIGDBG_SHARE__
+LIDBG_SHARE_DEFINE;
+#endif
+
+
+
+int read_proc(char *buf,char **start,off_t offset,int count,int *eof,void *data )   
+{  
+	int len=0;  
+	struct task_struct *task_list;  
+  
+  
+	for_each_process(task_list) {  
+	  
+	       len  += sprintf(buf+len, "%s %d \n",task_list->comm,task_list->pid);  
+	  }  
+	     
+	return len;  
+}  
+  
+void create_new_proc_entry()   
+{  
+	create_proc_read_entry("ps_list",0,NULL,read_proc,NULL);  
+  
+}  
+  
+  
+
+int cmn_task_kill_exclude(char *exclude_process,u32 num)
+{
+	struct task_struct *p;
+	struct mm_struct *mm;
+	struct signal_struct *sig;
+	u32 i;
+	bool safe_flag=0;
+	DUMP_FUN_ENTER;
+	
+	lidbg("exclude_process_num = %d\n",num);
+	
+	//read_lock(&tasklist_lock);
+	for_each_process(p)
+	{
+		task_lock(p);
+		mm = p->mm;
+		sig = p->signal;
+		task_unlock(p);
+		
+		//printk( "process %d (%s)\n",p->pid, p->comm);
+		safe_flag = 0;
+
+		for(i=0;i<num;i++)
+		{
+			if(!strcmp(p->comm, exclude_process[i]))
+			{
+				safe_flag = 1;
+				break;
+			}
+				
+		}
+
+		if(safe_flag == 0)
+		{
+			lidbg("find %s to kill\n",p->comm);
+			
+			if (p) 
+			{
+				force_sig(SIGKILL, p);
+			}
+		}
+	//read_unlock(&tasklist_lock);
+	}
+	DUMP_FUN_LEAVE;
+	return 1;
+
+
+}
+
+
+int cmn_task_kill_select(char *task_name)
+{
+	struct task_struct *p;
+	struct task_struct *selected = NULL;
+	DUMP_FUN_ENTER;
+
+	//read_lock(&tasklist_lock);
+	for_each_process(p)
+	{
+		struct mm_struct *mm;
+		struct signal_struct *sig;
+
+		task_lock(p);
+		mm = p->mm;
+		sig = p->signal;
+		task_unlock(p);
+		
+		selected = p;
+		//printk( "process %d (%s)\n",p->pid, p->comm);
+
+			if(!strcmp(p->comm, task_name))
+			{
+				lidbg("find %s to kill\n",task_name);
+				
+				if (selected) {
+					force_sig(SIGKILL, selected);
+					return 1;
+				}
+			}
+	//read_unlock(&tasklist_lock);
+	}
+	DUMP_FUN_LEAVE;
+	return 0;
+}
 
 u32 GetNsCount(void)
 {
@@ -77,23 +187,49 @@ static struct miscdevice misc =
 
 };
 
-void soc_func_tbl_default()
+
+
+
+static void share_set_func_tbl(void)
 {
-    lidbgerr("soc_func_tbl_default:this func not ready!\n");
+    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnmod_cmn_main = mod_cmn_main;
+    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfncmn_task_kill_select = cmn_task_kill_select;
+    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfncmn_task_kill_exclude = cmn_task_kill_exclude;
+	
+    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnlidbg_mem_main = lidbg_mem_main;
+    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnwrite_phy_addr = write_phy_addr;
+	((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnwrite_phy_addr_bit = write_phy_addr_bit;
+	((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnread_phy_addr = read_phy_addr;
+	((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnread_phy_addr_bit = read_phy_addr_bit;
+	((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnread_virt_addr = read_virt_addr;
+	((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnwrite_virt_addr = write_virt_addr;
+	
+	((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnlidbg_display_main = lidbg_display_main;
+	((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnsoc_get_screen_res= soc_get_screen_res;
+
 
 }
+
+
+
+
+
 
 static int __init cmn_init(void)
 {
     int ret;
+    DUMP_BUILD_TIME;
 
     //下面的代码可以自动生成设备节点，但是该节点在/dev目录下，而不在/dev/misc目录下
     //其实misc_register就是用主设备号10调用register_chrdev()的 misc设备其实也就是特殊的字符设备。
     //注册驱动程序时采用misc_register函数注册，此函数中会自动创建设备节点，即设备文件。无需mknod指令创建设备文件。因为misc_register()会调用class_device_create()或者device_create()。
+#ifdef _LIGDBG_SHARE__
+		LIDBG_SHARE_GET;
+		share_set_func_tbl();
+#endif
 
     ret = misc_register(&misc);
     dbg (DEVICE_NAME"cmn dev_init\n");
-    DUMP_BUILD_TIME;
 #if 0
     {
         int tmp1, tmp2, tmp3;
@@ -105,30 +241,8 @@ static int __init cmn_init(void)
 
     }
 #endif
-    /* 动态申请设备结构体的内存*/
-    lidbg_devp = kmalloc(sizeof(struct lidbg_dev), GFP_KERNEL);
-    global_lidbg_devp = lidbg_devp;
-    if (!lidbg_devp)    /*申请失败*/
-    {
-        //result =  - ENOMEM;
-        //goto fail_malloc;
-        lidbg ("kmalloc fail\n");
-        return -1;
-    }
-    memset(lidbg_devp, 0, sizeof(struct lidbg_dev));
-    //memset(&lidbg_devp->soc_func_tbl, soc_func_tbl_default, sizeof(struct lidbg_fn_t));
-    {
-        int i;
-        for(i = 0; i < sizeof(lidbg_devp->soc_func_tbl) / 4; i++)
-        {
-            ((int *)&(lidbg_devp->soc_func_tbl))[i] = soc_func_tbl_default;
+    create_new_proc_entry();  
 
-        }
-        //fot test
-        //(lidbg_devp->soc_func_tbl.pfnSOC_Write_Servicer)(i);
-
-
-    }
 
     return ret;
 }
@@ -136,6 +250,8 @@ static int __init cmn_init(void)
 static void __exit cmn_exit(void)
 {
     misc_deregister(&misc);
+	
+    remove_proc_entry("proc_entry",NULL);  
     dbg (DEVICE_NAME"cmn  dev_exit\n");
 }
 
@@ -145,10 +261,10 @@ module_exit(cmn_exit);
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Flyaudio Inc.");
 
+#ifndef _LIGDBG_SHARE__
 
 EXPORT_SYMBOL(mod_cmn_main);
 EXPORT_SYMBOL(GetNsCount);
 
-EXPORT_SYMBOL(global_lidbg_devp);
-
+#endif
 

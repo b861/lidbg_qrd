@@ -83,6 +83,7 @@
 #include "lidbg_enter.h"
 
 //#include "devices.h"
+#include "lidbg_share.h"
 
 
 

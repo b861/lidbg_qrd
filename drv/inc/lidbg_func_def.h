@@ -72,11 +72,13 @@ static inline int check_pt(void)
 #define SOC_Dev_Suspend_Prepare (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_Dev_Suspend_Prepare))
 
 //wakeup
-#define SOC_PWR_Ignore_Wakelock   (plidbg_dev->soc_func_tbl.pfnSOC_PWR_Ignore_Wakelock)
+#define SOC_PWR_Ignore_Wakelock    (plidbg_dev->soc_func_tbl.pfnSOC_PWR_Ignore_Wakelock)
 
 //mic
 #define SOC_Mic_Enable   (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_Mic_Enable))
 
+//
+#define ptasklist_lock   (plidbg_dev->soc_pvar_tbl.pvar_tasklist_lock)
 
 
 #endif

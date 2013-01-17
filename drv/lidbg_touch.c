@@ -3,6 +3,9 @@
 #include "lidbg.h"
 
 //#define LIDBG_MULTI_TOUCH_SUPPORT
+#ifdef _LIGDBG_SHARE__
+LIDBG_SHARE_DEFINE;
+#endif
 
 struct input_dev *input = NULL;
 
@@ -66,12 +69,23 @@ void lidbg_touch_report(u32 pos_x, u32 pos_y, u32 type)
 
 }
 
+static void share_set_func_tbl(void)
+{
+    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnlidbg_touch_main = lidbg_touch_main;
+    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnlidbg_touch_report = lidbg_touch_report;
+}
 
 int lidbg_touch_init(void)
 {
     int error;
 
     DUMP_BUILD_TIME;
+
+	
+#ifdef _LIGDBG_SHARE__
+		LIDBG_SHARE_GET;
+		share_set_func_tbl();
+#endif
     input = input_allocate_device();
     if (!input)
     {
@@ -169,8 +183,11 @@ void lidbg_touch_main(int argc, char **argv)
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Flyaudad Inc.");
 
+#ifndef _LIGDBG_SHARE__
+
 EXPORT_SYMBOL(lidbg_touch_main);
 EXPORT_SYMBOL(lidbg_touch_report);
+#endif
 
 module_init(lidbg_touch_init);
 module_exit(lidbg_touch_deinit);

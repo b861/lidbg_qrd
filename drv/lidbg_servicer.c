@@ -4,6 +4,12 @@
 #include "lidbg.h"
 #define DEVICE_NAME "lidbg_servicer"
 
+#ifdef _LIGDBG_SHARE__
+LIDBG_SHARE_DEFINE;
+#endif
+
+
+
 #define FIFO_SIZE (64)
 struct kfifo k2u_fifo;
 struct kfifo u2k_fifo;
@@ -285,6 +291,18 @@ static struct miscdevice misc =
     .fops = &dev_fops,
 
 };
+
+
+static void share_set_func_tbl(void)
+{
+    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnlidbg_servicer_main = lidbg_servicer_main;
+    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnk2u_write = k2u_write;
+    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnk2u_read = k2u_read;
+    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnu2k_read = u2k_read;
+
+}
+
+
 static int __init servicer_init(void)
 {
     int ret;
@@ -292,10 +310,15 @@ static int __init servicer_init(void)
     //下面的代码可以自动生成设备节点，但是该节点在/dev目录下，而不在/dev/misc目录下
     //其实misc_register就是用主设备号10调用register_chrdev()的 misc设备其实也就是特殊的字符设备。
     //注册驱动程序时采用misc_register函数注册，此函数中会自动创建设备节点，即设备文件。无需mknod指令创建设备文件。因为misc_register()会调用class_device_create()或者device_create()。
+    DUMP_BUILD_TIME;
+
+#ifdef _LIGDBG_SHARE__
+			LIDBG_SHARE_GET;
+			share_set_func_tbl();
+#endif
 
     ret = misc_register(&misc);
-    dbg (DEVICE_NAME"servicer dev_init\n");
-    DUMP_BUILD_TIME;
+    dbg (DEVICE_NAME"servicer_init\n");
     //DECLARE_KFIFO(cmd_fifo);
     //INIT_KFIFO(cmd_fifo);
     dbg ("kfifo_init,FIFO_SIZE=%d\n", FIFO_SIZE);
@@ -342,11 +365,13 @@ MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Flyaudio Inc.");
 
 
+#ifndef _LIGDBG_SHARE__
+
 EXPORT_SYMBOL(lidbg_servicer_main);
 EXPORT_SYMBOL(k2u_write);
 EXPORT_SYMBOL(k2u_read);
 EXPORT_SYMBOL(u2k_read);
-
+#endif
 
 
 

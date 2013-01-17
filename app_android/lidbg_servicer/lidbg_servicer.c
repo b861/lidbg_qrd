@@ -279,7 +279,7 @@ int main(int argc , char **argv)
 
     printf("lidbg_servicer start\n");
     //sleep(5);
-
+    system("insmod /system/lib/modules/out/lidbg_share.ko");
     system("insmod /system/lib/modules/out/lidbg_ts_to_recov.ko");
     system("insmod /system/lib/modules/out/lidbg_msg.ko");
     system("insmod /system/lib/modules/out/lidbg_common.ko");
@@ -302,6 +302,8 @@ int main(int argc , char **argv)
 
 
     //for flycar
+    
+    system("insmod /flysystem/lib/out/lidbg_share.ko");
     system("insmod /flysystem/lib/out/lidbg_ts_to_recov.ko");
     system("insmod /flysystem/lib/out/lidbg_msg.ko");
     system("insmod /flysystem/lib/out/lidbg_common.ko");
@@ -325,6 +327,8 @@ int main(int argc , char **argv)
 
 
     sleep(1);
+	
+    system("chmod 0777 /dev/lidbg_share");
     system("chmod 0777 /dev/mlidbg0");
     system("chmod 0777 /dev/lidbg_servicer");
     system("chmod 0777 /dev/lidbg_msg");

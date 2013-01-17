@@ -8,7 +8,7 @@ PWD := $(shell pwd)
 CROSS_COMPILE = $(DBG_CROSS_COMPILE)
 CC = $(CROSS_COMPILE)gcc
 
-
+obj-m	+= lidbg_share.o
 obj-m	+= lidbg_io.o
 obj-m	+= lidbg_ad.o
 obj-m	+= lidbg_i2c.o

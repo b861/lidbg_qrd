@@ -241,7 +241,18 @@ when err , <0
 	void (*pfnSOC_Mic_Enable)(bool enable);
 
 
+
 };
+
+
+struct lidbg_pvar_t
+{
+	//all pointer
+	rwlock_t *pvar_tasklist_lock;
+
+
+};
+
 
 #define LIDBG_SIZE	0x00001000 //MEM_SIZE_4_KB	/*全局内存最大1K字节*/
 
@@ -252,6 +263,7 @@ struct lidbg_dev
     unsigned char mem[LIDBG_SIZE]; /*全局内存*/
     unsigned char lidbg_smem[LIDBG_SIZE/4]; // 1k
     struct lidbg_fn_t soc_func_tbl;
+    struct lidbg_pvar_t soc_pvar_tbl;
     unsigned char reserve[128];
 };
 

@@ -5,6 +5,11 @@
 // http://blog.csdn.net/luoshengyang/article/details/6568411
 #include "lidbg.h"
 
+#ifdef _LIGDBG_SHARE__
+LIDBG_SHARE_DEFINE;
+void *global_lidbg_devp;
+
+#endif
 
 #define MEM_CLEAR 0x1  /*清0全局内存*/
 #define GET_GLOBAL 0x2
@@ -289,19 +294,19 @@ static ssize_t lidbg_write(struct file *filp, const char __user *buf,
 
         if(!strcmp(argv[1], "mem"))
         {
-            lidbg_mem_main(new_argc, new_argv);
+            share_lidbg_mem_main(new_argc, new_argv);
         }
         else if(!strcmp(argv[1], "i2c"))
         {
-            mod_i2c_main(new_argc, new_argv);
+            share_mod_i2c_main(new_argc, new_argv);
         }
         else if(!strcmp(argv[1], "io"))
         {
-            mod_io_main(new_argc, new_argv);
+            share_mod_io_main(new_argc, new_argv);
         }
         else if(!strcmp(argv[1], "ad"))
         {
-            mod_ad_main(new_argc, new_argv);
+            share_mod_ad_main(new_argc, new_argv);
         }
         else if(!strcmp(argv[1], "spi"))
         {
@@ -309,20 +314,20 @@ static ssize_t lidbg_write(struct file *filp, const char __user *buf,
         }
         else if(!strcmp(argv[1], "display"))
         {
-            lidbg_display_main(new_argc, new_argv);
+            share_lidbg_display_main(new_argc, new_argv);
         }
 
         else if(!strcmp(argv[1], "key"))
         {
-            lidbg_key_main(new_argc, new_argv);
+            share_lidbg_key_main(new_argc, new_argv);
         }
         else if(!strcmp(argv[1], "touch"))
         {
-            lidbg_touch_main(new_argc, new_argv);
+            share_lidbg_touch_main(new_argc, new_argv);
         }
         else if(!strcmp(argv[1], "soc"))
         {
-            lidbg_soc_main(new_argc, new_argv);
+            share_lidbg_soc_main(new_argc, new_argv);
         }
         else if(!strcmp(argv[1], "serial"))
         {
@@ -336,7 +341,7 @@ static ssize_t lidbg_write(struct file *filp, const char __user *buf,
 
         else if(!strcmp(argv[1], "servicer"))
         {
-            lidbg_servicer_main(new_argc, new_argv);
+            share_lidbg_servicer_main(new_argc, new_argv);
         }
 #if 1
         else if(!strcmp(argv[1], "video"))
@@ -432,6 +437,14 @@ int lidbg_init(void)
     lidbg("lidbg_init\n");
     //dump_build_time();
     DUMP_BUILD_TIME;
+
+#ifdef _LIGDBG_SHARE__
+		LIDBG_SHARE_GET;
+		
+		global_lidbg_devp=plidbg_share->lidbg_devp;
+#endif
+
+	
     /* 申请设备号*/
     if (lidbg_major)
         result = register_chrdev_region(devno, 1, "lidbg");

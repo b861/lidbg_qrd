@@ -4,6 +4,11 @@
 
 #include "lidbg.h"
 #define DEVICE_NAME "mlidbg_io"
+#ifdef _LIGDBG_SHARE__
+LIDBG_SHARE_DEFINE;
+void *global_lidbg_devp;
+
+#endif
 
 #define IO_IOCTL_READ  		(0)
 #define IO_IOCTL_WRITE  	(1)
@@ -87,8 +92,8 @@ void mod_io_main(int argc, char **argv)
         //drive_strength = simple_strtoul(argv[3], 0, 0);
 
 
-        soc_io_config( index,  GPIO_CFG_INPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA, 1);
-        status = soc_io_input(index);
+       share_soc_io_config( index,  GPIO_CFG_INPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA, 1);
+        status = share_soc_io_input(index);
 
 #endif
         lidbg("read: %x\n", status);
@@ -130,8 +135,8 @@ void mod_io_main(int argc, char **argv)
         //drive_strength = simple_strtoul(argv[3], 0, 0);
         status = simple_strtoul(argv[2], 0, 0);
 
-        soc_io_config( index,  GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_16MA, 1);
-        soc_io_output(index, status);
+        share_soc_io_config( index,  GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_16MA, 1);
+        share_soc_io_output(index, status);
 
 #endif
     }
@@ -150,7 +155,7 @@ void mod_io_main(int argc, char **argv)
 
         pio_int_config->pisr = io_test_irq;
         pio_int_config->dev = (void *)pio_int_config;
-        soc_io_irq(pio_int_config);
+        share_soc_io_irq(pio_int_config);
 
 
     }
@@ -327,11 +332,25 @@ static struct miscdevice misc =
 
 };
 #endif
+
+
+
+static void share_set_func_tbl(void)
+{
+    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnmod_io_main = mod_io_main;
+}
 static int __init io_init(void)
 {
     int ret = 0;
     dbg (DEVICE_NAME"io_dev_init\n");
     DUMP_BUILD_TIME;
+
+	
+#ifdef _LIGDBG_SHARE__
+		LIDBG_SHARE_GET;
+		share_set_func_tbl();
+		global_lidbg_devp=plidbg_share->lidbg_devp;
+#endif
     //下面的代码可以自动生成设备节点，但是该节点在/dev目录下，而不在/dev/misc目录下
     //其实misc_register就是用主设备号10调用register_chrdev()的 misc设备其实也就是特殊的字符设备。
     //注册驱动程序时采用misc_register函数注册，此函数中会自动创建设备节点，即设备文件。无需mknod指令创建设备文件。因为misc_register()会调用class_device_create()或者device_create()。
@@ -358,7 +377,8 @@ MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Flyaudio Inc.");
 
 
+#ifndef _LIGDBG_SHARE__
 
 EXPORT_SYMBOL(mod_io_main);
-
+#endif
 

@@ -10,11 +10,11 @@ u8 soc_io_config_log[IO_LOG_NUM];
 //spinlock_t gpio_log_lock; /* global dsp lock */
 
 
-
 void soc_io_init(void)
 {
     //spin_lock_init(&gpio_log_lock);
     memset(soc_io_config_log, 0, IO_LOG_NUM);
+
 }
 
 
@@ -249,8 +249,8 @@ bool soc_io_input( u32 index)
 
 }
 
-//EXPORT_SYMBOL(soc_io_write);
-//EXPORT_SYMBOL(soc_io_read);
+#ifndef _LIGDBG_SHARE__
+
 EXPORT_SYMBOL(soc_io_output);
 EXPORT_SYMBOL(soc_io_input);
 
@@ -258,7 +258,7 @@ EXPORT_SYMBOL(soc_io_irq);
 EXPORT_SYMBOL(soc_irq_enable);
 EXPORT_SYMBOL(soc_irq_disable);
 EXPORT_SYMBOL(soc_io_config);
-
+#endif
 
 
 

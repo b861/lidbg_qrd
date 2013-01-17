@@ -78,7 +78,8 @@ unsigned int   soc_bl_set(u32 bl_level)
 
 }
 
+#ifndef _LIGDBG_SHARE__
 EXPORT_SYMBOL(soc_bl_set);
 EXPORT_SYMBOL(soc_pwm_set);
-
+#endif
 

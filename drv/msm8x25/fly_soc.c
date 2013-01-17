@@ -3,8 +3,14 @@
  */
 
 
+#include "lidbg.h"
 
 #include "fly_soc.h"
+#ifdef _LIGDBG_SHARE__
+LIDBG_SHARE_DEFINE;
+void *global_lidbg_devp;
+
+#endif
 
 //int fastboot_get_status(void);
 //void fastboot_pwroff(void);
@@ -70,14 +76,14 @@ bool SOC_IO_ISR_Add(u32 irq, u32  interrupt_type, pinterrupt_isr func, void *dev
 
     lidbg("ext_int_num:%d \n", irq);
 
-    ret =  soc_io_irq(&io_int_config1);
+    ret =  share_soc_io_irq(&io_int_config1);
 
     return ret;
 }
 
 bool SOC_IO_ISR_Enable(u32 irq)
 {
-    soc_irq_enable(MSM_GPIO_TO_INT(irq));
+    share_soc_irq_enable(MSM_GPIO_TO_INT(irq));
 
     return 1;
 
@@ -86,7 +92,7 @@ bool SOC_IO_ISR_Enable(u32 irq)
 
 bool SOC_IO_ISR_Disable(u32 irq)
 {
-    soc_irq_disable(MSM_GPIO_TO_INT(irq));
+    share_soc_irq_disable(MSM_GPIO_TO_INT(irq));
 
     return 1;
 }
@@ -100,15 +106,15 @@ bool SOC_IO_ISR_Del (u32 irq)
 
 bool SOC_IO_Config(u32 index, bool direction, u32 pull, u32 drive_strength)
 {
-    return soc_io_config( index,  direction, pull, drive_strength, 1);
+    return share_soc_io_config( index,  direction, pull, drive_strength, 1);
 
 
 }
 
 void SOC_IO_Output_Ext(u32 group, u32 index, bool status, u32 pull, u32 drive_strength)
 {
-    soc_io_config( index,  GPIO_CFG_OUTPUT, pull, drive_strength, 1);
-    soc_io_output( index,  status);
+    share_soc_io_config( index,  GPIO_CFG_OUTPUT, pull, drive_strength, 1);
+    share_soc_io_output( index,  status);
 
 }
 
@@ -116,14 +122,14 @@ void SOC_IO_Output_Ext(u32 group, u32 index, bool status, u32 pull, u32 drive_st
 
 void SOC_IO_Output(u32 group, u32 index, bool status)
 {
-    soc_io_config( index,  GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_8MA, 0);
-    soc_io_output( index,  status);
+    share_soc_io_config( index,  GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_8MA, 0);
+    share_soc_io_output( index,  status);
 }
 
 bool SOC_IO_Input(u32 group, u32 index, u32 pull)
 {
-    soc_io_config( index,  GPIO_CFG_INPUT, pull/*GPIO_CFG_NO_PULL*/, GPIO_CFG_16MA, 0);
-    return soc_io_input(index);
+    share_soc_io_config( index,  GPIO_CFG_INPUT, pull/*GPIO_CFG_NO_PULL*/, GPIO_CFG_16MA, 0);
+    return share_soc_io_input(index);
 }
 
 
@@ -133,7 +139,7 @@ bool SOC_ADC_Get (u32 channel , u32 *value)
 
     *value = 0xffffffff;
 
-    *value = soc_ad_read(channel);
+    *value = share_soc_ad_read(channel);
 
     if(*value == 0xffffffff)
         return 0;
@@ -144,20 +150,20 @@ bool SOC_ADC_Get (u32 channel , u32 *value)
 
 void SOC_Key_Report(u32 key_value, u32 type)
 {
-    lidbg_key_report(key_value, type);
+    share_lidbg_key_report(key_value, type);
 
 }
 
 // 7bit i2c sub_addr
 int SOC_I2C_Send(int bus_id, char chip_addr, char *buf, unsigned int size)
 {
-    return  i2c_api_do_send( bus_id,  chip_addr,  0,  buf,  size);
+    return  share_i2c_api_do_send( bus_id,  chip_addr,  0,  buf,  size);
 
 
 }
 int SOC_I2C_Rec(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size)
 {
-    return  i2c_api_do_recv( bus_id,  chip_addr,  sub_addr, buf,  size);
+    return  share_i2c_api_do_recv( bus_id,  chip_addr,  sub_addr, buf,  size);
 
 
 }
@@ -167,7 +173,7 @@ int SOC_I2C_Rec(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, un
 int SOC_I2C_Rec_2B_SubAddr(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size)
 
 {
-    return  i2c_api_do_recv_sub_addr_2bytes( bus_id,  chip_addr,  sub_addr, buf,  size);
+    return  share_i2c_api_do_recv_sub_addr_2bytes( bus_id,  chip_addr,  sub_addr, buf,  size);
 
 
 }
@@ -175,14 +181,14 @@ int SOC_I2C_Rec_2B_SubAddr(int bus_id, char chip_addr, unsigned int sub_addr, ch
 int SOC_I2C_Rec_3B_SubAddr(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size)
 
 {
-    return  i2c_api_do_recv_sub_addr_3bytes( bus_id,  chip_addr,  sub_addr, buf,  size);
+    return  share_i2c_api_do_recv_sub_addr_3bytes( bus_id,  chip_addr,  sub_addr, buf,  size);
 
 
 }
 
 int SOC_I2C_Rec_Simple(int bus_id, char chip_addr, char *buf, unsigned int size)
 {
-    return  i2c_api_do_recv_no_sub_addr( bus_id,  chip_addr,  0, buf,  size);
+    return  share_i2c_api_do_recv_no_sub_addr( bus_id,  chip_addr,  0, buf,  size);
 
 
 }
@@ -195,21 +201,21 @@ int i2c_api_do_recv_TEF7000(int bus_id, char chip_addr, unsigned int sub_addr, c
 
 int SOC_I2C_Rec_SAF7741(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size)
 {
-    return  i2c_api_do_recv_SAF7741( bus_id,  chip_addr, sub_addr, buf,  size);
+    return  share_i2c_api_do_recv_SAF7741( bus_id,  chip_addr, sub_addr, buf,  size);
 
 
 }
 
 int SOC_I2C_Send_TEF7000(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size)
 {
-    return  i2c_api_do_send_TEF7000( bus_id,  chip_addr, sub_addr, buf,  size);
+    return  share_i2c_api_do_send_TEF7000( bus_id,  chip_addr, sub_addr, buf,  size);
 
 
 }
 
 int SOC_I2C_Rec_TEF7000(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size)
 {
-    return  i2c_api_do_recv_TEF7000( bus_id,  chip_addr, sub_addr, buf,  size);
+    return  share_i2c_api_do_recv_TEF7000( bus_id,  chip_addr, sub_addr, buf,  size);
 
 
 }
@@ -220,7 +226,7 @@ int SOC_I2C_Rec_TEF7000(int bus_id, char chip_addr, unsigned int sub_addr, char 
 void SOC_PWM_Set(int pwm_id, int duty_ns, int period_ns)
 {
 
-    soc_pwm_set(pwm_id, duty_ns, period_ns);
+    share_soc_pwm_set(pwm_id, duty_ns, period_ns);
 
 }
 
@@ -230,7 +236,7 @@ void SOC_PWM_Set(int pwm_id, int duty_ns, int period_ns)
 //0~255
 int SOC_BL_Set( u32 bl_level)
 {
-    soc_bl_set(bl_level);
+    share_soc_bl_set(bl_level);
 
     return 1;
 
@@ -239,21 +245,21 @@ int SOC_BL_Set( u32 bl_level)
 void SOC_Write_Servicer(int cmd)
 {
 
-    k2u_write(cmd);
+    share_k2u_write(cmd);
 }
 
 
 void SOC_Log_Dump(int cmd)
 {
 
-    k2u_write(cmd);
+    share_k2u_write(cmd);
 }
 
 
 void SOC_Capts_Insmod(int cmd)
 {
 
-    k2u_write(cmd);
+    share_k2u_write(cmd);
 }
 
 #if 0
@@ -307,7 +313,7 @@ int SOC_Display_Get_Res(u32 *screen_x, u32 *screen_y)
 	}
 	return ret;
 #else
-	return soc_get_screen_res(screen_x,screen_y);
+	return share_soc_get_screen_res(screen_x,screen_y);
 
 #endif
 }
@@ -370,6 +376,15 @@ int fly_soc_init(void)
 {
     lidbg("fly_soc_init\n");
     DUMP_FUN;
+
+#ifdef _LIGDBG_SHARE__
+			LIDBG_SHARE_GET;
+			global_lidbg_devp=plidbg_share->lidbg_devp;
+
+#endif
+
+
+	
     set_func_tbl();
 
     platform_device_register(&fly_soc_device);
