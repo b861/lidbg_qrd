@@ -231,17 +231,16 @@ struct lidbg_fn_t
     Vedio_Channel pfnglobal_video_channel_flag;
 
 
-    //dev
-    void (*pfnSOC_Dev_Suspend_Prepare)(void);
+	//dev
+	 void (*pfnSOC_Dev_Suspend_Prepare)(void);
 
-    //wakelock
-    bool (*pfnSOC_PWR_Ignore_Wakelock)(void);
+	//wakelock
+	bool (*pfnSOC_PWR_Ignore_Wakelock)(void);
 
-    //mic
-    void (*pfnSOC_Mic_Enable)(bool enable);
-
-
-
+	//mic
+	void (*pfnSOC_Mic_Enable)(bool enable);
+	//video
+	int (*pfnread_tw9912_chips_signal_status)(void);
 };
 
 

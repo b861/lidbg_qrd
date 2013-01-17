@@ -3,8 +3,12 @@
 #include "tw9912.h"
 #include "tw9912_config.h"
 #include "lidbg_enter.h"
+static struct task_struct * tw9912_Correction_Parameter_fun = NULL; 
+u8 tw9912_signal_unstabitily_for_Tw9912_init_flag=0;
+static int read_tw9912_chips_status_flag =0 , read_tw9912_chips_status_flag_1 = 0;
 #define TW9912_I2C_ChipAdd 0x44 //SIAD = 0-->0x44  SIAD =1-->0x45
 TW9912_input_info tw9912_input_information;
+ tw9912_run_flag tw912_run_sotp_flag;
 TW9912_Signal signal_is_how[5]={//用于记录四个通道的信息
 							{NOTONE,OTHER,source_other},//YIN0
 							{NOTONE,OTHER,source_other},//YIN1
@@ -33,16 +37,50 @@ u8 Tw9912_Parameter[]={0,0,};
 
 	if( format == PAL_I )
 	{//msleep(100);
-		Tw9912_Parameter[0]=0x0a;
-		Tw9912_Parameter[1]=0x1b;
+		Tw9912_Parameter[0]=0xff;
+		Tw9912_Parameter[1]=0x00;
 		ret = write_tw9912(Tw9912_Parameter);
+		
+		Tw9912_Parameter[0]=0x07;
+		Tw9912_Parameter[1]=0x12;
+		ret = write_tw9912(Tw9912_Parameter);
+		
+		Tw9912_Parameter[0]=0x0a;
+		Tw9912_Parameter[1]=0x1a;
+		ret = write_tw9912(Tw9912_Parameter);
+		
+		Tw9912_Parameter[0]=0x07;
+		Tw9912_Parameter[1]=0x12;
+		ret = write_tw9912(Tw9912_Parameter);
+		
 		Tw9912_Parameter[0]=0x09;
 		Tw9912_Parameter[1]=0x27;
 		ret = write_tw9912(Tw9912_Parameter);
 	}
 return ret;
 }
-						
+static int thread_tw9912_Correction_Parameter_fun(void *data)  
+{int i=0;
+  long int timeout;
+  	 printk("tw9912:thread_tw9912_Correction_Parameter_fun()\n");
+	while(!kthread_should_stop())
+	{
+	        timeout=10;
+		while(timeout > 0) 
+		{ //delay
+			timeout = schedule_timeout(timeout); 
+		} 
+		if (tw912_run_sotp_flag.run == 1)
+			{
+				 printk("tw9912 is run again and format is PALi\n");
+				Correction_Parameter_fun(tw912_run_sotp_flag.format);
+				tw912_run_sotp_flag.run = 0;
+				   kthread_stop(tw9912_Correction_Parameter_fun);  
+			}
+
+	}
+return 0;
+}						
 void tw9912_get_input_info(TW9912_input_info *input_information)
 {
 	
@@ -289,7 +327,57 @@ TW9912_input_info tw9912_input_information_1;
 		
 return signal_is_how_1.Format;
 }
+int read_tw9912_chips_status(u8 cmd)
+{
+static TW9912_input_info tw9912_input_information_status;
+static TW9912_input_info tw9912_input_information_status_next;
+tw9912_get_input_info(&tw9912_input_information_status_next);
+if(cmd)
+{
+/*
+	if(tw9912_input_information_status_next.input_detection.valu != tw9912_input_information_status.input_detection.valu)
+	{
 
+		 printk("worning:input_detection(0xc1) have change --old = %d,new =%d\n", \
+		 	tw9912_input_information_status.input_detection.valu,\
+		 	tw9912_input_information_status_next.input_detection.valu);
+		 
+		  tw9912_input_information_status.input_detection.valu = \
+		  	tw9912_input_information_status_next.input_detection.valu;
+		  return 1;
+	}
+	
+	if(tw9912_input_information_status_next.component_video_format.valu != tw9912_input_information_status.component_video_format.valu)
+	{
+	 
+		 printk("worning:component_video_format(0x1e) have change --old = %d,new =%d\n", \
+		 	tw9912_input_information_status.component_video_format.valu,\
+		 	tw9912_input_information_status_next.component_video_format.valu);
+
+		 tw9912_input_information_status.component_video_format.valu = \
+		 	tw9912_input_information_status_next.component_video_format.valu;
+		   return 1;
+	}
+*/	
+	if(tw9912_input_information_status_next.macrovision_detection.valu != tw9912_input_information_status.macrovision_detection.valu)
+	{
+	 
+		 printk("worning:macrovision_detection(0x30) have change --old = %d,new =%d\n", 
+		 	tw9912_input_information_status.macrovision_detection.valu,
+		 	tw9912_input_information_status_next.macrovision_detection.valu);
+	
+		 tw9912_input_information_status.macrovision_detection.valu = 
+		 	tw9912_input_information_status_next.macrovision_detection.valu;
+		//   return tw9912_input_information_status_next.macrovision_detection.valu;
+		 return 1;
+	}
+	return 0;
+}
+else
+{
+return tw9912_input_information_status_next.macrovision_detection.valu;
+}
+}
 Vedio_Format testing_video_signal(Vedio_Channel Channel)
 {
 Vedio_Format ret =OTHER;
@@ -461,11 +549,14 @@ tw9912_dbg("@@@@@Tw9912_appoint_pin_testing_video_signal!\n");
 	{
 		printk("\r\r\n\n");
 		printk("tw9912:testing NTSCp\n");
-		Tw9912_init_NTSCp();//initall all register 
+		//	Tw9912_init_NTSCp();//initall all register 
 		tw9912_status.flag = TW9912_initall_yes;
 		tw9912_status.Channel = SEPARATION;
 		tw9912_status.format = NTSC_P;
-		msleep(1000);
+		//	msleep(1000);
+		signal_is_how[SEPARATION].Format = NTSC_P;
+	ret =NTSC_P;
+	goto TEST_NTSCp;
 	}
 	write_tw9912(manually_initiate_auto_format_detection);
 	msleep(100);
@@ -484,9 +575,10 @@ tw9912_dbg("@@@@@Tw9912_appoint_pin_testing_video_signal!\n");
 			case PAL_P:     ret =4;
 				break;
 				
-		 default:     ret =5;
+			default:     	ret =5;
 				break;
 		}
+TEST_NTSCp:
 	return ret;
 CONFIG_not_ack_fail:
 	tw9912_dbg("Tw9912_appoint_pin_testing_video_signal()--->NACK error\n");
@@ -509,7 +601,7 @@ u8 valu;
 int Tw9912_init_NTSCp(void)
 {
     u32 i = 0;
-    u8 *config_pramat_piont=NULL;
+    u8 *config_pramat_piont=NULL;   
 	tw9912_dbg("Tw9912_init_NTSCp initall tw9912+\n");
 	TC9912_id();
 	tw9912_RESX_DOWN;
@@ -528,6 +620,17 @@ int Tw9912_init_NTSCp(void)
 		tw9912_dbg("w a=%x,v=%x\n",config_pramat_piont[i*2],config_pramat_piont[i*2+1]);
 		i++;
 	}
+
+	#ifdef DEBUG_PLOG_TW9912
+	i=0;
+	while(config_pramat_piont[i*2] != 0xfe)
+	{  u8 data = 0;
+		data = 0xff;
+		read_tw9912(config_pramat_piont[i*2], &data);
+		tw9912_dbg("r a=%x ,v= %x\n",config_pramat_piont[i*2] , data);
+		i++;
+	}
+#endif
 	tw9912_dbg("Tw9912_init_NTSCp initall tw9912-\n");
 //msleep(400);
 //Tw9912_appoint_pin_testing_video_signal(SEPARATION);
@@ -566,7 +669,6 @@ CONFIG_not_ack_fail:
 }
 int Tw9912_init(Vedio_Format config_pramat,Vedio_Channel Channel)
 {   
-
     u32 i = 0;
     int ret=0;
     u8 *config_pramat_piont=NULL;
@@ -581,10 +683,74 @@ int Tw9912_init(Vedio_Format config_pramat,Vedio_Channel Channel)
 	//神码情况
 	}
 	else if(config_pramat != STOP_VIDEO)
-	{printk("tw9912:Tw9912_init()-->Tw9912_appoint_pin_testing_video_signal()\n");
+	{
+		switch(Channel)
+			{
+			case 0: 	//	 YIN0
+			case SEPARATION: 	//	 YIN0
+				if(write_tw9912(Tw9912_input_pin_selet)==NACK) goto CONFIG_not_ack_fail;
+				break;
+			case 1: //	 YIN1
+				Tw9912_input_pin_selet[1]=0x44;//register valu selete YIN1
+				if(write_tw9912(Tw9912_input_pin_selet)==NACK) goto CONFIG_not_ack_fail;
+				break;
+			case 2: //	 YIN2
+				Tw9912_input_pin_selet[1]=0x48;
+				if(write_tw9912(Tw9912_input_pin_selet)==NACK) goto CONFIG_not_ack_fail;
+
+				break;
+			case 3: //	 YIN3
+				Tw9912_input_pin_selet[1]=0x4c;
+				if(write_tw9912(Tw9912_input_pin_selet)==NACK) goto CONFIG_not_ack_fail;
+	
+				Tw9912_input_pin_selet[0]=0xe8;//only selet YIN3 neet set
+				Tw9912_input_pin_selet[1]=0x3f;//disable YOUT buffer
+				if(write_tw9912(Tw9912_input_pin_selet)==NACK) goto CONFIG_not_ack_fail;
+				break;
+			default : 
+				tw9912_dbg("%s:you input Channel = %d error!\n",__FUNCTION__,Channel);
+				break;
+			}
+				
+		while(1)
+			{
+
+				
+				ret = read_tw9912_chips_status(0);//return register valu
+				msleep(10);
+				read_tw9912_chips_status_flag++;
+			
+			//printk("tw9912:read_tw9912_chips_status back %.2x\n",ret);
+				if( ret )
+				{
+					read_tw9912_chips_status_flag=0;	
+					read_tw9912_chips_status_flag_1++;
+					printk("tw9912:worning Channel = %d input  signal unstabitily! %d\n",Channel,read_tw9912_chips_status_flag_1);
+				}
+				else
+				{
+				printk("tw9912: input  signal stabitily! %d ,%d\n",read_tw9912_chips_status_flag,read_tw9912_chips_status_flag_1);
+				}
+				if(read_tw9912_chips_status_flag>20 ||read_tw9912_chips_status_flag_1>160)  
+				{
+					if (read_tw9912_chips_status_flag_1>=160) 
+						tw9912_signal_unstabitily_for_Tw9912_init_flag = 1;//find colobar flag signal bad
+					break;
+				}
+			}
+			read_tw9912_chips_status_flag = 0;
+			read_tw9912_chips_status_flag_1 = 0;
+
+	printk("tw9912:Tw9912_init()-->Tw9912_appoint_pin_testing_video_signal(%d)\n",Channel);
 		ret = Tw9912_appoint_pin_testing_video_signal(Channel);//bad
+		
+		
+		
 		if(ret==5)//the channel is not signal input
-			goto NOT_signal_input;
+			{
+				tw9912_signal_unstabitily_for_Tw9912_init_flag = 0;//find colobar flag signal bad
+				goto NOT_signal_input;
+			}
 		if(ret==-1)
 			goto CONFIG_not_ack_fail;
 
@@ -622,7 +788,7 @@ goto CONFIG_is_old;
 				tw9912_status.format = NTSC_I;
 				config_pramat_piont=TW9912_INIT_NTSC_Interlaced_input; 
 				//config_pramat_piont=TW9912_INIT_PAL_Interlaced_input; 
-				tw9912_dbg("%s:config_pramat->NTSC_Interlace\n",__func__);
+				printk("tw9912:%s:config_pramat->NTSC_Interlace\n",__func__);
 				break;
 			
 			case PAL_I:
@@ -631,7 +797,7 @@ goto CONFIG_is_old;
 				tw9912_status.format = PAL_I;
 				config_pramat_piont=TW9912_INIT_PAL_Interlaced_input; 
 				//config_pramat_piont=TW9912_INIT_NTSC_Interlaced_input; 
-				printk("%s:config_pramat->PAL_Interlace\n",__func__);
+				printk("tw9912:%s:config_pramat->PAL_Interlace\n",__func__);
 				break;
 			
 			case NTSC_P:
@@ -639,7 +805,7 @@ goto CONFIG_is_old;
 				tw9912_status.Channel = Channel;
 				tw9912_status.format = NTSC_P;
 				config_pramat_piont=TW9912_INIT_NTSC_Progressive_input;
-				printk("%s:config_pramat->NTSC_Progressive\n",__func__);
+				printk("tw9912:%s:config_pramat->NTSC_Progressive\n",__func__);
 				break;
 			
 			case PAL_P:
@@ -647,11 +813,12 @@ goto CONFIG_is_old;
 				tw9912_status.Channel = Channel;
 				tw9912_status.format = PAL_P;
 				config_pramat_piont=TW9912_INIT_PAL_Progressive_input;
-				printk("%s:config_pramat->PAL_Progressive\n",__func__);
+				printk("tw9912:%s:config_pramat->PAL_Progressive\n",__func__);
 				break;
+				
 			default:
 				printk("Format is Invalid ******\n");
-				printk("%s:signal_is_how[Channel].Format=%d\n",__func__,signal_is_how[Channel].Format);
+				printk("tw9912:%s:signal_is_how[Channel].Format=%d\n",__func__,signal_is_how[Channel].Format);
 				goto NOT_signal_input;
 				break;
 		}
@@ -671,13 +838,55 @@ goto CONFIG_is_old;
 				tw9912_dbg("w a=%x,v=%x\n",config_pramat_piont[i*2],config_pramat_piont[i*2+1]);
 				if(signal_is_how[Channel].Format == NTSC_P \
 					&& config_pramat_piont[i*2] >0x24\
-					&& config_pramat_piont[i*2] < 0x2d) usleep(100);
+					&& config_pramat_piont[i*2] < 0x2d) 
+					usleep(100);
 				i++;
 			}
-		
-			if(signal_is_how[Channel].Format ==PAL_I ||signal_is_how[Channel].Format == NTSC_I)
+		if(Channel == NTSC_P)
 			{
-				switch(Channel)//Independent testing
+				u8 manually_initiate_auto_format_detection[]={0x1d,0x89,};//bit7 
+															      //Writing 1 to this bit will manually initiate the auto format detection process
+															      //bit3 and bit0
+															      //only  enable recognition of NTSC
+				TW9912_input_info tw9912_input_information_NTSCp;
+				write_tw9912(manually_initiate_auto_format_detection);
+				msleep(100);
+				tw9912_get_input_info(&tw9912_input_information_NTSCp);
+				if(tw9912_input_information_NTSCp.input_detection.valu & 0x04)//Composite Sync detection status 
+				{
+				unsigned char Input_source_format;//Register 0xc1 bit[1:0]
+					/*
+						input source format detection in the case of composite sync. 
+						0 = 480i 
+						1 = 576i 
+						2 = 480p 
+						3 = 576p 
+						4 = 1080i 
+						5 = 720p 
+						6 = 1080p 7 = none of above 
+					*/
+						Input_source_format = tw9912_input_information_NTSCp.input_detection.valu & 0x03 ;//bit[1:0]
+						switch (Input_source_format)
+						{
+							case 0x2://480p
+							printk("tw9912 initall NTSCp config is dong and find NTSCp signal\n");	
+								break;
+							case 0x0://480i
+							case 0x1://567i
+							case 0x3://576p
+							case 0x4://1080i
+							case 0x5://720p
+							case 0x6://1080p
+							case 0x7://none of above
+								goto NOT_signal_input;
+								break;
+						}
+				}
+
+			}
+		else if(signal_is_how[Channel].Format ==PAL_I ||signal_is_how[Channel].Format == NTSC_I)//Set channel 
+			{
+				switch(Channel)
 					{
 						case 0: 	//	 YIN0
 							if(write_tw9912(Tw9912_input_pin_selet)==NACK) goto CONFIG_not_ack_fail;
@@ -705,22 +914,26 @@ goto CONFIG_is_old;
 					}
 				
 			}
-			else if (signal_is_how[Channel].Format ==NTSC_P )
-			{ u8 Tw9912_input_pin_selet[]={0x02,0x60,};
-				if(write_tw9912(Tw9912_input_pin_selet)==NACK) goto CONFIG_not_ack_fail;
-				//msleep(400);//wait for vedio signal Stable 
-			}
-		//	msleep(400);//wait for vedio signal Stable 
+		
 	}
-	/*else
-	{
-		tw9912_status.flag = TW9912_initall_not;
-		tw9912_status.Channel = NOTONE;
-		tw9912_status.format = OTHER;
-		config_pramat_piont=TW9912_Stop;
-		tw9912_dbg("%s:config_pramat->STOP_VIDEO\n",__func__);
-	}
-	*/
+
+	if(signal_is_how[Channel].Format ==PAL_I)
+		{u8 Tw9912_Parameter[]={0,0,};
+	
+		Tw9912_Parameter[0]=0x0a;
+		Tw9912_Parameter[1]=0x1b;
+		ret = write_tw9912(Tw9912_Parameter);
+
+		Tw9912_Parameter[0]=0x09;
+		Tw9912_Parameter[1]=0x27;
+		ret = write_tw9912(Tw9912_Parameter);
+
+	
+		tw912_run_sotp_flag.format = PAL_I;
+		tw912_run_sotp_flag.run = 1;
+		 printk("tw9912 is run again and format is PALi flag&&&\n");
+		  tw9912_Correction_Parameter_fun = kthread_run(thread_tw9912_Correction_Parameter_fun,NULL,"flyvideo_Parameter");  
+		}
 #ifdef DEBUG_PLOG_TW9912
 	i=0;
 	while(config_pramat_piont[i*2] != 0xfe)
@@ -732,7 +945,7 @@ goto CONFIG_is_old;
 	}
 #endif
 	printk("tw9912: init-\n");
-Correction_Parameter_fun(signal_is_how[Channel].Format);
+//Correction_Parameter_fun(signal_is_how[Channel].Format);
 //CONFIG_is_old:
     return 1;
 CONFIG_not_ack_fail:
