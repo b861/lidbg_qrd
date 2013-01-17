@@ -648,7 +648,65 @@ int Tw9912_init(Vedio_Format config_pramat,Vedio_Channel Channel)
 	//神码情况
 	}
 	else if(config_pramat != STOP_VIDEO)
-	{printk("tw9912:Tw9912_init()-->Tw9912_appoint_pin_testing_video_signal(%d)\n",Channel);
+	{
+
+		while(1)
+			{
+
+				switch(Channel)
+					{
+						case 0: 	//	 YIN0
+						case SEPARATION: 	//	 YIN0
+							if(write_tw9912(Tw9912_input_pin_selet)==NACK) goto CONFIG_not_ack_fail;
+							break;
+						case 1: //	 YIN1
+							Tw9912_input_pin_selet[1]=0x44;//register valu selete YIN1
+							if(write_tw9912(Tw9912_input_pin_selet)==NACK) goto CONFIG_not_ack_fail;
+							break;
+						case 2: //	 YIN2
+							Tw9912_input_pin_selet[1]=0x48;
+							if(write_tw9912(Tw9912_input_pin_selet)==NACK) goto CONFIG_not_ack_fail;
+
+							break;
+						case 3: //	 YIN3
+							Tw9912_input_pin_selet[1]=0x4c;
+							if(write_tw9912(Tw9912_input_pin_selet)==NACK) goto CONFIG_not_ack_fail;
+				
+							Tw9912_input_pin_selet[0]=0xe8;//only selet YIN3 neet set
+							Tw9912_input_pin_selet[1]=0x3f;//disable YOUT buffer
+							if(write_tw9912(Tw9912_input_pin_selet)==NACK) goto CONFIG_not_ack_fail;
+							break;
+						default : 
+							tw9912_dbg("%s:you input Channel = %d error!\n",__FUNCTION__,Channel);
+							break;
+					}
+				
+				ret = read_tw9912_chips_status(0);//return register valu
+				msleep(10);
+				read_tw9912_chips_status_flag++;
+			
+			//printk("tw9912:read_tw9912_chips_status back %.2x\n",ret);
+				if( ret )
+				{
+					read_tw9912_chips_status_flag=0;	
+					read_tw9912_chips_status_flag_1++;
+					printk("tw9912:worning Channel = %d input  signal unstabitily! %d\n",Channel,read_tw9912_chips_status_flag_1);
+				}
+				else
+				{
+				printk("tw9912: input  signal stabitily! %d ,%d\n",read_tw9912_chips_status_flag,read_tw9912_chips_status_flag_1);
+				}
+				if(read_tw9912_chips_status_flag>50 ||read_tw9912_chips_status_flag_1>160)  
+				{
+					if (read_tw9912_chips_status_flag_1>=160) 
+						tw9912_signal_unstabitily_for_Tw9912_init_flag = 1;//find colobar flag signal bad
+					break;
+				}
+			}
+			read_tw9912_chips_status_flag = 0;
+			read_tw9912_chips_status_flag_1 = 0;
+
+	printk("tw9912:Tw9912_init()-->Tw9912_appoint_pin_testing_video_signal(%d)\n",Channel);
 		ret = Tw9912_appoint_pin_testing_video_signal(Channel);//bad
 		
 		
@@ -820,32 +878,6 @@ goto CONFIG_is_old;
 			}
 		
 	}
-	while(1)
-	{
-		ret = read_tw9912_chips_status(0);//return register valu
-		msleep(10);
-		read_tw9912_chips_status_flag++;
-	
-	//printk("tw9912:read_tw9912_chips_status back %.2x\n",ret);
-		if( ret )
-		{
-			read_tw9912_chips_status_flag=0;	
-			read_tw9912_chips_status_flag_1++;
-			printk("tw9912:worning Channel = %d input  signal unstabitily! %d\n",Channel,read_tw9912_chips_status_flag_1);
-		}
-		else
-		{
-		printk("tw9912: input  signal stabitily! %d ,%d\n",read_tw9912_chips_status_flag,read_tw9912_chips_status_flag_1);
-		}
-		if(read_tw9912_chips_status_flag>50 ||read_tw9912_chips_status_flag_1>160)  
-		{
-			if (read_tw9912_chips_status_flag_1>=160) 
-				tw9912_signal_unstabitily_for_Tw9912_init_flag = 1;//find colobar flag signal bad
-			break;
-		}
-	}
-	read_tw9912_chips_status_flag = 0;
-	read_tw9912_chips_status_flag_1 = 0;
 #ifdef DEBUG_PLOG_TW9912
 	i=0;
 	while(config_pramat_piont[i*2] != 0xfe)

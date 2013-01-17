@@ -231,7 +231,7 @@ mutex_lock(&lock_chipe_config);
 		init_tw9912_ent(info_com_top_Channel);
 		}
 	VideoImage();
-msleep(300);//wait for video Steady display
+//msleep(300);//wait for video Steady display
 /*
 		printk("\r\n");
 		printk("TW9912:info_Vedio_Channel=%d\n",info_Vedio_Channel);
