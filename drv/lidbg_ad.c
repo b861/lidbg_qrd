@@ -190,8 +190,8 @@ static struct miscdevice misc =
 
 static void share_set_func_tbl(void)
 {
-	//ad
-	((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnmod_ad_main = mod_ad_main;
+    //ad
+    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnmod_ad_main = mod_ad_main;
 
 
 }
@@ -205,8 +205,8 @@ static int __init ad_init(void)
     //其实misc_register就是用主设备号10调用register_chrdev()的 misc设备其实也就是特殊的字符设备。
     //注册驱动程序时采用misc_register函数注册，此函数中会自动创建设备节点，即设备文件。无需mknod指令创建设备文件。因为misc_register()会调用class_device_create()或者device_create()。
 #ifdef _LIGDBG_SHARE__
-		LIDBG_SHARE_GET;
-		share_set_func_tbl();
+    LIDBG_SHARE_GET;
+    share_set_func_tbl();
 #endif
 
     ret = misc_register(&misc);

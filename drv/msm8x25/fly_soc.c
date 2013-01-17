@@ -300,20 +300,20 @@ void SOC_PWR_ShutDown(void)
 int SOC_Display_Get_Res(u32 *screen_x, u32 *screen_y)
 {
 #if 0
-	u32 x,y;
-	int ret = soc_get_screen_res(&x,&y);
-	if(ret)
-	{
-		if(x==1024||x==800)
-		{
-			*screen_x=x;
-			*screen_y=y;
-			
-		}
-	}
-	return ret;
+    u32 x, y;
+    int ret = soc_get_screen_res(&x, &y);
+    if(ret)
+    {
+        if(x == 1024 || x == 800)
+        {
+            *screen_x = x;
+            *screen_y = y;
+
+        }
+    }
+    return ret;
 #else
-	return share_soc_get_screen_res(screen_x,screen_y);
+    return share_soc_get_screen_res(screen_x, screen_y);
 
 #endif
 }
@@ -363,11 +363,11 @@ static void set_func_tbl(void)
 
 
 
-	//display/touch
+    //display/touch
     ((struct lidbg_dev *)global_lidbg_devp) ->soc_func_tbl.pfnSOC_Display_Get_Res = SOC_Display_Get_Res;
 
 
-	//mic
+    //mic
     ((struct lidbg_dev *)global_lidbg_devp) ->soc_func_tbl.pfnSOC_Mic_Enable = SOC_Mic_Enable;
 }
 
@@ -378,13 +378,13 @@ int fly_soc_init(void)
     DUMP_FUN;
 
 #ifdef _LIGDBG_SHARE__
-			LIDBG_SHARE_GET;
-			global_lidbg_devp=plidbg_share->lidbg_devp;
+    LIDBG_SHARE_GET;
+    global_lidbg_devp = plidbg_share->lidbg_devp;
 
 #endif
 
 
-	
+
     set_func_tbl();
 
     platform_device_register(&fly_soc_device);

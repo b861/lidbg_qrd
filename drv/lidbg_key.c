@@ -70,11 +70,11 @@ int lidbg_key_init(void)
     DUMP_BUILD_TIME;
 
 #ifdef _LIGDBG_SHARE__
-		LIDBG_SHARE_GET;
-		share_set_func_tbl();
+    LIDBG_SHARE_GET;
+    share_set_func_tbl();
 #endif
 
-	
+
     input = input_allocate_device();
     if (!input)
     {

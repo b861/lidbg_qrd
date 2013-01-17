@@ -17,8 +17,8 @@ int thread_bp_msg(void *data)
     {
         set_current_state(TASK_UNINTERRUPTIBLE);
         if(kthread_should_stop()) break;
-#if 0        
-{
+#if 0
+        {
             start_index = smem_log_temp->start_pos;
             end_index = smem_log_temp->end_pos;
             if((end_index + 1) % 100 != start_index)

@@ -5,77 +5,77 @@
 
 struct lidbg_fn_t_share
 {
-//io
-	void (*pfnmod_io_main)(int argc, char **argv);
+    //io
+    void (*pfnmod_io_main)(int argc, char **argv);
 
-	int (*pfnsoc_io_output)(unsigned int index, bool status);
+    int (*pfnsoc_io_output)(unsigned int index, bool status);
     bool (*pfnsoc_io_input)( unsigned int index);
-   
-   int (*pfnsoc_io_irq)(struct io_int_config *pio_int_config);
-   void (*pfnsoc_irq_enable)(unsigned int irq);
-   void (*pfnsoc_irq_disable)(unsigned int irq);
-   int (*pfnsoc_io_config)(unsigned int index, bool direction, unsigned int pull, unsigned int drive_strength, bool force_reconfig);
-//ad
-	void (*pfnmod_ad_main)(int argc, char **argv);
-	unsigned int   (*pfnsoc_ad_read)(unsigned int channel);
 
-//pwm
-	unsigned int   (*pfnsoc_bl_set)(unsigned int bl_level);
-	unsigned int   (*pfnsoc_pwm_set)(int pwm_id, int duty_ns, int period_ns);
+    int (*pfnsoc_io_irq)(struct io_int_config *pio_int_config);
+    void (*pfnsoc_irq_enable)(unsigned int irq);
+    void (*pfnsoc_irq_disable)(unsigned int irq);
+    int (*pfnsoc_io_config)(unsigned int index, bool direction, unsigned int pull, unsigned int drive_strength, bool force_reconfig);
+    //ad
+    void (*pfnmod_ad_main)(int argc, char **argv);
+    unsigned int   (*pfnsoc_ad_read)(unsigned int channel);
 
-
-//soc init
-	void (*pfnlidbg_soc_init)(void);
-	void (*pfnlidbg_soc_deinit)(void);
-	void (*pfnlidbg_board_init)(void);
-	void (*pfnlidbg_board_deinit)(void);
-
-//soc main
-	void (*pfnlidbg_soc_main)(int argc, char **argv);
+    //pwm
+    unsigned int   (*pfnsoc_bl_set)(unsigned int bl_level);
+    unsigned int   (*pfnsoc_pwm_set)(int pwm_id, int duty_ns, int period_ns);
 
 
-//key
-	void (*pfnlidbg_key_report)(unsigned int key_value, unsigned int type);
-	void (*pfnlidbg_key_main)(int argc, char **argv);
+    //soc init
+    void (*pfnlidbg_soc_init)(void);
+    void (*pfnlidbg_soc_deinit)(void);
+    void (*pfnlidbg_board_init)(void);
+    void (*pfnlidbg_board_deinit)(void);
 
-//i2c
-	int (*pfni2c_api_do_send)(int bus_id, char chip_addr, unsigned int  sub_addr, char *buf, unsigned int size);
-	int (*pfni2c_api_do_recv)(int bus_id, char chip_addr, unsigned int  sub_addr, char *buf, unsigned int size);
-	int (*pfni2c_api_do_recv_no_sub_addr)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
-	int (*pfni2c_api_do_recv_sub_addr_2bytes)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
-	int (*pfni2c_api_do_recv_sub_addr_3bytes)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
-	void (*pfnmod_i2c_main)(int argc, char **argv);
+    //soc main
+    void (*pfnlidbg_soc_main)(int argc, char **argv);
 
-	int (*pfni2c_api_do_recv_SAF7741)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
-	int (*pfni2c_api_do_send_TEF7000)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
-	int (*pfni2c_api_do_recv_TEF7000)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
 
-//servicer
-	void (*pfnlidbg_servicer_main)(int argc, char **argv);
-	void (*pfnk2u_write)(int cmd);
-	int (*pfnk2u_read)(void);
-	int (*pfnu2k_read)(void);
+    //key
+    void (*pfnlidbg_key_report)(unsigned int key_value, unsigned int type);
+    void (*pfnlidbg_key_main)(int argc, char **argv);
 
-//cmn
-	void (*pfnmod_cmn_main)(int argc, char **argv);
-	int (*pfncmn_task_kill_select)(char *task_name);
-	int (*pfncmn_task_kill_exclude)(char *exclude_process,unsigned int num);
+    //i2c
+    int (*pfni2c_api_do_send)(int bus_id, char chip_addr, unsigned int  sub_addr, char *buf, unsigned int size);
+    int (*pfni2c_api_do_recv)(int bus_id, char chip_addr, unsigned int  sub_addr, char *buf, unsigned int size);
+    int (*pfni2c_api_do_recv_no_sub_addr)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
+    int (*pfni2c_api_do_recv_sub_addr_2bytes)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
+    int (*pfni2c_api_do_recv_sub_addr_3bytes)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
+    void (*pfnmod_i2c_main)(int argc, char **argv);
 
-//mem
-	void (*pfnlidbg_mem_main)(int argc, char **argv);
-	void (*pfnwrite_phy_addr)(unsigned int PhyAddr, unsigned int WriteMemValue);
-	void (*pfnwrite_phy_addr_bit)(unsigned int offset, unsigned int num, unsigned int phy_addr, unsigned int value);
-	unsigned int (*pfnread_phy_addr)(unsigned int PhyAddr);
-	unsigned int (*pfnread_phy_addr_bit)(unsigned int offset, unsigned int num, unsigned int phy_addr);
-	unsigned int (*pfnread_virt_addr)(unsigned int phy_addr);
-	void (*pfnwrite_virt_addr)(unsigned int phy_addr, unsigned int value);
-//display
-	void (*pfnlidbg_display_main)(int argc, char **argv);
-	int  (*pfnsoc_get_screen_res)(unsigned int *screen_x, unsigned int *screen_y);
+    int (*pfni2c_api_do_recv_SAF7741)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
+    int (*pfni2c_api_do_send_TEF7000)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
+    int (*pfni2c_api_do_recv_TEF7000)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
 
-//touch
-	void (*pfnlidbg_touch_main)(int argc, char **argv);
-	void (*pfnlidbg_touch_report)(unsigned int pos_x, unsigned int pos_y, unsigned int type);
+    //servicer
+    void (*pfnlidbg_servicer_main)(int argc, char **argv);
+    void (*pfnk2u_write)(int cmd);
+    int (*pfnk2u_read)(void);
+    int (*pfnu2k_read)(void);
+
+    //cmn
+    void (*pfnmod_cmn_main)(int argc, char **argv);
+    int (*pfncmn_task_kill_select)(char *task_name);
+    int (*pfncmn_task_kill_exclude)(char *exclude_process, unsigned int num);
+
+    //mem
+    void (*pfnlidbg_mem_main)(int argc, char **argv);
+    void (*pfnwrite_phy_addr)(unsigned int PhyAddr, unsigned int WriteMemValue);
+    void (*pfnwrite_phy_addr_bit)(unsigned int offset, unsigned int num, unsigned int phy_addr, unsigned int value);
+    unsigned int (*pfnread_phy_addr)(unsigned int PhyAddr);
+    unsigned int (*pfnread_phy_addr_bit)(unsigned int offset, unsigned int num, unsigned int phy_addr);
+    unsigned int (*pfnread_virt_addr)(unsigned int phy_addr);
+    void (*pfnwrite_virt_addr)(unsigned int phy_addr, unsigned int value);
+    //display
+    void (*pfnlidbg_display_main)(int argc, char **argv);
+    int  (*pfnsoc_get_screen_res)(unsigned int *screen_x, unsigned int *screen_y);
+
+    //touch
+    void (*pfnlidbg_touch_main)(int argc, char **argv);
+    void (*pfnlidbg_touch_report)(unsigned int pos_x, unsigned int pos_y, unsigned int type);
 
 };
 
@@ -89,7 +89,7 @@ struct lidbg_share
 };
 
 
-#define LIDBG_SHARE_CHECK_READY  (plidbg_share != NULL)  
+#define LIDBG_SHARE_CHECK_READY  (plidbg_share != NULL)
 
 #define LIDBG_SHARE_DEFINE  struct lidbg_share *plidbg_share = NULL
 
@@ -119,19 +119,19 @@ struct lidbg_share
 
 
 
-	extern struct lidbg_share *plidbg_share;
-	
-	static inline int share_check_pt(void)
-	{
-		while (plidbg_share==NULL)
-		{
-			printk("lidbg:check_pt-plidbg_share==NULL\n");
-			msleep(200);
-		}
-		return 0;
-	}
+extern struct lidbg_share *plidbg_share;
 
-//io	
+static inline int share_check_pt(void)
+{
+    while (plidbg_share == NULL)
+    {
+        printk("lidbg:check_pt-plidbg_share==NULL\n");
+        msleep(200);
+    }
+    return 0;
+}
+
+//io
 #define share_mod_io_main (share_check_pt()?NULL:(plidbg_share->share_func_tbl.pfnmod_io_main))
 #define share_soc_io_output (share_check_pt()?NULL:(plidbg_share->share_func_tbl.pfnsoc_io_output))
 #define share_soc_io_input (share_check_pt()?NULL:(plidbg_share->share_func_tbl.pfnsoc_io_input))

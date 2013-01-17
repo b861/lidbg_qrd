@@ -92,7 +92,7 @@ void mod_io_main(int argc, char **argv)
         //drive_strength = simple_strtoul(argv[3], 0, 0);
 
 
-       share_soc_io_config( index,  GPIO_CFG_INPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA, 1);
+        share_soc_io_config( index,  GPIO_CFG_INPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA, 1);
         status = share_soc_io_input(index);
 
 #endif
@@ -345,11 +345,11 @@ static int __init io_init(void)
     dbg (DEVICE_NAME"io_dev_init\n");
     DUMP_BUILD_TIME;
 
-	
+
 #ifdef _LIGDBG_SHARE__
-		LIDBG_SHARE_GET;
-		share_set_func_tbl();
-		global_lidbg_devp=plidbg_share->lidbg_devp;
+    LIDBG_SHARE_GET;
+    share_set_func_tbl();
+    global_lidbg_devp = plidbg_share->lidbg_devp;
 #endif
     //下面的代码可以自动生成设备节点，但是该节点在/dev目录下，而不在/dev/misc目录下
     //其实misc_register就是用主设备号10调用register_chrdev()的 misc设备其实也就是特殊的字符设备。

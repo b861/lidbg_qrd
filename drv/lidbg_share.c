@@ -11,10 +11,10 @@ void *global_lidbg_devp;
 
 ssize_t  share_read(struct file *filp, char __user *buffer, size_t size, loff_t *offset)
 {
-	int ret;
-	while(plidbg_share == NULL)
-		lidbg("plidbg_share == NULL\n");
-	
+    int ret;
+    while(plidbg_share == NULL)
+        lidbg("plidbg_share == NULL\n");
+
     printk("share_read:read_value=%x,read_count=%d\n", (u32)plidbg_share, 4);
     if (copy_to_user(buffer, (void *)&plidbg_share, 4))
     {
@@ -38,14 +38,14 @@ ssize_t  share_write(struct file *filp, const char __user *buffer, size_t size, 
 
 int share_open(struct inode *inode, struct file *filp)
 {
-	DUMP_FUN;
+    DUMP_FUN;
 
     return 0;
 }
 
 int share_release(struct inode *inode, struct file *filp)
 {
-	DUMP_FUN;
+    DUMP_FUN;
     return 0;
 }
 
@@ -96,7 +96,7 @@ static int __init share_init(void)
     DUMP_BUILD_TIME;
     plidbg_share = kmalloc(sizeof(struct lidbg_share), GFP_KERNEL);
 
-    if (!plidbg_share) 
+    if (!plidbg_share)
     {
 
         lidbg ("kmalloc fail\n");
@@ -112,7 +112,7 @@ static int __init share_init(void)
         }
 
     }
-/////
+    /////
 
     /* 动态申请设备结构体的内存*/
     plidbg_share->lidbg_devp = kmalloc(sizeof(struct lidbg_dev), GFP_KERNEL);
@@ -139,7 +139,7 @@ static int __init share_init(void)
 
 
     memset(&(plidbg_share->lidbg_devp->soc_pvar_tbl), 0, sizeof(struct lidbg_pvar_t));
-	
+
     return ret;
 }
 

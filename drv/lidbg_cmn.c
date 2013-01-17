@@ -13,73 +13,74 @@ LIDBG_SHARE_DEFINE;
 
 
 
-int read_proc(char *buf,char **start,off_t offset,int count,int *eof,void *data )   
-{  
-	int len=0;  
-	struct task_struct *task_list;  
-  
-  
-	for_each_process(task_list) {  
-	  
-	       len  += sprintf(buf+len, "%s %d \n",task_list->comm,task_list->pid);  
-	  }  
-	     
-	return len;  
-}  
-  
-void create_new_proc_entry()   
-{  
-	create_proc_read_entry("ps_list",0,NULL,read_proc,NULL);  
-  
-}  
-  
-  
-
-int cmn_task_kill_exclude(char *exclude_process,u32 num)
+int read_proc(char *buf, char **start, off_t offset, int count, int *eof, void *data )
 {
-	struct task_struct *p;
-	struct mm_struct *mm;
-	struct signal_struct *sig;
-	u32 i;
-	bool safe_flag=0;
-	DUMP_FUN_ENTER;
-	
-	lidbg("exclude_process_num = %d\n",num);
-	
-	//read_lock(&tasklist_lock);
-	for_each_process(p)
-	{
-		task_lock(p);
-		mm = p->mm;
-		sig = p->signal;
-		task_unlock(p);
-		
-		//printk( "process %d (%s)\n",p->pid, p->comm);
-		safe_flag = 0;
+    int len = 0;
+    struct task_struct *task_list;
 
-		for(i=0;i<num;i++)
-		{
-			if(!strcmp(p->comm, exclude_process[i]))
-			{
-				safe_flag = 1;
-				break;
-			}
-				
-		}
 
-		if(safe_flag == 0)
-		{
-			lidbg("find %s to kill\n",p->comm);
-			
-			if (p) 
-			{
-				force_sig(SIGKILL, p);
-			}
-		}
-	//read_unlock(&tasklist_lock);
-	}
-	DUMP_FUN_LEAVE;
-	return 1;
+    for_each_process(task_list)
+    {
+
+        len  += sprintf(buf + len, "%s %d \n", task_list->comm, task_list->pid);
+    }
+
+    return len;
+}
+
+void create_new_proc_entry()
+{
+    create_proc_read_entry("ps_list", 0, NULL, read_proc, NULL);
+
+}
+
+
+
+int cmn_task_kill_exclude(char *exclude_process, u32 num)
+{
+    struct task_struct *p;
+    struct mm_struct *mm;
+    struct signal_struct *sig;
+    u32 i;
+    bool safe_flag = 0;
+    DUMP_FUN_ENTER;
+
+    lidbg("exclude_process_num = %d\n", num);
+
+    //read_lock(&tasklist_lock);
+    for_each_process(p)
+    {
+        task_lock(p);
+        mm = p->mm;
+        sig = p->signal;
+        task_unlock(p);
+
+        //printk( "process %d (%s)\n",p->pid, p->comm);
+        safe_flag = 0;
+
+        for(i = 0; i < num; i++)
+        {
+            if(!strcmp(p->comm, exclude_process[i]))
+            {
+                safe_flag = 1;
+                break;
+            }
+
+        }
+
+        if(safe_flag == 0)
+        {
+            lidbg("find %s to kill\n", p->comm);
+
+            if (p)
+            {
+                force_sig(SIGKILL, p);
+            }
+        }
+        //read_unlock(&tasklist_lock);
+    }
+    DUMP_FUN_LEAVE;
+    return 1;
 
 
 }
@@ -87,37 +88,38 @@ int cmn_task_kill_exclude(char *exclude_process,u32 num)
 
 int cmn_task_kill_select(char *task_name)
 {
-	struct task_struct *p;
-	struct task_struct *selected = NULL;
-	DUMP_FUN_ENTER;
+    struct task_struct *p;
+    struct task_struct *selected = NULL;
+    DUMP_FUN_ENTER;
 
-	//read_lock(&tasklist_lock);
-	for_each_process(p)
-	{
-		struct mm_struct *mm;
-		struct signal_struct *sig;
+    //read_lock(&tasklist_lock);
+    for_each_process(p)
+    {
+        struct mm_struct *mm;
+        struct signal_struct *sig;
 
-		task_lock(p);
-		mm = p->mm;
-		sig = p->signal;
-		task_unlock(p);
-		
-		selected = p;
-		//printk( "process %d (%s)\n",p->pid, p->comm);
+        task_lock(p);
+        mm = p->mm;
+        sig = p->signal;
+        task_unlock(p);
 
-			if(!strcmp(p->comm, task_name))
-			{
-				lidbg("find %s to kill\n",task_name);
-				
-				if (selected) {
-					force_sig(SIGKILL, selected);
-					return 1;
-				}
-			}
-	//read_unlock(&tasklist_lock);
-	}
-	DUMP_FUN_LEAVE;
-	return 0;
+        selected = p;
+        //printk( "process %d (%s)\n",p->pid, p->comm);
+
+        if(!strcmp(p->comm, task_name))
+        {
+            lidbg("find %s to kill\n", task_name);
+
+            if (selected)
+            {
+                force_sig(SIGKILL, selected);
+                return 1;
+            }
+        }
+        //read_unlock(&tasklist_lock);
+    }
+    DUMP_FUN_LEAVE;
+    return 0;
 }
 
 u32 GetNsCount(void)
@@ -195,17 +197,17 @@ static void share_set_func_tbl(void)
     ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnmod_cmn_main = mod_cmn_main;
     ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfncmn_task_kill_select = cmn_task_kill_select;
     ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfncmn_task_kill_exclude = cmn_task_kill_exclude;
-	
+
     ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnlidbg_mem_main = lidbg_mem_main;
     ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnwrite_phy_addr = write_phy_addr;
-	((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnwrite_phy_addr_bit = write_phy_addr_bit;
-	((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnread_phy_addr = read_phy_addr;
-	((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnread_phy_addr_bit = read_phy_addr_bit;
-	((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnread_virt_addr = read_virt_addr;
-	((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnwrite_virt_addr = write_virt_addr;
-	
-	((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnlidbg_display_main = lidbg_display_main;
-	((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnsoc_get_screen_res= soc_get_screen_res;
+    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnwrite_phy_addr_bit = write_phy_addr_bit;
+    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnread_phy_addr = read_phy_addr;
+    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnread_phy_addr_bit = read_phy_addr_bit;
+    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnread_virt_addr = read_virt_addr;
+    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnwrite_virt_addr = write_virt_addr;
+
+    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnlidbg_display_main = lidbg_display_main;
+    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnsoc_get_screen_res = soc_get_screen_res;
 
 
 }
@@ -224,8 +226,8 @@ static int __init cmn_init(void)
     //其实misc_register就是用主设备号10调用register_chrdev()的 misc设备其实也就是特殊的字符设备。
     //注册驱动程序时采用misc_register函数注册，此函数中会自动创建设备节点，即设备文件。无需mknod指令创建设备文件。因为misc_register()会调用class_device_create()或者device_create()。
 #ifdef _LIGDBG_SHARE__
-		LIDBG_SHARE_GET;
-		share_set_func_tbl();
+    LIDBG_SHARE_GET;
+    share_set_func_tbl();
 #endif
 
     ret = misc_register(&misc);
@@ -241,7 +243,7 @@ static int __init cmn_init(void)
 
     }
 #endif
-    create_new_proc_entry();  
+    create_new_proc_entry();
 
 
     return ret;
@@ -250,8 +252,8 @@ static int __init cmn_init(void)
 static void __exit cmn_exit(void)
 {
     misc_deregister(&misc);
-	
-    remove_proc_entry("proc_entry",NULL);  
+
+    remove_proc_entry("proc_entry", NULL);
     dbg (DEVICE_NAME"cmn  dev_exit\n");
 }
 

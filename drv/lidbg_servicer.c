@@ -313,8 +313,8 @@ static int __init servicer_init(void)
     DUMP_BUILD_TIME;
 
 #ifdef _LIGDBG_SHARE__
-			LIDBG_SHARE_GET;
-			share_set_func_tbl();
+    LIDBG_SHARE_GET;
+    share_set_func_tbl();
 #endif
 
     ret = misc_register(&misc);

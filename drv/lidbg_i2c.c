@@ -717,12 +717,12 @@ static void share_set_func_tbl(void)
     ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfni2c_api_do_recv = i2c_api_do_recv;
     ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfni2c_api_do_recv_no_sub_addr = i2c_api_do_recv_no_sub_addr;
     ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfni2c_api_do_recv_sub_addr_2bytes = i2c_api_do_recv_sub_addr_2bytes;
-	((struct lidbg_share *)plidbg_share)->share_func_tbl.pfni2c_api_do_recv_sub_addr_3bytes = i2c_api_do_recv_sub_addr_3bytes;
-	((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnmod_i2c_main = mod_i2c_main;
-	
-	((struct lidbg_share *)plidbg_share)->share_func_tbl.pfni2c_api_do_recv_SAF7741 = i2c_api_do_recv_SAF7741;
-	((struct lidbg_share *)plidbg_share)->share_func_tbl.pfni2c_api_do_send_TEF7000 = i2c_api_do_send_TEF7000;
-	((struct lidbg_share *)plidbg_share)->share_func_tbl.pfni2c_api_do_recv_TEF7000 = i2c_api_do_recv_TEF7000;
+    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfni2c_api_do_recv_sub_addr_3bytes = i2c_api_do_recv_sub_addr_3bytes;
+    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnmod_i2c_main = mod_i2c_main;
+
+    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfni2c_api_do_recv_SAF7741 = i2c_api_do_recv_SAF7741;
+    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfni2c_api_do_send_TEF7000 = i2c_api_do_send_TEF7000;
+    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfni2c_api_do_recv_TEF7000 = i2c_api_do_recv_TEF7000;
 
 }
 
@@ -732,13 +732,13 @@ static int __init i2c_api_init(void)
 
     //遍历adapter
     int ret;
-	
+
 #ifdef _LIGDBG_SHARE__
-		LIDBG_SHARE_GET;
-		share_set_func_tbl();
+    LIDBG_SHARE_GET;
+    share_set_func_tbl();
 #endif
 
-	ret=i2c_add_driver(&i2c_api_driver);//将driver注册到了i2c_bus_type的总线上 利用i2c_client的名称和id_table中的名称做匹配的
+    ret = i2c_add_driver(&i2c_api_driver); //将driver注册到了i2c_bus_type的总线上 利用i2c_client的名称和id_table中的名称做匹配的
     if (ret)
     {
         lidbg(KERN_ERR "[%s] Driver registration failed, module not inserted.\n", __func__);

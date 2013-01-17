@@ -439,12 +439,12 @@ int lidbg_init(void)
     DUMP_BUILD_TIME;
 
 #ifdef _LIGDBG_SHARE__
-		LIDBG_SHARE_GET;
-		
-		global_lidbg_devp=plidbg_share->lidbg_devp;
+    LIDBG_SHARE_GET;
+
+    global_lidbg_devp = plidbg_share->lidbg_devp;
 #endif
 
-	
+
     /* …Í«Î…Ë±∏∫≈*/
     if (lidbg_major)
         result = register_chrdev_region(devno, 1, "lidbg");

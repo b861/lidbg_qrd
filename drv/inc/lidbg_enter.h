@@ -98,12 +98,12 @@ typedef enum
 {
     BRIGHTNESS = 1,//ok
     CONTRAST,//ok
-    SHARPNESS,  
+    SHARPNESS,
     CHROMA_U,//ok
     CHROMA_V,
     HUE,//ok
     //Positive value results in red hue and negative value gives green hue.
-    	   //These bits control the color hue. It is in 2\u201fs complement form with 0 being the center 00 value. 
+    //These bits control the color hue. It is in 2\u201fs complement form with 0 being the center 00 value.
 } Vedio_Effect;
 typedef enum
 {
@@ -111,9 +111,9 @@ typedef enum
     PM_STATUS_SUSPEND_PENDING,
     PM_STATUS_RESUME_OK,
     PM_STATUS_LATE_RESUME_OK,
-	PM_STATUS_READY_TO_PWROFF,
+    PM_STATUS_READY_TO_PWROFF,
 
-	
+
 } LIDBG_FAST_PWROFF_STATUS;
 
 
@@ -124,40 +124,40 @@ typedef enum
 struct lidbg_fn_t
 {
     //io
-/*
- GPIO TLMM: Pullup/Pulldown
-enum {
-	GPIO_CFG_NO_PULL,
-	GPIO_CFG_PULL_DOWN,
-	GPIO_CFG_KEEPER,
-	GPIO_CFG_PULL_UP,
-};
+    /*
+     GPIO TLMM: Pullup/Pulldown
+    enum {
+    	GPIO_CFG_NO_PULL,
+    	GPIO_CFG_PULL_DOWN,
+    	GPIO_CFG_KEEPER,
+    	GPIO_CFG_PULL_UP,
+    };
 
-GPIO TLMM: Drive Strength
-enum {
-	GPIO_CFG_2MA,
-	GPIO_CFG_4MA,
-	GPIO_CFG_6MA,
-	GPIO_CFG_8MA,
-	GPIO_CFG_10MA,
-	GPIO_CFG_12MA,
-	GPIO_CFG_14MA,
-	GPIO_CFG_16MA,
-};
+    GPIO TLMM: Drive Strength
+    enum {
+    	GPIO_CFG_2MA,
+    	GPIO_CFG_4MA,
+    	GPIO_CFG_6MA,
+    	GPIO_CFG_8MA,
+    	GPIO_CFG_10MA,
+    	GPIO_CFG_12MA,
+    	GPIO_CFG_14MA,
+    	GPIO_CFG_16MA,
+    };
 
-*/
+    */
     void (*pfnSOC_IO_Output) (unsigned int group, unsigned int index, bool status);
     bool (*pfnSOC_IO_Input) (unsigned int group, unsigned int index, unsigned int pull);
     void (*pfnSOC_IO_Output_Ext)(unsigned int group, unsigned int index, bool status, unsigned int pull, unsigned int drive_strength);
     bool (*pfnSOC_IO_Config)(unsigned int index, bool direction, unsigned int pull, unsigned int drive_strength);
 
     //i2c
-/*
-7bit i2c sub_addr
-bus_id : 0/1
-return how many bytes read/write
-when err , <0
-*/
+    /*
+    7bit i2c sub_addr
+    bus_id : 0/1
+    return how many bytes read/write
+    when err , <0
+    */
     int (*pfnSOC_I2C_Send) (int bus_id, char chip_addr, char *buf, unsigned int size);
     int (*pfnSOC_I2C_Rec)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
     int (*pfnSOC_I2C_Rec_Simple)(int bus_id, char chip_addr, char *buf, unsigned int size);
@@ -170,29 +170,29 @@ when err , <0
     //io-irq
     //interrupt_type
 
-/*
+    /*
 
-#define IRQF_TRIGGER_RISING	0x00000001
-#define IRQF_TRIGGER_FALLING	0x00000002
-#define IRQF_TRIGGER_HIGH	0x00000004
-#define IRQF_TRIGGER_LOW	0x00000008
+    #define IRQF_TRIGGER_RISING	0x00000001
+    #define IRQF_TRIGGER_FALLING	0x00000002
+    #define IRQF_TRIGGER_HIGH	0x00000004
+    #define IRQF_TRIGGER_LOW	0x00000008
 
-*/
+    */
     bool (*pfnSOC_IO_ISR_Add)(unsigned int irq, unsigned int interrupt_type, pinterrupt_isr func, void *dev);
     bool (*pfnSOC_IO_ISR_Enable)(unsigned int irq);
     bool (*pfnSOC_IO_ISR_Disable)(unsigned int irq);
     bool (*pfnSOC_IO_ISR_Del )(unsigned int irq);
 
     //ad
-/*
- return 0 when err
-// 0-AIN2
-// 1-AIN3
-// 2-AIN4
-// 3-REM1
-// 4-REM2
-//#define ADC_MAX_CH (8)
-*/
+    /*
+     return 0 when err
+    // 0-AIN2
+    // 1-AIN3
+    // 2-AIN4
+    // 3-REM1
+    // 4-REM2
+    //#define ADC_MAX_CH (8)
+    */
     bool (*pfnSOC_ADC_Get)(unsigned int channel , unsigned int *value);
 
 
@@ -209,7 +209,7 @@ when err , <0
 
     //
     void (*pfnSOC_Write_Servicer)(int cmd );
-	
+
     //video
     void (*pfnlidbg_video_main)(int argc, char **argv);
     void (*pfnvideo_io_i2c_init)(void);
@@ -218,11 +218,11 @@ when err , <0
     int (*pfnflyVideoImageQualityConfig)(Vedio_Effect cmd , unsigned char  valu);
     void (*pfnvideo_init_config)(Vedio_Format config_pramat);
 
-	//display/touch
-	int (*pfnSOC_Display_Get_Res)(unsigned int *screen_x, unsigned int *screen_y);
+    //display/touch
+    int (*pfnSOC_Display_Get_Res)(unsigned int *screen_x, unsigned int *screen_y);
 
-	//lpc
-	void (*pfnSOC_LPC_Send)(unsigned char *p, unsigned int len);
+    //lpc
+    void (*pfnSOC_LPC_Send)(unsigned char *p, unsigned int len);
 
     //video
     Vedio_Format (*pfncamera_open_video_signal_test)(void);
@@ -231,14 +231,14 @@ when err , <0
     Vedio_Channel pfnglobal_video_channel_flag;
 
 
-	//dev
-	 void (*pfnSOC_Dev_Suspend_Prepare)(void);
+    //dev
+    void (*pfnSOC_Dev_Suspend_Prepare)(void);
 
-	//wakelock
-	bool (*pfnSOC_PWR_Ignore_Wakelock)(void);
+    //wakelock
+    bool (*pfnSOC_PWR_Ignore_Wakelock)(void);
 
-	//mic
-	void (*pfnSOC_Mic_Enable)(bool enable);
+    //mic
+    void (*pfnSOC_Mic_Enable)(bool enable);
 
 
 
@@ -247,8 +247,8 @@ when err , <0
 
 struct lidbg_pvar_t
 {
-	//all pointer
-	rwlock_t *pvar_tasklist_lock;
+    //all pointer
+    rwlock_t *pvar_tasklist_lock;
 
 
 };
@@ -268,7 +268,7 @@ struct lidbg_dev
 };
 
 
-#define LIDBG_DEV_CHECK_READY  (plidbg_dev != NULL)  
+#define LIDBG_DEV_CHECK_READY  (plidbg_dev != NULL)
 
 #define LIDBG_DEFINE  struct lidbg_dev *plidbg_dev = NULL
 
