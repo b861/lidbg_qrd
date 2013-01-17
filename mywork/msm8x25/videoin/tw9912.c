@@ -649,37 +649,37 @@ int Tw9912_init(Vedio_Format config_pramat,Vedio_Channel Channel)
 	}
 	else if(config_pramat != STOP_VIDEO)
 	{
+		switch(Channel)
+			{
+			case 0: 	//	 YIN0
+			case SEPARATION: 	//	 YIN0
+				if(write_tw9912(Tw9912_input_pin_selet)==NACK) goto CONFIG_not_ack_fail;
+				break;
+			case 1: //	 YIN1
+				Tw9912_input_pin_selet[1]=0x44;//register valu selete YIN1
+				if(write_tw9912(Tw9912_input_pin_selet)==NACK) goto CONFIG_not_ack_fail;
+				break;
+			case 2: //	 YIN2
+				Tw9912_input_pin_selet[1]=0x48;
+				if(write_tw9912(Tw9912_input_pin_selet)==NACK) goto CONFIG_not_ack_fail;
 
+				break;
+			case 3: //	 YIN3
+				Tw9912_input_pin_selet[1]=0x4c;
+				if(write_tw9912(Tw9912_input_pin_selet)==NACK) goto CONFIG_not_ack_fail;
+	
+				Tw9912_input_pin_selet[0]=0xe8;//only selet YIN3 neet set
+				Tw9912_input_pin_selet[1]=0x3f;//disable YOUT buffer
+				if(write_tw9912(Tw9912_input_pin_selet)==NACK) goto CONFIG_not_ack_fail;
+				break;
+			default : 
+				tw9912_dbg("%s:you input Channel = %d error!\n",__FUNCTION__,Channel);
+				break;
+			}
+				
 		while(1)
 			{
 
-				switch(Channel)
-					{
-						case 0: 	//	 YIN0
-						case SEPARATION: 	//	 YIN0
-							if(write_tw9912(Tw9912_input_pin_selet)==NACK) goto CONFIG_not_ack_fail;
-							break;
-						case 1: //	 YIN1
-							Tw9912_input_pin_selet[1]=0x44;//register valu selete YIN1
-							if(write_tw9912(Tw9912_input_pin_selet)==NACK) goto CONFIG_not_ack_fail;
-							break;
-						case 2: //	 YIN2
-							Tw9912_input_pin_selet[1]=0x48;
-							if(write_tw9912(Tw9912_input_pin_selet)==NACK) goto CONFIG_not_ack_fail;
-
-							break;
-						case 3: //	 YIN3
-							Tw9912_input_pin_selet[1]=0x4c;
-							if(write_tw9912(Tw9912_input_pin_selet)==NACK) goto CONFIG_not_ack_fail;
-				
-							Tw9912_input_pin_selet[0]=0xe8;//only selet YIN3 neet set
-							Tw9912_input_pin_selet[1]=0x3f;//disable YOUT buffer
-							if(write_tw9912(Tw9912_input_pin_selet)==NACK) goto CONFIG_not_ack_fail;
-							break;
-						default : 
-							tw9912_dbg("%s:you input Channel = %d error!\n",__FUNCTION__,Channel);
-							break;
-					}
 				
 				ret = read_tw9912_chips_status(0);//return register valu
 				msleep(10);
@@ -696,7 +696,7 @@ int Tw9912_init(Vedio_Format config_pramat,Vedio_Channel Channel)
 				{
 				printk("tw9912: input  signal stabitily! %d ,%d\n",read_tw9912_chips_status_flag,read_tw9912_chips_status_flag_1);
 				}
-				if(read_tw9912_chips_status_flag>50 ||read_tw9912_chips_status_flag_1>160)  
+				if(read_tw9912_chips_status_flag>30 ||read_tw9912_chips_status_flag_1>160)  
 				{
 					if (read_tw9912_chips_status_flag_1>=160) 
 						tw9912_signal_unstabitily_for_Tw9912_init_flag = 1;//find colobar flag signal bad
