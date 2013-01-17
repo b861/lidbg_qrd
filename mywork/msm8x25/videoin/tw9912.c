@@ -696,7 +696,7 @@ int Tw9912_init(Vedio_Format config_pramat,Vedio_Channel Channel)
 				{
 				printk("tw9912: input  signal stabitily! %d ,%d\n",read_tw9912_chips_status_flag,read_tw9912_chips_status_flag_1);
 				}
-				if(read_tw9912_chips_status_flag>30 ||read_tw9912_chips_status_flag_1>160)  
+				if(read_tw9912_chips_status_flag>20 ||read_tw9912_chips_status_flag_1>160)  
 				{
 					if (read_tw9912_chips_status_flag_1>=160) 
 						tw9912_signal_unstabitily_for_Tw9912_init_flag = 1;//find colobar flag signal bad
