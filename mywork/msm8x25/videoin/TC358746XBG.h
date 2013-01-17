@@ -2,6 +2,18 @@
 #define __SOC_TC358746XBG__
 #include "tw9912.h"
 #include "i2c_io.h"
+
+
+#define TC358746XBG_BLACK 0
+#define TC358746XBG_BLUE 1
+#define TC358746XBG_RED 2
+#define TC358746XBG_PINK 3
+#define TC358746XBG_GREEN 4
+#define TC358746XBG_LIGHT_BLUE 5
+#define TC358746XBG_YELLOW 6
+#define TC358746XBG_WHITE 7
+
+
 #define DEBUG_TC358
 #define TC358746XBG_RESET 28
 #define register_value_width_32 32

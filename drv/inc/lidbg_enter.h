@@ -239,8 +239,8 @@ when err , <0
 
 	//mic
 	void (*pfnSOC_Mic_Enable)(bool enable);
-
-
+	//video
+	int (*pfnread_tw9912_chips_signal_status)(void);
 };
 
 #define LIDBG_SIZE	0x00001000 //MEM_SIZE_4_KB	/*全局内存最大1K字节*/

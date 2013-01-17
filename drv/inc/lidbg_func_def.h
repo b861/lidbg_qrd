@@ -78,6 +78,6 @@ static inline int check_pt(void)
 #define SOC_Mic_Enable   (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_Mic_Enable))
 
 
-
+#define read_tw9912_chips_signal_status (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnread_tw9912_chips_signal_status))
 #endif
 

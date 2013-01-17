@@ -22,16 +22,20 @@ static void video_config_init(Vedio_Format config_pramat,u8 Channal)
 static int thread_vedio_signal_test(void *data)  
 {int i=0;
   long int timeout;
+  	 printk("tw9912:thread_vedio_signal_test()\n");
 	while(!kthread_should_stop())
 	{
-	        timeout=100;
-		while(timeout > 0) 
-		{ //delay
-			timeout = schedule_timeout(timeout); 
-		} 
-		printk("tw9912:test Yin3 back format :%d\n", flyVideoTestSignalPin_in(YIN2));
-		printk("tw9912:global_video_format_flag :%d",	global_video_format_flag);
-		printk("  %d\n",i++);
+	     //   timeout=10;
+	//	while(timeout > 0) 
+	//	{ //delay
+	//		timeout = schedule_timeout(timeout); 
+	//	} 
+	i=read_chips_signal_status();
+		// printk("tw9912: read_chips_signal_status() back0x%.2x   i &0x10= 0x%.2x\n",i,i &0x10);
+		 if( (i &0x10) == 0x10 )
+			printk("tw9912: read_chips_signal_status() back 0x%.2x\n",i);
+		msleep(10);
+	//	printk("time %d\n",i++);
 	}
 return 0;
 }
@@ -231,7 +235,8 @@ static void set_func_tbl(void)
 	plidbg_dev->soc_func_tbl.pfnvideo_init_config = video_init_config_in;
 	plidbg_dev->soc_func_tbl.pfncamera_open_video_signal_test = camera_open_video_signal_test_in;
 	plidbg_dev->soc_func_tbl.pfncamera_open_video_color = Video_Show_Output_Color;
-	global_video_format_flag = PAL_I;
+	plidbg_dev->soc_func_tbl.pfnread_tw9912_chips_signal_status = read_chips_signal_status;
+	global_video_format_flag = NTSC_I;
 	global_video_channel_flag = YIN2;//DVD
 
 }

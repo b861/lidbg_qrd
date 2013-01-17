@@ -6,16 +6,16 @@
 #define Progressive_Output_Format 0x12
 #define Interlaced_Output_Format 0x02 
 #define TW9912_RESET 43
-#define Progressive_Output_CLKx2 0x49  
-#define Interlaced_Output_CLKx1  0x05
+
+extern u8 tw9912_signal_unstabitily_for_Tw9912_init_flag;
 #if 0
 #define tw9912_dbg(msg...)  do { printk( KERN_CRIT "TW9912: " msg); }while(0)
 #else
 #define tw9912_dbg(msg...)  do {}while(0)
 #endif   
 #if 1
-#define tw9912_RESX_UP do{i2c_io_config(TW9912_RESET,GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA,0);gpio_set_value(TW9912_RESET, 1);}while(0)//34
-#define tw9912_RESX_DOWN do{i2c_io_config(TW9912_RESET,GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA,0);gpio_set_value(TW9912_RESET, 0);}while(0)//9912 reset output, active low 
+#define tw9912_RESX_UP do{i2c_io_config(TW9912_RESET,GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA,0);gpio_set_value(TW9912_RESET, 1);msleep(10);}while(0)//34
+#define tw9912_RESX_DOWN do{i2c_io_config(TW9912_RESET,GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA,0);gpio_set_value(TW9912_RESET, 0);msleep(10);}while(0)//9912 reset output, active low 
 #else
 #define tw9912_RESX_UP do{}while(0)
 #define tw9912_RESX_DOWN do{}while(0)
@@ -95,4 +95,5 @@ int Tw9912_appoint_pin_testing_video_signal(Vedio_Channel Channel);
 Vedio_Format testing_video_signal(Vedio_Channel Channel);
 int Tw9912_init_NTSCp(void);
 i2c_ack write_tw9912(char *buf );
+int read_tw9912_chips_status(u8 cmd);
 #endif

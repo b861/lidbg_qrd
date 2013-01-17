@@ -169,6 +169,8 @@ u8 valu[4];
 	}
 	
 }
+
+
 void colorbar_init(void)
 {
   u16 add_reg_1;
@@ -192,14 +194,30 @@ void colorbar_init(void)
 
 
 }
+void colorbar_init_blue(u8 color_flag)
+{
+u16 add_reg_1;
+  u32 add_val_1;
+  u16 i,j;
+		TC358_Register_config(lingceng_init_tab);printk("\n\nTC358746:parameter is lingceng_init_tab!\n");
 
+			i=color_flag;
+			for(j=360;j>0;j--)
+			{
+				TC358_Register_Write(&(colorbar_init_tab[2*i].add_reg),&(colorbar_init_tab[2*i].add_val),colorbar_init_tab[2*i].registet_width);
+				TC358_Register_Write(&(colorbar_init_tab[2*i+1].add_reg),&(colorbar_init_tab[2*i+1].add_val),colorbar_init_tab[2*i+1].registet_width);
+			}
+		add_reg_1=0x00e0;//Ê¹ÄÜcolobar
+		add_val_1=0xc1df;
+		TC358_Register_Write(&add_reg_1,&add_val_1,register_value_width_16);
+}
 void TC358_init(Vedio_Format flag)
 {
 	printk("Now inital TC358\n");
 	tc358746_dbg("flag= %d\n",flag);
 	Power_contorl();
 	TC358_id();
-    if(flag <= COLORBAR){
+    if(flag <= COLORBAR+8){
 					switch (flag)
 					{   
 						case NTSC_I: 
@@ -216,6 +234,12 @@ void TC358_init(Vedio_Format flag)
 						printk("\n\nTC358746:parameter is is Stop_tab!\n\n");
 							break;
 						case COLORBAR: colorbar_init();
+						printk("\n\nTC358746:parameter is is COLORBAR!\n\n");
+							break;
+						case COLORBAR+1: colorbar_init_blue(TC358746XBG_BLUE);
+						printk("\n\nTC358746:parameter is is COLORBAR!\n\n");
+							break;
+						case COLORBAR+2: colorbar_init_blue(TC358746XBG_RED);
 						printk("\n\nTC358746:parameter is is COLORBAR!\n\n");
 							break;
 						default : colorbar_init();
