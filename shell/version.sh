@@ -6,9 +6,9 @@
 
 
 
-DBG_DBG=YES
+DBG_RELEASE=YES
 
-export DBG_DBG
+export DBG_RELEASE
 
 
 

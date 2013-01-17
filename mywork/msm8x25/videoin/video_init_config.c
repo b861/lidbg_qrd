@@ -278,6 +278,7 @@ mutex_lock(&lock_chipe_config);
 	TC358_init(COLORBAR);
 	  //TC358_init(STOP_VIDEO);
 	}
+//Correction_Parameter_fun(signal_is_how[info_Vedio_Channel].Format);
 //spin_unlock(&spin_chipe_config_lock);
 up(&sem);
 mutex_unlock(&lock_chipe_config);

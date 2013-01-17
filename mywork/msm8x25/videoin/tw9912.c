@@ -3,11 +3,12 @@
 #include "tw9912.h"
 #include "tw9912_config.h"
 #include "lidbg_enter.h"
-
+static struct task_struct * tw9912_Correction_Parameter_fun = NULL; 
 u8 tw9912_signal_unstabitily_for_Tw9912_init_flag=0;
 static int read_tw9912_chips_status_flag =0 , read_tw9912_chips_status_flag_1 = 0;
 #define TW9912_I2C_ChipAdd 0x44 //SIAD = 0-->0x44  SIAD =1-->0x45
 TW9912_input_info tw9912_input_information;
+ tw9912_run_flag tw912_run_sotp_flag;
 TW9912_Signal signal_is_how[5]={//用于记录四个通道的信息
 							{NOTONE,OTHER,source_other},//YIN0
 							{NOTONE,OTHER,source_other},//YIN1
@@ -36,16 +37,50 @@ u8 Tw9912_Parameter[]={0,0,};
 
 	if( format == PAL_I )
 	{//msleep(100);
-		Tw9912_Parameter[0]=0x0a;
-		Tw9912_Parameter[1]=0x1b;
+		Tw9912_Parameter[0]=0xff;
+		Tw9912_Parameter[1]=0x00;
 		ret = write_tw9912(Tw9912_Parameter);
+		
+		Tw9912_Parameter[0]=0x07;
+		Tw9912_Parameter[1]=0x12;
+		ret = write_tw9912(Tw9912_Parameter);
+		
+		Tw9912_Parameter[0]=0x0a;
+		Tw9912_Parameter[1]=0x1a;
+		ret = write_tw9912(Tw9912_Parameter);
+		
+		Tw9912_Parameter[0]=0x07;
+		Tw9912_Parameter[1]=0x12;
+		ret = write_tw9912(Tw9912_Parameter);
+		
 		Tw9912_Parameter[0]=0x09;
 		Tw9912_Parameter[1]=0x27;
 		ret = write_tw9912(Tw9912_Parameter);
 	}
 return ret;
 }
-						
+static int thread_tw9912_Correction_Parameter_fun(void *data)  
+{int i=0;
+  long int timeout;
+  	 printk("tw9912:thread_tw9912_Correction_Parameter_fun()\n");
+	while(!kthread_should_stop())
+	{
+	        timeout=10;
+		while(timeout > 0) 
+		{ //delay
+			timeout = schedule_timeout(timeout); 
+		} 
+		if (tw912_run_sotp_flag.run == 1)
+			{
+				 printk("tw9912 is run again and format is PALi\n");
+				Correction_Parameter_fun(tw912_run_sotp_flag.format);
+				tw912_run_sotp_flag.run = 0;
+				   kthread_stop(tw9912_Correction_Parameter_fun);  
+			}
+
+	}
+return 0;
+}						
 void tw9912_get_input_info(TW9912_input_info *input_information)
 {
 	
@@ -712,7 +747,10 @@ int Tw9912_init(Vedio_Format config_pramat,Vedio_Channel Channel)
 		
 		
 		if(ret==5)//the channel is not signal input
-			goto NOT_signal_input;
+			{
+				tw9912_signal_unstabitily_for_Tw9912_init_flag = 0;//find colobar flag signal bad
+				goto NOT_signal_input;
+			}
 		if(ret==-1)
 			goto CONFIG_not_ack_fail;
 
@@ -878,6 +916,24 @@ goto CONFIG_is_old;
 			}
 		
 	}
+
+	if(signal_is_how[Channel].Format ==PAL_I)
+		{u8 Tw9912_Parameter[]={0,0,};
+	
+		Tw9912_Parameter[0]=0x0a;
+		Tw9912_Parameter[1]=0x1b;
+		ret = write_tw9912(Tw9912_Parameter);
+
+		Tw9912_Parameter[0]=0x09;
+		Tw9912_Parameter[1]=0x27;
+		ret = write_tw9912(Tw9912_Parameter);
+
+	
+		tw912_run_sotp_flag.format = PAL_I;
+		tw912_run_sotp_flag.run = 1;
+		 printk("tw9912 is run again and format is PALi flag&&&\n");
+		  tw9912_Correction_Parameter_fun = kthread_run(thread_tw9912_Correction_Parameter_fun,NULL,"flyvideo_Parameter");  
+		}
 #ifdef DEBUG_PLOG_TW9912
 	i=0;
 	while(config_pramat_piont[i*2] != 0xfe)
@@ -889,7 +945,7 @@ goto CONFIG_is_old;
 	}
 #endif
 	printk("tw9912: init-\n");
-Correction_Parameter_fun(signal_is_how[Channel].Format);
+//Correction_Parameter_fun(signal_is_how[Channel].Format);
 //CONFIG_is_old:
     return 1;
 CONFIG_not_ack_fail:
