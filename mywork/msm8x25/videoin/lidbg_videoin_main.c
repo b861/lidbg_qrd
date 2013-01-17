@@ -3,6 +3,8 @@
 #include "lidbg_enter.h"
 #include "video_init_config.h"
 static struct task_struct * Vedio_Signal_Test = NULL; 
+
+//extern tw9912_run_flag tw912_run_sotp_flag;
 LIDBG_DEFINE;
 static void video_config_init(Vedio_Format config_pramat,u8 Channal)
 {
@@ -249,12 +251,15 @@ int lidbg_video_init(void)
 	set_func_tbl();
 	video_io_i2c_init();
 	flyVideoChannelInitall(YIN2); // DVD
+	
 	    return 0;
 
 }
 
 int lidbg_video_deinit(void)
 {
+	printk("lidbg_video_deinit module exit.....\n");
+    
 	return 0;
 
 }

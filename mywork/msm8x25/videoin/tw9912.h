@@ -83,6 +83,11 @@ typedef struct
 }TW9912_initall_status;
 typedef struct 
 {
+ u8 run;
+ Vedio_Format format;
+}tw9912_run_flag;
+typedef struct 
+{
 	Vedio_Channel Channel;
 	Vedio_Format format;	
 }Last_config_t;
@@ -96,4 +101,5 @@ Vedio_Format testing_video_signal(Vedio_Channel Channel);
 int Tw9912_init_NTSCp(void);
 i2c_ack write_tw9912(char *buf );
 int read_tw9912_chips_status(u8 cmd);
+i2c_ack Correction_Parameter_fun(Vedio_Format format);
 #endif
