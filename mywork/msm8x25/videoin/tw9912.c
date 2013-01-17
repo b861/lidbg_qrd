@@ -3,6 +3,9 @@
 #include "tw9912.h"
 #include "tw9912_config.h"
 #include "lidbg_enter.h"
+
+u8 tw9912_signal_unstabitily_for_Tw9912_init_flag=0;
+static int read_tw9912_chips_status_flag =0 , read_tw9912_chips_status_flag_1 = 0;
 #define TW9912_I2C_ChipAdd 0x44 //SIAD = 0-->0x44  SIAD =1-->0x45
 TW9912_input_info tw9912_input_information;
 TW9912_Signal signal_is_how[5]={//用于记录四个通道的信息
@@ -289,7 +292,57 @@ TW9912_input_info tw9912_input_information_1;
 		
 return signal_is_how_1.Format;
 }
+int read_tw9912_chips_status(u8 cmd)
+{
+static TW9912_input_info tw9912_input_information_status;
+static TW9912_input_info tw9912_input_information_status_next;
+tw9912_get_input_info(&tw9912_input_information_status_next);
+if(cmd)
+{
+/*
+	if(tw9912_input_information_status_next.input_detection.valu != tw9912_input_information_status.input_detection.valu)
+	{
 
+		 printk("worning:input_detection(0xc1) have change --old = %d,new =%d\n", \
+		 	tw9912_input_information_status.input_detection.valu,\
+		 	tw9912_input_information_status_next.input_detection.valu);
+		 
+		  tw9912_input_information_status.input_detection.valu = \
+		  	tw9912_input_information_status_next.input_detection.valu;
+		  return 1;
+	}
+	
+	if(tw9912_input_information_status_next.component_video_format.valu != tw9912_input_information_status.component_video_format.valu)
+	{
+	 
+		 printk("worning:component_video_format(0x1e) have change --old = %d,new =%d\n", \
+		 	tw9912_input_information_status.component_video_format.valu,\
+		 	tw9912_input_information_status_next.component_video_format.valu);
+
+		 tw9912_input_information_status.component_video_format.valu = \
+		 	tw9912_input_information_status_next.component_video_format.valu;
+		   return 1;
+	}
+*/	
+	if(tw9912_input_information_status_next.macrovision_detection.valu != tw9912_input_information_status.macrovision_detection.valu)
+	{
+	 
+		 printk("worning:macrovision_detection(0x30) have change --old = %d,new =%d\n", 
+		 	tw9912_input_information_status.macrovision_detection.valu,
+		 	tw9912_input_information_status_next.macrovision_detection.valu);
+	
+		 tw9912_input_information_status.macrovision_detection.valu = 
+		 	tw9912_input_information_status_next.macrovision_detection.valu;
+		//   return tw9912_input_information_status_next.macrovision_detection.valu;
+		 return 1;
+	}
+	return 0;
+}
+else
+{
+return tw9912_input_information_status_next.macrovision_detection.valu;
+}
+}
 Vedio_Format testing_video_signal(Vedio_Channel Channel)
 {
 Vedio_Format ret =OTHER;
@@ -597,6 +650,9 @@ int Tw9912_init(Vedio_Format config_pramat,Vedio_Channel Channel)
 	else if(config_pramat != STOP_VIDEO)
 	{printk("tw9912:Tw9912_init()-->Tw9912_appoint_pin_testing_video_signal(%d)\n",Channel);
 		ret = Tw9912_appoint_pin_testing_video_signal(Channel);//bad
+		
+		
+		
 		if(ret==5)//the channel is not signal input
 			goto NOT_signal_input;
 		if(ret==-1)
@@ -764,7 +820,32 @@ goto CONFIG_is_old;
 			}
 		
 	}
-
+	while(1)
+	{
+		ret = read_tw9912_chips_status(0);//return register valu
+		msleep(10);
+		read_tw9912_chips_status_flag++;
+	
+	//printk("tw9912:read_tw9912_chips_status back %.2x\n",ret);
+		if( ret )
+		{
+			read_tw9912_chips_status_flag=0;	
+			read_tw9912_chips_status_flag_1++;
+			printk("tw9912:worning Channel = %d input  signal unstabitily! %d\n",Channel,read_tw9912_chips_status_flag_1);
+		}
+		else
+		{
+		printk("tw9912: input  signal stabitily! %d ,%d\n",read_tw9912_chips_status_flag,read_tw9912_chips_status_flag_1);
+		}
+		if(read_tw9912_chips_status_flag>50 ||read_tw9912_chips_status_flag_1>160)  
+		{
+			if (read_tw9912_chips_status_flag_1>=160) 
+				tw9912_signal_unstabitily_for_Tw9912_init_flag = 1;//find colobar flag signal bad
+			break;
+		}
+	}
+	read_tw9912_chips_status_flag = 0;
+	read_tw9912_chips_status_flag_1 = 0;
 #ifdef DEBUG_PLOG_TW9912
 	i=0;
 	while(config_pramat_piont[i*2] != 0xfe)

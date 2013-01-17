@@ -70,6 +70,6 @@ static inline int check_pt(void)
 
 //dev
 #define SOC_Dev_Suspend_Prepare (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_Dev_Suspend_Prepare))
-
+#define read_tw9912_chips_signal_status (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnread_tw9912_chips_signal_status))
 #endif
 

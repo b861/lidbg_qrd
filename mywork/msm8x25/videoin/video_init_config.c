@@ -206,6 +206,13 @@ mutex_unlock(&lock_chipe_config);
 //global_video_format_flag=ret;//Transmitted Jiang  Control
 return ret;
 }
+int read_chips_signal_status(void)
+{int ret=0;
+	mutex_lock(&lock_chipe_config);
+	 ret = read_tw9912_chips_status(1);//return 0 or 1  ,if back 1 signal have change 
+	 mutex_unlock(&lock_chipe_config);
+ return ret;//have change return 1 else retrun 0
+}
 void video_init_config_in(Vedio_Format config_pramat)
 {int i,j;
 printk("tw9912:@@@@@video_init_config_in(config_pramat=%d)\n",config_pramat);
@@ -234,24 +241,30 @@ msleep(300);//wait for video Steady display
 */
 		if(info_Vedio_Channel<=SEPARATION)
 		{
-
-				//switch (flyVideoSignalPinTest(info_Vedio_Channel))
-				switch (signal_is_how[info_Vedio_Channel].Format)
+				if(tw9912_signal_unstabitily_for_Tw9912_init_flag) //find colobar flag signal bad
 				{
-				case NTSC_I: TC358_init(NTSC_I);
-					   //TC358_init(PAL_Interlace);
-					break;
-				case PAL_I: TC358_init(PAL_I);
-					break;
-				case NTSC_P: TC358_init(NTSC_P);
-					break;
-				case PAL_P: TC358_init(PAL_P);
-					break;
-				default :printk("video not signal input\n"); 
-					    TC358_init(COLORBAR);
-					break;
+					 TC358_init(COLORBAR+2);//rea
+					 tw9912_signal_unstabitily_for_Tw9912_init_flag = 0;
 				}
-			
+				else
+				{
+				//switch (flyVideoSignalPinTest(info_Vedio_Channel))
+					switch (signal_is_how[info_Vedio_Channel].Format)
+					{
+					case NTSC_I: TC358_init(NTSC_I);
+						   //TC358_init(PAL_Interlace);
+						break;
+					case PAL_I: TC358_init(PAL_I);
+						break;
+					case NTSC_P: TC358_init(NTSC_P);
+						break;
+					case PAL_P: TC358_init(PAL_P);
+						break;
+					default :printk("video not signal input\n"); 
+						   TC358_init(COLORBAR+1);//blue
+						break;
+					}
+				}
 		}//if(info_Vedio_Channel<=SEPARATION)
 		else
 		{

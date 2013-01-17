@@ -230,7 +230,8 @@ when err , <0
 
 	//soc
 	 void (*pfnSOC_Dev_Suspend_Prepare)(void);
-
+	//video
+	int (*pfnread_tw9912_chips_signal_status)(void);
 };
 
 #define LIDBG_SIZE	0x00001000 //MEM_SIZE_4_KB	/*全局内存最大1K字节*/

@@ -2,6 +2,18 @@
 #define __SOC_TC358746XBG__
 #include "tw9912.h"
 #include "i2c_io.h"
+
+
+#define TC358746XBG_BLACK 0
+#define TC358746XBG_BLUE 1
+#define TC358746XBG_RED 2
+#define TC358746XBG_PINK 3
+#define TC358746XBG_GREEN 4
+#define TC358746XBG_LIGHT_BLUE 5
+#define TC358746XBG_YELLOW 6
+#define TC358746XBG_WHITE 7
+
+
 #define DEBUG_TC358
 #define TC358746XBG_RESET 28
 #define register_value_width_32 32
@@ -44,6 +56,5 @@
 #define tc358_MSEL_UP do{}while(0)//	do{SOC_IO_Config(34,GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_12MA);SOC_IO_Output(0, 34, 1);}while(0)// 1: Par_in -> CSI-2 TX
 #define tc358_MSEL_DOWN do{}while(0)//do{SOC_IO_Config(34,GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_12MA);SOC_IO_Output(0, 34, 0);}while(0)
 void TC358_init(Vedio_Format);
-void colorbar_init_blue(void);
 //void TC358_exit( void );
 #endif 
