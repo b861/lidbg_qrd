@@ -206,10 +206,10 @@ mutex_unlock(&lock_chipe_config);
 //global_video_format_flag=ret;//Transmitted Jiang  Control
 return ret;
 }
-int read_chips_signal_status(void)
+int read_chips_signal_status(u8 cmd)
 {int ret=0;
 	mutex_lock(&lock_chipe_config);
-	 ret = read_tw9912_chips_status(1);//return 0 or 1  ,if back 1 signal have change 
+	 ret = read_tw9912_chips_status(cmd);//return 0 or 1  ,if back 1 signal have change 
 	 mutex_unlock(&lock_chipe_config);
  return ret;//have change return 1 else retrun 0
 }

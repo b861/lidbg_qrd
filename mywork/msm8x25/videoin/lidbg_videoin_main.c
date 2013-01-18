@@ -3,8 +3,7 @@
 #include "lidbg_enter.h"
 #include "video_init_config.h"
 static struct task_struct * Vedio_Signal_Test = NULL; 
-
-//extern tw9912_run_flag tw912_run_sotp_flag;
+extern tw9912_run_flag tw912_run_sotp_flag;
 LIDBG_DEFINE;
 static void video_config_init(Vedio_Format config_pramat,u8 Channal)
 {
@@ -32,10 +31,32 @@ static int thread_vedio_signal_test(void *data)
 	//	{ //delay
 	//		timeout = schedule_timeout(timeout); 
 	//	} 
-	i=read_chips_signal_status();
-		// printk("tw9912: read_chips_signal_status() back0x%.2x   i &0x10= 0x%.2x\n",i,i &0x10);
-		 if( (i &0x10) == 0x10 )
-			printk("tw9912: read_chips_signal_status() back 0x%.2x\n",i);
+	i=read_chips_signal_status(1);
+		if(i)
+		{
+			printk("thread_vedio_signal_test find tw9912 have change!\n");
+			  TC358_init(COLORBAR+TC358746XBG_LIGHT_BLUE);//blue
+			while(read_chips_signal_status(0) !=0x0 )
+				{
+				msleep(100);
+				}
+			switch (tw912_run_sotp_flag.format) // valu com form tw9912.c 919 line
+					{
+					case NTSC_I: TC358_init(NTSC_I);
+						   //TC358_init(PAL_Interlace);
+						break;
+					case PAL_I: TC358_init(PAL_I);
+						break;
+					case NTSC_P: TC358_init(NTSC_P);
+						break;
+					case PAL_P: TC358_init(PAL_P);
+						break;
+					default :printk("video not signal input\n"); 
+						   TC358_init(COLORBAR+1);//blue
+						break;
+					}
+			msleep(10000);
+		}
 		msleep(10);
 	//	printk("time %d\n",i++);
 	}

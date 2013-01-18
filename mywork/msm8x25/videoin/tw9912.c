@@ -731,9 +731,9 @@ int Tw9912_init(Vedio_Format config_pramat,Vedio_Channel Channel)
 				{
 				printk("tw9912: input  signal stabitily! %d ,%d\n",read_tw9912_chips_status_flag,read_tw9912_chips_status_flag_1);
 				}
-				if(read_tw9912_chips_status_flag>20 ||read_tw9912_chips_status_flag_1>160)  
+				if(read_tw9912_chips_status_flag>10 ||read_tw9912_chips_status_flag_1>20)  
 				{
-					if (read_tw9912_chips_status_flag_1>=160) 
+					if (read_tw9912_chips_status_flag_1>=20) 
 						tw9912_signal_unstabitily_for_Tw9912_init_flag = 1;//find colobar flag signal bad
 					break;
 				}
@@ -916,7 +916,7 @@ goto CONFIG_is_old;
 			}
 		
 	}
-
+	tw912_run_sotp_flag.format = signal_is_how[Channel].Format;
 	if(signal_is_how[Channel].Format ==PAL_I)
 		{u8 Tw9912_Parameter[]={0,0,};
 	
@@ -928,8 +928,6 @@ goto CONFIG_is_old;
 		Tw9912_Parameter[1]=0x27;
 		ret = write_tw9912(Tw9912_Parameter);
 
-	
-		tw912_run_sotp_flag.format = PAL_I;
 		tw912_run_sotp_flag.run = 1;
 		 printk("tw9912 is run again and format is PALi flag&&&\n");
 		  tw9912_Correction_Parameter_fun = kthread_run(thread_tw9912_Correction_Parameter_fun,NULL,"flyvideo_Parameter");  
