@@ -27,7 +27,32 @@ return ret;
 i2c_ack write_tw9912(char *buf )
 {	
 i2c_ack ret;
+u8 buf_back;
+static int again_write_count=0;
 		ret=i2c_write_byte(1, TW9912_I2C_ChipAdd,buf, 2);
+#ifdef DEBUG_TW9912_CHECK_WRITE	
+		if (ret == ACK)
+		{
+			ret=i2c_read_byte(1,TW9912_I2C_ChipAdd, buf[0], &buf_back,1);
+			if(buf_back != buf[1] )
+			{
+				if(
+				    ( (buf[0] == 0x1c ||buf[0] == 0x1c ) &&  (buf_back&0xf) != (buf[1]&0xf ) ) ||\
+			    	    (  buf[0] == 0x1d && (buf_back&0x7f != buf[1]&0x7f ))\
+				   )
+					{
+						msleep(10);
+						printk("TW9912: error Read (0x%.2x) back (0x%.2x) and write (0x%.2x) in data inequality\n",buf[0],buf_back,buf[1]);
+						if(again_write_count < 2)
+						//	write_tw9912(buf);
+							i2c_write_byte(1, TW9912_I2C_ChipAdd,buf, 2);
+						again_write_count ++;
+					}
+			}
+				if(again_write_count >= 2) again_write_count = 0;
+		}
+#endif
+/**/	
 return ret;
 }
 i2c_ack Correction_Parameter_fun(Vedio_Format format)
@@ -731,9 +756,9 @@ int Tw9912_init(Vedio_Format config_pramat,Vedio_Channel Channel)
 				{
 				printk("tw9912: input  signal stabitily! %d ,%d\n",read_tw9912_chips_status_flag,read_tw9912_chips_status_flag_1);
 				}
-				if(read_tw9912_chips_status_flag>10 ||read_tw9912_chips_status_flag_1>20)  
+				if(read_tw9912_chips_status_flag>5 ||read_tw9912_chips_status_flag_1>10)  
 				{
-					if (read_tw9912_chips_status_flag_1>=20) 
+					if (read_tw9912_chips_status_flag_1>=10) 
 						tw9912_signal_unstabitily_for_Tw9912_init_flag = 1;//find colobar flag signal bad
 					break;
 				}
