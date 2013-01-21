@@ -508,6 +508,10 @@ void fastboot_pwroff(void)
 
     }
 
+#if 1 //ndef FLY_DEBUG
+	SOC_Key_Report(KEY_PAUSECD, KEY_PRESSED_RELEASED);
+	msleep(500);
+#endif
 
     fastboot_task_kill_exclude(kill_exclude_process);
 
