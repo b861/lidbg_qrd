@@ -34,9 +34,11 @@ static void TC358_Hardware_Rest(void)
 {
 	tc358_RESX_DOWN;
 	udelay(100);
+//	msleep(100);
 	//msleep(10000);
 	tc358_RESX_UP;
 	udelay(100);  
+//	msleep(100);
 
 }
 static void Power_contorl(void)
@@ -217,7 +219,7 @@ void TC358_init(Vedio_Format flag)
 	tc358746_dbg("flag= %d\n",flag);
 	Power_contorl();
 	TC358_id();
-    if(flag <= COLORBAR+8){
+    if(flag <= COLORBAR+TC358746XBG_WHITE){
 					switch (flag)
 					{   
 						case NTSC_I: 
@@ -236,10 +238,13 @@ void TC358_init(Vedio_Format flag)
 						case COLORBAR: colorbar_init();
 						printk("\n\nTC358746:parameter is is COLORBAR!\n\n");
 							break;
-						case COLORBAR+1: colorbar_init_blue(TC358746XBG_BLUE);
+						case COLORBAR+TC358746XBG_BLUE: colorbar_init_blue(TC358746XBG_BLUE);
 						printk("\n\nTC358746:parameter is is COLORBAR!\n\n");
 							break;
-						case COLORBAR+2: colorbar_init_blue(TC358746XBG_RED);
+						case COLORBAR+TC358746XBG_RED: colorbar_init_blue(TC358746XBG_RED);
+						printk("\n\nTC358746:parameter is is COLORBAR!\n\n");
+							break;
+						case COLORBAR+TC358746XBG_LIGHT_BLUE: colorbar_init_blue(TC358746XBG_LIGHT_BLUE);
 						printk("\n\nTC358746:parameter is is COLORBAR!\n\n");
 							break;
 						default : colorbar_init();

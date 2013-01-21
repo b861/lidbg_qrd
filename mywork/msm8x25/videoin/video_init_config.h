@@ -12,7 +12,7 @@ Vedio_Format flyVideoTestSignalPin_in(u8 Channel);
 Vedio_Format camera_open_video_signal_test_in(void);
 int flyVideoImageQualityConfig_in(Vedio_Effect cmd ,u8 valu);
 void Video_Show_Output_Color(void);
-int read_chips_signal_status(void);
+int read_chips_signal_status(u8 cmd);
 
 #endif
 
