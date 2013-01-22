@@ -332,18 +332,6 @@ find_key:
 
 #endif
 
-
-    //
-#ifdef DEBUG_GPIO_RETURN_KEY
-    if(SOC_IO_Input(0, GPIO_SCAN_KEY_RETURN, GPIO_CFG_PULL_DOWN) == 1)
-    {
-        //SOC_Key_Report(KEY_BACK, KEY_PRESSED_RELEASED);
-        //	 lidbg("KEY_BACK+\n");
-        SOC_PWR_ShutDown();
-
-    }
-#endif
-
 }
 
 
@@ -895,6 +883,7 @@ void fly_devices_init(void)
         lidbg("turn lcd on!\n");
         LCD_ON;
         BL_SET(BL_MAX / 2);
+		DVD_RESET_HIGH;
 
 #ifdef DEBUG_BUTTON
 
