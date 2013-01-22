@@ -189,6 +189,8 @@ char *kill_exclude_process[] =
 	"ath6kl",
 	"wpa_supplicant",
 	"workqueue_trust",
+	"logcat",
+	"bootanimation",
 
     "mm-qcamera-daemon",
     "com.android.qualcomm",
@@ -247,6 +249,7 @@ char *kill_exclude_process[] =
 	"lyaudio.Weather",
 	".flyaudio.media",
 	"ndroid.calendar",
+	"settings:remote",
 
     //"flush-31:6",
     //"flush-31:3",
@@ -270,7 +273,7 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
     bool safe_flag = 0;
     DUMP_FUN_ENTER;
 
-    lidbg("\n###########\n");
+    lidbg("######################\n");
 
 
     //if(ptasklist_lock != NULL)
@@ -299,6 +302,8 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
 			(strncmp(p->comm, "Fly", sizeof("Fly") - 1) == 0) ||
 			(strncmp(p->comm, "flyaudio", sizeof("flyaudio") - 1) == 0) ||
 			(strncmp(p->comm, "ksdioirqd", sizeof("ksdioirqd") - 1) == 0) ||
+			(strncmp(p->comm, "jbd2", sizeof("jbd2") - 1) == 0) ||
+			(strncmp(p->comm, "ext4", sizeof("ext4") - 1) == 0) ||
             (strncmp(p->comm, "ksoftirqd", sizeof("ksoftirqd") - 1) == 0)
         )
         {
@@ -343,18 +348,17 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
         //	read_unlock(ptasklist_lock);
     }//for_each_process
 
+
+	lidbg("######################\n\n");
+
     if(j == 0)
         lidbg("find nothing to kill\n");
     else
         for(i = 0; i < j; i++)
         {
-            force_sig(SIGKILL, kill_process[i]);
+        	if(kill_process[i])
+           		 force_sig(SIGKILL, kill_process[i]);
         }
-
-
-
-		
-	lidbg("###########\n\n");
 
     DUMP_FUN_LEAVE;
 
@@ -531,10 +535,10 @@ void fastboot_pwroff(void)
 
 #if 1 //ndef FLY_DEBUG
 	SOC_Key_Report(KEY_PAUSECD, KEY_PRESSED_RELEASED);
-	msleep(500);
+	msleep(100);
 #endif
 
-    fastboot_task_kill_exclude(kill_exclude_process);
+   // fastboot_task_kill_exclude(kill_exclude_process);
 
     SOC_Dev_Suspend_Prepare();
 
@@ -589,6 +593,9 @@ static void fastboot_early_suspend(struct early_suspend *h)
         lidbgerr("Call devices_early_suspend when suspend_pending != PM_STATUS_READY_TO_PWROFF\n");
 
     }
+	
+	fastboot_task_kill_exclude(kill_exclude_process);
+	
     wake_unlock(&(fb_data->flywakelock));
     complete(&suspend_start);
 

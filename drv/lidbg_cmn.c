@@ -23,6 +23,7 @@ int read_proc(char *buf, char **start, off_t offset, int count, int *eof, void *
     {
 
         len  += sprintf(buf + len, "%s %d \n", task_list->comm, task_list->pid);
+		msleep(100);//for test
     }
 
     return len;
