@@ -5,17 +5,31 @@ static Vedio_Channel info_com_top_Channel = YIN2;
 extern TW9912_Signal signal_is_how[5];
 u8 Image_Config[4][11]={
 						/*0*/	/*1*/	/*2*/	/*3*/	/*4*/	/*5*/	/*6*/	/*7*/	/*8*/	/*9*/	/*10*/
-					{	0x90,		0Xa0,	0xa5,		0xb5,		0xc5,		0xfc,		0xfa,		0x0,		0x10,		0x20,		0x30,	}, //BRIGHTNESS
+					{	0x90,		0Xa0,	0xa5,		0xb5,		0xc5,		0x03,		0xfa,		0x0,		0x10,		0x20,		0x30,	}, //BRIGHTNESS
 					{	0x20,		0x28,		0x38,		0x48,		0x58,		0x48,		0x78,		0x88	,	0x98,		0x9F,		0xB3,},//CONTRAST
 					{	0x0,		0x15,		0x30,		0x45,		0x65,		0x80,		0x95,		0xa5	,	0xd5,		0xe0,		0xff,},//HUE
 					{	0x0,		0x15,		0x30,		0x45,		0x65,		0x80,		0x95,		0xa5	,	0xd5,		0xe0,		0xff,},//SHARPNESS
 					   };
 static u8 Tw9912_image_global[4][2]={
-									{0x10,0xfc},//BRIGHTNESS
+									{0x10,0x03},//BRIGHTNESS
 									{0x11,0x48},//CONTRAST
 																	
 									{0x13,0x80},//HUE
 									{0x14,0x80},//SHARPNESS
+								};
+u8 Image_Config_AUX_BACK[4][11]={
+						/*0*/	/*1*/	/*2*/	/*3*/	/*4*/	/*5*/	/*6*/	/*7*/	/*8*/	/*9*/	/*10*/
+					{	0xe0,		0Xf3, 	0xf7,		0xfb,		0x00,		0x08,		0x0a,		0x0e,		0x014,	0x16,		0x18,	}, //BRIGHTNESS
+					{	0x57,		0x61,		0x67,		0x6d,		0x73,		0x58,		0x7d,		0x7f	,	0x81,		0x83,		0x85,},//CONTRAST
+					{	0x37,		0x47,		0x57,		0x67,		0x87,		0x97,		0xa7,		0xa5	,	0xd5,		0xe0,		0xff,},//HUE
+					{	0x37,		0x47,		0x57,		0x67,		0x87,		0x97,		0xa7,		0xa5	,	0xd5,		0xe0,		0xff,},//SHARPNESS
+					   };
+static u8 Tw9912_image_global_AUX_BACK[4][2]={
+									{0x10,0x08},//BRIGHTNESS
+									{0x11,0x58},//CONTRAST
+																	
+									{0x13,0x97},//HUE
+									{0x14,0x97},//SHARPNESS
 								};
 //spinlock_t spin_chipe_config_lock;
 struct mutex lock_chipe_config;
@@ -37,6 +51,9 @@ int static VideoImage(void)
  printk("\ntw9912:@@@@@VideoImage()\n");
  	for(i=0;i<4;i++)
  		{
+ 		if(info_com_top_Channel = YIN3)
+		ret = write_tw9912(&Tw9912_image_global_AUX_BACK[i]);
+		else
 		ret = write_tw9912(&Tw9912_image_global[i]);
 		}
 return ret;
@@ -55,48 +72,96 @@ mutex_lock(&lock_chipe_config);
 			mutex_unlock(&lock_chipe_config);
 			return -1;
 		}
-	switch (cmd)
+	if(info_com_top_Channel = YIN3)
 	{
-		case CONTRAST ://ok
-			Tw9912_image[0]=0x10;
-			Tw9912_image[1]=Image_Config[0][valu];
-			
-			Tw9912_image_global[0][1]=Image_Config[0][valu];//remember
-			ret = write_tw9912(&Tw9912_image);
-			break;
-		case BRIGHTNESS ://ok
-			Tw9912_image[0]=0x11;
-			//if(global_video_format_flag = NTSC_I)
+		switch (cmd)
 			{
-				Tw9912_image[1]=Image_Config[1][valu];
-				Tw9912_image_global[1][1]=Image_Config[1][valu];
-			}
-			ret = write_tw9912(&Tw9912_image);
-			break;
-		case HUE ://bad
-			Tw9912_image[0]=0x14;
-			//if(global_video_format_flag = NTSC_I)
-			{
-				Tw9912_image[1]=Image_Config[2][valu];
-				Tw9912_image_global[3][1]=Image_Config[2][valu];
-			}
-			ret = write_tw9912(&Tw9912_image);
-			break;
-		case SHARPNESS ://bad
-		case CHROMA_U :
-		case CHROMA_V :
-			//if(global_video_format_flag = NTSC_I)
-			{
-				Tw9912_image[1]=Image_Config[3][valu];
-				Tw9912_image_global[2][1]=Image_Config[3][valu];
-			}
-			Tw9912_image[0]=0x13;
-			ret = write_tw9912(&Tw9912_image);
+				case CONTRAST ://ok
+					Tw9912_image[0]=0x10;
+					Tw9912_image[1]=Image_Config[0][valu];
+					
+					Tw9912_image_global_AUX_BACK[0][1]=Image_Config_AUX_BACK[0][valu];//remember
+					ret = write_tw9912(&Tw9912_image);
+					break;
+				case BRIGHTNESS ://ok
+					Tw9912_image[0]=0x11;
+					//if(global_video_format_flag = NTSC_I)
+					{
+						Tw9912_image[1]=Image_Config_AUX_BACK[1][valu];
+						Tw9912_image_global_AUX_BACK[1][1]=Image_Config_AUX_BACK[1][valu];
+					}
+					ret = write_tw9912(&Tw9912_image);
+					break;
+				case HUE ://bad
+					Tw9912_image[0]=0x14;
+					//if(global_video_format_flag = NTSC_I)
+					{
+						Tw9912_image[1]=Image_Config_AUX_BACK[2][valu];
+						Tw9912_image_global_AUX_BACK[3][1]=Image_Config_AUX_BACK[2][valu];
+					}
+					ret = write_tw9912(&Tw9912_image);
+					break;
+				case SHARPNESS ://bad
+				case CHROMA_U :
+				case CHROMA_V :
+					//if(global_video_format_flag = NTSC_I)
+					{
+						Tw9912_image[1]=Image_Config_AUX_BACK[3][valu];
+						Tw9912_image_global_AUX_BACK[2][1]=Image_Config_AUX_BACK[3][valu];
+					}
+					Tw9912_image[0]=0x13;
+					ret = write_tw9912(&Tw9912_image);
 
-			Tw9912_image[0]=0x14;
-			ret = write_tw9912(&Tw9912_image);
-			break;
+					Tw9912_image[0]=0x14;
+					ret = write_tw9912(&Tw9912_image);
+					break;
+			}
+	}
+	else
+	{
+			switch (cmd)
+			{
+				case CONTRAST ://ok
+					Tw9912_image[0]=0x10;
+					Tw9912_image[1]=Image_Config_AUX_BACK[0][valu];
+					
+					Tw9912_image_global_AUX_BACK[0][1]=Image_Config_AUX_BACK[0][valu];//remember
+					ret = write_tw9912(&Tw9912_image);
+					break;
+				case BRIGHTNESS ://ok
+					Tw9912_image[0]=0x11;
+					//if(global_video_format_flag = NTSC_I)
+					{
+						Tw9912_image[1]=Image_Config_AUX_BACK[1][valu];
+						Tw9912_image_global_AUX_BACK[1][1]=Image_Config_AUX_BACK[1][valu];
+					}
+					ret = write_tw9912(&Tw9912_image);
+					break;
+				case HUE ://bad
+					Tw9912_image[0]=0x14;
+					//if(global_video_format_flag = NTSC_I)
+					{
+						Tw9912_image[1]=Image_Config_AUX_BACK[2][valu];
+						Tw9912_image_global_AUX_BACK[3][1]=Image_Config_AUX_BACK[2][valu];
+					}
+					ret = write_tw9912(&Tw9912_image);
+					break;
+				case SHARPNESS ://bad
+				case CHROMA_U :
+				case CHROMA_V :
+					//if(global_video_format_flag = NTSC_I)
+					{
+						Tw9912_image[1]=Image_Config_AUX_BACK[3][valu];
+						Tw9912_image_global_AUX_BACK[2][1]=Image_Config_AUX_BACK[3][valu];
+					}
+					Tw9912_image[0]=0x13;
+					ret = write_tw9912(&Tw9912_image);
 
+					Tw9912_image[0]=0x14;
+					ret = write_tw9912(&Tw9912_image);
+					break;
+
+			}
 	}
 //spin_unlock(&spin_chipe_config_lock);
 mutex_unlock(&lock_chipe_config);
@@ -172,6 +237,7 @@ return camera_open_video_signal_test_in_2();
 Vedio_Format flyVideoTestSignalPin_in(u8 Channel)
 {Vedio_Format ret= NOTONE;
 //spin_lock(&spin_chipe_config_lock);
+//return PAL_I;
 mutex_lock(&lock_chipe_config);
 	switch (Channel)
 	{
