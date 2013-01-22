@@ -239,13 +239,13 @@ void TC358_init(Vedio_Format flag)
 						printk("\n\nTC358746:parameter is is COLORBAR!\n\n");
 							break;
 						case COLORBAR+TC358746XBG_BLUE: colorbar_init_blue(TC358746XBG_BLUE);
-						printk("\n\nTC358746:parameter is is COLORBAR!\n\n");
+						printk("\n\nTC358746:parameter is is COLORBAR TC358746XBG_BLUE!\n\n");
 							break;
 						case COLORBAR+TC358746XBG_RED: colorbar_init_blue(TC358746XBG_RED);
-						printk("\n\nTC358746:parameter is is COLORBAR!\n\n");
+						printk("\n\nTC358746:parameter is is COLORBAR TC358746XBG_RED!\n\n");
 							break;
 						case COLORBAR+TC358746XBG_LIGHT_BLUE: colorbar_init_blue(TC358746XBG_LIGHT_BLUE);
-						printk("\n\nTC358746:parameter is is COLORBAR!\n\n");
+						printk("\n\nTC358746:parameter is is COLORBAR TC358746XBG_LIGHT_BLUE!\n\n");
 							break;
 						default : colorbar_init();
 						printk("\n\nTC358746:parameter is default NTSCi_init_tab!\n\n");

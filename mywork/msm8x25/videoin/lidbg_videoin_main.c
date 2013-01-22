@@ -151,7 +151,11 @@ printk("In lidbg_video_main()\n");
  #ifdef DEBUG_TW9912
 	else if(!strcmp(argv[0], "TW9912"))
 	{
-
+	if(!strcmp(argv[1], "initNTSCp"))
+		{
+			printk("Inital TW9912 NTSCp\n");
+			Tw9912_init_NTSCp();
+		}
 	if(!strcmp(argv[1], "testingyin0"))
 		{
 			Tw9912_appoint_pin_testing_video_signal(YIN0);
