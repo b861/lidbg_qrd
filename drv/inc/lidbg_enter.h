@@ -241,6 +241,11 @@ struct lidbg_fn_t
 	void (*pfnSOC_Mic_Enable)(bool enable);
 	//video
 	int (*pfnread_tw9912_chips_signal_status)(void);
+
+
+
+	// this func must put last!!
+	//void (*pfnlidbg_version_show)(void);
 };
 
 

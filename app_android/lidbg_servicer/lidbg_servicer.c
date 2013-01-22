@@ -404,10 +404,27 @@ open_dev:
     system("chmod 0777 /dev/flysemdriver");
 
 #endif
+if(0)
+{
+		system("echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
+		sleep(10);
+	{
+		 int i=15;
+		 while(i>0)
+		 {
+			 sleep(5);
+			 printf("set performance mode\n");
+			 system("echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
+			 i--;
+		 }
+	}
 
+}
+	
+	printf("enter while\n");
     while(1)
     {
-        sleep(60);
+		sleep(60);
     }
 
 

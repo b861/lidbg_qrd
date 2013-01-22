@@ -198,7 +198,7 @@ static void share_set_func_tbl(void)
 
 static int __init ad_init(void)
 {
-    int ret;
+    int ret=0;
     DUMP_BUILD_TIME;
 
     //下面的代码可以自动生成设备节点，但是该节点在/dev目录下，而不在/dev/misc目录下
@@ -209,7 +209,7 @@ static int __init ad_init(void)
     share_set_func_tbl();
 #endif
 
-    ret = misc_register(&misc);
+    //ret = misc_register(&misc);
     dbg (DEVICE_NAME"dev_init\n");
     return ret;
 }

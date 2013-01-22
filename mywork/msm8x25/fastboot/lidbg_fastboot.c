@@ -184,7 +184,11 @@ char *kill_exclude_process[] =
     //"flush-31:5",
     "audmgr_rpc",
     "sleep",
-    "boadcastreceiver"
+    "boadcastreceiver",
+	"cfg80211",
+	"ath6kl",
+	"wpa_supplicant",
+	"workqueue_trust",
 
     "mm-qcamera-daemon",
     "com.android.qualcomm",
@@ -233,8 +237,16 @@ char *kill_exclude_process[] =
     "droid.deskclock",
     "com.android.mms",
     "m.android.music",
+	"omm.datamonitor",
 
 
+//flyaudio	
+	"roid.flyaudioui",
+	"goodix_wq",
+	"io3.widget.time",
+	"lyaudio.Weather",
+	".flyaudio.media",
+	"ndroid.calendar",
 
     //"flush-31:6",
     //"flush-31:3",
@@ -258,7 +270,7 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
     bool safe_flag = 0;
     DUMP_FUN_ENTER;
 
-    //printk("%x\n",(int)ptasklist_lock);
+    lidbg("\n###########\n");
 
 
     //if(ptasklist_lock != NULL)
@@ -283,6 +295,10 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
             (strncmp(p->comm, "yaffs", sizeof("yaffs") - 1) == 0) ||
             (strncmp(p->comm, "irq", sizeof("irq") - 1) == 0) ||
             (strncmp(p->comm, "migration", sizeof("migration") - 1) == 0) ||
+			(strncmp(p->comm, "mmcqd", sizeof("mmcqd") - 1) == 0) ||
+			(strncmp(p->comm, "Fly", sizeof("Fly") - 1) == 0) ||
+			(strncmp(p->comm, "flyaudio", sizeof("flyaudio") - 1) == 0) ||
+			(strncmp(p->comm, "ksdioirqd", sizeof("ksdioirqd") - 1) == 0) ||
             (strncmp(p->comm, "ksoftirqd", sizeof("ksoftirqd") - 1) == 0)
         )
         {
@@ -334,6 +350,11 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
         {
             force_sig(SIGKILL, kill_process[i]);
         }
+
+
+
+		
+	lidbg("###########\n\n");
 
     DUMP_FUN_LEAVE;
 

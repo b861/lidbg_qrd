@@ -13,6 +13,9 @@ static inline int check_pt(void)
     return 0;
 }
 
+
+//#define lidbg_version_show (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnlidbg_version_show))
+
 #define SOC_IO_Output (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_IO_Output))
 #define SOC_IO_Input  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_IO_Input))
 #define SOC_IO_Output_Ext (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_IO_Output_Ext))
