@@ -867,7 +867,7 @@ goto CONFIG_is_old;
 					usleep(100);
 				i++;
 			}
-		if(Channel == NTSC_P)
+		if(Channel == SEPARATION)
 			{
 				u8 manually_initiate_auto_format_detection[]={0x1d,0x89,};//bit7 
 															      //Writing 1 to this bit will manually initiate the auto format detection process
