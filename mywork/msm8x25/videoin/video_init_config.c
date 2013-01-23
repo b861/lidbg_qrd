@@ -56,9 +56,25 @@ int static VideoImage(void)
  	for(i=0;i<5;i++)
  		{
  		if(info_com_top_Channel == YIN3)
-		ret = write_tw9912(&Tw9912_image_global_AUX_BACK[i]);
+			ret = write_tw9912(&Tw9912_image_global_AUX_BACK[i]);
 		else
-		ret = write_tw9912(&Tw9912_image_global[i]);
+			ret = write_tw9912(&Tw9912_image_global[i]);
+		}
+
+	if(info_com_top_Channel == YIN3)// back or AUX
+		{u8 Tw9912_image[2]={0x17,0x87,};//default input pin selet YIN0ss
+			ret = write_tw9912(Tw9912_image);
+			Tw9912_image[0]=0x08;
+			Tw9912_image[1]=0x14;// image down 5 line
+			ret = write_tw9912(Tw9912_image);
+			Tw9912_image[0]=0x0a;
+			Tw9912_image[1]=0x22;// image down 5 line
+			ret = write_tw9912(Tw9912_image);
+		}
+	else
+		{
+		u8 Tw9912_image[2]={0x0a,0x1a,};//image reft 5 line
+			ret = write_tw9912(Tw9912_image);
 		}
 return ret;
 }
@@ -247,6 +263,7 @@ return camera_open_video_signal_test_in_2();
 Vedio_Format flyVideoTestSignalPin_in(u8 Channel)
 {Vedio_Format ret= NOTONE;
 //spin_lock(&spin_chipe_config_lock);
+//return NTSC_I;
 mutex_lock(&lock_chipe_config);
 	switch (Channel)
 	{
