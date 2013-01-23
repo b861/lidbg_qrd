@@ -35,32 +35,8 @@ enum
 
 
 #ifdef BOARD_V1
-#define GPIO_DVD_RESET  (108)
-#define GPIO_LCD1  (31)
-#define GPIO_LCD2  (96)
-#define GPIO_LCD3  (97)
 #define GPIO_USB_ID (34)
 #define GPIO_LED_FLY (33)
-#endif
-
-
-
-
-#ifdef BOARD_V2
-#define GPIO_DVD_RESET  (109)
-#define GPIO_LCD1  (31)
-#define GPIO_LCD2  (97)
-#define GPIO_LCD3  (97)
-#define GPIO_USB_ID (81)
-#define GPIO_LED_FLY (82)
-#endif
-
-
-
-#ifdef FLY_DEBUG
-#define DEBUG_AD_KEY
-#define DEBUG_BUTTON
-
 
 
 //LCD_IDLE,  PANNE_PEN , PWM
@@ -72,6 +48,31 @@ enum
     					    SOC_IO_Output(0, GPIO_LCD2, 0);\
     					    SOC_IO_Output(0, GPIO_LCD3, 0);\
 				}while(0)
+
+#endif
+
+
+
+
+#ifdef BOARD_V2
+#define GPIO_USB_ID (81)
+#define GPIO_LED_FLY (82)
+
+//LCD_IDLE,  PANNE_PEN , PWM
+#define LCD_ON  do{       SOC_IO_Output(0, GPIO_LCD1, 1);\
+    					    SOC_IO_Output(0, GPIO_LCD3, 0);\
+				}while(0)
+#define LCD_OFF  do{       SOC_IO_Output(0, GPIO_LCD1, 0);\
+    					    SOC_IO_Output(0, GPIO_LCD3, 1);\
+				}while(0)
+
+#endif
+
+
+
+#ifdef FLY_DEBUG
+#define DEBUG_AD_KEY
+#define DEBUG_BUTTON
 
 
 #define DVD_RESET_HIGH  do{SOC_IO_Output(0, GPIO_DVD_RESET, 1); }while(0)
@@ -89,8 +90,8 @@ enum
 
 
 #else
-#define LCD_ON
-#define LCD_OFF
+//#define LCD_ON
+//#define LCD_OFF
 #define DVD_RESET_HIGH
 #define DVD_RESET_LOW
 #define DVD_RESET
@@ -106,7 +107,13 @@ enum
 
 #define GPIO_LED_SKU7 (108)
 
+#define GPIO_NULL GPIO_LED_FLY
 
+#define GPIO_DVD_RESET  (109)
+
+#define GPIO_LCD1  (31)
+#define GPIO_LCD2  (96)
+#define GPIO_LCD3  (97)
 
 #define GPIO_PWR_EN (23)
 #define GPIO_USB_HUB  (35)

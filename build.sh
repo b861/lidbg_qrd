@@ -27,11 +27,11 @@
 # dbg choose
 	case "$2" in
 	dbg) 
-	echo "EXTRA_CFLAGS += -DDBG_DBG" >> build_cfg.mk
+	echo "EXTRA_CFLAGS += -DFLY_DEBUG" >> build_cfg.mk
 	echo "dbg";;
 
 	rel) 
-	echo "EXTRA_CFLAGS += -DDBG_RELEASE" >> build_cfg.mk
+	echo "EXTRA_CFLAGS += -DFLY_RELEASE" >> build_cfg.mk
 	echo "rel";;
 	*)
 	echo -e "\033[41;37m  ===============support table====================\033[0m "  
