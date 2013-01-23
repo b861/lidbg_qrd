@@ -41,6 +41,8 @@ git_log
 dbg_cfg.sh
 push-kejing.sh
 key_hkjing.sh
+version.sh
+build_cfg.mk
 
 tmp/
 out/

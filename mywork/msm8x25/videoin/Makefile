@@ -16,9 +16,7 @@ lidbg_videoin-objs := lidbg_videoin_main.o tw9912.o TC358746XBG.o i2c_io.o video
 EXTRA_CFLAGS := -I$(DBG_DRV_PATH)/inc  -I$(DBG_DRV_PATH)/$(DBG_SOC)/inc  -I$(DBG_DEV_PATH)/$(DBG_SOC)
 #include $(DBG_DRV_PATH)/$(DBG_SOC)/drv_$(DBG_SOC).mk
 
-ifdef DBG_DBG
-EXTRA_CFLAGS += -DFLY_DEBUG
-endif
+include $(DBG_ROOT_PATH)/build_cfg.mk
 
 modules:
 	#env

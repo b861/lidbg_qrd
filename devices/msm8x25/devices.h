@@ -7,11 +7,6 @@
 #define DEBUG_LED
 #define DEBUG_UMOUNT_USB
 
-#define FLY_BOARD_1ST
-//#define FLY_BOARD_2ST
-
-
-
 void lidbg_device_main(int argc, char **argv);
 
 
@@ -39,7 +34,7 @@ enum
 //#define DEBUG_POWER_UP
 
 
-#ifdef FLY_BOARD_1ST
+#ifdef BOARD_V1
 #define GPIO_DVD_RESET  (108)
 #define GPIO_LCD1  (31)
 #define GPIO_LCD2  (96)
@@ -51,7 +46,7 @@ enum
 
 
 
-#ifdef FLY_BOARD_2ST
+#ifdef BOARD_V2
 #define GPIO_DVD_RESET  (109)
 #define GPIO_LCD1  (31)
 #define GPIO_LCD2  (97)

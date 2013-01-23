@@ -922,6 +922,15 @@ int dev_init(void)
 
     DUMP_BUILD_TIME;
 
+#ifdef FLY_V1
+lidbg("FLY_V1 version\n");
+#endif
+
+#ifdef FLY_V2
+lidbg("FLY_V2 version\n");
+#endif
+
+
 #ifdef FLY_DEBUG
     lidbg("debug version\n");
 #else
