@@ -246,6 +246,8 @@ struct lidbg_fn_t
 
 	// this func must put last!!
 	//void (*pfnlidbg_version_show)(void);
+	//video
+	int pfnglobal_video_camera_working_status;
 };
 
 
