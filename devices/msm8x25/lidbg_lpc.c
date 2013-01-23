@@ -437,7 +437,7 @@ int thread_lpc(void *data)
         if(kthread_should_stop()) break;
         if(1)
         {
-            if((SOC_PWR_GetStatus() == PM_STATUS_LATE_RESUME_OK) && (lpc_work_en == 1))
+            if((SOC_PWR_GetStatus() == PM_STATUS_LATE_RESUME_OK) && (lpc_work_en == 1) && (resume_count > 0))
             {
 #ifdef LPC_DEBUG_LOG
                 lidbg("lpc_send_rec_count=%d\n", lpc_send_rec_count);

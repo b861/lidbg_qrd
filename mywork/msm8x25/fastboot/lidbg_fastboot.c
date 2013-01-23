@@ -240,6 +240,7 @@ char *kill_exclude_process[] =
     "com.android.mms",
     "m.android.music",
 	"omm.datamonitor",
+	"oid.sysinfo.pro",
 
 
 //flyaudio	
