@@ -5,7 +5,7 @@
 #=======================================================================================
 
 source ../dbg_cfg.sh
-source ./version.sh
+#source ./version.sh
 
 DBG_SHELL_PATH=$DBG_ROOT_PATH/shell
 DBG_OUT_PATH=$DBG_ROOT_PATH/out

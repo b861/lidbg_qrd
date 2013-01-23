@@ -3,9 +3,7 @@
 #	Description : Make ALL
 #       Date:         2012/02/03
 #=======================================================================================
-#./clean.sh
-cd shell
-rm version.sh
-cp no_debug.sh version.sh
-./all_make.sh
+
+./build.sh v1 dbg
+
 
