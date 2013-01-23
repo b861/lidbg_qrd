@@ -128,7 +128,7 @@ enum
 //ad
 #define AD_KEY_PORT   (0xff)
 #define AD_KEY_READ_POLLING_TIME   (100)
-#define   USB_REC_POLLING_TIME (300)
+#define USB_REC_POLLING_TIME (300)
 
 
 

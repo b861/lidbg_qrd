@@ -482,9 +482,16 @@ void mcuFirstInit(void)
     while (SOC_IO_Input(0, MCU_IIC_REQ_I, GPIO_CFG_PULL_UP) == 0)
     {
         u8 buff[32];
+		static int count = 0;
+		count++;
         WHILE_ENTER;
         actualReadFromMCU(buff, 32);
-
+		if(count > 100)
+		{
+			
+			lidbg("exit mcuFirstInit!\n");
+			break;
+		}
     }
 
     //SOC_IO_Input(0, MCU_IIC_REQ_I, GPIO_CFG_PULL_UP);

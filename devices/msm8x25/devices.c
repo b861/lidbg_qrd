@@ -20,6 +20,7 @@ LIDBG_DEFINE;
 #endif
 
 #include "devices.h"
+#include <linux/proc_fs.h>
 
 
 #define LIDBG_GPIO_PULLUP  GPIO_CFG_PULL_UP
@@ -363,11 +364,13 @@ int thread_dev_init(void *data)
 
     fly_devices_init();
 
+#if 0
     while(1)//for polling test
     {
         msleep(10 * 1000);
 
     }
+#endif
     return 0;
 }
 
@@ -438,14 +441,7 @@ static int soc_dev_probe(struct platform_device *pdev)
 
     PWR_EN_ON;
 
-#ifdef FLY_DEBUG
-	
-	{
-		u8 buff[] = {0x00, 0x05, 0x01};//LPCControlPWREnable
-		lidbg("LPCControlPWREnable\n");
-		SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
-	}
-#endif
+
     get_platform();
 
     if(platform_id ==  PLATFORM_FLY)
@@ -469,6 +465,13 @@ static int soc_dev_probe(struct platform_device *pdev)
     else wake_up_process(led_task);
 #endif
 
+#ifdef FLY_DEBUG
+		
+		{
+			u8 buff[] = {0x00, 0x05, 0x01};//LPCControlPWREnable
+			lidbg("LPCControlPWREnable\n");
+			SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
+		}
 
     if(platform_id ==  PLATFORM_FLY)
     {
@@ -504,6 +507,7 @@ static int soc_dev_probe(struct platform_device *pdev)
 
     }
 
+#endif
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
     {
@@ -738,11 +742,37 @@ struct work_struct work_left_button1;
 static void work_left_button1_fn(struct work_struct *work)
 {
 
+#if 1	
+    static int count = 0;
+	static int usb_flag = 0;
+	if(count % 50 == 0)
+	{
+		usb_flag++;
+		
+		if(usb_flag % 2 == 1)
+		{
+		
+			lidbg("USB_ID_LOW_HOST\n");
+			USB_ID_LOW_HOST;
+		}
+		else
+		{
+		
+			lidbg("USB_ID_HIGH_DEV\n");
+			USB_ID_HIGH_DEV;
+		
+		}
+	}
+
+#endif
+
 
 #ifdef DEBUG_POWER_KEY
     static int count = 0;
     count++;
     lidbg("work_left_button1_fn %d\n", count);
+
+
     if(count % 40 == 0)
     {
         if(suspend_test)
@@ -879,6 +909,8 @@ void fly_devices_init(void)
 
         PWR_EN_ON;
 		USB_WORK_ENABLE;
+		lidbg("set USB_ID_HIGH_DEV\n");
+		USB_ID_HIGH_DEV;
 
         lidbg("turn lcd on!\n");
         LCD_ON;
@@ -917,16 +949,58 @@ static void set_func_tbl(void)
 }
 
 
+
+int read_proc_dev(char *buf, char **start, off_t offset, int count, int *eof, void *data )
+{
+    int len = 0;
+
+	lidbg("USB_ID_HIGH_DEV\n");
+	USB_ID_HIGH_DEV;
+
+
+    len  = sprintf(buf, "usb set dev \n");
+
+    return len;
+}
+
+int read_proc_host(char *buf, char **start, off_t offset, int count, int *eof, void *data )
+{
+    int len = 0;
+
+	lidbg("USB_ID_LOW_HOST\n");
+	USB_ID_LOW_HOST;
+
+
+    len  = sprintf(buf, "usb set host \n");
+
+    return len;
+}
+
+
+static void create_new_proc_entry_usb_dev()
+{
+    create_proc_read_entry("usb_dev", 0, NULL, read_proc_dev, NULL);
+
+}
+
+static void create_new_proc_entry_usb_host()
+{
+    create_proc_read_entry("usb_host", 0, NULL, read_proc_host, NULL);
+
+}
+
+
+
 int dev_init(void)
 {
 
     DUMP_BUILD_TIME;
 
-#ifdef FLY_V1
+#ifdef BOARD_V1
 lidbg("FLY_V1 version\n");
 #endif
 
-#ifdef FLY_V2
+#ifdef BOARD_V2
 lidbg("FLY_V2 version\n");
 #endif
 
@@ -965,6 +1039,8 @@ lidbg("FLY_V2 version\n");
 
     platform_device_register(&soc_devices);
     platform_driver_register(&soc_devices_driver);
+	create_new_proc_entry_usb_dev();
+	create_new_proc_entry_usb_host();
 
     return 0;
 }
@@ -1028,6 +1104,7 @@ void lidbg_device_main(int argc, char **argv)
 
 
 }
+
 
 
 
