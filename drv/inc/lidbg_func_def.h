@@ -84,5 +84,8 @@ static inline int check_pt(void)
 #define ptasklist_lock   (plidbg_dev->soc_pvar_tbl.pvar_tasklist_lock)
 
 #define read_tw9912_chips_signal_status (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnread_tw9912_chips_signal_status))
+//video
+#define global_camera_working_status  (plidbg_dev->soc_func_tbl.pfnglobal_video_camera_working_status)
+
 #endif
 
