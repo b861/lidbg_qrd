@@ -26,11 +26,12 @@ static int thread_vedio_signal_test(void *data)
   	 printk("tw9912:thread_vedio_signal_test()\n");
 	while(!kthread_should_stop())
 	{
-	     //   timeout=10;
-	//	while(timeout > 0) 
-	//	{ //delay
-	//		timeout = schedule_timeout(timeout); 
-	//	} 
+	timeout=1;
+	while(timeout > 0) 
+	{ //delay
+			timeout = schedule_timeout(timeout); 
+	} 
+	/*
 	i=read_chips_signal_status(1);
 		if(i)
 		{
@@ -57,8 +58,9 @@ static int thread_vedio_signal_test(void *data)
 					}
 			msleep(10000);
 		}
-		msleep(10);
-	//	printk("time %d\n",i++);
+		msleep(10);*/
+		
+	printk("global_camera_working_status = %d\n",global_camera_working_status);
 	}
 return 0;
 }
