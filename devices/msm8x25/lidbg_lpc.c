@@ -274,9 +274,12 @@ static void LPCdealReadFromMCUAll(BYTE *p, UINT length)
                     msleep(100);
 
                     lidbg("Ready ACC OFF!\n");
-                    msleep(100);
+                    //msleep(100);
+					lidbg("a\n");
                     LPCControlToSleep();
+					lidbg("b\n");
                     SOC_PWR_ShutDown();
+					lidbg("c\n");
                 }
                 else
                 {

@@ -388,9 +388,9 @@ static int thread_pwroff(void *data)
                 if(fastboot_get_status() == PM_STATUS_READY_TO_PWROFF)
                 {
 #ifdef FLY_DEBUG
-                    if(time_count >= 10)
+                    if(time_count >= 15)
 #else
-                    if(time_count >= 20)
+                    if(time_count >= 25)
 #endif
                     {
                         lidbgerr("thread_pwroff wait early suspend timeout!\n");
@@ -435,9 +435,9 @@ static int thread_fastboot_suspend(void *data)
                 if(fastboot_get_status() == PM_STATUS_EARLY_SUSPEND_PENDING)
                 {
 #ifdef FLY_DEBUG
-                    if(time_count >= 15)
+                    if(time_count >= 20)
 #else
-                    if(time_count >= 25)
+                    if(time_count >= 30)
 #endif
                     {
                         lidbgerr("thread_fastboot_suspend wait suspend timeout!\n");
@@ -488,10 +488,10 @@ static int thread_fastboot_resume(void *data)
         msleep(3000);
         SOC_Write_Servicer(WAKEUP_KERNEL);
 
-        SOC_Key_Report(KEY_HOME, KEY_PRESSED_RELEASED);
-        SOC_Key_Report(KEY_BACK, KEY_PRESSED_RELEASED);
+        //SOC_Key_Report(KEY_HOME, KEY_PRESSED_RELEASED);
+        //SOC_Key_Report(KEY_BACK, KEY_PRESSED_RELEASED);
 
-        msleep(2000);
+        msleep(1000);
         fastboot_set_status(PM_STATUS_LATE_RESUME_OK);
         DUMP_FUN_LEAVE;
     }
@@ -594,7 +594,18 @@ static void fastboot_early_suspend(struct early_suspend *h)
         lidbgerr("Call devices_early_suspend when suspend_pending != PM_STATUS_READY_TO_PWROFF\n");
 
     }
+#if 0 //for test
+
+	while(1)
+	{
+		fastboot_task_kill_exclude(kill_exclude_process);
+		msleep(2000);
+
+	}
 	
+#endif
+
+
 	//fastboot_task_kill_exclude(kill_exclude_process);
 	
     wake_unlock(&(fb_data->flywakelock));
@@ -606,7 +617,7 @@ static void fastboot_early_suspend(struct early_suspend *h)
 static void fastboot_late_resume(struct early_suspend *h)
 {
     DUMP_FUN;
-
+/*
 #ifdef FLY_DEBUG
     SOC_Key_Report(KEY_HOME, KEY_PRESSED_RELEASED);
     SOC_Key_Report(KEY_BACK, KEY_PRESSED_RELEASED);
@@ -616,7 +627,9 @@ static void fastboot_late_resume(struct early_suspend *h)
 
     fastboot_set_status(PM_STATUS_LATE_RESUME_OK);
 
+
 #endif
+*/
 
 
 
@@ -724,7 +737,8 @@ static int fastboot_resume(struct device *dev)
 
     fastboot_set_status(PM_STATUS_RESUME_OK);
     wake_lock(&(fb_data->flywakelock));
-    SOC_Write_Servicer(WAKEUP_KERNEL);
+    //SOC_Write_Servicer(WAKEUP_KERNEL);
+	complete(&resume_ok);
 
     ignore_wakelock = 0;
 
