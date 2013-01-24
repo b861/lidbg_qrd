@@ -750,10 +750,11 @@ static void work_left_button1_fn(struct work_struct *work)
 #if 1	
     static int count = 0;
 	static int usb_flag = 0;
+	
+	count++;
 	if(count % 50 == 0)
 	{
 		usb_flag++;
-		
 		if(usb_flag % 2 == 1)
 		{
 		
@@ -963,7 +964,7 @@ int read_proc_dev(char *buf, char **start, off_t offset, int count, int *eof, vo
 	USB_ID_HIGH_DEV;
 
 
-    len  = sprintf(buf, "usb set dev \n");
+    len  = sprintf(buf, "usb_set_dev\n");
 
     return len;
 }
@@ -976,7 +977,7 @@ int read_proc_host(char *buf, char **start, off_t offset, int count, int *eof, v
 	USB_ID_LOW_HOST;
 
 
-    len  = sprintf(buf, "usb set host \n");
+    len  = sprintf(buf, "usb_set_host\n");
 
     return len;
 }
