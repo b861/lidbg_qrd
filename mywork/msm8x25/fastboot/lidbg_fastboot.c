@@ -724,7 +724,7 @@ static int fastboot_resume(struct device *dev)
 
     fastboot_set_status(PM_STATUS_RESUME_OK);
     wake_lock(&(fb_data->flywakelock));
-   // SOC_Write_Servicer(WAKEUP_KERNEL);
+    SOC_Write_Servicer(WAKEUP_KERNEL);
 
     ignore_wakelock = 0;
 
