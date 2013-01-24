@@ -15,7 +15,11 @@
 
 
 #define DEBUG_TC358
+#ifdef BOARD_V2
+#define TC358746XBG_RESET 33
+#else//BOARD_V1
 #define TC358746XBG_RESET 28
+#endif
 #define register_value_width_32 32
 #define register_value_width_16 16
 #define TC358746_I2C_ChipAdd 0x07
