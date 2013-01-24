@@ -441,6 +441,11 @@ static int soc_dev_probe(struct platform_device *pdev)
 
     PWR_EN_ON;
 
+#ifndef FLY_DEBUG
+	USB_WORK_ENABLE;
+	LED_ON;
+
+#endif
 
     get_platform();
 
