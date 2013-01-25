@@ -268,27 +268,27 @@ mutex_lock(&lock_chipe_config);
 	switch (Channel)
 	{
 		case 0: 
-			info_Vedio_Channel = YIN0;
+		//	info_Vedio_Channel = YIN0;
 			ret=  testing_video_signal(YIN0);	
 			break;
 		case 1:
-			info_Vedio_Channel = YIN1;
+		//	info_Vedio_Channel = YIN1;
 			ret=  testing_video_signal(YIN1);
 			break;
 		case 2:
-			info_Vedio_Channel = YIN2;
+		//	info_Vedio_Channel = YIN2;
 			ret=  testing_video_signal(YIN2);
 			break;
 		case 3:
-			info_Vedio_Channel = YIN3;
+		//	info_Vedio_Channel = YIN3;
 			ret=  testing_video_signal(YIN3);
 			break;
 		case 4:
-			info_Vedio_Channel = SEPARATION;
+		//	info_Vedio_Channel = SEPARATION;
 			ret=  testing_video_signal(SEPARATION);
 			break;
 		default :
-			info_Vedio_Channel = NOTONE;
+		//	info_Vedio_Channel = NOTONE;
 			printk("%s:you input TW9912 Channel=%d error!\n",__FUNCTION__,Channel);
 			break;
 	}
@@ -307,6 +307,7 @@ int read_chips_signal_status(u8 cmd)
 }
 void video_init_config_in(Vedio_Format config_pramat)
 {int i,j;
+printk( "Video Module Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);
 printk("tw9912:@@@@@video_init_config_in(config_pramat=%d)\n",config_pramat);
 //spin_lock(&spin_chipe_config_lock);
 mutex_lock(&lock_chipe_config);
@@ -332,7 +333,7 @@ mutex_lock(&lock_chipe_config);
 		printk("TW9912:signal_is_how[%d].vedio_source=%d\n",info_Vedio_Channel,signal_is_how[info_Vedio_Channel].vedio_source);
 */
 		if(info_Vedio_Channel<=SEPARATION)
-		{
+		{ 
 				if(tw9912_signal_unstabitily_for_Tw9912_init_flag) //find colobar flag signal bad
 				{
 					printk("video_init_config:video input  signal unstabitily,now shouw RED\n"); 

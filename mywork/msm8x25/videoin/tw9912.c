@@ -462,7 +462,9 @@ TW9912_input_info tw9912_input_information_1;
 					tw9912_dbg("%s:you input Channel = %d >>>>>>>>>>>>>>error!\n",__FUNCTION__,Channel);
 					break;
 			}
-			msleep(400);//Wait for video Stability
+			//msleep(400);//Wait for video Stability ok
+			//msleep(100);// ok
+			msleep(50);
 		}
 		else if( (Channel == SEPARATION ) && the_last_config.Channel !=SEPARATION )
 		{
@@ -566,7 +568,7 @@ tw9912_dbg("@@@@@Tw9912_appoint_pin_testing_video_signal!\n");
 						break;
 						
 				}
-				msleep(400);//Wait for video Stability
+				//msleep(400);//Wait for video Stability
 			}
 	}
 	//else if( the_last_config.Channel !=SEPARATION )
@@ -584,7 +586,7 @@ tw9912_dbg("@@@@@Tw9912_appoint_pin_testing_video_signal!\n");
 	goto TEST_NTSCp;
 	}
 	write_tw9912(manually_initiate_auto_format_detection);
-	msleep(100);
+	//msleep(100);
 	tw9912_get_input_info(&tw9912_input_information);
 	Tw9912_analysis_input_signal(&tw9912_input_information,Channel);
  	display_tw9912_info();
