@@ -130,6 +130,12 @@ void LPCNoReset(void)
 
 }
 
+void LPCWorkOK(void)
+{
+    BYTE buff[] = {0x00, 0x02, 0x00};
+    LPCCombinDataStream(buff, SIZE_OF_ARRAY(buff));
+
+}
 
 
 
@@ -460,6 +466,7 @@ int thread_lpc(void *data)
                 //lidbg("thread_lpc:LPCCombinDataStream\n");
 
                 LPCCombinDataStream(buff, SIZE_OF_ARRAY(buff));
+				
 
 #if 0
 				BYTE buff[32];
@@ -477,6 +484,7 @@ int thread_lpc(void *data)
                 lpc_send_rec_count ++;
             }
             msleep(2000);
+			LPCWorkOK();
         }
         else
         {
