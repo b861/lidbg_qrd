@@ -877,7 +877,7 @@ goto CONFIG_is_old;
 															      //only  enable recognition of NTSC
 				TW9912_input_info tw9912_input_information_NTSCp;
 				write_tw9912(manually_initiate_auto_format_detection);
-				msleep(100);
+				//msleep(100);
 				tw9912_get_input_info(&tw9912_input_information_NTSCp);
 				if(tw9912_input_information_NTSCp.input_detection.valu & 0x04)//Composite Sync detection status 
 				{
