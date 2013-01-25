@@ -387,7 +387,11 @@ int thread_led(void *data)
         if(1) //条件为真
         {
             led_on();
-            msleep(1000);
+#ifdef FLY_DEBUG
+            msleep(500);
+#else
+            msleep(2000);
+#endif
         }
         else //条件为假
         {
@@ -441,11 +445,6 @@ static int soc_dev_probe(struct platform_device *pdev)
 
     PWR_EN_ON;
 
-#ifndef FLY_DEBUG
-	USB_WORK_ENABLE;
-	LED_ON;
-
-#endif
 
     get_platform();
 
@@ -470,13 +469,6 @@ static int soc_dev_probe(struct platform_device *pdev)
     else wake_up_process(led_task);
 #endif
 
-#ifdef FLY_DEBUG
-		
-		{
-			u8 buff[] = {0x00, 0x05, 0x01};//LPCControlPWREnable
-			lidbg("LPCControlPWREnable\n");
-			SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
-		}
 
     if(platform_id ==  PLATFORM_FLY)
     {
@@ -488,6 +480,13 @@ static int soc_dev_probe(struct platform_device *pdev)
         }
         else wake_up_process(dev_init_task);
 
+#ifdef FLY_DEBUG
+		
+		{
+			u8 buff[] = {0x00, 0x05, 0x01};//LPCControlPWREnable
+			lidbg("LPCControlPWREnable\n");
+			SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
+		}
 
 #ifdef DEBUG_AD_KEY
         key_task = kthread_create(thread_key, NULL, "key_task");
@@ -508,11 +507,11 @@ static int soc_dev_probe(struct platform_device *pdev)
         else  wake_up_process(pwr_task);
 #endif
 
+#endif
 
 
     }
 
-#endif
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
     {
@@ -921,6 +920,12 @@ void fly_devices_init(void)
     if(platform_id ==  PLATFORM_FLY)
     {
 
+
+#ifndef FLY_DEBUG
+		USB_WORK_ENABLE;
+		LCD_ON;
+#else
+
         PWR_EN_ON;
 		USB_WORK_ENABLE;
 		lidbg("set USB_ID_HIGH_DEV\n");
@@ -948,6 +953,7 @@ void fly_devices_init(void)
 
 
 
+#endif
 #endif
 
 

@@ -193,6 +193,10 @@ char *kill_exclude_process[] =
 	"workqueue_trust",
 	"logcat",
 	"bootanimation",
+	"fsck_msdos",
+	"usb-storage",
+
+
 
     "mm-qcamera-daemon",
     "com.android.qualcomm",
@@ -308,6 +312,7 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
 			(strncmp(p->comm, "ksdioirqd", sizeof("ksdioirqd") - 1) == 0) ||
 			(strncmp(p->comm, "jbd2", sizeof("jbd2") - 1) == 0) ||
 			(strncmp(p->comm, "ext4", sizeof("ext4") - 1) == 0) ||
+			(strncmp(p->comm, "scsi", sizeof("scsi") - 1) == 0) ||
             (strncmp(p->comm, "ksoftirqd", sizeof("ksoftirqd") - 1) == 0)
         )
         {
@@ -342,9 +347,10 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
             {
                 //kill_process[j] = p;
                 //j++;
-				force_sig(SIGKILL, p);
 
                 lidbg("## find %s to kill ##\n", p->comm);
+				
+				force_sig(SIGKILL, p);
                 //lidbg("+\n");
             }
         }
