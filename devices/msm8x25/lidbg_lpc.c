@@ -460,6 +460,20 @@ int thread_lpc(void *data)
                 //lidbg("thread_lpc:LPCCombinDataStream\n");
 
                 LPCCombinDataStream(buff, SIZE_OF_ARRAY(buff));
+
+#if 0
+				BYTE buff[32];
+				
+				struct timex  txc;
+				struct rtc_time tm;
+				do_gettimeofday(&(txc.time));
+				rtc_time_to_tm(txc.time.tv_sec,&tm);
+				//printk(\u201cUTC time :%d-%d-%d %d:%d:%d /n\u201d,tm.tm_year+1900,tm.tm_mon, tm.tm_mday,tm.tm_hour,tm.tm_min,tm.tm_sec);
+
+				
+                LPCCombinDataStream(buff, SIZE_OF_ARRAY(buff));
+#endif
+	
                 lpc_send_rec_count ++;
             }
             msleep(2000);

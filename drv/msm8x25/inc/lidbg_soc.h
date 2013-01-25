@@ -57,7 +57,7 @@
 #include <mach/usbdiag.h>
 #include <mach/msm_memtypes.h>
 #include <mach/msm_serial_hs.h>
-#include <mach/pmic.h>
+//#include <mach/pmic.h>
 #include <mach/socinfo.h>
 #include <mach/vreg.h>
 #include <mach/rpc_pmapp.h>

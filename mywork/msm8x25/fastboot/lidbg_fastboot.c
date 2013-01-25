@@ -277,7 +277,7 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
     DUMP_FUN_ENTER;
 
     //memset(kill_process, NULL, 100);
-    lidbg("######################\n");
+    lidbg("-----------------------\n");
 
 
     //if(ptasklist_lock != NULL)
@@ -344,7 +344,7 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
                 //j++;
 				force_sig(SIGKILL, p);
 
-                lidbg("find %s to kill\n", p->comm);
+                lidbg("## find %s to kill ##\n", p->comm);
                 //lidbg("+\n");
             }
         }
@@ -354,7 +354,7 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
     }//for_each_process
 
 
-	lidbg("######################\n\n");
+	lidbg("-----------------------\n\n");
 
 
 /*

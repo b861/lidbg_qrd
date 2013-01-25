@@ -57,6 +57,10 @@
 #include <asm/uaccess.h>
 #include <linux/kfifo.h>
 
+#include <linux/timer.h>
+#include <linux/timex.h>
+//#include <linux/rtc.h>
+
 
 ////////////
 
