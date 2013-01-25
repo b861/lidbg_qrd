@@ -31,7 +31,7 @@ u8 buf_back;
 static int again_write_count=0;
 		ret=i2c_write_byte(1, TW9912_I2C_ChipAdd,buf, 2);
 #ifdef DEBUG_TW9912_CHECK_WRITE	
-		if (ret == ACK)
+		if (ret == ACK && the_last_config.Channel == SEPARATION)
 		{
 			ret=i2c_read_byte(1,TW9912_I2C_ChipAdd, buf[0], &buf_back,1);
 			if(buf_back != buf[1] )
@@ -412,6 +412,10 @@ u8 Tw9912_input_pin_selet[]={0x02,0x40,};//default input pin selet YIN0
 TW9912_Signal signal_is_how_1={NOTONE,OTHER,source_other};
 TW9912_input_info tw9912_input_information_1;
 
+	if(the_last_config.Channel != Channel && the_last_config.Channel == SEPARATION)
+	{
+		Tw9912_init_agin(); 
+	}
 	 
 	if(Channel >SEPARATION) goto CHANNAL_ERROR;
 	signal_is_how_1.Channel =Channel;
@@ -423,8 +427,8 @@ TW9912_input_info tw9912_input_information_1;
 	channel_1 =(channel_1&0x0c) >>2 ;//read back now config Channel
 	if( (( (channel_1 != Channel ) && Channel != NOTONE) \
 		|| (tw9912_status.flag != TW9912_initall_yes)) \
-		&& Channel !=SEPARATION)//if now config Channel is not testing Channel
-																// or tw9912 is not have initall
+	  )//if now config Channel is not testing Channel
+	   // or tw9912 is not have initall
 		{
 		if(tw9912_status.flag == TW9912_initall_not)
 			{
@@ -575,7 +579,7 @@ tw9912_dbg("@@@@@Tw9912_appoint_pin_testing_video_signal!\n");
 	else
 	{
 		printk("\r\r\n\n");
-		printk("tw9912:testing NTSCp\n");
+		printk("tw9912:testing NTSCp The default detection!\n");
 		//	Tw9912_init_NTSCp();//initall all register 
 		tw9912_status.flag = TW9912_initall_yes;
 		tw9912_status.Channel = SEPARATION;
@@ -661,6 +665,29 @@ int Tw9912_init_NTSCp(void)
 	tw9912_dbg("Tw9912_init_NTSCp initall tw9912-\n");
 //msleep(400);
 //Tw9912_appoint_pin_testing_video_signal(SEPARATION);
+   return 1;
+CONFIG_not_ack_fail:
+	tw9912_dbg("%s:have NACK error!\n",__FUNCTION__);
+   return -1;
+}
+int Tw9912_init_agin(void)
+{
+    u32 i = 0;
+    u8 *config_pramat_piont=NULL;
+	tw9912_dbg("Tw9912_init_agin +\n");
+	TC9912_id();
+	tw9912_RESX_DOWN;
+	tw9912_RESX_UP;   
+	the_last_config.Channel =YIN3;
+	the_last_config.format = PAL_I;
+	config_pramat_piont=TW9912_INIT_AGAIN;
+	while(config_pramat_piont[i*2] != 0xfe)
+	{    
+		if(write_tw9912(&config_pramat_piont[i*2])==NACK) goto CONFIG_not_ack_fail;
+		tw9912_dbg("w a=%x,v=%x\n",config_pramat_piont[i*2],config_pramat_piont[i*2+1]);
+		i++;
+	}
+	tw9912_dbg("Tw9912_init_agin -\n");
    return 1;
 CONFIG_not_ack_fail:
 	tw9912_dbg("%s:have NACK error!\n",__FUNCTION__);
@@ -787,7 +814,7 @@ int Tw9912_init(Vedio_Format config_pramat,Vedio_Channel Channel)
 				printk("tw9912:Tw9912_appoint_pin_testing_video_signal() back NTSC_I\n");
 				break;
 			case NTSC_P:
-				printk("tw9912:Tw9912_appoint_pin_testing_video_signal()  back NTSC_P\n");
+				printk("tw9912:The next Configure NTSC\n");
 				break;
 			case PAL_I:
 				printk("tw9912:Tw9912_appoint_pin_testing_video_signal()  back PAL_I\n");
@@ -978,6 +1005,7 @@ CONFIG_not_ack_fail:
    return -2;
 NOT_signal_input:
 	tw9912_dbg("%s:the channal=%d not have video signal!\n",__FUNCTION__,Channel);
+	
    return -1;
 }
 
