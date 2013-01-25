@@ -760,12 +760,20 @@ static void work_left_button1_fn(struct work_struct *work)
 		
 			lidbg("USB_ID_LOW_HOST\n");
 			USB_ID_LOW_HOST;
+			
+            LCD_OFF;
+            msleep(500);
+            LCD_ON;
 		}
 		else
 		{
 		
 			lidbg("USB_ID_HIGH_DEV\n");
 			USB_ID_HIGH_DEV;
+			
+            LCD_OFF;
+            msleep(500);
+            LCD_ON;
 		
 		}
 	}

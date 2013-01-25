@@ -177,6 +177,8 @@ char *kill_exclude_process[] =
     "qmuxd",
     "netmgrd",
     "sh",
+	"mkdir",
+    "chmod",
     //"irq/304-ft5x06_",
     "system_server",
     "ATFWD-daemon",
@@ -265,7 +267,7 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
 {
 
 
-    struct task_struct *kill_process[100];
+    //struct task_struct *kill_process[100];
 
     struct task_struct *p;
     struct mm_struct *mm;
@@ -274,6 +276,7 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
     bool safe_flag = 0;
     DUMP_FUN_ENTER;
 
+    //memset(kill_process, NULL, 100);
     lidbg("######################\n");
 
 
@@ -337,8 +340,9 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
         {
             if (p)
             {
-                kill_process[j] = p;
-                j++;
+                //kill_process[j] = p;
+                //j++;
+				force_sig(SIGKILL, p);
 
                 lidbg("find %s to kill\n", p->comm);
                 //lidbg("+\n");
@@ -352,15 +356,20 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
 
 	lidbg("######################\n\n");
 
+
+/*
     if(j == 0)
         lidbg("find nothing to kill\n");
     else
         for(i = 0; i < j; i++)
         {
-        	if(kill_process[i])
+        	if(kill_process[i])				
+        	{
            		 force_sig(SIGKILL, kill_process[i]);
-        }
 
+        	}
+        }
+*/
     DUMP_FUN_LEAVE;
 
 
@@ -599,14 +608,14 @@ static void fastboot_early_suspend(struct early_suspend *h)
 	while(1)
 	{
 		fastboot_task_kill_exclude(kill_exclude_process);
-		msleep(2000);
+		msleep(1000);
 
 	}
 	
 #endif
 
 
-	//fastboot_task_kill_exclude(kill_exclude_process);
+	fastboot_task_kill_exclude(kill_exclude_process);
 	
     wake_unlock(&(fb_data->flywakelock));
     complete(&suspend_start);
