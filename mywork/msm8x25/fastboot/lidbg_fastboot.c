@@ -403,9 +403,9 @@ static int thread_pwroff(void *data)
                 if(fastboot_get_status() == PM_STATUS_READY_TO_PWROFF)
                 {
 #ifdef FLY_DEBUG
-                    if(time_count >= 15)
+                    if(time_count >= 10)
 #else
-                    if(time_count >= 25)
+                    if(time_count >= 15)
 #endif
                     {
                         lidbgerr("thread_pwroff wait early suspend timeout!\n");
@@ -450,16 +450,16 @@ static int thread_fastboot_suspend(void *data)
                 if(fastboot_get_status() == PM_STATUS_EARLY_SUSPEND_PENDING)
                 {
 #ifdef FLY_DEBUG
-                    if(time_count >= 20)
+                    if(time_count >= 15)
 #else
-                    if(time_count >= 30)
+                    if(time_count >= 20)
 #endif
                     {
                         lidbgerr("thread_fastboot_suspend wait suspend timeout!\n");
 #ifndef FLY_DEBUG
 
-                        SOC_Write_Servicer(LOG_DMESG);
-                        msleep(10000);//wait for write log finish
+                       // SOC_Write_Servicer(LOG_DMESG);
+                       // msleep(10000);//wait for write log finish
 #endif
 
                         ignore_wakelock = 1;

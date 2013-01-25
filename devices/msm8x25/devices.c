@@ -672,17 +672,11 @@ static void soc_dev_suspend_prepare(void)
 
 		
 
-#ifdef FLY_DEBUG
-		if(0)
-		{
-			u8 buff[] = {0x00, 0x05, 0x00};//LPCControlPWRDisenable
-			lidbg("LPCControlPWRDisenable\n");
-			SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
-			msleep(3000);
-		}
 
     //disable usb first
     USB_WORK_DISENABLE;
+
+#ifdef FLY_DEBUG
 	msleep(3000);
 #endif
 
