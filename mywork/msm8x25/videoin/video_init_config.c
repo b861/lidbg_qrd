@@ -203,6 +203,10 @@ printk("tw9912:@@@@@flyVideoInitall_in(Channel=%d)\n",Channel);
 	if (Channel>=YIN0 &&Channel<=NOTONE)
 	{//Channel = SEPARATION;
 		info_com_top_Channel = Channel;
+		if(Channel == YIN2)//dvd
+		{
+	//	info_com_top_Channel = SEPARATION;
+		}
 		global_video_channel_flag = Channel;
 	}
 	else
@@ -334,15 +338,22 @@ mutex_lock(&lock_chipe_config);
 */
 		if(info_Vedio_Channel<=SEPARATION)
 		{ 
-				if(tw9912_signal_unstabitily_for_Tw9912_init_flag) //find colobar flag signal bad
+				if(tw9912_signal_unstabitily_for_Tw9912_init_flag == 1) //find colobar flag signal bad
 				{
 					printk("video_init_config:video input  signal unstabitily,now shouw RED\n"); 
 					 TC358_init(COLORBAR+2);//rea
 					 tw9912_signal_unstabitily_for_Tw9912_init_flag = 0;
 				}
+				else if(tw9912_signal_unstabitily_for_Tw9912_init_flag == 2) //NTSCp not find!
+				{
+					printk("tw9912:Configure NTSCp but after configuration cannot detect a progressive signal,now shouw TC358746XBG_GREEN\n"); 
+					 TC358_init(COLORBAR+TC358746XBG_GREEN);//rea
+					 tw9912_signal_unstabitily_for_Tw9912_init_flag = 0;
+				}
 				else
 				{
 				//switch (flyVideoSignalPinTest(info_Vedio_Channel))
+				
 					switch (signal_is_how[info_Vedio_Channel].Format)
 					{
 					case NTSC_I: TC358_init(NTSC_I);
@@ -358,6 +369,7 @@ mutex_lock(&lock_chipe_config);
 						   TC358_init(COLORBAR+1);//blue
 						break;
 					}
+				/**/
 				}
 		}//if(info_Vedio_Channel<=SEPARATION)
 		else
