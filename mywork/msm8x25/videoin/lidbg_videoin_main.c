@@ -1,6 +1,7 @@
 
 
 #include "lidbg_enter.h"
+#include "lidbg_def.h"
 #include "video_init_config.h"
 static struct task_struct * Vedio_Signal_Test = NULL; 
 extern tw9912_run_flag tw912_run_sotp_flag;
@@ -269,16 +270,57 @@ static void set_func_tbl(void)
 	global_video_channel_flag = YIN2;//DVD
 	global_camera_working_status = 0;//stop
 }
+static int video_dev_probe(struct platform_device *pdev)
+{
+DUMP_BUILD_TIME;
+return 0;
+}
+static int video_dev_remove(struct platform_device *pdev)
+{
+DUMP_BUILD_TIME;
+return 0;
+}
+static int  video_dev_suspend(struct platform_device *pdev, pm_message_t state)
+{
+DUMP_BUILD_TIME;
+return 0;
+}
+static int video_dev_resume(struct platform_device *pdev)
+{
+Tw9912_hardware_reset();
+return 0;
+}
+static struct platform_driver video_driver =
+{
+    .probe = video_dev_probe,
+    .remove = video_dev_remove,
+    .suspend =  video_dev_suspend,
+    .resume =  video_dev_resume,
+    .driver = {
+        .name = "video_devices",
+        .owner = THIS_MODULE,
 
+    },
+
+
+};
+struct platform_device video_devices =
+{
+    .name			= "video_devices",
+    .id 			= 0,
+};
 
 int lidbg_video_init(void)
 {
 	printk("lidbg_video_init modules ismod\n");
 	LIDBG_GET;
 	set_func_tbl();
+	Tw9912_hardware_reset();
+//	TC358_init(PAL_I);
 	video_io_i2c_init();
 	flyVideoChannelInitall(YIN2); // DVD
-	
+platform_driver_register(&video_driver);
+platform_device_register(&video_devices);
 	    return 0;
 
 }

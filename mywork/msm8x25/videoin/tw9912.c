@@ -3,6 +3,7 @@
 #include "tw9912.h"
 #include "tw9912_config.h"
 #include "lidbg_enter.h"
+static int tw9912_reset_flag = 0;
 static struct task_struct * tw9912_Correction_Parameter_fun = NULL; 
 u8 tw9912_signal_unstabitily_for_Tw9912_init_flag=0;
 static int read_tw9912_chips_status_flag =0 , read_tw9912_chips_status_flag_1 = 0;
@@ -18,6 +19,11 @@ TW9912_Signal signal_is_how[5]={//用于记录四个通道的信息
 							};
 TW9912_initall_status tw9912_status={TW9912_initall_not,NOTONE,OTHER};
 Last_config_t the_last_config ={NOTONE,OTHER};
+void Tw9912_hardware_reset(void)
+{
+	tw9912_RESX_DOWN;
+	tw9912_RESX_UP;   
+}
 i2c_ack read_tw9912(unsigned int sub_addr, char *buf )
 {
 	i2c_ack ret;   
@@ -34,6 +40,7 @@ static int again_write_count=0;
 		if (ret == ACK && the_last_config.Channel == SEPARATION)
 		{
 			ret=i2c_read_byte(1,TW9912_I2C_ChipAdd, buf[0], &buf_back,1);
+printk("TW9912:  Register (0x%.2x) back (0x%.2x) and write (0x%.2x) \n",buf[0],buf_back,buf[1]);
 			if(buf_back != buf[1] )
 			{
 				if(
@@ -635,8 +642,6 @@ int Tw9912_init_NTSCp(void)
     u8 *config_pramat_piont=NULL;   
 	tw9912_dbg("Tw9912_init_NTSCp initall tw9912+\n");
 	TC9912_id();
-	tw9912_RESX_DOWN;
-	tw9912_RESX_UP;   
 	the_last_config.Channel =SEPARATION;
 	the_last_config.format = NTSC_P;
 	config_pramat_piont=TW9912_INIT_NTSC_Progressive_input; 
@@ -676,9 +681,7 @@ int Tw9912_init_agin(void)
     u8 *config_pramat_piont=NULL;
 	tw9912_dbg("Tw9912_init_agin +\n");
 	TC9912_id();
-	tw9912_RESX_DOWN;
-	tw9912_RESX_UP;   
-	the_last_config.Channel =YIN3;
+the_last_config.Channel =YIN3;
 	the_last_config.format = PAL_I;
 	config_pramat_piont=TW9912_INIT_AGAIN;
 	while(config_pramat_piont[i*2] != 0xfe)
@@ -699,8 +702,6 @@ int Tw9912_init_PALi(void)
     u8 *config_pramat_piont=NULL;
 	tw9912_dbg("Tw9912_init_PALi initall tw9912+\n");
 	TC9912_id();
-	tw9912_RESX_DOWN;
-	tw9912_RESX_UP;   
 	the_last_config.Channel =YIN3;
 	the_last_config.format = PAL_I;
 	config_pramat_piont=TW9912_INIT_PAL_Interlaced_input; 
@@ -769,6 +770,7 @@ int Tw9912_init(Vedio_Format config_pramat,Vedio_Channel Channel)
 		while(1)
 			{
 
+				if(Channel == SEPARATION) break;
 				
 				ret = read_tw9912_chips_status(0);//return register valu
 				msleep(10);
@@ -832,8 +834,6 @@ if(tw9912_status.flag == TW9912_initall_yes &&\
 		signal_is_how[Channel].Format == tw9912_status.format ) //now config is old config
 goto CONFIG_is_old;
 */			
-		tw9912_RESX_DOWN;
-		tw9912_RESX_UP;   
 		switch(signal_is_how[Channel].Format)
 		{
 			case NTSC_I:
@@ -906,7 +906,7 @@ goto CONFIG_is_old;
 				write_tw9912(manually_initiate_auto_format_detection);
 				//msleep(100);
 				tw9912_get_input_info(&tw9912_input_information_NTSCp);
-				if(tw9912_input_information_NTSCp.input_detection.valu & 0x04)//Composite Sync detection status 
+				if(tw9912_input_information_NTSCp.input_detection.valu & 0x08)//Composite Sync detection status 
 				{
 				unsigned char Input_source_format;//Register 0xc1 bit[1:0]
 					/*
@@ -919,7 +919,7 @@ goto CONFIG_is_old;
 						5 = 720p 
 						6 = 1080p 7 = none of above 
 					*/
-						Input_source_format = tw9912_input_information_NTSCp.input_detection.valu & 0x03 ;//bit[1:0]
+						Input_source_format = tw9912_input_information_NTSCp.input_detection.valu & 0x07 ;//bit[2:0]
 						switch (Input_source_format)
 						{
 							case 0x2://480p

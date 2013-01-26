@@ -4,7 +4,7 @@
 #include "TC358746XBG.h"
 #define I2C_US_IO
 #define APAT_BUS_ID 1
-
+static int tc358746_reset_flag =0;
 #ifndef SLEEP_MILLI_SEC
 #define SLEEP_MILLI_SEC(nMilliSec)\
 do { \
@@ -30,16 +30,15 @@ timeout = schedule_timeout(timeout); \
 static void TC358_Register_Write(u16 *add,u32 *valu,u8 flag);
 
 static void TC358_Register_Read(u16 add,char *buf,u8 flag);
-static void TC358_Hardware_Rest(void)
+void TC358_Hardware_Rest(void)
 {
 	tc358_RESX_DOWN;
-	udelay(100);
+//	udelay(100);
 //	msleep(100);
 	//msleep(10000);
 	tc358_RESX_UP;
-	udelay(100);  
+//	udelay(100);  
 //	msleep(100);
-
 }
 static void Power_contorl(void)
 {

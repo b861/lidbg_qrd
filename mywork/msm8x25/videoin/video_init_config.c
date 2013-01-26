@@ -353,6 +353,7 @@ mutex_lock(&lock_chipe_config);
 				else
 				{
 				//switch (flyVideoSignalPinTest(info_Vedio_Channel))
+				
 					switch (signal_is_how[info_Vedio_Channel].Format)
 					{
 					case NTSC_I: TC358_init(NTSC_I);
@@ -368,6 +369,7 @@ mutex_lock(&lock_chipe_config);
 						   TC358_init(COLORBAR+1);//blue
 						break;
 					}
+				/**/
 				}
 		}//if(info_Vedio_Channel<=SEPARATION)
 		else
