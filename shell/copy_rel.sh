@@ -14,7 +14,7 @@ echo "from" $src_dir
 echo "to" $dest_dir
 
 echo "SOC Modules Copy Start!"
-cp -u $src_dir/*.ko               $dest_dir/
+mv -u $src_dir/*.ko               $dest_dir/
 echo "SOC Modules Copy Finish!"
 
 
@@ -23,7 +23,7 @@ echo "from" $src_dir
 echo "to" $dest_dir
 
 echo "Modules Copy Start!"
-cp -u $src_dir/*.ko               $dest_dir/
+mv -u $src_dir/*.ko               $dest_dir/
 echo "Modules Copy Finish!"
 
 
@@ -32,7 +32,7 @@ echo "from" $src_dir
 echo "to" $dest_dir
 
 echo "Devices Modules Copy Start!"
-cp -u $src_dir/*.ko               $dest_dir/
+mv -u $src_dir/*.ko               $dest_dir/
 echo "Devices Modules Copy Finish!"
 
 #src_dir=$DBG_APP_LINUX_PATH
@@ -41,8 +41,8 @@ echo "Devices Modules Copy Finish!"
 #echo "appdbg Copy Finish!"
 
 #copy to soc/plat/out
-cp -ru $DBG_OUT_PATH/   $DBG_PLATFORM_DIR/release/
-cp -u $DBG_DRV_PATH/$DBG_SOC/inc/fly_soc.h   $DBG_PLATFORM_DIR/release/
+#cp -ru $DBG_OUT_PATH/   $DBG_PLATFORM_DIR/release/
+#cp -u $DBG_DRV_PATH/$DBG_SOC/inc/fly_soc.h   $DBG_PLATFORM_DIR/release/
 
 
 
