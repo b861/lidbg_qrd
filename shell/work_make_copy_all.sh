@@ -10,7 +10,7 @@ clear
 dbg_soc=$DBG_WORK_PATH/$DBG_SOC/
 cd $dbg_soc
 
-for each_dir in `ls -l | grep "^d" | awk '{print $9}'`
+for each_dir in `ls -l | grep "^d" | awk '{print $NF}'`
 
 	do
 	
@@ -42,7 +42,7 @@ for each_dir in `ls -l | grep "^d" | awk '{print $9}'`
 	fi
 	
 	#then copy to out dir 
-	cp -u $dir/*.ko     $DBG_OUT_PATH/
+	mv -u $dir/*.ko     $DBG_OUT_PATH/
 	
 	#if [ "$DBG_SYN_LI2XP" = "y" ]; then
 	#echo "######### execute Syn_file_Li2XP.sh ##########"

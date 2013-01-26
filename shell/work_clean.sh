@@ -4,7 +4,15 @@
 #       Date:         2010/04/27
 #=======================================================================================
 source ./env_entry.sh
-cd $DBG_WORK_PATH/$DBG_SOC/test && make clean
-cd $DBG_WORK_PATH/$DBG_SOC/touchscreen && make clean
-cd $DBG_WORK_PATH/$DBG_SOC/videoin && make clean
-cd $DBG_WORK_PATH/$DBG_SOC/fastboot && make clean
+
+dbg_soc=$DBG_WORK_PATH/$DBG_SOC/
+cd $dbg_soc
+
+for each_dir in `ls -l | grep "^d" | awk '{print $NF}'`
+
+do
+	cd $dbg_soc/$each_dir
+	make clean
+	
+done #end do 
+
