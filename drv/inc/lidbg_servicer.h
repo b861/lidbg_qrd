@@ -23,6 +23,9 @@
 #define CMD_FAST_POWER_OFF (70)
 #define UMOUNT_USB (80)
 
+#define SUSPEND_PREPARE (83)
+#define RESUME_PREPARE (84)
+
 void lidbg_servicer_main(int argc, char **argv);
 
 void k2u_write(int cmd);

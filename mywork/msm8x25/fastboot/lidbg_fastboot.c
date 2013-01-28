@@ -21,6 +21,7 @@ LIDBG_DEFINE;
 #include "lidbg_fastboot.h"
 
 
+//#define RUN_FASTBOOT
 
 static DECLARE_COMPLETION(suspend_start);
 static DECLARE_COMPLETION(early_suspend_start);
@@ -43,6 +44,8 @@ struct fastboot_data
 
 struct fastboot_data *fb_data;
 
+static spinlock_t kill_lock;
+unsigned long flags_kill;
 
 
 static struct task_struct *pwroff_task;
@@ -271,7 +274,8 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
 {
 
 
-    //struct task_struct *kill_process[100];
+    //struct task_struct *kill_process[32];
+    char kill_process[32][64];
 
     struct task_struct *p;
     struct mm_struct *mm;
@@ -286,6 +290,7 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
 
     //if(ptasklist_lock != NULL)
     //	read_lock(ptasklist_lock);
+	spin_lock_irqsave(&kill_lock, flags_kill);
 
     for_each_process(p)
     {
@@ -346,10 +351,12 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
             if (p)
             {
                 //kill_process[j] = p;
-                //j++;
+               
 
-                lidbg("## find %s to kill ##\n", p->comm);
+               // lidbg("## find %s to kill ##\n", p->comm);
 				
+			    sprintf(kill_process[j] , p->comm);
+				 j++;
 				force_sig(SIGKILL, p);
                 //lidbg("+\n");
             }
@@ -358,24 +365,25 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
         //if(ptasklist_lock != NULL)
         //	read_unlock(ptasklist_lock);
     }//for_each_process
+	spin_unlock_irqrestore(&kill_lock, flags_kill);
 
 
 	lidbg("-----------------------\n\n");
 
 
-/*
+
     if(j == 0)
         lidbg("find nothing to kill\n");
     else
         for(i = 0; i < j; i++)
         {
-        	if(kill_process[i])				
+        	//if(kill_process[i])				
         	{
-           		 force_sig(SIGKILL, kill_process[i]);
+           		lidbg("## find %s to kill ##\n", kill_process[i]);
 
         	}
         }
-*/
+
     DUMP_FUN_LEAVE;
 
 
@@ -563,7 +571,15 @@ void fastboot_pwroff(void)
 
 
 #ifdef FLY_DEBUG
+
+#ifdef RUN_FASTBOOT
     SOC_Write_Servicer(CMD_FAST_POWER_OFF);
+#else
+	SOC_Write_Servicer(SUSPEND_PREPARE);
+	msleep(500);
+	SOC_Key_Report(KEY_POWER, KEY_PRESSED_RELEASED);
+#endif
+
 #endif
 
     complete(&early_suspend_start);
@@ -622,7 +638,9 @@ static void fastboot_early_suspend(struct early_suspend *h)
 
 
 	fastboot_task_kill_exclude(kill_exclude_process);
-	
+#if 0
+	ignore_wakelock = 1;
+#endif
     wake_unlock(&(fb_data->flywakelock));
     complete(&suspend_start);
 
@@ -645,8 +663,13 @@ static void fastboot_late_resume(struct early_suspend *h)
 
 #endif
 */
+#ifdef FLY_DEBUG
+#ifndef RUN_FASTBOOT
 
+SOC_Write_Servicer(RESUME_PREPARE);
 
+#endif
+#endif
 
 
 }
@@ -709,6 +732,7 @@ static int  fastboot_probe(struct platform_device *pdev)
     }
     else wake_up_process(resume_task);
 
+	spin_lock_init(&kill_lock);
 
     DUMP_FUN_LEAVE;
 

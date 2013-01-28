@@ -648,10 +648,12 @@ static int thread_resume(void *data)
 
     DUMP_FUN_ENTER;
 	
-    msleep(3000);
-    lidbg("usb enable\n");
-	USB_WORK_ENABLE;
-
+    msleep(3000+4000);
+	
+	if(SOC_PWR_GetStatus() == PM_STATUS_LATE_RESUME_OK)
+	{
+		USB_WORK_ENABLE;
+	}
     DUMP_FUN_LEAVE;
     return 0;
 

@@ -48,6 +48,10 @@
 #define VIDEO_SET_PAL (81)
 #define VIDEO_SET_NTSC (82)
 
+#define SUSPEND_PREPARE (83)
+#define RESUME_PREPARE (84)
+
+
 
 pthread_t ntid;
 int fd = 0;
@@ -59,7 +63,7 @@ int  servicer_handler(int signum)
     int cmd = 0;
     static int count = 0;
     int readlen;
-    printf("servicer_handler+\n");
+    printf("servicer_handler++\n");
 
 
 
@@ -259,6 +263,23 @@ int  servicer_handler(int signum)
             break;
 
         }
+
+        case SUSPEND_PREPARE:
+        {
+			 printf("SUSPEND_PREPARE\n");
+			 system("echo 1 > /sys/bus/platform/devices/fastboot/fastboot");
+             break;
+
+        }
+        case RESUME_PREPARE:
+        {
+			printf("RESUME_PREPARE\n");
+			 system("echo 0 > /sys/bus/platform/devices/fastboot/fastboot");
+             break;
+
+        }
+
+
 	
         }
     }
