@@ -3,6 +3,7 @@ static int flag_io_config=0;
 static Vedio_Channel info_Vedio_Channel = NOTONE;
 static Vedio_Channel info_com_top_Channel = YIN2;
 extern TW9912_Signal signal_is_how[5];
+static struct task_struct * Signal_Test = NULL;
 u8 Image_Config[5][11]={
 						/*0*/	/*1*/	/*2*/	/*3*/	/*4*/	/*5*/	/*6*/	/*7*/	/*8*/	/*9*/	/*10*/
 					{	0xe9,		0Xf0,		0xf1,		0xf2,		0xf3,		0xf5,		0xf6,		0xf7,	        0xf8,		0xf9,		0xfd,	}, //BRIGHTNESS ed
@@ -309,6 +310,28 @@ int read_chips_signal_status(u8 cmd)
 	 mutex_unlock(&lock_chipe_config);
  return ret;//have change return 1 else retrun 0
 }
+static int thread_signal_test(void *data) 
+{int i=0;
+  long int timeout;
+  	 printk("tw9912:thread_signal_test()\n");
+	while(!kthread_should_stop())
+	{
+		timeout=10;
+		while(timeout > 0) 
+		{ //delay
+				timeout = schedule_timeout(timeout); 
+		} 
+
+		i=read_chips_signal_status(1);
+		
+		if(i)
+		{
+			printk("The backlight off!\n");
+			SOC_F_LCD_Light_Con(0);
+		}
+	}
+return 0;
+}
 void video_init_config_in(Vedio_Format config_pramat)
 {int i,j;
 printk( "Video Module Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);
@@ -384,6 +407,7 @@ mutex_lock(&lock_chipe_config);
 	TC358_init(COLORBAR);
 	  //TC358_init(STOP_VIDEO);
 	}
+//Signal_Test = kthread_run(thread_signal_test,NULL,"flyvideo_test");  
 //Correction_Parameter_fun(signal_is_how[info_Vedio_Channel].Format);
 //spin_unlock(&spin_chipe_config_lock);
 up(&sem);
