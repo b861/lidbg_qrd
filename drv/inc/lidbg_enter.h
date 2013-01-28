@@ -248,6 +248,8 @@ struct lidbg_fn_t
 	//void (*pfnlidbg_version_show)(void);
 	//video
 	int pfnglobal_video_camera_working_status;
+	//LCD
+	void (*pfnSOC_F_LCD_Light_Con)(unsigned int iOn);
 };
 
 

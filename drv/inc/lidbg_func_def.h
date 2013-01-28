@@ -86,6 +86,7 @@ static inline int check_pt(void)
 #define read_tw9912_chips_signal_status (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnread_tw9912_chips_signal_status))
 //video
 #define global_camera_working_status  (plidbg_dev->soc_func_tbl.pfnglobal_video_camera_working_status)
-
+//LCD
+#define SOC_F_LCD_Light_Con (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_F_LCD_Light_Con))
 #endif
 
