@@ -28,6 +28,7 @@
 #include <asm/system.h>
 #include <linux/fb.h>
 #include <linux/stat.h>
+#include <linux/proc_fs.h>
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
 #include <linux/earlysuspend.h>

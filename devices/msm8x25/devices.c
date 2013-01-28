@@ -20,7 +20,7 @@ LIDBG_DEFINE;
 #endif
 
 #include "devices.h"
-#include <linux/proc_fs.h>
+
 
 
 #define LIDBG_GPIO_PULLUP  GPIO_CFG_PULL_UP

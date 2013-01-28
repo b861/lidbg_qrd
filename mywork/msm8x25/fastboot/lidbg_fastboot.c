@@ -142,7 +142,7 @@ char *kill_exclude_process[] =
     //"flush-31:2",
     //"yaffs-bg-1",
     //"yaffs-bg-1",
-    "loop7",
+    //"loop7",
     "servicemanager",
     "vold",
     "netd",
@@ -260,6 +260,10 @@ char *kill_exclude_process[] =
 	".flyaudio.media",
 	"ndroid.calendar",
 	"settings:remote",
+	"kdmflush",
+	"kcryptd",
+	"kcryptd_io",
+	"dhcpcd",
 
     //"flush-31:6",
     //"flush-31:3",
@@ -268,6 +272,8 @@ char *kill_exclude_process[] =
     "task_kill_exclude_end",
 
 };
+
+
 
 
 static void fastboot_task_kill_exclude(char *exclude_process[])
@@ -290,6 +296,9 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
 
     //if(ptasklist_lock != NULL)
     //	read_lock(ptasklist_lock);
+
+
+	
 	spin_lock_irqsave(&kill_lock, flags_kill);
 
     for_each_process(p)
@@ -318,6 +327,7 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
 			(strncmp(p->comm, "jbd2", sizeof("jbd2") - 1) == 0) ||
 			(strncmp(p->comm, "ext4", sizeof("ext4") - 1) == 0) ||
 			(strncmp(p->comm, "scsi", sizeof("scsi") - 1) == 0) ||
+			(strncmp(p->comm, "loop", sizeof("loop") - 1) == 0) ||
             (strncmp(p->comm, "ksoftirqd", sizeof("ksoftirqd") - 1) == 0)
         )
         {
@@ -383,13 +393,27 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
 
         	}
         }
-
+	//msleep(10000);
     DUMP_FUN_LEAVE;
 
 
 
 }
 
+int kill_proc(char *buf, char **start, off_t offset, int count, int *eof, void *data )
+{
+
+
+	fastboot_task_kill_exclude(kill_exclude_process);
+
+    return 1;
+}
+
+void create_new_proc_entry()
+{
+    create_proc_read_entry("kill_task", 0, NULL, kill_proc, NULL);
+
+}
 
 
 static int thread_pwroff(void *data)
@@ -733,6 +757,7 @@ static int  fastboot_probe(struct platform_device *pdev)
     else wake_up_process(resume_task);
 
 	spin_lock_init(&kill_lock);
+    create_new_proc_entry();
 
     DUMP_FUN_LEAVE;
 
@@ -828,6 +853,8 @@ static void __exit fastboot_exit(void)
 {
     platform_driver_unregister(&fastboot_driver);
 }
+
+
 
 module_init(fastboot_init);
 module_exit(fastboot_exit);
