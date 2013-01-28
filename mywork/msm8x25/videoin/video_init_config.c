@@ -407,7 +407,7 @@ mutex_lock(&lock_chipe_config);
 	TC358_init(COLORBAR);
 	  //TC358_init(STOP_VIDEO);
 	}
-Signal_Test = kthread_run(thread_signal_test,NULL,"flyvideo_test");  
+//Signal_Test = kthread_run(thread_signal_test,NULL,"flyvideo_test");  
 //Correction_Parameter_fun(signal_is_how[info_Vedio_Channel].Format);
 //spin_unlock(&spin_chipe_config_lock);
 up(&sem);
