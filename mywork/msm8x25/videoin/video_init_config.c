@@ -80,7 +80,7 @@ int static VideoImage(void)
 		}
 
 #ifdef BOARD_V2
-	if(info_com_top_Channel == YIN2)
+	if(info_com_top_Channel == YIN2)//dvd cvbs
 	{
 	Tw9912_image[0]=0x08;//image dowd 3 line
 	Tw9912_image[1]=0x16;// image down 3 line
@@ -92,6 +92,41 @@ int static VideoImage(void)
        	Tw9912_image[0]=0x0B;//image dowd 3 line
 	Tw9912_image[1]=0xec;// image down 3 line
 	ret = write_tw9912(Tw9912_image);
+	}
+	else 	if(info_com_top_Channel == YIN3)//aux back_cvbs
+	{
+		if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
+		{
+			Tw9912_image[0]=0x08;//image dowd 3 line
+			Tw9912_image[1]=0x12;// image down 3 line
+			ret = write_tw9912(Tw9912_image);
+			Tw9912_image[0]=0x09;//image dowd 3 line
+			Tw9912_image[1]=0xf9;// image down 3 line
+			ret = write_tw9912(Tw9912_image);
+
+			Tw9912_image[0]=0x0A;//image dowd 3 line
+			Tw9912_image[1]=0x28;// image down 3 line
+			ret = write_tw9912(Tw9912_image);
+			
+		       	Tw9912_image[0]=0x0B;//image dowd 3 line
+			Tw9912_image[1]=0xec;// image down 3 line
+			ret = write_tw9912(Tw9912_image);
+		}
+		else//pal
+		{
+			Tw9912_image[0]=0x08;//image dowd 3 line
+			Tw9912_image[1]=0x10;// image down 3 line
+			ret = write_tw9912(Tw9912_image);
+		/*	Tw9912_image[0]=0x09;//image dowd 3 line
+			Tw9912_image[1]=0xf9;// image down 3 line
+			ret = write_tw9912(Tw9912_image);
+
+		       	Tw9912_image[0]=0x0B;//image dowd 3 line
+			Tw9912_image[1]=0xec;// image down 3 line
+			ret = write_tw9912(Tw9912_image);
+			*/
+		}
+
 	}
 #endif 
 return ret;
@@ -285,7 +320,7 @@ return camera_open_video_signal_test_in_2();
 Vedio_Format flyVideoTestSignalPin_in(u8 Channel)
 {Vedio_Format ret= NOTONE;
 //spin_lock(&spin_chipe_config_lock);
-//return NTSC_I;
+//return PAL_I;
 mutex_lock(&lock_chipe_config);
 	switch (Channel)
 	{
