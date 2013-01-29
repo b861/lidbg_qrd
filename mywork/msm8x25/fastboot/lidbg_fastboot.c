@@ -264,6 +264,10 @@ char *kill_exclude_process[] =
 	"kcryptd",
 	"kcryptd_io",
 	"dhcpcd",
+	"RilMessageDecod",
+	"getprop",
+	"setprop",
+
 
     //"flush-31:6",
     //"flush-31:3",
@@ -328,6 +332,8 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
 			(strncmp(p->comm, "ext4", sizeof("ext4") - 1) == 0) ||
 			(strncmp(p->comm, "scsi", sizeof("scsi") - 1) == 0) ||
 			(strncmp(p->comm, "loop", sizeof("loop") - 1) == 0) ||
+			
+		(strncmp(p->comm, "ServiceHandler", sizeof("ServiceHandler") - 1) == 0) ||
             (strncmp(p->comm, "ksoftirqd", sizeof("ksoftirqd") - 1) == 0)
         )
         {
