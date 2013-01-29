@@ -287,7 +287,9 @@ return 0;
 }
 static int video_dev_resume(struct platform_device *pdev)
 {
+printk("resume tw9912 reset\n");
 Tw9912_hardware_reset();
+
 return 0;
 }
 static struct platform_driver video_driver =
@@ -315,9 +317,9 @@ int lidbg_video_init(void)
 	printk("lidbg_video_init modules ismod\n");
 	LIDBG_GET;
 	set_func_tbl();
-	Tw9912_hardware_reset();
 //	TC358_init(PAL_I);
 	video_io_i2c_init();
+	Tw9912_hardware_reset();
 	flyVideoChannelInitall(YIN2); // DVD
 platform_driver_register(&video_driver);
 platform_device_register(&video_devices);
