@@ -23,6 +23,7 @@ void Tw9912_hardware_reset(void)
 {
 	tw9912_RESX_DOWN;
 	tw9912_RESX_UP;   
+	Tw9912_init_agin();
 }
 i2c_ack read_tw9912(unsigned int sub_addr, char *buf )
 {
