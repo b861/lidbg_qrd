@@ -443,7 +443,7 @@ static int thread_pwroff(void *data)
 #ifdef FLY_DEBUG
                     if(time_count >= 10)
 #else
-                    if(time_count >= 15)
+                    if(time_count >= 12)
 #endif
                     {
                         lidbgerr("thread_pwroff wait early suspend timeout!\n");
@@ -490,7 +490,7 @@ static int thread_fastboot_suspend(void *data)
 #ifdef FLY_DEBUG
                     if(time_count >= 15)
 #else
-                    if(time_count >= 20)
+                    if(time_count >= 17)
 #endif
                     {
                         lidbgerr("thread_fastboot_suspend wait suspend timeout!\n");
