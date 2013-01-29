@@ -55,6 +55,7 @@ struct early_suspend early_suspend;
 #endif
 
 bool suspend_test = 0;
+bool suspend_flag = 0;
 
 int i2c_devices_probe(int i2c_bus, unsigned char *i2c_devices_list)
 {
@@ -343,7 +344,11 @@ void led_on(void)
 
 #if 1
     static int led_status = 0;
-
+	if(suspend_flag == 1)
+	{
+		LED_ON;
+		return;
+	}
     if(led_status == 0)
     {
         LED_OFF;
@@ -567,8 +572,10 @@ static void devices_early_suspend(struct early_suspend *handler)
     if(platform_id ==  PLATFORM_FLY)
     {
         LCD_OFF;
+		LED_ON;
 		
     }
+	suspend_flag = 1;
     DUMP_FUN_LEAVE;
 
 }
@@ -578,6 +585,8 @@ static void devices_late_resume(struct early_suspend *handler)
     int err;
 
     DUMP_FUN_ENTER;
+	
+	suspend_flag = 0;
     if(platform_id ==  PLATFORM_FLY)
     {
 
@@ -633,6 +642,7 @@ static int  soc_dev_suspend(struct platform_device *pdev, pm_message_t state)
 #endif
 
 		PWR_EN_OFF;
+		LED_ON;
 
 
     }
