@@ -202,18 +202,18 @@ char *kill_exclude_process[] =
 
 
     "mm-qcamera-daemon",
-    "com.android.qualcomm",
-    "com.android.settings",
-    "com.qualcomm.privinit",
-    "com.qualcomm.restore.airplanemode",
-    "com.qualcomm.cabl",
-    "com.innopath.activecare",
-    "com.android.systemui",
-    "com.android.launcher",
+   // "com.android.qualcomm",
+    //"com.android.settings",
+   // "com.qualcomm.privinit",
+    //"com.qualcomm.restore.airplanemode",
+   // "com.qualcomm.cabl",
+   // "com.innopath.activecare",
+    //"com.android.systemui",
+   // "com.android.launcher",
     "com.qualcomm.fastboot",
-    "com.android.phone",
+    //"com.android.phone",
     "com.android.inputmethod.latin",
-    "com.qualcomm.stats",
+    //"com.qualcomm.stats",
 
 
 
@@ -223,43 +223,43 @@ char *kill_exclude_process[] =
     "oadcastreceiver",
     "mm-qcamera-daem",
     "putmethod.latin",
-    "m.android.phone",
-    "ndroid.launcher",
-    "ndroid.settings",
-    "d.process.acore",
-    "ndroid.qualcomm",
-    "re.airplanemode",
-    "ndroid.systemui",
-    "path.activecare",
-    "m.qualcomm.cabl",
-    "viders.calendar",
-    ".qualcomm.stats",
-    "alcomm.privinit",
+    //"m.android.phone",
+    //"ndroid.launcher",
+    //"ndroid.settings",
+   // "d.process.acore",
+    //"ndroid.qualcomm",
+   // "re.airplanemode",
+   // "ndroid.systemui",
+   // "path.activecare",
+   // "m.qualcomm.cabl",
+   // "viders.calendar",
+   // ".qualcomm.stats",
+   // "alcomm.privinit",
     "alcomm.fastboot",
-    "android.smspush",
-    "ndroid.contacts",
-    "d.process.media",
-    "qrd.simcontacts",
-    "droid.gallery3d",
-    "ndroid.exchange",
-    "m.android.email",
-    "oid.voicedialer",
-    "android.musicfx",
-    "droid.deskclock",
-    "com.android.mms",
-    "m.android.music",
-	"omm.datamonitor",
-	"oid.sysinfo.pro",
+   // "android.smspush",
+    //"ndroid.contacts",
+   // "d.process.media",
+    //"qrd.simcontacts",
+    //"droid.gallery3d",
+   // "ndroid.exchange",
+    //"m.android.email",
+    //"oid.voicedialer",
+   // "android.musicfx",
+    //"droid.deskclock",
+    //"com.android.mms",
+    //"m.android.music",
+	//"omm.datamonitor",
+	//"oid.sysinfo.pro",
 
 
 //flyaudio	
-	"roid.flyaudioui",
+	//"roid.flyaudioui",
 	"goodix_wq",
-	"io3.widget.time",
-	"lyaudio.Weather",
-	".flyaudio.media",
-	"ndroid.calendar",
-	"settings:remote",
+	//"io3.widget.time",
+	//"lyaudio.Weather",
+	//".flyaudio.media",
+	//"ndroid.calendar",
+	//"settings:remote",
 	"kdmflush",
 	"kcryptd",
 	"kcryptd_io",
@@ -332,8 +332,7 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
 			(strncmp(p->comm, "ext4", sizeof("ext4") - 1) == 0) ||
 			(strncmp(p->comm, "scsi", sizeof("scsi") - 1) == 0) ||
 			(strncmp(p->comm, "loop", sizeof("loop") - 1) == 0) ||
-			
-		(strncmp(p->comm, "ServiceHandler", sizeof("ServiceHandler") - 1) == 0) ||
+			(strncmp(p->comm, "ServiceHandler", sizeof("ServiceHandler") - 1) == 0) ||
             (strncmp(p->comm, "ksoftirqd", sizeof("ksoftirqd") - 1) == 0)
         )
         {
@@ -371,8 +370,7 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
 
                // lidbg("## find %s to kill ##\n", p->comm);
 				
-			    sprintf(kill_process[j] , p->comm);
-				 j++;
+			    sprintf(kill_process[j++] , p->comm);
 				force_sig(SIGKILL, p);
                 //lidbg("+\n");
             }
@@ -605,8 +603,8 @@ void fastboot_pwroff(void)
 #ifdef RUN_FASTBOOT
     SOC_Write_Servicer(CMD_FAST_POWER_OFF);
 #else
-	SOC_Write_Servicer(SUSPEND_PREPARE);
-	msleep(500);
+	//SOC_Write_Servicer(SUSPEND_PREPARE);
+	//msleep(500);
 	SOC_Key_Report(KEY_POWER, KEY_PRESSED_RELEASED);
 #endif
 
@@ -696,7 +694,7 @@ static void fastboot_late_resume(struct early_suspend *h)
 #ifdef FLY_DEBUG
 #ifndef RUN_FASTBOOT
 
-SOC_Write_Servicer(RESUME_PREPARE);
+//SOC_Write_Servicer(RESUME_PREPARE);
 
 #endif
 #endif
