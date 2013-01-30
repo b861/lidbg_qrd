@@ -584,6 +584,7 @@ void fastboot_pwroff(void)
         msleep(200);
 
     }
+	fastboot_set_status(PM_STATUS_READY_TO_PWROFF);
 
 #if 1 //ndef FLY_DEBUG
 	SOC_Key_Report(KEY_PAUSECD, KEY_PRESSED_RELEASED);
@@ -595,7 +596,7 @@ void fastboot_pwroff(void)
     SOC_Dev_Suspend_Prepare();
 
 
-    fastboot_set_status(PM_STATUS_READY_TO_PWROFF);
+   //fastboot_set_status(PM_STATUS_READY_TO_PWROFF);
 
 
 #ifdef FLY_DEBUG
