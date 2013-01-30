@@ -2,11 +2,6 @@
 #include "lidbg_def.h"
 
 #include "lidbg_enter.h"
-#include "devices.h"
-
-
-
-
 
 
 #include <linux/kernel.h>
@@ -21,16 +16,18 @@
 #include <linux/slab.h>
 #include <linux/sysfs.h>
 
-static struct task_struct *key_task;
+static struct task_struct *test_task;
 
 LIDBG_DEFINE;
 
 
 
-int thread_key_xxx(void *data)
+int thread_test_xxx(void *data)
 {
-
-
+	u8 tmp,i,j,buff[2];
+	i=0;
+	j=0;
+	tmp=0;
     while(1)
     {
         set_current_state(TASK_UNINTERRUPTIBLE);
@@ -40,16 +37,17 @@ int thread_key_xxx(void *data)
 
             while(1)
             {
-            
-              //  soc_task_kill("mediaserver");
-                USB_WORK_ENABLE;
-                msleep(30000);
-
+            	buff[0]=0x63;
+            	buff[1]=i&0xff;
+				i++;
+				j=128;
+				while(j--)
+					SOC_I2C_Send(1,0x88>>1, buff, 2);
 				
-				SOC_Write_Servicer(UMOUNT_USB);
-				msleep(5000);
-                USB_WORK_DISENABLE;
-				msleep(30000);
+				//SOC_I2C_Rec(1,0x88>>1, 0x63, &tmp,1);
+				printk(".");
+            	msleep(10);
+				
 
             }
         }
@@ -65,17 +63,17 @@ int thread_key_xxx(void *data)
 
 int lidbg_test_init(void)
 {
-    lidbg("lidbg_test_init.\n");
+    DUMP_BUILD_TIME;
     LIDBG_GET;
 
 
-    key_task = kthread_create(thread_key_xxx, NULL, "key_task");
-    if(IS_ERR(key_task))
+    test_task = kthread_create(thread_test_xxx, NULL, "test_task");
+    if(IS_ERR(test_task))
     {
         lidbg("Unable to start kernel thread.\n");
 
     }
-    else wake_up_process(key_task);
+    else wake_up_process(test_task);
     return 0;
 
 }
