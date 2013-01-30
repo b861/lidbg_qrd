@@ -4,6 +4,7 @@ static Vedio_Channel info_Vedio_Channel = NOTONE;
 static Vedio_Channel info_com_top_Channel = YIN2;
 extern TW9912_Signal signal_is_how[5];
 static struct task_struct * Signal_Test = NULL;
+#ifndef BOARD_V2 // V1
 u8 Image_Config[5][11]={
 						/*0*/	/*1*/	/*2*/	/*3*/	/*4*/	/*5*/	/*6*/	/*7*/	/*8*/	/*9*/	/*10*/
 					{	0xe9,		0Xf0,		0xf1,		0xf2,		0xf3,		0xf5,		0xf6,		0xf7,	        0xf8,		0xf9,		0xfd,	}, //BRIGHTNESS ed
@@ -36,6 +37,41 @@ static u8 Tw9912_image_global_AUX_BACK[5][2]={
 									{0x13,0x80},//SHARPNESS
 									{0x14,0x80},//SHARPNESS
 								};
+
+#else// V2
+u8 Image_Config[5][11]={
+						/*0*/	/*1*/	/*2*/	/*3*/	/*4*/	/*5*/	/*6*/	/*7*/	/*8*/	/*9*/	/*10*/
+					{	0xe9,		0Xf0,		0xf1,		0xf2,		0xf3,		0xef,		0xf6,		0xf7,	        0xf8,		0xf9,		0xfd,	}, //BRIGHTNESS ed
+					{	0x55,		0x60,		0x69,		0x70,		0x75,        0x80,		0x85,		0x8f	,	0x95,		0x9f,		0xa5,},//CONTRAST 9f
+					{	0x81,		0x96,		0xb9,		0xdf,		0xe7,		0xff,		0x0,   	0xa,		0x35,		0x63,		0x7f,},//HUE
+					{	0x46,		0x56,		0x76,		0x86,		0x96,		0xa6,		0xaf,		0xb6, 	0xbf,		0xc6,		0xd6,},//SHARPNESS
+					{	0x46,		0x56,		0x76,		0x86,		0x96,		0xa6,		0xaf,		0xb6, 	0xbf,		0xc6,		0xd6,},//SHARPNESS
+					   };
+static u8 Tw9912_image_global[5][2]={
+									{0x10,0xef},//BRIGHTNESS
+									{0x11,0x80},//CONTRAST
+																	
+									{0x15,0xff},//HUE
+									{0x13,0xa6},//SHARPNESS
+									{0x14,0xa6},//SHARPNESS
+								};
+u8 Image_Config_AUX_BACK[5][11]={
+						/*0*/	/*1*/	/*2*/	/*3*/	/*4*/	/*5*/	/*6*/	/*7*/	/*8*/	/*9*/	/*10*/
+					{	0x15,		0X0f, 	0x09,		0x05,		0x03,		0xff,		0xfa,		0xf0,		0xe9,	        0xe0,		0xc9,	}, //BRIGHTNESS
+					{	0x39,		0x40,		0x45,		0x50,		0x59,		0x60,		0x65,		0x6a	,	0x75,		0x8a,		0x90,},//CONTRAST
+					{	0xa9,		0xb5,		0xc5,		0xe0,		0xf1,		0x00,		0x20,		0x30	,	0x40,		0x50,		0x60,},//HUE
+					{	0x30,		0x40,		0x50,		0x60,		0x70,		0x80,		0x90,		0xa0	,	0xb0,		0xc0,		0xd0,},//SHARPNESS
+					{	0x30,		0x40,		0x50,		0x60,		0x70,		0x80,		0x90,		0xa0	,	0xb0,		0xc0,		0xd0,},//SHARPNESS
+					   };
+static u8 Tw9912_image_global_AUX_BACK[5][2]={
+									{0x10,0xff},//BRIGHTNESS
+									{0x11,0x60},//CONTRAST
+																	
+									{0x15,0x00},//HUE
+									{0x13,0x80},//SHARPNESS
+									{0x14,0x80},//SHARPNESS
+								};
+#endif
 //spinlock_t spin_chipe_config_lock;
 struct mutex lock_chipe_config;
 struct semaphore sem;
@@ -428,8 +464,8 @@ mutex_lock(&lock_chipe_config);
 				else
 				{
 				//switch (flyVideoSignalPinTest(info_Vedio_Channel))
-				
-					switch (signal_is_how[info_Vedio_Channel].Format)
+				if(1){
+			switch (signal_is_how[info_Vedio_Channel].Format)
 					{
 					case NTSC_I: TC358_init(NTSC_I);
 						   //TC358_init(PAL_Interlace);
@@ -444,6 +480,9 @@ mutex_lock(&lock_chipe_config);
 						   TC358_init(COLORBAR+1);//blue
 						break;
 					}
+				}
+				else
+				  TC358_init(COLORBAR);
 				/**/
 				}
 		}//if(info_Vedio_Channel<=SEPARATION)
