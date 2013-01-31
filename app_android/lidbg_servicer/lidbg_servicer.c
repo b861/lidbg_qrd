@@ -424,13 +424,19 @@ open_dev:
     //chegnweidong
     system("chmod 0777 /dev/flysemdriver");
 
+
+	sleep(5);
+
+	
+	system("chmod 777 /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
+
 #endif
 if(0)
 {
 		system("echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
 		
-		//stem("echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
-		//stem("echo powersave > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
+		//system("echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
+		//system("echo powersave > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
 		sleep(10);
 	{
 		 int i=15;
