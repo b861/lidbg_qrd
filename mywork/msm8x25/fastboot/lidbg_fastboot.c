@@ -198,6 +198,8 @@ char *kill_exclude_process[] =
 	"bootanimation",
 	"fsck_msdos",
 	"usb-storage",
+	"sys.DeviceHealth",
+	"system",
 
 
 
@@ -208,7 +210,7 @@ char *kill_exclude_process[] =
     //"com.qualcomm.restore.airplanemode",
    // "com.qualcomm.cabl",
    // "com.innopath.activecare",
-    //"com.android.systemui",
+    "com.android.systemui",
    // "com.android.launcher",
     "com.qualcomm.fastboot",
     //"com.android.phone",
@@ -226,10 +228,10 @@ char *kill_exclude_process[] =
     //"m.android.phone",
     //"ndroid.launcher",
     //"ndroid.settings",
-   // "d.process.acore",
+    "d.process.acore",
     //"ndroid.qualcomm",
    // "re.airplanemode",
-   // "ndroid.systemui",
+    "ndroid.systemui",
    // "path.activecare",
    // "m.qualcomm.cabl",
    // "viders.calendar",
@@ -238,14 +240,14 @@ char *kill_exclude_process[] =
     "alcomm.fastboot",
    // "android.smspush",
     //"ndroid.contacts",
-   // "d.process.media",
+    "d.process.media",
     //"qrd.simcontacts",
     //"droid.gallery3d",
    // "ndroid.exchange",
     //"m.android.email",
     //"oid.voicedialer",
    // "android.musicfx",
-    //"droid.deskclock",
+    "droid.deskclock",
     //"com.android.mms",
     //"m.android.music",
 	//"omm.datamonitor",
@@ -253,7 +255,7 @@ char *kill_exclude_process[] =
 
 
 //flyaudio	
-	//"roid.flyaudioui",
+	"roid.flyaudioui",
 	"goodix_wq",
 	//"io3.widget.time",
 	//"lyaudio.Weather",
