@@ -84,7 +84,7 @@ static struct TC358_register_struct PALp_init_tab[]=
 
 static struct TC358_register_struct NTSCp_init_tab[]=
 {
-//	add		value(dec)		register width			value(hex)
+//	add		value(dec)		register width			value(hex)   
 //0x0002	,	1 	,	register_value_width_16		},   //	0001
 //0x0002	,	0 	,	register_value_width_16		},   //	0000
 {	0x0016	,	4395 	,	register_value_width_16		},   //	112B
@@ -92,9 +92,9 @@ static struct TC358_register_struct NTSCp_init_tab[]=
 {	0x0006	,	196 	,	register_value_width_16		},   //	00C4
 {	0x0008	,	96 	,	register_value_width_16		},   //	0060
 {	0x0022	,	1500 	,	register_value_width_16		},   //	5A0
-{0x0100,0x203,register_value_width_32},//clck current 
-{0x0104,0x203,register_value_width_32},//lane0 current 
-{0x0108,0x203,register_value_width_32},//lane1 current 
+{0x0100,0x200,register_value_width_32},//clck current 
+{0x0104,0x200,register_value_width_32},//lane0 current 
+{0x0108,0x200,register_value_width_32},//lane1 current 
 {	0x0140	,	0 	,	register_value_width_32		},   //	00000000
 {	0x0144	,	0 	,	register_value_width_32		},   //	00000000
 {	0x0148	,	0 	,	register_value_width_32		},   //	00000000

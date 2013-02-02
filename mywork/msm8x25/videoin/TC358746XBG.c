@@ -15,7 +15,7 @@ timeout = schedule_timeout(timeout); \
 } \
 }while(0);
 #endif
-
+  
 
 #define COLOR_BLACK 0
 #define COLOR_RED 2
