@@ -119,10 +119,10 @@ int static VideoImage(void)
 	if(info_com_top_Channel == YIN2)//dvd cvbs
 	{
 	Tw9912_image[0]=0x08;//image dowd 3 line
-	Tw9912_image[1]=0x14;// image down 3 line
+	Tw9912_image[1]=0x15;// image down 3 line
 	ret = write_tw9912(Tw9912_image);
 	Tw9912_image[0]=0x09;//image dowd 3 line
-	Tw9912_image[1]=0xfb;// image down 3 line
+	Tw9912_image[1]=0xfa;// image down 3 line
 	ret = write_tw9912(Tw9912_image);
 
        	Tw9912_image[0]=0x0B;//image dowd 3 line
