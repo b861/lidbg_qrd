@@ -183,7 +183,7 @@ char *kill_exclude_process[] =
 	"mkdir",
     "chmod",
     //"irq/304-ft5x06_",
-    "system_server",
+    //"system_server",
     "ATFWD-daemon",
     "mpdecision",
     //"flush-31:5",
@@ -199,7 +199,7 @@ char *kill_exclude_process[] =
 	"fsck_msdos",
 	"usb-storage",
 	"sys.DeviceHealth",
-	"system",
+	//"system",
 
 
 
@@ -335,6 +335,7 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
 			(strncmp(p->comm, "scsi", sizeof("scsi") - 1) == 0) ||
 			(strncmp(p->comm, "loop", sizeof("loop") - 1) == 0) ||
 			(strncmp(p->comm, "ServiceHandler", sizeof("ServiceHandler") - 1) == 0) ||
+			(strncmp(p->comm, "system", sizeof("system") - 1) == 0) ||
             (strncmp(p->comm, "ksoftirqd", sizeof("ksoftirqd") - 1) == 0)
         )
         {
