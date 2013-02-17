@@ -294,7 +294,7 @@ printk("tw9912:@@@@@flyVideoInitall_in(Channel=%d)\n",Channel);
 		info_com_top_Channel = Channel;
 		if(Channel == YIN2)//dvd
 		{
-	//	info_com_top_Channel = SEPARATION;
+		info_com_top_Channel = SEPARATION;
 		}
 		global_video_channel_flag = Channel;
 	}
@@ -426,7 +426,13 @@ printk( "Video Module Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME_
 printk("tw9912:@@@@@video_init_config_in(config_pramat=%d)\n",config_pramat);
 //spin_lock(&spin_chipe_config_lock);
 mutex_lock(&lock_chipe_config);
-	if(config_pramat != STOP_VIDEO)
+
+if(info_com_top_Channel ==SEPARATION)
+	{
+Tw9912_init_NTSCp();	
+TC358_init(NTSC_P);
+	}
+else	if(config_pramat != STOP_VIDEO)
 	{	
 		if(info_com_top_Channel == NOTONE)
 		{
