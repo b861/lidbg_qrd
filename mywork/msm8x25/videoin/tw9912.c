@@ -420,7 +420,8 @@ u8 Tw9912_input_pin_selet[]={0x02,0x40,};//default input pin selet YIN0
 TW9912_Signal signal_is_how_1={NOTONE,OTHER,source_other};
 TW9912_input_info tw9912_input_information_1;
 
-	if(the_last_config.Channel != Channel && the_last_config.Channel == SEPARATION)
+	//if(the_last_config.Channel != Channel && the_last_config.Channel == SEPARATION)
+if(the_last_config.Channel != Channel)
 	{
 		Tw9912_init_agin(); 
 	}
@@ -680,18 +681,19 @@ int Tw9912_init_agin(void)
 {
     u32 i = 0;
     u8 *config_pramat_piont=NULL;
-	tw9912_dbg("Tw9912_init_agin +\n");
+	printk("Tw9912_init_agin +\n");
 	TC9912_id();
-the_last_config.Channel =YIN3;
+	the_last_config.Channel =YIN3;
 	the_last_config.format = PAL_I;
-	config_pramat_piont=TW9912_INIT_AGAIN;
+	//config_pramat_piont=TW9912_INIT_AGAIN;
+	config_pramat_piont=TW9912_INIT_NTSC_Interlaced_input;
 	while(config_pramat_piont[i*2] != 0xfe)
 	{    
 		if(write_tw9912(&config_pramat_piont[i*2])==NACK) goto CONFIG_not_ack_fail;
 		tw9912_dbg("w a=%x,v=%x\n",config_pramat_piont[i*2],config_pramat_piont[i*2+1]);
 		i++;
 	}
-	tw9912_dbg("Tw9912_init_agin -\n");
+	printk("Tw9912_init_agin -\n");
    return 1;
 CONFIG_not_ack_fail:
 	tw9912_dbg("%s:have NACK error!\n",__FUNCTION__);

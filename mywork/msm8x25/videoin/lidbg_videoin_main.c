@@ -321,6 +321,7 @@ int lidbg_video_init(void)
 	video_io_i2c_init();
 	Tw9912_hardware_reset();
 	flyVideoChannelInitall(YIN2); // DVD
+	video_init_config_in(NTSC_P);//first initall tw9912 all register
 platform_driver_register(&video_driver);
 platform_device_register(&video_devices);
 	    return 0;

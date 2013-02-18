@@ -39,7 +39,7 @@ static u8 Tw9912_image_global_AUX_BACK[5][2]={
 								};
 
 #else// V2
-u8 Image_Config[5][11]={
+u8 Image_Config[5][11]={//DVD YIN2
 						/*0*/	/*1*/	/*2*/	/*3*/	/*4*/	/*5*/	/*6*/	/*7*/	/*8*/	/*9*/	/*10*/
 					{	0xc5,		0Xd5,	0xdd,		0xe5,		0xed,		0xef,		0xf2,		0xf5,	        0xf8,		0xfb,		0xff,	}, //BRIGHTNESS ed
 					{	0x55,		0x65,		0x6d,		0x75,		0x7d,        0x80,		0x87,		0x8e	,	0x95,		0x9c,		0xa5,},//CONTRAST 9f
@@ -47,7 +47,7 @@ u8 Image_Config[5][11]={
 					{	0x20,		0x4a,		0x64,		0x7e,		0x98,		0xb6, 	0xbf,		0xc6,		0xd6,		0xe6,		0xf6,},//SHARPNESS
 					{	0x20,		0x4a,		0x64,		0x7e,		0x98,		0xb6, 	0xbf,		0xc6,		0xd6,		0xe6,		0xf6,},//SHARPNESS
 					   };
-static u8 Tw9912_image_global[5][2]={
+static u8 Tw9912_image_global[5][2]={//DVD YIN2
 									{0x10,0xef},//BRIGHTNESS
 									{0x11,0x80},//CONTRAST
 																	
@@ -55,7 +55,7 @@ static u8 Tw9912_image_global[5][2]={
 									{0x13,0xb6},//SHARPNESS
 									{0x14,0xb6},//SHARPNESS
 								};
-u8 Image_Config_AUX_BACK[5][11]={
+u8 Image_Config_AUX_BACK[5][11]={//back or AUX
 						/*0*/	/*1*/	/*2*/	/*3*/	/*4*/	/*5*/	/*6*/	/*7*/	/*8*/	/*9*/	/*10*/
 					{	0x15,		0X0f, 	0x09,		0x05,		0x03,		0xff,		0xfa,		0xf0,		0xe9,	        0xe0,		0xc9,	}, //BRIGHTNESS
 					{	0x39,		0x40,		0x45,		0x50,		0x59,		0x60,		0x65,		0x6a	,	0x75,		0x8a,		0x90,},//CONTRAST
@@ -63,7 +63,7 @@ u8 Image_Config_AUX_BACK[5][11]={
 					{	0x30,		0x40,		0x50,		0x60,		0x70,		0x80,		0x90,		0xa0	,	0xb0,		0xc0,		0xd0,},//SHARPNESS
 					{	0x30,		0x40,		0x50,		0x60,		0x70,		0x80,		0x90,		0xa0	,	0xb0,		0xc0,		0xd0,},//SHARPNESS
 					   };
-static u8 Tw9912_image_global_AUX_BACK[5][2]={
+static u8 Tw9912_image_global_AUX_BACK[5][2]={//back or AUX
 									{0x10,0xff},//BRIGHTNESS
 									{0x11,0x60},//CONTRAST
 																	
@@ -71,7 +71,24 @@ static u8 Tw9912_image_global_AUX_BACK[5][2]={
 									{0x13,0x80},//SHARPNESS
 									{0x14,0x80},//SHARPNESS
 								};
+
 #endif
+u8 Image_Config_separation[5][11]={//DVD separation
+						/*0*/	/*1*/	/*2*/	/*3*/	/*4*/	/*5*/	/*6*/	/*7*/	/*8*/	/*9*/	/*10*/
+					{	0xc5,		0Xd5,	0xdd,		0xe5,		0xe0,		0xee,		0xf2,		0xf5,	        0xf8,		0xfb,		0xff,	}, //BRIGHTNESS ed
+					{	0x55,		0x65,		0x6d,		0x75,		0x7d,        0x80,		0x87,		0x8e	,	0x95,		0x9c,		0xa5,},//CONTRAST 9f
+					{	0x81,		0x96,		0xb9,		0xdf,		0xe7,		0xff,		0x0,   	0xa,		0x35,		0x63,		0x7f,},//HUE
+					{	0x20,		0x4a,		0x64,		0x7e,		0x98,		0xb6, 	0xbf,		0xc6,		0xd6,		0xe6,		0xf6,},//SHARPNESS
+					{	0x20,		0x4a,		0x64,		0x7e,		0x98,		0xb6, 	0xbf,		0xc6,		0xd6,		0xe6,		0xf6,},//SHARPNESS
+					   };
+static u8 Tw9912_image_global_separation[5][2]={//DVD separation
+									{0x10,0xee},//BRIGHTNESS
+									{0x11,0x80},//CONTRAST
+																	
+									{0x15,0xff},//HUE
+									{0x13,0xb6},//SHARPNESS
+									{0x14,0xb6},//SHARPNESS
+								};
 //spinlock_t spin_chipe_config_lock;
 struct mutex lock_chipe_config;
 struct semaphore sem;
@@ -93,10 +110,12 @@ int static VideoImage(void)
  printk("\ntw9912:@@@@@VideoImage()\n");
  	for(i=0;i<5;i++)
  		{
- 		if(info_com_top_Channel == YIN3)
-			ret = write_tw9912(&Tw9912_image_global_AUX_BACK[i]);
-		else
-			ret = write_tw9912(&Tw9912_image_global[i]);
+	 		if(info_com_top_Channel == YIN3)//back or AUX
+				ret = write_tw9912(&Tw9912_image_global_AUX_BACK[i]);
+			else if(info_com_top_Channel == YIN2)//DVD YIN2
+				ret = write_tw9912(&Tw9912_image_global[i]);
+			else //DVD SEPARATION
+				ret = write_tw9912(&Tw9912_image_global_separation[i]);
 		}
 
 	if(info_com_top_Channel == YIN3)// back or AUX
@@ -109,10 +128,14 @@ int static VideoImage(void)
 			Tw9912_image[1]=0x22;// image down 5 line
 			ret = write_tw9912(Tw9912_image);
 		}
-	else
+	else if(info_com_top_Channel == YIN2)//DVD
 		{
 		u8 Tw9912_image[2]={0x08,0x1a,};//image reft 5 line
 			ret = write_tw9912(Tw9912_image);
+		}
+	else 
+		{
+		;
 		}
 
 #ifdef BOARD_V2
@@ -230,7 +253,7 @@ mutex_lock(&lock_chipe_config);
 					break;
 			}
 	}
-	else
+	else if(info_com_top_Channel == YIN2)
 	{
 			switch (cmd)
 			{
@@ -278,6 +301,54 @@ mutex_lock(&lock_chipe_config);
 
 			}
 	}
+	else 
+	{
+		switch (cmd)
+		{
+			case BRIGHTNESS ://ok
+				Tw9912_image[0]=0x10;
+				Tw9912_image[1]=Image_Config_separation[0][valu];
+				
+				Tw9912_image_global_separation[0][1]=Image_Config_separation[0][valu];//remember
+				ret = write_tw9912(&Tw9912_image);
+				break;
+			case CONTRAST ://ok
+				Tw9912_image[0]=0x11;
+				//if(global_video_format_flag = NTSC_I)
+				{
+					Tw9912_image[1]=Image_Config_separation[1][valu];
+					Tw9912_image_global_separation[1][1]=Image_Config_separation[1][valu];
+				}
+				ret = write_tw9912(&Tw9912_image);
+				break;
+			case HUE ://bad
+				Tw9912_image[0]=0x15;
+				//if(global_video_format_flag = NTSC_I)
+				{
+					Tw9912_image[1]=Image_Config_separation[2][valu];
+					Tw9912_image_global_separation[2][1]=Image_Config_separation[2][valu];
+				}
+				ret = write_tw9912(&Tw9912_image);
+				break;
+			case SHARPNESS ://bad
+			case CHROMA_U :
+			case CHROMA_V :
+				//if(global_video_format_flag = NTSC_I)
+				{
+					Tw9912_image[1]=Image_Config_separation[3][valu];
+					Tw9912_image_global_separation[3][1]=Image_Config_separation[3][valu];
+				}
+				Tw9912_image[0]=0x13;
+				ret = write_tw9912(&Tw9912_image);
+
+					Tw9912_image[1]=Image_Config_separation[4][valu];
+					Tw9912_image_global_separation[4][1]=Image_Config_separation[4][valu];
+				Tw9912_image[0]=0x14;
+				ret = write_tw9912(&Tw9912_image);
+				break;
+
+		}
+	}
 //spin_unlock(&spin_chipe_config_lock);
 mutex_unlock(&lock_chipe_config);
 	return ret;
@@ -295,6 +366,8 @@ printk("tw9912:@@@@@flyVideoInitall_in(Channel=%d)\n",Channel);
 		if(Channel == YIN2)//dvd
 		{
 		info_com_top_Channel = SEPARATION;
+		//info_com_top_Channel = YIN0;
+
 		}
 		global_video_channel_flag = Channel;
 	}
@@ -357,6 +430,8 @@ Vedio_Format flyVideoTestSignalPin_in(u8 Channel)
 {Vedio_Format ret= NOTONE;
 //spin_lock(&spin_chipe_config_lock);
 //return PAL_I;
+if(Channel == YIN2 || Channel == SEPARATION)
+	return NTSC_P;
 mutex_lock(&lock_chipe_config);
 	switch (Channel)
 	{
@@ -421,7 +496,7 @@ static int thread_signal_test(void *data)
 return 0;
 }
 void video_init_config_in(Vedio_Format config_pramat)
-{int i,j;
+{int i,j;   
 printk( "Video Module Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);
 printk("tw9912:@@@@@video_init_config_in(config_pramat=%d)\n",config_pramat);
 //spin_lock(&spin_chipe_config_lock);
@@ -429,7 +504,8 @@ mutex_lock(&lock_chipe_config);
 
 if(info_com_top_Channel ==SEPARATION)
 	{
-Tw9912_init_NTSCp();	
+Tw9912_init_NTSCp();
+VideoImage();
 TC358_init(NTSC_P);
 	}
 else	if(config_pramat != STOP_VIDEO)
