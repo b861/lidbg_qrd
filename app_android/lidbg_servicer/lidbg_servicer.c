@@ -426,9 +426,11 @@ open_dev:
 
 
 	sleep(5);
-
+	
 	
 	system("chmod 777 /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
+
+
 
 #endif
 if(0)
@@ -450,10 +452,22 @@ if(0)
 	}
 
 }
+
+	sleep(30);
+	system("chmod 777 /sys/module/lowmemorykiller/parameters/minfree");
+	// cat /sys/module/lowmemorykiller/parameters/minfree
+	//system("echo 3674,4969,6264,8312,9607,11444 > /sys/module/lowmemorykiller/parameters/minfree");//origin
+	sleep(1);
+	printf("set minfree\n");
+	system("echo 3674,4969,6264,6264,6264,6264 > /sys/module/lowmemorykiller/parameters/minfree");
+
+
 	
 	printf("enter while\n");
     while(1)
     {
+    	//printf("enter while...\n");
+		//system("echo 3674,4969,6264,6264,6264,6264 > /sys/module/lowmemorykiller/parameters/minfree");
 		sleep(60);
     }
 
