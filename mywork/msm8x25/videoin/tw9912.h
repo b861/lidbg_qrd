@@ -7,7 +7,6 @@
 #define Progressive_Output_Format 0x12
 #define Interlaced_Output_Format 0x02 
 #define TW9912_RESET 43
-
 extern u8 tw9912_signal_unstabitily_for_Tw9912_init_flag;
 #if 0
 #define tw9912_dbg(msg...)  do { printk( KERN_CRIT "TW9912: " msg); }while(0)
