@@ -165,8 +165,15 @@ void LPCControlHowLongToPowerOn(ULONG iTime)
 void LPCControlToSleep(void)
 {
     BYTE buff[] = {0x00, 0x01, 0x00};
+    BYTE buff2[] = {0x00, 0x98, 0xff,0xff,0xff,0xff};
 
     LPCCombinDataStream(buff, 3);
+
+	//no reset when sleep
+    LPCCombinDataStream(buff2, SIZE_OF_ARRAY(buff2));
+
+
+	
 }
 void LPCControlReset(void)
 {
@@ -277,10 +284,10 @@ static void LPCdealReadFromMCUAll(BYTE *p, UINT length)
 
                 if(SOC_PWR_GetStatus() == PM_STATUS_LATE_RESUME_OK)
                 {
-                    msleep(100);
+                   // msleep(100);
 
                     lidbg("Ready ACC OFF!\n");
-                    msleep(100);
+                   // msleep(100);
 					lidbg("a\n");
                     LPCControlToSleep();
 					lidbg("b\n");
