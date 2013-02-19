@@ -448,7 +448,8 @@ u8 Tw9912_input_pin_selet[]={0x02,0x40,};//default input pin selet YIN0
 TW9912_Signal signal_is_how_1={NOTONE,OTHER,source_other};
 TW9912_input_info tw9912_input_information_1;
 mutex_lock(&lock_com_chipe_config);
-	if(the_last_config.Channel != Channel && the_last_config.Channel == SEPARATION)
+	//if(the_last_config.Channel != Channel && the_last_config.Channel == SEPARATION)
+if(the_last_config.Channel != Channel)
 	{
 		Tw9912_init_agin(); 
 	}
@@ -716,9 +717,10 @@ int Tw9912_init_agin(void)
     u8 *config_pramat_piont=NULL;
 	tw9912_dbg("Tw9912_init_agin +\n");
 	TC9912_id();
-the_last_config.Channel =YIN3;
+	the_last_config.Channel =YIN3;
 	the_last_config.format = PAL_I;
-	config_pramat_piont=TW9912_INIT_AGAIN;
+	//config_pramat_piont=TW9912_INIT_AGAIN;
+	config_pramat_piont=TW9912_INIT_NTSC_Interlaced_input;
 	while(config_pramat_piont[i*2] != 0xfe)
 	{    
 		if(write_tw9912(&config_pramat_piont[i*2])==NACK) goto CONFIG_not_ack_fail;
@@ -839,10 +841,11 @@ SIGNAL_DELTE_AGAIN:
 	printk("tw9912 inital befor test signal count:%d;",delte_signal_count);
 		ret = Tw9912_appoint_pin_testing_video_signal(Channel);//bad
 		delte_signal_count++;
-		msleep(20);
+ 		msleep(20);
 		if(ret == 5&& delte_signal_count <10) goto SIGNAL_DELTE_AGAIN;
-		delte_signal_count = 0;
-mutex_lock(&lock_com_chipe_config);		
+ 		delte_signal_count = 0;
+ mutex_lock(&lock_com_chipe_config);		
+		
 		if(ret==5)//the channel is not signal input
 			{
 				tw9912_signal_unstabitily_for_Tw9912_init_flag = 0;//find colobar flag signal bad
