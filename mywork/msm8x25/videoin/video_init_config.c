@@ -74,6 +74,7 @@ static u8 Tw9912_image_global_AUX_BACK[5][2]={
 #endif
 //spinlock_t spin_chipe_config_lock;
 struct mutex lock_chipe_config;
+extern struct mutex lock_com_chipe_config;
 struct semaphore sem;
 void video_io_i2c_init_in(void)
 {
@@ -81,6 +82,7 @@ void video_io_i2c_init_in(void)
 	{	
 		//spin_lock_init(&spin_chipe_config_lock);
 		mutex_init(&lock_chipe_config);
+		mutex_init(&lock_com_chipe_config);
 		sema_init(&sem, 0);
 		i2c_io_config_init();
 		flag_io_config=1;
@@ -436,7 +438,9 @@ mutex_lock(&lock_chipe_config);
 	    	else
 	    	{
 	    	printk("tw9912:video_init_config_in()-->init_tw9912_ent()\n");
+		mutex_unlock(&lock_chipe_config);
 		init_tw9912_ent(info_com_top_Channel);
+		mutex_lock(&lock_chipe_config);
 		}
 	VideoImage();
 //msleep(300);//wait for video Steady display
