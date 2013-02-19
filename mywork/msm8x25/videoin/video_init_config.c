@@ -432,35 +432,40 @@ Vedio_Format flyVideoTestSignalPin_in(u8 Channel)
 {Vedio_Format ret= NOTONE;
 //spin_lock(&spin_chipe_config_lock);
 //return PAL_I;
-if(Channel == YIN2 || Channel == SEPARATION)
-	return NTSC_P;
 mutex_lock(&lock_chipe_config);
-	switch (Channel)
+	if(Channel == YIN2 || Channel == SEPARATION)
 	{
-		case 0: 
-		//	info_Vedio_Channel = YIN0;
-			ret=  testing_video_signal(YIN0);	
-			break;
-		case 1:
-		//	info_Vedio_Channel = YIN1;
-			ret=  testing_video_signal(YIN1);
-			break;
-		case 2:
-		//	info_Vedio_Channel = YIN2;
-			ret=  testing_video_signal(YIN2);
-			break;
-		case 3:
-		//	info_Vedio_Channel = YIN3;
-			ret=  testing_video_signal(YIN3);
-			break;
-		case 4:
-		//	info_Vedio_Channel = SEPARATION;
-			ret=  testing_video_signal(SEPARATION);
-			break;
-		default :
-		//	info_Vedio_Channel = NOTONE;
-			printk("%s:you input TW9912 Channel=%d error!\n",__FUNCTION__,Channel);
-			break;
+		ret= testing_NTSCp_video_signal();
+	}
+	else
+	{
+		switch (Channel)
+		{
+			case 0: 
+			//	info_Vedio_Channel = YIN0;
+				ret=  testing_video_signal(YIN0);	
+				break;
+			case 1:
+			//	info_Vedio_Channel = YIN1;
+				ret=  testing_video_signal(YIN1);
+				break;
+			case 2:
+			//	info_Vedio_Channel = YIN2;
+				ret=  testing_video_signal(YIN2);
+				break;
+			case 3:
+			//	info_Vedio_Channel = YIN3;
+				ret=  testing_video_signal(YIN3);
+				break;
+			case 4:
+			//	info_Vedio_Channel = SEPARATION;
+				ret=  testing_video_signal(SEPARATION);
+				break;
+			default :
+			//	info_Vedio_Channel = NOTONE;
+				printk("%s:you input TW9912 Channel=%d error!\n",__FUNCTION__,Channel);
+				break;
+		}
 	}
 printk("tw9912:flyVideoTestSignalPin_in(Channel=%d) back %d\n",Channel,ret);
 //spin_unlock(&spin_chipe_config_lock);
@@ -563,7 +568,7 @@ else	if(config_pramat != STOP_VIDEO)
 					case PAL_P: TC358_init(PAL_P);
 						break;
 					default :printk("video not signal input\n"); 
-						   TC358_init(COLORBAR+1);//blue
+						   TC358_init(COLORBAR+TC358746XBG_BLACK);//blue
 						break;
 					}
 				}

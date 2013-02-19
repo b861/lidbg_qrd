@@ -109,4 +109,5 @@ int read_tw9912_chips_status(u8 cmd);
 i2c_ack Correction_Parameter_fun(Vedio_Format format);
 int Tw9912_init_agin(void);
 void Tw9912_hardware_reset(void);
+Vedio_Format testing_NTSCp_video_signal();
 #endif

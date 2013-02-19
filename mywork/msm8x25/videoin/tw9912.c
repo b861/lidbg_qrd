@@ -412,6 +412,33 @@ else
 return tw9912_input_information_status_next.macrovision_detection.valu;
 }
 }
+Vedio_Format testing_NTSCp_video_signal()
+{
+Vedio_Format ret =OTHER;
+u8 valu;//default input pin selet YIN0
+	printk("testing_NTSCp_video_signal()\n");
+	read_tw9912(0xc1,&valu);
+	if(valu &0x08)//bit3 -->Composite Sync detection status
+	{
+		switch(valu&0x7)//bit[2:0]
+			{
+				case 0:  ret =NTSC_I;
+					break;
+				case 1:   ret =PAL_I;
+					break;
+
+				case 2:   ret =NTSC_P;
+					break;
+				case 3:   ret =PAL_P;
+					break;
+
+				default:   ret =OTHER;
+					break;
+			}
+	printk("testing_NTSCp_video_signal() singal lock back %d\n",ret);
+	}
+	return ret;
+}
 Vedio_Format testing_video_signal(Vedio_Channel Channel)
 {
 Vedio_Format ret =OTHER;
@@ -478,7 +505,7 @@ if(the_last_config.Channel != Channel)
 			}
 			//msleep(400);//Wait for video Stability ok
 			//msleep(100);// ok
-			msleep(50);
+			//msleep(50);
 		}
 		else if( (Channel == SEPARATION ) && the_last_config.Channel !=SEPARATION )
 		{
