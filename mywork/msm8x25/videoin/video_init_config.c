@@ -57,21 +57,36 @@ static u8 Tw9912_image_global[5][2]={//DVD YIN2
 								};
 u8 Image_Config_AUX_BACK[5][11]={//back or AUX
 						/*0*/	/*1*/	/*2*/	/*3*/	/*4*/	/*5*/	/*6*/	/*7*/	/*8*/	/*9*/	/*10*/
-					{	0x15,		0X0f, 	0x09,		0x05,		0x03,		0xff,		0xfa,		0xf0,		0xe9,	        0xe0,		0xc9,	}, //BRIGHTNESS
-					{	0x39,		0x40,		0x45,		0x50,		0x59,		0x60,		0x65,		0x6a	,	0x75,		0x8a,		0x90,},//CONTRAST
+					{	0x15,		0X0f, 	0x09,		0x05,		0x03,		0xf6,		0xfa,		0xf0,		0xe9,	        0xe0,		0xc9,	}, //BRIGHTNESS
+					{	0x33,		0x35,		0x39,		0x40,		0x45,		0x50,		0x59,		0x65,		0x6a	,	0x75,		0x8a,	},//CONTRAST
 					{	0xa9,		0xb5,		0xc5,		0xe0,		0xf1,		0x00,		0x20,		0x30	,	0x40,		0x50,		0x60,},//HUE
-					{	0x30,		0x40,		0x50,		0x60,		0x70,		0x80,		0x90,		0xa0	,	0xb0,		0xc0,		0xd0,},//SHARPNESS
-					{	0x30,		0x40,		0x50,		0x60,		0x70,		0x80,		0x90,		0xa0	,	0xb0,		0xc0,		0xd0,},//SHARPNESS
+					{	0x50,		0x60,		0x70,		0x80,		0x90,		0xa0,		0xb0,		0xc0,		0xd0,		0xe0,		0xf0,},//SHARPNESS
+					{	0x50,		0x60,		0x70,		0x80,		0x90,		0xa0,		0xb0,		0xc0,		0xd0,		0xe0,		0xf0,},//SHARPNESS
 					   };
-static u8 Tw9912_image_global_AUX_BACK[5][2]={//back or AUX
-									{0x10,0xff},//BRIGHTNESS
-									{0x11,0x60},//CONTRAST
+static u8 Tw9912_image_global_AUX_BACK[5][2]={
+									{0x10,0xF6},//BRIGHTNESS
+									{0x11,0x50},//CONTRAST
 																	
 									{0x15,0x00},//HUE
-									{0x13,0x80},//SHARPNESS
-									{0x14,0x80},//SHARPNESS
+									{0x13,0xa0},//SHARPNESS
+									{0x14,0xa0},//SHARPNESS
 								};
-
+u8 Image_Config_AUX_BACK_PAL_I[5][11]={
+						/*0*/	/*1*/	/*2*/	/*3*/	/*4*/	/*5*/	/*6*/	/*7*/	/*8*/	/*9*/	/*10*/
+					{	0x15,		0X0f, 	0x09,		0x05,		0x03,		0x05,		0xfa,		0xf0,		0xe9,	        0xe0,		0xc9,	}, //BRIGHTNESS
+					{	0x25,		0x30,		0x35,		0x39,		0x40,		0x44,		0x45,		0x50,		0x59,		0x65,		0x6a,},//CONTRAST
+					{	0xa9,		0xb5,		0xc5,		0xe0,		0xf1,		0x00,		0x20,		0x30	,	0x40,		0x50,		0x60,},//HUE
+					{	0x50,		0x60,		0x70,		0x80,		0x90,		0xa0,		0xb0,		0xc0,		0xd0,		0xe0,		0xf0,},//SHARPNESS
+					{	0x50,		0x60,		0x70,		0x80,		0x90,		0xa0,		0xb0,		0xc0,		0xd0,		0xe0,		0xf0,},//SHARPNESS
+					   };
+static u8 Tw9912_image_global_AUX_BACK_PAL_I[5][2]={
+									{0x10,0x05},//BRIGHTNESS
+									{0x11,0x44},//CONTRAST
+																	
+									{0x15,0x00},//HUE
+									{0x13,0xa0},//SHARPNESS
+									{0x14,0xa0},//SHARPNESS
+								};
 #endif
 u8 Image_Config_separation[5][11]={//DVD separation
 						/*0*/	/*1*/	/*2*/	/*3*/	/*4*/	/*5*/	/*6*/	/*7*/	/*8*/	/*9*/	/*10*/
@@ -112,8 +127,13 @@ int static VideoImage(void)
  printk("\ntw9912:@@@@@VideoImage()\n");
  	for(i=0;i<5;i++)
  		{
-	 		if(info_com_top_Channel == YIN3)//back or AUX
-				ret = write_tw9912(&Tw9912_image_global_AUX_BACK[i]);
+ 		if(info_com_top_Channel == YIN3)//back or AUX
+ 			{
+				if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
+						ret = write_tw9912(&Tw9912_image_global_AUX_BACK[i]);
+				else
+						ret = write_tw9912(&Tw9912_image_global_AUX_BACK_PAL_I[i]);
+			}
 			else if(info_com_top_Channel == YIN2)//DVD YIN2
 				ret = write_tw9912(&Tw9912_image_global[i]);
 			else //DVD SEPARATION
@@ -159,33 +179,41 @@ int static VideoImage(void)
 		if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
 		{
 			Tw9912_image[0]=0x08;//image dowd 3 line
-			Tw9912_image[1]=0x10;// image down 3 line
+			Tw9912_image[1]=0x15;// image down 3 line
 			ret = write_tw9912(Tw9912_image);
 			Tw9912_image[0]=0x09;//image dowd 3 line
 			Tw9912_image[1]=0xf9;// image down 3 line
 			ret = write_tw9912(Tw9912_image);
 
 			Tw9912_image[0]=0x0A;//image dowd 3 line
-			Tw9912_image[1]=0x28;// image down 3 line
+			Tw9912_image[1]=0x21;// image down 3 line
 			ret = write_tw9912(Tw9912_image);
 			
 		       	Tw9912_image[0]=0x0B;//image dowd 3 line
 			Tw9912_image[1]=0xec;// image down 3 line
 			ret = write_tw9912(Tw9912_image);
+			/**/
 		}
 		else//pal
-		{
-			Tw9912_image[0]=0x08;//image dowd 3 line
-			Tw9912_image[1]=0x10;// image down 3 line
+		{;
+		/*	Tw9912_image[0]=0x07;//image dowd 3 line
+			Tw9912_image[1]=0x22;// image down 3 line
 			ret = write_tw9912(Tw9912_image);
-		/*	Tw9912_image[0]=0x09;//image dowd 3 line
-			Tw9912_image[1]=0xf9;// image down 3 line
+			Tw9912_image[0]=0x08;//image dowd 3 line
+			Tw9912_image[1]=0x12;// image down 3 line
+			ret = write_tw9912(Tw9912_image);
+			Tw9912_image[0]=0x09;//image dowd 3 line
+			Tw9912_image[1]=0x40;// image down 3 line
 			ret = write_tw9912(Tw9912_image);
 
-		       	Tw9912_image[0]=0x0B;//image dowd 3 line
-			Tw9912_image[1]=0xec;// image down 3 line
+			Tw9912_image[0]=0x0a;//image dowd 3 line
+			Tw9912_image[1]=0x1c;// image down 3 line
 			ret = write_tw9912(Tw9912_image);
-			*/
+		       	Tw9912_image[0]=0x0B;//image dowd 3 line
+			Tw9912_image[1]=0xe6;// image down 3 line
+			ret = write_tw9912(Tw9912_image);
+		*/
+		//config at tw9912.c function --> i2c_ack Correction_Parameter_fun(Vedio_Format format)
 		}
 
 	}
@@ -208,51 +236,103 @@ mutex_lock(&lock_chipe_config);
 		}
 	if(info_com_top_Channel == YIN3)
 	{
-		switch (cmd)
-			{
-				
-				case BRIGHTNESS ://ok
-					Tw9912_image[0]=0x10;
-					Tw9912_image[1]=Image_Config_AUX_BACK[0][10-valu];
-					
-					Tw9912_image_global_AUX_BACK[0][1]=Image_Config_AUX_BACK[0][10-valu];//remember
-					ret = write_tw9912(&Tw9912_image);
-					break;
-				case CONTRAST ://ok
-					Tw9912_image[0]=0x11;
-					//if(global_video_format_flag = NTSC_I)
+		if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
+				{
+				switch (cmd)
 					{
-						Tw9912_image[1]=Image_Config_AUX_BACK[1][valu];
-						Tw9912_image_global_AUX_BACK[1][1]=Image_Config_AUX_BACK[1][valu];
-					}
-					ret = write_tw9912(&Tw9912_image);
-					break;
-				case HUE ://bad
-					Tw9912_image[0]=0x15;
-					//if(global_video_format_flag = NTSC_I)
-					{
-						Tw9912_image[1]=Image_Config_AUX_BACK[2][valu];
-						Tw9912_image_global_AUX_BACK[2][1]=Image_Config_AUX_BACK[2][valu];
-					}
-					ret = write_tw9912(&Tw9912_image);
-					break;
-				case SHARPNESS ://bad
-				case CHROMA_U :
-				case CHROMA_V :
-					//if(global_video_format_flag = NTSC_I)
-					{
-						Tw9912_image[1]=Image_Config_AUX_BACK[3][valu];
-						Tw9912_image_global_AUX_BACK[3][1]=Image_Config_AUX_BACK[3][valu];
-					}
-					Tw9912_image[0]=0x13;
-					ret = write_tw9912(&Tw9912_image);
-					
-						Tw9912_image[1]=Image_Config_AUX_BACK[4][valu];
-						Tw9912_image_global_AUX_BACK[4][1]=Image_Config_AUX_BACK[4][valu];
 						
-					Tw9912_image[0]=0x14;
-					ret = write_tw9912(&Tw9912_image);
-					break;
+						case BRIGHTNESS ://ok
+							Tw9912_image[0]=0x10;
+							Tw9912_image[1]=Image_Config_AUX_BACK[0][10-valu];
+							
+							Tw9912_image_global_AUX_BACK[0][1]=Image_Config_AUX_BACK[0][10-valu];//remember
+							ret = write_tw9912(&Tw9912_image);
+							break;
+						case CONTRAST ://ok
+							Tw9912_image[0]=0x11;
+							//if(global_video_format_flag = NTSC_I)
+							{
+								Tw9912_image[1]=Image_Config_AUX_BACK[1][valu];
+								Tw9912_image_global_AUX_BACK[1][1]=Image_Config_AUX_BACK[1][valu];
+							}
+							ret = write_tw9912(&Tw9912_image);
+							break;
+						case HUE ://bad
+							Tw9912_image[0]=0x15;
+							//if(global_video_format_flag = NTSC_I)
+							{
+								Tw9912_image[1]=Image_Config_AUX_BACK[2][valu];
+								Tw9912_image_global_AUX_BACK[2][1]=Image_Config_AUX_BACK[2][valu];
+							}
+							ret = write_tw9912(&Tw9912_image);
+							break;
+						case SHARPNESS ://bad
+						case CHROMA_U :
+						case CHROMA_V :
+							//if(global_video_format_flag = NTSC_I)
+							{
+								Tw9912_image[1]=Image_Config_AUX_BACK[3][valu];
+								Tw9912_image_global_AUX_BACK[3][1]=Image_Config_AUX_BACK[3][valu];
+							}
+							Tw9912_image[0]=0x13;
+							ret = write_tw9912(&Tw9912_image);
+							
+								Tw9912_image[1]=Image_Config_AUX_BACK[4][valu];
+								Tw9912_image_global_AUX_BACK[4][1]=Image_Config_AUX_BACK[4][valu];
+								
+							Tw9912_image[0]=0x14;
+							ret = write_tw9912(&Tw9912_image);
+							break;
+					}
+				}
+		else
+			{
+			switch (cmd)
+				{
+					
+					case BRIGHTNESS ://ok
+						Tw9912_image[0]=0x10;
+						Tw9912_image[1]=Image_Config_AUX_BACK_PAL_I[0][10-valu];
+						
+						Tw9912_image_global_AUX_BACK[0][1]=Image_Config_AUX_BACK_PAL_I[0][10-valu];//remember
+						ret = write_tw9912(&Tw9912_image);
+						break;
+					case CONTRAST ://ok
+						Tw9912_image[0]=0x11;
+						//if(global_video_format_flag = NTSC_I)
+						{
+							Tw9912_image[1]=Image_Config_AUX_BACK_PAL_I[1][valu];
+							Tw9912_image_global_AUX_BACK[1][1]=Image_Config_AUX_BACK_PAL_I[1][valu];
+						}
+						ret = write_tw9912(&Tw9912_image);
+						break;
+					case HUE ://bad
+						Tw9912_image[0]=0x15;
+						//if(global_video_format_flag = NTSC_I)
+						{
+							Tw9912_image[1]=Image_Config_AUX_BACK_PAL_I[2][valu];
+							Tw9912_image_global_AUX_BACK[2][1]=Image_Config_AUX_BACK_PAL_I[2][valu];
+						}
+						ret = write_tw9912(&Tw9912_image);
+						break;
+					case SHARPNESS ://bad
+					case CHROMA_U :
+					case CHROMA_V :
+						//if(global_video_format_flag = NTSC_I)
+						{
+							Tw9912_image[1]=Image_Config_AUX_BACK_PAL_I[3][valu];
+							Tw9912_image_global_AUX_BACK[3][1]=Image_Config_AUX_BACK_PAL_I[3][valu];
+						}
+						Tw9912_image[0]=0x13;
+						ret = write_tw9912(&Tw9912_image);
+						
+							Tw9912_image[1]=Image_Config_AUX_BACK_PAL_I[4][valu];
+							Tw9912_image_global_AUX_BACK[4][1]=Image_Config_AUX_BACK_PAL_I[4][valu];
+							
+						Tw9912_image[0]=0x14;
+						ret = write_tw9912(&Tw9912_image);
+						break;
+				}
 			}
 	}
 	else if(info_com_top_Channel == YIN2)

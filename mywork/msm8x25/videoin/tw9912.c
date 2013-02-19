@@ -76,20 +76,46 @@ u8 Tw9912_Parameter[]={0,0,};
 		ret = write_tw9912(Tw9912_Parameter);
 		
 		Tw9912_Parameter[0]=0x07;
-		Tw9912_Parameter[1]=0x12;
+		Tw9912_Parameter[1]=0x22;
 		ret = write_tw9912(Tw9912_Parameter);
 		
 		Tw9912_Parameter[0]=0x0a;
-		Tw9912_Parameter[1]=0x1a;
+		Tw9912_Parameter[1]=0x17;
 		ret = write_tw9912(Tw9912_Parameter);
 		
 		Tw9912_Parameter[0]=0x07;
+		Tw9912_Parameter[1]=0x22;
+		ret = write_tw9912(Tw9912_Parameter);
+
+		Tw9912_Parameter[0]=0x08;
 		Tw9912_Parameter[1]=0x12;
 		ret = write_tw9912(Tw9912_Parameter);
-		
 		Tw9912_Parameter[0]=0x09;
-		Tw9912_Parameter[1]=0x27;
+		Tw9912_Parameter[1]=0x40;
 		ret = write_tw9912(Tw9912_Parameter);
+	}
+	else if(format == NTSC_I )
+	{/*
+		Tw9912_Parameter[0]=0x08;//image dowd 3 line
+		Tw9912_Parameter[1]=0x11;// image down 3 line
+		ret = write_tw9912(Tw9912_Parameter);
+
+		Tw9912_Parameter[0]=0x09;//image dowd 3 line
+		Tw9912_Parameter[1]=0xf9;// image down 3 line
+		ret = write_tw9912(Tw9912_Parameter);
+
+		Tw9912_Parameter[0]=0x0A;//image dowd 3 line
+		Tw9912_Parameter[1]=0x29;// image down 3 line
+		ret = write_tw9912(Tw9912_Parameter);
+
+		Tw9912_Parameter[0]=0x0B;//image dowd 3 line
+		Tw9912_Parameter[1]=0xec;// image down 3 line
+		ret = write_tw9912(Tw9912_Parameter);
+	*/
+	}
+	else//separation
+	{
+	;
 	}
 return ret;
 }
@@ -1029,6 +1055,16 @@ goto CONFIG_is_old;
 		tw912_run_sotp_flag.run = 1;
 		 printk("tw9912 is run again and format is PALi flag&&&\n");
 		  tw9912_Correction_Parameter_fun = kthread_run(thread_tw9912_Correction_Parameter_fun,NULL,"flyvideo_Parameter");  
+		}
+	else if(signal_is_how[Channel].Format ==NTSC_I)
+		{u8 Tw9912_Parameter[]={0,0,};
+		tw912_run_sotp_flag.run = 1;
+		 printk("tw9912 is run again and format is NTSC_i flag&&&\n");
+		  tw9912_Correction_Parameter_fun = kthread_run(thread_tw9912_Correction_Parameter_fun,NULL,"flyvideo_Parameter");  
+		}
+	else
+		{
+			;
 		}
 #ifdef DEBUG_PLOG_TW9912
 	i=0;
