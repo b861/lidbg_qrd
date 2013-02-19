@@ -259,7 +259,7 @@ static void LPCdealReadFromMCUAll(BYTE *p, UINT length)
         switch (p[1])
         {
         case 0x01://ACC OFF/ON
-        case 0x09:
+        //case 0x09:
             switch (p[2])
             {
             case 0x00://ACC OFF

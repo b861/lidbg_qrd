@@ -763,8 +763,8 @@ static void work_left_button1_fn(struct work_struct *work)
 		if(usb_flag % 2 == 1)
 		{
 		
-			lidbg("USB_ID_LOW_HOST\n");
-			USB_ID_LOW_HOST;
+			lidbg("USB_ID_HIGH_DEV\n");
+			//USB_ID_HIGH_DEV;
 			
             LCD_OFF;
             msleep(500);
@@ -773,9 +773,9 @@ static void work_left_button1_fn(struct work_struct *work)
 		else
 		{
 		
-			lidbg("USB_ID_HIGH_DEV\n");
-			USB_ID_HIGH_DEV;
 			
+			lidbg("USB_ID_LOW_HOST\n");
+			//USB_ID_LOW_HOST;
             LCD_OFF;
             msleep(500);
             LCD_ON;
@@ -934,8 +934,8 @@ void fly_devices_init(void)
 
         PWR_EN_ON;
 		USB_WORK_ENABLE;
-		lidbg("set USB_ID_HIGH_DEV\n");
-		USB_ID_HIGH_DEV;
+		//lidbg("set USB_ID_HIGH_DEV\n");
+		//USB_ID_HIGH_DEV;
 
         lidbg("turn lcd on!\n");
         LCD_ON;
