@@ -202,7 +202,7 @@ u16 add_reg_1;
   u16 i,j;
 		TC358_Register_config(lingceng_init_tab);printk("\n\nTC358746:parameter is lingceng_init_tab!\n");
 
-			i=color_flag;
+			i=color_flag-1;
 			for(j=360;j>0;j--)
 			{
 				TC358_Register_Write(&(colorbar_init_tab[2*i].add_reg),&(colorbar_init_tab[2*i].add_val),colorbar_init_tab[2*i].registet_width);
@@ -248,6 +248,9 @@ void TC358_init(Vedio_Format flag)
 							break;
 						case COLORBAR+TC358746XBG_LIGHT_BLUE: colorbar_init_blue(TC358746XBG_LIGHT_BLUE);
 						printk("\n\nTC358746:parameter is is COLORBAR TC358746XBG_LIGHT_BLUE!\n\n");
+							break;
+						case COLORBAR+TC358746XBG_BLACK: colorbar_init_blue(TC358746XBG_BLACK);
+						printk("\n\nTC358746:parameter is is COLORBAR TC358746XBG_BLACK!\n\n");
 							break;
 						default : colorbar_init();
 						printk("\n\nTC358746:parameter is default NTSCi_init_tab!\n\n");
