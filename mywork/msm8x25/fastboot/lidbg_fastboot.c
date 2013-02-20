@@ -147,7 +147,7 @@ char *kill_exclude_process[] =
     //"yaffs-bg-1",
     //"loop7",
     "servicemanager",
-    "vold",
+//    "vold",
     "netd",
     "debuggerd",
     "rild",
