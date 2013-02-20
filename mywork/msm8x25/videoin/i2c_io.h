@@ -7,7 +7,6 @@
 //#define GPIO_I2C_SDA   15//tp0708
 #define GPIO_I2C_SCL   32 
 #define GPIO_I2C_SDA   107
-
 typedef enum 
 {
 	NACK=0,
