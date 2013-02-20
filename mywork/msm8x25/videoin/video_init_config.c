@@ -358,9 +358,9 @@ return camera_open_video_signal_test_in_2();
 Vedio_Format flyVideoTestSignalPin_in(u8 Channel)
 {Vedio_Format ret= NOTONE;
 //spin_lock(&spin_chipe_config_lock);
-//return PAL_I;
+//return NTSC_I;
 mutex_lock(&lock_chipe_config);
-	if(Channel == YIN2 || Channel == SEPARATION)
+	if(Channel == SEPARATION)
 	{
 		ret= testing_NTSCp_video_signal();
 	}
@@ -463,7 +463,7 @@ mutex_lock(&lock_chipe_config);
 				if(tw9912_signal_unstabitily_for_Tw9912_init_flag == 1) //find colobar flag signal bad
 				{
 					printk("video_init_config:video input  signal unstabitily,now shouw RED\n"); 
-					 TC358_init(COLORBAR+2);//rea
+					 TC358_init(COLORBAR+TC358746XBG_RED);//rea
 					 tw9912_signal_unstabitily_for_Tw9912_init_flag = 0;
 				}
 				else if(tw9912_signal_unstabitily_for_Tw9912_init_flag == 2) //NTSCp not find!

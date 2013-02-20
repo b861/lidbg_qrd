@@ -808,7 +808,7 @@ mutex_lock(&lock_com_chipe_config);
 
 				if(Channel == SEPARATION) break;
 				
-				ret = read_tw9912_chips_status(0);//return register valu
+				ret = read_tw9912_chips_status(1);//return register valu
 				msleep(10);
 				read_tw9912_chips_status_flag++;
 			
@@ -826,7 +826,7 @@ mutex_lock(&lock_com_chipe_config);
 				if(read_tw9912_chips_status_flag>5 ||read_tw9912_chips_status_flag_1>10)  
 				{
 					if (read_tw9912_chips_status_flag_1>=10) 
-						tw9912_signal_unstabitily_for_Tw9912_init_flag = 1;//find colobar flag signal bad
+						;//tw9912_signal_unstabitily_for_Tw9912_init_flag = 1;//find colobar flag signal bad
 					break;
 				}
 			}
