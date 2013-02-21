@@ -607,6 +607,7 @@ mutex_lock(&lock_chipe_config);
 
 if(info_com_top_Channel ==SEPARATION)
 	{
+printk("tw9912:%s:config_pramat->NTSC_separation\n",__func__);
 Tw9912_init_NTSCp();
 VideoImage();
 TC358_init(NTSC_P);

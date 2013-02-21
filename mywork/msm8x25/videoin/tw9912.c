@@ -443,6 +443,8 @@ Vedio_Format testing_NTSCp_video_signal()
 Vedio_Format ret =OTHER;
 u8 valu;//default input pin selet YIN0
 	printk("testing_NTSCp_video_signal()\n");
+	if(the_last_config.Channel != SEPARATION)
+		Tw9912_init_NTSCp();
 	read_tw9912(0xc1,&valu);
 	if(valu &0x08)//bit3 -->Composite Sync detection status
 	{
