@@ -358,7 +358,7 @@ return camera_open_video_signal_test_in_2();
 Vedio_Format flyVideoTestSignalPin_in(u8 Channel)
 {Vedio_Format ret= NOTONE;
 //spin_lock(&spin_chipe_config_lock);
-//return NTSC_I;
+//return PAL_I;
 mutex_lock(&lock_chipe_config);
 	if(Channel == SEPARATION)
 	{
