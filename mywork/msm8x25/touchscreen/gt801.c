@@ -994,7 +994,7 @@ SOC_Display_Get_Res(&screen_x, &screen_y);
     ts->use_irq = 1;
     ts->client->irq = GPIOEIT;
 #ifdef CONFIG_HAS_EARLYSUSPEND
-    ts->early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN + 1;
+    ts->early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN - 20;
     ts->early_suspend.suspend = goodix_ts_early_suspend;
     ts->early_suspend.resume = goodix_ts_late_resume;
     register_early_suspend(&ts->early_suspend);
@@ -1145,7 +1145,7 @@ static int goodix_ts_resume(struct i2c_client *client)
 static void goodix_ts_early_suspend(struct early_suspend *h)
 {
     struct goodix_ts_data *ts;
-    printk("\n\n\n[futengfei]come into============disable_irq==== [%s]\n", __func__);
+    printk("\n\n\n[futengfei]come into============disable_irq20==== [%s]\n", __func__);
     ts = container_of(h, struct goodix_ts_data, early_suspend);
 
 	disable_irq(MSM_GPIO_TO_INT(GPIOEIT));
@@ -1156,7 +1156,7 @@ static void goodix_ts_early_suspend(struct early_suspend *h)
 static void goodix_ts_late_resume(struct early_suspend *h)
 {
     struct goodix_ts_data *ts;
-    printk("\n\n\n[futengfei]come into=========enable_irq==== [%s]\n", __func__);
+    printk("\n\n\n[futengfei]come into=========enable_irq20==== [%s]\n", __func__);
     ts = container_of(h, struct goodix_ts_data, early_suspend);
     goodix_ts_resume(ts->client);
 	
@@ -1203,7 +1203,7 @@ static int __devinit goodix_ts_init(void)
     LIDBG_GET;
 #endif
     is_ts_load = 1;
-    printk("\n\n==in=GT801.KO===============touch INFO===================disirq=0225=futengfei\n");
+    printk("\n\n==in=GT801.KO===============touch INFO===================disirq20=0225=futengfei\n");
 
 
     //SOC_IO_Output(SHUTDOWN_PORT_GROUP, SHUTDOWN_PORT_INDEX, 1); //temprory by futengfei
