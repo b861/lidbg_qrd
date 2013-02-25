@@ -177,8 +177,8 @@ printk("In lidbg_video_main()\n");
 			valu = simple_strtoul(argv[3], 0, 0);
 			buf[0]=sub_addr;
 			buf[1]=valu;
-			i2c_write_byte(1, 0x45, buf , 2);
-			i2c_read_byte(1,0x45, sub_addr , &valu,1);
+			i2c_write_byte(1, 0x44, buf , 2);
+			i2c_read_byte(1,0x44, sub_addr , &valu,1);
 				printk("read adder=0x%02x, valu=0x%02x\n",buf[0],valu);
 		}	
 		
@@ -187,7 +187,7 @@ printk("In lidbg_video_main()\n");
 		u16 sub_addr;
 		u8 buf[2]={0,0};
 			sub_addr = simple_strtoul(argv[2], 0, 0);
-			i2c_read_byte(1,0x45, sub_addr ,buf,1);
+			i2c_read_byte(1,0x44, sub_addr ,buf,1);
 			printk("read adder=0x%02x,valu=0x%02x\n",sub_addr,buf[0]);
 		}
 	}
@@ -321,6 +321,7 @@ int lidbg_video_init(void)
 	video_io_i2c_init();
 	Tw9912_hardware_reset();
 	flyVideoChannelInitall(YIN2); // DVD
+	video_init_config_in(NTSC_P);//first initall tw9912 all register
 platform_driver_register(&video_driver);
 platform_device_register(&video_devices);
 	    return 0;

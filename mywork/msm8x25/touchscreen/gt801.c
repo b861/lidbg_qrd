@@ -1145,19 +1145,24 @@ static int goodix_ts_resume(struct i2c_client *client)
 static void goodix_ts_early_suspend(struct early_suspend *h)
 {
     struct goodix_ts_data *ts;
-    printk("\n\n\n[futengfei]come into================ [%s]\n", __func__);
+    printk("\n\n\n[futengfei]come into============disable_irq==== [%s]\n", __func__);
     ts = container_of(h, struct goodix_ts_data, early_suspend);
+
+	disable_irq(MSM_GPIO_TO_INT(GPIOEIT));
+
     goodix_ts_suspend(ts->client, PMSG_SUSPEND);
 }
 
 static void goodix_ts_late_resume(struct early_suspend *h)
 {
     struct goodix_ts_data *ts;
-    printk("\n\n\n[futengfei]come into================ [%s]\n", __func__);
+    printk("\n\n\n[futengfei]come into=========enable_irq==== [%s]\n", __func__);
     ts = container_of(h, struct goodix_ts_data, early_suspend);
     goodix_ts_resume(ts->client);
+	
+	enable_irq(MSM_GPIO_TO_INT(GPIOEIT));
 }
-#endif
+#endif 
 
 //可用于该驱动�?设备名—设备ID 列表
 //only one client
@@ -1198,7 +1203,7 @@ static int __devinit goodix_ts_init(void)
     LIDBG_GET;
 #endif
     is_ts_load = 1;
-    printk("\n\n==in=GT801.KO===============touch INFO=======================1205=futengfei\n");
+    printk("\n\n==in=GT801.KO===============touch INFO===================disirq=0225=futengfei\n");
 
 
     //SOC_IO_Output(SHUTDOWN_PORT_GROUP, SHUTDOWN_PORT_INDEX, 1); //temprory by futengfei

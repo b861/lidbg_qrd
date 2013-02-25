@@ -1231,19 +1231,23 @@ static int goodix_ts_resume(struct i2c_client *client)
 static void goodix_ts_early_suspend(struct early_suspend *h)
 {
     struct goodix_ts_data *ts;
-
-    printk("\n\n\n[futengfei]come into================ [%s]\n", __func__);
     ts = container_of(h, struct goodix_ts_data, early_suspend);
+
+	printk("\n\n\n[futengfei]come into==========disable_irq=== [%s]\n", __func__);
+	disable_irq(MSM_GPIO_TO_INT(GPIOEIT));
+
     goodix_ts_suspend(ts->client, PMSG_SUSPEND);
 }
 
 static void goodix_ts_late_resume(struct early_suspend *h)
 {
     struct goodix_ts_data *ts;
-    printk("\n\n\n[futengfei]come into================ [%s]\n", __func__);
+    printk("\n\n\n[futengfei]come into===========enable_irq== [%s]\n", __func__);
 
     ts = container_of(h, struct goodix_ts_data, early_suspend);
     goodix_ts_resume(ts->client);
+	enable_irq(MSM_GPIO_TO_INT(GPIOEIT));
+
 }
 #endif
 /////////////////////////////// UPDATE STEP 4 START/////////////////////////////////////////////////////////////////
@@ -2248,7 +2252,7 @@ static int __devinit goodix_ts_init(void)
 #ifndef SOC_COMPILE
     LIDBG_GET;
 #endif
-    printk("\n\n=IN=0125=============touch INFO==================%s\n", __func__);
+    printk("\n\n=IN==============touch INFO===============disirq=0225=%s\n", __func__);
     printk("1: goodix_ts_init :installing=>gt811.ko --------------------->futengfei\n");
 
 #if 0
