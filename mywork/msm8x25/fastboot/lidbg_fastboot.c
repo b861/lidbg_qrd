@@ -670,7 +670,7 @@ void fastboot_pwroff(void)
 
 //avoid mem leak
     fastboot_task_kill_select("mediaserver");
-    fastboot_task_kill_select("void");
+    fastboot_task_kill_select("vold");
 
 
    //fastboot_set_status(PM_STATUS_READY_TO_PWROFF);
