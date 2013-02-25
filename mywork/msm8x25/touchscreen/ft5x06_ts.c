@@ -712,8 +712,7 @@ SOC_Display_Get_Res(&screen_x, &screen_y);
         goto free_reset_gpio;
     }
 #ifdef CONFIG_HAS_EARLYSUSPEND
-    data->early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN +
-                                FT5X06_SUSPEND_LEVEL;
+    data->early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN - 20;
     data->early_suspend.suspend = ft5x06_ts_early_suspend;
     data->early_suspend.resume = ft5x06_ts_late_resume;
     register_early_suspend(&data->early_suspend);
@@ -806,7 +805,7 @@ static int __init ft5x06_ts_init(void)
 	LIDBG_GET;
 
     is_ts_load = 1;
-    printk( "=====800====================futengfei==============ft5x06_ts_init=========1012======== \n");
+    printk( "===================ft5x06_ts_init===========suspend-20==0225=futengfei \n");
     printk( "Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);
     return i2c_add_driver(&ft5x06_ts_driver);
 }

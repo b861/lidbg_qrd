@@ -1010,7 +1010,7 @@ SOC_Display_Get_Res(&screen_x, &screen_y);
 #endif
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
-    ts->early_suspend.level = EARLY_SUSPEND_LEVEL_DISABLE_FB;//EARLY_SUSPEND_LEVEL_BLANK_SCREEN +1;
+    ts->early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN - 20;
     ts->early_suspend.suspend = goodix_ts_early_suspend;
     ts->early_suspend.resume = goodix_ts_late_resume;
     register_early_suspend(&ts->early_suspend);
@@ -1233,7 +1233,7 @@ static void goodix_ts_early_suspend(struct early_suspend *h)
     struct goodix_ts_data *ts;
     ts = container_of(h, struct goodix_ts_data, early_suspend);
 
-	printk("\n\n\n[futengfei]come into==========disable_irq=== [%s]\n", __func__);
+	printk("\n\n\n[futengfei]come into==========disable_irq20=== [%s]\n", __func__);
 	disable_irq(MSM_GPIO_TO_INT(GPIOEIT));
 
     goodix_ts_suspend(ts->client, PMSG_SUSPEND);
@@ -1242,7 +1242,7 @@ static void goodix_ts_early_suspend(struct early_suspend *h)
 static void goodix_ts_late_resume(struct early_suspend *h)
 {
     struct goodix_ts_data *ts;
-    printk("\n\n\n[futengfei]come into===========enable_irq== [%s]\n", __func__);
+    printk("\n\n\n[futengfei]come into===========enable_irq20== [%s]\n", __func__);
 
     ts = container_of(h, struct goodix_ts_data, early_suspend);
     goodix_ts_resume(ts->client);
@@ -2252,7 +2252,7 @@ static int __devinit goodix_ts_init(void)
 #ifndef SOC_COMPILE
     LIDBG_GET;
 #endif
-    printk("\n\n=IN==============touch INFO===============disirq=0225=%s\n", __func__);
+    printk("\n\n=IN==============touch INFO===============disirq20=0225=%s\n", __func__);
     printk("1: goodix_ts_init :installing=>gt811.ko --------------------->futengfei\n");
 
 #if 0
