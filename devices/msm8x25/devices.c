@@ -590,13 +590,11 @@ static void devices_late_resume(struct early_suspend *handler)
     if(platform_id ==  PLATFORM_FLY)
     {
 
-
-        BL_SET(BL_MAX / 2);
-		
 		
 #ifdef FLY_DEBUG
 
-		
+		BL_SET(BL_MAX / 2);
+
 		if(0)
 		{
 			u8 buff[] = {0x00, 0x05, 0x01};//LPCControlPWREnable
