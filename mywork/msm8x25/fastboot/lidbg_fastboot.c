@@ -677,6 +677,7 @@ void fastboot_pwroff(void)
 
 
 #ifdef FLY_DEBUG
+	msleep(1000);
 
 #ifdef RUN_FASTBOOT
     SOC_Write_Servicer(CMD_FAST_POWER_OFF);
