@@ -267,7 +267,7 @@ static void set_func_tbl(void)
 	plidbg_dev->soc_func_tbl.pfncamera_open_video_color = Video_Show_Output_Color;
 	plidbg_dev->soc_func_tbl.pfnread_tw9912_chips_signal_status = read_chips_signal_status;
 	global_video_format_flag = NTSC_I;
-	global_video_channel_flag = YIN2;//DVD
+	global_video_channel_flag = YIN3;//DVD
 	global_camera_working_status = 0;//stop
 }
 static int video_dev_probe(struct platform_device *pdev)
