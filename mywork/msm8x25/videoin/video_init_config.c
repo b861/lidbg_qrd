@@ -363,6 +363,7 @@ mutex_lock(&lock_chipe_config);
 					ret = write_tw9912(&Tw9912_image);
 					break;
 				case CONTRAST ://ok
+					if(valu>=5)	valu=10;
 					Tw9912_image[0]=0x11;
 					//if(global_video_format_flag = NTSC_I)
 					{
@@ -399,7 +400,7 @@ mutex_lock(&lock_chipe_config);
 
 			}
 	}
-	else 
+	else //YUV
 	{
 		switch (cmd)
 		{
@@ -410,7 +411,8 @@ mutex_lock(&lock_chipe_config);
 				Tw9912_image_global_separation[0][1]=Image_Config_separation[0][valu];//remember
 				ret = write_tw9912(&Tw9912_image);
 				break;
-			case CONTRAST ://ok
+			case CONTRAST ://ok	
+				if(valu>=5)	valu=10;
 				Tw9912_image[0]=0x10;
 				//if(global_video_format_flag = NTSC_I)
 				{
