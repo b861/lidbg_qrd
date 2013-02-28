@@ -261,6 +261,10 @@ signal_is_how[channel].Format = NTSC_P;
 CHANNEL_FAILD:
 	;
 }
+void Disabel_video_data_out(void)
+{u8 disabel[]={0x03,0x27,};
+	write_tw9912(disabel);
+}
 void display_tw9912_info(void)
 {
 u8 i;
@@ -709,7 +713,7 @@ int Tw9912_init_NTSCp(void)
 	tw9912_dbg("Tw9912_init_NTSCp initall tw9912+\n");
 	TC9912_id();
 	the_last_config.Channel =SEPARATION;
-	the_last_config.format = NTSC_P;
+	the_last_config.format = NTSC_P;	printk("the_last_config.Channel  =%d\n",the_last_config.Channel );
 	config_pramat_piont=TW9912_INIT_NTSC_Progressive_input; 
 	while(TW9912_INIT_Public[i*2] != 0xfe)
 		{    

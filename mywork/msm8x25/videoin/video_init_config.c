@@ -3,6 +3,7 @@ static int flag_io_config=0;
 static Vedio_Channel info_Vedio_Channel = NOTONE;
 static Vedio_Channel info_com_top_Channel = YIN2;
 extern TW9912_Signal signal_is_how[5];
+extern Last_config_t the_last_config;
 static struct task_struct * Signal_Test = NULL;
 #ifndef BOARD_V2 // V1
 u8 Image_Config[5][11]={
@@ -135,6 +136,12 @@ void video_io_i2c_init_in(void)
 		i2c_io_config_init();
 		flag_io_config=1;
 	}
+}
+int static Change_channel(void)
+{
+printk("tw9912:Change_channel() \n");
+//Disabel_video_data_out();
+TC358_init(COLORBAR+TC358746XBG_BLACK);
 }
 int static VideoImage(void)
 {int ret;
@@ -531,6 +538,10 @@ Vedio_Format flyVideoTestSignalPin_in(u8 Channel)
 //spin_lock(&spin_chipe_config_lock);
 //return PAL_I;
 mutex_lock(&lock_chipe_config);
+	if(
+		( (the_last_config.Channel == YIN2 ||the_last_config.Channel == SEPARATION) &&Channel == YIN3)||\
+		(the_last_config.Channel == YIN3  && (Channel == YIN2 || Channel == SEPARATION))
+	   ) Change_channel();
 	if(Channel == SEPARATION||Channel == YIN2)
 	{
 		ret= testing_NTSCp_video_signal();
