@@ -409,9 +409,12 @@ open_dev:
     system("insmod /flysystem/lib/modules/FlyAudioDevice.ko");
     system("insmod /flysystem/lib/modules/productinfo.ko");
     system("insmod /flysystem/lib/modules/vendor_flyaudio.ko");
-
+	
     //chegnweidong
     system("insmod /flysystem/lib/mdrv/flysemdriver.ko");
+
+    system("insmod /flysystem/lib/tcdriver/uuid.ko");
+
 
     sleep(1);
     system("chmod 0777 /dev/FlyDebug");
@@ -433,7 +436,7 @@ open_dev:
 
 
 #endif
-if(0)
+if(1)
 {
 		system("echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
 		
