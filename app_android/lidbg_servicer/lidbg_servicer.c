@@ -436,7 +436,7 @@ open_dev:
 
 
 #endif
-if(1)
+if(0)
 {
 		system("echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
 		
