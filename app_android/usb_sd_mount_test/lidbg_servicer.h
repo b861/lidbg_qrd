@@ -10,7 +10,7 @@
 	int fd;\
 	 fd = open("/dev/mlidbg0", O_RDWR);\
 	 if((fd == 0)||(fd == (int)0xfffffffe)|| (fd == (int)0xffffffff))break;\
-	 write(fd, &cmd, sizeof(cmd));\
+	 write(fd, cmd, sizeof(cmd));\
 	 if((buf != NULL)&&(ret_bytes))\
 	 {\
 	 	read(fd, buf, ret_bytes);\
