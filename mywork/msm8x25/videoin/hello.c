@@ -1,12 +1,12 @@
 #include "lidbg.h"
 int lidbg_video_init(void)
 {
-	printk("lidbg_video_init modules ismod\n");
+    printk("lidbg_video_init modules ismod\n");
 }
 
 int lidbg_video_deinit(void)
 {
-	return 0;
+    return 0;
 
 }
 
