@@ -16,9 +16,9 @@ LIDBG_DEFINE;
 #define SCAN_TIME (500)
 #define TS_I2C_BUS (1)
 
-#define TS_RESET  do{   	SOC_IO_Output(0,26,0);\
+#define TS_RESET  do{   	SOC_IO_Output(0,27,1);\
 							msleep(500);\
-							SOC_IO_Output(0,26,1);\
+							SOC_IO_Output(0,27,0);\
 					}while(0)
 
 struct probe_device
@@ -114,7 +114,7 @@ static int ts_probe_init(void)
 {
     static struct task_struct *scan_task;
     DUMP_BUILD_TIME;
-
+    printk("[futengfei]==================ts_probe_init:mf_ts_rst_pin0308\n");
 #ifndef SOC_COMPILE
     LIDBG_GET;
 #endif

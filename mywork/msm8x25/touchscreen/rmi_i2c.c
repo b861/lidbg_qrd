@@ -53,7 +53,7 @@
 
 
 #define DRIVER_NAME "rmi4_ts"
-#define rmiresetpin 26
+#define rmiresetpin 27
 
 #define DEVICE_NAME "rmi4_ts"
 

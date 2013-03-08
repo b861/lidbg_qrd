@@ -82,9 +82,9 @@ static const char busname[] = "rmi";
 #include "rmi_function.h"
 #define SYNAPTICS_TS_IRQ 48
 #define FT5X06_IRQ_GPIO		48
-#define FT5X06_RESET_GPIO	26
+#define FT5X06_RESET_GPIO	27
 #define MXT_TS_IRQ_GPIO         48
-#define MXT_TS_RESET_GPIO       26
+#define MXT_TS_RESET_GPIO       27
 #define MSM_GSBI0_QUP_I2C_BUS_ID	0
 #define MSM_GSBI1_QUP_I2C_BUS_ID	1
 

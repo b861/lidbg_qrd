@@ -1186,9 +1186,9 @@ static int goodix_ts_resume(struct i2c_client *client)
         if(ret != 0)	//Initiall failed
         {
             printk("[futengfei]goodix_init_panel:goodix_init_panel failed=========retry=[%d]===ret[%d]\n", retry, ret);
-            SOC_IO_Output(0, 26, 0);
+            SOC_IO_Output(0, 27, 1);
             msleep(300);
-            SOC_IO_Output(0, 26, 1);
+            SOC_IO_Output(0, 27, 0);
             msleep(700);
             continue;
         }
@@ -2239,9 +2239,9 @@ return：
 	执行结果码，0表示正常执行
 ********************************************************/
 #define MSM_GSBI1_QUP_I2C_BUS_ID	1
-#define TS_RESET  do{   		SOC_IO_Output(0,26,0);\
+#define TS_RESET  do{   		SOC_IO_Output(0,27,1);\
 							msleep(500);\
-							SOC_IO_Output(0,26,1);\
+							SOC_IO_Output(0,27,0);\
 							msleep(500);\
 					}while(0)
 
