@@ -96,7 +96,7 @@ int ts_probe_thread(void *data)
         }
         else
         {
-            msleep(200);
+            ssleep(6);//3//6s later,if ts not load and scan again.
             if(is_ts_load == 0)
             {
                 scan_on = 1;
@@ -114,7 +114,7 @@ static int ts_probe_init(void)
 {
     static struct task_struct *scan_task;
     DUMP_BUILD_TIME;
-    printk("[futengfei]==================ts_probe_init:mf_ts_rst_pin0308\n");
+    printk("\n[futengfei]==================ts_probe_init:compatible GT801 GT811 SHUTDOWN pin0309\n");
 #ifndef SOC_COMPILE
     LIDBG_GET;
 #endif

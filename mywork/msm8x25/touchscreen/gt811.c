@@ -894,14 +894,18 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
 #if 1
 err_gpio_request_failed:
     //printk("goodix_init_panel:come to send init_panel==============futengfei=\n");
-    for(retry = 0; retry < 3; retry++)
+    for(retry = 0; retry < 10; retry++)
     {
         ret = goodix_init_panel(ts);
         msleep(2);
         if(ret != 0)	//Initiall failed
         {
-            printk("goodix_init_panel:Initiall ============failed");
-            continue;
+		printk("[futengfei]goodix_ts_probe.goodix_init_panel fail and again----------->GT811the %d times\n",retry);
+		SOC_IO_Output(0, 27, 1);
+		msleep(300);
+		SOC_IO_Output(0, 27, 0);//NOTE:GT811 SHUTDOWN PIN ,set hight to work. 
+		msleep(700);
+		continue;
         }
 
         else
@@ -1165,7 +1169,7 @@ static int goodix_ts_resume(struct i2c_client *client)
     printk("come into [%s]========futengfei======0829forGT811 RESUME RESET [futengfei]=\n", __func__);
     printk(KERN_INFO "Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);
 
-    for(retry = 0; retry < 10; retry++)
+    for(retry = 0; retry < 30; retry++)
     {
         goodix_init_panel(ts);
         init_err = SOC_I2C_Rec(1, 0x5d, 0x68, GT811_check, 6 );
@@ -2239,11 +2243,6 @@ return：
 	执行结果码，0表示正常执行
 ********************************************************/
 #define MSM_GSBI1_QUP_I2C_BUS_ID	1
-#define TS_RESET  do{   		SOC_IO_Output(0,27,1);\
-							msleep(500);\
-							SOC_IO_Output(0,27,0);\
-							msleep(500);\
-					}while(0)
 
 static int __devinit goodix_ts_init(void)
 {
@@ -2252,9 +2251,10 @@ static int __devinit goodix_ts_init(void)
 #ifndef SOC_COMPILE
     LIDBG_GET;
 #endif
-    printk("\n\n=IN==============touch INFO===============disirq20=0225=%s\n", __func__);
+    printk("\n\n=IN==============touch INFO===============compatible GT801 GT811 SHUTDOWN pin0309=%s\n", __func__);
     printk("1: goodix_ts_init :installing=>gt811.ko --------------------->futengfei\n");
-
+	SOC_IO_Output(0, 27, 0);
+	msleep(500);//ensure the gt811 shutdown pin is hight.
 #if 0
     {
         struct i2c_adapter *i2c_adap;

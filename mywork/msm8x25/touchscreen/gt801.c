@@ -963,12 +963,19 @@ SOC_Display_Get_Res(&screen_x, &screen_y);
     // SOC_IO_Output(SHUTDOWN_PORT_GROUP, SHUTDOWN_PORT_INDEX, 0); //temprory
 
     msleep(10);
-    for(count = 0; count < 3; count++)
+    for(count = 0; count < 10; count++)
     {
         //printk("come into ----------->35\n");
         ret = goodix_init_panel(ts);
         if(ret != 0)		//Initiall failed
-            continue;
+	{
+		printk("[futengfei]goodix_ts_probe.goodix_init_panel fail and again----------->GT801the %d times\n",count);
+		SOC_IO_Output(0, 27, 0);
+		msleep(300);
+		SOC_IO_Output(0, 27, 1);//NOTE:GT801 SHUTDOWN PIN ,set LOW  to work. 
+		msleep(700);
+		continue;
+	}
         else
         {
             if(ts->use_irq)
@@ -1079,7 +1086,7 @@ static int goodix_ts_resume(struct i2c_client *client)
     printk("come into [%s]========futengfei====== [futengfei]=\n", __func__);
     printk(KERN_INFO "Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);
 
-    for(retry = 0; retry < 10; retry++)
+    for(retry = 0; retry < 30; retry++)
     {
         goodix_init_panel(ts);
         init_err = SOC_I2C_Rec(1, 0x55, 0x68, GT811_check, 6 );
@@ -1100,9 +1107,9 @@ static int goodix_ts_resume(struct i2c_client *client)
         if(ret != 0)	//Initiall failed
         {
             printk("[futengfei]goodix_init_panel:goodix_init_panel failed=========retry=[%d]===ret[%d]\n", retry, ret);
-            SOC_IO_Output(0, 27, 1);
-            msleep(300);
             SOC_IO_Output(0, 27, 0);
+            msleep(300);
+            SOC_IO_Output(0, 27, 1);
             msleep(700);
             continue;
         }
@@ -1203,8 +1210,9 @@ static int __devinit goodix_ts_init(void)
     LIDBG_GET;
 #endif
     is_ts_load = 1;
-    printk("\n\n==in=GT801.KO===============touch INFO===================disirq20=0225=futengfei\n");
-
+    printk("\n\n==in=GT801.KO===============touch INFO==========compatible GT801 GT811 SHUTDOWN pin0309=futengfei\n");
+	SOC_IO_Output(0, 27, 1);
+	msleep(500);//ensure the gt801 shutdown pin is low.
 
     //SOC_IO_Output(SHUTDOWN_PORT_GROUP, SHUTDOWN_PORT_INDEX, 1); //temprory by futengfei
     goodix_wq = create_workqueue("goodix_wq");
