@@ -194,13 +194,14 @@ static struct ad_key_remap ad_key[] =
     {0, 530 , KEY_RESERVED/*KEY_MEDIA*/},
     {2, 1548, KEY_NEXT},
     {2, 2040, KEY_PREVIOUS},
-    {2, 1058, KEY_HOME},
+    {2, 2517, KEY_HOME},
+   
 
     //right
     {1, 1034, KEY_VOLUMEUP},
     {1, 1530, KEY_VOLUMEDOWN},
-    {2, 2558, KEY_MENU},
-    {1, 2024, KEY_BACK},
+    {4, 1108, KEY_MENU},
+    {4, 1372, KEY_BACK},
 
     //left button
     //{2, 3055, KEY_POWER},
@@ -240,6 +241,8 @@ void key_scan(void)
 {
 #if 0
     {
+    	u32 i,val;
+		#define ADC_MAX_CH (8)
         for(i = 0; i < ADC_MAX_CH; i++)
         {
             SOC_ADC_Get(i, &val);
@@ -251,9 +254,9 @@ void key_scan(void)
 #else
     static int old_key = 0xff;
     int key = 0xff;
-    key = find_ad_key(0);
-    if(key != 0xff) goto find_key;
-    key = find_ad_key(1);
+    //key = find_ad_key(0);
+    //if(key != 0xff) goto find_key;
+    key = find_ad_key(4);
     if(key != 0xff) goto find_key;
     key = find_ad_key(2);
     if(key != 0xff) goto find_key;
@@ -571,7 +574,7 @@ static void devices_early_suspend(struct early_suspend *handler)
     DUMP_FUN_ENTER;
     if(platform_id ==  PLATFORM_FLY)
     {
-        LCD_OFF;
+        LCD_OFF;	
 		LED_ON;
 		
     }
@@ -592,6 +595,9 @@ static void devices_late_resume(struct early_suspend *handler)
 
 		
 #ifdef FLY_DEBUG
+//LPCBackLightOn
+		//u8 buff[] = {0x00, 0x94, 0x01, 0x99};		
+		//SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
 
 		BL_SET(BL_MAX / 2);
 
@@ -672,7 +678,16 @@ static void soc_dev_suspend_prepare(void)
 {
 	
     DUMP_FUN;
-	
+
+#ifdef FLY_DEBUG
+{
+	//LPCBackLightOff
+	u8 buff[] = {0x00, 0x94, 0x00, 0x98};
+	SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
+}
+#endif
+
+
 #ifdef DEBUG_UMOUNT_USB
 			SOC_Write_Servicer(UMOUNT_USB);
 #ifdef FLY_DEBUG
@@ -800,8 +815,8 @@ static void work_left_button1_fn(struct work_struct *work)
             LCD_OFF;
             msleep(500);
             LCD_ON;
-            suspend_test = 0;
-            LPCControlSupendTestStop();
+           // suspend_test = 0;
+           // LPCControlSupendTestStop();
 
         }
         else
@@ -812,8 +827,8 @@ static void work_left_button1_fn(struct work_struct *work)
             LCD_OFF;
             msleep(500);
             LCD_ON;
-            suspend_test = 1;
-            LPCControlSupendTestStart();
+           // suspend_test = 1;
+           // LPCControlSupendTestStart();
             //SOC_Log_Dump(LOG_CONT);
         }
 
@@ -840,7 +855,7 @@ static void work_right_button1_fn(struct work_struct *work)
             msleep(500);
             LCD_ON;
             //LPCControlSupendTestStop();
-            usb_test = 0;
+           // usb_test = 0;
 
         }
         else
@@ -850,7 +865,7 @@ static void work_right_button1_fn(struct work_struct *work)
             msleep(500);
             LCD_ON;
             //LPCControlSupendTestStart();
-            usb_test = 1;
+           // usb_test = 1;
         }
     }
 #endif
