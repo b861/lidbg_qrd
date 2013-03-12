@@ -4,6 +4,8 @@ static Vedio_Channel info_Vedio_Channel = NOTONE;
 static Vedio_Channel info_com_top_Channel = YIN2;
 extern TW9912_Signal signal_is_how[5];
 static struct task_struct *Signal_Test = NULL;
+bool init_flag  = 0;
+
 #ifndef BOARD_V2 // V1
 u8 Image_Config[5][11] =
 {
@@ -135,16 +137,16 @@ static u8 Tw9912_image_global_separation[5][2] = //DVD separation
     {0x14, 0xb6}, //SHARPNESS
 };
 //spinlock_t spin_chipe_config_lock;
-struct mutex lock_chipe_config;
-extern struct mutex lock_com_chipe_config;
+struct mutex lock_chip_config;
+extern struct mutex lock_com_chip_config;
 struct semaphore sem;
 void video_io_i2c_init_in(void)
 {
     if (!flag_io_config)
     {
         //spin_lock_init(&spin_chipe_config_lock);
-        mutex_init(&lock_chipe_config);
-        mutex_init(&lock_com_chipe_config);
+        mutex_init(&lock_chip_config);
+        mutex_init(&lock_com_chip_config);
         sema_init(&sem, 0);
         i2c_io_config_init();
         flag_io_config = 1;
@@ -258,12 +260,12 @@ int flyVideoImageQualityConfig_in(Vedio_Effect cmd , u8 valu)
     u8 Tw9912_image[2] = {0, 0,}; //default input pin selet YIN0ss
     printk("\ntw9912:@@@@@flyVideoImageQualityConfig_in(cmd =%d,valu=%d)\n", cmd, valu);
     //spin_lock(&spin_chipe_config_lock);
-    mutex_lock(&lock_chipe_config);
+    mutex_lock(&lock_chip_config);
 
     if(valu > 10)
     {
         printk("\ntw9912:flyVideoImageQualityConfig_in() input valu is bad 10 errror\n\n");
-        mutex_unlock(&lock_chipe_config);
+        mutex_unlock(&lock_chip_config);
         return -1;
     }
     if(info_com_top_Channel == YIN3)
@@ -466,7 +468,7 @@ int flyVideoImageQualityConfig_in(Vedio_Effect cmd , u8 valu)
         }
     }
     //spin_unlock(&spin_chipe_config_lock);
-    mutex_unlock(&lock_chipe_config);
+    mutex_unlock(&lock_chip_config);
     return ret;
 }
 int init_tw9912_ent(Vedio_Channel Channel);
@@ -474,8 +476,9 @@ int flyVideoInitall_in(u8 Channel)
 {
     int ret = 1 ;
     //spin_lock(&spin_chipe_config_lock);
-    mutex_lock(&lock_chipe_config);
-    printk("tw9912:@@@@@flyVideoInitall_in(Channel=%d)\n", Channel);
+    
+    printk("tw9912:############flyVideoInitall_in(SwitchChannel=%d)\n", Channel);
+	mutex_lock(&lock_chip_config);
     if (Channel >= YIN0 && Channel <= NOTONE)
     {
         //Channel = SEPARATION;
@@ -495,7 +498,7 @@ int flyVideoInitall_in(u8 Channel)
         printk("%s: you input TW9912 Channel=%d error!\n", __FUNCTION__, Channel);
     }
     //spin_unlock(&spin_chipe_config_lock);
-    mutex_unlock(&lock_chipe_config);
+    mutex_unlock(&lock_chip_config);
     return ret;
     //success return 1 fail return -1
 }
@@ -503,7 +506,6 @@ int init_tw9912_ent(Vedio_Channel Channel)
 {
     int ret = -1 ;
     printk("tw9912:@@@@@init_tw9912_ent(Channel=%d)\n", Channel);
-    printk("tw9912:init_tw9912_ent()-->Tw9912_init()\n");
     switch (Channel)
     {
     case YIN0:
@@ -548,7 +550,7 @@ Vedio_Format flyVideoTestSignalPin_in(u8 Channel)
     Vedio_Format ret = NOTONE;
     //spin_lock(&spin_chipe_config_lock);
     //return PAL_I;
-    mutex_lock(&lock_chipe_config);
+    mutex_lock(&lock_chip_config);
     if(Channel == SEPARATION || Channel == YIN2)
     {
         ret = testing_NTSCp_video_signal();
@@ -585,16 +587,16 @@ Vedio_Format flyVideoTestSignalPin_in(u8 Channel)
     }
     printk("tw9912:flyVideoTestSignalPin_in(Channel=%d) back %d\n", Channel, ret);
     //spin_unlock(&spin_chipe_config_lock);
-    mutex_unlock(&lock_chipe_config);
+    mutex_unlock(&lock_chip_config);
     //global_video_format_flag=ret;//Transmitted Jiang  Control
     return ret;
 }
 int read_chips_signal_status(u8 cmd)
 {
     int ret = 0;
-    mutex_lock(&lock_chipe_config);
+    mutex_lock(&lock_chip_config);
     ret = read_tw9912_chips_status(cmd);//return 0 or 1  ,if back 1 signal have change
-    mutex_unlock(&lock_chipe_config);
+    mutex_unlock(&lock_chip_config);
     return ret;//have change return 1 else retrun 0
 }
 static int thread_signal_test(void *data)
@@ -624,14 +626,16 @@ static int thread_signal_test(void *data)
 void video_init_config_in(Vedio_Format config_pramat)
 {
     int i, j;
-    printk( "Video Module Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);
-    printk("tw9912:@@@@@video_init_config_in(config_pramat=%d)\n", config_pramat);
+    //printk( "Video Module Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);
+    //printk("tw9912:@@@@@video_init_config_in(config_pramat=%d)\n", config_pramat);
+	DUMP_FUN_ENTER;
+    printk("(config_pramat=%d)\n", config_pramat);
     //spin_lock(&spin_chipe_config_lock);
-    mutex_lock(&lock_chipe_config);
+    mutex_lock(&lock_chip_config);
 
     if(info_com_top_Channel == SEPARATION)
     {
-        printk("tw9912:%s:config_pramat->NTSC_separation\n", __func__);
+        printk("tw9912::config_pramat->NTSC_separation\n");
         Tw9912_init_NTSCp();
         VideoImage();
         TC358_init(NTSC_P);
@@ -646,9 +650,9 @@ void video_init_config_in(Vedio_Format config_pramat)
         else
         {
             printk("tw9912:video_init_config_in()-->init_tw9912_ent()\n");
-            mutex_unlock(&lock_chipe_config);
+            mutex_unlock(&lock_chip_config);
             init_tw9912_ent(info_com_top_Channel);
-            mutex_lock(&lock_chipe_config);
+            mutex_lock(&lock_chip_config);
         }
         VideoImage();
         //msleep(300);//wait for video Steady display
@@ -720,15 +724,16 @@ void video_init_config_in(Vedio_Format config_pramat)
     //Correction_Parameter_fun(signal_is_how[info_Vedio_Channel].Format);
     //spin_unlock(&spin_chipe_config_lock);
     up(&sem);
-    mutex_unlock(&lock_chipe_config);
+    mutex_unlock(&lock_chip_config);
+	DUMP_FUN_LEAVE;
 }
 void Video_Show_Output_Color(void)
 {
-    mutex_lock(&lock_chipe_config);
+    mutex_lock(&lock_chip_config);
     printk("tw9912:error ******************************\n");
     printk("tw9912:error Video_Show_Output_Color()\n");
     Tw9912_init_PALi();
     TC358_init(COLORBAR);
     //colorbar_init_blue();
-    mutex_unlock(&lock_chipe_config);
+    mutex_unlock(&lock_chip_config);
 }

@@ -314,11 +314,27 @@ struct platform_device video_devices =
     .id 			= 0,
 };
 
+
+int read_proc(char *buf, char **start, off_t offset, int count, int *eof, void *data )
+{
+    int len = 1;
+
+    return len;
+}
+
+void create_new_proc_entry()
+{
+    create_proc_read_entry("vin", 0, NULL, read_proc, NULL);
+
+}
+
+
 int lidbg_video_init(void)
 {
     printk("lidbg_video_init modules ismod\n");
     LIDBG_GET;
     set_func_tbl();
+	create_new_proc_entry();
     //	TC358_init(PAL_I);
     video_io_i2c_init();
     Tw9912_hardware_reset();
