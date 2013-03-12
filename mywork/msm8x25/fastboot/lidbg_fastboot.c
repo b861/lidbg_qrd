@@ -274,6 +274,15 @@ char *kill_exclude_process[] =
 	"setprop",
 
 
+    "m.android.phone",
+    "android.smspush",
+    "omm.datamonitor",
+    ".qualcomm.stats",
+    "droid.gallery3d",
+    "oid.voicedialer",
+
+
+
     //"flush-31:6",
     //"flush-31:3",
     //"flush-31:12",
