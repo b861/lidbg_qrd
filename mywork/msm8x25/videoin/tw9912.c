@@ -4,7 +4,7 @@
 #include "tw9912_config.h"
 #include "lidbg_enter.h"
 static int tw9912_reset_flag = 0;
-struct mutex lock_com_chip_config;
+struct mutex lock_com_chipe_config;
 static struct task_struct *tw9912_Correction_Parameter_fun = NULL;
 u8 tw9912_signal_unstabitily_for_Tw9912_init_flag = 0;
 static int read_tw9912_chips_status_flag = 0 , read_tw9912_chips_status_flag_1 = 0;
@@ -69,7 +69,6 @@ i2c_ack Correction_Parameter_fun(Vedio_Format format)
 {
     i2c_ack ret;
     u8 Tw9912_Parameter[] = {0, 0,};
-	DUMP_FUN_ENTER;
 
     if( format == PAL_I )
     {
@@ -122,7 +121,6 @@ i2c_ack Correction_Parameter_fun(Vedio_Format format)
     {
         ;
     }
-	DUMP_FUN_LEAVE;
     return ret;
 }
 static int thread_tw9912_Correction_Parameter_fun(void *data)
@@ -176,11 +174,6 @@ void tw9912_get_input_info(TW9912_input_info *input_information)
 
     read_tw9912(input_information->input_detection.index, \
                 &input_information->input_detection.valu);
-
-
-	read_tw9912(input_information->macrovision_detection.index, \
-			&input_information->macrovision_detection.valu);
-
 
 }
 void Tw9912_analysis_input_signal(TW9912_input_info *input_information, Vedio_Channel channel)
@@ -512,7 +505,7 @@ Vedio_Format testing_video_signal(Vedio_Channel Channel)
     u8 Tw9912_input_pin_selet[] = {0x02, 0x40,}; //default input pin selet YIN0
     TW9912_Signal signal_is_how_1 = {NOTONE, OTHER, source_other};
     TW9912_input_info tw9912_input_information_1;
-    mutex_lock(&lock_com_chip_config);
+    mutex_lock(&lock_com_chipe_config);
     //if(the_last_config.Channel != Channel && the_last_config.Channel == SEPARATION)
     if(the_last_config.Channel != Channel)
     {
@@ -613,14 +606,14 @@ Vedio_Format testing_video_signal(Vedio_Channel Channel)
     }
 
     tw9912_dbg("testing_signal(): back %d", signal_is_how_1.Format);
-    mutex_unlock(&lock_com_chip_config);
+    mutex_unlock(&lock_com_chipe_config);
     return signal_is_how_1.Format;
 CONFIG_not_ack_fail:
-    mutex_unlock(&lock_com_chip_config);
+    mutex_unlock(&lock_com_chipe_config);
     tw9912_dbg("tw9912:testing_video_signal()--->NACK error\n");
     ret = OTHER;
 CHANNAL_ERROR:
-    mutex_unlock(&lock_com_chip_config);
+    mutex_unlock(&lock_com_chipe_config);
     tw9912_dbg("tw9912:testing_video_signal()--->Channel input error\n");
     ret = OTHER;
     return ret;
@@ -631,7 +624,7 @@ int Tw9912_appoint_pin_testing_video_signal(Vedio_Channel Channel)
     u8 channel_1;
     u8 Tw9912_input_pin_selet[] = {0x02, 0x40,}; //default input pin selet YIN0
     u8 manually_initiate_auto_format_detection[] = {0x1d, 0xff,}; //default input pin selet YIN0
-    mutex_lock(&lock_com_chip_config);
+    mutex_lock(&lock_com_chipe_config);
     tw9912_dbg("@@@@@Tw9912_appoint_pin_testing_video_signal!\n");
 
     if(Channel != SEPARATION)
@@ -722,10 +715,10 @@ int Tw9912_appoint_pin_testing_video_signal(Vedio_Channel Channel)
         break;
     }
 TEST_NTSCp:
-    mutex_unlock(&lock_com_chip_config);
+    mutex_unlock(&lock_com_chipe_config);
     return ret;
 CONFIG_not_ack_fail:
-    mutex_unlock(&lock_com_chip_config);
+    mutex_unlock(&lock_com_chipe_config);
     tw9912_dbg("Tw9912_appoint_pin_testing_video_signal()--->NACK error\n");
     ret = -1;
     return ret;
@@ -747,7 +740,7 @@ int Tw9912_init_NTSCp(void)
 {
     u32 i = 0;
     u8 *config_pramat_piont = NULL;
-    DUMP_FUN_ENTER;
+    tw9912_dbg("Tw9912_init_NTSCp initall tw9912+\n");
     TC9912_id();
     the_last_config.Channel = SEPARATION;
     the_last_config.format = NTSC_P;
@@ -780,7 +773,7 @@ int Tw9912_init_NTSCp(void)
     //Tw9912_appoint_pin_testing_video_signal(SEPARATION);
     return 1;
 CONFIG_not_ack_fail:
-    DUMP_FUN_LEAVE;
+    tw9912_dbg("%s:have NACK error!\n", __FUNCTION__);
     return -1;
 }
 int Tw9912_init_agin(void)
@@ -834,11 +827,12 @@ CONFIG_not_ack_fail:
 int Tw9912_init(Vedio_Format config_pramat, Vedio_Channel Channel)
 {
     u32 i = 0;
-    int ret = 0, dete_signal_count = 0;
+    int ret = 0, delte_signal_count = 0;
     u8 *config_pramat_piont = NULL;
     u8 Tw9912_input_pin_selet[] = {0x02, 0x40,}; //default input pin selet YIN0
-    printk("###tw9912: init+\n");
-    mutex_lock(&lock_com_chip_config);
+    printk("tw9912: init+\n");
+    printk("\r\r\n\n");
+    mutex_lock(&lock_com_chipe_config);
     TC9912_id();
     //if(Channel == NOTONE&&tw9912_status.flag == TW9912_initall_not)
     if(Channel == NOTONE)
@@ -883,7 +877,7 @@ int Tw9912_init(Vedio_Format config_pramat, Vedio_Channel Channel)
             if(Channel == SEPARATION) break;
 
             ret = read_tw9912_chips_status(1);//return register valu
-            
+            msleep(10);
             read_tw9912_chips_status_flag++;
 
             //printk("tw9912:read_tw9912_chips_status back %.2x\n",ret);
@@ -891,41 +885,32 @@ int Tw9912_init(Vedio_Format config_pramat, Vedio_Channel Channel)
             {
                 read_tw9912_chips_status_flag = 0;
                 read_tw9912_chips_status_flag_1++;
-                printk("tw9912:worning Channel = %d input signal unstabitily! %d\n", Channel, read_tw9912_chips_status_flag_1);
+                printk("tw9912:worning Channel = %d input  signal unstabitily! %d\n", Channel, read_tw9912_chips_status_flag_1);
             }
             else
             {
-                printk("tw9912: input signal stabitily! %d ,%d\n", read_tw9912_chips_status_flag, read_tw9912_chips_status_flag_1);
+                printk("tw9912: input  signal stabitily! %d ,%d\n", read_tw9912_chips_status_flag, read_tw9912_chips_status_flag_1);
             }
-
-			
-            if(read_tw9912_chips_status_flag > 2 || read_tw9912_chips_status_flag_1 > 10)
+            if(read_tw9912_chips_status_flag > 5 || read_tw9912_chips_status_flag_1 > 10)
             {
                 if (read_tw9912_chips_status_flag_1 >= 10)
-					 printk("read_tw9912_chips_status_flag_1 >= 10,signal bad!\n");
-                    //;//tw9912_signal_unstabitily_for_Tw9912_init_flag = 1;//find colobar flag signal bad
+                    ;//tw9912_signal_unstabitily_for_Tw9912_init_flag = 1;//find colobar flag signal bad
                 break;
             }
-			msleep(10);
         }
         read_tw9912_chips_status_flag = 0;
         read_tw9912_chips_status_flag_1 = 0;
 
-
-
-
         printk("tw9912:Tw9912_init()-->Tw9912_appoint_pin_testing_video_signal(%d)\n", Channel);
-        mutex_unlock(&lock_com_chip_config);
-SIGNAL_DETE_AGAIN:
-        printk("tw9912 inital before test signal count:%d;\n", dete_signal_count);
+        mutex_unlock(&lock_com_chipe_config);
+SIGNAL_DELTE_AGAIN:
+        printk("tw9912 inital befor test signal count:%d;", delte_signal_count);
         ret = Tw9912_appoint_pin_testing_video_signal(Channel);//bad
-        dete_signal_count++;
+        delte_signal_count++;
         msleep(20);
-        if(ret == 5 && dete_signal_count < 10) goto SIGNAL_DETE_AGAIN;
-
-		
-        dete_signal_count = 0;
-        mutex_lock(&lock_com_chip_config);
+        if(ret == 5 && delte_signal_count < 10) goto SIGNAL_DELTE_AGAIN;
+        delte_signal_count = 0;
+        mutex_lock(&lock_com_chipe_config);
         if(ret == 5) //the channel is not signal input
         {
             tw9912_signal_unstabitily_for_Tw9912_init_flag = 0;//find colobar flag signal bad
@@ -1136,14 +1121,14 @@ SIGNAL_DETE_AGAIN:
     printk("tw9912: init-\n");
     //Correction_Parameter_fun(signal_is_how[Channel].Format);
     //CONFIG_is_old:
-    mutex_unlock(&lock_com_chip_config);
+    mutex_unlock(&lock_com_chipe_config);
     return 1;
 CONFIG_not_ack_fail:
-    mutex_unlock(&lock_com_chip_config);
+    mutex_unlock(&lock_com_chipe_config);
     tw9912_dbg("%s:have NACK error!\n", __FUNCTION__);
     return -2;
 NOT_signal_input:
-    mutex_unlock(&lock_com_chip_config);
+    mutex_unlock(&lock_com_chipe_config);
     tw9912_dbg("%s:the channal=%d not have video signal!\n", __FUNCTION__, Channel);
 
     return -1;

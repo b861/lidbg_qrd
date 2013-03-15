@@ -1,9 +1,5 @@
 #ifndef __TW9912_H__
 #define __TW9912_H__
-
-
-#include "lidbg_def.h"
-
 #define DEBUG_TW9912
 //#define DEBUG_PLOG_TW9912
 //#define DEBUG_TW9912_CHECK_WRITE

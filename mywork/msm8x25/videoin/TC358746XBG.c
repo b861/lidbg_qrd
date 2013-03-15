@@ -219,7 +219,7 @@ void colorbar_init_blue(u8 color_flag)
 }
 void TC358_init(Vedio_Format flag)
 {
-	DUMP_FUN_ENTER;
+    printk("Now inital TC358\n");
     tc358746_dbg("flag= %d\n", flag);
     Power_contorl();
     TC358_id();
@@ -278,7 +278,7 @@ void TC358_init(Vedio_Format flag)
         printk("\n\nTC358746:error:you input TC358746 parameter is not have !\n\n");
     }
     tc358746_dbg(KERN_INFO "Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);
- 	DUMP_FUN_LEAVE;
+    printk("inital done\n");
 
 }
 #if 0
