@@ -320,7 +320,7 @@ int main(int argc , char **argv)
     system("insmod /system/lib/modules/out/lidbg_soc_devices.ko");
     system("insmod /system/lib/modules/out/lidbg_videoin.ko");
     system("insmod /system/lib/modules/out/lidbg_to_bpmsg.ko");
-
+    system("insmod /system/lib/modules/out/lidbg_gps_driver.ko");
 
     //for flycar
     
@@ -344,6 +344,7 @@ int main(int argc , char **argv)
     system("insmod /flysystem/lib/out/lidbg_soc_devices.ko");
     system("insmod /flysystem/lib/out/lidbg_videoin.ko");
     system("insmod /flysystem/lib/out/lidbg_to_bpmsg.ko");
+    system("insmod /flysystem/lib/out/lidbg_gps_driver.ko");
 
 
 
@@ -353,7 +354,7 @@ int main(int argc , char **argv)
     system("chmod 0777 /dev/mlidbg0");
     system("chmod 0777 /dev/lidbg_servicer");
     system("chmod 0777 /dev/lidbg_msg");
-
+    system("chmod 0777 /dev/ubloxgps0");
 open_dev:
     fd = open("/dev/lidbg_servicer", O_RDWR);
     //printf("fd = %x\n",fd);
