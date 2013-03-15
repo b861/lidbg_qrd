@@ -207,10 +207,10 @@ char *kill_exclude_process[] =
 
 
     "mm-qcamera-daemon",
-   // "com.android.qualcomm",
+    "com.android.qualcomm",
     //"com.android.settings",
-   // "com.qualcomm.privinit",
-    //"com.qualcomm.restore.airplanemode",
+    "com.qualcomm.privinit",
+    "com.qualcomm.restore.airplanemode",
    // "com.qualcomm.cabl",
    // "com.innopath.activecare",
     "com.android.systemui",
@@ -272,6 +272,8 @@ char *kill_exclude_process[] =
 	"RilMessageDecod",
 	"getprop",
 	"setprop",
+	"ip",
+	":pushservice_v1",
 
 
     "m.android.phone",
