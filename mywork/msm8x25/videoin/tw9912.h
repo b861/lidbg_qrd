@@ -9,7 +9,7 @@
 #define TW9912_RESET 43
 
 extern u8 tw9912_signal_unstabitily_for_Tw9912_init_flag;
-#if 0
+#if 1
 #define tw9912_dbg(msg...)  do { printk( KERN_CRIT "TW9912: " msg); }while(0)
 #else
 #define tw9912_dbg(msg...)  do {}while(0)
@@ -112,4 +112,5 @@ int Tw9912_init_agin(void);
 void Tw9912_hardware_reset(void);
 Vedio_Format testing_NTSCp_video_signal();
 void Disabel_video_data_out(void);
+void read_NTSCp(void);
 #endif

@@ -32,6 +32,17 @@ i2c_ack read_tw9912(unsigned int sub_addr, char *buf )
 	ret=i2c_read_byte(1,TW9912_I2C_ChipAdd, sub_addr, buf,1);
 return ret;
 }
+void read_NTSCp(void)
+{u8 buf;
+int i=0;
+for(i=0;TW9912_INIT_NTSC_Progressive_input[i] != 0xfe;i+=2)
+{
+	read_tw9912(TW9912_INIT_NTSC_Progressive_input[i],&buf);
+	//printk("tw9912: TW9912_INIT_NTSC_Progressive_input[%d]=0x%.2x != readback =0x%.2xd",i,TW9912_INIT_NTSC_Progressive_input[i],buf);
+if(buf != TW9912_INIT_NTSC_Progressive_input[i+1])
+	printk("tw9912: worning TW9912_INIT_NTSC_Progressive_input[0x%.2x]=0x%.2x != readback =0x%.2x\n",TW9912_INIT_NTSC_Progressive_input[i],TW9912_INIT_NTSC_Progressive_input[i+1],buf);
+}
+}
 i2c_ack write_tw9912(char *buf )
 {	
 i2c_ack ret;
@@ -71,6 +82,7 @@ u8 Tw9912_Parameter[]={0,0,};
 
 	if( format == PAL_I )
 	{//msleep(100);
+	printk("Correction_Parameter_fun() PAL\n");
 		Tw9912_Parameter[0]=0xff;
 		Tw9912_Parameter[1]=0x00;
 		ret = write_tw9912(Tw9912_Parameter);
@@ -96,12 +108,13 @@ u8 Tw9912_Parameter[]={0,0,};
 		ret = write_tw9912(Tw9912_Parameter);
 	}
 	else if(format == NTSC_I )
-	{/*
-		Tw9912_Parameter[0]=0x08;//image dowd 3 line
-		Tw9912_Parameter[1]=0x11;// image down 3 line
+	{
+		printk("Correction_Parameter_fun() NTSC\n");
+		Tw9912_Parameter[0]=0x0a;//image dowd 3 line
+		Tw9912_Parameter[1]=0x17;// image down 3 line
 		ret = write_tw9912(Tw9912_Parameter);
 
-		Tw9912_Parameter[0]=0x09;//image dowd 3 line
+/*		Tw9912_Parameter[0]=0x09;//image dowd 3 line
 		Tw9912_Parameter[1]=0xf9;// image down 3 line
 		ret = write_tw9912(Tw9912_Parameter);
 
@@ -133,10 +146,10 @@ static int thread_tw9912_Correction_Parameter_fun(void *data)
 		} 
 		if (tw912_run_sotp_flag.run == 1)
 			{
-				 printk("tw9912 is run again and format is PALi\n");
+				// printk("tw9912 is run again and format is PALi\n");
 				Correction_Parameter_fun(tw912_run_sotp_flag.format);
 				tw912_run_sotp_flag.run = 0;
-				   kthread_stop(tw9912_Correction_Parameter_fun);  
+				kthread_stop(tw9912_Correction_Parameter_fun);  
 			}
 
 	}
@@ -1061,13 +1074,18 @@ goto CONFIG_is_old;
 
 		tw912_run_sotp_flag.run = 1;
 		 printk("tw9912 is run again and format is PALi flag&&&\n");
-		  tw9912_Correction_Parameter_fun = kthread_run(thread_tw9912_Correction_Parameter_fun,NULL,"flyvideo_Parameter");  
+	//	  tw9912_Correction_Parameter_fun = kthread_run(thread_tw9912_Correction_Parameter_fun,NULL,"flyvideo_Parameter");  
 		}
 	else if(signal_is_how[Channel].Format ==NTSC_I)
 		{u8 Tw9912_Parameter[]={0,0,};
+
+		Tw9912_Parameter[0]=0x0a;
+		Tw9912_Parameter[1]=0x19;
+		ret = write_tw9912(Tw9912_Parameter);
+
 		tw912_run_sotp_flag.run = 1;
 		 printk("tw9912 is run again and format is NTSC_i flag&&&\n");
-		  tw9912_Correction_Parameter_fun = kthread_run(thread_tw9912_Correction_Parameter_fun,NULL,"flyvideo_Parameter");  
+		//  tw9912_Correction_Parameter_fun = kthread_run(thread_tw9912_Correction_Parameter_fun,NULL,"flyvideo_Parameter");  
 		}
 	else
 		{

@@ -26,10 +26,6 @@ timeout = schedule_timeout(timeout); \
 #define COLOR_YELLOW 12
 #define COLOR_WHITE 14
 
-
-static void TC358_Register_Write(u16 *add,u32 *valu,u8 flag);
-
-static void TC358_Register_Read(u16 add,char *buf,u8 flag);
 void TC358_Hardware_Rest(void)
 {
 	tc358_RESX_DOWN;
@@ -46,7 +42,7 @@ static void Power_contorl(void)
 	tc358_MSEL_UP;//NULL now  1: Par_in -> CSI-2 TX
 	TC358_Hardware_Rest();
 }
-static void TC358_Register_Read(u16 add,char *buf,u8 flag)
+void TC358_Register_Read(u16 add,char *buf,u8 flag)
 {//int buf_change;
 	if(flag ==register_value_width_16) 
 	{
@@ -63,7 +59,7 @@ static void TC358_Register_Read(u16 add,char *buf,u8 flag)
 	
 }
 
-static void TC358_Register_Write(u16 *add,u32 *valu,u8 flag)
+void TC358_Register_Write(u16 *add,u32 *valu,u8 flag)
 {
 u8 BUF_tc358[6]; // address 2 valu=4;
 //u8 huang;
@@ -170,7 +166,23 @@ u8 valu[4];
 	}
 	
 }
+void TC358_data_output_enable(u8 flag)
+{		
+	u16 sub_addr=0x4;
+	u32 valu;
+	if(flag == 1)
+	{printk("TC358 output enable\n");
+	valu =0x1044;//enable
+				TC358_Register_Write(&sub_addr,&valu,register_value_width_16);
 
+	}
+	else
+	{printk("TC358 output disable\n");
+	valu =0x1014;//disable
+				TC358_Register_Write(&sub_addr,&valu,register_value_width_16);
+
+	}
+}
 
 void colorbar_init(void)
 {

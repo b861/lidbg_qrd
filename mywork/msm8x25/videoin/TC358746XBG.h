@@ -3,6 +3,8 @@
 #include "tw9912.h"
 #include "i2c_io.h"
 
+#define DISABLE 0
+#define ENABLE 1
 
 #define TC358746XBG_BLACK 1
 #define TC358746XBG_BLUE 2
@@ -23,7 +25,7 @@
 #define register_value_width_32 32
 #define register_value_width_16 16
 #define TC358746_I2C_ChipAdd 0x07
-#if 0
+#if 1
 #define tc358746_debug
 #define tc358746_dbg(msg...)  do { printk( KERN_CRIT "TC358746: " msg); }while(0)
 #else
@@ -61,5 +63,9 @@
 #define tc358_MSEL_DOWN do{}while(0)//do{SOC_IO_Config(34,GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_12MA);SOC_IO_Output(0, 34, 0);}while(0)
 void TC358_init(Vedio_Format);
 void TC358_Hardware_Rest(void);
+void TC358_Register_Write(u16 *add,u32 *valu,u8 flag);
+
+void TC358_Register_Read(u16 add,char *buf,u8 flag);
+void TC358_data_output_enable(u8 flag);
 //void TC358_exit( void );
 #endif 
