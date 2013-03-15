@@ -68,7 +68,10 @@ return 0;
 void lidbg_video_main_in(int argc, char **argv)
 {
 printk("In lidbg_video_main()\n");
-
+ if(!strcmp(argv[0], "agian_initall"))
+	{
+	video_init_config_in(NTSC_P);
+ 	}
 	 if(!strcmp(argv[0], "image"))
 	{
 		u32 valu;
@@ -154,6 +157,11 @@ printk("In lidbg_video_main()\n");
  #ifdef DEBUG_TW9912
 	else if(!strcmp(argv[0], "TW9912"))
 	{
+	if(!strcmp(argv[1], "read_all_NTSCp"))
+	{
+		printk("TW9912 Read All register\n");
+		read_NTSCp();
+	}
 	if(!strcmp(argv[1], "initNTSCp"))
 		{
 			printk("Inital TW9912 NTSCp\n");
@@ -204,6 +212,51 @@ printk("In lidbg_video_main()\n");
 		{
 				printk("TC358_init(PAL_Progressive);\n\n");
 				TC358_init(NTSC_P);
+		}
+		if(!strcmp(argv[1], "write"))
+		{
+		u8 buf[4]={0,0,0,0},flag;
+		u16 sub_addr;
+		u32 valu;
+		
+			sub_addr = simple_strtoul(argv[2], 0, 0);
+			valu = simple_strtoul(argv[3], 0, 0);
+			flag =  simple_strtoul(argv[4], 0, 0);
+			if(flag ==16)
+				{
+				printk("TC358 write in adder=0x%02x, valu=0x%02x\n",sub_addr,valu);
+				TC358_Register_Write(&sub_addr,&valu,register_value_width_16);
+				TC358_Register_Read(sub_addr,buf,register_value_width_16);
+				printk("TC358 read back adder=0x%02x, valu=0x%02x%02x%02x%02x\n",sub_addr,buf[2],buf[3],buf[0],buf[1]);
+				}
+			
+
+			else
+				{
+				printk("TC358 write in adder=0x%02x, valu=0x%02x\n",sub_addr,valu);
+				TC358_Register_Write(&sub_addr,&valu,register_value_width_32);
+				TC358_Register_Read(sub_addr,buf,register_value_width_32);
+				printk("TC358 read back adder=0x%02x, valu=0x%02x%02x%02x%02x\n",sub_addr,buf[2],buf[3],buf[0],buf[1]);
+				}
+		
+				
+		}	
+		if(!strcmp(argv[1], "Read"))
+		{
+		u8 flag,buf[4]={0,0,0,0};
+		u16 sub_addr;
+			sub_addr = simple_strtoul(argv[2], 0, 0);
+			flag =  simple_strtoul(argv[3], 0, 0);
+			if(flag ==16)
+				{
+				TC358_Register_Read(sub_addr,buf,register_value_width_16);
+				printk("TC358 read back adder=0x%02x, valu=0x%02x%02x%02x%02x\n",sub_addr,buf[2],buf[3],buf[0],buf[1]);
+				}
+			else
+				{
+				TC358_Register_Read(sub_addr,buf,register_value_width_32);
+				printk("TC358 read back adder=0x%02x, valu=0x%02x%02x%02x%02x\n",sub_addr,buf[2],buf[3],buf[0],buf[1]);
+				}
 		}
 	}
 

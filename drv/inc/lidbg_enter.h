@@ -77,6 +77,8 @@ typedef irqreturn_t (*pinterrupt_isr)(int irq, void *dev_id);
 #define SUSPEND_PREPARE (83)
 #define RESUME_PREPARE (84)
 
+#define VIDEO_SHOW_BLACK (85)
+#define VIDEO_NORMAL_SHOW (86)
 #endif
 
 typedef enum
