@@ -3,6 +3,7 @@ static int flag_io_config=0;
 static Vedio_Channel info_Vedio_Channel = NOTONE;
 static Vedio_Channel info_com_top_Channel = YIN2;
 extern TW9912_Signal signal_is_how[5];
+extern Last_config_t the_last_config;
 static struct task_struct * Signal_Test = NULL;
 #ifndef BOARD_V2 // V1
 u8 Image_Config[5][11]={
@@ -135,6 +136,16 @@ void video_io_i2c_init_in(void)
 		i2c_io_config_init();
 		flag_io_config=1;
 	}
+}
+int static Change_channel(void)
+{
+printk("TC358:Change_channel() \n");
+//Disabel_video_data_out();
+TC358_data_output_enable(DISABLE);
+msleep(1);
+TC358_init(COLORBAR+TC358746XBG_BLACK);
+msleep(1);
+TC358_data_output_enable(ENABLE);
 }
 int static VideoImage(void)
 {int ret;
@@ -531,6 +542,15 @@ Vedio_Format flyVideoTestSignalPin_in(u8 Channel)
 //spin_lock(&spin_chipe_config_lock);
 //return PAL_I;
 mutex_lock(&lock_chipe_config);
+	if(
+		( (the_last_config.Channel == YIN2 ||the_last_config.Channel == SEPARATION) &&Channel == YIN3)||\
+		(the_last_config.Channel == YIN3  && (Channel == YIN2 || Channel == SEPARATION))
+	   )
+	   {
+	   	SOC_Write_Servicer(VIDEO_SHOW_BLACK);
+	   	Change_channel();
+		
+	   }
 	if(Channel == SEPARATION||Channel == YIN2)
 	{
 		ret= testing_NTSCp_video_signal();
@@ -603,11 +623,13 @@ return 0;
 void video_init_config_in(Vedio_Format config_pramat)
 {int i,j;   
 printk( "Video Module Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);
-printk("tw9912:@@@@@video_init_config_in(config_pramat=%d)\n",config_pramat);
+printk("tw9912:@@@@@video_init_config_in(config_pramat=%d) info_com_top_Channel = %d\n",config_pramat,info_com_top_Channel);
 //spin_lock(&spin_chipe_config_lock);
 mutex_lock(&lock_chipe_config);
 
-if(info_com_top_Channel ==SEPARATION)
+SOC_Write_Servicer(VIDEO_NORMAL_SHOW);
+		
+if(info_com_top_Channel ==SEPARATION||info_com_top_Channel ==YIN2)
 	{
 printk("tw9912:%s:config_pramat->NTSC_separation\n",__func__);
 Tw9912_init_NTSCp();
@@ -685,6 +707,7 @@ else	if(config_pramat != STOP_VIDEO)
 	}
 	else
 	{ 
+	printk("TW9912:warning -->config_pramat == STOP_VIDEO\n");
 	TC358_init(COLORBAR);
 	  //TC358_init(STOP_VIDEO);
 	}
