@@ -247,7 +247,7 @@ static  int gps_server_driver_init(void)
 
 
     //22creat thread
-    gps_server_task = kthread_create(thread_gps_server, NULL, "ftf_gps_server");
+    gps_server_task = kthread_create(thread_gps_server, NULL, "fly_gps_server");
     if(IS_ERR(gps_server_task))
     {
         lidbg("Unable to start kernel thread.gps_server_task\n");

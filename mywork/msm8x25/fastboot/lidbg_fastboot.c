@@ -274,7 +274,7 @@ char *kill_exclude_process[] =
 	"setprop",
 	"ip",
 	":pushservice_v1",
-
+	"fly_gps_server",
 
     "m.android.phone",
     "android.smspush",
@@ -282,6 +282,7 @@ char *kill_exclude_process[] =
     ".qualcomm.stats",
     "droid.gallery3d",
     "oid.voicedialer",
+	"thermald",
 
 
 
@@ -379,6 +380,7 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
             (strncmp(p->comm, "migration", sizeof("migration") - 1) == 0) ||
 			(strncmp(p->comm, "mmcqd", sizeof("mmcqd") - 1) == 0) ||
 			(strncmp(p->comm, "Fly", sizeof("Fly") - 1) == 0) ||
+			(strncmp(p->comm, "fly", sizeof("fly") - 1) == 0) ||
 			(strncmp(p->comm, "flyaudio", sizeof("flyaudio") - 1) == 0) ||
 			(strncmp(p->comm, "ksdioirqd", sizeof("ksdioirqd") - 1) == 0) ||
 			(strncmp(p->comm, "jbd2", sizeof("jbd2") - 1) == 0) ||

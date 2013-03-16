@@ -381,7 +381,7 @@ open_dev:
     fcntl(fd, F_SETOWN, getpid());
     oflags = fcntl(fd, F_GETFL);
     fcntl(fd, F_SETFL, oflags | FASYNC); //调用驱动的fasync_helper
-
+    
 #endif
 
 
