@@ -141,17 +141,20 @@ int static Change_channel(void)
 {
 printk("TC358:Change_channel() \n");
 //Disabel_video_data_out();
+
 TC358_data_output_enable(DISABLE);
-msleep(1);
 TC358_init(COLORBAR+TC358746XBG_BLACK);
-msleep(1);
+//msleep(1);
 TC358_data_output_enable(ENABLE);
+tw9912_RESX_DOWN;//\u8fd9\u91cc\u5bf9tw9912\u590d\u4f4d\u7684\u539f\u56e0\u662f\u89e3\u51b3\u5012\u8f66\u9000\u56deDVD\u65f6\u89c6\u9891\u5361\u6b7b\u3002
+tw9912_RESX_UP;
+msleep(20);
 }
 int static VideoImage(void)
 {int ret;
  int i=0;
  u8 Tw9912_image[2]={0x17,0x87,};//default input pin selet YIN0ss
- printk("\ntw9912:@@@@@VideoImage()\n");
+ printk("\ntw9912:@@@@@VideoImage() info_com_top_Channel =%d\n",info_com_top_Channel);
  	for(i=0;i<5;i++)
  		{
  		if(info_com_top_Channel == YIN3)//back or AUX
@@ -206,14 +209,14 @@ int static VideoImage(void)
 		if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
 		{
 			Tw9912_image[0]=0x08;//image dowd 3 line
-			Tw9912_image[1]=0x15;// image down 3 line
+			Tw9912_image[1]=0x10;// image down 3 line
 			ret = write_tw9912(Tw9912_image);
 			Tw9912_image[0]=0x09;//image dowd 3 line
 			Tw9912_image[1]=0xf9;// image down 3 line
 			ret = write_tw9912(Tw9912_image);
 
 			Tw9912_image[0]=0x0A;//image dowd 3 line
-			Tw9912_image[1]=0x21;// image down 3 line
+			Tw9912_image[1]=0x23;// image down 3 line
 			ret = write_tw9912(Tw9912_image);
 			
 		       	Tw9912_image[0]=0x0B;//image dowd 3 line
