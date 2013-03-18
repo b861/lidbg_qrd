@@ -16,6 +16,7 @@ struct gps_device
     struct cdev cdev;
 };
 
+struct early_suspend early_suspend;
 
 #define GPS_BUF_SIZE (1024*4)
 u8 gps_data[GPS_BUF_SIZE];
@@ -29,6 +30,7 @@ u8 gps_data_for_jni[JNI_BUF_SIZE];
 u8 fifo_buffer[FIFO_SIZE];
 static struct kfifo gps_data_fifo;
 
+bool work_en = 1;
 
 static char  num_avi_gps_data[2] = { 0 };
 static int    avi_gps_data_hl = 0;
@@ -163,15 +165,8 @@ void clean_ublox_buf(void)
 {
 	DUMP_FUN_ENTER;
 
-read_again:
     SOC_I2C_Rec(1, 0x42, 0xfd, num_avi_gps_data, 2);
     avi_gps_data_hl = (num_avi_gps_data[0] << 8) + num_avi_gps_data[1];
-    if (avi_gps_data_hl > GPS_BUF_SIZE)
-    {
-        avi_gps_data_hl = GPS_BUF_SIZE;
-        SOC_I2C_Rec_Simple(1, 0x42, gps_data, GPS_BUF_SIZE);
-        goto read_again;
-    }
 	
     SOC_I2C_Rec_Simple(1, 0x42, gps_data, avi_gps_data_hl);
 
@@ -235,7 +230,9 @@ int thread_gps_server(void *data)
 	//clean_ublox_buf();
     while(1)
     {
-
+		if(work_en == 0)
+			goto do_nothing;
+		
         SOC_I2C_Rec(1, 0x42, 0xfd, num_avi_gps_data, 2);
         
         avi_gps_data_hl = (num_avi_gps_data[0] << 8) + num_avi_gps_data[1];
@@ -301,10 +298,93 @@ int read_proc(char *buf, char **start, off_t offset, int count, int *eof, void *
 void create_new_proc_entry()
 {
     create_proc_read_entry("ublox_dbg", 0, NULL, read_proc, NULL);
+// /cat proc/ublox_dbg
+}
+
+#ifdef CONFIG_HAS_EARLYSUSPEND
+
+static void gps_early_suspend(struct early_suspend *h)
+{
+    DUMP_FUN;
+	work_en = 0;
 
 }
 
+static void gps_late_resume(struct early_suspend *h)
+{
+    DUMP_FUN;
+	clean_ublox_buf();
+	work_en = 1;
 
+}
+
+#endif
+
+
+static int  gps_probe(struct platform_device *pdev)
+{
+
+		DUMP_FUN;
+#ifdef CONFIG_HAS_EARLYSUSPEND
+		early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN;
+		early_suspend.suspend = gps_early_suspend;
+		early_suspend.resume = gps_late_resume;
+		register_early_suspend(&early_suspend);
+#endif
+    return 0;
+}
+
+
+
+static int  gps_remove(struct platform_device *pdev)
+{
+    return 0;
+}
+
+
+
+#ifdef CONFIG_PM
+static int gps_resume(struct device *dev)
+{
+	DUMP_FUN_ENTER;
+	//work_en = 1;
+	return 0;
+
+}
+
+static int gps_suspend(struct device *dev)
+{
+	DUMP_FUN_ENTER;
+	//work_en = 0;
+	return 0;
+
+}
+
+static struct dev_pm_ops gps_pm_ops =
+{
+    .suspend	= gps_suspend,
+    .resume		= gps_resume,
+};
+#endif
+
+static struct platform_driver gps_driver =
+{
+    .probe		= gps_probe,
+    .remove     = gps_remove,
+    .driver         = {
+        .name = "lidbg_gps",
+        .owner = THIS_MODULE,
+#ifdef CONFIG_PM
+        .pm = &gps_pm_ops,
+#endif
+    },
+};
+
+static struct platform_device lidbg_gps_device =
+{
+    .name               = "lidbg_gps",
+    .id                 = -1,
+};
 
 
 static  int gps_server_driver_init(void)
@@ -371,6 +451,12 @@ static  int gps_server_driver_init(void)
     //33init all the tools
     init_waitqueue_head(&dev->queue);
     sema_init(&dev->sem, 1);
+
+
+    platform_device_register(&lidbg_gps_device);
+
+    return platform_driver_register(&gps_driver);
+
 
     //return
     return 0;
