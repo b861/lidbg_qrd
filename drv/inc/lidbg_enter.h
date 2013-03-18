@@ -29,6 +29,10 @@
 #include <linux/fb.h>
 #include <linux/stat.h>
 #include <linux/proc_fs.h>
+#include <linux/wait.h>
+#include <linux/poll.h>
+#include <linux/semaphore.h>
+#include <linux/kfifo.h>
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
 #include <linux/earlysuspend.h>

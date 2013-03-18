@@ -35,6 +35,9 @@
 #include <linux/i2c.h>
 #include <linux/spi/spi.h>
 
+#include <linux/wait.h>
+#include <linux/poll.h>
+#include <linux/semaphore.h>
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
 #include <linux/earlysuspend.h>
