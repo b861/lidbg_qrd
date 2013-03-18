@@ -284,6 +284,7 @@ i2c_ack i2c_write_byte(int bus_id, char chip_addr, char *buf, unsigned int size)
 {
     u8 i;     
     	mutex_lock(&io_i2c_lock);
+//printk("i2c:write byte:addr =0x%.2x value=0x%.2x ",buf[0],buf[1]);
 	i2c_init();
 
 	// start transmite

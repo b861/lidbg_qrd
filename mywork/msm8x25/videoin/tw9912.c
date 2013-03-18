@@ -30,6 +30,7 @@ i2c_ack read_tw9912(unsigned int sub_addr, char *buf )
 {
 	i2c_ack ret;   
 	ret=i2c_read_byte(1,TW9912_I2C_ChipAdd, sub_addr, buf,1);
+	tw9912_dbg("tw9912:read addr=0x%.2x value=0x%.2x\n",sub_addr,buf[0]);
 return ret;
 }
 void read_NTSCp(void)
@@ -48,6 +49,7 @@ i2c_ack write_tw9912(char *buf )
 i2c_ack ret;
 u8 buf_back;
 static int again_write_count=0;
+tw9912_dbg("tw9912:write addr=0x%.2x value=0x%.2x\n",buf[0],buf[1]);
 		ret=i2c_write_byte(1, TW9912_I2C_ChipAdd,buf, 2);
 #ifdef DEBUG_TW9912_CHECK_WRITE	
 		if (ret == ACK && the_last_config.Channel == SEPARATION)
@@ -82,7 +84,7 @@ u8 Tw9912_Parameter[]={0,0,};
 
 	if( format == PAL_I )
 	{//msleep(100);
-	printk("Correction_Parameter_fun() PAL\n");
+	tw9912_dbg("Correction_Parameter_fun() PAL\n");
 		Tw9912_Parameter[0]=0xff;
 		Tw9912_Parameter[1]=0x00;
 		ret = write_tw9912(Tw9912_Parameter);
@@ -109,10 +111,10 @@ u8 Tw9912_Parameter[]={0,0,};
 	}
 	else if(format == NTSC_I )
 	{
-		printk("Correction_Parameter_fun() NTSC\n");
-		Tw9912_Parameter[0]=0x0a;//image dowd 3 line
-		Tw9912_Parameter[1]=0x17;// image down 3 line
-		ret = write_tw9912(Tw9912_Parameter);
+		tw9912_dbg("Correction_Parameter_fun() NTSC\n");
+//		Tw9912_Parameter[0]=0x0a;//image dowd 3 line
+//		Tw9912_Parameter[1]=0x17;// image down 3 line
+//		ret = write_tw9912(Tw9912_Parameter);
 
 /*		Tw9912_Parameter[0]=0x09;//image dowd 3 line
 		Tw9912_Parameter[1]=0xf9;// image down 3 line
@@ -136,7 +138,7 @@ return ret;
 static int thread_tw9912_Correction_Parameter_fun(void *data)  
 {int i=0;
   long int timeout;
-  	 printk("tw9912:thread_tw9912_Correction_Parameter_fun()\n");
+  	 tw9912_dbg("tw9912:thread_tw9912_Correction_Parameter_fun()\n");
 	while(!kthread_should_stop())
 	{
 	        timeout=10;
@@ -460,7 +462,7 @@ Vedio_Format testing_NTSCp_video_signal()
 {
 Vedio_Format ret =OTHER;
 u8 valu;//default input pin selet YIN0
-	printk("testing_NTSCp_video_signal()\n");
+	tw9912_dbg("testing_NTSCp_video_signal()\n");
 	if(the_last_config.Channel != SEPARATION)
 		Tw9912_init_NTSCp();
 	read_tw9912(0xc1,&valu);
@@ -718,15 +720,45 @@ u8 valu;
 		printk("TW9912 Communication error!(0x%.2x)\n",TW9912_ID[1]);
 
 }
+static int bug_return_for_PALi(void)
+{ int ret;
+u32 i=0;
+    u8 *config_pramat_piont=NULL;   
+u8 Tw9912_image[2]={0x17,0x87,};//default input pin selet YIN0ss
+config_pramat_piont=TW9912_INIT_NTSC_Interlaced_input; 
+	while(config_pramat_piont[i*2] != 0xfe)
+	{    
+		if(write_tw9912(&config_pramat_piont[i*2])==NACK);
+//		tw9912_dbg("w a=%x,v=%x\n",config_pramat_piont[i*2],config_pramat_piont[i*2+1]);
+		i++;
+	}
+tw9912_dbg("Several register allocation, avoid returning the DVD video stop\n");
+			Tw9912_image[0]=0x08;//image dowd 3 line
+			Tw9912_image[1]=0x10;// image down 3 line
+			ret =  write_tw9912(Tw9912_image);
+			Tw9912_image[0]=0x09;//image dowd 3 line
+			Tw9912_image[1]=0xf9;// image down 3 line
+			ret = write_tw9912(Tw9912_image);
 
+			Tw9912_image[0]=0x0A;//image dowd 3 line
+			Tw9912_image[1]=0x23;// image down 3 line
+			ret = write_tw9912(Tw9912_image);
+			
+		       	Tw9912_image[0]=0x0B;//image dowd 3 line
+			Tw9912_image[1]=0xec;// image down 3 line
+			ret = write_tw9912(Tw9912_image);
+return ret;
+}
 int Tw9912_init_NTSCp(void)
 {
     u32 i = 0;
     u8 *config_pramat_piont=NULL;   
 	tw9912_dbg("Tw9912_init_NTSCp initall tw9912+\n");
 	TC9912_id();
+	printk("the_last_config.Channel  =%d\n",the_last_config.Channel );
 	the_last_config.Channel =SEPARATION;
-	the_last_config.format = NTSC_P;	printk("the_last_config.Channel  =%d\n",the_last_config.Channel );
+	the_last_config.format = NTSC_P;	
+//	bug_return_for_PALi();
 	config_pramat_piont=TW9912_INIT_NTSC_Progressive_input; 
 	while(TW9912_INIT_Public[i*2] != 0xfe)
 		{    
@@ -736,7 +768,7 @@ int Tw9912_init_NTSCp(void)
 	while(config_pramat_piont[i*2] != 0xfe)
 	{    
 		if(write_tw9912(&config_pramat_piont[i*2])==NACK) goto CONFIG_not_ack_fail;
-		tw9912_dbg("w a=%x,v=%x\n",config_pramat_piont[i*2],config_pramat_piont[i*2+1]);
+//		tw9912_dbg("w a=%x,v=%x\n",config_pramat_piont[i*2],config_pramat_piont[i*2+1]);
 		i++;
 	}
 
@@ -771,7 +803,7 @@ the_last_config.Channel =YIN3;
 	while(config_pramat_piont[i*2] != 0xfe)
 	{    
 		if(write_tw9912(&config_pramat_piont[i*2])==NACK) goto CONFIG_not_ack_fail;
-		tw9912_dbg("w a=%x,v=%x\n",config_pramat_piont[i*2],config_pramat_piont[i*2+1]);
+//		tw9912_dbg("w a=%x,v=%x\n",config_pramat_piont[i*2],config_pramat_piont[i*2+1]);
 		i++;
 	}
 	tw9912_dbg("Tw9912_init_agin -\n");
@@ -797,7 +829,7 @@ int Tw9912_init_PALi(void)
 	while(config_pramat_piont[i*2] != 0xfe)
 	{    
 		if(write_tw9912(&config_pramat_piont[i*2])==NACK) goto CONFIG_not_ack_fail;
-		tw9912_dbg("w a=%x,v=%x\n",config_pramat_piont[i*2],config_pramat_piont[i*2+1]);
+//		tw9912_dbg("w a=%x,v=%x\n",config_pramat_piont[i*2],config_pramat_piont[i*2+1]);
 		i++;
 	}
 	tw9912_dbg("Tw9912_appoint_pin_testing_video_signal initall tw9912-\n");
@@ -813,7 +845,7 @@ int Tw9912_init(Vedio_Format config_pramat,Vedio_Channel Channel)
     u8 *config_pramat_piont=NULL;
     u8 Tw9912_input_pin_selet[]={0x02,0x40,};//default input pin selet YIN0
 	printk("tw9912: init+\n");
-	printk("\r\r\n\n");
+	tw9912_dbg("\r\r\n\n");
 mutex_lock(&lock_com_chipe_config);
 	TC9912_id();
 	//if(Channel == NOTONE&&tw9912_status.flag == TW9912_initall_not)
@@ -848,7 +880,7 @@ mutex_lock(&lock_com_chipe_config);
 				if(write_tw9912(Tw9912_input_pin_selet)==NACK) goto CONFIG_not_ack_fail;
 				break;
 			default : 
-				tw9912_dbg("%s:you input Channel = %d error!\n",__FUNCTION__,Channel);
+				printk("%s:you input Channel = %d error!\n",__FUNCTION__,Channel);
 				break;
 			}
 				
@@ -882,10 +914,10 @@ mutex_lock(&lock_com_chipe_config);
 			read_tw9912_chips_status_flag = 0;
 			read_tw9912_chips_status_flag_1 = 0;
 
-	printk("tw9912:Tw9912_init()-->Tw9912_appoint_pin_testing_video_signal(%d)\n",Channel);
+	tw9912_dbg("tw9912:Tw9912_init()-->Tw9912_appoint_pin_testing_video_signal(%d)\n",Channel);
 mutex_unlock(&lock_com_chipe_config);
 SIGNAL_DELTE_AGAIN:
-	printk("tw9912 inital befor test signal count:%d;",delte_signal_count);
+	tw9912_dbg("tw9912 inital befor test signal count:%d;",delte_signal_count);
 		ret = Tw9912_appoint_pin_testing_video_signal(Channel);//bad
 		delte_signal_count++;
 		msleep(20);
@@ -979,7 +1011,7 @@ goto CONFIG_is_old;
 		while(config_pramat_piont[i*2] != 0xfe)
 			{    
 				if(write_tw9912(&config_pramat_piont[i*2])==NACK) goto CONFIG_not_ack_fail;
-				tw9912_dbg("w a=%x,v=%x\n",config_pramat_piont[i*2],config_pramat_piont[i*2+1]);
+//				tw9912_dbg("w a=%x,v=%x\n",config_pramat_piont[i*2],config_pramat_piont[i*2+1]);
 				if(signal_is_how[Channel].Format == NTSC_P \
 					&& config_pramat_piont[i*2] >0x24\
 					&& config_pramat_piont[i*2] < 0x2d) 
@@ -1053,7 +1085,7 @@ goto CONFIG_is_old;
 							if(write_tw9912(Tw9912_input_pin_selet)==NACK) goto CONFIG_not_ack_fail;
 							break;
 						default : 
-							tw9912_dbg("%s:you input Channel = %d error!\n",__FUNCTION__,Channel);
+							printk("%s:you input Channel = %d error!\n",__FUNCTION__,Channel);
 							break;
 					}
 				
@@ -1074,7 +1106,7 @@ goto CONFIG_is_old;
 
 		tw912_run_sotp_flag.run = 1;
 		 printk("tw9912 is run again and format is PALi flag&&&\n");
-	//	  tw9912_Correction_Parameter_fun = kthread_run(thread_tw9912_Correction_Parameter_fun,NULL,"flyvideo_Parameter");  
+		  tw9912_Correction_Parameter_fun = kthread_run(thread_tw9912_Correction_Parameter_fun,NULL,"flyvideo_Parameter");  
 		}
 	else if(signal_is_how[Channel].Format ==NTSC_I)
 		{u8 Tw9912_Parameter[]={0,0,};
@@ -1085,7 +1117,7 @@ goto CONFIG_is_old;
 
 		tw912_run_sotp_flag.run = 1;
 		 printk("tw9912 is run again and format is NTSC_i flag&&&\n");
-		//  tw9912_Correction_Parameter_fun = kthread_run(thread_tw9912_Correction_Parameter_fun,NULL,"flyvideo_Parameter");  
+		  tw9912_Correction_Parameter_fun = kthread_run(thread_tw9912_Correction_Parameter_fun,NULL,"flyvideo_Parameter");  
 		}
 	else
 		{
