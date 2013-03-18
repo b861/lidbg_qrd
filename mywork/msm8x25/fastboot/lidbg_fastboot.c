@@ -284,7 +284,8 @@ char *kill_exclude_process[] =
     "oid.voicedialer",
 	"thermald",
 
-
+	"tek.inputmethod",
+	"ndroid.launcher",
 
     //"flush-31:6",
     //"flush-31:3",
