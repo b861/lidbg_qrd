@@ -8,6 +8,12 @@ struct mutex lock_com_chipe_config;
 static struct task_struct * tw9912_Correction_Parameter_fun = NULL; 
 u8 tw9912_signal_unstabitily_for_Tw9912_init_flag=0;
 static int read_tw9912_chips_status_flag =0 , read_tw9912_chips_status_flag_1 = 0;
+u8 tw9912_reset_flag_jam=0;
+/*
+\u56e0\u4e3a\u914d\u7f6eNTSCp\u65f6\u64ad\u653e\u5361\u6b7b\u7684\u95ee\u9898\u9700\u8981\u5bf9tw9912\u590d\u4f4d\uff0c
+\u5728\u7b2c\u4e00\u6b21\u8fdb\u5165DVD\u65f6\u5e94\u4e3a\u672a\u80fd\u6267\u884c\u5230int static Change_channel(void)\u5b9e\u73b0tw9912\u7684\u590d\u4f4d\uff0c
+\u7279\u52a0\u5165\u6b64\u6807\u5fd7\u4f4d\u5bf9tw9912\u7b2c\u4e00\u6b21\u8fdb\u5165\u505a\u590d\u4f4d\u6807\u5fd7\u3002
+*/
 #define TW9912_I2C_ChipAdd 0x44 //SIAD = 0-->0x44  SIAD =1-->0x45
 TW9912_input_info tw9912_input_information;
  tw9912_run_flag tw912_run_sotp_flag;
@@ -25,6 +31,7 @@ void Tw9912_hardware_reset(void)
 	tw9912_RESX_DOWN;
 	tw9912_RESX_UP;   
 	Tw9912_init_agin();
+	tw9912_reset_flag_jam =0;//\u5524\u9192\u540e\u7b2c\u4e00\u6b21\u8fdb\u5165DVD\u5bf9tw9912\u8fdb\u884c\u590d\u4f4d
 }
 i2c_ack read_tw9912(unsigned int sub_addr, char *buf )
 {
@@ -753,6 +760,13 @@ int Tw9912_init_NTSCp(void)
 {
     u32 i = 0;
     u8 *config_pramat_piont=NULL;   
+	if (tw9912_reset_flag_jam ==0)
+	{
+	tw9912_reset_flag_jam =1;
+	tw9912_RESX_DOWN;//\u8fd9\u91cc\u5bf9tw9912\u590d\u4f4d\u7684\u539f\u56e0\u662f\u89e3\u51b3\u5012\u8f66\u9000\u56deDVD\u65f6\u89c6\u9891\u5361\u6b7b\u3002
+	tw9912_RESX_UP;
+	msleep(50);
+	}
 	tw9912_dbg("Tw9912_init_NTSCp initall tw9912+\n");
 	TC9912_id();
 	printk("the_last_config.Channel  =%d\n",the_last_config.Channel );
