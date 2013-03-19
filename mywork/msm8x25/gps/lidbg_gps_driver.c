@@ -241,7 +241,7 @@ int thread_gps_server(void *data)
 
         avi_gps_data_hl = (num_avi_gps_data[0] << 8) + num_avi_gps_data[1];
         if(debug_mask)
-            printk("[ublox]ublox_buf_len: %d\n", avi_gps_data_hl);
+            printk("[ublox]ublox_buf_len: ===========================%d\n", avi_gps_data_hl);
 
         if(avi_gps_data_hl > 0)
         {
@@ -271,6 +271,11 @@ int thread_gps_server(void *data)
 
         }
         wake_up_interruptible(&dev->queue);
+        if(debug_mask)
+        {
+            gps_data[avi_gps_data_hl ] = '\0';
+            printk("%s\n", gps_data);
+        }
 
 do_nothing:
         msleep(800);
