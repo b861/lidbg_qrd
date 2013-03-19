@@ -5,6 +5,23 @@ static Vedio_Channel info_com_top_Channel = YIN2;
 extern TW9912_Signal signal_is_how[5];
 extern Last_config_t the_last_config;
 static struct task_struct * Signal_Test = NULL;
+static char Channel_tab[][20]={
+					"YIN0",
+					"YIN1",
+					"DVD(YIN2)",
+					"BACK(YIN3)",
+					"DVD(YUV)",
+					"NOTONE",
+					 };
+static char Format_tab[][20]={
+					"NTSC_I",
+					"PAL_I",
+					"NTSC_P",
+					"PAL_P",
+					"STOP_VIDEO",
+					"COLORBAR",
+					"OTHER",
+					 };
 #ifndef BOARD_V2 // V1
 u8 Image_Config[5][11]={
 						/*0*/	/*1*/	/*2*/	/*3*/	/*4*/	/*5*/	/*6*/	/*7*/	/*8*/	/*9*/	/*10*/
@@ -154,7 +171,7 @@ int static VideoImage(void)
 {int ret;
  int i=0;
  u8 Tw9912_image[2]={0x17,0x87,};//default input pin selet YIN0ss
- printk("\ntw9912:@@@@@VideoImage() info_com_top_Channel =%d\n",info_com_top_Channel);
+ printk("fly_video_tw9912 The location of the image set ,key parameter info_com_top_Channel =%s.\n",Channel_tab[info_com_top_Channel]);
  	for(i=0;i<5;i++)
  		{
  		if(info_com_top_Channel == YIN3)//back or AUX
@@ -254,7 +271,7 @@ int flyVideoImageQualityConfig_in(Vedio_Effect cmd ,u8 valu)
 {
 int ret;
 u8 Tw9912_image[2]={0,0,};//default input pin selet YIN0ss
-	printk("\ntw9912:@@@@@flyVideoImageQualityConfig_in(cmd =%d,valu=%d)\n",cmd,valu);
+	printk("fly_video HAL Layer Image quality config (cmd =%d,valu=%d)\n",cmd,valu);
 	//spin_lock(&spin_chipe_config_lock);
 mutex_lock(&lock_chipe_config);
 	
@@ -473,7 +490,7 @@ int flyVideoInitall_in(u8 Channel)
 int ret=1 ;
 //spin_lock(&spin_chipe_config_lock);
 mutex_lock(&lock_chipe_config);
-printk("tw9912:@@@@@flyVideoInitall_in(Channel=%d)\n",Channel);
+printk("tw9912:@@@@@flyVideoInitall_in(Channel=%s)\n",Channel_tab[Channel]);
 	if (Channel>=YIN0 &&Channel<=NOTONE)
 	{//Channel = SEPARATION;
 		info_com_top_Channel = Channel;
@@ -499,34 +516,32 @@ return ret;
 int init_tw9912_ent(Vedio_Channel Channel)
 {
 int ret=-1 ;
-printk("tw9912:@@@@@init_tw9912_ent(Channel=%d)\n",Channel);
-printk("tw9912:init_tw9912_ent()-->Tw9912_init()\n");
 	switch (Channel)
 	{
 		case YIN0:
 			info_Vedio_Channel = YIN0;
 			ret = Tw9912_init(PAL_I,YIN0);
-			printk("TW9912:Channel selet YIN0\n");
+			printk("fly_video_tw9912:Channel selet YIN0\n");
 			break;
 		case YIN1:
 			info_Vedio_Channel = YIN1;
 			ret = Tw9912_init(PAL_I,YIN1);
-			printk("TW9912:Channel selet YIN1\n");
+			printk("fly_video_tw9912:Channel selet YIN1\n");
 			break;
 		case YIN2:
 			info_Vedio_Channel = YIN2;
 			ret = Tw9912_init(PAL_I,YIN2);
-			printk("TW9912:Channel selet YIN2\n");
+			printk("fly_video_tw9912:Channel selet YIN2\n");
 			break;
 		case YIN3:
 			info_Vedio_Channel = YIN3;
 			ret = Tw9912_init(PAL_I,YIN3);
-			printk("TW9912:Channel selet YIN3\n");
+			printk("fly_video_tw9912:Channel selet YIN3\n");
 			break;
 		case SEPARATION:
 			info_Vedio_Channel = SEPARATION;
 			ret = Tw9912_init(NTSC_P,SEPARATION);
-			printk("TW9912:Channel selet SEPARATION\n");
+			printk("fly_video_tw9912:Channel selet SEPARATION\n");
 			break;
 		default :
 			printk("%s: you input TW9912 Channel=%d error!\n",__FUNCTION__,Channel);
@@ -588,7 +603,7 @@ mutex_lock(&lock_chipe_config);
 				break;
 		}
 	}
-printk("tw9912:flyVideoTestSignalPin_in(Channel=%d) back %d\n",Channel,ret);
+printk("fly_video HAL Layer teset Channel =%s ,Format = %s\n",Channel_tab[Channel],Format_tab[ret-1]);
 //spin_unlock(&spin_chipe_config_lock);
 mutex_unlock(&lock_chipe_config);
 //global_video_format_flag=ret;//Transmitted Jiang  Control
@@ -625,8 +640,8 @@ return 0;
 }
 void video_init_config_in(Vedio_Format config_pramat)
 {int i,j;   
-printk( "Video Module Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);
-printk("tw9912:@@@@@video_init_config_in(config_pramat=%d) info_com_top_Channel = %d\n",config_pramat,info_com_top_Channel);
+printk( "\n\nVideo Module Build Time: %s %s  %s \n\n", __FUNCTION__, __DATE__, __TIME__);
+printk("fly_video Tw9912 and Tc358 initall, key parameter info_com_top_Channel = %s.\n",Channel_tab[info_com_top_Channel]);
 //spin_lock(&spin_chipe_config_lock);
 mutex_lock(&lock_chipe_config);
 
@@ -634,7 +649,7 @@ SOC_Write_Servicer(VIDEO_NORMAL_SHOW);
 		
 if(info_com_top_Channel ==SEPARATION||info_com_top_Channel ==YIN2)
 	{
-printk("tw9912:%s:config_pramat->NTSC_separation\n",__func__);
+printk("fly_video Enter configuration NTSCp branch\n");
 Tw9912_init_NTSCp();
 VideoImage();
 TC358_init(NTSC_P);
@@ -648,7 +663,7 @@ else	if(config_pramat != STOP_VIDEO)
 		}
 	    	else
 	    	{
-	    	printk("tw9912:video_init_config_in()-->init_tw9912_ent()\n");
+printk("fly_video Enter configuration NTSCi or PALi branch\n");
 		mutex_unlock(&lock_chipe_config);
 		init_tw9912_ent(info_com_top_Channel);
 		mutex_lock(&lock_chipe_config);
