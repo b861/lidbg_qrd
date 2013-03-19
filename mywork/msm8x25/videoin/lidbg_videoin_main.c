@@ -367,7 +367,7 @@ struct platform_device video_devices =
 
 int lidbg_video_init(void)
 {
-	printk("lidbg_video_init modules ismod\n");
+	printk("fly_video modules ismod\n");
 	LIDBG_GET;
 	set_func_tbl();
 //	TC358_init(PAL_I);
