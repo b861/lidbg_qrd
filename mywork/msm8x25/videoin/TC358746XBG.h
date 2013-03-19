@@ -30,7 +30,7 @@
 #define tc358746_dbg(msg...)  do { printk( KERN_CRIT "TC358746: " msg); }while(0)
 #else
 #define tc358746_dbg(msg...)  do {}while(0)
-#endif 
+#endif
 #if 0
 #define Video_RESX_UP do{i2c_io_config( 43,  GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA,0);gpio_set_value(43, 1);}while(0)
 #define Video_RESX_DOWN do{i2c_io_config( 43,  GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA,0);gpio_set_value(43,0);}while(0)//tp0707 reset output, active low 
@@ -49,7 +49,7 @@
 #define tc358_RESX_UP do{}while(0)
 #define tc358_RESX_DOWN do{}while(0)
 #endif
-	
+
 #endif
 #if 0
 #define RTC358_CS_UP do{SOC_IO_Config(33,GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_12MA);SOC_IO_Output(0, 33, 1);}while(0)
@@ -57,15 +57,15 @@
 #else
 #define RTC358_CS_UP do{}while(0)
 #define RTC358_CS_DOWN	 do{}while(0)	 //Chip Select, active low
-#endif 
+#endif
 
 #define tc358_MSEL_UP do{}while(0)//	do{SOC_IO_Config(34,GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_12MA);SOC_IO_Output(0, 34, 1);}while(0)// 1: Par_in -> CSI-2 TX
 #define tc358_MSEL_DOWN do{}while(0)//do{SOC_IO_Config(34,GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_12MA);SOC_IO_Output(0, 34, 0);}while(0)
 void TC358_init(Vedio_Format);
 void TC358_Hardware_Rest(void);
-void TC358_Register_Write(u16 *add,u32 *valu,u8 flag);
+void TC358_Register_Write(u16 *add, u32 *valu, u8 flag);
 
-void TC358_Register_Read(u16 add,char *buf,u8 flag);
+void TC358_Register_Read(u16 add, char *buf, u8 flag);
 void TC358_data_output_enable(u8 flag);
 //void TC358_exit( void );
-#endif 
+#endif
