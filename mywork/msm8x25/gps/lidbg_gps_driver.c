@@ -163,9 +163,13 @@ static  struct file_operations gps_fops =
 
 void clean_ublox_buf(void)
 {
+	int ret;
     DUMP_FUN_ENTER;
 
-    SOC_I2C_Rec(1, 0x42, 0xfd, num_avi_gps_data, 2);
+    ret=SOC_I2C_Rec(1, 0x42, 0xfd, num_avi_gps_data, 2);
+	if (ret < 0)
+		return;
+	
     avi_gps_data_hl = (num_avi_gps_data[0] << 8) + num_avi_gps_data[1];
 
     SOC_I2C_Rec_Simple(1, 0x42, gps_data, avi_gps_data_hl);
