@@ -36,7 +36,7 @@ static char  num_avi_gps_data[2] = { 0 };
 static int    avi_gps_data_hl = 0;
 int thread_gps_server(void *data);
 
-bool debug_mask = 1;
+bool debug_mask = 0;
 
 
 //global variable
@@ -336,7 +336,10 @@ int is_ublox_exist(void)
     {
         exist = SOC_I2C_Rec_Simple(1, 0x42, gps_data, 1 );
         if (exist < 0)
+        {
+        	msleep(100);
             continue;
+        }
         else
             return 1;
     }

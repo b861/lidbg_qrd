@@ -511,7 +511,7 @@ static int thread_pwroff(void *data)
                 if(fastboot_get_status() == PM_STATUS_READY_TO_PWROFF)
                 {
 #ifdef FLY_DEBUG
-                    if(time_count >= 30)
+                    if(time_count >= 20)
 #else
                     if(time_count >= 30)
 #endif
@@ -573,7 +573,7 @@ static int thread_fastboot_suspend(void *data)
                 if(fastboot_get_status() == PM_STATUS_EARLY_SUSPEND_PENDING)
                 {
 #ifdef FLY_DEBUG
-                    if(time_count >= 60)
+                    if(time_count >= 30)
 #else
                     if(time_count >= 60)
 #endif
