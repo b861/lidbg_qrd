@@ -5,24 +5,6 @@
 #define I2C_US_IO
 #define APAT_BUS_ID 1
 static int tc358746_reset_flag = 0;
-static char Format_tab[][20] =
-{
-    "NTSC_I",
-    "PAL_I",
-    "NTSC_P",
-    "PAL_P",
-    "STOP_VIDEO",
-    "COLORBAR",
-    "OTHER"//\u5bf9\u9f50
-    "xxxxx"//\u5bf9\u9f50
-    "BLUE",
-    "RED",
-    "PINK",
-    "GREEN",
-    "LIGHT_BLUE",
-    "YELLOW",
-    "WHITE",
-};
 #ifndef SLEEP_MILLI_SEC
 #define SLEEP_MILLI_SEC(nMilliSec)\
 do { \
@@ -46,7 +28,6 @@ timeout = schedule_timeout(timeout); \
 
 void TC358_Hardware_Rest(void)
 {
-    printk("fly_video_tc358746xbg reset\n");
     tc358_RESX_DOWN;
     //	udelay(100);
     //	msleep(100);
@@ -180,7 +161,7 @@ static void TC358_id(void)
     u8 valu[4];
     TC358_Register_Read((tc358746_id[0].add_reg), valu, tc358746_id[0].registet_width);
     if(valu[0] == tc358746_id[0].add_val >> 8)
-        printk("TC358746xbg ID=%02x%02x\n", valu[0], valu[1]);
+        printk("TC358746xbg:ID=%02x%02x\n", valu[0], valu[1]);
     else
     {
         printk("TC358746xbg Read Back ID=0x%02x%02x\n", valu[0], valu[1]);
@@ -252,7 +233,8 @@ void colorbar_init_blue(u8 color_flag)
 }
 void TC358_init(Vedio_Format flag)
 {
-    printk("fly_video_tc358746xbg initall ,key parameter is %s\n", Format_tab[flag-1]);
+    printk("Now inital TC358\n");
+    tc358746_dbg("flag= %d\n", flag);
     Power_contorl();
     TC358_id();
     if(flag <= COLORBAR + TC358746XBG_WHITE)
@@ -262,33 +244,42 @@ void TC358_init(Vedio_Format flag)
         case NTSC_I:
         case NTSC_P:
             TC358_Register_config(NTSCp_init_tab);
+            printk("\n\nTC358746:parameter is NTSCp_init_tab!\n\n");
             break;
 
         case PAL_I:
         case PAL_P:
             TC358_Register_config(PALp_init_tab);
+            printk("\n\nTC358746:parameter is PALp_init_tab!\n\n");
             break;
 
         case STOP_VIDEO:
             TC358_Register_config(Stop_tab);
+            printk("\n\nTC358746:parameter is is Stop_tab!\n\n");
             break;
         case COLORBAR:
             colorbar_init();
+            printk("\n\nTC358746:parameter is is COLORBAR!\n\n");
             break;
         case COLORBAR+TC358746XBG_BLUE:
             colorbar_init_blue(TC358746XBG_BLUE);
+            printk("\n\nTC358746:parameter is is COLORBAR TC358746XBG_BLUE!\n\n");
             break;
         case COLORBAR+TC358746XBG_RED:
             colorbar_init_blue(TC358746XBG_RED);
+            printk("\n\nTC358746:parameter is is COLORBAR TC358746XBG_RED!\n\n");
             break;
         case COLORBAR+TC358746XBG_GREEN:
             colorbar_init_blue(TC358746XBG_GREEN);
+            printk("\n\nTC358746:parameter is is COLORBAR TC358746XBG_GREEN!\n\n");
             break;
         case COLORBAR+TC358746XBG_LIGHT_BLUE:
             colorbar_init_blue(TC358746XBG_LIGHT_BLUE);
+            printk("\n\nTC358746:parameter is is COLORBAR TC358746XBG_LIGHT_BLUE!\n\n");
             break;
         case COLORBAR+TC358746XBG_BLACK:
             colorbar_init_blue(TC358746XBG_BLACK);
+            printk("\n\nTC358746:parameter is is COLORBAR TC358746XBG_BLACK!\n\n");
             break;
         default :
             colorbar_init();
@@ -301,7 +292,7 @@ void TC358_init(Vedio_Format flag)
         printk("\n\nTC358746:error:you input TC358746 parameter is not have !\n\n");
     }
     tc358746_dbg(KERN_INFO "Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);
-    printk("fly_video_tc358746xbg inital done\n");
+    printk("inital done\n");
 
 }
 #if 0

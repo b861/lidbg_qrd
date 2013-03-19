@@ -232,7 +232,16 @@ void lidbg_video_main_in(int argc, char **argv)
                 printk("TC358 read back adder=0x%02x, valu=0x%02x%02x%02x%02x\n", sub_addr, buf[2], buf[3], buf[0], buf[1]);
             }
 
-
+	else if(!strcmp(argv[0], "ResetNTSCi"))
+		{
+				printk("Reset Vedio NTSCi\n\n");
+				video_config_init(NTSC_I,YIN3);
+		}
+	else if(!strcmp(argv[0], "ResetPALi"))
+		{
+				printk("Reset Vedio PALi\n\n");
+				video_config_init(PAL_I,YIN3);
+		}
             else
             {
                 printk("TC358 write in adder=0x%02x, valu=0x%02x\n", sub_addr, valu);
@@ -241,6 +250,11 @@ void lidbg_video_main_in(int argc, char **argv)
                 printk("TC358 read back adder=0x%02x, valu=0x%02x%02x%02x%02x\n", sub_addr, buf[2], buf[3], buf[0], buf[1]);
             }
 
+		}
+	else if(!strcmp(argv[0], "ResetPALp"))
+		{
+				printk("Reset Vedio PALp\n\n");
+				video_config_init(PAL_P,YIN3);
 
         }
         if(!strcmp(argv[1], "Read"))
@@ -369,7 +383,7 @@ struct platform_device video_devices =
 
 int lidbg_video_init(void)
 {
-    printk("fly_video modules ismod\n");
+    printk("lidbg_video_init modules ismod\n");
     LIDBG_GET;
     set_func_tbl();
     //	TC358_init(PAL_I);
