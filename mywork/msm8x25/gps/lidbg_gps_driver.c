@@ -278,7 +278,7 @@ int thread_gps_server(void *data)
         }
 
 do_nothing:
-        msleep(800);
+        msleep(500);
 
     }
     DUMP_FUN_LEAVE;
@@ -480,7 +480,7 @@ static struct platform_device lidbg_gps_device =
 static  int gps_server_driver_init(void)
 {
 
-    printk(" \n[futengfei] ==IN=================gps_server_driver_init================0126=\n");
+    printk(" \n[futengfei] ==IN=================gps_server_driver_init==========500======0126=\n");
 
 #ifndef SOC_COMPILE
     LIDBG_GET;
