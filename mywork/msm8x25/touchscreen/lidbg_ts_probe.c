@@ -11,7 +11,8 @@
 
 LIDBG_DEFINE;
 #endif
-
+#define GPIO_PWR_EN (23)
+#define PWR_EN_ON_TS   do{SOC_IO_Config(GPIO_PWR_EN,GPIO_CFG_OUTPUT,GPIO_CFG_PULL_UP,GPIO_CFG_16MA);SOC_IO_Output(0, GPIO_PWR_EN, 1); }while(0)
 
 #define SCAN_TIME (500)
 #define TS_I2C_BUS (1)
@@ -53,6 +54,7 @@ void ts_scan(void)
 
     for(i = 0; i < SIZE_OF_ARRAY(ts_probe_dev); i++)
     {
+    	PWR_EN_ON_TS;
         rc1 = SOC_I2C_Rec_Simple(TS_I2C_BUS, ts_probe_dev[i].chip_addr, &tmp, 1 );
         rc2 = SOC_I2C_Rec(TS_I2C_BUS, ts_probe_dev[i].chip_addr, ts_probe_dev[i].sub_addr, &tmp, 1 );
 
@@ -114,7 +116,7 @@ static int ts_probe_init(void)
 {
     static struct task_struct *scan_task;
     DUMP_BUILD_TIME;
-    printk("\n[futengfei]==================ts_probe_init:compatible GT801 GT811 SHUTDOWN pin0309\n");
+    printk("\n[futengfei]==================ts_probe_init:compatible GT801 GT811 SHUTDOWN pin0320\n");
 #ifndef SOC_COMPILE
     LIDBG_GET;
 #endif
