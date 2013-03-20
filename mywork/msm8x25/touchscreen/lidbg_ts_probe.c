@@ -17,11 +17,6 @@ LIDBG_DEFINE;
 #define SCAN_TIME (500)
 #define TS_I2C_BUS (1)
 
-#define TS_RESET  do{   	SOC_IO_Output(0,27,1);\
-							msleep(500);\
-							SOC_IO_Output(0,27,0);\
-					}while(0)
-
 struct probe_device
 {
     char chip_addr;
@@ -32,10 +27,10 @@ struct probe_device
 struct probe_device ts_probe_dev[] =
 {
     //rmi
-    {0x2c, 0x68, LOG_CAP_TS_RMI}, //sku7
+   // {0x2c, 0x68, LOG_CAP_TS_RMI}, //sku7
     //ft5x06
-    {0x38, 0x00, LOG_CAP_TS_FT5X06_SKU7}, //sku7
-    {0x39, 0x00, LOG_CAP_TS_FT5X06}, //flycar
+  //  {0x38, 0x00, LOG_CAP_TS_FT5X06_SKU7}, //sku7
+  //  {0x39, 0x00, LOG_CAP_TS_FT5X06}, //flycar
     //gt811
     {0x5d, 0x00, LOG_CAP_TS_GT811}, //flycar
     {0x55, 0x00, LOG_CAP_TS_GT801}, //flycar
@@ -91,9 +86,12 @@ int ts_probe_thread(void *data)
 
         if(scan_on == 1)
         {
-            TS_RESET;
-            msleep(SCAN_TIME);
-            ts_scan();
+	SOC_IO_Output(0,27,1);
+	msleep(SCAN_TIME);
+	ts_scan();
+	SOC_IO_Output(0,27,0);
+	msleep(SCAN_TIME);
+	ts_scan();
 
         }
         else
@@ -116,7 +114,7 @@ static int ts_probe_init(void)
 {
     static struct task_struct *scan_task;
     DUMP_BUILD_TIME;
-    printk("\n[futengfei]==================ts_probe_init:compatible GT801 GT811 SHUTDOWN pin0320\n");
+    printk("\n[futengfei]=========500.500=========ts_probe_init:compatiblegt801811RSTpin0320\n");
 #ifndef SOC_COMPILE
     LIDBG_GET;
 #endif
