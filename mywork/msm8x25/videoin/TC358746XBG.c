@@ -156,17 +156,39 @@ static void TC358_Register_config(struct TC358_register_struct *TC358746_init_ta
 
 
 }
-static void TC358_id(void)
+static int TC358_id(void)
 {
     u8 valu[4];
-    TC358_Register_Read((tc358746_id[0].add_reg), valu, tc358746_id[0].registet_width);
-    if(valu[0] == tc358746_id[0].add_val >> 8)
-        printk("TC358746xbg:ID=%02x%02x\n", valu[0], valu[1]);
-    else
+	int ret;
+	
+    int  retry;
+    for(retry = 0; retry < 5; retry++)
     {
-        printk("TC358746xbg Read Back ID=0x%02x%02x\n", valu[0], valu[1]);
-        printk("****************error TC358746xbg devieces is not fond********************\n");
+	    TC358_Register_Read((tc358746_id[0].add_reg), valu, tc358746_id[0].registet_width);
+	    if(valu[0] == tc358746_id[0].add_val >> 8)
+	    {
+	        printk("TC358746xbg ID=%02x%02x\n", valu[0], valu[1]);
+			ret = 1;
+	    }
+	    else
+	    {
+	        printk("TC358746xbg Read Back ID=0x%02x%02x\n", valu[0], valu[1]);
+	        printk("****************error TC358746xbg devieces is not fond********************\n");
+			ret = -1;
+	    }
+
+		
+        if (ret < 0)
+        {
+        	msleep(50);
+            continue;
+        }
+        else
+            return ret;
+
+		
     }
+	return ret;
 
 }
 void TC358_data_output_enable(u8 flag)
@@ -233,10 +255,13 @@ void colorbar_init_blue(u8 color_flag)
 }
 void TC358_init(Vedio_Format flag)
 {
+	int ret;
     printk("Now inital TC358\n");
     tc358746_dbg("flag= %d\n", flag);
     Power_contorl();
-    TC358_id();
+    ret = TC358_id();
+	if(ret < 0)
+		return;
     if(flag <= COLORBAR + TC358746XBG_WHITE)
     {
         switch (flag)
