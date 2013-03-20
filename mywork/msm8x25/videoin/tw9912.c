@@ -27,28 +27,8 @@ TW9912_Signal signal_is_how[5] = //用于记录四个通道的信息
 };
 TW9912_initall_status tw9912_status = {TW9912_initall_not, NOTONE, OTHER};
 Last_config_t the_last_config = {NOTONE, OTHER};
-static char Channel_tab[][20] =
-{
-    "YIN0",
-    "YIN1",
-    "DVD(YIN2)",
-    "BACK(YIN3)",
-    "DVD(YUV)",
-    "NOTONE",
-};
-static char Format_tab[][20] =
-{
-    "NTSC_I",
-    "PAL_I",
-    "NTSC_P",
-    "PAL_P",
-    "STOP_VIDEO",
-    "COLORBAR",
-    "OTHER",
-};
 void Tw9912_hardware_reset(void)
 {
-    printk("fly_video_tw9912 hardware reset\n");
     tw9912_RESX_DOWN;
     tw9912_RESX_UP;
     Tw9912_init_agin();
@@ -191,7 +171,6 @@ static int thread_tw9912_Correction_Parameter_fun(void *data)
 }
 void tw9912_get_input_info(TW9912_input_info *input_information)
 {
-
     input_information->chip_status1.index = 0x01;	//register index
     input_information->chip_status2.index = 0x31;
     input_information->standard_selet.index = 0x1c;
@@ -745,22 +724,16 @@ int Tw9912_appoint_pin_testing_video_signal(Vedio_Channel Channel)
     {
     case NTSC_I:
         ret = 1;
-        printk("fly_video_config channel = %s,Signal system is NTSC_I\n", Channel_tab[Channel]);
         break;
-
     case PAL_I:
         ret = 2;
-        printk("fly_video_config channel = %s,Signal system is PAL_I\n", Channel_tab[Channel]);
         break;
 
     case NTSC_P:
         ret = 3;
-        printk("fly_video_config channel = %s,Signal system is NTSC_P\n", Channel_tab[Channel]);
         break;
-
     case PAL_P:
         ret = 4;
-        printk("fly_video_config channel = %s,Signal system is PAL_P\n", Channel_tab[Channel]);
         break;
 
     default:
@@ -772,7 +745,7 @@ TEST_NTSCp:
     return ret;
 CONFIG_not_ack_fail:
     mutex_unlock(&lock_com_chipe_config);
-    printk("Tw9912_appoint_pin_testing_video_signal()--->NACK error\n");
+    tw9912_dbg("Tw9912_appoint_pin_testing_video_signal()--->NACK error\n");
     ret = -1;
     return ret;
 }
@@ -871,7 +844,7 @@ int Tw9912_init_agin(void)
 {
     u32 i = 0;
     u8 *config_pramat_piont = NULL;
-    tw9912_dbg("fly_video_tw9912 init agin +\n");
+    tw9912_dbg("Tw9912_init_agin +\n");
     TC9912_id();
     the_last_config.Channel = YIN3;
     the_last_config.format = PAL_I;
@@ -883,7 +856,7 @@ int Tw9912_init_agin(void)
         //		tw9912_dbg("w a=%x,v=%x\n",config_pramat_piont[i*2],config_pramat_piont[i*2+1]);
         i++;
     }
-    tw9912_dbg("fly_video_tw9912 init agin  -\n");
+    tw9912_dbg("Tw9912_init_agin -\n");
     return 1;
 CONFIG_not_ack_fail:
     tw9912_dbg("%s:have NACK error!\n", __FUNCTION__);
@@ -922,6 +895,7 @@ int Tw9912_init(Vedio_Format config_pramat, Vedio_Channel Channel)
     u8 *config_pramat_piont = NULL;
     u8 Tw9912_input_pin_selet[] = {0x02, 0x40,}; //default input pin selet YIN0
     printk("tw9912: init+\n");
+    tw9912_dbg("\r\r\n\n");
     mutex_lock(&lock_com_chipe_config);
     TC9912_id();
     //if(Channel == NOTONE&&tw9912_status.flag == TW9912_initall_not)
@@ -1008,6 +982,26 @@ SIGNAL_DELTE_AGAIN:
         }
         if(ret == -1)
             goto CONFIG_not_ack_fail;
+
+        switch(ret)
+        {
+        case NTSC_I:
+            printk("tw9912:Tw9912_appoint_pin_testing_video_signal() back NTSC_I\n");
+            break;
+        case NTSC_P:
+            printk("tw9912:The next Configure NTSC\n");
+            break;
+        case PAL_I:
+            printk("tw9912:Tw9912_appoint_pin_testing_video_signal()  back PAL_I\n");
+            break;
+        case PAL_P:
+            printk("tw9912:Tw9912_appoint_pin_testing_video_signal()  back PAL_P\n");
+            break;
+        default:
+            ;
+            break;
+
+        }
         /*
         if(tw9912_status.flag == TW9912_initall_yes &&\
         		signal_is_how[Channel].Format == tw9912_status.format ) //now config is old config
@@ -1021,7 +1015,7 @@ SIGNAL_DELTE_AGAIN:
             tw9912_status.format = NTSC_I;
             config_pramat_piont = TW9912_INIT_NTSC_Interlaced_input;
             //config_pramat_piont=TW9912_INIT_PAL_Interlaced_input;
-            printk("fly_video_tw9912 config_pramat->NTSC_Interlace\n");
+            printk("tw9912:%s:config_pramat->NTSC_Interlace\n", __func__);
             break;
 
         case PAL_I:
@@ -1030,7 +1024,7 @@ SIGNAL_DELTE_AGAIN:
             tw9912_status.format = PAL_I;
             config_pramat_piont = TW9912_INIT_PAL_Interlaced_input;
             //config_pramat_piont=TW9912_INIT_NTSC_Interlaced_input;
-            printk("fly_video_tw9912 config_pramat->PAL_Interlace\n");
+            printk("tw9912:%s:config_pramat->PAL_Interlace\n", __func__);
             break;
 
         case NTSC_P:
@@ -1038,7 +1032,7 @@ SIGNAL_DELTE_AGAIN:
             tw9912_status.Channel = Channel;
             tw9912_status.format = NTSC_P;
             config_pramat_piont = TW9912_INIT_NTSC_Progressive_input;
-            printk("fly_video_tw9912 config_pramat->NTSC_Progressive\n");
+            printk("tw9912:%s:config_pramat->NTSC_Progressive\n", __func__);
             break;
 
         case PAL_P:
@@ -1046,7 +1040,7 @@ SIGNAL_DELTE_AGAIN:
             tw9912_status.Channel = Channel;
             tw9912_status.format = PAL_P;
             config_pramat_piont = TW9912_INIT_PAL_Progressive_input;
-            printk("fly_video_tw9912 config_pramat->PAL_Progressive\n");
+            printk("tw9912:%s:config_pramat->PAL_Progressive\n", __func__);
             break;
 
         default:
