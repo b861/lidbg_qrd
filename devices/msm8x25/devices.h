@@ -126,7 +126,12 @@ enum
 
 #define GPIO_LCD1  (31)
 #define GPIO_LCD2  (96)
-#define GPIO_LCD3  (97)
+//becauseof i can't catch the msg ,so i do with it on the way below;
+#ifdef FLY_DEBUG
+	#define GPIO_LCD3  (97)
+#else
+	#define GPIO_LCD3  (82) 
+#endif
 
 #define GPIO_PWR_EN (23)
 #define GPIO_USB_HUB  (35)
