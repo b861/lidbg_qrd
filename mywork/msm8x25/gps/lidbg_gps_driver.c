@@ -341,7 +341,10 @@ int is_ublox_exist(void)
             continue;
         }
         else
+        {
+        	SOC_Write_Servicer(UBLOX_EXIST);
             return 1;
+        }
     }
     return -1;
 }

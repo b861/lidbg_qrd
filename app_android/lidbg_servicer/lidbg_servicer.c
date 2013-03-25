@@ -54,6 +54,7 @@
 #define VIDEO_SHOW_BLACK (85)
 #define VIDEO_NORMAL_SHOW (86)
 
+#define UBLOX_EXIST   (88)
 
 
 pthread_t ntid;
@@ -296,6 +297,15 @@ loop_read:
 	    {
 	    printf("<<<<< now Set Video normal show.\n");
 	        property_set("fly.video.show.status", "1");// 1 is normal
+	        break;
+
+	    }
+		case UBLOX_EXIST:
+	    {
+
+			if (access("/flyapdata/lib/gps.msm7627a.so", R_OK) == 0) break;
+			printf("gps.msm7627a.so copy\n");
+			system("cp /flysystem/lib/gps.msm7627a.so /flyapdata/lib/gps.msm7627a.so");
 	        break;
 
 	    }

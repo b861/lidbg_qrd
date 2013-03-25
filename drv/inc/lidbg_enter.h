@@ -83,6 +83,9 @@ typedef irqreturn_t (*pinterrupt_isr)(int irq, void *dev_id);
 
 #define VIDEO_SHOW_BLACK (85)
 #define VIDEO_NORMAL_SHOW (86)
+
+#define UBLOX_EXIST   (88)
+
 #endif
 
 typedef enum

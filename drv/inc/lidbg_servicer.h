@@ -26,6 +26,9 @@
 #define SUSPEND_PREPARE (83)
 #define RESUME_PREPARE (84)
 
+
+#define UBLOX_EXIST   (88)
+
 void lidbg_servicer_main(int argc, char **argv);
 
 void k2u_write(int cmd);
