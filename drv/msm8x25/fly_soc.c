@@ -252,7 +252,7 @@ void SOC_Write_Servicer(int cmd)
 void SOC_Log_Dump(int cmd)
 {
 
-    share_k2u_write(cmd);
+    //share_k2u_write(cmd);
 }
 
 
