@@ -21,7 +21,7 @@ LIDBG_DEFINE;
 #include "lidbg_fastboot.h"
 
 
-//#define RUN_FASTBOOT
+#define RUN_FASTBOOT
 
 static DECLARE_COMPLETION(suspend_start);
 static DECLARE_COMPLETION(early_suspend_start);
@@ -511,9 +511,9 @@ static int thread_pwroff(void *data)
                 if(fastboot_get_status() == PM_STATUS_READY_TO_PWROFF)
                 {
 #ifdef FLY_DEBUG
-                    if(time_count >= 20)
+                    if(time_count >= 15)
 #else
-                    if(time_count >= 30)
+                    if(time_count >= 15)
 #endif
                     {
                         lidbgerr("thread_pwroff wait early suspend timeout!\n");
@@ -573,9 +573,9 @@ static int thread_fastboot_suspend(void *data)
                 if(fastboot_get_status() == PM_STATUS_EARLY_SUSPEND_PENDING)
                 {
 #ifdef FLY_DEBUG
-                    if(time_count >= 30)
+                    if(time_count >= 25)
 #else
-                    if(time_count >= 60)
+                    if(time_count >= 25)
 #endif
                     {
                         lidbgerr("thread_fastboot_suspend wait suspend timeout!\n");
@@ -673,7 +673,7 @@ void fastboot_pwroff(void)
     }
 	fastboot_set_status(PM_STATUS_READY_TO_PWROFF);
 
-#if 1 //ndef FLY_DEBUG
+#if 0 //ndef FLY_DEBUG
 	SOC_Key_Report(KEY_PAUSECD, KEY_PRESSED_RELEASED);
 	msleep(100);
 #endif
@@ -690,7 +690,7 @@ void fastboot_pwroff(void)
    //fastboot_set_status(PM_STATUS_READY_TO_PWROFF);
 
 
-#ifdef FLY_DEBUG
+#if 1//def FLY_DEBUG
 	msleep(1000);
 
 #ifdef RUN_FASTBOOT
