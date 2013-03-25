@@ -69,18 +69,22 @@ int  servicer_handler(int signum)
     printf("servicer_handler++\n");
 
 
-
+loop_read:
 
     readlen = read(fd, &cmd, 4);
+
+	if(cmd == SERVICER_DONOTHING)
+	{
+		printf("servicer_handler-\n");
+		return SERVICER_DONOTHING;
+	}
     //printf("fd=%x,readlen=%d,cmd=%d\n",fd,readlen,cmd);
-    LOGW("[futengfei]  fd=%x,readlen=%d,cmd=%d", fd, readlen, cmd);
-    if(cmd != SERVICER_DONOTHING)
+    //LOGW("[futengfei]  fd=%x,readlen=%d,cmd=%d", fd, readlen, cmd);
+    else
 
     {
 
         printf("cmd = %d\n", cmd);
-
-
 
         switch(cmd)
         {
@@ -297,9 +301,9 @@ int  servicer_handler(int signum)
 	    }
         }
     }
-
-    printf("servicer_handler-\n");
-    return cmd;
+	goto loop_read;
+    //printf("servicer_handler-\n");
+    //return cmd;
 }
 
 
@@ -402,7 +406,7 @@ open_dev:
     //clear fifo
     while(1)
     {
-        if(servicer_handler(0) == 0xffffffff)
+        if(servicer_handler(0) == SERVICER_DONOTHING)
             break;
     }
 

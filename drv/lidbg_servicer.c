@@ -101,7 +101,7 @@ int k2u_read(void)
     spin_lock_irqsave(&fifo_k2u_lock, flags_k2u);
     if(kfifo_is_empty(&k2u_fifo))
     {
-        ret = 0xffffffff;
+        ret = SERVICER_DONOTHING;
     }
     else
     {
