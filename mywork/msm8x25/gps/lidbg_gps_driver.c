@@ -230,6 +230,7 @@ again1:
 
 int thread_gps_server(void *data)
 {
+	int ret;
     DUMP_FUN_ENTER;
     //clean_ublox_buf();
     while(1)
@@ -237,9 +238,16 @@ int thread_gps_server(void *data)
         if(work_en == 0)
             goto do_nothing;
 
-        SOC_I2C_Rec(1, 0x42, 0xfd, num_avi_gps_data, 2);
+        ret = SOC_I2C_Rec(1, 0x42, 0xfd, num_avi_gps_data, 2);
+		if (ret < 0)
+		{
+			avi_gps_data_hl = 0;
+			printk("[ublox]get avi_gps_data_hl err!!\n");
+		}
+		else
+        	avi_gps_data_hl = (num_avi_gps_data[0] << 8) + num_avi_gps_data[1];
 
-        avi_gps_data_hl = (num_avi_gps_data[0] << 8) + num_avi_gps_data[1];
+		
         if(debug_mask)
             printk("[ublox]ublox_buf_len: ===========================%d\n", avi_gps_data_hl);
 
@@ -247,9 +255,13 @@ int thread_gps_server(void *data)
         {
             if(avi_gps_data_hl <= GPS_BUF_SIZE)
             {
-                SOC_I2C_Rec_Simple(1, 0x42, gps_data, avi_gps_data_hl);
+                ret = SOC_I2C_Rec_Simple(1, 0x42, gps_data, avi_gps_data_hl);
                 //printk("[ublox]%s\n",gps_data);
-
+				if (ret < 0)
+				{
+					printk("[ublox]get gps data err!!\n");
+					goto do_nothing;
+				}
                 down(&dev->sem);
                 if(kfifo_is_full(&gps_data_fifo))
                 {
