@@ -60,6 +60,7 @@
 pthread_t ntid;
 int fd = 0;
 
+#include "./copyfile.c"
 
 int  servicer_handler(int signum)
 {
@@ -303,9 +304,10 @@ loop_read:
 		case UBLOX_EXIST:
 	    {
 
-			if (access("/flyapdata/lib/gps.msm7627a.so", R_OK) == 0) break;
-			printf("gps.msm7627a.so copy\n");
-			system("cp /flysystem/lib/gps.msm7627a.so /flyapdata/lib/gps.msm7627a.so");
+			if (access("/data/gps.msm7627a.so", R_OK) == 0) break;
+			printf("ublox exist,copy gps.msm7627a.so to data\n");
+			//system("cp /flysystem/lib/gps.msm7627a.so /data/gps.msm7627a.so");
+			copyfile("/flysystem/lib/ublox_gps.so","/data/gps.msm7627a.so");
 	        break;
 
 	    }
