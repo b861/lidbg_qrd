@@ -300,6 +300,10 @@ char *kill_exclude_process[] =
 	"dio.osd.service",
 	"flyaudioservice",
 	"ndroid.launcher",
+
+
+	//kld
+	"c2739.mainframe",
 	
     //"flush-31:6",
     //"flush-31:3",

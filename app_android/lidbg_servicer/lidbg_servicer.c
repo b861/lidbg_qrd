@@ -288,14 +288,14 @@ loop_read:
         }
 	 case VIDEO_SHOW_BLACK:
 	    {
-	    printf("<<<<< now Set Video show black.\n");
+	    	printf("<<<<< now Set Video show black.\n");
 	        property_set("fly.video.show.status", "0");// 0 is black
 	        break;
 
 	    }
 	case VIDEO_NORMAL_SHOW:
 	    {
-	    printf("<<<<< now Set Video normal show.\n");
+	    	printf("<<<<< now Set Video normal show.\n");
 	        property_set("fly.video.show.status", "1");// 1 is normal
 	        break;
 
