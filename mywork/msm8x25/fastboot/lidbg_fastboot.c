@@ -314,6 +314,226 @@ char *kill_exclude_process[] =
 };
 
 
+char *kill_exclude_process_fake_suspend[] =
+{
+    "init",
+    "kthreadd",
+
+    "khelper",
+    "suspend_sys_syn",
+    "suspend",
+    "sync_supers",
+    "bdi-default",
+    "kblockd",
+    "khubd",
+    "l2cap",
+    "a2mp",
+    "modem_notifier",
+    "smd_channel_clo",
+    "smsm_cb_wq",
+    "rpcrouter",
+    "msm_adsp_probe",
+    "rpcrotuer_smd_x",
+    "krpcserversd",
+    "rmt_storage",
+    "voicememo_rpc",
+    "kadspd",
+    "kswapd0",
+    "fsnotify_mark",
+    "crypto",
+    "mdp_dma_wq",
+    "mdp_vsync_wq",
+    "mdp_pipe_ctrl_w",
+
+    "k_hsuart",
+    "kgsl-3d0",
+
+    "k_rmnet_mux_wor",
+    "f_mtp",
+    "file-storage",
+    "diag_wq",
+    "diag_cntl_wq",
+    "krtcclntd",
+    "krtcclntcbd",
+    "kbatteryclntd",
+    "kbatteryclntcbd",
+    "battery_queue",
+    "msm_adc",
+    "dalrpc_rcv_DAL0",
+    "iewq",
+    "kinteractiveup",
+
+    "binder",
+    "koemrapiclientc",
+
+    "krfcommd",
+    "msm-cpufreq",
+    "khsclntd",
+    "rq_stats",
+    "deferwq",
+    "ueventd",
+
+    "servicemanager",
+    "vold",
+    "netd",
+    "debuggerd",
+    "rild",
+    "surfaceflinger",
+    "zygote",
+    "drmserver",
+    "mediaserver",
+    "dbus-daemon",
+    "installd",
+    "keystore",
+    "qlogd",
+    "sh",
+    "cnd",
+    "wiperiface",
+    "mm-pp-daemon",
+    "logwrapper",
+    "gpu_dcvsd",
+    "k_gserial",
+    "lidbg_servicer",
+    "k_gsmd",
+    "msg_task",
+    "u2k_task",
+    "pwroff_task",
+    "suspend_task",
+    "pwroff_task",
+    "lpc_task",
+    "led_task",
+    "dev_init_task",
+    "key_task",
+    "k_rmnet_work",
+    "bp_msg_task",
+    "adbd",
+    "qmuxd",
+    "netmgrd",
+    "sh",
+	"mkdir",
+    "chmod",
+
+    "ATFWD-daemon",
+    "mpdecision",
+
+    "audmgr_rpc",
+    "sleep",
+    "boadcastreceiver",
+	"cfg80211",
+	"ath6kl",
+	"wpa_supplicant",
+	"workqueue_trust",
+	"logcat",
+	"bootanimation",
+	"fsck_msdos",
+	"usb-storage",
+	"sys.DeviceHealth",
+
+
+
+
+    "mm-qcamera-daemon",
+    "com.android.qualcomm",
+    "com.android.settings",
+    "com.qualcomm.privinit",
+    "com.qualcomm.restore.airplanemode",
+    "com.qualcomm.cabl",
+    "com.innopath.activecare",
+    "com.android.systemui",
+    "com.android.launcher",
+    "com.qualcomm.fastboot",
+    "com.android.phone",
+    "com.android.inputmethod.latin",
+    "com.qualcomm.stats",
+
+    // name err
+    "alljoyn-daemon",
+    "oadcastreceiver",
+    "mm-qcamera-daem",
+    "putmethod.latin",
+    "m.android.phone",
+    "ndroid.launcher",
+    "ndroid.settings",
+    "d.process.acore",
+    "ndroid.qualcomm",
+    "re.airplanemode",
+    "ndroid.systemui",
+    "path.activecare",
+    "m.qualcomm.cabl",
+    "viders.calendar",
+    ".qualcomm.stats",
+    "alcomm.privinit",
+    "alcomm.fastboot",
+    "android.smspush",
+    "ndroid.contacts",
+    "d.process.media",
+    "qrd.simcontacts",
+    "droid.gallery3d",
+    "ndroid.exchange",
+    "m.android.email",
+    "oid.voicedialer",
+    "android.musicfx",
+    "droid.deskclock",
+    "com.android.mms",
+    "m.android.music",
+	"omm.datamonitor",
+	"oid.sysinfo.pro",
+
+
+//flyaudio	
+	"roid.flyaudioui",
+	"goodix_wq",
+	"io3.widget.time",
+	"lyaudio.Weather",
+	".flyaudio.media",
+	"ndroid.calendar",
+	"settings:remote",
+	"kdmflush",
+	"kcryptd",
+	"kcryptd_io",
+	"dhcpcd",
+	"RilMessageDecod",
+	"getprop",
+	"setprop",
+	"ip",
+	":pushservice_v1",
+	"fly_gps_server",
+
+    "m.android.phone",
+    "android.smspush",
+    "omm.datamonitor",
+    ".qualcomm.stats",
+    "droid.gallery3d",
+    "oid.voicedialer",
+	"thermald",
+
+	"tek.inputmethod",
+	"ndroid.launcher",
+		
+
+
+
+	//8803
+	"cn.flyaudio.android.flyaudioservice",
+	"cn.flyaudio.navigation",
+	"com.android.launcher",
+	"cn.flyaudio.osd.service",
+
+	"udio.navigation",
+	"dio.osd.service",
+	"flyaudioservice",
+	"ndroid.launcher",
+
+
+	//kld
+	"c2739.mainframe",
+	
+
+    //"flush-7:7",
+    "task_kill_exclude_end",
+
+};
+
 
 int fastboot_task_kill_select(char *task_name)
 {
@@ -483,7 +703,9 @@ int kill_proc(char *buf, char **start, off_t offset, int count, int *eof, void *
 {
 
 
-	fastboot_task_kill_exclude(kill_exclude_process);
+	//fastboot_task_kill_exclude(kill_exclude_process);
+	fastboot_task_kill_exclude(kill_exclude_process_fake_suspend);
+	
 
     return 1;
 }
