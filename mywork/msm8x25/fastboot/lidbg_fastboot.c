@@ -286,7 +286,21 @@ char *kill_exclude_process[] =
 
 	"tek.inputmethod",
 	"ndroid.launcher",
+		
 
+
+
+	//8803
+	"cn.flyaudio.android.flyaudioservice",
+	"cn.flyaudio.navigation",
+	"com.android.launcher",
+	"cn.flyaudio.osd.service",
+
+	"udio.navigation",
+	"dio.osd.service",
+	"flyaudioservice",
+	"ndroid.launcher",
+	
     //"flush-31:6",
     //"flush-31:3",
     //"flush-31:12",
