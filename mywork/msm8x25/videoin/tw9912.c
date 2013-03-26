@@ -45,13 +45,17 @@ void read_NTSCp(void)
 {
     u8 buf;
     int i = 0;
+    i2c_ack ret;
     for(i = 0; TW9912_INIT_NTSC_Progressive_input[i] != 0xfe; i += 2)
     {
-        read_tw9912(TW9912_INIT_NTSC_Progressive_input[i], &buf);
+        ret = read_tw9912(TW9912_INIT_NTSC_Progressive_input[i], &buf);
+	if (ret == NACK) goto NACK_BREAK;
         //printk("tw9912: TW9912_INIT_NTSC_Progressive_input[%d]=0x%.2x != readback =0x%.2xd",i,TW9912_INIT_NTSC_Progressive_input[i],buf);
         if(buf != TW9912_INIT_NTSC_Progressive_input[i+1])
             printk("tw9912: worning TW9912_INIT_NTSC_Progressive_input[0x%.2x]=0x%.2x != readback =0x%.2x\n", TW9912_INIT_NTSC_Progressive_input[i], TW9912_INIT_NTSC_Progressive_input[i+1], buf);
     }
+NACK_BREAK:
+printk("interrupt becouts NACK\n");
 }
 i2c_ack write_tw9912(char *buf )
 {
@@ -98,22 +102,27 @@ i2c_ack Correction_Parameter_fun(Vedio_Format format)
         Tw9912_Parameter[0] = 0xff;
         Tw9912_Parameter[1] = 0x00;
         ret = write_tw9912(Tw9912_Parameter);
+	if (ret == NACK) goto NACK_BREAK;
 
         Tw9912_Parameter[0] = 0x07;
         Tw9912_Parameter[1] = 0x22;
         ret = write_tw9912(Tw9912_Parameter);
+	if (ret == NACK) goto NACK_BREAK;
 
         Tw9912_Parameter[0] = 0x0a;
         Tw9912_Parameter[1] = 0x17;
         ret = write_tw9912(Tw9912_Parameter);
+	if (ret == NACK) goto NACK_BREAK;
 
         Tw9912_Parameter[0] = 0x07;
         Tw9912_Parameter[1] = 0x22;
         ret = write_tw9912(Tw9912_Parameter);
+	if (ret == NACK) goto NACK_BREAK;
 
         Tw9912_Parameter[0] = 0x08;
         Tw9912_Parameter[1] = 0x12;
         ret = write_tw9912(Tw9912_Parameter);
+	if (ret == NACK) goto NACK_BREAK;
 
         Tw9912_Parameter[0] = 0x09;
         Tw9912_Parameter[1] = 0x40;
@@ -143,7 +152,9 @@ i2c_ack Correction_Parameter_fun(Vedio_Format format)
     {
         ;
     }
-    return ret;
+return ret;
+NACK_BREAK:
+return NACK;
 }
 static int thread_tw9912_Correction_Parameter_fun(void *data)
 {
@@ -171,6 +182,7 @@ static int thread_tw9912_Correction_Parameter_fun(void *data)
 }
 void tw9912_get_input_info(TW9912_input_info *input_information)
 {
+i2c_ack ret;
     input_information->chip_status1.index = 0x01;	//register index
     input_information->chip_status2.index = 0x31;
     input_information->standard_selet.index = 0x1c;
@@ -178,24 +190,30 @@ void tw9912_get_input_info(TW9912_input_info *input_information)
     input_information->macrovision_detection.index = 0x30;
     input_information->input_detection.index = 0xc1;
 
-    read_tw9912(input_information->chip_status1.index, \
-                &input_information->chip_status1.valu);
+	ret = read_tw9912(input_information->chip_status1.index, \
+	            &input_information->chip_status1.valu);
+	if (ret == NACK) goto NACK_BREAK;
 
-    read_tw9912(input_information->chip_status2.index, \
-                &input_information->chip_status2.valu);
+	ret = read_tw9912(input_information->chip_status2.index, \
+	            &input_information->chip_status2.valu);
+	if (ret == NACK) goto NACK_BREAK;
 
-    read_tw9912(input_information->standard_selet.index, \
-                &input_information->standard_selet.valu);
+	ret =read_tw9912(input_information->standard_selet.index, \
+	            &input_information->standard_selet.valu);
+	if (ret == NACK) goto NACK_BREAK;
 
-    read_tw9912(input_information->component_video_format.index, \
-                &input_information->component_video_format.valu);
+	ret = read_tw9912(input_information->component_video_format.index, \
+	            &input_information->component_video_format.valu);
+	if (ret == NACK) goto NACK_BREAK;
 
-    read_tw9912(input_information->macrovision_detection.index, \
-                &input_information->macrovision_detection.valu);
+	ret = read_tw9912(input_information->macrovision_detection.index, \
+	            &input_information->macrovision_detection.valu);
+	if (ret == NACK) goto NACK_BREAK;
 
-    read_tw9912(input_information->input_detection.index, \
-                &input_information->input_detection.valu);
-
+	read_tw9912(input_information->input_detection.index, \
+	            &input_information->input_detection.valu);
+NACK_BREAK:
+;
 }
 void Tw9912_analysis_input_signal(TW9912_input_info *input_information, Vedio_Channel channel)
 {

@@ -63,9 +63,10 @@
 #define tc358_MSEL_DOWN do{}while(0)//do{SOC_IO_Config(34,GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_12MA);SOC_IO_Output(0, 34, 0);}while(0)
 void TC358_init(Vedio_Format);
 void TC358_Hardware_Rest(void);
-void TC358_Register_Write(u16 *add, u32 *valu, u8 flag);
 
-void TC358_Register_Read(u16 add, char *buf, u8 flag);
+i2c_ack TC358_Register_Write(u16 *add, u32 *valu, u8 flag);
+i2c_ack TC358_Register_Read(u16 add, char *buf, u8 flag);
+
 void TC358_data_output_enable(u8 flag);
 //void TC358_exit( void );
 #endif

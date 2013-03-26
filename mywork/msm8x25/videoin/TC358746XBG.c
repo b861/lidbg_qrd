@@ -42,26 +42,28 @@ static void Power_contorl(void)
     tc358_MSEL_UP;//NULL now  1: Par_in -> CSI-2 TX
     TC358_Hardware_Rest();
 }
-void TC358_Register_Read(u16 add, char *buf, u8 flag)
+i2c_ack TC358_Register_Read(u16 add, char *buf, u8 flag)
 {
+i2c_ack ret ;
     //int buf_change;
     if(flag == register_value_width_16)
     {
-        i2c_read_2byte(APAT_BUS_ID, TC358746_I2C_ChipAdd, add, buf, 2);
+      ret =  i2c_read_2byte(APAT_BUS_ID, TC358746_I2C_ChipAdd, add, buf, 2);
     }
     else if (flag == register_value_width_32)
     {
-        i2c_read_2byte(APAT_BUS_ID, TC358746_I2C_ChipAdd, add, buf, 4);
+      ret =  i2c_read_2byte(APAT_BUS_ID, TC358746_I2C_ChipAdd, add, buf, 4);
         //	buf_change=*buf>>16;
         //	*buf=*buf<<16|buf_change;
     }
     else
         tc358746_dbg("you set regitset value width have error\n");
-
+return ret;
 }
 
-void TC358_Register_Write(u16 *add, u32 *valu, u8 flag)
+i2c_ack TC358_Register_Write(u16 *add, u32 *valu, u8 flag)
 {
+i2c_ack ret;
     u8 BUF_tc358[6]; // address 2 valu=4;
     //u8 huang;
     if(flag == register_value_width_16)
@@ -77,7 +79,7 @@ void TC358_Register_Write(u16 *add, u32 *valu, u8 flag)
         //	 tc358746_dbg("BUF_tc358[%d]=%x\n",huang,BUF_tc358[huang]);
         //}
         //tc358746_dbg("APAT_BUS_ID=%d,TC358746_I2C_ChipAdd=0x%x,sub_addr=0x%.2x%.2x,volu=0x%.2x%.2x\n",APAT_BUS_ID,TC358746_I2C_ChipAdd,BUF_tc358[0],BUF_tc358[1],BUF_tc358[2],BUF_tc358[3]);
-        i2c_write_2byte(APAT_BUS_ID, TC358746_I2C_ChipAdd, BUF_tc358, 4);
+       ret = i2c_write_2byte(APAT_BUS_ID, TC358746_I2C_ChipAdd, BUF_tc358, 4);
     }
     else if (flag == register_value_width_32)
     {
@@ -98,12 +100,14 @@ void TC358_Register_Write(u16 *add, u32 *valu, u8 flag)
         //		 tc358746_dbg("BUF_tc358[%d]=%x\n",huang,BUF_tc358[huang]);
         //        }
         //tc358746_dbg("APAT_BUS_ID=%d,TC358746_I2C_ChipAdd=0x%x,sub_addr=0x%.2x%.2x,volu=0x%.2x%.2x%.2x%.2x\n",APAT_BUS_ID,TC358746_I2C_ChipAdd,BUF_tc358[0],BUF_tc358[1],BUF_tc358[4],BUF_tc358[5],BUF_tc358[2],BUF_tc358[3]);
-        i2c_write_2byte(APAT_BUS_ID, TC358746_I2C_ChipAdd, BUF_tc358, 6);
+        ret = i2c_write_2byte(APAT_BUS_ID, TC358746_I2C_ChipAdd, BUF_tc358, 6);
     }
     else
     {
         tc358746_dbg("you set regitset value width have error\n");
+	return NACK;
     }
+return ret;
 }
 static void TC358_Software_Rest(void)
 {
@@ -115,9 +119,10 @@ static void TC358_Software_Rest(void)
     TC358_Register_Write(&add, &valu, register_value_width_16	); //normal
     msleep(1);
 }
-static void TC358_Register_config(struct TC358_register_struct *TC358746_init_tab)
+static int TC358_Register_config(struct TC358_register_struct *TC358746_init_tab)
 {
-
+int ret;
+i2c_ack back_ret;
     int i = 0;
 #ifdef tc358746_debug
     u8 valu[4];
@@ -126,8 +131,9 @@ static void TC358_Register_config(struct TC358_register_struct *TC358746_init_ta
     while(TC358746_init_tab[i].add_reg != 0xffff)//write
     {
 
-        TC358_Register_Write(&(TC358746_init_tab[i].add_reg), \
+      back_ret =  TC358_Register_Write(&(TC358746_init_tab[i].add_reg), \
                              &(TC358746_init_tab[i].add_val), TC358746_init_tab[i].registet_width);
+      if(back_ret  == NACK) goto NACK_BREAK;
 
         i++;
     }
@@ -144,7 +150,8 @@ static void TC358_Register_config(struct TC358_register_struct *TC358746_init_ta
         else
         {
 #ifdef tc358746_debug
-            TC358_Register_Read((TC358746_init_tab[i].add_reg), valu, TC358746_init_tab[i].registet_width);
+            back_ret = TC358_Register_Read((TC358746_init_tab[i].add_reg), valu, TC358746_init_tab[i].registet_width);
+  	    if(back_ret  == NACK) goto NACK_BREAK;
             if(TC358746_init_tab[i].registet_width == 32)
                 tc358746_dbg("r a=%x,v=%02x%02x%02x%02x\n", TC358746_init_tab[i].add_reg, valu[2], valu[3], valu[0], valu[1]);
             if(TC358746_init_tab[i].registet_width == 16)
@@ -154,7 +161,10 @@ static void TC358_Register_config(struct TC358_register_struct *TC358746_init_ta
         i++;
     }
 
-
+return 0;
+NACK_BREAK:
+printk("interuppt config because TC358746 NACK\n");
+return -1;
 }
 static int TC358_id(void)
 {
@@ -216,7 +226,9 @@ void colorbar_init(void)
     u16 add_reg_1;
     u32 add_val_1;
     u8 i, j;
-    TC358_Register_config(lingceng_init_tab);
+    i2c_ack ret;
+   ret = TC358_Register_config(lingceng_init_tab);
+     if(ret == NACK) goto NACK_BREAK;
     printk("\n\nTC358746:parameter is lingceng_init_tab!\n");
 
     //for(i=0;i<8;i++)
@@ -225,37 +237,45 @@ void colorbar_init(void)
         //for(j=48;j>0;j--)
         for(j = 180; j > 0; j--)
         {
-            TC358_Register_Write(&(colorbar_init_tab[2*i].add_reg), &(colorbar_init_tab[2*i].add_val), colorbar_init_tab[2*i].registet_width);
-            TC358_Register_Write(&(colorbar_init_tab[2*i+1].add_reg), &(colorbar_init_tab[2*i+1].add_val), colorbar_init_tab[2*i+1].registet_width);
+           ret = TC358_Register_Write(&(colorbar_init_tab[2*i].add_reg), &(colorbar_init_tab[2*i].add_val), colorbar_init_tab[2*i].registet_width);
+             if(ret == NACK) goto NACK_BREAK;
+           ret = TC358_Register_Write(&(colorbar_init_tab[2*i+1].add_reg), &(colorbar_init_tab[2*i+1].add_val), colorbar_init_tab[2*i+1].registet_width);
+             if(ret == NACK) goto NACK_BREAK;
         }
     }
     add_reg_1 = 0x00e0; //使能colobar
     add_val_1 = 0xc1df;
     TC358_Register_Write(&add_reg_1, &add_val_1, register_value_width_16);
-
-
+NACK_BREAK:
+	;
 }
 void colorbar_init_blue(u8 color_flag)
 {
     u16 add_reg_1;
     u32 add_val_1;
     u16 i, j;
-    TC358_Register_config(lingceng_init_tab);
+    i2c_ack ret;
+   ret = TC358_Register_config(lingceng_init_tab);
+   if(ret == NACK) goto NACK_BREAK;
     printk("\n\nTC358746:parameter is lingceng_init_tab!\n");
 
     i = color_flag - 1;
     for(j = 360; j > 0; j--)
     {
-        TC358_Register_Write(&(colorbar_init_tab[2*i].add_reg), &(colorbar_init_tab[2*i].add_val), colorbar_init_tab[2*i].registet_width);
-        TC358_Register_Write(&(colorbar_init_tab[2*i+1].add_reg), &(colorbar_init_tab[2*i+1].add_val), colorbar_init_tab[2*i+1].registet_width);
+        ret =TC358_Register_Write(&(colorbar_init_tab[2*i].add_reg), &(colorbar_init_tab[2*i].add_val), colorbar_init_tab[2*i].registet_width);
+	  if(ret == NACK) goto NACK_BREAK;
+        ret =TC358_Register_Write(&(colorbar_init_tab[2*i+1].add_reg), &(colorbar_init_tab[2*i+1].add_val), colorbar_init_tab[2*i+1].registet_width);
+	  if(ret == NACK) goto NACK_BREAK;
     }
     add_reg_1 = 0x00e0; //使能colobar
     add_val_1 = 0xc1df;
     TC358_Register_Write(&add_reg_1, &add_val_1, register_value_width_16);
+NACK_BREAK:
+	;
 }
 void TC358_init(Vedio_Format flag)
 {
-	int ret;
+int ret;
     printk("Now inital TC358\n");
     tc358746_dbg("flag= %d\n", flag);
     Power_contorl();
