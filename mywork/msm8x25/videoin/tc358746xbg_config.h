@@ -226,8 +226,8 @@ static struct TC358_register_struct lingceng_init_tab[] =
     {0x00e2, 0x600, register_value_width_16},
     {0x00e4, 0x40, register_value_width_16},
 
-    //{0x00e0,0xc1df,register_value_width_16},
-    //{0x0004,0x1076,register_value_width_16},
+    {0x00e0,0xc1df,register_value_width_16},
+    {0x0004,0x1076,register_value_width_16},
     {0xffff},
 };
 

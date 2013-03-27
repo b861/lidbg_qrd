@@ -30,11 +30,11 @@ void TC358_Hardware_Rest(void)
 {
     tc358_RESX_DOWN;
     //	udelay(100);
-    //	msleep(100);
+    	msleep(100);
     //msleep(10000);
     tc358_RESX_UP;
     //	udelay(100);
-    //	msleep(100);
+    	msleep(100);
 }
 static void Power_contorl(void)
 {

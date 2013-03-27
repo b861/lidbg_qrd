@@ -249,77 +249,97 @@ void lidbg_video_main_in(int argc, char **argv)
 #ifdef DEBUG_TC358
     else if (!strcmp(argv[0], "TC358"))
     {
-        if(!strcmp(argv[1], "pp"))
-        {
-            printk("TC358_init(PAL_Progressive);\n\n");
-            TC358_init(PAL_P);
-        }
-        if(!strcmp(argv[1], "np"))
-        {
-            printk("TC358_init(PAL_Progressive);\n\n");
-            TC358_init(NTSC_P);
-        }
-        if(!strcmp(argv[1], "write"))
-        {
-            u8 buf[4] = {0, 0, 0, 0}, flag;
-            u16 sub_addr;
-            u32 valu;
+	        if(!strcmp(argv[1], "pp"))
+	        {
+	            printk("TC358_init(PAL_Progressive);\n\n");
+	            TC358_init(PAL_P);
+	        }
+	        if(!strcmp(argv[1], "np"))
+	        {
+	            printk("TC358_init(PAL_Progressive);\n\n");
+	            TC358_init(NTSC_P);
+	        }
+		if(!strcmp(argv[1], "write"))
+		{
+		        u8 buf[4] = {0, 0, 0, 0}, flag;
+		        u16 sub_addr;
+		        u32 valu;
 
-            sub_addr = simple_strtoul(argv[2], 0, 0);
-            valu = simple_strtoul(argv[3], 0, 0);
-            flag =  simple_strtoul(argv[4], 0, 0);
-            if(flag == 16)
-            {
-                printk("TC358 write in adder=0x%02x, valu=0x%02x\n", sub_addr, valu);
-                TC358_Register_Write(&sub_addr, &valu, register_value_width_16);
-                TC358_Register_Read(sub_addr, buf, register_value_width_16);
-                printk("TC358 read back adder=0x%02x, valu=0x%02x%02x%02x%02x\n", sub_addr, buf[2], buf[3], buf[0], buf[1]);
-            }
+		        sub_addr = simple_strtoul(argv[2], 0, 0);
+		        valu = simple_strtoul(argv[3], 0, 0);
+		        flag =  simple_strtoul(argv[4], 0, 0);
+		        if(flag == 16)
+		        {
+		            printk("TC358 write in adder=0x%02x, valu=0x%02x\n", sub_addr, valu);
+		            TC358_Register_Write(&sub_addr, &valu, register_value_width_16);
+		            TC358_Register_Read(sub_addr, buf, register_value_width_16);
+		            printk("TC358 read back adder=0x%02x, valu=0x%02x%02x%02x%02x\n", sub_addr, buf[2], buf[3], buf[0], buf[1]);
+		        }
 
+
+		        else
+		        {
+		            printk("TC358 write in adder=0x%02x, valu=0x%02x\n", sub_addr, valu);
+		            TC358_Register_Write(&sub_addr, &valu, register_value_width_32);
+		            TC358_Register_Read(sub_addr, buf, register_value_width_32);
+		            printk("TC358 read back adder=0x%02x, valu=0x%02x%02x%02x%02x\n", sub_addr, buf[2], buf[3], buf[0], buf[1]);
+		        }
+		}
+		 if(!strcmp(argv[1], "Read"))
+	        {
+	            u8 flag, buf[4] = {0, 0, 0, 0};
+	            u16 sub_addr;
+	            sub_addr = simple_strtoul(argv[2], 0, 0);
+	            flag =  simple_strtoul(argv[3], 0, 0);
+	            if(flag == 16)
+	            {
+	                TC358_Register_Read(sub_addr, buf, register_value_width_16);
+	                printk("TC358 read back adder=0x%02x, valu=0x%02x%02x%02x%02x\n", sub_addr, buf[2], buf[3], buf[0], buf[1]);
+	            }
+	            else
+	            {
+	                TC358_Register_Read(sub_addr, buf, register_value_width_32);
+	                printk("TC358 read back adder=0x%02x, valu=0x%02x%02x%02x%02x\n", sub_addr, buf[2], buf[3], buf[0], buf[1]);
+	            }
+	        }
+		 else if(!strcmp(argv[1], "Reset720*480"))
+		{
+			printk("call TC358_init();\n\n");
+			TC358_init(2);
+		}
+		else if(!strcmp(argv[1], "Reset640*480"))
+		{
+			printk("call TC358_init();\n\n");
+			TC358_init(3);
+		}
+		else if(!strcmp(argv[1], "black"))
+		{
+			printk("call TC358_init();\n\n");
+			    TC358_init(COLORBAR + TC358746XBG_BLACK);
+		}
+		else if(!strcmp(argv[1], "red"))
+		{
+			printk("call TC358_init();\n\n");
+			    TC358_init(COLORBAR + TC358746XBG_RED);
+		}
+		
+    	}
 	else if(!strcmp(argv[0], "ResetNTSCi"))
-		{
-				printk("Reset Vedio NTSCi\n\n");
-				video_config_init(NTSC_I,YIN3);
-		}
+	{
+			printk("Reset Vedio NTSCi\n\n");
+			video_config_init(NTSC_I,YIN3);
+	}
 	else if(!strcmp(argv[0], "ResetPALi"))
-		{
-				printk("Reset Vedio PALi\n\n");
-				video_config_init(PAL_I,YIN3);
-		}
-            else
-            {
-                printk("TC358 write in adder=0x%02x, valu=0x%02x\n", sub_addr, valu);
-                TC358_Register_Write(&sub_addr, &valu, register_value_width_32);
-                TC358_Register_Read(sub_addr, buf, register_value_width_32);
-                printk("TC358 read back adder=0x%02x, valu=0x%02x%02x%02x%02x\n", sub_addr, buf[2], buf[3], buf[0], buf[1]);
-            }
-
-		}
+	{
+			printk("Reset Vedio PALi\n\n");
+			video_config_init(PAL_I,YIN3);
+	}
 	else if(!strcmp(argv[0], "ResetPALp"))
-		{
-				printk("Reset Vedio PALp\n\n");
-				video_config_init(PAL_P,YIN3);
+	{
+			printk("Reset Vedio PALp\n\n");
+			video_config_init(PAL_P,YIN3);
 
-        }
-        if(!strcmp(argv[1], "Read"))
-        {
-            u8 flag, buf[4] = {0, 0, 0, 0};
-            u16 sub_addr;
-            sub_addr = simple_strtoul(argv[2], 0, 0);
-            flag =  simple_strtoul(argv[3], 0, 0);
-            if(flag == 16)
-            {
-                TC358_Register_Read(sub_addr, buf, register_value_width_16);
-                printk("TC358 read back adder=0x%02x, valu=0x%02x%02x%02x%02x\n", sub_addr, buf[2], buf[3], buf[0], buf[1]);
-            }
-            else
-            {
-                TC358_Register_Read(sub_addr, buf, register_value_width_32);
-                printk("TC358 read back adder=0x%02x, valu=0x%02x%02x%02x%02x\n", sub_addr, buf[2], buf[3], buf[0], buf[1]);
-            }
-        }
-    }
-
+    	}
     else if(!strcmp(argv[0], "ResetNTSCi"))
     {
         printk("Reset Vedio NTSCi\n\n");
@@ -347,16 +367,6 @@ void lidbg_video_main_in(int argc, char **argv)
     {
         printk("StopVedio\n\n");
         video_config_init(STOP_VIDEO, YIN3);
-    }
-    else if(!strcmp(argv[0], "Reset720*480"))
-    {
-        printk("call TC358_init();\n\n");
-        TC358_init(2);
-    }
-    else if(!strcmp(argv[0], "Reset640*480"))
-    {
-        printk("call TC358_init();\n\n");
-        TC358_init(3);
     }
 #endif//#ifdef DEBUG_TC358
     else
