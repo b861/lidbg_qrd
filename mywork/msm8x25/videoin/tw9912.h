@@ -112,5 +112,7 @@ int Tw9912_init_agin(void);
 void Tw9912_hardware_reset(void);
 Vedio_Format testing_NTSCp_video_signal();
 void Disabel_video_data_out(void);
+void Enabel_video_data_out(void);
 void read_NTSCp(void);
+Vedio_Format Tw9912TestingChannalSignal(Vedio_Channel Channel);
 #endif
