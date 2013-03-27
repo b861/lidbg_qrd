@@ -510,7 +510,7 @@ char *kill_exclude_process_fake_suspend[] =
 	"tek.inputmethod",
 	"ndroid.launcher",
 		
-
+	"re-initialized>",
 
 
 	//8803
