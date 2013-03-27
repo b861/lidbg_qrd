@@ -46,10 +46,11 @@ void ts_scan(void)
     int i;
     int32_t rc1, rc2;
     u8 tmp;
+	PWR_EN_ON_TS;
 
     for(i = 0; i < SIZE_OF_ARRAY(ts_probe_dev); i++)
     {
-    	PWR_EN_ON_TS;
+    	
         rc1 = SOC_I2C_Rec_Simple(TS_I2C_BUS, ts_probe_dev[i].chip_addr, &tmp, 1 );
         rc2 = SOC_I2C_Rec(TS_I2C_BUS, ts_probe_dev[i].chip_addr, ts_probe_dev[i].sub_addr, &tmp, 1 );
 

@@ -165,7 +165,6 @@ loop_read:
         case LOG_CAP_TS_FT5X06:
         case LOG_CAP_TS_RMI:
         case LOG_CAP_TS_GT801:
-        case CMD_FAST_POWER_OFF :
         {
             if(LOG_CAP_TS_GT811 == cmd)
 
@@ -217,19 +216,23 @@ loop_read:
                 system("insmod /flysystem/lib/out/gt801.ko");
 
             }
-            else if ( CMD_FAST_POWER_OFF == cmd)
-            {
-                //system("setprop fly.fastboot.accoff 1");
-                property_set("fly.fastboot.accoff", "1");
-                system("am broadcast -a android.intent.action.FAST_BOOT_START");
-            }
-
             //sleep(10);//delay to mount sdcard
             //system("dmesg > /sdcard/log_cap_ts_dmesg.txt");
-
             break;
 
         }
+
+        case CMD_FAST_POWER_OFF :
+		{
+			//system("setprop fly.fastboot.accoff 1");
+			
+			printf("CMD_FAST_POWER_OFF+\n");
+			property_set("fly.fastboot.accoff", "1");
+			system("am broadcast -a android.intent.action.FAST_BOOT_START");
+			printf("CMD_FAST_POWER_OFF+-\n");
+
+			break;
+		}
 
         case UMOUNT_USB:
         {
@@ -260,14 +263,14 @@ loop_read:
 
 	case VIDEO_SET_PAL:
         {
-	    printf("<<<<< now get QCamera set pal\n");
+	   		printf("<<<<< now get QCamera set pal\n");
             property_set("tcc.fly.vin.pal", "1");// 1 is pal 0 is ntsc
             break;
 
         }
       case VIDEO_SET_NTSC:
         {
-	    printf("<<<<< now get QCamera set ntsc\n");
+	    	printf("<<<<< now get QCamera set ntsc\n");
             property_set("tcc.fly.vin.pal", "0");// 1 is pal 0 is ntsc
             break;
 
