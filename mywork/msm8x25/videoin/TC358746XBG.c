@@ -34,7 +34,7 @@ void TC358_Hardware_Rest(void)
     //msleep(10000);
     tc358_RESX_UP;
     //	udelay(100);
-    //	msleep(100);
+   // 	msleep(100);
 }
 static void Power_contorl(void)
 {
@@ -160,7 +160,6 @@ i2c_ack back_ret;
         }
         i++;
     }
-
 return 0;
 NACK_BREAK:
 printk("interuppt config because TC358746 NACK\n");
@@ -254,10 +253,11 @@ void colorbar_init_blue(u8 color_flag)
     u16 add_reg_1;
     u32 add_val_1;
     u16 i, j;
+    int ret_back;
     i2c_ack ret;
-   ret = TC358_Register_config(lingceng_init_tab);
-   if(ret == NACK) goto NACK_BREAK;
     printk("\n\nTC358746:parameter is lingceng_init_tab!\n");
+   ret_back = TC358_Register_config(lingceng_init_tab);
+   if(ret_back == -1) goto NACK_BREAK;
 
     i = color_flag - 1;
     for(j = 360; j > 0; j--)
@@ -270,8 +270,9 @@ void colorbar_init_blue(u8 color_flag)
     add_reg_1 = 0x00e0; //Ê¹ÄÜcolobar
     add_val_1 = 0xc1df;
     TC358_Register_Write(&add_reg_1, &add_val_1, register_value_width_16);
+return ;
 NACK_BREAK:
-	;
+printk("ERROR TC358 NACK :%s\n",__func__);
 }
 void TC358_init(Vedio_Format flag)
 {
@@ -326,6 +327,10 @@ int ret;
             colorbar_init_blue(TC358746XBG_BLACK);
             printk("\n\nTC358746:parameter is is COLORBAR TC358746XBG_BLACK!\n\n");
             break;
+        case COLORBAR+TC358746XBG_YELLOW:
+      	    colorbar_init_blue(TC358746XBG_YELLOW);
+       	    printk("\n\nTC358746:parameter is is COLORBAR TC358746XBG_YELLOW!\n\n");
+        break;
         default :
             colorbar_init();
             printk("\n\nTC358746:parameter is default NTSCi_init_tab!\n\n");

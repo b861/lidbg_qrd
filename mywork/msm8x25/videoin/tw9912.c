@@ -297,6 +297,8 @@ void Tw9912_analysis_input_signal(TW9912_input_info *input_information, Vedio_Ch
     else
     {
         printk("\r\rtw9912:testing NOT lock>>>>>>>>>>>\n");
+        signal_is_how[channel].Format = OTHER;
+        signal_is_how[channel].vedio_source = source_other;
     }
     if(channel == SEPARATION  )
     {
@@ -953,20 +955,20 @@ int Tw9912_init(Vedio_Format config_pramat, Vedio_Channel Channel)
             break;
         }
 
-        while(1)
+        while(0)
         {
 
             if(Channel == SEPARATION) break;
 
             ret = read_tw9912_chips_status(1);//return register valu
             msleep(10);
-            read_tw9912_chips_status_flag++;
+            read_tw9912_chips_status_flag_1++;
 
             //printk("tw9912:read_tw9912_chips_status back %.2x\n",ret);
             if( ret )
             {
-                read_tw9912_chips_status_flag = 0;
-                read_tw9912_chips_status_flag_1++;
+                read_tw9912_chips_status_flag ++;
+                read_tw9912_chips_status_flag_1=0;
                 printk("tw9912:worning Channel = %d input  signal unstabitily! %d\n", Channel, read_tw9912_chips_status_flag_1);
             }
             else
@@ -990,7 +992,7 @@ SIGNAL_DELTE_AGAIN:
         ret = Tw9912_appoint_pin_testing_video_signal(Channel);//bad
         delte_signal_count++;
         msleep(20);
-        if(ret == 5 && delte_signal_count < 10) goto SIGNAL_DELTE_AGAIN;
+        if(ret == 5 && delte_signal_count < 2) goto SIGNAL_DELTE_AGAIN;
         delte_signal_count = 0;
         mutex_lock(&lock_com_chipe_config);
         if(ret == 5) //the channel is not signal input
