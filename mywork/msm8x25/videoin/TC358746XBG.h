@@ -15,8 +15,11 @@
 #define TC358746XBG_YELLOW 7
 #define TC358746XBG_WHITE 8
 
-
+#ifdef DFLY_DEBUG
 #define DEBUG_TC358
+#define tc358746_debug
+#endif
+
 #ifdef BOARD_V2
 #define TC358746XBG_RESET 33
 #else//BOARD_V1
@@ -26,7 +29,6 @@
 #define register_value_width_16 16
 #define TC358746_I2C_ChipAdd 0x07
 #if 0
-#define tc358746_debug
 #define tc358746_dbg(msg...)  do { printk( KERN_CRIT "TC358746: " msg); }while(0)
 #else
 #define tc358746_dbg(msg...)  do {}while(0)
