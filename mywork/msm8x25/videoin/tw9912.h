@@ -1,6 +1,8 @@
 #ifndef __TW9912_H__
 #define __TW9912_H__
+#ifdef DFLY_DEBUG
 #define DEBUG_TW9912
+#endif
 //#define DEBUG_PLOG_TW9912
 //#define DEBUG_TW9912_CHECK_WRITE
 #define I2C_US_IO_1
