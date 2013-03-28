@@ -253,17 +253,20 @@ loop_read:
         }
         case SUSPEND_KERNEL:
         {
-            //system("su");
+            system("su");
             //system("echo peripheral > /mnt/debugfs/otg/mode");
             property_set("fly.fastboot.accoff", "1");
-            //system("echo mem > /sys/power/state");
+			if(1)
+			{
+           	 	system("echo mem > /sys/power/state");
+			}
+			else //not ok,why?
             {
-			 int fd;
-			 printf("SUSPEND_KERNEL\n");
-			 fd = open("/sys/power/state", O_RDWR);
-			 write(fd, "mem", sizeof("mem"));
-			 close(fd);
-
+				 int fd;
+				 printf("SUSPEND_KERNEL\n");
+				 fd = open("/sys/power/state", O_RDWR);
+				 write(fd, "mem", sizeof("mem"));
+				 close(fd);
             }
             break;
 
