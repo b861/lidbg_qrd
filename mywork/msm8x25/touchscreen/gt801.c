@@ -1006,6 +1006,8 @@ SOC_Display_Get_Res(&screen_x, &screen_y);
     ts->early_suspend.resume = goodix_ts_late_resume;
     register_early_suspend(&ts->early_suspend);
 #endif
+	//fake suspend
+	SOC_Fake_Register_Early_Suspend(&ts->early_suspend);
 
     dev_dbg(&client->dev, "Start  %s in %s mode\n", ts->input_dev->name, ts->use_irq ? "Interrupt" : "Polling\n");
     printk(  " out goodix_ts_probe---futengfei\n\n");

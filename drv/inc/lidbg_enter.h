@@ -125,7 +125,7 @@ typedef enum
     PM_STATUS_RESUME_OK,
     PM_STATUS_LATE_RESUME_OK,
     PM_STATUS_READY_TO_PWROFF,
-
+	PM_STATUS_READY_TO_FAKE_PWROFF,
 
 } LIDBG_FAST_PWROFF_STATUS;
 
@@ -263,6 +263,12 @@ struct lidbg_fn_t
 	int pfnglobal_video_camera_working_status;
 	//LCD
 	void (*pfnSOC_F_LCD_Light_Con)(unsigned int iOn);
+	//fake suspend
+	void (*pfnSOC_Fake_Register_Early_Suspend)(struct early_suspend *handler);
+
+
+
+	
 };
 
 

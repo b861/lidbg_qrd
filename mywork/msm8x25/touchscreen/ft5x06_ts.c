@@ -717,6 +717,8 @@ SOC_Display_Get_Res(&screen_x, &screen_y);
     data->early_suspend.resume = ft5x06_ts_late_resume;
     register_early_suspend(&data->early_suspend);
 #endif
+	//fake suspend
+	SOC_Fake_Register_Early_Suspend(&data->early_suspend);
 
     return 0;
 

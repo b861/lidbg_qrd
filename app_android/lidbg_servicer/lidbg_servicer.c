@@ -229,7 +229,7 @@ loop_read:
 			printf("CMD_FAST_POWER_OFF+\n");
 			property_set("fly.fastboot.accoff", "1");
 			system("am broadcast -a android.intent.action.FAST_BOOT_START");
-			printf("CMD_FAST_POWER_OFF+-\n");
+			printf("CMD_FAST_POWER_OFF-\n");
 
 			break;
 		}
@@ -466,6 +466,8 @@ open_dev:
 	
 	
 	system("chmod 777 /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
+	system("chmod 777 /proc/fake_suspend");
+	system("chmod 777 /proc/fake_wakeup");
 
 
 

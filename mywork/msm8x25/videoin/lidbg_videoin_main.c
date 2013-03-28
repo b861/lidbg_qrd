@@ -339,9 +339,36 @@ static void set_func_tbl(void)
     global_video_channel_flag = YIN3;//DVD
     global_camera_working_status = 0;//stop
 }
+
+
+struct early_suspend early_suspend;
+static int  video_early_suspend(struct early_suspend *h)
+{
+    DUMP_BUILD_TIME;
+    return 0;
+}
+static int video_late_resume(struct early_suspend *h)
+{
+    printk("resume tw9912 reset\n");
+    Tw9912_hardware_reset();
+
+    return 0;
+}
+
 static int video_dev_probe(struct platform_device *pdev)
 {
     DUMP_BUILD_TIME;
+
+	
+#ifdef CONFIG_HAS_EARLYSUSPEND
+		early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN;
+		early_suspend.suspend = video_early_suspend;
+		early_suspend.resume = video_late_resume;
+		//register_early_suspend(&early_suspend);
+#endif
+	
+		//fake suspend
+	SOC_Fake_Register_Early_Suspend(&early_suspend);
     return 0;
 }
 static int video_dev_remove(struct platform_device *pdev)
@@ -349,7 +376,7 @@ static int video_dev_remove(struct platform_device *pdev)
     DUMP_BUILD_TIME;
     return 0;
 }
-static int  video_dev_suspend(struct platform_device *pdev, pm_message_t state)
+static int  video_dev_suspend(struct platform_device *pdev)
 {
     DUMP_BUILD_TIME;
     return 0;

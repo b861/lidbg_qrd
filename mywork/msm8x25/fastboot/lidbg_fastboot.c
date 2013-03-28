@@ -29,6 +29,9 @@ static DECLARE_COMPLETION(early_suspend_start);
 static DECLARE_COMPLETION(resume_ok);
 static DECLARE_COMPLETION(pwroff_start);
 
+void fastboot_set_status(LIDBG_FAST_PWROFF_STATUS status);
+
+
 void fastboot_pwroff(void);
 
 
@@ -48,6 +51,7 @@ struct fastboot_data *fb_data;
 
 static spinlock_t kill_lock;
 unsigned long flags_kill;
+bool is_fake_suspend = 0;
 
 
 static struct task_struct *pwroff_task;
@@ -699,14 +703,15 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
 
 }
 
+
+
+
 int kill_proc(char *buf, char **start, off_t offset, int count, int *eof, void *data )
 {
 
 
-	//fastboot_task_kill_exclude(kill_exclude_process);
-	fastboot_task_kill_exclude(kill_exclude_process_fake_suspend);
+	fastboot_task_kill_exclude(kill_exclude_process);
 	
-
     return 1;
 }
 
@@ -731,6 +736,12 @@ void create_new_proc_entry2()
     create_proc_read_entry("fastboot_pwroff", 0, NULL, pwroff_proc, NULL);
 
 }
+
+
+
+#include "./fake_suspend.c"
+
+
 
 static int thread_pwroff(void *data)
 {
@@ -898,7 +909,7 @@ void fastboot_pwroff(void)
     u32 err_count = 0;
     DUMP_FUN_ENTER;
 
-    while(PM_STATUS_LATE_RESUME_OK != fastboot_get_status())
+    while((PM_STATUS_LATE_RESUME_OK != fastboot_get_status()) && (PM_STATUS_READY_TO_FAKE_PWROFF != fastboot_get_status()))
     {
         lidbgerr("Call SOC_PWR_ShutDown when suspend_pending != PM_STATUS_LATE_RESUME_OK :%d\n", fastboot_get_status());
         err_count++;
@@ -982,6 +993,7 @@ static void set_func_tbl(void)
     plidbg_dev->soc_func_tbl.pfnSOC_PWR_GetStatus = fastboot_get_status;
     plidbg_dev->soc_func_tbl.pfnSOC_PWR_SetStatus = fastboot_set_status;
     plidbg_dev->soc_func_tbl.pfnSOC_PWR_Ignore_Wakelock = fastboot_is_ignore_wakelock;
+	plidbg_dev->soc_func_tbl.pfnSOC_Fake_Register_Early_Suspend = fake_register_early_suspend;
 
 
 }
@@ -1009,8 +1021,7 @@ static void fastboot_early_suspend(struct early_suspend *h)
 	
 #endif
 
-
-	fastboot_task_kill_exclude(kill_exclude_process);
+		fastboot_task_kill_exclude(kill_exclude_process);
 #if 0
 	ignore_wakelock = 1;
 #endif
@@ -1116,6 +1127,8 @@ static int  fastboot_probe(struct platform_device *pdev)
 	spin_lock_init(&kill_lock);
     create_new_proc_entry();
     create_new_proc_entry2();
+	create_proc_entry_fake_suspend();
+	create_proc_entry_fake_wakeup();
 
     DUMP_FUN_LEAVE;
 

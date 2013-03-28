@@ -532,6 +532,8 @@ static int soc_dev_probe(struct platform_device *pdev)
 
     }
 #endif
+	//fake suspend
+	SOC_Fake_Register_Early_Suspend(&early_suspend);
 
     return 0;
 
