@@ -229,7 +229,7 @@ loop_read:
 			printf("CMD_FAST_POWER_OFF+\n");
 			property_set("fly.fastboot.accoff", "1");
 			system("am broadcast -a android.intent.action.FAST_BOOT_START");
-			printf("CMD_FAST_POWER_OFF+-\n");
+			printf("CMD_FAST_POWER_OFF-\n");
 
 			break;
 		}
@@ -253,10 +253,18 @@ loop_read:
         }
         case SUSPEND_KERNEL:
         {
-            system("su");
+            //system("su");
             //system("echo peripheral > /mnt/debugfs/otg/mode");
             property_set("fly.fastboot.accoff", "1");
-            system("echo mem > /sys/power/state");
+            //system("echo mem > /sys/power/state");
+            {
+			 int fd;
+			 printf("SUSPEND_KERNEL\n");
+			 fd = open("/sys/power/state", O_RDWR);
+			 write(fd, "mem", sizeof("mem"));
+			 close(fd);
+
+            }
             break;
 
         }
@@ -466,38 +474,50 @@ open_dev:
 	
 	
 	system("chmod 777 /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
+	system("chmod 777 /sys/power/state");
 
 
 
 #endif
-if(0)
-{
-		system("echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
-		
-		//system("echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
-		//system("echo powersave > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
-		sleep(10);
+	sleep(30);
+
+///////low mem kill
+	if(1)
 	{
-		 int i=15;
-		 while(i>0)
-		 {
-			 sleep(5);
-			 printf("set performance mode\n");
-			 system("echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
-			 i--;
-		 }
+		
+		system("chmod 777 /sys/module/lowmemorykiller/parameters/minfree");
+		// cat /sys/module/lowmemorykiller/parameters/minfree
+		//system("echo 3674,4969,6264,8312,9607,11444 > /sys/module/lowmemorykiller/parameters/minfree");//origin
+		sleep(1);
+		printf("set minfree\n");
+		system("echo 3674,4969,6264,6264,6264,6264 > /sys/module/lowmemorykiller/parameters/minfree");
 	}
 
-}
-
-	sleep(30);
-	system("chmod 777 /sys/module/lowmemorykiller/parameters/minfree");
-	// cat /sys/module/lowmemorykiller/parameters/minfree
-	//system("echo 3674,4969,6264,8312,9607,11444 > /sys/module/lowmemorykiller/parameters/minfree");//origin
-	sleep(1);
-	printf("set minfree\n");
-	system("echo 3674,4969,6264,6264,6264,6264 > /sys/module/lowmemorykiller/parameters/minfree");
-
+	
+////////set cpu fre 
+	if(1)
+	{
+			system("chmod 777 /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
+			//system("echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
+			sleep(1);
+			system("echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
+			//system("echo powersave > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
+			//sleep(10);
+		if(0)//loop set
+		{
+			 int i=2;
+			 while(i>0)
+			 {
+				 sleep(5);
+				 //printf("set performance mode\n");
+				 printf("set ondemand mode\n");
+				 system("echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
+				 //system("echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
+				 i--;
+			 }
+		}
+	
+	}
 
 	
 	printf("enter while\n");
