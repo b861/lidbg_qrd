@@ -1152,7 +1152,7 @@ SIGNAL_DELTE_AGAIN:
         ret = Tw9912_appoint_pin_testing_video_signal(Channel);//bad
         delte_signal_count++;
         msleep(20);
-        if(ret == 5 && delte_signal_count < 2) goto SIGNAL_DELTE_AGAIN;
+        if(ret == 5 && delte_signal_count < 4) goto SIGNAL_DELTE_AGAIN;
         delte_signal_count = 0;
         mutex_lock(&lock_com_chipe_config);
         if(ret == 5) //the channel is not signal input
