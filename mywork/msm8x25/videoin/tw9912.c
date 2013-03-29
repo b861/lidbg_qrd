@@ -310,6 +310,17 @@ CHANNEL_FAILD:
 void Disabel_video_data_out(void)
 {
     u8 disabel[] = {0x03, 0x27,};
+    tw9912_dbg("Disabel_video_data_out()\n");
+    read_tw9912(0x03, &disabel[1]); //register 0x02 channel selete
+    disabel[1] |=0x07;
+    write_tw9912(disabel);
+}
+void Enabel_video_data_out(void)
+{
+    u8 disabel[] = {0x03, 0x0,};
+    tw9912_dbg("Enabel_video_data_out()\n");
+    read_tw9912(0x03, &disabel[1]); //register 0x02 channel selete
+    disabel[1] &=0xf0;
     write_tw9912(disabel);
 }
 void display_tw9912_info(void)
@@ -410,6 +421,155 @@ void display_tw9912_info(void)
     /**/
 
 }
+static int TW9912_Channel_Choices(Vedio_Channel channel)
+{
+    u8 Tw9912_input_pin_selet[] = {0x02, 0x40,}; //default input pin selet YIN0
+    int ret;
+    printk("fly_video now channal choices %d",channel);
+    switch(channel)//Independent testing
+    {
+    case YIN0: 	//	 YIN0
+        if(write_tw9912(Tw9912_input_pin_selet) == NACK) goto CONFIG_not_ack_fail;
+        break;
+    case YIN1: //	 YIN1
+        Tw9912_input_pin_selet[1] = 0x44; //register valu selete YIN1
+        if(write_tw9912(Tw9912_input_pin_selet) == NACK) goto CONFIG_not_ack_fail;
+        break;
+    case YIN2: //	 YIN2
+        Tw9912_input_pin_selet[1] = 0x48;
+        if(write_tw9912(Tw9912_input_pin_selet) == NACK) goto CONFIG_not_ack_fail;
+
+        break;
+    case YIN3: //	 YIN3
+        Tw9912_input_pin_selet[1] = 0x4c;
+        if(write_tw9912(Tw9912_input_pin_selet) == NACK) goto CONFIG_not_ack_fail;
+
+        Tw9912_input_pin_selet[0] = 0xe8;
+        Tw9912_input_pin_selet[1] = 0x3f; //disable YOUT buffer
+        if(write_tw9912(Tw9912_input_pin_selet) == NACK) goto CONFIG_not_ack_fail;
+        break;
+      case SEPARATION: 	//	 YUV
+              Tw9912_input_pin_selet[1] = 0x70;
+        if(write_tw9912(Tw9912_input_pin_selet) == NACK) goto CONFIG_not_ack_fail;
+        break;
+    default :
+        tw9912_dbg("%s:you input Channel = %d >>>>>>>>>>>>>>error!\n", __FUNCTION__, channel);
+        break;
+    }
+    return 0;
+CONFIG_not_ack_fail:
+    printk("tw9912:TW9912_Channel_Choices()--->NACK error\n");
+    return -1;
+}
+Vedio_Format Tw9912TestingChannalSignal(Vedio_Channel Channel)
+{
+    Vedio_Format ret;
+    u8 signal = 0, i,valu;
+    u8 tw9912_register[] = {0x1c, 0x07,}; //default input pin selet YIN0
+ printk("Tw9912TestingChannalSignal(channel = %d)\n",Channel);   
+ if(Channel ==YIN2 ||Channel == SEPARATION)
+ return NTSC_P;
+mutex_lock(&lock_com_chipe_config);
+
+    if(the_last_config.Channel  != Channel){TW9912_Channel_Choices(Channel);}
+    else {tw9912_dbg("the_last_config.Channel  == Channel so not have change channal\n");}
+	
+    for(i = 0; i < 5; i++)
+    {
+        read_tw9912(0x01, &signal); //register 0x02 channel selete
+        if(signal & 0x80) printk("fly_video at channal (%d) not find signal\n", Channel);
+        else
+        {
+            printk("fly_video at channal (%d) find signal\n", Channel);
+            goto break_for;
+        }
+	mutex_unlock(&lock_com_chipe_config);
+        msleep(20);
+	mutex_lock(&lock_com_chipe_config);
+
+    }
+if(i==5)goto SIGNAL_NOT_LOCK;
+break_for:
+    write_tw9912(tw9912_register);// Auto detection
+mutex_unlock(&lock_com_chipe_config);
+    msleep(40);//waiting......
+mutex_lock(&lock_com_chipe_config);
+    read_tw9912(0x1c, &signal);
+    signal = signal & 0x70;
+    switch(signal)
+    {
+    case 0:
+        ret = NTSC_I;
+        printk("\nSTDNOW is NTSC(M)\n");
+        break;
+    case 0x10:
+        ret = PAL_I;
+        printk("\nSTDNOW is PAL (B,D,G,H,I)\n");
+        break;
+    case 0x20:
+        ret = OTHER;
+        printk("\nSTDNOW is SECAM\n");
+        break;
+    case 0x30:
+        ret = NTSC_I;
+        printk("\nSTDNOW is NTSC4.43\n");
+        break;
+    case 0x40:
+        ret = PAL_I;
+        printk("\nSTDNOW is PAL (M)\n");
+        break;
+    case 0x50:
+        ret = PAL_I;
+        printk("\nSTDNOW is PAL (CN)\n");
+        break;
+    case 0x60:
+        ret = PAL_I;
+        printk("\nSTDNOW is PAL 60\n");
+        break;
+    default :
+        ret = OTHER;
+        printk("\nSTDNOW is NA\n");
+        break;
+    }
+  //  if((Channel == YIN2 || Channel == SEPARATION) && ret == NTSC_I)
+    if(Channel == YIN2 || Channel == SEPARATION)
+    	{
+	   read_tw9912(0xc1, &valu);
+	    if(valu & 0x08) //bit3 -->Composite Sync detection status
+		    {
+		        switch(valu & 0x7) //bit[2:0]
+		        {
+		        case 0:
+		            ret = NTSC_I;
+		            break;
+		        case 1:
+		            ret = PAL_I;
+		            break;
+
+		        case 2:
+		            ret = NTSC_P;
+			  printk("\nDVD is NTSC_P\n");
+		            break;
+		        case 3:
+		            ret = PAL_P;
+		            break;
+
+		        default:
+		            ret = OTHER;
+		            break;
+		        }
+		        printk("testing_NTSCp_video_signal() singal lock back %d\n", ret);
+		    }
+	}
+    //    return NTSC_P;
+    printk("fly_video test signal is %d",ret);
+mutex_unlock(&lock_com_chipe_config);
+     return ret;
+SIGNAL_NOT_LOCK:
+mutex_unlock(&lock_com_chipe_config);
+	return OTHER;
+}
+
 Vedio_Format camera_open_video_signal_test_in_2(void)
 {
     Vedio_Format ret = OTHER;

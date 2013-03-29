@@ -34,7 +34,7 @@ void TC358_Hardware_Rest(void)
     //msleep(10000);
     tc358_RESX_UP;
     //	udelay(100);
-   // 	msleep(100);
+    //	msleep(100);
 }
 static void Power_contorl(void)
 {
@@ -160,6 +160,7 @@ i2c_ack back_ret;
         }
         i++;
     }
+
 return 0;
 NACK_BREAK:
 printk("interuppt config because TC358746 NACK\n");

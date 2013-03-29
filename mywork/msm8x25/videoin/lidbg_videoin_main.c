@@ -4,6 +4,7 @@
 #include "lidbg_def.h"
 #include "video_init_config.h"
 static struct task_struct *Vedio_Signal_Test = NULL;
+static struct task_struct *RunTimeTw9912Status = NULL;
 extern tw9912_run_flag tw912_run_sotp_flag;
 LIDBG_DEFINE;
 static void video_config_init(Vedio_Format config_pramat, u8 Channal)
@@ -64,8 +65,51 @@ static int thread_vedio_signal_test(void *data)
         	msleep(10);*/
 
         printk("global_camera_working_status = %d\n", global_camera_working_status);
+	printk("read_chips_signal_status = %d\n",read_chips_signal_status(1));
+	//printk("Tw9912TestingChannalSignal() = %d\n",Tw9912TestingChannalSignal(SEPARATION));
+
     }
     return 0;
+}
+static int TestTw9912SignalStatusThread(void *data)
+{
+    int i = 0;
+    long int timeout;
+    printk("%s()\n",__func__);
+    while(!kthread_should_stop())
+    {
+    if(global_camera_working_status)//camera is run
+    	{
+		timeout = 1;
+		while(timeout > 0)
+		{
+		//delay
+			timeout = schedule_timeout(timeout);
+		}
+		IfInputSignalNotStable();
+	}
+	else//camera is stop
+	{ video_config_debug("global_camera_working_status = 0 \n");
+		timeout = 600;
+	        while(timeout > 0)
+	        {
+	            //delay
+	            timeout = schedule_timeout(timeout);
+	        }
+	}
+    }
+    return 0;
+}
+static void CreadChipStatusFunction(void)
+{
+	printk("%s()\n",__func__);
+        RunTimeTw9912Status = kthread_run(TestTw9912SignalStatusThread, NULL, "flyvideo");
+
+}
+static void CleanChipStatusFunction(void)
+{
+		printk("%s()\n",__func__);
+                kthread_stop(RunTimeTw9912Status);
 }
 void lidbg_video_main_in(int argc, char **argv)
 {
@@ -403,6 +447,7 @@ int lidbg_video_init(void)
     video_init_config_in(NTSC_P);//first initall tw9912 all register
     platform_driver_register(&video_driver);
     platform_device_register(&video_devices);
+    //CreadChipStatusFunction();
     return 0;
 
 }
@@ -410,7 +455,7 @@ int lidbg_video_init(void)
 int lidbg_video_deinit(void)
 {
     printk("lidbg_video_deinit module exit.....\n");
-
+    //CleanChipStatusFunction();
     return 0;
 
 }
