@@ -159,7 +159,7 @@ int static Change_channel(void)
     TC358_data_output_enable(DISABLE);
     TC358_init(COLORBAR + TC358746XBG_BLACK);
     //msleep(1);
-    TC358_data_output_enable(ENABLE);
+    //TC358_data_output_enable(ENABLE);
     tw9912_RESX_DOWN;//\u8fd9\u91cc\u5bf9tw9912\u590d\u4f4d\u7684\u539f\u56e0\u662f\u89e3\u51b3\u5012\u8f66\u9000\u56deDVD\u65f6\u89c6\u9891\u5361\u6b7b\u3002
     tw9912_RESX_UP;
     msleep(20);
@@ -606,7 +606,7 @@ Vedio_Format flyVideoTestSignalPin_in(u8 Channel)
             break;
         }
     }
-    printk("tw9912:flyVideoTestSignalPin_in(Channel=%d) back %d\n", Channel, ret);
+    printk("\nC=%d,F=%d\n", Channel, ret);
     //spin_unlock(&spin_chipe_config_lock);
     mutex_unlock(&lock_chipe_config);
     //global_video_format_flag=ret;//Transmitted Jiang  Control
@@ -620,11 +620,74 @@ int read_chips_signal_status(u8 cmd)
     mutex_unlock(&lock_chipe_config);
     return ret;//have change return 1 else retrun 0
 }
+int IfInputSignalNotStable(void)
+{
+int ret;
+int i;
+Vedio_Format ret2;
+static u8 IfInputSignalNotStable_count=1;
+static u8 SignalNotFind_count=0;
+		video_config_debug("IfInputSignalNotStable(info_com_top_Channel =%d)\n",info_com_top_Channel);
+		if( (info_com_top_Channel != SEPARATION&&info_com_top_Channel != YIN2))
+		{//YIN3 CVBS
+			if(read_chips_signal_status(1) == 0 ) {video_config_debug("Signal is good\n");goto SIGNALISGOOD;}
+			SignalNotFind_count = 0;
+			if(IfInputSignalNotStable_count ==2){IfInputSignalNotStable_count = 1;goto SIGNALINPUT;}//if IfInputSignalNotStable_count ==1 the is first find signal bad,
+																								//IfInputSignalNotStable_count ==2 is signal recovery
+			IfInputSignalNotStable_count ++;
+			video_config_debug("signal astable\n");
+			mutex_lock(&lock_chipe_config);
+			//Disabel_video_data_out();
+			//TC358_data_output_enable(0);
+			mutex_unlock(&lock_chipe_config);
+			while(global_camera_working_status)//camera not exit
+			{
+			SignalNotFind_count++;
+			if(SignalNotFind_count>50) goto BREAKTHEWHILE;
+			ret2 = Tw9912TestingChannalSignal(info_com_top_Channel) ;
+			switch( ret2 ) 
+				{
+					case NTSC_I:
+						video_config_debug("find signal NTSC_I\n");
+						goto BREAKTHEWHILE;
+						break;
+					case PAL_I:
+						video_config_debug("find signal PAL_I\n");
+						goto BREAKTHEWHILE;
+						break;
+					case NTSC_P:
+						video_config_debug("find signal NTSC_P\n");
+						goto BREAKTHEWHILE;
+						break;
+					default :
+						for(i=0;i<10;i++)
+						{
+							if(!global_camera_working_status) goto BREAKTHEWHILE;
+							msleep(1);
+						}
+						video_config_debug("not signal\n");
+						break;
+				}
+			}
+			BREAKTHEWHILE:
+			mutex_lock(&lock_chipe_config);
+			//Enabel_video_data_out();
+			//TC358_data_output_enable(1);
+			mutex_unlock(&lock_chipe_config);
+		}
+		else//DVD YUV
+		{
+		;
+		}
+SIGNALISGOOD:
+SIGNALINPUT:
+return 0;
+}
 static int thread_signal_test(void *data)
 {
     int i = 0;
     long int timeout;
-    printk("tw9912:thread_signal_test()\n");
+    video_config_debug("thread_signal_test()\n");
     while(!kthread_should_stop())
     {
         timeout = 10;
@@ -720,12 +783,17 @@ void video_init_config_in(Vedio_Format config_pramat)
                         break;
                     default :
                         printk("video not signal input..\n");
-                        TC358_init(COLORBAR + TC358746XBG_BLACK); //blue
+                        TC358_init(COLORBAR + TC358746XBG_YELLOW); //blue
                         break;
                     }
                 }
-                else
+                else if(0)
                     TC358_init(COLORBAR);
+		else 
+			{
+			TC358_Hardware_Rest();
+			printk("Erorr timeout hkjing\n");
+			}
                 /**/
             }
         }//if(info_Vedio_Channel<=SEPARATION)
