@@ -787,8 +787,13 @@ void video_init_config_in(Vedio_Format config_pramat)
                         break;
                     }
                 }
-                else
+                else if(0)
                     TC358_init(COLORBAR);
+		else 
+			{
+			TC358_Hardware_Rest();
+			printk("Erorr timeout hkjing\n");
+			}
                 /**/
             }
         }//if(info_Vedio_Channel<=SEPARATION)
