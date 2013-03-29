@@ -1076,8 +1076,7 @@ int Tw9912_init(Vedio_Format config_pramat, Vedio_Channel Channel)
     int ret = 0, delte_signal_count = 0;
     u8 *config_pramat_piont = NULL;
     u8 Tw9912_input_pin_selet[] = {0x02, 0x40,}; //default input pin selet YIN0
-    printk("tw9912: init+\n");
-    tw9912_dbg("\r\r\n\n");
+    printk("tw9912: inital begin\n");
     mutex_lock(&lock_com_chipe_config);
     TC9912_id();
     //if(Channel == NOTONE&&tw9912_status.flag == TW9912_initall_not)
@@ -1173,16 +1172,16 @@ SIGNAL_DELTE_AGAIN:
         switch(ret)
         {
         case NTSC_I:
-            printk("tw9912:Tw9912_appoint_pin_testing_video_signal() back NTSC_I\n");
+            printk("\nVideoFormaIs NTSC_I\n\n");
             break;
         case NTSC_P:
-            printk("tw9912:The next Configure NTSC\n");
+            printk("\nVideoFormatIs NTSC\n\n");
             break;
         case PAL_I:
-            printk("tw9912:Tw9912_appoint_pin_testing_video_signal()  back PAL_I\n");
+            printk("\nVideoFormatIs PAL_I\n\n");
             break;
         case PAL_P:
-            printk("tw9912:Tw9912_appoint_pin_testing_video_signal()  back PAL_P\n");
+            printk("\nVideoFormatIs PAL_P\n\n");
             break;
         default:
             ;
@@ -1202,7 +1201,7 @@ SIGNAL_DELTE_AGAIN:
             tw9912_status.format = NTSC_I;
             config_pramat_piont = TW9912_INIT_NTSC_Interlaced_input;
             //config_pramat_piont=TW9912_INIT_PAL_Interlaced_input;
-            printk("tw9912:%s:config_pramat->NTSC_Interlace\n", __func__);
+            //printk("tw9912:%s:config_pramat->NTSC_Interlace\n", __func__);
             break;
 
         case PAL_I:
@@ -1211,7 +1210,7 @@ SIGNAL_DELTE_AGAIN:
             tw9912_status.format = PAL_I;
             config_pramat_piont = TW9912_INIT_PAL_Interlaced_input;
             //config_pramat_piont=TW9912_INIT_NTSC_Interlaced_input;
-            printk("tw9912:%s:config_pramat->PAL_Interlace\n", __func__);
+            //printk("tw9912:%s:config_pramat->PAL_Interlace\n", __func__);
             break;
 
         case NTSC_P:
@@ -1219,7 +1218,7 @@ SIGNAL_DELTE_AGAIN:
             tw9912_status.Channel = Channel;
             tw9912_status.format = NTSC_P;
             config_pramat_piont = TW9912_INIT_NTSC_Progressive_input;
-            printk("tw9912:%s:config_pramat->NTSC_Progressive\n", __func__);
+           //printk("tw9912:%s:config_pramat->NTSC_Progressive\n", __func__);
             break;
 
         case PAL_P:
@@ -1227,7 +1226,7 @@ SIGNAL_DELTE_AGAIN:
             tw9912_status.Channel = Channel;
             tw9912_status.format = PAL_P;
             config_pramat_piont = TW9912_INIT_PAL_Progressive_input;
-            printk("tw9912:%s:config_pramat->PAL_Progressive\n", __func__);
+            //printk("tw9912:%s:config_pramat->PAL_Progressive\n", __func__);
             break;
 
         default:
@@ -1344,7 +1343,7 @@ SIGNAL_DELTE_AGAIN:
         ret = write_tw9912(Tw9912_Parameter);
 
         tw912_run_sotp_flag.run = 1;
-        printk("tw9912 is run again and format is PALi flag&&&\n");
+        printk("Create a new thread\n");
         tw9912_Correction_Parameter_fun = kthread_run(thread_tw9912_Correction_Parameter_fun, NULL, "flyvideo_Parameter");
     }
     else if(signal_is_how[Channel].Format == NTSC_I)
@@ -1356,7 +1355,7 @@ SIGNAL_DELTE_AGAIN:
         ret = write_tw9912(Tw9912_Parameter);
 
         tw912_run_sotp_flag.run = 1;
-        printk("tw9912 is run again and format is NTSC_i flag&&&\n");
+        printk("Create a new thread\n");
         tw9912_Correction_Parameter_fun = kthread_run(thread_tw9912_Correction_Parameter_fun, NULL, "flyvideo_Parameter");
     }
     else
@@ -1374,7 +1373,7 @@ SIGNAL_DELTE_AGAIN:
         i++;
     }
 #endif
-    printk("tw9912: init-\n");
+    printk("tw9912: inital done\n");
     //Correction_Parameter_fun(signal_is_how[Channel].Format);
     //CONFIG_is_old:
     mutex_unlock(&lock_com_chipe_config);

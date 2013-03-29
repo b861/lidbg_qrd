@@ -516,8 +516,7 @@ int flyVideoInitall_in(u8 Channel)
 int init_tw9912_ent(Vedio_Channel Channel)
 {
     int ret = -1 ;
-    printk("tw9912:@@@@@init_tw9912_ent(Channel=%d)\n", Channel);
-    printk("tw9912:init_tw9912_ent()-->Tw9912_init()\n");
+    printk("tw9912:init_tw9912_ent(Channel=%d)\n", Channel);
     switch (Channel)
     {
     case YIN0:
@@ -710,8 +709,8 @@ static int thread_signal_test(void *data)
 void video_init_config_in(Vedio_Format config_pramat)
 {
     int i, j;
-    printk( "Video Module Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);
-    printk("tw9912:@@@@@video_init_config_in(config_pramat=%d) info_com_top_Channel = %d\n", config_pramat, info_com_top_Channel);
+    printk("\nVideo Module Build Time: %s %s  %s \n\n", __FUNCTION__, __DATE__, __TIME__);
+    printk("tw9912:config channal is %d\n",info_com_top_Channel);
     //spin_lock(&spin_chipe_config_lock);
     mutex_lock(&lock_chipe_config);
 
@@ -733,7 +732,6 @@ void video_init_config_in(Vedio_Format config_pramat)
         }
         else
         {
-            printk("tw9912:video_init_config_in()-->init_tw9912_ent()\n");
             mutex_unlock(&lock_chipe_config);
             init_tw9912_ent(info_com_top_Channel);
             mutex_lock(&lock_chipe_config);

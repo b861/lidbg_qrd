@@ -177,7 +177,7 @@ static int TC358_id(void)
 	    TC358_Register_Read((tc358746_id[0].add_reg), valu, tc358746_id[0].registet_width);
 	    if(valu[0] == tc358746_id[0].add_val >> 8)
 	    {
-	        printk("TC358746xbg ID=%02x%02x\n", valu[0], valu[1]);
+	        printk("\nTC358746xbg ID=%02x%02x\n", valu[0], valu[1]);
 			ret = 1;
 	    }
 	    else
@@ -278,7 +278,7 @@ printk("ERROR TC358 NACK :%s\n",__func__);
 void TC358_init(Vedio_Format flag)
 {
 int ret;
-    printk("Now inital TC358\n");
+    printk("TC358 inital begin\n");
     tc358746_dbg("flag= %d\n", flag);
     Power_contorl();
     ret = TC358_id();
@@ -343,7 +343,7 @@ int ret;
         printk("\n\nTC358746:error:you input TC358746 parameter is not have !\n\n");
     }
     tc358746_dbg(KERN_INFO "Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);
-    printk("inital done\n");
+    printk("TC358 inital done\n");
 
 }
 #if 0

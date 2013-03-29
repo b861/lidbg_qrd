@@ -15,10 +15,10 @@
 #define TC358746XBG_YELLOW 7
 #define TC358746XBG_WHITE 8
 
-#ifdef DFLY_DEBUG
+//#ifdef DFLY_DEBUG
 #define DEBUG_TC358
 #define tc358746_debug
-#endif
+//#endif
 
 #ifdef BOARD_V2
 #define TC358746XBG_RESET 33
