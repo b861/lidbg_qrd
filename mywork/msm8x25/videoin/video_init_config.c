@@ -156,13 +156,13 @@ int static Change_channel(void)
     printk("TC358:Change_channel() \n");
     //Disabel_video_data_out();
 
-    TC358_data_output_enable(DISABLE);
-    TC358_init(COLORBAR + TC358746XBG_BLACK);
+    //TC358_data_output_enable(DISABLE);
+    //TC358_init(COLORBAR + TC358746XBG_BLACK);
     //msleep(1);
     //TC358_data_output_enable(ENABLE);
-    tw9912_RESX_DOWN;//\u8fd9\u91cc\u5bf9tw9912\u590d\u4f4d\u7684\u539f\u56e0\u662f\u89e3\u51b3\u5012\u8f66\u9000\u56deDVD\u65f6\u89c6\u9891\u5361\u6b7b\u3002
-    tw9912_RESX_UP;
-    msleep(20);
+    //tw9912_RESX_DOWN;//\u8fd9\u91cc\u5bf9tw9912\u590d\u4f4d\u7684\u539f\u56e0\u662f\u89e3\u51b3\u5012\u8f66\u9000\u56deDVD\u65f6\u89c6\u9891\u5361\u6b7b\u3002
+   // tw9912_RESX_UP;
+    //msleep(20);
 }
 int static VideoImage(void)
 {
@@ -713,7 +713,6 @@ void video_init_config_in(Vedio_Format config_pramat)
     printk("tw9912:config channal is %d\n",info_com_top_Channel);
     //spin_lock(&spin_chipe_config_lock);
     mutex_lock(&lock_chipe_config);
-
     SOC_Write_Servicer(VIDEO_NORMAL_SHOW);
 
     if(info_com_top_Channel == SEPARATION || info_com_top_Channel == YIN2)
