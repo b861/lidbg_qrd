@@ -43,6 +43,7 @@ static int thread_resume(void *data);
 void fly_devices_init(void);
 
 int platform_id;
+bool i2c_c_ctrl = 0;
 
 struct platform_devices_resource devices_resource;
 
@@ -350,6 +351,8 @@ void led_on(void)
 	if(suspend_flag == 1)
 	{
 		LED_ON;
+		if(i2c_c_ctrl == 1)
+			TELL_LPC_PWR_ON;
 		return;
 	}
     if(led_status == 0)
@@ -576,6 +579,8 @@ static void devices_early_suspend(struct early_suspend *handler)
     {
         LCD_OFF;	
 		LED_ON;
+		TELL_LPC_PWR_ON;
+		i2c_c_ctrl = 1;
 		
     }
 	suspend_flag = 1;
@@ -592,6 +597,7 @@ static void devices_late_resume(struct early_suspend *handler)
 	suspend_flag = 0;
     if(platform_id ==  PLATFORM_FLY)
     {
+		i2c_c_ctrl = 0;
 
 		
 #ifdef FLY_DEBUG
@@ -647,6 +653,7 @@ static int  soc_dev_suspend(struct platform_device *pdev, pm_message_t state)
 
 		PWR_EN_OFF;
 		LED_ON;
+		i2c_c_ctrl = 0;
 
 
     }
@@ -718,6 +725,7 @@ static int soc_dev_resume(struct platform_device *pdev)
 
     if(platform_id ==  PLATFORM_FLY)
     {
+    	
     	TELL_LPC_PWR_ON;
         PWR_EN_ON;
 		

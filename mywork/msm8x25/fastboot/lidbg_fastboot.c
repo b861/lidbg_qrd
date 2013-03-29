@@ -826,13 +826,18 @@ static int thread_fastboot_suspend(void *data)
 #endif
 
                    		ignore_wakelock = 1;
+#if 0
 						while(PM_STATUS_RESUME_OK != fastboot_get_status())
 						{
 							lidbg("Trigger flywakelock\n");
 	                        wake_lock(&(fb_data->flywakelock));
 	                        wake_unlock(&(fb_data->flywakelock));
-							msleep(2000);
+							msleep(5000);
 						}
+#else
+						wake_lock(&(fb_data->flywakelock));
+						wake_unlock(&(fb_data->flywakelock));
+#endif
                         break;
                     }
                 }
