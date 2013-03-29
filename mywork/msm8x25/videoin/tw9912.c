@@ -1159,8 +1159,9 @@ SIGNAL_DELTE_AGAIN:
         if(ret == 5) //the channel is not signal input
         {
 		tw9912_signal_unstabitily_for_Tw9912_init_flag = 0;//find colobar flag signal bad
+		mutex_unlock(&lock_com_chipe_config);
 		ret_format = Tw9912TestingChannalSignal(Channel);
-		
+		mutex_lock(&lock_com_chipe_config);
 		if(ret_format == OTHER )
 			goto NOT_signal_input;
 		else
