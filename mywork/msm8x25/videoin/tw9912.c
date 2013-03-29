@@ -426,6 +426,7 @@ static int TW9912_Channel_Choices(Vedio_Channel channel)
     u8 Tw9912_input_pin_selet[] = {0x02, 0x40,}; //default input pin selet YIN0
     int ret;
     printk("fly_video now channal choices %d",channel);
+    the_last_config.Channel = channel;
     switch(channel)//Independent testing
     {
     case YIN0: 	//	 YIN0
@@ -1070,6 +1071,7 @@ CONFIG_not_ack_fail:
 }
 int Tw9912_init(Vedio_Format config_pramat, Vedio_Channel Channel)
 {
+    Vedio_Format ret_format;
     u32 i = 0;
     int ret = 0, delte_signal_count = 0;
     u8 *config_pramat_piont = NULL;
@@ -1157,8 +1159,13 @@ SIGNAL_DELTE_AGAIN:
         mutex_lock(&lock_com_chipe_config);
         if(ret == 5) //the channel is not signal input
         {
-            tw9912_signal_unstabitily_for_Tw9912_init_flag = 0;//find colobar flag signal bad
-            goto NOT_signal_input;
+		tw9912_signal_unstabitily_for_Tw9912_init_flag = 0;//find colobar flag signal bad
+		ret_format = Tw9912TestingChannalSignal(Channel);
+		
+		if(ret_format == OTHER )
+			goto NOT_signal_input;
+		else
+			signal_is_how[Channel].Format = ret_format;
         }
         if(ret == -1)
             goto CONFIG_not_ack_fail;
