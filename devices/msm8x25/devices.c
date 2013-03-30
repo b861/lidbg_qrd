@@ -351,8 +351,8 @@ void led_on(void)
 	if(suspend_flag == 1)
 	{
 		LED_ON;
-		if(i2c_c_ctrl == 1)
-			TELL_LPC_PWR_ON;
+		//if(i2c_c_ctrl == 1)
+		//	TELL_LPC_PWR_ON;
 		return;
 	}
     if(led_status == 0)
@@ -660,6 +660,7 @@ static int  soc_dev_suspend(struct platform_device *pdev, pm_message_t state)
 		PWR_EN_OFF;
 		LED_ON;
 		i2c_c_ctrl = 0;
+		TELL_LPC_PWR_OFF;
 
 
     }
