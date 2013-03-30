@@ -13,12 +13,17 @@ struct early_suspend {
 #endif
 };
 */
+//typedef void (*fake_suspend_func)(struct early_suspend *h);
+//fake_suspend_func pfunc_suspend [10]= {NULL} ; 
+//fake_suspend_func pfunc_wakeup [10]= {NULL} ; 
 
+struct early_suspend *fake_suspend_handler[10] = {NULL} ;
 
 void fake_register_early_suspend(struct early_suspend *handler)
 {
+#if 0
 	struct list_head *pos;
-#if 1
+
 	mutex_lock(&early_suspend_lock);
 	list_for_each(pos, &early_suspend_handlers) {
 		struct early_suspend *e;
@@ -28,12 +33,26 @@ void fake_register_early_suspend(struct early_suspend *handler)
 	}
 	list_add_tail(&handler->link, pos);
 	mutex_unlock(&early_suspend_lock);
+
+#else
+	int i;
+	for(i = 0; i< 10; i ++)
+	{
+		if(fake_suspend_handler[i] == NULL)
+		{
+			fake_suspend_handler[i] = handler;
+	        break;
+		}
+	}
+
+
 #endif
 }
 
 
 static void fake_early_suspend()
 {
+#if 0
 	struct early_suspend *pos;
 	list_for_each_entry(pos, &early_suspend_handlers, link) 
 	{
@@ -44,10 +63,25 @@ static void fake_early_suspend()
 			pos->suspend(pos);
 		}
 	}
+
+#else
+	int i;
+	for(i = 0; i< 10; i ++)
+	{
+		if(fake_suspend_handler[i] != NULL)
+		{
+			fake_suspend_handler[i]->suspend(fake_suspend_handler[i]);
+		}
+	}
+
+
+
+#endif
 }
 
 static void fake_late_resume()
 {
+#if 0
 	struct early_suspend *pos;
 
 	list_for_each_entry_reverse(pos, &early_suspend_handlers, link) 
@@ -58,6 +92,20 @@ static void fake_late_resume()
 			pos->resume(pos);
 		}
 	}
+
+#else
+
+	int i;
+	for(i = 0; i< 10; i ++)
+	{
+		if(fake_suspend_handler[i] != NULL)
+		{
+			fake_suspend_handler[i]->resume(fake_suspend_handler[i]);
+		}
+	}
+
+
+#endif
 }
 
 
