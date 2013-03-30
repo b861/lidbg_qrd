@@ -1019,6 +1019,8 @@ SOC_Display_Get_Res(&screen_x, &screen_y);
     ts->early_suspend.resume = goodix_ts_late_resume;
     register_early_suspend(&ts->early_suspend);
 #endif
+	//fake suspend	
+	SOC_Fake_Register_Early_Suspend(&ts->early_suspend);
 
     /////////////////////////////// UPDATE STEP 2 START /////////////////////////////////////////////////////////////////
     //#ifdef CONFIG_TOUCHSCREEN_GOODIX_IAP

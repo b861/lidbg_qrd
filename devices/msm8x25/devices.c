@@ -535,6 +535,8 @@ static int soc_dev_probe(struct platform_device *pdev)
 
     }
 #endif
+	//fake suspend
+	SOC_Fake_Register_Early_Suspend(&early_suspend);
 
     return 0;
 
@@ -577,7 +579,9 @@ static void devices_early_suspend(struct early_suspend *handler)
     DUMP_FUN_ENTER;
     if(platform_id ==  PLATFORM_FLY)
     {
-        LCD_OFF;	
+#ifdef FLY_DEBUG
+        LCD_OFF;
+#endif
 		LED_ON;
 		TELL_LPC_PWR_ON;
 		i2c_c_ctrl = 1;
@@ -606,6 +610,7 @@ static void devices_late_resume(struct early_suspend *handler)
 		//SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
 
 		BL_SET(BL_MAX / 2);
+		LCD_ON;
 
 		if(0)
 		{
@@ -643,6 +648,7 @@ static int  soc_dev_suspend(struct platform_device *pdev, pm_message_t state)
     if(platform_id ==  PLATFORM_FLY)
     {
         lidbg("turn lcd off!\n");
+#ifdef FLY_DEBUG
 
 #ifdef DEBUG_BUTTON
         SOC_IO_ISR_Disable(BUTTON_LEFT_1);
@@ -650,7 +656,7 @@ static int  soc_dev_suspend(struct platform_device *pdev, pm_message_t state)
         SOC_IO_ISR_Disable(BUTTON_RIGHT_1);
         SOC_IO_ISR_Disable(BUTTON_RIGHT_2);
 #endif
-
+#endif
 		PWR_EN_OFF;
 		LED_ON;
 		i2c_c_ctrl = 0;

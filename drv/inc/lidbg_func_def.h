@@ -88,5 +88,8 @@ static inline int check_pt(void)
 #define global_camera_working_status  (plidbg_dev->soc_func_tbl.pfnglobal_video_camera_working_status)
 //LCD
 #define SOC_F_LCD_Light_Con (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_F_LCD_Light_Con))
+//fake suspend
+#define SOC_Fake_Register_Early_Suspend (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_Fake_Register_Early_Suspend))
+
 #endif
 
