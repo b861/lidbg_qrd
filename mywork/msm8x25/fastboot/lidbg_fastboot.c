@@ -307,7 +307,7 @@ char *kill_exclude_process[] =
 
 
 	//kld
-	"c2739.mainframe",
+	//"c2739.mainframe",
 	
     //"flush-31:6",
     //"flush-31:3",
