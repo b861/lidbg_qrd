@@ -171,8 +171,8 @@ void clean_ublox_buf(void)
 		return;
 	
     avi_gps_data_hl = (num_avi_gps_data[0] << 8) + num_avi_gps_data[1];
-
-    SOC_I2C_Rec_Simple(1, 0x42, gps_data, avi_gps_data_hl);
+	if(avi_gps_data_hl > 0) 
+    	SOC_I2C_Rec_Simple(1, 0x42, gps_data, avi_gps_data_hl);
 
     DUMP_FUN_LEAVE;
 
