@@ -62,6 +62,17 @@ int fd = 0;
 
 #include "./copyfile.c"
 
+
+void log_acc_times()
+{
+
+
+
+
+}
+
+
+
 int  servicer_handler(int signum)
 {
 
@@ -248,6 +259,7 @@ loop_read:
             //system("setprop fly.fastboot.accoff 0");
             property_set("fly.fastboot.accoff", "0");
             //system("echo host > /mnt/debugfs/otg/mode");
+            log_acc_times();
             break;
 
         }
