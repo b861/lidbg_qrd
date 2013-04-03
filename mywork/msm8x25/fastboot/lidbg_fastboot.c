@@ -824,9 +824,9 @@ static int thread_fastboot_suspend(void *data)
                 if(fastboot_get_status() == PM_STATUS_EARLY_SUSPEND_PENDING)
                 {
 #ifdef FLY_DEBUG
-                    if(time_count >= 8)
+                    if(time_count >= 10)
 #else
-                    if(time_count >= 8)
+                    if(time_count >= 10)
 #endif
                     {
                         lidbgerr("thread_fastboot_suspend wait suspend timeout!\n");
