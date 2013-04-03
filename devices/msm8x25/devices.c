@@ -351,8 +351,8 @@ void led_on(void)
 	if(suspend_flag == 1)
 	{
 		LED_ON;
-		//if(i2c_c_ctrl == 1)
-		//	TELL_LPC_PWR_ON;
+		if(i2c_c_ctrl == 1)
+			TELL_LPC_PWR_ON;
 		return;
 	}
     if(led_status == 0)
@@ -365,6 +365,8 @@ void led_on(void)
         LED_ON;
         led_status = 0;
     }
+	TELL_LPC_PWR_ON;
+
 
 #endif
 }
@@ -455,6 +457,7 @@ static int soc_dev_probe(struct platform_device *pdev)
     DUMP_FUN;
 
     PWR_EN_ON;
+	TELL_LPC_PWR_ON;
 
 
     get_platform();
@@ -602,6 +605,7 @@ static void devices_late_resume(struct early_suspend *handler)
     if(platform_id ==  PLATFORM_FLY)
     {
 		i2c_c_ctrl = 0;
+		TELL_LPC_PWR_ON;
 
 		
 #ifdef FLY_DEBUG
@@ -657,9 +661,13 @@ static int  soc_dev_suspend(struct platform_device *pdev, pm_message_t state)
         SOC_IO_ISR_Disable(BUTTON_RIGHT_2);
 #endif
 #endif
+		i2c_c_ctrl = 0;
+
 		PWR_EN_OFF;
 		LED_ON;
 		i2c_c_ctrl = 0;
+		TELL_LPC_PWR_OFF;
+		TELL_LPC_PWR_OFF;
 		TELL_LPC_PWR_OFF;
 
 
@@ -959,6 +967,7 @@ void fly_devices_init(void)
 		USB_WORK_ENABLE;
 		LCD_ON;
 #else
+		TELL_LPC_PWR_ON;
 
         PWR_EN_ON;
 		USB_WORK_ENABLE;
