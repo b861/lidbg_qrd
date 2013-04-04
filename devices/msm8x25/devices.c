@@ -667,9 +667,6 @@ static int  soc_dev_suspend(struct platform_device *pdev, pm_message_t state)
 		LED_ON;
 		i2c_c_ctrl = 0;
 		TELL_LPC_PWR_OFF;
-		TELL_LPC_PWR_OFF;
-		TELL_LPC_PWR_OFF;
-
 
     }
 
