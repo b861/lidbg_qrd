@@ -53,6 +53,11 @@ static spinlock_t kill_lock;
 unsigned long flags_kill;
 bool is_fake_suspend = 0;
 
+int wakelock_occur_count = 0;
+#define MAX_WAIT_UNLOCK_TIME  (5)
+#define WAIT_LOCK_RESUME_TIMES  (3)
+
+#define HAS_LOCK_RESUME
 
 static struct task_struct *pwroff_task;
 static struct task_struct *suspend_task;
@@ -704,6 +709,19 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
 }
 
 
+u32 GetTickCount(void)
+
+{
+
+    struct timespec t_now;
+
+    do_posix_clock_monotonic_gettime(&t_now);
+
+    monotonic_to_bootbased(&t_now);
+
+    return t_now.tv_sec * 1000 + t_now.tv_nsec / 1000000;
+
+}
 
 
 int kill_proc(char *buf, char **start, off_t offset, int count, int *eof, void *data )
@@ -761,11 +779,8 @@ static int thread_pwroff(void *data)
                 time_count++;
                 if(fastboot_get_status() == PM_STATUS_READY_TO_PWROFF)
                 {
-#ifdef FLY_DEBUG
+
                     if(time_count >= 5)
-#else
-                    if(time_count >= 5)
-#endif
                     {
                         lidbgerr("thread_pwroff wait early suspend timeout!\n");
                         SOC_Write_Servicer(SUSPEND_KERNEL);
@@ -808,7 +823,8 @@ static int thread_fastboot_pwroff(void *data)
 static int thread_fastboot_suspend(void *data)
 {
     int time_count;
-
+	static u32 lock_resume_last_time = 0;
+	u32 lock_resume_interval;
     while(1)
     {
         set_current_state(TASK_UNINTERRUPTIBLE);
@@ -823,38 +839,52 @@ static int thread_fastboot_suspend(void *data)
                 time_count++;
                 if(fastboot_get_status() == PM_STATUS_EARLY_SUSPEND_PENDING)
                 {
-#ifdef FLY_DEBUG
-                    if(time_count >= 10)
+#ifdef HAS_LOCK_RESUME
+                    if(time_count >= MAX_WAIT_UNLOCK_TIME)
 #else
-                    if(time_count >= 10)
+					if(time_count >= 10)
 #endif
                     {
                         lidbgerr("thread_fastboot_suspend wait suspend timeout!\n");
-#ifndef FLY_DEBUG
 
                        // SOC_Write_Servicer(LOG_DMESG);
                        // msleep(10000);//wait for write log finish
-#endif
-
-                   		ignore_wakelock = 1;
-#if 0
-						while(PM_STATUS_RESUME_OK != fastboot_get_status())
+#ifdef HAS_LOCK_RESUME
+						lock_resume_interval = GetTickCount() - lock_resume_last_time;	
+						lock_resume_last_time = GetTickCount();
+					    lidbg("wakelock_occur_interval=%d,GetTickCount=%d\n",lock_resume_interval, GetTickCount());
+						if(lock_resume_interval > 80 * 1000)
 						{
-							lidbg("Trigger flywakelock\n");
-	                        wake_lock(&(fb_data->flywakelock));
-	                        wake_unlock(&(fb_data->flywakelock));
-							msleep(5000);
+							lidbg("reset wakelock_occur_count!!\n");
+							wakelock_occur_count = 0;
 						}
-#else
-						wake_lock(&(fb_data->flywakelock));
-						wake_unlock(&(fb_data->flywakelock));
+						wakelock_occur_count++;
+					    lidbg("wakelock_occur_count=%d\n",wakelock_occur_count);
+						if(wakelock_occur_count <= WAIT_LOCK_RESUME_TIMES)
+						{
+							SOC_Write_Servicer(WAKEUP_KERNEL);
+						}					
+						else
 #endif
-                        break;
+						{
+#ifdef HAS_LOCK_RESUME
+							msleep((10-MAX_WAIT_UNLOCK_TIME)*1000);
+#endif
+	                   		ignore_wakelock = 1;
+							wake_lock(&(fb_data->flywakelock));
+							wake_unlock(&(fb_data->flywakelock));
+							wakelock_occur_count = 0;
+						}
+						break;
                     }
                 }
                 else
                 {
                     lidbg("thread_fastboot_suspend wait time_count=%d\n", time_count);
+#ifdef HAS_LOCK_RESUME
+					wakelock_occur_count = 0;
+#endif
+
                     break;
 
                 }
@@ -1064,6 +1094,17 @@ static void fastboot_late_resume(struct early_suspend *h)
 
 #endif
 #endif
+
+#ifdef HAS_LOCK_RESUME
+				if(wakelock_occur_count != 0)
+				{
+				    
+					wake_lock(&(fb_data->flywakelock));
+					fastboot_set_status(PM_STATUS_LATE_RESUME_OK);
+					//complete(&resume_ok);
+				}
+#endif
+
 
 
 }

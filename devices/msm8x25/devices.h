@@ -210,14 +210,13 @@ enum
 #define  MCU_IIC_REQ_I (30)
 #define  MCU_SUSPEND_FLAG (29)
 
-
+//lidbg("tell lpc power off ok!#\n");
 #define TELL_LPC_PWR_OFF{\
-								lidbg("tell lpc power off ok!#\n");\
 								SOC_IO_Output(0,MCU_SUSPEND_FLAG,0);\
 							}while(0)
-
+							
+//lidbg("tell lpc power on ok!#\n");
 #define TELL_LPC_PWR_ON do{\
-								lidbg("tell lpc power on ok!#\n");\
 								SOC_IO_Input(0,MCU_IIC_REQ_I,GPIO_CFG_PULL_UP);\
 								SOC_IO_Output(0,MCU_SUSPEND_FLAG,1);\
 							}while(0)
