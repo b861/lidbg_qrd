@@ -71,7 +71,33 @@ void log_acc_times()
 
 }
 
+void set_power_state(int state)
+{
 
+	int fd;
+	const char suspendstring[] = "mem";
+	const char wakeupstring[] = "on";
+	const char *powerdev = "/sys/power/state";
+	
+	printf("set_power_state:%d\n",state);
+
+	fd = open(powerdev, O_RDWR);
+	if(fd >= 0) 
+	{
+	   //printf("open linux power dev ok: %s\n", powerdev);
+	   if(state == 0)
+	   	write(fd, suspendstring, sizeof(suspendstring) - 1);
+	   else
+	   	write(fd, wakeupstring, sizeof(wakeupstring) - 1);
+	   
+	   close(fd);
+	}
+	else
+	{  
+	   printf("open linux power dev fail: %s\n", powerdev);
+	}
+
+}
 
 int  servicer_handler(int signum)
 {
@@ -237,10 +263,10 @@ loop_read:
 		{
 			//system("setprop fly.fastboot.accoff 1");
 			
-			printf("CMD_FAST_POWER_OFF++\n");
+			printf("CMD_FAST_POWER_OFF+++\n");
 			property_set("fly.fastboot.accoff", "1");
 			system("am broadcast -a android.intent.action.FAST_BOOT_START");
-			printf("CMD_FAST_POWER_OFF--\n");
+			printf("CMD_FAST_POWER_OFF---\n");
 
 			break;
 		}
@@ -254,32 +280,39 @@ loop_read:
         }
         case WAKEUP_KERNEL:
         {
-            system("su");
-            system("echo on > /sys/power/state");
+			printf("WAKEUP_KERNEL+\n");
+			if(0)
+			{
+            	system("su");
+            	system("echo on > /sys/power/state");
+			}
+			else
+				set_power_state(1);
             //system("setprop fly.fastboot.accoff 0");
             property_set("fly.fastboot.accoff", "0");
             //system("echo host > /mnt/debugfs/otg/mode");
             log_acc_times();
+			printf("WAKEUP_KERNEL-\n");
             break;
 
         }
         case SUSPEND_KERNEL:
         {
-            system("su");
+			printf("SUSPEND_KERNEL+\n");
             //system("echo peripheral > /mnt/debugfs/otg/mode");
-            property_set("fly.fastboot.accoff", "0");//fix bug 
-			if(1)
+            property_set("fly.fastboot.accoff", "0");//fix bug ,enter suspend again
+
+			
+			if(0)//not safe
 			{
+				system("su");
            	 	system("echo mem > /sys/power/state");
 			}
-			else //not ok,why?
+			else
             {
-				 int fd;
-				 printf("SUSPEND_KERNEL\n");
-				 fd = open("/sys/power/state", O_RDWR);
-				 write(fd, "mem", sizeof("mem"));
-				 close(fd);
+				set_power_state(0);
             }
+			printf("SUSPEND_KERNEL-\n");
             break;
 
         }
