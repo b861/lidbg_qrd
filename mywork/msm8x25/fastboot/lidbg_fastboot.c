@@ -862,6 +862,7 @@ static int thread_fastboot_suspend(void *data)
 					    lidbg("wakelock_occur_count=%d\n",wakelock_occur_count);
 						if(wakelock_occur_count <= WAIT_LOCK_RESUME_TIMES)
 						{
+							wake_lock(&(fb_data->flywakelock));
 							SOC_Write_Servicer(WAKEUP_KERNEL);
 						}					
 						else
@@ -1099,7 +1100,7 @@ static void fastboot_late_resume(struct early_suspend *h)
 				if(wakelock_occur_count != 0)
 				{
 				    
-					wake_lock(&(fb_data->flywakelock));
+					
 					fastboot_set_status(PM_STATUS_LATE_RESUME_OK);
 					//complete(&resume_ok);
 				}
