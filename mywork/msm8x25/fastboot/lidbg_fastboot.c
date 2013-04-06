@@ -974,8 +974,8 @@ void fastboot_pwroff(void)
     SOC_Dev_Suspend_Prepare();
 
 //avoid mem leak
-    fastboot_task_kill_select("mediaserver");
-    fastboot_task_kill_select("vold");
+//    fastboot_task_kill_select("mediaserver");
+//    fastboot_task_kill_select("vold");
 
 
    //fastboot_set_status(PM_STATUS_READY_TO_PWROFF);
