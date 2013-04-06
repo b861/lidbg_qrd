@@ -237,10 +237,10 @@ loop_read:
 		{
 			//system("setprop fly.fastboot.accoff 1");
 			
-			printf("CMD_FAST_POWER_OFF+\n");
+			printf("CMD_FAST_POWER_OFF++\n");
 			property_set("fly.fastboot.accoff", "1");
 			system("am broadcast -a android.intent.action.FAST_BOOT_START");
-			printf("CMD_FAST_POWER_OFF-\n");
+			printf("CMD_FAST_POWER_OFF--\n");
 
 			break;
 		}
@@ -267,7 +267,7 @@ loop_read:
         {
             system("su");
             //system("echo peripheral > /mnt/debugfs/otg/mode");
-            property_set("fly.fastboot.accoff", "1");
+            property_set("fly.fastboot.accoff", "0");//fix bug 
 			if(1)
 			{
            	 	system("echo mem > /sys/power/state");
