@@ -100,6 +100,37 @@ void set_power_state(int state)
 
 }
 
+
+void thread_fastboot(void)
+{
+	printf("thread_fastboot+\n");
+	
+//	property_set("fly.fastboot.accoff", "1");
+	system("am broadcast -a android.intent.action.FAST_BOOT_START");
+	printf("thread_fastboot-\n");
+
+    pthread_exit(0);
+
+}
+
+
+void lunch_fastboot()
+{
+    pthread_t id1;
+    int ret;
+    ret=pthread_create(&id1,NULL,(void *)thread_fastboot,NULL);
+    if(ret!=0)
+    {
+         printf("Create pthread error!\n");
+        
+    }
+	//pthread_join(id1,NULL); 
+
+
+}
+
+
+
 int  servicer_handler(int signum)
 {
 
@@ -277,13 +308,21 @@ loop_read:
 		}
         case CMD_FAST_POWER_OFF :
 		{
-			//system("setprop fly.fastboot.accoff 1");
-			
 			printf("CMD_FAST_POWER_OFF+++\n");
-			property_set("fly.fastboot.accoff", "1");
-			system("am broadcast -a android.intent.action.FAST_BOOT_START");
+			//system("setprop fly.fastboot.accoff 1");
+			if(0)//why this will block sometime ?
+			{
+				
+				property_set("fly.fastboot.accoff", "1");
+				system("am broadcast -a android.intent.action.FAST_BOOT_START");
+				
+			}
+			else
+			{
+				lunch_fastboot();
+			}
 			printf("CMD_FAST_POWER_OFF---\n");
-
+			
 			break;
 		}
 
