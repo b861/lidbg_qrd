@@ -127,7 +127,7 @@ i2c_ack back_ret;
 #ifdef tc358746_debug
     u8 valu[4];
 #endif
-    TC358_Software_Rest();
+  //  TC358_Software_Rest();
     while(TC358746_init_tab[i].add_reg != 0xffff)//write
     {
 
@@ -137,30 +137,29 @@ i2c_ack back_ret;
 
         i++;
     }
+#ifdef tc358746_debug
     i = 0;
     while(TC358746_init_tab[i].add_reg != 0xffff)//read
     {
 
         if(TC358746_init_tab[i].add_reg == 0x500 || TC358746_init_tab[i].add_reg == 0x204 || TC358746_init_tab[i].add_reg == 0x518)
         {
-#ifdef tc358746_debug
+
             tc358746_dbg("TC358 read register=%02x,write only\n", TC358746_init_tab[i].add_reg);
-#endif
+
         }
         else
         {
-#ifdef tc358746_debug
             back_ret = TC358_Register_Read((TC358746_init_tab[i].add_reg), valu, TC358746_init_tab[i].registet_width);
   	    if(back_ret  == NACK) goto NACK_BREAK;
             if(TC358746_init_tab[i].registet_width == 32)
                 tc358746_dbg("r a=%x,v=%02x%02x%02x%02x\n", TC358746_init_tab[i].add_reg, valu[2], valu[3], valu[0], valu[1]);
             if(TC358746_init_tab[i].registet_width == 16)
                 tc358746_dbg("r a=%x,v=%02x%02x\n", TC358746_init_tab[i].add_reg, valu[0], valu[1]);
-#endif
         }
         i++;
     }
-
+#endif
 return 0;
 NACK_BREAK:
 printk("interuppt config because TC358746 NACK\n");
@@ -177,7 +176,7 @@ static int TC358_id(void)
 	    TC358_Register_Read((tc358746_id[0].add_reg), valu, tc358746_id[0].registet_width);
 	    if(valu[0] == tc358746_id[0].add_val >> 8)
 	    {
-	        printk("\nTC358746xbg ID=%02x%02x\n", valu[0], valu[1]);
+	        printk("TC358746xbg ID=%02x%02x\n", valu[0], valu[1]);
 			ret = 1;
 	    }
 	    else
@@ -230,7 +229,7 @@ void colorbar_init(void)
    ret = TC358_Register_config(lingceng_init_tab);
      if(ret == NACK) goto NACK_BREAK;
     printk("\n\nTC358746:parameter is lingceng_init_tab!\n");
-
+/* */
     //for(i=0;i<8;i++)
     for(i = 4; i < 7; i += 2)
     {
@@ -243,6 +242,7 @@ void colorbar_init(void)
              if(ret == NACK) goto NACK_BREAK;
         }
     }
+
     add_reg_1 = 0x00e0; //使能colobar
     add_val_1 = 0xc1df;
     TC358_Register_Write(&add_reg_1, &add_val_1, register_value_width_16);
@@ -256,7 +256,7 @@ void colorbar_init_blue(u8 color_flag)
     u16 i, j;
     int ret_back;
     i2c_ack ret;
-    printk("\n\nTC358746:parameter is lingceng_init_tab!\n");
+    printk("TC358746:parameter is lingceng_init_tab!\n");
    ret_back = TC358_Register_config(lingceng_init_tab);
    if(ret_back == -1) goto NACK_BREAK;
 
@@ -275,6 +275,22 @@ return ;
 NACK_BREAK:
 printk("ERROR TC358 NACK :%s\n",__func__);
 }
+static void colorbar_init_1(void)
+{
+    u16 add_reg_1;
+    u32 add_val_1;
+    int ret_back;
+    printk("TC358746:parameter is lingceng_init_tab!\n");
+   ret_back = TC358_Register_config(lingceng_init_tab);
+   if(ret_back == -1) goto NACK_BREAK;
+   
+    add_reg_1 = 0x00e0; //使能colobar
+    add_val_1 = 0xc1df;
+    TC358_Register_Write(&add_reg_1, &add_val_1, register_value_width_16);
+return ;
+NACK_BREAK:
+printk("ERROR TC358 NACK :%s\n",__func__);
+}
 void TC358_init(Vedio_Format flag)
 {
 int ret;
@@ -284,7 +300,7 @@ int ret;
     ret = TC358_id();
 	if(ret < 0)
 		return;
-    if(flag <= COLORBAR + TC358746XBG_WHITE)
+    if(flag <= COLORBAR + TC358746XBG_WHITE+1)
     {
         switch (flag)
         {
@@ -322,16 +338,21 @@ int ret;
             break;
         case COLORBAR+TC358746XBG_LIGHT_BLUE:
             colorbar_init_blue(TC358746XBG_LIGHT_BLUE);
-            printk("\n\nTC358746:parameter is is COLORBAR TC358746XBG_LIGHT_BLUE!\n\n");
+            printk("TC358746:parameter is is COLORBAR TC358746XBG_LIGHT_BLUE!\n\n");
             break;
         case COLORBAR+TC358746XBG_BLACK:
             colorbar_init_blue(TC358746XBG_BLACK);
-            printk("\n\nTC358746:parameter is is COLORBAR TC358746XBG_BLACK!\n\n");
+            printk("TC358746:parameter is is COLORBAR TC358746XBG_BLACK!\n\n");
             break;
         case COLORBAR+TC358746XBG_YELLOW:
       	    colorbar_init_blue(TC358746XBG_YELLOW);
        	    printk("\n\nTC358746:parameter is is COLORBAR TC358746XBG_YELLOW!\n\n");
         break;
+        case COLORBAR + TC358746XBG_WHITE+1://number 15
+      	    colorbar_init_1();
+       	    printk("\n\nTC358746:parameter only lingceng_init_tab!\n\n");
+        break;
+		
         default :
             colorbar_init();
             printk("\n\nTC358746:parameter is default NTSCi_init_tab!\n\n");

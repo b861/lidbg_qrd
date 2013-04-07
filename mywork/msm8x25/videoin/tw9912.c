@@ -27,6 +27,12 @@ TW9912_Signal signal_is_how[5] = //用于记录四个通道的信息
 };
 TW9912_initall_status tw9912_status = {TW9912_initall_not, NOTONE, OTHER};
 Last_config_t the_last_config = {NOTONE, OTHER};
+void Tw9912Reset_in(void)
+{
+    tw9912_RESX_DOWN;
+    msleep(20);
+    tw9912_RESX_UP;
+}
 void Tw9912_hardware_reset(void)
 {
     tw9912_RESX_DOWN;

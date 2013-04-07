@@ -90,6 +90,9 @@ static inline int check_pt(void)
 #define SOC_F_LCD_Light_Con (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_F_LCD_Light_Con))
 //fake suspend
 #define SOC_Fake_Register_Early_Suspend (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_Fake_Register_Early_Suspend))
+//video
+#define VideoReset (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnVideoReset))
+
 
 #endif
 

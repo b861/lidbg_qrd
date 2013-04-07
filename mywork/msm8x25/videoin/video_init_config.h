@@ -15,8 +15,9 @@ int flyVideoInitall_in(u8 Channel);
 Vedio_Format flyVideoTestSignalPin_in(u8 Channel);
 Vedio_Format camera_open_video_signal_test_in(void);
 int flyVideoImageQualityConfig_in(Vedio_Effect cmd , u8 valu);
-void Video_Show_Output_Color(void);
+void Video_Show_Output_Color(u8 color_flag);
 int read_chips_signal_status(u8 cmd);
 int IfInputSignalNotStable(void);
+void VideoReset_in(void);
 #endif
 
