@@ -17,7 +17,7 @@
 
 //#ifdef DFLY_DEBUG
 #define DEBUG_TC358
-#define tc358746_debug
+//#define tc358746_debug
 //#endif
 
 #ifdef BOARD_V2

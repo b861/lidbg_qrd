@@ -240,7 +240,7 @@ struct lidbg_fn_t
 
     //video
     Vedio_Format (*pfncamera_open_video_signal_test)(void);
-    void (*pfncamera_open_video_color)(void);
+    void (*pfncamera_open_video_color)(u8 color_flag);
     Vedio_Format pfnglobal_video_format_flag;
     Vedio_Channel pfnglobal_video_channel_flag;
 
@@ -266,10 +266,8 @@ struct lidbg_fn_t
 	void (*pfnSOC_F_LCD_Light_Con)(unsigned int iOn);
 	//fake suspend
 	void (*pfnSOC_Fake_Register_Early_Suspend)(struct early_suspend *handler);
-
-
-
-	
+	//video 
+	int (*pfnVideoReset)(void);
 };
 
 
