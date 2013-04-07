@@ -28,6 +28,7 @@
 
 
 #define UBLOX_EXIST   (88)
+#define CMD_ACC_OFF_PROPERTY_SET (89)
 
 void lidbg_servicer_main(int argc, char **argv);
 

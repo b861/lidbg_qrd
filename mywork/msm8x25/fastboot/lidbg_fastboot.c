@@ -985,6 +985,7 @@ void fastboot_pwroff(void)
 	msleep(1000);
 
 #ifdef RUN_FASTBOOT
+	SOC_Write_Servicer(CMD_ACC_OFF_PROPERTY_SET);
     SOC_Write_Servicer(CMD_FAST_POWER_OFF);
 #else
 	//SOC_Write_Servicer(SUSPEND_PREPARE);

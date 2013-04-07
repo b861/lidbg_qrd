@@ -55,6 +55,7 @@
 #define VIDEO_NORMAL_SHOW (86)
 
 #define UBLOX_EXIST   (88)
+#define CMD_ACC_OFF_PROPERTY_SET (89)
 
 
 pthread_t ntid;
@@ -155,12 +156,14 @@ loop_read:
             {
                 system("date >> /sdcard/all_mesg.txt");
                 system("logcat -f /dev/kmsg & dmesg >/sdcard/all_mesg.txt");
+				break;
 
             }
             if(LOG_CONT == cmd)
             {
 
                 system("logcat -f /dev/kmsg & cat /proc/kmsg >/sdcard/all_mesg.txt");
+				break;
 
             }
 
@@ -179,6 +182,7 @@ loop_read:
                 //system("date >> /sdcard/tflash/log_dmesg.txt");
 
                 // system("dmesg >> /sdcard/tflash/log_dmesg.txt");
+				break;
 
             }
 
@@ -189,6 +193,7 @@ loop_read:
                 system("date >> /sdcard/log_logcat.txt");
                 system("logcat >> /sdcard/log_logcat.txt");
                 //system("logcat | grep -irn lidbg >> /sdcard/log_logcat_lidbg.txt");
+				break;
 
 
 
@@ -210,6 +215,7 @@ loop_read:
 
                 system("insmod /system/lib/modules/out/gt811.ko");
                 system("insmod /flysystem/lib/out/gt811.ko");
+				break;
 
 
 
@@ -233,24 +239,28 @@ loop_read:
             {
                 system("insmod /system/lib/modules/out/ft5x06_ts.ko");
                 system("insmod /flysystem/lib/out/ft5x06_ts.ko");
+				break;
 
             }
 
             else if (LOG_CAP_TS_FT5X06_SKU7 == cmd)
             {
                 system("insmod /system/lib/modules/out/ft5x06_ts_sku7.ko");
+				break;
 
             }
 
             else if (LOG_CAP_TS_RMI == cmd)
             {
                 system("insmod /system/lib/modules/out/rmi_touch.ko");
+				break;
 
             }
             else if (LOG_CAP_TS_GT801 == cmd)
             {
                 system("insmod /system/lib/modules/out/gt801.ko");
                 system("insmod /flysystem/lib/out/gt801.ko");
+				break;
 
             }
             //sleep(10);//delay to mount sdcard
@@ -258,7 +268,13 @@ loop_read:
             break;
 
         }
+        case CMD_ACC_OFF_PROPERTY_SET :
+		{
+			printf("CMD_ACC_OFF_PROPERTY_SET\n");
+			property_set("fly.fastboot.accoff", "1");
+			break;
 
+		}
         case CMD_FAST_POWER_OFF :
 		{
 			//system("setprop fly.fastboot.accoff 1");
@@ -298,20 +314,27 @@ loop_read:
         }
         case SUSPEND_KERNEL:
         {
+			char value;
 			printf("SUSPEND_KERNEL+\n");
             //system("echo peripheral > /mnt/debugfs/otg/mode");
-            property_set("fly.fastboot.accoff", "0");//fix bug ,enter suspend again
-
 			
-			if(0)//not safe
+			property_get("fly.fastboot.accoff", &value, "");
+			printf("fly.fastboot.accoff=%c\n",value);
+			if(value == '1')
 			{
-				system("su");
-           	 	system("echo mem > /sys/power/state");
+	            property_set("fly.fastboot.accoff", "0");//fix bug ,enter suspend again
+
+				
+				if(0)//not safe
+				{
+					system("su");
+	           	 	system("echo mem > /sys/power/state");
+				}
+				else
+	            {
+					set_power_state(0);
+	            }
 			}
-			else
-            {
-				set_power_state(0);
-            }
 			printf("SUSPEND_KERNEL-\n");
             break;
 
