@@ -853,7 +853,7 @@ static int thread_fastboot_suspend(void *data)
 						lock_resume_interval = GetTickCount() - lock_resume_last_time;	
 						lock_resume_last_time = GetTickCount();
 					    lidbg("wakelock_occur_interval=%d,GetTickCount=%d\n",lock_resume_interval, GetTickCount());
-						if(lock_resume_interval > 80 * 1000)
+						if(lock_resume_interval > 180 * 1000)
 						{
 							lidbg("reset wakelock_occur_count!!\n");
 							wakelock_occur_count = 0;
