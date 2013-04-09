@@ -302,6 +302,7 @@ loop_read:
         case CMD_ACC_OFF_PROPERTY_SET :
 		{
 			printf("CMD_ACC_OFF_PROPERTY_SET\n");
+			system("echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
 			property_set("fly.fastboot.accoff", "1");
 			break;
 
@@ -345,6 +346,7 @@ loop_read:
 				set_power_state(1);
             //system("setprop fly.fastboot.accoff 0");
             property_set("fly.fastboot.accoff", "0");
+			system("echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
             //system("echo host > /mnt/debugfs/otg/mode");
             log_acc_times();
 			printf("WAKEUP_KERNEL-\n");
@@ -353,13 +355,13 @@ loop_read:
         }
         case SUSPEND_KERNEL:
         {
-			char value;
+			char value[16];
 			printf("SUSPEND_KERNEL+\n");
             //system("echo peripheral > /mnt/debugfs/otg/mode");
 			
-			property_get("fly.fastboot.accoff", &value, "");
-			printf("fly.fastboot.accoff=%c\n",value);
-			if(value == '1')
+			property_get("fly.fastboot.accoff", value, "");
+			printf("fly.fastboot.accoff=%c\n",value[0]);
+			if(value[0] == '1')
 			{
 	            property_set("fly.fastboot.accoff", "0");//fix bug ,enter suspend again
 
