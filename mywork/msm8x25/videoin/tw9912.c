@@ -50,7 +50,7 @@ i2c_ack read_tw9912(unsigned int sub_addr, char *buf )
 void read_NTSCp(void)
 {
     u8 buf;
-    int i = 0;
+    register int i = 0;
     i2c_ack ret;
     for(i = 0; TW9912_INIT_NTSC_Progressive_input[i] != 0xfe; i += 2)
     {
@@ -471,7 +471,8 @@ CONFIG_not_ack_fail:
 Vedio_Format Tw9912TestingChannalSignal(Vedio_Channel Channel)
 {
     Vedio_Format ret;
-    u8 signal = 0, i,valu;
+    u8 signal = 0, valu;
+    register u8 i;
     u8 tw9912_register[] = {0x1c, 0x07,}; //default input pin selet YIN0
  printk("Tw9912TestingChannalSignal(channel = %d)\n",Channel);   
  if(Channel ==YIN2 ||Channel == SEPARATION)

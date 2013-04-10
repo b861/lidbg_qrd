@@ -175,7 +175,7 @@ int static Change_channel(void)
 int static VideoImage(void)
 {
     int ret;
-    int i = 0;
+    register int i = 0;
     u8 Tw9912_image[2] = {0x17, 0x87,}; //default input pin selet YIN0ss
     printk("\ntw9912:@@@@@VideoImage() info_com_top_Channel =%d\n", info_com_top_Channel);
     for(i = 0; i < 5; i++)
