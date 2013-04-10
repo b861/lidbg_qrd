@@ -111,235 +111,244 @@ static void CleanChipStatusFunction(void)
 		printk("%s()\n",__func__);
                 kthread_stop(RunTimeTw9912Status);
 }
+#ifdef DEBUG_TW9912
+void lidbgVideoTerminalImageConfig(int argc, char **argv)
+{
+    u32 valu;
+    if(!strcmp(argv[2], "BRIGHTNESS"))
+    {
+        valu = simple_strtoul(argv[3], 0, 0);
+        flyVideoImageQualityConfig_in(BRIGHTNESS, valu);
+        printk("BRIGHTNESS valu=%d", valu);
+    }
+    if(!strcmp(argv[2], "CONTRAST"))
+    {
+        valu = simple_strtoul(argv[3], 0, 0);
+        flyVideoImageQualityConfig_in(CONTRAST, valu);
+        printk("CONTRAST valu=%d", valu);
+    }
+    if(!strcmp(argv[2], "SHARPNESS"))
+    {
+        valu = simple_strtoul(argv[3], 0, 0);
+        flyVideoImageQualityConfig_in(SHARPNESS, valu);
+        printk("SHARPNESS valu=%d", valu);
+    }
+    if(!strcmp(argv[2], "CHROMA_U"))
+    {
+        valu = simple_strtoul(argv[3], 0, 0);
+        flyVideoImageQualityConfig_in(CHROMA_U, valu);
+        printk("CHROMA_U valu=%d", valu);
+    }
+    if(!strcmp(argv[2], "CHROMA_V"))
+    {
+        valu = simple_strtoul(argv[3], 0, 0);
+        flyVideoImageQualityConfig_in(CHROMA_V, valu);
+        printk("CHROMA_V valu=%d", valu);
+    }
+    if(!strcmp(argv[2], "HUE"))
+    {
+        valu = simple_strtoul(argv[3], 0, 0);
+        flyVideoImageQualityConfig_in(HUE, valu);
+        printk("HUE valu=%d", valu);
+    }
+
+}
+#endif
+
+#ifdef DEBUG_TC358
+void lidbgVideoTc358746TerminalConfig(int argc, char **argv)
+{
+
+    if(!strcmp(argv[1], "pp"))
+    {
+        printk("TC358_init(PAL_Progressive);\n\n");
+        TC358_init(PAL_P);
+    }
+    else if(!strcmp(argv[1], "np"))
+    {
+        printk("TC358_init(PAL_Progressive);\n\n");
+        TC358_init(NTSC_P);
+    }
+    else if(!strcmp(argv[1], "write"))
+    {
+        u8 buf[4] = {0, 0, 0, 0}, flag;
+        u16 sub_addr;
+        u32 valu;
+
+        sub_addr = simple_strtoul(argv[2], 0, 0);
+        valu = simple_strtoul(argv[3], 0, 0);
+        flag =  simple_strtoul(argv[4], 0, 0);
+        if(flag == 16)
+        {
+            printk("TC358 write in adder=0x%02x, valu=0x%02x\n", sub_addr, valu);
+            TC358_Register_Write(&sub_addr, &valu, register_value_width_16);
+            TC358_Register_Read(sub_addr, buf, register_value_width_16);
+            printk("TC358 read back adder=0x%02x, valu=0x%02x%02x%02x%02x\n", sub_addr, buf[2], buf[3], buf[0], buf[1]);
+        }
+        else
+        {
+            printk("TC358 write in adder=0x%02x, valu=0x%02x\n", sub_addr, valu);
+            TC358_Register_Write(&sub_addr, &valu, register_value_width_32);
+            TC358_Register_Read(sub_addr, buf, register_value_width_32);
+            printk("TC358 read back adder=0x%02x, valu=0x%02x%02x%02x%02x\n", sub_addr, buf[2], buf[3], buf[0], buf[1]);
+        }
+
+    }
+    else if(!strcmp(argv[1], "Read"))
+    {
+        u8 flag, buf[4] = {0, 0, 0, 0};
+        u16 sub_addr;
+        sub_addr = simple_strtoul(argv[2], 0, 0);
+        flag =  simple_strtoul(argv[3], 0, 0);
+        if(flag == 16)
+        {
+            TC358_Register_Read(sub_addr, buf, register_value_width_16);
+            printk("TC358 read back adder=0x%02x, valu=0x%02x%02x%02x%02x\n", sub_addr, buf[2], buf[3], buf[0], buf[1]);
+        }
+        else
+        {
+            TC358_Register_Read(sub_addr, buf, register_value_width_32);
+            printk("TC358 read back adder=0x%02x, valu=0x%02x%02x%02x%02x\n", sub_addr, buf[2], buf[3], buf[0], buf[1]);
+        }
+    }
+    else if(!strcmp(argv[1], "Reset720*480"))
+    {
+        printk("call TC358_init();\n\n");
+        TC358_init(2);
+    }
+    else if(!strcmp(argv[1], "Reset640*480"))
+    {
+        printk("call TC358_init();\n\n");
+        TC358_init(3);
+    }
+    else if(!strcmp(argv[1], "ShowColor"))
+    {
+	 u16 cmd;
+	printk("call TC358_init();\n\n");
+        cmd = simple_strtoul(argv[2], 0, 0);
+        TC358_init(cmd);
+    }
+}
+#endif
+#ifdef DEBUG_TW9912
+void lidbgVideoTw9912TerminalConfig(int argc, char **argv)
+{
+    if(!strcmp(argv[1], "flyVideoTestSignalPinYin3"))
+    {
+        printk("tw9912:test Yin3 back format :%d", flyVideoTestSignalPin_in(YIN3));
+    }
+    else if(!strcmp(argv[1], "flyVideoTestSignalPinYin0"))
+    {
+        printk("tw9912:test Yin3 back format :%d", flyVideoTestSignalPin_in(YIN0));
+    }
+    else if(!strcmp(argv[1], "flyVideoTestSignalPinYuv"))
+    {
+        printk("tw9912:test Yin3 back format :%d", flyVideoTestSignalPin_in(SEPARATION));
+    }
+    else if(!strcmp(argv[1], "flyVideoInitallYin3"))
+    {
+        flyVideoInitall_in(YIN3);
+    }
+    else if(!strcmp(argv[1], "flyVideoInitallYin0"))
+    {
+        flyVideoInitall_in(YIN0);
+    }
+    else if(!strcmp(argv[1], "flyVideoInitallYin2"))
+    {
+        flyVideoInitall_in(YIN2);
+    }
+    else if(!strcmp(argv[1], "flyVideoInitallYuv"))
+    {
+        flyVideoInitall_in(SEPARATION);
+    }
+    else if(!strcmp(argv[1], "read_all_NTSCp"))
+    {
+        printk("TW9912 Read All register\n");
+        read_NTSCp();
+    }
+    else if(!strcmp(argv[1], "initNTSCp"))
+    {
+        printk("Inital TW9912 NTSCp\n");
+        Tw9912_init_NTSCp();
+    }
+    else if(!strcmp(argv[1], "write"))
+    {
+        u8 buf[2];
+
+        u16 sub_addr;
+        u32 valu;
+        sub_addr = simple_strtoul(argv[2], 0, 0);
+        valu = simple_strtoul(argv[3], 0, 0);
+        buf[0] = sub_addr;
+        buf[1] = valu;
+        i2c_write_byte(1, 0x44, buf , 2);
+        i2c_read_byte(1, 0x44, sub_addr , &valu, 1);
+        printk("read adder=0x%02x, valu=0x%02x\n", buf[0], valu);
+    }
+    else if(!strcmp(argv[1], "Read"))
+    {
+        u16 sub_addr;
+        u8 buf[2] = {0, 0};
+        sub_addr = simple_strtoul(argv[2], 0, 0);
+        i2c_read_byte(1, 0x44, sub_addr , buf, 1);
+        printk("read adder=0x%02x,valu=0x%02x\n", sub_addr, buf[0]);
+    }
+    else if(!strcmp(argv[1], "image"))
+    {
+        lidbgVideoTerminalImageConfig(argc, argv);
+    }
+    else
+    {
+        ;
+    }
+}
+#endif
 void lidbg_video_main_in(int argc, char **argv)
 {
+    u8 ret;
     printk("In lidbg_video_main()\n");
     if(!strcmp(argv[0], "agian_initall"))
     {
         video_init_config_in(NTSC_P);
     }
-    if(!strcmp(argv[0], "image"))
-    {
-        u32 valu;
-        if(!strcmp(argv[1], "BRIGHTNESS"))
-        {
-            valu = simple_strtoul(argv[2], 0, 0);
-            flyVideoImageQualityConfig_in(BRIGHTNESS, valu);
-            printk("BRIGHTNESS valu=%d", valu);
-        }
-        if(!strcmp(argv[1], "CONTRAST"))
-        {
-            valu = simple_strtoul(argv[2], 0, 0);
-            flyVideoImageQualityConfig_in(CONTRAST, valu);
-            printk("CONTRAST valu=%d", valu);
-        }
-        if(!strcmp(argv[1], "SHARPNESS"))
-        {
-            valu = simple_strtoul(argv[2], 0, 0);
-            flyVideoImageQualityConfig_in(SHARPNESS, valu);
-            printk("SHARPNESS valu=%d", valu);
-        }
-        if(!strcmp(argv[1], "CHROMA_U"))
-        {
-            valu = simple_strtoul(argv[2], 0, 0);
-            flyVideoImageQualityConfig_in(CHROMA_U, valu);
-            printk("CHROMA_U valu=%d", valu);
-        }
-        if(!strcmp(argv[1], "CHROMA_V"))
-        {
-            valu = simple_strtoul(argv[2], 0, 0);
-            flyVideoImageQualityConfig_in(CHROMA_V, valu);
-            printk("CHROMA_V valu=%d", valu);
-        }
-        if(!strcmp(argv[1], "HUE"))
-        {
-            valu = simple_strtoul(argv[2], 0, 0);
-            flyVideoImageQualityConfig_in(HUE, valu);
-            printk("HUE valu=%d", valu);
-        }
-
-    }
-    if(!strcmp(argv[0], "test"))
-    {
-        printk("tw9912:test test back format :%d", camera_open_video_signal_test());
-    }
-    if(!strcmp(argv[0], "on"))
-    {
-        Vedio_Signal_Test = kthread_run(thread_vedio_signal_test, NULL, "flyvideo");
-    }
-    if(!strcmp(argv[0], "off"))
-    {
-        kthread_stop(Vedio_Signal_Test);
-    }
-    if(!strcmp(argv[0], "testYin3"))
-    {
-        printk("tw9912:test Yin3 back format :%d", flyVideoTestSignalPin_in(YIN3));
-    }
-    if(!strcmp(argv[0], "testYin0"))
-    {
-        printk("tw9912:test Yin3 back format :%d", flyVideoTestSignalPin_in(YIN0));
-    }
-    if(!strcmp(argv[0], "testYuv"))
-    {
-        printk("tw9912:test Yin3 back format :%d", flyVideoTestSignalPin_in(SEPARATION));
-    }
-
-    if(!strcmp(argv[0], "checkoutYin3"))
-    {
-        flyVideoInitall_in(YIN3);
-    }
-    if(!strcmp(argv[0], "checkoutYin0"))
-    {
-        flyVideoInitall_in(YIN0);
-    }
-    if(!strcmp(argv[0], "checkoutYin2"))
-    {
-        flyVideoInitall_in(YIN2);
-    }
-    if(!strcmp(argv[0], "checkoutYuv"))
-    {
-        flyVideoInitall_in(SEPARATION);
-    }
 #ifdef DEBUG_TW9912
-    else if(!strcmp(argv[0], "TW9912"))
+    else if(!strcmp(argv[0], "Tw9912"))
     {
-        if(!strcmp(argv[1], "read_all_NTSCp"))
-        {
-            printk("TW9912 Read All register\n");
-            read_NTSCp();
-        }
-        if(!strcmp(argv[1], "initNTSCp"))
-        {
-            printk("Inital TW9912 NTSCp\n");
-            Tw9912_init_NTSCp();
-        }
-        if(!strcmp(argv[1], "testingyin0"))
-        {
-            Tw9912_appoint_pin_testing_video_signal(YIN0);
-        }
-        if(!strcmp(argv[1], "testingyin3"))
-        {
-            Tw9912_appoint_pin_testing_video_signal(YIN3);
-        }
-        if(!strcmp(argv[1], "write"))
-        {
-            u8 buf[2];
-
-            u16 sub_addr;
-            u32 valu;
-            sub_addr = simple_strtoul(argv[2], 0, 0);
-            valu = simple_strtoul(argv[3], 0, 0);
-            buf[0] = sub_addr;
-            buf[1] = valu;
-            i2c_write_byte(1, 0x44, buf , 2);
-            i2c_read_byte(1, 0x44, sub_addr , &valu, 1);
-            printk("read adder=0x%02x, valu=0x%02x\n", buf[0], valu);
-        }
-
-        if(!strcmp(argv[1], "Read"))
-        {
-            u16 sub_addr;
-            u8 buf[2] = {0, 0};
-            sub_addr = simple_strtoul(argv[2], 0, 0);
-            i2c_read_byte(1, 0x44, sub_addr , buf, 1);
-            printk("read adder=0x%02x,valu=0x%02x\n", sub_addr, buf[0]);
-        }
+        lidbgVideoTw9912TerminalConfig(argc, argv);
     }
 #endif
 #ifdef DEBUG_TC358
-    else if (!strcmp(argv[0], "TC358"))
+    else if(!strcmp(argv[0], "Tc358746"))
     {
-	        if(!strcmp(argv[1], "pp"))
-	        {
-	            printk("TC358_init(PAL_Progressive);\n\n");
-	            TC358_init(PAL_P);
-	        }
-	        if(!strcmp(argv[1], "np"))
-	        {
-	            printk("TC358_init(PAL_Progressive);\n\n");
-	            TC358_init(NTSC_P);
-	        }
-		if(!strcmp(argv[1], "write"))
-		{
-		        u8 buf[4] = {0, 0, 0, 0}, flag;
-		        u16 sub_addr;
-		        u32 valu;
+        lidbgVideoTc358746TerminalConfig(argc, argv);
+    }
+#endif
+    else if(!strcmp(argv[0], "TestingPresentChannalSignal"))
+    {
+        ret = camera_open_video_signal_test();
+        switch(ret)
+        {
+        case 1:
+            printk("TestingPresentChannalSignal format :NTSC_i\n");
+            break;
+        case 2:
+            printk("TestingPresentChannalSignal format :PAL_i\n");
+            break;
+        case 3:
+            printk("TestingPresentChannalSignal format :NTSC_p\n");
+            break;
 
-		        sub_addr = simple_strtoul(argv[2], 0, 0);
-		        valu = simple_strtoul(argv[3], 0, 0);
-		        flag =  simple_strtoul(argv[4], 0, 0);
-		        if(flag == 16)
-		        {
-		            printk("TC358 write in adder=0x%02x, valu=0x%02x\n", sub_addr, valu);
-		            TC358_Register_Write(&sub_addr, &valu, register_value_width_16);
-		            TC358_Register_Read(sub_addr, buf, register_value_width_16);
-		            printk("TC358 read back adder=0x%02x, valu=0x%02x%02x%02x%02x\n", sub_addr, buf[2], buf[3], buf[0], buf[1]);
-		        }
-
-
-		        else
-		        {
-		            printk("TC358 write in adder=0x%02x, valu=0x%02x\n", sub_addr, valu);
-		            TC358_Register_Write(&sub_addr, &valu, register_value_width_32);
-		            TC358_Register_Read(sub_addr, buf, register_value_width_32);
-		            printk("TC358 read back adder=0x%02x, valu=0x%02x%02x%02x%02x\n", sub_addr, buf[2], buf[3], buf[0], buf[1]);
-		        }
-		}
-		 if(!strcmp(argv[1], "Read"))
-	        {
-	            u8 flag, buf[4] = {0, 0, 0, 0};
-	            u16 sub_addr;
-	            sub_addr = simple_strtoul(argv[2], 0, 0);
-	            flag =  simple_strtoul(argv[3], 0, 0);
-	            if(flag == 16)
-	            {
-	                TC358_Register_Read(sub_addr, buf, register_value_width_16);
-	                printk("TC358 read back adder=0x%02x, valu=0x%02x%02x%02x%02x\n", sub_addr, buf[2], buf[3], buf[0], buf[1]);
-	            }
-	            else
-	            {
-	                TC358_Register_Read(sub_addr, buf, register_value_width_32);
-	                printk("TC358 read back adder=0x%02x, valu=0x%02x%02x%02x%02x\n", sub_addr, buf[2], buf[3], buf[0], buf[1]);
-	            }
-	        }
-		 else if(!strcmp(argv[1], "Reset720*480"))
-		{
-			printk("call TC358_init();\n\n");
-			TC358_init(2);
-		}
-		else if(!strcmp(argv[1], "Reset640*480"))
-		{
-			printk("call TC358_init();\n\n");
-			TC358_init(3);
-		}
-		else if(!strcmp(argv[1], "black"))
-		{
-			printk("call TC358_init();\n\n");
-			    TC358_init(COLORBAR + TC358746XBG_BLACK);
-		}
-		else if(!strcmp(argv[1], "red"))
-		{
-			printk("call TC358_init();\n\n");
-			    TC358_init(COLORBAR + TC358746XBG_RED);
-		}
-		
-    	}
-	else if(!strcmp(argv[0], "ResetNTSCi"))
-	{
-			printk("Reset Vedio NTSCi\n\n");
-			video_config_init(NTSC_I,YIN3);
-	}
-	else if(!strcmp(argv[0], "ResetPALi"))
-	{
-			printk("Reset Vedio PALi\n\n");
-			video_config_init(PAL_I,YIN3);
-	}
-	else if(!strcmp(argv[0], "ResetPALp"))
-	{
-			printk("Reset Vedio PALp\n\n");
-			video_config_init(PAL_P,YIN3);
-
-    	}
+        }
+    }
+    else if(!strcmp(argv[0], "on"))
+    {
+        Vedio_Signal_Test = kthread_run(thread_vedio_signal_test, NULL, "flyvideo");
+    }
+    else if(!strcmp(argv[0], "off"))
+    {
+        kthread_stop(Vedio_Signal_Test);
+    }
+#ifdef DEBUG_FLYVIDEO
     else if(!strcmp(argv[0], "ResetNTSCi"))
     {
         printk("Reset Vedio NTSCi\n\n");
@@ -368,13 +377,12 @@ void lidbg_video_main_in(int argc, char **argv)
         printk("StopVedio\n\n");
         video_config_init(STOP_VIDEO, YIN3);
     }
-#endif//#ifdef DEBUG_TC358
+#endif
     else
     {
         ;
     }
 }
-
 
 
 static void set_func_tbl(void)
