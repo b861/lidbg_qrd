@@ -870,9 +870,12 @@ static int thread_fastboot_suspend(void *data)
 #ifdef HAS_LOCK_RESUME
 							msleep((10-MAX_WAIT_UNLOCK_TIME)*1000);
 #endif
-	                   		ignore_wakelock = 1;
-							wake_lock(&(fb_data->flywakelock));
-							wake_unlock(&(fb_data->flywakelock));
+							if(fastboot_get_status() == PM_STATUS_EARLY_SUSPEND_PENDING)
+							{
+		                   		ignore_wakelock = 1;
+								wake_lock(&(fb_data->flywakelock));
+								wake_unlock(&(fb_data->flywakelock));
+							}
 							wakelock_occur_count = 0;
 						}
 						break;
