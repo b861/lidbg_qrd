@@ -2,17 +2,6 @@
 #define __TC358746XBG_CONFIG__
 #include "TC358746XBG.h"
 
-struct TC358_register_struct
-{
-    u16 add_reg;
-    u32 add_val;
-    u8 registet_width;
-};
-struct TC358_register_struct_read
-{
-    u16 add_reg;
-    u8 registet_width;
-};
 static struct TC358_register_struct tc358746_id[] =
 {
     {	0x0000	,	0x4400	,	register_value_width_16		},

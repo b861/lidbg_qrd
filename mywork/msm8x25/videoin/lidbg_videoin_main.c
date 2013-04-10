@@ -6,6 +6,8 @@
 static struct task_struct *Vedio_Signal_Test = NULL;
 static struct task_struct *RunTimeTw9912Status = NULL;
 extern tw9912_run_flag tw912_run_sotp_flag;
+extern struct TC358_register_struct colorbar_init_user_tab[2];
+
 LIDBG_DEFINE;
 static void video_config_init(Vedio_Format config_pramat, u8 Channal)
 {
@@ -228,6 +230,17 @@ void lidbgVideoTc358746TerminalConfig(int argc, char **argv)
         cmd = simple_strtoul(argv[2], 0, 0);
         TC358_init(cmd);
     }
+    else if(!strcmp(argv[1], "ShowColordebug"))
+    {
+	 u16 cmd;
+	printk("call TC358_init();\n\n");
+        cmd = simple_strtoul(argv[2], 0, 0);
+	colorbar_init_user_tab[0].add_val=cmd;
+	cmd = simple_strtoul(argv[3], 0, 0);
+	colorbar_init_user_tab[1].add_val=cmd;
+        TC358_init(7);
+    }
+	
 }
 #endif
 #ifdef DEBUG_TW9912

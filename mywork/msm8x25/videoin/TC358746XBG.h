@@ -15,6 +15,18 @@
 #define TC358746XBG_YELLOW 7
 #define TC358746XBG_WHITE 8
 
+struct TC358_register_struct
+{
+    u16 add_reg;
+    u32 add_val;
+    u8 registet_width;
+};
+struct TC358_register_struct_read
+{
+    u16 add_reg;
+    u8 registet_width;
+};
+
 //#ifdef DFLY_DEBUG
 #define DEBUG_TC358
 //#define tc358746_debug

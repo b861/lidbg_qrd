@@ -788,7 +788,7 @@ void video_init_config_in(Vedio_Format config_pramat)
                         break;
                     default :
                         printk("video not signal input..\n");
-                        TC358_init(COLORBAR + TC358746XBG_YELLOW); //blue
+                        TC358_init(COLORBAR + TC358746XBG_BLACK); //blue
                         break;
                     }
                 }

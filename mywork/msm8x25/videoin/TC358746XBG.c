@@ -5,6 +5,12 @@
 #define I2C_US_IO
 #define APAT_BUS_ID 1
 static int tc358746_reset_flag = 0;
+struct TC358_register_struct colorbar_init_user_tab[] =
+{
+    //80 pixel of hui
+    {0x00e8, 0x00, register_value_width_16},
+    {0x00e8, 0x94, register_value_width_16},
+};
 #ifndef SLEEP_MILLI_SEC
 #define SLEEP_MILLI_SEC(nMilliSec)\
 do { \
@@ -291,6 +297,33 @@ return ;
 NACK_BREAK:
 printk("ERROR TC358 NACK :%s\n",__func__);
 }
+static void colorbar_init_user(void)
+{
+    u16 add_reg_1;
+    u32 add_val_1;
+    int ret_back;
+	    u16 j;
+    i2c_ack ret;
+    printk("TC358746:parameter is lingceng_init_tab!\n");
+   ret_back = TC358_Register_config(lingceng_init_tab);
+   if(ret_back == -1) goto NACK_BREAK;
+   printk("colorbar_init_user_tab[0] = 0x%.2x\n",colorbar_init_user_tab[0].add_val);
+      printk("colorbar_init_user_tab[1] = 0x%.2x\n",colorbar_init_user_tab[1].add_val);
+
+       for(j = 360; j > 0; j--)
+    {
+        ret =TC358_Register_Write(&(colorbar_init_user_tab[0].add_reg), &(colorbar_init_user_tab[0].add_val), colorbar_init_user_tab[0].registet_width);
+	  if(ret == NACK) goto NACK_BREAK;
+        ret =TC358_Register_Write(&(colorbar_init_user_tab[1].add_reg), &(colorbar_init_user_tab[1].add_val), colorbar_init_user_tab[1].registet_width);
+	  if(ret == NACK) goto NACK_BREAK;
+    }
+    add_reg_1 = 0x00e0; //Ê¹ÄÜcolobar
+    add_val_1 = 0xc1df;
+    TC358_Register_Write(&add_reg_1, &add_val_1, register_value_width_16);
+return ;
+NACK_BREAK:
+printk("ERROR TC358 NACK :%s\n",__func__);
+}
 void TC358_init(Vedio_Format flag)
 {
 int ret;
@@ -341,8 +374,8 @@ int ret;
             printk("TC358746:parameter is is COLORBAR TC358746XBG_LIGHT_BLUE!\n\n");
             break;
         case COLORBAR+TC358746XBG_BLACK:
-            colorbar_init_blue(TC358746XBG_BLACK);
-            printk("TC358746:parameter is is COLORBAR TC358746XBG_BLACK!\n\n");
+	    colorbar_init_user();
+	    printk("TC358746:parameter is colorbar_init_user!\n\n");
             break;
         case COLORBAR+TC358746XBG_YELLOW:
       	    colorbar_init_blue(TC358746XBG_YELLOW);
