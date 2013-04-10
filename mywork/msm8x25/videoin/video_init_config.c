@@ -6,7 +6,7 @@ extern TW9912_Signal signal_is_how[5];
 extern Last_config_t the_last_config;
 static struct task_struct *Signal_Test = NULL;
 #ifndef BOARD_V2 // V1
-u8 Image_Config[5][11] =
+const u8 Image_Config[5][11] =
 {
     /*0*/	/*1*/	/*2*/	/*3*/	/*4*/	/*5*/	/*6*/	/*7*/	/*8*/	/*9*/	/*10*/
     {	0xe9,		0Xf0,		0xf1,		0xf2,		0xf3,		0xf5,		0xf6,		0xf7,	        0xf8,		0xf9,		0xfd,	}, //BRIGHTNESS ed
@@ -24,7 +24,7 @@ static u8 Tw9912_image_global[5][2] =
     {0x13, 0x7f}, //SHARPNESS
     {0x14, 0x7f}, //SHARPNESS
 };
-u8 Image_Config_AUX_BACK[5][11] =
+const u8 Image_Config_AUX_BACK[5][11] =
 {
     /*0*/	/*1*/	/*2*/	/*3*/	/*4*/	/*5*/	/*6*/	/*7*/	/*8*/	/*9*/	/*10*/
     {	0x15,		0X0f, 	0x09,		0x05,		0x03,		0xff,		0xfa,		0xf0,		0xe9,	        0xe0,		0xc9,	}, //BRIGHTNESS
@@ -42,7 +42,7 @@ static u8 Tw9912_image_global_AUX_BACK[5][2] =
     {0x13, 0x80}, //SHARPNESS
     {0x14, 0x80}, //SHARPNESS
 };
-u8 Image_Config_AUX_BACK_PAL_I[5][11] =
+const u8 Image_Config_AUX_BACK_PAL_I[5][11] =
 {
     /*0*/	/*1*/	/*2*/	/*3*/	/*4*/	/*5*/	/*6*/	/*7*/	/*8*/	/*9*/	/*10*/
     {	0x15,		0X0f, 	0x09,		0x05,		0x03,		0x05,		0xfa,		0xf0,		0xe9,	        0xe0,		0xc9,	}, //BRIGHTNESS
@@ -62,7 +62,7 @@ static u8 Tw9912_image_global_AUX_BACK_PAL_I[5][2] =
 };
 
 #else// V2
-u8 Image_Config[5][11] = //DVD YIN2
+const u8 Image_Config[5][11] = //DVD YIN2
 {
     /*0*/	/*1*/	/*2*/	/*3*/	/*4*/	/*5*/	/*6*/	/*7*/	/*8*/	/*9*/	/*10*/
     {	0xc5,		0Xd5,	0xdd,		0xe5,		0xed,		0xef,		0xf2,		0xf5,	        0xf8,		0xfb,		0xff,	}, //BRIGHTNESS ed
@@ -80,7 +80,7 @@ static u8 Tw9912_image_global[5][2] = //DVD YIN2
     {0x13, 0xb6}, //SHARPNESS
     {0x14, 0xb6}, //SHARPNESS
 };
-u8 Image_Config_AUX_BACK[5][11] = //back or AUX
+const u8 Image_Config_AUX_BACK[5][11] = //back or AUX
 {
     /*0*/	/*1*/	/*2*/	/*3*/	/*4*/	/*5*/	/*6*/	/*7*/	/*8*/	/*9*/	/*10*/
     {	0x15,		0X0f, 	0x09,		0x05,		0x03,		0xf6,		0xfa,		0xf0,		0xe9,	        0xe0,		0xc9,	}, //BRIGHTNESS
@@ -98,7 +98,7 @@ static u8 Tw9912_image_global_AUX_BACK[5][2] =
     {0x13, 0xa0}, //SHARPNESS
     {0x14, 0xa0}, //SHARPNESS
 };
-u8 Image_Config_AUX_BACK_PAL_I[5][11] =
+const u8 Image_Config_AUX_BACK_PAL_I[5][11] =
 {
     /*0*/	/*1*/	/*2*/	/*3*/	/*4*/	/*5*/	/*6*/	/*7*/	/*8*/	/*9*/	/*10*/
     {	0x15,		0X0f, 	0x09,		0x05,		0x03,		0x05,		0xfa,		0xf0,		0xe9,	        0xe0,		0xc9,	}, //BRIGHTNESS
@@ -117,7 +117,7 @@ static u8 Tw9912_image_global_AUX_BACK_PAL_I[5][2] =
     {0x14, 0xa0}, //SHARPNESS
 };
 #endif
-u8 Image_Config_separation[5][11] = //DVD separation
+const u8 Image_Config_separation[5][11] = //DVD separation
 {
     /*0*/	/*1*/	/*2*/	/*3*/	/*4*/	/*5*/	/*6*/	/*7*/	/*8*/	/*9*/	/*10*/
     {	0x50,		0x58,		0x65,		0x70,		0x75,        0x80,		0x85,		0x90	,	0x95,		0xa5,		0xb0,},//BRIGHTNESS ed

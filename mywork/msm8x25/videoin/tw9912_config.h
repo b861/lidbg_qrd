@@ -1,19 +1,19 @@
 #ifndef __TW9912_CONFIG_H__
 #define __TW9912_CONFIG_H__
 
-u8 TW9912_Stop[] =
+const u8 TW9912_Stop[] =
 {
     0xff, 0x00 //page0
     , 0x03, 0x07 //Output Control Register
     //	,0x06,0x27//shut down
     , 0xfe,
 };
-u8  TW9912_Shutd[] =
+const u8  TW9912_Shutd[] =
 {
     0x06, 0x27, //shut down
 };
 
-u8 TW9912_testing_signal[] =
+const u8 TW9912_testing_signal[] =
 {
     0x01, 0xff, //Chip Status Register (CSTATUS) read only
     /*
@@ -32,13 +32,13 @@ u8 TW9912_testing_signal[] =
     	bit[4:6]--> 0 = 480i 1 = 576i 2 = 480p 3 = 576p others = NA
     */
 };
-u8 TW9912_INIT_Public[] =
+const u8 TW9912_INIT_Public[] =
 {
     0xfe, 0x0
     , 0xfe,
 };
 
-u8 TW9912_INIT_AGAIN[] =
+const u8 TW9912_INIT_AGAIN[] =
 {
     0x02, 0x4C
     , 0x03, 0x20
@@ -65,7 +65,7 @@ u8 TW9912_INIT_AGAIN[] =
     , 0xE9, 0x61
     , 0xfe,
 };
-u8 TW9912_INIT_NTSC_Interlaced_input[] =
+const u8 TW9912_INIT_NTSC_Interlaced_input[] =
 {
     0x02, 0x4C
     , 0x03, 0x20
@@ -163,7 +163,7 @@ u8 TW9912_INIT_NTSC_Interlaced_input[] =
     , 0xE9, 0x61
     , 0xfe,
 };
-u8 TW9912_INIT_NTSC_Progressive_input[] =
+const u8 TW9912_INIT_NTSC_Progressive_input[] =
 {
     0xff, 0x00 //page0
     //,0x01,0xA2
@@ -260,7 +260,7 @@ u8 TW9912_INIT_NTSC_Progressive_input[] =
     , 0xE9, 0xA0
     , 0xfe,
 };
-u8 TW9912_INIT_PAL_Interlaced_input[] =
+const u8 TW9912_INIT_PAL_Interlaced_input[] =
 {
     0x02, 0x4C
     , 0x03, 0x20
@@ -360,7 +360,7 @@ u8 TW9912_INIT_PAL_Interlaced_input[] =
     , 0xE9, 0x61
     , 0xfe,
 };
-u8 TW9912_INIT_PAL_Progressive_input[] =
+const u8 TW9912_INIT_PAL_Progressive_input[] =
 {
     0x02, 0x60
     , 0x03, 0x20
