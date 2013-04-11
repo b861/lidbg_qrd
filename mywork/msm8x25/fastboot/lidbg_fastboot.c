@@ -868,10 +868,13 @@ static int thread_fastboot_suspend(void *data)
 #endif
 						{
 #ifdef HAS_LOCK_RESUME
+							lidbg("$+\n");
 							msleep((10-MAX_WAIT_UNLOCK_TIME)*1000);
+							lidbg("$-\n");
 #endif
 							if(fastboot_get_status() == PM_STATUS_EARLY_SUSPEND_PENDING)
 							{
+								lidbg("start force suspend...\n");
 		                   		ignore_wakelock = 1;
 								wake_lock(&(fb_data->flywakelock));
 								wake_unlock(&(fb_data->flywakelock));
@@ -1102,7 +1105,7 @@ static void fastboot_late_resume(struct early_suspend *h)
 #ifdef HAS_LOCK_RESUME
 				if(wakelock_occur_count != 0)
 				{
-				    
+				    lidbg("quick late resume\n");
 					wake_lock(&(fb_data->flywakelock));
 					fastboot_set_status(PM_STATUS_LATE_RESUME_OK);
 					//complete(&resume_ok);
@@ -1231,6 +1234,7 @@ static int fastboot_resume(struct device *dev)
 	complete(&resume_ok);
 
     ignore_wakelock = 0;
+	wakelock_occur_count = 0;
 
     return 0;
 }
