@@ -129,7 +129,7 @@ static int TC358_Register_config(struct TC358_register_struct *TC358746_init_tab
 {
 int ret;
 i2c_ack back_ret;
-    int i = 0;
+register int i = 0;
 #ifdef tc358746_debug
     u8 valu[4];
 #endif
@@ -230,7 +230,8 @@ void colorbar_init(void)
 {
     u16 add_reg_1;
     u32 add_val_1;
-    u8 i, j;
+    u8 i;
+    register u8 j;
     i2c_ack ret;
    ret = TC358_Register_config(lingceng_init_tab);
      if(ret == NACK) goto NACK_BREAK;
@@ -259,7 +260,8 @@ void colorbar_init_blue(u8 color_flag)
 {
     u16 add_reg_1;
     u32 add_val_1;
-    u16 i, j;
+    u16 i;
+    register u16 j;
     int ret_back;
     i2c_ack ret;
     printk("TC358746:parameter is lingceng_init_tab!\n");
@@ -302,7 +304,7 @@ static void colorbar_init_user(void)
     u16 add_reg_1;
     u32 add_val_1;
     int ret_back;
-	    u16 j;
+    register u16 j;
     i2c_ack ret;
     printk("TC358746:parameter is lingceng_init_tab!\n");
    ret_back = TC358_Register_config(lingceng_init_tab);
