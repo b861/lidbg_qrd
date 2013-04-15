@@ -2331,10 +2331,16 @@ ssize_t ts_nod_write (struct file *filp, const char __user *buf, size_t count, l
     data_rec[count]=  '\0';
     printk("[futengfei]ts_nod_write:==%d====[%s]\n",count,data_rec);
 // processing data
-if(!(strnicmp(data_rec,"TSMODE_NORMAL",count-1)))
-{
-
-}
+if(!(strnicmp(data_rec,"TSMODE_XYREVERT",count-1)))
+	{
+		xy_revert_en=1;
+		printk("[futengfei]ts_nod_write:==========TSMODE_XYREVERT\n");
+	}
+else if(!(strnicmp(data_rec,"TSMODE_NORMAL",count-1)))
+	{
+		xy_revert_en=0;
+		printk("[futengfei]ts_nod_write:==========TSMODE_NORMAL\n");
+	}
 
     return count;
 }
