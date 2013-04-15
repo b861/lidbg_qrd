@@ -160,7 +160,7 @@ void lidbgVideoTerminalImageConfig(int argc, char **argv)
 #ifdef DEBUG_TC358
 void lidbgVideoTc358746TerminalConfig(int argc, char **argv)
 {
-
+printk("lidbgVideoTc358746TerminalConfig()\n");
     if(!strcmp(argv[1], "pp"))
     {
         printk("TC358_init(PAL_Progressive);\n\n");
