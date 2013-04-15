@@ -991,7 +991,7 @@ int Tw9912_init_NTSCp(void)
         tw9912_reset_flag_jam = 1;
         tw9912_RESX_DOWN;//\u8fd9\u91cc\u5bf9tw9912\u590d\u4f4d\u7684\u539f\u56e0\u662f\u89e3\u51b3\u5012\u8f66\u9000\u56deDVD\u65f6\u89c6\u9891\u5361\u6b7b\u3002
         tw9912_RESX_UP;
-        msleep(50);
+      //  msleep(50);
     }
     tw9912_dbg("Tw9912_init_NTSCp initall tw9912+\n");
     TC9912_id();
