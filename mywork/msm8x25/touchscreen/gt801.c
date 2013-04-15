@@ -1222,7 +1222,97 @@ static struct i2c_driver goodix_ts_driver =
         .owner = THIS_MODULE,
     },
 };
+#define feature_ts_nod
 
+#ifdef feature_ts_nod
+#define TS_DEVICE_NAME "tsnod"
+static int major_number_ts = 0;
+static struct class *class_install_ts;
+
+struct ts_device
+{
+    unsigned int counter;
+    struct cdev cdev;
+};
+struct ts_device *tsdev;
+
+int ts_nod_open (struct inode *inode, struct file *filp)
+{
+    //do nothing
+    filp->private_data = tsdev;
+    printk("[futengfei]==================ts_nod_open\n");
+
+    return 0;          /* success */
+}
+
+ssize_t ts_nod_write (struct file *filp, const char __user *buf, size_t count, loff_t *f_pos)
+{	
+	char *data_rec[20];
+	struct ts_device *tsdev = filp->private_data;
+
+    if (copy_from_user( data_rec, buf, count))
+    {
+        printk("copy_from_user ERR\n");
+    }
+    data_rec[count]=  '\0';
+    printk("[futengfei]ts_nod_write:==%d====[%s]\n",count,data_rec);
+// processing data
+if(!(strnicmp(data_rec,"TSMODE_NORMAL",count-1)))
+{
+
+}
+
+    return count;
+}
+static  struct file_operations ts_nod_fops =
+{
+    .owner = THIS_MODULE,
+     .write = ts_nod_write,
+    .open = ts_nod_open,
+};
+
+static int init_cdev_ts(void)
+{
+    int ret, err, result;
+	
+    //11creat cdev
+    tsdev = (struct ts_device *)kmalloc( sizeof(struct ts_device), GFP_KERNEL );
+    if (tsdev == NULL)
+    {
+        ret = -ENOMEM;
+        printk("[futengfei]===========init_cdev_ts:kmalloc err \n");
+        return ret;
+    }
+
+    dev_t dev_number = MKDEV(major_number_ts, 0);
+    if(major_number_ts)
+    {
+        result = register_chrdev_region(dev_number, 1, TS_DEVICE_NAME);
+    }
+    else
+    {
+        result = alloc_chrdev_region(&dev_number, 0, 1, TS_DEVICE_NAME);
+        major_number_ts = MAJOR(dev_number);
+    }
+    printk("[futengfei]===========alloc_chrdev_region result:%d \n", result);
+
+    cdev_init(&tsdev->cdev, &ts_nod_fops);
+    tsdev->cdev.owner = THIS_MODULE;
+    tsdev->cdev.ops = &ts_nod_fops;
+    err = cdev_add(&tsdev->cdev, dev_number, 1);
+    if (err)
+        printk( "[futengfei]===========Error cdev_add\n");
+
+    //cread cdev node in /dev
+    class_install_ts = class_create(THIS_MODULE, "tsnodclass");
+    if(IS_ERR(class_install_ts))
+    {
+        printk( "[futengfei]=======class_create err\n");
+        return -1;
+    }
+    device_create(class_install_ts, NULL, dev_number, NULL, "%s%d", TS_DEVICE_NAME, 0);
+}
+#endif
 /*******************************************************
 功能�?	驱动加载函数
 return�?	执行结果码，0表示正常执行
@@ -1253,6 +1343,9 @@ static int __devinit goodix_ts_init(void)
     SOC_IO_Input(0, GPIOEIT, GPIO_CFG_PULL_UP);
     ret = i2c_add_driver(&goodix_ts_driver);
     //  SOC_IO_Output(SHUTDOWN_PORT_GROUP, SHUTDOWN_PORT_INDEX, 0); //temprory
+
+	printk("[futengfei]  init_cdev_ts();\n");	
+	init_cdev_ts();
     return ret;
 }
 
