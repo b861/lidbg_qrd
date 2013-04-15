@@ -96,6 +96,7 @@ i2c_ack write_tw9912(char *buf )
     /**/
     return ret;
 }
+#if 0
 i2c_ack Correction_Parameter_fun(Vedio_Format format)
 {
     i2c_ack ret;
@@ -162,6 +163,7 @@ return ret;
 NACK_BREAK:
 return NACK;
 }
+
 static int thread_tw9912_Correction_Parameter_fun(void *data)
 {
     int i = 0;
@@ -186,6 +188,7 @@ static int thread_tw9912_Correction_Parameter_fun(void *data)
     }
     return 0;
 }
+#endif
 void tw9912_get_input_info(TW9912_input_info *input_information)
 {
 i2c_ack ret;
@@ -1340,6 +1343,8 @@ SIGNAL_DELTE_AGAIN:
     tw912_run_sotp_flag.format = signal_is_how[Channel].Format;
     if(signal_is_how[Channel].Format == PAL_I)
     {
+    ;
+    /*
         u8 Tw9912_Parameter[] = {0, 0,};
 
         Tw9912_Parameter[0] = 0x0a;
@@ -1353,9 +1358,12 @@ SIGNAL_DELTE_AGAIN:
         tw912_run_sotp_flag.run = 1;
         printk("Create a new thread\n");
         tw9912_Correction_Parameter_fun = kthread_run(thread_tw9912_Correction_Parameter_fun, NULL, "flyvideo_Parameter");
+    */
     }
     else if(signal_is_how[Channel].Format == NTSC_I)
     {
+    ;
+    /*
         u8 Tw9912_Parameter[] = {0, 0,};
 
         Tw9912_Parameter[0] = 0x0a;
@@ -1365,6 +1373,7 @@ SIGNAL_DELTE_AGAIN:
         tw912_run_sotp_flag.run = 1;
         printk("Create a new thread\n");
         tw9912_Correction_Parameter_fun = kthread_run(thread_tw9912_Correction_Parameter_fun, NULL, "flyvideo_Parameter");
+     */
     }
     else
     {

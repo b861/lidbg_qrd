@@ -192,7 +192,7 @@ int static VideoImage(void)
         else //DVD SEPARATION
             ret = write_tw9912(&Tw9912_image_global_separation[i]);
     }
-
+#ifdef BOARD_V1
     if(info_com_top_Channel == YIN3)// back or AUX
     {
         ret = write_tw9912(Tw9912_image);
@@ -212,10 +212,12 @@ int static VideoImage(void)
     {
         ;
     }
-
+#endif
 #ifdef BOARD_V2
     if(info_com_top_Channel == YIN2)//dvd cvbs
     {
+    ;
+    /*
         Tw9912_image[0] = 0x08; //image dowd 3 line
         Tw9912_image[1] = 0x15; // image down 3 line
         ret = write_tw9912(Tw9912_image);
@@ -226,12 +228,14 @@ int static VideoImage(void)
         Tw9912_image[0] = 0x0B; //image dowd 3 line
         Tw9912_image[1] = 0xec; // image down 3 line
         ret = write_tw9912(Tw9912_image);
+	*/
     }
     else 	if(info_com_top_Channel == YIN3)//aux back_cvbs
     {
         if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
         {
-            Tw9912_image[0] = 0x08; //image dowd 3 line
+        ;
+      /*        Tw9912_image[0] = 0x08; //image dowd 3 line
             Tw9912_image[1] = 0x14; // image down 3 line
             ret = write_tw9912(Tw9912_image);
             Tw9912_image[0] = 0x09; //image dowd 3 line
@@ -239,13 +243,13 @@ int static VideoImage(void)
             ret = write_tw9912(Tw9912_image);
 
             Tw9912_image[0] = 0x0A; //image dowd 3 line
-            Tw9912_image[1] = 0x23; // image down 3 line
+            Tw9912_image[1] = 0x25; // image down 3 line
             ret = write_tw9912(Tw9912_image);
 
             Tw9912_image[0] = 0x0B; //image dowd 3 line
             Tw9912_image[1] = 0xec; // image down 3 line
             ret = write_tw9912(Tw9912_image);
-            /**/
+          */
         }
         else//pal
         {
