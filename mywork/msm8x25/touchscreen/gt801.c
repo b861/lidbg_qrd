@@ -90,6 +90,9 @@ touch_t touch = {0, 0, 0};
 #endif
 
 
+#define 	RESOLUTION_X	(1024)  //this
+#define 	RESOLUTION_Y	(600)
+static bool xy_revert_en=0; 
 
 #ifndef GUITAR_SMALL
 #error The code does not match the hardware version.
@@ -384,6 +387,11 @@ static void goodix_ts_work_func(struct work_struct *work)
         // pressure[4] = (unsigned int) (point_data[32]);//add
         if(g_New_PosY[4] != 0 && g_New_PosX[4] != 0)
         {
+if(xy_revert_en==1)
+{
+	g_New_PosY[4]=RESOLUTION_X -g_New_PosY[4];
+	g_New_PosX[4]=RESOLUTION_Y - g_New_PosX[4];
+}
             input_report_key(dev, ABS_MT_TRACKING_ID, 4);
             input_report_abs(dev, ABS_MT_TOUCH_MAJOR, 250);
             input_report_abs(dev, ABS_MT_POSITION_X, g_New_PosY[4]);
@@ -397,6 +405,11 @@ static void goodix_ts_work_func(struct work_struct *work)
 
         if(g_New_PosY[3] != 0 && g_New_PosX[3] != 0)
         {
+if(xy_revert_en==1)
+{
+	g_New_PosY[3]=RESOLUTION_X -g_New_PosY[3];
+	g_New_PosX[3]=RESOLUTION_Y - g_New_PosX[3];
+}
             input_report_key(dev, ABS_MT_TRACKING_ID, 3);
             input_report_abs(dev, ABS_MT_TOUCH_MAJOR, 250);
             input_report_abs(dev, ABS_MT_POSITION_X, g_New_PosY[3]);
@@ -410,6 +423,11 @@ static void goodix_ts_work_func(struct work_struct *work)
 
         if(g_New_PosY[2] != 0 && g_New_PosX[2] != 0)
         {
+if(xy_revert_en==1)
+{
+	g_New_PosY[2]=RESOLUTION_X -g_New_PosY[2];
+	g_New_PosX[2]=RESOLUTION_Y - g_New_PosX[2];
+}        
             input_report_key(dev, ABS_MT_TRACKING_ID, 2);
             input_report_abs(dev, ABS_MT_TOUCH_MAJOR, 250);
             input_report_abs(dev, ABS_MT_POSITION_X, g_New_PosY[2]);
@@ -423,6 +441,11 @@ static void goodix_ts_work_func(struct work_struct *work)
 
         if(g_New_PosY[1] != 0 && g_New_PosX[1] != 0)
         {
+if(xy_revert_en==1)
+{
+	g_New_PosY[1]=RESOLUTION_X -g_New_PosY[1];
+	g_New_PosX[1]=RESOLUTION_Y - g_New_PosX[1];
+}	        
             input_report_key(dev, ABS_MT_TRACKING_ID, 1);
             input_report_abs(dev, ABS_MT_TOUCH_MAJOR, 250);
             input_report_abs(dev, ABS_MT_POSITION_X, g_New_PosY[1]);
@@ -435,6 +458,11 @@ static void goodix_ts_work_func(struct work_struct *work)
         g_New_PosY[0] = ((( point_data[4]) << 8 ) + point_data[5]  );
         if(g_New_PosY[0] != 0 && g_New_PosX[0] != 0)
         {
+if(xy_revert_en==1)
+{
+	g_New_PosY[0]=RESOLUTION_X -g_New_PosY[0];
+	g_New_PosX[0]=RESOLUTION_Y - g_New_PosX[0];
+}       
             input_report_abs(ts->input_dev, ABS_MT_POSITION_X, g_New_PosY[0]);
             input_report_abs(ts->input_dev, ABS_MT_POSITION_Y, g_New_PosX[0]);
             input_report_abs(ts->input_dev, ABS_MT_TOUCH_MAJOR, 255);
@@ -447,7 +475,7 @@ static void goodix_ts_work_func(struct work_struct *work)
             if (touch_cnt > 50)
             {
                 touch_cnt = 0;
-                printk("[%d,%d]\n", g_New_PosY[0], g_New_PosX[0]);
+                printk("%d[%d,%d]\n", xy_revert_en,g_New_PosY[0], g_New_PosX[0]);
             }
 
         }
@@ -881,8 +909,6 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
 #ifdef GOODIX_MULTI_TOUCH
 
     //  set_bit(BTN_2, ts->input_dev->keybit);
-#define 	RESOLUTION_X	(1024)  //this
-#define 	RESOLUTION_Y	(600)
 #define GOODIX_TOUCH_WEIGHT_MAX 		(150)
 screen_x=RESOLUTION_X;
 screen_y=RESOLUTION_Y;
@@ -1212,7 +1238,7 @@ static int __devinit goodix_ts_init(void)
     LIDBG_GET;
 #endif
     is_ts_load = 1;
-    printk("\n\n==in=GT801.KO===============touch INFO==========compatible GT801 GT811 SHUTDOWN pin0309=futengfei\n");
+    printk("\n\n==in=GT801.KO======fukesi=========touch INFO==========compatible GT801 GT811 SHUTDOWN pin0309=futengfei\n");
 	SOC_IO_Output(0, 27, 1);
 	msleep(500);//ensure the gt801 shutdown pin is low.
 

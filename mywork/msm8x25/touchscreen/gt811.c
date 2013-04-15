@@ -84,6 +84,10 @@ touch_t touch = {0, 0, 0};
 #endif
 
 
+#define SCREEN_X (1024)
+#define SCREEN_Y (600)
+static bool xy_revert_en=0; 
+
 extern  unsigned int FLAG_FOR_15S_OFF;
 extern  bool is_ts_load;
 extern void SOC_Log_Dump(int cmd);
@@ -611,6 +615,11 @@ if(have_load==0)
             }
 
             if((input_x > ts->abs_x_max) || (input_y > ts->abs_y_max))continue;
+if(xy_revert_en==1)
+{
+			input_y=SCREEN_X -input_y;
+			input_x=SCREEN_Y - input_x;
+}		
             input_report_abs(ts->input_dev, ABS_MT_POSITION_X, input_y);
             input_report_abs(ts->input_dev, ABS_MT_POSITION_Y, input_x);
             input_report_abs(ts->input_dev, ABS_MT_TOUCH_MAJOR, 255);
@@ -666,7 +675,7 @@ if(have_load==0)
     if (touch_cnt == 50)
     {
         touch_cnt = 0;
-        printk("%d[%d,%d]\n",sensor_id, input_y, input_x);
+        printk("%d,%d[%d,%d]\n",xy_revert_en,sensor_id, input_y, input_x);
     }
 
 
@@ -984,8 +993,6 @@ err_gpio_request_failed:
     input_set_abs_params(ts->input_dev, ABS_X, 0,  ts->abs_x_max, 0, 0);
     input_set_abs_params(ts->input_dev, ABS_Y, 0, ts->abs_y_max, 0, 0);
     input_set_abs_params(ts->input_dev, ABS_PRESSURE, 0, 255, 0, 0);
-#define SCREEN_X (1024)
-#define SCREEN_Y (600)
 screen_x=SCREEN_X;
 screen_y=SCREEN_Y;
 SOC_Display_Get_Res(&screen_x, &screen_y);
@@ -1211,7 +1218,7 @@ static int goodix_ts_resume(struct i2c_client *client)
     int ret = 0, retry = 0, init_err = 0;
     uint8_t GT811_check[6] = {0x55};
     struct goodix_ts_data *ts = i2c_get_clientdata(client);
-    printk("come into [%s]========futengfei======0829forGT811 RESUME RESET [futengfei]=\n", __func__);
+    printk("come into [%s]========futengfei===fukesi===0829forGT811 RESUME RESET [futengfei]=\n", __func__);
     printk(KERN_INFO "Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);
 
     for(retry = 0; retry < 30; retry++)
@@ -2296,7 +2303,7 @@ static int __devinit goodix_ts_init(void)
 #ifndef SOC_COMPILE
     LIDBG_GET;
 #endif
-    printk("\n\n=IN==============touch INFO===============compatible GT801 GT811 SHUTDOWN pin0309=%s\n", __func__);
+    printk("\n\n=IN==============touch INFO============fukesi===compatible GT801 GT811 SHUTDOWN pin0309=%s\n", __func__);
     printk("1: goodix_ts_init :installing=>gt811.ko --------------------->futengfei\n");
 	SOC_IO_Output(0, 27, 0);
 	msleep(500);//ensure the gt811 shutdown pin is hight.
