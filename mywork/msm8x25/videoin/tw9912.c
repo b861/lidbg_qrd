@@ -1079,58 +1079,11 @@ CONFIG_not_ack_fail:
     tw9912_dbg("%s:have NACK error!\n", __FUNCTION__);
     return -1;
 }
-int Tw9912_init(Vedio_Format config_pramat, Vedio_Channel Channel)
+static void TW9912_inital_time_test_signal_stability(Vedio_Channel Channel)
 {
-    Vedio_Format ret_format;
-    u32 i = 0;
-    int ret = 0, delte_signal_count = 0;
-    u8 *config_pramat_piont = NULL;
-    u8 Tw9912_input_pin_selet[] = {0x02, 0x40,}; //default input pin selet YIN0
-    printk("tw9912: inital begin\n");
-    mutex_lock(&lock_com_chipe_config);
-    TC9912_id();
-    //if(Channel == NOTONE&&tw9912_status.flag == TW9912_initall_not)
-    if(Channel == NOTONE)
-    {
-        //随便初始一下，防止i2c由于tw9912不工作影响通信。
-        Tw9912_init_PALi();//initall all register
-        //神码情况
-    }
-    else if(config_pramat != STOP_VIDEO)
-    {
-        switch(Channel)
-        {
-        case 0: 	//	 YIN0
-        case SEPARATION: 	//	 YIN0
-            if(write_tw9912(Tw9912_input_pin_selet) == NACK) goto CONFIG_not_ack_fail;
-            break;
-        case 1: //	 YIN1
-            Tw9912_input_pin_selet[1] = 0x44; //register valu selete YIN1
-            if(write_tw9912(Tw9912_input_pin_selet) == NACK) goto CONFIG_not_ack_fail;
-            break;
-        case 2: //	 YIN2
-            Tw9912_input_pin_selet[1] = 0x48;
-            if(write_tw9912(Tw9912_input_pin_selet) == NACK) goto CONFIG_not_ack_fail;
-
-            break;
-        case 3: //	 YIN3
-            Tw9912_input_pin_selet[1] = 0x4c;
-            if(write_tw9912(Tw9912_input_pin_selet) == NACK) goto CONFIG_not_ack_fail;
-
-            Tw9912_input_pin_selet[0] = 0xe8; //only selet YIN3 neet set
-            Tw9912_input_pin_selet[1] = 0x3f; //disable YOUT buffer
-            if(write_tw9912(Tw9912_input_pin_selet) == NACK) goto CONFIG_not_ack_fail;
-            break;
-        default :
-            printk("%s:you input Channel = %d error!\n", __FUNCTION__, Channel);
-            break;
-        }
-
-        while(0)
-        {
-
-            if(Channel == SEPARATION) break;
-
+ int ret = 0;
+ while(1)
+ 	{
             ret = read_tw9912_chips_status(1);//return register valu
             msleep(10);
             read_tw9912_chips_status_flag_1++;
@@ -1152,10 +1105,36 @@ int Tw9912_init(Vedio_Format config_pramat, Vedio_Channel Channel)
                     ;//tw9912_signal_unstabitily_for_Tw9912_init_flag = 1;//find colobar flag signal bad
                 break;
             }
-        }
-        read_tw9912_chips_status_flag = 0;
-        read_tw9912_chips_status_flag_1 = 0;
+ 	}
+ 	
 
+	 read_tw9912_chips_status_flag = 0;
+        read_tw9912_chips_status_flag_1 = 0;
+}
+int Tw9912_init(Vedio_Format config_pramat, Vedio_Channel Channel)
+{
+    Vedio_Format ret_format;
+    u32 i = 0;
+    int ret = 0, delte_signal_count = 0;
+    u8 *config_pramat_piont = NULL;
+    u8 Tw9912_input_pin_selet[] = {0x02, 0x40,}; //default input pin selet YIN0
+    printk("tw9912: inital begin\n");
+    mutex_lock(&lock_com_chipe_config);
+    TC9912_id();
+    //if(Channel == NOTONE&&tw9912_status.flag == TW9912_initall_not)
+    if(Channel == NOTONE)
+    {
+        //随便初始一下，防止i2c由于tw9912不工作影响通信。
+        Tw9912_init_PALi();//initall all register
+        //神码情况
+    }
+    else if(config_pramat != STOP_VIDEO)
+    {
+    	TW9912_Channel_Choices(Channel);
+	if(0)
+	{
+	    TW9912_inital_time_test_signal_stability(Channel);
+    	}
         tw9912_dbg("tw9912:Tw9912_init()-->Tw9912_appoint_pin_testing_video_signal(%d)\n", Channel);
         mutex_unlock(&lock_com_chipe_config);
 SIGNAL_DELTE_AGAIN:
