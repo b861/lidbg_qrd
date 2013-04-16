@@ -6,7 +6,7 @@ extern TW9912_Signal signal_is_how[5];
 extern Last_config_t the_last_config;
 static struct task_struct *Signal_Test = NULL;
 #ifndef BOARD_V2 // V1
-u8 Image_Config[5][11] =
+const u8 Image_Config[5][11] =
 {
     /*0*/	/*1*/	/*2*/	/*3*/	/*4*/	/*5*/	/*6*/	/*7*/	/*8*/	/*9*/	/*10*/
     {	0xe9,		0Xf0,		0xf1,		0xf2,		0xf3,		0xf5,		0xf6,		0xf7,	        0xf8,		0xf9,		0xfd,	}, //BRIGHTNESS ed
@@ -24,7 +24,7 @@ static u8 Tw9912_image_global[5][2] =
     {0x13, 0x7f}, //SHARPNESS
     {0x14, 0x7f}, //SHARPNESS
 };
-u8 Image_Config_AUX_BACK[5][11] =
+const u8 Image_Config_AUX_BACK[5][11] =
 {
     /*0*/	/*1*/	/*2*/	/*3*/	/*4*/	/*5*/	/*6*/	/*7*/	/*8*/	/*9*/	/*10*/
     {	0x15,		0X0f, 	0x09,		0x05,		0x03,		0xff,		0xfa,		0xf0,		0xe9,	        0xe0,		0xc9,	}, //BRIGHTNESS
@@ -42,7 +42,7 @@ static u8 Tw9912_image_global_AUX_BACK[5][2] =
     {0x13, 0x80}, //SHARPNESS
     {0x14, 0x80}, //SHARPNESS
 };
-u8 Image_Config_AUX_BACK_PAL_I[5][11] =
+const u8 Image_Config_AUX_BACK_PAL_I[5][11] =
 {
     /*0*/	/*1*/	/*2*/	/*3*/	/*4*/	/*5*/	/*6*/	/*7*/	/*8*/	/*9*/	/*10*/
     {	0x15,		0X0f, 	0x09,		0x05,		0x03,		0x05,		0xfa,		0xf0,		0xe9,	        0xe0,		0xc9,	}, //BRIGHTNESS
@@ -62,7 +62,7 @@ static u8 Tw9912_image_global_AUX_BACK_PAL_I[5][2] =
 };
 
 #else// V2
-u8 Image_Config[5][11] = //DVD YIN2
+const u8 Image_Config[5][11] = //DVD YIN2
 {
     /*0*/	/*1*/	/*2*/	/*3*/	/*4*/	/*5*/	/*6*/	/*7*/	/*8*/	/*9*/	/*10*/
     {	0xc5,		0Xd5,	0xdd,		0xe5,		0xed,		0xef,		0xf2,		0xf5,	        0xf8,		0xfb,		0xff,	}, //BRIGHTNESS ed
@@ -80,60 +80,60 @@ static u8 Tw9912_image_global[5][2] = //DVD YIN2
     {0x13, 0xb6}, //SHARPNESS
     {0x14, 0xb6}, //SHARPNESS
 };
-u8 Image_Config_AUX_BACK[5][11] = //back or AUX
+const u8 Image_Config_AUX_BACK[5][11] = //back or AUX
 {
-    /*0*/	/*1*/	/*2*/	/*3*/	/*4*/	/*5*/	/*6*/	/*7*/	/*8*/	/*9*/	/*10*/
-    {	0x15,		0X0f, 	0x09,		0x05,		0x03,		0xf6,		0xfa,		0xf0,		0xe9,	        0xe0,		0xc9,	}, //BRIGHTNESS
-    {	0x33,		0x35,		0x39,		0x40,		0x45,		0x50,		0x59,		0x65,		0x6a	,	0x75,		0x8a,	},//CONTRAST
+       /*0*/	/*1*/	/*2*/	/*3*/	/*4*/	/*5*/	/*6*/	/*7*/	/*8*/	/*9*/	/*10*/
+    {	0x15,		0X0f, 	0x09,		0x05,		0x03,		0xf6,		0xf4,		0xf0,		0xe9,	        0xe0,		0xc9,	}, //BRIGHTNESS
+    {	0x33,		0x35,		0x39,		0x40,		0x45,		0x82,		0x92,		0xa2,		0xb2	,	0xc2,		0xd2,	},//CONTRAST
     {	0xa9,		0xb5,		0xc5,		0xe0,		0xf1,		0x00,		0x20,		0x30	,	0x40,		0x50,		0x60,},//HUE
-    {	0x50,		0x60,		0x70,		0x80,		0x90,		0xa0,		0xb0,		0xc0,		0xd0,		0xe0,		0xf0,},//SHARPNESS
-    {	0x50,		0x60,		0x70,		0x80,		0x90,		0xa0,		0xb0,		0xc0,		0xd0,		0xe0,		0xf0,},//SHARPNESS
+    {	0x50,		0x60,		0x70,		0x80,		0x90,		0xf0,		0xf0,		0xf0,		0xd0,		0xe0,		0xf0,},//SHARPNESS
+    {	0x50,		0x60,		0x70,		0x80,		0x90,		0xf0,		0xb0,		0xc0,		0xf0,		0xff,		0xff,},//SHARPNESS
 };
 static u8 Tw9912_image_global_AUX_BACK[5][2] =
 {
     {0x10, 0xF6}, //BRIGHTNESS
-    {0x11, 0x50}, //CONTRAST
+    {0x11, 0x82}, //CONTRAST
 
     {0x15, 0x00}, //HUE
-    {0x13, 0xa0}, //SHARPNESS
-    {0x14, 0xa0}, //SHARPNESS
+    {0x13, 0xf0}, //SHARPNESS
+    {0x14, 0xf0}, //SHARPNESS
 };
-u8 Image_Config_AUX_BACK_PAL_I[5][11] =
+const u8 Image_Config_AUX_BACK_PAL_I[5][11] =
 {
-    /*0*/	/*1*/	/*2*/	/*3*/	/*4*/	/*5*/	/*6*/	/*7*/	/*8*/	/*9*/	/*10*/
-    {	0x15,		0X0f, 	0x09,		0x05,		0x03,		0x05,		0xfa,		0xf0,		0xe9,	        0xe0,		0xc9,	}, //BRIGHTNESS
-    {	0x25,		0x30,		0x35,		0x39,		0x40,		0x44,		0x45,		0x50,		0x59,		0x65,		0x6a,},//CONTRAST
+       /*0*/	/*1*/	/*2*/	/*3*/	/*4*/	/*5*/	/*6*/	/*7*/	/*8*/	/*9*/	/*10*/
+    {	0x2f,		0x20,		0x15,		0X0f, 	0x09,		0x05,		0xfa,		0xf0,		0xe9,	        0xe0,		0xc9,	}, //BRIGHTNESS
+    {	0x25,		0x30,		0x35,		0x39,		0x40,		0x5c,		0x60,		0x65,		0x6f,		0x75,		0x7a,},//CONTRAST
     {	0xa9,		0xb5,		0xc5,		0xe0,		0xf1,		0x00,		0x20,		0x30	,	0x40,		0x50,		0x60,},//HUE
-    {	0x50,		0x60,		0x70,		0x80,		0x90,		0xa0,		0xb0,		0xc0,		0xd0,		0xe0,		0xf0,},//SHARPNESS
-    {	0x50,		0x60,		0x70,		0x80,		0x90,		0xa0,		0xb0,		0xc0,		0xd0,		0xe0,		0xf0,},//SHARPNESS
+    {	0x50,		0x60,		0x70,		0x80,		0x90,		0xf0,		0xf0,		0xf0,		0xd0,		0xe0,		0xd0,},//SHARPNESS  a0
+    {	0x50,		0x60,		0x70,		0x80,		0x90,		0xf0,		0xb0,		0xc0,		0xf0,		0xf0,		0xd0,},//SHARPNESS  a7
 };
 static u8 Tw9912_image_global_AUX_BACK_PAL_I[5][2] =
 {
     {0x10, 0x05}, //BRIGHTNESS
-    {0x11, 0x44}, //CONTRAST
+    {0x11, 0x5c}, //CONTRAST
 
     {0x15, 0x00}, //HUE
-    {0x13, 0xa0}, //SHARPNESS
-    {0x14, 0xa0}, //SHARPNESS
+    {0x13, 0xf0}, //SHARPNESS
+    {0x14, 0xf0}, //SHARPNESS
 };
 #endif
-u8 Image_Config_separation[5][11] = //DVD separation
+const u8 Image_Config_separation[5][11] = //DVD separation
 {
     /*0*/	/*1*/	/*2*/	/*3*/	/*4*/	/*5*/	/*6*/	/*7*/	/*8*/	/*9*/	/*10*/
-    {	0x50,		0x58,		0x65,		0x70,		0x75,        0x80,		0x85,		0x90	,	0x95,		0xa5,		0xb0,},//BRIGHTNESS ed
+    {	0x75,		0x85,		0x85,		0x90,		0x95,        0x99,		0xa9,		0xb5	,	0xbf,		0xc9,		0xe4,},//BRIGHTNESS ed
     {	0xc0,		0xc5,		0Xc9,	0xcf,		0xd0,		0xd5,		0xe0,		0xe2,	        0xe5,		0xe9,		0x00,	},//CONTRAST 9f
     {	0x87,		0x96,		0xb9,		0xdf,		0xe7,		0xff,		0x0,   	0xa,		0x35,		0x63,		0x7f,},//HUE
-    {	0x20,		0x4a,		0x64,		0x7e,		0x98,		0xb6, 	0xbf,		0xc6,		0xd6,		0xe6,		0xf6,},//SHARPNESS
-    {	0x20,		0x4a,		0x64,		0x7e,		0x98,		0xb6, 	0xbf,		0xc6,		0xd6,		0xe6,		0xf6,},//SHARPNESS
+    {	0x20,		0x4a,		0x64,		0x7e,		0x98,		0xff, 		0xff,		0xff,		0xff,		0xe6,		0xf6,},//SHARPNESS
+    {	0x20,		0x4a,		0x64,		0x7e,		0x98,		0xff, 		0xbf,		0xc6,		0xd6,		0xff,		0xff,},//SHARPNESS
 };
 static u8 Tw9912_image_global_separation[5][2] = //DVD separation
 {
-    {0x11, 0x80}, //BRIGHTNESS
+    {0x11, 0x99}, //BRIGHTNESS
     {0x10, 0x00}, //CONTRAST
 
     {0x15, 0xff}, //HUE
-    {0x13, 0xb6}, //SHARPNESS
-    {0x14, 0xb6}, //SHARPNESS
+    {0x13, 0xff}, //SHARPNESS
+    {0x14, 0xff}, //SHARPNESS
 };
 //spinlock_t spin_chipe_config_lock;
 struct mutex lock_chipe_config;
@@ -175,7 +175,7 @@ int static Change_channel(void)
 int static VideoImage(void)
 {
     int ret;
-    int i = 0;
+    register int i = 0;
     u8 Tw9912_image[2] = {0x17, 0x87,}; //default input pin selet YIN0ss
     printk("\ntw9912:@@@@@VideoImage() info_com_top_Channel =%d\n", info_com_top_Channel);
     for(i = 0; i < 5; i++)
@@ -192,7 +192,7 @@ int static VideoImage(void)
         else //DVD SEPARATION
             ret = write_tw9912(&Tw9912_image_global_separation[i]);
     }
-
+#ifdef BOARD_V1
     if(info_com_top_Channel == YIN3)// back or AUX
     {
         ret = write_tw9912(Tw9912_image);
@@ -212,10 +212,12 @@ int static VideoImage(void)
     {
         ;
     }
-
+#endif
 #ifdef BOARD_V2
     if(info_com_top_Channel == YIN2)//dvd cvbs
     {
+    ;
+    /*
         Tw9912_image[0] = 0x08; //image dowd 3 line
         Tw9912_image[1] = 0x15; // image down 3 line
         ret = write_tw9912(Tw9912_image);
@@ -226,12 +228,14 @@ int static VideoImage(void)
         Tw9912_image[0] = 0x0B; //image dowd 3 line
         Tw9912_image[1] = 0xec; // image down 3 line
         ret = write_tw9912(Tw9912_image);
+	*/
     }
     else 	if(info_com_top_Channel == YIN3)//aux back_cvbs
     {
         if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
         {
-            Tw9912_image[0] = 0x08; //image dowd 3 line
+        ;
+      /*        Tw9912_image[0] = 0x08; //image dowd 3 line
             Tw9912_image[1] = 0x14; // image down 3 line
             ret = write_tw9912(Tw9912_image);
             Tw9912_image[0] = 0x09; //image dowd 3 line
@@ -239,13 +243,13 @@ int static VideoImage(void)
             ret = write_tw9912(Tw9912_image);
 
             Tw9912_image[0] = 0x0A; //image dowd 3 line
-            Tw9912_image[1] = 0x23; // image down 3 line
+            Tw9912_image[1] = 0x25; // image down 3 line
             ret = write_tw9912(Tw9912_image);
 
             Tw9912_image[0] = 0x0B; //image dowd 3 line
             Tw9912_image[1] = 0xec; // image down 3 line
             ret = write_tw9912(Tw9912_image);
-            /**/
+          */
         }
         else//pal
         {
@@ -568,7 +572,7 @@ Vedio_Format flyVideoTestSignalPin_in(u8 Channel)
 {
     Vedio_Format ret = NOTONE;
     //spin_lock(&spin_chipe_config_lock);
-    //return PAL_I;
+  //  return NTSC_I;
     mutex_lock(&lock_chipe_config);
     if(
         ( (the_last_config.Channel == YIN2 || the_last_config.Channel == SEPARATION) && Channel == YIN3) || \
@@ -579,6 +583,9 @@ Vedio_Format flyVideoTestSignalPin_in(u8 Channel)
         Change_channel();
 
     }
+
+	//  mutex_unlock(&lock_chipe_config);
+	//return NTSC_I;
     if(Channel == SEPARATION || Channel == YIN2)
     {
         ret = testing_NTSCp_video_signal();

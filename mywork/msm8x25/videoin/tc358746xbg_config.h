@@ -2,11 +2,11 @@
 #define __TC358746XBG_CONFIG__
 #include "TC358746XBG.h"
 
-static struct TC358_register_struct tc358746_id[] =
+const struct TC358_register_struct tc358746_id[] =
 {
     {	0x0000	,	0x4400	,	register_value_width_16		},
 };
-static struct TC358_register_struct PALp_init_tab[] =
+const struct TC358_register_struct PALp_init_tab[] =
 {
 
     //	add		value(dec)		register width			value(hex)
@@ -71,7 +71,7 @@ static struct TC358_register_struct PALp_init_tab[] =
     {0xffff},
 };
 
-static struct TC358_register_struct NTSCp_init_tab[] =
+const struct TC358_register_struct NTSCp_init_tab[] =
 {
     //	add		value(dec)		register width			value(hex)
     //0x0002	,	1 	,	register_value_width_16		},   //	0001
@@ -106,7 +106,7 @@ static struct TC358_register_struct NTSCp_init_tab[] =
     {0xffff},
 };
 
-static struct TC358_register_struct colorbar_init_tab[] =
+const struct TC358_register_struct colorbar_init_tab[] =
 {
     //80 pixel of black
     {0x00e8, 0x7f, register_value_width_16},
@@ -134,7 +134,7 @@ static struct TC358_register_struct colorbar_init_tab[] =
     {0x00e8, 0xff7f, register_value_width_16},
 };
 
-static struct TC358_register_struct lingceng_init_tab[] =
+const struct TC358_register_struct lingceng_init_tab[] =
 {
     {0x00e0, 0x0, register_value_width_16},
     //	{0x0002,0xf,register_value_width_16},
@@ -220,7 +220,7 @@ static struct TC358_register_struct lingceng_init_tab[] =
     {0xffff},
 };
 
-static struct TC358_register_struct Stop_tab[] =
+const struct TC358_register_struct Stop_tab[] =
 {
     {0x0002, 0x2, register_value_width_16}, //sleep
     {0xffff},
