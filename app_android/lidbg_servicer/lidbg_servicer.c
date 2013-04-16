@@ -137,7 +137,7 @@ void set_power_state(int state)
 	const char wakeupstring[] = "on";
 	const char *powerdev = "/sys/power/state";
 	
-	printf("set_power_state:%d\n",state);
+	lidbg("set_power_state:%d\n",state);
 
 	fd = open(powerdev, O_RDWR);
 	if(fd >= 0) 
@@ -152,7 +152,7 @@ void set_power_state(int state)
 	}
 	else
 	{  
-	   printf("open linux power dev fail: %s\n", powerdev);
+	   lidbg("open linux power dev fail: %s\n", powerdev);
 	}
 
 }
@@ -160,11 +160,11 @@ void set_power_state(int state)
 
 void thread_fastboot(void)
 {
-	printf("thread_fastboot+\n");
+	lidbg("thread_fastboot+\n");
 	
 //	property_set("fly.fastboot.accoff", "1");
 	system("am broadcast -a android.intent.action.FAST_BOOT_START");
-	printf("thread_fastboot-\n");
+	lidbg("thread_fastboot-\n");
 
     pthread_exit(0);
 
@@ -178,7 +178,7 @@ void lunch_fastboot()
     ret=pthread_create(&id1,NULL,(void *)thread_fastboot,NULL);
     if(ret!=0)
     {
-         printf("Create pthread error!\n");
+         lidbg("Create pthread error!\n");
         
     }
 	//pthread_join(id1,NULL); 
@@ -194,7 +194,7 @@ int  servicer_handler(int signum)
     int cmd = 0;
     static int count = 0;
     int readlen;
-    printf("servicer_handler++\n");
+    lidbg("servicer_handler++\n");
 
 
 loop_read:
@@ -203,7 +203,7 @@ loop_read:
 
 	if(cmd == SERVICER_DONOTHING)
 	{
-		printf("servicer_handler-\n");
+		lidbg("servicer_handler-\n");
 		return SERVICER_DONOTHING;
 	}
     //printf("fd=%x,readlen=%d,cmd=%d\n",fd,readlen,cmd);
@@ -212,7 +212,7 @@ loop_read:
 
     {
 
-        printf("cmd = %d\n", cmd);
+        lidbg("cmd = %d\n", cmd);
 
         switch(cmd)
         {
@@ -232,11 +232,11 @@ loop_read:
                 //system("date > /sdcard/tflash/log_dmesg.txt");
             }
             count ++;
-            printf("count=%d\n", count);
+            lidbg("count=%d\n", count);
 
             if(count > LOG_COUNT_MAX)
             {
-                printf("log count>%d break!\n", LOG_COUNT_MAX);
+                lidbg("log count>%d break!\n", LOG_COUNT_MAX);
 
                 break;
             }
@@ -376,7 +376,7 @@ loop_read:
         }//over
         case CMD_ACC_OFF_PROPERTY_SET :
 		{
-			printf("CMD_ACC_OFF_PROPERTY_SET\n");
+			lidbg("CMD_ACC_OFF_PROPERTY_SET\n");
 			system("echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
 			property_set("fly.fastboot.accoff", "1");
 			break;
@@ -384,7 +384,7 @@ loop_read:
 		}
         case CMD_FAST_POWER_OFF :
 		{
-			printf("CMD_FAST_POWER_OFF+++\n");
+			lidbg("CMD_FAST_POWER_OFF+++\n");
 			//system("setprop fly.fastboot.accoff 1");
 			if(0)//why this will block sometime ?
 			{
@@ -397,7 +397,7 @@ loop_read:
 			{
 				lunch_fastboot();
 			}
-			printf("CMD_FAST_POWER_OFF---\n");
+			lidbg("CMD_FAST_POWER_OFF---\n");
 			
 			break;
 		}
@@ -411,7 +411,7 @@ loop_read:
         }
         case WAKEUP_KERNEL:
         {
-			printf("WAKEUP_KERNEL+\n");
+			lidbg("WAKEUP_KERNEL+\n");
 			if(0)
 			{
             	system("su");
@@ -424,18 +424,18 @@ loop_read:
 			system("echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
             //system("echo host > /mnt/debugfs/otg/mode");
             log_acc_times();
-			printf("WAKEUP_KERNEL-\n");
+			lidbg("WAKEUP_KERNEL-\n");
             break;
 
         }
         case SUSPEND_KERNEL:
         {
 			char value[16];
-			printf("SUSPEND_KERNEL+\n");
+			lidbg("SUSPEND_KERNEL+\n");
             //system("echo peripheral > /mnt/debugfs/otg/mode");
 			
 			property_get("fly.fastboot.accoff", value, "");
-			printf("fly.fastboot.accoff=%c\n",value[0]);
+			lidbg("fly.fastboot.accoff=%c\n",value[0]);
 			if(value[0] == '1')
 			{
 	            property_set("fly.fastboot.accoff", "0");//fix bug ,enter suspend again
@@ -451,21 +451,21 @@ loop_read:
 					set_power_state(0);
 	            }
 			}
-			printf("SUSPEND_KERNEL-\n");
+			lidbg("SUSPEND_KERNEL-\n");
             break;
 
         }
 
 	case VIDEO_SET_PAL:
         {
-	   		printf("<<<<< now get QCamera set pal\n");
+	   		lidbg("<<<<< now get QCamera set pal\n");
             property_set("tcc.fly.vin.pal", "1");// 1 is pal 0 is ntsc
             break;
 
         }
       case VIDEO_SET_NTSC:
         {
-	    	printf("<<<<< now get QCamera set ntsc\n");
+	    	lidbg("<<<<< now get QCamera set ntsc\n");
             property_set("tcc.fly.vin.pal", "0");// 1 is pal 0 is ntsc
             break;
 
@@ -473,28 +473,28 @@ loop_read:
 
         case SUSPEND_PREPARE:
         {
-			 printf("SUSPEND_PREPARE\n");
+			 lidbg("SUSPEND_PREPARE\n");
 			 system("echo 1 > /sys/bus/platform/devices/fastboot/fastboot");
              break;
 
         }
         case RESUME_PREPARE:
         {
-			printf("RESUME_PREPARE\n");
+			lidbg("RESUME_PREPARE\n");
 			 system("echo 0 > /sys/bus/platform/devices/fastboot/fastboot");
              break;
 
         }
 	 case VIDEO_SHOW_BLACK:
 	    {
-	    	printf("<<<<< now Set Video show black.\n");
+	    	lidbg("<<<<< now Set Video show black.\n");
 	        property_set("fly.video.show.status", "0");// 0 is black
 	        break;
 
 	    }
 	case VIDEO_NORMAL_SHOW:
 	    {
-	    	printf("<<<<< now Set Video normal show.\n");
+	    	lidbg("<<<<< now Set Video normal show.\n");
 	        property_set("fly.video.show.status", "1");// 1 is normal
 	        break;
 
@@ -503,7 +503,7 @@ loop_read:
 	    {
 
 			if (access("/data/gps.msm7627a.so", R_OK) == 0) break;
-			printf("ublox exist,copy gps.msm7627a.so to data\n");
+			lidbg("ublox exist,copy gps.msm7627a.so to data\n");
 			//system("cp /flysystem/lib/gps.msm7627a.so /data/gps.msm7627a.so");
 			copyfile("/flysystem/lib/ublox_gps.so","/data/gps.msm7627a.so");
 	        break;
@@ -526,7 +526,7 @@ int main(int argc , char **argv)
     int count = 0;
     int oflags;
 
-    printf("lidbg_servicer start\n");
+    lidbg("lidbg_servicer start\n");
     //sleep(5);
     system("insmod /system/lib/modules/out/lidbg_share.ko");
     system("insmod /system/lib/modules/out/lidbg_ts_to_recov.ko");
@@ -588,7 +588,7 @@ open_dev:
     //printf("fd = %x\n",fd);
     if((fd == 0xfffffffe) || (fd == 0) || (fd == 0xffffffff))
     {
-        printf("open lidbg_servicer fail\n");
+        lidbg("open lidbg_servicer fail\n");
         sleep(1);//delay wait for /dev/lidbg_servicer to creat
         //usleep(1000 * 100); //100ms
         goto open_dev;
@@ -681,7 +681,7 @@ open_dev:
 		// cat /sys/module/lowmemorykiller/parameters/minfree
 		//system("echo 3674,4969,6264,8312,9607,11444 > /sys/module/lowmemorykiller/parameters/minfree");//origin
 		sleep(1);
-		printf("set minfree\n");
+		lidbg("set minfree\n");
 		system("echo 3674,4969,6264,6264,6264,6264 > /sys/module/lowmemorykiller/parameters/minfree");
 	}
 
@@ -702,7 +702,7 @@ open_dev:
 			 {
 				 sleep(5);
 				 //printf("set performance mode\n");
-				 printf("set ondemand mode\n");
+				 lidbg("set ondemand mode\n");
 				 system("echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
 				 //system("echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
 				 i--;
@@ -712,7 +712,7 @@ open_dev:
 	}
 
 	
-	printf("enter while\n");
+	lidbg("enter while\n");
     while(1)
     {
     	//printf("enter while...\n");

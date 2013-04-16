@@ -3,7 +3,7 @@
 
 
 //#undef printf
-//#define printf  LIDBG_PRINT
+#define lidbg  LIDBG_PRINT
 
 
 #define LIDBG_CALL(cmd,buf,ret_bytes) do{\
