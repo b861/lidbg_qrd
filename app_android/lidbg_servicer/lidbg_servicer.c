@@ -60,9 +60,66 @@
 
 pthread_t ntid;
 int fd = 0;
-
+static int ts_nod_fd,ret;
 #include "./copyfile.c"
 
+
+int is_should_revert()
+{
+	struct stat stat;
+	char *source = "/flydata/flyhalconfig";
+	unsigned char *found = "TSMODE_XYREVERT";
+	int fd_sour;
+	int size,i;
+	int flag_len = strlen(found);
+	unsigned char *file_data;
+	//printf("==in=====================is_should_revert===============================\n");
+	//printf("source:%s\n",source);
+
+	fd_sour = open(source,O_RDONLY);
+	if( fd_sour < 0 )
+		{
+			printf("fail to open source file\n");
+			return -1;
+		}
+	if( fstat (fd_sour , &stat ) )
+		{
+			printf("fstat source file fail!!\n");
+			return -1;
+		}
+	size = stat.st_size+1;
+	//printf("source file size:%d\n",size);
+	file_data = (unsigned char*)malloc(stat.st_size);
+	if( !file_data )
+		{
+			printf("fail to mallo mem!!\n");
+			return -1;
+		}
+	if( read(fd_sour,file_data,stat.st_size) < 0 )	
+		{
+			printf("read data fail!!\n");
+			return -1;
+		}
+	file_data[size] = '\0';
+	close(fd_sour);
+	//printf("flag : %s\n",found);
+	//printf("\n\nfile_data : \n%s\n",file_data);
+	//printf("start found flag! flag len = %d\n",flag_len);
+	for(i=0;i<size-flag_len-1;i++)
+	{
+		if(memcmp( file_data+i, found, flag_len)==0)
+		{
+			printf("found [%s]flag success i = %d! return 1\n",found,i);
+			free(file_data);
+			//printf("==out=====================is_should_revert===============================\n");
+			return 0;
+		}
+	}
+	free(file_data);
+	printf("found [%s]flag fail i = %d! return -1\n",found,i);
+	//printf("==out=====================is_should_revert===============================\n");
+	return -1;
+}
 
 void log_acc_times()
 {
@@ -246,7 +303,6 @@ loop_read:
 
                 system("insmod /system/lib/modules/out/gt811.ko");
                 system("insmod /flysystem/lib/out/gt811.ko");
-				break;
 
 
 
@@ -270,35 +326,54 @@ loop_read:
             {
                 system("insmod /system/lib/modules/out/ft5x06_ts.ko");
                 system("insmod /flysystem/lib/out/ft5x06_ts.ko");
-				break;
 
             }
 
             else if (LOG_CAP_TS_FT5X06_SKU7 == cmd)
             {
                 system("insmod /system/lib/modules/out/ft5x06_ts_sku7.ko");
-				break;
 
             }
 
             else if (LOG_CAP_TS_RMI == cmd)
             {
                 system("insmod /system/lib/modules/out/rmi_touch.ko");
-				break;
 
             }
             else if (LOG_CAP_TS_GT801 == cmd)
             {
                 system("insmod /system/lib/modules/out/gt801.ko");
                 system("insmod /flysystem/lib/out/gt801.ko");
-				break;
 
             }
             //sleep(10);//delay to mount sdcard
             //system("dmesg > /sdcard/log_cap_ts_dmesg.txt");
-            break;
-
-        }
+           
+	//wait ts load ,for ts revert
+	sleep(3);
+	system("chmod 777 /dev/tsnod0");
+{
+		char *ts_tdev_node="/dev/tsnod0";
+		ts_nod_fd= open(ts_tdev_node, O_RDWR);
+		 if(ts_nod_fd<0)
+		    {
+			printf("open  ts_tdev_node fail\n");
+			break;
+		    }
+		if(is_should_revert()==0&&ts_nod_fd>0) 
+			{
+				ret=write(ts_nod_fd, "TSMODE_XYREVERT", sizeof("TSMODE_XYREVERT"));
+				if (ret < 0 )printf("[futengfei]=======================writeerr \n");
+				printf("[futengfei]=======================TS.XY will revert\n");
+				
+			}
+		else 
+			{
+				printf("[futengfei]=======================TS.XY will normal[%d]\n",ts_nod_fd);
+			}
+	}
+ 	break;
+        }//over
         case CMD_ACC_OFF_PROPERTY_SET :
 		{
 			printf("CMD_ACC_OFF_PROPERTY_SET\n");
@@ -594,8 +669,8 @@ open_dev:
 
 
 
-
 #endif
+
 	sleep(30);
 
 ///////low mem kill

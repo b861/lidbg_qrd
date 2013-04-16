@@ -2,8 +2,8 @@
 #define _LIGDBG_SERVER_APP__
 
 
-#undef printf
-#define printf  LIDBG_PRINT
+//#undef printf
+//#define printf  LIDBG_PRINT
 
 
 #define LIDBG_CALL(cmd,buf,ret_bytes) do{\
