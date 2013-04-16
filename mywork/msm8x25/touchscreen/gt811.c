@@ -88,6 +88,9 @@ extern  unsigned int FLAG_FOR_15S_OFF;
 extern  bool is_ts_load;
 extern void SOC_Log_Dump(int cmd);
 
+static int have_load = 0;    // 1: have load ,do't load again
+static int sensor_id = 2;	    //0:  8cunTS;      2: 7cunTS ;   7cun for default
+
 
 #define LOG_DMESG (1)
 
@@ -273,7 +276,7 @@ static int goodix_init_panel(struct goodix_ts_data *ts)
 {
     short ret = -1;
     printk("come to goodix_init_panel==================futengfei=\n");
-    uint8_t config_info[] =
+    uint8_t config_info7[] =
     {
         0x06, 0xA2,
         0x12,0x10,0x0E,0x0C,0x0A,0x08,0x06,0x04,0x02,0x00,0x01,0x11,0x11,0x11,0x21,0x11,
@@ -285,22 +288,53 @@ static int goodix_init_panel(struct goodix_ts_data *ts)
         0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x01
 
     };
+    uint8_t config_info8[] =
+    {
+        0x06, 0xA2,
+        0x12,0x10,0x0E,0x0C,0x0A,0x08,0x06,0x04,0x02,0x00,0x03,0x33,0x13,0x33,0x23,0x33,
+        0x33,0x33,0x43,0x33,0x53,0x33,0x63,0x33,0x73,0x33,0x83,0x33,0x93,0x33,0xA3,0x33,
+        0xB3,0x33,0xC3,0x33,0xD3,0x33,0xE3,0x33,0xF3,0x33,0x07,0x03,0xA8,0xA8,0xA8,0x30,
+        0x30,0x30,0x10,0x10,0x0A,0x48,0x30,0x07,0x03,0x00,0x05,0x58,0x02,0x00,0x04,0x00,
+        0x00,0x33,0x33,0x30,0x30,0x00,0x00,0x23,0x14,0x05,0x0A,0x80,0x00,0x00,0x00,0x00,
+        0x14,0x10,0xFE,0x01,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x0D,0x00,
+        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x01
 
+    };
     //config_info[62] = TOUCH_MAX_WIDTH >> 8;
     //config_info[61] = TOUCH_MAX_WIDTH & 0xff;
    // config_info[64] = TOUCH_MAX_HEIGHT >> 8;
    // config_info[63] = TOUCH_MAX_HEIGHT & 0xff;
 
-    ret = i2c_write_bytes(ts->client, config_info, sizeof(config_info) / sizeof(config_info[0]));
+
+ //sensor_id [0:  8cunTS;      2: 7cunTS ;   7cun for default]
+if(sensor_id == 0) //0:  8cunTS;
+	{
+		ret = i2c_write_bytes(ts->client, config_info8, sizeof(config_info8) / sizeof(config_info8[0]));
+		ts->abs_x_max = (config_info8[62] << 8) + config_info8[61];
+		ts->abs_y_max = (config_info8[64] << 8) + config_info8[63];
+		ts->max_touch_num = config_info8[60];
+		ts->int_trigger_type = ((config_info8[57] >> 3) & 0x01);
+		printk("[futengfei] goodix_init_panel=================config_info8\n");
+
+	}
+
+else //7cun for default
+	{
+		ret = i2c_write_bytes(ts->client, config_info7, sizeof(config_info7) / sizeof(config_info7[0]));
+		ts->abs_x_max = (config_info7[62] << 8) + config_info7[61];
+		ts->abs_y_max = (config_info7[64] << 8) + config_info7[63];
+		ts->max_touch_num = config_info7[60];
+		ts->int_trigger_type = ((config_info7[57] >> 3) & 0x01);
+		printk("[futengfei] goodix_init_panel=================config_info7\n");
+
+	}
+
     if(ret < 0)
     {
         printk( "GT811 Send config failed!\n");
         return ret;
     }
-    ts->abs_x_max = (config_info[62] << 8) + config_info[61];
-    ts->abs_y_max = (config_info[64] << 8) + config_info[63];
-    ts->max_touch_num = config_info[60];
-    ts->int_trigger_type = ((config_info[57] >> 3) & 0x01);
+
     printk( "GT811 init info:X_MAX=%d,Y_MAX=%d,TRIG_MODE=%s\n",	ts->abs_x_max, ts->abs_y_max, ts->int_trigger_type ? "RISING EDGE" : "FALLING EDGE");
     printk("leave from goodix_init_panel==================futengfei=\n");
     return 0;
@@ -480,7 +514,16 @@ COORDINATE_POLL:
     printk("\n");
 #endif
 
-
+if(have_load==0)
+{
+	sensor_id = point_data[2] >>6; //0:  8cunTS;      2: 7cunTS ;   7cun for default
+	if (sensor_id==0)
+		{
+			goodix_init_panel(ts);
+			have_load=1;
+		}
+}
+	
     if(point_data[2] & 0x20)
     {
         if(point_data[3] == 0xF0)
@@ -623,7 +666,7 @@ COORDINATE_POLL:
     if (touch_cnt == 50)
     {
         touch_cnt = 0;
-        printk("[%d,%d]\n", input_y, input_x);
+        printk("%d[%d,%d]\n",sensor_id, input_y, input_x);
     }
 
 
