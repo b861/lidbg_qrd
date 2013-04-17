@@ -438,7 +438,7 @@ loop_read:
 			
 			property_get("fly.fastboot.accoff", value, "");
 			lidbg("fly.fastboot.accoff=%c\n",value[0]);
-			if(value[0] == '1')
+			//if(value[0] == '1')
 			{
 	            property_set("fly.fastboot.accoff", "0");//fix bug ,enter suspend again
 
