@@ -73,8 +73,8 @@ int is_should_revert()
 	int size,i;
 	int flag_len = strlen(found);
 	unsigned char *file_data;
-	//printf("==in=====================is_should_revert===============================\n");
-	//printf("source:%s\n",source);
+	printf("==in=====================is_should_revert===============================\n");
+	printf("source:%s\n",source);
 
 	fd_sour = open(source,O_RDONLY);
 	if( fd_sour < 0 )
@@ -88,7 +88,7 @@ int is_should_revert()
 			return -1;
 		}
 	size = stat.st_size+1;
-	//printf("source file size:%d\n",size);
+	printf("source file size:%d\n",size);
 	file_data = (unsigned char*)malloc(stat.st_size);
 	if( !file_data )
 		{
@@ -104,22 +104,22 @@ int is_should_revert()
 		}
 	file_data[size] = '\0';
 	close(fd_sour);
-	//printf("flag : %s\n",found);
-	//printf("\n\nfile_data : \n%s\n",file_data);
-	//printf("start found flag! flag len = %d\n",flag_len);
-	for(i=0;i<size-flag_len-1;i++)
+	printf("flag : %s\n",found);
+	printf("\n\nfile_data : \n%s\n",file_data);
+	printf("start found flag! flag len = %d\n",flag_len);
+	for(i=0;i<size-flag_len;i++)
 	{
-		if(memcmp( file_data+i, found, flag_len)==0)
+		if(memcmp( file_data+i, found, flag_len-2)==0)
 		{
 			printf("found [%s]flag success i = %d! return 1\n",found,i);
 			free(file_data);
-			//printf("==out=====================is_should_revert===============================\n");
+			printf("==out=====================is_should_revert===============================\n");
 			return 0;
 		}
 	}
 	free(file_data);
 	printf("found [%s]flag fail i = %d! return -1\n",found,i);
-	//printf("==out=====================is_should_revert===============================\n");
+	printf("==out=====================is_should_revert===============================\n");
 	return -1;
 }
 
