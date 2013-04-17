@@ -93,11 +93,13 @@ int is_should_revert()
 	if( !file_data )
 		{
 			printf("fail to mallo mem!!\n");
+			free(file_data);
 			return -1;
 		}
 	if( read(fd_sour,file_data,stat.st_size) < 0 )	
 		{
 			printf("read data fail!!\n");
+			free(file_data);
 			return -1;
 		}
 	file_data[size] = '\0';
