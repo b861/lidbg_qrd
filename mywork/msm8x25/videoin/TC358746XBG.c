@@ -8,8 +8,8 @@ static int tc358746_reset_flag = 0;
 struct TC358_register_struct colorbar_init_user_tab[] =
 {
     //80 pixel of hui
-    {0x00e8, 0x00, register_value_width_16},
-    {0x00e8, 0x94, register_value_width_16},
+    {0x00e8, 0x307f, register_value_width_16},
+    {0x00e8, 0x307f, register_value_width_16},
 };
 #ifndef SLEEP_MILLI_SEC
 #define SLEEP_MILLI_SEC(nMilliSec)\
