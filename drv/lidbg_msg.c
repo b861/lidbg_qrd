@@ -17,8 +17,8 @@ DEFINE_SEMAPHORE(lidbg_msg_sem);
 static struct task_struct *msg_task;
 static int thread_msg(void *data);
 
-#define TOTAL_LOGS 100
-#define LOG_BYTES  64
+#define TOTAL_LOGS  (100)
+#define LOG_BYTES   (100)
 
 typedef struct
 {
@@ -35,7 +35,7 @@ int thread_msg(void *data)
 {
     plidbg_msg = (struct lidbg_msg *)kmalloc(sizeof( lidbg_msg), GFP_KERNEL);
 
-    memset(plidbg_msg->log, '\0', sizeof( lidbg_msg));
+    memset(plidbg_msg->log, '\0', /*sizeof( lidbg_msg)*/TOTAL_LOGS*LOG_BYTES);
     plidbg_msg->w_pos = plidbg_msg->r_pos = 0;
 
     while(1)
@@ -99,14 +99,14 @@ ssize_t  msg_write(struct file *filp, const char __user *buffer, size_t size, lo
 
 int msg_open(struct inode *inode, struct file *filp)
 {
-    //down(&lidbg_msg_sem);
+    down(&lidbg_msg_sem);
 
     return 0;
 }
 
 int msg_release(struct inode *inode, struct file *filp)
 {
-    //up(&lidbg_msg_sem);
+    up(&lidbg_msg_sem);
 
     return 0;
 }
