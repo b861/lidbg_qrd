@@ -89,7 +89,7 @@ int is_should_revert()
 		}
 	size = stat.st_size+1;
 	printf("source file size:%d\n",size);
-	file_data = (unsigned char*)malloc(stat.st_size);
+	file_data = (unsigned char*)malloc(size);
 	if( !file_data )
 		{
 			printf("fail to mallo mem!!\n");
@@ -102,7 +102,7 @@ int is_should_revert()
 			free(file_data);
 			return -1;
 		}
-	file_data[size] = '\0';
+	file_data[stat.st_size] = '\0';
 	close(fd_sour);
 	printf("flag : %s\n",found);
 	printf("\n\nfile_data : \n%s\n",file_data);
