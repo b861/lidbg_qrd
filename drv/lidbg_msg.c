@@ -75,9 +75,7 @@ ssize_t  msg_write(struct file *filp, const char __user *buffer, size_t size, lo
     int cmd ;
 
 
-    //down(&lidbg_msg_sem);
-
-
+    down(&lidbg_msg_sem);
 
     copy_from_user(&(plidbg_msg->log[plidbg_msg->w_pos]), buffer, size > LOG_BYTES ? LOG_BYTES : size);
 
@@ -86,11 +84,10 @@ ssize_t  msg_write(struct file *filp, const char __user *buffer, size_t size, lo
     plidbg_msg->log[plidbg_msg->w_pos][LOG_BYTES-1] = '\0';
 
     plidbg_msg->w_pos = (plidbg_msg->w_pos + 1)  % TOTAL_LOGS;
+	
+    up(&lidbg_msg_sem);
+	
     complete(&msg_ready);
-
-
-
-    //up(&lidbg_msg_sem);
 
 
     return size;
@@ -99,14 +96,14 @@ ssize_t  msg_write(struct file *filp, const char __user *buffer, size_t size, lo
 
 int msg_open(struct inode *inode, struct file *filp)
 {
-    down(&lidbg_msg_sem);
+    //down(&lidbg_msg_sem);
 
     return 0;
 }
 
 int msg_release(struct inode *inode, struct file *filp)
 {
-    up(&lidbg_msg_sem);
+    //up(&lidbg_msg_sem);
 
     return 0;
 }
