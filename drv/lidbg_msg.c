@@ -76,6 +76,7 @@ ssize_t  msg_write(struct file *filp, const char __user *buffer, size_t size, lo
 
 
     down(&lidbg_msg_sem);
+    memset(&(plidbg_msg->log[plidbg_msg->w_pos]), '\0', LOG_BYTES);
 
     copy_from_user(&(plidbg_msg->log[plidbg_msg->w_pos]), buffer, size > LOG_BYTES ? LOG_BYTES : size);
 
