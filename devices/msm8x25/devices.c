@@ -605,6 +605,8 @@ static void devices_late_resume(struct early_suspend *handler)
     if(platform_id ==  PLATFORM_FLY)
     {
 		i2c_c_ctrl = 0;
+		
+		SOC_IO_Config(MCU_IIC_REQ_I,GPIO_CFG_INPUT,GPIO_CFG_PULL_UP,GPIO_CFG_16MA);
 		TELL_LPC_PWR_ON;
 
 		
@@ -738,6 +740,7 @@ static int soc_dev_resume(struct platform_device *pdev)
     if(platform_id ==  PLATFORM_FLY)
     {
     	
+		SOC_IO_Config(MCU_IIC_REQ_I,GPIO_CFG_INPUT,GPIO_CFG_PULL_UP,GPIO_CFG_16MA);
     	TELL_LPC_PWR_ON;
         PWR_EN_ON;
 		
