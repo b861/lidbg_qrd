@@ -155,7 +155,7 @@ void VideoReset_in(void)
 {
 printk("reset tw9912 and tc358746\n");
 //Tw9912Reset_in();
-//TC358_Hardware_Rest();
+TC358_Hardware_Rest();
 }
 int static Change_channel(void)
 {
