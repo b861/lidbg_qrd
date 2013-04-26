@@ -94,7 +94,7 @@ static u8 Tw9912_image_global_AUX_BACK[5][2] =
     {0x10, 0x02}, //BRIGHTNESS
     {0x11, 0x54}, //CONTRAST
 
-    {0x15, 0xff}, //HUE
+    {0x14, 0xff}, //HUE
     {0x13, 0x72}, //SHARPNESS
     {0x14, 0x72}, //SHARPNESS
 };
@@ -112,7 +112,7 @@ static u8 Tw9912_image_global_AUX_BACK_PAL_I[5][2] =
     {0x10, 0x02}, //BRIGHTNESS
     {0x11, 0x54}, //CONTRAST
 
-    {0x15, 0xff}, //HUE
+    {0x14, 0xff}, //HUE
     {0x13, 0x72}, //SHARPNESS
     {0x14, 0x72}, //SHARPNESS
 };
@@ -177,7 +177,7 @@ int static VideoImage(void)
     int ret;
     register int i = 0;
     u8 Tw9912_image[2] = {0x17, 0x87,}; //default input pin selet YIN0ss
-    printk("\ntw9912:@@@@@VideoImage() info_com_top_Channel =%d\n", info_com_top_Channel);
+    printk("tw9912:@@@@@VideoImage() info_com_top_Channel =%d\n", info_com_top_Channel);
     for(i = 0; i < 5; i++)
     {
         if(info_com_top_Channel == YIN3)//back or AUX
@@ -606,7 +606,7 @@ Vedio_Format flyVideoTestSignalPin_in(u8 Channel)
     }
 
 	//mutex_unlock(&lock_chipe_config);
-	//return PAL_I;
+	//return NTSC_I;
     if(Channel == SEPARATION || Channel == YIN2)
     {
         ret = testing_NTSCp_video_signal();

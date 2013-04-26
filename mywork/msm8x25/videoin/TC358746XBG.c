@@ -342,64 +342,65 @@ int ret;
         case NTSC_I:
         case NTSC_P:
             TC358_Register_config(NTSCp_init_tab);
-            printk("\n\nTC358746:parameter is NTSCp_init_tab!\n\n");
+            printk("TC358746:parameter is NTSCp_init_tab!\n");
             break;
 
         case PAL_I:
         case PAL_P:
             TC358_Register_config(PALp_init_tab);
-            printk("\n\nTC358746:parameter is PALp_init_tab!\n\n");
+            printk("TC358746:parameter is PALp_init_tab!\n");
             break;
 
         case STOP_VIDEO:
             TC358_Register_config(Stop_tab);
-            printk("\n\nTC358746:parameter is is Stop_tab!\n\n");
+            printk("TC358746:parameter is is Stop_tab!\n");
             break;
         case COLORBAR:
             colorbar_init();
-            printk("\n\nTC358746:parameter is is COLORBAR!\n\n");
+            printk("TC358746:parameter is is COLORBAR!\n");
             break;
         case COLORBAR+TC358746XBG_BLUE:
             colorbar_init_blue(TC358746XBG_BLUE);
-            printk("\n\nTC358746:parameter is is COLORBAR TC358746XBG_BLUE!\n\n");
+            printk("TC358746:parameter is is COLORBAR TC358746XBG_BLUE!\n");
             break;
         case COLORBAR+TC358746XBG_RED:
             colorbar_init_blue(TC358746XBG_RED);
-            printk("\n\nTC358746:parameter is is COLORBAR TC358746XBG_RED!\n\n");
+            printk("TC358746:parameter is is COLORBAR TC358746XBG_RED!\n");
             break;
         case COLORBAR+TC358746XBG_GREEN:
             colorbar_init_blue(TC358746XBG_GREEN);
-            printk("\n\nTC358746:parameter is is COLORBAR TC358746XBG_GREEN!\n\n");
+            printk("TC358746:parameter is is COLORBAR TC358746XBG_GREEN!\n");
             break;
         case COLORBAR+TC358746XBG_LIGHT_BLUE:
             colorbar_init_blue(TC358746XBG_LIGHT_BLUE);
-            printk("TC358746:parameter is is COLORBAR TC358746XBG_LIGHT_BLUE!\n\n");
+            printk("TC358746:parameter is is COLORBAR TC358746XBG_LIGHT_BLUE!\n");
             break;
         case COLORBAR+TC358746XBG_BLACK:
 	    colorbar_init_user();
-	    printk("TC358746:parameter is colorbar_init_user!\n\n");
+	    printk("TC358746:parameter is colorbar_init_user!\n");
             break;
         case COLORBAR+TC358746XBG_YELLOW:
       	    colorbar_init_blue(TC358746XBG_YELLOW);
-       	    printk("\n\nTC358746:parameter is is COLORBAR TC358746XBG_YELLOW!\n\n");
+       	    printk("TC358746:parameter is is COLORBAR TC358746XBG_YELLOW!\n");
         break;
         case COLORBAR + TC358746XBG_WHITE+1://number 15
       	    colorbar_init_1();
-       	    printk("\n\nTC358746:parameter only lingceng_init_tab!\n\n");
+       	    printk("TC358746:parameter only lingceng_init_tab!\n");
         break;
 		
         default :
             colorbar_init();
-            printk("\n\nTC358746:parameter is default NTSCi_init_tab!\n\n");
+            printk("TC358746:parameter is default NTSCi_init_tab!\n");
             break;
         }
     }
     else
     {
-        printk("\n\nTC358746:error:you input TC358746 parameter is not have !\n\n");
+        printk("TC358746:error:you input TC358746 parameter is not have !\n");
     }
-    tc358746_dbg(KERN_INFO "Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);
-    printk("TC358 inital done\n");
+    tc358746_dbg(KERN_INFO 
+		"Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);
+    printk("TC358 inital done\n\n");
 
 }
 #if 0
