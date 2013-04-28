@@ -989,7 +989,7 @@ SOC_Display_Get_Res(&screen_x, &screen_y);
     // SOC_IO_Output(SHUTDOWN_PORT_GROUP, SHUTDOWN_PORT_INDEX, 0); //temprory
 
     msleep(10);
-    for(count = 0; count < 10; count++)
+    for(count = 0; count < 5; count++)
     {
         //printk("come into ----------->35\n");
         ret = goodix_init_panel(ts);
@@ -1114,7 +1114,7 @@ static int goodix_ts_resume(struct i2c_client *client)
     printk("come into [%s]========futengfei====== [futengfei]=\n", __func__);
     printk(KERN_INFO "Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);
 
-    for(retry = 0; retry < 30; retry++)
+    for(retry = 0; retry < 5; retry++)
     {
         goodix_init_panel(ts);
         init_err = SOC_I2C_Rec(1, 0x55, 0x68, GT811_check, 6 );

@@ -946,7 +946,7 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
 #if 1
 err_gpio_request_failed:
     //printk("goodix_init_panel:come to send init_panel==============futengfei=\n");
-    for(retry = 0; retry < 10; retry++)
+    for(retry = 0; retry < 5; retry++)
     {
         ret = goodix_init_panel(ts);
         msleep(2);
@@ -1221,7 +1221,7 @@ static int goodix_ts_resume(struct i2c_client *client)
     printk("come into [%s]========futengfei===fukesi===0829forGT811 RESUME RESET [futengfei]=\n", __func__);
     printk(KERN_INFO "Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);
 
-    for(retry = 0; retry < 30; retry++)
+    for(retry = 0; retry < 5; retry++)
     {
         goodix_init_panel(ts);
         init_err = SOC_I2C_Rec(1, 0x5d, 0x68, GT811_check, 6 );
