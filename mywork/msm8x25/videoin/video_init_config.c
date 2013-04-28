@@ -84,37 +84,37 @@ const u8 Image_Config_AUX_BACK[5][11] = //back or AUX
 {
        /*0*/		/*1*/		/*2*/		/*3*/		/*4*/		/*5*/		/*6*/		/*7*/		/*8*/		/*9*/		/*10*/
     {	0x15,		0X0f, 		0x09,		0x05,		0x03,		0x02,		0xf4,		0xf0,		0xe9,	        0xe0,		0xc9,	}, //BRIGHTNESS
-    {	0x33,		0x35,		0x39,		0x40,		0x45,		0x54,		0x92,		0xa2,		0xb2	,	0xc2,		0xd2,	},//CONTRAST
+    {	0x33,		0x35,		0x39,		0x40,		0x45,		0x54,		0x92,		0x59,		0xb2	,	0xc2,		0xd2,	},//CONTRAST
     {	0xa9,		0xb5,		0xc5,		0xe0,		0xf1,		0xff,		0x20,		0x30	,	0x40,		0x50,		0x60,},//HUE
-    {0x00,			0x22,		0x42,		0x52,		0x62,		0x72, 		0x82,		0x92,		0xa2,		0xb2,		0xd2,},//SHARPNESS
-    {	0x00,		0x22,		0x42,		0x52,		0x62,		0x72, 		0x82,		0x92,		0xa2,		0xb2,		0xd2,},//SHARPNESS
+    {0x00,			0x22,		0x42,		0x52,		0x62,		0x80, 		0x82,		0x92,		0xa2,		0xb2,		0xd2,},//SHARPNESS
+    {	0x00,		0x22,		0x42,		0x52,		0x62,		0x80, 		0x82,		0x92,		0xa2,		0xb2,		0xd2,},//SHARPNESS
 };
 static u8 Tw9912_image_global_AUX_BACK[5][2] =
 {
     {0x10, 0x02}, //BRIGHTNESS
     {0x11, 0x54}, //CONTRAST
 
-    {0x14, 0x72}, //HUE
-    {0x13, 0x72}, //SHARPNESS
-    {0x14, 0x72}, //SHARPNESS
+    {0x14, 0x80}, //HUE
+    {0x13, 0x80}, //SHARPNESS
+    {0x14, 0x80}, //SHARPNESS
 };
 const u8 Image_Config_AUX_BACK_PAL_I[5][11] =
 {
-       /*0*/		/*1*/		/*2*/		/*3*/		/*4*/		/*5*/	/*6*/	/*7*/	/*8*/	/*9*/	/*10*/
+       /*0*/		/*1*/		/*2*/		/*3*/		/*4*/		/*5*/		/*6*/		/*7*/		/*8*/		/*9*/		/*10*/
     {	0x2f,		0x20,		0x15,		0X0f, 		0x09,		0x02,		0xfa,		0xf0,		0xe9,	        0xe0,		0xc9,	}, //BRIGHTNESS
-    {	0x25,		0x30,		0x35,		0x39,		0x40,		0x54,		0x60,		0x65,		0x6f,		0x75,		0x7a,},//CONTRAST
+    {	0x25,		0x30,		0x35,		0x39,		0x40,		0x54,		0x57,		0x59,		0x6f,		0x75,		0x7a,},//CONTRAST
     {	0xa9,		0xb5,		0xc5,		0xe0,		0xf1,		0xff,		0x20,		0x30	,	0x40,		0x50,		0x60,},//HUE
-     {	0x00,		0x22,		0x42,		0x52,		0x62,		0x72, 		0x82,		0x92,		0xa2,		0xb2,		0xd2,},//SHARPNESS
-    {	0x00,		0x22,		0x42,		0x52,		0x62,		0x72, 		0x82,		0x92,		0xa2,		0xb2,		0xd2,},//SHARPNESS
+     {	0x00,		0x22,		0x42,		0x52,		0x62,		0x80, 		0x82,		0x92,		0xa2,		0xb2,		0xd2,},//SHARPNESS
+    {	0x00,		0x22,		0x42,		0x52,		0x62,		0x80, 		0x82,		0x92,		0xa2,		0xb2,		0xd2,},//SHARPNESS
 };
 static u8 Tw9912_image_global_AUX_BACK_PAL_I[5][2] =
 {
     {0x10, 0x02}, //BRIGHTNESS
     {0x11, 0x54}, //CONTRAST
 
-    {0x14, 0x72}, //HUE
-    {0x13, 0x72}, //SHARPNESS
-    {0x14, 0x72}, //SHARPNESS
+    {0x14, 0x80}, //HUE
+    {0x13, 0x80}, //SHARPNESS
+    {0x14, 0x80}, //SHARPNESS
 };
 #endif
 const u8 Image_Config_separation[5][11] = //DVD separation
@@ -299,14 +299,14 @@ int flyVideoImageQualityConfig_in(Vedio_Effect cmd , u8 valu)
             switch (cmd)
             {
 
-            case BRIGHTNESS ://ok
+            case CONTRAST://ok
                 Tw9912_image[0] = 0x10;
                 Tw9912_image[1] = Image_Config_AUX_BACK[0][10-valu];
 
                 Tw9912_image_global_AUX_BACK[0][1] = Image_Config_AUX_BACK[0][10-valu]; //remember
                 ret = write_tw9912(&Tw9912_image);
                 break;
-            case CONTRAST ://ok
+            case BRIGHTNESS ://ok
                 Tw9912_image[0] = 0x11;
                 //if(global_video_format_flag = NTSC_I)
                {
@@ -359,14 +359,14 @@ int flyVideoImageQualityConfig_in(Vedio_Effect cmd , u8 valu)
             switch (cmd)
             {
 
-            case BRIGHTNESS ://ok
+            case CONTRAST://ok
                 Tw9912_image[0] = 0x10;
                 Tw9912_image[1] = Image_Config_AUX_BACK_PAL_I[0][10-valu];
 
                 Tw9912_image_global_AUX_BACK_PAL_I[0][1] = Image_Config_AUX_BACK_PAL_I[0][10-valu]; //remember
                 ret = write_tw9912(&Tw9912_image);
                 break;
-            case CONTRAST ://ok
+            case BRIGHTNESS://ok
              Tw9912_image[0] = 0x11;
                 //if(global_video_format_flag = NTSC_I)
               {
@@ -769,7 +769,7 @@ void video_init_config_in(Vedio_Format config_pramat)
             init_tw9912_ent(info_com_top_Channel);
             mutex_lock(&lock_chipe_config);
         }
-        VideoImage();
+     //   VideoImage();
         //msleep(300);//wait for video Steady display
         /*
         		printk("\r\n");
