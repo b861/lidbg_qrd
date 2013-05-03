@@ -39,7 +39,8 @@ void Tw9912_hardware_reset(void)
     tw9912_dbg("%s:tw9912_RESX_DOWN\n",__func__);
     tw9912_RESX_DOWN;
     tw9912_RESX_UP;
-    Tw9912_init_agin();
+    //Tw9912_init_agin();
+    Tw9912_init_NTSCp();
     tw9912_reset_flag_jam = 0; //\u5524\u9192\u540e\u7b2c\u4e00\u6b21\u8fdb\u5165DVD\u5bf9tw9912\u8fdb\u884c\u590d\u4f4d
 }
 i2c_ack read_tw9912(unsigned int sub_addr, char *buf )
@@ -688,7 +689,8 @@ Vedio_Format testing_NTSCp_video_signal()
     u8 valu;//default input pin selet YIN0
     tw9912_dbg("testing_NTSCp_video_signal()\n");
     if(the_last_config.Channel != SEPARATION)
-        Tw9912_init_NTSCp();
+       // Tw9912_init_NTSCp();
+       Tw9912_YIN3ToYUV_init_agin();
     read_tw9912(0xc1, &valu);
     if(valu & 0x08) //bit3 -->Composite Sync detection status
     {
@@ -1042,7 +1044,7 @@ int Tw9912_init_agin(void)
     u32 i = 0;
     u8 *config_pramat_piont = NULL;
     tw9912_dbg("Tw9912_init_agin +\n");
-    TC9912_id();
+    //TC9912_id();
     the_last_config.Channel = YIN3;
     the_last_config.format = NTSC_I;
     config_pramat_piont=TW9912_INIT_AGAIN;
@@ -1054,6 +1056,28 @@ int Tw9912_init_agin(void)
         i++;
     }
     tw9912_dbg("Tw9912_init_agin -\n");
+    return 1;
+CONFIG_not_ack_fail:
+    tw9912_dbg("%s:have NACK error!\n", __FUNCTION__);
+    return -1;
+}
+int Tw9912_YIN3ToYUV_init_agin(void)
+{
+    u32 i = 0;
+    u8 *config_pramat_piont = NULL;
+    tw9912_dbg("Tw9912_YIN3ToYUV_init_agin +\n");
+   // TC9912_id();
+   the_last_config.Channel = SEPARATION;
+   the_last_config.format = NTSC_P;
+    config_pramat_piont=TW9912_YIN3ToYUV_INIT_AGAIN;
+   // config_pramat_piont = TW9912_INIT_NTSC_Interlaced_input;
+    while(config_pramat_piont[i*2] != 0xfe)
+    {
+        if(write_tw9912(&config_pramat_piont[i*2]) == NACK) goto CONFIG_not_ack_fail;
+        //		tw9912_dbg("w a=%x,v=%x\n",config_pramat_piont[i*2],config_pramat_piont[i*2+1]);
+        i++;
+    }
+    tw9912_dbg("Tw9912_YIN3ToYUV_init_agin -\n");
     return 1;
 CONFIG_not_ack_fail:
     tw9912_dbg("%s:have NACK error!\n", __FUNCTION__);
