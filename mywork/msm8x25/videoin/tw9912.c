@@ -1045,8 +1045,8 @@ int Tw9912_init_agin(void)
     TC9912_id();
     the_last_config.Channel = YIN3;
     the_last_config.format = NTSC_I;
-    //config_pramat_piont=TW9912_INIT_AGAIN;
-    config_pramat_piont = TW9912_INIT_NTSC_Interlaced_input;
+    config_pramat_piont=TW9912_INIT_AGAIN;
+   // config_pramat_piont = TW9912_INIT_NTSC_Interlaced_input;
     while(config_pramat_piont[i*2] != 0xfe)
     {
         if(write_tw9912(&config_pramat_piont[i*2]) == NACK) goto CONFIG_not_ack_fail;
