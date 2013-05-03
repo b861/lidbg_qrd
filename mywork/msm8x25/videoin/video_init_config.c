@@ -600,7 +600,7 @@ Vedio_Format flyVideoTestSignalPin_in(u8 Channel)
         (the_last_config.Channel == YIN3  && (Channel == YIN2 || Channel == SEPARATION))
     )
     {
-        SOC_Write_Servicer(VIDEO_SHOW_BLACK);
+        //SOC_Write_Servicer(VIDEO_SHOW_BLACK);
         Change_channel();
 
     }
@@ -749,7 +749,7 @@ void video_init_config_in(Vedio_Format config_pramat)
     printk("tw9912:config channal is %d\n",info_com_top_Channel);
     //spin_lock(&spin_chipe_config_lock);
     mutex_lock(&lock_chipe_config);
-    SOC_Write_Servicer(VIDEO_NORMAL_SHOW);
+    //SOC_Write_Servicer(VIDEO_NORMAL_SHOW);
 
     if(info_com_top_Channel == SEPARATION || info_com_top_Channel == YIN2)
     {
