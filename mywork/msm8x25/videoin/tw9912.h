@@ -11,7 +11,7 @@
 #define TW9912_RESET 43
 
 extern u8 tw9912_signal_unstabitily_for_Tw9912_init_flag;
-#if 0
+#if 1
 #define tw9912_dbg(msg...)  do { printk( KERN_CRIT "TW9912: " msg); }while(0)
 #else
 #define tw9912_dbg(msg...)  do {}while(0)
