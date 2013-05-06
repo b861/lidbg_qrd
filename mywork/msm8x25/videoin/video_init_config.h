@@ -3,6 +3,7 @@
 #include "i2c_io.h"
 #include "tw9912.h"
 #include "TC358746XBG.h"
+#define CARD_TYPE_HONDA_XIYU
 #if 0
 #define video_config_debug(msg...)  do { printk( KERN_CRIT "flyvideo: " msg); }while(0)
 #else
