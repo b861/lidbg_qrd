@@ -6,7 +6,7 @@ static Vedio_Channel info_com_top_Channel = YIN2;
 extern TW9912_Signal signal_is_how[5];
 extern Last_config_t the_last_config;
 static struct task_struct *Signal_Test = NULL;
-
+static u8 flag_now_config_channal_AUX_or_Astren=0; //0 is Sstren 1 is AUX
 //spinlock_t spin_chipe_config_lock;
 struct mutex lock_chipe_config;
 extern struct mutex lock_com_chipe_config;
@@ -52,7 +52,7 @@ int static VideoImage(void)
     register int i = 0;
     u8 Tw9912_image[2] = {0x17, 0x87,}; //default input pin selet YIN0ss
     printk("tw9912:@@@@@VideoImage() info_com_top_Channel =%d\n", info_com_top_Channel);
-    for(i = 0; i < 5; i++)
+for(i = 0; i < 5; i++)
     {
         if(info_com_top_Channel == YIN3)//back or AUX
         {
@@ -64,6 +64,23 @@ int static VideoImage(void)
         else //DVD SEPARATION
             ret = write_tw9912(&Tw9912_image_global_separation[i]);
     }
+
+if(flag_now_config_channal_AUX_or_Astren == 0)//Astren
+	{
+		if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
+			{
+				Tw9912_image[0] = 0x12;
+				Tw9912_image[1] = 0x1f;
+				ret = write_tw9912(&Tw9912_image);
+			}
+		else
+			{
+				Tw9912_image[0] = 0x12;
+				Tw9912_image[1] = 0xff;
+				ret = write_tw9912(&Tw9912_image);
+			}
+	}
+
 #ifdef BOARD_V1
     if(info_com_top_Channel == YIN3)// back or AUX
     {
@@ -128,7 +145,36 @@ int flyVideoImageQualityConfig_in(Vedio_Effect cmd , u8 valu)
     printk("\ntw9912:@@@@@flyVideoImageQualityConfig_in(cmd =%d,valu=%d)\n", cmd, valu);
     //spin_lock(&spin_chipe_config_lock);
     mutex_lock(&lock_chipe_config);
+/**************************************Astren************************************************/
+	if(valu == 240)
+	{
+	printk("Astern\n");
+	flag_now_config_channal_AUX_or_Astren = 0;
+	     if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
+	        {
+	        Tw9912_image_global_AUX_BACK[0][1] = 0x31;
+	        Tw9912_image_global_AUX_BACK[1][1] = 0x54;
+		 Tw9912_image_global_AUX_BACK[2][1] = 0x90;
+	        Tw9912_image_global_AUX_BACK[3][1] = 0x80;
+		 Tw9912_image_global_AUX_BACK[4][1] = 0x90;
+		 printk("Tw9912_image_global_AUX_BACK reset valu\n");
+	         ret =ACK;
+	     	 }
+	     else//PALi
+	     	{
+	        Tw9912_image_global_AUX_BACK_PAL_I[0][1]= 0xff;
+	        Tw9912_image_global_AUX_BACK_PAL_I[1][1]= 0x58;
+	        Tw9912_image_global_AUX_BACK_PAL_I[2][1]= 0x80;
+	        Tw9912_image_global_AUX_BACK_PAL_I[3][1]= 0x50;
+	        Tw9912_image_global_AUX_BACK_PAL_I[4][1]= 0x80;
+	         ret =ACK;
+		 }
 
+	mutex_unlock(&lock_chipe_config);
+	return ret;
+	}
+
+/**************************************AUX********************************************/
     if(valu > 10)
     {
         printk("\ntw9912:flyVideoImageQualityConfig_in() input valu is bad 10 errror\n\n");
@@ -137,6 +183,8 @@ int flyVideoImageQualityConfig_in(Vedio_Effect cmd , u8 valu)
     }
     if(info_com_top_Channel == YIN3)
     {
+    printk("AUX\n");
+    flag_now_config_channal_AUX_or_Astren = 1;
         if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
         {
             switch (cmd)
