@@ -1069,6 +1069,8 @@ static void fastboot_early_suspend(struct early_suspend *h)
 #endif
 
 		fastboot_task_kill_exclude(kill_exclude_process);
+		msleep(1000);
+
 #if 0
 	ignore_wakelock = 1;
 #endif
