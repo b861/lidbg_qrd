@@ -155,9 +155,9 @@ int flyVideoImageQualityConfig_in(Vedio_Effect cmd , u8 valu)
 	        Tw9912_image_global_AUX_BACK[0][1] = 0x31;
 	        Tw9912_image_global_AUX_BACK[1][1] = 0x54;
 		 Tw9912_image_global_AUX_BACK[2][1] = 0x90;
-	        Tw9912_image_global_AUX_BACK[3][1] = 0x80;
+	        Tw9912_image_global_AUX_BACK[3][1] = 0xff;
 		 Tw9912_image_global_AUX_BACK[4][1] = 0x90;
-		 printk("Tw9912_image_global_AUX_BACK reset valu\n");
+		 printk("Tw9912_image_global_AUX_BACK reset valu from NTSC_I\n");
 	         ret =ACK;
 	     	 }
 	     else//PALi
@@ -167,6 +167,7 @@ int flyVideoImageQualityConfig_in(Vedio_Effect cmd , u8 valu)
 	        Tw9912_image_global_AUX_BACK_PAL_I[2][1]= 0x80;
 	        Tw9912_image_global_AUX_BACK_PAL_I[3][1]= 0x50;
 	        Tw9912_image_global_AUX_BACK_PAL_I[4][1]= 0x80;
+		 printk("Tw9912_image_global_AUX_BACK reset valu from PAL_I\n");
 	         ret =ACK;
 		 }
 
@@ -278,7 +279,7 @@ int flyVideoImageQualityConfig_in(Vedio_Effect cmd , u8 valu)
         }
     }
     else //YUV
-    {
+    {printk("DVD\n");
         switch (cmd)
         {
         case CONTRAST ://ok
@@ -393,6 +394,7 @@ Vedio_Format camera_open_video_signal_test_in(void)
 Vedio_Format flyVideoTestSignalPin_in(u8 Channel)
 {
     Vedio_Format ret = NOTONE;
+    static u8 Format_count = 0;
     //spin_lock(&spin_chipe_config_lock);
     //  return NTSC_I;
     mutex_lock(&lock_chipe_config);
@@ -446,6 +448,22 @@ Vedio_Format flyVideoTestSignalPin_in(u8 Channel)
     //spin_unlock(&spin_chipe_config_lock);
     mutex_unlock(&lock_chipe_config);
     //global_video_format_flag=ret;//Transmitted Jiang  Control
+    
+    if( ret > 4 ) 
+	{
+		Format_count ++;
+		if(Format_count > 10)
+		{
+		  Format_count = 0 ;
+		  printk("warning : Test Input Signal Fail Now Reconfig Tw9912 \n");
+		  video_init_config_in( NTSC_I );
+		}
+	}
+	else
+	{
+		Format_count = 0;
+		signal_is_how[info_com_top_Channel].Format = ret;
+	}
     return ret;
 }
 int read_chips_signal_status(u8 cmd)
