@@ -7,6 +7,16 @@ extern TW9912_Signal signal_is_how[5];
 extern Last_config_t the_last_config;
 static struct task_struct *Signal_Test = NULL;
 static u8 flag_now_config_channal_AUX_or_Astren=0; //0 is Sstren 1 is AUX
+
+static TW9912_Image_Parameter TW9912_Image_Parameter_fly[6] = {
+																{BRIGHTNESS,5},
+																{CONTRAST,5},
+																{SHARPNESS,5},
+																{CHROMA_U,5},
+																{CHROMA_V,5},
+																{HUE,5},
+																};
+
 //spinlock_t spin_chipe_config_lock;
 struct mutex lock_chipe_config;
 extern struct mutex lock_com_chipe_config;
@@ -46,26 +56,162 @@ int static Change_channel(void)
     //msleep(20);
     //  mutex_unlock(&lock_chipe_config);
 }
+int static VideoImageParameterConfig(void)
+{
+	if (info_com_top_Channel == YIN3)
+	{
+	/**************************************Astren************************************************/
+		if(TW9912_Image_Parameter_fly[1].valu == 240)
+		{
+		printk("Astern\n");
+		flag_now_config_channal_AUX_or_Astren = 0;
+		     if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
+		        {
+		        Tw9912_image_global_AUX_BACK[0][1] = 0x10;//honda xiyu is 31 // is good 00
+		        Tw9912_image_global_AUX_BACK[1][1] = 0x63;//honda xiyu 5c //is good 58
+			 Tw9912_image_global_AUX_BACK[2][1] = 0x00;
+		        Tw9912_image_global_AUX_BACK[3][1] = 0x80;
+			 Tw9912_image_global_AUX_BACK[4][1] = 0x80;
+			 printk("Tw9912_image_global_AUX_BACK reset valu from NTSC_I\n");
+		     	 }
+		     else//PALi
+		     	{
+		        Tw9912_image_global_AUX_BACK_PAL_I[0][1]= 0x10;// is good 00
+		        Tw9912_image_global_AUX_BACK_PAL_I[1][1]= 0x63;//is good 58
+		        Tw9912_image_global_AUX_BACK_PAL_I[2][1]= 0x00;
+		        Tw9912_image_global_AUX_BACK_PAL_I[3][1]= 0x80;
+		        Tw9912_image_global_AUX_BACK_PAL_I[4][1]= 0x80;
+			 printk("Tw9912_image_global_AUX_BACK reset valu from PAL_I\n");
+			 }
+			 return 1;
+		}
+		else if(TW9912_Image_Parameter_fly[1].valu> 10)
+		{
+			printk("Error at %s you input valu = %d paramter have Problems",__func__,TW9912_Image_Parameter_fly[1].valu);
+			return -1;
+		}
+	/**************************************AUX********************************************/
+		else
+		{
+			printk("AUX\n");
+		   	 flag_now_config_channal_AUX_or_Astren = 1;
+		        if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
+		        {u8 i =0;
+			        for (i = BRIGHTNESS;i<=HUE;i++)
+			        { 
+			        switch (i)
+					{
+						case BRIGHTNESS:	
+						Tw9912_image_global_AUX_BACK[0][1] =\
+							Image_Config_AUX_BACK[0][10-TW9912_Image_Parameter_fly[BRIGHTNESS-1].valu];
+							break;
+						case CONTRAST:
+						Tw9912_image_global_AUX_BACK[1][1] =\
+							Image_Config_AUX_BACK[1][TW9912_Image_Parameter_fly[CONTRAST-1].valu];
+							break;
+						case HUE:
+						Tw9912_image_global_AUX_BACK[3][1] =\
+							Image_Config_AUX_BACK[3][TW9912_Image_Parameter_fly[CHROMA_U-1].valu];
+							Tw9912_image_global_AUX_BACK[4][1] =\
+						Image_Config_AUX_BACK[4][TW9912_Image_Parameter_fly[CHROMA_U-1].valu];
+							break;
+						case CHROMA_U:
+						Tw9912_image_global_AUX_BACK[2][1] =\
+							Image_Config_AUX_BACK[2][10-TW9912_Image_Parameter_fly[HUE-1].valu];
+							break;
+						default :
+							break;
+					}
+				}	            
+		        }
+		        else//PAL_i
+		        {
+		        u8 i =0;
+			        for (i = BRIGHTNESS;i<=HUE;i++)
+			        { 
+					switch (i)
+					{
+						case BRIGHTNESS:	
+						Tw9912_image_global_AUX_BACK_PAL_I[0][1] =\
+							Image_Config_AUX_BACK_PAL_I[0][10-TW9912_Image_Parameter_fly[BRIGHTNESS-1].valu];
+							break;
+						case CONTRAST:
+						Tw9912_image_global_AUX_BACK_PAL_I[1][1] =\
+							Image_Config_AUX_BACK_PAL_I[1][TW9912_Image_Parameter_fly[CONTRAST-1].valu];
+							break;
+						case CHROMA_U:
+						Tw9912_image_global_AUX_BACK_PAL_I[3][1] =\
+							Image_Config_AUX_BACK_PAL_I[3][TW9912_Image_Parameter_fly[CHROMA_U-1].valu];
+						Tw9912_image_global_AUX_BACK_PAL_I[4][1] =\
+							Image_Config_AUX_BACK_PAL_I[4][TW9912_Image_Parameter_fly[CHROMA_U-1].valu];
+							break;
+						case HUE:
+						Tw9912_image_global_AUX_BACK_PAL_I[2][1] =\
+							Image_Config_AUX_BACK_PAL_I[2][10-TW9912_Image_Parameter_fly[HUE-1].valu];
+							break;
+						default :
+							break;
+					}
+				}	            
+		        }
+			return 1;
+		}
+	}
+	/**************************************DVDS********************************************/
+	 else 
+	{u8 i =0;
+		printk("DVD\n");
+	        for (i = BRIGHTNESS;i<=HUE;i++)
+	        {
+			switch (i)
+			{
+			case  CONTRAST:	
+				Tw9912_image_global_separation[0][1] =\
+					Image_Config_separation[0][TW9912_Image_Parameter_fly[BRIGHTNESS-1].valu];
+				break;
+			case BRIGHTNESS:
+				Tw9912_image_global_separation[1][1] =\
+					Image_Config_separation[1][TW9912_Image_Parameter_fly[CONTRAST-1].valu];
+				break;
+			case HUE:
+				Tw9912_image_global_separation[2][1] =\
+					Image_Config_separation[2][TW9912_Image_Parameter_fly[HUE-1].valu];
+				break;
+			case CHROMA_U:
+				Tw9912_image_global_separation[3][1] =\
+					Image_Config_separation[3][TW9912_Image_Parameter_fly[CHROMA_U-1].valu];
+				Tw9912_image_global_separation[4][1] =\
+					Image_Config_separation[4][TW9912_Image_Parameter_fly[CHROMA_U-1].valu];
+				break;
+			default :
+				break;
+			}
+		}
+		  
+	}
+return 1;
+}
 int static VideoImage(void)
 {
     int ret;
     register int i = 0;
     u8 Tw9912_image[2] = {0x17, 0x87,}; //default input pin selet YIN0ss
-    printk("tw9912:@@@@@VideoImage() info_com_top_Channel =%d\n", info_com_top_Channel);
-for(i = 0; i < 5; i++)
-    {
-        if(info_com_top_Channel == YIN3)//back or AUX
-        {
-            if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
-                ret = write_tw9912(&Tw9912_image_global_AUX_BACK[i]);
-            else
-                ret = write_tw9912(&Tw9912_image_global_AUX_BACK_PAL_I[i]);
-        }
-        else //DVD SEPARATION
-            ret = write_tw9912(&Tw9912_image_global_separation[i]);
+    printk("VideoImage()\n");
+    VideoImageParameterConfig();
+    for(i = 0; i < 5; i++)
+	    {
+	        if(info_com_top_Channel == YIN3)//back or AUX
+	        {
+	            if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
+	                ret = write_tw9912(&Tw9912_image_global_AUX_BACK[i]);
+	            else
+	                ret = write_tw9912(&Tw9912_image_global_AUX_BACK_PAL_I[i]);
+	        }
+	        else //DVD SEPARATION
+	            ret = write_tw9912(&Tw9912_image_global_separation[i]);
     }
 
-if(flag_now_config_channal_AUX_or_Astren == 0)//Astren
+    if(flag_now_config_channal_AUX_or_Astren == 0)//Astren
 	{
 		if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
 			{
@@ -82,241 +228,53 @@ if(flag_now_config_channal_AUX_or_Astren == 0)//Astren
 	}
 
 #ifdef BOARD_V1
-    if(info_com_top_Channel == YIN3)// back or AUX
-    {
-        ret = write_tw9912(Tw9912_image);
-        Tw9912_image[0] = 0x08;
-        Tw9912_image[1] = 0x14; // image down 5 line
-        ret = write_tw9912(Tw9912_image);
-        Tw9912_image[0] = 0x0a;
-        Tw9912_image[1] = 0x22; // image down 5 line
-        ret = write_tw9912(Tw9912_image);
-    }
-    else if(info_com_top_Channel == YIN2)//DVD
-    {
-        u8 Tw9912_image[2] = {0x08, 0x1a,}; //image reft 5 line
-        ret = write_tw9912(Tw9912_image);
-    }
-    else
-    {
-        ;
-    }
+	    if(info_com_top_Channel == YIN3)// back or AUX
+	    {
+	        ret = write_tw9912(Tw9912_image);
+	        Tw9912_image[0] = 0x08;
+	        Tw9912_image[1] = 0x14; // image down 5 line
+	        ret = write_tw9912(Tw9912_image);
+	        Tw9912_image[0] = 0x0a;
+	        Tw9912_image[1] = 0x22; // image down 5 line
+	        ret = write_tw9912(Tw9912_image);
+	    }
+	    else if(info_com_top_Channel == YIN2)//DVD
+	    {
+	        u8 Tw9912_image[2] = {0x08, 0x1a,}; //image reft 5 line
+	        ret = write_tw9912(Tw9912_image);
+	    }
+	    else
+	    {
+	        ;
+	    }
 #endif
-#ifdef BOARD_V2
-    if(info_com_top_Channel == YIN2)//dvd cvbs
-    {
-        ;
-        /*
-            Tw9912_image[0] = 0x0B; //image dowd 3 line
-            Tw9912_image[1] = 0xec; // image down 3 line
-            ret = write_tw9912(Tw9912_image);
-        */
-    }
-    else 	if(info_com_top_Channel == YIN3)//aux back_cvbs
-    {
-        if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
-        {
-            ;
-            /*
-             Tw9912_image[0] = 0x0B; //image dowd 3 line
-             Tw9912_image[1] = 0xec; // image down 3 line
-             ret = write_tw9912(Tw9912_image);
-                      */
-        }
-        else//pal
-        {
-            ;
-            /*
-              Tw9912_image[0]=0x0B;//image dowd 3 line
-            	Tw9912_image[1]=0xe6;// image down 3 line
-            	ret = write_tw9912(Tw9912_image);
-            */
-            //config at tw9912.c function --> i2c_ack Correction_Parameter_fun(Vedio_Format format)
-        }
-
-    }
-#endif
-    return ret;
+return ret;
 }
 int flyVideoImageQualityConfig_in(Vedio_Effect cmd , u8 valu)
 {
     int ret;
     u8 Tw9912_image[2] = {0, 0,}; //default input pin selet YIN0ss
-    printk("\ntw9912:@@@@@flyVideoImageQualityConfig_in(cmd =%d,valu=%d)\n", cmd, valu);
-    //spin_lock(&spin_chipe_config_lock);
-    mutex_lock(&lock_chipe_config);
-/**************************************Astren************************************************/
-	if(valu == 240)
+    video_config_debug("flyVideoImage(%d,%d)\n", cmd, valu);
+	switch(cmd)
 	{
-	printk("Astern\n");
-	flag_now_config_channal_AUX_or_Astren = 0;
-	     if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
-	        {
-	        Tw9912_image_global_AUX_BACK[0][1] = 0x31;
-	        Tw9912_image_global_AUX_BACK[1][1] = 0x54;
-		 Tw9912_image_global_AUX_BACK[2][1] = 0x90;
-	        Tw9912_image_global_AUX_BACK[3][1] = 0xff;
-		 Tw9912_image_global_AUX_BACK[4][1] = 0x90;
-		 printk("Tw9912_image_global_AUX_BACK reset valu from NTSC_I\n");
-	         ret =ACK;
-	     	 }
-	     else//PALi
-	     	{
-	        Tw9912_image_global_AUX_BACK_PAL_I[0][1]= 0xff;
-	        Tw9912_image_global_AUX_BACK_PAL_I[1][1]= 0x58;
-	        Tw9912_image_global_AUX_BACK_PAL_I[2][1]= 0x80;
-	        Tw9912_image_global_AUX_BACK_PAL_I[3][1]= 0x50;
-	        Tw9912_image_global_AUX_BACK_PAL_I[4][1]= 0x80;
-		 printk("Tw9912_image_global_AUX_BACK reset valu from PAL_I\n");
-	         ret =ACK;
-		 }
-
-	mutex_unlock(&lock_chipe_config);
-	return ret;
+		case CONTRAST:TW9912_Image_Parameter_fly[CONTRAST-1].valu = valu;
+			break;
+		case BRIGHTNESS:TW9912_Image_Parameter_fly[BRIGHTNESS-1].valu= valu;
+			break;
+		case SHARPNESS:TW9912_Image_Parameter_fly[SHARPNESS-1].valu = valu;
+			break;
+		case CHROMA_U:TW9912_Image_Parameter_fly[CHROMA_U-1].valu= valu;
+			break;
+		case CHROMA_V:TW9912_Image_Parameter_fly[CHROMA_V-1].valu = valu;
+			break;
+		case HUE:TW9912_Image_Parameter_fly[HUE-1].valu = valu;
+			break;
+		default : printk("Error at %s you input cmd = %d paramter have Problems",__func__,cmd);
+			break;
 	}
-
-/**************************************AUX********************************************/
-    if(valu > 10)
-    {
-        printk("\ntw9912:flyVideoImageQualityConfig_in() input valu is bad 10 errror\n\n");
-        mutex_unlock(&lock_chipe_config);
-        return -1;
-    }
-    if(info_com_top_Channel == YIN3)
-    {
-    printk("AUX\n");
-    flag_now_config_channal_AUX_or_Astren = 1;
-        if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
-        {
-            switch (cmd)
-            {
-
-            case CONTRAST://ok
-                Tw9912_image[0] = 0x10;
-                Tw9912_image[1] = Image_Config_AUX_BACK[0][10-valu];
-                Tw9912_image_global_AUX_BACK[0][1] = Tw9912_image[1]; //remember
-                ret = write_tw9912(&Tw9912_image);
-                break;
-            case BRIGHTNESS ://ok
-                Tw9912_image[0] = 0x11;
-                Tw9912_image[1] = Image_Config_AUX_BACK[1][valu];
-                Tw9912_image_global_AUX_BACK[1][1] = Tw9912_image[1];
-                ret = write_tw9912(&Tw9912_image);
-                Tw9912_image[0] = 0x12;
-                if(valu > 5)
-                    Tw9912_image[1] = 0x10 | (valu + 5);
-                else if(valu == 5)
-                    Tw9912_image[1] = 0x10;
-                else
-                    Tw9912_image[1] = 0x10 | valu;
-                ret = write_tw9912(&Tw9912_image);
-
-                break;
-            case HUE ://bad
-                Tw9912_image[0] = 0x14;
-                Tw9912_image[1] = Image_Config_AUX_BACK[4][valu];
-                Tw9912_image_global_AUX_BACK[2][1] = Tw9912_image[1];
-                ret = write_tw9912(&Tw9912_image);
-                break;
-            case SHARPNESS ://bad
-            case CHROMA_U :
-            case CHROMA_V :
-                Tw9912_image[1] = Image_Config_AUX_BACK[3][valu];
-                Tw9912_image_global_AUX_BACK[3][1] = Tw9912_image[1];
-                Tw9912_image[0] = 0x13;
-                ret = write_tw9912(&Tw9912_image);
-                Tw9912_image[1] = Image_Config_AUX_BACK[4][valu];
-                Tw9912_image_global_AUX_BACK[4][1] = Tw9912_image[1];
-                Tw9912_image[0] = 0x14;
-                ret = write_tw9912(&Tw9912_image);
-                break;
-            }
-        }
-        else
-        {
-            switch (cmd)
-            {
-            case CONTRAST://ok
-                Tw9912_image[0] = 0x10;
-                Tw9912_image[1] = Image_Config_AUX_BACK_PAL_I[0][10-valu];
-
-                Tw9912_image_global_AUX_BACK_PAL_I[0][1] = Tw9912_image[1]; //remember
-                ret = write_tw9912(&Tw9912_image);
-                break;
-            case BRIGHTNESS://ok
-                Tw9912_image[0] = 0x11;
-                Tw9912_image[1] = Image_Config_AUX_BACK_PAL_I[1][valu];
-                Tw9912_image_global_AUX_BACK_PAL_I[1][1] = Tw9912_image[1];
-                ret = write_tw9912(&Tw9912_image);
-                Tw9912_image[0] = 0x12;
-                if(valu > 5)
-                    Tw9912_image[1] = 0xf0 | (valu + 5);
-                else if(valu == 5)
-                    Tw9912_image[1] = 0xf0;
-                else
-                    Tw9912_image[1] = 0xf0 | valu;
-                ret = write_tw9912(&Tw9912_image);
-                break;
-            case HUE ://bad
-                Tw9912_image[0] = 0x14;
-                Tw9912_image[1] = Image_Config_AUX_BACK_PAL_I[4][valu];
-                Tw9912_image_global_AUX_BACK_PAL_I[2][1] = Tw9912_image[1];
-                ret = write_tw9912(&Tw9912_image);
-                break;
-            case SHARPNESS ://bad
-            case CHROMA_U :
-            case CHROMA_V :
-                Tw9912_image[1] = Image_Config_AUX_BACK_PAL_I[3][valu];
-                Tw9912_image_global_AUX_BACK_PAL_I[3][1] = Tw9912_image[1];
-                Tw9912_image[0] = 0x13;
-                ret = write_tw9912(&Tw9912_image);
-                Tw9912_image[1] = Image_Config_AUX_BACK_PAL_I[4][valu];
-                Tw9912_image_global_AUX_BACK_PAL_I[4][1] = Tw9912_image[1];
-                Tw9912_image[0] = 0x14;
-                ret = write_tw9912(&Tw9912_image);
-                break;
-            }
-        }
-    }
-    else //YUV
-    {printk("DVD\n");
-        switch (cmd)
-        {
-        case CONTRAST ://ok
-            Tw9912_image[0] = 0x10;
-            Tw9912_image[1] = Image_Config_separation[0][valu];
-            Tw9912_image_global_separation[0][1] = Tw9912_image[1]; //remember
-            ret = write_tw9912(&Tw9912_image);
-            break;
-        case  BRIGHTNESS://ok
-            Tw9912_image[0] = 0x11;
-            Tw9912_image[1] = Image_Config_separation[1][valu];
-            Tw9912_image_global_separation[1][1] = Tw9912_image[1];
-            ret = write_tw9912(&Tw9912_image);
-            break;
-        case HUE ://bad
-            Tw9912_image[0] = 0x15;
-            Tw9912_image[1] = Image_Config_separation[2][valu];
-            Tw9912_image_global_separation[2][1] = Tw9912_image[1];
-            ret = write_tw9912(&Tw9912_image);
-            break;
-        case SHARPNESS ://bad
-        case CHROMA_U :
-        case CHROMA_V :
-            Tw9912_image[1] = Image_Config_separation[3][valu];
-            Tw9912_image_global_separation[3][1] = Tw9912_image[1];
-            Tw9912_image[0] = 0x13;
-            ret = write_tw9912(&Tw9912_image);
-            Tw9912_image[1] = Image_Config_separation[4][valu];
-            Tw9912_image_global_separation[4][1] = Tw9912_image[1];
-            Tw9912_image[0] = 0x14;
-            ret = write_tw9912(&Tw9912_image);
-            break;
-        }
-    }
-    //spin_unlock(&spin_chipe_config_lock);
-    mutex_unlock(&lock_chipe_config);
-    return ret;
+	if(cmd == BRIGHTNESS)//wait all set doen befor application
+		VideoImage();
+return 0;
 }
 int init_tw9912_ent(Vedio_Channel Channel);
 int flyVideoInitall_in(u8 Channel)
@@ -324,7 +282,7 @@ int flyVideoInitall_in(u8 Channel)
     int ret = 1 ;
     //spin_lock(&spin_chipe_config_lock);
     mutex_lock(&lock_chipe_config);
-    printk("tw9912:@@@@@flyVideoInitall_in(Channel=%d)\n", Channel);
+    printk("flyVideoInitall_in(%d)\n", Channel);
     if (Channel >= YIN0 && Channel <= NOTONE)
     {
         //Channel = SEPARATION;
@@ -351,36 +309,36 @@ int flyVideoInitall_in(u8 Channel)
 int init_tw9912_ent(Vedio_Channel Channel)
 {
     int ret = -1 ;
-    printk("tw9912:init_tw9912_ent(Channel=%d)\n", Channel);
+    video_config_debug("init_tw9912_ent(%d)\n", Channel);
     switch (Channel)
     {
     case YIN0:
         info_Vedio_Channel = YIN0;
         ret = Tw9912_init(PAL_I, YIN0);
-        printk("TW9912:Channel selet YIN0\n");
+        video_config_debug("TW9912:Channel selet YIN0\n");
         break;
     case YIN1:
         info_Vedio_Channel = YIN1;
         ret = Tw9912_init(PAL_I, YIN1);
-        printk("TW9912:Channel selet YIN1\n");
+        video_config_debug("TW9912:Channel selet YIN1\n");
         break;
     case YIN2:
         info_Vedio_Channel = YIN2;
         ret = Tw9912_init(PAL_I, YIN2);
-        printk("TW9912:Channel selet YIN2\n");
+        video_config_debug("TW9912:Channel selet YIN2\n");
         break;
     case YIN3:
         info_Vedio_Channel = YIN3;
         ret = Tw9912_init(PAL_I, YIN3);
-        printk("TW9912:Channel selet YIN3\n");
+        video_config_debug("TW9912:Channel selet YIN3\n");
         break;
     case SEPARATION:
         info_Vedio_Channel = SEPARATION;
         ret = Tw9912_init(NTSC_P, SEPARATION);
-        printk("TW9912:Channel selet SEPARATION\n");
+        video_config_debug("TW9912:Channel selet SEPARATION\n");
         break;
     default :
-        printk("%s: you input TW9912 Channel=%d error!\n", __FUNCTION__, Channel);
+        video_config_debug("%s: you input TW9912 Channel=%d error!\n", __FUNCTION__, Channel);
         break;
     }
     return ret;
@@ -574,14 +532,14 @@ void video_init_config_in(Vedio_Format config_pramat)
 {
     int i, j;
     printk("\nVideo Module Build Time: %s %s  %s \n\n", __FUNCTION__, __DATE__, __TIME__);
-    printk("tw9912:config channal is %d\n", info_com_top_Channel);
+    video_config_debug("tw9912:config channal is %d\n", info_com_top_Channel);
     //spin_lock(&spin_chipe_config_lock);
     mutex_lock(&lock_chipe_config);
     //SOC_Write_Servicer(VIDEO_NORMAL_SHOW);
 
     if(info_com_top_Channel == SEPARATION || info_com_top_Channel == YIN2)
     {
-        printk("tw9912:%s:config_pramat->NTSC_separation\n", __func__);
+        printk("%s:config_pramat->NTSC_separation\n", __func__);
         Tw9912_init_NTSCp();
         VideoImage();
         TC358_init(NTSC_P);
