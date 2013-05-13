@@ -29,6 +29,9 @@ static DECLARE_COMPLETION(early_suspend_start);
 static DECLARE_COMPLETION(resume_ok);
 static DECLARE_COMPLETION(pwroff_start);
 
+
+static DECLARE_COMPLETION(late_suspend_start);
+
 void fastboot_set_status(LIDBG_FAST_PWROFF_STATUS status);
 
 
@@ -63,6 +66,7 @@ static struct task_struct *pwroff_task;
 static struct task_struct *suspend_task;
 static struct task_struct *resume_task;
 static struct task_struct *pwroff_task;
+static struct task_struct *late_suspend_task;
 
 bool ignore_wakelock = 0;
 
@@ -886,7 +890,8 @@ static int thread_fastboot_suspend(void *data)
                 }
                 else
                 {
-                    lidbg("thread_fastboot_suspend wait time_count=%d\n", time_count);
+                    lidbg("thread_fastboot_suspend wait time_count=%d\n", time_count);					
+					complete(&late_suspend_start);
 #ifdef HAS_LOCK_RESUME
 					wakelock_occur_count = 0;
 #endif
@@ -906,6 +911,50 @@ static int thread_fastboot_suspend(void *data)
 
 
 
+static int thread_late_suspend(void *data)
+{
+    int time_count;
+
+    while(1)
+    {
+        set_current_state(TASK_UNINTERRUPTIBLE);
+        if(kthread_should_stop()) break;
+        if(1)
+        {
+            time_count = 0;
+            wait_for_completion(&late_suspend_start);
+            while(1)
+            {
+                msleep(1000);
+                time_count++;
+                if(fastboot_get_status() == PM_STATUS_SUSPEND_PENDING)
+                {
+
+                    if(time_count >= 10)
+                    {
+                        lidbgerr("late suspend wait early suspend timeout!\n");
+						lidbg("start force suspend...\n");
+                   		ignore_wakelock = 1;
+						wake_lock(&(fb_data->flywakelock));
+						wake_unlock(&(fb_data->flywakelock));
+                        break;
+                    }
+                }
+                else
+                {
+                    lidbg("late suspend wait time_count=%d\n", time_count);
+                    break;
+
+                }
+            }
+        }
+        else
+        {
+            schedule_timeout(HZ);
+        }
+    }
+    return 0;
+}
 
 
 
@@ -1183,6 +1232,18 @@ static int  fastboot_probe(struct platform_device *pdev)
 
     }
     else wake_up_process(resume_task);
+
+
+    INIT_COMPLETION(late_suspend_start);
+    late_suspend_task = kthread_create(thread_late_suspend, NULL, "late_suspend_task");
+    if(IS_ERR(late_suspend_task))
+    {
+        lidbg("Unable to start kernel thread.\n");
+
+    }
+    else wake_up_process(late_suspend_task);
+
+
 
 	spin_lock_init(&kill_lock);
     create_new_proc_entry();
