@@ -1,5 +1,19 @@
+
+
+
+#ifdef SOC_COMPILE
 #include "lidbg.h"
+#include "fly_soc.h"
+
+#else
+#include "lidbg_def.h"
+
+#include "lidbg_enter.h"
+
+#endif
+
 #include "lidbg_to_bpmsg.h"
+
 
 static struct task_struct *bp_msg_task;
 

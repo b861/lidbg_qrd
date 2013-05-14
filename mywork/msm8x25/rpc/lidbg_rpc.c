@@ -1,6 +1,16 @@
 
 
+#ifdef SOC_COMPILE
 #include "lidbg.h"
+#include "fly_soc.h"
+
+#else
+#include "lidbg_def.h"
+
+#include "lidbg_enter.h"
+
+#endif
+#include <mach/msm_rpcrouter.h>
 
 
 enum
