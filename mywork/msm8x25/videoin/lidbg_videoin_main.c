@@ -66,8 +66,10 @@ static int thread_vedio_signal_test(void *data)
         	}
         	msleep(10);*/
 
-        printk("global_camera_working_status = %d\n", global_camera_working_status);
-	printk("read_chips_signal_status = %d\n",read_chips_signal_status(1));
+      //  printk("global_camera_working_status = %d\n", global_camera_working_status);
+     // if(read_chips_signal_status(1))
+	//printk("read_chips_signal_status = %d\n",read_chips_signal_status(1));
+	read_chips_signal_status(1);
 	//printk("Tw9912TestingChannalSignal() = %d\n",Tw9912TestingChannalSignal(SEPARATION));
 
     }
