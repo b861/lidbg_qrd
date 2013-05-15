@@ -218,8 +218,8 @@ i2c_ack ret;
 	            &input_information->component_video_format.valu);
 	if (ret == NACK) goto NACK_BREAK;
 
-//	ret = read_tw9912(input_information->macrovision_detection.index, \
-//	            &input_information->macrovision_detection.valu);
+	ret = read_tw9912(input_information->macrovision_detection.index, \
+	            &input_information->macrovision_detection.valu);
 //	if (ret == NACK) goto NACK_BREAK;
 
 //	read_tw9912(input_information->input_detection.index, \

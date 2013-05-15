@@ -353,6 +353,7 @@ Vedio_Format flyVideoTestSignalPin_in(u8 Channel)
 {
     Vedio_Format ret = NOTONE;
     static u8 Format_count = 0;
+    static u8 Format_count_flag = 0;
     //spin_lock(&spin_chipe_config_lock);
     //  return NTSC_I;
     mutex_lock(&lock_chipe_config);
@@ -373,7 +374,9 @@ Vedio_Format flyVideoTestSignalPin_in(u8 Channel)
         ret = testing_NTSCp_video_signal();
     }
     else
-    {
+    {static u8 goto_agian_test = 0;
+AGAIN_TEST_FOR_BACK_NTSC_I:    
+	goto_agian_test ++;
         switch (Channel)
         {
         case 0:
@@ -401,6 +404,9 @@ Vedio_Format flyVideoTestSignalPin_in(u8 Channel)
             printk("%s:you input TW9912 Channel=%d error!\n", __FUNCTION__, Channel);
             break;
         }
+		if(ret == 1 && goto_agian_test <= 2 ) 
+			goto AGAIN_TEST_FOR_BACK_NTSC_I; 
+		else goto_agian_test = 0;
     }
     printk("C=%d,F=%d\n", Channel, ret);
     //spin_unlock(&spin_chipe_config_lock);
@@ -410,16 +416,23 @@ Vedio_Format flyVideoTestSignalPin_in(u8 Channel)
     if( ret > 4 ) 
 	{
 		Format_count ++;
-		if(Format_count > 10)
+		if(Format_count > 10 && Format_count_flag == 0)
 		{
-		  Format_count = 0 ;
-		  printk("warning : Test Input Signal Fail Now Reconfig Tw9912 \n");
-		  video_init_config_in( NTSC_I );
+			  Format_count = 0 ;
+			  Format_count_flag = 1;
+			  printk("warning : Test Input Signal Fail Now Reconfig Tw9912 \n");
+			 // video_init_config_in( PAL_P);
+			if(info_com_top_Channel == SEPARATION || info_com_top_Channel == YIN2)
+				Tw9912_init_NTSCp();
+			else
+	        		Tw9912_init(PAL_I, YIN3);
+		  
 		}
 	}
 	else
 	{
 		Format_count = 0;
+		Format_count_flag = 0;//When the AUX does not enter ,you can not repeat the configuration
 		signal_is_how[info_com_top_Channel].Format = ret;
 	}
     return ret;
@@ -536,7 +549,6 @@ void video_init_config_in(Vedio_Format config_pramat)
     //spin_lock(&spin_chipe_config_lock);
     mutex_lock(&lock_chipe_config);
     //SOC_Write_Servicer(VIDEO_NORMAL_SHOW);
-
     if(info_com_top_Channel == SEPARATION || info_com_top_Channel == YIN2)
     {
         printk("%s:config_pramat->NTSC_separation\n", __func__);
