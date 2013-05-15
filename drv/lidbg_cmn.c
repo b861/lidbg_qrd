@@ -131,6 +131,25 @@ u32 GetNsCount(void)
 
 }
 
+// cmn_launch_user("/system/bin/insmod", "/system/lib/modules/wlan.ko"); 
+// cmn_launch_user("/system/lidbg_servicer", NULL); 
+//在Linux内核中直接运行用户空间程序
+void cmn_launch_user( char bin_path[], char argv1[])
+{
+    char *argv[] = { bin_path, argv1, NULL };
+    static char *envp[] = { "HOME=/", "TERM=linux", "PATH=/system/bin", NULL };//tell me sh where it is;
+    int ret;
+//Linux  Kernel\u63d0\u4f9b\u4e86call_usermodehelper\u51fd\u6570\uff0c\u8ba9\u6211\u4eec\u80fd\u591f\u5f02\u5e38\u65b9\u4fbf\u5730\u5728\u5185\u6838\u4e2d\u76f4\u63a5\u65b0\u5efa\u548c\u8fd0\u884c\u7528\u6237\u7a7a\u95f4\u7a0b\u5e8f\uff0c\u5e76\u4e14\u8be5\u7a0b\u5e8f\u5177\u6709root\u6743\u9650\u3002
+    ret = call_usermodehelper(bin_path, argv, envp, UMH_WAIT_EXEC);
+    //NOTE:  I test that:use UMH_NO_WAIT can't lunch the exe; UMH_WAIT_PROCwill block the ko,
+    //UMH_WAIT_EXEC  is recommended.
+    if (ret < 0)
+        lidbg("lunch [%s %s] fail!\n", bin_path, argv1);
+    else
+        lidbg("lunch [%s %s] success!\n", bin_path, argv1);
+
+}
+
 
 ssize_t  cmn_read(struct file *filp, char __user *buffer, size_t size, loff_t *offset)
 {
@@ -209,7 +228,6 @@ static void share_set_func_tbl(void)
 
     ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnlidbg_display_main = lidbg_display_main;
     ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnsoc_get_screen_res = soc_get_screen_res;
-
 
 }
 
