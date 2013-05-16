@@ -351,6 +351,8 @@ Vedio_Format camera_open_video_signal_test_in(void)
 }
 Vedio_Format flyVideoTestSignalPin_in(u8 Channel)
 {
+    static Vedio_Format printk_count_flag_next = 0;
+    static u8 printk_format_count =0;
     Vedio_Format ret = NOTONE;
     static u8 Format_count = 0;
     static u8 Format_count_flag = 0;
@@ -408,7 +410,13 @@ AGAIN_TEST_FOR_BACK_NTSC_I:
 			goto AGAIN_TEST_FOR_BACK_NTSC_I; 
 		else goto_agian_test = 0;
     }
-    printk("C=%d,F=%d\n", Channel, ret);
+	if (printk_count_flag_next != ret || printk_format_count > 20)
+		{
+		printk_format_count =0;
+		printk_count_flag_next = ret;
+    		printk("C=%d,F=%d\n", Channel, ret);
+		}
+	else printk_format_count++;
     //spin_unlock(&spin_chipe_config_lock);
     mutex_unlock(&lock_chipe_config);
     //global_video_format_flag=ret;//Transmitted Jiang  Control
@@ -416,7 +424,7 @@ AGAIN_TEST_FOR_BACK_NTSC_I:
     if( ret > 4 ) 
 	{
 		Format_count ++;
-		if(Format_count > 10 && Format_count_flag == 0)
+		if(Format_count > 30 && Format_count_flag == 0)
 		{
 			  Format_count = 0 ;
 			  Format_count_flag = 1;
