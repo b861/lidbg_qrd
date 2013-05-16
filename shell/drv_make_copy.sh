@@ -53,7 +53,7 @@ else
 	read get_key
 fi
 
-
+sh  $DBG_SHELL_PATH/copy_rel.sh 
 #if [ "$DBG_SYN_LI2XP" = "y" ]; then
 #echo "######### execute Syn_file_Li2XP.sh ##########"
 #cd  $DBG_SHELL_PATH ; pwd

@@ -27,13 +27,13 @@ mv -u $src_dir/*.ko               $dest_dir/
 echo "Modules Copy Finish!"
 
 
-src_dir=$DBG_DEV_PATH/$DBG_SOC
-echo "from" $src_dir 
-echo "to" $dest_dir
+#src_dir=$DBG_DEV_PATH/$DBG_SOC
+#echo "from" $src_dir 
+#echo "to" $dest_dir
 
-echo "Devices Modules Copy Start!"
-mv -u $src_dir/*.ko               $dest_dir/
-echo "Devices Modules Copy Finish!"
+#echo "Devices Modules Copy Start!"
+#mv -u $src_dir/*.ko               $dest_dir/
+#echo "Devices Modules Copy Finish!"
 
 #src_dir=$DBG_APP_LINUX_PATH
 #echo "appdbg Copy Start!"
