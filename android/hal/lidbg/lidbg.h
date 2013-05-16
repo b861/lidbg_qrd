@@ -20,7 +20,7 @@ __BEGIN_DECLS
 struct lidbg_device_t {
     struct hw_device_t common;
 
-    int (*send_cmd)(struct lidbg_device_t* dev, char* cmd);
+    int (*send_cmd)(struct lidbg_device_t* dev,const char* cmd);
 };
 
 

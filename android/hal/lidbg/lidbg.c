@@ -28,6 +28,18 @@ static int lidbg_send_cmd(struct lidbg_device_t* dev, char* cmd);
 static int close_lidbg(struct lidbg_device_t *dev);
 static int open_lidbg(const struct hw_module_t* module, char const* name, struct hw_device_t** device);
 
+#define LIDBG_PRINT(msg...) do{\
+	int fd;\
+	char s[64];\
+	sprintf(s, "lidbg_msg: " msg);\
+	 fd = open("/dev/lidbg_msg", O_RDWR);\
+	 if((fd == 0)||(fd == (int)0xfffffffe)|| (fd == (int)0xffffffff))break;\
+	 write(fd, s, 64);\
+	 close(fd);\
+}while(0)
+
+
+
 /**
  * device methods
  */
@@ -53,8 +65,10 @@ static int open_lidbg(const struct hw_module_t* module, char const* name, struct
 {
 
     struct lidbg_device_t *dev = malloc(sizeof(struct lidbg_device_t));
+	LIDBG_PRINT("lidbg Stub: open_lidbg\n"); 
+	
     memset(dev, 0, sizeof(*dev));
-
+    
     dev->common.tag = HARDWARE_DEVICE_TAG;
     dev->common.version = 0;
     dev->common.module = (struct hw_module_t*)module;
@@ -69,9 +83,10 @@ static int open_lidbg(const struct hw_module_t* module, char const* name, struct
 static int lidbg_send_cmd(struct lidbg_device_t* dev, char* cmd) 
 {  
     int fd;
-    LOGI("lidbg Stub: lidbg_send_cmd %s", cmd); 
+    LIDBG_PRINT("lidbg Stub: lidbg_send_cmd %s\n", cmd); 
     fd = open(DEVICE_NAME, O_RDWR);
-    write(fd, cmd, /*sizeof(cmd)*/32);
+	if((fd == 0)||(fd == (int)0xfffffffe)|| (fd == (int)0xffffffff))return -1;
+    write(fd, cmd, strlen(cmd));
     close(fd);
     return 0;
 }  
