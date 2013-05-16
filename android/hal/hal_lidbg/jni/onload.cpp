@@ -32,8 +32,7 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* reserved)
     JNIEnv* env = NULL;
     jint result = -1;
 	
-    LOGE("[futengfei]cominto===================[%s]\n",__func__ );
-
+    LOGE("[futengfei]cominto====JNI===[%s]\n", __func__);
     if (vm->GetEnv((void**) &env, JNI_VERSION_1_4) != JNI_OK) {
         LOGE("GetEnv failed!");
         return result;

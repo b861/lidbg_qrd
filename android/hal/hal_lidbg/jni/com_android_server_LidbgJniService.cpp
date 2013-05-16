@@ -47,7 +47,7 @@ enum {
 struct Devices {
     lidbg_device_t* lights[LIGHT_COUNT];
 };
-    Devices* g_lidbg_devices;
+Devices* g_lidbg_devices;
 static lidbg_device_t* get_device(hw_module_t* module, char const* name)
 {
     int err;
@@ -89,18 +89,18 @@ static void finalize_native(JNIEnv *env, jobject clazz, int ptr)
 
 static void setLight_native(JNIEnv *env, jobject clazz, jstring cmd )
 {
-    //Devices* devices = (Devices*)ptr;
- lidbg_state_t * state;
-   // if ( devices->lights[light] == NULL) {
-       // return ;
-  //  }
+	struct lidbg_state_t  state;
+	if ( g_lidbg_devices->lights[LIGHT_INDEX_BACKLIGHT]== NULL) 
+		{
+			LOGE("[futengfei]======setLight_native:not find you device by name .\n");
+			return ;
+		}
 
-   // memset(&state, 0, sizeof(lidbg_state_t));
-    //state.color = colorARGB;
-        const char *setid = env->GetStringUTFChars(cmd, NULL);
-   state->cmd = setid;
-	LOGE("[futengfei]cominto===================[%s]\n", setid);
-   g_lidbg_devices->lights[LIGHT_INDEX_BACKLIGHT]->send_cmd( g_lidbg_devices->lights[LIGHT_INDEX_BACKLIGHT],state);
+	memset(&state, 0, sizeof(lidbg_state_t));
+	const char *setid = env->GetStringUTFChars(cmd, NULL);
+	state.cmd = setid;
+	LOGE("[futengfei]cominto====JNI===[%s]\n", setid);
+	g_lidbg_devices->lights[LIGHT_INDEX_BACKLIGHT]->cmd2kernel( g_lidbg_devices->lights[LIGHT_INDEX_BACKLIGHT],state);
 }
 
 static JNINativeMethod method_table[] = {
@@ -111,9 +111,9 @@ static JNINativeMethod method_table[] = {
 
 int register_android_server_Lidbg_Jni_Service(JNIEnv *env)
 {
-    LOGE("[futengfei]cominto===================[%s]\n",__func__ );
+	LOGE("[futengfei]cominto====JNI===[%s]\n", __func__);
 
-    return jniRegisterNativeMethods(env, "com/android/mypftf99/LidbgJniService",
+	return jniRegisterNativeMethods(env, "com/android/mypftf99/LidbgJniService",
             method_table, NELEM(method_table));
 }
 
