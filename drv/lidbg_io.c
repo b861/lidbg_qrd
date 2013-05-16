@@ -129,7 +129,15 @@ void mod_io_main(int argc, char **argv)
         u32 pull;
         u32 drive_strength;
         bool status;
-
+		
+    if(argc < 3)
+    {
+        lidbg("Usage:\n");
+        lidbg("w index status\n");
+        lidbg("r index \n");
+        lidbg("i\n");
+        return;
+    }
         index = simple_strtoul(argv[1], 0, 0);
         //pull = simple_strtoul(argv[2], 0, 0);
         //drive_strength = simple_strtoul(argv[3], 0, 0);

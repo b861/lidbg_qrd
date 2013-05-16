@@ -28,20 +28,20 @@ __BEGIN_DECLS
 #define LIDBG_HARDWARE_MODULE_ID "lidbg_hal"
 #define LIGHT_ID_BACKLIGHT          "backlight"
 
-
-struct lidbg_state_t {
-
-  const char *cmd;
-    int cmd_state;
-};
-
+//
+struct why
+{};
 struct lidbg_device_t {
     struct hw_device_t common;
 
 //add your methods below
-    int (*send_cmd)(struct lidbg_device_t* dev, struct lidbg_state_t * state);
+    int (*cmd2kernel)(struct lidbg_device_t* dev, struct  lidbg_state_t  state);
 };
-
+struct lidbg_state_t 
+{
+  const char *cmd;
+    int cmd_state;
+};
 
 __END_DECLS
 

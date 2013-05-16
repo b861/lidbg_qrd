@@ -24,23 +24,38 @@ static int g_havelidbgNode = 0;
 char const*const OUR_LIDBG_FILE   = "/dev/mlidbg0";
 
 
-
 void lidbg_init_globals(void)
 {
 
-     pthread_mutex_init(&g_lock, NULL);
-    g_havelidbgNode = (access(OUR_LIDBG_FILE, W_OK) == 0) ? 1 : 0;
-    LOGE("[futengfei]cominto===================[%s][%d]\n",__func__,g_havelidbgNode );
+	pthread_mutex_init(&g_lock, NULL);
+	g_havelidbgNode = (access(OUR_LIDBG_FILE, W_OK) == 0) ? 1 : 0;
+	LOGE("[futengfei]cominto=====HAL=======[%s][%d]\n",__func__,g_havelidbgNode );
+
 
 }
 
-static int send_cmd_func(struct lidbg_device_t* dev, struct lidbg_state_t const* state)
+static int cmd2kernel_func(struct lidbg_device_t* dev, struct lidbg_state_t  state)
 {
-    int err = 0;
-        LOGE("[futengfei]cominto===================[%s]\n",__func__ );
+	int err = 0;int g_lidbg_fd = 0;
+	LOGE("[futengfei]cominto====HAL=======[send_cmd_func]cmd[%s][%d]\n",state.cmd,strlen(state.cmd));
+        if (strlen(state.cmd)<1)return err;
+{
 
-    pthread_mutex_lock(&g_lock);
-    pthread_mutex_unlock(&g_lock);
+	g_lidbg_fd= open(OUR_LIDBG_FILE, O_RDWR);
+	if((g_lidbg_fd == 0)||(g_lidbg_fd == (int)0xfffffffe)|| (g_lidbg_fd == (int)0xffffffff))
+	{
+	LOGE("[futengfei]=====fail2open[%s]\n",OUR_LIDBG_FILE);
+	g_lidbg_fd=-1;
+	return  -1;
+	}
+	LOGE("[futengfei]=====sucess2open[%s]\n",OUR_LIDBG_FILE);
+	write(g_lidbg_fd, state.cmd, strlen(state.cmd));
+	close(g_lidbg_fd);
+}
+
+	
+	pthread_mutex_lock(&g_lock);
+	pthread_mutex_unlock(&g_lock);
     return err;
 }
 
@@ -49,23 +64,25 @@ static int send_cmd_func(struct lidbg_device_t* dev, struct lidbg_state_t const*
 static int close_lidbg(struct lidbg_device_t *dev)
 {
 
-    LOGE("[futengfei]cominto===================[%s]\n",__func__ );
-    if (dev) {
-        free(dev);
-    }
+    LOGE("[futengfei]cominto=====HAL=======[%s]\n",__func__ );
+	
+	if (dev) {
+	    free(dev);
+	}
     return 0;
 }
 
 static int open_lidbg(const struct hw_module_t* module, char const* name,
         struct hw_device_t** device)
 {
-    int (*send_cmd)(struct lidbg_device_t* dev, struct lidbg_state_t * state);
-    LOGE("[futengfei]cominto===================[%s]\n",__func__ );
+    int (*cmd2kernel)(struct lidbg_device_t* dev,struct lidbg_state_t  state);
+    LOGE("[futengfei]cominto=====HAL=======[%s]\n",__func__ );
     if (0 == strcmp(LIGHT_ID_BACKLIGHT, name)) {
-        send_cmd = send_cmd_func;
+        cmd2kernel = cmd2kernel_func;
     }
     else {
-        return -EINVAL;
+	LOGE("[futengfei]======NotfindyourName[%s]\n",name );
+        //return -EINVAL;
     }
 
     pthread_once(&g_init, lidbg_init_globals);
@@ -73,11 +90,12 @@ static int open_lidbg(const struct hw_module_t* module, char const* name,
     struct lidbg_device_t *dev = malloc(sizeof(struct lidbg_device_t));
     memset(dev, 0, sizeof(*dev));
 
+	
     dev->common.tag = HARDWARE_DEVICE_TAG;
     dev->common.version = 0;
     dev->common.module = (struct hw_module_t*)module;
     dev->common.close = (int (*)(struct hw_device_t*))close_lidbg;
-    dev->send_cmd = send_cmd;
+    dev->cmd2kernel = cmd2kernel;
 
     *device = (struct hw_device_t*)dev;
     return 0;
