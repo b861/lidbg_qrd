@@ -43,7 +43,7 @@ push-kejing.sh
 key_hkjing.sh
 version.sh
 build_cfg.mk
-lidbg_servicer
+
 
 tmp/
 out/
