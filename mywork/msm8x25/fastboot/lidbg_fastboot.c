@@ -299,7 +299,7 @@ char *kill_exclude_process[] =
 
 	"tek.inputmethod",
 	"ndroid.launcher",
-		
+	"late_suspend_ta",
 
 
 
