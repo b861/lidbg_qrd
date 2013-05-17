@@ -77,6 +77,10 @@ struct lidbg_fn_t_share
     void (*pfnlidbg_touch_main)(int argc, char **argv);
     void (*pfnlidbg_touch_report)(unsigned int pos_x, unsigned int pos_y, unsigned int type);
 
+	//cmm
+    int  (*pfncmn_launch_user)(char bin_path[], char argv1[]);
+
+
 };
 
 
@@ -197,6 +201,7 @@ static inline int share_check_pt(void)
 #define share_soc_get_screen_res (share_check_pt()?NULL:(plidbg_share->share_func_tbl.pfnsoc_get_screen_res))
 #define share_cmn_task_kill_select (share_check_pt()?NULL:(plidbg_share->share_func_tbl.pfncmn_task_kill_select))
 #define share_cmn_task_kill_exclude (share_check_pt()?NULL:(plidbg_share->share_func_tbl.pfncmn_task_kill_exclude))
+#define share_cmn_launch_user (share_check_pt()?NULL:(plidbg_share->share_func_tbl.pfncmn_launch_user))
 
 
 

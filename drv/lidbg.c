@@ -284,6 +284,9 @@ static ssize_t lidbg_write(struct file *filp, const char __user *buf,
         new_argc = argc - 2;
         new_argv = argv + 2;
 
+		if(argv[1] == NULL)
+			return -1;
+
         if(!strcmp(argv[1], "lidbg_get"))
         {
             lidbg("lidbg_devp addr = %x\n", (u32)(struct lidbg_dev *)global_lidbg_devp);
@@ -342,6 +345,11 @@ static ssize_t lidbg_write(struct file *filp, const char __user *buf,
         else if(!strcmp(argv[1], "servicer"))
         {
             share_lidbg_servicer_main(new_argc, new_argv);
+        }
+		
+		 else if(!strcmp(argv[1], "cmm"))
+        {
+            share_mod_cmn_main(new_argc, new_argv);
         }
 #if 1
         else if(!strcmp(argv[1], "video"))
@@ -475,7 +483,7 @@ int lidbg_init(void)
     //自动在/dev下创建my_device设备文件
     //在驱动初始化的代码里调用class_create为该设备创建一个class，
     /* creating your own class */
-    my_class = class_create(THIS_MODULE, "mlidbg_class");
+    my_class = class_create(THIS_MODULE, "mlidbg");
     if(IS_ERR(my_class))
     {
         lidbg("Err: failed in creating mlidbg class.\n");

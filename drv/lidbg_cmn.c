@@ -139,6 +139,7 @@ void cmn_launch_user( char bin_path[], char argv1[])
     char *argv[] = { bin_path, argv1, NULL };
     static char *envp[] = { "HOME=/", "TERM=linux", "PATH=/system/bin", NULL };//tell me sh where it is;
     int ret;
+	lidbg("%s ,%s\n",bin_path,argv1);
 //Linux  Kernel\u63d0\u4f9b\u4e86call_usermodehelper\u51fd\u6570\uff0c\u8ba9\u6211\u4eec\u80fd\u591f\u5f02\u5e38\u65b9\u4fbf\u5730\u5728\u5185\u6838\u4e2d\u76f4\u63a5\u65b0\u5efa\u548c\u8fd0\u884c\u7528\u6237\u7a7a\u95f4\u7a0b\u5e8f\uff0c\u5e76\u4e14\u8be5\u7a0b\u5e8f\u5177\u6709root\u6743\u9650\u3002
     ret = call_usermodehelper(bin_path, argv, envp, UMH_WAIT_EXEC);
     //NOTE:  I test that:use UMH_NO_WAIT can't lunch the exe; UMH_WAIT_PROCwill block the ko,
@@ -186,6 +187,45 @@ static int cmn_ioctl(
 void mod_cmn_main(int argc, char **argv)
 {
 
+    if(!strcmp(argv[0], "user"))
+    {
+
+		 if(argc < 2)
+	     {
+	        lidbg("Usage:\n");
+	        lidbg("bin_path\n");
+	        lidbg("bin_path argv1\n");
+	        return;
+		
+	     }
+#if 0
+		 if(argc == 2)
+		 {
+			cmn_launch_user(argv[1],NULL);
+		
+	     }
+		 else if(argc == 3)
+		 {
+			cmn_launch_user(argv[1],argv[2]);
+		
+	     }
+
+#else
+{
+		char *argv2[] = { argv[1], argv[2], argv[3],argv[4],NULL };
+		static char *envp[] = { "HOME=/", "TERM=linux", "PATH=/system/bin", NULL };
+		int ret;
+		lidbg("%s ,%s ,%s ,%s\n",argv[1],argv[2],argv[3],argv[4]);
+
+		ret = call_usermodehelper(argv[1], argv2, envp, UMH_WAIT_EXEC);
+		if (ret < 0)
+			lidbg("lunch fail!\n");
+		else
+			lidbg("lunch  success!\n");
+}
+#endif
+
+	}
 
     return;
 }
@@ -228,6 +268,9 @@ static void share_set_func_tbl(void)
 
     ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnlidbg_display_main = lidbg_display_main;
     ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnsoc_get_screen_res = soc_get_screen_res;
+
+	
+    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfncmn_launch_user = cmn_launch_user;
 
 }
 
