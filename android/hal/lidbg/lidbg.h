@@ -23,7 +23,6 @@ struct lidbg_device_t {
     int (*send_cmd)(struct lidbg_device_t* dev,const char* cmd);
 };
 
-
 __END_DECLS
 
 #endif  // ANDROID_LIDBG_INTERFACE_H

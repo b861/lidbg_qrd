@@ -21,12 +21,6 @@
 #define MODULE_NAME "Lidbg Module"
 #define MODULE_AUTHOR "sw.lee.g2@gmail.com"
 
-/*设备访问接口*/  
-static int lidbg_send_cmd(struct lidbg_device_t* dev, char* cmd);
-
-/*设备打开和关闭接口*/
-static int close_lidbg(struct lidbg_device_t *dev);
-static int open_lidbg(const struct hw_module_t* module, char const* name, struct hw_device_t** device);
 
 #define LIDBG_PRINT(msg...) do{\
 	int fd;\
@@ -38,6 +32,19 @@ static int open_lidbg(const struct hw_module_t* module, char const* name, struct
 	 close(fd);\
 }while(0)
 
+#undef LOGE
+#undef LOGI
+	 
+#define LOGE LIDBG_PRINT
+#define LOGI LIDBG_PRINT
+
+
+/*设备访问接口*/  
+static int lidbg_send_cmd(struct lidbg_device_t* dev, char* cmd);
+
+/*设备打开和关闭接口*/
+static int close_lidbg(struct lidbg_device_t *dev);
+static int open_lidbg(const struct hw_module_t* module, char const* name, struct hw_device_t** device);
 
 
 /**
@@ -65,7 +72,7 @@ static int open_lidbg(const struct hw_module_t* module, char const* name, struct
 {
 
     struct lidbg_device_t *dev = malloc(sizeof(struct lidbg_device_t));
-	LIDBG_PRINT("lidbg Stub: open_lidbg\n"); 
+	LOGI("lidbg Stub: open_lidbg\n"); 
 	
     memset(dev, 0, sizeof(*dev));
     
@@ -83,7 +90,7 @@ static int open_lidbg(const struct hw_module_t* module, char const* name, struct
 static int lidbg_send_cmd(struct lidbg_device_t* dev, char* cmd) 
 {  
     int fd;
-    LIDBG_PRINT("lidbg Stub: lidbg_send_cmd %s\n", cmd); 
+    LOGI("lidbg Stub: lidbg_send_cmd %s\n", cmd); 
     fd = open(DEVICE_NAME, O_RDWR);
 	if((fd == 0)||(fd == (int)0xfffffffe)|| (fd == (int)0xffffffff))return -1;
     write(fd, cmd, strlen(cmd));
