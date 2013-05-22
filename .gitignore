@@ -33,6 +33,10 @@
 *.orig
 *.tmp
 *.ver
+*.apk
+*.jpg
+*.dex
+*.class
 
 err_log
 copy_log

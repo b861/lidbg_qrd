@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:id="@+id/widget34"
+	android:layout_width="fill_parent" android:layout_height="fill_parent"
+	xmlns:android="http://schemas.android.com/apk/res/android">
+	<ImageView android:id="@+id/mx1imageview"
+		android:layout_width="wrap_content" android:layout_height="wrap_content"></ImageView>
+	<TextView android:id="@+id/mx1textview" android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:text="TextView"
+		android:textStyle="bold" android:textColor="#000fff" android:textSize="22dp"
+		android:layout_below="@id/mx1imageview"></TextView>
+
+</RelativeLayout>

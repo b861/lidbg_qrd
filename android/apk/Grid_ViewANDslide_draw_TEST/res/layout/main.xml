@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent" android:layout_height="fill_parent"
+	android:background="@drawable/pict1">
+
+
+
+	<AutoCompleteTextView android:id="@+id/cmd"
+		android:layout_width="wrap_content" android:layout_height="wrap_content"
+		android:hint="请输入命令：________" android:textStyle="bold"
+		android:textSize="80dp" android:textColor="#0000ff" />
+
+	<Button android:id="@+id/fasong_cmd" android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:text="【发送】"
+		android:layout_below="@id/cmd" android:textSize="50dp"
+		android:textColor="#000fff" android:focusable="false"
+		android:textStyle="bold" />
+	<Button android:id="@+id/qingkong_cmd" android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:text="【清空】"
+		android:layout_below="@id/cmd"
+		 android:layout_toRightOf="@id/fasong_cmd" android:textSize="50dp"
+		android:textColor="#000fff" android:focusable="false"
+		android:textStyle="bold" />
+
+
+
+
+	<SlidingDrawer android:id="@+id/mxslidedraw1"
+		android:layout_width="fill_parent" android:layout_height="fill_parent"
+		android:handle="@+id/layout1" android:content="@+id/mycontent1"
+		android:orientation="horizontal">
+		<LinearLayout android:id="@id/layout1"
+			android:layout_width="35px" android:layout_height="fill_parent"
+			android:gravity="center">
+			<ImageView android:id="@+id/myimage1" android:layout_width="35px"
+				android:layout_height="fill_parent" android:src="@drawable/open"></ImageView>
+		</LinearLayout>
+
+		<GridView android:id="@id/mycontent1" android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:numColumns="2"
+			android:gravity="center"></GridView>
+	</SlidingDrawer>
+
+</RelativeLayout>
