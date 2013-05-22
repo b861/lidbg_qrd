@@ -19,6 +19,8 @@ obj-m	+= ft5x06_ts_sku7.o
 obj-m	+= gt811.o
 obj-m	+= lidbg_ts_to_recov.o
 obj-m	+= gt801.o
+obj-m	+= gt801_wyh.o
+obj-m	+= gt80x_update.o
 
 EXTRA_CFLAGS := -I$(DBG_DRV_PATH)/inc  -I$(DBG_DRV_PATH)/$(DBG_SOC)/inc  -I$(DBG_DEV_PATH)/$(DBG_SOC)
 #include $(DBG_DRV_PATH)/$(DBG_SOC)/drv_$(DBG_SOC).mk
