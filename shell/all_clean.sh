@@ -3,4 +3,9 @@
 #	Description : Make ALL Clean
 #       Date:         2012/02/03
 #=======================================================================================
-./drv_clean.sh &&./work_clean.sh
+source ./env_entry.sh
+./drv_clean.sh
+./work_clean.sh
+cd $DBG_OUT_PATH && rm *.ko
+
+

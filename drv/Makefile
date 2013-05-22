@@ -37,7 +37,7 @@ modules_install:
 	cp lidbg_main.ko $(INSTALLDIR)
 
 clean:
-	rm -rf *.o *~ core .depend .*.cmd *.ko *.mod.c .tmp_versions *.order *.symvers
+	rm -rf *.o *~ core .depend .*.cmd *.ko *.mod.c .tmp_versions *.order *.symvers *_log
 
 .PHONY: modules modules_install clean
 

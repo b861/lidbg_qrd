@@ -3,6 +3,6 @@
 #	Description : Make ALL
 #       Date:         2012/02/03
 #=======================================================================================
-find . -name "*_log" -type f -exec rm  {} \;
+
 cd shell
 ./all_clean.sh
