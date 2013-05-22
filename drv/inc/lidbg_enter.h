@@ -282,12 +282,25 @@ struct lidbg_pvar_t
 
 #define LIDBG_SIZE	0x00001000 //MEM_SIZE_4_KB	/*全局内存最大1K字节*/
 
+struct lidbg_dev_smem
+{
+	unsigned long smemaddr;
+	unsigned long smemsize;
+	unsigned long valid_offset;
+};
+
+
 /*lidbg设备结构体*/
 struct lidbg_dev
 {
     struct cdev cdev; /*cdev结构体*/
-    unsigned char mem[LIDBG_SIZE]; /*全局内存*/
-    unsigned char lidbg_smem[LIDBG_SIZE/4]; // 1k
+	unsigned char mem[LIDBG_SIZE]; /*全局内存*/
+	union
+	{
+    	unsigned char lidbg_smem[LIDBG_SIZE/4]; // 1k
+		struct lidbg_dev_smem s;
+
+	}smem;
     struct lidbg_fn_t soc_func_tbl;
     struct lidbg_pvar_t soc_pvar_tbl;
     unsigned char reserve[128];

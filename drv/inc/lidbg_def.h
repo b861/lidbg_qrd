@@ -177,5 +177,8 @@ int checkCPUendian()
 						}										 \
 					}
 
+//结构体成员偏移量的计算
+#define OFFSETOF(type, field) ((size_t)&(((type *)0)->field))
+
 
 #endif

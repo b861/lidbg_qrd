@@ -62,6 +62,9 @@ pthread_t ntid;
 int fd = 0;
 static int ts_nod_fd,ret;
 #include "./copyfile.c"
+#include "./mmap.c"
+
+struct lidbg_dev_smem *plidbg_smem = NULL;
 
 
 int is_should_revert()
@@ -672,6 +675,10 @@ open_dev:
 
 
 #endif
+
+	plidbg_smem = (struct lidbg_dev_smem*)get_mmap();
+	lidbg("read smem:%x,%d\n",plidbg_smem->smemaddr,plidbg_smem->smemsize);
+
 
 	sleep(30);
 

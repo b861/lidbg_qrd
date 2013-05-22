@@ -19,16 +19,23 @@
 }while(0)
 
 #if 1
+
+#define LOG_BYTES   (100)
+
 #define LIDBG_PRINT(msg...) do{\
 	int fd;\
-	char s[64];\
+	char s[LOG_BYTES];\
 	sprintf(s, "lidbg_msg: " msg);\
+	s[LOG_BYTES - 1] = '\0';\
 	 fd = open("/dev/lidbg_msg", O_RDWR);\
 	 if((fd == 0)||(fd == (int)0xfffffffe)|| (fd == (int)0xffffffff))break;\
-	 write(fd, s, 64);\
+	 write(fd, s, /*sizeof(msg)*/strlen(s)/*LOG_BYTES*/);\
 	 close(fd);\
 }while(0)
 #endif
+
+
+
 
 
 //java
@@ -52,5 +59,13 @@ LIDBG_PRINT("hello world\n");
 
 
 */
+
+struct lidbg_dev_smem
+{
+	unsigned long smemaddr;
+	unsigned long smemsize;
+	unsigned long valid_offset;
+};
+
 
 #endif
