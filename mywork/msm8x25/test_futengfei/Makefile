@@ -23,7 +23,7 @@ modules_install:
 	ls
 
 clean:
-	rm -rf *.o *~ core .depend .*.cmd *.ko *.mod.c .tmp_versions *.order *.symvers
+	rm -rf *.o *~ core .depend .*.cmd *.ko *.mod.c .tmp_versions *.order *.symvers *_log
 
 .PHONY: modules modules_install clean
 
