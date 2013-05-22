@@ -33,7 +33,7 @@ LOCAL_SHARED_LIBRARIES := \
 ifeq ($(WITH_MALLOC_LEAK_CHECK),true)
     LOCAL_CFLAGS += -DMALLOC_LEAK_CHECK
 endif
-LOCAL_MODULE_PATH := $(LOCAL_PATH)/../../../out
+LOCAL_MODULE_PATH := $(LOCAL_PATH)/../../../../out
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE:= lib_lidbg_servers
 

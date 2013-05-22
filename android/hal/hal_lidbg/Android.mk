@@ -21,7 +21,7 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES := hal_lidbg.c
 
 
-LOCAL_MODULE_PATH := $(LOCAL_PATH)/../../out
+LOCAL_MODULE_PATH := $(LOCAL_PATH)/../../../out
 
 LOCAL_SHARED_LIBRARIES := liblog
 
