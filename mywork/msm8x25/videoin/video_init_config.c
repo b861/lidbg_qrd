@@ -17,7 +17,7 @@ static TW9912_Image_Parameter TW9912_Image_Parameter_fly[6] = {
 																{HUE,5},
 																};
 
-//spinlock_t spin_chipe_config_lock;
+//spinlock_t spin_chipe_config_lock;  
 struct mutex lock_chipe_config;
 extern struct mutex lock_com_chipe_config;
 struct semaphore sem;
@@ -68,7 +68,7 @@ int static VideoImageParameterConfig(void)
 		     if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
 		        {
 		        Tw9912_image_global_AUX_BACK[0][1] = 0x10;//honda xiyu is 31 // is good 00
-		        Tw9912_image_global_AUX_BACK[1][1] = 0x63;//honda xiyu 5c //is good 58
+		        Tw9912_image_global_AUX_BACK[1][1] = 0x70;//honda xiyu 5c //is good 58
 			 Tw9912_image_global_AUX_BACK[2][1] = 0x00;
 		        Tw9912_image_global_AUX_BACK[3][1] = 0x80;
 			 Tw9912_image_global_AUX_BACK[4][1] = 0x80;
@@ -77,7 +77,7 @@ int static VideoImageParameterConfig(void)
 		     else//PALi
 		     	{
 		        Tw9912_image_global_AUX_BACK_PAL_I[0][1]= 0x10;// is good 00
-		        Tw9912_image_global_AUX_BACK_PAL_I[1][1]= 0x63;//is good 58
+		        Tw9912_image_global_AUX_BACK_PAL_I[1][1]= 0x70;//is good 58
 		        Tw9912_image_global_AUX_BACK_PAL_I[2][1]= 0x00;
 		        Tw9912_image_global_AUX_BACK_PAL_I[3][1]= 0x80;
 		        Tw9912_image_global_AUX_BACK_PAL_I[4][1]= 0x80;
