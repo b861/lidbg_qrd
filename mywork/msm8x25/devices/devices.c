@@ -495,7 +495,12 @@ static int soc_dev_probe(struct platform_device *pdev)
         else wake_up_process(dev_init_task);
 
 #ifdef FLY_DEBUG
-		
+
+		if(1){	//LPCBackLightOn
+		u8 buff[] = {0x00, 0x94, 0x01, 0x99};		
+		SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
+		}
+
 		{
 			u8 buff[] = {0x00, 0x05, 0x01};//LPCControlPWREnable
 			lidbg("LPCControlPWREnable\n");
@@ -610,13 +615,16 @@ static void devices_late_resume(struct early_suspend *handler)
 		TELL_LPC_PWR_ON;
 
 		
-#ifdef FLY_DEBUG
-//LPCBackLightOn
-		//u8 buff[] = {0x00, 0x94, 0x01, 0x99};		
-		//SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
+#ifdef FLY_DEBU
+
 
 		BL_SET(BL_MAX / 2);
 		LCD_ON;
+
+		if(1){	//LPCBackLightOn
+		u8 buff[] = {0x00, 0x94, 0x01, 0x99};		
+		SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
+		}
 
 		if(0)
 		{
