@@ -203,7 +203,7 @@ static void share_set_func_tbl(void)
 static int __init io_init(void)
 {
     int ret = 0;
-    dbg (DEVICE_NAME"io_dev_init\n");
+    lidbg (DEVICE_NAME"io_dev_init\n");
     DUMP_BUILD_TIME;
 
 
@@ -226,7 +226,7 @@ static void __exit io_exit(void)
 #if 1
     misc_deregister(&misc);
 #endif
-    dbg (DEVICE_NAME"dev_exit\n");
+    lidbg (DEVICE_NAME"dev_exit\n");
 }
 
 module_init(io_init);

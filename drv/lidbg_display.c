@@ -531,7 +531,7 @@ void color_degree(struct fb_fix_screeninfo *pfb_fixinfo, struct fb_var_screeninf
         PIX_DEGREE = (LCD_WIDTH / DEGREE);
         LINE_BYTE_FULL = (LCD_WIDTH * RGBBYTE);
 
-        dbg (" RGB565\n");
+        lidbg (" RGB565\n");
 
 #if  1
         //R
@@ -648,7 +648,7 @@ void color_degree(struct fb_fix_screeninfo *pfb_fixinfo, struct fb_var_screeninf
         DEGREE = 256;
         PIX_DEGREE = (LCD_WIDTH / DEGREE);
         LINE_BYTE_FULL = (LCD_WIDTH * RGBBYTE);
-        dbg (" RGB888\n");
+        lidbg (" RGB888\n");
 
 #if  1
         //R

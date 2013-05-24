@@ -118,7 +118,7 @@ int cmn_task_kill_select(char *task_name)
     msleep(5);
     tmp2 = GetNsCount();
     tmp3 = tmp2 - tmp1;
-    dbg ("tmp3=%x \n", tmp3);
+    lidbg ("tmp3=%x \n", tmp3);
 
 }
 #endif
@@ -248,7 +248,7 @@ static int __init cmn_init(void)
 #endif
 
     ret = misc_register(&misc);
-    dbg (DEVICE_NAME"cmn dev_init\n");
+    lidbg (DEVICE_NAME"cmn dev_init\n");
 
     create_new_proc_entry();
     return ret;
@@ -259,7 +259,7 @@ static void __exit cmn_exit(void)
     misc_deregister(&misc);
 
     remove_proc_entry("proc_entry", NULL);
-    dbg (DEVICE_NAME"cmn  dev_exit\n");
+    lidbg (DEVICE_NAME"cmn  dev_exit\n");
 }
 
 module_init(cmn_init);

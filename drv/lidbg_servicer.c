@@ -34,7 +34,7 @@ int thread_u2k(void *data)
         if(kthread_should_stop()) break;
 
         wait_for_completion(&u2k_com);
-        dbg ("wait_for_completion ok\n");
+        lidbg ("wait_for_completion ok\n");
     }
     return 0;
 }
@@ -54,7 +54,7 @@ void k2u_write(int cmd)
 
     if(cmd != SERVICER_DONOTHING)
     {
-        dbg ("k2u_write=%d\n", cmd);
+        lidbg ("k2u_write=%d\n", cmd);
 
         spin_lock_irqsave(&fifo_k2u_lock, flags_k2u);
         kfifo_in(&k2u_fifo, &cmd, sizeof(int));
@@ -136,7 +136,7 @@ ssize_t  servicer_write(struct file *filp, const char __user *buffer, size_t siz
 
 int servicer_open(struct inode *inode, struct file *filp)
 {
-    dbg ("servicer_open\n");
+    lidbg ("servicer_open\n");
     return 0;
 }
 
@@ -199,10 +199,10 @@ static int __init servicer_init(void)
 #endif
 
     ret = misc_register(&misc);
-    dbg (DEVICE_NAME"servicer_init\n");
+    lidbg (DEVICE_NAME"servicer_init\n");
     //DECLARE_KFIFO(cmd_fifo);
     //INIT_KFIFO(cmd_fifo);
-    dbg ("kfifo_init,FIFO_SIZE=%d\n", FIFO_SIZE);
+    lidbg ("kfifo_init,FIFO_SIZE=%d\n", FIFO_SIZE);
     kfifo_init(&k2u_fifo, k2u_fifo_buffer, FIFO_SIZE);
     kfifo_init(&u2k_fifo, u2k_fifo_buffer, FIFO_SIZE);
     spin_lock_init(&fifo_k2u_lock);
@@ -221,7 +221,7 @@ static int __init servicer_init(void)
 static void __exit servicer_exit(void)
 {
     misc_deregister(&misc);
-    dbg (DEVICE_NAME"servicer  dev_exit\n");
+    lidbg (DEVICE_NAME"servicer  dev_exit\n");
 }
 
 module_init(servicer_init);

@@ -84,14 +84,14 @@ static int __init ad_init(void)
     share_set_func_tbl();
 #endif
 
-    dbg (DEVICE_NAME"dev_init\n");
+    lidbg (DEVICE_NAME"dev_init\n");
     return ret;
 }
 
 static void __exit ad_exit(void)
 {
     misc_deregister(&misc);
-    dbg (DEVICE_NAME"dev_exit\n");
+    lidbg (DEVICE_NAME"dev_exit\n");
 }
 
 module_init(ad_init);
