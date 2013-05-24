@@ -17,7 +17,7 @@ static TW9912_Image_Parameter TW9912_Image_Parameter_fly[6] = {
 																{HUE,5},
 																};
 
-//spinlock_t spin_chipe_config_lock;
+//spinlock_t spin_chipe_config_lock;  
 struct mutex lock_chipe_config;
 extern struct mutex lock_com_chipe_config;
 struct semaphore sem;
@@ -64,11 +64,12 @@ int static VideoImageParameterConfig(void)
 		if(TW9912_Image_Parameter_fly[1].valu == 240)
 		{
 		printk("Astern\n");
+		SOC_Write_Servicer(VIDEO_PASSAGE_ASTERN);
 		flag_now_config_channal_AUX_or_Astren = 0;
 		     if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
 		        {
 		        Tw9912_image_global_AUX_BACK[0][1] = 0x10;//honda xiyu is 31 // is good 00
-		        Tw9912_image_global_AUX_BACK[1][1] = 0x63;//honda xiyu 5c //is good 58
+		        Tw9912_image_global_AUX_BACK[1][1] = 0x70;//honda xiyu 5c //is good 58
 			 Tw9912_image_global_AUX_BACK[2][1] = 0x00;
 		        Tw9912_image_global_AUX_BACK[3][1] = 0x80;
 			 Tw9912_image_global_AUX_BACK[4][1] = 0x80;
@@ -77,7 +78,7 @@ int static VideoImageParameterConfig(void)
 		     else//PALi
 		     	{
 		        Tw9912_image_global_AUX_BACK_PAL_I[0][1]= 0x10;// is good 00
-		        Tw9912_image_global_AUX_BACK_PAL_I[1][1]= 0x63;//is good 58
+		        Tw9912_image_global_AUX_BACK_PAL_I[1][1]= 0x70;//is good 58
 		        Tw9912_image_global_AUX_BACK_PAL_I[2][1]= 0x00;
 		        Tw9912_image_global_AUX_BACK_PAL_I[3][1]= 0x80;
 		        Tw9912_image_global_AUX_BACK_PAL_I[4][1]= 0x80;
@@ -94,6 +95,7 @@ int static VideoImageParameterConfig(void)
 		else
 		{
 			printk("AUX\n");
+			SOC_Write_Servicer(VIDEO_PASSAGE_AUX);
 		   	 flag_now_config_channal_AUX_or_Astren = 1;
 		        if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
 		        {u8 i =0;
@@ -161,6 +163,7 @@ int static VideoImageParameterConfig(void)
 	 else 
 	{u8 i =0;
 		printk("DVD\n");
+		SOC_Write_Servicer(VIDEO_PASSAGE_DVD);
 	        for (i = BRIGHTNESS;i<=HUE;i++)
 	        {
 			switch (i)
@@ -218,6 +221,9 @@ int static VideoImage(void)
 				Tw9912_image[0] = 0x12;
 				Tw9912_image[1] = 0x1f;
 				ret = write_tw9912(&Tw9912_image);
+				Tw9912_image[0] = 0x08;
+				Tw9912_image[1] = 0x14;
+				ret = write_tw9912(&Tw9912_image);
 			}
 		else
 			{
@@ -254,7 +260,7 @@ int flyVideoImageQualityConfig_in(Vedio_Effect cmd , u8 valu)
 {
     int ret;
     u8 Tw9912_image[2] = {0, 0,}; //default input pin selet YIN0ss
-    video_config_debug("flyVideoImage(%d,%d)\n", cmd, valu);
+    printk("flyVideoImage(%d,%d)\n", cmd, valu);
 	switch(cmd)
 	{
 		case CONTRAST:TW9912_Image_Parameter_fly[CONTRAST-1].valu = valu;
@@ -291,7 +297,7 @@ int flyVideoInitall_in(u8 Channel)
         {
             info_com_top_Channel = SEPARATION;
             //info_com_top_Channel = YIN0;
-
+	    // SOC_Write_Servicer(VIDEO_PASSAGE_DVD);
         }
         global_video_channel_flag = Channel;
     }
