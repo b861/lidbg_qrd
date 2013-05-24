@@ -8,52 +8,6 @@ void soc_io_init(void)
     memset(soc_io_config_log, 0, IO_LOG_NUM);
 }
 
-/*
-
-int soc_gpio_log(struct io_config *pio_config)
-{
-    int i;
-    bool ret = 0;
-
-	int rc;
-
-	lidbg("soc_gpio_log+!\n");
-
-	   rc = gpio_tlmm_config(GPIO_CFG(pio_config->index, 0,
-			   pio_config->direction, pio_config->pull,
-			   pio_config->drive_strength), pio_config->disable);
-	   if (rc)
-	   	{
-		   lidbg("%s: gpio_tlmm_config for %d failed\n",
-			   __func__, pio_config->index);
-	   		ret = 0;
-	   		return ret;
-	   	}
-
-
-       soc_io_request_log[pio_config->] = 1;
-
-       ret = 1;
-
-    lidbg("soc_gpio_log-!\n");
-
-    return ret;
-}
-
-int soc_gpio_find_log( u32 index) // 1--log
-{
-
-    return soc_io_request_log[index];
-
-}
-*/
-
-//static int soc_irq_set_type(unsigned int irq, unsigned int type)
-//{
-
-//    return 0;
-//}
-
 
 void soc_irq_disable(unsigned int irq)
 {
@@ -88,9 +42,7 @@ int soc_io_irq(struct io_int_config *pio_int_config)//need set to input first?
     {
         lidbg("request_irq err!\n");
         return 0;
-
     }
-
     return 1;
 }
 
@@ -178,16 +130,13 @@ int soc_io_output(u32 index, bool status)
 
 bool soc_io_input( u32 index)
 {
-
     return gpio_get_value(index);
-
 }
 
 #ifndef _LIGDBG_SHARE__
 
 EXPORT_SYMBOL(soc_io_output);
 EXPORT_SYMBOL(soc_io_input);
-
 EXPORT_SYMBOL(soc_io_irq);
 EXPORT_SYMBOL(soc_irq_enable);
 EXPORT_SYMBOL(soc_irq_disable);

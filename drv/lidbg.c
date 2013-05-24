@@ -406,10 +406,6 @@ int lidbg_init(void)
 
     lidbg_create_proc();
 
-    lidbg_soc_init();
-
-    lidbg_board_init();
-
     return 0;
 
 fail_malloc:
@@ -431,9 +427,6 @@ void lidbg_exit(void)
     class_destroy(my_class);
 
     lidbg_remove_proc();
-
-    lidbg_board_deinit();
-    lidbg_soc_deinit();
 
     unregister_chrdev_region(MKDEV(lidbg_major, 0), 1); /* Õ∑≈…Ë±∏∫≈*/
 }

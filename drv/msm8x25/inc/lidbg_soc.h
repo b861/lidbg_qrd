@@ -152,11 +152,6 @@ struct io_int_config
 
 ///////////////////////////////////////
 
-void lidbg_soc_init(void);
-void lidbg_soc_deinit(void);
-void lidbg_board_init(void);
-void lidbg_board_deinit(void);
-
 void  soc_io_init(void);
 
 void  soc_ad_init(void);

@@ -30,10 +30,10 @@ static void share_set_func_tbl(void)
     ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnsoc_bl_set = soc_bl_set;
 
     //soc init
-    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnlidbg_soc_init = lidbg_soc_init;
-    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnlidbg_soc_deinit = lidbg_soc_deinit;
-    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnlidbg_board_init = lidbg_board_init;
-    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnlidbg_board_deinit = lidbg_board_deinit;
+   // ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnlidbg_soc_init = lidbg_soc_init;
+   // ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnlidbg_soc_deinit = lidbg_soc_deinit;
+   // ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnlidbg_board_init = lidbg_board_init;
+   // ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnlidbg_board_deinit = lidbg_board_deinit;
 
     //soc main
     ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnlidbg_soc_main = lidbg_soc_main;
@@ -78,7 +78,6 @@ void msm8x25_exit(void)
 
 void lidbg_soc_main(int argc, char **argv)
 {
-
     lidbg("lidbg_soc_main\n");
 
     if(argc < 3)
