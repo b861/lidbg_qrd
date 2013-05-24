@@ -1,8 +1,5 @@
 
-
-
 #include "lidbg.h"
-
 
 //struct fb_info *p_registered_fb;
 //int num_registered_fb = 0;
@@ -12,7 +9,6 @@
 //确认fbmem.c已经存在
 //EXPORT_SYMBOL(num_registered_fb);
 //EXPORT_SYMBOL(registered_fb);
-
 
 
 bool display_init_fbi(void)

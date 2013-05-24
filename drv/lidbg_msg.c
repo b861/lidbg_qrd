@@ -1,6 +1,4 @@
 
-
-
 #include "lidbg.h"
 #define DEVICE_NAME "lidbg_msg"
 
@@ -28,7 +26,6 @@ typedef struct
 } lidbg_msg;
 
 lidbg_msg *plidbg_msg = NULL;
-
 
 
 int thread_msg(void *data)
@@ -59,16 +56,10 @@ int thread_msg(void *data)
 }
 
 
-
-
 ssize_t  msg_read(struct file *filp, char __user *buffer, size_t size, loff_t *offset)
 {
-
     return size;
-
-
 }
-
 
 ssize_t  msg_write(struct file *filp, const char __user *buffer, size_t size, loff_t *offset)
 {
@@ -90,7 +81,6 @@ ssize_t  msg_write(struct file *filp, const char __user *buffer, size_t size, lo
 	
     complete(&msg_ready);
 
-
     return size;
 }
 
@@ -105,7 +95,6 @@ int msg_open(struct inode *inode, struct file *filp)
 int msg_release(struct inode *inode, struct file *filp)
 {
     //up(&lidbg_msg_sem);
-
     return 0;
 }
 
@@ -134,7 +123,6 @@ static int __init msg_init(void)
 
     ret = misc_register(&misc);
 
-
     INIT_COMPLETION(msg_ready);
 
     msg_task = kthread_create(thread_msg, NULL, "msg_task");
@@ -144,9 +132,6 @@ static int __init msg_init(void)
 
     }
     else wake_up_process(msg_task);
-
-
-
 
     return ret;
 }
@@ -162,7 +147,5 @@ module_exit(msg_exit);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Flyaudio Inc.");
-
-
 
 

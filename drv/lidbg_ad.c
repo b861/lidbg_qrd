@@ -1,6 +1,4 @@
 
-
-
 #include "lidbg.h"
 #define DEVICE_NAME "mlidbg_ad"
 
@@ -10,98 +8,11 @@ LIDBG_SHARE_DEFINE;
 
 ssize_t  ad_read(struct file *filp, char __user *buffer, size_t size, loff_t *offset)
 {
-
-#if 0
-    //Œ¥≤‚ ‘
-
-    struct ad_config ad_cfg;
-    //char **kp_char;
-    __u32 group;
-    __u32 index;
-    __u32 mux_index;
-    __u32 status;
-    int i;
-
-    dbg ("ad_read!\n");
-
-
-    //kp_char = kzalloc(size, GFP_KERNEL);
-    //copy_from_user(*kp_char, buffer, size);
-
-    i = 0;
-    while(i < size)
-    {
-        lidbg("%s ", (char *)buffer[i]);
-        i++;
-    }
-    lidbg("\n");
-
-
-    group = simple_strtoul((char *)buffer[0], 0, 0);
-    index = simple_strtoul((char *)buffer[1], 0, 0);
-    mux_index = simple_strtoul((char *)buffer[2], 0, 0);
-    status = simple_strtoul((char *)buffer[3], 0, 0);
-
-    ad_cfg.group = group;
-    ad_cfg.index = index;
-    ad_cfg.mux_index = mux_index;
-    ad_cfg.status = status;
-
-    ad_cfg.directadn = GPAD_IN;
-    ad_cfg.pull_en = 0;
-    ad_cfg.interrupt_en = 0;
-    ad_cfg.interrupt_type = 0;
-
-    soc_ad_read(&ad_cfg);
-#endif
     return size;
 }
 
 ssize_t  ad_write(struct file *filp, const char __user *buffer, size_t size, loff_t *offset)
 {
-#if 0
-
-    //Œ¥≤‚ ‘
-    struct ad_config ad_cfg;
-    //char **kp_char;
-    __u32 group;
-    __u32 index;
-    __u32 mux_index;
-    __u32 status;
-    int i;
-
-    dbg ("ad_write!\n");
-
-
-    //kp_char = kzalloc(size, GFP_KERNEL);
-    //copy_from_user(*kp_char, buffer, size);
-
-    i = 0;
-    while(i < size)
-    {
-        lidbg("%s ", (char *)buffer[i]);
-        i++;
-    }
-    lidbg("\n");
-
-
-    group = simple_strtoul((char *)buffer[0], 0, 0);
-    index = simple_strtoul((char *)buffer[1], 0, 0);
-    mux_index = simple_strtoul((char *)buffer[2], 0, 0);
-    status = simple_strtoul((char *)buffer[3], 0, 0);
-
-    ad_cfg.group = group;
-    ad_cfg.index = index;
-    ad_cfg.mux_index = mux_index;
-    ad_cfg.status = status;
-
-    ad_cfg.directadn = GPAD_OUT;
-    ad_cfg.pull_en = 0;
-    ad_cfg.interrupt_en = 0;
-    ad_cfg.interrupt_type = 0;
-
-    soc_ad_write(&ad_cfg);
-#endif
     return size;
 }
 
@@ -112,38 +23,6 @@ int ad_open(struct inode *inode, struct file *filp)
     lidbg("ad_open!\n");
     return 0;
 }
-
-#if 0
-static int ad_ioctl(
-    struct inode *inode,
-    struct file *file,
-    unsigned int cmd,
-    unsigned long arg)
-{
-#if 0
-    dbg ("ad_adctl!\n");
-    dbg (": %x %x\n", (u32)arg, cmd);
-    /*
-        switch(cmd)
-        {
-        case AD_ADCTL_READ:
-        case AD_ADCTL_WRITE:
-        {
-            break;
-
-        }
-    */
-    dbg (DEVICE_NAME": %d %d\n", (u32)arg, cmd);
-    return 1;
-default:
-    return -EINVAL;
-}
-#endif
-return 1;
-
-
-}
-#endif
 
 
 void mod_ad_main(int argc, char **argv)
@@ -173,7 +52,6 @@ void mod_ad_main(int argc, char **argv)
 static struct file_operations dev_fops =
 {
     .owner	=	THIS_MODULE,
-    //.ioctl	=	ad_ioctl,
     .open   = ad_open,
     .read   =   ad_read,
     .write  =  ad_write,
@@ -192,7 +70,6 @@ static void share_set_func_tbl(void)
 {
     //ad
     ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnmod_ad_main = mod_ad_main;
-
 
 }
 

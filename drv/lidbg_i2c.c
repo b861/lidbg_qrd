@@ -1,8 +1,6 @@
 
 /*i2c new style driver (Standard driver) */
 
-
-
 #include "lidbg.h"
 #ifdef _LIGDBG_SHARE__
 LIDBG_SHARE_DEFINE;
@@ -175,20 +173,6 @@ static int i2c_api_do_xfer(int bus_id, char chip_addr, unsigned int sub_addr, in
     switch (mode)
     {
     case I2C_API_XFER_MODE_SEND:
-
-#if 0
-        {
-            char *tmp;
-            tmp = kmalloc(size + 1, GFP_KERNEL);
-            if (tmp == NULL)
-                return -ENOMEM;
-            tmp[0] = sub_addr;
-            memcpy(&tmp[1], buf, size);
-            ret = i2c_master_send(i2c_api->client, tmp, size + 1);
-            ret = (ret == size + 1) ? size : ret;
-            break;
-        }
-#else
         {
             struct i2c_adapter *adap = i2c_api->client->adapter;
             struct i2c_msg msg;
@@ -202,18 +186,7 @@ static int i2c_api_do_xfer(int bus_id, char chip_addr, unsigned int sub_addr, in
             break;
         }
 
-
-#endif
-
     case I2C_API_XFER_MODE_RECV:
-#if 0
-
-        ret = i2c_master_send(i2c_api->client, &sub_addr, 1);//has stop bit
-        if (ret < 0)
-            return ret;
-        ret = i2c_master_recv(i2c_api->client, buf, size);
-        break;
-#else
         {
             struct i2c_adapter *adap = i2c_api->client->adapter;
             struct i2c_msg msg[2];
@@ -223,7 +196,6 @@ static int i2c_api_do_xfer(int bus_id, char chip_addr, unsigned int sub_addr, in
             msg[0].addr = i2c_api->client->addr;
             msg[0].flags = 0;
             msg[0].len = 1;
-            //msg[0].buf = &sub_addr;
             msg[0].buf = &subaddr;
 
             msg[1].addr = i2c_api->client->addr;
@@ -235,7 +207,6 @@ static int i2c_api_do_xfer(int bus_id, char chip_addr, unsigned int sub_addr, in
             ret = i2c_transfer(adap, msg, 2);
             break;
         }
-#endif
     case I2C_API_XFER_MODE_SEND_NO_SUBADDR:
         ret = i2c_master_send(i2c_api->client, buf, size);
         break;
@@ -265,7 +236,6 @@ static int i2c_api_do_xfer(int bus_id, char chip_addr, unsigned int sub_addr, in
     }
 
     case I2C_API_XFER_MODE_RECV_NO_SUBADDR:
-        //  ret = i2c_master_recv(i2c_api->client, buf, size);
     {
         struct i2c_adapter *adap = i2c_api->client->adapter;
         struct i2c_msg msg[2];
@@ -328,18 +298,15 @@ static int i2c_api_do_xfer(int bus_id, char chip_addr, unsigned int sub_addr, in
         break;
     }
 
-
     case I2C_API_XFER_MODE_RECV_TEF7000:
     {
         struct i2c_adapter *adap = i2c_api->client->adapter;
         struct i2c_msg msg[2];
         char SubAddr[3];
-        //char SubAddr_TEF7000;
         SubAddr[0] = 0x00;
         SubAddr[1] = 0xff;
         SubAddr[2] = 0xff;
 
-        //SubAddr_TEF7000 = sub_addr & 0xff;
 
         msg[0].addr = (SAF7741_I2C_ADDR_FOR_TEF7000 >> 1);
         msg[0].flags = 0;
@@ -350,18 +317,6 @@ static int i2c_api_do_xfer(int bus_id, char chip_addr, unsigned int sub_addr, in
         msg[1].flags = I2C_M_RD;
         msg[1].len = size;
         msg[1].buf = buf;
-
-        /*TEF7000 i2c READ no sub Addr*/
-
-        //msg[2].addr = (SAF7741_I2C_ADDR_FOR_TEF7000 >> 1);
-        //msg[2].flags = 0;
-        //msg[2].len = 3;
-        //msg[2].buf = SubAddr;
-
-        //msg[3].addr = i2c_api->client->addr;
-        //msg[3].flags = I2C_M_RD;
-        //msg[3].len = size;
-        //msg[3].buf = buf;
 
         ret = i2c_transfer(adap, msg, 2);
         break;
@@ -390,7 +345,6 @@ void mod_i2c_main(int argc, char **argv)
 
         lidbg("r_mult_sub_addr  bus_id  dev_addr sub_addr_bytes  start_reg num\n");
 
-
         return;
 
     }
@@ -400,11 +354,9 @@ void mod_i2c_main(int argc, char **argv)
         u32 bus_id, dev_addr, num, i;
         char *psend_data;
 
-        // lidbg("w port dev_addr num data1 data2\n");
         bus_id = simple_strtoul(argv[1], 0, 0);
         dev_addr = simple_strtoul(argv[2], 0, 0);
         num = simple_strtoul(argv[3], 0, 0);
-
 
         if(argc - 4 < num)
         {
@@ -436,14 +388,9 @@ void mod_i2c_main(int argc, char **argv)
 
 #endif
 
-
-
-
         //地址发送的时候还要左移一位
         // i2c_api_do_send(bus_id, dev_addr, psend_data[0], &psend_data[0], num ); /*How many bytes to write 减去dev_addr和reg地址后*/
         i2c_api_do_send(bus_id, dev_addr, 0, &psend_data[0], num ); /*How many bytes to write 减去dev_addr和reg地址后*/
-
-
         kfree(psend_data);
 
     }
@@ -476,9 +423,7 @@ void mod_i2c_main(int argc, char **argv)
 
         }
 
-
         kfree(psend_data);
-
 
     }
     else if(!strcmp(argv[0], "r_all"))
@@ -486,7 +431,6 @@ void mod_i2c_main(int argc, char **argv)
         u32 bus_id, dev_addr, num, i, start_reg;
         char *psend_data;
 
-        // lidbg("r bus_id dev_addr start_reg num\n");
         bus_id = simple_strtoul(argv[1], 0, 0);
         dev_addr = simple_strtoul(argv[2], 0, 0);
         start_reg = simple_strtoul(argv[3], 0, 0);
@@ -501,9 +445,7 @@ void mod_i2c_main(int argc, char **argv)
 
         }
 
-
         kfree(psend_data);
-
 
     }
 
@@ -535,18 +477,13 @@ void mod_i2c_main(int argc, char **argv)
         else if(sub_addr_bytes == 3)
             i2c_api_do_recv_sub_addr_3bytes(bus_id, dev_addr, start_reg, psend_data, num );
 
-
-
         for(i = 0; i < num; i++)
         {
             printk("reg %x = %x\n", start_reg + i, psend_data[i]);
 
         }
 
-
         kfree(psend_data);
-
-
     }
     else if(!strcmp(argv[0], "probe"))
     {
@@ -590,30 +527,6 @@ void mod_i2c_main(int argc, char **argv)
         kfree( i2c_devices);
     }
 
-#if 0
-    char buf[32];
-    lidbg("i2c_test\n");
-    memset(buf, 0x55, 32);
-
-    //lidbg("addr 0x1a; bus 0\n");
-
-    if(i2c_api_do_send(0, 0x1a, 0, buf, 1) <= 0)
-    {
-        lidbg("i2c_api_do_send1 err!\n");
-
-    }
-
-
-    //lidbg("addr 0x1c; bus 0\n");
-
-    if(i2c_api_do_send(0, 0x1c, 0, buf, 1) <= 0)
-    {
-        lidbg("i2c_api_do_send2 err!\n");
-
-    }
-#endif
-
-
 }
 
 
@@ -634,7 +547,6 @@ int i2c_api_do_recv_no_sub_addr(int bus_id, char chip_addr, unsigned int sub_add
 }
 
 
-
 int i2c_api_do_recv_sub_addr_2bytes(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size)
 {
     return i2c_api_do_xfer(bus_id, chip_addr, sub_addr, I2C_API_XFER_MODE_RECV_SUBADDR_2BYTES, buf, size);
@@ -645,9 +557,6 @@ int i2c_api_do_recv_sub_addr_3bytes(int bus_id, char chip_addr, unsigned int sub
 {
     return i2c_api_do_xfer(bus_id, chip_addr, sub_addr, I2C_API_XFER_MODE_RECV_SUBADDR_3BYTES, buf, size);
 }
-
-
-
 
 int i2c_api_do_recv_SAF7741(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size)
 {
@@ -663,8 +572,6 @@ int i2c_api_do_recv_TEF7000(int bus_id, char chip_addr, unsigned int sub_addr, c
 {
     return i2c_api_do_xfer(bus_id, chip_addr, sub_addr, I2C_API_XFER_MODE_RECV_TEF7000, buf, size);
 }
-
-
 
 int i2c_api_attach(struct i2c_adapter *adap)//被循环调用，遍历所有adapter
 {
@@ -728,8 +635,6 @@ static void share_set_func_tbl(void)
 
 static int __init i2c_api_init(void)
 {
-
-
     //遍历adapter
     int ret;
 

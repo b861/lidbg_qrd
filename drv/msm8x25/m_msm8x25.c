@@ -29,7 +29,6 @@ static void share_set_func_tbl(void)
     ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnsoc_pwm_set = soc_pwm_set;
     ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnsoc_bl_set = soc_bl_set;
 
-
     //soc init
     ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnlidbg_soc_init = lidbg_soc_init;
     ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnlidbg_soc_deinit = lidbg_soc_deinit;
@@ -44,7 +43,6 @@ static void share_set_func_tbl(void)
 int msm8x25_init(void)
 {
     DUMP_FUN;
-
 
 #ifdef _LIGDBG_SHARE__
     LIDBG_SHARE_GET;
@@ -66,7 +64,6 @@ int msm8x25_init(void)
 
 #endif
 
-
     soc_io_init();
     soc_ad_init();
     return 0;
@@ -79,7 +76,6 @@ void msm8x25_exit(void)
 
 }
 
-
 void lidbg_soc_main(int argc, char **argv)
 {
 
@@ -89,13 +85,7 @@ void lidbg_soc_main(int argc, char **argv)
     {
         lidbg("Usage:\n");
         return;
-
     }
-
-
-
-
-
 }
 
 #ifndef _LIGDBG_SHARE__
@@ -104,7 +94,6 @@ EXPORT_SYMBOL(lidbg_soc_main);
 #endif
 
 MODULE_AUTHOR("Lsw");
-//MODULE_LICENSE("Dual BSD/GPL");
 MODULE_LICENSE("GPL");
 
 module_init(msm8x25_init);

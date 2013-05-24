@@ -1,7 +1,6 @@
 /* Copyright (c) 2012, swlee
  *
  */
-
 // http://blog.csdn.net/luoshengyang/article/details/6568411
 #include "lidbg.h"
 
@@ -17,11 +16,8 @@ void *global_lidbg_devp;
 #define LIDBG_MAJOR 167    /*预设的lidbg的主设备号*/
 #define LIDBG_MINOR 0    /*预设的lidbg的主设备号*/
 
-//#define DUMMY_NAME "dummy_dev"
-
 struct cdev *my_cdev;
 struct class *my_class;
-
 
 static lidbg_major = LIDBG_MAJOR;
 
@@ -33,30 +29,24 @@ DEFINE_SEMAPHORE(lidbg_lock);
 #endif
 
 
-
-
-
-
 /*文件打开函数*/
 int lidbg_open(struct inode *inode, struct file *filp)
 {
     DUMP_FUN;
     /*将设备结构体指针赋值给文件私有数据指针*/
     filp->private_data = (struct lidbg_dev *)global_lidbg_devp;
-    if (filp->f_flags & O_NONBLOCK)    // \u963b\u585e
+    if (filp->f_flags & O_NONBLOCK)   
     {
-        if (down_trylock(&lidbg_lock))  // \u5982\u679c\u83b7\u53d6\u4e0d\u5230\u4fe1\u53f7\u91cf\uff0c\u5219\u7acb\u5373\u8fd4\u56de\u3002
+        if (down_trylock(&lidbg_lock))  
 
             return -EBUSY;
     }
-    else                               // \u975e\u963b\u585e
+    else                            
     {
-        /* \u83b7\u53d6\u4fe1\u53f7\u91cf */
-        down(&lidbg_lock);    // \u7b2c\u4e8c\u6b21\u83b7\u53d6\u4fe1\u53f7\u91cf\u65f6\u4f1a\u8fdb\u5165\u4f11\u7720\uff0c\u7b2c\u4e00\u4e2a\u5e94\u7528\u7a0b\u5e8f\u91ca\u653e\u540e\u624d\u4f1a\u88ab\u5524\u9192\u3002
+        down(&lidbg_lock);
     }
     return 0;
 }
-
 
 
 /*文件释放函数*/
@@ -95,38 +85,6 @@ static int lidbg_ioctl(struct inode *inodep, struct file *filp, unsigned
 static ssize_t lidbg_read(struct file *filp, char __user *buf, size_t size,
                           loff_t *ppos)
 {
-#if 0
-    unsigned long p =  *ppos;
-    unsigned int count = size;
-    int ret = 0;
-    struct lidbg_dev *dev = filp->private_data; /*获得设备结构体指针*/
-
-
-    lidbg("pos=%x\n", *ppos);
-    lidbg("size=%d\n", size);
-
-
-    /*分析和获取有效的写长度*/
-    if (p >= LIDBG_SIZE)
-        return count ?  - ENXIO : 0;
-    if (count > LIDBG_SIZE - p)
-        count = LIDBG_SIZE - p;
-
-    /*内核空间->用户空间*/
-    if (copy_to_user(buf, (void *)(dev->mem + p), count))
-    {
-        ret =  - EFAULT;
-    }
-    else
-    {
-        *ppos += count;
-        ret = count;
-
-        lidbg(KERN_INFO "read %d bytes(s) from %d\n", count, p);
-    }
-    return ret;
-#else
-
     unsigned int count = size;
     int ret = 0, read_value = 0;
     struct lidbg_dev *dev = filp->private_data; /*获得设备结构体指针*/
@@ -144,54 +102,18 @@ static ssize_t lidbg_read(struct file *filp, char __user *buf, size_t size,
     }
 
     return count;
-
-#endif
-
 }
-
 
 
 /*写函数 主要操作在这里 入口*/
 static ssize_t lidbg_write(struct file *filp, const char __user *buf,
                            size_t size, loff_t *ppos)
 {
-    //unsigned long p =  *ppos;
     int argc = 0;
-    //int ret = size;
     int i = 0;
     char *pt;
     char *argv[32] = {NULL};
     struct lidbg_dev *dev = filp->private_data; /*获得设备结构体指针*/
-#if 0
-    /*分析和获取有效的写长度*/
-    if (p >= LIDBG_SIZE)
-        return count ?  - ENXIO : 0;
-    if (count > LIDBG_SIZE - p)
-        count = LIDBG_SIZE - p;
-
-    /*用户空间->内核空间*/
-    if (copy_from_user(dev->mem + p, buf, count))
-        ret =  - EFAULT;
-    else
-    {
-        *ppos += count;
-        ret = count;
-
-        lidbg(KERN_INFO "written %d bytes(s) from %d\n", count, p);
-    }
-#endif
-#if 0
-    lidbg("size=%d\n", size);
-    i = 0;
-    while(i < size)
-    {
-        lidbg("%x", buf[i]);
-
-        lidbg("-");
-        i++;
-    }
-#endif
-
     memset(dev->mem, '\0', LIDBG_SIZE);
 
     /*用户空间->内核空间*/
@@ -218,8 +140,6 @@ static ssize_t lidbg_write(struct file *filp, const char __user *buf,
 
     argv[argc] = NULL;
 
-    //lidbg("argc=%d\n", argc);
-
     i = 0;
     lidbg("cmd:");
     while(i < argc)
@@ -228,8 +148,6 @@ static ssize_t lidbg_write(struct file *filp, const char __user *buf,
         i++;
     }
     printk("\n");
-
-
 
     // 解析命令
 
@@ -251,8 +169,6 @@ static ssize_t lidbg_write(struct file *filp, const char __user *buf,
             lidbg("open device io error");
         }
 
-        //old_fs = get_fs();
-        //set_fs(get_ds());
         BEGIN_KMEM;
 
         if (!strcmp(argv[2], "write"))
@@ -271,7 +187,6 @@ static ssize_t lidbg_write(struct file *filp, const char __user *buf,
 #endif
         }
 
-        //set_fs(old_fs);
         END_KMEM;
         filp_close(file, 0);
 
@@ -293,7 +208,6 @@ static ssize_t lidbg_write(struct file *filp, const char __user *buf,
             *(u32 *)(((struct lidbg_dev *)global_lidbg_devp)->mem) = (u32)(struct lidbg_dev *)global_lidbg_devp;
 
         }
-
 
         if(!strcmp(argv[1], "mem"))
         {
@@ -432,8 +346,6 @@ static void lidbg_setup_cdev(struct lidbg_dev *dev, int index)
 }
 
 
-
-
 void lidbg_create_proc(void);
 void lidbg_remove_proc(void);
 
@@ -443,12 +355,10 @@ int lidbg_init(void)
     int result, err;
     dev_t devno = MKDEV(lidbg_major, 0);
     lidbg("lidbg_init\n");
-    //dump_build_time();
     DUMP_BUILD_TIME;
 
 #ifdef _LIGDBG_SHARE__
     LIDBG_SHARE_GET;
-
     global_lidbg_devp = plidbg_share->lidbg_devp;
 #endif
 
@@ -479,7 +389,6 @@ int lidbg_init(void)
 
     lidbg("creating mlidbg class.\n");
 
-
     //自动在/dev下创建my_device设备文件
     //在驱动初始化的代码里调用class_create为该设备创建一个class，
     /* creating your own class */
@@ -495,10 +404,7 @@ int lidbg_init(void)
     // class_device_create(my_class, NULL, MKDEV(LIDBG_MAJOR, LIDBG_MINOR), NULL, "mlidbg" "%d", LIDBG_MINOR );
     device_create(my_class, NULL, MKDEV(LIDBG_MAJOR, LIDBG_MINOR), NULL, "mlidbg" "%d", LIDBG_MINOR );
 
-    /*\u521b\u5efa/proc/hello\u6587\u4ef6*/
     lidbg_create_proc();
-
-    //set_func_tbl();
 
     lidbg_soc_init();
 
@@ -525,13 +431,11 @@ void lidbg_exit(void)
 
     class_destroy(my_class);
 
-    /*\u5220\u9664/proc/hello\u6587\u4ef6*/
     lidbg_remove_proc();
 
     lidbg_board_deinit();
     lidbg_soc_deinit();
 
-    // lidbg_key_deinit();
     unregister_chrdev_region(MKDEV(lidbg_major, 0), 1); /*释放设备号*/
 }
 
@@ -577,12 +481,6 @@ void lidbg_remove_proc(void)
 {
     remove_proc_entry(LIDBG_DEVICE_PROC_NAME, NULL);
 }
-
-
-
-
-
-
 
 MODULE_AUTHOR("Lsw");
 //MODULE_LICENSE("Dual BSD/GPL");

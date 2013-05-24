@@ -49,8 +49,6 @@ void lidbg_key_report(u32 key_value, u32 type)
         input_sync(input);
     }
 
-
-
 }
 
 
@@ -64,7 +62,6 @@ static void share_set_func_tbl(void)
 
 int lidbg_key_init(void)
 {
-    //unsigned int type = button->type ?: EV_KEY;
     int error;
     int i;
     DUMP_BUILD_TIME;
@@ -73,7 +70,6 @@ int lidbg_key_init(void)
     LIDBG_SHARE_GET;
     share_set_func_tbl();
 #endif
-
 
     input = input_allocate_device();
     if (!input)
@@ -107,12 +103,10 @@ int lidbg_key_init(void)
     //<linux/input.h>
     for (i = 1; i < KEY_MAX; i++)
     {
-
         //set_bit(i & KEY_MAX, input->keybit);
         input_set_capability(input, EV_KEY, i);
 
     }
-
 
 #endif
     //clear_bit(KEY_RESERVED, zlgkpd->input->keybit);
@@ -132,14 +126,10 @@ fail:
 }
 
 
-
 void lidbg_key_deinit(void)
 {
 
     input_unregister_device(input);
-    //?input_free_device(input);
-    // return 0;
-
 
 }
 
@@ -244,8 +234,6 @@ void lidbg_key_main(int argc, char **argv)
 
 }
 
-
-
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Flyaudad Inc.");
 
@@ -255,6 +243,3 @@ EXPORT_SYMBOL(lidbg_key_report);
 #endif
 module_init(lidbg_key_init);
 module_exit(lidbg_key_deinit);
-
-
-

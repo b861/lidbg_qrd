@@ -12,7 +12,7 @@ obj-m	+= lidbg_soc_$(DBG_SOC).o
 obj-m	+= lidbg_fly_soc.o
 
 
-lidbg_soc_$(DBG_SOC)-objs := m_$(DBG_SOC).o lidbg_io_$(DBG_SOC).o  lidbg_ad_$(DBG_SOC).o lidbg_pwm_$(DBG_SOC).o lidbg_init_$(DBG_SOC).o lidbg_serial_$(DBG_SOC).o 
+lidbg_soc_$(DBG_SOC)-objs := m_$(DBG_SOC).o lidbg_io_$(DBG_SOC).o  lidbg_ad_$(DBG_SOC).o lidbg_pwm_$(DBG_SOC).o lidbg_init_$(DBG_SOC).o
 
 lidbg_fly_soc-objs :=fly_soc.o
 

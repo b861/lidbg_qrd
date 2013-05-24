@@ -11,8 +11,6 @@ unsigned int   soc_bl_set(u32 bl_level)
 {
     if(1)//flycar
     {
-
-
         if (p_fly_smem == NULL)
         {
             printk( "p_fly_smem == NULL\n");
@@ -75,7 +73,6 @@ unsigned int   soc_bl_set(u32 bl_level)
 
     }
     return 1;
-
 }
 
 #ifndef _LIGDBG_SHARE__

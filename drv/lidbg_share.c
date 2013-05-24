@@ -27,13 +27,11 @@ ssize_t  share_read(struct file *filp, char __user *buffer, size_t size, loff_t 
         ret = size;
     }
 
-
     return size;
 }
 
 ssize_t  share_write(struct file *filp, const char __user *buffer, size_t size, loff_t *offset)
 {
-
     return size;
 }
 
@@ -41,7 +39,6 @@ ssize_t  share_write(struct file *filp, const char __user *buffer, size_t size, 
 int share_open(struct inode *inode, struct file *filp)
 {
     DUMP_FUN;
-
     return 0;
 }
 
@@ -54,16 +51,12 @@ int share_release(struct inode *inode, struct file *filp)
 
 void mod_share_main(int argc, char **argv)
 {
-
     return;
 }
 
 static struct file_operations dev_fops =
 {
     .owner	=	THIS_MODULE,
-#if 0
-    .ioctl	=	share_ioctl,
-#endif
     .open   = share_open,
     .read   =   share_read,
     .write  =  share_write,
@@ -113,7 +106,6 @@ void create_shm_proc(void)
 }
 
 
-
 static int __init share_init(void)
 {
     int ret;
@@ -136,7 +128,6 @@ static int __init share_init(void)
             ((int *)&(plidbg_share->share_func_tbl))[i] = share_func_tbl_default;
 
         }
-
     }
     /////
     /* 动态申请设备结构体的内存*/
@@ -165,7 +156,6 @@ static int __init share_init(void)
         //(lidbg_devp->soc_func_tbl.pfnSOC_Write_Servicer)(i);
     }
 
-
     memset(&(plidbg_share->lidbg_devp->soc_pvar_tbl), 0, sizeof(struct lidbg_pvar_t));
 
 	plidbg_share->lidbg_devp->smem.s.smemaddr = __pa((unsigned long)(plidbg_share->lidbg_devp));
@@ -173,7 +163,6 @@ static int __init share_init(void)
 	plidbg_share->lidbg_devp->smem.s.valid_offset = OFFSETOF(struct lidbg_dev,smem.lidbg_smem);
 
 	create_shm_proc();
-
 
     return ret;
 }

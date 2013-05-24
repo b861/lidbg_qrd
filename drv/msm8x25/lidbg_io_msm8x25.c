@@ -1,23 +1,12 @@
 
-
-
 #include "lidbg.h"
-
 
 u8 soc_io_config_log[IO_LOG_NUM];
 
-//unsigned long flags;
-//spinlock_t gpio_log_lock; /* global dsp lock */
-
-
 void soc_io_init(void)
 {
-    //spin_lock_init(&gpio_log_lock);
     memset(soc_io_config_log, 0, IO_LOG_NUM);
-
 }
-
-
 
 /*
 
@@ -72,16 +61,10 @@ void soc_irq_disable(unsigned int irq)
 
 }
 
-
 void soc_irq_enable(unsigned int irq)
 {
     enable_irq(irq);
 }
-
-
-
-
-
 
 
 #if 0
@@ -107,51 +90,13 @@ int soc_io_irq(struct io_int_config *pio_int_config)//need set to input first?
         return 0;
 
     }
-    //soc_irq_enable(pio_int_config->ext_int_num);
 
     return 1;
 }
 
-
-/*
-int soc_io_write(struct io_config *pio_config)
-{
-
-
-#if 0
-    lidbg("\nsoc_io_write:");
-    lidbg("group %d;", pio_config->group);
-    lidbg("index %d;", pio_config->index);
-    lidbg("status %d;\n\n", pio_config->status);
-#endif
-
-soc_io_output(pio_config->index, pio_config->status);
-
-return 1;
-
-
-
-
-
-}
-
-
-int soc_io_read(struct io_config *pio_config)
-{
-
-
-		return soc_io_input(pio_config->index);
-
-}
-
-*/
 int soc_io_config(u32 index, bool direction, u32 pull, u32 drive_strength, bool force_reconfig)
 {
     int rc;
-
-    //avoid bp change io config,just for debug
-    //#define CONFIG_IO_EVERY_TIMES
-    //#ifdef CONFIG_IO_EVERY_TIMES
 
     if(force_reconfig)
     {
@@ -165,9 +110,6 @@ int soc_io_config(u32 index, bool direction, u32 pull, u32 drive_strength, bool 
             return 0;
         }
     }
-    //#endif
-
-
 
     if(soc_io_config_log[index] == 1)
     {
@@ -202,7 +144,6 @@ int soc_io_config(u32 index, bool direction, u32 pull, u32 drive_strength, bool 
         if (err)
         {
             lidbg("\n\nerr: gpio request failed!!!!!!\n\n\n");
-            //goto free_gpio;
         }
 
         if(direction == GPIO_CFG_INPUT)
@@ -217,27 +158,20 @@ int soc_io_config(u32 index, bool direction, u32 pull, u32 drive_strength, bool 
         }
         soc_io_config_log[index] = 1;
 
-
         return 1;
-
 
 free_gpio:
         if (gpio_is_valid(index))
             gpio_free(index);
         return 0;
     }
-
-
 }
-
 
 
 int soc_io_output(u32 index, bool status)
 {
 
-    //gpio_set_value_cansleep(index, status);
     gpio_set_value(index, status);
-
     return 1;
 
 }
@@ -259,6 +193,3 @@ EXPORT_SYMBOL(soc_irq_enable);
 EXPORT_SYMBOL(soc_irq_disable);
 EXPORT_SYMBOL(soc_io_config);
 #endif
-
-
-

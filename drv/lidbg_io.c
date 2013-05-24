@@ -1,7 +1,6 @@
 
 //http://blog.chinaunix.net/uid-20543672-id-3076669.html
 
-
 #include "lidbg.h"
 #define DEVICE_NAME "mlidbg_io"
 #ifdef _LIGDBG_SHARE__
@@ -61,8 +60,6 @@ void mod_io_main(int argc, char **argv)
 
 #endif
 
-
-
     if(!strcmp(argv[0], "r"))
     {
 #ifdef SOC_TCC8803
@@ -76,8 +73,6 @@ void mod_io_main(int argc, char **argv)
         io_cfg.group = group;
         io_cfg.index = index;
 
-
-
         status = soc_io_read(&io_cfg);
 #endif
 
@@ -88,9 +83,6 @@ void mod_io_main(int argc, char **argv)
         u32 drive_strength;
         bool status;
         index = simple_strtoul(argv[1], 0, 0);
-        //pull = simple_strtoul(argv[2], 0, 0);
-        //drive_strength = simple_strtoul(argv[3], 0, 0);
-
 
         share_soc_io_config( index,  GPIO_CFG_INPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA, 1);
         status = share_soc_io_input(index);
@@ -114,8 +106,6 @@ void mod_io_main(int argc, char **argv)
         index = simple_strtoul(argv[2], 0, 0);
         status = simple_strtoul(argv[3], 0, 0);
 
-
-
         io_cfg.group = group;
         io_cfg.index = index;
         io_cfg.status = status;
@@ -130,7 +120,6 @@ void mod_io_main(int argc, char **argv)
         u32 drive_strength;
         bool status;
 
-		
 		if(argc < 3)
 		{
 		    lidbg("Usage:\n");
@@ -141,8 +130,6 @@ void mod_io_main(int argc, char **argv)
 		}
 
         index = simple_strtoul(argv[1], 0, 0);
-        //pull = simple_strtoul(argv[2], 0, 0);
-        //drive_strength = simple_strtoul(argv[3], 0, 0);
         status = simple_strtoul(argv[2], 0, 0);
 
         share_soc_io_config( index,  GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_16MA, 1);
@@ -167,13 +154,9 @@ void mod_io_main(int argc, char **argv)
         pio_int_config->dev = (void *)pio_int_config;
         share_soc_io_irq(pio_int_config);
 
-
     }
 
 }
-
-
-#if 1
 
 
 int io_open(struct inode *inode, struct file *filp)
@@ -183,152 +166,23 @@ int io_open(struct inode *inode, struct file *filp)
     return 0;
 }
 
-
 ssize_t  io_write(struct file *filp, const char __user *buffer, size_t size, loff_t *offset)
 {
-#if 0
 
-    //Œ¥≤‚ ‘
-    struct io_config io_cfg;
-    //char **kp_char;
-    __u32 group;
-    __u32 index;
-    __u32 mux_index;
-    __u32 status;
-    int i;
-
-    dbg ("io_write!\n");
-
-
-    //kp_char = kzalloc(size, GFP_KERNEL);
-    //copy_from_user(*kp_char, buffer, size);
-
-    i = 0;
-    while(i < size)
-    {
-        lidbg("%s ", (char *)buffer[i]);
-        i++;
-    }
-    lidbg("\n");
-
-
-    group = simple_strtoul((char *)buffer[0], 0, 0);
-    index = simple_strtoul((char *)buffer[1], 0, 0);
-    mux_index = simple_strtoul((char *)buffer[2], 0, 0);
-    status = simple_strtoul((char *)buffer[3], 0, 0);
-
-    io_cfg.group = group;
-    io_cfg.index = index;
-    io_cfg.mux_index = mux_index;
-    io_cfg.status = status;
-
-    io_cfg.direction = GPIO_OUT;
-    io_cfg.pull_en = 0;
-    io_cfg.interrupt_en = 0;
-    io_cfg.interrupt_type = 0;
-
-    soc_io_write(&io_cfg);
-#endif
     return size;
 }
-
 
 
 ssize_t  io_read(struct file *filp, char __user *buffer, size_t size, loff_t *offset)
 {
 
-#if 0
-    //Œ¥≤‚ ‘
-
-    struct io_config io_cfg;
-    //char **kp_char;
-    __u32 group;
-    __u32 index;
-    __u32 mux_index;
-    __u32 status;
-    int i;
-
-    dbg ("io_read!\n");
-
-
-    //kp_char = kzalloc(size, GFP_KERNEL);
-    //copy_from_user(*kp_char, buffer, size);
-
-    i = 0;
-    while(i < size)
-    {
-        lidbg("%s ", (char *)buffer[i]);
-        i++;
-    }
-    lidbg("\n");
-
-
-    group = simple_strtoul((char *)buffer[0], 0, 0);
-    index = simple_strtoul((char *)buffer[1], 0, 0);
-    mux_index = simple_strtoul((char *)buffer[2], 0, 0);
-    status = simple_strtoul((char *)buffer[3], 0, 0);
-
-    io_cfg.group = group;
-    io_cfg.index = index;
-    io_cfg.mux_index = mux_index;
-    io_cfg.status = status;
-
-    io_cfg.direction = GPIO_IN;
-    io_cfg.pull_en = 0;
-    io_cfg.interrupt_en = 0;
-    io_cfg.interrupt_type = 0;
-
-    soc_io_read(&io_cfg);
-#endif
     return size;
 }
-
-#if 0
-static int io_ioctl(
-    struct inode *inode,
-    struct file *file,
-    unsigned int cmd,
-    unsigned long arg)
-{
-    dbg ("io_ioctl!\n");
-    dbg (": %x %x\n", (u32)arg, cmd);
-
-    switch(cmd)
-    {
-    case IO_IOCTL_READ:
-    case IO_IOCTL_WRITE:
-    {
-        /*
-                // int err;
-                struct io_config io_cfg;
-                io_cfg.direction = 1;
-                io_cfg.group =  1;
-                io_cfg.index1 = 1;
-                io_cfg.index2 = 5;
-                io_cfg.status = 1;
-                soc_io_set(&io_cfg);
-
-        */
-        break;
-
-    }
-
-    dbg (DEVICE_NAME": %d %d\n", (u32)arg, cmd);
-    return 1;
-    default:
-        return -EINVAL;
-    }
-    return 1;
-
-
-}
-#endif
 
 
 static struct file_operations dev_fops =
 {
     .owner	=	THIS_MODULE,
-    //.ioctl	=	io_ioctl,
     .open   = io_open,
     .read   =   io_read,
     .write  =  io_write,
@@ -341,9 +195,6 @@ static struct miscdevice misc =
     .fops = &dev_fops,
 
 };
-#endif
-
-
 
 static void share_set_func_tbl(void)
 {
@@ -368,8 +219,6 @@ static int __init io_init(void)
     ret = misc_register(&misc);
 #endif
     return ret;
-
-
 }
 
 static void __exit io_exit(void)
@@ -385,7 +234,6 @@ module_exit(io_exit);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Flyaudio Inc.");
-
 
 #ifndef _LIGDBG_SHARE__
 

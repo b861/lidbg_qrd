@@ -4,15 +4,11 @@
 
 #include "lidbg.h"
 
-
 static struct task_struct *pwr_up_task;
-
 
 int thread_pwr_up(void *data)
 {
     lidbg("thread_pwr_up!\n");
-
-
 
     while(1)
     {
@@ -35,13 +31,11 @@ void lidbg_soc_init(void)
 {
     lidbg("lidbg_soc_init!\n");
 
-
 }
 
 void lidbg_soc_deinit(void)
 {
     lidbg("lidbg_soc_deinit!\n");
-
 
 }
 
@@ -49,8 +43,6 @@ void lidbg_board_init(void)
 {
     int err;
     lidbg("lidbg_board_init!\n");
-
-
 
 #ifdef DEBUG_POWER_UP
     pwr_up_task = kthread_create(thread_pwr_up, NULL, "pwr_up_task");
@@ -61,12 +53,7 @@ void lidbg_board_init(void)
     else  wake_up_process(pwr_up_task);
 #endif
 
-
-
-
 }
-
-
 
 void lidbg_board_deinit(void)
 {
@@ -81,7 +68,6 @@ void lidbg_board_deinit(void)
     }
 #endif
 }
-
 
 EXPORT_SYMBOL(lidbg_soc_init);
 EXPORT_SYMBOL(lidbg_soc_deinit);

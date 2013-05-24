@@ -13,7 +13,6 @@ obj-m	+= lidbg_io.o
 obj-m	+= lidbg_ad.o
 obj-m	+= lidbg_i2c.o
 obj-m	+= lidbg_spi.o
-# obj-m	+= lidbg_serial.o
 obj-m	+= lidbg_key.o
 obj-m	+= lidbg_touch.o
 obj-m	+= lidbg_common.o

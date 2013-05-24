@@ -9,7 +9,6 @@ void  soc_ad_init(void)
 
 }
 
-
 unsigned int   soc_ad_read(unsigned int channel)
 {
     u32 value;
@@ -25,7 +24,6 @@ unsigned int   soc_ad_read(unsigned int channel)
         printk( "p_fly_smem == NULL\n");
         return 0xffffffff;
     }
-
 
     value = p_fly_smem->ch[channel];
 

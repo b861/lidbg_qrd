@@ -1,8 +1,5 @@
 
-
-
 #include "lidbg.h"
-
 
 struct spi_api
 {
@@ -136,13 +133,11 @@ static struct spi_driver spi_api_driver =
 
 static int __init spi_api_init(void)
 {
-
     /*
     SPI设备的驱动程序通过spi_register_driver注册进SPI子系统，驱动类型为struct spi_driver。
     因为spi总线不支持SPI设备的自动检测，所以一般在spi的probe函数中不会检测设备是否存在，
     而是做一些spi设备的初始化工作。
     */
-
 
     int ret = spi_register_driver(&spi_api_driver);
 
@@ -163,7 +158,6 @@ static void __exit spi_api_exit(void)
 
     spi_unregister_driver(&spi_api_driver);
 }
-
 
 
 void mod_spi_main(int argc, char **argv)

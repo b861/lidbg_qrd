@@ -1,5 +1,4 @@
 
-
 #include "lidbg.h"
 
 //#define LIDBG_MULTI_TOUCH_SUPPORT
@@ -23,9 +22,6 @@ struct input_dev *input = NULL;
 #define TOUCH_X_MAX  (RESOLUTION_X-1)
 #define TOUCH_Y_MIN  (0)
 #define TOUCH_Y_MAX  (RESOLUTION_Y-1)
-
-
-
 
 
 void lidbg_touch_report(u32 pos_x, u32 pos_y, u32 type)
@@ -127,8 +123,6 @@ int lidbg_touch_init(void)
     input_set_abs_params(input, ABS_PRESSURE, 0, 1, 0, 0);  //\u538b\u529b
 #endif
 
-
-
     error = input_register_device(input);
     if (error)
     {
@@ -144,15 +138,9 @@ fail:
 }
 
 
-
 void lidbg_touch_deinit(void)
 {
-
     input_unregister_device(input);
-    //?input_free_device(input);
-    // return 0;
-
-
 }
 
 
@@ -165,20 +153,14 @@ void lidbg_touch_main(int argc, char **argv)
         lidbg("Usage:\n");
         lidbg("x y type\n");
         return;
-
     }
     pos_x = simple_strtoul(argv[0], 0, 0);
     pos_y = simple_strtoul(argv[1], 0, 0);
     type = simple_strtoul(argv[2], 0, 0);
 
-
-
-
     lidbg_touch_report(pos_x, pos_y, type);
 
 }
-
-
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Flyaudad Inc.");
@@ -191,6 +173,4 @@ EXPORT_SYMBOL(lidbg_touch_report);
 
 module_init(lidbg_touch_init);
 module_exit(lidbg_touch_deinit);
-
-
 
