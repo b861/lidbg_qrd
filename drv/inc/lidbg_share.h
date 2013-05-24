@@ -77,7 +77,7 @@ struct lidbg_fn_t_share
     void (*pfnlidbg_touch_main)(int argc, char **argv);
     void (*pfnlidbg_touch_report)(unsigned int pos_x, unsigned int pos_y, unsigned int type);
 
-	//cmm
+    //cmm
     int  (*pfncmn_launch_user)(char bin_path[], char argv1[]);
 
 

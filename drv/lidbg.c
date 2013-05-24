@@ -35,13 +35,13 @@ int lidbg_open(struct inode *inode, struct file *filp)
     DUMP_FUN;
     /*将设备结构体指针赋值给文件私有数据指针*/
     filp->private_data = (struct lidbg_dev *)global_lidbg_devp;
-    if (filp->f_flags & O_NONBLOCK)   
+    if (filp->f_flags & O_NONBLOCK)
     {
-        if (down_trylock(&lidbg_lock))  
+        if (down_trylock(&lidbg_lock))
 
             return -EBUSY;
     }
-    else                            
+    else
     {
         down(&lidbg_lock);
     }
@@ -199,8 +199,8 @@ static ssize_t lidbg_write(struct file *filp, const char __user *buf,
         new_argc = argc - 2;
         new_argv = argv + 2;
 
-		if(argv[1] == NULL)
-			return -1;
+        if(argv[1] == NULL)
+            return -1;
 
         if(!strcmp(argv[1], "lidbg_get"))
         {
@@ -260,8 +260,8 @@ static ssize_t lidbg_write(struct file *filp, const char __user *buf,
         {
             share_lidbg_servicer_main(new_argc, new_argv);
         }
-		
-		 else if(!strcmp(argv[1], "cmm"))
+
+        else if(!strcmp(argv[1], "cmm"))
         {
             share_mod_cmn_main(new_argc, new_argv);
         }
@@ -425,7 +425,6 @@ void lidbg_exit(void)
     cdev_del(&((struct lidbg_dev *)global_lidbg_devp)->cdev);   /*注销cdev*/
     kfree(((struct lidbg_dev *)global_lidbg_devp));     /*释放设备结构体内存*/
 
-
     // class_device_destroy(my_class, MKDEV(LIDBG_MAJOR, LIDBG_MINOR));
     device_destroy(my_class, MKDEV(LIDBG_MAJOR, LIDBG_MINOR));
 
@@ -471,7 +470,6 @@ void lidbg_create_proc(void)
     entry = create_proc_entry(LIDBG_DEVICE_PROC_NAME, 0, NULL);
     if(entry)
     {
-        //entry->owner = THIS_MODULE;
         entry->read_proc = lidbg_proc_read;
         entry->write_proc = lidbg_proc_write;
     }
@@ -483,7 +481,6 @@ void lidbg_remove_proc(void)
 }
 
 MODULE_AUTHOR("Lsw");
-//MODULE_LICENSE("Dual BSD/GPL");
 MODULE_LICENSE("GPL");
 
 module_param(lidbg_major, int, S_IRUGO);

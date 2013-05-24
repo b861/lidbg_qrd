@@ -112,15 +112,15 @@ int cmn_task_kill_select(char *task_name)
 }
 
 #if 0
-    {
-        int tmp1, tmp2, tmp3;
-        tmp1 = GetNsCount();
-        msleep(5);
-        tmp2 = GetNsCount();
-        tmp3 = tmp2 - tmp1;
-        dbg ("tmp3=%x \n", tmp3);
+{
+    int tmp1, tmp2, tmp3;
+    tmp1 = GetNsCount();
+    msleep(5);
+    tmp2 = GetNsCount();
+    tmp3 = tmp2 - tmp1;
+    dbg ("tmp3=%x \n", tmp3);
 
-    }
+}
 #endif
 
 u32 GetNsCount(void)
@@ -131,14 +131,14 @@ u32 GetNsCount(void)
 
 }
 
-// cmn_launch_user("/system/bin/insmod", "/system/lib/modules/wlan.ko"); 
-// cmn_launch_user("/system/lidbg_servicer", NULL); 
+// cmn_launch_user("/system/bin/insmod", "/system/lib/modules/wlan.ko");
+// cmn_launch_user("/system/lidbg_servicer", NULL);
 void cmn_launch_user( char bin_path[], char argv1[])
 {
     char *argv[] = { bin_path, argv1, NULL };
     static char *envp[] = { "HOME=/", "TERM=linux", "PATH=/system/bin", NULL };//tell me sh where it is;
     int ret;
-	lidbg("%s ,%s\n",bin_path,argv1);
+    lidbg("%s ,%s\n", bin_path, argv1);
     ret = call_usermodehelper(bin_path, argv, envp, UMH_WAIT_EXEC);
     //NOTE:  I test that:use UMH_NO_WAIT can't lunch the exe; UMH_WAIT_PROCwill block the ko,
     //UMH_WAIT_EXEC  is recommended.
@@ -163,10 +163,8 @@ ssize_t  cmn_write(struct file *filp, const char __user *buffer, size_t size, lo
 
 int cmn_open(struct inode *inode, struct file *filp)
 {
-
     return 0;
 }
-
 
 void mod_cmn_main(int argc, char **argv)
 {
@@ -174,29 +172,29 @@ void mod_cmn_main(int argc, char **argv)
     if(!strcmp(argv[0], "user"))
     {
 
-		if(argc < 2)
-	     {
-	        lidbg("Usage:\n");
-	        lidbg("bin_path\n");
-	        lidbg("bin_path argv1\n");
-	        return;
-		
-	     }
+        if(argc < 2)
+        {
+            lidbg("Usage:\n");
+            lidbg("bin_path\n");
+            lidbg("bin_path argv1\n");
+            return;
 
-{
-		char *argv2[] = { argv[1], argv[2], argv[3],argv[4],NULL };
-		static char *envp[] = { "HOME=/", "TERM=linux", "PATH=/system/bin", NULL };
-		int ret;
-		lidbg("%s ,%s ,%s ,%s\n",argv[1],argv[2],argv[3],argv[4]);
+        }
 
-		ret = call_usermodehelper(argv[1], argv2, envp, UMH_WAIT_EXEC);
-		if (ret < 0)
-			lidbg("lunch fail!\n");
-		else
-			lidbg("lunch  success!\n");
-}
+        {
+            char *argv2[] = { argv[1], argv[2], argv[3], argv[4], NULL };
+            static char *envp[] = { "HOME=/", "TERM=linux", "PATH=/system/bin", NULL };
+            int ret;
+            lidbg("%s ,%s ,%s ,%s\n", argv[1], argv[2], argv[3], argv[4]);
 
-	}
+            ret = call_usermodehelper(argv[1], argv2, envp, UMH_WAIT_EXEC);
+            if (ret < 0)
+                lidbg("lunch fail!\n");
+            else
+                lidbg("lunch  success!\n");
+        }
+
+    }
 
     return;
 }
@@ -216,7 +214,6 @@ static struct miscdevice misc =
     .fops = &dev_fops,
 
 };
-
 
 static void share_set_func_tbl(void)
 {
@@ -238,7 +235,6 @@ static void share_set_func_tbl(void)
     ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfncmn_launch_user = cmn_launch_user;
 
 }
-
 
 
 static int __init cmn_init(void)

@@ -91,18 +91,18 @@ struct proc_dir_entry *proc_shm_map_dir;
 
 int get_shm_proc_info(char *page, char **start, off_t off, int count)
 {
-	lidbg("get_shm_proc_info:%x,%d,%d\n",plidbg_share->lidbg_devp->smem.s.smemaddr,plidbg_share->lidbg_devp->smem.s.smemsize,plidbg_share->lidbg_devp->smem.s.valid_offset);
-    return sprintf(page, "%lx %lu %lu\n", plidbg_share->lidbg_devp->smem.s.smemaddr, plidbg_share->lidbg_devp->smem.s.smemsize,plidbg_share->lidbg_devp->smem.s.valid_offset);
+    lidbg("get_shm_proc_info:%x,%d,%d\n", plidbg_share->lidbg_devp->smem.s.smemaddr, plidbg_share->lidbg_devp->smem.s.smemsize, plidbg_share->lidbg_devp->smem.s.valid_offset);
+    return sprintf(page, "%lx %lu %lu\n", plidbg_share->lidbg_devp->smem.s.smemaddr, plidbg_share->lidbg_devp->smem.s.smemsize, plidbg_share->lidbg_devp->smem.s.valid_offset);
 }
 
 void create_shm_proc(void)
 {
     if(NULL == (proc_shm_map_dir = proc_mkdir(PROC_SHM_MAP_DIR, NULL)) )
-	{
+    {
         printk("proc create error!\n");
         return ;
     }
-    create_proc_read_entry(PROC_SHM_MAP_INFO, 0, proc_shm_map_dir, get_shm_proc_info,NULL);
+    create_proc_read_entry(PROC_SHM_MAP_INFO, 0, proc_shm_map_dir, get_shm_proc_info, NULL);
 }
 
 
@@ -114,7 +114,7 @@ static int __init share_init(void)
     lidbg (DEVICE_NAME"share dev_init\n");
     DUMP_BUILD_TIME;
     plidbg_share = kmalloc(sizeof(struct lidbg_share), GFP_KERNEL);
-	if (!plidbg_share)
+    if (!plidbg_share)
     {
 
         lidbg ("kmalloc fail\n");
@@ -133,8 +133,8 @@ static int __init share_init(void)
     /* 动态申请设备结构体的内存*/
     //plidbg_share->lidbg_devp = kmalloc(sizeof(struct lidbg_dev), GFP_KERNEL);
     mmap_alloc(sizeof(struct lidbg_dev));
-	plidbg_share->lidbg_devp = (struct lidbg_dev*)mmap_buf;
-	
+    plidbg_share->lidbg_devp = (struct lidbg_dev *)mmap_buf;
+
     global_lidbg_devp = plidbg_share->lidbg_devp;
     if (!plidbg_share->lidbg_devp)    /*申请失败*/
     {
@@ -158,11 +158,11 @@ static int __init share_init(void)
 
     memset(&(plidbg_share->lidbg_devp->soc_pvar_tbl), 0, sizeof(struct lidbg_pvar_t));
 
-	plidbg_share->lidbg_devp->smem.s.smemaddr = __pa((unsigned long)(plidbg_share->lidbg_devp));
-	plidbg_share->lidbg_devp->smem.s.smemsize = mmap_size;
-	plidbg_share->lidbg_devp->smem.s.valid_offset = OFFSETOF(struct lidbg_dev,smem.lidbg_smem);
+    plidbg_share->lidbg_devp->smem.s.smemaddr = __pa((unsigned long)(plidbg_share->lidbg_devp));
+    plidbg_share->lidbg_devp->smem.s.smemsize = mmap_size;
+    plidbg_share->lidbg_devp->smem.s.valid_offset = OFFSETOF(struct lidbg_dev, smem.lidbg_smem);
 
-	create_shm_proc();
+    create_shm_proc();
 
     return ret;
 }
@@ -170,7 +170,7 @@ static int __init share_init(void)
 static void __exit share_exit(void)
 {
     misc_deregister(&misc);
-	mmap_free();
+    mmap_free();
     lidbg (DEVICE_NAME"share  dev_exit\n");
 }
 

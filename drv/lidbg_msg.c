@@ -32,7 +32,7 @@ int thread_msg(void *data)
 {
     plidbg_msg = (struct lidbg_msg *)kmalloc(sizeof( lidbg_msg), GFP_KERNEL);
 
-    memset(plidbg_msg->log, '\0', /*sizeof( lidbg_msg)*/TOTAL_LOGS*LOG_BYTES);
+    memset(plidbg_msg->log, '\0', /*sizeof( lidbg_msg)*/TOTAL_LOGS * LOG_BYTES);
     plidbg_msg->w_pos = plidbg_msg->r_pos = 0;
 
     while(1)
@@ -76,9 +76,9 @@ ssize_t  msg_write(struct file *filp, const char __user *buffer, size_t size, lo
     plidbg_msg->log[plidbg_msg->w_pos][LOG_BYTES-1] = '\0';
 
     plidbg_msg->w_pos = (plidbg_msg->w_pos + 1)  % TOTAL_LOGS;
-	
+
     up(&lidbg_msg_sem);
-	
+
     complete(&msg_ready);
 
     return size;

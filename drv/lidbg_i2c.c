@@ -173,40 +173,40 @@ static int i2c_api_do_xfer(int bus_id, char chip_addr, unsigned int sub_addr, in
     switch (mode)
     {
     case I2C_API_XFER_MODE_SEND:
-        {
-            struct i2c_adapter *adap = i2c_api->client->adapter;
-            struct i2c_msg msg;
+    {
+        struct i2c_adapter *adap = i2c_api->client->adapter;
+        struct i2c_msg msg;
 
-            msg.addr = i2c_api->client->addr;
-            msg.flags = 0;
-            msg.len = size;
-            msg.buf = buf;
+        msg.addr = i2c_api->client->addr;
+        msg.flags = 0;
+        msg.len = size;
+        msg.buf = buf;
 
-            ret = i2c_transfer(adap, &msg, 1);
-            break;
-        }
+        ret = i2c_transfer(adap, &msg, 1);
+        break;
+    }
 
     case I2C_API_XFER_MODE_RECV:
-        {
-            struct i2c_adapter *adap = i2c_api->client->adapter;
-            struct i2c_msg msg[2];
-            char subaddr;
-            subaddr = sub_addr & 0xff;
+    {
+        struct i2c_adapter *adap = i2c_api->client->adapter;
+        struct i2c_msg msg[2];
+        char subaddr;
+        subaddr = sub_addr & 0xff;
 
-            msg[0].addr = i2c_api->client->addr;
-            msg[0].flags = 0;
-            msg[0].len = 1;
-            msg[0].buf = &subaddr;
+        msg[0].addr = i2c_api->client->addr;
+        msg[0].flags = 0;
+        msg[0].len = 1;
+        msg[0].buf = &subaddr;
 
-            msg[1].addr = i2c_api->client->addr;
-            msg[1].flags = I2C_M_RD;
-            msg[1].len = size;
-            msg[1].buf = buf;
+        msg[1].addr = i2c_api->client->addr;
+        msg[1].flags = I2C_M_RD;
+        msg[1].len = size;
+        msg[1].buf = buf;
 
 
-            ret = i2c_transfer(adap, msg, 2);
-            break;
-        }
+        ret = i2c_transfer(adap, msg, 2);
+        break;
+    }
     case I2C_API_XFER_MODE_SEND_NO_SUBADDR:
         ret = i2c_master_send(i2c_api->client, buf, size);
         break;

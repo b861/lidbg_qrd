@@ -19,7 +19,6 @@ ssize_t  ad_write(struct file *filp, const char __user *buffer, size_t size, lof
 
 int ad_open(struct inode *inode, struct file *filp)
 {
-
     lidbg("ad_open!\n");
     return 0;
 }
@@ -70,12 +69,11 @@ static void share_set_func_tbl(void)
 {
     //ad
     ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnmod_ad_main = mod_ad_main;
-
 }
 
 static int __init ad_init(void)
 {
-    int ret=0;
+    int ret = 0;
     DUMP_BUILD_TIME;
 
     //下面的代码可以自动生成设备节点，但是该节点在/dev目录下，而不在/dev/misc目录下
@@ -86,7 +84,6 @@ static int __init ad_init(void)
     share_set_func_tbl();
 #endif
 
-    //ret = misc_register(&misc);
     dbg (DEVICE_NAME"dev_init\n");
     return ret;
 }

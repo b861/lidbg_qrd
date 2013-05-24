@@ -126,7 +126,7 @@ typedef enum
     PM_STATUS_RESUME_OK,
     PM_STATUS_LATE_RESUME_OK,
     PM_STATUS_READY_TO_PWROFF,
-	PM_STATUS_READY_TO_FAKE_PWROFF,
+    PM_STATUS_READY_TO_FAKE_PWROFF,
 
 } LIDBG_FAST_PWROFF_STATUS;
 
@@ -245,29 +245,29 @@ struct lidbg_fn_t
     Vedio_Channel pfnglobal_video_channel_flag;
 
 
-	//dev
-	 void (*pfnSOC_Dev_Suspend_Prepare)(void);
+    //dev
+    void (*pfnSOC_Dev_Suspend_Prepare)(void);
 
-	//wakelock
-	bool (*pfnSOC_PWR_Ignore_Wakelock)(void);
+    //wakelock
+    bool (*pfnSOC_PWR_Ignore_Wakelock)(void);
 
-	//mic
-	void (*pfnSOC_Mic_Enable)(bool enable);
-	//video
-	int (*pfnread_tw9912_chips_signal_status)(void);
+    //mic
+    void (*pfnSOC_Mic_Enable)(bool enable);
+    //video
+    int (*pfnread_tw9912_chips_signal_status)(void);
 
 
 
-	// this func must put last!!
-	//void (*pfnlidbg_version_show)(void);
-	//video
-	int pfnglobal_video_camera_working_status;
-	//LCD
-	void (*pfnSOC_F_LCD_Light_Con)(unsigned int iOn);
-	//fake suspend
-	void (*pfnSOC_Fake_Register_Early_Suspend)(struct early_suspend *handler);
-	//video 
-	int (*pfnVideoReset)(void);
+    // this func must put last!!
+    //void (*pfnlidbg_version_show)(void);
+    //video
+    int pfnglobal_video_camera_working_status;
+    //LCD
+    void (*pfnSOC_F_LCD_Light_Con)(unsigned int iOn);
+    //fake suspend
+    void (*pfnSOC_Fake_Register_Early_Suspend)(struct early_suspend *handler);
+    //video
+    int (*pfnVideoReset)(void);
 };
 
 
@@ -284,9 +284,9 @@ struct lidbg_pvar_t
 
 struct lidbg_dev_smem
 {
-	unsigned long smemaddr;
-	unsigned long smemsize;
-	unsigned long valid_offset;
+    unsigned long smemaddr;
+    unsigned long smemsize;
+    unsigned long valid_offset;
 };
 
 
@@ -294,13 +294,13 @@ struct lidbg_dev_smem
 struct lidbg_dev
 {
     struct cdev cdev; /*cdev结构体*/
-	unsigned char mem[LIDBG_SIZE]; /*全局内存*/
-	union
-	{
-    	unsigned char lidbg_smem[LIDBG_SIZE/4]; // 1k
-		struct lidbg_dev_smem s;
+    unsigned char mem[LIDBG_SIZE]; /*全局内存*/
+    union
+    {
+        unsigned char lidbg_smem[LIDBG_SIZE/4]; // 1k
+        struct lidbg_dev_smem s;
 
-	}smem;
+    } smem;
     struct lidbg_fn_t soc_func_tbl;
     struct lidbg_pvar_t soc_pvar_tbl;
     unsigned char reserve[128];
