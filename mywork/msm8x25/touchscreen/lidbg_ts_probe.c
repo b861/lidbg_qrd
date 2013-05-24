@@ -118,7 +118,7 @@ static int ts_probe_init(void)
 {
     static struct task_struct *scan_task;
     DUMP_BUILD_TIME;
-    printk("\n[futengfei]=========500.5001=========ts_probe_init:compatiblegt801811RSTpin0320\n");
+    printk("\n[futengfei]=========512300=========ts_probe_init\n");
 #ifndef SOC_COMPILE
     LIDBG_GET;
 #endif

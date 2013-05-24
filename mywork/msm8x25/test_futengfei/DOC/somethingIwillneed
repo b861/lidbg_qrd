@@ -20,6 +20,7 @@ ash
 	ret = wait_event_interruptible(dev->read_wq, dev->rx_done);
 /end
 
+msm_i2c_platform_data  clk_freq
 
 
 
