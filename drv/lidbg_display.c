@@ -13,6 +13,7 @@
 
 bool display_init_fbi(void)
 {
+#if 0
     struct fb_fix_screeninfo fb_fixinfo;
     struct fb_var_screeninfo fb_varinfo;
     int fbidx;
@@ -84,7 +85,7 @@ bool display_init_fbi(void)
     }
 
     lidbg("display_init_fbi-.\n");
-
+#endif
     return 1;
 }
 
@@ -490,7 +491,7 @@ RGB_OUTPUT_TYPE;
 
 void color_degree(struct fb_fix_screeninfo *pfb_fixinfo, struct fb_var_screeninfo *pfb_varinfo)
 {
-
+#if 0
     u32 lcd_phy_buffer;
     u32 *plcd_vir_buffer;
 
@@ -760,6 +761,7 @@ void color_degree(struct fb_fix_screeninfo *pfb_fixinfo, struct fb_var_screeninf
 
     iounmap(plcd_vir_buffer);
     lidbg(" ColorDegree-\n");
+#endif
 
 }
 
