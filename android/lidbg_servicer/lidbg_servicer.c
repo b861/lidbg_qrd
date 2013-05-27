@@ -60,6 +60,9 @@
 #define UBLOX_EXIST   (88)
 #define CMD_ACC_OFF_PROPERTY_SET (89)
 
+#define VIDEO_PASSAGE_AUX (90)
+#define VIDEO_PASSAGE_ASTERN (91)
+#define VIDEO_PASSAGE_DVD (92)
 
 pthread_t ntid;
 int fd = 0;
@@ -506,6 +509,27 @@ loop_read:
 	    {
 	    	lidbg("<<<<< now Set Video normal show.\n");
 	        property_set("fly.video.show.status", "1");// 1 is normal
+	        break;
+
+	    }
+ 	case VIDEO_PASSAGE_DVD:
+	    {
+	    	lidbg("<<<<< now Set Video channel is DVD.\n");
+	        property_set("fly.video.channel.status", "1");// 1 is DVD 2 is AUX 3 is Astern 
+	        break;
+
+	    }
+	case VIDEO_PASSAGE_AUX:
+	    {
+	    	lidbg("<<<<< now Set Video channel is aux.\n");
+	        property_set("fly.video.channel.status", "2");// 1 is DVD 2 is AUX 3 is Astern 
+	        break;
+
+	    }
+	case VIDEO_PASSAGE_ASTERN:
+	    {
+	    	lidbg("<<<<< now Set Video channel is Astren.\n");
+	        property_set("fly.video.channel.status", "3");// 1 is DVD 2 is AUX 3 is Astern 
 	        break;
 
 	    }
