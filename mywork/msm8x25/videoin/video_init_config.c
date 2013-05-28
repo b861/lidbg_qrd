@@ -568,6 +568,7 @@ void video_init_config_in(Vedio_Format config_pramat)
         printk("%s:config_pramat->NTSC_separation\n", __func__);
         Tw9912_init_NTSCp();
         VideoImage();
+	 SOC_Write_Servicer(VIDEO_NORMAL_SHOW);
         TC358_init(NTSC_P);
     }
     else	if(config_pramat != STOP_VIDEO)
@@ -614,20 +615,25 @@ void video_init_config_in(Vedio_Format config_pramat)
                     switch (signal_is_how[info_Vedio_Channel].Format)
                     {
                     case NTSC_I:
+			   SOC_Write_Servicer(VIDEO_NORMAL_SHOW);
                         TC358_init(NTSC_I);
                         //TC358_init(PAL_Interlace);
                         break;
                     case PAL_I:
+			   SOC_Write_Servicer(VIDEO_NORMAL_SHOW);
                         TC358_init(PAL_I);
                         break;
                     case NTSC_P:
+			   SOC_Write_Servicer(VIDEO_NORMAL_SHOW);
                         TC358_init(NTSC_P);
                         break;
                     case PAL_P:
+			   SOC_Write_Servicer(VIDEO_NORMAL_SHOW);
                         TC358_init(PAL_P);
                         break;
                     default :
                         printk("video not signal input..\n");
+			   SOC_Write_Servicer(VIDEO_SHOW_BLACK);
                         TC358_init(COLORBAR + TC358746XBG_BLACK); //blue
                         break;
                     }
