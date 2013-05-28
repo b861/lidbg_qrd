@@ -68,11 +68,11 @@ int static VideoImageParameterConfig(void)
 		flag_now_config_channal_AUX_or_Astren = 0;
 		     if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
 		        {
-		        Tw9912_image_global_AUX_BACK[0][1] = 0x10;//honda xiyu is 31 // is good 00
-		        Tw9912_image_global_AUX_BACK[1][1] = 0x63;//honda xiyu 5c //is good 58
+		        Tw9912_image_global_AUX_BACK[0][1] = 0x00;//honda xiyu is 31 // is good 00
+		        Tw9912_image_global_AUX_BACK[1][1] = 0x58;//honda xiyu 5c //is good 58
 			 Tw9912_image_global_AUX_BACK[2][1] = 0x00;
-		        Tw9912_image_global_AUX_BACK[3][1] = 0x80;
-			 Tw9912_image_global_AUX_BACK[4][1] = 0x80;
+		        Tw9912_image_global_AUX_BACK[3][1] = 0xdf;
+			 Tw9912_image_global_AUX_BACK[4][1] = 0xdf;
 			 printk("Tw9912_image_global_AUX_BACK reset valu from NTSC_I\n");
 		     	 }
 		     else//PALi
@@ -375,8 +375,8 @@ Vedio_Format flyVideoTestSignalPin_in(u8 Channel)
 
     }
 
-   // mutex_unlock(&lock_chipe_config);
-   //return NTSC_I;
+   mutex_unlock(&lock_chipe_config);
+  return NTSC_I;
     if(Channel == SEPARATION || Channel == YIN2)
     {
         ret = testing_NTSCp_video_signal();
