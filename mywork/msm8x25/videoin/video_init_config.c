@@ -64,6 +64,7 @@ int static VideoImageParameterConfig(void)
 		if(TW9912_Image_Parameter_fly[1].valu == 240)
 		{
 		printk("Astern\n");
+	//	SOC_Write_Servicer(VIDEO_PASSAGE_ASTERN);
 		flag_now_config_channal_AUX_or_Astren = 0;
 		     if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
 		        {
@@ -94,6 +95,7 @@ int static VideoImageParameterConfig(void)
 		else
 		{
 			printk("AUX\n");
+		//	SOC_Write_Servicer(VIDEO_PASSAGE_AUX);
 		   	 flag_now_config_channal_AUX_or_Astren = 1;
 		        if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
 		        {u8 i =0;
@@ -161,6 +163,7 @@ int static VideoImageParameterConfig(void)
 	 else 
 	{u8 i =0;
 		printk("DVD\n");
+	//	SOC_Write_Servicer(VIDEO_PASSAGE_DVD);
 	        for (i = BRIGHTNESS;i<=HUE;i++)
 	        {
 			switch (i)
@@ -218,6 +221,9 @@ int static VideoImage(void)
 				Tw9912_image[0] = 0x12;
 				Tw9912_image[1] = 0x1f;
 				ret = write_tw9912(&Tw9912_image);
+				Tw9912_image[0] = 0x08;
+				Tw9912_image[1] = 0x14;
+				ret = write_tw9912(&Tw9912_image);
 			}
 		else
 			{
@@ -254,7 +260,7 @@ int flyVideoImageQualityConfig_in(Vedio_Effect cmd , u8 valu)
 {
     int ret;
     u8 Tw9912_image[2] = {0, 0,}; //default input pin selet YIN0ss
-    video_config_debug("flyVideoImage(%d,%d)\n", cmd, valu);
+    printk("flyVideoImage(%d,%d)\n", cmd, valu);
 	switch(cmd)
 	{
 		case CONTRAST:TW9912_Image_Parameter_fly[CONTRAST-1].valu = valu;
@@ -291,7 +297,7 @@ int flyVideoInitall_in(u8 Channel)
         {
             info_com_top_Channel = SEPARATION;
             //info_com_top_Channel = YIN0;
-
+	    // SOC_Write_Servicer(VIDEO_PASSAGE_DVD);
         }
         global_video_channel_flag = Channel;
     }
@@ -562,6 +568,7 @@ void video_init_config_in(Vedio_Format config_pramat)
         printk("%s:config_pramat->NTSC_separation\n", __func__);
         Tw9912_init_NTSCp();
         VideoImage();
+	 SOC_Write_Servicer(VIDEO_NORMAL_SHOW);
         TC358_init(NTSC_P);
     }
     else	if(config_pramat != STOP_VIDEO)
@@ -608,20 +615,25 @@ void video_init_config_in(Vedio_Format config_pramat)
                     switch (signal_is_how[info_Vedio_Channel].Format)
                     {
                     case NTSC_I:
+			   SOC_Write_Servicer(VIDEO_NORMAL_SHOW);
                         TC358_init(NTSC_I);
                         //TC358_init(PAL_Interlace);
                         break;
                     case PAL_I:
+			   SOC_Write_Servicer(VIDEO_NORMAL_SHOW);
                         TC358_init(PAL_I);
                         break;
                     case NTSC_P:
+			   SOC_Write_Servicer(VIDEO_NORMAL_SHOW);
                         TC358_init(NTSC_P);
                         break;
                     case PAL_P:
+			   SOC_Write_Servicer(VIDEO_NORMAL_SHOW);
                         TC358_init(PAL_P);
                         break;
                     default :
                         printk("video not signal input..\n");
+			   SOC_Write_Servicer(VIDEO_SHOW_BLACK);
                         TC358_init(COLORBAR + TC358746XBG_BLACK); //blue
                         break;
                     }

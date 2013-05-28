@@ -427,9 +427,9 @@ static int  video_early_suspend(struct early_suspend *h)
 }
 static int video_late_resume(struct early_suspend *h)
 {
-    printk("resume tw9912 reset\n");
+    printk("video_late_resume tw9912 reset\n");
     Tw9912_hardware_reset();
-
+    //TC358_init(NTSC_P);
     return 0;
 }
 
@@ -442,7 +442,7 @@ static int video_dev_probe(struct platform_device *pdev)
 		early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN;
 		early_suspend.suspend = video_early_suspend;
 		early_suspend.resume = video_late_resume;
-		//register_early_suspend(&early_suspend);
+		register_early_suspend(&early_suspend);
 #endif
 	
 		//fake suspend
