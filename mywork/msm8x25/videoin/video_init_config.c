@@ -64,7 +64,7 @@ int static VideoImageParameterConfig(void)
 		if(TW9912_Image_Parameter_fly[1].valu == 240)
 		{
 		printk("Astern\n");
-		SOC_Write_Servicer(VIDEO_PASSAGE_ASTERN);
+	//	SOC_Write_Servicer(VIDEO_PASSAGE_ASTERN);
 		flag_now_config_channal_AUX_or_Astren = 0;
 		     if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
 		        {
@@ -95,7 +95,7 @@ int static VideoImageParameterConfig(void)
 		else
 		{
 			printk("AUX\n");
-			SOC_Write_Servicer(VIDEO_PASSAGE_AUX);
+		//	SOC_Write_Servicer(VIDEO_PASSAGE_AUX);
 		   	 flag_now_config_channal_AUX_or_Astren = 1;
 		        if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
 		        {u8 i =0;
@@ -163,7 +163,7 @@ int static VideoImageParameterConfig(void)
 	 else 
 	{u8 i =0;
 		printk("DVD\n");
-		SOC_Write_Servicer(VIDEO_PASSAGE_DVD);
+	//	SOC_Write_Servicer(VIDEO_PASSAGE_DVD);
 	        for (i = BRIGHTNESS;i<=HUE;i++)
 	        {
 			switch (i)
