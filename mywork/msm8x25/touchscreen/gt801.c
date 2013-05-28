@@ -188,7 +188,7 @@ static int goodix_init_panel(struct goodix_ts_data *ts)
 {
     int ret = -1;
 
-    printk("\n\n\ncome to init ts<-------goodix_init_panel_ftf!512-300\n\n\n");
+    printk("\n\n\ncome to init ts<-------goodix_init_panel_ftf!\n\n\n");
 
 
     //#define GUITAR_CONFIG_43
@@ -271,7 +271,7 @@ static int goodix_init_panel(struct goodix_ts_data *ts)
 #ifdef BOARD_V2
 uint8_t config_info[] = {0x30,
 				0x13,0x25,0x07,0x28,0x02,0x14,0x14,0x10,0x3C,0xB2,
-				0x01,0x2c,0x02,0x00,0x01,0x23,0x45,0x67,0x89,0xAB,
+				0x02,0x58,0x04,0x00,0x01,0x23,0x45,0x67,0x89,0xAB,
 				0xCD,0xE1,0x00,0x00,0x32,0x2D,0x4F,0xCF,0x20,0x83,
 				0x80,0x80,0x50,0x3C,0x1E,0xB4,0x00,0x30,0x2C,0x01,
 				0xEC,0x00,0x50,0x32,0x71,0x00,0x00,0x00,0x00,0x00,
@@ -394,8 +394,8 @@ if(xy_revert_en==1)
 }
             input_report_key(dev, ABS_MT_TRACKING_ID, 4);
             input_report_abs(dev, ABS_MT_TOUCH_MAJOR, 250);
-            input_report_abs(dev, ABS_MT_POSITION_X, g_New_PosY[4]*2);
-            input_report_abs(dev, ABS_MT_POSITION_Y, g_New_PosX[4]*2);
+            input_report_abs(dev, ABS_MT_POSITION_X, g_New_PosY[4]);
+            input_report_abs(dev, ABS_MT_POSITION_Y, g_New_PosX[4]);
             input_mt_sync(dev);
         }
     case 4:
@@ -412,8 +412,8 @@ if(xy_revert_en==1)
 }
             input_report_key(dev, ABS_MT_TRACKING_ID, 3);
             input_report_abs(dev, ABS_MT_TOUCH_MAJOR, 250);
-            input_report_abs(dev, ABS_MT_POSITION_X, g_New_PosY[3]*2);
-            input_report_abs(dev, ABS_MT_POSITION_Y, g_New_PosX[3]*2);
+            input_report_abs(dev, ABS_MT_POSITION_X, g_New_PosY[3]);
+            input_report_abs(dev, ABS_MT_POSITION_Y, g_New_PosX[3]);
             input_mt_sync(dev);
         }
     case 3:
@@ -430,8 +430,8 @@ if(xy_revert_en==1)
 }        
             input_report_key(dev, ABS_MT_TRACKING_ID, 2);
             input_report_abs(dev, ABS_MT_TOUCH_MAJOR, 250);
-            input_report_abs(dev, ABS_MT_POSITION_X, g_New_PosY[2]*2);
-            input_report_abs(dev, ABS_MT_POSITION_Y, g_New_PosX[2]*2);
+            input_report_abs(dev, ABS_MT_POSITION_X, g_New_PosY[2]);
+            input_report_abs(dev, ABS_MT_POSITION_Y, g_New_PosX[2]);
             input_mt_sync(dev);
         }
     case 2:
@@ -448,8 +448,8 @@ if(xy_revert_en==1)
 }	        
             input_report_key(dev, ABS_MT_TRACKING_ID, 1);
             input_report_abs(dev, ABS_MT_TOUCH_MAJOR, 250);
-            input_report_abs(dev, ABS_MT_POSITION_X, g_New_PosY[1]*2);
-            input_report_abs(dev, ABS_MT_POSITION_Y, g_New_PosX[1]*2);
+            input_report_abs(dev, ABS_MT_POSITION_X, g_New_PosY[1]);
+            input_report_abs(dev, ABS_MT_POSITION_Y, g_New_PosX[1]);
             input_mt_sync(dev);
         }
     case 1:
@@ -463,8 +463,8 @@ if(xy_revert_en==1)
 	g_New_PosY[0]=RESOLUTION_X -g_New_PosY[0];
 	g_New_PosX[0]=RESOLUTION_Y - g_New_PosX[0];
 }       
-            input_report_abs(ts->input_dev, ABS_MT_POSITION_X, g_New_PosY[0]*2);
-            input_report_abs(ts->input_dev, ABS_MT_POSITION_Y, g_New_PosX[0]*2);
+            input_report_abs(ts->input_dev, ABS_MT_POSITION_X, g_New_PosY[0]);
+            input_report_abs(ts->input_dev, ABS_MT_POSITION_Y, g_New_PosX[0]);
             input_report_abs(ts->input_dev, ABS_MT_TOUCH_MAJOR, 255);
             input_report_abs(ts->input_dev, ABS_MT_TRACKING_ID, 0);
             input_mt_sync(ts->input_dev);
@@ -1180,7 +1180,7 @@ static int goodix_ts_resume(struct i2c_client *client)
 static void goodix_ts_early_suspend(struct early_suspend *h)
 {
     struct goodix_ts_data *ts;
-    printk("\n\n\n[futengfei]come into====512-300========disable_irq20==== [%s]\n", __func__);
+    printk("\n\n\n[futengfei]come into===1024600=========disable_irq20==== [%s]\n", __func__);
     ts = container_of(h, struct goodix_ts_data, early_suspend);
 
 	disable_irq(MSM_GPIO_TO_INT(GPIOEIT));
@@ -1191,7 +1191,7 @@ static void goodix_ts_early_suspend(struct early_suspend *h)
 static void goodix_ts_late_resume(struct early_suspend *h)
 {
     struct goodix_ts_data *ts;
-    printk("\n\n\n[futengfei]come into===512-300======enable_irq20==== [%s]\n", __func__);
+    printk("\n\n\n[futengfei]come into====1024600=====enable_irq20==== [%s]\n", __func__);
     ts = container_of(h, struct goodix_ts_data, early_suspend);
     goodix_ts_resume(ts->client);
 	
@@ -1334,7 +1334,7 @@ static int __devinit goodix_ts_init(void)
     LIDBG_GET;
 #endif
     is_ts_load = 1;
-    printk("\n\n==in=GT801.KO=====512-300==========touch INFO===========futengfei\n");
+    printk("\n\n==in=GT801.KO=====1024600==========touch INFO===========futengfei\n");
 	SOC_IO_Output(0, 27, 0);
 	msleep(200);
 	SOC_IO_Output(0, 27, 1);
