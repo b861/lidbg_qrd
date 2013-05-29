@@ -1,5 +1,4 @@
 
-
 #ifdef SOC_COMPILE
 #include "lidbg.h"
 #include "fly_soc.h"
@@ -39,6 +38,11 @@ struct probe_device ts_probe_dev[] =
 bool scan_on = 1;
 unsigned int FLAG_FOR_15S_OFF = 0; //for  flycar
 bool is_ts_load = 0;
+
+/*add 2 variable to make  logic of update 801*/
+unsigned int shutdown_flag_ts = 0;
+unsigned int shutdown_flag_probe = 0;
+unsigned int shutdown_flag_gt811 = 0;
 
 void ts_scan(void)
 {
@@ -85,31 +89,41 @@ int ts_probe_thread(void *data)
             break;
         }
 
-        if(scan_on == 1)
-        {
-		SOC_IO_Output(0,27,1);
-		msleep(SCAN_TIME);
-		ts_scan();
-	 if(scan_on == 1)
-        	{
-			SOC_IO_Output(0,27,0);
+	if(shutdown_flag_probe == 0)
+	{
+	        if(scan_on == 1)
+	        {
+			SOC_IO_Output(0,27,1);
 			msleep(SCAN_TIME);
 			ts_scan();
-	 	}
+		 if(scan_on == 1)
+	        	{
+				SOC_IO_Output(0,27,0);
+				msleep(SCAN_TIME);
+				ts_scan();
+				if(scan_on ==0)
+					shutdown_flag_gt811 = 1;
+				else
+					shutdown_flag_gt811 = 0;
+		 	}
 
-        }
-        else
-        {
-            ssleep(6);//3//6s later,if ts not load and scan again.
-            if(is_ts_load == 0)
-            {
-                scan_on = 1;
-                lidbg("ts not load,scan again...\n");
-            }
-            else
-                break;
-
-        }
+	        }
+	        else
+	        {
+	            ssleep(6);//3//6s later,if ts not load and scan again.
+	            if(is_ts_load == 0)
+	            {
+	                scan_on = 1;
+	                lidbg("ts not load,scan again...\n");
+	            }
+	            else
+	                break;
+		}
+	}
+	else{
+		msleep(SCAN_TIME);
+		shutdown_flag_probe = 2;
+	}
     }
     return 0;
 }
@@ -118,7 +132,7 @@ static int ts_probe_init(void)
 {
     static struct task_struct *scan_task;
     DUMP_BUILD_TIME;
-    printk("\n[futengfei]=========512300=========ts_probe_init\n");
+    printk("\n[futengfei]==================update=====ts_probe_init=============\n");
 #ifndef SOC_COMPILE
     LIDBG_GET;
 #endif
@@ -134,7 +148,12 @@ module_exit(ts_probe_exit);
 
 EXPORT_SYMBOL(FLAG_FOR_15S_OFF);
 EXPORT_SYMBOL(is_ts_load);
-
+/******************************************************
+ 		add Logic for goodix801 update 
+*******************************************************/
+EXPORT_SYMBOL(shutdown_flag_ts);
+EXPORT_SYMBOL(shutdown_flag_probe);
+EXPORT_SYMBOL(shutdown_flag_gt811);
 
 MODULE_LICENSE("Dual BSD/GPL");
 MODULE_AUTHOR("lsw.");

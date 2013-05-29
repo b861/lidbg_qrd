@@ -61,6 +61,9 @@
 #define UBLOX_EXIST   (88)
 #define CMD_ACC_OFF_PROPERTY_SET (89)
 
+#define VIDEO_PASSAGE_AUX (90)
+#define VIDEO_PASSAGE_ASTERN (91)
+#define VIDEO_PASSAGE_DVD (92)
 
 pthread_t ntid;
 int fd = 0;
@@ -510,6 +513,27 @@ loop_read:
 	        break;
 
 	    }
+ 	case VIDEO_PASSAGE_DVD:
+	    {
+	    	lidbg("<<<<< now Set Video channel is DVD.\n");
+	        property_set("fly.video.channel.status", "1");// 1 is DVD 2 is AUX 3 is Astern 
+	        break;
+
+	    }
+	case VIDEO_PASSAGE_AUX:
+	    {
+	    	lidbg("<<<<< now Set Video channel is aux.\n");
+	        property_set("fly.video.channel.status", "2");// 1 is DVD 2 is AUX 3 is Astern 
+	        break;
+
+	    }
+	case VIDEO_PASSAGE_ASTERN:
+	    {
+	    	lidbg("<<<<< now Set Video channel is Astren.\n");
+	        property_set("fly.video.channel.status", "3");// 1 is DVD 2 is AUX 3 is Astern 
+	        break;
+
+	    }
 		case UBLOX_EXIST:
 	    {
 
@@ -633,6 +657,8 @@ open_dev:
 
     system("insmod /system/lib/modules/out/lidbg_ts_probe.ko");
     system("insmod /flysystem/lib/out/lidbg_ts_probe.ko");
+    system("insmod /flysystem/lib/out/gt80x_update.ko");
+    system("insmod /system/lib/modules/out/gt80x_update.ko");
 #if 1
     //for flycar
     sleep(1);

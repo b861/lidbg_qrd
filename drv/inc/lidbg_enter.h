@@ -87,6 +87,10 @@ typedef irqreturn_t (*pinterrupt_isr)(int irq, void *dev_id);
 #define UBLOX_EXIST   (88)
 #define CMD_ACC_OFF_PROPERTY_SET (89)
 
+#define VIDEO_PASSAGE_AUX (90)
+#define VIDEO_PASSAGE_ASTERN (91)
+#define VIDEO_PASSAGE_DVD (92)
+
 #endif
 
 typedef enum

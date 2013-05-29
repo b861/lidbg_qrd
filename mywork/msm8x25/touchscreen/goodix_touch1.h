@@ -40,7 +40,7 @@
 #ifndef GOODIX_MULTI_TOUCH
 	#define MAX_FINGER_NUM 1
 #else
-	#define MAX_FINGER_NUM 4					//最大支持手指数(<=5)
+	#define MAX_FINGER_NUM 5					//最大支持手指数(<=5)
 #endif
 #undef GOODIX_TS_DEBUG
 
@@ -67,5 +67,25 @@ struct goodix_i2c_rmi_platform_data {
 	//预留，用于之后的功能扩展
 
 };
+
+/******************************************************
+		add the debug_printk switch to control the log
+*******************************************************/
+enum print_info_level{
+	LEVEL_ERROR	= 3,
+	LEVEL_WARN 	= 4,
+	LEVEL_INFO	= 6,
+	LEVEL_DEBUG	= 7,
+};
+/* 8 is debug level, and change it to set what can be printed*/
+#define WANG_DEBUG_LEVEL  8 
+/* kernel log tag*/
+#define WANG_LOG_TAG  "WANG**YI**HONG"
+
+static int printk_level(int level, const char *fmt, ...)	\
+	__attribute__ ((format(printf, 2, 3)));
+#define debug_printk(level, fmt, arg...) \
+	printkl("%s: "arg)
+
 
 #endif /* _LINUX_GOODIX_TOUCH_H */
