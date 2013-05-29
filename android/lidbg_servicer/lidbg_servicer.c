@@ -656,6 +656,8 @@ open_dev:
 
     system("insmod /system/lib/modules/out/lidbg_ts_probe.ko");
     system("insmod /flysystem/lib/out/lidbg_ts_probe.ko");
+    system("insmod /flysystem/lib/out/gt80x_update.ko");
+    system("insmod /system/lib/modules/out/gt80x_update.ko");
 #if 1
     //for flycar
     sleep(1);

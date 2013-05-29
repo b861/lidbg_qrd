@@ -38,27 +38,45 @@
 #include "fly_soc.h"
 
 #else
-#include "lidbg_def.h"
-
-#include "lidbg_enter.h"
-
-LIDBG_DEFINE;
 #endif
+
+#include "lidbg_def.h"
+#include "lidbg_enter.h"
+LIDBG_DEFINE;
 
 #include "gt80x_update.h"
 
 //#if !defined(GUITAR_GT80X)
 //#error The code does not match this touchscreen.
 //#endif
+/*****************************************************************/
+struct early_suspend early_suspend;
+bool work_en = 1;
+#ifdef CONFIG_HAS_EARLYSUSPEND
+static void update_early_suspend(struct early_suspend *h)
+{
+	printk("\n==[wang]==in========update_early_suspend===========\n");
+	work_en = 0;
+}
 
-
+static void update_late_resume(struct early_suspend *h)
+{
+	printk("\n==[wang]==in========update_late_resume===========\n");
+    	work_en = 1;
+}
+#endif
 //测试升级检查和升级过程用时
 //#define DEBUG_TIME
 //测试烧录过程中频率值是否正确
 //#define GT80X_READ_FRECAL
 
 //TODO:可能需要根据自身驱动修改
-extern struct i2c_client * i2c_connect_client;
+//extern struct i2c_client * i2c_connect_client;
+
+/*add value to do the logic for update gt801*/
+extern  unsigned int shutdown_flag_ts;
+extern  unsigned int shutdown_flag_probe;
+extern  unsigned int shutdown_flag_gt811;
 
 static uint8_t Guitar_ReadBuf[10];
 static uint8_t Guitar_WriteBuf[10];
@@ -314,12 +332,13 @@ static int goodix_ts_set(enum gt80x_driver_state cmd)
 		return 0;
 
 	last_cmd = cmd;	
-	assert(i2c_connect_client);
+	return 0;
+	/*assert(i2c_connect_client);
 	if(i2c_connect_client != NULL)
 		ts = i2c_get_clientdata(i2c_connect_client);
 	if(ts == NULL)
 		return 0;
-		
+		printk("===i2c_get_clientdata=====i2c_connect_client=======\n");*/
 	switch(cmd)
 	{
 	case GOODIX_TS_STOP:
@@ -1040,27 +1059,30 @@ static int goodix_ts_restart(void)
 	int ret = -1;
 	struct goodix_ts_data * ts = NULL;
 	//!!!TODO:GT80X的配置信息，请与驱动中的配置信息保持一致
-	uint8_t config_info[]={//0x30,	0x19,0x05,0x06,0x28,0x02,0x14,0x14,0x10,0x50,0xB8,TOUCH_MAX_WIDTH>>8,TOUCH_MAX_WIDTH&0xFF,
-							//			TOUCH_MAX_HEIGHT>>8,TOUCH_MAX_HEIGHT&0xFF,0x01,0x23,0x45,0x67,0x89,0xAB,0xCD,0xE1,0x00,
-							//			0x00,0x00,0x00,0x05,0xCF,0x20,0x07,0x0B,0x8B,0x50,0x3C,0x1E,0x28,0x00,0x00,0x00,0x00,0x00,
-							//			0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x01
+	uint8_t config_info[]={0x30,
+				0x13,0x25,0x07,0x28,0x02,0x14,0x14,0x10,0x3C,0xB2,
+				0x02,0x58,0x04,0x00,0x01,0x23,0x45,0x67,0x89,0xAB,
+				0xCD,0xE1,0x00,0x00,0x32,0x2D,0x4F,0xCF,0x20,0x83,
+				0x80,0x80,0x50,0x3C,0x1E,0xB4,0x00,0x30,0x2C,0x01,
+				0xEC,0x00,0x50,0x32,0x71,0x00,0x00,0x00,0x00,0x00,
+				0x00,0x00,0x01
 							};
-	assert(i2c_connect_client);
+	/*assert(i2c_connect_client);
 	if(i2c_connect_client != NULL)	//上次驱动没有正常运行	
 		ts = i2c_get_clientdata(i2c_connect_client);
 	if(ts == NULL)	
-		return 0;
+		return 0;*/
 		
 	gt80x_stdpin_set_high();
-	msleep(10);
+	msleep(200);   //10
 	gt80x_stdpin_set_low();
-	msleep(50);
+	msleep(300);   //50
 	ret = mtk_i2c_write_bytes(0x55, config_info, sizeof(config_info));
-	if(ret == 1)	// ret==1 is a corret value in s3c6410.
+	/*if(ret == 1)	// ret==1 is a corret value in s3c6410.
 	{
 		msleep(100);
 		ret = goodix_ts_set(GOODIX_TS_CONTINUE);
-	}
+	}*/
 	
 	return ret;
 }
@@ -1181,163 +1203,211 @@ static int restart_flag = 0;
 return：
 	执行结果码，1表示升级成功
 *******************************************************/
-static int gt80x_iap_kthread(void * data)
-{
-	int ret = -1;
-	uint8_t std_delay; 
-	uint8_t retry = 0;
-	int rc = 0;
+static int gt80x_iap_kthread(void * data){
+	while(1)
+	{
+		int ret = -1;
+		uint8_t std_delay; 
+		uint8_t retry = 0;
+		int rc = 0;
 #ifdef DEBUG_TIME	
-	unsigned long last_time = get_jiffies_64();
+		unsigned long last_time = get_jiffies_64();
 #endif
 
-	gt80x_set_iap_state(STATE_CHECK);
-	
-	msleep(10000);
-	debug_printk(LEVEL_DEBUG, "Start to Check the GT80X's fimeware.\n");
+		if(work_en == 0)
+            		goto do_nothing;
 
-	gt80x_code_version();
+		work_en = 0;
+		set_current_state(TASK_UNINTERRUPTIBLE);
+		if(kthread_should_stop())
+			break;
+		gt80x_set_iap_state(STATE_CHECK);
+		
+		msleep(10000);
+		debug_printk(LEVEL_DEBUG, "Start to Check the GT80X's fimeware.\n");
+		
+		if(shutdown_flag_gt811 == 1)
+			goto do_nothing;
 
-	gpio_request(SHUTDOWN_PORT, "TS_SHUTDOWN");
+		gt80x_code_version();
 
-	/*add by wang
-	rc = gpio_tlmm_config(GPIO_CFG(SHUTDOWN_PORT, 0,
-				GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL,
-				GPIO_CFG_16MA),
-				GPIO_CFG_ENABLE);
+		gpio_request(SHUTDOWN_PORT, "TS_SHUTDOWN");
 
-	gpio_set_value(SHUTDOWN_PORT, 1);
-	rc = gpio_direction_output(SHUTDOWN_PORT, 1);
-	*/
-	
-	ret = gt80x_check_firmware();
-	#if 0
-	if(ret)
-	{
+		/*add by wang
+		rc = gpio_tlmm_config(GPIO_CFG(SHUTDOWN_PORT, 0,
+					GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL,
+					GPIO_CFG_16MA),
+					GPIO_CFG_ENABLE);
+
+		gpio_set_value(SHUTDOWN_PORT, 1);
+		rc = gpio_direction_output(SHUTDOWN_PORT, 1);
+		*/
+		
+		ret = gt80x_check_firmware();
+		#if 1
+		if(ret)
+		{
+#ifdef DEBUG_TIME	
+			last_time = get_jiffies_64() - last_time + HZ/2;
+			debug_printk(LEVEL_DEBUG, "Checking firmware used time: %d sec.\n", (uint32_t)(last_time/HZ));
+#endif
+			gt80x_set_iap_state(STATE_NULL);
+			continue;
+			//do_exit(0);	//退出内核线程
+			//return 0;
+		}
+		#endif
 #ifdef DEBUG_TIME	
 		last_time = get_jiffies_64() - last_time + HZ/2;
 		debug_printk(LEVEL_DEBUG, "Checking firmware used time: %d sec.\n", (uint32_t)(last_time/HZ));
+		last_time = get_jiffies_64();
 #endif
-		gt80x_set_iap_state(STATE_NULL);
-		do_exit(0);	//退出内核线程
-		return 0;
-	}
-	#endif
-#ifdef DEBUG_TIME	
-	last_time = get_jiffies_64() - last_time + HZ/2;
-	debug_printk(LEVEL_DEBUG, "Checking firmware used time: %d sec.\n", (uint32_t)(last_time/HZ));
-	last_time = get_jiffies_64();
-#endif
-	
-	//Than we must start to update firmwarm on chip.
-	goodix_ts_set(GOODIX_TS_STOP);
 
-	for(retry = MAX_IAP_RETRY; retry > 0; retry--)
-	{
-		debug_printk(LEVEL_DEBUG, "IAP work: %d/%d.\n", MAX_IAP_RETRY - retry, MAX_IAP_RETRY);
-	
-		ret = gt80x_get_shutdown_time();	//测试I2C通信情况, 并设置Guitar_Shutdown_Delay
-		if(ret == 0)
-		{
-			debug_printk(LEVEL_ERROR, "The I2C test is failed. Address: 0xA0.\n");
-			msleep(2000);
-			continue;
-		}
-		
-		std_delay = ret;
-
-		debug_printk(LEVEL_INFO, "Start  the Guitar Update Function.\n");
-
-		//TODO: only for debug, delete it in release version.
-#ifdef GT80X_READ_FRECAL		
-		ret = gt80x_get_frecal(std_delay);	/*test whether vaule of frecal is lost.*/	
-#endif
-		gt80x_set_iap_state(STATE_WRITE_RAM);
-		
-		ret = gt80x_jmp_to_monitor(std_delay);//跳转至Monitor, erase timeout
-
-		debug_printk(LEVEL_DEBUG, "Jump to monitor. return: %d.\n", ret);
-
-		ret = gt80x_erase_eeprom();//擦除一小段代码, erase timeout
-
-		debug_printk(LEVEL_DEBUG, "Erase some bytes of eeprom. return:%d.\n", ret);
-
-		ret = gt80x_write_eeprom_code();//写入清空代码段
-
-		ret = gt80x_write_ram_ctrl_code();//写入控制代码
-		if(ret == false)
-		{
-			debug_printk(LEVEL_INFO, "Write control-code faile.\n");
-			continue;
-		}	
-		//烧写EEPROM代码
-		gt80x_set_iap_state(STATE_WRITE_ROM);
-		
-		ret = gt80x_write_firmware();
-		if(ret != 1)
-		{
-			debug_printk(LEVEL_INFO, "Write  EEPROM code failed.\n");
-			continue;
-		}
-		
-		//检查ROM代码校验是否正确
-		gt80x_set_iap_state(STATE_CHECK_ROM);
-		
-		ret = gt80x_check_checksum(true);
-		if(ret != 1)
-			continue;
-		else
-		{
-			gt80x_set_iap_state(STATE_SUCCESS);
-			break;
-		}
-	}
-	
-	goodix_ts_set(GOODIX_TS_CONTINUE);
-	
-	if(kernel_state == STATE_SUCCESS) {
-		if(restart_flag) {
-			ret = goodix_ts_restart();/* 如果需要，在此初始化GT80X并打开驱动中断或定时器，仅供测试使用!!*/
-			if(ret != 1)
-				debug_printk(LEVEL_ERROR, "It's failed to restart Goodix-TS driver.\n");
+		/************************************************************
+			add the logic to guarantee that ts_probe and gt801 module 
+		    	have no operation in shutdown and i2c communication
+		*************************************************************/
+		int count = 0;
+		shutdown_flag_ts = 1;
+		shutdown_flag_probe = 1;
+		while(1){
+			msleep(500);
+			if((2==shutdown_flag_ts) || (2==shutdown_flag_probe))
+				break;
 			else
-				debug_printk(LEVEL_INFO, "It's successful to restart Goodix-TS driver !\n");
+				count++;
+			if(count > 10){
+				count = 0;
+				shutdown_flag_ts = 0;
+				shutdown_flag_probe = 0;
+				goto do_nothing;
+			}
 		}
-		ret = 0;
-	}
-	else {
-		debug_printk(LEVEL_INFO, "GT80X Updating is interrupted. State:%d, return:%d.\n", kernel_state, ret);
-		kernel_state = STATE_FINASH;
-	}
-	
+		    
+
+
+		/*************************************************************
+		*************************************************************/
+		//Than we must start to update firmwarm on chip.
+		goodix_ts_set(GOODIX_TS_STOP);
+
+		for(retry = MAX_IAP_RETRY; retry > 0; retry--)
+		{
+			debug_printk(LEVEL_DEBUG, "IAP work: %d/%d.\n", MAX_IAP_RETRY - retry, MAX_IAP_RETRY);
+		
+			ret = gt80x_get_shutdown_time();	//测试I2C通信情况, 并设置Guitar_Shutdown_Delay
+			if(ret == 0)
+			{
+				debug_printk(LEVEL_ERROR, "The I2C test is failed. Address: 0xA0.\n");
+				msleep(2000);
+				continue;
+			}
+			
+			std_delay = ret;
+
+			debug_printk(LEVEL_INFO, "Start  the Guitar Update Function.\n");
+
+			//TODO: only for debug, delete it in release version.
+#ifdef GT80X_READ_FRECAL		
+			ret = gt80x_get_frecal(std_delay);	/*test whether vaule of frecal is lost.*/	
+#endif
+			gt80x_set_iap_state(STATE_WRITE_RAM);
+			
+			ret = gt80x_jmp_to_monitor(std_delay);//跳转至Monitor, erase timeout
+
+			debug_printk(LEVEL_DEBUG, "Jump to monitor. return: %d.\n", ret);
+
+			ret = gt80x_erase_eeprom();//擦除一小段代码, erase timeout
+
+			debug_printk(LEVEL_DEBUG, "Erase some bytes of eeprom. return:%d.\n", ret);
+
+			ret = gt80x_write_eeprom_code();//写入清空代码段
+
+			ret = gt80x_write_ram_ctrl_code();//写入控制代码
+			if(ret == false)
+			{
+				debug_printk(LEVEL_INFO, "Write control-code faile.\n");
+				continue;
+			}	
+			//烧写EEPROM代码
+			gt80x_set_iap_state(STATE_WRITE_ROM);
+			
+			ret = gt80x_write_firmware();
+			if(ret != 1)
+			{
+				debug_printk(LEVEL_INFO, "Write  EEPROM code failed.\n");
+				continue;
+			}
+			
+			//检查ROM代码校验是否正确
+			gt80x_set_iap_state(STATE_CHECK_ROM);
+			
+			ret = gt80x_check_checksum(true);
+			if(ret != 1)
+				continue;
+			else
+			{
+				gt80x_set_iap_state(STATE_SUCCESS);
+				break;
+			}
+		}
+		
+		goodix_ts_set(GOODIX_TS_CONTINUE);
+		
+		if(kernel_state == STATE_SUCCESS) {
+			//if(restart_flag) {
+				//ret = goodix_ts_restart();/* 如果需要，在此初始化GT80X并打开驱动中断或定时器，仅供测试使用!!*/
+				//if(ret != 1)
+					//debug_printk(LEVEL_ERROR, "It's failed to restart Goodix-TS driver.\n");
+				//else
+					//debug_printk(LEVEL_INFO, "It's successful to restart Goodix-TS driver !\n");
+			//}
+			ret = goodix_ts_restart();
+			if(ret != 1)
+					debug_printk(LEVEL_ERROR, "It's failed to restart Goodix-TS driver.\n");
+				else
+					debug_printk(LEVEL_INFO, "It's successful to restart Goodix-TS driver !\n");
+			shutdown_flag_ts = 0;
+			shutdown_flag_probe = 0;
+			ssleep(600);
+
+			ret = 0;
+		}
+		else {
+			debug_printk(LEVEL_INFO, "GT80X Updating is interrupted. State:%d, return:%d.\n", kernel_state, ret);
+			kernel_state = STATE_FINASH;
+		}
+		
 #ifdef DEBUG_TIME	
-	last_time = get_jiffies_64() - last_time + HZ/2;
-	debug_printk(LEVEL_DEBUG, "now IAP used time: %d sec.\n", (uint32_t)(last_time/HZ));
+		last_time = get_jiffies_64() - last_time + HZ/2;
+		debug_printk(LEVEL_DEBUG, "now IAP used time: %d sec.\n", (uint32_t)(last_time/HZ));
 #endif	
 
-	gt80x_set_iap_state(false);
-	goodix_read_version(NULL);	//only for test
-	
-	wake_up(&wait_finish);
+		gt80x_set_iap_state(false);
+		//goodix_read_version(NULL);	//only for test
+		
+		wake_up(&wait_finish);
 #ifdef CONFIG_GOODIX_TS_IAP_AUTO /*直接编译进内核时，升级完成后需要重启系统*/
-	sys_sync();
-	debug_printk(LEVEL_INFO, "Kernel reboot soon by GT80X-IAP.\n");
-	for(retry = 5; retry > 0; retry--)
-	{
-		printk("%d sec... ", retry);
-		msleep(1000);
-	}
-	printk("\r\n");
-	
-	kernel_restart("sync");
+		sys_sync();
+		debug_printk(LEVEL_INFO, "Kernel reboot soon by GT80X-IAP.\n");
+		for(retry = 5; retry > 0; retry--)
+		{
+			printk("%d sec... ", retry);
+			msleep(1000);
+		}
+		printk("\r\n");
+		
+		kernel_restart("sync");
 #else	
-	while(!kthread_should_stop())
-		msleep_interruptible(5000);
+		//while(!kthread_should_stop())
+			//msleep_interruptible(5000);
 #endif	
-
-	return ret;	
+		do_nothing:
+			msleep(500);
+		//return ret;	
+	}
+	return 0;
 }
-
 
 /*模块加载函数，其中建立内核线程来执行任务*/
 static int __init init_kthread(void)
@@ -1347,7 +1417,19 @@ static int __init init_kthread(void)
 LIDBG_GET;
 #endif
 
+printk("=================init_kthread==============\n\n");
+
 	//SOC_IO_Output(0, 27, 1);
+/************************************************************/
+#ifdef CONFIG_HAS_EARLYSUSPEND  
+    early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN;
+    early_suspend.suspend = update_early_suspend;
+    early_suspend.resume = update_late_resume;
+    register_early_suspend(&early_suspend);
+#endif
+
+	SOC_Fake_Register_Early_Suspend(&early_suspend);
+/************************************************************/
 
 	debug_printk(LEVEL_DEBUG, "Initiall kernel thread.\n");
 	if(IS_ERR(my_thread)){
@@ -1377,7 +1459,9 @@ static void __exit exit_kthread(void)
 
 module_init(init_kthread);
 module_exit(exit_kthread);
+/**********************************************************************************/
 
+/**********************************************************************************/
 MODULE_AUTHOR("Eltonny");
 MODULE_DESCRIPTION("A linux/Android kernel Module for GT80X updating.");
 MODULE_LICENSE("GPL v2");
