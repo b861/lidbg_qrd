@@ -77,11 +77,11 @@ int static VideoImageParameterConfig(void)
 		     	 }
 		     else//PALi
 		     	{
-		        Tw9912_image_global_AUX_BACK_PAL_I[0][1]= 0x10;// is good 00
-		        Tw9912_image_global_AUX_BACK_PAL_I[1][1]= 0x63;//is good 58
+		        Tw9912_image_global_AUX_BACK_PAL_I[0][1]= 0x00;// is good 00
+		        Tw9912_image_global_AUX_BACK_PAL_I[1][1]= 0x58;//is good 58
 		        Tw9912_image_global_AUX_BACK_PAL_I[2][1]= 0x00;
-		        Tw9912_image_global_AUX_BACK_PAL_I[3][1]= 0x80;
-		        Tw9912_image_global_AUX_BACK_PAL_I[4][1]= 0x80;
+		        Tw9912_image_global_AUX_BACK_PAL_I[3][1]= 0xdf;
+		        Tw9912_image_global_AUX_BACK_PAL_I[4][1]= 0xdf;
 			 printk("Tw9912_image_global_AUX_BACK reset valu from PAL_I\n");
 			 }
 			 return 1;
@@ -222,7 +222,7 @@ int static VideoImage(void)
 				Tw9912_image[1] = 0x1f;
 				ret = write_tw9912(&Tw9912_image);
 				Tw9912_image[0] = 0x08;
-				Tw9912_image[1] = 0x14;
+				Tw9912_image[1] = 0x13;
 				ret = write_tw9912(&Tw9912_image);
 			}
 		else
