@@ -604,12 +604,13 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
     lidbg("-----------------------\n");
 
 
-    //if(ptasklist_lock != NULL)
-    //	read_lock(ptasklist_lock);
-
-
-	
-	spin_lock_irqsave(&kill_lock, flags_kill);
+    if(ptasklist_lock != NULL)
+    {
+    	lidbg("ptasklist_lock = %x\n",ptasklist_lock);
+    	read_lock(ptasklist_lock);
+    }
+	else
+		spin_lock_irqsave(&kill_lock, flags_kill);
 
     for_each_process(p)
     {
@@ -683,11 +684,12 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
                 //lidbg("+\n");
             }
         }
-
-        //if(ptasklist_lock != NULL)
-        //	read_unlock(ptasklist_lock);
     }//for_each_process
-	spin_unlock_irqrestore(&kill_lock, flags_kill);
+    
+     if(ptasklist_lock != NULL)
+      	read_unlock(ptasklist_lock);
+	 else
+		spin_unlock_irqrestore(&kill_lock, flags_kill);
 
 
 	lidbg("-----------------------\n\n");

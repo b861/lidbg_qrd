@@ -156,7 +156,7 @@ static int __init share_init(void)
         //(lidbg_devp->soc_func_tbl.pfnSOC_Write_Servicer)(i);
     }
 
-    memset(&(plidbg_share->lidbg_devp->soc_pvar_tbl), 0, sizeof(struct lidbg_pvar_t));
+    memset(&(plidbg_share->lidbg_devp->soc_pvar_tbl), NULL, sizeof(struct lidbg_pvar_t));
 
     plidbg_share->lidbg_devp->smem.s.smemaddr = __pa((unsigned long)(plidbg_share->lidbg_devp));
     plidbg_share->lidbg_devp->smem.s.smemsize = mmap_size;
