@@ -39,6 +39,8 @@ static struct utsname host_msg;
 void get_host_msg()
 {
     char hostname[32];
+    struct hostent *hent;
+    int i;
     uname(&host_msg);
     printf("\n%s,%s,%s,%s,%s\n", host_msg.sysname, host_msg.machine, host_msg.nodename, host_msg.release, host_msg.version);
 
@@ -50,6 +52,12 @@ void get_host_msg()
     else
         printf("localhost name:[%s]\n", hostname);
 
+    hent = gethostbyname(hostname);
+    printf("localhost name:[%s]\naddress_list:", hent->h_name);
+    for(i = 0; hent->h_addr_list[i]; i++)
+    {
+        printf("%s\t", inet_ntoa(*(struct in_addr *)(hent->h_addr_list[i])));
+    }
 }
 void test_opendir(const char *dir_path)
 {
@@ -100,7 +108,7 @@ void test_socket_smthing()
 
     my_addr.sin_family = AF_INET;
     my_addr.sin_port = htons(SERVPORT);
-    my_addr.sin_addr.s_addr = INADDR_ANY;
+    my_addr.sin_addr.s_addr = inet_addr("0.0.0.0");//INADDR_ANY;
     bzero(&(my_addr.sin_zero), 8);
 
     printf("my_addr.sin_addr: %s\n", inet_ntoa(my_addr.sin_addr));
@@ -119,8 +127,8 @@ void test_socket_smthing()
     {
         int sin_size = sizeof(struct sockaddr_in);
         printf("while(1)---------1\n");
-		
-	//accept will block to wait client ; we are server;
+
+        //accept will block to wait client ; we are server;
         if ((client_fd = accept(sockfd, (struct sockaddr *)&remote_addr, &sin_size)) == -1)
         {
             printf("accept err\n");
@@ -144,7 +152,19 @@ void test_socket_smthing()
 
 
 }
+void  test_fb(int zero_return)
+{
+    printf("[futengfei].%s===========%s\n",__func__, (zero_return?"on":"off"));
+    if(zero_return==0)
+    	{
+		return ;
+	}
 
+
+
+
+
+}
 int main (int argc, char **argv)
 {
     mdbg("=========test start1=============\n\n\n");
@@ -152,9 +172,12 @@ int main (int argc, char **argv)
     get_host_msg();
     test_dev_nod();
     test_opendir("/mnt/sdcard");
-    test_socket_smthing();
+    test_fb(1);
 
 
+
+
+    test_socket_smthing();//will block my test,so put it back;
     mdbg("=========test stop1=============\n\n\n");
     return 0;
 }

@@ -1,3 +1,18 @@
+#include <linux/slab.h>
+#include <linux/fs.h>
+#include <linux/module.h>
+#include <linux/miscdevice.h>
+#include <linux/mutex.h>
+#include <linux/sched.h>
+#include <linux/wait.h>
+#include <linux/uaccess.h>
+#include <linux/kthread.h>
+#include <linux/time.h>
+#include <linux/wait.h>
+#include <linux/msm_audio.h>
+#include <linux/msm_audio_aac.h>
+#include <mach/msm_qdsp6_audio.h>
+#include <mach/debug_mm.h>
 #include <linux/kernel.h>
 #include <linux/kobject.h>
 #include <linux/memory.h>
@@ -80,11 +95,11 @@ void creat_file(char *filename, char *txtbuff)
     }
 }
 
-void launch_exe( int on_off,char bin_path[], char argv1[])
+void launch_exe( int zero_return,char bin_path[], char argv1[])
 {
 
-    printk("[futengfei].confirm:lunch [%s %s] ===========%s\n",bin_path, argv1, (on_off?"on":"off"));
-    if(on_off==0)
+    printk("[futengfei].confirm:lunch [%s %s] ===========%s\n",bin_path, argv1, (zero_return?"on":"off"));
+    if(zero_return==0)
     	{
 		return ;
 	}
@@ -96,9 +111,9 @@ void launch_exe( int on_off,char bin_path[], char argv1[])
     //NOTE:  I test that:use UMH_NO_WAIT can't lunch the exe; UMH_WAIT_PROCwill block the ko,
     //UMH_WAIT_EXEC  is recommended.
     if (ret < 0)
-                printk("[futengfei].lunch [%s %s] =====%d======fail\n",bin_path, argv1, on_off);
+                printk("[futengfei].lunch [%s %s] =====%d======fail\n",bin_path, argv1, zero_return);
     else
-                printk("[futengfei].lunch [%s %s] =====%d======sucess\n",bin_path, argv1, on_off);
+                printk("[futengfei].lunch [%s %s] =====%d======sucess\n",bin_path, argv1, zero_return);
 
 }
 struct kobject *mstate_kobj;
@@ -149,8 +164,13 @@ static struct attribute *g[] = {
 static struct attribute_group attr_group = {
 	.attrs = g,
 };
-void kernel_creat_sysgroup()
+void kernel_creat_sysgroup(int zero_return)
 {
+    printk("[futengfei].%s===========%s\n",__func__, (zero_return?"on":"off"));
+    if(zero_return==0)
+    	{
+		return ;
+	}
 	mstate_kobj = kobject_create_and_add("mstate", NULL);
 	if (!mstate_kobj)
 		{
@@ -160,19 +180,36 @@ void kernel_creat_sysgroup()
 	printk("[futengfei]===========suc=kobject_create[mstate]\n");
 	return sysfs_create_group(mstate_kobj, &attr_group);
 }
+static struct task_struct *m_socket_task;
+static int m_socket_fk(void *data)  
+{
+
+return 1;
+}
+void kernel_creat_socket(int zero_return)
+{
+    printk("[futengfei].%s===========%s\n",__func__, (zero_return?"on":"off"));
+    if(zero_return==0)
+    	{
+		return ;
+	}
+
+	m_socket_task = kthread_run(m_socket_fk, NULL, "ftf_socket_task");
+	
+}
+
 int kernel_creat_file_init(void)
 {
     printk("[futengfei]===IN===============kernel_creat_file_init\n");
     //wait a moment
-    ssleep(3);
+    ssleep(2);
     show_some_msg();
     creat_file("/mnt/sdcard/love2.txt", "ceshideceshihaishiceshi."); //creat file
     launch_exe(0,"/system/bin/insmod", "/system/lib/modules/wlan.ko"); //lunch userspace exe ,test ok
     // ssleep(2);
     launch_exe(0,"/system/lidbg_servicer", NULL); //lunch userspace exe,test ok
-    
-    kernel_creat_sysgroup();
-
+    kernel_creat_sysgroup(1);
+    kernel_creat_socket(0);//not ok
 
 
 
