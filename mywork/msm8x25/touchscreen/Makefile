@@ -9,8 +9,8 @@ CROSS_COMPILE = $(DBG_CROSS_COMPILE)
 CC = $(CROSS_COMPILE)gcc
 
 
-obj-m	+= rmi_touch.o
-rmi_touch-objs := rmi_bus.o rmi_sensor.o rmi_function.o rmi_f01.o rmi_f05.o rmi_f11.o rmi_f19.o rmi_f34.o rmi_i2c.o
+#obj-m	+= rmi_touch.o
+#rmi_touch-objs := rmi_bus.o rmi_sensor.o rmi_function.o rmi_f01.o rmi_f05.o rmi_f11.o rmi_f19.o rmi_f34.o rmi_i2c.o
 
 obj-m	+= lidbg_ts_probe.o
 obj-m	+= ft5x06_ts.o
