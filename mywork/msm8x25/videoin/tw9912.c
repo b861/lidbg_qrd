@@ -308,7 +308,7 @@ void Tw9912_analysis_input_signal(TW9912_input_info *input_information, Vedio_Ch
     }
     else
     {
-        printk("\r\rtw9912:testing NOT lock>>>>>>>>>>>\n");
+        printk("tw9912:testing NOT lock>>>>>>>>>>>\n");
         signal_is_how[channel].Format = OTHER;
         signal_is_how[channel].vedio_source = source_other;
     }
@@ -476,7 +476,7 @@ CONFIG_not_ack_fail:
 }
 Vedio_Format Tw9912TestingChannalSignal(Vedio_Channel Channel)
 {
-    Vedio_Format ret;
+    Vedio_Format ret = OTHER;
     u8 signal = 0, valu;
     register u8 i;
     u8 tw9912_register[] = {0x1c, 0x07,}; //default input pin selet YIN0
@@ -488,7 +488,7 @@ mutex_lock(&lock_com_chipe_config);
     if(the_last_config.Channel  != Channel){TW9912_Channel_Choices(Channel);}
     else {tw9912_dbg("the_last_config.Channel  == Channel so not have change channal\n");}
 	
-    for(i = 0; i < 5; i++)
+    for(i = 0; i < 2; i++)
     {
         read_tw9912(0x01, &signal); //register 0x02 channel selete
         if(signal & 0x80) printk("tw9912:fly_video at channal (%d) not find signal\n", Channel);
@@ -502,7 +502,7 @@ mutex_lock(&lock_com_chipe_config);
 	mutex_lock(&lock_com_chipe_config);
 
     }
-if(i==5)goto SIGNAL_NOT_LOCK;
+if(i==2)goto SIGNAL_NOT_LOCK;
 break_for:
     write_tw9912(tw9912_register);// Auto detection
 mutex_unlock(&lock_com_chipe_config);
@@ -576,7 +576,7 @@ mutex_lock(&lock_com_chipe_config);
 		    }
 	}
     //    return NTSC_P;
-    printk("tw9912:fly_video test signal is %d",ret);
+    printk("tw9912:fly_video test signal is %d\n",ret);
 mutex_unlock(&lock_com_chipe_config);
      return ret;
 SIGNAL_NOT_LOCK:
@@ -1171,8 +1171,8 @@ SIGNAL_DELTE_AGAIN:
         tw9912_dbg("tw9912 inital befor test signal count:%d;", delte_signal_count);
         ret = Tw9912_appoint_pin_testing_video_signal(Channel);//bad
         delte_signal_count++;
-        msleep(20);
-        if(ret == 5 && delte_signal_count < 4) goto SIGNAL_DELTE_AGAIN;
+        //msleep(20);
+        if(ret == 5 && delte_signal_count < 2) goto SIGNAL_DELTE_AGAIN;
         delte_signal_count = 0;
         mutex_lock(&lock_com_chipe_config);
         if(ret == 5) //the channel is not signal input
