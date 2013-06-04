@@ -784,7 +784,7 @@ static int thread_pwroff(void *data)
                 if(fastboot_get_status() == PM_STATUS_READY_TO_PWROFF)
                 {
 
-                    if(time_count >= 5)
+                    if(time_count >= 5*2)
                     {
                         lidbgerr("thread_pwroff wait early suspend timeout!\n");
                         SOC_Write_Servicer(SUSPEND_KERNEL);
