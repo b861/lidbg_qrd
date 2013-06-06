@@ -536,7 +536,8 @@ char *kill_exclude_process_fake_suspend[] =
 	"dio.osd.service",
 	"flyaudioservice",
 	"ndroid.launcher",
-
+	"fb_late_resume_",
+	"GT80x Thread",
 
 	//kld
 	"c2739.mainframe",
@@ -606,7 +607,8 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
 
     if(ptasklist_lock != NULL)
     {
-    	lidbg("ptasklist_lock = %x\n",ptasklist_lock);
+    	//lidbg("ptasklist_lock = %x\n",ptasklist_lock);
+    	lidbg("read_lock+\n");
     	read_lock(ptasklist_lock);
     }
 	else
