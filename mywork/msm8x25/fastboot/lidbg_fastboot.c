@@ -313,6 +313,8 @@ char *kill_exclude_process[] =
 	"dio.osd.service",
 	"flyaudioservice",
 	"ndroid.launcher",
+	"fb_late_resume_",
+	"GT80x Thread",
 
 
 	//kld
