@@ -1003,7 +1003,7 @@ int Tw9912_init_NTSCp(void)
     }
     tw9912_dbg("Tw9912_init_NTSCp initall tw9912+\n");
     TC9912_id();
-    printk("the_last_config.Channel  =%d\n", the_last_config.Channel );
+   // printk("the_last_config.Channel  =%d\n", the_last_config.Channel );
     the_last_config.Channel = SEPARATION;
     the_last_config.format = NTSC_P;
     //	bug_return_for_PALi();
@@ -1192,16 +1192,16 @@ SIGNAL_DELTE_AGAIN:
         switch(ret)
         {
         case NTSC_I:
-            printk("\nVideoFormaIs NTSC_I\n\n");
+            printk("Video Forma Is NTSC_I\n");
             break;
         case NTSC_P:
-            printk("\nVideoFormatIs NTSC\n\n");
+            printk("Video Format Is NTSC\n");
             break;
         case PAL_I:
-            printk("\nVideoFormatIs PAL_I\n\n");
+            printk("Video Format Is PAL_I\n");
             break;
         case PAL_P:
-            printk("\nVideoFormatIs PAL_P\n\n");
+            printk("Video Format Is PAL_P\n");
             break;
         default:
             ;

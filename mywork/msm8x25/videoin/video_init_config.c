@@ -73,7 +73,7 @@ int static VideoImageParameterConfig(void)
 			 Tw9912_image_global_AUX_BACK[2][1] = 0x00;
 		        Tw9912_image_global_AUX_BACK[3][1] = 0xdf;
 			 Tw9912_image_global_AUX_BACK[4][1] = 0xdf;
-			 printk("Tw9912_image_global_AUX_BACK reset valu from NTSC_I\n");
+			// printk("Tw9912_image_global_AUX_BACK reset valu from NTSC_I\n");
 		     	 }
 		     else//PALi
 		     	{
@@ -82,7 +82,7 @@ int static VideoImageParameterConfig(void)
 		        Tw9912_image_global_AUX_BACK_PAL_I[2][1]= 0x00;
 		        Tw9912_image_global_AUX_BACK_PAL_I[3][1]= 0xdf;
 		        Tw9912_image_global_AUX_BACK_PAL_I[4][1]= 0xdf;
-			 printk("Tw9912_image_global_AUX_BACK reset valu from PAL_I\n");
+			// printk("Tw9912_image_global_AUX_BACK reset valu from PAL_I\n");
 			 }
 			 return 1;
 		}
@@ -558,18 +558,18 @@ static int thread_signal_test(void *data)
 void video_init_config_in(Vedio_Format config_pramat)
 {
     int i, j;
-    printk("\nVideo Module Build Time: %s %s  %s \n\n", __FUNCTION__, __DATE__, __TIME__);
+    printk("\n\nVideo Module Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);
     video_config_debug("tw9912:config channal is %d\n", info_com_top_Channel);
     //spin_lock(&spin_chipe_config_lock);
     mutex_lock(&lock_chipe_config);
     //SOC_Write_Servicer(VIDEO_NORMAL_SHOW);
     if(info_com_top_Channel == SEPARATION || info_com_top_Channel == YIN2)
     {
-        printk("%s:config_pramat->NTSC_separation\n", __func__);
         Tw9912_init_NTSCp();
         VideoImage();
 	 SOC_Write_Servicer(VIDEO_NORMAL_SHOW);
         TC358_init(NTSC_P);
+	 printk("Vedio Format Is NTSCp\n");
     }
     else	if(config_pramat != STOP_VIDEO)
     {
