@@ -110,7 +110,6 @@ static int __init share_init(void)
 {
     int ret;
 
-    ret = misc_register(&misc);
     lidbg (DEVICE_NAME"share dev_init\n");
     DUMP_BUILD_TIME;
     plidbg_share = kmalloc(sizeof(struct lidbg_share), GFP_KERNEL);
@@ -162,6 +161,9 @@ static int __init share_init(void)
     plidbg_share->lidbg_devp->smem.s.smemsize = mmap_size;
     plidbg_share->lidbg_devp->smem.s.valid_offset = OFFSETOF(struct lidbg_dev, smem.lidbg_smem);
 
+
+//create dev after data is initialized
+    ret = misc_register(&misc);
     create_shm_proc();
 
     return ret;
