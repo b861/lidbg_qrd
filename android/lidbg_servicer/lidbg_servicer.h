@@ -62,9 +62,9 @@ LIDBG_PRINT("hello world\n");
 
 struct lidbg_dev_smem
 {
-	unsigned long smemaddr;
-	unsigned long smemsize;
-	unsigned long valid_offset;
+    unsigned long smemaddr;
+    unsigned long smemsize;
+    unsigned long valid_offset;
 };
 
 
