@@ -447,7 +447,7 @@ loop_read:
 			char value[16];
 			lidbg("SUSPEND_KERNEL+\n");
             //system("echo peripheral > /mnt/debugfs/otg/mode");
-			
+			//system("stagefright -a -o /system/media/audio/ui/Unlock.ogg");
 			property_get("fly.fastboot.accoff", value, "");
 			lidbg("fly.fastboot.accoff=%c\n",value[0]);
 			//if(value[0] == '1')
