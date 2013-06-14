@@ -22,11 +22,10 @@ include $(DBG_DRV_PATH)/$(DBG_SOC)/drv_$(DBG_SOC).mk
 include $(DBG_ROOT_PATH)/build_cfg.mk
 
 modules:
-	#env
-	$(MAKE) -C $(KERNELDIR) M=$(PWD) modules
+	$(MAKE) -C $(KERNELDIR) M=$(PWD) ARCH=arm  CROSS_COMPILE=$(DBG_CROSS_COMPILE) modules
  
 modules_install:
-	cp soc_$(DBG_SOC).ko $(INSTALLDIR)
+	cp *.ko $(INSTALLDIR)
 
 clean:
 	rm -rf *.o *~ core .depend .*.cmd *.ko *.mod.c .tmp_versions *.order *.symvers *_log
