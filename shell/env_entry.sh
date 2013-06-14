@@ -7,6 +7,7 @@
 source ../dbg_cfg.sh
 #source ./version.sh
 
+DBG_ROOT_PATH=`cd ../ && pwd`
 DBG_SHELL_PATH=$DBG_ROOT_PATH/shell
 DBG_OUT_PATH=$DBG_ROOT_PATH/out
 DBG_OUT_RELEASE_PATH=$DBG_ROOT_PATH/out_release
@@ -24,7 +25,7 @@ DBG_SOC_DIR=$DBG_SOC_PATH/$DBG_SOC
 DBG_PLATFORM_DIR=$DBG_SOC_DIR/$DBG_PLATFORM
 
 
-
+export DBG_ROOT_PATH
 export DBG_SHELL_PATH
 export DBG_OUT_PATH
 export DBG_SOC_PATH
