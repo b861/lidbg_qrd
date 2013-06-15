@@ -1,0 +1,15 @@
+
+*编译方法：
+cd lidbg_qrd
+(1) cp ./drv/msm8x25/need/dbg_cfg_backup.sh ./dbg_cfg.sh
+(2) 修改DBG_SYSTEM_DIR环境变量
+(3) chmod 777  ./* -R
+以后每次编译只要运行build_rel.sh即可
+
+
+*个人的测试代码不要push 到服务器master分支，可创建自己的测试分支再push这个分支到服务器。
+把本地分支(locate_branch_name) push到服务器(remote_branch_name)
+git push origin locate_branch_name:remote_branch_name 
+查看远程分支
+git branch -r
+git pull origin remote_branch_name:locate_branch_name
