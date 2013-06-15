@@ -5,11 +5,6 @@
 #=======================================================================================
 source ./env_entry.sh
 
-mkdir $DBG_OUT_PATH
-mkdir $DBG_ANDROID_OUT_PATH
-mkdir -p $DBG_OUT_RELEASE_PATH/v1/out
-mkdir -p $DBG_OUT_RELEASE_PATH/v2/out
-
 if [ "$DBG_SYN_XP2LI" = "y" ]; then
 echo "######### execute Syn_file_XP2Li.sh ##########"
 sh ./Syn_file_XP2Li.sh

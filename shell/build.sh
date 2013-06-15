@@ -44,6 +44,9 @@ source ./env_entry.sh
 	exit;;
 	esac
 
+mkdir $DBG_OUT_PATH
+mkdir $DBG_ANDROID_OUT_PATH
+mkdir -p $DBG_OUT_RELEASE_PATH/$1/out
 
 #cd shell
 ./all_make.sh
