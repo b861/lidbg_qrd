@@ -10,7 +10,6 @@
 #include <pthread.h>
 #include <utils/Log.h>
 #include "lidbg_servicer.h"
-#include "../minui/minui.h"
 
 //mount yaffs2 mtd@system /system rw remount
 //...
