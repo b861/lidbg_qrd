@@ -18,14 +18,14 @@ int thread_test(void *data)
 
             while(1)
             {
-            	buff[0]=0x12;
-            	buff[1]=0x34;
+                buff[0] = 0x12;
+                buff[1] = 0x34;
 
-		SOC_I2C_Send(1,0x88>>1, buff, 2);
-		SOC_IO_Output(0,27,1);		
-		lidbg(".");
-            	msleep(10);
-				
+                SOC_I2C_Send(1, 0x88 >> 1, buff, 2);
+                SOC_IO_Output(0, 27, 1);
+                lidbg(".");
+                msleep(10);
+
 
             }
         }

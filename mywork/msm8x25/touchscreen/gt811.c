@@ -86,7 +86,7 @@ touch_t touch = {0, 0, 0};
 
 #define SCREEN_X (1024)
 #define SCREEN_Y (600)
-static bool xy_revert_en=0; 
+static bool xy_revert_en = 0;
 
 extern  unsigned int FLAG_FOR_15S_OFF;
 extern  bool is_ts_load;
@@ -283,55 +283,55 @@ static int goodix_init_panel(struct goodix_ts_data *ts)
     uint8_t config_info7[] =
     {
         0x06, 0xA2,
-        0x12,0x10,0x0E,0x0C,0x0A,0x08,0x06,0x04,0x02,0x00,0x01,0x11,0x11,0x11,0x21,0x11,
-        0x31,0x11,0x41,0x11,0x51,0x11,0x61,0x11,0x71,0x11,0x81,0x11,0x91,0x11,0xA1,0x11,
-        0xB1,0x11,0xC1,0x11,0xD1,0x11,0xE1,0x11,0xF1,0x11,0x07,0x03,0x10,0x10,0x10,0x20,
-        0x20,0x20,0x10,0x10,0x0A,0x48,0x30,0x07,0x03,0x00,0x05,0x44,0x02,0x00,0x04,0x00,
-        0x00,0x3C,0x35,0x38,0x32,0x00,0x00,0x23,0x14,0x05,0x0A,0x80,0x00,0x00,0x00,0x00,
-        0x14,0x10,0x58,0x02,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x0D,0x00,
-        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x01
+        0x12, 0x10, 0x0E, 0x0C, 0x0A, 0x08, 0x06, 0x04, 0x02, 0x00, 0x01, 0x11, 0x11, 0x11, 0x21, 0x11,
+        0x31, 0x11, 0x41, 0x11, 0x51, 0x11, 0x61, 0x11, 0x71, 0x11, 0x81, 0x11, 0x91, 0x11, 0xA1, 0x11,
+        0xB1, 0x11, 0xC1, 0x11, 0xD1, 0x11, 0xE1, 0x11, 0xF1, 0x11, 0x07, 0x03, 0x10, 0x10, 0x10, 0x20,
+        0x20, 0x20, 0x10, 0x10, 0x0A, 0x48, 0x30, 0x07, 0x03, 0x00, 0x05, 0x44, 0x02, 0x00, 0x04, 0x00,
+        0x00, 0x3C, 0x35, 0x38, 0x32, 0x00, 0x00, 0x23, 0x14, 0x05, 0x0A, 0x80, 0x00, 0x00, 0x00, 0x00,
+        0x14, 0x10, 0x58, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0D, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01
 
     };
     uint8_t config_info8[] =
     {
         0x06, 0xA2,
-        0x12,0x10,0x0E,0x0C,0x0A,0x08,0x06,0x04,0x02,0x00,0x01,0x11,0x11,0x11,0x21,0x11,
-        0x31,0x11,0x41,0x11,0x51,0x11,0x61,0x11,0x71,0x11,0x81,0x11,0x91,0x11,0xA1,0x11,
-        0xB1,0x11,0xC1,0x11,0xD1,0x11,0xE1,0x11,0xF1,0x11,0x07,0x03,0x10,0x10,0x10,0x20,
-        0x20,0x20,0x10,0x10,0x0A,0x48,0x30,0x07,0x03,0x00,0x05,0x44,0x02,0x00,0x04,0x00,
-        0x00,0x3C,0x35,0x38,0x32,0x00,0x00,0x23,0x14,0x05,0x0A,0x80,0x00,0x00,0x00,0x00,
-        0x14,0x10,0x58,0x02,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x0D,0x00,
-        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x01
+        0x12, 0x10, 0x0E, 0x0C, 0x0A, 0x08, 0x06, 0x04, 0x02, 0x00, 0x01, 0x11, 0x11, 0x11, 0x21, 0x11,
+        0x31, 0x11, 0x41, 0x11, 0x51, 0x11, 0x61, 0x11, 0x71, 0x11, 0x81, 0x11, 0x91, 0x11, 0xA1, 0x11,
+        0xB1, 0x11, 0xC1, 0x11, 0xD1, 0x11, 0xE1, 0x11, 0xF1, 0x11, 0x07, 0x03, 0x10, 0x10, 0x10, 0x20,
+        0x20, 0x20, 0x10, 0x10, 0x0A, 0x48, 0x30, 0x07, 0x03, 0x00, 0x05, 0x44, 0x02, 0x00, 0x04, 0x00,
+        0x00, 0x3C, 0x35, 0x38, 0x32, 0x00, 0x00, 0x23, 0x14, 0x05, 0x0A, 0x80, 0x00, 0x00, 0x00, 0x00,
+        0x14, 0x10, 0x58, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0D, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01
 
     };
     //config_info[62] = TOUCH_MAX_WIDTH >> 8;
     //config_info[61] = TOUCH_MAX_WIDTH & 0xff;
-   // config_info[64] = TOUCH_MAX_HEIGHT >> 8;
-   // config_info[63] = TOUCH_MAX_HEIGHT & 0xff;
+    // config_info[64] = TOUCH_MAX_HEIGHT >> 8;
+    // config_info[63] = TOUCH_MAX_HEIGHT & 0xff;
 
 
- //sensor_id [0:  8cunTS;      2: 7cunTS ;   7cun for default]
-if(sensor_id == 0) //0:  8cunTS;
-	{
-		ret = i2c_write_bytes(ts->client, config_info8, sizeof(config_info8) / sizeof(config_info8[0]));
-		ts->abs_x_max = (config_info8[62] << 8) + config_info8[61];
-		ts->abs_y_max = (config_info8[64] << 8) + config_info8[63];
-		ts->max_touch_num = config_info8[60];
-		ts->int_trigger_type = ((config_info8[57] >> 3) & 0x01);
-		printk("[futengfei] goodix_init_panel=================config_info8\n");
+    //sensor_id [0:  8cunTS;      2: 7cunTS ;   7cun for default]
+    if(sensor_id == 0) //0:  8cunTS;
+    {
+        ret = i2c_write_bytes(ts->client, config_info8, sizeof(config_info8) / sizeof(config_info8[0]));
+        ts->abs_x_max = (config_info8[62] << 8) + config_info8[61];
+        ts->abs_y_max = (config_info8[64] << 8) + config_info8[63];
+        ts->max_touch_num = config_info8[60];
+        ts->int_trigger_type = ((config_info8[57] >> 3) & 0x01);
+        printk("[futengfei] goodix_init_panel=================config_info8\n");
 
-	}
+    }
 
-else //7cun for default
-	{
-		ret = i2c_write_bytes(ts->client, config_info7, sizeof(config_info7) / sizeof(config_info7[0]));
-		ts->abs_x_max = (config_info7[62] << 8) + config_info7[61];
-		ts->abs_y_max = (config_info7[64] << 8) + config_info7[63];
-		ts->max_touch_num = config_info7[60];
-		ts->int_trigger_type = ((config_info7[57] >> 3) & 0x01);
-		printk("[futengfei] goodix_init_panel=================config_info7\n");
+    else //7cun for default
+    {
+        ret = i2c_write_bytes(ts->client, config_info7, sizeof(config_info7) / sizeof(config_info7[0]));
+        ts->abs_x_max = (config_info7[62] << 8) + config_info7[61];
+        ts->abs_y_max = (config_info7[64] << 8) + config_info7[63];
+        ts->max_touch_num = config_info7[60];
+        ts->int_trigger_type = ((config_info7[57] >> 3) & 0x01);
+        printk("[futengfei] goodix_init_panel=================config_info7\n");
 
-	}
+    }
 
     if(ret < 0)
     {
@@ -518,16 +518,16 @@ COORDINATE_POLL:
     printk("\n");
 #endif
 
-if(0)//if(have_load==0) //now disable
-{
-	sensor_id = point_data[2] >>6; //0:  8cunTS;      2: 7cunTS ;   7cun for default
-	if (sensor_id==0)
-		{
-			goodix_init_panel(ts);
-			have_load=1;
-		}
-}
-	
+    if(0)//if(have_load==0) //now disable
+    {
+        sensor_id = point_data[2] >> 6; //0:  8cunTS;      2: 7cunTS ;   7cun for default
+        if (sensor_id == 0)
+        {
+            goodix_init_panel(ts);
+            have_load = 1;
+        }
+    }
+
     if(point_data[2] & 0x20)
     {
         if(point_data[3] == 0xF0)
@@ -615,11 +615,11 @@ if(0)//if(have_load==0) //now disable
             }
 
             if((input_x > ts->abs_x_max) || (input_y > ts->abs_y_max))continue;
-if(xy_revert_en==1)
-{
-			input_y=SCREEN_X -input_y;
-			input_x=SCREEN_Y - input_x;
-}		
+            if(xy_revert_en == 1)
+            {
+                input_y = SCREEN_X - input_y;
+                input_x = SCREEN_Y - input_x;
+            }
             input_report_abs(ts->input_dev, ABS_MT_POSITION_X, input_y);
             input_report_abs(ts->input_dev, ABS_MT_POSITION_Y, input_x);
             input_report_abs(ts->input_dev, ABS_MT_TOUCH_MAJOR, 255);
@@ -675,7 +675,7 @@ if(xy_revert_en==1)
     if (touch_cnt == 50)
     {
         touch_cnt = 0;
-        printk("%d,%d[%d,%d]\n",xy_revert_en,sensor_id, input_y, input_x);
+        printk("%d,%d[%d,%d]\n", xy_revert_en, sensor_id, input_y, input_x);
     }
 
 
@@ -846,8 +846,8 @@ return:
 	Results of the implementation code, 0 for normal execution
 ********************************************************/
 
-static int screen_x=0;
-static int screen_y=0;
+static int screen_x = 0;
+static int screen_y = 0;
 static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id *id)
 {
     int ret = 0;
@@ -952,12 +952,12 @@ err_gpio_request_failed:
         msleep(2);
         if(ret != 0)	//Initiall failed
         {
-		printk("[futengfei]goodix_ts_probe.goodix_init_panel fail and again----------->GT811the %d times\n",retry);
-		SOC_IO_Output(0, 27, 1);
-		msleep(300);
-		SOC_IO_Output(0, 27, 0);//NOTE:GT811 SHUTDOWN PIN ,set hight to work. 
-		msleep(700);
-		continue;
+            printk("[futengfei]goodix_ts_probe.goodix_init_panel fail and again----------->GT811the %d times\n", retry);
+            SOC_IO_Output(0, 27, 1);
+            msleep(300);
+            SOC_IO_Output(0, 27, 0);//NOTE:GT811 SHUTDOWN PIN ,set hight to work.
+            msleep(700);
+            continue;
         }
 
         else
@@ -993,9 +993,9 @@ err_gpio_request_failed:
     input_set_abs_params(ts->input_dev, ABS_X, 0,  ts->abs_x_max, 0, 0);
     input_set_abs_params(ts->input_dev, ABS_Y, 0, ts->abs_y_max, 0, 0);
     input_set_abs_params(ts->input_dev, ABS_PRESSURE, 0, 255, 0, 0);
-screen_x=SCREEN_X;
-screen_y=SCREEN_Y;
-SOC_Display_Get_Res(&screen_x, &screen_y);
+    screen_x = SCREEN_X;
+    screen_y = SCREEN_Y;
+    SOC_Display_Get_Res(&screen_x, &screen_y);
 #ifdef GOODIX_MULTI_TOUCH
     input_set_abs_params(ts->input_dev, ABS_MT_WIDTH_MAJOR, 0, 255, 0, 0);
     input_set_abs_params(ts->input_dev, ABS_MT_TOUCH_MAJOR, 0, 255, 0, 0);
@@ -1069,8 +1069,8 @@ SOC_Display_Get_Res(&screen_x, &screen_y);
     ts->early_suspend.resume = goodix_ts_late_resume;
     register_early_suspend(&ts->early_suspend);
 #endif
-	//fake suspend	
-	SOC_Fake_Register_Early_Suspend(&ts->early_suspend);
+    //fake suspend
+    SOC_Fake_Register_Early_Suspend(&ts->early_suspend);
 
     /////////////////////////////// UPDATE STEP 2 START /////////////////////////////////////////////////////////////////
     //#ifdef CONFIG_TOUCHSCREEN_GOODIX_IAP
@@ -1289,8 +1289,8 @@ static void goodix_ts_early_suspend(struct early_suspend *h)
     struct goodix_ts_data *ts;
     ts = container_of(h, struct goodix_ts_data, early_suspend);
 
-	printk("\n\n\n[futengfei]come into===1024580=======disable_irq20=== [%s]\n", __func__);
-	disable_irq(MSM_GPIO_TO_INT(GPIOEIT));
+    printk("\n\n\n[futengfei]come into===1024580=======disable_irq20=== [%s]\n", __func__);
+    disable_irq(MSM_GPIO_TO_INT(GPIOEIT));
 
     goodix_ts_suspend(ts->client, PMSG_SUSPEND);
 }
@@ -1302,7 +1302,7 @@ static void goodix_ts_late_resume(struct early_suspend *h)
 
     ts = container_of(h, struct goodix_ts_data, early_suspend);
     goodix_ts_resume(ts->client);
-	enable_irq(MSM_GPIO_TO_INT(GPIOEIT));
+    enable_irq(MSM_GPIO_TO_INT(GPIOEIT));
 
 }
 #endif
@@ -2320,41 +2320,41 @@ int ts_nod_open (struct inode *inode, struct file *filp)
 }
 
 ssize_t ts_nod_write (struct file *filp, const char __user *buf, size_t count, loff_t *f_pos)
-{	
-	char *data_rec[20];
-	struct ts_device *tsdev = filp->private_data;
+{
+    char *data_rec[20];
+    struct ts_device *tsdev = filp->private_data;
 
     if (copy_from_user( data_rec, buf, count))
     {
         printk("copy_from_user ERR\n");
     }
-    data_rec[count]=  '\0';
-    printk("[futengfei]ts_nod_write:==%d====[%s]\n",count,data_rec);
-// processing data
-if(!(strnicmp(data_rec,"TSMODE_XYREVERT",count-1)))
-	{
-		xy_revert_en=1;
-		printk("[futengfei]ts_nod_write:==========TSMODE_XYREVERT\n");
-	}
-else if(!(strnicmp(data_rec,"TSMODE_NORMAL",count-1)))
-	{
-		xy_revert_en=0;
-		printk("[futengfei]ts_nod_write:==========TSMODE_NORMAL\n");
-	}
+    data_rec[count] =  '\0';
+    printk("[futengfei]ts_nod_write:==%d====[%s]\n", count, data_rec);
+    // processing data
+    if(!(strnicmp(data_rec, "TSMODE_XYREVERT", count - 1)))
+    {
+        xy_revert_en = 1;
+        printk("[futengfei]ts_nod_write:==========TSMODE_XYREVERT\n");
+    }
+    else if(!(strnicmp(data_rec, "TSMODE_NORMAL", count - 1)))
+    {
+        xy_revert_en = 0;
+        printk("[futengfei]ts_nod_write:==========TSMODE_NORMAL\n");
+    }
 
     return count;
 }
 static  struct file_operations ts_nod_fops =
 {
     .owner = THIS_MODULE,
-     .write = ts_nod_write,
+    .write = ts_nod_write,
     .open = ts_nod_open,
 };
 
 static int init_cdev_ts(void)
 {
     int ret, err, result;
-	
+
     //11creat cdev
     tsdev = (struct ts_device *)kmalloc( sizeof(struct ts_device), GFP_KERNEL );
     if (tsdev == NULL)
@@ -2402,10 +2402,10 @@ static int __devinit goodix_ts_init(void)
     LIDBG_GET;
 #endif
     printk("\n\n==in=GT811.KO=====1024580==========touch INFO===========futengfei\n");
-	SOC_IO_Output(0, 27, 1);
-	msleep(200);//ensure the gt811 shutdown pin is hight.
-	SOC_IO_Output(0, 27, 0);
-	msleep(300);//ensure the gt811 shutdown pin is hight.
+    SOC_IO_Output(0, 27, 1);
+    msleep(200);//ensure the gt811 shutdown pin is hight.
+    SOC_IO_Output(0, 27, 0);
+    msleep(300);//ensure the gt811 shutdown pin is hight.
 #if 0
     {
         struct i2c_adapter *i2c_adap;
@@ -2458,9 +2458,9 @@ again:
     }
 
     ret = i2c_add_driver(&goodix_ts_driver);
-	
-    printk("[futengfei]  init_cdev_ts();\n");	
-	init_cdev_ts();
+
+    printk("[futengfei]  init_cdev_ts();\n");
+    init_cdev_ts();
     return ret;
 }
 

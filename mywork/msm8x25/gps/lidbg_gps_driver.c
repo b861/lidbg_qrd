@@ -163,16 +163,16 @@ static  struct file_operations gps_fops =
 
 void clean_ublox_buf(void)
 {
-	int ret;
+    int ret;
     DUMP_FUN_ENTER;
 
-    ret=SOC_I2C_Rec(1, 0x42, 0xfd, num_avi_gps_data, 2);
-	if (ret < 0)
-		return;
-	
+    ret = SOC_I2C_Rec(1, 0x42, 0xfd, num_avi_gps_data, 2);
+    if (ret < 0)
+        return;
+
     avi_gps_data_hl = (num_avi_gps_data[0] << 8) + num_avi_gps_data[1];
-	if(avi_gps_data_hl > 0) 
-    	SOC_I2C_Rec_Simple(1, 0x42, gps_data, avi_gps_data_hl);
+    if(avi_gps_data_hl > 0)
+        SOC_I2C_Rec_Simple(1, 0x42, gps_data, avi_gps_data_hl);
 
     DUMP_FUN_LEAVE;
 
@@ -230,7 +230,7 @@ again1:
 
 int thread_gps_server(void *data)
 {
-	int ret;
+    int ret;
     DUMP_FUN_ENTER;
     //clean_ublox_buf();
     while(1)
@@ -239,15 +239,15 @@ int thread_gps_server(void *data)
             goto do_nothing;
 
         ret = SOC_I2C_Rec(1, 0x42, 0xfd, num_avi_gps_data, 2);
-		if (ret < 0)
-		{
-			avi_gps_data_hl = 0;
-			printk("[ublox]get avi_gps_data_hl err!!\n");
-		}
-		else
-        	avi_gps_data_hl = (num_avi_gps_data[0] << 8) + num_avi_gps_data[1];
+        if (ret < 0)
+        {
+            avi_gps_data_hl = 0;
+            printk("[ublox]get avi_gps_data_hl err!!\n");
+        }
+        else
+            avi_gps_data_hl = (num_avi_gps_data[0] << 8) + num_avi_gps_data[1];
 
-		
+
         if(debug_mask)
             printk("[ublox]ublox_buf_len: ===========================%d\n", avi_gps_data_hl);
 
@@ -257,11 +257,11 @@ int thread_gps_server(void *data)
             {
                 ret = SOC_I2C_Rec_Simple(1, 0x42, gps_data, avi_gps_data_hl);
                 //printk("[ublox]%s\n",gps_data);
-				if (ret < 0)
-				{
-					printk("[ublox]get gps data err!!\n");
-					goto do_nothing;
-				}
+                if (ret < 0)
+                {
+                    printk("[ublox]get gps data err!!\n");
+                    goto do_nothing;
+                }
                 down(&dev->sem);
                 if(kfifo_is_full(&gps_data_fifo))
                 {
@@ -349,12 +349,12 @@ int is_ublox_exist(void)
         exist = SOC_I2C_Rec_Simple(1, 0x42, gps_data, 1 );
         if (exist < 0)
         {
-        	msleep(100);
+            msleep(100);
             continue;
         }
         else
         {
-        	SOC_Write_Servicer(UBLOX_EXIST);
+            SOC_Write_Servicer(UBLOX_EXIST);
             return 1;
         }
     }
@@ -383,8 +383,8 @@ static int  gps_probe(struct platform_device *pdev)
     register_early_suspend(&early_suspend);
 #endif
 
-	//fake suspend
-	SOC_Fake_Register_Early_Suspend(&early_suspend);
+    //fake suspend
+    SOC_Fake_Register_Early_Suspend(&early_suspend);
 
 
     create_new_proc_entry(); //cat /proc/ublox_dbg to enable gps_debug

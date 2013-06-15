@@ -165,15 +165,15 @@ void LPCControlHowLongToPowerOn(ULONG iTime)
 void LPCControlToSleep(void)
 {
     BYTE buff[] = {0x00, 0x01, 0x00};
-    BYTE buff2[] = {0x00, 0x98, 0xff,0xff,0xff,0xff};
+    BYTE buff2[] = {0x00, 0x98, 0xff, 0xff, 0xff, 0xff};
 
     LPCCombinDataStream(buff, 3);
 
-	//no reset when sleep
+    //no reset when sleep
     LPCCombinDataStream(buff2, SIZE_OF_ARRAY(buff2));
 
 
-	
+
 }
 void LPCControlReset(void)
 {
@@ -247,18 +247,18 @@ static void LPCdealReadFromMCUAll(BYTE *p, UINT length)
     }
     iDriverResumeTime = 0;
 #ifdef LPC_DEBUG_LOG
-{
-	u32 i;
-    lidbg("From LPC:");//mode ,command,para
-    for(i = 0; i < length; i++)
     {
-        printk("%x ", p[i]);
+        u32 i;
+        lidbg("From LPC:");//mode ,command,para
+        for(i = 0; i < length; i++)
+        {
+            printk("%x ", p[i]);
 
+        }
+        printk("\n");
     }
-    printk("\n");
-}
 #endif
-	lpc_send_rec_count = 0;
+    lpc_send_rec_count = 0;
 
     switch (p[0])
     {
@@ -266,7 +266,7 @@ static void LPCdealReadFromMCUAll(BYTE *p, UINT length)
         switch (p[1])
         {
         case 0x01://ACC OFF/ON
-        //case 0x09:
+            //case 0x09:
             switch (p[2])
             {
             case 0x00://ACC OFF
@@ -284,15 +284,15 @@ static void LPCdealReadFromMCUAll(BYTE *p, UINT length)
 
                 if(SOC_PWR_GetStatus() == PM_STATUS_LATE_RESUME_OK)
                 {
-                   // msleep(100);
+                    // msleep(100);
 
                     lidbg("Ready ACC OFF!\n");
-                   // msleep(100);
-					lidbg("a\n");
+                    // msleep(100);
+                    lidbg("a\n");
                     LPCControlToSleep();
-					lidbg("b\n");
+                    lidbg("b\n");
                     SOC_PWR_ShutDown();
-					lidbg("c\n");
+                    lidbg("c\n");
                 }
                 else
                 {
@@ -309,8 +309,8 @@ static void LPCdealReadFromMCUAll(BYTE *p, UINT length)
 #ifdef LPC_DEBUG_LOG
             lidbg("LPC ping return!\n");
 #endif
-		if(lpc_send_rec_count > 0)
-            lpc_send_rec_count--;
+            if(lpc_send_rec_count > 0)
+                lpc_send_rec_count--;
             break;
         }
     default:
@@ -440,7 +440,7 @@ int thread_lpc(void *data)
 
     BYTE buff[] = {0x00, 0x96, 0x00, 0x00, 0x00, 0x00};
     BYTE iRandom = 0;
-	
+
     static u32 re_sleep_count = 0;
     buff[5] = iRandom;
     buff[4] = iRandom;
@@ -462,10 +462,10 @@ int thread_lpc(void *data)
                 {
                     re_sleep_count++;
                     lidbg("\n\n\nerrlsw:lpc_send_rec_count > 5 ,do SOC_PWR_ShutDown again! %d\n\n\n", re_sleep_count);
-					
+
 #ifdef AUTO_SLEEP_WHEN_WAKEUP_NOT_BY_LPC
-					if(resume_count > 0)
-                    	SOC_PWR_ShutDown();
+                    if(resume_count > 0)
+                        SOC_PWR_ShutDown();
 #endif
                     lpc_send_rec_count = 0;
 
@@ -473,25 +473,25 @@ int thread_lpc(void *data)
                 //lidbg("thread_lpc:LPCCombinDataStream\n");
 
                 LPCCombinDataStream(buff, SIZE_OF_ARRAY(buff));
-				
+
 
 #if 0
-				BYTE buff[32];
-				
-				struct timex  txc;
-				struct rtc_time tm;
-				do_gettimeofday(&(txc.time));
-				rtc_time_to_tm(txc.time.tv_sec,&tm);
-				//printk(\u201cUTC time :%d-%d-%d %d:%d:%d /n\u201d,tm.tm_year+1900,tm.tm_mon, tm.tm_mday,tm.tm_hour,tm.tm_min,tm.tm_sec);
+                BYTE buff[32];
 
-				
+                struct timex  txc;
+                struct rtc_time tm;
+                do_gettimeofday(&(txc.time));
+                rtc_time_to_tm(txc.time.tv_sec, &tm);
+                //printk(\u201cUTC time :%d-%d-%d %d:%d:%d /n\u201d,tm.tm_year+1900,tm.tm_mon, tm.tm_mday,tm.tm_hour,tm.tm_min,tm.tm_sec);
+
+
                 LPCCombinDataStream(buff, SIZE_OF_ARRAY(buff));
 #endif
-	
+
                 lpc_send_rec_count ++;
             }
             msleep(2000);
-			LPCWorkOK();
+            LPCWorkOK();
         }
         else
         {
@@ -514,16 +514,16 @@ void mcuFirstInit(void)
     while (SOC_IO_Input(0, MCU_IIC_REQ_I, GPIO_CFG_PULL_UP) == 0)
     {
         u8 buff[32];
-		static int count = 0;
-		count++;
+        static int count = 0;
+        count++;
         WHILE_ENTER;
         actualReadFromMCU(buff, 32);
-		if(count > 100)
-		{
-			
-			lidbg("exit mcuFirstInit!\n");
-			break;
-		}
+        if(count > 100)
+        {
+
+            lidbg("exit mcuFirstInit!\n");
+            break;
+        }
     }
 
     //SOC_IO_Input(0, MCU_IIC_REQ_I, GPIO_CFG_PULL_UP);
@@ -576,7 +576,7 @@ static int  lpc_probe(struct platform_device *pdev)
 {
 
     DUMP_FUN;
-	
+
     lidbg("lpc communication+\n");
     mcuFirstInit();
     LPCPowerOnOK();
@@ -647,7 +647,7 @@ static int lpc_resume(struct device *dev)
 
     TELL_LPC_PWR_ON;
     //msleep(200);
-	resume_count++;
+    resume_count++;
 
     return 0;
 }
@@ -693,9 +693,9 @@ static int __init lpc_init(void)
 {
     DUMP_BUILD_TIME;
 
-	
+
 #ifndef FLY_DEBUG
-	lidbg("lpc_init do nothing");
+    lidbg("lpc_init do nothing");
 #else
 #ifndef SOC_COMPILE
     LIDBG_GET;

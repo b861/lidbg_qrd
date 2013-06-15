@@ -61,14 +61,14 @@ bool suspend_flag = 0;
 int i2c_devices_probe(int i2c_bus, unsigned char *i2c_devices_list)
 {
     int rc, i, j = 0;
-  //  u8 *i2c_devices;
+    //  u8 *i2c_devices;
     u8 tmp[8];
 
 #define I2C_PROBE_INTERVAL_TIME (10)
 
     for(i = 1; i<(0xff >> 1); i++)
     {
-        rc = SOC_I2C_Rec(i2c_bus,(char)i,0,(char *)&tmp,1);
+        rc = SOC_I2C_Rec(i2c_bus, (char)i, 0, (char *)&tmp, 1);
 
         if (rc >= 0)
         {
@@ -196,7 +196,7 @@ static struct ad_key_remap ad_key[] =
     {2, 1548, KEY_NEXT},
     {2, 2040, KEY_PREVIOUS},
     {2, 2517, KEY_HOME},
-   
+
 
     //right
     {1, 1034, KEY_VOLUMEUP},
@@ -242,8 +242,8 @@ void key_scan(void)
 {
 #if 0
     {
-    	u32 i,val;
-		#define ADC_MAX_CH (8)
+        u32 i, val;
+#define ADC_MAX_CH (8)
         for(i = 0; i < ADC_MAX_CH; i++)
         {
             SOC_ADC_Get(i, &val);
@@ -348,13 +348,13 @@ void led_on(void)
 
 #if 1
     static int led_status = 0;
-	if(suspend_flag == 1)
-	{
-		LED_ON;
-		if(i2c_c_ctrl == 1)
-			TELL_LPC_PWR_ON;
-		return;
-	}
+    if(suspend_flag == 1)
+    {
+        LED_ON;
+        if(i2c_c_ctrl == 1)
+            TELL_LPC_PWR_ON;
+        return;
+    }
     if(led_status == 0)
     {
         LED_OFF;
@@ -365,7 +365,7 @@ void led_on(void)
         LED_ON;
         led_status = 0;
     }
-	TELL_LPC_PWR_ON;
+    TELL_LPC_PWR_ON;
 
 
 #endif
@@ -457,7 +457,7 @@ static int soc_dev_probe(struct platform_device *pdev)
     DUMP_FUN;
 
     PWR_EN_ON;
-	TELL_LPC_PWR_ON;
+    TELL_LPC_PWR_ON;
 
 
     get_platform();
@@ -496,16 +496,17 @@ static int soc_dev_probe(struct platform_device *pdev)
 
 #ifdef FLY_DEBUG
 
-		if(1){	//LPCBackLightOn
-		u8 buff[] = {0x00, 0x94, 0x01, 0x99};		
-		SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
-		}
+        if(1) 	//LPCBackLightOn
+        {
+            u8 buff[] = {0x00, 0x94, 0x01, 0x99};
+            SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
+        }
 
-		{
-			u8 buff[] = {0x00, 0x05, 0x01};//LPCControlPWREnable
-			lidbg("LPCControlPWREnable\n");
-			SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
-		}
+        {
+            u8 buff[] = {0x00, 0x05, 0x01};//LPCControlPWREnable
+            lidbg("LPCControlPWREnable\n");
+            SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
+        }
 
 #ifdef DEBUG_AD_KEY
         key_task = kthread_create(thread_key, NULL, "key_task");
@@ -543,8 +544,8 @@ static int soc_dev_probe(struct platform_device *pdev)
 
     }
 #endif
-	//fake suspend
-	SOC_Fake_Register_Early_Suspend(&early_suspend);
+    //fake suspend
+    SOC_Fake_Register_Early_Suspend(&early_suspend);
 
     return 0;
 
@@ -590,12 +591,12 @@ static void devices_early_suspend(struct early_suspend *handler)
 #ifdef FLY_DEBUG
         LCD_OFF;
 #endif
-		LED_ON;
-		TELL_LPC_PWR_ON;
-		i2c_c_ctrl = 1;
-		
+        LED_ON;
+        TELL_LPC_PWR_ON;
+        i2c_c_ctrl = 1;
+
     }
-	suspend_flag = 1;
+    suspend_flag = 1;
     DUMP_FUN_LEAVE;
 
 }
@@ -605,33 +606,34 @@ static void devices_late_resume(struct early_suspend *handler)
     int err;
 
     DUMP_FUN_ENTER;
-	
-	suspend_flag = 0;
+
+    suspend_flag = 0;
     if(platform_id ==  PLATFORM_FLY)
     {
-		i2c_c_ctrl = 0;
-		
-		SOC_IO_Config(MCU_IIC_REQ_I,GPIO_CFG_INPUT,GPIO_CFG_PULL_UP,GPIO_CFG_16MA);
-		TELL_LPC_PWR_ON;
+        i2c_c_ctrl = 0;
 
-		
+        SOC_IO_Config(MCU_IIC_REQ_I, GPIO_CFG_INPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA);
+        TELL_LPC_PWR_ON;
+
+
 #ifdef FLY_DEBU
 
 
-		BL_SET(BL_MAX / 2);
-		LCD_ON;
+        BL_SET(BL_MAX / 2);
+        LCD_ON;
 
-		if(1){	//LPCBackLightOn
-		u8 buff[] = {0x00, 0x94, 0x01, 0x99};		
-		SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
-		}
+        if(1) 	//LPCBackLightOn
+        {
+            u8 buff[] = {0x00, 0x94, 0x01, 0x99};
+            SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
+        }
 
-		if(0)
-		{
-			u8 buff[] = {0x00, 0x05, 0x01};//LPCControlPWREnable
-			lidbg("LPCControlPWREnable\n");
-			SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
-		}
+        if(0)
+        {
+            u8 buff[] = {0x00, 0x05, 0x01};//LPCControlPWREnable
+            lidbg("LPCControlPWREnable\n");
+            SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
+        }
 
 
         lidbg("create thread_resume!\n");
@@ -642,7 +644,7 @@ static void devices_late_resume(struct early_suspend *handler)
             err = PTR_ERR(resume_task);
         }
         else wake_up_process(resume_task);
-#endif		
+#endif
 
 
     }
@@ -671,12 +673,12 @@ static int  soc_dev_suspend(struct platform_device *pdev, pm_message_t state)
         SOC_IO_ISR_Disable(BUTTON_RIGHT_2);
 #endif
 #endif
-		i2c_c_ctrl = 0;
+        i2c_c_ctrl = 0;
 
-		PWR_EN_OFF;
-		LED_ON;
-		i2c_c_ctrl = 0;
-		TELL_LPC_PWR_OFF;
+        PWR_EN_OFF;
+        LED_ON;
+        i2c_c_ctrl = 0;
+        TELL_LPC_PWR_OFF;
 
     }
 
@@ -690,13 +692,13 @@ static int thread_resume(void *data)
 {
 
     DUMP_FUN_ENTER;
-	
-    msleep(3000+4000);
-	
-	if(SOC_PWR_GetStatus() == PM_STATUS_LATE_RESUME_OK)
-	{
-		USB_WORK_ENABLE;
-	}
+
+    msleep(3000 + 4000);
+
+    if(SOC_PWR_GetStatus() == PM_STATUS_LATE_RESUME_OK)
+    {
+        USB_WORK_ENABLE;
+    }
     DUMP_FUN_LEAVE;
     return 0;
 
@@ -705,33 +707,33 @@ static int thread_resume(void *data)
 
 static void soc_dev_suspend_prepare(void)
 {
-	
+
     DUMP_FUN;
 
 #ifdef FLY_DEBUG
-{
-	//LPCBackLightOff
-	u8 buff[] = {0x00, 0x94, 0x00, 0x98};
-	SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
-}
+    {
+        //LPCBackLightOff
+        u8 buff[] = {0x00, 0x94, 0x00, 0x98};
+        SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
+    }
 #endif
 
 
 #ifdef DEBUG_UMOUNT_USB
-			SOC_Write_Servicer(UMOUNT_USB);
+    SOC_Write_Servicer(UMOUNT_USB);
 #ifdef FLY_DEBUG
-			msleep(1000);
+    msleep(1000);
 #endif
 #endif
 
-		
+
 
 
     //disable usb first
     USB_WORK_DISENABLE;
 
 #ifdef FLY_DEBUG
-	msleep(3000);
+    msleep(3000);
 #endif
 
 
@@ -747,12 +749,12 @@ static int soc_dev_resume(struct platform_device *pdev)
 
     if(platform_id ==  PLATFORM_FLY)
     {
-    	
-		SOC_IO_Config(MCU_IIC_REQ_I,GPIO_CFG_INPUT,GPIO_CFG_PULL_UP,GPIO_CFG_16MA);
-    	TELL_LPC_PWR_ON;
+
+        SOC_IO_Config(MCU_IIC_REQ_I, GPIO_CFG_INPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA);
+        TELL_LPC_PWR_ON;
         PWR_EN_ON;
-		
-		USB_SWITCH_DISCONNECT;        
+
+        USB_SWITCH_DISCONNECT;
 
 #ifdef DEBUG_BUTTON
         SOC_IO_ISR_Enable(BUTTON_LEFT_1);
@@ -764,9 +766,9 @@ static int soc_dev_resume(struct platform_device *pdev)
 
         lidbg("turn lcd on!\n");
         LCD_ON;
-		
-		//reconfig led
-		SOC_IO_Config(devices_resource.led_gpio,GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_8MA);
+
+        //reconfig led
+        SOC_IO_Config(devices_resource.led_gpio, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_8MA);
 
     }
 
@@ -796,36 +798,36 @@ struct work_struct work_left_button1;
 static void work_left_button1_fn(struct work_struct *work)
 {
 
-#if 1	
+#if 1
     static int count = 0;
-	static int usb_flag = 0;
-	
-	count++;
-	if(count % 50 == 0)
-	{
-		usb_flag++;
-		if(usb_flag % 2 == 1)
-		{
-		
-			lidbg("USB_ID_HIGH_DEV\n");
-			//USB_ID_HIGH_DEV;
-			
+    static int usb_flag = 0;
+
+    count++;
+    if(count % 50 == 0)
+    {
+        usb_flag++;
+        if(usb_flag % 2 == 1)
+        {
+
+            lidbg("USB_ID_HIGH_DEV\n");
+            //USB_ID_HIGH_DEV;
+
             LCD_OFF;
             msleep(500);
             LCD_ON;
-		}
-		else
-		{
-		
-			
-			lidbg("USB_ID_LOW_HOST\n");
-			//USB_ID_LOW_HOST;
+        }
+        else
+        {
+
+
+            lidbg("USB_ID_LOW_HOST\n");
+            //USB_ID_LOW_HOST;
             LCD_OFF;
             msleep(500);
             LCD_ON;
-		
-		}
-	}
+
+        }
+    }
 
 #endif
 
@@ -846,8 +848,8 @@ static void work_left_button1_fn(struct work_struct *work)
             LCD_OFF;
             msleep(500);
             LCD_ON;
-           // suspend_test = 0;
-           // LPCControlSupendTestStop();
+            // suspend_test = 0;
+            // LPCControlSupendTestStop();
 
         }
         else
@@ -858,8 +860,8 @@ static void work_left_button1_fn(struct work_struct *work)
             LCD_OFF;
             msleep(500);
             LCD_ON;
-           // suspend_test = 1;
-           // LPCControlSupendTestStart();
+            // suspend_test = 1;
+            // LPCControlSupendTestStart();
             //SOC_Log_Dump(LOG_CONT);
         }
 
@@ -886,7 +888,7 @@ static void work_right_button1_fn(struct work_struct *work)
             msleep(500);
             LCD_ON;
             //LPCControlSupendTestStop();
-           // usb_test = 0;
+            // usb_test = 0;
 
         }
         else
@@ -896,7 +898,7 @@ static void work_right_button1_fn(struct work_struct *work)
             msleep(500);
             LCD_ON;
             //LPCControlSupendTestStart();
-           // usb_test = 1;
+            // usb_test = 1;
         }
     }
 #endif
@@ -972,20 +974,20 @@ void fly_devices_init(void)
 
 
 #ifndef FLY_DEBUG
-		USB_WORK_ENABLE;
-		LCD_ON;
+        USB_WORK_ENABLE;
+        LCD_ON;
 #else
-		TELL_LPC_PWR_ON;
+        TELL_LPC_PWR_ON;
 
         PWR_EN_ON;
-		USB_WORK_ENABLE;
-		//lidbg("set USB_ID_HIGH_DEV\n");
-		//USB_ID_HIGH_DEV;
+        USB_WORK_ENABLE;
+        //lidbg("set USB_ID_HIGH_DEV\n");
+        //USB_ID_HIGH_DEV;
 
         lidbg("turn lcd on!\n");
         LCD_ON;
         BL_SET(BL_MAX / 2);
-		DVD_RESET_HIGH;
+        DVD_RESET_HIGH;
 
 #ifdef DEBUG_BUTTON
 
@@ -1025,8 +1027,8 @@ int read_proc_dev(char *buf, char **start, off_t offset, int count, int *eof, vo
 {
     int len = 0;
 
-	lidbg("USB_ID_HIGH_DEV\n");
-	USB_ID_HIGH_DEV;
+    lidbg("USB_ID_HIGH_DEV\n");
+    USB_ID_HIGH_DEV;
 
 
     len  = sprintf(buf, "usb_set_dev\n");
@@ -1038,8 +1040,8 @@ int read_proc_host(char *buf, char **start, off_t offset, int count, int *eof, v
 {
     int len = 0;
 
-	lidbg("USB_ID_LOW_HOST\n");
-	USB_ID_LOW_HOST;
+    lidbg("USB_ID_LOW_HOST\n");
+    USB_ID_LOW_HOST;
 
 
     len  = sprintf(buf, "usb_set_host\n");
@@ -1068,11 +1070,11 @@ int dev_init(void)
     DUMP_BUILD_TIME;
 
 #ifdef BOARD_V1
-lidbg("FLY_V1 version\n");
+    lidbg("FLY_V1 version\n");
 #endif
 
 #ifdef BOARD_V2
-lidbg("FLY_V2 version\n");
+    lidbg("FLY_V2 version\n");
 #endif
 
 
@@ -1087,7 +1089,7 @@ lidbg("FLY_V2 version\n");
     LIDBG_GET_THREAD;
 #else
     LIDBG_GET;
-	set_func_tbl();
+    set_func_tbl();
 
 #endif
 #endif
@@ -1110,8 +1112,8 @@ lidbg("FLY_V2 version\n");
 
     platform_device_register(&soc_devices);
     platform_driver_register(&soc_devices_driver);
-	create_new_proc_entry_usb_dev();
-	create_new_proc_entry_usb_host();
+    create_new_proc_entry_usb_dev();
+    create_new_proc_entry_usb_host();
 
     return 0;
 }

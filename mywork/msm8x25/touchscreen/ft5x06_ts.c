@@ -522,8 +522,8 @@ static const struct dev_pm_ops ft5x06_ts_pm_ops =
 #endif
 };
 #endif
-static int screen_x=0;
-static int screen_y=0;
+static int screen_x = 0;
+static int screen_y = 0;
 static int ft5x06_ts_probe(struct i2c_client *client,
                            const struct i2c_device_id *id)
 {
@@ -585,9 +585,9 @@ static int ft5x06_ts_probe(struct i2c_client *client,
     __set_bit(BTN_TOUCH, input_dev->keybit);
 #define SCREEN_X (1024)
 #define SCREEN_Y (600)
-screen_x=SCREEN_X;
-screen_y=SCREEN_Y;
-SOC_Display_Get_Res(&screen_x, &screen_y);
+    screen_x = SCREEN_X;
+    screen_y = SCREEN_Y;
+    SOC_Display_Get_Res(&screen_x, &screen_y);
     input_set_abs_params(input_dev, ABS_MT_POSITION_X, 0,
                          /*pdata->x_max*/screen_x, 0, 0);
     input_set_abs_params(input_dev, ABS_MT_POSITION_Y, 0,
@@ -717,8 +717,8 @@ SOC_Display_Get_Res(&screen_x, &screen_y);
     data->early_suspend.resume = ft5x06_ts_late_resume;
     register_early_suspend(&data->early_suspend);
 #endif
-	//fake suspend
-	SOC_Fake_Register_Early_Suspend(&data->early_suspend);
+    //fake suspend
+    SOC_Fake_Register_Early_Suspend(&data->early_suspend);
 
     return 0;
 
@@ -804,7 +804,7 @@ static struct i2c_driver ft5x06_ts_driver =
 
 static int __init ft5x06_ts_init(void)
 {
-	LIDBG_GET;
+    LIDBG_GET;
 
     is_ts_load = 1;
     printk( "===================ft5x06_ts_init===========suspend-20==0225=futengfei \n");

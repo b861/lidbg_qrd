@@ -128,9 +128,9 @@ enum
 #define GPIO_LCD2  (96)
 //becauseof i can't catch the msg ,so i do with it on the way below;
 #ifdef FLY_DEBUG
-	#define GPIO_LCD3  (97)
+#define GPIO_LCD3  (97)
 #else
-	#define GPIO_LCD3  (82) 
+#define GPIO_LCD3  (82)
 #endif
 
 #define GPIO_PWR_EN (23)
@@ -212,7 +212,7 @@ enum
 
 //lidbg("tell lpc power off ok!#\n");
 #define TELL_LPC_PWR_OFF
-							
+
 //lidbg("tell lpc power on ok!#\n");
 #define TELL_LPC_PWR_ON do{\
 								SOC_IO_Input(0,MCU_IIC_REQ_I,GPIO_CFG_PULL_UP);\
@@ -224,8 +224,8 @@ enum
     			USB_ID_LOW_HOST;\
     			USB_SWITCH_CONNECT;\
     			USB_HUB_RST;\
-			}while(0)				
-							
+			}while(0)
+
 
 
 #define USB_WORK_DISENABLE  do{\
