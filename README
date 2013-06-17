@@ -2,17 +2,8 @@ linux debug(lidbg)
 此项目是以调试为目的，方便调试和控制外设，如在终端直接控制i2c，io，spi，读内存寄存器等。后来运用在产品中，目前我们写的驱动均是以ko的形式加载运行，代码集成在lidbg中。
 
 --------代码下载方法----------
-1.登陆github
-https://github.com/
-lisuweizhai@126.com
-flyaudio123
-
-2.按如下方法生成SSH Keys
-https://help.github.com/articles/generating-ssh-keys#platform-linux
-
-3.克隆仓库到本地
-git clone git@github.com:lisuwei/lidbg_qrd.git
-
+git clone qcom_share@192.168.9.222:/home/qcom_share/lidbg_qrd
+密码：8x25q
 
 ----------代码结构----------
 主要包含应用层（android），基础驱动模块（drv），具体工作模块（mywork），编译脚本（shell），输出目录（out/out_release）。
@@ -35,7 +26,7 @@ mywork\bp_msg：打印bp写入共享内存的调试信息。
 mywork\devices：控制一些系统正常运行必须的外设。
 mywork\fastboot：处理车机休眠唤醒相关。
 mywork\gps：ublox驱动。
-mywork\touchscreen：电容屏驱动。
+mywork\touchscreen：电容屏相关驱动。
 mywork\videoin：视频输入驱动。
 
 *编译脚本（shell）
@@ -55,8 +46,8 @@ cd lidbg_qrd
 
 2.编译
 提供两种方法
-(1) 编译所有模块，运行build_rel.sh
-(2) 编译单独模块,如
+(1) 编译所有模块，在lidbg根目录运行build_rel.sh
+(2) 编译单独模块,如在lidbg根目录执行:
 ./make.sh mywork/msm8x25/gps
 ./make.sh drv
 
