@@ -222,7 +222,7 @@ int static VideoImage(void)
 				Tw9912_image[1] = 0x1f;
 				ret = write_tw9912(&Tw9912_image);
 				Tw9912_image[0] = 0x08;
-				Tw9912_image[1] = 0x13;
+				Tw9912_image[1] = 0x11;
 				ret = write_tw9912(&Tw9912_image);
 			}
 		else
