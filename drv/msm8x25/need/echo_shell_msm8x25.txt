@@ -1,3 +1,4 @@
+############insmod############
 insmod /system/lib/modules/out/lidbg_share.ko
 insmod /system/lib/modules/out/lidbg_msg.ko
 insmod /system/lib/modules/out/lidbg_common.ko
@@ -17,20 +18,16 @@ echo "c key enter 2" > /dev/mlidbg0
 echo "c key back 2" > /dev/mlidbg0
 echo "c key end 2" > /dev/mlidbg0
 echo "c key volup 2" > /dev/mlidbg0
-echo "c touch 180 207 2" > /dev/mlidbg0
 echo "c key end 2" > /dev/mlidbg0
+echo "c touch 180 207 2" > /dev/mlidbg0
 
 ############device############
 echo "c device pwroff 2" > /dev/mlidbg0
 echo "c device ad 2" > /dev/mlidbg0
 
 ############io############
-echo "c io i 1 1 1 1" > /dev/mlidbg0
 echo "c io r 2 30" > /dev/mlidbg0
 echo "c io w 108 1" > /dev/mlidbg0
-echo "c io w 107 1" > /dev/mlidbg0
-echo "c io w 109 1" > /dev/mlidbg0
-echo "c io w 96 1" > /dev/mlidbg0
 echo "c io i 48" > /dev/mlidbg0
 
 ############display############
@@ -38,67 +35,18 @@ echo "c display color_degree 0" > /dev/mlidbg0
 
 ############mem############
 echo "c mem r 0xf020408c 1" > /dev/mlidbg0
-echo "c mem r 0xf02040c4 1" > /dev/mlidbg0
-echo "c mem r 0xf02040fc 1" > /dev/mlidbg0
-echo "c mem r 0xf0204134 1" > /dev/mlidbg0
 echo "c mem r 0xf0900000 0x84" > /dev/mlidbg0
-echo "c mem rb 0xf04000c4 24 5" > /dev/mlidbg0
 echo "c mem w 0xf040000c 0x200014" > /dev/mlidbg0
 echo "c mem w 0xf0004000 1" > /dev/mlidbg0
 echo "c mem wb 0xF08A0038 26 1 0" > /dev/mlidbg0
 echo "c mem wb 0xF0900000 21 1 1" > /dev/mlidbg0
-echo "c mem w 0xf0204134 0x34" > /dev/mlidbg0
+echo "c mem rb 0xf04000c4 24 5" > /dev/mlidbg0
 
 ############i2c############
 echo "c i2c w 1 0x4a 2 0x5 0xa0" > /dev/mlidbg0
-echo "c i2c w 1 0x4a 2 0x18 0xff" > /dev/mlidbg0
-echo "c i2c w 1 0x4a 2 0x19 0xff" > /demlidbg0
-echo "c i2c w 1 0x5c 2 0x9 128" > /dev/mlidbg0
-echo "c i2c w 1 0x5c 2 0xa 0xe6" > /dev/mlidbg0
-echo "c i2c r 1 0x5c 0x0 20" > /dev/mlidbg0
 echo "c i2c w 1 0x5c 2 0x0 0x2" > /dev/mlidbg0
-echo "c i2c w 1 0x5c 2 0x3 0xd" > /dev/mlidbg0
-echo "c i2c w 1 0x5c 2 0x8 0x4" > /dev/mlidbg0
-echo "c i2c w 1 0x5c 2 0xa 0x0" > /dev/mlidbg0
-echo "c i2c w 0 0x5c 2 0xd 0x27" > /dev/mlidbg0
 echo "c i2c r 1 0x5c 0x0 20" > /dev/mlidbg0
 echo "c i2c r_mult_sub_addr 0 0x36 2 0x3036 1" > /dev/mlidbg0
 
-
-######Camera gc2015#########
-# 8 bit i2c_addr 0x60
-echo "c i2c r 1 0x30 0x0 20" > /dev/mlidbg0
-echo "c i2c w 1 0x30 2 0x45 0x0" > /dev/mlidbg0
-
-
-###############
-#gt2005 8 bit i2c_addr 0x78
-echo "c i2c r_mult_sub_addr 1 0x3c 2 0x0 20" > /dev/mlidbg0
-
-
-
-############app############
-/system/bin/uart_test 3 115200
-
-/system/bin/dvd_ctrl out
-/system/bin/dvd_ctrl play
-/system/bin/dvd_ctrl stop
-/system/bin/dvd_ctrl next
-/system/bin/dvd_ctrl pre
-/system/bin/dvd_ctrl left
-/system/bin/dvd_ctrl right
-/system/bin/dvd_ctrl up
-/system/bin/dvd_ctrl down
-/system/bin/dvd_ctrl enter
-/system/bin/dvd_ctrl menu
-/system/bin/dvd_ctrl ff
-/system/bin/dvd_ctrl fr
-/system/bin/dvd_ctrl pal
-/system/bin/dvd_ctrl ntsc
-
-/system/bin/serial_test w 3 57600 abcdefg 7
-/system/bin/serial_test r 3 57600 8
-
-/system/bin/uart_test_send 3 115200
-/system/bin/uart_test_rec 3 115200
+本文档只列举了部分指令。
 
