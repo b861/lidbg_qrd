@@ -90,7 +90,7 @@ static bool xy_revert_en = 0;
 
 extern  unsigned int FLAG_FOR_15S_OFF;
 extern  bool is_ts_load;
-extern void SOC_Log_Dump(int cmd);
+//SOC_Log_Dumpextern void SOC_Log_Dump(int cmd);
 
 static int have_load = 0;    // 1: have load ,do't load again
 static int sensor_id = 2;	    //0:  8cunTS;      2: 7cunTS ;   7cun for default
@@ -584,8 +584,8 @@ COORDINATE_POLL:
     finger = point_count;
     if (finger == 4)
     {
-        printk("SOC_Log_Dump\n");
-        SOC_Log_Dump(LOG_DMESG);
+        //printk("SOC_Log_Dump\n");
+        //SOC_Log_Dump(LOG_DMESG);
     }
     if (finger > 5)
     {

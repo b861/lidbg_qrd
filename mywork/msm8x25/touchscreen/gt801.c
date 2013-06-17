@@ -61,7 +61,7 @@ extern  unsigned int FLAG_FOR_15S_OFF;
 extern  bool is_ts_load;
 extern unsigned int shutdown_flag_ts;
 
-extern void SOC_Log_Dump(int cmd);
+//extern void SOC_Log_Dump(int cmd);
 /******************************************************
 			added by wangyihong
 ******************************************************/
@@ -475,8 +475,8 @@ static void goodix_ts_work_func(struct work_struct *work)
     }
     if (finger_list.length == 4)
     {
-        printk("SOC_Log_Dump\n");
-        SOC_Log_Dump(LOG_DMESG);
+        //printk("SOC_Log_Dump\n");
+        //SOC_Log_Dump(LOG_DMESG);
     }
     if(finger_list.length == 5)
     {
