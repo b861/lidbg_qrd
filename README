@@ -55,20 +55,23 @@ cd lidbg_qrd
 
 
 ----------运行----------
-以下两种方法均可
+在原生系统模块放到/system/lib/modules/out,产品系统中模块放到/flysystem/lib/modules
+以下两种方法均可运行模块
 1.在终端用ismod指令直接加载模块
-见drv/msm8x25/need/echo_shell_msm8x25.txt文件insmod下
+见drv/msm8x25/need/echo_shell_msm8x25.txt文件insmod下  (正式产品是flysystem目录)
 
 2. 开机自动运行lidbg_servicer加载模块 
 把lidbg_servicer打包进系统，在文件out/target/product/msm7627a/root/init.qcom.rc添加
-service lidbg_servicer /system/bin/logwrapper /system/bin/lidbg_servicer
+chmod 777 /system/bin/lidbg_servicer  (正式产品是/flysystem/bin目录)
+和
+service lidbg_servicer /system/bin/logwrapper /system/bin/lidbg_servicer  (正式产品是/flysystem/bin目录)
     class late_start
     user root
     group root
 
 
 ----------git使用注意事项----------
-1.参考《git提交规范.txt》
+1.参考qcom_share 的《git提交规范.txt》
 2.个人的测试代码不要push 到服务器master分支，如需要可创建自己的测试分支再push这个分支到服务器。
 把本地分支(locate_branch_name) push到服务器(remote_branch_name)
 git push origin locate_branch_name:remote_branch_name 
