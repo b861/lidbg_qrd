@@ -8,6 +8,21 @@ static struct task_struct *RunTimeTw9912Status = NULL;
 extern tw9912_run_flag tw912_run_sotp_flag;
 extern struct TC358_register_struct colorbar_init_user_tab[2];
 
+#define MAJOR_Tw9912 0
+//#define MINOR_LED 1
+#define DEV_NAME "tw9912config"
+
+dev_t tw9912_dev;
+struct class *tw9912_class;
+struct cdev *tw9912_cdev;
+
+TW9912Info global_tw9912_info={
+						0x08,
+						0x15,
+						false,//true is find black line;
+						true//true is neet again find the black line;
+						};
+
 LIDBG_DEFINE;
 static void video_config_init(Vedio_Format config_pramat, u8 Channal)
 {
@@ -463,7 +478,8 @@ static int video_dev_resume(struct platform_device *pdev)
 {
     printk("resume tw9912 reset\n");
     Tw9912_hardware_reset();
-
+    global_tw9912_info.flag=true;//true is neet again find the black line;
+    global_tw9912_info.reg_val=0x15;
     return 0;
 }
 static struct platform_driver video_driver =
@@ -485,11 +501,85 @@ struct platform_device video_devices =
     .name			= "video_devices",
     .id 			= 0,
 };
+int tw9912_open(struct inode *inode, struct file *filp)
+{
+    /*\u5c06\u8bbe\u5907\u7ed3\u6784\u4f53\u6307\u9488\u8d4b\u503c\u7ed9\u6587\u4ef6\u79c1\u6709\u6570\u636e\u6307\u9488*/
+	//printk("tw9912config open------>\n");
+    return 0;
+}
+static ssize_t tw9912_read(struct file *filp, char __user *buf, size_t size,
+                          loff_t *ppos)
+{
+    unsigned int count = size;
+    ssize_t ret;
+    if (copy_to_user(buf, (void *)(&global_tw9912_info), count))
+    {
+        ret =  - EFAULT;
+    }
+    else
+    {
+        ret = count;
+    }
 
+    return count;
+}
+static ssize_t tw9912_write(struct file *filp, const char __user *buf, size_t count, loff_t *f_pos)
+{
+//struct tw9912_config_data cdata;
+    u8 para[] = {0x0, 0x0,};
+  if (copy_from_user(&global_tw9912_info, buf, count))
+    {
+        printk("tw9912config copy_from_user ERR\n");
+    } 
+  /*  */
+    printk("tw9912config paramter is %.2x%.2x\n",global_tw9912_info.reg,global_tw9912_info.reg_val);
+      para[0]=global_tw9912_info.reg;
+      if(global_tw9912_info.reg_val  > 0x10)
+     		 para[1]=global_tw9912_info.reg_val;
+      write_tw9912(para);
+}
+static const struct file_operations tw9912_fops =
+{
+	.owner = THIS_MODULE,
+	.llseek = NULL,
+	.read = tw9912_read,
+	.write = tw9912_write,
+	.open = tw9912_open,
+	.release = NULL,
+};
+int tw9912_index_init(void)
+{  int err;
+  err=alloc_chrdev_region(&tw9912_dev,0,1,DEV_NAME);//\u5411\u5185\u6838\u6ce8\u518c\u4e00\u4e2a\u8bbe\u5907
+    if(err<0)
+		{
+			printk("register_chrdev tw9912config is error!\n ");
+			return err;
+		}
+   tw9912_cdev = cdev_alloc();
+   tw9912_cdev->owner= THIS_MODULE;
+   tw9912_cdev->ops = &tw9912_fops;
+   err = cdev_add(tw9912_cdev,tw9912_dev,1);
+   if(err)  
+   printk(KERN_NOTICE "Error for cdec_add() -->adding tw9912config %d \n", MINOR(tw9912_dev));
+   tw9912_class =class_create(THIS_MODULE,"tw9912config_class");
+   if(IS_ERR(tw9912_class))
+	    {
+	        printk("Err: failed in creating mlidbg class.\n");
+	        goto fail_class_create;
+	    }
+    device_create(tw9912_class,NULL,tw9912_dev,NULL,DEV_NAME); //\u521b\u5efa\u4e00\u4e2a\u8bbe\u5907\u8282\u70b9\uff0c\u8282\u70b9\u540d\u4e3aDEV_NAME "%d"
+	printk("tw9912config device_create ok\n");
+return 0;
+fail_class_create:
+    unregister_chrdev_region(tw9912_dev, 1);
+    return -1;
+}
 int lidbg_video_init(void)
 {
+  
     printk("lidbg_video_init modules ismod\n");
     LIDBG_GET;
+    tw9912_index_init();
     set_func_tbl();
     //	TC358_init(PAL_I);
     video_io_i2c_init();
@@ -499,14 +589,25 @@ int lidbg_video_init(void)
     platform_driver_register(&video_driver);
     platform_device_register(&video_devices);
     //CreadChipStatusFunction();
-    return 0;
-
+return 0;
+}
+void tw9912_exit( void )
+{	
+	printk("tw9912config_exit_now.....\n");
+	//void cdev_put(struct cdev *p)
+	
+	cdev_del(tw9912_cdev);
+	device_destroy(tw9912_class,tw9912_dev);
+	class_destroy(tw9912_class);
+	//cdev_put(led_cdev);
+	unregister_chrdev_region(tw9912_dev, 1);
 }
 
 int lidbg_video_deinit(void)
 {
     printk("lidbg_video_deinit module exit.....\n");
     //CleanChipStatusFunction();
+    tw9912_exit();
     return 0;
 
 }

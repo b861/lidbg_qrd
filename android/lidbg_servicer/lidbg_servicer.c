@@ -599,6 +599,7 @@ int main(int argc , char **argv)
     system("chmod 0777 /dev/lidbg_servicer");
     system("chmod 0777 /dev/lidbg_msg");
     system("chmod 0777 /dev/ubloxgps0");
+    system("chmod 606 /dev/tw9912config");
 open_dev:
     fd = open("/dev/lidbg_servicer", O_RDWR);
     //printf("fd = %x\n",fd);

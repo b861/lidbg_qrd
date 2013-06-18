@@ -5,6 +5,7 @@ static Vedio_Channel info_Vedio_Channel = NOTONE;
 static Vedio_Channel info_com_top_Channel = YIN2;
 extern TW9912_Signal signal_is_how[5];
 extern Last_config_t the_last_config;
+extern TW9912Info global_tw9912_info;
 static struct task_struct *Signal_Test = NULL;
 static u8 flag_now_config_channal_AUX_or_Astren=0; //0 is Sstren 1 is AUX
 
@@ -222,7 +223,7 @@ int static VideoImage(void)
 				Tw9912_image[1] = 0x1f;
 				ret = write_tw9912(&Tw9912_image);
 				Tw9912_image[0] = 0x08;
-				Tw9912_image[1] = 0x11;
+				Tw9912_image[1] = global_tw9912_info.reg_val;//form qcamerahwi_preview.cpp
 				ret = write_tw9912(&Tw9912_image);
 			}
 		else
