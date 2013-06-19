@@ -670,6 +670,9 @@ open_dev:
     system("chmod 0777 /dev/FlyAudio");
     system("chmod 0666 /dev/FlySpeed");
     system("chmod 0666 /dev/FlyBrake");
+    system("chmod 0777 /dev/FlyDR");
+    system("chmod 0777 /dev/FlyAS");
+
 
     //chegnweidong
     system("chmod 0777 /dev/flysemdriver");
