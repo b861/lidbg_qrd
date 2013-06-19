@@ -645,11 +645,11 @@ open_dev:
     sleep(1);
     system("insmod /flysystem/lib/modules/FlyDebug.ko");
     system("insmod /flysystem/lib/modules/FlyMmap.ko");
-    system("insmod /flysystem/lib/modules/FlyPM.ko");
-    system("insmod /flysystem/lib/modules/FlyPMDevice.ko");
-    system("insmod /flysystem/lib/modules/FlyADC.ko");
-    system("insmod /flysystem/lib/modules/FlySpeed.ko");
-    system("insmod /flysystem/lib/modules/FlyBrake.ko");
+    //system("insmod /flysystem/lib/modules/FlyPM.ko");
+    //system("insmod /flysystem/lib/modules/FlyPMDevice.ko");
+    //system("insmod /flysystem/lib/modules/FlyADC.ko");
+    //system("insmod /flysystem/lib/modules/FlySpeed.ko");
+    //system("insmod /flysystem/lib/modules/FlyBrake.ko");
     system("insmod /flysystem/lib/modules/FlyHardware.ko");
     system("insmod /flysystem/lib/modules/FlyHardwareDevice.ko");
     system("insmod /flysystem/lib/modules/FlyAudio.ko");
@@ -669,8 +669,8 @@ open_dev:
     system("chmod 0777 /dev/FlyMmap ");
     system("chmod 0777 /dev/FlyHardware");
     system("chmod 0777 /dev/FlyAudio");
-    system("chmod 0666 /dev/FlySpeed");
-    system("chmod 0666 /dev/FlyBrake");
+    //system("chmod 0666 /dev/FlySpeed");
+    //system("chmod 0666 /dev/FlyBrake");
     system("chmod 0777 /dev/FlyDR");
     system("chmod 0777 /dev/FlyAS");
 
