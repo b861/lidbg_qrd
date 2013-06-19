@@ -45,11 +45,16 @@ cd lidbg_qrd
 以上步骤只需配置一次
 
 2.编译
-提供两种方法
+*模块提供两种方法
 (1) 编译所有模块，在lidbg根目录运行build_rel.sh
 (2) 编译单独模块,如在lidbg根目录执行:
 ./make.sh mywork/msm8x25/gps
 ./make.sh drv
+
+生成模块在out目录
+
+*lidbg_servicer
+在终端执行android/lidbg_servicer目录下的build.sh脚本,生成模块在android/out目录
 
 3.运行clean.sh可清除所有编译后产生的文件。
 
