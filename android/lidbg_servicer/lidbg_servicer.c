@@ -655,6 +655,8 @@ open_dev:
     system("insmod /flysystem/lib/modules/FlyAudioDevice.ko");
     system("insmod /flysystem/lib/modules/productinfo.ko");
     system("insmod /flysystem/lib/modules/vendor_flyaudio.ko");
+    system("insmod /flysystem/lib/modules/FlyDR.ko");
+    system("insmod /flysystem/lib/modules/FlyAS.ko");
 
     //chegnweidong
     system("insmod /flysystem/lib/mdrv/flysemdriver.ko");
