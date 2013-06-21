@@ -386,12 +386,13 @@ static void goodix_ts_work_func(struct work_struct *work)
 #endif
 
     //if i2c transfer is failed, let it restart less than 10 times
-    if( ts->retry > 9)
+    if( ts->retry > 20)
     {
         if(!ts->use_irq && (ts->timer.state != HRTIMER_STATE_INACTIVE))
             hrtimer_cancel(&ts->timer);
         dev_info(&(ts->client->dev), "Because of transfer error, %s stop working.\n", s3c_ts_name);
-        return ;
+	ts->retry = 0;
+	goto NO_ACTION;//return ;
     }
     if(ts->bad_data)
         msleep(16);
@@ -1038,7 +1039,7 @@ static int goodix_ts_resume(struct i2c_client *client)
     int ret = 0, retry = 0, init_err = 0;
     uint8_t GT811_check[6] = {0x55};
     struct goodix_ts_data *ts = i2c_get_clientdata(client);
-    printk("come into [%s]========futengfei====== [futengfei]=\n", __func__);
+    printk("come into [%s]=====return===futengfei====== [futengfei]=\n", __func__);
     for(retry = 0; retry < 5; retry++)
     {
         goodix_init_panel(ts);
@@ -1147,7 +1148,7 @@ static int __devinit goodix_ts_init(void)
 #endif
 
     is_ts_load = 1;
-    printk("================into Gt801.ko=1024590==============2013.6.4==\n");
+    printk("================into Gt801.ko=1024590==============2013.6.21==\n");
 
     /*configure shutdown pin,ensure this pin is low, make IC in working state*/
     SOC_IO_Output(0, 27, 0);
