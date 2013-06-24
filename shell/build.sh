@@ -13,14 +13,20 @@ source ./env_entry.sh
 	v2) 
 	echo "EXTRA_CFLAGS += -DBOARD_V2" > $DBG_ROOT_PATH/build_cfg.mk
 	echo "v2";;
+
+	v3) 
+	echo "EXTRA_CFLAGS += -DBOARD_V3" > $DBG_ROOT_PATH/build_cfg.mk
+	echo "v3";;
+
 	*)
 	echo -e "\033[41;37m  ===============support table====================\033[0m "  
 	echo "v1"
 	echo "v2"
+	echo "v3"
 	echo "dbg"
 	echo "rel"
 	echo "  "
-	echo -e "check your input: \033[41;37m  $1 $2  \033[0m"
+	echo -e "exit,check your input: \033[41;37m  $1 $2  \033[0m"
 	exit;;
 	esac 
 
@@ -33,14 +39,16 @@ source ./env_entry.sh
 	rel) 
 	echo "EXTRA_CFLAGS += -DFLY_RELEASE" >> $DBG_ROOT_PATH/build_cfg.mk
 	echo "rel";;
+
 	*)
 	echo -e "\033[41;37m  ===============support table====================\033[0m "  
 	echo "v1"
 	echo "v2"
+	echo "v3"
 	echo "dbg"
 	echo "rel"
 	echo "  "
-	echo -e "check your input: \033[41;37m  $1 $2  \033[0m"
+	echo -e "exit,check your input: \033[41;37m  $1 $2  \033[0m"
 	exit;;
 	esac
 

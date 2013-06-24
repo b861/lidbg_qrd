@@ -40,7 +40,7 @@ out_release：编译后自动生成，存放产品正式包需要的模块，由
 1.配置编译环境
 cd lidbg_qrd
 (1) cp ./drv/msm8x25/need/dbg_cfg_backup.sh ./dbg_cfg.sh
-(2) 修改DBG_SYSTEM_DIR环境变量,指向的包的内核需编译过一遍(make bootimage)
+(2) 修改DBG_PLATFORM,DBG_SYSTEM_DIR环境变量(指向的包的内核需编译过一遍(make bootimage))
 (3) chmod 777  ./* -R
 以上步骤只需配置一次
 

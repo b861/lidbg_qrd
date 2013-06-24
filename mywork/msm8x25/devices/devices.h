@@ -82,6 +82,23 @@ enum
 #endif
 
 
+#ifdef BOARD_V3
+#define GPIO_USB_ID (81)
+#define GPIO_LED_FLY (82)
+
+//LCD_IDLE,  PANNE_PEN , PWM
+#define LCD_ON do{ }while(0)
+#define LCD_OFF do{ }while(0)
+
+#define USB_HUB_ENABLE do{ }while(0)
+#define USB_HUB_DISABLE do{ }while(0)
+
+#define USB_SWITCH_DISCONNECT do{ }while(0)
+#define USB_SWITCH_CONNECT do{ }while(0)
+
+#endif
+
+
 
 #ifdef FLY_DEBUG
 #define DEBUG_AD_KEY
