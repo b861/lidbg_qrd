@@ -6,16 +6,6 @@
 
 cd shell
 source ./env_entry.sh
-
-case "$DBG_PLATFORM" in
-    msm7627a)
-	./build.sh v2 rel;;
-    msm8625)
-	./build.sh v3 rel;;
-    *) 
-	echo "exit,not find your platform:  $DBG_PLATFORM"
-	exit;;
-esac
-
+./build.sh $BOARD_VERSION $BUILD_VERSION
 ./copy_out_release.sh
 

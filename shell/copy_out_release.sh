@@ -1,7 +1,7 @@
 
 source ./env_entry.sh
 
-release_path=$DBG_OUT_RELEASE_PATH/v2/out
+release_path=$DBG_OUT_RELEASE_PATH/$BOARD_VERSION/out
 
 cp $DBG_OUT_PATH/lidbg_share.ko $release_path
 cp $DBG_OUT_PATH/lidbg_ts_to_recov.ko $release_path
