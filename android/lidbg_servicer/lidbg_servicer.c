@@ -698,7 +698,7 @@ open_dev:
     sleep(30);
 
     ///////low mem kill
-    if(1)
+    if(0)
     {
 
         system("chmod 777 /sys/module/lowmemorykiller/parameters/minfree");
@@ -707,6 +707,7 @@ open_dev:
         sleep(1);
         lidbg("set minfree\n");
         system("echo 3674,4969,6264,6264,6264,6264 > /sys/module/lowmemorykiller/parameters/minfree");
+		//system("echo 6300,7866,9432,11480,13047,15697 > /sys/module/lowmemorykiller/parameters/minfree");
     }
 
 
