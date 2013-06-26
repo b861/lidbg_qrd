@@ -57,7 +57,7 @@ mkdir $DBG_ANDROID_OUT_PATH
 mkdir -p $DBG_OUT_RELEASE_PATH/$1/out
 
 #cd shell
-./all_make.sh $1
+#./all_make.sh
 #adb wait-for-device remount
 #adb remount
 #adb push ./out /system/lib/modules/out

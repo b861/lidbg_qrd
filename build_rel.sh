@@ -6,6 +6,6 @@
 
 cd shell
 source ./env_entry.sh
-./build.sh $BOARD_VERSION $BUILD_VERSION
+./build.sh $BOARD_VERSION $BUILD_VERSION && ./all_make.sh
 ./copy_out_release.sh
 
