@@ -5,14 +5,19 @@
 #=======================================================================================
 source ./env_entry.sh
 
-if [ "$BOARD_VERSION" = "" ]; then
-echo "exit:  BOARD_VERSION=null"
+if [ "$DBG_OUT_PATH" = "" ]; then
+echo "exit:  DBG_OUT_PATH=null"
+exit
+fi
+
+if [ "$DBG_OUT_RELEASE_PATH " = "" ]; then
+echo "exit:  DBG_OUT_PATH=null"
 exit
 fi
 
 ./drv_clean.sh
 ./work_clean.sh
-cd $DBG_OUT_PATH && rm *.ko
-cd $DBG_OUT_RELEASE_PATH && rm -rf $BOARD_VERSION
+rm -rf $DBG_OUT_PATH
+rm -rf $DBG_OUT_RELEASE_PATH 
 cd $DBG_ANDROID_PATH && rm -rf out
 

@@ -7,5 +7,5 @@
 cd shell && ./all_clean.sh
 cd ..
 rm ./build_cfg.mk
-find . -name "*.ko" -type f -exec rm  {} \;
+#find . -name "*.ko" -type f -exec rm  {} \;
 
