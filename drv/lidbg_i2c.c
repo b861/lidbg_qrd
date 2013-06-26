@@ -76,6 +76,27 @@ static struct i2c_driver i2c_api_driver =
 
  };
 
+static struct i2c_gpio_platform_data fly_i2c_gpio_pdata = {
+	.sda_pin		= MSM_I2C_GPIO_SDA2,
+	.sda_is_open_drain	= 0,
+	.scl_pin		= MSM_I2C_GPIO_SCL2,
+	.scl_is_open_drain	= 1,
+	.udelay			= 50,		/* 10 kHz */
+};
+
+static struct platform_device fly_i2c_gpio_device = {
+	.name			= "i2c-gpio",
+	.id			= 2,		//will be used to set the i2c_bus number
+	.dev			={
+		.platform_data	= &fly_i2c_gpio_pdata,
+	},
+};
+
+void soc_i2c_gpio_init(struct platform_device *pdev)
+{
+	share_soc_i2c_gpio_config(pdev);
+}
+
 static struct i2c_api *get_i2c_api(int bus_id)
 {
     //由于在系统中可能存在多个adapter,因为将每一条I2C总线对应一个编号,下文中称为I2C总线号.
@@ -637,10 +658,23 @@ static int __init i2c_api_init(void)
 {
     //遍历adapter
     int ret;
+	
+#ifdef CONFIG_I2C_GPIO 
+    soc_i2c_gpio_init(&fly_i2c_gpio_device);
+#endif
 
 #ifdef _LIGDBG_SHARE__
     LIDBG_SHARE_GET;
     share_set_func_tbl();
+#endif
+
+#ifdef CONFIG_I2C_GPIO 
+    ret = platform_device_register(&fly_i2c_gpio_device);
+    if (ret)
+    {
+        lidbg(KERN_ERR "[%s] Device registration failed!\n", __func__);
+        return ret;
+    }
 #endif
 
     ret = i2c_add_driver(&i2c_api_driver); //将driver注册到了i2c_bus_type的总线上 利用i2c_client的名称和id_table中的名称做匹配的

@@ -60,6 +60,9 @@
 
 #endif
 
+//i2c-gpio
+#define MSM_I2C_GPIO_SDA2 107
+#define MSM_I2C_GPIO_SCL2 32
 
 //IO
 

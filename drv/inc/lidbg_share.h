@@ -50,6 +50,9 @@ struct lidbg_fn_t_share
     int (*pfni2c_api_do_send_TEF7000)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
     int (*pfni2c_api_do_recv_TEF7000)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
 
+    //i2c-gpio
+    void (*pfnsoc_i2c_gpio_config)(struct platform_device *pdev);
+
     //servicer
     void (*pfnlidbg_servicer_main)(int argc, char **argv);
     void (*pfnk2u_write)(int cmd);
@@ -145,6 +148,8 @@ static inline int share_check_pt(void)
 #define share_soc_irq_disable (share_check_pt()?NULL:(plidbg_share->share_func_tbl.pfnsoc_irq_disable))
 #define share_soc_io_config (share_check_pt()?NULL:(plidbg_share->share_func_tbl.pfnsoc_io_config))
 
+//i2c-gpio
+#define share_soc_i2c_gpio_config (share_check_pt()?NULL:(plidbg_share->share_func_tbl.pfnsoc_i2c_gpio_config))
 
 //ad
 #define share_mod_ad_main (share_check_pt()?NULL:(plidbg_share->share_func_tbl.pfnmod_ad_main))

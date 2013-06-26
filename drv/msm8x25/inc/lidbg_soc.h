@@ -167,6 +167,7 @@ int soc_io_output(u32 index, bool status);
 bool soc_io_input(u32 index);
 int soc_io_config(u32 index, bool direction, u32 pull, u32 drive_strength, bool force_reconfig);
 int soc_serial_set_tty(int port, int baud, char parity, int bits);
+void soc_i2c_gpio_config(struct platform_device *pdev);
 
 
 
