@@ -68,6 +68,9 @@
 
 #include <mach/msm_rpcrouter.h>
 
+//i2c-gpio
+#define MSM_I2C_GPIO_SDA2 107
+#define MSM_I2C_GPIO_SCL2 32
 
 #if 0
 enum
