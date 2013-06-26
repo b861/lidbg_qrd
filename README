@@ -44,6 +44,20 @@ cd lidbg_qrd
 (3) chmod 777  ./* -R
 以上步骤只需配置一次
 
+dbg_cfg.sh编译环境变量配置说明：
+＊DBG_PLATFORM:
+msm7627a--8x25平台
+msm8625--8x25q平台
+
+＊BUILD_VERSION
+dbg--编译出运行在原生系统的模块
+rel--编译出运行在发布产品系统的模块
+
+*BOARD_VERSION
+v1--适用于8x25第一版硬件（pcb）
+v2--适用于8x25第二版及最后量产硬件（pcb）
+v3--适用于8x25q车机第一版硬件（pcb）
+
 2.编译
 *模块提供两种方法
 (1) 编译所有模块，在lidbg根目录运行build_rel.sh
@@ -60,6 +74,7 @@ cd lidbg_qrd
 
 
 ----------运行----------
+正式产品包已经默认加载lidbg相关模块，要是在原生系统想要运行lidbg模块，按下方法：
 在原生系统模块放到/system/lib/modules/out,产品系统中模块放到/flysystem/lib/modules
 以下两种方法均可运行模块
 1.在终端用ismod指令直接加载模块
