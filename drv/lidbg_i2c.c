@@ -659,14 +659,15 @@ static int __init i2c_api_init(void)
     //±éÀúadapter
     int ret;
 	
-#ifdef CONFIG_I2C_GPIO 
-    soc_i2c_gpio_init(&fly_i2c_gpio_device);
-#endif
-
 #ifdef _LIGDBG_SHARE__
     LIDBG_SHARE_GET;
     share_set_func_tbl();
 #endif
+
+#ifdef CONFIG_I2C_GPIO 
+    soc_i2c_gpio_init(&fly_i2c_gpio_device);
+#endif
+
 
 #ifdef CONFIG_I2C_GPIO 
     ret = platform_device_register(&fly_i2c_gpio_device);
