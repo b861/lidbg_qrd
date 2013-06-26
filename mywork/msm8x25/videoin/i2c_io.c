@@ -77,23 +77,20 @@ static void clr_i2c_pin(u32 pin)
 }
 void i2c_io_config_init(void)
 {
-/*
     i2c_io_config(GPIO_I2C_SDA, GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA, 1);
     i2c_io_config(GPIO_I2C_SCL, GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA, 1);
     i2c_io_config(TW9912_RESET, GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA, 1); //tw9912 reset//43
     i2c_io_config(TC358746XBG_RESET, GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA, 1); // tc358746 reset
     printk("first init GPIO_I2C_SDA and GPIO_I2C_SCL\n");
-    */
 }
 static void i2c_init(void)
 {
-/*
+
     i2c_io_config( GPIO_I2C_SDA, GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA, 0);
     i2c_io_config( GPIO_I2C_SCL, GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA, 0);
 
     set_i2c_pin(GPIO_I2C_SDA);
     set_i2c_pin(GPIO_I2C_SCL);
-*/
 }
 
 static void i2c_free(void)
