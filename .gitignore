@@ -47,7 +47,8 @@ push-kejing.sh
 key_hkjing.sh
 version.sh
 build_cfg.mk
-
+i2c-algo-bit.c
+i2c-gpio.c
 
 tmp/
 out/
