@@ -2,7 +2,7 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := gps.msm7627a
+LOCAL_MODULE := gps.$(DBG_PLATFORM)
 
 LOCAL_MODULE_PATH := $(LOCAL_PATH)/../out
 
