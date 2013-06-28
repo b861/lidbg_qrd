@@ -882,6 +882,7 @@ static int thread_fastboot_suspend(void *data)
                             msleep((10 - MAX_WAIT_UNLOCK_TIME) * 1000);
                             lidbg("$-\n");
 #endif
+							wakelock_occur_count = 0;
                             if(fastboot_get_status() == PM_STATUS_EARLY_SUSPEND_PENDING)
                             {
                                 lidbg("start force suspend...\n");
@@ -889,7 +890,11 @@ static int thread_fastboot_suspend(void *data)
                                 wake_lock(&(fb_data->flywakelock));
                                 wake_unlock(&(fb_data->flywakelock));
                             }
-                            wakelock_occur_count = 0;
+                            else
+                            {
+								lidbg("thread_fastboot_suspend wait time_count=%d\n", time_count);
+								complete(&late_suspend_start);
+							}
                         }
                         break;
                     }

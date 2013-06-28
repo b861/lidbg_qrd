@@ -22,6 +22,9 @@ static void share_set_func_tbl(void)
     ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnsoc_irq_disable = soc_irq_disable;
     ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnsoc_io_config = soc_io_config;
 
+    //i2c-gpio
+    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnsoc_i2c_gpio_config = soc_i2c_gpio_config;
+
     //ad
     ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnsoc_ad_read = soc_ad_read;
 

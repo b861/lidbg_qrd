@@ -80,6 +80,10 @@ struct lidbg_fn_t_share
     //cmm
     int  (*pfncmn_launch_user)(char bin_path[], char argv1[]);
 
+        //i2c-gpio
+    void (*pfnsoc_i2c_gpio_config)(struct platform_device *pdev);
+
+
 
 };
 
@@ -145,6 +149,8 @@ static inline int share_check_pt(void)
 #define share_soc_irq_disable (share_check_pt()?NULL:(plidbg_share->share_func_tbl.pfnsoc_irq_disable))
 #define share_soc_io_config (share_check_pt()?NULL:(plidbg_share->share_func_tbl.pfnsoc_io_config))
 
+//i2c-gpio
+#define share_soc_i2c_gpio_config (share_check_pt()?NULL:(plidbg_share->share_func_tbl.pfnsoc_i2c_gpio_config))
 
 //ad
 #define share_mod_ad_main (share_check_pt()?NULL:(plidbg_share->share_func_tbl.pfnmod_ad_main))

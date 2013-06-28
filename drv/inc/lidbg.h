@@ -64,6 +64,7 @@
 #include <linux/timex.h>
 //#include <linux/rtc.h>
 
+#include <linux/i2c-gpio.h>   //for i2c-gpio
 
 ////////////
 
