@@ -353,11 +353,17 @@ static int  goodix_read_version(struct goodix_ts_data *ts)
     version_data[0] = 0x6A;
     ret = i2c_write_bytes(ts->client, version, 2);
     if (ret < 0)
-        goto error_i2c_version;
+    {
+	printk("[wang]:===goodix_read_version.i2c_write_bytes error.\n");
+	goto error_i2c_version;
+    }
     msleep(16);
     ret = i2c_read_bytes(ts->client, version_data, 40);
     if (ret < 0)
+    {
+    	printk("[wang]:===goodix_read_version.i2c_read_bytes error.\n");
         goto error_i2c_version;
+    }
     dev_info(&ts->client->dev, " Guitar Version: %s\n", &version_data[1]);
     version[1] = 0x00;				//cancel the command
     i2c_write_bytes(ts->client, version, 2);
@@ -402,7 +408,8 @@ static void goodix_ts_work_func(struct work_struct *work)
     {
         if(!ts->use_irq && (ts->timer.state != HRTIMER_STATE_INACTIVE))
             hrtimer_cancel(&ts->timer);
-        dev_info(&(ts->client->dev), "Because of transfer error, %s stop working.\n", s3c_ts_name);
+       // dev_info(&(ts->client->dev), "Because of transfer error, %s stop working.\n", s3c_ts_name);
+        printk("[wang]:=======Because of transfer error, stop working.\n");
 	ts->retry = 0;
 	goto NO_ACTION;//return ;
     }
@@ -421,9 +428,14 @@ static void goodix_ts_work_func(struct work_struct *work)
         }
         else
         {
-            goodix_init_panel(ts);
+            ret = goodix_init_panel(ts);
+	    if(ret<0)
+	    {
+		printk("[wang]:=====goodix_init_panel error in work_func. \n", ret);
+	    }
             msleep(500);
         }
+	printk("[wang]:=====I2C read point data error. Number:%d\n", ret);
         goto XFER_ERROR;
     }
     //printk("=====WANG i2c_read_bytes success=======\n");
@@ -439,20 +451,29 @@ static void goodix_ts_work_func(struct work_struct *work)
         for(count = 1; count < 8; count++)
             check_sum += (int)point_data[count];
         if((check_sum % 256) != point_data[8])
-            goto XFER_ERROR;
+        {
+		printk("[wang]:=======check_sum 1 is failed\n");
+		goto XFER_ERROR;
+        }
         break;
     case 2:
     case 3:
         for(count = 1; count < 13; count++)
             check_sum += (int)point_data[count];
         if((check_sum % 256) != point_data[13])
-            goto XFER_ERROR;
+        {
+		printk("[wang]:=======check_sum 2 or 3 is failed\n");
+		goto XFER_ERROR;
+        }
         break;
     default:		//(point_data[1]& 0x1f) > 3
         for(count = 1; count < 34; count++)
             check_sum += (int)point_data[count];
         if((check_sum % 256) != point_data[34])
-            goto XFER_ERROR;
+        {
+		printk("[wang]:=======check_sum >3 is failed\n");
+		goto XFER_ERROR;
+        }
     }
 
     point_data[1] &= 0x1f;
@@ -565,7 +586,7 @@ BIT_NO_CHANGE:
             }
             if(FLAG_FOR_15S_OFF < 0)
             {
-                printk("\nerr:FLAG_FOR_15S_OFF===[%d]\n", FLAG_FOR_15S_OFF);
+                printk("\n[wang]:====err:FLAG_FOR_15S_OFF===[%d]\n", FLAG_FOR_15S_OFF);
             }
 
 #ifdef RECORVERY_MODULE
@@ -745,7 +766,8 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     /*veryfy the i2c adpater funtion*/
     if (!i2c_check_functionality(client->adapter, I2C_FUNC_I2C))
     {
-        dev_err(&client->dev, "System need I2C function.\n");
+        //dev_err(&client->dev, "System need I2C function.\n");
+        printk("[wang]========i2c_check_functionality failed.\n");
         ret = -ENODEV;
         goto err_check_functionality_failed;
     }
@@ -772,6 +794,20 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     msleep(16);
     unsigned int buf = 0;
     client->addr = 0x55;
+
+ /*allocate kernel space for ts, and initialize it*/
+    ts = kzalloc(sizeof(*ts), GFP_KERNEL);
+    if (ts == NULL)
+    {
+    	printk("[wang]========alloc ts_data failed.\n");
+        ret = -ENOMEM;
+        goto err_alloc_data_failed;
+    }
+    INIT_WORK(&ts->work, goodix_ts_work_func);                      //initialize work struct for TS.
+    ts->client = client;
+    i2c_set_clientdata(client, ts);
+    pdata = client->dev.platform_data;                                        //pdata used for what?
+    
     /*Test i2c communication whether is rihgt or not*/
     for(retry = 0; retry < 5; retry++)
     {
@@ -781,7 +817,8 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     }
     if(ret < 0)
     {
-        dev_err(&client->dev, "========Warnning: I2C connection might be something wrong!\n");
+        //dev_err(&client->dev, "========Warnning: I2C connection might be something wrong!\n");
+        printk("[wang]========I2C connection might be something wrong!\n");
         goto err_i2c_failed;
     }
 
@@ -790,28 +827,17 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     gpio_set_value(SHUTDOWN_PORT, 1);		         //suspend
 #endif
 
-    /*allocate kernel space for ts, and initialize it*/
-    ts = kzalloc(sizeof(*ts), GFP_KERNEL);
-    if (ts == NULL)
-    {
-        ret = -ENOMEM;
-        goto err_alloc_data_failed;
-    }
-    INIT_WORK(&ts->work, goodix_ts_work_func);                      //initialize work struct for TS.
-    ts->client = client;
-    i2c_set_clientdata(client, ts);
-    pdata = client->dev.platform_data;                                        //pdata used for what?
+   
 
     /*allocate input_dev, and initialize it, then register to kernel input sub-system */
     ts->input_dev = input_allocate_device();
     if (ts->input_dev == NULL)
     {
         ret = -ENOMEM;
-        dev_dbg(&client->dev, "Failed to allocate input device\n");
+        //dev_dbg(&client->dev, "Failed to allocate input device\n");
+        printk("[wang]========allocate input device failed!\n");
         goto err_input_dev_alloc_failed;
     }
-    printk( "allocate input device successful!\n");
-
 
     ts->input_dev->evbit[0] = BIT_MASK(EV_SYN) | BIT_MASK(EV_KEY) | BIT_MASK(EV_ABS) ;
     ts->input_dev->keybit[BIT_WORD(BTN_TOUCH)] = BIT_MASK(BTN_TOUCH);	//can remove
@@ -833,7 +859,7 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     screen_x = RESOLUTION_X;
     screen_y = RESOLUTION_Y;
     SOC_Display_Get_Res(&screen_x, &screen_y);
-    printk( "get touch screen resolution is [%d*%d].\n", screen_x, screen_y);
+    printk( "[wang]:===get touch screen resolution is [%d*%d].\n", screen_x, screen_y);
 #endif
 
 #ifdef GOODIX_MULTI_TOUCH
@@ -856,10 +882,10 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     ret = input_register_device(ts->input_dev);
     if (ret)
     {
-        dev_err(&client->dev, "Probe: Unable to register %s input device\n", ts->input_dev->name);
+        //dev_err(&client->dev, "Probe: Unable to register %s input device\n", ts->input_dev->name);
+        printk( "[wang]:====input_register_device failed.\n");
         goto err_input_register_device_failed;
     }
-    printk( "register input device successful.\n");
 
     ts->use_irq = 0;
     ts->retry = 0;
@@ -873,7 +899,8 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
         ret = gpio_request(INT_PORT, "TS_INT");	//Request IO
         if (ret < 0)
         {
-            dev_err(&client->dev, "Failed to request GPIO:%d, ERRNO:%d\n", (int)INT_PORT, ret);
+           // dev_err(&client->dev, "Failed to request GPIO:%d, ERRNO:%d\n", (int)INT_PORT, ret);
+       	    printk( "[wang]:====gpio_request INT failed.\n");
             goto err_int_request_failed;
         }
         //ret = s3c_gpio_cfgpin(INT_PORT, INT_CFG);	//Set IO port function
@@ -884,7 +911,8 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
                            client->name, ts);
         if (ret != 0)
         {
-            dev_err(&client->dev, "Can't allocate touchscreen's interrupt!ERRNO:%d\n", ret);
+            //dev_err(&client->dev, "Can't allocate touchscreen's interrupt!ERRNO:%d\n", ret);
+       	    printk( "[wang]:========request_irq failed.\n");
             gpio_direction_input(INT_PORT);
             gpio_free( INT_PORT);
             goto err_int_request_failed;
@@ -893,7 +921,7 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
         {
             disable_irq(TS_INT);
             ts->use_irq = 1;
-            printk( "=========Reques EIRQ %d succesd on GPIO:%d\n", TS_INT, INT_PORT);
+            printk( "[wang]:======Reques EIRQ %d succesd on GPIO:%d\n", TS_INT, INT_PORT);
         }
     }
 #endif
@@ -905,7 +933,7 @@ err_int_request_failed:
         hrtimer_init(&ts->timer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
         ts->timer.function = goodix_ts_timer_func;
         hrtimer_start(&ts->timer, ktime_set(1, 0), HRTIMER_MODE_REL);
-        printk( "Reques EIRQ %d failed on GPIO:%d\n", TS_INT, INT_PORT);
+        printk( "[wang]:===Reques EIRQ %d failed on GPIO:%d\n", TS_INT, INT_PORT);
 
     }
 
@@ -921,7 +949,7 @@ err_int_request_failed:
         ret = goodix_init_panel(ts);
         if(ret != 0)		//Initiall failed
         {
-            printk("[wangyihong]goodix_ts_probe.goodix_init_panel fail and again----------->GT801the %d times\n", count);
+            printk("[wang]:=====goodix_ts_probe.goodix_init_panel fail and again----------->GT801the %d times\n", count);
             SOC_IO_Output(0, 27, 0);
             msleep(300);
             SOC_IO_Output(0, 27, 1);//NOTE:GT801 SHUTDOWN PIN ,set LOW  to work.
@@ -930,7 +958,7 @@ err_int_request_failed:
         }
         else
         {
-            printk( "goodix_init_panel success !\n");
+            printk( "[wang]:====goodix_init_panel success !\n");
             if(ts->use_irq)
                 enable_irq(TS_INT);
             break;
@@ -938,6 +966,7 @@ err_int_request_failed:
     }
     if(ret != 0)
     {
+        printk( "[wang]:====goodix_init_panel failed !\n");
         ts->bad_data = 1;
         goto err_init_godix_ts;
     }
@@ -955,7 +984,7 @@ err_int_request_failed:
 
     dev_info(&client->dev, "Start  %s in %s mode\n",
              ts->input_dev->name, ts->use_irq ? "Interrupt" : "Polling");
-    printk("goodix_ts_probe is finished\n");
+    printk("[wang]:====goodix_ts_probe is finished\n");
     return 0;
 
 err_init_godix_ts:
@@ -1042,7 +1071,10 @@ static int goodix_ts_suspend(struct i2c_client *client, pm_message_t mesg)
         hrtimer_cancel(&ts->timer);
     ret = cancel_work_sync(&ts->work);
     if(ret && ts->use_irq)
-        enable_irq(client->irq);
+    	{
+    		printk("[wang]:=====enable irq in suspend.\n");
+        	enable_irq(client->irq);
+    	}
     return 0;
 }
 //重新唤醒
@@ -1051,10 +1083,14 @@ static int goodix_ts_resume(struct i2c_client *client)
     int ret = 0, retry = 0, init_err = 0;
     uint8_t GT811_check[6] = {0x55};
     struct goodix_ts_data *ts = i2c_get_clientdata(client);
-    printk("come into [%s]=====return===futengfei====== [futengfei]=\n", __func__);
+    printk("come into [%s]=====add print======= [futengfei]=\n", __func__);
     for(retry = 0; retry < 5; retry++)
     {
-        goodix_init_panel(ts);
+        ret = goodix_init_panel(ts);
+	if(ret<0)
+	{
+		printk("[wang]:====goodix_init_panel failed in goodix_ts_resume\n");
+	}
         init_err = SOC_I2C_Rec(1, 0x55, 0x68, GT811_check, 6 );
         ret = 0;
         if(init_err < 0)
@@ -1112,7 +1148,7 @@ static void goodix_ts_late_resume(struct early_suspend *h)
 
     if (ts->use_irq)
     {
-        printk( "enable_irq((INT_PORT));\n");
+        printk( "[wang]:========enable_irq((INT_PORT));\n");
         enable_irq(MSM_GPIO_TO_INT(INT_PORT));
     }
 
@@ -1160,7 +1196,7 @@ static int __devinit goodix_ts_init(void)
 #endif
 
     is_ts_load = 1;
-    printk("================into Gt801.ko=1024590==============2013.6.21==\n");
+    printk("================into Gt801.ko=1024590==============2013.6.24==\n");
 
     /*configure shutdown pin,ensure this pin is low, make IC in working state*/
     SOC_IO_Output(0, 27, 0);
@@ -1177,7 +1213,7 @@ static int __devinit goodix_ts_init(void)
 
     }
     ret = i2c_add_driver(&goodix_ts_driver);
-    printk("====================out Gt801.ko===============2013.6.4==\n");
+    printk("====================out Gt801.ko===============2013.6.24==\n");
     return ret;
 }
 
