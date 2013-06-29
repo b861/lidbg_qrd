@@ -40,6 +40,7 @@ modules_install:
  
 clean:
 	rm -rf *.o *~ core .depend .*.cmd *.ko *.mod.c .tmp_versions *.order *.symvers *_log
+	rm i2c-gpio.c i2c-algo-bit.c
 
 .PHONY: modules modules_install clean
 
