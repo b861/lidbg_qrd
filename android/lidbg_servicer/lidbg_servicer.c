@@ -545,6 +545,8 @@ int main(int argc , char **argv)
     int oflags;
 
     lidbg("lidbg_servicer start\n");
+    system("echo 600000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq");
+    system("echo 600000 > /sys/devices/system/cpu/cpu1/cpufreq/scaling_max_freq");
     //sleep(5);
     system("insmod /system/lib/modules/out/lidbg_share.ko");
     system("insmod /system/lib/modules/out/lidbg_ts_to_recov.ko");
