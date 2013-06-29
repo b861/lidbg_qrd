@@ -60,7 +60,7 @@ v3--适用于8x25q车机第一版硬件（pcb）
 
 2.编译
 *模块提供两种方法
-(1) 编译所有模块，在lidbg根目录运行build_rel.sh
+(1) 编译所有模块，在lidbg根目录运行build.sh
 (2) 编译单独模块，如在lidbg根目录执行:
 ./make.sh mywork/msm8x25/gps
 ./make.sh drv
