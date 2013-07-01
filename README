@@ -3,10 +3,10 @@ linux debug(lidbg)
 
 --------代码下载方法----------
 git clone qcom_share@192.168.9.222:/home/qcom_share/lidbg_qrd
-密码：8x25q
+密码：l
 
 ----------代码结构----------
-主要包含应用层（android），基础驱动模块（drv），具体工作模块（mywork），编译脚本（shell），输出目录（out/out_release）。
+主要包含应用层（android），基础驱动模块（core），具体工作模块（drivers），编译脚本（build），输出目录（out/out_release）。
 
 *应用层（android）
 android/lidbg_servicer ：启动自动运行，用于加载模块，接收内核模块的消息作相应处理，在内核层不方便实现的功能在此处理。
@@ -14,32 +14,32 @@ android/uart_send_rec_test：用于串口稳定性测试。
 android/usb_sd_mount_test：用于U盘和SD卡插拔稳定性测试。
 android/out：编译后自动生成， 应用层生成的目标文件。
 
-*基础驱动模块（drv）
+*基础驱动模块（core）
 作用主要有两个：
-1.封装不同soc的底层实现（i2c / io / spi / ad / pwm等），提供通用接口给其他模块。通过共享其包含指针函数的结构体地址，给其他模块（主要是mywork下的模块）调用。
-2.创建节点/dev/mlidbg0，提供在shell终端控制外设调试的命令，具体的命令参考drv\msm8x25\need\echo_shell_msm8x25.txt。
+1.封装不同soc的底层实现（i2c / io / spi / ad / pwm等），提供通用接口给其他模块。通过共享其包含指针函数的结构体地址，给其他模块（主要是drivers下的模块）调用。
+2.创建节点/dev/mlidbg0，提供在shell终端控制外设调试的命令，具体的命令参考core\msm8x25\doc\echo_shell_msm8x25.txt。
 
-*具体工作模块（mywork）
-mywork下是一些具体实际的工作，为了保证其平台可移植性，尽量不要调用soc的底层函数，而是调用drv提供的通用接口：
-mywork\example：调用drv的函数接口例子。
-mywork\bp_msg：打印bp写入共享内存的调试信息。
-mywork\devices：控制一些系统正常运行必须的外设。
-mywork\fastboot：处理车机休眠唤醒相关。
-mywork\gps：ublox驱动。
-mywork\touchscreen：电容屏相关驱动。
-mywork\videoin：视频输入驱动。
+*具体工作模块（drivers）
+drivers下是一些具体实际的工作，为了保证其平台可移植性，尽量不要调用soc的底层函数，而是调用core提供的通用接口：
+drivers\example：调用core的函数接口例子。
+drivers\bp_msg：打印bp写入共享内存的调试信息。
+drivers\devices：控制一些系统正常运行必须的外设。
+drivers\fastboot：处理车机休眠唤醒相关。
+drivers\gps：ublox驱动。
+drivers\touchscreen：电容屏相关驱动。
+drivers\videoin：视频输入驱动。
 
-*编译脚本（shell）
-shell：编译使用到的脚本。
+*编译脚本（build）
+build：编译使用到的脚本。
 
 输出目录（out/out_release）
 out：编译后自动生成，存放所有编译生成的模块。
-out_release：编译后自动生成，存放产品正式包需要的模块，由shell/copy_out_release.sh脚本指定。产品正式打包时只提供此目录。
+out_release：编译后自动生成，存放产品正式包需要的模块，由build/copy_out_release.sh脚本指定。产品正式打包时只提供此目录。
 
 ----------编译方法----------
 1.配置编译环境
 cd lidbg_qrd
-(1) cp ./drv/msm8x25/need/dbg_cfg_backup.sh ./dbg_cfg.sh
+(1) cp ./core/msm8x25/doc/dbg_cfg_backup.sh ./dbg_cfg.sh
 (2) 修改DBG_SYSTEM_DIR环境变量(指向的包的内核需编译过一遍(make bootimage))
 (3) chmod 777  ./* -R
 以上步骤只需配置一次
@@ -62,8 +62,8 @@ v3--适用于8x25q车机第一版硬件（pcb）
 *模块提供两种方法
 (1) 编译所有模块，在lidbg根目录运行build.sh
 (2) 编译单独模块，如在lidbg根目录执行:
-./make.sh mywork/msm8x25/gps
-./make.sh drv
+./make.sh drivers/msm8x25/gps
+./make.sh core
 
 生成模块在out目录
 
@@ -78,7 +78,7 @@ v3--适用于8x25q车机第一版硬件（pcb）
 在原生系统模块放到/system/lib/modules/out,产品系统中模块放到/flysystem/lib/out/
 以下两种方法均可运行模块
 1.在终端用ismod指令直接加载模块
-见drv/msm8x25/need/echo_shell_msm8x25.txt文件insmod下  (正式产品是flysystem目录)
+见core/msm8x25/doc/echo_shell_msm8x25.txt文件insmod下  (正式产品是flysystem目录)
 
 2. 开机自动运行lidbg_servicer加载模块 
 把lidbg_servicer打包进系统，在文件out/target/product/msm7627a/root/init.qcom.rc添加

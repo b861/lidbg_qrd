@@ -55,10 +55,3 @@ source ./env_entry.sh
 mkdir $DBG_OUT_PATH
 mkdir -p $DBG_OUT_RELEASE_PATH/$1/out
 
-#cd shell
-#./all_make.sh
-#adb wait-for-device remount
-#adb remount
-#adb push ./out /system/lib/modules/out
-#adb reboot
-

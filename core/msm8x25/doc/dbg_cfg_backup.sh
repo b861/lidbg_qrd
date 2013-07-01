@@ -11,7 +11,7 @@ case "$DBG_PLATFORM" in
     msm8625)
 	BOARD_VERSION=v3
 	DBG_SYSTEM_DIR=/home/swlee/R8625QSOSKQLYA3060;;
-    *)
+    *) 
 	echo "exit,not find your platform:  $DBG_PLATFORM"
 	exit;;
 esac

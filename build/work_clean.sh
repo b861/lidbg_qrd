@@ -13,5 +13,5 @@ for each_dir in `ls -l | grep "^d" | awk '{print $NF}'`
 do
 	cd $dbg_soc/$each_dir && make clean
 	
-done #end do 
+done
 
