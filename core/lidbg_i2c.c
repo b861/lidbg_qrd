@@ -673,7 +673,6 @@ static int __init i2c_api_init(void)
 	share_cmn_launch_user("/system/bin/insmod", "/system/lib/modules/out/lidbg_i2c_gpio.ko");
 	share_cmn_launch_user("/system/bin/insmod", "/flysystem/lib/out/lidbg_i2c_gpio.ko");
 	msleep(50);//delay for  lidbg_i2c_gpio.ko complete
-#endif
 
     soc_i2c_gpio_init(&fly_i2c_gpio_device);
     ret = platform_device_register(&fly_i2c_gpio_device);
@@ -682,6 +681,7 @@ static int __init i2c_api_init(void)
         lidbg(KERN_ERR "[%s] Device registration failed!\n", __func__);
         return ret;
     }
+#endif	
 #endif
 
     ret = i2c_add_driver(&i2c_api_driver); //将driver注册到了i2c_bus_type的总线上 利用i2c_client的名称和id_table中的名称做匹配的
