@@ -23,9 +23,6 @@
 #define CMD_FAST_POWER_OFF (70)
 #define UMOUNT_USB (80)
 
-#define SUSPEND_PREPARE (83)
-#define RESUME_PREPARE (84)
-
 
 #define UBLOX_EXIST   (88)
 #define CMD_ACC_OFF_PROPERTY_SET (89)

@@ -78,8 +78,6 @@ typedef irqreturn_t (*pinterrupt_isr)(int irq, void *dev_id);
 #define VIDEO_SET_PAL (81)
 #define VIDEO_SET_NTSC (82)
 
-#define SUSPEND_PREPARE (83)
-#define RESUME_PREPARE (84)
 
 #define VIDEO_SHOW_BLACK (85)
 #define VIDEO_NORMAL_SHOW (86)
