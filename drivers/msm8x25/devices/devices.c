@@ -1077,6 +1077,10 @@ int dev_init(void)
     lidbg("FLY_V2 version\n");
 #endif
 
+#ifdef BOARD_V3
+    lidbg("FLY_V3 version\n");
+#endif
+
 
 #ifdef FLY_DEBUG
     lidbg("debug version\n");
