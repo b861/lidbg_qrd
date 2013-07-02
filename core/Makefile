@@ -31,8 +31,8 @@ include $(DBG_DRV_PATH)/$(DBG_SOC)/drv_$(DBG_SOC).mk
 include $(DBG_ROOT_PATH)/build_cfg.mk
 
 modules:
-	cp -u $(DBG_SYSTEM_DIR)/kernel/drivers/i2c/busses/i2c-gpio.c ./i2c-gpio.c
-	cp -u $(DBG_SYSTEM_DIR)/kernel/drivers/i2c/algos/i2c-algo-bit.c ./i2c-algo-bit.c
+	cp  $(DBG_SYSTEM_DIR)/kernel/drivers/i2c/busses/i2c-gpio.c ./i2c-gpio.c
+	cp  $(DBG_SYSTEM_DIR)/kernel/drivers/i2c/algos/i2c-algo-bit.c ./i2c-algo-bit.c
 	$(MAKE) -C $(KERNELDIR) M=$(PWD) ARCH=arm  CROSS_COMPILE=$(DBG_CROSS_COMPILE) modules
  
 modules_install:
