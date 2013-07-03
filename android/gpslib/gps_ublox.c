@@ -454,7 +454,7 @@ static void nmea_reader_parse_gsv(NmeaReader *r, NmeaTokenizer *t)
 	GpsSvInfo sv_info;
 	int i;
 
-	D("nmea_reader_parse_gsv");
+	D("[futengfei]===CPUHnmea_reader_parse_gsv");
 	Token tok_num = nmea_tokenizer_get(t,1);
 	Token tok_which = nmea_tokenizer_get(t,2);
 	//Token tok_sv_num = nmea_tokenizer_get(t,3);
@@ -813,7 +813,7 @@ gps_state_thread( void*  arg )
                 D("epoll_wait() unexpected error: %s", strerror(errno));
             continue;
         }
-        D("gps thread received %d events", nevents);
+        D("[futengfei]===CPUHgps thread received %d events", nevents);
         for (ne = 0; ne < nevents; ne++) {
             if ((events[ne].events & (EPOLLERR|EPOLLHUP)) != 0) {
                 D("EPOLLERR or EPOLLHUP after epoll_wait() !?");
@@ -935,7 +935,7 @@ Fail:
 /*****************************************************************/
 /*****************************************************************/
 
-
+static int ublox_gps_start();
 static int
 ublox_gps_init(GpsCallbacks* callbacks)
 {
@@ -946,7 +946,8 @@ ublox_gps_init(GpsCallbacks* callbacks)
 
     if (s->fd < 0)
         return -1;
-
+	D("[futengfei]================call[ublox_gps_start]\n");
+	ublox_gps_start();
     return 0;
 }
 
