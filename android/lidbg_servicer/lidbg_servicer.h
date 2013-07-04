@@ -4,6 +4,7 @@
 
 //#undef printf
 #define lidbg  LIDBG_PRINT
+#define DUMP_BUILD_TIME    do{ lidbg( "Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);}while(0)
 
 
 #define LIDBG_CALL(cmd,buf,ret_bytes) do{\

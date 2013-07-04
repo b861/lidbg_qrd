@@ -51,8 +51,6 @@
 #define VIDEO_SET_PAL (81)
 #define VIDEO_SET_NTSC (82)
 
-#define SUSPEND_PREPARE (83)
-#define RESUME_PREPARE (84)
 
 #define VIDEO_SHOW_BLACK (85)
 #define VIDEO_NORMAL_SHOW (86)
@@ -377,7 +375,7 @@ loop_read:
         case CMD_ACC_OFF_PROPERTY_SET :
         {
             lidbg("CMD_ACC_OFF_PROPERTY_SET\n");
-            system("echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
+            //system("echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
             property_set("fly.fastboot.accoff", "1");
             break;
 
@@ -404,7 +402,7 @@ loop_read:
         case UMOUNT_USB:
         {
 
-            system("umount /mnt/usbdisk");
+            //system("umount /mnt/usbdisk");
             break;
 
         }
@@ -420,7 +418,7 @@ loop_read:
                 set_power_state(1);
             //system("setprop fly.fastboot.accoff 0");
             property_set("fly.fastboot.accoff", "0");
-            system("echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
+            //system("echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
             //system("echo host > /mnt/debugfs/otg/mode");
             log_acc_times();
             lidbg("WAKEUP_KERNEL-\n");
@@ -468,7 +466,7 @@ loop_read:
             break;
 
         }
-
+#if 0
         case SUSPEND_PREPARE:
         {
             lidbg("SUSPEND_PREPARE\n");
@@ -483,6 +481,7 @@ loop_read:
             break;
 
         }
+#endif
         case VIDEO_SHOW_BLACK:
         {
             lidbg("<<<<< now Set Video show black.\n");
@@ -643,6 +642,9 @@ open_dev:
     system("insmod /flysystem/lib/out/gt80x_update.ko");
     system("insmod /system/lib/modules/out/gt80x_update.ko");
 #if 1
+    //chegnweidong
+    system("insmod /flysystem/lib/mdrv/flysemdriver.ko");
+    system("insmod /flysystem/lib/tcdriver/uuid.ko");
     //for flycar
     sleep(1);
     system("insmod /flysystem/lib/modules/FlyDebug.ko");
@@ -655,11 +657,6 @@ open_dev:
     system("insmod /flysystem/lib/modules/vendor_flyaudio.ko");
     //system("insmod /flysystem/lib/modules/FlyDR.ko");
     //system("insmod /flysystem/lib/modules/FlyAS.ko");
-
-    //chegnweidong
-    system("insmod /flysystem/lib/mdrv/flysemdriver.ko");
-    system("insmod /flysystem/lib/tcdriver/uuid.ko");
-
 
     sleep(1);
     system("chmod 0777 /dev/FlyDebug");
@@ -692,6 +689,7 @@ open_dev:
 #endif
 
     sleep(30);
+	DUMP_BUILD_TIME;
 
     ///////low mem kill
     if(0)
@@ -702,13 +700,13 @@ open_dev:
         //system("echo 3674,4969,6264,8312,9607,11444 > /sys/module/lowmemorykiller/parameters/minfree");//origin
         sleep(1);
         lidbg("set minfree\n");
-        system("echo 3674,4969,6264,6264,6264,6264 > /sys/module/lowmemorykiller/parameters/minfree");
-		//system("echo 6300,7866,9432,11480,13047,15697 > /sys/module/lowmemorykiller/parameters/minfree");
+       // system("echo 3674,4969,6264,6264,6264,6264 > /sys/module/lowmemorykiller/parameters/minfree");
+        system("echo 3674,4969,6264,8312,9607,11444 > /sys/module/lowmemorykiller/parameters/minfree");
     }
 
 
     ////////set cpu fre
-    if(1)
+    if(0)
     {
         system("chmod 777 /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
         //system("echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
@@ -731,8 +729,6 @@ open_dev:
         }
     }
 
-    lidbg("ui_init\n");
-    //ui_init();
 
     lidbg("enter while\n");
     while(1)
