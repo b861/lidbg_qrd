@@ -4,7 +4,6 @@
 #include "lidbg_enter.h"
 LIDBG_DEFINE;
 
-
 #define DEVICE_NAME "ubloxgps"
 
 struct gps_device
@@ -22,8 +21,8 @@ struct early_suspend early_suspend;
 u8 gps_data[GPS_BUF_SIZE];
 
 
-#define JNI_BUF_SIZE (512)
-u8 gps_data_for_jni[JNI_BUF_SIZE];
+#define HAL_BUF_SIZE (512)
+u8 gps_data_for_hal[HAL_BUF_SIZE];
 
 
 #define FIFO_SIZE (1024*4)
@@ -38,56 +37,17 @@ int thread_gps_server(void *data);
 
 bool debug_mask = 0;
 
-
-//global variable
 struct gps_device *dev;
-
+static struct task_struct *gps_server_task;
 
 int gps_open (struct inode *inode, struct file *filp)
 {
-    //do nothing
     filp->private_data = dev;
-    printk("[futengfei]==================gps_open\n");
-
-    return 0;          /* success */
+    printk("[ublox]gps_open\n");
+    return 0;
 }
 
 
-/*
- * Data management: read and write
- */
-#if 0
-ssize_t gps_read (struct file *filp, char __user *buf, size_t count, loff_t *f_pos)
-{
-    struct gps_device *dev = filp->private_data;
-    int ret;
-
-    //printk("[futengfei]==================gps_read %d,%d\n", count, avi_gps_data_hl);
-
-    if (avi_gps_data_hl == 0)
-    {
-        if(wait_event_interruptible(dev->queue, avi_gps_data_hl > 0))
-            return -ERESTARTSYS;
-    }
-
-    down(&dev->sem);
-    if (avi_gps_data_hl > 0)
-    {
-        copy_to_user(buf, gps_data, avi_gps_data_hl);
-        ret = avi_gps_data_hl;
-        avi_gps_data_hl = 0;
-    }
-    else
-    {
-        avi_gps_data_hl = 0;
-        ret =  -1;
-    }
-    up(&dev->sem);
-out:
-    printk("gps_read:%dreturn %d byte\n", count, ret);
-    return ret;
-}
-#else
 ssize_t gps_read (struct file *filp, char __user *buf, size_t count, loff_t *f_pos)
 {
     struct gps_device *dev = filp->private_data;
@@ -99,21 +59,20 @@ ssize_t gps_read (struct file *filp, char __user *buf, size_t count, loff_t *f_p
             return -ERESTARTSYS;
     }
 
-
     down(&dev->sem);
     fifo_len = kfifo_len(&gps_data_fifo);
 
-    if(fifo_len > JNI_BUF_SIZE)
-        read_len = JNI_BUF_SIZE;
+    if(fifo_len > HAL_BUF_SIZE)
+        read_len = HAL_BUF_SIZE;
     else
         read_len = fifo_len;
 
-    kfifo_out(&gps_data_fifo, &gps_data_for_jni, read_len);
+    kfifo_out(&gps_data_fifo, &gps_data_for_hal, read_len);
     up(&dev->sem);
 
-    copy_to_user(buf, gps_data_for_jni, read_len);
+    copy_to_user(buf, gps_data_for_hal, read_len);
 
-    if(fifo_len > JNI_BUF_SIZE)
+    if(fifo_len > HAL_BUF_SIZE)
         wake_up_interruptible(&dev->queue);
 
     if(debug_mask)
@@ -122,14 +81,12 @@ ssize_t gps_read (struct file *filp, char __user *buf, size_t count, loff_t *f_p
 }
 
 
-#endif
-
 ssize_t gps_write (struct file *filp, const char __user *buf, size_t count, loff_t *f_pos)
 {
     struct gps_device *dev = filp->private_data;
-    printk("[futengfei]==================gps_write\n");
+    printk("[ublox]gps_write\n");
 
-    printk("[futengfei] gps_data=>%s\n", gps_data);
+    printk("[ublox] gps_data=>%s\n", gps_data);
 
     return count;
 }
@@ -141,8 +98,6 @@ static unsigned int gps_poll(struct file *filp, struct poll_table_struct *wait)
 
     down(&dev->sem);
     poll_wait(filp, &dev->queue, wait);
-
-    //if (avi_gps_data_hl > 0 && avi_gps_data_hl <= 512)
 
     if(!kfifo_is_empty(&gps_data_fifo))
         mask |= POLLIN | POLLRDNORM;
@@ -179,60 +134,10 @@ void clean_ublox_buf(void)
 }
 
 
-
-#if 0
-int thread_gps_server(void *data)
-{
-    int i = 0;
-    //purpse to clear the ublox buffer
-again1:
-    SOC_I2C_Rec(1, 0x42, 0xfd, num_avi_gps_data, 2);
-    avi_gps_data_hl = (num_avi_gps_data[0] << 8) + num_avi_gps_data[1];
-    if (avi_gps_data_hl > 512)
-    {
-        avi_gps_data_hl = 512;
-        SOC_I2C_Rec_Simple(1, 0x42, gps_data, 512);
-        goto again1;
-    }
-    SOC_I2C_Rec_Simple(1, 0x42, gps_data, avi_gps_data_hl);
-    printk("[futengfei]================go to while(1)\n");
-    while(1)
-    {
-        // set_current_state(TASK_UNINTERRUPTIBLE);
-        //  if(kthread_should_stop()) break;
-        //my thread item
-
-        SOC_I2C_Rec(1, 0x42, 0xfd, num_avi_gps_data, 2);
-        down(&dev->sem);
-        avi_gps_data_hl = (num_avi_gps_data[0] << 8) + num_avi_gps_data[1];
-        printk("[futengfei]================avi_gps_data_hl[%d]\n", avi_gps_data_hl);
-
-        //printk("[futengfei] gps_data[%d]  REG:0xfd 0xfe =>0x%x 0x%x ]\n", avi_gps_data_hl, num_avi_gps_data[0], num_avi_gps_data[1]);
-        if (avi_gps_data_hl > 0 )
-        {
-            if (avi_gps_data_hl > 512)
-            {
-                SOC_I2C_Rec_Simple(1, 0x42, gps_data, 512);
-                up(&dev->sem);
-                continue;
-            }
-            SOC_I2C_Rec_Simple(1, 0x42, gps_data, avi_gps_data_hl);
-            wake_up_interruptible(&dev->queue);
-        }
-        up(&dev->sem);
-        msleep(500);
-
-    }
-    return 0;
-}
-
-#else
-
 int thread_gps_server(void *data)
 {
     int ret;
     DUMP_FUN_ENTER;
-    //clean_ublox_buf();
     while(1)
     {
         if(work_en == 0)
@@ -249,14 +154,13 @@ int thread_gps_server(void *data)
 
 
         if(debug_mask)
-            printk("[ublox]ublox_buf_len: ===========================%d\n", avi_gps_data_hl);
+            printk("[ublox]ublox_buf_len: %d\n", avi_gps_data_hl);
 
         if(avi_gps_data_hl > 0)
         {
             if(avi_gps_data_hl <= GPS_BUF_SIZE)
             {
                 ret = SOC_I2C_Rec_Simple(1, 0x42, gps_data, avi_gps_data_hl);
-                //printk("[ublox]%s\n",gps_data);
                 if (ret < 0)
                 {
                     printk("[ublox]get gps data err!!\n");
@@ -273,7 +177,7 @@ int thread_gps_server(void *data)
             }
             else
             {
-                printk("[ublox]err!!!!!!1\n");
+                printk("[ublox]data len err!!!!!!\n");
                 goto do_nothing;
             }
         }
@@ -296,16 +200,6 @@ do_nothing:
     DUMP_FUN_LEAVE;
     return 0;
 }
-
-
-
-#endif
-
-
-static int major_number = 0;
-static struct task_struct *gps_server_task;
-static struct class *class_install;
-
 
 
 int read_proc(char *buf, char **start, off_t offset, int count, int *eof, void *data )
@@ -364,16 +258,18 @@ int is_ublox_exist(void)
 static int  gps_probe(struct platform_device *pdev)
 {
     int ret, err, result;
+	static struct class *class_install;
+	static int major_number = 0;
 
     DUMP_FUN;
     if(is_ublox_exist() < 0)
     {
-        printk("[futengfei]=======================ublox.miss\n\n");
+        printk("[ublox]ublox.miss\n\n");
         return 0;
     }
     else
     {
-        printk("[futengfei]=======================ublox.exist\n\n");
+        printk("[ublox]ublox.exist\n\n");
     }
 
 #ifdef CONFIG_HAS_EARLYSUSPEND  //  enable/disable the gps thread 
@@ -386,15 +282,14 @@ static int  gps_probe(struct platform_device *pdev)
     //fake suspend
     SOC_Fake_Register_Early_Suspend(&early_suspend);
 
-
     create_new_proc_entry(); //cat /proc/ublox_dbg to enable gps_debug
 
-    //11creat cdev
+    // 1creat cdev
     dev = (struct gps_device *)kmalloc( sizeof(struct gps_device), GFP_KERNEL );
     if (dev == NULL)
     {
         ret = -ENOMEM;
-        printk("[futengfei]===========gps_server_driver_init:kmalloc err \n");
+        printk("[ublox]gps_server_driver_init:kmalloc err \n");
         return ret;
     }
 
@@ -408,26 +303,25 @@ static int  gps_probe(struct platform_device *pdev)
         result = alloc_chrdev_region(&dev_number, 0, 1, DEVICE_NAME);
         major_number = MAJOR(dev_number);
     }
-    printk("[futengfei]===========alloc_chrdev_region result:%d \n", result);
+    printk("[ublox]alloc_chrdev_region result:%d \n", result);
 
     cdev_init(&dev->cdev, &gps_fops);
     dev->cdev.owner = THIS_MODULE;
     dev->cdev.ops = &gps_fops;
     err = cdev_add(&dev->cdev, dev_number, 1);
     if (err)
-        printk( "[futengfei]===========Error cdev_add\n");
+        printk( "[ublox]Error cdev_add\n");
 
     //cread cdev node in /dev
     class_install = class_create(THIS_MODULE, "gpsclass");
     if(IS_ERR(class_install))
     {
-        printk( "[futengfei]=======class_create err\n");
+        printk( "[ublox]class_create err\n");
         return -1;
     }
     device_create(class_install, NULL, dev_number, NULL, "%s%d", DEVICE_NAME, 0);
 
-
-    //22creat thread
+    // 2creat thread
     gps_server_task = kthread_create(thread_gps_server, NULL, "fly_gps_server");
     if(IS_ERR(gps_server_task))
     {
@@ -435,24 +329,18 @@ static int  gps_probe(struct platform_device *pdev)
     }
     else wake_up_process(gps_server_task);
 
-
-    //33init all the tools
+    // 3init all the tools
     init_waitqueue_head(&dev->queue);
     sema_init(&dev->sem, 1);
     kfifo_init(&gps_data_fifo, fifo_buffer, FIFO_SIZE);
-
-
-
     return 0;
 }
-
 
 
 static int  gps_remove(struct platform_device *pdev)
 {
     return 0;
 }
-
 
 
 #ifdef CONFIG_PM
@@ -501,13 +389,11 @@ static struct platform_device lidbg_gps_device =
 
 static  int gps_server_driver_init(void)
 {
-
-    printk(" \n[futengfei] ==IN=================gps_server_driver_init==========500======0126=\n");
+    printk(" \n[ublox] ==IN==gps_server_driver_init==\n");
 
 #ifndef SOC_COMPILE
     LIDBG_GET;
 #endif
-
 
     platform_device_register(&lidbg_gps_device);
 
@@ -515,10 +401,9 @@ static  int gps_server_driver_init(void)
 
 }
 
-//void __exit
 static void gps_server_driver_exit(void)
 {
-    printk(" \n[futengfei] ==IN=================gps_server_driver_exit================0126=\n");
+    printk(" \n[ublox] ==IN==gps_server_driver_exit==\n");
 
     // misc_deregister(&misc);
     // kfree(dev);
@@ -528,4 +413,5 @@ module_init(gps_server_driver_init);
 module_exit(gps_server_driver_exit);
 
 MODULE_LICENSE("GPL");
+
 

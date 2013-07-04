@@ -8,7 +8,7 @@ PWD := $(shell pwd)
 CROSS_COMPILE = $(DBG_CROSS_COMPILE)
 CC = $(CROSS_COMPILE)gcc
 
-obj-m	+= lidbg_gps_driver.o
+obj-m	+= lidbg_gps.o
 
 EXTRA_CFLAGS := -I$(DBG_DRV_PATH)/inc  -I$(DBG_DRV_PATH)/$(DBG_SOC)/inc  -I$(DBG_DEV_PATH)/$(DBG_SOC)
 #include $(DBG_DRV_PATH)/$(DBG_SOC)/drv_$(DBG_SOC).mk
