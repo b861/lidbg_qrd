@@ -75,7 +75,12 @@ v3--适用于8x25q车机第一版硬件（pcb）
 
 ----------运行----------
 正式产品包已经默认加载lidbg相关模块，要是在原生系统想要运行lidbg模块，按下方法：
-在原生系统模块放到/system/lib/modules/out,产品系统中模块放到/flysystem/lib/out/
+在原生系统模块放到/system/lib/modules/out
+adb push ./lidbg_qrd/out /system/lib/modules/out
+
+产品系统中模块放到/flysystem/lib/out/
+adb push ./lidbg_qrd/out /flysystem/lib/out
+
 以下两种方法均可运行模块
 1.在终端用ismod指令直接加载模块
 见core/msm8x25/doc/echo_shell_msm8x25.txt文件insmod下  (正式产品是flysystem目录)
@@ -88,6 +93,10 @@ service lidbg_servicer /system/bin/logwrapper /system/bin/lidbg_servicer  (正�
     class late_start
     user root
     group root
+
+
+----------集成到系统镜像----------
+执行build/copy2img.sh后重新make编译系统即可
 
 
 ----------git使用注意事项----------
