@@ -71,6 +71,8 @@ extern unsigned int shutdown_flag_ts;
 #endif
 
 static struct workqueue_struct *goodix_wq;
+struct goodix_ts_data *ts;
+
 
 /********************************************
 *	管理当前手指状态的伪队列，对当前手指根据时间顺序排序
@@ -87,6 +89,48 @@ EXPORT_SYMBOL(i2c_connect_client);
 static void goodix_ts_early_suspend(struct early_suspend *h);
 static void goodix_ts_late_resume(struct early_suspend *h);
 #endif
+
+
+/*funciton: add node to open or close IRQ
+    date: 2013.7.3
+*/
+bool debug_on = 0;
+int open_proc(char *buf, char **start, off_t offset, int count, int *eof, void *data )
+{
+    printk("[wang]:=====GT801 enable_irq.\n");
+    enable_irq(ts->client->irq);
+	
+    return 1;
+}
+
+int close_proc(char *buf, char **start, off_t offset, int count, int *eof, void *data)
+{
+    printk("[wang]:=====GT801 disable_irq_nosync. \n");
+    disable_irq_nosync(ts->client->irq);
+
+    return 1;
+}
+
+int print_proc(char *buf, char **start, off_t offset, int count, int *eof, void *data)
+{
+    printk("[wang]:=====GT801 print on debug_log.\n");
+   debug_on = 1;
+
+    return 1;
+}
+
+
+void create_new_proc_entry()
+{
+    create_proc_read_entry("en_irq", 0, NULL, open_proc, NULL);
+    // /cat proc/en_irq
+    create_proc_read_entry("close_irq", 0, NULL, close_proc, NULL);
+    // cat proc/close_irq
+    create_proc_read_entry("print_on", 0, NULL, print_proc, NULL);
+    // cat proc/print_on
+    
+}
+
 
 
 /********************************************************
@@ -392,6 +436,9 @@ static void goodix_ts_work_func(struct work_struct *work)
     int count = 0;
     int check_sum = 0;
 
+    if(debug_on)
+	printk( "[wang]:====come into  goodix_ts_work_func!\n");
+
     struct goodix_ts_data *ts = container_of(work, struct goodix_ts_data, work);
     //printk( "come into goodix_ts_work_func!\n");
 
@@ -438,7 +485,12 @@ static void goodix_ts_work_func(struct work_struct *work)
 	printk("[wang]:=====I2C read point data error. Number:%d\n", ret);
         goto XFER_ERROR;
     }
-    //printk("=====WANG i2c_read_bytes success=======\n");
+
+    if(debug_on)
+    {
+	printk( "[wang]:====i2c_read point_data success!\n");
+	printk("[wang]:====point_data[1] is %d\n", point_data[1]);
+    }
     ts->bad_data = 0;
 
 
@@ -653,6 +705,10 @@ XFER_ERROR:
 NO_ACTION:
     if(ts->use_irq)
         enable_irq(ts->client->irq);
+    if(debug_on)
+    {
+	printk( "[wang]:====end of goodix_ts_work_func!\n");
+    }
 
 }
 
@@ -688,7 +744,8 @@ return：
 static irqreturn_t goodix_ts_irq_handler(int irq, void *dev_id)
 {
     struct goodix_ts_data *ts = dev_id;
-    //printk( "come into  goodix_ts_irq_handler!\n");
+    if(debug_on)
+		printk( "[wang]:====come into  goodix_ts_irq_handler!\n");
 
     disable_irq_nosync(ts->client->irq);
     queue_work(goodix_wq, &ts->work);
@@ -754,7 +811,6 @@ static int screen_x = 0;
 static int screen_y = 0;
 static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id *id)
 {
-    struct goodix_ts_data *ts;
     int ret = 0;
     int retry = 0;
     int count = 0;
@@ -973,6 +1029,9 @@ err_int_request_failed:
     goodix_read_version(ts);
     msleep(500);
 
+    create_new_proc_entry();  // cat /proc/en_irq  to enable IRQ , /proc/close_irq to disable IRQ,  cat proc/print_on to print log.
+
+
     /*power management*/
 #ifdef CONFIG_HAS_EARLYSUSPEND
     ts->early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN - 20;
@@ -1059,7 +1118,7 @@ static int goodix_ts_suspend(struct i2c_client *client, pm_message_t mesg)
 {
     int ret;
     struct goodix_ts_data *ts = i2c_get_clientdata(client);
-    printk("[futengfei]come into [%s]===========1024590=== =\n", __func__);
+    printk("[futengfei]come into [%s]======1024590=== add irq NODE====2013.07.03=\n", __func__);
 
     if (ts->use_irq)
     {
@@ -1083,7 +1142,7 @@ static int goodix_ts_resume(struct i2c_client *client)
     int ret = 0, retry = 0, init_err = 0;
     uint8_t GT811_check[6] = {0x55};
     struct goodix_ts_data *ts = i2c_get_clientdata(client);
-    printk("come into [%s]=====add print======= [futengfei]=\n", __func__);
+    printk("come into [%s]=====add irq NODE====2013.07.03=== [futengfei]=\n", __func__);
     for(retry = 0; retry < 5; retry++)
     {
         ret = goodix_init_panel(ts);
@@ -1131,6 +1190,7 @@ static int goodix_ts_resume(struct i2c_client *client)
 
     return 0;
 }
+
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
 static void goodix_ts_early_suspend(struct early_suspend *h)
@@ -1196,7 +1256,7 @@ static int __devinit goodix_ts_init(void)
 #endif
 
     is_ts_load = 1;
-    printk("================into Gt801.ko=1024590==============2013.6.24==\n");
+    printk("================into Gt801.ko=1024590==============2013.07.03==\n");
 
     /*configure shutdown pin,ensure this pin is low, make IC in working state*/
     SOC_IO_Output(0, 27, 0);
@@ -1212,8 +1272,10 @@ static int __devinit goodix_ts_init(void)
         return -ENOMEM;
 
     }
+
+	
     ret = i2c_add_driver(&goodix_ts_driver);
-    printk("====================out Gt801.ko===============2013.6.24==\n");
+    printk("====================out Gt801.ko===============2013.07.03==\n");
     return ret;
 }
 
