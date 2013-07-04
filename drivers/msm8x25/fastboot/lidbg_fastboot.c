@@ -4,7 +4,6 @@
 
 //#define SOC_COMPILE
 
-
 #ifdef SOC_COMPILE
 #include "lidbg.h"
 #include "fly_soc.h"
@@ -74,16 +73,7 @@ char *kill_exclude_process[] =
 {
     "init",
     "kthreadd",
-    //"ksoftirqd/0",
-    //"kworker/0:0",
-    //"kworker/u:0",
-    //"kworker/u:1",
-    //"kworker/0:1",
-    //"kworker/u:2",
-    //"kworker/0:2",
-    //"kworker/u:4",
 
-    //"migration/0",
     "khelper",
     "suspend_sys_syn",
     "suspend",
@@ -112,24 +102,6 @@ char *kill_exclude_process[] =
 
     "k_hsuart",
     "kgsl-3d0",
-    //"mtdblock0",
-    //"mtdblock1",
-    //"mtdblock2",
-    //"mtdblock3",
-    //"mtdblock4",
-    //"mtdblock5",
-    //"mtdblock6",
-    //"mtdblock7",
-    //"mtdblock8",
-    //"mtdblock9",
-    //"mtdblock10",
-    //"mtdblock11",
-    //"mtdblock12",
-    //"mtdblock13",
-    //"mtdblock14",
-    //"mtdblock15",
-    //"mtdblock16",
-    //"mtdblock17",
     "k_rmnet_mux_wor",
     "f_mtp",
     "file-storage",
@@ -144,21 +116,14 @@ char *kill_exclude_process[] =
     "dalrpc_rcv_DAL0",
     "iewq",
     "kinteractiveup",
-    //"irq/298-msm-sdc",
     "binder",
     "koemrapiclientc",
-    //"kworker/u:3",
     "krfcommd",
     "msm-cpufreq",
     "khsclntd",
     "rq_stats",
     "deferwq",
     "ueventd",
-    //"yaffs-bg-1",
-    //"flush-31:2",
-    //"yaffs-bg-1",
-    //"yaffs-bg-1",
-    //"loop7",
     "servicemanager",
     "vold",
     "netd",
@@ -198,11 +163,8 @@ char *kill_exclude_process[] =
     "sh",
     "mkdir",
     "chmod",
-    //"irq/304-ft5x06_",
-    //"system_server",
     "ATFWD-daemon",
     "mpdecision",
-    //"flush-31:5",
     "audmgr_rpc",
     "sleep",
     "boadcastreceiver",
@@ -215,17 +177,12 @@ char *kill_exclude_process[] =
     "fsck_msdos",
     "usb-storage",
     "sys.DeviceHealth",
-    //"system",
-
-
 
     "mm-qcamera-daemon",
     "com.android.qualcomm",
-    //"com.android.settings",
     "com.qualcomm.privinit",
     "com.qualcomm.restore.airplanemode",
-    // "com.qualcomm.cabl",
-    // "com.innopath.activecare",
+ 
     "com.android.systemui",
     // "com.android.launcher",
     "com.qualcomm.fastboot",
@@ -233,51 +190,26 @@ char *kill_exclude_process[] =
     "com.android.inputmethod.latin",
     //"com.qualcomm.stats",
 
-
-
-
     // name err
     "alljoyn-daemon",
     "oadcastreceiver",
     "mm-qcamera-daem",
     "putmethod.latin",
-    //"m.android.phone",
-    //"ndroid.launcher",
-    //"ndroid.settings",
-    "d.process.acore",
-    //"ndroid.qualcomm",
-    // "re.airplanemode",
-    "ndroid.systemui",
-    // "path.activecare",
-    // "m.qualcomm.cabl",
-    // "viders.calendar",
-    // ".qualcomm.stats",
-    // "alcomm.privinit",
-    "alcomm.fastboot",
-    // "android.smspush",
-    //"ndroid.contacts",
-    "d.process.media",
-    //"qrd.simcontacts",
-    //"droid.gallery3d",
-    // "ndroid.exchange",
-    //"m.android.email",
-    //"oid.voicedialer",
-    // "android.musicfx",
-    "droid.deskclock",
-    //"com.android.mms",
-    //"m.android.music",
-    //"omm.datamonitor",
-    //"oid.sysinfo.pro",
 
+    "d.process.acore",
+
+    "ndroid.systemui",
+
+    "alcomm.fastboot",
+
+    "d.process.media",
+
+    "droid.deskclock",
 
     //flyaudio
     "roid.flyaudioui",
     "goodix_wq",
-    //"io3.widget.time",
-    //"lyaudio.Weather",
-    //".flyaudio.media",
-    //"ndroid.calendar",
-    //"settings:remote",
+
     "kdmflush",
     "kcryptd",
     "kcryptd_io",
@@ -301,8 +233,6 @@ char *kill_exclude_process[] =
     "ndroid.launcher",
     "late_suspend_ta",
 
-
-
     //8803
     "cn.flyaudio.android.flyaudioservice",
     "cn.flyaudio.navigation",
@@ -317,13 +247,6 @@ char *kill_exclude_process[] =
     "GT80x Thread",
 
 
-    //kld
-    //"c2739.mainframe",
-
-    //"flush-31:6",
-    //"flush-31:3",
-    //"flush-31:12",
-    //"flush-7:7",
     "task_kill_exclude_end",
 
 };
@@ -445,8 +368,6 @@ char *kill_exclude_process_fake_suspend[] =
     "sys.DeviceHealth",
 
 
-
-
     "mm-qcamera-daemon",
     "com.android.qualcomm",
     "com.android.settings",
@@ -527,7 +448,6 @@ char *kill_exclude_process_fake_suspend[] =
 
     "re-initialized>",
 
-
     //8803
     "cn.flyaudio.android.flyaudioservice",
     "cn.flyaudio.navigation",
@@ -544,8 +464,6 @@ char *kill_exclude_process_fake_suspend[] =
     //kld
     "c2739.mainframe",
 
-
-    //"flush-7:7",
     "task_kill_exclude_end",
 
 };
@@ -557,7 +475,14 @@ int fastboot_task_kill_select(char *task_name)
     struct task_struct *selected = NULL;
     DUMP_FUN_ENTER;
 
-    //read_lock(&tasklist_lock);
+    if(ptasklist_lock != NULL)
+    {
+        lidbg("read_lock+\n");
+        read_lock(ptasklist_lock);
+    }
+    else
+        spin_lock_irqsave(&kill_lock, flags_kill);
+	
     for_each_process(p)
     {
         struct mm_struct *mm;
@@ -569,7 +494,6 @@ int fastboot_task_kill_select(char *task_name)
         task_unlock(p);
 
         selected = p;
-        //printk( "process %d (%s)\n",p->pid, p->comm);
 
         if(!strcmp(p->comm, task_name))
         {
@@ -581,19 +505,20 @@ int fastboot_task_kill_select(char *task_name)
                 return 1;
             }
         }
-        //read_unlock(&tasklist_lock);
     }
+	
+    if(ptasklist_lock != NULL)
+        read_unlock(ptasklist_lock);
+    else
+        spin_unlock_irqrestore(&kill_lock, flags_kill);
+
     DUMP_FUN_LEAVE;
     return 0;
 }
 
 
-
 static void fastboot_task_kill_exclude(char *exclude_process[])
 {
-
-
-    //struct task_struct *kill_process[32];
     char kill_process[32][64];
 
     struct task_struct *p;
@@ -603,13 +528,10 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
     bool safe_flag = 0;
     DUMP_FUN_ENTER;
 
-    //memset(kill_process, NULL, 100);
     lidbg("-----------------------\n");
-
 
     if(ptasklist_lock != NULL)
     {
-        //lidbg("ptasklist_lock = %x\n",ptasklist_lock);
         lidbg("read_lock+\n");
         read_lock(ptasklist_lock);
     }
@@ -622,12 +544,8 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
         mm = p->mm;
         sig = p->signal;
         task_unlock(p);
-
-        //lidbg( "process %d (%s)\n",p->pid, p->comm);
         safe_flag = 0;
         i = 0;
-
-
         if(
             (strncmp(p->comm, "flush", sizeof("flush") - 1) == 0) ||
             (strncmp(p->comm, "mtdblock", sizeof("mtdblock") - 1) == 0) ||
@@ -649,16 +567,11 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
             (strncmp(p->comm, "ksoftirqd", sizeof("ksoftirqd") - 1) == 0)
         )
         {
-
-            //lidbg("this safe,next1\n\n");
-
             continue;
-
         }
 
         while(1)
         {
-            //lidbg( "---(%s)\n",exclude_process[i]);
 
             if(!strcmp(exclude_process[i], "task_kill_exclude_end"))
                 break;
@@ -666,26 +579,18 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
             if(strcmp(p->comm, exclude_process[i]) == 0)
             {
                 safe_flag = 1;
-                //lidbg("this safe,next2\n\n");
                 break;
             }
 
             i++;
-
         }
 
         if(safe_flag == 0)
         {
             if (p)
             {
-                //kill_process[j] = p;
-
-
-                // lidbg("## find %s to kill ##\n", p->comm);
-
                 sprintf(kill_process[j++] , p->comm);
                 force_sig(SIGKILL, p);
-                //lidbg("+\n");
             }
         }
     }//for_each_process
@@ -695,9 +600,7 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
     else
         spin_unlock_irqrestore(&kill_lock, flags_kill);
 
-
     lidbg("-----------------------\n\n");
-
 
 
     if(j == 0)
@@ -705,24 +608,18 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
     else
         for(i = 0; i < j; i++)
         {
-            //if(kill_process[i])
             {
                 lidbg("## find %s to kill ##\n", kill_process[i]);
 
             }
         }
-    //msleep(10000);
     DUMP_FUN_LEAVE;
-
-
 
 }
 
 
 u32 GetTickCount(void)
-
 {
-
     struct timespec t_now;
 
     do_posix_clock_monotonic_gettime(&t_now);
@@ -730,14 +627,11 @@ u32 GetTickCount(void)
     monotonic_to_bootbased(&t_now);
 
     return t_now.tv_sec * 1000 + t_now.tv_nsec / 1000000;
-
 }
 
 
 int kill_proc(char *buf, char **start, off_t offset, int count, int *eof, void *data )
 {
-
-
     fastboot_task_kill_exclude(kill_exclude_process);
 
     return 1;
@@ -766,10 +660,7 @@ void create_new_proc_entry2()
 }
 
 
-
 #include "./fake_suspend.c"
-
-
 
 static int thread_pwroff(void *data)
 {
@@ -814,11 +705,8 @@ static int thread_pwroff(void *data)
 }
 
 
-
-
 static int thread_fastboot_pwroff(void *data)
 {
-
     while(1)
     {
 
@@ -975,9 +863,6 @@ static int thread_fastboot_resume(void *data)
 {
     while(1)
     {
-        // set_current_state(TASK_UNINTERRUPTIBLE);
-        // if(kthread_should_stop()) break;
-
         wait_for_completion(&resume_ok);
         DUMP_FUN_ENTER;
         msleep(3000);
@@ -995,14 +880,11 @@ static int thread_fastboot_resume(void *data)
 
 
 
-
-
 int fastboot_get_status(void)
 {
     return fb_data->suspend_pending;
 
 }
-
 
 void fastboot_set_status(LIDBG_FAST_PWROFF_STATUS status)
 {
@@ -1030,11 +912,6 @@ void fastboot_pwroff(void)
     }
     fastboot_set_status(PM_STATUS_READY_TO_PWROFF);
 
-#if 0 //ndef FLY_DEBUG
-    SOC_Key_Report(KEY_PAUSECD, KEY_PRESSED_RELEASED);
-    msleep(100);
-#endif
-
     // fastboot_task_kill_exclude(kill_exclude_process);
 
     SOC_Dev_Suspend_Prepare();
@@ -1043,10 +920,6 @@ void fastboot_pwroff(void)
     //    fastboot_task_kill_select("mediaserver");
     //    fastboot_task_kill_select("vold");
 
-
-    //fastboot_set_status(PM_STATUS_READY_TO_PWROFF);
-
-
 #if 1//def FLY_DEBUG
     msleep(1000);
 
@@ -1054,8 +927,6 @@ void fastboot_pwroff(void)
     SOC_Write_Servicer(CMD_ACC_OFF_PROPERTY_SET);
     SOC_Write_Servicer(CMD_FAST_POWER_OFF);
 #else
-    //SOC_Write_Servicer(SUSPEND_PREPARE);
-    //msleep(500);
     SOC_Key_Report(KEY_POWER, KEY_PRESSED_RELEASED);
 #endif
 
@@ -1063,9 +934,7 @@ void fastboot_pwroff(void)
 
     complete(&early_suspend_start);
 
-
 }
-
 
 
 bool fastboot_is_ignore_wakelock(void)
@@ -1083,15 +952,10 @@ void fastboot_go_pwroff(void)
 }
 
 
-
 #ifndef SOC_COMPILE
 
 static void set_func_tbl(void)
 {
-
-    //pwr
-
-
 #ifdef FLY_DEBUG
     plidbg_dev->soc_func_tbl.pfnSOC_PWR_ShutDown = fastboot_go_pwroff;
 #else
@@ -1102,7 +966,6 @@ static void set_func_tbl(void)
     plidbg_dev->soc_func_tbl.pfnSOC_PWR_Ignore_Wakelock = fastboot_is_ignore_wakelock;
     plidbg_dev->soc_func_tbl.pfnSOC_Fake_Register_Early_Suspend = fake_register_early_suspend;
 
-
 }
 #endif
 
@@ -1110,28 +973,17 @@ static void set_func_tbl(void)
 #ifdef CONFIG_HAS_EARLYSUSPEND
 static void fastboot_early_suspend(struct early_suspend *h)
 {
-
     lidbg("fastboot_early_suspend:%d\n", fb_data->resume_count);
     if(PM_STATUS_EARLY_SUSPEND_PENDING != fastboot_get_status())
     {
         lidbgerr("Call devices_early_suspend when suspend_pending != PM_STATUS_READY_TO_PWROFF\n");
 
     }
-#if 0 //for test
-
-    while(1)
-    {
-        fastboot_task_kill_exclude(kill_exclude_process);
-        msleep(1000);
-
-    }
-
-#endif
 
     fastboot_task_kill_exclude(kill_exclude_process);
     msleep(1000);
 
-#if 0
+#if 0 //for test
     ignore_wakelock = 1;
 #endif
     wake_unlock(&(fb_data->flywakelock));
@@ -1143,26 +995,6 @@ static void fastboot_early_suspend(struct early_suspend *h)
 static void fastboot_late_resume(struct early_suspend *h)
 {
     DUMP_FUN;
-    /*
-    #ifdef FLY_DEBUG
-        SOC_Key_Report(KEY_HOME, KEY_PRESSED_RELEASED);
-        SOC_Key_Report(KEY_BACK, KEY_PRESSED_RELEASED);
-        complete(&resume_ok);
-    #else
-    	SOC_Write_Servicer(WAKEUP_KERNEL);
-
-        fastboot_set_status(PM_STATUS_LATE_RESUME_OK);
-
-
-    #endif
-    */
-#ifdef FLY_DEBUG
-#ifndef RUN_FASTBOOT
-
-    //SOC_Write_Servicer(RESUME_PREPARE);
-
-#endif
-#endif
 
 #ifdef HAS_LOCK_RESUME
     if(wakelock_occur_count != 0)
@@ -1170,11 +1002,8 @@ static void fastboot_late_resume(struct early_suspend *h)
         lidbg("quick late resume\n");
         wake_lock(&(fb_data->flywakelock));
         fastboot_set_status(PM_STATUS_LATE_RESUME_OK);
-        //complete(&resume_ok);
     }
 #endif
-
-
 
 }
 #endif
@@ -1232,8 +1061,7 @@ static int  fastboot_probe(struct platform_device *pdev)
 
     }
     else wake_up_process(suspend_task);
-
-
+	
 
     INIT_COMPLETION(resume_ok);
     resume_task = kthread_create(thread_fastboot_resume, NULL, "pwroff_task");
@@ -1254,8 +1082,6 @@ static int  fastboot_probe(struct platform_device *pdev)
     }
     else wake_up_process(late_suspend_task);
 
-
-
     spin_lock_init(&kill_lock);
     create_new_proc_entry();
     create_new_proc_entry2();
@@ -1263,7 +1089,6 @@ static int  fastboot_probe(struct platform_device *pdev)
     create_proc_entry_fake_wakeup();
 
     DUMP_FUN_LEAVE;
-
 
     return 0;
 
@@ -1304,7 +1129,6 @@ static int fastboot_resume(struct device *dev)
 
     fastboot_set_status(PM_STATUS_RESUME_OK);
     wake_lock(&(fb_data->flywakelock));
-    //SOC_Write_Servicer(WAKEUP_KERNEL);
     complete(&resume_ok);
 
     ignore_wakelock = 0;
@@ -1339,10 +1163,6 @@ static struct platform_device lidbg_fastboot_device =
     .id                 = -1,
 };
 
-
-
-
-
 static int __init fastboot_init(void)
 {
     DUMP_BUILD_TIME;
@@ -1352,9 +1172,7 @@ static int __init fastboot_init(void)
     set_func_tbl();
 #endif
 
-
     platform_device_register(&lidbg_fastboot_device);
-
     return platform_driver_register(&fastboot_driver);
 }
 
@@ -1364,16 +1182,8 @@ static void __exit fastboot_exit(void)
 }
 
 
-
-
-
-
-
-
-
 module_init(fastboot_init);
 module_exit(fastboot_exit);
-
 
 
 MODULE_LICENSE("GPL");
