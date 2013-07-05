@@ -576,6 +576,12 @@ static int  lpc_probe(struct platform_device *pdev)
 {
 
     DUMP_FUN;
+	
+#ifndef FLY_DEBUG
+	lidbg("lpc_init do nothing\n");
+	return 0;
+#endif
+
 
     lidbg("lpc communication+\n");
     mcuFirstInit();
@@ -693,17 +699,14 @@ static int __init lpc_init(void)
 {
     DUMP_BUILD_TIME;
 
-
-#ifndef FLY_DEBUG
-    lidbg("lpc_init do nothing");
-#else
 #ifndef SOC_COMPILE
     LIDBG_GET;
     set_func_tbl();
 #endif
+
+
     platform_device_register(&lidbg_lpc);
     platform_driver_register(&lpc_driver);
-#endif
 
     return 0;
 }
