@@ -27,7 +27,23 @@
 
 LIDBG_DEFINE;
 #endif
-
+#include <linux/i2c.h>
+#include <linux/input.h>
+#include <linux/input/mt.h>
+#include <linux/slab.h>
+#include <linux/interrupt.h>
+#include <linux/delay.h>
+#include <linux/kernel.h>
+#include <linux/module.h>
+#include <linux/gpio.h>
+#include <linux/regulator/consumer.h>
+#include <linux/input/ft5x06_ts.h>
+#include <linux/firmware.h>
+#include <linux/syscalls.h>
+#include <asm/uaccess.h>
+#include <linux/wakelock.h>
+#include <mach/pmic.h>
+#include <linux/debugfs.h>
 #include <linux/kernel.h>
 #include <linux/device.h>
 #include <linux/hrtimer.h>
@@ -620,26 +636,33 @@ COORDINATE_POLL:
                 input_y = SCREEN_X - input_y;
                 input_x = SCREEN_Y - input_x;
             }
-            input_report_abs(ts->input_dev, ABS_MT_POSITION_X, input_y);
-            input_report_abs(ts->input_dev, ABS_MT_POSITION_Y, input_x);
-            input_report_abs(ts->input_dev, ABS_MT_TOUCH_MAJOR, 255);
-            //			input_report_abs(ts->input_dev, ABS_MT_WIDTH_MAJOR, input_w);
-            input_report_abs(ts->input_dev, ABS_MT_TRACKING_ID, track_id[count]);
-            input_mt_sync(ts->input_dev);
+#ifdef BOARD_V2
+		input_report_abs(ts->input_dev, ABS_MT_POSITION_X, input_y);
+		input_report_abs(ts->input_dev, ABS_MT_POSITION_Y, input_x);
+		input_report_abs(ts->input_dev, ABS_MT_TOUCH_MAJOR, 255);
+		input_report_abs(ts->input_dev, ABS_MT_TRACKING_ID, track_id[count]);
+		input_mt_sync(ts->input_dev);
+#endif
+
+#ifdef BOARD_V3
+		input_mt_slot(ts->input_dev, track_id[count]);
+		input_mt_report_slot_state(ts->input_dev, MT_TOOL_FINGER,1);
+		input_report_abs(ts->input_dev, ABS_MT_POSITION_X,input_y);
+		input_report_abs(ts->input_dev, ABS_MT_POSITION_Y,input_x);
+		input_report_abs(ts->input_dev, ABS_MT_TOUCH_MAJOR,255);
+#endif		
+
         }
-        //else
-        //	{
-        //	printk("finger err\n");
-        //	}
 
-
-
+#ifdef BOARD_V3
+		input_report_key(ts->input_dev, BTN_TOUCH, 1);
+		input_sync(ts->input_dev);
+#endif	
         FLAG_FOR_15S_OFF++;
         if(FLAG_FOR_15S_OFF >= 1000)
         {
             FLAG_FOR_15S_OFF = 1000;
         }
-        //printk("\nFLAG_FOR_15S_OFF===[%d]\n",FLAG_FOR_15S_OFF);
         if(FLAG_FOR_15S_OFF < 0)
         {
             printk("\nerr:FLAG_FOR_15S_OFF===[%d]\n", FLAG_FOR_15S_OFF);
@@ -657,8 +680,17 @@ COORDINATE_POLL:
     }
     else
     {
+#ifdef BOARD_V2    
         input_report_abs(ts->input_dev, ABS_MT_TOUCH_MAJOR, 0);
         input_mt_sync(ts->input_dev);
+#endif
+
+#ifdef BOARD_V3
+	input_mt_slot(ts->input_dev, 0);
+	input_mt_report_slot_state(ts->input_dev, MT_TOOL_FINGER,0);
+	input_report_key(ts->input_dev, BTN_TOUCH, 0);
+	input_sync(ts->input_dev);
+#endif
 
 #ifdef RECORVERY_MODULE
         {
@@ -668,16 +700,16 @@ COORDINATE_POLL:
 #endif
 
     }
-
+#ifdef BOARD_V2  
     input_report_key(ts->input_dev, BTN_TOUCH, finger > 0);
     input_sync(ts->input_dev);
+#endif
     touch_cnt++;
-    if (touch_cnt == 50)
+    if (touch_cnt == 60)
     {
         touch_cnt = 0;
-        printk("%d,%d[%d,%d]\n", xy_revert_en, sensor_id, input_y, input_x);
+        printk("Q%d,%d[%d,%d]\n", xy_revert_en, sensor_id, input_y, input_x);
     }
-
 
 #ifdef HAVE_TOUCH_KEY_REPORT
     if(finger == 1 && key_back_press == 0 && input_y > 784 && input_x < 13)
@@ -978,30 +1010,44 @@ err_gpio_request_failed:
         printk("goodix_ts_probe: Failed to allocate input device=======futengfei======\n");
         goto err_input_dev_alloc_failed;
     }
-
-    ts->input_dev->evbit[0] = BIT_MASK(EV_SYN) | BIT_MASK(EV_KEY) | BIT_MASK(EV_ABS) ;
-    ts->input_dev->keybit[BIT_WORD(BTN_TOUCH)] = BIT_MASK(BTN_TOUCH);
-    ts->input_dev->absbit[0] = BIT(ABS_X) | BIT(ABS_Y) | BIT(ABS_PRESSURE);
+	    screen_x = SCREEN_X;
+	    screen_y = SCREEN_Y;
+	    SOC_Display_Get_Res(&screen_x, &screen_y);
+#ifdef BOARD_V2
+	    ts->input_dev->evbit[0] = BIT_MASK(EV_SYN) | BIT_MASK(EV_KEY) | BIT_MASK(EV_ABS) ;
+	    ts->input_dev->keybit[BIT_WORD(BTN_TOUCH)] = BIT_MASK(BTN_TOUCH);
+	    ts->input_dev->absbit[0] = BIT(ABS_X) | BIT(ABS_Y) | BIT(ABS_PRESSURE);
 #ifdef HAVE_TOUCH_KEY
-    //#if 1
-    for(retry = 0; retry < MAX_KEY_NUM; retry++)
-    {
-        input_set_capability(ts->input_dev, EV_KEY, touch_key_array[retry]);
-    }
+	    //#if 1
+	    for(retry = 0; retry < MAX_KEY_NUM; retry++)
+	    {
+	        input_set_capability(ts->input_dev, EV_KEY, touch_key_array[retry]);
+	    }
 #endif
 
-    input_set_abs_params(ts->input_dev, ABS_X, 0,  ts->abs_x_max, 0, 0);
-    input_set_abs_params(ts->input_dev, ABS_Y, 0, ts->abs_y_max, 0, 0);
-    input_set_abs_params(ts->input_dev, ABS_PRESSURE, 0, 255, 0, 0);
-    screen_x = SCREEN_X;
-    screen_y = SCREEN_Y;
-    SOC_Display_Get_Res(&screen_x, &screen_y);
+	    input_set_abs_params(ts->input_dev, ABS_X, 0,  ts->abs_x_max, 0, 0);
+	    input_set_abs_params(ts->input_dev, ABS_Y, 0, ts->abs_y_max, 0, 0);
+	    input_set_abs_params(ts->input_dev, ABS_PRESSURE, 0, 255, 0, 0);
 #ifdef GOODIX_MULTI_TOUCH
-    input_set_abs_params(ts->input_dev, ABS_MT_WIDTH_MAJOR, 0, 255, 0, 0);
-    input_set_abs_params(ts->input_dev, ABS_MT_TOUCH_MAJOR, 0, 255, 0, 0);
-    input_set_abs_params(ts->input_dev, ABS_MT_POSITION_X, 0, screen_x  , 0, 0); //ts->abs_y_max
-    input_set_abs_params(ts->input_dev, ABS_MT_POSITION_Y, 0, screen_y , 0, 0);	//ts->abs_x_max
+	    input_set_abs_params(ts->input_dev, ABS_MT_WIDTH_MAJOR, 0, 255, 0, 0);
+	    input_set_abs_params(ts->input_dev, ABS_MT_TOUCH_MAJOR, 0, 255, 0, 0);
+	    input_set_abs_params(ts->input_dev, ABS_MT_POSITION_X, 0, screen_x  , 0, 0); //ts->abs_y_max
+	    input_set_abs_params(ts->input_dev, ABS_MT_POSITION_Y, 0, screen_y , 0, 0);	//ts->abs_x_max
 #endif
+#endif
+
+#ifdef BOARD_V3
+	__set_bit(EV_KEY, ts->input_dev->evbit);
+	__set_bit(EV_ABS, ts->input_dev->evbit);
+	__set_bit(BTN_TOUCH, ts->input_dev->keybit);
+	__set_bit(INPUT_PROP_DIRECT, ts->input_dev->propbit);
+	
+	input_mt_init_slots(ts->input_dev, 5);
+	input_set_abs_params(ts->input_dev, ABS_MT_POSITION_X, 0,screen_x, 0, 0);
+	input_set_abs_params(ts->input_dev, ABS_MT_POSITION_Y, 0,screen_y, 0, 0);
+	input_set_abs_params(ts->input_dev, ABS_MT_TOUCH_MAJOR, 0, 255, 0, 0);
+#endif
+
     printk("check your screen [%d*%d]=================futengfei===\n", screen_x, screen_y);
 
     sprintf(ts->phys, "input/ts");
