@@ -10,6 +10,10 @@ insmod /system/lib/modules/out/lidbg_soc_msm8x25.ko
 insmod /system/lib/modules/out/lidbg_io.ko
 insmod /system/lib/modules/out/lidbg_ad.ko
 insmod /system/lib/modules/out/lidbg_main.ko
+insmod /system/lib/modules/out/lidbg_fly_soc.ko
+insmod /system/lib/modules/out/lidbg_ts_probe.ko
+insmod /system/lib/modules/out/lidbg_ts_to_recov.ko
+insmod /system/lib/modules/out/gt811.ko
 
 
 ############key############
