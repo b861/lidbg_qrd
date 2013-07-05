@@ -52,6 +52,8 @@ LIDBG_DEFINE;
 /*****************************************************************/
 struct early_suspend early_suspend;
 bool work_en = 1;
+int version_check = 0;
+	
 #ifdef CONFIG_HAS_EARLYSUSPEND
 static void update_early_suspend(struct early_suspend *h)
 {
@@ -1045,6 +1047,7 @@ static int gt80x_check_firmware(void)
     else if(ret != VERSION_EQUAL)
         checksum_state = false;
 
+version_check = ret;
     //checksum_state = false; /*Only for debug*/
 error_go_out:
     goodix_ts_set(GOODIX_TS_CONTINUE);
@@ -1253,7 +1256,7 @@ static int gt80x_iap_kthread(void *data)
 
         ret = gt80x_check_firmware();
 #if 1
-        if(ret)
+        if(ret || (version_check==VERSION_LOWER) || (version_check==VERSION_HIGHER))
         {
 #ifdef DEBUG_TIME
             last_time = get_jiffies_64() - last_time + HZ / 2;
@@ -1387,6 +1390,8 @@ static int gt80x_iap_kthread(void *data)
         else
         {
             debug_printk(LEVEL_INFO, "GT80X Updating is interrupted. State:%d, return:%d.\n", kernel_state, ret);
+	    shutdown_flag_ts = 0;
+            shutdown_flag_probe = 0;
             kernel_state = STATE_FINASH;
         }
 

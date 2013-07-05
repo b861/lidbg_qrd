@@ -70,7 +70,7 @@ struct goodix_ts_data
 
 #define GT80X_VERSION_LENGTH	40
 
-#define MAX_IAP_RETRY			10
+#define MAX_IAP_RETRY			5 //10
 
 enum gt80x_driver_state
 {
