@@ -34,7 +34,7 @@ enum
 //#define DEBUG_POWER_UP
 
 
-#ifdef BOARD_V1
+#if defined(BOARD_V1)
 #define GPIO_USB_ID (34)
 #define GPIO_LED_FLY (33)
 
@@ -61,7 +61,7 @@ enum
 
 
 
-#ifdef BOARD_V2
+#if defined(BOARD_V2)
 #define GPIO_USB_ID (81)
 #define GPIO_LED_FLY (82)
 
@@ -82,19 +82,31 @@ enum
 #endif
 
 
-#ifdef BOARD_V3
-#define GPIO_USB_ID (81)
+
+#if defined(BOARD_V3)
+
+#define LPC_IO_SET(cmd,status)  do{\
+	u8 buff[] = {0x07, cmd, status};\
+	SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\
+}while(0)
+
+
+#define GPIO_USB_ID (83)
 #define GPIO_LED_FLY (82)
 
 //LCD_IDLE,  PANNE_PEN , PWM
-#define LCD_ON do{ }while(0)
-#define LCD_OFF do{ }while(0)
+#define LCD_ON  do{       LPC_IO_SET(0x0f, 1);\
+    					    SOC_IO_Output(0, GPIO_LCD3, 0);\
+				}while(0)
+#define LCD_OFF   do{       LPC_IO_SET(0x0f, 0);\
+    					    SOC_IO_Output(0, GPIO_LCD3, 1);\
+				}while(0)
 
-#define USB_HUB_ENABLE do{ }while(0)
-#define USB_HUB_DISABLE do{ }while(0)
+#define USB_HUB_ENABLE do{LPC_IO_SET(0x07, 1); }while(0)
+#define USB_HUB_DISABLE do{LPC_IO_SET(0x07, 0); }while(0)
 
-#define USB_SWITCH_DISCONNECT do{ }while(0)
-#define USB_SWITCH_CONNECT do{ }while(0)
+#define USB_SWITCH_DISCONNECT do{ LPC_IO_SET(0x11, 0);}while(0)
+#define USB_SWITCH_CONNECT do{LPC_IO_SET(0x11, 1); }while(0)
 
 #endif
 
@@ -144,7 +156,7 @@ enum
 #define GPIO_LCD1  (31)
 #define GPIO_LCD2  (96)
 //becauseof i can't catch the msg ,so i do with it on the way below;
-#ifdef FLY_DEBUG
+#if 1 //#ifdef  FLY_DEBUG
 #define GPIO_LCD3  (97)
 #else
 #define GPIO_LCD3  (82)
@@ -202,9 +214,13 @@ enum
 #endif
 
 
+#if (defined(BOARD_V1) || defined(BOARD_V2))
 #define PWR_EN_ON   do{SOC_IO_Config(GPIO_PWR_EN,GPIO_CFG_OUTPUT,GPIO_CFG_PULL_UP,GPIO_CFG_16MA);SOC_IO_Output(0, GPIO_PWR_EN, 1); }while(0)
 #define PWR_EN_OFF  do{SOC_IO_Config(GPIO_PWR_EN,GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_8MA);SOC_IO_Output(0, GPIO_PWR_EN, 0); }while(0)
-
+#else
+#define PWR_EN_ON  LPC_IO_SET(0x12,1)
+#define PWR_EN_OFF  LPC_IO_SET(0x12,0)
+#endif
 
 #define USB_ID_HIGH_DEV do{\
 								SOC_IO_Config(GPIO_USB_ID,GPIO_CFG_INPUT,GPIO_CFG_PULL_UP,GPIO_CFG_8MA);\
@@ -252,11 +268,5 @@ enum
 			USB_SWITCH_DISCONNECT;\
 			USB_ID_LOW_HOST;\
 	}while(0)
-
-
-
-
-
-
 
 #endif
