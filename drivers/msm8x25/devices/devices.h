@@ -94,12 +94,12 @@ enum
 #define GPIO_USB_ID (83)
 #define GPIO_LED_FLY (82)
 
-//LCD_IDLE,  PANNE_PEN , PWM
+// PANNE_PEN , RESET
 #define LCD_ON  do{       LPC_IO_SET(0x0f, 1);\
-    					    SOC_IO_Output(0, GPIO_LCD3, 0);\
+    					    SOC_IO_Output(0, GPIO_LCD3, 1);\
 				}while(0)
 #define LCD_OFF   do{       LPC_IO_SET(0x0f, 0);\
-    					    SOC_IO_Output(0, GPIO_LCD3, 1);\
+    					    SOC_IO_Output(0, GPIO_LCD3, 0);\
 				}while(0)
 
 #define USB_HUB_ENABLE do{LPC_IO_SET(0x07, 1); }while(0)
