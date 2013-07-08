@@ -20,6 +20,7 @@ obj-m	+= lidbg_common.o
 obj-m	+= lidbg_servicer.o
 obj-m	+= lidbg_msg.o
 obj-m	+= lidbg_main.o
+obj-m	+= lidbg_loader.o
 
 lidbg_common-objs :=  lidbg_cmn.o  lidbg_mem.o lidbg_display.o
 lidbg_main-objs := lidbg.o 
