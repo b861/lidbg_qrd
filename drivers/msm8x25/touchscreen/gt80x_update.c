@@ -707,6 +707,11 @@ static bool gt80x_write_ram_ctrl_code(void)
             if(retry_time == 0)
             {
                 debug_printk(LEVEL_INFO, "Write control-code failed. ret: %d, data: 0x%02x\n", ret, buffer[1]);
+
+		gt80x_stdpin_set_high();
+		msleep(10);
+		gt80x_stdpin_set_low();
+		msleep(30);
                 return false;
             }
         }
