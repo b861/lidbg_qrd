@@ -576,8 +576,11 @@ fail_class_create:
 }
 int lidbg_video_init(void)
 {
-  
+   
     printk("lidbg_video_init modules ismod\n");
+#ifdef	BOARD_V3
+	return 0;
+#endif
     LIDBG_GET;
     tw9912_index_init();
     set_func_tbl();

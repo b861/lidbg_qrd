@@ -11,6 +11,32 @@ void *global_lidbg_devp;
 
 #endif
 
+
+
+char *insmod_list[] =
+{
+    "lidbg_fastboot.ko",
+    "lidbg_lpc.ko",
+	"lidbg_soc_devices.ko",
+	"lidbg_to_bpmsg.ko",
+	"lidbg_gps.ko",
+	"lidbg_ts_to_recov.ko",
+	"lidbg_ts_probe.ko",
+	"gt80x_update.ko",
+	NULL,
+
+};
+
+char *insmod_path[] =
+{
+    "/system/lib/modules/out/",
+    "/flysystem/lib/out/",
+    NULL,
+};
+
+
+
+
 struct platform_device fly_soc_device =
 {
     .name			= "fly_socs",
@@ -21,7 +47,24 @@ struct platform_device fly_soc_device =
 
 static int fly_soc_probe(struct platform_device *pdev)
 {
+	int i,j;
+	char path[100];
     lidbg("fly_soc_probe\n");
+	for(i=0;insmod_path[i]!=NULL;i++)	
+	{
+		for(j=0;insmod_list[j]!=NULL;j++)
+		{
+			sprintf(path, "%s%s", insmod_path[i],insmod_list[j]);
+			lidbg("load %s\n",path);
+			share_cmn_launch_user("/system/bin/insmod", path );
+		}
+	}
+
+#if 1
+		share_cmn_launch_user("/system/bin/lidbg_servicer", NULL);
+		share_cmn_launch_user("/flysystem/bin/lidbg_servicer", NULL);
+#endif
+
     return 0;
 
 }

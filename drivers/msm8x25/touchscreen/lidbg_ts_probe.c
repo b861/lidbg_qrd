@@ -21,6 +21,7 @@ struct probe_device
     char chip_addr;
     unsigned int sub_addr;
     int cmd;
+	char *name;
 };
 
 struct probe_device ts_probe_dev[] =
@@ -31,8 +32,8 @@ struct probe_device ts_probe_dev[] =
     //  {0x38, 0x00, LOG_CAP_TS_FT5X06_SKU7}, //sku7
     //  {0x39, 0x00, LOG_CAP_TS_FT5X06}, //flycar
     //gt811
-    {0x5d, 0x00, LOG_CAP_TS_GT811}, //flycar
-    {0x55, 0x00, LOG_CAP_TS_GT801}, //flycar
+    {0x5d, 0x00, LOG_CAP_TS_GT811,"gt811.ko"}, //flycar
+    {0x55, 0x00, LOG_CAP_TS_GT801,"gt801.ko"}, //flycar
 };
 
 bool scan_on = 1;
@@ -44,12 +45,28 @@ unsigned int shutdown_flag_ts = 0;
 unsigned int shutdown_flag_probe = 0;
 unsigned int shutdown_flag_gt811 = 0;
 
+void launch_user( char bin_path[], char argv1[],char argv2[])
+{
+    char *argv[] = { bin_path, argv1, argv2, NULL };
+    static char *envp[] = { "HOME=/", "TERM=linux", "PATH=/system/bin", NULL };
+    int ret;
+    ret = call_usermodehelper(bin_path, argv, envp, UMH_WAIT_EXEC);
+
+  if (ret < 0)
+        lidbg("lunch fail!\n");
+    else
+        lidbg("lunch  success!\n");
+
+}
+
+
 void ts_scan(void)
 {
     static unsigned int loop = 0;
     int i;
     int32_t rc1, rc2;
     u8 tmp;
+	char path[100];
     PWR_EN_ON_TS;
 
     for(i = 0; i < SIZE_OF_ARRAY(ts_probe_dev); i++)
@@ -69,6 +86,11 @@ void ts_scan(void)
             SOC_I2C_Rec(TS_I2C_BUS, 0x12, 0x00, &tmp, 1 ); //let i2c bus release
             //SOC_Capts_Insmod(ts_probe_dev[i].cmd);
             SOC_Write_Servicer(ts_probe_dev[i].cmd);
+			sprintf(path, "/system/lib/modules/out/%s", ts_probe_dev[i].name);
+			launch_user("/system/bin/insmod", path ,NULL);
+			
+			sprintf(path, "/flysystem/lib/out/%s", ts_probe_dev[i].name);
+			launch_user("/system/bin/insmod", path ,NULL);
             break;
         }
     }
