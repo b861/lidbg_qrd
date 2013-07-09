@@ -31,12 +31,21 @@ struct TC358_register_struct_read
 #define DEBUG_TC358
 //#define tc358746_debug
 //#endif
+#define TC358746XBG_RESET 33
+
+#ifdef BOARD_V2
 
 #ifdef BOARD_V1
 #define TC358746XBG_RESET 28
 #else//V2 V3
 #define TC358746XBG_RESET 33
 #endif
+
+#elif BOARD_V3
+#define TC358746XBG_RESET 33
+#endif
+
+
 #define register_value_width_32 32
 #define register_value_width_16 16
 #define TC358746_I2C_ChipAdd 0x07
