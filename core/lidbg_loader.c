@@ -2,6 +2,30 @@
 
 struct task_struct *loader_task;
 
+char *insmod_list[] =
+{
+    "lidbg_share.ko",
+    "lidbg_msg.ko",
+	"lidbg_common.ko",
+	"lidbg_servicer.ko",
+	"lidbg_touch.ko",
+	"lidbg_key.ko",
+	"lidbg_i2c.ko",
+	"lidbg_soc_msm8x25.ko",
+	"lidbg_io.ko",
+	"lidbg_ad.ko",
+	"lidbg_main.ko",
+	"lidbg_fly_soc.ko",
+	NULL,
+
+};
+
+char *insmod_path[] =
+{
+    "/system/lib/modules/out/",
+    "/flysystem/lib/out/",
+    NULL,
+};
 
 void launch_user( char bin_path[], char argv1[],char argv2[])
 {
@@ -13,7 +37,7 @@ void launch_user( char bin_path[], char argv1[],char argv2[])
   if (ret < 0)
         lidbg("lunch fail!\n");
     else
-        lidbg("lunch  success!\n");
+        lidbg("lunch success!\n");
 
 }
 
@@ -21,69 +45,27 @@ void launch_user( char bin_path[], char argv1[],char argv2[])
 
 int thread_loader(void *data)
 {
+	int i,j;
+	char path[100];
 	DUMP_FUN_ENTER;
-	
-	launch_user("/system/bin/lidbg_servicer", NULL,NULL);
-	launch_user("/flysystem/bin/lidbg_servicer", NULL,NULL);
-	return 1;
+
+
 	//msleep(100);
-	launch_user("/system/bin/insmod", "/system/lib/modules/out/lidbg_share.ko",NULL);
-	launch_user("/system/bin/insmod", "/system/lib/modules/out/lidbg_msg.ko",NULL);
-	launch_user("/system/bin/insmod", "/system/lib/modules/out/lidbg_common.ko",NULL);
-	launch_user("/system/bin/insmod", "/system/lib/modules/out/lidbg_servicer.ko",NULL);
-	launch_user("/system/bin/insmod", "/system/lib/modules/out/lidbg_touch.ko",NULL);
-	launch_user("/system/bin/insmod", "/system/lib/modules/out/lidbg_key.ko",NULL);
-	launch_user("/system/bin/insmod", "/system/lib/modules/out/lidbg_i2c.ko",NULL);
-	launch_user("/system/bin/insmod", "/system/lib/modules/out/lidbg_soc_msm8x25.ko",NULL);
-	launch_user("/system/bin/insmod", "/system/lib/modules/out/lidbg_io.ko",NULL);
-	launch_user("/system/bin/insmod", "/system/lib/modules/out/lidbg_ad.ko",NULL);
-	launch_user("/system/bin/insmod", "/system/lib/modules/out/lidbg_main.ko",NULL);
-	launch_user("/system/bin/insmod", "/system/lib/modules/out/lidbg_fly_soc.ko",NULL);
-
-
-
-	launch_user("/system/bin/insmod", "/flysystem/lib/out/lidbg_share.ko",NULL);
-	launch_user("/system/bin/insmod", "/flysystem/lib/out/lidbg_msg.ko",NULL);
-	launch_user("/system/bin/insmod", "/flysystem/lib/out/lidbg_common.ko",NULL);
-	launch_user("/system/bin/insmod", "/flysystem/lib/out/lidbg_servicer.ko",NULL);
-	launch_user("/system/bin/insmod", "/flysystem/lib/out/lidbg_touch.ko",NULL);
-	launch_user("/system/bin/insmod", "/flysystem/lib/out/lidbg_key.ko",NULL);
-	launch_user("/system/bin/insmod", "/flysystem/lib/out/lidbg_i2c.ko",NULL);
-	launch_user("/system/bin/insmod", "/flysystem/lib/out/lidbg_soc_msm8x25.ko",NULL);
-	launch_user("/system/bin/insmod", "/flysystem/lib/out/lidbg_io.ko",NULL);
-	launch_user("/system/bin/insmod", "/flysystem/lib/out/lidbg_ad.ko",NULL);
-	launch_user("/system/bin/insmod", "/flysystem/lib/out/lidbg_main.ko",NULL);
-	launch_user("/system/bin/insmod", "/flysystem/lib/out/lidbg_fly_soc.ko",NULL);
-
-
-
-	launch_user("/system/bin/insmod", "/system/lib/modules/out/lidbg_fastboot.ko",NULL);
-	launch_user("/system/bin/insmod", "/system/lib/modules/out/lidbg_lpc.ko",NULL);
-	launch_user("/system/bin/insmod", "/system/lib/modules/out/lidbg_soc_devices.ko",NULL);
-	launch_user("/system/bin/insmod", "/system/lib/modules/out/lidbg_videoin.ko",NULL);
-	launch_user("/system/bin/insmod", "/system/lib/modules/out/lidbg_to_bpmsg.ko",NULL);
-	launch_user("/system/bin/insmod", "/system/lib/modules/out/lidbg_gps.ko",NULL);
-	launch_user("/system/bin/insmod", "/system/lib/modules/out/lidbg_ts_to_recov.ko",NULL);
-	launch_user("/system/bin/insmod", "/system/lib/modules/out/lidbg_ts_probe.ko",NULL);
-
-	launch_user("/system/bin/insmod", "/flysystem/lib/out/lidbg_fastboot.ko",NULL);
-	launch_user("/system/bin/insmod", "/flysystem/lib/out/lidbg_lpc.ko",NULL);
-	launch_user("/system/bin/insmod", "/flysystem/lib/out/lidbg_soc_devices.ko",NULL);
-	launch_user("/system/bin/insmod", "/flysystem/lib/out/lidbg_videoin.ko",NULL);
-	launch_user("/system/bin/insmod", "/flysystem/lib/out/lidbg_to_bpmsg.ko",NULL);
-	launch_user("/system/bin/insmod", "/flysystem/lib/out/lidbg_gps.ko",NULL);
-	launch_user("/system/bin/insmod", "/flysystem/lib/out/lidbg_ts_to_recov.ko",NULL);
-	launch_user("/system/bin/insmod", "/flysystem/lib/out/lidbg_ts_probe.ko",NULL);
-
-
-
+	for(i=0;insmod_path[i]!=NULL;i++)	
+	{
+		for(j=0;insmod_list[j]!=NULL;j++)
+		{
+			sprintf(path, "%s%s", insmod_path[i],insmod_list[j]);
+			lidbg("load %s\n",path);
+			launch_user("/system/bin/insmod", path ,NULL);
+		}
+	}
+	
 	msleep(1000);	
 	launch_user("/system/bin/chmod", "0777", "/dev/lidbg_share");
-
+	launch_user("/system/bin/chmod", "0777", "/dev/mlidbg0");
 
 	DUMP_FUN_LEAVE;
-
-
 
 }
 
