@@ -6,6 +6,9 @@ LIDBG_DEFINE;
 
 #define DEVICE_NAME "ubloxgps"
 
+#define GPS_START	_IO('g', 1)
+#define GPS_STOP	_IO('g', 2)
+
 struct gps_device
 {
     char *name;
@@ -14,6 +17,8 @@ struct gps_device
     struct semaphore sem;
     struct cdev cdev;
 };
+
+static int started = 0;
 
 struct early_suspend early_suspend;
 
@@ -52,6 +57,11 @@ ssize_t gps_read (struct file *filp, char __user *buf, size_t count, loff_t *f_p
 {
     struct gps_device *dev = filp->private_data;
     int read_len, fifo_len;
+
+    if (!started) {
+	printk("[ublox] gps stoped but read");
+	return -1;
+    }
 
     if(kfifo_is_empty(&gps_data_fifo))
     {
@@ -96,14 +106,40 @@ static unsigned int gps_poll(struct file *filp, struct poll_table_struct *wait)
     struct gps_device *dev = filp->private_data;
     unsigned int mask = 0;
 
-    down(&dev->sem);
+ //   printk("ublox:gps_poll called");
+
+
     poll_wait(filp, &dev->queue, wait);
+    if (!started) {
+//	printk("ublox:gps not start but poll");
+	return 0;
+    }
 
-    if(!kfifo_is_empty(&gps_data_fifo))
+    down(&dev->sem);
+    if(!kfifo_is_empty(&gps_data_fifo)) {
         mask |= POLLIN | POLLRDNORM;
-
+//	printk("ublox:gps poll have data");
+    }
     up(&dev->sem);
     return mask;
+}
+
+static long gps_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+{
+	switch(cmd) {
+	case GPS_START:
+		printk("[ublox]:ioctl GPS START");
+		started = 1;
+		break;
+	case GPS_STOP:
+		printk("[ublox]:ioctl GPS STOP");
+		started = 0;
+		break;
+	default:
+		return -ENOTTY;
+	}
+	
+	return 0;
 }
 
 static  struct file_operations gps_fops =
@@ -113,6 +149,7 @@ static  struct file_operations gps_fops =
     .write = gps_write,
     .poll = gps_poll,
     .open = gps_open,
+    .unlocked_ioctl = gps_ioctl,
 };
 
 
@@ -186,7 +223,11 @@ int thread_gps_server(void *data)
             goto do_nothing;
 
         }
-        wake_up_interruptible(&dev->queue);
+	if (started) {
+		if (debug_mask)
+			printk("ublox:have data need read\n");
+        	wake_up_interruptible(&dev->queue);
+	}
         if(debug_mask)
         {
             gps_data[avi_gps_data_hl ] = '\0';

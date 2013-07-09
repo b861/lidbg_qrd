@@ -27,6 +27,7 @@
 #include <pthread.h>
 #include <fcntl.h>
 #include <sys/epoll.h>
+#include <sys/ioctl.h>
 #include <math.h>
 #include <time.h>
 
@@ -35,6 +36,7 @@
 #define  LOG_TAG  "gps_ublox"
 #include <cutils/log.h>
 */
+
 #include <cutils/sockets.h>
 
 #include <android/log.h>
@@ -44,13 +46,16 @@
 
 #define  GPS_DEV_NAME  "/dev/ubloxgps0"
 
-#define  GPS_DEBUG  1
+#define  GPS_DEBUG  0
 
 #if GPS_DEBUG
 #  define  D(...)   LOGD(__VA_ARGS__)
 #else
 #  define  D(...)   ((void)0)
 #endif
+
+#define GPS_START       _IO('g', 1)
+#define GPS_STOP        _IO('g', 2)
 
 /*****************************************************************/
 /*****************************************************************/
@@ -790,7 +795,7 @@ gps_state_thread( void*  arg )
     GpsState*   state = (GpsState*) arg;
     NmeaReader  reader[1];
     int         epoll_fd   = epoll_create(2);
-    int         started    = 0;
+//    int         started    = 0;
     int         gps_fd     = state->fd;
     int         control_fd = state->control[1];
 
@@ -807,7 +812,7 @@ gps_state_thread( void*  arg )
         struct epoll_event   events[2];
         int                  ne, nevents;
 
-        nevents = epoll_wait( epoll_fd, events, 2, 100 );
+        nevents = epoll_wait( epoll_fd, events, 2, 200 );
         if (nevents < 0) {
             if (errno != EINTR)
                 D("epoll_wait() unexpected error: %s", strerror(errno));
@@ -836,9 +841,9 @@ gps_state_thread( void*  arg )
                         return;
                     }
                     else if (cmd == CMD_START) {
-                        if (!started) {
+                        /*if (!started)*/ {
                             D("gps thread starting  location_cb=%p", state->callbacks.location_cb);
-                            started = 1;
+                         //   started = 1;
                             nmea_reader_set_callback( reader, state->callbacks.location_cb );
 				reader->callbacks = state->callbacks;
 				reader->status.size = sizeof(GpsStatus);
@@ -847,17 +852,26 @@ gps_state_thread( void*  arg )
                         }
                     }
                     else if (cmd == CMD_STOP) {
-                        if (started) {
+                      /*  if (started)*/ {
                             D("gps thread stopping");
-                            started = 0;
+                           // started = 0;
 				reader->status.size = sizeof(GpsStatus);
-				reader->status.status = GPS_STATUS_ENGINE_ON;
+				//reader->status.status = GPS_STATUS_ENGINE_ON;
+				reader->status.status = GPS_STATUS_ENGINE_OFF;
 				reader->callbacks.status_cb(&reader->status);
+				reader->sv.size = sizeof(GpsSvStatus);
+				reader->sv.num_svs = 0;
+				reader->sv.ephemeris_mask = 0;
+				reader->sv.almanac_mask = 0;
+				reader->sv.used_in_fix_mask = 0;
+				reader->fix_mask = 0;
+				reader->callbacks.sv_status_cb(&reader->sv);
+
                             nmea_reader_set_callback( reader, NULL );
                         }
                     }
                 }
-                else if ((fd == gps_fd) && started)
+                else if ((fd == gps_fd) /*&& started*/)
                 {
                     char  buff[512];
                     D("gps fd event");
@@ -868,8 +882,9 @@ gps_state_thread( void*  arg )
                         if (ret < 0) {
                             if (errno == EINTR)
                                 continue;
-                            if (errno != EWOULDBLOCK)
+                            if (errno != EWOULDBLOCK) {
                                 D("error while reading from gps daemon socket: %s:", strerror(errno));
+			    }
                             break;
                         }
                         D("received %d bytes: %.*s", ret, ret, buff);
@@ -946,8 +961,7 @@ ublox_gps_init(GpsCallbacks* callbacks)
 
     if (s->fd < 0)
         return -1;
-	D("[futengfei]================call[ublox_gps_start]\n");
-	ublox_gps_start();
+
     return 0;
 }
 
@@ -973,6 +987,7 @@ ublox_gps_start()
 
     D("%s: called", __FUNCTION__);
     gps_state_start(s);
+    ioctl(s->fd, GPS_START);
     return 0;
 }
 
@@ -988,7 +1003,9 @@ ublox_gps_stop()
     }
 
     D("%s: called", __FUNCTION__);
+
     gps_state_stop(s);
+    ioctl(s->fd, GPS_STOP);
     return 0;
 }
 
