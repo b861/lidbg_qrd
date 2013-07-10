@@ -290,7 +290,7 @@ loop_read:
             break;
 
         }
-#if 0
+#ifdef BOARD_V2
         //cap_ts
         case LOG_CAP_TS_GT811:
         case LOG_CAP_TS_FT5X06_SKU7:
@@ -349,9 +349,9 @@ loop_read:
             //system("dmesg > /sdcard/log_cap_ts_dmesg.txt");
 
             //wait ts load ,for ts revert
-            sleep(10);
+            sleep(3);
             system("chmod 777 /dev/tsnod0");
-			if(1)
+	if(1)
             {
                 char *ts_tdev_node = "/dev/tsnod0";
                 ts_nod_fd = open(ts_tdev_node, O_RDWR);
@@ -374,6 +374,10 @@ loop_read:
             }
             break;
         }//over
+#else
+//v3+ .wait for add.
+
+ 
 #endif
         case CMD_ACC_OFF_PROPERTY_SET :
         {
@@ -553,7 +557,7 @@ int main(int argc , char **argv)
    //for 8x25q
     //system("chmod 0644 /system/lib/modules/out/*.ko");
     //system("chmod 0644 /flysystem/lib/out/*.ko");
-#if 0
+#ifdef BOARD_V2
     //sleep(5);
     system("insmod /system/lib/modules/out/lidbg_share.ko");
     system("insmod /system/lib/modules/out/lidbg_ts_to_recov.ko");
@@ -604,6 +608,9 @@ int main(int argc , char **argv)
 	system("insmod /flysystem/lib/out/lidbg_gps_driver.ko");
 
     sleep(1);
+#else
+
+
 #endif
     system("chmod 0777 /dev/lidbg_share");
     system("chmod 0777 /dev/mlidbg0");
@@ -646,12 +653,13 @@ open_dev:
         if(servicer_handler(0) == SERVICER_DONOTHING)
             break;
     }
-#if 0
-
+#ifdef BOARD_V2
     system("insmod /system/lib/modules/out/lidbg_ts_probe.ko");
     system("insmod /flysystem/lib/out/lidbg_ts_probe.ko");
     system("insmod /flysystem/lib/out/gt80x_update.ko");
     system("insmod /system/lib/modules/out/gt80x_update.ko");
+#else
+
 #endif
 	
 #if 1

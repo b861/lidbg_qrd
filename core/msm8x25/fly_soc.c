@@ -13,6 +13,9 @@ void *global_lidbg_devp;
 
 
 
+#ifdef BOARD_V2
+
+#else
 char *insmod_list[] =
 {
     "lidbg_fastboot.ko",
@@ -33,7 +36,7 @@ char *insmod_path[] =
     "/flysystem/lib/out/",
     NULL,
 };
-
+#endif
 
 
 
@@ -47,9 +50,12 @@ struct platform_device fly_soc_device =
 
 static int fly_soc_probe(struct platform_device *pdev)
 {
+#ifdef BOARD_V2
+   	 lidbg("fly_soc_probe.BOARD_V2\n");
+#else
 	int i,j;
 	char path[100];
-    lidbg("fly_soc_probe\n");
+    lidbg("fly_soc_probe.BOARD_V3+\n");
 	for(i=0;insmod_path[i]!=NULL;i++)	
 	{
 		for(j=0;insmod_list[j]!=NULL;j++)
@@ -65,6 +71,7 @@ static int fly_soc_probe(struct platform_device *pdev)
 		share_cmn_launch_user("/flysystem/bin/lidbg_servicer", NULL);
 #endif
 
+#endif
     return 0;
 
 }

@@ -8,14 +8,17 @@ source ./env_entry.sh
 	case "$1" in
 	v1) 	
 	echo "EXTRA_CFLAGS += -DBOARD_V1" > $DBG_ROOT_PATH/build_cfg.mk
+	echo "LOCAL_CFLAGS += -DBOARD_V1" >> $DBG_ROOT_PATH/build_cfg.mk
 	echo "v1";;
 
 	v2) 
 	echo "EXTRA_CFLAGS += -DBOARD_V2" > $DBG_ROOT_PATH/build_cfg.mk
+	echo "LOCAL_CFLAGS += -DBOARD_V2" >> $DBG_ROOT_PATH/build_cfg.mk
 	echo "v2";;
 
 	v3) 
 	echo "EXTRA_CFLAGS += -DBOARD_V3" > $DBG_ROOT_PATH/build_cfg.mk
+	echo "LOCAL_CFLAGS += -DBOARD_V3" >> $DBG_ROOT_PATH/build_cfg.mk
 	echo "v3";;
 
 	*)
