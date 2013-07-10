@@ -7,16 +7,32 @@ unsigned int   soc_pwm_set(int pwm_id, int duty_ns, int period_ns)
     return 1;
 }
 
+void soc_bl_init(void)
+{
+	pmapp_disp_backlight_init();
+}
+
 unsigned int   soc_bl_set(u32 bl_level)
 {
     if(1)//flycar
     {
+#ifdef BOARD_V3
+	int err;
+
+	err = pmapp_disp_backlight_set_brightness(bl_level);
+	if(err)
+	{
+	     printk("Backlight set brightness failed !\n");
+	     return 0;
+	}
+#else
         if (p_fly_smem == NULL)
         {
             printk( "p_fly_smem == NULL\n");
             return 0;
         }
         p_fly_smem->bl_value = (int)bl_level;
+#endif
     }
     else//sku7
     {
