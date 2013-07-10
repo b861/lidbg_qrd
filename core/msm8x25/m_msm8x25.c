@@ -67,10 +67,7 @@ int msm8x25_init(void)
 
 #endif
 
-#ifdef BOARD_V3
     soc_bl_init();
-#endif
-
     soc_io_init();
     soc_ad_init();
 	
