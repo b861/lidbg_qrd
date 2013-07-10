@@ -9,7 +9,7 @@ git clone qcom_share@192.168.9.222:/home/qcom_share/lidbg_qrd
 主要包含应用层（android），基础驱动模块（core），具体工作模块（drivers），编译脚本（build），输出目录（out/out_release）。
 
 *应用层（android）
-android/lidbg_servicer ：启动自动运行，用于加载模块，接收内核模块的消息作相应处理，在内核层不方便实现的功能在此处理。
+android/lidbg_servicer ：用于加载第三方模块，接收内核模块的消息作相应处理，在内核层不方便实现的功能在此处理。
 android/uart_send_rec_test：用于串口稳定性测试。
 android/usb_sd_mount_test：用于U盘和SD卡插拔稳定性测试。
 android/out：编译后自动生成， 应用层生成的目标文件。
@@ -74,19 +74,20 @@ v3--适用于8x25q车机第一版硬件（pcb）
 
 
 ----------运行----------
-正式产品包已经默认加载lidbg相关模块，要是在原生系统想要运行lidbg模块，按下方法：
-在原生系统模块放到/system/lib/modules/out
-执行 build/push.sh
+正式产品包已经默认加载lidbg相关模块，要是想push自己的lidbg模块到机器执行，执行下面指令：
+原生系统执行 
+build/push.sh
 
-产品系统中模块放到/flysystem/lib/out/
-执行 build/pushfly.sh
+产品系统执行 
+build/pushfly.sh
 
 以下两种方法均可运行模块
 1.在终端用ismod指令直接加载模块
 执行 build/insmod.sh  (正式产品是flysystem目录)
 
-2. 开机自动运行lidbg_servicer加载模块 
-把lidbg_servicer打包进系统，在文件out/target/product/msm7627a/root/init.qcom.rc添加
+2. 开机自动运行lidbg_servicer加载模块
+*8x25:
+把lidbg_servicer打包进系统，在文件system/core/rootdir/etc/init.qcom.rc添加
 chmod 777 /system/bin/lidbg_servicer  (正式产品是/flysystem/bin目录)
 和
 service lidbg_servicer /system/bin/logwrapper /system/bin/lidbg_servicer  (正式产品是/flysystem/bin目录)
@@ -94,6 +95,10 @@ service lidbg_servicer /system/bin/logwrapper /system/bin/lidbg_servicer  (正�
     user root
     group root
 
+*8x25Q:
+在文件device/qcom/common/rootdir/etc/init.qcom.rc添加
+    chmod 0644 /system/lib/modules/out/*.ko
+    insmod /system/lib/modules/out/lidbg_loader.ko
 
 ----------集成到系统镜像----------
 执行build/copy2img.sh后重新make编译系统即可
