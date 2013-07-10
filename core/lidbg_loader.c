@@ -49,7 +49,7 @@ int thread_loader(void *data)
 	char path[100];
 	DUMP_FUN_ENTER;
 
-
+	//return 0;
 	//msleep(100);
 	for(i=0;insmod_path[i]!=NULL;i++)	
 	{
@@ -58,6 +58,7 @@ int thread_loader(void *data)
 			sprintf(path, "%s%s", insmod_path[i],insmod_list[j]);
 			lidbg("load %s\n",path);
 			launch_user("/system/bin/insmod", path ,NULL);
+			msleep(100);
 		}
 	}
 	
@@ -66,6 +67,7 @@ int thread_loader(void *data)
 	launch_user("/system/bin/chmod", "0777", "/dev/mlidbg0");
 
 	DUMP_FUN_LEAVE;
+	return 0;
 
 }
 

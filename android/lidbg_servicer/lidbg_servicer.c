@@ -290,7 +290,8 @@ loop_read:
             break;
 
         }
-#ifdef BOARD_V2
+		
+#if (defined(BOARD_V1) || defined(BOARD_V2))
         //cap_ts
         case LOG_CAP_TS_GT811:
         case LOG_CAP_TS_FT5X06_SKU7:
@@ -382,7 +383,10 @@ loop_read:
         case CMD_ACC_OFF_PROPERTY_SET :
         {
             lidbg("CMD_ACC_OFF_PROPERTY_SET\n");
-            //system("echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
+	
+#if (defined(BOARD_V1) || defined(BOARD_V2))
+            system("echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
+#endif            
             property_set("fly.fastboot.accoff", "1");
             break;
 
@@ -408,8 +412,9 @@ loop_read:
         }
         case UMOUNT_USB:
         {
-
-            //system("umount /mnt/usbdisk");
+#if (defined(BOARD_V1) || defined(BOARD_V2))
+            system("umount /mnt/usbdisk");
+#endif
             break;
 
         }
@@ -425,8 +430,9 @@ loop_read:
                 set_power_state(1);
             //system("setprop fly.fastboot.accoff 0");
             property_set("fly.fastboot.accoff", "0");
-            //system("echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
-            //system("echo host > /mnt/debugfs/otg/mode");
+#if (defined(BOARD_V1) || defined(BOARD_V2))
+            system("echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
+#endif
             log_acc_times();
             lidbg("WAKEUP_KERNEL-\n");
             break;
@@ -554,11 +560,7 @@ int main(int argc , char **argv)
     system("echo 600000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq");
     system("echo 600000 > /sys/devices/system/cpu/cpu1/cpufreq/scaling_max_freq");
 
-   //for 8x25q
-    //system("chmod 0644 /system/lib/modules/out/*.ko");
-    //system("chmod 0644 /flysystem/lib/out/*.ko");
-#ifdef BOARD_V2
-    //sleep(5);
+#if (defined(BOARD_V1) || defined(BOARD_V2))
     system("insmod /system/lib/modules/out/lidbg_share.ko");
     system("insmod /system/lib/modules/out/lidbg_ts_to_recov.ko");
     system("insmod /system/lib/modules/out/lidbg_msg.ko");
@@ -608,10 +610,9 @@ int main(int argc , char **argv)
 	system("insmod /flysystem/lib/out/lidbg_gps_driver.ko");
 
     sleep(1);
-#else
-
-
 #endif
+
+
     system("chmod 0777 /dev/lidbg_share");
     system("chmod 0777 /dev/mlidbg0");
     system("chmod 0777 /dev/lidbg_servicer");
@@ -653,13 +654,11 @@ open_dev:
         if(servicer_handler(0) == SERVICER_DONOTHING)
             break;
     }
-#ifdef BOARD_V2
+#if (defined(BOARD_V1) || defined(BOARD_V2))
     system("insmod /system/lib/modules/out/lidbg_ts_probe.ko");
     system("insmod /flysystem/lib/out/lidbg_ts_probe.ko");
     system("insmod /flysystem/lib/out/gt80x_update.ko");
     system("insmod /system/lib/modules/out/gt80x_update.ko");
-#else
-
 #endif
 	
 #if 1
@@ -676,8 +675,9 @@ open_dev:
     system("insmod /flysystem/lib/modules/FlyAudioDevice.ko");
     system("insmod /flysystem/lib/modules/productinfo.ko");
     system("insmod /flysystem/lib/modules/vendor_flyaudio.ko");
-    //system("insmod /flysystem/lib/modules/FlyDR.ko");
-    //system("insmod /flysystem/lib/modules/FlyAS.ko");
+    system("insmod /flysystem/lib/modules/FlyDR.ko");
+    system("insmod /flysystem/lib/modules/FlyAS.ko");
+	system("insmod /flysystem/lib/modules/FlyReturn.ko");
 
     sleep(1);
     system("chmod 0777 /dev/FlyDebug");
@@ -685,8 +685,9 @@ open_dev:
     system("chmod 0777 /dev/FlyHardware");
     system("chmod 0777 /dev/FlyAudio");
 
-    //system("chmod 0777 /dev/FlyDR");
-    //system("chmod 0777 /dev/FlyAS");
+    system("chmod 0777 /dev/FlyDR");
+    system("chmod 0777 /dev/FlyAS");
+	system("chmod 0777 /dev/FlyReturn");
 
 
     //chegnweidong
@@ -711,9 +712,10 @@ open_dev:
 
     sleep(30);
 	DUMP_BUILD_TIME;
-
-    ///////low mem kill
-    if(0)
+	
+#if (defined(BOARD_V1) || defined(BOARD_V2))
+	   ///////low mem kill
+    if(1)
     {
 
         system("chmod 777 /sys/module/lowmemorykiller/parameters/minfree");
@@ -721,17 +723,17 @@ open_dev:
         //system("echo 3674,4969,6264,8312,9607,11444 > /sys/module/lowmemorykiller/parameters/minfree");//origin
         sleep(1);
         lidbg("set minfree\n");
-       // system("echo 3674,4969,6264,6264,6264,6264 > /sys/module/lowmemorykiller/parameters/minfree");
-        system("echo 3674,4969,6264,8312,9607,11444 > /sys/module/lowmemorykiller/parameters/minfree");
+        system("echo 3674,4969,6264,6264,6264,6264 > /sys/module/lowmemorykiller/parameters/minfree");
     }
 
 
     ////////set cpu fre
-    if(0)
+    if(1)
     {
         system("chmod 777 /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
         //system("echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
         sleep(1);
+		lidbg("set ondemand mode\n");
         system("echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
         //system("echo powersave > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
         //sleep(10);
@@ -749,13 +751,11 @@ open_dev:
             }
         }
     }
-
+#endif
 
     lidbg("enter while\n");
     while(1)
     {
-        //printf("enter while...\n");
-        //system("echo 3674,4969,6264,6264,6264,6264 > /sys/module/lowmemorykiller/parameters/minfree");
         sleep(60);
     }
 

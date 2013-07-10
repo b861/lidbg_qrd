@@ -13,7 +13,7 @@ void *global_lidbg_devp;
 
 
 
-#ifdef BOARD_V2
+#if (defined(BOARD_V1) || defined(BOARD_V2))
 
 #else
 char *insmod_list[] =
@@ -50,7 +50,7 @@ struct platform_device fly_soc_device =
 
 static int fly_soc_probe(struct platform_device *pdev)
 {
-#ifdef BOARD_V2
+#if (defined(BOARD_V1) || defined(BOARD_V2))
    	 lidbg("fly_soc_probe.BOARD_V2\n");
 #else
 	int i,j;
@@ -63,6 +63,7 @@ static int fly_soc_probe(struct platform_device *pdev)
 			sprintf(path, "%s%s", insmod_path[i],insmod_list[j]);
 			lidbg("load %s\n",path);
 			share_cmn_launch_user("/system/bin/insmod", path );
+			msleep(100);
 		}
 	}
 

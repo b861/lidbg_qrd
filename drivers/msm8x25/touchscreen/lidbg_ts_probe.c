@@ -32,7 +32,7 @@ struct probe_device ts_probe_dev[] =
     //  {0x38, 0x00, LOG_CAP_TS_FT5X06_SKU7}, //sku7
     //  {0x39, 0x00, LOG_CAP_TS_FT5X06}, //flycar
     //gt811
-#ifdef BOARD_V2
+#if (defined(BOARD_V1) || defined(BOARD_V2))
     {0x5d, 0x00, LOG_CAP_TS_GT811}, //flycar
     {0x55, 0x00, LOG_CAP_TS_GT801}, //flycar
 #else
@@ -50,7 +50,7 @@ unsigned int shutdown_flag_ts = 0;
 unsigned int shutdown_flag_probe = 0;
 unsigned int shutdown_flag_gt811 = 0;
 
-#ifdef BOARD_V2
+#if (defined(BOARD_V1) || defined(BOARD_V2))
 
 #else
 void launch_user( char bin_path[], char argv1[],char argv2[])
@@ -93,7 +93,7 @@ void ts_scan(void)
             scan_on = 0;
             SOC_I2C_Rec(TS_I2C_BUS, 0x12, 0x00, &tmp, 1 ); //let i2c bus release
 
-#ifdef BOARD_V2
+#if (defined(BOARD_V1) || defined(BOARD_V2))
 	SOC_Write_Servicer(ts_probe_dev[i].cmd);
 #else
 	sprintf(path, "/system/lib/modules/out/%s", ts_probe_dev[i].name);

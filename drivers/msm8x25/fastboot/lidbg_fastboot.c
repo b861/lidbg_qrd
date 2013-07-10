@@ -57,7 +57,12 @@ bool is_fake_suspend = 0;
 
 int wakelock_occur_count = 0;
 #define MAX_WAIT_UNLOCK_TIME  (5)
+
+#if (defined(BOARD_V1) || defined(BOARD_V2))
 #define WAIT_LOCK_RESUME_TIMES  (3)
+#else
+#define WAIT_LOCK_RESUME_TIMES  (1)
+#endif
 
 #define HAS_LOCK_RESUME
 
