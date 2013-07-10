@@ -161,6 +161,7 @@ void  soc_ad_init(void);
 u32  soc_ad_read(u32 ch);
 u32  soc_bl_set(u32 bl_level);
 u32  soc_pwm_set(int pwm_id, int duty_ns, int period_ns);
+void soc_bl_init(void);
 
 int soc_io_irq(struct io_int_config *pio_int_config);
 void soc_irq_disable(unsigned int irq);
