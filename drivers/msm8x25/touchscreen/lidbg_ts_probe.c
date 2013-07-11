@@ -49,7 +49,7 @@ bool is_ts_load = 0;
 unsigned int shutdown_flag_ts = 0;
 unsigned int shutdown_flag_probe = 0;
 unsigned int shutdown_flag_gt811 = 0;
-
+unsigned int irq_signal = 0;
 #if (defined(BOARD_V1) || defined(BOARD_V2))
 
 #else
@@ -191,6 +191,7 @@ EXPORT_SYMBOL(is_ts_load);
 EXPORT_SYMBOL(shutdown_flag_ts);
 EXPORT_SYMBOL(shutdown_flag_probe);
 EXPORT_SYMBOL(shutdown_flag_gt811);
+EXPORT_SYMBOL(irq_signal);
 
 MODULE_LICENSE("Dual BSD/GPL");
 MODULE_AUTHOR("lsw.");

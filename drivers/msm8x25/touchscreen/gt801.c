@@ -60,6 +60,7 @@ unsigned int  touch_cnt = 0;
 extern  unsigned int FLAG_FOR_15S_OFF;
 extern  bool is_ts_load;
 extern unsigned int shutdown_flag_ts;
+extern unsigned int irq_signal;
 
 //extern void SOC_Log_Dump(int cmd);
 /******************************************************
@@ -1118,7 +1119,7 @@ static int goodix_ts_suspend(struct i2c_client *client, pm_message_t mesg)
 {
     int ret;
     struct goodix_ts_data *ts = i2c_get_clientdata(client);
-    printk("[futengfei]come into [%s]======1024590=== add irq NODE====2013.07.03=\n", __func__);
+    printk("[futengfei]come into [%s]===== enable irq after update====2013.07.11=\n", __func__);
 
     if (ts->use_irq)
     {
@@ -1142,7 +1143,7 @@ static int goodix_ts_resume(struct i2c_client *client)
     int ret = 0, retry = 0, init_err = 0;
     uint8_t GT811_check[6] = {0x55};
     struct goodix_ts_data *ts = i2c_get_clientdata(client);
-    printk("come into [%s]=====add irq NODE====2013.07.03=== [futengfei]=\n", __func__);
+    printk("come into [%s]=====enable irq after update====2013.07.11=== [futengfei]=\n", __func__);
     for(retry = 0; retry < 5; retry++)
     {
         ret = goodix_init_panel(ts);
@@ -1256,7 +1257,7 @@ static int __devinit goodix_ts_init(void)
 #endif
 
     is_ts_load = 1;
-    printk("================into Gt801.ko=1024590==============2013.07.03==\n");
+    printk("================into Gt801.ko=1024590==============2013.07.11==\n");
 
     /*configure shutdown pin,ensure this pin is low, make IC in working state*/
     SOC_IO_Output(0, 27, 0);
@@ -1275,7 +1276,13 @@ static int __devinit goodix_ts_init(void)
 
 	
     ret = i2c_add_driver(&goodix_ts_driver);
-    printk("====================out Gt801.ko===============2013.07.03==\n");
+    if(irq_signal==1)
+    {
+	printk("[wang]:=======GT801 update is successful, enable the irq.\n");
+	enable_irq(ts->client->irq);
+    }
+
+    printk("====================out Gt801.ko===============2013.07.11==\n");
     return ret;
 }
 

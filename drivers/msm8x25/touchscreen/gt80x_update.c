@@ -80,6 +80,7 @@ static void update_late_resume(struct early_suspend *h)
 extern  unsigned int shutdown_flag_ts;
 extern  unsigned int shutdown_flag_probe;
 extern  unsigned int shutdown_flag_gt811;
+extern unsigned int irq_signal;
 
 static uint8_t Guitar_ReadBuf[10];
 static uint8_t Guitar_WriteBuf[10];
@@ -1234,6 +1235,7 @@ static int gt80x_iap_kthread(void *data)
             goto do_nothing;
 
         work_en = 0;
+	irq_signal = 0;
         set_current_state(TASK_UNINTERRUPTIBLE);
         if(kthread_should_stop())
             break;
@@ -1388,6 +1390,7 @@ static int gt80x_iap_kthread(void *data)
                 debug_printk(LEVEL_INFO, "It's successful to restart Goodix-TS driver !\n");
             shutdown_flag_ts = 0;
             shutdown_flag_probe = 0;
+	    irq_signal = 1;
             ssleep(600);
 
             ret = 0;
