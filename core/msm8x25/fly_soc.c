@@ -25,7 +25,9 @@ char *insmod_list[] =
 	"lidbg_gps.ko",
 	"lidbg_ts_to_recov.ko",
 	"lidbg_ts_probe.ko",
+#if (defined(BOARD_V1) || defined(BOARD_V2))
 	"gt80x_update.ko",
+#endif
 	NULL,
 
 };

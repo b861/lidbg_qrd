@@ -797,10 +797,13 @@ static struct platform_driver soc_devices_driver =
 struct work_struct work_left_button1;
 static void work_left_button1_fn(struct work_struct *work)
 {
+	led_on();
+	SOC_Key_Report(KEY_BACK, KEY_PRESSED_RELEASED);
 
-#if 1
+#if 0
     static int count = 0;
     static int usb_flag = 0;
+	led_on();
 
     count++;
     if(count % 50 == 0)
@@ -832,7 +835,7 @@ static void work_left_button1_fn(struct work_struct *work)
 #endif
 
 
-#ifdef DEBUG_POWER_KEY
+#if 0 //def DEBUG_POWER_KEY
     static int count = 0;
     count++;
     lidbg("work_left_button1_fn %d\n", count);
@@ -872,9 +875,12 @@ static void work_left_button1_fn(struct work_struct *work)
 struct work_struct work_right_button1;
 static void work_right_button1_fn(struct work_struct *work)
 {
-
-#if 1
+	
+	led_on();
+#if 0
     static int count = 0;
+	led_on();
+
     count++;
     lidbg("work_left_button1_fn %d\n", count);
     if(count % 40 == 0)

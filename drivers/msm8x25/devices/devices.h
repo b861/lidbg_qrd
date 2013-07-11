@@ -178,12 +178,18 @@ enum
 #define USB_REC_POLLING_TIME (300)
 
 
-
+#if (defined(BOARD_V1) || defined(BOARD_V2))
 #define BUTTON_LEFT_1 (76)//k4
 #define BUTTON_LEFT_2 (58)//k3
-
 #define BUTTON_RIGHT_1 (44)//k1
 #define BUTTON_RIGHT_2 (49)//k2
+#else
+#define BUTTON_LEFT_1 (76)//k4
+#define BUTTON_LEFT_2 (84)//k3
+#define BUTTON_RIGHT_1 (44)//k1
+#define BUTTON_RIGHT_2 (49)//k2
+
+#endif
 
 #define  MCU_IIC_REQ_ISR  (30)
 
