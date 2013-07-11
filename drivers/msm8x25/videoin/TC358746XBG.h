@@ -66,8 +66,15 @@ struct TC358_register_struct_read
 #define tc358_RESX_DOWN do{SOC_IO_Config(34,GPIO_CFG_OUTPUT,GPIO_CFG_PULL_UP,GPIO_CFG_12MA);SOC_IO_Output(0, 34, 0);}while(0)//System reset input, active low 
 #else
 #if 1
+
+#ifdef BOARD_V3
+#define tc358_RESX_UP do{i2c_io_config(TC358746XBG_RESET,GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA,0);gpio_set_value(TC358746XBG_RESET, 1);}while(0)
+#define tc358_RESX_DOWN do{i2c_io_config(TC358746XBG_RESET,GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA,0);gpio_set_value(TC358746XBG_RESET, 0);}while(0)
+#else
 #define tc358_RESX_UP do{i2c_io_config(TC358746XBG_RESET,GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA,0);gpio_set_value(TC358746XBG_RESET, 0);}while(0)
 #define tc358_RESX_DOWN do{i2c_io_config(TC358746XBG_RESET,GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA,0);gpio_set_value(TC358746XBG_RESET, 1);}while(0)
+#endif
+
 #else
 #define tc358_RESX_UP do{}while(0)
 #define tc358_RESX_DOWN do{}while(0)
