@@ -1119,7 +1119,7 @@ static int goodix_ts_suspend(struct i2c_client *client, pm_message_t mesg)
 {
     int ret;
     struct goodix_ts_data *ts = i2c_get_clientdata(client);
-    printk("[futengfei]come into [%s]===== enable irq after update====2013.07.11=\n", __func__);
+    printk("[futengfei]come into [%s]=====remodify timing sequence====2013.07.12=\n", __func__);
 
     if (ts->use_irq)
     {
@@ -1143,9 +1143,13 @@ static int goodix_ts_resume(struct i2c_client *client)
     int ret = 0, retry = 0, init_err = 0;
     uint8_t GT811_check[6] = {0x55};
     struct goodix_ts_data *ts = i2c_get_clientdata(client);
-    printk("come into [%s]=====enable irq after update====2013.07.11=== [futengfei]=\n", __func__);
+    printk("come into [%s]====remodify the timing sequence====2013.07.12=== [futengfei]=\n", __func__);
     for(retry = 0; retry < 5; retry++)
     {
+	SOC_IO_Output(0, 27, 0);
+	msleep(20);
+	SOC_IO_Output(0, 27, 1);
+	msleep(200);
         ret = goodix_init_panel(ts);
 	if(ret<0)
 	{
@@ -1168,10 +1172,10 @@ static int goodix_ts_resume(struct i2c_client *client)
         if(ret != 0)	//Initiall failed
         {
             printk("[futengfei]goodix_init_panel:goodix_init_panel failed=========retry=[%d]===ret[%d]\n", retry, ret);
-            SOC_IO_Output(0, 27, 0);
-            msleep(300);
-            SOC_IO_Output(0, 27, 1);
-            msleep(700);
+            //SOC_IO_Output(0, 27, 0);
+            //msleep(20);
+            //SOC_IO_Output(0, 27, 1);
+            //msleep(200);
             continue;
         }
 
@@ -1257,7 +1261,7 @@ static int __devinit goodix_ts_init(void)
 #endif
 
     is_ts_load = 1;
-    printk("================into Gt801.ko=1024590==============2013.07.11==\n");
+    printk("================into Gt801.ko=1024590==============2013.07.12==\n");
 
     /*configure shutdown pin,ensure this pin is low, make IC in working state*/
     SOC_IO_Output(0, 27, 0);
@@ -1282,7 +1286,7 @@ static int __devinit goodix_ts_init(void)
 	enable_irq(ts->client->irq);
     }
 
-    printk("====================out Gt801.ko===============2013.07.11==\n");
+    printk("====================out Gt801.ko===============2013.07.12==\n");
     return ret;
 }
 
