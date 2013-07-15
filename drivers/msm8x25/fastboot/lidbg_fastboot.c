@@ -473,6 +473,36 @@ char *kill_exclude_process_fake_suspend[] =
 
 };
 
+void set_power_state(int state)
+{
+
+    struct file *fd = NULL;
+    const char suspendstring[] = "mem";
+    const char wakeupstring[] = "on";
+    const char *powerdev = "/sys/power/state";
+	mm_segment_t old_fs;
+
+    lidbg("set_power_state:%d\n", state);
+
+    fd = filp_open(powerdev, O_RDWR, 0);
+    if(fd >= 0)
+    {
+    	BEGIN_KMEM;
+        if(state == 0)
+            fd->f_op->write(fd, suspendstring, sizeof(suspendstring) - 1, &fd->f_pos);
+        else
+            fd->f_op->write(fd, wakeupstring, sizeof(wakeupstring) - 1, &fd->f_pos);
+		END_KMEM;
+
+        filp_close(fd,0);
+    }
+    else
+    {
+        lidbg("open linux power dev fail: %s\n", powerdev);
+    }
+
+}
+
 
 int fastboot_task_kill_select(char *task_name)
 {
@@ -689,7 +719,11 @@ static int thread_pwroff(void *data)
                     if(time_count >= 5 * 2)
                     {
                         lidbgerr("thread_pwroff wait early suspend timeout!\n");
+#if (defined(BOARD_V1) || defined(BOARD_V2))
                         SOC_Write_Servicer(SUSPEND_KERNEL);
+#else
+					    set_power_state(0);
+#endif
                         break;
                     }
                 }
@@ -765,7 +799,12 @@ static int thread_fastboot_suspend(void *data)
                         lidbg("wakelock_occur_count=%d\n", wakelock_occur_count);
                         if(wakelock_occur_count <= WAIT_LOCK_RESUME_TIMES)
                         {
-                            SOC_Write_Servicer(WAKEUP_KERNEL);
+#if (defined(BOARD_V1) || defined(BOARD_V2))
+                        SOC_Write_Servicer(WAKEUP_KERNEL);
+#else
+						set_power_state(1);
+#endif
+
                         }
                         else
 #endif
@@ -871,8 +910,11 @@ static int thread_fastboot_resume(void *data)
         wait_for_completion(&resume_ok);
         DUMP_FUN_ENTER;
         msleep(3000);
+#if (defined(BOARD_V1) || defined(BOARD_V2))
         SOC_Write_Servicer(WAKEUP_KERNEL);
-
+#else
+		set_power_state(1);
+#endif
         //SOC_Key_Report(KEY_HOME, KEY_PRESSED_RELEASED);
         //SOC_Key_Report(KEY_BACK, KEY_PRESSED_RELEASED);
 
@@ -929,8 +971,10 @@ void fastboot_pwroff(void)
     msleep(1000);
 
 #ifdef RUN_FASTBOOT
+#if (defined(BOARD_V1) || defined(BOARD_V2))
     SOC_Write_Servicer(CMD_ACC_OFF_PROPERTY_SET);
     SOC_Write_Servicer(CMD_FAST_POWER_OFF);
+#endif
 #else
     SOC_Key_Report(KEY_POWER, KEY_PRESSED_RELEASED);
 #endif

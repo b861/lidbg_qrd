@@ -289,7 +289,9 @@ int is_ublox_exist(void)
         }
         else
         {
+#if (defined(BOARD_V1) || defined(BOARD_V2))        
             SOC_Write_Servicer(UBLOX_EXIST);
+#endif
             return 1;
         }
     }
