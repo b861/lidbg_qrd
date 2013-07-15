@@ -79,7 +79,11 @@ void LPCControlPWRDisenable(void);
 								SOC_IO_Input(0,MCU_IIC_REQ_ISR,GPIO_CFG_PULL_UP);\
 							}while(0)
 #else
-#define TELL_LPC_PWR_OFF
+#define TELL_LPC_PWR_OFF do{  \
+								lidbg("tell lpc power off ok!\n");\
+								SOC_IO_Config(MCU_IIC_REQ_I,GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_16MA);\
+								SOC_IO_Output(0, MCU_IIC_REQ_I, 0);\
+							}while(0)
 #define TELL_LPC_PWR_ON do{\
 								lidbg("tell lpc power on ok!\n");\
 								SOC_IO_Config(MCU_IIC_REQ_I,GPIO_CFG_INPUT,GPIO_CFG_PULL_UP,GPIO_CFG_8MA);\
