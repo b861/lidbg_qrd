@@ -32,7 +32,7 @@ void launch_user( char bin_path[], char argv1[],char argv2[])
     char *argv[] = { bin_path, argv1, argv2, NULL };
     static char *envp[] = { "HOME=/", "TERM=linux", "PATH=/system/bin", NULL };
     int ret;
-    ret = call_usermodehelper(bin_path, argv, envp, UMH_WAIT_EXEC);
+    ret = call_usermodehelper(bin_path, argv, envp, UMH_WAIT_PROC);
 
   if (ret < 0)
         lidbg("lunch fail!\n");
@@ -58,11 +58,11 @@ int thread_loader(void *data)
 			sprintf(path, "%s%s", insmod_path[i],insmod_list[j]);
 			lidbg("load %s\n",path);
 			launch_user("/system/bin/insmod", path ,NULL);
-			msleep(100);
+//			msleep(100);
 		}
 	}
 	
-	msleep(1000);	
+//	msleep(1000);	
 	launch_user("/system/bin/chmod", "0777", "/dev/lidbg_share");
 	launch_user("/system/bin/chmod", "0777", "/dev/mlidbg0");
 

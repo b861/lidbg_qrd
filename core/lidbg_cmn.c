@@ -139,7 +139,7 @@ void cmn_launch_user( char bin_path[], char argv1[])
     static char *envp[] = { "HOME=/", "TERM=linux", "PATH=/system/bin", NULL };//tell me sh where it is;
     int ret;
     lidbg("%s ,%s\n", bin_path, argv1);
-    ret = call_usermodehelper(bin_path, argv, envp, UMH_WAIT_EXEC);
+    ret = call_usermodehelper(bin_path, argv, envp, UMH_WAIT_PROC);
     //NOTE:  I test that:use UMH_NO_WAIT can't lunch the exe; UMH_WAIT_PROCwill block the ko,
     //UMH_WAIT_EXEC  is recommended.
     if (ret < 0)
@@ -187,7 +187,7 @@ void mod_cmn_main(int argc, char **argv)
             int ret;
             lidbg("%s ,%s ,%s ,%s\n", argv[1], argv[2], argv[3], argv[4]);
 
-            ret = call_usermodehelper(argv[1], argv2, envp, UMH_WAIT_EXEC);
+            ret = call_usermodehelper(argv[1], argv2, envp, UMH_WAIT_PROC);
             if (ret < 0)
                 lidbg("lunch fail!\n");
             else

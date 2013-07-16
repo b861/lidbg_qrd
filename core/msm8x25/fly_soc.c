@@ -5,6 +5,9 @@
 #include "lidbg.h"
 
 #include "fly_soc.h"
+
+struct task_struct *soc_task;
+
 #ifdef _LIGDBG_SHARE__
 LIDBG_SHARE_DEFINE;
 void *global_lidbg_devp;
@@ -49,15 +52,11 @@ struct platform_device fly_soc_device =
 };
 
 
-
-static int fly_soc_probe(struct platform_device *pdev)
+int soc_thread(void *data)
 {
-#if (defined(BOARD_V1) || defined(BOARD_V2))
-   	 lidbg("fly_soc_probe.BOARD_V2\n");
-#else
 	int i,j;
 	char path[100];
-    lidbg("fly_soc_probe.BOARD_V3+\n");
+       lidbg("fly_soc_probe.BOARD_V3+\n");
 	for(i=0;insmod_path[i]!=NULL;i++)	
 	{
 		for(j=0;insmod_list[j]!=NULL;j++)
@@ -65,7 +64,7 @@ static int fly_soc_probe(struct platform_device *pdev)
 			sprintf(path, "%s%s", insmod_path[i],insmod_list[j]);
 			lidbg("load %s\n",path);
 			share_cmn_launch_user("/system/bin/insmod", path );
-			msleep(100);
+//			msleep(100);
 		}
 	}
 
@@ -74,6 +73,21 @@ static int fly_soc_probe(struct platform_device *pdev)
 		share_cmn_launch_user("/flysystem/bin/lidbg_servicer", NULL);
 #endif
 
+
+}
+
+static int fly_soc_probe(struct platform_device *pdev)
+{
+#if (defined(BOARD_V1) || defined(BOARD_V2))
+   	 lidbg("fly_soc_probe.BOARD_V2\n");
+#else
+    soc_task = kthread_create(soc_thread, NULL, "lidbg_soc_thread");
+    if(IS_ERR(soc_task))
+    {
+        lidbg("Unable to start thread.\n");
+
+    }
+    else wake_up_process(soc_task);
 #endif
     return 0;
 

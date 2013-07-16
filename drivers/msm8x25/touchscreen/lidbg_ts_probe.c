@@ -58,7 +58,7 @@ void launch_user( char bin_path[], char argv1[],char argv2[])
     char *argv[] = { bin_path, argv1, argv2, NULL };
     static char *envp[] = { "HOME=/", "TERM=linux", "PATH=/system/bin", NULL };
     int ret;
-    ret = call_usermodehelper(bin_path, argv, envp, UMH_WAIT_EXEC);
+    ret = call_usermodehelper(bin_path, argv, envp, UMH_WAIT_PROC);
 
   if (ret < 0)
         lidbg("lunch fail!\n");

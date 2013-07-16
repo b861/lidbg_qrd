@@ -672,7 +672,7 @@ static int __init i2c_api_init(void)
 	lidbg("load lidbg_i2c_gpio.ko\n");
 	share_cmn_launch_user("/system/bin/insmod", "/system/lib/modules/out/lidbg_i2c_gpio.ko");
 	share_cmn_launch_user("/system/bin/insmod", "/flysystem/lib/out/lidbg_i2c_gpio.ko");
-	msleep(50);//delay for  lidbg_i2c_gpio.ko complete
+//	msleep(50);//delay for  lidbg_i2c_gpio.ko complete
 
     soc_i2c_gpio_init(&fly_i2c_gpio_device);
     ret = platform_device_register(&fly_i2c_gpio_device);
