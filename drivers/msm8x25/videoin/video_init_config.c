@@ -299,13 +299,13 @@ int flyVideoInitall_in(u8 Channel)
             info_com_top_Channel = SEPARATION;
             //info_com_top_Channel = YIN0;
 	    // SOC_Write_Servicer(VIDEO_PASSAGE_DVD);
+	//            global_video_channel_flag = DVD;
         }
-        global_video_channel_flag = Channel;
     }
     else
     {
         info_com_top_Channel = NOTONE;
-        global_video_channel_flag = NOTONE;
+   //     global_video_channel_flag = OTHER;
         printk("%s: you input TW9912 Channel=%d error!\n", __FUNCTION__, Channel);
     }
     //spin_unlock(&spin_chipe_config_lock);
@@ -586,6 +586,16 @@ void video_init_config_in(Vedio_Format config_pramat)
             mutex_lock(&lock_chipe_config);
         }
         VideoImage();
+
+	printk("global_video_channel_flag = %x\n",global_video_channel_flag);
+	if(global_video_channel_flag == TV_4KO)
+	{u8 Tw9912_register_valu[] = {0x08, 0x17,}; //default input pin selet YIN0
+		write_tw9912(Tw9912_register_valu);
+		Tw9912_register_valu[0] =0xa;
+		Tw9912_register_valu[1] =0x1e;
+		write_tw9912(Tw9912_register_valu);
+	}
+
         //msleep(300);//wait for video Steady display
         /*
         		printk("\r\n");

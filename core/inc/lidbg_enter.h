@@ -102,6 +102,14 @@ typedef enum
 } Vedio_Channel;
 typedef enum
 {
+    AUX_4KO = 0,
+    TV_4KO,
+    ASTREN_4KO,
+    DVD_4KO,
+    OTHER_CHANNEL_4KO,
+} Vedio_Channel_2;
+typedef enum
+{
     NTSC_I = 1,
     PAL_I,
     NTSC_P,
@@ -244,7 +252,7 @@ struct lidbg_fn_t
     Vedio_Format (*pfncamera_open_video_signal_test)(void);
     void (*pfncamera_open_video_color)(u8 color_flag);
     Vedio_Format pfnglobal_video_format_flag;
-    Vedio_Channel pfnglobal_video_channel_flag;
+    Vedio_Channel_2 pfnglobal_video_channel_flag;
 
 
     //dev

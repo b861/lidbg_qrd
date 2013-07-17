@@ -429,7 +429,7 @@ static void set_func_tbl(void)
     plidbg_dev->soc_func_tbl.pfnread_tw9912_chips_signal_status = read_chips_signal_status;
     plidbg_dev->soc_func_tbl.pfnVideoReset= VideoReset_in;
     global_video_format_flag = NTSC_I;
-    global_video_channel_flag = YIN3;//DVD
+    global_video_channel_flag = TV_4KO;//DVD
     global_camera_working_status = 0;//stop
 }
 
