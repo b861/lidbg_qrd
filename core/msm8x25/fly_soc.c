@@ -51,7 +51,8 @@ struct platform_device fly_soc_device =
     .id 			= 0,
 };
 
-
+#if (defined(BOARD_V1) || defined(BOARD_V2))
+#else
 int soc_thread(void *data)
 {
 	int i,j;
@@ -75,6 +76,7 @@ int soc_thread(void *data)
 
 
 }
+#endif
 
 static int fly_soc_probe(struct platform_device *pdev)
 {
