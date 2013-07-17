@@ -16,6 +16,7 @@ char *insmod_list[] =
 	"lidbg_ad.ko",
 	"lidbg_main.ko",
 	"lidbg_fly_soc.ko",
+	"lidbg_videoin.ko",
 	NULL,
 
 };
