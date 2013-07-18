@@ -90,25 +90,19 @@ int lidbg_key_init(void)
 
 
     __set_bit(EV_KEY, input->evbit);
-
-#if 0
-    for (i = 0; i < ARRAY_SIZE(lidbg_keycode); i++)
-    {
-
-        //set_bit(lidbg_keycode[i] & KEY_MAX, input->keybit);
-        input_set_capability(input, EV_KEY, lidbg_keycode[i] & KEY_MAX);
-
-    }
-#else
-    //<linux/input.h>
+//屏蔽物理键盘.SKUD.futengfei
+#if (defined(BOARD_V1) || defined(BOARD_V2))
     for (i = 1; i < KEY_MAX; i++)
     {
-        //set_bit(i & KEY_MAX, input->keybit);
         input_set_capability(input, EV_KEY, i);
-
     }
+#else
+    for (i = 0; i < ARRAY_SIZE(lidbg_keycode); i++)
+    {
+        input_set_capability(input, EV_KEY, lidbg_keycode[i] & KEY_MAX);
+    }
+ #endif
 
-#endif
     //clear_bit(KEY_RESERVED, zlgkpd->input->keybit);
 
     error = input_register_device(input);
