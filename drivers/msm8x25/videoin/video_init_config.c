@@ -565,12 +565,19 @@ void video_init_config_in(Vedio_Format config_pramat)
     mutex_lock(&lock_chipe_config);
     //SOC_Write_Servicer(VIDEO_NORMAL_SHOW);
     if(info_com_top_Channel == SEPARATION || info_com_top_Channel == YIN2)
-    {
+    {  if(testing_NTSCp_video_signal() == NTSC_P)
+    	{
         Tw9912_init_NTSCp();
         VideoImage();
 	 SOC_Write_Servicer(VIDEO_NORMAL_SHOW);
         TC358_init(NTSC_P);
 	 printk("Vedio Format Is NTSCp\n");
+    	}
+	else
+	{
+ 	printk("Waring Not find DVD video signal..\n");
+	TC358_init(COLORBAR + TC358746XBG_YELLOW); //blue
+	}
     }
     else	if(config_pramat != STOP_VIDEO)
     {
