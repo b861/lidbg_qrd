@@ -4,7 +4,7 @@
 #include "TC358746XBG.h"
 #define I2C_US_IO
 #define APAT_BUS_ID 1
-static int tc358746_reset_flag = 0;
+//static int tc358746_reset_flag = 0;
 struct TC358_register_struct colorbar_init_user_tab[] =
 {
     //80 pixel of hui
@@ -50,7 +50,7 @@ static void Power_contorl(void)
 }
 i2c_ack TC358_Register_Read(u16 add, char *buf, u8 flag)
 {
-i2c_ack ret ;
+i2c_ack ret = NACK;
     //int buf_change;
     if(flag == register_value_width_16)
     {
@@ -125,9 +125,8 @@ static void TC358_Software_Rest(void)
     TC358_Register_Write(&add, &valu, register_value_width_16	); //normal
     msleep(1);
 }
-static int TC358_Register_config(struct TC358_register_struct *TC358746_init_tab)
+static int TC358_Register_config(const struct TC358_register_struct *TC358746_init_tab)
 {
-int ret;
 i2c_ack back_ret;
 register int i = 0;
 #ifdef tc358746_debug
@@ -137,8 +136,8 @@ register int i = 0;
     while(TC358746_init_tab[i].add_reg != 0xffff)//write
     {
 
-      back_ret =  TC358_Register_Write(&(TC358746_init_tab[i].add_reg), \
-                             &(TC358746_init_tab[i].add_val), TC358746_init_tab[i].registet_width);
+      back_ret =  TC358_Register_Write((u16 *)&(TC358746_init_tab[i].add_reg), \
+                             (u32 *)&(TC358746_init_tab[i].add_val), TC358746_init_tab[i].registet_width);
       if(back_ret  == NACK) goto NACK_BREAK;
 
         i++;
@@ -243,16 +242,16 @@ void colorbar_init(void)
         //for(j=48;j>0;j--)
         for(j = 180; j > 0; j--)
         {
-           ret = TC358_Register_Write(&(colorbar_init_tab[2*i].add_reg), &(colorbar_init_tab[2*i].add_val), colorbar_init_tab[2*i].registet_width);
+           ret = TC358_Register_Write((u16 *)&(colorbar_init_tab[2*i].add_reg), (u32 *)&(colorbar_init_tab[2*i].add_val), (u8)colorbar_init_tab[2*i].registet_width);
              if(ret == NACK) goto NACK_BREAK;
-           ret = TC358_Register_Write(&(colorbar_init_tab[2*i+1].add_reg), &(colorbar_init_tab[2*i+1].add_val), colorbar_init_tab[2*i+1].registet_width);
+           ret = TC358_Register_Write((u16 *)&(colorbar_init_tab[2*i+1].add_reg), (u32 *)&(colorbar_init_tab[2*i+1].add_val), (u8)colorbar_init_tab[2*i+1].registet_width);
              if(ret == NACK) goto NACK_BREAK;
         }
     }
 
     add_reg_1 = 0x00e0; //使能colobar
     add_val_1 = 0xc1df;
-    TC358_Register_Write(&add_reg_1, &add_val_1, register_value_width_16);
+    TC358_Register_Write((u16 *)&add_reg_1, (u32 *)&add_val_1,(u8) register_value_width_16);
 NACK_BREAK:
 	;
 }
@@ -271,9 +270,9 @@ void colorbar_init_blue(u8 color_flag)
     i = color_flag - 1;
     for(j = 360; j > 0; j--)
     {
-        ret =TC358_Register_Write(&(colorbar_init_tab[2*i].add_reg), &(colorbar_init_tab[2*i].add_val), colorbar_init_tab[2*i].registet_width);
+        ret =TC358_Register_Write((u16 *)&(colorbar_init_tab[2*i].add_reg), (u32 *)&(colorbar_init_tab[2*i].add_val), (u8)colorbar_init_tab[2*i].registet_width);
 	  if(ret == NACK) goto NACK_BREAK;
-        ret =TC358_Register_Write(&(colorbar_init_tab[2*i+1].add_reg), &(colorbar_init_tab[2*i+1].add_val), colorbar_init_tab[2*i+1].registet_width);
+        ret =TC358_Register_Write((u16 *)&(colorbar_init_tab[2*i+1].add_reg), (u32 *)&(colorbar_init_tab[2*i+1].add_val), (u8)colorbar_init_tab[2*i+1].registet_width);
 	  if(ret == NACK) goto NACK_BREAK;
     }
     add_reg_1 = 0x00e0; //使能colobar

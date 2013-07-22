@@ -3,9 +3,9 @@
 #include "tw9912.h"
 #include "tw9912_config.h"
 #include "lidbg_enter.h"
-static int tw9912_reset_flag = 0;
+//static int tw9912_reset_flag = 0;
 struct mutex lock_com_chipe_config;
-static struct task_struct *tw9912_Correction_Parameter_fun = NULL;
+//static struct task_struct *tw9912_Correction_Parameter_fun = NULL;
 u8 tw9912_signal_unstabitily_for_Tw9912_init_flag = 0;
 static int read_tw9912_chips_status_flag = 0 , read_tw9912_chips_status_flag_1 = 0;
 u8 tw9912_reset_flag_jam = 0;
@@ -69,32 +69,35 @@ printk("tw9912:%s:interrupt becouts NACK\n",__func__);
 i2c_ack write_tw9912(char *buf )
 {
     i2c_ack ret;
-    u8 buf_back;
-    static int again_write_count = 0;
+    
     tw9912_dbg("tw9912:write addr=0x%.2x value=0x%.2x\n", buf[0], buf[1]);
     ret = i2c_write_byte(1, TW9912_I2C_ChipAdd, buf, 2);
 #ifdef DEBUG_TW9912_CHECK_WRITE
-    if (ret == ACK && the_last_config.Channel == SEPARATION)
-    {
-        ret = i2c_read_byte(1, TW9912_I2C_ChipAdd, buf[0], &buf_back, 1);
-        tw9912_dbg("TW9912:  Register (0x%.2x) back (0x%.2x) and write (0x%.2x) \n", buf[0], buf_back, buf[1]);
-        if(buf_back != buf[1] )
-        {
-            if(
-                ( (buf[0] == 0x1c || buf[0] == 0x1c ) &&  (buf_back & 0xf) != (buf[1] & 0xf ) ) || \
-                (  buf[0] == 0x1d && (buf_back & 0x7f != buf[1] & 0x7f ))\
-            )
-            {
-                msleep(10);
-                tw9912_dbg("TW9912: error Read (0x%.2x) back (0x%.2x) and write (0x%.2x) in data inequality\n", buf[0], buf_back, buf[1]);
-                if(again_write_count < 2)
-                    //	write_tw9912(buf);
-                    i2c_write_byte(1, TW9912_I2C_ChipAdd, buf, 2);
-                again_write_count ++;
-            }
-        }
-        if(again_write_count >= 2) again_write_count = 0;
-    }
+	{static int again_write_count = 0;
+	 u8 buf_back;
+
+	    if (ret == ACK && the_last_config.Channel == SEPARATION)
+	    {
+	        ret = i2c_read_byte(1, TW9912_I2C_ChipAdd, buf[0], &buf_back, 1);
+	        tw9912_dbg("TW9912:  Register (0x%.2x) back (0x%.2x) and write (0x%.2x) \n", buf[0], buf_back, buf[1]);
+	        if(buf_back != buf[1] )
+	        {
+	            if(
+	                ( (buf[0] == 0x1c || buf[0] == 0x1c ) &&  (buf_back & 0xf) != (buf[1] & 0xf ) ) || \
+	                (  buf[0] == 0x1d && (buf_back & 0x7f != buf[1] & 0x7f ))\
+	            )
+	            {
+	                msleep(10);
+	                tw9912_dbg("TW9912: error Read (0x%.2x) back (0x%.2x) and write (0x%.2x) in data inequality\n", buf[0], buf_back, buf[1]);
+	                if(again_write_count < 2)
+	                    //	write_tw9912(buf);
+	                    i2c_write_byte(1, TW9912_I2C_ChipAdd, buf, 2);
+	                again_write_count ++;
+	            }
+	        }
+	        if(again_write_count >= 2) again_write_count = 0;
+	    }
+	}
 #endif
     /**/
     return ret;
@@ -436,7 +439,6 @@ void display_tw9912_info(void)
 static int TW9912_Channel_Choices(Vedio_Channel channel)
 {
     u8 Tw9912_input_pin_selet[] = {0x02, 0x40,}; //default input pin selet YIN0
-    int ret;
     tw9912_dbg("fly_video now channal choices %d",channel);
     the_last_config.Channel = channel;
     switch(channel)//Independent testing
@@ -586,10 +588,8 @@ mutex_unlock(&lock_com_chipe_config);
 
 Vedio_Format camera_open_video_signal_test_in_2(void)
 {
-    Vedio_Format ret = OTHER;
     u8 channel_1;
     u8 format_1;
-    u8 Tw9912_input_pin_selet[] = {0x02, 0x40,}; //default input pin selet YIN0
     TW9912_Signal signal_is_how_1 = {NOTONE, OTHER, source_other};
     TW9912_input_info tw9912_input_information_1;
 
@@ -683,7 +683,7 @@ int read_tw9912_chips_status(u8 cmd)
         return tw9912_input_information_status_next.macrovision_detection.valu;
     }
 }
-Vedio_Format testing_NTSCp_video_signal()
+Vedio_Format testing_NTSCp_video_signal(void)
 {
     Vedio_Format ret = OTHER;
     u8 valu;//default input pin selet YIN0
@@ -721,9 +721,9 @@ Vedio_Format testing_NTSCp_video_signal()
 Vedio_Format testing_video_signal(Vedio_Channel Channel)
 {
     Vedio_Format ret = OTHER;
-    u8 channel_1;
+//    u8 channel_1;
     u8 format_1;
-    u8 Tw9912_input_pin_selet[] = {0x02, 0x40,}; //default input pin selet YIN0
+//    u8 Tw9912_input_pin_selet[] = {0x02, 0x40,}; //default input pin selet YIN0
     TW9912_Signal signal_is_how_1 = {NOTONE, OTHER, source_other};
     TW9912_input_info tw9912_input_information_1;
     mutex_lock(&lock_com_chipe_config);
@@ -832,10 +832,10 @@ Vedio_Format testing_video_signal(Vedio_Channel Channel)
     tw9912_dbg("testing_signal(): back %d\n", signal_is_how_1.Format);
     mutex_unlock(&lock_com_chipe_config);
     return signal_is_how_1.Format;
-CONFIG_not_ack_fail:
-    mutex_unlock(&lock_com_chipe_config);
-    tw9912_dbg("tw9912:testing_video_signal()--->NACK error\n");
-    ret = OTHER;
+//CONFIG_not_ack_fail:
+//    mutex_unlock(&lock_com_chipe_config);
+//    tw9912_dbg("tw9912:testing_video_signal()--->NACK error\n");
+//   ret = OTHER;
 CHANNAL_ERROR:
     mutex_unlock(&lock_com_chipe_config);
     tw9912_dbg("tw9912:testing_video_signal()--->Channel input error\n");
@@ -959,16 +959,17 @@ static void TC9912_id(void)
         printk("TW9912 Communication error!(0x%.2x)\n", TW9912_ID[1]);
 
 }
+  /*
 static int bug_return_for_PALi(void)
 {
     int ret;
     u32 i = 0;
-    u8 *config_pramat_piont = NULL;
+    const u8 *config_pramat_piont = NULL;
     u8 Tw9912_image[2] = {0x17, 0x87,}; //default input pin selet YIN0ss
     config_pramat_piont = TW9912_INIT_NTSC_Interlaced_input;
     while(config_pramat_piont[i*2] != 0xfe)
     {
-        if(write_tw9912(&config_pramat_piont[i*2]) == NACK);
+        if(write_tw9912((char *)&config_pramat_piont[i*2]) == NACK);
         //		tw9912_dbg("w a=%x,v=%x\n",config_pramat_piont[i*2],config_pramat_piont[i*2+1]);
         i++;
     }
@@ -989,10 +990,11 @@ static int bug_return_for_PALi(void)
     ret = write_tw9912(Tw9912_image);
     return ret;
 }
+*/
 int Tw9912_init_NTSCp(void)
 {
     u32 i = 0;
-    u8 *config_pramat_piont = NULL;
+    const u8 *config_pramat_piont = NULL;
     if (tw9912_reset_flag_jam == 0)
     {
         tw9912_reset_flag_jam = 1;
@@ -1010,12 +1012,12 @@ int Tw9912_init_NTSCp(void)
     config_pramat_piont = TW9912_INIT_NTSC_Progressive_input;
     while(TW9912_INIT_Public[i*2] != 0xfe)
     {
-        if(write_tw9912(&TW9912_INIT_Public[i*2]) == NACK) goto CONFIG_not_ack_fail;
+        if(write_tw9912((char *)&TW9912_INIT_Public[i*2]) == NACK) goto CONFIG_not_ack_fail;
         i++;
     }
     while(config_pramat_piont[i*2] != 0xfe)
     {
-        if(write_tw9912(&config_pramat_piont[i*2]) == NACK) goto CONFIG_not_ack_fail;
+        if(write_tw9912((char *)&config_pramat_piont[i*2]) == NACK) goto CONFIG_not_ack_fail;
         //		tw9912_dbg("w a=%x,v=%x\n",config_pramat_piont[i*2],config_pramat_piont[i*2+1]);
         i++;
     }
@@ -1042,7 +1044,7 @@ CONFIG_not_ack_fail:
 int Tw9912_init_agin(void)
 {
     u32 i = 0;
-    u8 *config_pramat_piont = NULL;
+   const u8 *config_pramat_piont = NULL;
     tw9912_dbg("Tw9912_init_agin +\n");
     //TC9912_id();
     the_last_config.Channel = YIN3;
@@ -1051,7 +1053,7 @@ int Tw9912_init_agin(void)
    // config_pramat_piont = TW9912_INIT_NTSC_Interlaced_input;
     while(config_pramat_piont[i*2] != 0xfe)
     {
-        if(write_tw9912(&config_pramat_piont[i*2]) == NACK) goto CONFIG_not_ack_fail;
+        if(write_tw9912((char *)&config_pramat_piont[i*2]) == NACK) goto CONFIG_not_ack_fail;
         //		tw9912_dbg("w a=%x,v=%x\n",config_pramat_piont[i*2],config_pramat_piont[i*2+1]);
         i++;
     }
@@ -1064,7 +1066,7 @@ CONFIG_not_ack_fail:
 int Tw9912_YIN3ToYUV_init_agin(void)
 {
     u32 i = 0;
-    u8 *config_pramat_piont = NULL;
+    const u8 *config_pramat_piont = NULL;
     tw9912_dbg("Tw9912_YIN3ToYUV_init_agin +\n");
    // TC9912_id();
    the_last_config.Channel = SEPARATION;
@@ -1073,7 +1075,7 @@ int Tw9912_YIN3ToYUV_init_agin(void)
    // config_pramat_piont = TW9912_INIT_NTSC_Interlaced_input;
     while(config_pramat_piont[i*2] != 0xfe)
     {
-        if(write_tw9912(&config_pramat_piont[i*2]) == NACK) goto CONFIG_not_ack_fail;
+        if(write_tw9912((char *)&config_pramat_piont[i*2]) == NACK) goto CONFIG_not_ack_fail;
         //		tw9912_dbg("w a=%x,v=%x\n",config_pramat_piont[i*2],config_pramat_piont[i*2+1]);
         i++;
     }
@@ -1086,7 +1088,7 @@ CONFIG_not_ack_fail:
 int Tw9912_init_PALi(void)
 {
     u32 i = 0;
-    u8 *config_pramat_piont = NULL;
+    const u8 *config_pramat_piont = NULL;
     tw9912_dbg("Tw9912_init_PALi initall tw9912+\n");
     TC9912_id();
     the_last_config.Channel = YIN3;
@@ -1094,12 +1096,12 @@ int Tw9912_init_PALi(void)
     config_pramat_piont = TW9912_INIT_PAL_Interlaced_input;
     while(TW9912_INIT_Public[i*2] != 0xfe)
     {
-        if(write_tw9912(&TW9912_INIT_Public[i*2]) == NACK) goto CONFIG_not_ack_fail;
+        if(write_tw9912((char *)&TW9912_INIT_Public[i*2]) == NACK) goto CONFIG_not_ack_fail;
         i++;
     }
     while(config_pramat_piont[i*2] != 0xfe)
     {
-        if(write_tw9912(&config_pramat_piont[i*2]) == NACK) goto CONFIG_not_ack_fail;
+        if(write_tw9912((char *)&config_pramat_piont[i*2]) == NACK) goto CONFIG_not_ack_fail;
         //		tw9912_dbg("w a=%x,v=%x\n",config_pramat_piont[i*2],config_pramat_piont[i*2+1]);
         i++;
     }
@@ -1146,7 +1148,7 @@ int Tw9912_init(Vedio_Format config_pramat, Vedio_Channel Channel)
     Vedio_Format ret_format;
     u32 i = 0;
     int ret = 0, delte_signal_count = 0;
-    u8 *config_pramat_piont = NULL;
+    const u8 *config_pramat_piont = NULL;
     u8 Tw9912_input_pin_selet[] = {0x02, 0x40,}; //default input pin selet YIN0
     printk("tw9912: inital begin\n");
     mutex_lock(&lock_com_chipe_config);
@@ -1261,13 +1263,13 @@ SIGNAL_DELTE_AGAIN:
 
         while(TW9912_INIT_Public[i*2] != 0xfe)
         {
-            if(write_tw9912(&TW9912_INIT_Public[i*2]) == NACK) goto CONFIG_not_ack_fail;
+            if(write_tw9912((char *)&TW9912_INIT_Public[i*2]) == NACK) goto CONFIG_not_ack_fail;
             i++;
         }
         //for(;i<SIZE_OF_ARRAY(config_pramat_piont)/2;i++)
         while(config_pramat_piont[i*2] != 0xfe)
         {
-            if(write_tw9912(&config_pramat_piont[i*2]) == NACK) goto CONFIG_not_ack_fail;
+            if(write_tw9912((char *)&config_pramat_piont[i*2]) == NACK) goto CONFIG_not_ack_fail;
             //				tw9912_dbg("w a=%x,v=%x\n",config_pramat_piont[i*2],config_pramat_piont[i*2+1]);
             if(signal_is_how[Channel].Format == NTSC_P \
                     && config_pramat_piont[i*2] > 0x24\
@@ -1282,7 +1284,7 @@ SIGNAL_DELTE_AGAIN:
             //bit3 and bit0
             //only  enable recognition of NTSC
             TW9912_input_info tw9912_input_information_NTSCp;
-            write_tw9912(manually_initiate_auto_format_detection);
+            write_tw9912((char *)manually_initiate_auto_format_detection);
             //msleep(100);
             tw9912_get_input_info(&tw9912_input_information_NTSCp);
             if(tw9912_input_information_NTSCp.input_detection.valu & 0x08)//Composite Sync detection status
@@ -1322,24 +1324,24 @@ SIGNAL_DELTE_AGAIN:
             switch(Channel)
             {
             case 0: 	//	 YIN0
-                if(write_tw9912(Tw9912_input_pin_selet) == NACK) goto CONFIG_not_ack_fail;
+                if(write_tw9912((char *)Tw9912_input_pin_selet) == NACK) goto CONFIG_not_ack_fail;
                 break;
             case 1: //	 YIN1
                 Tw9912_input_pin_selet[1] = 0x44; //register valu selete YIN1
-                if(write_tw9912(Tw9912_input_pin_selet) == NACK) goto CONFIG_not_ack_fail;
+                if(write_tw9912((char *)Tw9912_input_pin_selet) == NACK) goto CONFIG_not_ack_fail;
                 break;
             case 2: //	 YIN2
                 Tw9912_input_pin_selet[1] = 0x48;
-                if(write_tw9912(Tw9912_input_pin_selet) == NACK) goto CONFIG_not_ack_fail;
+                if(write_tw9912((char *)Tw9912_input_pin_selet) == NACK) goto CONFIG_not_ack_fail;
 
                 break;
             case 3: //	 YIN3
                 Tw9912_input_pin_selet[1] = 0x4c;
-                if(write_tw9912(Tw9912_input_pin_selet) == NACK) goto CONFIG_not_ack_fail;
+                if(write_tw9912((char *)Tw9912_input_pin_selet) == NACK) goto CONFIG_not_ack_fail;
 
                 Tw9912_input_pin_selet[0] = 0xe8; //only selet YIN3 neet set
                 Tw9912_input_pin_selet[1] = 0x3f; //disable YOUT buffer
-                if(write_tw9912(Tw9912_input_pin_selet) == NACK) goto CONFIG_not_ack_fail;
+                if(write_tw9912((char *)Tw9912_input_pin_selet) == NACK) goto CONFIG_not_ack_fail;
                 break;
             default :
                 printk("tw9912:%s:you input Channel = %d error!\n", __FUNCTION__, Channel);

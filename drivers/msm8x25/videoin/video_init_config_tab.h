@@ -107,7 +107,7 @@
 #pragma message("目前硬件版本是：V3")
 
 #ifndef BOARD_V3
-#pragma message("目前硬件版本是：V3以上，请注意该处的参数设置,是否满足要求（video_ini_config_tab.h: line:110）")
+#pragma message("目前硬件版本是：V3以上，请注意该处的参数设置,是否满足要求")
 #endif
 
 		const u8 Image_Config_AUX_BACK[5][11] = 
