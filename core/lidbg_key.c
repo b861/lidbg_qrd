@@ -2,10 +2,6 @@
 
 #include "lidbg.h"
 
-#ifdef _LIGDBG_SHARE__
-LIDBG_SHARE_DEFINE;
-#endif
-
 struct input_dev *input = NULL;
 
 typedef unsigned char  KEYCODE_T;
@@ -52,24 +48,12 @@ void lidbg_key_report(u32 key_value, u32 type)
 }
 
 
-static void share_set_func_tbl(void)
-{
-    //io
-    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnlidbg_key_main = lidbg_key_main;
-    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnlidbg_key_report = lidbg_key_report;
-}
-
 
 int lidbg_key_init(void)
 {
     int error;
     int i;
     DUMP_BUILD_TIME;
-
-#ifdef _LIGDBG_SHARE__
-    LIDBG_SHARE_GET;
-    share_set_func_tbl();
-#endif
 
     input = input_allocate_device();
     if (!input)
@@ -231,9 +215,7 @@ void lidbg_key_main(int argc, char **argv)
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Flyaudad Inc.");
 
-#ifndef _LIGDBG_SHARE__
 EXPORT_SYMBOL(lidbg_key_main);
 EXPORT_SYMBOL(lidbg_key_report);
-#endif
 module_init(lidbg_key_init);
 module_exit(lidbg_key_deinit);

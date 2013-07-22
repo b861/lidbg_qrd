@@ -2,21 +2,8 @@
 #include "lidbg.h"
 
 //#define LIDBG_MULTI_TOUCH_SUPPORT
-#ifdef _LIGDBG_SHARE__
-LIDBG_SHARE_DEFINE;
-#endif
 
 struct input_dev *input = NULL;
-
-#ifdef SOC_TCC8803
-#define RESOLUTION_X   (800)
-#define RESOLUTION_Y   (480)
-#endif
-
-#ifdef SOC_MSM8x25
-#define RESOLUTION_X   (320)
-#define RESOLUTION_Y   (480)
-#endif
 
 #define TOUCH_X_MIN  (0)
 #define TOUCH_X_MAX  (RESOLUTION_X-1)
@@ -65,23 +52,14 @@ void lidbg_touch_report(u32 pos_x, u32 pos_y, u32 type)
 
 }
 
-static void share_set_func_tbl(void)
-{
-    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnlidbg_touch_main = lidbg_touch_main;
-    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnlidbg_touch_report = lidbg_touch_report;
-}
 
 int lidbg_touch_init(void)
 {
     int error;
-
+    u32 RESOLUTION_X=1024;
+    u32 RESOLUTION_Y=600;
     DUMP_BUILD_TIME;
 
-
-#ifdef _LIGDBG_SHARE__
-    LIDBG_SHARE_GET;
-    share_set_func_tbl();
-#endif
     input = input_allocate_device();
     if (!input)
     {
@@ -95,6 +73,8 @@ int lidbg_touch_init(void)
     input->id.vendor = 0x0001;
     input->id.product = 0x0011;
     input->id.version = 0x0101;
+
+   soc_get_screen_res(&RESOLUTION_X,&RESOLUTION_Y);
 
 #ifdef LIDBG_MULTI_TOUCH_SUPPORT
     set_bit(EV_SYN, input->evbit);
@@ -165,11 +145,9 @@ void lidbg_touch_main(int argc, char **argv)
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Flyaudad Inc.");
 
-#ifndef _LIGDBG_SHARE__
 
 EXPORT_SYMBOL(lidbg_touch_main);
 EXPORT_SYMBOL(lidbg_touch_report);
-#endif
 
 module_init(lidbg_touch_init);
 module_exit(lidbg_touch_deinit);

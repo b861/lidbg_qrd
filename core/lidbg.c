@@ -4,11 +4,7 @@
 // http://blog.csdn.net/luoshengyang/article/details/6568411
 #include "lidbg.h"
 
-#ifdef _LIGDBG_SHARE__
-LIDBG_SHARE_DEFINE;
-void *global_lidbg_devp;
-
-#endif
+struct lidbg_dev *global_lidbg_devp;
 
 #define MEM_CLEAR 0x1  /*清0全局内存*/
 #define GET_GLOBAL 0x2
@@ -211,19 +207,19 @@ static ssize_t lidbg_write(struct file *filp, const char __user *buf,
 
         if(!strcmp(argv[1], "mem"))
         {
-            share_lidbg_mem_main(new_argc, new_argv);
+            lidbg_mem_main(new_argc, new_argv);
         }
         else if(!strcmp(argv[1], "i2c"))
         {
-            share_mod_i2c_main(new_argc, new_argv);
+            mod_i2c_main(new_argc, new_argv);
         }
         else if(!strcmp(argv[1], "io"))
         {
-            share_mod_io_main(new_argc, new_argv);
+            mod_io_main(new_argc, new_argv);
         }
         else if(!strcmp(argv[1], "ad"))
         {
-            share_mod_ad_main(new_argc, new_argv);
+            mod_ad_main(new_argc, new_argv);
         }
         else if(!strcmp(argv[1], "spi"))
         {
@@ -231,20 +227,20 @@ static ssize_t lidbg_write(struct file *filp, const char __user *buf,
         }
         else if(!strcmp(argv[1], "display"))
         {
-            share_lidbg_display_main(new_argc, new_argv);
+            lidbg_display_main(new_argc, new_argv);
         }
 
         else if(!strcmp(argv[1], "key"))
         {
-            share_lidbg_key_main(new_argc, new_argv);
+            lidbg_key_main(new_argc, new_argv);
         }
         else if(!strcmp(argv[1], "touch"))
         {
-            share_lidbg_touch_main(new_argc, new_argv);
+            lidbg_touch_main(new_argc, new_argv);
         }
         else if(!strcmp(argv[1], "soc"))
         {
-            share_lidbg_soc_main(new_argc, new_argv);
+            lidbg_soc_main(new_argc, new_argv);
         }
         else if(!strcmp(argv[1], "serial"))
         {
@@ -258,12 +254,12 @@ static ssize_t lidbg_write(struct file *filp, const char __user *buf,
 
         else if(!strcmp(argv[1], "servicer"))
         {
-            share_lidbg_servicer_main(new_argc, new_argv);
+            lidbg_servicer_main(new_argc, new_argv);
         }
 
         else if(!strcmp(argv[1], "cmm"))
         {
-            share_mod_cmn_main(new_argc, new_argv);
+            mod_cmn_main(new_argc, new_argv);
         }
 #if 1
         else if(!strcmp(argv[1], "video"))
@@ -357,12 +353,6 @@ int lidbg_init(void)
     lidbg("lidbg_init\n");
     DUMP_BUILD_TIME;
 
-#ifdef _LIGDBG_SHARE__
-    LIDBG_SHARE_GET;
-    global_lidbg_devp = plidbg_share->lidbg_devp;
-#endif
-
-
     /* 申请设备号*/
     if (lidbg_major)
         result = register_chrdev_region(devno, 1, "lidbg");
@@ -373,16 +363,16 @@ int lidbg_init(void)
     }
     if (result < 0)
         return result;
-#if 0
+#if 1
     /* 动态申请设备结构体的内存*/
-    lidbg_devp = kmalloc(sizeof(struct lidbg_dev), GFP_KERNEL);
+    global_lidbg_devp = kmalloc(sizeof(struct lidbg_dev), GFP_KERNEL);
 
-    if (!lidbg_devp)    /*申请失败*/
+    if (!global_lidbg_devp)    /*申请失败*/
     {
         result =  - ENOMEM;
         goto fail_malloc;
     }
-    memset(lidbg_devp, 0, sizeof(struct lidbg_dev));
+    memset(global_lidbg_devp, 0, sizeof(struct lidbg_dev));
 #endif
     lidbg_setup_cdev((struct lidbg_dev *)global_lidbg_devp, 0);
 
@@ -475,6 +465,9 @@ void lidbg_remove_proc(void)
 
 MODULE_AUTHOR("Lsw");
 MODULE_LICENSE("GPL");
+
+EXPORT_SYMBOL(global_lidbg_devp);
+
 
 module_param(lidbg_major, int, S_IRUGO);
 

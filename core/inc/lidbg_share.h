@@ -2,7 +2,7 @@
 #ifndef _LIGDBG_SHARE__
 #define _LIGDBG_SHARE__
 
-
+#if 0
 struct lidbg_fn_t_share
 {
     //io
@@ -216,5 +216,6 @@ static inline int share_check_pt(void)
 #define share_lidbg_touch_report (share_check_pt()?NULL:(plidbg_share->share_func_tbl.pfnlidbg_touch_report))
 
 
+#endif
 #endif
 

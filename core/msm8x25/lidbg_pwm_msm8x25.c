@@ -12,7 +12,7 @@ void soc_bl_init(void)
 #if (defined(BOARD_V1) || defined(BOARD_V2))
 
 #else
-	pmapp_disp_backlight_init();
+	//pmapp_disp_backlight_init();
 #endif
 
 }
@@ -32,7 +32,7 @@ unsigned int   soc_bl_set(u32 bl_level)
 #else
 	int err;
 
-	err = pmapp_disp_backlight_set_brightness(bl_level);
+	//err = pmapp_disp_backlight_set_brightness(bl_level);
 	if(err)
 	{
 	     printk("Backlight set brightness failed !\n");
@@ -98,8 +98,6 @@ unsigned int   soc_bl_set(u32 bl_level)
     return 1;
 }
 
-#ifndef _LIGDBG_SHARE__
 EXPORT_SYMBOL(soc_bl_set);
 EXPORT_SYMBOL(soc_pwm_set);
-#endif
 

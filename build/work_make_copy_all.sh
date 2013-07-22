@@ -32,6 +32,6 @@ for each_dir in `ls -l | grep "^d" | awk '{print $NF}'`
 		read get_key
 	fi
 	#then copy to out dir 
-	mv -u $dir/*.ko     $DBG_OUT_PATH/
+	cp -u $dir/*.ko     $DBG_OUT_PATH/
 done
 

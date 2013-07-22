@@ -1,6 +1,7 @@
 /* Copyright (c) 2012, swlee
  *
  */
+#if 0
 
 #include "lidbg.h"
 #include "lidbg_mmap.c"
@@ -182,8 +183,6 @@ module_exit(share_exit);
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Flyaudio Inc.");
 
-#ifndef _LIGDBG_SHARE__
 
 EXPORT_SYMBOL(global_lidbg_devp);
 #endif
-

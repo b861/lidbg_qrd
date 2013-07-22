@@ -17,6 +17,7 @@ lidbg_test-objs :=test.o
 EXTRA_CFLAGS := -I$(DBG_DRV_PATH)/inc  -I$(DBG_DRV_PATH)/$(DBG_SOC)/inc  -I$(DBG_DEV_PATH)/$(DBG_SOC)
 #include $(DBG_DRV_PATH)/$(DBG_SOC)/drv_$(DBG_SOC).mk
 include $(DBG_ROOT_PATH)/build_cfg.mk
+KBUILD_EXTRA_SYMBOLS := $(DBG_DRV_PATH)/$(DBG_SOC)/Module.symvers $(DBG_DRV_PATH)/Module.symvers
 
 modules:
 	$(MAKE) -C $(KERNELDIR) M=$(PWD) ARCH=arm  CROSS_COMPILE=$(DBG_CROSS_COMPILE) modules

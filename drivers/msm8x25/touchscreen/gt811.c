@@ -37,7 +37,7 @@ LIDBG_DEFINE;
 #include <linux/module.h>
 #include <linux/gpio.h>
 #include <linux/regulator/consumer.h>
-#include <linux/input/ft5x06_ts.h>
+//#include <linux/input/ft5x06_ts.h>
 #include <linux/firmware.h>
 #include <linux/syscalls.h>
 #include <asm/uaccess.h>

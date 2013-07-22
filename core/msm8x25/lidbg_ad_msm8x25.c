@@ -30,7 +30,6 @@ unsigned int  soc_ad_read(unsigned int channel)
 }
 
 
-#ifndef _LIGDBG_SHARE__
 EXPORT_SYMBOL(soc_ad_read);
-#endif
+
 

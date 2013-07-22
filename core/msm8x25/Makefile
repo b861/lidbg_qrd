@@ -9,12 +9,8 @@ CROSS_COMPILE = $(DBG_CROSS_COMPILE)
 CC = $(CROSS_COMPILE)gcc
 
 obj-m	+= lidbg_soc_$(DBG_SOC).o
-obj-m	+= lidbg_fly_soc.o
 
-
-lidbg_soc_$(DBG_SOC)-objs := m_$(DBG_SOC).o lidbg_io_$(DBG_SOC).o  lidbg_ad_$(DBG_SOC).o lidbg_pwm_$(DBG_SOC).o lidbg_i2c_gpio_$(DBG_SOC).o
-
-lidbg_fly_soc-objs :=fly_soc.o
+lidbg_soc_$(DBG_SOC)-objs := m_$(DBG_SOC).o lidbg_io_$(DBG_SOC).o  lidbg_ad_$(DBG_SOC).o lidbg_pwm_$(DBG_SOC).o
 
 EXTRA_CFLAGS := -I$(DBG_DRV_PATH)/inc  -I$(DBG_DRV_PATH)/$(DBG_SOC)/inc  -I$(DBG_DEV_PATH)/$(DBG_SOC)
 include $(DBG_DRV_PATH)/$(DBG_SOC)/drv_$(DBG_SOC).mk

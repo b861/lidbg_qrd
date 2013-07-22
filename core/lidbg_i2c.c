@@ -2,12 +2,6 @@
 /*i2c new style driver (Standard driver) */
 
 #include "lidbg.h"
-#ifdef _LIGDBG_SHARE__
-LIDBG_SHARE_DEFINE;
-#endif
-
-#define LIDBG_I2C_GPIO
-
 
 //#define I2C_NEW_STYLE
 //#define  USE_I2C_LOCK
@@ -79,26 +73,22 @@ static struct i2c_driver i2c_api_driver =
 
  };
 
-static struct i2c_gpio_platform_data fly_i2c_gpio_pdata = {
-	.sda_pin		= MSM_I2C_GPIO_SDA2,
+static struct i2c_gpio_platform_data i2c_gpio_pdata = {
+	.sda_pin		= LIDBG_I2C_GPIO_SDA,
 	.sda_is_open_drain	= 0,
-	.scl_pin		= MSM_I2C_GPIO_SCL2,
+	.scl_pin		= LIDBG_I2C_GPIO_SCL,
 	.scl_is_open_drain	= 1,
 	.udelay			= 50,		/* 10 kHz */
 };
 
-static struct platform_device fly_i2c_gpio_device = {
+static struct platform_device i2c_gpio_device = {
 	.name			= "i2c-gpio",
 	.id			= 2,		//will be used to set the i2c_bus number
 	.dev			={
-		.platform_data	= &fly_i2c_gpio_pdata,
+		.platform_data	= &i2c_gpio_pdata,
 	},
 };
 
-void soc_i2c_gpio_init(struct platform_device *pdev)
-{
-	share_soc_i2c_gpio_config(pdev);
-}
 
 static struct i2c_api *get_i2c_api(int bus_id)
 {
@@ -642,40 +632,19 @@ int i2c_api_detach(struct i2c_adapter *adap)
 }
 
 
-static void share_set_func_tbl(void)
-{
-    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfni2c_api_do_send = i2c_api_do_send;
-    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfni2c_api_do_recv = i2c_api_do_recv;
-    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfni2c_api_do_recv_no_sub_addr = i2c_api_do_recv_no_sub_addr;
-    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfni2c_api_do_recv_sub_addr_2bytes = i2c_api_do_recv_sub_addr_2bytes;
-    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfni2c_api_do_recv_sub_addr_3bytes = i2c_api_do_recv_sub_addr_3bytes;
-    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfnmod_i2c_main = mod_i2c_main;
-
-    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfni2c_api_do_recv_SAF7741 = i2c_api_do_recv_SAF7741;
-    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfni2c_api_do_send_TEF7000 = i2c_api_do_send_TEF7000;
-    ((struct lidbg_share *)plidbg_share)->share_func_tbl.pfni2c_api_do_recv_TEF7000 = i2c_api_do_recv_TEF7000;
-
-}
-
 static int __init i2c_api_init(void)
 {
     //±éÀúadapter
     int ret;
-	
-#ifdef _LIGDBG_SHARE__
-    LIDBG_SHARE_GET;
-    share_set_func_tbl();
-#endif
 
 #ifdef LIDBG_I2C_GPIO 
 #ifndef CONFIG_I2C_GPIO
 	lidbg("load lidbg_i2c_gpio.ko\n");
-	share_cmn_launch_user("/system/bin/insmod", "/system/lib/modules/out/lidbg_i2c_gpio.ko");
-	share_cmn_launch_user("/system/bin/insmod", "/flysystem/lib/out/lidbg_i2c_gpio.ko");
-//	msleep(50);//delay for  lidbg_i2c_gpio.ko complete
+	cmn_launch_user("/system/bin/insmod", "/system/lib/modules/out/lidbg_i2c_gpio.ko");
+	cmn_launch_user("/system/bin/insmod", "/flysystem/lib/out/lidbg_i2c_gpio.ko");
 
-    soc_i2c_gpio_init(&fly_i2c_gpio_device);
-    ret = platform_device_register(&fly_i2c_gpio_device);
+    I2C_GPIO_CONFIG;
+    ret = platform_device_register(&i2c_gpio_device);
     if (ret)
     {
         lidbg(KERN_ERR "[%s] Device registration failed!\n", __func__);
@@ -710,7 +679,6 @@ MODULE_LICENSE("GPL");
 module_init(i2c_api_init);
 module_exit(i2c_api_exit);
 
-#ifndef _LIGDBG_SHARE__
 
 EXPORT_SYMBOL(i2c_api_do_send);
 EXPORT_SYMBOL(i2c_api_do_recv);
@@ -723,5 +691,4 @@ EXPORT_SYMBOL(lidbg_i2c_running);
 EXPORT_SYMBOL(i2c_api_do_recv_SAF7741);
 EXPORT_SYMBOL(i2c_api_do_send_TEF7000);
 EXPORT_SYMBOL(i2c_api_do_recv_TEF7000);
-#endif
 

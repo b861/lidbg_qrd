@@ -877,9 +877,8 @@ int  soc_get_screen_res(u32 *screen_x, u32 *screen_y)
 }
 
 
-#ifndef _LIGDBG_SHARE__
 EXPORT_SYMBOL(lidbg_display_main);
 EXPORT_SYMBOL(soc_get_screen_res);
-#endif
+
 
 

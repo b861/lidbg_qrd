@@ -12,7 +12,7 @@
 
 #endif
 
-#include "lidbg_to_bpmsg.h"
+#include "lidbg_bpmsg.h"
 
 
 static struct task_struct *bp_msg_task;

@@ -120,7 +120,7 @@ free_gpio:
 }
 
 
-int soc_io_output(u32 index, bool status)
+int soc_io_output(u32 group,u32 index, bool status)
 {
 
     gpio_set_value(index, status);
@@ -133,7 +133,6 @@ bool soc_io_input( u32 index)
     return gpio_get_value(index);
 }
 
-#ifndef _LIGDBG_SHARE__
 
 EXPORT_SYMBOL(soc_io_output);
 EXPORT_SYMBOL(soc_io_input);
@@ -141,4 +140,3 @@ EXPORT_SYMBOL(soc_io_irq);
 EXPORT_SYMBOL(soc_irq_enable);
 EXPORT_SYMBOL(soc_irq_disable);
 EXPORT_SYMBOL(soc_io_config);
-#endif

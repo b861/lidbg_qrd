@@ -8,7 +8,7 @@ PWD := $(shell pwd)
 CROSS_COMPILE = $(DBG_CROSS_COMPILE)
 CC = $(CROSS_COMPILE)gcc
 
-obj-m	+= lidbg_share.o
+#obj-m	+= lidbg_share.o
 obj-m	+= lidbg_io.o
 obj-m	+= lidbg_ad.o
 obj-m	+= lidbg_i2c_gpio.o
@@ -30,10 +30,11 @@ EXTRA_CFLAGS := -I$(DBG_DRV_PATH)/inc  -I$(DBG_DRV_PATH)/$(DBG_SOC)/inc  -I$(DBG
 include $(DBG_DRV_PATH)/$(DBG_SOC)/drv_$(DBG_SOC).mk
 
 include $(DBG_ROOT_PATH)/build_cfg.mk
+KBUILD_EXTRA_SYMBOLS := $(DBG_DRV_PATH)/$(DBG_SOC)/Module.symvers
 
 modules:
-	cp  $(DBG_SYSTEM_DIR)/kernel/drivers/i2c/busses/i2c-gpio.c ./i2c-gpio.c
-	cp  $(DBG_SYSTEM_DIR)/kernel/drivers/i2c/algos/i2c-algo-bit.c ./i2c-algo-bit.c
+	cp  $(KERNELDIR)/source/drivers/i2c/busses/i2c-gpio.c ./i2c-gpio.c
+	cp  $(KERNELDIR)/source/drivers/i2c/algos/i2c-algo-bit.c ./i2c-algo-bit.c
 	$(MAKE) -C $(KERNELDIR) M=$(PWD) ARCH=arm  CROSS_COMPILE=$(DBG_CROSS_COMPILE) modules
  
 modules_install:

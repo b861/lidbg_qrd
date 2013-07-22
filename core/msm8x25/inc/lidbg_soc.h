@@ -68,9 +68,6 @@
 
 #include <mach/msm_rpcrouter.h>
 
-//i2c-gpio
-#define MSM_I2C_GPIO_SDA2 107
-#define MSM_I2C_GPIO_SCL2 32
 
 #if 0
 enum
@@ -167,12 +164,9 @@ int soc_io_irq(struct io_int_config *pio_int_config);
 void soc_irq_disable(unsigned int irq);
 void soc_irq_enable(unsigned int irq);
 
-int soc_io_output(u32 index, bool status);
+int soc_io_output(u32 group,u32 index, bool status);
 bool soc_io_input(u32 index);
 int soc_io_config(u32 index, bool direction, u32 pull, u32 drive_strength, bool force_reconfig);
-int soc_serial_set_tty(int port, int baud, char parity, int bits);
-void soc_i2c_gpio_config(struct platform_device *pdev);
-
 
 
 void lidbg_soc_main(int argc, char **argv);
@@ -191,7 +185,22 @@ struct fly_smem
 
 extern struct fly_smem *p_fly_smem ;
 
+#define IO_CONFIG_OUTPUT(group,index) do{  soc_io_config( index,  GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_16MA, 1);}while(0)
+#define IO_CONFIG_INPUT(group,index) do{  soc_io_config( index,  GPIO_CFG_INPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA, 1);}while(0)
 
+#define GPIO_TO_INT MSM_GPIO_TO_INT
+
+
+//i2c-gpio
+//#define LIDBG_I2C_GPIO
+
+#define LIDBG_I2C_GPIO_SDA (107)
+#define LIDBG_I2C_GPIO_SCL (32)
+
+#define I2C_GPIO_CONFIG do{	 \
+	 gpio_tlmm_config(GPIO_CFG(LIDBG_I2C_GPIO_SDA, 0, (GPIO_CFG_OUTPUT | GPIO_CFG_INPUT), GPIO_CFG_PULL_UP, GPIO_CFG_16MA), GPIO_CFG_ENABLE);\
+	 gpio_tlmm_config(GPIO_CFG(LIDBG_I2C_GPIO_SCL, 0, GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA), GPIO_CFG_ENABLE);\
+}while(0)
 
 #endif
 
