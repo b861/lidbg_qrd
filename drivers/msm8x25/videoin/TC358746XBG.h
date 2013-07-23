@@ -31,18 +31,18 @@ struct TC358_register_struct_read
 #define DEBUG_TC358
 //#define tc358746_debug
 //#endif
-#define TC358746XBG_RESET 33
-
-#ifdef BOARD_V2
 
 #ifdef BOARD_V1
 #define TC358746XBG_RESET 28
-#else//V2 V3
+#elif BOARD_V2
 #define TC358746XBG_RESET 33
-#endif
+#else //BOARD_V3
 
-#elif BOARD_V3
+#ifndef BOARD_V3
+#pragma message("目前硬件版本是：V3以上，请注意该处的参数设置,是否满足要求（TC358746XBG: line:50）")
+#endif
 #define TC358746XBG_RESET 33
+
 #endif
 
 

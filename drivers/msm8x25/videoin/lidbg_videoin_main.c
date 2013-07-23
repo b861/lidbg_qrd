@@ -4,7 +4,7 @@
 #include "lidbg_def.h"
 #include "video_init_config.h"
 static struct task_struct *Vedio_Signal_Test = NULL;
-static struct task_struct *RunTimeTw9912Status = NULL;
+//static struct task_struct *RunTimeTw9912Status = NULL;
 extern tw9912_run_flag tw912_run_sotp_flag;
 extern struct TC358_register_struct colorbar_init_user_tab[2];
 
@@ -41,7 +41,6 @@ static void video_config_init(Vedio_Format config_pramat, u8 Channal)
 }
 static int thread_vedio_signal_test(void *data)
 {
-    int i = 0;
     long int timeout;
     printk("tw9912:thread_vedio_signal_test()\n");
     while(!kthread_should_stop())
@@ -90,9 +89,9 @@ static int thread_vedio_signal_test(void *data)
     }
     return 0;
 }
+/*
 static int TestTw9912SignalStatusThread(void *data)
 {
-    int i = 0;
     long int timeout;
     printk("%s()\n",__func__);
     while(!kthread_should_stop())
@@ -119,6 +118,7 @@ static int TestTw9912SignalStatusThread(void *data)
     }
     return 0;
 }
+
 static void CreadChipStatusFunction(void)
 {
 	printk("%s()\n",__func__);
@@ -130,6 +130,7 @@ static void CleanChipStatusFunction(void)
 		printk("%s()\n",__func__);
                 kthread_stop(RunTimeTw9912Status);
 }
+*/
 #ifdef DEBUG_TW9912
 void lidbgVideoTerminalImageConfig(int argc, char **argv)
 {
@@ -312,7 +313,7 @@ void lidbgVideoTw9912TerminalConfig(int argc, char **argv)
         buf[0] = sub_addr;
         buf[1] = valu;
         i2c_write_byte(1, 0x44, buf , 2);
-        i2c_read_byte(1, 0x44, sub_addr , &valu, 1);
+        i2c_read_byte(1, 0x44, sub_addr , (char*)&valu, 1);
         printk("read adder=0x%02x, valu=0x%02x\n", buf[0], valu);
     }
     else if(!strcmp(argv[1], "Read"))
@@ -355,7 +356,7 @@ void lidbg_video_main_in(int argc, char **argv)
 #endif
     else if(!strcmp(argv[0], "TestingPresentChannalSignal"))
     {
-        ret = camera_open_video_signal_test();
+        ret =(u8) camera_open_video_signal_test();
         switch(ret)
         {
         case 1:
@@ -469,7 +470,7 @@ static int video_dev_remove(struct platform_device *pdev)
     DUMP_BUILD_TIME;
     return 0;
 }
-static int  video_dev_suspend(struct platform_device *pdev)
+static int  video_dev_suspend(struct platform_device *pdev,pm_message_t state)
 {
     DUMP_BUILD_TIME;
     return 0;
@@ -537,6 +538,7 @@ static ssize_t tw9912_write(struct file *filp, const char __user *buf, size_t co
       if(global_tw9912_info.reg_val  > 0x10)
      		 para[1]=global_tw9912_info.reg_val;
       write_tw9912(para);
+return 0;
 }
 static const struct file_operations tw9912_fops =
 {
@@ -606,12 +608,12 @@ void tw9912_exit( void )
 	unregister_chrdev_region(tw9912_dev, 1);
 }
 
-int lidbg_video_deinit(void)
+void lidbg_video_deinit(void)
 {
     printk("lidbg_video_deinit module exit.....\n");
     //CleanChipStatusFunction();
     tw9912_exit();
-    return 0;
+   // return 0;
 
 }
 

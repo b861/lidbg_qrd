@@ -6,7 +6,7 @@ static Vedio_Channel info_com_top_Channel = YIN2;
 extern TW9912_Signal signal_is_how[5];
 extern Last_config_t the_last_config;
 extern TW9912Info global_tw9912_info;
-static struct task_struct *Signal_Test = NULL;
+//static struct task_struct *Signal_Test = NULL;
 static u8 flag_now_config_channal_AUX_or_Astren=0; //0 is Sstren 1 is AUX
 
 static TW9912_Image_Parameter TW9912_Image_Parameter_fly[6] = {
@@ -56,6 +56,7 @@ int static Change_channel(void)
     tw9912_RESX_UP;
     //msleep(20);
     //  mutex_unlock(&lock_chipe_config);
+    return 0;
 }
 int static VideoImageParameterConfig(void)
 {
@@ -207,12 +208,12 @@ int static VideoImage(void)
 	        if(info_com_top_Channel == YIN3)//back or AUX
 	        {
 	            if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
-	                ret = write_tw9912(&Tw9912_image_global_AUX_BACK[i]);
+	                ret = write_tw9912((char *)&Tw9912_image_global_AUX_BACK[i]);
 	            else
-	                ret = write_tw9912(&Tw9912_image_global_AUX_BACK_PAL_I[i]);
+	                ret = write_tw9912((char *)&Tw9912_image_global_AUX_BACK_PAL_I[i]);
 	        }
 	        else //DVD SEPARATION
-	            ret = write_tw9912(&Tw9912_image_global_separation[i]);
+	            ret = write_tw9912((char *)&Tw9912_image_global_separation[i]);
     }
 
     if(flag_now_config_channal_AUX_or_Astren == 0)//Astren
@@ -221,34 +222,34 @@ int static VideoImage(void)
 			{
 				Tw9912_image[0] = 0x12;
 				Tw9912_image[1] = 0x1f;
-				ret = write_tw9912(&Tw9912_image);
+				ret = write_tw9912((char *)&Tw9912_image);
 				Tw9912_image[0] = 0x08;
 				Tw9912_image[1] = global_tw9912_info.reg_val;//form qcamerahwi_preview.cpp
-				ret = write_tw9912(&Tw9912_image);
+				ret = write_tw9912((char *)&Tw9912_image);
 			}
 		else
 			{
 				Tw9912_image[0] = 0x12;
 				Tw9912_image[1] = 0xff;
-				ret = write_tw9912(&Tw9912_image);
+				ret = write_tw9912((char *)&Tw9912_image);
 			}
 	}
 
 #ifdef BOARD_V1
 	    if(info_com_top_Channel == YIN3)// back or AUX
 	    {
-	        ret = write_tw9912(Tw9912_image);
+	        ret = write_tw9912((char *)Tw9912_image);
 	        Tw9912_image[0] = 0x08;
 	        Tw9912_image[1] = 0x14; // image down 5 line
-	        ret = write_tw9912(Tw9912_image);
+	        ret = write_tw9912((char *)Tw9912_image);
 	        Tw9912_image[0] = 0x0a;
 	        Tw9912_image[1] = 0x22; // image down 5 line
-	        ret = write_tw9912(Tw9912_image);
+	        ret = write_tw9912((char *)Tw9912_image);
 	    }
 	    else if(info_com_top_Channel == YIN2)//DVD
 	    {
 	        u8 Tw9912_image[2] = {0x08, 0x1a,}; //image reft 5 line
-	        ret = write_tw9912(Tw9912_image);
+	        ret = write_tw9912((char *)Tw9912_image);
 	    }
 	    else
 	    {
@@ -259,8 +260,6 @@ return ret;
 }
 int flyVideoImageQualityConfig_in(Vedio_Effect cmd , u8 valu)
 {
-    int ret;
-    u8 Tw9912_image[2] = {0, 0,}; //default input pin selet YIN0ss
     printk("flyVideoImage(%d,%d)\n", cmd, valu);
 	switch(cmd)
 	{
@@ -462,7 +461,6 @@ int read_chips_signal_status(u8 cmd)
 }
 int IfInputSignalNotStable(void)
 {
-    int ret;
     int i;
     Vedio_Format ret2;
     static u8 IfInputSignalNotStable_count = 1;
@@ -532,7 +530,7 @@ SIGNALISGOOD:
 SIGNALINPUT:
     return 0;
 }
-static int thread_signal_test(void *data)
+/*static int thread_signal_test(void *data)
 {
     int i = 0;
     long int timeout;
@@ -555,10 +553,9 @@ static int thread_signal_test(void *data)
         }
     }
     return 0;
-}
+}*/
 void video_init_config_in(Vedio_Format config_pramat)
 {
-    int i, j;
     printk("\n\nVideo Module Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);
     video_config_debug("tw9912:config channal is %d\n", info_com_top_Channel);
     //spin_lock(&spin_chipe_config_lock);
@@ -597,10 +594,10 @@ void video_init_config_in(Vedio_Format config_pramat)
 	printk("global_video_channel_flag = %x\n",global_video_channel_flag);
 	if(global_video_channel_flag == TV_4KO)
 	{u8 Tw9912_register_valu[] = {0x08, 0x17,}; //default input pin selet YIN0
-		write_tw9912(Tw9912_register_valu);
+		write_tw9912((char *)Tw9912_register_valu);
 		Tw9912_register_valu[0] =0xa;
 		Tw9912_register_valu[1] =0x1e;
-		write_tw9912(Tw9912_register_valu);
+		write_tw9912((char *)Tw9912_register_valu);
 	}
 
         //msleep(300);//wait for video Steady display

@@ -28,7 +28,7 @@ extern u8 tw9912_signal_unstabitily_for_Tw9912_init_flag;
 #elif BOARD_V2
 #define tw9912_RESX_UP do{i2c_io_config(TW9912_RESET,GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA,0);gpio_set_value(TW9912_RESET, 0);}while(0)//34
 #define tw9912_RESX_DOWN do{i2c_io_config(TW9912_RESET,GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA,0);gpio_set_value(TW9912_RESET, 1);}while(0)//9912 reset output, active low 
-#elif BOARD_V3
+#else //BOARD_V3
 #define tw9912_RESX_UP do{i2c_io_config(TW9912_RESET,GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA,0);gpio_set_value(TW9912_RESET, 1);}while(0)//34
 #define tw9912_RESX_DOWN do{i2c_io_config(TW9912_RESET,GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA,0);gpio_set_value(TW9912_RESET, 0);}while(0)//9912 reset output, active low 
 #endif
@@ -127,7 +127,7 @@ int read_tw9912_chips_status(u8 cmd);
 i2c_ack Correction_Parameter_fun(Vedio_Format format);
 int Tw9912_init_agin(void);
 void Tw9912_hardware_reset(void);
-Vedio_Format testing_NTSCp_video_signal();
+Vedio_Format testing_NTSCp_video_signal(void);
 void Disabel_video_data_out(void);
 void Enabel_video_data_out(void);
 void read_NTSCp(void);
