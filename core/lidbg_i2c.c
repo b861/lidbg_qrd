@@ -642,15 +642,15 @@ static int __init i2c_api_init(void)
 	lidbg("load lidbg_i2c_gpio.ko\n");
 	cmn_launch_user("/system/bin/insmod", "/system/lib/modules/out/lidbg_i2c_gpio.ko");
 	cmn_launch_user("/system/bin/insmod", "/flysystem/lib/out/lidbg_i2c_gpio.ko");
-
-    I2C_GPIO_CONFIG;
-    ret = platform_device_register(&i2c_gpio_device);
-    if (ret)
-    {
-        lidbg(KERN_ERR "[%s] Device registration failed!\n", __func__);
-        return ret;
-    }
 #endif	
+
+	I2C_GPIO_CONFIG;
+	ret = platform_device_register(&i2c_gpio_device);
+	if (ret)
+	{
+		lidbg(KERN_ERR "[%s] Device registration failed!\n", __func__);
+		return ret;
+	}
 #endif
 
     ret = i2c_add_driver(&i2c_api_driver); //将driver注册到了i2c_bus_type的总线上 利用i2c_client的名称和id_table中的名称做匹配的
