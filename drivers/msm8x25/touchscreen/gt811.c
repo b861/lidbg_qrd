@@ -491,6 +491,7 @@ static void goodix_ts_work_func(struct work_struct *work)
     static uint8_t  last_key = 0;
     unsigned int  count = 0;
     unsigned int position = 0;
+    int finger_up_cunt =0;
     int ret = -1;
     int tmp = 0;
 
@@ -625,13 +626,14 @@ COORDINATE_POLL:
     }
     //printk("finger=[%d]\n",finger);
     //return 0;
+    finger_up_cunt = 5-finger;
     if(finger)
     {
 #ifdef BOARD_V2
 	    for(count = 0; count < finger; count++)
 #endif	
 #ifdef BOARD_V3
-	    for(count = 0; count < 1; count++)
+	    for(count = 0; count < finger; count++)
 #endif	
         {
             if(track_id[count] != 3)
@@ -666,7 +668,7 @@ COORDINATE_POLL:
 #endif
 
 #ifdef BOARD_V3
-		input_mt_slot(ts->input_dev, 0);
+		input_mt_slot(ts->input_dev, count);
 		input_mt_report_slot_state(ts->input_dev, MT_TOOL_FINGER,1);
 		input_report_abs(ts->input_dev, ABS_MT_POSITION_X,input_y);
 		input_report_abs(ts->input_dev, ABS_MT_POSITION_Y,input_x);
@@ -676,6 +678,16 @@ COORDINATE_POLL:
         }
 
 #ifdef BOARD_V3
+		if(finger_up_cunt>0)
+		{
+			int cunt;
+			int rept=4;
+			for(cunt= 0; cunt <finger_up_cunt; cunt++,rept--)
+			{
+				input_mt_slot(ts->input_dev,rept);
+				input_mt_report_slot_state(ts->input_dev, MT_TOOL_FINGER,0);
+			}
+		}
 		input_report_key(ts->input_dev, BTN_TOUCH, 1);
 		input_sync(ts->input_dev);
 #endif	
@@ -733,10 +745,10 @@ COORDINATE_POLL:
     input_sync(ts->input_dev);
 #endif
     touch_cnt++;
-    if (touch_cnt == 60)
+    if (touch_cnt == 90)
     {
         touch_cnt = 0;
-        printk("Q2%d,%d[%d,%d]\n", xy_revert_en, sensor_id, input_y, input_x);
+        printk("QM%d,%d[%d,%d]\n", xy_revert_en, sensor_id, input_y, input_x);
     }
 
 #ifdef HAVE_TOUCH_KEY_REPORT
