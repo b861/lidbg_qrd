@@ -1007,10 +1007,17 @@ err_int_request_failed:
         if(ret != 0)		//Initiall failed
         {
             printk("[wang]:=====goodix_ts_probe.goodix_init_panel fail and again----------->GT801the %d times\n", count);
+#ifdef BOARD_V2
             SOC_IO_Output(0, 27, 0);
             msleep(300);
             SOC_IO_Output(0, 27, 1);//NOTE:GT801 SHUTDOWN PIN ,set LOW  to work.
             msleep(700);
+#else
+            SOC_IO_Output(0, 27, 1);
+            msleep(300);
+            SOC_IO_Output(0, 27, 0);//NOTE:GT801 SHUTDOWN PIN ,set LOW  to work.
+            msleep(700);
+#endif
             continue;
         }
         else
@@ -1146,10 +1153,18 @@ static int goodix_ts_resume(struct i2c_client *client)
     printk("come into [%s]====remodify the timing sequence====2013.07.12=== [futengfei]=\n", __func__);
     for(retry = 0; retry < 5; retry++)
     {
+
+#ifdef BOARD_V2
 	SOC_IO_Output(0, 27, 0);
 	msleep(20);
 	SOC_IO_Output(0, 27, 1);
 	msleep(200);
+#else
+	SOC_IO_Output(0, 27, 1);
+	msleep(20);
+	SOC_IO_Output(0, 27, 0);//NOTE:GT801 SHUTDOWN PIN ,set LOW  to work.
+	msleep(200);
+#endif
         ret = goodix_init_panel(ts);
 	if(ret<0)
 	{
@@ -1264,10 +1279,17 @@ static int __devinit goodix_ts_init(void)
     printk("================into Gt801.ko=1024590==============2013.07.12==\n");
 
     /*configure shutdown pin,ensure this pin is low, make IC in working state*/
-    SOC_IO_Output(0, 27, 0);
-    msleep(200);
-    SOC_IO_Output(0, 27, 1);
-    msleep(300);
+#ifdef BOARD_V2
+	    SOC_IO_Output(0, 27, 0);
+	    msleep(200);
+	    SOC_IO_Output(0, 27, 1);
+	    msleep(300);
+#else
+	    SOC_IO_Output(0, 27, 1);
+	    msleep(200);
+	    SOC_IO_Output(0, 27, 0);
+	    msleep(300);
+#endif
 
     init_cdev_ts();
     goodix_wq = create_workqueue("goodix_wq");

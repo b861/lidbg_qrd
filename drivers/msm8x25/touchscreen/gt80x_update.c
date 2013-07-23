@@ -379,14 +379,23 @@ static int goodix_ts_set(enum gt80x_driver_state cmd)
 static inline void gt80x_stdpin_set_high(void)
 {
     //gpio_direction_output(SHUTDOWN_PORT, 1);
-    SOC_IO_Output(0, 27, 0);
+
+#ifdef BOARD_V2
+	   SOC_IO_Output(0, 27, 0);
+#else
+	   SOC_IO_Output(0, 27, 1);
+#endif
 }
 
 //½«SHUTDOWN¹Ü½ÅÀ­µÍ
 static inline void gt80x_stdpin_set_low(void)
 {
     //gpio_direction_output(SHUTDOWN_PORT, 0);
-    SOC_IO_Output(0, 27, 1);
+#ifdef BOARD_V2
+	   SOC_IO_Output(0, 27, 1);
+#else
+	   SOC_IO_Output(0, 27, 0);
+#endif
 }
 
 //Test i2c to check device. Before it SHUTDOWN port Must be low state 30ms or more.

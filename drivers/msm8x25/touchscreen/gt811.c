@@ -748,7 +748,7 @@ COORDINATE_POLL:
     if (touch_cnt == 90)
     {
         touch_cnt = 0;
-        printk("QM%d,%d[%d,%d]\n", xy_revert_en, sensor_id, input_y, input_x);
+        printk("QR%d,%d[%d,%d]\n", xy_revert_en, sensor_id, input_y, input_x);
     }
 
 #ifdef HAVE_TOUCH_KEY_REPORT
@@ -1025,10 +1025,18 @@ err_gpio_request_failed:
         if(ret != 0)	//Initiall failed
         {
             printk("[futengfei]goodix_ts_probe.goodix_init_panel fail and again----------->GT811the %d times\n", retry);
+#ifdef BOARD_V2
             SOC_IO_Output(0, 27, 1);
             msleep(300);
             SOC_IO_Output(0, 27, 0);//NOTE:GT811 SHUTDOWN PIN ,set hight to work.
             msleep(700);
+#else
+            SOC_IO_Output(0, 27, 0);
+            msleep(300);
+            SOC_IO_Output(0, 27, 1);//NOTE:GT811 SHUTDOWN PIN ,set hight to work.
+            msleep(700);
+#endif
+
             continue;
         }
 
@@ -1328,10 +1336,17 @@ static int goodix_ts_resume(struct i2c_client *client)
         if(ret != 0)	//Initiall failed
         {
             printk("[futengfei]goodix_init_panel:goodix_init_panel failed=========retry=[%d]===ret[%d]\n", retry, ret);
+#ifdef BOARD_V2
             SOC_IO_Output(0, 27, 1);
             msleep(300);
-            SOC_IO_Output(0, 27, 0);
+            SOC_IO_Output(0, 27, 0);//NOTE:GT811 SHUTDOWN PIN ,set hight to work.
             msleep(700);
+#else
+            SOC_IO_Output(0, 27, 0);
+            msleep(300);
+            SOC_IO_Output(0, 27, 1);//NOTE:GT811 SHUTDOWN PIN ,set hight to work.
+            msleep(700);
+#endif
             continue;
         }
 
@@ -2488,10 +2503,20 @@ static int __devinit goodix_ts_init(void)
     LIDBG_GET;
 #endif
     printk("\n\n==in=GT811.KO=====1024580==========touch INFO===========futengfei\n");
-    SOC_IO_Output(0, 27, 1);
-    msleep(200);//ensure the gt811 shutdown pin is hight.
-    SOC_IO_Output(0, 27, 0);
-    msleep(300);//ensure the gt811 shutdown pin is hight.
+
+//V2有反相器，V3没有
+#ifdef BOARD_V2
+            SOC_IO_Output(0, 27, 1);
+            msleep(200);
+            SOC_IO_Output(0, 27, 0);//NOTE:GT811 SHUTDOWN PIN ,set hight to work.
+            msleep(300);
+#else
+            SOC_IO_Output(0, 27, 0);
+            msleep(200);
+            SOC_IO_Output(0, 27, 1);//NOTE:GT811 SHUTDOWN PIN ,set hight to work.
+            msleep(300);
+#endif
+
 #if 0
     {
         struct i2c_adapter *i2c_adap;
