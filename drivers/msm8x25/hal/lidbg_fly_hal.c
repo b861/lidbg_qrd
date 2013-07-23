@@ -16,8 +16,8 @@ extern void *global_lidbg_devp;
 #else
 char *insmod_list[] =
 {
-      "lidbg_fastboot.ko",
-      "lidbg_lpc.ko",
+    "lidbg_fastboot.ko",
+    "lidbg_lpc.ko",
 	"lidbg_devices.ko",
 	"lidbg_bpmsg.ko",
 	"lidbg_gps.ko",

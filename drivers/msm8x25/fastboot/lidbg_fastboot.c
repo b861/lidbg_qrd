@@ -680,6 +680,7 @@ void create_new_proc_entry()
 
 int pwroff_proc(char *buf, char **start, off_t offset, int count, int *eof, void *data )
 {
+	DUMP_FUN_ENTER;
 
     if(PM_STATUS_LATE_RESUME_OK == fastboot_get_status())
         fastboot_pwroff();
@@ -750,6 +751,7 @@ static int thread_fastboot_pwroff(void *data)
     {
 
         wait_for_completion(&pwroff_start);
+		DUMP_FUN_ENTER;
         fastboot_pwroff();
 
     }

@@ -6,7 +6,7 @@ char *insmod_list[] =
 {
 //    "lidbg_share.ko",
 	"lidbg_soc_msm8x25.ko",
-      "lidbg_msg.ko",
+    "lidbg_msg.ko",
 	"lidbg_common.ko",
 	"lidbg_servicer.ko",
 	"lidbg_touch.ko",

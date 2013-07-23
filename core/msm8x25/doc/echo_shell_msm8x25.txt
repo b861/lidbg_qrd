@@ -13,7 +13,7 @@ echo "c device pwroff 2" > /dev/mlidbg0
 echo "c device ad 2" > /dev/mlidbg0
 
 ############io############
-echo "c io r 2 30" > /dev/mlidbg0
+echo "c io r 30" > /dev/mlidbg0
 echo "c io w 108 1" > /dev/mlidbg0
 echo "c io i 48" > /dev/mlidbg0
 
