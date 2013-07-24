@@ -22,13 +22,16 @@
 #include <linux/kthread.h>
 #include <linux/time.h>
 #include <linux/namei.h>
-#include "gt9xxfm.h"
-#include "gt9xxfm_firmware.h"
+#include "gt910.h"
+#include "gt910fm_firmware.h"
+#include <linux/irq.h>
+#include <linux/delay.h>
+
 
 #define GUP_REG_HW_INFO             0x4220
 #define GUP_REG_FW_MSG              0x41E4
 #define GUP_REG_PID_VID             0x8140
-#define FL_UPDATE_PATH              "/data/_fm_update_.bin"
+#define FL_UPDATE_PATH              "/flysystem/lib/out/_fm_update_.bin"
 #define FL_UPDATE_PATH_SD           "/sdcard/_fm_update_.bin"
 
 #define FW_HEAD_LENGTH               14
@@ -122,10 +125,13 @@ extern void gtp_irq_disable(struct goodix_ts_data *ts);
 extern s32 gtp_fw_startup(struct i2c_client *client);
 static s32 gup_burn_fw_proc(struct i2c_client *client, u16 start_addr, s32 start_index, s32 burn_len);
 static s32 gup_check_fw_proc(struct i2c_client *client, u16 start_addr, s32 start_index, s32 burn_len);
+extern void gtp_int_sync(s32 ms);
 
 
 #if GTP_ESD_PROTECT
 void gtp_esd_switch(struct i2c_client *, s32);
+static struct delayed_work gtp_esd_check_work;
+static struct workqueue_struct * gtp_esd_check_workqueue = NULL;
 #endif
 
 /*******************************************************
@@ -186,7 +192,7 @@ s32 gup_i2c_write(struct i2c_client *client,u8 *buf,s32 len)
     struct i2c_msg msg;
     s32 ret=-1;
     s32 retries = 0;
-
+//printk( "====updata ==gup_i2c_write:client===.addr:0x%02X\n",   client->addr );
     GTP_DEBUG_FUNC();
     //GTP_DEBUG("i2c write 0x%04X, %d bytes(0x%02X, 0x%02X)", ((buf[0] << 8) | buf[1]), len - 2, buf[2], ((len > 3) ? buf[3] : 0xFF));
     
@@ -318,7 +324,7 @@ static u8 gup_set_ic_msg(struct i2c_client *client, u16 addr, u8 val)
     msg[0] = (addr >> 8) & 0xff;
     msg[1] = addr & 0xff;
     msg[2] = val;
-
+printk( "==== gup_set_ic_msg:client===.addr:0x%02X\n",   client->addr );
     for (i = 0; i < 5; i++)
     {
         if (gup_i2c_write(client, msg, GTP_ADDR_LENGTH + 1) > 0)
@@ -341,7 +347,7 @@ s32 gup_hold_ss51_dsp(struct i2c_client *client)
     s32 ret = -1;
     s32 retry = 0;
     u8 rd_buf[3];
-    
+    printk( "==== gup_hold_ss51_dsp:client.addr:0x%02X\n",   client->addr );
     while(retry++ < 200)
     {
         // step4:Hold ss51 & dsp
@@ -423,9 +429,11 @@ s32 gup_enter_update_mode(struct i2c_client *client)
     s32 ret = -1;
     //s32 retry = 0;
     //u8 rd_buf[3];
-    
+	gtp_reset_guitar(i2c_connect_client, 20);
+	//printk("====gup_enter_update_mode======");
     //step1:RST output low last at least 2ms
-    GTP_GPIO_OUTPUT(GTP_RST_PORT, 0);
+/* GTP_GPIO_OUTPUT(GTP_RST_PORT, 0);
+
     msleep(2);
     
     //step2:select I2C slave addr,INT:0--0xBA;1--0x28.
@@ -433,9 +441,9 @@ s32 gup_enter_update_mode(struct i2c_client *client)
     msleep(2);
     
     //step3:RST output high reset guitar
-    GTP_GPIO_OUTPUT(GTP_RST_PORT, 1);
-    
-    msleep(5);
+ GTP_GPIO_OUTPUT(GTP_RST_PORT, 1);
+
+    msleep(6);*/
     
     //select addr & hold ss51_dsp
     ret = gup_hold_ss51_dsp(client);
@@ -478,7 +486,9 @@ s32 gup_enter_update_mode(struct i2c_client *client)
 
 void gup_leave_update_mode(void)
 {
-    GTP_GPIO_AS_INT(GTP_INT_PORT);
+   // GTP_GPIO_AS_INT(GTP_INT_PORT);
+    gpio_tlmm_config(GPIO_CFG(GTP_INT_PORT, 0, GPIO_CFG_INPUT, GPIO_CFG_NO_PULL,  GPIO_CFG_8MA), GPIO_CFG_ENABLE);
+	gpio_get_value(GTP_INT_PORT);
     
     GTP_DEBUG("[leave_update_mode]reset chip.");
     gtp_reset_guitar(i2c_connect_client, 20);
@@ -943,6 +953,7 @@ s32 gup_fw_download_proc(void *dir, u8 dwn_mode)
     struct goodix_ts_data *ts;
     
     ts = i2c_get_clientdata(i2c_connect_client);
+	//printk( " client.addr:0x%02X\n",   client->addr );
     if (NULL == dir)
     {
         if(GTP_FL_FW_BURN == dwn_mode)       // flashless firmware burn mode
@@ -953,7 +964,8 @@ s32 gup_fw_download_proc(void *dir, u8 dwn_mode)
         {
             GTP_INFO("[fw_download_proc]Begin fw esd recovery check ......");
         }       
-    }   
+    }  
+ 
     else
     {
         GTP_INFO("[fw_download_proc]Begin firmware update by bin file");
@@ -1334,6 +1346,8 @@ s32 gup_clk_calibration(void)
     i2c_write_bytes(i2c_connect_client, 0x41F9, &buf, 1);
 #endif
 
-    GTP_GPIO_AS_INT(GTP_INT_PORT);
+	//GTP_GPIO_AS_INT(GTP_INT_PORT);
+	gpio_tlmm_config(GPIO_CFG(GTP_INT_PORT, 0, GPIO_CFG_INPUT, GPIO_CFG_NO_PULL,  GPIO_CFG_8MA), GPIO_CFG_ENABLE);
+	gpio_get_value(GTP_INT_PORT);
     return i;
 }

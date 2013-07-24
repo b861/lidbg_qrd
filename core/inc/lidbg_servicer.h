@@ -20,6 +20,7 @@
 #define LOG_CAP_TS_FT5X06_SKU7 (67)
 #define LOG_CAP_TS_RMI (68)
 #define LOG_CAP_TS_GT801 (69)
+#define LOG_CAP_TS_GT911 (71)
 #define CMD_FAST_POWER_OFF (70)
 #define UMOUNT_USB (80)
 

@@ -74,6 +74,8 @@ typedef irqreturn_t (*pinterrupt_isr)(int irq, void *dev_id);
 #define LOG_CAP_TS_RMI (68)
 #define LOG_CAP_TS_GT801 (69)
 #define CMD_FAST_POWER_OFF (70)
+#define LOG_CAP_TS_GT911 (71)
+
 #define UMOUNT_USB (80)
 #define VIDEO_SET_PAL (81)
 #define VIDEO_SET_NTSC (82)
