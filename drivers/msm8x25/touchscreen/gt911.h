@@ -1,6 +1,6 @@
-/* drivers/input/touchscreen/gt9xx.h
+/* drivers/input/touchscreen/gt813_827_828.h
  * 
- * 2010 - 2013 Goodix Technology.
+ * 2010 - 2012 Goodix Technology.
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,10 +13,12 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU 
  * General Public License for more details.
  * 
+ * Version:1.0
+ *      V1.0:2012/08/31,first release.
  */
 
-#ifndef _GOODIX_GT9XX_H_
-#define _GOODIX_GT9XX_H_
+#ifndef _LINUX_GOODIX_TOUCH_H
+#define	_LINUX_GOODIX_TOUCH_H
 
 #include <linux/kernel.h>
 #include <linux/hrtimer.h>
@@ -34,9 +36,7 @@
 #include <mach/gpio.h>
 #include <linux/earlysuspend.h>
 
-
-struct goodix_ts_data 
-{
+struct goodix_ts_data {
     spinlock_t irq_lock;
     struct i2c_client *client;
     struct input_dev  *input_dev;
@@ -47,77 +47,52 @@ struct goodix_ts_data
     s32 use_irq;
     u16 abs_x_max;
     u16 abs_y_max;
-    u8  enter_update;
     u8  max_touch_num;
     u8  int_trigger_type;
     u8  green_wake_mode;
     u8  chip_type;
+    u8  enter_update;
     u8  gtp_is_suspend;
     u8  gtp_rawdiff_mode;
     u8  gtp_cfg_len;
-    u16 bak_ref_len;
-    s32 ref_chk_fs_times;
-    s32 clk_chk_fs_times;
-    u8  esd_running;
-    u8  rqst_processing;
 };
 
 extern u16 show_len;
 extern u16 total_len;
 
-
 //***************************PART1:ON/OFF define*******************************
 #define GTP_CUSTOM_CFG        0
-#define GTP_CHANGE_X2Y        0
+#define GTP_DRIVER_SEND_CFG   1 
 #define GTP_HAVE_TOUCH_KEY    0
-#define GTP_ICS_SLOT_REPORT   1
-
+#define GTP_POWER_CTRL_SLEEP  1
 #define GTP_AUTO_UPDATE       1
-#define GTP_ESD_PROTECT       1
+#define GTP_CHANGE_X2Y        0
+#define GTP_ESD_PROTECT       0
 #define GTP_CREATE_WR_NODE    1
-#define GTP_SLIDE_WAKEUP      0
+#define GTP_ICS_SLOT_REPORT   0
+
+#define GUP_USE_HEADER_FILE   0
 
 #define GTP_DEBUG_ON          1
 #define GTP_DEBUG_ARRAY_ON    0
 #define GTP_DEBUG_FUNC_ON     0
 
-//*************************** PART2:TODO define **********************************
-// STEP_1(REQUIRED): Define Configuration Information Group(s)
-// Sensor_ID Map:
-/* sensor_opt1 sensor_opt2 Sensor_ID
-    GND         GND         0 
-    VDDIO       GND         1 
-    NC          GND         2 
-    GND         NC/300K     3 
-    VDDIO       NC/300K     4 
-    NC          NC/300K     5 
-*/
-// TODO: define your own default or for Sensor_ID == 0 config here. 
-// The predefined one is just a sample config, which is not suitable for your tp in most cases.
-#define CTP_CFG_GROUP1 {0x00,0x00,0x04,0x58,0x02,0x05,0x0D,0x00,0x02,0x08,0x19,0x0F,0x50,0x3C,0x03,0x05,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x18,0x1A,0x1E,0x14,0x88,0x08,0x0A,0x1E,0x00,0xC1,0x11,0x00,0x00,0x00,0x18,0x03,0x25,0x00,0x00,0x00,0x00,0x00,0x03,0x64,0x32,0x00,0x00,0x00,0x0F,0x6E,0x94,0x85,0x02,0x08,0x00,0x00,0x00,0xFF,0x12,0x00,0xD5,0x1B,0x00,0xD5,0x29,0x00,0x6D,0x3D,0x00,0x6D,0x5B,0x00,0x59,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x08,0x0A,0x0C,0x0E,0x10,0x12,0x14,0x16,0x18,0x1A,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0x02,0x04,0x05,0x06,0x08,0x0A,0x0C,0x0E,0x1D,0x1E,0x1F,0x20,0x22,0x24,0x28,0x29,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xCF,0x01 }
-    
-// TODO: define your config for Sensor_ID == 1 here, if needed
+//***************************PART2:TODO define**********************************
+//STEP_1(REQUIRED):Change config table.
+/*TODO: puts the config info corresponded to your TP here, the following is just 
+a sample config, send this config should cause the chip cannot work normally*/
+//default or float
+#define CTP_CFG_GROUP1 {0x42,0xE0,0x01,0x20,0x03,0x05,0x14,0x01,0x02,0x08,0x19,0x00,0x50,0x28,0x03,0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x90,0x00,0x0A,0x48,0x00,0xF3,0x0D,0x00,0x00,0x00,0x9A,0x02,0x2D,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x32,0x96,0x94,0x85,0x42,0x08,0x00,0x00,0xC1,0x11,0x1A,0xB3,0x15,0x1C,0xE6,0x1B,0x1C,0x0B,0x1E,0x1E,0x8D,0x20,0x21,0x00,0x00,0x10,0x28,0x48,0x00,0x5F,0x50,0x30,0xFF,0xFF,0x06,0x00,0x00,0x00,0x00,0x00,0x00,0x1C,0x96,0x64,0x0F,0x00,0x00,0x02,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x08,0x0A,0x0C,0x0E,0x10,0x12,0x14,0x16,0x18,0x1A,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x02,0x04,0x05,0x06,0x08,0x0A,0x0C,0x1D,0x1E,0x1F,0x20,0x22,0x24,0x28,0x29,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x14,0x1E,0x28,0x28,0x32,0x3C,0x3C,0x3C,0x50,0x50,0x50,0x32,0x50,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xDB,0x01}
+//TODO puts your group2 config info here,if need.
+//VDDIO
 #define CTP_CFG_GROUP2 {\
     }
-
-// TODO: define your config for Sensor_ID == 2 here, if needed
+//TODO puts your group3 config info here,if need.
+//GND
 #define CTP_CFG_GROUP3 {\
     }
 
-// TODO: define your config for Sensor_ID == 3 here, if needed
-#define CTP_CFG_GROUP4 {\
-    }
-
-// TODO: define your config for Sensor_ID == 4 here, if needed
-#define CTP_CFG_GROUP5 {\
-    }
-
-// TODO: define your config for Sensor_ID == 5 here, if needed
-#define CTP_CFG_GROUP6 {\
-     }
-
-
-// STEP_2(REQUIRED): Customize your I/O ports & I/O operations
+//STEP_2(REQUIRED):Change I/O define & I/O operation mode.
 #define GTP_RST_PORT    S5PV210_GPJ3(6)
 #define GTP_INT_PORT    S5PV210_GPH1(3)
 #define GTP_INT_IRQ     gpio_to_irq(GTP_INT_PORT)
@@ -137,74 +112,44 @@ extern u16 total_len;
 #define GTP_GPIO_FREE(pin)              gpio_free(pin)
 #define GTP_IRQ_TAB                     {IRQ_TYPE_EDGE_RISING, IRQ_TYPE_EDGE_FALLING, IRQ_TYPE_LEVEL_LOW, IRQ_TYPE_LEVEL_HIGH}
 
-// STEP_3(optional): Specify your special config info if needed
+//STEP_3(optional):Custom set some config by themself,if need.
 #if GTP_CUSTOM_CFG
-  #define GTP_MAX_HEIGHT   1024
-  #define GTP_MAX_WIDTH    600
-  #define GTP_INT_TRIGGER  0            // 0: Rising 1: Falling
+  #define GTP_MAX_HEIGHT   800
+  #define GTP_MAX_WIDTH    480
+  #define GTP_INT_TRIGGER  0    //0:Rising 1:Falling
 #else
-  #define GTP_MAX_HEIGHT   1024
-  #define GTP_MAX_WIDTH    600
+  #define GTP_MAX_HEIGHT   4096
+  #define GTP_MAX_WIDTH    4096
   #define GTP_INT_TRIGGER  1
 #endif
 #define GTP_MAX_TOUCH         5
-#define GTP_ESD_CHECK_CIRCLE  2000      // jiffy: ms, a cycle of 2s is recommanded.
+#define GTP_ESD_CHECK_CIRCLE  2000
 
-// STEP_4(optional): If keys are available and reported as keys, config your key info here                             
+//STEP_4(optional):If this project have touch key,Set touch key config.                                    
 #if GTP_HAVE_TOUCH_KEY
-    #define GTP_KEY_TAB  {KEY_MENU, KEY_HOME, KEY_BACK}
+    #define GTP_KEY_TAB	 {KEY_MENU, KEY_HOME, KEY_BACK, KEY_SEND}
 #endif
 
 //***************************PART3:OTHER define*********************************
-#define GTP_DRIVER_VERSION    "V1.0_For_Flashless<2013/05/15>"
+#define GTP_DRIVER_VERSION    "V1.2<2012/10/25>"
 #define GTP_I2C_NAME          "Goodix-TS"
-#define GTP_POLL_TIME         10     // jiffy: ms
+#define GTP_POLL_TIME         10
 #define GTP_ADDR_LENGTH       2
-#define GTP_CONFIG_MIN_LENGTH 186
 #define GTP_CONFIG_MAX_LENGTH 240
 #define FAIL                  0
 #define SUCCESS               1
-#define SWITCH_OFF        0
-#define SWITCH_ON         1
 
-#define GTP_BAK_REF_SEND                0
-#define GTP_BAK_REF_STORE               1
-#define GTP_REG_BAK_REF                 0x99D0
-#define GTP_CHK_FS_MNT_MAX              300
-
-
-#define GTP_BAK_REF_PATH                "/data/gtp_ref.bin"
-#define GTP_MAIN_CLK_PATH               "/data/gtp_clk.bin"
-
-#define GTP_RQST_CONFIG                 0x01
-#define GTP_RQST_BAK_REF                0x02
-#define GTP_RQST_RESET                  0x03
-#define GTP_RQST_CLK_RESENT             0x04
-#define GTP_RQST_RESPONDED              0x00
-#define GTP_RQST_IDLE                   0xFF
-
-#define GTP_TYPE_FLASHLESS          0x01
-#define GTP_TYPE_MASK               0x02
-
-#define GTP_FL_FW_BURN              0x00
-#define GTP_FL_ESD_RECOVERY         0x01
-
-// Registers define
+//Register define
 #define GTP_READ_COOR_ADDR    0x814E
 #define GTP_REG_SLEEP         0x8040
 #define GTP_REG_SENSOR_ID     0x814A
 #define GTP_REG_CONFIG_DATA   0x8047
 #define GTP_REG_VERSION       0x8140
-#define GTP_REG_HAVE_KEY      0x804E
-#define GTP_REG_MAIN_CLK      0x8020
 
-#define CFG_LOC_DRVA_NUM            29
-#define CFG_LOC_DRVB_NUM            30
-#define CFG_LOC_SENS_NUM            31
 #define RESOLUTION_LOC        3
 #define TRIGGER_LOC           8
 
-// Log define
+//Log define
 #define GTP_INFO(fmt,arg...)           printk("<<-GTP-INFO->> "fmt"\n",##arg)
 #define GTP_ERROR(fmt,arg...)          printk("<<-GTP-ERROR->> "fmt"\n",##arg)
 #define GTP_DEBUG(fmt,arg...)          do{\
@@ -238,6 +183,16 @@ extern u16 total_len;
                                          y = z;\
                                        }while (0)
 
+//****************************PART4:UPDATE define*******************************
+//Error no
+#define ERROR_NO_FILE           2   //ENOENT
+#define ERROR_FILE_READ         23  //ENFILE
+#define ERROR_FILE_TYPE         21  //EISDIR
+#define ERROR_GPIO_REQUEST      4   //EINTR
+#define ERROR_I2C_TRANSFER      5   //EIO
+#define ERROR_NO_RESPONSE       16  //EBUSY
+#define ERROR_TIMEOUT           110 //ETIMEDOUT
+
 //*****************************End of Part III********************************
 
-#endif /* _GOODIX_GT9XX_H_ */
+#endif /* _LINUX_GOODIX_TOUCH_H */
