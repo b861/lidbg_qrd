@@ -46,7 +46,7 @@
 
 #define  GPS_DEV_NAME  "/dev/ubloxgps0"
 
-#define  GPS_DEBUG  0
+#define  GPS_DEBUG  1
 
 #if GPS_DEBUG
 #  define  D(...)   LOGD(__VA_ARGS__)
