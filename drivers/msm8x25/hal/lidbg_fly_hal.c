@@ -9,8 +9,6 @@
 LIDBG_DEFINE;
 struct task_struct *soc_task;
 
-extern void *global_lidbg_devp;
-
 #if (defined(BOARD_V1) || defined(BOARD_V2))
 
 #else
@@ -109,13 +107,13 @@ bool SOC_IO_Config(u32 index, bool direction, u32 pull, u32 drive_strength)
 void SOC_IO_Output_Ext(u32 group, u32 index, bool status, u32 pull, u32 drive_strength)
 {
     soc_io_config( index,  GPIO_CFG_OUTPUT, pull, drive_strength, 1);
-    soc_io_output(0, index,  status);
+    soc_io_output(group, index,  status);
 }
 
 void SOC_IO_Output(u32 group, u32 index, bool status)
 {
     soc_io_config( index,  GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_8MA, 0);
-    soc_io_output(0, index,  status);
+    soc_io_output(group, index,  status);
 }
 
 bool SOC_IO_Input(u32 group, u32 index, u32 pull)
@@ -214,55 +212,54 @@ void SOC_Mic_Enable( bool enable)
 static void set_func_tbl(void)
 {
     //io
-    ((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_IO_Output = SOC_IO_Output;
-    ((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_IO_Input = SOC_IO_Input;
-    ((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_IO_Output_Ext = SOC_IO_Output_Ext;
-    ((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_IO_Config = SOC_IO_Config;
+    plidbg_dev->soc_func_tbl.pfnSOC_IO_Output = SOC_IO_Output;
+    plidbg_dev->soc_func_tbl.pfnSOC_IO_Input = SOC_IO_Input;
+    plidbg_dev->soc_func_tbl.pfnSOC_IO_Output_Ext = SOC_IO_Output_Ext;
+    plidbg_dev->soc_func_tbl.pfnSOC_IO_Config = SOC_IO_Config;
     //i2c
-    ((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_I2C_Send = SOC_I2C_Send;
-    ((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_I2C_Rec = SOC_I2C_Rec;
-    ((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_I2C_Rec_Simple = SOC_I2C_Rec_Simple;
+    plidbg_dev->soc_func_tbl.pfnSOC_I2C_Send = SOC_I2C_Send;
+    plidbg_dev->soc_func_tbl.pfnSOC_I2C_Rec = SOC_I2C_Rec;
+    plidbg_dev->soc_func_tbl.pfnSOC_I2C_Rec_Simple = SOC_I2C_Rec_Simple;
 
-    ((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_I2C_Rec_SAF7741 = SOC_I2C_Rec_SAF7741;
-    ((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_I2C_Send_TEF7000 = SOC_I2C_Send_TEF7000;
-    ((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_I2C_Rec_TEF7000 = SOC_I2C_Rec_TEF7000;
+    plidbg_dev->soc_func_tbl.pfnSOC_I2C_Rec_SAF7741 = SOC_I2C_Rec_SAF7741;
+    plidbg_dev->soc_func_tbl.pfnSOC_I2C_Send_TEF7000 = SOC_I2C_Send_TEF7000;
+    plidbg_dev->soc_func_tbl.pfnSOC_I2C_Rec_TEF7000 = SOC_I2C_Rec_TEF7000;
 
     //io-irq
-    ((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_IO_ISR_Add = SOC_IO_ISR_Add;
-    ((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_IO_ISR_Enable = SOC_IO_ISR_Enable;
-    ((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_IO_ISR_Disable = SOC_IO_ISR_Disable;
-    ((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnSOC_IO_ISR_Del = SOC_IO_ISR_Del;
+    plidbg_dev->soc_func_tbl.pfnSOC_IO_ISR_Add = SOC_IO_ISR_Add;
+    plidbg_dev->soc_func_tbl.pfnSOC_IO_ISR_Enable = SOC_IO_ISR_Enable;
+    plidbg_dev->soc_func_tbl.pfnSOC_IO_ISR_Disable = SOC_IO_ISR_Disable;
+    plidbg_dev->soc_func_tbl.pfnSOC_IO_ISR_Del = SOC_IO_ISR_Del;
 
     //ad
-    ((struct lidbg_dev *)global_lidbg_devp) ->soc_func_tbl.pfnSOC_ADC_Get = SOC_ADC_Get;
+    plidbg_dev->soc_func_tbl.pfnSOC_ADC_Get = SOC_ADC_Get;
 
     //key
-    ((struct lidbg_dev *)global_lidbg_devp) ->soc_func_tbl.pfnSOC_Key_Report = SOC_Key_Report;
+    plidbg_dev->soc_func_tbl.pfnSOC_Key_Report = SOC_Key_Report;
 
     //bl
-    ((struct lidbg_dev *)global_lidbg_devp) ->soc_func_tbl.pfnSOC_BL_Set = SOC_BL_Set;
+    plidbg_dev->soc_func_tbl.pfnSOC_BL_Set = SOC_BL_Set;
 
     //
-    ((struct lidbg_dev *)global_lidbg_devp) ->soc_func_tbl.pfnSOC_Write_Servicer = SOC_Write_Servicer;
+    plidbg_dev->soc_func_tbl.pfnSOC_Write_Servicer = SOC_Write_Servicer;
     //video
 
-
     //display/touch
-    ((struct lidbg_dev *)global_lidbg_devp) ->soc_func_tbl.pfnSOC_Display_Get_Res = SOC_Display_Get_Res;
+    plidbg_dev->soc_func_tbl.pfnSOC_Display_Get_Res = SOC_Display_Get_Res;
 
     //mic
-    ((struct lidbg_dev *)global_lidbg_devp) ->soc_func_tbl.pfnSOC_Mic_Enable = SOC_Mic_Enable;
+    plidbg_dev->soc_func_tbl.pfnSOC_Mic_Enable = SOC_Mic_Enable;
 }
 
 
 int fly_soc_init(void)
 {
-    lidbg("fly_soc_init\n");
-    DUMP_FUN;
+    DUMP_BUILD_TIME;
+	LIDBG_GET;
     set_func_tbl();
 
 #if (defined(BOARD_V1) || defined(BOARD_V2))
-   	 lidbg("fly_soc_probe\n");
+    lidbg("fly_soc_probe\n");
 #else
     soc_task = kthread_create(soc_thread, NULL, "lidbg_soc_thread");
     if(IS_ERR(soc_task))

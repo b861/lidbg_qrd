@@ -4,7 +4,7 @@
 // http://blog.csdn.net/luoshengyang/article/details/6568411
 #include "lidbg.h"
 
-struct lidbg_dev *global_lidbg_devp;
+struct lidbg_dev *global_lidbg_devp = NULL;
 
 #define MEM_CLEAR 0x1  /*清0全局内存*/
 #define GET_GLOBAL 0x2
@@ -345,6 +345,13 @@ static void lidbg_setup_cdev(struct lidbg_dev *dev, int index)
 void lidbg_create_proc(void);
 void lidbg_remove_proc(void);
 
+void soc_func_tbl_default()
+{
+    lidbgerr("soc_func_tbl_default:this func not ready!\n");
+
+}
+
+
 /*设备驱动模块加载函数*/
 int lidbg_init(void)
 {
@@ -373,6 +380,20 @@ int lidbg_init(void)
         goto fail_malloc;
     }
     memset(global_lidbg_devp, 0, sizeof(struct lidbg_dev));
+
+	{
+		int i;
+		for(i = 0; i < sizeof(global_lidbg_devp->soc_func_tbl) / 4; i++)
+		{
+			((int *)&(global_lidbg_devp->soc_func_tbl))[i] = soc_func_tbl_default;
+
+		}
+	}
+
+	memset(&(global_lidbg_devp->soc_pvar_tbl), NULL, sizeof(struct lidbg_pvar_t));
+
+
+
 #endif
     lidbg_setup_cdev((struct lidbg_dev *)global_lidbg_devp, 0);
 
@@ -465,8 +486,6 @@ void lidbg_remove_proc(void)
 
 MODULE_AUTHOR("Lsw");
 MODULE_LICENSE("GPL");
-
-EXPORT_SYMBOL(global_lidbg_devp);
 
 
 module_param(lidbg_major, int, S_IRUGO);
