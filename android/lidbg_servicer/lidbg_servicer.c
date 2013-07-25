@@ -82,53 +82,53 @@ int is_should_revert()
     int size, i;
     int flag_len = strlen(found);
     unsigned char *file_data;
-    printf("==in=====================is_should_revert===============================\n");
-    printf("source:%s\n", source);
+    lidbg("==in===is_should_revert=====\n");
+    lidbg("source:%s\n", source);
 
     fd_sour = open(source, O_RDONLY);
     if( fd_sour < 0 )
     {
-        printf("fail to open source file\n");
+        lidbg("fail to open source file\n");
         return -1;
     }
     if( fstat (fd_sour , &stat ) )
     {
-        printf("fstat source file fail!!\n");
+        lidbg("fstat source file fail!!\n");
         return -1;
     }
     size = stat.st_size + 1;
-    printf("source file size:%d\n", size);
+    lidbg("source file size:%d\n", size);
     file_data = (unsigned char *)malloc(size);
     if( !file_data )
     {
-        printf("fail to mallo mem!!\n");
+        lidbg("fail to mallo mem!!\n");
         free(file_data);
         return -1;
     }
     if( read(fd_sour, file_data, stat.st_size) < 0 )
     {
-        printf("read data fail!!\n");
+        lidbg("read data fail!!\n");
         free(file_data);
         return -1;
     }
     file_data[stat.st_size] = '\0';
     close(fd_sour);
-    printf("flag : %s\n", found);
-    printf("\n\nfile_data : \n%s\n", file_data);
-    printf("start found flag! flag len = %d\n", flag_len);
+    lidbg("flag : %s\n", found);
+    lidbg("\n\nfile_data : \n%s\n", file_data);
+    lidbg("start found flag! flag len = %d\n", flag_len);
     for(i = 0; i < size - flag_len; i++)
     {
         if(memcmp( file_data + i, found, flag_len - 2) == 0)
         {
-            printf("found [%s]flag success i = %d! return 1\n", found, i);
+            lidbg("success found flag[%s]  i = %d! return 1\n", found, i);
             free(file_data);
-            printf("==out=====================is_should_revert===============================\n");
+            lidbg("==out===is_should_revert=====\n");
             return 0;
         }
     }
     free(file_data);
-    printf("found [%s]flag fail i = %d! return -1\n", found, i);
-    printf("==out=====================is_should_revert===============================\n");
+    lidbg("fail found flag [%s]  i = %d! return -1\n", found, i);
+    lidbg("==out===is_should_revert=====\n");
     return -1;
 }
 
@@ -153,7 +153,7 @@ void set_power_state(int state)
     fd = open(powerdev, O_RDWR);
     if(fd >= 0)
     {
-        //printf("open linux power dev ok: %s\n", powerdev);
+        //lidbg("open linux power dev ok: %s\n", powerdev);
         if(state == 0)
             write(fd, suspendstring, sizeof(suspendstring) - 1);
         else
@@ -196,6 +196,33 @@ void lunch_fastboot()
 
 }
 
+
+void ts_check_revert_andset()
+{
+    char *ts_tdev_node = "/dev/tsnod0";
+    system("chmod 777 /dev/tsnod0");
+
+    if(is_should_revert() == 0)
+    {
+        //wait ts load ,for ts revert
+        sleep(3);
+        ts_nod_fd = open(ts_tdev_node, O_RDWR);
+        if(ts_nod_fd < 0)
+        {
+            lidbg("open  ts_tdev_node fail\n");
+            return ;
+        }
+        ret = write(ts_nod_fd, "TSMODE_XYREVERT", sizeof("TSMODE_XYREVERT"));
+        close(ts_nod_fd);
+        if (ret < 0 )lidbg("[futengfei]=======================writeerr \n");
+        lidbg("[futengfei]=======================TS.XY will revert\n");
+    }
+    else
+    {
+        lidbg("[futengfei]=======================TS.XY will normal\n");
+    }
+    return ;
+}
 int  servicer_handler(int signum)
 {
 
@@ -214,7 +241,7 @@ loop_read:
         lidbg("servicer_handler-\n");
         return SERVICER_DONOTHING;
     }
-    //printf("fd=%x,readlen=%d,cmd=%d\n",fd,readlen,cmd);
+    //lidbg("fd=%x,readlen=%d,cmd=%d\n",fd,readlen,cmd);
     //LOGW("[futengfei]  fd=%x,readlen=%d,cmd=%d", fd, readlen, cmd);
     else
     {
@@ -262,7 +289,7 @@ loop_read:
 
             if(LOG_DMESG == cmd)
             {
-                //printf("LOG_DMESG == cmd\n");
+                //lidbg("LOG_DMESG == cmd\n");
 
                 system("date >> /sdcard/log_dmesg.txt");
 
@@ -281,7 +308,7 @@ loop_read:
             else if(LOG_LOGCAT == cmd)
             {
 
-                //printf("LOG_LOGCAT == cmd\n");
+                //lidbg("LOG_LOGCAT == cmd\n");
                 system("date >> /sdcard/log_logcat.txt");
                 system("logcat >> /sdcard/log_logcat.txt");
                 //system("logcat | grep -irn lidbg >> /sdcard/log_logcat_lidbg.txt");
@@ -291,13 +318,14 @@ loop_read:
 
         }
 		
-#if (defined(BOARD_V1) || defined(BOARD_V2))
+
         //cap_ts
         case LOG_CAP_TS_GT811:
         case LOG_CAP_TS_FT5X06_SKU7:
         case LOG_CAP_TS_FT5X06:
         case LOG_CAP_TS_RMI:
         case LOG_CAP_TS_GT801:
+#if (defined(BOARD_V1) || defined(BOARD_V2))
         {
             if(LOG_CAP_TS_GT811 == cmd)
             {
@@ -349,36 +377,15 @@ loop_read:
             //sleep(10);//delay to mount sdcard
             //system("dmesg > /sdcard/log_cap_ts_dmesg.txt");
 
-            //wait ts load ,for ts revert
-            sleep(3);
-            system("chmod 777 /dev/tsnod0");
-	if(1)
-            {
-                char *ts_tdev_node = "/dev/tsnod0";
-                ts_nod_fd = open(ts_tdev_node, O_RDWR);
-                if(ts_nod_fd < 0)
-                {
-                    printf("open  ts_tdev_node fail\n");
-                    break;
-                }
-                if(is_should_revert() == 0 && ts_nod_fd > 0)
-                {
-                    ret = write(ts_nod_fd, "TSMODE_XYREVERT", sizeof("TSMODE_XYREVERT"));
-                    if (ret < 0 )printf("[futengfei]=======================writeerr \n");
-                    printf("[futengfei]=======================TS.XY will revert\n");
-
-                }
-                else
-                {
-                    printf("[futengfei]=======================TS.XY will normal[%d]\n", ts_nod_fd);
-                }
-            }
+            ts_check_revert_andset();
             break;
         }//over
 #else
-//v3+ .wait for add.
-
- 
+//v3+ 
+		{
+			ts_check_revert_andset();
+			break;
+		}//over
 #endif
         case CMD_ACC_OFF_PROPERTY_SET :
         {
@@ -543,7 +550,7 @@ loop_read:
         }
     }
     goto loop_read;
-    //printf("servicer_handler-\n");
+    //lidbg("servicer_handler-\n");
     //return cmd;
 }
 
@@ -621,7 +628,7 @@ int main(int argc , char **argv)
     system("chmod 606 /dev/tw9912config");
 open_dev:
     fd = open("/dev/lidbg_servicer", O_RDWR);
-    //printf("fd = %x\n",fd);
+    //lidbg("fd = %x\n",fd);
     if((fd == 0xfffffffe) || (fd == 0) || (fd == 0xffffffff))
     {
         lidbg("open lidbg_servicer fail\n");
@@ -743,7 +750,7 @@ open_dev:
             while(i > 0)
             {
                 sleep(5);
-                //printf("set performance mode\n");
+                //lidbg("set performance mode\n");
                 lidbg("set ondemand mode\n");
                 system("echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
                 //system("echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
