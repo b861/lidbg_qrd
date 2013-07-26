@@ -562,6 +562,7 @@ int main(int argc , char **argv)
     int cmd = 0;
     int count = 0;
     int oflags;
+	DUMP_BUILD_TIME;
 
     lidbg("lidbg_servicer start\n");
     system("echo 600000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq");
@@ -708,6 +709,8 @@ open_dev:
     system("chmod 777 /proc/fake_suspend");
     system("chmod 777 /proc/fake_wakeup");
 
+    system("chmod 0666 /dev/mtd/mtd1");
+
 #endif
 
 #ifdef SHARE_MMAP_ENABLE
@@ -718,7 +721,6 @@ open_dev:
 #endif
 
     sleep(30);
-	DUMP_BUILD_TIME;
 	
 #if (defined(BOARD_V1) || defined(BOARD_V2))
 	   ///////low mem kill
