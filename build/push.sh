@@ -8,5 +8,6 @@ adb push $DBG_ANDROID_OUT_PATH/lidbg_servicer /system/bin/lidbg_servicer
 adb shell chmod 777 /system/lib/modules/out/*.ko
 adb shell chmod 777 /system/bin/lidbg_servicer
 adb shell rm -r /flysystem/lib/out
+adb shell rm -r /flysystem/bin/lidbg_servicer
 adb shell sync
 adb reboot
