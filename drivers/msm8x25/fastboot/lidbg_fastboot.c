@@ -61,7 +61,7 @@ int wakelock_occur_count = 0;
 #if (defined(BOARD_V1) || defined(BOARD_V2))
 #define WAIT_LOCK_RESUME_TIMES  (3)
 #else
-#define WAIT_LOCK_RESUME_TIMES  (1)
+#define WAIT_LOCK_RESUME_TIMES  (0)
 #endif
 
 #define HAS_LOCK_RESUME
@@ -265,6 +265,8 @@ char *kill_exclude_process[] =
 	"alcomm.privinit",
 	"m.qualcomm.cabl",
 	"ndroid.settings",
+	".baidu.padinput",
+	"io3.widget.time",
 
 
     "task_kill_exclude_end",
