@@ -250,6 +250,21 @@ char *kill_exclude_process[] =
     "ndroid.launcher",
     "fb_late_resume_",
     "GT80x Thread",
+//V3
+	"msm_ipc_router",
+	"krmt_storagecln",
+	"uether",
+	"isl29028_workqu",
+	"acdb_cb_thread",
+	"fmcd",
+	"thundersoft.fmc",
+	"qualcomm.logkit",
+	"qosmgr",
+	"re.airplanemode",
+	"ualcomm.display",
+	"alcomm.privinit",
+	"m.qualcomm.cabl",
+	"ndroid.settings",
 
 
     "task_kill_exclude_end",
