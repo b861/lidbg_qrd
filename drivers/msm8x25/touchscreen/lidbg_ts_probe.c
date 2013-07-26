@@ -101,6 +101,9 @@ void ts_scan(void)
 
 	sprintf(path, "/flysystem/lib/out/%s", ts_probe_dev[i].name);
 	launch_user("/system/bin/insmod", path ,NULL);
+	
+//in V3+,after find the ts,tell the server to check ts revert.
+	SOC_Write_Servicer(ts_probe_dev[i].cmd);
 #endif 		
             break;
         }

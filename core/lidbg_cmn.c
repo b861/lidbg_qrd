@@ -127,7 +127,7 @@ u32 GetNsCount(void)
 
 // cmn_launch_user("/system/bin/insmod", "/system/lib/modules/wlan.ko");
 // cmn_launch_user("/system/lidbg_servicer", NULL);
-void cmn_launch_user( char bin_path[], char argv1[])
+int  cmn_launch_user( char bin_path[], char argv1[])
 {
     char *argv[] = { bin_path, argv1, NULL };
     static char *envp[] = { "HOME=/", "TERM=linux", "PATH=/system/bin", NULL };//tell me sh where it is;
@@ -140,7 +140,7 @@ void cmn_launch_user( char bin_path[], char argv1[])
         lidbg("lunch [%s %s] fail!\n", bin_path, argv1);
     else
         lidbg("lunch [%s %s] success!\n", bin_path, argv1);
-
+    return ret;
 }
 
 void mod_cmn_main(int argc, char **argv)
