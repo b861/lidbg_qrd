@@ -18,7 +18,7 @@ struct cdev *tw9912_cdev;
 
 TW9912Info global_tw9912_info={
 						0x08,
-						0x15,
+						0x17,
 						false,//true is find black line;
 						true//true is neet again find the black line;
 						};
@@ -515,11 +515,13 @@ static ssize_t tw9912_read(struct file *filp, char __user *buf, size_t size,
     ssize_t ret;
     if (copy_to_user(buf, (void *)(&global_tw9912_info), count))
     {
-        ret =  - EFAULT;
+		printk("TW9912config : copy_to_user ERR\n");
+		ret =  - EFAULT;
     }
     else
     {
-        ret = count;
+		printk("TW9912config : paramter copy to user : %.2x%.2x\n",global_tw9912_info.reg,global_tw9912_info.reg_val);
+		ret = count;
     }
 
     return count;
@@ -530,14 +532,20 @@ static ssize_t tw9912_write(struct file *filp, const char __user *buf, size_t co
     u8 para[] = {0x0, 0x0,};
   if (copy_from_user(&global_tw9912_info, buf, count))
     {
-        printk("tw9912config copy_from_user ERR\n");
+	printk("TW9912config : copy_from_user ERR\n");
     } 
   /*  */
-    printk("tw9912config paramter is %.2x%.2x\n",global_tw9912_info.reg,global_tw9912_info.reg_val);
-      para[0]=global_tw9912_info.reg;
-      if(global_tw9912_info.reg_val  > 0x10)
-     		 para[1]=global_tw9912_info.reg_val;
-      write_tw9912(para);
+	if(global_tw9912_info.reg_val  > 0x10 && global_tw9912_info.reg == 0x8)
+	{
+	printk("TW9912config : paramter is %.2x%.2x NOW write in the register\n",global_tw9912_info.reg,global_tw9912_info.reg_val);
+	para[0]=global_tw9912_info.reg;
+	para[1]=global_tw9912_info.reg_val;
+	write_tw9912(para);
+	}
+	else
+	{
+		 printk("TW9912config : paramter is %.2x%.2x NOT write in the regitster\n",global_tw9912_info.reg,global_tw9912_info.reg_val);
+	}
 return 0;
 }
 static const struct file_operations tw9912_fops =
