@@ -22,6 +22,7 @@
 #define LOG_CAP_TS_GT801 (69)
 #define LOG_CAP_TS_GT911 (71)
 #define CMD_FAST_POWER_OFF (70)
+#define LOG_CAP_TS_GT910 (72)
 #define UMOUNT_USB (80)
 
 

@@ -47,7 +47,7 @@
 #define LOG_CAP_TS_GT801 (69)
 #define  CMD_FAST_POWER_OFF (70)
 #define LOG_CAP_TS_GT911 (71)
-
+#define LOG_CAP_TS_GT910 (72)
 #define UMOUNT_USB (80)
 #define VIDEO_SET_PAL (81)
 #define VIDEO_SET_NTSC (82)
@@ -293,11 +293,13 @@ loop_read:
         }
 		
         //cap_ts
-        case LOG_CAP_TS_GT811:
-        case LOG_CAP_TS_FT5X06_SKU7:
-        case LOG_CAP_TS_FT5X06:
-        case LOG_CAP_TS_RMI:
-        case LOG_CAP_TS_GT801:
+		case LOG_CAP_TS_GT811:
+		case LOG_CAP_TS_FT5X06_SKU7:
+		case LOG_CAP_TS_FT5X06:
+		case LOG_CAP_TS_RMI:
+		case LOG_CAP_TS_GT801:
+		case LOG_CAP_TS_GT911:
+		case LOG_CAP_TS_GT910:
 #if (defined(BOARD_V1) || defined(BOARD_V2))
         {
             if(LOG_CAP_TS_GT811 == cmd)
@@ -346,6 +348,16 @@ loop_read:
                 system("insmod /system/lib/modules/out/gt801.ko");
                 system("insmod /flysystem/lib/out/gt801.ko");
 
+            }
+			else if (LOG_CAP_TS_GT911 == cmd)
+			{
+				system("insmod /system/lib/modules/out/gt911.ko");
+				system("insmod /flysystem/lib/out/gt911.ko");
+			}
+			else if (LOG_CAP_TS_GT910 == cmd)
+			{
+				system("insmod /system/lib/modules/out/gt910new.ko");
+				system("insmod /flysystem/lib/out/gt910new.ko");
             }
             //sleep(10);//delay to mount sdcard
             //system("dmesg > /sdcard/log_cap_ts_dmesg.txt");

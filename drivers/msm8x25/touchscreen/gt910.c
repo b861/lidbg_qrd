@@ -36,7 +36,11 @@
 #include "lidbg_enter.h"
 LIDBG_DEFINE;
 #endif
-
+#define RECORVERY_MODULE
+#ifdef RECORVERY_MODULE
+#include "touch.h"
+touch_t touch = {0, 0, 0};
+#endif
 #define CFG_GROUP_LEN(p_cfg_grp)  (sizeof(p_cfg_grp) / sizeof(p_cfg_grp[0]))
 
 static const char *goodix_ts_name = "Goodix Flashless TS";
@@ -97,9 +101,14 @@ typedef enum
 } DOZE_T;
 static DOZE_T doze_status = DOZE_DISABLED;
 #endif
-
+#define SCREEN_X (1024)
+#define SCREEN_Y (600)
+static int screen_x = 0;
+static int screen_y = 0;
+static bool xy_revert_en = 0;
 static u8 chip_gt9xxs = 0;  // true if ic is gt9xxs, like gt915s
-
+extern  bool is_ts_load;
+extern  unsigned int FLAG_FOR_15S_OFF;
 /*******************************************************
 Function:
     Read data from the i2c slave device.
@@ -532,20 +541,18 @@ Output:
 *********************************************************/
 static void gtp_touch_down(struct goodix_ts_data* ts,s32 id,s32 x,s32 y,s32 w)
 {
-#if GTP_CHANGE_X2Y
+if(xy_revert_en == 1)
     GTP_SWAP(x, y);
-#endif
-
 #if GTP_ICS_SLOT_REPORT
     input_mt_slot(ts->input_dev, id);
     input_report_abs(ts->input_dev, ABS_MT_TRACKING_ID, id);
     input_report_abs(ts->input_dev, ABS_MT_POSITION_X, x);
-    input_report_abs(ts->input_dev, ABS_MT_POSITION_Y, 600-y);
+    input_report_abs(ts->input_dev, ABS_MT_POSITION_Y, screen_y-y);
     input_report_abs(ts->input_dev, ABS_MT_TOUCH_MAJOR, w);
     input_report_abs(ts->input_dev, ABS_MT_WIDTH_MAJOR, w);
 #else
     input_report_abs(ts->input_dev, ABS_MT_POSITION_X, x);
-    input_report_abs(ts->input_dev, ABS_MT_POSITION_Y, 600-y);
+    input_report_abs(ts->input_dev, ABS_MT_POSITION_Y, screen_y-y);
     input_report_abs(ts->input_dev, ABS_MT_TOUCH_MAJOR, w);
     input_report_abs(ts->input_dev, ABS_MT_WIDTH_MAJOR, w);
     input_report_abs(ts->input_dev, ABS_MT_TRACKING_ID, id);
@@ -555,7 +562,7 @@ static void gtp_touch_down(struct goodix_ts_data* ts,s32 id,s32 x,s32 y,s32 w)
 	if (touch_cnt > 100)
 	{
 		touch_cnt = 0;
-		GTP_DEBUG("%d[%d,%d];",id,x,600-y);
+		GTP_DEBUG("%d[%d,%d];",id,x,screen_y-y);
 	}
 }
 
@@ -799,11 +806,35 @@ static void goodix_ts_work_func(struct work_struct *work)
                 pos += 8;
                 id = coor_data[pos] & 0x0F;
                 touch_index |= (0x01<<id);
+#ifdef RECORVERY_MODULE
+	if( (input_y >= 0) && (input_x >= 0) )
+		{
+		touch.x = point_data[4]|(point_data[5]<<8);
+		touch.y =screen_y - (point_data[6]|(point_data[7]<<8));
+		touch.pressed = 1;
+		set_touch_pos(&touch);
+		}
+#endif
+		FLAG_FOR_15S_OFF++;
+			if(FLAG_FOR_15S_OFF >= 1000)
+			{
+			FLAG_FOR_15S_OFF = 1000;
+			}
+			if(FLAG_FOR_15S_OFF < 0)
+			{
+			printk("\nerr:FLAG_FOR_15S_OFF===[%d]\n", FLAG_FOR_15S_OFF);
+			}
             }
             else
             {
                 gtp_touch_up(ts, i);
                 pre_touch &= ~(0x01 << i);
+				#ifdef RECORVERY_MODULE
+					{
+						touch.pressed = 0;
+						set_touch_pos(&touch);
+					}
+				#endif
             }
         }
     }
@@ -822,14 +853,38 @@ static void goodix_ts_work_func(struct work_struct *work)
             input_w  = coor_data[5] | (coor_data[6] << 8);
         
             gtp_touch_down(ts, id, input_x, input_y, input_w);
+#ifdef RECORVERY_MODULE
+	if( (input_y >= 0) && (input_x >= 0) )
+		{
+			touch.x = point_data[4]|(point_data[5]<<8);
+			touch.y =screen_y - (point_data[6]|(point_data[7]<<8));
+			touch.pressed = 1;
+			set_touch_pos(&touch);
+		}
+#endif
         }
+		FLAG_FOR_15S_OFF++;
+    if(FLAG_FOR_15S_OFF >= 1000)
+    {
+        FLAG_FOR_15S_OFF = 1000;
+    }
+    if(FLAG_FOR_15S_OFF < 0)
+    {
+        printk("\nerr:FLAG_FOR_15S_OFF===[%d]\n", FLAG_FOR_15S_OFF);
+    }
     }
     else if (pre_touch)
     {
     
         GTP_DEBUG("Touch Release!");
         gtp_touch_up(ts, 0);
-    }
+#ifdef RECORVERY_MODULE
+	{
+		touch.pressed = 0;
+		set_touch_pos(&touch);
+	}
+#endif
+	}
 
     pre_touch = touch_num;
 #endif
@@ -1495,6 +1550,7 @@ Output:
     Executive outcomes.
         0: succeed, otherwise: failed.
 *******************************************************/
+
 static s8 gtp_request_input_dev(struct goodix_ts_data *ts)
 {
     s8 ret = -1;
@@ -1511,7 +1567,9 @@ static s8 gtp_request_input_dev(struct goodix_ts_data *ts)
         GTP_ERROR("Failed to allocate input device.");
         return -ENOMEM;
     }
-
+	screen_x = SCREEN_X;
+	screen_y = SCREEN_Y;
+	SOC_Display_Get_Res(&screen_x, &screen_y);
     ts->input_dev->evbit[0] = BIT_MASK(EV_SYN) | BIT_MASK(EV_KEY) | BIT_MASK(EV_ABS) ;
 #if GTP_ICS_SLOT_REPORT
     __set_bit(INPUT_PROP_DIRECT, ts->input_dev->propbit);
@@ -1531,11 +1589,11 @@ static s8 gtp_request_input_dev(struct goodix_ts_data *ts)
     input_set_capability(ts->input_dev, EV_KEY, KEY_POWER);
 #endif 
 
-#if GTP_CHANGE_X2Y
+ if(xy_revert_en == 1)
     GTP_SWAP(ts->abs_x_max, ts->abs_y_max);
-#endif
-    input_set_abs_params(ts->input_dev, ABS_MT_POSITION_X, 0, ts->abs_x_max, 0, 0);
-    input_set_abs_params(ts->input_dev, ABS_MT_POSITION_Y, 0, ts->abs_y_max, 0, 0);
+
+    input_set_abs_params(ts->input_dev, ABS_MT_POSITION_X, 0, screen_x, 0, 0);
+    input_set_abs_params(ts->input_dev, ABS_MT_POSITION_Y, 0, screen_y, 0, 0);
     input_set_abs_params(ts->input_dev, ABS_MT_WIDTH_MAJOR, 0, 255, 0, 0);
     input_set_abs_params(ts->input_dev, ABS_MT_TOUCH_MAJOR, 0, 255, 0, 0);
     input_set_abs_params(ts->input_dev, ABS_MT_TRACKING_ID, 0, 10, 0, 0);
@@ -1697,6 +1755,7 @@ Output:
     Executive outcomes. 
         0: succeed.
 *******************************************************/
+
 static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id *id)
 {
     s32 ret = -1;
@@ -2101,7 +2160,105 @@ static struct i2c_driver goodix_ts_driver = {
         .owner    = THIS_MODULE,
     },
 };
-//extern void ui_print(char *fmt,...);
+#define MSM_GSBI1_QUP_I2C_BUS_ID	1
+
+#define feature_ts_nod
+
+#ifdef feature_ts_nod
+#define TS_DEVICE_NAME "tsnod"
+static int major_number_ts = 0;
+static struct class *class_install_ts;
+
+struct ts_device
+{
+    unsigned int counter;
+    struct cdev cdev;
+};
+struct ts_device *tsdev;
+
+int ts_nod_open (struct inode *inode, struct file *filp)
+{
+    //do nothing
+    filp->private_data = tsdev;
+    printk("[futengfei]==================ts_nod_open\n");
+
+    return 0;          /* success */
+}
+
+ssize_t ts_nod_write (struct file *filp, const char __user *buf, size_t count, loff_t *f_pos)
+{
+    char *data_rec[20];
+    struct ts_device *tsdev = filp->private_data;
+
+    if (copy_from_user( data_rec, buf, count))
+    {
+        printk("copy_from_user ERR\n");
+    }
+    data_rec[count] =  '\0';
+    printk("gt910-ts_nod_write:==%d====[%s]\n", count, data_rec);
+    // processing data
+    if(!(strnicmp(data_rec, "TSMODE_XYREVERT", count - 1)))
+    {
+        xy_revert_en = 1;
+        printk("[gt910]ts_nod_write:==========TSMODE_XYREVERT\n");
+    }
+    else if(!(strnicmp(data_rec, "TSMODE_NORMAL", count - 1)))
+    {
+        xy_revert_en = 0;
+        printk("[gt910]ts_nod_write:==========TSMODE_NORMAL\n");
+    }
+
+    return count;
+}
+static  struct file_operations ts_nod_fops =
+{
+    .owner = THIS_MODULE,
+    .write = ts_nod_write,
+    .open = ts_nod_open,
+};
+
+static int init_cdev_ts(void)
+{
+    int ret, err, result;
+
+    //11creat cdev
+    tsdev = (struct ts_device *)kmalloc( sizeof(struct ts_device), GFP_KERNEL );
+    if (tsdev == NULL)
+    {
+        ret = -ENOMEM;
+        printk("gt910===========init_cdev_ts:kmalloc err \n");
+        return ret;
+    }
+
+    dev_t dev_number = MKDEV(major_number_ts, 0);
+    if(major_number_ts)
+    {
+        result = register_chrdev_region(dev_number, 1, TS_DEVICE_NAME);
+    }
+    else
+    {
+        result = alloc_chrdev_region(&dev_number, 0, 1, TS_DEVICE_NAME);
+        major_number_ts = MAJOR(dev_number);
+    }
+    printk("gt910===========alloc_chrdev_region result:%d \n", result);
+
+    cdev_init(&tsdev->cdev, &ts_nod_fops);
+    tsdev->cdev.owner = THIS_MODULE;
+    tsdev->cdev.ops = &ts_nod_fops;
+    err = cdev_add(&tsdev->cdev, dev_number, 1);
+    if (err)
+        printk( "gt910===========Error cdev_add\n");
+
+    //cread cdev node in /dev
+    class_install_ts = class_create(THIS_MODULE, "tsnodclass");
+    if(IS_ERR(class_install_ts))
+    {
+        printk( "gt910=======class_create err\n");
+        return -1;
+    }
+    device_create(class_install_ts, NULL, dev_number, NULL, "%s%d", TS_DEVICE_NAME, 0);
+}
+#endif
 /*******************************************************    
 Function:
     Driver Install function.
@@ -2113,12 +2270,23 @@ Output:
 static int __devinit goodix_ts_init(void)
 {
 
-	#ifndef SOC_COMPILE
-		LIDBG_GET;
-	#endif
+#ifndef SOC_COMPILE
+LIDBG_GET;
+#endif
 
-    s32 ret;
-
+s32 ret;
+is_ts_load = 1;
+#ifdef BOARD_V2
+    SOC_IO_Output(0, 27, 1);
+    msleep(200);
+    SOC_IO_Output(0, 27, 0);//NOTE:GT910 SHUTDOWN PIN ,set hight to work.
+    msleep(300);
+#else
+    SOC_IO_Output(0, 27, 0);
+    msleep(200);
+    SOC_IO_Output(0, 27, 1);//NOTE:GT910 SHUTDOWN PIN ,set hight to work.
+    msleep(300);
+#endif
     GTP_DEBUG_FUNC();   
     GTP_INFO("=====GTP driver installing...=====gt910");
 	//ui_print("===ui==GTP driver installing...=====gt910");
@@ -2138,6 +2306,7 @@ static int __devinit goodix_ts_init(void)
 #endif
 
     ret = i2c_add_driver(&goodix_ts_driver);
+    init_cdev_ts();
     return ret; 
 }
 

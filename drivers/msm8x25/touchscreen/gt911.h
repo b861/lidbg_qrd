@@ -78,7 +78,7 @@ extern u16 total_len;
 #define GTP_HAVE_TOUCH_KEY    0
 #define GTP_POWER_CTRL_SLEEP  1
 #define GTP_AUTO_UPDATE       0
-#define GTP_CHANGE_X2Y        1
+//#define GTP_CHANGE_X2Y       1
 #define GTP_ESD_PROTECT       0
 #define GTP_CREATE_WR_NODE    1
 #ifdef BOARD_V2
