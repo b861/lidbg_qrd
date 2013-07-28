@@ -20,7 +20,9 @@ obj-m	+= gt811.o
 obj-m	+= lidbg_ts_to_recov.o
 obj-m	+= gt801.o
 obj-m	+= gt80x_update.o
-
+obj-m	+= gt911.o
+obj-m += gt910new.o
+gt910new-objs :=gt910fm_update.o gt910.o 
 EXTRA_CFLAGS := -I$(DBG_DRV_PATH)/inc  -I$(DBG_DRV_PATH)/$(DBG_SOC)/inc  -I$(DBG_DEV_PATH)/$(DBG_SOC)
 #include $(DBG_DRV_PATH)/$(DBG_SOC)/drv_$(DBG_SOC).mk
 
