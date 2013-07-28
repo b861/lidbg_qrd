@@ -828,7 +828,7 @@ static int thread_fastboot_suspend(void *data)
                         else
 #endif
                         {
-#ifdef HAS_LOCK_RESUME
+#if 0//def HAS_LOCK_RESUME
                             lidbg("$+\n");
                             msleep((10 - MAX_WAIT_UNLOCK_TIME) * 1000);
                             lidbg("$-\n");
@@ -1193,7 +1193,6 @@ static int fastboot_resume(struct device *dev)
 {
     DUMP_FUN;
     lidbg("fastboot_resume:%d\n", ++fb_data->resume_count);
-    lidbg("call kernel on!\n");
 
     fastboot_set_status(PM_STATUS_RESUME_OK);
     wake_lock(&(fb_data->flywakelock));
