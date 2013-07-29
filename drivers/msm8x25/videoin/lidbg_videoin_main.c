@@ -27,7 +27,7 @@ TW9912Info global_tw9912_info_for_NTSC_I={
 						};
 TW9912Info global_tw9912_info_for_PAL_I={
 						0x08,
-						0x12,
+						0x17,
 						false,//true is find black line;
 						true//true is neet again find the black line;
 						};
