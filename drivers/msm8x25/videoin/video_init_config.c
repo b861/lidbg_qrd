@@ -1,13 +1,14 @@
 #include "video_init_config.h"
 #include "video_init_config_tab.h"
 static int flag_io_config = 0;
-static Vedio_Channel info_Vedio_Channel = NOTONE;
-static Vedio_Channel info_com_top_Channel = YIN2;
+Vedio_Channel info_Vedio_Channel = NOTONE;
+Vedio_Channel info_com_top_Channel = YIN2;
 extern TW9912_Signal signal_is_how[5];
 extern Last_config_t the_last_config;
-extern TW9912Info global_tw9912_info;
+extern TW9912Info global_tw9912_info_for_NTSC_I;
+extern TW9912Info global_tw9912_info_for_PAL_I;
 //static struct task_struct *Signal_Test = NULL;
-static u8 flag_now_config_channal_AUX_or_Astren=0; //0 is Sstren 1 is AUX
+static u8 flag_now_config_channal_AUX_or_Astren=0; //0 is Sstren 1 is AUX 2 is DVD
 
 static TW9912_Image_Parameter TW9912_Image_Parameter_fly[6] = {
 																{BRIGHTNESS,5},
@@ -166,6 +167,7 @@ int static VideoImageParameterConfig(void)
 	{u8 i =0;
 		printk("DVD\n");
 	//	SOC_Write_Servicer(VIDEO_PASSAGE_DVD);
+		 flag_now_config_channal_AUX_or_Astren = 2;
 	        for (i = BRIGHTNESS;i<=HUE;i++)
 	        {
 			switch (i)
@@ -224,13 +226,16 @@ int static VideoImage(void)
 				Tw9912_image[1] = 0x1f;
 				ret = write_tw9912((char *)&Tw9912_image);
 				Tw9912_image[0] = 0x08;
-				Tw9912_image[1] = global_tw9912_info.reg_val;//form qcamerahwi_preview.cpp
+				Tw9912_image[1] = global_tw9912_info_for_NTSC_I.reg_val;//form qcamerahwi_preview.cpp
 				ret = write_tw9912((char *)&Tw9912_image);
 			}
 		else
 			{
 				Tw9912_image[0] = 0x12;
 				Tw9912_image[1] = 0xff;
+				ret = write_tw9912((char *)&Tw9912_image);
+				Tw9912_image[0] = 0x08;
+				Tw9912_image[1] = global_tw9912_info_for_PAL_I.reg_val;//form qcamerahwi_preview.cpp
 				ret = write_tw9912((char *)&Tw9912_image);
 			}
 	}

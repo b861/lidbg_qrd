@@ -7,6 +7,9 @@ static struct task_struct *Vedio_Signal_Test = NULL;
 //static struct task_struct *RunTimeTw9912Status = NULL;
 extern tw9912_run_flag tw912_run_sotp_flag;
 extern struct TC358_register_struct colorbar_init_user_tab[2];
+extern Vedio_Channel info_Vedio_Channel;
+extern TW9912_Signal signal_is_how[5];
+extern Vedio_Channel info_com_top_Channel;
 
 #define MAJOR_Tw9912 0
 //#define MINOR_LED 1
@@ -16,9 +19,15 @@ dev_t tw9912_dev;
 struct class *tw9912_class;
 struct cdev *tw9912_cdev;
 
-TW9912Info global_tw9912_info={
+TW9912Info global_tw9912_info_for_NTSC_I={
 						0x08,
-						0x15,
+						0x17,
+						false,//true is find black line;
+						true//true is neet again find the black line;
+						};
+TW9912Info global_tw9912_info_for_PAL_I={
+						0x08,
+						0x12,
 						false,//true is find black line;
 						true//true is neet again find the black line;
 						};
@@ -477,10 +486,12 @@ static int  video_dev_suspend(struct platform_device *pdev,pm_message_t state)
 }
 static int video_dev_resume(struct platform_device *pdev)
 {
-    printk("resume tw9912 reset\n");
-    Tw9912_hardware_reset();
-    global_tw9912_info.flag=true;//true is neet again find the black line;
-    global_tw9912_info.reg_val=0x15;
+	printk("resume tw9912 reset\n");
+	Tw9912_hardware_reset();
+	global_tw9912_info_for_NTSC_I.flag=true;//true is neet again find the black line;
+	global_tw9912_info_for_NTSC_I.reg_val=0x17;
+	global_tw9912_info_for_PAL_I.flag=true;//true is neet again find the black line;
+	global_tw9912_info_for_PAL_I.reg_val=0x12;
     return 0;
 }
 static struct platform_driver video_driver =
@@ -513,31 +524,99 @@ static ssize_t tw9912_read(struct file *filp, char __user *buf, size_t size,
 {
     unsigned int count = size;
     ssize_t ret;
-    if (copy_to_user(buf, (void *)(&global_tw9912_info), count))
-    {
-        ret =  - EFAULT;
-    }
-    else
-    {
-        ret = count;
-    }
-
+	if(signal_is_how[info_Vedio_Channel].Format == NTSC_I)
+	{
+  //  if (copy_to_user(buf, (void *)(&global_tw9912_info), count))
+	if (copy_to_user(buf, (void *)(&global_tw9912_info_for_NTSC_I), count))
+		{
+			printk("TW9912config : copy_to_user ERR\n");
+			ret =  - EFAULT;
+		}
+		else
+		{
+			printk("TW9912config : NTSC_I paramter copy to user : %.2x%.2x\n",\
+				global_tw9912_info_for_NTSC_I.reg,global_tw9912_info_for_NTSC_I.reg_val);
+			ret = count;
+		}
+	}
+	else if(signal_is_how[info_Vedio_Channel].Format == PAL_I)
+	{
+		if (copy_to_user(buf, (void *)(&global_tw9912_info_for_PAL_I), count))
+		{
+			printk("TW9912config : copy_to_user ERR\n");
+			ret =  - EFAULT;
+		}
+		else
+		{
+			printk("TW9912config : PAL_I paramter copy to user : %.2x%.2x\n",\
+				global_tw9912_info_for_PAL_I.reg,global_tw9912_info_for_PAL_I.reg_val);
+			ret = count;
+		}
+	}
+	else
+	{
+		printk("\nWarning: at read TW9912config :signal_is_how[info_Vedio_Channel].Format =%d,is NOT at Astren\n",\
+			signal_is_how[info_Vedio_Channel].Format);
+		printk("TW9912config :read false\n\n");
+	}
     return count;
 }
 static ssize_t tw9912_write(struct file *filp, const char __user *buf, size_t count, loff_t *f_pos)
 {
-//struct tw9912_config_data cdata;
-    u8 para[] = {0x0, 0x0,};
-  if (copy_from_user(&global_tw9912_info, buf, count))
-    {
-        printk("tw9912config copy_from_user ERR\n");
-    } 
-  /*  */
-    printk("tw9912config paramter is %.2x%.2x\n",global_tw9912_info.reg,global_tw9912_info.reg_val);
-      para[0]=global_tw9912_info.reg;
-      if(global_tw9912_info.reg_val  > 0x10)
-     		 para[1]=global_tw9912_info.reg_val;
-      write_tw9912(para);
+	//struct tw9912_config_data cdata;
+	u8 para[] = {0x0, 0x0,};
+
+	if(signal_is_how[info_Vedio_Channel].Format == NTSC_I)
+	{
+		if (copy_from_user(&global_tw9912_info_for_NTSC_I, buf, count))
+		{
+			printk("TW9912config : copy_from_user ERR\n");
+		}
+		/*  */
+		if(global_tw9912_info_for_NTSC_I.reg_val  > 0x10 && global_tw9912_info_for_NTSC_I.reg == 0x8\
+			&& info_com_top_Channel != SEPARATION && info_com_top_Channel != YIN2)
+		{
+			printk("TW9912config : paramter is %.2x%.2x NOW write in the register\n",\
+				global_tw9912_info_for_NTSC_I.reg,global_tw9912_info_for_NTSC_I.reg_val);
+			para[0]=global_tw9912_info_for_NTSC_I.reg;
+			para[1]=global_tw9912_info_for_NTSC_I.reg_val;
+			write_tw9912(para);
+		}
+		else
+		{
+			 printk("TW9912config : paramter is %.2x%.2x NOT write in the regitster\n",\
+			 global_tw9912_info_for_NTSC_I.reg,global_tw9912_info_for_NTSC_I.reg_val);
+		}
+	}
+	else if(signal_is_how[info_Vedio_Channel].Format == PAL_I)
+	{
+		if (copy_from_user(&global_tw9912_info_for_PAL_I, buf, count))
+		{
+			printk("TW9912config : copy_from_user ERR\n");
+		}
+		/*  */
+		if(global_tw9912_info_for_PAL_I.reg_val  > 0x10 && global_tw9912_info_for_PAL_I.reg == 0x8\
+			&& info_com_top_Channel != SEPARATION && info_com_top_Channel != YIN2)
+		{
+			printk("TW9912config : paramter is %.2x%.2x NOW write in the register\n",\
+				global_tw9912_info_for_PAL_I.reg,global_tw9912_info_for_PAL_I.reg_val);
+			para[0]=global_tw9912_info_for_PAL_I.reg;
+			para[1]=global_tw9912_info_for_PAL_I.reg_val;
+			write_tw9912(para);
+		}
+		else
+		{
+			 printk("TW9912config : paramter is %.2x%.2x NOT write in the regitster\n",\
+			 global_tw9912_info_for_PAL_I.reg,global_tw9912_info_for_PAL_I.reg_val);
+		}
+
+	}
+	else
+	{
+		printk("\nWarning: at read TW9912config :signal_is_how[info_Vedio_Channel].Format =%d,is NOT at Astren\n",\
+				signal_is_how[info_Vedio_Channel].Format);
+		printk("TW9912config :NOT write the regitster\n\n");
+	}
 return 0;
 }
 static const struct file_operations tw9912_fops =
