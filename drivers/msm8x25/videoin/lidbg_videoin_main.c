@@ -306,6 +306,12 @@ void lidbgVideoTw9912TerminalConfig(int argc, char **argv)
         printk("TW9912 Read All register\n");
         read_NTSCp();
     }
+	else if(!strcmp(argv[1], "read_all_register"))
+	{
+		printk("TW9912 Read All register+\n\n");
+		TW9912_read_all_register();
+		printk("TW9912 Read All register-\n\n");
+	}
     else if(!strcmp(argv[1], "initNTSCp"))
     {
         printk("Inital TW9912 NTSCp\n");

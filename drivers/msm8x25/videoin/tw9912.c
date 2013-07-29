@@ -66,6 +66,21 @@ void read_NTSCp(void)
 NACK_BREAK:
 printk("tw9912:%s:interrupt becouts NACK\n",__func__);
 }
+void TW9912_read_all_register(void)
+{
+    u8 buf;
+    register int i = 0;
+    i2c_ack ret;
+    for(i = 0; i != 0xfe; i ++)
+    {
+        ret = read_tw9912(i, &buf);
+	if (ret == NACK) goto NACK_BREAK;
+        //printk("tw9912: TW9912_INIT_NTSC_Progressive_input[%d]=0x%.2x != readback =0x%.2xd",i,TW9912_INIT_NTSC_Progressive_input[i],buf);
+            printk("tw9912:add(0x%.2x)=0x%.2x\n", i,buf);
+    }
+NACK_BREAK:
+printk("tw9912:%s:interrupt becouts NACK\n",__func__);
+}
 i2c_ack write_tw9912(char *buf )
 {
     i2c_ack ret;

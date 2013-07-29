@@ -134,4 +134,5 @@ void read_NTSCp(void);
 Vedio_Format Tw9912TestingChannalSignal(Vedio_Channel Channel);
 void Tw9912Reset_in(void);
 int Tw9912_YIN3ToYUV_init_agin(void);
+void TW9912_read_all_register(void);
 #endif
