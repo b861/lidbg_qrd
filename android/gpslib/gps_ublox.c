@@ -30,6 +30,7 @@
 #include <sys/ioctl.h>
 #include <math.h>
 #include <time.h>
+#include <cutils/log.h>
 
 /*
 #define LOG_NDEBUG 0
@@ -459,7 +460,7 @@ static void nmea_reader_parse_gsv(NmeaReader *r, NmeaTokenizer *t)
 	GpsSvInfo sv_info;
 	int i;
 
-	D("[futengfei]===CPUHnmea_reader_parse_gsv");
+	D("[futengfei]===HCPUnmea_reader_parse_gsv");
 	Token tok_num = nmea_tokenizer_get(t,1);
 	Token tok_which = nmea_tokenizer_get(t,2);
 	//Token tok_sv_num = nmea_tokenizer_get(t,3);
@@ -818,7 +819,7 @@ gps_state_thread( void*  arg )
                 D("epoll_wait() unexpected error: %s", strerror(errno));
             continue;
         }
-        D("[futengfei]===CPUHgps thread received %d events", nevents);
+        D("[futengfei]===HCPUgps thread received %d events", nevents);
         for (ne = 0; ne < nevents; ne++) {
             if ((events[ne].events & (EPOLLERR|EPOLLHUP)) != 0) {
                 D("EPOLLERR or EPOLLHUP after epoll_wait() !?");
@@ -911,11 +912,12 @@ gps_state_init( GpsState*  state, GpsCallbacks* callbacks )
     state->control[1] = -1;
     state->fd         = -1;
 
+again:
     state->fd = open(GPS_DEV_NAME, O_RDONLY);
-
     if (state->fd < 0) {
-        D("no gps detected");
-        return;
+	LOGD("[ublox]futengfei err_access.again=======[%s]",GPS_DEV_NAME); 
+	sleep(1);
+	goto again;
     }
 
     D("gps will read from '%s'", GPS_DEV_NAME);
@@ -1071,10 +1073,6 @@ static int open_gps(const struct hw_module_t* module, char const* name,
     struct gps_device_t *dev = malloc(sizeof(struct gps_device_t));
     D("%s", __FUNCTION__);
     memset(dev, 0, sizeof(*dev));
-
-    if (access(GPS_DEV_NAME, F_OK)) {
-        return -1;
-    }
 
     dev->common.tag = HARDWARE_DEVICE_TAG;
     dev->common.version = 0;

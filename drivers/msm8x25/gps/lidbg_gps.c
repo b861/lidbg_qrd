@@ -305,6 +305,7 @@ static int  gps_probe(struct platform_device *pdev)
 	static int major_number = 0;
 
     DUMP_FUN;
+#if (defined(BOARD_V1) || defined(BOARD_V2))      
     if(is_ublox_exist() < 0)
     {
         printk("[ublox]ublox.miss\n\n");
@@ -314,6 +315,10 @@ static int  gps_probe(struct platform_device *pdev)
     {
         printk("[ublox]ublox.exist\n\n");
     }
+#else
+        printk("[ublox]V3+==========use_ublox_default;\n\n");
+#endif
+
 
 #ifdef CONFIG_HAS_EARLYSUSPEND  //  enable/disable the gps thread 
     early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN;
