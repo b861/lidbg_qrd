@@ -267,6 +267,7 @@ char *kill_exclude_process[] =
 	"ndroid.settings",
 	".baidu.padinput",
 	"io3.widget.time",
+	"com.baidu.input",
 
 
     "task_kill_exclude_end",
