@@ -63,21 +63,37 @@ void mod_io_main(int argc, char **argv)
     }
     else if(!strcmp(argv[0], "i"))
     {
+		  if(!strcmp(argv[1], "request"))
+		  {
 
-        struct io_int_config   *pio_int_config;
-        pio_int_config = kmalloc(sizeof(struct io_int_config), GFP_KERNEL);
+			struct io_int_config   *pio_int_config;
+			pio_int_config = kmalloc(sizeof(struct io_int_config), GFP_KERNEL);
 
-        pio_int_config->ext_int_num = simple_strtoul(argv[1], 0, 0);
-        lidbg("ext_int_num: %d\n", pio_int_config->ext_int_num);
-        pio_int_config->ext_int_num = GPIO_TO_INT(pio_int_config->ext_int_num);
-        lidbg("ext_int_num: %d\n", pio_int_config->ext_int_num);
+			pio_int_config->ext_int_num = simple_strtoul(argv[2], 0, 0);
+			lidbg("request ext_int_num: %d\n", pio_int_config->ext_int_num);
+			pio_int_config->ext_int_num = GPIO_TO_INT(pio_int_config->ext_int_num);
+			lidbg("request ext_int_num: %d\n", pio_int_config->ext_int_num);
 
-        pio_int_config->irqflags =  IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT;
+			pio_int_config->irqflags =  IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT;
 
-        pio_int_config->pisr = io_test_irq;
-        pio_int_config->dev = (void *)pio_int_config;
-        soc_io_irq(pio_int_config);
+			pio_int_config->pisr = io_test_irq;
+			pio_int_config->dev = (void *)pio_int_config;
+			soc_io_irq(pio_int_config);
+		 }
+		  else if(!strcmp(argv[1], "enable"))
+		  {
+		    int irq = simple_strtoul(argv[2], 0, 0);
+		    lidbg("enable irq: %d\n", irq);
+			soc_irq_enable(GPIO_TO_INT(irq));
+		  }
+		  else if(!strcmp(argv[1], "disable"))
+		  {
+			int irq = simple_strtoul(argv[2], 0, 0);
+			lidbg("disable irq: %d\n", irq);
+			soc_irq_disable(GPIO_TO_INT(irq));
+		  }
     }
+
 }
 
 static int __init io_init(void)
