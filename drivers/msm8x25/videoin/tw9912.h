@@ -107,12 +107,13 @@ typedef struct
     Vedio_Channel Channel;
     Vedio_Format format;
 } Last_config_t;
-typedef struct 
+typedef struct
 {
 unsigned char reg;
 unsigned char reg_val;
 bool sta;//true is find black line;
 bool flag;//true is neet again find the black line;
+bool this_is_first_open;//true is first
 }TW9912Info;
 /**************************/
 int Tw9912_init_PALi(void);

@@ -23,13 +23,15 @@ TW9912Info global_tw9912_info_for_NTSC_I={
 						0x08,
 						0x17,
 						false,//true is find black line;
-						true//true is neet again find the black line;
+						true,//true is neet again find the black line;
+						true,//first open the camera
 						};
 TW9912Info global_tw9912_info_for_PAL_I={
 						0x08,
 						0x17,
 						false,//true is find black line;
-						true//true is neet again find the black line;
+						true,//true is neet again find the black line;
+						true,//first open the camera
 						};
 
 LIDBG_DEFINE;
@@ -496,8 +498,11 @@ static int video_dev_resume(struct platform_device *pdev)
 	Tw9912_hardware_reset();
 	global_tw9912_info_for_NTSC_I.flag=true;//true is neet again find the black line;
 	global_tw9912_info_for_NTSC_I.reg_val=0x17;
+	global_tw9912_info_for_NTSC_I.this_is_first_open = true;
 	global_tw9912_info_for_PAL_I.flag=true;//true is neet again find the black line;
 	global_tw9912_info_for_PAL_I.reg_val=0x12;
+	global_tw9912_info_for_PAL_I.this_is_first_open = true;//first open the camera
+
     return 0;
 }
 static struct platform_driver video_driver =
@@ -561,9 +566,18 @@ static ssize_t tw9912_read(struct file *filp, char __user *buf, size_t size,
 	}
 	else
 	{
-		printk("\nWarning: at read TW9912config :signal_is_how[info_Vedio_Channel].Format =%d,is NOT at Astren\n",\
-			signal_is_how[info_Vedio_Channel].Format);
-		printk("TW9912config :read false\n\n");
+		if (copy_to_user(buf, (void *)(&global_tw9912_info_for_PAL_I), count))
+		{
+			printk("TW9912config : copy_to_user ERR\n");
+			ret =  - EFAULT;
+		}
+		else
+		{
+			printk("TW9912config : PAL_I paramter copy to user : 0x%.2x\n",\
+				global_tw9912_info_for_PAL_I.this_is_first_open);
+			ret = count;
+		}
+		//printk("TW9912config :read false\n\n");
 	}
     return count;
 }
@@ -618,10 +632,13 @@ static ssize_t tw9912_write(struct file *filp, const char __user *buf, size_t co
 
 	}
 	else
-	{
-		printk("\nWarning: at read TW9912config :signal_is_how[info_Vedio_Channel].Format =%d,is NOT at Astren\n",\
-				signal_is_how[info_Vedio_Channel].Format);
-		printk("TW9912config :NOT write the regitster\n\n");
+	{TW9912Info global_tw9912_info;
+		if (copy_from_user(&global_tw9912_info, buf, count))
+		{
+			printk("TW9912config : copy_from_user ERR\n");
+		}
+		global_tw9912_info_for_PAL_I.this_is_first_open= global_tw9912_info.this_is_first_open;
+		printk("TW9912config :Synchronous DVD open count\n");
 	}
 return 0;
 }
