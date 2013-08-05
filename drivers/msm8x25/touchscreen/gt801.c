@@ -6,6 +6,23 @@
  * Date: 2010.11.11
  *
  *---------------------------------------------------------------------------------------------------------*/
+#include <linux/i2c.h>
+#include <linux/input.h>
+#include <linux/input/mt.h>
+#include <linux/slab.h>
+#include <linux/interrupt.h>
+#include <linux/delay.h>
+#include <linux/kernel.h>
+#include <linux/module.h>
+#include <linux/gpio.h>
+#include <linux/regulator/consumer.h>
+#include <linux/input/ft5x06_ts.h>
+#include <linux/firmware.h>
+#include <linux/syscalls.h>
+#include <asm/uaccess.h>
+#include <linux/wakelock.h>
+#include <mach/pmic.h>
+#include <linux/debugfs.h>
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/time.h>
@@ -623,15 +640,27 @@ BIT_NO_CHANGE:
     /* ABS_MT_TOUCH_MAJOR is used as ABS_MT_PRESSURE in android. */
     for(count = 0; count < (finger_list.length); count++)
     {
+#ifdef BOARD_V3
+		input_mt_slot(ts->input_dev, finger_list.pointer[count].num);
+		if(finger_list.pointer[count].state == FLAG_DOWN)
+		{
+			input_mt_report_slot_state(ts->input_dev, MT_TOOL_FINGER, 1);
+			input_report_abs(ts->input_dev, ABS_MT_POSITION_X, finger_list.pointer[count].x);
+			input_report_abs(ts->input_dev, ABS_MT_POSITION_Y, finger_list.pointer[count].y);
+			input_report_abs(ts->input_dev, ABS_MT_TOUCH_MAJOR, 255);
+		}
+		else
+			input_mt_report_slot_state(ts->input_dev, MT_TOOL_FINGER, 0);
+#endif
         if(finger_list.pointer[count].state == FLAG_DOWN)
         {
-
+#ifdef BOARD_V2
             input_report_abs(ts->input_dev, ABS_MT_POSITION_X, finger_list.pointer[count].x);
             input_report_abs(ts->input_dev, ABS_MT_POSITION_Y, finger_list.pointer[count].y);
             //input_report_abs(ts->input_dev, ABS_MT_TOUCH_MAJOR, finger_list.pointer[count].pressure);
             //input_report_abs(ts->input_dev, ABS_MT_WIDTH_MAJOR, finger_list.pointer[count].pressure);
             input_report_key(ts->input_dev, BTN_TOUCH, finger_list.pointer[count].state);
-
+#endif
             FLAG_FOR_15S_OFF++;
             if(FLAG_FOR_15S_OFF >= 1000)
             {
@@ -652,17 +681,19 @@ BIT_NO_CHANGE:
             }
 #endif
             touch_cnt++;
-            if (touch_cnt > 50)
+            if (touch_cnt > 100)
             {
                 touch_cnt = 0;
-                printk("%d[%d,%d]\n", xy_revert_en, finger_list.pointer[count].x, finger_list.pointer[count].y);
+                printk("QR%d[%d,%d]\n", xy_revert_en, finger_list.pointer[count].x, finger_list.pointer[count].y);
             }
 
 
         }
         else
         {
+#ifdef BOARD_V2
             input_report_key(ts->input_dev, BTN_TOUCH, finger_list.pointer[count].state);
+#endif
 
 #ifdef RECORVERY_MODULE
             {
@@ -675,12 +706,14 @@ BIT_NO_CHANGE:
         }
         //input_report_abs(ts->input_dev, ABS_MT_TOUCH_MAJOR, finger_list.pointer[count].pressure);
         //input_report_abs(ts->input_dev, ABS_MT_WIDTH_MAJOR, finger_list.pointer[count].pressure);
+#ifdef BOARD_V2
         input_mt_sync(ts->input_dev);
-
+#endif
     }
-
-
-
+#ifdef BOARD_V3
+	input_report_key(ts->input_dev, BTN_TOUCH, !!finger_list.length);
+	input_sync(ts->input_dev);
+#endif
 
 
 
@@ -697,8 +730,10 @@ BIT_NO_CHANGE:
     input_mt_sync(ts->input_dev);
 #endif
 #endif
-    input_sync(ts->input_dev);
 
+#ifdef BOARD_V2
+    input_sync(ts->input_dev);
+#endif
     del_point(&finger_list);
     finger_bit = point_data[1];
 
@@ -895,7 +930,15 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
         printk("[wang]========allocate input device failed!\n");
         goto err_input_dev_alloc_failed;
     }
+#define SUPPORT_MULTI_RESOLUTION
+#ifdef SUPPORT_MULTI_RESOLUTION
+    screen_x = RESOLUTION_X;
+    screen_y = RESOLUTION_Y;
+    SOC_Display_Get_Res(&screen_x, &screen_y);
+    printk( "[wang]:===get touch screen resolution is [%d*%d].\n", screen_x, screen_y);
+#endif
 
+#ifdef BOARD_V2
     ts->input_dev->evbit[0] = BIT_MASK(EV_SYN) | BIT_MASK(EV_KEY) | BIT_MASK(EV_ABS) ;
     ts->input_dev->keybit[BIT_WORD(BTN_TOUCH)] = BIT_MASK(BTN_TOUCH);	//can remove
     ts->input_dev->absbit[0] = BIT(ABS_X) | BIT(ABS_Y) | BIT(ABS_PRESSURE);		//can remove
@@ -911,19 +954,24 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     input_set_abs_params(ts->input_dev, ABS_PRESSURE, 0, 38, 0, 0);	                          //can remove
 
     /*support auto adapt TS with various resolution*/
-#define SUPPORT_MULTI_RESOLUTION
-#ifdef SUPPORT_MULTI_RESOLUTION
-    screen_x = RESOLUTION_X;
-    screen_y = RESOLUTION_Y;
-    SOC_Display_Get_Res(&screen_x, &screen_y);
-    printk( "[wang]:===get touch screen resolution is [%d*%d].\n", screen_x, screen_y);
-#endif
-
 #ifdef GOODIX_MULTI_TOUCH
     input_set_abs_params(ts->input_dev, ABS_MT_WIDTH_MAJOR, 0, 255, 0, 0);
     input_set_abs_params(ts->input_dev, ABS_MT_TOUCH_MAJOR, 0, 255, 0, 0);
     input_set_abs_params(ts->input_dev, ABS_MT_POSITION_X, 0, screen_x, 0, 0);
     input_set_abs_params(ts->input_dev, ABS_MT_POSITION_Y, 0, screen_y, 0, 0);
+#endif
+#endif
+
+#ifdef BOARD_V3
+	__set_bit(EV_KEY, ts->input_dev->evbit);
+	__set_bit(EV_ABS, ts->input_dev->evbit);
+	__set_bit(BTN_TOUCH, ts->input_dev->keybit);
+	__set_bit(INPUT_PROP_DIRECT, ts->input_dev->propbit);
+	
+	input_mt_init_slots(ts->input_dev, 5);
+	input_set_abs_params(ts->input_dev, ABS_MT_POSITION_X, 0,screen_x, 0, 0);
+	input_set_abs_params(ts->input_dev, ABS_MT_POSITION_Y, 0,screen_y, 0, 0);
+	input_set_abs_params(ts->input_dev, ABS_MT_TOUCH_MAJOR, 0, 255, 0, 0);
 #endif
 
     sprintf(ts->phys, "input/ts)");
