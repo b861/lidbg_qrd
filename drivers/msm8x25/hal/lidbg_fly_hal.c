@@ -55,7 +55,7 @@ int soc_thread(void *data)
 	}
 
 #if 1
-		msleep(500);
+		msleep(1000);
 		if(cmn_launch_user("/system/bin/lidbg_servicer", NULL)<0)
 			cmn_launch_user("/flysystem/bin/lidbg_servicer", NULL);
 #endif
