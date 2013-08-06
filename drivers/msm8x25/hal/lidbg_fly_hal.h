@@ -169,8 +169,9 @@ int SOC_BL_Set( unsigned int level);
 //PWR
 void SOC_PWR_ShutDown(void);//power-down
 int SOC_PWR_GetStatus(void);
-
-
+	//I2c_Rate	 i2c_api_set_rate(int  bus_id, int rate)
+	//int (*pfnSOC_I2C_Set_Rate)(int  bus_id, int rate);
+int SOC_I2C_Set_Rate(int  bus_id, int rate);
 
 #ifndef SOC_COMPILE
 

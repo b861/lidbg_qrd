@@ -5,6 +5,7 @@
 #include "lidbg_enter.h"
 //#define GPIO_I2C_SCL   43 //tw9912 reset
 //#define GPIO_I2C_SDA   15//tp0708
+#define FLY_VIDEO_BOARD_V3 //add by huangzongqiang
 #ifdef BOARD_V2
 #define GPIO_I2C_SCL   32
 #define GPIO_I2C_SDA   107

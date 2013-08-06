@@ -78,12 +78,12 @@ static struct i2c_gpio_platform_data i2c_gpio_pdata = {
 	.sda_is_open_drain	= 0,
 	.scl_pin		= LIDBG_I2C_GPIO_SCL,
 	.scl_is_open_drain	= 1,
-	.udelay			= 50,		/* 10 kHz */
+	.udelay			= 1,		/* 10 kHz */
 };
 
 static struct platform_device i2c_gpio_device = {
 	.name			= "i2c-gpio",
-	.id			= 2,		//will be used to set the i2c_bus number
+	.id			= 3,		//will be used to set the i2c_bus number
 	.dev			={
 		.platform_data	= &i2c_gpio_pdata,
 	},
@@ -140,7 +140,35 @@ static void del_i2c_api(struct i2c_api *i2c_api)
     spin_unlock(&i2c_api_list_lock);
     kfree(i2c_api);
 }
+int i2c_api_set_rate(int  bus_id, int rate)
+{
+    struct i2c_api *i2c_api ;
+    lidbg_i2c_running = 1; // for touch intr
+	#ifdef USE_I2C_LOCK
+    mutex_lock(&i2c_lock);
+	#endif
+   i2c_api = get_i2c_api(bus_id);
+   if (!i2c_api)
+        return -ENODEV;
+	 
+	struct i2c_algo_bit_data *adap1=i2c_api->client->adapter->algo_data;
+	if(adap1!=NULL){
+		
+			(*adap1).udelay=rate;	
+			//printk("\n*****Set the i2c_rate sucessuful !\n\n");
+			return 0;
+	 }
+	else{
+		//printk("\n*****Set the i2c_rate not sucessuful !\n\n");
+	}
+	
+	#ifdef USE_I2C_LOCK
+    mutex_unlock(&i2c_lock);
+	#endif
+    lidbg_i2c_running = 0;
+	return 0;
 
+}
 static int i2c_api_do_xfer(int bus_id, char chip_addr, unsigned int sub_addr, int mode,
                            char *buf, unsigned int size)
 {
@@ -691,4 +719,5 @@ EXPORT_SYMBOL(lidbg_i2c_running);
 EXPORT_SYMBOL(i2c_api_do_recv_SAF7741);
 EXPORT_SYMBOL(i2c_api_do_send_TEF7000);
 EXPORT_SYMBOL(i2c_api_do_recv_TEF7000);
+EXPORT_SYMBOL(i2c_api_set_rate);//add by huangzongqiang
 

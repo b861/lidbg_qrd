@@ -14,7 +14,7 @@ extern Vedio_Channel info_com_top_Channel;
 #define MAJOR_Tw9912 0
 //#define MINOR_LED 1
 #define DEV_NAME "tw9912config"
-
+extern struct lidbg_dev *plidbg_dev; //add by huangzongqiang
 dev_t tw9912_dev;
 struct class *tw9912_class;
 struct cdev *tw9912_cdev;
@@ -329,22 +329,52 @@ void lidbgVideoTw9912TerminalConfig(int argc, char **argv)
         valu = simple_strtoul(argv[3], 0, 0);
         buf[0] = sub_addr;
         buf[1] = valu;
+		#ifdef FLY_VIDEO_BOARD_V3
+	 int ret_send=0;
+	 int ret_rec=0;
+	 //ret_send=i2c_api_do_send(3, 0x44, buf[0],buf,2);
+	 i2c_write_byte(3, 0x44, buf , 2);
+	 printk("FLY_VIDEO_BOARD_V3 write adder=0x%02x, valu=0x%02x\n", buf[0], buf[1]);
+	// ret_rec=i2c_api_do_recv(3, 0x44, sub_addr , (char*)&valu, 1);
+	//i2c_read_byte(3, 0x44, sub_addr , (char*)&valu, 1);
+	 printk("FLY_VIDEO_BOARD_V3 read adder=0x%02x, valu=0x%02x\n", buf[0], valu);
+	 #else
         i2c_write_byte(1, 0x44, buf , 2);
         i2c_read_byte(1, 0x44, sub_addr , (char*)&valu, 1);
         printk("read adder=0x%02x, valu=0x%02x\n", buf[0], valu);
+	#endif
     }
     else if(!strcmp(argv[1], "Read"))
     {
         u16 sub_addr;
         u8 buf[2] = {0, 0};
         sub_addr = simple_strtoul(argv[2], 0, 0);
+			#ifdef FLY_VIDEO_BOARD_V3
+			int ret;
+			//ret=SOC_I2C_Rec(3, 0x44, sub_addr , buf, 1);
+			// ret=i2c_api_do_recv(3, 0x44, sub_addr , buf, 1);
+			i2c_read_byte(3, 0x44, sub_addr , buf, 1);
+       	printk(" FLY_VIDEO_BOARD_V3 read adder=0x%02x,valu=0x%02x ret=%d \n", sub_addr, buf[0],ret);
+			 #else
         i2c_read_byte(1, 0x44, sub_addr , buf, 1);
         printk("read adder=0x%02x,valu=0x%02x\n", sub_addr, buf[0]);
+			#endif
     }
     else if(!strcmp(argv[1], "image"))
     {
         lidbgVideoTerminalImageConfig(argc, argv);
     }
+	else if(!strcmp(argv[1], "I2cRate"))
+	{
+		#ifdef FLY_VIDEO_BOARD_V3
+		int	rate;
+		rate= simple_strtoul(argv[2], 0, 0);
+		SOC_I2C_Set_Rate(3, rate);
+		printk(" FLY_VIDEO_BOARD_V3 I2C_Rate_Debug rate=%d\n", rate);
+		#else
+		
+		#endif
+	}
     else
     {
         ;

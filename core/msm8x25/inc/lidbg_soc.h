@@ -191,11 +191,17 @@ extern struct fly_smem *p_fly_smem ;
 #define GPIO_TO_INT MSM_GPIO_TO_INT
 
 
+ 
 //i2c-gpio
-//#define LIDBG_I2C_GPIO
-
+#define LIDBG_I2C_GPIO
+	
+#if	0
 #define LIDBG_I2C_GPIO_SDA (107)
 #define LIDBG_I2C_GPIO_SCL (32)
+#else
+#define LIDBG_I2C_GPIO_SDA (109)
+#define LIDBG_I2C_GPIO_SCL (35)
+#endif
 
 #define I2C_GPIO_CONFIG do{	 \
 	 gpio_tlmm_config(GPIO_CFG(LIDBG_I2C_GPIO_SDA, 0, (GPIO_CFG_OUTPUT | GPIO_CFG_INPUT), GPIO_CFG_PULL_UP, GPIO_CFG_16MA), GPIO_CFG_ENABLE);\

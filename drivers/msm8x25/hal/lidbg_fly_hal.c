@@ -209,7 +209,13 @@ int SOC_Display_Get_Res(u32 *screen_x, u32 *screen_y)
 
 void SOC_Mic_Enable( bool enable)
 {}
-
+	//I2c_Rate	 i2c_api_set_rate(int  bus_id, int rate)
+	//int (*pfnSOC_I2C_Set_Rate)(int  bus_id, int rate);
+int SOC_I2C_Set_Rate(int  bus_id, int rate)
+{
+	return		 i2c_api_set_rate(bus_id, rate);
+}
+	
 static void set_func_tbl(void)
 {
     //io
@@ -221,7 +227,11 @@ static void set_func_tbl(void)
     plidbg_dev->soc_func_tbl.pfnSOC_I2C_Send = SOC_I2C_Send;
     plidbg_dev->soc_func_tbl.pfnSOC_I2C_Rec = SOC_I2C_Rec;
     plidbg_dev->soc_func_tbl.pfnSOC_I2C_Rec_Simple = SOC_I2C_Rec_Simple;
-
+	//add by huangzongqiang	SOC_I2C_Rec_2B_SubAddr(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size)
+	plidbg_dev->soc_func_tbl.pfnSOC_I2C_Rec_2B_SubAddr=SOC_I2C_Rec_2B_SubAddr;
+	//I2c_Rate	 i2c_api_set_rate(int  bus_id, int rate)
+	//int (*pfnSOC_I2C_Set_Rate)(int  bus_id, int rate);
+	plidbg_dev->soc_func_tbl.pfnSOC_I2C_Set_Rate=SOC_I2C_Set_Rate;
     plidbg_dev->soc_func_tbl.pfnSOC_I2C_Rec_SAF7741 = SOC_I2C_Rec_SAF7741;
     plidbg_dev->soc_func_tbl.pfnSOC_I2C_Send_TEF7000 = SOC_I2C_Send_TEF7000;
     plidbg_dev->soc_func_tbl.pfnSOC_I2C_Rec_TEF7000 = SOC_I2C_Rec_TEF7000;

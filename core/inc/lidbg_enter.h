@@ -280,6 +280,10 @@ struct lidbg_fn_t
     void (*pfnSOC_Fake_Register_Early_Suspend)(struct early_suspend *handler);
     //video
     int (*pfnVideoReset)(void);
+	//add huang	SOC_I2C_Rec_2B_SubAddr(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size)
+	int (*pfnSOC_I2C_Rec_2B_SubAddr)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
+	//I2c_Rate	 i2c_api_set_rate(int  bus_id, int rate)
+	int (*pfnSOC_I2C_Set_Rate)(int  bus_id, int rate);
 };
 
 
