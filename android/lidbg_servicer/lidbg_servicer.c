@@ -622,8 +622,8 @@ int main(int argc , char **argv)
     system("insmod /flysystem/lib/out/lidbg_gps.ko");
 	system("insmod /flysystem/lib/out/lidbg_gps_driver.ko");
 
-    sleep(1);
 #endif
+    sleep(1);
 
 
     system("chmod 0777 /dev/lidbg_share");
@@ -766,11 +766,16 @@ open_dev:
         }
     }
 #endif
-
+//cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_cur_freq 
     lidbg("enter while\n");
     while(1)
     {
-        sleep(60);
+
+		sleep(60);
+		//lidbg(".\n");
+		//system("echo 1008000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq");
+		//system("echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
+        //sleep(10);
     }
 
     return 0;
