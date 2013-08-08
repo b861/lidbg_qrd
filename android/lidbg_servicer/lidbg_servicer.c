@@ -389,29 +389,7 @@ loop_read:
             break;
         }//over
 #else
-//v3+ .wait for add.
-	lidbg("[futengfei]============start to check ts revert\n");
-	if (access("/flydata/focus", R_OK) == 0)
-	{
-	     //wait ts load ,for ts revert
-	     sleep(3);
-	    system("chmod 777 /dev/tsnod0");
-	    char *ts_tdev_node = "/dev/tsnod0";
-	    ts_nod_fd = open(ts_tdev_node, O_RDWR);
-	    if(ts_nod_fd < 0)
-	    {
-	        lidbg("open  ts_tdev_node fail\n");
-	        break;
-	    }
-	    ret = write(ts_nod_fd, "TSMODE_XYREVERT", sizeof("TSMODE_XYREVERT"));
-	    close(ts_nod_fd);
-	    if (ret < 0 )lidbg("[futengfei]=======================writeerr \n");
-	    lidbg("[futengfei]=======================TS.XY will revert\n");
-	}
-	else
-	{
-	    lidbg("[futengfei]=======================TS.XY will normal\n");
-	}
+//v3+ .
 	break;
 #endif
         case CMD_ACC_OFF_PROPERTY_SET :

@@ -76,6 +76,7 @@ static bool xy_revert_en = 0;
 unsigned int  touch_cnt = 0;
 extern  unsigned int FLAG_FOR_15S_OFF;
 extern  bool is_ts_load;
+extern int ts_should_revert;
 extern unsigned int shutdown_flag_ts;
 extern unsigned int irq_signal;
 
@@ -620,7 +621,7 @@ BIT_NO_CHANGE:
         //finger_list.pointer[count].x = finger_list.pointer[count].y;
         //finger_list.pointer[count].y = finger_list.pointer[count].x;
         swap(finger_list.pointer[count].x, finger_list.pointer[count].y);
-        if(1 == xy_revert_en)                                                                                	//if x and y coordinate are revert
+       if((1 == xy_revert_en)||(1 == ts_should_revert))//if x and y coordinate are revert
         {
             finger_list.pointer[count].x = RESOLUTION_X - finger_list.pointer[count].x;
             finger_list.pointer[count].y = RESOLUTION_Y - finger_list.pointer[count].y;

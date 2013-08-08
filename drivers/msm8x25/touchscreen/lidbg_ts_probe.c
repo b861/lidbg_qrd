@@ -15,6 +15,9 @@ LIDBG_DEFINE;
 
 #define SCAN_TIME (500)
 #define TS_I2C_BUS (1)
+#define FLYHAL_CONFIG_PATH "/flydata/flyhalconfig"
+static LIST_HEAD(flyhal_config_list);
+int ts_should_revert = -1;
 
 struct probe_device
 {
@@ -105,8 +108,14 @@ void ts_scan(void)
 	sprintf(path, "/flysystem/lib/out/%s", ts_probe_dev[i].name);
 	launch_user("/system/bin/insmod", path ,NULL);
 	
-//in V3+,after find the ts,tell the server to check ts revert.
-	SOC_Write_Servicer(ts_probe_dev[i].cmd);
+//in V3+,check ts revert and save the ts sate.
+	sprintf(path, "loadts=%s\n\0", ts_probe_dev[i].name);
+	fileserver_main(NULL, fs_cmd_file_appendmode, path, NULL);
+	ts_should_revert = fileserver_deal_cmd(&flyhal_config_list, fs_cmd_list_is_strinfile, "TSMODE_XYREVERT", NULL);
+	if(ts_should_revert > 0)
+		printk("[futengfei]=======================TS.XY will revert\n");
+	else
+		printk("[futengfei]=======================TS.XY will normal\n");
 #endif 		
             break;
         }
@@ -179,6 +188,7 @@ static int ts_probe_init(void)
 #ifndef SOC_COMPILE
     LIDBG_GET;
 #endif
+	fileserver_main(FLYHAL_CONFIG_PATH, fs_cmd_file_listmode, NULL, &flyhal_config_list);
     scan_task = kthread_create(ts_probe_thread, NULL, "ts_scan_task");
     wake_up_process(scan_task);
     return 0;
@@ -191,6 +201,7 @@ module_exit(ts_probe_exit);
 
 EXPORT_SYMBOL(FLAG_FOR_15S_OFF);
 EXPORT_SYMBOL(is_ts_load);
+EXPORT_SYMBOL(ts_should_revert);
 /******************************************************
  		add Logic for goodix801 update
 *******************************************************/

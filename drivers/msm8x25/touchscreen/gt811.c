@@ -106,6 +106,7 @@ static bool xy_revert_en = 0;
 
 extern  unsigned int FLAG_FOR_15S_OFF;
 extern  bool is_ts_load;
+extern int ts_should_revert;
 //SOC_Log_Dumpextern void SOC_Log_Dump(int cmd);
 
 static int have_load = 0;    // 1: have load ,do't load again
@@ -654,7 +655,7 @@ COORDINATE_POLL:
             }
 
             if((input_x > ts->abs_x_max) || (input_y > ts->abs_y_max))continue;
-            if(xy_revert_en == 1)
+            if((xy_revert_en == 1)||(1 == ts_should_revert))
             {
                 input_y = SCREEN_X - input_y;
                 input_x = SCREEN_Y - input_x;

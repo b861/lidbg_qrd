@@ -80,6 +80,7 @@ static void gtp_esd_check_func(struct work_struct *);
 #define SCREEN_X (1024)
 #define SCREEN_Y (600)
 extern  bool is_ts_load;
+extern int ts_should_revert;
 extern  unsigned int FLAG_FOR_15S_OFF;
 static bool xy_revert_en = 1;
 /*******************************************************	
@@ -263,7 +264,7 @@ Output:
 *******************************************************/
 static void gtp_touch_down(struct goodix_ts_data* ts,s32 id,s32 x,s32 y,s32 w)
 {
-if (xy_revert_en)
+if ((xy_revert_en)||(1 == ts_should_revert))
     GTP_SWAP(x, y);
 //printk("xy_revert_en =%d\n",xy_revert_en );
 #if GTP_ICS_SLOT_REPORT
@@ -1026,7 +1027,7 @@ static s8 gtp_request_input_dev(struct goodix_ts_data *ts)
         input_set_capability(ts->input_dev,EV_KEY,touch_key_array[index]);	
     }
 #endif
-    if(xy_revert_en == 1)
+    if((xy_revert_en == 1)||(1 == ts_should_revert))
 
     GTP_SWAP(ts->abs_x_max, ts->abs_y_max);
 
