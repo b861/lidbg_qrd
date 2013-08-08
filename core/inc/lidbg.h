@@ -1,6 +1,7 @@
 #ifndef _LIGDBG_DEV__
 #define _LIGDBG_DEV__
 
+#include <linux/vmalloc.h>
 #include <linux/miscdevice.h>
 #include <linux/delay.h>
 #include <asm/irq.h>
