@@ -203,6 +203,12 @@ extern struct fly_smem *p_fly_smem ;
 #define LIDBG_I2C_GPIO_SCL (35)
 #endif
 
+#define LIDBG_I2C_BUS_ID (3)
+#define LIDBG_I2C_DEFAULT_DELAY (1)
+
+
+
+
 #define I2C_GPIO_CONFIG do{	 \
 	 gpio_tlmm_config(GPIO_CFG(LIDBG_I2C_GPIO_SDA, 0, (GPIO_CFG_OUTPUT | GPIO_CFG_INPUT), GPIO_CFG_PULL_UP, GPIO_CFG_16MA), GPIO_CFG_ENABLE);\
 	 gpio_tlmm_config(GPIO_CFG(LIDBG_I2C_GPIO_SCL, 0, GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA), GPIO_CFG_ENABLE);\

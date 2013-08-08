@@ -73,21 +73,24 @@ static struct i2c_driver i2c_api_driver =
 
  };
 
+#ifdef LIDBG_I2C_GPIO 
+
 static struct i2c_gpio_platform_data i2c_gpio_pdata = {
 	.sda_pin		= LIDBG_I2C_GPIO_SDA,
 	.sda_is_open_drain	= 0,
 	.scl_pin		= LIDBG_I2C_GPIO_SCL,
 	.scl_is_open_drain	= 1,
-	.udelay			= 1,		/* 10 kHz */
+	.udelay			= LIDBG_I2C_DEFAULT_DELAY,		/* 10 kHz */
 };
 
 static struct platform_device i2c_gpio_device = {
 	.name			= "i2c-gpio",
-	.id			= 3,		//will be used to set the i2c_bus number
+	.id			= LIDBG_I2C_BUS_ID,		//will be used to set the i2c_bus number
 	.dev			={
 		.platform_data	= &i2c_gpio_pdata,
 	},
 };
+#endif
 
 
 static struct i2c_api *get_i2c_api(int bus_id)
