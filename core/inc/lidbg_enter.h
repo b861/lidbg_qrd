@@ -130,6 +130,7 @@ struct fileserver_interface
 //struct fileserver_interface myfs_interface;//not use
 extern int fileserver_deal_cmd(struct list_head *client_list, enum string_dev_cmd cmd, char *lookfor, char *key);
 extern int fileserver_main(char *filename, enum string_dev_cmd cmd, char *str_append, struct list_head *client_list);
+extern struct list_head lidbg_config_list;
 //zone end
 
 typedef enum

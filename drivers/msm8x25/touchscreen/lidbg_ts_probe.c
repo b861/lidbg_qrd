@@ -13,7 +13,7 @@ LIDBG_DEFINE;
 #define GPIO_PWR_EN (23)
 #define PWR_EN_ON_TS   do{SOC_IO_Config(GPIO_PWR_EN,GPIO_CFG_OUTPUT,GPIO_CFG_PULL_UP,GPIO_CFG_16MA);SOC_IO_Output(0, GPIO_PWR_EN, 1); }while(0)
 
-#define SCAN_TIME (500)
+static int ts_scan_delayms =0;
 #define TS_I2C_BUS (1)
 #define FLYHAL_CONFIG_PATH "/flydata/flyhalconfig"
 static LIST_HEAD(flyhal_config_list);
@@ -89,7 +89,7 @@ void ts_scan(void)
         rc1 = SOC_I2C_Rec_Simple(TS_I2C_BUS, ts_probe_dev[i].chip_addr, &tmp, 1 );
         rc2 = SOC_I2C_Rec(TS_I2C_BUS, ts_probe_dev[i].chip_addr, ts_probe_dev[i].sub_addr, &tmp, 1 );
 
-        lidbg("rc1=%x,rc2=%x\n", rc1, rc2);
+        lidbg("rc1=%x,rc2=%x,ts_scan_delayms=%d\n", rc1, rc2,ts_scan_delayms);
 
         if ((rc1 < 0) && (rc2 < 0))
             lidbg("i2c_addr 0x%x probe fail!\n", ts_probe_dev[i].chip_addr);
@@ -129,6 +129,10 @@ void ts_scan(void)
 
 int ts_probe_thread(void *data)
 {
+
+	ts_scan_delayms = fileserver_deal_cmd(&lidbg_config_list, fs_cmd_list_getvalue, NULL, "ts_scan_delayms");
+	if(ts_scan_delayms < 100)
+		ts_scan_delayms = 500;
     while(1)
     {
         set_current_state(TASK_UNINTERRUPTIBLE);
@@ -143,12 +147,12 @@ int ts_probe_thread(void *data)
             if(scan_on == 1)
             {
                 SOC_IO_Output(0, 27, 1);
-                msleep(SCAN_TIME);
+                msleep(ts_scan_delayms);
                 ts_scan();
                 if(scan_on == 1)
                 {
                     SOC_IO_Output(0, 27, 0);
-                    msleep(SCAN_TIME);
+                    msleep(ts_scan_delayms);
                     ts_scan();
                     if(scan_on == 0)
                         shutdown_flag_gt811 = 1;
@@ -173,7 +177,7 @@ int ts_probe_thread(void *data)
         {
               //printk("[wang]:=========is in updating.\n");
 	    shutdown_flag_probe = 2;
-            msleep(SCAN_TIME);
+            msleep(ts_scan_delayms);
             
         }
     }

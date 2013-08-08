@@ -211,7 +211,7 @@ void fileserver_initonce(void)
 	//note:your list can only be init once;I hope all your list init in the zone below
 	printk("[futengfei]==============fileserver_initonce\n");
 //	fileserver_main(LIDBG_KILL_LIST_PATH, fs_cmd_file_listmode, NULL, &kill_list_test);
-//	fileserver_main(LIDBG_CONFIG_FILE_PATH, fs_cmd_file_configmode, NULL, &lidbg_config_list);
+	fileserver_main(LIDBG_CONFIG_FILE_PATH, fs_cmd_file_configmode, NULL, &lidbg_config_list);
 }
 void fileserver_example(void)
 {
@@ -450,4 +450,5 @@ EXPORT_SYMBOL(GetNsCount);
 EXPORT_SYMBOL(cmn_launch_user);
 EXPORT_SYMBOL(fileserver_deal_cmd);
 EXPORT_SYMBOL (fileserver_main);
+EXPORT_SYMBOL (lidbg_config_list);
 
