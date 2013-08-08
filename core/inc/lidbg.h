@@ -92,7 +92,8 @@
 #include "lidbg_enter.h"
 
 //#include "devices.h"
-#include "lidbg_share.h"
+//#include "lidbg_share.h"
+
 #include <linux/i2c-algo-bit.h>	//add by huangzongqiang
 
 

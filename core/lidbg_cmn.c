@@ -3,6 +3,75 @@
  */
 #include "lidbg.h"
 
+#define GET_INODE_FROM_FILEP(filp) ((filp)->f_path.dentry->d_inode)
+
+int lidbg_readwrite_file(const char *filename, char *rbuf,
+	const char *wbuf, size_t length)
+{
+	int ret = 0;
+	struct file *filp = (struct file *)-ENOENT;
+	mm_segment_t oldfs;
+	oldfs = get_fs();
+	set_fs(KERNEL_DS);
+
+	do {
+		int mode = (wbuf) ? O_RDWR : O_RDONLY;
+		filp = filp_open(filename, mode, S_IRUSR);
+
+		if (IS_ERR(filp) || !filp->f_op) {
+			ret = -ENOENT;
+			break;
+		}
+
+		if (!filp->f_op->write || !filp->f_op->read) {
+			filp_close(filp, NULL);
+			ret = -ENOENT;
+			break;
+		}
+
+		if (length == 0) {
+			/* Read the length of the file only */
+			struct inode    *inode;
+
+			inode = GET_INODE_FROM_FILEP(filp);
+			if (!inode) {
+				lidbg(
+					"kernel_readwrite_file: Error 2\n");
+				ret = -ENOENT;
+				break;
+			}
+			ret = i_size_read(inode->i_mapping->host);
+			break;
+		}
+
+		if (wbuf) {
+			ret = filp->f_op->write(
+				filp, wbuf, length, &filp->f_pos);
+			if (ret < 0) {
+				lidbg(
+					"kernel_readwrite_file: Error 3\n");
+				break;
+			}
+		} else {
+			ret = filp->f_op->read(
+				filp, rbuf, length, &filp->f_pos);
+			if (ret < 0) {
+				lidbg(
+					"kernel_readwrite_file: Error 4\n");
+				break;
+			}
+		}
+	} while (0);
+
+	if (!IS_ERR(filp))
+		filp_close(filp, NULL);
+
+	set_fs(oldfs);
+	lidbg( "kernel_readwrite_file: ret=%d\n", ret);
+
+	return ret;
+}
+
 
 
 //zone below [fileserver]
@@ -269,7 +338,7 @@ void create_new_proc_entry()
 }
 
 
-int cmn_task_kill_exclude(char *exclude_process, u32 num)
+int lidbg_task_kill_exclude(char *exclude_process, u32 num)
 {
     struct task_struct *p;
     struct mm_struct *mm;
@@ -288,7 +357,7 @@ int cmn_task_kill_exclude(char *exclude_process, u32 num)
         sig = p->signal;
         task_unlock(p);
 
-        //printk( "process %d (%s)\n",p->pid, p->comm);
+        //lidbg( "process %d (%s)\n",p->pid, p->comm);
         safe_flag = 0;
 
         for(i = 0; i < num; i++)
@@ -316,7 +385,7 @@ int cmn_task_kill_exclude(char *exclude_process, u32 num)
 }
 
 
-int cmn_task_kill_select(char *task_name)
+int lidbg_task_kill_select(char *task_name)
 {
     struct task_struct *p;
     struct task_struct *selected = NULL;
@@ -334,7 +403,7 @@ int cmn_task_kill_select(char *task_name)
         task_unlock(p);
 
         selected = p;
-        //printk( "process %d (%s)\n",p->pid, p->comm);
+        //lidbg( "process %d (%s)\n",p->pid, p->comm);
 
         if(!strcmp(p->comm, task_name))
         {
@@ -355,16 +424,16 @@ int cmn_task_kill_select(char *task_name)
 #if 0
 {
     int tmp1, tmp2, tmp3;
-    tmp1 = GetNsCount();
+    tmp1 = lidbg_get_ns_count();
     msleep(5);
-    tmp2 = GetNsCount();
+    tmp2 = lidbg_get_ns_count();
     tmp3 = tmp2 - tmp1;
     lidbg ("tmp3=%x \n", tmp3);
 
 }
 #endif
 
-u32 GetNsCount(void)
+u32 lidbg_get_ns_count(void)
 {
     struct timespec t_now;
     getnstimeofday(&t_now);
@@ -374,7 +443,7 @@ u32 GetNsCount(void)
 
 // cmn_launch_user("/system/bin/insmod", "/system/lib/modules/wlan.ko");
 // cmn_launch_user("/system/lidbg_servicer", NULL);
-int  cmn_launch_user( char bin_path[], char argv1[])
+int  lidbg_launch_user( char bin_path[], char argv1[])
 {
     char *argv[] = { bin_path, argv1, NULL };
     static char *envp[] = { "HOME=/", "TERM=linux", "PATH=/system/bin", NULL };//tell me sh where it is;
@@ -446,8 +515,11 @@ MODULE_AUTHOR("Flyaudio Inc.");
 
 
 EXPORT_SYMBOL(mod_cmn_main);
-EXPORT_SYMBOL(GetNsCount);
-EXPORT_SYMBOL(cmn_launch_user);
+EXPORT_SYMBOL(lidbg_get_ns_count);
+EXPORT_SYMBOL(lidbg_launch_user);
+EXPORT_SYMBOL(lidbg_readwrite_file);
+EXPORT_SYMBOL(lidbg_task_kill_select);
+
 EXPORT_SYMBOL(fileserver_deal_cmd);
 EXPORT_SYMBOL (fileserver_main);
 EXPORT_SYMBOL (lidbg_config_list);

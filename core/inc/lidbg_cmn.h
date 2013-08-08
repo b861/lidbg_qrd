@@ -7,8 +7,10 @@
 
 void mod_cmn_main(int argc, char **argv);
 
-u32 GetNsCount(void);
-int cmn_task_kill(char *task_name);
-int cmn_launch_user( char bin_path[], char argv1[]);
+u32 lidbg_get_ns_count(void);
+int lidbg_launch_user( char bin_path[], char argv1[]);
+int lidbg_readwrite_file(const char *filename, char *rbuf,const char *wbuf, size_t length);
+int lidbg_task_kill_select(char *task_name);
+
 #endif
 

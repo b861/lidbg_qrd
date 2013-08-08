@@ -18,6 +18,7 @@ LIDBG_DEFINE;
 
 
 #include "lidbg_fastboot.h"
+int lidbg_readwrite_file(const char *filename, char *rbuf,const char *wbuf, size_t length);
 
 
 #define RUN_FASTBOOT
@@ -268,6 +269,8 @@ char *kill_exclude_process[] =
 	".baidu.padinput",
 	"io3.widget.time",
 	"com.baidu.input",
+	"dio.flyaudioram",
+	"encode_button_q",
 
 
     "task_kill_exclude_end",
@@ -493,7 +496,7 @@ char *kill_exclude_process_fake_suspend[] =
 
 void set_power_state(int state)
 {
-
+#if 0
     struct file *fd = NULL;
     const char suspendstring[] = "mem";
     const char wakeupstring[] = "on";
@@ -518,7 +521,14 @@ void set_power_state(int state)
     {
         lidbg("open linux power dev fail: %s\n", powerdev);
     }
-
+#else
+	char buf[8];
+	if(state == 0)
+		lidbg_readwrite_file("/sys/power/state", NULL, "mem", sizeof("mem")-1);
+	else
+		lidbg_readwrite_file("/sys/power/state", NULL, "on", sizeof("on")-1);
+	
+#endif
 }
 
 
@@ -701,7 +711,8 @@ int pwroff_proc(char *buf, char **start, off_t offset, int count, int *eof, void
 	DUMP_FUN_ENTER;
 
     if(PM_STATUS_LATE_RESUME_OK == fastboot_get_status())
-        fastboot_pwroff();
+        //fastboot_pwroff();
+		set_power_state(0);
 
     return 1;
 }
@@ -1055,7 +1066,8 @@ static void fastboot_early_suspend(struct early_suspend *h)
 #if 0 //for test
     ignore_wakelock = 1;
 #endif
-    wake_unlock(&(fb_data->flywakelock));
+   wake_unlock(&(fb_data->flywakelock));
+   //wake_lock(&(fb_data->flywakelock));
     complete(&suspend_start);
 
 
