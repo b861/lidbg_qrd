@@ -509,7 +509,8 @@ static void nmea_reader_parse_gsv(NmeaReader *r, NmeaTokenizer *t)
 
 		D("commit one SvStatus:num_svs=%d, ephemeris_mask=0x%x, almanac_mask=0x%x, used_in_fix_mask=0x%x", cur_sv, r->sv.ephemeris_mask, r->sv.almanac_mask, r->sv.used_in_fix_mask);
 
-		r->callbacks.sv_status_cb(&r->sv);
+		if (r->callbacks.sv_status_cb)
+			r->callbacks.sv_status_cb(&r->sv);
 	}
 }
 
@@ -720,7 +721,7 @@ gps_state_start( GpsState*  s )
     while (ret < 0 && errno == EINTR);
 
     if (ret != 1)
-        D("%s: could not send CMD_START command: ret=%d: %s",
+        LOGD("%s: could not send CMD_START command: ret=%d: %s",
           __FUNCTION__, ret, strerror(errno));
 }
 
@@ -735,7 +736,7 @@ gps_state_stop( GpsState*  s )
     while (ret < 0 && errno == EINTR);
 
     if (ret != 1)
-        D("%s: could not send CMD_STOP command: ret=%d: %s",
+        LOGD("%s: could not send CMD_STOP command: ret=%d: %s",
           __FUNCTION__, ret, strerror(errno));
 }
 
@@ -806,7 +807,7 @@ gps_state_thread( void*  arg )
     epoll_register( epoll_fd, control_fd );
     epoll_register( epoll_fd, gps_fd );
 
-    D("gps thread running");
+    LOGD("gps thread running");
 
     // now loop
     for (;;) {
@@ -832,7 +833,7 @@ gps_state_thread( void*  arg )
                 {
                     char  cmd = 255;
                     int   ret;
-                    D("gps control fd event");
+                    LOGD("gps control fd event");
                     do {
                         ret = read( fd, &cmd, 1 );
                     } while (ret < 0 && errno == EINTR);
@@ -907,6 +908,7 @@ gps_state_thread( void*  arg )
 static void
 gps_state_init( GpsState*  state, GpsCallbacks* callbacks )
 {
+    int ret;
     state->init       = 1;
     state->control[0] = -1;
     state->control[1] = -1;
@@ -919,9 +921,11 @@ again:
 	sleep(1);
 	goto again;
     }
-
     D("gps will read from '%s'", GPS_DEV_NAME);
-
+    ret = ioctl(state->fd, GPS_STOP);
+    if (ret) {
+	D("ioctl GPS_STOP fail");
+    }
     if ( socketpair( AF_LOCAL, SOCK_STREAM, 0, state->control ) < 0 ) {
         D("could not create thread control socket pair: %s", strerror(errno));
         goto Fail;
@@ -980,6 +984,8 @@ ublox_gps_cleanup(void)
 static int
 ublox_gps_start()
 {
+    int ret;
+
     GpsState*  s = _gps_state;
 
     if (!s->init) {
@@ -987,9 +993,12 @@ ublox_gps_start()
         return -1;
     }
 
-    D("%s: called", __FUNCTION__);
+    LOGD("%s: called", __FUNCTION__);
     gps_state_start(s);
-    ioctl(s->fd, GPS_START);
+    ret = ioctl(s->fd, GPS_START);
+    if (ret) {
+	LOGD("ioctl error");
+    }
     return 0;
 }
 
@@ -997,6 +1006,7 @@ ublox_gps_start()
 static int
 ublox_gps_stop()
 {
+    int ret;
     GpsState*  s = _gps_state;
 
     if (!s->init) {
@@ -1004,10 +1014,13 @@ ublox_gps_stop()
         return -1;
     }
 
-    D("%s: called", __FUNCTION__);
+    LOGD("%s: called", __FUNCTION__);
 
     gps_state_stop(s);
-    ioctl(s->fd, GPS_STOP);
+    ret = ioctl(s->fd, GPS_STOP);
+    if (ret) {
+	LOGD("ioctl error");
+    }
     return 0;
 }
 
