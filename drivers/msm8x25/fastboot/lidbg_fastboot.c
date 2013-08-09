@@ -23,6 +23,7 @@ int lidbg_readwrite_file(const char *filename, char *rbuf,const char *wbuf, size
 
 #define RUN_FASTBOOT
 
+static LIST_HEAD(fastboot_kill_list);
 static DECLARE_COMPLETION(suspend_start);
 static DECLARE_COMPLETION(early_suspend_start);
 
@@ -632,7 +633,7 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
         {
             continue;
         }
-
+#if (defined(BOARD_V1) || defined(BOARD_V2))
         while(1)
         {
 
@@ -648,6 +649,21 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
             i++;
         }
 
+#else
+		//safe_flag = fileserver_deal_cmd(&fastboot_kill_list, fs_cmd_list_is_strinfile,p->comm, NULL);
+	{
+		struct string_dev *pos; 	
+		list_for_each_entry(pos, &fastboot_kill_list, tmp_list)
+		{
+			if(strcmp(p->comm, pos->yourkey) == 0)
+			{
+                safe_flag = 1;
+                break;
+            }
+			
+		}
+	}
+#endif
         if(safe_flag == 0)
         {
             if (p)
@@ -1169,6 +1185,7 @@ static int  fastboot_probe(struct platform_device *pdev)
     create_proc_entry_fake_suspend();
     create_proc_entry_fake_wakeup();
 
+	fileserver_main("/flysystem/lib/out/fastboot_not_kill_list.conf", fs_cmd_file_listmode, NULL, &fastboot_kill_list);
     DUMP_FUN_LEAVE;
 
     return 0;

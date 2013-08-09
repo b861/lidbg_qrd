@@ -95,7 +95,6 @@ typedef irqreturn_t (*pinterrupt_isr)(int irq, void *dev_id);
 
 
 //zone start
-#define LIDBG_CONFIG_FILE_PATH "/flysystem/lib/out/lidbg_config"
 enum string_dev_cmd
 {
     //file mode under cmd for fileserver_main();

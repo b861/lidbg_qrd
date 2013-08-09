@@ -77,6 +77,7 @@ int lidbg_readwrite_file(const char *filename, char *rbuf,
 //zone below [fileserver]
 #define LIDBG_KILL_LIST_PATH "/flysystem/lib/out/lidbg_kill_list"
 #define LIDBG_STATE_FILE_PATH "/data/lidbg_state"
+#define LIDBG_CONFIG_FILE_PATH "/flysystem/lib/out/lidbg.conf"
 #define LIDBG_STRING_DEV_MAX 500
 struct string_dev mysr_dev[LIDBG_STRING_DEV_MAX];//sizeof(mysr_dev[10000])=16?
 static int dev_pre_pos = 0;

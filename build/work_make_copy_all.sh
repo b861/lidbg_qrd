@@ -22,7 +22,6 @@ for each_dir in `ls -l | grep "^d" | awk '{print $NF}'`
 
 	if [ "$?" = "0" ]; then
 		echo -e "\033[42;37m Make  Successful\033[0m"
-		clear
 
 	else
 		echo -e "\033[41;37m +++++++++ $each_dir error codes +++++++++ \033[0m"
@@ -33,5 +32,7 @@ for each_dir in `ls -l | grep "^d" | awk '{print $NF}'`
 	fi
 	#then copy to out dir 
 	cp -u $dir/*.ko     $DBG_OUT_PATH/
+	cp -u $dir/*.conf     $DBG_OUT_PATH/
+	clear
 done
 

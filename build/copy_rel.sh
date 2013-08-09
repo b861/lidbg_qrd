@@ -17,6 +17,6 @@ src_dir=$DBG_DRV_PATH
 echo "from" $src_dir 
 echo "to" $dest_dir
 cp -u $src_dir/*.ko               $dest_dir/
-
+cp -u $src_dir/*.conf               $dest_dir/
 echo "copy_rel-"
 
