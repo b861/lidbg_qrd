@@ -16,6 +16,7 @@ for each_dir in `ls -l | grep "^d" | awk '{print $NF}'`
 	
 	dir=$dbg_soc/$each_dir
 
+if [ -s $dir/Makefile ]; then
 	echo -e "\n\033[44;37m ----build    $each_dir    ko---- \033[0m"
 	cd  $dir ; pwd          # ";"  do when ok or not   "&&" do when first no err
 	make modules -j4 > build_log
@@ -34,5 +35,9 @@ for each_dir in `ls -l | grep "^d" | awk '{print $NF}'`
 	cp -u $dir/*.ko     $DBG_OUT_PATH/
 	cp -u $dir/*.conf     $DBG_OUT_PATH/
 	clear
+else
+	echo -e "\033[43;37m ----build    $each_dir    ko---- \033[0m"
+	echo -e "skip:invalid Makefile"
+fi
 done
 
