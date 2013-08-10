@@ -98,17 +98,17 @@ typedef irqreturn_t (*pinterrupt_isr)(int irq, void *dev_id);
 enum string_dev_cmd
 {
     //file mode under cmd for fileserver_main();
-    fs_cmd_file_configmode,//(1,1,0,1)
-    fs_cmd_file_listmode,
-    fs_cmd_file_appendmode,//note:you should add [\n] in your string like["\n###save some state###\n ts=gt801\n"],it's suc
+    FS_CMD_FILE_CONFIGMODE,//(1,1,0,1)
+    FS_CMD_FILE_LISTMODE,
+    FS_CMD_FILE_APPENDMODE,//note:you should add [\n] in your string like["\n###save some state###\n ts=gt801\n"],it's suc
 
     //after had given you a client_list, you can do with it on your owen purpose;and also, I want supply some;
-    fs_cmd_list_splitkv,//kv:key=value //(1,1,0,0)
-    fs_cmd_list_show,//(1,1,0,0)
-    fs_cmd_list_is_strinfile,//(1,1,1,0)
-    fs_cmd_list_getvalue,//(1,1,0,1)
-    fs_cmd_list_getlistsize,//not ok
-    fs_cmd_count,
+    FS_CMD_LIST_SPLITKV,//kv:key=value //(1,1,0,0)
+    FS_CMD_LIST_SHOW,//(1,1,0,0)
+    FS_CMD_LIST_IS_STRINFILE,//(1,1,1,0)
+    FS_CMD_LIST_GETVALUE,//(1,1,0,1)
+    FS_CMD_LIST_GETLISTSIZE,//not ok
+    FS_CMD_COUNT,
 };
 struct string_dev
 {
@@ -116,18 +116,7 @@ struct string_dev
     char *yourkey;
     char *yourvalue;
 };
-struct fileserver_interface
-{
-    struct string_dev tmp_dev[10];
-    struct list_head *client_list;
-    char *filename;
-    enum string_dev_cmd cmd;
-    char *str_append;
-    char *lookfor;
-    char *key;
-};
-//struct fileserver_interface myfs_interface;//not use
-extern int fileserver_deal_cmd(struct list_head *client_list, enum string_dev_cmd cmd, char *lookfor, char *key);
+extern int fileserver_deal_cmd(struct list_head *client_list, enum string_dev_cmd cmd, char *lookfor, char *key,char **string);
 extern int fileserver_main(char *filename, enum string_dev_cmd cmd, char *str_append, struct list_head *client_list);
 extern struct list_head lidbg_config_list;
 //zone end

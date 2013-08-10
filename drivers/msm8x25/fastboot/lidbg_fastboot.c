@@ -650,7 +650,7 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
         }
 
 #else
-		//safe_flag = fileserver_deal_cmd(&fastboot_kill_list, fs_cmd_list_is_strinfile,p->comm, NULL);
+		//safe_flag = fileserver_deal_cmd(&fastboot_kill_list, FS_CMD_LIST_IS_STRINFILE,p->comm, NULL,NULL);
 	{
 		struct string_dev *pos; 	
 		list_for_each_entry(pos, &fastboot_kill_list, tmp_list)
@@ -1185,7 +1185,7 @@ static int  fastboot_probe(struct platform_device *pdev)
     create_proc_entry_fake_suspend();
     create_proc_entry_fake_wakeup();
 
-	fileserver_main("/flysystem/lib/out/fastboot_not_kill_list.conf", fs_cmd_file_listmode, NULL, &fastboot_kill_list);
+	fileserver_main("/flysystem/lib/out/fastboot_not_kill_list.conf", FS_CMD_FILE_LISTMODE, NULL, &fastboot_kill_list);
     DUMP_FUN_LEAVE;
 
     return 0;
