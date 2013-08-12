@@ -42,7 +42,7 @@ struct probe_device ts_probe_dev[] =
 #else
     {0x5d, 0x00, LOG_CAP_TS_GT811,"gt811.ko"}, //flycar
     {0x55, 0x00, LOG_CAP_TS_GT801,"gt801.ko"}, //flycar
-//{0x5d, 0x00, LOG_CAP_TS_GT911,"gt911.ko"}, //flycar
+//{0x14, 0x00, LOG_CAP_TS_GT911,"gt911.ko"}, //flycar
 //{0x5d, 0x00, LOG_CAP_TS_GT910,"gt910new.ko"}, //flycar
 #endif    
 };

@@ -286,7 +286,7 @@ if ((xy_revert_en)||(1 == ts_should_revert))
 	if (touch_cnt == 100)
 	{
 		touch_cnt = 0;
-		GTP_DEBUG("%d[%d,%d];",id,x,y);
+		printk("%d[%d,%d];\n",id,x,y);
 	}
 }
 /*******************************************************
@@ -598,22 +598,27 @@ Output:
 void gtp_reset_guitar(struct i2c_client *client, s32 ms)
 {
     GTP_DEBUG_FUNC();
-
+       #ifdef BOARD_V2
 	SOC_IO_Output(0, 27, 1);
 	//GTP_GPIO_OUTPUT(GTP_RST_PORT, 0);   //begin select I2C slave addr
 	msleep(ms);
-	#ifdef BOARD_V2
-	GTP_GPIO_OUTPUT(GTP_INT_PORT, client->addr == 0x14);
-	#endif
-	#ifdef BOARD_V3
-	GTP_GPIO_OUTPUT(GTP_INT_PORT, client->addr == 0x5d);
-	#endif
+	GTP_GPIO_OUTPUT(GTP_INT_PORT, 1);
 	// GTP_GPIO_OUTPUT(GTP_INT_PORT, 0);
 	msleep(2);
 	SOC_IO_Output(0, 27, 0);
 	// GTP_GPIO_OUTPUT(GTP_RST_PORT, 1);
-    
-    msleep(6);                          //must > 3ms
+	#endif
+	#ifdef BOARD_V3
+	SOC_IO_Output(0, 27, 0);
+	//GTP_GPIO_OUTPUT(GTP_RST_PORT, 0);   //begin select I2C slave addr
+	msleep(ms);
+	GTP_GPIO_OUTPUT(GTP_INT_PORT, 1);
+	// GTP_GPIO_OUTPUT(GTP_INT_PORT, 0);
+	msleep(2);
+	SOC_IO_Output(0, 27, 1);
+	#endif
+	// GTP_GPIO_OUTPUT(GTP_RST_PORT, 1);
+      msleep(6);                          //must > 3ms
     GTP_GPIO_AS_INPUT(GTP_RST_PORT);    //end select I2C slave addr
     
     gtp_int_sync(50);
@@ -725,11 +730,17 @@ static s32 gtp_init_panel(struct goodix_ts_data *ts)
     u8 cfg_info_group1[] = CTP_CFG_GROUP1;
     u8 cfg_info_group2[] = CTP_CFG_GROUP2;
     u8 cfg_info_group3[] = CTP_CFG_GROUP3;
-    u8 *send_cfg_buf[3] = {cfg_info_group1, cfg_info_group2, cfg_info_group3};
-    u8 cfg_info_len[3] = {sizeof(cfg_info_group1)/sizeof(cfg_info_group1[0]), 
+    u8 cfg_info_group4[] = CTP_CFG_GROUP4;
+    u8 cfg_info_group5[] = CTP_CFG_GROUP5;
+    u8 cfg_info_group6[] = CTP_CFG_GROUP6;
+    u8 *send_cfg_buf[6] = {cfg_info_group1, cfg_info_group2, cfg_info_group3,cfg_info_group4, cfg_info_group5, cfg_info_group6};
+    u8 cfg_info_len[6] = {sizeof(cfg_info_group1)/sizeof(cfg_info_group1[0]), 
                           sizeof(cfg_info_group2)/sizeof(cfg_info_group2[0]),
-                          sizeof(cfg_info_group3)/sizeof(cfg_info_group3[0])};
-    for(i=0; i<3; i++)
+                          sizeof(cfg_info_group3)/sizeof(cfg_info_group3[0]),
+                          sizeof(cfg_info_group4)/sizeof(cfg_info_group4[0]),
+                          sizeof(cfg_info_group5)/sizeof(cfg_info_group5[0]),
+                          sizeof(cfg_info_group6)/sizeof(cfg_info_group6[0])};
+    for(i=0; i<6; i++)
     {
         if(cfg_info_len[i] > ts->gtp_cfg_len)
         {
@@ -737,11 +748,11 @@ static s32 gtp_init_panel(struct goodix_ts_data *ts)
         }
     }
     GTP_DEBUG("len1=%d,len2=%d,len3=%d,send_len:%d",cfg_info_len[0],cfg_info_len[1],cfg_info_len[2],ts->gtp_cfg_len);
-    if ((!cfg_info_len[1]) && (!cfg_info_len[2]))
+  /*  if ((!cfg_info_len[1]) && (!cfg_info_len[2]))
     {
         rd_cfg_buf[GTP_ADDR_LENGTH] = 0; 
     }
-    else
+    else*/
     {
         rd_cfg_buf[0] = GTP_REG_SENSOR_ID >> 8;
         rd_cfg_buf[1] = GTP_REG_SENSOR_ID & 0xff;
@@ -753,7 +764,7 @@ static s32 gtp_init_panel(struct goodix_ts_data *ts)
         }
         rd_cfg_buf[GTP_ADDR_LENGTH] &= 0x07;
     }
-    GTP_DEBUG("SENSOR ID:%d", rd_cfg_buf[GTP_ADDR_LENGTH]);
+printk("SENSOR ID:%d", rd_cfg_buf[GTP_ADDR_LENGTH]);
     memset(&config[GTP_ADDR_LENGTH], 0, GTP_CONFIG_MAX_LENGTH);
     memcpy(&config[GTP_ADDR_LENGTH], send_cfg_buf[rd_cfg_buf[GTP_ADDR_LENGTH]], ts->gtp_cfg_len);
 
@@ -1106,7 +1117,7 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
   client->addr = 0x14;
 #endif
 #ifdef BOARD_V3
-  client->addr = 0x5d;
+  client->addr = 0x14;
 #endif
     ts->client = client;
     i2c_set_clientdata(client, ts);
