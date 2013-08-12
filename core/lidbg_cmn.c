@@ -76,7 +76,7 @@ int lidbg_readwrite_file(const char *filename, char *rbuf,
 
 //zone below [fileserver]
 #define LIDBG_STATE_FILE_PATH "/data/lidbg_state"
-#define LIDBG_CONFIG_FILE_PATH "/flysystem/lib/out/lidbg.conf"
+#define LIDBG_CONFIG_FILE_PATH "/flysystem/lib/out/drivers.conf"
 static int g_dubug_on = 0;
 LIST_HEAD(lidbg_config_list);
 

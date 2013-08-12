@@ -29,4 +29,5 @@ cp $DBG_OUT_PATH/gt80x_update.ko $release_path
 cp $DBG_OUT_PATH/lidbg_loader.ko $release_path
 cp $DBG_OUT_PATH/lidbg_uart.ko $release_path
 cp $DBG_OUT_PATH/fastboot_not_kill_list.conf $release_path
-cp $DBG_OUT_PATH/lidbg.conf $release_path
+cp $DBG_OUT_PATH/core.conf $release_path
+cp $DBG_OUT_PATH/drivers.conf $release_path

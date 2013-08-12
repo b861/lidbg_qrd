@@ -9,6 +9,7 @@ source ./env_entry.sh
 clear
 dbg_soc=$DBG_WORK_PATH/$DBG_SOC/
 cd $dbg_soc
+cp -u *.conf     $DBG_OUT_PATH/
 
 for each_dir in `ls -l | grep "^d" | awk '{print $NF}'`
 
