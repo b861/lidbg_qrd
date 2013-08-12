@@ -14,6 +14,7 @@ obj-m	+= lidbg_ad.o
 obj-m	+= lidbg_i2c_gpio.o
 obj-m	+= lidbg_i2c.o
 obj-m	+= lidbg_spi.o
+obj-m	+= lidbg_uart.o
 obj-m	+= lidbg_key.o
 obj-m	+= lidbg_touch.o
 obj-m	+= lidbg_common.o

@@ -215,7 +215,18 @@ int SOC_I2C_Set_Rate(int  bus_id, int rate)
 {
 	return		 i2c_api_set_rate(bus_id, rate);
 }
-	
+
+void SOC_IO_Uart_Cfg(u32 baud)
+{
+	soc_io_uart_cfg(baud);
+}
+
+void SOC_IO_Uart_Send(u8 data)
+{
+	soc_io_uart_send(data);
+}
+
+
 static void set_func_tbl(void)
 {
     //io

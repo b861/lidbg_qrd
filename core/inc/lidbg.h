@@ -78,7 +78,7 @@
 #include "lidbg_def.h"
 #include "lidbg_mem.h"
 #include "lidbg_i2c.h"
-#include "lidbg_serial.h"
+#include "lidbg_uart.h"
 #include "lidbg_spi.h"
 //#include "lidbg_init.h"
 #include "lidbg_display.h"

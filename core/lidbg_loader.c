@@ -14,6 +14,7 @@ char *insmod_list[] =
 	"lidbg_i2c.ko",
 	"lidbg_io.ko",
 	"lidbg_ad.ko",
+	"lidbg_uart.ko",
 	"lidbg_main.ko",
 	"lidbg_fly_hal.ko",
 	NULL,
