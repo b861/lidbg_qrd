@@ -215,7 +215,7 @@ extern struct fly_smem *p_fly_smem ;
 }while(0)
 
 
-#define TX_GPIO (43)
+#define TX_GPIO (123)  //27
 #define TX_H  do{soc_io_output(0,TX_GPIO, 1);}while(0)
 #define TX_L  do{soc_io_output(0,TX_GPIO, 0);}while(0)
 #define TX_CFG  do{soc_io_config(TX_GPIO, GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_16MA,1);}while(0)

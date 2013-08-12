@@ -221,9 +221,18 @@ void SOC_IO_Uart_Cfg(u32 baud)
 	soc_io_uart_cfg(baud);
 }
 
-void SOC_IO_Uart_Send(u8 data)
+void SOC_IO_Uart_Send( u32 baud,const char *fmt, ... )
 {
-	soc_io_uart_send(data);
+	va_list args;
+	int n;
+	char printbuffer[256];
+
+	va_start ( args, fmt );
+        n = vsprintf ( printbuffer, (const char *)fmt, args );
+        va_end ( args );
+
+
+	soc_io_uart_send(baud,(unsigned char *)printbuffer);
 }
 
 
@@ -234,6 +243,7 @@ static void set_func_tbl(void)
     plidbg_dev->soc_func_tbl.pfnSOC_IO_Input = SOC_IO_Input;
     plidbg_dev->soc_func_tbl.pfnSOC_IO_Output_Ext = SOC_IO_Output_Ext;
     plidbg_dev->soc_func_tbl.pfnSOC_IO_Config = SOC_IO_Config;
+  
     //i2c
     plidbg_dev->soc_func_tbl.pfnSOC_I2C_Send = SOC_I2C_Send;
     plidbg_dev->soc_func_tbl.pfnSOC_I2C_Rec = SOC_I2C_Rec;
@@ -271,6 +281,9 @@ static void set_func_tbl(void)
 
     //mic
     plidbg_dev->soc_func_tbl.pfnSOC_Mic_Enable = SOC_Mic_Enable;
+
+   // uart
+    plidbg_dev->soc_func_tbl.pfnSOC_IO_Uart_Send = SOC_IO_Uart_Send;
 }
 
 

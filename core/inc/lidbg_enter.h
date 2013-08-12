@@ -312,6 +312,8 @@ struct lidbg_fn_t
 	int (*pfnSOC_I2C_Rec_2B_SubAddr)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
 	//I2c_Rate	 i2c_api_set_rate(int  bus_id, int rate)
 	int (*pfnSOC_I2C_Set_Rate)(int  bus_id, int rate);
+
+	void (*pfnSOC_IO_Uart_Send)( u32 baud,const char *fmt, ... );
 };
 
 

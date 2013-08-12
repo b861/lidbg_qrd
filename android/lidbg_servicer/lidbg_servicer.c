@@ -610,6 +610,8 @@ int main(int argc , char **argv)
     system("insmod /flysystem/lib/out/lidbg_soc_msm8x25.ko");
     system("insmod /flysystem/lib/out/lidbg_io.ko");
     system("insmod /flysystem/lib/out/lidbg_ad.ko");
+	system("insmod /flysystem/lib/out/lidbg_uart.ko");
+
     system("insmod /flysystem/lib/out/lidbg_main.ko");
 
     system("insmod /flysystem/lib/out/lidbg_fly_soc.ko");

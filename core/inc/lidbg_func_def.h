@@ -94,6 +94,8 @@ static inline int check_pt(void)
 //video
 #define VideoReset (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnVideoReset))
 
+//uart
+#define SOC_IO_Uart_Send (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_IO_Uart_Send))
 
 #endif
 
