@@ -642,7 +642,7 @@ static int lpc_suspend(struct device *dev)
 {
     DUMP_FUN;
 
-    TELL_LPC_PWR_OFF;
+    //TELL_LPC_PWR_OFF;
 
     return 0;
 }
@@ -651,7 +651,7 @@ static int lpc_resume(struct device *dev)
 {
     DUMP_FUN;
 
-    TELL_LPC_PWR_ON;
+    //TELL_LPC_PWR_ON;
     //msleep(200);
     resume_count++;
 

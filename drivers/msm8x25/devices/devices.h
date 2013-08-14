@@ -250,7 +250,7 @@ enum
 #define  MCU_SUSPEND_FLAG (29)
 
 //lidbg("tell lpc power off ok!#\n");
-#if 0
+#if 1
 #define TELL_LPC_PWR_OFF do{  \
 								SOC_IO_Config(MCU_IIC_REQ_I,GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_16MA);\
 								SOC_IO_Output(0, MCU_IIC_REQ_I, 0);\

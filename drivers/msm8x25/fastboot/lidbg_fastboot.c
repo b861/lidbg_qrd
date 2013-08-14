@@ -44,6 +44,10 @@ struct fastboot_data
     int suspend_pending;
     u32 resume_count;
     struct mutex lock;
+	int kill_task_en;
+	int haslock_resume_times;
+	int max_wait_unlock_time;
+	
 #if defined(CONFIG_HAS_EARLYSUSPEND)
     struct wake_lock flywakelock;
     struct early_suspend early_suspend;
@@ -824,7 +828,7 @@ static int thread_fastboot_suspend(void *data)
                 if(fastboot_get_status() == PM_STATUS_EARLY_SUSPEND_PENDING)
                 {
 #ifdef HAS_LOCK_RESUME
-                    if(time_count >= MAX_WAIT_UNLOCK_TIME)
+                    if(time_count >= /*MAX_WAIT_UNLOCK_TIME*/fb_data->max_wait_unlock_time)
 #else
                     if(time_count >= 10)
 #endif
@@ -844,7 +848,7 @@ static int thread_fastboot_suspend(void *data)
                         }
                         wakelock_occur_count++;
                         lidbg("wakelock_occur_count=%d\n", wakelock_occur_count);
-                        if(wakelock_occur_count <= WAIT_LOCK_RESUME_TIMES)
+                        if(wakelock_occur_count <= /*WAIT_LOCK_RESUME_TIMES*/fb_data->haslock_resume_times)
                         {
 #if (defined(BOARD_V1) || defined(BOARD_V2))
                         SOC_Write_Servicer(WAKEUP_KERNEL);
@@ -856,7 +860,7 @@ static int thread_fastboot_suspend(void *data)
                         else
 #endif
                         {
-#if 0//def HAS_LOCK_RESUME
+#ifdef HAS_LOCK_RESUME
                             lidbg("$+\n");
                             msleep((10 - MAX_WAIT_UNLOCK_TIME) * 1000);
                             lidbg("$-\n");
@@ -1075,15 +1079,17 @@ static void fastboot_early_suspend(struct early_suspend *h)
         lidbgerr("Call devices_early_suspend when suspend_pending != PM_STATUS_READY_TO_PWROFF\n");
 
     }
-
-    fastboot_task_kill_exclude(kill_exclude_process);
-    msleep(1000);
-
+	if(fb_data->kill_task_en)
+	{
+    	fastboot_task_kill_exclude(kill_exclude_process);
+    	msleep(1000);
+	}
+	
 #if 0 //for test
     ignore_wakelock = 1;
 #endif
    wake_unlock(&(fb_data->flywakelock));
-   //wake_lock(&(fb_data->flywakelock));
+   //wake_lock(&(fb_data->flywakelock));//to test force suspend
     complete(&suspend_start);
 
 
@@ -1129,6 +1135,26 @@ static int  fastboot_probe(struct platform_device *pdev)
     register_early_suspend(&fb_data->early_suspend);
     wake_lock(&(fb_data->flywakelock));
 #endif
+
+
+{
+	int ret = 0;char *string;
+
+	fb_data->kill_task_en = 1;
+	ret = fileserver_deal_cmd(&lidbg_config_list, FS_CMD_LIST_GETVALUE, NULL, "kill_task_en",&string);
+	if(ret>0) fb_data->kill_task_en = simple_strtoul(string, 0, 0);
+	lidbg("config:kill_task_en=%d",fb_data->kill_task_en);
+	
+	fb_data->haslock_resume_times = 0;
+	ret = fileserver_deal_cmd(&lidbg_config_list, FS_CMD_LIST_GETVALUE, NULL, "haslock_resume_times",&string);
+	if(ret>0) fb_data->haslock_resume_times = simple_strtoul(string, 0, 0);
+	lidbg("config:haslock_resume_times=%d",fb_data->haslock_resume_times);
+
+	fb_data->max_wait_unlock_time = 5;
+	ret = fileserver_deal_cmd(&lidbg_config_list, FS_CMD_LIST_GETVALUE, NULL, "max_wait_unlock_time",&string);
+	if(ret>0) fb_data->max_wait_unlock_time = simple_strtoul(string, 0, 0);
+	lidbg("config:max_wait_unlock_time=%d",fb_data->max_wait_unlock_time);
+}
 
 
     INIT_COMPLETION(early_suspend_start);

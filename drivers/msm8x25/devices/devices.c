@@ -44,6 +44,7 @@ void fly_devices_init(void);
 
 int platform_id;
 bool i2c_c_ctrl = 0;
+int i2c_ctrl = 0;
 
 struct platform_devices_resource devices_resource;
 
@@ -473,14 +474,34 @@ static int soc_dev_probe(struct platform_device *pdev)
 
     }
 
+{
+	int ret = 0;char *string;
+	ret = fileserver_deal_cmd(&lidbg_config_list, FS_CMD_LIST_GETVALUE, NULL, "i2c_ctrl",&string);
+	if(ret>0) i2c_ctrl = simple_strtoul(string, 0, 0);
+	lidbg("config:i2c_ctrl=%d",i2c_ctrl);
+}
+
+
+
 
 #ifdef DEBUG_LED
-    led_task = kthread_create(thread_led, NULL, "led_task");
-    if(IS_ERR(led_task))
-    {
-        lidbg("Unable to start kernel thread.\n");
-    }
-    else wake_up_process(led_task);
+{
+	bool led_en = 1;
+	int ret = 0;char *string;
+	ret = fileserver_deal_cmd(&lidbg_config_list, FS_CMD_LIST_GETVALUE, NULL, "led_en",&string);
+	if(ret>0) led_en = simple_strtoul(string, 0, 0);
+	lidbg("config:led_en=%d",led_en);
+	
+	if(led_en)
+	{
+	    led_task = kthread_create(thread_led, NULL, "led_task");
+	    if(IS_ERR(led_task))
+	    {
+	        lidbg("Unable to start kernel thread.\n");
+	    }
+	    else wake_up_process(led_task);
+	}
+}
 #endif
 
 
@@ -678,7 +699,8 @@ static int  soc_dev_suspend(struct platform_device *pdev, pm_message_t state)
         PWR_EN_OFF;
         LED_ON;
         i2c_c_ctrl = 0;
-        TELL_LPC_PWR_OFF;
+		if(i2c_ctrl)
+        	TELL_LPC_PWR_OFF;
 
     }
 
