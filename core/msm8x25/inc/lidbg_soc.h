@@ -42,13 +42,8 @@
 #include <linux/android_pmem.h>
 #include <linux/bootmem.h>
 #include <linux/mfd/marimba.h>
-#include <linux/power_supply.h>
 #include <linux/regulator/consumer.h>
 #include <linux/memblock.h>
-#include <asm/mach/mmc.h>
-#include <asm/mach-types.h>
-#include <asm/mach/arch.h>
-#include <asm/hardware/gic.h>
 #include <mach/board.h>
 #include <mach/msm_iomap.h>
 #include <mach/msm_hsusb.h>

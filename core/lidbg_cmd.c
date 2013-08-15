@@ -150,6 +150,11 @@ void parse_cmd(char *pt)
         {
             mod_cmn_main(new_argc, new_argv);
         }
+
+        else if(!strcmp(argv[1], "file"))
+        {
+            lidbg_fileserver_main(new_argc, new_argv);
+        }
 #if 1
         else if(!strcmp(argv[1], "video"))
         {

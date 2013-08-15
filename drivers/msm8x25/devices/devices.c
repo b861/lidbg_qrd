@@ -476,9 +476,9 @@ static int soc_dev_probe(struct platform_device *pdev)
 
 {
 	int ret = 0;char *string;
-	ret = fileserver_deal_cmd(&lidbg_config_list, FS_CMD_LIST_GETVALUE, NULL, "i2c_ctrl",&string);
+	ret = fileserver_deal_cmd(&lidbg_drivers_list, FS_CMD_LIST_GETVALUE, NULL, "i2c_ctrl",&string);
 	if(ret>0) i2c_ctrl = simple_strtoul(string, 0, 0);
-	lidbg("config:i2c_ctrl=%d",i2c_ctrl);
+	lidbg("config:i2c_ctrl=%d\n",i2c_ctrl);
 }
 
 
@@ -488,9 +488,9 @@ static int soc_dev_probe(struct platform_device *pdev)
 {
 	bool led_en = 1;
 	int ret = 0;char *string;
-	ret = fileserver_deal_cmd(&lidbg_config_list, FS_CMD_LIST_GETVALUE, NULL, "led_en",&string);
+	ret = fileserver_deal_cmd(&lidbg_drivers_list, FS_CMD_LIST_GETVALUE, NULL, "led_en",&string);
 	if(ret>0) led_en = simple_strtoul(string, 0, 0);
-	lidbg("config:led_en=%d",led_en);
+	lidbg("config:led_en=%d\n",led_en);
 	
 	if(led_en)
 	{

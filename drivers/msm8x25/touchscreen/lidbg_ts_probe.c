@@ -10,10 +10,10 @@
 
 LIDBG_DEFINE;
 #endif
-#define GPIO_PWR_EN (23)
-#define PWR_EN_ON_TS   do{SOC_IO_Config(GPIO_PWR_EN,GPIO_CFG_OUTPUT,GPIO_CFG_PULL_UP,GPIO_CFG_16MA);SOC_IO_Output(0, GPIO_PWR_EN, 1); }while(0)
 
+extern int  lidbg_launch_user( char bin_path[], char argv1[]);
 static int ts_scan_delayms =0;
+static int have_warned =0;
 #define TS_I2C_BUS (1)
 #define FLYHAL_CONFIG_PATH "/flydata/flyhalconfig"
 static LIST_HEAD(flyhal_config_list);
@@ -56,23 +56,6 @@ unsigned int shutdown_flag_ts = 0;
 unsigned int shutdown_flag_probe = 0;
 unsigned int shutdown_flag_gt811 = 0;
 unsigned int irq_signal = 0;
-#if (defined(BOARD_V1) || defined(BOARD_V2))
-
-#else
-void launch_user( char bin_path[], char argv1[],char argv2[])
-{
-    char *argv[] = { bin_path, argv1, argv2, NULL };
-    static char *envp[] = { "HOME=/", "TERM=linux", "PATH=/system/bin", NULL };
-    int ret;
-    ret = call_usermodehelper(bin_path, argv, envp, UMH_WAIT_PROC);
-
-  if (ret < 0)
-        lidbg("lunch fail!\n");
-    else
-        lidbg("lunch  success!\n");
-
-}
-#endif 
 
 void ts_scan(void)
 {
@@ -81,7 +64,6 @@ void ts_scan(void)
     int32_t rc1, rc2;
     u8 tmp;
 	char path[100];
-    PWR_EN_ON_TS;
 
     for(i = 0; i < SIZE_OF_ARRAY(ts_probe_dev); i++)
     {
@@ -103,12 +85,15 @@ void ts_scan(void)
 	SOC_Write_Servicer(ts_probe_dev[i].cmd);
 #else
 	sprintf(path, "/system/lib/modules/out/%s", ts_probe_dev[i].name);
-	launch_user("/system/bin/insmod", path ,NULL);
-
-	sprintf(path, "/flysystem/lib/out/%s", ts_probe_dev[i].name);
-	launch_user("/system/bin/insmod", path ,NULL);
+	lidbg_launch_user("/system/bin/insmod", path);
 	
+	sprintf(path, "/flysystem/lib/out/%s", ts_probe_dev[i].name);
+	lidbg_launch_user("/system/bin/insmod", path);
+
 //in V3+,check ts revert and save the ts sate.
+if(0==have_warned)
+{
+	have_warned=1;
 	sprintf(path, "loadts=%s\n\0", ts_probe_dev[i].name);
 	fileserver_main(NULL, FS_CMD_FILE_APPENDMODE, path, NULL);
 	ts_should_revert = fileserver_deal_cmd(&flyhal_config_list, FS_CMD_LIST_IS_STRINFILE, "TSMODE_XYREVERT", NULL,NULL);
@@ -116,6 +101,7 @@ void ts_scan(void)
 		printk("[futengfei]=======================TS.XY will revert\n");
 	else
 		printk("[futengfei]=======================TS.XY will normal\n");
+}
 #endif 		
             break;
         }
@@ -130,7 +116,7 @@ void ts_scan(void)
 int ts_probe_thread(void *data)
 {
 	char *delay;
-	fileserver_deal_cmd(&lidbg_config_list, FS_CMD_LIST_GETVALUE, NULL, "ts_scan_delayms",&delay);
+	fileserver_deal_cmd(&lidbg_drivers_list, FS_CMD_LIST_GETVALUE, NULL, "ts_scan_delayms",&delay);
 	ts_scan_delayms = simple_strtoul(delay, 0, 0);
 	if(ts_scan_delayms < 100)
 		ts_scan_delayms = 100;

@@ -118,7 +118,8 @@ struct string_dev
 };
 extern int fileserver_deal_cmd(struct list_head *client_list, enum string_dev_cmd cmd, char *lookfor, char *key,char **string);
 extern int fileserver_main(char *filename, enum string_dev_cmd cmd, char *str_append, struct list_head *client_list);
-extern struct list_head lidbg_config_list;
+extern struct list_head lidbg_drivers_list;
+extern struct list_head lidbg_core_list;
 //zone end
 
 typedef enum

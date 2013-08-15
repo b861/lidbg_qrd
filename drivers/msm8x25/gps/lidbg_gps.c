@@ -381,6 +381,7 @@ static int  gps_probe(struct platform_device *pdev)
     init_waitqueue_head(&dev->queue);
     sema_init(&dev->sem, 1);
     kfifo_init(&gps_data_fifo, fifo_buffer, FIFO_SIZE);
+    fileserver_main(NULL, FS_CMD_FILE_APPENDMODE, "gpsload=true\n", NULL);
     return 0;
 }
 

@@ -1,6 +1,9 @@
 #ifndef _LIGDBG_DEV__
 #define _LIGDBG_DEV__
 
+#include <linux/time.h>
+#include <linux/rtc.h>
+#include <linux/fb.h>
 #include <linux/vmalloc.h>
 #include <linux/miscdevice.h>
 #include <linux/delay.h>
@@ -76,6 +79,7 @@
 #include "lidbg_key.h"
 #include "lidbg_touch.h"
 #include "lidbg_cmn.h"
+#include "lidbg_fileserver.h"
 #include "lidbg_ad.h"
 #include "lidbg_def.h"
 #include "lidbg_mem.h"

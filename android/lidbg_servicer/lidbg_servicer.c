@@ -717,7 +717,7 @@ open_dev:
     system("chmod 777 /proc/fake_wakeup");
 
     system("chmod 0666 /dev/mtd/mtd1");
-
+    system("chmod 0777 /lidbg_state.txt");
 #endif
 
 #ifdef SHARE_MMAP_ENABLE
