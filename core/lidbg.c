@@ -191,6 +191,8 @@ void lidbg_remove_proc(void);
 void soc_func_tbl_default()
 {
     lidbgerr("soc_func_tbl_default:this func not ready!\n");
+	//print who call this
+	dump_stack();
 
 }
 

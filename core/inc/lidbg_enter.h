@@ -361,7 +361,7 @@ struct lidbg_dev
 	 struct file *fd = NULL;\
 	 printk("lidbg:call LIDBG_GET by %s\n",__FUNCTION__);\
 	 while(1){\
-	 	printk("lidbg:try open mlidbg0!\n");\
+	 	printk("lidbg: %s try open mlidbg0!\n",__FUNCTION__);\
 	 	fd = filp_open("/dev/mlidbg0", O_RDWR, 0);\
 	 	printk("lidbg:get fd=%x\n",(int)fd);\
 	    if((fd == NULL)||((int)fd == 0xfffffffe)){printk("lidbg:get fd fail!\n");msleep(500);}\

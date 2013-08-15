@@ -31,6 +31,8 @@
 #include <linux/hrtimer.h>
 
 #include <linux/stat.h>
+#include <linux/kprobes.h>
+#include <asm/traps.h>
 
 
 #include <linux/i2c.h>
