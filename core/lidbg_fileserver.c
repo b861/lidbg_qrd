@@ -27,8 +27,11 @@ int fileserver_deal_cmd(struct list_head *client_list, enum string_dev_cmd cmd, 
         list_for_each_entry(pos, client_list, tmp_list)
         {
             p = memchr(pos->yourkey, '=', strlen(pos->yourkey));
-            pos->yourvalue = p + 1;
-            *p = '\0';
+            if(p != NULL)
+            {
+                pos->yourvalue = p + 1;
+                *p = '\0';
+            }
         }
 
         break;
@@ -52,7 +55,6 @@ int fileserver_deal_cmd(struct list_head *client_list, enum string_dev_cmd cmd, 
                 return 1;
             }
         }
-        *string = "-1";
         printk("[futengfei]:err find key[%s]\n", key);
         return -1;
     case FS_CMD_LIST_IS_STRINFILE:
@@ -195,7 +197,7 @@ again:
     all_purpose = 0;
     while((token = strsep(&file_ptr, "\n")) != NULL )
     {
-        if(strlen(token) > 2 && token[0] != '#')
+        if( token[0] != '#' && token[0] != '\n' && token[0] != '\0')
         {
             if(g_dubug_on)
                 printk("%d[%s]\n", all_purpose, token);
@@ -204,6 +206,8 @@ again:
             list_add(&(add_new_dev->tmp_list), client_list);
             all_purpose++;
         }
+        else if(g_dubug_on)
+            printk("droped[%s]\n", token);
     }
     if(cmd == FS_CMD_FILE_CONFIGMODE)
         fileserver_deal_cmd(client_list, FS_CMD_LIST_SPLITKV, NULL, NULL, NULL);

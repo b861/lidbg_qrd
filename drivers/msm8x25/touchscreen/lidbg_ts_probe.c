@@ -12,7 +12,7 @@ LIDBG_DEFINE;
 #endif
 
 extern int  lidbg_launch_user( char bin_path[], char argv1[]);
-static int ts_scan_delayms =0;
+static int ts_scan_delayms =500;
 static int have_warned =0;
 #define TS_I2C_BUS (1)
 #define FLYHAL_CONFIG_PATH "/flydata/flyhalconfig"
@@ -116,10 +116,14 @@ if(0==have_warned)
 int ts_probe_thread(void *data)
 {
 	char *delay;
-	fileserver_deal_cmd(&lidbg_drivers_list, FS_CMD_LIST_GETVALUE, NULL, "ts_scan_delayms",&delay);
-	ts_scan_delayms = simple_strtoul(delay, 0, 0);
-	if(ts_scan_delayms < 100)
-		ts_scan_delayms = 100;
+	int ret;
+	ret = fileserver_deal_cmd(&lidbg_drivers_list, FS_CMD_LIST_GETVALUE, NULL, "ts_scan_delayms", &delay);
+	if(ret > 0)
+	{
+	    ts_scan_delayms = simple_strtoul(delay, 0, 0);
+	    if(ts_scan_delayms < 100)
+	        ts_scan_delayms = 100;
+	}
     while(1)
     {
         set_current_state(TASK_UNINTERRUPTIBLE);
