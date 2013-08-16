@@ -66,7 +66,7 @@ int static VideoImageParameterConfig(void)
 	/**************************************Astren************************************************/
 		if(TW9912_Image_Parameter_fly[1].valu == 240)
 		{
-		printk("Astern\n");
+		printk("Astern 2 Normal \n");
 	//	SOC_Write_Servicer(VIDEO_PASSAGE_ASTERN);
 		flag_now_config_channal_AUX_or_Astren = 0;
 		     if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
@@ -81,6 +81,31 @@ int static VideoImageParameterConfig(void)
 		     else//PALi
 		     	{
 		        Tw9912_image_global_AUX_BACK_PAL_I[0][1]= 0x00;// is good 00
+		        Tw9912_image_global_AUX_BACK_PAL_I[1][1]= 0x5f;//is good 58
+		        Tw9912_image_global_AUX_BACK_PAL_I[2][1]= 0x20;
+		        Tw9912_image_global_AUX_BACK_PAL_I[3][1]= 0xdf;
+		        Tw9912_image_global_AUX_BACK_PAL_I[4][1]= 0xdf;
+			// printk("Tw9912_image_global_AUX_BACK reset valu from PAL_I\n");
+			 }
+			 return 1;
+		}
+		else if(TW9912_Image_Parameter_fly[1].valu == 0xF1)
+		{
+		printk("Astern 2 New Teana\n");
+	//	SOC_Write_Servicer(VIDEO_PASSAGE_ASTERN);
+		flag_now_config_channal_AUX_or_Astren = 0;
+		     if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
+		        {
+		        Tw9912_image_global_AUX_BACK[0][1] = 0x15;//honda xiyu is 31 // is good 00
+		        Tw9912_image_global_AUX_BACK[1][1] = 0x5f;//honda xiyu 5c //is good 58
+			 Tw9912_image_global_AUX_BACK[2][1] = 0x20;
+		        Tw9912_image_global_AUX_BACK[3][1] = 0xdf;
+			 Tw9912_image_global_AUX_BACK[4][1] = 0xdf;
+			// printk("Tw9912_image_global_AUX_BACK reset valu from NTSC_I\n");
+		     	 }
+		     else//PALi
+		     	{
+		        Tw9912_image_global_AUX_BACK_PAL_I[0][1]= 0x15;// is good 00
 		        Tw9912_image_global_AUX_BACK_PAL_I[1][1]= 0x5f;//is good 58
 		        Tw9912_image_global_AUX_BACK_PAL_I[2][1]= 0x20;
 		        Tw9912_image_global_AUX_BACK_PAL_I[3][1]= 0xdf;
