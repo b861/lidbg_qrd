@@ -228,13 +228,11 @@ void SOC_IO_Uart_Send( u32 baud,const char *fmt, ... )
 	char printbuffer[256];
 
 	va_start ( args, fmt );
-        n = vsprintf ( printbuffer, (const char *)fmt, args );
-        va_end ( args );
-
-
+    n = vsprintf ( printbuffer, (const char *)fmt, args );
+    va_end ( args );
 	soc_io_uart_send(baud,(unsigned char *)printbuffer);
-}
 
+}
 
 static void set_func_tbl(void)
 {

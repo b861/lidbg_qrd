@@ -179,9 +179,6 @@ int thread_pwr(void *data)
     return 0;
 }
 
-
-
-
 struct ad_key_remap
 {
     u32 ch;
@@ -327,12 +324,7 @@ find_key:
 
 #endif
 
-
-
-
     }
-
-
 
     old_key = key;
 
@@ -340,8 +332,6 @@ find_key:
 #endif
 
 }
-
-
 
 
 void led_on(void)
@@ -454,12 +444,10 @@ struct platform_device soc_devices =
 static int soc_dev_probe(struct platform_device *pdev)
 {
 
-
     DUMP_FUN;
 
     PWR_EN_ON;
     TELL_LPC_PWR_ON;
-
 
     get_platform();
 
@@ -481,9 +469,6 @@ static int soc_dev_probe(struct platform_device *pdev)
 	lidbg("config:i2c_ctrl=%d\n",i2c_ctrl);
 }
 
-
-
-
 #ifdef DEBUG_LED
 {
 	bool led_en = 1;
@@ -503,7 +488,6 @@ static int soc_dev_probe(struct platform_device *pdev)
 	}
 }
 #endif
-
 
     if(platform_id ==  PLATFORM_FLY)
     {
@@ -549,7 +533,6 @@ static int soc_dev_probe(struct platform_device *pdev)
 #endif
 
 #endif
-
 
     }
 
@@ -619,7 +602,6 @@ static void devices_early_suspend(struct early_suspend *handler)
     }
     suspend_flag = 1;
     DUMP_FUN_LEAVE;
-
 }
 
 static void devices_late_resume(struct early_suspend *handler)
@@ -636,9 +618,7 @@ static void devices_late_resume(struct early_suspend *handler)
         SOC_IO_Config(MCU_IIC_REQ_I, GPIO_CFG_INPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA);
         TELL_LPC_PWR_ON;
 
-
 #ifdef FLY_DEBU
-
 
         BL_SET(BL_MAX / 2);
         LCD_ON;
@@ -655,7 +635,6 @@ static void devices_late_resume(struct early_suspend *handler)
             lidbg("LPCControlPWREnable\n");
             SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
         }
-
 
         lidbg("create thread_resume!\n");
         resume_task = kthread_create(thread_resume, NULL, "dev_resume_task");
@@ -674,13 +653,9 @@ static void devices_late_resume(struct early_suspend *handler)
 #endif
 
 
-
-
-
 static int  soc_dev_suspend(struct platform_device *pdev, pm_message_t state)
 {
     lidbg("soc_dev_suspend\n");
-
 
     if(platform_id ==  PLATFORM_FLY)
     {
@@ -704,7 +679,6 @@ static int  soc_dev_suspend(struct platform_device *pdev, pm_message_t state)
 
     }
 
-
     return 0;
 
 }
@@ -712,7 +686,6 @@ static int  soc_dev_suspend(struct platform_device *pdev, pm_message_t state)
 
 static int thread_resume(void *data)
 {
-
     DUMP_FUN_ENTER;
 
     msleep(3000 + 4000);
@@ -723,7 +696,6 @@ static int thread_resume(void *data)
     }
     DUMP_FUN_LEAVE;
     return 0;
-
 
 }
 
@@ -740,16 +712,12 @@ static void soc_dev_suspend_prepare(void)
     }
 #endif
 
-
 #ifdef DEBUG_UMOUNT_USB
     SOC_Write_Servicer(UMOUNT_USB);
 #ifdef FLY_DEBUG
     msleep(1000);
 #endif
 #endif
-
-
-
 
     //disable usb first
     USB_WORK_DISENABLE;
@@ -936,11 +904,6 @@ static void work_right_button1_fn(struct work_struct *work)
 }
 
 
-
-
-
-
-
 irqreturn_t irq_left_button1(int irq, void *dev_id)
 {
 #if 0
@@ -1032,11 +995,8 @@ void fly_devices_init(void)
         SOC_IO_ISR_Add(BUTTON_RIGHT_1, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT, irq_right_button1, NULL);
         SOC_IO_ISR_Add(BUTTON_RIGHT_2, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT, irq_right_button2, NULL);
 
-
-
 #endif
 #endif
-
 
     }
 }
@@ -1048,8 +1008,6 @@ static void set_func_tbl(void)
     ((struct lidbg_dev *)plidbg_dev)->soc_func_tbl.pfnSOC_Dev_Suspend_Prepare = soc_dev_suspend_prepare;
 
 }
-
-
 
 int read_proc_dev(char *buf, char **start, off_t offset, int count, int *eof, void *data )
 {
@@ -1070,10 +1028,7 @@ int read_proc_host(char *buf, char **start, off_t offset, int count, int *eof, v
 
     lidbg("USB_ID_LOW_HOST\n");
     USB_ID_LOW_HOST;
-
-
     len  = sprintf(buf, "usb_set_host\n");
-
     return len;
 }
 
@@ -1081,15 +1036,12 @@ int read_proc_host(char *buf, char **start, off_t offset, int count, int *eof, v
 static void create_new_proc_entry_usb_dev()
 {
     create_proc_read_entry("usb_dev", 0, NULL, read_proc_dev, NULL);
-
 }
 
 static void create_new_proc_entry_usb_host()
 {
     create_proc_read_entry("usb_host", 0, NULL, read_proc_host, NULL);
-
 }
-
 
 
 int dev_init(void)
@@ -1156,8 +1108,6 @@ void dev_exit(void)
 
 }
 
-
-
 void lidbg_device_main(int argc, char **argv)
 {
 
@@ -1182,7 +1132,6 @@ void lidbg_device_main(int argc, char **argv)
         }
     }
 
-
     if(!strcmp(argv[0], "bl"))
     {
         u32 bl;
@@ -1204,13 +1153,8 @@ void lidbg_device_main(int argc, char **argv)
         ch = simple_strtoul(argv[1], 0, 0);
         SOC_ADC_Get(ch, &val);
         lidbg("ch%d = %x\n", ch, val);
-
     }
-
-
 }
-
-
 
 
 EXPORT_SYMBOL(lidbg_device_main);

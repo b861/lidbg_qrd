@@ -570,8 +570,11 @@ int main(int argc , char **argv)
 	DUMP_BUILD_TIME;
 
     lidbg("lidbg_servicer start\n");
+	
+#if (defined(BOARD_V1) || defined(BOARD_V2))
     system("echo 600000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq");
     system("echo 600000 > /sys/devices/system/cpu/cpu1/cpufreq/scaling_max_freq");
+#endif
 
 #if (defined(BOARD_V1) || defined(BOARD_V2))
     system("insmod /system/lib/modules/out/lidbg_share.ko");
@@ -717,7 +720,6 @@ open_dev:
     system("chmod 777 /proc/fake_wakeup");
 
     system("chmod 0666 /dev/mtd/mtd1");
-    system("chmod 0777 /lidbg_state.txt");
 #endif
 
 #ifdef SHARE_MMAP_ENABLE

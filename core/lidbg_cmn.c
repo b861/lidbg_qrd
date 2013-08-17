@@ -203,8 +203,8 @@ int lidbg_get_current_time(char *time_string)
     struct rtc_time tm;
     getnstimeofday(&ts);
     rtc_time_to_tm(ts.tv_sec, &tm);
-    tlen = sprintf(time_string, "==boot_time==%d-%02d-%02d %02d:%02d:%02d.UTC====\n",
-                   tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,tm.tm_hour, tm.tm_min, tm.tm_sec);
+    tlen = sprintf(time_string, "%d-%02d-%02d %02d:%02d:%02d.\n",
+                   tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,tm.tm_hour + 8, tm.tm_min, tm.tm_sec);
     return tlen;
 }
 // cmn_launch_user("/system/bin/insmod", "/system/lib/modules/wlan.ko");
@@ -220,8 +220,8 @@ int  lidbg_launch_user( char bin_path[], char argv1[])
     //UMH_WAIT_EXEC  is recommended.
     if (ret < 0)
         lidbg("lunch [%s %s] fail!\n", bin_path, argv1);
-    else
-        lidbg("lunch [%s %s] success!\n", bin_path, argv1);
+    //else
+    //    lidbg("lunch [%s %s] success!\n", bin_path, argv1);
     return ret;
 }
 
