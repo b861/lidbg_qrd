@@ -305,19 +305,21 @@ static int  gps_probe(struct platform_device *pdev)
 	static int major_number = 0;
 
     DUMP_FUN;
-#if (defined(BOARD_V1) || defined(BOARD_V2))      
-    if(is_ublox_exist() < 0)
+
+	if(is_ublox_exist() < 0)	
     {
         printk("[ublox]ublox.miss\n\n");
+#if (defined(BOARD_V1) || defined(BOARD_V2))	
         return 0;
+#endif		
     }
     else
     {
         printk("[ublox]ublox.exist\n\n");
+	 fileserver_main(NULL, FS_CMD_FILE_APPENDMODE,"ublox_exist=true\n", NULL);
+		
     }
-#else
-        printk("[ublox]V3+==========use_ublox_default;\n\n");
-#endif
+
 
 
 #ifdef CONFIG_HAS_EARLYSUSPEND  //  enable/disable the gps thread 
@@ -381,7 +383,6 @@ static int  gps_probe(struct platform_device *pdev)
     init_waitqueue_head(&dev->queue);
     sema_init(&dev->sem, 1);
     kfifo_init(&gps_data_fifo, fifo_buffer, FIFO_SIZE);
-    fileserver_main(NULL, FS_CMD_FILE_APPENDMODE, "gpsload=true\n", NULL);
     return 0;
 }
 
