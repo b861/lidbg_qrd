@@ -123,7 +123,7 @@ int fake_suspend(char *buf, char **start, off_t offset, int count, int *eof, voi
         fastboot_set_status(PM_STATUS_READY_TO_FAKE_PWROFF);
 
         fake_early_suspend();
-        fastboot_task_kill_exclude(kill_exclude_process_fake_suspend);
+      //  fastboot_task_kill_exclude(kill_exclude_process_fake_suspend);
 
         //SOC_Write_Servicer(SUSPEND_KERNEL);
     }

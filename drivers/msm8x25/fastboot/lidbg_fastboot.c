@@ -7,18 +7,21 @@
 #ifdef SOC_COMPILE
 #include "lidbg.h"
 #include "fly_soc.h"
-
 #else
 #include "lidbg_def.h"
-
 #include "lidbg_enter.h"
-
 LIDBG_DEFINE;
 #endif
 
+#include <mach/proc_comm.h>
+#include <mach/clk.h>
+#include <mach/socinfo.h>
+#include <mach/proc_comm.h>
+#include <clock.h>
+#include <clock-pcom.h>
+
 
 #include "lidbg_fastboot.h"
-int lidbg_readwrite_file(const char *filename, char *rbuf,const char *wbuf, size_t length);
 
 
 #define RUN_FASTBOOT
@@ -34,9 +37,8 @@ static DECLARE_COMPLETION(pwroff_start);
 static DECLARE_COMPLETION(late_suspend_start);
 
 void fastboot_set_status(LIDBG_FAST_PWROFF_STATUS status);
-
-
 void fastboot_pwroff(void);
+int lidbg_readwrite_file(const char *filename, char *rbuf,const char *wbuf, size_t length);
 
 
 struct fastboot_data
@@ -47,7 +49,7 @@ struct fastboot_data
 	int kill_task_en;
 	int haslock_resume_times;
 	int max_wait_unlock_time;
-	
+	int clk_block_suspend;
 #if defined(CONFIG_HAS_EARLYSUSPEND)
     struct wake_lock flywakelock;
     struct early_suspend early_suspend;
@@ -79,7 +81,7 @@ static struct task_struct *pwroff_task;
 static struct task_struct *late_suspend_task;
 
 bool ignore_wakelock = 0;
-
+#if (defined(BOARD_V1) || defined(BOARD_V2))
 char *kill_exclude_process[] =
 {
     "init",
@@ -498,44 +500,84 @@ char *kill_exclude_process_fake_suspend[] =
     "task_kill_exclude_end",
 
 };
-
+#endif
 void set_power_state(int state)
 {
-#if 0
-    struct file *fd = NULL;
-    const char suspendstring[] = "mem";
-    const char wakeupstring[] = "on";
-    const char *powerdev = "/sys/power/state";
-	mm_segment_t old_fs;
-
-    lidbg("set_power_state:%d\n", state);
-
-    fd = filp_open(powerdev, O_RDWR, 0);
-    if(fd >= 0)
-    {
-    	BEGIN_KMEM;
-        if(state == 0)
-            fd->f_op->write(fd, suspendstring, sizeof(suspendstring) - 1, &fd->f_pos);
-        else
-            fd->f_op->write(fd, wakeupstring, sizeof(wakeupstring) - 1, &fd->f_pos);
-		END_KMEM;
-
-        filp_close(fd,0);
-    }
-    else
-    {
-        lidbg("open linux power dev fail: %s\n", powerdev);
-    }
-#else
 	char buf[8];
 	if(state == 0)
 		lidbg_readwrite_file("/sys/power/state", NULL, "mem", sizeof("mem")-1);
 	else
 		lidbg_readwrite_file("/sys/power/state", NULL, "on", sizeof("on")-1);
-	
-#endif
 }
 
+
+void set_cpu_governor(int state)
+{
+	char buf[16];
+	int len;
+	lidbg("set_cpu_governor:%d\n",state);
+	
+#if 1
+	{lidbg("do nothing\n");return;}
+#endif
+
+	if(state == 0)
+	{
+    	len = sprintf(buf, "%s","ondemand");
+	}
+	else
+	{
+		len = sprintf(buf, "%s","performance");
+
+	}
+	lidbg_readwrite_file("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor", NULL, buf, len);
+}
+
+
+static int pc_clk_is_enabled(int id)
+{
+	if (msm_proc_comm(PCOM_CLKCTL_RPC_ENABLED, &id, NULL))
+		return 0;
+	else
+		return id;
+}
+
+int check_all_clk_disable(vold)
+{
+	int i=P_NR_CLKS-1;
+	int ret = 0;
+	lidbg_io("\ncheck_all_clk_disable\n");
+	while(i>=0)
+	{
+		if (pc_clk_is_enabled(i))
+		{
+		 	lidbg_io("pc_clk_is_enabled:%d\n", i);		 	
+			ret++;
+		}
+		i--;
+	}
+	return ret;
+}
+
+int check_clk_disable(vold)
+{
+	int ret = 0;
+	DUMP_FUN_ENTER;
+	if(pc_clk_is_enabled(P_UART1DM_CLK))
+	{
+		lidbg("find clk:%d\n",P_UART1DM_CLK);
+		ret = 1;
+	}
+
+	if(pc_clk_is_enabled(P_MDP_CLK))
+	{
+		lidbg("find clk:%d\n",P_MDP_CLK);
+		ret = 1;
+	}
+	DUMP_FUN_LEAVE;
+	return ret;
+	
+}
 
 int fastboot_task_kill_select(char *task_name)
 {
@@ -654,7 +696,6 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
         }
 
 #else
-		//safe_flag = fileserver_deal_cmd(&fastboot_kill_list, FS_CMD_LIST_IS_STRINFILE,p->comm, NULL,NULL);
 	{
 		struct string_dev *pos; 	
 		list_for_each_entry(pos, &fastboot_kill_list, tmp_list)
@@ -662,9 +703,13 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
 			if(strcmp(p->comm, pos->yourkey) == 0)
 			{
                 safe_flag = 1;
+				//lidbg("nokill:%s\n", pos->yourkey);
                 break;
             }
-			
+			else
+			{
+				//lidbg("kill:%s\n", pos->yourkey);
+			}
 		}
 	}
 #endif
@@ -715,8 +760,11 @@ u32 GetTickCount(void)
 
 int kill_proc(char *buf, char **start, off_t offset, int count, int *eof, void *data )
 {
+#if (defined(BOARD_V1) || defined(BOARD_V2))
     fastboot_task_kill_exclude(kill_exclude_process);
-
+#else
+	fastboot_task_kill_exclude(NULL);
+#endif
     return 1;
 }
 
@@ -729,11 +777,8 @@ void create_new_proc_entry()
 int pwroff_proc(char *buf, char **start, off_t offset, int count, int *eof, void *data )
 {
 	DUMP_FUN_ENTER;
-
     if(PM_STATUS_LATE_RESUME_OK == fastboot_get_status())
-        //fastboot_pwroff();
-		set_power_state(0);
-
+        fastboot_pwroff();
     return 1;
 }
 
@@ -741,7 +786,6 @@ int pwroff_proc(char *buf, char **start, off_t offset, int count, int *eof, void
 void create_new_proc_entry2()
 {
     create_proc_read_entry("fastboot_pwroff", 0, NULL, pwroff_proc, NULL);
-
 }
 
 
@@ -802,7 +846,6 @@ static int thread_fastboot_pwroff(void *data)
         wait_for_completion(&pwroff_start);
 		DUMP_FUN_ENTER;
         fastboot_pwroff();
-
     }
     return 0;
 }
@@ -827,6 +870,13 @@ static int thread_fastboot_suspend(void *data)
                 time_count++;
                 if(fastboot_get_status() == PM_STATUS_EARLY_SUSPEND_PENDING)
                 {
+					if(fb_data->clk_block_suspend)
+					{
+						lidbg("some clk block suspend!\n");
+						set_power_state(1);
+						break;
+					}
+					
 #ifdef HAS_LOCK_RESUME
                     if(time_count >= /*MAX_WAIT_UNLOCK_TIME*/fb_data->max_wait_unlock_time)
 #else
@@ -835,8 +885,6 @@ static int thread_fastboot_suspend(void *data)
                     {
                         lidbgerr("thread_fastboot_suspend wait suspend timeout!\n");
 
-                        // SOC_Write_Servicer(LOG_DMESG);
-                        // msleep(10000);//wait for write log finish
 #ifdef HAS_LOCK_RESUME
                         lock_resume_interval = GetTickCount() - lock_resume_last_time;
                         lock_resume_last_time = GetTickCount();
@@ -889,7 +937,6 @@ static int thread_fastboot_suspend(void *data)
 #ifdef HAS_LOCK_RESUME
                     wakelock_occur_count = 0;
 #endif
-
                     break;
 
                 }
@@ -902,7 +949,6 @@ static int thread_fastboot_suspend(void *data)
     }
     return 0;
 }
-
 
 
 static int thread_late_suspend(void *data)
@@ -951,7 +997,6 @@ static int thread_late_suspend(void *data)
 }
 
 
-
 void fastboot_set_status(LIDBG_FAST_PWROFF_STATUS status);
 
 static int thread_fastboot_resume(void *data)
@@ -971,17 +1016,23 @@ static int thread_fastboot_resume(void *data)
 
         msleep(1000);
         fastboot_set_status(PM_STATUS_LATE_RESUME_OK);
+		
+	//log acc off times
+		if(fb_data->resume_count  % 5 == 0)
+		{
+			char tmp[32];
+			sprintf(tmp, "acc_off_times=%d\n",fb_data->resume_count);
+			fileserver_main(NULL, FS_CMD_FILE_APPENDMODE,tmp, NULL);
+		}
         DUMP_FUN_LEAVE;
     }
     return 0;
 }
 
 
-
 int fastboot_get_status(void)
 {
     return fb_data->suspend_pending;
-
 }
 
 void fastboot_set_status(LIDBG_FAST_PWROFF_STATUS status)
@@ -1010,9 +1061,9 @@ void fastboot_pwroff(void)
     }
     fastboot_set_status(PM_STATUS_READY_TO_PWROFF);
 
-    // fastboot_task_kill_exclude(kill_exclude_process);
-
     SOC_Dev_Suspend_Prepare();
+	
+	set_cpu_governor(1);//performance
 
     //avoid mem leak
     //    fastboot_task_kill_select("mediaserver");
@@ -1040,15 +1091,12 @@ void fastboot_pwroff(void)
 bool fastboot_is_ignore_wakelock(void)
 {
     return ignore_wakelock;
-
 }
 
 void fastboot_go_pwroff(void)
 {
     DUMP_FUN_ENTER;
-
     complete(&pwroff_start);
-
 }
 
 
@@ -1065,7 +1113,6 @@ static void set_func_tbl(void)
     plidbg_dev->soc_func_tbl.pfnSOC_PWR_SetStatus = fastboot_set_status;
     plidbg_dev->soc_func_tbl.pfnSOC_PWR_Ignore_Wakelock = fastboot_is_ignore_wakelock;
     plidbg_dev->soc_func_tbl.pfnSOC_Fake_Register_Early_Suspend = fake_register_early_suspend;
-
 }
 #endif
 
@@ -1073,25 +1120,40 @@ static void set_func_tbl(void)
 #ifdef CONFIG_HAS_EARLYSUSPEND
 static void fastboot_early_suspend(struct early_suspend *h)
 {
+
     lidbg("fastboot_early_suspend:%d\n", fb_data->resume_count);
     if(PM_STATUS_EARLY_SUSPEND_PENDING != fastboot_get_status())
     {
         lidbgerr("Call devices_early_suspend when suspend_pending != PM_STATUS_READY_TO_PWROFF\n");
-
     }
+
 	if(fb_data->kill_task_en)
 	{
-    	fastboot_task_kill_exclude(kill_exclude_process);
-    	msleep(1000);
+#if (defined(BOARD_V1) || defined(BOARD_V2))
+	    	fastboot_task_kill_exclude(kill_exclude_process);
+#else
+			fastboot_task_kill_exclude(NULL);
+#endif
+	    	msleep(1000);
 	}
 	
 #if 0 //for test
     ignore_wakelock = 1;
 #endif
-   wake_unlock(&(fb_data->flywakelock));
+
+   check_all_clk_disable();
+
+   if(check_clk_disable())
+   {
+	   fb_data->clk_block_suspend = 1;
+   }
+   else
+   {
+	   fb_data->clk_block_suspend = 0;
+	   wake_unlock(&(fb_data->flywakelock));
+   }
    //wake_lock(&(fb_data->flywakelock));//to test force suspend
     complete(&suspend_start);
-
 
 }
 
@@ -1100,14 +1162,16 @@ static void fastboot_late_resume(struct early_suspend *h)
     DUMP_FUN;
 
 #ifdef HAS_LOCK_RESUME
-    if(wakelock_occur_count != 0)
+    if((wakelock_occur_count != 0)||(fb_data->clk_block_suspend == 1))
     {
         lidbg("quick late resume\n");
-        wake_lock(&(fb_data->flywakelock));
+		if(fb_data->clk_block_suspend == 0)
+        	wake_lock(&(fb_data->flywakelock));
         fastboot_set_status(PM_STATUS_LATE_RESUME_OK);
     }
 #endif
 
+	set_cpu_governor(0);//ondemand
 }
 #endif
 
@@ -1127,9 +1191,10 @@ static int  fastboot_probe(struct platform_device *pdev)
 
     fastboot_set_status(PM_STATUS_LATE_RESUME_OK);
     fb_data->resume_count = 0;
+	fb_data->clk_block_suspend = 0;
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
-    fb_data->early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN;
+    fb_data->early_suspend.level = EARLY_SUSPEND_LEVEL_DISABLE_FB + 5; //the later the better
     fb_data->early_suspend.suspend = fastboot_early_suspend;
     fb_data->early_suspend.resume = fastboot_late_resume;
     register_early_suspend(&fb_data->early_suspend);
@@ -1240,9 +1305,14 @@ static int fastboot_suspend(struct device *dev)
     if(PM_STATUS_SUSPEND_PENDING != fastboot_get_status())
     {
         lidbgerr("Call fastboot_suspend when suspend_pending != PM_STATUS_SUSPEND_PENDING\n");
-
     }
-
+#if 0
+   if(check_all_clk_disable())
+   {
+	  // lidbg_io("wake up\n");
+	  // set_power_state(1);//fail
+   }
+#endif
     return 0;
 }
 
@@ -1313,5 +1383,4 @@ module_exit(fastboot_exit);
 MODULE_LICENSE("GPL");
 
 MODULE_DESCRIPTION("lidbg fastboot driver");
-
 
