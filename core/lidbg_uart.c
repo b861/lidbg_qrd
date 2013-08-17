@@ -1,13 +1,10 @@
 
-
 #include "lidbg.h"
 
 static u32 delay=0;
 static spinlock_t uart_lock;
 unsigned long flags_uart_send;
-
-void soc_io_uart_send1 ( u32 baud,const char *fmt, ... );
-
+int io_uart_en = 0;
 
 void soc_io_uart_send1 ( u32 baud,const char *fmt, ... )
 {
@@ -36,27 +33,28 @@ void soc_io_uart_cfg(u32 baud)
 
 void soc_io_uart_send(u32 baud, char *printChar)
 {
-	u8 data;
-	u8 len, i;
-	len = strlen(printChar);
-	//printk("\n\n\n*******soc_io_uart_send******\n\n");
-	soc_io_uart_cfg(baud);
-	
-	for(i=0; i<len; i++){
-	   	data = (u8)(printChar[i]);
-		soc_io_uart_send_byte(data);
+	if(io_uart_en)
+	{
+		u8 data;
+		u8 len, i;
+		len = strlen(printChar);
+		soc_io_uart_cfg(baud);
+		
+		for(i=0; i<len; i++){
+		   	data = (u8)(printChar[i]);
+			soc_io_uart_send_byte(data);
+		}
+		soc_io_uart_send_byte(13);   //equal \r
+		soc_io_uart_send_byte(10);   // equal \n
 	}
-	
-	soc_io_uart_send_byte(13);   //equal \r
-	soc_io_uart_send_byte(10);   // equal \n
 }
 
 void soc_io_uart_send_byte(u8 input)
 {
     u8 i=8;
-	spin_lock_irqsave(&uart_lock, flags_uart_send);
-    TX_L;
-    Delay(delay);//start bit
+    spin_lock_irqsave(&uart_lock, flags_uart_send);
+    TX_L;//start bit
+    Delay(delay);
     while(i--)
     {
         if(input&0x01)TX_H;else TX_L; //send bit
@@ -70,23 +68,13 @@ void soc_io_uart_send_byte(u8 input)
 
 void lidbg_uart_main(int argc, char **argv)
 {
-
 	if(!strcmp(argv[0], "io_w"))
 	{
 		u8 data;
 		u32 delay;
 		u8 len,i;
-	//len = strlen(argv[2]);
-        delay = simple_strtoul(argv[1], 0, 0);
+        	delay = simple_strtoul(argv[1], 0, 0);
 		soc_io_uart_send1(delay,"%s", argv[2]);
-		/*soc_io_uart_cfg(delay);
-       		for(i=0; i<len; i++){
-	       		data = (u8)(argv[2][i]);
-			soc_io_uart_send_byte(data);
-			
-       		}
-		soc_io_uart_send_byte(13);   //equal \r
-		soc_io_uart_send_byte(10);   // equal \n*/
 	}
 }
 
@@ -95,6 +83,15 @@ static int __init io_uart_init(void)
     DUMP_BUILD_TIME;
     lidbg("io_uart_init\n");	
     spin_lock_init(&uart_lock);
+	
+{
+	int ret = 0;char *string;
+	ret = fileserver_deal_cmd(&lidbg_core_list, FS_CMD_LIST_GETVALUE, NULL, "io_uart_en",&string);
+	if(ret>0) io_uart_en = simple_strtoul(string, 0, 0);
+	lidbg("config:io_uart_en=%d\n",io_uart_en);
+}
+
+	
     return 0;
 }
 
@@ -106,8 +103,12 @@ static void __exit io_uart_exit(void)
 module_init(io_uart_init);
 module_exit(io_uart_exit);
 
+MODULE_LICENSE("GPL");
+
 EXPORT_SYMBOL(soc_io_uart_cfg);
 EXPORT_SYMBOL(soc_io_uart_send);
 EXPORT_SYMBOL(lidbg_uart_main);
 EXPORT_SYMBOL(soc_io_uart_send_byte);
+
+
 

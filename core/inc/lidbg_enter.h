@@ -93,6 +93,18 @@ typedef irqreturn_t (*pinterrupt_isr)(int irq, void *dev_id);
 
 #endif
 
+// 1.2Gh
+#define IO_UART_DELAY_1200_115200 (14)
+#define IO_UART_DELAY_1200_4800 (418)
+
+//245M
+#define IO_UART_DELAY_245_115200 (4)
+
+// pm2.c low freq
+#define IO_UART_DELAY_PM2_4800 (165)
+
+//#define lidbg_io(fmt,...) do{SOC_IO_Uart_Send(IO_UART_DELAY_245_115200,fmt,##__VA_ARGS__);}while(0)
+#define lidbg_io(fmt,...) do{lidbg(fmt,##__VA_ARGS__);}while(0)
 
 //zone start
 enum string_dev_cmd
@@ -364,7 +376,7 @@ struct lidbg_dev
 	 struct file *fd = NULL;\
 	 printk("lidbg:call LIDBG_GET by %s\n",__FUNCTION__);\
 	 while(1){\
-	 	printk("lidbg: %s try open mlidbg0!\n",__FUNCTION__);\
+	 	printk("lidbg: %s:%s try open mlidbg0!\n",__FILE__,__FUNCTION__);\
 	 	fd = filp_open("/dev/mlidbg0", O_RDWR, 0);\
 	 	printk("lidbg:get fd=%x\n",(int)fd);\
 	    if((fd == NULL)||((int)fd == 0xfffffffe)){printk("lidbg:get fd fail!\n");msleep(500);}\
