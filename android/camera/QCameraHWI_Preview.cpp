@@ -1377,8 +1377,9 @@ unsigned int BlackCoordinateX;//第一次发现黑点的坐标
 unsigned int BlackCoordinateY;
 unsigned int BlackFreamCount;//同个x坐标下，帧数统计
 bool ThisIsFirstFind;//是否是第一次发现，区别在于，若是第一次寻找黑点，需逐个遍历，否这直接判断对应的纵行。
+unsigned int BegingFindBlackFreamCount;//第一次发现黑点的坐标
 }SplitScreenInfo;
-static SplitScreenInfo LongitudinalInformationRemember={300,0,0,true};
+static SplitScreenInfo LongitudinalInformationRemember={300,0,0,true,0};
 static pthread_t thread_DetermineImageSplitScreenID = NULL;
 static bool globao_mFlyPreviewStatus;
 static bool global_need_rePreview = false;
@@ -1390,7 +1391,8 @@ static nsecs_t Astern_last_time = 0;
 static unsigned int rePreview_count = 0;
 static bool global_Fream_is_first = true;
 static unsigned int open_dev_fail_count=0;
-
+static unsigned int Longitudinal_last_fream_count =99;
+static unsigned int global_fram_at_one_sec_count = 0;
 void *CameraRestartPreviewThread(void *mHalCamCtrl1)
 {
 	QCameraHardwareInterface *mHalCamCtrl = (QCameraHardwareInterface *)mHalCamCtrl1;
@@ -1457,12 +1459,12 @@ static bool VideoItselfBlackJudge(mm_camera_ch_data_buf_t *frame)
 			if(*piont_y <= 0x20)//找到啦一个黑色点
 				black_count ++;
 
-			if( (480 - j + black_count) < 100)//一定无法达到470个点的要求，没必要再执行下去。
+			if( (480 - j + black_count) < 300)//一定无法达到470个点的要求，没必要再执行下去。
 						continue;
 
-			if(black_count>100)
+			if(black_count>300)
 				{
-					ALOGE("Flyvideo-:这帧本身是黑色");
+					ALOGE("Flyvideo-:黑");
 					return 1;//这帧本身是黑色
 				}
 		}
@@ -1472,15 +1474,32 @@ return 0;
 //Determine whether the split-screen
 static bool DetermineImageSplitScreen_Longitudinal(mm_camera_ch_data_buf_t *frame,QCameraHardwareInterface *mHalCamCtrl,float flymFps,char *video_channel_status,nsecs_t flynow)
 {
-	unsigned int i =0 ,j =0;
+	int i =0 ,j = 20,j_end = 700;
 	unsigned char *piont_y;
 	unsigned int dete_count = 0;
-	for(j=20;j<700;j++)
+	Longitudinal_last_fream_count ++;
+	if(Longitudinal_last_fream_count > 0xfffe) Longitudinal_last_fream_count = 99;
+	if( Longitudinal_last_fream_count < 100)//时间过滤，防止短时间内，连续的出现preview操作
+	{//ALOGE("Flyvideo-:T");
+			return 0;
+	}
+	if(LongitudinalInformationRemember.ThisIsFirstFind == false)
+	{//连续5帧还没做完判断，重新定位黑边坐标
+		LongitudinalInformationRemember.BegingFindBlackFreamCount++;
+		if(LongitudinalInformationRemember.BegingFindBlackFreamCount > 5)
 		{
-			if(LongitudinalInformationRemember.ThisIsFirstFind == false && j != LongitudinalInformationRemember.BlackCoordinateX)
-				continue;//第一次寻找黑点要遍历本行所有点，否则其他行跳过
-
-			piont_y = (unsigned char *)(frame->def.frame->buffer+frame->def.frame->y_off+720*300 + j);//在300行，横向扫描
+			LongitudinalInformationRemember.BegingFindBlackFreamCount = 0;
+			LongitudinalInformationRemember.ThisIsFirstFind = true;
+		}
+	}
+	if(LongitudinalInformationRemember.ThisIsFirstFind == false)//如果已经定位啦黑色边,不再做横向遍历查找黑点坐标
+	{
+		j = LongitudinalInformationRemember.BlackCoordinateX;
+		j_end = j;
+	}
+	for(;j<=j_end;j++)
+		{
+			piont_y = (unsigned char *)(frame->def.frame->buffer+frame->def.frame->y_off+720*300 + j);//在第300行，横向扫描
 			if(*piont_y <= 0x20)//找到啦一个黑色点
 			{
 				for(i=10;i<470;i++)
@@ -1490,22 +1509,23 @@ static bool DetermineImageSplitScreen_Longitudinal(mm_camera_ch_data_buf_t *fram
 					{
 						dete_count++;
 						if( (460 - (i-10) + dete_count) < 455)//一定无法达到400个点的要求，没必要再执行下去。
-							continue;
-
-						if(dete_count > 455 && VideoItselfBlackJudge(frame) == 0 )//在这个纵向行黑色点个数达到啦设置值,且这帧本身不是黑色屏
+							goto THE_FOR;//跳到下一个黑点对应的列统计。
+						if(dete_count > 454 && VideoItselfBlackJudge(frame) == 1)//提前一帧判断是否是黑色数据帧
+							return 0;//未发生分屏
+						if(dete_count > 455)//在这个纵向行黑色点个数达到啦设置值,且这帧本身不是黑色屏
 						{
 						//LOGE("DetermineImageSplitScreen:buf[%d]= 0x%.2x\n",((180*j) + i),(*piont_crcb) );
 							if(LongitudinalInformationRemember.ThisIsFirstFind == true)//这里是第一次找到黑色点
 							{
-								LongitudinalInformationRemember.ThisIsFirstFind = false;
-								LongitudinalInformationRemember.BlackCoordinateX = j;
+								LongitudinalInformationRemember.ThisIsFirstFind = false;//定位啦黑色边
+								LongitudinalInformationRemember.BlackCoordinateX = j;//记下这一纵行
 								LongitudinalInformationRemember.BlackFreamCount = 1;
 							}
 							else
 							{
 								LongitudinalInformationRemember.BlackFreamCount ++;
 							}
-							ALOGE("Flyvideo-:纵向分屏判断，黑色数据在第%d纵行中，异常数据=%d，统计帧数=%d\n",j,dete_count,LongitudinalInformationRemember.BlackFreamCount);
+							ALOGE("Flyvideo-:第%d纵行,累计帧=%d\n",j,LongitudinalInformationRemember.BlackFreamCount);
 							if(LongitudinalInformationRemember.BlackFreamCount  >250)//5sec
 							{
 								global_need_rePreview = false;//防止CameraRestartPreviewThread阻塞导致，global_need_rePreview无法赋值成true；
@@ -1513,16 +1533,18 @@ static bool DetermineImageSplitScreen_Longitudinal(mm_camera_ch_data_buf_t *fram
 							}
 							if(global_need_rePreview == false )
 							{
-								if(LongitudinalInformationRemember.BlackFreamCount >= 25) //发现有 25 帧就重新preview
+								if(LongitudinalInformationRemember.BlackFreamCount >= 2) //发现连续的5帧中有 2 帧就重新preview
 								{
+									Longitudinal_last_fream_count = 0;//时间标签更新
 									global_need_rePreview = true;
 									LongitudinalInformationRemember.BlackFreamCount = 0;
-									//LOGE("Flyvideo-: need rePreview\n");
-
-									if( pthread_create(&thread_DetermineImageSplitScreenID, NULL,CameraRestartPreviewThread, (void *)mHalCamCtrl) != 0)
-										ALOGE("Flyvideo-纵向分屏判断,发现分屏，创建线程重新预览失败！\n");
-									else
-										ALOGE("Flyvideo-纵向分屏判断,发现分屏，创建线程重新预览成功！\n");
+									ALOGE("Flyvideo-:纵向分屏,stopPreview()-->\n");
+									mHalCamCtrl->stopPreview();
+									ALOGE("Flyvideo-:纵向分屏,startPreview()-->\n");
+									mHalCamCtrl->startPreview();
+									global_need_rePreview = false;
+									LongitudinalInformationRemember.ThisIsFirstFind = true;
+									LongitudinalInformationRemember.BegingFindBlackFreamCount = 0;
 									return 1;//返回分屏信息
 								}
 							}
@@ -1531,6 +1553,8 @@ static bool DetermineImageSplitScreen_Longitudinal(mm_camera_ch_data_buf_t *fram
 					}
 
 				}
+				THE_FOR:
+				;
 			}
 		}
 BREAK_THE:
@@ -1546,10 +1570,13 @@ static bool DetermineImageSplitScreen(mm_camera_ch_data_buf_t *frame,QCameraHard
     unsigned int dete_count = 0;
 
 	if(flymFps<24){ALOGE("Flyvideo-:flymFps = %f",flymFps);return 0;}
-
+	if(++global_fram_at_one_sec_count < 20)//过滤判断次数的频繁度，每隔20帧判断一次，
+		return 0;
+	else
+		global_fram_at_one_sec_count = 0;
 	//纵向分屏判断
-	//if(DetermineImageSplitScreen_Longitudinal(frame,mHalCamCtrl,flymFps,video_channel_status,flynow) == 1)
-	//	return 1;
+	if(DetermineImageSplitScreen_Longitudinal(frame,mHalCamCtrl,flymFps,video_channel_status,flynow) == 1)
+		return 1;
 
 	// property_get("fly.video.channel.status",video_channel_status,"1");//1:DVD 2:AUX 3:Astren
 
@@ -2149,9 +2176,14 @@ end:
   void QCameraStream_preview::stop() {
     ALOGE("%s: E", __func__);
     int ret=MM_CAMERA_OK;
-rePreview_count = 0;
-globao_mFlyPreviewStatus = 0;
+LongitudinalInformationRemember.ThisIsFirstFind = true;
+LongitudinalInformationRemember.BegingFindBlackFreamCount = 0;
+global_fram_at_one_sec_count = 0;
+ToFindBlackLineAndSetTheTw9912VerticalDelayRegister_is_ok = false; //at next preview ,again run function
+DetermineImageSplitScreen_do_not_or_yes = true;//at next preview ,allow run function DetermineImageSplitScreen at astren
 global_Fream_is_first = true;
+globao_mFlyPreviewStatus = 0;
+rePreview_count = 0;
 open_dev_fail_count =0;
 ALOGE("Flyvideo-mFlyPreviewStatus =%d\n",globao_mFlyPreviewStatus);
     if(!mActive) {
@@ -2209,7 +2241,7 @@ ALOGE("Flyvideo-mFlyPreviewStatus =%d\n",globao_mFlyPreviewStatus);
 
     ALOGE("%s : BEGIN",__func__);
     int ret=MM_CAMERA_OK,i;
-
+Longitudinal_last_fream_count =99;//判断纵向分屏的时间标签
     if(!mInit)
     {
       ALOGE("%s : Stream not Initalized",__func__);
