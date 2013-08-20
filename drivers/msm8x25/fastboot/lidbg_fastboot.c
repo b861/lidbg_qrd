@@ -574,6 +574,12 @@ int check_clk_disable(vold)
 		lidbg("find clk:%d\n",P_MDP_CLK);
 		ret = 1;
 	}
+
+	if(pc_clk_is_enabled(P_ADSP_CLK))
+	{
+		lidbg("find clk:%d\n",P_ADSP_CLK);
+		ret = 1;
+	}
 	DUMP_FUN_LEAVE;
 	return ret;
 	
