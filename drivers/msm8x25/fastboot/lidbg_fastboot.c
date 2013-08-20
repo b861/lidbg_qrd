@@ -1022,7 +1022,7 @@ static int thread_fastboot_resume(void *data)
 		{
 			char tmp[32];
 			sprintf(tmp, "acc_off_times=%d\n",fb_data->resume_count);
-			fileserver_main(NULL, FS_CMD_FILE_APPENDMODE,tmp, NULL);
+			fs_file_log(tmp);
 		}
         DUMP_FUN_LEAVE;
     }
@@ -1206,17 +1206,17 @@ static int  fastboot_probe(struct platform_device *pdev)
 	int ret = 0;char *string;
 
 	fb_data->kill_task_en = 1;
-	ret = fileserver_deal_cmd(&lidbg_drivers_list, FS_CMD_LIST_GETVALUE, NULL, "kill_task_en",&string);
+	ret = fs_get_value(&lidbg_drivers_list, "kill_task_en",&string);
 	if(ret>0) fb_data->kill_task_en = simple_strtoul(string, 0, 0);
 	lidbg("config:kill_task_en=%d\n",fb_data->kill_task_en);
 	
 	fb_data->haslock_resume_times = 0;
-	ret = fileserver_deal_cmd(&lidbg_drivers_list, FS_CMD_LIST_GETVALUE, NULL, "haslock_resume_times",&string);
+	ret = fs_get_value(&lidbg_drivers_list, "haslock_resume_times",&string);
 	if(ret>0) fb_data->haslock_resume_times = simple_strtoul(string, 0, 0);
 	lidbg("config:haslock_resume_times=%d\n",fb_data->haslock_resume_times);
 
 	fb_data->max_wait_unlock_time = 5;
-	ret = fileserver_deal_cmd(&lidbg_drivers_list, FS_CMD_LIST_GETVALUE, NULL, "max_wait_unlock_time",&string);
+	ret = fs_get_value(&lidbg_drivers_list, "max_wait_unlock_time",&string);
 	if(ret>0) fb_data->max_wait_unlock_time = simple_strtoul(string, 0, 0);
 	lidbg("config:max_wait_unlock_time=%d\n",fb_data->max_wait_unlock_time);
 }
@@ -1276,8 +1276,8 @@ static int  fastboot_probe(struct platform_device *pdev)
     create_proc_entry_fake_suspend();
     create_proc_entry_fake_wakeup();
 
-	if(fileserver_main("/flysystem/lib/out/fastboot_not_kill_list.conf", FS_CMD_FILE_LISTMODE, NULL, &fastboot_kill_list)<0)
-		fileserver_main("/system/lib/modules/out/fastboot_not_kill_list.conf", FS_CMD_FILE_LISTMODE, NULL, &fastboot_kill_list);
+	if(fs_fill_list("/flysystem/lib/out/fastboot_not_kill_list.conf", FS_CMD_FILE_LISTMODE, &fastboot_kill_list)<0)
+		fs_fill_list("/system/lib/modules/out/fastboot_not_kill_list.conf", FS_CMD_FILE_LISTMODE, &fastboot_kill_list);
     DUMP_FUN_LEAVE;
 
     return 0;

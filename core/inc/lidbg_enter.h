@@ -119,6 +119,7 @@ enum string_dev_cmd
     FS_CMD_LIST_SHOW,//(1,1,0,0)
     FS_CMD_LIST_IS_STRINFILE,//(1,1,1,0)
     FS_CMD_LIST_GETVALUE,//(1,1,0,1)
+    FS_CMD_LIST_SETVALUE,//(1,1,0,1)
     FS_CMD_LIST_GETLISTSIZE,//not ok
     FS_CMD_COUNT,
 };
@@ -128,8 +129,12 @@ struct string_dev
     char *yourkey;
     char *yourvalue;
 };
-extern int fileserver_deal_cmd(struct list_head *client_list, enum string_dev_cmd cmd, char *lookfor, char *key,char **string);
-extern int fileserver_main(char *filename, enum string_dev_cmd cmd, char *str_append, struct list_head *client_list);
+extern int fs_get_value(struct list_head *client_list, char *key, char **string);
+extern int fs_set_value(struct list_head *client_list, char *key, char *string);
+extern int fs_find_string(struct list_head *client_list, char *string);
+extern int fs_show_list(struct list_head *client_list);
+extern int fs_file_log( char *str_append);
+extern int fs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *client_list);
 extern struct list_head lidbg_drivers_list;
 extern struct list_head lidbg_core_list;
 //zone end

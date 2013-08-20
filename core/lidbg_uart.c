@@ -86,7 +86,7 @@ static int __init io_uart_init(void)
 	
 {
 	int ret = 0;char *string;
-	ret = fileserver_deal_cmd(&lidbg_core_list, FS_CMD_LIST_GETVALUE, NULL, "io_uart_en",&string);
+	ret = fs_get_value(&lidbg_core_list,"io_uart_en",&string);
 	if(ret>0) io_uart_en = simple_strtoul(string, 0, 0);
 	lidbg("config:io_uart_en=%d\n",io_uart_en);
 }

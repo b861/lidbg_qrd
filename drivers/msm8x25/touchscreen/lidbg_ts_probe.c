@@ -95,8 +95,8 @@ if(0==have_warned)
 {
 	have_warned=1;
 	sprintf(path, "loadts=%s\n\0", ts_probe_dev[i].name);
-	fileserver_main(NULL, FS_CMD_FILE_APPENDMODE, path, NULL);
-	ts_should_revert = fileserver_deal_cmd(&flyhal_config_list, FS_CMD_LIST_IS_STRINFILE, "TSMODE_XYREVERT", NULL,NULL);
+	fs_file_log(path);
+	ts_should_revert = fs_find_string(&flyhal_config_list,"TSMODE_XYREVERT");
 	if(ts_should_revert > 0)
 		printk("[futengfei]=======================TS.XY will revert\n");
 	else
@@ -117,7 +117,7 @@ int ts_probe_thread(void *data)
 {
 	char *delay;
 	int ret;
-	ret = fileserver_deal_cmd(&lidbg_drivers_list, FS_CMD_LIST_GETVALUE, NULL, "ts_scan_delayms", &delay);
+	ret = fs_get_value(&lidbg_drivers_list,"ts_scan_delayms", &delay);
 	if(ret > 0)
 	{
 	    ts_scan_delayms = simple_strtoul(delay, 0, 0);
@@ -183,7 +183,7 @@ static int ts_probe_init(void)
 #ifndef SOC_COMPILE
     LIDBG_GET;
 #endif
-	fileserver_main(FLYHAL_CONFIG_PATH, FS_CMD_FILE_LISTMODE, NULL, &flyhal_config_list);
+	fs_fill_list(FLYHAL_CONFIG_PATH, FS_CMD_FILE_LISTMODE, &flyhal_config_list);
     scan_task = kthread_create(ts_probe_thread, NULL, "ts_scan_task");
     wake_up_process(scan_task);
     return 0;
