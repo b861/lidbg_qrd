@@ -619,7 +619,7 @@ void gtp_reset_guitar(struct i2c_client *client, s32 ms)
 	#endif
 	// GTP_GPIO_OUTPUT(GTP_RST_PORT, 1);
       msleep(6);                          //must > 3ms
-    GTP_GPIO_AS_INPUT(GTP_RST_PORT);    //end select I2C slave addr
+    //GTP_GPIO_AS_INPUT(GTP_RST_PORT);    //end select I2C slave addr
     
     gtp_int_sync(50);
 }
@@ -944,7 +944,7 @@ static s8 gtp_request_io_port(struct goodix_ts_data *ts)
         ret = -ENODEV;
     }
 
-    GTP_GPIO_AS_INPUT(GTP_RST_PORT);
+   // GTP_GPIO_AS_INPUT(GTP_RST_PORT);
     gtp_reset_guitar(ts->client, 20);
     ret =1;
     if(ret < 0)
