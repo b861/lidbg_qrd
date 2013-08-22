@@ -55,14 +55,14 @@ void clearfifo_tofile(void)
 int fs_file_log( const char *fmt, ... )
 {
     int len;
-	va_list args;
-	int n;
-	char str_append[256];
-	va_start ( args, fmt );
+    va_list args;
+    int n;
+    char str_append[256];
+    va_start ( args, fmt );
     n = vsprintf ( str_append, (const char *)fmt, args );
     va_end ( args );
 
-	len = strlen(str_append);
+    len = strlen(str_append);
 
     if(kfifo_is_full(&log_fifo) || kfifo_avail(&log_fifo) < len)
     {
@@ -349,19 +349,99 @@ static int bfs_log_func(void *data)
     return 1;
 }
 
+bool  is_file_exist(char *file)
+{
+    struct file *filep;
+    filep = filp_open(file, O_RDWR , 0);
+    if(IS_ERR(filep))
+        return false;
+    else
+        filp_close(filep, 0);
+    return true;
+}
+bool copy_file(char *from, char *to)
+{
+    char *string;
+    unsigned int file_len;
+    struct file *pfilefrom;
+    struct file *pfileto;
+    struct inode *inodefrom = NULL;
+    mm_segment_t old_fs;
+
+    if(!is_file_exist(from))
+    {
+        FS_ERR("<file_miss:%s>\n", from);
+        return false;
+    }
+
+    pfilefrom = filp_open(from, O_RDWR , 0);
+    pfileto = filp_open(to, O_CREAT | O_RDWR , 0600);
+    if(IS_ERR(pfileto))
+    {
+        FS_ERR("<%s>\n", to);
+        filp_close(pfilefrom, 0);
+        return false;
+    }
+    old_fs = get_fs();
+    set_fs(get_ds());
+    inodefrom = pfilefrom->f_dentry->d_inode;
+    file_len = inodefrom->i_size;
+
+    string = (unsigned char *)vmalloc(file_len);
+    if(string == NULL)
+        return false;
+    pfilefrom->f_op->llseek(pfilefrom, 0, 0);
+    pfilefrom->f_op->read(pfilefrom, string, file_len, &pfilefrom->f_pos);
+    set_fs(old_fs);
+    filp_close(pfilefrom, 0);
+
+    old_fs = get_fs();
+    set_fs(get_ds());
+    pfileto->f_op->llseek(pfileto, 0, 0);
+    pfileto->f_op->write(pfileto, string, file_len, &pfileto->f_pos);
+    set_fs(old_fs);
+    filp_close(pfilefrom, 0);
+
+    vfree(string);
+    return true;
+}
 void fileserverinit_once(void)
 {
     //note:your list can only be init once
     char *enable;
     char tbuff[100];
     int ret;
+    char *driver_sd_path = "/mnt/sdcard/drivers.conf";
+    char *driver_fly_path = "/flysystem/lib/out/drivers.conf";
+    char *driver_lidbg_path = "/system/lib/modules/out/drivers.conf";
+
+    char *core_sd_path = "/mnt/sdcard/core.conf";
+    char *core_fly_path = "/flysystem/lib/out/core.conf";
+    char *core_lidbg_path = "/system/lib/modules/out/core.conf";
+    //search priority:sd_path>fly_path>lidbg_path
+    if(is_file_exist(driver_sd_path) || copy_file(driver_fly_path, driver_sd_path) || copy_file(driver_lidbg_path, driver_sd_path))
+        fs_fill_list(driver_sd_path, FS_CMD_FILE_CONFIGMODE, &lidbg_drivers_list);
+    else
+    {
+        if(is_file_exist(driver_fly_path))
+            fs_fill_list(driver_fly_path, FS_CMD_FILE_CONFIGMODE, &lidbg_drivers_list);
+        else
+            fs_fill_list(driver_lidbg_path, FS_CMD_FILE_CONFIGMODE, &lidbg_drivers_list);
+    }
+
+    if(is_file_exist(core_sd_path) || copy_file(core_fly_path, core_sd_path) || copy_file(core_lidbg_path, core_sd_path))
+        fs_fill_list(core_sd_path, FS_CMD_FILE_CONFIGMODE, &lidbg_core_list);
+    else
+    {
+        if(is_file_exist(core_fly_path))
+            fs_fill_list(core_fly_path, FS_CMD_FILE_CONFIGMODE, &lidbg_core_list);
+        else
+            fs_fill_list(core_lidbg_path, FS_CMD_FILE_CONFIGMODE, &lidbg_core_list);
+    }
+
     spin_lock_init(&fs_lock);
     kfifo_init(&log_fifo, log_buffer, FIFO_SIZE);
     kfifo_reset(&log_fifo);
-    if(fs_fill_list("/flysystem/lib/out/drivers.conf", FS_CMD_FILE_CONFIGMODE, &lidbg_drivers_list) < 0)
-        fs_fill_list("/system/lib/modules/out/drivers.conf", FS_CMD_FILE_CONFIGMODE, &lidbg_drivers_list);
-    if(fs_fill_list("/flysystem/lib/out/core.conf", FS_CMD_FILE_CONFIGMODE, &lidbg_core_list) < 0)
-        fs_fill_list("/system/lib/modules/out/core.conf", FS_CMD_FILE_CONFIGMODE, &lidbg_core_list);
     lidbg_get_current_time(tbuff);
     fs_file_log(tbuff);
     ret = fs_get_value(&lidbg_core_list, "fs_dbg_enable", &enable);
@@ -374,6 +454,7 @@ void fileserverinit_once(void)
 //zone end
 
 //zone below [fileserver_test]
+static int test_count = 0;
 void test_fileserver_stability(void)
 {
     char *delay, *value, tbuff[100];
@@ -396,6 +477,13 @@ void test_fileserver_stability(void)
     lidbg_get_current_time(tbuff);
     fs_file_log(tbuff);
 
+    if(0)
+    {
+        sprintf(tbuff, "/mnt/sdcard/lidbg/lidbg_c%d.txt\0", ++test_count);
+        copy_file("/system/lib/modules/out/core.conf", tbuff);
+        sprintf(tbuff, "/mnt/sdcard/lidbg/lidbg_d%d.txt\0", test_count);
+        copy_file("/system/lib/modules/out/drivers.conf", tbuff);
+    }
     if(0)
     {
         fs_show_list(&kill_list_test);
