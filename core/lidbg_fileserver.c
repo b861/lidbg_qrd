@@ -52,9 +52,18 @@ void clearfifo_tofile(void)
     spin_unlock_irqrestore(&fs_lock, flags);
     fileserver_main(NULL, FS_CMD_FILE_APPENDMODE, log_buffer2write, NULL);
 }
-int fs_file_log( char *str_append)
+int fs_file_log( const char *fmt, ... )
 {
-    int len = strlen(str_append);
+    int len;
+	va_list args;
+	int n;
+	char str_append[256];
+	va_start ( args, fmt );
+    n = vsprintf ( str_append, (const char *)fmt, args );
+    va_end ( args );
+
+	len = strlen(str_append);
+
     if(kfifo_is_full(&log_fifo) || kfifo_avail(&log_fifo) < len)
     {
         clearfifo_tofile();

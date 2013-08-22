@@ -106,6 +106,8 @@ typedef irqreturn_t (*pinterrupt_isr)(int irq, void *dev_id);
 //#define lidbg_io(fmt,...) do{SOC_IO_Uart_Send(IO_UART_DELAY_245_115200,fmt,##__VA_ARGS__);}while(0)
 #define lidbg_io(fmt,...) do{lidbg(fmt,##__VA_ARGS__);}while(0)
 
+
+
 //zone start
 enum string_dev_cmd
 {
@@ -133,10 +135,14 @@ extern int fs_get_value(struct list_head *client_list, char *key, char **string)
 extern int fs_set_value(struct list_head *client_list, char *key, char *string);
 extern int fs_find_string(struct list_head *client_list, char *string);
 extern int fs_show_list(struct list_head *client_list);
-extern int fs_file_log( char *str_append);
+extern int fs_file_log( const char *fmt, ...);
 extern int fs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *client_list);
 extern struct list_head lidbg_drivers_list;
 extern struct list_head lidbg_core_list;
+
+#define lidbg_fs(fmt,...) do{fs_file_log(fmt,##__VA_ARGS__);}while(0)
+
+
 //zone end
 
 typedef enum

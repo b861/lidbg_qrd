@@ -316,7 +316,7 @@ static int  gps_probe(struct platform_device *pdev)
     else
     {
         printk("[ublox]ublox.exist\n\n");
-	 fs_file_log("ublox_exist=true\n");
+	   fs_file_log("ublox_exist=true\n");
 		
     }
 

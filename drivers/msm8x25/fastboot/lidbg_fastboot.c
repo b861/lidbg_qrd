@@ -1026,9 +1026,7 @@ static int thread_fastboot_resume(void *data)
 	//log acc off times
 		if(fb_data->resume_count  % 5 == 0)
 		{
-			char tmp[32];
-			sprintf(tmp, "acc_off_times=%d\n",fb_data->resume_count);
-			fs_file_log(tmp);
+			fs_file_log("acc_off_times=%d\n",fb_data->resume_count);
 		}
         DUMP_FUN_LEAVE;
     }

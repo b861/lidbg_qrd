@@ -94,8 +94,7 @@ void ts_scan(void)
 if(0==have_warned)
 {
 	have_warned=1;
-	sprintf(path, "loadts=%s\n\0", ts_probe_dev[i].name);
-	fs_file_log(path);
+	fs_file_log("loadts=%s\n\0", ts_probe_dev[i].name);
 	ts_should_revert = fs_find_string(&flyhal_config_list,"TSMODE_XYREVERT");
 	if(ts_should_revert > 0)
 		printk("[futengfei]=======================TS.XY will revert\n");
