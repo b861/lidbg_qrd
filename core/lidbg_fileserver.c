@@ -49,6 +49,7 @@ void clearfifo_tofile(void)
     spin_lock_irqsave(&fs_lock, flags);
     fifo_len = kfifo_len(&log_fifo);
     kfifo_out(&log_fifo, log_buffer2write, fifo_len);
+    log_buffer2write[fifo_len > FIFO_SIZE - 1 ? FIFO_SIZE - 1 : fifo_len] = '\0';
     spin_unlock_irqrestore(&fs_lock, flags);
     fileserver_main(NULL, FS_CMD_FILE_APPENDMODE, log_buffer2write, NULL);
 }
@@ -190,7 +191,7 @@ int bfs_file_amend(char *file2amend, char *str_append)
         printk("[futengfei]err.fileappend_mode:<str_append=null>\n");
         return -1;
     }
-    printk("[futengfei]warn.check:<fileappend_mode>\n");
+    //printk("[futengfei]warn.check:<fileappend_mode>\n");
     flags = O_CREAT | O_RDWR | O_APPEND;
 
 again:
@@ -200,14 +201,14 @@ again:
         printk("[futengfei]err.open:<%s>\n", file2amend);
         return -1;
     }
-    printk("[futengfei]succeed.open:<%s>\n", file2amend);
+    //printk("[futengfei]succeed.open:<%s>\n", file2amend);
 
     old_fs = get_fs();
     set_fs(get_ds());
 
     inode = filep->f_dentry->d_inode;
     file_len = inode->i_size;
-    printk("[futengfei]warn.File_length:<%d>\n", file_len);
+    // printk("[futengfei]warn.File_length:<%d>\n", file_len);
     file_len = file_len + 2;
 
 
@@ -230,7 +231,7 @@ again:
     filep->f_op->write(filep, str_append, strlen(str_append), &filep->f_pos);
     set_fs(old_fs);
     filp_close(filep, 0);
-    printk("[futengfei]succeed.fileappend_mode:<write.over.return>\n");
+    //printk("[futengfei]succeed.fileappend_mode:<write.over.return>\n");
     return 1;
 }
 
@@ -306,7 +307,8 @@ int  fileserver_main(char *filename, enum string_dev_cmd cmd, char *str_append, 
 {
     //note: cmd tell me the file mode,if it is config file I will do more;
     int ret = -1;
-    printk("\n[futengfei]==IN==fileserver_main\n");
+    if(g_dubug_on)
+        printk("\n[futengfei]==IN==fileserver_main\n");
 
     switch (cmd)
     {
@@ -328,8 +330,8 @@ int  fileserver_main(char *filename, enum string_dev_cmd cmd, char *str_append, 
         printk("\n[futengfei]err.fileserver_main:<unknown.cmd:%d>\n", cmd);
         break;
     }
-
-    printk("[futengfei]==OUT==fileserver_main\n");
+    if(g_dubug_on)
+        printk("[futengfei]==OUT==fileserver_main\n");
     return ret;
 }
 
