@@ -948,9 +948,9 @@ status_t QCameraStream_preview::processPreviewFrameWithDisplay(
   nsecs_t timeStamp = seconds_to_nanoseconds(frame->def.frame->ts.tv_sec) ;
   timeStamp += frame->def.frame->ts.tv_nsec;
 
- // if (UNLIKELY(mHalCamCtrl->mDebugFps)) {
+  if (UNLIKELY(mHalCamCtrl->mDebugFps)) {
       mHalCamCtrl->debugShowPreviewFPS();
-  //}
+  }
 
 #ifdef USE_ION
 
