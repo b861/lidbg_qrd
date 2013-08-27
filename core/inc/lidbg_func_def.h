@@ -77,6 +77,7 @@ static inline int check_pt(void)
 
 //wakeup
 #define SOC_PWR_Ignore_Wakelock    (plidbg_dev->soc_func_tbl.pfnSOC_PWR_Ignore_Wakelock)
+#define SOC_PWR_Get_WakeLock (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_Get_WakeLock))
 
 //mic
 #define SOC_Mic_Enable   (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_Mic_Enable))

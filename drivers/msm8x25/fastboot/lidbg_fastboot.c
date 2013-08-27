@@ -25,6 +25,7 @@ LIDBG_DEFINE;
 
 
 #define RUN_FASTBOOT
+#define EXPORT_ACTIVE_WAKE_LOCKS
 
 static LIST_HEAD(fastboot_kill_list);
 static DECLARE_COMPLETION(suspend_start);
@@ -32,13 +33,12 @@ static DECLARE_COMPLETION(early_suspend_start);
 
 static DECLARE_COMPLETION(resume_ok);
 static DECLARE_COMPLETION(pwroff_start);
-
-
 static DECLARE_COMPLETION(late_suspend_start);
 
 void fastboot_set_status(LIDBG_FAST_PWROFF_STATUS status);
 void fastboot_pwroff(void);
 int lidbg_readwrite_file(const char *filename, char *rbuf,const char *wbuf, size_t length);
+
 
 
 struct fastboot_data
@@ -50,6 +50,8 @@ struct fastboot_data
 	int haslock_resume_times;
 	int max_wait_unlock_time;
 	int clk_block_suspend;
+	int has_wakelock_can_not_ignore;
+	int is_quick_resume;
 #if defined(CONFIG_HAS_EARLYSUSPEND)
     struct wake_lock flywakelock;
     struct early_suspend early_suspend;
@@ -81,6 +83,65 @@ static struct task_struct *pwroff_task;
 static struct task_struct *late_suspend_task;
 
 bool ignore_wakelock = 0;
+
+#ifdef EXPORT_ACTIVE_WAKE_LOCKS 
+extern struct list_head active_wake_locks[];
+void fastboot_get_wake_locks(struct list_head *p){}
+#else
+struct list_head *active_wake_locks = NULL;
+void fastboot_get_wake_locks(struct list_head *p)
+{
+	active_wake_locks = p;
+}
+#endif
+
+
+static void list_active_locks()
+{
+#ifdef EXPORT_ACTIVE_WAKE_LOCKS 
+	struct wake_lock *lock;
+	int type = 0;
+	if(active_wake_locks == NULL) return;
+	list_for_each_entry(lock, &active_wake_locks[type], link)
+	{
+		lidbg("active wake lock %s\n", lock->name);
+		
+		if(!strcmp(lock->name, "adsp"))
+		{
+			lidbg("wake_lock:adsp\n");
+			fs_file_log("wake_lock:adsp\n");
+		    fb_data->has_wakelock_can_not_ignore = 1;
+		}
+	}
+#else
+	//this can only see user_wakelock
+    //cat /proc/wakelocks can see all wakelocks
+	#define READ_BUF (256)
+	static char wakelock[READ_BUF];
+	char *p;
+	char *token;
+	p = wakelock;
+
+	memset(wakelock, '\0' , READ_BUF);
+	lidbg_readwrite_file("/sys/power/wake_lock", p, NULL, READ_BUF);
+	lidbg("%s\n",p);
+	
+    while((token = strsep(&p, " ")) != NULL )
+    {
+		printk("[%s]\n", token);
+		
+		if(!strcmp(token, "adsp"))
+		{
+			lidbg("wake_lock:%s\n",token);
+			fs_file_log("wake_lock:%s\n",token);
+		    fb_data->has_wakelock_can_not_ignore = 1;
+		}
+	}
+#endif
+}
+
+
+
 #if (defined(BOARD_V1) || defined(BOARD_V2))
 char *kill_exclude_process[] =
 {
@@ -784,7 +845,8 @@ int pwroff_proc(char *buf, char **start, off_t offset, int count, int *eof, void
 {
 	DUMP_FUN_ENTER;
     if(PM_STATUS_LATE_RESUME_OK == fastboot_get_status())
-        fastboot_pwroff();
+       // fastboot_pwroff();
+       list_active_locks();
     return 1;
 }
 
@@ -879,10 +941,25 @@ static int thread_fastboot_suspend(void *data)
 					if(fb_data->clk_block_suspend)
 					{
 						lidbg("some clk block suspend!\n");
+						fb_data->is_quick_resume = 1;
 						set_power_state(1);
 						break;
 					}
+		
+					list_active_locks();			
+					if(fb_data->has_wakelock_can_not_ignore)
+					{
+#if 0					
+						fast6boot_task_kill_select(".flyaudio.media");
+						//fastboot_task_kill_select("d.process.media");
+#else					
+						lidbg("some wakelock block suspend!\n");
+						fb_data->is_quick_resume = 1;
+						set_power_state(1);
+						break;
 					
+#endif
+					}
 #ifdef HAS_LOCK_RESUME
                     if(time_count >= /*MAX_WAIT_UNLOCK_TIME*/fb_data->max_wait_unlock_time)
 #else
@@ -907,6 +984,7 @@ static int thread_fastboot_suspend(void *data)
 #if (defined(BOARD_V1) || defined(BOARD_V2))
                         SOC_Write_Servicer(WAKEUP_KERNEL);
 #else
+						fb_data->is_quick_resume = 1;
 						set_power_state(1);
 #endif
 
@@ -914,7 +992,7 @@ static int thread_fastboot_suspend(void *data)
                         else
 #endif
                         {
-#ifdef HAS_LOCK_RESUME
+#if 0//def HAS_LOCK_RESUME
                             lidbg("$+\n");
                             msleep((10 - MAX_WAIT_UNLOCK_TIME) * 1000);
                             lidbg("$-\n");
@@ -1117,6 +1195,9 @@ static void set_func_tbl(void)
     plidbg_dev->soc_func_tbl.pfnSOC_PWR_SetStatus = fastboot_set_status;
     plidbg_dev->soc_func_tbl.pfnSOC_PWR_Ignore_Wakelock = fastboot_is_ignore_wakelock;
     plidbg_dev->soc_func_tbl.pfnSOC_Fake_Register_Early_Suspend = fake_register_early_suspend;
+	
+    plidbg_dev->soc_func_tbl.pfnSOC_Get_WakeLock = fastboot_get_wake_locks;
+	
 }
 #endif
 
@@ -1158,7 +1239,6 @@ static void fastboot_early_suspend(struct early_suspend *h)
    }
    //wake_lock(&(fb_data->flywakelock));//to test force suspend
     complete(&suspend_start);
-
 }
 
 static void fastboot_late_resume(struct early_suspend *h)
@@ -1166,11 +1246,17 @@ static void fastboot_late_resume(struct early_suspend *h)
     DUMP_FUN;
 
 #ifdef HAS_LOCK_RESUME
-    if((wakelock_occur_count != 0)||(fb_data->clk_block_suspend == 1))
+    //if((wakelock_occur_count != 0)||(fb_data->clk_block_suspend == 1)||(fb_data->has_wakelock_can_not_ignore == 1))
+    if(fb_data->is_quick_resume)
     {
         lidbg("quick late resume\n");
 		if(fb_data->clk_block_suspend == 0)
         	wake_lock(&(fb_data->flywakelock));
+//reset flag
+		fb_data->has_wakelock_can_not_ignore = 0;
+		fb_data->clk_block_suspend = 0;
+		fb_data->is_quick_resume = 0;
+		
         fastboot_set_status(PM_STATUS_LATE_RESUME_OK);
     }
 #endif
@@ -1196,6 +1282,8 @@ static int  fastboot_probe(struct platform_device *pdev)
     fastboot_set_status(PM_STATUS_LATE_RESUME_OK);
     fb_data->resume_count = 0;
 	fb_data->clk_block_suspend = 0;
+	fb_data->has_wakelock_can_not_ignore = 0;
+	fb_data->is_quick_resume= 0;
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
     fb_data->early_suspend.level = EARLY_SUSPEND_LEVEL_DISABLE_FB + 5; //the later the better

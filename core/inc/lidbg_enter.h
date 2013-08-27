@@ -43,6 +43,7 @@
 #include <linux/kthread.h> //kthread_create()¡¢kthread_run()
 #include <linux/input.h>
 #include <linux/wakelock.h>
+#include <linux/vmalloc.h>
 
 #endif
 
@@ -340,6 +341,10 @@ struct lidbg_fn_t
 	int (*pfnSOC_I2C_Set_Rate)(int  bus_id, int rate);
 
 	void (*pfnSOC_IO_Uart_Send)( u32 baud,const char *fmt, ... );
+
+	void (*pfnSOC_Get_WakeLock)(struct list_head *p);
+
+	
 };
 
 
