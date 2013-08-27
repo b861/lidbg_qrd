@@ -137,6 +137,8 @@ extern int fs_find_string(struct list_head *client_list, char *string);
 extern int fs_show_list(struct list_head *client_list);
 extern int fs_file_log( const char *fmt, ...);
 extern int fs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *client_list);
+extern bool fs_copy_file(char *from, char *to);
+extern void fs_log_sync(void);
 extern struct list_head lidbg_drivers_list;
 extern struct list_head lidbg_core_list;
 #define lidbg_fs(fmt,...) do{fs_file_log(fmt,##__VA_ARGS__);}while(0)

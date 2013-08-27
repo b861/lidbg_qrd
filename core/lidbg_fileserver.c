@@ -25,6 +25,7 @@ static struct task_struct *fileserver_test_task3;
 //zone below [interface]
 int fileserver_deal_cmd(struct list_head *client_list, enum string_dev_cmd cmd, char *lookfor, char *key, char **string);
 int fileserver_main(char *filename, enum string_dev_cmd cmd, char *str_append, struct list_head *client_list);
+bool copy_file(char *from, char *to);
 
 int fs_get_value(struct list_head *client_list, char *key, char **string)
 {
@@ -74,9 +75,17 @@ int fs_file_log( const char *fmt, ... )
     spin_unlock_irqrestore(&fs_lock, flags);
     return 1;
 }
+void fs_log_sync(void)
+{
+    clearfifo_tofile();
+}
 int fs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *client_list)
 {
     return fileserver_main(filename, cmd, NULL, client_list);
+}
+bool fs_copy_file(char *from, char *to)
+{
+    return copy_file(from, to);
 }
 //zone end
 
@@ -335,7 +344,7 @@ int  fileserver_main(char *filename, enum string_dev_cmd cmd, char *str_append, 
     return ret;
 }
 
-static int bfs_log_func(void *data)
+static int thread_log_func(void *data)
 {
     allow_signal(SIGKILL);
     allow_signal(SIGSTOP);
@@ -451,7 +460,7 @@ void fileserverinit_once(void)
     ret = fs_get_value(&lidbg_core_list, "fs_clearlogfifo_ms", &enable);
     if(ret > 0)    g_clearlogfifo_ms = simple_strtoul(enable, 0, 0);
     printk("[futengfei]warn.fileserverinit_once:<g_dubug_on=%d;clearlogfifo_ms=%d>\n", g_dubug_on, g_clearlogfifo_ms);
-    filelog_task = kthread_run(bfs_log_func, NULL, "ftf_clearlogfifo");
+    filelog_task = kthread_run(thread_log_func, NULL, "ftf_clearlogfifo");
 }
 //zone end
 
@@ -482,9 +491,9 @@ void test_fileserver_stability(void)
     if(0)
     {
         sprintf(tbuff, "/mnt/sdcard/lidbg/lidbg_c%d.txt\0", ++test_count);
-        copy_file("/system/lib/modules/out/core.conf", tbuff);
+        fs_copy_file("/system/lib/modules/out/core.conf", tbuff);
         sprintf(tbuff, "/mnt/sdcard/lidbg/lidbg_d%d.txt\0", test_count);
-        copy_file("/system/lib/modules/out/drivers.conf", tbuff);
+        fs_copy_file("/system/lib/modules/out/drivers.conf", tbuff);
     }
     if(0)
     {
@@ -546,15 +555,26 @@ void fileserver_thread_test(int zero_return)
 
 void lidbg_fileserver_main(int argc, char **argv)
 {
+    int cmd = 0;
     int thread_count = 0;
-    if(argc < 1)
+    if(argc < 2)
     {
-        printk("[futengfei]err.lidbg_fileserver_main:echo \"c file 1\" > /dev/mlidbg0\n");
+        printk("[futengfei]err.lidbg_fileserver_main:echo \"c file 1 1\" > /dev/mlidbg0\n");
         return;
     }
 
     thread_count = simple_strtoul(argv[0], 0, 0);
+    cmd = simple_strtoul(argv[1], 0, 0);
     fileserver_thread_test(thread_count);
+    switch (cmd)
+    {
+    case 1:
+        fs_log_sync();
+        break;
+    default:
+        FS_ERR("<check you cmd:%d>\n", cmd);
+        break;
+    }
 }
 
 
@@ -568,4 +588,6 @@ EXPORT_SYMBOL(fs_find_string);
 EXPORT_SYMBOL(fs_show_list);
 EXPORT_SYMBOL(fs_file_log);
 EXPORT_SYMBOL(fs_fill_list);
+EXPORT_SYMBOL(fs_copy_file);
+EXPORT_SYMBOL(fs_log_sync);
 //zone end
