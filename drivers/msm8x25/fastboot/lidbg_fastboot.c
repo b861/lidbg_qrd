@@ -1164,7 +1164,7 @@ void fastboot_pwroff(void)
 #endif
 
 #endif
-
+	fs_log_sync();
     complete(&early_suspend_start);
 
 }
