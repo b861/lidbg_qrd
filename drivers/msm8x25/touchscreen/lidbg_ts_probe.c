@@ -114,15 +114,9 @@ if(0==have_warned)
 
 int ts_probe_thread(void *data)
 {
-	char *delay;
-	int ret;
-	ret = fs_get_value(&lidbg_drivers_list,"ts_scan_delayms", &delay);
-	if(ret > 0)
-	{
-	    ts_scan_delayms = simple_strtoul(delay, 0, 0);
-	    if(ts_scan_delayms < 100)
-	        ts_scan_delayms = 100;
-	}
+    fs_get_intvalue(&lidbg_drivers_list,"ts_scan_delayms", &ts_scan_delayms,NULL);
+    if(ts_scan_delayms < 100)
+        ts_scan_delayms = 100;
     while(1)
     {
         set_current_state(TASK_UNINTERRUPTIBLE);

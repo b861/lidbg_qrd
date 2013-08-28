@@ -130,7 +130,10 @@ struct string_dev
     struct list_head tmp_list;
     char *yourkey;
     char *yourvalue;
+    int *int_value;
+    void (*callback)(char *key,char *value);
 };
+extern int fs_get_intvalue(struct list_head *client_list, char *key,int *int_value,void (*callback)(char *key,char *value));
 extern int fs_get_value(struct list_head *client_list, char *key, char **string);
 extern int fs_set_value(struct list_head *client_list, char *key, char *string);
 extern int fs_find_string(struct list_head *client_list, char *string);

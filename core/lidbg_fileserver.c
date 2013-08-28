@@ -9,9 +9,19 @@
 static struct kfifo log_fifo;
 spinlock_t		fs_lock;
 unsigned long flags;
+static const char *driver_sd_path = "/mnt/sdcard/drivers.conf";
+static const char *driver_fly_path = "/flysystem/lib/out/drivers.conf";
+static const char *driver_lidbg_path = "/system/lib/modules/out/drivers.conf";
+static const char *core_sd_path = "/mnt/sdcard/core.conf";
+static const char *core_fly_path = "/flysystem/lib/out/core.conf";
+static const char *core_lidbg_path = "/system/lib/modules/out/core.conf";
 static struct task_struct *filelog_task;
+static struct task_struct *filepoll_task;
+struct rtc_time precorefile_tm;
+struct rtc_time predriverfile_tm;
 static int g_dubug_on = 0;
 static int g_clearlogfifo_ms = 30000;
+static int g_pollfile_ms = 10000;
 unsigned char log_buffer[FIFO_SIZE];
 unsigned char log_buffer2write[FIFO_SIZE];
 LIST_HEAD(lidbg_drivers_list);
@@ -23,25 +33,30 @@ static struct task_struct *fileserver_test_task3;
 //zone end
 
 //zone below [interface]
-int fileserver_deal_cmd(struct list_head *client_list, enum string_dev_cmd cmd, char *lookfor, char *key, char **string);
+int fileserver_deal_cmd(struct list_head *client_list, enum string_dev_cmd cmd, char *lookfor, char *key, char **string, int *int_value, void (*callback)(char *key, char *value ));
 int fileserver_main(char *filename, enum string_dev_cmd cmd, char *str_append, struct list_head *client_list);
 bool copy_file(char *from, char *to);
 
+int fs_get_intvalue(struct list_head *client_list, char *key, int *int_value, void (*callback)(char *key, char *value))
+{
+    char *string;
+    return  fileserver_deal_cmd(client_list, FS_CMD_LIST_GETVALUE, NULL, key, &string, int_value, callback);
+}
 int fs_get_value(struct list_head *client_list, char *key, char **string)
 {
-    return fileserver_deal_cmd( client_list, FS_CMD_LIST_GETVALUE, NULL, key, string);
+    return fileserver_deal_cmd( client_list, FS_CMD_LIST_GETVALUE, NULL, key, string, NULL, NULL);
 }
 int fs_set_value(struct list_head *client_list, char *key, char *string)
 {
-    return fileserver_deal_cmd( client_list, FS_CMD_LIST_SETVALUE, NULL, key, &string);
+    return fileserver_deal_cmd( client_list, FS_CMD_LIST_SETVALUE, NULL, key, &string, NULL, NULL);
 }
 int fs_find_string(struct list_head *client_list, char *string)
 {
-    return fileserver_deal_cmd(client_list, FS_CMD_LIST_IS_STRINFILE, string, NULL, NULL);
+    return fileserver_deal_cmd(client_list, FS_CMD_LIST_IS_STRINFILE, string, NULL, NULL, NULL, NULL);
 }
 int fs_show_list(struct list_head *client_list)
 {
-    return fileserver_deal_cmd(client_list, FS_CMD_LIST_SHOW, NULL, NULL, NULL);
+    return fileserver_deal_cmd(client_list, FS_CMD_LIST_SHOW, NULL, NULL, NULL, NULL, NULL);
 }
 
 void clearfifo_tofile(void)
@@ -91,7 +106,7 @@ bool fs_copy_file(char *from, char *to)
 
 
 //zone below [fileserver]
-int fileserver_deal_cmd(struct list_head *client_list, enum string_dev_cmd cmd, char *lookfor, char *key, char **string)
+int fileserver_deal_cmd(struct list_head *client_list, enum string_dev_cmd cmd, char *lookfor, char *key, char **string, int *int_value, void (*callback)(char *key, char *value))
 {
     //note:you can add more func here,just copy one of the case as belows;
     struct string_dev *pos;
@@ -133,6 +148,13 @@ int fileserver_deal_cmd(struct list_head *client_list, enum string_dev_cmd cmd, 
             if (!strcmp(pos->yourkey, key))
             {
                 *string = pos->yourvalue;
+                if(int_value)
+                {
+                    pos->int_value = int_value;
+                    *int_value = simple_strtoul(pos->yourvalue, 0, 0);
+                }
+                if(callback)
+                    pos->callback = callback;
                 printk("[futengfei]succeed.find_key:<%s=%s>\n", key, *string);
                 return 1;
             }
@@ -145,12 +167,28 @@ int fileserver_deal_cmd(struct list_head *client_list, enum string_dev_cmd cmd, 
         {
             if ( (!strcmp(pos->yourkey, key))  &&  (strcmp(pos->yourvalue, *string)) )
             {
-                pos->yourvalue = *string;
-                printk("[futengfei]succeed.set_key:<%s=%s>\n", key, pos->yourvalue);
+                p = *string;
+                pos->yourvalue = kmalloc(strlen(p) + 1, GFP_KERNEL);
+                if (pos->yourvalue  != NULL)
+                {
+                    strcpy(pos->yourvalue, p);
+                    printk("[futengfei]succeed.set_key:<%s=%s>\n", key, pos->yourvalue);
+                }
+                if (pos->int_value)
+                {
+                    *(pos->int_value) = simple_strtoul(p, 0, 0);
+                    printk("[futengfei]succeed.set_keyvalue:<%s=%d>\n", key, *(pos->int_value));
+                }
+                if (pos->callback)
+                {
+                    pos->callback(key, pos->yourvalue);
+                    printk("[futengfei]succeed.pos->callback();\n");
+                }
                 return 1;
             }
         }
-        printk("[futengfei]err.set_key:<%s>\n", key);
+        if(g_dubug_on)
+            printk("[futengfei]err.set_key:<%s>\n", key);
         return -1;
     case FS_CMD_LIST_IS_STRINFILE:
         list_for_each_entry(pos, client_list, tmp_list)
@@ -305,10 +343,10 @@ int bfs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *cli
             all_purpose++;
         }
         else if(g_dubug_on)
-            printk("droped[%s]\n", token);
+            printk("\ndroped[%s]\n", token);
     }
     if(cmd == FS_CMD_FILE_CONFIGMODE)
-        fileserver_deal_cmd(client_list, FS_CMD_LIST_SPLITKV, NULL, NULL, NULL);
+        fileserver_deal_cmd(client_list, FS_CMD_LIST_SPLITKV, NULL, NULL, NULL, NULL, NULL);
     return 1;
 }
 
@@ -358,6 +396,144 @@ static int thread_log_func(void *data)
         }
     }
     return 1;
+}
+
+int update_list(const char *filename, struct list_head *client_list)
+{
+    struct file *filep;
+    struct inode *inode = NULL;
+    struct string_dev *pos;
+    mm_segment_t old_fs;
+    char *token, *file_ptr, *ptmp, *key, *value;
+    int all_purpose;
+    unsigned int file_len;
+
+    filep = filp_open(filename, O_RDWR , 0);
+    if(IS_ERR(filep))
+    {
+        printk("[futengfei]err.open:<%s>\n", filename);
+        return -1;
+    }
+    printk("[futengfei]succeed.open:<%s>\n", filename);
+
+    old_fs = get_fs();
+    set_fs(get_ds());
+
+    inode = filep->f_dentry->d_inode;
+    file_len = inode->i_size;
+    printk("[futengfei]warn.File_length:<%d>\n", file_len);
+    file_len = file_len + 2;
+
+    file_ptr = (unsigned char *)kzalloc(file_len, GFP_KERNEL);
+    if(file_ptr == NULL)
+    {
+        printk( "[futengfei]err.vmalloc:<cannot kzalloc memory!>\n");
+        return -1;
+    }
+
+    filep->f_op->llseek(filep, 0, 0);
+    all_purpose = filep->f_op->read(filep, file_ptr, file_len, &filep->f_pos);
+    if(all_purpose <= 0)
+    {
+        printk( "[futengfei]err.f_op->read:<read file data failed>\n");
+        return -1;
+    }
+    set_fs(old_fs);
+    filp_close(filep, 0);
+
+    file_ptr[file_len - 1] = '\0';
+    while((token = strsep(&file_ptr, "\n")) != NULL )
+    {
+        if( token[0] != '#' && strlen(token) > 2)
+        {
+            key = token;
+            ptmp = memchr(key, '=', strlen(key));
+            if(ptmp != NULL)
+            {
+                value = ptmp + 1;
+                *ptmp = '\0';
+                printk("<%s,%s>\n", key, value);
+                fileserver_deal_cmd( client_list, FS_CMD_LIST_SETVALUE, NULL, key, &value, NULL, NULL);
+            }
+            else if(g_dubug_on)
+                printk("\ndroped[%s]\n", token);
+        }
+    }
+    kfree(file_ptr);
+    return 1;
+}
+
+bool get_file_mftime(const char *filename, struct rtc_time *ptm)
+{
+    struct file *filep;
+    struct inode *inode = NULL;
+    struct timespec mtime;
+    filep = filp_open(filename, O_RDWR , 0);
+    if(IS_ERR(filep))
+    {
+        if(g_dubug_on)
+            printk("[futengfei]err.open:<%s>\n", filename);
+        return false;
+    }
+    inode = filep->f_dentry->d_inode;
+    mtime = inode->i_mtime;
+    rtc_time_to_tm(mtime.tv_sec, ptm);
+    filp_close(filep, 0);
+    return true;
+}
+
+bool is_tm_updated(struct rtc_time *pretm, struct rtc_time *newtm)
+{
+    if(pretm->tm_sec == newtm->tm_sec && pretm->tm_min == newtm->tm_min && pretm->tm_hour == newtm->tm_hour &&
+            pretm->tm_mday == newtm->tm_mday && pretm->tm_mon == newtm->tm_mon && pretm->tm_year == newtm->tm_year )
+        return false;
+    else
+        return true;
+}
+
+bool is_file_updated(const char *filename, struct rtc_time *pretm)
+{
+    struct rtc_time tm;
+    if(get_file_mftime(filename, &tm) && is_tm_updated(pretm, &tm))
+    {
+        *pretm = tm; //get_file_mftime(filename, pretm);//give the new tm to pretm;
+        return true;
+    }
+    else
+        return false;
+}
+
+static int thread_filepoll_func(void *data)
+{
+    allow_signal(SIGKILL);
+    allow_signal(SIGSTOP);
+    //set_freezable();
+    get_file_mftime(core_sd_path, &precorefile_tm);
+    get_file_mftime(driver_sd_path, &predriverfile_tm);
+    while(!kthread_should_stop())
+    {
+        msleep(g_pollfile_ms);
+
+        if(is_file_updated(core_sd_path, &precorefile_tm))
+        {
+            FS_WARN("<file modify time:%d-%02d-%02d %02d:%02d:%02d>\n",
+                    precorefile_tm.tm_year + 1900, precorefile_tm.tm_mon + 1, precorefile_tm.tm_mday, precorefile_tm.tm_hour + 8, precorefile_tm.tm_min, precorefile_tm.tm_sec);
+            update_list(core_sd_path, &lidbg_core_list);
+        }
+
+        if(is_file_updated(driver_sd_path, &predriverfile_tm))
+        {
+            FS_WARN("<file modify time:%d-%02d-%02d %02d:%02d:%02d>\n",
+                    precorefile_tm.tm_year + 1900, precorefile_tm.tm_mon + 1, precorefile_tm.tm_mday, precorefile_tm.tm_hour + 8, precorefile_tm.tm_min, precorefile_tm.tm_sec);
+            update_list(driver_sd_path, &lidbg_drivers_list);
+        }
+    }
+    return 1;
+}
+
+void property_callback(char *key, char *value)
+{
+    FS_WARN("<%s=%s>\n", key, value);
 }
 
 bool  is_file_exist(char *file)
@@ -422,13 +598,7 @@ void fileserverinit_once(void)
     char *enable;
     char tbuff[100];
     int ret;
-    char *driver_sd_path = "/mnt/sdcard/drivers.conf";
-    char *driver_fly_path = "/flysystem/lib/out/drivers.conf";
-    char *driver_lidbg_path = "/system/lib/modules/out/drivers.conf";
 
-    char *core_sd_path = "/mnt/sdcard/core.conf";
-    char *core_fly_path = "/flysystem/lib/out/core.conf";
-    char *core_lidbg_path = "/system/lib/modules/out/core.conf";
     //search priority:sd_path>fly_path>lidbg_path
     if(is_file_exist(driver_sd_path) || copy_file(driver_fly_path, driver_sd_path) || copy_file(driver_lidbg_path, driver_sd_path))
         fs_fill_list(driver_sd_path, FS_CMD_FILE_CONFIGMODE, &lidbg_drivers_list);
@@ -455,12 +625,12 @@ void fileserverinit_once(void)
     kfifo_reset(&log_fifo);
     lidbg_get_current_time(tbuff);
     fs_file_log(tbuff);
-    ret = fs_get_value(&lidbg_core_list, "fs_dbg_enable", &enable);
-    if(ret > 0)    g_dubug_on = simple_strtoul(enable, 0, 0);
-    ret = fs_get_value(&lidbg_core_list, "fs_clearlogfifo_ms", &enable);
-    if(ret > 0)    g_clearlogfifo_ms = simple_strtoul(enable, 0, 0);
-    printk("[futengfei]warn.fileserverinit_once:<g_dubug_on=%d;clearlogfifo_ms=%d>\n", g_dubug_on, g_clearlogfifo_ms);
+    fs_get_intvalue(&lidbg_core_list, "fs_dbg_enable", &g_dubug_on, NULL);
+    fs_get_intvalue(&lidbg_core_list, "fs_clearlogfifo_ms", &g_clearlogfifo_ms, NULL);
+    fs_get_intvalue(&lidbg_core_list, "fs_pollfile_ms", &g_pollfile_ms, property_callback);
+    printk("[futengfei]warn.fileserverinit_once:<g_dubug_on=%d;clearlogfifo_ms=%d,g_pollfile_ms=%d>\n", g_dubug_on, g_clearlogfifo_ms, g_pollfile_ms);
     filelog_task = kthread_run(thread_log_func, NULL, "ftf_clearlogfifo");
+    filepoll_task = kthread_run(thread_filepoll_func, NULL, "ftf_filepolltask");
 }
 //zone end
 
@@ -474,19 +644,24 @@ void test_fileserver_stability(void)
     //test_fileserver_stability
     fs_find_string(&kill_list_test, "cn.flyaudio.navigation");
     fs_find_string(&kill_list_test, "cn.flyaudio.navigationfutengfei");
-    ret = fs_get_value(&lidbg_drivers_list, "futengfei", &delay);
-    if(ret > 0) printk("[futengfei]get key value:[%d]\n", (int)simple_strtoul(delay, 0, 0) );
-    ret = fs_get_value(&lidbg_drivers_list, "mayanping", &delay);
-    if(ret > 0) printk("[futengfei]get key value:[%d]\n", (int)simple_strtoul(delay, 0, 0) );
-    ret = fs_get_value(&lidbg_drivers_list, "fs_dbg_enable", &delay);
-    if(ret > 0) printk("[futengfei]get key value:[%d]\n", (int)simple_strtoul(delay, 0, 0) );
+    fs_get_intvalue(&lidbg_drivers_list, "futengfei", &ret, NULL);
+    printk("[futengfei]get key value:[%d]\n", ret );
+    fs_get_intvalue(&lidbg_drivers_list, "mayanping", &ret, NULL);
+    printk("[futengfei]get key value:[%d]\n", ret );
+    fs_get_intvalue(&lidbg_core_list, "fs_dbg_enable", &ret, NULL);
+    printk("[futengfei]get key value:[%d]\n", ret );
     delay = "futengfei1";
     fs_set_value(&lidbg_core_list, "fs_dbg_enable", delay);
-    fs_set_value(&lidbg_core_list, "fs_dbg_enable", "0");
     fs_get_value(&lidbg_core_list, "fs_dbg_enable", &value);
     printk("[futengfei]warn.test_fileserver_stability:<value=%s>\n", value);
     lidbg_get_current_time(tbuff);
     fs_file_log(tbuff);
+
+
+    is_file_updated(core_sd_path, &precorefile_tm);
+    update_list(core_sd_path, &lidbg_core_list);
+    is_file_updated(driver_sd_path, &predriverfile_tm);
+    update_list(driver_sd_path, &lidbg_drivers_list);
 
     if(0)
     {
@@ -582,6 +757,7 @@ void lidbg_fileserver_main(int argc, char **argv)
 EXPORT_SYMBOL(lidbg_fileserver_main);
 EXPORT_SYMBOL(lidbg_drivers_list);
 EXPORT_SYMBOL(lidbg_core_list);
+EXPORT_SYMBOL(fs_get_intvalue);
 EXPORT_SYMBOL(fs_get_value);
 EXPORT_SYMBOL(fs_set_value);
 EXPORT_SYMBOL(fs_find_string);

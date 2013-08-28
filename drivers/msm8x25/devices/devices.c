@@ -462,19 +462,13 @@ static int soc_dev_probe(struct platform_device *pdev)
 
     }
 
-{
-	int ret = 0;char *string;
-	ret = fs_get_value(&lidbg_drivers_list,"i2c_ctrl",&string);
-	if(ret>0) i2c_ctrl = simple_strtoul(string, 0, 0);
+	fs_get_intvalue(&lidbg_drivers_list,"i2c_ctrl",&i2c_ctrl,NULL);
 	lidbg("config:i2c_ctrl=%d\n",i2c_ctrl);
-}
 
 #ifdef DEBUG_LED
 {
 	bool led_en = 1;
-	int ret = 0;char *string;
-	ret = fs_get_value(&lidbg_drivers_list,"led_en",&string);
-	if(ret>0) led_en = simple_strtoul(string, 0, 0);
+	fs_get_intvalue(&lidbg_drivers_list,"led_en",&led_en,NULL);
 	lidbg("config:led_en=%d\n",led_en);
 	
 	if(led_en)

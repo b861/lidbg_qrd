@@ -1207,21 +1207,16 @@ static int  fastboot_probe(struct platform_device *pdev)
 
 
 {
-	int ret = 0;char *string;
-
 	fb_data->kill_task_en = 1;
-	ret = fs_get_value(&lidbg_drivers_list, "kill_task_en",&string);
-	if(ret>0) fb_data->kill_task_en = simple_strtoul(string, 0, 0);
+	fs_get_intvalue(&lidbg_drivers_list, "kill_task_en",&fb_data->kill_task_en,NULL);
 	lidbg("config:kill_task_en=%d\n",fb_data->kill_task_en);
 	
 	fb_data->haslock_resume_times = 0;
-	ret = fs_get_value(&lidbg_drivers_list, "haslock_resume_times",&string);
-	if(ret>0) fb_data->haslock_resume_times = simple_strtoul(string, 0, 0);
+	fs_get_intvalue(&lidbg_drivers_list, "haslock_resume_times",&fb_data->haslock_resume_times,NULL);
 	lidbg("config:haslock_resume_times=%d\n",fb_data->haslock_resume_times);
 
 	fb_data->max_wait_unlock_time = 5;
-	ret = fs_get_value(&lidbg_drivers_list, "max_wait_unlock_time",&string);
-	if(ret>0) fb_data->max_wait_unlock_time = simple_strtoul(string, 0, 0);
+	fs_get_intvalue(&lidbg_drivers_list, "max_wait_unlock_time",&fb_data->max_wait_unlock_time,NULL);
 	lidbg("config:max_wait_unlock_time=%d\n",fb_data->max_wait_unlock_time);
 }
 

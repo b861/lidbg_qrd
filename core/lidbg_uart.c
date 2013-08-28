@@ -84,13 +84,8 @@ static int __init io_uart_init(void)
     lidbg("io_uart_init\n");	
     spin_lock_init(&uart_lock);
 	
-{
-	int ret = 0;char *string;
-	ret = fs_get_value(&lidbg_core_list,"io_uart_en",&string);
-	if(ret>0) io_uart_en = simple_strtoul(string, 0, 0);
-	lidbg("config:io_uart_en=%d\n",io_uart_en);
-}
-
+    fs_get_intvalue(&lidbg_core_list, "io_uart_en", &io_uart_en, NULL);
+    lidbg("config:io_uart_en=%d\n",io_uart_en);
 	
     return 0;
 }
