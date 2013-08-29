@@ -13,10 +13,13 @@
 LIDBG_DEFINE;
 #endif
 
+#if (defined(BOARD_V1) || defined(BOARD_V2))
+#include <proc_comm.h>
+#else
 #include <mach/proc_comm.h>
+#endif
 #include <mach/clk.h>
 #include <mach/socinfo.h>
-#include <mach/proc_comm.h>
 #include <clock.h>
 #include <clock-pcom.h>
 
@@ -25,7 +28,10 @@ LIDBG_DEFINE;
 
 
 #define RUN_FASTBOOT
+#if (defined(BOARD_V1) || defined(BOARD_V2))
+#else
 #define EXPORT_ACTIVE_WAKE_LOCKS
+#endif
 
 static LIST_HEAD(fastboot_kill_list);
 static DECLARE_COMPLETION(suspend_start);
@@ -141,427 +147,6 @@ static void list_active_locks()
 }
 
 
-
-#if (defined(BOARD_V1) || defined(BOARD_V2))
-char *kill_exclude_process[] =
-{
-    "init",
-    "kthreadd",
-
-    "khelper",
-    "suspend_sys_syn",
-    "suspend",
-    "sync_supers",
-    "bdi-default",
-    "kblockd",
-    "khubd",
-    "l2cap",
-    "a2mp",
-    "modem_notifier",
-    "smd_channel_clo",
-    "smsm_cb_wq",
-    "rpcrouter",
-    "msm_adsp_probe",
-    "rpcrotuer_smd_x",
-    "krpcserversd",
-    "rmt_storage",
-    "voicememo_rpc",
-    "kadspd",
-    "kswapd0",
-    "fsnotify_mark",
-    "crypto",
-    "mdp_dma_wq",
-    "mdp_vsync_wq",
-    "mdp_pipe_ctrl_w",
-
-    "k_hsuart",
-    "kgsl-3d0",
-    "k_rmnet_mux_wor",
-    "f_mtp",
-    "file-storage",
-    "diag_wq",
-    "diag_cntl_wq",
-    "krtcclntd",
-    "krtcclntcbd",
-    "kbatteryclntd",
-    "kbatteryclntcbd",
-    "battery_queue",
-    "msm_adc",
-    "dalrpc_rcv_DAL0",
-    "iewq",
-    "kinteractiveup",
-    "binder",
-    "koemrapiclientc",
-    "krfcommd",
-    "msm-cpufreq",
-    "khsclntd",
-    "rq_stats",
-    "deferwq",
-    "ueventd",
-    "servicemanager",
-    "vold",
-    "netd",
-    "debuggerd",
-    "rild",
-    "surfaceflinger",
-    "zygote",
-    "drmserver",
-    "mediaserver",
-    "dbus-daemon",
-    "installd",
-    "keystore",
-    "qlogd",
-    "sh",
-    "cnd",
-    "wiperiface",
-    "mm-pp-daemon",
-    "logwrapper",
-    "gpu_dcvsd",
-    "k_gserial",
-    "lidbg_servicer",
-    "k_gsmd",
-    "msg_task",
-    "u2k_task",
-    "pwroff_task",
-    "suspend_task",
-    "pwroff_task",
-    "lpc_task",
-    "led_task",
-    "dev_init_task",
-    "key_task",
-    "k_rmnet_work",
-    "bp_msg_task",
-    "adbd",
-    "qmuxd",
-    "netmgrd",
-    "sh",
-    "mkdir",
-    "chmod",
-    "ATFWD-daemon",
-    "mpdecision",
-    "audmgr_rpc",
-    "sleep",
-    "boadcastreceiver",
-    "cfg80211",
-    "ath6kl",
-    "wpa_supplicant",
-    "workqueue_trust",
-    "logcat",
-    "bootanimation",
-    "fsck_msdos",
-    "usb-storage",
-    "sys.DeviceHealth",
-
-    "mm-qcamera-daemon",
-    "com.android.qualcomm",
-    "com.qualcomm.privinit",
-    "com.qualcomm.restore.airplanemode",
- 
-    "com.android.systemui",
-    // "com.android.launcher",
-    "com.qualcomm.fastboot",
-    //"com.android.phone",
-    "com.android.inputmethod.latin",
-    //"com.qualcomm.stats",
-
-    // name err
-    "alljoyn-daemon",
-    "oadcastreceiver",
-    "mm-qcamera-daem",
-    "putmethod.latin",
-
-    "d.process.acore",
-
-    "ndroid.systemui",
-
-    "alcomm.fastboot",
-
-    "d.process.media",
-
-    "droid.deskclock",
-
-    //flyaudio
-    "roid.flyaudioui",
-    "goodix_wq",
-
-    "kdmflush",
-    "kcryptd",
-    "kcryptd_io",
-    "dhcpcd",
-    "RilMessageDecod",
-    "getprop",
-    "setprop",
-    "ip",
-    ":pushservice_v1",
-    "fly_gps_server",
-
-    "m.android.phone",
-    "android.smspush",
-    "omm.datamonitor",
-    ".qualcomm.stats",
-    "droid.gallery3d",
-    "oid.voicedialer",
-    "thermald",
-
-    "tek.inputmethod",
-    "ndroid.launcher",
-    "late_suspend_ta",
-
-    //8803
-    "cn.flyaudio.android.flyaudioservice",
-    "cn.flyaudio.navigation",
-    "com.android.launcher",
-    "cn.flyaudio.osd.service",
-
-    "udio.navigation",
-    "dio.osd.service",
-    "flyaudioservice",
-    "ndroid.launcher",
-    "fb_late_resume_",
-    "GT80x Thread",
-//V3
-	"msm_ipc_router",
-	"krmt_storagecln",
-	"uether",
-	"isl29028_workqu",
-	"acdb_cb_thread",
-	"fmcd",
-	"thundersoft.fmc",
-	"qualcomm.logkit",
-	"qosmgr",
-	"re.airplanemode",
-	"ualcomm.display",
-	"alcomm.privinit",
-	"m.qualcomm.cabl",
-	"ndroid.settings",
-	".baidu.padinput",
-	"io3.widget.time",
-	"com.baidu.input",
-	"dio.flyaudioram",
-	"encode_button_q",
-
-
-    "task_kill_exclude_end",
-
-};
-
-
-char *kill_exclude_process_fake_suspend[] =
-{
-    "init",
-    "kthreadd",
-
-    "khelper",
-    "suspend_sys_syn",
-    "suspend",
-    "sync_supers",
-    "bdi-default",
-    "kblockd",
-    "khubd",
-    "l2cap",
-    "a2mp",
-    "modem_notifier",
-    "smd_channel_clo",
-    "smsm_cb_wq",
-    "rpcrouter",
-    "msm_adsp_probe",
-    "rpcrotuer_smd_x",
-    "krpcserversd",
-    "rmt_storage",
-    "voicememo_rpc",
-    "kadspd",
-    "kswapd0",
-    "fsnotify_mark",
-    "crypto",
-    "mdp_dma_wq",
-    "mdp_vsync_wq",
-    "mdp_pipe_ctrl_w",
-
-    "k_hsuart",
-    "kgsl-3d0",
-
-    "k_rmnet_mux_wor",
-    "f_mtp",
-    "file-storage",
-    "diag_wq",
-    "diag_cntl_wq",
-    "krtcclntd",
-    "krtcclntcbd",
-    "kbatteryclntd",
-    "kbatteryclntcbd",
-    "battery_queue",
-    "msm_adc",
-    "dalrpc_rcv_DAL0",
-    "iewq",
-    "kinteractiveup",
-
-    "binder",
-    "koemrapiclientc",
-
-    "krfcommd",
-    "msm-cpufreq",
-    "khsclntd",
-    "rq_stats",
-    "deferwq",
-    "ueventd",
-
-    "servicemanager",
-    "vold",
-    "netd",
-    "debuggerd",
-    "rild",
-    "surfaceflinger",
-    "zygote",
-    "drmserver",
-    "mediaserver",
-    "dbus-daemon",
-    "installd",
-    "keystore",
-    "qlogd",
-    "sh",
-    "cnd",
-    "wiperiface",
-    "mm-pp-daemon",
-    "logwrapper",
-    "gpu_dcvsd",
-    "k_gserial",
-    "lidbg_servicer",
-    "k_gsmd",
-    "msg_task",
-    "u2k_task",
-    "pwroff_task",
-    "suspend_task",
-    "pwroff_task",
-    "lpc_task",
-    "led_task",
-    "dev_init_task",
-    "key_task",
-    "k_rmnet_work",
-    "bp_msg_task",
-    "adbd",
-    "qmuxd",
-    "netmgrd",
-    "sh",
-    "mkdir",
-    "chmod",
-
-    "ATFWD-daemon",
-    "mpdecision",
-
-    "audmgr_rpc",
-    "sleep",
-    "boadcastreceiver",
-    "cfg80211",
-    "ath6kl",
-    "wpa_supplicant",
-    "workqueue_trust",
-    "logcat",
-    "bootanimation",
-    "fsck_msdos",
-    "usb-storage",
-    "sys.DeviceHealth",
-
-
-    "mm-qcamera-daemon",
-    "com.android.qualcomm",
-    "com.android.settings",
-    "com.qualcomm.privinit",
-    "com.qualcomm.restore.airplanemode",
-    "com.qualcomm.cabl",
-    "com.innopath.activecare",
-    "com.android.systemui",
-    "com.android.launcher",
-    "com.qualcomm.fastboot",
-    "com.android.phone",
-    "com.android.inputmethod.latin",
-    "com.qualcomm.stats",
-
-    // name err
-    "alljoyn-daemon",
-    "oadcastreceiver",
-    "mm-qcamera-daem",
-    "putmethod.latin",
-    "m.android.phone",
-    "ndroid.launcher",
-    "ndroid.settings",
-    "d.process.acore",
-    "ndroid.qualcomm",
-    "re.airplanemode",
-    "ndroid.systemui",
-    "path.activecare",
-    "m.qualcomm.cabl",
-    "viders.calendar",
-    ".qualcomm.stats",
-    "alcomm.privinit",
-    "alcomm.fastboot",
-    "android.smspush",
-    "ndroid.contacts",
-    "d.process.media",
-    "qrd.simcontacts",
-    "droid.gallery3d",
-    "ndroid.exchange",
-    "m.android.email",
-    "oid.voicedialer",
-    "android.musicfx",
-    "droid.deskclock",
-    "com.android.mms",
-    "m.android.music",
-    "omm.datamonitor",
-    "oid.sysinfo.pro",
-
-
-    //flyaudio
-    "roid.flyaudioui",
-    "goodix_wq",
-    "io3.widget.time",
-    "lyaudio.Weather",
-    ".flyaudio.media",
-    "ndroid.calendar",
-    "settings:remote",
-    "kdmflush",
-    "kcryptd",
-    "kcryptd_io",
-    "dhcpcd",
-    "RilMessageDecod",
-    "getprop",
-    "setprop",
-    "ip",
-    ":pushservice_v1",
-    "fly_gps_server",
-
-    "m.android.phone",
-    "android.smspush",
-    "omm.datamonitor",
-    ".qualcomm.stats",
-    "droid.gallery3d",
-    "oid.voicedialer",
-    "thermald",
-
-    "tek.inputmethod",
-    "ndroid.launcher",
-
-    "re-initialized>",
-
-    //8803
-    "cn.flyaudio.android.flyaudioservice",
-    "cn.flyaudio.navigation",
-    "com.android.launcher",
-    "cn.flyaudio.osd.service",
-
-    "udio.navigation",
-    "dio.osd.service",
-    "flyaudioservice",
-    "ndroid.launcher",
-    "fb_late_resume_",
-    "GT80x Thread",
-
-    //kld
-    "c2739.mainframe",
-
-    "task_kill_exclude_end",
-
-};
-#endif
 void set_power_state(int state)
 {
 	char buf[8];
@@ -746,23 +331,6 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
         {
             continue;
         }
-#if (defined(BOARD_V1) || defined(BOARD_V2))
-        while(1)
-        {
-
-            if(!strcmp(exclude_process[i], "task_kill_exclude_end"))
-                break;
-
-            if(strcmp(p->comm, exclude_process[i]) == 0)
-            {
-                safe_flag = 1;
-                break;
-            }
-
-            i++;
-        }
-
-#else
 	{
 		struct string_dev *pos; 	
 		list_for_each_entry(pos, &fastboot_kill_list, tmp_list)
@@ -779,7 +347,6 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
 			}
 		}
 	}
-#endif
         if(safe_flag == 0)
         {
             if (p)
@@ -827,11 +394,8 @@ u32 GetTickCount(void)
 
 int kill_proc(char *buf, char **start, off_t offset, int count, int *eof, void *data )
 {
-#if (defined(BOARD_V1) || defined(BOARD_V2))
-    fastboot_task_kill_exclude(kill_exclude_process);
-#else
+
 	fastboot_task_kill_exclude(NULL);
-#endif
     return 1;
 }
 
@@ -1214,11 +778,7 @@ static void fastboot_early_suspend(struct early_suspend *h)
 
 	if(fb_data->kill_task_en)
 	{
-#if (defined(BOARD_V1) || defined(BOARD_V2))
-	    	fastboot_task_kill_exclude(kill_exclude_process);
-#else
 			fastboot_task_kill_exclude(NULL);
-#endif
 	    	msleep(1000);
 	}
 	

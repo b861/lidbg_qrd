@@ -289,9 +289,6 @@ int is_ublox_exist(void)
         }
         else
         {
-#if (defined(BOARD_V1) || defined(BOARD_V2))        
-            SOC_Write_Servicer(UBLOX_EXIST);
-#endif
             return 1;
         }
     }
@@ -308,10 +305,7 @@ static int  gps_probe(struct platform_device *pdev)
 
 	if(is_ublox_exist() < 0)	
     {
-        printk("[ublox]ublox.miss\n\n");
-#if (defined(BOARD_V1) || defined(BOARD_V2))	
-        return 0;
-#endif		
+        printk("[ublox]ublox.miss\n\n");	
     }
     else
     {

@@ -29,22 +29,10 @@ struct probe_device
 
 struct probe_device ts_probe_dev[] =
 {
-    //rmi
-    // {0x2c, 0x68, LOG_CAP_TS_RMI}, //sku7
-    //ft5x06
-    //  {0x38, 0x00, LOG_CAP_TS_FT5X06_SKU7}, //sku7
-    //  {0x39, 0x00, LOG_CAP_TS_FT5X06}, //flycar
-    //gt811
-#if (defined(BOARD_V1) || defined(BOARD_V2))
-    {0x5d, 0x00, LOG_CAP_TS_GT811}, //flycar
-    {0x55, 0x00, LOG_CAP_TS_GT801}, //flycar
-//{0x14, 0x00, LOG_CAP_TS_GT911}, //flycar
-#else
     {0x5d, 0x00, LOG_CAP_TS_GT811,"gt811.ko"}, //flycar
     {0x55, 0x00, LOG_CAP_TS_GT801,"gt801.ko"}, //flycar
 //{0x14, 0x00, LOG_CAP_TS_GT911,"gt911.ko"}, //flycar
-//{0x5d, 0x00, LOG_CAP_TS_GT910,"gt910new.ko"}, //flycar
-#endif    
+//{0x5d, 0x00, LOG_CAP_TS_GT910,"gt910new.ko"}, //flycar  
 };
 
 bool scan_on = 1;
@@ -81,28 +69,31 @@ void ts_scan(void)
             scan_on = 0;
             SOC_I2C_Rec(TS_I2C_BUS, 0x12, 0x00, &tmp, 1 ); //let i2c bus release
 
-#if (defined(BOARD_V1) || defined(BOARD_V2))
-	SOC_Write_Servicer(ts_probe_dev[i].cmd);
-#else
-	sprintf(path, "/system/lib/modules/out/%s", ts_probe_dev[i].name);
-	lidbg_launch_user("/system/bin/insmod", path);
-	
-	sprintf(path, "/flysystem/lib/out/%s", ts_probe_dev[i].name);
-	lidbg_launch_user("/system/bin/insmod", path);
 
-//in V3+,check ts revert and save the ts sate.
-if(0==have_warned)
-{
-	have_warned=1;
-	fs_file_log("loadts=%s\n", ts_probe_dev[i].name);
-	ts_should_revert = fs_find_string(&flyhal_config_list,"TSMODE_XYREVERT");
-	if(ts_should_revert > 0)
-		printk("[futengfei]=======================TS.XY will revert\n");
-	else
-		printk("[futengfei]=======================TS.XY will normal\n");
-}
-#endif 		
-            break;
+			sprintf(path, "/system/lib/modules/out/%s", ts_probe_dev[i].name);
+			lidbg_launch_user("/system/bin/insmod", path);
+			
+			sprintf(path, "/flysystem/lib/out/%s", ts_probe_dev[i].name);
+			lidbg_launch_user("/system/bin/insmod", path);
+
+			//in V3+,check ts revert and save the ts sate.
+			if(0==have_warned)
+			{
+				have_warned=1;
+				fs_file_log("loadts=%s\n", ts_probe_dev[i].name);
+				ts_should_revert = fs_find_string(&flyhal_config_list,"TSMODE_XYREVERT");
+				if(ts_should_revert > 0)
+					printk("[futengfei]=======================TS.XY will revert\n");
+				else
+					printk("[futengfei]=======================TS.XY will normal\n");
+			}
+			
+			if (!strcmp(ts_probe_dev[i].name, "gt801.ko"))
+			{
+				lidbg_launch_user("/system/bin/insmod", "/system/lib/modules/out/gt80x_update.ko");
+				lidbg_launch_user("/system/bin/insmod", "/flysystem/lib/out/gt80x_update.ko");
+			}
+	        break;
         }
     }
 
@@ -114,9 +105,15 @@ if(0==have_warned)
 
 int ts_probe_thread(void *data)
 {
+
+	fs_fill_list(FLYHAL_CONFIG_PATH, FS_CMD_FILE_LISTMODE, &flyhal_config_list);
     fs_get_intvalue(&lidbg_drivers_list,"ts_scan_delayms", &ts_scan_delayms,NULL);
     if(ts_scan_delayms < 100)
         ts_scan_delayms = 100;
+	
+	lidbg_launch_user("/system/bin/insmod", "/system/lib/modules/out/lidbg_ts_to_recov.ko");
+	lidbg_launch_user("/system/bin/insmod", "/flysystem/lib/out/lidbg_ts_to_recov.ko");
+
     while(1)
     {
         set_current_state(TASK_UNINTERRUPTIBLE);
@@ -160,7 +157,7 @@ int ts_probe_thread(void *data)
         else
         {
               //printk("[wang]:=========is in updating.\n");
-	    shutdown_flag_probe = 2;
+	    	shutdown_flag_probe = 2;
             msleep(ts_scan_delayms);
             
         }
@@ -170,13 +167,11 @@ int ts_probe_thread(void *data)
 
 static int ts_probe_init(void)
 {
-    static struct task_struct *scan_task;
+    struct task_struct *scan_task;
     DUMP_BUILD_TIME;
-    printk("\n[futengfei]==================update=====ts_probe_init=============\n");
 #ifndef SOC_COMPILE
     LIDBG_GET;
 #endif
-	fs_fill_list(FLYHAL_CONFIG_PATH, FS_CMD_FILE_LISTMODE, &flyhal_config_list);
     scan_task = kthread_create(ts_probe_thread, NULL, "ts_scan_task");
     wake_up_process(scan_task);
     return 0;

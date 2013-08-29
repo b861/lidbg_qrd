@@ -9,9 +9,7 @@
 LIDBG_DEFINE;
 struct task_struct *soc_task;
 
-#if (defined(BOARD_V1) || defined(BOARD_V2))
 
-#else
 char *insmod_list[] =
 {
     "lidbg_fastboot.ko",
@@ -19,14 +17,9 @@ char *insmod_list[] =
 	"lidbg_devices.ko",
 	"lidbg_bpmsg.ko",
 	"lidbg_gps.ko",
-	"lidbg_ts_to_recov.ko",
-	"lidbg_ts_probe.ko",
 	"lidbg_videoin.ko",
-#if (defined(BOARD_V1) || defined(BOARD_V2))
-	"gt80x_update.ko",
-#endif
+	"lidbg_ts_probe.ko",
 	NULL,
-
 };
 
 char *insmod_path[] =
@@ -35,11 +28,8 @@ char *insmod_path[] =
     "/flysystem/lib/out/",
     NULL,
 };
-#endif
 
 
-#if (defined(BOARD_V1) || defined(BOARD_V2))
-#else
 int soc_thread(void *data)
 {
 	int i,j;
@@ -54,14 +44,15 @@ int soc_thread(void *data)
 		}
 	}
 
-#if 1
+#if (defined(BOARD_V1) || defined(BOARD_V2))
+
+#else
 		msleep(1000);
 		if(lidbg_launch_user("/system/bin/lidbg_servicer", NULL)<0)
 			lidbg_launch_user("/flysystem/bin/lidbg_servicer", NULL);
 #endif
 
 }
-#endif
 
 
 
@@ -290,10 +281,7 @@ int fly_soc_init(void)
     DUMP_BUILD_TIME;
 	LIDBG_GET;
     set_func_tbl();
-
-#if (defined(BOARD_V1) || defined(BOARD_V2))
-    lidbg("fly_soc_probe\n");
-#else
+	
     soc_task = kthread_create(soc_thread, NULL, "lidbg_soc_thread");
     if(IS_ERR(soc_task))
     {
@@ -301,7 +289,6 @@ int fly_soc_init(void)
 
     }
     else wake_up_process(soc_task);
-#endif
     return 0;
 }
 

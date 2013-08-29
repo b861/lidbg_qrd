@@ -300,7 +300,7 @@ loop_read:
 		case LOG_CAP_TS_GT801:
 		case LOG_CAP_TS_GT911:
 		case LOG_CAP_TS_GT910:
-#if (defined(BOARD_V1) || defined(BOARD_V2))
+#if 0//(defined(BOARD_V1) || defined(BOARD_V2))
         {
             if(LOG_CAP_TS_GT811 == cmd)
             {
@@ -424,7 +424,7 @@ loop_read:
         }
         case UMOUNT_USB:
         {
-#if (defined(BOARD_V1) || defined(BOARD_V2))
+#if 0//(defined(BOARD_V1) || defined(BOARD_V2))
             system("umount /mnt/usbdisk");
 #endif
             break;
@@ -576,7 +576,7 @@ int main(int argc , char **argv)
     system("echo 600000 > /sys/devices/system/cpu/cpu1/cpufreq/scaling_max_freq");
 #endif
 
-#if (defined(BOARD_V1) || defined(BOARD_V2))
+#if 0//(defined(BOARD_V1) || defined(BOARD_V2))
     system("insmod /system/lib/modules/out/lidbg_share.ko");
     system("insmod /system/lib/modules/out/lidbg_ts_to_recov.ko");
     system("insmod /system/lib/modules/out/lidbg_msg.ko");
@@ -672,7 +672,7 @@ open_dev:
         if(servicer_handler(0) == SERVICER_DONOTHING)
             break;
     }
-#if (defined(BOARD_V1) || defined(BOARD_V2))
+#if 0//(defined(BOARD_V1) || defined(BOARD_V2))
     system("insmod /system/lib/modules/out/lidbg_ts_probe.ko");
     system("insmod /flysystem/lib/out/lidbg_ts_probe.ko");
     system("insmod /flysystem/lib/out/gt80x_update.ko");
