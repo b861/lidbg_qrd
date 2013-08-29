@@ -3,7 +3,7 @@
 #	Description : Make ALL
 #       Date:         2012/02/03
 #=======================================================================================
-
+chmod 777 -R ./*
 cd build
 source ./env_entry.sh
 ./build_cfg.sh $BOARD_VERSION $BUILD_VERSION && ./all_make.sh
