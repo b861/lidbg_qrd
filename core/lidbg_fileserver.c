@@ -387,6 +387,7 @@ static int thread_log_func(void *data)
     allow_signal(SIGKILL);
     allow_signal(SIGSTOP);
     //set_freezable();
+	ssleep(20);
     while(!kthread_should_stop())
     {
         msleep(g_clearlogfifo_ms);
@@ -510,6 +511,11 @@ static int thread_filepoll_func(void *data)
     //set_freezable();
     get_file_mftime(core_sd_path, &precorefile_tm);
     get_file_mftime(driver_sd_path, &predriverfile_tm);
+	ssleep(50);
+	if(!copy_file(driver_fly_path, driver_sd_path))
+		copy_file(driver_lidbg_path, driver_sd_path);
+	if(!copy_file(core_fly_path, core_sd_path))
+		copy_file(core_lidbg_path, core_sd_path);
     while(!kthread_should_stop())
     {
         msleep(g_pollfile_ms);
