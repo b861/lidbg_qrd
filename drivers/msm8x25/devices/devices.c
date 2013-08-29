@@ -22,6 +22,7 @@ LIDBG_DEFINE;
 #include "devices.h"
 
 
+bool led_en ;
 
 #define LIDBG_GPIO_PULLUP  GPIO_CFG_PULL_UP
 
@@ -390,6 +391,7 @@ int thread_led(void *data)
         if(kthread_should_stop()) break;
         if(1) //条件为真
         {
+        if(led_en)
             led_on();
 #ifdef FLY_DEBUG
             msleep(500);
@@ -462,15 +464,13 @@ static int soc_dev_probe(struct platform_device *pdev)
 
     }
 
-	fs_get_intvalue(&lidbg_drivers_list,"i2c_ctrl",&i2c_ctrl,NULL);
-	lidbg("config:i2c_ctrl=%d\n",i2c_ctrl);
+	FS_REGISTER_INT_DRV(i2c_ctrl,0,NULL);
+
 
 #ifdef DEBUG_LED
 {
-	bool led_en = 1;
-	fs_get_intvalue(&lidbg_drivers_list,"led_en",&led_en,NULL);
-	lidbg("config:led_en=%d\n",led_en);
-	
+	FS_REGISTER_INT_DRV(led_en,1,NULL);
+
 	if(led_en)
 	{
 	    led_task = kthread_create(thread_led, NULL, "led_task");

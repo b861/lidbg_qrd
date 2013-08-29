@@ -107,6 +107,14 @@ typedef irqreturn_t (*pinterrupt_isr)(int irq, void *dev_id);
 //#define lidbg_io(fmt,...) do{SOC_IO_Uart_Send(IO_UART_DELAY_245_115200,fmt,##__VA_ARGS__);}while(0)
 #define lidbg_io(fmt,...) do{lidbg(fmt,##__VA_ARGS__);}while(0)
 
+#define FS_REGISTER_INT_DRV(name,def_value,callback) name=def_value; \
+			fs_get_intvalue(&lidbg_drivers_list, #name,&name,callback); \
+			lidbg("config:#name=%d\n",name);
+
+#define FS_REGISTER_INT_CORE(name,def_value,callback) name=def_value; \
+			fs_get_intvalue(&lidbg_core_list, #name,&name,callback); \
+			lidbg("config:#name=%d\n",name);
+
 
 
 //zone start

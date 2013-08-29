@@ -53,6 +53,7 @@ struct fastboot_data
     u32 resume_count;
     struct mutex lock;
 	int kill_task_en;
+	int kill_all_task;
 	int haslock_resume_times;
 	int max_wait_unlock_time;
 	int clk_block_suspend;
@@ -281,7 +282,7 @@ int fastboot_task_kill_select(char *task_name)
 
 static void fastboot_task_kill_exclude(char *exclude_process[])
 {
-    char kill_process[32][64];
+    char kill_process[32][25];
 
     struct task_struct *p;
     struct mm_struct *mm;
@@ -308,6 +309,9 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
         task_unlock(p);
         safe_flag = 0;
         i = 0;
+
+	if(fb_data->kill_all_task == 0)
+	{
         if(
             (strncmp(p->comm, "flush", sizeof("flush") - 1) == 0) ||
             (strncmp(p->comm, "mtdblock", sizeof("mtdblock") - 1) == 0) ||
@@ -337,15 +341,16 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
 		{
 			if(strcmp(p->comm, pos->yourkey) == 0)
 			{
-                safe_flag = 1;
-				//lidbg("nokill:%s\n", pos->yourkey);
-                break;
-            }
+		                safe_flag = 1;
+				  //lidbg("nokill:%s\n", pos->yourkey);
+		                break;
+			}
 			else
 			{
 				//lidbg("kill:%s\n", pos->yourkey);
 			}
 		}
+	}
 	}
         if(safe_flag == 0)
         {
@@ -817,13 +822,22 @@ static void fastboot_late_resume(struct early_suspend *h)
 		fb_data->clk_block_suspend = 0;
 		fb_data->is_quick_resume = 0;
 		
-        fastboot_set_status(PM_STATUS_LATE_RESUME_OK);
     }
+	fastboot_set_status(PM_STATUS_LATE_RESUME_OK);
+
 #endif
 
 	set_cpu_governor(0);//ondemand
 }
 #endif
+
+
+void kill_all_task(char *key, char *value)
+{
+  fastboot_task_kill_exclude(NULL);
+}
+
+
 
 static int  fastboot_probe(struct platform_device *pdev)
 {
@@ -854,19 +868,10 @@ static int  fastboot_probe(struct platform_device *pdev)
 #endif
 
 
-{
-	fb_data->kill_task_en = 1;
-	fs_get_intvalue(&lidbg_drivers_list, "kill_task_en",&fb_data->kill_task_en,NULL);
-	lidbg("config:kill_task_en=%d\n",fb_data->kill_task_en);
-	
-	fb_data->haslock_resume_times = 0;
-	fs_get_intvalue(&lidbg_drivers_list, "haslock_resume_times",&fb_data->haslock_resume_times,NULL);
-	lidbg("config:haslock_resume_times=%d\n",fb_data->haslock_resume_times);
-
-	fb_data->max_wait_unlock_time = 5;
-	fs_get_intvalue(&lidbg_drivers_list, "max_wait_unlock_time",&fb_data->max_wait_unlock_time,NULL);
-	lidbg("config:max_wait_unlock_time=%d\n",fb_data->max_wait_unlock_time);
-}
+	FS_REGISTER_INT_DRV(fb_data->kill_task_en,1,NULL);
+	FS_REGISTER_INT_DRV(fb_data->kill_all_task,0,kill_all_task);
+	FS_REGISTER_INT_DRV(fb_data->haslock_resume_times,0,NULL);
+	FS_REGISTER_INT_DRV(fb_data->max_wait_unlock_time,5,NULL);
 
 
     INIT_COMPLETION(early_suspend_start);

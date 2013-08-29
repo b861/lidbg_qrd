@@ -83,9 +83,8 @@ static int __init io_uart_init(void)
     DUMP_BUILD_TIME;
     lidbg("io_uart_init\n");	
     spin_lock_init(&uart_lock);
-	
-    fs_get_intvalue(&lidbg_core_list, "io_uart_en", &io_uart_en, NULL);
-    lidbg("config:io_uart_en=%d\n",io_uart_en);
+
+    FS_REGISTER_INT_CORE(io_uart_en,0,NULL);
 	
     return 0;
 }

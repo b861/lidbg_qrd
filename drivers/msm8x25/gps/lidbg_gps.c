@@ -40,7 +40,7 @@ static char  num_avi_gps_data[2] = { 0 };
 static int    avi_gps_data_hl = 0;
 int thread_gps_server(void *data);
 
-bool debug_mask = 0;
+bool gps_debug_en = 0;
 
 struct gps_device *dev;
 static struct task_struct *gps_server_task;
@@ -85,7 +85,7 @@ ssize_t gps_read (struct file *filp, char __user *buf, size_t count, loff_t *f_p
     if(fifo_len > HAL_BUF_SIZE)
         wake_up_interruptible(&dev->queue);
 
-    if(debug_mask)
+    if(gps_debug_en)
         printk("[ublox]fifo_len: %d, jni_read: %d\n", fifo_len, read_len);
     return read_len;
 }
@@ -190,7 +190,7 @@ int thread_gps_server(void *data)
             avi_gps_data_hl = (num_avi_gps_data[0] << 8) + num_avi_gps_data[1];
 
 
-        if(debug_mask)
+        if(gps_debug_en)
             printk("[ublox]ublox_buf_len: %d\n", avi_gps_data_hl);
 
         if(avi_gps_data_hl > 0)
@@ -224,11 +224,11 @@ int thread_gps_server(void *data)
 
         }
 	if (started) {
-		if (debug_mask)
+		if (gps_debug_en)
 			printk("ublox:have data need read\n");
         	wake_up_interruptible(&dev->queue);
 	}
-        if(debug_mask)
+        if(gps_debug_en)
         {
             gps_data[avi_gps_data_hl ] = '\0';
             printk("%s\n", gps_data);
@@ -246,7 +246,7 @@ do_nothing:
 int read_proc(char *buf, char **start, off_t offset, int count, int *eof, void *data )
 {
     printk("enable ublox print\n");
-    debug_mask = 1;
+    gps_debug_en = 1;
 
     return 1;
 }
@@ -314,7 +314,7 @@ static int  gps_probe(struct platform_device *pdev)
 		
     }
 
-
+	FS_REGISTER_INT_DRV(gps_debug_en,0,NULL);
 
 #ifdef CONFIG_HAS_EARLYSUSPEND  //  enable/disable the gps thread 
     early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN;
