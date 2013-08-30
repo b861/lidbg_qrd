@@ -30,7 +30,7 @@ lidbg_msg *plidbg_msg = NULL;
 
 int thread_msg(void *data)
 {
-    plidbg_msg = (struct lidbg_msg *)kmalloc(sizeof( lidbg_msg), GFP_KERNEL);
+    plidbg_msg = ( lidbg_msg *)kmalloc(sizeof( lidbg_msg), GFP_KERNEL);
 
     memset(plidbg_msg->log, '\0', /*sizeof( lidbg_msg)*/TOTAL_LOGS * LOG_BYTES);
     plidbg_msg->w_pos = plidbg_msg->r_pos = 0;
@@ -63,13 +63,14 @@ ssize_t  msg_read(struct file *filp, char __user *buffer, size_t size, loff_t *o
 
 ssize_t  msg_write(struct file *filp, const char __user *buffer, size_t size, loff_t *offset)
 {
-    int cmd ;
-
 
     down(&lidbg_msg_sem);
     memset(&(plidbg_msg->log[plidbg_msg->w_pos]), '\0', LOG_BYTES);
 
-    copy_from_user(&(plidbg_msg->log[plidbg_msg->w_pos]), buffer, size > LOG_BYTES ? LOG_BYTES : size);
+    if(copy_from_user(&(plidbg_msg->log[plidbg_msg->w_pos]), buffer, size > LOG_BYTES ? LOG_BYTES : size))
+    {
+        lidbg("copy_from_user ERR\n");
+    }
 
     //for safe
     plidbg_msg->log[plidbg_msg->w_pos][LOG_BYTES-2] = '\n';

@@ -24,7 +24,7 @@ unsigned int  soc_ad_read(unsigned int channel)
         return 0xffffffff;
     }
 
-    value = p_fly_smem->ch[channel];
+    value = p_fly_smem->bp2ap[channel];
 
     return value;
 }

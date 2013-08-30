@@ -2,30 +2,11 @@
  *
  */
 
-
-
-//#define SOC_COMPILE
-
-
-#ifdef SOC_COMPILE
 #include "lidbg.h"
-#include "fly_soc.h"
-
-#else
-#include "lidbg_def.h"
-
-#include "lidbg_enter.h"
 
 LIDBG_DEFINE;
-#endif
-
-
-#include "lidbg_lpc.h"
-
 
 //#define LPC_DEBUG_LOG
-
-
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
 static void lpc_early_suspend(struct early_suspend *handler);
@@ -44,8 +25,6 @@ u32 lpc_send_rec_count = 0;
 
 u32 resume_count = 0;
 
-
-static struct task_struct *lpc_task;
 int thread_lpc(void *data);
 bool lpc_work_en = 0;
 
@@ -691,7 +670,7 @@ static struct platform_driver lpc_driver =
 static void set_func_tbl(void)
 {
     //lpc
-    ((struct lidbg_dev *)plidbg_dev)->soc_func_tbl.pfnSOC_LPC_Send = LPCCombinDataStream;
+    ((struct lidbg_hal *)plidbg_dev)->soc_func_tbl.pfnSOC_LPC_Send = LPCCombinDataStream;
 
 }
 
@@ -699,11 +678,8 @@ static int __init lpc_init(void)
 {
     DUMP_BUILD_TIME;
 
-#ifndef SOC_COMPILE
     LIDBG_GET;
     set_func_tbl();
-#endif
-
 
     platform_device_register(&lidbg_lpc);
     platform_driver_register(&lpc_driver);

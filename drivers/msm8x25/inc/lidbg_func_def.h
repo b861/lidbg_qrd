@@ -1,7 +1,7 @@
 #ifndef _LIGDBG_FUNCDEF__
 #define _LIGDBG_FUNCDEF__
 
-extern struct lidbg_dev *plidbg_dev;
+extern struct lidbg_hal *plidbg_dev;
 
 static inline int check_pt(void)
 {
@@ -97,6 +97,10 @@ static inline int check_pt(void)
 
 //uart
 #define SOC_IO_Uart_Send (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_IO_Uart_Send))
+
+
+#define SOC_Get_Share_Mem (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_Get_Share_Mem))
+#define SOC_System_Status (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_System_Status))
 
 #endif
 

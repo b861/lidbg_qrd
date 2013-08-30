@@ -1,13 +1,14 @@
 /* Copyright (c) 2012, swlee
  *
  */
-#define SOC_COMPILE
+#define LIDBG_FLY_HAL
 
 #include "lidbg.h"
 
-#include "lidbg_fly_hal.h"
 LIDBG_DEFINE;
+
 struct task_struct *soc_task;
+FLY_SYSTEM_STATUS g_system_status;
 
 
 char *insmod_list[] =
@@ -29,7 +30,13 @@ char *insmod_path[] =
     NULL,
 };
 
+void hal_func_tbl_default(void)
+{
+    lidbgerr("hal_func_tbl_default:this func not ready!\n");
+	//print who call this
+	dump_stack();
 
+}
 int soc_thread(void *data)
 {
 	int i,j;
@@ -51,7 +58,7 @@ int soc_thread(void *data)
 		if(lidbg_launch_user("/system/bin/lidbg_servicer", NULL)<0)
 			lidbg_launch_user("/flysystem/bin/lidbg_servicer", NULL);
 #endif
-
+	return 0;
 }
 
 
@@ -225,6 +232,18 @@ void SOC_IO_Uart_Send( u32 baud,const char *fmt, ... )
 
 }
 
+
+struct fly_smem* SOC_Get_Share_Mem(void)
+{
+	return p_fly_smem;
+}
+
+void SOC_System_Status(FLY_SYSTEM_STATUS status)
+{
+	g_system_status = status;
+}
+
+
 static void set_func_tbl(void)
 {
     //io
@@ -273,14 +292,85 @@ static void set_func_tbl(void)
 
    // uart
     plidbg_dev->soc_func_tbl.pfnSOC_IO_Uart_Send = SOC_IO_Uart_Send;
+
+   plidbg_dev->soc_func_tbl.pfnSOC_Get_Share_Mem = SOC_Get_Share_Mem;
+   plidbg_dev->soc_func_tbl.pfnSOC_System_Status = SOC_System_Status;
+
+   
+}
+
+int hal_open(struct inode *inode, struct file *filp)
+{
+    return 0;
+}
+
+int hal_release(struct inode *inode, struct file *filp)
+{
+    return 0;
 }
 
 
-int fly_soc_init(void)
+ssize_t hal_read(struct file *filp, char __user *buf, size_t size,
+                          loff_t *ppos)
 {
-    DUMP_BUILD_TIME;
-	LIDBG_GET;
-    set_func_tbl();
+    unsigned int count = 4;
+    int ret = 0;
+	u32 read_value = 0;
+	read_value = (u32)plidbg_dev;
+
+    printk("hal_read:read_value=%x,read_count=%d\n", (u32)read_value, count);
+    if (copy_to_user(buf, &read_value, count))
+    {
+        ret =  - EFAULT;
+    }
+    else
+    {
+        ret = count;
+    }
+
+    return count;
+}
+
+
+
+#define DEVICE_NAME "lidbg_hal"
+
+static struct file_operations dev_fops =
+{
+    .owner	=	THIS_MODULE,
+    .open   =   hal_open,
+    .read   =   hal_read,
+    .release =  hal_release,
+};
+
+
+static struct miscdevice misc =
+{
+    .minor = MISC_DYNAMIC_MINOR,
+    .name = DEVICE_NAME,
+    .fops = &dev_fops,
+
+};
+
+
+int fly_hal_init(void)
+{
+	int ret;
+	DUMP_BUILD_TIME;
+	ret = misc_register(&misc);
+
+	plidbg_dev = kmalloc(sizeof(struct lidbg_hal), GFP_KERNEL);
+	{
+		int i;
+		for(i = 0; i < sizeof(plidbg_dev->soc_func_tbl) / 4; i++)
+		{
+			((int *)&(plidbg_dev->soc_func_tbl))[i] = hal_func_tbl_default;
+
+		}
+	}
+	memset(&(plidbg_dev->soc_pvar_tbl), (int)NULL, sizeof(struct lidbg_pvar_t));
+
+	set_func_tbl();
 	
     soc_task = kthread_create(soc_thread, NULL, "lidbg_soc_thread");
     if(IS_ERR(soc_task))
@@ -292,13 +382,15 @@ int fly_soc_init(void)
     return 0;
 }
 
-void fly_soc_deinit(void)
+void fly_hal_deinit(void)
 {
-    lidbg("fly_soc_deinit\n");
 }
 
-module_init(fly_soc_init);
-module_exit(fly_soc_deinit);
+module_init(fly_hal_init);
+module_exit(fly_hal_deinit);
+
+EXPORT_SYMBOL(g_system_status);
+
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Flyaudad Inc.");

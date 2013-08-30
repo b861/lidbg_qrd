@@ -33,15 +33,7 @@
 
 //#include <plat/gpio-bank-f.h>
 //#include <linux/goodix_touch.h>
-#ifdef SOC_COMPILE
 #include "lidbg.h"
-#include "fly_soc.h"
-
-#else
-#endif
-
-#include "lidbg_def.h"
-#include "lidbg_enter.h"
 LIDBG_DEFINE;
 
 #include "gt80x_update.h"
@@ -1447,9 +1439,7 @@ do_nothing:
 static int __init init_kthread(void)
 {
     int err;
-#ifndef SOC_COMPILE
     LIDBG_GET;
-#endif
 
     printk("=================init_kthread==============\n\n");
 

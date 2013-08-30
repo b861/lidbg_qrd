@@ -25,14 +25,9 @@
 
 #include "gt911.h"
 
-#ifdef SOC_COMPILE
 #include "lidbg.h"
-#include "fly_soc.h"
-#else
-#include "lidbg_def.h"
-#include "lidbg_enter.h"
 LIDBG_DEFINE;
-#endif
+
 #define RECORVERY_MODULE
 #ifdef RECORVERY_MODULE
 #include "touch.h"
@@ -1492,9 +1487,7 @@ Output:
 ********************************************************/
 static int __devinit goodix_ts_init(void)
 {
-	#ifndef SOC_COMPILE
 	LIDBG_GET;
-	#endif
 is_ts_load = 1;
 #ifdef BOARD_V2
     SOC_IO_Output(0, 27, 1);

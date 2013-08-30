@@ -1,7 +1,6 @@
 
 
-#include "lidbg_def.h"
-#include "lidbg_enter.h"
+#include "lidbg.h"
 LIDBG_DEFINE;
 
 #define DEVICE_NAME "ubloxgps"
@@ -40,7 +39,7 @@ static char  num_avi_gps_data[2] = { 0 };
 static int    avi_gps_data_hl = 0;
 int thread_gps_server(void *data);
 
-bool gps_debug_en = 0;
+int gps_debug_en = 0;
 
 struct gps_device *dev;
 static struct task_struct *gps_server_task;
@@ -56,7 +55,7 @@ int gps_open (struct inode *inode, struct file *filp)
 ssize_t gps_read (struct file *filp, char __user *buf, size_t count, loff_t *f_pos)
 {
     struct gps_device *dev = filp->private_data;
-    int read_len, fifo_len;
+    int read_len, fifo_len,bytes;
 
     if (!started) {
 	printk("[ublox] gps stoped but read");
@@ -77,10 +76,13 @@ ssize_t gps_read (struct file *filp, char __user *buf, size_t count, loff_t *f_p
     else
         read_len = fifo_len;
 
-    kfifo_out(&gps_data_fifo, &gps_data_for_hal, read_len);
+    bytes = kfifo_out(&gps_data_fifo, &gps_data_for_hal, read_len);
     up(&dev->sem);
 
-    copy_to_user(buf, gps_data_for_hal, read_len);
+    if(copy_to_user(buf, gps_data_for_hal, read_len))
+    {
+	return -1;
+    }
 
     if(fifo_len > HAL_BUF_SIZE)
         wake_up_interruptible(&dev->queue);
@@ -93,7 +95,7 @@ ssize_t gps_read (struct file *filp, char __user *buf, size_t count, loff_t *f_p
 
 ssize_t gps_write (struct file *filp, const char __user *buf, size_t count, loff_t *f_pos)
 {
-    struct gps_device *dev = filp->private_data;
+    //struct gps_device *dev = filp->private_data;
     printk("[ublox]gps_write\n");
 
     printk("[ublox] gps_data=>%s\n", gps_data);
@@ -251,7 +253,7 @@ int read_proc(char *buf, char **start, off_t offset, int count, int *eof, void *
     return 1;
 }
 
-void create_new_proc_entry()
+void create_new_proc_entry(void)
 {
     create_proc_read_entry("ublox_dbg", 0, NULL, read_proc, NULL);
     // /cat proc/ublox_dbg
@@ -300,6 +302,7 @@ static int  gps_probe(struct platform_device *pdev)
     int ret, err, result;
 	static struct class *class_install;
 	static int major_number = 0;
+    dev_t dev_number = MKDEV(major_number, 0);
 
     DUMP_FUN;
 
@@ -337,7 +340,6 @@ static int  gps_probe(struct platform_device *pdev)
         return ret;
     }
 
-    dev_t dev_number = MKDEV(major_number, 0);
     if(major_number)
     {
         result = register_chrdev_region(dev_number, 1, DEVICE_NAME);
@@ -431,13 +433,11 @@ static struct platform_device lidbg_gps_device =
 };
 
 
-static  int gps_server_driver_init(void)
+static  int gps_server_init(void)
 {
     printk(" \n[ublox] ==IN==gps_server_driver_init==\n");
 
-#ifndef SOC_COMPILE
     LIDBG_GET;
-#endif
 
     platform_device_register(&lidbg_gps_device);
 
@@ -445,7 +445,7 @@ static  int gps_server_driver_init(void)
 
 }
 
-static void gps_server_driver_exit(void)
+static void gps_server_exit(void)
 {
     printk(" \n[ublox] ==IN==gps_server_driver_exit==\n");
 
@@ -453,8 +453,8 @@ static void gps_server_driver_exit(void)
     // kfree(dev);
 }
 
-module_init(gps_server_driver_init);
-module_exit(gps_server_driver_exit);
+module_init(gps_server_init);
+module_exit(gps_server_exit);
 
 MODULE_LICENSE("GPL");
 

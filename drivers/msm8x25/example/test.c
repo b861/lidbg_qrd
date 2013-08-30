@@ -1,6 +1,5 @@
 
-#include "lidbg_def.h"
-#include "lidbg_enter.h"
+#include "lidbg.h"
 
 static struct task_struct *test_task;
 

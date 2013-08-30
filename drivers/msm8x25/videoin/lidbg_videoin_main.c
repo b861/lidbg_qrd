@@ -1,7 +1,6 @@
 
 
-#include "lidbg_enter.h"
-#include "lidbg_def.h"
+#include "lidbg.h"
 #include "video_init_config.h"
 static struct task_struct *Vedio_Signal_Test = NULL;
 //static struct task_struct *RunTimeTw9912Status = NULL;
@@ -14,7 +13,7 @@ extern Vedio_Channel info_com_top_Channel;
 #define MAJOR_Tw9912 0
 //#define MINOR_LED 1
 #define DEV_NAME "tw9912config"
-extern struct lidbg_dev *plidbg_dev; //add by huangzongqiang
+extern struct lidbg_hal *plidbg_dev; //add by huangzongqiang
 dev_t tw9912_dev;
 struct class *tw9912_class;
 struct cdev *tw9912_cdev;

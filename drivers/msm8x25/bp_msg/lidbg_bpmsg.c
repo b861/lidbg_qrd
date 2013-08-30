@@ -1,19 +1,7 @@
 
 
 
-#ifdef SOC_COMPILE
 #include "lidbg.h"
-#include "fly_soc.h"
-
-#else
-#include "lidbg_def.h"
-
-#include "lidbg_enter.h"
-
-#endif
-
-#include "lidbg_bpmsg.h"
-
 
 static struct task_struct *bp_msg_task;
 
@@ -84,7 +72,6 @@ int thread_bp_msg(void *data)
 
 int bp_msg_init(void)
 {
-    int err;
     DUMP_FUN;
 #if 0//def FLY_DEBUG
     lidbg("debug:bp_msg_init do nothing");

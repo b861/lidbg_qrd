@@ -6,60 +6,18 @@
  * Date: 2010.11.11
  *
  *---------------------------------------------------------------------------------------------------------*/
-#include <linux/i2c.h>
-#include <linux/input.h>
+
 #include <linux/input/mt.h>
-#include <linux/slab.h>
-#include <linux/interrupt.h>
-#include <linux/delay.h>
-#include <linux/kernel.h>
-#include <linux/module.h>
-#include <linux/gpio.h>
-#include <linux/regulator/consumer.h>
-#include <linux/input/ft5x06_ts.h>
-#include <linux/firmware.h>
-#include <linux/syscalls.h>
-#include <asm/uaccess.h>
-#include <linux/wakelock.h>
-#include <mach/pmic.h>
-#include <linux/debugfs.h>
-#include <linux/kernel.h>
-#include <linux/module.h>
-#include <linux/time.h>
-#include <linux/delay.h>
-#include <linux/device.h>
-#include <linux/earlysuspend.h>
-#include <linux/hrtimer.h>
-#include <linux/i2c.h>
-#include <linux/input.h>
-#include <linux/interrupt.h>
-#include <linux/io.h>
-#include <linux/platform_device.h>
-#include <mach/gpio.h>
-//#include <plat/gpio-cfg.h>
-//#include <plat/gpio-bank-l.h>
-//#include <plat/gpio-bank-f.h>
-#include <linux/irq.h>
-
-//adding head files
-#include <linux/slab.h>
-#include <linux/init.h>
-#include <linux/module.h>
-
 
 #include "goodix_touch1.h"
 #include "goodix_queue1.h"
 
 /****************************modify by wangyihong**************************
 ************************************************************************/
-#ifdef SOC_COMPILE
 #include "lidbg.h"
-#include "fly_soc.h"
-#else
-#include "lidbg_def.h"
-#include "lidbg_enter.h"
+
 LIDBG_DEFINE;
-#endif
+
 
 #define RECORVERY_MODULE
 #ifdef RECORVERY_MODULE
@@ -1320,9 +1278,7 @@ static int __devinit goodix_ts_init(void)
 {
     int ret;
 
-#ifndef SOC_COMPILE
     LIDBG_GET;
-#endif
 
     is_ts_load = 1;
     printk("================into Gt801.ko=1024590==============2013.07.12==\n");

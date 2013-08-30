@@ -1,3 +1,4 @@
+#include "lidbg.h"
 #include "i2c_io.h"
 #include "tw9912.h"
 #include "tc358746xbg_config.h"

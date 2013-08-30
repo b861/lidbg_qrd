@@ -26,8 +26,6 @@ void mod_io_main(int argc, char **argv)
     if(!strcmp(argv[0], "r"))
     {
         u32 index;
-        u32 pull;
-        u32 drive_strength;
         bool status;
         index = simple_strtoul(argv[1], 0, 0);
 
@@ -41,8 +39,6 @@ void mod_io_main(int argc, char **argv)
     else if(!strcmp(argv[0], "w"))
     {
         u32 index;
-        u32 pull;
-        u32 drive_strength;
         bool status;
 
         if(argc < 3)

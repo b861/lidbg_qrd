@@ -167,9 +167,9 @@ int soc_io_config(u32 index, bool direction, u32 pull, u32 drive_strength, bool 
 void lidbg_soc_main(int argc, char **argv);
 
 ///////////////////////////////////////
-#define ADC_MAX_CH (8)
+#define ADC_MAX_CH (16)
 
-
+#if 0
 struct fly_smem
 {
     int reserved1;
@@ -177,6 +177,13 @@ struct fly_smem
     int reserved2;
     int bl_value;
 };
+#else
+struct fly_smem
+{
+    unsigned int bp2ap[16];
+    unsigned int ap2bp[16];
+};
+#endif
 
 extern struct fly_smem *p_fly_smem ;
 
@@ -209,12 +216,21 @@ extern struct fly_smem *p_fly_smem ;
 	 gpio_tlmm_config(GPIO_CFG(LIDBG_I2C_GPIO_SCL, 0, GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA), GPIO_CFG_ENABLE);\
 }while(0)
 
-
+//io_uart
 #define TX_GPIO (123)  //27
 #define TX_H  do{soc_io_output(0,TX_GPIO, 1);}while(0)
 #define TX_L  do{soc_io_output(0,TX_GPIO, 0);}while(0)
 #define TX_CFG  do{soc_io_config(TX_GPIO, GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_16MA,1);}while(0)
 
+// 1.2Gh
+#define IO_UART_DELAY_1200_115200 (14)
+#define IO_UART_DELAY_1200_4800 (418)
+
+//245M
+#define IO_UART_DELAY_245_115200 (4)
+
+// pm2.c low freq
+#define IO_UART_DELAY_PM2_4800 (165)
 
 #endif
 

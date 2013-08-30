@@ -3,8 +3,9 @@
 
 
 
-
 #define SERVICER_DONOTHING  (0)
+#if 0
+
 #define LOG_DMESG  (1)
 #define LOG_LOGCAT (2)
 #define LOG_ALL (3)
@@ -28,7 +29,7 @@
 
 #define UBLOX_EXIST   (88)
 #define CMD_ACC_OFF_PROPERTY_SET (89)
-
+#endif
 void lidbg_servicer_main(int argc, char **argv);
 
 void k2u_write(int cmd);

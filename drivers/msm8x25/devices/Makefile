@@ -16,7 +16,7 @@ lidbg_devices-objs :=devices.o
 
 EXTRA_CFLAGS := -I$(DBG_DRV_PATH)/inc  -I$(DBG_DRV_PATH)/$(DBG_SOC)/inc  -I$(DBG_DEV_PATH)/$(DBG_SOC)
 
-# include $(DBG_DRV_PATH)/$(DBG_SOC)/drv_$(DBG_SOC).mk
+include $(DBG_WORK_PATH)/$(DBG_SOC)/drivers.mk
 include $(DBG_ROOT_PATH)/build_cfg.mk
 KBUILD_EXTRA_SYMBOLS := $(DBG_DRV_PATH)/$(DBG_SOC)/Module.symvers $(DBG_DRV_PATH)/Module.symvers
 

@@ -25,7 +25,7 @@ unsigned int   soc_bl_set(u32 bl_level)
 		printk( "p_fly_smem == NULL\n");
 		return 0;
 	}
-	p_fly_smem->bl_value = (int)bl_level;
+	p_fly_smem->ap2bp[0] = (int)bl_level;
 
 #else
 	int err;

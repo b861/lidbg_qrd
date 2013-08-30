@@ -46,6 +46,7 @@ void lidbg_soc_main(int argc, char **argv)
 
 
 EXPORT_SYMBOL(lidbg_soc_main);
+EXPORT_SYMBOL(p_fly_smem);
 
 MODULE_AUTHOR("Lsw");
 MODULE_LICENSE("GPL");

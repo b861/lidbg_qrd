@@ -1,9 +1,14 @@
 
-#ifndef _LIGDBG_ENTER__
-#define _LIGDBG_ENTER__
+#ifndef _FLY_HAL__
+#define _FLY_HAL__
 
-#ifdef SOC_COMPILE
-#include "lidbg.h"
+#ifdef BUILD_DRIVERS
+#include <devices.h>
+#include <lidbg_bpmsg.h>
+#include <lidbg_fastboot.h>
+#include <lidbg_lpc.h>
+#include <tw9912.h>
+
 #else
 #include <linux/miscdevice.h>
 #include <asm/irq.h>
@@ -33,32 +38,17 @@
 #include <linux/poll.h>
 #include <linux/semaphore.h>
 #include <linux/kfifo.h>
-
 #ifdef CONFIG_HAS_EARLYSUSPEND
 #include <linux/earlysuspend.h>
 #endif
-
-
 #include <asm/uaccess.h>
-#include <linux/kthread.h> //kthread_create()、kthread_run()
+#include <linux/kthread.h> 
 #include <linux/input.h>
 #include <linux/wakelock.h>
 #include <linux/vmalloc.h>
-
 #endif
 
-#ifndef SOC_COMPILE
 
-typedef irqreturn_t (*pinterrupt_isr)(int irq, void *dev_id);
-
-
-#define KEY_RELEASED    (0)
-#define KEY_PRESSED      (1)
-#define KEY_PRESSED_RELEASED   ( 2)
-
-
-
-#define SERVICER_DONOTHING  (0)
 #define LOG_DMESG  (1)
 #define LOG_LOGCAT (2)
 #define LOG_ALL (3)
@@ -92,69 +82,28 @@ typedef irqreturn_t (*pinterrupt_isr)(int irq, void *dev_id);
 #define VIDEO_PASSAGE_ASTERN (91)
 #define VIDEO_PASSAGE_DVD (92)
 
-#endif
 
-// 1.2Gh
-#define IO_UART_DELAY_1200_115200 (14)
-#define IO_UART_DELAY_1200_4800 (418)
+#if (defined(BUILD_SOC) || defined(BUILD_CORE) || defined(BUILD_DRIVERS))
+extern FLY_SYSTEM_STATUS g_system_status;
+#else
+#define lidbg_io(fmt,...) //do{SOC_IO_Uart_Send(IO_UART_DELAY_245_115200,fmt,##__VA_ARGS__);}while(0)
 
-//245M
-#define IO_UART_DELAY_245_115200 (4)
-
-// pm2.c low freq
-#define IO_UART_DELAY_PM2_4800 (165)
-
-//#define lidbg_io(fmt,...) do{SOC_IO_Uart_Send(IO_UART_DELAY_245_115200,fmt,##__VA_ARGS__);}while(0)
-#define lidbg_io(fmt,...) do{lidbg(fmt,##__VA_ARGS__);}while(0)
-
-#define FS_REGISTER_INT_DRV(name,def_value,callback) name=def_value; \
-			fs_get_intvalue(&lidbg_drivers_list, #name,&name,callback); \
-			lidbg("config:#name=%d\n",name);
-
-#define FS_REGISTER_INT_CORE(name,def_value,callback) name=def_value; \
-			fs_get_intvalue(&lidbg_core_list, #name,&name,callback); \
-			lidbg("config:#name=%d\n",name);
+#define BEGIN_KMEM do{old_fs = get_fs();set_fs(get_ds());}while(0)
+#define END_KMEM   do{set_fs(old_fs);}while(0)
 
 
+#define KEY_RELEASED    (0)
+#define KEY_PRESSED      (1)
+#define KEY_PRESSED_RELEASED   ( 2)
 
-//zone start
-enum string_dev_cmd
+typedef irqreturn_t (*pinterrupt_isr)(int irq, void *dev_id);
+
+struct fly_smem
 {
-    //file mode under cmd for fileserver_main();
-    FS_CMD_FILE_CONFIGMODE,//(1,1,0,1)
-    FS_CMD_FILE_LISTMODE,
-    FS_CMD_FILE_APPENDMODE,//note:you should add [\n] in your string like["\n###save some state###\n ts=gt801\n"],it's suc
+    unsigned int bp2ap[16];
+    unsigned int ap2bp[16];
+};
 
-    //after had given you a client_list, you can do with it on your owen purpose;and also, I want supply some;
-    FS_CMD_LIST_SPLITKV,//kv:key=value //(1,1,0,0)
-    FS_CMD_LIST_SHOW,//(1,1,0,0)
-    FS_CMD_LIST_IS_STRINFILE,//(1,1,1,0)
-    FS_CMD_LIST_GETVALUE,//(1,1,0,1)
-    FS_CMD_LIST_SETVALUE,//(1,1,0,1)
-    FS_CMD_LIST_GETLISTSIZE,//not ok
-    FS_CMD_COUNT,
-};
-struct string_dev
-{
-    struct list_head tmp_list;
-    char *yourkey;
-    char *yourvalue;
-    int *int_value;
-    void (*callback)(char *key,char *value);
-};
-extern int fs_get_intvalue(struct list_head *client_list, char *key,int *int_value,void (*callback)(char *key,char *value));
-extern int fs_get_value(struct list_head *client_list, char *key, char **string);
-extern int fs_set_value(struct list_head *client_list, char *key, char *string);
-extern int fs_find_string(struct list_head *client_list, char *string);
-extern int fs_show_list(struct list_head *client_list);
-extern int fs_file_log( const char *fmt, ...);
-extern int fs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *client_list);
-extern bool fs_copy_file(char *from, char *to);
-extern void fs_log_sync(void);
-extern struct list_head lidbg_drivers_list;
-extern struct list_head lidbg_core_list;
-#define lidbg_fs(fmt,...) do{fs_file_log(fmt,##__VA_ARGS__);}while(0)
-//zone end
 
 typedef enum
 {
@@ -194,6 +143,8 @@ typedef enum
     //Positive value results in red hue and negative value gives green hue.
     //These bits control the color hue. It is in 2\u201fs complement form with 0 being the center 00 value.
 } Vedio_Effect;
+
+
 typedef enum
 {
     PM_STATUS_EARLY_SUSPEND_PENDING,
@@ -202,12 +153,19 @@ typedef enum
     PM_STATUS_LATE_RESUME_OK,
     PM_STATUS_READY_TO_PWROFF,
     PM_STATUS_READY_TO_FAKE_PWROFF,
-
+    
 } LIDBG_FAST_PWROFF_STATUS;
 
+typedef enum
+{
+    FLY_ACC_ON,
+    FLY_ACC_OFF,
+    FLY_READY_TO_SUSPEND,
+    FLY_SUSPEND,
+} FLY_SYSTEM_STATUS;
 
-#define BEGIN_KMEM do{old_fs = get_fs();set_fs(get_ds());}while(0)
-#define END_KMEM   do{set_fs(old_fs);}while(0)
+
+#endif
 
 
 struct lidbg_fn_t
@@ -280,7 +238,7 @@ struct lidbg_fn_t
     // 2-AIN4
     // 3-REM1
     // 4-REM2
-    //#define ADC_MAX_CH (8)
+    //#define ADC_MAX_CH (16)
     */
     bool (*pfnSOC_ADC_Get)(unsigned int channel , unsigned int *value);
 
@@ -353,48 +311,30 @@ struct lidbg_fn_t
 	void (*pfnSOC_Get_WakeLock)(struct list_head *p);
 
 	
-};
+	struct fly_smem* (*pfnSOC_Get_Share_Mem)(void);
+	void (*pfnSOC_System_Status)(FLY_SYSTEM_STATUS status);
 
+	
+};
 
 struct lidbg_pvar_t
 {
     //all pointer
     rwlock_t *pvar_tasklist_lock;
-
-
 };
 
-
-#define LIDBG_SIZE	0x00001000 //MEM_SIZE_4_KB	/*全局内存最大1K字节*/
-
-struct lidbg_dev_smem
+struct lidbg_hal
 {
-    unsigned long smemaddr;
-    unsigned long smemsize;
-    unsigned long valid_offset;
+ struct lidbg_fn_t soc_func_tbl;
+ struct lidbg_pvar_t soc_pvar_tbl;
+ unsigned char reserve[128];
 };
 
-
-/*lidbg设备结构体*/
-struct lidbg_dev
-{
-    struct cdev cdev; /*cdev结构体*/
-    unsigned char mem[LIDBG_SIZE]; /*全局内存*/
-    union
-    {
-        unsigned char lidbg_smem[LIDBG_SIZE/4]; // 1k
-        struct lidbg_dev_smem s;
-
-    } smem;
-    struct lidbg_fn_t soc_func_tbl;
-    struct lidbg_pvar_t soc_pvar_tbl;
-    unsigned char reserve[128];
-};
 
 
 #define LIDBG_DEV_CHECK_READY  (plidbg_dev != NULL)
 
-#define LIDBG_DEFINE  struct lidbg_dev *plidbg_dev = NULL
+#define LIDBG_DEFINE  struct lidbg_hal *plidbg_dev = NULL
 
 #define LIDBG_GET  \
  	do{\
@@ -402,14 +342,13 @@ struct lidbg_dev
 	 struct file *fd = NULL;\
 	 printk("lidbg:call LIDBG_GET by %s\n",__FUNCTION__);\
 	 while(1){\
-	 	printk("lidbg: %s:%s try open mlidbg0!\n",__FILE__,__FUNCTION__);\
-	 	fd = filp_open("/dev/mlidbg0", O_RDWR, 0);\
+	 	printk("lidbg: %s:%s try open lidbg_hal!\n",__FILE__,__FUNCTION__);\
+	 	fd = filp_open("/dev/lidbg_hal", O_RDWR, 0);\
 	 	printk("lidbg:get fd=%x\n",(int)fd);\
 	    if((fd == NULL)||((int)fd == 0xfffffffe)){printk("lidbg:get fd fail!\n");msleep(500);}\
 	    else break;\
 	 }\
 	 BEGIN_KMEM;\
-	 fd->f_op->write(fd, "c lidbg_get", sizeof("c lidbg_get"), &fd->f_pos);\
 	 fd->f_op->read(fd, (void*)&plidbg_dev, 4 ,&fd->f_pos);\
 	 END_KMEM;\
 	filp_close(fd,0);\
@@ -421,7 +360,7 @@ struct lidbg_dev
 
 
 #define LIDBG_THREAD_DEFINE   \
-    struct lidbg_dev *plidbg_dev = NULL;\
+    struct lidbg_hal *plidbg_dev = NULL;\
 	static struct task_struct *getlidbg_task;\
 	static int thread_getlidbg(void *data);\
 	int thread_getlidbg(void *data)\
@@ -429,8 +368,6 @@ struct lidbg_dev
 		LIDBG_GET;\
 		return 0;\
 	}
-
-
 
 #define LIDBG_GET_THREAD  do{\
 	getlidbg_task = kthread_create(thread_getlidbg, NULL, "getlidbg_task");\
@@ -440,11 +377,8 @@ struct lidbg_dev
 	}else wake_up_process(getlidbg_task);\
 }while(0)
 
-
-
-#ifndef SOC_COMPILE
+#ifndef LIDBG_FLY_HAL
 #include "lidbg_func_def.h"
 #endif
 
 #endif
-

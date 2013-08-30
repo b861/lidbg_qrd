@@ -1,3 +1,4 @@
+#include "lidbg.h"
 #include "video_init_config.h"
 #include "video_init_config_tab.h"
 static int flag_io_config = 0;

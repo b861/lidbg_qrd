@@ -51,7 +51,7 @@ void fake_register_early_suspend(struct early_suspend *handler)
 }
 
 
-static void fake_early_suspend()
+static void fake_early_suspend(void)
 {
 #if 0
     struct early_suspend *pos;
@@ -80,7 +80,7 @@ static void fake_early_suspend()
 #endif
 }
 
-static void fake_late_resume()
+static void fake_late_resume(void)
 {
 #if 0
     struct early_suspend *pos;
@@ -132,7 +132,7 @@ int fake_suspend(char *buf, char **start, off_t offset, int count, int *eof, voi
     return sprintf(buf, "is_fake_suspend:%d\n", is_fake_suspend);
 }
 
-void create_proc_entry_fake_suspend()
+void create_proc_entry_fake_suspend(void)
 {
     create_proc_read_entry("fake_suspend", 0, NULL, fake_suspend, NULL);
 
@@ -154,18 +154,11 @@ int fake_wakeup(char *buf, char **start, off_t offset, int count, int *eof, void
 
 }
 
-void create_proc_entry_fake_wakeup()
+void create_proc_entry_fake_wakeup(void)
 {
     create_proc_read_entry("fake_wakeup", 0, NULL, fake_wakeup, NULL);
 
 }
-
-
-
-
-
-
-
 
 
 

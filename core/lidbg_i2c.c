@@ -145,7 +145,8 @@ static void del_i2c_api(struct i2c_api *i2c_api)
 }
 int i2c_api_set_rate(int  bus_id, int rate)
 {
-    struct i2c_api *i2c_api ;
+    struct i2c_api *i2c_api = NULL ;
+    struct i2c_algo_bit_data *adap1=i2c_api->client->adapter->algo_data;
     lidbg_i2c_running = 1; // for touch intr
 	#ifdef USE_I2C_LOCK
     mutex_lock(&i2c_lock);
@@ -154,7 +155,6 @@ int i2c_api_set_rate(int  bus_id, int rate)
    if (!i2c_api)
         return -ENODEV;
 	 
-	struct i2c_algo_bit_data *adap1=i2c_api->client->adapter->algo_data;
 	if(adap1!=NULL){
 		
 			(*adap1).udelay=rate;	
@@ -546,7 +546,7 @@ void mod_i2c_main(int argc, char **argv)
 
         for(i = 1; i<(0xff >> 1); i++)
         {
-            rc = i2c_api_do_recv(PROBE_I2C_BUS, i, 0, &tmp, 1 );
+            rc = i2c_api_do_recv(PROBE_I2C_BUS, i, 0, tmp, 1 );
 
             if (rc >= 0)
             {

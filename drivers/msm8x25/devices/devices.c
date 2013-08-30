@@ -2,32 +2,17 @@
  *
  */
 
-//#define SOC_COMPILE
-
-#ifdef SOC_COMPILE
 #include "lidbg.h"
-#include "fly_soc.h"
-
-#else
-#include "lidbg_def.h"
-
-#include "lidbg_enter.h"
-#if 0
-LIDBG_THREAD_DEFINE;
-#else
 LIDBG_DEFINE;
-#endif
-#endif
 
-#include "devices.h"
-
-
-bool led_en ;
+int led_en ;
 
 #define LIDBG_GPIO_PULLUP  GPIO_CFG_PULL_UP
 
 static struct task_struct *led_task;
+#ifdef DEBUG_AD_KEY
 static struct task_struct *key_task;
+#endif
 #ifdef DEBUG_POWER_KEY
 static struct task_struct *pwr_task;
 #endif
@@ -70,7 +55,7 @@ int i2c_devices_probe(int i2c_bus, unsigned char *i2c_devices_list)
 
     for(i = 1; i<(0xff >> 1); i++)
     {
-        rc = SOC_I2C_Rec(i2c_bus, (char)i, 0, (char *)&tmp, 1);
+        rc = SOC_I2C_Rec(i2c_bus, (char)i, 0, (char *)tmp, 1);
 
         if (rc >= 0)
         {
@@ -600,7 +585,6 @@ static void devices_early_suspend(struct early_suspend *handler)
 
 static void devices_late_resume(struct early_suspend *handler)
 {
-    int err;
 
     DUMP_FUN_ENTER;
 
@@ -999,7 +983,7 @@ void fly_devices_init(void)
 static void set_func_tbl(void)
 {
     //lpc
-    ((struct lidbg_dev *)plidbg_dev)->soc_func_tbl.pfnSOC_Dev_Suspend_Prepare = soc_dev_suspend_prepare;
+    ((struct lidbg_hal *)plidbg_dev)->soc_func_tbl.pfnSOC_Dev_Suspend_Prepare = soc_dev_suspend_prepare;
 
 }
 
@@ -1027,12 +1011,12 @@ int read_proc_host(char *buf, char **start, off_t offset, int count, int *eof, v
 }
 
 
-static void create_new_proc_entry_usb_dev()
+static void create_new_proc_entry_usb_dev(void)
 {
     create_proc_read_entry("usb_dev", 0, NULL, read_proc_dev, NULL);
 }
 
-static void create_new_proc_entry_usb_host()
+static void create_new_proc_entry_usb_host(void)
 {
     create_proc_read_entry("usb_host", 0, NULL, read_proc_host, NULL);
 }
@@ -1062,15 +1046,9 @@ int dev_init(void)
     lidbg("release version\n");
 #endif
 
-#ifndef SOC_COMPILE
-#if 0
-    LIDBG_GET_THREAD;
-#else
     LIDBG_GET;
     set_func_tbl();
 
-#endif
-#endif
 #if 0
     PWR_EN_ON;
 

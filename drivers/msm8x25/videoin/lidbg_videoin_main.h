@@ -60,5 +60,4 @@
 #include "tw9912.h"
 #include "tc358746xbg_config.h"
 #include "TC358746XBG.h"
-#include "lidbg_enter.h"
 #endif

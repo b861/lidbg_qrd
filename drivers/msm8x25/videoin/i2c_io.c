@@ -1,3 +1,4 @@
+#include "lidbg.h"
 #include "i2c_io.h"
 #include <linux/gpio.h>
 #include <linux/io.h>
@@ -9,7 +10,7 @@
 static struct mutex io_i2c_lock;
 #define  Dtime 1
 #define  DELAY_UNIT 1
-extern struct lidbg_dev *plidbg_dev;//add by huangzongqiang
+extern struct lidbg_hal *plidbg_dev;//add by huangzongqiang
 int i2c_io_config(unsigned int index, unsigned int direction, unsigned int pull, unsigned int drive_strength, unsigned int flag)
 {
     int rc;

@@ -10,7 +10,6 @@ int k2u_fifo_buffer[FIFO_SIZE];
 int u2k_fifo_buffer[FIFO_SIZE];
 
 static spinlock_t fifo_k2u_lock;
-static spinlock_t fifo_u2k_lock;
 
 unsigned long flags_k2u;
 unsigned long flags_u2k;
@@ -66,9 +65,7 @@ void k2u_write(int cmd)
 // read from kernel to user
 int k2u_read(void)
 {
-
-    int ret;
-
+    int ret,count;
     spin_lock_irqsave(&fifo_k2u_lock, flags_k2u);
     if(kfifo_is_empty(&k2u_fifo))
     {
@@ -76,24 +73,21 @@ int k2u_read(void)
     }
     else
     {
-        kfifo_out(&k2u_fifo, &ret, sizeof(int));
+        count = kfifo_out(&k2u_fifo, &ret, sizeof(int));
     }
     spin_unlock_irqrestore(&fifo_k2u_lock, flags_k2u);
     return ret;
-
 }
 
 // read from  user to  kernel
 
 int u2k_read(void)
 {
-
-    int ret;
+    int ret,count;
     spin_lock_irqsave(&fifo_k2u_lock, flags_k2u);
-    kfifo_out(&u2k_fifo, &ret, sizeof(int));
+    count = kfifo_out(&u2k_fifo, &ret, sizeof(int));
     spin_unlock_irqrestore(&fifo_k2u_lock, flags_k2u);
     return ret;
-
 }
 
 
@@ -142,11 +136,11 @@ void lidbg_servicer_main(int argc, char **argv)
     u32 cmd = 0;
     if(!strcmp(argv[0], "dmesg"))
     {
-        cmd = LOG_DMESG ;
+        //cmd = LOG_DMESG ;
     }
     else if(!strcmp(argv[0], "logcat"))
     {
-        cmd = LOG_LOGCAT ;
+        //cmd = LOG_LOGCAT ;
     }
 
     k2u_write(cmd);

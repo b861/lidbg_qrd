@@ -96,7 +96,8 @@ typedef unsigned int			uchar;
 #define MEM_SIZE_1024_MB             (0x40000000)
 #define MEM_SIZE_2048_MB             (0x80000000)
 
-
+#define BEGIN_KMEM do{old_fs = get_fs();set_fs(get_ds());}while(0)
+#define END_KMEM   do{set_fs(old_fs);}while(0)
 
 
 

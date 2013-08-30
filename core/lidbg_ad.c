@@ -5,7 +5,7 @@
 void mod_ad_main(int argc, char **argv)
 {
 
-    __u32 val, ch, interval;
+    u32 val, ch, interval;
 
     if(argc < 2)
     {
@@ -27,7 +27,6 @@ void mod_ad_main(int argc, char **argv)
 
 static int __init ad_init(void)
 {
-    int ret = 0;
     return 0;
 }
 

@@ -68,12 +68,11 @@
 
 #include <linux/timer.h>
 #include <linux/timex.h>
-//#include <linux/rtc.h>
 
 #include <linux/i2c-gpio.h>   //for i2c-gpio
+#include <linux/i2c-algo-bit.h>	//add by huangzongqiang
 
 ////////////
-
 
 #include "lidbg_io.h"
 #include "lidbg_key.h"
@@ -86,21 +85,16 @@
 #include "lidbg_i2c.h"
 #include "lidbg_uart.h"
 #include "lidbg_spi.h"
-//#include "lidbg_init.h"
 #include "lidbg_display.h"
 #include "lidbg_servicer.h"
 
-//#include "mlidbg_legacy_i2c.h"
-
 ////////////
 #include "lidbg_soc.h"
-//#include "fly_soc.h"
+
+
+#ifdef BUILD_DRIVERS
 #include "lidbg_enter.h"
-
-//#include "devices.h"
-//#include "lidbg_share.h"
-
-#include <linux/i2c-algo-bit.h>	//add by huangzongqiang
+#endif
 
 
 #endif

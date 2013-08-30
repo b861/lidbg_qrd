@@ -61,7 +61,6 @@ int thread_loader(void *data)
 
 int __init loader_init(void)
 {
-    int ret;
     DUMP_BUILD_TIME;
     loader_task = kthread_create(thread_loader, NULL, "lidbg_loader");
     if(IS_ERR(loader_task))

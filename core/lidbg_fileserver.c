@@ -1,6 +1,9 @@
 
 #include "lidbg.h"
 
+#define FS_WARN(fmt, args...) pr_info("[futengfei]warn.%s: " fmt,__func__,##args)
+#define FS_ERR(fmt, args...) pr_info("[futengfei]err.%s: " fmt,__func__,##args)
+#define FS_SUC(fmt, args...) pr_info("[futengfei]suceed.%s: " fmt,__func__,##args)
 
 //zone below [tools]
 #define LIDBG_LOG_FILE_PATH "/mnt/sdcard/lidbg_log.txt"

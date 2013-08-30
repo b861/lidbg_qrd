@@ -2,7 +2,7 @@
 #include "i2c_io.h"
 #include "tw9912.h"
 #include "tw9912_config.h"
-#include "lidbg_enter.h"
+#include "lidbg.h"
 //static int tw9912_reset_flag = 0;
 struct mutex lock_com_chipe_config;
 //static struct task_struct *tw9912_Correction_Parameter_fun = NULL;

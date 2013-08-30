@@ -73,7 +73,8 @@ int spi_api_do_set(int bus_id,
         return -ENODEV;
 
     spi = spi_api->spi;
-    spi->mode &= ~SPI_MODE_MASK;
+    //spi->mode &= ~SPI_MODE_MASK;
+    spi->mode &= SPI_MODE_MASK;
     spi->mode |= mode;
     spi->bits_per_word = bits_per_word;
     spi->max_speed_hz = max_speed_hz;

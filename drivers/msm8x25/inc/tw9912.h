@@ -1,5 +1,8 @@
 #ifndef __TW9912_H__
 #define __TW9912_H__
+
+#include "i2c_io.h"
+
 //#ifdef DFLY_DEBUG
 #define DEBUG_TW9912
 //#endif
@@ -36,27 +39,46 @@ extern u8 tw9912_signal_unstabitily_for_Tw9912_init_flag;
 #define tw9912_RESX_UP do{}while(0)
 #define tw9912_RESX_DOWN do{}while(0)
 #endif
-/*
+
 typedef enum
 {
-	YIN0=0,//not use
-	YIN1,//not use
-	YIN2,// now is use Y of SEPARATION / DVD_CVBS
-	YIN3,//now is use AUX/BACK_CVBS
-	SEPARATION,//Progressive
-	NOTONE,
-}Vedio_Channel;
+    YIN0 = 0, //now is use Progressive Yin
+    YIN1,//not use
+    YIN2,// now is use Y of SEPARATION / DVD_CVBS
+    YIN3,//now is use AUX/BACK_CVBS
+    SEPARATION,//Progressive
+    NOTONE,
+} Vedio_Channel;
 typedef enum
 {
-	NTSC_I=1,
-	PAL_I,
-	NTSC_P,
-	PAL_P,
-	STOP_VIDEO,
-	COLORBAR,
-	OTHER,
-}Vedio_Format;
-*/
+    AUX_4KO = 0,
+    TV_4KO,
+    ASTREN_4KO,
+    DVD_4KO,
+    OTHER_CHANNEL_4KO,
+} Vedio_Channel_2;
+typedef enum
+{
+    NTSC_I = 1,
+    PAL_I,
+    NTSC_P,
+    PAL_P,
+    STOP_VIDEO,
+    COLORBAR,
+    OTHER,
+} Vedio_Format;
+typedef enum
+{
+    BRIGHTNESS = 1,//ok
+    CONTRAST,//ok
+    SHARPNESS,
+    CHROMA_U,//ok
+    CHROMA_V,
+    HUE,//ok
+    //Positive value results in red hue and negative value gives green hue.
+    //These bits control the color hue. It is in 2\u201fs complement form with 0 being the center 00 value.
+} Vedio_Effect;
+
 typedef enum
 {
     source_60Hz = 0, //NTSC

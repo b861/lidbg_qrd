@@ -1,17 +1,9 @@
 /* Copyright (c) 2012, swlee
  *
  */
-
-//#define SOC_COMPILE
-
-#ifdef SOC_COMPILE
 #include "lidbg.h"
-#include "fly_soc.h"
-#else
-#include "lidbg_def.h"
-#include "lidbg_enter.h"
+
 LIDBG_DEFINE;
-#endif
 
 #if (defined(BOARD_V1) || defined(BOARD_V2))
 #include <proc_comm.h>
@@ -22,10 +14,6 @@ LIDBG_DEFINE;
 #include <mach/socinfo.h>
 #include <clock.h>
 #include <clock-pcom.h>
-
-
-#include "lidbg_fastboot.h"
-
 
 #define RUN_FASTBOOT
 #if (defined(BOARD_V1) || defined(BOARD_V2))
@@ -103,7 +91,7 @@ void fastboot_get_wake_locks(struct list_head *p)
 #endif
 
 
-static void list_active_locks()
+static void list_active_locks(void)
 {
 #ifdef EXPORT_ACTIVE_WAKE_LOCKS 
 	struct wake_lock *lock;
@@ -150,7 +138,6 @@ static void list_active_locks()
 
 void set_power_state(int state)
 {
-	char buf[8];
 	if(state == 0)
 		lidbg_readwrite_file("/sys/power/state", NULL, "mem", sizeof("mem")-1);
 	else
@@ -189,7 +176,7 @@ static int pc_clk_is_enabled(int id)
 		return id;
 }
 
-int check_all_clk_disable(vold)
+int check_all_clk_disable(void)
 {
 	int i=P_NR_CLKS-1;
 	int ret = 0;
@@ -206,7 +193,7 @@ int check_all_clk_disable(vold)
 	return ret;
 }
 
-int check_clk_disable(vold)
+int check_clk_disable(void)
 {
 	int ret = 0;
 	DUMP_FUN_ENTER;
@@ -404,7 +391,7 @@ int kill_proc(char *buf, char **start, off_t offset, int count, int *eof, void *
     return 1;
 }
 
-void create_new_proc_entry()
+void create_new_proc_entry(void)
 {
     create_proc_read_entry("kill_task", 0, NULL, kill_proc, NULL);
 
@@ -420,7 +407,7 @@ int pwroff_proc(char *buf, char **start, off_t offset, int count, int *eof, void
 }
 
 
-void create_new_proc_entry2()
+void create_new_proc_entry2(void)
 {
     create_proc_read_entry("fastboot_pwroff", 0, NULL, pwroff_proc, NULL);
 }
@@ -718,7 +705,7 @@ void fastboot_pwroff(void)
 
     //avoid mem leak
     //    fastboot_task_kill_select("mediaserver");
-    //    fastboot_task_kill_select("vold");
+    //    fastboot_task_kill_select("void");
 
 #if 1//def FLY_DEBUG
     msleep(1000);
@@ -751,7 +738,6 @@ void fastboot_go_pwroff(void)
 }
 
 
-#ifndef SOC_COMPILE
 
 static void set_func_tbl(void)
 {
@@ -768,8 +754,6 @@ static void set_func_tbl(void)
     plidbg_dev->soc_func_tbl.pfnSOC_Get_WakeLock = fastboot_get_wake_locks;
 	
 }
-#endif
-
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
 static void fastboot_early_suspend(struct early_suspend *h)
@@ -1013,10 +997,8 @@ static int __init fastboot_init(void)
 {
     DUMP_BUILD_TIME;
 
-#ifndef SOC_COMPILE
     LIDBG_GET;
     set_func_tbl();
-#endif
 
     platform_device_register(&lidbg_fastboot_device);
     return platform_driver_register(&fastboot_driver);

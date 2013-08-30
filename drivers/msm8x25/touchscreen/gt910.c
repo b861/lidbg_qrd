@@ -28,14 +28,9 @@
     #include <linux/input/mt.h>
 #endif
 
-#ifdef SOC_COMPILE
 #include "lidbg.h"
-#include "fly_soc.h"
-#else
-#include "lidbg_def.h"
-#include "lidbg_enter.h"
 LIDBG_DEFINE;
-#endif
+
 #define RECORVERY_MODULE
 #ifdef RECORVERY_MODULE
 #include "touch.h"
@@ -2270,9 +2265,7 @@ Output:
 static int __devinit goodix_ts_init(void)
 {
 
-#ifndef SOC_COMPILE
 LIDBG_GET;
-#endif
 
 s32 ret;
 is_ts_load = 1;

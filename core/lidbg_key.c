@@ -1,28 +1,22 @@
 
-
 #include "lidbg.h"
 
 struct input_dev *input = NULL;
 
 typedef unsigned char  KEYCODE_T;
 
-#if 1
 static KEYCODE_T lidbg_keycode[] =
 {
-
     KEY_MENU,   KEY_HOME,  KEY_BACK,
     KEY_DOWN,   KEY_UP,  KEY_RIGHT, KEY_LEFT,
     KEY_VOLUMEDOWN, KEY_VOLUMEUP, KEY_PAUSE, KEY_MUTE,
     KEY_POWER, KEY_SLEEP, KEY_WAKEUP,
     KEY_ENTER, KEY_END
 };
-#endif
 
 void lidbg_key_report(u32 key_value, u32 type)
 {
-
     lidbg("key - key_value:%d\n", key_value);
-
 
     if(type == KEY_PRESSED)
         lidbg("key - press\n");
@@ -35,7 +29,6 @@ void lidbg_key_report(u32 key_value, u32 type)
     {
         input_report_key(input, key_value, type);
         input_sync(input);
-
     }
     else
     {
@@ -44,9 +37,7 @@ void lidbg_key_report(u32 key_value, u32 type)
         input_report_key(input, key_value, KEY_RELEASED);
         input_sync(input);
     }
-
 }
-
 
 
 int lidbg_key_init(void)
@@ -58,9 +49,7 @@ int lidbg_key_init(void)
     input = input_allocate_device();
     if (!input)
     {
-
         lidbg("input_allocate_device err!\n");
-
         goto fail;
     }
     input->name = "lidbg_key";
@@ -75,7 +64,7 @@ int lidbg_key_init(void)
 
     __set_bit(EV_KEY, input->evbit);
 //屏蔽物理键盘.SKUD.futengfei
-#if (defined(BOARD_V1) || defined(BOARD_V2))
+#if 0//(defined(BOARD_V1) || defined(BOARD_V2))
     for (i = 1; i < KEY_MAX; i++)
     {
         input_set_capability(input, EV_KEY, i);
@@ -106,9 +95,7 @@ fail:
 
 void lidbg_key_deinit(void)
 {
-
     input_unregister_device(input);
-
 }
 
 

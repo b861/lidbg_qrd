@@ -86,59 +86,10 @@ int read_proc(char *buf, char **start, off_t offset, int count, int *eof, void *
     return len;
 }
 
-void create_new_proc_entry()
+void create_new_proc_entry(void)
 {
     create_proc_read_entry("ps_list", 0, NULL, read_proc, NULL);
-
 }
-
-
-int lidbg_task_kill_exclude(char *exclude_process, u32 num)
-{
-    struct task_struct *p;
-    struct mm_struct *mm;
-    struct signal_struct *sig;
-    u32 i;
-    bool safe_flag = 0;
-    DUMP_FUN_ENTER;
-
-    lidbg("exclude_process_num = %d\n", num);
-
-    //read_lock(&tasklist_lock);
-    for_each_process(p)
-    {
-        task_lock(p);
-        mm = p->mm;
-        sig = p->signal;
-        task_unlock(p);
-
-        //lidbg( "process %d (%s)\n",p->pid, p->comm);
-        safe_flag = 0;
-
-        for(i = 0; i < num; i++)
-        {
-            if(!strcmp(p->comm, exclude_process[i]))
-            {
-                safe_flag = 1;
-                break;
-            }
-        }
-        if(safe_flag == 0)
-        {
-            lidbg("find %s to kill\n", p->comm);
-
-            if (p)
-            {
-                force_sig(SIGKILL, p);
-            }
-        }
-        //read_unlock(&tasklist_lock);
-    }
-    DUMP_FUN_LEAVE;
-    return 1;
-
-}
-
 
 int lidbg_task_kill_select(char *task_name)
 {

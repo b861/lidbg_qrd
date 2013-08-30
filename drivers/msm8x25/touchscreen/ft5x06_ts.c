@@ -28,10 +28,9 @@
 #include <linux/gpio.h>
 #include <linux/regulator/consumer.h>
 
-#include "lidbg_def.h"
 #include "ft5x06_ts.h"
 
-#include "lidbg_enter.h"
+#include "lidbg.h"
 
 LIDBG_DEFINE;
 

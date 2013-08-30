@@ -4,6 +4,28 @@
 // http://blog.csdn.net/luoshengyang/article/details/6568411
 #include "lidbg.h"
 
+#define LIDBG_SIZE (MEM_SIZE_4_KB)
+struct lidbg_dev_smem
+{
+    unsigned long smemaddr;
+    unsigned long smemsize;
+    unsigned long valid_offset;
+};
+
+
+/*lidbg设备结构体*/
+struct lidbg_dev
+{
+    struct cdev cdev; /*cdev结构体*/
+    unsigned char mem[LIDBG_SIZE]; /*全局内存*/
+    union
+    {
+        unsigned char lidbg_smem[LIDBG_SIZE/4]; // 1k
+        struct lidbg_dev_smem s;
+
+    } smem;
+};
+
 struct lidbg_dev *global_lidbg_devp = NULL;
 
 #define MEM_CLEAR 0x1  /*清0全局内存*/
@@ -15,7 +37,7 @@ struct lidbg_dev *global_lidbg_devp = NULL;
 struct cdev *my_cdev;
 struct class *my_class;
 
-static lidbg_major = LIDBG_MAJOR;
+static int lidbg_major = LIDBG_MAJOR;
 
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,36)
@@ -110,8 +132,10 @@ static ssize_t lidbg_write(struct file *filp, const char __user *buf,
     memset(dev->mem, '\0', LIDBG_SIZE);
 
     /*用户空间->内核空间*/
-    copy_from_user(dev->mem, buf, size);
-
+    if(copy_from_user(dev->mem, buf, size))
+    	{
+        printk("copy_from_user ERR\n");
+	}
 	parse_cmd(dev->mem);
     return size;//若不为size则重复执行
 }
@@ -188,19 +212,11 @@ static void lidbg_setup_cdev(struct lidbg_dev *dev, int index)
 void lidbg_create_proc(void);
 void lidbg_remove_proc(void);
 
-void soc_func_tbl_default()
-{
-    lidbgerr("soc_func_tbl_default:this func not ready!\n");
-	//print who call this
-	dump_stack();
-
-}
-
 
 /*设备驱动模块加载函数*/
 int lidbg_init(void)
 {
-    int result, err;
+    int result;
     dev_t devno = MKDEV(lidbg_major, 0);
     lidbg("lidbg_init\n");
     DUMP_BUILD_TIME;
@@ -215,7 +231,6 @@ int lidbg_init(void)
     }
     if (result < 0)
         return result;
-#if 1
     /* 动态申请设备结构体的内存*/
     global_lidbg_devp = kmalloc(sizeof(struct lidbg_dev), GFP_KERNEL);
 
@@ -226,20 +241,6 @@ int lidbg_init(void)
     }
     memset(global_lidbg_devp, 0, sizeof(struct lidbg_dev));
 
-	{
-		int i;
-		for(i = 0; i < sizeof(global_lidbg_devp->soc_func_tbl) / 4; i++)
-		{
-			((int *)&(global_lidbg_devp->soc_func_tbl))[i] = soc_func_tbl_default;
-
-		}
-	}
-
-	memset(&(global_lidbg_devp->soc_pvar_tbl), NULL, sizeof(struct lidbg_pvar_t));
-
-
-
-#endif
     lidbg_setup_cdev((struct lidbg_dev *)global_lidbg_devp, 0);
 
 

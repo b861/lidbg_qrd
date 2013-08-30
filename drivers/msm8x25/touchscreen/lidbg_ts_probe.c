@@ -1,15 +1,7 @@
 
-#ifdef SOC_COMPILE
 #include "lidbg.h"
-#include "fly_soc.h"
-
-#else
-#include "lidbg_def.h"
-
-#include "lidbg_enter.h"
 
 LIDBG_DEFINE;
-#endif
 
 extern int  lidbg_launch_user( char bin_path[], char argv1[]);
 static int ts_scan_delayms =500;
@@ -169,9 +161,7 @@ static int ts_probe_init(void)
 {
     struct task_struct *scan_task;
     DUMP_BUILD_TIME;
-#ifndef SOC_COMPILE
     LIDBG_GET;
-#endif
     scan_task = kthread_create(ts_probe_thread, NULL, "ts_scan_task");
     wake_up_process(scan_task);
     return 0;

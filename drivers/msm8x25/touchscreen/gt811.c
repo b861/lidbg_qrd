@@ -15,85 +15,14 @@
  *Any problem,please contact andrew@goodix.com,+86 755-33338828
  *
  */
-//#define SOC_COMPILE
-#ifdef SOC_COMPILE
 #include "lidbg.h"
-#include "fly_soc.h"
-
-#else
-#include "lidbg_def.h"
-
-#include "lidbg_enter.h"
-
 LIDBG_DEFINE;
-#endif
-#include <linux/i2c.h>
-#include <linux/input.h>
+
 #include <linux/input/mt.h>
-#include <linux/slab.h>
-#include <linux/interrupt.h>
-#include <linux/delay.h>
-#include <linux/kernel.h>
-#include <linux/module.h>
-#include <linux/gpio.h>
-#include <linux/regulator/consumer.h>
-//#include <linux/input/ft5x06_ts.h>
-#include <linux/firmware.h>
-#include <linux/syscalls.h>
-#include <asm/uaccess.h>
-#include <linux/wakelock.h>
-#include <mach/pmic.h>
-#include <linux/debugfs.h>
-#include <linux/kernel.h>
-#include <linux/device.h>
-#include <linux/hrtimer.h>
-#include <linux/delay.h>
-#include <linux/platform_device.h>
-#include <linux/init.h>
-#include <linux/input.h>
-#include <linux/interrupt.h>
-#include <linux/module.h>
-#include <linux/clk.h>
-#include <linux/irq.h>
-#include <linux/slab.h>
-#include <linux/spinlock.h>
-#include <linux/i2c.h>
 
-
-#include <asm/io.h>
-#include <asm/irq.h>
-#include <mach/hardware.h>
-
-
-#include <mach/irqs.h>
-
-
-#include <linux/kernel.h>
-#include <linux/module.h>
-#include <linux/time.h>
-#include <linux/delay.h>
-#include <linux/device.h>
-#include <linux/earlysuspend.h>
-#include <linux/hrtimer.h>
-#include <linux/i2c.h>
-#include <linux/input.h>
-#include <linux/interrupt.h>
-#include <linux/io.h>
-#include <linux/platform_device.h>
-#include <mach/gpio.h>
-
-#include <linux/irq.h>
-#include <linux/syscalls.h>
-#include <linux/reboot.h>
-#include <linux/proc_fs.h>
 #include "gt811.h"
 #include "gt811_firmware.h"
 
-#include <linux/vmalloc.h>
-#include <linux/fs.h>
-#include <linux/string.h>
-#include <linux/completion.h>
-#include <asm/uaccess.h>
 #ifdef RECORVERY_MODULE
 #include "touch.h"
 touch_t touch = {0, 0, 0};
@@ -2456,6 +2385,7 @@ static  struct file_operations ts_nod_fops =
 static int init_cdev_ts(void)
 {
     int ret, err, result;
+    dev_t dev_number = MKDEV(major_number_ts, 0);
 
     //11creat cdev
     tsdev = (struct ts_device *)kmalloc( sizeof(struct ts_device), GFP_KERNEL );
@@ -2466,7 +2396,6 @@ static int init_cdev_ts(void)
         return ret;
     }
 
-    dev_t dev_number = MKDEV(major_number_ts, 0);
     if(major_number_ts)
     {
         result = register_chrdev_region(dev_number, 1, TS_DEVICE_NAME);
@@ -2500,9 +2429,7 @@ static int __devinit goodix_ts_init(void)
 {
     int ret = 0;
     is_ts_load = 1;
-#ifndef SOC_COMPILE
     LIDBG_GET;
-#endif
     printk("\n\n==in=GT811.KO=====1024580==========touch INFO===========futengfei\n");
 
 //V2有反相器，V3没有

@@ -849,6 +849,10 @@ int  soc_get_screen_res(u32 *screen_x, u32 *screen_y)
 
     int fbidx;
     struct fb_var_screeninfo fb_varinfo;
+
+     fb_varinfo.xres= 0;
+     fb_varinfo.yres = 0;
+	
     lidbg("num_registered_fb = %d \n", num_registered_fb);
 
     for(fbidx = 0; fbidx < num_registered_fb; fbidx++)
