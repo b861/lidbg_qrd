@@ -449,12 +449,12 @@ static int soc_dev_probe(struct platform_device *pdev)
 
     }
 
-	FS_REGISTER_INT_DRV(i2c_ctrl,0,NULL);
+	FS_REGISTER_INT(i2c_ctrl,"i2c_ctrl",0,NULL);
 
 
 #ifdef DEBUG_LED
 {
-	FS_REGISTER_INT_DRV(led_en,1,NULL);
+	FS_REGISTER_INT(led_en,"led_en",1,NULL);
 
 	if(led_en)
 	{

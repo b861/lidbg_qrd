@@ -1,8 +1,6 @@
 #ifndef _LIGDBG_FILESERVER__
 #define _LIGDBG_FILESERVER__
 
-void lidbg_fileserver_main(int argc, char **argv);
-
 //zone start
 enum string_dev_cmd
 {
@@ -28,6 +26,7 @@ struct string_dev
     int *int_value;
     void (*callback)(char *key,char *value);
 };
+void lidbg_fileserver_main(int argc, char **argv);
 extern int fs_get_intvalue(struct list_head *client_list, char *key,int *int_value,void (*callback)(char *key,char *value));
 extern int fs_get_value(struct list_head *client_list, char *key, char **string);
 extern int fs_set_value(struct list_head *client_list, char *key, char *string);
@@ -39,16 +38,12 @@ extern bool fs_copy_file(char *from, char *to);
 extern void fs_log_sync(void);
 extern struct list_head lidbg_drivers_list;
 extern struct list_head lidbg_core_list;
-
 #define lidbg_fs(fmt,...) do{fs_file_log(fmt,##__VA_ARGS__);}while(0)
-
-#define FS_REGISTER_INT_DRV(name,def_value,callback) name=def_value; \
-			fs_get_intvalue(&lidbg_drivers_list, #name,&name,callback); \
-			lidbg("config:"#name"=%d\n",name);
-
-#define FS_REGISTER_INT_CORE(name,def_value,callback) name=def_value; \
-			fs_get_intvalue(&lidbg_core_list, #name,&name,callback); \
-			lidbg("config:"#name"=%d\n",name);
+#define FS_REGISTER_INT(intvalue,key,def_value,callback) intvalue=def_value; \
+			if(fs_get_intvalue(&lidbg_drivers_list, key,&intvalue,callback)<0) \
+				fs_get_intvalue(&lidbg_core_list, key,&intvalue,callback);\
+			lidbg("config:%s=%d\n",key,intvalue);
+//zone end
 
 
 #endif

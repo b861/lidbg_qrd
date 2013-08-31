@@ -852,10 +852,10 @@ static int  fastboot_probe(struct platform_device *pdev)
 #endif
 
 
-	FS_REGISTER_INT_DRV(fb_data->kill_task_en,1,NULL);
-	FS_REGISTER_INT_DRV(fb_data->kill_all_task,0,kill_all_task);
-	FS_REGISTER_INT_DRV(fb_data->haslock_resume_times,0,NULL);
-	FS_REGISTER_INT_DRV(fb_data->max_wait_unlock_time,5,NULL);
+	FS_REGISTER_INT(fb_data->kill_task_en,"kill_task_en",1,NULL);
+	FS_REGISTER_INT(fb_data->kill_all_task,"kill_all_task",0,kill_all_task);
+	FS_REGISTER_INT(fb_data->haslock_resume_times,"haslock_resume_times",0,NULL);
+	FS_REGISTER_INT(fb_data->max_wait_unlock_time,"max_wait_unlock_time",5,NULL);
 
 
     INIT_COMPLETION(early_suspend_start);

@@ -82,7 +82,7 @@ static int __init io_uart_init(void)
     lidbg("io_uart_init\n");	
     spin_lock_init(&uart_lock);
 
-    FS_REGISTER_INT_CORE(io_uart_en,0,NULL);
+    FS_REGISTER_INT(io_uart_en,"io_uart_en",0,NULL);
 	
     return 0;
 }

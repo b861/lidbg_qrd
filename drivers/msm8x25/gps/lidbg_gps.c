@@ -317,7 +317,7 @@ static int  gps_probe(struct platform_device *pdev)
 		
     }
 
-	FS_REGISTER_INT_DRV(gps_debug_en,0,NULL);
+	FS_REGISTER_INT(gps_debug_en,"gps_debug_en",0,NULL);
 
 #ifdef CONFIG_HAS_EARLYSUSPEND  //  enable/disable the gps thread 
     early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN;

@@ -12,12 +12,12 @@
 static struct kfifo log_fifo;
 spinlock_t		fs_lock;
 unsigned long flags;
-static const char *driver_sd_path = "/mnt/sdcard/drivers.conf";
-static const char *driver_fly_path = "/flysystem/lib/out/drivers.conf";
-static const char *driver_lidbg_path = "/system/lib/modules/out/drivers.conf";
-static const char *core_sd_path = "/mnt/sdcard/core.conf";
-static const char *core_fly_path = "/flysystem/lib/out/core.conf";
-static const char *core_lidbg_path = "/system/lib/modules/out/core.conf";
+static  char *driver_sd_path = "/mnt/sdcard/drivers.conf";
+static  char *driver_fly_path = "/flysystem/lib/out/drivers.conf";
+static  char *driver_lidbg_path = "/system/lib/modules/out/drivers.conf";
+static  char *core_sd_path = "/mnt/sdcard/core.conf";
+static  char *core_fly_path = "/flysystem/lib/out/core.conf";
+static  char *core_lidbg_path = "/system/lib/modules/out/core.conf";
 static struct task_struct *filelog_task;
 static struct task_struct *filepoll_task;
 struct rtc_time precorefile_tm;
@@ -390,7 +390,7 @@ static int thread_log_func(void *data)
     allow_signal(SIGKILL);
     allow_signal(SIGSTOP);
     //set_freezable();
-	ssleep(20);
+    ssleep(20);
     while(!kthread_should_stop())
     {
         msleep(g_clearlogfifo_ms);
@@ -406,7 +406,6 @@ int update_list(const char *filename, struct list_head *client_list)
 {
     struct file *filep;
     struct inode *inode = NULL;
-    struct string_dev *pos;
     mm_segment_t old_fs;
     char *token, *file_ptr, *ptmp, *key, *value;
     int all_purpose;
@@ -514,11 +513,11 @@ static int thread_filepoll_func(void *data)
     //set_freezable();
     get_file_mftime(core_sd_path, &precorefile_tm);
     get_file_mftime(driver_sd_path, &predriverfile_tm);
-	ssleep(50);
-	if(!copy_file(driver_fly_path, driver_sd_path))
-		copy_file(driver_lidbg_path, driver_sd_path);
-	if(!copy_file(core_fly_path, core_sd_path))
-		copy_file(core_lidbg_path, core_sd_path);
+    ssleep(50);
+    if(!copy_file(driver_fly_path, driver_sd_path))
+        copy_file(driver_lidbg_path, driver_sd_path);
+    if(!copy_file(core_fly_path, core_sd_path))
+        copy_file(core_lidbg_path, core_sd_path);
     while(!kthread_should_stop())
     {
         msleep(g_pollfile_ms);
@@ -603,10 +602,7 @@ bool copy_file(char *from, char *to)
 }
 void fileserverinit_once(void)
 {
-    //note:your list can only be init once
-    char *enable;
     char tbuff[100];
-    int ret;
 
     //search priority:sd_path>fly_path>lidbg_path
     if(is_file_exist(driver_sd_path) || copy_file(driver_fly_path, driver_sd_path) || copy_file(driver_lidbg_path, driver_sd_path))
@@ -674,9 +670,9 @@ void test_fileserver_stability(void)
 
     if(0)
     {
-        sprintf(tbuff, "/mnt/sdcard/lidbg/lidbg_c%d.txt\0", ++test_count);
+        sprintf(tbuff, "/mnt/sdcard/lidbg/lidbg_c%d.txt", ++test_count);
         fs_copy_file("/system/lib/modules/out/core.conf", tbuff);
-        sprintf(tbuff, "/mnt/sdcard/lidbg/lidbg_d%d.txt\0", test_count);
+        sprintf(tbuff, "/mnt/sdcard/lidbg/lidbg_d%d.txt", test_count);
         fs_copy_file("/system/lib/modules/out/drivers.conf", tbuff);
     }
     if(0)
