@@ -15,11 +15,9 @@ LIDBG_DEFINE;
 #include <clock.h>
 #include <clock-pcom.h>
 
-#define RUN_FASTBOOT
-#if (defined(BOARD_V1) || defined(BOARD_V2))
-#else
-#define EXPORT_ACTIVE_WAKE_LOCKS
-#endif
+
+//#define EXPORT_ACTIVE_WAKE_LOCKS
+
 
 static LIST_HEAD(fastboot_kill_list);
 static DECLARE_COMPLETION(suspend_start);
@@ -93,7 +91,7 @@ void fastboot_get_wake_locks(struct list_head *p)
 
 static void list_active_locks(void)
 {
-#ifdef EXPORT_ACTIVE_WAKE_LOCKS 
+#if 1//def EXPORT_ACTIVE_WAKE_LOCKS 
 	struct wake_lock *lock;
 	int type = 0;
 	if(active_wake_locks == NULL) return;
