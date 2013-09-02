@@ -25,10 +25,11 @@ extern u8 tw9912_signal_unstabitily_for_Tw9912_init_flag;
 #endif
 #if 1
 
-#ifdef BOARD_V1
-#define tw9912_RESX_UP do{i2c_io_config(TW9912_RESET,GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA,0);gpio_set_value(TW9912_RESET, 1);}while(0)//34
-#define tw9912_RESX_DOWN do{i2c_io_config(TW9912_RESET,GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA,0);gpio_set_value(TW9912_RESET, 0);msleep(100);}while(0)//9912 reset output, active low 
-#elif BOARD_V2
+//#ifdef BOARD_V1
+//#define tw9912_RESX_UP do{i2c_io_config(TW9912_RESET,GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA,0);gpio_set_value(TW9912_RESET, 1);}while(0)//34
+//#define tw9912_RESX_DOWN do{i2c_io_config(TW9912_RESET,GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA,0);gpio_set_value(TW9912_RESET, 0);msleep(100);}while(0)//9912 reset output, active low 
+//#elif BOARD_V2
+#ifdef BOARD_V2
 #define tw9912_RESX_UP do{i2c_io_config(TW9912_RESET,GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA,0);gpio_set_value(TW9912_RESET, 0);}while(0)//34
 #define tw9912_RESX_DOWN do{i2c_io_config(TW9912_RESET,GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA,0);gpio_set_value(TW9912_RESET, 1);}while(0)//9912 reset output, active low 
 #else //BOARD_V3
