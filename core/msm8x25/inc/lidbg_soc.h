@@ -180,9 +180,10 @@ struct fly_smem
 #else
 struct fly_smem
 {
-    unsigned int bp2ap[16];
-    unsigned int ap2bp[16];
+    unsigned char bp2ap[16];
+    unsigned char ap2bp[8];
 };
+
 #endif
 
 extern struct fly_smem *p_fly_smem ;
