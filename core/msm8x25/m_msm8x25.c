@@ -5,6 +5,13 @@
 
 struct fly_smem *p_fly_smem = NULL;
 
+
+int soc_temp_get(void)
+{
+	return SMEM_TEMP;
+}
+
+
 int msm8x25_init(void)
 {
     DUMP_FUN;
@@ -47,6 +54,7 @@ void lidbg_soc_main(int argc, char **argv)
 
 EXPORT_SYMBOL(lidbg_soc_main);
 EXPORT_SYMBOL(p_fly_smem);
+EXPORT_SYMBOL(soc_temp_get);
 
 MODULE_AUTHOR("Lsw");
 MODULE_LICENSE("GPL");
