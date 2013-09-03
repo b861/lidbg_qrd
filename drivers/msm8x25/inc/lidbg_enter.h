@@ -98,12 +98,22 @@ extern FLY_SYSTEM_STATUS g_system_status;
 
 typedef irqreturn_t (*pinterrupt_isr)(int irq, void *dev_id);
 
+#if 1
+struct fly_smem
+{
+    int reserved1;
+    u32 ch[ADC_MAX_CH];
+    int reserved2;
+    int bl_value;
+};
+#else
+
 struct fly_smem
 {
     unsigned char bp2ap[16];
     unsigned char ap2bp[8];
 };
-
+#endif
 
 typedef enum
 {

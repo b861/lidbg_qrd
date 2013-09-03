@@ -169,7 +169,7 @@ void lidbg_soc_main(int argc, char **argv);
 ///////////////////////////////////////
 #define ADC_MAX_CH (16)
 
-#if 0
+#if 1
 struct fly_smem
 {
     int reserved1;
@@ -183,7 +183,6 @@ struct fly_smem
     unsigned char bp2ap[16];
     unsigned char ap2bp[8];
 };
-
 #endif
 
 extern struct fly_smem *p_fly_smem ;

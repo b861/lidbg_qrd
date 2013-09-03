@@ -23,9 +23,11 @@ unsigned int  soc_ad_read(unsigned int channel)
        //printk( "p_fly_smem == NULL\n");
         return 0xffffffff;
     }
-
+#if 1
+	value = p_fly_smem->ch[channel];
+#else
     value = p_fly_smem->bp2ap[channel];
-
+#endif
     return value;
 }
 
