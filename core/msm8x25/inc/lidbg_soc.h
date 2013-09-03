@@ -163,7 +163,7 @@ int soc_io_output(u32 group,u32 index, bool status);
 bool soc_io_input(u32 index);
 int soc_io_config(u32 index, bool direction, u32 pull, u32 drive_strength, bool force_reconfig);
 
-
+int soc_temp_get(void);
 void lidbg_soc_main(int argc, char **argv);
 
 ///////////////////////////////////////
@@ -177,13 +177,22 @@ struct fly_smem
     int reserved2;
     int bl_value;
 };
+#define SMEM_AD  p_fly_smem->ch
+#define SMEM_BL  p_fly_smem->bl_value
+#define SMEM_TEMP  p_fly_smem->ch[8]
+
 #else
 struct fly_smem
 {
     unsigned char bp2ap[16];
     unsigned char ap2bp[8];
 };
+#define SMEM_AD  p_fly_smem->bp2ap
+#define SMEM_BL  p_fly_smem->ap2bp
+#define SMEM_TEMP  p_fly_smem->bp2ap[8]
+
 #endif
+
 
 extern struct fly_smem *p_fly_smem ;
 
