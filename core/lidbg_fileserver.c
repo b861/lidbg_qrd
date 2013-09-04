@@ -1,45 +1,84 @@
 
 #include "lidbg.h"
+#include <linux/completion.h>
 
 #define FS_WARN(fmt, args...) pr_info("[futengfei]warn.%s: " fmt,__func__,##args)
 #define FS_ERR(fmt, args...) pr_info("[futengfei]err.%s: " fmt,__func__,##args)
 #define FS_SUC(fmt, args...) pr_info("[futengfei]suceed.%s: " fmt,__func__,##args)
 
 //zone below [tools]
+#define FS_VERSION "FS.VERSION:  [20130903 V3.0]"
 #define LIDBG_LOG_FILE_PATH "/mnt/sdcard/lidbg_log.txt"
-#define LIDBG_STATE_FILE_PATH "/mnt/sdcard/lidbg_state.txt"
+#define LIDBG_KMSG_FILE_PATH "/mnt/sdcard/lidbg_kmsg.txt"
+#define LIDBG_NODE "/dev/mlidbg0"
+#define KMSG_NODE "/proc/kmsg"
 #define FIFO_SIZE (1024)
 static struct kfifo log_fifo;
 spinlock_t		fs_lock;
 unsigned long flags;
-static  char *driver_sd_path = "/mnt/sdcard/drivers.conf";
+static  char *driver_sd_path = "/mnt/sdcard/drivers.txt";
 static  char *driver_fly_path = "/flysystem/lib/out/drivers.conf";
 static  char *driver_lidbg_path = "/system/lib/modules/out/drivers.conf";
-static  char *core_sd_path = "/mnt/sdcard/core.conf";
+static  char *core_sd_path = "/mnt/sdcard/core.txt";
 static  char *core_fly_path = "/flysystem/lib/out/core.conf";
 static  char *core_lidbg_path = "/system/lib/modules/out/core.conf";
+static  char *cmd_sd_path = "/mnt/sdcard/cmd.txt";
+static  char *cmd_fly_path = "/flysystem/lib/out/cmd.conf";
+static  char *cmd_lidbg_path = "/system/lib/modules/out/cmd.conf";
+static  char *state_sd_path = "/mnt/state.txt";
+static  char *state_fly_path = "/flysystem/lib/out/state.conf";
+static  char *state_lidbg_path = "/system/lib/modules/out/state.conf";
 static struct task_struct *filelog_task;
 static struct task_struct *filepoll_task;
+static struct task_struct *fs_statetask;
+static struct task_struct *fs_kmsgtask;
 struct rtc_time precorefile_tm;
 struct rtc_time predriverfile_tm;
+struct rtc_time precmdfile_tm;
+struct completion kmsg_wait;
 static int g_dubug_on = 0;
 static int g_clearlogfifo_ms = 30000;
-static int g_pollfile_ms = 10000;
+static int g_pollfile_ms = 7000;
+static int g_pollstate_ms = 1000;
+static int g_pollkmsg_en = 0;
+static int g_iskmsg_ready = 0;
 unsigned char log_buffer[FIFO_SIZE];
 unsigned char log_buffer2write[FIFO_SIZE];
 LIST_HEAD(lidbg_drivers_list);
 LIST_HEAD(lidbg_core_list);
+LIST_HEAD(lidbg_state_list);
 LIST_HEAD(kill_list_test);//for test
 static struct task_struct *fileserver_test_task;
 static struct task_struct *fileserver_test_task2;
 static struct task_struct *fileserver_test_task3;
+static int test_count = 0;
 //zone end
 
 //zone below [interface]
 int fileserver_deal_cmd(struct list_head *client_list, enum string_dev_cmd cmd, char *lookfor, char *key, char **string, int *int_value, void (*callback)(char *key, char *value ));
-int fileserver_main(char *filename, enum string_dev_cmd cmd, char *str_append, struct list_head *client_list);
+int bfs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *client_list);
+int bfs_file_amend(char *file2amend, char *str_append);
 bool copy_file(char *from, char *to);
 
+void fs_enable_kmsg( bool enable )
+{
+    if(enable)
+    {
+        g_pollkmsg_en = 1;
+        if(g_iskmsg_ready)
+            complete(&kmsg_wait);
+    }
+    else
+        g_pollkmsg_en = 0;
+}
+void  fs_save_state(void)
+{
+    fileserver_deal_cmd(&lidbg_state_list, FS_CMD_LIST_SAVE2FILE, NULL, NULL, NULL, NULL, NULL);
+}
+int fs_regist_state(char *key, int *value)
+{
+    return fileserver_deal_cmd( &lidbg_state_list, FS_CMD_LIST_SAVEINFO, NULL, key, NULL, value, NULL);
+}
 int fs_get_intvalue(struct list_head *client_list, char *key, int *int_value, void (*callback)(char *key, char *value))
 {
     char *string;
@@ -70,14 +109,14 @@ void clearfifo_tofile(void)
     kfifo_out(&log_fifo, log_buffer2write, fifo_len);
     log_buffer2write[fifo_len > FIFO_SIZE - 1 ? FIFO_SIZE - 1 : fifo_len] = '\0';
     spin_unlock_irqrestore(&fs_lock, flags);
-    fileserver_main(NULL, FS_CMD_FILE_APPENDMODE, log_buffer2write, NULL);
+    bfs_file_amend(LIDBG_LOG_FILE_PATH, log_buffer2write);
 }
 int fs_file_log( const char *fmt, ... )
 {
     int len;
     va_list args;
     int n;
-    char str_append[256];
+    char str_append[512];
     va_start ( args, fmt );
     n = vsprintf ( str_append, (const char *)fmt, args );
     va_end ( args );
@@ -99,7 +138,12 @@ void fs_log_sync(void)
 }
 int fs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *client_list)
 {
-    return fileserver_main(filename, cmd, NULL, client_list);
+    int ret = -1;
+    if(list_empty(client_list))
+        ret = bfs_fill_list(filename, cmd, client_list);
+    else
+        printk("[futengfei]err.fs_fill_list:<your list is not empty>\n");
+    return ret;
 }
 bool fs_copy_file(char *from, char *to)
 {
@@ -113,7 +157,7 @@ int fileserver_deal_cmd(struct list_head *client_list, enum string_dev_cmd cmd, 
 {
     //note:you can add more func here,just copy one of the case as belows;
     struct string_dev *pos;
-    char *p;
+    char *p, buff[256];
     if(g_dubug_on)
         printk("\n[futengfei]======fileserver_deal_cmd[%d]\n", cmd);
     if (list_empty(client_list))
@@ -145,6 +189,32 @@ int fileserver_deal_cmd(struct list_head *client_list, enum string_dev_cmd cmd, 
         }
         break;
 
+    case FS_CMD_LIST_SAVEINFO:
+        list_for_each_entry(pos, client_list, tmp_list)
+        {
+            if (!strcmp(pos->yourkey, key))
+            {
+                if(int_value)
+                    pos->int_value = int_value;
+                if(callback)
+                    pos->callback = callback;
+            }
+        }
+        return 1;
+
+    case FS_CMD_LIST_SAVE2FILE:
+        memset(buff, 0, sizeof(buff));
+        list_for_each_entry(pos, client_list, tmp_list)
+        {
+            if(pos->yourkey && pos->int_value)
+                sprintf(buff, "1%s=%d", pos->yourkey, *(pos->int_value));
+            else if(pos->yourkey && pos->yourvalue)
+                sprintf(buff, "2%s=%s", pos->yourkey, pos->yourvalue);
+
+            fs_file_log("%s\n", buff);
+        }
+        return 1;
+
     case FS_CMD_LIST_GETVALUE:
         list_for_each_entry(pos, client_list, tmp_list)
         {
@@ -166,17 +236,27 @@ int fileserver_deal_cmd(struct list_head *client_list, enum string_dev_cmd cmd, 
         return -1;
 
     case FS_CMD_LIST_SETVALUE:
+    case FS_CMD_LIST_SETVALUE2://malloc mem;
         list_for_each_entry(pos, client_list, tmp_list)
         {
             if ( (!strcmp(pos->yourkey, key))  &&  (strcmp(pos->yourvalue, *string)) )
             {
                 p = *string;
-                pos->yourvalue = kmalloc(strlen(p) + 1, GFP_KERNEL);
-                if (pos->yourvalue  != NULL)
+                if(cmd == FS_CMD_LIST_SETVALUE2)
                 {
-                    strcpy(pos->yourvalue, p);
+                    pos->yourvalue = kmalloc(strlen(p) + 1, GFP_KERNEL);
+                    if (pos->yourvalue  != NULL)
+                    {
+                        strcpy(pos->yourvalue, p);
+                        printk("[futengfei]succeed.set_key2:<%s=%s>\n", key, pos->yourvalue);
+                    }
+                }
+                else
+                {
+                    pos->yourvalue = *string;
                     printk("[futengfei]succeed.set_key:<%s=%s>\n", key, pos->yourvalue);
                 }
+
                 if (pos->int_value)
                 {
                     *(pos->int_value) = simple_strtoul(p, 0, 0);
@@ -193,6 +273,7 @@ int fileserver_deal_cmd(struct list_head *client_list, enum string_dev_cmd cmd, 
         if(g_dubug_on)
             printk("[futengfei]err.set_key:<%s>\n", key);
         return -1;
+
     case FS_CMD_LIST_IS_STRINFILE:
         list_for_each_entry(pos, client_list, tmp_list)
         {
@@ -291,7 +372,7 @@ int bfs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *cli
     struct inode *inode = NULL;
     struct string_dev *add_new_dev;
     mm_segment_t old_fs;
-    char *token, *file_ptr;
+    char *token, *file_ptr, *file_ptmp;
     int all_purpose;
     unsigned int file_len;
 
@@ -334,9 +415,10 @@ int bfs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *cli
 
     printk("[futengfei]warn.toke:<%s>\n", filename);
     all_purpose = 0;
-    while((token = strsep(&file_ptr, "\n")) != NULL )
+    file_ptmp = file_ptr;
+    while((token = strsep(&file_ptmp, "\n")) != NULL )
     {
-        if( token[0] != '#' && token[0] != '\n' && token[0] != '\0')
+        if( token[0] != '#' && token[0] != '\n'  && token[0] != 18 && token[0] != 13)//del char:er,dc2 look for ASCII
         {
             if(g_dubug_on)
                 printk("%d[%s]\n", all_purpose, token);
@@ -353,38 +435,6 @@ int bfs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *cli
     return 1;
 }
 
-int  fileserver_main(char *filename, enum string_dev_cmd cmd, char *str_append, struct list_head *client_list)
-{
-    //note: cmd tell me the file mode,if it is config file I will do more;
-    int ret = -1;
-    if(g_dubug_on)
-        printk("\n[futengfei]==IN==fileserver_main\n");
-
-    switch (cmd)
-    {
-    case FS_CMD_FILE_CONFIGMODE:
-    case FS_CMD_FILE_LISTMODE:
-        if(list_empty(client_list))
-        {
-            ret = bfs_fill_list(filename, cmd, client_list);
-        }
-        else
-        {
-            printk("[futengfei]err.fileserver_main:<your list is not empty>\n");
-        }
-        break;
-    case FS_CMD_FILE_APPENDMODE:
-        ret = bfs_file_amend(LIDBG_LOG_FILE_PATH, str_append);
-        break;
-    default:
-        printk("\n[futengfei]err.fileserver_main:<unknown.cmd:%d>\n", cmd);
-        break;
-    }
-    if(g_dubug_on)
-        printk("[futengfei]==OUT==fileserver_main\n");
-    return ret;
-}
-
 static int thread_log_func(void *data)
 {
     allow_signal(SIGKILL);
@@ -393,11 +443,16 @@ static int thread_log_func(void *data)
     ssleep(20);
     while(!kthread_should_stop())
     {
-        msleep(g_clearlogfifo_ms);
-        if(!kfifo_is_empty(&log_fifo))
+        if(g_clearlogfifo_ms)
         {
-            clearfifo_tofile();
+            msleep(g_clearlogfifo_ms);
+            if(!kfifo_is_empty(&log_fifo))
+            {
+                clearfifo_tofile();
+            }
         }
+        else
+            ssleep(30);
     }
     return 1;
 }
@@ -407,7 +462,7 @@ int update_list(const char *filename, struct list_head *client_list)
     struct file *filep;
     struct inode *inode = NULL;
     mm_segment_t old_fs;
-    char *token, *file_ptr, *ptmp, *key, *value;
+    char *token, *file_ptr, *file_ptmp, *ptmp, *key, *value;
     int all_purpose;
     unsigned int file_len;
 
@@ -445,7 +500,8 @@ int update_list(const char *filename, struct list_head *client_list)
     filp_close(filep, 0);
 
     file_ptr[file_len - 1] = '\0';
-    while((token = strsep(&file_ptr, "\n")) != NULL )
+    file_ptmp = file_ptr;
+    while((token = strsep(&file_ptmp, "\n")) != NULL )
     {
         if( token[0] != '#' && strlen(token) > 2)
         {
@@ -456,10 +512,90 @@ int update_list(const char *filename, struct list_head *client_list)
                 value = ptmp + 1;
                 *ptmp = '\0';
                 printk("<%s,%s>\n", key, value);
-                fileserver_deal_cmd( client_list, FS_CMD_LIST_SETVALUE, NULL, key, &value, NULL, NULL);
+                fileserver_deal_cmd( client_list, FS_CMD_LIST_SETVALUE2, NULL, key, &value, NULL, NULL);
             }
             else if(g_dubug_on)
                 printk("\ndroped[%s]\n", token);
+        }
+    }
+    kfree(file_ptr);
+    return 1;
+}
+
+bool readwrite_file(const char *filename, char *wbuff, char *rbuff, int *rbuff_len)
+{
+    struct file *filep;
+    mm_segment_t old_fs;
+
+    filep = filp_open(filename,  O_RDWR, 0);
+    if(IS_ERR(filep) || !(filep->f_op) || !(filep->f_op->read) || !(filep->f_op->write))
+        return false;
+    old_fs = get_fs();
+    set_fs(get_ds());
+    if(wbuff)
+        filep->f_op->write(filep, wbuff, strlen(wbuff), &filep->f_pos);
+    else
+        filep->f_op->read(filep, rbuff, *rbuff_len, &filep->f_pos);
+    set_fs(old_fs);
+    filp_close(filep, 0);
+    return true;
+}
+
+int launch_file_cmd(const char *filename)
+{
+    struct file *filep;
+    struct inode *inode = NULL;
+    mm_segment_t old_fs;
+    char *token, *file_ptr, *file_ptmp;
+    int all_purpose;
+    unsigned int file_len;
+
+    filep = filp_open(filename, O_RDWR , 0);
+    if(IS_ERR(filep))
+    {
+        printk("[futengfei]err.open:<%s>\n", filename);
+        return -1;
+    }
+    printk("[futengfei]succeed.open:<%s>\n", filename);
+
+    old_fs = get_fs();
+    set_fs(get_ds());
+
+    inode = filep->f_dentry->d_inode;
+    file_len = inode->i_size;
+    printk("[futengfei]warn.File_length:<%d>\n", file_len);
+    file_len = file_len + 2;
+
+    file_ptr = (unsigned char *)kzalloc(file_len, GFP_KERNEL);
+    if(file_ptr == NULL)
+    {
+        printk( "[futengfei]err.vmalloc:<cannot kzalloc memory!>\n");
+        return -1;
+    }
+
+    filep->f_op->llseek(filep, 0, 0);
+    all_purpose = filep->f_op->read(filep, file_ptr, file_len, &filep->f_pos);
+    if(all_purpose <= 0)
+    {
+        printk( "[futengfei]err.f_op->read:<read file data failed>\n");
+        return -1;
+    }
+    set_fs(old_fs);
+    filp_close(filep, 0);
+
+    file_ptr[file_len - 1] = '\0';
+    file_ptmp = file_ptr;
+    while((token = strsep(&file_ptmp, "\n")) != NULL )
+    {
+        if( token[0] != '#' && token[0] != '0' && token[1] == 'c' )
+        {
+            int loop;
+            char p[2] ;
+            p[0] = token[0];
+            p[1] = '\0';
+            loop = simple_strtoul(p, 0, 0);
+            for(; loop > 0; loop--)
+                readwrite_file(LIDBG_NODE, token + 1, NULL, NULL);
         }
     }
     kfree(file_ptr);
@@ -506,42 +642,135 @@ bool is_file_updated(const char *filename, struct rtc_time *pretm)
         return false;
 }
 
-static int thread_filepoll_func(void *data)
+static int thread_pollfile_func(void *data)
 {
     allow_signal(SIGKILL);
     allow_signal(SIGSTOP);
     //set_freezable();
-    get_file_mftime(core_sd_path, &precorefile_tm);
-    get_file_mftime(driver_sd_path, &predriverfile_tm);
     ssleep(50);
     if(!copy_file(driver_fly_path, driver_sd_path))
         copy_file(driver_lidbg_path, driver_sd_path);
     if(!copy_file(core_fly_path, core_sd_path))
         copy_file(core_lidbg_path, core_sd_path);
+    if(!copy_file(cmd_fly_path, cmd_sd_path))
+        copy_file(cmd_lidbg_path, cmd_sd_path);
+    get_file_mftime(core_sd_path, &precorefile_tm);
+    get_file_mftime(driver_sd_path, &predriverfile_tm);
+    get_file_mftime(cmd_sd_path, &precmdfile_tm);
+    g_iskmsg_ready = 1;
+    if(g_pollkmsg_en)
+        complete(&kmsg_wait);
     while(!kthread_should_stop())
     {
-        msleep(g_pollfile_ms);
-
-        if(is_file_updated(core_sd_path, &precorefile_tm))
+        if(g_pollfile_ms)
         {
-            FS_WARN("<file modify time:%d-%02d-%02d %02d:%02d:%02d>\n",
-                    precorefile_tm.tm_year + 1900, precorefile_tm.tm_mon + 1, precorefile_tm.tm_mday, precorefile_tm.tm_hour + 8, precorefile_tm.tm_min, precorefile_tm.tm_sec);
-            update_list(core_sd_path, &lidbg_core_list);
-        }
+            msleep(g_pollfile_ms);
+            if(is_file_updated(core_sd_path, &precorefile_tm))
+            {
+                FS_WARN("<file modify time:%d-%02d-%02d %02d:%02d:%02d>\n",
+                        precorefile_tm.tm_year + 1900, precorefile_tm.tm_mon + 1, precorefile_tm.tm_mday, precorefile_tm.tm_hour + 8, precorefile_tm.tm_min, precorefile_tm.tm_sec);
+                update_list(core_sd_path, &lidbg_core_list);
+            }
 
-        if(is_file_updated(driver_sd_path, &predriverfile_tm))
-        {
-            FS_WARN("<file modify time:%d-%02d-%02d %02d:%02d:%02d>\n",
-                    precorefile_tm.tm_year + 1900, precorefile_tm.tm_mon + 1, precorefile_tm.tm_mday, precorefile_tm.tm_hour + 8, precorefile_tm.tm_min, precorefile_tm.tm_sec);
-            update_list(driver_sd_path, &lidbg_drivers_list);
+            if(is_file_updated(driver_sd_path, &predriverfile_tm))
+            {
+                FS_WARN("<file modify time:%d-%02d-%02d %02d:%02d:%02d>\n",
+                        precorefile_tm.tm_year + 1900, precorefile_tm.tm_mon + 1, precorefile_tm.tm_mday, precorefile_tm.tm_hour + 8, precorefile_tm.tm_min, precorefile_tm.tm_sec);
+                update_list(driver_sd_path, &lidbg_drivers_list);
+            }
+
+            if(is_file_updated(cmd_sd_path, &precmdfile_tm))
+            {
+                FS_WARN("<file modify time:%d-%02d-%02d %02d:%02d:%02d>\n",
+                        precorefile_tm.tm_year + 1900, precorefile_tm.tm_mon + 1, precorefile_tm.tm_mday, precorefile_tm.tm_hour + 8, precorefile_tm.tm_min, precorefile_tm.tm_sec);
+                launch_file_cmd(cmd_sd_path);
+            }
+
         }
+        else
+            ssleep(30);
     }
     return 1;
 }
 
-void property_callback(char *key, char *value)
+static int thread_pollstate_func(void *data)
 {
-    FS_WARN("<%s=%s>\n", key, value);
+    struct string_dev *pos;
+    struct file *filep;
+    mm_segment_t old_fs;
+    char buff[100];
+    allow_signal(SIGKILL);
+    allow_signal(SIGSTOP);
+    //set_freezable();
+    ssleep(50);
+    while(!kthread_should_stop())
+    {
+        if(g_pollstate_ms)
+        {
+            msleep(g_pollstate_ms);
+            filep = filp_open(state_sd_path, O_CREAT | O_RDWR | O_TRUNC , 0600);
+            if(!IS_ERR(filep))
+            {
+                old_fs = get_fs();
+                set_fs(get_ds());
+                if(filep->f_op->write)
+                {
+                    list_for_each_entry(pos, &lidbg_state_list, tmp_list)
+                    {
+                        if(pos->yourkey && pos->int_value)
+                        {
+                            sprintf(buff, "%s=%d\n", pos->yourkey, *(pos->int_value));
+                            filep->f_op->write(filep, buff, strlen(buff), &filep->f_pos);
+                            filep->f_op->llseek(filep, 0, SEEK_END);
+                        }
+                    }
+                }
+                set_fs(old_fs);
+                filp_close(filep, 0);
+            }
+        }
+        else
+            ssleep(30);
+    }
+    return 1;
+}
+
+static int thread_pollkmsg_func(void *data)
+{
+    struct file *filep;
+    mm_segment_t old_fs;
+    char buff[1024];
+    int  ret = -1;
+    allow_signal(SIGKILL);
+    allow_signal(SIGSTOP);
+    //set_freezable();
+    memset(buff, 0, sizeof(buff));
+    while(!kthread_should_stop())
+    {
+
+        if( !wait_for_completion_interruptible(&kmsg_wait))
+        {
+            filep = filp_open(KMSG_NODE,  O_RDONLY , 0);
+            if(!IS_ERR(filep))
+            {
+                old_fs = get_fs();
+                set_fs(get_ds());
+                while(g_pollkmsg_en)
+                {
+                    ret = filep->f_op->read(filep, buff, 1023, &filep->f_pos);
+                    if(ret > 0)
+                    {
+                        buff[ret] = '\0';
+                        bfs_file_amend(LIDBG_KMSG_FILE_PATH, buff);
+                        msleep(150);
+                    }
+                }
+                set_fs(old_fs);
+                filp_close(filep, 0);
+            }
+        }
+    }
+    return 1;
 }
 
 bool  is_file_exist(char *file)
@@ -600,6 +829,14 @@ bool copy_file(char *from, char *to)
     vfree(string);
     return true;
 }
+
+void callback_pollkmsg(char *key, char *value)
+{
+    FS_WARN("<%s=%s>\n", key, value);
+    if ( (!strcmp(key, "fs_kmsg_en" ))  &&  (strcmp(value, "0" )) )
+        complete(&kmsg_wait);
+}
+
 void fileserverinit_once(void)
 {
     char tbuff[100];
@@ -625,22 +862,37 @@ void fileserverinit_once(void)
             fs_fill_list(core_lidbg_path, FS_CMD_FILE_CONFIGMODE, &lidbg_core_list);
     }
 
+    if(is_file_exist(state_fly_path))
+        fs_fill_list(state_fly_path, FS_CMD_FILE_CONFIGMODE, &lidbg_state_list);
+    else
+        fs_fill_list(state_lidbg_path, FS_CMD_FILE_CONFIGMODE, &lidbg_state_list);
+
+    init_completion(&kmsg_wait);
     spin_lock_init(&fs_lock);
     kfifo_init(&log_fifo, log_buffer, FIFO_SIZE);
     kfifo_reset(&log_fifo);
-    lidbg_get_current_time(tbuff);
-    fs_file_log(tbuff);
+    lidbg_get_current_time(tbuff, NULL);
+    fs_file_log("%s\n", FS_VERSION );
+    fs_file_log("%s\n", tbuff);
+
+    fs_regist_state("fs_pollfile_ms", &g_pollfile_ms);
+    fs_regist_state("fs_kmsg_en", &g_pollkmsg_en);
+    fs_regist_state("fs_updatestate_ms", &g_pollstate_ms);
+
     fs_get_intvalue(&lidbg_core_list, "fs_dbg_enable", &g_dubug_on, NULL);
     fs_get_intvalue(&lidbg_core_list, "fs_clearlogfifo_ms", &g_clearlogfifo_ms, NULL);
-    fs_get_intvalue(&lidbg_core_list, "fs_pollfile_ms", &g_pollfile_ms, property_callback);
-    printk("[futengfei]warn.fileserverinit_once:<g_dubug_on=%d;clearlogfifo_ms=%d,g_pollfile_ms=%d>\n", g_dubug_on, g_clearlogfifo_ms, g_pollfile_ms);
+    fs_get_intvalue(&lidbg_core_list, "fs_pollfile_ms", &g_pollfile_ms, NULL);
+    fs_get_intvalue(&lidbg_core_list, "fs_updatestate_ms", &g_pollstate_ms, NULL);
+    fs_get_intvalue(&lidbg_core_list, "fs_kmsg_en", &g_pollkmsg_en, callback_pollkmsg);
+    printk("[futengfei]warn.fileserverinit_once:<g_dubug_on=%d;g_pollstate_ms=%d,g_pollkmsg_en=%d>\n", g_dubug_on, g_pollstate_ms, g_pollkmsg_en);
     filelog_task = kthread_run(thread_log_func, NULL, "ftf_clearlogfifo");
-    filepoll_task = kthread_run(thread_filepoll_func, NULL, "ftf_filepolltask");
+    filepoll_task = kthread_run(thread_pollfile_func, NULL, "ftf_filepolltask");
+    fs_statetask = kthread_run(thread_pollstate_func, NULL, "ftf_statetask");
+    fs_kmsgtask = kthread_run(thread_pollkmsg_func, NULL, "ftf_kmsgtask");
 }
 //zone end
 
 //zone below [fileserver_test]
-static int test_count = 0;
 void test_fileserver_stability(void)
 {
     char *delay, *value, tbuff[100];
@@ -659,18 +911,18 @@ void test_fileserver_stability(void)
     fs_set_value(&lidbg_core_list, "fs_dbg_enable", delay);
     fs_get_value(&lidbg_core_list, "fs_dbg_enable", &value);
     printk("[futengfei]warn.test_fileserver_stability:<value=%s>\n", value);
-    lidbg_get_current_time(tbuff);
-    fs_file_log(tbuff);
+    lidbg_get_current_time(tbuff, NULL);
+    fs_file_log("%s\n", tbuff);
 
 
     is_file_updated(core_sd_path, &precorefile_tm);
     update_list(core_sd_path, &lidbg_core_list);
     is_file_updated(driver_sd_path, &predriverfile_tm);
     update_list(driver_sd_path, &lidbg_drivers_list);
-
+    test_count++;
     if(0)
     {
-        sprintf(tbuff, "/mnt/sdcard/lidbg/lidbg_c%d.txt", ++test_count);
+        sprintf(tbuff, "/mnt/sdcard/lidbg/lidbg_c%d.txt", test_count);
         fs_copy_file("/system/lib/modules/out/core.conf", tbuff);
         sprintf(tbuff, "/mnt/sdcard/lidbg/lidbg_d%d.txt", test_count);
         fs_copy_file("/system/lib/modules/out/drivers.conf", tbuff);
@@ -682,17 +934,18 @@ void test_fileserver_stability(void)
         fs_show_list(&kill_list_test);
         fs_show_list(&lidbg_drivers_list);
     }
-
 }
 static int fileserver_test_fk(void *data)
 {
     allow_signal(SIGKILL);
     allow_signal(SIGSTOP);
     //set_freezable();
+    fs_regist_state("acc_off_times", &test_count);
     while(!kthread_should_stop())
     {
         test_fileserver_stability();
         ssleep(1);
+        fs_log_sync();
     };
     return 1;
 }
@@ -751,6 +1004,12 @@ void lidbg_fileserver_main(int argc, char **argv)
     case 1:
         fs_log_sync();
         break;
+    case 2:
+        fs_enable_kmsg(true);
+        break;
+    case 3:
+        fs_enable_kmsg(false);
+        break;
     default:
         FS_ERR("<check you cmd:%d>\n", cmd);
         break;
@@ -762,6 +1021,9 @@ void lidbg_fileserver_main(int argc, char **argv)
 EXPORT_SYMBOL(lidbg_fileserver_main);
 EXPORT_SYMBOL(lidbg_drivers_list);
 EXPORT_SYMBOL(lidbg_core_list);
+EXPORT_SYMBOL(fs_enable_kmsg);
+EXPORT_SYMBOL(fs_save_state);
+EXPORT_SYMBOL(fs_regist_state);
 EXPORT_SYMBOL(fs_get_intvalue);
 EXPORT_SYMBOL(fs_get_value);
 EXPORT_SYMBOL(fs_set_value);

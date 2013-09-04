@@ -1,20 +1,31 @@
 #ifndef _LIGDBG_FILESERVER__
 #define _LIGDBG_FILESERVER__
 
+/*
+    FS增加抓取kmsg功能+解析cmd功能+动态刷新state功能
+
+    抓取kmsg功能:配置SD中core.conf的fs_kmsg_en=0为1，被阻塞的kmsg线程将启动；重新设置为0后线程将重新被阻塞
+    解析cmd功能:0c key back 2 第一字符0表示执行指令的次数（最多9次）
+    动态刷新state:动态刷出acc_off_times=0(state.conf)等需要动态显示的内容，\
+    刷新率由core.config中的fs_updatestate_ms给出,如其为零，刷新线程将阻塞
+    另：删除了fileserver_main函数
+*/
+
 //zone start
 enum string_dev_cmd
 {
-    //file mode under cmd for fileserver_main();
-    FS_CMD_FILE_CONFIGMODE,//(1,1,0,1)
+    FS_CMD_FILE_CONFIGMODE,
     FS_CMD_FILE_LISTMODE,
-    FS_CMD_FILE_APPENDMODE,//note:you should add [\n] in your string like["\n###save some state###\n ts=gt801\n"],it's suc
 
     //after had given you a client_list, you can do with it on your owen purpose;and also, I want supply some;
-    FS_CMD_LIST_SPLITKV,//kv:key=value //(1,1,0,0)
-    FS_CMD_LIST_SHOW,//(1,1,0,0)
-    FS_CMD_LIST_IS_STRINFILE,//(1,1,1,0)
-    FS_CMD_LIST_GETVALUE,//(1,1,0,1)
-    FS_CMD_LIST_SETVALUE,//(1,1,0,1)
+    FS_CMD_LIST_SPLITKV,//kv:key=value
+    FS_CMD_LIST_SHOW,
+    FS_CMD_LIST_IS_STRINFILE,
+    FS_CMD_LIST_GETVALUE,
+    FS_CMD_LIST_SETVALUE,//not malloc mem
+    FS_CMD_LIST_SETVALUE2,//malloc mem
+    FS_CMD_LIST_SAVEINFO,
+    FS_CMD_LIST_SAVE2FILE,
     FS_CMD_LIST_GETLISTSIZE,//not ok
     FS_CMD_COUNT,
 };
@@ -27,6 +38,9 @@ struct string_dev
     void (*callback)(char *key,char *value);
 };
 void lidbg_fileserver_main(int argc, char **argv);
+extern void fs_enable_kmsg( bool enable );
+extern void fs_save_state(void);
+extern int fs_regist_state(char *key, int *value);
 extern int fs_get_intvalue(struct list_head *client_list, char *key,int *int_value,void (*callback)(char *key,char *value));
 extern int fs_get_value(struct list_head *client_list, char *key, char **string);
 extern int fs_set_value(struct list_head *client_list, char *key, char *string);

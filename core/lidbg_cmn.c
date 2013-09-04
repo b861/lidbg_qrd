@@ -147,15 +147,18 @@ u32 lidbg_get_ns_count(void)
 
 }
 
-int lidbg_get_current_time(char *time_string)
+int lidbg_get_current_time(char *time_string,struct rtc_time *ptm)
 {
-    int  tlen;
+    int  tlen=-1;
     struct timespec ts;
     struct rtc_time tm;
     getnstimeofday(&ts);
     rtc_time_to_tm(ts.tv_sec, &tm);
-    tlen = sprintf(time_string, "%d-%02d-%02d %02d:%02d:%02d.\n",
-                   tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,tm.tm_hour + 8, tm.tm_min, tm.tm_sec);
+    if(time_string)
+        tlen = sprintf(time_string, "%d-%02d-%02d %02d:%02d:%02d",
+        tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour + 8, tm.tm_min, tm.tm_sec);
+    if(ptm)
+        *ptm = tm;
     return tlen;
 }
 // cmn_launch_user("/system/bin/insmod", "/system/lib/modules/wlan.ko");
