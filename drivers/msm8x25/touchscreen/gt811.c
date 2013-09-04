@@ -23,7 +23,7 @@ LIDBG_DEFINE;
 #include "gt811.h"
 #include "gt811_firmware.h"
 
-#ifdef RECORVERY_MODULE
+#ifdef BUILD_FOR_RECOVERY
 #include "touch.h"
 touch_t touch = {0, 0, 0};
 #endif
@@ -630,7 +630,7 @@ COORDINATE_POLL:
         {
             printk("\nerr:FLAG_FOR_15S_OFF===[%d]\n", FLAG_FOR_15S_OFF);
         }
-#ifdef RECORVERY_MODULE
+#ifdef BUILD_FOR_RECOVERY
         if( (input_y >= 0) && (input_x >= 0) )
         {
             touch.x = input_y;
@@ -662,7 +662,7 @@ COORDINATE_POLL:
 
 #endif
 
-#ifdef RECORVERY_MODULE
+#ifdef BUILD_FOR_RECOVERY
         {
             touch.pressed = 0;
             set_touch_pos(&touch);

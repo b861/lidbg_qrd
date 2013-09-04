@@ -28,8 +28,8 @@
 #include "lidbg.h"
 LIDBG_DEFINE;
 
-#define RECORVERY_MODULE
-#ifdef RECORVERY_MODULE
+#define BUILD_FOR_RECOVERY
+#ifdef BUILD_FOR_RECOVERY
 #include "touch.h"
 touch_t touch = {0, 0, 0};
 #endif
@@ -436,7 +436,7 @@ FLAG_FOR_15S_OFF++;
 
 if (touch_index & (0x01<<0))
 {
-#ifdef RECORVERY_MODULE
+#ifdef BUILD_FOR_RECOVERY
 	if( (input_y >= 0) && (input_x >= 0) )
 	{
 		touch.x = point_data[6]|(point_data[7]<<8);
@@ -449,7 +449,7 @@ if (touch_index & (0x01<<0))
 }
 else
 {
-#ifdef RECORVERY_MODULE
+#ifdef BUILD_FOR_RECOVERY
 	{
 		touch.pressed = 0;
 		set_touch_pos(&touch);
@@ -472,7 +472,7 @@ else
             input_w  = coor_data[5] | coor_data[6] << 8;
 
             gtp_touch_down(ts, id, input_x, input_y, input_w);
-#ifdef RECORVERY_MODULE
+#ifdef BUILD_FOR_RECOVERY
 	if( (input_y >= 0) && (input_x >= 0) )
 	{
 		touch.x = point_data[6]|(point_data[7]<<8);
@@ -496,7 +496,7 @@ FLAG_FOR_15S_OFF++;
     {
         GTP_DEBUG("Touch Release!");
         gtp_touch_up(ts, 0);
-#ifdef RECORVERY_MODULE
+#ifdef BUILD_FOR_RECOVERY
 	{
 		touch.pressed = 0;
 		set_touch_pos(&touch);

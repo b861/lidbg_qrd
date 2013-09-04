@@ -77,8 +77,8 @@ LIDBG_DEFINE;
 #define FT5X06_VTG_MAX_UV	3300000
 #define FT5X06_I2C_VTG_MIN_UV	1800000
 #define FT5X06_I2C_VTG_MAX_UV	1800000
-#define RECORVERY_MODULE
-#ifdef RECORVERY_MODULE
+#define BUILD_FOR_RECOVERY
+#ifdef BUILD_FOR_RECOVERY
 #include "touch.h"
 touch_t touch = {0, 0, 0};
 #endif
@@ -249,7 +249,7 @@ static void ft5x06_report_value(struct ft5x06_ts_data *data)
         {
             printk("\nerr:FLAG_FOR_15S_OFF===[%d]\n", FLAG_FOR_15S_OFF);
         }
-#ifdef RECORVERY_MODULE
+#ifdef BUILD_FOR_RECOVERY
         if( ( event->y[0] >= 0) && ( event->x[0] >= 0) )
         {
             touch.x = event->y[0];
@@ -267,7 +267,7 @@ static void ft5x06_report_value(struct ft5x06_ts_data *data)
     //--------------------futengfei------------------------
     if(!!!fingerdown)
     {
-#ifdef RECORVERY_MODULE
+#ifdef BUILD_FOR_RECOVERY
         {
             touch.pressed = 0;
             set_touch_pos(&touch);

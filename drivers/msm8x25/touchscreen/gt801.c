@@ -19,8 +19,8 @@
 LIDBG_DEFINE;
 
 
-#define RECORVERY_MODULE
-#ifdef RECORVERY_MODULE
+#define BUILD_FOR_RECOVERY
+#ifdef BUILD_FOR_RECOVERY
 #include "touch.h"
 touch_t touch = {0, 0, 0};
 #endif
@@ -630,7 +630,7 @@ BIT_NO_CHANGE:
                 printk("\n[wang]:====err:FLAG_FOR_15S_OFF===[%d]\n", FLAG_FOR_15S_OFF);
             }
 
-#ifdef RECORVERY_MODULE
+#ifdef BUILD_FOR_RECOVERY
             if( (finger_list.pointer[0].x >= 0) && (finger_list.pointer[0].y >= 0) )
             {
                 touch.x = finger_list.pointer[0].x;
@@ -654,7 +654,7 @@ BIT_NO_CHANGE:
             input_report_key(ts->input_dev, BTN_TOUCH, finger_list.pointer[count].state);
 #endif
 
-#ifdef RECORVERY_MODULE
+#ifdef BUILD_FOR_RECOVERY
             {
                 touch.pressed = 0;
                 set_touch_pos(&touch);
