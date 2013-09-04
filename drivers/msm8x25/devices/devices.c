@@ -326,7 +326,7 @@ void log_temp(void)
 	cur_temp = soc_temp_get();
 	if(old_temp != cur_temp)
 	{
-	       lidbg_get_current_time(buf);
+	       lidbg_get_current_time(buf,NULL);
 		lidbg_fs("%s,temp:%d",buf,cur_temp);
 		old_temp = cur_temp;
 	}
