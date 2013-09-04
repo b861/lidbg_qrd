@@ -1,4 +1,5 @@
 ifneq ($(USE_CAMERA_STUB),true)
+  ifeq ($(strip $(BOARD_USES_QCOM_HARDWARE)), true)
     # When zero we link against libmmcamera; when 1, we dlopen libmmcamera.
     DLOPEN_LIBMMCAMERA:=1
     ifneq ($(BUILD_TINY_ANDROID),true)
@@ -33,51 +34,45 @@ ifneq ($(USE_CAMERA_STUB),true)
         LOCAL_CFLAGS += -DUSE_ION
       endif
 
+      LOCAL_CFLAGS += -DCAMERA_ION_HEAP_ID=ION_CP_MM_HEAP_ID # 8660=SMI, Rest=EBI
+      LOCAL_CFLAGS += -DCAMERA_ZSL_ION_HEAP_ID=ION_CP_MM_HEAP_ID
       ifeq ($(call is-board-platform,msm8960),true)
-        LOCAL_CFLAGS += -DCAMERA_ION_HEAP_ID=ION_CP_MM_HEAP_ID # 8960=EBI
-        LOCAL_CFLAGS += -DCAMERA_ZSL_ION_HEAP_ID=ION_CP_MM_HEAP_ID
         LOCAL_CFLAGS += -DCAMERA_GRALLOC_HEAP_ID=GRALLOC_USAGE_PRIVATE_MM_HEAP
         LOCAL_CFLAGS += -DCAMERA_GRALLOC_FALLBACK_HEAP_ID=GRALLOC_USAGE_PRIVATE_IOMMU_HEAP
         LOCAL_CFLAGS += -DCAMERA_ION_FALLBACK_HEAP_ID=ION_IOMMU_HEAP_ID
         LOCAL_CFLAGS += -DCAMERA_ZSL_ION_FALLBACK_HEAP_ID=ION_IOMMU_HEAP_ID
         LOCAL_CFLAGS += -DCAMERA_GRALLOC_CACHING_ID=0
       else ifeq ($(call is-chipset-prefix-in-board-platform,msm8660),true)
-        LOCAL_CFLAGS += -DCAMERA_ION_HEAP_ID=ION_CP_MM_HEAP_ID # 8660=SMI
-        LOCAL_CFLAGS += -DCAMERA_ZSL_ION_HEAP_ID=ION_CP_MM_HEAP_ID
         LOCAL_CFLAGS += -DCAMERA_GRALLOC_HEAP_ID=GRALLOC_USAGE_PRIVATE_CAMERA_HEAP
-        LOCAL_CFLAGS += -DCAMERA_GRALLOC_FALLBACK_HEAP_ID=GRALLOC_USAGE_PRIVATE_IOMMU_HEAP
-        LOCAL_CFLAGS += -DCAMERA_ION_FALLBACK_HEAP_ID=ION_IOMMU_HEAP_ID # EBI
-        LOCAL_CFLAGS += -DCAMERA_ZSL_ION_FALLBACK_HEAP_ID=ION_IOMMU_HEAP_ID
+        LOCAL_CFLAGS += -DCAMERA_GRALLOC_FALLBACK_HEAP_ID=GRALLOC_USAGE_PRIVATE_CAMERA_HEAP # Don't Care
+        LOCAL_CFLAGS += -DCAMERA_ION_FALLBACK_HEAP_ID=ION_CAMERA_HEAP_ID # EBI
+        LOCAL_CFLAGS += -DCAMERA_ZSL_ION_FALLBACK_HEAP_ID=ION_CAMERA_HEAP_ID
         LOCAL_CFLAGS += -DCAMERA_GRALLOC_CACHING_ID=0
       else
-        LOCAL_CFLAGS += -DCAMERA_ION_HEAP_ID=ION_CAMERA_HEAP_ID
-        LOCAL_CFLAGS += -DCAMERA_ZSL_ION_HEAP_ID=ION_CAMERA_HEAP_ID
-        LOCAL_CFLAGS += -DCAMERA_GRALLOC_HEAP_ID=GRALLOC_USAGE_PRIVATE_CAMERA_HEAP
-        LOCAL_CFLAGS += -DCAMERA_GRALLOC_FALLBACK_HEAP_ID=GRALLOC_USAGE_PRIVATE_CAMERA_HEAP
+        LOCAL_CFLAGS += -DCAMERA_GRALLOC_HEAP_ID=GRALLOC_USAGE_PRIVATE_ADSP_HEAP
+        LOCAL_CFLAGS += -DCAMERA_GRALLOC_FALLBACK_HEAP_ID=GRALLOC_USAGE_PRIVATE_ADSP_HEAP # Don't Care
         LOCAL_CFLAGS += -DCAMERA_GRALLOC_CACHING_ID=GRALLOC_USAGE_PRIVATE_UNCACHED #uncached
-        LOCAL_CFLAGS += -DCAMERA_ION_FALLBACK_HEAP_ID=ION_CAMERA_HEAP_ID
-        LOCAL_CFLAGS += -DCAMERA_ZSL_ION_FALLBACK_HEAP_ID=ION_CAMERA_HEAP_ID
       endif
 
       ifeq ($(V4L2_BASED_LIBCAM),true)
         ifeq ($(call is-board-platform,msm7627a),true)
           LOCAL_HAL_FILES := QCameraHAL.cpp QCameraHWI_Parm.cpp\
             QCameraHWI.cpp QCameraHWI_Preview.cpp \
-						FlyCamera.cpp \
+						FlyCamera.cpp\
             QCameraHWI_Record_7x27A.cpp QCameraHWI_Still.cpp \
             QCameraHWI_Mem.cpp QCameraHWI_Display.cpp \
-            QCameraStream.cpp QualcommCamera2.cpp QCameraHWI_Rdi.cpp QCameraParameters.cpp
+            QCameraStream.cpp QualcommCamera2.cpp
         else
           LOCAL_HAL_FILES := QCameraHAL.cpp QCameraHWI_Parm.cpp\
             QCameraHWI.cpp QCameraHWI_Preview.cpp \
-						FlyCamera.cpp \
+						FlyCamera.cpp\
             QCameraHWI_Record.cpp QCameraHWI_Still.cpp \
             QCameraHWI_Mem.cpp QCameraHWI_Display.cpp \
-            QCameraStream.cpp QualcommCamera2.cpp QCameraHWI_Rdi.cpp QCameraParameters.cpp
+            QCameraStream.cpp QualcommCamera2.cpp
         endif
 
       else
-        LOCAL_HAL_FILES := QualcommCamera.cpp QualcommCameraHardware.cpp QCameraParameters.cpp
+        LOCAL_HAL_FILES := QualcommCamera.cpp QualcommCameraHardware.cpp
       endif
 
       LOCAL_CFLAGS+= -DHW_ENCODE
@@ -102,22 +97,26 @@ ifneq ($(USE_CAMERA_STUB),true)
       # Uncomment below line to enable smooth zoom
       #LOCAL_CFLAGS+= -DCAMERA_SMOOTH_ZOOM
 
-       LOCAL_C_INCLUDES+= \
+      LOCAL_C_INCLUDES+= \
         $(TARGET_OUT_HEADERS)/mm-camera \
         $(TARGET_OUT_HEADERS)/mm-camera/common \
         $(TARGET_OUT_HEADERS)/mm-still \
         $(TARGET_OUT_HEADERS)/mm-still/jpeg \
 
       ifeq ($(V4L2_BASED_LIBCAM),true)
-        LOCAL_C_INCLUDES+= hardware/qcom/media/mm-core/inc
+        LOCAL_C_INCLUDES+= $(TARGET_OUT_HEADERS)/mm-core/omxcore
         LOCAL_C_INCLUDES+= $(TARGET_OUT_HEADERS)/mm-still/mm-omx
         LOCAL_C_INCLUDES+= $(LOCAL_PATH)/mm-camera-interface
       endif
 
-      LOCAL_C_INCLUDES+= hardware/qcom/display/libgralloc
-      LOCAL_C_INCLUDES+= hardware/qcom/display/libgenlock
-      LOCAL_C_INCLUDES+= hardware/qcom/media/libstagefrighthw
-      LOCAL_C_INCLUDES+= $(TARGET_OUT_HEADERS)/tscamera-ext
+      LOCAL_C_INCLUDES+= $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/include/media
+      LOCAL_C_INCLUDES+= $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/include
+      LOCAL_ADDITIONAL_DEPENDENCIES := $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr
+      LOCAL_C_INCLUDES += hardware/qcom/display/libgralloc \
+        hardware/qcom/display/libgenlock \
+        hardware/qcom/media/libstagefrighthw
+
+      LOCAL_ADDITIONAL_DEPENDENCIES := $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr
 
       ifeq ($(V4L2_BASED_LIBCAM),true)
         LOCAL_SHARED_LIBRARIES:= libutils libui libcamera_client liblog libcutils libmmjpeg libmmstillomx libimage-jpeg-enc-omx-comp
@@ -126,7 +125,7 @@ ifneq ($(USE_CAMERA_STUB),true)
          LOCAL_SHARED_LIBRARIES:= libutils libui libcamera_client liblog libcutils libmmjpeg
       endif
 
-      LOCAL_SHARED_LIBRARIES+= libgenlock libbinder libtscamera-ext
+      LOCAL_SHARED_LIBRARIES+= libgenlock libbinder
       ifneq ($(DLOPEN_LIBMMCAMERA),1)
         LOCAL_SHARED_LIBRARIES+= liboemcamera
       else
@@ -135,13 +134,14 @@ ifneq ($(USE_CAMERA_STUB),true)
 
       LOCAL_CFLAGS += -include bionic/libc/kernel/common/linux/socket.h
 
-      # LOCAL_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)/hw
-			LOCAL_MODULE_PATH := $(LOCAL_PATH)/../out/system/lib/hw
+      #LOCAL_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)/hw
+			LOCAL_MODULE_PATH := $(LOCAL_PATH)/../../../out/system/lib/hw
       LOCAL_MODULE:= camera.$(TARGET_BOARD_PLATFORM)
       LOCAL_MODULE_TAGS := optional
       include $(BUILD_SHARED_LIBRARY)
 
     endif # BUILD_TINY_ANDROID
+  endif # BOARD_USES_QCOM_HARDWARE
 endif # USE_CAMERA_STUB
 
 ifeq ($(V4L2_BASED_LIBCAM),true)
