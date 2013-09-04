@@ -613,7 +613,7 @@ static void devices_late_resume(struct early_suspend *handler)
         SOC_IO_Config(MCU_IIC_REQ_I, GPIO_CFG_INPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA);
         TELL_LPC_PWR_ON;
 
-#ifdef FLY_DEBU
+#ifdef FLY_DEBUG
 
         BL_SET(BL_MAX / 2);
         LCD_ON;
@@ -959,21 +959,17 @@ void fly_devices_init(void)
     {
 
 
-#ifndef FLY_DEBUG
-        USB_WORK_ENABLE;
-        LCD_ON;
-#else
+#if (defined(FLY_DEBUG) || defined(BUILD_FOR_RECOVERY))
+
+		DVD_RESET_HIGH;
         TELL_LPC_PWR_ON;
 
         PWR_EN_ON;
         USB_WORK_ENABLE;
-        //lidbg("set USB_ID_HIGH_DEV\n");
-        //USB_ID_HIGH_DEV;
 
         lidbg("turn lcd on!\n");
-        LCD_ON;
         BL_SET(BL_MAX / 2);
-        DVD_RESET_HIGH;
+        LCD_ON;
 
 #ifdef DEBUG_BUTTON
 

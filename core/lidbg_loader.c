@@ -29,7 +29,7 @@ char *insmod_path[] =
 void launch_user( char bin_path[], char argv1[],char argv2[])
 {
     char *argv[] = { bin_path, argv1, argv2, NULL };
-    static char *envp[] = { "HOME=/", "TERM=linux", "PATH=/system/bin", NULL };
+    static char *envp[] = { "HOME=/", "TERM=linux", "PATH=/system/bin:/sbin", NULL };
     int ret;
     ret = call_usermodehelper(bin_path, argv, envp, UMH_WAIT_PROC);
 }
@@ -46,7 +46,7 @@ int thread_loader(void *data)
 		{
 			sprintf(path, "%s%s", insmod_path[i],insmod_list[j]);
 			//lidbg("load %s\n",path);
-			launch_user("/system/bin/insmod", path ,NULL);
+			launch_user(INSMOD_PATH, path ,NULL);
 		}
 	}
 	

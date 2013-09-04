@@ -8,5 +8,11 @@ int lidbg_readwrite_file(const char *filename, char *rbuf,const char *wbuf, size
 int lidbg_task_kill_select(char *task_name);
 int lidbg_get_current_time(char *time_string,struct rtc_time *ptm);
 
+#ifdef BUILD_FOR_RECOVERY
+#define INSMOD_PATH "/sbin/insmod"
+#else
+#define INSMOD_PATH "/system/bin/insmod"
+#endif
+
 #endif
 

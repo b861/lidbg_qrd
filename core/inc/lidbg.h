@@ -96,6 +96,7 @@
 #include "lidbg_enter.h"
 #endif
 
+//#define BUILD_FOR_RECOVERY
 
 #endif
 

@@ -47,7 +47,7 @@ int soc_thread(void *data)
 		{
 			sprintf(path, "%s%s", insmod_path[i],insmod_list[j]);
 			//lidbg("load %s\n",path);
-			lidbg_launch_user("/system/bin/insmod", path );
+			lidbg_launch_user(INSMOD_PATH, path );
 			msleep(100);
 		}
 	}

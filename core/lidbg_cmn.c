@@ -166,7 +166,7 @@ int lidbg_get_current_time(char *time_string,struct rtc_time *ptm)
 int  lidbg_launch_user( char bin_path[], char argv1[])
 {
     char *argv[] = { bin_path, argv1, NULL };
-    static char *envp[] = { "HOME=/", "TERM=linux", "PATH=/system/bin", NULL };//tell me sh where it is;
+    static char *envp[] = { "HOME=/", "TERM=linux", "PATH=/system/bin:/sbin", NULL };//tell me sh where it is;
     int ret;
     lidbg("%s ,%s\n", bin_path, argv1);
     ret = call_usermodehelper(bin_path, argv, envp, UMH_WAIT_EXEC);
@@ -196,7 +196,7 @@ void mod_cmn_main(int argc, char **argv)
 
         {
             char *argv2[] = { argv[1], argv[2], argv[3], argv[4], NULL };
-            static char *envp[] = { "HOME=/", "TERM=linux", "PATH=/system/bin", NULL };
+            static char *envp[] = { "HOME=/", "TERM=linux", "PATH=/system/bin:/sbin", NULL };
             int ret;
             lidbg("%s ,%s ,%s ,%s\n", argv[1], argv[2], argv[3], argv[4]);
 
