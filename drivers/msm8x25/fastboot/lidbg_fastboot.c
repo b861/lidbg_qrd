@@ -17,6 +17,7 @@ LIDBG_DEFINE;
 
 
 //#define EXPORT_ACTIVE_WAKE_LOCKS
+#define RUN_FASTBOOT
 
 
 static LIST_HEAD(fastboot_kill_list);
@@ -88,6 +89,17 @@ void fastboot_get_wake_locks(struct list_head *p)
 }
 #endif
 
+static void log_active_locks(void)
+{
+	struct wake_lock *lock;
+	int type = 0;
+	if(active_wake_locks == NULL) return;
+	list_for_each_entry(lock, &active_wake_locks[type], link)
+	{
+		lidbg_fs("active wake lock %s\n", lock->name);
+	}
+}
+
 
 static void list_active_locks(void)
 {
@@ -102,7 +114,7 @@ static void list_active_locks(void)
 		if(!strcmp(lock->name, "adsp"))
 		{
 			lidbg("wake_lock:adsp\n");
-			fs_file_log("wake_lock:adsp\n");
+			lidbg_fs("wake_lock:adsp\n");
 		    fb_data->has_wakelock_can_not_ignore = 1;
 		}
 	}
@@ -198,18 +210,21 @@ int check_clk_disable(void)
 	if(pc_clk_is_enabled(P_UART1DM_CLK))
 	{
 		lidbg("find clk:%d\n",P_UART1DM_CLK);
+		lidbg_fs("find clk:%d\n",P_UART1DM_CLK);
 		ret = 1;
 	}
 
 	if(pc_clk_is_enabled(P_MDP_CLK))
 	{
 		lidbg("find clk:%d\n",P_MDP_CLK);
+		lidbg_fs("find clk:%d\n",P_MDP_CLK);
 		ret = 1;
 	}
 
 	if(pc_clk_is_enabled(P_ADSP_CLK))
 	{
 		lidbg("find clk:%d\n",P_ADSP_CLK);
+		lidbg_fs("find clk:%d\n",P_ADSP_CLK);
 		ret = 1;
 	}
 	DUMP_FUN_LEAVE;
@@ -551,6 +566,7 @@ static int thread_fastboot_suspend(void *data)
                             msleep((10 - MAX_WAIT_UNLOCK_TIME) * 1000);
                             lidbg("$-\n");
 #endif
+							//log_active_locks();
 							wakelock_occur_count = 0;
                             if(fastboot_get_status() == PM_STATUS_EARLY_SUSPEND_PENDING)
                             {
@@ -705,6 +721,9 @@ void fastboot_pwroff(void)
     //    fastboot_task_kill_select("mediaserver");
     //    fastboot_task_kill_select("void");
 
+	fs_save_state();
+	fs_log_sync();
+
 #if 1//def FLY_DEBUG
     msleep(1000);
 
@@ -718,7 +737,6 @@ void fastboot_pwroff(void)
 #endif
 
 #endif
-	fs_log_sync();
     complete(&early_suspend_start);
 
 }
@@ -850,6 +868,7 @@ static int  fastboot_probe(struct platform_device *pdev)
 #endif
 
 
+    fs_regist_state("acc_off_times", (int*)&fb_data->resume_count);
 	FS_REGISTER_INT(fb_data->kill_task_en,"kill_task_en",1,NULL);
 	FS_REGISTER_INT(fb_data->kill_all_task,"kill_all_task",0,kill_all_task);
 	FS_REGISTER_INT(fb_data->haslock_resume_times,"haslock_resume_times",0,NULL);

@@ -731,6 +731,8 @@ open_dev:
 
     sleep(30);
 	
+    system("chmod 0777 /mnt/state.txt");
+	
 #if (defined(BOARD_V1) || defined(BOARD_V2))
 	   ///////low mem kill
     if(1)

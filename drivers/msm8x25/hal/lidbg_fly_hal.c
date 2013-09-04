@@ -8,7 +8,7 @@
 LIDBG_DEFINE;
 
 struct task_struct *soc_task;
-FLY_SYSTEM_STATUS g_system_status;
+FLY_SYSTEM_STATUS g_system_status = FLY_ACC_ON;
 
 
 char *insmod_list[] =
@@ -48,6 +48,7 @@ int soc_thread(void *data)
 			sprintf(path, "%s%s", insmod_path[i],insmod_list[j]);
 			//lidbg("load %s\n",path);
 			lidbg_launch_user("/system/bin/insmod", path );
+			msleep(100);
 		}
 	}
 

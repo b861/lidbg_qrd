@@ -25,7 +25,8 @@ static  char *core_lidbg_path = "/system/lib/modules/out/core.conf";
 static  char *cmd_sd_path = "/mnt/sdcard/cmd.txt";
 static  char *cmd_fly_path = "/flysystem/lib/out/cmd.conf";
 static  char *cmd_lidbg_path = "/system/lib/modules/out/cmd.conf";
-static  char *state_sd_path = "/mnt/state.txt";
+static  char *state_sd_path = "/mnt/sdcard/state.txt";
+static  char *state_mem_path = "/mnt/state.txt";
 static  char *state_fly_path = "/flysystem/lib/out/state.conf";
 static  char *state_lidbg_path = "/system/lib/modules/out/state.conf";
 static struct task_struct *filelog_task;
@@ -71,9 +72,18 @@ void fs_enable_kmsg( bool enable )
     else
         g_pollkmsg_en = 0;
 }
+
+
+void fs_dump_kmsg( u32 size )
+{
+
+}
+
+
 void  fs_save_state(void)
 {
-    fileserver_deal_cmd(&lidbg_state_list, FS_CMD_LIST_SAVE2FILE, NULL, NULL, NULL, NULL, NULL);
+    //fileserver_deal_cmd(&lidbg_state_list, FS_CMD_LIST_SAVE2FILE, NULL, NULL, NULL, NULL, NULL);
+    fs_copy_file(state_mem_path,state_sd_path);
 }
 int fs_regist_state(char *key, int *value)
 {
@@ -702,13 +712,13 @@ static int thread_pollstate_func(void *data)
     allow_signal(SIGKILL);
     allow_signal(SIGSTOP);
     //set_freezable();
-    ssleep(50);
+    //ssleep(50);
     while(!kthread_should_stop())
     {
         if(g_pollstate_ms)
         {
             msleep(g_pollstate_ms);
-            filep = filp_open(state_sd_path, O_CREAT | O_RDWR | O_TRUNC , 0600);
+            filep = filp_open(state_mem_path, O_CREAT | O_RDWR | O_TRUNC , 0600);
             if(!IS_ERR(filep))
             {
                 old_fs = get_fs();
@@ -875,10 +885,6 @@ void fileserverinit_once(void)
     fs_file_log("%s\n", FS_VERSION );
     fs_file_log("%s\n", tbuff);
 
-    fs_regist_state("fs_pollfile_ms", &g_pollfile_ms);
-    fs_regist_state("fs_kmsg_en", &g_pollkmsg_en);
-    fs_regist_state("fs_updatestate_ms", &g_pollstate_ms);
-
     fs_get_intvalue(&lidbg_core_list, "fs_dbg_enable", &g_dubug_on, NULL);
     fs_get_intvalue(&lidbg_core_list, "fs_clearlogfifo_ms", &g_clearlogfifo_ms, NULL);
     fs_get_intvalue(&lidbg_core_list, "fs_pollfile_ms", &g_pollfile_ms, NULL);
@@ -941,6 +947,9 @@ static int fileserver_test_fk(void *data)
     allow_signal(SIGSTOP);
     //set_freezable();
     fs_regist_state("acc_off_times", &test_count);
+    //fs_regist_state("fs_pollfile_ms", &g_pollfile_ms);
+    //fs_regist_state("fs_kmsg_en", &g_pollkmsg_en);
+    //fs_regist_state("fs_updatestate_ms", &g_pollstate_ms);
     while(!kthread_should_stop())
     {
         test_fileserver_stability();

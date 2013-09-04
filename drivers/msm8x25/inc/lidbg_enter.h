@@ -99,6 +99,7 @@ extern FLY_SYSTEM_STATUS g_system_status;
 typedef irqreturn_t (*pinterrupt_isr)(int irq, void *dev_id);
 
 #if 1
+#define ADC_MAX_CH (8)
 struct fly_smem
 {
     int reserved1;
@@ -248,7 +249,6 @@ struct lidbg_fn_t
     // 2-AIN4
     // 3-REM1
     // 4-REM2
-    //#define ADC_MAX_CH (16)
     */
     bool (*pfnSOC_ADC_Get)(unsigned int channel , unsigned int *value);
 

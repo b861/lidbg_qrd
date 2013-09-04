@@ -9,8 +9,7 @@ echo "c key end 2" > /dev/mlidbg0
 echo "c touch 180 207 2" > /dev/mlidbg0
 
 ############device############
-echo "c device pwroff 2" > /dev/mlidbg0
-echo "c device ad 2" > /dev/mlidbg0
+echo "c ad 2" > /dev/mlidbg0
 
 ############io############
 echo "c io r 30" > /dev/mlidbg0

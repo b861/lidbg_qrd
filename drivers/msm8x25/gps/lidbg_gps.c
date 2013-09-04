@@ -179,7 +179,7 @@ int thread_gps_server(void *data)
     DUMP_FUN_ENTER;
     while(1)
     {
-        if(work_en == 0)
+        if((work_en == 0)/*||(g_system_status != FLY_ACC_ON)*/)
             goto do_nothing;
 
         ret = SOC_I2C_Rec(1, 0x42, 0xfd, num_avi_gps_data, 2);

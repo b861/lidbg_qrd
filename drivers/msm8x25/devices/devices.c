@@ -322,12 +322,15 @@ find_key:
 void log_temp(void)
 {
 	static int old_temp,cur_temp;
+	int tmp;
 	static char buf[32];
 	cur_temp = soc_temp_get();
-	if(old_temp != cur_temp)
+    fs_regist_state("cpu_temperature", &cur_temp);
+	tmp = cur_temp - old_temp;
+	if(ABS(tmp) >= 5)
 	{
-	       lidbg_get_current_time(buf,NULL);
-		lidbg_fs("%s,temp:%d",buf,cur_temp);
+	    lidbg_get_current_time(buf,NULL);
+		lidbg_fs("time:%s,temp:%d\n",buf,cur_temp);
 		old_temp = cur_temp;
 	}
 }

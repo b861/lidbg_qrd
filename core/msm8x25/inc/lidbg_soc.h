@@ -167,7 +167,7 @@ int soc_temp_get(void);
 void lidbg_soc_main(int argc, char **argv);
 
 ///////////////////////////////////////
-#define ADC_MAX_CH (16)
+#define ADC_MAX_CH (8)
 
 #if 1
 struct fly_smem
@@ -179,17 +179,17 @@ struct fly_smem
 };
 #define SMEM_AD  p_fly_smem->ch
 #define SMEM_BL  p_fly_smem->bl_value
-#define SMEM_TEMP  p_fly_smem->ch[8]
+#define SMEM_TEMP  p_fly_smem->ch[6]
 
 #else
 struct fly_smem
 {
-    unsigned char bp2ap[16];
-    unsigned char ap2bp[8];
+    u32 bp2ap[16];
+    u32 ap2bp[8];
 };
 #define SMEM_AD  p_fly_smem->bp2ap
-#define SMEM_BL  p_fly_smem->ap2bp
-#define SMEM_TEMP  p_fly_smem->bp2ap[8]
+#define SMEM_BL  p_fly_smem->ap2bp[0]
+#define SMEM_TEMP  p_fly_smem->bp2ap[6]
 
 #endif
 
