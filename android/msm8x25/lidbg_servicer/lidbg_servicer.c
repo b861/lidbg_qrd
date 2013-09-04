@@ -576,60 +576,19 @@ int main(int argc , char **argv)
     system("echo 600000 > /sys/devices/system/cpu/cpu1/cpufreq/scaling_max_freq");
 #endif
 
-#if 0//(defined(BOARD_V1) || defined(BOARD_V2))
-    system("insmod /system/lib/modules/out/lidbg_share.ko");
-    system("insmod /system/lib/modules/out/lidbg_ts_to_recov.ko");
-    system("insmod /system/lib/modules/out/lidbg_msg.ko");
-    system("insmod /system/lib/modules/out/lidbg_common.ko");
-    system("insmod /system/lib/modules/out/lidbg_servicer.ko");
-    system("insmod /system/lib/modules/out/lidbg_touch.ko");
-    system("insmod /system/lib/modules/out/lidbg_key.ko");
-    system("insmod /system/lib/modules/out/lidbg_i2c.ko");
-    system("insmod /system/lib/modules/out/lidbg_soc_msm8x25.ko");
-    system("insmod /system/lib/modules/out/lidbg_io.ko");
-    system("insmod /system/lib/modules/out/lidbg_ad.ko");
-    system("insmod /system/lib/modules/out/lidbg_main.ko");
+open_dev:
+    fd = open("/dev/mlidbg0", O_RDWR);
+	if((fd == 0xfffffffe) || (fd == 0) || (fd == 0xffffffff))
+	{
+		lidbg("open mlidbg0 fail\n");
+		sleep(1);//delay wait for /dev/lidbg_servicer to creat
+		goto open_dev;
+	}
+	close(fd);
 
-    system("insmod /system/lib/modules/out/lidbg_fly_soc.ko");
+    lidbg("open mlidbg0 ok\n");
 
-    system("insmod /system/lib/modules/out/lidbg_fastboot.ko");
-    system("insmod /system/lib/modules/out/lidbg_lpc.ko");
-    system("insmod /system/lib/modules/out/lidbg_soc_devices.ko");
-    system("insmod /system/lib/modules/out/lidbg_videoin.ko");
-    system("insmod /system/lib/modules/out/lidbg_to_bpmsg.ko");
-    system("insmod /system/lib/modules/out/lidbg_gps.ko");
-	system("insmod /system/lib/modules/out/lidbg_gps_driver.ko");
-
-    //for flycar
-
-    system("insmod /flysystem/lib/out/lidbg_share.ko");
-    system("insmod /flysystem/lib/out/lidbg_ts_to_recov.ko");
-    system("insmod /flysystem/lib/out/lidbg_msg.ko");
-    system("insmod /flysystem/lib/out/lidbg_common.ko");
-    system("insmod /flysystem/lib/out/lidbg_servicer.ko");
-    system("insmod /flysystem/lib/out/lidbg_touch.ko");
-    system("insmod /flysystem/lib/out/lidbg_key.ko");
-    system("insmod /flysystem/lib/out/lidbg_i2c.ko");
-    system("insmod /flysystem/lib/out/lidbg_soc_msm8x25.ko");
-    system("insmod /flysystem/lib/out/lidbg_io.ko");
-    system("insmod /flysystem/lib/out/lidbg_ad.ko");
-	system("insmod /flysystem/lib/out/lidbg_uart.ko");
-
-    system("insmod /flysystem/lib/out/lidbg_main.ko");
-
-    system("insmod /flysystem/lib/out/lidbg_fly_soc.ko");
-
-    system("insmod /flysystem/lib/out/lidbg_fastboot.ko");
-    system("insmod /flysystem/lib/out/lidbg_lpc.ko");
-    system("insmod /flysystem/lib/out/lidbg_soc_devices.ko");
-    system("insmod /flysystem/lib/out/lidbg_videoin.ko");
-    system("insmod /flysystem/lib/out/lidbg_to_bpmsg.ko");
-    system("insmod /flysystem/lib/out/lidbg_gps.ko");
-	system("insmod /flysystem/lib/out/lidbg_gps_driver.ko");
-
-#endif
     sleep(1);
-
 
     system("chmod 0777 /dev/lidbg_share");
     system("chmod 0777 /dev/mlidbg0");
@@ -637,34 +596,21 @@ int main(int argc , char **argv)
     system("chmod 0777 /dev/lidbg_msg");
     system("chmod 0777 /dev/ubloxgps0");
     system("chmod 606 /dev/tw9912config");
-open_dev:
+
+	
     fd = open("/dev/lidbg_servicer", O_RDWR);
-    //printf("fd = %x\n",fd);
-    if((fd == 0xfffffffe) || (fd == 0) || (fd == 0xffffffff))
-    {
-        lidbg("open lidbg_servicer fail\n");
-        sleep(1);//delay wait for /dev/lidbg_servicer to creat
-        //usleep(1000 * 100); //100ms
-        goto open_dev;
-    }
+	if((fd == 0xfffffffe) || (fd == 0) || (fd == 0xffffffff))
+	{
+		lidbg("open lidbg_servicer fail\n");
+		goto open_dev;
 
-    //system("date > /sdcard/log_dmesg.txt");
-    //system("date > /sdcard/log_dmesg_lidbg.txt");
-    //system("date > /sdcard/log_logcat.txt");
+	}
 
-#if 0	//block_read
-    while(1)
-    {
-        servicer_handler(0);
-
-    }
-#else//sigal read
     signal(SIGIO, servicer_handler); //让input_handler()处理SIGIO信号
     fcntl(fd, F_SETOWN, getpid());
     oflags = fcntl(fd, F_GETFL);
     fcntl(fd, F_SETFL, oflags | FASYNC); //调用驱动的fasync_helper
 
-#endif
 
     //clear fifo
     while(1)
@@ -672,13 +618,7 @@ open_dev:
         if(servicer_handler(0) == SERVICER_DONOTHING)
             break;
     }
-#if 0//(defined(BOARD_V1) || defined(BOARD_V2))
-    system("insmod /system/lib/modules/out/lidbg_ts_probe.ko");
-    system("insmod /flysystem/lib/out/lidbg_ts_probe.ko");
-    system("insmod /flysystem/lib/out/gt80x_update.ko");
-    system("insmod /system/lib/modules/out/gt80x_update.ko");
-#endif
-	
+
 #if 1
     //chegnweidong
     system("insmod /flysystem/lib/mdrv/flysemdriver.ko");
@@ -718,6 +658,7 @@ open_dev:
     system("chmod 777 /sys/power/state");
     system("chmod 777 /proc/fake_suspend");
     system("chmod 777 /proc/fake_wakeup");
+	system("chmod 777 /mnt/state.txt");
 
     system("chmod 0666 /dev/mtd/mtd1");
 #endif
@@ -730,8 +671,6 @@ open_dev:
 #endif
 
     sleep(30);
-	
-    system("chmod 0777 /mnt/state.txt");
 	
 #if (defined(BOARD_V1) || defined(BOARD_V2))
 	   ///////low mem kill

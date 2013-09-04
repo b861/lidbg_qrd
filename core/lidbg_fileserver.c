@@ -883,7 +883,7 @@ void fileserverinit_once(void)
     kfifo_reset(&log_fifo);
     lidbg_get_current_time(tbuff, NULL);
 	
-    fs_file_log("\nBuild Time: %s %s %s \n", __FILE__, __DATE__, __TIME__);
+    fs_file_log("\nBuild Time: %s, %s, %s\n", __FILE__, __DATE__, __TIME__);
     fs_file_log("%s\n", FS_VERSION );
     fs_file_log("%s\n", tbuff);
 

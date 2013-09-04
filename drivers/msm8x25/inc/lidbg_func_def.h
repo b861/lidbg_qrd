@@ -8,6 +8,7 @@ static inline int check_pt(void)
     while (plidbg_dev == NULL)
     {
         printk("lidbg:check if plidbg_dev==NULL\n");
+		printk("%s,line %d\n", __FILE__,__LINE__);
 		dump_stack();//provide some information
         msleep(200);
     }
