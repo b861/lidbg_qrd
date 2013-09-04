@@ -418,15 +418,6 @@ static void goodix_ts_work_func(struct work_struct *work)
                 pos += 8;
                 id = coor_data[pos] & 0x0F;
                 touch_index |= (0x01<<id);
-#ifdef RECORVERY_MODULE
-	if( (input_y >= 0) && (input_x >= 0) )
-	{
-		touch.x = point_data[6]|(point_data[7]<<8);
-		touch.y = point_data[4]|(point_data[5]<<8);
-		touch.pressed = 1;
-		set_touch_pos(&touch);
-	}
-#endif
 FLAG_FOR_15S_OFF++;
 	if(FLAG_FOR_15S_OFF >= 1000)
 	{
@@ -441,13 +432,30 @@ FLAG_FOR_15S_OFF++;
             {
                 gtp_touch_up(ts, i);
                 pre_touch &= ~(0x01 << i);
+            }
+
+if (touch_index & (0x01<<0))
+{
+#ifdef RECORVERY_MODULE
+	if( (input_y >= 0) && (input_x >= 0) )
+	{
+		touch.x = point_data[6]|(point_data[7]<<8);
+		touch.y = point_data[4]|(point_data[5]<<8);
+		touch.pressed = 1;
+		set_touch_pos(&touch);
+	}
+#endif
+
+}
+else
+{
 #ifdef RECORVERY_MODULE
 	{
 		touch.pressed = 0;
 		set_touch_pos(&touch);
 	}
 #endif
-            }
+}
         }
     }
 
