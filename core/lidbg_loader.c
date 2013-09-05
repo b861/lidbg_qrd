@@ -4,9 +4,9 @@ struct task_struct *loader_task;
 
 char *insmod_list[] =
 {
+	SOC_KO,
 	"lidbg_common.ko",
-	"lidbg_soc_msm8x25.ko",
-       "lidbg_msg.ko",
+    "lidbg_msg.ko",
 	"lidbg_servicer.ko",
 	"lidbg_touch.ko",
 	"lidbg_key.ko",
@@ -50,8 +50,7 @@ int thread_loader(void *data)
 		}
 	}
 	
-	launch_user("/system/bin/chmod", "0777", "/dev/lidbg_share");
-	launch_user("/system/bin/chmod", "0777", "/dev/mlidbg0");
+	//launch_user("/system/bin/chmod", "0777", "/dev/mlidbg0");
 
 	DUMP_FUN_LEAVE;
 	return 0;

@@ -1,5 +1,5 @@
 
-KERNELDIR = $(DBG_KERNEL_DIR)
+KERNELDIR = $(DBG_KERNEL_SRC_DIR)
 INSTALLDIR = $(DBG_COPY_DIR)
 
 # The current directory is passed to sub-makes as argument
@@ -17,7 +17,7 @@ KBUILD_EXTRA_SYMBOLS := $(DBG_DRV_PATH)/$(DBG_SOC)/Module.symvers $(DBG_DRV_PATH
 EXTRA_CFLAGS  += -I$(DBG_WORK_PATH)/$(DBG_SOC)/inc
 
 modules:
-	$(MAKE) -C $(KERNELDIR) M=$(PWD) ARCH=arm  CROSS_COMPILE=$(DBG_CROSS_COMPILE) modules
+	$(MAKE) -C $(DBG_KERNEL_OBJ_DIR) M=$(PWD) ARCH=arm  CROSS_COMPILE=$(DBG_CROSS_COMPILE) modules
  
 modules_install:
 	cp *.ko $(INSTALLDIR)

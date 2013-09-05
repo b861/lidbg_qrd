@@ -1,5 +1,5 @@
 
-KERNELDIR = $(DBG_KERNEL_DIR)
+KERNELDIR = $(DBG_KERNEL_SRC_DIR)
 INSTALLDIR = $(DBG_COPY_DIR)
 
 # The current directory is passed to sub-makes as argument
@@ -34,9 +34,9 @@ include $(DBG_ROOT_PATH)/build_cfg.mk
 KBUILD_EXTRA_SYMBOLS := $(DBG_DRV_PATH)/$(DBG_SOC)/Module.symvers
 
 modules:
-	cp  $(KERNELDIR)/source/drivers/i2c/busses/i2c-gpio.c ./i2c-gpio.c
-	cp  $(KERNELDIR)/source/drivers/i2c/algos/i2c-algo-bit.c ./i2c-algo-bit.c
-	$(MAKE) -C $(KERNELDIR) M=$(PWD) ARCH=arm  CROSS_COMPILE=$(DBG_CROSS_COMPILE) modules
+	cp  $(KERNELDIR)/drivers/i2c/busses/i2c-gpio.c ./i2c-gpio.c
+	cp  $(KERNELDIR)/drivers/i2c/algos/i2c-algo-bit.c ./i2c-algo-bit.c
+	$(MAKE) -C $(DBG_KERNEL_OBJ_DIR) M=$(PWD) ARCH=arm  CROSS_COMPILE=$(DBG_CROSS_COMPILE) modules
  
 modules_install:
 	cp *.ko $(INSTALLDIR)
