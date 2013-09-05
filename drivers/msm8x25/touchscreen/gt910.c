@@ -31,7 +31,6 @@
 #include "lidbg.h"
 LIDBG_DEFINE;
 
-#define BUILD_FOR_RECOVERY
 #ifdef BUILD_FOR_RECOVERY
 #include "touch.h"
 touch_t touch = {0, 0, 0};

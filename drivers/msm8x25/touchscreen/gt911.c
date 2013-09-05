@@ -28,7 +28,6 @@
 #include "lidbg.h"
 LIDBG_DEFINE;
 
-#define BUILD_FOR_RECOVERY
 #ifdef BUILD_FOR_RECOVERY
 #include "touch.h"
 touch_t touch = {0, 0, 0};
@@ -443,6 +442,7 @@ if (touch_index & (0x01<<0))
 		touch.y = point_data[4]|(point_data[5]<<8);
 		touch.pressed = 1;
 		set_touch_pos(&touch);
+		printk("[%d,%d]==========%d\n",touch.x,touch.y,touch.pressed);
 	}
 #endif
 
@@ -453,6 +453,7 @@ else
 	{
 		touch.pressed = 0;
 		set_touch_pos(&touch);
+		printk("[%d,%d]==========%d\n",touch.x,touch.y,touch.pressed);
 	}
 #endif
 }

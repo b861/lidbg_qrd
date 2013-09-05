@@ -130,7 +130,6 @@ struct goodix_ts_data
 //#define HAVE_TOUCH_KEY_REPORT
 //#define READ_KEY_VALUE
 //#define READ_KEY_COOR
-#define BUILD_FOR_RECOVERY
 #define KEY_PRESS (1)
 #define KEY_RELEASE (0)
 #ifdef HAVE_TOUCH_KEY

@@ -77,7 +77,6 @@ LIDBG_DEFINE;
 #define FT5X06_VTG_MAX_UV	3300000
 #define FT5X06_I2C_VTG_MIN_UV	1800000
 #define FT5X06_I2C_VTG_MAX_UV	1800000
-#define BUILD_FOR_RECOVERY
 #ifdef BUILD_FOR_RECOVERY
 #include "touch.h"
 touch_t touch = {0, 0, 0};

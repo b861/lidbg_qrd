@@ -73,6 +73,7 @@
 #include <linux/i2c-algo-bit.h>	//add by huangzongqiang
 
 ////////////
+#define BUILD_FOR_RECOVERY
 
 #include "lidbg_io.h"
 #include "lidbg_key.h"
@@ -91,12 +92,9 @@
 ////////////
 #include "lidbg_soc.h"
 
-
 #ifdef BUILD_DRIVERS
 #include "lidbg_enter.h"
 #endif
-
-//#define BUILD_FOR_RECOVERY
 
 #endif
 
