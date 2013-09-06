@@ -13,7 +13,7 @@ FLY_SYSTEM_STATUS g_system_status = FLY_ACC_ON;
 
 char *insmod_list[] =
 {
-//    "lidbg_fastboot.ko",
+    "lidbg_fastboot.ko",
 //    "lidbg_lpc.ko",
 //	"lidbg_devices.ko",
 //	"lidbg_bpmsg.ko",

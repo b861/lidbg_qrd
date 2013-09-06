@@ -23,7 +23,7 @@ char *insmod_path[] =
 {
     "/system/lib/modules/out/",
     "/flysystem/lib/out/",
-    NULL,
+   NULL,
 };
 
 void launch_user( char bin_path[], char argv1[],char argv2[])

@@ -21,7 +21,7 @@ typedef enum
 } FLY_SYSTEM_STATUS;
 
 
-int fastboot_get_status(void);
+//int fastboot_get_status(void);
 void fastboot_pwroff(void);
 
 
