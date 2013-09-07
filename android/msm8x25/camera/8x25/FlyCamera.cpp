@@ -148,6 +148,7 @@ void FlyCameraThisIsFirstOpenAtDVD()
 						 }
 						 tw9912_info.this_is_first_open = false;
 						 write(file_fd, (const void *)(&tw9912_info),sizeof(TW9912Info));
+						 close(file_fd);
 							OPEN_ERR:
 						 global_Fream_is_first = false;
 			}
