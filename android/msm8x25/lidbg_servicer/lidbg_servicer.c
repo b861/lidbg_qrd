@@ -11,18 +11,6 @@
 #include <utils/Log.h>
 #include "lidbg_servicer.h"
 
-//mount yaffs2 mtd@system /system rw remount
-//...
-//   chmod 777 /dev/lidbg_servicer
-//    chmod 777 /dev/mlidbg0
-//    chmod 777 /system/bin/lidbg_servicer
-
-//service lidbg_servicer /system/bin/logwrapper /system/bin/lidbg_servicer
-//    class late_start
-//    user root
-//    group root
-
-
 //#define SHARE_MMAP_ENABLE
 
 
@@ -74,110 +62,12 @@ static int ts_nod_fd, ret;
 struct lidbg_dev_smem *plidbg_smem = NULL;
 
 
-int is_should_revert()
-{
-    struct stat stat;
-    char *source = "/flydata/flyhalconfig";
-    unsigned char *found = "TSMODE_XYREVERT";
-    int fd_sour;
-    int size, i;
-    int flag_len = strlen(found);
-    unsigned char *file_data;
-    printf("==in=====================is_should_revert===============================\n");
-    printf("source:%s\n", source);
-
-    fd_sour = open(source, O_RDONLY);
-    if( fd_sour < 0 )
-    {
-        printf("fail to open source file\n");
-        return -1;
-    }
-    if( fstat (fd_sour , &stat ) )
-    {
-        printf("fstat source file fail!!\n");
-        return -1;
-    }
-    size = stat.st_size + 1;
-    printf("source file size:%d\n", size);
-    file_data = (unsigned char *)malloc(size);
-    if( !file_data )
-    {
-        printf("fail to mallo mem!!\n");
-        free(file_data);
-        return -1;
-    }
-    if( read(fd_sour, file_data, stat.st_size) < 0 )
-    {
-        printf("read data fail!!\n");
-        free(file_data);
-        return -1;
-    }
-    file_data[stat.st_size] = '\0';
-    close(fd_sour);
-    printf("flag : %s\n", found);
-    printf("\n\nfile_data : \n%s\n", file_data);
-    printf("start found flag! flag len = %d\n", flag_len);
-    for(i = 0; i < size - flag_len; i++)
-    {
-        if(memcmp( file_data + i, found, flag_len - 2) == 0)
-        {
-            printf("found [%s]flag success i = %d! return 1\n", found, i);
-            free(file_data);
-            printf("==out=====================is_should_revert===============================\n");
-            return 0;
-        }
-    }
-    free(file_data);
-    printf("found [%s]flag fail i = %d! return -1\n", found, i);
-    printf("==out=====================is_should_revert===============================\n");
-    return -1;
-}
-
-void log_acc_times()
-{
-
-
-
-
-}
-
-void set_power_state(int state)
-{
-
-    int fd;
-    const char suspendstring[] = "mem";
-    const char wakeupstring[] = "on";
-    const char *powerdev = "/sys/power/state";
-
-    lidbg("set_power_state:%d\n", state);
-
-    fd = open(powerdev, O_RDWR);
-    if(fd >= 0)
-    {
-        //printf("open linux power dev ok: %s\n", powerdev);
-        if(state == 0)
-            write(fd, suspendstring, sizeof(suspendstring) - 1);
-        else
-            write(fd, wakeupstring, sizeof(wakeupstring) - 1);
-
-        close(fd);
-    }
-    else
-    {
-        lidbg("open linux power dev fail: %s\n", powerdev);
-    }
-
-}
-
 
 void thread_fastboot(void)
 {
     lidbg("thread_fastboot+\n");
-
-    //	property_set("fly.fastboot.accoff", "1");
     system("am broadcast -a android.intent.action.FAST_BOOT_START");
     lidbg("thread_fastboot-\n");
-
     pthread_exit(0);
 
 }
@@ -191,10 +81,7 @@ void lunch_fastboot()
     if(ret != 0)
     {
         lidbg("Create pthread error!\n");
-
     }
-    //pthread_join(id1,NULL);
-
 }
 
 int  servicer_handler(int signum)
@@ -205,7 +92,6 @@ int  servicer_handler(int signum)
     int readlen;
     lidbg("servicer_handler++\n");
 
-
 loop_read:
 
     readlen = read(fd, &cmd, 4);
@@ -215,266 +101,18 @@ loop_read:
         lidbg("servicer_handler-\n");
         return SERVICER_DONOTHING;
     }
-    //printf("fd=%x,readlen=%d,cmd=%d\n",fd,readlen,cmd);
-    //LOGW("[futengfei]  fd=%x,readlen=%d,cmd=%d", fd, readlen, cmd);
     else
     {
         lidbg("cmd = %d\n", cmd);
 
         switch(cmd)
         {
-        case LOG_DMESG:
-        case LOG_LOGCAT:
-        case LOG_ALL:
-        case LOG_CONT:
-        {
-            if(count == 0)
-
-            {
-                system("date > /sdcard/log_logcat.txt");
-                system("date > /sdcard/log_dmesg.txt");
-                system("date > /sdcard/all_mesg.txt");
-                //system("date > /sdcard/log_dmesg_lidbg.txt");
-
-                //system("date > /sdcard/tflash/log_dmesg.txt");
-            }
-            count ++;
-            lidbg("count=%d\n", count);
-
-            if(count > LOG_COUNT_MAX)
-            {
-                lidbg("log count>%d break!\n", LOG_COUNT_MAX);
-
-                break;
-            }
-            if(LOG_ALL == cmd)
-            {
-                system("date >> /sdcard/all_mesg.txt");
-                system("logcat -f /dev/kmsg & dmesg >/sdcard/all_mesg.txt");
-                break;
-
-            }
-            if(LOG_CONT == cmd)
-            {
-
-                system("logcat -f /dev/kmsg & cat /proc/kmsg >/sdcard/all_mesg.txt");
-                break;
-            }
-
-            if(LOG_DMESG == cmd)
-            {
-                //printf("LOG_DMESG == cmd\n");
-
-                system("date >> /sdcard/log_dmesg.txt");
-
-                system("dmesg >> /sdcard/log_dmesg.txt");
-
-                //system("date >> /sdcard/log_dmesg_lidbg.txt");
-
-                //system("dmesg | grep -irn lidbg >> /sdcard/log_dmesg_lidbg.txt");
-
-                //system("date >> /sdcard/tflash/log_dmesg.txt");
-
-                // system("dmesg >> /sdcard/tflash/log_dmesg.txt");
-                break;
-            }
-
-            else if(LOG_LOGCAT == cmd)
-            {
-
-                //printf("LOG_LOGCAT == cmd\n");
-                system("date >> /sdcard/log_logcat.txt");
-                system("logcat >> /sdcard/log_logcat.txt");
-                //system("logcat | grep -irn lidbg >> /sdcard/log_logcat_lidbg.txt");
-                break;
-            }
-            break;
-
-        }
-		
-        //cap_ts
-		case LOG_CAP_TS_GT811:
-		case LOG_CAP_TS_FT5X06_SKU7:
-		case LOG_CAP_TS_FT5X06:
-		case LOG_CAP_TS_RMI:
-		case LOG_CAP_TS_GT801:
-		case LOG_CAP_TS_GT911:
-		case LOG_CAP_TS_GT910:
-#if 0//(defined(BOARD_V1) || defined(BOARD_V2))
-        {
-            if(LOG_CAP_TS_GT811 == cmd)
-            {
-#if 1
-
-                system("insmod /system/lib/modules/out/gt811.ko");
-                system("insmod /flysystem/lib/out/gt811.ko");
-
-#else
-                void *module;
-                module = read_file("/lib/modules/out/rmi_touch.ko", &size);
-                if (!module)
-                    printk("read_file rmi_touch.ko fail\n");
-                else
-                {
-                    ret = init_module(module, size, "");
-                    if(ret < 0)
-                        printk("init_module rmi_touch.ko fail\n");
-                    free(module);
-                }
-
-#endif
-            }
-
-            else if (LOG_CAP_TS_FT5X06 == cmd)
-            {
-                system("insmod /system/lib/modules/out/ft5x06_ts.ko");
-                system("insmod /flysystem/lib/out/ft5x06_ts.ko");
-
-            }
-
-            else if (LOG_CAP_TS_FT5X06_SKU7 == cmd)
-            {
-                system("insmod /system/lib/modules/out/ft5x06_ts_sku7.ko");
-
-            }
-
-            else if (LOG_CAP_TS_RMI == cmd)
-            {
-                system("insmod /system/lib/modules/out/rmi_touch.ko");
-
-            }
-            else if (LOG_CAP_TS_GT801 == cmd)
-            {
-                system("insmod /system/lib/modules/out/gt801.ko");
-                system("insmod /flysystem/lib/out/gt801.ko");
-
-            }
-			else if (LOG_CAP_TS_GT911 == cmd)
-			{
-				system("insmod /system/lib/modules/out/gt911.ko");
-				system("insmod /flysystem/lib/out/gt911.ko");
-			}
-			else if (LOG_CAP_TS_GT910 == cmd)
-			{
-				system("insmod /system/lib/modules/out/gt910new.ko");
-				system("insmod /flysystem/lib/out/gt910new.ko");
-            }
-            //sleep(10);//delay to mount sdcard
-            //system("dmesg > /sdcard/log_cap_ts_dmesg.txt");
-
-            //wait ts load ,for ts revert
-            sleep(3);
-            system("chmod 777 /dev/tsnod0");
-	if(1)
-            {
-                char *ts_tdev_node = "/dev/tsnod0";
-                ts_nod_fd = open(ts_tdev_node, O_RDWR);
-                if(ts_nod_fd < 0)
-                {
-                    printf("open  ts_tdev_node fail\n");
-                    break;
-                }
-                if(is_should_revert() == 0 && ts_nod_fd > 0)
-                {
-                    ret = write(ts_nod_fd, "TSMODE_XYREVERT", sizeof("TSMODE_XYREVERT"));
-                    if (ret < 0 )printf("[futengfei]=======================writeerr \n");
-                    printf("[futengfei]=======================TS.XY will revert\n");
-
-                }
-                else
-                {
-                    printf("[futengfei]=======================TS.XY will normal[%d]\n", ts_nod_fd);
-                }
-            }
-            break;
-        }//over
-#else
-//v3+ .
-	break;
-#endif
-        case CMD_ACC_OFF_PROPERTY_SET :
-        {
-            lidbg("CMD_ACC_OFF_PROPERTY_SET\n");
-	
-#if (defined(BOARD_V1) || defined(BOARD_V2))
-            system("echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
-#endif            
-            property_set("fly.fastboot.accoff", "1");
-            break;
-
-        }
         case CMD_FAST_POWER_OFF :
         {
             lidbg("CMD_FAST_POWER_OFF+++\n");
-            //system("setprop fly.fastboot.accoff 1");
-            if(0)//why this will block sometime ?
-            {
-
-                property_set("fly.fastboot.accoff", "1");
-                system("am broadcast -a android.intent.action.FAST_BOOT_START");
-
-            }
-            else
-            {
-                lunch_fastboot();
-            }
+            lunch_fastboot();
             lidbg("CMD_FAST_POWER_OFF---\n");
-
             break;
-        }
-        case UMOUNT_USB:
-        {
-#if 0//(defined(BOARD_V1) || defined(BOARD_V2))
-            system("umount /mnt/usbdisk");
-#endif
-            break;
-
-        }
-        case WAKEUP_KERNEL:
-        {
-            lidbg("WAKEUP_KERNEL+\n");
-            if(0)
-            {
-                system("su");
-                system("echo on > /sys/power/state");
-            }
-            else
-                set_power_state(1);
-            //system("setprop fly.fastboot.accoff 0");
-            property_set("fly.fastboot.accoff", "0");
-#if (defined(BOARD_V1) || defined(BOARD_V2))
-            system("echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
-#endif
-            log_acc_times();
-            lidbg("WAKEUP_KERNEL-\n");
-            break;
-
-        }
-        case SUSPEND_KERNEL:
-        {
-            char value[16];
-            lidbg("SUSPEND_KERNEL+\n");
-            //system("echo peripheral > /mnt/debugfs/otg/mode");
-            //system("stagefright -a -o /system/media/audio/ui/Unlock.ogg");
-            property_get("fly.fastboot.accoff", value, "");
-            lidbg("fly.fastboot.accoff=%c\n", value[0]);
-            //if(value[0] == '1')
-            {
-                property_set("fly.fastboot.accoff", "0");//fix bug ,enter suspend again
-
-                if(0)//not safe
-                {
-                    system("su");
-                    system("echo mem > /sys/power/state");
-                }
-                else
-                {
-                    set_power_state(0);
-                }
-            }
-            lidbg("SUSPEND_KERNEL-\n");
-            break;
-
         }
 
         case VIDEO_SET_PAL:
@@ -491,22 +129,7 @@ loop_read:
             break;
 
         }
-#if 0
-        case SUSPEND_PREPARE:
-        {
-            lidbg("SUSPEND_PREPARE\n");
-            system("echo 1 > /sys/bus/platform/devices/fastboot/fastboot");
-            break;
 
-        }
-        case RESUME_PREPARE:
-        {
-            lidbg("RESUME_PREPARE\n");
-            system("echo 0 > /sys/bus/platform/devices/fastboot/fastboot");
-            break;
-
-        }
-#endif
         case VIDEO_SHOW_BLACK:
         {
             lidbg("<<<<< now Set Video show black.\n");
@@ -540,23 +163,11 @@ loop_read:
             lidbg("<<<<< now Set Video channel is Astren.\n");
             property_set("fly.video.channel.status", "3");// 1 is DVD 2 is AUX 3 is Astern
             break;
-
-        }
-        case UBLOX_EXIST:
-        {
-
-            if (access("/data/gps.msm7627a.so", R_OK) == 0) break;
-            lidbg("ublox exist,copy gps.msm7627a.so to data\n");
-            //system("cp /flysystem/lib/gps.msm7627a.so /data/gps.msm7627a.so");
-            copyfile("/flysystem/lib/ublox_gps.so", "/data/gps.msm7627a.so");
-            break;
-
         }
         }
     }
     goto loop_read;
-    //printf("servicer_handler-\n");
-    //return cmd;
+
 }
 
 
@@ -567,7 +178,6 @@ int main(int argc , char **argv)
     int cmd = 0;
     int count = 0;
     int oflags;
-	DUMP_BUILD_TIME;
 
     lidbg("lidbg_servicer start\n");
 	
@@ -585,6 +195,8 @@ open_dev:
 		goto open_dev;
 	}
 	close(fd);
+
+	DUMP_BUILD_TIME;
 
     lidbg("open mlidbg0 ok\n");
 
@@ -664,7 +276,6 @@ open_dev:
 #endif
 
 #ifdef SHARE_MMAP_ENABLE
-
     plidbg_smem = (struct lidbg_dev_smem *)get_mmap();
     //test ok
     lidbg("read smem:%x,%d\n", plidbg_smem->smemaddr, plidbg_smem->smemsize);
@@ -685,43 +296,18 @@ open_dev:
         system("echo 3674,4969,6264,6264,6264,6264 > /sys/module/lowmemorykiller/parameters/minfree");
     }
 
-
     ////////set cpu fre
-    if(1)
-    {
-        system("chmod 777 /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
-        //system("echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
-        sleep(1);
-		lidbg("set ondemand mode\n");
-        system("echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
-        //system("echo powersave > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
-        //sleep(10);
-        if(0)//loop set
-        {
-            int i = 2;
-            while(i > 0)
-            {
-                sleep(5);
-                //printf("set performance mode\n");
-                lidbg("set ondemand mode\n");
-                system("echo ondemand > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
-                //system("echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
-                i--;
-            }
-        }
-    }
 #endif
-//cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_cur_freq 
+	//cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_cur_freq 
     lidbg("enter while\n");
     while(1)
     {
-
 		sleep(60);
 		//lidbg(".\n");
+		//system("chmod 777 /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
 		//system("echo 1008000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq");
 		//system("echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
         //sleep(10);
     }
-
     return 0;
 }

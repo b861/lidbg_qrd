@@ -63,7 +63,7 @@ int wakelock_occur_count = 0;
 #define MAX_WAIT_UNLOCK_TIME  (5)
 
 #if (defined(BOARD_V1) || defined(BOARD_V2))
-#define WAIT_LOCK_RESUME_TIMES  (3)
+#define WAIT_LOCK_RESUME_TIMES  (0)
 #else
 #define WAIT_LOCK_RESUME_TIMES  (0)
 #endif
@@ -148,6 +148,8 @@ static void list_active_locks(void)
 
 void set_power_state(int state)
 {
+	lidbg("set_power_state:%d\n",state);
+
 	if(state == 0)
 		lidbg_readwrite_file("/sys/power/state", NULL, "mem", sizeof("mem")-1);
 	else
@@ -450,11 +452,7 @@ static int thread_pwroff(void *data)
                     if(time_count >= 5 * 2)
                     {
                         lidbgerr("thread_pwroff wait early suspend timeout!\n");
-#if (defined(BOARD_V1) || defined(BOARD_V2))
-                        SOC_Write_Servicer(SUSPEND_KERNEL);
-#else
 					    set_power_state(0);
-#endif
                         break;
                     }
                 }
@@ -550,13 +548,8 @@ static int thread_fastboot_suspend(void *data)
                         lidbg("wakelock_occur_count=%d\n", wakelock_occur_count);
                         if(wakelock_occur_count <= /*WAIT_LOCK_RESUME_TIMES*/fb_data->haslock_resume_times)
                         {
-#if (defined(BOARD_V1) || defined(BOARD_V2))
-                        SOC_Write_Servicer(WAKEUP_KERNEL);
-#else
-						fb_data->is_quick_resume = 1;
-						set_power_state(1);
-#endif
-
+							fb_data->is_quick_resume = 1;
+							set_power_state(1);
                         }
                         else
 #endif
@@ -660,11 +653,7 @@ static int thread_fastboot_resume(void *data)
         wait_for_completion(&resume_ok);
         DUMP_FUN_ENTER;
         msleep(3000);
-#if (defined(BOARD_V1) || defined(BOARD_V2))
-        SOC_Write_Servicer(WAKEUP_KERNEL);
-#else
 		set_power_state(1);
-#endif
         //SOC_Key_Report(KEY_HOME, KEY_PRESSED_RELEASED);
         //SOC_Key_Report(KEY_BACK, KEY_PRESSED_RELEASED);
 
@@ -674,8 +663,12 @@ static int thread_fastboot_resume(void *data)
 	//log acc off times
 		if(fb_data->resume_count  % 5 == 0)
 		{
-			fs_file_log("acc_off_times=%d\n",fb_data->resume_count);
+			lidbg_fs("ats=%d\n",fb_data->resume_count);
 		}
+		
+		//fs_save_state();
+		//fs_log_sync();
+		
         DUMP_FUN_LEAVE;
     }
     return 0;
@@ -721,15 +714,15 @@ void fastboot_pwroff(void)
     //    fastboot_task_kill_select("mediaserver");
     //    fastboot_task_kill_select("void");
 
-	fs_save_state();
-	fs_log_sync();
+	//fs_save_state();
+	//fs_log_sync();
 
 #if 1//def FLY_DEBUG
     msleep(1000);
 
 #ifdef RUN_FASTBOOT
 #if (defined(BOARD_V1) || defined(BOARD_V2))
-    SOC_Write_Servicer(CMD_ACC_OFF_PROPERTY_SET);
+    //SOC_Write_Servicer(CMD_ACC_OFF_PROPERTY_SET);
     SOC_Write_Servicer(CMD_FAST_POWER_OFF);
 #endif
 #else
