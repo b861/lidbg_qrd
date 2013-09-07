@@ -1,31 +1,31 @@
 
 #include "lidbg.h"
-#include <linux/completion.h>
 
 #define FS_WARN(fmt, args...) pr_info("[futengfei]warn.%s: " fmt,__func__,##args)
 #define FS_ERR(fmt, args...) pr_info("[futengfei]err.%s: " fmt,__func__,##args)
 #define FS_SUC(fmt, args...) pr_info("[futengfei]suceed.%s: " fmt,__func__,##args)
 
 //zone below [tools]
-#define FS_VERSION "FS.VERSION:  [20130903 V3.0]"
-#define LIDBG_LOG_FILE_PATH "/mnt/sdcard/lidbg_log.txt"
-#define LIDBG_KMSG_FILE_PATH "/mnt/sdcard/lidbg_kmsg.txt"
+#define FS_VERSION "FS.VERSION:  [20130907 V4.0]"
+#define LIDBG_LOG_FILE_PATH "/mnt/sdcard/Android/lidbg_log.txt"
+#define LIDBG_KMSG_FILE_PATH "/mnt/sdcard/Android/lidbg_kmsg.txt"
+#define MACHINE_ID_FILE "/mnt/sdcard/Android/MIF.txt"
 #define LIDBG_NODE "/dev/mlidbg0"
 #define KMSG_NODE "/proc/kmsg"
 #define FIFO_SIZE (1024)
 static struct kfifo log_fifo;
 spinlock_t		fs_lock;
 unsigned long flags;
-static  char *driver_sd_path = "/mnt/sdcard/drivers.txt";
+static  char *driver_sd_path = "/mnt/sdcard/Android/drivers.txt";
 static  char *driver_fly_path = "/flysystem/lib/out/drivers.conf";
 static  char *driver_lidbg_path = "/system/lib/modules/out/drivers.conf";
-static  char *core_sd_path = "/mnt/sdcard/core.txt";
+static  char *core_sd_path = "/mnt/sdcard/Android/core.txt";
 static  char *core_fly_path = "/flysystem/lib/out/core.conf";
 static  char *core_lidbg_path = "/system/lib/modules/out/core.conf";
-static  char *cmd_sd_path = "/mnt/sdcard/cmd.txt";
+static  char *cmd_sd_path = "/mnt/sdcard/Android/cmd.txt";
 static  char *cmd_fly_path = "/flysystem/lib/out/cmd.conf";
 static  char *cmd_lidbg_path = "/system/lib/modules/out/cmd.conf";
-static  char *state_sd_path = "/mnt/sdcard/state.txt";
+static  char *state_sd_path = "/mnt/sdcard/Android/state.txt";
 static  char *state_mem_path = "/mnt/state.txt";
 static  char *state_fly_path = "/flysystem/lib/out/state.conf";
 static  char *state_lidbg_path = "/system/lib/modules/out/state.conf";
@@ -43,6 +43,7 @@ static int g_pollfile_ms = 7000;
 static int g_pollstate_ms = 1000;
 static int g_pollkmsg_en = 0;
 static int g_iskmsg_ready = 0;
+static int machine_id = 0;
 unsigned char log_buffer[FIFO_SIZE];
 unsigned char log_buffer2write[FIFO_SIZE];
 LIST_HEAD(lidbg_drivers_list);
@@ -59,6 +60,7 @@ static int test_count = 0;
 int fileserver_deal_cmd(struct list_head *client_list, enum string_dev_cmd cmd, char *lookfor, char *key, char **string, int *int_value, void (*callback)(char *key, char *value ));
 int bfs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *client_list);
 int bfs_file_amend(char *file2amend, char *str_append);
+int dump_kmsg(char *name, int size, int *always);
 bool copy_file(char *from, char *to);
 
 void fs_enable_kmsg( bool enable )
@@ -72,18 +74,21 @@ void fs_enable_kmsg( bool enable )
     else
         g_pollkmsg_en = 0;
 }
-
-
-void fs_dump_kmsg( u32 size )
+int get_machine_id(void)
 {
-
+    return machine_id;
 }
-
-
-void  fs_save_state(void)
+int fs_string2file(char *filename, char *string)
 {
-    //fileserver_deal_cmd(&lidbg_state_list, FS_CMD_LIST_SAVE2FILE, NULL, NULL, NULL, NULL, NULL);
-    fs_copy_file(state_mem_path,state_sd_path);
+    return bfs_file_amend(filename, string);
+}
+int fs_dump_kmsg( int size )
+{
+    return dump_kmsg(KMSG_NODE, size, NULL);
+}
+void fs_save_state(void)
+{
+    fs_copy_file(state_mem_path, state_sd_path); //fileserver_deal_cmd(&lidbg_state_list, FS_CMD_LIST_SAVE2FILE, NULL, NULL, NULL, NULL, NULL);
 }
 int fs_regist_state(char *key, int *value)
 {
@@ -532,23 +537,34 @@ int update_list(const char *filename, struct list_head *client_list)
     return 1;
 }
 
-bool readwrite_file(const char *filename, char *wbuff, char *rbuff, int *rbuff_len)
+int readwrite_file(const char *filename, char *wbuff, char *rbuff, int readlen)
 {
     struct file *filep;
+    struct inode *inodefrom = NULL;
     mm_segment_t old_fs;
+    unsigned int file_len = 1;
 
     filep = filp_open(filename,  O_RDWR, 0);
     if(IS_ERR(filep) || !(filep->f_op) || !(filep->f_op->read) || !(filep->f_op->write))
-        return false;
+        return -1;
     old_fs = get_fs();
     set_fs(get_ds());
+
     if(wbuff)
         filep->f_op->write(filep, wbuff, strlen(wbuff), &filep->f_pos);
     else
-        filep->f_op->read(filep, rbuff, *rbuff_len, &filep->f_pos);
+    {
+        inodefrom = filep->f_dentry->d_inode;
+        file_len = inodefrom->i_size;
+        filep->f_op->llseek(filep, 0, 0);
+        filep->f_op->read(filep, rbuff, file_len, &filep->f_pos);
+        *(rbuff + (file_len < readlen ? file_len : readlen - 1)) = '\0';
+        if(g_dubug_on)
+            FS_WARN("%d,%s\n", file_len, rbuff);
+    }
     set_fs(old_fs);
     filp_close(filep, 0);
-    return true;
+    return file_len;
 }
 
 int launch_file_cmd(const char *filename)
@@ -605,7 +621,7 @@ int launch_file_cmd(const char *filename)
             p[1] = '\0';
             loop = simple_strtoul(p, 0, 0);
             for(; loop > 0; loop--)
-                readwrite_file(LIDBG_NODE, token + 1, NULL, NULL);
+                readwrite_file(LIDBG_NODE, token + 1, NULL, 0);
         }
     }
     kfree(file_ptr);
@@ -744,41 +760,50 @@ static int thread_pollstate_func(void *data)
     }
     return 1;
 }
-
-static int thread_pollkmsg_func(void *data)
+int dump_kmsg(char *name, int size, int *always)
 {
     struct file *filep;
     mm_segment_t old_fs;
     char buff[1024];
     int  ret = -1;
+    int kmsglen = 0;
+    int req_kmsglen = size;
+    memset(buff, 0, sizeof(buff));
+    if(!size && !always)
+    {
+        FS_ERR("<size_k=null&&always=null>\n");
+        return -1;
+    }
+    filep = filp_open(name,  O_RDONLY , 0);
+    if(!IS_ERR(filep))
+    {
+        old_fs = get_fs();
+        set_fs(get_ds());
+        while(kmsglen < req_kmsglen || (!always ? 0 : *always) )
+        {
+            ret = filep->f_op->read(filep, buff, 1023, &filep->f_pos);
+            if(ret > 0)
+            {
+                buff[ret] = '\0';
+                bfs_file_amend(LIDBG_KMSG_FILE_PATH, buff);
+                kmsglen += ret;
+                //msleep(150);
+            }
+        }
+        set_fs(old_fs);
+        filp_close(filep, 0);
+    }
+    return kmsglen;
+}
+static int thread_pollkmsg_func(void *data)
+{
     allow_signal(SIGKILL);
     allow_signal(SIGSTOP);
     //set_freezable();
-    memset(buff, 0, sizeof(buff));
     while(!kthread_should_stop())
     {
-
         if( !wait_for_completion_interruptible(&kmsg_wait))
-        {
-            filep = filp_open(KMSG_NODE,  O_RDONLY , 0);
-            if(!IS_ERR(filep))
-            {
-                old_fs = get_fs();
-                set_fs(get_ds());
-                while(g_pollkmsg_en)
-                {
-                    ret = filep->f_op->read(filep, buff, 1023, &filep->f_pos);
-                    if(ret > 0)
-                    {
-                        buff[ret] = '\0';
-                        bfs_file_amend(LIDBG_KMSG_FILE_PATH, buff);
-                        msleep(150);
-                    }
-                }
-                set_fs(old_fs);
-                filp_close(filep, 0);
-            }
-        }
+            dump_kmsg(KMSG_NODE, 0, &g_pollkmsg_en);
     }
     return 1;
 }
@@ -847,6 +872,24 @@ void callback_pollkmsg(char *key, char *value)
         complete(&kmsg_wait);
 }
 
+void set_machine_id(void)
+{
+    char string[64];
+    if(is_file_exist(MACHINE_ID_FILE))
+    {
+        readwrite_file(MACHINE_ID_FILE, NULL, string, sizeof(string));
+        machine_id = simple_strtoul(string, 0, 0);
+    }
+    else
+    {
+        get_random_bytes(&machine_id, sizeof(int));
+        machine_id = ABS(machine_id);
+        sprintf(string, "%d", machine_id);
+        if(g_dubug_on)
+            FS_WARN("%s\n", string);
+        bfs_file_amend(MACHINE_ID_FILE, string);
+    }
+}
 void fileserverinit_once(void)
 {
     char tbuff[100];
@@ -882,10 +925,13 @@ void fileserverinit_once(void)
     kfifo_init(&log_fifo, log_buffer, FIFO_SIZE);
     kfifo_reset(&log_fifo);
     lidbg_get_current_time(tbuff, NULL);
-	
+    set_machine_id();
+
     fs_file_log("\nBuild Time: %s, %s, %s\n", __FILE__, __DATE__, __TIME__);
     fs_file_log("%s\n", FS_VERSION );
     fs_file_log("%s\n", tbuff);
+    fs_file_log("machine_id:%d\n", get_machine_id());//save to log
+    FS_WARN("machine_id:%d\n", get_machine_id());//sdve to uart
 
     fs_get_intvalue(&lidbg_core_list, "fs_dbg_enable", &g_dubug_on, NULL);
     fs_get_intvalue(&lidbg_core_list, "fs_clearlogfifo_ms", &g_clearlogfifo_ms, NULL);
@@ -922,6 +968,8 @@ void test_fileserver_stability(void)
     lidbg_get_current_time(tbuff, NULL);
     fs_file_log("%s\n", tbuff);
 
+    fs_string2file("/mnt/sdcard/Android/fs_string2file.txt", tbuff);
+    set_machine_id();
 
     is_file_updated(core_sd_path, &precorefile_tm);
     update_list(core_sd_path, &lidbg_core_list);
@@ -943,7 +991,7 @@ void test_fileserver_stability(void)
         fs_show_list(&lidbg_drivers_list);
     }
 }
-static int fileserver_test_fk(void *data)
+static int thread_fileserver_test(void *data)
 {
     allow_signal(SIGKILL);
     allow_signal(SIGSTOP);
@@ -969,15 +1017,15 @@ void fileserver_thread_test(int zero_return)
     {
     case 3:
         printk("[futengfei]======start_kthread_run1.2.3\n");
-        fileserver_test_task3 = kthread_run(fileserver_test_fk, NULL, "ftf_fs_task3");
+        fileserver_test_task3 = kthread_run(thread_fileserver_test, NULL, "ftf_fs_task3");
         msleep(88);
     case 2:
         printk("[futengfei]======start_kthread_run1.2\n");
-        fileserver_test_task2 = kthread_run(fileserver_test_fk, NULL, "ftf_fs_task2");
+        fileserver_test_task2 = kthread_run(thread_fileserver_test, NULL, "ftf_fs_task2");
         msleep(230);
     case 1:
         printk("[futengfei]======start_kthread_run1\n");
-        fileserver_test_task = kthread_run(fileserver_test_fk, NULL, "ftf_fs_task");
+        fileserver_test_task = kthread_run(thread_fileserver_test, NULL, "ftf_fs_task");
         break;
     case 0:
         printk("[futengfei]======stop_kthread_run1.2.3\n");
@@ -1000,15 +1048,17 @@ void fileserver_thread_test(int zero_return)
 void lidbg_fileserver_main(int argc, char **argv)
 {
     int cmd = 0;
+    int cmd_para = 0;
     int thread_count = 0;
-    if(argc < 2)
+    if(argc < 3)
     {
-        printk("[futengfei]err.lidbg_fileserver_main:echo \"c file 1 1\" > /dev/mlidbg0\n");
+        printk("[futengfei]err.lidbg_fileserver_main:echo \"c file 1 1 1\" > /dev/mlidbg0\n");
         return;
     }
 
     thread_count = simple_strtoul(argv[0], 0, 0);
     cmd = simple_strtoul(argv[1], 0, 0);
+    cmd_para = simple_strtoul(argv[2], 0, 0);
     fileserver_thread_test(thread_count);
     switch (cmd)
     {
@@ -1016,10 +1066,13 @@ void lidbg_fileserver_main(int argc, char **argv)
         fs_log_sync();
         break;
     case 2:
-        fs_enable_kmsg(true);
+        fs_enable_kmsg(cmd_para);
         break;
     case 3:
-        fs_enable_kmsg(false);
+        fs_dump_kmsg(cmd_para * 1024);
+        break;
+    case 4:
+        FS_WARN("machine_id:%d\n", get_machine_id());//sdve to uart
         break;
     default:
         FS_ERR("<check you cmd:%d>\n", cmd);
@@ -1032,8 +1085,11 @@ void lidbg_fileserver_main(int argc, char **argv)
 EXPORT_SYMBOL(lidbg_fileserver_main);
 EXPORT_SYMBOL(lidbg_drivers_list);
 EXPORT_SYMBOL(lidbg_core_list);
+EXPORT_SYMBOL(get_machine_id);
 EXPORT_SYMBOL(fs_enable_kmsg);
+EXPORT_SYMBOL(fs_string2file);
 EXPORT_SYMBOL(fs_save_state);
+EXPORT_SYMBOL(fs_dump_kmsg);
 EXPORT_SYMBOL(fs_regist_state);
 EXPORT_SYMBOL(fs_get_intvalue);
 EXPORT_SYMBOL(fs_get_value);

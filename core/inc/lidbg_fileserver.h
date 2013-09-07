@@ -38,13 +38,16 @@ struct string_dev
     void (*callback)(char *key,char *value);
 };
 void lidbg_fileserver_main(int argc, char **argv);
+extern int get_machine_id(void);
 extern void fs_enable_kmsg( bool enable );
 extern void fs_save_state(void);
+extern int fs_dump_kmsg( int size );
 extern int fs_regist_state(char *key, int *value);
 extern int fs_get_intvalue(struct list_head *client_list, char *key,int *int_value,void (*callback)(char *key,char *value));
 extern int fs_get_value(struct list_head *client_list, char *key, char **string);
 extern int fs_set_value(struct list_head *client_list, char *key, char *string);
 extern int fs_find_string(struct list_head *client_list, char *string);
+extern int fs_string2file(char *filename, char *string);
 extern int fs_show_list(struct list_head *client_list);
 extern int fs_file_log( const char *fmt, ...);
 extern int fs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *client_list);
