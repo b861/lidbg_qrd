@@ -172,7 +172,7 @@ void lidbg_soc_main(int argc, char **argv);
 #if 1
 struct fly_smem
 {
-    int reserved1;
+    u8 reserved[4];
     u32 ch[ADC_MAX_CH];
     int reserved2;
     int bl_value;

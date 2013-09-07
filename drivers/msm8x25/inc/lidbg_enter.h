@@ -102,7 +102,7 @@ typedef irqreturn_t (*pinterrupt_isr)(int irq, void *dev_id);
 #define ADC_MAX_CH (8)
 struct fly_smem
 {
-    int reserved1;
+    u8 reserved[4];
     u32 ch[ADC_MAX_CH];
     int reserved2;
     int bl_value;
