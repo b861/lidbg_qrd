@@ -207,7 +207,6 @@ open_dev:
     system("chmod 0777 /dev/lidbg_servicer");
     system("chmod 0777 /dev/lidbg_msg");
     system("chmod 0777 /dev/ubloxgps0");
-    system("chmod 606 /dev/tw9912config");
 
 	
     fd = open("/dev/lidbg_servicer", O_RDWR);
@@ -262,7 +261,7 @@ open_dev:
 
     //chegnweidong
     system("chmod 0777 /dev/flysemdriver");
-
+    system("chmod 606 /dev/tw9912config");
 
     sleep(5);
 
