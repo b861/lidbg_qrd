@@ -8,7 +8,6 @@
 LIDBG_DEFINE;
 
 struct task_struct *soc_task;
-FLY_SYSTEM_STATUS g_system_status = FLY_ACC_ON;
 
 
 char *insmod_list[] =
@@ -47,7 +46,7 @@ int soc_thread(void *data)
 		{
 			sprintf(path, "%s%s", insmod_path[i],insmod_list[j]);
 			//lidbg("load %s\n",path);
-			lidbg_launch_user(INSMOD_PATH, path );
+			lidbg_launch_user(INSMOD_PATH, path ,NULL);
 			msleep(100);
 		}
 	}
@@ -56,8 +55,8 @@ int soc_thread(void *data)
 
 #else
 		msleep(1000);
-		if(lidbg_launch_user("/system/bin/lidbg_servicer", NULL)<0)
-			lidbg_launch_user("/flysystem/bin/lidbg_servicer", NULL);
+		if(lidbg_launch_user("/system/bin/lidbg_servicer", NULL,NULL)<0)
+			lidbg_launch_user("/flysystem/bin/lidbg_servicer", NULL,NULL);
 #endif
 	return 0;
 }
@@ -241,7 +240,7 @@ struct fly_smem* SOC_Get_Share_Mem(void)
 
 void SOC_System_Status(FLY_SYSTEM_STATUS status)
 {
-	g_system_status = status;
+	g_var.system_status = status;
 }
 
 
@@ -333,6 +332,21 @@ ssize_t hal_read(struct file *filp, char __user *buf, size_t size,
 }
 
 
+#include "cmd.c"
+static ssize_t hal_write(struct file *filp, const char __user *buf,
+                           size_t size, loff_t *ppos)
+{
+	char cmd_buf[512];
+    memset(cmd_buf, '\0', 512);
+
+    if(copy_from_user(cmd_buf, buf, size))
+    {
+        printk("copy_from_user ERR\n");
+	}
+	parse_cmd(cmd_buf);
+    return size;
+}
+
 
 #define DEVICE_NAME "lidbg_hal"
 
@@ -341,6 +355,7 @@ static struct file_operations dev_fops =
     .owner	=	THIS_MODULE,
     .open   =   hal_open,
     .read   =   hal_read,
+    .write   =   hal_write,
     .release =  hal_release,
 };
 
@@ -373,6 +388,10 @@ int fly_hal_init(void)
 
 	set_func_tbl();
 	
+	g_var.temp = 0;
+	g_var.system_status = FLY_ACC_ON;
+	g_var.machine_id = get_machine_id();
+		
     soc_task = kthread_create(soc_thread, NULL, "lidbg_soc_thread");
     if(IS_ERR(soc_task))
     {
@@ -389,8 +408,6 @@ void fly_hal_deinit(void)
 
 module_init(fly_hal_init);
 module_exit(fly_hal_deinit);
-
-EXPORT_SYMBOL(g_system_status);
 
 
 MODULE_LICENSE("GPL");

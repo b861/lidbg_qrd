@@ -671,8 +671,8 @@ static int __init i2c_api_init(void)
 #ifdef LIDBG_I2C_GPIO 
 #ifndef CONFIG_I2C_GPIO
 	lidbg("load lidbg_i2c_gpio.ko\n");
-	lidbg_launch_user(INSMOD_PATH, "/system/lib/modules/out/lidbg_i2c_gpio.ko");
-	lidbg_launch_user(INSMOD_PATH, "/flysystem/lib/out/lidbg_i2c_gpio.ko");
+	lidbg_launch_user(INSMOD_PATH, "/system/lib/modules/out/lidbg_i2c_gpio.ko",NULL);
+	lidbg_launch_user(INSMOD_PATH, "/flysystem/lib/out/lidbg_i2c_gpio.ko",NULL);
 #endif	
 
 	I2C_GPIO_CONFIG;

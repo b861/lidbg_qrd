@@ -47,7 +47,7 @@ extern int fs_get_intvalue(struct list_head *client_list, char *key,int *int_val
 extern int fs_get_value(struct list_head *client_list, char *key, char **string);
 extern int fs_set_value(struct list_head *client_list, char *key, char *string);
 extern int fs_find_string(struct list_head *client_list, char *string);
-extern int fs_string2file(char *filename, char *string);
+extern int fs_string2file(char *filename, const char *fmt, ... );
 extern int fs_show_list(struct list_head *client_list);
 extern int fs_file_log( const char *fmt, ...);
 extern int fs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *client_list);
@@ -55,7 +55,22 @@ extern bool fs_copy_file(char *from, char *to);
 extern void fs_log_sync(void);
 extern struct list_head lidbg_drivers_list;
 extern struct list_head lidbg_core_list;
-#define lidbg_fs(fmt,...) do{fs_file_log(fmt,##__VA_ARGS__);}while(0)
+
+
+#define lidbg_fs_log(path,fmt,...) do{	char buf[32];\
+								lidbg_get_current_time(buf,NULL);\
+								fs_string2file(path,"[%s] ",buf);\
+								fs_string2file(path,fmt,##__VA_ARGS__);\
+								}while(0)
+
+
+#define lidbg_fs(fmt,...) do{	char buf[32];\
+								lidbg_get_current_time(buf,NULL);\
+								fs_file_log("[%s] ",buf);\
+								fs_file_log(fmt,##__VA_ARGS__);\
+								}while(0)
+
+
 #define FS_REGISTER_INT(intvalue,key,def_value,callback) intvalue=def_value; \
 			if(fs_get_intvalue(&lidbg_drivers_list, key,&intvalue,callback)<0) \
 				fs_get_intvalue(&lidbg_core_list, key,&intvalue,callback);\

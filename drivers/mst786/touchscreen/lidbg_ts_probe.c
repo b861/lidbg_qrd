@@ -3,7 +3,6 @@
 
 LIDBG_DEFINE;
 
-extern int  lidbg_launch_user( char bin_path[], char argv1[]);
 static int ts_scan_delayms =500;
 static int have_warned =0;
 #define TS_I2C_BUS (1)
@@ -63,10 +62,10 @@ void ts_scan(void)
 
 
 			sprintf(path, "/system/lib/modules/out/%s", ts_probe_dev[i].name);
-			lidbg_launch_user(INSMOD_PATH, path);
+			lidbg_launch_user(INSMOD_PATH, path,NULL);
 			
 			sprintf(path, "/flysystem/lib/out/%s", ts_probe_dev[i].name);
-			lidbg_launch_user(INSMOD_PATH, path);
+			lidbg_launch_user(INSMOD_PATH, path,NULL);
 
 			//in V3+,check ts revert and save the ts sate.
 			if(0==have_warned)
@@ -82,8 +81,8 @@ void ts_scan(void)
 			
 			if (!strcmp(ts_probe_dev[i].name, "gt801.ko"))
 			{
-				lidbg_launch_user(INSMOD_PATH, "/system/lib/modules/out/gt80x_update.ko");
-				lidbg_launch_user(INSMOD_PATH, "/flysystem/lib/out/gt80x_update.ko");
+				lidbg_launch_user(INSMOD_PATH, "/system/lib/modules/out/gt80x_update.ko",NULL);
+				lidbg_launch_user(INSMOD_PATH, "/flysystem/lib/out/gt80x_update.ko",NULL);
 			}
 	        break;
         }
@@ -103,8 +102,8 @@ int ts_probe_thread(void *data)
     if(ts_scan_delayms < 100)
         ts_scan_delayms = 100;
 	
-	lidbg_launch_user(INSMOD_PATH, "/system/lib/modules/out/lidbg_ts_to_recov.ko");
-	lidbg_launch_user(INSMOD_PATH, "/flysystem/lib/out/lidbg_ts_to_recov.ko");
+	lidbg_launch_user(INSMOD_PATH, "/system/lib/modules/out/lidbg_ts_to_recov.ko",NULL);
+	lidbg_launch_user(INSMOD_PATH, "/flysystem/lib/out/lidbg_ts_to_recov.ko",NULL);
 
     while(1)
     {

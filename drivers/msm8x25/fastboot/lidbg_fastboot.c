@@ -15,6 +15,7 @@ LIDBG_DEFINE;
 #include <clock.h>
 #include <clock-pcom.h>
 
+#define FASTBOOT_LOG_PATH "/data/log_fb.txt"
 
 //#define EXPORT_ACTIVE_WAKE_LOCKS
 #define RUN_FASTBOOT
@@ -663,7 +664,7 @@ static int thread_fastboot_resume(void *data)
 	//log acc off times
 		if(fb_data->resume_count  % 5 == 0)
 		{
-			lidbg_fs("ats=%d\n",fb_data->resume_count);
+			lidbg_fs_log(FASTBOOT_LOG_PATH,"ats=%d\n",fb_data->resume_count);
 		}
 		
 		//fs_save_state();
@@ -819,7 +820,7 @@ static void fastboot_late_resume(struct early_suspend *h)
 	fastboot_set_status(PM_STATUS_LATE_RESUME_OK);
 
 #endif
-
+	lidbg("machine_id=%d\n",g_var.machine_id);
 	set_cpu_governor(0);//ondemand
 }
 #endif

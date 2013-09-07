@@ -7,25 +7,25 @@
 
 //zone below [tools]
 #define FS_VERSION "FS.VERSION:  [20130907 V4.0]"
-#define LIDBG_LOG_FILE_PATH "/mnt/sdcard/Android/lidbg_log.txt"
-#define LIDBG_KMSG_FILE_PATH "/mnt/sdcard/Android/lidbg_kmsg.txt"
-#define MACHINE_ID_FILE "/mnt/sdcard/Android/MIF.txt"
+#define LIDBG_LOG_FILE_PATH "/data/lidbg_log.txt"
+#define LIDBG_KMSG_FILE_PATH "/data/lidbg_kmsg.txt"
+#define MACHINE_ID_FILE "/data/MIF.txt"
 #define LIDBG_NODE "/dev/mlidbg0"
 #define KMSG_NODE "/proc/kmsg"
 #define FIFO_SIZE (1024)
 static struct kfifo log_fifo;
 spinlock_t		fs_lock;
 unsigned long flags;
-static  char *driver_sd_path = "/mnt/sdcard/Android/drivers.txt";
+static  char *driver_sd_path = "/data/drivers.txt";
 static  char *driver_fly_path = "/flysystem/lib/out/drivers.conf";
 static  char *driver_lidbg_path = "/system/lib/modules/out/drivers.conf";
-static  char *core_sd_path = "/mnt/sdcard/Android/core.txt";
+static  char *core_sd_path = "/data/core.txt";
 static  char *core_fly_path = "/flysystem/lib/out/core.conf";
 static  char *core_lidbg_path = "/system/lib/modules/out/core.conf";
-static  char *cmd_sd_path = "/mnt/sdcard/Android/cmd.txt";
+static  char *cmd_sd_path = "/data/cmd.txt";
 static  char *cmd_fly_path = "/flysystem/lib/out/cmd.conf";
 static  char *cmd_lidbg_path = "/system/lib/modules/out/cmd.conf";
-static  char *state_sd_path = "/mnt/sdcard/Android/state.txt";
+static  char *state_sd_path = "/data/state.txt";
 static  char *state_mem_path = "/mnt/state.txt";
 static  char *state_fly_path = "/flysystem/lib/out/state.conf";
 static  char *state_lidbg_path = "/system/lib/modules/out/state.conf";
@@ -78,9 +78,17 @@ int get_machine_id(void)
 {
     return machine_id;
 }
-int fs_string2file(char *filename, char *string)
+int fs_string2file(char *filename, const char *fmt, ... )
 {
-    return bfs_file_amend(filename, string);
+    int len;
+    va_list args;
+    int n;
+    char str_append[256];
+    va_start ( args, fmt );
+    n = vsprintf ( str_append, (const char *)fmt, args );
+    va_end ( args );
+
+    return bfs_file_amend(filename, str_append);
 }
 int fs_dump_kmsg( int size )
 {
@@ -131,7 +139,7 @@ int fs_file_log( const char *fmt, ... )
     int len;
     va_list args;
     int n;
-    char str_append[512];
+    char str_append[256];
     va_start ( args, fmt );
     n = vsprintf ( str_append, (const char *)fmt, args );
     va_end ( args );
@@ -341,7 +349,7 @@ int bfs_file_amend(char *file2amend, char *str_append)
     flags = O_CREAT | O_RDWR | O_APPEND;
 
 again:
-    filep = filp_open(file2amend, flags , 0600);
+    filep = filp_open(file2amend, flags , 0777);
     if(IS_ERR(filep))
     {
         printk("[futengfei]err.open:<%s>\n", file2amend);
@@ -734,7 +742,7 @@ static int thread_pollstate_func(void *data)
         if(g_pollstate_ms)
         {
             msleep(g_pollstate_ms);
-            filep = filp_open(state_mem_path, O_CREAT | O_RDWR | O_TRUNC , 0600);
+            filep = filp_open(state_mem_path, O_CREAT | O_RDWR | O_TRUNC , 0777);
             if(!IS_ERR(filep))
             {
                 old_fs = get_fs();
@@ -764,7 +772,7 @@ int dump_kmsg(char *name, int size, int *always)
 {
     struct file *filep;
     mm_segment_t old_fs;
-    char buff[1024];
+    char buff[512];
     int  ret = -1;
     int kmsglen = 0;
     int req_kmsglen = size;
@@ -781,7 +789,7 @@ int dump_kmsg(char *name, int size, int *always)
         set_fs(get_ds());
         while(kmsglen < req_kmsglen || (!always ? 0 : *always) )
         {
-            ret = filep->f_op->read(filep, buff, 1023, &filep->f_pos);
+            ret = filep->f_op->read(filep, buff, 512-1, &filep->f_pos);
             if(ret > 0)
             {
                 buff[ret] = '\0';
@@ -834,7 +842,7 @@ bool copy_file(char *from, char *to)
     }
 
     pfilefrom = filp_open(from, O_RDWR , 0);
-    pfileto = filp_open(to, O_CREAT | O_RDWR , 0600);
+    pfileto = filp_open(to, O_CREAT | O_RDWR , 0777);
     if(IS_ERR(pfileto))
     {
         FS_ERR("<%s>\n", to);
@@ -929,9 +937,9 @@ void fileserverinit_once(void)
 
     fs_file_log("\nBuild Time: %s, %s, %s\n", __FILE__, __DATE__, __TIME__);
     fs_file_log("%s\n", FS_VERSION );
-    fs_file_log("%s\n", tbuff);
     fs_file_log("machine_id:%d\n", get_machine_id());//save to log
     FS_WARN("machine_id:%d\n", get_machine_id());//sdve to uart
+    fs_file_log("%s\n", tbuff);
 
     fs_get_intvalue(&lidbg_core_list, "fs_dbg_enable", &g_dubug_on, NULL);
     fs_get_intvalue(&lidbg_core_list, "fs_clearlogfifo_ms", &g_clearlogfifo_ms, NULL);
@@ -943,6 +951,9 @@ void fileserverinit_once(void)
     filepoll_task = kthread_run(thread_pollfile_func, NULL, "ftf_filepolltask");
     fs_statetask = kthread_run(thread_pollstate_func, NULL, "ftf_statetask");
     fs_kmsgtask = kthread_run(thread_pollkmsg_func, NULL, "ftf_kmsgtask");
+	
+	lidbg_launch_user(CHMOD_PATH, "777", "/data");
+
 }
 //zone end
 

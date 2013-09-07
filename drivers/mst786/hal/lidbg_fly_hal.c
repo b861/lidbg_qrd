@@ -47,7 +47,7 @@ int soc_thread(void *data)
 		{
 			sprintf(path, "%s%s", insmod_path[i],insmod_list[j]);
 			//lidbg("load %s\n",path);
-			lidbg_launch_user(INSMOD_PATH, path );
+			lidbg_launch_user(INSMOD_PATH, path ,NULL);
 			msleep(100);
 		}
 	}
@@ -56,8 +56,8 @@ int soc_thread(void *data)
 
 #else
 		msleep(1000);
-		if(lidbg_launch_user("/system/bin/lidbg_servicer", NULL)<0)
-			lidbg_launch_user("/flysystem/bin/lidbg_servicer", NULL);
+		if(lidbg_launch_user("/system/bin/lidbg_servicer", NULL,NULL)<0)
+			lidbg_launch_user("/flysystem/bin/lidbg_servicer", NULL,NULL);
 #endif
 	return 0;
 }

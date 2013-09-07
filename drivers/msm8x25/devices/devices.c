@@ -319,18 +319,17 @@ find_key:
 
 }
 
+#define TEMP_LOG_PATH "/data/log_ct.txt"
+
 void log_temp(void)
 {
 	static int old_temp,cur_temp;
 	int tmp;
-	static char buf[32];
-	cur_temp = soc_temp_get();
-    fs_regist_state("cpu_temperature", &cur_temp);
+	g_var.temp = cur_temp = soc_temp_get();
 	tmp = cur_temp - old_temp;
 	if(ABS(tmp) >= 5)
 	{
-	    lidbg_get_current_time(buf,NULL);
-		lidbg_fs("time:%s,temp:%d\n",buf,cur_temp);
+		lidbg_fs_log(TEMP_LOG_PATH,"temp:%d\n",cur_temp);
 		old_temp = cur_temp;
 	}
 }
@@ -1061,6 +1060,8 @@ int dev_init(void)
 
     LIDBG_GET;
     set_func_tbl();
+	
+    fs_regist_state("ct", &(g_var.temp));
 
 #if 0
     PWR_EN_ON;

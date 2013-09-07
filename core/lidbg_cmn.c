@@ -163,9 +163,9 @@ int lidbg_get_current_time(char *time_string,struct rtc_time *ptm)
 }
 // cmn_launch_user("/system/bin/insmod", "/system/lib/modules/wlan.ko");
 // cmn_launch_user("/system/lidbg_servicer", NULL);
-int  lidbg_launch_user( char bin_path[], char argv1[])
+int  lidbg_launch_user( char bin_path[], char argv1[],char argv2[])
 {
-    char *argv[] = { bin_path, argv1, NULL };
+    char *argv[] = { bin_path, argv1,argv2, NULL };
     static char *envp[] = { "HOME=/", "TERM=linux", "PATH=/system/bin:/sbin", NULL };//tell me sh where it is;
     int ret;
     lidbg("%s ,%s\n", bin_path, argv1);

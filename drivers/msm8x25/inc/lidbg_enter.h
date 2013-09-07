@@ -84,7 +84,6 @@
 
 
 #if (defined(BUILD_SOC) || defined(BUILD_CORE) || defined(BUILD_DRIVERS))
-extern FLY_SYSTEM_STATUS g_system_status;
 #else
 #define lidbg_io(fmt,...) //do{SOC_IO_Uart_Send(IO_UART_DELAY_245_115200,fmt,##__VA_ARGS__);}while(0)
 
@@ -331,6 +330,9 @@ struct lidbg_pvar_t
 {
     //all pointer
     rwlock_t *pvar_tasklist_lock;
+	int temp;
+	FLY_SYSTEM_STATUS system_status;
+	int machine_id;
 };
 
 struct lidbg_hal
@@ -345,6 +347,8 @@ struct lidbg_hal
 #define LIDBG_DEV_CHECK_READY  (plidbg_dev != NULL)
 
 #define LIDBG_DEFINE  struct lidbg_hal *plidbg_dev = NULL
+
+#define g_var  plidbg_dev->soc_pvar_tbl
 
 #define LIDBG_GET  \
  	do{\
