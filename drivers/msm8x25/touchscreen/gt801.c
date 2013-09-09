@@ -629,6 +629,10 @@ BIT_NO_CHANGE:
                 printk("\n[wang]:====err:FLAG_FOR_15S_OFF===[%d]\n", FLAG_FOR_15S_OFF);
             }
 
+	g_curr_tspara.x=finger_list.pointer[0].x;
+	g_curr_tspara.y=finger_list.pointer[0].y;
+	g_curr_tspara.press=true;
+
 #ifdef BUILD_FOR_RECOVERY
             if( (finger_list.pointer[0].x >= 0) && (finger_list.pointer[0].y >= 0) )
             {
@@ -652,6 +656,8 @@ BIT_NO_CHANGE:
 #ifdef BOARD_V2
             input_report_key(ts->input_dev, BTN_TOUCH, finger_list.pointer[count].state);
 #endif
+
+	g_curr_tspara.press=false;
 
 #ifdef BUILD_FOR_RECOVERY
             {

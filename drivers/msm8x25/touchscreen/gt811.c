@@ -630,6 +630,11 @@ COORDINATE_POLL:
         {
             printk("\nerr:FLAG_FOR_15S_OFF===[%d]\n", FLAG_FOR_15S_OFF);
         }
+
+	g_curr_tspara.x=input_y;
+	g_curr_tspara.y=input_x;
+	g_curr_tspara.press=true;
+
 #ifdef BUILD_FOR_RECOVERY
         if( (input_y >= 0) && (input_x >= 0) )
         {
@@ -668,6 +673,7 @@ COORDINATE_POLL:
             set_touch_pos(&touch);
         }
 #endif
+	g_curr_tspara.press=false;
 
     }
 #ifdef BOARD_V2  

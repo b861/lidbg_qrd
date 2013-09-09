@@ -105,6 +105,9 @@ int ts_probe_thread(void *data)
 	lidbg_launch_user(INSMOD_PATH, "/system/lib/modules/out/lidbg_ts_to_recov.ko",NULL);
 	lidbg_launch_user(INSMOD_PATH, "/flysystem/lib/out/lidbg_ts_to_recov.ko",NULL);
 
+	lidbg_launch_user(INSMOD_PATH, "/system/lib/modules/out/lidbg_ts_event.ko",NULL);
+	lidbg_launch_user(INSMOD_PATH, "/flysystem/lib/out/lidbg_ts_event.ko",NULL);
+
     while(1)
     {
         set_current_state(TASK_UNINTERRUPTIBLE);

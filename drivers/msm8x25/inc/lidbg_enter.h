@@ -8,7 +8,7 @@
 #include <lidbg_fastboot.h>
 #include <lidbg_lpc.h>
 #include <tw9912.h>
-
+#include <lidbg_ts_event.h>
 #else
 #include <linux/miscdevice.h>
 #include <asm/irq.h>

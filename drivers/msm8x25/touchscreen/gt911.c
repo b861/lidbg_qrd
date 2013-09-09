@@ -435,6 +435,11 @@ FLAG_FOR_15S_OFF++;
 
 if (touch_index & (0x01<<0))
 {
+
+	g_curr_tspara.x=point_data[6]|(point_data[7]<<8);
+	g_curr_tspara.y=point_data[4]|(point_data[5]<<8);
+	g_curr_tspara.press=true;
+
 #ifdef BUILD_FOR_RECOVERY
 	if( (input_y >= 0) && (input_x >= 0) )
 	{
@@ -449,6 +454,8 @@ if (touch_index & (0x01<<0))
 }
 else
 {
+	g_curr_tspara.press=false;
+
 #ifdef BUILD_FOR_RECOVERY
 	{
 		touch.pressed = 0;

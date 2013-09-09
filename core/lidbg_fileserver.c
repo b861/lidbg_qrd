@@ -1,9 +1,9 @@
 
 #include "lidbg.h"
 
-#define FS_WARN(fmt, args...) pr_info("[futengfei]warn.%s: " fmt,__func__,##args)
-#define FS_ERR(fmt, args...) pr_info("[futengfei]err.%s: " fmt,__func__,##args)
-#define FS_SUC(fmt, args...) pr_info("[futengfei]suceed.%s: " fmt,__func__,##args)
+#define FS_WARN(fmt, args...) pr_info("[futengfei.fs]warn.%s: " fmt,__func__,##args)
+#define FS_ERR(fmt, args...) pr_info("[futengfei.fs]err.%s: " fmt,__func__,##args)
+#define FS_SUC(fmt, args...) pr_info("[futengfei.fs]suceed.%s: " fmt,__func__,##args)
 
 //zone below [tools]
 #define FS_VERSION "FS.VERSION:  [20130907 V4.0]"
@@ -789,7 +789,7 @@ int dump_kmsg(char *name, int size, int *always)
         set_fs(get_ds());
         while(kmsglen < req_kmsglen || (!always ? 0 : *always) )
         {
-            ret = filep->f_op->read(filep, buff, 512-1, &filep->f_pos);
+            ret = filep->f_op->read(filep, buff, 512 - 1, &filep->f_pos);
             if(ret > 0)
             {
                 buff[ret] = '\0';
@@ -951,9 +951,6 @@ void fileserverinit_once(void)
     filepoll_task = kthread_run(thread_pollfile_func, NULL, "ftf_filepolltask");
     fs_statetask = kthread_run(thread_pollstate_func, NULL, "ftf_statetask");
     fs_kmsgtask = kthread_run(thread_pollkmsg_func, NULL, "ftf_kmsgtask");
-	
-	lidbg_launch_user(CHMOD_PATH, "777", "/data");
-
 }
 //zone end
 
