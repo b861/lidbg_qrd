@@ -329,7 +329,7 @@ void log_temp(void)
 	tmp = cur_temp - old_temp;
 	if(ABS(tmp) >= 5)
 	{
-		lidbg_fs_log(TEMP_LOG_PATH,"temp:%d\n",cur_temp);
+		lidbg_fs_log(TEMP_LOG_PATH,"%d\n",cur_temp);
 		old_temp = cur_temp;
 	}
 }

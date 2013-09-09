@@ -561,6 +561,8 @@ static int thread_fastboot_suspend(void *data)
                             lidbg("$-\n");
 #endif
 							//log_active_locks();
+							#define __LOG_BUF_LEN   (1 << CONFIG_LOG_BUF_SHIFT)
+							fs_dump_kmsg(__LOG_BUF_LEN);
 							wakelock_occur_count = 0;
                             if(fastboot_get_status() == PM_STATUS_EARLY_SUSPEND_PENDING)
                             {
@@ -664,7 +666,7 @@ static int thread_fastboot_resume(void *data)
 	//log acc off times
 		if(fb_data->resume_count  % 5 == 0)
 		{
-			lidbg_fs_log(FASTBOOT_LOG_PATH,"ats=%d\n",fb_data->resume_count);
+			lidbg_fs_log(FASTBOOT_LOG_PATH,"%d\n",fb_data->resume_count);
 			fs_save_state();
 			fs_log_sync();
 		}
@@ -863,7 +865,7 @@ static int  fastboot_probe(struct platform_device *pdev)
 #endif
 
 
-    fs_regist_state("acc_off_times", (int*)&fb_data->resume_count);
+    fs_regist_state("ats", (int*)&fb_data->resume_count);
 	FS_REGISTER_INT(fb_data->kill_task_en,"kill_task_en",1,NULL);
 	FS_REGISTER_INT(fb_data->kill_all_task,"kill_all_task",0,kill_all_task);
 	FS_REGISTER_INT(fb_data->haslock_resume_times,"haslock_resume_times",0,NULL);
