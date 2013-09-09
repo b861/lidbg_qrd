@@ -956,19 +956,17 @@ void fly_devices_init(void)
 
     if(platform_id ==  PLATFORM_FLY)
     {
-
+		USB_WORK_ENABLE;
+		LCD_ON;
 
 #if (defined(FLY_DEBUG) || defined(BUILD_FOR_RECOVERY))
 
 		DVD_RESET_HIGH;
         TELL_LPC_PWR_ON;
-
         PWR_EN_ON;
-        USB_WORK_ENABLE;
-
+       
         lidbg("turn lcd on!\n");
         BL_SET(BL_MAX / 2);
-        LCD_ON;
 
 #ifdef DEBUG_BUTTON
 
