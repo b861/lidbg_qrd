@@ -772,11 +772,8 @@ int dump_kmsg(char *name, int size, int *always)
 {
     struct file *filep;
     mm_segment_t old_fs;
-    char buff[512];
+
     int  ret = -1;
-    int kmsglen = 0;
-    int req_kmsglen = size;
-    memset(buff, 0, sizeof(buff));
     if(!size && !always)
     {
         FS_ERR("<size_k=null&&always=null>\n");
@@ -787,21 +784,44 @@ int dump_kmsg(char *name, int size, int *always)
     {
         old_fs = get_fs();
         set_fs(get_ds());
-        while(kmsglen < req_kmsglen || (!always ? 0 : *always) )
+
+        if(size)
         {
-            ret = filep->f_op->read(filep, buff, 512 - 1, &filep->f_pos);
+            char *psize = NULL;
+            psize = (unsigned char *)vmalloc(size);
+            if(psize == NULL)
+            {
+                FS_ERR("<cannot malloc memory!>\n");
+                return ret;
+            }
+
+            ret = filep->f_op->read(filep, psize, size - 1, &filep->f_pos);
             if(ret > 0)
             {
-                buff[ret] = '\0';
-                bfs_file_amend(LIDBG_KMSG_FILE_PATH, buff);
-                kmsglen += ret;
-                //msleep(150);
+                psize[ret] = '\0';
+                bfs_file_amend(LIDBG_KMSG_FILE_PATH, psize);
+            }
+            vfree(psize);
+        }
+        else
+        {
+            char buff[512];
+            memset(buff, 0, sizeof(buff));
+            while( (!always ? 0 : *always) )
+            {
+                ret = filep->f_op->read(filep, buff, 512 - 1, &filep->f_pos);
+                if(ret > 0)
+                {
+                    buff[ret] = '\0';
+                    bfs_file_amend(LIDBG_KMSG_FILE_PATH, buff);
+                }
             }
         }
+
         set_fs(old_fs);
         filp_close(filep, 0);
     }
-    return kmsglen;
+    return ret;
 }
 static int thread_pollkmsg_func(void *data)
 {
