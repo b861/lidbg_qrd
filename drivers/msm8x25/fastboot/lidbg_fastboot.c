@@ -665,10 +665,11 @@ static int thread_fastboot_resume(void *data)
 		if(fb_data->resume_count  % 5 == 0)
 		{
 			lidbg_fs_log(FASTBOOT_LOG_PATH,"ats=%d\n",fb_data->resume_count);
+			fs_save_state();
+			fs_log_sync();
 		}
 		
-		//fs_save_state();
-		//fs_log_sync();
+
 		
         DUMP_FUN_LEAVE;
     }
