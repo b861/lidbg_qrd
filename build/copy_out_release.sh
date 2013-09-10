@@ -5,7 +5,6 @@ release_path=$DBG_OUT_RELEASE_PATH/$BOARD_VERSION/out
 
 #cp $DBG_OUT_PATH/lidbg_share.ko $release_path
 cp $DBG_OUT_PATH/lidbg_ts_to_recov.ko $release_path
-cp $DBG_OUT_PATH/lidbg_ts_event.ko $release_path
 cp $DBG_OUT_PATH/lidbg_msg.ko $release_path
 cp $DBG_OUT_PATH/lidbg_common.ko $release_path
 cp $DBG_OUT_PATH/lidbg_servicer.ko $release_path

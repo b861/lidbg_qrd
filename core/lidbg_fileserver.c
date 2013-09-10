@@ -6,7 +6,8 @@
 #define FS_SUC(fmt, args...) pr_info("[futengfei.fs]suceed.%s: " fmt,__func__,##args)
 
 //zone below [tools]
-#define FS_VERSION "FS.VERSION:  [20130907 V4.0]"
+#define FS_VERSION "FS.VERSION:  [20130910 V5.0]"
+#define DEBUG_MEM_FILE "/data/fs_private.txt"
 #define LIDBG_LOG_FILE_PATH "/data/lidbg_log.txt"
 #define LIDBG_KMSG_FILE_PATH "/data/lidbg_kmsg.txt"
 #define MACHINE_ID_FILE "/data/MIF.txt"
@@ -33,22 +34,26 @@ static struct task_struct *filelog_task;
 static struct task_struct *filepoll_task;
 static struct task_struct *fs_statetask;
 static struct task_struct *fs_kmsgtask;
+static struct task_struct *fs_fdetectask;
 struct rtc_time precorefile_tm;
 struct rtc_time predriverfile_tm;
 struct rtc_time precmdfile_tm;
 struct completion kmsg_wait;
+static int g_dubug_mem = 0;
 static int g_dubug_on = 0;
 static int g_clearlogfifo_ms = 30000;
 static int g_pollfile_ms = 7000;
 static int g_pollstate_ms = 1000;
 static int g_pollkmsg_en = 0;
 static int g_iskmsg_ready = 0;
+static int g_filedetect_ms = 10000;
 static int machine_id = 0;
 unsigned char log_buffer[FIFO_SIZE];
 unsigned char log_buffer2write[FIFO_SIZE];
 LIST_HEAD(lidbg_drivers_list);
 LIST_HEAD(lidbg_core_list);
-LIST_HEAD(lidbg_state_list);
+LIST_HEAD(fs_state_list);
+LIST_HEAD(fs_filedetec_list);
 LIST_HEAD(kill_list_test);//for test
 static struct task_struct *fileserver_test_task;
 static struct task_struct *fileserver_test_task2;
@@ -61,8 +66,18 @@ int fileserver_deal_cmd(struct list_head *client_list, enum string_dev_cmd cmd, 
 int bfs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *client_list);
 int bfs_file_amend(char *file2amend, char *str_append);
 int dump_kmsg(char *name, int size, int *always);
+void regist_filedetec(char *filename, void (*cb_filedetec)(char *filename ));
 bool copy_file(char *from, char *to);
+bool is_file_exist(char *file);
 
+
+void fs_regist_filedetec(char *filename, void (*cb_filedetec)(char *filename ))
+{
+    if(filename && cb_filedetec)
+        regist_filedetec(filename, cb_filedetec);
+    else
+        FS_ERR("<filename||cb_filedetec:null?>\n");
+}
 void fs_enable_kmsg( bool enable )
 {
     if(enable)
@@ -80,7 +95,6 @@ int get_machine_id(void)
 }
 int fs_string2file(char *filename, const char *fmt, ... )
 {
-    int len;
     va_list args;
     int n;
     char str_append[256];
@@ -96,11 +110,11 @@ int fs_dump_kmsg( int size )
 }
 void fs_save_state(void)
 {
-    fs_copy_file(state_mem_path, state_sd_path); //fileserver_deal_cmd(&lidbg_state_list, FS_CMD_LIST_SAVE2FILE, NULL, NULL, NULL, NULL, NULL);
+    fs_copy_file(state_mem_path, state_sd_path); //fileserver_deal_cmd(&fs_state_list, FS_CMD_LIST_SAVE2FILE, NULL, NULL, NULL, NULL, NULL);
 }
 int fs_regist_state(char *key, int *value)
 {
-    return fileserver_deal_cmd( &lidbg_state_list, FS_CMD_LIST_SAVEINFO, NULL, key, NULL, value, NULL);
+    return fileserver_deal_cmd( &fs_state_list, FS_CMD_LIST_SAVEINFO, NULL, key, NULL, value, NULL);
 }
 int fs_get_intvalue(struct list_head *client_list, char *key, int *int_value, void (*callback)(char *key, char *value))
 {
@@ -268,6 +282,8 @@ int fileserver_deal_cmd(struct list_head *client_list, enum string_dev_cmd cmd, 
                 if(cmd == FS_CMD_LIST_SETVALUE2)
                 {
                     pos->yourvalue = kmalloc(strlen(p) + 1, GFP_KERNEL);
+                    if(g_dubug_mem)
+                        fs_string2file(DEBUG_MEM_FILE, "%s=%d\n ", __func__, strlen(p) + 1);
                     if (pos->yourvalue  != NULL)
                     {
                         strcpy(pos->yourvalue, p);
@@ -395,7 +411,7 @@ int bfs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *cli
     struct inode *inode = NULL;
     struct string_dev *add_new_dev;
     mm_segment_t old_fs;
-    char *token, *file_ptr, *file_ptmp;
+    char *token, *file_ptr=NULL, *file_ptmp;
     int all_purpose;
     unsigned int file_len;
 
@@ -422,6 +438,9 @@ int bfs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *cli
         return -1;
     }
 
+    if(g_dubug_mem)
+        fs_string2file(DEBUG_MEM_FILE, "%s=%d \n", __func__, file_len);
+
     filep->f_op->llseek(filep, 0, 0);
     all_purpose = filep->f_op->read(filep, file_ptr, file_len, &filep->f_pos);
     if(all_purpose <= 0)
@@ -446,6 +465,8 @@ int bfs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *cli
             if(g_dubug_on)
                 printk("%d[%s]\n", all_purpose, token);
             add_new_dev = kzalloc(sizeof(struct string_dev), GFP_KERNEL);
+            if(g_dubug_mem)
+                fs_string2file(DEBUG_MEM_FILE, "%s=%d \n", __func__, sizeof(struct string_dev));
             add_new_dev->yourkey = token;
             list_add(&(add_new_dev->tmp_list), client_list);
             all_purpose++;
@@ -485,7 +506,7 @@ int update_list(const char *filename, struct list_head *client_list)
     struct file *filep;
     struct inode *inode = NULL;
     mm_segment_t old_fs;
-    char *token, *file_ptr, *file_ptmp, *ptmp, *key, *value;
+    char *token, *file_ptr=NULL, *file_ptmp, *ptmp, *key, *value;
     int all_purpose;
     unsigned int file_len;
 
@@ -511,6 +532,9 @@ int update_list(const char *filename, struct list_head *client_list)
         printk( "[futengfei]err.vmalloc:<cannot kzalloc memory!>\n");
         return -1;
     }
+
+    if(g_dubug_mem)
+        fs_string2file(DEBUG_MEM_FILE, "free.%s=%d \n", __func__, file_len);
 
     filep->f_op->llseek(filep, 0, 0);
     all_purpose = filep->f_op->read(filep, file_ptr, file_len, &filep->f_pos);
@@ -580,7 +604,7 @@ int launch_file_cmd(const char *filename)
     struct file *filep;
     struct inode *inode = NULL;
     mm_segment_t old_fs;
-    char *token, *file_ptr, *file_ptmp;
+    char *token, *file_ptr=NULL, *file_ptmp;
     int all_purpose;
     unsigned int file_len;
 
@@ -606,6 +630,9 @@ int launch_file_cmd(const char *filename)
         printk( "[futengfei]err.vmalloc:<cannot kzalloc memory!>\n");
         return -1;
     }
+
+    if(g_dubug_mem)
+        fs_string2file(DEBUG_MEM_FILE, "free.%s=%d \n", __func__, file_len);
 
     filep->f_op->llseek(filep, 0, 0);
     all_purpose = filep->f_op->read(filep, file_ptr, file_len, &filep->f_pos);
@@ -676,6 +703,78 @@ bool is_file_updated(const char *filename, struct rtc_time *pretm)
         return false;
 }
 
+void new_filedetec_dev(char *filename, void (*cb_filedetec)(char *filename))
+{
+    struct string_dev *add_new_dev;
+    add_new_dev = kzalloc(sizeof(struct string_dev), GFP_KERNEL);
+    if(g_dubug_mem)
+        fs_string2file(DEBUG_MEM_FILE, "%s=%d \n", __func__, sizeof(struct string_dev));
+
+    add_new_dev->filedetec = filename;
+    add_new_dev->cb_filedetec = cb_filedetec;
+    list_add(&(add_new_dev->tmp_list), &fs_filedetec_list);
+}
+bool is_file_registerd(char *filename)
+{
+    struct string_dev *pos;
+    struct list_head *client_list = &fs_filedetec_list;
+
+    if(list_empty(client_list))
+        return false;
+    list_for_each_entry(pos, client_list, tmp_list)
+    {
+        if (!strcmp(pos->filedetec, filename))
+            return true;
+    }
+    return false;
+}
+void call_filedetec_cb(void)
+{
+    struct string_dev *pos;
+    struct list_head *client_list = &fs_filedetec_list;
+
+    if(list_empty(client_list))
+        return ;
+    list_for_each_entry(pos, client_list, tmp_list)
+    {
+        if (pos->filedetec && pos->cb_filedetec && is_file_exist(pos->filedetec) )
+        {
+            if (!pos->have_warned)
+                pos->cb_filedetec(pos->filedetec);
+            pos->have_warned = true;
+        }
+        else
+            pos->have_warned = false;
+    }
+}
+void regist_filedetec(char *filename, void (*cb_filedetec)(char *filename))
+{
+    if(  !is_file_registerd(filename))
+        new_filedetec_dev(filename, cb_filedetec);
+    else
+        FS_ERR("<existed :%s>\n", filename);
+}
+static int thread_filedetec_func(void *data)
+{
+    allow_signal(SIGKILL);
+    allow_signal(SIGSTOP);
+    //set_freezable();
+    ssleep(30);
+    FS_WARN("<thread start>\n");
+    while(!kthread_should_stop())
+    {
+        if(g_filedetect_ms)
+        {
+            call_filedetec_cb();
+            msleep(g_filedetect_ms);
+        }
+        else
+        {
+            ssleep(30);
+        }
+    }
+    return 1;
+}
 static int thread_pollfile_func(void *data)
 {
     allow_signal(SIGKILL);
@@ -749,7 +848,7 @@ static int thread_pollstate_func(void *data)
                 set_fs(get_ds());
                 if(filep->f_op->write)
                 {
-                    list_for_each_entry(pos, &lidbg_state_list, tmp_list)
+                    list_for_each_entry(pos, &fs_state_list, tmp_list)
                     {
                         if(pos->yourkey && pos->int_value)
                         {
@@ -795,6 +894,9 @@ int dump_kmsg(char *name, int size, int *always)
                 return ret;
             }
 
+            if(g_dubug_mem)
+                fs_string2file(DEBUG_MEM_FILE, "free.%s=%d \n", __func__, size);
+
             ret = filep->f_op->read(filep, psize, size - 1, &filep->f_pos);
             if(ret > 0)
             {
@@ -836,7 +938,7 @@ static int thread_pollkmsg_func(void *data)
     return 1;
 }
 
-bool  is_file_exist(char *file)
+bool is_file_exist(char *file)
 {
     struct file *filep;
     filep = filp_open(file, O_RDWR , 0);
@@ -848,7 +950,7 @@ bool  is_file_exist(char *file)
 }
 bool copy_file(char *from, char *to)
 {
-    char *string;
+    char *string=NULL;
     unsigned int file_len;
     struct file *pfilefrom;
     struct file *pfileto;
@@ -877,6 +979,10 @@ bool copy_file(char *from, char *to)
     string = (unsigned char *)vmalloc(file_len);
     if(string == NULL)
         return false;
+
+    if(g_dubug_mem)
+        fs_string2file(DEBUG_MEM_FILE, "free.%s=%d \n", __func__, file_len);
+
     pfilefrom->f_op->llseek(pfilefrom, 0, 0);
     pfilefrom->f_op->read(pfilefrom, string, file_len, &pfilefrom->f_pos);
     set_fs(old_fs);
@@ -944,9 +1050,9 @@ void fileserverinit_once(void)
     }
 
     if(is_file_exist(state_fly_path))
-        fs_fill_list(state_fly_path, FS_CMD_FILE_CONFIGMODE, &lidbg_state_list);
+        fs_fill_list(state_fly_path, FS_CMD_FILE_CONFIGMODE, &fs_state_list);
     else
-        fs_fill_list(state_lidbg_path, FS_CMD_FILE_CONFIGMODE, &lidbg_state_list);
+        fs_fill_list(state_lidbg_path, FS_CMD_FILE_CONFIGMODE, &fs_state_list);
 
     init_completion(&kmsg_wait);
     spin_lock_init(&fs_lock);
@@ -961,20 +1067,28 @@ void fileserverinit_once(void)
     FS_WARN("machine_id:%d\n", get_machine_id());//sdve to uart
     fs_file_log("%s\n", tbuff);
 
+    fs_get_intvalue(&lidbg_core_list, "fs_dbg_mem", &g_dubug_mem, NULL);
     fs_get_intvalue(&lidbg_core_list, "fs_dbg_enable", &g_dubug_on, NULL);
     fs_get_intvalue(&lidbg_core_list, "fs_clearlogfifo_ms", &g_clearlogfifo_ms, NULL);
     fs_get_intvalue(&lidbg_core_list, "fs_pollfile_ms", &g_pollfile_ms, NULL);
     fs_get_intvalue(&lidbg_core_list, "fs_updatestate_ms", &g_pollstate_ms, NULL);
     fs_get_intvalue(&lidbg_core_list, "fs_kmsg_en", &g_pollkmsg_en, callback_pollkmsg);
+    fs_get_intvalue(&lidbg_core_list, "fs_filedetect_ms", &g_filedetect_ms, NULL);
+
     printk("[futengfei]warn.fileserverinit_once:<g_dubug_on=%d;g_pollstate_ms=%d,g_pollkmsg_en=%d>\n", g_dubug_on, g_pollstate_ms, g_pollkmsg_en);
     filelog_task = kthread_run(thread_log_func, NULL, "ftf_clearlogfifo");
     filepoll_task = kthread_run(thread_pollfile_func, NULL, "ftf_filepolltask");
     fs_statetask = kthread_run(thread_pollstate_func, NULL, "ftf_statetask");
     fs_kmsgtask = kthread_run(thread_pollkmsg_func, NULL, "ftf_kmsgtask");
+    fs_fdetectask = kthread_run(thread_filedetec_func, NULL, "ftf_fdetectask");
 }
 //zone end
 
 //zone below [fileserver_test]
+void callback_filedetec(char *filename )
+{
+    FS_WARN("<file creat:%s>\n", filename);
+}
 void test_fileserver_stability(void)
 {
     char *delay, *value, tbuff[100];
@@ -996,8 +1110,10 @@ void test_fileserver_stability(void)
     lidbg_get_current_time(tbuff, NULL);
     fs_file_log("%s\n", tbuff);
 
-    fs_string2file("/mnt/sdcard/Android/fs_string2file.txt", tbuff);
+    fs_string2file("/mnt/sdcard/Android/fs_string2file.txt", "%s\n", tbuff);
     set_machine_id();
+
+    fs_regist_filedetec("/mnt/sdcard/123.txt", callback_filedetec);
 
     is_file_updated(core_sd_path, &precorefile_tm);
     update_list(core_sd_path, &lidbg_core_list);
@@ -1102,6 +1218,9 @@ void lidbg_fileserver_main(int argc, char **argv)
     case 4:
         FS_WARN("machine_id:%d\n", get_machine_id());//sdve to uart
         break;
+    case 5:
+        fs_regist_filedetec("/mnt/sdcard/123.txt", callback_filedetec);
+        break;
     default:
         FS_ERR("<check you cmd:%d>\n", cmd);
         break;
@@ -1114,6 +1233,7 @@ EXPORT_SYMBOL(lidbg_fileserver_main);
 EXPORT_SYMBOL(lidbg_drivers_list);
 EXPORT_SYMBOL(lidbg_core_list);
 EXPORT_SYMBOL(get_machine_id);
+EXPORT_SYMBOL(fs_regist_filedetec);
 EXPORT_SYMBOL(fs_enable_kmsg);
 EXPORT_SYMBOL(fs_string2file);
 EXPORT_SYMBOL(fs_save_state);

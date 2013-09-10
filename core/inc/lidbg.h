@@ -78,9 +78,10 @@
 
 #include "lidbg_io.h"
 #include "lidbg_key.h"
-#include "lidbg_touch.h"
+#include "lidbg_ts.h"
 #include "lidbg_cmn.h"
 #include "lidbg_fileserver.h"
+#include "lidbg_ts_event.h"
 #include "lidbg_ad.h"
 #include "lidbg_def.h"
 #include "lidbg_mem.h"

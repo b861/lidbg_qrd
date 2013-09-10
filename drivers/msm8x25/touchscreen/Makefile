@@ -3,7 +3,6 @@ include $(DBG_WORK_PATH)/$(DBG_SOC)/drivers.mk
 
 obj-m	+= lidbg_ts_probe.o
 obj-m	+= lidbg_ts_to_recov.o
-obj-m	+= lidbg_ts_event.o
 #obj-m	+= ft5x06_ts.o
 obj-m	+= gt801.o
 obj-m	+= gt80x_update.o

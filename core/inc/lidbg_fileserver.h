@@ -34,11 +34,15 @@ struct string_dev
     struct list_head tmp_list;
     char *yourkey;
     char *yourvalue;
+    char *filedetec;
     int *int_value;
-    void (*callback)(char *key,char *value);
+    bool have_warned;
+    void (*callback)(char * key, char * value);
+    void (*cb_filedetec)(char * filename );
 };
 void lidbg_fileserver_main(int argc, char **argv);
 extern int get_machine_id(void);
+extern void fs_regist_filedetec(char *filename, void (*cb_filedetec)(char *filename ));
 extern void fs_enable_kmsg( bool enable );
 extern void fs_save_state(void);
 extern int fs_dump_kmsg( int size );

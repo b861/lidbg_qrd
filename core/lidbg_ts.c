@@ -52,7 +52,7 @@ void lidbg_touch_report(u32 pos_x, u32 pos_y, u32 type)
 
 }
 
-
+extern void  toucheventinit_once(void);
 int lidbg_touch_init(void)
 {
     int error;
@@ -110,6 +110,9 @@ int lidbg_touch_init(void)
 
         goto fail;
     }
+    
+    toucheventinit_once();
+
     return 0;
 fail:
     input_free_device(input);
