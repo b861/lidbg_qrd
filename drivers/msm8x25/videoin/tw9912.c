@@ -810,8 +810,8 @@ Vedio_Format testing_video_signal(Vedio_Channel Channel)
     }
  */
     tw9912_get_input_info(&tw9912_input_information_1);
-    if(tw9912_input_information_1.chip_status1.valu & 0x08 )//bit3=1 Vertical logi is locked to the incoming video soruce
-    {
+    if( (tw9912_input_information_1.chip_status1.valu & 0x08) && !(tw9912_input_information_1.chip_status1.valu & 0x80) )//bit3=1 Vertical logi is locked to the incoming video soruce
+    {																								// bit7 =0 video is detected
         if(tw9912_input_information_1.chip_status1.valu & 0x01)  signal_is_how_1.vedio_source = source_50Hz;
         else signal_is_how_1.vedio_source = source_60Hz;
 
