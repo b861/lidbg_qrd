@@ -1024,6 +1024,15 @@ void set_machine_id(void)
         bfs_file_amend(MACHINE_ID_FILE, string);
     }
 }
+
+void callback_dump_kmsg(char *filename )
+{
+    FS_WARN("<file creat:%s>\n", filename);
+#define __LOG_BUF_LEN	(1 << CONFIG_LOG_BUF_SHIFT)
+	fs_dump_kmsg(__LOG_BUF_LEN);
+}
+
+
 void fileserverinit_once(void)
 {
     char tbuff[100];
@@ -1074,6 +1083,9 @@ void fileserverinit_once(void)
     fs_get_intvalue(&lidbg_core_list, "fs_updatestate_ms", &g_pollstate_ms, NULL);
     fs_get_intvalue(&lidbg_core_list, "fs_kmsg_en", &g_pollkmsg_en, callback_pollkmsg);
     fs_get_intvalue(&lidbg_core_list, "fs_filedetect_ms", &g_filedetect_ms, NULL);
+
+    fs_regist_filedetec("/mnt/sdcard/dump_kmsg", callback_dump_kmsg);
+    fs_regist_filedetec("/mnt/usbdisk/dump_kmsg", callback_dump_kmsg);
 
     printk("[futengfei]warn.fileserverinit_once:<g_dubug_on=%d;g_pollstate_ms=%d,g_pollkmsg_en=%d>\n", g_dubug_on, g_pollstate_ms, g_pollkmsg_en);
     filelog_task = kthread_run(thread_log_func, NULL, "ftf_clearlogfifo");
