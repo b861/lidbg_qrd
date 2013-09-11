@@ -5,7 +5,7 @@
 
 
 #define DEBUG_LED
-#define DEBUG_UMOUNT_USB
+//#define DEBUG_UMOUNT_USB
 
 void lidbg_device_main(int argc, char **argv);
 

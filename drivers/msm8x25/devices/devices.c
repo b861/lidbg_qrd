@@ -1,6 +1,4 @@
-/* Copyright (c) 2012, swlee
- *
- */
+/* Copyright (c) 2012, swlee */
 
 #include "lidbg.h"
 LIDBG_DEFINE;
@@ -133,7 +131,6 @@ void pwr_key_scan(void)
 
         SOC_PWR_ShutDown();
 
-
     }
 #endif
 }
@@ -218,7 +215,6 @@ int find_ad_key(u32 ch)
     }
 
     return 0xff;
-
 
 }
 
@@ -369,14 +365,6 @@ int thread_dev_init(void *data)
 {
 
     fly_devices_init();
-
-#if 0
-    while(1)//for polling test
-    {
-        msleep(10 * 1000);
-
-    }
-#endif
     return 0;
 }
 
@@ -534,8 +522,6 @@ static int soc_dev_probe(struct platform_device *pdev)
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
     {
-
-        //\u5728suspend\u7684\u65f6\u5019\u5148\u6267\u884c\u4f18\u5148\u7b49\u7ea7\u4f4e\u7684handler\uff0c\u5728resume\u7684\u65f6\u5019\u5219\u5148\u6267\u884c\u7b49\u7ea7\u9ad8\u7684handler
         early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN;//EARLY_SUSPEND_LEVEL_BLANK_SCREEN + 1;
         early_suspend.suspend = devices_early_suspend;
         early_suspend.resume = devices_late_resume;
@@ -727,9 +713,7 @@ static void soc_dev_suspend_prepare(void)
 
 static int soc_dev_resume(struct platform_device *pdev)
 {
-
     lidbg("soc_dev_resume\n");
-
 
     if(platform_id ==  PLATFORM_FLY)
     {
@@ -756,7 +740,6 @@ static int soc_dev_resume(struct platform_device *pdev)
 
     }
 
-
     return 0;
 
 }
@@ -771,10 +754,7 @@ static struct platform_driver soc_devices_driver =
     .driver = {
         .name = "soc_devices",
         .owner = THIS_MODULE,
-
     },
-
-
 };
 
 
@@ -783,118 +763,12 @@ static void work_left_button1_fn(struct work_struct *work)
 {
 	led_on();
 	SOC_Key_Report(KEY_BACK, KEY_PRESSED_RELEASED);
-
-#if 0
-    static int count = 0;
-    static int usb_flag = 0;
-	led_on();
-
-    count++;
-    if(count % 50 == 0)
-    {
-        usb_flag++;
-        if(usb_flag % 2 == 1)
-        {
-
-            lidbg("USB_ID_HIGH_DEV\n");
-            //USB_ID_HIGH_DEV;
-
-            LCD_OFF;
-            msleep(500);
-            LCD_ON;
-        }
-        else
-        {
-
-
-            lidbg("USB_ID_LOW_HOST\n");
-            //USB_ID_LOW_HOST;
-            LCD_OFF;
-            msleep(500);
-            LCD_ON;
-
-        }
-    }
-
-#endif
-
-
-#if 0 //def DEBUG_POWER_KEY
-    static int count = 0;
-    count++;
-    lidbg("work_left_button1_fn %d\n", count);
-
-
-    if(count % 40 == 0)
-    {
-        if(suspend_test)
-        {
-            printk("\n\n");
-            lidbg("LPCControlSupendTestStop\n");
-            printk("\n\n");
-            LCD_OFF;
-            msleep(500);
-            LCD_ON;
-            // suspend_test = 0;
-            // LPCControlSupendTestStop();
-
-        }
-        else
-        {
-            printk("\n\n");
-            lidbg("LPCControlSupendTestStart\n");
-            printk("\n\n");
-            LCD_OFF;
-            msleep(500);
-            LCD_ON;
-            // suspend_test = 1;
-            // LPCControlSupendTestStart();
-            //SOC_Log_Dump(LOG_CONT);
-        }
-
-    }
-#endif
 }
 
 struct work_struct work_right_button1;
 static void work_right_button1_fn(struct work_struct *work)
 {
-	
 	led_on();
-#if 0
-    static int count = 0;
-	led_on();
-
-    count++;
-    lidbg("work_left_button1_fn %d\n", count);
-    if(count % 40 == 0)
-    {
-
-        static bool usb_test = 0;
-        if(usb_test)
-        {
-            lidbg("LPCControlUSBTestStop\n");
-            LCD_OFF;
-            msleep(500);
-            LCD_ON;
-            //LPCControlSupendTestStop();
-            // usb_test = 0;
-
-        }
-        else
-        {
-            lidbg("LPCControlUSBTestStart\n");
-            LCD_OFF;
-            msleep(500);
-            LCD_ON;
-            //LPCControlSupendTestStart();
-            // usb_test = 1;
-        }
-    }
-#endif
-
-
-
 }
 
 
@@ -919,9 +793,7 @@ irqreturn_t irq_left_button1(int irq, void *dev_id)
 irqreturn_t irq_left_button2(int irq, void *dev_id)
 {
 
-
     lidbg("irq_left_button2: %d\n", irq);
-
 
     return IRQ_HANDLED;
 
@@ -930,11 +802,9 @@ irqreturn_t irq_left_button2(int irq, void *dev_id)
 
 irqreturn_t irq_right_button1(int irq, void *dev_id)
 {
-
     lidbg("irq_right_button1: %d\n", irq);
     //led_on();
     schedule_work(&work_right_button1);
-
     return IRQ_HANDLED;
 
 }
@@ -943,8 +813,6 @@ irqreturn_t irq_right_button2(int irq, void *dev_id)
 {
 
     lidbg("irq_right_button2: %d\n", irq);
-
-
     return IRQ_HANDLED;
 
 }
@@ -994,7 +862,6 @@ static void set_func_tbl(void)
 {
     //lpc
     ((struct lidbg_hal *)plidbg_dev)->soc_func_tbl.pfnSOC_Dev_Suspend_Prepare = soc_dev_suspend_prepare;
-
 }
 
 int read_proc_dev(char *buf, char **start, off_t offset, int count, int *eof, void *data )
@@ -1003,8 +870,6 @@ int read_proc_dev(char *buf, char **start, off_t offset, int count, int *eof, vo
 
     lidbg("USB_ID_HIGH_DEV\n");
     USB_ID_HIGH_DEV;
-
-
     len  = sprintf(buf, "usb_set_dev\n");
 
     return len;
@@ -1013,7 +878,6 @@ int read_proc_dev(char *buf, char **start, off_t offset, int count, int *eof, vo
 int read_proc_host(char *buf, char **start, off_t offset, int count, int *eof, void *data )
 {
     int len = 0;
-
     lidbg("USB_ID_LOW_HOST\n");
     USB_ID_LOW_HOST;
     len  = sprintf(buf, "usb_set_host\n");
@@ -1031,10 +895,17 @@ static void create_new_proc_entry_usb_host(void)
     create_proc_read_entry("usb_host", 0, NULL, read_proc_host, NULL);
 }
 
+int lcd_reset_en=0;
+void lcd_reset(char *key, char *value )
+{
+	LCD_OFF;
+	msleep(500);
+	LCD_ON;
+}
+
 
 int dev_init(void)
 {
-
     DUMP_BUILD_TIME;
 
 #ifdef BOARD_V1
@@ -1060,6 +931,7 @@ int dev_init(void)
     set_func_tbl();
 	
     fs_regist_state("ct", &(g_var.temp));
+	FS_REGISTER_INT(lcd_reset_en,"lcd_reset",0,lcd_reset);
 
 #if 0
     PWR_EN_ON;
@@ -1100,20 +972,9 @@ void lidbg_device_main(int argc, char **argv)
     if(argc < 1)
     {
         lidbg("Usage:\n");
-        lidbg("camera set_id camid\n");
         lidbg("bl value\n");
-        lidbg("pwroff\n");
         return;
 
-    }
-
-    if(!strcmp(argv[0], "camera"))
-    {
-        if(!strcmp(argv[1], "set_id"))
-        {
-            //u32 cam_id =  simple_strtoul(argv[2], 0, 0);
-            //SOC_Camera_Set(cam_id);
-        }
     }
 
     if(!strcmp(argv[0], "bl"))
@@ -1122,14 +983,6 @@ void lidbg_device_main(int argc, char **argv)
         bl = simple_strtoul(argv[1], 0, 0);
         SOC_BL_Set(bl);
     }
-
-    if(!strcmp(argv[0], "pwroff"))
-    {
-        msleep(3000);
-        lidbg("Ready to entry sleep ...");
-        SOC_PWR_ShutDown();
-    }
-
 
     if(!strcmp(argv[0], "ad"))
     {
