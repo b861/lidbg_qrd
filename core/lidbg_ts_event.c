@@ -24,7 +24,7 @@ struct dev_password
 {
     struct list_head tmp_list;
     char *password;
-    void (*cb_password)(char * password );
+    void (*cb_password)(char *password );
 };
 
 
@@ -35,7 +35,7 @@ static struct task_struct *te_task;
 static char prepare_cmd[CMD_MAX];
 static int prepare_cmdpos = 0;
 static int g_dubug_mem = 0;
-static int g_te_dbg_en = 1;
+static int g_te_dbg_en = 0;
 static int g_te_scandelay_ms = 100;
 //zone end
 
@@ -98,6 +98,23 @@ bool is_password_exist(char *password)//
     }
     return false;
 }
+bool show_password_list()
+{
+    struct dev_password *pos;
+    struct list_head *client_list = &te_password_list;
+
+    if(list_empty(client_list))
+    {
+        TE_ERR("<nobody_register>\n");
+        return false;
+    }
+    list_for_each_entry(pos, client_list, tmp_list)
+    {
+        if (pos->password )
+            TE_WARN("<registerd_list:%s>\n", pos->password);
+    }
+    return true;
+}
 bool call_password_cb(char *password)
 {
     struct dev_password *pos;
@@ -111,9 +128,13 @@ bool call_password_cb(char *password)
     list_for_each_entry(pos, client_list, tmp_list)
     {
         if (pos->password && pos->cb_password && (!strcmp(pos->password, password)) )
+        {
             pos->cb_password(pos->password);
+            if(g_te_dbg_en)
+                TE_WARN("<have called:%s>\n", pos->password);
+        }
     }
-    return false;
+    return true;
 }
 bool regist_password(char *password, void (*cb_password)(char *password ))
 {
@@ -192,8 +213,9 @@ static int thread_te_analysis(void *data)
     //set_freezable();
     ssleep(25);
     TE_WARN("<thread start>\n" );
+    if(g_te_dbg_en)
+        show_password_list();
     g_curr_tspara.press = false;
-
     while(!kthread_should_stop())
     {
         if(g_te_scandelay_ms)
@@ -205,10 +227,19 @@ static int thread_te_analysis(void *data)
     return 1;
 }
 //zone end
-void callback_password(char *password )
+
+void cb_password_chmod(char *password )
 {
-    TE_WARN("<called:%s>\n", password);
+    if(g_te_dbg_en)
+        TE_WARN("<called:%s>\n", password);
     lidbg_launch_user(CHMOD_PATH, "777", "/data");
+}
+void cb_kv_password(char *key, char *value)
+{
+    if(g_te_dbg_en)
+        TE_WARN("<%s=%s>\n", key, value);
+    if ( (!strcmp(key, "te_dbg_en" ))  &&  (strcmp(value, "0" )) )
+        show_password_list();
 }
 void  toucheventinit_once(void)
 {
@@ -217,10 +248,10 @@ void  toucheventinit_once(void)
     TE_WARN("<%s>\n", TE_VERSION);
     fs_file_log("%s\n", TE_VERSION );
 
-    FS_REGISTER_INT(g_te_dbg_en, "te_dbg_en", 0, NULL);
+    FS_REGISTER_INT(g_te_dbg_en, "te_dbg_en", 0, cb_kv_password);
     FS_REGISTER_INT(g_te_scandelay_ms, "te_scandelay_ms", 100, NULL);
 
-    te_regist_password("001122", callback_password);
+    te_regist_password("001122", cb_password_chmod);
     fs_get_intvalue(&lidbg_core_list, "fs_dbg_mem", &g_dubug_mem, NULL);
 
     te_task = kthread_run(thread_te_analysis, NULL, "ftf_te_task");

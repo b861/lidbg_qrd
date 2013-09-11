@@ -41,6 +41,7 @@ struct rtc_time precmdfile_tm;
 struct completion kmsg_wait;
 static int g_dubug_mem = 0;
 static int g_dubug_on = 0;
+static int g_dubug_filedetec = 0;
 static int g_clearlogfifo_ms = 30000;
 static int g_pollfile_ms = 7000;
 static int g_pollstate_ms = 1000;
@@ -411,7 +412,7 @@ int bfs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *cli
     struct inode *inode = NULL;
     struct string_dev *add_new_dev;
     mm_segment_t old_fs;
-    char *token, *file_ptr=NULL, *file_ptmp;
+    char *token, *file_ptr = NULL, *file_ptmp;
     int all_purpose;
     unsigned int file_len;
 
@@ -506,7 +507,7 @@ int update_list(const char *filename, struct list_head *client_list)
     struct file *filep;
     struct inode *inode = NULL;
     mm_segment_t old_fs;
-    char *token, *file_ptr=NULL, *file_ptmp, *ptmp, *key, *value;
+    char *token, *file_ptr = NULL, *file_ptmp, *ptmp, *key, *value;
     int all_purpose;
     unsigned int file_len;
 
@@ -604,7 +605,7 @@ int launch_file_cmd(const char *filename)
     struct file *filep;
     struct inode *inode = NULL;
     mm_segment_t old_fs;
-    char *token, *file_ptr=NULL, *file_ptmp;
+    char *token, *file_ptr = NULL, *file_ptmp;
     int all_purpose;
     unsigned int file_len;
 
@@ -728,6 +729,19 @@ bool is_file_registerd(char *filename)
     }
     return false;
 }
+void show_filedetec_list(void)
+{
+    struct string_dev *pos;
+    struct list_head *client_list = &fs_filedetec_list;
+
+    if(list_empty(client_list))
+        return ;
+    list_for_each_entry(pos, client_list, tmp_list)
+    {
+        if (pos->filedetec && pos->cb_filedetec)
+            FS_WARN("<registerd_list:%s>\n", pos->filedetec);
+    }
+}
 void call_filedetec_cb(void)
 {
     struct string_dev *pos;
@@ -739,8 +753,14 @@ void call_filedetec_cb(void)
     {
         if (pos->filedetec && pos->cb_filedetec && is_file_exist(pos->filedetec) )
         {
+            if(g_dubug_filedetec)
+                FS_WARN("<should call :%s>\n", pos->filedetec);
             if (!pos->have_warned)
+            {
                 pos->cb_filedetec(pos->filedetec);
+                if(g_dubug_filedetec)
+                    FS_WARN("<have called :%s>\n", pos->filedetec);
+            }
             pos->have_warned = true;
         }
         else
@@ -761,6 +781,8 @@ static int thread_filedetec_func(void *data)
     //set_freezable();
     ssleep(30);
     FS_WARN("<thread start>\n");
+    if(g_dubug_filedetec)
+        show_filedetec_list();
     while(!kthread_should_stop())
     {
         if(g_filedetect_ms)
@@ -950,7 +972,7 @@ bool is_file_exist(char *file)
 }
 bool copy_file(char *from, char *to)
 {
-    char *string=NULL;
+    char *string = NULL;
     unsigned int file_len;
     struct file *pfilefrom;
     struct file *pfileto;
@@ -999,13 +1021,6 @@ bool copy_file(char *from, char *to)
     return true;
 }
 
-void callback_pollkmsg(char *key, char *value)
-{
-    FS_WARN("<%s=%s>\n", key, value);
-    if ( (!strcmp(key, "fs_kmsg_en" ))  &&  (strcmp(value, "0" )) )
-        complete(&kmsg_wait);
-}
-
 void set_machine_id(void)
 {
     char string[64];
@@ -1025,13 +1040,31 @@ void set_machine_id(void)
     }
 }
 
-void callback_dump_kmsg(char *filename )
+void cb_kv_pollkmsg(char *key, char *value)
 {
-    FS_WARN("<file creat:%s>\n", filename);
-#define __LOG_BUF_LEN	(1 << CONFIG_LOG_BUF_SHIFT)
-	fs_dump_kmsg(__LOG_BUF_LEN);
+    if(g_dubug_on)
+        FS_WARN("<%s=%s>\n", key, value);
+    if ( (!strcmp(key, "fs_kmsg_en" ))  &&  (strcmp(value, "0" )) )
+        complete(&kmsg_wait);
 }
-
+void cb_kv_filedetecen(char *key, char *value)
+{
+    if(g_dubug_on)
+        FS_WARN("<%s=%s>\n", key, value);
+    if ( (!strcmp(key, "fs_file_detect_en" ))  &&  (strcmp(value, "0" )) )
+        show_filedetec_list();
+}
+void cb_filedetec_dump_kmsg(char *filename )
+{
+    if(g_dubug_filedetec)
+        FS_WARN("<callback belong::%s>\n", filename);
+    fs_dump_kmsg((1 << CONFIG_LOG_BUF_SHIFT));
+}
+void cb_filedetec_test(char *filename )
+{
+    if(g_dubug_filedetec)
+        FS_WARN("<callback belong::%s>\n", filename);
+}
 
 void fileserverinit_once(void)
 {
@@ -1081,11 +1114,14 @@ void fileserverinit_once(void)
     fs_get_intvalue(&lidbg_core_list, "fs_clearlogfifo_ms", &g_clearlogfifo_ms, NULL);
     fs_get_intvalue(&lidbg_core_list, "fs_pollfile_ms", &g_pollfile_ms, NULL);
     fs_get_intvalue(&lidbg_core_list, "fs_updatestate_ms", &g_pollstate_ms, NULL);
-    fs_get_intvalue(&lidbg_core_list, "fs_kmsg_en", &g_pollkmsg_en, callback_pollkmsg);
+    fs_get_intvalue(&lidbg_core_list, "fs_kmsg_en", &g_pollkmsg_en, cb_kv_pollkmsg);
     fs_get_intvalue(&lidbg_core_list, "fs_filedetect_ms", &g_filedetect_ms, NULL);
+    fs_get_intvalue(&lidbg_core_list, "fs_file_detect_en", &g_dubug_filedetec, cb_kv_filedetecen);
 
-    fs_regist_filedetec("/mnt/sdcard/dump_kmsg", callback_dump_kmsg);
-    fs_regist_filedetec("/mnt/usbdisk/dump_kmsg", callback_dump_kmsg);
+    fs_regist_filedetec("/mnt/sdcard/dump_kmsg", cb_filedetec_dump_kmsg);
+    fs_regist_filedetec("/mnt/usbdisk/dump_kmsg", cb_filedetec_dump_kmsg);
+    fs_regist_filedetec("/mnt/sdcard/123.txt", cb_filedetec_test);
+
 
     printk("[futengfei]warn.fileserverinit_once:<g_dubug_on=%d;g_pollstate_ms=%d,g_pollkmsg_en=%d>\n", g_dubug_on, g_pollstate_ms, g_pollkmsg_en);
     filelog_task = kthread_run(thread_log_func, NULL, "ftf_clearlogfifo");
@@ -1097,10 +1133,6 @@ void fileserverinit_once(void)
 //zone end
 
 //zone below [fileserver_test]
-void callback_filedetec(char *filename )
-{
-    FS_WARN("<file creat:%s>\n", filename);
-}
 void test_fileserver_stability(void)
 {
     char *delay, *value, tbuff[100];
@@ -1124,8 +1156,6 @@ void test_fileserver_stability(void)
 
     fs_string2file("/mnt/sdcard/Android/fs_string2file.txt", "%s\n", tbuff);
     set_machine_id();
-
-    fs_regist_filedetec("/mnt/sdcard/123.txt", callback_filedetec);
 
     is_file_updated(core_sd_path, &precorefile_tm);
     update_list(core_sd_path, &lidbg_core_list);
@@ -1231,7 +1261,7 @@ void lidbg_fileserver_main(int argc, char **argv)
         FS_WARN("machine_id:%d\n", get_machine_id());//sdve to uart
         break;
     case 5:
-        fs_regist_filedetec("/mnt/sdcard/123.txt", callback_filedetec);
+        fs_regist_filedetec("/mnt/sdcard/123.txt", cb_filedetec_test);
         break;
     default:
         FS_ERR("<check you cmd:%d>\n", cmd);
