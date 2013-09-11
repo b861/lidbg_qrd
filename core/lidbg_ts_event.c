@@ -20,6 +20,14 @@ NOTE:
 #define SAFE  50
 #define CMD_MAX  6
 
+struct dev_password
+{
+    struct list_head tmp_list;
+    char *password;
+    void (*cb_password)(char * password );
+};
+
+
 LIST_HEAD(te_password_list);
 struct tspara g_pre_tspara ;
 struct tspara g_curr_tspara = {0, 0, false} ;

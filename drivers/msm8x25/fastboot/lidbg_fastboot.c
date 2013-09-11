@@ -212,22 +212,22 @@ int check_clk_disable(void)
 	DUMP_FUN_ENTER;
 	if(pc_clk_is_enabled(P_UART1DM_CLK))
 	{
-		lidbg("find clk:%d\n",P_UART1DM_CLK);
-		lidbg_fs("find clk:%d\n",P_UART1DM_CLK);
+		lidbg("find clk:%d\n",P_UART1DM_CLK);		
+		lidbg_fs_log(FASTBOOT_LOG_PATH,"clk:%d\n",P_UART1DM_CLK);
 		ret = 1;
 	}
 
 	if(pc_clk_is_enabled(P_MDP_CLK))
 	{
 		lidbg("find clk:%d\n",P_MDP_CLK);
-		lidbg_fs("find clk:%d\n",P_MDP_CLK);
+		lidbg_fs_log(FASTBOOT_LOG_PATH,"clk:%d\n",P_MDP_CLK);
 		ret = 1;
 	}
 
 	if(pc_clk_is_enabled(P_ADSP_CLK))
 	{
 		lidbg("find clk:%d\n",P_ADSP_CLK);
-		lidbg_fs("find clk:%d\n",P_ADSP_CLK);
+		lidbg_fs_log(FASTBOOT_LOG_PATH,"clk:%d\n",P_ADSP_CLK);
 		ret = 1;
 	}
 	DUMP_FUN_LEAVE;
