@@ -114,9 +114,11 @@ int fs_string2file(char *filename, const char *fmt, ... )
 
     return bfs_file_amend(filename, str_append);
 }
-int fs_dump_kmsg( int size )
+int fs_dump_kmsg(char* tag, int size )
 {
     file_separator(LIDBG_KMSG_FILE_PATH);
+	if(tag != NULL)
+		fs_string2file(LIDBG_KMSG_FILE_PATH,"fs_dump_kmsg: %s\n",tag);
     return dump_kmsg(KMSG_NODE, LIDBG_KMSG_FILE_PATH, size, NULL);
 }
 void fs_save_state(void)
@@ -1073,7 +1075,7 @@ void cb_filedetec_dump_kmsg(char *filename )
 {
     if(g_dubug_filedetec)
         FS_WARN("<callback belong::%s>\n", filename);
-    fs_dump_kmsg((1 << CONFIG_LOG_BUF_SHIFT));
+   fs_dump_kmsg(__FUNCTION__,__LOG_BUF_LEN);
 }
 void cb_filedetec_test(char *filename )
 {
@@ -1270,7 +1272,7 @@ void lidbg_fileserver_main(int argc, char **argv)
         fs_enable_kmsg(cmd_para);
         break;
     case 3:
-        fs_dump_kmsg(cmd_para * 1024);
+        fs_dump_kmsg(__FUNCTION__,cmd_para * 1024);
         break;
     case 4:
         FS_WARN("machine_id:%d\n", get_machine_id());//sdve to uart

@@ -454,6 +454,7 @@ static int soc_dev_probe(struct platform_device *pdev)
     }
 
 	FS_REGISTER_INT(i2c_ctrl,"i2c_ctrl",0,NULL);
+	fs_file_separator(TEMP_LOG_PATH);
 
 
 #ifdef DEBUG_LED

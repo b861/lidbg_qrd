@@ -561,8 +561,8 @@ static int thread_fastboot_suspend(void *data)
                             lidbg("$-\n");
 #endif
 							//log_active_locks();
-							#define __LOG_BUF_LEN   (1 << CONFIG_LOG_BUF_SHIFT)
-							fs_dump_kmsg(__LOG_BUF_LEN);
+							fs_dump_kmsg(__FUNCTION__,__LOG_BUF_LEN);
+							lidbg_fs_log(FASTBOOT_LOG_PATH,"force suspend\n");
 							wakelock_occur_count = 0;
                             if(fastboot_get_status() == PM_STATUS_EARLY_SUSPEND_PENDING)
                             {
@@ -871,6 +871,7 @@ static int  fastboot_probe(struct platform_device *pdev)
 	FS_REGISTER_INT(fb_data->haslock_resume_times,"haslock_resume_times",0,NULL);
 	FS_REGISTER_INT(fb_data->max_wait_unlock_time,"max_wait_unlock_time",5,NULL);
 
+	fs_file_separator(FASTBOOT_LOG_PATH);
 
     INIT_COMPLETION(early_suspend_start);
     pwroff_task = kthread_create(thread_pwroff, NULL, "pwroff_task");

@@ -1,6 +1,8 @@
 #ifndef _LIGDBG_FILESERVER__
 #define _LIGDBG_FILESERVER__
 
+#define __LOG_BUF_LEN	(1 << CONFIG_LOG_BUF_SHIFT)
+
 /*
     FS增加抓取kmsg功能+解析cmd功能+动态刷新state功能
 
@@ -47,7 +49,7 @@ extern void fs_enable_kmsg( bool enable );
 extern void fs_save_state(void);
 extern void fs_log_sync(void);
 extern int get_machine_id(void);
-extern int fs_dump_kmsg( int size );
+extern int fs_dump_kmsg(char *tag, int size );
 extern int fs_regist_state(char *key, int *value);
 extern int fs_get_intvalue(struct list_head *client_list, char *key,int *int_value,void (*callback)(char *key,char *value));
 extern int fs_get_value(struct list_head *client_list, char *key, char **string);
@@ -74,7 +76,6 @@ extern struct list_head lidbg_core_list;
 								fs_file_log("[%s] ",buf);\
 								fs_file_log(fmt,##__VA_ARGS__);\
 								}while(0)
-
 
 #define FS_REGISTER_INT(intvalue,key,def_value,callback) intvalue=def_value; \
 			if(fs_get_intvalue(&lidbg_drivers_list, key,&intvalue,callback)<0) \
