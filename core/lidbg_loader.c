@@ -21,6 +21,7 @@ char *insmod_list[] =
 
 char *insmod_path[] =
 {
+    "/sdcard/out/",
     "/system/lib/modules/out/",
     "/flysystem/lib/out/",
    NULL,
