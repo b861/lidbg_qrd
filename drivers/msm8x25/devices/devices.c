@@ -4,6 +4,7 @@
 LIDBG_DEFINE;
 
 int led_en ;
+int temp_log_freq;
 
 #define LIDBG_GPIO_PULLUP  GPIO_CFG_PULL_UP
 
@@ -323,7 +324,7 @@ void log_temp(void)
 	int tmp;
 	g_var.temp = cur_temp = soc_temp_get();
 	tmp = cur_temp - old_temp;
-	if(ABS(tmp) >= 5)
+	if(ABS(tmp) >= temp_log_freq)
 	{
 		lidbg_fs_log(TEMP_LOG_PATH,"%d\n",cur_temp);
 		old_temp = cur_temp;
@@ -454,6 +455,7 @@ static int soc_dev_probe(struct platform_device *pdev)
     }
 
 	FS_REGISTER_INT(i2c_ctrl,"i2c_ctrl",0,NULL);
+	FS_REGISTER_INT(temp_log_freq,"temp_log_freq",5,NULL);
 	fs_file_separator(TEMP_LOG_PATH);
 
 
