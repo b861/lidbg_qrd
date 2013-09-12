@@ -67,7 +67,7 @@ int lidbg_readwrite_file(const char *filename, char *rbuf,
 		filp_close(filp, NULL);
 
 	set_fs(oldfs);
-	lidbg( "kernel_readwrite_file: ret=%d\n", ret);
+	//lidbg( "kernel_readwrite_file: ret=%d\n", ret);
 
 	return ret;
 }
@@ -161,8 +161,7 @@ int lidbg_get_current_time(char *time_string,struct rtc_time *ptm)
         *ptm = tm;
     return tlen;
 }
-// cmn_launch_user("/system/bin/insmod", "/system/lib/modules/wlan.ko");
-// cmn_launch_user("/system/lidbg_servicer", NULL);
+
 int  lidbg_launch_user( char bin_path[], char argv1[],char argv2[])
 {
     char *argv[] = { bin_path, argv1,argv2, NULL };
