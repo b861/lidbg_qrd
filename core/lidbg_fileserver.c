@@ -1,12 +1,16 @@
 
 #include "lidbg.h"
+/*
+update log:
+	1:[20130912 V5.1]/add separaror
+*/
 
 #define FS_WARN(fmt, args...) pr_info("[futengfei.fs]warn.%s: " fmt,__func__,##args)
 #define FS_ERR(fmt, args...) pr_info("[futengfei.fs]err.%s: " fmt,__func__,##args)
 #define FS_SUC(fmt, args...) pr_info("[futengfei.fs]suceed.%s: " fmt,__func__,##args)
 
 //zone below [tools]
-#define FS_VERSION "FS.VERSION:  [20130910 V5.0]"
+#define FS_VERSION "FS.VERSION:  [20130912 V5.1]"
 #define DEBUG_MEM_FILE "/data/fs_private.txt"
 #define LIDBG_LOG_FILE_PATH "/data/lidbg_log.txt"
 #define LIDBG_KMSG_FILE_PATH "/data/lidbg_kmsg.txt"
@@ -66,12 +70,17 @@ static int test_count = 0;
 int fileserver_deal_cmd(struct list_head *client_list, enum string_dev_cmd cmd, char *lookfor, char *key, char **string, int *int_value, void (*callback)(char *key, char *value ));
 int bfs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *client_list);
 int bfs_file_amend(char *file2amend, char *str_append);
-int dump_kmsg(char *name, int size, int *always);
+int dump_kmsg(char *node, char *save_msg_file, int size, int *always);
 void regist_filedetec(char *filename, void (*cb_filedetec)(char *filename ));
+void file_separator(char *file2separator);
 bool copy_file(char *from, char *to);
 bool is_file_exist(char *file);
 
 
+void fs_file_separator(char *file2separator)
+{
+	file_separator(file2separator);
+}
 void fs_regist_filedetec(char *filename, void (*cb_filedetec)(char *filename ))
 {
     if(filename && cb_filedetec)
@@ -107,7 +116,8 @@ int fs_string2file(char *filename, const char *fmt, ... )
 }
 int fs_dump_kmsg( int size )
 {
-    return dump_kmsg(KMSG_NODE, size, NULL);
+    file_separator(LIDBG_KMSG_FILE_PATH);
+    return dump_kmsg(KMSG_NODE, LIDBG_KMSG_FILE_PATH, size, NULL);
 }
 void fs_save_state(void)
 {
@@ -479,7 +489,12 @@ int bfs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *cli
         fileserver_deal_cmd(client_list, FS_CMD_LIST_SPLITKV, NULL, NULL, NULL, NULL, NULL);
     return 1;
 }
-
+void file_separator(char *file2separator)
+{
+    char buf[32];
+    lidbg_get_current_time(buf, NULL);
+    fs_string2file(file2separator, "------------------------%s------------------------\n", buf);
+}
 static int thread_log_func(void *data)
 {
     allow_signal(SIGKILL);
@@ -889,7 +904,7 @@ static int thread_pollstate_func(void *data)
     }
     return 1;
 }
-int dump_kmsg(char *name, int size, int *always)
+int dump_kmsg(char *node, char *save_msg_file, int size, int *always)
 {
     struct file *filep;
     mm_segment_t old_fs;
@@ -900,7 +915,7 @@ int dump_kmsg(char *name, int size, int *always)
         FS_ERR("<size_k=null&&always=null>\n");
         return -1;
     }
-    filep = filp_open(name,  O_RDONLY , 0);
+    filep = filp_open(node,  O_RDONLY , 0);
     if(!IS_ERR(filep))
     {
         old_fs = get_fs();
@@ -923,7 +938,7 @@ int dump_kmsg(char *name, int size, int *always)
             if(ret > 0)
             {
                 psize[ret] = '\0';
-                bfs_file_amend(LIDBG_KMSG_FILE_PATH, psize);
+                bfs_file_amend(save_msg_file, psize);
             }
             vfree(psize);
         }
@@ -937,7 +952,7 @@ int dump_kmsg(char *name, int size, int *always)
                 if(ret > 0)
                 {
                     buff[ret] = '\0';
-                    bfs_file_amend(LIDBG_KMSG_FILE_PATH, buff);
+                    bfs_file_amend(save_msg_file, buff);
                 }
             }
         }
@@ -955,7 +970,7 @@ static int thread_pollkmsg_func(void *data)
     while(!kthread_should_stop())
     {
         if( !wait_for_completion_interruptible(&kmsg_wait))
-            dump_kmsg(KMSG_NODE, 0, &g_pollkmsg_en);
+            dump_kmsg(KMSG_NODE, LIDBG_KMSG_FILE_PATH, 0, &g_pollkmsg_en);
     }
     return 1;
 }
@@ -1276,6 +1291,7 @@ EXPORT_SYMBOL(lidbg_drivers_list);
 EXPORT_SYMBOL(lidbg_core_list);
 EXPORT_SYMBOL(get_machine_id);
 EXPORT_SYMBOL(fs_regist_filedetec);
+EXPORT_SYMBOL(fs_file_separator);
 EXPORT_SYMBOL(fs_enable_kmsg);
 EXPORT_SYMBOL(fs_string2file);
 EXPORT_SYMBOL(fs_save_state);
