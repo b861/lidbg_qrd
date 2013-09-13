@@ -161,10 +161,10 @@ int fs_show_list(struct list_head *client_list)
 
 void clearfifo_tofile(void)
 {
-    int fifo_len,ret;
+    int fifo_len, ret;
     spin_lock_irqsave(&fs_lock, flags);
     fifo_len = kfifo_len(&log_fifo);
-    ret=kfifo_out(&log_fifo, log_buffer2write, fifo_len);
+    ret = kfifo_out(&log_fifo, log_buffer2write, fifo_len);
     log_buffer2write[fifo_len > FIFO_SIZE - 1 ? FIFO_SIZE - 1 : fifo_len] = '\0';
     spin_unlock_irqrestore(&fs_lock, flags);
     bfs_file_amend(LIDBG_LOG_FILE_PATH, log_buffer2write);
@@ -326,7 +326,7 @@ int fileserver_deal_cmd(struct list_head *client_list, enum string_dev_cmd cmd, 
         list_for_each_entry(pos, client_list, tmp_list)
         {
             int len = strlen(lookfor);
-            if(p = memchr(pos->yourkey, lookfor[0], strlen(pos->yourkey)))
+            if((p = memchr(pos->yourkey, lookfor[0], strlen(pos->yourkey))))
             {
                 //note:you can use [strncmp()] to replace the code below;
                 //I want to study the workflow;
@@ -1082,7 +1082,7 @@ void cb_filedetec_dump_kmsg(char *filename )
 {
     if(g_dubug_filedetec)
         FS_WARN("<callback belong::%s>\n", filename);
-   fs_dump_kmsg((char *)__FUNCTION__,__LOG_BUF_LEN);
+    fs_dump_kmsg((char *)__FUNCTION__, __LOG_BUF_LEN);
 }
 void cb_filedetec_test(char *filename )
 {
@@ -1282,7 +1282,7 @@ void lidbg_fileserver_main(int argc, char **argv)
         fs_enable_kmsg(cmd_para);
         break;
     case 3:
-        fs_dump_kmsg((char *)__FUNCTION__,cmd_para * 1024);
+        fs_dump_kmsg((char *)__FUNCTION__, cmd_para * 1024);
         break;
     case 4:
         FS_WARN("machine_id:%d\n", get_machine_id());
