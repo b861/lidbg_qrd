@@ -65,6 +65,7 @@
 
 
 #define SOC_KO  "lidbg_soc_msm8x60.ko"
+#define HAL_KO  "suspend_monitor.ko"
 
 struct io_config
 {
