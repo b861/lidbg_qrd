@@ -98,7 +98,7 @@ bool is_password_exist(char *password)//
     }
     return false;
 }
-bool show_password_list()
+bool show_password_list(void)
 {
     struct dev_password *pos;
     struct list_head *client_list = &te_password_list;
@@ -252,7 +252,7 @@ void  toucheventinit_once(void)
     FS_REGISTER_INT(g_te_scandelay_ms, "te_scandelay_ms", 100, NULL);
 
     te_regist_password("001122", cb_password_chmod);
-    fs_get_intvalue(&lidbg_core_list, "fs_dbg_mem", &g_dubug_mem, NULL);
+    fs_get_intvalue(&lidbg_core_list, "te_dbg_mem", &g_dubug_mem, NULL);
 
     te_task = kthread_run(thread_te_analysis, NULL, "ftf_te_task");
 

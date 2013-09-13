@@ -3,6 +3,7 @@
 /*
 update log:
 	1:[20130912 V5.1]/add separaror
+	2:[20130913 V6.0]/save core,driver list to overwrite core.conf driver.conf
 */
 
 #define FS_WARN(fmt, args...) pr_info("[futengfei.fs]warn.%s: " fmt,__func__,##args)
@@ -10,7 +11,7 @@ update log:
 #define FS_SUC(fmt, args...) pr_info("[futengfei.fs]suceed.%s: " fmt,__func__,##args)
 
 //zone below [tools]
-#define FS_VERSION "FS.VERSION:  [20130912 V5.1]"
+#define FS_VERSION "FS.VERSION:  [20130913 V6.0]"
 #define DEBUG_MEM_FILE "/data/fs_private.txt"
 #define LIDBG_LOG_FILE_PATH "/data/lidbg_log.txt"
 #define LIDBG_KMSG_FILE_PATH "/data/lidbg_kmsg.txt"
@@ -31,7 +32,7 @@ static  char *cmd_sd_path = "/data/cmd.txt";
 static  char *cmd_fly_path = "/flysystem/lib/out/cmd.conf";
 static  char *cmd_lidbg_path = "/system/lib/modules/out/cmd.conf";
 static  char *state_sd_path = "/data/state.txt";
-static  char *state_mem_path = "/mnt/state.txt";
+static  char *state_mem_path = "/data/state.txt";
 static  char *state_fly_path = "/flysystem/lib/out/state.conf";
 static  char *state_lidbg_path = "/system/lib/modules/out/state.conf";
 static struct task_struct *filelog_task;
@@ -71,15 +72,23 @@ int fileserver_deal_cmd(struct list_head *client_list, enum string_dev_cmd cmd, 
 int bfs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *client_list);
 int bfs_file_amend(char *file2amend, char *str_append);
 int dump_kmsg(char *node, char *save_msg_file, int size, int *always);
+int get_int_value(struct list_head *client_list, char *key, int *int_value, void (*callback)(char *key, char *value));
+void save_list_to_file(struct list_head *client_list, char *filename);
 void regist_filedetec(char *filename, void (*cb_filedetec)(char *filename ));
 void file_separator(char *file2separator);
 bool copy_file(char *from, char *to);
 bool is_file_exist(char *file);
 
 
+void fs_save_list_to_file(void)
+{
+    save_list_to_file(&lidbg_core_list, core_sd_path);
+    save_list_to_file(&lidbg_drivers_list, driver_sd_path);
+    fs_copy_file(state_mem_path, state_sd_path);
+}
 void fs_file_separator(char *file2separator)
 {
-	file_separator(file2separator);
+    file_separator(file2separator);
 }
 void fs_regist_filedetec(char *filename, void (*cb_filedetec)(char *filename ))
 {
@@ -114,16 +123,16 @@ int fs_string2file(char *filename, const char *fmt, ... )
 
     return bfs_file_amend(filename, str_append);
 }
-int fs_dump_kmsg(char* tag, int size )
+int fs_dump_kmsg(char *tag, int size )
 {
     file_separator(LIDBG_KMSG_FILE_PATH);
-	if(tag != NULL)
-		fs_string2file(LIDBG_KMSG_FILE_PATH,"fs_dump_kmsg: %s\n",tag);
+    if(tag != NULL)
+        fs_string2file(LIDBG_KMSG_FILE_PATH, "fs_dump_kmsg: %s\n", tag);
     return dump_kmsg(KMSG_NODE, LIDBG_KMSG_FILE_PATH, size, NULL);
 }
 void fs_save_state(void)
 {
-    fs_copy_file(state_mem_path, state_sd_path); //fileserver_deal_cmd(&fs_state_list, FS_CMD_LIST_SAVE2FILE, NULL, NULL, NULL, NULL, NULL);
+    fs_copy_file(state_mem_path, state_sd_path);
 }
 int fs_regist_state(char *key, int *value)
 {
@@ -131,8 +140,7 @@ int fs_regist_state(char *key, int *value)
 }
 int fs_get_intvalue(struct list_head *client_list, char *key, int *int_value, void (*callback)(char *key, char *value))
 {
-    char *string;
-    return  fileserver_deal_cmd(client_list, FS_CMD_LIST_GETVALUE, NULL, key, &string, int_value, callback);
+    return get_int_value(client_list, key, int_value, callback);
 }
 int fs_get_value(struct list_head *client_list, char *key, char **string)
 {
@@ -153,10 +161,10 @@ int fs_show_list(struct list_head *client_list)
 
 void clearfifo_tofile(void)
 {
-    int fifo_len;
+    int fifo_len,ret;
     spin_lock_irqsave(&fs_lock, flags);
     fifo_len = kfifo_len(&log_fifo);
-    kfifo_out(&log_fifo, log_buffer2write, fifo_len);
+    ret=kfifo_out(&log_fifo, log_buffer2write, fifo_len);
     log_buffer2write[fifo_len > FIFO_SIZE - 1 ? FIFO_SIZE - 1 : fifo_len] = '\0';
     spin_unlock_irqrestore(&fs_lock, flags);
     bfs_file_amend(LIDBG_LOG_FILE_PATH, log_buffer2write);
@@ -203,11 +211,45 @@ bool fs_copy_file(char *from, char *to)
 
 
 //zone below [fileserver]
+int get_int_value(struct list_head *client_list, char *key, int *int_value, void (*callback)(char *key, char *value))
+{
+    struct string_dev *pos;
+    if (list_empty(client_list))
+    {
+        printk("[futengfei]err.fileserver_deal_cmd:<list_is_empty>\n");
+        return -2;
+    }
+    list_for_each_entry(pos, client_list, tmp_list)
+    {
+        if (!strcmp(pos->yourkey, key) )
+        {
+            if(pos->int_value)
+            {
+                *int_value = *(pos->int_value);
+                printk("[futengfei]succeed.find_key:<%s=%d>\n", key, *(pos->int_value) );
+                return 1;
+            }
+            if(int_value && pos->yourvalue)
+            {
+                pos->int_value = int_value;
+                *(pos->int_value) = simple_strtoul(pos->yourvalue, 0, 0);
+                pos->yourvalue = NULL;
+            }
+            if(callback)
+                pos->callback = callback;
+            printk("[futengfei]succeed.find_key:<%s=%d>\n", key, *(pos->int_value) );
+            return 1;
+        }
+    }
+    printk("[futengfei]err.fail_find:<%s>\n", key);
+    return -1;
+
+}
 int fileserver_deal_cmd(struct list_head *client_list, enum string_dev_cmd cmd, char *lookfor, char *key, char **string, int *int_value, void (*callback)(char *key, char *value))
 {
     //note:you can add more func here,just copy one of the case as belows;
     struct string_dev *pos;
-    char *p, buff[256];
+    char *p;
     if(g_dubug_on)
         printk("\n[futengfei]======fileserver_deal_cmd[%d]\n", cmd);
     if (list_empty(client_list))
@@ -252,32 +294,12 @@ int fileserver_deal_cmd(struct list_head *client_list, enum string_dev_cmd cmd, 
         }
         return 1;
 
-    case FS_CMD_LIST_SAVE2FILE:
-        memset(buff, 0, sizeof(buff));
-        list_for_each_entry(pos, client_list, tmp_list)
-        {
-            if(pos->yourkey && pos->int_value)
-                sprintf(buff, "1%s=%d", pos->yourkey, *(pos->int_value));
-            else if(pos->yourkey && pos->yourvalue)
-                sprintf(buff, "2%s=%s", pos->yourkey, pos->yourvalue);
-
-            fs_file_log("%s\n", buff);
-        }
-        return 1;
-
     case FS_CMD_LIST_GETVALUE:
         list_for_each_entry(pos, client_list, tmp_list)
         {
             if (!strcmp(pos->yourkey, key))
             {
                 *string = pos->yourvalue;
-                if(int_value)
-                {
-                    pos->int_value = int_value;
-                    *int_value = simple_strtoul(pos->yourvalue, 0, 0);
-                }
-                if(callback)
-                    pos->callback = callback;
                 printk("[futengfei]succeed.find_key:<%s=%s>\n", key, *string);
                 return 1;
             }
@@ -286,39 +308,13 @@ int fileserver_deal_cmd(struct list_head *client_list, enum string_dev_cmd cmd, 
         return -1;
 
     case FS_CMD_LIST_SETVALUE:
-    case FS_CMD_LIST_SETVALUE2://malloc mem;
         list_for_each_entry(pos, client_list, tmp_list)
         {
-            if ( (!strcmp(pos->yourkey, key))  &&  (strcmp(pos->yourvalue, *string)) )
+            if ( (!strcmp(pos->yourkey, key)) && pos->yourvalue && (strcmp(pos->yourvalue, *string)))
             {
-                p = *string;
-                if(cmd == FS_CMD_LIST_SETVALUE2)
-                {
-                    pos->yourvalue = kmalloc(strlen(p) + 1, GFP_KERNEL);
-                    if(g_dubug_mem)
-                        fs_string2file(DEBUG_MEM_FILE, "%s=%d\n ", __func__, strlen(p) + 1);
-                    if (pos->yourvalue  != NULL)
-                    {
-                        strcpy(pos->yourvalue, p);
-                        printk("[futengfei]succeed.set_key2:<%s=%s>\n", key, pos->yourvalue);
-                    }
-                }
-                else
-                {
-                    pos->yourvalue = *string;
-                    printk("[futengfei]succeed.set_key:<%s=%s>\n", key, pos->yourvalue);
-                }
 
-                if (pos->int_value)
-                {
-                    *(pos->int_value) = simple_strtoul(p, 0, 0);
-                    printk("[futengfei]succeed.set_keyvalue:<%s=%d>\n", key, *(pos->int_value));
-                }
-                if (pos->callback)
-                {
-                    pos->callback(key, pos->yourvalue);
-                    printk("[futengfei]succeed.pos->callback();\n");
-                }
+                pos->yourvalue = *string;
+                printk("[futengfei]succeed.set_key:<%s=%s>\n", key, pos->yourvalue);
                 return 1;
             }
         }
@@ -374,7 +370,6 @@ int bfs_file_amend(char *file2amend, char *str_append)
         printk("[futengfei]err.fileappend_mode:<str_append=null>\n");
         return -1;
     }
-    //printk("[futengfei]warn.check:<fileappend_mode>\n");
     flags = O_CREAT | O_RDWR | O_APPEND;
 
 again:
@@ -384,14 +379,12 @@ again:
         printk("[futengfei]err.open:<%s>\n", file2amend);
         return -1;
     }
-    //printk("[futengfei]succeed.open:<%s>\n", file2amend);
 
     old_fs = get_fs();
     set_fs(get_ds());
 
     inode = filep->f_dentry->d_inode;
     file_len = inode->i_size;
-    // printk("[futengfei]warn.File_length:<%d>\n", file_len);
     file_len = file_len + 2;
 
 
@@ -414,7 +407,6 @@ again:
     filep->f_op->write(filep, str_append, strlen(str_append), &filep->f_pos);
     set_fs(old_fs);
     filp_close(filep, 0);
-    //printk("[futengfei]succeed.fileappend_mode:<write.over.return>\n");
     return 1;
 }
 
@@ -502,7 +494,6 @@ static int thread_log_func(void *data)
     allow_signal(SIGKILL);
     allow_signal(SIGSTOP);
     //set_freezable();
-    ssleep(20);
     while(!kthread_should_stop())
     {
         if(g_clearlogfifo_ms)
@@ -523,9 +514,10 @@ int update_list(const char *filename, struct list_head *client_list)
 {
     struct file *filep;
     struct inode *inode = NULL;
+    struct string_dev *pos;
     mm_segment_t old_fs;
     char *token, *file_ptr = NULL, *file_ptmp, *ptmp, *key, *value;
-    int all_purpose;
+    int all_purpose, curren_intvalue;
     unsigned int file_len;
 
     filep = filp_open(filename, O_RDWR , 0);
@@ -541,7 +533,6 @@ int update_list(const char *filename, struct list_head *client_list)
 
     inode = filep->f_dentry->d_inode;
     file_len = inode->i_size;
-    printk("[futengfei]warn.File_length:<%d>\n", file_len);
     file_len = file_len + 2;
 
     file_ptr = (unsigned char *)kzalloc(file_len, GFP_KERNEL);
@@ -577,7 +568,24 @@ int update_list(const char *filename, struct list_head *client_list)
                 value = ptmp + 1;
                 *ptmp = '\0';
                 printk("<%s,%s>\n", key, value);
-                fileserver_deal_cmd( client_list, FS_CMD_LIST_SETVALUE2, NULL, key, &value, NULL, NULL);
+                {
+                    //start
+                    list_for_each_entry(pos, client_list, tmp_list)
+                    {
+                        if ( (!strcmp(pos->yourkey, key)) )//&& pos->yourvalue && (strcmp(pos->yourvalue, *string))
+                        {
+                            curren_intvalue = simple_strtoul(value, 0, 0);
+                            if (pos->int_value && (*(pos->int_value) != curren_intvalue))
+                            {
+                                *(pos->int_value) = curren_intvalue;
+                                if (pos->callback)
+                                    pos->callback(key, value);
+                                FS_SUC("<%s=%d>\n", key, *(pos->int_value));
+                            }
+                        }
+                    }
+                }//end
+
             }
             else if(g_dubug_on)
                 printk("\ndroped[%s]\n", token);
@@ -796,7 +804,7 @@ static int thread_filedetec_func(void *data)
     allow_signal(SIGKILL);
     allow_signal(SIGSTOP);
     //set_freezable();
-    ssleep(30);
+    ssleep(20);
     FS_WARN("<thread start>\n");
     if(g_dubug_filedetec)
         show_filedetec_list();
@@ -819,13 +827,7 @@ static int thread_pollfile_func(void *data)
     allow_signal(SIGKILL);
     allow_signal(SIGSTOP);
     //set_freezable();
-    ssleep(50);
-    if(!copy_file(driver_fly_path, driver_sd_path))
-        copy_file(driver_lidbg_path, driver_sd_path);
-    if(!copy_file(core_fly_path, core_sd_path))
-        copy_file(core_lidbg_path, core_sd_path);
-    if(!copy_file(cmd_fly_path, cmd_sd_path))
-        copy_file(cmd_lidbg_path, cmd_sd_path);
+    ssleep(20);
     get_file_mftime(core_sd_path, &precorefile_tm);
     get_file_mftime(driver_sd_path, &predriverfile_tm);
     get_file_mftime(cmd_sd_path, &precmdfile_tm);
@@ -864,42 +866,47 @@ static int thread_pollfile_func(void *data)
     }
     return 1;
 }
-
-static int thread_pollstate_func(void *data)
+void save_list_to_file(struct list_head *client_list, char *filename)
 {
     struct string_dev *pos;
     struct file *filep;
     mm_segment_t old_fs;
     char buff[100];
+    filep = filp_open(filename, O_CREAT | O_RDWR | O_TRUNC , 0777);
+    if(!IS_ERR(filep))
+    {
+        old_fs = get_fs();
+        set_fs(get_ds());
+        if(filep->f_op->write)
+        {
+            list_for_each_entry(pos, client_list, tmp_list)
+            {
+                memset(buff, '\0', sizeof(buff));
+                if(pos->yourkey && pos->int_value)
+                    sprintf(buff, "%s=%d\n", pos->yourkey, *(pos->int_value));
+                else if(pos->yourkey && pos->yourvalue)
+                    sprintf(buff, "%s=%s\n", pos->yourkey, pos->yourvalue);
+                filep->f_op->write(filep, buff, strlen(buff), &filep->f_pos);
+                filep->f_op->llseek(filep, 0, SEEK_END);
+            }
+        }
+        set_fs(old_fs);
+        filp_close(filep, 0);
+    }
+    else
+        FS_ERR("<fail open:%s>\n", filename);
+}
+static int thread_pollstate_func(void *data)
+{
     allow_signal(SIGKILL);
     allow_signal(SIGSTOP);
     //set_freezable();
-    //ssleep(50);
     while(!kthread_should_stop())
     {
         if(g_pollstate_ms)
         {
             msleep(g_pollstate_ms);
-            filep = filp_open(state_mem_path, O_CREAT | O_RDWR | O_TRUNC , 0777);
-            if(!IS_ERR(filep))
-            {
-                old_fs = get_fs();
-                set_fs(get_ds());
-                if(filep->f_op->write)
-                {
-                    list_for_each_entry(pos, &fs_state_list, tmp_list)
-                    {
-                        if(pos->yourkey && pos->int_value)
-                        {
-                            sprintf(buff, "%s=%d\n", pos->yourkey, *(pos->int_value));
-                            filep->f_op->write(filep, buff, strlen(buff), &filep->f_pos);
-                            filep->f_op->llseek(filep, 0, SEEK_END);
-                        }
-                    }
-                }
-                set_fs(old_fs);
-                filp_close(filep, 0);
-            }
+            save_list_to_file(&fs_state_list, state_mem_path);
         }
         else
             ssleep(30);
@@ -1068,14 +1075,14 @@ void cb_kv_filedetecen(char *key, char *value)
 {
     if(g_dubug_on)
         FS_WARN("<%s=%s>\n", key, value);
-    if ( (!strcmp(key, "fs_file_detect_en" ))  &&  (strcmp(value, "0" )) )
+    if ( (!strcmp(key, "fs_dbg_file_detect" ))  &&  (strcmp(value, "0" )) )
         show_filedetec_list();
 }
 void cb_filedetec_dump_kmsg(char *filename )
 {
     if(g_dubug_filedetec)
         FS_WARN("<callback belong::%s>\n", filename);
-   fs_dump_kmsg(__FUNCTION__,__LOG_BUF_LEN);
+   fs_dump_kmsg((char *)__FUNCTION__,__LOG_BUF_LEN);
 }
 void cb_filedetec_test(char *filename )
 {
@@ -1113,6 +1120,9 @@ void fileserverinit_once(void)
     else
         fs_fill_list(state_lidbg_path, FS_CMD_FILE_CONFIGMODE, &fs_state_list);
 
+    if(!copy_file(cmd_fly_path, cmd_sd_path))
+        copy_file(cmd_lidbg_path, cmd_sd_path);
+
     init_completion(&kmsg_wait);
     spin_lock_init(&fs_lock);
     kfifo_init(&log_fifo, log_buffer, FIFO_SIZE);
@@ -1133,7 +1143,7 @@ void fileserverinit_once(void)
     fs_get_intvalue(&lidbg_core_list, "fs_updatestate_ms", &g_pollstate_ms, NULL);
     fs_get_intvalue(&lidbg_core_list, "fs_kmsg_en", &g_pollkmsg_en, cb_kv_pollkmsg);
     fs_get_intvalue(&lidbg_core_list, "fs_filedetect_ms", &g_filedetect_ms, NULL);
-    fs_get_intvalue(&lidbg_core_list, "fs_file_detect_en", &g_dubug_filedetec, cb_kv_filedetecen);
+    fs_get_intvalue(&lidbg_core_list, "fs_dbg_file_detect", &g_dubug_filedetec, cb_kv_filedetecen);
 
     fs_regist_filedetec("/mnt/sdcard/dump_kmsg", cb_filedetec_dump_kmsg);
     fs_regist_filedetec("/mnt/usbdisk/dump_kmsg", cb_filedetec_dump_kmsg);
@@ -1171,7 +1181,7 @@ void test_fileserver_stability(void)
     lidbg_get_current_time(tbuff, NULL);
     fs_file_log("%s\n", tbuff);
 
-    fs_string2file("/mnt/sdcard/Android/fs_string2file.txt", "%s\n", tbuff);
+    fs_string2file("/data/fs_string2file.txt", "%s\n", tbuff);
     set_machine_id();
 
     is_file_updated(core_sd_path, &precorefile_tm);
@@ -1199,7 +1209,7 @@ static int thread_fileserver_test(void *data)
     allow_signal(SIGKILL);
     allow_signal(SIGSTOP);
     //set_freezable();
-    fs_regist_state("acc_off_times", &test_count);
+    fs_regist_state("ats", &test_count);
     //fs_regist_state("fs_pollfile_ms", &g_pollfile_ms);
     //fs_regist_state("fs_kmsg_en", &g_pollkmsg_en);
     //fs_regist_state("fs_updatestate_ms", &g_pollstate_ms);
@@ -1272,13 +1282,13 @@ void lidbg_fileserver_main(int argc, char **argv)
         fs_enable_kmsg(cmd_para);
         break;
     case 3:
-        fs_dump_kmsg(__FUNCTION__,cmd_para * 1024);
+        fs_dump_kmsg((char *)__FUNCTION__,cmd_para * 1024);
         break;
     case 4:
-        FS_WARN("machine_id:%d\n", get_machine_id());//sdve to uart
+        FS_WARN("machine_id:%d\n", get_machine_id());
         break;
     case 5:
-        fs_regist_filedetec("/mnt/sdcard/123.txt", cb_filedetec_test);
+        fs_save_list_to_file();
         break;
     default:
         FS_ERR("<check you cmd:%d>\n", cmd);
@@ -1292,6 +1302,7 @@ EXPORT_SYMBOL(lidbg_fileserver_main);
 EXPORT_SYMBOL(lidbg_drivers_list);
 EXPORT_SYMBOL(lidbg_core_list);
 EXPORT_SYMBOL(get_machine_id);
+EXPORT_SYMBOL(fs_save_list_to_file);
 EXPORT_SYMBOL(fs_regist_filedetec);
 EXPORT_SYMBOL(fs_file_separator);
 EXPORT_SYMBOL(fs_enable_kmsg);

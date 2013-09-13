@@ -43,6 +43,7 @@ struct string_dev
     void (*cb_filedetec)(char * filename );
 };
 void lidbg_fileserver_main(int argc, char **argv);
+extern void fs_save_list_to_file(void);
 extern void fs_file_separator(char *file2separator);
 extern void fs_regist_filedetec(char *filename, void (*cb_filedetec)(char *filename ));
 extern void fs_enable_kmsg( bool enable );
