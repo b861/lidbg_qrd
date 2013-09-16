@@ -4,6 +4,7 @@
 update log:
 	1:[20130912 V5.1]/add separaror
 	2:[20130913 V6.0]/save core,driver list to overwrite core.conf driver.conf
+	3:[20130916 V7.0]/check if the conf file need to be updated
 */
 
 #define FS_WARN(fmt, args...) pr_info("[futengfei.fs]warn.%s: " fmt,__func__,##args)
@@ -11,11 +12,12 @@ update log:
 #define FS_SUC(fmt, args...) pr_info("[futengfei.fs]suceed.%s: " fmt,__func__,##args)
 
 //zone below [tools]
-#define FS_VERSION "FS.VERSION:  [20130913 V6.0]"
+#define FS_VERSION "FS.VERSION:  [20130916 V7.0]"
 #define DEBUG_MEM_FILE "/data/fs_private.txt"
 #define LIDBG_LOG_FILE_PATH "/data/lidbg_log.txt"
 #define LIDBG_KMSG_FILE_PATH "/data/lidbg_kmsg.txt"
 #define MACHINE_ID_FILE "/data/MIF.txt"
+#define PRE_CONF_INFO_FILE "/data/conf_info.txt"
 #define LIDBG_NODE "/dev/mlidbg0"
 #define KMSG_NODE "/proc/kmsg"
 #define FIFO_SIZE (1024)
@@ -32,7 +34,7 @@ static  char *cmd_sd_path = "/data/cmd.txt";
 static  char *cmd_fly_path = "/flysystem/lib/out/cmd.conf";
 static  char *cmd_lidbg_path = "/system/lib/modules/out/cmd.conf";
 static  char *state_sd_path = "/data/state.txt";
-static  char *state_mem_path = "/data/state.txt";
+static  char *state_mem_path = "/dev/log/state.txt";
 static  char *state_fly_path = "/flysystem/lib/out/state.conf";
 static  char *state_lidbg_path = "/system/lib/modules/out/state.conf";
 static struct task_struct *filelog_task;
@@ -689,6 +691,21 @@ int launch_file_cmd(const char *filename)
     return 1;
 }
 
+bool set_file_len_to_zero(char *filename)
+{
+    struct file *filep;
+    filep = filp_open(filename, O_CREAT | O_RDWR | O_TRUNC , 0777);
+    if(IS_ERR(filep))
+        return false;
+    else
+        filp_close(filep, 0);
+    return true;
+}
+void show_tm(struct rtc_time *ptmp)
+{
+    FS_WARN("<file modify time:%d-%02d-%02d %02d:%02d:%02d>\n",
+            ptmp->tm_year + 1900, ptmp->tm_mon + 1, ptmp->tm_mday, ptmp->tm_hour + 8, ptmp->tm_min, ptmp->tm_sec);
+}
 bool get_file_mftime(const char *filename, struct rtc_time *ptm)
 {
     struct file *filep;
@@ -841,22 +858,19 @@ static int thread_pollfile_func(void *data)
             msleep(g_pollfile_ms);
             if(is_file_updated(core_sd_path, &precorefile_tm))
             {
-                FS_WARN("<file modify time:%d-%02d-%02d %02d:%02d:%02d>\n",
-                        precorefile_tm.tm_year + 1900, precorefile_tm.tm_mon + 1, precorefile_tm.tm_mday, precorefile_tm.tm_hour + 8, precorefile_tm.tm_min, precorefile_tm.tm_sec);
+                show_tm(&precorefile_tm);
                 update_list(core_sd_path, &lidbg_core_list);
             }
 
             if(is_file_updated(driver_sd_path, &predriverfile_tm))
             {
-                FS_WARN("<file modify time:%d-%02d-%02d %02d:%02d:%02d>\n",
-                        precorefile_tm.tm_year + 1900, precorefile_tm.tm_mon + 1, precorefile_tm.tm_mday, precorefile_tm.tm_hour + 8, precorefile_tm.tm_min, precorefile_tm.tm_sec);
+                show_tm(&predriverfile_tm);
                 update_list(driver_sd_path, &lidbg_drivers_list);
             }
 
             if(is_file_updated(cmd_sd_path, &precmdfile_tm))
             {
-                FS_WARN("<file modify time:%d-%02d-%02d %02d:%02d:%02d>\n",
-                        precorefile_tm.tm_year + 1900, precorefile_tm.tm_mon + 1, precorefile_tm.tm_mday, precorefile_tm.tm_hour + 8, precorefile_tm.tm_min, precorefile_tm.tm_sec);
+                show_tm(&precmdfile_tm);
                 launch_file_cmd(cmd_sd_path);
             }
 
@@ -1039,7 +1053,7 @@ bool copy_file(char *from, char *to)
     pfileto->f_op->llseek(pfileto, 0, 0);
     pfileto->f_op->write(pfileto, string, file_len, &pfileto->f_pos);
     set_fs(old_fs);
-    filp_close(pfilefrom, 0);
+    filp_close(pfileto, 0);
 
     vfree(string);
     return true;
@@ -1090,38 +1104,73 @@ void cb_filedetec_test(char *filename )
         FS_WARN("<callback belong::%s>\n", filename);
 }
 
+void copy_all_conf_file(void)
+{
+    if(is_file_exist(core_fly_path))
+    {
+        copy_file(core_fly_path, core_sd_path);
+        copy_file(driver_fly_path, driver_sd_path) ;
+        copy_file(state_fly_path, state_sd_path);
+        copy_file(cmd_fly_path, cmd_sd_path);
+    }
+    else
+    {
+        copy_file(core_lidbg_path, core_sd_path);
+        copy_file(driver_lidbg_path, driver_sd_path);
+        copy_file(state_lidbg_path, state_sd_path);
+        copy_file(cmd_lidbg_path, cmd_sd_path);
+    }
+}
+bool get_file_tmstring(char *filename, char *tmstring)
+{
+    struct rtc_time tm;
+    if(filename && tmstring && get_file_mftime(filename, &tm) )
+    {
+        sprintf(tmstring, "%d-%02d-%02d %02d:%02d:%02d",
+                tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour + 8, tm.tm_min, tm.tm_sec);
+        return true;
+    }
+    return false;
+}
+bool is_conf_updated(char *filename, char *infofile)
+{
+    char pres[64], news[64];
+    if (get_file_tmstring(filename, news) && (readwrite_file(infofile, NULL, pres, sizeof(pres)) > 0) && (strcmp(news, pres)))
+        return true;
+    else
+        return false;
+}
+void check_conf_file(char *filename)
+{
+    if(!is_file_exist(PRE_CONF_INFO_FILE) || is_conf_updated(filename, PRE_CONF_INFO_FILE))
+    {
+        char  news[64];
+
+        FS_WARN("<overwrite all conf:push,update?>\n");
+        copy_all_conf_file();
+        get_file_tmstring(filename, news);
+        set_file_len_to_zero(PRE_CONF_INFO_FILE);
+        bfs_file_amend(PRE_CONF_INFO_FILE, news);
+    }
+}
 void fileserverinit_once(void)
 {
     char tbuff[100];
 
+    if(is_file_exist(core_fly_path))
+        check_conf_file(core_fly_path);
+    else
+        check_conf_file(core_lidbg_path);
+
     //search priority:sd_path>fly_path>lidbg_path
-    if(is_file_exist(driver_sd_path) || copy_file(driver_fly_path, driver_sd_path) || copy_file(driver_lidbg_path, driver_sd_path))
-        fs_fill_list(driver_sd_path, FS_CMD_FILE_CONFIGMODE, &lidbg_drivers_list);
-    else
+    if(!is_file_exist(driver_sd_path) || !is_file_exist(core_sd_path) || !is_file_exist(state_sd_path))
     {
-        if(is_file_exist(driver_fly_path))
-            fs_fill_list(driver_fly_path, FS_CMD_FILE_CONFIGMODE, &lidbg_drivers_list);
-        else
-            fs_fill_list(driver_lidbg_path, FS_CMD_FILE_CONFIGMODE, &lidbg_drivers_list);
+        FS_WARN("<overwrite all conf:conf miss>\n");
+        copy_all_conf_file();
     }
-
-    if(is_file_exist(core_sd_path) || copy_file(core_fly_path, core_sd_path) || copy_file(core_lidbg_path, core_sd_path))
-        fs_fill_list(core_sd_path, FS_CMD_FILE_CONFIGMODE, &lidbg_core_list);
-    else
-    {
-        if(is_file_exist(core_fly_path))
-            fs_fill_list(core_fly_path, FS_CMD_FILE_CONFIGMODE, &lidbg_core_list);
-        else
-            fs_fill_list(core_lidbg_path, FS_CMD_FILE_CONFIGMODE, &lidbg_core_list);
-    }
-
-    if(is_file_exist(state_fly_path))
-        fs_fill_list(state_fly_path, FS_CMD_FILE_CONFIGMODE, &fs_state_list);
-    else
-        fs_fill_list(state_lidbg_path, FS_CMD_FILE_CONFIGMODE, &fs_state_list);
-
-    if(!copy_file(cmd_fly_path, cmd_sd_path))
-        copy_file(cmd_lidbg_path, cmd_sd_path);
+    fs_fill_list(driver_sd_path, FS_CMD_FILE_CONFIGMODE, &lidbg_drivers_list);
+    fs_fill_list(core_sd_path, FS_CMD_FILE_CONFIGMODE, &lidbg_core_list);
+    fs_fill_list(state_sd_path, FS_CMD_FILE_CONFIGMODE, &fs_state_list);
 
     init_completion(&kmsg_wait);
     spin_lock_init(&fs_lock);
@@ -1172,12 +1221,13 @@ void test_fileserver_stability(void)
     printk("[futengfei]get key value:[%d]\n", ret );
     fs_get_intvalue(&lidbg_drivers_list, "mayanping", &ret, NULL);
     printk("[futengfei]get key value:[%d]\n", ret );
-    fs_get_intvalue(&lidbg_core_list, "fs_dbg_enable", &ret, NULL);
+    fs_get_intvalue(&lidbg_core_list, "fs_updatestate_ms", &ret, NULL);
     printk("[futengfei]get key value:[%d]\n", ret );
+
     delay = "futengfei1";
-    fs_set_value(&lidbg_core_list, "fs_dbg_enable", delay);
-    fs_get_value(&lidbg_core_list, "fs_dbg_enable", &value);
-    printk("[futengfei]warn.test_fileserver_stability:<value=%s>\n", value);
+//    fs_set_value(&lidbg_core_list, "fs_private_patch", delay);
+//    fs_get_value(&lidbg_core_list, "fs_private_patch", &value);
+//    printk("[futengfei]warn.test_fileserver_stability:<value=%s>\n", value);
     lidbg_get_current_time(tbuff, NULL);
     fs_file_log("%s\n", tbuff);
 
@@ -1218,6 +1268,7 @@ static int thread_fileserver_test(void *data)
         test_fileserver_stability();
         ssleep(1);
         fs_log_sync();
+        //fs_save_list_to_file();
     };
     return 1;
 }
