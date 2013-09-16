@@ -491,7 +491,8 @@ static int video_late_resume(struct early_suspend *h)
 {
     printk("video_late_resume tw9912 reset\n");
     Tw9912_hardware_reset();
-    //TC358_init(NTSC_P);
+    flyVideoChannelInitall(YIN2); // DVD
+    video_init_config_in(NTSC_P);//first initall tw9912 all register
     return 0;
 }
 
@@ -523,8 +524,8 @@ static int  video_dev_suspend(struct platform_device *pdev,pm_message_t state)
 }
 static int video_dev_resume(struct platform_device *pdev)
 {
-	printk("resume tw9912 reset\n");
-	Tw9912_hardware_reset();
+	printk("resume video chip environment variables reset\n");
+	//Tw9912_hardware_reset();
 	global_tw9912_info_for_NTSC_I.flag=true;//true is neet again find the black line;
 	global_tw9912_info_for_NTSC_I.reg_val=0x17;
 	global_tw9912_info_for_NTSC_I.this_is_first_open = true;

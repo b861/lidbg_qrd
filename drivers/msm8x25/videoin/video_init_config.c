@@ -630,10 +630,14 @@ void video_init_config_in(Vedio_Format config_pramat)
 
 	printk("global_video_channel_flag = %x\n",global_video_channel_flag);
 	if(global_video_channel_flag == TV_4KO)
-	{u8 Tw9912_register_valu[] = {0x08, 0x17,}; //default input pin selet YIN0
+	{u8 Tw9912_register_valu[] = {0x08, 0x17,};
 		write_tw9912((char *)Tw9912_register_valu);
 		Tw9912_register_valu[0] =0xa;
 		Tw9912_register_valu[1] =0x1e;
+		write_tw9912((char *)Tw9912_register_valu);
+	}
+	else if(global_video_channel_flag == AUX_4KO)
+	{u8 Tw9912_register_valu[] = {0x08, 0x15,};
 		write_tw9912((char *)Tw9912_register_valu);
 	}
 
