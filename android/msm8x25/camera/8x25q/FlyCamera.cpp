@@ -62,9 +62,11 @@ namespace android {
 	static nsecs_t flymLastFpsTime = 0;
   static nsecs_t flynow;
   static nsecs_t flydiff;
+	static unsigned int FlyCameraThisIsFirstOpenAtDVD_flag = 0;
 
 void FlyCameraStar()
 {
+	FlyCameraThisIsFirstOpenAtDVD_flag = 0;
 	globao_mFlyPreviewStatus = 1;
 	DEBUGLOG("Flyvideo-mFlyPreviewStatus =%d\n",globao_mFlyPreviewStatus);
 }
@@ -109,7 +111,10 @@ void FlyCameraGetInfo(mm_camera_ch_data_buf_t *Frame,QCameraHardwareInterface *m
         flymLastFpsTime = flynow;
         flymLastFrameCount = flymFrameCount;
     }
-
+//if(video_channel_status[0] == '2')//AUX
+//	{
+//	memset((void *)(frame->def.frame->buffer+frame->def.frame->y_off),0,720*3);
+//	}
 }
 static int ToFindBlackLineAndSetTheTw9912VerticalDelayRegister(mm_camera_ch_data_buf_t *frame);
 bool FlyCameraImageDownFindBlackLine()
@@ -124,9 +129,10 @@ bool FlyCameraImageDownFindBlackLine()
 			}
 return 0;
 }
-void FlyCameraThisIsFirstOpenAtDVD()
+bool FlyCameraThisIsFirstOpenAtDVD()
 {
-	if(video_channel_status[0] == '1' && global_Fream_is_first == true)
+	FlyCameraThisIsFirstOpenAtDVD_flag++;
+	if(video_channel_status[0] == '1' && global_Fream_is_first == true && FlyCameraThisIsFirstOpenAtDVD_flag >= 0)
 			{
 						 int file_fd;
 						 TW9912Info tw9912_info;
@@ -150,7 +156,9 @@ void FlyCameraThisIsFirstOpenAtDVD()
 						 write(file_fd, (const void *)(&tw9912_info),sizeof(TW9912Info));
 							OPEN_ERR:
 						 global_Fream_is_first = false;
+						 return 1;
 			}
+	return 0;
 }
 void FlyCameraNotSignalAtLastTime()
 {
@@ -360,7 +368,7 @@ unsigned int black_count=0;
 					if( black_count > 280)//“黑色"数据大于700认为是黑屏
 					{
 						//FlagBlack(frame);
-						DEBUGLOG("Flyvideo-：确定倒车视频已断开,发现的黑色数据个数= %d 个,其中一个黑色数据是0x%.2x",black_count,*piont_y);
+						//DEBUGLOG("Flyvideo-：确定倒车视频已断开,发现的黑色数据个数= %d 个,其中一个黑色数据是0x%.2x",black_count,*piont_y);
 						return 1;
 					}
 				}
@@ -671,8 +679,6 @@ static bool DetermineImageSplitScreen(mm_camera_ch_data_buf_t *frame,QCameraHard
 		}
 	}
 BREAK_THE:
-if(video_channel_status[0] == '2' || video_channel_status[0] == '3')//AUX
-	memset((void *)(frame->def.frame->buffer+frame->def.frame->y_off),0,720*3);
 return 0;//未发生分屏
 }
 bool FlyCameraFrameDisplayOrOutDisplay()
@@ -686,7 +692,7 @@ bool FlyCameraFrameDisplayOrOutDisplay()
 		{
 			if(BlackJudge(frame) == 1)//发现黑屏
 				//return processPreviewFrameWithOutDisplay(frame);
-				DEBUGLOG("Flyvideo-：发现黑屏，但是目前还未作任何处理\n");
+				;//DEBUGLOG("Flyvideo-：发现黑屏，但是目前还未作任何处理\n");
 			else
 				{
 				if( DetermineImageSplitScreen(frame,mHalCamCtrl) )//发现分屏

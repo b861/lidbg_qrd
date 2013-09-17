@@ -6,7 +6,7 @@ extern void FlyCameraStop();
 extern void FlyCameraRelease();
 extern void FlyCameraGetInfo(mm_camera_ch_data_buf_t *Frame,QCameraHardwareInterface *mHalCamCtrl_1);
 extern void FlyCameraNotSignalAtLastTime();
-extern void FlyCameraThisIsFirstOpenAtDVD();
+extern bool FlyCameraThisIsFirstOpenAtDVD();
 extern bool FlyCameraImageDownFindBlackLine();
 extern bool FlyCameraFrameDisplayOrOutDisplay();
 

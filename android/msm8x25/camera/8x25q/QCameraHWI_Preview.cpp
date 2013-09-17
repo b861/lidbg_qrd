@@ -1387,7 +1387,8 @@ status_t QCameraStream_preview::processPreviewFrame (
 		if(FlyCameraImageDownFindBlackLine())
 			return processPreviewFrameWithOutDisplay(frame);
 
-		FlyCameraThisIsFirstOpenAtDVD();
+		if(FlyCameraThisIsFirstOpenAtDVD())
+			return processPreviewFrameWithOutDisplay(frame);
 	
 		if (mHalCamCtrl->isNoDisplayMode()) {
 			return processPreviewFrameWithOutDisplay(frame);
