@@ -21,6 +21,7 @@ update log:
 #define LIDBG_NODE "/dev/mlidbg0"
 #define KMSG_NODE "/proc/kmsg"
 #define FIFO_SIZE (1024)
+#define MAX_FILE_LEN (MEM_SIZE_4_MB)
 static struct kfifo log_fifo;
 spinlock_t		fs_lock;
 unsigned long flags;
@@ -390,7 +391,7 @@ again:
     file_len = file_len + 2;
 
 
-    if(file_len > MEM_SIZE_8_MB)
+    if(file_len > MAX_FILE_LEN)
     {
         printk("[futengfei]warn.fileappend_mode:< file>8M.goto.again >\n");
         is_file_cleard = 1;
