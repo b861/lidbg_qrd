@@ -108,9 +108,10 @@ static void list_active_locks(void)
 	struct wake_lock *lock;
 	int type = 0;
 	if(active_wake_locks == NULL) return;
+	spin_lock_irqsave(&kill_lock, flags_kill);
 	list_for_each_entry(lock, &active_wake_locks[type], link)
 	{
-		lidbg("active wake lock %s\n", lock->name);
+		//lidbg("active wake lock %s\n", lock->name);
 		
 		if(!strcmp(lock->name, "adsp"))
 		{
@@ -119,6 +120,7 @@ static void list_active_locks(void)
 		    fb_data->has_wakelock_can_not_ignore = 1;
 		}
 	}
+	spin_unlock_irqrestore(&kill_lock, flags_kill);
 #else
 	//this can only see user_wakelock
     //cat /proc/wakelocks can see all wakelocks
@@ -506,6 +508,10 @@ static int thread_fastboot_suspend(void *data)
                 time_count++;
                 if(fastboot_get_status() == PM_STATUS_EARLY_SUSPEND_PENDING)
                 {
+
+					if(fb_data->kill_task_en)
+						fastboot_task_kill_exclude(NULL);
+					
 					if(fb_data->clk_block_suspend)
 					{
 						lidbg("some clk block suspend!\n");
@@ -781,7 +787,7 @@ static void fastboot_early_suspend(struct early_suspend *h)
 	if(fb_data->kill_task_en)
 	{
 			fastboot_task_kill_exclude(NULL);
-	    	msleep(1000);
+	    	//msleep(1000);
 	}
 	
 #if 0 //for test
