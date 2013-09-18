@@ -116,7 +116,7 @@ static void list_active_locks(void)
 		if(!strcmp(lock->name, "adsp"))
 		{
 			lidbg("wake_lock:adsp\n");
-			lidbg_fs("wake_lock:adsp\n");
+			lidbg_fs_log(FASTBOOT_LOG_PATH,"wake_lock:adsp\n");
 		    fb_data->has_wakelock_can_not_ignore = 1;
 		}
 	}
