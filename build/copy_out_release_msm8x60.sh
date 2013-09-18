@@ -14,7 +14,7 @@ cp $DBG_OUT_PATH/lidbg_ad.ko $release_path
 cp $DBG_OUT_PATH/lidbg_main.ko $release_path
 cp $DBG_OUT_PATH/lidbg_loader.ko $release_path
 cp $DBG_OUT_PATH/lidbg_uart.ko $release_path
-cp $DBG_OUT_PATH/lidbg_fly_hal.ko $release_path
+cp $DBG_OUT_PATH/suspend_monitor.ko $release_path
 cp $DBG_OUT_PATH/core.conf $release_path
 cp $DBG_OUT_PATH/drivers.conf $release_path
 cp $DBG_OUT_PATH/cmd.conf $release_path

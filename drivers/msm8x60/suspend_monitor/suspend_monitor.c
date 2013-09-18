@@ -10,6 +10,7 @@
 char const*const BUTTON_FILE
         = "/sys/class/leds/button-backlight/brightness";
 int suspend_times = 0;
+int led_ctrl_en = 1;
 
 void led_ctrl(bool on)
 {
@@ -20,11 +21,12 @@ void led_ctrl(bool on)
 }
 
 int sleep_time;
-void led_tigger()
+void led_tigger(void)
 {
     static int status = 0;
 	status = status % 2;
-	led_ctrl(status);
+	if(led_ctrl_en)
+		led_ctrl(status);
 	if(status==1)
 		msleep(sleep_time/10);
 	else
@@ -33,45 +35,22 @@ void led_tigger()
 	status++;
 }
 
-int suspend_monitor_open (struct inode *inode, struct file *filp)
-{
-    return 0;
-}
-
-
-ssize_t suspend_monitor_read (struct file *filp, char __user *buf, size_t count, loff_t *f_pos)
-{
-    return 0;
-}
-
-
-ssize_t suspend_monitor_write (struct file *filp, const char __user *buf, size_t count, loff_t *f_pos)
-{
-    return 0;
-}
-
-
-
-static  struct file_operations suspend_monitor_fops =
-{
-    .owner = THIS_MODULE,
-    .read = suspend_monitor_read,
-    .write = suspend_monitor_write,
-    .open = suspend_monitor_open,
-};
-
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
 static void suspend_monitor_early_suspend(struct early_suspend *h)
 {
+       DUMP_FUN;
 	sleep_time = LED_FLASH_FAST;
-    DUMP_FUN;
+	led_ctrl_en = 0;
+	led_ctrl(1);
 }
 
 static void suspend_monitor_late_resume(struct early_suspend *h)
 {
+	DUMP_FUN;
 	sleep_time = LED_FLASH_SLOW;
-    DUMP_FUN;
+	led_ctrl(0);
+	led_ctrl_en = 1;
 }
 
 #endif
@@ -79,21 +58,39 @@ static void suspend_monitor_late_resume(struct early_suspend *h)
 
 int thread_led(void *data)
 {
-	led_tigger();
+#if 1
+	while(1)
+		led_tigger();
+#else
+	while(1)
+	{
+		if(led_ctrl_en)
+			led_ctrl(0);
+		msleep(500);
+	}
+#endif
+	return 0;
 }
 
+
+struct early_suspend early_suspend;
 static struct task_struct *led_task;
 static int  suspend_monitor_probe(struct platform_device *pdev)
 {
-
-	
+ 	DUMP_FUN_ENTER;
+#ifdef CONFIG_HAS_EARLYSUSPEND
+    early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN;
+    early_suspend.suspend =  suspend_monitor_early_suspend;
+    early_suspend.resume =  suspend_monitor_late_resume;
+    register_early_suspend(&early_suspend);
+#endif
     fs_regist_state("suspend_times", &suspend_times);
 
 	sleep_time = LED_FLASH_SLOW;
-    led_task = kthread_create(thread_led, NULL, "fly_gps_server");
+    led_task = kthread_create(thread_led, NULL, "led_task");
     if(IS_ERR(led_task))
     {
-        lidbg("Unable to start kernel thread.gps_server_task\n");
+        lidbg("Unable to start kernel task\n");
     }
     else wake_up_process(led_task);
 
@@ -112,6 +109,7 @@ static int suspend_monitor_resume(struct device *dev)
 {
     DUMP_FUN_ENTER;
 	suspend_times ++;
+    led_ctrl(1);
     return 0;
 
 }
@@ -119,6 +117,7 @@ static int suspend_monitor_resume(struct device *dev)
 static int suspend_monitor_suspend(struct device *dev)
 {
     DUMP_FUN_ENTER;
+    led_ctrl(0);
     return 0;
 
 }
