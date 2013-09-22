@@ -8,7 +8,7 @@ NOTE:
 */
 
 //zone below[tools]
-#define TE_VERSION "TE.VERSION:  [20130910 V2.0]"
+#define TE_VERSION "TE.VERSION:  [20130910]"
 #define DEBUG_MEM_FILE "/data/fs_private.txt"
 #define TE_WARN(fmt, args...) pr_info("[futengfei.te]warn.%s: " fmt,__func__,##args)
 #define TE_ERR(fmt, args...) pr_info("[futengfei.te]err.%s: " fmt,__func__,##args)

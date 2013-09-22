@@ -5,6 +5,7 @@ update log:
 	1:[20130912 V5.1]/add separaror
 	2:[20130913 V6.0]/save core,driver list to overwrite core.conf driver.conf
 	3:[20130916 V7.0]/check if the conf file need to be updated
+	4:[20130922] copy file (from to),set file[to] length to zero
 */
 
 #define FS_WARN(fmt, args...) pr_info("[futengfei.fs]warn.%s: " fmt,__func__,##args)
@@ -12,7 +13,7 @@ update log:
 #define FS_SUC(fmt, args...) pr_info("[futengfei.fs]suceed.%s: " fmt,__func__,##args)
 
 //zone below [tools]
-#define FS_VERSION "FS.VERSION:  [20130916 V7.0]"
+#define FS_VERSION "FS.VERSION:  [20130922]"
 #define DEBUG_MEM_FILE "/data/fs_private.txt"
 #define LIDBG_LOG_FILE_PATH "/data/lidbg_log.txt"
 #define LIDBG_KMSG_FILE_PATH "/data/lidbg_kmsg.txt"
@@ -79,6 +80,7 @@ int get_int_value(struct list_head *client_list, char *key, int *int_value, void
 void save_list_to_file(struct list_head *client_list, char *filename);
 void regist_filedetec(char *filename, void (*cb_filedetec)(char *filename ));
 void file_separator(char *file2separator);
+void update_file_tm(void);
 bool copy_file(char *from, char *to);
 bool is_file_exist(char *file);
 
@@ -88,6 +90,7 @@ void fs_save_list_to_file(void)
     save_list_to_file(&lidbg_core_list, core_sd_path);
     save_list_to_file(&lidbg_drivers_list, driver_sd_path);
     fs_copy_file(state_mem_path, state_sd_path);
+    update_file_tm();
 }
 void fs_file_separator(char *file2separator)
 {
@@ -840,15 +843,19 @@ static int thread_filedetec_func(void *data)
     }
     return 1;
 }
+void update_file_tm(void)
+{
+    get_file_mftime(core_sd_path, &precorefile_tm);
+    get_file_mftime(driver_sd_path, &predriverfile_tm);
+    get_file_mftime(cmd_sd_path, &precmdfile_tm);
+}
 static int thread_pollfile_func(void *data)
 {
     allow_signal(SIGKILL);
     allow_signal(SIGSTOP);
     //set_freezable();
     ssleep(20);
-    get_file_mftime(core_sd_path, &precorefile_tm);
-    get_file_mftime(driver_sd_path, &predriverfile_tm);
-    get_file_mftime(cmd_sd_path, &precmdfile_tm);
+    update_file_tm();
     g_iskmsg_ready = 1;
     if(g_pollkmsg_en)
         complete(&kmsg_wait);
@@ -1025,7 +1032,7 @@ bool copy_file(char *from, char *to)
     }
 
     pfilefrom = filp_open(from, O_RDWR , 0);
-    pfileto = filp_open(to, O_CREAT | O_RDWR , 0777);
+    pfileto = filp_open(to, O_CREAT | O_RDWR | O_TRUNC, 0777);
     if(IS_ERR(pfileto))
     {
         FS_ERR("<%s>\n", to);
@@ -1226,9 +1233,9 @@ void test_fileserver_stability(void)
     printk("[futengfei]get key value:[%d]\n", ret );
 
     delay = "futengfei1";
-//    fs_set_value(&lidbg_core_list, "fs_private_patch", delay);
-//    fs_get_value(&lidbg_core_list, "fs_private_patch", &value);
-//    printk("[futengfei]warn.test_fileserver_stability:<value=%s>\n", value);
+    //fs_set_value(&lidbg_core_list, "fs_private_patch", delay);
+    //fs_get_value(&lidbg_core_list, "fs_private_patch", &value);
+    //printk("[futengfei]warn.test_fileserver_stability:<value=%s>\n", value);
     lidbg_get_current_time(tbuff, NULL);
     fs_file_log("%s\n", tbuff);
 
