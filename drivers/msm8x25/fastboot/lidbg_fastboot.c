@@ -568,7 +568,7 @@ static int thread_fastboot_suspend(void *data)
 #endif
 							//log_active_locks();
 							fs_dump_kmsg((char *)__FUNCTION__,__LOG_BUF_LEN);
-							lidbg_fs_log(FASTBOOT_LOG_PATH,"force suspend\n");
+							lidbg_fs_log(FASTBOOT_LOG_PATH,"*\n");
 							wakelock_occur_count = 0;
                             if(fastboot_get_status() == PM_STATUS_EARLY_SUSPEND_PENDING)
                             {
