@@ -231,19 +231,21 @@ int static VideoImage(void)
     u8 Tw9912_image[2] = {0x17, 0x87,}; //default input pin selet YIN0ss
     printk("VideoImage()\n");
     VideoImageParameterConfig();
-    for(i = 0; i < 5; i++)
-	    {
-	        if(info_com_top_Channel == YIN3)//back or AUX
-	        {
-	            if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
-	                ret = write_tw9912((char *)&Tw9912_image_global_AUX_BACK[i]);
-	            else
-	                ret = write_tw9912((char *)&Tw9912_image_global_AUX_BACK_PAL_I[i]);
-	        }
-	        else //DVD SEPARATION
-	            ret = write_tw9912((char *)&Tw9912_image_global_separation[i]);
-    }
-
+	if(flag_now_config_channal_AUX_or_Astren !=0)
+	{
+	    for(i = 0; i < 5; i++)
+		    {
+		        if(info_com_top_Channel == YIN3)//back or AUX
+		        {
+		            if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
+		                ret = write_tw9912((char *)&Tw9912_image_global_AUX_BACK[i]);
+		            else
+		                ret = write_tw9912((char *)&Tw9912_image_global_AUX_BACK_PAL_I[i]);
+		        }
+		        else //DVD SEPARATION
+		            ret = write_tw9912((char *)&Tw9912_image_global_separation[i]);
+	    }
+	}
     if(flag_now_config_channal_AUX_or_Astren == 0)//Astren
 	{
 		if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
@@ -264,6 +266,41 @@ int static VideoImage(void)
 				Tw9912_image[1] = global_tw9912_info_for_PAL_I.reg_val;//form qcamerahwi_preview.cpp
 				ret = write_tw9912((char *)&Tw9912_image);
 			}
+		printk("Astren new parameter\n");
+				Tw9912_image[0] = 0x06;
+				Tw9912_image[1] = 0x13;//form qcamerahwi_preview.cpp
+				ret = write_tw9912((char *)&Tw9912_image);
+				Tw9912_image[0] = 0x21;
+				Tw9912_image[1] = 0x42;//form qcamerahwi_preview.cpp
+				ret = write_tw9912((char *)&Tw9912_image);
+				Tw9912_image[0] = 0x22;
+				Tw9912_image[1] = 0xff;
+				ret = write_tw9912((char *)&Tw9912_image);
+				/**/
+				Tw9912_image[0] = 0x10;
+				Tw9912_image[1] = 0x00;
+				ret = write_tw9912((char *)&Tw9912_image);
+				Tw9912_image[0] = 0x11;
+				Tw9912_image[1] = 0x64;
+				ret = write_tw9912((char *)&Tw9912_image);
+				Tw9912_image[0] = 0x12;
+				Tw9912_image[1] = 0x10;
+				ret = write_tw9912((char *)&Tw9912_image);
+				Tw9912_image[0] = 0x13;
+				Tw9912_image[1] = 0x80;
+				ret = write_tw9912((char *)&Tw9912_image);
+				Tw9912_image[0] = 0x14;
+				Tw9912_image[1] = 0x80;
+				ret = write_tw9912((char *)&Tw9912_image);
+				Tw9912_image[0] = 0x15;
+				Tw9912_image[1] = 0x18;
+				ret = write_tw9912((char *)&Tw9912_image);
+				Tw9912_image[0] = 0x17;
+				Tw9912_image[1] = 0x30;
+				ret = write_tw9912((char *)&Tw9912_image);
+				Tw9912_image[0] = 0x27;
+				Tw9912_image[1] = 0x2d;
+				ret = write_tw9912((char *)&Tw9912_image);
 	}
 
 #ifdef BOARD_V1
