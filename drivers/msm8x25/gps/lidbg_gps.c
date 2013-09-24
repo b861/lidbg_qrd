@@ -58,7 +58,7 @@ ssize_t gps_read (struct file *filp, char __user *buf, size_t count, loff_t *f_p
     int read_len, fifo_len,bytes;
 
     if (!started) {
-	printk("[ublox] gps stoped but read");
+	printk("[ublox] gps stoped but read\n");
 	return -1;
     }
 
@@ -130,11 +130,11 @@ static long gps_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 {
 	switch(cmd) {
 	case GPS_START:
-		printk("[ublox]:ioctl GPS START");
+		printk("[ublox]:ioctl GPS START\n");
 		started = 1;
 		break;
 	case GPS_STOP:
-		printk("[ublox]:ioctl GPS STOP");
+		printk("[ublox]:ioctl GPS STOP\n");
 		started = 0;
 		break;
 	default:
@@ -336,7 +336,7 @@ static int  gps_probe(struct platform_device *pdev)
     if (dev == NULL)
     {
         ret = -ENOMEM;
-        printk("[ublox]gps_server_driver_init:kmalloc err \n");
+        printk("[ublox]gps_server_driver_init:kmalloc err\n");
         return ret;
     }
 
@@ -349,7 +349,7 @@ static int  gps_probe(struct platform_device *pdev)
         result = alloc_chrdev_region(&dev_number, 0, 1, DEVICE_NAME);
         major_number = MAJOR(dev_number);
     }
-    printk("[ublox]alloc_chrdev_region result:%d \n", result);
+    printk("[ublox]alloc_chrdev_region result:%d\n", result);
 
     cdev_init(&dev->cdev, &gps_fops);
     dev->cdev.owner = THIS_MODULE;
