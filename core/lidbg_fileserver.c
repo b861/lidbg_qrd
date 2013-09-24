@@ -1219,7 +1219,7 @@ void fileserverinit_once(void)
 //zone below [fileserver_test]
 void test_fileserver_stability(void)
 {
-    char *delay, *value, tbuff[100];
+    char *delay, tbuff[100];
     int ret = 0;
 
     //test_fileserver_stability
@@ -1348,6 +1348,37 @@ void lidbg_fileserver_main(int argc, char **argv)
         break;
     case 5:
         fs_save_list_to_file();
+        break;
+
+    case 7:
+        if(cmd_para)
+            lidbg_mkdir("/data/123");
+        else
+            lidbg_rmdir("/data/123");
+        break;
+    case 8:
+        if(cmd_para)
+            lidbg_touch("/data/123/4.txt");
+        else
+            lidbg_rm("/data/123/4.txt");
+        break;
+    case 9:
+        if(cmd_para)
+            lidbg_cp("/data/123/4.txt", "/data/4.txt");
+         else
+            lidbg_rm("/data/4.txt");
+        break;
+    case 10:
+        if(cmd_para)
+            lidbg_setprop("fly.ftf.test", "1");
+        else
+            lidbg_setprop("fly.ftf.test", "0");
+        break;
+    case 11:
+        lidbg_chmod("/data");
+        break;
+    case 13:
+        lidbg_reboot();
         break;
     default:
         FS_ERR("<check you cmd:%d>\n", cmd);

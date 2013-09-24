@@ -178,6 +178,43 @@ int  lidbg_launch_user( char bin_path[], char argv1[],char argv2[])
     return ret;
 }
 
+int  lidbg_chmod(char path[])
+{
+    return lidbg_launch_user(CHMOD_PATH, "777", path);
+}
+int  lidbg_cp(char from[],char to[])
+{
+    return fs_copy_file(from, to);
+}
+int  lidbg_mv(char from[],char to[])
+{
+    return lidbg_launch_user(MV_PATH, from, to);
+}
+int  lidbg_rm(char path[])
+{
+    return lidbg_launch_user(RM_PATH, path, NULL);
+}
+int  lidbg_rmdir(char path[])
+{
+    return lidbg_launch_user(RMDIR_PATH, path, NULL);
+}
+int  lidbg_mkdir(char path[])
+{
+    return lidbg_launch_user(MKDIR_PATH, path, NULL);
+}
+int  lidbg_touch(char path[])
+{
+    return lidbg_launch_user(TOUCH_PATH, path, NULL);
+}
+int  lidbg_reboot(void)
+{
+    return lidbg_launch_user(REBOOT_PATH, NULL, NULL);
+}
+int  lidbg_setprop(char key[],char value[])
+{
+    return lidbg_launch_user(SETPROP_PATH, key, value);
+}
+
 void mod_cmn_main(int argc, char **argv)
 {
 
@@ -231,6 +268,15 @@ module_exit(cmn_exit);
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Flyaudio Inc.");
 
+EXPORT_SYMBOL(lidbg_chmod);
+EXPORT_SYMBOL(lidbg_cp);
+EXPORT_SYMBOL(lidbg_mv);
+EXPORT_SYMBOL(lidbg_rm);
+EXPORT_SYMBOL(lidbg_rmdir);
+EXPORT_SYMBOL(lidbg_mkdir);
+EXPORT_SYMBOL(lidbg_touch);
+EXPORT_SYMBOL(lidbg_reboot);
+EXPORT_SYMBOL(lidbg_setprop);
 
 EXPORT_SYMBOL(mod_cmn_main);
 EXPORT_SYMBOL(lidbg_get_ns_count);

@@ -379,6 +379,7 @@ static int  gps_probe(struct platform_device *pdev)
     init_waitqueue_head(&dev->queue);
     sema_init(&dev->sem, 1);
     kfifo_init(&gps_data_fifo, fifo_buffer, FIFO_SIZE);
+    lidbg_chmod("/dev/ubloxgps0");
     return 0;
 }
 
