@@ -2,6 +2,8 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/../inc
+
 LOCAL_MODULE := gps.$(DBG_PLATFORM)
 
 LOCAL_MODULE_PATH := $(LOCAL_PATH)/../out

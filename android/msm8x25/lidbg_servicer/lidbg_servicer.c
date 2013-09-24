@@ -249,6 +249,7 @@ open_dev:
 	system("insmod /flysystem/lib/modules/FlyReturn.ko");
 
     sleep(1);
+    system("chmod 0777 /dev/ubloxgps0");
     system("chmod 0777 /dev/FlyDebug");
     system("chmod 0777 /dev/FlyMmap ");
     system("chmod 0777 /dev/FlyHardware");
@@ -264,6 +265,7 @@ open_dev:
     system("chmod 606 /dev/tw9912config");
 
     sleep(5);
+    system("chmod 0777 /dev/ubloxgps0");
 
     system("chmod 777 /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
     system("chmod 777 /sys/power/state");

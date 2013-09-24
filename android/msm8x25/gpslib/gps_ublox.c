@@ -31,6 +31,7 @@
 #include <math.h>
 #include <time.h>
 #include <cutils/log.h>
+#include "lidbg_servicer.h"
 
 /*
 #define LOG_NDEBUG 0
@@ -50,9 +51,9 @@
 #define  GPS_DEBUG  (0)
 
 #if GPS_DEBUG
-#  define  D(...)   LOGD(__VA_ARGS__)
+#define  D(...)   LOGD(__VA_ARGS__)
 #else
-#  define  D(...)   ((void)0)
+#define  D(...)
 #endif
 
 #define GPS_START       _IO('g', 1)
@@ -460,7 +461,7 @@ static void nmea_reader_parse_gsv(NmeaReader *r, NmeaTokenizer *t)
 	GpsSvInfo sv_info;
 	int i;
 
-	D("[futengfei]===HCPUnmea_reader_parse_gsv");
+	//D("[futengfei]===HCPUnmea_reader_parse_gsv");
 	Token tok_num = nmea_tokenizer_get(t,1);
 	Token tok_which = nmea_tokenizer_get(t,2);
 	//Token tok_sv_num = nmea_tokenizer_get(t,3);
@@ -820,7 +821,7 @@ gps_state_thread( void*  arg )
                 D("epoll_wait() unexpected error: %s", strerror(errno));
             continue;
         }
-        D("[futengfei]===HCPUgps thread received %d events", nevents);
+       // D("[futengfei]===HCPUgps thread received %d events", nevents);
         for (ne = 0; ne < nevents; ne++) {
             if ((events[ne].events & (EPOLLERR|EPOLLHUP)) != 0) {
                 D("EPOLLERR or EPOLLHUP after epoll_wait() !?");
@@ -917,7 +918,8 @@ gps_state_init( GpsState*  state, GpsCallbacks* callbacks )
 again:
     state->fd = open(GPS_DEV_NAME, O_RDONLY);
     if (state->fd < 0) {
-	LOGD("[ublox]futengfei err_access.again=======[%s]",GPS_DEV_NAME); 
+	LOGD("[ublox]futengfei err_access.again=======[%s]",GPS_DEV_NAME);
+	lidbg("[ublox]futengfei err_access.again=======[%s]\n",GPS_DEV_NAME);
 	sleep(1);
 	goto again;
     }
