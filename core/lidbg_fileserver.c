@@ -1213,9 +1213,9 @@ void fileserverinit_once(void)
     fs_get_intvalue(&lidbg_core_list, "fs_filedetect_ms", &g_filedetect_ms, NULL);
     fs_get_intvalue(&lidbg_core_list, "fs_dbg_file_detect", &g_dubug_filedetec, cb_kv_filedetecen);
 
-    fs_regist_filedetec("/mnt/sdcard/dump_kmsg", cb_filedetec_dump_kmsg);
-    fs_regist_filedetec("/mnt/usbdisk/dump_kmsg", cb_filedetec_dump_kmsg);
-    fs_regist_filedetec("/mnt/sdcard/123.txt", cb_filedetec_test);
+    //fs_regist_filedetec("/mnt/sdcard/dump_kmsg", cb_filedetec_dump_kmsg);
+    //fs_regist_filedetec("/mnt/usbdisk/dump_kmsg", cb_filedetec_dump_kmsg);
+    //fs_regist_filedetec("/mnt/sdcard/123.txt", cb_filedetec_test);
 
 
     printk("[futengfei]warn.fileserverinit_once:<g_dubug_on=%d;g_pollstate_ms=%d,g_pollkmsg_en=%d>\n", g_dubug_on, g_pollstate_ms, g_pollkmsg_en);

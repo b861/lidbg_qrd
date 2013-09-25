@@ -116,7 +116,7 @@ static void list_active_locks(void)
 		if(!strcmp(lock->name, "adsp"))
 		{
 			lidbg("wake_lock:adsp\n");
-			lidbg_fs_log(FASTBOOT_LOG_PATH,"wake_lock:adsp\n");
+			//lidbg_fs_log(FASTBOOT_LOG_PATH,"wake_lock:adsp\n");
 		    fb_data->has_wakelock_can_not_ignore = 1;
 		}
 	}
@@ -287,7 +287,7 @@ int fastboot_task_kill_select(char *task_name)
 
 static void fastboot_task_kill_exclude(char *exclude_process[])
 {
-    char kill_process[32][25];
+    static char kill_process[32][25];
 
     struct task_struct *p;
     struct mm_struct *mm;
@@ -295,9 +295,9 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
     u32 i, j = 0;
     bool safe_flag = 0;
     DUMP_FUN_ENTER;
+	msleep(1000); //for test
 
     lidbg("-----------------------\n");
-
     if(ptasklist_lock != NULL)
     {
         lidbg("read_lock+\n");
@@ -315,7 +315,7 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
         safe_flag = 0;
         i = 0;
 
-	if(fb_data->kill_all_task == 0)
+	//if(fb_data->kill_all_task == 0)
 	{
         if(
             (strncmp(p->comm, "flush", sizeof("flush") - 1) == 0) ||
@@ -557,6 +557,7 @@ static int thread_fastboot_suspend(void *data)
                         {
 							fb_data->is_quick_resume = 1;
 							set_power_state(1);
+							lidbg_fs_log(FASTBOOT_LOG_PATH,"-\n");
                         }
                         else
 #endif
