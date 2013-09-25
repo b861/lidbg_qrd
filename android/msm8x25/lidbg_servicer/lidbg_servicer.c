@@ -201,13 +201,10 @@ open_dev:
     lidbg("open mlidbg0 ok\n");
 
     sleep(1);
-
-    system("chmod 0777 /dev/lidbg_share");
     system("chmod 0777 /dev/mlidbg0");
     system("chmod 0777 /dev/lidbg_servicer");
     system("chmod 0777 /dev/lidbg_msg");
     system("chmod 0777 /dev/ubloxgps0");
-
 	
     fd = open("/dev/lidbg_servicer", O_RDWR);
 	if((fd == 0xfffffffe) || (fd == 0) || (fd == 0xffffffff))

@@ -30,8 +30,8 @@ lidbg_msg *plidbg_msg = NULL;
 
 int thread_msg(void *data)
 {
-    plidbg_msg = ( lidbg_msg *)kmalloc(sizeof( lidbg_msg), GFP_KERNEL);
 
+    plidbg_msg = ( lidbg_msg *)kmalloc(sizeof( lidbg_msg), GFP_KERNEL);
     memset(plidbg_msg->log, '\0', /*sizeof( lidbg_msg)*/TOTAL_LOGS * LOG_BYTES);
     plidbg_msg->w_pos = plidbg_msg->r_pos = 0;
 
@@ -133,6 +133,8 @@ static int __init msg_init(void)
 
     }
     else wake_up_process(msg_task);
+	
+    lidbg_chmod("/dev/lidbg_msg");
 
     return ret;
 }

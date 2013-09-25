@@ -703,6 +703,9 @@ int tw9912_index_init(void)
 	    }
     device_create(tw9912_class,NULL,tw9912_dev,NULL,DEV_NAME); //\u521b\u5efa\u4e00\u4e2a\u8bbe\u5907\u8282\u70b9\uff0c\u8282\u70b9\u540d\u4e3aDEV_NAME "%d"
 	printk("tw9912config device_create ok\n");
+	
+    lidbg_chmod("/dev/tw9912config");
+
 return 0;
 fail_class_create:
     unregister_chrdev_region(tw9912_dev, 1);

@@ -935,6 +935,9 @@ static int  fastboot_probe(struct platform_device *pdev)
 
 	if(fs_fill_list("/flysystem/lib/out/fastboot_not_kill_list.conf", FS_CMD_FILE_LISTMODE, &fastboot_kill_list)<0)
 		fs_fill_list("/system/lib/modules/out/fastboot_not_kill_list.conf", FS_CMD_FILE_LISTMODE, &fastboot_kill_list);
+
+    lidbg_chmod("/sys/power/state");
+	
     DUMP_FUN_LEAVE;
 
     return 0;

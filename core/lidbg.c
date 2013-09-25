@@ -262,6 +262,8 @@ int lidbg_init(void)
     device_create(my_class, NULL, MKDEV(LIDBG_MAJOR, LIDBG_MINOR), NULL, "mlidbg" "%d", LIDBG_MINOR );
 
     lidbg_create_proc();
+	
+    lidbg_chmod("/dev/mlidbg0");
 
     return 0;
 

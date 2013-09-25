@@ -22,7 +22,7 @@ static DECLARE_WAIT_QUEUE_HEAD(k2u_wait);
 static DECLARE_COMPLETION(u2k_com);
 
 int thread_u2k(void *data)
-{
+{	
     while(1)
     {
         set_current_state(TASK_UNINTERRUPTIBLE);
@@ -190,7 +190,8 @@ static int __init servicer_init(void)
         u2k_task = NULL;
     }
     wake_up_process(u2k_task);
-
+	
+    lidbg_chmod("/dev/lidbg_servicer");
     return ret;
 }
 

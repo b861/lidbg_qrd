@@ -399,6 +399,8 @@ int fly_hal_init(void)
 
     }
     else wake_up_process(soc_task);
+
+    lidbg_chmod("/dev/lidbg_hal");
     return 0;
 }
 
