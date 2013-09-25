@@ -34,3 +34,4 @@ cp $DBG_OUT_PATH/core.conf $release_path
 cp $DBG_OUT_PATH/drivers.conf $release_path
 cp $DBG_OUT_PATH/cmd.conf $release_path
 cp $DBG_OUT_PATH/state.conf $release_path
+cp $DBG_OUT_PATH/build_time.txt $release_path

@@ -39,6 +39,11 @@ static  char *state_sd_path = "/data/state.txt";
 static  char *state_mem_path = "/dev/log/state.txt";
 static  char *state_fly_path = "/flysystem/lib/out/state.conf";
 static  char *state_lidbg_path = "/system/lib/modules/out/state.conf";
+
+static  char *build_time_sd_path = "/data/build_time.txt";
+static  char *build_time_fly_path = "/flysystem/lib/out/build_time.txt";
+static  char *build_time_lidbg_path = "/system/lib/modules/out/build_time.txt";
+
 static struct task_struct *filelog_task;
 static struct task_struct *filepoll_task;
 static struct task_struct *fs_statetask;
@@ -1166,9 +1171,16 @@ void fileserverinit_once(void)
     char tbuff[100];
 
     if(is_file_exist(core_fly_path))
+    {
+        fs_copy_file(build_time_fly_path, build_time_sd_path);
         check_conf_file(core_fly_path);
+    }
     else
+    {
+        fs_copy_file(build_time_lidbg_path,build_time_sd_path);
         check_conf_file(core_lidbg_path);
+    }
+
 
     //search priority:sd_path>fly_path>lidbg_path
     if(!is_file_exist(driver_sd_path) || !is_file_exist(core_sd_path) || !is_file_exist(state_sd_path))
@@ -1187,7 +1199,6 @@ void fileserverinit_once(void)
     lidbg_get_current_time(tbuff, NULL);
     set_machine_id();
 
-    fs_file_log("\nBuild Time: %s, %s, %s\n", __FILE__, __DATE__, __TIME__);
     fs_file_log("%s\n", FS_VERSION );
     fs_file_log("machine_id:%d\n", get_machine_id());//save to log
     FS_WARN("machine_id:%d\n", get_machine_id());//sdve to uart
@@ -1365,7 +1376,7 @@ void lidbg_fileserver_main(int argc, char **argv)
     case 9:
         if(cmd_para)
             lidbg_cp("/data/123/4.txt", "/data/4.txt");
-         else
+        else
             lidbg_rm("/data/4.txt");
         break;
     case 10:
