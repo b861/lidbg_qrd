@@ -72,20 +72,20 @@ int static VideoImageParameterConfig(void)
 		flag_now_config_channal_AUX_or_Astren = 0;
 		     if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
 		        {
-		        Tw9912_image_global_AUX_BACK[0][1] = 0x00;//honda xiyu is 31 // is good 00
-		        Tw9912_image_global_AUX_BACK[1][1] = 0x5f;//honda xiyu 5c //is good 58
-			 Tw9912_image_global_AUX_BACK[2][1] = 0xf0;
-		        Tw9912_image_global_AUX_BACK[3][1] = 0xdf;
-			 Tw9912_image_global_AUX_BACK[4][1] = 0xdf;
+		        Tw9912_image_global_AUX_BACK[0][1] = 0x0b;//honda xiyu is 31 // is good 00
+		        Tw9912_image_global_AUX_BACK[1][1] = 0x54;//honda xiyu 5c //is good 58
+			 Tw9912_image_global_AUX_BACK[2][1] = 0x18;
+		        Tw9912_image_global_AUX_BACK[3][1] = 0x92;
+			 Tw9912_image_global_AUX_BACK[4][1] = 0xcA;
 			// printk("Tw9912_image_global_AUX_BACK reset valu from NTSC_I\n");
 		     	 }
 		     else//PALi
 		     	{
-		        Tw9912_image_global_AUX_BACK_PAL_I[0][1]= 0x00;// is good 00
-		        Tw9912_image_global_AUX_BACK_PAL_I[1][1]= 0x5f;//is good 58
-		        Tw9912_image_global_AUX_BACK_PAL_I[2][1]= 0xf0;
-		        Tw9912_image_global_AUX_BACK_PAL_I[3][1]= 0xdf;
-		        Tw9912_image_global_AUX_BACK_PAL_I[4][1]= 0xdf;
+		        Tw9912_image_global_AUX_BACK_PAL_I[0][1]= 0x0b;// is good 00
+		        Tw9912_image_global_AUX_BACK_PAL_I[1][1]= 0x54;//is good 58
+		        Tw9912_image_global_AUX_BACK_PAL_I[2][1]= 0x18;
+		        Tw9912_image_global_AUX_BACK_PAL_I[3][1]= 0x92;
+		        Tw9912_image_global_AUX_BACK_PAL_I[4][1]= 0xcA;
 			// printk("Tw9912_image_global_AUX_BACK reset valu from PAL_I\n");
 			 }
 			 return 1;
@@ -231,9 +231,7 @@ int static VideoImage(void)
     u8 Tw9912_image[2] = {0x17, 0x87,}; //default input pin selet YIN0ss
     printk("VideoImage()\n");
     VideoImageParameterConfig();
-	if(flag_now_config_channal_AUX_or_Astren !=0)
-	{
-	    for(i = 0; i < 5; i++)
+	for(i = 0; i < 5; i++)
 		    {
 		        if(info_com_top_Channel == YIN3)//back or AUX
 		        {
@@ -244,7 +242,6 @@ int static VideoImage(void)
 		        }
 		        else //DVD SEPARATION
 		            ret = write_tw9912((char *)&Tw9912_image_global_separation[i]);
-	    }
 	}
     if(flag_now_config_channal_AUX_or_Astren == 0)//Astren
 	{
@@ -266,6 +263,7 @@ int static VideoImage(void)
 				Tw9912_image[1] = global_tw9912_info_for_PAL_I.reg_val;//form qcamerahwi_preview.cpp
 				ret = write_tw9912((char *)&Tw9912_image);
 			}
+		#if 0
 		printk("Astren new parameter\n");
 				Tw9912_image[0] = 0x06;
 				Tw9912_image[1] = 0x13;//form qcamerahwi_preview.cpp
@@ -301,6 +299,7 @@ int static VideoImage(void)
 				Tw9912_image[0] = 0x27;
 				Tw9912_image[1] = 0x2d;
 				ret = write_tw9912((char *)&Tw9912_image);
+		#endif
 	}
 
 #ifdef BOARD_V1
