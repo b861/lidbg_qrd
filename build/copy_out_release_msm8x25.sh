@@ -35,3 +35,7 @@ cp $DBG_OUT_PATH/drivers.conf $release_path
 cp $DBG_OUT_PATH/cmd.conf $release_path
 cp $DBG_OUT_PATH/state.conf $release_path
 cp $DBG_OUT_PATH/build_time.txt $release_path
+cp $DBG_ANDROID_OUT_PATH/lidbg_servicer $release_path
+cp $DBG_ANDROID_OUT_PATH/gps.DBG_PLATFORM.so $release_path
+cp $DBG_ANDROID_OUT_PATH/client_mobile $release_path
+cp $DBG_ANDROID_OUT_PATH/fileserver.apk $release_path

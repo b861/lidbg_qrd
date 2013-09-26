@@ -4,13 +4,8 @@ adb  wait-for-device remount
 adb shell rm /flysystem/lib/out/*.ko
 adb shell sync
 adb push $DBG_OUT_RELEASE_PATH/$BOARD_VERSION/out /flysystem/lib/out
-adb push $DBG_ANDROID_OUT_PATH/lidbg_servicer /flysystem/bin/lidbg_servicer
-adb push $DBG_ANDROID_OUT_PATH/client_mobile /flysystem/lib/out/client_mobile
-adb push $DBG_ANDROID_OUT_PATH/fileserver.apk /flysystem/lib/out/fileserver.apk
 adb push $DBG_ANDROID_OUT_PATH/gps.$DBG_PLATFORM.so /flysystem/lib/hw/gps.$DBG_PLATFORM.so
 adb shell chmod 777 /flysystem/lib/out/*.ko
-adb shell chmod 777 /flysystem/bin/lidbg_servicer
 adb shell rm -r /system/lib/modules/out
-adb shell rm -r /system/bin/lidbg_servicer
 adb shell sync
 adb reboot
