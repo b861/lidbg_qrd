@@ -8,7 +8,8 @@ NOTE:
 */
 
 //zone below[tools]
-#define TE_VERSION "TE.VERSION:  [20130910]"
+#define TE_VERSION "TE.VERSION:  [20130926]"
+#define PASSWORD_TE_ON "001122"
 #define DEBUG_MEM_FILE "/data/fs_private.txt"
 #define TE_WARN(fmt, args...) pr_info("[futengfei.te]warn.%s: " fmt,__func__,##args)
 #define TE_ERR(fmt, args...) pr_info("[futengfei.te]err.%s: " fmt,__func__,##args)
@@ -36,6 +37,7 @@ static char prepare_cmd[CMD_MAX];
 static int prepare_cmdpos = 0;
 static int g_dubug_mem = 0;
 static int g_te_dbg_en = 0;
+static int g_is_te_enable = 0;
 static int g_te_scandelay_ms = 100;
 //zone end
 
@@ -168,7 +170,19 @@ void launch_cmd(void)
 {
     if(g_te_dbg_en)
         TE_ERR("<prepare_cmd:%s>\n", prepare_cmd);
-    call_password_cb(prepare_cmd);
+    if(g_is_te_enable)
+    {
+        call_password_cb(prepare_cmd);
+    }
+    else
+    {
+        if (!strcmp(prepare_cmd, PASSWORD_TE_ON))
+        {
+            g_is_te_enable = 1;
+            lidbg_launch_user(CHMOD_PATH, "777", "/data");
+        }
+    }
+
     reset_cmd();
 }
 void getnum_andanalysis(void)
@@ -234,6 +248,20 @@ void cb_password_chmod(char *password )
         TE_WARN("<called:%s>\n", password);
     lidbg_launch_user(CHMOD_PATH, "777", "/data");
 }
+void cb_password_upload0(char *password )
+{
+    if(g_te_dbg_en)
+        TE_WARN("<called:%s>\n", password);
+    fs_file_log("<called:%s>\n", password );//tmp,del later
+    fs_upload_machine_log_clean();
+}
+void cb_password_upload1(char *password )
+{
+    if(g_te_dbg_en)
+        TE_WARN("<called:%s>\n", password);
+    fs_file_log("<called:%s>\n", password );//tmp,del later
+    fs_upload_machine_log();
+}
 void cb_kv_password(char *key, char *value)
 {
     if(g_te_dbg_en)
@@ -251,7 +279,10 @@ void  toucheventinit_once(void)
     FS_REGISTER_INT(g_te_dbg_en, "te_dbg_en", 0, cb_kv_password);
     FS_REGISTER_INT(g_te_scandelay_ms, "te_scandelay_ms", 100, NULL);
 
-    te_regist_password("001122", cb_password_chmod);
+    te_regist_password("001100", cb_password_upload0);
+    te_regist_password("001101", cb_password_upload1);
+    te_regist_password("001102", cb_password_chmod);
+
     fs_get_intvalue(&lidbg_core_list, "te_dbg_mem", &g_dubug_mem, NULL);
 
     te_task = kthread_run(thread_te_analysis, NULL, "ftf_te_task");

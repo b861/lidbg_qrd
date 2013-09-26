@@ -5,7 +5,8 @@ update log:
 	1:[20130912 V5.1]/add separaror
 	2:[20130913 V6.0]/save core,driver list to overwrite core.conf driver.conf
 	3:[20130916 V7.0]/check if the conf file need to be updated
-	4:[20130922] copy file (from to),set file[to] length to zero
+	4:[20130922]/copy file (from to),set file[to] length to zero
+	5:[20130926]/add socket func to upload machine_info;also fileserver.apk will make operation easier.password[001101]will enable this func;
 */
 
 #define FS_WARN(fmt, args...) pr_info("[futengfei.fs]warn.%s: " fmt,__func__,##args)
@@ -13,7 +14,7 @@ update log:
 #define FS_SUC(fmt, args...) pr_info("[futengfei.fs]suceed.%s: " fmt,__func__,##args)
 
 //zone below [tools]
-#define FS_VERSION "FS.VERSION:  [20130922]"
+#define FS_VERSION "FS.VERSION:  [20130926]"
 #define DEBUG_MEM_FILE "/data/fs_private.txt"
 #define LIDBG_LOG_FILE_PATH "/data/lidbg_log.txt"
 #define LIDBG_KMSG_FILE_PATH "/data/lidbg_kmsg.txt"
@@ -86,6 +87,7 @@ void save_list_to_file(struct list_head *client_list, char *filename);
 void regist_filedetec(char *filename, void (*cb_filedetec)(char *filename ));
 void file_separator(char *file2separator);
 void update_file_tm(void);
+bool upload_machine_log(void);
 bool copy_file(char *from, char *to);
 bool is_file_exist(char *file);
 
@@ -218,10 +220,44 @@ bool fs_copy_file(char *from, char *to)
 {
     return copy_file(from, to);
 }
+bool fs_upload_machine_log(void)
+{
+    return upload_machine_log();
+}
+void fs_upload_machine_log_clean(void)
+{
+    lidbg_rm("/system/app/fileserver.apk");
+    lidbg_rm("/flysystem/lib/out/fileserver.apk");
+}
 //zone end
 
 
 //zone below [fileserver]
+void chmod_for_apk(void)
+{
+    lidbg_chmod("/data");
+    lidbg_chmod("/system/app");
+    lidbg_chmod("/flysystem/lib/out/fileserver.apk");
+    lidbg_chmod("/system/lib/modules/out/fileserver.apk");
+}
+void upload_machine_log_prepare(void)
+{
+    if(!is_file_exist("/system/app/fileserver.apk"))
+    {
+        if(fs_copy_file("/flysystem/lib/out/fileserver.apk", "/system/app/fileserver.apk"))
+            fs_copy_file("/system/lib/modules/out/fileserver.apk", "/system/app/fileserver.apk");
+    }
+}
+bool upload_machine_log(void)
+{
+    chmod_for_apk();
+    upload_machine_log_prepare();
+
+    if(lidbg_launch_user("/flysystem/lib/out/client_mobile", NULL, NULL) < 0)
+        lidbg_launch_user("/system/lib/modules/out/client_mobile", NULL, NULL);
+
+    return true;
+}
 int get_int_value(struct list_head *client_list, char *key, int *int_value, void (*callback)(char *key, char *value))
 {
     struct string_dev *pos;
@@ -830,7 +866,7 @@ static int thread_filedetec_func(void *data)
     allow_signal(SIGKILL);
     allow_signal(SIGSTOP);
     //set_freezable();
-    ssleep(20);
+    ssleep(45);
     FS_WARN("<thread start>\n");
     if(g_dubug_filedetec)
         show_filedetec_list();
@@ -1177,10 +1213,9 @@ void fileserverinit_once(void)
     }
     else
     {
-        fs_copy_file(build_time_lidbg_path,build_time_sd_path);
+        fs_copy_file(build_time_lidbg_path, build_time_sd_path);
         check_conf_file(core_lidbg_path);
     }
-
 
     //search priority:sd_path>fly_path>lidbg_path
     if(!is_file_exist(driver_sd_path) || !is_file_exist(core_sd_path) || !is_file_exist(state_sd_path))
@@ -1199,7 +1234,7 @@ void fileserverinit_once(void)
     lidbg_get_current_time(tbuff, NULL);
     set_machine_id();
 
-    fs_file_log("%s\n", FS_VERSION );
+    fs_file_log("\n%s\n", FS_VERSION );
     fs_file_log("machine_id:%d\n", get_machine_id());//save to log
     FS_WARN("machine_id:%d\n", get_machine_id());//sdve to uart
     fs_file_log("%s\n", tbuff);
@@ -1342,7 +1377,10 @@ void lidbg_fileserver_main(int argc, char **argv)
     thread_count = simple_strtoul(argv[0], 0, 0);
     cmd = simple_strtoul(argv[1], 0, 0);
     cmd_para = simple_strtoul(argv[2], 0, 0);
-    fileserver_thread_test(thread_count);
+
+    if(thread_count)
+        fileserver_thread_test(thread_count);
+
     switch (cmd)
     {
     case 1:
@@ -1360,36 +1398,17 @@ void lidbg_fileserver_main(int argc, char **argv)
     case 5:
         fs_save_list_to_file();
         break;
-
+    case 6:
+        bfs_file_amend(LIDBG_LOG_FILE_PATH, "<chmod_for_apk>\n");//tmp,del later
+        chmod_for_apk();
+        break;
     case 7:
-        if(cmd_para)
-            lidbg_mkdir("/data/123");
-        else
-            lidbg_rmdir("/data/123");
+        bfs_file_amend(LIDBG_LOG_FILE_PATH, "<upload_machine_log>\n");//tmp,del later
+        upload_machine_log();
         break;
     case 8:
-        if(cmd_para)
-            lidbg_touch("/data/123/4.txt");
-        else
-            lidbg_rm("/data/123/4.txt");
-        break;
-    case 9:
-        if(cmd_para)
-            lidbg_cp("/data/123/4.txt", "/data/4.txt");
-        else
-            lidbg_rm("/data/4.txt");
-        break;
-    case 10:
-        if(cmd_para)
-            lidbg_setprop("fly.ftf.test", "1");
-        else
-            lidbg_setprop("fly.ftf.test", "0");
-        break;
-    case 11:
-        lidbg_chmod("/data");
-        break;
-    case 13:
-        lidbg_reboot();
+        bfs_file_amend(LIDBG_LOG_FILE_PATH, "<upload_machine_log1>\n");//tmp,del later
+        fs_upload_machine_log_clean();
         break;
     default:
         FS_ERR("<check you cmd:%d>\n", cmd);
@@ -1403,6 +1422,8 @@ EXPORT_SYMBOL(lidbg_fileserver_main);
 EXPORT_SYMBOL(lidbg_drivers_list);
 EXPORT_SYMBOL(lidbg_core_list);
 EXPORT_SYMBOL(get_machine_id);
+EXPORT_SYMBOL(fs_upload_machine_log_clean);
+EXPORT_SYMBOL(fs_upload_machine_log);
 EXPORT_SYMBOL(fs_save_list_to_file);
 EXPORT_SYMBOL(fs_regist_filedetec);
 EXPORT_SYMBOL(fs_file_separator);

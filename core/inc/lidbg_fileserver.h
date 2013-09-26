@@ -61,6 +61,9 @@ extern int fs_show_list(struct list_head *client_list);
 extern int fs_file_log( const char *fmt, ...);
 extern int fs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *client_list);
 extern bool fs_copy_file(char *from, char *to);
+extern bool fs_upload_machine_log(void);
+extern void fs_upload_machine_log_clean(void);
+
 extern struct list_head lidbg_drivers_list;
 extern struct list_head lidbg_core_list;
 
