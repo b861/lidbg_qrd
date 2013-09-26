@@ -166,7 +166,7 @@ void set_cpu_governor(int state)
 	int len;
 	lidbg("set_cpu_governor:%d\n",state);
 	
-#if 1
+#if 0
 	{lidbg("do nothing\n");return;}
 #endif
 
@@ -295,7 +295,6 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
     u32 i, j = 0;
     bool safe_flag = 0;
     DUMP_FUN_ENTER;
-	msleep(1000); //for test
 
     lidbg("-----------------------\n");
     if(ptasklist_lock != NULL)
@@ -315,8 +314,6 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
         safe_flag = 0;
         i = 0;
 
-	//if(fb_data->kill_all_task == 0)
-	{
         if(
             (strncmp(p->comm, "flush", sizeof("flush") - 1) == 0) ||
             (strncmp(p->comm, "mtdblock", sizeof("mtdblock") - 1) == 0) ||
@@ -340,23 +337,25 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
         {
             continue;
         }
+
+		
 	{
 		struct string_dev *pos; 	
 		list_for_each_entry(pos, &fastboot_kill_list, tmp_list)
 		{
 			if(strcmp(p->comm, pos->yourkey) == 0)
 			{
-		                safe_flag = 1;
-				  //lidbg("nokill:%s\n", pos->yourkey);
-		                break;
+	            safe_flag = 1;
+		  		//lidbg("nokill:%s\n", pos->yourkey);
+	            break;
 			}
 			else
 			{
-				//lidbg("kill:%s\n", pos->yourkey);
+			
 			}
 		}
 	}
-	}
+
         if(safe_flag == 0)
         {
             if (p)
@@ -519,7 +518,8 @@ static int thread_fastboot_suspend(void *data)
 						set_power_state(1);
 						break;
 					}
-		
+#if (defined(BOARD_V1) || defined(BOARD_V2))
+#else		
 					list_active_locks();			
 					if(fb_data->has_wakelock_can_not_ignore)
 					{
@@ -534,6 +534,9 @@ static int thread_fastboot_suspend(void *data)
 					
 #endif
 					}
+#endif
+
+			
 #ifdef HAS_LOCK_RESUME
                     if(time_count >= /*MAX_WAIT_UNLOCK_TIME*/fb_data->max_wait_unlock_time)
 #else
@@ -719,7 +722,7 @@ void fastboot_pwroff(void)
 
     SOC_Dev_Suspend_Prepare();
 	
-	set_cpu_governor(1);//performance
+	//set_cpu_governor(1);//performance
 
     //avoid mem leak
     //    fastboot_task_kill_select("mediaserver");
@@ -784,17 +787,26 @@ static void fastboot_early_suspend(struct early_suspend *h)
     {
         lidbgerr("Call devices_early_suspend when suspend_pending != PM_STATUS_READY_TO_PWROFF\n");
     }
-
+	
+	set_cpu_governor(1);//performance
 	if(fb_data->kill_task_en)
 	{
+			
+			lidbg("kill_task_en+\n");
+			msleep(1000); //for test
 			fastboot_task_kill_exclude(NULL);
-	    	//msleep(1000);
+	    	msleep(1000); //for test
+	    	lidbg("kill_task_en-\n");
 	}
+	set_cpu_governor(0);//ondemand
 	
 #if 0 //for test
     ignore_wakelock = 1;
 #endif
-
+#if (defined(BOARD_V1) || defined(BOARD_V2))
+	fb_data->clk_block_suspend = 0;
+	wake_unlock(&(fb_data->flywakelock));
+#else
    check_all_clk_disable();
 
    if(check_clk_disable())
@@ -806,6 +818,8 @@ static void fastboot_early_suspend(struct early_suspend *h)
 	   fb_data->clk_block_suspend = 0;
 	   wake_unlock(&(fb_data->flywakelock));
    }
+#endif
+
    //wake_lock(&(fb_data->flywakelock));//to test force suspend
     complete(&suspend_start);
 }
@@ -831,7 +845,7 @@ static void fastboot_late_resume(struct early_suspend *h)
 
 #endif
 	lidbg("machine_id=%d\n",g_var.machine_id);
-	set_cpu_governor(0);//ondemand
+	//set_cpu_governor(0);//ondemand
 }
 #endif
 
