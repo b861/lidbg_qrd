@@ -323,6 +323,7 @@ struct lidbg_fn_t
 	void (*pfnSOC_System_Status)(FLY_SYSTEM_STATUS status);
 
 	
+	int (*pfnSOC_Get_CpuFreq)(void);
 };
 
 struct lidbg_pvar_t
@@ -332,6 +333,7 @@ struct lidbg_pvar_t
 	int temp;
 	FLY_SYSTEM_STATUS system_status;
 	int machine_id;
+	int cpu_freq;
 };
 
 struct lidbg_hal

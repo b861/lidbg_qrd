@@ -245,6 +245,20 @@ void SOC_System_Status(FLY_SYSTEM_STATUS status)
 }
 
 
+int SOC_Get_CpuFreq(void)
+{
+	char buf[16];
+	int cpu_freq;
+	lidbg_readwrite_file("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_cur_freq", buf,NULL, 16);
+	cpu_freq = simple_strtoul(buf, 0, 0);
+	g_var.cpu_freq = cpu_freq;
+	//lidbg("cpufreq=%d\n",cpu_freq);
+	
+	return cpu_freq;
+}
+
+
+
 static void set_func_tbl(void)
 {
     //io
@@ -296,6 +310,8 @@ static void set_func_tbl(void)
 
    plidbg_dev->soc_func_tbl.pfnSOC_Get_Share_Mem = SOC_Get_Share_Mem;
    plidbg_dev->soc_func_tbl.pfnSOC_System_Status = SOC_System_Status;
+   
+   plidbg_dev->soc_func_tbl.pfnSOC_Get_CpuFreq = SOC_Get_CpuFreq;
 
    
 }
