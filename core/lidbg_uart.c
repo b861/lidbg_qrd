@@ -71,7 +71,7 @@ void lidbg_uart_main(int argc, char **argv)
 	if(!strcmp(argv[0], "io_w"))
 	{
 		u32 delay;
-        	delay = simple_strtoul(argv[1], 0, 0);
+        delay = simple_strtoul(argv[1], 0, 0);
 		soc_io_uart_send1(delay,"%s", argv[2]);
 	}
 }

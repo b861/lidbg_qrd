@@ -236,11 +236,19 @@ extern struct fly_smem *p_fly_smem ;
 #define IO_UART_DELAY_1200_115200 (14)
 #define IO_UART_DELAY_1200_4800 (418)
 
+// 1Gh
+#define IO_UART_DELAY_1008_115200 (7)
+
 //245M
 #define IO_UART_DELAY_245_115200 (4)
 
 // pm2.c low freq
 #define IO_UART_DELAY_PM2_4800 (165)
 
+#if (defined(BOARD_V1) || defined(BOARD_V2))
+#define lidbg_io(fmt,...) do{SOC_IO_Uart_Send(IO_UART_DELAY_1008_115200,fmt,##__VA_ARGS__);}while(0)
+#else
+#define lidbg_io(fmt,...) do{SOC_IO_Uart_Send(IO_UART_DELAY_1200_115200,fmt,##__VA_ARGS__);}while(0)
+#endif
 #endif
 
