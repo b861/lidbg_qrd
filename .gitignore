@@ -26,7 +26,6 @@
 *_
 *.i
 *.d
-*.doc
 *.png
 *.gitk*
 *.lib
@@ -54,7 +53,6 @@ tmp/
 out/
 other/
 tools/
-doc/
 soc/
 collect/
 notes/
