@@ -161,10 +161,9 @@ int lidbg_get_current_time(char *time_string,struct rtc_time *ptm)
         *ptm = tm;
     return tlen;
 }
-
-int  lidbg_launch_user( char bin_path[], char argv1[],char argv2[])
+int  lidbg_launch_user( char bin_path[], char argv1[],char argv2[],char argv3[],char argv4[],char argv5[],char argv6[])
 {
-    char *argv[] = { bin_path, argv1,argv2, NULL };
+    char *argv[] = { bin_path, argv1,argv2, argv3, argv4, argv5, argv6,NULL };
     static char *envp[] = { "HOME=/", "TERM=linux", "PATH=/system/bin:/sbin", NULL };//tell me sh where it is;
     int ret;
     lidbg("%s ,%s\n", bin_path, argv1);
@@ -178,9 +177,21 @@ int  lidbg_launch_user( char bin_path[], char argv1[],char argv2[])
     return ret;
 }
 
+int  lidbg_exe(char path[])
+{
+    return lidbg_launch_user(path, NULL, NULL, NULL, NULL, NULL, NULL);
+}
+int  lidbg_mount(char path[])
+{
+    return lidbg_launch_user(MOUNT_PATH, "-o", "remount",path, NULL, NULL, NULL);
+}
+int  lidbg_insmod(char path[])
+{
+    return lidbg_launch_user(INSMOD_PATH, path, NULL, NULL, NULL, NULL, NULL);
+}
 int  lidbg_chmod(char path[])
 {
-    return lidbg_launch_user(CHMOD_PATH, "777", path);
+    return lidbg_launch_user(CHMOD_PATH, "777", path, NULL, NULL, NULL, NULL);
 }
 int  lidbg_cp(char from[],char to[])
 {
@@ -188,31 +199,31 @@ int  lidbg_cp(char from[],char to[])
 }
 int  lidbg_mv(char from[],char to[])
 {
-    return lidbg_launch_user(MV_PATH, from, to);
+    return lidbg_launch_user(MV_PATH, from, to, NULL, NULL, NULL, NULL);
 }
 int  lidbg_rm(char path[])
 {
-    return lidbg_launch_user(RM_PATH, path, NULL);
+    return lidbg_launch_user(RM_PATH, path, NULL, NULL, NULL, NULL, NULL);
 }
 int  lidbg_rmdir(char path[])
 {
-    return lidbg_launch_user(RMDIR_PATH, path, NULL);
+    return lidbg_launch_user(RMDIR_PATH, path, NULL, NULL, NULL, NULL, NULL);
 }
 int  lidbg_mkdir(char path[])
 {
-    return lidbg_launch_user(MKDIR_PATH, path, NULL);
+    return lidbg_launch_user(MKDIR_PATH, path, NULL, NULL, NULL, NULL, NULL);
 }
 int  lidbg_touch(char path[])
 {
-    return lidbg_launch_user(TOUCH_PATH, path, NULL);
+    return lidbg_launch_user(TOUCH_PATH, path, NULL, NULL, NULL, NULL, NULL);
 }
 int  lidbg_reboot(void)
 {
-    return lidbg_launch_user(REBOOT_PATH, NULL, NULL);
+    return lidbg_launch_user(REBOOT_PATH, NULL, NULL, NULL, NULL, NULL, NULL);
 }
 int  lidbg_setprop(char key[],char value[])
 {
-    return lidbg_launch_user(SETPROP_PATH, key, value);
+    return lidbg_launch_user(SETPROP_PATH, key, value, NULL, NULL, NULL, NULL);
 }
 
 void mod_cmn_main(int argc, char **argv)
@@ -268,6 +279,10 @@ module_exit(cmn_exit);
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Flyaudio Inc.");
 
+
+EXPORT_SYMBOL(lidbg_exe);
+EXPORT_SYMBOL(lidbg_mount);
+EXPORT_SYMBOL(lidbg_insmod);
 EXPORT_SYMBOL(lidbg_chmod);
 EXPORT_SYMBOL(lidbg_cp);
 EXPORT_SYMBOL(lidbg_mv);

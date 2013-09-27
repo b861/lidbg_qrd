@@ -8,7 +8,7 @@ NOTE:
 */
 
 //zone below[tools]
-#define TE_VERSION "TE.VERSION:  [20130926]"
+#define TE_VERSION "TE.VERSION:  [20130927]"
 #define PASSWORD_TE_ON "001122"
 #define DEBUG_MEM_FILE "/data/fs_private.txt"
 #define TE_WARN(fmt, args...) pr_info("[futengfei.te]warn.%s: " fmt,__func__,##args)
@@ -172,6 +172,7 @@ void launch_cmd(void)
         TE_ERR("<prepare_cmd:%s>\n", prepare_cmd);
     if(g_is_te_enable)
     {
+        TE_WARN("<en>\n");
         call_password_cb(prepare_cmd);
     }
     else
@@ -179,7 +180,7 @@ void launch_cmd(void)
         if (!strcmp(prepare_cmd, PASSWORD_TE_ON))
         {
             g_is_te_enable = 1;
-            lidbg_launch_user(CHMOD_PATH, "777", "/data");
+            lidbg_chmod( "/data");
         }
     }
 
@@ -246,21 +247,38 @@ void cb_password_chmod(char *password )
 {
     if(g_te_dbg_en)
         TE_WARN("<called:%s>\n", password);
-    lidbg_launch_user(CHMOD_PATH, "777", "/data");
+    lidbg_chmod("/system/bin/mount");
+    lidbg_mount("/system");
+
+    lidbg_chmod("/data");
 }
-void cb_password_upload0(char *password )
+void cb_password_upload(char *password )
 {
     if(g_te_dbg_en)
         TE_WARN("<called:%s>\n", password);
-    fs_file_log("<called:%s>\n", password );//tmp,del later
-    fs_upload_machine_log_clean();
-}
-void cb_password_upload1(char *password )
-{
-    if(g_te_dbg_en)
-        TE_WARN("<called:%s>\n", password);
-    fs_file_log("<called:%s>\n", password );//tmp,del later
+    fs_file_log("<called:%s>\n", __func__ );//tmp,del later
     fs_upload_machine_log();
+}
+void cb_password_call_apk(char *password )
+{
+    if(g_te_dbg_en)
+        TE_WARN("<called:%s>\n", password);
+    fs_file_log("<called:%s>\n", __func__ );//tmp,del later
+    fs_call_apk();
+}
+void cb_password_remove_apk(char *password )
+{
+    if(g_te_dbg_en)
+        TE_WARN("<called:%s>\n", password);
+    fs_file_log("<called:%s>\n", __func__ );//tmp,del later
+    fs_remove_apk();
+}
+void cb_password_clean_all(char *password )
+{
+    if(g_te_dbg_en)
+        TE_WARN("<called:%s>\n", password);
+    fs_file_log("<called:%s>\n", __func__ );//tmp,del later
+    fs_clean_all();
 }
 void cb_kv_password(char *key, char *value)
 {
@@ -279,9 +297,11 @@ void  toucheventinit_once(void)
     FS_REGISTER_INT(g_te_dbg_en, "te_dbg_en", 0, cb_kv_password);
     FS_REGISTER_INT(g_te_scandelay_ms, "te_scandelay_ms", 100, NULL);
 
-    te_regist_password("001100", cb_password_upload0);
-    te_regist_password("001101", cb_password_upload1);
-    te_regist_password("001102", cb_password_chmod);
+    te_regist_password("001100", cb_password_remove_apk);
+    te_regist_password("001101", cb_password_upload);
+    te_regist_password("001102", cb_password_call_apk);
+    te_regist_password("001110", cb_password_clean_all);
+    te_regist_password("001111", cb_password_chmod);
 
     fs_get_intvalue(&lidbg_core_list, "te_dbg_mem", &g_dubug_mem, NULL);
 

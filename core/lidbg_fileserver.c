@@ -7,6 +7,7 @@ update log:
 	3:[20130916 V7.0]/check if the conf file need to be updated
 	4:[20130922]/copy file (from to),set file[to] length to zero
 	5:[20130926]/add socket func to upload machine_info;also fileserver.apk will make operation easier.password[001101]will enable this func;
+	6:[20130927]/add remount system func.etc
 */
 
 #define FS_WARN(fmt, args...) pr_info("[futengfei.fs]warn.%s: " fmt,__func__,##args)
@@ -14,7 +15,7 @@ update log:
 #define FS_SUC(fmt, args...) pr_info("[futengfei.fs]suceed.%s: " fmt,__func__,##args)
 
 //zone below [tools]
-#define FS_VERSION "FS.VERSION:  [20130926]"
+#define FS_VERSION "FS.VERSION:  [20130927]"
 #define DEBUG_MEM_FILE "/data/fs_private.txt"
 #define LIDBG_LOG_FILE_PATH "/data/lidbg_log.txt"
 #define LIDBG_KMSG_FILE_PATH "/data/lidbg_kmsg.txt"
@@ -62,6 +63,7 @@ static int g_pollfile_ms = 7000;
 static int g_pollstate_ms = 1000;
 static int g_pollkmsg_en = 0;
 static int g_iskmsg_ready = 0;
+static int g_is_remountd_system = 0;
 static int g_filedetect_ms = 10000;
 static int machine_id = 0;
 unsigned char log_buffer[FIFO_SIZE];
@@ -87,6 +89,9 @@ void save_list_to_file(struct list_head *client_list, char *filename);
 void regist_filedetec(char *filename, void (*cb_filedetec)(char *filename ));
 void file_separator(char *file2separator);
 void update_file_tm(void);
+void remount_system(void);
+void call_apk(void);
+void clean_all(void);
 bool upload_machine_log(void);
 bool copy_file(char *from, char *to);
 bool is_file_exist(char *file);
@@ -222,40 +227,70 @@ bool fs_copy_file(char *from, char *to)
 }
 bool fs_upload_machine_log(void)
 {
+    lidbg_rm("/dev/log/mobile.txt");
+    remount_system();
     return upload_machine_log();
 }
-void fs_upload_machine_log_clean(void)
+void fs_call_apk(void)
+{
+    call_apk();
+}
+void fs_remove_apk(void)
 {
     lidbg_rm("/system/app/fileserver.apk");
-    lidbg_rm("/flysystem/lib/out/fileserver.apk");
+}
+void fs_clean_all(void)
+{
+    clean_all();
 }
 //zone end
 
 
 //zone below [fileserver]
+void remount_system(void)
+{
+    if(!g_is_remountd_system)
+    {
+        g_is_remountd_system = 1;
+        lidbg_chmod("/system/bin/mount");
+        lidbg_mount("/system");
+        msleep(200);
+    }
+}
 void chmod_for_apk(void)
 {
+    remount_system();
+    lidbg_chmod("/system/bin/mount");
+    lidbg_mount("/system");
     lidbg_chmod("/data");
     lidbg_chmod("/system/app");
     lidbg_chmod("/flysystem/lib/out/fileserver.apk");
     lidbg_chmod("/system/lib/modules/out/fileserver.apk");
 }
-void upload_machine_log_prepare(void)
+void call_apk(void)
 {
-    if(!is_file_exist("/system/app/fileserver.apk"))
-    {
-        if(fs_copy_file("/flysystem/lib/out/fileserver.apk", "/system/app/fileserver.apk"))
-            fs_copy_file("/system/lib/modules/out/fileserver.apk", "/system/app/fileserver.apk");
-    }
+    chmod_for_apk();
+    if(fs_copy_file("/flysystem/lib/out/fileserver.apk", "/system/app/fileserver.apk"))
+        fs_copy_file("/system/lib/modules/out/fileserver.apk", "/system/app/fileserver.apk");
+}
+void clean_all(void)
+{
+    lidbg_rm("/system/app/fileserver.apk");
+    lidbg_rm("/flysystem/lilb/out/fileserver.apk");
+    lidbg_rm(driver_sd_path);
+    lidbg_rm(core_sd_path);
+    lidbg_rm(state_sd_path);
+    lidbg_rm(cmd_sd_path);
+    lidbg_rm(state_sd_path);
+    lidbg_rm(LIDBG_LOG_FILE_PATH);
+    lidbg_rm(PRE_CONF_INFO_FILE);
+    lidbg_rm("/data/log_fb.txt");
+    lidbg_rm("/data/log_ct.txt");
 }
 bool upload_machine_log(void)
 {
-    chmod_for_apk();
-    upload_machine_log_prepare();
-
-    if(lidbg_launch_user("/flysystem/lib/out/client_mobile", NULL, NULL) < 0)
-        lidbg_launch_user("/system/lib/modules/out/client_mobile", NULL, NULL);
-
+    if(lidbg_exe("/flysystem/lib/out/client_mobile") < 0)
+        lidbg_exe("/system/lib/modules/out/client_mobile");
     return true;
 }
 int get_int_value(struct list_head *client_list, char *key, int *int_value, void (*callback)(char *key, char *value))
@@ -1403,12 +1438,16 @@ void lidbg_fileserver_main(int argc, char **argv)
         chmod_for_apk();
         break;
     case 7:
-        bfs_file_amend(LIDBG_LOG_FILE_PATH, "<upload_machine_log>\n");//tmp,del later
-        upload_machine_log();
+        bfs_file_amend(LIDBG_LOG_FILE_PATH, "<fs_upload_machine_log>\n");//tmp,del later
+        fs_upload_machine_log();
         break;
     case 8:
-        bfs_file_amend(LIDBG_LOG_FILE_PATH, "<upload_machine_log1>\n");//tmp,del later
-        fs_upload_machine_log_clean();
+        bfs_file_amend(LIDBG_LOG_FILE_PATH, "<fs_clean_all>\n");//tmp,del later
+        fs_clean_all();
+        break;
+    case 9:
+        FS_WARN("<lidbg_mount>\n");
+        lidbg_mount("/system");
         break;
     default:
         FS_ERR("<check you cmd:%d>\n", cmd);
@@ -1422,7 +1461,9 @@ EXPORT_SYMBOL(lidbg_fileserver_main);
 EXPORT_SYMBOL(lidbg_drivers_list);
 EXPORT_SYMBOL(lidbg_core_list);
 EXPORT_SYMBOL(get_machine_id);
-EXPORT_SYMBOL(fs_upload_machine_log_clean);
+EXPORT_SYMBOL(fs_call_apk);
+EXPORT_SYMBOL(fs_remove_apk);
+EXPORT_SYMBOL(fs_clean_all);
 EXPORT_SYMBOL(fs_upload_machine_log);
 EXPORT_SYMBOL(fs_save_list_to_file);
 EXPORT_SYMBOL(fs_regist_filedetec);
