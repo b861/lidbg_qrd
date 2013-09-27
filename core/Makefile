@@ -24,7 +24,7 @@ obj-m	+= lidbg_main.o
 obj-m	+= lidbg_loader.o
 
 lidbg_touch-objs :=  lidbg_ts.o lidbg_ts_event.o
-lidbg_common-objs :=  lidbg_cmn.o  lidbg_mem.o lidbg_display.o lidbg_fileserver.o
+lidbg_common-objs :=  lidbg_cmn.o  lidbg_mem.o lidbg_display.o lidbg_fileserver.o lidbg_notifier.o
 lidbg_main-objs := lidbg.o 
 lidbg_i2c_gpio-objs := i2c-algo-bit.o i2c-gpio.o
 

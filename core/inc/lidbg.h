@@ -90,6 +90,8 @@
 #include "lidbg_spi.h"
 #include "lidbg_display.h"
 #include "lidbg_servicer.h"
+#include "lidbg_notifier.h"
+
 
 ////////////
 #include "lidbg_soc.h"

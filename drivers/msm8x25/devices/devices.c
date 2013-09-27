@@ -44,6 +44,28 @@ struct early_suspend early_suspend;
 bool suspend_test = 0;
 bool suspend_flag = 0;
 
+
+static int lidbg_event(struct notifier_block *this,
+				unsigned long event, void *ptr)
+{
+	DUMP_FUN;
+    lidbg("event:%d\n", event);
+	
+	switch (event) {
+	case 0:
+		  
+		  break;
+	default:
+		return NOTIFY_DONE;
+	}
+}
+
+static struct notifier_block lidbg_notifier = {
+	.notifier_call = lidbg_event,
+};
+
+
+
 int i2c_devices_probe(int i2c_bus, unsigned char *i2c_devices_list)
 {
     int rc, i, j = 0;
@@ -336,6 +358,7 @@ void led_on(void)
 
 #if 1
     static int led_status = 0;
+
     if(suspend_flag == 1)
     {
         LED_ON;
@@ -534,6 +557,8 @@ static int soc_dev_probe(struct platform_device *pdev)
 #endif
     //fake suspend
     SOC_Fake_Register_Early_Suspend(&early_suspend);
+
+	register_lidbg_notifier(&lidbg_notifier);
 
     return 0;
 
