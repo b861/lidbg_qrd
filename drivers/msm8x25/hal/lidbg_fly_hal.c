@@ -240,6 +240,7 @@ struct fly_smem* SOC_Get_Share_Mem(void)
 
 void SOC_System_Status(FLY_SYSTEM_STATUS status)
 {
+	lidbg("SOC_System_Status=%d\n",status);
 	g_var.system_status = status;
 }
 
@@ -318,7 +319,7 @@ ssize_t hal_read(struct file *filp, char __user *buf, size_t size,
 	u32 read_value = 0;
 	read_value = (u32)plidbg_dev;
 
-    printk("hal_read:read_value=%x,read_count=%d\n", (u32)read_value, count);
+    lidbg("hal_read:read_value=%x,read_count=%d\n", (u32)read_value, count);
     if (copy_to_user(buf, &read_value, count))
     {
         ret =  - EFAULT;
@@ -341,7 +342,7 @@ static ssize_t hal_write(struct file *filp, const char __user *buf,
 
     if(copy_from_user(cmd_buf, buf, size))
     {
-        printk("copy_from_user ERR\n");
+        lidbg("copy_from_user ERR\n");
 	}
 	parse_cmd(cmd_buf);
     return size;

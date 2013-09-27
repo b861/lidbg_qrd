@@ -174,9 +174,14 @@ void set_cpu_governor(int state)
 	{
     	len = sprintf(buf, "%s","ondemand");
 	}
-	else
+	else if(state == 1)
 	{
 		len = sprintf(buf, "%s","performance");
+
+	}
+	else if(state == 2)
+	{
+		len = sprintf(buf, "%s","powersave");
 
 	}
 	lidbg_readwrite_file("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor", NULL, buf, len);
@@ -195,12 +200,12 @@ int check_all_clk_disable(void)
 {
 	int i=P_NR_CLKS-1;
 	int ret = 0;
-	lidbg_io("\ncheck_all_clk_disable\n");
+	DUMP_FUN;
 	while(i>=0)
 	{
 		if (pc_clk_is_enabled(i))
 		{
-		 	lidbg_io("pc_clk_is_enabled:%d\n", i);		 	
+		 	lidbg("pc_clk_is_enabled:%d\n", i);		 	
 			ret++;
 		}
 		i--;
@@ -798,6 +803,8 @@ static void fastboot_early_suspend(struct early_suspend *h)
 	    	msleep(1000); //for test
 	    	lidbg("kill_task_en-\n");
 	}
+	check_all_clk_disable();
+	
 	set_cpu_governor(0);//ondemand
 	
 #if 0 //for test
@@ -807,7 +814,6 @@ static void fastboot_early_suspend(struct early_suspend *h)
 	fb_data->clk_block_suspend = 0;
 	wake_unlock(&(fb_data->flywakelock));
 #else
-   check_all_clk_disable();
 
    if(check_clk_disable())
    {
