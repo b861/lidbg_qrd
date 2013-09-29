@@ -48,6 +48,7 @@ version.sh
 build_cfg.mk
 i2c-algo-bit.c
 i2c-gpio.c
+build_time.txt
 
 tmp/
 out/
