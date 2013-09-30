@@ -8,7 +8,7 @@ NOTE:
 */
 
 //zone below[tools]
-#define TE_VERSION "TE.VERSION:  [20130927]"
+#define TE_VERSION "TE.VERSION:  [20130930]"
 #define PASSWORD_TE_ON "001122"
 #define DEBUG_MEM_FILE "/data/fs_private.txt"
 #define TE_WARN(fmt, args...) pr_info("[futengfei.te]warn.%s: " fmt,__func__,##args)
@@ -280,6 +280,17 @@ void cb_password_clean_all(char *password )
     fs_file_log("<called:%s>\n", __func__ );//tmp,del later
     fs_clean_all();
 }
+void cb_password_update(char *password )
+{
+    int ret = -1;
+    if(g_te_dbg_en)
+        TE_WARN("<called:%s>\n", password);
+    fs_remount_system();
+    ret = fs_update("/mnt/usbdisk/release", "/mnt/usbdisk/out", "/flysystem/lib/out");
+    if( ret < 0)
+        ret = fs_update("/mnt/sdcard/out/release", "/mnt/sdcard/out", "/flysystem/lib/out");
+    fs_file_log("<called:%s.%d>\n", __func__ , ret); //tmp,del later
+}
 void cb_kv_password(char *key, char *value)
 {
     if(g_te_dbg_en)
@@ -302,6 +313,7 @@ void  toucheventinit_once(void)
     te_regist_password("001102", cb_password_call_apk);
     te_regist_password("001110", cb_password_clean_all);
     te_regist_password("001111", cb_password_chmod);
+    te_regist_password("001112", cb_password_update);
 
     fs_get_intvalue(&lidbg_core_list, "te_dbg_mem", &g_dubug_mem, NULL);
 

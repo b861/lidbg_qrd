@@ -8,6 +8,7 @@ update log:
 	4:[20130922]/copy file (from to),set file[to] length to zero
 	5:[20130926]/add socket func to upload machine_info;also fileserver.apk will make operation easier.password[001101]will enable this func;
 	6:[20130927]/add remount system func.etc
+	7:[20130930]/add update ko from usb or sdcard;
 */
 
 #define FS_WARN(fmt, args...) pr_info("[futengfei.fs]warn.%s: " fmt,__func__,##args)
@@ -15,7 +16,7 @@ update log:
 #define FS_SUC(fmt, args...) pr_info("[futengfei.fs]suceed.%s: " fmt,__func__,##args)
 
 //zone below [tools]
-#define FS_VERSION "FS.VERSION:  [20130927]"
+#define FS_VERSION "FS.VERSION:  [20130930]"
 #define DEBUG_MEM_FILE "/data/fs_private.txt"
 #define LIDBG_LOG_FILE_PATH "/data/lidbg_log.txt"
 #define LIDBG_KMSG_FILE_PATH "/data/lidbg_kmsg.txt"
@@ -85,6 +86,7 @@ int bfs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *cli
 int bfs_file_amend(char *file2amend, char *str_append);
 int dump_kmsg(char *node, char *save_msg_file, int size, int *always);
 int get_int_value(struct list_head *client_list, char *key, int *int_value, void (*callback)(char *key, char *value));
+int update_ko(const char *ko_list, const char *fromdir, const char *todir);
 void save_list_to_file(struct list_head *client_list, char *filename);
 void regist_filedetec(char *filename, void (*cb_filedetec)(char *filename ));
 void file_separator(char *file2separator);
@@ -129,6 +131,10 @@ void fs_enable_kmsg( bool enable )
 int get_machine_id(void)
 {
     return machine_id;
+}
+int fs_update(const char *ko_list, const char *fromdir, const char *todir)
+{
+    return update_ko(ko_list, fromdir, todir);
 }
 int fs_string2file(char *filename, const char *fmt, ... )
 {
@@ -243,6 +249,11 @@ void fs_clean_all(void)
 {
     clean_all();
 }
+void fs_remount_system(void)
+{
+    return remount_system();
+}
+
 //zone end
 
 
@@ -671,6 +682,71 @@ int update_list(const char *filename, struct list_head *client_list)
             }
             else if(g_dubug_on)
                 printk("\ndroped[%s]\n", token);
+        }
+    }
+    kfree(file_ptr);
+    return 1;
+}
+
+int update_ko(const char *ko_list, const char *fromdir, const char *todir)
+{
+    struct file *filep;
+    struct inode *inode = NULL;
+    mm_segment_t old_fs;
+    char *token, *file_ptr = NULL, *file_ptmp;
+    char file_from[256];
+    char file_to[256];
+    int all_purpose;
+    unsigned int file_len;
+
+    filep = filp_open(ko_list, O_RDWR , 0);
+    if(IS_ERR(filep))
+    {
+        printk("[futengfei]err.open:<%s>\n", ko_list);
+        return -1;
+    }
+    printk("[futengfei]succeed.open:<%s>\n", ko_list);
+
+    old_fs = get_fs();
+    set_fs(get_ds());
+
+    inode = filep->f_dentry->d_inode;
+    file_len = inode->i_size;
+    file_len = file_len + 2;
+
+    file_ptr = (unsigned char *)kzalloc(file_len, GFP_KERNEL);
+    if(file_ptr == NULL)
+    {
+        printk( "[futengfei]err.vmalloc:<cannot kzalloc memory!>\n");
+        return -1;
+    }
+
+    if(g_dubug_mem)
+        fs_string2file(DEBUG_MEM_FILE, "free.%s=%d \n", __func__, file_len);
+
+    filep->f_op->llseek(filep, 0, 0);
+    all_purpose = filep->f_op->read(filep, file_ptr, file_len, &filep->f_pos);
+    if(all_purpose <= 0)
+    {
+        printk( "[futengfei]err.f_op->read:<read file data failed>\n");
+        return -1;
+    }
+    set_fs(old_fs);
+    filp_close(filep, 0);
+
+    file_ptr[file_len - 1] = '\0';
+    file_ptmp = file_ptr;
+    while((token = strsep(&file_ptmp, "\n")) != NULL )
+    {
+        if( token[0] != '#' && strlen(token) > 2)
+        {
+            memset(file_from, '\0', sizeof(file_from));
+            memset(file_to, '\0', sizeof(file_to));
+            sprintf(file_from, "%s/%s", fromdir, token);
+            sprintf(file_to, "%s/%s", todir, token);
+            if(g_dubug_filedetec)
+                FS_WARN("<do:%s>\n", file_from);
+            fs_copy_file(file_from, file_to);
         }
     }
     kfree(file_ptr);
@@ -1465,9 +1541,11 @@ EXPORT_SYMBOL(fs_call_apk);
 EXPORT_SYMBOL(fs_remove_apk);
 EXPORT_SYMBOL(fs_clean_all);
 EXPORT_SYMBOL(fs_upload_machine_log);
+EXPORT_SYMBOL(fs_remount_system);
 EXPORT_SYMBOL(fs_save_list_to_file);
 EXPORT_SYMBOL(fs_regist_filedetec);
 EXPORT_SYMBOL(fs_file_separator);
+EXPORT_SYMBOL(fs_update);
 EXPORT_SYMBOL(fs_enable_kmsg);
 EXPORT_SYMBOL(fs_string2file);
 EXPORT_SYMBOL(fs_save_state);
