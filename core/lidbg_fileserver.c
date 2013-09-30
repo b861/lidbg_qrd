@@ -44,8 +44,8 @@ static  char *state_fly_path = "/flysystem/lib/out/state.conf";
 static  char *state_lidbg_path = "/system/lib/modules/out/state.conf";
 
 static  char *build_time_sd_path = "/data/build_time.txt";
-static  char *build_time_fly_path = "/flysystem/lib/out/build_time.txt";
-static  char *build_time_lidbg_path = "/system/lib/modules/out/build_time.txt";
+static  char *build_time_fly_path = "/flysystem/lib/out/build_time.conf";
+static  char *build_time_lidbg_path = "/system/lib/modules/out/build_time.conf";
 
 static struct task_struct *filelog_task;
 static struct task_struct *filepoll_task;
@@ -265,6 +265,7 @@ void remount_system(void)
         g_is_remountd_system = 1;
         lidbg_chmod("/system/bin/mount");
         lidbg_mount("/system");
+		lidbg_mount("/flysystem");
         msleep(200);
     }
 }

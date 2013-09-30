@@ -286,10 +286,13 @@ void cb_password_update(char *password )
     if(g_te_dbg_en)
         TE_WARN("<called:%s>\n", password);
     fs_remount_system();
-    ret = fs_update("/mnt/usbdisk/release", "/mnt/usbdisk/out", "/flysystem/lib/out");
+    ret = fs_update("/mnt/usbdisk/out/release", "/mnt/usbdisk/out", "/flysystem/lib/out");
     if( ret < 0)
         ret = fs_update("/mnt/sdcard/out/release", "/mnt/sdcard/out", "/flysystem/lib/out");
     fs_file_log("<called:%s.%d>\n", __func__ , ret); //tmp,del later
+
+	//if( ret >= 0)
+	//	lidbg_reboot();
 }
 void cb_kv_password(char *key, char *value)
 {
