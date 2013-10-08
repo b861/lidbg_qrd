@@ -14,3 +14,4 @@ gt80x_update.ko
 fastboot_not_kill_list.conf
 drivers.conf
 state.conf
+###############
