@@ -55,8 +55,10 @@ static int lidbg_event(struct notifier_block *this,
 		  
 		  break;
 	default:
-		return NOTIFY_DONE;
+		break;
 	}
+	
+	return NOTIFY_DONE;
 }
 
 static struct notifier_block lidbg_notifier = {

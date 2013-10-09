@@ -61,8 +61,10 @@ static int gps_event_handle(struct notifier_block *this,
 		break;
 
 	default:
-		return NOTIFY_DONE;
+		break;
 	}
+	
+	return NOTIFY_DONE;
 }
 
 
