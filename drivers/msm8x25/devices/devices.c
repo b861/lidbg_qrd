@@ -49,7 +49,6 @@ static int lidbg_event(struct notifier_block *this,
 				unsigned long event, void *ptr)
 {
 	DUMP_FUN;
-    lidbg("event:%d\n", event);
 	
 	switch (event) {
 	case 0:

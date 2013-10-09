@@ -991,7 +991,7 @@ ublox_gps_start()
     GpsState*  s = _gps_state;
 
     if (!s->init) {
-        D("%s: called with uninitialized state !!", __FUNCTION__);
+        LOGD("%s: called with uninitialized state !!", __FUNCTION__);
         return -1;
     }
 

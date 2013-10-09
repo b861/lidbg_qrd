@@ -18,6 +18,8 @@ struct gps_device
 };
 
 static int started = 0;
+static int  work_en = 1;
+module_param_named(work_en, work_en, int, 0644 );
 
 struct early_suspend early_suspend;
 
@@ -33,7 +35,6 @@ u8 gps_data_for_hal[HAL_BUF_SIZE];
 u8 fifo_buffer[FIFO_SIZE];
 static struct kfifo gps_data_fifo;
 
-bool work_en = 1;
 
 static char  num_avi_gps_data[2] = { 0 };
 static int    avi_gps_data_hl = 0;
@@ -43,6 +44,33 @@ int gps_debug_en = 0;
 
 struct gps_device *dev;
 static struct task_struct *gps_server_task;
+
+static int gps_event_handle(struct notifier_block *this,
+				unsigned long event, void *ptr)
+{
+	DUMP_FUN;
+	
+	switch (event) {
+	case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE,FLY_ACC_ON):
+		  lidbg("set work_en = 1\n");
+		  work_en = 1;
+		  break;
+	case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE,FLY_ACC_OFF):
+		 lidbg("set work_en = 0\n");
+		 work_en = 0;
+		break;
+
+	default:
+		return NOTIFY_DONE;
+	}
+}
+
+
+static struct notifier_block gps_notifier = {
+	.notifier_call = gps_event_handle,
+};
+
+
 
 int gps_open (struct inode *inode, struct file *filp)
 {
@@ -179,9 +207,12 @@ int thread_gps_server(void *data)
     DUMP_FUN_ENTER;
     while(1)
     {
-        if((work_en == 0)||(g_var.system_status != FLY_ACC_ON))
+        if((work_en == 0)||(started == 0))
+        {
+            if(gps_debug_en)
+            	printk("[ublox]goto do_nothing:%d,%d\n",work_en,started);
             goto do_nothing;
-
+        }
         ret = SOC_I2C_Rec(1, 0x42, 0xfd, num_avi_gps_data, 2);
         if (ret < 0)
         {
@@ -225,11 +256,12 @@ int thread_gps_server(void *data)
             goto do_nothing;
 
         }
-	if (started) {
-		if (gps_debug_en)
-			printk("ublox:have data need read\n");
-        	wake_up_interruptible(&dev->queue);
-	}
+		
+		if (started) {
+			if (gps_debug_en)
+				printk("ublox:have data need read\n");
+	        wake_up_interruptible(&dev->queue);
+		}
         if(gps_debug_en)
         {
             gps_data[avi_gps_data_hl ] = '\0';
@@ -296,6 +328,8 @@ int is_ublox_exist(void)
     }
     return -1;
 }
+
+
 
 static int  gps_probe(struct platform_device *pdev)
 {
@@ -380,6 +414,9 @@ static int  gps_probe(struct platform_device *pdev)
     sema_init(&dev->sem, 1);
     kfifo_init(&gps_data_fifo, fifo_buffer, FIFO_SIZE);
     lidbg_chmod("/dev/ubloxgps0");
+
+	register_lidbg_notifier(&gps_notifier);
+	
     return 0;
 }
 

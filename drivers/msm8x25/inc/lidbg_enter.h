@@ -83,6 +83,9 @@
 
 
 #if (defined(BUILD_SOC) || defined(BUILD_CORE) || defined(BUILD_DRIVERS))
+#define NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE (110)
+#define NOTIFIER_MINOR_XXX (0)
+
 #else
 #define lidbg_io(fmt,...) //do{SOC_IO_Uart_Send(IO_UART_DELAY_245_115200,fmt,##__VA_ARGS__);}while(0)
 

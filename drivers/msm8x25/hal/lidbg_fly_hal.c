@@ -238,10 +238,24 @@ struct fly_smem* SOC_Get_Share_Mem(void)
 	return p_fly_smem;
 }
 
+
 void SOC_System_Status(FLY_SYSTEM_STATUS status)
 {
 	lidbg("SOC_System_Status=%d\n",status);
 	g_var.system_status = status;
+	
+	lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE,g_var.system_status));
+#if 0
+	if(g_var.system_status == FLY_ACC_OFF)
+	{
+		// stop gps i2c read
+		lidbg_readwrite_file("/sys/module/lidbg_gps/parameters/work_en", NULL, "0", sizeof("0")-1);
+	}
+	else if(g_var.system_status == FLY_ACC_ON)
+	{
+		lidbg_readwrite_file("/sys/module/lidbg_gps/parameters/work_en", NULL, "1", sizeof("1")-1);
+	}
+#endif
 }
 
 
