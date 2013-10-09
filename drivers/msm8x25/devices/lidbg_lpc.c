@@ -509,12 +509,15 @@ void mcuFirstInit(void)
     SOC_IO_ISR_Add(MCU_IIC_REQ_ISR, IRQF_TRIGGER_FALLING | IRQF_ONESHOT, MCUIIC_isr, pGlobalHardwareInfo);
 
 #ifdef FLY_DEBUG
+{
+	static struct task_struct *lpc_task;
     lpc_task = kthread_create(thread_lpc, NULL, "lpc_task");
     if(IS_ERR(lpc_task))
     {
         lidbg("Unable to start kernel thread.\n");
     }
     else wake_up_process(lpc_task);
+}
 #endif
 
 

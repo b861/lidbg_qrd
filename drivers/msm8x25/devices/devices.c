@@ -650,7 +650,7 @@ static void devices_late_resume(struct early_suspend *handler)
         if(IS_ERR(resume_task))
         {
             lidbg("Unable to start kernel thread.\n");
-            err = PTR_ERR(resume_task);
+            PTR_ERR(resume_task);
         }
         else wake_up_process(resume_task);
 #endif
