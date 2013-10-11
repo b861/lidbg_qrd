@@ -9,6 +9,7 @@ update log:
 	5:[20130926]/add socket func to upload machine_info;also fileserver.apk will make operation easier.password[001101]will enable this func;
 	6:[20130927]/add remount system func.etc
 	7:[20130930]/add update ko from usb or sdcard;
+	8:[20131011]/fs_fill_list,mf open file mode:O_RDONLY
 */
 
 #define FS_WARN(fmt, args...) pr_info("[futengfei.fs]warn.%s: " fmt,__func__,##args)
@@ -16,7 +17,7 @@ update log:
 #define FS_SUC(fmt, args...) pr_info("[futengfei.fs]suceed.%s: " fmt,__func__,##args)
 
 //zone below [tools]
-#define FS_VERSION "FS.VERSION:  [20130930]"
+#define FS_VERSION "FS.VERSION:  [20131011]"
 #define DEBUG_MEM_FILE "/data/fs_private.txt"
 #define LIDBG_LOG_FILE_PATH "/data/lidbg_log.txt"
 #define LIDBG_KMSG_FILE_PATH "/data/lidbg_kmsg.txt"
@@ -514,7 +515,7 @@ int bfs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *cli
     int all_purpose;
     unsigned int file_len;
 
-    filep = filp_open(filename, O_RDWR , 0);
+    filep = filp_open(filename,  O_RDONLY, 0);//O_RDWR
     if(IS_ERR(filep))
     {
         printk("[futengfei]err.open:<%s>\n", filename);
