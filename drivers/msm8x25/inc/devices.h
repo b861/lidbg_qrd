@@ -95,10 +95,10 @@ enum
 #define GPIO_LED_FLY (82)
 
 // PANNE_PEN , RESET
-#define LCD_ON  do{       LPC_IO_SET(0x0f, 1);\
+#define LCD_ON  do{      /* LPC_IO_SET(0x0f, 1);*/\
     					    SOC_IO_Output(0, GPIO_LCD3, 1);\
 				}while(0)
-#define LCD_OFF   do{       LPC_IO_SET(0x0f, 0);\
+#define LCD_OFF   do{       /*LPC_IO_SET(0x0f, 0);*/\
     					    SOC_IO_Output(0, GPIO_LCD3, 0);\
 				}while(0)
 
