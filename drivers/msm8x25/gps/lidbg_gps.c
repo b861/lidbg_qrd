@@ -299,6 +299,10 @@ static void gps_early_suspend(struct early_suspend *h)
 {
     DUMP_FUN;
     work_en = 0;
+	
+	down(&dev->sem);
+    kfifo_reset(&gps_data_fifo);
+    up(&dev->sem);
 
 }
 
@@ -306,6 +310,11 @@ static void gps_late_resume(struct early_suspend *h)
 {
     DUMP_FUN;
     clean_ublox_buf();
+	
+	down(&dev->sem);
+    kfifo_reset(&gps_data_fifo);
+    up(&dev->sem);
+	
     work_en = 1;
 
 }
