@@ -105,5 +105,8 @@ static inline int check_pt(void)
 
 #define SOC_Get_CpuFreq (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_Get_CpuFreq))
 
+#define SOC_LCD_Reset (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_LCD_Reset))
+
+
 #endif
 

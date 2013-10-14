@@ -854,14 +854,13 @@ void fly_devices_init(void)
     if(platform_id ==  PLATFORM_FLY)
     {
 		USB_WORK_ENABLE;
-		LCD_ON;
-
+		
 #if (defined(FLY_DEBUG) || defined(BUILD_FOR_RECOVERY))
 
 		DVD_RESET_HIGH;
         TELL_LPC_PWR_ON;
         PWR_EN_ON;
-       
+        LCD_ON;
         lidbg("turn lcd on!\n");
         BL_SET(BL_MAX / 2);
 
@@ -927,10 +926,10 @@ static void create_new_proc_entry_usb_host(void)
 int lcd_reset_en=0;
 void lcd_reset(char *key, char *value )
 {
-	LCD_OFF;
-	msleep(500);
-	LCD_ON;
+	SOC_LCD_Reset();
 }
+
+
 
 
 int dev_init(void)

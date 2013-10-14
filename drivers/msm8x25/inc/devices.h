@@ -283,4 +283,10 @@ enum
 			USB_ID_LOW_HOST;\
 	}while(0)
 
+
+#define LCD_RESET do{\
+				LCD_OFF;\
+				msleep(20);\
+				LCD_ON;\
+			}while(0)
 #endif

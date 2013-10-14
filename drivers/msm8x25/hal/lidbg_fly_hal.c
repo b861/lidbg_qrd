@@ -194,6 +194,17 @@ int SOC_BL_Set( u32 bl_level)
 
 }
 
+void SOC_LCD_Reset(void)
+{
+	SOC_BL_Set(PWM_BL_MIN);
+	msleep(20);// bp loop time
+	LCD_RESET;
+	msleep(20);//wait lcd ready
+	SOC_BL_Set(PWM_BL_MAX);
+}
+
+
+
 void SOC_Write_Servicer(int cmd)
 {
     k2u_write(cmd);
@@ -327,6 +338,7 @@ static void set_func_tbl(void)
    
    plidbg_dev->soc_func_tbl.pfnSOC_Get_CpuFreq = SOC_Get_CpuFreq;
 
+   plidbg_dev->soc_func_tbl.pfnSOC_LCD_Reset = SOC_LCD_Reset;
    
 }
 

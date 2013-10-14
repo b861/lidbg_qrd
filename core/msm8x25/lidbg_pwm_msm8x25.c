@@ -37,6 +37,7 @@ unsigned int   soc_bl_set(u32 bl_level)
 	}
 
 #endif
+	lidbg("soc_bl_set:%d\n",bl_level);
     return 1;
 }
 

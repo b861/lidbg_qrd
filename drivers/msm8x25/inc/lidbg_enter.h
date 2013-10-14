@@ -86,6 +86,8 @@
 #define NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE (110)
 #define NOTIFIER_MINOR_XXX (0)
 
+#define PWM_BL_MAX (255)
+#define PWM_BL_MIN (0)
 #else
 #define lidbg_io(fmt,...) //do{SOC_IO_Uart_Send(IO_UART_DELAY_245_115200,fmt,##__VA_ARGS__);}while(0)
 
@@ -103,8 +105,8 @@ typedef irqreturn_t (*pinterrupt_isr)(int irq, void *dev_id);
 #define ADC_MAX_CH (8)
 struct fly_smem
 {
-    u8 reserved[4];
-    u32 ch[ADC_MAX_CH];
+    unsigned char reserved[4];
+    unsigned int ch[ADC_MAX_CH];
     int reserved2;
     int bl_value;
 };
@@ -327,6 +329,8 @@ struct lidbg_fn_t
 
 	
 	int (*pfnSOC_Get_CpuFreq)(void);
+
+	void (*pfnSOC_LCD_Reset)(void);
 };
 
 struct lidbg_pvar_t
