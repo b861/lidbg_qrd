@@ -1,6 +1,9 @@
 #include "lidbg.h"
 
 struct task_struct *loader_task;
+struct task_struct *restart_task;
+
+int load_modules_count = 0;
 
 char *insmod_list[] =
 {
@@ -35,11 +38,31 @@ void launch_user( char bin_path[], char argv1[],char argv2[])
     ret = call_usermodehelper(bin_path, argv, envp, UMH_WAIT_PROC);
 }
 
+int thread_check_restart(void *data)
+{
+	DUMP_FUN_ENTER;
+	msleep(5000);
+	lidbg("load_modules_count=%d\n",load_modules_count);
+	if(load_modules_count == 0)
+	{
+		lidbg("load_modules_count err,call kernel_restart!\n");
+		kernel_restart(NULL);
+	}
+	DUMP_FUN_LEAVE;
+}
+
 int thread_loader(void *data)
 {
 	int i,j;
 	char path[100];
 	DUMP_FUN_ENTER;
+    restart_task = kthread_create(thread_check_restart, NULL, "lidbg_restart");
+    if(IS_ERR(restart_task))
+    {
+        lidbg("Unable to start thread.\n");
+
+    }
+    else wake_up_process(restart_task);
 
 	for(i=0;insmod_path[i]!=NULL;i++)	
 	{
@@ -52,7 +75,6 @@ int thread_loader(void *data)
 	}
 	
 	//launch_user("/system/bin/chmod", "0777", "/dev/mlidbg0");
-
 	DUMP_FUN_LEAVE;
 	return 0;
 
@@ -77,6 +99,8 @@ void __exit loader_exit(void)
 
 module_init(loader_init);
 module_exit(loader_exit);
+
+EXPORT_SYMBOL(load_modules_count);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Flyaudio Inc.");

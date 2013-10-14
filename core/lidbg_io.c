@@ -94,7 +94,7 @@ void mod_io_main(int argc, char **argv)
 
 static int __init io_init(void)
 {
-    DUMP_BUILD_TIME;
+    LIDBG_MODULE_LOG;
     return 0;
 }
 

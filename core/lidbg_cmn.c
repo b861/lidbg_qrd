@@ -262,9 +262,10 @@ void mod_cmn_main(int argc, char **argv)
 extern void fileserverinit_once(void);
 static int __init cmn_init(void)
 {
-	fileserverinit_once();
-    DUMP_BUILD_TIME;
+    LIDBG_MODULE_LOG;
     create_new_proc_entry();
+	
+	fileserverinit_once();
     return 0;
 }
 

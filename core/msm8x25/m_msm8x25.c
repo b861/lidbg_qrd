@@ -14,7 +14,7 @@ int soc_temp_get(void)
 
 int msm8x25_init(void)
 {
-    DUMP_FUN;
+	LIDBG_MODULE_LOG;
 
     lidbg( "smem_alloc id = %d\n", SMEM_ID_VENDOR0);
     p_fly_smem = (struct fly_smem *)smem_alloc(SMEM_ID_VENDOR0, sizeof(struct fly_smem));

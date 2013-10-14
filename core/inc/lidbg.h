@@ -72,10 +72,12 @@
 
 #include <linux/i2c-gpio.h>   //for i2c-gpio
 #include <linux/i2c-algo-bit.h>	//add by huangzongqiang
+#include <linux/reboot.h>
 
 ////////////
 //#define BUILD_FOR_RECOVERY
 
+#include "lidbg_loader.h"
 #include "lidbg_io.h"
 #include "lidbg_key.h"
 #include "lidbg_ts.h"
@@ -99,6 +101,7 @@
 #ifdef BUILD_DRIVERS
 #include "lidbg_enter.h"
 #endif
+
 
 #endif
 

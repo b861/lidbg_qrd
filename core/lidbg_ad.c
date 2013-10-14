@@ -27,6 +27,7 @@ void mod_ad_main(int argc, char **argv)
 
 static int __init ad_init(void)
 {
+	LIDBG_MODULE_LOG;
     return 0;
 }
 

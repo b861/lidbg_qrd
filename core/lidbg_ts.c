@@ -58,7 +58,7 @@ int lidbg_touch_init(void)
     int error;
     u32 RESOLUTION_X=1024;
     u32 RESOLUTION_Y=600;
-    DUMP_BUILD_TIME;
+    LIDBG_MODULE_LOG;
 
     input = input_allocate_device();
     if (!input)

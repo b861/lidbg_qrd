@@ -667,6 +667,7 @@ static int __init i2c_api_init(void)
 {
     //±éÀúadapter
     int ret;
+	LIDBG_MODULE_LOG;
 
 #ifdef LIDBG_I2C_GPIO 
 #ifndef CONFIG_I2C_GPIO

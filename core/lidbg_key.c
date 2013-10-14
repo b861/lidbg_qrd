@@ -44,7 +44,7 @@ int lidbg_key_init(void)
 {
     int error;
     int i;
-    DUMP_BUILD_TIME;
+    LIDBG_MODULE_LOG;
 
     input = input_allocate_device();
     if (!input)

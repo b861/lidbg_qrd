@@ -119,9 +119,7 @@ static struct miscdevice misc =
 static int __init msg_init(void)
 {
     int ret;
-
-    DUMP_BUILD_TIME;
-
+	LIDBG_MODULE_LOG;
     ret = misc_register(&misc);
 
     INIT_COMPLETION(msg_ready);

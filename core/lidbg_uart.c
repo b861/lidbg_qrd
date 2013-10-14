@@ -78,7 +78,7 @@ void lidbg_uart_main(int argc, char **argv)
 
 static int __init io_uart_init(void)
 {
-    DUMP_BUILD_TIME;
+    LIDBG_MODULE_LOG;
     lidbg("io_uart_init\n");	
     spin_lock_init(&uart_lock);
 

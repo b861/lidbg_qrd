@@ -218,8 +218,7 @@ int lidbg_init(void)
 {
     int result;
     dev_t devno = MKDEV(lidbg_major, 0);
-    lidbg("lidbg_init\n");
-    DUMP_BUILD_TIME;
+    LIDBG_MODULE_LOG;
 
     /* …Í«Î…Ë±∏∫≈*/
     if (lidbg_major)
