@@ -100,8 +100,8 @@ int soc_io_config(u32 index, bool direction, u32 pull, u32 drive_strength, bool 
 
         if(direction == GPIO_CFG_INPUT)
             err = gpio_direction_input(index);
-        else
-            err = gpio_direction_output(index, 1);
+        //else
+        //    err = gpio_direction_output(index, 1);
 
         if (err)
         {
@@ -122,7 +122,7 @@ free_gpio:
 
 int soc_io_output(u32 group,u32 index, bool status)
 {
-
+	gpio_direction_output(index, status);
     gpio_set_value(index, status);
     return 1;
 
