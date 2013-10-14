@@ -655,7 +655,7 @@ static void devices_late_resume(struct early_suspend *handler)
         else wake_up_process(resume_task);
 #endif
 
-		lidbg_fs_log(TEMP_LOG_PATH,"*\n");
+		//lidbg_fs_log(TEMP_LOG_PATH,"*\n");
     }
     DUMP_FUN_LEAVE;
 }
