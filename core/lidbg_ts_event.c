@@ -301,6 +301,14 @@ void cb_kv_password(char *key, char *value)
     if ( (!strcmp(key, "te_dbg_en" ))  &&  (strcmp(value, "0" )) )
         show_password_list();
 }
+void cb_password_kmsg(char *password )
+{
+    if(g_te_dbg_en)
+        TE_WARN("<called:%s>\n", password);
+
+    if(lidbg_exe("/flysystem/lib/out/lidbg_kmsg") < 0)
+        TE_ERR("Exe lidbg_kmsg failed !\n");
+}
 void  toucheventinit_once(void)
 {
     TE_WARN("<==IN==>\n");
@@ -317,6 +325,7 @@ void  toucheventinit_once(void)
     te_regist_password("001110", cb_password_clean_all);
     te_regist_password("001111", cb_password_chmod);
     te_regist_password("001112", cb_password_update);
+    te_regist_password("010000", cb_password_kmsg);
 
     fs_get_intvalue(&lidbg_core_list, "te_dbg_mem", &g_dubug_mem, NULL);
 
