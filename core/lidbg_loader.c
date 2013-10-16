@@ -49,6 +49,7 @@ int thread_check_restart(void *data)
 		kernel_restart(NULL);
 	}
 	DUMP_FUN_LEAVE;
+	return 0;
 }
 
 int thread_loader(void *data)

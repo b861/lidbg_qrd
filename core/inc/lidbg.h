@@ -1,6 +1,7 @@
 #ifndef _LIGDBG_DEV__
 #define _LIGDBG_DEV__
 
+#include <linux/usb.h>
 #include <linux/random.h>
 #include <linux/time.h>
 #include <linux/rtc.h>

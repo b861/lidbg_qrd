@@ -8,7 +8,7 @@ NOTE:
 */
 
 //zone below[tools]
-#define TE_VERSION "TE.VERSION:  [20130930]"
+#define TE_VERSION "TE.VERSION:  [20131016]"
 #define PASSWORD_TE_ON "001122"
 #define DEBUG_MEM_FILE "/data/fs_private.txt"
 #define TE_WARN(fmt, args...) pr_info("[futengfei.te]warn.%s: " fmt,__func__,##args)
@@ -33,6 +33,8 @@ LIST_HEAD(te_password_list);
 struct tspara g_pre_tspara ;
 struct tspara g_curr_tspara = {0, 0, false} ;
 static struct task_struct *te_task;
+static struct task_struct *udisk_update_task;
+static struct completion udisk_update_wait;
 static char prepare_cmd[CMD_MAX];
 static int prepare_cmdpos = 0;
 static int g_dubug_mem = 0;
@@ -44,6 +46,7 @@ static int g_te_scandelay_ms = 100;
 
 //zone below [interface]
 bool regist_password(char *password, void (*cb_password)(char *password ));
+void cb_password_update(char *password );
 
 bool te_regist_password(char *password, void (*cb_password)(char *password ))
 {
@@ -238,7 +241,39 @@ static int thread_te_analysis(void *data)
         else
             ssleep(30);
     };
+    return 1;
+}
 
+static int usb_nc_update(struct notifier_block *nb, unsigned long action, void *data)
+{
+    switch (action)
+    {
+    case USB_DEVICE_ADD:
+        complete(&udisk_update_wait);
+        break;
+    case USB_DEVICE_REMOVE:
+        break;
+    }
+    return NOTIFY_OK;
+}
+
+static struct notifier_block usb_nb_update =
+{
+    .notifier_call = usb_nc_update,
+};
+static int thread_udisk_update(void *data)
+{
+    allow_signal(SIGKILL);
+    allow_signal(SIGSTOP);
+    //set_freezable();
+    while(!kthread_should_stop())
+    {
+        if(!wait_for_completion_interruptible(&udisk_update_wait))
+        {
+            ssleep(4);
+            cb_password_update("000000");
+        }
+    }
     return 1;
 }
 //zone end
@@ -282,17 +317,20 @@ void cb_password_clean_all(char *password )
 }
 void cb_password_update(char *password )
 {
-    int ret = -1;
-    if(g_te_dbg_en)
-        TE_WARN("<called:%s>\n", password);
-    fs_remount_system();
-    ret = fs_update("/mnt/usbdisk/out/release", "/mnt/usbdisk/out", "/flysystem/lib/out");
-    if( ret < 0)
-        ret = fs_update("/mnt/sdcard/out/release", "/mnt/sdcard/out", "/flysystem/lib/out");
-    fs_file_log("<called:%s.%d>\n", __func__ , ret); //tmp,del later
+    if(fs_is_file_exist("/mnt/usbdisk/out/release"))
+    {
+        int ret = -1;
+        TE_WARN("<===============UPDATE_INFO =================>\n" );
+        ret = fs_update("/mnt/usbdisk/out/release", "/mnt/usbdisk/out", "/flysystem/lib/out");
+        fs_file_log("<called:%s.%d>\n", __func__ , ret); //tmp,del later
 
-	//if( ret >= 0)
-	//	lidbg_reboot();
+        if( ret >= 0)
+            lidbg_reboot();
+    }
+    else
+    {
+        TE_ERR("<up>\n" );
+    }
 }
 void cb_kv_password(char *key, char *value)
 {
@@ -316,6 +354,8 @@ void  toucheventinit_once(void)
     TE_WARN("<%s>\n", TE_VERSION);
     fs_file_log("%s\n", TE_VERSION );
 
+    init_completion(&udisk_update_wait);
+
     FS_REGISTER_INT(g_te_dbg_en, "te_dbg_en", 0, cb_kv_password);
     FS_REGISTER_INT(g_te_scandelay_ms, "te_scandelay_ms", 100, NULL);
 
@@ -330,6 +370,8 @@ void  toucheventinit_once(void)
     fs_get_intvalue(&lidbg_core_list, "te_dbg_mem", &g_dubug_mem, NULL);
 
     te_task = kthread_run(thread_te_analysis, NULL, "ftf_te_task");
+    udisk_update_task = kthread_run(thread_udisk_update, NULL, "ftf_te_update");
+    fs_register_usb_notify(&usb_nb_update);
 
     TE_WARN("<==OUT==>\n");
 }

@@ -163,7 +163,7 @@ void set_power_state(int state)
 void set_cpu_governor(int state)
 {
 	char buf[16];
-	int len;
+	int len=-1;
 	lidbg("set_cpu_governor:%d\n",state);
 	
 #if 0

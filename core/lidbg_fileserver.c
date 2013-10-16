@@ -10,6 +10,7 @@ update log:
 	6:[20130927]/add remount system func.etc
 	7:[20130930]/add update ko from usb or sdcard;
 	8:[20131011]/fs_fill_list,mf open file mode:O_RDONLY
+	9:[20131016]/add linux usb event;
 */
 
 #define FS_WARN(fmt, args...) pr_info("[futengfei.fs]warn.%s: " fmt,__func__,##args)
@@ -17,7 +18,7 @@ update log:
 #define FS_SUC(fmt, args...) pr_info("[futengfei.fs]suceed.%s: " fmt,__func__,##args)
 
 //zone below [tools]
-#define FS_VERSION "FS.VERSION:  [20131011]"
+#define FS_VERSION "FS.VERSION:  [20131016]"
 #define DEBUG_MEM_FILE "/data/fs_private.txt"
 #define LIDBG_LOG_FILE_PATH "/data/lidbg_log.txt"
 #define LIDBG_KMSG_FILE_PATH "/data/lidbg_kmsg.txt"
@@ -238,6 +239,10 @@ bool fs_upload_machine_log(void)
     remount_system();
     return upload_machine_log();
 }
+bool fs_is_file_exist(char *file)
+{
+    return is_file_exist(file);
+}
 void fs_call_apk(void)
 {
     call_apk();
@@ -252,9 +257,12 @@ void fs_clean_all(void)
 }
 void fs_remount_system(void)
 {
-    return remount_system();
+    remount_system();
 }
-
+void fs_register_usb_notify(struct notifier_block *nb)
+{
+    usb_register_notify(nb);// bus_register_notifier(&usb_bus_type, &usb_bus_nb_test);
+}
 //zone end
 
 
@@ -266,7 +274,7 @@ void remount_system(void)
         g_is_remountd_system = 1;
         lidbg_chmod("/system/bin/mount");
         lidbg_mount("/system");
-		lidbg_mount("/flysystem");
+        lidbg_mount("/flysystem");
         msleep(200);
     }
 }
@@ -615,7 +623,7 @@ int update_list(const char *filename, struct list_head *client_list)
     int all_purpose, curren_intvalue;
     unsigned int file_len;
 
-    filep = filp_open(filename, O_RDWR , 0);
+    filep = filp_open(filename, O_RDONLY , 0);
     if(IS_ERR(filep))
     {
         printk("[futengfei]err.open:<%s>\n", filename);
@@ -701,13 +709,15 @@ int update_ko(const char *ko_list, const char *fromdir, const char *todir)
     int all_purpose;
     unsigned int file_len;
 
-    filep = filp_open(ko_list, O_RDWR , 0);
+    filep = filp_open(ko_list, O_RDONLY , 0);
     if(IS_ERR(filep))
     {
         printk("[futengfei]err.open:<%s>\n", ko_list);
         return -1;
     }
     printk("[futengfei]succeed.open:<%s>\n", ko_list);
+
+    fs_remount_system();
 
     old_fs = get_fs();
     set_fs(get_ds());
@@ -746,8 +756,7 @@ int update_ko(const char *ko_list, const char *fromdir, const char *todir)
             memset(file_to, '\0', sizeof(file_to));
             sprintf(file_from, "%s/%s", fromdir, token);
             sprintf(file_to, "%s/%s", todir, token);
-            if(g_dubug_filedetec)
-                FS_WARN("<do:%s>\n", file_from);
+            FS_WARN("<cp:%s,%s>\n", file_from, file_to);
             fs_copy_file(file_from, file_to);
         }
     }
@@ -794,7 +803,7 @@ int launch_file_cmd(const char *filename)
     int all_purpose;
     unsigned int file_len;
 
-    filep = filp_open(filename, O_RDWR , 0);
+    filep = filp_open(filename, O_RDONLY , 0);
     if(IS_ERR(filep))
     {
         printk("[futengfei]err.open:<%s>\n", filename);
@@ -869,7 +878,7 @@ bool get_file_mftime(const char *filename, struct rtc_time *ptm)
     struct file *filep;
     struct inode *inode = NULL;
     struct timespec mtime;
-    filep = filp_open(filename, O_RDWR , 0);
+    filep = filp_open(filename, O_RDONLY , 0);
     if(IS_ERR(filep))
     {
         if(g_dubug_on)
@@ -1163,12 +1172,21 @@ static int thread_pollkmsg_func(void *data)
 bool is_file_exist(char *file)
 {
     struct file *filep;
-    filep = filp_open(file, O_RDWR , 0);
+    struct inode *inodefrom = NULL;
+    unsigned int file_len;
+    filep = filp_open(file, O_RDONLY , 0);
     if(IS_ERR(filep))
         return false;
     else
+    {
+        inodefrom = filep->f_dentry->d_inode;
+        file_len = inodefrom->i_size;
         filp_close(filep, 0);
-    return true;
+        if(file_len > 0)
+            return true;
+        else
+            return false;
+    }
 }
 bool copy_file(char *from, char *to)
 {
@@ -1185,7 +1203,7 @@ bool copy_file(char *from, char *to)
         return false;
     }
 
-    pfilefrom = filp_open(from, O_RDWR , 0);
+    pfilefrom = filp_open(from, O_RDONLY , 0);
     pfileto = filp_open(to, O_CREAT | O_RDWR | O_TRUNC, 0777);
     if(IS_ERR(pfileto))
     {
@@ -1282,6 +1300,14 @@ void copy_all_conf_file(void)
         copy_file(state_lidbg_path, state_sd_path);
         copy_file(cmd_lidbg_path, cmd_sd_path);
     }
+
+#if (defined(BOARD_V1) || defined(BOARD_V2))
+    copy_file("/flysystem/lib/out/gps.msm7627a.so", "/flysystem/lib/hw/gps.msm7627a.so");
+    FS_WARN("copy_file:gps_hal.msm7627a\n");
+#else
+    copy_file("/flysystem/lib/out/gps.msm8625.so", "/flysystem/lib/hw/gps.msm8625.so");
+    FS_WARN("copy_file:gps_hal.msm8625\n");
+#endif
 }
 bool get_file_tmstring(char *filename, char *tmstring)
 {
@@ -1330,8 +1356,11 @@ void fileserverinit_once(void)
         check_conf_file(core_lidbg_path);
     }
 
-    //search priority:sd_path>fly_path>lidbg_path
-    if(!is_file_exist(driver_sd_path) || !is_file_exist(core_sd_path) || !is_file_exist(state_sd_path))
+#if (defined(BOARD_V1) || defined(BOARD_V2))
+    if(!is_file_exist(driver_sd_path) || !is_file_exist(core_sd_path) || !is_file_exist(state_sd_path) || !is_file_exist("/flysystem/lib/hw/gps.msm7627a.so"))
+#else
+    if(!is_file_exist(driver_sd_path) || !is_file_exist(core_sd_path) || !is_file_exist(state_sd_path) || !is_file_exist("/flysystem/lib/hw/gps.msm8625.so"))
+#endif
     {
         FS_WARN("<overwrite all conf:conf miss>\n");
         copy_all_conf_file();
@@ -1539,10 +1568,12 @@ EXPORT_SYMBOL(lidbg_fileserver_main);
 EXPORT_SYMBOL(lidbg_drivers_list);
 EXPORT_SYMBOL(lidbg_core_list);
 EXPORT_SYMBOL(get_machine_id);
+EXPORT_SYMBOL(fs_is_file_exist);
 EXPORT_SYMBOL(fs_call_apk);
 EXPORT_SYMBOL(fs_remove_apk);
 EXPORT_SYMBOL(fs_clean_all);
 EXPORT_SYMBOL(fs_upload_machine_log);
+EXPORT_SYMBOL(fs_register_usb_notify);
 EXPORT_SYMBOL(fs_remount_system);
 EXPORT_SYMBOL(fs_save_list_to_file);
 EXPORT_SYMBOL(fs_regist_filedetec);
