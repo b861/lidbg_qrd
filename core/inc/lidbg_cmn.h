@@ -5,7 +5,6 @@ int  lidbg_exe(char path[]);
 int  lidbg_mount(char path[]);
 int  lidbg_insmod(char path[]);
 int  lidbg_chmod(char path[]);
-int  lidbg_cp(char from[],char to[]);
 int  lidbg_mv(char from[],char to[]);
 int  lidbg_rm(char path[]);
 int  lidbg_rmdir(char path[]);

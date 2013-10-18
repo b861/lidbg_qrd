@@ -4,13 +4,16 @@
 #define __LOG_BUF_LEN	(1 << CONFIG_LOG_BUF_SHIFT)
 
 /*
-    FS增加抓取kmsg功能+解析cmd功能+动态刷新state功能
-
-    抓取kmsg功能:配置SD中core.conf的fs_kmsg_en=0为1，被阻塞的kmsg线程将启动；重新设置为0后线程将重新被阻塞
-    解析cmd功能:0c key back 2 第一字符0表示执行指令的次数（最多9次）
-    动态刷新state:动态刷出acc_off_times=0(state.conf)等需要动态显示的内容，\
-    刷新率由core.config中的fs_updatestate_ms给出,如其为零，刷新线程将阻塞
-    另：删除了fileserver_main函数
+update log:
+	1:[20130912 V5.1]/add separaror
+	2:[20130913 V6.0]/save core,driver list to overwrite core.conf driver.conf
+	3:[20130916 V7.0]/check if the conf file need to be updated
+	4:[20130922]/copy file (from to),set file[to] length to zero
+	5:[20130926]/add socket func to upload machine_info;also fileserver.apk will make operation easier.password[001101]will enable this func;
+	6:[20130927]/add remount system func.etc
+	7:[20130930]/add update ko from usb or sdcard;
+	8:[20131011]/fs_fill_list,mf open file mode:O_RDONLY
+	9:[20131016]/add linux usb event;
 */
 
 //zone start
@@ -39,21 +42,21 @@ struct string_dev
     char *filedetec;
     int *int_value;
     bool have_warned;
-    void (*callback)(char * key, char * value);
-    void (*cb_filedetec)(char * filename );
+    void (*callback)(char *key, char *value);
+    void (*cb_filedetec)(char *filename );
 };
-void lidbg_fileserver_main(int argc, char **argv);
-extern void fs_save_list_to_file(void);
+extern void lidbg_fileserver_main(int argc, char **argv);
 extern void fs_file_separator(char *file2separator);
 extern void fs_regist_filedetec(char *filename, void (*cb_filedetec)(char *filename ));
 extern void fs_enable_kmsg( bool enable );
 extern void fs_save_state(void);
 extern void fs_log_sync(void);
+extern int  lidbg_cp(char from[], char to[]);
 extern int get_machine_id(void);
 extern int fs_update(const char *ko_list, const char *fromdir, const char *todir);
 extern int fs_dump_kmsg(char *tag, int size );
 extern int fs_regist_state(char *key, int *value);
-extern int fs_get_intvalue(struct list_head *client_list, char *key,int *int_value,void (*callback)(char *key,char *value));
+extern int fs_get_intvalue(struct list_head *client_list, char *key, int *int_value, void (*callback)(char *key, char *value));
 extern int fs_get_value(struct list_head *client_list, char *key, char **string);
 extern int fs_set_value(struct list_head *client_list, char *key, char *string);
 extern int fs_find_string(struct list_head *client_list, char *string);
@@ -64,7 +67,6 @@ extern int fs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_hea
 extern bool fs_is_file_exist(char *file);
 extern bool fs_copy_file(char *from, char *to);
 extern bool fs_upload_machine_log(void);
-extern void fs_register_usb_notify(struct notifier_block *nb);
 extern void fs_remount_system(void);
 extern void fs_call_apk(void);
 extern void fs_remove_apk(void);
@@ -72,6 +74,11 @@ extern void fs_clean_all(void);
 
 extern struct list_head lidbg_drivers_list;
 extern struct list_head lidbg_core_list;
+extern struct list_head fs_state_list;
+extern struct list_head lidbg_core_list;
+extern struct list_head lidbg_drivers_list;
+extern struct list_head lidbg_core_list;
+
 
 
 #define lidbg_fs_log(path,fmt,...) do{	char buf[32];\

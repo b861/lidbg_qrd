@@ -2,6 +2,7 @@ lidbg_loader.ko
 lidbg_uart.ko
 lidbg_msg.ko
 lidbg_common.ko
+lidbg_fileserver.ko
 lidbg_servicer.ko
 lidbg_touch.ko
 lidbg_key.ko
@@ -10,6 +11,7 @@ lidbg_io.ko
 lidbg_ad.ko
 lidbg_i2c_gpio.ko
 lidbg_main.ko
+lidbg_misc.ko
 core.conf
 cmd.conf
 build_time.conf

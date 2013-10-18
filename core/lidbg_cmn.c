@@ -193,10 +193,6 @@ int  lidbg_chmod(char path[])
 {
     return lidbg_launch_user(CHMOD_PATH, "777", path, NULL, NULL, NULL, NULL);
 }
-int  lidbg_cp(char from[],char to[])
-{
-    return fs_copy_file(from, to);
-}
 int  lidbg_mv(char from[],char to[])
 {
     return lidbg_launch_user(MV_PATH, from, to, NULL, NULL, NULL, NULL);
@@ -259,13 +255,10 @@ void mod_cmn_main(int argc, char **argv)
     return;
 }
 
-extern void fileserverinit_once(void);
 static int __init cmn_init(void)
 {
     LIDBG_MODULE_LOG;
     create_new_proc_entry();
-	
-	fileserverinit_once();
     return 0;
 }
 
@@ -285,7 +278,6 @@ EXPORT_SYMBOL(lidbg_exe);
 EXPORT_SYMBOL(lidbg_mount);
 EXPORT_SYMBOL(lidbg_insmod);
 EXPORT_SYMBOL(lidbg_chmod);
-EXPORT_SYMBOL(lidbg_cp);
 EXPORT_SYMBOL(lidbg_mv);
 EXPORT_SYMBOL(lidbg_rm);
 EXPORT_SYMBOL(lidbg_rmdir);

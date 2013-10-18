@@ -9,6 +9,7 @@ char *insmod_list[] =
 {
 	SOC_KO,
 	"lidbg_common.ko",
+	"lidbg_fileserver.ko",
     "lidbg_msg.ko",
 	"lidbg_servicer.ko",
 	"lidbg_touch.ko",
@@ -18,6 +19,7 @@ char *insmod_list[] =
 	"lidbg_ad.ko",
 	"lidbg_uart.ko",
 	"lidbg_main.ko",
+	"lidbg_misc.ko",
 	HAL_KO,
 	NULL,
 };
