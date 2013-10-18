@@ -119,7 +119,7 @@ static void *lidbg_gui_thread_funs(void *data)
 
 	while(1) {
 #if 1
-		rdSize = read(arg->inFd, arg->rdBuff, sizeof(arg->rdBuff));
+		rdSize = read(arg->inFd, arg->rdBuff, RD_BUFF_SIZE);
 
 		if(rdSize < 0)
 			printf("Read file error !\n");
@@ -149,8 +149,8 @@ static void *lidbg_gui_thread_funs(void *data)
 						
 		}
 #endif
-		sleep(1);
-//		usleep(200 * 1000);
+//		sleep(1);
+		usleep(500 * 1000);
 	}
 
 	return ((void *) 0);
@@ -191,7 +191,8 @@ int main()
 
 	guiInfo.outBuffSize = vinfo.xres * vinfo.yres * (vinfo.bits_per_pixel / 8);
 	guiInfo.outBuff = (char *)malloc(guiInfo.outBuffSize);
-	
+	guiInfo.rdBuff = (char *)malloc(RD_BUFF_SIZE);
+
 	//figure out the size of the screen 
 	screensize = guiInfo.outBuffSize * SYS_FB_NUM;
 

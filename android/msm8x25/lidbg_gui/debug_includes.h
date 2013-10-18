@@ -21,6 +21,7 @@
 #define GUI_LCM_YMAX 600
 
 #define SYS_FB_NUM 3
+#define RD_BUFF_SIZE (10 * 1024)
 
 // 1:clean one line, 0:clean all screen
 #define CLEAN_LINE 0
@@ -37,7 +38,7 @@
 
 struct gui_info {
 	int inFd;	 //where opened message from
-	char rdBuff[1024];  //buffer to store info read from inFd
+	char *rdBuff;  //buffer to store info read from inFd
 	char *outBuff;  //an own buffer to store info for use 
 	unsigned int outBuffSize;
 	char *sysFbBaseAddr;
