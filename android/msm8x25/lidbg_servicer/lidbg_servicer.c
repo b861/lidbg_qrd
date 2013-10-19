@@ -114,6 +114,23 @@ loop_read:
             lidbg("CMD_FAST_POWER_OFF---\n");
             break;
         }
+        case LOG_LOGCAT :
+        {
+            lidbg("logcat+\n");
+			system("date > /data/logcat.txt");
+			system("logcat >> /data/logcat.txt");
+            lidbg("logcat-\n");
+            break;
+        }
+        case LOG_DMESG :
+        {
+            lidbg("kmsg+\n");
+			system("date > /data/kmsg.txt");
+			system("cat /proc/kmsg >> /data/kmsg.txt");
+            lidbg("kmsg-\n");
+            break;
+        }
+
 
         case VIDEO_SET_PAL:
         {

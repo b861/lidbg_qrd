@@ -2,6 +2,7 @@
 
 static struct task_struct *udisk_update_task;
 static struct completion udisk_update_wait;
+int logcat_en;
 
 
 void cb_password_chmod(char *password )
@@ -87,6 +88,11 @@ static struct notifier_block usb_nb_update =
     .notifier_call = usb_nc_update,
 };
 
+void logcat_lunch(char *key, char *value )
+{
+	k2u_write(LOG_LOGCAT);
+}
+
 static int __init lidbg_misc_init(void)
 {
     TE_WARN("<==IN==>\n");
@@ -101,6 +107,8 @@ static int __init lidbg_misc_init(void)
     te_regist_password("001111", cb_password_chmod);
     te_regist_password("001112", cb_password_update);
     te_regist_password("010000", cb_password_kmsg);
+	
+	FS_REGISTER_INT(logcat_en,"logcat_en",0,logcat_lunch);
 
     udisk_update_task = kthread_run(thread_udisk_update, NULL, "ftf_te_update");
 

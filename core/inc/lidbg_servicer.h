@@ -4,6 +4,9 @@
 
 
 #define SERVICER_DONOTHING  (0)
+#define LOG_DMESG  (1)
+#define LOG_LOGCAT (2)
+
 #if 0
 
 #define LOG_DMESG  (1)
