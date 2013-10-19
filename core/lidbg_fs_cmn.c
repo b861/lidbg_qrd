@@ -259,11 +259,6 @@ bool get_file_tmstring(char *filename, char *tmstring)
     }
     return false;
 }
-void cb_filedetec_test(char *filename )
-{
-    if(g_filedetec_dbg)
-        FS_WARN("<callback belong::%s>\n", filename);
-}
 void cb_kv_filedetecen(char *key, char *value)
 {
     FS_WARN("<%s=%s>\n", key, value);

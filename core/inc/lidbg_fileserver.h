@@ -71,6 +71,7 @@ extern void fs_remount_system(void);
 extern void fs_call_apk(void);
 extern void fs_remove_apk(void);
 extern void fs_clean_all(void);
+extern void fs_save_list_to_file(void);
 
 extern struct list_head lidbg_drivers_list;
 extern struct list_head lidbg_core_list;

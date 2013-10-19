@@ -5,7 +5,7 @@
 
 //zone below [fs.log.tools]
 #define FIFO_SIZE (1024)
-#define MAX_FILE_LEN (MEM_SIZE_4_MB)
+#define MAX_FILE_LEN (MEM_SIZE_1_MB)
 spinlock_t		fs_lock;
 int g_clearlogfifo_ms = 30000;
 int g_iskmsg_ready = 1;

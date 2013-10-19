@@ -232,7 +232,7 @@ void  toucheventinit_once(void)
     TE_WARN("<==IN==>\n");
 
     TE_WARN("<%s>\n", TE_VERSION);
-    fs_file_log("%s\n", TE_VERSION );
+    fs_string2file("/dev/log/Vfste.txt","%s\n", TE_VERSION );
     FS_REGISTER_INT(g_te_dbg_en, "te_dbg_en", 0, cb_kv_password);
     FS_REGISTER_INT(g_te_scandelay_ms, "te_scandelay_ms", 100, NULL);
 

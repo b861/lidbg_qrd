@@ -202,14 +202,12 @@ void lidbg_fileserver_main_init(void)
 {
     char tbuff[100];
 
-    fs_file_log("\n%s\n", FS_VERSION );
-    fs_file_log("machine_id:%d\n", get_machine_id());//save to log
     lidbg_get_current_time(tbuff, NULL);
-    fs_file_log("%s\n", tbuff);
+    fs_file_log("current_time:%s\n", tbuff);
+    fs_string2file("/dev/log/Vfste.txt","%s\n", FS_VERSION );
 
     fs_get_intvalue(&lidbg_core_list, "fs_mem_dbg", &g_mem_dbg, NULL);
 
-    //fs_regist_filedetec("/mnt/sdcard/123.txt", cb_filedetec_test);
 }
 //zone end
 
