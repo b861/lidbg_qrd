@@ -10,6 +10,7 @@ do
 	mmm $dir -B
 done
 
+cd $LOCATE_PATH/../../build && ./copy_out_release.sh
 
 
 
