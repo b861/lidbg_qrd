@@ -8,7 +8,8 @@ u32 read_phy_addr(U32 PhyAddr);
 u32 read_phy_addr_bit(u32 offset, u32 num, u32 phy_addr);
 u32 read_virt_addr(u32 phy_addr);
 void write_virt_addr(u32 phy_addr, u32 value);
-
+u32 read_virt_addr_bit(u32 offset, u32 num, u32 phy_addr);
+void write_virt_addr_bit(u32 offset, u32 num, u32 phy_addr, u32 value);
 
 #endif
 

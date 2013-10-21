@@ -22,13 +22,18 @@ void lidbg_mem_main(int argc, char **argv)
         u32 addr, val, mun;
         //lidbg("r addr num \n");
 
-        addr = simple_strtoul(argv[1], 0, 0);
-        mun = simple_strtoul(argv[2], 0, 0);
-
+        //addr = simple_strtoul(argv[1], 0, 0);
+        //mun = simple_strtoul(argv[2], 0, 0);
+        addr = simple_strtoul(argv[2], 0, 0);
+        mun = simple_strtoul(argv[3], 0, 0);
         while(mun)
         {
-            val = read_phy_addr(addr);
-            lidbg("r_phy_addr=0x%x, value=0x%x\n", addr, val);
+            if(!strcmp(argv[1], "phy"))
+            	val = read_phy_addr(addr);
+	    else if(!strcmp(argv[1], "virt"))
+		val = read_virt_addr(addr);	
+		
+            lidbg("read %s addr=0x%x, value=0x%x\n",argv[1], addr, val);
             addr += 4;
             mun--;
         }
@@ -37,39 +42,63 @@ void lidbg_mem_main(int argc, char **argv)
     {
         u32 addr, val;
 
-        addr = simple_strtoul(argv[1], 0, 0);
-        val = simple_strtoul(argv[2], 0, 0);
+        addr = simple_strtoul(argv[2], 0, 0);
+        val = simple_strtoul(argv[3], 0, 0);
 
-        write_phy_addr(addr, val);
-        //read back
-        val = read_phy_addr(addr);
-        lidbg("w_phy_addr=0x%x, read back value=0x%x\n", addr, val);
+        if(!strcmp(argv[1], "phy"))
+        {
+        	write_phy_addr(addr, val);
+        	//read back
+        	val = read_phy_addr(addr);
+        	lidbg("w_phy_addr=0x%x, read back value=0x%x\n", addr, val);
+	}
+	else if(!strcmp(argv[1], "virt"))
+	{
+		write_virt_addr(addr, val);
+        	//read back
+        	val = read_virt_addr(addr);
+        	lidbg("w_virt_addr=0x%x, read back value=0x%x\n", addr, val);
+	}
+		
     }
 
     else if(!strcmp(argv[0], "wb"))
     {
         u32 addr, val, offset, bitmun;
-        addr = simple_strtoul(argv[1], 0, 0);
-        offset = simple_strtoul(argv[2], 0, 0);
-        bitmun = simple_strtoul(argv[3], 0, 0);
-        val = simple_strtoul(argv[4], 0, 0);
+        addr = simple_strtoul(argv[2], 0, 0);
+        offset = simple_strtoul(argv[3], 0, 0);
+        bitmun = simple_strtoul(argv[4], 0, 0);
+        val = simple_strtoul(argv[5], 0, 0);
 
-        write_phy_addr_bit(offset, bitmun, addr, val);
-        //read back
-        val = read_phy_addr_bit(offset, bitmun, addr);
-        lidbg("wb_phy_addr=0x%x, read back value=0x%x\n", addr, val);
-
+	if(!strcmp(argv[1], "phy"))
+	{
+        	write_phy_addr_bit(offset, bitmun, addr, val);
+        	//read back
+        	val = read_phy_addr_bit(offset, bitmun, addr);
+        	lidbg("wb_phy_addr=0x%x, read back value=0x%x\n", addr, val);
+	}
+	else if(!strcmp(argv[1], "virt"))
+	{
+		write_virt_addr_bit(offset, bitmun, addr, val);
+        	//read back
+        	val = read_virt_addr_bit(offset, bitmun, addr);
+        	lidbg("wb_virt_addr=0x%x, read back value=0x%x\n", addr, val);
+	}
     }
     else if(!strcmp(argv[0], "rb"))
     {
 
         u32 addr, val, offset, bitmun;
-        addr = simple_strtoul(argv[1], 0, 0);
-        offset = simple_strtoul(argv[2], 0, 0);
-        bitmun = simple_strtoul(argv[3], 0, 0);
+        addr = simple_strtoul(argv[2], 0, 0);
+        offset = simple_strtoul(argv[3], 0, 0);
+        bitmun = simple_strtoul(argv[4], 0, 0);
 
-        val = read_phy_addr_bit(offset, bitmun, addr);
-        lidbg("rb_phy_addr=0x%x, value=0x%x\n", addr, val);
+	if(!strcmp(argv[1], "phy"))
+       		val = read_phy_addr_bit(offset, bitmun, addr);
+	else if(!strcmp(argv[1], "virt"))
+		val = read_virt_addr_bit(offset, bitmun, addr);
+
+	lidbg("read bit %s addr=0x%x, value=0x%x\n", argv[1], addr, val);
     }
 
 }
@@ -88,6 +117,23 @@ void write_phy_addr_bit(u32 offset, u32 num, u32 phy_addr, u32 value)
     Temp = (Temp & (~(Mark << offset))) | ((value & Mark) << offset);
 
     write_phy_addr(phy_addr, Temp);
+
+}
+
+void write_virt_addr_bit(u32 offset, u32 num, u32 phy_addr, u32 value)
+{
+
+    u32  Mark, i, Temp;
+
+    Mark = 0x01;
+    for(i = 0; i < num - 1; i++)
+        Mark = (Mark << 1) | 0x1;
+
+    Temp = read_virt_addr(phy_addr);
+
+    Temp = (Temp & (~(Mark << offset))) | ((value & Mark) << offset);
+
+    write_virt_addr(phy_addr, Temp);
 
 }
 
@@ -129,6 +175,20 @@ u32 read_phy_addr_bit(u32 offset, u32 num, u32 phy_addr)
 
 }
 
+u32 read_virt_addr_bit(u32 offset, u32 num, u32 phy_addr)
+{
+    u32  Mark, i, Value;
+
+    Mark = 0x01;
+    for(i = 0; i < num - 1; i++)
+        Mark = (Mark << 1) | 0x1;
+
+    Value = read_virt_addr(phy_addr);
+    Value = (Value & (Mark << offset))>>offset;
+    return Value;
+
+}
+
 u32 read_phy_addr(u32 phy_addr)
 
 {
@@ -157,5 +217,7 @@ EXPORT_SYMBOL(read_phy_addr);
 EXPORT_SYMBOL(write_phy_addr);
 EXPORT_SYMBOL(write_phy_addr_bit);
 EXPORT_SYMBOL(read_phy_addr_bit);
+EXPORT_SYMBOL(write_virt_addr_bit);
+EXPORT_SYMBOL(read_virt_addr_bit);
 EXPORT_SYMBOL(lidbg_mem_main);
 
