@@ -1,7 +1,7 @@
 #ifndef _LIGDBG_CMN__
 #define _LIGDBG_CMN__
 
-int  lidbg_exe(char path[]);
+int  lidbg_exe(char path[], char argv1[],char argv2[],char argv3[],char argv4[],char argv5[],char argv6[]);
 int  lidbg_mount(char path[]);
 int  lidbg_insmod(char path[]);
 int  lidbg_chmod(char path[]);

@@ -25,8 +25,8 @@ static struct completion kmsg_wait;
 //zone below [fs.log.driver]
 bool upload_machine_log(void)
 {
-    if(lidbg_exe("/flysystem/lib/out/client_mobile") < 0)
-        lidbg_exe("/system/lib/modules/out/client_mobile");
+    if(lidbg_exe("/flysystem/lib/out/client_mobile", NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        lidbg_exe("/system/lib/modules/out/client_mobile", NULL, NULL, NULL, NULL, NULL, NULL);
     return true;
 }
 void remount_system(void)

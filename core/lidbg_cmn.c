@@ -177,9 +177,9 @@ int  lidbg_launch_user( char bin_path[], char argv1[],char argv2[],char argv3[],
     return ret;
 }
 
-int  lidbg_exe(char path[])
+int  lidbg_exe(char path[], char argv1[],char argv2[],char argv3[],char argv4[],char argv5[],char argv6[])
 {
-    return lidbg_launch_user(path, NULL, NULL, NULL, NULL, NULL, NULL);
+    return lidbg_launch_user(path, argv1, argv2, argv3, argv4, argv5, argv6);
 }
 int  lidbg_mount(char path[])
 {

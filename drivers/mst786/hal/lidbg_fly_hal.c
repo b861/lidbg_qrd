@@ -56,8 +56,8 @@ int soc_thread(void *data)
 
 #else
 		msleep(1000);
-		if(lidbg_exe("/system/bin/lidbg_servicer")<0)
-			lidbg_exe("/flysystem/bin/lidbg_servicer");
+		if(lidbg_exe("/system/bin/lidbg_servicer",NULL,NULL,NULL,NULL,NULL,NULL)<0)
+			lidbg_exe("/flysystem/bin/lidbg_servicer",NULL,NULL,NULL,NULL,NULL,NULL);
 #endif
 	return 0;
 }
