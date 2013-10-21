@@ -10,6 +10,7 @@ struct tspara
 
 extern struct tspara g_curr_tspara;
 extern bool te_regist_password(char *password, void (*cb_password)(char *password ));
+extern bool te_is_ts_touched(void);
 
 
 #define TE_WARN(fmt, args...) pr_info("[futengfei.te]warn.%s: " fmt,__func__,##args)

@@ -45,6 +45,7 @@ struct string_dev
     void (*callback)(char *key, char *value);
     void (*cb_filedetec)(char *filename );
 };
+#define MEM_FILE_VERSION "/dev/log/lidbg_version.txt"
 extern void lidbg_fileserver_main(int argc, char **argv);
 extern void fs_file_separator(char *file2separator);
 extern void fs_regist_filedetec(char *filename, void (*cb_filedetec)(char *filename ));
@@ -53,6 +54,7 @@ extern void fs_save_state(void);
 extern void fs_log_sync(void);
 extern int  lidbg_cp(char from[], char to[]);
 extern int get_machine_id(void);
+extern int fs_get_file_content(char *file, char *rbuff, int readlen);
 extern int fs_update(const char *ko_list, const char *fromdir, const char *todir);
 extern int fs_dump_kmsg(char *tag, int size );
 extern int fs_regist_state(char *key, int *value);

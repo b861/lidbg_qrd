@@ -176,7 +176,6 @@ static int thread_pollkmsg_func(void *data)
 {
     allow_signal(SIGKILL);
     allow_signal(SIGSTOP);
-    //set_freezable();
     while(!kthread_should_stop())
     {
         if( !wait_for_completion_interruptible(&kmsg_wait))
@@ -198,7 +197,6 @@ static int thread_log_func(void *data)
 {
     allow_signal(SIGKILL);
     allow_signal(SIGSTOP);
-    //set_freezable();
     while(!kthread_should_stop())
     {
         if(g_clearlogfifo_ms)

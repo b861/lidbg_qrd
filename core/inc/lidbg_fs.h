@@ -31,6 +31,7 @@
 
 
 extern int g_mem_dbg;
+extern int g_is_boot_completed;
 extern int readwrite_file(const char *filename, char *wbuff, char *rbuff, int readlen);
 extern int update_list(const char *filename, struct list_head *client_list);
 extern int bfs_file_amend(char *file2amend, char *str_append);

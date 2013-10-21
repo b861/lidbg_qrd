@@ -160,8 +160,8 @@ static int thread_filedetec_func(void *data)
 {
     allow_signal(SIGKILL);
     allow_signal(SIGSTOP);
-    //set_freezable();
     ssleep(45);
+    g_is_boot_completed = 1;
     FS_WARN("<thread start>\n");
     if(g_filedetec_dbg)
         show_filedetec_list();
@@ -285,6 +285,10 @@ bool fs_is_file_exist(char *file)
 {
     return is_file_exist(file);
 }
+int fs_get_file_content(char *file, char *rbuff, int readlen)
+{
+    return readwrite_file(file, NULL, rbuff, readlen);
+}
 int  lidbg_cp(char from[], char to[])
 {
     return fs_copy_file(from, to);
@@ -301,6 +305,7 @@ void lidbg_fs_cmn_init(void)
 }
 
 EXPORT_SYMBOL(lidbg_cp);
+EXPORT_SYMBOL(fs_get_file_content);
 EXPORT_SYMBOL(fs_regist_filedetec);
 EXPORT_SYMBOL(fs_copy_file);
 EXPORT_SYMBOL(fs_is_file_exist);

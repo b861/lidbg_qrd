@@ -3,12 +3,13 @@
 #include "lidbg_fs.h"
 
 //zone below [tools]
-#define FS_VERSION "FS.VERSION:  [20131018]"
+#define FS_VERSION "FS.VERSION:  [20131021]"
 LIST_HEAD(kill_list_test);
 static struct task_struct *fileserver_test_task;
 static struct task_struct *fileserver_test_task2;
 static struct task_struct *fileserver_test_task3;
 int g_mem_dbg = 0;
+int g_is_boot_completed = 0;
 static int test_count = 0;
 //zone end
 
@@ -58,7 +59,6 @@ static int thread_fileserver_test(void *data)
 {
     allow_signal(SIGKILL);
     allow_signal(SIGSTOP);
-    //set_freezable();
     fs_regist_state("ats", &test_count);
     while(!kthread_should_stop())
     {
@@ -201,13 +201,10 @@ void lidbg_fileserver_main_prepare(void)
 void lidbg_fileserver_main_init(void)
 {
     char tbuff[100];
-
     lidbg_get_current_time(tbuff, NULL);
     fs_file_log("current_time:%s\n", tbuff);
-    fs_string2file("/dev/log/Vfste.txt","%s\n", FS_VERSION );
-
+    fs_string2file(MEM_FILE_VERSION, "%s\n", FS_VERSION );
     fs_get_intvalue(&lidbg_core_list, "fs_mem_dbg", &g_mem_dbg, NULL);
-
 }
 //zone end
 

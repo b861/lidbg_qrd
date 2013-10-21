@@ -4,11 +4,11 @@
 /*
 NOTE:
 	1:ts_event=te
-	2:code entry:[toucheventinit_once()]  [te_regist_password()]
+	2:code entry:[touch_event_init()]  [te_regist_password()]
 */
 
 //zone below[tools]
-#define TE_VERSION "TE.VERSION:  [20131018]"
+#define TE_VERSION "TE.VERSION:  [20131021]"
 #define PASSWORD_TE_ON "001122"
 #define DEBUG_MEM_FILE "/data/fs_private.txt"
 #define SCEEN_X 1024
@@ -152,7 +152,7 @@ void launch_cmd(void)
 {
     if(g_te_dbg_en)
         TE_ERR("<prepare_cmd:%s>\n", prepare_cmd);
-    if(g_is_te_enable||!strcmp(prepare_cmd,PASSWORD_TE_ON ))
+    if(g_is_te_enable || !strcmp(prepare_cmd, PASSWORD_TE_ON ))
     {
         TE_WARN("<en>\n");
         call_password_cb(prepare_cmd);
@@ -198,7 +198,6 @@ static int thread_te_analysis(void *data)
 {
     allow_signal(SIGKILL);
     allow_signal(SIGSTOP);
-    //set_freezable();
     ssleep(25);
     TE_WARN("<thread start>\n" );
     if(g_te_dbg_en)
@@ -213,8 +212,8 @@ static int thread_te_analysis(void *data)
     };
     return 1;
 }
-
 //zone end
+
 void cb_kv_password(char *key, char *value)
 {
     if(g_te_dbg_en)
@@ -227,12 +226,12 @@ void cb_password_te_enable(char *password )
     g_is_te_enable = 1;
     lidbg_chmod( "/data");
 }
-void  toucheventinit_once(void)
+void  touch_event_init(void)
 {
     TE_WARN("<==IN==>\n");
 
     TE_WARN("<%s>\n", TE_VERSION);
-    fs_string2file("/dev/log/Vfste.txt","%s\n", TE_VERSION );
+    fs_string2file(MEM_FILE_VERSION, "%s\n", TE_VERSION );
     FS_REGISTER_INT(g_te_dbg_en, "te_dbg_en", 0, cb_kv_password);
     FS_REGISTER_INT(g_te_scandelay_ms, "te_scandelay_ms", 100, NULL);
 
@@ -254,11 +253,16 @@ bool te_regist_password(char *password, void (*cb_password)(char *password ))
         TE_ERR("<password||cb_password:null?>\n");
     return false;
 }
+bool te_is_ts_touched(void)
+{
+    return g_curr_tspara.press;
+}
 //zone end
 
 
 //zone below [EXPORT_SYMBOL]
 EXPORT_SYMBOL(g_curr_tspara);
 EXPORT_SYMBOL(te_regist_password);
+EXPORT_SYMBOL(te_is_ts_touched);
 //zone end
 
