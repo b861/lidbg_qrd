@@ -5,11 +5,12 @@
 
 //zone below [fs.log.tools]
 #define FIFO_SIZE (1024)
-#define MAX_FILE_LEN (MEM_SIZE_1_MB)
 spinlock_t		fs_lock;
 int g_clearlogfifo_ms = 30000;
 int g_iskmsg_ready = 1;
 int g_pollkmsg_en = 0;
+int max_file_len = 1;
+
 int g_is_remountd_system = 0;
 unsigned char log_buffer[FIFO_SIZE];
 unsigned char log_buffer2write[FIFO_SIZE];
@@ -87,7 +88,7 @@ again:
     file_len = file_len + 2;
 
 
-    if(file_len > MAX_FILE_LEN)
+    if(file_len > max_file_len * MEM_SIZE_1_MB)
     {
         printk("[futengfei]warn.fileappend_mode:< file>8M.goto.again >\n");
         is_file_cleard = 1;
@@ -313,8 +314,9 @@ void lidbg_fs_log_init(void)
     kfifo_init(&log_fifo, log_buffer, FIFO_SIZE);
     kfifo_reset(&log_fifo);
 
-    fs_get_intvalue(&lidbg_core_list, "fs_clearlogfifo_ms", &g_clearlogfifo_ms, NULL);
-    fs_get_intvalue(&lidbg_core_list, "fs_kmsg_en", &g_pollkmsg_en, cb_kv_pollkmsg);
+	FS_REGISTER_INT(g_clearlogfifo_ms,"fs_clearlogfifo_ms",0,NULL);
+	FS_REGISTER_INT(g_pollkmsg_en,"fs_kmsg_en",0,cb_kv_pollkmsg);
+	FS_REGISTER_INT(max_file_len,"fs_max_file_len",1,NULL);
 
 }
 
