@@ -52,11 +52,18 @@ void cb_password_update(char *password )
     }
 }
 
-void cb_password_kmsg(char *password )
+void cb_password_gui_kmsg(char *password )
 {
     if(lidbg_exe("/flysystem/lib/out/lidbg_gui", "/proc/kmsg", "1", NULL, NULL, NULL, NULL) < 0)
         TE_ERR("Exe lidbg_kmsg failed !\n");
 }
+
+void cb_password_gui_state(char *password )
+{
+    if(lidbg_exe("/flysystem/lib/out/lidbg_gui", "/dev/log/state.txt", "1", NULL, NULL, NULL, NULL) < 0)
+        TE_ERR("Exe status failed !\n");
+}
+
 static int thread_udisk_update(void *data)
 {
     allow_signal(SIGKILL);
@@ -119,8 +126,9 @@ static int __init lidbg_misc_init(void)
     te_regist_password("001110", cb_password_clean_all);
     te_regist_password("001111", cb_password_chmod);
     te_regist_password("001112", cb_password_update);
-    te_regist_password("010000", cb_password_kmsg);
-
+    te_regist_password("001120", cb_password_gui_kmsg);
+    te_regist_password("001121", cb_password_gui_state);
+	
     FS_REGISTER_INT(logcat_en, "logcat_en", 0, logcat_lunch);
     FS_REGISTER_INT(reboot_delay_s, "rds", 0, NULL);
 

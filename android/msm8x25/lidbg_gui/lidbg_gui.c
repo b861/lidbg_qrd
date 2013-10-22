@@ -120,6 +120,9 @@ static void *lidbg_gui_thread_funs(void *data)
 	while(1) {
 #if 1
 		rdSize = read(arg->inFd, arg->rdBuff, RD_BUFF_SIZE);
+		printf("Read rdSize:%d\n",rdSize);
+		if(rdSize == 0)
+			lseek(arg->inFd,0,SEEK_SET);
 
 		if(rdSize < 0)
 			printf("Read file error !\n");
