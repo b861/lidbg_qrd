@@ -54,7 +54,7 @@ void cb_password_update(char *password )
 
 void cb_password_kmsg(char *password )
 {
-    if(lidbg_exe("/flysystem/lib/out/lidbg_kmsg", NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    if(lidbg_exe("/flysystem/lib/out/lidbg_gui", "/proc/kmsg", "1", NULL, NULL, NULL, NULL) < 0)
         TE_ERR("Exe lidbg_kmsg failed !\n");
 }
 static int thread_udisk_update(void *data)

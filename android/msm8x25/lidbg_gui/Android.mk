@@ -10,10 +10,10 @@ LOCAL_SRC_FILES := \
 	font24_32.c \
 	GUI_BASIC.c \
 	debug_lcd_io.c \
-	lidbg_kmsg.c
+	lidbg_gui.c
 
 LOCAL_MODULE_TAGS:= optional
 
-LOCAL_MODULE := lidbg_kmsg
+LOCAL_MODULE := lidbg_gui
 
 include $(BUILD_EXECUTABLE)

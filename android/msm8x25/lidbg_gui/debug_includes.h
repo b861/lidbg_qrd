@@ -42,7 +42,8 @@ struct gui_info {
 	char *outBuff;  //an own buffer to store info for use 
 	unsigned int outBuffSize;
 	char *sysFbBaseAddr;
-
+	int interval;	//interval delay to clean the screen 
+	
 	int *cleanScreenFlag;
 };
 
