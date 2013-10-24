@@ -82,9 +82,11 @@ extern struct list_head lidbg_core_list;
 extern struct list_head lidbg_drivers_list;
 extern struct list_head lidbg_core_list;
 
+#define printk_fs(msg...)  do { printk( KERN_CRIT "lidbg_fs: " msg); }while(0)
 
 
 #define lidbg_fs_log(path,fmt,...) do{	char buf[32];\
+								printk_fs(fmt,##__VA_ARGS__);\
 								lidbg_get_current_time(buf,NULL);\
 								fs_string2file(path,"[%s] ",buf);\
 								fs_string2file(path,fmt,##__VA_ARGS__);\
@@ -92,6 +94,7 @@ extern struct list_head lidbg_core_list;
 
 
 #define lidbg_fs(fmt,...) do{	char buf[32];\
+								printk_fs(fmt,##__VA_ARGS__);\
 								lidbg_get_current_time(buf,NULL);\
 								fs_file_log("[%s] ",buf);\
 								fs_file_log(fmt,##__VA_ARGS__);\
