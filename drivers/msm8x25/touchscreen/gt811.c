@@ -239,8 +239,8 @@ static int goodix_init_panel(struct goodix_ts_data *ts)
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01
 
     };
-#endif
-#ifdef BOARD_V3	
+//#endif
+#else 
     uint8_t config_info7[] =
     {
         0x06, 0xA2,
@@ -559,12 +559,7 @@ COORDINATE_POLL:
     finger_up_cunt = 5-finger;
     if(finger)
     {
-#ifdef BOARD_V2
 	    for(count = 0; count < finger; count++)
-#endif	
-#ifdef BOARD_V3
-	    for(count = 0; count < finger; count++)
-#endif	
         {
             if(track_id[count] != 3)
             {
@@ -595,9 +590,8 @@ COORDINATE_POLL:
 		input_report_abs(ts->input_dev, ABS_MT_TOUCH_MAJOR, 255);
 		input_report_abs(ts->input_dev, ABS_MT_TRACKING_ID, track_id[count]);
 		input_mt_sync(ts->input_dev);
-#endif
 
-#ifdef BOARD_V3
+#else 
 		input_mt_slot(ts->input_dev, count);
 		input_mt_report_slot_state(ts->input_dev, MT_TOOL_FINGER,1);
 		input_report_abs(ts->input_dev, ABS_MT_POSITION_X,input_y);
@@ -607,7 +601,7 @@ COORDINATE_POLL:
 
         }
 
-#ifdef BOARD_V3
+#ifndef BOARD_V2 
 		if(finger_up_cunt>0)
 		{
 			int cunt;
@@ -651,9 +645,8 @@ COORDINATE_POLL:
 #ifdef BOARD_V2    
         input_report_abs(ts->input_dev, ABS_MT_TOUCH_MAJOR, 0);
         input_mt_sync(ts->input_dev);
-#endif
-
-#ifdef BOARD_V3
+		
+#else
 {
 	int count =0;
 	for(count=0;count<5;count++)
@@ -1018,9 +1011,8 @@ err_gpio_request_failed:
 	    input_set_abs_params(ts->input_dev, ABS_MT_POSITION_X, 0, screen_x  , 0, 0); //ts->abs_y_max
 	    input_set_abs_params(ts->input_dev, ABS_MT_POSITION_Y, 0, screen_y , 0, 0);	//ts->abs_x_max
 #endif
-#endif
 
-#ifdef BOARD_V3
+#else 
 	__set_bit(EV_KEY, ts->input_dev->evbit);
 	__set_bit(EV_ABS, ts->input_dev->evbit);
 	__set_bit(BTN_TOUCH, ts->input_dev->keybit);

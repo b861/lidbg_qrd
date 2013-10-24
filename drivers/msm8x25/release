@@ -11,6 +11,7 @@ gt801.ko
 gt811.ko
 gt911.ko
 gt80x_update.ko
+lidbg_acc.ko
 fastboot_not_kill_list.conf
 drivers.conf
 state.conf

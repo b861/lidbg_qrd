@@ -83,8 +83,8 @@ extern u16 total_len;
 #define GTP_CREATE_WR_NODE    1
 #ifdef BOARD_V2
 #define GTP_ICS_SLOT_REPORT   0
-#endif	
-#ifdef BOARD_V3
+	
+#else
 #define GTP_ICS_SLOT_REPORT   1
 #endif
 

@@ -11,11 +11,8 @@
 #define I2C_US_IO_1
 #define Progressive_Output_Format 0x12
 #define Interlaced_Output_Format 0x02
-#ifdef BOARD_V3
 #define TW9912_RESET 43
-#else
-#define TW9912_RESET 43
-#endif
+
 
 extern u8 tw9912_signal_unstabitily_for_Tw9912_init_flag;
 #if 0

@@ -21,12 +21,18 @@ echo input :"$1" "$2" "$3"
 	echo "EXTRA_CFLAGS += -DBOARD_V3" > $DBG_ROOT_PATH/build_cfg.mk
 	echo "LOCAL_CFLAGS += -DBOARD_V3" >> $DBG_ROOT_PATH/build_cfg.mk
 	echo "v3";;
+
+	v4) 
+	echo "EXTRA_CFLAGS += -DBOARD_V4" > $DBG_ROOT_PATH/build_cfg.mk
+	echo "LOCAL_CFLAGS += -DBOARD_V4" >> $DBG_ROOT_PATH/build_cfg.mk
+	echo "v4";;
 	*)
 
 	echo -e "\033[41;37m  ===============support table====================\033[0m "  
 	echo "v1"
 	echo "v2"
 	echo "v3"
+	echo "v4"
 	echo "dbg"
 	echo "rel"
 	echo "  "
@@ -51,6 +57,7 @@ echo input :"$1" "$2" "$3"
 	echo "v1"
 	echo "v2"
 	echo "v3"
+	echo "v4"
 	echo "dbg"
 	echo "rel"
 	echo "  "
@@ -81,6 +88,7 @@ echo input :"$1" "$2" "$3"
 	echo "v1"
 	echo "v2"
 	echo "v3"
+	echo "v4"
 	echo "dbg"
 	echo "rel"
 	echo "  "

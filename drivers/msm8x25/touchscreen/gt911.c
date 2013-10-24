@@ -618,8 +618,8 @@ void gtp_reset_guitar(struct i2c_client *client, s32 ms)
 	msleep(2);
 	SOC_IO_Output(0, 27, 0);
 	// GTP_GPIO_OUTPUT(GTP_RST_PORT, 1);
-	#endif
-	#ifdef BOARD_V3
+
+	#else 
 	SOC_IO_Output(0, 27, 0);
 	//GTP_GPIO_OUTPUT(GTP_RST_PORT, 0);   //begin select I2C slave addr
 	msleep(ms);
@@ -1126,8 +1126,8 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     INIT_WORK(&ts->work, goodix_ts_work_func);
 #ifdef BOARD_V2
   client->addr = 0x14;
-#endif
-#ifdef BOARD_V3
+
+#else
   client->addr = 0x14;
 #endif
     ts->client = client;

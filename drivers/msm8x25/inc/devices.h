@@ -56,12 +56,12 @@ enum
 #define USB_SWITCH_CONNECT  do{SOC_IO_Config(GPIO_USB_SWITCH,GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_8MA);SOC_IO_Output(0, GPIO_USB_SWITCH, 0); }while(0)
 
 
-#endif
+//#endif
 
 
 
 
-#if defined(BOARD_V2)
+#elif defined(BOARD_V2)
 #define GPIO_USB_ID (81)
 #define GPIO_LED_FLY (82)
 
@@ -79,11 +79,11 @@ enum
 #define USB_SWITCH_DISCONNECT   do{SOC_IO_Config(GPIO_USB_SWITCH,GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_8MA);SOC_IO_Output(0, GPIO_USB_SWITCH, 0); }while(0)
 #define USB_SWITCH_CONNECT  do{SOC_IO_Config(GPIO_USB_SWITCH,GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_8MA);SOC_IO_Output(0, GPIO_USB_SWITCH, 1); }while(0)
 
-#endif
+//#endif
 
 
 
-#if defined(BOARD_V3)
+#else 
 
 #define LPC_IO_SET(cmd,status)  do{\
 	u8 buff[] = {0x07, cmd, status};\

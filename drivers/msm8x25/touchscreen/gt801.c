@@ -327,10 +327,10 @@ static int goodix_init_panel(struct goodix_ts_data *ts)
                              0x00, 0x50, 0x3C, 0x32, 0x71, 0x00, 0x00, 0x00, 0x00, 0x00,
                              0x00, 0x00, 0x01
                             };
-#endif
+//#endif
 
 
-#ifdef BOARD_V2
+#elif BOARD_V2
     uint8_t config_info[] = {0x30,
                              0x13, 0x03, 0x07, 0x28, 0x02, 0x14, 0x14, 0x10, 0x3C, 0xB2,
                              0x02, 0x4e, 0x04, 0x00, 0x01, 0x23, 0x45, 0x67, 0x89, 0xAB,
@@ -339,9 +339,9 @@ static int goodix_init_panel(struct goodix_ts_data *ts)
                              0x30, 0x00, 0x5A, 0x32, 0x71, 0x00, 0x00, 0x00, 0x00, 0x00,
                              0x00, 0x00, 0x01
                             };
-#endif
+//#endif
 
-#ifdef BOARD_V3
+#else 
 		uint8_t config_info[] = {0x30,
 								 0x13, 0x03, 0x07, 0x28, 0x02, 0x14, 0x14, 0x10, 0x3C, 0xB2,
 								 0x02, 0x4e, 0x04, 0x00, 0x01, 0x23, 0x45, 0x67, 0x89, 0xAB,
@@ -598,7 +598,7 @@ BIT_NO_CHANGE:
     /* ABS_MT_TOUCH_MAJOR is used as ABS_MT_PRESSURE in android. */
     for(count = 0; count < (finger_list.length); count++)
     {
-#ifdef BOARD_V3
+#ifndef BOARD_V2
 		input_mt_slot(ts->input_dev, finger_list.pointer[count].num);
 		if(finger_list.pointer[count].state == FLAG_DOWN)
 		{
@@ -674,7 +674,7 @@ BIT_NO_CHANGE:
         input_mt_sync(ts->input_dev);
 #endif
     }
-#ifdef BOARD_V3
+#ifndef BOARD_V2
 	input_report_key(ts->input_dev, BTN_TOUCH, !!finger_list.length);
 	input_sync(ts->input_dev);
 #endif
@@ -924,9 +924,8 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     input_set_abs_params(ts->input_dev, ABS_MT_POSITION_X, 0, screen_x, 0, 0);
     input_set_abs_params(ts->input_dev, ABS_MT_POSITION_Y, 0, screen_y, 0, 0);
 #endif
-#endif
 
-#ifdef BOARD_V3
+#else 
 	__set_bit(EV_KEY, ts->input_dev->evbit);
 	__set_bit(EV_ABS, ts->input_dev->evbit);
 	__set_bit(BTN_TOUCH, ts->input_dev->keybit);

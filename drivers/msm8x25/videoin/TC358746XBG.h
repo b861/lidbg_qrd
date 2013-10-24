@@ -38,7 +38,7 @@ struct TC358_register_struct_read
 #define TC358746XBG_RESET 33
 #else //BOARD_V3
 
-#ifndef BOARD_V3
+#ifndef BOARD_V3 
 #pragma message("目前硬件版本是：V3以上，请注意该处的参数设置,是否满足要求（TC358746XBG: line:50）")
 #endif
 #define TC358746XBG_RESET 33
@@ -67,12 +67,14 @@ struct TC358_register_struct_read
 #else
 #if 1
 
-#ifdef BOARD_V3
-#define tc358_RESX_UP do{i2c_io_config(TC358746XBG_RESET,GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA,0);gpio_set_value(TC358746XBG_RESET, 1);}while(0)
-#define tc358_RESX_DOWN do{i2c_io_config(TC358746XBG_RESET,GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA,0);gpio_set_value(TC358746XBG_RESET, 0);}while(0)
-#else
+#ifdef BOARD_V2
 #define tc358_RESX_UP do{i2c_io_config(TC358746XBG_RESET,GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA,0);gpio_set_value(TC358746XBG_RESET, 0);}while(0)
 #define tc358_RESX_DOWN do{i2c_io_config(TC358746XBG_RESET,GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA,0);gpio_set_value(TC358746XBG_RESET, 1);}while(0)
+
+#else
+#define tc358_RESX_UP do{i2c_io_config(TC358746XBG_RESET,GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA,0);gpio_set_value(TC358746XBG_RESET, 1);}while(0)
+#define tc358_RESX_DOWN do{i2c_io_config(TC358746XBG_RESET,GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA,0);gpio_set_value(TC358746XBG_RESET, 0);}while(0)
+
 #endif
 
 #else
