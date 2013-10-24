@@ -7,10 +7,10 @@ for each_dir in `ls -l $LOCATE_PATH | grep "^d" | awk '{print $NF}'`
 
 do
 	dir=$LOCATE_PATH/$each_dir
-	mmm $dir -B
+	mmm $dir -B  && cp -u $DBG_ANDROID_OUT_PATH/*  $DBG_OUT_PATH/
 done
 
-cd $LOCATE_PATH/../../build && ./copy_out_release.sh
+cd $DBG_SHELL_PATH && ./copy_out_release.sh
 
 
 
