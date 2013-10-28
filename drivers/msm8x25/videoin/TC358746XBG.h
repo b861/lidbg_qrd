@@ -34,7 +34,7 @@ struct TC358_register_struct_read
 
 #ifdef BOARD_V1
 #define TC358746XBG_RESET 28
-#elif BOARD_V2
+#elif defined(BOARD_V2)
 #define TC358746XBG_RESET 33
 #else //BOARD_V3
 
