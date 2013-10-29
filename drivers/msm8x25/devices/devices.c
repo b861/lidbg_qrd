@@ -557,7 +557,7 @@ static int soc_dev_probe(struct platform_device *pdev)
     }
 #endif
     //fake suspend
-    SOC_Fake_Register_Early_Suspend(&early_suspend);
+    //SOC_Fake_Register_Early_Suspend(&early_suspend);
 
 	register_lidbg_notifier(&lidbg_notifier);
 

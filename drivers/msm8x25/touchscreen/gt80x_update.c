@@ -1452,7 +1452,7 @@ static int __init init_kthread(void)
     register_early_suspend(&early_suspend);
 #endif
 
-    SOC_Fake_Register_Early_Suspend(&early_suspend);
+   // SOC_Fake_Register_Early_Suspend(&early_suspend);
     /************************************************************/
 
     debug_printk(LEVEL_DEBUG, "Initiall kernel thread.\n");

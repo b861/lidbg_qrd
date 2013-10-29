@@ -372,7 +372,7 @@ static int  gps_probe(struct platform_device *pdev)
 #endif
 
     //fake suspend
-    SOC_Fake_Register_Early_Suspend(&early_suspend);
+    //SOC_Fake_Register_Early_Suspend(&early_suspend);
 
     create_new_proc_entry(); //cat /proc/ublox_dbg to enable gps_debug
 

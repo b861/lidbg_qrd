@@ -716,7 +716,7 @@ static int ft5x06_ts_probe(struct i2c_client *client,
     register_early_suspend(&data->early_suspend);
 #endif
     //fake suspend
-    SOC_Fake_Register_Early_Suspend(&data->early_suspend);
+   // SOC_Fake_Register_Early_Suspend(&data->early_suspend);
 
     return 0;
 

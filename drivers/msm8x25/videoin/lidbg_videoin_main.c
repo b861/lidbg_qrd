@@ -509,7 +509,7 @@ static int video_dev_probe(struct platform_device *pdev)
 #endif
 	
 		//fake suspend
-	SOC_Fake_Register_Early_Suspend(&early_suspend);
+	//SOC_Fake_Register_Early_Suspend(&early_suspend);
     return 0;
 }
 static int video_dev_remove(struct platform_device *pdev)

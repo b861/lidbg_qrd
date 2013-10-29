@@ -1092,7 +1092,7 @@ err_gpio_request_failed:
     register_early_suspend(&ts->early_suspend);
 #endif
     //fake suspend
-    SOC_Fake_Register_Early_Suspend(&ts->early_suspend);
+    //SOC_Fake_Register_Early_Suspend(&ts->early_suspend);
 
     /////////////////////////////// UPDATE STEP 2 START /////////////////////////////////////////////////////////////////
     //#ifdef CONFIG_TOUCHSCREEN_GOODIX_IAP

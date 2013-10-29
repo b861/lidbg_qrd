@@ -1058,7 +1058,7 @@ err_int_request_failed:
     ts->early_suspend.resume = goodix_ts_late_resume;
     register_early_suspend(&ts->early_suspend);
 #endif
-    SOC_Fake_Register_Early_Suspend(&ts->early_suspend);  //fake suspend
+   // SOC_Fake_Register_Early_Suspend(&ts->early_suspend);  //fake suspend
 
     dev_info(&client->dev, "Start  %s in %s mode\n",
              ts->input_dev->name, ts->use_irq ? "Interrupt" : "Polling");
