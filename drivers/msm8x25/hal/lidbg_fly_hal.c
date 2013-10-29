@@ -9,6 +9,7 @@ LIDBG_DEFINE;
 
 struct task_struct *soc_task;
 
+int SOC_Get_CpuFreq(void);
 
 char *insmod_list[] =
 {
@@ -44,6 +45,13 @@ int soc_thread(void *data)
 {
 	int i,j;
 	char path[100];
+#if (defined(BOARD_V1) || defined(BOARD_V2))
+	lidbg_readwrite_file("/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq", NULL, "600000", sizeof("600000")-1);
+#else
+	lidbg_readwrite_file("/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq", NULL, "700800", sizeof("700800")-1);
+#endif
+	SOC_Get_CpuFreq();
+
 	for(i=0;insmod_path[i]!=NULL;i++)	
 	{
 		for(j=0;insmod_list[j]!=NULL;j++)
@@ -281,7 +289,7 @@ int SOC_Get_CpuFreq(void)
 	lidbg_readwrite_file("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_cur_freq", buf,NULL, 16);
 	cpu_freq = simple_strtoul(buf, 0, 0);
 	g_var.cpu_freq = cpu_freq;
-	//lidbg("cpufreq=%d\n",cpu_freq);
+	lidbg("cpufreq=%d\n",cpu_freq);
 	
 	return cpu_freq;
 }
