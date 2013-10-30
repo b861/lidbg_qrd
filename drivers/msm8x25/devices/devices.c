@@ -347,7 +347,7 @@ void log_temp(void)
 	int tmp;
 	g_var.temp = cur_temp = soc_temp_get();
 	tmp = cur_temp - old_temp;
-	if(ABS(tmp) >= temp_log_freq)
+	if((temp_log_freq != 0)&&(ABS(tmp) >= temp_log_freq))
 	{
 		lidbg_fs_log(TEMP_LOG_PATH,"%d\n",cur_temp);
 		old_temp = cur_temp;
