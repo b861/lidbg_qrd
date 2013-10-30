@@ -124,5 +124,16 @@ void parse_cmd(char *pt)
 #endif
     }
 
+	if (!strcmp(argv[0], "appcmd"))
+	{
+	    if (!strcmp(argv[1], "*158#001"))
+	    {
+	        k2u_write(LOG_LOGCAT);
+	    }
+	    if (!strcmp(argv[1], "*158#002"))
+	    {
+	        k2u_write(LOG_DMESG);
+	    }
+	}
 
 }

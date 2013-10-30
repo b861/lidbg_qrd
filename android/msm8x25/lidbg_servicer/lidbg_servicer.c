@@ -118,7 +118,7 @@ loop_read:
         {
             lidbg("logcat+\n");
 			system("date > /data/logcat.txt");
-			system("logcat >> /data/logcat.txt");
+			system("logcat >> /data/logcat.txt &");
             lidbg("logcat-\n");
             break;
         }
@@ -126,7 +126,7 @@ loop_read:
         {
             lidbg("kmsg+\n");
 			system("date > /data/kmsg.txt");
-			system("cat /proc/kmsg >> /data/kmsg.txt");
+			system("cat /proc/kmsg >> /data/kmsg.txt &");
             lidbg("kmsg-\n");
             break;
         }
