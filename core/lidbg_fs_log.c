@@ -314,7 +314,7 @@ void lidbg_fs_log_init(void)
     kfifo_init(&log_fifo, log_buffer, FIFO_SIZE);
     kfifo_reset(&log_fifo);
 
-	FS_REGISTER_INT(g_clearlogfifo_ms,"fs_clearlogfifo_ms",0,NULL);
+	FS_REGISTER_INT(g_clearlogfifo_ms,"fs_clearlogfifo_ms",30000,NULL);
 	FS_REGISTER_INT(g_pollkmsg_en,"fs_kmsg_en",0,cb_kv_pollkmsg);
 	FS_REGISTER_INT(max_file_len,"fs_max_file_len",1,NULL);
 
