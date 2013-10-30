@@ -213,7 +213,6 @@ open_dev:
 	}
 	close(fd);
 
-	DUMP_BUILD_TIME;
 
     lidbg("open mlidbg0 ok\n");
 
@@ -314,7 +313,13 @@ open_dev:
     ////////set cpu fre
 #endif
 	//cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_cur_freq 
-    lidbg("enter while\n");
+	
+	DUMP_BUILD_TIME;
+#if (defined(BOARD_V1) || defined(BOARD_V2))
+    lidbg("BOARD_V2\n");
+#elif defined(BOARD_V3)
+	lidbg("BOARD_V3\n");
+#endif
     while(1)
     {
 		sleep(60);
