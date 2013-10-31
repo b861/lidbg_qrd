@@ -97,7 +97,7 @@ static void log_active_locks(void)
 	if(active_wake_locks == NULL) return;
 	list_for_each_entry(lock, &active_wake_locks[type], link)
 	{
-		lidbg_fs("active wake lock %s\n", lock->name);
+		lidbg_fs_log(FASTBOOT_LOG_PATH,"active wake lock %s\n", lock->name);
 	}
 }
 
@@ -141,7 +141,7 @@ static void list_active_locks(void)
 		if(!strcmp(token, "adsp"))
 		{
 			lidbg("wake_lock:%s\n",token);
-			fs_file_log("wake_lock:%s\n",token);
+			fs_mem_log("wake_lock:%s\n",token);
 		    fb_data->has_wakelock_can_not_ignore = 1;
 		}
 	}
@@ -684,7 +684,6 @@ static int thread_fastboot_resume(void *data)
 		{
 			lidbg_fs_log(FASTBOOT_LOG_PATH,"%d\n",fb_data->resume_count);
 			fs_save_state();
-			fs_log_sync();
 		}
 		
 
@@ -735,7 +734,6 @@ void fastboot_pwroff(void)
     //    fastboot_task_kill_select("void");
 
 	//fs_save_state();
-	//fs_log_sync();
 
 #if 1//def FLY_DEBUG
     msleep(1000);

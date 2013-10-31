@@ -4,7 +4,7 @@
 LIDBG_DEFINE;
 
 static int ts_scan_delayms =500;
-static int have_warned =0;
+static int is_warned =0;
 #define TS_I2C_BUS (1)
 #define FLYHAL_CONFIG_PATH "/flydata/flyhalconfig"
 static LIST_HEAD(flyhal_config_list);
@@ -68,10 +68,10 @@ void ts_scan(void)
 			lidbg_insmod( path );
 
 			//in V3+,check ts revert and save the ts sate.
-			if(0==have_warned)
+			if(0==is_warned)
 			{
-				have_warned=1;
-				fs_file_log("loadts=%s\n", ts_probe_dev[i].name);
+				is_warned=1;
+				fs_mem_log("loadts=%s\n", ts_probe_dev[i].name);
 				ts_should_revert = fs_find_string(&flyhal_config_list,"TSMODE_XYREVERT");
 				if(ts_should_revert > 0)
 					printk("[futengfei]=======================TS.XY will revert\n");

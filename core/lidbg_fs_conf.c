@@ -26,10 +26,8 @@ void clean_all(void)
     lidbg_rm("/flysystem/lilb/out/fileserver.apk");
     lidbg_rm(driver_sd_path);
     lidbg_rm(core_sd_path);
-    lidbg_rm(state_sd_path);
     lidbg_rm(cmd_sd_path);
     lidbg_rm(state_sd_path);
-    lidbg_rm(LIDBG_LOG_FILE_PATH);
     lidbg_rm(PRE_CONF_INFO_FILE);
     lidbg_rm("/data/log_fb.txt");
     lidbg_rm("/data/log_ct.txt");
@@ -119,19 +117,19 @@ static int thread_pollfile_func(void *data)
         if(g_pollfile_ms)
         {
             msleep(g_pollfile_ms);
-            if(is_file_updated(core_sd_path, &precorefile_tm))
+            if(is_file_tm_updated(core_sd_path, &precorefile_tm))
             {
                 show_tm(&precorefile_tm);
                 update_list(core_sd_path, &lidbg_core_list);
             }
 
-            if(is_file_updated(driver_sd_path, &predriverfile_tm))
+            if(is_file_tm_updated(driver_sd_path, &predriverfile_tm))
             {
                 show_tm(&predriverfile_tm);
                 update_list(driver_sd_path, &lidbg_drivers_list);
             }
 
-            if(is_file_updated(cmd_sd_path, &precmdfile_tm))
+            if(is_file_tm_updated(cmd_sd_path, &precmdfile_tm))
             {
                 show_tm(&precmdfile_tm);
                 launch_file_cmd(cmd_sd_path);
@@ -158,52 +156,6 @@ void set_machine_id(void)
         sprintf(string, "%d", machine_id);
         FS_WARN("new machine_id:%s\n", string);
         bfs_file_amend(MACHINE_ID_FILE, string);
-    }
-}
-void copy_all_conf_file(void)
-{
-    if(fs_is_file_exist(core_fly_path))
-    {
-        fs_copy_file(core_fly_path, core_sd_path);
-        fs_copy_file(driver_fly_path, driver_sd_path) ;
-        fs_copy_file(state_fly_path, state_sd_path);
-        fs_copy_file(cmd_fly_path, cmd_sd_path);
-    }
-    else
-    {
-        fs_copy_file(core_lidbg_path, core_sd_path);
-        fs_copy_file(driver_lidbg_path, driver_sd_path);
-        fs_copy_file(state_lidbg_path, state_sd_path);
-        fs_copy_file(cmd_lidbg_path, cmd_sd_path);
-    }
-
-#if (defined(BOARD_V1) || defined(BOARD_V2))
-    if(fs_copy_file("/flysystem/lib/out/gps.msm7627a.so", "/flysystem/lib/hw/gps.msm7627a.so"))
-        FS_WARN("copy_file:gps_hal.msm7627a\n");
-#else
-    if( fs_copy_file("/flysystem/lib/out/gps.msm8625.so", "/flysystem/lib/hw/gps.msm8625.so"))
-        FS_WARN("copy_file:gps_hal.msm8625\n");
-#endif
-}
-bool is_conf_updated(char *filename, char *infofile)
-{
-    char pres[64], news[64];
-    if (get_file_tmstring(filename, news) && (readwrite_file(infofile, NULL, pres, sizeof(pres)) > 0) && (strcmp(news, pres)))
-        return true;
-    else
-        return false;
-}
-void check_conf_file(char *filename)
-{
-    if(!fs_is_file_exist(PRE_CONF_INFO_FILE) || is_conf_updated(filename, PRE_CONF_INFO_FILE))
-    {
-        char  news[64];
-
-        FS_WARN("<overwrite all conf:push,update?>\n");
-        copy_all_conf_file();
-        get_file_tmstring(filename, news);
-        clear_file(PRE_CONF_INFO_FILE);
-        bfs_file_amend(PRE_CONF_INFO_FILE, news);
     }
 }
 static int thread_pollstate_func(void *data)

@@ -75,7 +75,7 @@ bool is_tm_updated(struct rtc_time *pretm, struct rtc_time *newtm)
     else
         return true;
 }
-bool is_file_updated(const char *filename, struct rtc_time *pretm)
+bool is_file_tm_updated(const char *filename, struct rtc_time *pretm)
 {
     struct rtc_time tm;
     if(get_file_mftime(filename, &tm) && is_tm_updated(pretm, &tm))
@@ -137,16 +137,16 @@ void call_filedetec_cb(void)
         {
             if(g_filedetec_dbg)
                 FS_WARN("<should call :%s>\n", pos->filedetec);
-            if (!pos->have_warned)
+            if (!pos->is_warned)
             {
                 pos->cb_filedetec(pos->filedetec);
                 if(g_filedetec_dbg)
                     FS_WARN("<have called :%s>\n", pos->filedetec);
             }
-            pos->have_warned = true;
+            pos->is_warned = true;
         }
         else
-            pos->have_warned = false;
+            pos->is_warned = false;
     }
 }
 void regist_filedetec(char *filename, void (*cb_filedetec)(char *filename))
@@ -259,6 +259,25 @@ bool get_file_tmstring(char *filename, char *tmstring)
     }
     return false;
 }
+bool fs_is_file_updated(char *filename, char *infofile)
+{
+    char pres[64], news[64];
+
+    get_file_tmstring(filename, news);
+
+    if(!fs_is_file_exist(infofile))//first:check infofile
+    {
+overwrite:
+        fs_clear_file(infofile);
+        bfs_file_amend(infofile, news);
+        return true;
+    }
+
+    if ( (readwrite_file(infofile, NULL, pres, sizeof(pres)) > 0) && (strcmp(news, pres)))
+        goto overwrite;
+    else
+        return false;
+}
 void cb_kv_filedetecen(char *key, char *value)
 {
     FS_WARN("<%s=%s>\n", key, value);
@@ -285,6 +304,10 @@ bool fs_is_file_exist(char *file)
 {
     return is_file_exist(file);
 }
+bool fs_clear_file(char *filename)
+{
+    return clear_file(filename);
+}
 int fs_get_file_content(char *file, char *rbuff, int readlen)
 {
     return readwrite_file(file, NULL, rbuff, readlen);
@@ -309,3 +332,5 @@ EXPORT_SYMBOL(fs_get_file_content);
 EXPORT_SYMBOL(fs_regist_filedetec);
 EXPORT_SYMBOL(fs_copy_file);
 EXPORT_SYMBOL(fs_is_file_exist);
+EXPORT_SYMBOL(fs_is_file_updated);
+EXPORT_SYMBOL(fs_clear_file);

@@ -4,22 +4,12 @@
 
 
 //zone below [fs.log.tools]
-#define FIFO_SIZE (1024)
-spinlock_t		fs_lock;
-int g_clearlogfifo_ms = 30000;
+int max_file_len = 1;
 int g_iskmsg_ready = 1;
 int g_pollkmsg_en = 0;
-int max_file_len = 1;
-
 int g_is_remountd_system = 0;
-unsigned char log_buffer[FIFO_SIZE];
-unsigned char log_buffer2write[FIFO_SIZE];
-unsigned long flags;
-static struct kfifo log_fifo;
 static struct task_struct *fs_kmsgtask;
-static struct task_struct *filelog_task;
 static struct completion kmsg_wait;
-
 //zone end
 
 
@@ -184,35 +174,6 @@ static int thread_pollkmsg_func(void *data)
     }
     return 1;
 }
-void clearfifo_tofile(void)
-{
-    int fifo_len, ret;
-    spin_lock_irqsave(&fs_lock, flags);
-    fifo_len = kfifo_len(&log_fifo);
-    ret = kfifo_out(&log_fifo, log_buffer2write, fifo_len);
-    log_buffer2write[fifo_len > FIFO_SIZE - 1 ? FIFO_SIZE - 1 : fifo_len] = '\0';
-    spin_unlock_irqrestore(&fs_lock, flags);
-    bfs_file_amend(LIDBG_LOG_FILE_PATH, log_buffer2write);
-}
-static int thread_log_func(void *data)
-{
-    allow_signal(SIGKILL);
-    allow_signal(SIGSTOP);
-    while(!kthread_should_stop())
-    {
-        if(g_clearlogfifo_ms)
-        {
-            msleep(g_clearlogfifo_ms);
-            if(!kfifo_is_empty(&log_fifo))
-            {
-                clearfifo_tofile();
-            }
-        }
-        else
-            ssleep(30);
-    }
-    return 1;
-}
 void cb_kv_pollkmsg(char *key, char *value)
 {
     FS_WARN("<%s=%s>\n", key, value);
@@ -256,7 +217,7 @@ int fs_string2file(char *filename, const char *fmt, ... )
 
     return bfs_file_amend(filename, str_append);
 }
-int fs_file_log( const char *fmt, ... )
+int fs_mem_log( const char *fmt, ... )
 {
     int len;
     va_list args;
@@ -268,18 +229,9 @@ int fs_file_log( const char *fmt, ... )
 
     len = strlen(str_append);
 
-    if(kfifo_is_full(&log_fifo) || kfifo_avail(&log_fifo) < len)
-    {
-        clearfifo_tofile();
-    }
-    spin_lock_irqsave(&fs_lock, flags);
-    kfifo_in(&log_fifo, str_append, len);
-    spin_unlock_irqrestore(&fs_lock, flags);
+    bfs_file_amend(LIDBG_MEM_COMMEN_FILE, str_append);
+
     return 1;
-}
-void fs_log_sync(void)
-{
-    clearfifo_tofile();
 }
 bool fs_upload_machine_log(void)
 {
@@ -307,26 +259,18 @@ void lidbg_fs_log_init(void)
 {
 
     init_completion(&kmsg_wait);
-    spin_lock_init(&fs_lock);
 
-    filelog_task = kthread_run(thread_log_func, NULL, "ftf_clearlogfifo");
+    FS_REGISTER_INT(g_pollkmsg_en, "fs_kmsg_en", 0, cb_kv_pollkmsg);
+    FS_REGISTER_INT(max_file_len, "fs_max_file_len", 1, NULL);
+
     fs_kmsgtask = kthread_run(thread_pollkmsg_func, NULL, "ftf_kmsgtask");
-    kfifo_init(&log_fifo, log_buffer, FIFO_SIZE);
-    kfifo_reset(&log_fifo);
-
-	FS_REGISTER_INT(g_clearlogfifo_ms,"fs_clearlogfifo_ms",30000,NULL);
-	FS_REGISTER_INT(g_pollkmsg_en,"fs_kmsg_en",0,cb_kv_pollkmsg);
-	FS_REGISTER_INT(max_file_len,"fs_max_file_len",1,NULL);
-
 }
 
 EXPORT_SYMBOL(fs_file_separator);
 EXPORT_SYMBOL(fs_dump_kmsg);
 EXPORT_SYMBOL(fs_enable_kmsg);
 EXPORT_SYMBOL(fs_string2file);
-EXPORT_SYMBOL(clearfifo_tofile);
-EXPORT_SYMBOL(fs_file_log);
-EXPORT_SYMBOL(fs_log_sync);
+EXPORT_SYMBOL(fs_mem_log);
 EXPORT_SYMBOL(fs_upload_machine_log);
 EXPORT_SYMBOL(fs_call_apk);
 EXPORT_SYMBOL(fs_remove_apk);

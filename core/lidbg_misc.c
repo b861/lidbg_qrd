@@ -9,41 +9,38 @@ static int reboot_delay_s = 0;
 
 void cb_password_chmod(char *password )
 {
+    fs_mem_log("<called:%s>\n", __func__ );
+
     lidbg_chmod("/system/bin/mount");
     lidbg_mount("/system");
-
     lidbg_chmod("/data");
 }
 void cb_password_upload(char *password )
 {
-    fs_file_log("<called:%s>\n", __func__ );//tmp,del later
+    fs_mem_log("<called:%s>\n", __func__ );
     fs_upload_machine_log();
 }
 void cb_password_call_apk(char *password )
 {
-    fs_file_log("<called:%s>\n", __func__ );//tmp,del later
+    fs_mem_log("<called:%s>\n", __func__ );
     fs_call_apk();
 }
 void cb_password_remove_apk(char *password )
 {
-    fs_file_log("<called:%s>\n", __func__ );//tmp,del later
+    fs_mem_log("<called:%s>\n", __func__ );
     fs_remove_apk();
 }
 void cb_password_clean_all(char *password )
 {
-    fs_file_log("<called:%s>\n", __func__ );//tmp,del later
+    fs_mem_log("<called:%s>\n", __func__ );
     fs_clean_all();
 }
 void cb_password_update(char *password )
 {
     if(fs_is_file_exist("/mnt/usbdisk/out/release"))
     {
-        int ret = -1;
         TE_WARN("<===============UPDATE_INFO =================>\n" );
-        ret = fs_update("/mnt/usbdisk/out/release", "/mnt/usbdisk/out", "/flysystem/lib/out");
-        fs_file_log("<called:%s.%d>\n", __func__ , ret); //tmp,del later
-
-        if( ret >= 0)
+        if( fs_update("/mnt/usbdisk/out/release", "/mnt/usbdisk/out", "/flysystem/lib/out") >= 0)
             lidbg_reboot();
     }
     else
@@ -128,7 +125,7 @@ static int __init lidbg_misc_init(void)
     te_regist_password("001112", cb_password_update);
     te_regist_password("001120", cb_password_gui_kmsg);
     te_regist_password("001121", cb_password_gui_state);
-	
+
     FS_REGISTER_INT(logcat_en, "logcat_en", 0, logcat_lunch);
     FS_REGISTER_INT(reboot_delay_s, "rds", 0, NULL);
 

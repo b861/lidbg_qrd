@@ -3,7 +3,7 @@
 #include "lidbg_fs.h"
 
 //zone below [tools]
-#define FS_VERSION "FS.VERSION:  [20131021]"
+#define FS_VERSION "FS.VERSION:  [20131031]"
 LIST_HEAD(kill_list_test);
 static struct task_struct *fileserver_test_task;
 static struct task_struct *fileserver_test_task2;
@@ -35,7 +35,7 @@ void test_fileserver_stability(void)
     //fs_get_value(&lidbg_core_list, "fs_private_patch", &value);
     //printk("[futengfei]warn.test_fileserver_stability:<value=%s>\n", value);
     lidbg_get_current_time(tbuff, NULL);
-    fs_file_log("%s\n", tbuff);
+    fs_mem_log("%s\n", tbuff);
 
     fs_string2file("/data/fs_string2file.txt", "%s\n", tbuff);
 
@@ -64,7 +64,6 @@ static int thread_fileserver_test(void *data)
     {
         test_fileserver_stability();
         ssleep(1);
-        fs_log_sync();
         //fs_save_list_to_file();
     };
     return 1;
@@ -127,7 +126,6 @@ void lidbg_fileserver_main(int argc, char **argv)
     switch (cmd)
     {
     case 1:
-        fs_log_sync();
         break;
     case 2:
         fs_enable_kmsg(cmd_para);
@@ -142,15 +140,15 @@ void lidbg_fileserver_main(int argc, char **argv)
         fs_save_list_to_file();
         break;
     case 6:
-        bfs_file_amend(LIDBG_LOG_FILE_PATH, "<chmod_for_apk>\n");//tmp,del later
+        bfs_file_amend(LIDBG_MEM_COMMEN_FILE, "<chmod_for_apk>\n");
         chmod_for_apk();
         break;
     case 7:
-        bfs_file_amend(LIDBG_LOG_FILE_PATH, "<fs_upload_machine_log>\n");//tmp,del later
+        bfs_file_amend(LIDBG_MEM_COMMEN_FILE, "<fs_upload_machine_log>\n");
         fs_upload_machine_log();
         break;
     case 8:
-        bfs_file_amend(LIDBG_LOG_FILE_PATH, "<fs_clean_all>\n");//tmp,del later
+        bfs_file_amend(LIDBG_MEM_COMMEN_FILE, "<fs_clean_all>\n");
         fs_clean_all();
         break;
     case 9:
@@ -165,33 +163,51 @@ void lidbg_fileserver_main(int argc, char **argv)
 
 
 //zone below [fileserver]
+bool is_fly_system(void)
+{
+    if(fs_is_file_exist(build_time_fly_path))
+        return true;
+    else
+        return false;
+}
+void copy_all_conf_file(void)
+{
+    if(is_fly_system())
+    {
+        fs_copy_file(build_time_fly_path, build_time_sd_path);
+        fs_copy_file(core_fly_path, core_sd_path);
+        fs_copy_file(driver_fly_path, driver_sd_path) ;
+        fs_copy_file(state_fly_path, state_sd_path);
+        fs_copy_file(cmd_fly_path, cmd_sd_path);
+    }
+    else
+    {
+        fs_copy_file(build_time_lidbg_path, build_time_sd_path);
+        fs_copy_file(core_lidbg_path, core_sd_path);
+        fs_copy_file(driver_lidbg_path, driver_sd_path);
+        fs_copy_file(state_lidbg_path, state_sd_path);
+        fs_copy_file(cmd_lidbg_path, cmd_sd_path);
+    }
+}
+void check_conf_file(void)
+{
+
+    if(fs_is_file_updated(build_time_fly_path, PRE_CONF_INFO_FILE)||(!fs_is_file_exist(driver_sd_path) || !fs_is_file_exist(core_sd_path) || !fs_is_file_exist(state_sd_path)))
+    {
+        FS_WARN("<overwrite:push,update?>\n");
+        copy_all_conf_file();
+    }
+
+}
+
 void lidbg_fileserver_main_prepare(void)
 {
 
     FS_WARN("<%s>\n", FS_VERSION);
     set_machine_id();
-    FS_WARN("machine_id:%d\n", get_machine_id());//sdve to uart
+    FS_WARN("machine_id:%d\n", get_machine_id());
 
-    if(fs_is_file_exist(core_fly_path))
-    {
-        fs_copy_file(build_time_fly_path, build_time_sd_path);
-        check_conf_file(core_fly_path);
-    }
-    else
-    {
-        fs_copy_file(build_time_lidbg_path, build_time_sd_path);
-        check_conf_file(core_lidbg_path);
-    }
-
-#if (defined(BOARD_V1) || defined(BOARD_V2))
-    if(!fs_is_file_exist(driver_sd_path) || !fs_is_file_exist(core_sd_path) || !fs_is_file_exist(state_sd_path) || !fs_is_file_exist("/flysystem/lib/hw/gps.msm7627a.so"))
-#else
-    if(!fs_is_file_exist(driver_sd_path) || !fs_is_file_exist(core_sd_path) || !fs_is_file_exist(state_sd_path) || !fs_is_file_exist("/flysystem/lib/hw/gps.msm8625.so"))
-#endif
-    {
-        FS_WARN("<overwrite all conf:conf miss>\n");
-        copy_all_conf_file();
-    }
+    check_conf_file();
 
     fs_fill_list(driver_sd_path, FS_CMD_FILE_CONFIGMODE, &lidbg_drivers_list);
     fs_fill_list(core_sd_path, FS_CMD_FILE_CONFIGMODE, &lidbg_core_list);
@@ -200,11 +216,8 @@ void lidbg_fileserver_main_prepare(void)
 }
 void lidbg_fileserver_main_init(void)
 {
-    char tbuff[100];
-    lidbg_get_current_time(tbuff, NULL);
-    fs_file_log("current_time:%s\n", tbuff);
-    fs_string2file(MEM_FILE_VERSION, "%s\n", FS_VERSION );
     fs_get_intvalue(&lidbg_core_list, "fs_mem_dbg", &g_mem_dbg, NULL);
+    fs_string2file(LIDBG_MEM_COMMEN_FILE, "%s\n", FS_VERSION );
 }
 //zone end
 

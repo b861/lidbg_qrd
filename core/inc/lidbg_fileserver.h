@@ -14,6 +14,7 @@ update log:
 	7:[20130930]/add update ko from usb or sdcard;
 	8:[20131011]/fs_fill_list,mf open file mode:O_RDONLY
 	9:[20131016]/add linux usb event;
+	10:[20131031]/change structure
 */
 
 //zone start
@@ -41,17 +42,21 @@ struct string_dev
     char *yourvalue;
     char *filedetec;
     int *int_value;
-    bool have_warned;
+    bool is_warned;
     void (*callback)(char *key, char *value);
     void (*cb_filedetec)(char *filename );
 };
-#define MEM_FILE_VERSION "/dev/log/lidbg_version.txt"
+
+#define LIDBG_MEM_COMMEN_FILE "/dev/log/lidbg_commen_file.txt"
+#define PRE_CONF_INFO_FILE "/data/conf_info.txt"
+#define build_time_sd_path "/data/build_time.txt"
+#define build_time_fly_path "/flysystem/lib/out/build_time.conf"
+#define build_time_lidbg_path "/system/lib/modules/out/build_time.conf"
 extern void lidbg_fileserver_main(int argc, char **argv);
 extern void fs_file_separator(char *file2separator);
 extern void fs_regist_filedetec(char *filename, void (*cb_filedetec)(char *filename ));
 extern void fs_enable_kmsg( bool enable );
 extern void fs_save_state(void);
-extern void fs_log_sync(void);
 extern int  lidbg_cp(char from[], char to[]);
 extern int get_machine_id(void);
 extern int fs_get_file_content(char *file, char *rbuff, int readlen);
@@ -64,9 +69,12 @@ extern int fs_set_value(struct list_head *client_list, char *key, char *string);
 extern int fs_find_string(struct list_head *client_list, char *string);
 extern int fs_string2file(char *filename, const char *fmt, ... );
 extern int fs_show_list(struct list_head *client_list);
-extern int fs_file_log( const char *fmt, ...);
+extern int fs_mem_log( const char *fmt, ...);
 extern int fs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *client_list);
+extern bool is_fly_system(void);
+extern bool fs_clear_file(char *filename);
 extern bool fs_is_file_exist(char *file);
+extern bool fs_is_file_updated(char *filename, char *infofile);
 extern bool fs_copy_file(char *from, char *to);
 extern bool fs_upload_machine_log(void);
 extern void fs_remount_system(void);
@@ -93,11 +101,11 @@ extern struct list_head lidbg_core_list;
 								}while(0)
 
 
-#define lidbg_fs(fmt,...) do{	char buf[32];\
+#define lidbg_fs_mem(fmt,...) do{	char buf[32];\
 								printk_fs(fmt,##__VA_ARGS__);\
 								lidbg_get_current_time(buf,NULL);\
-								fs_file_log("[%s] ",buf);\
-								fs_file_log(fmt,##__VA_ARGS__);\
+								fs_mem_log("[%s] ",buf);\
+								fs_mem_log(fmt,##__VA_ARGS__);\
 								}while(0)
 
 #define FS_REGISTER_INT(intvalue,key,def_value,callback) intvalue=def_value; \
