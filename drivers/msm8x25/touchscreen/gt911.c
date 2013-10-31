@@ -1108,7 +1108,7 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     GTP_INFO("GTP Driver Version:%s",GTP_DRIVER_VERSION);
     GTP_INFO("GTP Driver build@%s,%s", __TIME__,__DATE__);
     GTP_INFO("GTP I2C Address:0x%02x", client->addr);
-    spin_lock_init(&ts->irq_lock);
+   
     i2c_connect_client = client;
     if (!i2c_check_functionality(client->adapter, I2C_FUNC_I2C)) 
     {
@@ -1135,6 +1135,7 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     //ts->irq_lock = SPIN_LOCK_UNLOCKED;
     //DEFINE_SPINLOCK(ts->irq_lock);
     //spin_lock_init(&ts->irq_lock);
+     spin_lock_init(&ts->irq_lock);
     ts->gtp_rawdiff_mode = 0;
 
     ret = gtp_request_io_port(ts);
