@@ -10,6 +10,7 @@ char *insmod_list[] =
 	SOC_KO,
 	"lidbg_common.ko",
 	"lidbg_fileserver.ko",
+	"lidbg_wakelock_stat.ko",
     "lidbg_msg.ko",
 	"lidbg_servicer.ko",
 	"lidbg_touch.ko",

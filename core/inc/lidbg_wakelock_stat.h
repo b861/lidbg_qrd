@@ -9,6 +9,7 @@ struct wakelock_item
     int cunt_max;
 };
 
+extern struct list_head lidbg_wakelock_list;
 void lidbg_wakelock_stat(int argc, char **argv);
 void lidbg_show_wakelock(void);
 

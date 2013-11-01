@@ -12,6 +12,7 @@ lidbg_ad.ko
 lidbg_i2c_gpio.ko
 lidbg_main.ko
 lidbg_misc.ko
+lidbg_wakelock_stat.ko
 core.conf
 cmd.conf
 build_time.conf

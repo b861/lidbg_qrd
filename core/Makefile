@@ -20,13 +20,14 @@ obj-m	+= lidbg_touch.o
 obj-m	+= lidbg_misc.o
 obj-m	+= lidbg_fileserver.o
 obj-m	+= lidbg_common.o
+obj-m	+= lidbg_wakelock_stat.o
 obj-m	+= lidbg_servicer.o
 obj-m	+= lidbg_msg.o
 obj-m	+= lidbg_main.o
 obj-m	+= lidbg_loader.o
 
 lidbg_touch-objs :=  lidbg_ts.o lidbg_ts_event.o
-lidbg_common-objs :=  lidbg_cmn.o  lidbg_mem.o lidbg_display.o lidbg_notifier.o lidbg_wakelock_stat.o
+lidbg_common-objs :=  lidbg_cmn.o  lidbg_mem.o lidbg_display.o lidbg_notifier.o
 lidbg_fileserver-objs :=  lidbg_fileserver_main.o lidbg_fs_cmn.o lidbg_fs_keyvalue.o lidbg_fs_update.o lidbg_fs_log.o lidbg_fs_conf.o
 lidbg_main-objs := lidbg.o 
 lidbg_i2c_gpio-objs := i2c-algo-bit.o i2c-gpio.o
