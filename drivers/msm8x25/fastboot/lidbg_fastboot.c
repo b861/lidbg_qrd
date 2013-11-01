@@ -187,6 +187,19 @@ void set_cpu_governor(int state)
 	lidbg_readwrite_file("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor", NULL, buf, len);
 }
 
+void wakelock_stat(int lock,char* name)
+{
+	char buf[64];
+	int len=-1;
+	if(lock)
+		len = sprintf(buf, "c wakelock lock %s",name);
+	else
+		len = sprintf(buf, "c wakelock unlock %s",name);
+		
+	lidbg_readwrite_file("/dev/mlidbg0", NULL, buf, len);
+
+}
+
 
 static int pc_clk_is_enabled(int id)
 {
@@ -205,13 +218,48 @@ int check_all_clk_disable(void)
 	{
 		if (pc_clk_is_enabled(i))
 		{
-		 	lidbg("pc_clk_is_enabled:%d\n", i);		 	
+		 	lidbg("pc_clk_is_enabled:%3d\n", i);		 	
 			ret++;
 		}
 		i--;
 	}
 	return ret;
 }
+int safe_clk[] ={105,103,102,95,51,31,16,15,12,8,4,3,1};
+
+bool find_unsafe_clk(void)
+{
+	int j,i=P_NR_CLKS-1;
+	int ret = 0;
+	bool is_safe = 0;
+	DUMP_FUN;
+	while(i>=0)
+	{
+		if (pc_clk_is_enabled(i))
+		{
+			is_safe = 0;
+			for(j = 0; j < sizeof(safe_clk); j++)
+			{
+				if(i == safe_clk[j] )
+				{	
+					is_safe = 1;
+					break;
+				}
+			}	
+			if(is_safe == 0)
+			{
+				lidbg_fs_log(FASTBOOT_LOG_PATH,"find unsafe clk:%d\n",i);
+				ret = 1;
+				return ret;
+			}
+		}
+		i--;
+	}
+	return ret;
+
+}
+
+
 
 int check_clk_disable(void)
 {
@@ -237,10 +285,21 @@ int check_clk_disable(void)
 		lidbg_fs_log(FASTBOOT_LOG_PATH,"clk:%d\n",P_ADSP_CLK);
 		ret = 1;
 	}
+
+
+	if(pc_clk_is_enabled(P_UART3_CLK))
+	{
+		lidbg("find clk:%d\n",P_UART3_CLK);
+		lidbg_fs_log(FASTBOOT_LOG_PATH,"clk:%d\n",P_UART3_CLK);
+		ret = 1;
+	}
+	
 	DUMP_FUN_LEAVE;
 	return ret;
 	
 }
+
+
 
 int fastboot_task_kill_select(char *task_name)
 {
@@ -517,7 +576,7 @@ static int thread_fastboot_suspend(void *data)
 					if(fb_data->kill_task_en)
 						fastboot_task_kill_exclude(NULL);
 					
-					if(fb_data->clk_block_suspend)
+					if((fb_data->clk_block_suspend)&&(wakelock_occur_count < 5 ))
 					{
 						lidbg("some clk block suspend!\n");
 						fb_data->is_quick_resume = 1;
@@ -527,7 +586,7 @@ static int thread_fastboot_suspend(void *data)
 #if (defined(BOARD_V1) || defined(BOARD_V2))
 #else		
 					list_active_locks();			
-					if(fb_data->has_wakelock_can_not_ignore)
+					if((fb_data->has_wakelock_can_not_ignore)&&(wakelock_occur_count < 5 ))
 					{
 #if 0					
 						fast6boot_task_kill_select(".flyaudio.media");
@@ -562,6 +621,9 @@ static int thread_fastboot_suspend(void *data)
                         }
                         wakelock_occur_count++;
                         lidbg("wakelock_occur_count=%d\n", wakelock_occur_count);
+						
+						lidbg_show_wakelock();
+						
                         if(wakelock_occur_count <= /*WAIT_LOCK_RESUME_TIMES*/fb_data->haslock_resume_times)
                         {
 							fb_data->is_quick_resume = 1;
@@ -809,12 +871,13 @@ static void fastboot_early_suspend(struct early_suspend *h)
 #if 0 //for test
     ignore_wakelock = 1;
 #endif
-#if (defined(BOARD_V1) || defined(BOARD_V2))
+#if 0//(defined(BOARD_V1) || defined(BOARD_V2))
 	fb_data->clk_block_suspend = 0;
 	wake_unlock(&(fb_data->flywakelock));
 #else
 
-   if(check_clk_disable())
+   //if(check_clk_disable())
+   if(find_unsafe_clk())
    {
 	   fb_data->clk_block_suspend = 1;
    }

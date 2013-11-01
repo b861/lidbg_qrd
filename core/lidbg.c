@@ -39,6 +39,8 @@ struct class *my_class;
 
 static int lidbg_major = LIDBG_MAJOR;
 
+static int  debug_mask = 0;
+module_param_named(debug_mask, debug_mask, int, 0644 );
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,36)
 DECLARE_MUTEX(lidbg_lock);
@@ -50,7 +52,7 @@ DEFINE_SEMAPHORE(lidbg_lock);
 /*文件打开函数*/
 int lidbg_open(struct inode *inode, struct file *filp)
 {
-    DUMP_FUN;
+    if(debug_mask) DUMP_FUN;
     /*将设备结构体指针赋值给文件私有数据指针*/
     filp->private_data = (struct lidbg_dev *)global_lidbg_devp;
     if (filp->f_flags & O_NONBLOCK)
@@ -70,7 +72,7 @@ int lidbg_open(struct inode *inode, struct file *filp)
 /*文件释放函数*/
 int lidbg_release(struct inode *inode, struct file *filp)
 {
-    DUMP_FUN;
+    if(debug_mask) DUMP_FUN;
     up(&lidbg_lock);
     return 0;
 }

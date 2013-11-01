@@ -26,14 +26,16 @@ void parse_cmd(char *pt)
     argv[argc] = NULL;
 
     i = 0;
-    lidbg("cmd:");
-    while(i < argc)
-    {
-        printk("%s ", argv[i]);
-        i++;
-    }
-    printk("\n");
-
+	if(debug_mask)
+	{
+	    lidbg("cmd:");
+	    while(i < argc)
+	    {
+	        printk("%s ", argv[i]);
+	        i++;
+	    }
+	    printk("\n");
+	}
     // ½âÎöÃüÁî
 
     // µ÷ÓÃÆäËûÄ£¿éµÄº¯Êý
