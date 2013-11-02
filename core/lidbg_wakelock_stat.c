@@ -97,7 +97,7 @@ bool unregister_wakelock(char *name)
 
 void lidbg_show_wakelock(void)
 {
-    int count = 0;
+    int index = 0;
     struct wakelock_item *pos;
     struct list_head *client_list = &lidbg_wakelock_list;
 
@@ -107,9 +107,12 @@ void lidbg_show_wakelock(void)
     {
         if (pos->name)
         {
-            count++;
-            lidbg("<%d.INFO%d:[%s].%d,%d>\n", pos->cunt, count, pos->name, pos->is_count_wakelock, pos->cunt_max);
+            index++;
+            lidbg("<%d.INFO%d:[%s].%d,%d>\n", pos->cunt, index, pos->name, pos->is_count_wakelock, pos->cunt_max);
         }
+		#define FASTBOOT_LOG_PATH "/data/log_fb.txt"
+		if(pos->cunt != 0)
+			lidbg_fs_log(FASTBOOT_LOG_PATH,"active wake lock %s\n", pos->name);
     }
 }
 
