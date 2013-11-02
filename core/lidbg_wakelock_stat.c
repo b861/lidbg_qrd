@@ -20,7 +20,7 @@ struct wakelock_item *get_wakelock_item(char *name)
     }
     return NULL;
 }
-bool new_wakelock_item(char *name)
+bool new_wakelock_item(char *wakelock_type, char *name)
 {
     struct wakelock_item *add_new_item;
     struct list_head *client_list = &lidbg_wakelock_list;
@@ -38,6 +38,10 @@ bool new_wakelock_item(char *name)
     memcpy(add_new_item->name, name, strlen(name));
     add_new_item->cunt++;
     add_new_item->cunt_max++;
+    if(!strcmp(wakelock_type, "count"))
+        add_new_item->is_count_wakelock = true;
+    else
+        add_new_item->is_count_wakelock = false;
 
     spin_lock_irqsave(&new_item_lock, flags);
     list_add(&(add_new_item->tmp_list), client_list);
@@ -49,7 +53,7 @@ bool new_wakelock_item(char *name)
 }
 
 
-bool register_wakelock(char *name)
+bool register_wakelock(char *wakelock_type, char *name)
 {
     struct wakelock_item *wakelock_pos = get_wakelock_item(name);
     if(wakelock_pos)
@@ -61,7 +65,7 @@ bool register_wakelock(char *name)
         return true;
     }
     else
-        return new_wakelock_item(name);
+        return new_wakelock_item(wakelock_type, name);
 }
 
 bool unregister_wakelock(char *name)
@@ -69,8 +73,15 @@ bool unregister_wakelock(char *name)
     struct wakelock_item *wakelock_pos = get_wakelock_item(name);
     if(wakelock_pos)
     {
-        if(wakelock_pos->cunt > 0)
-            wakelock_pos->cunt--;
+
+        if(wakelock_pos->is_count_wakelock)
+        {
+            if(wakelock_pos->cunt > 0)
+                wakelock_pos->cunt--;
+        }
+        else
+            wakelock_pos->cunt = 0;
+
         if(g_wakelock_dbg)
             lidbg("<RDC:%d[%s],%d>\n", wakelock_pos->cunt, wakelock_pos->name,  wakelock_pos->cunt_max);
         return true;
@@ -97,7 +108,7 @@ void lidbg_show_wakelock(void)
         if (pos->name)
         {
             count++;
-            lidbg("<%d.INFO%d:[%s],%d>\n", pos->cunt, count, pos->name, pos->cunt_max);
+            lidbg("<%d.INFO%d:[%s].%d,%d>\n", pos->cunt, count, pos->name, pos->is_count_wakelock, pos->cunt_max);
         }
     }
 }
@@ -106,22 +117,24 @@ void lidbg_show_wakelock(void)
 void lidbg_wakelock_stat(int argc, char **argv)
 {
 
+    char *wakelock_action = NULL;
     char *wakelock_type = NULL;
     char *wakelock_name = NULL;
-    if(argc < 2)
+    if(argc < 3)
     {
-        printk("[futengfei]err.lidbg_wakelock_stat:echo \"c wakelock lock name\" > /dev/mlidbg0\n");
+        printk("[futengfei]err.lidbg_wakelock_stat:echo \"c wakelock lock count name\" > /dev/mlidbg0\n");
         return;
     }
 
-    wakelock_type = argv[0];
-    wakelock_name = argv[1];
+    wakelock_action = argv[0];
+    wakelock_type = argv[1];
+    wakelock_name = argv[2];
 
-    if (!strcmp(wakelock_type, "lock"))
-        register_wakelock(wakelock_name);
-    else if (!strcmp(wakelock_type, "unlock"))
+    if (!strcmp(wakelock_action, "lock"))
+        register_wakelock(wakelock_type, wakelock_name);
+    else if (!strcmp(wakelock_action, "unlock"))
         unregister_wakelock(wakelock_name);
-    else if (!strcmp(wakelock_type, "show"))
+    else if (!strcmp(wakelock_action, "show"))
         lidbg_show_wakelock();
 
 }

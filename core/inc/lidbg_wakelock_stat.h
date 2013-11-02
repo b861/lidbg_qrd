@@ -7,6 +7,7 @@ struct wakelock_item
     char *name;
     int cunt;
     int cunt_max;
+    bool is_count_wakelock;
 };
 
 extern struct list_head lidbg_wakelock_list;
