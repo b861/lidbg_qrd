@@ -1,13 +1,16 @@
 #include "lidbg.h"
 
 
+#define WL_COUNT_TYPE "count"
+#define WL_UNCOUNT_TYPE "uncount"
+
 LIST_HEAD(lidbg_wakelock_list);
 static spinlock_t  new_item_lock;
 static int g_wakelock_dbg = 0;
 
 
 
-struct wakelock_item *get_wakelock_item(char *name)
+struct wakelock_item *get_wakelock_item(const char *name)
 {
     struct wakelock_item *pos;
     struct list_head *client_list = &lidbg_wakelock_list;
@@ -20,7 +23,7 @@ struct wakelock_item *get_wakelock_item(char *name)
     }
     return NULL;
 }
-bool new_wakelock_item(char *wakelock_type, char *name)
+bool new_wakelock_item(bool cnt_wakelock,const char *name)
 {
     struct wakelock_item *add_new_item;
     struct list_head *client_list = &lidbg_wakelock_list;
@@ -38,22 +41,18 @@ bool new_wakelock_item(char *wakelock_type, char *name)
     memcpy(add_new_item->name, name, strlen(name));
     add_new_item->cunt++;
     add_new_item->cunt_max++;
-    if(!strcmp(wakelock_type, "count"))
-        add_new_item->is_count_wakelock = true;
-    else
-        add_new_item->is_count_wakelock = false;
+    add_new_item->is_count_wakelock = cnt_wakelock;
 
     spin_lock_irqsave(&new_item_lock, flags);
     list_add(&(add_new_item->tmp_list), client_list);
     spin_unlock_irqrestore(&new_item_lock, flags);
-
-    if(g_wakelock_dbg)
-        lidbg("<NEW:[%s]>\n", add_new_item->name);
+	//if(g_wakelock_dbg)
+	lidbg("<NEW:[%s]>\n", add_new_item->name);
     return true;
 }
 
 
-bool register_wakelock(char *wakelock_type, char *name)
+bool register_wakelock(bool cnt_wakelock, const char *name)
 {
     struct wakelock_item *wakelock_pos = get_wakelock_item(name);
     if(wakelock_pos)
@@ -65,12 +64,13 @@ bool register_wakelock(char *wakelock_type, char *name)
         return true;
     }
     else
-        return new_wakelock_item(wakelock_type, name);
+        return new_wakelock_item(cnt_wakelock, name);
 }
 
-bool unregister_wakelock(char *name)
+bool unregister_wakelock(const char *name)
 {
     struct wakelock_item *wakelock_pos = get_wakelock_item(name);
+	
     if(wakelock_pos)
     {
 
@@ -83,14 +83,21 @@ bool unregister_wakelock(char *name)
             wakelock_pos->cunt = 0;
 
         if(g_wakelock_dbg)
-            lidbg("<RDC:%d[%s],%d>\n", wakelock_pos->cunt, wakelock_pos->name,  wakelock_pos->cunt_max);
+            lidbg("<DEL:%d[%s],%d>\n", wakelock_pos->cunt, wakelock_pos->name,  wakelock_pos->cunt_max);
         return true;
     }
     else
     {
         //can't find the wakelock? show the wakelock list.
-        lidbg("<===============WAKELOCK_LIST=================>\n");
-        lidbg_show_wakelock();
+		if(g_wakelock_dbg)
+		{
+			struct list_head *client_list = &lidbg_wakelock_list;
+			if(!list_empty(client_list))
+			{
+					lidbg("<===============WAKELOCK_LIST=================%s>\n",name);
+					lidbg_show_wakelock();
+			}
+		}
         return false;
     }
 }
@@ -108,11 +115,8 @@ void lidbg_show_wakelock(void)
         if (pos->name)
         {
             index++;
-            lidbg("<%d.INFO%d:[%s].%d,%d>\n", pos->cunt, index, pos->name, pos->is_count_wakelock, pos->cunt_max);
+            lidbg("<%d.INFO%d:[%s],%d,%d>\n", pos->cunt, index, pos->name, pos->is_count_wakelock, pos->cunt_max);
         }
-		#define FASTBOOT_LOG_PATH "/data/log_fb.txt"
-		if(pos->cunt != 0)
-			lidbg_fs_log(FASTBOOT_LOG_PATH,"active wake lock %s\n", pos->name);
     }
 }
 
@@ -123,6 +127,7 @@ void lidbg_wakelock_stat(int argc, char **argv)
     char *wakelock_action = NULL;
     char *wakelock_type = NULL;
     char *wakelock_name = NULL;
+	bool is_count_wakelock = false;
     if(argc < 3)
     {
         printk("[futengfei]err.lidbg_wakelock_stat:echo \"c wakelock lock count name\" > /dev/mlidbg0\n");
@@ -132,16 +137,32 @@ void lidbg_wakelock_stat(int argc, char **argv)
     wakelock_action = argv[0];
     wakelock_type = argv[1];
     wakelock_name = argv[2];
+	
+	if(!strcmp(wakelock_type, WL_COUNT_TYPE))
+		is_count_wakelock=true;
 
     if (!strcmp(wakelock_action, "lock"))
-        register_wakelock(wakelock_type, wakelock_name);
+        register_wakelock(is_count_wakelock, wakelock_name);
     else if (!strcmp(wakelock_action, "unlock"))
         unregister_wakelock(wakelock_name);
     else if (!strcmp(wakelock_action, "show"))
         lidbg_show_wakelock();
 
 }
+void lidbg_wakelock_register(bool to_lock, const char*name)
+{
+	if(g_wakelock_dbg)
+		lidbg("<lidbg_wakelock_register:[%d][%s]>\n",to_lock, name);
 
+	if(to_lock)
+	{
+		register_wakelock(false, name);
+	}
+	else
+	{
+		unregister_wakelock(name);
+	}
+}
 
 void cb_kv_show_list(char *key, char *value)
 {
@@ -168,8 +189,9 @@ MODULE_DESCRIPTION("wakelock.stat");
 MODULE_LICENSE("GPL");
 
 
-EXPORT_SYMBOL(lidbg_wakelock_stat_init);
+EXPORT_SYMBOL(lidbg_wakelock_list);
 EXPORT_SYMBOL(lidbg_wakelock_stat);
 EXPORT_SYMBOL(lidbg_show_wakelock);
+EXPORT_SYMBOL(lidbg_wakelock_register);
 
 

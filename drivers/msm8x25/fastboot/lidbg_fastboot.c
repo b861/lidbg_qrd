@@ -187,17 +187,42 @@ void set_cpu_governor(int state)
 	lidbg_readwrite_file("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor", NULL, buf, len);
 }
 
-void wakelock_stat(int lock,char* name)
+void wakelock_stat(int lock,const char* name)
 {
+#if 0
 	char buf[64];
 	int len=-1;
 	if(lock)
-		len = sprintf(buf, "c wakelock lock %s",name);
+		len = sprintf(buf, "c wakelock lock uncount %s",name);
 	else
-		len = sprintf(buf, "c wakelock unlock %s",name);
+		len = sprintf(buf, "c wakelock unlock uncount %s",name);
 		
 	lidbg_readwrite_file("/dev/mlidbg0", NULL, buf, len);
 
+#else
+	lidbg_wakelock_register(lock,name);
+#endif
+}
+
+void show_wakelock(void)
+{
+    int index = 0;
+    struct wakelock_item *pos;
+    struct list_head *client_list = &lidbg_wakelock_list;
+
+    if(list_empty(client_list))
+        lidbg("<err.lidbg_show_wakelock:nobody_register>\n");
+    list_for_each_entry(pos, client_list, tmp_list)
+    {
+        if (pos->name)
+        {
+            index++;
+            lidbg("<%d.INFO%d:[%s].%d,%d>\n", pos->cunt, index, pos->name, pos->is_count_wakelock, pos->cunt_max);
+        }
+		#define FASTBOOT_LOG_PATH "/data/log_fb.txt"
+		if(pos->cunt != 0)
+			lidbg_fs_log(FASTBOOT_LOG_PATH,"active wake lock %s\n", pos->name);
+    }
 }
 
 
@@ -622,7 +647,7 @@ static int thread_fastboot_suspend(void *data)
                         wakelock_occur_count++;
                         lidbg("wakelock_occur_count=%d\n", wakelock_occur_count);
 						
-						lidbg_show_wakelock();
+						show_wakelock();
 						
                         if(wakelock_occur_count <= /*WAIT_LOCK_RESUME_TIMES*/fb_data->haslock_resume_times)
                         {
@@ -842,6 +867,7 @@ static void set_func_tbl(void)
 	
     plidbg_dev->soc_func_tbl.pfnSOC_Get_WakeLock = fastboot_get_wake_locks;
 	
+    plidbg_dev->soc_func_tbl.pfnSOC_WakeLock_Stat = wakelock_stat;
 }
 
 #ifdef CONFIG_HAS_EARLYSUSPEND

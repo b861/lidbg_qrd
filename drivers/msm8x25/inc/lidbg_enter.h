@@ -329,6 +329,8 @@ struct lidbg_fn_t
 	int (*pfnSOC_Get_CpuFreq)(void);
 
 	void (*pfnSOC_LCD_Reset)(void);
+	
+	void (*pfnSOC_WakeLock_Stat)(int lock,const char* name);
 };
 
 struct lidbg_pvar_t

@@ -52,7 +52,10 @@ DEFINE_SEMAPHORE(lidbg_lock);
 /*文件打开函数*/
 int lidbg_open(struct inode *inode, struct file *filp)
 {
+
     if(debug_mask) DUMP_FUN;
+#if 0
+
     /*将设备结构体指针赋值给文件私有数据指针*/
     filp->private_data = (struct lidbg_dev *)global_lidbg_devp;
     if (filp->f_flags & O_NONBLOCK)
@@ -65,6 +68,7 @@ int lidbg_open(struct inode *inode, struct file *filp)
     {
         down(&lidbg_lock);
     }
+#endif
     return 0;
 }
 
@@ -73,7 +77,9 @@ int lidbg_open(struct inode *inode, struct file *filp)
 int lidbg_release(struct inode *inode, struct file *filp)
 {
     if(debug_mask) DUMP_FUN;
+#if 0	
     up(&lidbg_lock);
+#endif
     return 0;
 }
 
@@ -130,6 +136,7 @@ static ssize_t lidbg_read(struct file *filp, char __user *buf, size_t size,
 static ssize_t lidbg_write(struct file *filp, const char __user *buf,
                            size_t size, loff_t *ppos)
 {
+#if 0
     struct lidbg_dev *dev = filp->private_data; /*获得设备结构体指针*/
     memset(dev->mem, '\0', LIDBG_SIZE);
 
@@ -138,7 +145,30 @@ static ssize_t lidbg_write(struct file *filp, const char __user *buf,
     	{
         printk("copy_from_user ERR\n");
 	}
+	
 	parse_cmd(dev->mem);
+#else
+
+	char *mem = NULL;
+	mem = (char *)kmalloc(size+1,GFP_KERNEL);//size+1 for '\0'
+	if (mem == NULL)
+    {
+        lidbg("lidbg_write kmalloc err\n");
+        return 0;
+    }
+	memset(mem, '\0', size+1);
+
+	/*用户空间->内核空间*/
+	if(copy_from_user(mem, buf, size))
+	{
+		printk("copy_from_user ERR\n");
+	}
+	
+	//lidbg("size:%d,%s\n",size,mem);
+	parse_cmd(mem);
+	kfree(mem);
+#endif
+
     return size;//若不为size则重复执行
 }
 
