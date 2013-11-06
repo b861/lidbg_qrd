@@ -508,8 +508,8 @@ int pwroff_proc(char *buf, char **start, off_t offset, int count, int *eof, void
 {
 	DUMP_FUN_ENTER;
     if(PM_STATUS_LATE_RESUME_OK == fastboot_get_status())
-       // fastboot_pwroff();
-       list_active_locks();
+        fastboot_pwroff();
+       //list_active_locks();
     return 0;
 }
 
