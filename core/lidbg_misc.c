@@ -127,7 +127,7 @@ static int __init lidbg_misc_init(void)
     te_regist_password("001121", cb_password_gui_state);
 
     FS_REGISTER_INT(logcat_en, "logcat_en", 0, logcat_lunch);
-    FS_REGISTER_INT(reboot_delay_s, "rds", 0, NULL);
+    FS_REGISTER_INT(reboot_delay_s, "reboot_delay_s", 0, NULL);
 
     udisk_update_task = kthread_run(thread_udisk_update, NULL, "ftf_te_update");
 

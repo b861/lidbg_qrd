@@ -961,7 +961,7 @@ int dev_init(void)
     LIDBG_GET;
     set_func_tbl();
 	
-    fs_regist_state("ct", &(g_var.temp));
+    fs_regist_state("cpu_temp", &(g_var.temp));
 	FS_REGISTER_INT(lcd_reset_en,"lcd_reset",0,lcd_reset);
 
 #if 0

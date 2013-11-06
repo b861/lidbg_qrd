@@ -221,7 +221,7 @@ void show_wakelock(void)
         }
 		#define FASTBOOT_LOG_PATH "/data/log_fb.txt"
 		if(pos->cunt != 0)
-			lidbg_fs_log(FASTBOOT_LOG_PATH,"active wake lock %s\n", pos->name);
+			lidbg_fs_log(FASTBOOT_LOG_PATH,"block wakelock %s\n", pos->name);
     }
 }
 
@@ -273,7 +273,7 @@ bool find_unsafe_clk(void)
 			}	
 			if(is_safe == 0)
 			{
-				lidbg_fs_log(FASTBOOT_LOG_PATH,"find unsafe clk:%d\n",i);
+				lidbg_fs_log(FASTBOOT_LOG_PATH,"block unsafe clk:%d\n",i);
 				ret = 1;
 				return ret;
 			}
@@ -653,7 +653,7 @@ static int thread_fastboot_suspend(void *data)
                         {
 							fb_data->is_quick_resume = 1;
 							set_power_state(1);
-							lidbg_fs_log(FASTBOOT_LOG_PATH,"-\n");
+							lidbg_fs_log(FASTBOOT_LOG_PATH,"quick resume\n");
                         }
                         else
 #endif
@@ -665,7 +665,7 @@ static int thread_fastboot_suspend(void *data)
 #endif
 							//log_active_locks();
 							fs_dump_kmsg((char *)__FUNCTION__,__LOG_BUF_LEN);
-							lidbg_fs_log(FASTBOOT_LOG_PATH,"*\n");
+							lidbg_fs_log(FASTBOOT_LOG_PATH,"force suspend\n");
 							wakelock_occur_count = 0;
                             if(fastboot_get_status() == PM_STATUS_EARLY_SUSPEND_PENDING)
                             {
@@ -980,7 +980,7 @@ static int  fastboot_probe(struct platform_device *pdev)
 #endif
 
 
-    fs_regist_state("ats", (int*)&fb_data->resume_count);
+    fs_regist_state("acc_times", (int*)&fb_data->resume_count);
 	FS_REGISTER_INT(fb_data->kill_task_en,"kill_task_en",1,NULL);
 	FS_REGISTER_INT(fb_data->kill_all_task,"kill_all_task",0,kill_all_task);
 	FS_REGISTER_INT(fb_data->haslock_resume_times,"haslock_resume_times",0,NULL);
