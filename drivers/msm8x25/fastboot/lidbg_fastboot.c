@@ -604,6 +604,7 @@ static int thread_fastboot_suspend(void *data)
 					if((fb_data->clk_block_suspend)&&(wakelock_occur_count < 5 ))
 					{
 						lidbg("some clk block suspend!\n");
+						wakelock_occur_count++;
 						fb_data->is_quick_resume = 1;
 						set_power_state(1);
 						break;
@@ -618,6 +619,7 @@ static int thread_fastboot_suspend(void *data)
 						//fastboot_task_kill_select("d.process.media");
 #else					
 						lidbg("some wakelock block suspend!\n");
+						wakelock_occur_count++;
 						fb_data->is_quick_resume = 1;
 						set_power_state(1);
 						break;
