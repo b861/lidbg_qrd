@@ -250,7 +250,7 @@ int check_all_clk_disable(void)
 	}
 	return ret;
 }
-int safe_clk[] ={105,103,102,95,51,31,16,15,12,8,4,3,1};
+int safe_clk[] = {113,105,103,102,95,51,31,16,15,12,8,4,3,1};
 
 bool find_unsafe_clk(void)
 {
@@ -1049,6 +1049,7 @@ static int  fastboot_probe(struct platform_device *pdev)
 
     lidbg_chmod("/sys/power/state");
 	
+    te_regist_password("001200", fastboot_pwroff);
     DUMP_FUN_LEAVE;
 
     return 0;
