@@ -78,7 +78,11 @@ void ts_scan(void)
 				else
 					printk("[futengfei]=======================TS.XY will normal\n");
 			}
-			
+			if (!strcmp(ts_probe_dev[i].name, "gt801.ko"))
+			{
+				lidbg_insmod("/system/lib/modules/out/gt80x_update.ko");
+				lidbg_insmod("/flysystem/lib/out/gt80x_update.ko");
+			}
 	        break;
         }
     }
