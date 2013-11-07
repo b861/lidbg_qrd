@@ -13,12 +13,12 @@ int SOC_Get_CpuFreq(void);
 
 char *insmod_list[] =
 {
+	 "lidbg_lpc.ko",
 #if (defined(BOARD_V2)||defined(BOARD_V3))
         "lidbg_fastboot.ko",
 #else
 	"lidbg_acc.ko",
 #endif
-        "lidbg_lpc.ko",
 	"lidbg_devices.ko",
 	"lidbg_bpmsg.ko",
 	"lidbg_gps.ko",
@@ -81,7 +81,7 @@ int soc_thread(void *data)
 		}
 	}
 
-#if (defined(BOARD_V1) || defined(BOARD_V2) )
+#if (defined(BOARD_V1) || defined(BOARD_V2)  || defined(BOARD_V4))
 
 #else
 		msleep(1000);

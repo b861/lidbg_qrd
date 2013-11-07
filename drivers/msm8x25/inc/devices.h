@@ -83,7 +83,7 @@ enum
 
 
 
-#else 
+#elif defined(BOARD_V3)
 
 #define LPC_IO_SET(cmd,status)  do{\
 	u8 buff[] = {0x07, cmd, status};\
@@ -107,6 +107,30 @@ enum
 
 #define USB_SWITCH_DISCONNECT do{ LPC_IO_SET(0x11, 0);}while(0)
 #define USB_SWITCH_CONNECT do{LPC_IO_SET(0x11, 1); }while(0)
+
+#else
+
+#define LPC_IO_SET(cmd,status)  do{\
+	u8 buff[] = {0x02, cmd, status};\
+	SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\
+}while(0)
+
+#define GPIO_USB_ID (83)
+#define GPIO_LED_FLY (82)
+
+// PANNE_PEN , RESET
+#define LCD_ON  do{      /* LPC_IO_SET(0x0f, 1);*/\
+    					    SOC_IO_Output(0, GPIO_LCD3, 1);\
+				}while(0)
+#define LCD_OFF   do{       /*LPC_IO_SET(0x0f, 0);*/\
+    					    SOC_IO_Output(0, GPIO_LCD3, 0);\
+				}while(0)
+
+#define USB_HUB_ENABLE do{LPC_IO_SET(0x09, 1); }while(0)
+#define USB_HUB_DISABLE do{LPC_IO_SET(0x09, 0); }while(0)
+
+#define USB_SWITCH_DISCONNECT do{ LPC_IO_SET(0x08, 0);}while(0)
+#define USB_SWITCH_CONNECT do{LPC_IO_SET(0x08, 1); }while(0)
 
 #endif
 
@@ -289,4 +313,11 @@ enum
 				msleep(20);\
 				LCD_ON;\
 			}while(0)
+
+#define FORCE_LOGIC_ACC do{\		
+		u8 buff[] = {0x03, 0x01, 0xff};\	
+		lidbg("FORCE_LOGIC_ACC\n");\	
+		SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\
+			}while(0)
+
 #endif
