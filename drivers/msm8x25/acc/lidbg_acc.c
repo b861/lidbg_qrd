@@ -100,7 +100,6 @@ void acc_pwroff(void)
 
 void cb_password_poweroff(char *password )
 {
-    fs_file_log("<called:%s>\n", __func__ );//tmp,del later
     acc_pwroff();
 }
 
