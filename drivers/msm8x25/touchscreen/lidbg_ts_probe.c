@@ -79,11 +79,6 @@ void ts_scan(void)
 					printk("[futengfei]=======================TS.XY will normal\n");
 			}
 			
-			if (!strcmp(ts_probe_dev[i].name, "gt801.ko"))
-			{
-				lidbg_insmod("/system/lib/modules/out/gt80x_update.ko");
-				lidbg_insmod("/flysystem/lib/out/gt80x_update.ko");
-			}
 	        break;
         }
     }
@@ -104,7 +99,10 @@ int ts_probe_thread(void *data)
 	
 	lidbg_insmod("/system/lib/modules/out/lidbg_ts_to_recov.ko");
 	lidbg_insmod("/flysystem/lib/out/lidbg_ts_to_recov.ko");
-
+	
+	lidbg_insmod("/system/lib/modules/out/gt80x_update.ko");
+	lidbg_insmod("/flysystem/lib/out/gt80x_update.ko");
+	
     while(1)
     {
         set_current_state(TASK_UNINTERRUPTIBLE);
