@@ -86,6 +86,14 @@ void ts_scan(void)
     loop++;
     lidbg("ts_scan_time:%d\n", loop);
 
+#if (defined(BOARD_V1) || defined(BOARD_V2))
+	if(loop==10)
+	{
+		lidbg_insmod("/system/lib/modules/out/gt80x_update.ko");
+		lidbg_insmod("/flysystem/lib/out/gt80x_update.ko");
+	}
+#endif
+
     //if(loop > 10) {scan_on=0;}
 }
 
@@ -99,9 +107,6 @@ int ts_probe_thread(void *data)
 	
 	lidbg_insmod("/system/lib/modules/out/lidbg_ts_to_recov.ko");
 	lidbg_insmod("/flysystem/lib/out/lidbg_ts_to_recov.ko");
-	
-	lidbg_insmod("/system/lib/modules/out/gt80x_update.ko");
-	lidbg_insmod("/flysystem/lib/out/gt80x_update.ko");
 	
     while(1)
     {
