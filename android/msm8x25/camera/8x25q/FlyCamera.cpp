@@ -564,14 +564,28 @@ static bool DetermineImageSplitScreen(mm_camera_ch_data_buf_t *frame,QCameraHard
 	unsigned char *piont_crcb;
 	unsigned int dete_count = 0;
 
+
+
 	if(FlyCameraflymFps<24){DEBUGLOG("Flyvideo-x:flymFps = %f",FlyCameraflymFps);return 0;}
 	if(++global_fram_at_one_sec_count < 50)//过滤判断次数的频繁度，每隔20帧判断一次，
+		{
+			if(video_channel_status[0] == '2' || video_channel_status[0] == '3')//AUX
+			{
+				memset((void *)(frame->def.frame->buffer+frame->def.frame->y_off),0,720*3);
+			}
 		return 0;
+		}
 	else
 		global_fram_at_one_sec_count = 0;
 	//纵向分屏判断
 	if(DetermineImageSplitScreen_Longitudinal(frame,mHalCamCtrl) == 1)
+		{
+			if(video_channel_status[0] == '2' || video_channel_status[0] == '3')//AUX
+			{
+			memset((void *)(frame->def.frame->buffer+frame->def.frame->y_off),0,720*3);
+			}
 		return 1;
+		}
 
 	// property_get("fly.video.channel.status",video_channel_status,"1");//1:DVD 2:AUX 3:Astren
 
@@ -672,8 +686,10 @@ static bool DetermineImageSplitScreen(mm_camera_ch_data_buf_t *frame,QCameraHard
 		}
 	}
 BREAK_THE:
-if(video_channel_status[0] == '2' || video_channel_status[0] == '3')//AUX
-	memset((void *)(frame->def.frame->buffer+frame->def.frame->y_off),0,720*3);
+	if(video_channel_status[0] == '2' || video_channel_status[0] == '3')//AUX
+		{
+			memset((void *)(frame->def.frame->buffer+frame->def.frame->y_off),0,720*3);
+		}
 return 0;//未发生分屏
 }
 bool FlyCameraFrameDisplayOrOutDisplay()
