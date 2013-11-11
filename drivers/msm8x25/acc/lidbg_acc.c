@@ -7,6 +7,11 @@ LIDBG_DEFINE;
 #define HAL_SO "/flysystem/lib/hw/flyfa.default.so"
 
 
+void lidbg_accoff_main(void);
+void lidbg_accon_main(void);
+void lidbg_suspendon_main(void);
+void lidbg_suspendoff_main(void);
+
 
 static DECLARE_COMPLETION(acc_ready);
 
@@ -36,13 +41,25 @@ typedef struct
 lidbg_acc *plidbg_acc = NULL;
 
 
+void wakelock_stat(int lock,const char* name)
+{
+	lidbg_wakelock_register(lock,name);
+}
+
+
+static void set_func_tbl(void)
+{
+   // plidbg_dev->soc_func_tbl.pfnSOC_Get_WakeLock = fastboot_get_wake_locks;
+    plidbg_dev->soc_func_tbl.pfnSOC_WakeLock_Stat = wakelock_stat;
+}
+
 #ifdef CONFIG_HAS_EARLYSUSPEND
 static void acc_early_suspend(struct early_suspend *handler)
 {
 	//USB_WORK_DISENABLE;
 	if(!fs_is_file_exist(HAL_SO))
 	{
-		USB_WORK_DISENABLE;
+		//USB_WORK_DISENABLE;
 	}
 
 	DUMP_FUN_ENTER;
@@ -75,7 +92,7 @@ static int thread_acc_resume(void *data)
    	 //msleep( );
     	if(!fs_is_file_exist(HAL_SO))
 	{
-		USB_WORK_ENABLE;
+		//USB_WORK_ENABLE;
 	}
 
 
@@ -97,11 +114,6 @@ void acc_pwroff(void)
 #endif
 }
 
-
-void cb_password_poweroff(char *password )
-{
-    acc_pwroff();
-}
 
 int thread_acc(void *data)
 {
@@ -135,11 +147,11 @@ ssize_t  acc_read(struct file *filp, char __user *buffer, size_t size, loff_t *o
     return size;
 }
 
-ssize_t  acc_write(struct file *filp, const char __user *buffer, size_t size, loff_t *offset)
+ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff_t *offset)
 {
 
 	lidbg("acc_write.\n");
-	down(&lidbg_acc_sem);
+	//down(&lidbg_acc_sem);
 
 	/*memset(&(plidbg_acc->acc_flag), 0, sizeof(plidbg_acc->acc_flag));
 	if(copy_from_user(&(plidbg_acc->acc_flag), buffer, size))
@@ -148,11 +160,44 @@ ssize_t  acc_write(struct file *filp, const char __user *buffer, size_t size, lo
 	}
 	lidbg("acc write %s\n", plidbg_acc->acc_flag)*/
 
-	up(&lidbg_acc_sem);
+	//up(&lidbg_acc_sem);
 
-	complete(&acc_ready);
+	//complete(&acc_ready);
 
-	return size;
+	{
+
+		char *data_rec[20];
+		if (copy_from_user( data_rec, buf, count))
+		{
+		printk("copy_from_user ERR\n");
+		}
+		data_rec[count] =  '\0';
+
+		printk("acc_nod_write:==%d====[%s]\n", count, data_rec);
+
+		// processing data
+		if(!(strnicmp(data_rec, "screen_on", count - 1)))
+		{
+			printk("******into screen_on********\n");
+			lidbg_accon_main();
+		}
+		else if(!(strnicmp(data_rec, "screen_off", count - 1)))
+		{
+			printk("******into screen_off********\n");
+			lidbg_accoff_main();
+		}
+		else if(!(strnicmp(data_rec, "suspend_on", count - 1)))
+		{
+			printk("******into suspend_on********\n");
+			lidbg_suspendon_main();
+		}
+		else if(!(strnicmp(data_rec, "suspend_off", count - 1)))
+		{
+			printk("******into suspend_off********\n");
+			lidbg_suspendoff_main();
+		}
+	}
+	return count;
 }
 
 
@@ -169,7 +214,18 @@ int acc_release(struct inode *inode, struct file *filp)
     return 0;
 }
 
-
+void cb_password_poweroff(char *password )
+{
+    acc_pwroff();
+}
+void cb_password_disconnect_usb(char *password )
+{
+    lidbg_accoff_main();
+}
+void cb_password_connect_usb(char *password )
+{
+    lidbg_accon_main();
+}
 static int  acc_probe(struct platform_device *pdev)
 {
 
@@ -178,6 +234,8 @@ static int  acc_probe(struct platform_device *pdev)
 		FORCE_LOGIC_ACC;
 	}
 	te_regist_password("001200", cb_password_poweroff);
+	te_regist_password("001201", cb_password_disconnect_usb);
+	te_regist_password("001202", cb_password_connect_usb);
 	return 0;
 }
 
@@ -208,7 +266,7 @@ static int  acc_remove(struct platform_device *pdev)
 static int acc_resume(struct device *dev)
 {
     DUMP_FUN_ENTER;
-    lidbg_readwrite_file("/sys/power/state", NULL, "on", sizeof("on")-1);
+  //  lidbg_readwrite_file("/sys/power/state", NULL, "on", sizeof("on")-1);
 
     return 0;
 
@@ -254,6 +312,7 @@ static int __init acc_init(void)
 {
 	int ret;
 	LIDBG_GET;
+    	set_func_tbl();
 
     platform_device_register(&lidbg_acc_device);
 
@@ -293,10 +352,50 @@ static void __exit acc_exit(void)
     	lidbg (DEVICE_NAME"acc  dev_exit\n");
 }
 
+//zone end
+void lidbg_accoff_main(void)
+{
+	printk("\n************into lidbg_accoff_main******\n");
+	//LCD_OFF;
+	    u8 buff[] = {0x02, 0x0d, 0x0};//LPCControlPWREnable
+            SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
+			
+	if(SOC_Hal_Acc_Callback)
+		SOC_Hal_Acc_Callback(0);
+}
 
+void lidbg_accon_main(void)
+{
+	//LCD_ON;
+	printk("\n************into lidbg_accon_main******\n");
+	u8 buff[] = {0x02, 0x0d, 0x1};//LPCControlPWREnable
+        SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
+	if(SOC_Hal_Acc_Callback)
+		SOC_Hal_Acc_Callback(1);
+
+}
+
+void lidbg_suspendon_main(void)
+{
+	printk("\n************into lidbg_suspendon_main******\n");
+	if(SOC_Hal_Acc_Callback)
+		SOC_Hal_Acc_Callback(2);
+	//msleep(4000);
+	USB_WORK_ENABLE;
+}
+
+void lidbg_suspendoff_main(void)
+{
+	printk("\n************into lidbg_suspendoff_main******\n");
+	USB_WORK_DISENABLE;
+	if(SOC_Hal_Acc_Callback)
+		SOC_Hal_Acc_Callback(3);	
+}
 
 module_init(acc_init);
 module_exit(acc_exit);
 
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("mstar lidbg_acc driver");
+
+EXPORT_SYMBOL(lidbg_accoff_main);

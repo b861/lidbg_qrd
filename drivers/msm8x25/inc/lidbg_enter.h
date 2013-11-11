@@ -6,6 +6,7 @@
 #include <devices.h>
 #include <lidbg_bpmsg.h>
 #include <lidbg_fastboot.h>
+#include <lidbg_acc.h>
 #include <lidbg_lpc.h>
 #include <tw9912.h>
 #else
@@ -329,8 +330,13 @@ struct lidbg_fn_t
 	int (*pfnSOC_Get_CpuFreq)(void);
 
 	void (*pfnSOC_LCD_Reset)(void);
+
 	
 	void (*pfnSOC_WakeLock_Stat)(int lock,const char* name);
+
+	//screan_off :0 screan_on :1 suspendon:2 suspendoff:3 
+	void (*pfnHal_Acc_Callback)(int para);
+
 };
 
 struct lidbg_pvar_t
