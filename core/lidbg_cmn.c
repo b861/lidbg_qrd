@@ -177,7 +177,72 @@ int  lidbg_launch_user( char bin_path[], char argv1[],char argv2[],char argv3[],
     return ret;
 }
 
-int  lidbg_exe(char path[], char argv1[],char argv2[],char argv3[],char argv4[],char argv5[],char argv6[])
+static struct class *lidbg_cdev_class = NULL;
+bool new_cdev(struct file_operations *cdev_fops, char *nodename)
+{
+    struct cdev *new_cdev = NULL;
+    struct device *new_device = NULL;
+    dev_t dev_number=0;
+    int major_number_ts = 0;
+    int err, result;
+
+    new_cdev = kzalloc(sizeof(struct cdev), GFP_KERNEL);
+    if (!new_cdev)
+    {
+        lidbg("err.new_cdev:kzalloc \n");
+        return false;
+    }
+
+    dev_number= MKDEV(major_number_ts, 0);
+    if(major_number_ts)
+        result = register_chrdev_region(dev_number, 1, nodename);
+    else
+        result = alloc_chrdev_region(&dev_number, 0, 1, nodename);
+
+    if (result)
+    {
+        lidbg("err.new_cdev:alloc_chrdev_region result:%d \n", result);
+        return false;
+    }
+    major_number_ts = MAJOR(dev_number);
+
+    cdev_init(new_cdev, cdev_fops);
+    new_cdev->owner = cdev_fops->owner;
+    new_cdev->ops = cdev_fops;
+    err = cdev_add(new_cdev, dev_number, 1);
+    if (err)
+    {
+        lidbg("err.new_cdev:cdev_add result:%d \n", err);
+        return false;
+    }
+
+    if(!lidbg_cdev_class)
+    {
+        lidbg_cdev_class = class_create(cdev_fops->owner, "lidbg_cdev_class");
+        if(IS_ERR(lidbg_cdev_class))
+        {
+            lidbg("err.new_cdev:class_create\n");
+            cdev_del(new_cdev);
+            kfree(new_cdev);
+            lidbg_cdev_class = NULL;
+            return false;
+        }
+    }
+
+    new_device = device_create(lidbg_cdev_class, NULL, dev_number, NULL, "%s%d", nodename, 0);
+    if (!new_device)
+    {
+        lidbg("err.new_cdev:device_create\n");
+        cdev_del(new_cdev);
+        kfree(new_cdev);
+        return false;
+    }
+
+    return true;
+}
+
+
+int  lidbg_exe(char path[], char argv1[], char argv2[], char argv3[], char argv4[], char argv5[], char argv6[])
 {
     return lidbg_launch_user(path, argv1, argv2, argv3, argv4, argv5, argv6);
 }
@@ -220,6 +285,10 @@ int  lidbg_reboot(void)
 int  lidbg_setprop(char key[],char value[])
 {
     return lidbg_launch_user(SETPROP_PATH, key, value, NULL, NULL, NULL, NULL);
+}
+bool lidbg_new_cdev(struct file_operations *cdev_fops, char *nodename)
+{
+    return new_cdev(cdev_fops, nodename);
 }
 
 void mod_cmn_main(int argc, char **argv)
@@ -292,3 +361,4 @@ EXPORT_SYMBOL(lidbg_launch_user);
 EXPORT_SYMBOL(lidbg_readwrite_file);
 EXPORT_SYMBOL(lidbg_task_kill_select);
 EXPORT_SYMBOL(lidbg_get_current_time);
+EXPORT_SYMBOL(lidbg_new_cdev);
