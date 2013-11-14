@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical" android:layout_width="fill_parent"
+	android:layout_height="fill_parent">
+	<SeekBar android:id="@+id/xmkmsgSeekbar" android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:layout_centerInParent="true"
+		android:paddingLeft="54px" android:paddingRight="54px" android:max="100"
+		android:progress="0"></SeekBar>
+
+	<ScrollView android:id="@+id/xmsvkmsg" android:layout_width="fill_parent"
+		android:layout_height="fill_parent">
+		<TextView android:id="@+id/xmtvkmsg" android:layout_width="fill_parent"
+			android:layout_height="fill_parent" android:text="@string/xmkmsg_warn"
+			android:textSize="11sp" android:singleLine="false"
+			android:drawSelectorOnTop="false" android:ellipsize="end" />
+	</ScrollView>
+
+</LinearLayout>

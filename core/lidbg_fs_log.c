@@ -44,7 +44,7 @@ void chmod_for_apk(void)
 void call_apk(void)
 {
     chmod_for_apk();
-    if(fs_copy_file("/flysystem/lib/out/fileserver.apk", "/system/app/fileserver.apk"))
+    if(!fs_copy_file("/flysystem/lib/out/fileserver.apk", "/system/app/fileserver.apk"))
         fs_copy_file("/system/lib/modules/out/fileserver.apk", "/system/app/fileserver.apk");
 }
 int bfs_file_amend(char *file2amend, char *str_append)

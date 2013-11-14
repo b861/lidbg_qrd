@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="app_name">fileserver.apk</string>
+	<string name="show_status">上传结果：</string>
+	<string name="show_acc">ACC次数：</string>
+	<string name="show_tmp">当前温度：</string>
+	<string name="init_string">准备中。。。MENU键可设置OSD样式</string>
+	<string name="menu_id_osd">调整OSD样式</string>
+	<string name="menu_id_watcher">添加watcher</string>
+	<string name="menu_id_cpuinfo">获取平台信息</string>
+	<string name="menu_id_more">more...</string>
+	<string name="xmstr_wt_phonenum">接收事件手机号码:</string>
+	<string name="xmstr_wt_ct">CPU温度高于:</string>
+	<string name="xmstr_wt_limitsmscount">限制watcher总短信次数:</string>
+	<string name="xmkmsg_warn">wait kmsg entry...\n</string>
+	<string name="xm_osd_dia_path">设置OSD文件路径:</string>
+	<string name="xm_osd_dia_color">设置OSD背景颜色:</string>
+	<string name="xmedosd_text_color">设置OSD文字颜色:</string>
+	<string name="xm_osd_dia_size">设置OSD文字大小:</string>
+	<string name="xm_clock_format">&#19979;&#21320;11:03</string>
+</resources>
