@@ -14,6 +14,8 @@ typedef enum
 
 //int fastboot_get_status(void);
 void fastboot_pwroff(void);
+extern void lidbg_accoff_main(int argc, char **argv);
+
 
 #endif
 
