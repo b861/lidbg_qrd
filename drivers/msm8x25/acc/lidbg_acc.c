@@ -12,7 +12,7 @@ void lidbg_accon_main(void);
 void lidbg_suspendon_main(void);
 void lidbg_suspendoff_main(void);
 
-
+int acc_on =0;
 static DECLARE_COMPLETION(acc_ready);
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,36)
@@ -109,8 +109,26 @@ void acc_pwroff(void)
 	//USB_WORK_DISENABLE;
 	
 #ifdef RUN_ACCBOOT
-	lidbg("send CMD_FAST_POWER_OFF  to lidbg_server\n");
-	SOC_Write_Servicer(CMD_FAST_POWER_OFF);
+
+
+switch(acc_on)
+{
+	case 1:
+		lidbg("send CMD_FAST_POWER_OFF  to lidbg_server\n");
+		SOC_Write_Servicer(CMD_FAST_POWER_OFF);
+		break;
+	case 2:
+		lidbg("send CMD_ACC_ON  to lidbg_server\n");
+		SOC_Write_Servicer(CMD_ACC_ON);
+		break;
+	case 3:
+		lidbg("send CMD_ACC_OFF  to lidbg_server\n");
+		SOC_Write_Servicer(CMD_ACC_OFF);
+		break;
+	default:
+		lidbg("send ACC_STATE %d  to lidbg_server\n",acc_on);
+		break;
+}
 #endif
 }
 
@@ -129,7 +147,7 @@ int thread_acc(void *data)
         if(1)
         {
             	wait_for_completion(&acc_ready);
-		USB_WORK_DISENABLE;
+		//USB_WORK_DISENABLE;
 		msleep(200);
 		acc_pwroff();
         }
@@ -151,18 +169,19 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
 {
 
 	lidbg("acc_write.\n");
-	//down(&lidbg_acc_sem);
+	acc_on=0;
+	/*down(&lidbg_acc_sem);
 
-	/*memset(&(plidbg_acc->acc_flag), 0, sizeof(plidbg_acc->acc_flag));
+	memset(&(plidbg_acc->acc_flag), 0, sizeof(plidbg_acc->acc_flag));
 	if(copy_from_user(&(plidbg_acc->acc_flag), buffer, size))
 	{
 		lidbg("copy_from_user ERR\n");
 	}
-	lidbg("acc write %s\n", plidbg_acc->acc_flag)*/
+	lidbg("acc write %s\n", plidbg_acc->acc_flag)
 
-	//up(&lidbg_acc_sem);
+	up(&lidbg_acc_sem);
 
-	//complete(&acc_ready);
+	complete(&acc_ready);*/
 
 	{
 
@@ -195,6 +214,24 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
 		{
 			printk("******into suspend_off********\n");
 			lidbg_suspendoff_main();
+		}
+		else if(!(strnicmp(data_rec, "power", count - 1)))
+		{
+			printk("******goto fastboot********\n");
+			acc_on=1;
+			complete(&acc_ready);
+		}
+		else if(!(strnicmp(data_rec, "acc_on", count - 1)))
+		{
+			printk("******goto acc_on********\n");
+			acc_on=2;
+			complete(&acc_ready);
+		}
+		else if(!(strnicmp(data_rec, "acc_off", count - 1)))
+		{
+			printk("******goto acc_off********\n");
+			acc_on=3;
+			complete(&acc_ready);
 		}
 	}
 	return count;

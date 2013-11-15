@@ -81,7 +81,7 @@ int soc_thread(void *data)
 		}
 	}
 
-#if (defined(BOARD_V1) || defined(BOARD_V2) )
+#if (defined(BOARD_V1) || defined(BOARD_V2)  || defined(BOARD_V4))
 
 #else
 		msleep(1000);

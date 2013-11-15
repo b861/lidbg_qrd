@@ -51,6 +51,9 @@
 #define VIDEO_PASSAGE_ASTERN (91)
 #define VIDEO_PASSAGE_DVD (92)
 
+#define CMD_ACC_OFF (93)
+#define CMD_ACC_ON (94)
+
 pthread_t ntid;
 int fd = 0;
 static int ts_nod_fd, ret;
@@ -66,7 +69,8 @@ struct lidbg_dev_smem *plidbg_smem = NULL;
 void thread_fastboot(void)
 {
     lidbg("thread_fastboot+\n");
-    system("am broadcast -a android.intent.action.FAST_BOOT_START");
+    //system("am broadcast -a android.intent.action.FAST_BOOT_START");
+    system("am broadcast -a cn.flyaudio.intent.action.FAST_BOOT_START");
     lidbg("thread_fastboot-\n");
     pthread_exit(0);
 
@@ -107,10 +111,25 @@ loop_read:
 
         switch(cmd)
         {
+        case CMD_ACC_OFF :
+        {
+            lidbg("CMD_ACC_OFF+++\n");
+            system("am broadcast -a cn.flyaudio.boot.ACCOFF &");
+            lidbg("CMD_ACC_OFF---\n");
+            break;
+        }
+        case CMD_ACC_ON :
+        {
+            lidbg("CMD_ACC_ON+++\n");
+            system("am broadcast -a cn.flyaudio.boot.ACCON &");
+            lidbg("CMD_ACC_ON---\n");
+            break;
+        }
         case CMD_FAST_POWER_OFF :
         {
             lidbg("CMD_FAST_POWER_OFF+++\n");
-            lunch_fastboot();
+            system("am broadcast -a cn.flyaudio.intent.action.FAST_BOOT_START &");
+            //lunch_fastboot();
             lidbg("CMD_FAST_POWER_OFF---\n");
             break;
         }

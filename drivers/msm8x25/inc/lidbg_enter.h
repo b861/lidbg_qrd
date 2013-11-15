@@ -80,6 +80,8 @@
 #define VIDEO_PASSAGE_ASTERN (91)
 #define VIDEO_PASSAGE_DVD (92)
 
+#define CMD_ACC_OFF (93)
+#define CMD_ACC_ON (94)
 
 #if (defined(BUILD_SOC) || defined(BUILD_CORE) || defined(BUILD_DRIVERS))
 #define NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE (110)
