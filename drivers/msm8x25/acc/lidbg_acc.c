@@ -185,7 +185,7 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
 
 	{
 
-		char *data_rec[20];
+		char data_rec[20];
 		if (copy_from_user( data_rec, buf, count))
 		{
 		printk("copy_from_user ERR\n");
@@ -375,7 +375,7 @@ static int __init acc_init(void)
 	}
 	else wake_up_process(acc_task);
 
-	lidbg_chmod("/dev/lidbg_acc");
+	lidbg_chmod("/dev/lidbg_acc");
 	
 	lidbg (DEVICE_NAME"acc  dev_init\n");
 

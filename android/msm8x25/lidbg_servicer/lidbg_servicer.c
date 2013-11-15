@@ -69,8 +69,7 @@ struct lidbg_dev_smem *plidbg_smem = NULL;
 void thread_fastboot(void)
 {
     lidbg("thread_fastboot+\n");
-    //system("am broadcast -a android.intent.action.FAST_BOOT_START");
-    system("am broadcast -a cn.flyaudio.intent.action.FAST_BOOT_START");
+	system("am broadcast -a android.intent.action.FAST_BOOT_START");
     lidbg("thread_fastboot-\n");
     pthread_exit(0);
 
@@ -128,9 +127,12 @@ loop_read:
         case CMD_FAST_POWER_OFF :
         {
             lidbg("CMD_FAST_POWER_OFF+++\n");
-            system("am broadcast -a cn.flyaudio.intent.action.FAST_BOOT_START &");
-            //lunch_fastboot();
-            lidbg("CMD_FAST_POWER_OFF---\n");
+#if (defined(BOARD_V1) || defined(BOARD_V2))
+				lunch_fastboot();
+#else	
+				system("am broadcast -a cn.flyaudio.intent.action.FAST_BOOT_START &");
+#endif
+	            lidbg("CMD_FAST_POWER_OFF---\n");
             break;
         }
         case LOG_LOGCAT :
