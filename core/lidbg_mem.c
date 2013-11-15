@@ -19,7 +19,7 @@ void lidbg_mem_main(int argc, char **argv)
     if(!strcmp(argv[0], "r"))
     {
 
-        u32 addr, val, mun;
+        u32 addr, val = 0, mun;
         //lidbg("r addr num \n");
 
         //addr = simple_strtoul(argv[1], 0, 0);
@@ -88,7 +88,7 @@ void lidbg_mem_main(int argc, char **argv)
     else if(!strcmp(argv[0], "rb"))
     {
 
-        u32 addr, val, offset, bitmun;
+        u32 addr, val = 0, offset, bitmun;
         addr = simple_strtoul(argv[2], 0, 0);
         offset = simple_strtoul(argv[3], 0, 0);
         bitmun = simple_strtoul(argv[4], 0, 0);

@@ -219,7 +219,6 @@ void show_wakelock(void)
             index++;
             lidbg("<%d.INFO%d:[%s].%d,%d>\n", pos->cunt, index, pos->name, pos->is_count_wakelock, pos->cunt_max);
         }
-		#define FASTBOOT_LOG_PATH "/data/log_fb.txt"
 		if(pos->cunt != 0)
 			lidbg_fs_log(FASTBOOT_LOG_PATH,"block wakelock %s\n", pos->name);
     }
