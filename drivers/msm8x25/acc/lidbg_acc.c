@@ -5,6 +5,7 @@ LIDBG_DEFINE;
 #define RUN_ACCBOOT
 #define DEVICE_NAME "lidbg_acc"
 #define HAL_SO "/flysystem/lib/hw/flyfa.default.so"
+#define FASTBOOT_LOG_PATH "/data/log_fb.txt"
 
 
 void lidbg_accoff_main(void);
@@ -12,8 +13,10 @@ void lidbg_accon_main(void);
 void lidbg_suspendon_main(void);
 void lidbg_suspendoff_main(void);
 
+int suspend_state = 0;   //0 :early suspend; 1: suspend 
 int acc_on =0;
 static DECLARE_COMPLETION(acc_ready);
+static DECLARE_COMPLETION(suspend_start);
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,36)
 DECLARE_MUTEX(lidbg_acc_sem);
@@ -39,6 +42,7 @@ typedef struct
 } lidbg_acc;
 
 lidbg_acc *plidbg_acc = NULL;
+static struct task_struct *suspend_task;
 
 
 void wakelock_stat(int lock,const char* name)
@@ -46,6 +50,25 @@ void wakelock_stat(int lock,const char* name)
 	lidbg_wakelock_register(lock,name);
 }
 
+void show_wakelock(void)
+{
+    int index = 0;
+    struct wakelock_item *pos;
+    struct list_head *client_list = &lidbg_wakelock_list;
+
+    if(list_empty(client_list))
+        lidbg("<err.lidbg_show_wakelock:nobody_register>\n");
+    list_for_each_entry(pos, client_list, tmp_list)
+    {
+        if (pos->name)
+        {
+            index++;
+            lidbg("<%d.INFO%d:[%s].%d,%d>\n", pos->cunt, index, pos->name, pos->is_count_wakelock, pos->cunt_max);
+        }
+		if(pos->cunt != 0)
+			lidbg_fs_log(FASTBOOT_LOG_PATH,"block wakelock %s\n", pos->name);
+    }
+}
 
 static void set_func_tbl(void)
 {
@@ -61,7 +84,8 @@ static void acc_early_suspend(struct early_suspend *handler)
 	{
 		//USB_WORK_DISENABLE;
 	}
-
+	suspend_state = 0;
+	complete(&suspend_start);
 	DUMP_FUN_ENTER;
 }
 
@@ -159,6 +183,39 @@ int thread_acc(void *data)
     return 0;
 }
 
+
+static int thread_acc_suspend(void *data)
+{
+	int time_count;
+	
+	while(1)
+	{
+		set_current_state(TASK_UNINTERRUPTIBLE);
+		if(kthread_should_stop()) break;
+		if(1)
+		{
+			time_count = 0;
+			wait_for_completion(&suspend_start);
+			while(1)
+			{
+				msleep(1000);
+                		time_count++;
+				if(suspend_state == 0)    //if suspend state always in early suspend
+				{
+					 if(time_count >= 10)
+					 {
+						lidbgerr("thread_acc_suspend wait suspend timeout!\n");
+						show_wakelock();
+						break;
+					 }
+				}
+				else
+					break;
+			}
+		}
+	}
+	return 0;
+}
 
 ssize_t  acc_read(struct file *filp, char __user *buffer, size_t size, loff_t *offset)
 {
@@ -313,6 +370,7 @@ static int acc_suspend(struct device *dev)
 {
     DUMP_FUN_ENTER;
     //work_en = 0;
+    suspend_state = 1;
     return 0;
 
 }
@@ -374,6 +432,15 @@ static int __init acc_init(void)
 		 lidbg("Unable to start kernel thread.\n");
 	}
 	else wake_up_process(acc_task);
+
+	 INIT_COMPLETION(suspend_start);
+	suspend_task = kthread_create(thread_acc_suspend, NULL, "suspend_task");
+	if(IS_ERR(suspend_task))
+	{
+		lidbg("Unable to start kernel suspend_task.\n");
+
+	}
+	else wake_up_process(suspend_task);
 
 	lidbg_chmod("/dev/lidbg_acc");
 	
