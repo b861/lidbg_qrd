@@ -14,7 +14,7 @@ void lidbg_suspendon_main(void);
 void lidbg_suspendoff_main(void);
 
 int suspend_state = 0;   //0 :early suspend; 1: suspend 
-int acc_on =0;
+
 static DECLARE_COMPLETION(acc_ready);
 static DECLARE_COMPLETION(suspend_start);
 
@@ -39,6 +39,7 @@ struct early_suspend early_suspend;
 typedef struct
 {
 	unsigned int  acc_flag;
+	u32 resume_count;
 } lidbg_acc;
 
 lidbg_acc *plidbg_acc = NULL;
@@ -79,7 +80,7 @@ static void set_func_tbl(void)
 #ifdef CONFIG_HAS_EARLYSUSPEND
 static void acc_early_suspend(struct early_suspend *handler)
 {
-	//USB_WORK_DISENABLE;
+	 lidbg("acc_early_suspend:%d\n", plidbg_acc->resume_count);
 	if(!fs_is_file_exist(HAL_SO))
 	{
 		//USB_WORK_DISENABLE;
@@ -134,53 +135,7 @@ void acc_pwroff(void)
 	
 #ifdef RUN_ACCBOOT
 
-
-switch(acc_on)
-{
-	case 1:
-		lidbg("send CMD_FAST_POWER_OFF  to lidbg_server\n");
-		SOC_Write_Servicer(CMD_FAST_POWER_OFF);
-		break;
-	case 2:
-		lidbg("send CMD_ACC_ON  to lidbg_server\n");
-		SOC_Write_Servicer(CMD_ACC_ON);
-		break;
-	case 3:
-		lidbg("send CMD_ACC_OFF  to lidbg_server\n");
-		SOC_Write_Servicer(CMD_ACC_OFF);
-		break;
-	default:
-		lidbg("send ACC_STATE %d  to lidbg_server\n",acc_on);
-		break;
-}
 #endif
-}
-
-
-int thread_acc(void *data)
-{
-    	lidbg("thread_acc.\n");
-
-    plidbg_acc = ( lidbg_acc *)kmalloc(sizeof(lidbg_acc), GFP_KERNEL);
-    memset(plidbg_acc, 0, sizeof(*plidbg_acc));
-
-    while(1)
-    {
-        set_current_state(TASK_UNINTERRUPTIBLE);
-        if(kthread_should_stop()) break;
-        if(1)
-        {
-            	wait_for_completion(&acc_ready);
-		//USB_WORK_DISENABLE;
-		msleep(200);
-		acc_pwroff();
-        }
-        else
-        {
-            schedule_timeout(HZ);
-        }
-    }
-    return 0;
 }
 
 
@@ -200,12 +155,14 @@ static int thread_acc_suspend(void *data)
 			{
 				msleep(1000);
                 		time_count++;
+				if(time_count >= 5)		
+					show_wakelock();
 				if(suspend_state == 0)    //if suspend state always in early suspend
 				{
 					 if(time_count >= 10)
 					 {
 						lidbgerr("thread_acc_suspend wait suspend timeout!\n");
-						show_wakelock();
+						//show_wakelock();
 						break;
 					 }
 				}
@@ -226,19 +183,6 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
 {
 
 	lidbg("acc_write.\n");
-	acc_on=0;
-	/*down(&lidbg_acc_sem);
-
-	memset(&(plidbg_acc->acc_flag), 0, sizeof(plidbg_acc->acc_flag));
-	if(copy_from_user(&(plidbg_acc->acc_flag), buffer, size))
-	{
-		lidbg("copy_from_user ERR\n");
-	}
-	lidbg("acc write %s\n", plidbg_acc->acc_flag)
-
-	up(&lidbg_acc_sem);
-
-	complete(&acc_ready);*/
 
 	{
 
@@ -252,43 +196,40 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
 		printk("acc_nod_write:==%d====[%s]\n", count, data_rec);
 
 		// processing data
-		if(!(strnicmp(data_rec, "screen_on", count - 1)))
+	         if(!strcmp(data_rec, "screen_on"))
 		{
 			printk("******into screen_on********\n");
 			lidbg_accon_main();
 		}
-		else if(!(strnicmp(data_rec, "screen_off", count - 1)))
+		else if(!strcmp(data_rec, "screen_off"))
 		{
 			printk("******into screen_off********\n");
 			lidbg_accoff_main();
 		}
-		else if(!(strnicmp(data_rec, "suspend_on", count - 1)))
+		else if(!strcmp(data_rec, "suspend_on"))
 		{
 			printk("******into suspend_on********\n");
 			lidbg_suspendon_main();
 		}
-		else if(!(strnicmp(data_rec, "suspend_off", count - 1)))
+		else if(!strcmp(data_rec, "suspend_off"))
 		{
 			printk("******into suspend_off********\n");
 			lidbg_suspendoff_main();
 		}
-		else if(!(strnicmp(data_rec, "power", count - 1)))
+		else if(!strcmp(data_rec, "power"))
 		{
 			printk("******goto fastboot********\n");
-			acc_on=1;
-			complete(&acc_ready);
+			SOC_Write_Servicer(CMD_FAST_POWER_OFF);
 		}
-		else if(!(strnicmp(data_rec, "acc_on", count - 1)))
+		else if(!strcmp(data_rec, "acc_on"))
 		{
 			printk("******goto acc_on********\n");
-			acc_on=2;
-			complete(&acc_ready);
+			SOC_Write_Servicer(CMD_ACC_ON);
 		}
-		else if(!(strnicmp(data_rec, "acc_off", count - 1)))
+		else if(!strcmp(data_rec, "acc_off"))
 		{
 			printk("******goto acc_off********\n");
-			acc_on=3;
-			complete(&acc_ready);
+			SOC_Write_Servicer(CMD_ACC_OFF);
 		}
 	}
 	return count;
@@ -310,7 +251,7 @@ int acc_release(struct inode *inode, struct file *filp)
 
 void cb_password_poweroff(char *password )
 {
-    acc_pwroff();
+	SOC_Write_Servicer(CMD_FAST_POWER_OFF);
 }
 void cb_password_disconnect_usb(char *password )
 {
@@ -322,15 +263,31 @@ void cb_password_connect_usb(char *password )
 }
 static int  acc_probe(struct platform_device *pdev)
 {
+	int ret;
+	DUMP_FUN_ENTER;
+	plidbg_acc = kmalloc(sizeof(lidbg_acc), GFP_KERNEL);
+	if (!plidbg_acc)
+	{
+		ret = -ENODEV;
+		goto fail_mem;
+	}
 
+	 plidbg_acc->resume_count = 0;
+	 
 	if(!fs_is_file_exist(HAL_SO))
 	{
 		FORCE_LOGIC_ACC;
 	}
+
+	fs_regist_state("acc_times", (int*)&plidbg_acc->resume_count);
+	fs_file_separator(FASTBOOT_LOG_PATH);
 	te_regist_password("001200", cb_password_poweroff);
 	te_regist_password("001201", cb_password_disconnect_usb);
 	te_regist_password("001202", cb_password_connect_usb);
 	return 0;
+
+	fail_mem:
+		return ret;
 }
 
 static struct file_operations dev_fops =
@@ -360,8 +317,8 @@ static int  acc_remove(struct platform_device *pdev)
 static int acc_resume(struct device *dev)
 {
     DUMP_FUN_ENTER;
-  //  lidbg_readwrite_file("/sys/power/state", NULL, "on", sizeof("on")-1);
 
+    lidbg("fastboot_resume:%d\n", ++plidbg_acc->resume_count);
     return 0;
 
 }
@@ -426,12 +383,6 @@ static int __init acc_init(void)
 	}
 #endif
 
-	acc_task = kthread_create(thread_acc, NULL, "acc_task");
-	if(IS_ERR(acc_task))
-	{
-		 lidbg("Unable to start kernel thread.\n");
-	}
-	else wake_up_process(acc_task);
 
 	 INIT_COMPLETION(suspend_start);
 	suspend_task = kthread_create(thread_acc_suspend, NULL, "suspend_task");
@@ -441,6 +392,7 @@ static int __init acc_init(void)
 
 	}
 	else wake_up_process(suspend_task);
+
 
 	lidbg_chmod("/dev/lidbg_acc");
 	
