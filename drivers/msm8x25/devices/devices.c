@@ -929,7 +929,62 @@ void lcd_reset(char *key, char *value )
 	SOC_LCD_Reset();
 }
 
+int dev_open(struct inode *inode, struct file *filp)
+{
+    return 0;
 
+}
+static void parse_cmd(char *pt)
+{
+	lidbg("%s\n",pt);
+	
+    if (!strcmp(pt, "fan_on"))
+    {
+		AIRFAN_BACK_ON;
+	}
+    else if (!strcmp(pt, "fan_off"))
+    {
+		AIRFAN_BACK_OFF;
+	}
+	
+}
+
+static ssize_t dev_write(struct file *filp, const char __user *buf,
+                           size_t size, loff_t *ppos)
+{
+	char *mem = NULL;
+	mem = (char *)kmalloc(size+1,GFP_KERNEL);//size+1 for '\0'
+	if (mem == NULL)
+    {
+        lidbg("dev_write kmalloc err\n");
+        return 0;
+    }
+	memset(mem, '\0', size+1);
+
+	if(copy_from_user(mem, buf, size))
+	{
+		printk("copy_from_user ERR\n");
+	}
+
+	parse_cmd(mem);
+	
+	kfree(mem);
+
+}
+
+int dev_close(struct inode *inode, struct file *filp)
+{
+    return 0;
+}
+
+
+static struct file_operations dev_fops =
+{
+    .owner = THIS_MODULE,
+    .write = dev_write,
+    .open = dev_open,
+    .release = dev_close,
+};
 
 
 int dev_init(void)
@@ -961,6 +1016,8 @@ int dev_init(void)
     LIDBG_GET;
     set_func_tbl();
 	
+	lidbg_new_cdev(&dev_fops,"flydev");
+
     fs_regist_state("cpu_temp", &(g_var.temp));
 	FS_REGISTER_INT(lcd_reset_en,"lcd_reset",0,lcd_reset);
 
