@@ -233,6 +233,16 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
 			acc_on=3;
 			complete(&acc_ready);
 		}
+		else if(!(strnicmp(data_rec, "backairfan_on", count - 1)))
+		{
+			printk("******goto backairfan_on********\n");
+			AIRFAN_BACK_ON;
+		}
+		else if(!(strnicmp(data_rec, "backairfan_off", count - 1)))
+		{
+			printk("******goto backairfan_off********\n");
+			AIRFAN_BACK_OFF;
+		}
 	}
 	return count;
 }

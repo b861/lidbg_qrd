@@ -320,4 +320,14 @@ enum
 		SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\
 			}while(0)
 
+#define AIRFAN_BACK_ON do{\
+		u8 buff[] = {0x02, 0x01, 0x1};\
+		lidbg("AIRFAN_BACK_ON\n");\
+		SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\
+			}while(0)
+#define AIRFAN_BACK_OFF do{\
+		u8 buff[] = {0x02, 0x01, 0x0};\
+		lidbg("AIRFAN_BACK_OFF\n");\
+		SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\
+			}while(0)
 #endif
