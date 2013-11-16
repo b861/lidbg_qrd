@@ -334,7 +334,7 @@ struct lidbg_fn_t
 	void (*pfnSOC_LCD_Reset)(void);
 
 	
-	void (*pfnSOC_WakeLock_Stat)(int lock,const char* name);
+	void (*pfnSOC_WakeLock_Stat)(bool lock,const char* name);
 
 	//screan_off :0 screan_on :1 suspendon:2 suspendoff:3 
 	void (*pfnHal_Acc_Callback)(int para);

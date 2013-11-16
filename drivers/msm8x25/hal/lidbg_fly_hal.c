@@ -314,6 +314,7 @@ int SOC_Get_CpuFreq(void)
 
 
 
+
 static void set_func_tbl(void)
 {
     //io
@@ -369,6 +370,8 @@ static void set_func_tbl(void)
    plidbg_dev->soc_func_tbl.pfnSOC_Get_CpuFreq = SOC_Get_CpuFreq;
 
    plidbg_dev->soc_func_tbl.pfnSOC_LCD_Reset = SOC_LCD_Reset;
+   
+   plidbg_dev->soc_func_tbl.pfnSOC_WakeLock_Stat = lidbg_wakelock_register;
    
 }
 
