@@ -229,7 +229,7 @@ int fs_mem_log( const char *fmt, ... )
 
     len = strlen(str_append);
 
-    bfs_file_amend(LIDBG_MEM_COMMEN_FILE, str_append);
+    bfs_file_amend(LIDBG_MEM_LOG_FILE, str_append);
 
     return 1;
 }

@@ -47,7 +47,7 @@ struct string_dev
     void (*cb_filedetec)(char *filename );
 };
 
-#define LIDBG_MEM_COMMEN_FILE "/dev/log/lidbg_commen_file.txt"
+#define LIDBG_MEM_LOG_FILE "/dev/log/lidbg_log.txt"
 #define PRE_CONF_INFO_FILE "/data/conf_info.txt"
 #define build_time_sd_path "/data/build_time.txt"
 #define build_time_fly_path "/flysystem/lib/out/build_time.conf"

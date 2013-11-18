@@ -231,7 +231,7 @@ void  touch_event_init(void)
     TE_WARN("<==IN==>\n");
 
     TE_WARN("<%s>\n", TE_VERSION);
-    fs_string2file(LIDBG_MEM_COMMEN_FILE, "%s\n", TE_VERSION );
+    fs_string2file(LIDBG_MEM_LOG_FILE, "%s\n", TE_VERSION );
     FS_REGISTER_INT(g_te_dbg_en, "te_dbg_en", 0, cb_kv_password);
     FS_REGISTER_INT(g_te_scandelay_ms, "te_scandelay_ms", 100, NULL);
 

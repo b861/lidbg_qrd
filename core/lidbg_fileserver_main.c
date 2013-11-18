@@ -140,15 +140,15 @@ void lidbg_fileserver_main(int argc, char **argv)
         fs_save_list_to_file();
         break;
     case 6:
-        bfs_file_amend(LIDBG_MEM_COMMEN_FILE, "<chmod_for_apk>\n");
+        bfs_file_amend(LIDBG_MEM_LOG_FILE, "<chmod_for_apk>\n");
         chmod_for_apk();
         break;
     case 7:
-        bfs_file_amend(LIDBG_MEM_COMMEN_FILE, "<fs_upload_machine_log>\n");
+        bfs_file_amend(LIDBG_MEM_LOG_FILE, "<fs_upload_machine_log>\n");
         fs_upload_machine_log();
         break;
     case 8:
-        bfs_file_amend(LIDBG_MEM_COMMEN_FILE, "<fs_clean_all>\n");
+        bfs_file_amend(LIDBG_MEM_LOG_FILE, "<fs_clean_all>\n");
         fs_clean_all();
         break;
     case 9:
@@ -219,7 +219,7 @@ void lidbg_fileserver_main_prepare(void)
 void lidbg_fileserver_main_init(void)
 {
     fs_get_intvalue(&lidbg_core_list, "fs_mem_dbg", &g_mem_dbg, NULL);
-    fs_string2file(LIDBG_MEM_COMMEN_FILE, "%s\n", FS_VERSION );
+    fs_string2file(LIDBG_MEM_LOG_FILE, "%s\n", FS_VERSION );
 }
 //zone end
 
