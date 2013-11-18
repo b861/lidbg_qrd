@@ -187,13 +187,22 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
 	{
 
 		char data_rec[20];
+		char *p=NULL;
+		int len=count;
 		if (copy_from_user( data_rec, buf, count))
 		{
 		printk("copy_from_user ERR\n");
 		}
-		data_rec[count] =  '\0';
+		
+		if((p = memchr(data_rec, '\n', count)))
+		{
+			len=p - data_rec;
+			*p='\0';
+		}
+		else
+			data_rec[len] =  '\0';
 
-		printk("acc_nod_write:==%d====[%s]\n", count, data_rec);
+		printk("acc_nod_write:==%d====[%s]\n", len, data_rec);
 
 		// processing data
 	         if(!strcmp(data_rec, "screen_on"))
@@ -210,11 +219,13 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
 		{
 			printk("******into suspend_on********\n");
 			lidbg_suspendon_main();
+			//lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SUSPEND_EVENT,NOTIFIER_MINOR_SUSPEND_ON));
 		}
 		else if(!strcmp(data_rec, "suspend_off"))
 		{
 			printk("******into suspend_off********\n");
 			lidbg_suspendoff_main();
+			//lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SUSPEND_EVENT,NOTIFIER_MINOR_SUSPEND_OFF));
 		}
 		else if(!strcmp(data_rec, "power"))
 		{
@@ -225,11 +236,13 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
 		{
 			printk("******goto acc_on********\n");
 			SOC_Write_Servicer(CMD_ACC_ON);
+			lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_ACC_ON));
 		}
 		else if(!strcmp(data_rec, "acc_off"))
 		{
 			printk("******goto acc_off********\n");
 			SOC_Write_Servicer(CMD_ACC_OFF);
+			lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_ACC_OFF));
 		}
 	}
 	return count;

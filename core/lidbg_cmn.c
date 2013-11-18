@@ -182,18 +182,24 @@ bool new_cdev(struct file_operations *cdev_fops, char *nodename)
 {
     struct cdev *new_cdev = NULL;
     struct device *new_device = NULL;
-    dev_t dev_number=0;
+    dev_t dev_number = 0;
     int major_number_ts = 0;
     int err, result;
+
+    if(!cdev_fops->owner || !nodename)
+    {
+        LIDBG_ERR("cdev_fops->owner||nodename \n");
+        return false;
+    }
 
     new_cdev = kzalloc(sizeof(struct cdev), GFP_KERNEL);
     if (!new_cdev)
     {
-        lidbg("err.new_cdev:kzalloc \n");
+        LIDBG_ERR("kzalloc \n");
         return false;
     }
 
-    dev_number= MKDEV(major_number_ts, 0);
+    dev_number = MKDEV(major_number_ts, 0);
     if(major_number_ts)
         result = register_chrdev_region(dev_number, 1, nodename);
     else
@@ -201,7 +207,7 @@ bool new_cdev(struct file_operations *cdev_fops, char *nodename)
 
     if (result)
     {
-        lidbg("err.new_cdev:alloc_chrdev_region result:%d \n", result);
+        LIDBG_ERR("alloc_chrdev_region result:%d \n", result);
         return false;
     }
     major_number_ts = MAJOR(dev_number);
@@ -212,7 +218,7 @@ bool new_cdev(struct file_operations *cdev_fops, char *nodename)
     err = cdev_add(new_cdev, dev_number, 1);
     if (err)
     {
-        lidbg("err.new_cdev:cdev_add result:%d \n", err);
+        LIDBG_ERR("cdev_add result:%d \n", err);
         return false;
     }
 
@@ -221,7 +227,7 @@ bool new_cdev(struct file_operations *cdev_fops, char *nodename)
         lidbg_cdev_class = class_create(cdev_fops->owner, "lidbg_cdev_class");
         if(IS_ERR(lidbg_cdev_class))
         {
-            lidbg("err.new_cdev:class_create\n");
+            LIDBG_ERR("class_create\n");
             cdev_del(new_cdev);
             kfree(new_cdev);
             lidbg_cdev_class = NULL;
@@ -232,7 +238,7 @@ bool new_cdev(struct file_operations *cdev_fops, char *nodename)
     new_device = device_create(lidbg_cdev_class, NULL, dev_number, NULL, "%s%d", nodename, 0);
     if (!new_device)
     {
-        lidbg("err.new_cdev:device_create\n");
+        LIDBG_ERR("device_create\n");
         cdev_del(new_cdev);
         kfree(new_cdev);
         return false;
@@ -288,7 +294,16 @@ int  lidbg_setprop(char key[],char value[])
 }
 bool lidbg_new_cdev(struct file_operations *cdev_fops, char *nodename)
 {
-    return new_cdev(cdev_fops, nodename);
+    if(new_cdev(cdev_fops, nodename))
+    {
+        char path[32];
+        sprintf(path, "/dev/%s0", nodename);
+        lidbg_chmod(path);
+        LIDBG_SUC("new cdev:[%s]\n", path);
+        return true;
+    }
+    else
+        return false;
 }
 
 void mod_cmn_main(int argc, char **argv)

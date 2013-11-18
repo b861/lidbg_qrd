@@ -52,9 +52,12 @@ typedef unsigned int			uchar;
 #define MSG_ERROR        (1)
 #define MSG_DEBUG        (1)
 
-#define lidbg(msg...)  do { printk( KERN_CRIT "lidbg: " msg); }while(0)
+#define lidbg(msg...)  do { printk( KERN_CRIT "[lidbg] " msg); }while(0)
 #define lidbgerr(msg...)  do { printk( KERN_CRIT "\nlidbgerr: " msg); }while(0)
 
+#define LIDBG_WARN(fmt, args...) do { pr_info("[lidbg]warn.%s: " fmt,__func__,##args);}while(0)
+#define LIDBG_ERR(fmt, args...) do { pr_info("[lidbg]err.%s: " fmt,__func__,##args);}while(0)
+#define LIDBG_SUC(fmt, args...) do { pr_info("[lidbg]suceed.%s: " fmt,__func__,##args);}while(0)
 
 #define FUNCTION_IN       do{lidbg("%d: %s() In", __LINE__, __FUNCTION__);}while(0)
 #define FUNCTION_OUT    do{lidbg("%d: %s() Out", __LINE__, __FUNCTION__);}while(0)

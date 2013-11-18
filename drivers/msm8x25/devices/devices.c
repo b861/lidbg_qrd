@@ -44,16 +44,35 @@ struct early_suspend early_suspend;
 bool suspend_test = 0;
 bool suspend_flag = 0;
 
+wait_queue_head_t read_wait;
+u8 audio_data_for_hal[2];
 
+void unmute_ns(void)
+{
+	printk("[futengfei].unmute_ns");
+	audio_data_for_hal[0]=0x01;
+	audio_data_for_hal[1]=0x00;
+	wake_up_interruptible(&read_wait);
+}
+void mute_s(void)
+{
+	printk("[futengfei].mute_s");
+	audio_data_for_hal[0]=0x01;
+	audio_data_for_hal[1]=0x01;
+	wake_up_interruptible(&read_wait);
+}
 static int lidbg_event(struct notifier_block *this,
 				unsigned long event, void *ptr)
 {
 	DUMP_FUN;
 	
 	switch (event) {
-	case 0:
-		  
-		  break;
+	case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_ACC_ON):
+		unmute_ns();
+		break;
+	case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_ACC_OFF):
+		mute_s();
+		break;
 	default:
 		break;
 	}
@@ -952,7 +971,8 @@ static void parse_cmd(char *pt)
 static ssize_t dev_write(struct file *filp, const char __user *buf,
                            size_t size, loff_t *ppos)
 {
-	char *mem = NULL;
+	char *mem = NULL,*p = NULL;
+	int len=size;
 	mem = (char *)kmalloc(size+1,GFP_KERNEL);//size+1 for '\0'
 	if (mem == NULL)
     {
@@ -966,10 +986,20 @@ static ssize_t dev_write(struct file *filp, const char __user *buf,
 		printk("copy_from_user ERR\n");
 	}
 
+	if((p = memchr(mem, '\n', size)))
+	{
+		len=p - mem;
+		*p='\0';
+	}
+	else
+		mem[len] =  '\0';
+
+	
 	parse_cmd(mem);
 	
 	kfree(mem);
-
+	
+	return size;//warn:don't forget it;
 }
 
 int dev_close(struct inode *inode, struct file *filp)
@@ -977,12 +1007,36 @@ int dev_close(struct inode *inode, struct file *filp)
     return 0;
 }
 
+ssize_t  dev_read(struct file *filp, char __user *buffer, size_t size, loff_t *offset)
+{
+    lidbg("dev_read.%d,%d,%d\n", audio_data_for_hal[0],audio_data_for_hal[1], size);
+    if(audio_data_for_hal[0] != 0x01)
+        return -1;
+    if(copy_to_user(buffer, audio_data_for_hal, sizeof(audio_data_for_hal)))
+    {
+        return -1;
+    }
+    else
+    {
+        audio_data_for_hal[0]=0x00;
+        return size;
+    }
+}
 
+static unsigned int dev_poll(struct file *filp, poll_table *wait)
+{
+    unsigned int mask = 0;
+    interruptible_sleep_on(&read_wait);
+    mask |= POLLIN | POLLRDNORM;
+    return mask;
+}
 static struct file_operations dev_fops =
 {
     .owner = THIS_MODULE,
-    .write = dev_write,
     .open = dev_open,
+    .read = dev_read,
+    .write = dev_write,
+    .poll = dev_poll,
     .release = dev_close,
 };
 
@@ -1016,6 +1070,7 @@ int dev_init(void)
     LIDBG_GET;
     set_func_tbl();
 	
+	init_waitqueue_head(&read_wait);
 	lidbg_new_cdev(&dev_fops,"flydev");
 
     fs_regist_state("cpu_temp", &(g_var.temp));

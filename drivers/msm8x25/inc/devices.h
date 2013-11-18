@@ -314,9 +314,9 @@ enum
 				LCD_ON;\
 			}while(0)
 
-#define FORCE_LOGIC_ACC do{\		
-		u8 buff[] = {0x03, 0x01, 0xff};\	
-		lidbg("FORCE_LOGIC_ACC\n");\	
+#define FORCE_LOGIC_ACC do{\
+		u8 buff[] = {0x03, 0x01, 0xff};\
+		lidbg("FORCE_LOGIC_ACC\n");\
 		SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\
 			}while(0)
 
