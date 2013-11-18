@@ -155,7 +155,7 @@ int ts_nod_open (struct inode *inode, struct file *filp)
 
 ssize_t ts_nod_write (struct file *filp, const char __user *buf, size_t count, loff_t *f_pos)
 {
-    char *data_rec[20];
+    char data_rec[20];
     struct ts_device *tsdev = filp->private_data;
 
     if (copy_from_user( data_rec, buf, count))
