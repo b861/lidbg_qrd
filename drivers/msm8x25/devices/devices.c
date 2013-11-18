@@ -17,6 +17,7 @@ static struct task_struct *pwr_task;
 #endif
 static struct task_struct *dev_init_task;
 static struct task_struct *resume_task;
+static struct task_struct *Thermal_task = NULL;
 
 int thread_dev_init(void *data);
 int thread_led(void *data);
@@ -30,7 +31,7 @@ void fly_devices_init(void);
 int platform_id;
 bool i2c_c_ctrl = 0;
 int i2c_ctrl = 0;
-
+static bool voice_mute = 0;
 struct platform_devices_resource devices_resource;
 
 
@@ -372,7 +373,49 @@ void log_temp(void)
 		old_temp = cur_temp;
 	}
 }
+static int thread_thermal(void *data)
+{
+    long int timeout;
+	int cur_temp;
+	int flag_fan_run_statu =0;
+    printk("devices:thread_thermal()\n");
+    while(!kthread_should_stop())
+    {
+        timeout = 100;
+        while(timeout > 0)
+        {
+            //delay
+            timeout = schedule_timeout(timeout);
+        }
+	cur_temp = soc_temp_get();
+	 printk("MSM_THERM: %d *C\n",cur_temp);
 
+	 if(cur_temp > 65 && flag_fan_run_statu == 0 && !voice_mute)//on
+	 {
+		printk("Fan ON\n");
+		flag_fan_run_statu =1;
+		AIRFAN_BACK_ON;
+	 }
+	 else if(cur_temp <= 65 && flag_fan_run_statu == 1)//off
+	 {
+	 	printk("Fan OFF\n");
+		flag_fan_run_statu =0;
+		AIRFAN_BACK_OFF;
+	 }
+
+	 if(cur_temp > 80 && flag_fan_run_statu == 0 && voice_mute)//on
+	 {
+		printk("Warning voice mute but MSM_THERM overtop\n");
+	 }
+	 
+	 if(cur_temp > 85 && flag_fan_run_statu == 0 && voice_mute)//on
+	 {
+		printk("Warning voice mute but MSM_THERM overtop now runing Fan\n");
+		AIRFAN_BACK_ON;
+	 }
+    }
+    return 0;
+}
 void led_on(void)
 {
 
@@ -959,11 +1002,12 @@ static void parse_cmd(char *pt)
 	
     if (!strcmp(pt, "fan_on"))
     {
-		AIRFAN_BACK_ON;
+		voice_mute = 0;
 	}
     else if (!strcmp(pt, "fan_off"))
     {
 		AIRFAN_BACK_OFF;
+		voice_mute = 1;//mute
 	}
 	
 }
@@ -1097,7 +1141,7 @@ int dev_init(void)
     platform_driver_register(&soc_devices_driver);
     create_new_proc_entry_usb_dev();
     create_new_proc_entry_usb_host();
-
+    Thermal_task =  kthread_run(thread_thermal, NULL, "flythermalthread");
     return 0;
 }
 
