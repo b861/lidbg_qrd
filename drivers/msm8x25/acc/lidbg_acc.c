@@ -8,11 +8,6 @@ LIDBG_DEFINE;
 #define FASTBOOT_LOG_PATH "/data/log_fb.txt"
 
 
-void lidbg_accoff_main(void);
-void lidbg_accon_main(void);
-void lidbg_suspendon_main(void);
-void lidbg_suspendoff_main(void);
-
 int suspend_state = 0;   //0 :early suspend; 1: suspend 
 
 static DECLARE_COMPLETION(acc_ready);
@@ -26,8 +21,6 @@ DEFINE_SEMAPHORE(lidbg_acc_sem);
 
 static struct task_struct *acc_task;
 static struct task_struct *resume_task;
-static int thread_acc(void *data);
-static int thread_acc_resume(void *data);
 
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
@@ -44,12 +37,6 @@ typedef struct
 
 lidbg_acc *plidbg_acc = NULL;
 static struct task_struct *suspend_task;
-
-
-void wakelock_stat(int lock,const char* name)
-{
-	lidbg_wakelock_register(lock,name);
-}
 
 void show_wakelock(void)
 {
@@ -71,72 +58,20 @@ void show_wakelock(void)
     }
 }
 
-static void set_func_tbl(void)
-{
-   // plidbg_dev->soc_func_tbl.pfnSOC_Get_WakeLock = fastboot_get_wake_locks;
-    plidbg_dev->soc_func_tbl.pfnSOC_WakeLock_Stat = wakelock_stat;
-}
-
 #ifdef CONFIG_HAS_EARLYSUSPEND
 static void acc_early_suspend(struct early_suspend *handler)
 {
 	 lidbg("acc_early_suspend:%d\n", plidbg_acc->resume_count);
-	if(!fs_is_file_exist(HAL_SO))
-	{
-		//USB_WORK_DISENABLE;
-	}
+
 	suspend_state = 0;
 	complete(&suspend_start);
-	DUMP_FUN_ENTER;
 }
 
 static void acc_late_resume(struct early_suspend *handler)
 {
-
     DUMP_FUN_ENTER;
-
-        lidbg("create thread_acc_resume!\n");
-        resume_task = kthread_create(thread_acc_resume, NULL, "acc_resume_task");
-        if(IS_ERR(resume_task))
-        {
-            lidbg("Unable to start kernel  resume_task thread.\n");
-            PTR_ERR(resume_task);
-        }
-        else wake_up_process(resume_task);
-
-    DUMP_FUN_LEAVE;
 }
 #endif
-
-
-
-static int thread_acc_resume(void *data)
-{
-    DUMP_FUN_ENTER;
-
-   	 //msleep( );
-    	if(!fs_is_file_exist(HAL_SO))
-	{
-		//USB_WORK_ENABLE;
-	}
-
-
-    DUMP_FUN_LEAVE;
-    return 0;
-
-}
-
-
-void acc_pwroff(void)
-{
-	DUMP_FUN_ENTER;
-
-	//USB_WORK_DISENABLE;
-	
-#ifdef RUN_ACCBOOT
-
-#endif
-}
 
 
 static int thread_acc_suspend(void *data)
@@ -154,7 +89,7 @@ static int thread_acc_suspend(void *data)
 			while(1)
 			{
 				msleep(1000);
-                		time_count++;
+                time_count++;
 						
 				if(suspend_state == 0)    //if suspend state always in early suspend
 				{
@@ -181,13 +116,12 @@ ssize_t  acc_read(struct file *filp, char __user *buffer, size_t size, loff_t *o
 ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff_t *offset)
 {
 
-	lidbg("acc_write.\n");
-
-	{
-
 		char data_rec[20];
 		char *p=NULL;
 		int len=count;
+		
+		lidbg("acc_write.\n");
+		
 		if (copy_from_user( data_rec, buf, count))
 		{
 		printk("copy_from_user ERR\n");
@@ -204,32 +138,23 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
 		printk("acc_nod_write:==%d====[%s]\n", len, data_rec);
 
 		// processing data
-	         if(!strcmp(data_rec, "screen_on"))
+	    if(!strcmp(data_rec, "screen_on"))
 		{
 			printk("******into screen_on********\n");
-			lidbg_accon_main();
 		}
 		else if(!strcmp(data_rec, "screen_off"))
 		{
 			printk("******into screen_off********\n");
-			lidbg_accoff_main();
 		}
 		else if(!strcmp(data_rec, "suspend_on"))
 		{
 			printk("******into suspend_on********\n");
-			lidbg_suspendon_main();
-			lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SUSPEND_EVENT,NOTIFIER_MINOR_SUSPEND_ON));
+			lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_SUSPEND_UNPREPARE));
 		}
 		else if(!strcmp(data_rec, "suspend_off"))
 		{
 			printk("******into suspend_off********\n");
-			lidbg_suspendoff_main();
-			lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SUSPEND_EVENT,NOTIFIER_MINOR_SUSPEND_OFF));
-		}
-		else if(!strcmp(data_rec, "power"))
-		{
-			printk("******goto fastboot********\n");
-			SOC_Write_Servicer(CMD_FAST_POWER_OFF);
+			lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_SUSPEND_PREPARE));
 		}
 		else if(!strcmp(data_rec, "acc_on"))
 		{
@@ -243,21 +168,23 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
 			SOC_Write_Servicer(CMD_ACC_OFF);
 			lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_ACC_OFF));
 		}
-	}
+		else if(!strcmp(data_rec, "power"))
+		{
+			printk("******goto fastboot********\n");
+			SOC_Write_Servicer(CMD_FAST_POWER_OFF);
+		}		
+		
 	return count;
 }
 
 
 int acc_open(struct inode *inode, struct file *filp)
 {
-    //down(&lidbg_msg_sem);
-
     return 0;
 }
 
 int acc_release(struct inode *inode, struct file *filp)
 {
-    //up(&lidbg_msg_sem);
     return 0;
 }
 
@@ -265,14 +192,7 @@ void cb_password_poweroff(char *password )
 {
 	SOC_Write_Servicer(CMD_FAST_POWER_OFF);
 }
-void cb_password_disconnect_usb(char *password )
-{
-    lidbg_accoff_main();
-}
-void cb_password_connect_usb(char *password )
-{
-    lidbg_accon_main();
-}
+
 static int  acc_probe(struct platform_device *pdev)
 {
 	int ret;
@@ -292,10 +212,10 @@ static int  acc_probe(struct platform_device *pdev)
 	}
 
 	fs_regist_state("acc_times", (int*)&plidbg_acc->resume_count);
-	fs_file_separator(FASTBOOT_LOG_PATH);
 	te_regist_password("001200", cb_password_poweroff);
-	te_regist_password("001201", cb_password_disconnect_usb);
-	te_regist_password("001202", cb_password_connect_usb);
+
+	fs_file_separator(FASTBOOT_LOG_PATH);
+	
 	return 0;
 
 	fail_mem:
@@ -319,7 +239,6 @@ static struct miscdevice misc =
 
 };
 
-
 static int  acc_remove(struct platform_device *pdev)
 {
     return 0;
@@ -338,12 +257,10 @@ static int acc_resume(struct device *dev)
 static int acc_suspend(struct device *dev)
 {
     DUMP_FUN_ENTER;
-    //work_en = 0;
     suspend_state = 1;
     return 0;
 
 }
-
 
 static struct dev_pm_ops acc_pm_ops =
 {
@@ -371,17 +288,14 @@ static struct platform_device lidbg_acc_device =
     .id                 = -1,
 };
 
-
 static int __init acc_init(void)
 {
 	int ret;
 	LIDBG_GET;
-    	set_func_tbl();
 
     platform_device_register(&lidbg_acc_device);
 
     platform_driver_register(&acc_driver);
-
 
 	INIT_COMPLETION(acc_ready);
 	ret = misc_register(&misc);
@@ -395,7 +309,6 @@ static int __init acc_init(void)
 	}
 #endif
 
-
 	 INIT_COMPLETION(suspend_start);
 	suspend_task = kthread_create(thread_acc_suspend, NULL, "suspend_task");
 	if(IS_ERR(suspend_task))
@@ -405,11 +318,9 @@ static int __init acc_init(void)
 	}
 	else wake_up_process(suspend_task);
 
-
 	lidbg_chmod("/dev/lidbg_acc");
 	
-	lidbg (DEVICE_NAME"acc  dev_init\n");
-
+	lidbg (DEVICE_NAME"acc dev_init\n");
 
 	return ret;
 }
@@ -417,53 +328,12 @@ static int __init acc_init(void)
 static void __exit acc_exit(void)
 {
 	misc_deregister(&misc);
-    	lidbg (DEVICE_NAME"acc  dev_exit\n");
-}
-
-//zone end
-void lidbg_accoff_main(void)
-{
-	printk("\n************into lidbg_accoff_main******\n");
-	//LCD_OFF;
-	    u8 buff[] = {0x02, 0x0d, 0x0};//LPCControlPWREnable
-            SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
-			
-	if(SOC_Hal_Acc_Callback)
-		SOC_Hal_Acc_Callback(0);
-}
-
-void lidbg_accon_main(void)
-{
-	//LCD_ON;
-	printk("\n************into lidbg_accon_main******\n");
-	u8 buff[] = {0x02, 0x0d, 0x1};//LPCControlPWREnable
-        SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
-	if(SOC_Hal_Acc_Callback)
-		SOC_Hal_Acc_Callback(1);
-
-}
-
-void lidbg_suspendon_main(void)
-{
-	printk("\n************into lidbg_suspendon_main******\n");
-	if(SOC_Hal_Acc_Callback)
-		SOC_Hal_Acc_Callback(2);
-	//msleep(4000);
-	USB_WORK_ENABLE;
-}
-
-void lidbg_suspendoff_main(void)
-{
-	printk("\n************into lidbg_suspendoff_main******\n");
-	USB_WORK_DISENABLE;
-	if(SOC_Hal_Acc_Callback)
-		SOC_Hal_Acc_Callback(3);	
+    	lidbg (DEVICE_NAME"acc dev_exit\n");
 }
 
 module_init(acc_init);
 module_exit(acc_exit);
 
 MODULE_LICENSE("GPL");
-MODULE_DESCRIPTION("mstar lidbg_acc driver");
+MODULE_DESCRIPTION("lidbg_acc driver");
 
-EXPORT_SYMBOL(lidbg_accoff_main);

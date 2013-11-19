@@ -84,11 +84,28 @@ static int lidbg_event(struct notifier_block *this,
 	
 	switch (event) {
 	case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_ACC_ON):
+		LCD_ON;
 		unmute_ns();
+		if(SOC_Hal_Acc_Callback)
+			SOC_Hal_Acc_Callback(1);
 		break;
 	case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_ACC_OFF):
+		LCD_OFF;
 		mute_s();
+		if(SOC_Hal_Acc_Callback)
+			SOC_Hal_Acc_Callback(0);
 		break;
+
+	case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_SUSPEND_PREPARE):
+		USB_WORK_DISENABLE;
+		if(SOC_Hal_Acc_Callback)
+			SOC_Hal_Acc_Callback(3);
+		break;
+	case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_SUSPEND_UNPREPARE):
+		if(SOC_Hal_Acc_Callback)
+			SOC_Hal_Acc_Callback(2);
+		USB_WORK_ENABLE;
+		break;	
 	default:
 		break;
 	}

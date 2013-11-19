@@ -226,11 +226,13 @@ int SOC_BL_Set( u32 bl_level)
 
 void SOC_LCD_Reset(void)
 {
+#if 0
 	SOC_BL_Set(PWM_BL_MIN);
 	msleep(20);// bp loop time
 	LCD_RESET;
 	msleep(20);//wait lcd ready
 	SOC_BL_Set(PWM_BL_MAX);
+#endif
 }
 
 

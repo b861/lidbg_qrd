@@ -108,7 +108,7 @@ enum
 #define USB_SWITCH_DISCONNECT do{ LPC_IO_SET(0x11, 0);}while(0)
 #define USB_SWITCH_CONNECT do{LPC_IO_SET(0x11, 1); }while(0)
 
-#else
+#else  //v4
 
 #define LPC_IO_SET(cmd,status)  do{\
 	u8 buff[] = {0x02, cmd, status};\
@@ -119,11 +119,11 @@ enum
 #define GPIO_LED_FLY (82)
 
 // PANNE_PEN , RESET
-#define LCD_ON  do{      /* LPC_IO_SET(0x0f, 1);*/\
-    					    SOC_IO_Output(0, GPIO_LCD3, 1);\
+#define LCD_ON  do{      	u8 buff[] = {0x02, 0x0d, 0x1};\
+        SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\
 				}while(0)
-#define LCD_OFF   do{       /*LPC_IO_SET(0x0f, 0);*/\
-    					    SOC_IO_Output(0, GPIO_LCD3, 0);\
+#define LCD_OFF   do{     u8 buff[] = {0x02, 0x0d, 0x0};\
+            SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\
 				}while(0)
 
 #define USB_HUB_ENABLE do{LPC_IO_SET(0x09, 1); }while(0)
