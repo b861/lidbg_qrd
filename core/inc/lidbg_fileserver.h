@@ -59,7 +59,7 @@ extern void fs_enable_kmsg( bool enable );
 extern void fs_save_state(void);
 extern int  lidbg_cp(char from[], char to[]);
 extern int get_machine_id(void);
-extern int fs_get_file_content(char *file, char *rbuff, int readlen);
+extern int fs_readwrite_file(const char *filename, char *wbuff, char *rbuff, int readlen);
 extern int fs_update(const char *ko_list, const char *fromdir, const char *todir);
 extern int fs_dump_kmsg(char *tag, int size );
 extern int fs_regist_state(char *key, int *value);

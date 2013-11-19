@@ -308,9 +308,9 @@ bool fs_clear_file(char *filename)
 {
     return clear_file(filename);
 }
-int fs_get_file_content(char *file, char *rbuff, int readlen)
+int fs_readwrite_file(const char *filename, char *wbuff, char *rbuff, int readlen)
 {
-    return readwrite_file(file, NULL, rbuff, readlen);
+    return readwrite_file(filename, wbuff, rbuff, readlen);
 }
 int  lidbg_cp(char from[], char to[])
 {
@@ -328,7 +328,7 @@ void lidbg_fs_cmn_init(void)
 }
 
 EXPORT_SYMBOL(lidbg_cp);
-EXPORT_SYMBOL(fs_get_file_content);
+EXPORT_SYMBOL(fs_readwrite_file);
 EXPORT_SYMBOL(fs_regist_filedetec);
 EXPORT_SYMBOL(fs_copy_file);
 EXPORT_SYMBOL(fs_is_file_exist);
