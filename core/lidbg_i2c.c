@@ -541,6 +541,11 @@ void mod_i2c_main(int argc, char **argv)
 #define I2C_DEVICES_MAX (32)
 
         i2c_devices = kmalloc(I2C_DEVICES_MAX, GFP_KERNEL);
+		if (i2c_devices == NULL)
+		{
+			LIDBG_ERR("kmalloc.\n");		
+		}
+
         memset(i2c_devices, 0, I2C_DEVICES_MAX);
 
 

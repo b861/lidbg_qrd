@@ -23,6 +23,10 @@ int msm8x25_init(void)
     {
         lidbg( "smem_alloc fail,kmalloc mem!\n");
         p_fly_smem = (struct fly_smem *)kmalloc(sizeof(struct fly_smem), GFP_KERNEL);
+		if(p_fly_smem == NULL)
+	    {
+	        LIDBG_ERR("<err.register_wakelock:kzalloc.name>\n");
+	    }
         memset(p_fly_smem, 0, sizeof(struct fly_smem));
     }
 	

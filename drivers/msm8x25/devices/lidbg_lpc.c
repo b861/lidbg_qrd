@@ -52,6 +52,10 @@ void LPCCombinDataStream(BYTE *p, UINT len)
     if (3 + len + 1 > 16)
     {
         buf = (BYTE *)kmalloc(sizeof(BYTE) * (4 + len), GFP_KERNEL);
+		if (buf == NULL)
+		{
+			LIDBG_ERR("kmalloc.\n");		
+		}
         bMalloc = TRUE;
     }
     else

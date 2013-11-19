@@ -62,8 +62,12 @@ void mod_io_main(int argc, char **argv)
 		  if(!strcmp(argv[1], "request"))
 		  {
 
-			struct io_int_config   *pio_int_config;
+			struct io_int_config   *pio_int_config = NULL;
 			pio_int_config = kmalloc(sizeof(struct io_int_config), GFP_KERNEL);
+			if (pio_int_config == NULL)
+			{
+				LIDBG_ERR("kmalloc.\n");		
+			}
 
 			pio_int_config->ext_int_num = simple_strtoul(argv[2], 0, 0);
 			lidbg("request ext_int_num: %d\n", pio_int_config->ext_int_num);

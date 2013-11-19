@@ -453,6 +453,12 @@ int fly_hal_init(void)
 	ret = misc_register(&misc);
 
 	plidbg_dev = kmalloc(sizeof(struct lidbg_hal), GFP_KERNEL);
+	if (plidbg_dev == NULL)
+	{
+		
+		LIDBG_ERR("kmalloc.\n");		
+		return 0;
+	}
 	{
 		int i;
 		for(i = 0; i < sizeof(plidbg_dev->soc_func_tbl) / 4; i++)
