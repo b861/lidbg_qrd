@@ -54,6 +54,15 @@ bool suspend_flag = 0;
 wait_queue_head_t read_wait;
 u8 audio_data_for_hal[2];
 
+void cb_password_enable_usb(char *password )
+{
+    	USB_WORK_ENABLE;
+}
+void cb_password_disable_usb(char *password )
+{
+    	USB_WORK_DISENABLE;
+}
+
 void unmute_ns(void)
 {
 	printk("[futengfei].unmute_ns");
@@ -625,6 +634,8 @@ static int soc_dev_probe(struct platform_device *pdev)
 #endif
     //fake suspend
     //SOC_Fake_Register_Early_Suspend(&early_suspend);
+	te_regist_password("001210", cb_password_enable_usb);
+	te_regist_password("001211", cb_password_disable_usb);
 
 	register_lidbg_notifier(&lidbg_notifier);
 #if (defined(BOARD_V1) || defined(BOARD_V2) || defined(BOARD_V3))

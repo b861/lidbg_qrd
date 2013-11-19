@@ -129,8 +129,8 @@ enum
 #define USB_HUB_ENABLE do{LPC_IO_SET(0x09, 1); }while(0)
 #define USB_HUB_DISABLE do{LPC_IO_SET(0x09, 0); }while(0)
 
-#define USB_SWITCH_DISCONNECT do{ LPC_IO_SET(0x08, 0);}while(0)
-#define USB_SWITCH_CONNECT do{LPC_IO_SET(0x08, 1); }while(0)
+#define USB_SWITCH_DISCONNECT do{ SOC_IO_Output(0, 58, 1);}while(0)
+#define USB_SWITCH_CONNECT do{SOC_IO_Output(0, 58, 0); }while(0)
 
 #endif
 

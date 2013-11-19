@@ -155,15 +155,14 @@ static int thread_acc_suspend(void *data)
 			{
 				msleep(1000);
                 		time_count++;
-				if(time_count >= 5)		
-					show_wakelock();
+						
 				if(suspend_state == 0)    //if suspend state always in early suspend
 				{
-					 if(time_count >= 10)
+					 if(time_count >= 15)
 					 {
 						lidbgerr("thread_acc_suspend wait suspend timeout!\n");
-						//show_wakelock();
-						break;
+						show_wakelock();
+						//break;
 					 }
 				}
 				else
@@ -219,13 +218,13 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
 		{
 			printk("******into suspend_on********\n");
 			lidbg_suspendon_main();
-			//lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SUSPEND_EVENT,NOTIFIER_MINOR_SUSPEND_ON));
+			lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SUSPEND_EVENT,NOTIFIER_MINOR_SUSPEND_ON));
 		}
 		else if(!strcmp(data_rec, "suspend_off"))
 		{
 			printk("******into suspend_off********\n");
 			lidbg_suspendoff_main();
-			//lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SUSPEND_EVENT,NOTIFIER_MINOR_SUSPEND_OFF));
+			lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SUSPEND_EVENT,NOTIFIER_MINOR_SUSPEND_OFF));
 		}
 		else if(!strcmp(data_rec, "power"))
 		{
