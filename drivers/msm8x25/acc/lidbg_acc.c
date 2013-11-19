@@ -118,7 +118,7 @@ ssize_t  acc_read(struct file *filp, char __user *buffer, size_t size, loff_t *o
 ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff_t *offset)
 {
 
-		char data_rec[20];
+		char data_rec[32];
 		char *p=NULL;
 		int len=count;
 		

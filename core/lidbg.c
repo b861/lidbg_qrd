@@ -148,7 +148,7 @@ static ssize_t lidbg_write(struct file *filp, const char __user *buf,
 	
 	parse_cmd(dev->mem);
 #else
-
+/*
 	char *mem = NULL;
 	mem = (char *)kmalloc(size+1,GFP_KERNEL);//size+1 for '\0'
 	if (mem == NULL)
@@ -156,6 +156,8 @@ static ssize_t lidbg_write(struct file *filp, const char __user *buf,
         lidbg("lidbg_write kmalloc err\n");
         return 0;
     }
+*/
+	char mem[64];
 	memset(mem, '\0', size+1);
 
 	/*用户空间->内核空间*/
@@ -166,7 +168,7 @@ static ssize_t lidbg_write(struct file *filp, const char __user *buf,
 	
 	//lidbg("size:%d,%s\n",size,mem);
 	parse_cmd(mem);
-	kfree(mem);
+	//kfree(mem);
 #endif
 
     return size;//若不为size则重复执行
