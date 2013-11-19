@@ -70,6 +70,8 @@ static void acc_early_suspend(struct early_suspend *handler)
 static void acc_late_resume(struct early_suspend *handler)
 {
     DUMP_FUN_ENTER;
+	suspend_state = 1;
+
 }
 #endif
 
@@ -93,7 +95,7 @@ static int thread_acc_suspend(void *data)
 						
 				if(suspend_state == 0)    //if suspend state always in early suspend
 				{
-					 if(time_count >= 15)
+					 if(time_count >= 30)
 					 {
 						lidbgerr("thread_acc_suspend wait suspend timeout!\n");
 						show_wakelock();
@@ -138,25 +140,7 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
 		printk("acc_nod_write:==%d====[%s]\n", len, data_rec);
 
 		// processing data
-	    if(!strcmp(data_rec, "screen_on"))
-		{
-			printk("******into screen_on********\n");
-		}
-		else if(!strcmp(data_rec, "screen_off"))
-		{
-			printk("******into screen_off********\n");
-		}
-		else if(!strcmp(data_rec, "suspend_on"))
-		{
-			printk("******into suspend_on********\n");
-			lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_SUSPEND_UNPREPARE));
-		}
-		else if(!strcmp(data_rec, "suspend_off"))
-		{
-			printk("******into suspend_off********\n");
-			lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_SUSPEND_PREPARE));
-		}
-		else if(!strcmp(data_rec, "acc_on"))
+		 if(!strcmp(data_rec, "acc_on"))
 		{
 			printk("******goto acc_on********\n");
 			SOC_Write_Servicer(CMD_ACC_ON);

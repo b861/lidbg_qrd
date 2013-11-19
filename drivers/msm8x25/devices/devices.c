@@ -34,12 +34,16 @@ int thread_usb(void *data);
 static int thread_resume(void *data);
 
 void fly_devices_init(void);
+static int lidbg_event(struct notifier_block *this, unsigned long event, void *ptr);
 
 int platform_id;
 bool i2c_c_ctrl = 0;
 int i2c_ctrl = 0;
 struct platform_devices_resource devices_resource;
 
+static struct notifier_block lidbg_notifier = {
+	.notifier_call = lidbg_event,
+};
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
 static void devices_early_suspend(struct early_suspend *handler);
@@ -77,45 +81,7 @@ void mute_s(void)
 	audio_data_for_hal[1]=0x01;
 	wake_up_interruptible(&read_wait);
 }
-static int lidbg_event(struct notifier_block *this,
-				unsigned long event, void *ptr)
-{
-	DUMP_FUN;
-	
-	switch (event) {
-	case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_ACC_ON):
-		LCD_ON;
-		unmute_ns();
-		if(SOC_Hal_Acc_Callback)
-			SOC_Hal_Acc_Callback(1);
-		break;
-	case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_ACC_OFF):
-		LCD_OFF;
-		mute_s();
-		if(SOC_Hal_Acc_Callback)
-			SOC_Hal_Acc_Callback(0);
-		break;
 
-	case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_SUSPEND_PREPARE):
-		USB_WORK_DISENABLE;
-		if(SOC_Hal_Acc_Callback)
-			SOC_Hal_Acc_Callback(3);
-		break;
-	case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_SUSPEND_UNPREPARE):
-		if(SOC_Hal_Acc_Callback)
-			SOC_Hal_Acc_Callback(2);
-		USB_WORK_ENABLE;
-		break;	
-	default:
-		break;
-	}
-	
-	return NOTIFY_DONE;
-}
-
-static struct notifier_block lidbg_notifier = {
-	.notifier_call = lidbg_event,
-};
 
 
 
@@ -1050,9 +1016,67 @@ static void parse_cmd(char *pt)
     {
 		hal_fan_on = false;
 	}
+
+	else if(!strcmp(pt, "screen_on"))
+	{
+		printk("******into screen_on********\n");
+		LCD_ON;
+		unmute_ns();
+		if(SOC_Hal_Acc_Callback)
+			SOC_Hal_Acc_Callback(1);
+	}
+	else if(!strcmp(pt, "screen_off"))
+	{
+		printk("******into screen_off********\n");
+		LCD_OFF;
+		mute_s();
+		if(SOC_Hal_Acc_Callback)
+			SOC_Hal_Acc_Callback(0);
+		;
+	}
+	else if(!strcmp(pt, "suspend_on"))
+	{
+		printk("******into suspend_on********\n");
+		lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_SUSPEND_UNPREPARE));
+	}
+	else if(!strcmp(pt, "suspend_off"))
+	{
+		printk("******into suspend_off********\n");
+		lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_SUSPEND_PREPARE));
+	}
 #endif
 	
 }
+static int lidbg_event(struct notifier_block *this,
+				unsigned long event, void *ptr)
+{
+	DUMP_FUN;
+	
+	switch (event) {
+	case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_ACC_ON):
+
+		break;
+	case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_ACC_OFF):
+
+		break;
+
+	case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_SUSPEND_PREPARE):
+		USB_WORK_DISENABLE;
+		if(SOC_Hal_Acc_Callback)
+			SOC_Hal_Acc_Callback(3);
+		break;
+	case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_SUSPEND_UNPREPARE):
+		if(SOC_Hal_Acc_Callback)
+			SOC_Hal_Acc_Callback(2);
+		USB_WORK_ENABLE;
+		break;	
+	default:
+		break;
+	}
+	
+	return NOTIFY_DONE;
+}
+
 
 static ssize_t dev_write(struct file *filp, const char __user *buf,
                            size_t size, loff_t *ppos)
