@@ -6,7 +6,13 @@ LIDBG_DEFINE;
 static int ts_scan_delayms =500;
 static int is_warned =0;
 #define TS_I2C_BUS (1)
-#define FLYHAL_CONFIG_PATH "/flydata/flyhalconfig"
+
+#if (defined(BOARD_V1) || defined(BOARD_V2) || defined(BOARD_V3))
+	#define FLYHAL_CONFIG_PATH "/flydata/flyhalconfig"
+#else
+	#define FLYHAL_CONFIG_PATH "/flysystem/flyconfig/default/halconfig/flyhalconfig.txt"
+#endif
+
 static LIST_HEAD(flyhal_config_list);
 int ts_should_revert = -1;
 
