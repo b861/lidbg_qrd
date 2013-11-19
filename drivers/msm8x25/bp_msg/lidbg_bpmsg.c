@@ -13,6 +13,9 @@ smem_log_deep *smem_log_temp = NULL;
 
 int thread_bp_msg(void *data)
 {
+	int bp_msg_en;	
+	FS_REGISTER_INT(bp_msg_en,"bp_msg_en",1,NULL);
+	
     smem_log_temp->write_flag = 1;
 
     while(1)
@@ -54,7 +57,7 @@ int thread_bp_msg(void *data)
 
             if(start_index != end_index)
             {
-                printk("%s\n", smem_log_temp->log[end_index]);
+                if(bp_msg_en)printk("%s\n", smem_log_temp->log[end_index]);
                 smem_log_temp->end_pos = (end_index + 1)  % TOTAL_LOGS;
                 msleep(50);
             }
