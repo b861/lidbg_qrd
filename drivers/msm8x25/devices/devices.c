@@ -17,7 +17,14 @@ static struct task_struct *pwr_task;
 #endif
 static struct task_struct *dev_init_task;
 static struct task_struct *resume_task;
+
+#if (defined(BOARD_V1) || defined(BOARD_V2) || defined(BOARD_V3))
+#else
 static struct task_struct *Thermal_task = NULL;
+static int fan_onoff_temp;
+static bool flag_fan_run_statu = false;
+static bool hal_fan_on = true;
+#endif
 
 int thread_dev_init(void *data);
 int thread_led(void *data);
@@ -31,7 +38,6 @@ void fly_devices_init(void);
 int platform_id;
 bool i2c_c_ctrl = 0;
 int i2c_ctrl = 0;
-static bool voice_mute = 0;
 struct platform_devices_resource devices_resource;
 
 
@@ -373,49 +379,48 @@ void log_temp(void)
 		old_temp = cur_temp;
 	}
 }
+#if (defined(BOARD_V1) || defined(BOARD_V2) || defined(BOARD_V3))
+#else
 static int thread_thermal(void *data)
 {
     long int timeout;
 	int cur_temp;
-	int flag_fan_run_statu =0;
     printk("devices:thread_thermal()\n");
     while(!kthread_should_stop())
-    {
+    {/*
         timeout = 100;
         while(timeout > 0)
         {
             //delay
             timeout = schedule_timeout(timeout);
-        }
+        }*/
+        msleep(1000);
 	cur_temp = soc_temp_get();
 	 printk("MSM_THERM: %d *C\n",cur_temp);
 
-	 if(cur_temp > 65 && flag_fan_run_statu == 0 && !voice_mute)//on
+	 if( (cur_temp > fan_onoff_temp) & hal_fan_on )//on
 	 {
-		printk("Fan ON\n");
-		flag_fan_run_statu =1;
-		AIRFAN_BACK_ON;
+	 	if(!flag_fan_run_statu)
+	 	{
+			printk("Fan ON\n");
+			flag_fan_run_statu =true;
+			AIRFAN_BACK_ON;
+	 	}
 	 }
-	 else if(cur_temp <= 65 && flag_fan_run_statu == 1)//off
+	 else
 	 {
-	 	printk("Fan OFF\n");
-		flag_fan_run_statu =0;
-		AIRFAN_BACK_OFF;
-	 }
-
-	 if(cur_temp > 80 && flag_fan_run_statu == 0 && voice_mute)//on
-	 {
-		printk("Warning voice mute but MSM_THERM overtop\n");
+	 	if(flag_fan_run_statu)
+	 	{
+		 	printk("Fan OFF\n");
+			flag_fan_run_statu =false;
+			AIRFAN_BACK_OFF;
+	 	}
 	 }
 	 
-	 if(cur_temp > 85 && flag_fan_run_statu == 0 && voice_mute)//on
-	 {
-		printk("Warning voice mute but MSM_THERM overtop now runing Fan\n");
-		AIRFAN_BACK_ON;
-	 }
     }
     return 0;
 }
+#endif
 void led_on(void)
 {
 
@@ -622,7 +627,11 @@ static int soc_dev_probe(struct platform_device *pdev)
     //SOC_Fake_Register_Early_Suspend(&early_suspend);
 
 	register_lidbg_notifier(&lidbg_notifier);
-
+#if (defined(BOARD_V1) || defined(BOARD_V2) || defined(BOARD_V3))
+#else
+    Thermal_task =  kthread_run(thread_thermal, NULL, "flythermalthread");
+	FS_REGISTER_INT(fan_onoff_temp,"fan_onoff_temp",65,NULL);
+#endif	
     return 0;
 
 }
@@ -719,6 +728,13 @@ static void devices_late_resume(struct early_suspend *handler)
 
 		//lidbg_fs_log(TEMP_LOG_PATH,"*\n");
     }
+	
+#if (defined(BOARD_V1) || defined(BOARD_V2) || defined(BOARD_V3))
+#else
+	flag_fan_run_statu = false;
+	AIRFAN_BACK_OFF;
+#endif
+
     DUMP_FUN_LEAVE;
 }
 #endif
@@ -999,16 +1015,18 @@ int dev_open(struct inode *inode, struct file *filp)
 static void parse_cmd(char *pt)
 {
 	lidbg("%s\n",pt);
-	
+#if (defined(BOARD_V1) || defined(BOARD_V2) || defined(BOARD_V3))
+#else	
     if (!strcmp(pt, "fan_on"))
     {
-		voice_mute = 0;
+		hal_fan_on = true;
 	}
     else if (!strcmp(pt, "fan_off"))
     {
-		AIRFAN_BACK_OFF;
-		voice_mute = 1;//mute
+		//AIRFAN_BACK_OFF;
+		hal_fan_on = false;//mute
 	}
+#endif
 	
 }
 
@@ -1141,7 +1159,7 @@ int dev_init(void)
     platform_driver_register(&soc_devices_driver);
     create_new_proc_entry_usb_dev();
     create_new_proc_entry_usb_host();
-    Thermal_task =  kthread_run(thread_thermal, NULL, "flythermalthread");
+
     return 0;
 }
 
