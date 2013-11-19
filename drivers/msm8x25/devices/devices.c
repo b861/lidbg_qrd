@@ -388,48 +388,41 @@ void log_temp(void)
 		old_temp = cur_temp;
 	}
 }
+
 #if (defined(BOARD_V1) || defined(BOARD_V2) || defined(BOARD_V3))
 #else
 static int thread_thermal(void *data)
 {
-    long int timeout;
 	int cur_temp;
-    printk("devices:thread_thermal()\n");
+    DUMP_FUN;
     while(!kthread_should_stop())
-    {/*
-        timeout = 100;
-        while(timeout > 0)
-        {
-            //delay
-            timeout = schedule_timeout(timeout);
-        }*/
-        msleep(1000);
-	cur_temp = soc_temp_get();
-	 printk("MSM_THERM: %d *C\n",cur_temp);
-
-	 if( (cur_temp > fan_onoff_temp) & hal_fan_on )//on
-	 {
-	 	if(!flag_fan_run_statu)
-	 	{
-			printk("Fan ON\n");
-			flag_fan_run_statu =true;
-			AIRFAN_BACK_ON;
-	 	}
-	 }
-	 else
-	 {
-	 	if(flag_fan_run_statu)
-	 	{
-		 	printk("Fan OFF\n");
-			flag_fan_run_statu =false;
-			AIRFAN_BACK_OFF;
-	 	}
-	 }
-	 
+    {
+	    msleep(1000);
+		
+		log_temp();
+		cur_temp = soc_temp_get();
+		// printk("MSM_THERM: %d *C\n",cur_temp);
+		 if( (cur_temp > fan_onoff_temp) & hal_fan_on )//on
+		 {
+		 	if(!flag_fan_run_statu)
+		 	{
+				flag_fan_run_statu = true;
+				AIRFAN_BACK_ON;
+		 	}
+		 }
+		 else //off
+		 {
+		 	if(flag_fan_run_statu)
+		 	{
+				flag_fan_run_statu = false;
+				AIRFAN_BACK_OFF;
+		 	}
+		 }
     }
     return 0;
 }
 #endif
+
 void led_on(void)
 {
 
@@ -457,7 +450,10 @@ void led_on(void)
 
 
 #endif
+#if (defined(BOARD_V1) || defined(BOARD_V2) || defined(BOARD_V3))
 	log_temp();
+#endif
+
 
 }
 
@@ -638,6 +634,7 @@ static int soc_dev_probe(struct platform_device *pdev)
 	te_regist_password("001211", cb_password_disable_usb);
 
 	register_lidbg_notifier(&lidbg_notifier);
+
 #if (defined(BOARD_V1) || defined(BOARD_V2) || defined(BOARD_V3))
 #else
     Thermal_task =  kthread_run(thread_thermal, NULL, "flythermalthread");
@@ -1034,8 +1031,7 @@ static void parse_cmd(char *pt)
 	}
     else if (!strcmp(pt, "fan_off"))
     {
-		//AIRFAN_BACK_OFF;
-		hal_fan_on = false;//mute
+		hal_fan_on = false;
 	}
 #endif
 	
