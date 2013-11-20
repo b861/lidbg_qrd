@@ -12,23 +12,26 @@ static int g_wakelock_dbg_item = 0;
 
 
 
-struct wakelock_item *get_wakelock_item(const char *name)
+struct wakelock_item *get_wakelock_item(struct list_head *client_list, const char *name)
 {
     struct wakelock_item *pos;
-    struct list_head *client_list = &lidbg_wakelock_list;
+    unsigned long flags;
+
+    spin_lock_irqsave(&new_item_lock, flags);
     list_for_each_entry(pos, client_list, tmp_list)
     {
         if (!strcmp(pos->name, name))
         {
+            spin_unlock_irqrestore(&new_item_lock, flags);
             return pos;
         }
     }
+    spin_unlock_irqrestore(&new_item_lock, flags);
     return NULL;
 }
-bool new_wakelock_item(bool cnt_wakelock, const char *name)
+bool new_wakelock_item(struct list_head *client_list, bool cnt_wakelock, const char *name)
 {
     struct wakelock_item *add_new_item;
-    struct list_head *client_list = &lidbg_wakelock_list;
     unsigned long flags;
 
     if(g_wakelock_dbg_item)
@@ -50,8 +53,8 @@ bool new_wakelock_item(bool cnt_wakelock, const char *name)
     }
 
     strcpy(add_new_item->name, name);
-    add_new_item->cunt++;
-    add_new_item->cunt_max++;
+    add_new_item->cunt = 1;
+    add_new_item->cunt_max = 1;
     add_new_item->is_count_wakelock = cnt_wakelock;
     if(g_wakelock_dbg_item)
         lidbg("-----3\n");
@@ -64,9 +67,9 @@ bool new_wakelock_item(bool cnt_wakelock, const char *name)
 }
 
 
-bool register_wakelock(bool cnt_wakelock, const char *name)
+bool register_wakelock(struct list_head *client_list, bool cnt_wakelock, const char *name)
 {
-    struct wakelock_item *wakelock_pos = get_wakelock_item(name);
+    struct wakelock_item *wakelock_pos = get_wakelock_item(client_list, name);
     if(wakelock_pos)
     {
         wakelock_pos->cunt++;
@@ -76,12 +79,12 @@ bool register_wakelock(bool cnt_wakelock, const char *name)
         return true;
     }
     else
-        return new_wakelock_item(cnt_wakelock, name);
+        return new_wakelock_item( client_list, cnt_wakelock, name);
 }
 
-bool unregister_wakelock(const char *name)
+bool unregister_wakelock(struct list_head *client_list, const char *name)
 {
-    struct wakelock_item *wakelock_pos = get_wakelock_item(name);
+    struct wakelock_item *wakelock_pos = get_wakelock_item(client_list, name);
 
     if(wakelock_pos)
     {
@@ -101,9 +104,9 @@ bool unregister_wakelock(const char *name)
     else
     {
         //can't find the wakelock? show the wakelock list.
+        lidbg("<ERR:[%s]>\n", name );
         if(g_wakelock_dbg)
         {
-            struct list_head *client_list = &lidbg_wakelock_list;
             if(!list_empty(client_list))
             {
                 lidbg("<===============WAKELOCK_LIST=================%s>\n", name);
@@ -118,8 +121,10 @@ void lidbg_show_wakelock(void)
 {
     int index = 0;
     struct wakelock_item *pos;
-    struct list_head *client_list = &lidbg_wakelock_list;
+    struct list_head *client_list ;
 
+    return ;
+    client_list = &lidbg_wakelock_list;
     if(list_empty(client_list))
         lidbg("<err.lidbg_show_wakelock:nobody_register>\n");
     list_for_each_entry(pos, client_list, tmp_list)
@@ -175,9 +180,9 @@ void lidbg_wakelock_stat(int argc, char **argv)
         is_count_wakelock = true;
 
     if (!strcmp(wakelock_action, "lock"))
-        register_wakelock(is_count_wakelock, wakelock_name);
+        register_wakelock(&lidbg_wakelock_list, is_count_wakelock, wakelock_name);
     else if (!strcmp(wakelock_action, "unlock"))
-        unregister_wakelock(wakelock_name);
+        unregister_wakelock(&lidbg_wakelock_list, wakelock_name);
     else if (!strcmp(wakelock_action, "show"))
         lidbg_show_wakelock();
     else if (!strcmp(wakelock_action, "dbg"))
@@ -191,11 +196,11 @@ void lidbg_wakelock_register(bool to_lock, const char *name)
 
     if(to_lock)
     {
-        register_wakelock(false, name);
+        register_wakelock(&lidbg_wakelock_list, false, name);
     }
     else
     {
-        unregister_wakelock(name);
+        unregister_wakelock(&lidbg_wakelock_list, name);
     }
 }
 
