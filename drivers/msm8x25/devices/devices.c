@@ -1081,18 +1081,22 @@ static int lidbg_event(struct notifier_block *this,
 static ssize_t dev_write(struct file *filp, const char __user *buf,
                            size_t size, loff_t *ppos)
 {
-	//char *mem = NULL,*p = NULL;
 	char *p = NULL;
 	int len=size;
-	/*
-	mem = (char *)kmalloc(size+1,GFP_KERNEL);//size+1 for '\0'
-	if (mem == NULL)
-    {
-        lidbg("dev_write kmalloc err\n");
-        return 0;
-    }
-    */
-    char mem[32];
+	char tmp[32];
+	char *mem = tmp;
+	bool is_alloc = 0;
+	if(size >= 32)
+	{
+		mem = (char *)kmalloc(size+1,GFP_KERNEL);//size+1 for '\0'
+		if (mem == NULL)
+	    {
+	        lidbg("dev_write kmalloc err\n");
+	        return 0;
+	    }
+		is_alloc = 1;
+	}
+
 	memset(mem, '\0', size+1);
 
 	if(copy_from_user(mem, buf, size))
@@ -1111,7 +1115,8 @@ static ssize_t dev_write(struct file *filp, const char __user *buf,
 	
 	parse_cmd(mem);
 	
-	//kfree(mem);
+	if(is_alloc)
+		kfree(mem);
 	
 	return size;//warn:don't forget it;
 }
