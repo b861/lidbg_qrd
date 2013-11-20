@@ -48,7 +48,7 @@ void show_wakelock(void)
         lidbg("<err.lidbg_show_wakelock:nobody_register>\n");
     list_for_each_entry(pos, client_list, tmp_list)
     {
-        if (pos->name && pos->cunt >0)
+        if (pos->name && pos->cunt > 0)
         {
             index++;
             lidbg("<%d.INFO%d:[%s].%d,%d>\n", pos->cunt, index, pos->name, pos->is_count_wakelock, pos->cunt_max);
@@ -95,7 +95,7 @@ static int thread_acc_suspend(void *data)
 						
 				if(suspend_state == 0)    //if suspend state always in early suspend
 				{
-					 if(time_count >= 40)
+					 if(time_count >= 60)
 					 {
 						lidbgerr("thread_acc_suspend wait suspend timeout!\n");
 						show_wakelock();
