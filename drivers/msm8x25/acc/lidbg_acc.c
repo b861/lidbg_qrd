@@ -97,10 +97,11 @@ void show_wakelock(void)
 }
 
 struct list_head *active_wake_locks = NULL;
-void fastboot_get_wake_locks(struct list_head *p)
+void get_wake_locks(struct list_head *p)
 {
 	active_wake_locks = p;
 }
+
 static void list_active_locks(void)
 {
  	struct wake_lock *lock;
@@ -116,6 +117,10 @@ static void list_active_locks(void)
 	spin_unlock_irqrestore(&active_wakelock_list_lock, irq_flags);
 }
 
+static void set_func_tbl(void)
+{
+	 plidbg_dev->soc_func_tbl.pfnSOC_Get_WakeLock = get_wake_locks;
+}
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
 static void acc_early_suspend(struct early_suspend *handler)
@@ -334,12 +339,13 @@ static struct platform_device lidbg_acc_device =
     .name               = "lidbg_acc1",
     .id                 = -1,
 };
+   
 
 static int __init acc_init(void)
 {
 	int ret;
 	LIDBG_GET;
-
+	set_func_tbl();
     platform_device_register(&lidbg_acc_device);
 
     platform_driver_register(&acc_driver);
