@@ -959,6 +959,7 @@ static void set_func_tbl(void)
 {
     //lpc
     ((struct lidbg_hal *)plidbg_dev)->soc_func_tbl.pfnSOC_Dev_Suspend_Prepare = soc_dev_suspend_prepare;
+	((struct lidbg_hal *)plidbg_dev)->soc_func_tbl.pfnHal_Acc_Callback = NULL;
 }
 
 int read_proc_dev(char *buf, char **start, off_t offset, int count, int *eof, void *data )
@@ -1031,8 +1032,7 @@ static void parse_cmd(char *pt)
 		LCD_OFF;
 		mute_s();
 		if(SOC_Hal_Acc_Callback)
-			SOC_Hal_Acc_Callback(0);
-		;
+			SOC_Hal_Acc_Callback(0); 
 	}
 	else if(!strcmp(pt, "suspend_on"))
 	{

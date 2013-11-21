@@ -1,4 +1,13 @@
 #include "lidbg.h"
+#if (defined(BOARD_V1) || defined(BOARD_V2))
+#include <proc_comm.h>
+#else
+#include <mach/proc_comm.h>
+#endif
+#include <mach/clk.h>
+#include <mach/socinfo.h>
+#include <clock.h>
+#include <clock-pcom.h>
 
 LIDBG_DEFINE;
 
@@ -22,6 +31,8 @@ DEFINE_SEMAPHORE(lidbg_acc_sem);
 static struct task_struct *acc_task;
 static struct task_struct *resume_task;
 
+static spinlock_t  active_wakelock_list_lock;
+
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
 static void acc_early_suspend(struct early_suspend *handler);
@@ -37,6 +48,33 @@ typedef struct
 
 lidbg_acc *plidbg_acc = NULL;
 static struct task_struct *suspend_task;
+
+static int pc_clk_is_enabled(int id)
+{
+	if (msm_proc_comm(PCOM_CLKCTL_RPC_ENABLED, &id, NULL))
+		return 0;
+	else
+		return id;
+}
+
+
+int check_all_clk_disable(void)
+{
+	int i=P_NR_CLKS-1;
+	int ret = 0;
+	DUMP_FUN;
+	while(i>=0)
+	{
+		if (pc_clk_is_enabled(i))
+		{
+		 	lidbg("pc_clk_is_enabled:%3d\n", i);		 	
+			ret++;
+		}
+		i--;
+	}
+	return ret;
+}
+
 
 void show_wakelock(void)
 {
@@ -58,12 +96,34 @@ void show_wakelock(void)
     }
 }
 
+struct list_head *active_wake_locks = NULL;
+void fastboot_get_wake_locks(struct list_head *p)
+{
+	active_wake_locks = p;
+}
+static void list_active_locks(void)
+{
+ 	struct wake_lock *lock;
+	int type = 0;
+	unsigned long irq_flags;
+	if(active_wake_locks == NULL) return;
+	DUMP_FUN;
+	spin_lock_irqsave(&active_wakelock_list_lock, irq_flags);
+	list_for_each_entry(lock, &active_wake_locks[type], link)
+	{
+		lidbg("%s\n", lock->name);
+	}
+	spin_unlock_irqrestore(&active_wakelock_list_lock, irq_flags);
+}
+
+
 #ifdef CONFIG_HAS_EARLYSUSPEND
 static void acc_early_suspend(struct early_suspend *handler)
 {
 	 lidbg("acc_early_suspend:%d\n", plidbg_acc->resume_count);
 
 	suspend_state = 0;
+	check_all_clk_disable();
 	complete(&suspend_start);
 }
 
@@ -99,6 +159,7 @@ static int thread_acc_suspend(void *data)
 					 {
 						lidbgerr("thread_acc_suspend wait suspend timeout!\n");
 						show_wakelock();
+						list_active_locks();
 						//break;
 					 }
 				}
@@ -194,6 +255,8 @@ static int  acc_probe(struct platform_device *pdev)
 	{
 		FORCE_LOGIC_ACC;
 	}
+	
+    spin_lock_init(&active_wakelock_list_lock);
 
 	fs_regist_state("acc_times", (int*)&plidbg_acc->resume_count);
 	te_regist_password("001200", cb_password_poweroff);
