@@ -249,7 +249,7 @@ int check_all_clk_disable(void)
 	}
 	return ret;
 }
-int safe_clk[] = {113,105,103,102,95,51,31,16,15,12,8,4,3,1};
+int safe_clk[] = {113,105,103,102,95,51,31,20,16,15,12,10,8,4,3,1};
 
 bool find_unsafe_clk(void)
 {
@@ -906,7 +906,7 @@ static void fastboot_early_suspend(struct early_suspend *h)
    //if(check_clk_disable())
    if(find_unsafe_clk())
    {
-	   fb_data->clk_block_suspend = 1;
+	  // fb_data->clk_block_suspend = 1;
    }
    else
    {

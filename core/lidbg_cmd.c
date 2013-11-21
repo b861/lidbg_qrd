@@ -98,11 +98,6 @@ void parse_cmd(char *pt)
              lidbg_uart_main(new_argc, new_argv);
         }
 
-        else if(!strcmp(argv[1], "device"))
-        {
-            //  lidbg_device_main(new_argc, new_argv);
-        }
-
         else if(!strcmp(argv[1], "servicer"))
         {
             lidbg_servicer_main(new_argc, new_argv);
@@ -123,13 +118,6 @@ void parse_cmd(char *pt)
 			lidbg_wakelock_stat(new_argc, new_argv);
 		}
 
-#if 1
-        else if(!strcmp(argv[1], "video"))
-        {
-         //   if(((struct lidbg_dev *)global_lidbg_devp) != NULL)
-        //        ((struct lidbg_dev *)global_lidbg_devp)->soc_func_tbl.pfnlidbg_video_main(new_argc, new_argv);
-        }
-#endif
     }
 
 	else if (!strcmp(argv[0], "appcmd"))
