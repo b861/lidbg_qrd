@@ -951,6 +951,7 @@ void fly_devices_init(void)
 #endif
 #endif
 
+	    unmute_ns();
     }
 }
 
