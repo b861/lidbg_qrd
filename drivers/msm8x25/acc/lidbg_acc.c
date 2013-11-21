@@ -355,7 +355,7 @@ static int __init acc_init(void)
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
 	{
-		early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN;//EARLY_SUSPEND_LEVEL_BLANK_SCREEN + 1;
+		early_suspend.level =EARLY_SUSPEND_LEVEL_DISABLE_FB + 5; //the later the better
 		early_suspend.suspend = acc_early_suspend;
 		early_suspend.resume = acc_late_resume;
 		register_early_suspend(&early_suspend);
