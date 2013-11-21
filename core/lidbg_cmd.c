@@ -142,6 +142,14 @@ void parse_cmd(char *pt)
 	    {
 	        k2u_write(LOG_DMESG);
 	    }
+	    else if (!strcmp(argv[1], "*158#003"))
+	    {
+			lidbg_chmod("/data");
+	    }
+	    else if (!strcmp(argv[1], "*158#999"))
+	    {
+			fs_call_apk();
+	    }
 	}
 
 }
