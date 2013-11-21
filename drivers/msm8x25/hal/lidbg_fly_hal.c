@@ -43,7 +43,7 @@ void hal_func_tbl_default(void)
 }
 void file_check(void)
 {
-    if(fs_is_file_updated(build_time_fly_path, PRE_CONF_INFO_FILE))
+    if(is_out_updated)
     {
         lidbg("<start to cp gps.so>\n");
 

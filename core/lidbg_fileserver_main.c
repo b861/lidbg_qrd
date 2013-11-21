@@ -8,6 +8,7 @@ LIST_HEAD(kill_list_test);
 static struct task_struct *fileserver_test_task;
 static struct task_struct *fileserver_test_task2;
 static struct task_struct *fileserver_test_task3;
+bool is_out_updated=false;
 int g_mem_dbg = 0;
 int g_is_boot_completed = 0;
 static int test_count = 0;
@@ -195,6 +196,7 @@ void check_conf_file(void)
     if(fs_is_file_updated(build_time_fly_path, PRE_CONF_INFO_FILE)||(!fs_is_file_exist(driver_sd_path) || !fs_is_file_exist(core_sd_path) || !fs_is_file_exist(state_sd_path)))
     {
         FS_WARN("<overwrite:push,update?>\n");
+		is_out_updated=true;
         copy_all_conf_file();
     }
 
@@ -247,6 +249,7 @@ static void __exit lidbg_fileserver_exit(void)
 
 
 EXPORT_SYMBOL(lidbg_fileserver_main);
+EXPORT_SYMBOL(is_out_updated);
 
 
 module_init(lidbg_fileserver_init);
