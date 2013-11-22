@@ -1026,6 +1026,7 @@ static void parse_cmd(char *pt)
 		printk("******into screen_on********\n");
 		if(!is_fly)
 		{
+			printk("\n\n===LCD_ON====\n\n");
 			LCD_ON;
 		}
 		unmute_ns();
@@ -1071,6 +1072,7 @@ static int lidbg_event(struct notifier_block *this,
 
 	case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_SUSPEND_PREPARE):
 		USB_WORK_DISENABLE;
+		//USB_POWER_OFF;
 		if(SOC_Hal_Acc_Callback)
 			SOC_Hal_Acc_Callback(3);
 		break;
@@ -1078,6 +1080,7 @@ static int lidbg_event(struct notifier_block *this,
 		if(SOC_Hal_Acc_Callback)
 			SOC_Hal_Acc_Callback(2);
 		USB_WORK_ENABLE;
+		//USB_POWER_ON;
 		break;	
 	default:
 		break;

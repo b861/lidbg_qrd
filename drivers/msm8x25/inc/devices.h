@@ -119,11 +119,11 @@ enum
 #define GPIO_LED_FLY (82)
 
 // PANNE_PEN , RESET
-#define LCD_ON  do{      	u8 buff[] = {0x02, 0x0d, 0x1};\
-        SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\
+#define LCD_ON  do{    \  
+		printk("\n\n======LCD_ON=======\n\n");\
 				}while(0)
-#define LCD_OFF   do{     u8 buff[] = {0x02, 0x0d, 0x0};\
-            SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\
+#define LCD_OFF   do{   \
+		printk("\n\n======LCD_OFF=======\n\n");\
 				}while(0)
 
 #define USB_HUB_ENABLE do{LPC_IO_SET(0x09, 1); }while(0)
@@ -331,4 +331,16 @@ enum
 		lidbg("AIRFAN_BACK_OFF\n");\
 		SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\
 			}while(0)
+
+#define USB_POWER_ON do{\
+		u8 buff[] = {0x02, 0x0e, 0x1};\
+		printk("\n\n========USB_POWER_ON======\n\n");\
+		SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\		
+						}while(0)
+
+#define USB_POWER_OFF do{\
+		u8 buff[] = {0x02, 0x0e, 0x0};\
+		printk("\n\n========USB_POWER_OFF======\n\n");\
+		SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\		
+						}while(0)
 #endif
