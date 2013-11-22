@@ -7,7 +7,6 @@ int led_en ;
 int temp_log_freq;
 
 #define LIDBG_GPIO_PULLUP  GPIO_CFG_PULL_UP
-#define HAL_SO "/flysystem/lib/hw/flyfa.default.so"
 
 static struct task_struct *led_task;
 #ifdef DEBUG_AD_KEY
@@ -25,7 +24,9 @@ static struct task_struct *Thermal_task = NULL;
 static int fan_onoff_temp;
 static bool flag_fan_run_statu = false;
 static bool hal_fan_on = true;
+extern bool is_fly = false;
 #endif
+
 
 int thread_dev_init(void *data);
 int thread_led(void *data);
@@ -1023,7 +1024,7 @@ static void parse_cmd(char *pt)
 	else if(!strcmp(pt, "screen_on"))
 	{
 		printk("******into screen_on********\n");
-		if(!fs_is_file_exist(HAL_SO))
+		if(!is_fly)
 		{
 			LCD_ON;
 		}
@@ -1034,7 +1035,7 @@ static void parse_cmd(char *pt)
 	else if(!strcmp(pt, "screen_off"))
 	{
 		printk("******into screen_off********\n");
-		if(!fs_is_file_exist(HAL_SO))
+		if(!is_fly)
 		{
 			LCD_OFF;
 		}
