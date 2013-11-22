@@ -5,14 +5,25 @@ import java.io.FileOutputStream;
 	private void lidbg_printk(String msg)
 	{
 		final String LOG_E = "LIDBG_PRINT";
-		msg = "JAVA:" + msg;
-		byte b[] = msg.getBytes();
-		FileOutputStream stateOutputMsg;
-		try {
-		stateOutputMsg = new FileOutputStream("/dev/lidbg_msg", true);
-		stateOutputMsg.write(b);
-		} catch (Exception e ) {
-			Log.e(LOG_E, "Failed to lidbg_printk");
+		String newmsg = "JAVA:" + msg;
+		File mFile = new File("/dev/lidbg_msg");
+		if (mFile.exists())
+		{
+			try
+			{
+				FileOutputStream fout = new FileOutputStream(
+						mFile.getAbsolutePath());
+				byte[] bytes = newmsg.getBytes();
+				fout.write(bytes);
+				fout.close();
+			} catch (Exception e )
+			{
+				Log.e(LOG_E, "Failed to lidbg_printk");
+			}
+
+		} else
+		{
+			Log.e(LOG_E, "/dev/lidbg_msg not exist");
 		}
 	}
 
