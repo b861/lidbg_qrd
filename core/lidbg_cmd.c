@@ -138,6 +138,14 @@ void parse_cmd(char *pt)
 	    {
 			fs_call_apk();
 	    }
+	    else if (!strcmp(argv[1], "*158#004"))
+	    {
+			lidbg_rm("/data/logcat.txt");
+	    }
+	    else if (!strcmp(argv[1], "*158#005"))
+	    {
+			lidbg_rm("/data/kmsg.txt");
+	    }
 	}
 
 }
