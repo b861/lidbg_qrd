@@ -34,8 +34,6 @@ bool new_wakelock_item(struct list_head *client_list, bool cnt_wakelock, const c
     struct wakelock_item *add_new_item;
     unsigned long flags;
 
-    if(g_wakelock_dbg_item)
-        lidbg("-----1");
     add_new_item = kmalloc(sizeof(struct wakelock_item), GFP_ATOMIC);
     if(add_new_item == NULL)
     {
@@ -43,8 +41,6 @@ bool new_wakelock_item(struct list_head *client_list, bool cnt_wakelock, const c
         return false;
     }
 
-    if(g_wakelock_dbg_item)
-        lidbg("-----2");
     add_new_item->name = kmalloc(strlen(name) + 1, GFP_ATOMIC);
     if(add_new_item->name == NULL)
     {
@@ -56,8 +52,6 @@ bool new_wakelock_item(struct list_head *client_list, bool cnt_wakelock, const c
     add_new_item->cunt = 1;
     add_new_item->cunt_max = 1;
     add_new_item->is_count_wakelock = cnt_wakelock;
-    if(g_wakelock_dbg_item)
-        lidbg("-----3\n");
 
     spin_lock_irqsave(&new_item_lock, flags);
     list_add(&(add_new_item->tmp_list), client_list);
@@ -104,12 +98,11 @@ bool unregister_wakelock(struct list_head *client_list, const char *name)
     else
     {
         //can't find the wakelock? show the wakelock list.
-        lidbg("<ERR:[%s]>\n", name );
+        lidbg("<LOST:[%s]>\n", name );
         if(g_wakelock_dbg)
         {
             if(!list_empty(client_list))
             {
-                lidbg("<===============WAKELOCK_LIST=================%s>\n", name);
                 lidbg_show_wakelock();
             }
         }

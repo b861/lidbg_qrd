@@ -77,7 +77,7 @@ void ts_scan(void)
 			if(0==is_warned)
 			{
 				is_warned=1;
-				//fs_mem_log("loadts=%s\n", ts_probe_dev[i].name);
+				fs_mem_log("loadts=%s\n", ts_probe_dev[i].name);
 				lidbg_fs_log(TS_LOG_PATH,"loadts=%s\n", ts_probe_dev[i].name);
 				ts_should_revert = fs_find_string(&flyhal_config_list,"TSMODE_XYREVERT");
 				if(ts_should_revert > 0)
