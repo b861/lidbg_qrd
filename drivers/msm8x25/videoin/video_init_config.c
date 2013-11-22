@@ -10,7 +10,7 @@ extern TW9912Info global_tw9912_info_for_NTSC_I;
 extern TW9912Info global_tw9912_info_for_PAL_I;
 //static struct task_struct *Signal_Test = NULL;
 static u8 flag_now_config_channal_AUX_or_Astren=0; //0 is Sstren 1 is AUX 2 is DVD
-
+u8 global_debug_thread=0;
 static TW9912_Image_Parameter TW9912_Image_Parameter_fly[6] = {
 																{BRIGHTNESS,5},
 																{CONTRAST,5},
@@ -442,8 +442,8 @@ Vedio_Format flyVideoTestSignalPin_in(u8 Channel)
 
     }
 
- //  mutex_unlock(&lock_chipe_config);
-//  return NTSC_I;
+  // mutex_unlock(&lock_chipe_config);
+// return NTSC_I;
     if(Channel == SEPARATION || Channel == YIN2)
     {
         ret = testing_NTSCp_video_signal();
@@ -526,6 +526,15 @@ int read_chips_signal_status(u8 cmd)
     mutex_unlock(&lock_chipe_config);
     return ret;//have change return 1 else retrun 0
 }
+int read_chips_signal_status_fast(u8 *valu)
+{   
+
+    int ret = 0;
+    mutex_lock(&lock_chipe_config);
+    ret = read_tw9912_chips_status_fast(valu);//return 0 or 1  ,if back 1 signal have change
+    mutex_unlock(&lock_chipe_config);
+    return ret;//have change return 1 else retrun 0
+}
 int IfInputSignalNotStable(void)
 {
     int i;
@@ -601,26 +610,22 @@ SIGNALINPUT:
 {
     int i = 0;
     long int timeout;
-    video_config_debug("thread_signal_test()\n");
+   // video_config_debug("thread_signal_test()\n");
+   printk("thread_signal_test() IN \n");
     while(!kthread_should_stop())
     {
-        timeout = 10;
-        while(timeout > 0)
-        {
-            //delay
-            timeout = schedule_timeout(timeout);
-        }
-
-        i = read_chips_signal_status(1);
-
-        if(i)
-        {
-            printk("The backlight off!\n");
-            SOC_F_LCD_Light_Con(0);
-        }
+       
+	if(global_camera_working_status && global_debug_thread) //camera star work
+        {u8 valu;
+        	read_chips_signal_status_fast(&valu);
+		 msleep(60);
+	}
+	else
+	msleep(500);
     }
     return 0;
-}*/
+}
+*/
 void video_init_config_in(Vedio_Format config_pramat)
 {
     printk("\n\nVideo Module Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);
@@ -658,9 +663,9 @@ void video_init_config_in(Vedio_Format config_pramat)
         }
         else
         {
-            mutex_unlock(&lock_chipe_config);
+            //mutex_unlock(&lock_chipe_config);
             init_tw9912_ent(info_com_top_Channel);
-            mutex_lock(&lock_chipe_config);
+            //mutex_lock(&lock_chipe_config);
         }
         VideoImage();
 

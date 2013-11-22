@@ -12,6 +12,10 @@ extern bool FlyCameraFrameDisplayOrOutDisplay();
 
 extern float FlyCameraflymFps;
 extern char video_channel_status[10];
+
+#define TW9912_IOC_MAGIC  'T'
+#define COPY_TW9912_STATUS_REGISTER_0X01_4USER   _IO(TW9912_IOC_MAGIC, 1)
+#define TW9912_IOC_MAXNR 1
 }; // namespace android
 
 #endif

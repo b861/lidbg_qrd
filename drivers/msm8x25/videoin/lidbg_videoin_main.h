@@ -58,6 +58,11 @@
 
 #include "i2c_io.h"
 #include "tw9912.h"
-#include "tc358746xbg_config.h"
+//#include "tc358746xbg_config.h"
 #include "TC358746XBG.h"
+
+#define TW9912_IOC_MAGIC  'T'
+#define COPY_TW9912_STATUS_REGISTER_0X01_4USER   _IO(TW9912_IOC_MAGIC, 1)
+#define TW9912_IOC_MAXNR 1
+
 #endif

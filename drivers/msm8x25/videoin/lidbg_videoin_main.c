@@ -2,6 +2,7 @@
 
 #include "lidbg.h"
 #include "video_init_config.h"
+#include "lidbg_videoin_main.h"
 static struct task_struct *Vedio_Signal_Test = NULL;
 //static struct task_struct *RunTimeTw9912Status = NULL;
 extern tw9912_run_flag tw912_run_sotp_flag;
@@ -9,7 +10,7 @@ extern struct TC358_register_struct colorbar_init_user_tab[2];
 extern Vedio_Channel info_Vedio_Channel;
 extern TW9912_Signal signal_is_how[5];
 extern Vedio_Channel info_com_top_Channel;
-
+extern u8 global_debug_thread;
 #define MAJOR_Tw9912 0
 //#define MINOR_LED 1
 #define DEV_NAME "tw9912config"
@@ -17,7 +18,7 @@ extern struct lidbg_hal *plidbg_dev; //add by huangzongqiang
 dev_t tw9912_dev;
 struct class *tw9912_class;
 struct cdev *tw9912_cdev;
-
+static u8 tw9912_read_func_read_data = 0;
 TW9912Info global_tw9912_info_for_NTSC_I={
 						0x08,
 						0x17,
@@ -394,6 +395,8 @@ void lidbg_video_main_in(int argc, char **argv)
         lidbgVideoTw9912TerminalConfig(argc, argv);
     }
 #endif
+   else  if(!strcmp(argv[0], "debug_thread_run"))
+   	global_debug_thread =!global_debug_thread;
 #ifdef DEBUG_TC358
     else if(!strcmp(argv[0], "Tc358746"))
     {
@@ -560,54 +563,93 @@ int tw9912_open(struct inode *inode, struct file *filp)
 	//printk("tw9912config open------>\n");
     return 0;
 }
+static int tw9912_ioctl(struct file *filp, unsigned
+                       int cmd, unsigned long arg)
+{
+	/*  if(_IOC_TYPE(cmd) != TW9912_IOC_MAGIC)//_IOC_TYPE()-->//kernel\include\asm-generic
+		 return -ENOTTY;
+       if (_IOC_NR(cmd) > TW9912_IOC_MAXNR)
+       	 return -ENOTTY;*/ 
+	switch (cmd)
+	    {
+	    case COPY_TW9912_STATUS_REGISTER_0X01_4USER:
+	      		tw9912_read_func_read_data = 1;
+			//printk(KERN_INFO "COPY_TW9912_STATUS_REGISTER_0X01_4USER\n");
+			//printk(".\n");
+	        break;
+	    default:
+	       return  - EINVAL;
+	    }
+	    return 0;
+}
 static ssize_t tw9912_read(struct file *filp, char __user *buf, size_t size,
                           loff_t *ppos)
 {
     unsigned int count = size;
     ssize_t ret;
-	if(signal_is_how[info_Vedio_Channel].Format == NTSC_I)
+	if(!tw9912_read_func_read_data)
 	{
-  //  if (copy_to_user(buf, (void *)(&global_tw9912_info), count))
-	if (copy_to_user(buf, (void *)(&global_tw9912_info_for_NTSC_I), count))
+		if(signal_is_how[info_Vedio_Channel].Format == NTSC_I)
 		{
-			printk("TW9912config : copy_to_user ERR\n");
-			ret =  - EFAULT;
+	  //  if (copy_to_user(buf, (void *)(&global_tw9912_info), count))
+		if (copy_to_user(buf, (void *)(&global_tw9912_info_for_NTSC_I), count))
+			{
+				printk("TW9912config : copy_to_user ERR\n");
+				ret =  - EFAULT;
+			}
+			else
+			{
+				printk("TW9912config : NTSC_I paramter copy to user : %.2x%.2x\n",\
+					global_tw9912_info_for_NTSC_I.reg,global_tw9912_info_for_NTSC_I.reg_val);
+				ret = count;
+			}
+		}
+		else if(signal_is_how[info_Vedio_Channel].Format == PAL_I)
+		{
+			if (copy_to_user(buf, (void *)(&global_tw9912_info_for_PAL_I), count))
+			{
+				printk("TW9912config : copy_to_user ERR\n");
+				ret =  - EFAULT;
+			}
+			else
+			{
+				printk("TW9912config : PAL_I paramter copy to user : %.2x%.2x\n",\
+					global_tw9912_info_for_PAL_I.reg,global_tw9912_info_for_PAL_I.reg_val);
+				ret = count;
+			}
 		}
 		else
 		{
-			printk("TW9912config : NTSC_I paramter copy to user : %.2x%.2x\n",\
-				global_tw9912_info_for_NTSC_I.reg,global_tw9912_info_for_NTSC_I.reg_val);
-			ret = count;
+			if (copy_to_user(buf, (void *)(&global_tw9912_info_for_PAL_I), count))
+			{
+				printk("TW9912config : copy_to_user ERR\n");
+				ret =  - EFAULT;
+			}
+			else
+			{
+				printk("TW9912config : PAL_I paramter copy to user : 0x%.2x\n",\
+					global_tw9912_info_for_PAL_I.this_is_first_open);
+				ret = count;
+			}
+			//printk("TW9912config :read false\n\n");
 		}
 	}
-	else if(signal_is_how[info_Vedio_Channel].Format == PAL_I)
-	{
-		if (copy_to_user(buf, (void *)(&global_tw9912_info_for_PAL_I), count))
+	else if(tw9912_read_func_read_data ==1)
+	{u8 valu;
+	int ret=0;
+		tw9912_read_func_read_data = 0 ;// at every turn have ioct once
+	       ret = read_chips_signal_status_fast(&valu);
+		if(ret == NACK)
 		{
-			printk("TW9912config : copy_to_user ERR\n");
-			ret =  - EFAULT;
+			printk("Worning read tw9912 NACK\n");
+			valu = 0x68;//the value representative vedio signal is good
 		}
-		else
-		{
-			printk("TW9912config : PAL_I paramter copy to user : %.2x%.2x\n",\
-				global_tw9912_info_for_PAL_I.reg,global_tw9912_info_for_PAL_I.reg_val);
-			ret = count;
-		}
-	}
-	else
-	{
-		if (copy_to_user(buf, (void *)(&global_tw9912_info_for_PAL_I), count))
-		{
-			printk("TW9912config : copy_to_user ERR\n");
-			ret =  - EFAULT;
-		}
-		else
-		{
-			printk("TW9912config : PAL_I paramter copy to user : 0x%.2x\n",\
-				global_tw9912_info_for_PAL_I.this_is_first_open);
-			ret = count;
-		}
-		//printk("TW9912config :read false\n\n");
+		//printk("copy_to_user status vale is 0x%.2x\n",valu);
+		if (copy_to_user(buf, (void *)(&valu), sizeof(u8)))
+			{
+				printk("TW9912config : copy_to_user ERR\n");
+				ret =  - EFAULT;
+			}
 	}
     return count;
 }
@@ -679,6 +721,7 @@ static const struct file_operations tw9912_fops =
 	.read = tw9912_read,
 	.write = tw9912_write,
 	.open = tw9912_open,
+	.unlocked_ioctl = tw9912_ioctl,
 	.release = NULL,
 };
 int tw9912_index_init(void)

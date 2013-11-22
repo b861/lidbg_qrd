@@ -24,5 +24,6 @@ void Video_Show_Output_Color(u8 color_flag);
 int read_chips_signal_status(u8 cmd);
 int IfInputSignalNotStable(void);
 void VideoReset_in(void);
+int read_chips_signal_status_fast(u8 *valu);
 #endif
 

@@ -62,11 +62,18 @@ namespace android {
 	static nsecs_t flymLastFpsTime = 0;
   static nsecs_t flynow;
   static nsecs_t flydiff;
-
+  static int global_tw9912_file_fd;
+  static int global_fream_give_up =0;
 void FlyCameraStar()
 {
 	globao_mFlyPreviewStatus = 1;
+	global_fream_give_up = 0;
 	DEBUGLOG("Flyvideo-mFlyPreviewStatus =%d\n",globao_mFlyPreviewStatus);
+	global_tw9912_file_fd = open("/dev/tw9912config",O_RDWR);
+	if(global_tw9912_file_fd ==-1)
+		{
+		DEBUGLOG("Flyvideo-:Error FlyCameraStar() tw9912config faild\n");
+		}
 }
 void FlyCameraStop()
 {
@@ -79,6 +86,7 @@ LongitudinalInformationRemember.BegingFindBlackFreamCount = 0;
 DetermineImageSplitScreen_do_not_or_yes = true;//at next preview ,allow run function DetermineImageSplitScreen at astren
 globao_mFlyPreviewStatus = 0;
 global_Fream_is_first = true;
+close(global_tw9912_file_fd);
 DEBUGLOG("Flyvideo-mFlyPreviewStatus =%d\n",globao_mFlyPreviewStatus);
 }
 void FlyCameraRelease()
@@ -692,8 +700,50 @@ BREAK_THE:
 		}
 return 0;//未发生分屏
 }
-bool FlyCameraFrameDisplayOrOutDisplay()
+static int FlyCameraReadTw9912StatusRegitsterValue()
 {
+	int file_fd;
+	unsigned char value,value_1;
+	int arg = 0;
+	unsigned int cmd;
+       if(global_tw9912_file_fd == -1)
+	return 0;
+	cmd = COPY_TW9912_STATUS_REGISTER_0X01_4USER;
+	if (ioctl(global_tw9912_file_fd,cmd, &arg) < 0)
+        {
+		DEBUGLOG("Flyvideo-: Call cmd COPY_TW9912_STATUS_REGISTER_0X01_4USER fail\n");
+		close(file_fd);
+		return 0;
+	}
+	read(global_tw9912_file_fd, (void *)(&value),sizeof(unsigned char));
+	//DEBUGLOG("Flyvideo-:0x%.2x\n",value);
+
+	value_1 = value & 0x68;
+	if(value_1 != 0x68)
+	{
+		//global_fream_give_up ++ ;
+		if(global_fream_give_up < 10)
+		{
+		DEBUGLOG("Flyvideo-:Vedio singnal bad\n");
+		//memset((void *)(frame->def.frame->buffer+frame->def.frame->y_off),0,720*480);
+		//memset((void *)(frame->def.frame->buffer+frame->def.frame->cbcr_off),0,720*480);
+		return 1;
+		}
+		else
+		{// hope 10 fream ago signal is good 
+		global_fream_give_up = 0;
+		return 0;
+		}
+	}
+return 0;
+}
+bool FlyCameraFrameDisplayOrOutDisplay()
+{bool ret;
+		if(video_channel_status[0] != '1')//is not DVD
+		{
+			ret = FlyCameraReadTw9912StatusRegitsterValue();//1:DVD 2:AUX 3:Astren
+			if(ret == 1) return 1;
+		}
 		if(video_channel_status[0] != '3')
 		{//倒车状态先判断黑屏再判断分屏
 			if( DetermineImageSplitScreen(frame,mHalCamCtrl) )//发现分屏这个帧丢弃不显示

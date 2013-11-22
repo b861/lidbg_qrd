@@ -156,4 +156,5 @@ Vedio_Format Tw9912TestingChannalSignal(Vedio_Channel Channel);
 void Tw9912Reset_in(void);
 int Tw9912_YIN3ToYUV_init_agin(void);
 void TW9912_read_all_register(void);
+int read_tw9912_chips_status_fast(u8 *valu);
 #endif

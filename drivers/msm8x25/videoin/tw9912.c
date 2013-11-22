@@ -647,12 +647,19 @@ Vedio_Format camera_open_video_signal_test_in_2(void)
 
     return signal_is_how_1.Format;
 }
+int read_tw9912_chips_status_fast(u8 *valu)
+{
+  int ret = 0;
+	ret = read_tw9912(0x01,valu);
+    return ret;//have change return 1 else retrun 0
+}
 int read_tw9912_chips_status(u8 cmd)
 {
     static TW9912_input_info tw9912_input_information_status;
     static TW9912_input_info tw9912_input_information_status_next;
-    tw9912_get_input_info(&tw9912_input_information_status_next);
-    if(cmd)
+    if(cmd !=2 )
+    	tw9912_get_input_info(&tw9912_input_information_status_next);
+    if(cmd ==1)
     {
         /*
         	if(tw9912_input_information_status_next.input_detection.valu != tw9912_input_information_status.input_detection.valu)
@@ -692,6 +699,15 @@ int read_tw9912_chips_status(u8 cmd)
             return 1;
         }
         return 0;
+    }
+    else if (cmd == 2)
+    {u8 valu;
+	read_tw9912(0x01,&valu);
+	printk("0x01 = 0x%.2x\n",valu);
+	if(valu &0x80)
+	{
+	printk("signal bad \n");
+	}
     }
     else
     {
