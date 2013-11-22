@@ -216,8 +216,9 @@ int main(int argc , char **argv)
     int cmd = 0;
     int count = 0;
     int oflags;
-
+	
     lidbg("lidbg_servicer start\n");
+
 	
 #if (defined(BOARD_V1) || defined(BOARD_V2))
     system("echo 600000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq");
@@ -336,6 +337,8 @@ open_dev:
 	//cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_cur_freq 
 	
 	DUMP_BUILD_TIME;
+    DUMP_BUILD_TIME_FILE;
+
 #if (defined(BOARD_V1) || defined(BOARD_V2))
     lidbg("BOARD_V2\n");
 #elif defined(BOARD_V3)
