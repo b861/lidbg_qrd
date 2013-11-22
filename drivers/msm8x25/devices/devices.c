@@ -7,6 +7,7 @@ int led_en ;
 int temp_log_freq;
 
 #define LIDBG_GPIO_PULLUP  GPIO_CFG_PULL_UP
+#define HAL_SO "/flysystem/lib/hw/flyfa.default.so"
 
 static struct task_struct *led_task;
 #ifdef DEBUG_AD_KEY
@@ -1022,7 +1023,10 @@ static void parse_cmd(char *pt)
 	else if(!strcmp(pt, "screen_on"))
 	{
 		printk("******into screen_on********\n");
-		LCD_ON;
+		if(!fs_is_file_exist(HAL_SO))
+		{
+			LCD_ON;
+		}
 		unmute_ns();
 		if(SOC_Hal_Acc_Callback)
 			SOC_Hal_Acc_Callback(1);
@@ -1030,7 +1034,10 @@ static void parse_cmd(char *pt)
 	else if(!strcmp(pt, "screen_off"))
 	{
 		printk("******into screen_off********\n");
-		LCD_OFF;
+		if(!fs_is_file_exist(HAL_SO))
+		{
+			LCD_OFF;
+		}
 		mute_s();
 		if(SOC_Hal_Acc_Callback)
 			SOC_Hal_Acc_Callback(0); 
