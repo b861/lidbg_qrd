@@ -137,17 +137,29 @@ loop_read:
         }
         case LOG_LOGCAT :
         {
+			static bool flag = 0;
+			if(flag)break; else flag = 1;
             lidbg("logcat+\n");
 			system("date >> /data/logcat.txt");
 			system("logcat >> /data/logcat.txt &");
+			
+			msleep(1000);
+			system("chmod 777 /data/logcat.txt");
+			system("chmod 777 /data/*.txt");
             lidbg("logcat-\n");
             break;
         }
         case LOG_DMESG :
         {
+			static bool flag = 0;
+			if(flag)break; else flag = 1;
             lidbg("kmsg+\n");
 			system("date >> /data/kmsg.txt");
 			system("cat /proc/kmsg >> /data/kmsg.txt &");
+			
+			msleep(1000);
+			system("chmod 777 /data/kmsg.txt");
+            lidbg("logcat-\n");
             lidbg("kmsg-\n");
             break;
         }

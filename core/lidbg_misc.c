@@ -108,8 +108,6 @@ static struct notifier_block usb_nb_update =
 void logcat_lunch(char *key, char *value )
 {
     k2u_write(LOG_LOGCAT);
-    msleep(1000);
-   lidbg_chmod("/data/logcat.txt");
 }
 
 static int __init lidbg_misc_init(void)
