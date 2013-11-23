@@ -77,6 +77,8 @@ extern bool fs_clear_file(char *filename);
 extern bool fs_is_file_exist(char *file);
 extern bool fs_is_file_updated(char *filename, char *infofile);
 extern bool fs_copy_file(char *from, char *to);
+extern bool fs_copy_file_dir(char *fromdir, char *todir, char *filename);
+extern bool fs_mv_file_dir(char *fromdir, char *todir, char *filename);
 extern bool fs_upload_machine_log(void);
 extern void fs_remount_system(void);
 extern void fs_call_apk(void);

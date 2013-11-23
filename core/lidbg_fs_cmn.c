@@ -300,6 +300,32 @@ bool fs_copy_file(char *from, char *to)
 {
     return copy_file(from, to);
 }
+bool fs_copy_file_dir(char *fromdir, char *todir, char *filename)
+{
+    char file_from[64];
+    char file_to[64];
+    memset(file_from, '\0', sizeof(file_from));
+    memset(file_to, '\0', sizeof(file_to));
+    sprintf(file_from, "%s/%s", fromdir, filename);
+    sprintf(file_to, "%s/%s", todir, filename);
+
+    if(g_filedetec_dbg)
+        FS_WARN("[%s],[%s]", file_from, file_to);
+    return 	fs_copy_file(file_from, file_to);
+}
+bool fs_mv_file_dir(char *fromdir, char *todir, char *filename)
+{
+    char file_from[64];
+    char file_to[64];
+    memset(file_from, '\0', sizeof(file_from));
+    memset(file_to, '\0', sizeof(file_to));
+    sprintf(file_from, "%s/%s", fromdir, filename);
+    sprintf(file_to, "%s/%s", todir, filename);
+
+    if(g_filedetec_dbg)
+        FS_WARN("[%s],[%s]", file_from, file_to);
+    return 	lidbg_mv(file_from, file_to);
+}
 bool fs_is_file_exist(char *file)
 {
     return is_file_exist(file);
@@ -331,6 +357,8 @@ EXPORT_SYMBOL(lidbg_cp);
 EXPORT_SYMBOL(fs_readwrite_file);
 EXPORT_SYMBOL(fs_regist_filedetec);
 EXPORT_SYMBOL(fs_copy_file);
+EXPORT_SYMBOL(fs_copy_file_dir);
+EXPORT_SYMBOL(fs_mv_file_dir);
 EXPORT_SYMBOL(fs_is_file_exist);
 EXPORT_SYMBOL(fs_is_file_updated);
 EXPORT_SYMBOL(fs_clear_file);

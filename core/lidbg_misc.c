@@ -5,6 +5,7 @@ static struct task_struct *reboot_task;
 static struct completion udisk_update_wait;
 static int logcat_en;
 static int reboot_delay_s = 0;
+static int cp_data_to_udisk_en = 0;
 
 
 void cb_password_chmod(char *password )
@@ -69,7 +70,7 @@ static int thread_udisk_update(void *data)
     {
         if(!wait_for_completion_interruptible(&udisk_update_wait))
         {
-            ssleep(4);
+            ssleep(7);
             cb_password_update("000000");
         }
     }
@@ -110,6 +111,43 @@ void logcat_lunch(char *key, char *value )
     k2u_write(LOG_LOGCAT);
 }
 
+void cp_data_to_udisk(char *key, char *value )
+{
+    char dir[128], tbuff[100];
+    int copy_delay = 300;
+    memset(dir, '\0', sizeof(dir));
+    memset(tbuff, '\0', sizeof(tbuff));
+
+    lidbg_get_current_time(tbuff, NULL);
+    sprintf(dir, "/mnt/usbdisk/ID%d-%s", get_machine_id(), tbuff);
+    lidbg_mkdir(dir);
+
+    msleep(1000);
+    fs_copy_file_dir("/data", dir, "log_ct.txt");
+    msleep(copy_delay);
+    fs_copy_file_dir("/data", dir, "log_fb.txt");
+    msleep(copy_delay);
+    fs_copy_file_dir("/data", dir, "ts_log.txt");
+    msleep(copy_delay);
+    fs_copy_file_dir("/dev/log", dir, "lidbg_log.txt");
+
+    msleep(copy_delay);
+    fs_copy_file_dir("/data", dir, "core.txt");
+    msleep(copy_delay);
+    fs_copy_file_dir("/data", dir, "drivers.txt");
+    msleep(copy_delay);
+    fs_copy_file_dir("/data", dir, "build_time.txt");
+    msleep(copy_delay);
+    fs_copy_file_dir("/data", dir, "conf_info.txt");
+    msleep(copy_delay);
+    fs_copy_file_dir("/data", dir, "MIF.txt");
+    msleep(copy_delay);
+    fs_copy_file_dir("/data", dir, "logcat.txt");
+    msleep(copy_delay);
+    fs_copy_file_dir("/data", dir, "kmsg.txt");
+    msleep(copy_delay);
+
+}
 static int __init lidbg_misc_init(void)
 {
     TE_WARN("<==IN==>\n");
@@ -128,9 +166,10 @@ static int __init lidbg_misc_init(void)
 
     FS_REGISTER_INT(logcat_en, "logcat_en", 0, logcat_lunch);
     FS_REGISTER_INT(reboot_delay_s, "reboot_delay_s", 0, NULL);
+    FS_REGISTER_INT(cp_data_to_udisk_en, "cp_data_to_udisk_en", 0, cp_data_to_udisk);
 
-	if(1==logcat_en)
-		logcat_lunch(NULL,NULL);
+    if(1 == logcat_en)
+        logcat_lunch(NULL, NULL);
     udisk_update_task = kthread_run(thread_udisk_update, NULL, "ftf_te_update");
 
     if(reboot_delay_s)

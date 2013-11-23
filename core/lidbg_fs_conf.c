@@ -179,7 +179,6 @@ static int usb_nc_conf(struct notifier_block *nb, unsigned long action, void *da
     switch (action)
     {
     case USB_DEVICE_ADD:
-        FS_WARN("<get usb event>\n");
         complete(&udisk_conf_wait);
         break;
     case USB_DEVICE_REMOVE:
@@ -203,7 +202,7 @@ static int thread_udisk_conf(void *data)
             if(!g_is_boot_completed)
                 ssleep(30);
             else
-                ssleep(4);
+                ssleep(7);
             update_list("/mnt/usbdisk/conf/core.conf", &lidbg_core_list);
             update_list("/mnt/usbdisk/conf/drivers.conf", &lidbg_drivers_list);
         }

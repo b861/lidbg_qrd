@@ -122,28 +122,23 @@ void parse_cmd(char *pt)
 
 	else if (!strcmp(argv[0], "appcmd"))
 	{
-	    if (!strcmp(argv[1], "*158#001"))
+	    if (!strcmp(argv[1], "*158#999"))
 	    {
+			fs_call_apk();
+	    }
+	    else if (!strcmp(argv[1], "*158#001"))
+	    {
+	        lidbg_chmod("/data");
 	        k2u_write(LOG_LOGCAT);
 	    }
 	    else if (!strcmp(argv[1], "*158#002"))
 	    {
+	        lidbg_chmod("/data");
 	        k2u_write(LOG_DMESG);
 	    }
 	    else if (!strcmp(argv[1], "*158#003"))
 	    {
-			lidbg_chmod("/data");
-	    }
-	    else if (!strcmp(argv[1], "*158#999"))
-	    {
-			fs_call_apk();
-	    }
-	    else if (!strcmp(argv[1], "*158#004"))
-	    {
 			lidbg_rm("/data/logcat.txt");
-	    }
-	    else if (!strcmp(argv[1], "*158#005"))
-	    {
 			lidbg_rm("/data/kmsg.txt");
 	    }
 	}

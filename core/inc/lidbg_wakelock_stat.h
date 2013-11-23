@@ -13,6 +13,6 @@ struct wakelock_item
 extern struct list_head lidbg_wakelock_list;
 void lidbg_wakelock_stat(int argc, char **argv);
 void lidbg_show_wakelock(void);
-void lidbg_wakelock_register(bool to_lock, const char*name);
+void lidbg_wakelock_register(bool to_lock, const char *name);
 
 #endif
