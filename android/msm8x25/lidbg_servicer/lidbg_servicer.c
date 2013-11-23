@@ -141,7 +141,7 @@ loop_read:
 			if(flag)break; else flag = 1;
             lidbg("logcat+\n");
 			system("date >> /data/logcat.txt");
-			system("logcat >> /data/logcat.txt &");
+			system("logcat  -v time>> /data/logcat.txt &");
 			
 			sleep(1);
 			system("chmod 777 /data/logcat.txt");
