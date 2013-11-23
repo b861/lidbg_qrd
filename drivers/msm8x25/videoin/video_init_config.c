@@ -442,7 +442,7 @@ Vedio_Format flyVideoTestSignalPin_in(u8 Channel)
 
     }
 
-  // mutex_unlock(&lock_chipe_config);
+   //mutex_unlock(&lock_chipe_config);
 // return NTSC_I;
     if(Channel == SEPARATION || Channel == YIN2)
     {

@@ -385,13 +385,13 @@ static bool RowsOfDataTraversingTheFrameToFindTheBlackLineForDVDorAUX(mm_camera_
 	unsigned char *piont_y;
 	int i = 0,jj =0;
 	unsigned int count;
-	unsigned int find_line = 477;//NTSC
+	unsigned int find_line = 479;//NTSC
 	if(video_format[0] == '4' || video_format[0] == '2')
 	{
 	DEBUGLOG("Flyvideo-:视频制式是:PAL，寻找范围是：9～562");
 	find_line = 562;//PAL
 	}
-	else DEBUGLOG("Flyvideo-:视频制式是:NTSC，寻找范围是：9～477");
+	else DEBUGLOG("Flyvideo-:视频制式是:NTSC，寻找范围是：9～479");
 			DEBUGLOG("Flyvideo-可能发生分屏，寻找黑边中。。。");
 			for(i=9;i<find_line;i++)//某列下的第几行，找 一个点 看数据是否是黑色；前10行和后10行放弃找，正常情况下前3行是黑色的数据
 			{
@@ -575,7 +575,7 @@ static bool DetermineImageSplitScreen(mm_camera_ch_data_buf_t *frame,QCameraHard
 
 
 	if(FlyCameraflymFps<24){DEBUGLOG("Flyvideo-x:flymFps = %f",FlyCameraflymFps);return 0;}
-	if(++global_fram_at_one_sec_count < 50)//过滤判断次数的频繁度，每隔20帧判断一次，
+	if(++global_fram_at_one_sec_count < 10)//过滤判断次数的频繁度，每隔20帧判断一次，
 		{
 			if(video_channel_status[0] == '2' || video_channel_status[0] == '3')//AUX
 			{
@@ -584,7 +584,13 @@ static bool DetermineImageSplitScreen(mm_camera_ch_data_buf_t *frame,QCameraHard
 		return 0;
 		}
 	else
-		global_fram_at_one_sec_count = 0;
+		{
+			global_fram_at_one_sec_count = 0;
+			if(video_channel_status[0] == '2' || video_channel_status[0] == '3')//AUX
+				{
+					memset((void *)(frame->def.frame->buffer+frame->def.frame->y_off),0,720*3);
+				}		
+		}
 	//纵向分屏判断
 	if(DetermineImageSplitScreen_Longitudinal(frame,mHalCamCtrl) == 1)
 		{
@@ -656,8 +662,8 @@ static bool DetermineImageSplitScreen(mm_camera_ch_data_buf_t *frame,QCameraHard
 			for(i=0;i<20;i++)
 			{
 				piont_crcb = (unsigned char *)(frame->def.frame->buffer+frame->def.frame->cbcr_off+(180*j + i));
-				if((*piont_crcb) < (0x7f - 10) || (*piont_crcb) > (0x80+10) )//第一行有颜色说明发生啦分屏
-				{
+				if((*piont_crcb) < (0x7f - 3) || (*piont_crcb) > (0x80+3) )//第一行有颜色说明发生啦分屏
+				{//DEBUGLOG("Flyvideo-..");
 					dete_count++;//一行判断超过10个可疑点才认为是数据异常
 						if(dete_count > 9)
 						{
@@ -669,9 +675,8 @@ static bool DetermineImageSplitScreen(mm_camera_ch_data_buf_t *frame,QCameraHard
 								global_need_rePreview = false;//防止CameraRestartPreviewThread阻塞导致，global_need_rePreview无法赋值成true；
 								global_fram_count = 0;
 							}
-							if(global_need_rePreview == false && (flynow - DVDorAUX_last_time) > ms2ns(15000))//离上次时间超过10s
+							if(global_need_rePreview == false)//离上次时间超过10s
 							{
-								DVDorAUX_last_time = flynow;
 								if(global_fram_count >= 1 && RowsOfDataTraversingTheFrameToFindTheBlackLineForDVDorAUX(frame)) //发现有一帧就重新preview ,且寻找到啦黑边
 								{
 									global_fram_count = 0;
@@ -694,10 +699,7 @@ static bool DetermineImageSplitScreen(mm_camera_ch_data_buf_t *frame,QCameraHard
 		}
 	}
 BREAK_THE:
-	if(video_channel_status[0] == '2' || video_channel_status[0] == '3')//AUX
-		{
-			memset((void *)(frame->def.frame->buffer+frame->def.frame->y_off),0,720*3);
-		}
+
 return 0;//未发生分屏
 }
 static int FlyCameraReadTw9912StatusRegitsterValue()
