@@ -393,6 +393,7 @@ static int thread_thermal(void *data)
 		 	{
 				flag_fan_run_statu = true;
 				AIRFAN_BACK_ON;
+				lidbg_fs_log(TEMP_LOG_PATH,"AIR_ON\n");
 		 	}
 		 }
 		 else //off
@@ -401,6 +402,7 @@ static int thread_thermal(void *data)
 		 	{
 				flag_fan_run_statu = false;
 				AIRFAN_BACK_OFF;
+				lidbg_fs_log(TEMP_LOG_PATH,"AIR_OFF\n");
 		 	}
 		 }
     }
