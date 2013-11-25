@@ -386,7 +386,7 @@ static int thread_thermal(void *data)
 		log_temp();
 		cur_temp = soc_temp_get();
 		// printk("MSM_THERM: %d *C\n",cur_temp);
-		 if( (cur_temp > fan_onoff_temp) & hal_fan_on )//on
+		 if( (cur_temp > fan_onoff_temp) && hal_fan_on && (suspend_flag == 0))//on
 		 {
 		 	if(!flag_fan_run_statu)
 		 	{
@@ -673,9 +673,14 @@ static void devices_early_suspend(struct early_suspend *handler)
         LED_ON;
         TELL_LPC_PWR_ON;
         i2c_c_ctrl = 1;
+		suspend_flag = 1;
+#if (defined(BOARD_V1) || defined(BOARD_V2) || defined(BOARD_V3))
+#else
+			flag_fan_run_statu = false;
+			AIRFAN_BACK_OFF;
+#endif
 
     }
-    suspend_flag = 1;
     DUMP_FUN_LEAVE;
 }
 
@@ -723,12 +728,6 @@ static void devices_late_resume(struct early_suspend *handler)
 		//lidbg_fs_log(TEMP_LOG_PATH,"*\n");
     }
 	
-#if (defined(BOARD_V1) || defined(BOARD_V2) || defined(BOARD_V3))
-#else
-	flag_fan_run_statu = false;
-	AIRFAN_BACK_OFF;
-#endif
-
     DUMP_FUN_LEAVE;
 }
 #endif
