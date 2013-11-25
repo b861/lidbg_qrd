@@ -24,7 +24,6 @@ static struct task_struct *Thermal_task = NULL;
 static int fan_onoff_temp;
 static bool flag_fan_run_statu = false;
 static bool hal_fan_on = true;
-extern bool is_fly = false;
 #endif
 
 
@@ -690,8 +689,8 @@ static void devices_late_resume(struct early_suspend *handler)
     {
         i2c_c_ctrl = 0;
 
-        SOC_IO_Config(MCU_IIC_REQ_I, GPIO_CFG_INPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA);
-        TELL_LPC_PWR_ON;
+        //SOC_IO_Config(MCU_IIC_REQ_I, GPIO_CFG_INPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA);
+        //TELL_LPC_PWR_ON;
 
 #ifdef FLY_DEBUG
 
@@ -820,11 +819,11 @@ static int soc_dev_resume(struct platform_device *pdev)
     if(platform_id ==  PLATFORM_FLY)
     {
 
-        SOC_IO_Config(MCU_IIC_REQ_I, GPIO_CFG_INPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA);
-        TELL_LPC_PWR_ON;
-        PWR_EN_ON;
+        //SOC_IO_Config(MCU_IIC_REQ_I, GPIO_CFG_INPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA);
+        //TELL_LPC_PWR_ON;
+        //PWR_EN_ON;
 
-        USB_SWITCH_DISCONNECT;
+        //USB_SWITCH_DISCONNECT;
 
 #ifdef DEBUG_BUTTON
         SOC_IO_ISR_Enable(BUTTON_LEFT_1);
@@ -834,8 +833,8 @@ static int soc_dev_resume(struct platform_device *pdev)
 #endif
 
 
-        lidbg("turn lcd on!\n");
-        LCD_ON;
+        //lidbg("turn lcd on!\n");
+        //LCD_ON;
 
         //reconfig led
         SOC_IO_Config(devices_resource.led_gpio, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_8MA);
@@ -1026,7 +1025,7 @@ static void parse_cmd(char *pt)
 	else if(!strcmp(pt, "screen_on"))
 	{
 		printk("******into screen_on********\n");
-		if(!is_fly)
+		if(!g_var.is_fly)
 		{
 			printk("\n\n===LCD_ON====\n\n");
 			LCD_ON;
@@ -1038,8 +1037,9 @@ static void parse_cmd(char *pt)
 	else if(!strcmp(pt, "screen_off"))
 	{
 		printk("******into screen_off********\n");
-		if(!is_fly)
+		if(!g_var.is_fly)
 		{
+			printk("\n\n===LCD_OFF====, isfly=%d\n\n", g_var.is_fly);
 			LCD_OFF;
 		}
 		mute_s();

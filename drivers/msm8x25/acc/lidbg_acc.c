@@ -200,7 +200,7 @@ static int thread_acc_suspend(void *data)
 						
 				if(suspend_state == 0)    //if suspend state always in early suspend
 				{
-					 if(time_count >= 60)
+					 if(time_count >= 10)
 					 {
 						lidbgerr("thread_acc_suspend wait suspend timeout!\n");
 						show_wakelock();

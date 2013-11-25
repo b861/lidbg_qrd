@@ -7,7 +7,6 @@
 
 LIDBG_DEFINE;
 #define HAL_SO "/flysystem/lib/hw/flyfa.default.so"
-bool is_fly = false;
 
 struct task_struct *soc_task;
 
@@ -487,7 +486,8 @@ int fly_hal_init(void)
 
 	if(fs_is_file_exist(HAL_SO))
 	{
-		is_fly = true;
+		printk("=======is product=====\n");
+		g_var.is_fly = true;
 	}
 
     lidbg_chmod("/dev/lidbg_hal");
@@ -505,5 +505,4 @@ module_exit(fly_hal_deinit);
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Flyaudad Inc.");
 
-EXPORT_SYMBOL(is_fly);
 

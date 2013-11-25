@@ -356,6 +356,7 @@ struct lidbg_pvar_t
 	FLY_SYSTEM_STATUS system_status;
 	int machine_id;
 	int cpu_freq;
+	bool is_fly;
 };
 
 struct lidbg_hal
