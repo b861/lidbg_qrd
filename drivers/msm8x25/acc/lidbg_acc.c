@@ -32,6 +32,8 @@ static struct task_struct *acc_task;
 static struct task_struct *resume_task;
 
 static spinlock_t  active_wakelock_list_lock;
+static spinlock_t kill_lock;
+static LIST_HEAD(fastboot_kill_list);
 
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
@@ -45,7 +47,7 @@ typedef struct
 	unsigned int  acc_flag;
 	u32 resume_count;
 	u32 poweroff_count;
-	u32 accroff_count;
+	u32 accoff_count;
 } lidbg_acc;
 
 lidbg_acc *plidbg_acc = NULL;
@@ -113,6 +115,115 @@ bool find_unsafe_clk(void)
 
 }
 
+
+
+
+static void fastboot_task_kill_exclude()
+{
+    static char kill_process[32][25];
+	unsigned long flags_kill;
+
+    struct task_struct *p;
+    struct mm_struct *mm;
+    struct signal_struct *sig;
+    u32 i, j = 0;
+    bool safe_flag = 0;
+    DUMP_FUN_ENTER;
+
+    lidbg("-----------------------\n");
+    if(ptasklist_lock != NULL)
+    {
+        lidbg("read_lock+\n");
+        read_lock(ptasklist_lock);
+    }
+    else
+        spin_lock_irqsave(&kill_lock, flags_kill);
+
+    for_each_process(p)
+    {
+        task_lock(p);
+        mm = p->mm;
+        sig = p->signal;
+        task_unlock(p);
+        safe_flag = 0;
+        i = 0;
+
+        if(
+            (strncmp(p->comm, "flush", sizeof("flush") - 1) == 0) ||
+            (strncmp(p->comm, "mtdblock", sizeof("mtdblock") - 1) == 0) ||
+            (strncmp(p->comm, "kworker", sizeof("kworker") - 1) == 0) ||
+            (strncmp(p->comm, "yaffs", sizeof("yaffs") - 1) == 0) ||
+            (strncmp(p->comm, "irq", sizeof("irq") - 1) == 0) ||
+            (strncmp(p->comm, "migration", sizeof("migration") - 1) == 0) ||
+            (strncmp(p->comm, "mmcqd", sizeof("mmcqd") - 1) == 0) ||
+            (strncmp(p->comm, "Fly", sizeof("Fly") - 1) == 0) ||
+            (strncmp(p->comm, "fly", sizeof("fly") - 1) == 0) ||
+            (strncmp(p->comm, "flyaudio", sizeof("flyaudio") - 1) == 0) ||
+            (strncmp(p->comm, "ksdioirqd", sizeof("ksdioirqd") - 1) == 0) ||
+            (strncmp(p->comm, "jbd2", sizeof("jbd2") - 1) == 0) ||
+            (strncmp(p->comm, "ext4", sizeof("ext4") - 1) == 0) ||
+            (strncmp(p->comm, "scsi", sizeof("scsi") - 1) == 0) ||
+            (strncmp(p->comm, "loop", sizeof("loop") - 1) == 0) ||
+            (strncmp(p->comm, "ServiceHandler", sizeof("ServiceHandler") - 1) == 0) ||
+            (strncmp(p->comm, "system", sizeof("system") - 1) == 0) ||
+            (strncmp(p->comm, "ksoftirqd", sizeof("ksoftirqd") - 1) == 0) ||
+            (strncmp(p->comm, "ftf", sizeof("ftf") - 1) == 0)
+        )
+        {
+            continue;
+        }
+
+		
+	{
+		struct string_dev *pos; 	
+		list_for_each_entry(pos, &fastboot_kill_list, tmp_list)
+		{
+			if(strcmp(p->comm, pos->yourkey) == 0)
+			{
+	            safe_flag = 1;
+		  		//lidbg("nokill:%s\n", pos->yourkey);
+	            break;
+			}
+			else
+			{
+			
+			}
+		}
+	}
+
+        if(safe_flag == 0)
+        {
+            if (p)
+            {
+                sprintf(kill_process[j++] , p->comm);
+                //force_sig(SIGKILL, p);
+            }
+        }
+    }//for_each_process
+
+    if(ptasklist_lock != NULL)
+        read_unlock(ptasklist_lock);
+    else
+        spin_unlock_irqrestore(&kill_lock, flags_kill);
+
+    lidbg("-----------------------\n\n");
+
+
+    if(j == 0)
+        lidbg("find nothing to kill\n");
+    else
+        for(i = 0; i < j; i++)
+        {
+            {
+                lidbg("## find %s to kill ##\n", kill_process[i]);
+
+            }
+        }
+    DUMP_FUN_LEAVE;
+
+}
+
+
 void show_wakelock(void)
 {
     int index = 0;
@@ -167,9 +278,9 @@ static void acc_early_suspend(struct early_suspend *handler)
 	suspend_state = 0;
 	check_all_clk_disable();
 	
-	if(find_unsafe_clk())
-	{
-	}
+	if(find_unsafe_clk()){}
+	
+	fastboot_task_kill_exclude();
 }
 
 static void acc_late_resume(struct early_suspend *handler)
@@ -319,6 +430,11 @@ static int  acc_probe(struct platform_device *pdev)
 
 	fs_file_separator(FASTBOOT_LOG_PATH);
 	
+	if(fs_fill_list("/flysystem/lib/out/fastboot_not_kill_list.conf", FS_CMD_FILE_LISTMODE, &fastboot_kill_list)<0)
+		fs_fill_list("/system/lib/modules/out/fastboot_not_kill_list.conf", FS_CMD_FILE_LISTMODE, &fastboot_kill_list);
+
+	spin_lock_init(&kill_lock);
+
 	return 0;
 
 	fail_mem:
