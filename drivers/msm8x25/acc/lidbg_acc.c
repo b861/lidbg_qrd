@@ -322,8 +322,9 @@ static int thread_acc_suspend(void *data)
 					 {
 						lidbgerr("thread_acc_suspend wait suspend timeout!\n");
 						show_wakelock();
-						list_active_locks();
-						ignore_wakelock = 1;
+						//list_active_locks();
+						 if(time_count >= 120)
+							ignore_wakelock = 1;
 						//break;
 					 }
 				}
