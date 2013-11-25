@@ -181,6 +181,7 @@ struct fly_smem
 #define SMEM_AD  p_fly_smem->ch
 #define SMEM_BL  p_fly_smem->bl_value
 #define SMEM_TEMP  p_fly_smem->ch[6]
+#define STRICT_SUSPEND  p_fly_smem->ch[0]
 
 #else
 struct fly_smem

@@ -262,6 +262,12 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
 		{
 			printk("******goto fastboot********\n");
 			SOC_Write_Servicer(CMD_FAST_POWER_OFF);
+			
+			if((!g_var.is_fly)||(STRICT_SUSPEND == 0xff))
+			{
+				SOC_Write_Servicer(LOG_LOGCAT);
+				SOC_Write_Servicer(LOG_DMESG);
+			}
 		}		
 		
 	return count;
