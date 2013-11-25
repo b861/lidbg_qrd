@@ -78,42 +78,38 @@ int check_all_clk_disable(void)
 
 
 
-int check_clk_disable(void)
+int safe_clk[] = {113,105,103,102,95,51,31,20,16,15,12,10,8,4,3,1};
+
+bool find_unsafe_clk(void)
 {
+	int j,i=P_NR_CLKS-1;
 	int ret = 0;
-	DUMP_FUN_ENTER;
-	if(pc_clk_is_enabled(P_UART1DM_CLK))
+	bool is_safe = 0;
+	DUMP_FUN;
+	while(i>=0)
 	{
-		lidbg("find clk:%d\n",P_UART1DM_CLK);		
-		lidbg_fs_log(FASTBOOT_LOG_PATH,"clk:%d\n",P_UART1DM_CLK);
-		ret = 1;
+		if (pc_clk_is_enabled(i))
+		{
+			is_safe = 0;
+			for(j = 0; j < sizeof(safe_clk); j++)
+			{
+				if(i == safe_clk[j] )
+				{	
+					is_safe = 1;
+					break;
+				}
+			}	
+			if(is_safe == 0)
+			{
+				lidbg_fs_log(FASTBOOT_LOG_PATH,"block unsafe clk:%d\n",i);
+				ret = 1;
+				return ret;
+			}
+		}
+		i--;
 	}
-
-	if(pc_clk_is_enabled(P_MDP_CLK))
-	{
-		lidbg("find clk:%d\n",P_MDP_CLK);
-		lidbg_fs_log(FASTBOOT_LOG_PATH,"clk:%d\n",P_MDP_CLK);
-		ret = 1;
-	}
-
-	if(pc_clk_is_enabled(P_ADSP_CLK))
-	{
-		lidbg("find clk:%d\n",P_ADSP_CLK);
-		lidbg_fs_log(FASTBOOT_LOG_PATH,"clk:%d\n",P_ADSP_CLK);
-		ret = 1;
-	}
-
-
-	if(pc_clk_is_enabled(P_UART3_CLK))
-	{
-		lidbg("find clk:%d\n",P_UART3_CLK);
-		lidbg_fs_log(FASTBOOT_LOG_PATH,"clk:%d\n",P_UART3_CLK);
-		ret = 1;
-	}
-	
-	DUMP_FUN_LEAVE;
 	return ret;
-	
+
 }
 
 void show_wakelock(void)
@@ -169,7 +165,10 @@ static void acc_early_suspend(struct early_suspend *handler)
 
 	suspend_state = 0;
 	check_all_clk_disable();
-	check_clk_disable();
+	
+	if(find_unsafe_clk())
+	{
+	}
 	complete(&suspend_start);
 }
 
