@@ -35,6 +35,8 @@ static spinlock_t  active_wakelock_list_lock;
 static spinlock_t kill_lock;
 static LIST_HEAD(fastboot_kill_list);
 
+bool ignore_wakelock = 0;
+
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
 static void acc_early_suspend(struct early_suspend *handler);
@@ -116,6 +118,10 @@ bool find_unsafe_clk(void)
 }
 
 
+bool is_ignore_wakelock(void)
+{
+    return ignore_wakelock;
+}
 
 
 static void fastboot_task_kill_exclude()
@@ -268,6 +274,7 @@ static void list_active_locks(void)
 static void set_func_tbl(void)
 {
 	 plidbg_dev->soc_func_tbl.pfnSOC_Get_WakeLock = get_wake_locks;
+	 plidbg_dev->soc_func_tbl.pfnSOC_PWR_Ignore_Wakelock = is_ignore_wakelock;
 }
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
@@ -316,6 +323,7 @@ static int thread_acc_suspend(void *data)
 						lidbgerr("thread_acc_suspend wait suspend timeout!\n");
 						show_wakelock();
 						list_active_locks();
+						ignore_wakelock = 1;
 						//break;
 					 }
 				}
@@ -467,6 +475,7 @@ static int  acc_remove(struct platform_device *pdev)
 static int acc_resume(struct device *dev)
 {
     DUMP_FUN_ENTER;
+    ignore_wakelock = 0;
 
     lidbg("fastboot_resume:%d\n", ++plidbg_acc->resume_count);
 	if(plidbg_acc->poweroff_count != plidbg_acc->resume_count)
