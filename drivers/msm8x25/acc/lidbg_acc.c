@@ -82,7 +82,7 @@ int check_all_clk_disable(void)
 
 
 
-int safe_clk[] = {113,106,105,103,102,95,51,31,20,16,15,12,10,8,4,3,1};
+int safe_clk[] = {113,106,105,104,103,102,95,51,31,20,16,15,12,10,8,4,3,1};
 
 bool find_unsafe_clk(void)
 {
