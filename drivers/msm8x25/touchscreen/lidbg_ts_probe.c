@@ -65,16 +65,19 @@ void ts_scan(void)
         {
             lidbg("i2c_addr 0x%x found!\n", ts_probe_dev[i].chip_addr);
 			if(!oldname)
-				{
-			oldname=ts_probe_dev[i].name;
-			return ;
-				}
+			{
+				oldname=ts_probe_dev[i].name;
+				return ;
+			}
 			else
 				{
 					if(!strcmp(oldname,ts_probe_dev[i].name))
-					con++;
+						con++;
 					else
+					{
 						con=0;
+						oldname=NULL;
+					}
 	     if(con>3)
 			{
             scan_on = 0;
