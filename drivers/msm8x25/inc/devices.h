@@ -308,11 +308,21 @@ enum
 	}while(0)
 
 
+#if (defined(BOARD_V1) || defined(BOARD_V2) || defined(BOARD_V3))
 #define LCD_RESET do{\
 				LCD_OFF;\
 				msleep(20);\
 				LCD_ON;\
 			}while(0)
+#else
+#define LCD_RESET do{\
+				printk("\n\nLCD_RESET\n\n");\
+				SOC_IO_Output(0, GPIO_LCD3, 0);\
+				msleep(20);\
+				SOC_IO_Output(0, GPIO_LCD3, 1);\
+			}while(0)
+#endif
+
 
 #define FORCE_LOGIC_ACC do{\
 		u8 buff[] = {0x03, 0x01, 0xff};\

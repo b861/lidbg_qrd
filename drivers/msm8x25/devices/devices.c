@@ -1030,6 +1030,7 @@ static void parse_cmd(char *pt)
 			LCD_ON;
 		}
 		unmute_ns();
+		LCD_RESET;
 		if(SOC_Hal_Acc_Callback)
 			SOC_Hal_Acc_Callback(1);
 	}
