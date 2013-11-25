@@ -76,6 +76,46 @@ int check_all_clk_disable(void)
 }
 
 
+
+
+int check_clk_disable(void)
+{
+	int ret = 0;
+	DUMP_FUN_ENTER;
+	if(pc_clk_is_enabled(P_UART1DM_CLK))
+	{
+		lidbg("find clk:%d\n",P_UART1DM_CLK);		
+		lidbg_fs_log(FASTBOOT_LOG_PATH,"clk:%d\n",P_UART1DM_CLK);
+		ret = 1;
+	}
+
+	if(pc_clk_is_enabled(P_MDP_CLK))
+	{
+		lidbg("find clk:%d\n",P_MDP_CLK);
+		lidbg_fs_log(FASTBOOT_LOG_PATH,"clk:%d\n",P_MDP_CLK);
+		ret = 1;
+	}
+
+	if(pc_clk_is_enabled(P_ADSP_CLK))
+	{
+		lidbg("find clk:%d\n",P_ADSP_CLK);
+		lidbg_fs_log(FASTBOOT_LOG_PATH,"clk:%d\n",P_ADSP_CLK);
+		ret = 1;
+	}
+
+
+	if(pc_clk_is_enabled(P_UART3_CLK))
+	{
+		lidbg("find clk:%d\n",P_UART3_CLK);
+		lidbg_fs_log(FASTBOOT_LOG_PATH,"clk:%d\n",P_UART3_CLK);
+		ret = 1;
+	}
+	
+	DUMP_FUN_LEAVE;
+	return ret;
+	
+}
+
 void show_wakelock(void)
 {
     int index = 0;
@@ -129,6 +169,7 @@ static void acc_early_suspend(struct early_suspend *handler)
 
 	suspend_state = 0;
 	check_all_clk_disable();
+	check_clk_disable();
 	complete(&suspend_start);
 }
 
