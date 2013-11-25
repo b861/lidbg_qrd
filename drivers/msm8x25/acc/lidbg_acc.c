@@ -44,6 +44,8 @@ typedef struct
 {
 	unsigned int  acc_flag;
 	u32 resume_count;
+	u32 poweroff_count;
+	u32 accroff_count;
 } lidbg_acc;
 
 lidbg_acc *plidbg_acc = NULL;
@@ -78,14 +80,13 @@ int check_all_clk_disable(void)
 
 
 
-int safe_clk[] = {113,105,103,102,95,51,31,20,16,15,12,10,8,4,3,1};
+int safe_clk[] = {113,106,105,103,102,95,51,31,20,16,15,12,10,8,4,3,1};
 
 bool find_unsafe_clk(void)
 {
 	int j,i=P_NR_CLKS-1;
 	int ret = 0;
 	bool is_safe = 0;
-	DUMP_FUN;
 	while(i>=0)
 	{
 		if (pc_clk_is_enabled(i))
@@ -169,7 +170,6 @@ static void acc_early_suspend(struct early_suspend *handler)
 	if(find_unsafe_clk())
 	{
 	}
-	complete(&suspend_start);
 }
 
 static void acc_late_resume(struct early_suspend *handler)
@@ -255,6 +255,7 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
 		else if(!strcmp(data_rec, "acc_off"))
 		{
 			printk("******goto acc_off********\n");
+			plidbg_acc->accoff_count ++;
 			SOC_Write_Servicer(CMD_ACC_OFF);
 			lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_ACC_OFF));
 		}
@@ -262,12 +263,14 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
 		{
 			printk("******goto fastboot********\n");
 			SOC_Write_Servicer(CMD_FAST_POWER_OFF);
-			
+			plidbg_acc->poweroff_count++;
 			if((!g_var.is_fly)||(STRICT_SUSPEND == 0xff))
 			{
 				SOC_Write_Servicer(LOG_LOGCAT);
 				SOC_Write_Servicer(LOG_DMESG);
 			}
+			
+			complete(&suspend_start);
 		}		
 		
 	return count;
@@ -301,6 +304,8 @@ static int  acc_probe(struct platform_device *pdev)
 	}
 
 	 plidbg_acc->resume_count = 0;
+	 plidbg_acc->accoff_count = 0;
+	 plidbg_acc->poweroff_count = 0;
 	 
 	if(!fs_is_file_exist(HAL_SO))
 	{
@@ -348,6 +353,11 @@ static int acc_resume(struct device *dev)
     DUMP_FUN_ENTER;
 
     lidbg("fastboot_resume:%d\n", ++plidbg_acc->resume_count);
+	if(plidbg_acc->poweroff_count != plidbg_acc->resume_count)
+	{
+		lidbg("err:poweroff_count:%d\n", plidbg_acc->poweroff_count);
+
+	}
     return 0;
 
 }
