@@ -321,7 +321,7 @@ enum
 			}while(0)
 #else
 #define LCD_RESET do{\
-				printk("\n\nLCD_RESET\n\n");\
+				printk("LCD_RESET\n");\
 				SOC_IO_Output(0, GPIO_LCD3, 0);\
 				msleep(20);\
 				SOC_IO_Output(0, GPIO_LCD3, 1);\
