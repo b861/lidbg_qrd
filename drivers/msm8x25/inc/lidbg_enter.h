@@ -43,7 +43,7 @@
 #include <linux/earlysuspend.h>
 #endif
 #include <asm/uaccess.h>
-#include <linux/kthread.h> 
+#include <linux/kthread.h>
 #include <linux/input.h>
 #include <linux/wakelock.h>
 #include <linux/vmalloc.h>
@@ -176,7 +176,7 @@ typedef enum
     PM_STATUS_LATE_RESUME_OK,
     PM_STATUS_READY_TO_PWROFF,
     PM_STATUS_READY_TO_FAKE_PWROFF,
-    
+
 } LIDBG_FAST_PWROFF_STATUS;
 
 typedef enum
@@ -323,29 +323,29 @@ struct lidbg_fn_t
     void (*pfnSOC_Fake_Register_Early_Suspend)(struct early_suspend *handler);
     //video
     int (*pfnVideoReset)(void);
-	//add huang	SOC_I2C_Rec_2B_SubAddr(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size)
-	int (*pfnSOC_I2C_Rec_2B_SubAddr)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
-	//I2c_Rate	 i2c_api_set_rate(int  bus_id, int rate)
-	int (*pfnSOC_I2C_Set_Rate)(int  bus_id, int rate);
+    //add huang	SOC_I2C_Rec_2B_SubAddr(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size)
+    int (*pfnSOC_I2C_Rec_2B_SubAddr)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
+    //I2c_Rate	 i2c_api_set_rate(int  bus_id, int rate)
+    int (*pfnSOC_I2C_Set_Rate)(int  bus_id, int rate);
 
-	void (*pfnSOC_IO_Uart_Send)( u32 baud,const char *fmt, ... );
+    void (*pfnSOC_IO_Uart_Send)( u32 baud, const char *fmt, ... );
 
-	void (*pfnSOC_Get_WakeLock)(struct list_head *p);
+    void (*pfnSOC_Get_WakeLock)(struct list_head *p);
 
-	
-	struct fly_smem* (*pfnSOC_Get_Share_Mem)(void);
-	void (*pfnSOC_System_Status)(FLY_SYSTEM_STATUS status);
 
-	
-	int (*pfnSOC_Get_CpuFreq)(void);
+    struct fly_smem *(*pfnSOC_Get_Share_Mem)(void);
+    void (*pfnSOC_System_Status)(FLY_SYSTEM_STATUS status);
 
-	void (*pfnSOC_LCD_Reset)(void);
 
-	
-	void (*pfnSOC_WakeLock_Stat)(bool lock,const char* name);
+    int (*pfnSOC_Get_CpuFreq)(void);
 
-	//screan_off :0 screan_on :1 suspendon:2 suspendoff:3 
-	void (*pfnHal_Acc_Callback)(int para);
+    void (*pfnSOC_LCD_Reset)(void);
+
+
+    void (*pfnSOC_WakeLock_Stat)(bool lock, const char *name);
+
+    //screan_off :0 screan_on :1 suspendon:2 suspendoff:3
+    void (*pfnHal_Acc_Callback)(int para);
 
 };
 
@@ -353,18 +353,18 @@ struct lidbg_pvar_t
 {
     //all pointer
     rwlock_t *pvar_tasklist_lock;
-	int temp;
-	FLY_SYSTEM_STATUS system_status;
-	int machine_id;
-	int cpu_freq;
-	bool is_fly;
+    int temp;
+    FLY_SYSTEM_STATUS system_status;
+    int machine_id;
+    int cpu_freq;
+    bool is_fly;
 };
 
 struct lidbg_hal
 {
- struct lidbg_fn_t soc_func_tbl;
- struct lidbg_pvar_t soc_pvar_tbl;
- unsigned char reserve[128];
+    struct lidbg_fn_t soc_func_tbl;
+    struct lidbg_pvar_t soc_pvar_tbl;
+    unsigned char reserve[128];
 };
 
 

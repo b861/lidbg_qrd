@@ -111,7 +111,7 @@ int soc_io_irq(struct io_int_config *pio_int_config);
 void soc_irq_disable(unsigned int irq);
 void soc_irq_enable(unsigned int irq);
 
-int soc_io_output(u32 group,u32 index, bool status);
+int soc_io_output(u32 group, u32 index, bool status);
 bool soc_io_input(u32 index);
 int soc_io_config(u32 index, bool direction, u32 pull, u32 drive_strength, bool force_reconfig);
 
@@ -154,10 +154,10 @@ extern struct fly_smem *p_fly_smem ;
 #define GPIO_TO_INT MSM_GPIO_TO_INT
 
 
- 
+
 //i2c-gpio
 //#define LIDBG_I2C_GPIO
-	
+
 #if	0
 #define LIDBG_I2C_GPIO_SDA (107)
 #define LIDBG_I2C_GPIO_SCL (32)

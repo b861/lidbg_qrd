@@ -31,8 +31,8 @@ U8  GUI_Point(U32 x, U32 y, U32 color)
 {
 
 
-//    GUI_PutPixel(&LayerConfig[GUI_LAYER], x, y, color);
-	GUI_PutPixel(x, y, color);
+    //    GUI_PutPixel(&LayerConfig[GUI_LAYER], x, y, color);
+    GUI_PutPixel(x, y, color);
 
 
     return(1);
@@ -51,7 +51,7 @@ U8  GUI_Point(U32 x, U32 y, U32 color)
 ****************************************************************************/
 U8  GUI_ReadPoint(U8 x, U8 y, U32 *ret)
 {
-//    *ret = GUI_GetPixel(&LayerConfig[GUI_LAYER], x, y);
+    //    *ret = GUI_GetPixel(&LayerConfig[GUI_LAYER], x, y);
     *ret = GUI_GetPixel(x, y);
 
     return(1);
@@ -71,7 +71,7 @@ U8  GUI_ReadPoint(U8 x, U8 y, U32 *ret)
 void  GUI_HLine(U8 x0, U8 y0, U8 x1, U32 color)
 {
 
-//    GUI_DrawHline(&LayerConfig[GUI_LAYER], x0, x1, y0, color);
+    //    GUI_DrawHline(&LayerConfig[GUI_LAYER], x0, x1, y0, color);
     GUI_DrawHline(x0, x1, y0, color);
 
 }
@@ -89,7 +89,7 @@ void  GUI_HLine(U8 x0, U8 y0, U8 x1, U32 color)
 ***********************************************************************/
 void  GUI_RLine(U8 x0, U8 y0, U8 y1, U32 color)
 {
-//    GUI_DrawVline(&LayerConfig[GUI_LAYER], x0, y0, y1, color);
+    //    GUI_DrawVline(&LayerConfig[GUI_LAYER], x0, y0, y1, color);
     GUI_DrawVline(x0, y0, y1, color);
 }
 

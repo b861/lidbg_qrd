@@ -15,16 +15,17 @@ void soc_bl_init(void)
 
 unsigned int   soc_bl_set(u32 bl_level)
 {
-	int ret = 0;
-	
-	(*bd).props.brightness = bl_level;
-	ret = cedric_backlight_set_intensity(bd);
-	if(ret) {
-		printk("[BL]: Set backlight failed !\n");
-		return 0;
-	}
-	else
-		return 1;
+    int ret = 0;
+
+    (*bd).props.brightness = bl_level;
+    ret = cedric_backlight_set_intensity(bd);
+    if(ret)
+    {
+        printk("[BL]: Set backlight failed !\n");
+        return 0;
+    }
+    else
+        return 1;
 }
 
 EXPORT_SYMBOL(soc_bl_set);

@@ -45,7 +45,7 @@ LIDBG_DEFINE;
 struct early_suspend early_suspend;
 bool work_en = 1;
 int version_check = 0;
-	
+
 #ifdef CONFIG_HAS_EARLYSUSPEND
 static void update_early_suspend(struct early_suspend *h)
 {
@@ -260,7 +260,7 @@ static int mtk_i2c_write_bytes(uint8_t slave_add,  uint8_t *buf, uint16_t len)
 {
     int ret = -1;
     uint16_t offset = 0, count = 0;	//
-    uint8_t buffer[MAX_I2C_BYTES_NUM+1] = { *buf };	//首地址赋值
+    uint8_t buffer[MAX_I2C_BYTES_NUM + 1] = { *buf };	//首地址赋值
     uint8_t *start_reg = buf + 1;
 
     if(len == 0)
@@ -289,7 +289,7 @@ static int mtk_i2c_read_bytes(uint8_t slave_add,  uint8_t *buf, uint32_t len)
 {
     int ret = -1;
     uint16_t offset = 0, count = 0;	//
-    uint8_t buffer[MAX_I2C_BYTES_NUM+1] = { *buf };
+    uint8_t buffer[MAX_I2C_BYTES_NUM + 1] = { *buf };
     uint8_t *start_reg = buf + 1;
 
     if(len == 0)
@@ -373,9 +373,9 @@ static inline void gt80x_stdpin_set_high(void)
     //gpio_direction_output(SHUTDOWN_PORT, 1);
 
 #ifdef BOARD_V2
-	   SOC_IO_Output(0, 27, 0);
+    SOC_IO_Output(0, 27, 0);
 #else
-	   SOC_IO_Output(0, 27, 1);
+    SOC_IO_Output(0, 27, 1);
 #endif
 }
 
@@ -384,9 +384,9 @@ static inline void gt80x_stdpin_set_low(void)
 {
     //gpio_direction_output(SHUTDOWN_PORT, 0);
 #ifdef BOARD_V2
-	   SOC_IO_Output(0, 27, 1);
+    SOC_IO_Output(0, 27, 1);
 #else
-	   SOC_IO_Output(0, 27, 0);
+    SOC_IO_Output(0, 27, 0);
 #endif
 }
 
@@ -625,7 +625,7 @@ static bool gt80x_write_eeprom_code(void)
     {
         ret = 0;
         for(j = 0; j < 5; j++)
-            ret += gt80x_write_word(gt80x_to_write_addr(0x4000 + i), gt80x_eeprom_code[i] * 256 + gt80x_eeprom_code[i+1]);
+            ret += gt80x_write_word(gt80x_to_write_addr(0x4000 + i), gt80x_eeprom_code[i] * 256 + gt80x_eeprom_code[i + 1]);
 
         if(ret == 0)
         {
@@ -710,10 +710,10 @@ static bool gt80x_write_ram_ctrl_code(void)
             {
                 debug_printk(LEVEL_INFO, "Write control-code failed. ret: %d, data: 0x%02x\n", ret, buffer[1]);
 
-		gt80x_stdpin_set_high();
-		msleep(10);
-		gt80x_stdpin_set_low();
-		msleep(30);
+                gt80x_stdpin_set_high();
+                msleep(10);
+                gt80x_stdpin_set_low();
+                msleep(30);
                 return false;
             }
         }
@@ -909,7 +909,7 @@ static bool  goodix_read_version(uint8_t *buffer)
 {
     int ret;
     uint8_t version[2] = {0x69, 0xff};					//command of reading Guitar's version
-    uint8_t version_data[GT80X_VERSION_LENGTH+1] = {0x6A};	//store touchscreen version infomation
+    uint8_t version_data[GT80X_VERSION_LENGTH + 1] = {0x6A};	//store touchscreen version infomation
     memset(version_data + 1, 0, GT80X_VERSION_LENGTH);
     if(buffer != NULL)
         memset(buffer, 0, GT80X_VERSION_LENGTH);
@@ -988,7 +988,7 @@ static int gt80x_check_firmware(void)
     int retry = 0;
     int ret = false;
     bool checksum_state = false;	//CheckSum检查状态
-    uint8_t gt80x_rom_version[GT80X_VERSION_LENGTH+2] = { 0 };
+    uint8_t gt80x_rom_version[GT80X_VERSION_LENGTH + 2] = { 0 };
 
     goodix_ts_set(GOODIX_TS_STOP);
 
@@ -1054,7 +1054,7 @@ static int gt80x_check_firmware(void)
     else if(ret != VERSION_EQUAL)
         checksum_state = false;
 
-version_check = ret;
+    version_check = ret;
     //checksum_state = false; /*Only for debug*/
 error_go_out:
     goodix_ts_set(GOODIX_TS_CONTINUE);
@@ -1236,7 +1236,7 @@ static int gt80x_iap_kthread(void *data)
             goto do_nothing;
 
         work_en = 0;
-	irq_signal = 0;
+        irq_signal = 0;
         set_current_state(TASK_UNINTERRUPTIBLE);
         if(kthread_should_stop())
             break;
@@ -1264,7 +1264,7 @@ static int gt80x_iap_kthread(void *data)
 
         ret = gt80x_check_firmware();
 #if 1
-        if(ret || (version_check==VERSION_LOWER) || (version_check==VERSION_HIGHER))
+        if(ret || (version_check == VERSION_LOWER) || (version_check == VERSION_HIGHER))
         {
 #ifdef DEBUG_TIME
             last_time = get_jiffies_64() - last_time + HZ / 2;
@@ -1391,7 +1391,7 @@ static int gt80x_iap_kthread(void *data)
                 debug_printk(LEVEL_INFO, "It's successful to restart Goodix-TS driver !\n");
             shutdown_flag_ts = 0;
             shutdown_flag_probe = 0;
-	    irq_signal = 1;
+            irq_signal = 1;
             ssleep(600);
 
             ret = 0;
@@ -1399,7 +1399,7 @@ static int gt80x_iap_kthread(void *data)
         else
         {
             debug_printk(LEVEL_INFO, "GT80X Updating is interrupted. State:%d, return:%d.\n", kernel_state, ret);
-	    shutdown_flag_ts = 0;
+            shutdown_flag_ts = 0;
             shutdown_flag_probe = 0;
             kernel_state = STATE_FINASH;
         }
@@ -1452,7 +1452,7 @@ static int __init init_kthread(void)
     register_early_suspend(&early_suspend);
 #endif
 
-   // SOC_Fake_Register_Early_Suspend(&early_suspend);
+    // SOC_Fake_Register_Early_Suspend(&early_suspend);
     /************************************************************/
 
     debug_printk(LEVEL_DEBUG, "Initiall kernel thread.\n");

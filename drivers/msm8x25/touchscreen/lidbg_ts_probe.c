@@ -3,14 +3,14 @@
 
 LIDBG_DEFINE;
 
-static int ts_scan_delayms =500;
-static int is_warned =0;
+static int ts_scan_delayms = 500;
+static int is_warned = 0;
 #define TS_I2C_BUS (1)
 
 #if (defined(BOARD_V1) || defined(BOARD_V2) || defined(BOARD_V3))
-	#define FLYHAL_CONFIG_PATH "/flydata/flyhalconfig"
+#define FLYHAL_CONFIG_PATH "/flydata/flyhalconfig"
 #else
-	#define FLYHAL_CONFIG_PATH "/flysystem/flyconfig/default/lidbgconfig/flylidbgconfig.txt"
+#define FLYHAL_CONFIG_PATH "/flysystem/flyconfig/default/lidbgconfig/flylidbgconfig.txt"
 #endif
 
 static LIST_HEAD(flyhal_config_list);
@@ -21,15 +21,15 @@ struct probe_device
     char chip_addr;
     unsigned int sub_addr;
     int cmd;
-	char *name;
+    char *name;
 };
 
 struct probe_device ts_probe_dev[] =
 {
-    {0x5d, 0x00, LOG_CAP_TS_GT811,"gt811.ko"},
-    {0x55, 0x00, LOG_CAP_TS_GT801,"gt801.ko"},
-    {0x14, 0x00, LOG_CAP_TS_GT911,"gt911.ko"},
-//{0x5d, 0x00, LOG_CAP_TS_GT910,"gt910new.ko"}, //flycar  
+    {0x5d, 0x00, LOG_CAP_TS_GT811, "gt811.ko"},
+    {0x55, 0x00, LOG_CAP_TS_GT801, "gt801.ko"},
+    {0x14, 0x00, LOG_CAP_TS_GT911, "gt911.ko"},
+    //{0x5d, 0x00, LOG_CAP_TS_GT910,"gt910new.ko"}, //flycar
 };
 
 bool scan_on = 1;
@@ -48,7 +48,7 @@ void ts_scan(void)
     int i;
     int32_t rc1, rc2;
     u8 tmp;
-	char path[100];
+    char path[100];
 
     for(i = 0; i < SIZE_OF_ARRAY(ts_probe_dev); i++)
     {
@@ -56,7 +56,7 @@ void ts_scan(void)
         rc1 = SOC_I2C_Rec_Simple(TS_I2C_BUS, ts_probe_dev[i].chip_addr, &tmp, 1 );
         rc2 = SOC_I2C_Rec(TS_I2C_BUS, ts_probe_dev[i].chip_addr, ts_probe_dev[i].sub_addr, &tmp, 1 );
 
-        lidbg("rc1=%x,rc2=%x,ts_scan_delayms=%d\n", rc1, rc2,ts_scan_delayms);
+        lidbg("rc1=%x,rc2=%x,ts_scan_delayms=%d\n", rc1, rc2, ts_scan_delayms);
 
         if ((rc1 < 0) && (rc2 < 0))
             lidbg("i2c_addr 0x%x probe fail!\n", ts_probe_dev[i].chip_addr);
@@ -67,30 +67,30 @@ void ts_scan(void)
             SOC_I2C_Rec(TS_I2C_BUS, 0x12, 0x00, &tmp, 1 ); //let i2c bus release
 
 
-			sprintf(path, "/system/lib/modules/out/%s", ts_probe_dev[i].name);
-			lidbg_insmod( path );
-			
-			sprintf(path, "/flysystem/lib/out/%s", ts_probe_dev[i].name);
-			lidbg_insmod( path );
+            sprintf(path, "/system/lib/modules/out/%s", ts_probe_dev[i].name);
+            lidbg_insmod( path );
 
-			//in V3+,check ts revert and save the ts sate.
-			if(0==is_warned)
-			{
-				is_warned=1;
-				fs_mem_log("loadts=%s\n", ts_probe_dev[i].name);
-				lidbg_fs_log(TS_LOG_PATH,"loadts=%s\n", ts_probe_dev[i].name);
-				ts_should_revert = fs_find_string(&flyhal_config_list,"TSMODE_XYREVERT");
-				if(ts_should_revert > 0)
-					printk("[futengfei]=======================TS.XY will revert\n");
-				else
-					printk("[futengfei]=======================TS.XY will normal\n");
-			}
-			if (!strcmp(ts_probe_dev[i].name, "gt801.ko"))
-			{
-				lidbg_insmod("/system/lib/modules/out/gt80x_update.ko");
-				lidbg_insmod("/flysystem/lib/out/gt80x_update.ko");
-			}
-	        break;
+            sprintf(path, "/flysystem/lib/out/%s", ts_probe_dev[i].name);
+            lidbg_insmod( path );
+
+            //in V3+,check ts revert and save the ts sate.
+            if(0 == is_warned)
+            {
+                is_warned = 1;
+                fs_mem_log("loadts=%s\n", ts_probe_dev[i].name);
+                lidbg_fs_log(TS_LOG_PATH, "loadts=%s\n", ts_probe_dev[i].name);
+                ts_should_revert = fs_find_string(&flyhal_config_list, "TSMODE_XYREVERT");
+                if(ts_should_revert > 0)
+                    printk("[futengfei]=======================TS.XY will revert\n");
+                else
+                    printk("[futengfei]=======================TS.XY will normal\n");
+            }
+            if (!strcmp(ts_probe_dev[i].name, "gt801.ko"))
+            {
+                lidbg_insmod("/system/lib/modules/out/gt80x_update.ko");
+                lidbg_insmod("/flysystem/lib/out/gt80x_update.ko");
+            }
+            break;
         }
     }
 
@@ -98,11 +98,11 @@ void ts_scan(void)
     lidbg("ts_scan_time:%d\n", loop);
 
 #if (defined(BOARD_V1) || defined(BOARD_V2))
-	if(loop==10)
-	{
-		lidbg_insmod("/system/lib/modules/out/gt80x_update.ko");
-		lidbg_insmod("/flysystem/lib/out/gt80x_update.ko");
-	}
+    if(loop == 10)
+    {
+        lidbg_insmod("/system/lib/modules/out/gt80x_update.ko");
+        lidbg_insmod("/flysystem/lib/out/gt80x_update.ko");
+    }
 #endif
 
     //if(loop > 10) {scan_on=0;}
@@ -111,14 +111,14 @@ void ts_scan(void)
 int ts_probe_thread(void *data)
 {
 
-	fs_fill_list(FLYHAL_CONFIG_PATH, FS_CMD_FILE_LISTMODE, &flyhal_config_list);
-    fs_get_intvalue(&lidbg_drivers_list,"ts_scan_delayms", &ts_scan_delayms,NULL);
+    fs_fill_list(FLYHAL_CONFIG_PATH, FS_CMD_FILE_LISTMODE, &flyhal_config_list);
+    fs_get_intvalue(&lidbg_drivers_list, "ts_scan_delayms", &ts_scan_delayms, NULL);
     if(ts_scan_delayms < 100)
         ts_scan_delayms = 100;
-	
-	lidbg_insmod("/system/lib/modules/out/lidbg_ts_to_recov.ko");
-	lidbg_insmod("/flysystem/lib/out/lidbg_ts_to_recov.ko");
-	
+
+    lidbg_insmod("/system/lib/modules/out/lidbg_ts_to_recov.ko");
+    lidbg_insmod("/flysystem/lib/out/lidbg_ts_to_recov.ko");
+
     while(1)
     {
         set_current_state(TASK_UNINTERRUPTIBLE);
@@ -129,7 +129,7 @@ int ts_probe_thread(void *data)
 
         if(shutdown_flag_probe == 0)
         {
-           printk("[wang]:======begin to probe ts_driver.\n");
+            printk("[wang]:======begin to probe ts_driver.\n");
             if(scan_on == 1)
             {
                 SOC_IO_Output(0, 27, 1);
@@ -161,10 +161,10 @@ int ts_probe_thread(void *data)
         }
         else
         {
-              //printk("[wang]:=========is in updating.\n");
-	    	shutdown_flag_probe = 2;
+            //printk("[wang]:=========is in updating.\n");
+            shutdown_flag_probe = 2;
             msleep(ts_scan_delayms);
-            
+
         }
     }
     return 0;

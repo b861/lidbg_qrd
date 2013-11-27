@@ -57,7 +57,7 @@ struct goodix_ts_data
 //7, MAX NUMBER of BYTES by MTK's i2c operation(not include data address).
 #define MAX_I2C_BYTES_NUM	7
 
-//错误码定义
+//?????
 #define ERROR_NO_FILE				ENOENT	// 2
 #define ERROR_FILE_READ				ENFILE	// 23
 #define ERROR_FILE_TYPE				EISDIR	// 21
@@ -81,13 +81,13 @@ enum gt80x_driver_state
 enum gt80x_version_state
 {
     VERSION_INVALID 	= 0,
-    /**版本号为空或为乱码，固件可能已经失效 */
+    /**?????????,???????? */
     VERSION_CONFUSION 	= 1,
-    /**文件版本与IC固件相同或更低 */
+    /**?????IC??????? */
     VERSION_LOWER		= 2,
-    /**版本号较高 */
+    /**????? */
     VERSION_HIGHER		= 3,
-    /**版本号一致，状态正常 */
+    /**?????,???? */
     VERSION_EQUAL		= 4,
 };
 

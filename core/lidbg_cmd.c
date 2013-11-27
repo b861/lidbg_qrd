@@ -2,7 +2,7 @@ void parse_cmd(char *pt)
 {
     int argc = 0;
     int i = 0;
-    
+
     char *argv[32] = {NULL};
 
     // »ñÈ¡ÃüÁî ´æÈëargvÊý×é
@@ -26,16 +26,16 @@ void parse_cmd(char *pt)
     argv[argc] = NULL;
 
     i = 0;
-	if(debug_mask)
-	{
-	    lidbg("cmd:");
-	    while(i < argc)
-	    {
-	        printk("%s ", argv[i]);
-	        i++;
-	    }
-	    printk("\n");
-	}
+    if(debug_mask)
+    {
+        lidbg("cmd:");
+        while(i < argc)
+        {
+            printk("%s ", argv[i]);
+            i++;
+        }
+        printk("\n");
+    }
     // ½âÎöÃüÁî
 
     // µ÷ÓÃÆäËûÄ£¿éµÄº¯Êý
@@ -95,7 +95,7 @@ void parse_cmd(char *pt)
         }
         else if(!strcmp(argv[1], "uart"))
         {
-             lidbg_uart_main(new_argc, new_argv);
+            lidbg_uart_main(new_argc, new_argv);
         }
 
         else if(!strcmp(argv[1], "servicer"))
@@ -113,34 +113,34 @@ void parse_cmd(char *pt)
             lidbg_fileserver_main(new_argc, new_argv);
         }
 
-		else if (!strcmp(argv[1], "wakelock"))
-		{
-			lidbg_wakelock_stat(new_argc, new_argv);
-		}
+        else if (!strcmp(argv[1], "wakelock"))
+        {
+            lidbg_wakelock_stat(new_argc, new_argv);
+        }
 
     }
 
-	else if (!strcmp(argv[0], "appcmd"))
-	{
-	    if (!strcmp(argv[1], "*158#999"))
-	    {
-			fs_call_apk();
-	    }
-	    else if (!strcmp(argv[1], "*158#001"))
-	    {
-	        lidbg_chmod("/data");
-	        k2u_write(LOG_LOGCAT);
-	    }
-	    else if (!strcmp(argv[1], "*158#002"))
-	    {
-	        lidbg_chmod("/data");
-	        k2u_write(LOG_DMESG);
-	    }
-	    else if (!strcmp(argv[1], "*158#003"))
-	    {
-			lidbg_rm("/data/logcat.txt");
-			lidbg_rm("/data/kmsg.txt");
-	    }
-	}
+    else if (!strcmp(argv[0], "appcmd"))
+    {
+        if (!strcmp(argv[1], "*158#999"))
+        {
+            fs_call_apk();
+        }
+        else if (!strcmp(argv[1], "*158#001"))
+        {
+            lidbg_chmod("/data");
+            k2u_write(LOG_LOGCAT);
+        }
+        else if (!strcmp(argv[1], "*158#002"))
+        {
+            lidbg_chmod("/data");
+            k2u_write(LOG_DMESG);
+        }
+        else if (!strcmp(argv[1], "*158#003"))
+        {
+            lidbg_rm("/data/logcat.txt");
+            lidbg_rm("/data/kmsg.txt");
+        }
+    }
 
 }

@@ -1164,8 +1164,8 @@ void  GUI_FloodFill(U32 x0, U32 y0, U32 color)
     /* 开始向上填充 */
 FILL_UP:
     if(0 == up_no) goto FILL_DOWN;							// 若向下扫描已完成，则退出
-    xx = up_point[up_no-1].x;							// 否则取出下一折点
-    yy = up_point[up_no-1].y;
+    xx = up_point[up_no - 1].x;							// 否则取出下一折点
+    yy = up_point[up_no - 1].y;
     up_no--;
     xx0 = GUI_ReadLeftPoint(xx, yy, fcolor);
     xx1 = GUI_ReadRightPoint(xx, yy, fcolor);
@@ -1262,8 +1262,8 @@ FILL_DOWN:
             goto FILL_UP;
         }
     }
-    xx = down_point[down_no-1].x;						// 否则取出下一折点
-    yy = down_point[down_no-1].y;
+    xx = down_point[down_no - 1].x;						// 否则取出下一折点
+    yy = down_point[down_no - 1].y;
     down_no--;
     xx0 = GUI_ReadLeftPoint(xx, yy, fcolor);
     xx1 = GUI_ReadRightPoint(xx, yy, fcolor);

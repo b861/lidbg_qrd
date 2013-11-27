@@ -20,7 +20,7 @@ struct lidbg_dev
     unsigned char mem[LIDBG_SIZE]; /*全局内存*/
     union
     {
-        unsigned char lidbg_smem[LIDBG_SIZE/4]; // 1k
+        unsigned char lidbg_smem[LIDBG_SIZE / 4]; // 1k
         struct lidbg_dev_smem s;
 
     } smem;
@@ -77,7 +77,7 @@ int lidbg_open(struct inode *inode, struct file *filp)
 int lidbg_release(struct inode *inode, struct file *filp)
 {
     if(debug_mask) DUMP_FUN;
-#if 0	
+#if 0
     up(&lidbg_lock);
 #endif
     return 0;
@@ -142,38 +142,38 @@ static ssize_t lidbg_write(struct file *filp, const char __user *buf,
 
     /*用户空间->内核空间*/
     if(copy_from_user(dev->mem, buf, size))
-    	{
+    {
         printk("copy_from_user ERR\n");
-	}
-	
-	parse_cmd(dev->mem);
+    }
+
+    parse_cmd(dev->mem);
 #else
 
-	char tmp[64];
-	char *mem = tmp;
-	bool is_alloc = 0;
-	if(size >= 64)
-	{
-		mem = (char *)kmalloc(size+1,GFP_KERNEL);//size+1 for '\0'
-		if (mem == NULL)
-	    {
-	        lidbg("lidbg_write kmalloc err\n");
-	        return 0;
-	    }
-		is_alloc = 1;
-	}
-	memset(mem, '\0', size+1);
+    char tmp[64];
+    char *mem = tmp;
+    bool is_alloc = 0;
+    if(size >= 64)
+    {
+        mem = (char *)kmalloc(size + 1, GFP_KERNEL); //size+1 for '\0'
+        if (mem == NULL)
+        {
+            lidbg("lidbg_write kmalloc err\n");
+            return 0;
+        }
+        is_alloc = 1;
+    }
+    memset(mem, '\0', size + 1);
 
-	/*用户空间->内核空间*/
-	if(copy_from_user(mem, buf, size))
-	{
-		printk("copy_from_user ERR\n");
-	}
-	
-	//lidbg("size:%d,%s\n",size,mem);
-	parse_cmd(mem);
-	if(is_alloc)
-		kfree(mem);
+    /*用户空间->内核空间*/
+    if(copy_from_user(mem, buf, size))
+    {
+        printk("copy_from_user ERR\n");
+    }
+
+    //lidbg("size:%d,%s\n",size,mem);
+    parse_cmd(mem);
+    if(is_alloc)
+        kfree(mem);
 #endif
 
     return size;//若不为size则重复执行
@@ -300,7 +300,7 @@ int lidbg_init(void)
     device_create(my_class, NULL, MKDEV(LIDBG_MAJOR, LIDBG_MINOR), NULL, "mlidbg" "%d", LIDBG_MINOR );
 
     lidbg_create_proc();
-	
+
     lidbg_chmod("/dev/mlidbg0");
 
     return 0;

@@ -125,7 +125,7 @@ static int __init share_init(void)
         int i;
         for(i = 0; i < sizeof(plidbg_share->share_func_tbl) / 4; i++)
         {
-            ((int *)&(plidbg_share->share_func_tbl))[i] = share_func_tbl_default;
+            ((int *) & (plidbg_share->share_func_tbl))[i] = share_func_tbl_default;
 
         }
     }
@@ -149,7 +149,7 @@ static int __init share_init(void)
         int i;
         for(i = 0; i < sizeof(plidbg_share->lidbg_devp->soc_func_tbl) / 4; i++)
         {
-            ((int *)&(plidbg_share->lidbg_devp->soc_func_tbl))[i] = soc_func_tbl_default;
+            ((int *) & (plidbg_share->lidbg_devp->soc_func_tbl))[i] = soc_func_tbl_default;
 
         }
         //fot test
@@ -163,7 +163,7 @@ static int __init share_init(void)
     plidbg_share->lidbg_devp->smem.s.valid_offset = OFFSETOF(struct lidbg_dev, smem.lidbg_smem);
 
 
-//create dev after data is initialized
+    //create dev after data is initialized
     ret = misc_register(&misc);
     create_shm_proc();
 

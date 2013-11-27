@@ -2,7 +2,7 @@ void parse_cmd(char *pt)
 {
     int argc = 0;
     int i = 0;
-    
+
     char *argv[32] = {NULL};
 
     // »ñÈ¡ÃüÁî ´æÈëargvÊý×é

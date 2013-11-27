@@ -50,18 +50,18 @@ int soc_io_config(u32 index, bool direction, u32 pull, u32 drive_strength, bool 
 {
 
     if(direction == GPIO_CFG_OUTPUT)
-		MDrv_GPIO_Pad_Oen(index);
+        MDrv_GPIO_Pad_Oen(index);
     else if(direction == GPIO_CFG_INPUT)
-		MDrv_GPIO_Pad_Odn(index);
-    else 
-		printk("Gpio direction is not supported!\n");
-	
-    if(pull == GPIO_CFG_PULL_UP)
-		MDrv_GPIO_Pull_High(index);
-    else if(pull == GPIO_CFG_PULL_DOWN)
-		MDrv_GPIO_Pull_Low(index);
+        MDrv_GPIO_Pad_Odn(index);
     else
-		printk("Gpio-%d no pull !\n", index);
+        printk("Gpio direction is not supported!\n");
+
+    if(pull == GPIO_CFG_PULL_UP)
+        MDrv_GPIO_Pull_High(index);
+    else if(pull == GPIO_CFG_PULL_DOWN)
+        MDrv_GPIO_Pull_Low(index);
+    else
+        printk("Gpio-%d no pull !\n", index);
 
 #if 0
     int rc;
@@ -134,21 +134,21 @@ free_gpio:
         return 0;
     }
 #endif
-	return 1;
+    return 1;
 }
 
 
-int soc_io_output(u32 group,u32 index, bool status)
+int soc_io_output(u32 group, u32 index, bool status)
 {
 
-	MDrv_GPIO_Pad_Set(index);
-	
-	if(status == 1) 
-		MDrv_GPIO_Set_High(index);
-	else 
-		MDrv_GPIO_Set_Low(index);
-	
-	return 1;
+    MDrv_GPIO_Pad_Set(index);
+
+    if(status == 1)
+        MDrv_GPIO_Set_High(index);
+    else
+        MDrv_GPIO_Set_Low(index);
+
+    return 1;
 }
 
 bool soc_io_input( u32 index)

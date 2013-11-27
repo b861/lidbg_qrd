@@ -42,8 +42,9 @@ bool i2c_c_ctrl = 0;
 int i2c_ctrl = 0;
 struct platform_devices_resource devices_resource;
 
-static struct notifier_block lidbg_notifier = {
-	.notifier_call = lidbg_event,
+static struct notifier_block lidbg_notifier =
+{
+    .notifier_call = lidbg_event,
 };
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
@@ -61,26 +62,26 @@ u8 audio_data_for_hal[2];
 
 void cb_password_enable_usb(char *password )
 {
-    	USB_WORK_ENABLE;
+    USB_WORK_ENABLE;
 }
 void cb_password_disable_usb(char *password )
 {
-    	USB_WORK_DISENABLE;
+    USB_WORK_DISENABLE;
 }
 
 void unmute_ns(void)
 {
-	printk("[futengfei].unmute_ns");
-	audio_data_for_hal[0]=0x01;
-	audio_data_for_hal[1]=0x00;
-	wake_up_interruptible(&read_wait);
+    printk("[futengfei].unmute_ns");
+    audio_data_for_hal[0] = 0x01;
+    audio_data_for_hal[1] = 0x00;
+    wake_up_interruptible(&read_wait);
 }
 void mute_s(void)
 {
-	printk("[futengfei].mute_s");
-	audio_data_for_hal[0]=0x01;
-	audio_data_for_hal[1]=0x01;
-	wake_up_interruptible(&read_wait);
+    printk("[futengfei].mute_s");
+    audio_data_for_hal[0] = 0x01;
+    audio_data_for_hal[1] = 0x01;
+    wake_up_interruptible(&read_wait);
 }
 
 
@@ -94,7 +95,7 @@ int i2c_devices_probe(int i2c_bus, unsigned char *i2c_devices_list)
 
 #define I2C_PROBE_INTERVAL_TIME (10)
 
-    for(i = 1; i<(0xff >> 1); i++)
+    for(i = 1; i < (0xff >> 1); i++)
     {
         rc = SOC_I2C_Rec(i2c_bus, (char)i, 0, (char *)tmp, 1);
 
@@ -362,48 +363,48 @@ find_key:
 
 void log_temp(void)
 {
-	static int old_temp,cur_temp;
-	int tmp;
-	g_var.temp = cur_temp = soc_temp_get();
-	tmp = cur_temp - old_temp;
-	if((temp_log_freq != 0)&&(ABS(tmp) >= temp_log_freq))
-	{
-		lidbg_fs_log(TEMP_LOG_PATH,"%d\n",cur_temp);
-		old_temp = cur_temp;
-	}
+    static int old_temp, cur_temp;
+    int tmp;
+    g_var.temp = cur_temp = soc_temp_get();
+    tmp = cur_temp - old_temp;
+    if((temp_log_freq != 0) && (ABS(tmp) >= temp_log_freq))
+    {
+        lidbg_fs_log(TEMP_LOG_PATH, "%d\n", cur_temp);
+        old_temp = cur_temp;
+    }
 }
 
 #if (defined(BOARD_V1) || defined(BOARD_V2) || defined(BOARD_V3))
 #else
 static int thread_thermal(void *data)
 {
-	int cur_temp;
+    int cur_temp;
     DUMP_FUN;
     while(!kthread_should_stop())
     {
-	    msleep(1000);
-		
-		log_temp();
-		cur_temp = soc_temp_get();
-		// printk("MSM_THERM: %d *C\n",cur_temp);
-		 if( (cur_temp > fan_onoff_temp) && hal_fan_on && (suspend_flag == 0))//on
-		 {
-		 	if(!flag_fan_run_statu)
-		 	{
-				flag_fan_run_statu = true;
-				AIRFAN_BACK_ON;
-				lidbg_fs_log(TEMP_LOG_PATH,"AIR_ON\n");
-		 	}
-		 }
-		 else //off
-		 {
-		 	if(flag_fan_run_statu)
-		 	{
-				flag_fan_run_statu = false;
-				AIRFAN_BACK_OFF;
-				lidbg_fs_log(TEMP_LOG_PATH,"AIR_OFF\n");
-		 	}
-		 }
+        msleep(1000);
+
+        log_temp();
+        cur_temp = soc_temp_get();
+        // printk("MSM_THERM: %d *C\n",cur_temp);
+        if( (cur_temp > fan_onoff_temp) && hal_fan_on && (suspend_flag == 0))//on
+        {
+            if(!flag_fan_run_statu)
+            {
+                flag_fan_run_statu = true;
+                AIRFAN_BACK_ON;
+                lidbg_fs_log(TEMP_LOG_PATH, "AIR_ON\n");
+            }
+        }
+        else //off
+        {
+            if(flag_fan_run_statu)
+            {
+                flag_fan_run_statu = false;
+                AIRFAN_BACK_OFF;
+                lidbg_fs_log(TEMP_LOG_PATH, "AIR_OFF\n");
+            }
+        }
     }
     return 0;
 }
@@ -437,7 +438,7 @@ void led_on(void)
 
 #endif
 #if (defined(BOARD_V1) || defined(BOARD_V2) || defined(BOARD_V3))
-	log_temp();
+    log_temp();
 #endif
 
 
@@ -463,8 +464,8 @@ int thread_led(void *data)
         if(kthread_should_stop()) break;
         if(1) //条件为真
         {
-        if(led_en)
-            led_on();
+            if(led_en)
+                led_on();
 #ifdef FLY_DEBUG
             msleep(500);
 #else
@@ -536,25 +537,25 @@ static int soc_dev_probe(struct platform_device *pdev)
 
     }
 
-	FS_REGISTER_INT(i2c_ctrl,"i2c_ctrl",0,NULL);
-	FS_REGISTER_INT(temp_log_freq,"temp_log_freq",5,NULL);
-	fs_file_separator(TEMP_LOG_PATH);
+    FS_REGISTER_INT(i2c_ctrl, "i2c_ctrl", 0, NULL);
+    FS_REGISTER_INT(temp_log_freq, "temp_log_freq", 5, NULL);
+    fs_file_separator(TEMP_LOG_PATH);
 
 
 #ifdef DEBUG_LED
-{
-	FS_REGISTER_INT(led_en,"led_en",1,NULL);
+    {
+        FS_REGISTER_INT(led_en, "led_en", 1, NULL);
 
-	if(led_en)
-	{
-	    led_task = kthread_create(thread_led, NULL, "led_task");
-	    if(IS_ERR(led_task))
-	    {
-	        lidbg("Unable to start kernel thread.\n");
-	    }
-	    else wake_up_process(led_task);
-	}
-}
+        if(led_en)
+        {
+            led_task = kthread_create(thread_led, NULL, "led_task");
+            if(IS_ERR(led_task))
+            {
+                lidbg("Unable to start kernel thread.\n");
+            }
+            else wake_up_process(led_task);
+        }
+    }
 #endif
 
     if(platform_id ==  PLATFORM_FLY)
@@ -616,16 +617,16 @@ static int soc_dev_probe(struct platform_device *pdev)
 #endif
     //fake suspend
     //SOC_Fake_Register_Early_Suspend(&early_suspend);
-	te_regist_password("001210", cb_password_enable_usb);
-	te_regist_password("001211", cb_password_disable_usb);
+    te_regist_password("001210", cb_password_enable_usb);
+    te_regist_password("001211", cb_password_disable_usb);
 
-	register_lidbg_notifier(&lidbg_notifier);
+    register_lidbg_notifier(&lidbg_notifier);
 
 #if (defined(BOARD_V1) || defined(BOARD_V2) || defined(BOARD_V3))
 #else
     Thermal_task =  kthread_run(thread_thermal, NULL, "flythermalthread");
-	FS_REGISTER_INT(fan_onoff_temp,"fan_onoff_temp",65,NULL);
-#endif	
+    FS_REGISTER_INT(fan_onoff_temp, "fan_onoff_temp", 65, NULL);
+#endif
     return 0;
 
 }
@@ -673,11 +674,11 @@ static void devices_early_suspend(struct early_suspend *handler)
         LED_ON;
         TELL_LPC_PWR_ON;
         i2c_c_ctrl = 1;
-		suspend_flag = 1;
+        suspend_flag = 1;
 #if (defined(BOARD_V1) || defined(BOARD_V2) || defined(BOARD_V3))
 #else
-			flag_fan_run_statu = false;
-			AIRFAN_BACK_OFF;
+        flag_fan_run_statu = false;
+        AIRFAN_BACK_OFF;
 #endif
 
     }
@@ -725,9 +726,9 @@ static void devices_late_resume(struct early_suspend *handler)
         else wake_up_process(resume_task);
 #endif
 
-		//lidbg_fs_log(TEMP_LOG_PATH,"*\n");
+        //lidbg_fs_log(TEMP_LOG_PATH,"*\n");
     }
-	
+
     DUMP_FUN_LEAVE;
 }
 #endif
@@ -754,8 +755,8 @@ static int  soc_dev_suspend(struct platform_device *pdev, pm_message_t state)
         PWR_EN_OFF;
         LED_ON;
         i2c_c_ctrl = 0;
-		if(i2c_ctrl)
-        	TELL_LPC_PWR_OFF;
+        if(i2c_ctrl)
+            TELL_LPC_PWR_OFF;
 
     }
 
@@ -861,14 +862,14 @@ static struct platform_driver soc_devices_driver =
 struct work_struct work_left_button1;
 static void work_left_button1_fn(struct work_struct *work)
 {
-	led_on();
-	SOC_Key_Report(KEY_BACK, KEY_PRESSED_RELEASED);
+    led_on();
+    SOC_Key_Report(KEY_BACK, KEY_PRESSED_RELEASED);
 }
 
 struct work_struct work_right_button1;
 static void work_right_button1_fn(struct work_struct *work)
 {
-	led_on();
+    led_on();
 }
 
 
@@ -924,11 +925,11 @@ void fly_devices_init(void)
 
     if(platform_id ==  PLATFORM_FLY)
     {
-		USB_WORK_ENABLE;
-		
+        USB_WORK_ENABLE;
+
 #if (defined(FLY_DEBUG) || defined(BUILD_FOR_RECOVERY))
 
-		DVD_RESET_HIGH;
+        DVD_RESET_HIGH;
         TELL_LPC_PWR_ON;
         PWR_EN_ON;
         LCD_ON;
@@ -953,7 +954,7 @@ void fly_devices_init(void)
 #endif
 #endif
 
-	    unmute_ns();
+        unmute_ns();
     }
 }
 
@@ -962,7 +963,7 @@ static void set_func_tbl(void)
 {
     //lpc
     ((struct lidbg_hal *)plidbg_dev)->soc_func_tbl.pfnSOC_Dev_Suspend_Prepare = soc_dev_suspend_prepare;
-	((struct lidbg_hal *)plidbg_dev)->soc_func_tbl.pfnHal_Acc_Callback = NULL;
+    ((struct lidbg_hal *)plidbg_dev)->soc_func_tbl.pfnHal_Acc_Callback = NULL;
 }
 
 int read_proc_dev(char *buf, char **start, off_t offset, int count, int *eof, void *data )
@@ -996,10 +997,10 @@ static void create_new_proc_entry_usb_host(void)
     create_proc_read_entry("usb_host", 0, NULL, read_proc_host, NULL);
 }
 
-int lcd_reset_en=0;
+int lcd_reset_en = 0;
 void lcd_reset(char *key, char *value )
 {
-	SOC_LCD_Reset();
+    SOC_LCD_Reset();
 }
 
 int dev_open(struct inode *inode, struct file *filp)
@@ -1009,126 +1010,127 @@ int dev_open(struct inode *inode, struct file *filp)
 }
 static void parse_cmd(char *pt)
 {
-	lidbg("%s\n",pt);
+    lidbg("%s\n", pt);
 #if (defined(BOARD_V1) || defined(BOARD_V2) || defined(BOARD_V3))
-#else	
+#else
     if (!strcmp(pt, "fan_on"))
     {
-		hal_fan_on = true;
-	}
+        hal_fan_on = true;
+    }
     else if (!strcmp(pt, "fan_off"))
     {
-		hal_fan_on = false;
-	}
+        hal_fan_on = false;
+    }
 
-	else if(!strcmp(pt, "screen_on"))
-	{
-		printk("******into screen_on********\n");
-		LCD_RESET;
-		if(SOC_Hal_Acc_Callback)
-			SOC_Hal_Acc_Callback(1);
-	}
-	else if(!strcmp(pt, "screen_off"))
-	{
-		printk("******into screen_off********\n");
-		if(SOC_Hal_Acc_Callback)
-			SOC_Hal_Acc_Callback(0); 
-	}
-	else if(!strcmp(pt, "suspend_on"))
-	{
-		printk("******into suspend_on********\n");
-		lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_SUSPEND_UNPREPARE));
-		if(SOC_Hal_Acc_Callback)
-			SOC_Hal_Acc_Callback(2);
-	}
-	else if(!strcmp(pt, "suspend_off"))
-	{
-		printk("******into suspend_off********\n");
-		lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_SUSPEND_PREPARE));
-		if(SOC_Hal_Acc_Callback)
-			SOC_Hal_Acc_Callback(3);
-	}
+    else if(!strcmp(pt, "screen_on"))
+    {
+        printk("******into screen_on********\n");
+        LCD_RESET;
+        if(SOC_Hal_Acc_Callback)
+            SOC_Hal_Acc_Callback(1);
+    }
+    else if(!strcmp(pt, "screen_off"))
+    {
+        printk("******into screen_off********\n");
+        if(SOC_Hal_Acc_Callback)
+            SOC_Hal_Acc_Callback(0);
+    }
+    else if(!strcmp(pt, "suspend_on"))
+    {
+        printk("******into suspend_on********\n");
+        lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_SUSPEND_UNPREPARE));
+        if(SOC_Hal_Acc_Callback)
+            SOC_Hal_Acc_Callback(2);
+    }
+    else if(!strcmp(pt, "suspend_off"))
+    {
+        printk("******into suspend_off********\n");
+        lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_SUSPEND_PREPARE));
+        if(SOC_Hal_Acc_Callback)
+            SOC_Hal_Acc_Callback(3);
+    }
 #endif
-	
+
 }
 static int lidbg_event(struct notifier_block *this,
-				unsigned long event, void *ptr)
+                       unsigned long event, void *ptr)
 {
-	DUMP_FUN;
-	
-	switch (event) {
+    DUMP_FUN;
 
-	case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_ACC_OFF):
-		if(!g_var.is_fly)LCD_OFF;
-		mute_s();
-		break;
+    switch (event)
+    {
 
-	case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_SUSPEND_PREPARE):
-		break;
-		
-	case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_POWER_OFF):
-		USB_WORK_DISENABLE;
-		break;
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_ACC_OFF):
+        if(!g_var.is_fly)LCD_OFF;
+        mute_s();
+        break;
 
-	case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_ACC_ON):
-		LCD_RESET;
-		if(!g_var.is_fly)LCD_ON;
-		unmute_ns();
-		USB_WORK_ENABLE;
-		break;
-		
-	case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_SUSPEND_UNPREPARE):
-		break;
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_SUSPEND_PREPARE):
+        break;
 
-	default:
-		break;
-	}
-	
-	return NOTIFY_DONE;
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_POWER_OFF):
+        USB_WORK_DISENABLE;
+        break;
+
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_ACC_ON):
+        LCD_RESET;
+        if(!g_var.is_fly)LCD_ON;
+        unmute_ns();
+        USB_WORK_ENABLE;
+        break;
+
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_SUSPEND_UNPREPARE):
+        break;
+
+    default:
+        break;
+    }
+
+    return NOTIFY_DONE;
 }
 
 
 static ssize_t dev_write(struct file *filp, const char __user *buf,
-                           size_t size, loff_t *ppos)
+                         size_t size, loff_t *ppos)
 {
-	char *p = NULL;
-	int len=size;
-	char tmp[32];
-	char *mem = tmp;
-	bool is_alloc = 0;
-	if(size >= 32)
-	{
-		mem = (char *)kmalloc(size+1,GFP_KERNEL);//size+1 for '\0'
-		if (mem == NULL)
-	    {
-	        lidbg("dev_write kmalloc err\n");
-	        return 0;
-	    }
-		is_alloc = 1;
-	}
+    char *p = NULL;
+    int len = size;
+    char tmp[32];
+    char *mem = tmp;
+    bool is_alloc = 0;
+    if(size >= 32)
+    {
+        mem = (char *)kmalloc(size + 1, GFP_KERNEL); //size+1 for '\0'
+        if (mem == NULL)
+        {
+            lidbg("dev_write kmalloc err\n");
+            return 0;
+        }
+        is_alloc = 1;
+    }
 
-	memset(mem, '\0', size+1);
+    memset(mem, '\0', size + 1);
 
-	if(copy_from_user(mem, buf, size))
-	{
-		printk("copy_from_user ERR\n");
-	}
+    if(copy_from_user(mem, buf, size))
+    {
+        printk("copy_from_user ERR\n");
+    }
 
-	if((p = memchr(mem, '\n', size)))
-	{
-		len= p - mem;
-		*p='\0';
-	}
-	else
-		mem[len] =  '\0';
+    if((p = memchr(mem, '\n', size)))
+    {
+        len = p - mem;
+        *p = '\0';
+    }
+    else
+        mem[len] =  '\0';
 
-	
-	parse_cmd(mem);
-	
-	if(is_alloc)
-		kfree(mem);
-	
-	return size;//warn:don't forget it;
+
+    parse_cmd(mem);
+
+    if(is_alloc)
+        kfree(mem);
+
+    return size;//warn:don't forget it;
 }
 
 int dev_close(struct inode *inode, struct file *filp)
@@ -1138,7 +1140,7 @@ int dev_close(struct inode *inode, struct file *filp)
 
 ssize_t  dev_read(struct file *filp, char __user *buffer, size_t size, loff_t *offset)
 {
-    lidbg("dev_read.%d,%d,%d\n", audio_data_for_hal[0],audio_data_for_hal[1], size);
+    lidbg("dev_read.%d,%d,%d\n", audio_data_for_hal[0], audio_data_for_hal[1], size);
     if(audio_data_for_hal[0] != 0x01)
         return -1;
     if(copy_to_user(buffer, audio_data_for_hal, sizeof(audio_data_for_hal)))
@@ -1147,7 +1149,7 @@ ssize_t  dev_read(struct file *filp, char __user *buffer, size_t size, loff_t *o
     }
     else
     {
-        audio_data_for_hal[0]=0x00;
+        audio_data_for_hal[0] = 0x00;
         return size;
     }
 }
@@ -1198,13 +1200,13 @@ int dev_init(void)
 
     LIDBG_GET;
     set_func_tbl();
-	
-	init_waitqueue_head(&read_wait);
-	lidbg_new_cdev(&dev_fops,"flydev");
-	fs_register_filename_list(TEMP_LOG_PATH,true);
 
-	fs_regist_state("cpu_temp", &(g_var.temp));
-	FS_REGISTER_INT(lcd_reset_en,"lcd_reset",0,lcd_reset);
+    init_waitqueue_head(&read_wait);
+    lidbg_new_cdev(&dev_fops, "flydev");
+    fs_register_filename_list(TEMP_LOG_PATH, true);
+
+    fs_regist_state("cpu_temp", &(g_var.temp));
+    FS_REGISTER_INT(lcd_reset_en, "lcd_reset", 0, lcd_reset);
 
 #if 0
     PWR_EN_ON;

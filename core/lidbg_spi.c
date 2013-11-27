@@ -129,8 +129,8 @@ static struct spi_driver spi_api_driver =
         .owner = THIS_MODULE,
     },
     .probe = spi_api_probe,
-     .remove = spi_api_remove,
-  };
+    .remove = spi_api_remove,
+};
 
 static int __init spi_api_init(void)
 {

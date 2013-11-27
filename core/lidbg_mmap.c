@@ -39,7 +39,7 @@ int mmap_alloc(int require_buf_size)
     return 0;
 }
 /*
-//2.用户空间映射内存
+//2.????????
 
 int test_mmap()
 {
@@ -52,7 +52,7 @@ int test_mmap()
 }
 */
 
-//3.内核空间映射内存: 实现file_operations的mmap函数
+//3.????????: ??file_operations?mmap??
 static int mmap_mmap(struct file *filp, struct vm_area_struct *vma)
 {
     int ret;
@@ -85,7 +85,7 @@ static int mmap_mmap(struct file *filp, struct vm_area_struct *vma)
 }
 
 /*
-//4.用户空间撤销内存映射
+//4.??????????
 
 void test_munmap()
 {
@@ -94,7 +94,7 @@ void test_munmap()
 }
 */
 
-//5.内核空间释放内存; 必须在用户空间执行munmap系统调用后才能释放
+//5.????????; ?????????munmap?????????
 void mmap_free()
 {
 #ifdef USE_KMALLOC

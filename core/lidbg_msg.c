@@ -32,10 +32,10 @@ int thread_msg(void *data)
 {
 
     plidbg_msg = ( lidbg_msg *)kmalloc(sizeof( lidbg_msg), GFP_KERNEL);
-	if (plidbg_msg == NULL)
-	{
-		LIDBG_ERR("kmalloc.\n");		
-	}
+    if (plidbg_msg == NULL)
+    {
+        LIDBG_ERR("kmalloc.\n");
+    }
     memset(plidbg_msg->log, '\0', /*sizeof( lidbg_msg)*/TOTAL_LOGS * LOG_BYTES);
     plidbg_msg->w_pos = plidbg_msg->r_pos = 0;
 
@@ -77,8 +77,8 @@ ssize_t  msg_write(struct file *filp, const char __user *buffer, size_t size, lo
     }
 
     //for safe
-    plidbg_msg->log[plidbg_msg->w_pos][LOG_BYTES-2] = '\n';
-    plidbg_msg->log[plidbg_msg->w_pos][LOG_BYTES-1] = '\0';
+    plidbg_msg->log[plidbg_msg->w_pos][LOG_BYTES - 2] = '\n';
+    plidbg_msg->log[plidbg_msg->w_pos][LOG_BYTES - 1] = '\0';
 
     plidbg_msg->w_pos = (plidbg_msg->w_pos + 1)  % TOTAL_LOGS;
 
@@ -123,7 +123,7 @@ static struct miscdevice misc =
 static int __init msg_init(void)
 {
     int ret;
-	LIDBG_MODULE_LOG;
+    LIDBG_MODULE_LOG;
     ret = misc_register(&misc);
 
     INIT_COMPLETION(msg_ready);
@@ -135,7 +135,7 @@ static int __init msg_init(void)
 
     }
     else wake_up_process(msg_task);
-	
+
     lidbg_chmod("/dev/lidbg_msg");
 
     return ret;

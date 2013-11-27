@@ -585,7 +585,7 @@ U8  GUI_PutChar24_32(U32 x, U32 y, U8 ch)
         for(j = 0; j < 24; j++)					// 每行共24点
         {
             /* 若当前点为0、8、16点，读取点阵数据 */
-            if( (j & 0x07) == 0 ) font_dat = FONT24x32[ch][i*3+j>>3];
+            if( (j & 0x07) == 0 ) font_dat = FONT24x32[ch][i * 3 + j >> 3];
             /* 设置相应的点为color或为back_color */
             if( (font_dat & DCB2HEX_TAB[j]) == 0 ) GUI_CopyColor(&bakc, back_color);
             else  GUI_CopyColor(&bakc, disp_color);

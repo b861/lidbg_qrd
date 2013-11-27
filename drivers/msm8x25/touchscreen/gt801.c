@@ -51,8 +51,8 @@ struct goodix_ts_data *ts;
 
 
 /********************************************
-*	管理当前手指状态的伪队列，对当前手指根据时间顺序排序
-*	适用于Guitar小屏		*/
+*	????????????,?????????????
+*	???Guitar??		*/
 static struct point_queue  finger_list;	//record the fingers list
 /*************************************************/
 
@@ -75,7 +75,7 @@ int open_proc(char *buf, char **start, off_t offset, int count, int *eof, void *
 {
     printk("[wang]:=====GT801 enable_irq.\n");
     enable_irq(ts->client->irq);
-	
+
     return 1;
 }
 
@@ -90,7 +90,7 @@ int close_proc(char *buf, char **start, off_t offset, int count, int *eof, void 
 int print_proc(char *buf, char **start, off_t offset, int count, int *eof, void *data)
 {
     printk("[wang]:=====GT801 print on debug_log.\n");
-   debug_on = 1;
+    debug_on = 1;
 
     return 1;
 }
@@ -104,7 +104,7 @@ void create_new_proc_entry()
     // cat proc/close_irq
     create_proc_read_entry("print_on", 0, NULL, print_proc, NULL);
     // cat proc/print_on
-    
+
 }
 
 
@@ -232,17 +232,17 @@ static int init_cdev_ts(void)
 
 
 /*******************************************************
-功能：
-	读取从机数据
-	每个读操作用两条i2c_msg组成，第1条消息用于发送从机地址，
-	第2条用于发送读取地址和取回数据；每条消息前发送起始信号
-参数：
-	client:	i2c设备，包含设备地址
-	buf[0]：	首字节为读取地址
-	buf[1]~buf[len]：数据缓冲区
-	len：	读取数据长度
-return：
-	执行消息数
+??:
+	??????
+	????????i2c_msg??,?1???????????,
+	?2??????????????;???????????
+??:
+	client:	i2c??,??????
+	buf[0]:	????????
+	buf[1]~buf[len]:?????
+	len:	??????
+return:
+	?????
 *********************************************************/
 /*Function as i2c_master_send */
 static int i2c_read_bytes(struct i2c_client *client, uint8_t *buf, int len)
@@ -256,13 +256,13 @@ static int i2c_read_bytes(struct i2c_client *client, uint8_t *buf, int len)
 
     struct i2c_msg msgs[2];
     int ret = -1;
-    //发送写地址
-    msgs[0].flags = !I2C_M_RD; //写消息
+    //?????
+    msgs[0].flags = !I2C_M_RD; //???
     msgs[0].addr = client->addr;
     msgs[0].len = 1;
     msgs[0].buf = &buf[0];
-    //接收数据
-    msgs[1].flags = I2C_M_RD; //读消息
+    //????
+    msgs[1].flags = I2C_M_RD; //???
     msgs[1].addr = client->addr;
     msgs[1].len = len - 1;
     msgs[1].buf = &buf[1];
@@ -273,15 +273,15 @@ static int i2c_read_bytes(struct i2c_client *client, uint8_t *buf, int len)
 
 
 /*******************************************************
-功能：
-	向从机写数据
-参数：
-	client:	i2c设备，包含设备地址
-	buf[0]：	首字节为写地址
-	buf[1]~buf[len]：数据缓冲区
-	len：	数据长度
-return：
-	执行消息数
+??:
+	??????
+??:
+	client:	i2c??,??????
+	buf[0]:	???????
+	buf[1]~buf[len]:?????
+	len:	????
+return:
+	?????
 *******************************************************/
 /*Function as i2c_master_send */
 static int i2c_write_bytes(struct i2c_client *client, uint8_t *data, int len)
@@ -295,8 +295,8 @@ static int i2c_write_bytes(struct i2c_client *client, uint8_t *data, int len)
 
     struct i2c_msg msg;
     int ret = -1;
-    //发送设备地址
-    msg.flags = !I2C_M_RD; //写消息
+    //??????
+    msg.flags = !I2C_M_RD; //???
     msg.addr = client->addr;  //client->addr;
     msg.len = len;  //len
     msg.buf = data;
@@ -307,12 +307,12 @@ static int i2c_write_bytes(struct i2c_client *client, uint8_t *data, int len)
 }
 
 /*******************************************************
-功能：
-	Guitar初始化函数，用于发送配置信息，获取版本信息
-参数：
-	ts:	client私有数据结构体
-return：
-	执行结果码，0表示正常执行
+??:
+	Guitar?????,????????,??????
+??:
+	ts:	client???????
+return:
+	?????,0??????
 *******************************************************/
 static int goodix_init_panel(struct goodix_ts_data *ts)
 {
@@ -327,7 +327,7 @@ static int goodix_init_panel(struct goodix_ts_data *ts)
                              0x00, 0x50, 0x3C, 0x32, 0x71, 0x00, 0x00, 0x00, 0x00, 0x00,
                              0x00, 0x00, 0x01
                             };
-//#endif
+    //#endif
 
 
 #elif defined(BOARD_V2)
@@ -339,17 +339,17 @@ static int goodix_init_panel(struct goodix_ts_data *ts)
                              0x30, 0x00, 0x5A, 0x32, 0x71, 0x00, 0x00, 0x00, 0x00, 0x00,
                              0x00, 0x00, 0x01
                             };
-//#endif
+    //#endif
 
-#else 
-		uint8_t config_info[] = {0x30,
-								 0x13, 0x03, 0x07, 0x28, 0x02, 0x14, 0x14, 0x10, 0x3C, 0xB2,
-								 0x02, 0x4e, 0x04, 0x00, 0x01, 0x23, 0x45, 0x67, 0x89, 0xAB,
-								 0xCD, 0xE1, 0x00, 0x00, 0x35, 0x30, 0x4D, 0xC2, 0x20, 0x00,
-								 0xE3, 0x80, 0x50, 0x3C, 0x1E, 0xB4, 0x00, 0x38, 0x33, 0x02,
-								 0x30, 0x00, 0x5A, 0x32, 0x71, 0x00, 0x00, 0x00, 0x00, 0x00,
-								 0x00, 0x00, 0x01
-								};
+#else
+    uint8_t config_info[] = {0x30,
+                             0x13, 0x03, 0x07, 0x28, 0x02, 0x14, 0x14, 0x10, 0x3C, 0xB2,
+                             0x02, 0x4e, 0x04, 0x00, 0x01, 0x23, 0x45, 0x67, 0x89, 0xAB,
+                             0xCD, 0xE1, 0x00, 0x00, 0x35, 0x30, 0x4D, 0xC2, 0x20, 0x00,
+                             0xE3, 0x80, 0x50, 0x3C, 0x1E, 0xB4, 0x00, 0x38, 0x33, 0x02,
+                             0x30, 0x00, 0x5A, 0x32, 0x71, 0x00, 0x00, 0x00, 0x00, 0x00,
+                             0x00, 0x00, 0x01
+                            };
 #endif
 
 
@@ -363,7 +363,7 @@ error_i2c_transfer:
 
     return ret;
 }
-/*读取GT80X的版本号并打印*/
+/*??GT80X???????*/
 static int  goodix_read_version(struct goodix_ts_data *ts)
 {
     int ret;
@@ -374,14 +374,14 @@ static int  goodix_read_version(struct goodix_ts_data *ts)
     ret = i2c_write_bytes(ts->client, version, 2);
     if (ret < 0)
     {
-	printk("[wang]:===goodix_read_version.i2c_write_bytes error.\n");
-	goto error_i2c_version;
+        printk("[wang]:===goodix_read_version.i2c_write_bytes error.\n");
+        goto error_i2c_version;
     }
     msleep(16);
     ret = i2c_read_bytes(ts->client, version_data, 40);
     if (ret < 0)
     {
-    	printk("[wang]:===goodix_read_version.i2c_read_bytes error.\n");
+        printk("[wang]:===goodix_read_version.i2c_read_bytes error.\n");
         goto error_i2c_version;
     }
     dev_info(&ts->client->dev, " Guitar Version: %s\n", &version_data[1]);
@@ -394,13 +394,13 @@ error_i2c_version:
 }
 
 /*******************************************************
-功能：
-	触摸屏工作函数
-	由中断触发，接受1组坐标数据，校验后再分析输出
-参数：
-	ts:	client私有数据结构体
-return：
-	执行结果码，0表示正常执行
+??:
+	???????
+	?????,??1?????,????????
+??:
+	ts:	client???????
+return:
+	?????,0??????
 ********************************************************/
 static void goodix_ts_work_func(struct work_struct *work)
 {
@@ -413,7 +413,7 @@ static void goodix_ts_work_func(struct work_struct *work)
     int check_sum = 0;
 
     if(debug_on)
-	printk( "[wang]:====come into  goodix_ts_work_func!\n");
+        printk( "[wang]:====come into  goodix_ts_work_func!\n");
 
     struct goodix_ts_data *ts = container_of(work, struct goodix_ts_data, work);
     //printk( "come into goodix_ts_work_func!\n");
@@ -431,10 +431,10 @@ static void goodix_ts_work_func(struct work_struct *work)
     {
         if(!ts->use_irq && (ts->timer.state != HRTIMER_STATE_INACTIVE))
             hrtimer_cancel(&ts->timer);
-       // dev_info(&(ts->client->dev), "Because of transfer error, %s stop working.\n", s3c_ts_name);
+        // dev_info(&(ts->client->dev), "Because of transfer error, %s stop working.\n", s3c_ts_name);
         printk("[wang]:=======Because of transfer error, stop working.\n");
-	ts->retry = 0;
-	goto NO_ACTION;//return ;
+        ts->retry = 0;
+        goto NO_ACTION;//return ;
     }
     if(ts->bad_data)
         msleep(16);
@@ -452,20 +452,20 @@ static void goodix_ts_work_func(struct work_struct *work)
         else
         {
             ret = goodix_init_panel(ts);
-	    if(ret<0)
-	    {
-		printk("[wang]:=====goodix_init_panel error in work_func. \n", ret);
-	    }
+            if(ret < 0)
+            {
+                printk("[wang]:=====goodix_init_panel error in work_func. \n", ret);
+            }
             msleep(500);
         }
-	printk("[wang]:=====I2C read point data error. Number:%d\n", ret);
+        printk("[wang]:=====I2C read point data error. Number:%d\n", ret);
         goto XFER_ERROR;
     }
 
     if(debug_on)
     {
-	printk( "[wang]:====i2c_read point_data success!\n");
-	printk("[wang]:====point_data[1] is %d\n", point_data[1]);
+        printk( "[wang]:====i2c_read point_data success!\n");
+        printk("[wang]:====point_data[1] is %d\n", point_data[1]);
     }
     ts->bad_data = 0;
 
@@ -480,8 +480,8 @@ static void goodix_ts_work_func(struct work_struct *work)
             check_sum += (int)point_data[count];
         if((check_sum % 256) != point_data[8])
         {
-		printk("[wang]:=======check_sum 1 is failed\n");
-		goto XFER_ERROR;
+            printk("[wang]:=======check_sum 1 is failed\n");
+            goto XFER_ERROR;
         }
         break;
     case 2:
@@ -490,8 +490,8 @@ static void goodix_ts_work_func(struct work_struct *work)
             check_sum += (int)point_data[count];
         if((check_sum % 256) != point_data[13])
         {
-		printk("[wang]:=======check_sum 2 or 3 is failed\n");
-		goto XFER_ERROR;
+            printk("[wang]:=======check_sum 2 or 3 is failed\n");
+            goto XFER_ERROR;
         }
         break;
     default:		//(point_data[1]& 0x1f) > 3
@@ -499,8 +499,8 @@ static void goodix_ts_work_func(struct work_struct *work)
             check_sum += (int)point_data[count];
         if((check_sum % 256) != point_data[34])
         {
-		printk("[wang]:=======check_sum >3 is failed\n");
-		goto XFER_ERROR;
+            printk("[wang]:=======check_sum >3 is failed\n");
+            goto XFER_ERROR;
         }
     }
 
@@ -564,9 +564,9 @@ BIT_NO_CHANGE:
 
         if(finger_list.pointer[count].num != 3)
         {
-            finger_list.pointer[count].x = (unsigned int) (point_data[read_position] << 8) + (unsigned int)( point_data[read_position+1]);
-            finger_list.pointer[count].y = (unsigned int)(point_data[read_position+2] << 8) + (unsigned int) (point_data[read_position+3]);
-            finger_list.pointer[count].pressure = (unsigned int) (point_data[read_position+4]);
+            finger_list.pointer[count].x = (unsigned int) (point_data[read_position] << 8) + (unsigned int)( point_data[read_position + 1]);
+            finger_list.pointer[count].y = (unsigned int)(point_data[read_position + 2] << 8) + (unsigned int) (point_data[read_position + 3]);
+            finger_list.pointer[count].pressure = (unsigned int) (point_data[read_position + 4]);
         }
         else
         {
@@ -578,7 +578,7 @@ BIT_NO_CHANGE:
         //finger_list.pointer[count].x = finger_list.pointer[count].y;
         //finger_list.pointer[count].y = finger_list.pointer[count].x;
         swap(finger_list.pointer[count].x, finger_list.pointer[count].y);
-       if((1 == xy_revert_en)||(1 == ts_should_revert))//if x and y coordinate are revert
+        if((1 == xy_revert_en) || (1 == ts_should_revert)) //if x and y coordinate are revert
         {
             finger_list.pointer[count].x = RESOLUTION_X - finger_list.pointer[count].x;
             finger_list.pointer[count].y = RESOLUTION_Y - finger_list.pointer[count].y;
@@ -599,16 +599,16 @@ BIT_NO_CHANGE:
     for(count = 0; count < (finger_list.length); count++)
     {
 #ifndef BOARD_V2
-		input_mt_slot(ts->input_dev, finger_list.pointer[count].num);
-		if(finger_list.pointer[count].state == FLAG_DOWN)
-		{
-			input_mt_report_slot_state(ts->input_dev, MT_TOOL_FINGER, 1);
-			input_report_abs(ts->input_dev, ABS_MT_POSITION_X, finger_list.pointer[count].x);
-			input_report_abs(ts->input_dev, ABS_MT_POSITION_Y, finger_list.pointer[count].y);
-			input_report_abs(ts->input_dev, ABS_MT_TOUCH_MAJOR, 255);
-		}
-		else
-			input_mt_report_slot_state(ts->input_dev, MT_TOOL_FINGER, 0);
+        input_mt_slot(ts->input_dev, finger_list.pointer[count].num);
+        if(finger_list.pointer[count].state == FLAG_DOWN)
+        {
+            input_mt_report_slot_state(ts->input_dev, MT_TOOL_FINGER, 1);
+            input_report_abs(ts->input_dev, ABS_MT_POSITION_X, finger_list.pointer[count].x);
+            input_report_abs(ts->input_dev, ABS_MT_POSITION_Y, finger_list.pointer[count].y);
+            input_report_abs(ts->input_dev, ABS_MT_TOUCH_MAJOR, 255);
+        }
+        else
+            input_mt_report_slot_state(ts->input_dev, MT_TOOL_FINGER, 0);
 #endif
         if(finger_list.pointer[count].state == FLAG_DOWN)
         {
@@ -629,9 +629,9 @@ BIT_NO_CHANGE:
                 printk("\n[wang]:====err:FLAG_FOR_15S_OFF===[%d]\n", FLAG_FOR_15S_OFF);
             }
 
-	g_curr_tspara.x=finger_list.pointer[0].x;
-	g_curr_tspara.y=finger_list.pointer[0].y;
-	g_curr_tspara.press=true;
+            g_curr_tspara.x = finger_list.pointer[0].x;
+            g_curr_tspara.y = finger_list.pointer[0].y;
+            g_curr_tspara.press = true;
 
 #ifdef BUILD_FOR_RECOVERY
             if( (finger_list.pointer[0].x >= 0) && (finger_list.pointer[0].y >= 0) )
@@ -657,7 +657,7 @@ BIT_NO_CHANGE:
             input_report_key(ts->input_dev, BTN_TOUCH, finger_list.pointer[count].state);
 #endif
 
-	g_curr_tspara.press=false;
+            g_curr_tspara.press = false;
 
 #ifdef BUILD_FOR_RECOVERY
             {
@@ -675,8 +675,8 @@ BIT_NO_CHANGE:
 #endif
     }
 #ifndef BOARD_V2
-	input_report_key(ts->input_dev, BTN_TOUCH, !!finger_list.length);
-	input_sync(ts->input_dev);
+    input_report_key(ts->input_dev, BTN_TOUCH, !!finger_list.length);
+    input_sync(ts->input_dev);
 #endif
 
 
@@ -707,19 +707,19 @@ NO_ACTION:
         enable_irq(ts->client->irq);
     if(debug_on)
     {
-	printk( "[wang]:====end of goodix_ts_work_func!\n");
+        printk( "[wang]:====end of goodix_ts_work_func!\n");
     }
 
 }
 
 /*******************************************************
-功能：
-	计时器响应函数
-	由计时器触发，调度触摸屏工作函数运行；之后重新计时
-参数：
-	timer：函数关联的计时器
-return：
-	计时器工作模式，HRTIMER_NORESTART表示不需要自动重启
+??:
+	???????
+	??????,???????????;??????
+??:
+	timer:????????
+return:
+	???????,HRTIMER_NORESTART?????????
 ********************************************************/
 static enum hrtimer_restart goodix_ts_timer_func(struct hrtimer *timer)
 {
@@ -732,20 +732,20 @@ static enum hrtimer_restart goodix_ts_timer_func(struct hrtimer *timer)
 }
 
 /*******************************************************
-功能：
-	中断响应函数
-	由中断触发，调度触摸屏处理函数运行
-参数：
-	timer：函数关联的计时器
-return：
-	计时器工作模式，HRTIMER_NORESTART表示不需要自动重启
+??:
+	??????
+	?????,???????????
+??:
+	timer:????????
+return:
+	???????,HRTIMER_NORESTART?????????
 ********************************************************/
 #if defined(INT_PORT)
 static irqreturn_t goodix_ts_irq_handler(int irq, void *dev_id)
 {
     struct goodix_ts_data *ts = dev_id;
     if(debug_on)
-		printk( "[wang]:====come into  goodix_ts_irq_handler!\n");
+        printk( "[wang]:====come into  goodix_ts_irq_handler!\n");
 
     disable_irq_nosync(ts->client->irq);
     queue_work(goodix_wq, &ts->work);
@@ -755,12 +755,12 @@ static irqreturn_t goodix_ts_irq_handler(int irq, void *dev_id)
 #endif
 
 /*******************************************************
-功能：
-	GT80X的电源管理
-参数：
-	on:设置GT80X运行模式，0为进入Sleep模式
-return：
-	是否设置成功，小于0表示设置失败
+??:
+	GT80X?????
+??:
+	on:??GT80X????,0???Sleep??
+return:
+	??????,??0??????
 ********************************************************/
 #if defined(SHUTDOWN_PORT)
 static int goodix_ts_power(struct goodix_ts_data *ts, int on)
@@ -796,15 +796,15 @@ static int goodix_ts_power(struct goodix_ts_data *ts, int on)
 #endif
 
 /*******************************************************
-功能：
-	触摸屏探测函数
-	在注册驱动时调用（要求存在对应的client）；
-	用于IO,中断等资源申请；设备注册；触摸屏初始化等工作
-参数：
-	client：待驱动的设备结构体
-	id：设备ID
-return：
-	执行结果码，0表示正常执行
+??:
+	???????
+	????????(???????client);
+	??IO,???????;????;?????????
+??:
+	client:?????????
+	id:??ID
+return:
+	?????,0??????
 ********************************************************/
 
 static int screen_x = 0;
@@ -851,11 +851,11 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     unsigned int buf = 0;
     client->addr = 0x55;
 
- /*allocate kernel space for ts, and initialize it*/
+    /*allocate kernel space for ts, and initialize it*/
     ts = kzalloc(sizeof(*ts), GFP_KERNEL);
     if (ts == NULL)
     {
-    	printk("[wang]========alloc ts_data failed.\n");
+        printk("[wang]========alloc ts_data failed.\n");
         ret = -ENOMEM;
         goto err_alloc_data_failed;
     }
@@ -863,7 +863,7 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     ts->client = client;
     i2c_set_clientdata(client, ts);
     pdata = client->dev.platform_data;                                        //pdata used for what?
-    
+
     /*Test i2c communication whether is rihgt or not*/
     for(retry = 0; retry < 5; retry++)
     {
@@ -883,7 +883,7 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     gpio_set_value(SHUTDOWN_PORT, 1);		         //suspend
 #endif
 
-   
+
 
     /*allocate input_dev, and initialize it, then register to kernel input sub-system */
     ts->input_dev = input_allocate_device();
@@ -925,16 +925,16 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     input_set_abs_params(ts->input_dev, ABS_MT_POSITION_Y, 0, screen_y, 0, 0);
 #endif
 
-#else 
-	__set_bit(EV_KEY, ts->input_dev->evbit);
-	__set_bit(EV_ABS, ts->input_dev->evbit);
-	__set_bit(BTN_TOUCH, ts->input_dev->keybit);
-	__set_bit(INPUT_PROP_DIRECT, ts->input_dev->propbit);
-	
-	input_mt_init_slots(ts->input_dev, 5);
-	input_set_abs_params(ts->input_dev, ABS_MT_POSITION_X, 0,screen_x, 0, 0);
-	input_set_abs_params(ts->input_dev, ABS_MT_POSITION_Y, 0,screen_y, 0, 0);
-	input_set_abs_params(ts->input_dev, ABS_MT_TOUCH_MAJOR, 0, 255, 0, 0);
+#else
+    __set_bit(EV_KEY, ts->input_dev->evbit);
+    __set_bit(EV_ABS, ts->input_dev->evbit);
+    __set_bit(BTN_TOUCH, ts->input_dev->keybit);
+    __set_bit(INPUT_PROP_DIRECT, ts->input_dev->propbit);
+
+    input_mt_init_slots(ts->input_dev, 5);
+    input_set_abs_params(ts->input_dev, ABS_MT_POSITION_X, 0, screen_x, 0, 0);
+    input_set_abs_params(ts->input_dev, ABS_MT_POSITION_Y, 0, screen_y, 0, 0);
+    input_set_abs_params(ts->input_dev, ABS_MT_TOUCH_MAJOR, 0, 255, 0, 0);
 #endif
 
     sprintf(ts->phys, "input/ts)");
@@ -967,8 +967,8 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
         ret = gpio_request(INT_PORT, "TS_INT");	//Request IO
         if (ret < 0)
         {
-           // dev_err(&client->dev, "Failed to request GPIO:%d, ERRNO:%d\n", (int)INT_PORT, ret);
-       	    printk( "[wang]:====gpio_request INT failed.\n");
+            // dev_err(&client->dev, "Failed to request GPIO:%d, ERRNO:%d\n", (int)INT_PORT, ret);
+            printk( "[wang]:====gpio_request INT failed.\n");
             goto err_int_request_failed;
         }
         //ret = s3c_gpio_cfgpin(INT_PORT, INT_CFG);	//Set IO port function
@@ -980,7 +980,7 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
         if (ret != 0)
         {
             //dev_err(&client->dev, "Can't allocate touchscreen's interrupt!ERRNO:%d\n", ret);
-       	    printk( "[wang]:========request_irq failed.\n");
+            printk( "[wang]:========request_irq failed.\n");
             gpio_direction_input(INT_PORT);
             gpio_free( INT_PORT);
             goto err_int_request_failed;
@@ -1058,7 +1058,7 @@ err_int_request_failed:
     ts->early_suspend.resume = goodix_ts_late_resume;
     register_early_suspend(&ts->early_suspend);
 #endif
-   // SOC_Fake_Register_Early_Suspend(&ts->early_suspend);  //fake suspend
+    // SOC_Fake_Register_Early_Suspend(&ts->early_suspend);  //fake suspend
 
     dev_info(&client->dev, "Start  %s in %s mode\n",
              ts->input_dev->name, ts->use_irq ? "Interrupt" : "Polling");
@@ -1093,12 +1093,12 @@ err_check_functionality_failed:
 
 
 /*******************************************************
-功能：
-	驱动资源释放
-参数：
-	client：设备结构体
-return：
-	执行结果码，0表示正常执行
+??:
+	??????
+??:
+	client:?????
+return:
+	?????,0??????
 ********************************************************/
 static int goodix_ts_remove(struct i2c_client *client)
 {
@@ -1132,7 +1132,7 @@ static int goodix_ts_remove(struct i2c_client *client)
     return 0;
 }
 
-//停用设备
+//????
 static int goodix_ts_suspend(struct i2c_client *client, pm_message_t mesg)
 {
     int ret;
@@ -1149,13 +1149,13 @@ static int goodix_ts_suspend(struct i2c_client *client, pm_message_t mesg)
         hrtimer_cancel(&ts->timer);
     ret = cancel_work_sync(&ts->work);
     if(ret && ts->use_irq)
-    	{
-    		printk("[wang]:=====enable irq in suspend.\n");
-        	enable_irq(client->irq);
-    	}
+    {
+        printk("[wang]:=====enable irq in suspend.\n");
+        enable_irq(client->irq);
+    }
     return 0;
 }
-//重新唤醒
+//????
 static int goodix_ts_resume(struct i2c_client *client)
 {
     int ret = 0, retry = 0, init_err = 0;
@@ -1166,21 +1166,21 @@ static int goodix_ts_resume(struct i2c_client *client)
     {
 
 #ifdef BOARD_V2
-	SOC_IO_Output(0, 27, 0);
-	msleep(20);
-	SOC_IO_Output(0, 27, 1);
-	msleep(200);
+        SOC_IO_Output(0, 27, 0);
+        msleep(20);
+        SOC_IO_Output(0, 27, 1);
+        msleep(200);
 #else
-	SOC_IO_Output(0, 27, 1);
-	msleep(20);
-	SOC_IO_Output(0, 27, 0);//NOTE:GT801 SHUTDOWN PIN ,set LOW  to work.
-	msleep(200);
+        SOC_IO_Output(0, 27, 1);
+        msleep(20);
+        SOC_IO_Output(0, 27, 0);//NOTE:GT801 SHUTDOWN PIN ,set LOW  to work.
+        msleep(200);
 #endif
         ret = goodix_init_panel(ts);
-	if(ret<0)
-	{
-		printk("[wang]:====goodix_init_panel failed in goodix_ts_resume\n");
-	}
+        if(ret < 0)
+        {
+            printk("[wang]:====goodix_init_panel failed in goodix_ts_resume\n");
+        }
         init_err = SOC_I2C_Rec(1, 0x55, 0x68, GT811_check, 6 );
         ret = 0;
         if(init_err < 0)
@@ -1248,7 +1248,7 @@ static void goodix_ts_late_resume(struct early_suspend *h)
 }
 #endif
 
-//可用于该驱动的 设备名—设备ID 列表
+//??????? ???—??ID ??
 //only one client
 static const struct i2c_device_id goodix_ts_id[] =
 {
@@ -1256,7 +1256,7 @@ static const struct i2c_device_id goodix_ts_id[] =
     { }
 };
 
-//设备驱动结构体
+//???????
 static struct i2c_driver goodix_ts_driver =
 {
     .probe		= goodix_ts_probe,
@@ -1273,10 +1273,10 @@ static struct i2c_driver goodix_ts_driver =
 };
 
 /*******************************************************
-功能：
-	驱动加载函数
-return：
-	执行结果码，0表示正常执行
+??:
+	??????
+return:
+	?????,0??????
 ********************************************************/
 static int __devinit goodix_ts_init(void)
 {
@@ -1289,15 +1289,15 @@ static int __devinit goodix_ts_init(void)
 
     /*configure shutdown pin,ensure this pin is low, make IC in working state*/
 #ifdef BOARD_V2
-	    SOC_IO_Output(0, 27, 0);
-	    msleep(200);
-	    SOC_IO_Output(0, 27, 1);
-	    msleep(300);
+    SOC_IO_Output(0, 27, 0);
+    msleep(200);
+    SOC_IO_Output(0, 27, 1);
+    msleep(300);
 #else
-	    SOC_IO_Output(0, 27, 1);
-	    msleep(200);
-	    SOC_IO_Output(0, 27, 0);
-	    msleep(300);
+    SOC_IO_Output(0, 27, 1);
+    msleep(200);
+    SOC_IO_Output(0, 27, 0);
+    msleep(300);
 #endif
 
     init_cdev_ts();
@@ -1309,12 +1309,12 @@ static int __devinit goodix_ts_init(void)
 
     }
 
-	
+
     ret = i2c_add_driver(&goodix_ts_driver);
-    if(irq_signal==1)
+    if(irq_signal == 1)
     {
-	printk("[wang]:=======GT801 update is successful, enable the irq.\n");
-	enable_irq(ts->client->irq);
+        printk("[wang]:=======GT801 update is successful, enable the irq.\n");
+        enable_irq(ts->client->irq);
     }
 
     printk("====================out Gt801.ko===============2013.07.12==\n");
@@ -1322,10 +1322,10 @@ static int __devinit goodix_ts_init(void)
 }
 
 /*******************************************************
-功能：
-	驱动卸载函数
-参数：
-	client：设备结构体
+??:
+	??????
+??:
+	client:?????
 ********************************************************/
 static void __exit goodix_ts_exit(void)
 {

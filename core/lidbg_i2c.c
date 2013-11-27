@@ -71,24 +71,26 @@ static struct i2c_driver i2c_api_driver =
     .address_data   = &addr_data, /* Addresses to scan */
 #endif
 
- };
-
-#ifdef LIDBG_I2C_GPIO 
-
-static struct i2c_gpio_platform_data i2c_gpio_pdata = {
-	.sda_pin		= LIDBG_I2C_GPIO_SDA,
-	.sda_is_open_drain	= 0,
-	.scl_pin		= LIDBG_I2C_GPIO_SCL,
-	.scl_is_open_drain	= 1,
-	.udelay			= LIDBG_I2C_DEFAULT_DELAY,		/* 10 kHz */
 };
 
-static struct platform_device i2c_gpio_device = {
-	.name			= "i2c-gpio",
-	.id			= LIDBG_I2C_BUS_ID,		//will be used to set the i2c_bus number
-	.dev			={
-		.platform_data	= &i2c_gpio_pdata,
-	},
+#ifdef LIDBG_I2C_GPIO
+
+static struct i2c_gpio_platform_data i2c_gpio_pdata =
+{
+    .sda_pin		= LIDBG_I2C_GPIO_SDA,
+    .sda_is_open_drain	= 0,
+    .scl_pin		= LIDBG_I2C_GPIO_SCL,
+    .scl_is_open_drain	= 1,
+    .udelay			= LIDBG_I2C_DEFAULT_DELAY,		/* 10 kHz */
+};
+
+static struct platform_device i2c_gpio_device =
+{
+    .name			= "i2c-gpio",
+    .id			= LIDBG_I2C_BUS_ID,		//will be used to set the i2c_bus number
+    .dev			= {
+        .platform_data	= &i2c_gpio_pdata,
+    },
 };
 #endif
 
@@ -146,30 +148,32 @@ static void del_i2c_api(struct i2c_api *i2c_api)
 int i2c_api_set_rate(int  bus_id, int rate)
 {
     struct i2c_api *i2c_api = NULL ;
-    struct i2c_algo_bit_data *adap1=i2c_api->client->adapter->algo_data;
+    struct i2c_algo_bit_data *adap1 = i2c_api->client->adapter->algo_data;
     lidbg_i2c_running = 1; // for touch intr
-	#ifdef USE_I2C_LOCK
+#ifdef USE_I2C_LOCK
     mutex_lock(&i2c_lock);
-	#endif
-   i2c_api = get_i2c_api(bus_id);
-   if (!i2c_api)
+#endif
+    i2c_api = get_i2c_api(bus_id);
+    if (!i2c_api)
         return -ENODEV;
-	 
-	if(adap1!=NULL){
-		
-			(*adap1).udelay=rate;	
-			//printk("\n*****Set the i2c_rate sucessuful !\n\n");
-			return 0;
-	 }
-	else{
-		//printk("\n*****Set the i2c_rate not sucessuful !\n\n");
-	}
-	
-	#ifdef USE_I2C_LOCK
+
+    if(adap1 != NULL)
+    {
+
+        (*adap1).udelay = rate;
+        //printk("\n*****Set the i2c_rate sucessuful !\n\n");
+        return 0;
+    }
+    else
+    {
+        //printk("\n*****Set the i2c_rate not sucessuful !\n\n");
+    }
+
+#ifdef USE_I2C_LOCK
     mutex_unlock(&i2c_lock);
-	#endif
+#endif
     lidbg_i2c_running = 0;
-	return 0;
+    return 0;
 
 }
 static int i2c_api_do_xfer(int bus_id, char chip_addr, unsigned int sub_addr, int mode,
@@ -412,7 +416,7 @@ void mod_i2c_main(int argc, char **argv)
         for(i = 0; i < num; i++)
         {
 
-            psend_data[i] = (char)simple_strtoul(argv[i+4], 0, 0);
+            psend_data[i] = (char)simple_strtoul(argv[i + 4], 0, 0);
         }
 
 
@@ -541,15 +545,15 @@ void mod_i2c_main(int argc, char **argv)
 #define I2C_DEVICES_MAX (32)
 
         i2c_devices = kmalloc(I2C_DEVICES_MAX, GFP_KERNEL);
-		if (i2c_devices == NULL)
-		{
-			LIDBG_ERR("kmalloc.\n");		
-		}
+        if (i2c_devices == NULL)
+        {
+            LIDBG_ERR("kmalloc.\n");
+        }
 
         memset(i2c_devices, 0, I2C_DEVICES_MAX);
 
 
-        for(i = 1; i<(0xff >> 1); i++)
+        for(i = 1; i < (0xff >> 1); i++)
         {
             rc = i2c_api_do_recv(PROBE_I2C_BUS, i, 0, tmp, 1 );
 
@@ -672,22 +676,22 @@ static int __init i2c_api_init(void)
 {
     //遍历adapter
     int ret;
-	LIDBG_MODULE_LOG;
+    LIDBG_MODULE_LOG;
 
-#ifdef LIDBG_I2C_GPIO 
+#ifdef LIDBG_I2C_GPIO
 #ifndef CONFIG_I2C_GPIO
-	lidbg("load lidbg_i2c_gpio.ko\n");
-	lidbg_insmod( "/system/lib/modules/out/lidbg_i2c_gpio.ko");
-	lidbg_insmod( "/flysystem/lib/out/lidbg_i2c_gpio.ko");
-#endif	
+    lidbg("load lidbg_i2c_gpio.ko\n");
+    lidbg_insmod( "/system/lib/modules/out/lidbg_i2c_gpio.ko");
+    lidbg_insmod( "/flysystem/lib/out/lidbg_i2c_gpio.ko");
+#endif
 
-	I2C_GPIO_CONFIG;
-	ret = platform_device_register(&i2c_gpio_device);
-	if (ret)
-	{
-		lidbg(KERN_ERR "[%s] Device registration failed!\n", __func__);
-		return ret;
-	}
+    I2C_GPIO_CONFIG;
+    ret = platform_device_register(&i2c_gpio_device);
+    if (ret)
+    {
+        lidbg(KERN_ERR "[%s] Device registration failed!\n", __func__);
+        return ret;
+    }
 #endif
 
     ret = i2c_add_driver(&i2c_api_driver); //将driver注册到了i2c_bus_type的总线上 利用i2c_client的名称和id_table中的名称做匹配的

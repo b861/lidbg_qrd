@@ -6,70 +6,81 @@
 #define GET_INODE_FROM_FILEP(filp) ((filp)->f_path.dentry->d_inode)
 
 int lidbg_readwrite_file(const char *filename, char *rbuf,
-	const char *wbuf, size_t length)
+                         const char *wbuf, size_t length)
 {
-	int ret = 0;
-	struct file *filp = (struct file *)-ENOENT;
-	mm_segment_t oldfs;
-	oldfs = get_fs();
-	set_fs(KERNEL_DS);
+    int ret = 0;
+    struct file *filp = (struct file *) - ENOENT;
+    mm_segment_t oldfs;
+    oldfs = get_fs();
+    set_fs(KERNEL_DS);
 
-	do {
-		int mode = (wbuf) ? O_RDWR : O_RDONLY;
-		filp = filp_open(filename, mode, S_IRUSR);
+    do
+    {
+        int mode = (wbuf) ? O_RDWR : O_RDONLY;
+        filp = filp_open(filename, mode, S_IRUSR);
 
-		if (IS_ERR(filp) || !filp->f_op) {
-			ret = -ENOENT;
-			break;
-		}
+        if (IS_ERR(filp) || !filp->f_op)
+        {
+            ret = -ENOENT;
+            break;
+        }
 
-		if (!filp->f_op->write || !filp->f_op->read) {
-			filp_close(filp, NULL);
-			ret = -ENOENT;
-			break;
-		}
+        if (!filp->f_op->write || !filp->f_op->read)
+        {
+            filp_close(filp, NULL);
+            ret = -ENOENT;
+            break;
+        }
 
-		if (length == 0) {
-			/* Read the length of the file only */
-			struct inode    *inode;
+        if (length == 0)
+        {
+            /* Read the length of the file only */
+            struct inode    *inode;
 
-			inode = GET_INODE_FROM_FILEP(filp);
-			if (!inode) {
-				lidbg(
-					"kernel_readwrite_file: Error 2\n");
-				ret = -ENOENT;
-				break;
-			}
-			ret = i_size_read(inode->i_mapping->host);
-			break;
-		}
+            inode = GET_INODE_FROM_FILEP(filp);
+            if (!inode)
+            {
+                lidbg(
+                    "kernel_readwrite_file: Error 2\n");
+                ret = -ENOENT;
+                break;
+            }
+            ret = i_size_read(inode->i_mapping->host);
+            break;
+        }
 
-		if (wbuf) {
-			ret = filp->f_op->write(
-				filp, wbuf, length, &filp->f_pos);
-			if (ret < 0) {
-				lidbg(
-					"kernel_readwrite_file: Error 3\n");
-				break;
-			}
-		} else {
-			ret = filp->f_op->read(
-				filp, rbuf, length, &filp->f_pos);
-			if (ret < 0) {
-				lidbg(
-					"kernel_readwrite_file: Error 4\n");
-				break;
-			}
-		}
-	} while (0);
+        if (wbuf)
+        {
+            ret = filp->f_op->write(
+                      filp, wbuf, length, &filp->f_pos);
+            if (ret < 0)
+            {
+                lidbg(
+                    "kernel_readwrite_file: Error 3\n");
+                break;
+            }
+        }
+        else
+        {
+            ret = filp->f_op->read(
+                      filp, rbuf, length, &filp->f_pos);
+            if (ret < 0)
+            {
+                lidbg(
+                    "kernel_readwrite_file: Error 4\n");
+                break;
+            }
+        }
+    }
+    while (0);
 
-	if (!IS_ERR(filp))
-		filp_close(filp, NULL);
+    if (!IS_ERR(filp))
+        filp_close(filp, NULL);
 
-	set_fs(oldfs);
-	//lidbg( "kernel_readwrite_file: ret=%d\n", ret);
+    set_fs(oldfs);
+    //lidbg( "kernel_readwrite_file: ret=%d\n", ret);
 
-	return ret;
+    return ret;
 }
 
 
@@ -147,23 +158,23 @@ u32 lidbg_get_ns_count(void)
 
 }
 
-int lidbg_get_current_time(char *time_string,struct rtc_time *ptm)
+int lidbg_get_current_time(char *time_string, struct rtc_time *ptm)
 {
-    int  tlen=-1;
+    int  tlen = -1;
     struct timespec ts;
     struct rtc_time tm;
     getnstimeofday(&ts);
     rtc_time_to_tm(ts.tv_sec, &tm);
     if(time_string)
         tlen = sprintf(time_string, "%d-%02d-%02d__%02d.%02d.%02d",
-        tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour , tm.tm_min, tm.tm_sec);
+                       tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour , tm.tm_min, tm.tm_sec);
     if(ptm)
         *ptm = tm;
     return tlen;
 }
-int  lidbg_launch_user( char bin_path[], char argv1[],char argv2[],char argv3[],char argv4[],char argv5[],char argv6[])
+int  lidbg_launch_user( char bin_path[], char argv1[], char argv2[], char argv3[], char argv4[], char argv5[], char argv6[])
 {
-    char *argv[] = { bin_path, argv1,argv2, argv3, argv4, argv5, argv6,NULL };
+    char *argv[] = { bin_path, argv1, argv2, argv3, argv4, argv5, argv6, NULL };
     static char *envp[] = { "HOME=/", "TERM=linux", "PATH=/system/bin:/sbin", NULL };//tell me sh where it is;
     int ret;
     lidbg("%s ,%s\n", bin_path, argv1);
@@ -254,7 +265,7 @@ int  lidbg_exe(char path[], char argv1[], char argv2[], char argv3[], char argv4
 }
 int  lidbg_mount(char path[])
 {
-    return lidbg_launch_user(MOUNT_PATH, "-o", "remount",path, NULL, NULL, NULL);
+    return lidbg_launch_user(MOUNT_PATH, "-o", "remount", path, NULL, NULL, NULL);
 }
 int  lidbg_insmod(char path[])
 {
@@ -264,7 +275,7 @@ int  lidbg_chmod(char path[])
 {
     return lidbg_launch_user(CHMOD_PATH, "777", path, NULL, NULL, NULL, NULL);
 }
-int  lidbg_mv(char from[],char to[])
+int  lidbg_mv(char from[], char to[])
 {
     return lidbg_launch_user(MV_PATH, from, to, NULL, NULL, NULL, NULL);
 }
@@ -288,7 +299,7 @@ int  lidbg_reboot(void)
 {
     return lidbg_launch_user(REBOOT_PATH, NULL, NULL, NULL, NULL, NULL, NULL);
 }
-int  lidbg_setprop(char key[],char value[])
+int  lidbg_setprop(char key[], char value[])
 {
     return lidbg_launch_user(SETPROP_PATH, key, value, NULL, NULL, NULL, NULL);
 }

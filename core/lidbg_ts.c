@@ -56,8 +56,8 @@ extern void  touch_event_init(void);
 int lidbg_touch_init(void)
 {
     int error;
-    u32 RESOLUTION_X=1024;
-    u32 RESOLUTION_Y=600;
+    u32 RESOLUTION_X = 1024;
+    u32 RESOLUTION_Y = 600;
     LIDBG_MODULE_LOG;
 
     input = input_allocate_device();
@@ -74,7 +74,7 @@ int lidbg_touch_init(void)
     input->id.product = 0x0011;
     input->id.version = 0x0101;
 
-   soc_get_screen_res(&RESOLUTION_X,&RESOLUTION_Y);
+    soc_get_screen_res(&RESOLUTION_X, &RESOLUTION_Y);
 
 #ifdef LIDBG_MULTI_TOUCH_SUPPORT
     set_bit(EV_SYN, input->evbit);
@@ -110,7 +110,7 @@ int lidbg_touch_init(void)
 
         goto fail;
     }
-    
+
     touch_event_init();
 
     return 0;

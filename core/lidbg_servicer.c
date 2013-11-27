@@ -22,7 +22,7 @@ static DECLARE_WAIT_QUEUE_HEAD(k2u_wait);
 static DECLARE_COMPLETION(u2k_com);
 
 int thread_u2k(void *data)
-{	
+{
     while(1)
     {
         set_current_state(TASK_UNINTERRUPTIBLE);
@@ -65,7 +65,7 @@ void k2u_write(int cmd)
 // read from kernel to user
 int k2u_read(void)
 {
-    int ret,count;
+    int ret, count;
     spin_lock_irqsave(&fifo_k2u_lock, flags_k2u);
     if(kfifo_is_empty(&k2u_fifo))
     {
@@ -83,7 +83,7 @@ int k2u_read(void)
 
 int u2k_read(void)
 {
-    int ret,count;
+    int ret, count;
     spin_lock_irqsave(&fifo_k2u_lock, flags_k2u);
     count = kfifo_out(&u2k_fifo, &ret, sizeof(int));
     spin_unlock_irqrestore(&fifo_k2u_lock, flags_k2u);
@@ -172,7 +172,7 @@ static int __init servicer_init(void)
     //下面的代码可以自动生成设备节点，但是该节点在/dev目录下，而不在/dev/misc目录下
     //其实misc_register就是用主设备号10调用register_chrdev()的 misc设备其实也就是特殊的字符设备。
     //注册驱动程序时采用misc_register函数注册，此函数中会自动创建设备节点，即设备文件。无需mknod指令创建设备文件。因为misc_register()会调用class_device_create()或者device_create()。
-	LIDBG_MODULE_LOG;
+    LIDBG_MODULE_LOG;
 
 
     ret = misc_register(&misc);
@@ -191,7 +191,7 @@ static int __init servicer_init(void)
         u2k_task = NULL;
     }
     wake_up_process(u2k_task);
-	
+
     lidbg_chmod("/dev/lidbg_servicer");
     return ret;
 }

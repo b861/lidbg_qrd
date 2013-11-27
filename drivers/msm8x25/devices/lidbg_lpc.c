@@ -52,10 +52,10 @@ void LPCCombinDataStream(BYTE *p, UINT len)
     if (3 + len + 1 > 16)
     {
         buf = (BYTE *)kmalloc(sizeof(BYTE) * (4 + len), GFP_KERNEL);
-		if (buf == NULL)
-		{
-			LIDBG_ERR("kmalloc.\n");		
-		}
+        if (buf == NULL)
+        {
+            LIDBG_ERR("kmalloc.\n");
+        }
         bMalloc = TRUE;
     }
     else
@@ -69,11 +69,11 @@ void LPCCombinDataStream(BYTE *p, UINT len)
     checksum = buf[2];
     for (i = 0; i < len; i++)
     {
-        buf[3+i] = p[i];
+        buf[3 + i] = p[i];
         checksum += p[i];
     }
 
-    buf[3+i] = checksum;
+    buf[3 + i] = checksum;
 #ifdef LPC_DEBUG_LOG
     lidbg("ToMCU:%x %x %x\n", p[0], p[1], p[2]);
 #endif
@@ -513,15 +513,15 @@ void mcuFirstInit(void)
     SOC_IO_ISR_Add(MCU_IIC_REQ_ISR, IRQF_TRIGGER_FALLING | IRQF_ONESHOT, MCUIIC_isr, pGlobalHardwareInfo);
 
 #ifdef FLY_DEBUG
-{
-	static struct task_struct *lpc_task;
-    lpc_task = kthread_create(thread_lpc, NULL, "lpc_task");
-    if(IS_ERR(lpc_task))
     {
-        lidbg("Unable to start kernel thread.\n");
+        static struct task_struct *lpc_task;
+        lpc_task = kthread_create(thread_lpc, NULL, "lpc_task");
+        if(IS_ERR(lpc_task))
+        {
+            lidbg("Unable to start kernel thread.\n");
+        }
+        else wake_up_process(lpc_task);
     }
-    else wake_up_process(lpc_task);
-}
 #endif
 
 
@@ -562,10 +562,10 @@ static int  lpc_probe(struct platform_device *pdev)
 {
 
     DUMP_FUN;
-	
+
 #ifndef FLY_DEBUG
-	lidbg("lpc_init do nothing\n");
-	return 0;
+    lidbg("lpc_init do nothing\n");
+    return 0;
 #endif
 
 

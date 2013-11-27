@@ -8,14 +8,14 @@ struct fly_smem *p_fly_smem = NULL;
 
 int soc_temp_get(void)
 {
-	return 0;
+    return 0;
 }
 
 
 int msm8x25_init(void)
 {
 
-	
+
     return 0;
 }
 

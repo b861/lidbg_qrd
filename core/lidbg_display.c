@@ -568,7 +568,7 @@ void color_degree(struct fb_fix_screeninfo *pfb_fixinfo, struct fb_var_screeninf
         {
             for(j = 0; j < PIX_DEGREE; j ++)
             {
-                *(  (PIX_BYTE *)(uiLCDBufferAddress) + LCD_WIDTH*(PER_COLOR_HEIGHT) + (i * PIX_DEGREE + j)  ) = (PIX_BYTE)GET_COLOR_RGB555(R_value, G_value, B_value);
+                *(  (PIX_BYTE *)(uiLCDBufferAddress) + LCD_WIDTH * (PER_COLOR_HEIGHT) + (i * PIX_DEGREE + j)  ) = (PIX_BYTE)GET_COLOR_RGB555(R_value, G_value, B_value);
             }
             G_value ++;
         }
@@ -592,7 +592,7 @@ void color_degree(struct fb_fix_screeninfo *pfb_fixinfo, struct fb_var_screeninf
         {
             for(j = 0; j < PIX_DEGREE; j ++)
             {
-                *(  (PIX_BYTE *)(uiLCDBufferAddress) + LCD_WIDTH*(PER_COLOR_HEIGHT * 2) + (i * PIX_DEGREE + j)  ) = (PIX_BYTE)GET_COLOR_RGB555(R_value, G_value, B_value);
+                *(  (PIX_BYTE *)(uiLCDBufferAddress) + LCD_WIDTH * (PER_COLOR_HEIGHT * 2) + (i * PIX_DEGREE + j)  ) = (PIX_BYTE)GET_COLOR_RGB555(R_value, G_value, B_value);
             }
             B_value ++;
         }
@@ -617,7 +617,7 @@ void color_degree(struct fb_fix_screeninfo *pfb_fixinfo, struct fb_var_screeninf
         {
             for(j = 0; j < PIX_DEGREE; j ++)
             {
-                *(  (PIX_BYTE *)(uiLCDBufferAddress) + LCD_WIDTH*(PER_COLOR_HEIGHT * 3) + (i * PIX_DEGREE + j)  ) = (PIX_BYTE)GET_COLOR_RGB555(R_value, G_value, B_value);
+                *(  (PIX_BYTE *)(uiLCDBufferAddress) + LCD_WIDTH * (PER_COLOR_HEIGHT * 3) + (i * PIX_DEGREE + j)  ) = (PIX_BYTE)GET_COLOR_RGB555(R_value, G_value, B_value);
             }
             R_value ++;
             G_value ++;
@@ -685,7 +685,7 @@ void color_degree(struct fb_fix_screeninfo *pfb_fixinfo, struct fb_var_screeninf
         {
             for(j = 0; j < PIX_DEGREE; j ++)
             {
-                *(  (PIX_BYTE *)(uiLCDBufferAddress) + LCD_WIDTH*(PER_COLOR_HEIGHT) + (i * PIX_DEGREE + j)  ) = (PIX_BYTE)GET_COLOR_RGB888(R_value, G_value, B_value);
+                *(  (PIX_BYTE *)(uiLCDBufferAddress) + LCD_WIDTH * (PER_COLOR_HEIGHT) + (i * PIX_DEGREE + j)  ) = (PIX_BYTE)GET_COLOR_RGB888(R_value, G_value, B_value);
             }
             G_value ++;
         }
@@ -709,7 +709,7 @@ void color_degree(struct fb_fix_screeninfo *pfb_fixinfo, struct fb_var_screeninf
         {
             for(j = 0; j < PIX_DEGREE; j ++)
             {
-                *(  (PIX_BYTE *)(uiLCDBufferAddress) + LCD_WIDTH*(PER_COLOR_HEIGHT * 2) + (i * PIX_DEGREE + j)  ) = (PIX_BYTE)GET_COLOR_RGB888(R_value, G_value, B_value);
+                *(  (PIX_BYTE *)(uiLCDBufferAddress) + LCD_WIDTH * (PER_COLOR_HEIGHT * 2) + (i * PIX_DEGREE + j)  ) = (PIX_BYTE)GET_COLOR_RGB888(R_value, G_value, B_value);
             }
             B_value ++;
         }
@@ -734,7 +734,7 @@ void color_degree(struct fb_fix_screeninfo *pfb_fixinfo, struct fb_var_screeninf
         {
             for(j = 0; j < PIX_DEGREE; j ++)
             {
-                *(  (PIX_BYTE *)(uiLCDBufferAddress) + LCD_WIDTH*(PER_COLOR_HEIGHT * 3) + (i * PIX_DEGREE + j)  ) = (PIX_BYTE)GET_COLOR_RGB888(R_value, G_value, B_value);
+                *(  (PIX_BYTE *)(uiLCDBufferAddress) + LCD_WIDTH * (PER_COLOR_HEIGHT * 3) + (i * PIX_DEGREE + j)  ) = (PIX_BYTE)GET_COLOR_RGB888(R_value, G_value, B_value);
             }
             R_value ++;
             G_value ++;
@@ -850,9 +850,9 @@ int  soc_get_screen_res(u32 *screen_x, u32 *screen_y)
     int fbidx;
     struct fb_var_screeninfo fb_varinfo;
 
-     fb_varinfo.xres= 0;
-     fb_varinfo.yres = 0;
-	
+    fb_varinfo.xres = 0;
+    fb_varinfo.yres = 0;
+
     lidbg("num_registered_fb = %d \n", num_registered_fb);
 
     for(fbidx = 0; fbidx < num_registered_fb; fbidx++)

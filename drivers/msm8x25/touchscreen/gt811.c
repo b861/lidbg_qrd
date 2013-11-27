@@ -127,8 +127,8 @@ static int i2c_write_bytes(struct i2c_client *client, uint8_t *data, int len)
 {
     struct i2c_msg msg;
     int ret = -1;
-    //发送设备地址
-    msg.flags = !I2C_M_RD; //写消息
+    //??????
+    msg.flags = !I2C_M_RD; //???
     msg.addr = client->addr;
     msg.len = len;
     msg.buf = data;
@@ -226,7 +226,7 @@ static int goodix_init_panel(struct goodix_ts_data *ts)
 {
     short ret = -1;
     printk("come to goodix_init_panel=======7.8heti===========futengfei=\n");
-#ifdef BOARD_V2	
+#ifdef BOARD_V2
     uint8_t config_info7[] =
     {
         0x06, 0xA2,
@@ -239,8 +239,8 @@ static int goodix_init_panel(struct goodix_ts_data *ts)
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01
 
     };
-//#endif
-#else 
+    //#endif
+#else
     uint8_t config_info7[] =
     {
         0x06, 0xA2,
@@ -421,7 +421,7 @@ static void goodix_ts_work_func(struct work_struct *work)
     static uint8_t  last_key = 0;
     unsigned int  count = 0;
     unsigned int position = 0;
-    int finger_up_cunt =0;
+    int finger_up_cunt = 0;
     int ret = -1;
     int tmp = 0;
 
@@ -556,10 +556,10 @@ COORDINATE_POLL:
     }
     //printk("finger=[%d]\n",finger);
     //return 0;
-    finger_up_cunt = 5-finger;
+    finger_up_cunt = 5 - finger;
     if(finger)
     {
-	    for(count = 0; count < finger; count++)
+        for(count = 0; count < finger; count++)
         {
             if(track_id[count] != 3)
             {
@@ -567,8 +567,8 @@ COORDINATE_POLL:
                     position = 4 + track_id[count] * 5;
                 else
                     position = 30;
-                input_x = (uint16_t)(point_data[position] << 8) + (uint16_t)point_data[position+1];
-                input_y = (uint16_t)(point_data[position+2] << 8) + (uint16_t)point_data[position+3];
+                input_x = (uint16_t)(point_data[position] << 8) + (uint16_t)point_data[position + 1];
+                input_y = (uint16_t)(point_data[position + 2] << 8) + (uint16_t)point_data[position + 3];
                 //input_w = point_data[position+4];
             }
             else
@@ -579,42 +579,42 @@ COORDINATE_POLL:
             }
 
             if((input_x > ts->abs_x_max) || (input_y > ts->abs_y_max))continue;
-            if((xy_revert_en == 1)||(1 == ts_should_revert))
+            if((xy_revert_en == 1) || (1 == ts_should_revert))
             {
                 input_y = SCREEN_X - input_y;
                 input_x = SCREEN_Y - input_x;
             }
 #ifdef BOARD_V2
-		input_report_abs(ts->input_dev, ABS_MT_POSITION_X, input_y);
-		input_report_abs(ts->input_dev, ABS_MT_POSITION_Y, input_x);
-		input_report_abs(ts->input_dev, ABS_MT_TOUCH_MAJOR, 255);
-		input_report_abs(ts->input_dev, ABS_MT_TRACKING_ID, track_id[count]);
-		input_mt_sync(ts->input_dev);
+            input_report_abs(ts->input_dev, ABS_MT_POSITION_X, input_y);
+            input_report_abs(ts->input_dev, ABS_MT_POSITION_Y, input_x);
+            input_report_abs(ts->input_dev, ABS_MT_TOUCH_MAJOR, 255);
+            input_report_abs(ts->input_dev, ABS_MT_TRACKING_ID, track_id[count]);
+            input_mt_sync(ts->input_dev);
 
-#else 
-		input_mt_slot(ts->input_dev, count);
-		input_mt_report_slot_state(ts->input_dev, MT_TOOL_FINGER,1);
-		input_report_abs(ts->input_dev, ABS_MT_POSITION_X,input_y);
-		input_report_abs(ts->input_dev, ABS_MT_POSITION_Y,input_x);
-		input_report_abs(ts->input_dev, ABS_MT_TOUCH_MAJOR,255);
-#endif		
+#else
+            input_mt_slot(ts->input_dev, count);
+            input_mt_report_slot_state(ts->input_dev, MT_TOOL_FINGER, 1);
+            input_report_abs(ts->input_dev, ABS_MT_POSITION_X, input_y);
+            input_report_abs(ts->input_dev, ABS_MT_POSITION_Y, input_x);
+            input_report_abs(ts->input_dev, ABS_MT_TOUCH_MAJOR, 255);
+#endif
 
         }
 
-#ifndef BOARD_V2 
-		if(finger_up_cunt>0)
-		{
-			int cunt;
-			int rept=4;
-			for(cunt= 0; cunt <finger_up_cunt; cunt++,rept--)
-			{
-				input_mt_slot(ts->input_dev,rept);
-				input_mt_report_slot_state(ts->input_dev, MT_TOOL_FINGER,0);
-			}
-		}
-		input_report_key(ts->input_dev, BTN_TOUCH, 1);
-		input_sync(ts->input_dev);
-#endif	
+#ifndef BOARD_V2
+        if(finger_up_cunt > 0)
+        {
+            int cunt;
+            int rept = 4;
+            for(cunt = 0; cunt < finger_up_cunt; cunt++, rept--)
+            {
+                input_mt_slot(ts->input_dev, rept);
+                input_mt_report_slot_state(ts->input_dev, MT_TOOL_FINGER, 0);
+            }
+        }
+        input_report_key(ts->input_dev, BTN_TOUCH, 1);
+        input_sync(ts->input_dev);
+#endif
         FLAG_FOR_15S_OFF++;
         if(FLAG_FOR_15S_OFF >= 1000)
         {
@@ -625,9 +625,9 @@ COORDINATE_POLL:
             printk("\nerr:FLAG_FOR_15S_OFF===[%d]\n", FLAG_FOR_15S_OFF);
         }
 
-	g_curr_tspara.x=input_y;
-	g_curr_tspara.y=input_x;
-	g_curr_tspara.press=true;
+        g_curr_tspara.x = input_y;
+        g_curr_tspara.y = input_x;
+        g_curr_tspara.press = true;
 
 #ifdef BUILD_FOR_RECOVERY
         if( (input_y >= 0) && (input_x >= 0) )
@@ -642,21 +642,21 @@ COORDINATE_POLL:
     }
     else
     {
-#ifdef BOARD_V2    
+#ifdef BOARD_V2
         input_report_abs(ts->input_dev, ABS_MT_TOUCH_MAJOR, 0);
         input_mt_sync(ts->input_dev);
-		
+
 #else
-{
-	int count =0;
-	for(count=0;count<5;count++)
-	{
-		input_mt_slot(ts->input_dev, count);
-		input_mt_report_slot_state(ts->input_dev, MT_TOOL_FINGER,0);
-		input_report_key(ts->input_dev, BTN_TOUCH, 0);
-		input_sync(ts->input_dev);
-	}
-}
+        {
+            int count = 0;
+            for(count = 0; count < 5; count++)
+            {
+                input_mt_slot(ts->input_dev, count);
+                input_mt_report_slot_state(ts->input_dev, MT_TOOL_FINGER, 0);
+                input_report_key(ts->input_dev, BTN_TOUCH, 0);
+                input_sync(ts->input_dev);
+            }
+        }
 
 #endif
 
@@ -666,10 +666,10 @@ COORDINATE_POLL:
             set_touch_pos(&touch);
         }
 #endif
-	g_curr_tspara.press=false;
+        g_curr_tspara.press = false;
 
     }
-#ifdef BOARD_V2  
+#ifdef BOARD_V2
     input_report_key(ts->input_dev, BTN_TOUCH, finger > 0);
     input_sync(ts->input_dev);
 #endif
@@ -722,7 +722,7 @@ COORDINATE_POLL:
     {
         for(count = 0; count < MAX_KEY_NUM; count++)
         {
-            input_report_key(ts->input_dev, touch_key_array[count], !!(key&(0x01 << count)));
+            input_report_key(ts->input_dev, touch_key_array[count], !!(key & (0x01 << count)));
         }
     }
     last_key = key;
@@ -987,41 +987,41 @@ err_gpio_request_failed:
         printk("goodix_ts_probe: Failed to allocate input device=======futengfei======\n");
         goto err_input_dev_alloc_failed;
     }
-	    screen_x = SCREEN_X;
-	    screen_y = SCREEN_Y;
-	    SOC_Display_Get_Res(&screen_x, &screen_y);
+    screen_x = SCREEN_X;
+    screen_y = SCREEN_Y;
+    SOC_Display_Get_Res(&screen_x, &screen_y);
 #ifdef BOARD_V2
-	    ts->input_dev->evbit[0] = BIT_MASK(EV_SYN) | BIT_MASK(EV_KEY) | BIT_MASK(EV_ABS) ;
-	    ts->input_dev->keybit[BIT_WORD(BTN_TOUCH)] = BIT_MASK(BTN_TOUCH);
-	    ts->input_dev->absbit[0] = BIT(ABS_X) | BIT(ABS_Y) | BIT(ABS_PRESSURE);
+    ts->input_dev->evbit[0] = BIT_MASK(EV_SYN) | BIT_MASK(EV_KEY) | BIT_MASK(EV_ABS) ;
+    ts->input_dev->keybit[BIT_WORD(BTN_TOUCH)] = BIT_MASK(BTN_TOUCH);
+    ts->input_dev->absbit[0] = BIT(ABS_X) | BIT(ABS_Y) | BIT(ABS_PRESSURE);
 #ifdef HAVE_TOUCH_KEY
-	    //#if 1
-	    for(retry = 0; retry < MAX_KEY_NUM; retry++)
-	    {
-	        input_set_capability(ts->input_dev, EV_KEY, touch_key_array[retry]);
-	    }
+    //#if 1
+    for(retry = 0; retry < MAX_KEY_NUM; retry++)
+    {
+        input_set_capability(ts->input_dev, EV_KEY, touch_key_array[retry]);
+    }
 #endif
 
-	    input_set_abs_params(ts->input_dev, ABS_X, 0,  ts->abs_x_max, 0, 0);
-	    input_set_abs_params(ts->input_dev, ABS_Y, 0, ts->abs_y_max, 0, 0);
-	    input_set_abs_params(ts->input_dev, ABS_PRESSURE, 0, 255, 0, 0);
+    input_set_abs_params(ts->input_dev, ABS_X, 0,  ts->abs_x_max, 0, 0);
+    input_set_abs_params(ts->input_dev, ABS_Y, 0, ts->abs_y_max, 0, 0);
+    input_set_abs_params(ts->input_dev, ABS_PRESSURE, 0, 255, 0, 0);
 #ifdef GOODIX_MULTI_TOUCH
-	    input_set_abs_params(ts->input_dev, ABS_MT_WIDTH_MAJOR, 0, 255, 0, 0);
-	    input_set_abs_params(ts->input_dev, ABS_MT_TOUCH_MAJOR, 0, 255, 0, 0);
-	    input_set_abs_params(ts->input_dev, ABS_MT_POSITION_X, 0, screen_x  , 0, 0); //ts->abs_y_max
-	    input_set_abs_params(ts->input_dev, ABS_MT_POSITION_Y, 0, screen_y , 0, 0);	//ts->abs_x_max
+    input_set_abs_params(ts->input_dev, ABS_MT_WIDTH_MAJOR, 0, 255, 0, 0);
+    input_set_abs_params(ts->input_dev, ABS_MT_TOUCH_MAJOR, 0, 255, 0, 0);
+    input_set_abs_params(ts->input_dev, ABS_MT_POSITION_X, 0, screen_x  , 0, 0); //ts->abs_y_max
+    input_set_abs_params(ts->input_dev, ABS_MT_POSITION_Y, 0, screen_y , 0, 0);	//ts->abs_x_max
 #endif
 
-#else 
-	__set_bit(EV_KEY, ts->input_dev->evbit);
-	__set_bit(EV_ABS, ts->input_dev->evbit);
-	__set_bit(BTN_TOUCH, ts->input_dev->keybit);
-	__set_bit(INPUT_PROP_DIRECT, ts->input_dev->propbit);
-	
-	input_mt_init_slots(ts->input_dev, 5);
-	input_set_abs_params(ts->input_dev, ABS_MT_POSITION_X, 0,screen_x, 0, 0);
-	input_set_abs_params(ts->input_dev, ABS_MT_POSITION_Y, 0,screen_y, 0, 0);
-	input_set_abs_params(ts->input_dev, ABS_MT_TOUCH_MAJOR, 0, 255, 0, 0);
+#else
+    __set_bit(EV_KEY, ts->input_dev->evbit);
+    __set_bit(EV_ABS, ts->input_dev->evbit);
+    __set_bit(BTN_TOUCH, ts->input_dev->keybit);
+    __set_bit(INPUT_PROP_DIRECT, ts->input_dev->propbit);
+
+    input_mt_init_slots(ts->input_dev, 5);
+    input_set_abs_params(ts->input_dev, ABS_MT_POSITION_X, 0, screen_x, 0, 0);
+    input_set_abs_params(ts->input_dev, ABS_MT_POSITION_Y, 0, screen_y, 0, 0);
+    input_set_abs_params(ts->input_dev, ABS_MT_TOUCH_MAJOR, 0, 255, 0, 0);
 #endif
 
     printk("check your screen [%d*%d]=================futengfei===\n", screen_x, screen_y);
@@ -1200,7 +1200,7 @@ static int goodix_ts_remove(struct i2c_client *client)
     return 0;
 }
 
-//停用设备
+//????
 static int goodix_ts_suspend(struct i2c_client *client, pm_message_t mesg)
 {
     int ret;
@@ -1876,8 +1876,8 @@ static u8  gt811_update_firmware( u8 *nvram, u16 start_addr, u16 length, struct 
     u16 cur_frame_num, total_frame_num, cur_frame_len;
     u32 gt80x_update_rate;
 
-    unsigned char i2c_data_buf[PACK_SIZE+2] = {0,};
-    unsigned char i2c_chk_data_buf[PACK_SIZE+2] = {0,};
+    unsigned char i2c_data_buf[PACK_SIZE + 2] = {0,};
+    unsigned char i2c_chk_data_buf[PACK_SIZE + 2] = {0,};
 
     printk("come into [%s]", __func__);
     if( length > NVRAM_LEN - NVRAM_BOOT_SECTOR_LEN )
@@ -1915,7 +1915,7 @@ static u8  gt811_update_firmware( u8 *nvram, u16 start_addr, u16 length, struct 
         //strncpy(&i2c_data_buf[2], &nvram[cur_frame_num*PACK_SIZE], cur_frame_len);
         for(i = 0; i < cur_frame_len; i++)
         {
-            i2c_data_buf[2+i] = nvram[cur_frame_num*PACK_SIZE+i];
+            i2c_data_buf[2 + i] = nvram[cur_frame_num * PACK_SIZE + i];
         }
         do
         {
@@ -2010,7 +2010,7 @@ static u8  gt811_update_firmware( u8 *nvram, u16 start_addr, u16 length, struct 
                 err = 1;
             }
 
-            if( is_equal( &nvram[cur_frame_num*PACK_SIZE], &i2c_chk_data_buf[2], cur_frame_len ) == 0 )
+            if( is_equal( &nvram[cur_frame_num * PACK_SIZE], &i2c_chk_data_buf[2], cur_frame_len ) == 0 )
             {
                 err = 1;
             }
@@ -2282,7 +2282,7 @@ exit_downloader:
 //******************************End of firmware update surpport*******************************
 /////////////////////////////// UPDATE STEP 4 END /////////////////////////////////////////////////////////////////
 
-//可用于该驱动的 设备名—设备ID 列表
+//??????? ???—??ID ??
 //only one client
 static const struct i2c_device_id goodix_ts_id[] =
 {
@@ -2290,7 +2290,7 @@ static const struct i2c_device_id goodix_ts_id[] =
     { }
 };
 
-//设备驱动结构体
+//???????
 static struct i2c_driver goodix_ts_driver =
 {
     .probe		= goodix_ts_probe,
@@ -2318,10 +2318,10 @@ static struct i2c_board_info i2c_gt811[]  =
 };
 
 /*******************************************************
-功能：
-	驱动加载函数
-return：
-	执行结果码，0表示正常执行
+??:
+	??????
+return:
+	?????,0??????
 ********************************************************/
 #define MSM_GSBI1_QUP_I2C_BUS_ID	1
 
@@ -2430,17 +2430,17 @@ static int __devinit goodix_ts_init(void)
     LIDBG_GET;
     printk("\n\n==in=GT811.KO=====1024580==========touch INFO===========futengfei\n");
 
-//V2有反相器，V3没有
+    //V2????,V3??
 #ifdef BOARD_V2
-            SOC_IO_Output(0, 27, 1);
-            msleep(200);
-            SOC_IO_Output(0, 27, 0);//NOTE:GT811 SHUTDOWN PIN ,set hight to work.
-            msleep(300);
+    SOC_IO_Output(0, 27, 1);
+    msleep(200);
+    SOC_IO_Output(0, 27, 0);//NOTE:GT811 SHUTDOWN PIN ,set hight to work.
+    msleep(300);
 #else
-            SOC_IO_Output(0, 27, 0);
-            msleep(200);
-            SOC_IO_Output(0, 27, 1);//NOTE:GT811 SHUTDOWN PIN ,set hight to work.
-            msleep(300);
+    SOC_IO_Output(0, 27, 0);
+    msleep(200);
+    SOC_IO_Output(0, 27, 1);//NOTE:GT811 SHUTDOWN PIN ,set hight to work.
+    msleep(300);
 #endif
 
 #if 0
@@ -2502,10 +2502,10 @@ again:
 }
 
 /*******************************************************
-功能：
-	驱动卸载函数
-参数：
-	client：设备结构体
+??:
+	??????
+??:
+	client:?????
 ********************************************************/
 static void __exit goodix_ts_exit(void)
 {
@@ -2517,7 +2517,7 @@ static void __exit goodix_ts_exit(void)
     //destroy_workqueue(goodix_wq);		//release our work queue
 }
 
-late_initcall(goodix_ts_init);				//最后初始化驱动felix
+late_initcall(goodix_ts_init);				//???????felix
 module_exit(goodix_ts_exit);
 
 MODULE_DESCRIPTION("Goodix Touchscreen Driver");

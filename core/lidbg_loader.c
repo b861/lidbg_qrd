@@ -7,22 +7,22 @@ int load_modules_count = 0;
 
 char *insmod_list[] =
 {
-	SOC_KO,
-	"lidbg_common.ko",
-	"lidbg_fileserver.ko",
-	"lidbg_wakelock_stat.ko",
+    SOC_KO,
+    "lidbg_common.ko",
+    "lidbg_fileserver.ko",
+    "lidbg_wakelock_stat.ko",
     "lidbg_msg.ko",
-	"lidbg_servicer.ko",
-	"lidbg_touch.ko",
-	"lidbg_key.ko",
-	"lidbg_i2c.ko",
-	"lidbg_io.ko",
-	"lidbg_ad.ko",
-	"lidbg_uart.ko",
-	"lidbg_main.ko",
-	"lidbg_misc.ko",
-	HAL_KO,
-	NULL,
+    "lidbg_servicer.ko",
+    "lidbg_touch.ko",
+    "lidbg_key.ko",
+    "lidbg_i2c.ko",
+    "lidbg_io.ko",
+    "lidbg_ad.ko",
+    "lidbg_uart.ko",
+    "lidbg_main.ko",
+    "lidbg_misc.ko",
+    HAL_KO,
+    NULL,
 };
 
 char *insmod_path[] =
@@ -30,10 +30,10 @@ char *insmod_path[] =
     "/sdcard/out/",
     "/system/lib/modules/out/",
     "/flysystem/lib/out/",
-   NULL,
+    NULL,
 };
 
-void launch_user( char bin_path[], char argv1[],char argv2[])
+void launch_user( char bin_path[], char argv1[], char argv2[])
 {
     char *argv[] = { bin_path, argv1, argv2, NULL };
     static char *envp[] = { "HOME=/", "TERM=linux", "PATH=/system/bin:/sbin", NULL };
@@ -43,23 +43,23 @@ void launch_user( char bin_path[], char argv1[],char argv2[])
 
 int thread_check_restart(void *data)
 {
-	DUMP_FUN_ENTER;
-	msleep(5000);
-	lidbg("load_modules_count=%d\n",load_modules_count);
-	if(load_modules_count == 0)
-	{
-		lidbg("load_modules_count err,call kernel_restart!\n");
-		kernel_restart(NULL);
-	}
-	DUMP_FUN_LEAVE;
-	return 0;
+    DUMP_FUN_ENTER;
+    msleep(5000);
+    lidbg("load_modules_count=%d\n", load_modules_count);
+    if(load_modules_count == 0)
+    {
+        lidbg("load_modules_count err,call kernel_restart!\n");
+        kernel_restart(NULL);
+    }
+    DUMP_FUN_LEAVE;
+    return 0;
 }
 
 int thread_loader(void *data)
 {
-	int i,j;
-	char path[100];
-	DUMP_FUN_ENTER;
+    int i, j;
+    char path[100];
+    DUMP_FUN_ENTER;
     restart_task = kthread_create(thread_check_restart, NULL, "lidbg_restart");
     if(IS_ERR(restart_task))
     {
@@ -68,19 +68,19 @@ int thread_loader(void *data)
     }
     else wake_up_process(restart_task);
 
-	for(i=0;insmod_path[i]!=NULL;i++)	
-	{
-		for(j=0;insmod_list[j]!=NULL;j++)
-		{
-			sprintf(path, "%s%s", insmod_path[i],insmod_list[j]);
-			//lidbg("load %s\n",path);
-			launch_user(INSMOD_PATH, path ,NULL);
-		}
-	}
-	
-	//launch_user("/system/bin/chmod", "0777", "/dev/mlidbg0");
-	DUMP_FUN_LEAVE;
-	return 0;
+    for(i = 0; insmod_path[i] != NULL; i++)
+    {
+        for(j = 0; insmod_list[j] != NULL; j++)
+        {
+            sprintf(path, "%s%s", insmod_path[i], insmod_list[j]);
+            //lidbg("load %s\n",path);
+            launch_user(INSMOD_PATH, path , NULL);
+        }
+    }
+
+    //launch_user("/system/bin/chmod", "0777", "/dev/mlidbg0");
+    DUMP_FUN_LEAVE;
+    return 0;
 
 }
 

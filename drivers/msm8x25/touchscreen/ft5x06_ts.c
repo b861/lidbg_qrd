@@ -716,7 +716,7 @@ static int ft5x06_ts_probe(struct i2c_client *client,
     register_early_suspend(&data->early_suspend);
 #endif
     //fake suspend
-   // SOC_Fake_Register_Early_Suspend(&data->early_suspend);
+    // SOC_Fake_Register_Early_Suspend(&data->early_suspend);
 
     return 0;
 
@@ -797,7 +797,7 @@ static struct i2c_driver ft5x06_ts_driver =
 #endif
     },
     .id_table = ft5x06_ts_id,
- };
+};
 
 
 static int __init ft5x06_ts_init(void)

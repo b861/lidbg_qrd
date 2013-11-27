@@ -69,7 +69,7 @@ struct lidbg_dev_smem *plidbg_smem = NULL;
 void thread_fastboot(void)
 {
     lidbg("thread_fastboot+\n");
-	system("am broadcast -a android.intent.action.FAST_BOOT_START");
+    system("am broadcast -a android.intent.action.FAST_BOOT_START");
     lidbg("thread_fastboot-\n");
     pthread_exit(0);
 
@@ -128,37 +128,39 @@ loop_read:
         {
             lidbg("CMD_FAST_POWER_OFF+++\n");
 #if (defined(BOARD_V1) || defined(BOARD_V2))
-				lunch_fastboot();
-#else	
-				system("am broadcast -a cn.flyaudio.intent.action.FAST_BOOT_START &");
+            lunch_fastboot();
+#else
+            system("am broadcast -a cn.flyaudio.intent.action.FAST_BOOT_START &");
 #endif
-	            lidbg("CMD_FAST_POWER_OFF---\n");
+            lidbg("CMD_FAST_POWER_OFF---\n");
             break;
         }
         case LOG_LOGCAT :
         {
-			static int flag = 0;
-			if(flag)break; else flag = 1;
+            static int flag = 0;
+            if(flag)break;
+            else flag = 1;
             lidbg("logcat+\n");
-			system("date >> /data/logcat.txt");
-			system("logcat  -v time>> /data/logcat.txt &");
-			
-			sleep(1);
-			system("chmod 777 /data/logcat.txt");
-			system("chmod 777 /data/*.txt");
+            system("date >> /data/logcat.txt");
+            system("logcat  -v time>> /data/logcat.txt &");
+
+            sleep(1);
+            system("chmod 777 /data/logcat.txt");
+            system("chmod 777 /data/*.txt");
             lidbg("logcat-\n");
             break;
         }
         case LOG_DMESG :
         {
-			static int flag = 0;
-			if(flag)break; else flag = 1;
+            static int flag = 0;
+            if(flag)break;
+            else flag = 1;
             lidbg("kmsg+\n");
-			system("date >> /data/kmsg.txt");
-			system("cat /proc/kmsg >> /data/kmsg.txt &");
-			
-			sleep(1);
-			system("chmod 777 /data/kmsg.txt");
+            system("date >> /data/kmsg.txt");
+            system("cat /proc/kmsg >> /data/kmsg.txt &");
+
+            sleep(1);
+            system("chmod 777 /data/kmsg.txt");
             lidbg("logcat-\n");
             lidbg("kmsg-\n");
             break;
@@ -228,10 +230,10 @@ int main(int argc , char **argv)
     int cmd = 0;
     int count = 0;
     int oflags;
-	
+
     lidbg("lidbg_servicer start\n");
 
-	
+
 #if (defined(BOARD_V1) || defined(BOARD_V2))
     system("echo 600000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq");
     system("echo 600000 > /sys/devices/system/cpu/cpu1/cpufreq/scaling_max_freq");
@@ -239,13 +241,13 @@ int main(int argc , char **argv)
 
 open_dev:
     fd = open("/dev/mlidbg0", O_RDWR);
-	if((fd == 0xfffffffe) || (fd == 0) || (fd == 0xffffffff))
-	{
-		lidbg("open mlidbg0 fail\n");
-		sleep(1);//delay wait for /dev/lidbg_servicer to creat
-		goto open_dev;
-	}
-	close(fd);
+    if((fd == 0xfffffffe) || (fd == 0) || (fd == 0xffffffff))
+    {
+        lidbg("open mlidbg0 fail\n");
+        sleep(1);//delay wait for /dev/lidbg_servicer to creat
+        goto open_dev;
+    }
+    close(fd);
 
 
     lidbg("open mlidbg0 ok\n");
@@ -255,19 +257,19 @@ open_dev:
     system("chmod 0777 /dev/lidbg_servicer");
     system("chmod 0777 /dev/lidbg_msg");
     system("chmod 0777 /dev/ubloxgps0");
-	
+
     fd = open("/dev/lidbg_servicer", O_RDWR);
-	if((fd == 0xfffffffe) || (fd == 0) || (fd == 0xffffffff))
-	{
-		lidbg("open lidbg_servicer fail\n");
-		goto open_dev;
+    if((fd == 0xfffffffe) || (fd == 0) || (fd == 0xffffffff))
+    {
+        lidbg("open lidbg_servicer fail\n");
+        goto open_dev;
 
-	}
+    }
 
-    signal(SIGIO, servicer_handler); //让input_handler()处理SIGIO信号
+    signal(SIGIO, servicer_handler); //?input_handler()??SIGIO??
     fcntl(fd, F_SETOWN, getpid());
     oflags = fcntl(fd, F_GETFL);
-    fcntl(fd, F_SETFL, oflags | FASYNC); //调用驱动的fasync_helper
+    fcntl(fd, F_SETFL, oflags | FASYNC); //?????fasync_helper
 
 
     //clear fifo
@@ -293,7 +295,7 @@ open_dev:
     system("insmod /flysystem/lib/modules/vendor_flyaudio.ko");
     system("insmod /flysystem/lib/modules/FlyDR.ko");
     system("insmod /flysystem/lib/modules/FlyAS.ko");
-	system("insmod /flysystem/lib/modules/FlyReturn.ko");
+    system("insmod /flysystem/lib/modules/FlyReturn.ko");
 
     sleep(1);
     system("chmod 0777 /dev/ubloxgps0");
@@ -304,7 +306,7 @@ open_dev:
 
     system("chmod 0777 /dev/FlyDR");
     system("chmod 0777 /dev/FlyAS");
-	system("chmod 0777 /dev/FlyReturn");
+    system("chmod 0777 /dev/FlyReturn");
 
 
     //chegnweidong
@@ -318,7 +320,7 @@ open_dev:
     system("chmod 777 /sys/power/state");
     system("chmod 777 /proc/fake_suspend");
     system("chmod 777 /proc/fake_wakeup");
-	system("chmod 777 /mnt/state.txt");
+    system("chmod 777 /mnt/state.txt");
 
     system("chmod 0666 /dev/mtd/mtd1");
 #endif
@@ -330,9 +332,9 @@ open_dev:
 #endif
 
     sleep(30);
-	
+
 #if (defined(BOARD_V1) || defined(BOARD_V2))
-	   ///////low mem kill
+    ///////low mem kill
     if(1)
     {
 
@@ -346,28 +348,28 @@ open_dev:
 
     ////////set cpu fre
 #endif
-	//cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_cur_freq 
-	
-	DUMP_BUILD_TIME;
+    //cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_cur_freq
+
+    DUMP_BUILD_TIME;
     DUMP_BUILD_TIME_FILE;
 
 #if (defined(BOARD_V1) || defined(BOARD_V2))
     lidbg("BOARD_V2\n");
 #elif defined(BOARD_V3)
-	lidbg("BOARD_V3\n");
+    lidbg("BOARD_V3\n");
 #endif
 
-if(access("/data/core.txt", R_OK) == 0)//NOTE: tmp.clear the history.del it later
+    if(access("/data/core.txt", R_OK) == 0)//NOTE: tmp.clear the history.del it later
         system("rm /data/*.txt");
 
     while(1)
     {
-		sleep(60);
-		//lidbg(".\n");
-		//system("chmod 777 /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
-		//system("echo 1008000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq");
-		//system("echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
-		//echo "userspace" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+        sleep(60);
+        //lidbg(".\n");
+        //system("chmod 777 /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
+        //system("echo 1008000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq");
+        //system("echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
+        //echo "userspace" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
         //echo 600000 > /sys/devices/system/cpu/cpufreq/ondemand/scaling_setspeed
         //sleep(10);
     }

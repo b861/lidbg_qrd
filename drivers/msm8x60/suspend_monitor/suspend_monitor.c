@@ -7,50 +7,50 @@
 #define LED_FLASH_FAST (500)
 #define LED_FLASH_SLOW (2000)
 
-char const*const BUTTON_FILE
-        = "/sys/class/leds/button-backlight/brightness";
+char const *const BUTTON_FILE
+    = "/sys/class/leds/button-backlight/brightness";
 int suspend_times = 0;
 int led_ctrl_en = 1;
 
 void led_ctrl(bool on)
 {
-	int len;
-	char buf[4];
-	len = sprintf(buf, "%d", on);
-	lidbg_readwrite_file(BUTTON_FILE, NULL, buf, len);
+    int len;
+    char buf[4];
+    len = sprintf(buf, "%d", on);
+    lidbg_readwrite_file(BUTTON_FILE, NULL, buf, len);
 }
 
 int sleep_time;
 void led_tigger(void)
 {
     static int status = 0;
-	status = status % 2;
-	if(led_ctrl_en)
-		led_ctrl(status);
-	if(status==1)
-		msleep(sleep_time/10);
-	else
-		msleep(sleep_time);
-	
-	status++;
+    status = status % 2;
+    if(led_ctrl_en)
+        led_ctrl(status);
+    if(status == 1)
+        msleep(sleep_time / 10);
+    else
+        msleep(sleep_time);
+
+    status++;
 }
 
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
 static void suspend_monitor_early_suspend(struct early_suspend *h)
 {
-       DUMP_FUN;
-	sleep_time = LED_FLASH_FAST;
-	led_ctrl_en = 0;
-	led_ctrl(1);
+    DUMP_FUN;
+    sleep_time = LED_FLASH_FAST;
+    led_ctrl_en = 0;
+    led_ctrl(1);
 }
 
 static void suspend_monitor_late_resume(struct early_suspend *h)
 {
-	DUMP_FUN;
-	sleep_time = LED_FLASH_SLOW;
-	led_ctrl(0);
-	led_ctrl_en = 1;
+    DUMP_FUN;
+    sleep_time = LED_FLASH_SLOW;
+    led_ctrl(0);
+    led_ctrl_en = 1;
 }
 
 #endif
@@ -59,17 +59,17 @@ static void suspend_monitor_late_resume(struct early_suspend *h)
 int thread_led(void *data)
 {
 #if 1
-	while(1)
-		led_tigger();
+    while(1)
+        led_tigger();
 #else
-	while(1)
-	{
-		if(led_ctrl_en)
-			led_ctrl(0);
-		msleep(500);
-	}
+    while(1)
+    {
+        if(led_ctrl_en)
+            led_ctrl(0);
+        msleep(500);
+    }
 #endif
-	return 0;
+    return 0;
 }
 
 
@@ -77,7 +77,7 @@ struct early_suspend early_suspend;
 static struct task_struct *led_task;
 static int  suspend_monitor_probe(struct platform_device *pdev)
 {
- 	DUMP_FUN_ENTER;
+    DUMP_FUN_ENTER;
 #ifdef CONFIG_HAS_EARLYSUSPEND
     early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN;
     early_suspend.suspend =  suspend_monitor_early_suspend;
@@ -86,7 +86,7 @@ static int  suspend_monitor_probe(struct platform_device *pdev)
 #endif
     fs_regist_state("suspend_times", &suspend_times);
 
-	sleep_time = LED_FLASH_SLOW;
+    sleep_time = LED_FLASH_SLOW;
     led_task = kthread_create(thread_led, NULL, "led_task");
     if(IS_ERR(led_task))
     {
@@ -108,7 +108,7 @@ static int  suspend_monitor_remove(struct platform_device *pdev)
 static int suspend_monitor_resume(struct device *dev)
 {
     DUMP_FUN_ENTER;
-	suspend_times ++;
+    suspend_times ++;
     led_ctrl(1);
     return 0;
 

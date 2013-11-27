@@ -18,10 +18,10 @@ struct fastboot_data
     int suspend_pending;
     u32 resume_count;
     struct mutex lock;
-	int kill_task_en;
-	int haslock_resume_times;
-	int max_wait_unlock_time;
-	int clk_block_suspend;
+    int kill_task_en;
+    int haslock_resume_times;
+    int max_wait_unlock_time;
+    int clk_block_suspend;
 #if defined(CONFIG_HAS_EARLYSUSPEND)
     struct wake_lock flywakelock;
     struct early_suspend early_suspend;
@@ -46,7 +46,7 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
     lidbg("1.-----------------------\n");
 
 #if 0
-if(ptasklist_lock != NULL)
+    if(ptasklist_lock != NULL)
     {
         lidbg("read_lock+\n");
         read_lock(ptasklist_lock);
@@ -55,7 +55,7 @@ if(ptasklist_lock != NULL)
 #endif
 
     lidbg(" before .spin_lock_irqsave-----------------------\n");
-	spin_lock_irqsave(&kill_lock, flags_kill);
+    spin_lock_irqsave(&kill_lock, flags_kill);
 
     for_each_process(p)
     {
@@ -89,20 +89,20 @@ if(ptasklist_lock != NULL)
             continue;
         }
 
-	struct string_dev *pos; 	
-	list_for_each_entry(pos, &fastboot_kill_list, tmp_list)
-	{
-		if(strncmp(p->comm, pos->yourkey, strlen(p->comm)) == 0)
-		{
-           		safe_flag = 1;
-			//lidbg("nokill:%s\n", pos->yourkey);
-            		break;
-        	}
-		else
-		{
-			//lidbg("kill:%s\n", pos->yourkey);
-		}
-	}
+        struct string_dev *pos;
+        list_for_each_entry(pos, &fastboot_kill_list, tmp_list)
+        {
+            if(strncmp(p->comm, pos->yourkey, strlen(p->comm)) == 0)
+            {
+                safe_flag = 1;
+                //lidbg("nokill:%s\n", pos->yourkey);
+                break;
+            }
+            else
+            {
+                //lidbg("kill:%s\n", pos->yourkey);
+            }
+        }
 
         if(safe_flag == 0)
         {
@@ -114,10 +114,10 @@ if(ptasklist_lock != NULL)
         }
     }//for_each_process
 
-  //  if(ptasklist_lock != NULL)
-     //   read_unlock(ptasklist_lock);
-   // else
-        spin_unlock_irqrestore(&kill_lock, flags_kill);
+    //  if(ptasklist_lock != NULL)
+    //   read_unlock(ptasklist_lock);
+    // else
+    spin_unlock_irqrestore(&kill_lock, flags_kill);
 
     lidbg("-----------------------\n\n");
 
@@ -139,7 +139,7 @@ if(ptasklist_lock != NULL)
 int kill_proc(char *buf, char **start, off_t offset, int count, int *eof, void *data )
 {
 
-	fastboot_task_kill_exclude(NULL);
+    fastboot_task_kill_exclude(NULL);
     return 1;
 }
 
@@ -150,10 +150,10 @@ void create_new_proc_entry(void)
 
 int pwroff_proc(char *buf, char **start, off_t offset, int count, int *eof, void *data )
 {
-	DUMP_FUN_ENTER;
-   // if(PM_STATUS_LATE_RESUME_OK == fastboot_get_status())
-        fastboot_pwroff();
-       //list_active_locks();
+    DUMP_FUN_ENTER;
+    // if(PM_STATUS_LATE_RESUME_OK == fastboot_get_status())
+    fastboot_pwroff();
+    //list_active_locks();
     return 0;
 }
 
@@ -185,8 +185,8 @@ void fastboot_pwroff(void)
     //    fastboot_task_kill_select("vold");
 
 #if 1//def FLY_DEBUG
-	fastboot_task_kill_exclude(NULL);
-	msleep(1000);
+    fastboot_task_kill_exclude(NULL);
+    msleep(1000);
 
 #ifdef RUN_FASTBOOT
     lidbg("before SOC_Key_Report \n");
@@ -209,8 +209,8 @@ static int fastboot_suspend(struct device *dev)
 
 static int fastboot_resume(struct device *dev)
 {
-	lidbg("fastboot_resume:%d\n", ++fb_data->resume_count);
-	return 0;
+    lidbg("fastboot_resume:%d\n", ++fb_data->resume_count);
+    return 0;
 }
 #endif
 
@@ -219,12 +219,12 @@ static int fastboot_resume(struct device *dev)
 static void fastboot_early_suspend(struct early_suspend *h)
 {
 
-	lidbg("fastboot_early_suspend:%d\n", fb_data->resume_count);	
+    lidbg("fastboot_early_suspend:%d\n", fb_data->resume_count);
 
-	fastboot_task_kill_exclude(NULL);
-	msleep(1000);
-	
-	//complete(&suspend_start);
+    fastboot_task_kill_exclude(NULL);
+    msleep(1000);
+
+    //complete(&suspend_start);
 }
 
 static void fastboot_late_resume(struct early_suspend *h)
@@ -248,40 +248,40 @@ static int  fastboot_remove(struct platform_device *pdev)
 
 static int  fastboot_probe(struct platform_device *pdev)
 {
-	int ret;
-	DUMP_FUN_ENTER;
+    int ret;
+    DUMP_FUN_ENTER;
 
-	fb_data = kmalloc(sizeof(struct fastboot_data), GFP_KERNEL);
-	if (!fb_data)
-	{
-		ret = -ENODEV;
-		goto fail_mem;
-	}
-	fb_data->resume_count = 0;
+    fb_data = kmalloc(sizeof(struct fastboot_data), GFP_KERNEL);
+    if (!fb_data)
+    {
+        ret = -ENODEV;
+        goto fail_mem;
+    }
+    fb_data->resume_count = 0;
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
-	fb_data->early_suspend.level = EARLY_SUSPEND_LEVEL_DISABLE_FB + 5; //the later the better
-	fb_data->early_suspend.suspend = fastboot_early_suspend;
-	fb_data->early_suspend.resume = fastboot_late_resume;
-	register_early_suspend(&fb_data->early_suspend);
+    fb_data->early_suspend.level = EARLY_SUSPEND_LEVEL_DISABLE_FB + 5; //the later the better
+    fb_data->early_suspend.suspend = fastboot_early_suspend;
+    fb_data->early_suspend.resume = fastboot_late_resume;
+    register_early_suspend(&fb_data->early_suspend);
 #endif
 
-	spin_lock_init(&kill_lock);
+    spin_lock_init(&kill_lock);
 
-	create_new_proc_entry();
-        create_new_proc_entry2();
+    create_new_proc_entry();
+    create_new_proc_entry2();
 
-	if(fs_fill_list("/mnt/sdcard/out/fastboot_not_kill_list.conf", FS_CMD_FILE_LISTMODE, &fastboot_kill_list)<0)
-		fs_fill_list("/system/lib/modules/out/fastboot_not_kill_list.conf", FS_CMD_FILE_LISTMODE, &fastboot_kill_list);
-	DUMP_FUN_LEAVE;
-	lidbg("fastboot_early_suspend:%d\n", fb_data->resume_count);	
+    if(fs_fill_list("/mnt/sdcard/out/fastboot_not_kill_list.conf", FS_CMD_FILE_LISTMODE, &fastboot_kill_list) < 0)
+        fs_fill_list("/system/lib/modules/out/fastboot_not_kill_list.conf", FS_CMD_FILE_LISTMODE, &fastboot_kill_list);
+    DUMP_FUN_LEAVE;
+    lidbg("fastboot_early_suspend:%d\n", fb_data->resume_count);
 
 
-	return 0;
+    return 0;
 
 
 fail_mem:
-	return ret;
+    return ret;
 }
 
 static struct dev_pm_ops fastboot_pm_ops =
@@ -291,45 +291,45 @@ static struct dev_pm_ops fastboot_pm_ops =
 };
 
 
-static struct platform_driver fastboot_driver=
+static struct platform_driver fastboot_driver =
 {
-	.probe                = fastboot_probe,
-	.remove             = fastboot_remove,
-	.driver                ={
-		.name = "lidbg_fastboot",
-		.owner = THIS_MODULE,
+    .probe                = fastboot_probe,
+    .remove             = fastboot_remove,
+    .driver                = {
+        .name = "lidbg_fastboot",
+        .owner = THIS_MODULE,
 #ifdef CONFIG_PM
-       		.pm = &fastboot_pm_ops,
+        .pm = &fastboot_pm_ops,
 #endif
-	},
+    },
 };
 
 
-static struct platform_device lidbg_fastboot_device=
+static struct platform_device lidbg_fastboot_device =
 {
-	.name               = "lidbg_fastboot",
-	.id                     = -1,
+    .name               = "lidbg_fastboot",
+    .id                     = -1,
 };
 
 
 
 static int __init fastboot_init(void)
 {
-	int ret;
+    int ret;
 
-	LIDBG_GET;
-	set_func_tbl();
+    LIDBG_GET;
+    set_func_tbl();
 
 
-	platform_device_register(&lidbg_fastboot_device);
-	ret = platform_driver_register(&fastboot_driver);
+    platform_device_register(&lidbg_fastboot_device);
+    ret = platform_driver_register(&fastboot_driver);
 
-	return ret;
+    return ret;
 }
 
 static void __exit fastboot_exit(void)
 {
-	platform_driver_unregister(&fastboot_driver);
+    platform_driver_unregister(&fastboot_driver);
 }
 
 

@@ -24,7 +24,7 @@
 
 #define GOODIX_I2C_NAME "ft5x06_ts"
 #define GUITAR_SMALL
-//触摸屏的分辨率
+//???????
 //#define TOUCH_MAX_HEIGHT 	7680
 //#define TOUCH_MAX_WIDTH	 	5120
 #define TOUCH_MAX_HEIGHT 	5120
@@ -33,7 +33,7 @@
 
 
 
-//显示屏的分辨率
+//???????
 #define SCREEN_MAX_HEIGHT	480//480				
 #define SCREEN_MAX_WIDTH	800//272
 
@@ -52,7 +52,7 @@
 //#define  INT_PORT  	S3C64XX_GPL(10)			//Int IO port
 //#define TS_INT 		gpio_to_irq(INT_PORT)		//Interrupt Number,EINT18 as 119
 
-//#define 	SHUTDOWN_PORT S3C64XX_GPF(3)	//SHUTDOWN管脚号
+//#define 	SHUTDOWN_PORT S3C64XX_GPF(3)	//SHUTDOWN???
 //#define  INT_CFG    	S3C_GPIO_SFN(3)		//IO configer,EINT type
 
 #define MAX_FINGER_NUM	5
@@ -84,8 +84,8 @@ struct goodix_ts_data
 struct goodix_i2c_rmi_platform_data
 {
     uint32_t version;	/* Use this entry for panels with */
-    //该结构体用于管理设备平台资源
-    //预留，用于之后的功能扩展
+    //??????????????
+    //??,?????????
 
 };
 

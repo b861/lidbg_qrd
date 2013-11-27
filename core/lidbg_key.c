@@ -63,7 +63,7 @@ int lidbg_key_init(void)
 
 
     __set_bit(EV_KEY, input->evbit);
-//屏蔽物理键盘.SKUD.futengfei
+    //??????.SKUD.futengfei
 #if 0//(defined(BOARD_V1) || defined(BOARD_V2))
     for (i = 1; i < KEY_MAX; i++)
     {
@@ -74,7 +74,7 @@ int lidbg_key_init(void)
     {
         input_set_capability(input, EV_KEY, lidbg_keycode[i] & KEY_MAX);
     }
- #endif
+#endif
 
     //clear_bit(KEY_RESERVED, zlgkpd->input->keybit);
 

@@ -8,13 +8,13 @@ struct fly_smem *p_fly_smem = NULL;
 
 int soc_temp_get(void)
 {
-	return SMEM_TEMP;
+    return SMEM_TEMP;
 }
 
 
 int msm8x25_init(void)
 {
-	DUMP_BUILD_TIME;//LIDBG_MODULE_LOG;
+    DUMP_BUILD_TIME;//LIDBG_MODULE_LOG;
 
     lidbg( "smem_alloc id = %d\n", SMEM_ID_VENDOR0);
     p_fly_smem = (struct fly_smem *)smem_alloc(SMEM_ID_VENDOR0, sizeof(struct fly_smem));
@@ -23,17 +23,17 @@ int msm8x25_init(void)
     {
         lidbg( "smem_alloc fail,kmalloc mem!\n");
         p_fly_smem = (struct fly_smem *)kmalloc(sizeof(struct fly_smem), GFP_KERNEL);
-		if(p_fly_smem == NULL)
-	    {
-	        LIDBG_ERR("<err.register_wakelock:kzalloc.name>\n");
-	    }
+        if(p_fly_smem == NULL)
+        {
+            LIDBG_ERR("<err.register_wakelock:kzalloc.name>\n");
+        }
         memset(p_fly_smem, 0, sizeof(struct fly_smem));
     }
-	
+
     soc_bl_init();
     soc_io_init();
     soc_ad_init();
-	
+
     return 0;
 }
 

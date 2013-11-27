@@ -95,9 +95,9 @@ static struct i2c_driver legacy_i2c_driver =
 
     */
     .attach_adapter = legacy_i2c_attach,
-     .detach_client  = legacy_i2c_detach,
-      .command =        NULL,
-   };
+    .detach_client  = legacy_i2c_detach,
+    .command =        NULL,
+};
 
 
 

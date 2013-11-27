@@ -1,18 +1,18 @@
 /* drivers/input/touchscreen/gt813_827_828.h
- * 
+ *
  * 2010 - 2012 Goodix Technology.
- * 
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be a reference 
- * to you, when you are integrating the GOODiX's CTP IC into your system, 
- * but WITHOUT ANY WARRANTY; without even the implied warranty of 
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU 
+ *
+ * This program is distributed in the hope that it will be a reference
+ * to you, when you are integrating the GOODiX's CTP IC into your system,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
- * 
+ *
  * Version:1.0
  *      V1.0:2012/08/31,first release.
  */
@@ -48,8 +48,9 @@
 #include <linux/module.h>
 #include <linux/spinlock.h>
 
-struct goodix_ts_data 
-    {spinlock_t irq_lock;
+struct goodix_ts_data
+{
+    spinlock_t irq_lock;
     struct i2c_client *client;
     struct input_dev  *input_dev;
     struct hrtimer timer;
@@ -74,7 +75,7 @@ extern u16 total_len;
 
 //***************************PART1:ON/OFF define*******************************
 #define GTP_CUSTOM_CFG        0
-#define GTP_DRIVER_SEND_CFG   1 
+#define GTP_DRIVER_SEND_CFG   1
 #define GTP_HAVE_TOUCH_KEY    0
 #define GTP_POWER_CTRL_SLEEP  1
 #define GTP_AUTO_UPDATE       0
@@ -83,7 +84,7 @@ extern u16 total_len;
 #define GTP_CREATE_WR_NODE    1
 #ifdef BOARD_V2
 #define GTP_ICS_SLOT_REPORT   0
-	
+
 #else
 #define GTP_ICS_SLOT_REPORT   1
 #endif
@@ -96,7 +97,7 @@ extern u16 total_len;
 
 //***************************PART2:TODO define**********************************
 //STEP_1(REQUIRED):Change config table.
-/*TODO: puts the config info corresponded to your TP here, the following is just 
+/*TODO: puts the config info corresponded to your TP here, the following is just
 a sample config, send this config should cause the chip cannot work normally*/
 //default or float
 //#define CTP_CFG_GROUP1      {0x42,0xE0,0x01,0x20,0x03,0x05,0x11,0x01,0x02,0x08,0x19,0x00,0x50,0x28,0x03,0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x90,0x00,0x0A,0x48,0x00,0xF3,0x0D,0x00,0x00,0x00,0x9A,0x02,0x2D,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x32,0x96,0x94,0x85,0x42,0x08,0x00,0x00,0xC1,0x11,0x1A,0xB3,0x15,0x1C,0xE6,0x1B,0x1C,0x0B,0x1E,0x1E,0x8D,0x20,0x21,0x00,0x00,0x10,0x28,0x48,0x00,0x5F,0x50,0x30,0xFF,0xFF,0x06,0x00,0x00,0x00,0x00,0x00,0x00,0x1C,0x96,0x64,0x0F,0x00,0x00,0x02,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x08,0x0A,0x0C,0x0E,0x10,0x12,0x14,0x16,0x18,0x1A,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x02,0x04,0x05,0x06,0x08,0x0A,0x0C,0x1D,0x1E,0x1F,0x20,0x22,0x24,0x28,0x29,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x14,0x1E,0x28,0x28,0x32,0x3C,0x3C,0x3C,0x50,0x50,0x50,0x32,0x50,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xDB,0x01}
@@ -125,7 +126,7 @@ a sample config, send this config should cause the chip cannot work normally*/
 
 #define GTP_GPIO_AS_INPUT(pin)          do{\
                                             gpio_tlmm_config(GPIO_CFG(pin, 0, GPIO_CFG_INPUT, GPIO_CFG_NO_PULL, GPIO_CFG_8MA), GPIO_CFG_ENABLE);\
-                                            gpio_direction_input(pin);\						
+                                            gpio_direction_input(pin);\
                                         }while(0)
 /*#define GTP_GPIO_AS_INT(pin)            do{\
                                             GTP_GPIO_AS_INPUT(pin);\
@@ -139,20 +140,20 @@ a sample config, send this config should cause the chip cannot work normally*/
 
 //STEP_3(optional):Custom set some config by themself,if need.
 #if GTP_CUSTOM_CFG
-  #define GTP_MAX_HEIGHT   800
-  #define GTP_MAX_WIDTH    480
-  #define GTP_INT_TRIGGER  0    //0:Rising 1:Falling
+#define GTP_MAX_HEIGHT   800
+#define GTP_MAX_WIDTH    480
+#define GTP_INT_TRIGGER  0    //0:Rising 1:Falling
 #else
-  #define GTP_MAX_HEIGHT   4096
-  #define GTP_MAX_WIDTH    4096
-  #define GTP_INT_TRIGGER  1
+#define GTP_MAX_HEIGHT   4096
+#define GTP_MAX_WIDTH    4096
+#define GTP_INT_TRIGGER  1
 #endif
 #define GTP_MAX_TOUCH         5
 #define GTP_ESD_CHECK_CIRCLE  2000
 
-//STEP_4(optional):If this project have touch key,Set touch key config.                                    
+//STEP_4(optional):If this project have touch key,Set touch key config.
 #if GTP_HAVE_TOUCH_KEY
-    #define GTP_KEY_TAB	 {KEY_MENU, KEY_HOME, KEY_BACK, KEY_SEND}
+#define GTP_KEY_TAB	 {KEY_MENU, KEY_HOME, KEY_BACK, KEY_SEND}
 #endif
 
 //***************************PART3:OTHER define*********************************

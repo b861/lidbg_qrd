@@ -6,10 +6,10 @@
  * Date:	2010.9.15
  */
 
-/* 用于管理手指序列的伪队列操作函数，
- * 适用于Goodix的Guitar小屏驱动
- * 调整手指上报顺序以避免出现手指ID交换现象
- * 在大屏驱动中，该功能将被调整
+/* ????????????????,
+ * ???Goodix?Guitar????
+ * ???????????????ID????
+ * ??????,???????
  */
 #ifndef _LINUX_GOODIX_QUEUE_H
 #define	_LINUX_GOODIX_QUEUE_H
@@ -29,9 +29,9 @@ struct point_queue
 
 
 /*******************************************************
-功能：
-	删除手指队列中松键的手指
-参数：
+??:
+	????????????
+??:
 	point_list
 ********************************************************/
 static void del_point(struct point_queue *point_list)
@@ -45,19 +45,19 @@ static void del_point(struct point_queue *point_list)
                 return ;
             position = count;
             for(; position < MAX_FINGER_NUM - 1; position++)
-                point_list->pointer[position] = point_list->pointer[position+1];
+                point_list->pointer[position] = point_list->pointer[position + 1];
             point_list->length--;
         }
 }
 
 /*******************************************************
-功能：
-	在队列尾中加入新增的手指
-参数：
+??:
+	????????????
+??:
 	point_list
-	num：手指标号
-return：
-	是否成功增加手指
+	num:????
+return:
+	????????
 ********************************************************/
 static int add_point(struct point_queue *point_list, int num)
 {
@@ -71,13 +71,13 @@ static int add_point(struct point_queue *point_list, int num)
 
 //
 /*******************************************************
-功能：
-	查找松键的手指并设置标志位为FLAG_UP
-参数：
+??:
+	??????????????FLAG_UP
+??:
 	point_list
-	num：手指标号
-return：
-	是否成功设置手指标志位
+	num:????
+return:
+	???????????
 ********************************************************/
 static int set_up_point(struct point_queue *point_list, int num)
 {

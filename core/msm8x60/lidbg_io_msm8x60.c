@@ -107,7 +107,7 @@ free_gpio:
 }
 
 
-int soc_io_output(u32 group,u32 index, bool status)
+int soc_io_output(u32 group, u32 index, bool status)
 {
 
     gpio_set_value(index, status);

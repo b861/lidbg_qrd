@@ -14,18 +14,18 @@ int SOC_Get_CpuFreq(void);
 
 char *insmod_list[] =
 {
-	 "lidbg_lpc.ko",
+    "lidbg_lpc.ko",
 #if (defined(BOARD_V2)||defined(BOARD_V3))
-        "lidbg_fastboot.ko",
+    "lidbg_fastboot.ko",
 #else
-	"lidbg_acc.ko",
+    "lidbg_acc.ko",
 #endif
-	"lidbg_devices.ko",
-	"lidbg_bpmsg.ko",
-	"lidbg_gps.ko",
-	"lidbg_videoin.ko",
-	"lidbg_ts_probe.ko",
-	NULL,
+    "lidbg_devices.ko",
+    "lidbg_bpmsg.ko",
+    "lidbg_gps.ko",
+    "lidbg_videoin.ko",
+    "lidbg_ts_probe.ko",
+    NULL,
 };
 
 char *insmod_path[] =
@@ -38,8 +38,8 @@ char *insmod_path[] =
 void hal_func_tbl_default(void)
 {
     lidbgerr("hal_func_tbl_default:this func not ready!\n");
-	//print who call this
-	dump_stack();
+    //print who call this
+    dump_stack();
 
 }
 void file_check(void)
@@ -61,35 +61,35 @@ void file_check(void)
 }
 int soc_thread(void *data)
 {
-	int i,j;
-	char path[100];
+    int i, j;
+    char path[100];
 #if (defined(BOARD_V1) || defined(BOARD_V2))
-	lidbg_readwrite_file("/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq", NULL, "600000", sizeof("600000")-1);
+    lidbg_readwrite_file("/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq", NULL, "600000", sizeof("600000") - 1);
 #else
-	lidbg_readwrite_file("/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq", NULL, "700800", sizeof("700800")-1);
+    lidbg_readwrite_file("/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq", NULL, "700800", sizeof("700800") - 1);
 #endif
-	SOC_Get_CpuFreq();
-	file_check();
+    SOC_Get_CpuFreq();
+    file_check();
 
-	for(i=0;insmod_path[i]!=NULL;i++)	
-	{
-		for(j=0;insmod_list[j]!=NULL;j++)
-		{
-			sprintf(path, "%s%s", insmod_path[i],insmod_list[j]);
-			//lidbg("load %s\n",path);
-			lidbg_insmod(path);
-			msleep(100);
-		}
-	}
+    for(i = 0; insmod_path[i] != NULL; i++)
+    {
+        for(j = 0; insmod_list[j] != NULL; j++)
+        {
+            sprintf(path, "%s%s", insmod_path[i], insmod_list[j]);
+            //lidbg("load %s\n",path);
+            lidbg_insmod(path);
+            msleep(100);
+        }
+    }
 
 #if (defined(BOARD_V1) || defined(BOARD_V2)  || defined(BOARD_V4))
 
 #else
-		msleep(1000);
-		if(lidbg_exe("/flysystem/lib/out/lidbg_servicer",NULL,NULL,NULL,NULL,NULL,NULL) < 0)
-			lidbg_exe("/system/lib/modules/out/lidbg_servicer",NULL,NULL,NULL,NULL,NULL,NULL);
+    msleep(1000);
+    if(lidbg_exe("/flysystem/lib/out/lidbg_servicer", NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        lidbg_exe("/system/lib/modules/out/lidbg_servicer", NULL, NULL, NULL, NULL, NULL, NULL);
 #endif
-	return 0;
+    return 0;
 }
 
 
@@ -228,11 +228,11 @@ int SOC_BL_Set( u32 bl_level)
 void SOC_LCD_Reset(void)
 {
 #if 0
-	SOC_BL_Set(PWM_BL_MIN);
-	msleep(20);// bp loop time
-	LCD_RESET;
-	msleep(20);//wait lcd ready
-	SOC_BL_Set(PWM_BL_MAX);
+    SOC_BL_Set(PWM_BL_MIN);
+    msleep(20);// bp loop time
+    LCD_RESET;
+    msleep(20);//wait lcd ready
+    SOC_BL_Set(PWM_BL_MAX);
 #endif
 }
 
@@ -251,68 +251,68 @@ int SOC_Display_Get_Res(u32 *screen_x, u32 *screen_y)
 
 void SOC_Mic_Enable( bool enable)
 {}
-	//I2c_Rate	 i2c_api_set_rate(int  bus_id, int rate)
-	//int (*pfnSOC_I2C_Set_Rate)(int  bus_id, int rate);
+//I2c_Rate	 i2c_api_set_rate(int  bus_id, int rate)
+//int (*pfnSOC_I2C_Set_Rate)(int  bus_id, int rate);
 int SOC_I2C_Set_Rate(int  bus_id, int rate)
 {
-	return		 i2c_api_set_rate(bus_id, rate);
+    return		 i2c_api_set_rate(bus_id, rate);
 }
 
 void SOC_IO_Uart_Cfg(u32 baud)
 {
-	soc_io_uart_cfg(baud);
+    soc_io_uart_cfg(baud);
 }
 
-void SOC_IO_Uart_Send( u32 baud,const char *fmt, ... )
+void SOC_IO_Uart_Send( u32 baud, const char *fmt, ... )
 {
-	va_list args;
-	int n;
-	char printbuffer[256];
+    va_list args;
+    int n;
+    char printbuffer[256];
 
-	va_start ( args, fmt );
+    va_start ( args, fmt );
     n = vsprintf ( printbuffer, (const char *)fmt, args );
     va_end ( args );
-	soc_io_uart_send(baud,(unsigned char *)printbuffer);
+    soc_io_uart_send(baud, (unsigned char *)printbuffer);
 
 }
 
 
-struct fly_smem* SOC_Get_Share_Mem(void)
+struct fly_smem *SOC_Get_Share_Mem(void)
 {
-	return p_fly_smem;
+    return p_fly_smem;
 }
 
 
 void SOC_System_Status(FLY_SYSTEM_STATUS status)
 {
-	lidbg("SOC_System_Status=%d\n",status);
-	g_var.system_status = status;
-	
-	lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE,g_var.system_status));
+    lidbg("SOC_System_Status=%d\n", status);
+    g_var.system_status = status;
+
+    lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, g_var.system_status));
 #if 0
-	if(g_var.system_status == FLY_ACC_OFF)
-	{
-		// stop gps i2c read
-		lidbg_readwrite_file("/sys/module/lidbg_gps/parameters/work_en", NULL, "0", sizeof("0")-1);
-	}
-	else if(g_var.system_status == FLY_ACC_ON)
-	{
-		lidbg_readwrite_file("/sys/module/lidbg_gps/parameters/work_en", NULL, "1", sizeof("1")-1);
-	}
+    if(g_var.system_status == FLY_ACC_OFF)
+    {
+        // stop gps i2c read
+        lidbg_readwrite_file("/sys/module/lidbg_gps/parameters/work_en", NULL, "0", sizeof("0") - 1);
+    }
+    else if(g_var.system_status == FLY_ACC_ON)
+    {
+        lidbg_readwrite_file("/sys/module/lidbg_gps/parameters/work_en", NULL, "1", sizeof("1") - 1);
+    }
 #endif
 }
 
 
 int SOC_Get_CpuFreq(void)
 {
-	char buf[16];
-	int cpu_freq;
-	lidbg_readwrite_file("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_cur_freq", buf,NULL, 16);
-	cpu_freq = simple_strtoul(buf, 0, 0);
-	g_var.cpu_freq = cpu_freq;
-	lidbg("cpufreq=%d\n",cpu_freq);
-	
-	return cpu_freq;
+    char buf[16];
+    int cpu_freq;
+    lidbg_readwrite_file("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_cur_freq", buf, NULL, 16);
+    cpu_freq = simple_strtoul(buf, 0, 0);
+    g_var.cpu_freq = cpu_freq;
+    lidbg("cpufreq=%d\n", cpu_freq);
+
+    return cpu_freq;
 }
 
 
@@ -325,16 +325,16 @@ static void set_func_tbl(void)
     plidbg_dev->soc_func_tbl.pfnSOC_IO_Input = SOC_IO_Input;
     plidbg_dev->soc_func_tbl.pfnSOC_IO_Output_Ext = SOC_IO_Output_Ext;
     plidbg_dev->soc_func_tbl.pfnSOC_IO_Config = SOC_IO_Config;
-  
+
     //i2c
     plidbg_dev->soc_func_tbl.pfnSOC_I2C_Send = SOC_I2C_Send;
     plidbg_dev->soc_func_tbl.pfnSOC_I2C_Rec = SOC_I2C_Rec;
     plidbg_dev->soc_func_tbl.pfnSOC_I2C_Rec_Simple = SOC_I2C_Rec_Simple;
-	//add by huangzongqiang	SOC_I2C_Rec_2B_SubAddr(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size)
-	plidbg_dev->soc_func_tbl.pfnSOC_I2C_Rec_2B_SubAddr=SOC_I2C_Rec_2B_SubAddr;
-	//I2c_Rate	 i2c_api_set_rate(int  bus_id, int rate)
-	//int (*pfnSOC_I2C_Set_Rate)(int  bus_id, int rate);
-	plidbg_dev->soc_func_tbl.pfnSOC_I2C_Set_Rate=SOC_I2C_Set_Rate;
+    //add by huangzongqiang	SOC_I2C_Rec_2B_SubAddr(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size)
+    plidbg_dev->soc_func_tbl.pfnSOC_I2C_Rec_2B_SubAddr = SOC_I2C_Rec_2B_SubAddr;
+    //I2c_Rate	 i2c_api_set_rate(int  bus_id, int rate)
+    //int (*pfnSOC_I2C_Set_Rate)(int  bus_id, int rate);
+    plidbg_dev->soc_func_tbl.pfnSOC_I2C_Set_Rate = SOC_I2C_Set_Rate;
     plidbg_dev->soc_func_tbl.pfnSOC_I2C_Rec_SAF7741 = SOC_I2C_Rec_SAF7741;
     plidbg_dev->soc_func_tbl.pfnSOC_I2C_Send_TEF7000 = SOC_I2C_Send_TEF7000;
     plidbg_dev->soc_func_tbl.pfnSOC_I2C_Rec_TEF7000 = SOC_I2C_Rec_TEF7000;
@@ -364,18 +364,18 @@ static void set_func_tbl(void)
     //mic
     plidbg_dev->soc_func_tbl.pfnSOC_Mic_Enable = SOC_Mic_Enable;
 
-   // uart
+    // uart
     plidbg_dev->soc_func_tbl.pfnSOC_IO_Uart_Send = SOC_IO_Uart_Send;
 
-   plidbg_dev->soc_func_tbl.pfnSOC_Get_Share_Mem = SOC_Get_Share_Mem;
-   plidbg_dev->soc_func_tbl.pfnSOC_System_Status = SOC_System_Status;
-   
-   plidbg_dev->soc_func_tbl.pfnSOC_Get_CpuFreq = SOC_Get_CpuFreq;
+    plidbg_dev->soc_func_tbl.pfnSOC_Get_Share_Mem = SOC_Get_Share_Mem;
+    plidbg_dev->soc_func_tbl.pfnSOC_System_Status = SOC_System_Status;
 
-   plidbg_dev->soc_func_tbl.pfnSOC_LCD_Reset = SOC_LCD_Reset;
-   
-   plidbg_dev->soc_func_tbl.pfnSOC_WakeLock_Stat = lidbg_wakelock_register;
-   
+    plidbg_dev->soc_func_tbl.pfnSOC_Get_CpuFreq = SOC_Get_CpuFreq;
+
+    plidbg_dev->soc_func_tbl.pfnSOC_LCD_Reset = SOC_LCD_Reset;
+
+    plidbg_dev->soc_func_tbl.pfnSOC_WakeLock_Stat = lidbg_wakelock_register;
+
 }
 
 int hal_open(struct inode *inode, struct file *filp)
@@ -390,12 +390,12 @@ int hal_release(struct inode *inode, struct file *filp)
 
 
 ssize_t hal_read(struct file *filp, char __user *buf, size_t size,
-                          loff_t *ppos)
+                 loff_t *ppos)
 {
     unsigned int count = 4;
     int ret = 0;
-	u32 read_value = 0;
-	read_value = (u32)plidbg_dev;
+    u32 read_value = 0;
+    read_value = (u32)plidbg_dev;
 
     lidbg("hal_read:read_value=%x,read_count=%d\n", (u32)read_value, count);
     if (copy_to_user(buf, &read_value, count))
@@ -413,16 +413,16 @@ ssize_t hal_read(struct file *filp, char __user *buf, size_t size,
 
 #include "cmd.c"
 static ssize_t hal_write(struct file *filp, const char __user *buf,
-                           size_t size, loff_t *ppos)
+                         size_t size, loff_t *ppos)
 {
-	char cmd_buf[512];
+    char cmd_buf[512];
     memset(cmd_buf, '\0', 512);
 
     if(copy_from_user(cmd_buf, buf, size))
     {
         lidbg("copy_from_user ERR\n");
-	}
-	parse_cmd(cmd_buf);
+    }
+    parse_cmd(cmd_buf);
     return size;
 }
 
@@ -449,33 +449,33 @@ static struct miscdevice misc =
 
 int fly_hal_init(void)
 {
-	int ret;
-	DUMP_BUILD_TIME;
-	ret = misc_register(&misc);
+    int ret;
+    DUMP_BUILD_TIME;
+    ret = misc_register(&misc);
 
-	plidbg_dev = kmalloc(sizeof(struct lidbg_hal), GFP_KERNEL);
-	if (plidbg_dev == NULL)
-	{
-		
-		LIDBG_ERR("kmalloc.\n");		
-		return 0;
-	}
-	{
-		int i;
-		for(i = 0; i < sizeof(plidbg_dev->soc_func_tbl) / 4; i++)
-		{
-			((int *)&(plidbg_dev->soc_func_tbl))[i] = hal_func_tbl_default;
+    plidbg_dev = kmalloc(sizeof(struct lidbg_hal), GFP_KERNEL);
+    if (plidbg_dev == NULL)
+    {
 
-		}
-	}
-	memset(&(plidbg_dev->soc_pvar_tbl), (int)NULL, sizeof(struct lidbg_pvar_t));
+        LIDBG_ERR("kmalloc.\n");
+        return 0;
+    }
+    {
+        int i;
+        for(i = 0; i < sizeof(plidbg_dev->soc_func_tbl) / 4; i++)
+        {
+            ((int *) & (plidbg_dev->soc_func_tbl))[i] = hal_func_tbl_default;
 
-	set_func_tbl();
-	
-	g_var.temp = 0;
-	g_var.system_status = FLY_ACC_ON;
-	g_var.machine_id = get_machine_id();
-		
+        }
+    }
+    memset(&(plidbg_dev->soc_pvar_tbl), (int)NULL, sizeof(struct lidbg_pvar_t));
+
+    set_func_tbl();
+
+    g_var.temp = 0;
+    g_var.system_status = FLY_ACC_ON;
+    g_var.machine_id = get_machine_id();
+
     soc_task = kthread_create(soc_thread, NULL, "lidbg_soc_thread");
     if(IS_ERR(soc_task))
     {
@@ -484,11 +484,11 @@ int fly_hal_init(void)
     }
     else wake_up_process(soc_task);
 
-	if(fs_is_file_exist(HAL_SO))
-	{
-		printk("=======is product=====\n");
-		g_var.is_fly = true;
-	}
+    if(fs_is_file_exist(HAL_SO))
+    {
+        printk("=======is product=====\n");
+        g_var.is_fly = true;
+    }
 
     lidbg_chmod("/dev/lidbg_hal");
     return 0;

@@ -80,7 +80,7 @@ struct lidbg_fn_t_share
     //cmm
     int  (*pfncmn_launch_user)(char bin_path[], char argv1[]);
 
-        //i2c-gpio
+    //i2c-gpio
     void (*pfnsoc_i2c_gpio_config)(struct platform_device *pdev);
 
 

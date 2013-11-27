@@ -9,7 +9,7 @@ typedef enum
     PM_STATUS_LATE_RESUME_OK,
     PM_STATUS_READY_TO_PWROFF,
     PM_STATUS_READY_TO_FAKE_PWROFF,
-    
+
 } LIDBG_FAST_PWROFF_STATUS;
 
 typedef enum

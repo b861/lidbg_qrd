@@ -13,9 +13,9 @@ smem_log_deep *smem_log_temp = NULL;
 
 int thread_bp_msg(void *data)
 {
-	int bp_msg_en;	
-	FS_REGISTER_INT(bp_msg_en,"bp_msg_en",1,NULL);
-	
+    int bp_msg_en;
+    FS_REGISTER_INT(bp_msg_en, "bp_msg_en", 1, NULL);
+
     smem_log_temp->write_flag = 1;
 
     while(1)

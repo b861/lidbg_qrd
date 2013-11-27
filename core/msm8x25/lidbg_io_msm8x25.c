@@ -99,14 +99,14 @@ int soc_io_config(u32 index, bool direction, u32 pull, u32 drive_strength, bool 
         }
 
         if(direction == GPIO_CFG_INPUT)
-    	{
-		    err = gpio_direction_input(index);
-		    if (err)
-		    {
-		        lidbg("gpio_direction_set failed\n");
-		        goto free_gpio;
-		    }
-		}
+        {
+            err = gpio_direction_input(index);
+            if (err)
+            {
+                lidbg("gpio_direction_set failed\n");
+                goto free_gpio;
+            }
+        }
         soc_io_config_log[index] = 1;
 
         return 1;
@@ -119,9 +119,9 @@ free_gpio:
 }
 
 
-int soc_io_output(u32 group,u32 index, bool status)
+int soc_io_output(u32 group, u32 index, bool status)
 {
-	gpio_direction_output(index, status);
+    gpio_direction_output(index, status);
     gpio_set_value(index, status);
     return 1;
 

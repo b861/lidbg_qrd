@@ -8,28 +8,28 @@ struct fly_smem *p_fly_smem = NULL;
 
 int soc_temp_get(void)
 {
-	return SMEM_TEMP;
+    return SMEM_TEMP;
 }
 
 
 int msm8x25_init(void)
 {
     DUMP_FUN;
-/*
-    lidbg( "smem_alloc id = %d\n", SMEM_ID_VENDOR0);
-    p_fly_smem = (struct fly_smem *)smem_alloc(SMEM_ID_VENDOR0, sizeof(struct fly_smem));
+    /*
+        lidbg( "smem_alloc id = %d\n", SMEM_ID_VENDOR0);
+        p_fly_smem = (struct fly_smem *)smem_alloc(SMEM_ID_VENDOR0, sizeof(struct fly_smem));
 
-    if (p_fly_smem == NULL)
-    {
-        lidbg( "smem_alloc fail,kmalloc mem!\n");
-        p_fly_smem = (struct fly_smem *)kmalloc(sizeof(struct fly_smem), GFP_KERNEL);
-        memset(p_fly_smem, 0, sizeof(struct fly_smem));
-    }
-	
-    soc_bl_init();
-    soc_io_init();
-    soc_ad_init();
-*/
+        if (p_fly_smem == NULL)
+        {
+            lidbg( "smem_alloc fail,kmalloc mem!\n");
+            p_fly_smem = (struct fly_smem *)kmalloc(sizeof(struct fly_smem), GFP_KERNEL);
+            memset(p_fly_smem, 0, sizeof(struct fly_smem));
+        }
+
+        soc_bl_init();
+        soc_io_init();
+        soc_ad_init();
+    */
     return 0;
 }
 
