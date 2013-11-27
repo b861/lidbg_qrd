@@ -15,7 +15,7 @@ LIDBG_DEFINE;
 #include <clock.h>
 #include <clock-pcom.h>
 
-#define FASTBOOT_LOG_PATH "/data/log_fb.txt"
+#define FASTBOOT_LOG_PATH LIDBG_LOG_DIR"log_fb.txt"
 
 //#define EXPORT_ACTIVE_WAKE_LOCKS
 #define RUN_FASTBOOT

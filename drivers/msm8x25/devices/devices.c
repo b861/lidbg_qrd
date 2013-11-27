@@ -358,7 +358,7 @@ find_key:
 
 }
 
-#define TEMP_LOG_PATH "/data/log_ct.txt"
+#define TEMP_LOG_PATH LIDBG_LOG_DIR"log_ct.txt"
 
 void log_temp(void)
 {

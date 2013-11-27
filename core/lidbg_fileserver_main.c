@@ -39,7 +39,7 @@ void test_fileserver_stability(void)
     lidbg_get_current_time(tbuff, NULL);
     fs_mem_log("%s\n", tbuff);
 
-    fs_string2file("/data/fs_string2file.txt", "%s\n", tbuff);
+    fs_string2file(LIDBG_LOG_DIR"fs_string2file.txt", "%s\n", tbuff);
 
     test_count++;
     if(0)
@@ -221,7 +221,7 @@ void lidbg_fileserver_main_prepare(void)
     fs_fill_list(state_sd_path, FS_CMD_FILE_CONFIGMODE, &fs_state_list);
 
     lidbg_mkdir("/data/lidbg_osd");
-
+    lidbg_mkdir("/data/lidbg");
 }
 void lidbg_fileserver_main_init(void)
 {

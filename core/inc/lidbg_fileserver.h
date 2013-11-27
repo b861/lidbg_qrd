@@ -52,10 +52,11 @@ struct fs_filename_item
     char *filename;
     bool copy_en;
 };
+#define LIDBG_LOG_DIR "/data/lidbg/"
 
 #define LIDBG_MEM_LOG_FILE "/dev/log/lidbg_log.txt"
-#define PRE_CONF_INFO_FILE "/data/conf_info.txt"
-#define build_time_sd_path "/data/build_time.txt"
+#define PRE_CONF_INFO_FILE LIDBG_LOG_DIR"conf_info.txt"
+#define build_time_sd_path LIDBG_LOG_DIR"build_time.txt"
 #define build_time_fly_path "/flysystem/lib/out/build_time.conf"
 #define build_time_lidbg_path "/system/lib/modules/out/build_time.conf"
 extern void lidbg_fileserver_main(int argc, char **argv);

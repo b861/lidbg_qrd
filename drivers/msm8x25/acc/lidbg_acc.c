@@ -14,7 +14,7 @@ LIDBG_DEFINE;
 #define RUN_ACCBOOT
 #define DEVICE_NAME "lidbg_acc"
 #define HAL_SO "/flysystem/lib/hw/flyfa.default.so"
-#define FASTBOOT_LOG_PATH "/data/log_fb.txt"
+#define FASTBOOT_LOG_PATH LIDBG_LOG_DIR"log_fb.txt"
 
 
 int suspend_state = PM_STATUS_LATE_RESUME_OK;

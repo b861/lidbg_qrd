@@ -55,10 +55,10 @@ public class FsActivityMain extends Activity
 
 	private String PREFE_FILE_FS = "fileserver";
 	private String lidbg_node = "/dev/mlidbg0";
-	private String lidbg_conf_dir = "/data";
+	private String lidbg_conf_dir = "/data/lidbg";
 	private String state_file_path = "/dev/log/state.txt";
 	private String result_file_path = "/dev/log/mobile.txt";
-	private String machine_id_file = "/data/MIF.txt";
+	private String machine_id_file = "/data/lidbg/MIF.txt";
 	private String osd_dir_path = "/data/lidbg_osd";
 	private String prefer_osd_dir = "osd_dir";
 	private String prefer_osd_size = "osd_size";

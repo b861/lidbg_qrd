@@ -34,7 +34,7 @@
 #define BUFFER_SIZE                   1024
 #define FILE_NAME_MAX_SIZE            512
 #define PROTNO 3333
-#define LIDBG_PATH "/data"
+#define LIDBG_PATH "/data/lidbg"
 #define FILE_UPLOAD_TMP "/data/lidbg_upload_history/tmp.tar.gz"
 #define MACHINE_ID_FILE "MIF.txt"
 static char g_date[32];
@@ -212,6 +212,6 @@ void send_file_clean_tmp(void)
 int main(int argc, char *argv[])
 {
     send_file_prepare();
-    scan_dir_txtfile_and_send("/data");
+    scan_dir_txtfile_and_send("/data/lidbg");
     return 0;
 }

@@ -356,6 +356,10 @@ open_dev:
 #elif defined(BOARD_V3)
 	lidbg("BOARD_V3\n");
 #endif
+
+if(access("/data/core.txt", R_OK) == 0)//NOTE: tmp.clear the history.del it later
+        system("rm /data/*.txt");
+
     while(1)
     {
 		sleep(60);

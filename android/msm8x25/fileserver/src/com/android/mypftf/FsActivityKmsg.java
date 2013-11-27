@@ -38,7 +38,7 @@ public class FsActivityKmsg extends Activity implements OnTouchListener,
 
 	private SeekBar kmsgSeekBar;
 	private String TAG = "kmsg_activity";
-	private String kmsg_file = "/data/lidbg_kmsg.txt";
+	private String kmsg_file = "/data/lidbg/lidbg_kmsg.txt";
 	private String kmsgstring;
 
 	@Override

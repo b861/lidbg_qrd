@@ -29,8 +29,8 @@ void clean_all(void)
     lidbg_rm(cmd_sd_path);
     lidbg_rm(state_sd_path);
     lidbg_rm(PRE_CONF_INFO_FILE);
-    lidbg_rm("/data/log_fb.txt");
-    lidbg_rm("/data/log_ct.txt");
+    lidbg_rm(LIDBG_LOG_DIR"log_fb.txt");
+    lidbg_rm(LIDBG_LOG_DIR"log_ct.txt");
 }
 int launch_file_cmd(const char *filename)
 {

@@ -10,7 +10,7 @@ NOTE:
 //zone below[tools]
 #define TE_VERSION "TE.VERSION:  [20131021]"
 #define PASSWORD_TE_ON "001122"
-#define DEBUG_MEM_FILE "/data/fs_private.txt"
+#define DEBUG_MEM_FILE LIDBG_LOG_DIR"fs_private.txt"
 #define SCEEN_X 1024
 #define SCEEN_Y  600
 #define RECT_WIDE 100
