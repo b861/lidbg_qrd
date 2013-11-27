@@ -41,8 +41,7 @@ unsigned int shutdown_flag_ts = 0;
 unsigned int shutdown_flag_probe = 0;
 unsigned int shutdown_flag_gt811 = 0;
 unsigned int irq_signal = 0;
-char *oldname=NULL;
-static int con=0;
+
 void ts_scan(void)
 {
     static unsigned int loop = 0;
@@ -64,22 +63,6 @@ void ts_scan(void)
         else
         {
             lidbg("i2c_addr 0x%x found!\n", ts_probe_dev[i].chip_addr);
-			if(!oldname)
-			{
-				oldname=ts_probe_dev[i].name;
-				return ;
-			}
-			else
-				{
-					if(!strcmp(oldname,ts_probe_dev[i].name))
-						con++;
-					else
-					{
-						con=0;
-						oldname=NULL;
-					}
-	     if(con>3)
-			{
             scan_on = 0;
             SOC_I2C_Rec(TS_I2C_BUS, 0x12, 0x00, &tmp, 1 ); //let i2c bus release
 
@@ -110,8 +93,7 @@ void ts_scan(void)
 	        break;
         }
     }
-        	}
-    	}
+
     loop++;
     lidbg("ts_scan_time:%d\n", loop);
 
