@@ -78,6 +78,7 @@ extern int fs_show_list(struct list_head *client_list);
 extern int fs_mem_log( const char *fmt, ...);
 extern int fs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *client_list);
 extern bool is_out_updated;
+extern bool is_fs_work_enable;
 extern bool is_fly_system(void);
 extern bool fs_clear_file(char *filename);
 extern bool fs_is_file_exist(char *file);

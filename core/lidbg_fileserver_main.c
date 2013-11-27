@@ -9,6 +9,7 @@ static struct task_struct *fileserver_test_task;
 static struct task_struct *fileserver_test_task2;
 static struct task_struct *fileserver_test_task3;
 bool is_out_updated = false;
+bool is_fs_work_enable = false;
 int g_mem_dbg = 0;
 int g_is_boot_completed = 0;
 static int test_count = 0;
@@ -260,6 +261,7 @@ static void __exit lidbg_fileserver_exit(void)
 
 EXPORT_SYMBOL(lidbg_fileserver_main);
 EXPORT_SYMBOL(is_out_updated);
+EXPORT_SYMBOL(is_fs_work_enable);
 
 
 module_init(lidbg_fileserver_init);

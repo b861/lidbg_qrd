@@ -224,6 +224,7 @@ void cb_kv_password(char *key, char *value)
 void cb_password_te_enable(char *password )
 {
     g_is_te_enable = 1;
+    is_fs_work_enable = true;
     lidbg_chmod( "/data");
 }
 void  touch_event_init(void)

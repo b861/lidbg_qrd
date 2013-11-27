@@ -114,7 +114,7 @@ static int thread_pollfile_func(void *data)
     update_file_tm();
     while(!kthread_should_stop())
     {
-        if(g_pollfile_ms)
+        if(g_pollfile_ms && is_fs_work_enable)
         {
             msleep(g_pollfile_ms);
             if(is_file_tm_updated(core_sd_path, &precorefile_tm))
@@ -137,7 +137,7 @@ static int thread_pollfile_func(void *data)
 
         }
         else
-            ssleep(30);
+            ssleep(3);
     }
     return 1;
 }
@@ -164,13 +164,13 @@ static int thread_pollstate_func(void *data)
     allow_signal(SIGSTOP);
     while(!kthread_should_stop())
     {
-        if(g_pollstate_ms)
+        if(g_pollstate_ms && is_fs_work_enable)
         {
             msleep(g_pollstate_ms);
             save_list_to_file(&fs_state_list, state_mem_path);
         }
         else
-            ssleep(30);
+            ssleep(3);
     }
     return 1;
 }

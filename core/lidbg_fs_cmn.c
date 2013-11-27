@@ -247,14 +247,14 @@ static int thread_filedetec_func(void *data)
         show_filedetec_list();
     while(!kthread_should_stop())
     {
-        if(g_filedetect_ms)
+        if(g_filedetect_ms && is_fs_work_enable)
         {
             call_filedetec_cb();
             msleep(g_filedetect_ms);
         }
         else
         {
-            ssleep(30);
+            ssleep(3);
         }
     }
     return 1;
