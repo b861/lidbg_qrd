@@ -1066,6 +1066,7 @@ static int lidbg_event(struct notifier_block *this,
         break;
 
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_SUSPEND_PREPARE):
+		USB_WORK_DISENABLE;
         break;
 
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_POWER_OFF):
@@ -1080,6 +1081,7 @@ static int lidbg_event(struct notifier_block *this,
         break;
 
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_SUSPEND_UNPREPARE):
+		USB_WORK_ENABLE;
         break;
 
     default:
