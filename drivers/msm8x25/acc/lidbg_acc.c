@@ -17,7 +17,7 @@ LIDBG_DEFINE;
 #define FASTBOOT_LOG_PATH "/data/log_fb.txt"
 
 
-int suspend_state = 0;   //0 :early suspend; 1: suspend 
+int suspend_state = PM_STATUS_LATE_RESUME_OK;
 
 static DECLARE_COMPLETION(acc_ready);
 static DECLARE_COMPLETION(suspend_start);
@@ -230,7 +230,7 @@ static void fastboot_task_kill_exclude()
 }
 
 
-void show_wakelock(void)
+void show_wakelock(bool file_log)
 {
     int index = 0;
     struct wakelock_item *pos;
@@ -245,7 +245,7 @@ void show_wakelock(void)
             index++;
             lidbg("<%d.INFO%d:[%s].%d,%d>\n", pos->cunt, index, pos->name, pos->is_count_wakelock, pos->cunt_max);
         }
-		if(pos->cunt != 0)
+		if((file_log)&&(pos->cunt != 0))
 			lidbg_fs_log(FASTBOOT_LOG_PATH,"block wakelock %s\n", pos->name);
     }
 }
@@ -282,7 +282,7 @@ static void acc_early_suspend(struct early_suspend *handler)
 {
 	 lidbg("acc_early_suspend:%d\n", plidbg_acc->resume_count);
 
-	suspend_state = 0;
+	suspend_state = PM_STATUS_EARLY_SUSPEND_PENDING;
 	check_all_clk_disable();
 	
 	if(find_unsafe_clk()){}
@@ -293,7 +293,7 @@ static void acc_early_suspend(struct early_suspend *handler)
 static void acc_late_resume(struct early_suspend *handler)
 {
     DUMP_FUN_ENTER;
-	suspend_state = 1;
+	suspend_state = PM_STATUS_LATE_RESUME_OK;
 
 }
 #endif
@@ -316,15 +316,19 @@ static int thread_acc_suspend(void *data)
 				msleep(1000);
                 time_count++;
 						
-				if(suspend_state == 0)    //if suspend state always in early suspend
+				if(suspend_state == PM_STATUS_EARLY_SUSPEND_PENDING)    //if suspend state always in early suspend
 				{
 					 if(time_count >= 10)
 					 {
 						lidbgerr("thread_acc_suspend wait suspend timeout!\n");
-						show_wakelock();
+						show_wakelock(0);
 						//list_active_locks();
 						 if(time_count >= 120)
-							ignore_wakelock = 1;
+						 {
+						 	show_wakelock(1);
+							if(suspend_state == PM_STATUS_EARLY_SUSPEND_PENDING)
+								ignore_wakelock = 1;
+						 }
 						//break;
 					 }
 				}
@@ -368,23 +372,24 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
 		// processing data
 		 if(!strcmp(data_rec, "acc_on"))
 		{
-			printk("******goto acc_on********\n");
+			printk("******bp:goto acc_on********\n");
 			SOC_Write_Servicer(CMD_ACC_ON);
 			lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_ACC_ON));
 		}
 		else if(!strcmp(data_rec, "acc_off"))
 		{
-			printk("******goto acc_off********\n");
+			printk("******bp:goto acc_off********\n");
 			plidbg_acc->accoff_count ++;
 			SOC_Write_Servicer(CMD_ACC_OFF);
 			lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_ACC_OFF));
 		}
 		else if(!strcmp(data_rec, "power"))
 		{
-			printk("******goto fastboot********\n");
+			printk("******bp:goto fastboot********\n");
+			lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_POWER_OFF));
 			SOC_Write_Servicer(CMD_FAST_POWER_OFF);
 			plidbg_acc->poweroff_count++;
-			if((!g_var.is_fly)||(STRICT_SUSPEND == 0xff))
+			if((!g_var.is_fly)/*||(STRICT_SUSPEND == 0xff)*/)
 			{
 				SOC_Write_Servicer(LOG_LOGCAT);
 				SOC_Write_Servicer(LOG_DMESG);
@@ -477,6 +482,7 @@ static int acc_resume(struct device *dev)
 {
     DUMP_FUN_ENTER;
     ignore_wakelock = 0;
+	suspend_state = PM_STATUS_RESUME_OK;
 
     lidbg("fastboot_resume:%d\n", ++plidbg_acc->resume_count);
 	if(plidbg_acc->poweroff_count != plidbg_acc->resume_count)
@@ -491,7 +497,7 @@ static int acc_resume(struct device *dev)
 static int acc_suspend(struct device *dev)
 {
     DUMP_FUN_ENTER;
-    suspend_state = 1;
+    suspend_state = PM_STATUS_SUSPEND_PENDING;
     return 0;
 
 }

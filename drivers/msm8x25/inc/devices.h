@@ -120,10 +120,15 @@ enum
 
 // PANNE_PEN , RESET
 #define LCD_ON  do{    \  
-		printk("\n\n======LCD_ON=======\n\n");\
+		printk("LCD_ON\n");\
+		u8 buff[] = {0x02, 0x0d, 0x1};\
+        SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\
 				}while(0)
+				
 #define LCD_OFF   do{   \
-		printk("\n\n======LCD_OFF=======\n\n");\
+		printk("LCD_OFF\n");\
+		u8 buff[] = {0x02, 0x0d, 0x0};\
+        SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\
 				}while(0)
 
 #define USB_HUB_ENABLE do{LPC_IO_SET(0x09, 1); }while(0)

@@ -1024,25 +1024,12 @@ static void parse_cmd(char *pt)
 	else if(!strcmp(pt, "screen_on"))
 	{
 		printk("******into screen_on********\n");
-		if(!g_var.is_fly)
-		{
-			printk("\n\n===LCD_ON====\n\n");
-			LCD_ON;
-		}
-		unmute_ns();
-		LCD_RESET;
 		if(SOC_Hal_Acc_Callback)
 			SOC_Hal_Acc_Callback(1);
 	}
 	else if(!strcmp(pt, "screen_off"))
 	{
 		printk("******into screen_off********\n");
-		if(!g_var.is_fly)
-		{
-			printk("\n\n===LCD_OFF====, isfly=%d\n\n", g_var.is_fly);
-			LCD_OFF;
-		}
-		mute_s();
 		if(SOC_Hal_Acc_Callback)
 			SOC_Hal_Acc_Callback(0); 
 	}
@@ -1050,11 +1037,15 @@ static void parse_cmd(char *pt)
 	{
 		printk("******into suspend_on********\n");
 		lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_SUSPEND_UNPREPARE));
+		if(SOC_Hal_Acc_Callback)
+			SOC_Hal_Acc_Callback(2);
 	}
 	else if(!strcmp(pt, "suspend_off"))
 	{
 		printk("******into suspend_off********\n");
 		lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_SUSPEND_PREPARE));
+		if(SOC_Hal_Acc_Callback)
+			SOC_Hal_Acc_Callback(3);
 	}
 #endif
 	
@@ -1065,25 +1056,29 @@ static int lidbg_event(struct notifier_block *this,
 	DUMP_FUN;
 	
 	switch (event) {
-	case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_ACC_ON):
 
-		break;
 	case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_ACC_OFF):
-
+		if(!g_var.is_fly)LCD_OFF;
+		mute_s();
 		break;
 
 	case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_SUSPEND_PREPARE):
-		USB_WORK_DISENABLE;
-		//USB_POWER_OFF;
-		if(SOC_Hal_Acc_Callback)
-			SOC_Hal_Acc_Callback(3);
 		break;
-	case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_SUSPEND_UNPREPARE):
-		if(SOC_Hal_Acc_Callback)
-			SOC_Hal_Acc_Callback(2);
+		
+	case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_POWER_OFF):
+		USB_WORK_DISENABLE;
+		break;
+
+	case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_ACC_ON):
+		LCD_RESET;
+		if(!g_var.is_fly)LCD_ON;
+		unmute_ns();
 		USB_WORK_ENABLE;
-		//USB_POWER_ON;
-		break;	
+		break;
+		
+	case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT,NOTIFIER_MINOR_SUSPEND_UNPREPARE):
+		break;
+
 	default:
 		break;
 	}
