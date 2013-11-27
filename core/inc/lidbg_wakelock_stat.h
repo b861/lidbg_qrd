@@ -8,8 +8,14 @@ struct wakelock_item
     int cunt;
     int cunt_max;
     bool is_count_wakelock;
+    unsigned int pid;
+    unsigned int uid;
 };
 
+static inline char *lock_type(bool cnt_wakelock)
+{
+    return cnt_wakelock ? "java" : "linux";
+}
 extern struct list_head lidbg_wakelock_list;
 void lidbg_wakelock_stat(int argc, char **argv);
 void lidbg_show_wakelock(void);
