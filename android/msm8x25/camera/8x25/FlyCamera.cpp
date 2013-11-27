@@ -566,7 +566,9 @@ static bool DetermineImageSplitScreen(mm_camera_ch_data_buf_t *frame,QCameraHard
 
 	if(FlyCameraflymFps<24){DEBUGLOG("Flyvideo-x:flymFps = %f",FlyCameraflymFps);return 0;}
 	if(++global_fram_at_one_sec_count < 50)//过滤判断次数的频繁度，每隔20帧判断一次，
-		return 0;
+	{
+	return 0;
+	}
 	else
 		global_fram_at_one_sec_count = 0;
 	//纵向分屏判断
@@ -672,12 +674,24 @@ static bool DetermineImageSplitScreen(mm_camera_ch_data_buf_t *frame,QCameraHard
 		}
 	}
 BREAK_THE:
-if(video_channel_status[0] == '2' || video_channel_status[0] == '3')//AUX
-	memset((void *)(frame->def.frame->buffer+frame->def.frame->y_off),0,720*3);
+
 return 0;//未发生分屏
 }
 bool FlyCameraFrameDisplayOrOutDisplay()
 {
+	if(video_channel_status[0] == '2' || video_channel_status[0] == '3')//AUX
+			{
+				memset((void *)(frame->def.frame->buffer+frame->def.frame->y_off),0,720*3);
+
+				if(video_format[0] == '4' || video_format[0] == '2')
+				;//pal
+				else
+				{
+				memset((void *)(frame->def.frame->buffer+frame->def.frame->cbcr_off+720*236),0x7f,720*3);//720*476=342720 235 7f
+				memset((void *)(frame->def.frame->buffer+frame->def.frame->y_off+720*475),0,720*5);
+				}
+			}
+
 		if(video_channel_status[0] != '3')
 		{//倒车状态先判断黑屏再判断分屏
 			if( DetermineImageSplitScreen(frame,mHalCamCtrl) )//发现分屏这个帧丢弃不显示
