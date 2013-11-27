@@ -4,11 +4,91 @@
 
 //zone below [fs.cmn.tools]
 LIST_HEAD(fs_filedetec_list);
+LIST_HEAD(fs_filename_list);
+static struct task_struct *fs_fdetectask;
+static spinlock_t  new_item_lock;
 int g_filedetec_dbg = 0;
 int g_filedetect_ms = 10000;
-static struct task_struct *fs_fdetectask;
 //zone end
 
+//zone below [fs.fs_filename_list]
+struct fs_filename_item *get_filename_list_item(struct list_head *client_list, const char *filename)
+{
+    struct fs_filename_item *pos;
+    unsigned long flags;
+
+    spin_lock_irqsave(&new_item_lock, flags);
+    list_for_each_entry(pos, client_list, tmp_list)
+    {
+        if (!strcmp(pos->filename, filename))
+        {
+            spin_unlock_irqrestore(&new_item_lock, flags);
+            return pos;
+        }
+    }
+    spin_unlock_irqrestore(&new_item_lock, flags);
+    return NULL;
+}
+bool new_filename_list_item(struct list_head *client_list, char *filename, bool copy_en)
+{
+    struct fs_filename_item *add_new_item;
+    unsigned long flags;
+
+    add_new_item = kmalloc(sizeof(struct fs_filename_item), GFP_ATOMIC);
+    if(add_new_item == NULL)
+    {
+        FS_ERR("<kmalloc.fs_filename_item>\n");
+        return false;
+    }
+
+    add_new_item->filename = kmalloc(strlen(filename) + 1, GFP_ATOMIC);
+    if(add_new_item->filename == NULL)
+    {
+        FS_ERR("<kmalloc.strlen(name)>\n");
+        return false;
+    }
+
+    strcpy(add_new_item->filename, filename);
+    add_new_item->copy_en = copy_en;
+
+    spin_lock_irqsave(&new_item_lock, flags);
+    list_add(&(add_new_item->tmp_list), client_list);
+    spin_unlock_irqrestore(&new_item_lock, flags);
+    //FS_SUC("<NEW:[%s,%d]>\n",filename,copy_en);
+    return true;
+}
+
+bool register_filename_list(struct list_head *client_list, char *filename, bool copy_en)
+{
+    struct fs_filename_item *pos = get_filename_list_item(client_list, filename);
+    if(pos)
+    {
+        FS_ERR("<EEXIST.%s>\n", filename);
+        return false;
+    }
+    else
+        return new_filename_list_item(client_list, filename, copy_en);
+}
+void show_filename_list(struct list_head *client_list)
+{
+    int index = 0;
+    struct fs_filename_item *pos;
+
+    if(!list_empty(client_list))
+    {
+        list_for_each_entry(pos, client_list, tmp_list)
+        {
+            if (pos->filename)
+            {
+                index++;
+                FS_WARN("<%d.%dINFO:[%s]>\n", pos->copy_en, index, pos->filename);
+            }
+        }
+    }
+    else
+        FS_ERR("<nobody_register>\n");
+}
+//zone end
 
 //zone below [fs.cmn.driver]
 int readwrite_file(const char *filename, char *wbuff, char *rbuff, int readlen)
@@ -300,32 +380,6 @@ bool fs_copy_file(char *from, char *to)
 {
     return copy_file(from, to);
 }
-bool fs_copy_file_dir(char *fromdir, char *todir, char *filename)
-{
-    char file_from[64];
-    char file_to[64];
-    memset(file_from, '\0', sizeof(file_from));
-    memset(file_to, '\0', sizeof(file_to));
-    sprintf(file_from, "%s/%s", fromdir, filename);
-    sprintf(file_to, "%s/%s", todir, filename);
-
-    if(g_filedetec_dbg)
-        FS_WARN("[%s],[%s]", file_from, file_to);
-    return 	fs_copy_file(file_from, file_to);
-}
-bool fs_mv_file_dir(char *fromdir, char *todir, char *filename)
-{
-    char file_from[64];
-    char file_to[64];
-    memset(file_from, '\0', sizeof(file_from));
-    memset(file_to, '\0', sizeof(file_to));
-    sprintf(file_from, "%s/%s", fromdir, filename);
-    sprintf(file_to, "%s/%s", todir, filename);
-
-    if(g_filedetec_dbg)
-        FS_WARN("[%s],[%s]", file_from, file_to);
-    return 	lidbg_mv(file_from, file_to);
-}
 bool fs_is_file_exist(char *file)
 {
     return is_file_exist(file);
@@ -342,12 +396,27 @@ int  lidbg_cp(char from[], char to[])
 {
     return fs_copy_file(from, to);
 }
+bool fs_register_filename_list(char *filename, bool copy_en)
+{
+    if(filename)
+        return register_filename_list(&fs_filename_list, filename, copy_en);
+    else
+    {
+        FS_ERR("<filename.null>\n");
+        return false;
+    }
+}
+void fs_show_filename_list(void)
+{
+    show_filename_list(&fs_filename_list);
+}
 //zone end
 
 
 
 void lidbg_fs_cmn_init(void)
 {
+    spin_lock_init(&new_item_lock);
     fs_get_intvalue(&lidbg_core_list, "fs_filedetect_ms", &g_filedetect_ms, NULL);
     fs_get_intvalue(&lidbg_core_list, "fs_filedetect_dbg", &g_filedetec_dbg, cb_kv_filedetecen);
     fs_fdetectask = kthread_run(thread_filedetec_func, NULL, "ftf_fdetectask");
@@ -357,8 +426,10 @@ EXPORT_SYMBOL(lidbg_cp);
 EXPORT_SYMBOL(fs_readwrite_file);
 EXPORT_SYMBOL(fs_regist_filedetec);
 EXPORT_SYMBOL(fs_copy_file);
-EXPORT_SYMBOL(fs_copy_file_dir);
-EXPORT_SYMBOL(fs_mv_file_dir);
 EXPORT_SYMBOL(fs_is_file_exist);
 EXPORT_SYMBOL(fs_is_file_updated);
 EXPORT_SYMBOL(fs_clear_file);
+EXPORT_SYMBOL(fs_filename_list);
+EXPORT_SYMBOL(fs_register_filename_list);
+EXPORT_SYMBOL(fs_show_filename_list);
+

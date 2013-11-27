@@ -1,6 +1,16 @@
 #ifndef _LIGDBG_DEV__
 #define _LIGDBG_DEV__
 
+
+#include <linux/file.h>
+#include <linux/mm.h>
+#include <linux/pagemap.h>
+#include <linux/backing-dev.h>
+#include <linux/pagevec.h>
+#include <linux/fadvise.h>
+#include <linux/writeback.h>
+#include <linux/syscalls.h>
+#include <asm/unistd.h>
 #include <linux/usb.h>
 #include <linux/random.h>
 #include <linux/time.h>

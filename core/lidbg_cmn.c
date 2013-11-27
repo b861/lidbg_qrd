@@ -362,6 +362,7 @@ EXPORT_SYMBOL(lidbg_exe);
 EXPORT_SYMBOL(lidbg_mount);
 EXPORT_SYMBOL(lidbg_insmod);
 EXPORT_SYMBOL(lidbg_chmod);
+EXPORT_SYMBOL(lidbg_new_cdev);
 EXPORT_SYMBOL(lidbg_mv);
 EXPORT_SYMBOL(lidbg_rm);
 EXPORT_SYMBOL(lidbg_rmdir);
@@ -376,4 +377,4 @@ EXPORT_SYMBOL(lidbg_launch_user);
 EXPORT_SYMBOL(lidbg_readwrite_file);
 EXPORT_SYMBOL(lidbg_task_kill_select);
 EXPORT_SYMBOL(lidbg_get_current_time);
-EXPORT_SYMBOL(lidbg_new_cdev);
+

@@ -156,6 +156,10 @@ void lidbg_fileserver_main(int argc, char **argv)
         FS_WARN("<lidbg_mount>\n");
         lidbg_mount("/system");
         break;
+    case 10:
+        FS_WARN("<fs_show_filename_list>\n");
+        fs_show_filename_list();
+        break;
     default:
         FS_ERR("<check you cmd:%d>\n", cmd);
         break;
@@ -222,6 +226,12 @@ void lidbg_fileserver_main_init(void)
 {
     fs_get_intvalue(&lidbg_core_list, "fs_mem_dbg", &g_mem_dbg, NULL);
     fs_string2file(LIDBG_MEM_LOG_FILE, "%s\n", FS_VERSION );
+    fs_register_filename_list(LIDBG_MEM_LOG_FILE, true);
+    fs_register_filename_list(build_time_sd_path, true);
+    fs_register_filename_list(LIDBG_KMSG_FILE_PATH, true);
+    fs_register_filename_list(MACHINE_ID_FILE, true);
+    fs_register_filename_list(driver_sd_path, true);
+    fs_register_filename_list(core_sd_path, true);
 }
 //zone end
 

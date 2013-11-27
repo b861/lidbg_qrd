@@ -46,6 +46,12 @@ struct string_dev
     void (*callback)(char *key, char *value);
     void (*cb_filedetec)(char *filename );
 };
+struct fs_filename_item
+{
+    struct list_head tmp_list;
+    char *filename;
+    bool copy_en;
+};
 
 #define LIDBG_MEM_LOG_FILE "/dev/log/lidbg_log.txt"
 #define PRE_CONF_INFO_FILE "/data/conf_info.txt"
@@ -77,9 +83,9 @@ extern bool fs_clear_file(char *filename);
 extern bool fs_is_file_exist(char *file);
 extern bool fs_is_file_updated(char *filename, char *infofile);
 extern bool fs_copy_file(char *from, char *to);
-extern bool fs_copy_file_dir(char *fromdir, char *todir, char *filename);
-extern bool fs_mv_file_dir(char *fromdir, char *todir, char *filename);
 extern bool fs_upload_machine_log(void);
+extern bool fs_register_filename_list(char *filename, bool copy_en);
+extern void fs_show_filename_list(void);
 extern void fs_remount_system(void);
 extern void fs_call_apk(void);
 extern void fs_remove_apk(void);
@@ -88,10 +94,7 @@ extern void fs_save_list_to_file(void);
 
 extern struct list_head lidbg_drivers_list;
 extern struct list_head lidbg_core_list;
-extern struct list_head fs_state_list;
-extern struct list_head lidbg_core_list;
-extern struct list_head lidbg_drivers_list;
-extern struct list_head lidbg_core_list;
+extern struct list_head fs_filename_list;
 
 #define printk_fs(msg...)  do { printk( KERN_CRIT "lidbg_fs: " msg); }while(0)
 

@@ -1134,6 +1134,7 @@ static int __init fastboot_init(void)
 
     LIDBG_GET;
     set_func_tbl();
+    fs_register_filename_list(FASTBOOT_LOG_PATH,true);
 
     platform_device_register(&lidbg_fastboot_device);
     return platform_driver_register(&fastboot_driver);

@@ -1200,8 +1200,9 @@ int dev_init(void)
 	
 	init_waitqueue_head(&read_wait);
 	lidbg_new_cdev(&dev_fops,"flydev");
+	fs_register_filename_list(TEMP_LOG_PATH,true);
 
-    fs_regist_state("cpu_temp", &(g_var.temp));
+	fs_regist_state("cpu_temp", &(g_var.temp));
 	FS_REGISTER_INT(lcd_reset_en,"lcd_reset",0,lcd_reset);
 
 #if 0

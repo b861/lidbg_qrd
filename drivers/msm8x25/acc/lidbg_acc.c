@@ -560,9 +560,9 @@ static int __init acc_init(void)
 	else wake_up_process(suspend_task);
 
 	lidbg_chmod("/dev/lidbg_acc");
-	
 	lidbg (DEVICE_NAME"acc dev_init\n");
-
+	fs_register_filename_list(FASTBOOT_LOG_PATH,true);
+	
 	return ret;
 }
 

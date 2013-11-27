@@ -1,8 +1,6 @@
 #ifndef _LIGDBG_CMN__
 #define _LIGDBG_CMN__
 
-bool lidbg_new_cdev(struct file_operations *cdev_fops, char *nodename);
-
 int  lidbg_exe(char path[], char argv1[],char argv2[],char argv3[],char argv4[],char argv5[],char argv6[]);
 int  lidbg_mount(char path[]);
 int  lidbg_insmod(char path[]);
@@ -21,6 +19,7 @@ int  lidbg_launch_user( char bin_path[], char argv1[],char argv2[],char argv3[],
 int lidbg_readwrite_file(const char *filename, char *rbuf,const char *wbuf, size_t length);
 int lidbg_task_kill_select(char *task_name);
 int lidbg_get_current_time(char *time_string,struct rtc_time *ptm);
+extern bool lidbg_new_cdev(struct file_operations *cdev_fops, char *nodename);
 
 #ifdef BUILD_FOR_RECOVERY
 #define MOUNT_PATH "/sbin/mount"

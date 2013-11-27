@@ -23,6 +23,7 @@
 #define state_fly_path "/flysystem/lib/out/state.conf"
 #define state_lidbg_path "/system/lib/modules/out/state.conf"
 
+extern struct list_head fs_state_list;
 extern int g_mem_dbg;
 extern int g_is_boot_completed;
 extern int readwrite_file(const char *filename, char *wbuff, char *rbuff, int readlen);

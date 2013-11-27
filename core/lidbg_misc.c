@@ -113,41 +113,44 @@ void logcat_lunch(char *key, char *value )
 
 void cp_data_to_udisk(char *key, char *value )
 {
-    char dir[128], tbuff[100];
-    int copy_delay = 300;
-    memset(dir, '\0', sizeof(dir));
-    memset(tbuff, '\0', sizeof(tbuff));
 
-    lidbg_get_current_time(tbuff, NULL);
-    sprintf(dir, "/mnt/usbdisk/ID%d-%s", get_machine_id(), tbuff);
-    lidbg_mkdir(dir);
 
-    msleep(1000);
-    fs_copy_file_dir("/data", dir, "log_ct.txt");
-    msleep(copy_delay);
-    fs_copy_file_dir("/data", dir, "log_fb.txt");
-    msleep(copy_delay);
-    fs_copy_file_dir("/data", dir, "ts_log.txt");
-    msleep(copy_delay);
-    fs_copy_file_dir("/dev/log", dir, "lidbg_log.txt");
+    struct list_head *client_list = &fs_filename_list;
+    if(!list_empty(client_list))
+    {
+        int index = 0;
+        char dir[128], tbuff[128];
+        int copy_delay = 300;
+        struct fs_filename_item *pos;
 
-    msleep(copy_delay);
-    fs_copy_file_dir("/data", dir, "core.txt");
-    msleep(copy_delay);
-    fs_copy_file_dir("/data", dir, "drivers.txt");
-    msleep(copy_delay);
-    fs_copy_file_dir("/data", dir, "build_time.txt");
-    msleep(copy_delay);
-    fs_copy_file_dir("/data", dir, "conf_info.txt");
-    msleep(copy_delay);
-    fs_copy_file_dir("/data", dir, "MIF.txt");
-    msleep(copy_delay);
-    fs_copy_file_dir("/data", dir, "logcat.txt");
-    msleep(copy_delay);
-    fs_copy_file_dir("/data", dir, "kmsg.txt");
-    msleep(copy_delay);
+        memset(dir, '\0', sizeof(dir));
+        memset(tbuff, '\0', sizeof(tbuff));
 
+        lidbg_get_current_time(tbuff, NULL);
+        sprintf(dir, "/mnt/usbdisk/ID%d-%s", get_machine_id(), tbuff);
+        lidbg_mkdir(dir);
+        msleep(1000);
+
+        list_for_each_entry(pos, client_list, tmp_list)
+        {
+            if (pos->filename && pos->copy_en)
+            {
+                char *file = strrchr(pos->filename, '/');
+                if(file)
+                {
+                    index++;
+                    memset(tbuff, '\0', sizeof(tbuff));
+                    sprintf(tbuff, "%s/%s", dir, ++file);
+                    fs_copy_file(pos->filename, tbuff);
+                    msleep(copy_delay);
+                }
+            }
+        }
+    }
+    else
+        LIDBG_ERR("<nobody_register>\n");
 }
+
 static int __init lidbg_misc_init(void)
 {
     TE_WARN("<==IN==>\n");
@@ -167,6 +170,8 @@ static int __init lidbg_misc_init(void)
     FS_REGISTER_INT(logcat_en, "logcat_en", 0, logcat_lunch);
     FS_REGISTER_INT(reboot_delay_s, "reboot_delay_s", 0, NULL);
     FS_REGISTER_INT(cp_data_to_udisk_en, "cp_data_to_udisk_en", 0, cp_data_to_udisk);
+    fs_register_filename_list("/data/logcat.txt", true);
+    fs_register_filename_list("/data/kmsg.txt", true);
 
     if(1 == logcat_en)
         logcat_lunch(NULL, NULL);
