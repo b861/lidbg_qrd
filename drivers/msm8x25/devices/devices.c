@@ -1024,6 +1024,7 @@ static void parse_cmd(char *pt)
 	else if(!strcmp(pt, "screen_on"))
 	{
 		printk("******into screen_on********\n");
+		LCD_RESET;
 		if(SOC_Hal_Acc_Callback)
 			SOC_Hal_Acc_Callback(1);
 	}
