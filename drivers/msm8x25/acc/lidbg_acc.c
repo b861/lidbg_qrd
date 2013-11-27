@@ -242,11 +242,16 @@ void show_wakelock(bool file_log)
     {
         if (pos->name && pos->cunt > 0)
         {
+			if(!strcmp(pos->name, "mmc0_detect") || !strcmp(pos->name, "mmc1_detect")|| !strcmp(pos->name, "mmc2_detect")
+				|| !strcmp(pos->name, "msm_serial_hs_rx")|| !strcmp(pos->name, "msm_serial_hs_dma")
+			)
+			continue;
+			
             index++;
             lidbg("<%d.INFO%d:[%s].%d,%d>\n", pos->cunt, index, pos->name, pos->is_count_wakelock, pos->cunt_max);
+			if(file_log)
+				lidbg_fs_log(FASTBOOT_LOG_PATH,"block wakelock %s\n", pos->name);
         }
-		if((file_log)&&(pos->cunt != 0))
-			lidbg_fs_log(FASTBOOT_LOG_PATH,"block wakelock %s\n", pos->name);
     }
 }
 
