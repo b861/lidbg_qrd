@@ -10,7 +10,7 @@ static int is_warned =0;
 #if (defined(BOARD_V1) || defined(BOARD_V2) || defined(BOARD_V3))
 	#define FLYHAL_CONFIG_PATH "/flydata/flyhalconfig"
 #else
-	#define FLYHAL_CONFIG_PATH "/flysystem/flyconfig/default/halconfig/flyhalconfig.txt"
+	#define FLYHAL_CONFIG_PATH "/flysystem/flyconfig/default/lidbgconfig/flylidbgconfig.txt"
 #endif
 
 static LIST_HEAD(flyhal_config_list);
