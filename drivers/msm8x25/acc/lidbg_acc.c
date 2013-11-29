@@ -248,7 +248,7 @@ void show_wakelock(bool file_log)
                 continue;
 
             index++;
-            lidbg("%d,MAX%d<THE%d:[%d,%d][%s][%s]>\n", pos->cunt, pos->cunt_max, index, pos->pid, pos->uid, lock_type(pos->is_count_wakelock), pos->name );
+            lidbg("%d,MAX:%d<THE%d:[%d,%d][%s][%s]>\n", pos->cunt, pos->cunt_max, index, pos->pid, pos->uid, lock_type(pos->is_count_wakelock), pos->name );
             if(file_log)
                 lidbg_fs_log(FASTBOOT_LOG_PATH, "block wakelock %s\n", pos->name);
         }
