@@ -14,7 +14,7 @@ struct wakelock_item
 
 static inline char *lock_type(bool cnt_wakelock)
 {
-    return cnt_wakelock ? "java" : "linux";
+    return cnt_wakelock ? "java" : "kernel";
 }
 extern struct list_head lidbg_wakelock_list;
 void lidbg_wakelock_stat(int argc, char **argv);

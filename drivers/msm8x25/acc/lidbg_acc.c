@@ -82,7 +82,7 @@ int check_all_clk_disable(void)
 }
 
 
-
+//53 24 32 109
 
 int safe_clk[] = {113, 106, 105, 104, 103, 102, 95, 51, 31, 20, 16, 15, 12, 10, 8, 4, 3, 1};
 
@@ -248,7 +248,7 @@ void show_wakelock(bool file_log)
                 continue;
 
             index++;
-            lidbg("%d,MAX:%d<THE%d:[%d,%d][%s][%s]>\n", pos->cunt, pos->cunt_max, index, pos->pid, pos->uid, lock_type(pos->is_count_wakelock), pos->name );
+            lidbg("<THE%d:[%d,%d][%s][%s]>,%d,MAX:%d\n",  index, pos->pid, pos->uid, lock_type(pos->is_count_wakelock), pos->name,pos->cunt, pos->cunt_max );
             if(file_log)
                 lidbg_fs_log(FASTBOOT_LOG_PATH, "block wakelock %s\n", pos->name);
         }

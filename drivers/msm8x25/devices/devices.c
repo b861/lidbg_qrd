@@ -1070,14 +1070,12 @@ static int lidbg_event(struct notifier_block *this,
         break;
 
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_POWER_OFF):
-        USB_WORK_DISENABLE;
         break;
 
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_ACC_ON):
         LCD_RESET;
         if(!g_var.is_fly)LCD_ON;
         unmute_ns();
-        USB_WORK_ENABLE;
         break;
 
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_SUSPEND_UNPREPARE):
