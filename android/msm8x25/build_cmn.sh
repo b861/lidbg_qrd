@@ -1,4 +1,5 @@
 LOCATE_PATH=`pwd`
+echo $LOCATE_PATH
 source ../../../dbg_cfg.sh
 cd ../../../build && source env_entry.sh && ./build_cfg.sh $BOARD_VERSION $BUILD_VERSION $DBG_SOC
 cd $DBG_SYSTEM_DIR/&&source build/envsetup.sh&&choosecombo release $DBG_PLATFORM eng

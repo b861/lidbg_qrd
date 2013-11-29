@@ -48,14 +48,20 @@ void file_check(void)
     {
         lidbg("<start to cp gps.so>\n");
 
-#if (defined(BOARD_V1) || defined(BOARD_V2))
-        fs_copy_file("/flysystem/lib/out/lidbg_servicer", "/flysystem/bin/lidbg_servicer");
+#if (defined(BOARD_V1) || defined(BOARD_V2))//25
+        if(fs_copy_file("/flysystem/lib/out/lidbg_servicer", "/flysystem/bin/lidbg_servicer"))
+            lidbg("copy_file:lidbg_servicer\n");
+			
         if(fs_copy_file("/flysystem/lib/out/gps.msm7627a.so", "/flysystem/lib/hw/gps.msm7627a.so"))
             lidbg("copy_file:gps_hal.msm7627a\n");
+		
 #else
         if( fs_copy_file("/flysystem/lib/out/gps.msm8625.so", "/flysystem/lib/hw/gps.msm8625.so"))
             lidbg("copy_file:gps_hal.msm8625\n");
 #endif
+
+		if( fs_copy_file("/flysystem/lib/out/camera.msm7627a.so", "/flysystem/lib/hw/camera.msm7627a.so"))
+			lidbg("copy_file:camera.msm7627a.so\n");
 
     }
 }
