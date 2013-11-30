@@ -230,6 +230,58 @@ static void fastboot_task_kill_exclude()
 }
 
 
+
+
+
+int fastboot_task_kill_select(char *task_name)
+{
+    struct task_struct *p;
+    struct task_struct *selected = NULL;
+    unsigned long flags_kill;
+    DUMP_FUN_ENTER;
+
+    if(ptasklist_lock != NULL)
+    {
+        lidbg("read_lock+\n");
+        read_lock(ptasklist_lock);
+    }
+    else
+        spin_lock_irqsave(&kill_lock, flags_kill);
+
+    for_each_process(p)
+    {
+        struct mm_struct *mm;
+        struct signal_struct *sig;
+
+        task_lock(p);
+        mm = p->mm;
+        sig = p->signal;
+        task_unlock(p);
+
+        selected = p;
+
+        if(!strcmp(p->comm, task_name))
+        {
+            lidbg("find %s to kill\n", task_name);
+
+            if (selected)
+            {
+                force_sig(SIGKILL, selected);
+                break;
+            }
+        }
+    }
+
+    if(ptasklist_lock != NULL)
+        read_unlock(ptasklist_lock);
+    else
+        spin_unlock_irqrestore(&kill_lock, flags_kill);
+
+    DUMP_FUN_LEAVE;
+    return 0;
+}
+
+
 void show_wakelock(bool file_log)
 {
     int index = 0;
@@ -328,6 +380,13 @@ static int thread_acc_suspend(void *data)
                         lidbgerr("thread_acc_suspend wait suspend timeout!\n");
                         show_wakelock(0);
                         //list_active_locks();
+                        #if 0
+                        if(time_count % 30 == 0)
+                        {
+							fastboot_task_kill_select("tencent.qqmusic");
+							fastboot_task_kill_select(".flyaudio.media");
+                        }
+						#endif
                         if(time_count >= 120)
                         {
                             show_wakelock(1);
@@ -394,10 +453,10 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
         lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_POWER_OFF));
         SOC_Write_Servicer(CMD_FAST_POWER_OFF);
         plidbg_acc->poweroff_count++;
-        if((!g_var.is_fly)/*||(STRICT_SUSPEND == 0xff)*/)
+        if((!g_var.is_fly)||(STRICT_SUSPEND == 0xff))
         {
             SOC_Write_Servicer(LOG_LOGCAT);
-            SOC_Write_Servicer(LOG_DMESG);
+            //SOC_Write_Servicer(LOG_DMESG);
         }
         msleep(5000);
         complete(&suspend_start);

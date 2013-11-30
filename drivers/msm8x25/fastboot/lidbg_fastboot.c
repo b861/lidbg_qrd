@@ -361,7 +361,7 @@ int fastboot_task_kill_select(char *task_name)
             if (selected)
             {
                 force_sig(SIGKILL, selected);
-                return 1;
+                break;
             }
         }
     }
