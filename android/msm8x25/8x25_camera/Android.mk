@@ -135,7 +135,7 @@ ifneq ($(USE_CAMERA_STUB),true)
       LOCAL_CFLAGS += -include bionic/libc/kernel/common/linux/socket.h
 
       #LOCAL_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)/hw
-			LOCAL_MODULE_PATH := $(LOCAL_PATH)/../../../out/system/lib/hw
+			LOCAL_MODULE_PATH := $(LOCAL_PATH)/../out
       LOCAL_MODULE:= camera.$(TARGET_BOARD_PLATFORM)
       LOCAL_MODULE_TAGS := optional
       include $(BUILD_SHARED_LIBRARY)
@@ -144,6 +144,6 @@ ifneq ($(USE_CAMERA_STUB),true)
   endif # BOARD_USES_QCOM_HARDWARE
 endif # USE_CAMERA_STUB
 
-ifeq ($(V4L2_BASED_LIBCAM),true)
-include $(LOCAL_PATH)/mm-camera-interface/Android.mk
-endif
+#ifeq ($(V4L2_BASED_LIBCAM),true)
+#include $(LOCAL_PATH)/mm-camera-interface/Android.mk
+#endif
