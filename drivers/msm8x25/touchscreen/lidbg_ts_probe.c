@@ -33,7 +33,6 @@ struct probe_device ts_probe_dev[] =
 };
 
 bool scan_on = 1;
-unsigned int FLAG_FOR_15S_OFF = 0; //for  flycar
 bool is_ts_load = 0;
 
 /*add 2 variable to make  logic of update 801*/
@@ -185,7 +184,6 @@ static void ts_probe_exit(void) {}
 module_init(ts_probe_init);
 module_exit(ts_probe_exit);
 
-EXPORT_SYMBOL(FLAG_FOR_15S_OFF);
 EXPORT_SYMBOL(is_ts_load);
 EXPORT_SYMBOL(ts_should_revert);
 /******************************************************

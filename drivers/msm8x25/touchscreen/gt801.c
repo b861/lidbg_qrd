@@ -31,7 +31,6 @@ static bool xy_revert_en = 0;
 
 
 unsigned int  touch_cnt = 0;
-extern  unsigned int FLAG_FOR_15S_OFF;
 extern  bool is_ts_load;
 extern int ts_should_revert;
 extern unsigned int shutdown_flag_ts;
@@ -619,14 +618,14 @@ BIT_NO_CHANGE:
             //input_report_abs(ts->input_dev, ABS_MT_WIDTH_MAJOR, finger_list.pointer[count].pressure);
             input_report_key(ts->input_dev, BTN_TOUCH, finger_list.pointer[count].state);
 #endif
-            FLAG_FOR_15S_OFF++;
-            if(FLAG_FOR_15S_OFF >= 1000)
+            g_var.flag_for_15s_off++;
+            if(g_var.flag_for_15s_off >= 1000)
             {
-                FLAG_FOR_15S_OFF = 1000;
+                g_var.flag_for_15s_off = 1000;
             }
-            if(FLAG_FOR_15S_OFF < 0)
+            if(g_var.flag_for_15s_off < 0)
             {
-                printk("\n[wang]:====err:FLAG_FOR_15S_OFF===[%d]\n", FLAG_FOR_15S_OFF);
+                printk("\n[wang]:====err:FLAG_FOR_15S_OFF===[%d]\n", g_var.flag_for_15s_off);
             }
 
             g_curr_tspara.x = finger_list.pointer[0].x;

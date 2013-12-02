@@ -75,7 +75,6 @@ static void gtp_esd_check_func(struct work_struct *);
 #define SCREEN_Y (600)
 extern  bool is_ts_load;
 extern int ts_should_revert;
-extern  unsigned int FLAG_FOR_15S_OFF;
 static bool xy_revert_en = 1;
 /*******************************************************
 Function:
@@ -417,14 +416,14 @@ static void goodix_ts_work_func(struct work_struct *work)
                 pos += 8;
                 id = coor_data[pos] & 0x0F;
                 touch_index |= (0x01 << id);
-                FLAG_FOR_15S_OFF++;
-                if(FLAG_FOR_15S_OFF >= 1000)
+                g_var.flag_for_15s_off++;
+                if(g_var.flag_for_15s_off >= 1000)
                 {
-                    FLAG_FOR_15S_OFF = 1000;
+                    g_var.flag_for_15s_off = 1000;
                 }
-                if(FLAG_FOR_15S_OFF < 0)
+                if(g_var.flag_for_15s_off < 0)
                 {
-                    printk("\n[GT911]:====err:FLAG_FOR_15S_OFF===[%d]\n", FLAG_FOR_15S_OFF);
+                    printk("\n[GT911]:====err:FLAG_FOR_15S_OFF===[%d]\n", g_var.flag_for_15s_off);
                 }
             }
             else// if (pre_touch & (0x01 << i))
@@ -489,14 +488,14 @@ static void goodix_ts_work_func(struct work_struct *work)
                 set_touch_pos(&touch);
             }
 #endif
-            FLAG_FOR_15S_OFF++;
-            if(FLAG_FOR_15S_OFF >= 1000)
+            g_var.flag_for_15s_off++;
+            if(g_var.flag_for_15s_off >= 1000)
             {
-                FLAG_FOR_15S_OFF = 1000;
+                g_var.flag_for_15s_off = 1000;
             }
-            if(FLAG_FOR_15S_OFF < 0)
+            if(g_var.flag_for_15s_off < 0)
             {
-                printk("\n[GT911]:====err:FLAG_FOR_15S_OFF===[%d]\n", FLAG_FOR_15S_OFF);
+                printk("\n[GT911]:====err:FLAG_FOR_15S_OFF===[%d]\n", g_var.flag_for_15s_off);
             }
         }
     }

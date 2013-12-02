@@ -102,7 +102,6 @@ static int screen_y = 0;
 static bool xy_revert_en = 0;
 static u8 chip_gt9xxs = 0;  // true if ic is gt9xxs, like gt915s
 extern  bool is_ts_load;
-extern  unsigned int FLAG_FOR_15S_OFF;
 /*******************************************************
 Function:
     Read data from the i2c slave device.
@@ -811,14 +810,14 @@ static void goodix_ts_work_func(struct work_struct *work)
                     set_touch_pos(&touch);
                 }
 #endif
-                FLAG_FOR_15S_OFF++;
-                if(FLAG_FOR_15S_OFF >= 1000)
+                g_var.flag_for_15s_off++;
+                if(g_var.flag_for_15s_off >= 1000)
                 {
-                    FLAG_FOR_15S_OFF = 1000;
+                    g_var.flag_for_15s_off = 1000;
                 }
-                if(FLAG_FOR_15S_OFF < 0)
+                if(g_var.flag_for_15s_off < 0)
                 {
-                    printk("\nerr:FLAG_FOR_15S_OFF===[%d]\n", FLAG_FOR_15S_OFF);
+                    printk("\nerr:FLAG_FOR_15S_OFF===[%d]\n", g_var.flag_for_15s_off);
                 }
             }
             else
@@ -859,14 +858,14 @@ static void goodix_ts_work_func(struct work_struct *work)
             }
 #endif
         }
-        FLAG_FOR_15S_OFF++;
-        if(FLAG_FOR_15S_OFF >= 1000)
+        g_var.flag_for_15s_off++;
+        if(g_var.flag_for_15s_off >= 1000)
         {
-            FLAG_FOR_15S_OFF = 1000;
+            g_var.flag_for_15s_off = 1000;
         }
-        if(FLAG_FOR_15S_OFF < 0)
+        if(g_var.flag_for_15s_off < 0)
         {
-            printk("\nerr:FLAG_FOR_15S_OFF===[%d]\n", FLAG_FOR_15S_OFF);
+            printk("\nerr:FLAG_FOR_15S_OFF===[%d]\n", g_var.flag_for_15s_off);
         }
     }
     else if (pre_touch)

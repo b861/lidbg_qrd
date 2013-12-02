@@ -358,6 +358,7 @@ struct lidbg_pvar_t
     int machine_id;
     int cpu_freq;
     bool is_fly;
+    unsigned int flag_for_15s_off;
 };
 
 struct lidbg_hal

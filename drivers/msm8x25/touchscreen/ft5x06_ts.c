@@ -82,7 +82,6 @@ LIDBG_DEFINE;
 touch_t touch = {0, 0, 0};
 #endif
 extern  bool is_ts_load;
-extern unsigned int FLAG_FOR_15S_OFF;
 struct ts_event
 {
     u16 x[CFG_MAX_TOUCH_POINTS];	/*x coordinate */
@@ -238,15 +237,15 @@ static void ft5x06_report_value(struct ft5x06_ts_data *data)
                          event->pressure);
         input_mt_sync(data->input_dev);
         //--------------------futengfei------------------------
-        FLAG_FOR_15S_OFF++;
-        if(FLAG_FOR_15S_OFF >= 1000)
+        g_var.flag_for_15s_off++;
+        if(g_var.flag_for_15s_off >= 1000)
         {
-            FLAG_FOR_15S_OFF = 1000;
+            g_var.flag_for_15s_off = 1000;
         }
         //printk("\nFLAG_FOR_15S_OFF===[%d]\n",FLAG_FOR_15S_OFF);
-        if(FLAG_FOR_15S_OFF < 0)
+        if(g_var.flag_for_15s_off < 0)
         {
-            printk("\nerr:FLAG_FOR_15S_OFF===[%d]\n", FLAG_FOR_15S_OFF);
+            printk("\nerr:FLAG_FOR_15S_OFF===[%d]\n", g_var.flag_for_15s_off);
         }
 #ifdef BUILD_FOR_RECOVERY
         if( ( event->y[0] >= 0) && ( event->x[0] >= 0) )

@@ -33,7 +33,6 @@ touch_t touch = {0, 0, 0};
 #define SCREEN_Y (600)
 static bool xy_revert_en = 0;
 
-extern  unsigned int FLAG_FOR_15S_OFF;
 extern  bool is_ts_load;
 extern int ts_should_revert;
 //SOC_Log_Dumpextern void SOC_Log_Dump(int cmd);
@@ -615,14 +614,14 @@ COORDINATE_POLL:
         input_report_key(ts->input_dev, BTN_TOUCH, 1);
         input_sync(ts->input_dev);
 #endif
-        FLAG_FOR_15S_OFF++;
-        if(FLAG_FOR_15S_OFF >= 1000)
+        g_var.flag_for_15s_off++;
+        if(g_var.flag_for_15s_off >= 1000)
         {
-            FLAG_FOR_15S_OFF = 1000;
+            g_var.flag_for_15s_off = 1000;
         }
-        if(FLAG_FOR_15S_OFF < 0)
+        if(g_var.flag_for_15s_off < 0)
         {
-            printk("\nerr:FLAG_FOR_15S_OFF===[%d]\n", FLAG_FOR_15S_OFF);
+            printk("\nerr:FLAG_FOR_15S_OFF===[%d]\n", g_var.flag_for_15s_off);
         }
 
         g_curr_tspara.x = input_y;
