@@ -337,6 +337,7 @@ static bool VideoItselfBlackJudge(mm_camera_ch_data_buf_t *frame)
 		}
 return 0;
 }
+/*
 static bool BlackJudge(mm_camera_ch_data_buf_t *frame)
 {
 unsigned char *piont_y,*piont_y_last;
@@ -372,6 +373,7 @@ unsigned int black_count=0;
 	//}
 return 0;
 }
+*/
 static bool RowsOfDataTraversingTheFrameToFindTheBlackLineForDVDorAUX(mm_camera_ch_data_buf_t *frame)
 {
 	unsigned char *piont_y;
@@ -679,15 +681,16 @@ return 0;//未发生分屏
 }
 bool FlyCameraFrameDisplayOrOutDisplay()
 {
-	if(video_channel_status[0] == '2' || video_channel_status[0] == '3')//AUX
+	if(video_channel_status[0] == '2')//AUX
 			{
-				memset((void *)(frame->def.frame->buffer+frame->def.frame->y_off),0,720*3);
+				memset((void *)(frame->def.frame->buffer+frame->def.frame->y_off),0,720*3);//黑前三行
+				memset((void *)(frame->def.frame->buffer+frame->def.frame->cbcr_off),0x7f,720*2);
 
 				if(video_format[0] == '4' || video_format[0] == '2')
 				;//pal
 				else
 				{
-				memset((void *)(frame->def.frame->buffer+frame->def.frame->cbcr_off+720*236),0x7f,720*3);//720*476=342720 235 7f
+				memset((void *)(frame->def.frame->buffer+frame->def.frame->cbcr_off+720*236),0x7f,720*3);//黑后3行
 				memset((void *)(frame->def.frame->buffer+frame->def.frame->y_off+720*475),0,720*5);
 				}
 			}
@@ -699,17 +702,17 @@ bool FlyCameraFrameDisplayOrOutDisplay()
 		}
 		else//Astren
 		{
-			if(BlackJudge(frame) == 1)//发现黑屏
+			//if(BlackJudge(frame) == 1)//发现黑屏
 				//return processPreviewFrameWithOutDisplay(frame);
-				DEBUGLOG("Flyvideo-：发现黑屏，但是目前还未作任何处理\n");
-			else
-				{
+			//	DEBUGLOG("Flyvideo-：发现黑屏，但是目前还未作任何处理\n");
+			//else
+			//	{
 				if( DetermineImageSplitScreen(frame,mHalCamCtrl) )//发现分屏
 					return 1;
 				else
 					return 0;
-				}
-			return 0;
+			//	}
+			//return 0;
 		}
 return 0;
 }
