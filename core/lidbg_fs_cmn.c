@@ -240,8 +240,6 @@ static int thread_filedetec_func(void *data)
 {
     allow_signal(SIGKILL);
     allow_signal(SIGSTOP);
-    ssleep(45);
-    g_is_boot_completed = 1;
     FS_WARN("<thread start>\n");
     if(g_filedetec_dbg)
         show_filedetec_list();

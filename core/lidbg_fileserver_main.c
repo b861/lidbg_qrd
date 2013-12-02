@@ -11,7 +11,6 @@ static struct task_struct *fileserver_test_task3;
 bool is_out_updated = false;
 bool is_fs_work_enable = false;
 int g_mem_dbg = 0;
-int g_is_boot_completed = 0;
 static int test_count = 0;
 //zone end
 

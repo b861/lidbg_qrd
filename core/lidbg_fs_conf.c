@@ -199,10 +199,7 @@ static int thread_udisk_conf(void *data)
     {
         if(!wait_for_completion_interruptible(&udisk_conf_wait))
         {
-            if(!g_is_boot_completed)
-                ssleep(30);
-            else
-                ssleep(7);
+            ssleep(5);
             update_list("/mnt/usbdisk/conf/core.conf", &lidbg_core_list);
             update_list("/mnt/usbdisk/conf/drivers.conf", &lidbg_drivers_list);
         }
