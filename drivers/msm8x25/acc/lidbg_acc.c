@@ -233,7 +233,7 @@ static void fastboot_task_kill_exclude()
 
 
 
-int fastboot_task_kill_select(char *task_name)
+int task_kill_select(char *task_name)
 {
     struct task_struct *p;
     struct task_struct *selected = NULL;
@@ -282,6 +282,59 @@ int fastboot_task_kill_select(char *task_name)
 }
 
 
+
+
+
+
+int task_find_by_pid(int pid)
+{
+    struct task_struct *p;
+    struct task_struct *selected = NULL;
+    unsigned long flags_kill;
+    DUMP_FUN_ENTER;
+
+    if(ptasklist_lock != NULL)
+    {
+        lidbg("read_lock+\n");
+        read_lock(ptasklist_lock);
+    }
+    else
+        spin_lock_irqsave(&kill_lock, flags_kill);
+
+    for_each_process(p)
+    {
+        struct mm_struct *mm;
+        struct signal_struct *sig;
+
+        task_lock(p);
+        mm = p->mm;
+        sig = p->signal;
+        task_unlock(p);
+
+        selected = p;
+
+        if (p->pid == pid)
+        {
+            lidbg("find %s by pid-%d\n", p->comm, pid);
+
+            //if (selected)
+            {
+                //force_sig(SIGKILL, selected);
+                break;
+            }
+        }
+    }
+
+    if(ptasklist_lock != NULL)
+        read_unlock(ptasklist_lock);
+    else
+        spin_unlock_irqrestore(&kill_lock, flags_kill);
+
+    DUMP_FUN_LEAVE;
+    return 0;
+}
+
+
 void show_wakelock(bool file_log)
 {
     int index = 0;
@@ -301,6 +354,8 @@ void show_wakelock(bool file_log)
 
             index++;
             lidbg("<THE%d:[%d,%d][%s][%s]>,%d,MAX:%d\n",  index, pos->pid, pos->uid, lock_type(pos->is_count_wakelock), pos->name,pos->cunt, pos->cunt_max );
+			if(pos->pid != 0)
+				task_find_by_pid(pos->pid);
             if(file_log)
                 lidbg_fs_log(FASTBOOT_LOG_PATH, "block wakelock %s\n", pos->name);
         }
@@ -345,6 +400,9 @@ static void acc_early_suspend(struct early_suspend *handler)
     if(find_unsafe_clk()) {}
 
     fastboot_task_kill_exclude();
+	
+	task_kill_select("tencent.qqmusic");
+	task_kill_select(".flyaudio.media");
 }
 
 static void acc_late_resume(struct early_suspend *handler)
@@ -379,6 +437,9 @@ static int thread_acc_suspend(void *data)
                     {
                         lidbgerr("thread_acc_suspend wait suspend timeout!\n");
 						
+						task_kill_select("tencent.qqmusic");
+						task_kill_select(".flyaudio.media");
+
                         if(time_count % 5 == 0)
                         {
                         	show_wakelock(0);
@@ -389,11 +450,11 @@ static int thread_acc_suspend(void *data)
 							fastboot_task_kill_exclude();
                         }
 
-                        #if 1
+                        #if 0
                         if(time_count % 30 == 0)
                         {
-							fastboot_task_kill_select("tencent.qqmusic");
-							fastboot_task_kill_select(".flyaudio.media");
+							task_kill_select("tencent.qqmusic");
+							task_kill_select(".flyaudio.media");
                         }
 						#endif
                         if(time_count >= 120)

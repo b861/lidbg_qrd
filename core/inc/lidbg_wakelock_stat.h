@@ -8,8 +8,8 @@ struct wakelock_item
     int cunt;
     int cunt_max;
     bool is_count_wakelock;
-    unsigned int pid;
-    unsigned int uid;
+    int pid;
+    int uid;
 };
 
 static inline char *lock_type(bool cnt_wakelock)
