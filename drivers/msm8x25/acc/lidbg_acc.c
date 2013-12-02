@@ -108,7 +108,7 @@ bool find_unsafe_clk(void)
             {
                 lidbg_fs_log(FASTBOOT_LOG_PATH, "block unsafe clk:%d\n", i);
                 ret = 1;
-                return ret;
+                //return ret;
             }
         }
         i--;
@@ -315,7 +315,8 @@ int task_find_by_pid(int pid)
 
         if (p->pid == pid)
         {
-            lidbg("find %s by pid-%d\n", p->comm, pid);
+           // lidbg("find %s by pid-%d\n", p->comm, pid);
+            lidbg_fs_log(FASTBOOT_LOG_PATH,"find %s by pid-%d\n", p->comm, pid);
 
             //if (selected)
             {
@@ -354,10 +355,13 @@ void show_wakelock(bool file_log)
 
             index++;
             lidbg("<THE%d:[%d,%d][%s][%s]>,%d,MAX:%d\n",  index, pos->pid, pos->uid, lock_type(pos->is_count_wakelock), pos->name,pos->cunt, pos->cunt_max );
-			if(pos->pid != 0)
-				task_find_by_pid(pos->pid);
             if(file_log)
+            {
                 lidbg_fs_log(FASTBOOT_LOG_PATH, "block wakelock %s\n", pos->name);
+				
+				if(pos->pid != 0)
+					task_find_by_pid(pos->pid);
+            }
         }
     }
 }

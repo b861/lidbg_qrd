@@ -207,7 +207,65 @@ void wakelock_stat(int lock, const char *name)
 #endif
 }
 
-void show_wakelock(void)
+
+
+
+
+
+
+int task_find_by_pid(int pid)
+{
+    struct task_struct *p;
+    struct task_struct *selected = NULL;
+    unsigned long flags_kill;
+    DUMP_FUN_ENTER;
+
+    if(ptasklist_lock != NULL)
+    {
+        lidbg("read_lock+\n");
+        read_lock(ptasklist_lock);
+    }
+    else
+        spin_lock_irqsave(&kill_lock, flags_kill);
+
+    for_each_process(p)
+    {
+        struct mm_struct *mm;
+        struct signal_struct *sig;
+
+        task_lock(p);
+        mm = p->mm;
+        sig = p->signal;
+        task_unlock(p);
+
+        selected = p;
+
+        if (p->pid == pid)
+        {
+           // lidbg("find %s by pid-%d\n", p->comm, pid);
+            lidbg_fs_log(FASTBOOT_LOG_PATH,"find %s by pid-%d\n", p->comm, pid);
+
+            //if (selected)
+            {
+                //force_sig(SIGKILL, selected);
+                break;
+            }
+        }
+    }
+
+    if(ptasklist_lock != NULL)
+        read_unlock(ptasklist_lock);
+    else
+        spin_unlock_irqrestore(&kill_lock, flags_kill);
+
+    DUMP_FUN_LEAVE;
+    return 0;
+}
+
+
+
+
+void show_wakelock(bool file_log)
 {
     int index = 0;
     struct wakelock_item *pos;
@@ -217,13 +275,23 @@ void show_wakelock(void)
         lidbg("<err.lidbg_show_wakelock:nobody_register>\n");
     list_for_each_entry(pos, client_list, tmp_list)
     {
-        if (pos->name)
+        if (pos->name && pos->cunt > 0)
         {
+            if(!strcmp(pos->name, "mmc0_detect") || !strcmp(pos->name, "mmc1_detect") || !strcmp(pos->name, "mmc2_detect")
+                    || !strcmp(pos->name, "msm_serial_hs_rx") || !strcmp(pos->name, "msm_serial_hs_dma")
+              )
+                continue;
+
             index++;
             lidbg("<THE%d:[%d,%d][%s][%s]>,%d,MAX:%d\n",  index, pos->pid, pos->uid, lock_type(pos->is_count_wakelock), pos->name,pos->cunt, pos->cunt_max );
+            if(file_log)
+            {
+                lidbg_fs_log(FASTBOOT_LOG_PATH, "block wakelock %s\n", pos->name);
+				
+				if(pos->pid != 0)
+					task_find_by_pid(pos->pid);
+            }
         }
-        if(pos->cunt != 0)
-            lidbg_fs_log(FASTBOOT_LOG_PATH, "block wakelock %s\n", pos->name);
     }
 }
 
@@ -277,7 +345,7 @@ bool find_unsafe_clk(void)
             {
                 lidbg_fs_log(FASTBOOT_LOG_PATH, "block unsafe clk:%d\n", i);
                 ret = 1;
-                return ret;
+               // return ret;
             }
         }
         i--;
@@ -651,7 +719,7 @@ static int thread_fastboot_suspend(void *data)
                         wakelock_occur_count++;
                         lidbg("wakelock_occur_count=%d\n", wakelock_occur_count);
 
-                        show_wakelock();
+                        show_wakelock(1);
 
                         if(wakelock_occur_count <= /*WAIT_LOCK_RESUME_TIMES*/fb_data->haslock_resume_times)
                         {
