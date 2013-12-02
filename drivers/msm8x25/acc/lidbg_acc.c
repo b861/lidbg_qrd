@@ -378,9 +378,18 @@ static int thread_acc_suspend(void *data)
                     if(time_count >= 10)
                     {
                         lidbgerr("thread_acc_suspend wait suspend timeout!\n");
-                        show_wakelock(0);
-                        //list_active_locks();
-                        #if 0
+						
+                        if(time_count % 5 == 0)
+                        {
+                        	show_wakelock(0);
+                        	//list_active_locks();
+                        }
+                        if(time_count % 10 == 0)
+                        {
+							fastboot_task_kill_exclude();
+                        }
+
+                        #if 1
                         if(time_count % 30 == 0)
                         {
 							fastboot_task_kill_select("tencent.qqmusic");
