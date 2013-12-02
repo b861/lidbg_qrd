@@ -318,9 +318,9 @@ int task_find_by_pid(int pid)
            // lidbg("find %s by pid-%d\n", p->comm, pid);
             lidbg_fs_log(FASTBOOT_LOG_PATH,"find %s by pid-%d\n", p->comm, pid);
 
-            //if (selected)
+           // if (selected)
             {
-                //force_sig(SIGKILL, selected);
+             //   force_sig(SIGKILL, selected);
                 break;
             }
         }
@@ -407,6 +407,8 @@ static void acc_early_suspend(struct early_suspend *handler)
 	
 	task_kill_select("tencent.qqmusic");
 	task_kill_select(".flyaudio.media");
+	task_kill_select("mediaserver");
+
 }
 
 static void acc_late_resume(struct early_suspend *handler)
@@ -434,16 +436,15 @@ static int thread_acc_suspend(void *data)
             {
                 msleep(1000);
                 time_count++;
-
+		task_kill_select("tencent.qqmusic");
+		task_kill_select(".flyaudio.media");
+		task_kill_select("mediaserver");
                 if(suspend_state == PM_STATUS_EARLY_SUSPEND_PENDING)    //if suspend state always in early suspend
                 {
                     if(time_count >= 10)
                     {
                         lidbgerr("thread_acc_suspend wait suspend timeout!\n");
 						
-						task_kill_select("tencent.qqmusic");
-						task_kill_select(".flyaudio.media");
-
                         if(time_count % 5 == 0)
                         {
                         	show_wakelock(0);
