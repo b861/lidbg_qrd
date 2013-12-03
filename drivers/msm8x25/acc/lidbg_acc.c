@@ -28,8 +28,6 @@ DECLARE_MUTEX(lidbg_acc_sem);
 DEFINE_SEMAPHORE(lidbg_acc_sem);
 #endif
 
-static struct task_struct *acc_task;
-static struct task_struct *resume_task;
 
 static spinlock_t  active_wakelock_list_lock;
 static spinlock_t kill_lock;
@@ -294,7 +292,7 @@ int task_find_by_pid(int pid)
 	char name[64];
 	memset(name,'\0',sizeof(name));
     DUMP_FUN_ENTER;
-
+ 
     if(ptasklist_lock != NULL)
     {
         lidbg("read_lock+\n");
@@ -452,7 +450,7 @@ static int thread_acc_suspend(void *data)
                         if(time_count % 5 == 0)
                         {
                         	show_wakelock(0);
-                        	//list_active_locks();
+                        	if(0)list_active_locks();
                         }
                         if(time_count % 10 == 0)
                         {

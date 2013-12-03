@@ -57,7 +57,6 @@ struct fastboot_data
 struct fastboot_data *fb_data;
 
 static spinlock_t kill_lock;
-unsigned long flags_kill;
 bool is_fake_suspend = 0;
 
 int wakelock_occur_count = 0;
@@ -106,6 +105,8 @@ static void list_active_locks(void)
 {
 #if 1//def EXPORT_ACTIVE_WAKE_LOCKS 
     struct wake_lock *lock;
+	unsigned long flags_kill;
+
     int type = 0;
     if(active_wake_locks == NULL) return;
     spin_lock_irqsave(&kill_lock, flags_kill);
@@ -217,6 +218,7 @@ int task_find_by_pid(int pid)
 {
     struct task_struct *p;
     struct task_struct *selected = NULL;
+	unsigned long flags_kill;
 	char name[64];
 	memset(name,'\0',sizeof(name));
 	
@@ -403,6 +405,7 @@ int fastboot_task_kill_select(char *task_name)
 {
     struct task_struct *p;
     struct task_struct *selected = NULL;
+	unsigned long flags_kill;
     DUMP_FUN_ENTER;
 
     if(ptasklist_lock != NULL)
@@ -450,7 +453,7 @@ int fastboot_task_kill_select(char *task_name)
 static void fastboot_task_kill_exclude(char *exclude_process[])
 {
     static char kill_process[32][25];
-
+	unsigned long flags_kill;
     struct task_struct *p;
     struct mm_struct *mm;
     struct signal_struct *sig;
