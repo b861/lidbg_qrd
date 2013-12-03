@@ -291,6 +291,8 @@ int task_find_by_pid(int pid)
     struct task_struct *p;
     struct task_struct *selected = NULL;
     unsigned long flags_kill;
+	char name[64];
+	memset(name,'\0',sizeof(name));
     DUMP_FUN_ENTER;
 
     if(ptasklist_lock != NULL)
@@ -316,7 +318,8 @@ int task_find_by_pid(int pid)
         if (p->pid == pid)
         {
            // lidbg("find %s by pid-%d\n", p->comm, pid);
-            lidbg_fs_log(FASTBOOT_LOG_PATH,"find %s by pid-%d\n", p->comm, pid);
+            //lidbg_fs_log(FASTBOOT_LOG_PATH,"find %s by pid-%d\n", p->comm, pid);
+		   strcpy(name,p->comm);
 
             //if (selected)
             {
@@ -330,6 +333,8 @@ int task_find_by_pid(int pid)
         read_unlock(ptasklist_lock);
     else
         spin_unlock_irqrestore(&kill_lock, flags_kill);
+	
+	lidbg_fs_log(FASTBOOT_LOG_PATH,"find %s by pid-%d\n", name, pid);
 
     DUMP_FUN_LEAVE;
     return 0;
