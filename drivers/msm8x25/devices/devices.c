@@ -393,7 +393,7 @@ static int thread_thermal(void *data)
             {
                 flag_fan_run_statu = true;
                 AIRFAN_BACK_ON;
-                lidbg_fs_log(TEMP_LOG_PATH, "AIR_ON\n");
+                lidbg_fs_log(TEMP_LOG_PATH, "AIR_ON:%d\n",cur_temp);
             }
         }
         else //off
@@ -402,7 +402,7 @@ static int thread_thermal(void *data)
             {
                 flag_fan_run_statu = false;
                 AIRFAN_BACK_OFF;
-                lidbg_fs_log(TEMP_LOG_PATH, "AIR_OFF\n");
+                lidbg_fs_log(TEMP_LOG_PATH, "AIR_OFF:%d\n",cur_temp);
             }
         }
     }
@@ -1074,7 +1074,7 @@ static int lidbg_event(struct notifier_block *this,
 
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_ACC_ON):
         LCD_RESET;
-        if(!g_var.is_fly)LCD_ON;
+        /*if(!g_var.is_fly)*/LCD_ON;
         unmute_ns();
         break;
 
