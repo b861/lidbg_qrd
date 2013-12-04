@@ -50,7 +50,7 @@ void cb_password_update(char *password )
 }
 void update_lidbg_out_dir(char *key, char *value )
 {
-	cb_password_update(NULL);
+    cb_password_update(NULL);
 }
 
 void cb_password_gui_kmsg(char *password )

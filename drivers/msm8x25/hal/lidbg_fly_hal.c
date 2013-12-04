@@ -42,29 +42,7 @@ void hal_func_tbl_default(void)
     dump_stack();
 
 }
-void file_check(void)
-{
-    if(is_out_updated)
-    {
-        lidbg("<start to cp gps.so>\n");
 
-#if (defined(BOARD_V1) || defined(BOARD_V2))//25
-        if(fs_copy_file("/flysystem/lib/out/lidbg_servicer", "/flysystem/bin/lidbg_servicer"))
-            lidbg("copy_file:lidbg_servicer\n");
-			
-        if(fs_copy_file("/flysystem/lib/out/gps.msm7627a.so", "/flysystem/lib/hw/gps.msm7627a.so"))
-            lidbg("copy_file:gps_hal.msm7627a\n");
-		
-#else
-        if( fs_copy_file("/flysystem/lib/out/gps.msm8625.so", "/flysystem/lib/hw/gps.msm8625.so"))
-            lidbg("copy_file:gps_hal.msm8625\n");
-#endif
-
-		if( fs_copy_file("/flysystem/lib/out/camera.msm7627a.so", "/flysystem/lib/hw/camera.msm7627a.so"))
-			lidbg("copy_file:camera.msm7627a.so\n");
-
-    }
-}
 int soc_thread(void *data)
 {
     int i, j;
@@ -75,7 +53,6 @@ int soc_thread(void *data)
     lidbg_readwrite_file("/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq", NULL, "700800", sizeof("700800") - 1);
 #endif
     SOC_Get_CpuFreq();
-    file_check();
 
     for(i = 0; insmod_path[i] != NULL; i++)
     {
