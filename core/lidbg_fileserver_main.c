@@ -201,8 +201,8 @@ void check_conf_file(void)
     {
         FS_WARN("<overwrite:push,update?>\n");
         is_out_updated = true;
-        copy_all_conf_file();
         analysis_copylist("/flysystem/lib/out/copylist.conf");
+        copy_all_conf_file();
         lidbg_rm("/data/logcat.txt");
         lidbg_rm("/data/kmsg.txt");
     }
@@ -213,10 +213,11 @@ void lidbg_fileserver_main_prepare(void)
 {
 
     FS_WARN("<%s>\n", FS_VERSION);
-    set_machine_id();
-    FS_WARN("machine_id:%d\n", get_machine_id());
 
     check_conf_file();
+
+    set_machine_id();
+    FS_WARN("machine_id:%d\n", get_machine_id());
 
     fs_fill_list(driver_sd_path, FS_CMD_FILE_CONFIGMODE, &lidbg_drivers_list);
     fs_fill_list(core_sd_path, FS_CMD_FILE_CONFIGMODE, &lidbg_core_list);
