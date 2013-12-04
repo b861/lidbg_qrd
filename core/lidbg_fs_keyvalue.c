@@ -341,6 +341,7 @@ int update_list(const char *filename, struct list_head *client_list)
         }
     }
     kfree(file_ptr);
+    lidbg_domineering_ack();
     return 1;
 }
 //zone end

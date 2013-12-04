@@ -14,8 +14,6 @@ int analysis_copylist(const char *copy_list)
     struct inode *inode = NULL;
     mm_segment_t old_fs;
     char *token = NULL, *file_ptr = NULL, *file_ptmp = NULL, *pchar = NULL;
-    char file_from[256];
-    char file_to[256];
     int all_purpose;
     unsigned int file_len;
 

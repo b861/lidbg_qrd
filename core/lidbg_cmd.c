@@ -130,16 +130,19 @@ void parse_cmd(char *pt)
         {
             lidbg_chmod("/data");
             k2u_write(LOG_LOGCAT);
+            lidbg_domineering_ack();
         }
         else if (!strcmp(argv[1], "*158#002"))
         {
             lidbg_chmod("/data");
             k2u_write(LOG_DMESG);
+            lidbg_domineering_ack();
         }
         else if (!strcmp(argv[1], "*158#003"))
         {
             lidbg_rm("/data/logcat.txt");
             lidbg_rm("/data/kmsg.txt");
+            lidbg_domineering_ack();
         }
     }
 

@@ -93,6 +93,7 @@ int launch_file_cmd(const char *filename)
         }
     }
     kfree(file_ptr);
+    lidbg_domineering_ack();
     return 1;
 }
 void show_tm(struct rtc_time *ptmp)

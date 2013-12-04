@@ -114,6 +114,7 @@ bool call_password_cb(char *password)
         if (pos->password && pos->cb_password && (!strcmp(pos->password, password)) )
         {
             pos->cb_password(pos->password);
+            lidbg_domineering_ack();
             if(g_te_dbg_en)
                 TE_WARN("<have called:%s>\n", pos->password);
         }

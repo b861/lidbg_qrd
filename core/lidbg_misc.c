@@ -118,6 +118,7 @@ void cp_data_to_udisk(char *key, char *value )
         }
         lidbg_rm("/data/logcat.txt");
         lidbg_rm("/data/kmsg.txt");
+        lidbg_domineering_ack();
     }
     else
         LIDBG_ERR("<nobody_register>\n");

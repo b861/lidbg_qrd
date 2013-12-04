@@ -258,7 +258,12 @@ bool new_cdev(struct file_operations *cdev_fops, char *nodename)
     return true;
 }
 
-
+void lidbg_domineering_ack(void)
+{
+    soc_bl_set(80);
+    msleep(100);
+    soc_bl_set(250);
+}
 int  lidbg_exe(char path[], char argv1[], char argv2[], char argv3[], char argv4[], char argv5[], char argv6[])
 {
     return lidbg_launch_user(path, argv1, argv2, argv3, argv4, argv5, argv6);
@@ -381,6 +386,7 @@ EXPORT_SYMBOL(lidbg_mkdir);
 EXPORT_SYMBOL(lidbg_touch);
 EXPORT_SYMBOL(lidbg_reboot);
 EXPORT_SYMBOL(lidbg_setprop);
+EXPORT_SYMBOL(lidbg_domineering_ack);
 
 EXPORT_SYMBOL(mod_cmn_main);
 EXPORT_SYMBOL(lidbg_get_ns_count);
