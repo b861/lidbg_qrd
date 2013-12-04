@@ -62,11 +62,18 @@ namespace android {
 	static nsecs_t flymLastFpsTime = 0;
   static nsecs_t flynow;
   static nsecs_t flydiff;
-
+  static int global_tw9912_file_fd;
+  static int global_fream_give_up =0;
 void FlyCameraStar()
 {
 	globao_mFlyPreviewStatus = 1;
+	global_fream_give_up = 0;
 	DEBUGLOG("Flyvideo-mFlyPreviewStatus =%d\n",globao_mFlyPreviewStatus);
+	global_tw9912_file_fd = open("/dev/tw9912config",O_RDWR);
+	if(global_tw9912_file_fd ==-1)
+		{
+		DEBUGLOG("Flyvideo-:Error FlyCameraStar() tw9912config faild\n");
+		}
 }
 void FlyCameraStop()
 {
@@ -79,6 +86,7 @@ LongitudinalInformationRemember.BegingFindBlackFreamCount = 0;
 DetermineImageSplitScreen_do_not_or_yes = true;//at next preview ,allow run function DetermineImageSplitScreen at astren
 globao_mFlyPreviewStatus = 0;
 global_Fream_is_first = true;
+close(global_tw9912_file_fd);
 DEBUGLOG("Flyvideo-mFlyPreviewStatus =%d\n",globao_mFlyPreviewStatus);
 }
 void FlyCameraRelease()
@@ -566,8 +574,10 @@ static bool DetermineImageSplitScreen(mm_camera_ch_data_buf_t *frame,QCameraHard
 	unsigned char *piont_crcb;
 	unsigned int dete_count = 0;
 
+
+
 	if(FlyCameraflymFps<24){DEBUGLOG("Flyvideo-x:flymFps = %f",FlyCameraflymFps);return 0;}
-	if(++global_fram_at_one_sec_count < 50)//过滤判断次数的频繁度，每隔20帧判断一次，
+	if(++global_fram_at_one_sec_count < 10)//过滤判断次数的频繁度，每隔20帧判断一次，
 	{
 	return 0;
 	}
@@ -638,8 +648,8 @@ static bool DetermineImageSplitScreen(mm_camera_ch_data_buf_t *frame,QCameraHard
 			for(i=0;i<20;i++)
 			{
 				piont_crcb = (unsigned char *)(frame->def.frame->buffer+frame->def.frame->cbcr_off+(180*j + i));
-				if((*piont_crcb) < (0x7f - 10) || (*piont_crcb) > (0x80+10) )//第一行有颜色说明发生啦分屏
-				{
+				if((*piont_crcb) < (0x7f - 3) || (*piont_crcb) > (0x80+3) )//第一行有颜色说明发生啦分屏
+				{//DEBUGLOG("Flyvideo-..");
 					dete_count++;//一行判断超过10个可疑点才认为是数据异常
 						if(dete_count > 9)
 						{
@@ -651,9 +661,8 @@ static bool DetermineImageSplitScreen(mm_camera_ch_data_buf_t *frame,QCameraHard
 								global_need_rePreview = false;//防止CameraRestartPreviewThread阻塞导致，global_need_rePreview无法赋值成true；
 								global_fram_count = 0;
 							}
-							if(global_need_rePreview == false && (flynow - DVDorAUX_last_time) > ms2ns(15000))//离上次时间超过10s
+							if(global_need_rePreview == false)//离上次时间超过10s
 							{
-								DVDorAUX_last_time = flynow;
 								if(global_fram_count >= 1 && RowsOfDataTraversingTheFrameToFindTheBlackLineForDVDorAUX(frame)) //发现有一帧就重新preview ,且寻找到啦黑边
 								{
 									global_fram_count = 0;
@@ -679,26 +688,78 @@ BREAK_THE:
 
 return 0;//未发生分屏
 }
-bool FlyCameraFrameDisplayOrOutDisplay()
+static int FlyCameraReadTw9912StatusRegitsterValue()
+{
+	int file_fd;
+	unsigned char value,value_1;
+	int arg = 0;
+	unsigned int cmd;
+       if(global_tw9912_file_fd == -1)
+	return 0;
+	cmd = COPY_TW9912_STATUS_REGISTER_0X01_4USER;
+	if (ioctl(global_tw9912_file_fd,cmd, &arg) < 0)
+        {
+		DEBUGLOG("Flyvideo-: Call cmd COPY_TW9912_STATUS_REGISTER_0X01_4USER fail\n");
+		close(file_fd);
+		return 0;
+	}
+	read(global_tw9912_file_fd, (void *)(&value),sizeof(unsigned char));
+	//DEBUGLOG("Flyvideo-:0x%.2x\n",value);
+
+	value_1 = value & 0x68;
+	if(value_1 != 0x68)
+	{
+		//global_fream_give_up ++ ;
+		if(global_fream_give_up < 10)
+		{
+		DEBUGLOG("Flyvideo-:Vedio singnal bad\n");
+		//memset((void *)(frame->def.frame->buffer+frame->def.frame->y_off),0,720*480);
+		//memset((void *)(frame->def.frame->buffer+frame->def.frame->cbcr_off),0,720*480);
+		return 1;
+		}
+		else
+		{// hope 10 fream ago signal is good 
+		global_fream_give_up = 0;
+		return 0;
+		}
+	}
+return 0;
+}
+static void FlyCameraAuxBlackLine(void)
 {
 	if(video_channel_status[0] == '2')//AUX
 			{
-				memset((void *)(frame->def.frame->buffer+frame->def.frame->y_off),0,720*3);//黑前三行
+				memset((void *)(frame->def.frame->buffer+frame->def.frame->y_off),0x1e,720*3);//黑前三行
 				memset((void *)(frame->def.frame->buffer+frame->def.frame->cbcr_off),0x7f,720*2);
 
 				if(video_format[0] == '4' || video_format[0] == '2')
 				;//pal
 				else
 				{
-				memset((void *)(frame->def.frame->buffer+frame->def.frame->cbcr_off+720*236),0x7f,720*3);//黑后3行
-				memset((void *)(frame->def.frame->buffer+frame->def.frame->y_off+720*475),0,720*5);
+				memset((void *)(frame->def.frame->buffer+frame->def.frame->cbcr_off+720*237),0x80,720*4);//黑后3行
+				memset((void *)(frame->def.frame->buffer+frame->def.frame->y_off+720*475),0x1e,720*5);
 				}
 			}
+}
+bool FlyCameraFrameDisplayOrOutDisplay()
+{
+/*bool ret;
+		if(video_channel_status[0] != '1')//is not DVD
+		{
+			ret = FlyCameraReadTw9912StatusRegitsterValue();//1:DVD 2:AUX 3:Astren
+			if(ret == 1) return 1;
+		}
+*/
 
 		if(video_channel_status[0] != '3')
 		{//倒车状态先判断黑屏再判断分屏
 			if( DetermineImageSplitScreen(frame,mHalCamCtrl) )//发现分屏这个帧丢弃不显示
-			return 1;
+			{
+				FlyCameraAuxBlackLine();			
+				return 1;
+			}
+			else 
+				FlyCameraAuxBlackLine();
 		}
 		else//Astren
 		{

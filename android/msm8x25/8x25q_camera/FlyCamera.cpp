@@ -345,6 +345,7 @@ static bool VideoItselfBlackJudge(mm_camera_ch_data_buf_t *frame)
 		}
 return 0;
 }
+/*
 static bool BlackJudge(mm_camera_ch_data_buf_t *frame)
 {
 unsigned char *piont_y,*piont_y_last;
@@ -380,18 +381,19 @@ unsigned int black_count=0;
 	//}
 return 0;
 }
+*/
 static bool RowsOfDataTraversingTheFrameToFindTheBlackLineForDVDorAUX(mm_camera_ch_data_buf_t *frame)
 {
 	unsigned char *piont_y;
 	int i = 0,jj =0;
 	unsigned int count;
-	unsigned int find_line = 479;//NTSC
+	unsigned int find_line = 477;//NTSC
 	if(video_format[0] == '4' || video_format[0] == '2')
 	{
 	DEBUGLOG("Flyvideo-:视频制式是:PAL，寻找范围是：9～562");
 	find_line = 562;//PAL
 	}
-	else DEBUGLOG("Flyvideo-:视频制式是:NTSC，寻找范围是：9～479");
+	else DEBUGLOG("Flyvideo-:视频制式是:NTSC，寻找范围是：9～477");
 			DEBUGLOG("Flyvideo-可能发生分屏，寻找黑边中。。。");
 			for(i=9;i<find_line;i++)//某列下的第几行，找 一个点 看数据是否是黑色；前10行和后10行放弃找，正常情况下前3行是黑色的数据
 			{
@@ -576,30 +578,14 @@ static bool DetermineImageSplitScreen(mm_camera_ch_data_buf_t *frame,QCameraHard
 
 	if(FlyCameraflymFps<24){DEBUGLOG("Flyvideo-x:flymFps = %f",FlyCameraflymFps);return 0;}
 	if(++global_fram_at_one_sec_count < 10)//过滤判断次数的频繁度，每隔20帧判断一次，
-		{
-			if(video_channel_status[0] == '2' || video_channel_status[0] == '3')//AUX
-			{
-				memset((void *)(frame->def.frame->buffer+frame->def.frame->y_off),0,720*3);
-			}
-		return 0;
-		}
+	{
+	return 0;
+	}
 	else
-		{
-			global_fram_at_one_sec_count = 0;
-			if(video_channel_status[0] == '2' || video_channel_status[0] == '3')//AUX
-				{
-					memset((void *)(frame->def.frame->buffer+frame->def.frame->y_off),0,720*3);
-				}		
-		}
+		global_fram_at_one_sec_count = 0;
 	//纵向分屏判断
 	if(DetermineImageSplitScreen_Longitudinal(frame,mHalCamCtrl) == 1)
-		{
-			if(video_channel_status[0] == '2' || video_channel_status[0] == '3')//AUX
-			{
-			memset((void *)(frame->def.frame->buffer+frame->def.frame->y_off),0,720*3);
-			}
 		return 1;
-		}
 
 	// property_get("fly.video.channel.status",video_channel_status,"1");//1:DVD 2:AUX 3:Astren
 
@@ -739,31 +725,55 @@ static int FlyCameraReadTw9912StatusRegitsterValue()
 	}
 return 0;
 }
+static void FlyCameraAuxBlackLine(void)
+{
+	if(video_channel_status[0] == '2')//AUX
+			{
+				memset((void *)(frame->def.frame->buffer+frame->def.frame->y_off),0x1e,720*3);//黑前三行
+				memset((void *)(frame->def.frame->buffer+frame->def.frame->cbcr_off),0x7f,720*2);
+
+				if(video_format[0] == '4' || video_format[0] == '2')
+				;//pal
+				else
+				{
+				memset((void *)(frame->def.frame->buffer+frame->def.frame->cbcr_off+720*237),0x80,720*4);//黑后3行
+				memset((void *)(frame->def.frame->buffer+frame->def.frame->y_off+720*475),0x1e,720*5);
+				}
+			}
+}
 bool FlyCameraFrameDisplayOrOutDisplay()
-{bool ret;
+{
+bool ret;
 		if(video_channel_status[0] != '1')//is not DVD
 		{
 			ret = FlyCameraReadTw9912StatusRegitsterValue();//1:DVD 2:AUX 3:Astren
 			if(ret == 1) return 1;
 		}
+
+
 		if(video_channel_status[0] != '3')
 		{//倒车状态先判断黑屏再判断分屏
 			if( DetermineImageSplitScreen(frame,mHalCamCtrl) )//发现分屏这个帧丢弃不显示
-			return 1;
+			{
+				FlyCameraAuxBlackLine();			
+				return 1;
+			}
+			else 
+				FlyCameraAuxBlackLine();
 		}
 		else//Astren
 		{
-			if(BlackJudge(frame) == 1)//发现黑屏
+			//if(BlackJudge(frame) == 1)//发现黑屏
 				//return processPreviewFrameWithOutDisplay(frame);
-				DEBUGLOG("Flyvideo-：发现黑屏，但是目前还未作任何处理\n");
-			else
-				{
+			//	DEBUGLOG("Flyvideo-：发现黑屏，但是目前还未作任何处理\n");
+			//else
+			//	{
 				if( DetermineImageSplitScreen(frame,mHalCamCtrl) )//发现分屏
 					return 1;
 				else
 					return 0;
-				}
-			return 0;
+			//	}
+			//return 0;
 		}
 return 0;
 }
