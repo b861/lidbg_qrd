@@ -222,7 +222,7 @@ int task_find_by_pid(int pid)
 	char name[64];
 	memset(name,'\0',sizeof(name));
 	
-    DUMP_FUN_ENTER;	
+   // DUMP_FUN_ENTER;	
     if(ptasklist_lock != NULL)
     {
         lidbg("read_lock+\n");
@@ -263,7 +263,7 @@ int task_find_by_pid(int pid)
 	
 	lidbg_fs_log(FASTBOOT_LOG_PATH,"find %s by pid-%d\n", name, pid);
 
-    DUMP_FUN_LEAVE;
+   // DUMP_FUN_LEAVE;
     return 0;
 }
 

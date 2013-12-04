@@ -1074,7 +1074,7 @@ static int lidbg_event(struct notifier_block *this,
 
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_ACC_ON):
         LCD_RESET;
-        /*if(!g_var.is_fly)*/LCD_ON;
+        if(!g_var.is_fly)LCD_ON;
         unmute_ns();
         break;
 
