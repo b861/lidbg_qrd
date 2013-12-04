@@ -15,5 +15,4 @@ lidbg_acc.ko
 fastboot_not_kill_list.conf
 drivers.conf
 state.conf
-copylist.conf
 ###############
