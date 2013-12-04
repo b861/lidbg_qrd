@@ -433,6 +433,7 @@ static int thread_acc_suspend(void *data)
         {
             time_count = 0;
             wait_for_completion(&suspend_start);
+			msleep(5000);
             while(1)
             {
                 msleep(1000);
@@ -535,7 +536,7 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
             SOC_Write_Servicer(LOG_LOGCAT);
             //SOC_Write_Servicer(LOG_DMESG);
         }
-        msleep(5000);
+        //msleep(5000); big err
         complete(&suspend_start);
     }
 
