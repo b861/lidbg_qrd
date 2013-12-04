@@ -72,20 +72,20 @@ int static VideoImageParameterConfig(void)
 		flag_now_config_channal_AUX_or_Astren = 0;
 		     if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
 		        {
-		        Tw9912_image_global_AUX_BACK[0][1] = 0xff;//honda xiyu is 31 // is good 00
-		        Tw9912_image_global_AUX_BACK[1][1] = 0x5a;//honda xiyu 5c //is good 58
-			 Tw9912_image_global_AUX_BACK[2][1] = 0x20;
+		        Tw9912_image_global_AUX_BACK[0][1] = 0x0;//honda xiyu is 31 // is good 00
+		        Tw9912_image_global_AUX_BACK[1][1] = 0x6a;//honda xiyu 5c //is good 58
+			 Tw9912_image_global_AUX_BACK[2][1] = 0x00;
 		        Tw9912_image_global_AUX_BACK[3][1] = 0xff;
 			 Tw9912_image_global_AUX_BACK[4][1] = 0xff;
 			// printk("Tw9912_image_global_AUX_BACK reset valu from NTSC_I\n");
 		     	 }
 		     else//PALi
 		     	{
-		        Tw9912_image_global_AUX_BACK_PAL_I[0][1]= 0xff;// is good 00
-		        Tw9912_image_global_AUX_BACK_PAL_I[1][1]= 0x5a;//is good 58
-		        Tw9912_image_global_AUX_BACK_PAL_I[2][1]= 0x20;
-		        Tw9912_image_global_AUX_BACK_PAL_I[3][1]= 0xff;
-		        Tw9912_image_global_AUX_BACK_PAL_I[4][1]= 0xff;
+		        Tw9912_image_global_AUX_BACK_PAL_I[0][1]= 0x0;// is good 00
+		        Tw9912_image_global_AUX_BACK_PAL_I[1][1]= 0x6a;//is good 58
+		        Tw9912_image_global_AUX_BACK_PAL_I[2][1]= 0x00;
+		        Tw9912_image_global_AUX_BACK_PAL_I[3][1]= 0xf0;
+		        Tw9912_image_global_AUX_BACK_PAL_I[4][1]= 0xf0;
 			// printk("Tw9912_image_global_AUX_BACK reset valu from PAL_I\n");
 			 }
 			 return 1;
