@@ -55,6 +55,10 @@ void parse_cmd(char *pt)
             *(u32 *)(((struct lidbg_dev *)global_lidbg_devp)->mem) = (u32)NULL;//(u32)(struct lidbg_dev *)global_lidbg_devp;
 
         }
+        else if (!strcmp(argv[1], "soc"))
+        {
+            soc_main(new_argc, new_argv);
+        }
 
         if(!strcmp(argv[1], "mem"))
         {

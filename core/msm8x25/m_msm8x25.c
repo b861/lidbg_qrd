@@ -12,6 +12,32 @@ int soc_temp_get(void)
 }
 
 
+void soc_main(int argc, char **argv)
+{
+
+    if(argc < 1)
+    {
+        lidbg("Usage:\n");
+        lidbg("bl value\n");
+        return;
+    }
+
+    if(!strcmp(argv[0], "bl"))
+    {
+        u32 bl;
+        bl = simple_strtoul(argv[1], 0, 0);
+        soc_bl_set(bl);
+    }
+
+    if(!strcmp(argv[0], "ad"))
+    {
+        u32 ch, val;
+        ch = simple_strtoul(argv[1], 0, 0);
+        lidbg("ch%d = %x\n", ch, soc_ad_read(ch));
+    }
+}
+
+
 int msm8x25_init(void)
 {
     DUMP_BUILD_TIME;//LIDBG_MODULE_LOG;
@@ -59,6 +85,7 @@ void lidbg_soc_main(int argc, char **argv)
 EXPORT_SYMBOL(lidbg_soc_main);
 EXPORT_SYMBOL(p_fly_smem);
 EXPORT_SYMBOL(soc_temp_get);
+EXPORT_SYMBOL(soc_main);
 
 MODULE_AUTHOR("Lsw");
 MODULE_LICENSE("GPL");
