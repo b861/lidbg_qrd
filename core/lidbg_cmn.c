@@ -260,9 +260,15 @@ bool new_cdev(struct file_operations *cdev_fops, char *nodename)
 
 void lidbg_domineering_ack(void)
 {
+#if (defined(BOARD_V1) || defined(BOARD_V2) || defined(BOARD_V3))
     soc_bl_set(80);
     msleep(100);
     soc_bl_set(250);
+#else
+    soc_bl_set(250);
+    msleep(100);
+    soc_bl_set(80);
+#endif
 }
 int  lidbg_exe(char path[], char argv1[], char argv2[], char argv3[], char argv4[], char argv5[], char argv6[])
 {
