@@ -95,8 +95,6 @@
 #define NOTIFIER_MINOR_SUSPEND_UNPREPARE (3)
 #define NOTIFIER_MINOR_POWER_OFF (4)
 
-#define PWM_BL_MAX (255)
-#define PWM_BL_MIN (0)
 #else
 #define lidbg_io(fmt,...) //do{SOC_IO_Uart_Send(IO_UART_DELAY_245_115200,fmt,##__VA_ARGS__);}while(0)
 

@@ -1077,22 +1077,14 @@ static int lidbg_event(struct notifier_block *this,
         if(!g_var.is_fly)LCD_ON;
         unmute_ns();
         break;
-    case NOTIFIER_VALUE(NOTIFIER_MAJOR_SIGNAL_EVENT, NOTIFIER_MINOR_SIGNAL_BAKLIGHT_ACK):
-#if (defined(BOARD_V1) || defined(BOARD_V2) || defined(BOARD_V3))
-        SOC_BL_Set(80);
-        msleep(100);
-        SOC_BL_Set(250);
-#else
-        SOC_BL_Set(250);
-        msleep(100);
-        SOC_BL_Set(80);
-#endif
-        break;
-
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_SUSPEND_UNPREPARE):
 		USB_WORK_ENABLE;
         break;
-
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_SIGNAL_EVENT, NOTIFIER_MINOR_SIGNAL_BAKLIGHT_ACK):
+        SOC_BL_Set(BL_MIN);
+        msleep(100);
+        SOC_BL_Set(BL_MAX);
+        break;
     default:
         break;
     }
