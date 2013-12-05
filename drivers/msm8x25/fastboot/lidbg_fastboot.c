@@ -804,10 +804,14 @@ static int thread_late_suspend(void *data)
                     if(time_count >= 10)
                     {
                         lidbgerr("late suspend wait early suspend timeout!\n");
+						#if 0
                         lidbg("start force suspend...\n");
                         ignore_wakelock = 1;
                         wake_lock(&(fb_data->flywakelock));
                         wake_unlock(&(fb_data->flywakelock));
+						#else
+						set_power_state(1);
+						#endif
                         break;
                     }
                 }
