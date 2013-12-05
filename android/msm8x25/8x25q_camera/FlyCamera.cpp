@@ -398,13 +398,13 @@ static bool RowsOfDataTraversingTheFrameToFindTheBlackLineForDVDorAUX(mm_camera_
 			for(i=9;i<find_line;i++)//某列下的第几行，找 一个点 看数据是否是黑色；前10行和后10行放弃找，正常情况下前3行是黑色的数据
 			{
 				piont_y = (unsigned char *)(frame->def.frame->buffer+frame->def.frame->y_off+720*i + 300);//在第300列下的每行找黑点
-				if(*piont_y <= 0x20)//到此，在某列下的某行，找到啦一个黑点，接下来对这一行，遍历700个点，看这行是否确实都是黑色数据
+				if(*piont_y <= 0x43)//到此，在某列下的某行，找到啦一个黑点，接下来对这一行，遍历700个点，看这行是否确实都是黑色数据
 				//if((*piont_y) >= 0x20 && (*piont_y) <= 0x35 )
 				{
 					for(jj=0;jj<719;jj++)//在一行的遍历
 					{
 						piont_y = (unsigned char *)(frame->def.frame->buffer+frame->def.frame->y_off+720*i + jj);
-						if(*piont_y <= 0x20)
+						if(*piont_y <= 0x43)
 						//if((*piont_y) >= 0x20 && (*piont_y) <= 0x35 )
 							count++;//黑点
 						if( (719-jj+count)< 715)//一定无法达到700个点的要求，没必要再执行下去。
