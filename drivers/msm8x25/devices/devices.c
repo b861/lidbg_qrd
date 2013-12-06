@@ -6,6 +6,7 @@ LIDBG_DEFINE;
 int led_en ;
 int temp_log_freq;
 
+#define  USB_1_1 "/flysystem/usb11"
 #define LIDBG_GPIO_PULLUP  GPIO_CFG_PULL_UP
 
 static struct task_struct *led_task;
@@ -415,6 +416,7 @@ void led_on(void)
 
 #if 1
     static int led_status = 0;
+
 
     if(suspend_flag == 1)
     {
@@ -922,11 +924,9 @@ void fly_devices_init(void)
 {
     lidbg("fly_devices_init\n");
 
-
     if(platform_id ==  PLATFORM_FLY)
     {
-        USB_WORK_ENABLE;
-
+   	
 #if (defined(FLY_DEBUG) || defined(BUILD_FOR_RECOVERY))
 
         DVD_RESET_HIGH;
@@ -955,6 +955,13 @@ void fly_devices_init(void)
 #endif
 
         unmute_ns();
+	if( fs_is_file_exist(USB_1_1))
+	{
+		lidbg("Translate to usb1.1 modes\n");
+		USB_ID_HIGH_DEV;
+		ssleep(30);
+	}
+	USB_WORK_ENABLE;
     }
 }
 
