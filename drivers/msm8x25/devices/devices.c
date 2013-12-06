@@ -18,6 +18,7 @@ static struct task_struct *pwr_task;
 #endif
 static struct task_struct *dev_init_task;
 static struct task_struct *resume_task;
+static struct task_struct *usb_task;
 
 #if (defined(BOARD_V1) || defined(BOARD_V2) || defined(BOARD_V3))
 #else
@@ -60,6 +61,13 @@ bool suspend_flag = 0;
 
 wait_queue_head_t read_wait;
 u8 audio_data_for_hal[2];
+
+int thread_usb(void *data)
+{
+	msleep(5000);
+	USB_WORK_ENABLE;
+	return 0;
+}
 
 void cb_password_enable_usb(char *password )
 {
@@ -1097,7 +1105,13 @@ static int lidbg_event(struct notifier_block *this,
         unmute_ns();
         break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_SUSPEND_UNPREPARE):
-		USB_WORK_ENABLE;
+		usb_task = kthread_create(thread_usb, NULL, "lidbg_usb_thread");
+		if(IS_ERR(usb_task))
+		{
+			lidbg("Unable to start thread.\n");
+		}
+		else wake_up_process(usb_task);
+
         break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SIGNAL_EVENT, NOTIFIER_MINOR_SIGNAL_BAKLIGHT_ACK):
         SOC_BL_Set(BL_MIN);
