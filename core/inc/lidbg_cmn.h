@@ -50,5 +50,20 @@ extern bool lidbg_new_cdev(struct file_operations *cdev_fops, char *nodename);
 #define SETPROP_PATH "/system/bin/setprop"
 #endif
 
+
+
+
+#define CREATE_KTHREAD(func)\
+{\
+struct task_struct *task;\
+task = kthread_create(func, NULL, "lidbg_thread_"##func);\
+if(IS_ERR(task))\
+{\
+	lidbg("Unable to start thread.\n");\
+}\
+else wake_up_process(task);\
+}\
+}\
+
 #endif
 

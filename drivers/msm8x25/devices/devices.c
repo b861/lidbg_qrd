@@ -727,13 +727,8 @@ static void devices_late_resume(struct early_suspend *handler)
         }
 
         lidbg("create thread_resume!\n");
-        resume_task = kthread_create(thread_resume, NULL, "dev_resume_task");
-        if(IS_ERR(resume_task))
-        {
-            lidbg("Unable to start kernel thread.\n");
-            PTR_ERR(resume_task);
-        }
-        else wake_up_process(resume_task);
+        CREATE_KTHREAD(thread_resume);
+
 #endif
 
         //lidbg_fs_log(TEMP_LOG_PATH,"*\n");
