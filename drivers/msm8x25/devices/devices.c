@@ -1053,9 +1053,9 @@ static void parse_cmd(char *pt)
     else if(!strcmp(pt, "usb_reset"))
     {
         lidbg("usb_reset\n");
-	USB_WORK_DISENABLE;
-	msleep(200);
-	USB_WORK_ENABLE;
+		USB_WORK_DISENABLE;
+		msleep(200);
+		USB_WORK_ENABLE;
     }
 	
 #endif
@@ -1110,6 +1110,7 @@ static ssize_t dev_write(struct file *filp, const char __user *buf,
 {
     char *p = NULL;
     int len = size;
+#if 0
     char tmp[32];
     char *mem = tmp;
     bool is_alloc = 0;
@@ -1123,6 +1124,10 @@ static ssize_t dev_write(struct file *filp, const char __user *buf,
         }
         is_alloc = 1;
     }
+#endif
+    char tmp[size + 1];//C99 variable length array 
+    char *mem = tmp;
+    bool is_alloc = 0;
 
     memset(mem, '\0', size + 1);
 

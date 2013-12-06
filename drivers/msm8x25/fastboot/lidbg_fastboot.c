@@ -810,6 +810,7 @@ static int thread_late_suspend(void *data)
                         wake_lock(&(fb_data->flywakelock));
                         wake_unlock(&(fb_data->flywakelock));
 						#else
+						fastboot_set_status(PM_STATUS_RESUME_OK);
 						set_power_state(1);
 						#endif
                         break;

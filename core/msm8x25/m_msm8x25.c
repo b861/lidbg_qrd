@@ -31,7 +31,7 @@ void soc_main(int argc, char **argv)
 
     if(!strcmp(argv[0], "ad"))
     {
-        u32 ch, val;
+        u32 ch;
         ch = simple_strtoul(argv[1], 0, 0);
         lidbg("ch%d = %x\n", ch, soc_ad_read(ch));
     }

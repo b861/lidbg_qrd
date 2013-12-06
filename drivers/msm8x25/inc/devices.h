@@ -120,14 +120,14 @@ enum
 
 // PANNE_PEN , RESET
 #define LCD_ON  do{    \
-		printk("LCD_ON\n");\
 		u8 buff[] = {0x02, 0x0d, 0x1};\
+		printk("LCD_ON\n");\
         SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\
 				}while(0)
 
 #define LCD_OFF   do{   \
-		printk("LCD_OFF\n");\
 		u8 buff[] = {0x02, 0x0d, 0x0};\
+		printk("LCD_OFF\n");\
         SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\
 				}while(0)
 
