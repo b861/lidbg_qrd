@@ -1025,7 +1025,7 @@ static void parse_cmd(char *pt)
     else if(!strcmp(pt, "screen_on"))
     {
         printk("******into screen_on********\n");
-        LCD_RESET;
+       // LCD_RESET;
         if(SOC_Hal_Acc_Callback)
             SOC_Hal_Acc_Callback(1);
     }
@@ -1073,8 +1073,11 @@ static int lidbg_event(struct notifier_block *this,
         break;
 
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_ACC_ON):
-        LCD_RESET;
-        if(!g_var.is_fly)LCD_ON;
+        if(!g_var.is_fly)
+	{	
+		LCD_RESET;
+		LCD_ON;
+	}
         unmute_ns();
         break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_SUSPEND_UNPREPARE):
