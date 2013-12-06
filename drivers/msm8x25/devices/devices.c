@@ -1049,6 +1049,15 @@ static void parse_cmd(char *pt)
         if(SOC_Hal_Acc_Callback)
             SOC_Hal_Acc_Callback(3);
     }
+
+    else if(!strcmp(pt, "usb_reset"))
+    {
+        lidbg("usb_reset\n");
+	USB_WORK_DISENABLE;
+	msleep(200);
+	USB_WORK_ENABLE;
+    }
+	
 #endif
 
 }
