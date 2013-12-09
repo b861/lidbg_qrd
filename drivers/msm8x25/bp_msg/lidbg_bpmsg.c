@@ -58,11 +58,11 @@ int thread_bp_msg(void *data)
             {
                 if(bp_msg_en)printk("%s\n", smem_log_temp->log[end_index]);
                 smem_log_temp->end_pos = (end_index + 1)  % TOTAL_LOGS;
-                msleep(50);
+                msleep(BP_MSG_POLLING_TIME);
             }
             else
             {
-                msleep(50);
+                msleep(BP_MSG_POLLING_TIME);
             }
 
         }

@@ -15,6 +15,6 @@ typedef struct
     char log[TOTAL_LOGS][LOG_BYTES];
     u8 write_flag;
 } smem_log_deep;
-#define 	BP_MSG_POLLING_TIME	(300)
+#define 	BP_MSG_POLLING_TIME	(50)
 
 #endif
