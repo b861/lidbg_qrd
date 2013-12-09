@@ -458,17 +458,9 @@ int fly_hal_init(void)
     g_var.temp = 0;
     g_var.system_status = FLY_ACC_ON;
     g_var.machine_id = get_machine_id();
-#if 0
-    soc_task = kthread_create(soc_thread, NULL, "lidbg_soc_thread");
-    if(IS_ERR(soc_task))
-    {
-        lidbg("Unable to start thread.\n");
-
-    }
-    else wake_up_process(soc_task);
-#else
-	CREATE_KTHREAD(soc_thread);
-#endif
+	
+	CREATE_KTHREAD(soc_thread, NULL);
+	
     if(fs_is_file_exist(HAL_SO))
     {
         printk("=======is product=====\n");

@@ -1,7 +1,6 @@
 
 #include "lidbg.h"
 
-static struct task_struct *test_task;
 
 LIDBG_DEFINE;
 
@@ -43,14 +42,8 @@ int lidbg_test_init(void)
     DUMP_BUILD_TIME;
     LIDBG_GET;
 
+    CREATE_KTHREAD(thread_test, NULL);
 
-    test_task = kthread_create(thread_test, NULL, "test_task");
-    if(IS_ERR(test_task))
-    {
-        lidbg("Unable to start kernel thread.\n");
-
-    }
-    else wake_up_process(test_task);
     return 0;
 
 }

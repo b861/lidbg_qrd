@@ -43,7 +43,6 @@ int thread_gps_server(void *data);
 int gps_debug_en = 0;
 
 struct gps_device *dev;
-static struct task_struct *gps_server_task;
 
 static int gps_event_handle(struct notifier_block *this,
                             unsigned long event, void *ptr)
@@ -420,12 +419,7 @@ static int  gps_probe(struct platform_device *pdev)
     device_create(class_install, NULL, dev_number, NULL, "%s%d", DEVICE_NAME, 0);
 
     // 2creat thread
-    gps_server_task = kthread_create(thread_gps_server, NULL, "fly_gps_server");
-    if(IS_ERR(gps_server_task))
-    {
-        lidbg("Unable to start kernel thread.gps_server_task\n");
-    }
-    else wake_up_process(gps_server_task);
+    CREATE_KTHREAD(thread_gps_server, NULL);
 
     // 3init all the tools
     init_waitqueue_head(&dev->queue);

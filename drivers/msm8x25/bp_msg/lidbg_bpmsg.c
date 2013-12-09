@@ -3,7 +3,6 @@
 
 #include "lidbg.h"
 
-static struct task_struct *bp_msg_task;
 
 int thread_bp_msg(void *data);
 
@@ -87,12 +86,7 @@ int bp_msg_init(void)
         return 0;
     }
 
-    bp_msg_task = kthread_create(thread_bp_msg, NULL, "bp_msg_task");
-    if(IS_ERR(bp_msg_task))
-    {
-        lidbg("Unable to start kernel thread.bp_msg_task\n");
-    }
-    else wake_up_process(bp_msg_task);
+    CREATE_KTHREAD(thread_bp_msg, NULL);
     printk("[futengfei]  =bp_msg_init=OUT===============================\n");
 #endif
     return 0;
@@ -101,12 +95,13 @@ int bp_msg_init(void)
 void bp_msg_exit(void)
 {
     printk("[futengfei]  ==OUT=================bp_msg_exit==============\n");
+#if 0
     if(bp_msg_task)
     {
         kthread_stop(bp_msg_task);
         bp_msg_task = NULL;
     }
-
+#endif
 }
 
 

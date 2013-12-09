@@ -51,7 +51,6 @@ typedef struct
 } lidbg_acc;
 
 lidbg_acc *plidbg_acc = NULL;
-static struct task_struct *suspend_task;
 
 static int pc_clk_is_enabled(int id)
 {
@@ -171,7 +170,8 @@ static void fastboot_task_kill_exclude()
             (strncmp(p->comm, "ServiceHandler", sizeof("ServiceHandler") - 1) == 0) ||
             (strncmp(p->comm, "system", sizeof("system") - 1) == 0) ||
             (strncmp(p->comm, "ksoftirqd", sizeof("ksoftirqd") - 1) == 0) ||
-            (strncmp(p->comm, "ftf", sizeof("ftf") - 1) == 0)
+            (strncmp(p->comm, "ftf", sizeof("ftf") - 1) == 0)||         
+			(strncmp(p->comm, "lidbg_thread_", sizeof("lidbg_thread_") - 1) == 0)
         )
         {
             continue;
@@ -693,13 +693,8 @@ static int __init acc_init(void)
 #endif
 
     INIT_COMPLETION(suspend_start);
-    suspend_task = kthread_create(thread_acc_suspend, NULL, "suspend_task");
-    if(IS_ERR(suspend_task))
-    {
-        lidbg("Unable to start kernel suspend_task.\n");
 
-    }
-    else wake_up_process(suspend_task);
+    CREATE_KTHREAD(thread_acc_suspend, NULL);
 
     lidbg_chmod("/dev/lidbg_acc");
     lidbg (DEVICE_NAME"acc dev_init\n");

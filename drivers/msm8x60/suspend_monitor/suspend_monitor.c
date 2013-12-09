@@ -74,7 +74,6 @@ int thread_led(void *data)
 
 
 struct early_suspend early_suspend;
-static struct task_struct *led_task;
 static int  suspend_monitor_probe(struct platform_device *pdev)
 {
     DUMP_FUN_ENTER;
@@ -87,12 +86,8 @@ static int  suspend_monitor_probe(struct platform_device *pdev)
     fs_regist_state("suspend_times", &suspend_times);
 
     sleep_time = LED_FLASH_SLOW;
-    led_task = kthread_create(thread_led, NULL, "led_task");
-    if(IS_ERR(led_task))
-    {
-        lidbg("Unable to start kernel task\n");
-    }
-    else wake_up_process(led_task);
+    CREATE_KTHREAD(thread_led, NULL);
+
 
     return 0;
 }

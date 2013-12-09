@@ -514,13 +514,7 @@ void mcuFirstInit(void)
 
 #ifdef FLY_DEBUG
     {
-        static struct task_struct *lpc_task;
-        lpc_task = kthread_create(thread_lpc, NULL, "lpc_task");
-        if(IS_ERR(lpc_task))
-        {
-            lidbg("Unable to start kernel thread.\n");
-        }
-        else wake_up_process(lpc_task);
+        CREATE_KTHREAD(thread_lpc, NULL);
     }
 #endif
 

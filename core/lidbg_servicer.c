@@ -16,7 +16,6 @@ unsigned long flags_u2k;
 
 //http://blog.csdn.net/yjzl1911/article/details/5654893
 static struct fasync_struct *fasync_queue;
-static struct task_struct *u2k_task;
 
 static DECLARE_WAIT_QUEUE_HEAD(k2u_wait);
 static DECLARE_COMPLETION(u2k_com);
@@ -184,13 +183,7 @@ static int __init servicer_init(void)
     kfifo_init(&u2k_fifo, u2k_fifo_buffer, FIFO_SIZE);
     spin_lock_init(&fifo_k2u_lock);
 
-    u2k_task = kthread_create(thread_u2k, NULL, "u2k_task");
-    if(IS_ERR(u2k_task))
-    {
-        lidbg("Unable to start kernel thread.\n");
-        u2k_task = NULL;
-    }
-    wake_up_process(u2k_task);
+    CREATE_KTHREAD(thread_u2k, NULL);
 
     lidbg_chmod("/dev/lidbg_servicer");
     return ret;

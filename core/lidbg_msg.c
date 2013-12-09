@@ -12,7 +12,6 @@ DEFINE_SEMAPHORE(lidbg_msg_sem);
 #endif
 
 
-static struct task_struct *msg_task;
 static int thread_msg(void *data);
 
 #define TOTAL_LOGS  (100)
@@ -128,13 +127,7 @@ static int __init msg_init(void)
 
     INIT_COMPLETION(msg_ready);
 
-    msg_task = kthread_create(thread_msg, NULL, "msg_task");
-    if(IS_ERR(msg_task))
-    {
-        lidbg("Unable to start kernel thread.\n");
-
-    }
-    else wake_up_process(msg_task);
+    CREATE_KTHREAD(thread_msg, NULL);
 
     lidbg_chmod("/dev/lidbg_msg");
 

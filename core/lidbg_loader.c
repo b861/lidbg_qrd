@@ -1,7 +1,5 @@
 #include "lidbg.h"
 
-struct task_struct *loader_task;
-struct task_struct *restart_task;
 
 int load_modules_count = 0;
 
@@ -60,13 +58,7 @@ int thread_loader(void *data)
     int i, j;
     char path[100];
     DUMP_FUN_ENTER;
-    restart_task = kthread_create(thread_check_restart, NULL, "lidbg_restart");
-    if(IS_ERR(restart_task))
-    {
-        lidbg("Unable to start thread.\n");
-
-    }
-    else wake_up_process(restart_task);
+    CREATE_KTHREAD(thread_check_restart, NULL);
 
     for(i = 0; insmod_path[i] != NULL; i++)
     {
@@ -87,14 +79,7 @@ int thread_loader(void *data)
 int __init loader_init(void)
 {
     DUMP_BUILD_TIME;
-    loader_task = kthread_create(thread_loader, NULL, "lidbg_loader");
-    if(IS_ERR(loader_task))
-    {
-        lidbg("Unable to start thread.\n");
-
-    }
-    else wake_up_process(loader_task);
-
+    CREATE_KTHREAD(thread_loader, NULL);
     return 0;
 }
 

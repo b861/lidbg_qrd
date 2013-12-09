@@ -9,16 +9,7 @@ int temp_log_freq;
 #define  USB_1_1 "/flysystem/usb11"
 #define LIDBG_GPIO_PULLUP  GPIO_CFG_PULL_UP
 
-static struct task_struct *led_task;
-#ifdef DEBUG_AD_KEY
-static struct task_struct *key_task;
-#endif
-#ifdef DEBUG_POWER_KEY
-static struct task_struct *pwr_task;
-#endif
-static struct task_struct *dev_init_task;
 static struct task_struct *resume_task;
-static struct task_struct *usb_task;
 
 #if (defined(BOARD_V1) || defined(BOARD_V2) || defined(BOARD_V3))
 #else
@@ -558,25 +549,15 @@ static int soc_dev_probe(struct platform_device *pdev)
 
         if(led_en)
         {
-            led_task = kthread_create(thread_led, NULL, "led_task");
-            if(IS_ERR(led_task))
-            {
-                lidbg("Unable to start kernel thread.\n");
-            }
-            else wake_up_process(led_task);
+            CREATE_KTHREAD(thread_led, NULL);
         }
     }
 #endif
 
     if(platform_id ==  PLATFORM_FLY)
     {
-        dev_init_task = kthread_create(thread_dev_init, NULL, "dev_init_task");
-        if(IS_ERR(dev_init_task))
-        {
-            lidbg("Unable to start kernel thread.\n");
+        CREATE_KTHREAD(thread_dev_init, NULL);
 
-        }
-        else wake_up_process(dev_init_task);
 
 #ifdef FLY_DEBUG
 
@@ -593,22 +574,12 @@ static int soc_dev_probe(struct platform_device *pdev)
         }
 
 #ifdef DEBUG_AD_KEY
-        key_task = kthread_create(thread_key, NULL, "key_task");
-        if(IS_ERR(key_task))
-        {
-            lidbg("Unable to start kernel thread.\n");
-        }
-        else wake_up_process(key_task);
+        CREATE_KTHREAD(thread_key, NULL);
+
 #endif
 
 #ifdef DEBUG_POWER_KEY
-        pwr_task = kthread_create(thread_pwr, NULL, "pwr_task");
-        if(IS_ERR(pwr_task))
-        {
-            lidbg("Unable to start kernel thread.\n");
-
-        }
-        else  wake_up_process(pwr_task);
+        CREATE_KTHREAD(thread_pwr, NULL);
 #endif
 
 #endif
@@ -643,7 +614,7 @@ static int soc_dev_probe(struct platform_device *pdev)
 static int soc_dev_remove(struct platform_device *pdev)
 {
     lidbg("soc_dev_remove\n");
-
+#if 0
     if(led_task)
     {
         kthread_stop(led_task);
@@ -663,7 +634,7 @@ static int soc_dev_remove(struct platform_device *pdev)
         pwr_task = NULL;
     }
 #endif
-
+#endif
     return 0;
 
 }
@@ -726,8 +697,7 @@ static void devices_late_resume(struct early_suspend *handler)
             SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
         }
 
-        lidbg("create thread_resume!\n");
-        CREATE_KTHREAD(thread_resume);
+        CREATE_KTHREAD(thread_resume, NULL);
 
 #endif
 
@@ -1100,13 +1070,7 @@ static int lidbg_event(struct notifier_block *this,
         unmute_ns();
         break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_SUSPEND_UNPREPARE):
-		usb_task = kthread_create(thread_usb, NULL, "lidbg_usb_thread");
-		if(IS_ERR(usb_task))
-		{
-			lidbg("Unable to start thread.\n");
-		}
-		else wake_up_process(usb_task);
-
+		CREATE_KTHREAD(thread_usb, NULL);
         break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SIGNAL_EVENT, NOTIFIER_MINOR_SIGNAL_BAKLIGHT_ACK):
         SOC_BL_Set(BL_MIN);

@@ -498,7 +498,8 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
             (strncmp(p->comm, "ServiceHandler", sizeof("ServiceHandler") - 1) == 0) ||
             (strncmp(p->comm, "system", sizeof("system") - 1) == 0) ||
             (strncmp(p->comm, "ksoftirqd", sizeof("ksoftirqd") - 1) == 0) ||
-            (strncmp(p->comm, "ftf", sizeof("ftf") - 1) == 0)
+            (strncmp(p->comm, "ftf", sizeof("ftf") - 1) == 0)||      
+			(strncmp(p->comm, "lidbg_thread_", sizeof("lidbg_thread_") - 1) == 0)
         )
         {
             continue;

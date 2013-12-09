@@ -171,11 +171,10 @@ int ts_probe_thread(void *data)
 
 static int ts_probe_init(void)
 {
-    struct task_struct *scan_task;
     DUMP_BUILD_TIME;
     LIDBG_GET;
-    scan_task = kthread_create(ts_probe_thread, NULL, "ts_scan_task");
-    wake_up_process(scan_task);
+    CREATE_KTHREAD(ts_probe_thread, NULL);
+
     return 0;
 }
 
