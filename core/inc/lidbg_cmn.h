@@ -54,16 +54,16 @@ extern bool lidbg_new_cdev(struct file_operations *cdev_fops, char *nodename);
 
 
 #define CREATE_KTHREAD(func)\
-{\
+do{\
 struct task_struct *task;\
-task = kthread_create(func, NULL, "lidbg_thread_"##func);\
+lidbg("create kthread %s\n","lidbg_thread_"#func);\
+task = kthread_create(func, NULL, "lidbg_thread_"#func);\
 if(IS_ERR(task))\
 {\
 	lidbg("Unable to start thread.\n");\
 }\
 else wake_up_process(task);\
-}\
-}\
+}while(0)\
 
 #endif
 
