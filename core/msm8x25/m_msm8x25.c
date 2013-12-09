@@ -12,7 +12,7 @@ int soc_temp_get(void)
 }
 
 
-void soc_main(int argc, char **argv)
+void lidbg_soc_main(int argc, char **argv)
 {
 
     if(argc < 1)
@@ -70,22 +70,11 @@ void msm8x25_exit(void)
 
 }
 
-void lidbg_soc_main(int argc, char **argv)
-{
-    lidbg("lidbg_soc_main\n");
-
-    if(argc < 3)
-    {
-        lidbg("Usage:\n");
-        return;
-    }
-}
 
 
 EXPORT_SYMBOL(lidbg_soc_main);
 EXPORT_SYMBOL(p_fly_smem);
 EXPORT_SYMBOL(soc_temp_get);
-EXPORT_SYMBOL(soc_main);
 
 MODULE_AUTHOR("Lsw");
 MODULE_LICENSE("GPL");

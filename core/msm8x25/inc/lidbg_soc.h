@@ -166,7 +166,6 @@ int soc_io_config(u32 index, bool direction, u32 pull, u32 drive_strength, bool 
 
 int soc_temp_get(void);
 void lidbg_soc_main(int argc, char **argv);
-void soc_main(int argc, char **argv);
 
 ///////////////////////////////////////
 #define ADC_MAX_CH (8)
