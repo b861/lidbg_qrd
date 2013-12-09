@@ -359,6 +359,9 @@ static void set_func_tbl(void)
 
     plidbg_dev->soc_func_tbl.pfnSOC_WakeLock_Stat = lidbg_wakelock_register;
 
+	
+    plidbg_dev->soc_func_tbl.pfnNotifier_Call = lidbg_notifier_call_chain;
+
 }
 
 int hal_open(struct inode *inode, struct file *filp)

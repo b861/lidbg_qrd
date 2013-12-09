@@ -112,5 +112,8 @@ static inline int check_pt(void)
 
 #define SOC_Hal_Acc_Callback (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnHal_Acc_Callback))
 
+#define SOC_Notifier_Call (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnNotifier_Call))
+
+
 #endif
 

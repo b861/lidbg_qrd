@@ -344,6 +344,8 @@ struct lidbg_fn_t
 
     //screan_off :0 screan_on :1 suspendon:2 suspendoff:3
     void (*pfnHal_Acc_Callback)(int para);
+	
+    int (*pfnNotifier_Call)(unsigned long val);
 
 };
 
