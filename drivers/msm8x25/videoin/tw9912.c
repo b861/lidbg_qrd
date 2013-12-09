@@ -21,8 +21,8 @@ tw9912_initall_status_t tw9912_status = {TW9912_initall_not, NOTONE, OTHER};
 last_config_t the_last_config = {NOTONE, OTHER};
 
 void tw9912_hardware_reset(void)
-{	
-    tw9912_dbg("%s:tw9912_RESX_DOWN\n",__func__);
+{
+    tw9912_dbg("%s:tw9912_RESX_DOWN\n", __func__);
     tw9912_RESX_DOWN;
     msleep(20);
     tw9912_RESX_UP;
@@ -43,22 +43,22 @@ i2c_ack tw9912_write(char *buf )
 }
 void tw9912_get_input_info(tw9912_input_info_t *input_information)
 {
-i2c_ack ret;
+    i2c_ack ret;
     input_information->chip_status1.index = 0x01;	//register index
     input_information->component_video_format.index = 0x1e;
     input_information->macrovision_detection.index = 0x30;
-	ret = tw9912_read(input_information->chip_status1.index, \
-	            &input_information->chip_status1.valu);
-	if (ret == NACK) goto NACK_BREAK;
+    ret = tw9912_read(input_information->chip_status1.index, \
+                      &input_information->chip_status1.valu);
+    if (ret == NACK) goto NACK_BREAK;
 
-	ret = tw9912_read(input_information->component_video_format.index, \
-	            &input_information->component_video_format.valu);
-	if (ret == NACK) goto NACK_BREAK;
+    ret = tw9912_read(input_information->component_video_format.index, \
+                      &input_information->component_video_format.valu);
+    if (ret == NACK) goto NACK_BREAK;
 
-	ret = tw9912_read(input_information->macrovision_detection.index, \
-	            &input_information->macrovision_detection.valu);
+    ret = tw9912_read(input_information->macrovision_detection.index, \
+                      &input_information->macrovision_detection.valu);
 NACK_BREAK:
-;
+    ;
 }
 void tw9912_analysis_input_signal(tw9912_input_info_t *input_information, vedio_channel_t channel)
 {
@@ -67,7 +67,7 @@ void tw9912_analysis_input_signal(tw9912_input_info_t *input_information, vedio_
 
     if(channel > SEPARATION)
     {
-        printk("tw9912:%s:input chanel paramal have error!\n",__func__);
+        printk("tw9912:%s:input chanel paramal have error!\n", __func__);
         goto CHANNEL_FAILD;
     }
     signal_is_how[channel].Channel = channel;
@@ -79,46 +79,46 @@ void tw9912_analysis_input_signal(tw9912_input_info_t *input_information, vedio_
         printk("tw9912:Signal is lock<<<<<<<<<<<<<<\n");
         signal_is_how[channel].Channel = channel;
         tw9912_read(0x02, &channel_1); //register 0x02 channel selete
-            if(channel != SEPARATION)
+        if(channel != SEPARATION)
+        {
+            format_1 = input_information->component_video_format.valu & 0x70;
+            if(format_1 == 0x00)
             {
-                format_1 = input_information->component_video_format.valu & 0x70;
-                if(format_1 == 0x00)
-                {
-                    signal_is_how[channel].Format = NTSC_I;
-                }
-                else if(format_1 == 0x10)
-                {
-                    signal_is_how[channel].Format = PAL_I;
-                }
-                else if(format_1 == 0x20)
-                {
-                    signal_is_how[channel].Format = NTSC_P;
-                }
-                else if(format_1 == 0x30)
-                {
-                    signal_is_how[channel].Format = PAL_P;
-                }
-                else
-                {
-                    signal_is_how[channel].Format = OTHER;
-                }
+                signal_is_how[channel].Format = NTSC_I;
+            }
+            else if(format_1 == 0x10)
+            {
+                signal_is_how[channel].Format = PAL_I;
+            }
+            else if(format_1 == 0x20)
+            {
+                signal_is_how[channel].Format = NTSC_P;
+            }
+            else if(format_1 == 0x30)
+            {
+                signal_is_how[channel].Format = PAL_P;
             }
             else
             {
-                format_1 = input_information->input_detection.valu & 0x07;
-                if(format_1 == 0x2)
-                {
-                    signal_is_how[channel].Format = NTSC_P;
-                }
-                else if(format_1 == 0x3)
-                {
-                    signal_is_how[channel].Format = PAL_P;
-                }
-                else
-                {
-                    printk("tw9912:Signal is lock but testing >>>>>>>>>>>>failed\n");
-                }
+                signal_is_how[channel].Format = OTHER;
             }
+        }
+        else
+        {
+            format_1 = input_information->input_detection.valu & 0x07;
+            if(format_1 == 0x2)
+            {
+                signal_is_how[channel].Format = NTSC_P;
+            }
+            else if(format_1 == 0x3)
+            {
+                signal_is_how[channel].Format = PAL_P;
+            }
+            else
+            {
+                printk("tw9912:Signal is lock but testing >>>>>>>>>>>>failed\n");
+            }
+        }
     }
     else
     {
@@ -134,7 +134,7 @@ void Disabel_video_data_out(void)
     u8 disabel[] = {0x03, 0x27,};
     tw9912_dbg("Disabel_video_data_out()\n");
     tw9912_read(0x03, &disabel[1]); //register 0x02 channel selete
-    disabel[1] |=0x07;
+    disabel[1] |= 0x07;
     tw9912_write(disabel);
 }
 void Enabel_video_data_out(void)
@@ -142,13 +142,13 @@ void Enabel_video_data_out(void)
     u8 disabel[] = {0x03, 0x0,};
     tw9912_dbg("Enabel_video_data_out()\n");
     tw9912_read(0x03, &disabel[1]); //register 0x02 channel selete
-    disabel[1] &=0xf0;
+    disabel[1] &= 0xf0;
     tw9912_write(disabel);
 }
 static int tw9912_channel_choeces_again(vedio_channel_t channel)
 {
     u8 Tw9912_input_pin_selet[] = {0x02, 0x40,}; //default input pin selet YIN0
-    tw9912_dbg("fly_video now channal choices %d",channel);
+    tw9912_dbg("fly_video now channal choices %d", channel);
     the_last_config.Channel = channel;
     switch(channel)//Independent testing
     {
@@ -172,8 +172,8 @@ static int tw9912_channel_choeces_again(vedio_channel_t channel)
         Tw9912_input_pin_selet[1] = 0x3f; //disable YOUT buffer
         if(tw9912_write(Tw9912_input_pin_selet) == NACK) goto CONFIG_not_ack_fail;
         break;
-      case SEPARATION: 	//	 YUV
-              Tw9912_input_pin_selet[1] = 0x70;
+    case SEPARATION: 	//	 YUV
+        Tw9912_input_pin_selet[1] = 0x70;
         if(tw9912_write(Tw9912_input_pin_selet) == NACK) goto CONFIG_not_ack_fail;
         break;
     default :
@@ -191,14 +191,20 @@ vedio_format_t tw9912_testing_channal_signal(vedio_channel_t Channel)
     u8 signal = 0, valu;
     register u8 i;
     u8 tw9912_register[] = {0x1c, 0x07,}; //default input pin selet YIN0
- printk("tw9912_testing_channal_signal(channel = %d)\n",Channel);   
- if(Channel ==YIN2 ||Channel == SEPARATION)
- return NTSC_P;
-mutex_lock(&lock_com_chipe_config);
+    printk("tw9912_testing_channal_signal(channel = %d)\n", Channel);
+    if(Channel == YIN2 || Channel == SEPARATION)
+        return NTSC_P;
+    mutex_lock(&lock_com_chipe_config);
 
-    if(the_last_config.Channel  != Channel){tw9912_channel_choeces_again(Channel);}
-    else {tw9912_dbg("the_last_config.Channel  == Channel so not have change channal\n");}
-	
+    if(the_last_config.Channel  != Channel)
+    {
+        tw9912_channel_choeces_again(Channel);
+    }
+    else
+    {
+        tw9912_dbg("the_last_config.Channel  == Channel so not have change channal\n");
+    }
+
     for(i = 0; i < 2; i++)
     {
         tw9912_read(0x01, &signal); //register 0x02 channel selete
@@ -208,17 +214,17 @@ mutex_lock(&lock_com_chipe_config);
             printk("tw9912:fly_video at channal (%d) find signal\n", Channel);
             goto break_for;
         }
-	mutex_unlock(&lock_com_chipe_config);
+        mutex_unlock(&lock_com_chipe_config);
         msleep(20);
-	mutex_lock(&lock_com_chipe_config);
+        mutex_lock(&lock_com_chipe_config);
 
     }
-if(i==2)goto SIGNAL_NOT_LOCK;
+    if(i == 2)goto SIGNAL_NOT_LOCK;
 break_for:
     tw9912_write(tw9912_register);// Auto detection
-mutex_unlock(&lock_com_chipe_config);
+    mutex_unlock(&lock_com_chipe_config);
     msleep(40);//waiting......
-mutex_lock(&lock_com_chipe_config);
+    mutex_lock(&lock_com_chipe_config);
     tw9912_read(0x1c, &signal);
     signal = signal & 0x70;
     switch(signal)
@@ -257,40 +263,40 @@ mutex_lock(&lock_com_chipe_config);
         break;
     }
     if(Channel == YIN2 || Channel == SEPARATION)
-    	{
-	   tw9912_read(0xc1, &valu);
-	    if(valu & 0x08) //bit3 -->Composite Sync detection status
-		    {
-		        switch(valu & 0x7) //bit[2:0]
-		        {
-		        case 0:
-		            ret = NTSC_I;
-		            break;
-		        case 1:
-		            ret = PAL_I;
-		            break;
+    {
+        tw9912_read(0xc1, &valu);
+        if(valu & 0x08) //bit3 -->Composite Sync detection status
+        {
+            switch(valu & 0x7) //bit[2:0]
+            {
+            case 0:
+                ret = NTSC_I;
+                break;
+            case 1:
+                ret = PAL_I;
+                break;
 
-		        case 2:
-		            ret = NTSC_P;
-			  printk("\nDVD is NTSC_P\n");
-		            break;
-		        case 3:
-		            ret = PAL_P;
-		            break;
+            case 2:
+                ret = NTSC_P;
+                printk("\nDVD is NTSC_P\n");
+                break;
+            case 3:
+                ret = PAL_P;
+                break;
 
-		        default:
-		            ret = OTHER;
-		            break;
-		        }
-		        printk("tw9912:tw9912_yuv_signal_testing() singal lock back %d\n", ret);
-		    }
-	}
-    printk("tw9912:fly_video test signal is %d\n",ret);
-mutex_unlock(&lock_com_chipe_config);
-     return ret;
+            default:
+                ret = OTHER;
+                break;
+            }
+            printk("tw9912:tw9912_yuv_signal_testing() singal lock back %d\n", ret);
+        }
+    }
+    printk("tw9912:fly_video test signal is %d\n", ret);
+    mutex_unlock(&lock_com_chipe_config);
+    return ret;
 SIGNAL_NOT_LOCK:
-mutex_unlock(&lock_com_chipe_config);
-	return OTHER;
+    mutex_unlock(&lock_com_chipe_config);
+    return OTHER;
 }
 
 vedio_format_t camera_open_video_signal_test_in_2(void)
@@ -341,17 +347,17 @@ vedio_format_t camera_open_video_signal_test_in_2(void)
 }
 int read_tw9912_chips_status_fast(u8 *valu)
 {
-  int ret = 0;
-	ret = tw9912_read(0x01,valu);
+    int ret = 0;
+    ret = tw9912_read(0x01, valu);
     return ret;//have change return 1 else retrun 0
 }
 int tw9912_read_chips_status(u8 cmd)
 {
     static tw9912_input_info_t tw9912_input_information_status;
     static tw9912_input_info_t tw9912_input_information_status_next;
-    if(cmd !=2 )
-    	tw9912_get_input_info(&tw9912_input_information_status_next);
-    if(cmd ==1)
+    if(cmd != 2 )
+        tw9912_get_input_info(&tw9912_input_information_status_next);
+    if(cmd == 1)
     {
         if(tw9912_input_information_status_next.macrovision_detection.valu != tw9912_input_information_status.macrovision_detection.valu)
         {
@@ -367,13 +373,14 @@ int tw9912_read_chips_status(u8 cmd)
         return 0;
     }
     else if (cmd == 2)
-    {u8 valu;
-	tw9912_read(0x01,&valu);
-	printk("0x01 = 0x%.2x\n",valu);
-	if(valu &0x80)
-	{
-	printk("signal bad \n");
-	}
+    {
+        u8 valu;
+        tw9912_read(0x01, &valu);
+        printk("0x01 = 0x%.2x\n", valu);
+        if(valu & 0x80)
+        {
+            printk("signal bad \n");
+        }
     }
     else
     {
@@ -386,7 +393,7 @@ vedio_format_t tw9912_yuv_signal_testing(void)
     u8 valu;//default input pin selet YIN0
     tw9912_dbg("tw9912_yuv_signal_testing()\n");
     if(the_last_config.Channel != SEPARATION)
-       Tw9912_YIN3ToYUV_init_agin();
+        Tw9912_YIN3ToYUV_init_agin();
     tw9912_read(0xc1, &valu);
     if(valu & 0x08) //bit3 -->Composite Sync detection status
     {
@@ -431,30 +438,31 @@ vedio_format_t tw9912_cvbs_signal_tsting(vedio_channel_t Channel)
 
     signal_is_how_1.Format = OTHER;
     signal_is_how_1.vedio_source = source_other;
-	
+
     tw9912_get_input_info(&tw9912_input_information_1);
     if( (tw9912_input_information_1.chip_status1.valu & 0x08) && !(tw9912_input_information_1.chip_status1.valu & 0x80) )//bit3=1 Vertical logi is locked to the incoming video soruce
-    {																								// bit7 =0 video is detected
+    {
+        // bit7 =0 video is detected
         if(tw9912_input_information_1.chip_status1.valu & 0x01)  signal_is_how_1.vedio_source = source_50Hz;
         else signal_is_how_1.vedio_source = source_60Hz;
 
-            format_1 = tw9912_input_information_1.component_video_format.valu & 0x70;
-            if(format_1 == 0x00)
-            {
-                signal_is_how_1.Format = NTSC_I;
-            }
-            else if(format_1 == 0x10)
-            {
-                signal_is_how_1.Format = PAL_I;
-            }
-            else if(format_1 == 0x20)
-            {
-                signal_is_how_1.Format = NTSC_P;
-            }
-            else if(format_1 == 0x30)
-            {
-                signal_is_how_1.Format = PAL_P;
-            }
+        format_1 = tw9912_input_information_1.component_video_format.valu & 0x70;
+        if(format_1 == 0x00)
+        {
+            signal_is_how_1.Format = NTSC_I;
+        }
+        else if(format_1 == 0x10)
+        {
+            signal_is_how_1.Format = PAL_I;
+        }
+        else if(format_1 == 0x20)
+        {
+            signal_is_how_1.Format = NTSC_P;
+        }
+        else if(format_1 == 0x30)
+        {
+            signal_is_how_1.Format = PAL_P;
+        }
     }
 
     tw9912_dbg("testing_signal(): back %d\n", signal_is_how_1.Format);
@@ -584,7 +592,7 @@ int tw9912_config_array_NTSCp(void)
     if (tw9912_reset_flag_jam == 0)
     {
         tw9912_reset_flag_jam = 1;
-	tw9912_dbg("%s:tw9912_RESX_DOWN\n",__func__);
+        tw9912_dbg("%s:tw9912_RESX_DOWN\n", __func__);
         tw9912_RESX_DOWN;//\u8fd9\u91cc\u5bf9tw9912\u590d\u4f4d\u7684\u539f\u56e0\u662f\u89e3\u51b3\u5012\u8f66\u9000\u56deDVD\u65f6\u89c6\u9891\u5361\u6b7b\u3002
         tw9912_RESX_UP;
     }
@@ -608,11 +616,11 @@ CONFIG_not_ack_fail:
 int tw9912_config_array_agin(void)
 {
     u32 i = 0;
-   const u8 *config_pramat_piont = NULL;
+    const u8 *config_pramat_piont = NULL;
     tw9912_dbg("tw9912_config_array_agin +\n");
     the_last_config.Channel = YIN3;
     the_last_config.format = NTSC_I;
-    config_pramat_piont=TW9912_INIT_AGAIN;
+    config_pramat_piont = TW9912_INIT_AGAIN;
     while(config_pramat_piont[i*2] != 0xfe)
     {
         if(tw9912_write((char *)&config_pramat_piont[i*2]) == NACK) goto CONFIG_not_ack_fail;
@@ -629,9 +637,9 @@ int Tw9912_YIN3ToYUV_init_agin(void)
     u32 i = 0;
     const u8 *config_pramat_piont = NULL;
     tw9912_dbg("Tw9912_YIN3ToYUV_init_agin +\n");
-   the_last_config.Channel = SEPARATION;
-   the_last_config.format = NTSC_P;
-    config_pramat_piont=TW9912_YIN3ToYUV_INIT_AGAIN;
+    the_last_config.Channel = SEPARATION;
+    the_last_config.format = NTSC_P;
+    config_pramat_piont = TW9912_YIN3ToYUV_INIT_AGAIN;
     while(config_pramat_piont[i*2] != 0xfe)
     {
         if(tw9912_write((char *)&config_pramat_piont[i*2]) == NACK) goto CONFIG_not_ack_fail;
@@ -676,7 +684,7 @@ int tw9912_config_array(vedio_format_t config_pramat, vedio_channel_t Channel)
     tw9912_get_chip_id();
     if(config_pramat != STOP_VIDEO)
     {
-    	tw9912_channel_choeces_again(Channel);
+        tw9912_channel_choeces_again(Channel);
         tw9912_dbg("tw9912:tw9912_config_array()-->Tw9912_appoint_pin_tw9912_cvbs_signal_tsting(%d)\n", Channel);
         mutex_unlock(&lock_com_chipe_config);
 SIGNAL_DELTE_AGAIN:
@@ -689,14 +697,14 @@ SIGNAL_DELTE_AGAIN:
         mutex_lock(&lock_com_chipe_config);
         if(ret == 5) //the channel is not signal input
         {
-		tw9912_signal_unstabitily_for_tw9912_config_array_flag = 0;//find colobar flag signal bad
-		mutex_unlock(&lock_com_chipe_config);
-		ret_format = tw9912_testing_channal_signal(Channel);
-		mutex_lock(&lock_com_chipe_config);
-		if(ret_format == OTHER )
-			goto NOT_signal_input;
-		else
-			signal_is_how[Channel].Format = ret_format;
+            tw9912_signal_unstabitily_for_tw9912_config_array_flag = 0;//find colobar flag signal bad
+            mutex_unlock(&lock_com_chipe_config);
+            ret_format = tw9912_testing_channal_signal(Channel);
+            mutex_lock(&lock_com_chipe_config);
+            if(ret_format == OTHER )
+                goto NOT_signal_input;
+            else
+                signal_is_how[Channel].Format = ret_format;
         }
         if(ret == -1)
             goto CONFIG_not_ack_fail;
@@ -720,8 +728,8 @@ SIGNAL_DELTE_AGAIN:
             break;
 
         }
-	 tw9912_status.flag = TW9912_initall_yes;
-	 tw9912_status.Channel = Channel;
+        tw9912_status.flag = TW9912_initall_yes;
+        tw9912_status.Channel = Channel;
         switch(signal_is_how[Channel].Format)
         {
         case NTSC_I:
@@ -740,14 +748,14 @@ SIGNAL_DELTE_AGAIN:
             break;
 
         case PAL_P:
-            
+
             tw9912_status.format = PAL_P;
             config_pramat_piont = TW9912_INIT_PAL_Progressive_input;
             break;
 
         default:
-	 tw9912_status.flag = TW9912_initall_not;
-	 tw9912_status.Channel = NOTONE;
+            tw9912_status.flag = TW9912_initall_not;
+            tw9912_status.Channel = NOTONE;
             printk("Format is Invalid ******\n");
             printk("tw9912:%s:signal_is_how[Channel].Format=%d\n", __func__, signal_is_how[Channel].Format);
             goto NOT_signal_input;

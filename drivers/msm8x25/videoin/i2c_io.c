@@ -80,10 +80,10 @@ static void clr_i2c_pin(u32 pin)
 #endif
 void i2c_io_config_init(void)
 {
-	#ifndef FLY_VIDEO_BOARD_V3
+#ifndef FLY_VIDEO_BOARD_V3
     i2c_io_config(GPIO_I2C_SDA, GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA, 1);
     i2c_io_config(GPIO_I2C_SCL, GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA, 1);
-	#endif
+#endif
     i2c_io_config(TW9912_RESET, GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA, 1); //tw9912 reset//43
     i2c_io_config(TC358746XBG_RESET, GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA, 1); // tc358746 reset
     printk("first init GPIO_I2C_SDA and GPIO_I2C_SCL\n");
@@ -91,7 +91,7 @@ void i2c_io_config_init(void)
 #ifndef FLY_VIDEO_BOARD_V3
 static void i2c_init(void)
 {
-	
+
     i2c_io_config( GPIO_I2C_SDA, GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA, 0);
     i2c_io_config( GPIO_I2C_SCL, GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA, 0);
 
@@ -104,7 +104,7 @@ static void i2c_free(void)
 {
     return;
 }
-	
+
 static void i2c_delay(u32 time)
 {
 #if 0
@@ -235,23 +235,26 @@ static void i2c_write_chip_addr(u8 chip_addr, i2c_WR_flag flag)
 #endif
 i2c_ack i2c_read_byte(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size)
 {
-	#ifdef FLY_VIDEO_BOARD_V3
-	int ret=0;
-	//ret=i2c_api_do_recv(3,chip_addr, sub_addr , buf, size);
-	ret=SOC_I2C_Rec(3,chip_addr, sub_addr , buf, size);
-	//printk("\n************ i2c_read_byte =%d*******\n",ret);
-	//if(ret==size){
-	if(ret>0){
-		#ifdef  DEBUG_ACK
-			return NACK;
-		#else
-			return ACK;
-		#endif
+#ifdef FLY_VIDEO_BOARD_V3
+    int ret = 0;
+    //ret=i2c_api_do_recv(3,chip_addr, sub_addr , buf, size);
+    ret = SOC_I2C_Rec(3, chip_addr, sub_addr , buf, size);
+    //printk("\n************ i2c_read_byte =%d*******\n",ret);
+    //if(ret==size){
+    if(ret > 0)
+    {
+#ifdef  DEBUG_ACK
+        return NACK;
+#else
+        return ACK;
+#endif
 
-	}else{
-	return NACK;
-	}
-	#else
+    }
+    else
+    {
+        return NACK;
+    }
+#else
     u8 i;
     mutex_lock(&io_i2c_lock);
     i2c_init();
@@ -306,24 +309,27 @@ i2c_ack i2c_read_byte(int bus_id, char chip_addr, unsigned int sub_addr, char *b
     i2c_free();
     mutex_unlock(&io_i2c_lock);
     return ACK;
-	#endif
+#endif
 }
 i2c_ack i2c_write_byte(int bus_id, char chip_addr, char *buf, unsigned int size)
 {
-	#ifdef FLY_VIDEO_BOARD_V3
-	int ret_send=0;
-	ret_send=SOC_I2C_Send(3,  chip_addr, buf,size);
-	// printk("\n************i2c_write_byte =%d*******\n",ret_send);
-	 if(ret_send>0){
-			#ifdef  DEBUG_ACK
-				return NACK;
-			#else
-				return ACK;
-			#endif
-	 }else{
-	return NACK;
-	 }
-	#else
+#ifdef FLY_VIDEO_BOARD_V3
+    int ret_send = 0;
+    ret_send = SOC_I2C_Send(3,  chip_addr, buf, size);
+    // printk("\n************i2c_write_byte =%d*******\n",ret_send);
+    if(ret_send > 0)
+    {
+#ifdef  DEBUG_ACK
+        return NACK;
+#else
+        return ACK;
+#endif
+    }
+    else
+    {
+        return NACK;
+    }
+#else
     u8 i;
     mutex_lock(&io_i2c_lock);
     //printk("i2c:write byte:addr =0x%.2x value=0x%.2x ",buf[0],buf[1]);
@@ -379,22 +385,25 @@ i2c_ack i2c_write_byte(int bus_id, char chip_addr, char *buf, unsigned int size)
     i2c_free();
     mutex_unlock(&io_i2c_lock);
     return ACK;
-	#endif
+#endif
 }
 
 
 i2c_ack i2c_read_2byte(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size)
 {
-	#ifdef FLY_VIDEO_BOARD_V3
-	int ret_rec=0;
-	 ret_rec=SOC_I2C_Rec_2B_SubAddr(3, TC358746_I2C_ChipAdd, sub_addr, buf, size);
-	 //printk("\n************i2c_read_2byte  ret_rec=%d *****************\n",ret_rec);
-	 if(ret_rec>0){
-	return ACK;
-	 }else{
-	return NACK;
-	 }	 
-	#else
+#ifdef FLY_VIDEO_BOARD_V3
+    int ret_rec = 0;
+    ret_rec = SOC_I2C_Rec_2B_SubAddr(3, TC358746_I2C_ChipAdd, sub_addr, buf, size);
+    //printk("\n************i2c_read_2byte  ret_rec=%d *****************\n",ret_rec);
+    if(ret_rec > 0)
+    {
+        return ACK;
+    }
+    else
+    {
+        return NACK;
+    }
+#else
     u8 i;
     mutex_lock(&io_i2c_lock);
     i2c_init();
@@ -460,21 +469,24 @@ i2c_ack i2c_read_2byte(int bus_id, char chip_addr, unsigned int sub_addr, char *
     i2c_free();
     mutex_unlock(&io_i2c_lock);
     return ACK;
-	#endif
+#endif
 }
 
 i2c_ack i2c_write_2byte(int bus_id, char chip_addr, char *buf, unsigned int size)
 {
-	#ifdef FLY_VIDEO_BOARD_V3
-	int ret_send=0;
-	ret_send=SOC_I2C_Send(3, chip_addr,buf,size);
-	//printk("\n*************i2c_write_2byt ret_send=%d**************\n",ret_send);
-	if(ret_send>0){
-	return ACK;
-	}else{
-	return NACK;
-	}
-	#else
+#ifdef FLY_VIDEO_BOARD_V3
+    int ret_send = 0;
+    ret_send = SOC_I2C_Send(3, chip_addr, buf, size);
+    //printk("\n*************i2c_write_2byt ret_send=%d**************\n",ret_send);
+    if(ret_send > 0)
+    {
+        return ACK;
+    }
+    else
+    {
+        return NACK;
+    }
+#else
     u8 i;
     mutex_lock(&io_i2c_lock);
     i2c_init();
@@ -533,7 +545,7 @@ i2c_ack i2c_write_2byte(int bus_id, char chip_addr, char *buf, unsigned int size
     i2c_free();
     mutex_unlock(&io_i2c_lock);
     return ACK;
-	#endif
+#endif
 }
 #endif //end I2C_IO_IMITATION
 

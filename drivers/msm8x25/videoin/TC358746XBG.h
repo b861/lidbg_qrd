@@ -46,7 +46,7 @@ struct tc358746xbg_register_t_read
 #define TC358746XBG_RESET 33
 #else //BOARD_V3
 
-#ifndef BOARD_V3 
+#ifndef BOARD_V3
 #pragma message("目前硬件版本是：V3以上，请注意该处的参数设置,是否满足要求（TC358746XBG: line:50）")
 #endif
 #define TC358746XBG_RESET 33
