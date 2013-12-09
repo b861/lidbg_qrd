@@ -2,13 +2,12 @@
 #include "video_init_config.h"
 #include "video_init_config_tab.h"
 static int flag_io_config = 0;
-Vedio_Channel info_Vedio_Channel = NOTONE;
-Vedio_Channel info_com_top_Channel = YIN2;
-extern TW9912_Signal signal_is_how[5];
-extern Last_config_t the_last_config;
-extern TW9912Info global_tw9912_info_for_NTSC_I;
-extern TW9912Info global_tw9912_info_for_PAL_I;
-//static struct task_struct *Signal_Test = NULL;
+vedio_channel_t info_vedio_channel_t = NOTONE;
+vedio_channel_t info_com_top_Channel = YIN2;
+extern tw9912_signal_t signal_is_how[5];
+extern last_config_t the_last_config;
+extern tw9912info_t global_tw9912_info_for_NTSC_I;
+extern tw9912info_t global_tw9912_info_for_PAL_I;
 static u8 flag_now_config_channal_AUX_or_Astren=0; //0 is Sstren 1 is AUX 2 is DVD
 u8 global_debug_thread=0;
 static TW9912_Image_Parameter TW9912_Image_Parameter_fly[6] = {
@@ -20,7 +19,6 @@ static TW9912_Image_Parameter TW9912_Image_Parameter_fly[6] = {
 																{HUE,5},
 																};
 
-//spinlock_t spin_chipe_config_lock;
 struct mutex lock_chipe_config;
 extern struct mutex lock_com_chipe_config;
 struct semaphore sem;
@@ -28,7 +26,6 @@ void video_io_i2c_init_in(void)
 {
     if (!flag_io_config)
     {
-        //spin_lock_init(&spin_chipe_config_lock);
         mutex_init(&lock_chipe_config);
         mutex_init(&lock_com_chipe_config);
         sema_init(&sem, 0);
@@ -36,22 +33,16 @@ void video_io_i2c_init_in(void)
         flag_io_config = 1;
     }
 }
-void VideoReset_in(void)
+void chips_hardware_reset(void)
 {
     printk("reset tw9912 and tc358746\n");
-    //Tw9912Reset_in();
-    TC358_Hardware_Rest();
+    //tw9912_hardware_reset();
+    tc358746xbg_hardware_reset();
 }
-int static Change_channel(void)
+int static video_signal_channel_switching_occurs(void)
 {
-    //   mutex_lock(&lock_chipe_config);
-    printk("TC358:Change_channel() \n");
-    //Disabel_video_data_out();//tw9912
-
-    TC358_data_output_enable(DISABLE);
-    //TC358_init(COLORBAR + TC358746XBG_BLACK);
-    //msleep(1);
-    //TC358_data_output_enable(ENABLE);
+    printk("TC358:video_signal_channel_switching_occurs() \n");
+    tc358746xbg_data_out_enable(DISABLE);
     printk("%s:tw9912_RESX_DOWN\n", __func__);
 
     tw9912_RESX_DOWN;//\u8fd9\u91cc\u5bf9tw9912\u590d\u4f4d\u7684\u539f\u56e0\u662f\u89e3\u51b3\u5012\u8f66\u9000\u56deDVD\u65f6\u89c6\u9891\u5361\u6b7b\u3002
@@ -60,7 +51,7 @@ int static Change_channel(void)
     //  mutex_unlock(&lock_chipe_config);
     return 0;
 }
-int static VideoImageParameterConfig(void)
+int static video_image_config_parameter_buffer(void)
 {
 	if (info_com_top_Channel == YIN3)
 	{
@@ -68,7 +59,6 @@ int static VideoImageParameterConfig(void)
 		if(TW9912_Image_Parameter_fly[1].valu == 240)
 		{
 		printk("Astern 2 Normal \n");
-	//	SOC_Write_Servicer(VIDEO_PASSAGE_ASTERN);
 		flag_now_config_channal_AUX_or_Astren = 0;
 		     if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
 		        {
@@ -93,7 +83,6 @@ int static VideoImageParameterConfig(void)
 		else if(TW9912_Image_Parameter_fly[1].valu == 0xF1)
 		{
 		printk("Astern 2 New Teana\n");
-	//	SOC_Write_Servicer(VIDEO_PASSAGE_ASTERN);
 		flag_now_config_channal_AUX_or_Astren = 0;
 		     if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
 		        {
@@ -124,7 +113,6 @@ int static VideoImageParameterConfig(void)
 		else
 		{
 			printk("AUX\n");
-		//	SOC_Write_Servicer(VIDEO_PASSAGE_AUX);
 		   	 flag_now_config_channal_AUX_or_Astren = 1;
 		        if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
 		        {u8 i =0;
@@ -192,7 +180,6 @@ int static VideoImageParameterConfig(void)
 	 else 
 	{u8 i =0;
 		printk("DVD\n");
-	//	SOC_Write_Servicer(VIDEO_PASSAGE_DVD);
 		 flag_now_config_channal_AUX_or_Astren = 2;
 	        for (i = BRIGHTNESS;i<=HUE;i++)
 	        {
@@ -224,24 +211,24 @@ int static VideoImageParameterConfig(void)
 	}
 return 1;
 }
-int static VideoImage(void)
+int static video_image_config_begin(void)
 {
     int ret;
     register int i = 0;
     u8 Tw9912_image[2] = {0x17, 0x87,}; //default input pin selet YIN0ss
-    printk("VideoImage()\n");
-    VideoImageParameterConfig();
+    printk("video_image_config_begin()\n");
+    video_image_config_parameter_buffer();
 	for(i = 0; i < 5; i++)
 		    {
 		        if(info_com_top_Channel == YIN3)//back or AUX
 		        {
 		            if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
-		                ret = write_tw9912((char *)&Tw9912_image_global_AUX_BACK[i]);
+		                ret = tw9912_write((char *)&Tw9912_image_global_AUX_BACK[i]);
 		            else
-		                ret = write_tw9912((char *)&Tw9912_image_global_AUX_BACK_PAL_I[i]);
+		                ret = tw9912_write((char *)&Tw9912_image_global_AUX_BACK_PAL_I[i]);
 		        }
 		        else //DVD SEPARATION
-		            ret = write_tw9912((char *)&Tw9912_image_global_separation[i]);
+		            ret = tw9912_write((char *)&Tw9912_image_global_separation[i]);
 	}
     if(flag_now_config_channal_AUX_or_Astren == 0)//Astren
 	{
@@ -249,74 +236,37 @@ int static VideoImage(void)
 			{
 				Tw9912_image[0] = 0x12;
 				Tw9912_image[1] = 0x1f;
-				ret = write_tw9912((char *)&Tw9912_image);
+				ret = tw9912_write((char *)&Tw9912_image);
 				Tw9912_image[0] = 0x08;
 				Tw9912_image[1] = global_tw9912_info_for_NTSC_I.reg_val;//form qcamerahwi_preview.cpp
-				ret = write_tw9912((char *)&Tw9912_image);
+				ret = tw9912_write((char *)&Tw9912_image);
 			}
 		else
 			{
 				Tw9912_image[0] = 0x12;
 				Tw9912_image[1] = 0xff;
-				ret = write_tw9912((char *)&Tw9912_image);
+				ret = tw9912_write((char *)&Tw9912_image);
 				Tw9912_image[0] = 0x08;
 				Tw9912_image[1] = global_tw9912_info_for_PAL_I.reg_val;//form qcamerahwi_preview.cpp
-				ret = write_tw9912((char *)&Tw9912_image);
+				ret = tw9912_write((char *)&Tw9912_image);
 			}
-		#if 0
-		printk("Astren new parameter\n");
-				Tw9912_image[0] = 0x06;
-				Tw9912_image[1] = 0x13;//form qcamerahwi_preview.cpp
-				ret = write_tw9912((char *)&Tw9912_image);
-				Tw9912_image[0] = 0x21;
-				Tw9912_image[1] = 0x42;//form qcamerahwi_preview.cpp
-				ret = write_tw9912((char *)&Tw9912_image);
-				Tw9912_image[0] = 0x22;
-				Tw9912_image[1] = 0xff;
-				ret = write_tw9912((char *)&Tw9912_image);
-				/**/
-				Tw9912_image[0] = 0x10;
-				Tw9912_image[1] = 0x00;
-				ret = write_tw9912((char *)&Tw9912_image);
-				Tw9912_image[0] = 0x11;
-				Tw9912_image[1] = 0x64;
-				ret = write_tw9912((char *)&Tw9912_image);
-				Tw9912_image[0] = 0x12;
-				Tw9912_image[1] = 0x10;
-				ret = write_tw9912((char *)&Tw9912_image);
-				Tw9912_image[0] = 0x13;
-				Tw9912_image[1] = 0x80;
-				ret = write_tw9912((char *)&Tw9912_image);
-				Tw9912_image[0] = 0x14;
-				Tw9912_image[1] = 0x80;
-				ret = write_tw9912((char *)&Tw9912_image);
-				Tw9912_image[0] = 0x15;
-				Tw9912_image[1] = 0x18;
-				ret = write_tw9912((char *)&Tw9912_image);
-				Tw9912_image[0] = 0x17;
-				Tw9912_image[1] = 0x30;
-				ret = write_tw9912((char *)&Tw9912_image);
-				Tw9912_image[0] = 0x27;
-				Tw9912_image[1] = 0x2d;
-				ret = write_tw9912((char *)&Tw9912_image);
-		#endif
 	}
 
 #ifdef BOARD_V1
 	    if(info_com_top_Channel == YIN3)// back or AUX
 	    {
-	        ret = write_tw9912((char *)Tw9912_image);
+	        ret = tw9912_write((char *)Tw9912_image);
 	        Tw9912_image[0] = 0x08;
 	        Tw9912_image[1] = 0x14; // image down 5 line
-	        ret = write_tw9912((char *)Tw9912_image);
+	        ret = tw9912_write((char *)Tw9912_image);
 	        Tw9912_image[0] = 0x0a;
 	        Tw9912_image[1] = 0x22; // image down 5 line
-	        ret = write_tw9912((char *)Tw9912_image);
+	        ret = tw9912_write((char *)Tw9912_image);
 	    }
 	    else if(info_com_top_Channel == YIN2)//DVD
 	    {
 	        u8 Tw9912_image[2] = {0x08, 0x1a,}; //image reft 5 line
-	        ret = write_tw9912((char *)Tw9912_image);
+	        ret = tw9912_write((char *)Tw9912_image);
 	    }
 	    else
 	    {
@@ -327,7 +277,7 @@ return ret;
 }
 int flyVideoImageQualityConfig_in(Vedio_Effect cmd , u8 valu)
 {
-    printk("flyVideoImage(%d,%d)\n", cmd, valu);
+    printk("flyvideo_image_config_begin(%d,%d)\n", cmd, valu);
 	switch(cmd)
 	{
 		case CONTRAST:TW9912_Image_Parameter_fly[CONTRAST-1].valu = valu;
@@ -346,107 +296,87 @@ int flyVideoImageQualityConfig_in(Vedio_Effect cmd , u8 valu)
 			break;
 	}
 	if(cmd == BRIGHTNESS)//wait all set doen befor application
-		VideoImage();
+		video_image_config_begin();
 return 0;
 }
-int init_tw9912_ent(Vedio_Channel Channel);
+int tw9912_config_for_cvbs_signal(vedio_channel_t Channel);
 int flyVideoInitall_in(u8 Channel)
 {
     int ret = 1 ;
-    //spin_lock(&spin_chipe_config_lock);
     mutex_lock(&lock_chipe_config);
     printk("flyVideoInitall_in(%d)\n", Channel);
     if (Channel >= YIN0 && Channel <= NOTONE)
     {
-        //Channel = SEPARATION;
         info_com_top_Channel = Channel;
         if(Channel == YIN2)//dvd
-        {
             info_com_top_Channel = SEPARATION;
-            //info_com_top_Channel = YIN0;
-	    // SOC_Write_Servicer(VIDEO_PASSAGE_DVD);
-	//            global_video_channel_flag = DVD;
-        }
     }
     else
     {
-        info_com_top_Channel = NOTONE;
-   //     global_video_channel_flag = OTHER;
         printk("%s: you input TW9912 Channel=%d error!\n", __FUNCTION__, Channel);
     }
-    //spin_unlock(&spin_chipe_config_lock);
     mutex_unlock(&lock_chipe_config);
     return ret;
     //success return 1 fail return -1
 }
-int init_tw9912_ent(Vedio_Channel Channel)
+int tw9912_config_for_cvbs_signal(vedio_channel_t Channel)
 {
     int ret = -1 ;
-    video_config_debug("init_tw9912_ent(%d)\n", Channel);
+    video_config_debug("tw9912_config_for_cvbs_signal(%d)\n", Channel);
     switch (Channel)
     {
     case YIN0:
-        info_Vedio_Channel = YIN0;
-        ret = Tw9912_init(PAL_I, YIN0);
+        info_vedio_channel_t = YIN0;
+        ret = tw9912_config_array(PAL_I, YIN0);
         video_config_debug("TW9912:Channel selet YIN0\n");
         break;
     case YIN1:
-        info_Vedio_Channel = YIN1;
-        ret = Tw9912_init(PAL_I, YIN1);
+        info_vedio_channel_t = YIN1;
+        ret = tw9912_config_array(PAL_I, YIN1);
         video_config_debug("TW9912:Channel selet YIN1\n");
         break;
     case YIN2:
-        info_Vedio_Channel = YIN2;
-        ret = Tw9912_init(PAL_I, YIN2);
+        info_vedio_channel_t = YIN2;
+        ret = tw9912_config_array(PAL_I, YIN2);
         video_config_debug("TW9912:Channel selet YIN2\n");
         break;
     case YIN3:
-        info_Vedio_Channel = YIN3;
-        ret = Tw9912_init(PAL_I, YIN3);
+        info_vedio_channel_t = YIN3;
+        ret = tw9912_config_array(PAL_I, YIN3);
         video_config_debug("TW9912:Channel selet YIN3\n");
-        break;
-    case SEPARATION:
-        info_Vedio_Channel = SEPARATION;
-        ret = Tw9912_init(NTSC_P, SEPARATION);
-        video_config_debug("TW9912:Channel selet SEPARATION\n");
         break;
     default :
         video_config_debug("%s: you input TW9912 Channel=%d error!\n", __FUNCTION__, Channel);
         break;
     }
     return ret;
-    //success return 1 fail return -1
 }
-Vedio_Format camera_open_video_signal_test_in(void)
+vedio_format_t camera_open_video_signal_test_in(void)
 {
     down(&sem);
     return camera_open_video_signal_test_in_2();
 }
-Vedio_Format flyVideoTestSignalPin_in(u8 Channel)
+vedio_format_t flyVideoTestSignalPin_in(u8 Channel)
 {
-    static Vedio_Format printk_count_flag_next = 0;
+    static vedio_format_t printk_count_flag_next = 0;
     static u8 printk_format_count =0;
-    Vedio_Format ret = NOTONE;
+    vedio_format_t ret = NOTONE;
     static u8 Format_count = 0;
     static u8 Format_count_flag = 0;
-    //spin_lock(&spin_chipe_config_lock);
-    //  return NTSC_I;
     mutex_lock(&lock_chipe_config);
     if(
         ( (the_last_config.Channel == YIN2 || the_last_config.Channel == SEPARATION) && Channel == YIN3) || \
         (the_last_config.Channel == YIN3  && (Channel == YIN2 || Channel == SEPARATION))
     )
     {
-        //SOC_Write_Servicer(VIDEO_SHOW_BLACK);
-        Change_channel();
-
+        video_signal_channel_switching_occurs();
     }
 
    //mutex_unlock(&lock_chipe_config);
 // return NTSC_I;
     if(Channel == SEPARATION || Channel == YIN2)
     {
-        ret = testing_NTSCp_video_signal();
+        ret = tw9912_yuv_signal_testing();
     }
     else
     {static u8 goto_agian_test = 0;
@@ -455,27 +385,21 @@ AGAIN_TEST_FOR_BACK_NTSC_I:
         switch (Channel)
         {
         case 0:
-            //	info_Vedio_Channel = YIN0;
-            ret =  testing_video_signal(YIN0);
+            ret =  tw9912_cvbs_signal_tsting(YIN0);
             break;
         case 1:
-            //	info_Vedio_Channel = YIN1;
-            ret =  testing_video_signal(YIN1);
+            ret =  tw9912_cvbs_signal_tsting(YIN1);
             break;
         case 2:
-            //	info_Vedio_Channel = YIN2;
-            ret =  testing_video_signal(YIN2);
+            ret =  tw9912_cvbs_signal_tsting(YIN2);
             break;
         case 3:
-            //	info_Vedio_Channel = YIN3;
-            ret =  testing_video_signal(YIN3);
+            ret =  tw9912_cvbs_signal_tsting(YIN3);
             break;
         case 4:
-            //	info_Vedio_Channel = SEPARATION;
-            ret =  testing_video_signal(SEPARATION);
+            ret =  tw9912_cvbs_signal_tsting(SEPARATION);
             break;
         default :
-            //	info_Vedio_Channel = NOTONE;
             printk("%s:you input TW9912 Channel=%d error!\n", __FUNCTION__, Channel);
             break;
         }
@@ -490,10 +414,8 @@ AGAIN_TEST_FOR_BACK_NTSC_I:
     		printk("C=%d,F=%d\n", Channel, ret);
 		}
 	else printk_format_count++;
-    //spin_unlock(&spin_chipe_config_lock);
     mutex_unlock(&lock_chipe_config);
-    //global_video_format_flag=ret;//Transmitted Jiang  Control
-    
+	
     if( ret > 4 ) 
 	{
 		Format_count ++;
@@ -502,12 +424,11 @@ AGAIN_TEST_FOR_BACK_NTSC_I:
 			  Format_count = 0 ;
 			  Format_count_flag = 1;
 			  printk("warning : Test Input Signal Fail Now Reconfig Tw9912 \n");
-			 // video_init_config_in( PAL_P);
+			 // chips_config_begin( PAL_P);
 			if(info_com_top_Channel == SEPARATION || info_com_top_Channel == YIN2)
-				Tw9912_init_NTSCp();
+				tw9912_config_array_NTSCp();
 			else
-	        		Tw9912_init(PAL_I, YIN3);
-		  
+	        		tw9912_config_array(PAL_I, YIN3);
 		}
 	}
 	else
@@ -522,7 +443,7 @@ int read_chips_signal_status(u8 cmd)
 {
     int ret = 0;
     mutex_lock(&lock_chipe_config);
-    ret = read_tw9912_chips_status(cmd);//return 0 or 1  ,if back 1 signal have change
+    ret = tw9912_read_chips_status(cmd);//return 0 or 1  ,if back 1 signal have change
     mutex_unlock(&lock_chipe_config);
     return ret;//have change return 1 else retrun 0
 }
@@ -538,7 +459,7 @@ int read_chips_signal_status_fast(u8 *valu)
 int IfInputSignalNotStable(void)
 {
     int i;
-    Vedio_Format ret2;
+    vedio_format_t ret2;
     static u8 IfInputSignalNotStable_count = 1;
     static u8 SignalNotFind_count = 0;
     video_config_debug("IfInputSignalNotStable(info_com_top_Channel =%d)\n", info_com_top_Channel);
@@ -561,13 +482,13 @@ int IfInputSignalNotStable(void)
         video_config_debug("signal astable\n");
         mutex_lock(&lock_chipe_config);
         //Disabel_video_data_out();
-        //TC358_data_output_enable(0);
+        //tc358746xbg_data_out_enable(0);
         mutex_unlock(&lock_chipe_config);
         while(global_camera_working_status)//camera not exit
         {
             SignalNotFind_count++;
             if(SignalNotFind_count > 50) goto BREAKTHEWHILE;
-            ret2 = Tw9912TestingChannalSignal(info_com_top_Channel) ;
+            ret2 = tw9912_testing_channal_signal(info_com_top_Channel) ;
             switch( ret2 )
             {
             case NTSC_I:
@@ -593,10 +514,7 @@ int IfInputSignalNotStable(void)
             }
         }
 BREAKTHEWHILE:
-        mutex_lock(&lock_chipe_config);
-        //Enabel_video_data_out();
-        //TC358_data_output_enable(1);
-        mutex_unlock(&lock_chipe_config);
+	;
     }
     else//DVD YUV
     {
@@ -606,170 +524,87 @@ SIGNALISGOOD:
 SIGNALINPUT:
     return 0;
 }
-/*static int thread_signal_test(void *data)
+static void chips_config_cvbs_begin()
 {
-    int i = 0;
-    long int timeout;
-   // video_config_debug("thread_signal_test()\n");
-   printk("thread_signal_test() IN \n");
-    while(!kthread_should_stop())
-    {
-       
-	if(global_camera_working_status && global_debug_thread) //camera star work
-        {u8 valu;
-        	read_chips_signal_status_fast(&valu);
-		 msleep(60);
-	}
-	else
-	msleep(500);
-    }
-    return 0;
-}
-*/
-void video_init_config_in(Vedio_Format config_pramat)
-{
-    printk("\n\nVideo Module Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);
-    video_config_debug("tw9912:config channal is %d\n", info_com_top_Channel);
-    //spin_lock(&spin_chipe_config_lock);
-    mutex_lock(&lock_chipe_config);
-    //SOC_Write_Servicer(VIDEO_NORMAL_SHOW);
-    if(info_com_top_Channel == SEPARATION || info_com_top_Channel == YIN2)
-    {
-    	if(testing_NTSCp_video_signal() == NTSC_P)
-    	{
-			Tw9912_init_NTSCp();
-			VideoImage();
-			SOC_Write_Servicer(VIDEO_NORMAL_SHOW);
-			TC358_init(NTSC_P);
-			printk("Vedio Format Is NTSCp\n");
-    	}
-		else
-		{
-			printk("\nWaring Not find DVD video signal..\n");
-			//TC358_init(COLORBAR + TC358746XBG_YELLOW); //blue
-			Tw9912_init_NTSCp();
-			VideoImage();
-			SOC_Write_Servicer(VIDEO_NORMAL_SHOW);
-			TC358_init(NTSC_P);
-			//printk("Vedio Format Is NTSCp\n");
-		}
-    }
-    else	if(config_pramat != STOP_VIDEO)
-    {
-        if(info_com_top_Channel == NOTONE)
-        {
-            Tw9912_init_PALi();
-            printk("TW9912:warning -->info_com_top_Channel == NOTONE,Tw9912 Ignore\n");
-        }
-        else
-        {
-            //mutex_unlock(&lock_chipe_config);
-            init_tw9912_ent(info_com_top_Channel);
-            //mutex_lock(&lock_chipe_config);
-        }
-        VideoImage();
+	tw9912_config_for_cvbs_signal(info_com_top_Channel);
+	video_image_config_begin();
 
 	printk("global_video_channel_flag = %x\n",global_video_channel_flag);
 	if(global_video_channel_flag == TV_4KO)
 	{u8 Tw9912_register_valu[] = {0x08, 0x17,};
-		write_tw9912((char *)Tw9912_register_valu);
+		tw9912_write((char *)Tw9912_register_valu);
 		Tw9912_register_valu[0] =0xa;
 		Tw9912_register_valu[1] =0x1e;
-		write_tw9912((char *)Tw9912_register_valu);
+		tw9912_write((char *)Tw9912_register_valu);
 	}
 	else if(global_video_channel_flag == AUX_4KO)
 	{u8 Tw9912_register_valu[] = {0x08, 0x15,};
-		write_tw9912((char *)Tw9912_register_valu);
+		tw9912_write((char *)Tw9912_register_valu);
 	}
 
-        //msleep(300);//wait for video Steady display
-        /*
-        		printk("\r\n");
-        		printk("TW9912:info_Vedio_Channel=%d\n",info_Vedio_Channel);
-        		printk("TW9912:signal_is_how[%d].Channel=%d\n",info_Vedio_Channel,signal_is_how[info_Vedio_Channel].Channel);
-        		printk("TW9912:signal_is_how[%d].Format=%d\n",info_Vedio_Channel,signal_is_how[info_Vedio_Channel].Format);
-        		printk("TW9912:signal_is_how[%d].vedio_source=%d\n",info_Vedio_Channel,signal_is_how[info_Vedio_Channel].vedio_source);
-        */
-        if(info_Vedio_Channel <= SEPARATION)
+        if(info_vedio_channel_t <= SEPARATION)
         {
-            if(tw9912_signal_unstabitily_for_Tw9912_init_flag == 1) //find colobar flag signal bad
-            {
-                printk("video_init_config:video input  signal unstabitily,now shouw RED\n");
-                TC358_init(COLORBAR + TC358746XBG_RED); //rea
-                tw9912_signal_unstabitily_for_Tw9912_init_flag = 0;
-            }
-            else if(tw9912_signal_unstabitily_for_Tw9912_init_flag == 2) //NTSCp not find!
-            {
-                printk("tw9912:Configure NTSCp but after configuration cannot detect a progressive signal,now shouw TC358746XBG_GREEN\n");
-                TC358_init(COLORBAR + TC358746XBG_GREEN); //rea
-                tw9912_signal_unstabitily_for_Tw9912_init_flag = 0;
-            }
-            else
-            {
-                //switch (flyVideoSignalPinTest(info_Vedio_Channel))
-                if(1)
-                {
-                    switch (signal_is_how[info_Vedio_Channel].Format)
+                    switch (signal_is_how[info_vedio_channel_t].Format)
                     {
                     case NTSC_I:
 			   SOC_Write_Servicer(VIDEO_NORMAL_SHOW);
-                        TC358_init(NTSC_I);
-                        //TC358_init(PAL_Interlace);
+                        tc358746xbg_config_begin(NTSC_I);
+                        //tc358746xbg_config_begin(PAL_Interlace);
                         break;
                     case PAL_I:
 			   SOC_Write_Servicer(VIDEO_NORMAL_SHOW);
-                        TC358_init(PAL_I);
+                        tc358746xbg_config_begin(PAL_I);
                         break;
                     case NTSC_P:
 			   SOC_Write_Servicer(VIDEO_NORMAL_SHOW);
-                        TC358_init(NTSC_P);
+                        tc358746xbg_config_begin(NTSC_P);
                         break;
                     case PAL_P:
 			   SOC_Write_Servicer(VIDEO_NORMAL_SHOW);
-                        TC358_init(PAL_P);
+                        tc358746xbg_config_begin(PAL_P);
                         break;
                     default :
                         printk("video not signal input..\n");
 			   SOC_Write_Servicer(VIDEO_SHOW_BLACK);
-                        TC358_init(COLORBAR + TC358746XBG_BLACK); //blue
+                        tc358746xbg_config_begin(COLORBAR + TC358746XBG_BLACK); //blue
                         break;
                     }
-                }
-                else if(0)
-                    TC358_init(COLORBAR);
-                else
-                {
-                    TC358_Hardware_Rest();
-                    printk("Erorr timeout hkjing\n");
-                }
-                /**/
-            }
-        }//if(info_Vedio_Channel<=SEPARATION)
+        }//if(info_vedio_channel_t<=SEPARATION)
         else
         {
             printk("Video_init_config:TW9912 not config!\n");
-            TC358_init(COLORBAR);
+            tc358746xbg_config_begin(COLORBAR);
         }
-
-    }
+}
+static void chips_config_yuv_begin()
+{
+	tw9912_config_array_NTSCp();
+	video_image_config_begin();
+	SOC_Write_Servicer(VIDEO_NORMAL_SHOW);
+	tc358746xbg_config_begin(NTSC_P);
+	printk("Vedio Format Is NTSCp\n");
+}
+void chips_config_begin(vedio_format_t config_pramat)// All start
+{
+    printk("\n\nVideo Module Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);
+    video_config_debug("tw9912:config channal is %d\n", info_com_top_Channel);
+    mutex_lock(&lock_chipe_config);
+    if(info_com_top_Channel == SEPARATION)
+  	chips_config_yuv_begin();
+    else	if(config_pramat != STOP_VIDEO)
+	chips_config_cvbs_begin();
     else
     {
         printk("TW9912:warning -->config_pramat == STOP_VIDEO\n");
-        TC358_init(COLORBAR);
-        //TC358_init(STOP_VIDEO);
+        tc358746xbg_config_begin(COLORBAR);
     }
-    //Signal_Test = kthread_run(thread_signal_test,NULL,"flyvideo_test");
-    //Correction_Parameter_fun(signal_is_how[info_Vedio_Channel].Format);
-    //spin_unlock(&spin_chipe_config_lock);
     up(&sem);
     mutex_unlock(&lock_chipe_config);
 }
-void Video_Show_Output_Color(u8 color_flag)
+void tc358746xbg_show_color(u8 color_flag)
 {
     mutex_lock(&lock_chipe_config);
-    printk("flyvideo:error Video_Show_Output_Color()\n");
-    //  Tw9912_init_PALi();
-    TC358_init(color_flag);
-    //colorbar_init_blue();
+    printk("flyvideo:error tc358746xbg_show_color()\n");
+    tc358746xbg_config_begin(color_flag);
     mutex_unlock(&lock_chipe_config);
 }

@@ -12,9 +12,10 @@
 #define Progressive_Output_Format 0x12
 #define Interlaced_Output_Format 0x02
 #define TW9912_RESET 43
+#define TW9912_I2C_ChipAdd 0x44 //SIAD = 0-->0x44  SIAD =1-->0x45
 
 
-extern u8 tw9912_signal_unstabitily_for_Tw9912_init_flag;
+extern u8 tw9912_signal_unstabitily_for_tw9912_config_array_flag;
 #if 0
 #define tw9912_dbg(msg...)  do { printk( KERN_CRIT "TW9912: " msg); }while(0)
 #else
@@ -46,7 +47,7 @@ typedef enum
     YIN3,//now is use AUX/BACK_CVBS
     SEPARATION,//Progressive
     NOTONE,
-} Vedio_Channel;
+} vedio_channel_t;
 typedef enum
 {
     AUX_4KO = 0,
@@ -54,7 +55,7 @@ typedef enum
     ASTREN_4KO,
     DVD_4KO,
     OTHER_CHANNEL_4KO,
-} Vedio_Channel_2;
+} vedio_channel_t_2;
 typedef enum
 {
     NTSC_I = 1,
@@ -64,7 +65,7 @@ typedef enum
     STOP_VIDEO,
     COLORBAR,
     OTHER,
-} Vedio_Format;
+} vedio_format_t;
 typedef enum
 {
     BRIGHTNESS = 1,//ok
@@ -85,10 +86,10 @@ typedef enum
 } Source_in;
 typedef struct
 {
-    Vedio_Channel Channel;
-    Vedio_Format Format;
+    vedio_channel_t Channel;
+    vedio_format_t Format;
     Source_in vedio_source;
-} TW9912_Signal;
+} tw9912_signal_t;
 /**************************/
 typedef struct
 {
@@ -104,7 +105,7 @@ typedef struct
     TW9912_reg component_video_format;//0x1e
     TW9912_reg macrovision_detection;//0x30
     TW9912_reg input_detection;//0xc1
-} TW9912_input_info;
+} tw9912_input_info_t;
 /**************************/
 typedef enum
 {
@@ -114,19 +115,19 @@ typedef enum
 typedef struct
 {
     TW9912_initall_flag flag;
-    Vedio_Channel Channel;
-    Vedio_Format format;
-} TW9912_initall_status;
+    vedio_channel_t Channel;
+    vedio_format_t format;
+} tw9912_initall_status_t;
 typedef struct
 {
     u8 run;
-    Vedio_Format format;
-} tw9912_run_flag;
+    vedio_format_t format;
+} tw9912_run_flag_t;
 typedef struct
 {
-    Vedio_Channel Channel;
-    Vedio_Format format;
-} Last_config_t;
+    vedio_channel_t Channel;
+    vedio_format_t format;
+} last_config_t;
 typedef struct
 {
 unsigned char reg;
@@ -134,27 +135,24 @@ unsigned char reg_val;
 bool sta;//true is find black line;
 bool flag;//true is neet again find the black line;
 bool this_is_first_open;//true is first
-}TW9912Info;
+}tw9912info_t;
 /**************************/
-int Tw9912_init_PALi(void);
-int Tw9912_init(Vedio_Format config_pramat, Vedio_Channel Channel);
+int tw9912_config_array(vedio_format_t config_pramat, vedio_channel_t Channel);
 
-Vedio_Format camera_open_video_signal_test_in_2(void);
-int Tw9912_appoint_pin_testing_video_signal(Vedio_Channel Channel);
-Vedio_Format testing_video_signal(Vedio_Channel Channel);
-int Tw9912_init_NTSCp(void);
-i2c_ack write_tw9912(char *buf );
-int read_tw9912_chips_status(u8 cmd);
-i2c_ack Correction_Parameter_fun(Vedio_Format format);
-int Tw9912_init_agin(void);
-void Tw9912_hardware_reset(void);
-Vedio_Format testing_NTSCp_video_signal(void);
+vedio_format_t camera_open_video_signal_test_in_2(void);
+int Tw9912_appoint_pin_tw9912_cvbs_signal_tsting(vedio_channel_t Channel);
+vedio_format_t tw9912_cvbs_signal_tsting(vedio_channel_t Channel);
+i2c_ack tw9912_write(char *buf );
+int tw9912_read_chips_status(u8 cmd);
+i2c_ack Correction_Parameter_fun(vedio_format_t format);
+int tw9912_config_array_agin(void);
+vedio_format_t tw9912_yuv_signal_testing(void);
 void Disabel_video_data_out(void);
 void Enabel_video_data_out(void);
-void read_NTSCp(void);
-Vedio_Format Tw9912TestingChannalSignal(Vedio_Channel Channel);
-void Tw9912Reset_in(void);
+vedio_format_t tw9912_testing_channal_signal(vedio_channel_t Channel);
+void tw9912_hardware_reset(void);
 int Tw9912_YIN3ToYUV_init_agin(void);
-void TW9912_read_all_register(void);
 int read_tw9912_chips_status_fast(u8 *valu);
+int tw9912_config_array_PALi(void);
+int tw9912_config_array_NTSCp(void);
 #endif

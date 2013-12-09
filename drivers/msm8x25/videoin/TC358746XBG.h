@@ -15,13 +15,22 @@
 #define TC358746XBG_YELLOW 7
 #define TC358746XBG_WHITE 8
 
-struct TC358_register_struct
+#define COLOR_BLACK 0
+#define COLOR_RED 2
+#define COLOR_BLUE 4
+#define COLOR_PINK 6
+#define COLOR_GREEN 8
+#define COLOR_LIGHT_BLUE 10
+#define COLOR_YELLOW 12
+#define COLOR_WHITE 14
+
+struct tc358746xbg_register_t
 {
     u16 add_reg;
     u32 add_val;
     u8 registet_width;
 };
-struct TC358_register_struct_read
+struct tc358746xbg_register_t_read
 {
     u16 add_reg;
     u8 registet_width;
@@ -29,7 +38,6 @@ struct TC358_register_struct_read
 
 //#ifdef DFLY_DEBUG
 #define DEBUG_TC358
-//#define tc358746_debug
 //#endif
 
 #ifdef BOARD_V1
@@ -93,12 +101,12 @@ struct TC358_register_struct_read
 
 #define tc358_MSEL_UP do{}while(0)//	do{SOC_IO_Config(34,GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_12MA);SOC_IO_Output(0, 34, 1);}while(0)// 1: Par_in -> CSI-2 TX
 #define tc358_MSEL_DOWN do{}while(0)//do{SOC_IO_Config(34,GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_12MA);SOC_IO_Output(0, 34, 0);}while(0)
-void TC358_init(Vedio_Format);
-void TC358_Hardware_Rest(void);
+void tc358746xbg_config_begin(vedio_format_t);
+void tc358746xbg_hardware_reset(void);
 
-i2c_ack TC358_Register_Write(u16 *add, u32 *valu, u8 flag);
-i2c_ack TC358_Register_Read(u16 add, char *buf, u8 flag);
+i2c_ack tc358746xbg_write(u16 *add, u32 *valu, u8 flag);
+i2c_ack tc358746xbg_read(u16 add, char *buf, u8 flag);
 
-void TC358_data_output_enable(u8 flag);
+void tc358746xbg_data_out_enable(u8 flag);
 //void TC358_exit( void );
 #endif

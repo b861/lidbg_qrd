@@ -134,7 +134,7 @@ typedef enum
     YIN3,//now is use AUX/BACK_CVBS
     SEPARATION,//Progressive
     NOTONE,
-} Vedio_Channel;
+} vedio_channel_t;
 typedef enum
 {
     AUX_4KO = 0,
@@ -142,7 +142,7 @@ typedef enum
     ASTREN_4KO,
     DVD_4KO,
     OTHER_CHANNEL_4KO,
-} Vedio_Channel_2;
+} vedio_channel_t_2;
 typedef enum
 {
     NTSC_I = 1,
@@ -152,7 +152,7 @@ typedef enum
     STOP_VIDEO,
     COLORBAR,
     OTHER,
-} Vedio_Format;
+} vedio_format_t;
 typedef enum
 {
     BRIGHTNESS = 1,//ok
@@ -281,9 +281,9 @@ struct lidbg_fn_t
     void (*pfnlidbg_video_main)(int argc, char **argv);
     void (*pfnvideo_io_i2c_init)(void);
     int (*pfnflyVideoInitall)(unsigned char  Channel);
-    Vedio_Format (*pfnflyVideoTestSignalPin)(unsigned char  Channel);
+    vedio_format_t (*pfnflyVideoTestSignalPin)(unsigned char  Channel);
     int (*pfnflyVideoImageQualityConfig)(Vedio_Effect cmd , unsigned char  valu);
-    void (*pfnvideo_init_config)(Vedio_Format config_pramat);
+    void (*pfnvideo_init_config)(vedio_format_t config_pramat);
 
     //display/touch
     int (*pfnSOC_Display_Get_Res)(unsigned int *screen_x, unsigned int *screen_y);
@@ -292,10 +292,10 @@ struct lidbg_fn_t
     void (*pfnSOC_LPC_Send)(unsigned char *p, unsigned int len);
 
     //video
-    Vedio_Format (*pfncamera_open_video_signal_test)(void);
+    vedio_format_t (*pfncamera_open_video_signal_test)(void);
     void (*pfncamera_open_video_color)(u8 color_flag);
-    Vedio_Format pfnglobal_video_format_flag;
-    Vedio_Channel_2 pfnglobal_video_channel_flag;
+    vedio_format_t pfnglobal_video_format_flag;
+    vedio_channel_t_2 pfnglobal_video_channel_flag;
 
 
     //dev

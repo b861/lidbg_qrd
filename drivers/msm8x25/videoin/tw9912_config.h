@@ -32,11 +32,7 @@ const u8 TW9912_testing_signal[] =
     	bit[4:6]--> 0 = 480i 1 = 576i 2 = 480p 3 = 576p others = NA
     */
 };
-const u8 TW9912_INIT_Public[] =
-{
-    0xfe, 0x0
-    , 0xfe,
-};
+
 const u8 TW9912_YIN3ToYUV_INIT_AGAIN[] =
 {
     0x02, 0x70

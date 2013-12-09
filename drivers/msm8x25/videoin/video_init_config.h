@@ -14,16 +14,16 @@ typedef struct
     Vedio_Effect cmd;	//register index
     unsigned char valu;		//resister valu
 } TW9912_Image_Parameter;
-void video_init_config_in(Vedio_Format config_pramat);
+void chips_config_begin(vedio_format_t config_pramat);
 void video_io_i2c_init_in(void);
 int flyVideoInitall_in(u8 Channel);
-Vedio_Format flyVideoTestSignalPin_in(u8 Channel);
-Vedio_Format camera_open_video_signal_test_in(void);
+vedio_format_t flyVideoTestSignalPin_in(u8 Channel);
+vedio_format_t camera_open_video_signal_test_in(void);
 int flyVideoImageQualityConfig_in(Vedio_Effect cmd , u8 valu);
-void Video_Show_Output_Color(u8 color_flag);
+void tc358746xbg_show_color(u8 color_flag);
 int read_chips_signal_status(u8 cmd);
 int IfInputSignalNotStable(void);
-void VideoReset_in(void);
+void chips_hardware_reset(void);
 int read_chips_signal_status_fast(u8 *valu);
 #endif
 

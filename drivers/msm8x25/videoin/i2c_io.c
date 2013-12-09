@@ -66,7 +66,7 @@ free_gpio:
 gpio_request_failed:
     return 0;
 }
-
+#ifndef FLY_VIDEO_BOARD_V3
 static void set_i2c_pin(u32 pin)
 {
     //  soc_io_output(pin, 1);
@@ -77,6 +77,7 @@ static void clr_i2c_pin(u32 pin)
     //soc_io_output(pin,0);
     gpio_set_value(pin, 0);
 }
+#endif
 void i2c_io_config_init(void)
 {
 	#ifndef FLY_VIDEO_BOARD_V3
@@ -87,22 +88,23 @@ void i2c_io_config_init(void)
     i2c_io_config(TC358746XBG_RESET, GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA, 1); // tc358746 reset
     printk("first init GPIO_I2C_SDA and GPIO_I2C_SCL\n");
 }
+#ifndef FLY_VIDEO_BOARD_V3
 static void i2c_init(void)
 {
-	#ifndef FLY_VIDEO_BOARD_V3
+	
     i2c_io_config( GPIO_I2C_SDA, GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA, 0);
     i2c_io_config( GPIO_I2C_SCL, GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA, 0);
 
     set_i2c_pin(GPIO_I2C_SDA);
     set_i2c_pin(GPIO_I2C_SCL);
-	#endif
+
 }
 
 static void i2c_free(void)
 {
     return;
 }
-
+	
 static void i2c_delay(u32 time)
 {
 #if 0
@@ -144,6 +146,7 @@ static void i2c_write_ask(i2c_ack flag)
     set_i2c_pin(GPIO_I2C_SDA);
     i2c_delay(DELAY_UNIT << Dtime);
 }
+
 
 static i2c_ack i2c_read_ack(void)
 {
@@ -229,6 +232,7 @@ static void i2c_write_chip_addr(u8 chip_addr, i2c_WR_flag flag)
         i2c_write(chip_addr) ;
     }
 }
+#endif
 i2c_ack i2c_read_byte(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size)
 {
 	#ifdef FLY_VIDEO_BOARD_V3
