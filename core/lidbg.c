@@ -163,7 +163,7 @@ static ssize_t lidbg_write(struct file *filp, const char __user *buf,
         is_alloc = 1;
     }
 #endif
-    char tmp[size + 1];//C99 variable length array 
+    char tmp[size + 1];//C99 variable length array
     char *mem = tmp;
     bool is_alloc = 0;
 

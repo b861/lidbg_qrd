@@ -209,6 +209,62 @@ void check_conf_file(void)
 
 }
 
+
+static int get_parameters(char *buf, char **param1)
+{
+    char *token;
+    int pos = 0;
+    while((token = strsep(&buf, " ")) != NULL )
+    {
+        *param1 = token;
+        param1++;
+        pos++;
+    }
+    return pos;
+}
+int fs_nod_open (struct inode *inode, struct file *filp)
+{
+    return 0;
+}
+ssize_t fs_nod_write (struct file *filp, const char __user *buf, size_t count, loff_t *f_pos)
+{
+    int pos = 0;
+    char *tmp, *param[20];
+    tmp = memdup_user(buf, count);
+    if (IS_ERR(tmp))
+    {
+        FS_ERR("<memdup_user>\n");
+        return PTR_ERR(tmp);
+    }
+
+    pos = get_parameters(tmp, param);
+
+    if(pos < 5)
+    {
+        FS_ERR("echo \"c file tw 1 1\" > /dev/fs_node0\n");
+        goto out;
+    }
+    //zone start [dosomething]
+
+    if(!strcmp(param[2], "tw") )
+    {
+        int cmd = simple_strtoul(param[3], 0, 0);
+        int cmd_para = simple_strtoul(param[4], 0, 0);
+        lidbg_fs_timework_test(cmd, cmd_para);
+    }
+
+    //zone end
+out:
+    kfree(tmp);
+    return count;
+}
+
+static  struct file_operations fs_nod_fops =
+{
+    .owner = THIS_MODULE,
+    .write = fs_nod_write,
+    .open = fs_nod_open,
+};
 void lidbg_fileserver_main_prepare(void)
 {
 
@@ -225,6 +281,8 @@ void lidbg_fileserver_main_prepare(void)
 
     lidbg_mkdir("/data/lidbg_osd");
     lidbg_mkdir("/data/lidbg");
+
+    lidbg_new_cdev(&fs_nod_fops, "fs_node");
 }
 void lidbg_fileserver_main_init(void)
 {
@@ -250,6 +308,7 @@ static int __init lidbg_fileserver_init(void)
     lidbg_fs_update_init();
     lidbg_fs_conf_init();
     lidbg_fs_cmn_init();
+    lidbg_fs_timeworker_init();
 
     lidbg_fileserver_main_init();//note,put it in the end.
 
