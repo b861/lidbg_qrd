@@ -359,6 +359,8 @@ struct lidbg_pvar_t
     int cpu_freq;
     bool is_fly;
     unsigned int flag_for_15s_off;
+    bool is_usb11;
+
 };
 
 struct lidbg_hal

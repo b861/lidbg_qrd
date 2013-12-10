@@ -8,7 +8,6 @@ int temp_log_freq;
 
 #define  USB_1_1 "/flysystem/usb11"
 #define LIDBG_GPIO_PULLUP  GPIO_CFG_PULL_UP
-extern bool is_usb11;
 
 static struct task_struct *resume_task;
 
@@ -58,14 +57,15 @@ u8 audio_data_for_hal[2];
 int thread_usb_11(void *data)
 {
 	USB_WORK_DISENABLE;
-	ssleep(20);
+	g_var.is_usb11 = 0;
+	ssleep(15);
     while(1)
     {
         set_current_state(TASK_UNINTERRUPTIBLE);
         if(kthread_should_stop()) break;
         if(1) 
         {
-		if( !is_usb11)
+		if( !g_var.is_usb11)
 		{
 			lidbg("\n\nTranslate to usb1.1 modes\n\n");
 			USB_ID_HIGH_DEV;
@@ -77,7 +77,7 @@ int thread_usb_11(void *data)
 		else{
 			//USB_WORK_DISENABLE;
 			//msleep(1000);
-			ssleep(30);
+			ssleep(10);
 			USB_WORK_ENABLE;
 			break;
 		}
