@@ -8,6 +8,7 @@ int temp_log_freq;
 
 #define  USB_1_1 "/flysystem/usb11"
 #define LIDBG_GPIO_PULLUP  GPIO_CFG_PULL_UP
+extern bool is_usb11;
 
 static struct task_struct *resume_task;
 
@@ -26,6 +27,7 @@ int thread_key(void *data);
 int thread_pwr(void *data);
 int thread_usb(void *data);
 static int thread_resume(void *data);
+int thread_usb_11(void *data);
 
 void fly_devices_init(void);
 static int lidbg_event(struct notifier_block *this, unsigned long event, void *ptr);
@@ -52,6 +54,39 @@ bool suspend_flag = 0;
 
 wait_queue_head_t read_wait;
 u8 audio_data_for_hal[2];
+
+int thread_usb_11(void *data)
+{
+	USB_WORK_DISENABLE;
+	ssleep(20);
+    while(1)
+    {
+        set_current_state(TASK_UNINTERRUPTIBLE);
+        if(kthread_should_stop()) break;
+        if(1) 
+        {
+		if( !is_usb11)
+		{
+			lidbg("\n\nTranslate to usb1.1 modes\n\n");
+			USB_ID_HIGH_DEV;
+			msleep(1000);
+			//USB_WORK_ENABLE;
+			USB_ID_LOW_HOST;
+			msleep(1000);
+		}
+		else{
+			//USB_WORK_DISENABLE;
+			//msleep(1000);
+			ssleep(30);
+			USB_WORK_ENABLE;
+			break;
+		}
+        }
+	else
+            schedule_timeout(HZ);
+    }
+	return 0;
+}
 
 int thread_usb(void *data)
 {
@@ -928,13 +963,18 @@ void fly_devices_init(void)
 #endif
 
         unmute_ns();
-	if( fs_is_file_exist(USB_1_1))
+
+	if(!fs_is_file_exist(USB_1_1))
+		USB_WORK_ENABLE;
+	else
+		CREATE_KTHREAD(thread_usb_11, NULL);
+	/*if( fs_is_file_exist(USB_1_1))
 	{
 		lidbg("Translate to usb1.1 modes\n");
 		USB_ID_HIGH_DEV;
 		ssleep(30);
 	}
-	USB_WORK_ENABLE;
+	USB_WORK_ENABLE;*/
     }
 }
 
