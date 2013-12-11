@@ -6,7 +6,7 @@ LIDBG_DEFINE;
 int led_en ;
 int temp_log_freq;
 
-#define  USB_1_1 "/flysystem/usb11"
+#define  USB_1_1 "/flysystem/flyconfig/default/usb11"
 #define LIDBG_GPIO_PULLUP  GPIO_CFG_PULL_UP
 
 static struct task_struct *resume_task;
