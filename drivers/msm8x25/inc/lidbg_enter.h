@@ -371,7 +371,7 @@ union{
 	};
 union{
     struct lidbg_pvar_t soc_pvar_tbl;
-    unsigned char reserve[128];
+    unsigned char reserve1[128];
 	};
 };
 
