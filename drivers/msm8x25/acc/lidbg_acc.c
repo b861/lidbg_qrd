@@ -104,7 +104,11 @@ bool find_unsafe_clk(void)
             }
             if(is_safe == 0)
             {
+            #if 0
                 lidbg_fs_log(FASTBOOT_LOG_PATH, "block unsafe clk:%d\n", i);
+            #else
+				lidbg("block unsafe clk:%d\n", i);
+			#endif
                 ret = 1;
                 //return ret;
             }
@@ -525,6 +529,7 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
     if(!strcmp(data_rec, "acc_on"))
     {
         printk("******bp:goto acc_on********\n");
+		fake_suspend = 1;
         SOC_Write_Servicer(CMD_ACC_ON);
         lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_ACC_ON));
     }
