@@ -365,9 +365,14 @@ struct lidbg_pvar_t
 
 struct lidbg_hal
 {
-    struct lidbg_fn_t soc_func_tbl;
+union{
+	struct lidbg_fn_t soc_func_tbl;
+	unsigned char reserve[256];
+	};
+union{
     struct lidbg_pvar_t soc_pvar_tbl;
     unsigned char reserve[128];
+	};
 };
 
 
