@@ -1130,7 +1130,7 @@ static ssize_t dev_write(struct file *filp, const char __user *buf,
 {
     char *p = NULL;
     int len = size;
-#if 0
+#if 1
     char tmp[32];
     char *mem = tmp;
     bool is_alloc = 0;
@@ -1144,10 +1144,11 @@ static ssize_t dev_write(struct file *filp, const char __user *buf,
         }
         is_alloc = 1;
     }
-#endif
+#else
     char tmp[size + 1];//C99 variable length array 
     char *mem = tmp;
     bool is_alloc = 0;
+#endif
 
     memset(mem, '\0', size + 1);
 
