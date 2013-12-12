@@ -86,6 +86,7 @@ int thread_usb_11(void *data)
 	else
             schedule_timeout(HZ);
     }
+	
 	return 0;
 }
 
@@ -969,9 +970,11 @@ void fly_devices_init(void)
 	if(!fs_is_file_exist(USB_1_1))
 		USB_WORK_ENABLE;
 	else{
-#ifndef BUILD_FOR_RECOVERY
+	#ifdef BUILD_FOR_RECOVERY
+		USB_WORK_ENABLE;
+	#else
 		CREATE_KTHREAD(thread_usb_11, NULL);
-#endif
+	#endif
 		}
 	/*if( fs_is_file_exist(USB_1_1))
 	{
