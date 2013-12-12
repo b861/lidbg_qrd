@@ -968,8 +968,11 @@ void fly_devices_init(void)
 
 	if(!fs_is_file_exist(USB_1_1))
 		USB_WORK_ENABLE;
-	else
+	else{
+#ifndef BUILD_FOR_RECOVERY
 		CREATE_KTHREAD(thread_usb_11, NULL);
+#endif
+		}
 	/*if( fs_is_file_exist(USB_1_1))
 	{
 		lidbg("Translate to usb1.1 modes\n");
