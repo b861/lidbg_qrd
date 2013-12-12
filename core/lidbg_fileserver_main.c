@@ -245,14 +245,9 @@ ssize_t fs_nod_write (struct file *filp, const char __user *buf, size_t count, l
         goto out;
     }
     //zone start [dosomething]
-
     if(!strcmp(param[2], "tw") )
     {
-        int cmd = simple_strtoul(param[3], 0, 0);
-        int cmd_para = simple_strtoul(param[4], 0, 0);
-        lidbg_fs_timework_test(cmd, cmd_para);
     }
-
     //zone end
 out:
     kfree(tmp);
@@ -282,7 +277,8 @@ void lidbg_fileserver_main_prepare(void)
     lidbg_mkdir("/data/lidbg_osd");
     lidbg_mkdir("/data/lidbg");
 
-    lidbg_new_cdev(&fs_nod_fops, "fs_node");
+    if(0)
+        lidbg_new_cdev(&fs_nod_fops, "fs_node");
 }
 void lidbg_fileserver_main_init(void)
 {
@@ -308,7 +304,6 @@ static int __init lidbg_fileserver_init(void)
     lidbg_fs_update_init();
     lidbg_fs_conf_init();
     lidbg_fs_cmn_init();
-    lidbg_fs_timeworker_init();
 
     lidbg_fileserver_main_init();//note,put it in the end.
 

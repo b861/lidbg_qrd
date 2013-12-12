@@ -124,7 +124,7 @@ void parse_cmd(char *pt)
     {
         if (!strcmp(argv[1], "*158#999"))
         {
-            tw_time_worker_register(500, fs_call_apk);
+            fs_call_apk();
         }
         else if (!strcmp(argv[1], "*158#001"))
         {

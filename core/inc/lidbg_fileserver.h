@@ -59,9 +59,6 @@ struct fs_filename_item
 #define build_time_sd_path LIDBG_LOG_DIR"build_time.txt"
 #define build_time_fly_path "/flysystem/lib/out/build_time.conf"
 #define build_time_lidbg_path "/system/lib/modules/out/build_time.conf"
-
-
-extern bool tw_time_worker_register(int timeout, void (*callback)(void));
 extern void lidbg_fileserver_main(int argc, char **argv);
 extern void fs_file_separator(char *file2separator);
 extern void fs_regist_filedetec(char *filename, void (*cb_filedetec)(char *filename ));

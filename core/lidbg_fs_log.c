@@ -239,9 +239,14 @@ bool fs_upload_machine_log(void)
     remount_system();
     return upload_machine_log();
 }
-void fs_call_apk(void)
+int thread_call_apk_init(void *data)
 {
     call_apk();
+    return 0;
+}
+void fs_call_apk(void)
+{
+    CREATE_KTHREAD(thread_call_apk_init, NULL);
 }
 void fs_remove_apk(void)
 {
