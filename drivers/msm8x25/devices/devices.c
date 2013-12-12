@@ -30,6 +30,7 @@ int thread_usb_11(void *data);
 
 void fly_devices_init(void);
 static int lidbg_event(struct notifier_block *this, unsigned long event, void *ptr);
+static struct file_operations dev_fops;
 
 int platform_id;
 bool i2c_c_ctrl = 0;
@@ -573,6 +574,7 @@ static int soc_dev_probe(struct platform_device *pdev)
 
     }
 
+    lidbg_new_cdev(&dev_fops, "flydev");
     FS_REGISTER_INT(i2c_ctrl, "i2c_ctrl", 0, NULL);
     FS_REGISTER_INT(temp_log_freq, "temp_log_freq", 5, NULL);
     fs_file_separator(TEMP_LOG_PATH);
@@ -1243,7 +1245,6 @@ int dev_init(void)
     set_func_tbl();
 
     init_waitqueue_head(&read_wait);
-    lidbg_new_cdev(&dev_fops, "flydev");
     fs_register_filename_list(TEMP_LOG_PATH, true);
 
     fs_regist_state("cpu_temp", &(g_var.temp));
