@@ -49,7 +49,7 @@ namespace android {
 	static unsigned int Longitudinal_last_fream_count =9;
 	static SplitScreenInfo LongitudinalInformationRemember={300,0,0,true,0};
 	static bool global_need_rePreview = false;
-	static pthread_t thread_DetermineImageSplitScreenID = NULL;
+	static pthread_t thread_DetermineImageSplitScreenID;
 	static bool DetermineImageSplitScreen_do_not_or_yes = true;
 	static int global_fram_count = 0;
 	static nsecs_t Astern_last_time = 0;
@@ -64,10 +64,14 @@ namespace android {
   static nsecs_t flydiff;
   static int global_tw9912_file_fd;
   static int global_fream_give_up =0;
+	static unsigned int global_last_critical_point = 50;
+  static unsigned int global_last_bottom_critical_point = 435;
 void FlyCameraStar()
 {
 	globao_mFlyPreviewStatus = 1;
 	global_fream_give_up = 0;
+	//global_last_critical_point = 50;
+	//global_last_bottom_critical_point = 435;
 	DEBUGLOG("Flyvideo-mFlyPreviewStatus =%d\n",globao_mFlyPreviewStatus);
 	global_tw9912_file_fd = open("/dev/tw9912config",O_RDWR);
 	if(global_tw9912_file_fd ==-1)
@@ -148,7 +152,7 @@ void FlyCameraThisIsFirstOpenAtDVD()
 						 read(file_fd, (void *)(&tw9912_info),sizeof(TW9912Info));
 						 if(tw9912_info.this_is_first_open == true)
 						 {
-							       DEBUGLOG("Flyvideo-x:第一次打开DVD,重新preview\n");
+							       DEBUGLOG("Flyvideo-x:第一次打开DVD\n");
 							       mHalCamCtrl->stopPreview();
 							       //      sleep(1);
 							       mHalCamCtrl->startPreview();
@@ -165,9 +169,9 @@ void FlyCameraNotSignalAtLastTime()
 {
 	if(video_show_status[0] == '0' && rePreview_count > 100)
 		{//发现黑屏 且 视频在上次打开没有视频源输入
-			DEBUGLOG("Flyvideo-上次视频打开，视频源无视频输入，stopPreview()-->\n");
+			DEBUGLOG("Flyvideo-上次视频打开，视频源无视频输入\n");
 			mHalCamCtrl->stopPreview();
-			DEBUGLOG("Flyvideo-上次视频打开，视频源无视频输入，startPreview()-->\n");
+			DEBUGLOG("Flyvideo-上次视频打开，视频源无视频输入\n");
 			mHalCamCtrl->startPreview();
 			rePreview_count = 0;
 		}
@@ -180,16 +184,17 @@ void FlyCameraNotSignalAtLastTime()
 void *CameraRestartPreviewThread(void *mHalCamCtrl1)
 {
 	QCameraHardwareInterface *mHalCamCtrl = (QCameraHardwareInterface *)mHalCamCtrl1;
-	usleep(1000*500);//500 ms
+
 	if(globao_mFlyPreviewStatus == 1)
 	{
-		DEBUGLOG("Flyvideo-DetermineImageSplitScreen:stopPreview()-->\n");
+		DEBUGLOG("Flyvideo-:stopPreview()-->\n");
 		mHalCamCtrl->stopPreview();
 		//	sleep(1);
-
-		DEBUGLOG("Flyvideo-DetermineImageSplitScreen:startPreview()-->\n");
+		usleep(1000);
+		DEBUGLOG("Flyvideo-:startPreview()-->\n");
 		mHalCamCtrl->startPreview();
 		//	sleep(1);
+		usleep(500000);//500 ms
 	}
 	else
 	{
@@ -316,7 +321,7 @@ static int ToFindBlackLineAndSetTheTw9912VerticalDelayRegister(mm_camera_ch_data
 	}
 	else
 	{
-		DEBUGLOG("Flyvideo-从内核读回的数据 tw9912_info.flag == false 无需再“腾”顶部的黑线");
+		DEBUGLOG("Flyvideo-:无需再“腾”顶部的黑线");
 		ToFindBlackLineAndSetTheTw9912VerticalDelayRegister_is_ok = true;
 	}
 	close(file_fd);
@@ -328,18 +333,36 @@ static bool VideoItselfBlackJudge(mm_camera_ch_data_buf_t *frame)
 	unsigned int black_count;
 	int i =0 ,j =0;
 	unsigned char *piont_y;
-	for(;j<480;j++)
+
+	black_count = 0;
+	for(j=60;j<400;j++)
 		{i++;
 			piont_y = (unsigned char *)(frame->def.frame->buffer+frame->def.frame->y_off+720*j + i);//取值 正方形 斜线查找
 			if(*piont_y <= 0x20)//找到啦一个黑色点
 				black_count ++;
 
-			if( (480 - j + black_count) < 450)//一定无法达到470个点的要求，没必要再执行下去。
+			if( (400 - j + black_count) < 170)//一定无法达到470个点的要求，没必要再执行下去。
 						continue;
 
-			if(black_count>450)
+			if(black_count>170)
 				{
-					DEBUGLOG("Flyvideo-:黑");
+					//DEBUGLOG("Flyvideo-:黑");
+					return 1;//这帧本身是黑色
+				}
+		}
+
+	for(j=400;j>60;j--)
+		{i++;
+			piont_y = (unsigned char *)(frame->def.frame->buffer+frame->def.frame->y_off+720*j + i);//取值 正方形 斜线查找
+			if(*piont_y <= 0x20)//找到啦一个黑色点
+				black_count ++;
+
+			if( (400 - j + black_count) < 280)//一定无法达到470个点的要求，没必要再执行下去。
+						continue;
+
+			if(black_count>280)
+				{
+					//DEBUGLOG("Flyvideo-:黑");
 					return 1;//这帧本身是黑色
 				}
 		}
@@ -385,15 +408,15 @@ return 0;
 static bool RowsOfDataTraversingTheFrameToFindTheBlackLineForDVDorAUX(mm_camera_ch_data_buf_t *frame)
 {
 	unsigned char *piont_y;
-	int i = 0,jj =0;
+	unsigned int i = 0,jj =0;
 	unsigned int count;
 	unsigned int find_line = 477;//NTSC
 	if(video_format[0] == '4' || video_format[0] == '2')
 	{
-	DEBUGLOG("Flyvideo-:视频制式是:PAL，寻找范围是：9～562");
+	//DEBUGLOG("Flyvideo-:视频制式是:PAL，寻找范围是：9～562");
 	find_line = 562;//PAL
 	}
-	else DEBUGLOG("Flyvideo-:视频制式是:NTSC，寻找范围是：9～477");
+	//else DEBUGLOG("Flyvideo-:视频制式是:NTSC，寻找范围是：9～477");
 			DEBUGLOG("Flyvideo-可能发生分屏，寻找黑边中。。。");
 			for(i=9;i<find_line;i++)//某列下的第几行，找 一个点 看数据是否是黑色；前10行和后10行放弃找，正常情况下前3行是黑色的数据
 			{
@@ -421,22 +444,22 @@ static bool RowsOfDataTraversingTheFrameToFindTheBlackLineForDVDorAUX(mm_camera_
 DEBUGLOG("Flyvideo-找不到黑边");
 return 0;
 Break_The_Func:
-DEBUGLOG("Flyvideo-：确定发生啦分屏,黑边位置在第 %d 行，发现的黑色数据个数= %d 个,其中一个黑色数据是0x%.2x",i,count,*piont_y);
+DEBUGLOG("Flyvideo-：%d行分屏，数据%d个,黑色数据0x%.2x",i,count,*piont_y);
 return 1;//确定这帧是出现啦分屏
 }
 static bool RowsOfDataTraversingTheFrameToFindTheBlackLine(mm_camera_ch_data_buf_t *frame)
 {
 	unsigned char *piont_y;
-	int i = 0,jj =0;
+	unsigned int i = 0,jj =0;
 	unsigned int count;
 	unsigned int find_line = 477;//NTSC
 	if(video_format[0] == '4' || video_format[0] == '2')
 	{
-	DEBUGLOG("Flyvideo-:视频制式是:PAL，寻找范围是：9～562");
+	//DEBUGLOG("Flyvideo-:视频制式是:PAL，寻找范围是：9～562");
 	find_line = 562;//PAL
 	}
-	else DEBUGLOG("Flyvideo-:视频制式是:NTSC，寻找范围是：9～477");
-			DEBUGLOG("Flyvideo-可能发生分屏，寻找黑边中。。。");
+	//else DEBUGLOG("Flyvideo-:视频制式是:NTSC，寻找范围是：9～477");
+	DEBUGLOG("Flyvideo-可能发生分屏，寻找黑边中。。。");
 			for(i=9;i<find_line;i++)//某列下的第几行，找 一个点 看数据是否是黑色；前10行和后10行放弃找，正常情况下前3行是黑色的数据
 			{
 				piont_y = (unsigned char *)(frame->def.frame->buffer+frame->def.frame->y_off+720*i + 300);//在第300列下的每行找黑点
@@ -463,7 +486,7 @@ static bool RowsOfDataTraversingTheFrameToFindTheBlackLine(mm_camera_ch_data_buf
 DEBUGLOG("Flyvideo-找不到黑边");
 return 0;
 Break_The_Func:
-DEBUGLOG("Flyvideo-：确定发生啦分屏,黑边位置在第 %d 行，发现的黑色数据个数= %d 个,其中一个黑色数据是0x%.2x",i,count,*piont_y);
+DEBUGLOG("Flyvideo-：在第 %d 行确定发生啦分屏,数据=%d 个,黑色=0x%.2x",i,count,*piont_y);
 return 1;//确定这帧是出现啦分屏
 }
 //Determine whether the split-screen
@@ -474,7 +497,7 @@ static bool DetermineImageSplitScreen_Longitudinal(mm_camera_ch_data_buf_t *fram
 	unsigned int dete_count = 0;
 	Longitudinal_last_fream_count ++;
 	if(Longitudinal_last_fream_count > 0xfffe) Longitudinal_last_fream_count = 9;
-	if( Longitudinal_last_fream_count < 10)//时间过滤，防止短时间内，连续的出现preview操作
+	if( Longitudinal_last_fream_count < 4)//时间过滤，防止短时间内，连续的出现preview操作
 	{//DEBUGLOG("Flyvideo-:T");
 			return 0;
 	}
@@ -488,53 +511,48 @@ static bool DetermineImageSplitScreen_Longitudinal(mm_camera_ch_data_buf_t *fram
 		}
 	}
 	if(LongitudinalInformationRemember.ThisIsFirstFind == false)//如果已经定位啦黑色边,不再做横向遍历查找黑点坐标
-	{
+	{//黑色行位置已经确定
 		j = LongitudinalInformationRemember.BlackCoordinateX;
 		j_end = j;
-	}
-	for(;j<=j_end;j++)
-		{
-			piont_y = (unsigned char *)(frame->def.frame->buffer+frame->def.frame->y_off+720*300 + j);//在第300行，横向扫描
-			if(*piont_y <= 0x20)//找到啦一个黑色点
+		dete_count = 0 ;
+			for(i=60;i<400;i++)
 			{
-				for(i=10;i<470;i++)
+				piont_y = (unsigned char *)(frame->def.frame->buffer+frame->def.frame->y_off+720*i + j);
+				if((*piont_y) <= 0x20)
 				{
-					piont_y = (unsigned char *)(frame->def.frame->buffer+frame->def.frame->y_off+720*i + j);
-					if((*piont_y) <= 0x20)
-					{
-						dete_count++;
-						if( (460 - (i-10) + dete_count) < 455)//一定无法达到400个点的要求，没必要再执行下去。
-							{
-								dete_count = 0;
-								goto THE_FOR;//跳到下一个黑点对应的列统计。
-							}
-						if(dete_count > 454 && VideoItselfBlackJudge(frame) == 1)//提前一帧判断是否是黑色数据帧
-							return 0;//未发生分屏
-						if(dete_count > 455)//在这个纵向行黑色点个数达到啦设置值,且这帧本身不是黑色屏
+					dete_count++;
+					if( (400 - i + dete_count) < 330)//一定无法达到400个点的要求，没必要再执行下去。
 						{
 							dete_count = 0;
-						//LOGE("DetermineImageSplitScreen:buf[%d]= 0x%.2x\n",((180*j) + i),(*piont_crcb) );
-							if(LongitudinalInformationRemember.ThisIsFirstFind == true)//这里是第一次找到黑色点
-							{
-								LongitudinalInformationRemember.ThisIsFirstFind = false;//定位啦黑色边
-								LongitudinalInformationRemember.BlackCoordinateX = j;//记下这一纵行
-								LongitudinalInformationRemember.BlackFreamCount = 1;
-							}
-							else
-							{
-								LongitudinalInformationRemember.BlackFreamCount ++;
-							}
-							DEBUGLOG("Flyvideo-:第%d纵行,累计帧=%d\n",j,LongitudinalInformationRemember.BlackFreamCount);
-							if(LongitudinalInformationRemember.BlackFreamCount  >250)//5sec
-							{
-								global_need_rePreview = false;//防止CameraRestartPreviewThread阻塞导致，global_need_rePreview无法赋值成true；
-								LongitudinalInformationRemember.ThisIsFirstFind = true;
-							}
-							if(global_need_rePreview == false )
-							{
+							goto THE_FOR;//跳到下一个黑点对应的列统计。
+						}
+					if(dete_count > 330 && VideoItselfBlackJudge(frame) == 1)//提前一帧判断是否是黑色数据帧
+						return 0;//未发生分屏
+					if(dete_count > 330)//在这个纵向行黑色点个数达到啦设置值,且这帧本身不是黑色屏
+					{
+						dete_count = 0;
+						Longitudinal_last_fream_count = 0;//时间标签更新
+					//LOGE("DetermineImageSplitScreen:buf[%d]= 0x%.2x\n",((180*j) + i),(*piont_crcb) );
+						if(LongitudinalInformationRemember.ThisIsFirstFind == true)//这里是第一次找到黑色点
+						{
+							LongitudinalInformationRemember.ThisIsFirstFind = false;//定位啦黑色边
+							LongitudinalInformationRemember.BlackCoordinateX = j;//记下这一纵行
+							LongitudinalInformationRemember.BlackFreamCount = 1;
+						}
+						else
+						{
+							LongitudinalInformationRemember.BlackFreamCount ++;
+						}
+						DEBUGLOG("Flyvideo-:第%d纵行,累计帧=%d\n",j,LongitudinalInformationRemember.BlackFreamCount);
+						if(LongitudinalInformationRemember.BlackFreamCount  >250)//5sec
+						{
+							global_need_rePreview = false;//防止CameraRestartPreviewThread阻塞导致，global_need_rePreview无法赋值成true；
+							LongitudinalInformationRemember.ThisIsFirstFind = true;
+						}
+						if(global_need_rePreview == false )
+						{
 								if(LongitudinalInformationRemember.BlackFreamCount >= 5) //发现连续的15帧中有 14 帧就重新preview
 								{
-									Longitudinal_last_fream_count = 0;//时间标签更新
 									global_need_rePreview = true;
 									LongitudinalInformationRemember.BlackFreamCount = 0;
 									#if 0
@@ -553,18 +571,259 @@ static bool DetermineImageSplitScreen_Longitudinal(mm_camera_ch_data_buf_t *fram
 									LongitudinalInformationRemember.BegingFindBlackFreamCount = 0;
 									return 1;//返回分屏信息
 								}
-							}
-						goto BREAK_THE;
+								else
+								return 0;
 						}
+					goto BREAK_THE;
 					}
-
 				}
-				THE_FOR:
-				;
+			}
+		THE_FOR:
+		;
+	}
+	else
+	{//黑色行位置还未确定
+		for(;j<=j_end;j++)
+			{
+				piont_y = (unsigned char *)(frame->def.frame->buffer+frame->def.frame->y_off+720*300 + j);//在第300行，横向扫描
+				if(*piont_y <= 0x20)//找到啦一个黑色点
+				{
+					dete_count = 0 ;
+					for(i=60;i<400;i++)
+					{
+						piont_y = (unsigned char *)(frame->def.frame->buffer+frame->def.frame->y_off+720*i + j);
+						if((*piont_y) <= 0x20)
+						{
+							dete_count++;
+							if( (400 - i + dete_count) < 330)//一定无法达到400个点的要求，没必要再执行下去。
+								{
+									dete_count = 0;
+									goto THE_FOR_2;//跳到下一个黑点对应的列统计。
+								}
+							if(dete_count > 330 && VideoItselfBlackJudge(frame) == 1)//提前一帧判断是否是黑色数据帧
+								return 0;//未发生分屏
+							if(dete_count > 330)//在这个纵向行黑色点个数达到啦设置值,且这帧本身不是黑色屏
+							{
+								dete_count = 0;
+								Longitudinal_last_fream_count = 0;//时间标签更新
+							//LOGE("DetermineImageSplitScreen:buf[%d]= 0x%.2x\n",((180*j) + i),(*piont_crcb) );
+								if(LongitudinalInformationRemember.ThisIsFirstFind == true)//这里是第一次找到黑色点
+								{
+									LongitudinalInformationRemember.ThisIsFirstFind = false;//定位啦黑色边
+									LongitudinalInformationRemember.BlackCoordinateX = j;//记下这一纵行
+									LongitudinalInformationRemember.BlackFreamCount = 1;
+								}
+								else
+								{
+									LongitudinalInformationRemember.BlackFreamCount ++;
+								}
+								DEBUGLOG("Flyvideo-:第%d纵行,累计帧=%d\n",j,LongitudinalInformationRemember.BlackFreamCount);
+								if(LongitudinalInformationRemember.BlackFreamCount  >250)//5sec
+								{
+									global_need_rePreview = false;//防止CameraRestartPreviewThread阻塞导致，global_need_rePreview无法赋值成true；
+									LongitudinalInformationRemember.ThisIsFirstFind = true;
+								}
+								if(global_need_rePreview == false )
+								{
+									if(LongitudinalInformationRemember.BlackFreamCount >= 5) //发现连续的15帧中有 14 帧就重新preview
+									{
+										global_need_rePreview = true;
+										LongitudinalInformationRemember.BlackFreamCount = 0;
+										#if 0
+												DEBUGLOG("Flyvideo-:纵向分屏,stopPreview()-->\n");
+												mHalCamCtrl->stopPreview();
+												DEBUGLOG("Flyvideo-:纵向分屏,startPreview()-->\n");
+												mHalCamCtrl->startPreview();
+										#else
+												if( pthread_create(&thread_DetermineImageSplitScreenID, NULL,CameraRestartPreviewThread, (void *)mHalCamCtrl) != 0)
+													DEBUGLOG("Flyvideo-:纵向分屏，创建线程重新预览失败！\n");
+												else
+													DEBUGLOG("Flyvideo-:纵向分屏\n");
+										#endif
+										LongitudinalInformationRemember.ThisIsFirstFind = true;
+										LongitudinalInformationRemember.BegingFindBlackFreamCount = 0;
+										return 1;//返回分屏信息
+									}
+								}
+							goto BREAK_THE;
+							}
+						}
+
+					}
+					THE_FOR_2:
+					;
+				}
 			}
 		}
 BREAK_THE:
 return 0;//未发生分屏
+}
+static void WriteDataToFrameBuffer(mm_camera_ch_data_buf_t *frame, unsigned int at_line_write, unsigned int start, unsigned int len)
+{
+	memset((void *)(frame->def.frame->buffer+frame->def.frame->y_off+720*at_line_write + start),0xff,len);
+
+}
+static unsigned int LookingForABlackCriticalLine(mm_camera_ch_data_buf_t *frame,unsigned int star,unsigned int len,unsigned int down_or_up)
+{
+unsigned char *piont_y;
+unsigned int line_count,jj,count=0;
+unsigned int temp;
+	if(down_or_up)//向下寻找
+	{
+			for(line_count = star ;line_count < star+len ; line_count ++)
+					 {
+							piont_y = (unsigned char *)(frame->def.frame->buffer+frame->def.frame->y_off+ line_count*720 + 300);
+								if(*piont_y <= 0x43)//发现一个黑点
+								{
+									//DEBUGLOG("Flyvideo-xx: 在 %d ,数%d,数据是%d\n",line_count,count,*piont_y);
+									count = 0;
+									for(jj=0;jj<700;jj++)//在一行的遍历 中部取值判断
+									{
+										piont_y = (unsigned char *)(frame->def.frame->buffer+frame->def.frame->y_off+720*line_count + jj);
+										if(*piont_y <= 0x30)
+											count++;//黑点
+										//else DEBUGLOG("Flyvideo-a:0x%.2x jj = %d line_count = %d count =%d\n",*piont_y,jj,line_count,count);
+										if( (700-jj+count) < 690)//一定无法达到200个点的要求，没必要再执行下去。
+										{//如果剩下的（600-jj）加上已经发现的（count）已经小于200，将结束循环
+											//DEBUGLOG("Flyvideo-xx: 在 %d 行的黑点累计数达不到要求提前结束判断\n",line_count);
+											goto Break_The_For;
+										}
+									}
+									Break_The_For:
+									if(count >= 650) goto GO_H_NEXT;//当这行的部分黑色数据确实有190个，跳出整个遍历
+									else {
+												//DEBUGLOG("Flyvideo-xx: 找到啦顶部的视频临界行在 %d 行，cont = %d\n",line_count,count);
+												return line_count;
+												}
+							 }
+							 else return line_count;
+						GO_H_NEXT:
+						;
+					 }
+		//DEBUGLOG("Flyvideo-xx: 寻找临界行 超出设定（%d）寻找的范围\n",star+len);
+	}
+	else
+	{
+		 for(line_count = star ;line_count > star - len ; line_count --)
+				 {
+
+						piont_y = (unsigned char *)(frame->def.frame->buffer+frame->def.frame->y_off+ line_count*720 + 300);
+							if(*piont_y <= 0x43)//发现一个黑点
+							{//DEBUGLOG("Flyvideo-xx: 在 %d 行发现一个黑点\n",line_count);
+								count = 0;
+								for(jj=0;jj<700;jj++)//在一行的遍历 中部取值判断
+								{
+									piont_y = (unsigned char *)(frame->def.frame->buffer+frame->def.frame->y_off+720*line_count + jj);
+									if(*piont_y <= 0x20)
+									//if((*piont_y) >= 0x20 && (*piont_y) <= 0x35 )
+										count++;//黑点
+									if( (700-jj+count)< 690)//一定无法达到200个点的要求，没必要再执行下去。
+									{//如果剩下的（600-jj）加上已经发现的（count）已经小于200，将结束循环
+										//DEBUGLOG("Flyvideo-xx: 在 %d 行的黑点累计数达不到要求提前结束判断\n",line_count);
+										goto Break_The_For_2;
+									}
+								}
+								Break_The_For_2:
+								if(count >= 650) goto GO_H_NEXT_2;//当这行的部分黑色数据确实有190个，跳出整个遍历
+								else { count =0; return  line_count;}
+						 }
+						 else return line_count;
+					GO_H_NEXT_2:
+					;
+				 }
+		//DEBUGLOG("Flyvideo-xx: 寻找临界行 超出设定（%d）寻找的范围\n",star-len);
+	}
+return 0;
+}
+static bool DetermineImageSplitScreenDVD_16_9_Vedio(mm_camera_ch_data_buf_t *frame,QCameraHardwareInterface *mHalCamCtrl)
+{
+
+  unsigned int line_count,jj;//第二行开始
+  unsigned int shift_count = 0,bottom_shift_count=0;
+  unsigned int new_critical_point,new_bottom_critical_point;
+  static unsigned int global_count_critical_point = 0,global_count_critical_point_1 = 0;
+	if(video_channel_status[0] == '1')//DVD
+	{
+		 new_critical_point = LookingForABlackCriticalLine(frame,0,300,1);/*向下寻找*/
+		 if(new_critical_point)//新的可视数据的临界点
+			{
+					//	DEBUGLOG("Flyvideo-xx: 顶 临界行在 %d \n",new_critical_point);
+					//WriteDataToFrameBuffer(frame,new_critical_point,0,100);
+					if(new_critical_point < 10)
+					{
+							global_count_critical_point_1 = 0;
+							new_bottom_critical_point = LookingForABlackCriticalLine(frame,479,70,0);/*向上寻找*/
+							if(new_bottom_critical_point < 420)
+							{
+									global_count_critical_point ++;
+									//DEBUGLOG("Flyvideo-xx:global_count_critical_point = %d\n",global_count_critical_point);
+									if(global_count_critical_point >15)
+									{
+											global_count_critical_point = 0;
+											if(global_need_rePreview == false )
+											{
+													global_need_rePreview = true;
+													DEBUGLOG("Flyvideo-xx: 16:9 视频边界不对称 分屏");
+													if( pthread_create(&thread_DetermineImageSplitScreenID, NULL,CameraRestartPreviewThread, (void *)mHalCamCtrl) != 0)
+														DEBUGLOG("Flyvideo-发现分屏，创建线程重新预览失败！DVD\n");
+													//else
+													//	DEBUGLOG("Flyvideo-发现分屏 DVD\n");
+											}
+									}
+							}
+					}
+					else
+					if(new_critical_point != global_last_critical_point)
+					{
+						global_count_critical_point = 0;
+						//DEBUGLOG("Flyvideo-xx: 新的视频临界行%d ！= 旧的临界行 %d\n",new_critical_point,global_last_critical_point);
+						shift_count = new_critical_point > global_last_critical_point?new_critical_point - global_last_critical_point:global_last_critical_point - new_critical_point;
+						if(shift_count > 8)//偏移2行
+						{
+							global_count_critical_point_1++;
+							//DEBUGLOG("Flyvideo-xx:global_count_critical_point_1 = %d\n",global_count_critical_point_1);
+							if(global_count_critical_point_1 >15)
+							{
+								global_count_critical_point_1 = 0;
+								DEBUGLOG("Flyvideo-xx: 顶 偏移 %d\n",shift_count);
+								goto FIND_BOTTOM_CRITICAL_POINT;
+							}
+						}
+					}
+			}
+		 else
+			return 0;
+	}
+return 0;
+
+FIND_BOTTOM_CRITICAL_POINT:
+	new_bottom_critical_point = LookingForABlackCriticalLine(frame,479,80,0);/*向上寻找*/
+	//if(new_bottom_critical_point)
+	goto FIND_BOTTOM_CRITICAL_POINT_2;
+return 0;
+
+FIND_BOTTOM_CRITICAL_POINT_2:
+	//DEBUGLOG("Flyvideo-xx: 底 临界行在 %d \n",new_bottom_critical_point);
+	//WriteDataToFrameBuffer(frame,new_bottom_critical_point,0,100);
+bottom_shift_count = new_bottom_critical_point > global_last_bottom_critical_point?new_bottom_critical_point - global_last_bottom_critical_point:global_last_bottom_critical_point - new_bottom_critical_point;
+	DEBUGLOG("Flyvideo-xx: 底 偏移 %d\n",bottom_shift_count);
+//	if( bottom_shift_count > 8/*底部同时间偏移*/)
+	{
+			global_last_critical_point = new_critical_point;//更新 新的临界行
+			global_last_bottom_critical_point = new_bottom_critical_point;
+			if(global_need_rePreview == false )
+			{
+					global_need_rePreview = true;
+					DEBUGLOG("Flyvideo-xx: 16：9视频分屏");
+					if( pthread_create(&thread_DetermineImageSplitScreenID, NULL,CameraRestartPreviewThread, (void *)mHalCamCtrl) != 0)
+						DEBUGLOG("Flyvideo-发现分屏，创建线程重新预览失败！DVD\n");
+					//else
+						//DEBUGLOG("Flyvideo-发现分屏 DVD\n");
+			}
+	return 1; //确实发生啦分屏；
+	}
+
+return 0;
 }
 static bool DetermineImageSplitScreen(mm_camera_ch_data_buf_t *frame,QCameraHardwareInterface *mHalCamCtrl)
 {
@@ -576,7 +835,7 @@ static bool DetermineImageSplitScreen(mm_camera_ch_data_buf_t *frame,QCameraHard
 
 
 
-	if(FlyCameraflymFps<24){DEBUGLOG("Flyvideo-x:flymFps = %f",FlyCameraflymFps);return 0;}
+	if(FlyCameraflymFps<24){DEBUGLOG("Flyvideo-x:FPS = %f",FlyCameraflymFps);return 0;}
 	if(++global_fram_at_one_sec_count < 10)//过滤判断次数的频繁度，每隔20帧判断一次，
 	{
 	return 0;
@@ -628,7 +887,7 @@ static bool DetermineImageSplitScreen(mm_camera_ch_data_buf_t *frame,QCameraHard
 										if( pthread_create(&thread_DetermineImageSplitScreenID, NULL,CameraRestartPreviewThread, (void *)mHalCamCtrl) != 0)
 											DEBUGLOG("Flyvideo-发现分屏，创建线程重新预览失败！Astren\n");
 										else
-											DEBUGLOG("Flyvideo-发现分屏，创建线程重新预览成功！Astren\n");
+											DEBUGLOG("Flyvideo-发现分屏 Astren\n");
 										return 1;//返回分屏信息
 									}
 								}
@@ -653,7 +912,7 @@ static bool DetermineImageSplitScreen(mm_camera_ch_data_buf_t *frame,QCameraHard
 					dete_count++;//一行判断超过10个可疑点才认为是数据异常
 						if(dete_count > 9)
 						{
-						DEBUGLOG("Flyvideo-异常数据积累个数达到啦设置值");
+						//DEBUGLOG("Flyvideo-异常数据积累个数达到啦设置值");
 						//DEBUGLOG("DetermineImageSplitScreen:buf[%d]= 0x%.2x\n",((180*j) + i),(*piont_crcb) );
 						global_fram_count ++;//数据异常帧数统计
 							if(global_fram_count >50)//1sec
@@ -672,7 +931,7 @@ static bool DetermineImageSplitScreen(mm_camera_ch_data_buf_t *frame,QCameraHard
 									if( pthread_create(&thread_DetermineImageSplitScreenID, NULL,CameraRestartPreviewThread, (void *)mHalCamCtrl) != 0)
 										DEBUGLOG("Flyvideo-发现分屏，创建线程重新预览失败！DVD or AUX\n");
 									else
-										DEBUGLOG("Flyvideo-发现分屏，创建线程重新预览成功！DVD or AUX\n");
+										DEBUGLOG("Flyvideo-发现分屏 DVD or AUX\n");
 									return 1;//返回分屏信息
 								}
 							}
@@ -685,7 +944,7 @@ static bool DetermineImageSplitScreen(mm_camera_ch_data_buf_t *frame,QCameraHard
 		}
 	}
 BREAK_THE:
-
+DetermineImageSplitScreenDVD_16_9_Vedio(frame,mHalCamCtrl);
 return 0;//未发生分屏
 }
 static int FlyCameraReadTw9912StatusRegitsterValue()
