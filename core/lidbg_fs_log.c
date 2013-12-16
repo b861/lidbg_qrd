@@ -103,7 +103,7 @@ void file_separator(char *file2separator)
 {
     char buf[32];
     lidbg_get_current_time(buf, NULL);
-    fs_string2file(file2separator, "--%s--\n", buf);
+    fs_string2file(file2separator, "------%s------\n", buf);
 }
 int dump_kmsg(char *node, char *save_msg_file, int size, int *always)
 {
