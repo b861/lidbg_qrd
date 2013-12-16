@@ -4,6 +4,7 @@
 #define WL_COUNT_TYPE "count"
 #define WL_UNCOUNT_TYPE "uncount"
 
+static LIST_HEAD(waklelock_detail_list);
 LIST_HEAD(lidbg_wakelock_list);
 static spinlock_t  new_item_lock;
 static struct task_struct *wl_item_dbg_task;
@@ -63,14 +64,18 @@ bool new_wakelock_item(struct list_head *client_list, bool cnt_wakelock, const c
 }
 
 
-bool register_wakelock(struct list_head *client_list, bool cnt_wakelock, const char *name, unsigned int pid, unsigned int uid)
+bool register_wakelock(struct list_head *client_list, struct list_head *detail_list, bool cnt_wakelock, const char *name, unsigned int pid, unsigned int uid)
 {
+    bool is_item_req_detail = false;
     struct wakelock_item *wakelock_pos = get_wakelock_item(client_list, name);
+    if(detail_list&&get_wakelock_item(detail_list, name))
+        is_item_req_detail = true;
+
     if(wakelock_pos)
     {
         wakelock_pos->cunt++;
         wakelock_pos->cunt_max++;
-        if(g_wakelock_dbg)
+        if(g_wakelock_dbg || is_item_req_detail)
             lidbg("<ADD:[%s][%d,%d][%s]>\n", lock_type(wakelock_pos->is_count_wakelock), wakelock_pos->cunt, wakelock_pos->cunt_max, wakelock_pos->name );
         return true;
     }
@@ -78,9 +83,12 @@ bool register_wakelock(struct list_head *client_list, bool cnt_wakelock, const c
         return new_wakelock_item( client_list, cnt_wakelock, name, pid, uid);
 }
 
-bool unregister_wakelock(struct list_head *client_list, const char *name)
+bool unregister_wakelock(struct list_head *client_list, struct list_head *detail_list, const char *name)
 {
+    bool is_item_req_detail = false;
     struct wakelock_item *wakelock_pos = get_wakelock_item(client_list, name);
+    if(detail_list&&get_wakelock_item(detail_list, name))
+        is_item_req_detail = true;
 
     if(wakelock_pos)
     {
@@ -93,7 +101,7 @@ bool unregister_wakelock(struct list_head *client_list, const char *name)
         else
             wakelock_pos->cunt = 0;
 
-        if(g_wakelock_dbg)
+        if(g_wakelock_dbg || is_item_req_detail)
             lidbg("<DEL:[%s][%d,%d][%s]>\n", lock_type(wakelock_pos->is_count_wakelock), wakelock_pos->cunt, wakelock_pos->cunt_max, wakelock_pos->name );
         return true;
     }
@@ -182,9 +190,9 @@ void lidbg_wakelock_stat(int argc, char **argv)
         is_count_wakelock = true;
 
     if (!strcmp(wakelock_action, "lock"))
-        register_wakelock(&lidbg_wakelock_list, is_count_wakelock, wakelock_name, pid, uid);
+        register_wakelock(&lidbg_wakelock_list, &waklelock_detail_list, is_count_wakelock, wakelock_name, pid, uid);
     else if (!strcmp(wakelock_action, "unlock"))
-        unregister_wakelock(&lidbg_wakelock_list, wakelock_name);
+        unregister_wakelock(&lidbg_wakelock_list, &waklelock_detail_list, wakelock_name);
     else if (!strcmp(wakelock_action, "show"))
         lidbg_show_wakelock();
     else if (!strcmp(wakelock_action, "dbg"))
@@ -198,11 +206,11 @@ void lidbg_wakelock_register(bool to_lock, const char *name)
 
     if(to_lock)
     {
-        register_wakelock(&lidbg_wakelock_list, false, name, 0, 0);
+        register_wakelock(&lidbg_wakelock_list, &waklelock_detail_list, false, name, 0, 0);
     }
     else
     {
-        unregister_wakelock(&lidbg_wakelock_list, name);
+        unregister_wakelock(&lidbg_wakelock_list, &waklelock_detail_list, name);
     }
 }
 
@@ -215,9 +223,14 @@ static int __init lidbg_wakelock_stat_init(void)
 {
     DUMP_BUILD_TIME;
 
+    if(fs_fill_list("/flysystem/lib/out/wakelock_detail_list.conf", FS_CMD_FILE_LISTMODE, &waklelock_detail_list) < 0)
+        fs_fill_list("/system/lib/modules/out/wakelock_detail_list.conf", FS_CMD_FILE_LISTMODE, &waklelock_detail_list);
+
     spin_lock_init(&new_item_lock);
     FS_REGISTER_INT(g_wakelock_dbg, "wakelock_dbg", 0, cb_kv_show_list);
     FS_REGISTER_INT(g_wakelock_dbg_item, "wakelock_dbg_item", 0, NULL);
+
+
 
     return 0;
 }
