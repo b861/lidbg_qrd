@@ -48,7 +48,7 @@ int static video_signal_channel_switching_occurs(void)
 
     tw9912_RESX_DOWN;//\u8fd9\u91cc\u5bf9tw9912\u590d\u4f4d\u7684\u539f\u56e0\u662f\u89e3\u51b3\u5012\u8f66\u9000\u56deDVD\u65f6\u89c6\u9891\u5361\u6b7b\u3002
     tw9912_RESX_UP;
-    msleep(20);
+    //msleep(20);
     //  mutex_unlock(&lock_chipe_config);
     return 0;
 }
@@ -374,7 +374,13 @@ vedio_format_t flyVideoTestSignalPin_in(u8 Channel)
     static u8 Format_count = 0;
     static u8 Format_count_flag = 0;
     mutex_lock(&lock_chipe_config);
-
+    if(
+        ( (the_last_config.Channel == YIN2 || the_last_config.Channel == SEPARATION) && Channel == YIN3) || \
+        (the_last_config.Channel == YIN3  && (Channel == YIN2 || Channel == SEPARATION))
+    )
+    {
+        video_signal_channel_switching_occurs();
+    }
 
     //mutex_unlock(&lock_chipe_config);
     // return NTSC_I;
@@ -596,13 +602,6 @@ void chips_config_begin(vedio_format_t config_pramat)// All start
     printk("\n\nVideo Module Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);
     video_config_debug("tw9912:config channal is %d\n", info_com_top_Channel);
     mutex_lock(&lock_chipe_config);
-	if(
-	( (the_last_config.Channel == YIN2 || the_last_config.Channel == SEPARATION) && info_com_top_Channel == YIN3) || \
-	(the_last_config.Channel == YIN3  && (info_com_top_Channel == YIN2 || info_com_top_Channel == SEPARATION))
-	)
-	{
-	video_signal_channel_switching_occurs();
-	}
     if(info_com_top_Channel == SEPARATION)
         chips_config_yuv_begin();
     else	if(config_pramat != STOP_VIDEO)
