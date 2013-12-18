@@ -140,17 +140,14 @@ loop_read:
             static int flag = 0;
             if(flag)break;
             else flag = 1;
-            lidbg("logcat+\n");
-            lidbg("first:rm logcat.txt&&kmsg.txt\n");
+            lidbg("logcat+\nfirst:rm logcat.txt\n");
             system("rm /data/logcat.txt");
-            system("rm /data/kmsg.txt");
-	   sleep(1);
+	   		sleep(1);
             system("date >> /data/logcat.txt");
-            system("logcat  -v time>> /data/logcat.txt &");
-
-            sleep(1);
+			sleep(1);
             system("chmod 777 /data/logcat.txt");
-            system("chmod 777 /data/*.txt");
+			sleep(1);
+            system("logcat  -v time>> /data/logcat.txt &");
             lidbg("logcat-\n");
             break;
         }
@@ -159,12 +156,14 @@ loop_read:
             static int flag = 0;
             if(flag)break;
             else flag = 1;
-            lidbg("kmsg+\n");
+            lidbg("kmsg+\nfirst:rm kmsg.txt\n");
+            system("rm /data/kmsg.txt");
+			sleep(1);
             system("date >> /data/kmsg.txt");
-            system("cat /proc/kmsg >> /data/kmsg.txt &");
-
-            sleep(1);
+			sleep(1);
             system("chmod 777 /data/kmsg.txt");
+			sleep(1);
+            system("cat /proc/kmsg >> /data/kmsg.txt &");
             lidbg("kmsg-\n");
             break;
         }
