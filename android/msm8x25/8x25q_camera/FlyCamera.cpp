@@ -68,15 +68,30 @@ namespace android {
   static unsigned int global_last_bottom_critical_point = 435;
 void FlyCameraStar()
 {
+TW9912Info tw9912_info;
 	globao_mFlyPreviewStatus = 1;
 	global_fream_give_up = 0;
 	//global_last_critical_point = 50;
 	//global_last_bottom_critical_point = 435;
+
 	DEBUGLOG("Flyvideo-mFlyPreviewStatus =%d\n",globao_mFlyPreviewStatus);
 	global_tw9912_file_fd = open("/dev/tw9912config",O_RDWR);
 	if(global_tw9912_file_fd ==-1)
 		{
 		DEBUGLOG("Flyvideo-:Error FlyCameraStar() tw9912config faild\n");
+		}
+
+  property_get("fly.video.channel.status",video_channel_status,"1");//1:DVD 2:AUX 3:Astren
+  if(video_channel_status[1] == '3' && DetermineImageSplitScreen_do_not_or_yes == false)//在上次打开为找到黑线，这次打开再运行进行黑线寻找
+		{
+			DEBUGLOG("Flyvideo-:在上次打开倒车中，未找到黑线，再找一次\n");
+			ToFindBlackLineAndSetTheTw9912VerticalDelayRegister_is_ok = false;
+			read(global_tw9912_file_fd, (void *)(&tw9912_info),sizeof(TW9912Info));
+			tw9912_info.sta = false;
+			tw9912_info.flag = true;
+			tw9912_info.reg = 0x08;
+			tw9912_info.reg_val = 0x17;
+			write(global_tw9912_file_fd, (const void *)(&tw9912_info),sizeof(TW9912Info));
 		}
 }
 void FlyCameraStop()
@@ -218,12 +233,12 @@ static bool ToFindBlackLine(mm_camera_ch_data_buf_t *frame)
 
 				//if( (*piont_y) == (*piont_y_last) && (*piont_y) < 0x25)//TW9912 黑屏数据是 0x20
 				//if( (*piont_y) == (*piont_y_last) && (*piont_y) < 0x2f)//TW9912 黑屏数据是 0x20
-				if((*piont_y) >= 0x20 && (*piont_y) <= 0x35 )
+				if(/*(*piont_y) >= 0x20 &&*/ (*piont_y) <= 0x42/*0x35*/ )
 				{
 					black_count++;
-					if( (719-i+black_count)< 700)//一定无法达到700个点的要求，没必要再执行下去。
+					if( (719-i+black_count)< 710)//一定无法达到700个点的要求，没必要再执行下去。
 					return 0;
-					if( black_count > 700)//“黑色"数据大于700认为是黑线出现
+					if( black_count > 710)//“黑色"数据大于700认为是黑线出现
 					{
 						//FlagBlack(frame);
 						DEBUGLOG("Flyvideo-：第一行黑色行，成功腾出,在这行黑色数据的个数 = %d 个,其中一个黑色数据是0x%.2x",black_count,*piont_y);
