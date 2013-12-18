@@ -15,7 +15,7 @@
 #else
 #define DEBUGLOG do{}while(0)
 #endif
-
+#define BCAR_BLACK_VALUE_UPERR_LIMIT /*0x42*/ 0x42
 namespace android {
 
 	typedef struct
@@ -233,7 +233,7 @@ static bool ToFindBlackLine(mm_camera_ch_data_buf_t *frame)
 
 				//if( (*piont_y) == (*piont_y_last) && (*piont_y) < 0x25)//TW9912 黑屏数据是 0x20
 				//if( (*piont_y) == (*piont_y_last) && (*piont_y) < 0x2f)//TW9912 黑屏数据是 0x20
-				if(/*(*piont_y) >= 0x20 &&*/ (*piont_y) <= 0x42/*0x35*/ )
+				if(/*(*piont_y) >= 0x20 &&*/ (*piont_y) <= BCAR_BLACK_VALUE_UPERR_LIMIT/*0x42*//*0x35*/ )
 				{
 					black_count++;
 					if( (719-i+black_count)< 710)//一定无法达到700个点的要求，没必要再执行下去。
@@ -479,13 +479,15 @@ static bool RowsOfDataTraversingTheFrameToFindTheBlackLine(mm_camera_ch_data_buf
 			{
 				piont_y = (unsigned char *)(frame->def.frame->buffer+frame->def.frame->y_off+720*i + 300);//在第300列下的每行找黑点
 				//if(*piont_y <= 0x20)//到此，在某列下的某行，找到啦一个黑点，接下来对这一行，遍历700个点，看这行是否确实都是黑色数据
-				if((*piont_y) >= 0x20 && (*piont_y) <= 0x35 )
+				//if((*piont_y) >= 0x20 && (*piont_y) <= 0x35 )
+				if(/*(*piont_y) >= 0x20 &&*/ (*piont_y) <= BCAR_BLACK_VALUE_UPERR_LIMIT /*0x42*//*0x35*/ )
 				{
 					for(jj=0;jj<719;jj++)//在一行的遍历
 					{
 						piont_y = (unsigned char *)(frame->def.frame->buffer+frame->def.frame->y_off+720*i + jj);
 						//if(*piont_y <= 0x20)
-						if((*piont_y) >= 0x20 && (*piont_y) <= 0x35 )
+						//if((*piont_y) >= 0x20 && (*piont_y) <= 0x35 )
+						if(/*(*piont_y) >= 0x20 &&*/ (*piont_y) <= BCAR_BLACK_VALUE_UPERR_LIMIT /*0x42*//*0x35*/ )
 							count++;//黑点
 						if( (719-jj+count)< 715)//一定无法达到700个点的要求，没必要再执行下去。
 						{//如果剩下的（715-jj）加上以发现的（count）已经小于700，将结束循环
@@ -873,12 +875,13 @@ static bool DetermineImageSplitScreen(mm_camera_ch_data_buf_t *frame,QCameraHard
 		}
 		else
 		{
+			dete_count = 0;
 			for(j=0;j<4;j++)
 			{
 				for(i=0;i<20;i++)
 				{
 					piont_y = (unsigned char *)(frame->def.frame->buffer+frame->def.frame->y_off+180*j + i);
-					if((*piont_y) < 0x20 || (*piont_y) > 0x35 )
+					if((*piont_y) < 0x20 || (*piont_y) > BCAR_BLACK_VALUE_UPERR_LIMIT /*0x42*/ )
 					{
 						dete_count++;//一行判断超过10个可疑点才认为是数据异常
 							if(dete_count > 5)
@@ -1019,7 +1022,7 @@ bool FlyCameraFrameDisplayOrOutDisplay()
 {
 bool ret;
 		if(video_channel_status[0] != '1')//is not DVD
-		{
+		{//判断视频是否稳定，不稳定这帧不显示，改函数用来改善倒车推车有大块绿条问题
 			ret = FlyCameraReadTw9912StatusRegitsterValue();//1:DVD 2:AUX 3:Astren
 			if(ret == 1) return 1;
 		}
