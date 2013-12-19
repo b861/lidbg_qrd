@@ -43,7 +43,7 @@ void hal_func_tbl_default(void)
 
 }
 
-int soc_thread(void *data)
+int loader_thread(void *data)
 {
     int i, j;
     char path[100];
@@ -433,6 +433,22 @@ static struct miscdevice misc =
 
 };
 
+int hal_init(void *data)
+{
+    if(fs_is_file_exist(HAL_SO))
+    {
+        printk("=======is product=====\n");
+        g_var.is_fly = true;
+    }
+	msleep(500);
+    lidbg_chmod("/dev/lidbg_hal");
+	msleep(500);
+
+	CREATE_KTHREAD(loader_thread, NULL);
+	return 0;
+}
+
+
 int fly_hal_init(void)
 {
     int ret;
@@ -461,16 +477,9 @@ int fly_hal_init(void)
     g_var.temp = 0;
     g_var.system_status = FLY_ACC_ON;
     g_var.machine_id = get_machine_id();
-	
-	CREATE_KTHREAD(soc_thread, NULL);
-	
-    if(fs_is_file_exist(HAL_SO))
-    {
-        printk("=======is product=====\n");
-        g_var.is_fly = true;
-    }
 
-    lidbg_chmod("/dev/lidbg_hal");
+	CREATE_KTHREAD(hal_init,NULL);
+
     return 0;
 }
 

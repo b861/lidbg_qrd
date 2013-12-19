@@ -123,7 +123,8 @@ void cp_data_to_udisk(char *key, char *value )
         LIDBG_ERR("<nobody_register>\n");
 }
 
-static int __init lidbg_misc_init(void)
+
+int misc_init(void *data)
 {
     TE_WARN("<==IN==>\n");
 
@@ -149,8 +150,20 @@ static int __init lidbg_misc_init(void)
         reboot_task = kthread_run(thread_reboot, NULL, "ftf_misc_reb");
     else
         lidbg("<reb.exit.%d>\n", reboot_delay_s);
+	
+	TE_WARN("<==OUT==>\n\n");
 
-    TE_WARN("<==OUT==>\n\n");
+	return 0;
+
+
+}
+
+
+static int __init lidbg_misc_init(void)
+{
+	
+	DUMP_FUN;
+	CREATE_KTHREAD(misc_init,NULL);
     return 0;
 }
 

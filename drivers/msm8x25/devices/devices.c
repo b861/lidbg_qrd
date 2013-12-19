@@ -121,6 +121,35 @@ void mute_s(void)
     wake_up_interruptible(&read_wait);
 }
 
+int read_proc_dev(char *buf, char **start, off_t offset, int count, int *eof, void *data )
+{
+    int len = 0;
+
+    lidbg("USB_ID_HIGH_DEV\n");
+    USB_ID_HIGH_DEV;
+    len  = sprintf(buf, "usb_set_dev\n");
+
+    return len;
+}
+
+int read_proc_host(char *buf, char **start, off_t offset, int count, int *eof, void *data )
+{
+    int len = 0;
+    lidbg("USB_ID_LOW_HOST\n");
+    USB_ID_LOW_HOST;
+    len  = sprintf(buf, "usb_set_host\n");
+    return len;
+}
+
+static void create_new_proc_entry_usb_dev(void)
+{
+    create_proc_read_entry("usb_dev", 0, NULL, read_proc_dev, NULL);
+}
+
+static void create_new_proc_entry_usb_host(void)
+{
+    create_proc_read_entry("usb_host", 0, NULL, read_proc_host, NULL);
+}
 
 
 
@@ -553,11 +582,25 @@ struct platform_device soc_devices =
     .id 			= 0,
 };
 
+int lcd_reset_en = 0;
+
+void lcd_reset(char *key, char *value )
+{
+    SOC_LCD_Reset();
+}
 
 static int soc_dev_probe(struct platform_device *pdev)
 {
 
     DUMP_FUN;
+
+    init_waitqueue_head(&read_wait);
+    fs_register_filename_list(TEMP_LOG_PATH, true);
+
+    fs_regist_state("cpu_temp", &(g_var.temp));
+    FS_REGISTER_INT(lcd_reset_en, "lcd_reset", 0, lcd_reset);
+    create_new_proc_entry_usb_dev();
+    create_new_proc_entry_usb_host();
 
     PWR_EN_ON;
     TELL_LPC_PWR_ON;
@@ -994,42 +1037,7 @@ static void set_func_tbl(void)
     ((struct lidbg_hal *)plidbg_dev)->soc_func_tbl.pfnHal_Acc_Callback = NULL;
 }
 
-int read_proc_dev(char *buf, char **start, off_t offset, int count, int *eof, void *data )
-{
-    int len = 0;
 
-    lidbg("USB_ID_HIGH_DEV\n");
-    USB_ID_HIGH_DEV;
-    len  = sprintf(buf, "usb_set_dev\n");
-
-    return len;
-}
-
-int read_proc_host(char *buf, char **start, off_t offset, int count, int *eof, void *data )
-{
-    int len = 0;
-    lidbg("USB_ID_LOW_HOST\n");
-    USB_ID_LOW_HOST;
-    len  = sprintf(buf, "usb_set_host\n");
-    return len;
-}
-
-
-static void create_new_proc_entry_usb_dev(void)
-{
-    create_proc_read_entry("usb_dev", 0, NULL, read_proc_dev, NULL);
-}
-
-static void create_new_proc_entry_usb_host(void)
-{
-    create_proc_read_entry("usb_host", 0, NULL, read_proc_host, NULL);
-}
-
-int lcd_reset_en = 0;
-void lcd_reset(char *key, char *value )
-{
-    SOC_LCD_Reset();
-}
 
 int dev_open(struct inode *inode, struct file *filp)
 {
@@ -1250,12 +1258,6 @@ int dev_init(void)
     LIDBG_GET;
     set_func_tbl();
 
-    init_waitqueue_head(&read_wait);
-    fs_register_filename_list(TEMP_LOG_PATH, true);
-
-    fs_regist_state("cpu_temp", &(g_var.temp));
-    FS_REGISTER_INT(lcd_reset_en, "lcd_reset", 0, lcd_reset);
-
 #if 0
     PWR_EN_ON;
 
@@ -1275,8 +1277,6 @@ int dev_init(void)
 
     platform_device_register(&soc_devices);
     platform_driver_register(&soc_devices_driver);
-    create_new_proc_entry_usb_dev();
-    create_new_proc_entry_usb_host();
 
     return 0;
 }

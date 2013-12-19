@@ -219,19 +219,22 @@ void cb_kv_show_list(char *key, char *value)
     lidbg_show_wakelock();
 }
 
+int wakelock_stat_init(void *data)
+{
+    if(fs_fill_list("/flysystem/lib/out/wakelock_detail_list.conf", FS_CMD_FILE_LISTMODE, &waklelock_detail_list) < 0)
+        fs_fill_list("/system/lib/modules/out/wakelock_detail_list.conf", FS_CMD_FILE_LISTMODE, &waklelock_detail_list);
+
+    FS_REGISTER_INT(g_wakelock_dbg, "wakelock_dbg", 0, cb_kv_show_list);
+    FS_REGISTER_INT(g_wakelock_dbg_item, "wakelock_dbg_item", 0, NULL);
+	return 0;
+}
+
 static int __init lidbg_wakelock_stat_init(void)
 {
     DUMP_BUILD_TIME;
 
-    if(fs_fill_list("/flysystem/lib/out/wakelock_detail_list.conf", FS_CMD_FILE_LISTMODE, &waklelock_detail_list) < 0)
-        fs_fill_list("/system/lib/modules/out/wakelock_detail_list.conf", FS_CMD_FILE_LISTMODE, &waklelock_detail_list);
-
     spin_lock_init(&new_item_lock);
-    FS_REGISTER_INT(g_wakelock_dbg, "wakelock_dbg", 0, cb_kv_show_list);
-    FS_REGISTER_INT(g_wakelock_dbg_item, "wakelock_dbg_item", 0, NULL);
-
-
-
+	CREATE_KTHREAD(wakelock_stat_init,NULL);
     return 0;
 }
 

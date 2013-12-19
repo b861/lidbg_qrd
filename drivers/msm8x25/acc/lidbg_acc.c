@@ -600,6 +600,24 @@ static int  acc_probe(struct platform_device *pdev)
 
     spin_lock_init(&active_wakelock_list_lock);
 
+#ifdef CONFIG_HAS_EARLYSUSPEND
+	{
+		early_suspend.level = EARLY_SUSPEND_LEVEL_DISABLE_FB + 5; //the later the better
+		early_suspend.suspend = acc_early_suspend;
+		early_suspend.resume = acc_late_resume;
+		register_early_suspend(&early_suspend);
+	}
+#endif
+	
+	INIT_COMPLETION(suspend_start);
+
+	CREATE_KTHREAD(thread_acc_suspend, NULL);
+
+	lidbg_chmod("/dev/lidbg_acc");
+	lidbg (DEVICE_NAME"acc dev_init\n");
+	fs_register_filename_list(FASTBOOT_LOG_PATH, true);
+
+
     fs_regist_state("acc_times", (int *)&plidbg_acc->accoff_count);
     fs_regist_state("suspend_times", (int *)&plidbg_acc->resume_count);
     te_regist_password("001200", cb_password_poweroff);
@@ -702,23 +720,6 @@ static int __init acc_init(void)
 
     INIT_COMPLETION(acc_ready);
     ret = misc_register(&misc);
-
-#ifdef CONFIG_HAS_EARLYSUSPEND
-    {
-        early_suspend.level = EARLY_SUSPEND_LEVEL_DISABLE_FB + 5; //the later the better
-        early_suspend.suspend = acc_early_suspend;
-        early_suspend.resume = acc_late_resume;
-        register_early_suspend(&early_suspend);
-    }
-#endif
-
-    INIT_COMPLETION(suspend_start);
-
-    CREATE_KTHREAD(thread_acc_suspend, NULL);
-
-    lidbg_chmod("/dev/lidbg_acc");
-    lidbg (DEVICE_NAME"acc dev_init\n");
-    fs_register_filename_list(FASTBOOT_LOG_PATH, true);
 
     return ret;
 }

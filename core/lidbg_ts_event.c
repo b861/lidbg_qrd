@@ -228,7 +228,7 @@ void cb_password_te_enable(char *password )
     is_fs_work_enable = true;
     lidbg_chmod( "/data");
 }
-void  touch_event_init(void)
+int  touch_event_init(void *data)
 {
     TE_WARN("<==IN==>\n");
 
@@ -244,6 +244,7 @@ void  touch_event_init(void)
     te_task = kthread_run(thread_te_analysis, NULL, "ftf_te_task");
 
     TE_WARN("<==OUT==>\n");
+	return 0;
 }
 
 //zone below [interface]

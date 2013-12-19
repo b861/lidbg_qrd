@@ -1075,6 +1075,7 @@ static int  fastboot_probe(struct platform_device *pdev)
     FS_REGISTER_INT(fb_data->max_wait_unlock_time, "max_wait_unlock_time", 5, NULL);
 
     fs_file_separator(FASTBOOT_LOG_PATH);
+    fs_register_filename_list(FASTBOOT_LOG_PATH, true);
 
     INIT_COMPLETION(early_suspend_start);
     pwroff_task = kthread_create(thread_pwroff, NULL, "pwroff_task");
@@ -1221,7 +1222,6 @@ static int __init fastboot_init(void)
 
     LIDBG_GET;
     set_func_tbl();
-    fs_register_filename_list(FASTBOOT_LOG_PATH, true);
 
     platform_device_register(&lidbg_fastboot_device);
     return platform_driver_register(&fastboot_driver);
