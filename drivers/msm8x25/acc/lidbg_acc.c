@@ -426,7 +426,9 @@ static void acc_early_suspend(struct early_suspend *handler)
 static void acc_late_resume(struct early_suspend *handler)
 {
     DUMP_FUN_ENTER;
-    suspend_state = PM_STATUS_LATE_RESUME_OK;
+    suspend_state = PM_STATUS_LATE_RESUME_OK; 
+	fs_save_state();
+    
 
 }
 #endif
@@ -598,7 +600,8 @@ static int  acc_probe(struct platform_device *pdev)
 
     spin_lock_init(&active_wakelock_list_lock);
 
-    fs_regist_state("acc_times", (int *)&plidbg_acc->resume_count);
+    fs_regist_state("acc_times", (int *)&plidbg_acc->accoff_count);
+    fs_regist_state("suspend_times", (int *)&plidbg_acc->resume_count);
     te_regist_password("001200", cb_password_poweroff);
 
     fs_file_separator(FASTBOOT_LOG_PATH);
