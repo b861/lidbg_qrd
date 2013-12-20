@@ -797,15 +797,15 @@ static int  soc_dev_suspend(struct platform_device *pdev, pm_message_t state)
     if(platform_id ==  PLATFORM_FLY)
     {
         lidbg("turn lcd off!\n");
-#ifdef FLY_DEBUG
-
+        if(!g_var.is_fly)
+        {
 #ifdef DEBUG_BUTTON
         SOC_IO_ISR_Disable(BUTTON_LEFT_1);
         SOC_IO_ISR_Disable(BUTTON_LEFT_2);
         SOC_IO_ISR_Disable(BUTTON_RIGHT_1);
         SOC_IO_ISR_Disable(BUTTON_RIGHT_2);
 #endif
-#endif
+        }
         i2c_c_ctrl = 0;
 
         PWR_EN_OFF;
@@ -918,14 +918,14 @@ static struct platform_driver soc_devices_driver =
 struct work_struct work_left_button1;
 static void work_left_button1_fn(struct work_struct *work)
 {
-    led_on();
-    SOC_Key_Report(KEY_BACK, KEY_PRESSED_RELEASED);
+    SOC_Key_Report(KEY_HOME, KEY_PRESSED_RELEASED);
 }
 
 struct work_struct work_right_button1;
 static void work_right_button1_fn(struct work_struct *work)
 {
-    led_on();
+    SOC_Key_Report(KEY_MENU, KEY_PRESSED_RELEASED);
+
 }
 
 
@@ -980,7 +980,8 @@ void fly_devices_init(void)
 
     if(platform_id ==  PLATFORM_FLY)
     {
-   	
+
+	
 #if (defined(FLY_DEBUG) || defined(BUILD_FOR_RECOVERY))
 
         DVD_RESET_HIGH;
@@ -990,22 +991,24 @@ void fly_devices_init(void)
         lidbg("turn lcd on!\n");
         BL_SET(BL_MAX / 2);
 
-#ifdef DEBUG_BUTTON
-
-        INIT_WORK(&work_left_button1, work_left_button1_fn);
-        INIT_WORK(&work_right_button1, work_right_button1_fn);
-
-        SOC_IO_Input(BUTTON_LEFT_1, BUTTON_LEFT_1, GPIO_CFG_PULL_UP);
-        SOC_IO_Input(BUTTON_LEFT_2, BUTTON_LEFT_2, GPIO_CFG_PULL_UP);
-        SOC_IO_Input(BUTTON_RIGHT_1, BUTTON_RIGHT_1, GPIO_CFG_PULL_UP);
-        SOC_IO_Input(BUTTON_RIGHT_2, BUTTON_RIGHT_2, GPIO_CFG_PULL_UP);
-
-        SOC_IO_ISR_Add(BUTTON_LEFT_1, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT, irq_left_button1, NULL);
-        SOC_IO_ISR_Add(BUTTON_LEFT_2, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT, irq_left_button2, NULL);
-        SOC_IO_ISR_Add(BUTTON_RIGHT_1, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT, irq_right_button1, NULL);
-        SOC_IO_ISR_Add(BUTTON_RIGHT_2, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT, irq_right_button2, NULL);
-
 #endif
+
+#ifdef DEBUG_BUTTON
+		if(!g_var.is_fly)
+		{
+			INIT_WORK(&work_left_button1, work_left_button1_fn);
+			INIT_WORK(&work_right_button1, work_right_button1_fn);
+
+			SOC_IO_Input(BUTTON_LEFT_1, BUTTON_LEFT_1, GPIO_CFG_PULL_UP);
+			SOC_IO_Input(BUTTON_LEFT_2, BUTTON_LEFT_2, GPIO_CFG_PULL_UP);
+			SOC_IO_Input(BUTTON_RIGHT_1, BUTTON_RIGHT_1, GPIO_CFG_PULL_UP);
+			SOC_IO_Input(BUTTON_RIGHT_2, BUTTON_RIGHT_2, GPIO_CFG_PULL_UP);
+
+			SOC_IO_ISR_Add(BUTTON_LEFT_1, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT, irq_left_button1, NULL);
+			SOC_IO_ISR_Add(BUTTON_LEFT_2, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT, irq_left_button2, NULL);
+			SOC_IO_ISR_Add(BUTTON_RIGHT_1, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT, irq_right_button1, NULL);
+			SOC_IO_ISR_Add(BUTTON_RIGHT_2, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT, irq_right_button2, NULL);
+		}
 #endif
 
         unmute_ns();
@@ -1249,14 +1252,14 @@ int dev_init(void)
     lidbg("FLY_V4 version\n");
 #endif
 
-#ifdef FLY_DEBUG
-    lidbg("debug version\n");
-#else
-    lidbg("release version\n");
-#endif
-
     LIDBG_GET;
     set_func_tbl();
+
+	if(!g_var.is_fly)
+	    lidbg("debug version\n");
+	else
+	    lidbg("release version\n");
+
 
 #if 0
     PWR_EN_ON;

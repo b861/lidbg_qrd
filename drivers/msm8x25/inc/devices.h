@@ -140,10 +140,10 @@ enum
 #endif
 
 
+#define DEBUG_BUTTON
 
 #ifdef FLY_DEBUG
 #define DEBUG_AD_KEY
-#define DEBUG_BUTTON
 
 
 #define DVD_RESET_HIGH  do{SOC_IO_Output(0, GPIO_DVD_RESET, 1); }while(0)
