@@ -6,6 +6,7 @@
 #define SERVICER_DONOTHING  (0)
 #define LOG_DMESG  (1)
 #define LOG_LOGCAT (2)
+#define LOG_CLEAR_LOGCAT_KMSG (5)
 
 #if 0
 

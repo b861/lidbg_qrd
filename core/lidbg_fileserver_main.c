@@ -203,7 +203,6 @@ void check_conf_file(void)
         is_out_updated = true;
         analysis_copylist("/flysystem/lib/out/copylist.conf");
         copy_all_conf_file();
-        lidbg_rm("/data/logcat.txt");
         lidbg_rm("/data/kmsg.txt");
     }
 

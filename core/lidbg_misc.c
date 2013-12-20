@@ -116,7 +116,6 @@ void cp_data_to_udisk(char *key, char *value )
                 }
             }
         }
-        lidbg_rm("/data/logcat.txt");
         lidbg_rm("/data/kmsg.txt");
         lidbg_domineering_ack();
     }
@@ -141,7 +140,6 @@ static int __init lidbg_misc_init(void)
     FS_REGISTER_INT(reboot_delay_s, "reboot_delay_s", 0, NULL);
     FS_REGISTER_INT(cp_data_to_udisk_en, "cp_data_to_udisk_en", 0, cp_data_to_udisk);
     FS_REGISTER_INT(update_lidbg_out_dir_en, "update_lidbg_out_dir_en", 0, update_lidbg_out_dir);
-    fs_register_filename_list("/data/logcat.txt", true);
     fs_register_filename_list("/data/kmsg.txt", true);
 
     if(1 == logcat_en)

@@ -122,6 +122,8 @@ void parse_cmd(char *pt)
 
     else if (!strcmp(argv[0], "appcmd"))
     {
+        lidbg("appcmd:[%s]\n", argv[1]);
+
         if (!strcmp(argv[1], "*158#999"))
         {
             fs_call_apk();
@@ -140,8 +142,7 @@ void parse_cmd(char *pt)
         }
         else if (!strcmp(argv[1], "*158#003"))
         {
-            lidbg_rm("/data/logcat.txt");
-            lidbg_rm("/data/kmsg.txt");
+            k2u_write(LOG_CLEAR_LOGCAT_KMSG);
             lidbg_domineering_ack();
         }
     }

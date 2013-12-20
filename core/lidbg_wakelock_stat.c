@@ -68,7 +68,7 @@ bool register_wakelock(struct list_head *client_list, struct list_head *detail_l
 {
     bool is_item_req_detail = false;
     struct wakelock_item *wakelock_pos = get_wakelock_item(client_list, name);
-    if(detail_list&&get_wakelock_item(detail_list, name))
+    if(detail_list && get_wakelock_item(detail_list, name))
         is_item_req_detail = true;
 
     if(wakelock_pos)
@@ -87,7 +87,7 @@ bool unregister_wakelock(struct list_head *client_list, struct list_head *detail
 {
     bool is_item_req_detail = false;
     struct wakelock_item *wakelock_pos = get_wakelock_item(client_list, name);
-    if(detail_list&&get_wakelock_item(detail_list, name))
+    if(detail_list && get_wakelock_item(detail_list, name))
         is_item_req_detail = true;
 
     if(wakelock_pos)

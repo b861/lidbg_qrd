@@ -23,6 +23,7 @@
 #define LOG_LOGCAT (2)
 #define LOG_ALL (3)
 #define LOG_CONT    (4)
+#define LOG_CLEAR_LOGCAT_KMSG (5)
 
 #define WAKEUP_KERNEL (10)
 #define SUSPEND_KERNEL (11)
@@ -64,7 +65,51 @@ static int ts_nod_fd, ret;
 
 struct lidbg_dev_smem *plidbg_smem = NULL;
 
-
+static char logcat_name[64];
+int read_from_file(const char *path, char *buf, size_t size)
+{
+    if (!path)
+        return -1;
+    int fd = open(path, O_RDONLY, 0);
+    if (fd == -1)
+    {
+        lidbg("Could not open '%s'", path);
+        return -1;
+    }
+    ssize_t count = read(fd, buf, size);
+    if (count > 0)
+    {
+        while (count > 0 && buf[count - 1] == '\n')
+            count--;
+        buf[count] = '\0';
+    }
+    else
+    {
+        buf[0] = '\0';
+    }
+    close(fd);
+    return count;
+}
+void get_time(char *datastring)
+{
+    struct tm *local;
+    const char *tmFormat = "%Y%m%d_%I%M%S";
+    time_t now = time(NULL);
+    local = localtime(&now);
+    if(datastring)
+        strftime(datastring, 64, tmFormat, local);
+}
+void compose_logcat_name(char *logname)
+{
+    char mchine_id[32];
+    char current_time[32];
+    get_time(current_time);
+    if ( read_from_file("/data/lidbg/MIF.txt", mchine_id, sizeof(mchine_id)) > 0)
+        sprintf(logname, "logcat_%s_%s.txt", mchine_id, current_time);
+    else
+        sprintf(logname, "logcat_default_%s.txt", current_time);
+    lidbg("compose_logcat_name:new.[%s]\n", logname);
+}
 
 void thread_fastboot(void)
 {
@@ -138,16 +183,21 @@ loop_read:
         case LOG_LOGCAT :
         {
             static int flag = 0;
+            char cmd[128];
             if(flag)break;
             else flag = 1;
-            lidbg("logcat+\nfirst:rm logcat.txt\n");
-            system("rm /data/logcat.txt");
-	   		sleep(1);
-            system("date >> /data/logcat.txt");
-			sleep(1);
-            system("chmod 777 /data/logcat.txt");
-			sleep(1);
-            system("logcat  -v time>> /data/logcat.txt &");
+            lidbg("logcat+\n\n");
+
+            compose_logcat_name(logcat_name);
+
+            sprintf(cmd, "date >/data/%s", logcat_name);
+            system(cmd);
+            memset(cmd, '\0', sizeof(cmd));
+            sleep(1);
+            system("chmod 777 /data/logcat*");
+            sleep(1);
+            sprintf(cmd, "logcat  -v time>> /data/%s &", logcat_name);
+            system(cmd);
             lidbg("logcat-\n");
             break;
         }
@@ -156,15 +206,21 @@ loop_read:
             static int flag = 0;
             if(flag)break;
             else flag = 1;
-            lidbg("kmsg+\nfirst:rm kmsg.txt\n");
-            system("rm /data/kmsg.txt");
-			sleep(1);
-            system("date >> /data/kmsg.txt");
-			sleep(1);
+            lidbg("kmsg+\n");
+            system("date > /data/kmsg.txt");
+            sleep(1);
             system("chmod 777 /data/kmsg.txt");
-			sleep(1);
+            sleep(1);
             system("cat /proc/kmsg >> /data/kmsg.txt &");
             lidbg("kmsg-\n");
+            break;
+        }
+        case LOG_CLEAR_LOGCAT_KMSG :
+        {
+            lidbg("clear+logcat*&&kmsg.txt\n");
+            system("rm /data/logcat*");
+            system("rm /data/kmsg.txt");
+            lidbg("clear-logcat*&&kmsg.txt\n");
             break;
         }
 
