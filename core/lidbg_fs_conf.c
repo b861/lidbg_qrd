@@ -138,7 +138,7 @@ static int thread_pollfile_func(void *data)
 
         }
         else
-            ssleep(3);
+            ssleep(1);
     }
     return 1;
 }
@@ -171,7 +171,7 @@ static int thread_pollstate_func(void *data)
             save_list_to_file(&fs_state_list, state_mem_path);
         }
         else
-            ssleep(3);
+            ssleep(1);
     }
     return 1;
 }

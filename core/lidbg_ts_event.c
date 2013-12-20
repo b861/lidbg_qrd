@@ -209,8 +209,8 @@ static int thread_te_analysis(void *data)
         if(g_te_scandelay_ms)
             getnum_andanalysis();
         else
-            ssleep(30);
-    };
+            ssleep(1);
+    }
     return 1;
 }
 //zone end

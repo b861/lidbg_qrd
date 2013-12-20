@@ -252,7 +252,7 @@ static int thread_filedetec_func(void *data)
         }
         else
         {
-            ssleep(3);
+            ssleep(1);
         }
     }
     return 1;
