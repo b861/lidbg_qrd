@@ -776,6 +776,7 @@ static s32 gtp_init_panel(struct goodix_ts_data *ts)
         rd_cfg_buf[GTP_ADDR_LENGTH] &= 0x07;
     }
     printk("SENSOR ID:%d", rd_cfg_buf[GTP_ADDR_LENGTH]);
+	lidbg_fs_log(TS_LOG_PATH, "SENSOR ID:%d\n", rd_cfg_buf[GTP_ADDR_LENGTH]);
     memset(&config[GTP_ADDR_LENGTH], 0, GTP_CONFIG_MAX_LENGTH);
     memcpy(&config[GTP_ADDR_LENGTH], send_cfg_buf[rd_cfg_buf[GTP_ADDR_LENGTH]], ts->gtp_cfg_len);
 
