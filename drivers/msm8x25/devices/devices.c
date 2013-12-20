@@ -880,14 +880,15 @@ static int soc_dev_resume(struct platform_device *pdev)
         //PWR_EN_ON;
 
         //USB_SWITCH_DISCONNECT;
-
+		if(!g_var.is_fly)
+		{
 #ifdef DEBUG_BUTTON
-        SOC_IO_ISR_Enable(BUTTON_LEFT_1);
-        SOC_IO_ISR_Enable(BUTTON_LEFT_2);
-        SOC_IO_ISR_Enable(BUTTON_RIGHT_1);
-        SOC_IO_ISR_Enable(BUTTON_RIGHT_2);
+	        SOC_IO_ISR_Enable(BUTTON_LEFT_1);
+	        SOC_IO_ISR_Enable(BUTTON_LEFT_2);
+	        SOC_IO_ISR_Enable(BUTTON_RIGHT_1);
+	        SOC_IO_ISR_Enable(BUTTON_RIGHT_2);
 #endif
-
+		}
 
         //lidbg("turn lcd on!\n");
         //LCD_ON;
