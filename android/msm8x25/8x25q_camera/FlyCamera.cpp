@@ -66,6 +66,9 @@ namespace android {
   static int global_fream_give_up =0;
 	static unsigned int global_last_critical_point = 50;
   static unsigned int global_last_bottom_critical_point = 435;
+
+void *CameraRestartPreviewThread(void *mHalCamCtrl1);
+
 void FlyCameraStar()
 {
 TW9912Info tw9912_info;
@@ -73,7 +76,6 @@ TW9912Info tw9912_info;
 	global_fream_give_up = 0;
 	//global_last_critical_point = 50;
 	//global_last_bottom_critical_point = 435;
-
 	DEBUGLOG("Flyvideo-mFlyPreviewStatus =%d\n",globao_mFlyPreviewStatus);
 	global_tw9912_file_fd = open("/dev/tw9912config",O_RDWR);
 	if(global_tw9912_file_fd ==-1)
@@ -169,7 +171,7 @@ void FlyCameraThisIsFirstOpenAtDVD()
 						 {
 							       DEBUGLOG("Flyvideo-x:第一次打开DVD\n");
 							       mHalCamCtrl->stopPreview();
-							       //      sleep(1);
+							      	usleep(1000);
 							       mHalCamCtrl->startPreview();
 							       //      sleep(1);
 						 }
@@ -184,10 +186,22 @@ void FlyCameraNotSignalAtLastTime()
 {
 	if(video_show_status[0] == '0' && rePreview_count > 100)
 		{//发现黑屏 且 视频在上次打开没有视频源输入
-			DEBUGLOG("Flyvideo-上次视频打开，视频源无视频输入\n");
-			mHalCamCtrl->stopPreview();
-			DEBUGLOG("Flyvideo-上次视频打开，视频源无视频输入\n");
-			mHalCamCtrl->startPreview();
+			int arg = 0;
+			unsigned int cmd;
+			cmd = AGAIN_RESET_VIDEO_CONFIG_BEGIN;
+			if (ioctl(global_tw9912_file_fd,cmd, &arg) < 0)
+		        {
+				DEBUGLOG("Flyvideo-: ioctl AGAIN_RESET_VIDEO_CONFIG_BEGIN 4 tw9912 node  fail\n");
+			}
+			if(global_need_rePreview == false )
+			{
+					global_need_rePreview = true;
+					DEBUGLOG("Flyvideo-上次的open是碰到视频不稳定，再次配置chip后的再次预览");
+					if( pthread_create(&thread_DetermineImageSplitScreenID, NULL,CameraRestartPreviewThread, (void *)mHalCamCtrl) != 0)
+						DEBUGLOG("Flyvideo-创建线程重新预览失败！DVD\n");
+					//else
+					//	DEBUGLOG("Flyvideo-发现分屏 DVD\n");
+			}
 			rePreview_count = 0;
 		}
 		else if(video_show_status[0] == '0')
@@ -967,17 +981,15 @@ return 0;//未发生分屏
 }
 static int FlyCameraReadTw9912StatusRegitsterValue()
 {
-	int file_fd;
 	unsigned char value,value_1;
 	int arg = 0;
 	unsigned int cmd;
-       if(global_tw9912_file_fd == -1)
+  if(global_tw9912_file_fd == -1)
 	return 0;
 	cmd = COPY_TW9912_STATUS_REGISTER_0X01_4USER;
 	if (ioctl(global_tw9912_file_fd,cmd, &arg) < 0)
         {
 		DEBUGLOG("Flyvideo-: Call cmd COPY_TW9912_STATUS_REGISTER_0X01_4USER fail\n");
-		close(file_fd);
 		return 0;
 	}
 	read(global_tw9912_file_fd, (void *)(&value),sizeof(unsigned char));

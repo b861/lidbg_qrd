@@ -285,6 +285,10 @@ static int tw9912_node_ioctl(struct file *filp, unsigned
     case COPY_TW9912_STATUS_REGISTER_0X01_4USER:
         tw9912_read_func_read_data = 1;
         break;
+    case AGAIN_RESET_VIDEO_CONFIG_BEGIN :
+	chips_config_begin(NTSC_I);
+	printk("at last open backcar not signal but app opened camera,so, now again config the chips\n");
+	break;
     default:
         return  - EINVAL;
     }
