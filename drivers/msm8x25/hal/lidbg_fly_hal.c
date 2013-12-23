@@ -15,7 +15,7 @@ int SOC_Get_CpuFreq(void);
 char *insmod_list[] =
 {
     "lidbg_lpc.ko",
-#if (defined(BOARD_V2)||defined(BOARD_V3))
+#if (defined(BOARD_V1) || defined(BOARD_V2) || defined(BOARD_V3))
     "lidbg_fastboot.ko",
 #else
     "lidbg_acc.ko",
@@ -24,7 +24,11 @@ char *insmod_list[] =
     "lidbg_bpmsg.ko",
     "lidbg_gps.ko",
     "lidbg_videoin.ko",
+#if (defined(BOARD_V1) || defined(BOARD_V2) || defined(BOARD_V3))
     "lidbg_ts_probe.ko",
+ #else
+	 "lidbg_ts_probe_new.ko",
+ #endif
     NULL,
 };
 
