@@ -175,6 +175,9 @@ static int tw9912_channel_choeces_again(vedio_channel_t channel)
     case SEPARATION: 	//	 YUV
         Tw9912_input_pin_selet[1] = 0x70;
         if(tw9912_write(Tw9912_input_pin_selet) == NACK) goto CONFIG_not_ack_fail;
+	 Tw9912_input_pin_selet[0] = 0xe8;
+        Tw9912_input_pin_selet[1] = 0x30; //disable YOUT buffer
+        if(tw9912_write(Tw9912_input_pin_selet) == NACK) goto CONFIG_not_ack_fail;
         break;
     default :
         tw9912_dbg("%s:you input Channel = %d >>>>>>>>>>>>>>error!\n", __FUNCTION__, channel);
