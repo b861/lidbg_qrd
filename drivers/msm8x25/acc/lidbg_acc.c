@@ -550,7 +550,7 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
         lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_POWER_OFF));
         SOC_Write_Servicer(CMD_FAST_POWER_OFF);
         plidbg_acc->poweroff_count++;
-        if((!g_var.is_fly)||(STRICT_SUSPEND == 0xff))
+        if((!g_var.is_fly))
         {
             SOC_Write_Servicer(LOG_LOGCAT);
             //SOC_Write_Servicer(LOG_DMESG);
