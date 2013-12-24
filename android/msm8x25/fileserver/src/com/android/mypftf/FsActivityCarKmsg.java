@@ -23,19 +23,17 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class FsActivityKmsg extends Activity implements OnTouchListener,
+public class FsActivityCarKmsg extends Activity implements OnTouchListener,
 		OnGestureListener
 {
-
 	private TextView kmsgTextView;
 	private Thread kmsg_thread;
 	private ScrollView kmsgScrollView;
 	private FileInputStream inputStream;
-
 	private boolean in_follow_enable = false;
 	private boolean is_ts_moved;
+	private boolean kmsg_thread_enable = true;
 	private GestureDetector detector = new GestureDetector(this);
-
 	private SeekBar kmsgSeekBar;
 	private String TAG = "kmsg_activity";
 	private String kmsg_file = "/data/lidbg/lidbg_kmsg.txt";
@@ -48,23 +46,21 @@ public class FsActivityKmsg extends Activity implements OnTouchListener,
 		super.onCreate(savedInstanceState);
 		request_full_screen();
 		setContentView(R.layout.layout_kmsg);
+
+		kmsg_thread_enable = true;
 		setTitle("fileserver.apk 获取系统KMSG模式  【machine_id:"
-				+ FsActivityMain.machine_id + "】");
+				+ FsActivityCarMain.machine_id + "】");
 		Log.e(TAG, "[futengfei].onProgressChanged:\n");
-
 		toast_show("长摁开启KMSG跟随");
-
 		kmsgTextView = (TextView) findViewById(R.id.xmtvkmsg);
 		kmsgScrollView = (ScrollView) findViewById(R.id.xmsvkmsg);
 		kmsgSeekBar = (SeekBar) findViewById(R.id.xmkmsgSeekbar);
-
 		kmsgTextView.setTextColor(Color.WHITE);
 		kmsgTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10);
 		kmsgTextView.setScrollbarFadingEnabled(true);
 		kmsgTextView.setBackgroundColor(Color.parseColor("#150015"));
 		kmsgTextView.setOnLongClickListener(new OnLongClickListener()
 		{
-
 			@Override
 			public boolean onLongClick(View v)
 			{
@@ -80,14 +76,11 @@ public class FsActivityKmsg extends Activity implements OnTouchListener,
 				return false;
 			}
 		});
-
 		kmsgScrollView.setScrollbarFadingEnabled(false);
 		kmsgScrollView.setSmoothScrollingEnabled(true);
 		kmsgScrollView.setOnTouchListener(this);
 		kmsgScrollView.setLongClickable(true);
-
 		detector.setIsLongpressEnabled(true);
-
 		kmsgSeekBar.setOnSeekBarChangeListener(kmsgSeekBarChangeListener);
 		creat_kmsg_thread();
 	}
@@ -116,7 +109,7 @@ public class FsActivityKmsg extends Activity implements OnTouchListener,
 			float srollto = seekBar.getProgress() * kmsgTextView.getHeight();
 			kmsgScrollView.smoothScrollTo((int) srollto / seekBar.getMax(),
 					(int) srollto / seekBar.getMax());
-			Log.e(TAG, "[futengfei].onProgressChanged:\n" + srollto);
+			Log.w(TAG, "[futengfei].onProgressChanged:\n" + srollto);
 		}
 	};
 
@@ -130,7 +123,7 @@ public class FsActivityKmsg extends Activity implements OnTouchListener,
 	private void toast_show(CharSequence toast_string)
 	{
 		// TODO Auto-generated method stub
-		Toast.makeText(FsActivityKmsg.this, toast_string, Toast.LENGTH_SHORT)
+		Toast.makeText(FsActivityCarKmsg.this, toast_string, Toast.LENGTH_SHORT)
 				.show();
 	}
 
@@ -139,7 +132,6 @@ public class FsActivityKmsg extends Activity implements OnTouchListener,
 		// TODO Auto-generated method stub
 		kmsg_thread = (Thread) new Thread(new Runnable()
 		{
-
 			private long kmsg_delay = 600;
 			private int old_file_length = 0;
 			private int buff_len = 512;
@@ -149,7 +141,6 @@ public class FsActivityKmsg extends Activity implements OnTouchListener,
 			@Override
 			public void run()
 			{
-
 				try
 				{
 					kmsgFile = new File(kmsg_file);
@@ -159,69 +150,65 @@ public class FsActivityKmsg extends Activity implements OnTouchListener,
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-
 				while (true)
 				{
 					runOnUiThread(new Runnable()
 					{
-
 						public void run()
 						{
-							try
+							if (kmsg_thread_enable)
 							{
-								len = inputStream.available();
-								setTitle("fileserver.apk 获取系统KMSG模式  【machine_id:"
-										+ FsActivityMain.machine_id
-										+ "】"
-										+ "                     "
-										+ kmsgFile.length()
-										+ "  "
-										+ kmsgTextView.getHeight()
-										+ "  speed:"
-										+ len);
-								if (in_follow_enable)
+								try
 								{
-									buff_len = 128;
-									kmsg_delay = 200;
-								}
-								if (len > buff_len)
-								{
-									byte[] buffer = new byte[len];
-									inputStream.read(buffer);
-									kmsgstring = EncodingUtils.getString(
-											buffer, "UTF-8");
-									if (in_follow_enable && !is_ts_moved)
+									len = inputStream.available();
+									setTitle("fileserver.apk 获取系统KMSG模式  【machine_id:"
+											+ FsActivityCarMain.machine_id
+											+ "】"
+											+ "                     "
+											+ kmsgFile.length()
+											+ "  "
+											+ kmsgTextView.getHeight()
+											+ "  speed:" + len);
+									if (in_follow_enable)
 									{
-										kmsgScrollView
-												.fullScroll(ScrollView.FOCUS_DOWN);
+										buff_len = 128;
+										kmsg_delay = 200;
 									}
-
-									kmsgTextView.append(kmsgstring);
-									if (in_follow_enable && !is_ts_moved)
+									if (len > buff_len)
 									{
-										kmsgScrollView
-												.fullScroll(ScrollView.FOCUS_DOWN);
+										byte[] buffer = new byte[len];
+										inputStream.read(buffer);
+										kmsgstring = EncodingUtils.getString(
+												buffer, "UTF-8");
+										if (in_follow_enable && !is_ts_moved)
+										{
+											kmsgScrollView
+													.fullScroll(ScrollView.FOCUS_DOWN);
+										}
+										kmsgTextView.append(kmsgstring);
+										if (in_follow_enable && !is_ts_moved)
+										{
+											kmsgScrollView
+													.fullScroll(ScrollView.FOCUS_DOWN);
+										}
 									}
-
-								}
-
-								if (kmsgFile.length() < old_file_length)
+									if (kmsgFile.length() < old_file_length)
+									{
+										inputStream.close();
+										inputStream = new FileInputStream(
+												kmsgFile);
+										kmsgTextView.setText("reset");
+										// toast_show("reset");
+										Log.e(TAG,
+												"[futengfei].kmsgTextView:reset\n");
+									}
+									old_file_length = (int) kmsgFile.length();
+								} catch (IOException e)
 								{
-									inputStream.close();
-									inputStream = new FileInputStream(kmsgFile);
-									kmsgTextView.setText("reset");
-									// toast_show("reset");
-									Log.e(TAG,
-											"[futengfei].kmsgTextView:reset\n");
+									// TODO Auto-generated catch block
+									e.printStackTrace();
 								}
-								old_file_length = (int) kmsgFile.length();
-
-							} catch (IOException e)
-							{
-								// TODO Auto-generated catch block
-								e.printStackTrace();
 							}
-
 						}
 					});
 					// Log.e(TAG, "-------->onResume" + cunt1);
@@ -246,6 +233,7 @@ public class FsActivityKmsg extends Activity implements OnTouchListener,
 		try
 		{
 			inputStream.close();
+			kmsg_thread_enable = false;
 		} catch (IOException e)
 		{
 			// TODO Auto-generated catch block
@@ -266,7 +254,6 @@ public class FsActivityKmsg extends Activity implements OnTouchListener,
 			float velocityY)
 	{
 		// TODO Auto-generated method stub
-
 		return false;
 	}
 
@@ -274,7 +261,6 @@ public class FsActivityKmsg extends Activity implements OnTouchListener,
 	public void onLongPress(MotionEvent e)
 	{
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -289,7 +275,6 @@ public class FsActivityKmsg extends Activity implements OnTouchListener,
 	public void onShowPress(MotionEvent e)
 	{
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -311,12 +296,10 @@ public class FsActivityKmsg extends Activity implements OnTouchListener,
 							.getHeight()));
 			Log.e(TAG, "[futengfei].kmsgSeekBar.setProgress\n");
 			break;
-
 		default:
 			break;
 		}
 		// detector.onTouchEvent(event);
 		return false;
 	}
-
 }

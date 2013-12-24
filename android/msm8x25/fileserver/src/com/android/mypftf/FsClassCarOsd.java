@@ -1,5 +1,4 @@
 package com.android.mypftf;
-
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
@@ -13,7 +12,7 @@ import android.view.WindowManager.LayoutParams;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class FsClassOsd
+public class FsClassCarOsd
 {
 	public WindowManager wm = null;
 	public static WindowManager.LayoutParams params = new WindowManager.LayoutParams();
@@ -21,13 +20,9 @@ public class FsClassOsd
 	private TextView cpuaccTextView;
 	private boolean is_view_added = false;
 	private Context gcontext;
-
 	private String TAG = "futengfei";
 
-	/**
-	 * 
-	 */
-	public FsClassOsd(Context context)
+	public FsClassCarOsd(Context context)
 	{
 		// TODO Auto-generated constructor stub
 		gcontext = context;
@@ -64,10 +59,8 @@ public class FsClassOsd
 			params.gravity = Gravity.TOP | Gravity.CENTER;
 			LayoutInflater inflater = (LayoutInflater) gcontext
 					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
 			mcpuaccOSD = (View) inflater.inflate(layoutid, null);
 			cpuaccTextView = (TextView) mcpuaccOSD.findViewById(textviewid);
-
 		}
 	}
 
@@ -123,5 +116,4 @@ public class FsClassOsd
 		// TODO Auto-generated method stub
 		cpuaccTextView.setTextColor(Color.parseColor("#" + string));
 	}
-
 }

@@ -1,6 +1,7 @@
 package com.android.mypftf;
-
 import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -11,29 +12,41 @@ import java.io.FileOutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.telephony.gsm.SmsManager;
 import android.widget.Toast;
+
 import org.apache.http.util.EncodingUtils;
 
 /**
  * @author futengfeimyp
  * 
  */
-public class FsClassCommen
+public class FsClassCarCommen
 {
+	private static final String NULL = null;
 	Context gcontext;
+	private WifiManager mWifiManager;
+	private Runtime tmpRuntime;
 
 	/**
 	 * 
 	 */
-	public FsClassCommen(Context context)
+	public FsClassCarCommen(Context context)
 	{
 		// TODO Auto-generated constructor stub
 		gcontext = context;
+		tmpRuntime = Runtime.getRuntime();
+		mWifiManager = (WifiManager) gcontext
+				.getSystemService(Context.WIFI_SERVICE);
 	}
 
 	public void intent_open_file(String path, String action)
@@ -90,36 +103,60 @@ public class FsClassCommen
 		return get_file_content(pathString);
 	}
 
-	public void write_to_file(String file_path, String write_str)
+	public void write_to_file(String file_path, boolean creatit,
+			String write_str)
 	{
 		// TODO Auto-generated method stub
-		File mFile = new File(file_path);
-		if (mFile.exists())// mFile.createNewFile();
-							// mjextern_directory.toString()
-		{
-			try
-			{
-				FileOutputStream fout = new FileOutputStream(
-						mFile.getAbsolutePath());
-				byte[] bytes = write_str.getBytes();
-				fout.write(bytes);
-				fout.close();
-			} catch (IOException e)
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 
-		} else
+		if (write_str == null)
 		{
-			show_toast(file_path + "：不存在");
+			return;
+		}
+		File mFile = new File(file_path);
+		if (!mFile.exists())
+		{
+			if (creatit)
+			{
+				try
+				{
+					mFile.createNewFile();
+				} catch (IOException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			} else
+			{
+				show_toast(file_path + "：不存在");
+				return;
+			}
+		}
+
+		try
+		{
+			FileOutputStream fout = new FileOutputStream(
+					mFile.getAbsolutePath());
+			byte[] bytes = write_str.getBytes();
+			fout.write(bytes);
+			fout.close();
+		} catch (IOException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if (creatit)
+		{
+			show_toast("已存入:" + file_path);
 		}
 	}
 
 	public void show_toast(String toast_string)
 	{
 		// TODO Auto-generated method stub
-		Toast.makeText(gcontext, toast_string, Toast.LENGTH_SHORT).show();
+		if (toast_string != null)
+		{
+			Toast.makeText(gcontext, toast_string, Toast.LENGTH_SHORT).show();
+		}
 	}
 
 	public void show_toast_longer(String toast_string)
@@ -238,14 +275,124 @@ public class FsClassCommen
 	public boolean iswifiactivy()
 	{
 		// TODO Auto-generated method stub
-		WifiManager mWifiManager = (WifiManager) gcontext
-				.getSystemService(Context.WIFI_SERVICE);
 		if (mWifiManager.isWifiEnabled())
 		{
 			return true;
 		}
 		return false;
 
+	}
+
+	public String getHostIpAddress()
+	{
+		// TODO Auto-generated method stub
+		WifiInfo wi = mWifiManager.getConnectionInfo();
+		int ipAdd = wi.getIpAddress();
+		return (ipAdd & 0xFF) + "." + ((ipAdd >> 8) & 0xFF) + "."
+				+ ((ipAdd >> 16) & 0xFF) + "." + (ipAdd >> 24 & 0xFF);
+	}
+
+	public String runRootCommend(String RootCommend)
+	{
+		// TODO Auto-generated method stub
+		StringBuffer stringBuffer = null;
+		DataOutputStream os = null;
+		Process rootCommendProcess = null;
+		try
+		{
+			rootCommendProcess = tmpRuntime.exec("su");
+			String newcmdString = RootCommend + "\n";
+			os = new DataOutputStream(rootCommendProcess.getOutputStream());
+			os.write(newcmdString.getBytes());
+			os.write("exit\n".getBytes());
+			os.flush();
+			try
+			{
+				rootCommendProcess.waitFor();
+			} catch (InterruptedException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			stringBuffer = new StringBuffer();
+			DataInputStream dataInputStream = new DataInputStream(
+					rootCommendProcess.getInputStream());
+			String line;
+			while ((line = dataInputStream.readLine()) != NULL)
+			{
+				stringBuffer.append(line).append("\n");
+			}
+
+		} catch (IOException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+
+		} finally
+		{
+			if (os != null)
+			{
+				try
+				{
+					os.close();
+				} catch (IOException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			rootCommendProcess.destroy();
+		}
+		if (stringBuffer != null)
+		{
+			return stringBuffer.toString();
+		} else
+		{
+			return null;
+		}
+	}
+
+	public String GetRawFileContent(int RawId)
+	{
+		// TODO Auto-generated method stub
+		String fineString = null;
+		InputStream inputStream = gcontext.getResources()
+				.openRawResource(RawId);
+		int len;
+		try
+		{
+			len = inputStream.available();
+			if (len == 0)
+			{
+				len = 500;
+			}
+			byte[] buffer = new byte[len];
+			inputStream.read(buffer);
+			fineString = EncodingUtils.getString(buffer, "UTF-8");
+			// toast_show("resString="+fineString);
+			inputStream.close();
+		} catch (IOException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return fineString;
+	}
+
+	public String GetCurrentTime(String format)
+	{
+		// TODO Auto-generated method stub
+		SimpleDateFormat formatter = new SimpleDateFormat(format);
+		Date curDate = new Date(System.currentTimeMillis());// 获取当前时间
+		String str = formatter.format(curDate);
+		return str;
+	}
+
+	public void send_msg(String num, String context)
+	{
+		// TODO Auto-generated method stub
+		SmsManager.getDefault().sendTextMessage(num, null, context, null, null);
 	}
 
 }

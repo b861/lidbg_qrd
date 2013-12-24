@@ -126,6 +126,7 @@ void parse_cmd(char *pt)
 
         if (!strcmp(argv[1], "*158#999"))
         {
+            is_fs_work_enable = true;
             fs_call_apk();
         }
         else if (!strcmp(argv[1], "*158#001"))

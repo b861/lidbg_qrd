@@ -1,66 +1,118 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:orientation="vertical" android:layout_width="fill_parent"
-	android:layout_height="fill_parent">
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
 
-	<ImageView android:id="@+id/lo_iv_osd" android:layout_width="fill_parent"
-		android:layout_height="45dip" android:layout_gravity="center_vertical"
-		android:adjustViewBounds="true" android:src="@drawable/icon"
-		android:layout_weight="4" />
+    <ImageView
+        android:id="@+id/lo_iv_osd"
+        android:layout_width="fill_parent"
+        android:layout_height="45dip"
+        android:layout_gravity="center_vertical"
+        android:layout_weight="4"
+        android:adjustViewBounds="true"
+        android:src="@drawable/ic_launcher" />
 
-	<DigitalClock android:layout_width="fill_parent"
-		android:layout_height="match_parent" android:text="@string/xm_clock_format"
-		android:textStyle="bold" android:textColor="#0000ff"
-		android:focusable="false" android:background="#0066CC"
-		android:gravity="center_horizontal" android:layout_weight="4"></DigitalClock>
+    <DigitalClock
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="4"
+        android:background="#0066CC"
+        android:focusable="false"
+        android:gravity="center_horizontal"
+        android:text="@string/xm_clock_format"
+        android:textColor="#0000ff"
+        android:textStyle="bold" >
+    </DigitalClock>
 
-	<LinearLayout android:orientation="horizontal"
-		android:layout_width="fill_parent" android:layout_height="match_parent">
-		<TextView android:layout_width="fill_parent"
-			android:layout_height="match_parent" android:layout_weight="3"
-			android:text="@string/xm_osd_dia_path" android:gravity="center_vertical"
-			android:background="#330022" />
-		<EditText android:id="@+id/xmedosd_path"
-			android:layout_width="fill_parent" android:layout_height="match_parent"
-			android:layout_weight="2" android:inputType="text" android:hint="文件夹的绝对路径"
-			android:gravity="left" />
-	</LinearLayout>
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal" >
 
-	<LinearLayout android:orientation="horizontal"
-		android:layout_width="fill_parent" android:layout_height="match_parent">
-		<TextView android:layout_width="fill_parent"
-			android:layout_height="match_parent" android:layout_weight="3"
-			android:text="@string/xm_osd_dia_color" android:gravity="center_vertical"
-			android:background="#330022" />
-		<EditText android:id="@+id/xmedosd_color"
-			android:layout_width="fill_parent" android:layout_height="match_parent"
-			android:layout_weight="2" android:hint="如RGB:220022" android:gravity="left" />
-	</LinearLayout>
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="3"
+            android:background="#330022"
+            android:gravity="center_vertical"
+            android:text="@string/xm_osd_dia_path" />
 
-	<LinearLayout android:orientation="horizontal"
-		android:layout_width="fill_parent" android:layout_height="match_parent">
-		<TextView android:layout_width="fill_parent"
-			android:layout_height="match_parent" android:layout_weight="3"
-			android:text="@string/xmedosd_text_color" android:gravity="center_vertical"
-			android:background="#330022" />
-		<EditText android:id="@+id/xmedosd_text_color"
-			android:layout_width="fill_parent" android:layout_height="match_parent"
-			android:layout_weight="2" android:hint="如RGB:993366" android:gravity="left" />
-	</LinearLayout>
+        <EditText
+            android:id="@+id/xmedosd_path"
+            android:layout_width="fill_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="2"
+            android:gravity="left"
+            android:hint="文件夹的绝对路径"
+            android:inputType="text" />
+    </LinearLayout>
 
-	<LinearLayout android:orientation="horizontal"
-		android:layout_width="fill_parent" android:layout_height="match_parent">
-		<TextView android:layout_width="fill_parent"
-			android:layout_height="match_parent" android:layout_weight="3"
-			android:text="@string/xm_osd_dia_size" android:gravity="center_vertical"
-			android:background="#330022" />
-		<SeekBar android:id="@+id/xmsbosd_size" android:layout_width="fill_parent"
-			android:layout_height="match_parent" android:layout_weight="2"
-			android:layout_centerInParent="true" android:max="120"
-			android:progress="15" />
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal" >
 
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="3"
+            android:background="#330022"
+            android:gravity="center_vertical"
+            android:text="@string/xm_osd_dia_color" />
 
-	</LinearLayout>
+        <EditText
+            android:id="@+id/xmedosd_color"
+            android:layout_width="fill_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="2"
+            android:gravity="left"
+            android:hint="如RGB:220022" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="3"
+            android:background="#330022"
+            android:gravity="center_vertical"
+            android:text="@string/xmedosd_text_color" />
+
+        <EditText
+            android:id="@+id/xmedosd_text_color"
+            android:layout_width="fill_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="2"
+            android:gravity="left"
+            android:hint="如RGB:993366" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="3"
+            android:background="#330022"
+            android:gravity="center_vertical"
+            android:text="@string/xm_osd_dia_size" />
+
+        <SeekBar
+            android:id="@+id/xmsbosd_size"
+            android:layout_width="fill_parent"
+            android:layout_height="match_parent"
+            android:layout_centerInParent="true"
+            android:layout_weight="2"
+            android:max="120"
+            android:progress="15" />
+    </LinearLayout>
 
 </LinearLayout>

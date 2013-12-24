@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="4"
+        android:background="#330022"
+        android:focusable="false"
+        android:gravity="center_horizontal"
+        android:text="@string/xm_backlight_comment"
+        android:textColor="#0000ff"
+        android:textStyle="bold" >
+    </TextView>
+
+    <DigitalClock
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="4"
+        android:background="#0066CC"
+        android:focusable="false"
+        android:gravity="center_horizontal"
+        android:text="@string/xm_clock_format"
+        android:textColor="#0000ff"
+        android:textStyle="bold" >
+    </DigitalClock>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="6"
+            android:orientation="horizontal" >
+
+            <TimePicker
+                android:id="@+id/xm_timePicker_bl"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="2" />
+        </LinearLayout>
+
+        <EditText
+            android:id="@+id/xmedresult_bl"
+            android:layout_width="fill_parent"
+            android:layout_height="match_parent"
+            android:gravity="left"
+            android:hint="没有华丽的界面，请按照上述格式填写..."
+            android:inputType="text" />
+    </LinearLayout>
+
+</LinearLayout>
