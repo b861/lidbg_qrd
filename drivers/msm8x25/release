@@ -7,6 +7,7 @@ lidbg_videoin.ko
 lidbg_bpmsg.ko
 lidbg_gps.ko
 lidbg_ts_probe.ko
+lidbg_ts_probe_new.ko
 gt801.ko
 gt811.ko
 gt911.ko
