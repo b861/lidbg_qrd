@@ -292,7 +292,7 @@ void lidbg_fileserver_main_init(void)
 }
 //zone end
 
-int fileserver_init(void *data)
+static int __init lidbg_fileserver_init(void)
 {
     FS_WARN("<==IN==>\n");
 
@@ -305,16 +305,8 @@ int fileserver_init(void *data)
     lidbg_fs_cmn_init();
 
     lidbg_fileserver_main_init();//note,put it in the end.
+
     FS_WARN("<==OUT==>\n\n");
-
-	return 0;
-
-}
-
-static int __init lidbg_fileserver_init(void)
-{
-	DUMP_FUN;
-	CREATE_KTHREAD(fileserver_init,NULL);
     return 0;
 }
 

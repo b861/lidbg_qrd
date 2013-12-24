@@ -52,7 +52,7 @@ void lidbg_touch_report(u32 pos_x, u32 pos_y, u32 type)
 
 }
 
-extern int  touch_event_init(void *data);
+extern void  touch_event_init(void);
 int lidbg_touch_init(void)
 {
     int error;
@@ -110,7 +110,8 @@ int lidbg_touch_init(void)
 
         goto fail;
     }
-	CREATE_KTHREAD(touch_event_init,NULL);
+
+    touch_event_init();
 
     return 0;
 fail:

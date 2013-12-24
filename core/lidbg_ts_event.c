@@ -209,8 +209,8 @@ static int thread_te_analysis(void *data)
         if(g_te_scandelay_ms)
             getnum_andanalysis();
         else
-            ssleep(1);
-    }
+            ssleep(30);
+    };
     return 1;
 }
 //zone end
@@ -228,7 +228,7 @@ void cb_password_te_enable(char *password )
     is_fs_work_enable = true;
     lidbg_chmod( "/data");
 }
-int  touch_event_init(void *data)
+void  touch_event_init(void)
 {
     TE_WARN("<==IN==>\n");
 
@@ -244,7 +244,6 @@ int  touch_event_init(void *data)
     te_task = kthread_run(thread_te_analysis, NULL, "ftf_te_task");
 
     TE_WARN("<==OUT==>\n");
-	return 0;
 }
 
 //zone below [interface]
