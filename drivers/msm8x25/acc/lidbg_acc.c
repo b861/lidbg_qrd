@@ -17,11 +17,13 @@ LIDBG_DEFINE;
 #define FASTBOOT_LOG_PATH LIDBG_LOG_DIR"log_fb.txt"
 
 
-int suspend_state = PM_STATUS_LATE_RESUME_OK;
+LIDBG_FAST_PWROFF_STATUS suspend_state = PM_STATUS_LATE_RESUME_OK;
 bool fake_suspend = 1;
 
 static DECLARE_COMPLETION(acc_ready);
 static DECLARE_COMPLETION(suspend_start);
+static DECLARE_COMPLETION(acc_status_correct);
+
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,36)
 DECLARE_MUTEX(lidbg_acc_sem);
@@ -495,6 +497,22 @@ static int thread_acc_suspend(void *data)
     return 0;
 }
 
+
+
+static int acc_correct(void *data)
+{
+    while(1)
+    {
+        wait_for_completion(&acc_status_correct);
+		DUMP_FUN;
+		lidbg("suspend_state=%d\n",suspend_state);
+		msleep(3000);
+		SOC_Key_Report(KEY_END,KEY_PRESSED_RELEASED);
+    }
+}
+
+
+
 ssize_t  acc_read(struct file *filp, char __user *buffer, size_t size, loff_t *offset)
 {
     return size;
@@ -531,6 +549,8 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
     if(!strcmp(data_rec, "acc_on"))
     {
         printk("******bp:goto acc_on********\n");
+		if(suspend_state == PM_STATUS_LATE_RESUME_OK)
+			complete(&acc_status_correct);
 		fake_suspend = 1;
         SOC_Write_Servicer(CMD_ACC_ON);
         lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_ACC_ON));
@@ -538,6 +558,8 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
     else if(!strcmp(data_rec, "acc_off"))
     {
         printk("******bp:goto acc_off********\n");
+		if(suspend_state == PM_STATUS_EARLY_SUSPEND_PENDING)
+			complete(&acc_status_correct);
 		fake_suspend = 1;
         plidbg_acc->accoff_count ++;
         SOC_Write_Servicer(CMD_ACC_OFF);
@@ -610,8 +632,10 @@ static int  acc_probe(struct platform_device *pdev)
 #endif
 	
 	INIT_COMPLETION(suspend_start);
-
 	CREATE_KTHREAD(thread_acc_suspend, NULL);
+	
+	INIT_COMPLETION(acc_status_correct);
+	CREATE_KTHREAD(acc_correct, NULL);
 
 	lidbg_chmod("/dev/lidbg_acc");
 	lidbg (DEVICE_NAME"acc dev_init\n");
