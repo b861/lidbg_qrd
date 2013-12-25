@@ -507,7 +507,11 @@ static int acc_correct(void *data)
 		DUMP_FUN;
 		lidbg("suspend_state=%d\n",suspend_state);
 		msleep(3000);
-		SOC_Key_Report(KEY_POWER,KEY_PRESSED_RELEASED);
+		if(
+			((plidbg_acc->acc_flag == 1)&&(suspend_state == PM_STATUS_LATE_RESUME_OK)) ||
+			((plidbg_acc->acc_flag == 0)&&(suspend_state == PM_STATUS_EARLY_SUSPEND_PENDING))
+		  )
+			SOC_Key_Report(KEY_POWER,KEY_PRESSED_RELEASED);
     }
 }
 
@@ -549,6 +553,7 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
     if(!strcmp(data_rec, "acc_on"))
     {
         printk("******bp:goto acc_on********\n");
+		plidbg_acc->acc_flag = 1;
 		if(suspend_state == PM_STATUS_LATE_RESUME_OK)
 			complete(&acc_status_correct);
 		fake_suspend = 1;
@@ -558,6 +563,7 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
     else if(!strcmp(data_rec, "acc_off"))
     {
         printk("******bp:goto acc_off********\n");
+		plidbg_acc->acc_flag = 0;
 		if(suspend_state == PM_STATUS_EARLY_SUSPEND_PENDING)
 			complete(&acc_status_correct);
 		fake_suspend = 1;
@@ -610,7 +616,8 @@ static int  acc_probe(struct platform_device *pdev)
         ret = -ENODEV;
         goto fail_mem;
     }
-
+	
+	plidbg_acc->acc_flag = 1;
     plidbg_acc->resume_count = 0;
     plidbg_acc->accoff_count = 0;
     plidbg_acc->poweroff_count = 0;
