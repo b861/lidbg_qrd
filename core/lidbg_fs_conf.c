@@ -221,7 +221,8 @@ int get_machine_id(void)
 }
 void fs_save_state(void)
 {
-    fs_copy_file(state_mem_path, state_sd_path);
+    if(is_fs_work_enable)
+        fs_copy_file(state_mem_path, state_sd_path);
 }
 //zone end
 

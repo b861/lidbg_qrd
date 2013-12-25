@@ -197,7 +197,7 @@ void copy_all_conf_file(void)
 void check_conf_file(void)
 {
 
-    if(fs_is_file_updated(build_time_fly_path, PRE_CONF_INFO_FILE) || (!fs_is_file_exist(driver_sd_path) || !fs_is_file_exist(core_sd_path) || !fs_is_file_exist(state_sd_path)))
+    if(fs_is_file_updated(build_time_fly_path, PRE_CONF_INFO_FILE) || (!is_file_empty(driver_sd_path) || !is_file_empty(core_sd_path) || !is_file_empty(state_sd_path)))
     {
         FS_WARN("<overwrite:push,update?>\n");
         is_out_updated = true;

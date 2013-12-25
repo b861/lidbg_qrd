@@ -269,6 +269,25 @@ bool is_file_exist(char *file)
         return true;
     }
 }
+bool is_file_empty(char *file)
+{
+    struct file *filep;
+    struct inode *inodefrom = NULL;
+    unsigned int file_len;
+    filep = filp_open(file, O_RDONLY , 0);
+    if(IS_ERR(filep))
+        return false;
+    else
+    {
+        inodefrom = filep->f_dentry->d_inode;
+        file_len = inodefrom->i_size;
+        filp_close(filep, 0);
+        if(file_len > 0)
+            return true;
+        else
+            return false;
+    }
+}
 bool copy_file(char *from, char *to)
 {
     char *string = NULL;
