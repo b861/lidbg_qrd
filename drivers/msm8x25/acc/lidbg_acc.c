@@ -507,7 +507,7 @@ static int acc_correct(void *data)
 		DUMP_FUN;
 		lidbg("suspend_state=%d\n",suspend_state);
 		msleep(3000);
-		SOC_Key_Report(KEY_END,KEY_PRESSED_RELEASED);
+		SOC_Key_Report(KEY_POWER,KEY_PRESSED_RELEASED);
     }
 }
 
