@@ -15,12 +15,10 @@
 #define DEBUG_PRINT_READ_FLAG 0
 #define DEBUG_COUNT_FLAG 0
 #define DEBUG_CRC_FLAG 1
-#define RD_BUFF_SIZE (4 * 1024 * 1024)
-#define RD_SIZE 2048
+#define RD_SIZE (2048)
 
 struct uartConfig {
 	int fd;
-	int ttyNum;
 	int ttyReadWrite;
 	int baudRate;
 	char *portName;
@@ -31,14 +29,8 @@ struct uartConfig {
 	int rlen;		//lenght have read
 };
 
-char *dev[] = {"/dev/ttyMSM0", "/dev/ttyMSM1", "/dev/ttyMSM2", "/dev/ttyGS0", "/dev/ttyHS0"};
-
-static unsigned char wbuff[] = {0,1,2,3,4,5,6,7,8,9};
-static unsigned char *rbuff;
 static struct uartConfig pUartInfo;
 
-static pthread_mutex_t mutex; 
- 
 int set_opt(int fd, int nSpeed, int nBits, char nEvent, int nStop)
 {
 	struct termios newtio, oldtio;
@@ -136,25 +128,11 @@ int set_opt(int fd, int nSpeed, int nBits, char nEvent, int nStop)
 	return 0;
 }
 
-int open_port(int fd, int comport)
+int open_port(int fd, char *portName)
 {
 	long vdisable;
 
-	switch(comport) {
-		case 1:
-			pUartInfo.fd = open( dev[0], O_RDWR | O_NOCTTY | O_NDELAY);break;
-		case 2:
-			pUartInfo.fd = open( dev[1], O_RDWR | O_NOCTTY | O_NDELAY);break;
-		case 3:
-			pUartInfo.fd = open( dev[2], O_RDWR | O_NOCTTY | O_NDELAY);break;
-		case 4:
-			pUartInfo.fd = open( dev[3], O_RDWR | O_NOCTTY | O_NDELAY);break;
-		case 5:
-			pUartInfo.fd = open( dev[4], O_RDWR | O_NOCTTY | O_NDELAY);break;
-
-		default:
-			return -1;
-	}
+	pUartInfo.fd = open( portName, O_RDWR | O_NOCTTY | O_NDELAY);
 
 	if (-1 == pUartInfo.fd)
 	{
@@ -162,7 +140,7 @@ int open_port(int fd, int comport)
 		return(-1);
 	}
 	else{
-		printf("open %s .....\n",dev[comport - 1]);
+		printf("open %s .....\n",portName);
 	}
 
 	if (fcntl(pUartInfo.fd, F_SETFL, 0) < 0)
@@ -182,28 +160,23 @@ void *write_thread_fun(void *arg)
 	int i = 0;
 
 	struct uartConfig *pInfo = arg;
+	static unsigned char wbuff[] = {0,1,2,3,4,5,6,7,8,9};
 	
 	pInfo->nwrite = sizeof(wbuff);
 	
 	while(1) {
-//		pthread_mutex_lock(&mutex);
-
 		pInfo->wlen = 0;
 
-		if((pInfo->fd) > 0)
+		if((pInfo->fd) > 0) //Tx
 		{
 
-			if(pInfo->ttyReadWrite == 0)	//Tx
-			{
 				pInfo->wlen = write(pInfo->fd, wbuff, pInfo->nwrite);
 //				usleep(10 * 1000);
 #if DEBUG_PRINT_WRITE_FLAG
 				printf("sent:%d  %s\n",pInfo->wlen,wbuff);
 #endif
-
-			}
  		}	
-//		pthread_mutex_unlock(&mutex);	
+
 	}
 	
 	return NULL;
@@ -219,18 +192,23 @@ void *read_thread_fun(void *arg)
 	char parm = 0;
 	unsigned int count = 0;
 	struct uartConfig *pInfo = arg;
+	static unsigned char *rbuff;
 
 	pInfo->nread = RD_SIZE;
 
+	rbuff = (unsigned char *)malloc(RD_SIZE * sizeof(char));
+	if(rbuff == NULL) {
+		printf("Alloc mem fo rbuff failed.");
+		return NULL;
+	}
+
+	memset(rbuff, 0, RD_SIZE * sizeof(char));
+	
 	while(1) {
-//	pthread_mutex_lock(&mutex);  
-//	memset(rbuff, 0, RD_BUFF_SIZE * sizeof(char));
 	pInfo->rlen = 0;
 
-	if((pInfo->fd) > 0)
+	if((pInfo->fd) > 0) 	//Rx
 	{
-		if(pInfo->ttyReadWrite == 0)	//Rx
-		{
 			pInfo->rlen = read(pInfo->fd, rbuff, pInfo->nread);
 
 			if(pInfo->rlen == 0){	//in case of don't back to the start of the file, when reading to the end
@@ -283,12 +261,8 @@ void *read_thread_fun(void *arg)
 				parm = tmp;
 #endif
 			}
-
 		}		
 	}	
-	
-//	pthread_mutex_unlock(&mutex);
-	}
 	
 	return NULL;
 }
@@ -313,32 +287,23 @@ int main(int argc , char **argv)
 		printf("uaer:%s TxRx(0) ttyNumber\n",argv[0]);
 		printf("uaer:%s Tx(1) ttyNumber\n",argv[0]);
 		printf("uaer:%s Rx(2) ttyNumber\n",argv[0]);
-		printf("uaer:example: %s 0 1 115200\n",argv[0]);
+		printf("uaer:example: %s 0 /dev/ttyS0 115200\n",argv[0]);
 		return -1;
 	}
 	
 	pUartInfo.ttyReadWrite = strtoul(argv[1], 0, 0);
-	pUartInfo.ttyNum = strtoul(argv[2], 0, 0);
+	pUartInfo.portName = argv[2];
 	pUartInfo.baudRate = strtoul(argv[3], 0, 0);
 	pUartInfo.fd = -1;
 	
-	if(pUartInfo.ttyNum < 1){
-		printf("uaer:%s ttyNumber (ttyNumber >= 1)\n",argv[0]);
+	if(pUartInfo.portName == NULL){
+		printf("ERR:tty dev does not exist.\n");
 		return -1;
 	}
 	
-	printf("%s %d %d\n",argv[0], pUartInfo.ttyReadWrite, pUartInfo.ttyNum);
+	printf("%s %d %s %d\n",argv[0], pUartInfo.ttyReadWrite, pUartInfo.portName, pUartInfo.baudRate);
 
-//	pthread_mutex_init(&mutex, NULL);
-	rbuff = (unsigned char *)malloc(RD_BUFF_SIZE * sizeof(char));
-	if(rbuff == NULL) {
-		printf("Alloc mem fo rbuff failed.");
-		return -1;
-	}
-
-	memset(rbuff, 0, RD_BUFF_SIZE * sizeof(char));
-	
-	if ((pUartInfo.fd = open_port(pUartInfo.fd, pUartInfo.ttyNum)) < 0)
+	if ((pUartInfo.fd = open_port(pUartInfo.fd, pUartInfo.portName)) < 0)
 	{
 		printf("open_port error\n");
 		return -1;
@@ -351,21 +316,29 @@ int main(int argc , char **argv)
 	}
 	
 	//read thread
-	ret = pthread_create(&readTheadId, NULL, read_thread_fun,(void *)&pUartInfo);
-	if(ret != 0)
-	{
-		printf("Failed to create open and close thrad !\n");
-		return -1;
+	if((pUartInfo.ttyReadWrite == 0) ||(pUartInfo.ttyReadWrite == 2)) {
+		ret = pthread_create(&readTheadId, NULL, read_thread_fun,(void *)&pUartInfo);
+		if(ret != 0)
+		{
+			printf("Failed to create open and close thrad !\n");
+			return -1;
+		}
 	}
+	else if(pUartInfo.ttyReadWrite != 1) {
+		printf("Unknown test mode.\n");
+		return -1;
+	}		
 	
 	//write thread
-	ret = pthread_create(&writeTheadId, NULL, write_thread_fun,(void *)&pUartInfo);
-	if(ret != 0)
-	{
-		printf("Failed to create read and write thrad !\n");
-		return -1;
+	if((pUartInfo.ttyReadWrite == 0) ||(pUartInfo.ttyReadWrite == 1)) {
+		ret = pthread_create(&writeTheadId, NULL, write_thread_fun,(void *)&pUartInfo);
+		if(ret != 0)
+		{
+			printf("Failed to create read and write thrad !\n");
+			return -1;
+		}
 	}
-	
+
 	while(1)
 		sleep(60);
 
@@ -373,6 +346,7 @@ int main(int argc , char **argv)
 	
 	return 0;
 }
+
 
 
 
