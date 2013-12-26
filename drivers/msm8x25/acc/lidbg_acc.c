@@ -586,7 +586,7 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
 
     if (copy_from_user( data_rec, buf, count))
     {
-        printk("copy_from_user ERR\n");
+        lidbg("copy_from_user ERR\n");
     }
 
     if((p = memchr(data_rec, '\n', count)))
@@ -597,12 +597,12 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
     else
         data_rec[len] =  '\0';
 
-    printk("acc_nod_write:==%d====[%s]\n", len, data_rec);
+    lidbg("acc_nod_write:==%d====[%s]\n", len, data_rec);
 
     // processing data
     if(!strcmp(data_rec, "acc_on"))
     {
-        printk("******bp:goto acc_on********\n");
+        lidbg("******bp:goto acc_on********\n");
 		acc_triger_time = get_tick_count();
 		plidbg_acc->acc_flag = 1;
 		//if(suspend_state == PM_STATUS_LATE_RESUME_OK)
@@ -613,7 +613,7 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
     }
     else if(!strcmp(data_rec, "acc_off"))
     {
-        printk("******bp:goto acc_off********\n");
+        lidbg("******bp:goto acc_off********\n");
 		acc_triger_time = get_tick_count();
 		plidbg_acc->acc_flag = 0;
 		//if(suspend_state == PM_STATUS_EARLY_SUSPEND_PENDING)
@@ -625,7 +625,7 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
     }
     else if(!strcmp(data_rec, "power"))
     {
-        printk("******bp:goto fastboot********\n");
+        lidbg("******bp:goto fastboot********\n");
 		fake_suspend = 0;
         lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_POWER_OFF));
         SOC_Write_Servicer(CMD_FAST_POWER_OFF);
