@@ -11,33 +11,16 @@ linux debug(lidbg)
 
 *应用层（android）
 android/JAVA:                          提供一些函数模块，可直接用于上层java代码中（例如把java程序中的打印信息输出到串口）。
-android/msm8x25/lidbg_servicer：       用于加载第三方模块，接收内核模块的消息作相应处理，在内核层不方便实现的功能在此处理。
-android/msm8x25/uart_send_rec_test：   用于串口稳定性测试。
-android/msm8x25/usb_sd_mount_test：    用于U盘和SD卡插拔稳定性测试。
-android/msm8x25/fileserver：           上层apk，用于在界面形式与lidbg中的驱动进行交互（需要在3G拨号界面输入*#*#158999#*#*）。
-android/msm8x25/client_mobile：        上层apk，采用socket通信将本机调试信息上传到服务器（192.168.9.222）。
-android/msm8x25/lidbg_gui：            用于将内核信息输出到LCD屏。
-android/msm8x25/8x25q_camera：         8x25q产品的关于摄像头的HAL模块代码。
-android/msm8x25/gpslib：               gps驱动对应的HAL模块代码
-android/out：                          编译后自动生成， 应用层生成的目标文件。
+详见android/soc/README
 
 *基础驱动模块（core）
 作用主要有两个：
-1.封装不同soc的底层实现（例如i2c / io / spi / ad / pwm等，在core/msm8x25目录），提供通用接口给其他模块。通过共享其包含指针函数的结构体地址，给其他模块（主要是drivers下的模块）调用。
-2.创建节点/dev/mlidbg0，提供在shell终端控制外设调试的命令，具体的命令参考core\msm8x25\doc\echo_shell_msm8x25.txt。
+1.封装不同soc的底层实现（例如i2c / io / spi / ad / pwm等，在core/soc目录），提供通用接口给其他模块。通过共享其包含指针函数的结构体地址，给其他模块（主要是drivers下的模块）调用。
+2.创建节点/dev/mlidbg0，提供在shell终端控制外设调试的命令，具体的命令参考core\soc\doc\echo_shell_soc.txt。
 
 *具体工作模块（drivers）
 drivers下是在不同平台下的一些具体实际工作，为了保证其平台可移植性，尽量不要调用soc的底层函数，而是调用core提供的通用接口：
-drivers/msm8x25/example：              调用core的函数接口例子。
-drivers/msm8x25/bp_msg：               打印bp写入共享内存的调试信息。
-drivers/msm8x25/devices：              控制系统正常运行和开关机中必须的外设。
-drivers/msm8x25/fastboot：             处理msm8x25平台休眠唤醒相关。
-drivers/msm8x25/acc：                  处理msm8x25Q平台休眠唤醒相关。
-drivers/msm8x25/gps：                  ublox驱动。
-drivers/msm8x25/touchscreen：          电容屏相关驱动。
-drivers/msm8x25/videoin：              视频输入驱动。
-drivers/msm8x25/hal：                  设置函数指针调用，并加载驱动模块（主要是drivers目录下的）。
-drivers/msm8x25/inc：				   drivers下使用的头文件。
+详见drivers/soc/README
 
 
 *编译脚本（build）
@@ -51,32 +34,20 @@ out_release：编译后自动生成，存放产品正式包需要的模块，由
 ----------编译方法----------
 1.配置编译环境
 cd lidbg_qrd
-(1) cp ./core/msm8x25/doc/dbg_cfg_backup.sh ./dbg_cfg.sh
+(1) cp ./core/soc/doc/dbg_cfg_backup.sh ./dbg_cfg.sh
 (2) 修改DBG_SYSTEM_DIR环境变量(指向的包的内核需编译过一遍(make bootimage))
 (3) chmod 777  ./* -R
 以上步骤只需配置一次
 
 dbg_cfg.sh编译环境变量配置说明：
-＊DBG_PLATFORM:
-msm7627a--8x25平台
-msm8625--8x25q平台
-
-＊BUILD_VERSION
-dbg--编译出运行在原生系统的模块
-rel--编译出运行在发布产品系统的模块
-
-*BOARD_VERSION
-v1--适用于8x25第一版硬件（pcb）
-v2--适用于8x25第二版及最后量产硬件（pcb）
-v3--适用于8x25q车机第一版硬件（pcb）
-V4--新架构程序版本，适用于8x25q第一版硬件之后的版本（pcb）
+详见core/soc/README
 
 
 2.编译
 *模块提供两种方法
 (1) 编译所有模块，在lidbg根目录运行build.sh
 (2) 编译单独模块，如在lidbg根目录执行:
-./make.sh drivers/msm8x25/gps
+./make.sh drivers/soc/gps
 ./make.sh core
 生成模块在out目录
 
@@ -99,30 +70,7 @@ build/pushfly.sh
 执行 build/insmod.sh  (正式产品是flysystem/lib/out目录)
 
 2. 开机自动运行lidbg_servicer和lidbg_loader.ko加载模块
-*8x25:
-把lidbg_servicer打包进系统，在文件system/core/rootdir/etc/init.qcom.rc添加
-chmod 777 /system/bin/lidbg_servicer  (正式产品是/flysystem/bin目录)
-和
-service lidbg_servicer /system/bin/logwrapper /system/bin/lidbg_servicer  (正式产品是/flysystem/bin目录)
-    class late_start
-    user root
-    group root
-
-*8x25Q:
-a.原生系统：在文件device/qcom/common/rootdir/etc/init.qcom.rc添加
-	on boot 
-	chmod 0644 /system/lib/modules/out/*.ko
-    insmod /system/lib/modules/out/lidbg_loader.ko
-	
-b.产品系统：在文件system/core/rootdir/init.flyaudio.rc添加
-	on boot 
-    chmod 0644 /flysystem/lib/out/*.ko
-    insmod /flysystem/lib/out/lidbg_loader.ko
-和
-service lidbg_servicer /system/bin/logwrapper /flysystem/lib/out/lidbg_servicer
-    class late_start
-    user root
-    group root 	
+详见core/soc/README	
 
 -------------集成到系统镜像-------------
 执行build/copy2img.sh后重新make编译系统即可
