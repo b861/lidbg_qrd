@@ -84,6 +84,12 @@
 #define CMD_ACC_OFF (93)
 #define CMD_ACC_ON (94)
 
+
+#define NOTIFIER_MAJOR_ACC_STATE (5)
+#define NOTIFIER_MINOR_ACC_OFF (0)
+#define NOTIFIER_MINOR_ACC_ON (1)
+
+
 #if (defined(BUILD_SOC) || defined(BUILD_CORE) || defined(BUILD_DRIVERS))
 #define NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE (110)
 #define NOTIFIER_MINOR_XXX (0)
@@ -95,7 +101,10 @@
 #define NOTIFIER_MINOR_SUSPEND_UNPREPARE (3)
 #define NOTIFIER_MINOR_POWER_OFF (4)
 
+
 #else
+#define NOTIFIER_VALUE(major,minor)  (((major)&0xffff)<<16 | ((minor)&0xffff))
+
 #define lidbg_io(fmt,...) //do{SOC_IO_Uart_Send(IO_UART_DELAY_245_115200,fmt,##__VA_ARGS__);}while(0)
 
 #define BEGIN_KMEM do{old_fs = get_fs();set_fs(get_ds());}while(0)

@@ -23,6 +23,15 @@ bool fake_suspend = 1;
 static DECLARE_COMPLETION(acc_ready);
 static DECLARE_COMPLETION(suspend_start);
 static DECLARE_COMPLETION(acc_status_correct);
+static int lidbg_acc_state(struct notifier_block *this, unsigned long event, void *ptr);
+
+
+
+static struct notifier_block acc_notifier =
+{
+    .notifier_call = lidbg_acc_state,
+};
+
 
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,36)
@@ -54,6 +63,32 @@ typedef struct
 } lidbg_acc;
 
 lidbg_acc *plidbg_acc = NULL;
+
+
+static int lidbg_acc_state(struct notifier_block *this,
+                       unsigned long event, void *ptr)
+{
+    DUMP_FUN;
+
+    switch (event)
+    {
+
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_STATE, NOTIFIER_MINOR_ACC_OFF):
+		lidbg("====receive ACC_STATE:%d\n",NOTIFIER_MINOR_ACC_OFF);
+		suspend_state = PM_STATUS_EARLY_SUSPEND_PENDING;
+        break;
+	case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_STATE, NOTIFIER_MINOR_ACC_ON):
+		lidbg("====receive ACC_STATE:%d\n",NOTIFIER_MINOR_ACC_ON);
+		suspend_state = PM_STATUS_LATE_RESUME_OK;
+		break;
+		
+    default:
+        break;
+    }
+
+    return NOTIFY_DONE;
+}
+
 
 static int pc_clk_is_enabled(int id)
 {
@@ -505,13 +540,19 @@ static int acc_correct(void *data)
     {
         wait_for_completion(&acc_status_correct);
 		DUMP_FUN;
-		lidbg("suspend_state=%d\n",suspend_state);
+		lidbg("acc_correct:acc_flag=%d, suspend_state=%d\n",plidbg_acc->acc_flag,suspend_state);
 		msleep(3000);
+		lidbg("acc_correct:acc_flag=%d, suspend_state=%d\n",plidbg_acc->acc_flag,suspend_state);
 		if(
-			((plidbg_acc->acc_flag == 1)&&(suspend_state == PM_STATUS_LATE_RESUME_OK)) ||
-			((plidbg_acc->acc_flag == 0)&&(suspend_state == PM_STATUS_EARLY_SUSPEND_PENDING))
+			((plidbg_acc->acc_flag == 1)&&(suspend_state != PM_STATUS_LATE_RESUME_OK)) ||
+			((plidbg_acc->acc_flag == 0)&&(suspend_state != PM_STATUS_EARLY_SUSPEND_PENDING))
 		  )
-			SOC_Key_Report(KEY_POWER,KEY_PRESSED_RELEASED);
+		{
+			
+			lidbg("\n\n\n\n\n\nacc_correct:send power_key\n\n\n\n\n\n");
+			SOC_Key_Report(KEY_POWER,KEY_PRESSED_RELEASED);			
+			lidbg_fs_log(FASTBOOT_LOG_PATH,"acc_correct:acc_flag=%d, suspend_state=%d\n",plidbg_acc->acc_flag,suspend_state);
+		}
     }
 }
 
@@ -554,7 +595,7 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
     {
         printk("******bp:goto acc_on********\n");
 		plidbg_acc->acc_flag = 1;
-		if(suspend_state == PM_STATUS_LATE_RESUME_OK)
+		//if(suspend_state == PM_STATUS_LATE_RESUME_OK)
 			complete(&acc_status_correct);
 		fake_suspend = 1;
         SOC_Write_Servicer(CMD_ACC_ON);
@@ -564,7 +605,7 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
     {
         printk("******bp:goto acc_off********\n");
 		plidbg_acc->acc_flag = 0;
-		if(suspend_state == PM_STATUS_EARLY_SUSPEND_PENDING)
+		//if(suspend_state == PM_STATUS_EARLY_SUSPEND_PENDING)
 			complete(&acc_status_correct);
 		fake_suspend = 1;
         plidbg_acc->accoff_count ++;
@@ -659,6 +700,8 @@ static int  acc_probe(struct platform_device *pdev)
         fs_fill_list("/system/lib/modules/out/fastboot_not_kill_list.conf", FS_CMD_FILE_LISTMODE, &fastboot_kill_list);
 
     spin_lock_init(&kill_lock);
+	
+    register_lidbg_notifier(&acc_notifier);
 
     return 0;
 
