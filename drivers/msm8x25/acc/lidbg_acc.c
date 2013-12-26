@@ -19,6 +19,7 @@ LIDBG_DEFINE;
 
 LIDBG_FAST_PWROFF_STATUS suspend_state = PM_STATUS_LATE_RESUME_OK;
 bool fake_suspend = 1;
+u32 acc_triger_time = 0;
 
 static DECLARE_COMPLETION(acc_ready);
 static DECLARE_COMPLETION(suspend_start);
@@ -73,12 +74,12 @@ static int lidbg_acc_state(struct notifier_block *this,
     switch (event)
     {
 
-    case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_STATE, NOTIFIER_MINOR_ACC_OFF):
-		lidbg("====receive ACC_STATE:%d\n",NOTIFIER_MINOR_ACC_OFF);
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATE, NOTIFIER_MINOR_SYSTEM_OFF):
+		lidbg("====receive SYSTEM_STATE:%d\n",NOTIFIER_MINOR_SYSTEM_OFF);
 		suspend_state = PM_STATUS_EARLY_SUSPEND_PENDING;
         break;
-	case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_STATE, NOTIFIER_MINOR_ACC_ON):
-		lidbg("====receive ACC_STATE:%d\n",NOTIFIER_MINOR_ACC_ON);
+	case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATE, NOTIFIER_MINOR_SYSTEM_ON):
+		lidbg("====receive SYSTEM_STATE:%d\n",NOTIFIER_MINOR_SYSTEM_ON);
 		suspend_state = PM_STATUS_LATE_RESUME_OK;
 		break;
 		
@@ -536,13 +537,21 @@ static int thread_acc_suspend(void *data)
 
 static int acc_correct(void *data)
 {
+	u32 tick;
     while(1)
     {
         wait_for_completion(&acc_status_correct);
+        //msleep(100);//for test
 		DUMP_FUN;
-		lidbg("acc_correct:acc_flag=%d, suspend_state=%d\n",plidbg_acc->acc_flag,suspend_state);
+		lidbg("acc_correct1:acc_flag=%d, suspend_state=%d\n",plidbg_acc->acc_flag,suspend_state);
 		msleep(3000);
-		lidbg("acc_correct:acc_flag=%d, suspend_state=%d\n",plidbg_acc->acc_flag,suspend_state);
+		
+		tick = get_tick_count() - acc_triger_time;
+		lidbg("acc_correct:tick=%d\n",tick);
+        if ( tick < 3000)
+			continue;
+		
+		lidbg("acc_correct2:acc_flag=%d, suspend_state=%d\n",plidbg_acc->acc_flag,suspend_state);
 		if(
 			((plidbg_acc->acc_flag == 1)&&(suspend_state != PM_STATUS_LATE_RESUME_OK)) ||
 			((plidbg_acc->acc_flag == 0)&&(suspend_state != PM_STATUS_EARLY_SUSPEND_PENDING))
@@ -551,7 +560,7 @@ static int acc_correct(void *data)
 			
 			lidbg("\n\n\n\n\n\nacc_correct:send power_key\n\n\n\n\n\n");
 			SOC_Key_Report(KEY_POWER,KEY_PRESSED_RELEASED);			
-			lidbg_fs_log(FASTBOOT_LOG_PATH,"acc_correct:acc_flag=%d, suspend_state=%d\n",plidbg_acc->acc_flag,suspend_state);
+			lidbg_fs_log(FASTBOOT_LOG_PATH,"acc_correct:acc_flag=%d, suspend_state=%d,tick=%d\n",plidbg_acc->acc_flag,suspend_state,tick);
 		}
     }
 }
@@ -594,6 +603,7 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
     if(!strcmp(data_rec, "acc_on"))
     {
         printk("******bp:goto acc_on********\n");
+		acc_triger_time = get_tick_count();
 		plidbg_acc->acc_flag = 1;
 		//if(suspend_state == PM_STATUS_LATE_RESUME_OK)
 			complete(&acc_status_correct);
@@ -604,6 +614,7 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
     else if(!strcmp(data_rec, "acc_off"))
     {
         printk("******bp:goto acc_off********\n");
+		acc_triger_time = get_tick_count();
 		plidbg_acc->acc_flag = 0;
 		//if(suspend_state == PM_STATUS_EARLY_SUSPEND_PENDING)
 			complete(&acc_status_correct);

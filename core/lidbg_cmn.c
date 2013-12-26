@@ -158,6 +158,15 @@ u32 lidbg_get_ns_count(void)
 
 }
 
+u32 get_tick_count(void)//return how many ms since boot
+{
+    struct timespec t_now;
+    do_posix_clock_monotonic_gettime(&t_now);
+    monotonic_to_bootbased(&t_now);
+    return t_now.tv_sec * 1000 + t_now.tv_nsec / 1000000;
+}
+
+
 int lidbg_get_current_time(char *time_string, struct rtc_time *ptm)
 {
     int  tlen = -1;
@@ -392,6 +401,7 @@ EXPORT_SYMBOL(lidbg_domineering_ack);
 
 EXPORT_SYMBOL(mod_cmn_main);
 EXPORT_SYMBOL(lidbg_get_ns_count);
+EXPORT_SYMBOL(get_tick_count);
 EXPORT_SYMBOL(lidbg_launch_user);
 EXPORT_SYMBOL(lidbg_readwrite_file);
 EXPORT_SYMBOL(lidbg_task_kill_select);

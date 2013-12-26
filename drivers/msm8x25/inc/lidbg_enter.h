@@ -85,9 +85,9 @@
 #define CMD_ACC_ON (94)
 
 
-#define NOTIFIER_MAJOR_ACC_STATE (5)
-#define NOTIFIER_MINOR_ACC_OFF (0)
-#define NOTIFIER_MINOR_ACC_ON (1)
+#define NOTIFIER_MAJOR_SYSTEM_STATE (5)
+#define NOTIFIER_MINOR_SYSTEM_OFF (0)
+#define NOTIFIER_MINOR_SYSTEM_ON (1)
 
 
 #if (defined(BUILD_SOC) || defined(BUILD_CORE) || defined(BUILD_DRIVERS))

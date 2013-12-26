@@ -20,6 +20,7 @@ int  lidbg_setprop(char key[], char value[]);
 void lidbg_domineering_ack(void);
 void mod_cmn_main(int argc, char **argv);
 u32 lidbg_get_ns_count(void);
+u32 get_tick_count(void);
 int  lidbg_launch_user( char bin_path[], char argv1[], char argv2[], char argv3[], char argv4[], char argv5[], char argv6[]);
 int lidbg_readwrite_file(const char *filename, char *rbuf, const char *wbuf, size_t length);
 int lidbg_task_kill_select(char *task_name);
