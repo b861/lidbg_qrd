@@ -53,7 +53,51 @@ void parse_cmd(char *pt)
                 ((struct lidbg_hal *)plidbg_dev)->soc_func_tbl.pfnlidbg_video_main(new_argc, new_argv);
         }
 
-    }
 
+		
+    }
+	
+	else if (!strcmp(argv[0], "appcmd"))
+	{
+		lidbg("%s:[%s]\n", argv[0],argv[1]);
+	
+		if (!strcmp(argv[1], "*158#999"))
+		{
+			is_fs_work_enable = true;
+			fs_call_apk();
+		}
+		else if (!strcmp(argv[1], "*158#001"))
+		{
+			lidbg_chmod("/data");
+			k2u_write(LOG_LOGCAT);
+			lidbg_domineering_ack();
+		}
+		else if (!strcmp(argv[1], "*158#002"))
+		{
+			lidbg_chmod("/data");
+			k2u_write(LOG_DMESG);
+			lidbg_domineering_ack();
+		}
+		else if (!strcmp(argv[1], "*158#003"))
+		{
+			k2u_write(LOG_CLEAR_LOGCAT_KMSG);
+			lidbg_domineering_ack();
+		}
+	
+		else if (!strcmp(argv[1], "*158#010"))
+		{
+			lidbg("USB_ID_LOW_HOST\n");\
+			USB_ID_LOW_HOST;
+			lidbg_domineering_ack();
+		}
+	
+		else if (!strcmp(argv[1], "*158#011"))
+		{
+		
+			lidbg("USB_ID_HIGH_DEV\n");\
+			USB_ID_HIGH_DEV;
+			lidbg_domineering_ack();
+		}
+	}
 
 }

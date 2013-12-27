@@ -117,35 +117,5 @@ void parse_cmd(char *pt)
         {
             lidbg_wakelock_stat(new_argc, new_argv);
         }
-
     }
-
-    else if (!strcmp(argv[0], "appcmd"))
-    {
-        lidbg("appcmd:[%s]\n", argv[1]);
-
-        if (!strcmp(argv[1], "*158#999"))
-        {
-            is_fs_work_enable = true;
-            fs_call_apk();
-        }
-        else if (!strcmp(argv[1], "*158#001"))
-        {
-            lidbg_chmod("/data");
-            k2u_write(LOG_LOGCAT);
-            lidbg_domineering_ack();
-        }
-        else if (!strcmp(argv[1], "*158#002"))
-        {
-            lidbg_chmod("/data");
-            k2u_write(LOG_DMESG);
-            lidbg_domineering_ack();
-        }
-        else if (!strcmp(argv[1], "*158#003"))
-        {
-            k2u_write(LOG_CLEAR_LOGCAT_KMSG);
-            lidbg_domineering_ack();
-        }
-    }
-
 }

@@ -269,6 +269,7 @@ bool new_cdev(struct file_operations *cdev_fops, char *nodename)
 
 void lidbg_domineering_ack(void)
 {
+	DUMP_FUN;
     lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SIGNAL_EVENT, NOTIFIER_MINOR_SIGNAL_BAKLIGHT_ACK));
 }
 int  lidbg_exe(char path[], char argv1[], char argv2[], char argv3[], char argv4[], char argv5[], char argv6[])
