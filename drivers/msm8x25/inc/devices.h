@@ -262,8 +262,8 @@ enum
 #endif
 
 #define USB_ID_HIGH_DEV do{\
-								SOC_IO_Config(GPIO_USB_ID,GPIO_CFG_INPUT,GPIO_CFG_PULL_UP,GPIO_CFG_8MA);\
-								SOC_IO_Input(0,GPIO_USB_ID,GPIO_CFG_PULL_UP);\
+								SOC_IO_Config(GPIO_USB_ID,GPIO_CFG_INPUT,GPIO_CFG_PULL_UP,GPIO_CFG_16MA);\
+								SOC_IO_Output(0,GPIO_USB_ID,1);\
 							}while(0)
 #define USB_ID_LOW_HOST do{  \
 								SOC_IO_Config(GPIO_USB_ID,GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_16MA);\
