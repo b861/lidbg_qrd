@@ -19,6 +19,7 @@ static bool flag_fan_run_statu = false;
 static bool hal_fan_on = true;
 #endif
 
+static DECLARE_COMPLETION(usb_resume);
 
 int thread_dev_init(void *data);
 int thread_led(void *data);
@@ -92,8 +93,12 @@ int thread_usb_11(void *data)
 
 int thread_usb(void *data)
 {
-	msleep(5000);
-	USB_WORK_ENABLE;
+	while(1)
+	{
+		wait_for_completion(&usb_resume);
+		msleep(5000);
+		USB_WORK_ENABLE;
+	}
 	return 0;
 }
 
@@ -622,6 +627,9 @@ static int soc_dev_probe(struct platform_device *pdev)
     FS_REGISTER_INT(i2c_ctrl, "i2c_ctrl", 0, NULL);
     FS_REGISTER_INT(temp_log_freq, "temp_log_freq", 5, NULL);
     fs_file_separator(TEMP_LOG_PATH);
+	
+	INIT_COMPLETION(usb_resume);
+	CREATE_KTHREAD(thread_usb, NULL);
 
 
 #ifdef DEBUG_LED
@@ -1130,7 +1138,7 @@ static int lidbg_event(struct notifier_block *this,
         unmute_ns();
         break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_SUSPEND_UNPREPARE):
-		CREATE_KTHREAD(thread_usb, NULL);
+		complete(&usb_resume);
         break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SIGNAL_EVENT, NOTIFIER_MINOR_SIGNAL_BAKLIGHT_ACK):
         SOC_BL_Set(BL_MIN);
