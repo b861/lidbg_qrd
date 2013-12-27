@@ -142,11 +142,11 @@ bool find_unsafe_clk(void)
             }
             if(is_safe == 0)
             {
-            #if 0
-                lidbg_fs_log(FASTBOOT_LOG_PATH, "block unsafe clk:%d\n", i);
-            #else
-				lidbg("block unsafe clk:%d\n", i);
-			#endif
+	            if((i == 14) || (i == 33) || (i == 34))
+	                lidbg_fs_log(FASTBOOT_LOG_PATH, "block unsafe clk:%d\n", i);
+	            else
+					lidbg("block unsafe clk:%d\n", i);
+
                 ret = 1;
                 //return ret;
             }
