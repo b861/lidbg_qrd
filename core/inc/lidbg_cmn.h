@@ -28,28 +28,21 @@ int lidbg_get_current_time(char *time_string, struct rtc_time *ptm);
 extern bool lidbg_new_cdev(struct file_operations *cdev_fops, char *nodename);
 
 #ifdef BUILD_FOR_RECOVERY
-#define MOUNT_PATH "/sbin/mount"
-#define INSMOD_PATH "/sbin/insmod"
-#define CHMOD_PATH  "/sbin/chmod"
-#define MV_PATH  "/sbin/mv"
-#define RM_PATH  "/sbin/rm"
-#define RMDIR_PATH  "/sbin/rmdir"
-#define MKDIR_PATH  "/sbin/mkdir"
-#define TOUCH_PATH  "/sbin/touch"
-#define REBOOT_PATH  "/sbin/reboot"
-#define SETPROP_PATH "/sbin/setprop"
+#define BIN_PATH  "/sbin/"
 #else
-#define MOUNT_PATH "/system/bin/mount"
-#define INSMOD_PATH "/system/bin/insmod"
-#define CHMOD_PATH "/system/bin/chmod"
-#define MV_PATH "/system/bin/mv"
-#define RM_PATH  "/system/bin/rm"
-#define RMDIR_PATH  "/system/bin/rmdir"
-#define MKDIR_PATH  "/system/bin/mkdir"
-#define TOUCH_PATH  "/system/bin/touch"
-#define REBOOT_PATH  "/system/bin/reboot"
-#define SETPROP_PATH "/system/bin/setprop"
+#define BIN_PATH  "/system/bin/"
 #endif
+
+#define MOUNT_PATH BIN_PATH"mount"
+#define INSMOD_PATH BIN_PATH"insmod"
+#define CHMOD_PATH  BIN_PATH"chmod"
+#define MV_PATH  BIN_PATH"mv"
+#define RM_PATH  BIN_PATH"rm"
+#define RMDIR_PATH  BIN_PATH"rm"
+#define MKDIR_PATH  BIN_PATH"mkdir"
+#define TOUCH_PATH  BIN_PATH"touch"
+#define REBOOT_PATH  BIN_PATH"reboot"
+#define SETPROP_PATH BIN_PATH"setprop"
 
 
 

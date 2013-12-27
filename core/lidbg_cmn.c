@@ -298,7 +298,7 @@ int  lidbg_rm(char path[])
 }
 int  lidbg_rmdir(char path[])
 {
-    return lidbg_launch_user(RMDIR_PATH, path, NULL, NULL, NULL, NULL, NULL);
+    return lidbg_launch_user(RMDIR_PATH, "-r", path, NULL, NULL, NULL, NULL);
 }
 int  lidbg_mkdir(char path[])
 {

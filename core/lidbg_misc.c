@@ -5,6 +5,7 @@ static int logcat_en;
 static int reboot_delay_s = 0;
 static int cp_data_to_udisk_en = 0;
 static int update_lidbg_out_dir_en = 0;
+static int delete_out_dir_after_update = 1;
 
 
 void cb_password_chmod(char *password )
@@ -41,7 +42,11 @@ void cb_password_update(char *password )
     {
         TE_WARN("<===============UPDATE_INFO =================>\n" );
         if( fs_update("/mnt/usbdisk/out/release", "/mnt/usbdisk/out", "/flysystem/lib/out") >= 0)
+        {
+        	if(delete_out_dir_after_update)
+				lidbg_rmdir("/mnt/usbdisk/out");
             lidbg_reboot();
+        }
     }
     else
     {
@@ -141,6 +146,7 @@ int misc_init(void *data)
     FS_REGISTER_INT(reboot_delay_s, "reboot_delay_s", 0, NULL);
     FS_REGISTER_INT(cp_data_to_udisk_en, "cp_data_to_udisk_en", 0, cp_data_to_udisk);
     FS_REGISTER_INT(update_lidbg_out_dir_en, "update_lidbg_out_dir_en", 0, update_lidbg_out_dir);
+    FS_REGISTER_INT(delete_out_dir_after_update, "delete_out_dir_after_update", 0, NULL);
     fs_register_filename_list("/data/kmsg.txt", true);
 
     if(1 == logcat_en)
