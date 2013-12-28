@@ -459,7 +459,8 @@ static void acc_early_suspend(struct early_suspend *handler)
 	{
 	    check_all_clk_disable();
 
-	    if(find_unsafe_clk()) { complete(&completion_quick_resume);}
+	    if(find_unsafe_clk()) 
+			 complete(&completion_quick_resume);
 
 	    fastboot_task_kill_exclude();
 	}
@@ -482,15 +483,17 @@ static int acc_quick_resume(void *data)
 	while(1)
 	{
 		wait_for_completion(&completion_quick_resume);
-		lidbg_fs_log(FASTBOOT_LOG_PATH, "quick_resume:%d\n", quick_resume_times);
-		if(quick_resume_times < 3)
+		lidbg_fs_log(FASTBOOT_LOG_PATH, "quick_resume:%d\n", ++quick_resume_times);
+		if(quick_resume_times < 4)
 		{
 			set_power_state(1);
-			quick_resume_times ++;
 			//continue;
 			msleep(5000);
-			if(plidbg_acc->acc_flag == 0)	
-				SOC_Write_Servicer(CMD_ACC_OFF);
+			if(plidbg_acc->acc_flag == 0)
+			{
+				lidbg("run fastboot again %d\n",quick_resume_times);
+				SOC_Write_Servicer(CMD_FAST_POWER_OFF);
+			}
 				
 		}
 		else
