@@ -43,10 +43,16 @@ function push_func()
 	./build/push.sh
 }
 
-function pull_func()
+function pull_lidbg_func()
 {
 	echo git pull
 	expect ./build/pull_lidbg
+}
+
+function push_lidbg_func()
+{
+	echo push lidbg_qrd到服务器
+	expect ./build/push_lidbg
 }
 
 function menu_func()
@@ -59,7 +65,9 @@ function menu_func()
 	echo [4] release.sh'                      '编译lidbg所有文件
 	echo [5] push.sh'                         'push驱动模块到原生系统
 	echo [6] choose platform'                 '选择平台
-	echo [7] pull'                            'git pull
+	echo [7] pull'                            'git pull服务器的libg_qrd
+	echo [8] push'                            'git push服务器libg_qrd
+	echo [9] gitk'                            '执行gitk		
 	echo 
 }
 
@@ -79,8 +87,12 @@ function handle_func()
 		6)
 			platform_func;;
 		7)       
-		 	pull_func;;
-		*) 
+		 	pull_lidbg_func;;
+		8)	
+			push_lidbg_func;;
+		9)
+			gitk &;;
+		*)
 			echo 
 			#exit;;
 		esac
@@ -104,7 +116,6 @@ function auto_build()
 }
 
 
-
-	auto_build $1 $2;
+auto_build $1 $2;
 
 
