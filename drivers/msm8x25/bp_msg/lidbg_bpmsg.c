@@ -56,7 +56,7 @@ int thread_bp_msg(void *data)
 
             if(start_index != end_index)
             {
-                if(bp_msg_en)printk("[bp_msg] %s\n", smem_log_temp->log[end_index]);
+                if(bp_msg_en)printk("[lidbg_bp] %s\n", smem_log_temp->log[end_index]);
                 smem_log_temp->end_pos = (end_index + 1)  % TOTAL_LOGS;
                 msleep(BP_MSG_POLLING_TIME);
             }

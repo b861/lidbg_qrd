@@ -70,6 +70,8 @@
 #define VIDEO_SET_PAL (81)
 #define VIDEO_SET_NTSC (82)
 
+#define CMD_FLY_POWER_OFF (101)
+
 
 #define VIDEO_SHOW_BLACK (85)
 #define VIDEO_NORMAL_SHOW (86)

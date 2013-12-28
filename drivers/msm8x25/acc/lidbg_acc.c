@@ -20,10 +20,13 @@ LIDBG_DEFINE;
 LIDBG_FAST_PWROFF_STATUS suspend_state = PM_STATUS_LATE_RESUME_OK;
 bool fake_suspend = 1;
 u32 acc_triger_time = 0;
+u8 quick_resume_times = 0;
 
-static DECLARE_COMPLETION(acc_ready);
 static DECLARE_COMPLETION(suspend_start);
 static DECLARE_COMPLETION(acc_status_correct);
+static DECLARE_COMPLETION(completion_quick_resume);
+
+
 static int lidbg_acc_state(struct notifier_block *this, unsigned long event, void *ptr);
 
 
@@ -143,11 +146,14 @@ bool find_unsafe_clk(void)
             if(is_safe == 0)
             {
 	            if((i == 14) || (i == 33) || (i == 34))
+	            {
+	            	ret = 1;
 	                lidbg_fs_log(FASTBOOT_LOG_PATH, "block unsafe clk:%d\n", i);
+	            }
 	            else
 					lidbg("block unsafe clk:%d\n", i);
 
-                ret = 1;
+                //ret = 1;
                 //return ret;
             }
         }
@@ -453,7 +459,7 @@ static void acc_early_suspend(struct early_suspend *handler)
 	{
 	    check_all_clk_disable();
 
-	    if(find_unsafe_clk()) {}
+	    if(find_unsafe_clk()) { complete(&completion_quick_resume);}
 
 	    fastboot_task_kill_exclude();
 	}
@@ -471,6 +477,28 @@ static void acc_late_resume(struct early_suspend *handler)
 }
 #endif
 
+static int acc_quick_resume(void *data)
+{
+	while(1)
+	{
+		wait_for_completion(&completion_quick_resume);
+		lidbg_fs_log(FASTBOOT_LOG_PATH, "quick_resume:%d\n", quick_resume_times);
+		if(quick_resume_times < 3)
+		{
+			set_power_state(1);
+			quick_resume_times ++;
+			//continue;
+			msleep(5000);
+			if(plidbg_acc->acc_flag == 0)	
+				SOC_Write_Servicer(CMD_ACC_OFF);
+				
+		}
+		else
+		{
+			quick_resume_times = 0;
+		}
+	}
+}
 
 static int thread_acc_suspend(void *data)
 {
@@ -628,7 +656,7 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
         lidbg("******bp:goto fastboot********\n");
 		fake_suspend = 0;
         lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_POWER_OFF));
-        SOC_Write_Servicer(CMD_FAST_POWER_OFF);
+        SOC_Write_Servicer(CMD_FLY_POWER_OFF);
         plidbg_acc->poweroff_count++;
         if((!g_var.is_fly))
         {
@@ -695,6 +723,9 @@ static int  acc_probe(struct platform_device *pdev)
 	
 	INIT_COMPLETION(acc_status_correct);
 	CREATE_KTHREAD(acc_correct, NULL);
+
+	INIT_COMPLETION(completion_quick_resume);
+	CREATE_KTHREAD(acc_quick_resume, NULL);
 
 	lidbg_chmod("/dev/lidbg_acc");
 	lidbg (DEVICE_NAME"acc dev_init\n");
@@ -803,7 +834,6 @@ static int __init acc_init(void)
 
     platform_driver_register(&acc_driver);
 
-    INIT_COMPLETION(acc_ready);
     ret = misc_register(&misc);
 
     return ret;

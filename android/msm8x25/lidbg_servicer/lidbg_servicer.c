@@ -34,12 +34,14 @@
 #define LOG_CAP_TS_FT5X06_SKU7 (67)
 #define LOG_CAP_TS_RMI (68)
 #define LOG_CAP_TS_GT801 (69)
-#define  CMD_FAST_POWER_OFF (70)
+#define CMD_FAST_POWER_OFF (70)
 #define LOG_CAP_TS_GT911 (71)
 #define LOG_CAP_TS_GT910 (72)
 #define UMOUNT_USB (80)
 #define VIDEO_SET_PAL (81)
 #define VIDEO_SET_NTSC (82)
+
+#define CMD_FLY_POWER_OFF (101)
 
 
 #define VIDEO_SHOW_BLACK (85)
@@ -172,13 +174,18 @@ loop_read:
         case CMD_FAST_POWER_OFF :
         {
             lidbg("CMD_FAST_POWER_OFF+++\n");
-#if (defined(BOARD_V1) || defined(BOARD_V2))
             lunch_fastboot();
-#else
-            system("am broadcast -a cn.flyaudio.intent.action.FAST_BOOT_START &");
-#endif
             lidbg("CMD_FAST_POWER_OFF---\n");
             break;
+        }
+
+		
+		case CMD_FLY_POWER_OFF:
+		{
+			 lidbg("CMD_FLY_POWER_OFF+++\n");
+             system("am broadcast -a cn.flyaudio.intent.action.FAST_BOOT_START &");
+			 lidbg("CMD_FLY_POWER_OFF---\n");
+			 break;
         }
         case LOG_LOGCAT :
         {

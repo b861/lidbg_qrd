@@ -84,6 +84,15 @@ int lidbg_readwrite_file(const char *filename, char *rbuf,
 }
 
 
+void set_power_state(int state)
+{
+    lidbg("set_power_state:%d\n", state);
+
+    if(state == 0)
+        lidbg_readwrite_file("/sys/power/state", NULL, "mem", sizeof("mem") - 1);
+    else
+        lidbg_readwrite_file("/sys/power/state", NULL, "on", sizeof("on") - 1);
+}
 
 int read_proc(char *buf, char **start, off_t offset, int count, int *eof, void *data )
 {
@@ -407,4 +416,8 @@ EXPORT_SYMBOL(lidbg_launch_user);
 EXPORT_SYMBOL(lidbg_readwrite_file);
 EXPORT_SYMBOL(lidbg_task_kill_select);
 EXPORT_SYMBOL(lidbg_get_current_time);
+EXPORT_SYMBOL(set_power_state);
+
+
+
 

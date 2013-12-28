@@ -25,7 +25,8 @@ int  lidbg_launch_user( char bin_path[], char argv1[], char argv2[], char argv3[
 int lidbg_readwrite_file(const char *filename, char *rbuf, const char *wbuf, size_t length);
 int lidbg_task_kill_select(char *task_name);
 int lidbg_get_current_time(char *time_string, struct rtc_time *ptm);
-extern bool lidbg_new_cdev(struct file_operations *cdev_fops, char *nodename);
+bool lidbg_new_cdev(struct file_operations *cdev_fops, char *nodename);
+void set_power_state(int state);
 
 #ifdef BUILD_FOR_RECOVERY
 #define BIN_PATH  "/sbin/"

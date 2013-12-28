@@ -150,17 +150,6 @@ static void list_active_locks(void)
 }
 
 
-void set_power_state(int state)
-{
-    lidbg("set_power_state:%d\n", state);
-
-    if(state == 0)
-        lidbg_readwrite_file("/sys/power/state", NULL, "mem", sizeof("mem") - 1);
-    else
-        lidbg_readwrite_file("/sys/power/state", NULL, "on", sizeof("on") - 1);
-}
-
-
 void set_cpu_governor(int state)
 {
     char buf[16];
