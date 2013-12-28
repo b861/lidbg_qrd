@@ -23,5 +23,6 @@ else
 	git add .
 	git commit -am $1
 	expect ./push
+	gitk &
 fi
 

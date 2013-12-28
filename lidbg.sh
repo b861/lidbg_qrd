@@ -22,7 +22,7 @@ function build_func()
 function pushfly_func()
 {
 	echo push驱动模块到产品系统
-	./build/pushfly.sh
+	./pushfly.sh
 }
 
 function release_func()
@@ -40,19 +40,20 @@ function release_func()
 function push_func()
 {
 	echo push到原生系统
-	./build/push.sh
+	./push.sh
 }
 
 function pull_lidbg_func()
 {
 	echo git pull
-	expect ./build/pull_lidbg
+	expect ./pull_lidbg
+	chmod 777 $DBG_ROOT_PATH
 }
 
 function push_lidbg_func()
 {
 	echo push lidbg_qrd到服务器
-	expect ./build/push_lidbg
+	expect ./push_lidbg
 }
 
 function menu_func()
@@ -67,7 +68,8 @@ function menu_func()
 	echo [6] choose platform'                 '选择平台
 	echo [7] pull'                            'git pull服务器的libg_qrd
 	echo [8] push'                            'git push服务器libg_qrd
-	echo [9] gitk'                            '执行gitk		
+	echo [9] gitk'                            '执行gitk	
+	echo [10] nautilus'                       '打开lidbg目录	
 	echo 
 }
 
@@ -92,6 +94,8 @@ function handle_func()
 			push_lidbg_func;;
 		9)
 			gitk &;;
+		10)
+			nautilus $DBG_ROOT_PATH;;
 		*)
 			echo 
 			#exit;;
@@ -115,7 +119,8 @@ function auto_build()
 	done
 }
 
-
+cd build
+source ./env_entry.sh
 auto_build $1 $2;
 
 
