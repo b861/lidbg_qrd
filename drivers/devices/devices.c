@@ -1075,27 +1075,39 @@ static void parse_cmd(char *pt)
         printk("******into screen_on********\n");
        // LCD_RESET;
         if(SOC_Hal_Acc_Callback)
+        {
+        	lidbg("hal callback 1\n");
             SOC_Hal_Acc_Callback(1);
+        }
     }
     else if(!strcmp(pt, "screen_off"))
     {
         printk("******into screen_off********\n");
         if(SOC_Hal_Acc_Callback)
+        {
+        	lidbg("hal callback 0\n");
             SOC_Hal_Acc_Callback(0);
+        }
     }
     else if(!strcmp(pt, "suspend_on"))
     {
         printk("******into suspend_on********\n");
         lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_SUSPEND_UNPREPARE));
         if(SOC_Hal_Acc_Callback)
+        {
+        	lidbg("hal callback 2\n");
             SOC_Hal_Acc_Callback(2);
+        }
     }
     else if(!strcmp(pt, "suspend_off"))
     {
         printk("******into suspend_off********\n");
         lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_SUSPEND_PREPARE));
         if(SOC_Hal_Acc_Callback)
+        {
+        	lidbg("hal callback 3\n");
             SOC_Hal_Acc_Callback(3);
+        }
     }
 
     else if(!strcmp(pt, "usb_reset"))
