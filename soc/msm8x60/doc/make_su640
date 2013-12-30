@@ -1,0 +1,16 @@
+source build/envsetup.sh
+breakfast su640
+brunch su640
+
+su
+mount -o remount,rw /dev/block/mmcblk0p27 /system
+adb push out /system/lib/modules/out
+
+insmod /system/lib/modules/out/lidbg_loader.ko
+
+
+adb push out /sdcard/out
+adb shell
+su
+insmod /sdcard/out/lidbg_loader.ko
+cat /proc/kmsg
