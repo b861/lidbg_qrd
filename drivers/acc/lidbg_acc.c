@@ -484,6 +484,7 @@ static int acc_quick_resume(void *data)
 	{
 		wait_for_completion(&completion_quick_resume);
 		lidbg_fs_log(FASTBOOT_LOG_PATH, "quick_resume:%d\n", ++quick_resume_times);
+#if 0
 		if(quick_resume_times < 4)
 		{
 			set_power_state(1);
@@ -500,6 +501,9 @@ static int acc_quick_resume(void *data)
 		{
 			quick_resume_times = 0;
 		}
+#else
+		set_power_state(1);	
+#endif
 	}
 }
 
