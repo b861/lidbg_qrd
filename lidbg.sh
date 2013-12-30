@@ -30,7 +30,7 @@ function release_func()
 {
 	echo 编译lidbg所有文件
 	read -p "是否提交到二进制仓库y/n:" choice
-	if [ $choice = y ];then
+	if [[ $choice = y ]];then
 		read -p "输入提交到二进制仓库的说明文字：" descriptor
 		./release.sh $descriptor
 	else
@@ -116,6 +116,7 @@ function auto_build()
 	       	menu_do $1
 		menu_do $2
 	while :;do
+		cd $DBG_SHELL_PATH
 		menu_func
 		read -p "Enter your select:" name1 name2 name3 name4 name5
 	       	menu_do $name1
