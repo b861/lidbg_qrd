@@ -7,7 +7,7 @@
 echo "copy_rel+"
 source ./env_entry.sh
 
-src_dir=$DBG_DRV_PATH/$DBG_SOC
+src_dir=$DBG_SOC_PATH/$DBG_SOC
 dest_dir=$DBG_OUT_PATH
 echo "from" $src_dir 
 echo "to" $dest_dir

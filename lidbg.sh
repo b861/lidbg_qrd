@@ -1,3 +1,5 @@
+
+
 function platform_func()
 {
 	echo 平台选择
@@ -5,7 +7,6 @@ function platform_func()
 		exit	
 	fi
 }
-
 
 function clean_func()
 {
@@ -47,7 +48,7 @@ function pull_lidbg_func()
 {
 	echo git pull
 	expect ./pull_lidbg
-	chmod 777 $DBG_ROOT_PATH
+	chmod 777 $DBG_ROOT_PATH -R
 }
 
 function push_lidbg_func()
@@ -58,8 +59,6 @@ function push_lidbg_func()
 
 function menu_func()
 {
-	echo 
-	echo	
 	echo [1] clean.sh'                        '清除生成文件	
 	echo [2] buid.sh'                         '编译模块
 	echo [3] pushfly.sh'                      'push驱动模块到产品系统
@@ -69,8 +68,9 @@ function menu_func()
 	echo [7] pull'                            'git pull服务器的libg_qrd
 	echo [8] push'                            'git push服务器libg_qrd
 	echo [9] gitk'                            '执行gitk	
-	echo [10] nautilus'                       '打开lidbg目录	
-	echo 
+	echo [10] nautilus'                       '打开lidbg目录
+
+	soc_menu_func
 }
 
 function handle_func()
@@ -97,30 +97,39 @@ function handle_func()
 		10)
 			nautilus $DBG_ROOT_PATH;;
 		*)
-			echo 
-			#exit;;
+			echo
 		esac
+}
+
+
+function menu_do()
+{
+	if [[ $1 -le 20 ]] ;then
+		handle_func $1
+	else
+		soc_handle_func $1
+	fi
 }
 
 function auto_build()
 {
 	       	handle_func $1
 		handle_func $2
-
 	while :;do
-		menu_func	
+		menu_func
 		read -p "Enter your select:" name1 name2 name3 name4 name5
-	       	handle_func $name1
-		handle_func $name2
-		handle_func $name3
-		handle_func $name4
-		handle_func $name5
-
+	       	menu_do $name1
+		menu_do $name2
+		menu_do $name3
+		menu_do $name4
+		menu_do $name5
 	done
 }
 
+# apt-get install expect
 cd build
 source ./env_entry.sh
+. menu_$DBG_SOC.sh
+. soc_$DBG_SOC.sh
 auto_build $1 $2;
-
 

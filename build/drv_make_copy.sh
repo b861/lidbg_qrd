@@ -6,7 +6,7 @@
 
 source ./env_entry.sh
 
-dir=$DBG_DRV_PATH
+dir=$DBG_SOC_PATH
 
 clear
 
@@ -24,6 +24,7 @@ else
 	read get_key
 fi
 
+dir=$DBG_DRV_PATH
 echo -e "\033[44;37m ----build core ko---- \033[0m"
 cd  $dir ; pwd          # ";"  do when ok or not   "&&" do when first no err
 make modules -j16 > build_log

@@ -7,7 +7,7 @@
 source ./env_entry.sh
 
 clear
-dbg_soc=$DBG_WORK_PATH/$DBG_SOC/
+dbg_soc=$DBG_WORK_PATH
 cd $dbg_soc
 cp -u *.conf     $DBG_OUT_PATH/
 
