@@ -113,8 +113,8 @@ function menu_do()
 
 function auto_build()
 {
-	       	handle_func $1
-		handle_func $2
+	       	menu_do $1
+		menu_do $2
 	while :;do
 		menu_func
 		read -p "Enter your select:" name1 name2 name3 name4 name5
@@ -129,7 +129,6 @@ function auto_build()
 # apt-get install expect
 cd build
 source ./env_entry.sh
-. menu_$DBG_SOC.sh
 . soc_$DBG_SOC.sh
 auto_build $1 $2;
 
