@@ -1,7 +1,7 @@
 
 chmod 777 -R ./
 source ./env_entry.sh
-
+./build_cfg.sh $BOARD_VERSION $BUILD_VERSION $DBG_SOC
 ./clean.sh
 cd $DBG_ANDROID_PATH/$DBG_SOC
 ./build_all.sh
@@ -9,7 +9,7 @@ cd $DBG_ANDROID_PATH/$DBG_SOC
 cd -
 ./build.sh
 
-if [[ $1 =  ]]; then
+if [ $1 =  ]; then
 	echo "exit"
 else
 	apt-get install expect

@@ -69,8 +69,9 @@ function menu_func()
 	echo [8] push'                            'git push服务器libg_qrd
 	echo [9] gitk'                            '执行gitk	
 	echo [10] nautilus'                       '打开lidbg目录
-
+	echo 
 	soc_menu_func
+	echo
 }
 
 function handle_func()
