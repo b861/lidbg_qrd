@@ -1046,7 +1046,8 @@ static void set_func_tbl(void)
 {
     //lpc
     ((struct lidbg_hal *)plidbg_dev)->soc_func_tbl.pfnSOC_Dev_Suspend_Prepare = soc_dev_suspend_prepare;
-    ((struct lidbg_hal *)plidbg_dev)->soc_func_tbl.pfnHal_Acc_Callback = NULL;
+	if(!g_var.is_fly)
+    	((struct lidbg_hal *)plidbg_dev)->soc_func_tbl.pfnHal_Acc_Callback = NULL;
 }
 
 
