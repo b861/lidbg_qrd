@@ -102,7 +102,7 @@
 #define NOTIFIER_MINOR_SUSPEND_PREPARE  (2)
 #define NOTIFIER_MINOR_SUSPEND_UNPREPARE (3)
 #define NOTIFIER_MINOR_POWER_OFF (4)
-
+#define NOTIFIER_MINOR_DISABLE_USB (5)
 
 #else
 #define NOTIFIER_VALUE(major,minor)  (((major)&0xffff)<<16 | ((minor)&0xffff))

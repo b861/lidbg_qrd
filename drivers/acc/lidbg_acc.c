@@ -458,8 +458,8 @@ static void acc_early_suspend(struct early_suspend *handler)
 
 	if(fake_suspend == 0)
 	{
+	    lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_DISABLE_USB));
 	    check_all_clk_disable();
-
 	    if(find_unsafe_clk()) 
 			 complete(&completion_quick_resume);
 

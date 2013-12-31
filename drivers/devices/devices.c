@@ -1138,7 +1138,7 @@ static int lidbg_event(struct notifier_block *this,
         break;
 
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_SUSPEND_PREPARE):
-		USB_WORK_DISENABLE;
+		//USB_WORK_DISENABLE;
         break;
 
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_POWER_OFF):
@@ -1160,6 +1160,11 @@ static int lidbg_event(struct notifier_block *this,
         msleep(100);
         SOC_BL_Set(BL_MAX);
         break;
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_DISABLE_USB):
+	lidbg("\ndisable usb after kill process\n");
+	USB_WORK_DISENABLE;
+        break;
+		
     default:
         break;
     }
