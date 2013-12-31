@@ -749,8 +749,6 @@ static void devices_early_suspend(struct early_suspend *handler)
 #else
         flag_fan_run_statu = false;
         AIRFAN_BACK_OFF;
-		
-        mute_s();
 #endif
 
     }
@@ -1142,6 +1140,7 @@ static int lidbg_event(struct notifier_block *this,
         break;
 
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_POWER_OFF):
+	 mute_s();
         break;
 
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_ACC_ON):
