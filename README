@@ -15,12 +15,12 @@ android/JAVA:提供一些函数模块，可直接用于上层java代码中（例
 
 *基础驱动模块（core）
 作用主要有两个：
-1.封装不同soc的底层实现（例如i2c / io / spi / ad / pwm等，在core/soc目录），提供通用接口给其他模块。通过共享其包含指针函数的结构体地址，给其他模块（主要是drivers下的模块）调用。
-2.创建节点/dev/mlidbg0，提供在shell终端控制外设调试的命令，具体的命令参考core\soc\doc\echo_shell_soc.txt。
+1.封装不同soc的底层实现（例如i2c / io / spi / ad / pwm等，在soc/soc目录），提供通用接口给其他模块。通过共享其包含指针函数的结构体地址，给其他模块（主要是drivers下的模块）调用。
+2.创建节点/dev/mlidbg0，提供在shell终端控制外设调试的命令，具体的命令参考soc\soc\doc\echo_shell_soc.txt。
 
 *具体工作模块（drivers）
 drivers下是在不同平台下的一些具体实际工作，为了保证其平台可移植性，尽量不要调用soc的底层函数，而是调用core提供的通用接口：
-详见drivers/soc/README
+详见drivers/README
 
 
 *编译脚本（build）
@@ -34,20 +34,20 @@ out_release：编译后自动生成，存放产品正式包需要的模块，由
 ----------编译方法----------
 1.配置编译环境
 cd lidbg_qrd
-(1) cp ./core/soc/doc/dbg_cfg_backup.sh ./dbg_cfg.sh
+(1) cp ./soc/soc/doc/dbg_cfg_backup.sh ./dbg_cfg.sh
 (2) 修改DBG_SYSTEM_DIR环境变量(指向的包的内核需编译过一遍(make bootimage))
 (3) chmod 777  ./* -R
 以上步骤只需配置一次
 
 dbg_cfg.sh编译环境变量配置说明：
-详见core/soc/README
+详见soc/soc/README
 
 
 2.编译
 *模块提供两种方法
 (1) 编译所有模块，在lidbg根目录运行build.sh
 (2) 编译单独模块，如在lidbg根目录执行:
-./make.sh drivers/soc/gps
+./make.sh drivers/gps
 ./make.sh core
 生成模块在out目录
 
@@ -70,7 +70,7 @@ build/pushfly.sh
 执行 build/insmod.sh  (正式产品是flysystem/lib/out目录)
 
 2. 开机自动运行lidbg_servicer和lidbg_loader.ko加载模块
-详见core/soc/README	
+详见soc/soc/README	
 
 -------------集成到系统镜像-------------
 执行build/copy2img.sh后重新make编译系统即可

@@ -59,6 +59,7 @@ function push_lidbg_func()
 
 function menu_func()
 {
+	echo $DBG_ROOT_PATH
 	echo [1] clean.sh'                        '清除生成文件	
 	echo [2] buid.sh'                         '编译模块
 	echo [3] pushfly.sh'                      'push驱动模块到产品系统
@@ -70,6 +71,7 @@ function menu_func()
 	echo [9] gitk'                            '执行gitk	
 	echo [10] nautilus'                       '打开lidbg目录
 	echo 
+	echo $DBG_SYSTEM_DIR
 	soc_menu_func
 	echo
 }
