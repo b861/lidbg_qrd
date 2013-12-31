@@ -749,6 +749,8 @@ static void devices_early_suspend(struct early_suspend *handler)
 #else
         flag_fan_run_statu = false;
         AIRFAN_BACK_OFF;
+		
+        mute_s();
 #endif
 
     }
