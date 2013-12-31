@@ -19,6 +19,7 @@ else
 	cd $UPDATA_BIN_DIR
 	pwd
 	expect ./pull
+	expect ./pull
 	cp -ru $DBG_OUT_RELEASE_PATH/$BOARD_VERSION/out  $UPDATA_BIN_DIR
 	git add .
 	git commit -am $1
