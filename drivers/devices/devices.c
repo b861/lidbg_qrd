@@ -749,6 +749,11 @@ static void devices_early_suspend(struct early_suspend *handler)
 #else
         flag_fan_run_statu = false;
         AIRFAN_BACK_OFF;
+	if(g_var.fake_suspend == 0)
+	{
+		lidbg("\ndisable usb after kill process\n");
+		USB_WORK_DISENABLE;
+	}
 #endif
 
     }
@@ -1158,10 +1163,6 @@ static int lidbg_event(struct notifier_block *this,
         SOC_BL_Set(BL_MIN);
         msleep(100);
         SOC_BL_Set(BL_MAX);
-        break;
-    case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_DISABLE_USB):
-	lidbg("\ndisable usb after kill process\n");
-	USB_WORK_DISENABLE;
         break;
 		
     default:

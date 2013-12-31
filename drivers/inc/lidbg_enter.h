@@ -102,7 +102,6 @@
 #define NOTIFIER_MINOR_SUSPEND_PREPARE  (2)
 #define NOTIFIER_MINOR_SUSPEND_UNPREPARE (3)
 #define NOTIFIER_MINOR_POWER_OFF (4)
-#define NOTIFIER_MINOR_DISABLE_USB (5)
 
 #else
 #define NOTIFIER_VALUE(major,minor)  (((major)&0xffff)<<16 | ((minor)&0xffff))
@@ -371,6 +370,7 @@ struct lidbg_pvar_t
     bool is_fly;
     unsigned int flag_for_15s_off;
     bool is_usb11;
+    bool fake_suspend;
 
 };
 

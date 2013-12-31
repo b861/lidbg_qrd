@@ -18,7 +18,6 @@ LIDBG_DEFINE;
 
 
 LIDBG_FAST_PWROFF_STATUS suspend_state = PM_STATUS_LATE_RESUME_OK;
-bool fake_suspend = 1;
 u32 acc_triger_time = 0;
 u8 quick_resume_times = 0;
 
@@ -456,9 +455,8 @@ static void acc_early_suspend(struct early_suspend *handler)
 
     suspend_state = PM_STATUS_EARLY_SUSPEND_PENDING;
 
-	if(fake_suspend == 0)
+	if(g_var.fake_suspend == 0)
 	{
-	    lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_DISABLE_USB));
 	    check_all_clk_disable();
 	    if(find_unsafe_clk()) 
 			 complete(&completion_quick_resume);
@@ -643,7 +641,7 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
 		plidbg_acc->acc_flag = 1;
 		//if(suspend_state == PM_STATUS_LATE_RESUME_OK)
 			complete(&acc_status_correct);
-		fake_suspend = 1;
+		g_var.fake_suspend = 1;
         SOC_Write_Servicer(CMD_ACC_ON);
         lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_ACC_ON));
     }
@@ -654,7 +652,7 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
 		plidbg_acc->acc_flag = 0;
 		//if(suspend_state == PM_STATUS_EARLY_SUSPEND_PENDING)
 			complete(&acc_status_correct);
-		fake_suspend = 1;
+		g_var.fake_suspend = 1;
         plidbg_acc->accoff_count ++;
         SOC_Write_Servicer(CMD_ACC_OFF);
         lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_ACC_OFF));
@@ -662,7 +660,7 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
     else if(!strcmp(data_rec, "power"))
     {
         lidbg("******bp:goto fastboot********\n");
-		fake_suspend = 0;
+		g_var.fake_suspend = 0;
         lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_POWER_OFF));
         SOC_Write_Servicer(CMD_FLY_POWER_OFF);
         plidbg_acc->poweroff_count++;
@@ -709,6 +707,7 @@ static int  acc_probe(struct platform_device *pdev)
     plidbg_acc->resume_count = 0;
     plidbg_acc->accoff_count = 0;
     plidbg_acc->poweroff_count = 0;
+	g_var.fake_suspend = 1;
 
     if(!fs_is_file_exist(HAL_SO))
     {
