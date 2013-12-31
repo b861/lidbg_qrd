@@ -9,7 +9,7 @@ cd $DBG_ANDROID_PATH/$DBG_SOC
 cd -
 ./build.sh
 
-if [ $1 =  ]; then
+if [ "$1" = "" ]; then
 	echo "exit"
 else
 	apt-get install expect
