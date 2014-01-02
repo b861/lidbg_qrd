@@ -114,6 +114,7 @@ static inline int check_pt(void)
 
 #define SOC_Notifier_Call (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnNotifier_Call))
 
+#define SOC_PWR_Status_Accon (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_PWR_Status_Accon))
 
 #endif
 

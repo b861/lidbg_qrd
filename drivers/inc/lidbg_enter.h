@@ -357,6 +357,9 @@ struct lidbg_fn_t
 	
     int (*pfnNotifier_Call)(unsigned long val);
 
+    bool (*pfnSOC_PWR_Status_Accon)(void);
+
+
 };
 
 struct lidbg_pvar_t

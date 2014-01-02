@@ -50,7 +50,6 @@ static LIST_HEAD(fastboot_kill_list);
 
 bool ignore_wakelock = 0;
 
-
 #ifdef CONFIG_HAS_EARLYSUSPEND
 static void acc_early_suspend(struct early_suspend *handler);
 static void acc_late_resume(struct early_suspend *handler);
@@ -167,6 +166,11 @@ bool find_unsafe_clk(void)
 bool is_ignore_wakelock(void)
 {
     return ignore_wakelock;
+}
+
+bool is_state_accon(void)
+{
+    return plidbg_acc->acc_flag;
 }
 
 
@@ -446,6 +450,7 @@ static void set_func_tbl(void)
 {
     plidbg_dev->soc_func_tbl.pfnSOC_Get_WakeLock = get_wake_locks;
     plidbg_dev->soc_func_tbl.pfnSOC_PWR_Ignore_Wakelock = is_ignore_wakelock;
+    plidbg_dev->soc_func_tbl.pfnSOC_PWR_Status_Accon = is_state_accon;
 }
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
