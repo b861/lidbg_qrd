@@ -1,9 +1,6 @@
 #include "lidbg.h"
-#include "lidbg_fs.h"
-#include "lidbg_cmn.h"
-#include <linux/kfifo.h>
 
-#define BUFF_SIZE 256
+#define BUFF_SIZE (256)
 #define DEVICE_NAME "lidbg_mem_log"
 #define LIDBG_FIFO_SIZE (5 * 1024 * 1024)
 
@@ -16,29 +13,27 @@ struct lidbg_msg_device
 };
 
 static struct lidbg_msg_device *dev;
-static int lidbg_mem_log_ready;
-static int max_file_len = 1;
+int lidbg_mem_log_ready = 0;
 
 static int lidbg_msg_open (struct inode *inode, struct file *filp)
 {
 	filp->private_data = dev;
-	printk("lidbg_msg_open\n");
+	DUMP_FUN;
 	return 0;
 }
 
 static ssize_t lidbg_msg_read (struct file *filp, char __user *buf, size_t count, loff_t *f_pos)
 {
-	printk("lidbg_fifo_read\n");
+	DUMP_FUN;
 	return 0;
 }
 
 static ssize_t lidbg_msg_write (struct file *filp, const char __user *buf, size_t count, loff_t *f_pos)
 {
-	//struct lidbg_fifo_device *dev = filp->private_data;
 	int ret = 0;
 	char *msg_write_buff; 
 
-	msg_write_buff =kmalloc(count, GFP_KERNEL);
+	msg_write_buff = kmalloc(count, GFP_KERNEL);
 
 	if (copy_from_user( msg_write_buff, buf, count))
 		printk("Lidbg msg copy_from_user ERR\n");
@@ -52,6 +47,11 @@ static ssize_t lidbg_msg_write (struct file *filp, const char __user *buf, size_
 	return ret;
 }
 
+int lidbg_msg_release(struct inode *inode, struct file *filp)
+{
+    return 0;
+}
+
 
 static  struct file_operations lidbg_msg_fops =
 {
@@ -59,6 +59,7 @@ static  struct file_operations lidbg_msg_fops =
 	.read = lidbg_msg_read,
 	.write = lidbg_msg_write,
 	.open = lidbg_msg_open,
+    .release = lidbg_msg_release,
 };
 
 static int mem_log_file_amend(char *file2amend, char *str_append)
@@ -66,7 +67,7 @@ static int mem_log_file_amend(char *file2amend, char *str_append)
     struct file *filep;
     struct inode *inode = NULL;
     mm_segment_t old_fs;
-    int  flags, is_file_cleard = 0;
+    int  flags = 0;
     unsigned int file_len;
 
     if(str_append == NULL)
@@ -76,7 +77,6 @@ static int mem_log_file_amend(char *file2amend, char *str_append)
     }
     flags = O_CREAT | O_RDWR | O_APPEND;
 
-again:
     filep = filp_open(file2amend, flags , 0777);
     if(IS_ERR(filep))
     {
@@ -91,23 +91,8 @@ again:
     file_len = inode->i_size;
     file_len = file_len + 2;
 
-
-    if(file_len > max_file_len * MEM_SIZE_1_MB)
-    {
-        printk("[futengfei]warn.fileappend_mode:< file>8M.goto.again >\n");
-        is_file_cleard = 1;
-        flags = O_CREAT | O_RDWR | O_APPEND | O_TRUNC;
-        set_fs(old_fs);
-        filp_close(filep, 0);
-        goto again;
-    }
     filep->f_op->llseek(filep, 0, SEEK_END);//note:to the end to append;
-    if(1 == is_file_cleard)
-    {
-        char *str_warn = "============have_cleard=============\n\n";
-        is_file_cleard = 0;
-        filep->f_op->write(filep, str_warn, strlen(str_warn), &filep->f_pos);
-    }
+
     filep->f_op->write(filep, str_append, strlen(str_append), &filep->f_pos);
     set_fs(old_fs);
     filp_close(filep, 0);
@@ -141,23 +126,24 @@ static void lidbg_msg_is_enough(int len)
 
 int lidbg_msg_put( const char *fmt, ... )
 {
+	int ret;
+	if(lidbg_mem_log_ready) 
+	{
 
-	if(lidbg_mem_log_ready) {
-
-		int ret, len;
+		int len;
 		va_list args;
 		char msg_in_buff[BUFF_SIZE];
-		char buf[32];
-		lidbg_get_curr_time(buf,NULL);
+		
+		lidbg_get_curr_time(msg_in_buff,NULL);
 	
-		len = strlen(buf);
+		len = strlen(msg_in_buff);
 
 		lidbg_msg_is_enough(len);
 		down(&dev->sem);
-		ret = kfifo_in(&dev->fifo, buf, len);
+		ret = kfifo_in(&dev->fifo, msg_in_buff, len);
 		up(&dev->sem);
 
-		memset(msg_in_buff, '\0',sizeof(msg_in_buff));
+		memset(msg_in_buff, '\0', sizeof(msg_in_buff));
 
 		va_start ( args, fmt );
 		ret = vsprintf (msg_in_buff, (const char *)fmt, args );
@@ -170,27 +156,40 @@ int lidbg_msg_put( const char *fmt, ... )
  		down(&dev->sem);	
 		ret = kfifo_in(&dev->fifo, msg_in_buff, len);
 		up(&dev->sem);
+		
+		ret = 1;
 	}
 	else
+	{
 		printk("Lidbg mem log is not ready!\n");
+		ret = 0;
+	}
 	
-	return 1;
+	return ret;
 }
 EXPORT_SYMBOL(lidbg_msg_put);
 
 int lidbg_msg_get(char *to_file, int out_mode )
 {
 	int len =0;
-	unsigned int ret = 0;
-	char *msg_out_buff; 
+	unsigned int ret = 1;
+	char *msg_out_buff = NULL; 
 
 	
 	down(&dev->sem);
 	len = kfifo_len(&dev->fifo);
 	up(&dev->sem);
-		
-	msg_out_buff =kmalloc(len, GFP_KERNEL);
-		
+
+	printk("lidbg_msg_get kfifo_len=%d\n",len);
+	
+	msg_out_buff = kmalloc(len, GFP_KERNEL);
+	if (msg_out_buff == NULL)
+    {
+        ret = -1;
+        printk("lidbg_msg_get kmalloc err \n");
+        return ret;
+    }
+	
 	down(&dev->sem);
 	ret = kfifo_out(&dev->fifo, msg_out_buff, len);
 	up(&dev->sem);
@@ -202,7 +201,7 @@ int lidbg_msg_get(char *to_file, int out_mode )
 		return -1;
 	}
 	
-	return 1;
+	return ret;
 }
 EXPORT_SYMBOL(lidbg_msg_get);
 
@@ -212,7 +211,6 @@ static int  lidbg_msg_probe(struct platform_device *pdev)
 	int major_number = 0;
 	dev_t dev_number;
 
-	lidbg_mem_log_ready = 0;
 	
 	dev_number = MKDEV(major_number, 0);
 	dev = (struct lidbg_msg_device *)kmalloc( sizeof(struct lidbg_msg_device), GFP_KERNEL);
@@ -226,7 +224,7 @@ static int  lidbg_msg_probe(struct platform_device *pdev)
 	
 	if(major_number)
 	{
-        	ret = register_chrdev_region(dev_number, 1, DEVICE_NAME);
+        ret = register_chrdev_region(dev_number, 1, DEVICE_NAME);
 	}
 	else
 	{
@@ -281,7 +279,7 @@ static struct platform_device lidbg_string_device =
 
 static  int lidbg_msg_init(void)
 {
-	printk(" \nlidbg fifo driver init==\n");
+	DUMP_BUILD_TIME;
 	platform_device_register(&lidbg_string_device);
 
 	return platform_driver_register(&lidbg_string_driver);
@@ -290,7 +288,7 @@ static  int lidbg_msg_init(void)
 
 static void lidbg_msg_exit(void)
 {
-	printk(" \nlidbg msg driver exit\n");
+	DUMP_FUN;
 	
 	platform_device_unregister(&lidbg_string_device);
 	platform_driver_unregister(&lidbg_string_driver);
