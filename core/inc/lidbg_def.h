@@ -51,8 +51,11 @@ typedef unsigned int			uchar;
 // For Debug
 #define MSG_ERROR        (1)
 #define MSG_DEBUG        (1)
-
-#define lidbg(msg...)  do { printk( KERN_CRIT "[lidbg] " msg); }while(0)
+#ifdef NOT_USE_MEM_LOG
+#define lidbg(msg...)  do { printk( KERN_CRIT "[lidbg] " msg);}while(0)
+#else
+#define lidbg(msg...)  do { printk( KERN_CRIT "[lidbg] " msg);lidbg_msg_put(msg);}while(0)
+#endif
 #define lidbgerr(msg...)  do { printk( KERN_CRIT "\nlidbgerr: " msg); }while(0)
 
 #define LIDBG_WARN(fmt, args...) do { pr_info("[lidbg]warn.%s: " fmt,__func__,##args);}while(0)

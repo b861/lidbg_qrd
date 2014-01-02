@@ -6,6 +6,7 @@ static int reboot_delay_s = 0;
 static int cp_data_to_udisk_en = 0;
 static int update_lidbg_out_dir_en = 0;
 static int delete_out_dir_after_update = 1;
+static int dump_mem_log = 0;
 
 
 void cb_password_chmod(char *password )
@@ -68,6 +69,11 @@ void cb_password_gui_state(char *password )
 {
     if(lidbg_exe("/flysystem/lib/out/lidbg_gui", "/dev/log/state.txt", "1", NULL, NULL, NULL, NULL) < 0)
         TE_ERR("Exe status failed !\n");
+}
+
+void cb_password_mem_log(char *password )
+{
+ 	lidbg_msg_get("/data/lidbg/lidbg_mem_log.txt", 0);
 }
 
 static int thread_reboot(void *data)
@@ -141,13 +147,16 @@ int misc_init(void *data)
     te_regist_password("001112", cb_password_update);
     te_regist_password("001120", cb_password_gui_kmsg);
     te_regist_password("001121", cb_password_gui_state);
+    te_regist_password("001200", cb_password_mem_log);
 
+    FS_REGISTER_INT(dump_mem_log, "dump_mem_log", 0, cb_password_mem_log);
     FS_REGISTER_INT(logcat_en, "logcat_en", 0, logcat_lunch);
     FS_REGISTER_INT(reboot_delay_s, "reboot_delay_s", 0, NULL);
     FS_REGISTER_INT(cp_data_to_udisk_en, "cp_data_to_udisk_en", 0, cp_data_to_udisk);
     FS_REGISTER_INT(update_lidbg_out_dir_en, "update_lidbg_out_dir_en", 0, update_lidbg_out_dir);
     FS_REGISTER_INT(delete_out_dir_after_update, "delete_out_dir_after_update", 0, NULL);
     fs_register_filename_list("/data/kmsg.txt", true);
+    fs_register_filename_list("/data/lidbg/lidbg_mem_log.txt", true);
 
     if(1 == logcat_en)
         logcat_lunch(NULL, NULL);

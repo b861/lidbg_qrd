@@ -105,7 +105,7 @@
 #include "lidbg_servicer.h"
 #include "lidbg_notifier.h"
 #include "lidbg_wakelock_stat.h"
-
+#include "lidbg_mem_log.h"
 
 ////////////
 #include "lidbg_soc.h"

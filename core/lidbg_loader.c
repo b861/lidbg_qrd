@@ -1,11 +1,14 @@
-#include "lidbg.h"
 
+#define NOT_USE_MEM_LOG
+
+#include "lidbg.h"
 
 int load_modules_count = 0;
 
 char *insmod_list[] =
 {
     SOC_KO,
+    "lidbg_mem_log.ko",
     "lidbg_common.ko",
     "lidbg_fileserver.ko",
     "lidbg_wakelock_stat.ko",
