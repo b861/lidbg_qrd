@@ -58,7 +58,6 @@ struct early_suspend early_suspend;
 
 typedef struct
 {
-    unsigned int  acc_flag;
     u32 resume_count;
     u32 poweroff_count;
     u32 accoff_count;
@@ -145,7 +144,7 @@ bool find_unsafe_clk(void)
             {
 	            if((i == 14) || (i == 33) || (i == 34))
 	            {
-	            	if(i == 14)
+	            	//if(i == 14)
 	            		ret = 1;
 	                lidbg_fs_log(FASTBOOT_LOG_PATH, "block unsafe clk:%d\n", i);
 	            }
@@ -170,7 +169,7 @@ bool is_ignore_wakelock(void)
 
 bool is_state_accon(void)
 {
-    return plidbg_acc->acc_flag;
+    return g_var.acc_flag;
 }
 
 
@@ -495,7 +494,7 @@ static int acc_quick_resume(void *data)
 			set_power_state(1);
 			//continue;
 			msleep(5000);
-			if(plidbg_acc->acc_flag == 0)
+			if(g_var.acc_flag == 0)
 			{
 				lidbg("run fastboot again %d\n",quick_resume_times);
 				SOC_Write_Servicer(CMD_FAST_POWER_OFF);
@@ -583,7 +582,7 @@ static int acc_correct(void *data)
         wait_for_completion(&acc_status_correct);
         //msleep(100);//for test
 		DUMP_FUN;
-		lidbg("acc_correct1:acc_flag=%d, suspend_state=%d\n",plidbg_acc->acc_flag,suspend_state);
+		lidbg("acc_correct1:acc_flag=%d, suspend_state=%d\n",g_var.acc_flag,suspend_state);
 		msleep(3000);
 		
 		tick = get_tick_count() - acc_triger_time;
@@ -591,16 +590,16 @@ static int acc_correct(void *data)
         if ( tick < 3000)
 			continue;
 		
-		lidbg("acc_correct2:acc_flag=%d, suspend_state=%d\n",plidbg_acc->acc_flag,suspend_state);
+		lidbg("acc_correct2:acc_flag=%d, suspend_state=%d\n",g_var.acc_flag,suspend_state);
 		if(
-			((plidbg_acc->acc_flag == 1)&&(suspend_state != PM_STATUS_LATE_RESUME_OK)) ||
-			((plidbg_acc->acc_flag == 0)&&(suspend_state != PM_STATUS_EARLY_SUSPEND_PENDING))
+			((g_var.acc_flag == 1)&&(suspend_state != PM_STATUS_LATE_RESUME_OK)) ||
+			((g_var.acc_flag == 0)&&(suspend_state != PM_STATUS_EARLY_SUSPEND_PENDING))
 		  )
 		{
 			
 			lidbg("\n\n\n\n\n\nacc_correct:send power_key\n\n\n\n\n\n");
 			SOC_Key_Report(KEY_POWER,KEY_PRESSED_RELEASED);			
-			lidbg_fs_log(FASTBOOT_LOG_PATH,"acc_correct:acc_flag=%d, suspend_state=%d,tick=%d\n",plidbg_acc->acc_flag,suspend_state,tick);
+			lidbg_fs_log(FASTBOOT_LOG_PATH,"acc_correct:acc_flag=%d, suspend_state=%d,tick=%d\n",g_var.acc_flag,suspend_state,tick);
 		}
     }
 }
@@ -644,7 +643,7 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
     {
         lidbg("******bp:goto acc_on********\n");
 		acc_triger_time = get_tick_count();
-		plidbg_acc->acc_flag = 1;
+		g_var.acc_flag = 1;
 		//if(suspend_state == PM_STATUS_LATE_RESUME_OK)
 			complete(&acc_status_correct);
 		g_var.fake_suspend = 0;
@@ -655,7 +654,7 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
     {
         lidbg("******bp:goto acc_off********\n");
 		acc_triger_time = get_tick_count();
-		plidbg_acc->acc_flag = 0;
+		g_var.acc_flag = 0;
 		//if(suspend_state == PM_STATUS_EARLY_SUSPEND_PENDING)
 			complete(&acc_status_correct);
 		g_var.fake_suspend = 1;
@@ -709,7 +708,7 @@ static int  acc_probe(struct platform_device *pdev)
         goto fail_mem;
     }
 	
-	plidbg_acc->acc_flag = 1;
+	g_var.acc_flag = 1;
     plidbg_acc->resume_count = 0;
     plidbg_acc->accoff_count = 0;
     plidbg_acc->poweroff_count = 0;

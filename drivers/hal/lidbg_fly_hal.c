@@ -482,6 +482,11 @@ int fly_hal_init(void)
     g_var.system_status = FLY_ACC_ON;
     g_var.machine_id = get_machine_id();
 
+
+	g_var.is_fly = 1;
+	g_var.fake_suspend = 0;
+	g_var.acc_flag = 1;
+
 	CREATE_KTHREAD(hal_init,NULL);
 
     return 0;

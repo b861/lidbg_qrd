@@ -374,6 +374,7 @@ struct lidbg_pvar_t
     unsigned int flag_for_15s_off;
     bool is_usb11;
     bool fake_suspend;
+    bool acc_flag;
 
 };
 
