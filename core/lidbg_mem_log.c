@@ -15,6 +15,10 @@ struct lidbg_msg_device
 static struct lidbg_msg_device *dev;
 int lidbg_mem_log_ready = 0;
 
+
+static int lidbg_get_curr_time(char *time_string, struct rtc_time *ptm);
+static void lidbg_msg_is_enough(int len);
+
 static int lidbg_msg_open (struct inode *inode, struct file *filp)
 {
 	filp->private_data = dev;
@@ -31,19 +35,39 @@ static ssize_t lidbg_msg_read (struct file *filp, char __user *buf, size_t count
 static ssize_t lidbg_msg_write (struct file *filp, const char __user *buf, size_t count, loff_t *f_pos)
 {
 	int ret = 0;
-	char *msg_write_buff; 
 
-	msg_write_buff = kmalloc(count, GFP_KERNEL);
+	if(count > 0) 
+	{
+		int len;
+		char msg_write_buff[BUFF_SIZE]; 
 
-	if (copy_from_user( msg_write_buff, buf, count))
-		printk("Lidbg msg copy_from_user ERR\n");
+		lidbg_get_curr_time(msg_write_buff,NULL);
+		len = strlen(msg_write_buff);
 
-	if(kfifo_is_full(&dev->fifo))
-		ret = kfifo_out(&dev->fifo, msg_write_buff, count);
+		lidbg_msg_is_enough(len);
+		down(&dev->sem);
+		ret = kfifo_in(&dev->fifo, msg_write_buff, len);
+		up(&dev->sem);
+
+
+		if (copy_from_user( msg_write_buff, buf, count))
+			printk("Lidbg msg copy_from_user ERR\n");
+		
+		memset(msg_write_buff, '\0', sizeof(msg_write_buff));	
+
+		len = strlen(msg_write_buff);
+
+		lidbg_msg_is_enough(len);
+
+ 		down(&dev->sem);	
+		ret = kfifo_in(&dev->fifo, msg_write_buff, len);
+		up(&dev->sem);
+		
+		ret = 1;
+	}
+	else
+		ret = 0;
 	
-	down(&dev->sem);
-	ret = kfifo_in(&dev->fifo, msg_write_buff, count);
-	up(&dev->sem);
 	return ret;
 }
 
@@ -184,12 +208,13 @@ int lidbg_msg_get(char *to_file, int out_mode )
 	
 	msg_out_buff = kmalloc(len, GFP_KERNEL);
 	if (msg_out_buff == NULL)
-    {
-        ret = -1;
-        printk("lidbg_msg_get kmalloc err \n");
-        return ret;
-    }
-	
+	{
+		ret = -1;
+		printk("lidbg_msg_get kmalloc err \n");
+		return ret;
+	}
+
+	memset(msg_out_buff, '\0', sizeof(msg_out_buff));
 	down(&dev->sem);
 	ret = kfifo_out(&dev->fifo, msg_out_buff, len);
 	up(&dev->sem);
@@ -200,6 +225,8 @@ int lidbg_msg_get(char *to_file, int out_mode )
 		printk("ERR: lidbg msg out msg to file.\n");
 		return -1;
 	}
+
+	kfree(msg_out_buff);
 	
 	return ret;
 }
@@ -260,7 +287,7 @@ static int  lidbg_msg_remove(struct platform_device *pdev)
 	return 0;
 }
 
-static struct platform_driver lidbg_string_driver =
+static struct platform_driver lidbg_mem_log_driver =
 {
     .probe		= lidbg_msg_probe,
     .remove     = lidbg_msg_remove,
@@ -270,7 +297,7 @@ static struct platform_driver lidbg_string_driver =
     },
 };
 
-static struct platform_device lidbg_string_device =
+static struct platform_device lidbg_mem_log_device =
 {
     .name               = "lidbg_mem_log",
     .id                 = -1,
@@ -280,9 +307,9 @@ static struct platform_device lidbg_string_device =
 static  int lidbg_msg_init(void)
 {
 	DUMP_BUILD_TIME;
-	platform_device_register(&lidbg_string_device);
+	platform_device_register(&lidbg_mem_log_device);
 
-	return platform_driver_register(&lidbg_string_driver);
+	return platform_driver_register(&lidbg_mem_log_driver);
 
 }
 
@@ -290,8 +317,8 @@ static void lidbg_msg_exit(void)
 {
 	DUMP_FUN;
 	
-	platform_device_unregister(&lidbg_string_device);
-	platform_driver_unregister(&lidbg_string_driver);
+	platform_device_unregister(&lidbg_mem_log_device);
+	platform_driver_unregister(&lidbg_mem_log_driver);
 }
 
 module_init(lidbg_msg_init);
