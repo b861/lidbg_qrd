@@ -49,12 +49,11 @@ static ssize_t lidbg_msg_write (struct file *filp, const char __user *buf, size_
 		ret = kfifo_in(&dev->fifo, msg_write_buff, len);
 		up(&dev->sem);
 
+		memset(msg_write_buff, '\0', sizeof(msg_write_buff));	
 
 		if (copy_from_user( msg_write_buff, buf, count))
 			printk("Lidbg msg copy_from_user ERR\n");
 		
-		memset(msg_write_buff, '\0', sizeof(msg_write_buff));	
-
 		len = strlen(msg_write_buff);
 
 		lidbg_msg_is_enough(len);
