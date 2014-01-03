@@ -487,7 +487,8 @@ static int acc_quick_resume(void *data)
 	while(1)
 	{
 		wait_for_completion(&completion_quick_resume);
-		lidbg_fs_log(FASTBOOT_LOG_PATH, "quick_resume:%d\n", ++quick_resume_times);
+		quick_resume_times++;
+		lidbg_fs_log(FASTBOOT_LOG_PATH, "quick_resume:%d\n", quick_resume_times);
 #if 0
 		if(quick_resume_times < 4)
 		{
@@ -646,7 +647,7 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
 		plidbg_acc->acc_flag = 1;
 		//if(suspend_state == PM_STATUS_LATE_RESUME_OK)
 			complete(&acc_status_correct);
-		g_var.fake_suspend = 1;
+		g_var.fake_suspend = 0;
         SOC_Write_Servicer(CMD_ACC_ON);
         lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_ACC_ON));
     }
