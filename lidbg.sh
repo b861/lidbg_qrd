@@ -68,8 +68,9 @@ function menu_func()
 	echo [6] choose platform'                 '选择平台
 	echo [7] pull'                            'git pull服务器的libg_qrd
 	echo [8] push'                            'git push服务器libg_qrd
-	echo [9] gitk'                            '执行gitk	
-	echo [10] nautilus'                       '打开lidbg目录
+	echo [9] gitk'                            '执行gitk
+	echo [10] git log'                        '执行git log --oneline	
+	echo [11] nautilus'                       '打开lidbg目录
 	echo 
 	echo $DBG_SYSTEM_DIR
 	soc_menu_func
@@ -98,6 +99,8 @@ function handle_func()
 		9)
 			gitk &;;
 		10)
+			git log --oneline;;
+		11)
 			nautilus $DBG_ROOT_PATH;;
 		*)
 			echo
