@@ -307,9 +307,15 @@ bool copy_file(char *from, char *to)
     pfileto = filp_open(to, O_CREAT | O_RDWR | O_TRUNC, 0777);
     if(IS_ERR(pfileto))
     {
-        FS_ERR("<%s>\n", to);
-        filp_close(pfilefrom, 0);
-        return false;
+		lidbg_rm(to);
+		msleep(500);
+		pfileto = filp_open(to, O_CREAT | O_RDWR | O_TRUNC, 0777);
+		if(IS_ERR(pfileto))
+		{
+	        FS_ERR("fail to open <%s>\n", to);
+	        filp_close(pfilefrom, 0);
+	        return false;
+		}
     }
     old_fs = get_fs();
     set_fs(get_ds());

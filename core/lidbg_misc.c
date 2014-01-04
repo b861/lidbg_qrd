@@ -46,6 +46,9 @@ void cb_password_update(char *password )
         {
         	if(delete_out_dir_after_update)
 				lidbg_rmdir("/mnt/usbdisk/out");
+
+			//lidbg_chmod("/flysystem/lib/out");
+			lidbg_launch_user(CHMOD_PATH, "777", "/flysystem/lib/out", "-R", NULL, NULL, NULL);
             lidbg_reboot();
         }
     }
