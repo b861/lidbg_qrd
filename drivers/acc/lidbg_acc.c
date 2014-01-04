@@ -592,7 +592,7 @@ static int acc_correct(void *data)
 		
 		lidbg("acc_correct2:acc_flag=%d, suspend_state=%d\n",g_var.acc_flag,suspend_state);
 		if(
-			((g_var.acc_flag == 1)&&(suspend_state != PM_STATUS_LATE_RESUME_OK)) ||
+			((g_var.acc_flag == 1)&&(suspend_state != PM_STATUS_LATE_RESUME_OK)&&(suspend_state != PM_STATUS_RESUME_OK)) ||
 			((g_var.acc_flag == 0)&&(suspend_state != PM_STATUS_EARLY_SUSPEND_PENDING))
 		  )
 		{
@@ -642,6 +642,7 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
     if(!strcmp(data_rec, "acc_on"))
     {
         lidbg("******bp:goto acc_on********\n");
+		ignore_wakelock = 0;
 		acc_triger_time = get_tick_count();
 		g_var.acc_flag = 1;
 		//if(suspend_state == PM_STATUS_LATE_RESUME_OK)
