@@ -16,7 +16,9 @@ common_src_files := \
 	Devmapper.cpp \
 	ResponseCode.cpp \
 	Xwarp.cpp \
-	cryptfs.c
+	cryptfs.c \
+	Ntfs.cpp \
+	Exfat.cpp
 
 common_c_includes := \
 	$(KERNEL_HEADERS) \
@@ -49,6 +51,7 @@ LOCAL_MODULE_TAGS := eng tests
 include $(BUILD_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
+LOCAL_MODULE_PATH := $(LOCAL_PATH)/../out
 
 LOCAL_MODULE:= vold
 

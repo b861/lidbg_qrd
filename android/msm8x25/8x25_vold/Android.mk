@@ -60,6 +60,8 @@ include $(BUILD_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 
+LOCAL_MODULE_PATH := $(LOCAL_PATH)/../out
+
 LOCAL_MODULE:= vold
 
 LOCAL_SRC_FILES := \

@@ -7,4 +7,5 @@ gps.msm8625.so
 fileserver.apk
 camera.msm7627a.so
 copylist.conf
+vold
 ###############
