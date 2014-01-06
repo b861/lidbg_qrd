@@ -49,6 +49,8 @@ do
 	echo --------------------------$i--------------------------------------------  >>  ./lidbg_log/wakelock.txt
 	echo ------------------------------------------------------------------------  >>  ./lidbg_log/wakelock.txt
 	cat $i | grep "block wakelock" >> ./lidbg_log/wakelock.txt
+
+	cat $i | grep -E "block unsafe clk:33|block unsafe clk:14|block wakelock|killing any children in process group|acc_correct:send power_key|bp:my|Linux version|bp:reset|bp:pwr=" >>  ./lidbg_log/$i
 done
 
 
