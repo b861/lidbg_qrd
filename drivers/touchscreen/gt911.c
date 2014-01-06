@@ -445,6 +445,8 @@ static void goodix_ts_work_func(struct work_struct *work)
                 {
                     touch.x = point_data[6] | (point_data[7] << 8);
                     touch.y = point_data[4] | (point_data[5] << 8);
+					if (1 == ts_should_revert)
+					GTP_REVERT(touch.x, touch.y);
                     touch.pressed = 1;
                     set_touch_pos(&touch);
                     printk("[%d,%d]==========%d\n", touch.x, touch.y, touch.pressed);
@@ -485,7 +487,9 @@ static void goodix_ts_work_func(struct work_struct *work)
             {
                 touch.x = point_data[6] | (point_data[7] << 8);
                 touch.y = point_data[4] | (point_data[5] << 8);
-                touch.pressed = 1;
+				if (1 == ts_should_revert)
+				GTP_REVERT(touch.x, touch.y);
+				touch.pressed = 1;
                 set_touch_pos(&touch);
             }
 #endif
