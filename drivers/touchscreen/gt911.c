@@ -71,8 +71,7 @@ static struct delayed_work gtp_esd_check_work;
 static struct workqueue_struct *gtp_esd_check_workqueue = NULL;
 static void gtp_esd_check_func(struct work_struct *);
 #endif
-#define SCREEN_X (1024)
-#define SCREEN_Y (600)
+
 extern  bool is_ts_load;
 extern int ts_should_revert;
 static bool xy_revert_en = 1;
@@ -257,8 +256,10 @@ Output:
 *******************************************************/
 static void gtp_touch_down(struct goodix_ts_data *ts, s32 id, s32 x, s32 y, s32 w)
 {
-    if ((xy_revert_en) || (1 == ts_should_revert))
+    if (xy_revert_en)
         GTP_SWAP(x, y);
+	if (1 == ts_should_revert)
+		GTP_REVERT(x, y);
     //printk("xy_revert_en =%d\n",xy_revert_en );
 #if GTP_ICS_SLOT_REPORT
     input_mt_slot(ts->input_dev, id);

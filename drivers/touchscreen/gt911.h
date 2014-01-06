@@ -178,7 +178,8 @@ a sample config, send this config should cause the chip cannot work normally*/
 
 #define RESOLUTION_LOC        3
 #define TRIGGER_LOC           8
-
+#define SCREEN_X (1024)
+#define SCREEN_Y (600)
 //Log define
 #define GTP_INFO(fmt,arg...)           printk("<<-GTP-INFO->> "fmt"\n",##arg)
 #define GTP_ERROR(fmt,arg...)          printk("<<-GTP-ERROR->> "fmt"\n",##arg)
@@ -212,7 +213,11 @@ a sample config, send this config should cause the chip cannot work normally*/
                                          x = y;\
                                          y = z;\
                                        }while (0)
-
+#define GTP_REVERT(x, y)                 do{\
+                                         typeof(x) z = x;\
+                                         x = SCREEN_X-x;\
+                                         y = SCREEN_Y-y;\
+                                       }while (0)
 //****************************PART4:UPDATE define*******************************
 //Error no
 #define ERROR_NO_FILE           2   //ENOENT
