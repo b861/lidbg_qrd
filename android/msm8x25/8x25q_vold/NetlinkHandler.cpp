@@ -51,6 +51,10 @@ void NetlinkHandler::onEvent(NetlinkEvent *evt) {
         return;
     }
 
+//add log by wangyihong for printing log
+SLOGW("NetlinkHandler::onEvent: subsys=%s, mPath=%s",  subsys, evt->findParam("DEVPATH"));
+SLOGW("NetlinkHandler::onEvent: action = %d,type =%s",  evt->getAction(),evt->findParam("DEVTYPE"));
+
     if (!strcmp(subsys, "block")) {
         vm->handleBlockEvent(evt);
     }

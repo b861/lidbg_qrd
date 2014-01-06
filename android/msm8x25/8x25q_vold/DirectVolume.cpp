@@ -281,6 +281,9 @@ void DirectVolume::handleDiskRemoved(const char *devpath, NetlinkEvent *evt) {
              getLabel(), getMountpoint(), major, minor);
     mVm->getBroadcaster()->sendBroadcast(ResponseCode::VolumeDiskRemoved,
                                              msg, false);
+//fly
+	Volume::unmountVol(true, false);
+//fly
     setState(Volume::State_NoMedia);
 }
 
@@ -299,7 +302,11 @@ void DirectVolume::handlePartitionRemoved(const char *devpath, NetlinkEvent *evt
      * itself
      */
     state = getState();
+
+    SLOGD("[wang]:****========Volume state is %d\n\n", state);
+	
     if (state != Volume::State_Mounted && state != Volume::State_Shared) {
+	SLOGD("[wang]:========Volume state is %d\n\n", state);
         return;
     }
         

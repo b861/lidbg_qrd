@@ -47,6 +47,8 @@ public:
     static const char *ASECDIR;
 
     static const char *LOOPDIR;
+    static const int MAX_PARTITIONS = 16;
+    static const int MAX_UNMOUNT_PARTITIONS = 256;
 
 protected:
     char *mLabel;
@@ -56,6 +58,10 @@ protected:
     int mPartIdx;
     int mOrigPartIdx;
     bool mRetryMount;
+
+    char *mMountPart[MAX_PARTITIONS];           //
+    char *mUnMountPart[MAX_UNMOUNT_PARTITIONS]; //
+    int mSharelun[MAX_PARTITIONS];
 
     /*
      * The major/minor tuple of the currently mounted filesystem.
@@ -102,6 +108,13 @@ private:
     int doUnmount(const char *path, bool force);
     int doMoveMount(const char *src, const char *dst, bool force);
     void protectFromAutorunStupidity();
+
+	char* createMountPoint(const char *path, int major, int minor);
+	int deleteMountPoint(char* mountpoint);
+	void saveUnmountPoint(char* mountpoint);
+	void deleteUnMountPoint(int clear);
+	int deleteDeviceNode(const char *path);
+	int mMountedPartNum;
 };
 
 typedef android::List<Volume *> VolumeCollection;
