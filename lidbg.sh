@@ -23,7 +23,7 @@ function build_func()
 function pushfly_func()
 {
 	echo push驱动模块到产品系统
-	./pushfly.sh
+	sh $DBG_TOOLS_PATH/pushfly.sh
 }
 
 function release_func()
@@ -41,20 +41,20 @@ function release_func()
 function push_func()
 {
 	echo push到原生系统
-	./push.sh
+	sh $DBG_TOOLS_PATH/push.sh
 }
 
 function pull_lidbg_func()
 {
 	echo git pull
-	expect ./pull_lidbg
+	expect $DBG_TOOLS_PATH/pull_lidbg
 	chmod 777 $DBG_ROOT_PATH -R
 }
 
 function push_lidbg_func()
 {
 	echo push lidbg_qrd到服务器
-	expect ./push_lidbg
+	expect $DBG_TOOLS_PATH/push_lidbg
 }
 
 function menu_func()
