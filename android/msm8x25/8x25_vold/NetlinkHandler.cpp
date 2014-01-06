@@ -50,6 +50,9 @@ void NetlinkHandler::onEvent(NetlinkEvent *evt) {
         SLOGW("No subsystem found in netlink event");
         return;
     }
+//add log by wangyihong
+SLOGW("NetlinkHandler::onEvent: subsys=%s, mPath=%s",  subsys, evt->findParam("DEVPATH"));
+SLOGW("NetlinkHandler::onEvent: action = %d,type =%s",  evt->getAction(),evt->findParam("DEVTYPE"));
 
     if (!strcmp(subsys, "block")) {
         vm->handleBlockEvent(evt);

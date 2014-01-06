@@ -37,7 +37,6 @@ public:
     static const int State_Formatting = 6;
     static const int State_Shared     = 7;
     static const int State_SharedMnt  = 8;
-    static const int State_Nomem   = 9;
 
     static const char *SECDIR;
     static const char *SEC_STGDIR;
@@ -47,9 +46,18 @@ public:
 
     static const char *LOOPDIR;
 
+    static const int MAX_PARTITIONS = 16;
+    static const int MAX_UNMOUNT_PARTITIONS = 256;
+
 protected:
     char *mLabel;
     char *mMountpoint;
+
+
+    char *mMountPart[MAX_PARTITIONS];           //
+    char *mUnMountPart[MAX_UNMOUNT_PARTITIONS]; //
+    int mSharelun[MAX_PARTITIONS];
+	
     VolumeManager *mVm;
     bool mDebug;
     int mPartIdx;
@@ -83,16 +91,18 @@ public:
     void setDebug(bool enable);
     virtual int getVolInfo(struct volume_info *v) = 0;
 
+    virtual int getDeviceNodes(dev_t *devs, int max) = 0;
+
 protected:
     void setState(int state);
 
-    virtual int getDeviceNodes(dev_t *devs, int max) = 0;
     virtual int updateDeviceInfo(char *new_path, int new_major, int new_minor) = 0;
     virtual void revertDeviceInfo(void) = 0;
     virtual int isDecrypted(void) = 0;
     virtual int getFlags(void) = 0;
 
     int createDeviceNode(const char *path, int major, int minor);
+	
 
 private:
     int initializeMbr(const char *deviceNode);
@@ -101,6 +111,13 @@ private:
     int doUnmount(const char *path, bool force);
     int doMoveMount(const char *src, const char *dst, bool force);
     void protectFromAutorunStupidity();
+
+	char* createMountPoint(const char *path, int major, int minor);
+	int deleteMountPoint(char* mountpoint);
+	void saveUnmountPoint(char* mountpoint);
+	void deleteUnMountPoint(int clear);
+	int deleteDeviceNode(const char *path);
+	int mMountedPartNum;
 };
 
 typedef android::List<Volume *> VolumeCollection;

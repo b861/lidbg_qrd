@@ -44,8 +44,11 @@
 #include "VolumeManager.h"
 #include "ResponseCode.h"
 #include "Fat.h"
+#include "Ntfs.h"
 #include "Process.h"
 #include "cryptfs.h"
+#include  "Exfat.h"
+#include "Ntfs.h"
 
 extern "C" void dos_partition_dec(void const *pp, struct dos_partition *d);
 extern "C" void dos_partition_enc(void *pp, struct dos_partition *d);
@@ -104,13 +107,12 @@ static const char *stateToStr(int state) {
         return "Shared-Unmounted";
     else if (state == Volume::State_SharedMnt)
         return "Shared-Mounted";
-    else if (state == Volume::State_Nomem)
-	return "No-Enough-Memory";
     else
         return "Unknown-Error";
 }
 
 Volume::Volume(VolumeManager *vm, const char *label, const char *mount_point) {
+    char switchable[PROPERTY_VALUE_MAX];
     mVm = vm;
     mDebug = false;
     mLabel = strdup(label);
@@ -119,6 +121,29 @@ Volume::Volume(VolumeManager *vm, const char *label, const char *mount_point) {
     mCurrentlyMountedKdev = -1;
     mPartIdx = -1;
     mRetryMount = false;
+
+    property_get("persist.sys.vold.switchexternal", switchable, "0");
+    if (!strcmp(switchable,"1")) {
+        char *first, *second = NULL;
+        const char *delim = ",";
+
+        property_get("ro.vold.switchablepair", switchable, "");
+
+        if (!(first = strtok(switchable, delim))) {
+            SLOGE("Mount switch requested, but no switchable mountpoints found");
+            return;
+        } else if (!(second = strtok(NULL, delim))) {
+            SLOGE("Mount switch requested, but bad switchable mountpoints found");
+            return;
+        }
+        if (!strcmp(mount_point,first)) {
+                free(mMountpoint);
+                mMountpoint = strdup(second);
+        } else if (!strcmp(mount_point,second)) {
+                free(mMountpoint);
+                mMountpoint = strdup(first);
+        }
+    }
 }
 
 Volume::~Volume() {
@@ -210,6 +235,144 @@ int Volume::createDeviceNode(const char *path, int major, int minor) {
     return 0;
 }
 
+
+/* path: partition mount path. eg: '/mnt/usbhost1/8_1' */
+int Volume::deleteDeviceNode(const char *path){
+#if 0
+    int major = 0, minor = 0;
+	char devicePath[255];
+
+	char *temp_str1 = NULL;
+	char *temp_str2 = NULL;
+	char str_major[256];
+	char str_path[256];
+	int len = 0;
+
+	if(!path){
+		SLOGE("Volume::deleteDeviceNode: path(%s) is invalid\n", path);
+		return -1;
+	}
+
+	SLOGI("Volume::deleteDeviceNode: path=%s\n", path);
+
+	/* get device major and minor from path */
+	memset(str_major, 0, 256);
+	memset(str_path, 0, 256);
+	strcpy(str_path, path);
+
+	temp_str1 = strrchr(str_path, '/');
+	temp_str2 = strrchr(str_path, '_');
+	if(temp_str1 == NULL || temp_str2 == NULL){
+		SLOGE("Volume::deleteDeviceNode: path(%s) is invalid\n", path);
+		return -1;
+	}
+
+	/* delete '/' & '_' */
+	temp_str1++;
+	temp_str2++;
+	if(temp_str1 == NULL || temp_str2 == NULL){
+		SLOGE("Volume::deleteDeviceNode: path(%s) is invalid\n", path);
+		return -1;
+	}
+
+	len = strcspn(temp_str1, "_");
+	strncpy(str_major, temp_str1, len);
+
+	major = strtol(str_major, NULL, 10);
+	minor = strtol(temp_str2, NULL, 10);
+
+	SLOGI("Volume::deleteDeviceNode: major=%d, minor=%d\n", major, minor);
+
+	/* delete DeviceNode */
+	memset(devicePath, 0, 255);
+	sprintf(devicePath, "/dev/block/vold/%d:%d", major, minor);
+
+	if (unlink(devicePath)) {
+		SLOGE("Volume::deleteDeviceNode: Failed to remove %s (%s)", path, strerror(errno));
+		return -1;
+	}else{
+		SLOGI("Volume::deleteDeviceNode: delete DeviceNode '%s' successful\n", path);
+	}
+
+#endif
+
+	return 0;
+}
+
+char* Volume::createMountPoint(const char *path, int major, int minor) {
+	char* mountpoint = (char*) malloc(sizeof(char)*256);
+
+	memset(mountpoint, 0, sizeof(char)*256);
+	//sprintf(mountpoint, "%s/%d_%d", path, major, minor);
+	sprintf(mountpoint, "%s/disk_%d", path, minor);
+	if( access(mountpoint, F_OK) ){
+		SLOGI("Volume: file '%s' is not exist, create it", mountpoint);
+
+		if(mkdir(mountpoint, 0777)){
+			SLOGW("Volume: create file '%s' failed, errno is %d", mountpoint, errno);
+			return NULL;
+		}
+	}else{
+	
+		SLOGW("Volume: file '%s' is exist, can not create it", mountpoint);
+		return mountpoint;
+	}
+
+	return mountpoint;
+}
+
+int Volume::deleteMountPoint(char* mountpoint) {
+	if(mountpoint){
+		if( !access(mountpoint, F_OK) ){
+			SLOGW("Volume::deleteMountPoint: %s", mountpoint);
+			if(rmdir(mountpoint)){
+				SLOGW("Volume: remove file '%s' failed, errno is %d", mountpoint, errno);
+				return -1;
+			}
+		}
+
+	
+		free(mountpoint);
+		mountpoint = NULL;
+	}
+
+	return 0;
+}
+
+void Volume::saveUnmountPoint(char* mountpoint){
+	int i = 0;
+
+	for(i = 0; i < MAX_UNMOUNT_PARTITIONS; i++){
+		if(mUnMountPart[i] == NULL){
+			mUnMountPart[i] = mMountPart[i];
+		}
+	}
+
+	if(i >= MAX_UNMOUNT_PARTITIONS){
+		SLOGI("Volume::saveUnmountPoint: unmount point is over %d", MAX_UNMOUNT_PARTITIONS);
+	}
+
+	return;
+}
+
+
+void Volume::deleteUnMountPoint(int clear){
+	int i = 0;
+
+	for(i = 0; i < MAX_UNMOUNT_PARTITIONS; i++){
+		if(mUnMountPart[i]){
+			SLOGW("Volume::deleteUnMountPoint: %s", mUnMountPart[i]);
+
+			if(deleteMountPoint(mUnMountPart[i]) == 0){
+				deleteDeviceNode(mUnMountPart[i]);
+				mUnMountPart[i] = NULL;
+			}
+		}
+	}
+
+	return;
+}
+
 int Volume::formatVol() {
 
     if (getState() == Volume::State_NoMedia) {
@@ -231,17 +394,8 @@ int Volume::formatVol() {
     bool formatEntireDevice = (mPartIdx == -1);
     char devicePath[255];
     dev_t diskNode = getDiskDevice();
-    dev_t partNode;
+    dev_t partNode = MKDEV(MAJOR(diskNode), (formatEntireDevice ? 1 : mPartIdx));
 
-    if(mPartIdx == MINOR(diskNode)){
-    partNode = MKDEV(MAJOR(diskNode),(formatEntireDevice ? 1: mPartIdx));
-    }
-    else{
-    partNode = MKDEV(MAJOR(diskNode), (MINOR(diskNode) + mPartIdx));
-
-	if(mPartIdx == -1)
-		partNode = MKDEV(MAJOR(diskNode), (MINOR(diskNode) + 1));
-    }
     setState(Volume::State_Formatting);
 
     int ret = -1;
@@ -255,8 +409,19 @@ int Volume::formatVol() {
             goto err;
         }
     }
+
     sprintf(devicePath, "/dev/block/vold/%d:%d",
             MAJOR(partNode), MINOR(partNode));
+
+#ifdef VOLD_EMMC_SHARES_DEV_MAJOR
+    // If emmc and sdcard share dev major number, vold may pick
+    // incorrectly based on partition nodes alone, formatting
+    // the wrong device. Use device nodes instead.
+    dev_t deviceNodes;
+    getDeviceNodes((dev_t *) &deviceNodes, 1);
+    sprintf(devicePath, "/dev/block/vold/%d:%d", MAJOR(deviceNodes), MINOR(deviceNodes));
+#endif
+
     if (mDebug) {
         SLOGI("Formatting volume %s (%s)", getLabel(), devicePath);
     }
@@ -265,6 +430,7 @@ int Volume::formatVol() {
         SLOGE("Failed to format (%s)", strerror(errno));
         goto err;
     }
+
     ret = 0;
 
 err:
@@ -300,8 +466,11 @@ bool Volume::isMountpointMounted(const char *path) {
 
 int Volume::mountVol() {
     dev_t deviceNodes[4];
+    int mounted = 0;
     int n, i, rc = 0;
     char errmsg[255];
+    char mount_point[255];
+    char screenshots[255];
     bool primaryStorage = isPrimaryStorage();
     char decrypt_state[PROPERTY_VALUE_MAX];
     char crypto_state[PROPERTY_VALUE_MAX];
@@ -311,11 +480,15 @@ int Volume::mountVol() {
     property_get("vold.decrypt", decrypt_state, "");
     property_get("vold.encrypt_progress", encrypt_progress, "");
 
+
     /* Don't try to mount the volumes if we have not yet entered the disk password
      * or are in the process of encrypting.
-     */
-    if ((getState() == Volume::State_NoMedia) ||
+     */	
+   if ((getState() == Volume::State_NoMedia) ||
         ((!strcmp(decrypt_state, "1") || encrypt_progress[0]) && primaryStorage)) {
+
+	SLOGE("=======come into primaryStorage branch1111====\n");
+
         snprintf(errmsg, sizeof(errmsg),
                  "Volume %s %s mount failed - no media",
                  getLabel(), getMountpoint());
@@ -324,13 +497,15 @@ int Volume::mountVol() {
                                          errmsg, false);
         errno = ENODEV;
         return -1;
-    } else if (getState() != Volume::State_Idle) {
+    } 
+   /*else if (getState() != Volume::State_Idle) {
+    	SLOGE("=======come another primaryStorage branch====\n");
         errno = EBUSY;
         if (getState() == Volume::State_Pending) {
             mRetryMount = true;
         }
         return -1;
-    }
+    }*/
 
     if (isMountpointMounted(getMountpoint())) {
         SLOGW("Volume is idle but appears to be mounted - fixing");
@@ -358,6 +533,8 @@ int Volume::mountVol() {
        char new_sys_path[MAXPATHLEN];
        char nodepath[256];
        int new_major, new_minor;
+       SLOGE("=======this is  !isDecrypted branch=======\n");
+	
 
        if (n != 1) {
            /* We only expect one device node returned when mounting encryptable volumes */
@@ -395,6 +572,8 @@ int Volume::mountVol() {
         }
     }
 
+SLOGI("Volume::mountVol: mMountpoint %s\n", mMountpoint);
+
     for (i = 0; i < n; i++) {
         char devicePath[255];
 
@@ -406,25 +585,58 @@ int Volume::mountVol() {
         errno = 0;
         setState(Volume::State_Checking);
 
+//add by wangyihong, support NTFS and fat Hard-disk.
+	errno = 0;
+	int gid;
+	gid = AID_SDCARD_RW;
+	
+	if(Exfat::check(devicePath) == 0)
+	{
+		SLOGI("this is exfat filesystem, no process!\n");
+	}
+	else if(Ntfs::check(devicePath) == 0)
+	{
+		SLOGI("this is NTFS filesystem, ready to mount!\n");
+		if (Ntfs::doMount(devicePath, "/mnt/secure/staging", false, false, false, AID_SYSTEM, gid, 0702, true)) 
+		{
+		        SLOGE("%s failed to mount via NTFS (%s)\n", devicePath, strerror(errno));
+		        continue;
+		}
+	}
+	else
+	{
+		SLOGI("this is VFAT filesystem, ready to mount!\n");
+		if (Fat::doMount(devicePath, "/mnt/secure/staging", false, false, false, AID_SYSTEM, gid, 0702, true))
+		{
+                	SLOGE("%s failed to mount via VFAT (%s)\n", devicePath, strerror(errno));
+                	continue;
+            	}
+	}
+//add by wangyihong, support NTFS and fat Hard-disk.
+
+
+#if 0
+	bool isFatFs;
+	if(Exfat::check(devicePath) == 0)
+	{
+		SLOGI("this is exfat filesystem\n");
+	}
+	else{
+
+        isFatFs = true;
         if (Fat::check(devicePath)) {
             if (errno == ENODATA) {
                 SLOGW("%s does not contain a FAT filesystem\n", devicePath);
-                continue;
+                isFatFs = false;
+            } else {
+                errno = EIO;
+                /* Badness - abort the mount */
+                SLOGE("%s failed FS checks (%s)", devicePath, strerror(errno));
+                setState(Volume::State_Idle);
+                return -1;
             }
-
-	    if (errno == ENOMEM) {
-		SLOGE("%s failed FS checks (%s)", devicePath, strerror(errno));
-		setState(Volume::State_Nomem);
-		return -1;
-	    }
-
-            errno = EIO;
-            /* Badness - abort the mount */
-            SLOGE("%s failed FS checks (%s)", devicePath, strerror(errno));
-            setState(Volume::State_Idle);
-            return -1;
         }
-
+	}
         /*
          * Mount the device on our internal staging mountpoint so we can
          * muck with it before exposing it to non priviledged users.
@@ -432,27 +644,25 @@ int Volume::mountVol() {
         errno = 0;
         int gid;
 
-        if (primaryStorage) {
-            // Special case the primary SD card.
-            // For this we grant write access to the SDCARD_RW group.
-            gid = AID_SDCARD_RW;
+        // Originally, non-primary storage was set to MEDIA_RW group which
+        // prevented users from writing to it. We don't want that.
+        gid = AID_SDCARD_RW;
+
+        if (isFatFs) {
+            if (Fat::doMount(devicePath, "/mnt/secure/staging", false, false, false,
+                    AID_SYSTEM, gid, 0702, true)) {
+                SLOGE("%s failed to mount via VFAT (%s)\n", devicePath, strerror(errno));
+                continue;
+            }
         } else {
-            // For secondary external storage we keep things locked up.
-            gid = AID_MEDIA_RW;
+            if (Ntfs::doMount(devicePath, "/mnt/secure/staging", false, false, false,
+                    AID_SYSTEM, gid, 0702, true)) {
+                SLOGE("%s failed to mount via NTFS (%s)\n", devicePath, strerror(errno));
+                continue;
+            }
         }
-		if((flags & VOL_RDONLY) == (VOL_RDONLY)) {
-			if (Fat::doMount(devicePath, "/mnt/secure/staging", true, false, false,
-						AID_SYSTEM, gid, 0702, true)) {
-				SLOGE("%s failed to mount via VFAT (%s)\n", devicePath, strerror(errno));
-				continue;
-			}
-		} else {
-			if (Fat::doMount(devicePath, "/mnt/secure/staging", false, false, false,
-						AID_SYSTEM, gid, 0702, true)) {
-				SLOGE("%s failed to mount via VFAT (%s)\n", devicePath, strerror(errno));
-				continue;
-			}
-		}
+#endif
+
         SLOGI("Device %s, target %s mounted @ /mnt/secure/staging", devicePath, getMountpoint());
 
         protectFromAutorunStupidity();
@@ -469,17 +679,81 @@ int Volume::mountVol() {
          * Now that the bindmount trickery is done, atomically move the
          * whole subtree to expose it to non priviledged users.
          */
-        if (doMoveMount("/mnt/secure/staging", getMountpoint(), false)) {
-            SLOGE("Failed to move mount (%s)", strerror(errno));
-            umount("/mnt/secure/staging");
-            setState(Volume::State_Idle);
-            return -1;
-        }
-        setState(Volume::State_Mounted);
-        mCurrentlyMountedKdev = deviceNodes[i];
-        return 0;
+	
+		/* auto mount and much partition */
+		if((mPartIdx == -1) && (n > 1)){
+			mMountPart[i] = createMountPoint( mMountpoint, MAJOR(deviceNodes[i]), MINOR(deviceNodes[i]) );
+			if(mMountPart[i] == NULL){
+				SLOGE("Part is already mount, can not mount again, (%s)\n", strerror(errno));
+				umount("/mnt/secure/staging");
+				continue;
+			}
+
+			if (doMoveMount("/mnt/secure/staging", mMountPart[i], false)) {
+				SLOGE("Part(%s) failed to move mount (%s)\n", mMountPart[i], strerror(errno));
+				deleteMountPoint(mMountPart[i]);
+				mMountPart[i] = NULL;
+				umount("/mnt/secure/staging");
+				continue;
+			}
+
+			SLOGI("mountVlo: mount %s, successful\n", mMountPart[i]);
+
+			mCurrentlyMountedKdev = deviceNodes[i];
+			mounted++;
+		}else{
+		if (doMoveMount("/mnt/secure/staging", getMountpoint(), false)) {
+	            	SLOGE("Failed to move mount (%s)\n", strerror(errno));
+	            	umount("/mnt/secure/staging");
+	            	goto failed;
+        	}
+		
+	
+
+
+			setState(Volume::State_Mounted);
+			sprintf(mount_point,"%s",getMountpoint());
+	sprintf(screenshots,"%s/DCIM",mount_point);
+
+	mkdir(screenshots,0666);
+	sprintf(screenshots,"%s/DCIM/ScreenShots",mount_point);
+	mkdir(screenshots,0666);
+	SLOGE("***********mount_point=%s ;  mkdir ScreenShots_dir=%s ********", mount_point,screenshots);
+	        mCurrentlyMountedKdev = deviceNodes[i];
+	        mMountedPartNum = 1;
+
+	        return 0;
+		}
+
     }
 
+
+	if(n>1)
+	{
+		sprintf(mount_point,"%s","/mnt/usbdisk/disk_1");
+		sprintf(screenshots,"%s/DCIM", mount_point);
+		
+		mkdir(screenshots,0666);
+		sprintf(screenshots,"%s/DCIM/ScreenShots",mount_point);
+		mkdir(screenshots,0666);
+		SLOGE("***************mount_point=%s ;  mkdir ScreenShots_dir=%s ********", mount_point,screenshots);
+	}
+
+
+
+	mMountedPartNum = n;
+	if(mounted){
+	    setState(Volume::State_Mounted);
+	}else{
+		mMountedPartNum = 0;
+		//setState(Volume::State_Idle);
+
+		goto failed;
+	}
+
+    SLOGI("Volume::mountVol: getState=%d, State_Mounted=%d\n", getState(), Volume::State_Mounted);
+    return 0;
+failed:
     SLOGE("Volume %s found no suitable devices for mounting :(\n", getLabel());
     setState(Volume::State_Idle);
 
@@ -630,38 +904,64 @@ int Volume::unmountVol(bool force, bool revert) {
     setState(Volume::State_Unmounting);
     usleep(1000 * 1000); // Give the framework some time to react
 
+SLOGE("mPartIdx = %d, mMountedPartNum= %d\n", mPartIdx, mMountedPartNum);
     /*
      * First move the mountpoint back to our internal staging point
      * so nobody else can muck with it while we work.
      */
-    if (doMoveMount(getMountpoint(), SEC_STGDIR, force)) {
-        SLOGE("Failed to move mount %s => %s (%s)", getMountpoint(), SEC_STGDIR, strerror(errno));
-        setState(Volume::State_Mounted);
-        return -1;
-    }
+     for(i = mMountedPartNum-1; i >= 0; i--){
+ 	if((mPartIdx == -1) && (mMountedPartNum > 1))
+	{
+		if(mMountPart[i]){
+			if (doMoveMount(mMountPart[i], SEC_STGDIR, force)) {
+				SLOGE("Failed to move mount %s => %s (%s)", mMountPart[i], SEC_STGDIR, strerror(errno));
+				setState(Volume::State_Mounted);
+				return -1;
+			}
+
+			if(deleteMountPoint(mMountPart[i])){
+			
+				saveUnmountPoint(mMountPart[i]);
+			}else{
+				deleteDeviceNode(mMountPart[i]);
+			}
+
+			mMountPart[i] = NULL;
+		}	
+	 }
+	else{
+		    if (doMoveMount(getMountpoint(), SEC_STGDIR, force)) {
+		        SLOGE("Failed to move mount %s => %s (%s)", getMountpoint(), SEC_STGDIR, strerror(errno));
+		        setState(Volume::State_Mounted);
+		        return -1;
+		    }
+	}
 
     protectFromAutorunStupidity();
 
-    /*
-     * Unmount the tmpfs which was obscuring the asec image directory
-     * from non root users
-     */
-if (isPrimaryStorage()) {
-    if (doUnmount(Volume::SEC_STG_SECIMGDIR, force)) {
-        SLOGE("Failed to unmount tmpfs on %s (%s)", SEC_STG_SECIMGDIR, strerror(errno));
-        goto fail_republish;
+    /* Undo createBindMounts(), which is only called for primary storage */
+   if (isPrimaryStorage()) {
+        /*
+         * Unmount the tmpfs which was obscuring the asec image directory
+         * from non root users
+         */
+
+        if (doUnmount(Volume::SEC_STG_SECIMGDIR, force)) {
+            SLOGE("Failed to unmount tmpfs on %s (%s)", SEC_STG_SECIMGDIR, strerror(errno));
+            goto fail_republish;
+        }
+
+        /*
+         * Remove the bindmount we were using to keep a reference to
+         * the previously obscured directory.
+         */
+
+        if (doUnmount(Volume::SEC_ASECDIR, force)) {
+            SLOGE("Failed to remove bindmount on %s (%s)", SEC_ASECDIR, strerror(errno));
+            goto fail_remount_tmpfs;
+        }
     }
 
-    /*
-     * Remove the bindmount we were using to keep a reference to
-     * the previously obscured directory.
-     */
-
-    if (doUnmount(Volume::SEC_ASECDIR, force)) {
-        SLOGE("Failed to remove bindmount on %s (%s)", SEC_ASECDIR, strerror(errno));
-        goto fail_remount_tmpfs;
-    }
-}
     /*
      * Finally, unmount the actual block device from the staging dir
      */
@@ -681,7 +981,20 @@ if (isPrimaryStorage()) {
         revertDeviceInfo();
         SLOGI("Encrypted volume %s reverted successfully", getMountpoint());
     }
+ }
 
+		//add by wang yihong 15:35
+if(mMountedPartNum>1){
+			if (doMoveMount(getMountpoint(), SEC_STGDIR, force)) {
+		        SLOGE("Failed to move mount %s => %s (%s)", getMountpoint(), SEC_STGDIR, strerror(errno));
+		        setState(Volume::State_Mounted);
+		        return -1;
+		    }
+	}
+	if(((mPartIdx == -1) &&(mMountedPartNum > 1)) && mMountpoint){
+		deleteUnMountPoint(0);
+		chmod(mMountpoint, 0x00);
+	}
     setState(Volume::State_Idle);
     mCurrentlyMountedKdev = -1;
     return 0;

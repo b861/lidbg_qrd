@@ -23,7 +23,6 @@
 
 #include <fcntl.h>
 #include <dirent.h>
-#include <cutils/properties.h>
 
 #define LOG_TAG "Vold"
 
@@ -33,6 +32,7 @@
 #include "CommandListener.h"
 #include "NetlinkManager.h"
 #include "DirectVolume.h"
+#include "AutoVolume.h"
 #include "cryptfs.h"
 
 static int process_config(VolumeManager *vm);
@@ -156,56 +156,42 @@ static int parse_mount_flags(char *mount_flags)
         flags |= VOL_NONREMOVABLE;
     }
 
-    if (strcasestr(mount_flags, "readonly")) {
-        flags |= VOL_RDONLY;
-    }
-
     return flags;
 }
 
 static int process_config(VolumeManager *vm) {
     FILE *fp;
-    FILE *fp2;
     int n = 0;
     char line[255];
-    char state[255];
-    int sdcard_partition_override = 0;
-    int emmc_partition_support = 0;
-    char value[PROPERTY_VALUE_MAX];
+    Volume *vol = 0;
 
-	property_get("persist.sys.emmcsdcard.enabled", value, "");
-	sdcard_partition_override = atoi(value);
+    if ((fp = fopen("/proc/cmdline", "r"))) {
+        while (fscanf(fp, "%s", line) > 0) {
+            if (!strncmp(line, "SDCARD=", 7)) {
+                const char *sdcard = line + 7;
+                if (*sdcard) {
+                    // FIXME: should not hardcode the label and mount_point
+                    if ((vol = new AutoVolume(vm, "sdcard", "/mnt/sdcard", sdcard))) {
+                        vm->addVolume(vol);
+                        break;
+                    }
+                }
+            }
+        }
+        fclose(fp);
+    }
 
-	property_get("persist.sys.emmcpartition", value, "");
-	emmc_partition_support = atoi(value);
-
-	if(!emmc_partition_support){
-		if (!(fp = fopen("/etc/vold.origin.fstab", "r"))) {
-			return -1;
-		}
-		SLOGI("Load /etc/vold.origin.fstab. Do not use internal emmc partition.");
-	}
-	else{
-		if(sdcard_partition_override){
-			fp2 = fopen("/sys/devices/system/soc/soc0/hw_platform", "r");
-			if(!fp2)
-				return -1;
-			if (fgets(state, sizeof(state), fp2) && !strncmp(state, "msm7627a_sku7", 13)) {
-				if (!(fp = fopen("/etc/vold.fat.fstab", "r")))
-					return -1;
-				SLOGI("Load /etc/vold.fat.fstab, use internal fat.img as SDCARD!");
-			} else {
-				if (!(fp = fopen("/etc/vold.emmc.fstab", "r")))
-					return -1;
-				SLOGI("Load /etc/vold.emmc.fstab, use internal emmc as SDCARD!");
-			}
-			fclose(fp2);
-		}
-		else{
-			if (!(fp = fopen("/etc/vold.fstab", "r")))
-				return -1;
-		}
-	}
+    if (!(fp = fopen("/etc/vold.fstab", "r"))) {
+        // no volume added yet, create a AutoVolume object
+        // to mount USB/MMC/SD automatically
+        if (!vol) {
+            // FIXME: should not hardcode the label and mount_point
+            vol = new AutoVolume(vm, "sdcard", "/mnt/sdcard");
+            if (vol)
+                vm->addVolume(vol);
+        }
+        return vol ? 0 : -ENOMEM;
+    }
 
     while(fgets(line, sizeof(line), fp)) {
         const char *delim = " \t";
@@ -245,13 +231,17 @@ static int process_config(VolumeManager *vm) {
                 goto out_syntax;
             }
 
-            if (!strcmp(part, "auto")) {
-                dv = new DirectVolume(vm, label, mount_point, -1);
-            } else {
-                dv = new DirectVolume(vm, label, mount_point, atoi(part));
-            }
-
+            const char *sdcard = 0;
             while ((sysfs_path = strtok_r(NULL, delim, &save_ptr))) {
+                if ((sdcard = strncmp(sysfs_path, "SDCARD=", 7) ? 0 : sysfs_path + 7))
+                    break;
+                if (!dv) {
+                     if (!strcmp(part, "auto")) {
+                        dv = new DirectVolume(vm, label, mount_point, -1);
+                    } else {
+                        dv = new DirectVolume(vm, label, mount_point, atoi(part));
+                    }
+                }
                 if (*sysfs_path != '/') {
                     /* If the first character is not a '/', it must be flags */
                     break;
@@ -261,6 +251,10 @@ static int process_config(VolumeManager *vm) {
                          label);
                     goto out_fail;
                 }
+            }
+
+            if (!dv) {
+                dv = new AutoVolume(vm, label, mount_point, sdcard);
             }
 
             /* If sysfs_path is non-null at this point, then it contains

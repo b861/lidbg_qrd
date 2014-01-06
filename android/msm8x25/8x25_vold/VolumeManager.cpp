@@ -30,6 +30,7 @@
 #include <openssl/md5.h>
 
 #include <cutils/log.h>
+#include <cutils/properties.h>
 
 #include <sysutils/NetlinkEvent.h>
 
@@ -42,8 +43,6 @@
 #include "Process.h"
 #include "Asec.h"
 #include "cryptfs.h"
-
-//#define MASS_STORAGE_FILE_PATH  "/sys/class/android_usb/android0/f_mass_storage/lun/file"
 
 VolumeManager *VolumeManager::sInstance = NULL;
 
@@ -58,7 +57,14 @@ VolumeManager::VolumeManager() {
     mVolumes = new VolumeCollection();
     mActiveContainers = new AsecIdCollection();
     mBroadcaster = NULL;
+    mUmsSharingCount = 0;
+    mSavedDirtyRatio = -1;
     mVolManagerDisabled = 0;
+
+    // set dirty ratio to ro.vold.umsdirtyratio (default 0) when UMS is active
+    char dirtyratio[PROPERTY_VALUE_MAX];
+    property_get("ro.vold.umsdirtyratio", dirtyratio, "0");
+    mUmsDirtyRatio = atoi(dirtyratio);
 }
 
 VolumeManager::~VolumeManager() {
@@ -914,9 +920,12 @@ int VolumeManager::shareEnabled(const char *label, const char *method, bool *ena
 }
 
 static const char *LUN_FILES[] = {
+#ifdef CUSTOM_LUN_FILE
+    CUSTOM_LUN_FILE,
+#endif
     /* Only andriod0 exists, but the %d in there is a hack to satisfy the
        format string and also give a not found error when %d > 0 */
-    "/sys/class/android_usb/android0/f_mass_storage/lun%d/file",
+    "/sys/class/android_usb/android%d/f_mass_storage/lun/file",
     NULL
 };
 
@@ -964,7 +973,7 @@ int VolumeManager::shareVolume(const char *label, const char *method) {
     }
 
     if (v->getState() != Volume::State_Idle) {
-        // You need to unmount manually befoe sharing
+        // You need to unmount manually before sharing
         errno = EBUSY;
         return -1;
     }
@@ -981,6 +990,17 @@ int VolumeManager::shareVolume(const char *label, const char *method) {
         return -1;
     }
 
+#ifdef VOLD_EMMC_SHARES_DEV_MAJOR
+    // If emmc and sdcard share dev major number, vold may pick
+    // incorrectly based on partition nodes alone. Use device nodes instead.
+    v->getDeviceNodes((dev_t *) &d, 1);
+    if ((MAJOR(d) == 0) && (MINOR(d) == 0)) {
+        // This volume does not support raw disk access
+        errno = EINVAL;
+        return -1;
+    }
+#endif
+
     int fd, lun_number;
     char nodepath[255];
     snprintf(nodepath,
@@ -992,7 +1012,7 @@ int VolumeManager::shareVolume(const char *label, const char *method) {
     if (v->isPrimaryStorage()) {
         lun_number = 0;
     } else {
-        lun_number = 1;
+        lun_number = SECOND_LUN_NUM;
     }
 
     if ((fd = openLun(lun_number)) < 0) {
@@ -1007,6 +1027,21 @@ int VolumeManager::shareVolume(const char *label, const char *method) {
 
     close(fd);
     v->handleVolumeShared();
+    if (mUmsSharingCount++ == 0) {
+        FILE* fp;
+        mSavedDirtyRatio = -1; // in case we fail
+        if ((fp = fopen("/proc/sys/vm/dirty_ratio", "r+"))) {
+            char line[16];
+            if (fgets(line, sizeof(line), fp) && sscanf(line, "%d", &mSavedDirtyRatio)) {
+                fprintf(fp, "%d\n", mUmsDirtyRatio);
+            } else {
+                SLOGE("Failed to read dirty_ratio (%s)", strerror(errno));
+            }
+            fclose(fp);
+        } else {
+            SLOGE("Failed to open /proc/sys/vm/dirty_ratio (%s)", strerror(errno));
+        }
+    }
     return 0;
 }
 
@@ -1035,11 +1070,11 @@ int VolumeManager::unshareVolume(const char *label, const char *method) {
     if (v->isPrimaryStorage()) {
         lun_number = 0;
     } else {
-        lun_number = 1;
+        lun_number = SECOND_LUN_NUM;
     }
 
     if ((fd = openLun(lun_number)) < 0) {
-       return -1;
+        return -1;
     }
 
     char ch = 0;
@@ -1051,6 +1086,16 @@ int VolumeManager::unshareVolume(const char *label, const char *method) {
 
     close(fd);
     v->handleVolumeUnshared();
+    if (--mUmsSharingCount == 0 && mSavedDirtyRatio != -1) {
+        FILE* fp;
+        if ((fp = fopen("/proc/sys/vm/dirty_ratio", "r+"))) {
+            fprintf(fp, "%d\n", mSavedDirtyRatio);
+            fclose(fp);
+        } else {
+            SLOGE("Failed to open /proc/sys/vm/dirty_ratio (%s)", strerror(errno));
+        }
+        mSavedDirtyRatio = -1;
+    }
     return 0;
 }
 

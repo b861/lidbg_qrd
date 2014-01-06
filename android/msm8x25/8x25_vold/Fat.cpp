@@ -51,7 +51,7 @@ int Fat::check(const char *fsPath) {
         SLOGW("Skipping fs checks\n");
         return 0;
     }
-
+    //return 0;
     int pass = 1;
     int rc = 0;
     do {

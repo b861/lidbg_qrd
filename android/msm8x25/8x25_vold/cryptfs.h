@@ -69,7 +69,6 @@ struct volume_info {
 };
 #define VOL_NONREMOVABLE 0x1
 #define VOL_ENCRYPTABLE  0x2
-#define VOL_RDONLY  0x4
 
 #ifdef __cplusplus
 extern "C" {
