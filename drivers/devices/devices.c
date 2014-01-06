@@ -1137,11 +1137,12 @@ static int lidbg_event(struct notifier_block *this,
 
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_ACC_OFF):
         if(!g_var.is_fly)LCD_OFF;
-        mute_s();
+        //mute_s();
         break;
 
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_SUSPEND_PREPARE):
 		//USB_WORK_DISENABLE;
+		mute_s();
         break;
 
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_POWER_OFF):
