@@ -13,17 +13,17 @@ if [ "$1" = "" ]; then
 	echo "exit"
 else
 	apt-get install expect
-	cp -u ./pull  $UPDATA_BIN_DIR/pull
-	cp -u ./push  $UPDATA_BIN_DIR/push
+	cp -u $DBG_TOOLS_PATH/pull  $UPDATA_BIN_DIR/pull
+	cp -u $DBG_TOOLS_PATH/push  $UPDATA_BIN_DIR/push
 	
 	cd $UPDATA_BIN_DIR
 	pwd
-	expect ./pull
-	expect ./pull
+	expect $DBG_TOOLS_PATH/pull
+	expect $DBG_TOOLS_PATH/pull
 	cp -ru $DBG_OUT_RELEASE_PATH/$BOARD_VERSION/out  $UPDATA_BIN_DIR
 	git add .
 	git commit -am $1
-	expect ./push
+	expect $DBG_TOOLS_PATH/push
 	gitk &
 fi
 

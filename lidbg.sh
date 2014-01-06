@@ -136,6 +136,6 @@ function auto_build()
 # apt-get install expect
 cd build
 source ./env_entry.sh
-. soc_$DBG_SOC.sh
+. $DBG_TOOLS_PATH/soc_$DBG_SOC.sh
 auto_build $1 $2;
 
