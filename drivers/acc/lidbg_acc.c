@@ -557,17 +557,19 @@ static int thread_acc_suspend(void *data)
 							task_kill_select(".flyaudio.media");
                         }
 						#endif
-			   if(time_count== 115)
-			{
-			            SOC_Write_Servicer(CMD_IGNORE_WAKELOCK);
-			}	
+						
+						if(time_count== 115)
+						{
+						   lidbgerr("clear user wakelock\n");
+						   SOC_Write_Servicer(CMD_IGNORE_WAKELOCK);
+						}	
                         if(time_count >= 120)
                         {
                             show_wakelock(1);
                             if(suspend_state == PM_STATUS_EARLY_SUSPEND_PENDING)
                             {
                             	ignore_wakelock = 1;	
-			    }
+			    			}
                         }
                         //break;
                     }
@@ -605,7 +607,7 @@ static int acc_correct(void *data)
 		  )
 		{
 			
-			lidbg("\n\n\n\n\n\nacc_correct:send power_key\n\n\n\n\n\n");
+			lidbgerr("\n\n\n\n\n\nacc_correct:send power_key\n\n\n\n\n\n");
 			SOC_Key_Report(KEY_POWER,KEY_PRESSED_RELEASED);			
 			lidbg_fs_log(FASTBOOT_LOG_PATH,"acc_correct:acc_flag=%d, suspend_state=%d,tick=%d\n",g_var.acc_flag,suspend_state,tick);
 		}
