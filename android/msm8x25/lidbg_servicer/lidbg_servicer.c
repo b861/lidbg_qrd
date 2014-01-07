@@ -445,6 +445,7 @@ open_dev:
         //system("echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
         //echo "userspace" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
         //echo 600000 > /sys/devices/system/cpu/cpufreq/ondemand/scaling_setspeed
+        //cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_cur_freq
         //sleep(10);
     }
     return 0;

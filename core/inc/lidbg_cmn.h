@@ -27,6 +27,7 @@ int lidbg_task_kill_select(char *task_name);
 int lidbg_get_current_time(char *time_string, struct rtc_time *ptm);
 bool lidbg_new_cdev(struct file_operations *cdev_fops, char *nodename);
 void set_power_state(int state);
+void lidbg_loop_warning(void);
 
 #ifdef BUILD_FOR_RECOVERY
 #define BIN_PATH  "/sbin/"

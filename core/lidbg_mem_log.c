@@ -3,6 +3,7 @@
 #define BUFF_SIZE (256)
 #define DEVICE_NAME "lidbg_mem_log"
 #define LIDBG_FIFO_SIZE (5 * 1024 * 1024)
+#define MEM_LOG_EN
 
 struct lidbg_msg_device
 {
@@ -198,35 +199,36 @@ int lidbg_msg_get(char *to_file, int out_mode )
 	unsigned int ret = 1;
 	char *msg_out_buff = NULL; 
 
-	
-	down(&dev->sem);
-	len = kfifo_len(&dev->fifo);
-	up(&dev->sem);
-
-	printk("lidbg_msg_get kfifo_len=%d\n",len);
-	
-	msg_out_buff = kmalloc(len, GFP_KERNEL);
-	if (msg_out_buff == NULL)
+	if(lidbg_mem_log_ready)
 	{
-		ret = -1;
-		printk("lidbg_msg_get kmalloc err \n");
-		return ret;
+		down(&dev->sem);
+		len = kfifo_len(&dev->fifo);
+		up(&dev->sem);
+
+		printk("lidbg_msg_get kfifo_len=%d\n",len);
+		
+		msg_out_buff = kmalloc(len, GFP_KERNEL);
+		if (msg_out_buff == NULL)
+		{
+			ret = -1;
+			printk("lidbg_msg_get kmalloc err \n");
+			return ret;
+		}
+
+		memset(msg_out_buff, '\0', sizeof(msg_out_buff));
+		down(&dev->sem);
+		ret = kfifo_out(&dev->fifo, msg_out_buff, len);
+		up(&dev->sem);
+
+		ret = mem_log_file_amend(to_file, msg_out_buff);
+		if(ret != 1)
+		{
+			printk("ERR: lidbg msg out msg to file.\n");
+			return -1;
+		}
+
+		kfree(msg_out_buff);
 	}
-
-	memset(msg_out_buff, '\0', sizeof(msg_out_buff));
-	down(&dev->sem);
-	ret = kfifo_out(&dev->fifo, msg_out_buff, len);
-	up(&dev->sem);
-
-	ret = mem_log_file_amend(to_file, msg_out_buff);
-	if(ret != 1)
-	{
-		printk("ERR: lidbg msg out msg to file.\n");
-		return -1;
-	}
-
-	kfree(msg_out_buff);
-	
 	return ret;
 }
 EXPORT_SYMBOL(lidbg_msg_get);
@@ -237,7 +239,9 @@ static int  lidbg_msg_probe(struct platform_device *pdev)
 	int major_number = 0;
 	dev_t dev_number;
 
-	
+#ifdef MEM_LOG_EN
+	return 0;
+#endif
 	dev_number = MKDEV(major_number, 0);
 	dev = (struct lidbg_msg_device *)kmalloc( sizeof(struct lidbg_msg_device), GFP_KERNEL);
 	if (dev == NULL)

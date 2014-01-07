@@ -7,7 +7,6 @@
 int max_file_len = 1;
 int g_iskmsg_ready = 1;
 int g_pollkmsg_en = 0;
-int g_is_remountd_system = 0;
 static struct task_struct *fs_kmsgtask;
 static struct completion kmsg_wait;
 //zone end
@@ -22,6 +21,7 @@ bool upload_machine_log(void)
 }
 void remount_system(void)
 {
+	static int g_is_remountd_system = 0;
     if(!g_is_remountd_system)
     {
         g_is_remountd_system = 1;

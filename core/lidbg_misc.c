@@ -7,6 +7,7 @@ static int cp_data_to_udisk_en = 0;
 static int update_lidbg_out_dir_en = 0;
 static int delete_out_dir_after_update = 1;
 static int dump_mem_log = 0;
+static int loop_warning_en = 0;
 
 
 void cb_password_chmod(char *password )
@@ -139,6 +140,24 @@ void cp_data_to_udisk(char *key, char *value )
         LIDBG_ERR("<nobody_register>\n");
 }
 
+int loop_warnning(void *data)
+{
+	while(1)
+	{
+		lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SIGNAL_EVENT, NOTIFIER_MINOR_SIGNAL_BAKLIGHT_ACK));
+		msleep(1000);
+	}
+    return 0;
+}
+
+void lidbg_loop_warning(void)
+{
+	if(loop_warning_en)
+	{
+		DUMP_FUN;
+		CREATE_KTHREAD(loop_warnning, NULL);
+	}
+}
 
 int misc_init(void *data)
 {
@@ -160,6 +179,7 @@ int misc_init(void *data)
     FS_REGISTER_INT(cp_data_to_udisk_en, "cp_data_to_udisk_en", 0, cp_data_to_udisk);
     FS_REGISTER_INT(update_lidbg_out_dir_en, "update_lidbg_out_dir_en", 0, update_lidbg_out_dir);
     FS_REGISTER_INT(delete_out_dir_after_update, "delete_out_dir_after_update", 0, NULL);
+    FS_REGISTER_INT(loop_warning_en, "loop_warning_en", 0, NULL);
     fs_register_filename_list("/data/kmsg.txt", true);
     fs_register_filename_list("/data/lidbg/lidbg_mem_log.txt", true);
 
@@ -193,6 +213,9 @@ static void __exit lidbg_misc_exit(void)
 
 module_init(lidbg_misc_init);
 module_exit(lidbg_misc_exit);
+
+EXPORT_SYMBOL(lidbg_loop_warning);
+
 
 MODULE_AUTHOR("futengfei");
 MODULE_DESCRIPTION("misc zone");
