@@ -1,3 +1,4 @@
+ifeq ($(DBG_PLATFORM),msm7627a)
 LOCAL_PATH:= $(call my-dir)
 
 common_src_files := \
@@ -109,3 +110,4 @@ LOCAL_CFLAGS :=
 LOCAL_SHARED_LIBRARIES := libcutils
 
 include $(BUILD_EXECUTABLE)
+endif
