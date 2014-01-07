@@ -53,7 +53,6 @@ build_time.conf
 tmp/
 out/
 other/
-tools/
 collect/
 notes/
 other/
