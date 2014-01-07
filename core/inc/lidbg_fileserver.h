@@ -68,6 +68,7 @@ extern int  lidbg_cp(char from[], char to[]);
 extern int get_machine_id(void);
 extern int fs_readwrite_file(const char *filename, char *wbuff, char *rbuff, int readlen);
 extern int fs_update(const char *ko_list, const char *fromdir, const char *todir);
+extern int analysis_copylist(const char *copy_list);
 extern int fs_dump_kmsg(char *tag, int size );
 extern int fs_regist_state(char *key, int *value);
 extern int fs_get_intvalue(struct list_head *client_list, char *key, int *int_value, void (*callback)(char *key, char *value));

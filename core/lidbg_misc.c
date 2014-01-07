@@ -39,6 +39,8 @@ void cb_password_clean_all(char *password )
 }
 void cb_password_update(char *password )
 {
+	analysis_copylist("/mnt/usbdisk/conf/copylist.conf");
+
     if(fs_is_file_exist("/mnt/usbdisk/out/release"))
     {
         TE_WARN("<===============UPDATE_INFO =================>\n" );

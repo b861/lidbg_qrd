@@ -150,4 +150,5 @@ void lidbg_fs_update_init(void)
 }
 
 EXPORT_SYMBOL(fs_update);
+EXPORT_SYMBOL(analysis_copylist);
 
