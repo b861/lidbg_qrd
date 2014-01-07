@@ -68,9 +68,9 @@ function soc_handle_func()
 	23)
 		build_all;;
 	24)
-		expect $DBG_SHELL_PATH/pull;;
+		expect $DBG_TOOLS_PATH/pull;;
 	25)
-		expect $DBG_SHELL_PATH/push;;
+		expect $DBG_TOOLS_PATH/push;;
 	26)
 		gitk &;;
 	27)
