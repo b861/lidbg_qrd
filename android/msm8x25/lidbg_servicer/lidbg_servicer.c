@@ -56,6 +56,7 @@
 
 #define CMD_ACC_OFF (93)
 #define CMD_ACC_ON (94)
+#define CMD_IGNORE_WAKELOCK (95)
 
 pthread_t ntid;
 int fd = 0;
@@ -180,13 +181,21 @@ loop_read:
         }
 
 		
-		case CMD_FLY_POWER_OFF:
-		{
-			 lidbg("CMD_FLY_POWER_OFF+++\n");
-             system("am broadcast -a cn.flyaudio.intent.action.FAST_BOOT_START &");
-			 lidbg("CMD_FLY_POWER_OFF---\n");
-			 break;
+	case CMD_FLY_POWER_OFF:
+	{
+		lidbg("CMD_FLY_POWER_OFF+++\n");
+		system("am broadcast -a cn.flyaudio.intent.action.FAST_BOOT_START &");
+		lidbg("CMD_FLY_POWER_OFF---\n");
+		break;
         }
+	case CMD_IGNORE_WAKELOCK:
+	{
+		lidbg("CMD_IGNORE_WAKELOCK+++\n");
+		system("am broadcast -a com.android.FORCESUSPEND &");
+		lidbg("CMD_IGNORE_WAKELOCK---\n");
+		break;
+	}
+		
         case LOG_LOGCAT :
         {
             static int flag = 0;

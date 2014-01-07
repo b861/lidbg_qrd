@@ -555,11 +555,17 @@ static int thread_acc_suspend(void *data)
 							task_kill_select(".flyaudio.media");
                         }
 						#endif
+			   if(time_count== 115)
+			{
+			            SOC_Write_Servicer(CMD_IGNORE_WAKELOCK);
+			}	
                         if(time_count >= 120)
                         {
                             show_wakelock(1);
                             if(suspend_state == PM_STATUS_EARLY_SUSPEND_PENDING)
-                                ignore_wakelock = 1;
+                            {
+                            	ignore_wakelock = 1;	
+			    }
                         }
                         //break;
                     }

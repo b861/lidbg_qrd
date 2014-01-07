@@ -85,7 +85,7 @@
 
 #define CMD_ACC_OFF (93)
 #define CMD_ACC_ON (94)
-
+#define CMD_IGNORE_WAKELOCK (95)
 
 #define NOTIFIER_MAJOR_SYSTEM_STATE (5)
 #define NOTIFIER_MINOR_SYSTEM_OFF (0)
