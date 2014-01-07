@@ -459,7 +459,7 @@ static void acc_early_suspend(struct early_suspend *handler)
 
     suspend_state = PM_STATUS_EARLY_SUSPEND_PENDING;
 
-	if(g_var.fake_suspend == 0)
+	if((g_var.fake_suspend == 0)&&(g_var.acc_flag == 0))
 	{
 	    check_all_clk_disable();
 	    if(find_unsafe_clk()) 
