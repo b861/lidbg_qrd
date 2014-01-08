@@ -185,7 +185,7 @@ int lidbg_msg_put( const char *fmt, ... )
 	}
 	else
 	{
-		printk("Lidbg mem log is not ready!\n");
+		//printk("Lidbg mem log is not ready!\n");
 		ret = 0;
 	}
 	
@@ -239,7 +239,7 @@ static int  lidbg_msg_probe(struct platform_device *pdev)
 	int major_number = 0;
 	dev_t dev_number;
 
-#ifdef MEM_LOG_EN
+#ifndef MEM_LOG_EN
 	return 0;
 #endif
 	dev_number = MKDEV(major_number, 0);
