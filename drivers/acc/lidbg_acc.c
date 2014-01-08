@@ -803,7 +803,8 @@ static int acc_resume(struct device *dev)
     ignore_wakelock = 0;
     suspend_state = PM_STATUS_RESUME_OK;
 
-    lidbg("fastboot_resume:%d\n", ++plidbg_acc->resume_count);
+    lidbg("fastboot_resume:%d\n", plidbg_acc->resume_count);
+   plidbg_acc->resume_count++;
     if(plidbg_acc->poweroff_count != plidbg_acc->resume_count)
     {
         lidbg("err:poweroff_count:%d\n", plidbg_acc->poweroff_count);

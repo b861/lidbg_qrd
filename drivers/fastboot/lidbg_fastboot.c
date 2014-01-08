@@ -1167,8 +1167,8 @@ static int fastboot_suspend(struct device *dev)
 static int fastboot_resume(struct device *dev)
 {
     DUMP_FUN;
-    lidbg("fastboot_resume:%d\n", ++fb_data->resume_count);
-
+    lidbg("fastboot_resume:%d\n", fb_data->resume_count);
+    ++fb_data->resume_count;
     fastboot_set_status(PM_STATUS_RESUME_OK);
     wake_lock(&(fb_data->flywakelock));
     complete(&resume_ok);
