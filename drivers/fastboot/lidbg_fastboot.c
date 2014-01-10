@@ -980,7 +980,7 @@ static void fastboot_early_suspend(struct early_suspend *h)
     {
         // fb_data->clk_block_suspend = 1;
     }
-    else
+    //else
     {
         fb_data->clk_block_suspend = 0;
         wake_unlock(&(fb_data->flywakelock));
