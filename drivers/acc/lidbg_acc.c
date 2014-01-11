@@ -16,11 +16,30 @@ LIDBG_DEFINE;
 #define HAL_SO "/flysystem/lib/hw/flyfa.default.so"
 #define FASTBOOT_LOG_PATH LIDBG_LOG_DIR"log_fb.txt"
 
-
+int mdp_flag = 0; 
 LIDBG_FAST_PWROFF_STATUS suspend_state = PM_STATUS_LATE_RESUME_OK;
 u32 acc_triger_time = 0;
 u8 quick_resume_times = 0;
+typedef enum {
+	MDP_BLOCK_POWER_OFF,
+	MDP_BLOCK_POWER_ON
+} MDP_BLOCK_POWER_STATE;
 
+typedef enum {
+	MDP_CMD_BLOCK,
+	MDP_OVERLAY0_BLOCK,
+	MDP_MASTER_BLOCK,
+	MDP_PPP_BLOCK,
+	MDP_DMA2_BLOCK,
+	MDP_DMA3_BLOCK,
+	MDP_DMA_S_BLOCK,
+	MDP_DMA_E_BLOCK,
+	MDP_OVERLAY1_BLOCK,
+	MDP_OVERLAY2_BLOCK,
+	MDP_MAX_BLOCK
+} MDP_BLOCK_TYPE;
+
+extern void mdp_pipe_ctrl(MDP_BLOCK_TYPE block, MDP_BLOCK_POWER_STATE state,bool isr);
 static DECLARE_COMPLETION(suspend_start);
 static DECLARE_COMPLETION(acc_status_correct);
 static DECLARE_COMPLETION(completion_quick_resume);
@@ -54,6 +73,7 @@ bool ignore_wakelock = 0;
 static void acc_early_suspend(struct early_suspend *handler);
 static void acc_late_resume(struct early_suspend *handler);
 struct early_suspend early_suspend;
+//struct wake_lock testwakelock;
 #endif
 
 typedef struct
@@ -145,7 +165,16 @@ bool find_unsafe_clk(void)
 	            if((i == 14) || (i == 33) || (i == 34))
 	            {
 	            	if(i == 14)
-						lidbg_loop_warning();
+	            		{
+	            			lidbg("begin to mdp_pipe_ctr\n");
+	            			mdp_pipe_ctrl(0,0,0);
+							mdp_flag = 1;
+							msleep(500);
+					if(pc_clk_is_enabled(i))
+						 lidbg("pc_clk_is_enabled:%3d\n", i);
+					
+					lidbg_loop_warning();
+	            		}
 					
 	            	ret = 1;
 	                lidbg_fs_log(FASTBOOT_LOG_PATH, "block unsafe clk:%d\n", i);
@@ -465,10 +494,13 @@ static void acc_early_suspend(struct early_suspend *handler)
 	{
 	    check_all_clk_disable();
 	    if(find_unsafe_clk()) 
-			 complete(&completion_quick_resume);
+			lidbg("------------have clk block\n");
+		
+	 complete(&completion_quick_resume);
 
 	    fastboot_task_kill_exclude();
 	}
+	//wake_lock(&testwakelock);
 	//task_kill_select("tencent.qqmusic");
 	//task_kill_select(".flyaudio.media");
 }
@@ -476,9 +508,15 @@ static void acc_early_suspend(struct early_suspend *handler)
 static void acc_late_resume(struct early_suspend *handler)
 {
     DUMP_FUN_ENTER;
+	if(mdp_flag == 1)
+		{
+			lidbg("-----------mdp_pipe_ctr 0 1 0\n");
+			mdp_pipe_ctrl(0,1,0);
+			mdp_flag = 0;
+			}
     suspend_state = PM_STATUS_LATE_RESUME_OK; 
 	fs_save_state();
-    
+    //wake_unlock(&testwakelock);
 
 }
 #endif
@@ -508,6 +546,7 @@ static int acc_quick_resume(void *data)
 			quick_resume_times = 0;
 		}
 #else
+		//msleep(7000);
 		set_power_state(1);	
 #endif
 	}
@@ -732,6 +771,8 @@ static int  acc_probe(struct platform_device *pdev)
 
     spin_lock_init(&active_wakelock_list_lock);
 
+
+  // wake_lock_init(&(testwakelock), WAKE_LOCK_SUSPEND, "test_wake_lock");
 #ifdef CONFIG_HAS_EARLYSUSPEND
 	{
 		early_suspend.level = EARLY_SUSPEND_LEVEL_DISABLE_FB + 5; //the later the better
