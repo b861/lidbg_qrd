@@ -140,7 +140,7 @@ int check_all_clk_disable(void)
 
 //53 109 34
 
-int safe_clk[] = {113, 106, 105, 104, 103, 102, 97 ,95, 51, 32, 31, 24, 22, 20, 16, 15, 12, 10, 8, 4, 3, 1};
+int safe_clk[] = {113, 106, 105, 104, 103, 102, 97 ,95, 53, 51, 37, 32, 31, 24, 23, 22, 20, 16, 15, 12, 10, 8, 4, 3, 1};
 
 bool find_unsafe_clk(void)
 {
@@ -164,20 +164,26 @@ bool find_unsafe_clk(void)
             {
 	            if((i == 14) || (i == 33) || (i == 34))
 	            {
-	            	if(i == 14)
-	            		{
-	            			lidbg("begin to mdp_pipe_ctr\n");
-	            			mdp_pipe_ctrl(0,0,0);
-							mdp_flag = 1;
-							msleep(500);
-					if(pc_clk_is_enabled(i))
-						 lidbg("pc_clk_is_enabled:%3d\n", i);
+
+					ret = 1;
+					lidbg_fs_log(FASTBOOT_LOG_PATH, "block unsafe clk:%d\n", i);
+
 					
-					lidbg_loop_warning();
-	            		}
+					if(i == 14)
+					{
+						lidbg("begin to mdp_pipe_ctr\n");
+						mdp_pipe_ctrl(0,0,0);
+						mdp_flag = 1;
+						msleep(500);
+						if(!pc_clk_is_enabled(i))
+						{
+							lidbg("pc_clk_is_disabled:%3d\n", i);
+							ret = 0;
+						}
+						
+						lidbg_loop_warning();
+					}
 					
-	            	ret = 1;
-	                lidbg_fs_log(FASTBOOT_LOG_PATH, "block unsafe clk:%d\n", i);
 	            }
 	            else
 					lidbg("block unsafe clk:%d\n", i);
@@ -493,10 +499,8 @@ static void acc_early_suspend(struct early_suspend *handler)
 	if((g_var.fake_suspend == 0)&&(g_var.acc_flag == 0))
 	{
 	    check_all_clk_disable();
-	    if(find_unsafe_clk()) 
-			lidbg("------------have clk block\n");
-		
-	 complete(&completion_quick_resume);
+	    if(find_unsafe_clk()) 		
+	 		complete(&completion_quick_resume);
 
 	    fastboot_task_kill_exclude();
 	}
@@ -509,11 +513,11 @@ static void acc_late_resume(struct early_suspend *handler)
 {
     DUMP_FUN_ENTER;
 	if(mdp_flag == 1)
-		{
-			lidbg("-----------mdp_pipe_ctr 0 1 0\n");
-			mdp_pipe_ctrl(0,1,0);
-			mdp_flag = 0;
-			}
+	{
+		lidbg("-----------mdp_pipe_ctr 0 1 0\n");
+		mdp_pipe_ctrl(0,1,0);
+		mdp_flag = 0;
+	}
     suspend_state = PM_STATUS_LATE_RESUME_OK; 
 	fs_save_state();
     //wake_unlock(&testwakelock);
