@@ -13,9 +13,9 @@
 
 #define DEBUG_PRINT_WRITE_FLAG 0
 #define DEBUG_PRINT_READ_FLAG 0
-#define DEBUG_COUNT_FLAG 0
+#define DEBUG_COUNT_FLAG 1
 #define DEBUG_CRC_FLAG 1
-#define RD_SIZE (2048)
+#define RD_SIZE (250)
 
 struct uartConfig {
 	int fd;
@@ -94,6 +94,10 @@ int set_opt(int fd, int nSpeed, int nBits, char nEvent, int nStop)
 		cfsetispeed(&newtio, B460800);
 		cfsetospeed(&newtio, B460800);
 		break;
+	case 576000:
+		cfsetispeed(&newtio, B576000);
+		cfsetospeed(&newtio, B576000);
+		break;
 	case 921600:
 		cfsetispeed(&newtio, B921600);
 		cfsetospeed(&newtio, B921600);
@@ -132,7 +136,7 @@ int open_port(int fd, char *portName)
 {
 	long vdisable;
 
-	pUartInfo.fd = open( portName, O_RDWR | O_NOCTTY | O_NDELAY);
+	pUartInfo.fd = open( portName, O_RDWR | O_NOCTTY);
 
 	if (-1 == pUartInfo.fd)
 	{
@@ -169,11 +173,12 @@ void *write_thread_fun(void *arg)
 
 		if((pInfo->fd) > 0) //Tx
 		{
-
+			for(i=0; i<50; i++)
 				pInfo->wlen = write(pInfo->fd, wbuff, pInfo->nwrite);
-//				usleep(10 * 1000);
+
+			//usleep(10 * 1000);
 #if DEBUG_PRINT_WRITE_FLAG
-				printf("sent:%d  %s\n",pInfo->wlen,wbuff);
+			printf("sent:%d  %s\n",pInfo->wlen,wbuff);
 #endif
  		}	
 
@@ -225,33 +230,38 @@ void *read_thread_fun(void *arg)
 				}
 				printf("\n");
 #endif
-#if DEBUG_COUNT_FLAG			
-				for(i = 0; i < pInfo->rlen; i++)	//count KBytes have received
-				{
-					count ++;
-						
-					if(count % (1024) == 0 )
-                  				printf("%dkB\n", count / 1024 );
-
-				}
-#endif
 #if DEBUG_CRC_FLAG
 				tmp = rbuff[0];	
 
 				if(timesFlag != 0)
-					if(tmp != (parm + 1) % 10) {
+					if(tmp != ((parm + 1) % 10)) {
 						printf("Received error at the next time ...\n");
-						timesFlag = 0;
-						exit(0);					
+
+						printf("%d - %d",parm, tmp);
+						printf("\n\n");
+
+//						timesFlag = 0;
+//						exit(0);					
 				}
 
 				for(i = 1; i < pInfo->rlen; i++)
 				{
 
+#if DEBUG_COUNT_FLAG			
+					count ++;
+						
+					if(count % (1024 * 1024) == 0 )
+                  				printf("%dMB\n", count / (1024 * 1024) );
+
+#endif
 					if(rbuff[i] != ((tmp + 1) % 10)) {
 						printf("Received Error ...\n");
-						timesFlag = 0;
-						exit(0);					
+
+						printf("%d - %d",tmp, rbuff[i]);
+						printf("\n\n");
+
+//						timesFlag = 0;
+//						exit(0);					
 					}
 					
 					tmp = rbuff[i];
@@ -346,7 +356,6 @@ int main(int argc , char **argv)
 	
 	return 0;
 }
-
 
 
 
