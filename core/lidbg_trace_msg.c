@@ -92,7 +92,7 @@ static int thread_trace_msg_in(void *data)
 			memset(buff, '\0', sizeof(buff));
 		}
 		else
-			sleep(1);
+			msleep(1000);
 	}
 
 	return 0;
@@ -107,25 +107,30 @@ static int thread_trace_msg_out(void *data)
 	memset(buff, '\0', sizeof(buff));
 	while(1)
 	{
-		if(kfifo_is_empty(&pdev->fifo))
-		{
-			msleep(50);
-			continue;
-		}
+	
+		if(!pdev->disable_flag){
+			if(kfifo_is_empty(&pdev->fifo))
+			{
+				msleep(50);
+				continue;
+			}
 
-		down(&pdev->sem);
-		len = kfifo_out(&pdev->fifo, &buff[i], 1);
-		up(&pdev->sem);
-		
-		if(buff[i] == '\n')
-		{
-			i = 0;
-			lidbg_trace_key_word(buff);
-			memset(buff, '\0', sizeof(buff));
-			continue;
-		}
+			down(&pdev->sem);
+			len = kfifo_out(&pdev->fifo, &buff[i], 1);
+			up(&pdev->sem);
+			
+			if(buff[i] == '\n')
+			{
+				i = 0;
+				lidbg_trace_key_word(buff);
+				memset(buff, '\0', sizeof(buff));
+				continue;
+			}
 
-		i++;
+			i++;
+		}
+		else
+			msleep(1000);
 	}
 	
 	return 0;
