@@ -209,7 +209,7 @@ int bfs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *cli
     file_ptmp = file_ptr;
     while((token = strsep(&file_ptmp, "\n")) != NULL )
     {
-        if( token[0] != '#' && token[0] != '\n'  && token[0] != 18 && token[0] != 13)//del char:er,dc2 look for ASCII
+        if( token[0] != '#' && token[0] != '\n'  && token[0] != 18 && token[0] != 13  && token[0] != '\0')//del char:er,dc2 look for ASCII
         {
             if(g_kvbug_on)
                 printk("%d[%s]\n", all_purpose, token);

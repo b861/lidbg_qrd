@@ -17,4 +17,5 @@ fastboot_not_kill_list.conf
 drivers.conf
 state.conf
 wakelock_detail_list.conf
+lidbg_trace_msg_string_list.conf
 ###############

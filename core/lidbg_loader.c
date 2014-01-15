@@ -11,6 +11,7 @@ char *insmod_list[] =
     "lidbg_mem_log.ko",
     "lidbg_common.ko",
     "lidbg_fileserver.ko",
+    "lidbg_trace_msg.ko",
     "lidbg_wakelock_stat.ko",
     "lidbg_msg.ko",
     "lidbg_servicer.ko",

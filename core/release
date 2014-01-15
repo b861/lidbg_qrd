@@ -14,6 +14,7 @@ lidbg_main.ko
 lidbg_misc.ko
 lidbg_wakelock_stat.ko
 lidbg_mem_log.ko
+lidbg_trace_msg.ko
 core.conf
 cmd.conf
 build_time.conf
