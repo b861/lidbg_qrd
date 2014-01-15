@@ -91,6 +91,8 @@ static int thread_trace_msg_in(void *data)
 			msleep(50);
 			memset(buff, '\0', sizeof(buff));
 		}
+		else
+			sleep(1);
 	}
 
 	return 0;
