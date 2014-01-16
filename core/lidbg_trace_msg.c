@@ -5,6 +5,7 @@
 #define DEVICE_NAME "lidbg_trace_msg"
 #define LIDBG_TRACE_MSG_FIFO_SIZE		(32  * 1024)
 #define LIDBG_TRACE_MSG_PATH "/data/lidbg/lidbg_trace_msg.txt"
+#define TRACE_MSG_FROM_KMSG 1
 
 static LIST_HEAD(lidbg_trace_msg_string_list);
 
@@ -13,7 +14,6 @@ struct lidbg_trace_message_device
 	char *name;
 	int disable_flag;
 	struct kfifo fifo;
-	struct cdev cdev;
 	struct semaphore sem;
 };
 
@@ -94,7 +94,6 @@ static int thread_trace_msg_in(void *data)
 		else
 			msleep(1000);
 	}
-
 	return 0;
 }
 
@@ -154,7 +153,6 @@ static ssize_t lidbg_trace_msg_write (struct file *filp, const char __user *buf,
 {
 	int ret = 0;
 	char pbuff[256];
-
 	memset(pbuff, '\0', sizeof(pbuff));
 
 	if (copy_from_user( pbuff, buf, count))
@@ -185,12 +183,9 @@ static  struct file_operations lidbg_trace_msg_fops =
 
 static int  lidbg_trace_msg_probe(struct platform_device *ppdev)
 {
-	int ret, err;
-	int major_number = 0;
-	dev_t dev_number;
+	int ret;
 
 	DUMP_FUN;
-	dev_number = MKDEV(major_number, 0);
 	pdev = (struct lidbg_trace_message_device *)kmalloc( sizeof(struct lidbg_trace_message_device), GFP_KERNEL);
 	if (pdev == NULL)
 	{
@@ -198,8 +193,17 @@ static int  lidbg_trace_msg_probe(struct platform_device *ppdev)
         	printk("Kmalloc space for lidbg msg failed.\n");
         	return ret;
 	}
+	ret = kfifo_alloc(&pdev->fifo, LIDBG_TRACE_MSG_FIFO_SIZE, GFP_KERNEL);
+	if(ret)
+	{
+		printk("Alloc kfifo for lidbg dev failed.\n");
+		return ret;
+	}	
+	pdev->disable_flag = 1;
 
-	
+#if 0	
+	dev_number = MKDEV(major_number, 0);
+
 	if(major_number)
 	{
 	        ret = register_chrdev_region(dev_number, 1, DEVICE_NAME);
@@ -213,18 +217,11 @@ static int  lidbg_trace_msg_probe(struct platform_device *ppdev)
 	cdev_init(&pdev->cdev, &lidbg_trace_msg_fops);
 	pdev->cdev.owner = THIS_MODULE;
 	pdev->cdev.ops = &lidbg_trace_msg_fops;
-	pdev->disable_flag = 1;
-	
-	ret = kfifo_alloc(&pdev->fifo, LIDBG_TRACE_MSG_FIFO_SIZE, GFP_KERNEL);
-	if(ret)
-	{
-		printk("Alloc kfifo for lidbg dev failed.\n");
-		return ret;
-	}
 
 	err = cdev_add(&pdev->cdev, dev_number, 1);
 	if (err)
 		printk( "Add cdev error.\n");
+#endif
 
 	sema_init(&pdev->sem, 1);
 
@@ -232,10 +229,14 @@ static int  lidbg_trace_msg_probe(struct platform_device *ppdev)
 		fs_fill_list("/system/lib/modules/out/lidbg_trace_msg_string_list.conf", FS_CMD_FILE_LISTMODE, &lidbg_trace_msg_string_list);
 
 	fs_file_separator(LIDBG_TRACE_MSG_PATH);
+	fs_register_filename_list(LIDBG_TRACE_MSG_PATH, true);
 	FS_REGISTER_INT(pdev->disable_flag, "trace_msg_disable", 1, NULL);
-
+#if  TRACE_MSG_FROM_KMSG
 	CREATE_KTHREAD(thread_trace_msg_in, NULL);
+#endif
 	CREATE_KTHREAD(thread_trace_msg_out, NULL);
+
+	lidbg_new_cdev(&lidbg_trace_msg_fops, DEVICE_NAME);
 
 	return 0;
 }
