@@ -69,6 +69,7 @@ static int ts_nod_fd, ret;
 struct lidbg_dev_smem *plidbg_smem = NULL;
 
 static char logcat_name[64];
+static char kmsg_name[64];
 int read_from_file(const char *path, char *buf, size_t size)
 {
     if (!path)
@@ -102,16 +103,26 @@ void get_time(char *datastring)
     if(datastring)
         strftime(datastring, 64, tmFormat, local);
 }
-void compose_logcat_name(char *logname)
+void compose_log_name(char *logname, unsigned int log_type)  //log_type 0: logcat     1:kmsg 
 {
     char mchine_id[32];
     char current_time[32];
+	
     get_time(current_time);
-    if ( read_from_file("/data/lidbg/MIF.txt", mchine_id, sizeof(mchine_id)) > 0)
-        sprintf(logname, "logcat_%s_%s.txt", mchine_id, current_time);
+    if ( read_from_file("/data/lidbg/MIF.txt", mchine_id, sizeof(mchine_id)) > 0){
+	if(log_type==0)	
+        	sprintf(logname, "logcat_%s_%s.txt", mchine_id, current_time);
+	else 
+		sprintf(logname, "kmsg_%s_%s.txt", mchine_id, current_time);
+    }
     else
-        sprintf(logname, "logcat_default_%s.txt", current_time);
-    lidbg("compose_logcat_name:new.[%s]\n", logname);
+    {
+    	if(log_type==0)
+        	sprintf(logname, "logcat_default_%s.txt", current_time);
+	else
+		sprintf(logname, "kmsg_default_%s.txt", current_time);
+    }
+    lidbg("compose_log_name:new.[%s]\n", logname);
 }
 
 void thread_fastboot(void)
@@ -204,7 +215,7 @@ loop_read:
             else flag = 1;
             lidbg("logcat+\n\n");
 
-            compose_logcat_name(logcat_name);
+            compose_log_name(logcat_name, 0);
 
             sprintf(cmd, "date >/data/%s", logcat_name);
             system(cmd);
@@ -220,23 +231,30 @@ loop_read:
         case LOG_DMESG :
         {
             static int flag = 0;
+	    char cmd[128];
             if(flag)break;
             else flag = 1;
-            lidbg("kmsg+\n");
-            system("date > /data/kmsg.txt");
+            lidbg("\n\n\nkmsg+\n\n");
+
+            compose_log_name(kmsg_name,1);
+
+            sprintf(cmd, "date >/data/%s", kmsg_name);
+            system(cmd);
+            memset(cmd, '\0', sizeof(cmd));
             sleep(1);
-            system("chmod 777 /data/kmsg.txt");
+            system("chmod 777 /data/kmsg*");
             sleep(1);
-            system("cat /proc/kmsg >> /data/kmsg.txt &");
+            sprintf(cmd, "cat /proc/kmsg >> /data/%s &", kmsg_name);
+            system(cmd);
             lidbg("kmsg-\n");
             break;
         }
         case LOG_CLEAR_LOGCAT_KMSG :
         {
-            lidbg("clear+logcat*&&kmsg.txt\n");
+            lidbg("clear+logcat*&&kmsg*\n");
             system("rm /data/logcat*");
-            system("rm /data/kmsg.txt");
-            lidbg("clear-logcat*&&kmsg.txt\n");
+            system("rm /data/kmsg*");
+            lidbg("clear-logcat*&&kmsg*\n");
             break;
         }
 
