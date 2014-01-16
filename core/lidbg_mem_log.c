@@ -141,9 +141,10 @@ static int lidbg_get_curr_time(char *time_string, struct rtc_time *ptm)
 static void lidbg_msg_is_enough(int len)
 {
 	if(kfifo_is_full(&dev->fifo) || (kfifo_avail(&dev->fifo) < len))
-	{
+	{	
+		int ret =0;
 		char msg_clean_buff[len];
- 		kfifo_out(&dev->fifo, msg_clean_buff, len);
+ 		ret = kfifo_out(&dev->fifo, msg_clean_buff, len);
 	}
 
 }
@@ -238,7 +239,8 @@ static int  lidbg_msg_probe(struct platform_device *pdev)
 	int ret, err;
 	int major_number = 0;
 	dev_t dev_number;
-
+	static struct class *class_install;
+	
 #ifndef MEM_LOG_EN
 	return 0;
 #endif
@@ -277,6 +279,14 @@ static int  lidbg_msg_probe(struct platform_device *pdev)
 	if (err)
 		printk( "Add cdev error.\n");
 
+	class_install = class_create(THIS_MODULE, "trace_msg");
+	if(IS_ERR(class_install))
+	{
+    		printk( "lidbg mem log class_create err\n");
+		return -1;
+	}
+	device_create(class_install, NULL, dev_number, NULL, "%s%d", DEVICE_NAME, 0);
+	
 	 sema_init(&dev->sem, 1);
 
 	lidbg_mem_log_ready = 1;
