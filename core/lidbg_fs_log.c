@@ -75,7 +75,7 @@ again:
 
     inode = filep->f_dentry->d_inode;
     file_len = inode->i_size;
-    file_len = file_len + 2;
+    file_len = file_len + 1;
 
 
     if(file_len > max_file_len * MEM_SIZE_1_MB)

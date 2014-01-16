@@ -113,7 +113,7 @@ static int mem_log_file_amend(char *file2amend, char *str_append)
 
     inode = filep->f_dentry->d_inode;
     file_len = inode->i_size;
-    file_len = file_len + 2;
+    file_len = file_len + 1;
 
     filep->f_op->llseek(filep, 0, SEEK_END);//note:to the end to append;
 

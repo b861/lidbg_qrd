@@ -282,7 +282,7 @@ int update_list(const char *filename, struct list_head *client_list)
 
     inode = filep->f_dentry->d_inode;
     file_len = inode->i_size;
-    file_len = file_len + 2;
+    file_len = file_len + 1;
 
     file_ptr = (unsigned char *)kzalloc(file_len, GFP_KERNEL);
     if(file_ptr == NULL)
