@@ -70,7 +70,8 @@ static int thread_trace_msg_in(void *data)
 	int len;
 	char buff[256];
 	struct file *filep;
-
+	mm_segment_t old_fs;
+	
 	filep = filp_open("/proc/kmsg", O_RDONLY, 0644);
 	if(filep < 0)
 		printk("Open /proc/kmsg failed !\n");
@@ -79,6 +80,9 @@ static int thread_trace_msg_in(void *data)
 	
 	while(1)
 	{
+		old_fs = get_fs();
+		set_fs(get_ds());
+		
 		if(!pdev->disable_flag) {
 			len = filep->f_op->read(filep, buff, 256, &filep->f_pos);
 
@@ -93,7 +97,11 @@ static int thread_trace_msg_in(void *data)
 		}
 		else
 			msleep(1000);
+		
+		set_fs(old_fs);
 	}
+	
+	filp_close(filep, 0);
 	return 0;
 }
 
@@ -200,28 +208,6 @@ static int  lidbg_trace_msg_probe(struct platform_device *ppdev)
 		return ret;
 	}	
 	pdev->disable_flag = 1;
-
-#if 0	
-	dev_number = MKDEV(major_number, 0);
-
-	if(major_number)
-	{
-	        ret = register_chrdev_region(dev_number, 1, DEVICE_NAME);
-	}
-	else
-	{
-		ret = alloc_chrdev_region(&dev_number, 0, 1, DEVICE_NAME);
-		major_number = MAJOR(dev_number);
-	}
-
-	cdev_init(&pdev->cdev, &lidbg_trace_msg_fops);
-	pdev->cdev.owner = THIS_MODULE;
-	pdev->cdev.ops = &lidbg_trace_msg_fops;
-
-	err = cdev_add(&pdev->cdev, dev_number, 1);
-	if (err)
-		printk( "Add cdev error.\n");
-#endif
 
 	sema_init(&pdev->sem, 1);
 
