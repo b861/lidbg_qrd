@@ -49,6 +49,29 @@
 #include <linux/vmalloc.h>
 #endif
 
+#ifndef _MDP_STRUCT__
+#define _MDP_STRUCT__
+typedef enum {
+	MDP_BLOCK_POWER_OFF,
+	MDP_BLOCK_POWER_ON
+} MDP_BLOCK_POWER_STATE;
+
+typedef enum {
+	MDP_CMD_BLOCK,
+	MDP_OVERLAY0_BLOCK,
+	MDP_MASTER_BLOCK,
+	MDP_PPP_BLOCK,
+	MDP_DMA2_BLOCK,
+	MDP_DMA3_BLOCK,
+	MDP_DMA_S_BLOCK,
+	MDP_DMA_E_BLOCK,
+	MDP_OVERLAY1_BLOCK,
+	MDP_OVERLAY2_BLOCK,
+	MDP_MAX_BLOCK
+} MDP_BLOCK_TYPE;
+
+#endif
+
 
 #define LOG_ALL (3)
 #define LOG_CONT    (4)
@@ -90,6 +113,7 @@
 #define NOTIFIER_MAJOR_SYSTEM_STATE (5)
 #define NOTIFIER_MINOR_SYSTEM_OFF (0)
 #define NOTIFIER_MINOR_SYSTEM_ON (1)
+
 
 
 #if (defined(BUILD_SOC) || defined(BUILD_CORE) || defined(BUILD_DRIVERS))
@@ -194,7 +218,6 @@ typedef enum
     FLY_READY_TO_SUSPEND,
     FLY_SUSPEND,
 } FLY_SYSTEM_STATUS;
-
 
 #endif
 
@@ -359,6 +382,7 @@ struct lidbg_fn_t
 
     bool (*pfnSOC_PWR_Status_Accon)(void);
 
+    void(*pfn_Call_mdp_pipe_ctrl)(MDP_BLOCK_TYPE block, MDP_BLOCK_POWER_STATE state, unsigned int isr);
 
 };
 

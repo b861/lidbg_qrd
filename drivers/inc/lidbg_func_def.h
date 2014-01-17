@@ -116,5 +116,7 @@ static inline int check_pt(void)
 
 #define SOC_PWR_Status_Accon (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_PWR_Status_Accon))
 
+#define SOC_Call_mdp_pipe_ctrl (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfn_Call_mdp_pipe_ctrl))
+
 #endif
 

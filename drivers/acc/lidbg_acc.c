@@ -20,26 +20,7 @@ int mdp_flag = 0;
 LIDBG_FAST_PWROFF_STATUS suspend_state = PM_STATUS_LATE_RESUME_OK;
 u32 acc_triger_time = 0;
 u8 quick_resume_times = 0;
-typedef enum {
-	MDP_BLOCK_POWER_OFF,
-	MDP_BLOCK_POWER_ON
-} MDP_BLOCK_POWER_STATE;
 
-typedef enum {
-	MDP_CMD_BLOCK,
-	MDP_OVERLAY0_BLOCK,
-	MDP_MASTER_BLOCK,
-	MDP_PPP_BLOCK,
-	MDP_DMA2_BLOCK,
-	MDP_DMA3_BLOCK,
-	MDP_DMA_S_BLOCK,
-	MDP_DMA_E_BLOCK,
-	MDP_OVERLAY1_BLOCK,
-	MDP_OVERLAY2_BLOCK,
-	MDP_MAX_BLOCK
-} MDP_BLOCK_TYPE;
-
-extern void mdp_pipe_ctrl(MDP_BLOCK_TYPE block, MDP_BLOCK_POWER_STATE state,bool isr);
 static DECLARE_COMPLETION(suspend_start);
 static DECLARE_COMPLETION(acc_status_correct);
 static DECLARE_COMPLETION(completion_quick_resume);
@@ -170,7 +151,7 @@ bool find_unsafe_clk(void)
 					if(i == 14)
 					{
 						lidbg("begin to mdp_pipe_ctr\n");
-						mdp_pipe_ctrl(0,0,0);
+						SOC_Call_mdp_pipe_ctrl(0,0,0);
 						mdp_flag = 1;
 						msleep(500);
 						if(!pc_clk_is_enabled(i))
@@ -513,7 +494,7 @@ static void acc_late_resume(struct early_suspend *handler)
 	if(mdp_flag == 1)
 	{
 		lidbg("-----------mdp_pipe_ctr 0 1 0\n");
-		mdp_pipe_ctrl(0,1,0);
+		SOC_Call_mdp_pipe_ctrl(0,1,0);
 		mdp_flag = 0;
 	}
     suspend_state = PM_STATUS_LATE_RESUME_OK; 
