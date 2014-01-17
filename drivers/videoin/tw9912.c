@@ -208,7 +208,7 @@ vedio_format_t tw9912_testing_channal_signal(vedio_channel_t Channel)
         tw9912_dbg("the_last_config.Channel  == Channel so not have change channal\n");
     }
 
-    for(i = 0; i < 2; i++)
+    for(i = 0; i < 20; i++)
     {
         tw9912_read(0x01, &signal); //register 0x02 channel selete
         if(signal & 0x80) printk("tw9912:fly_video at channal (%d) not find signal\n", Channel);
