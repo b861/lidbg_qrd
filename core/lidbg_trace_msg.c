@@ -68,7 +68,7 @@ static void lidbg_trace_msg_is_enough(int len)
 static int thread_trace_msg_in(void *data)
 {
 	int len;
-	char buff[256];
+	char buff[512];
 	struct file *filep;
 	mm_segment_t old_fs;
 	
@@ -84,7 +84,7 @@ static int thread_trace_msg_in(void *data)
 		set_fs(get_ds());
 		
 		if(!pdev->disable_flag) {
-			len = filep->f_op->read(filep, buff, 256, &filep->f_pos);
+			len = filep->f_op->read(filep, buff, 512, &filep->f_pos);
 
 			lidbg_trace_msg_is_enough(len);
 
@@ -92,7 +92,7 @@ static int thread_trace_msg_in(void *data)
 			kfifo_in(&pdev->fifo, buff, len);
 			up(&pdev->sem);
 
-			msleep(50);
+			msleep(100);
 			memset(buff, '\0', sizeof(buff));
 		}
 		else
@@ -109,7 +109,7 @@ static int thread_trace_msg_out(void *data)
 {
 	int i = 0;
 	int len;
-	char buff[256];
+	char buff[512];
 
 	memset(buff, '\0', sizeof(buff));
 	while(1)
@@ -126,7 +126,7 @@ static int thread_trace_msg_out(void *data)
 			len = kfifo_out(&pdev->fifo, &buff[i], 1);
 			up(&pdev->sem);
 			
-			if(buff[i] == '\n')
+			if(buff[i] == '\n' || (i > 510))
 			{
 				i = 0;
 				lidbg_trace_key_word(buff);
