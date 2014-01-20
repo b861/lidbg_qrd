@@ -93,7 +93,6 @@ static int thread_trace_msg_in(void *data)
 			up(&pdev->sem);
 
 			msleep(100);
-			memset(buff, '\0', sizeof(buff));
 		}
 		else
 			msleep(1000);
@@ -126,11 +125,11 @@ static int thread_trace_msg_out(void *data)
 			len = kfifo_out(&pdev->fifo, &buff[i], 1);
 			up(&pdev->sem);
 			
-			if(buff[i] == '\n' || (i > 510))
+			if(buff[i] == '\n' || (i >= 510))
 			{
-				i = 0;
+				buff[i+1] = '\0';
 				lidbg_trace_key_word(buff);
-				memset(buff, '\0', sizeof(buff));
+				i = 0;
 				continue;
 			}
 
