@@ -623,7 +623,6 @@ static int soc_dev_probe(struct platform_device *pdev)
 
     }
 
-    lidbg_new_cdev(&dev_fops, "flydev");
     FS_REGISTER_INT(i2c_ctrl, "i2c_ctrl", 0, NULL);
     FS_REGISTER_INT(temp_log_freq, "temp_log_freq", 5, NULL);
     fs_file_separator(TEMP_LOG_PATH);
@@ -697,6 +696,10 @@ static int soc_dev_probe(struct platform_device *pdev)
     Thermal_task =  kthread_run(thread_thermal, NULL, "flythermalthread");
     FS_REGISTER_INT(fan_onoff_temp, "fan_onoff_temp", 65, NULL);
 #endif
+
+    lidbg_new_cdev(&dev_fops, "flydev");
+
+
     return 0;
 
 }
