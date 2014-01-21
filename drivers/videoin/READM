@@ -1,0 +1,110 @@
+echo "c key home 2" > /dev/mlidbg0
+echo "c key back 2" > /dev/mlidbg0
+echo "c key enter 2" > /dev/mlidbg0
+echo "c key end 2" > /dev/mlidbg0
+echo "c menu end 2" > /dev/mlidbg0
+
+echo "c i2c w 1 0x7 4 0x10 0x2 0x1" > /dev/mlidbg0
+echo "c i2c r 1 0x5c 0x80 20" > /dev/mlidbg0
+
+echo "c mem r 0xa1000010 1" > /dev/mlidbg0
+
+MIPI CSI1 MIPI_PROTOCOL_STATUS
+    echo "c mem r 0xa1000010 1" > /dev/mlidbg0
+    echo "c video ResetNTSCp" > /dev/mlidbg0
+
+MIPI CSI1 MIPI_SHORT_PACKET_CAPTURE_STATUS
+    echo "c mem r 0xa1000014 1" > /dev/mlidbg0
+
+MIPI CSI0 MIPI_PROTOCOL_STATUS
+    echo "c mem r 0xa0f00010 1" > /dev/mlidbg0
+    echo "c video ResetNTSCp" > /dev/mlidbg0
+MIPI CSI0 MIPI_SHORT_PACKET_CAPTURE_STATUS
+    echo "c mem r 0xa0f00014 1" > /dev/mlidbg0
+
+echo "c video on" > /dev/lidbg_hal
+echo "c video off" > /dev/lidbg_hal
+
+echo "c i2c r 1 0x45 0x1e 1" > /dev/lidbg_hal  
+echo "c i2c w 1 0x45 2 0x3 0x7" > /dev/lidbg_hal
+
+注：
+    echo "c TC358 Read 0x0100 16" > /dev/lidbg_hal
+                      add  width
+    echo "c TC358 Write 0x0100 0x0123 16" > /dev/lidbg_hal
+                  add     valu  width
+
+
+echo "c video Tw9912 write 0x13 0xa0" > /dev/lidbg_hal
+echo "c video Tw9912 Read 0x23" > /dev/lidbg_hal
+
+亮度
+    echo "c video Tw9912 write 0x10 0xe7" > /dev/lidbg_hal
+    echo "c video Tw9912 Read 0x10" > /dev/lidbg_hal
+对比度
+    echo "c video Tw9912 write 0x11 0x64" > /dev/lidbg_hal
+    echo "c video Tw9912 Read 0x11" > /dev/lidbg_hal
+HUE
+    echo "c video Tw9912 write 0x15 0x0" > /dev/lidbg_hal
+    echo "c video Tw9912 Read 0x15" > /dev/lidbg_hal
+chroma u
+chroma v
+    echo "c video Tw9912 write 0x13 0x80" > /dev/lidbg_hal
+    echo "c video Tw9912 write 0x14 0x80" > /dev/lidbg_hal
+
+开发备忘：
+1、如何dump视频的YUV原数据，
+脚本如下：
+
+#将如下的内容写入一个脚本XX.sh中运行，如果没有/root/桌面/dump/ 请先建立该文件夹 dump
+while :;do
+adb shell chmod 777 data/
+echo "按回车,继续"
+read
+echo "删除本地文件dump下的视频数据"
+rm -f /root/桌面/dump/*
+echo "等待手机中。。。"
+adb wait-for-device && adb shell rm data/*.yuv
+echo "删除手机文件data下的视频数据"
+echo "dump...."
+adb shell setprop persist.camera.dumpimg 1
+sleep 2
+adb shell setprop persist.camera.dumpimg 0
+
+adb pull data/0p_720x480.yuv /root/桌面/dump
+adb pull data/1p_720x480.yuv /root/桌面/dump
+adb pull data/2p_720x480.yuv /root/桌面/dump
+adb pull data/3p_720x480.yuv /root/桌面/dump
+adb pull data/4p_720x480.yuv /root/桌面/dump
+adb pull data/5p_720x480.yuv /root/桌面/dump
+adb pull data/6p_720x480.yuv /root/桌面/dump
+adb pull data/7p_720x480.yuv /root/桌面/dump
+adb pull data/8p_720x480.yuv /root/桌面/dump
+adb pull data/9p_720x480.yuv /root/桌面/dump
+done
+#脚本结束
+
+dump的代码实现在QcameaHWI_Preview.cpp中的 mHalCameCtrl->dumpFrameToFile(xxx
+
+2、如何查看帧率
+开启帧率打印
+adb shell setprop persist.debug.sf.showfps 1
+关闭帧率打印
+adb shell setprop persist.debug.sf.showfps 0
+过滤adb logcat | grep "Preview Frames Per Second"
+帧率实现在 QcameaHWI_Preview.cpp     mHalCamCtrl->debugShowPreviewFPS();
+
+
+3、如何丢帧
+在QcameaHWI_Preview.cpp status_t QCameraStream_preview::processPreviewFrame ( 中有个计数变量 index =1;
+
+4、CSI 通道数的选择，ov5647_truly_cm6868_v4l2.c ov5647_truly_cm6868_csi_params = 中的 lane_cnt = 2; 2表示用双通道（2对数据通道1对时钟通道），1就用 1 对数据通道传输
+
+5、视频数据分辨率的设置 在 msm_sensor.c msm_sensor_get_output_info(  中
+
+6、芯片配置的内核入口 ov5647_truly_cm6868_v4l2.c ov5647_truly_cm6868_sensor_setting( 的 video_init_config(
+
+7、视频分屏判断入口在 cameaHWI_Preview.cpp 的 status_t QCameraStream_preview::processPreviewFrame (  实现在FlyCamea.cpp中
+
+8、GPIo i2c 等配置在板文件 board-msm7627a-camera.c 中的宏 CONFIG_OV5647_TRULY_CM6868下
+

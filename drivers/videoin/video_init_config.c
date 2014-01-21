@@ -40,6 +40,10 @@ void chips_hardware_reset(void)
     //tw9912_hardware_reset();
     tc358746xbg_hardware_reset();
 }
+/*
+函数名：int static video_signal_channel_switching_occurs(void)
+功能：  通道变换时，复位9912，（CVBS切到YUV时，YUV解码出问题，来一次复位问题解决）
+*/
 int static video_signal_channel_switching_occurs(void)
 {
     printk("TC358:video_signal_channel_switching_occurs() \n");
@@ -56,15 +60,18 @@ int static video_image_config_parameter_buffer(void)
 {
     if (info_com_top_Channel == YIN3)
     {
+/*
+目前倒车的亮度等值，只有一下的一组。
+*/
         /**************************************Astren************************************************/
-        if(TW9912_Image_Parameter_fly[1].valu == 240)
+        if(TW9912_Image_Parameter_fly[1].valu == 240)//240 是和蒋工商量好的值，用于区别目前是倒车的配置
         {
             printk("Astern 2 Normal \n");
             flag_now_config_channal_AUX_or_Astren = 0;
             if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
             {
-                Tw9912_image_global_AUX_BACK[0][1] = 0x0;//honda xiyu is 31 // is good 00
-                Tw9912_image_global_AUX_BACK[1][1] = 0x61;//honda xiyu 5c //is good 58
+                Tw9912_image_global_AUX_BACK[0][1] = 0x0;
+                Tw9912_image_global_AUX_BACK[1][1] = 0x61;
                 Tw9912_image_global_AUX_BACK[2][1] = 0x00;
                 Tw9912_image_global_AUX_BACK[3][1] = 0xff;
                 Tw9912_image_global_AUX_BACK[4][1] = 0xff;
@@ -72,8 +79,8 @@ int static video_image_config_parameter_buffer(void)
             }
             else//PALi
             {
-                Tw9912_image_global_AUX_BACK_PAL_I[0][1] = 0x0; // is good 00
-                Tw9912_image_global_AUX_BACK_PAL_I[1][1] = 0x61; //is good 58
+                Tw9912_image_global_AUX_BACK_PAL_I[0][1] = 0x0; 
+                Tw9912_image_global_AUX_BACK_PAL_I[1][1] = 0x61; 
                 Tw9912_image_global_AUX_BACK_PAL_I[2][1] = 0x00;
                 Tw9912_image_global_AUX_BACK_PAL_I[3][1] = 0xff;
                 Tw9912_image_global_AUX_BACK_PAL_I[4][1] = 0xff;
@@ -87,8 +94,8 @@ int static video_image_config_parameter_buffer(void)
             flag_now_config_channal_AUX_or_Astren = 0;
             if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
             {
-                Tw9912_image_global_AUX_BACK[0][1] = 0x15;//honda xiyu is 31 // is good 00
-                Tw9912_image_global_AUX_BACK[1][1] = 0x61;//honda xiyu 5c //is good 58
+                Tw9912_image_global_AUX_BACK[0][1] = 0x15;
+                Tw9912_image_global_AUX_BACK[1][1] = 0x61;
                 Tw9912_image_global_AUX_BACK[2][1] = 0x00;
                 Tw9912_image_global_AUX_BACK[3][1] = 0xff;
                 Tw9912_image_global_AUX_BACK[4][1] = 0xff;
@@ -96,8 +103,8 @@ int static video_image_config_parameter_buffer(void)
             }
             else//PALi
             {
-                Tw9912_image_global_AUX_BACK_PAL_I[0][1] = 0x15; // is good 00
-                Tw9912_image_global_AUX_BACK_PAL_I[1][1] = 0x61; //is good 58
+                Tw9912_image_global_AUX_BACK_PAL_I[0][1] = 0x15; 
+                Tw9912_image_global_AUX_BACK_PAL_I[1][1] = 0x61; 
                 Tw9912_image_global_AUX_BACK_PAL_I[2][1] = 0x00;
                 Tw9912_image_global_AUX_BACK_PAL_I[3][1] = 0xff;
                 Tw9912_image_global_AUX_BACK_PAL_I[4][1] = 0xff;
@@ -278,7 +285,7 @@ int static video_image_config_begin(void)
 #endif
     return ret;
 }
-int flyVideoImageQualityConfig_in(Vedio_Effect cmd , u8 valu)
+int flyVideoImageQualityConfig_in(Vedio_Effect cmd , u8 valu)//valu的值的范围是0～10
 {
     printk("flyvideo_image_config_begin(%d,%d)\n", cmd, valu);
     switch(cmd)
@@ -310,16 +317,16 @@ int flyVideoImageQualityConfig_in(Vedio_Effect cmd , u8 valu)
     return 0;
 }
 int tw9912_config_for_cvbs_signal(vedio_channel_t Channel);
-int flyVideoInitall_in(u8 Channel)
-{
+int flyVideoInitall_in(u8 Channel)//给蒋工的视频通道切换接口
+{//该函数实际上是改变通道标志变量的值，没有实际改变芯片的通道
     int ret = 1 ;
     mutex_lock(&lock_chipe_config);
     printk("flyVideoInitall_in(%d)\n", Channel);
     if (Channel >= YIN0 && Channel <= NOTONE)
     {
         info_com_top_Channel = Channel;
-        if(Channel == YIN2)//dvd
-            info_com_top_Channel = SEPARATION;
+        if(Channel == YIN2)//DVD通道
+            info_com_top_Channel = SEPARATION;//DVD 的 逐行视频
     }
     else
     {
@@ -366,7 +373,7 @@ vedio_format_t camera_open_video_signal_test_in(void)
     down(&sem);
     return camera_open_video_signal_test_in_2();
 }
-vedio_format_t flyVideoTestSignalPin_in(u8 Channel)
+vedio_format_t flyVideoTestSignalPin_in(u8 Channel)//给蒋工的视频检测函数接口
 {
     static vedio_format_t printk_count_flag_next = 0;
     static u8 printk_format_count = 0;
@@ -377,7 +384,7 @@ vedio_format_t flyVideoTestSignalPin_in(u8 Channel)
     if(
         ( (the_last_config.Channel == YIN2 || the_last_config.Channel == SEPARATION) && Channel == YIN3) || \
         (the_last_config.Channel == YIN3  && (Channel == YIN2 || Channel == SEPARATION))
-    )
+    )//这次和上次的通道不是一个通道
     {
         video_signal_channel_switching_occurs();
     }
@@ -419,7 +426,7 @@ AGAIN_TEST_FOR_BACK_NTSC_I:
         else goto_agian_test = 0;
     }
     if (printk_count_flag_next != ret || printk_format_count > 20)
-    {
+    {//打印屏蔽，同样的信息每20次输出一个，不一样马上输出
         printk_format_count = 0;
         printk_count_flag_next = ret;
         printk("C=%d,F=%d\n", Channel, ret);
@@ -597,7 +604,7 @@ static void chips_config_yuv_begin()
     tc358746xbg_config_begin(NTSC_P);
     printk("Vedio Format Is NTSCp\n");
 }
-void chips_config_begin(vedio_format_t config_pramat)// All start
+void chips_config_begin(vedio_format_t config_pramat)// 配置主入口在内核的ov5647_truly_cm6868_v4l2.c 的xxx_setting_xx中调用
 {
     printk("\n\nVideo Module Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);
     video_config_debug("tw9912:config channal is %d\n", info_com_top_Channel);
