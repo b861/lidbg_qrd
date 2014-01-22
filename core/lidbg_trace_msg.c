@@ -1,6 +1,5 @@
 
 #include "lidbg.h"
-#include "lidbg_fs.h"
 
 #define DEVICE_NAME "lidbg_trace_msg"
 #define LIDBG_TRACE_MSG_FIFO_SIZE		(32  * 1024)

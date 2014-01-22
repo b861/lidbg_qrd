@@ -1,6 +1,5 @@
 
 #include "lidbg.h"
-#include "lidbg_fs.h"
 
 //zone below [fs.confops.tools]
 LIST_HEAD(lidbg_drivers_list);

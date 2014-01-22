@@ -1,6 +1,5 @@
 
 #include "lidbg.h"
-#include "lidbg_fs.h"
 
 //zone below [tools]
 #define FS_VERSION "FS.VERSION:  [20131031]"

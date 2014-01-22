@@ -1,7 +1,5 @@
 
 #include "lidbg.h"
-#include "lidbg_fs.h"
-
 //zone below [fs.cmn.tools]
 LIST_HEAD(fs_filedetec_list);
 LIST_HEAD(fs_filename_list);
