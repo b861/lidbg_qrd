@@ -141,7 +141,7 @@ void FlyCameraGetInfo(mm_camera_ch_data_buf_t *Frame,QCameraHardwareInterface *m
 
 }
 static int ToFindBlackLineAndSetTheTw9912VerticalDelayRegister(mm_camera_ch_data_buf_t *frame);
-bool FlyCameraImageDownFindBlackLine()
+bool FlyCameraImageDownFindBlackLine()//下移动图像 寻找黑线
 {
 		if(video_channel_status[0] == '3' && ToFindBlackLineAndSetTheTw9912VerticalDelayRegister_is_ok == false)//onle at Astren and not PAL
 			{
@@ -153,7 +153,7 @@ bool FlyCameraImageDownFindBlackLine()
 			}
 return 0;
 }
-void FlyCameraThisIsFirstOpenAtDVD()
+void FlyCameraThisIsFirstOpenAtDVD()//第一次打开DVD做一次重新的preview
 {
 	if(video_channel_status[0] == '1' && global_Fream_is_first == true)
 			{
@@ -182,7 +182,7 @@ void FlyCameraThisIsFirstOpenAtDVD()
 						 global_Fream_is_first = false;
 			}
 }
-void FlyCameraNotSignalAtLastTime()
+void FlyCameraNotSignalAtLastTime()//在上次的倒车时候 ，没检测到视频输入信号要重新配置下视频芯片和re preview
 {
 	if(video_show_status[0] == '0' && rePreview_count > 100)
 		{//发现黑屏 且 视频在上次打开没有视频源输入
@@ -235,7 +235,7 @@ void *CameraRestartPreviewThread(void *mHalCamCtrl1)
     return NULL;
 }
 
-static bool ToFindBlackLine(mm_camera_ch_data_buf_t *frame)
+static bool ToFindBlackLine(mm_camera_ch_data_buf_t *frame)//寻找是否真的存在黑线（分屏判断确定）
 {
 	unsigned char *piont_y,*piont_y_last;
 	unsigned int i,j,i_last=0;
@@ -357,7 +357,7 @@ static int ToFindBlackLineAndSetTheTw9912VerticalDelayRegister(mm_camera_ch_data
 OPEN_ERR:
 return 0;
 }
-static bool VideoItselfBlackJudge(mm_camera_ch_data_buf_t *frame)
+static bool VideoItselfBlackJudge(mm_camera_ch_data_buf_t *frame)//判断视频是否是本身是黑色的数据
 {
 	unsigned int black_count;
 	int i =0 ,j =0;
@@ -522,7 +522,7 @@ return 1;//确定这帧是出现啦分屏
 }
 //Determine whether the split-screen
 static bool DetermineImageSplitScreen_Longitudinal(mm_camera_ch_data_buf_t *frame,QCameraHardwareInterface *mHalCamCtrl)
-{
+{//纵向分屏判断
 	int i =0 ,j = 30,j_end = 690;
 	unsigned char *piont_y;
 	unsigned int dete_count = 0;
@@ -690,7 +690,7 @@ BREAK_THE:
 return 0;//未发生分屏
 }
 static void WriteDataToFrameBuffer(mm_camera_ch_data_buf_t *frame, unsigned int at_line_write, unsigned int start, unsigned int len)
-{
+{//写黑色数据到视频缓存
 	memset((void *)(frame->def.frame->buffer+frame->def.frame->y_off+720*at_line_write + start),0xff,len);
 
 }
@@ -767,7 +767,7 @@ unsigned int temp;
 return 0;
 }
 static bool DetermineImageSplitScreenDVD_16_9_Vedio(mm_camera_ch_data_buf_t *frame,QCameraHardwareInterface *mHalCamCtrl)
-{
+{//针对16：9视频的分屏判断，
 
   unsigned int line_count,jj;//第二行开始
   unsigned int shift_count = 0,bottom_shift_count=0;
@@ -980,7 +980,7 @@ DetermineImageSplitScreenDVD_16_9_Vedio(frame,mHalCamCtrl);
 return 0;//未发生分屏
 }
 static int FlyCameraReadTw9912StatusRegitsterValue()
-{
+{//判断这帧数据是否是稳定的，不稳定不显示，针对退出视频时绿色块问题
 	unsigned char value,value_1;
 	int arg = 0;
 	unsigned int cmd;
@@ -1015,7 +1015,7 @@ static int FlyCameraReadTw9912StatusRegitsterValue()
 return 0;
 }
 static void FlyCameraAuxBlackLine(void)
-{
+{//写黑色数据到 帧缓存中，可以屏蔽这个动作看视频显示表现就知道区别
 	if(video_channel_status[0] == '2')//AUX
 			{
 				memset((void *)(frame->def.frame->buffer+frame->def.frame->y_off),0x1e,720*3);//黑前三行
