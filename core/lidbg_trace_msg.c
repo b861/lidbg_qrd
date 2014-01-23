@@ -263,10 +263,26 @@ static void __exit lidbg_trace_msg_exit(void)
 	platform_driver_unregister(&lidbg_trace_msg_driver);
 }
 
+
+
+
+
+void trace_msg_main(int argc, char **argv)
+{
+
+    if(!strcmp(argv[0], "disable"))
+    {
+    	lidbg("\n============disable======\n\n\n");
+	lidbg_trace_msg_disable(1);
+    }
+
+}
+
 module_init(lidbg_trace_msg_init);
 module_exit(lidbg_trace_msg_exit);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Flyaudad Inc.");
+EXPORT_SYMBOL(trace_msg_main);
 
 
