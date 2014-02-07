@@ -52,9 +52,12 @@ function soc_menu_func()
 	echo [24] git pull
 	echo [25] git push
 	echo [26] gitk
-	echo [27] fastboot flash boot
-	echo [28] fastboot flash system
-	echo [29] nautilus
+	echo [27] adb reboot bootloader
+	echo [28] fastboot flash boot
+	echo [29] fastboot flash system
+	echo [30] fastboot reboot
+	echo [31] nautilus
+	echo "[40] make kernel & reboot & flash"
 }
 
 function soc_handle_func()
@@ -74,11 +77,17 @@ function soc_handle_func()
 	26)
 		gitk &;;
 	27)
-		flash_kernel;;
+		adb reboot bootloader;;
 	28)
-		flash_system;;
+		flash_kernel;;
 	29)
+		flash_system;;
+	30)
+		fastboot reboot;;
+	31)
 		nautilus $DBG_SYSTEM_DIR;;
+	40)
+		adb reboot bootloader && build_kernel && flash_kernel && fastboot reboot;;
 	*)
 		echo
 	esac
