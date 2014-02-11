@@ -31,7 +31,7 @@ i2c_ack tw9912_read(unsigned int sub_addr, char *buf )
 {
     i2c_ack ret;
     ret = i2c_read_byte(1, TW9912_I2C_ChipAdd, sub_addr, buf, 1);
-    tw9912_dbg("tw9912:read addr=0x%.2x value=0x%.2x\n", sub_addr, buf[0]);
+    //tw9912_dbg("tw9912:read addr=0x%.2x value=0x%.2x\n", sub_addr, buf[0]);
     return ret;
 }
 i2c_ack tw9912_write(char *buf )
@@ -469,7 +469,7 @@ vedio_format_t tw9912_cvbs_signal_tsting(vedio_channel_t Channel)
         }
     }
 
-    tw9912_dbg("testing_signal(): back %d\n", signal_is_how_1.Format);
+    //tw9912_dbg("testing_signal(): back %d\n", signal_is_how_1.Format);
     mutex_unlock(&lock_com_chipe_config);
     return signal_is_how_1.Format;
 CHANNAL_ERROR:
@@ -683,6 +683,8 @@ int tw9912_config_array( vedio_channel_t Channel)
     int ret = 0, delte_signal_count = 0;
     const u8 *config_pramat_piont = NULL;
     u8 Tw9912_input_pin_selet[] = {0x02, 0x40,}; //default input pin selet YIN0
+    char configed_value = 0;
+    int configed_cnt = 0;
     lidbg("tw9912: inital begin\n");
     mutex_lock(&lock_com_chipe_config);
     tw9912_get_chip_id();
@@ -770,7 +772,20 @@ SIGNAL_DELTE_AGAIN:
         the_last_config.format = signal_is_how[Channel].Format;
         while(config_pramat_piont[i*2] != 0xfe)
         {
+ CONFIG_MEM_AGAIN:
             if(tw9912_write((char *)&config_pramat_piont[i*2]) == NACK) goto CONFIG_not_ack_fail;
+                       if(tw9912_read((unsigned int)config_pramat_piont[i*2], &configed_value) != NACK )
+                             if(((config_pramat_piont[i*2]) != 0x1C) && (configed_value != config_pramat_piont[i*2 + 1]) && (configed_cnt < 5))
+                                {
+                                       configed_cnt++;
+					    lidbgerr("tw9912 i2c write failed, configed_cnt = %d\n", configed_cnt);
+                                       goto CONFIG_MEM_AGAIN;
+                               }
+                               else
+                                       configed_cnt =0;
+                       else
+                               goto CONFIG_not_ack_fail;
+
             if(signal_is_how[Channel].Format == NTSC_P \
                     && config_pramat_piont[i*2] > 0x24\
                     && config_pramat_piont[i*2] < 0x2d)
