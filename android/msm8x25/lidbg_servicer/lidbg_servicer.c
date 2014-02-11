@@ -236,6 +236,7 @@ loop_read:
             else flag = 1;
             lidbg("\n\n\nkmsg+\n\n");
 
+	   system("echo c lidbg_trace_msg disable > /dev/mlidbg0");
             compose_log_name(kmsg_name,1);
 
             sprintf(cmd, "date >/data/%s", kmsg_name);
