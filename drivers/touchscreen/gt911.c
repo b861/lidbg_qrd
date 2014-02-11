@@ -743,7 +743,7 @@ static s32 gtp_init_panel(struct goodix_ts_data *ts,char *ic_type)
     u8 rd_cfg_buf[16];
  if(!strcmp(ic_type,"911"))
  	{
-    printk("=====ic_type:911======\n");
+    lidbg("=====ic_type:911======\n");
 	
     u8 cfg_info_group1[] = CTP_CFG_GROUP1;
     u8 cfg_info_group2[] = CTP_CFG_GROUP2;
@@ -814,7 +814,7 @@ static s32 gtp_init_panel(struct goodix_ts_data *ts,char *ic_type)
  	
 	else
 	{
-	printk("=====ic_type:928======\n");
+	lidbg("=====ic_type:928======\n");
 	u8 cfg_info_group1[] = CTP928_CFG_GROUP1;
     u8 cfg_info_group2[] = CTP928_CFG_GROUP2;
     u8 cfg_info_group3[] = CTP928_CFG_GROUP3;
@@ -853,7 +853,7 @@ static s32 gtp_init_panel(struct goodix_ts_data *ts,char *ic_type)
         }
         rd_cfg_buf[GTP_ADDR_LENGTH] &= 0x07;
     }
-    printk("SENSOR ID:%d", rd_cfg_buf[GTP_ADDR_LENGTH]);
+    lidbg("SENSOR ID:%d", rd_cfg_buf[GTP_ADDR_LENGTH]);
 	lidbg_fs_log(TS_LOG_PATH, "SENSOR ID:%d\n", rd_cfg_buf[GTP_ADDR_LENGTH]);
     memset(&config[GTP_ADDR_LENGTH], 0, GTP_CONFIG_MAX_LENGTH);
     memcpy(&config[GTP_ADDR_LENGTH], send_cfg_buf[rd_cfg_buf[GTP_ADDR_LENGTH]], ts->gtp_cfg_len);

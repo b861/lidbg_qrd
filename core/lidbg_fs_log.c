@@ -98,6 +98,8 @@ again:
     filp_close(filep, 0);
     return 1;
 }
+
+
 void file_separator(char *file2separator)
 {
     char buf[32];
@@ -281,4 +283,6 @@ EXPORT_SYMBOL(fs_upload_machine_log);
 EXPORT_SYMBOL(fs_call_apk);
 EXPORT_SYMBOL(fs_remove_apk);
 EXPORT_SYMBOL(fs_remount_system);
+EXPORT_SYMBOL(bfs_file_amend);
+
 

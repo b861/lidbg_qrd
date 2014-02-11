@@ -41,7 +41,7 @@ static void lidbg_trace_key_word(char *string)
 		if(strlen(pmsg->yourkey))
 			ret = strstr(string, pmsg->yourkey);
 		if(ret) {
-			fs_string2file(LIDBG_TRACE_MSG_PATH, "%s",string);
+			bfs_file_amend(LIDBG_TRACE_MSG_PATH,string);
 			ret =NULL;
 		}
 	
