@@ -105,12 +105,12 @@ struct lidbg_share
  	do{\
 	 mm_segment_t old_fs;\
 	 struct file *fd = NULL;\
-	 printk("lidbg:call LIDBG_SHARE_GET by %s\n",__FUNCTION__);\
+	 lidbg("lidbg:call LIDBG_SHARE_GET by %s\n",__FUNCTION__);\
 	 while(1){\
-	 	printk("lidbg_share:try open lidbg_share!\n");\
+	 	lidbg("lidbg_share:try open lidbg_share!\n");\
 	 	fd = filp_open("/dev/lidbg_share", O_RDWR, 0);\
-	 	printk("lidbg_share:get fd=%x\n",(int)fd);\
-	    if((fd == NULL)||((int)fd == 0xfffffffe)){printk("lidbg_share:get fd fail!\n");msleep(500);}\
+	 	lidbg("lidbg_share:get fd=%x\n",(int)fd);\
+	    if((fd == NULL)||((int)fd == 0xfffffffe)){lidbg("lidbg_share:get fd fail!\n");msleep(500);}\
 	    else break;\
 	 }\
 	 BEGIN_KMEM;\
@@ -119,7 +119,7 @@ struct lidbg_share
 	filp_close(fd,0);\
 	if(plidbg_share == NULL)\
 	{\
-		printk("LIDBG_SHARE_GET fail!\n");\
+		lidbg("LIDBG_SHARE_GET fail!\n");\
 	}\
 }while(0)
 
@@ -133,7 +133,7 @@ static inline int share_check_pt(void)
 {
     while (plidbg_share == NULL)
     {
-        printk("lidbg:check_pt-plidbg_share==NULL\n");
+        lidbg("lidbg:check_pt-plidbg_share==NULL\n");
         msleep(200);
     }
     return 0;

@@ -225,7 +225,7 @@ static void LPCdealReadFromMCUAll(BYTE *p, UINT length)
         if (GetTickCount() - iDriverResumeTime >= 6 * 1000)
         {
             //bResumeError = TRUE;
-            printk("JQilin Resume Error...\n");
+            lidbg("JQilin Resume Error...\n");
         }
     }
     iDriverResumeTime = 0;
@@ -238,7 +238,7 @@ static void LPCdealReadFromMCUAll(BYTE *p, UINT length)
             printk("%x ", p[i]);
 
         }
-        printk("\n");
+        lidbg("\n");
     }
 #endif
     lpc_send_rec_count = 0;
@@ -465,7 +465,7 @@ int thread_lpc(void *data)
                 struct rtc_time tm;
                 do_gettimeofday(&(txc.time));
                 rtc_time_to_tm(txc.time.tv_sec, &tm);
-                //printk(\u201cUTC time :%d-%d-%d %d:%d:%d /n\u201d,tm.tm_year+1900,tm.tm_mon, tm.tm_mday,tm.tm_hour,tm.tm_min,tm.tm_sec);
+                //lidbg(\u201cUTC time :%d-%d-%d %d:%d:%d /n\u201d,tm.tm_year+1900,tm.tm_mon, tm.tm_mday,tm.tm_hour,tm.tm_min,tm.tm_sec);
 
 
                 LPCCombinDataStream(buff, SIZE_OF_ARRAY(buff));

@@ -11,7 +11,7 @@ int get_int_value(struct list_head *client_list, char *key, int *int_value, void
     struct string_dev *pos;
     if (list_empty(client_list))
     {
-        printk("[futengfei]err.fileserver_deal_cmd:<list_is_empty>\n");
+        lidbg("[futengfei]err.fileserver_deal_cmd:<list_is_empty>\n");
         return -2;
     }
     list_for_each_entry(pos, client_list, tmp_list)
@@ -21,7 +21,7 @@ int get_int_value(struct list_head *client_list, char *key, int *int_value, void
             if(pos->int_value)
             {
                 *int_value = *(pos->int_value);
-                printk("[futengfei]succeed.find_key:<%s=%d>\n", key, *(pos->int_value) );
+                lidbg("[futengfei]succeed.find_key:<%s=%d>\n", key, *(pos->int_value) );
                 return 1;
             }
             if(int_value && pos->yourvalue)
@@ -32,11 +32,11 @@ int get_int_value(struct list_head *client_list, char *key, int *int_value, void
             }
             if(callback)
                 pos->callback = callback;
-            printk("[futengfei]succeed.find_key:<%s=%d>\n", key, *(pos->int_value) );
+            lidbg("[futengfei]succeed.find_key:<%s=%d>\n", key, *(pos->int_value) );
             return 1;
         }
     }
-    printk("[futengfei]err.fail_find:<%s>\n", key);
+    lidbg("[futengfei]err.fail_find:<%s>\n", key);
     return -1;
 
 }
@@ -47,10 +47,10 @@ int fileserver_deal_cmd(struct list_head *client_list, enum string_dev_cmd cmd, 
     struct string_dev *pos;
     char *p;
     if(g_kvbug_on)
-        printk("\n[futengfei]======fileserver_deal_cmd[%d]\n", cmd);
+        lidbg("\n[futengfei]======fileserver_deal_cmd[%d]\n", cmd);
     if (list_empty(client_list))
     {
-        printk("[futengfei]err.fileserver_deal_cmd:<list_is_empty>\n");
+        lidbg("[futengfei]err.fileserver_deal_cmd:<list_is_empty>\n");
         return -2;
     }
     switch (cmd)
@@ -71,9 +71,9 @@ int fileserver_deal_cmd(struct list_head *client_list, enum string_dev_cmd cmd, 
         list_for_each_entry(pos, client_list, tmp_list)
         {
             if(pos->yourvalue)
-                printk("[%s]=[%s]\n", pos->yourkey, pos->yourvalue);
+                lidbg("[%s]=[%s]\n", pos->yourkey, pos->yourvalue);
             else
-                printk("[%s]\n", pos->yourkey);
+                lidbg("[%s]\n", pos->yourkey);
         }
         break;
 
@@ -96,11 +96,11 @@ int fileserver_deal_cmd(struct list_head *client_list, enum string_dev_cmd cmd, 
             if (!strcmp(pos->yourkey, key))
             {
                 *string = pos->yourvalue;
-                printk("[futengfei]succeed.find_key:<%s=%s>\n", key, *string);
+                lidbg("[futengfei]succeed.find_key:<%s=%s>\n", key, *string);
                 return 1;
             }
         }
-        printk("[futengfei]err.fail_find:<%s>\n", key);
+        lidbg("[futengfei]err.fail_find:<%s>\n", key);
         return -1;
 
     case FS_CMD_LIST_SETVALUE:
@@ -110,12 +110,12 @@ int fileserver_deal_cmd(struct list_head *client_list, enum string_dev_cmd cmd, 
             {
 
                 pos->yourvalue = *string;
-                printk("[futengfei]succeed.set_key:<%s=%s>\n", key, pos->yourvalue);
+                lidbg("[futengfei]succeed.set_key:<%s=%s>\n", key, pos->yourvalue);
                 return 1;
             }
         }
         if(g_kvbug_on)
-            printk("[futengfei]err.set_key:<%s>\n", key);
+            lidbg("[futengfei]err.set_key:<%s>\n", key);
         return -1;
 
     case FS_CMD_LIST_IS_STRINFILE:
@@ -131,11 +131,11 @@ int fileserver_deal_cmd(struct list_head *client_list, enum string_dev_cmd cmd, 
                     if( p[len - 1] == lookfor[len - 1])
                     {
                         if(g_kvbug_on)
-                            printk("[futengfei]======%d[%c][%c]\n", len, p[len - 1], lookfor[len - 1]);
+                            lidbg("[futengfei]======%d[%c][%c]\n", len, p[len - 1], lookfor[len - 1]);
                         len--;
                         if(len == 0)
                         {
-                            printk("[futengfei]succeed.have_find:<%s>\n", lookfor);
+                            lidbg("[futengfei]succeed.have_find:<%s>\n", lookfor);
                             return 1;
                         }
                     }
@@ -144,10 +144,10 @@ int fileserver_deal_cmd(struct list_head *client_list, enum string_dev_cmd cmd, 
                 }
             }
         }
-        printk("[futengfei]err.fail_find:<%s>\n", lookfor);
+        lidbg("[futengfei]err.fail_find:<%s>\n", lookfor);
         return -1;
     default:
-        printk("\n[futengfei]err.fileserver_deal_cmd:<unknown.cmd:%d\n", cmd);
+        lidbg("\n[futengfei]err.fileserver_deal_cmd:<unknown.cmd:%d\n", cmd);
         return -1;
     }
     return 1;
@@ -166,23 +166,23 @@ int bfs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *cli
     filep = filp_open(filename,  O_RDONLY, 0);//O_RDWR
     if(IS_ERR(filep))
     {
-        printk("[futengfei]err.open:<%s>\n", filename);
+        lidbg("[futengfei]err.open:<%s>\n", filename);
         return -1;
     }
-    printk("[futengfei]succeed.open:<%s>\n", filename);
+    lidbg("[futengfei]succeed.open:<%s>\n", filename);
 
     old_fs = get_fs();
     set_fs(get_ds());
 
     inode = filep->f_dentry->d_inode;
     file_len = inode->i_size;
-    printk("[futengfei]warn.File_length:<%d>\n", file_len);
+    lidbg("[futengfei]warn.File_length:<%d>\n", file_len);
     file_len = file_len + 1;
 
     file_ptr = (unsigned char *)vmalloc(file_len);
     if(file_ptr == NULL)
     {
-        printk( "[futengfei]err.vmalloc:<cannot malloc memory!>\n");
+        lidbg( "[futengfei]err.vmalloc:<cannot malloc memory!>\n");
         return -1;
     }
 
@@ -193,7 +193,7 @@ int bfs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *cli
     all_purpose = filep->f_op->read(filep, file_ptr, file_len, &filep->f_pos);
     if(all_purpose <= 0)
     {
-        printk( "[futengfei]err.f_op->read:<read file data failed>\n");
+        lidbg( "[futengfei]err.f_op->read:<read file data failed>\n");
         return -1;
     }
     set_fs(old_fs);
@@ -201,9 +201,9 @@ int bfs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *cli
 
     file_ptr[file_len - 1] = '\0';
     if(g_kvbug_on)
-        printk("%s\n", file_ptr);
+        lidbg("%s\n", file_ptr);
 
-    printk("[futengfei]warn.toke:<%s>\n", filename);
+    lidbg("[futengfei]warn.toke:<%s>\n", filename);
     all_purpose = 0;
     file_ptmp = file_ptr;
     while((token = strsep(&file_ptmp, "\n")) != NULL )
@@ -211,7 +211,7 @@ int bfs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *cli
         if( token[0] != '#' && token[0] != '\n'  && token[0] != 18 && token[0] != 13  && token[0] != '\0' && token[0] != 10)//del char:er,dc2 look for ASCII
         {
             if(g_kvbug_on)
-                printk("%d[%s]\n", all_purpose, token);
+                lidbg("%d[%s]\n", all_purpose, token);
             add_new_dev = kzalloc(sizeof(struct string_dev), GFP_KERNEL);
             if(g_mem_dbg)
                 fs_string2file(DEBUG_MEM_FILE, "%s=%d \n", __func__, sizeof(struct string_dev));
@@ -220,7 +220,7 @@ int bfs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *cli
             all_purpose++;
         }
         else if(g_kvbug_on)
-            printk("\ndroped[%s]\n", token);
+            lidbg("\ndroped[%s]\n", token);
     }
     if(cmd == FS_CMD_FILE_CONFIGMODE)
         fileserver_deal_cmd(client_list, FS_CMD_LIST_SPLITKV, NULL, NULL, NULL, NULL, NULL);
@@ -271,10 +271,10 @@ int update_list(const char *filename, struct list_head *client_list)
     filep = filp_open(filename, O_RDONLY , 0);
     if(IS_ERR(filep))
     {
-        printk("[futengfei]err.open:<%s>\n", filename);
+        lidbg("[futengfei]err.open:<%s>\n", filename);
         return -1;
     }
-    printk("[futengfei]succeed.open:<%s>\n", filename);
+    lidbg("[futengfei]succeed.open:<%s>\n", filename);
 
     old_fs = get_fs();
     set_fs(get_ds());
@@ -286,7 +286,7 @@ int update_list(const char *filename, struct list_head *client_list)
     file_ptr = (unsigned char *)kzalloc(file_len, GFP_KERNEL);
     if(file_ptr == NULL)
     {
-        printk( "[futengfei]err.vmalloc:<cannot kzalloc memory!>\n");
+        lidbg( "[futengfei]err.vmalloc:<cannot kzalloc memory!>\n");
         return -1;
     }
 
@@ -297,7 +297,7 @@ int update_list(const char *filename, struct list_head *client_list)
     all_purpose = filep->f_op->read(filep, file_ptr, file_len, &filep->f_pos);
     if(all_purpose <= 0)
     {
-        printk( "[futengfei]err.f_op->read:<read file data failed>\n");
+        lidbg( "[futengfei]err.f_op->read:<read file data failed>\n");
         return -1;
     }
     set_fs(old_fs);
@@ -315,7 +315,7 @@ int update_list(const char *filename, struct list_head *client_list)
             {
                 value = ptmp + 1;
                 *ptmp = '\0';
-                printk("<%s,%s>\n", key, value);
+                lidbg("<%s,%s>\n", key, value);
                 {
                     //start
                     list_for_each_entry(pos, client_list, tmp_list)
@@ -336,7 +336,7 @@ int update_list(const char *filename, struct list_head *client_list)
 
             }
             else if(g_kvbug_on)
-                printk("\ndroped[%s]\n", token);
+                lidbg("\ndroped[%s]\n", token);
         }
     }
     kfree(file_ptr);
@@ -383,7 +383,7 @@ int fs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *clie
     if(list_empty(client_list))
         ret = bfs_fill_list(filename, cmd, client_list);
     else
-        printk("[futengfei]err.fs_fill_list:<your list is not empty>\n");
+        lidbg("[futengfei]err.fs_fill_list:<your list is not empty>\n");
     return ret;
 }
 //zone end

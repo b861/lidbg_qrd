@@ -152,7 +152,7 @@ static int i2c_pre_cmd(struct goodix_ts_data *ts)
     int ret;
     uint8_t pre_cmd_data[2] = {0};
 
-    printk("come into [%s]", __func__);
+    lidbg("come into [%s]", __func__);
     pre_cmd_data[0] = 0x0f;
     pre_cmd_data[1] = 0xff;
     ret = i2c_write_bytes(ts->client, pre_cmd_data, 2);
@@ -175,7 +175,7 @@ static int i2c_end_cmd(struct goodix_ts_data *ts)
     int ret;
     uint8_t end_cmd_data[2] = {0};
 
-    printk("come into [%s]", __func__);
+    lidbg("come into [%s]", __func__);
     end_cmd_data[0] = 0x80;
     end_cmd_data[1] = 0x00;
     ret = i2c_write_bytes(ts->client, end_cmd_data, 2);
@@ -224,7 +224,7 @@ return:
 static int goodix_init_panel(struct goodix_ts_data *ts)
 {
     short ret = -1;
-    printk("come to goodix_init_panel=======7.8heti===========futengfei=\n");
+    lidbg("come to goodix_init_panel=======7.8heti===========futengfei=\n");
 #ifdef BOARD_V2
     uint8_t config_info7[] =
     {
@@ -279,7 +279,7 @@ static int goodix_init_panel(struct goodix_ts_data *ts)
         ts->abs_y_max = (config_info8[64] << 8) + config_info8[63];
         ts->max_touch_num = config_info8[60];
         ts->int_trigger_type = ((config_info8[57] >> 3) & 0x01);
-        printk("[futengfei] goodix_init_panel=================config_info8\n");
+        lidbg("[futengfei] goodix_init_panel=================config_info8\n");
 
     }
 
@@ -290,18 +290,18 @@ static int goodix_init_panel(struct goodix_ts_data *ts)
         ts->abs_y_max = (config_info7[64] << 8) + config_info7[63];
         ts->max_touch_num = config_info7[60];
         ts->int_trigger_type = ((config_info7[57] >> 3) & 0x01);
-        printk("[futengfei] goodix_init_panel=================config_info7\n");
+        lidbg("[futengfei] goodix_init_panel=================config_info7\n");
 
     }
 
     if(ret < 0)
     {
-        printk( "GT811 Send config failed!\n");
+        lidbg( "GT811 Send config failed!\n");
         return ret;
     }
 
-    printk( "GT811 init info:X_MAX=%d,Y_MAX=%d,TRIG_MODE=%s\n",	ts->abs_x_max, ts->abs_y_max, ts->int_trigger_type ? "RISING EDGE" : "FALLING EDGE");
-    printk("leave from goodix_init_panel==================futengfei=\n");
+    lidbg( "GT811 init info:X_MAX=%d,Y_MAX=%d,TRIG_MODE=%s\n",	ts->abs_x_max, ts->abs_y_max, ts->int_trigger_type ? "RISING EDGE" : "FALLING EDGE");
+    lidbg("leave from goodix_init_panel==================futengfei=\n");
     return 0;
 }
 
@@ -324,7 +324,7 @@ static short  goodix_read_version(struct goodix_ts_data *ts)
     char cpf = 0;
     memset(version_data, 0, 5);
 
-    printk("come into [%s]", __func__);
+    lidbg("come into [%s]", __func__);
     version_data[0] = 0x07;
     version_data[1] = 0x17;
 
@@ -349,12 +349,12 @@ static short  goodix_read_version(struct goodix_ts_data *ts)
     if(cpf == 10)
     {
         ts->version = (version_data[2] << 8) + version_data[3];
-        printk( "GT811 Verion:0x%04x\n", ts->version);
+        lidbg( "GT811 Verion:0x%04x\n", ts->version);
         ret = 0;
     }
     else
     {
-        printk(" Guitar Version Read Error: %d.%d\n", version_data[3], version_data[2]);
+        lidbg(" Guitar Version Read Error: %d.%d\n", version_data[3], version_data[2]);
         ts->version = 0xffff;
         ret = -1;
     }
@@ -367,7 +367,7 @@ static void gt811_irq_enable(struct goodix_ts_data *ts)
 {
     unsigned long irqflags;
 
-    printk("come into [%s]", __func__);
+    lidbg("come into [%s]", __func__);
     spin_lock_irqsave(&ts->irq_lock, irqflags);
     if (ts->irq_is_disable)
     {
@@ -381,7 +381,7 @@ static void gt811_irq_disable(struct goodix_ts_data *ts)
 {
     unsigned long irqflags;
 
-    printk("come into [%s]", __func__);
+    lidbg("come into [%s]", __func__);
     spin_lock_irqsave(&ts->irq_lock, irqflags);
     if (!ts->irq_is_disable)
     {
@@ -426,17 +426,17 @@ static void goodix_ts_work_func(struct work_struct *work)
 
     struct goodix_ts_data *ts = container_of(work, struct goodix_ts_data, work);
     SOC_IO_ISR_Disable(GPIOEIT);
-    //printk("\n4:come into %s=========================futengfei====\n",__func__);
+    //lidbg("\n4:come into %s=========================futengfei====\n",__func__);
     //return 0;
 #ifdef DEBUG
-    printk("int count :%d\n", ++int_count);
-    printk("ready?:%d\n", raw_data_ready);
+    lidbg("int count :%d\n", ++int_count);
+    lidbg("ready?:%d\n", raw_data_ready);
 #endif
     if (RAW_DATA_ACTIVE == raw_data_ready)
     {
         raw_data_ready = RAW_DATA_READY;
 #ifdef DEBUG
-        printk("ready!\n");
+        lidbg("ready!\n");
 #endif
     }
 
@@ -446,26 +446,26 @@ COORDINATE_POLL:
 
     if( tmp > 9)
     {
-        printk( "Because of transfer error,touchscreen stop working.\n");
+        lidbg( "Because of transfer error,touchscreen stop working.\n");
         goto XFER_ERROR ;
     }
 
     ret = i2c_read_bytes(ts->client, point_data, sizeof(point_data) / sizeof(point_data[0]));
     if(ret <= 0)
     {
-        printk("I2C transfer error. Number:%d\n ", ret);
+        lidbg("I2C transfer error. Number:%d\n ", ret);
         ts->bad_data = 1;
         tmp ++;
         ts->retry++;
 
 #ifndef INT_PORT
         {
-            printk("goto COORDINATE_POL[%d]times\n", tmp);
+            lidbg("goto COORDINATE_POL[%d]times\n", tmp);
             goto COORDINATE_POLL;
         }
 #else
         {
-            printk("goto XFER_ERROR[%d]times\n", tmp);
+            lidbg("goto XFER_ERROR[%d]times\n", tmp);
             goto XFER_ERROR;
         }
 #endif
@@ -474,10 +474,10 @@ COORDINATE_POLL:
 #if 0
     for(count = 0; count < (sizeof(point_data) / sizeof(point_data[0])); count++)
     {
-        printk("[%2d]:0x%2x", count, point_data[count]);
-        if((count + 1) % 10 == 0)printk("\n");
+        lidbg("[%2d]:0x%2x", count, point_data[count]);
+        if((count + 1) % 10 == 0)lidbg("\n");
     }
-    printk("\n");
+    lidbg("\n");
 #endif
 
     if(0)//if(have_load==0) //now disable
@@ -497,7 +497,7 @@ COORDINATE_POLL:
             //gpio_direction_output(SHUTDOWN_PORT, 0);
             msleep(1);
             //gpio_direction_input(SHUTDOWN_PORT);
-            printk("word:goodix_init_panel again=======futengfei===\n");
+            lidbg("word:goodix_init_panel again=======futengfei===\n");
             goodix_init_panel(ts);
             goto WORK_FUNC_END;
         }
@@ -527,7 +527,7 @@ COORDINATE_POLL:
     }
     if(check_sum != point_data[read_position])
     {
-        //printk( "coor chksum error!===goto end==========futengfei==\n");
+        //lidbg( "coor chksum error!===goto end==========futengfei==\n");
         goto XFER_ERROR;
     }
 
@@ -546,14 +546,14 @@ COORDINATE_POLL:
     finger = point_count;
     if (finger == 4)
     {
-        //printk("SOC_Log_Dump\n");
+        //lidbg("SOC_Log_Dump\n");
         //SOC_Log_Dump(LOG_DMESG);
     }
     if (finger > 5)
     {
-        printk("finger>5\n");
+        lidbg("finger>5\n");
     }
-    //printk("finger=[%d]\n",finger);
+    //lidbg("finger=[%d]\n",finger);
     //return 0;
     finger_up_cunt = 5 - finger;
     if(finger)
@@ -621,7 +621,7 @@ COORDINATE_POLL:
         }
         if(g_var.flag_for_15s_off < 0)
         {
-            printk("\nerr:FLAG_FOR_15S_OFF===[%d]\n", g_var.flag_for_15s_off);
+            lidbg("\nerr:FLAG_FOR_15S_OFF===[%d]\n", g_var.flag_for_15s_off);
         }
 
         g_curr_tspara.x = input_y;
@@ -676,7 +676,7 @@ COORDINATE_POLL:
     if (touch_cnt == 90)
     {
         touch_cnt = 0;
-        printk("QR%d,%d[%d,%d]\n", xy_revert_en, sensor_id, input_y, input_x);
+        lidbg("QR%d,%d[%d,%d]\n", xy_revert_en, sensor_id, input_y, input_x);
     }
 
 #ifdef HAVE_TOUCH_KEY_REPORT
@@ -749,7 +749,7 @@ static enum hrtimer_restart goodix_ts_timer_func(struct hrtimer *timer)
 {
     struct goodix_ts_data *ts = container_of(timer, struct goodix_ts_data, timer);
 
-    printk("come into [%s]", __func__);
+    lidbg("come into [%s]", __func__);
     //queue_work(goodix_wq, &ts->work);
     hrtimer_start(&ts->timer, ktime_set(0, (POLL_TIME + 6) * 1000000), HRTIMER_MODE_REL);
     return HRTIMER_NORESTART;
@@ -763,10 +763,10 @@ Function:
 static irqreturn_t goodix_ts_irq_handler(int irq, void *dev_id)
 {
     struct goodix_ts_data *ts = dev_id;
-    // printk("\n3:come into %s============================futengfei====\n",__func__);
-    //printk("-------------------ts_irq_handler------------------\n");
+    // lidbg("\n3:come into %s============================futengfei====\n",__func__);
+    //lidbg("-------------------ts_irq_handler------------------\n");
     //#ifndef STOP_IRQ_TYPE
-    //printk("../n");
+    //lidbg("../n");
 #if 0
     gt811_irq_disable(ts);     //KT ADD 1202
 #endif
@@ -790,7 +790,7 @@ static int goodix_ts_power(struct goodix_ts_data *ts, int on)
     int ret = -1;
 
     unsigned char i2c_control_buf[3] = {0x06, 0x92, 0x01};		//suspend cmd
-    printk("come into [%s]", __func__);
+    lidbg("come into [%s]", __func__);
 #ifdef INT_PORT
     if(ts != NULL && !ts->use_irq)
         return -2;
@@ -799,7 +799,7 @@ static int goodix_ts_power(struct goodix_ts_data *ts, int on)
     {
     case 0:
         ret = i2c_write_bytes(ts->client, i2c_control_buf, 3);
-        printk( "Send suspend cmd\n");
+        lidbg( "Send suspend cmd\n");
         if(ret > 0)						//failed
             ret = 0;
         return ret;
@@ -829,7 +829,7 @@ static int goodix_ts_power(struct goodix_ts_data *ts, int on)
         return ret;
 
     default:
-        printk( "%s: Cant't support this command.", s3c_ts_name);
+        lidbg( "%s: Cant't support this command.", s3c_ts_name);
         return -EINVAL;
     }
 
@@ -857,11 +857,11 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     struct goodix_ts_data *ts;
     struct goodix_i2c_rmi_platform_data *pdata;
 
-    printk("2:come into %s====================futengfei=====\n", __func__);
+    lidbg("2:come into %s====================futengfei=====\n", __func__);
 
     if (!i2c_check_functionality(client->adapter, I2C_FUNC_I2C))
     {
-        printk( "Must have I2C_FUNC_I2C.\n");
+        lidbg( "Must have I2C_FUNC_I2C.\n");
         ret = -ENODEV;
         goto err_check_functionality_failed;
     }
@@ -878,7 +878,7 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     	ret = gpio_request(SHUTDOWN_PORT, "RESET_INT");
     	if (ret < 0)
             {
-    		printk( "Failed to request RESET GPIO:%d, ERRNO:%d\n",(int)SHUTDOWN_PORT,ret);
+    		lidbg( "Failed to request RESET GPIO:%d, ERRNO:%d\n",(int)SHUTDOWN_PORT,ret);
     		goto err_gpio_request;
     	}
     	s3c_gpio_setpull(SHUTDOWN_PORT, S3C_GPIO_PULL_UP);		//set GPIO pull-up
@@ -893,12 +893,12 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     		ret =i2c_write_bytes(client, &test_data, 1);	//Test I2C connection.
     		if (ret > 0)
     			break;
-    		printk( "GT811 I2C TEST FAILED!Please check the HARDWARE connect\n");
+    		lidbg( "GT811 I2C TEST FAILED!Please check the HARDWARE connect\n");
     	}
 
     	if(ret <= 0)
     	{
-    		printk( "Warnning: I2C communication might be ERROR!\n");
+    		lidbg( "Warnning: I2C communication might be ERROR!\n");
     		goto err_i2c_failed;
     	}
      */
@@ -917,7 +917,7 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     ret = gt811_downloader( ts, goodix_gt811_firmware);
     if(ret < 0)
     {
-        printk( "Warnning: gt811 update might be ERROR!\n");
+        lidbg( "Warnning: gt811 update might be ERROR!\n");
         //goto err_input_dev_alloc_failed;
     }
 #endif
@@ -930,7 +930,7 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
         ret = gpio_request(INT_PORT, "TS_INT");	//Request IO
         if (ret < 0)
         {
-            printk( "Failed to request GPIO:%d, ERRNO:%d\n", (int)INT_PORT, ret);
+            lidbg( "Failed to request GPIO:%d, ERRNO:%d\n", (int)INT_PORT, ret);
             goto err_gpio_request_failed;
         }
         s3c_gpio_setpull(INT_PORT, S3C_GPIO_PULL_NONE);	//ret > 0 ?
@@ -945,14 +945,14 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
 #endif
 #if 1
 err_gpio_request_failed:
-    //printk("goodix_init_panel:come to send init_panel==============futengfei=\n");
+    //lidbg("goodix_init_panel:come to send init_panel==============futengfei=\n");
     for(retry = 0; retry < 5; retry++)
     {
         ret = goodix_init_panel(ts);
         msleep(2);
         if(ret != 0)	//Initiall failed
         {
-            printk("[futengfei]goodix_ts_probe.goodix_init_panel fail and again----------->GT811the %d times\n", retry);
+            lidbg("[futengfei]goodix_ts_probe.goodix_init_panel fail and again----------->GT811the %d times\n", retry);
 #ifdef BOARD_V2
             SOC_IO_Output(0, 27, 1);
             msleep(300);
@@ -973,7 +973,7 @@ err_gpio_request_failed:
     }
     if(ret != 0)
     {
-        printk("goodix_init_panel:============Initiall failed");
+        lidbg("goodix_init_panel:============Initiall failed");
         ts->bad_data = 1;
         //goto err_init_godix_ts;
     }
@@ -983,7 +983,7 @@ err_gpio_request_failed:
     if (ts->input_dev == NULL)
     {
         ret = -ENOMEM;
-        printk("goodix_ts_probe: Failed to allocate input device=======futengfei======\n");
+        lidbg("goodix_ts_probe: Failed to allocate input device=======futengfei======\n");
         goto err_input_dev_alloc_failed;
     }
     screen_x = SCREEN_X;
@@ -1023,7 +1023,7 @@ err_gpio_request_failed:
     input_set_abs_params(ts->input_dev, ABS_MT_TOUCH_MAJOR, 0, 255, 0, 0);
 #endif
 
-    printk("check your screen [%d*%d]=================futengfei===\n", screen_x, screen_y);
+    lidbg("check your screen [%d*%d]=================futengfei===\n", screen_x, screen_y);
 
     sprintf(ts->phys, "input/ts");
     ts->input_dev->name = s3c_ts_name;
@@ -1036,7 +1036,7 @@ err_gpio_request_failed:
     ret = input_register_device(ts->input_dev);
     if (ret)
     {
-        printk("Probe: Unable to register %s input device=======futengfei====\n", ts->input_dev->name);
+        lidbg("Probe: Unable to register %s input device=======futengfei====\n", ts->input_dev->name);
         goto err_input_register_device_failed;
     }
     ts->bad_data = 0;
@@ -1047,7 +1047,7 @@ err_gpio_request_failed:
                        client->name, ts);
     if (ret != 0)
     {
-        printk("Cannot allocate ts INT!ERRNO:%d\n", ret);
+        lidbg("Cannot allocate ts INT!ERRNO:%d\n", ret);
         gpio_direction_input(INT_PORT);
         gpio_free(INT_PORT);
         goto err_init_godix_ts;
@@ -1060,7 +1060,7 @@ err_gpio_request_failed:
         disable_irq(client->irq);
 #endif
         ts->use_irq = 1;
-        printk("Reques EIRQ %d succesd on GPIO:%d\n", TS_INT, INT_PORT);
+        lidbg("Reques EIRQ %d succesd on GPIO:%d\n", TS_INT, INT_PORT);
     }
 #endif
 
@@ -1099,19 +1099,19 @@ err_gpio_request_failed:
     goodix_proc_entry = create_proc_entry("goodix-update", 0666, NULL);
     if(goodix_proc_entry == NULL)
     {
-        printk( "Couldn't create proc entry!\n");
+        lidbg( "Couldn't create proc entry!\n");
         ret = -ENOMEM;
         goto err_create_proc_entry;
     }
     else
     {
-        printk( "Create proc entry success!\n");
+        lidbg( "Create proc entry success!\n");
         goodix_proc_entry->write_proc = goodix_update_write;
         goodix_proc_entry->read_proc = goodix_update_read;
     }
 #endif
     ///////////////////////////////UPDATE STEP 2 END /////////////////////////////////////////////////////////////////
-    //	printk("Start %s in %s mode,Driver Modify Date:2012-01-05\n", ts->input_dev->name, ts->use_irq ? "interrupt" : "polling");
+    //	lidbg("Start %s in %s mode,Driver Modify Date:2012-01-05\n", ts->input_dev->name, ts->use_irq ? "interrupt" : "polling");
 
     //SOC_IO_ISR_Disable(GPIOEIT);
     SOC_IO_Input(0, GPIOEIT, GPIO_CFG_PULL_UP);
@@ -1119,12 +1119,12 @@ err_gpio_request_failed:
     ret = SOC_IO_ISR_Add(GPIOEIT, IRQF_TRIGGER_FALLING, goodix_ts_irq_handler, ts);
     if(ret == 0)
     {
-        printk("[futengfei]gt811:------->SOC_IO_ISR_Add err\n");
+        lidbg("[futengfei]gt811:------->SOC_IO_ISR_Add err\n");
     }
     ts->use_irq = 1;
     ts->client->irq = GPIOEIT;
     //SOC_IO_ISR_Enable(GPIOEIT);
-    printk("=OUT==============touch INFO==================%s\n\n", __func__);
+    lidbg("=OUT==============touch INFO==================%s\n\n", __func__);
     return 0;
 
 err_init_godix_ts:
@@ -1153,7 +1153,7 @@ err_alloc_data_failed:
 err_check_functionality_failed:
 err_create_proc_entry:
 
-    printk("\nerr_init_godix_ts==================futengfei=========\n");
+    lidbg("\nerr_init_godix_ts==================futengfei=========\n");
     return ret;
 }
 
@@ -1169,7 +1169,7 @@ return:
 static int goodix_ts_remove(struct i2c_client *client)
 {
     struct goodix_ts_data *ts = i2c_get_clientdata(client);
-    printk("come into [%s]", __func__);
+    lidbg("come into [%s]", __func__);
 
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
@@ -1205,7 +1205,7 @@ static int goodix_ts_suspend(struct i2c_client *client, pm_message_t mesg)
     int ret;
     struct goodix_ts_data *ts = i2c_get_clientdata(client);
 
-    printk(" [%s]========futengfei=======\n\n\n", __func__);
+    lidbg(" [%s]========futengfei=======\n\n\n", __func__);
     /*
     	if (ts->use_irq)
     		//disable_irq(client->irq);
@@ -1227,7 +1227,7 @@ static int goodix_ts_suspend(struct i2c_client *client, pm_message_t mesg)
     	if (ts->power) {
     		ret = ts->power(ts, 0);
     		if (ret < 0)
-    			printk("goodix_ts_resume power off failed\n");
+    			lidbg("goodix_ts_resume power off failed\n");
     	}
     */
 
@@ -1239,8 +1239,8 @@ static int goodix_ts_resume(struct i2c_client *client)
     int ret = 0, retry = 0, init_err = 0;
     uint8_t GT811_check[6] = {0x55};
     struct goodix_ts_data *ts = i2c_get_clientdata(client);
-    printk("come into [%s]========futengfei===fukesi===0829forGT811 RESUME RESET [futengfei]=\n", __func__);
-    printk(KERN_INFO "Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);
+    lidbg("come into [%s]========futengfei===fukesi===0829forGT811 RESUME RESET [futengfei]=\n", __func__);
+    lidbg(KERN_INFO "Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);
 
     for(retry = 0; retry < 5; retry++)
     {
@@ -1250,19 +1250,19 @@ static int goodix_ts_resume(struct i2c_client *client)
         //if( GT811_check[0] == 0xff&&GT811_check[1] == 0xff&&GT811_check[2] == 0xff&&GT811_check[3] == 0xff&&GT811_check[4] == 0xff&&GT811_check[5] == 0xff)
         if(init_err < 0)
         {
-            printk("[futengfei]goodix_init_panel:goodix_init_panel failed====retry=[%d]\n", retry);
+            lidbg("[futengfei]goodix_init_panel:goodix_init_panel failed====retry=[%d]\n", retry);
             ret = 1;
         }
         else
         {
-            printk("[futengfei]goodix_init_panel:goodix_init_panel success====retry=[%d]\n\n\n", retry);
+            lidbg("[futengfei]goodix_init_panel:goodix_init_panel success====retry=[%d]\n\n\n", retry);
             ret = 0;
         }
 
         msleep(8);
         if(ret != 0)	//Initiall failed
         {
-            printk("[futengfei]goodix_init_panel:goodix_init_panel failed=========retry=[%d]===ret[%d]\n", retry, ret);
+            lidbg("[futengfei]goodix_init_panel:goodix_init_panel failed=========retry=[%d]===ret[%d]\n", retry, ret);
 #ifdef BOARD_V2
             SOC_IO_Output(0, 27, 1);
             msleep(300);
@@ -1280,13 +1280,13 @@ static int goodix_ts_resume(struct i2c_client *client)
         else
             break;
 
-        printk("[futengfei] goodix_ts_resume:if this is appear ,that is say the continue no goto for directly!\n");
+        lidbg("[futengfei] goodix_ts_resume:if this is appear ,that is say the continue no goto for directly!\n");
 
     }
 
     if(ret != 0)
     {
-        printk("goodix_init_panel:Initiall failed============");
+        lidbg("goodix_init_panel:Initiall failed============");
         ts->bad_data = 1;
         //goto err_init_godix_ts;
     }
@@ -1295,7 +1295,7 @@ static int goodix_ts_resume(struct i2c_client *client)
     	if (ts->power) {
     		ret = ts->power(ts, 1);
     		if (ret < 0)
-    			printk("goodix_ts_resume power on failed\n");
+    			lidbg("goodix_ts_resume power on failed\n");
     	}
 
     	if (ts->use_irq)
@@ -1317,7 +1317,7 @@ static void goodix_ts_early_suspend(struct early_suspend *h)
     struct goodix_ts_data *ts;
     ts = container_of(h, struct goodix_ts_data, early_suspend);
 
-    printk("\n\n\n[futengfei]come into===1024580=======disable_irq20=== [%s]\n", __func__);
+    lidbg("\n\n\n[futengfei]come into===1024580=======disable_irq20=== [%s]\n", __func__);
     disable_irq(MSM_GPIO_TO_INT(GPIOEIT));
 
     goodix_ts_suspend(ts->client, PMSG_SUSPEND);
@@ -1326,7 +1326,7 @@ static void goodix_ts_early_suspend(struct early_suspend *h)
 static void goodix_ts_late_resume(struct early_suspend *h)
 {
     struct goodix_ts_data *ts;
-    printk("\n\n\n[futengfei]come into===1024580========enable_irq20== [%s]\n", __func__);
+    lidbg("\n\n\n[futengfei]come into===1024580========enable_irq20== [%s]\n", __func__);
 
     ts = container_of(h, struct goodix_ts_data, early_suspend);
     goodix_ts_resume(ts->client);
@@ -1350,7 +1350,7 @@ static struct file *update_file_open(char *path, mm_segment_t *old_fs_p)
             errno = -ENOENT;
         else
             errno = PTR_ERR(filp);
-        printk("The update file for Guitar open error.\n");
+        lidbg("The update file for Guitar open error.\n");
         return NULL;
     }
     *old_fs_p = get_fs();
@@ -1377,7 +1377,7 @@ static int update_get_flen(char *path)
         return 0;
 
     length = file_ck->f_op->llseek(file_ck, 0, SEEK_END);
-    //printk("File length: %d\n", length);
+    //lidbg("File length: %d\n", length);
     if(length < 0)
         length = 0;
     update_file_close(file_ck, old_fs);
@@ -1395,25 +1395,25 @@ static int goodix_update_write(struct file *filp, const char __user *buff, unsig
     mm_segment_t old_fs;
     unsigned char *file_ptr = NULL;
     unsigned int file_len;
-    printk("come into [%s]", __func__);
+    lidbg("come into [%s]", __func__);
     ts = i2c_get_clientdata(i2c_connect_client);
     if(ts == NULL)
     {
-        printk("goodix write to kernel via proc file!@@@@@@\n");
+        lidbg("goodix write to kernel via proc file!@@@@@@\n");
         return 0;
     }
 
-    //printk("goodix write to kernel via proc file!@@@@@@\n");
+    //lidbg("goodix write to kernel via proc file!@@@@@@\n");
     if(copy_from_user(&cmd, buff, len))
     {
-        printk("goodix write to kernel via proc file!@@@@@@\n");
+        lidbg("goodix write to kernel via proc file!@@@@@@\n");
         return -EFAULT;
     }
-    //printk("Write cmd is:%d,write len is:%ld\n",cmd[0], len);
+    //lidbg("Write cmd is:%d,write len is:%ld\n",cmd[0], len);
     switch(cmd[0])
     {
     case APK_UPDATE_TP:
-        printk("Write cmd is:%d,cmd arg is:%s,write len is:%ld\n", cmd[0], &cmd[1], len);
+        lidbg("Write cmd is:%d,cmd arg is:%s,write len is:%ld\n", cmd[0], &cmd[1], len);
         memset(update_path, 0, 60);
         strncpy(update_path, cmd + 1, 60);
 
@@ -1425,23 +1425,23 @@ static int goodix_update_write(struct file *filp, const char __user *buff, unsig
         file_data = update_file_open(update_path, &old_fs);
         if(file_data == NULL)   //file_data has been opened at the last time
         {
-            printk( "cannot open update file\n");
+            lidbg( "cannot open update file\n");
             return 0;
         }
 
         file_len = update_get_flen(update_path);
-        printk( "Update file length:%d\n", file_len);
+        lidbg( "Update file length:%d\n", file_len);
         file_ptr = (unsigned char *)vmalloc(file_len);
         if(file_ptr == NULL)
         {
-            printk( "cannot malloc memory!\n");
+            lidbg( "cannot malloc memory!\n");
             return 0;
         }
 
         ret = file_data->f_op->read(file_data, file_ptr, file_len, &file_data->f_pos);
         if(ret <= 0)
         {
-            printk( "read file data failed\n");
+            lidbg( "read file data failed\n");
             return 0;
         }
         update_file_close(file_data, old_fs);
@@ -1450,7 +1450,7 @@ static int goodix_update_write(struct file *filp, const char __user *buff, unsig
         vfree(file_ptr);
         if(ret < 0)
         {
-            printk("Warnning: GT811 update might be ERROR!\n");
+            lidbg("Warnning: GT811 update might be ERROR!\n");
             return 0;
         }
 
@@ -1466,7 +1466,7 @@ static int goodix_update_write(struct file *filp, const char __user *buff, unsig
             msleep(2);
             if(ret != 0)	//Initiall failed
             {
-                printk( "Init panel failed!\n");
+                lidbg( "Init panel failed!\n");
                 continue;
             }
             else
@@ -1498,37 +1498,37 @@ static int goodix_update_write(struct file *filp, const char __user *buff, unsig
     case APK_READ_FUN:							//functional command
         if(cmd[1] == CMD_READ_VER)
         {
-            printk("Read version!\n");
+            lidbg("Read version!\n");
             ts->read_mode = MODE_RD_VER;
         }
         else if(cmd[1] == CMD_READ_CFG)
         {
-            printk("Read config info!\n");
+            lidbg("Read config info!\n");
 
             ts->read_mode = MODE_RD_CFG;
         }
         else if (cmd[1] == CMD_READ_RAW)
         {
-            printk("Read raw data!\n");
+            lidbg("Read raw data!\n");
 
             ts->read_mode = MODE_RD_RAW;
         }
         else if (cmd[1] == CMD_READ_CHIP_TYPE)
         {
-            printk("Read chip type!\n");
+            lidbg("Read chip type!\n");
 
             ts->read_mode = MODE_RD_CHIP_TYPE;
         }
         return 1;
 
     case APK_WRITE_CFG:
-        printk("Begin write config info!Config length:%d\n", cmd[1]);
+        lidbg("Begin write config info!Config length:%d\n", cmd[1]);
         i2c_pre_cmd(ts);
         ret = i2c_write_bytes(ts->client, cmd + 2, cmd[1] + 2);
         i2c_end_cmd(ts);
         if(ret != 1)
         {
-            printk("Write Config failed!return:%d\n", ret);
+            lidbg("Write Config failed!return:%d\n", ret);
             return -1;
         }
         return 1;
@@ -1545,14 +1545,14 @@ static int goodix_update_read( char *page, char **start, off_t off, int count, i
     int len = 0;
     int read_times = 0;
     struct goodix_ts_data *ts;
-    printk("come into [%s]", __func__);
+    lidbg("come into [%s]", __func__);
     unsigned char read_data[360] = {80, };
 
     ts = i2c_get_clientdata(i2c_connect_client);
     if(ts == NULL)
         return 0;
 
-    printk("___READ__\n");
+    lidbg("___READ__\n");
     if(ts->read_mode == MODE_RD_VER)		//read version data
     {
         i2c_pre_cmd(ts);
@@ -1560,7 +1560,7 @@ static int goodix_update_read( char *page, char **start, off_t off, int count, i
         i2c_end_cmd(ts);
         if(ret < 0)
         {
-            printk("Read version data failed!\n");
+            lidbg("Read version data failed!\n");
             return 0;
         }
 
@@ -1581,7 +1581,7 @@ static int goodix_update_read( char *page, char **start, off_t off, int count, i
 
         read_data[0] = 0x06;
         read_data[1] = 0xa2;       // cfg start address
-        printk("read config addr is:%x,%x\n", read_data[0], read_data[1]);
+        lidbg("read config addr is:%x,%x\n", read_data[0], read_data[1]);
 
         len = 106;
         i2c_pre_cmd(ts);
@@ -1589,7 +1589,7 @@ static int goodix_update_read( char *page, char **start, off_t off, int count, i
         i2c_end_cmd(ts);
         if(ret <= 0)
         {
-            printk("Read config info failed!\n");
+            lidbg("Read config info failed!\n");
             return 0;
         }
 
@@ -1614,8 +1614,8 @@ RETRY:
 
 #ifdef DEBUG
         sum += read_times;
-        printk("count :%d\n", ++access_count);
-        printk("A total of try times:%d\n", sum);
+        lidbg("count :%d\n", ++access_count);
+        lidbg("A total of try times:%d\n", sum);
 #endif
 
         read_times = 0;
@@ -1633,7 +1633,7 @@ RETRY:
             }
         }
 #ifdef DEBUG
-        printk("read times:%d\n", read_times);
+        lidbg("read times:%d\n", read_times);
 #endif
         read_data[0] = 0x08;
         read_data[1] = 0x80;       // raw data address
@@ -1648,7 +1648,7 @@ RETRY:
 
         if(ret <= 0)
         {
-            printk("Read raw data failed!\n");
+            lidbg("Read raw data failed!\n");
             return 0;
         }
         memcpy(page, read_data + 2, len);
@@ -1661,7 +1661,7 @@ RETRY:
 
         if(ret <= 0)
         {
-            printk("Read raw data failed!\n");
+            lidbg("Read raw data failed!\n");
             return 0;
         }
         memcpy(&page[160], read_data + 2, len);
@@ -1670,11 +1670,11 @@ RETRY:
         //**************
         for (i = 0; i < 300; i++)
         {
-            printk("%6x", page[i]);
+            lidbg("%6x", page[i]);
 
             if ((i + 1) % 10 == 0)
             {
-                printk("\n");
+                lidbg("\n");
             }
         }
         //********************/
@@ -1695,8 +1695,8 @@ static u8  is_equal( u8 *src , u8 *dst , int len )
 #if 0
     for( i = 0 ; i < len ; i++ )
     {
-        printk("[%02X:%02X]", src[i], dst[i]);
-        if((i + 1) % 10 == 0)printk("\n");
+        lidbg("[%02X:%02X]", src[i], dst[i]);
+        if((i + 1) % 10 == 0)lidbg("\n");
     }
 #endif
 
@@ -1718,7 +1718,7 @@ static  u8 gt811_nvram_store( struct goodix_ts_data *ts )
     u8 inbuf[3] = {REG_NVRCS_H, REG_NVRCS_L, 0};
     //u8 outbuf[3] = {};
 
-    printk("come into [%s]", __func__);
+    lidbg("come into [%s]", __func__);
     ret = i2c_read_bytes( ts->client, inbuf, 3 );
 
     if ( ret < 0 )
@@ -1749,7 +1749,7 @@ static u8  gt811_nvram_recall( struct goodix_ts_data *ts )
     int ret;
     u8 inbuf[3] = {REG_NVRCS_H, REG_NVRCS_L, 0};
 
-    printk("come into [%s]", __func__);
+    lidbg("come into [%s]", __func__);
     ret = i2c_read_bytes( ts->client, inbuf, 3 );
 
     if ( ret < 0 )
@@ -1775,7 +1775,7 @@ static  int gt811_reset( struct goodix_ts_data *ts )
     unsigned char outbuf[3] = {0, 0xff, 0};
     unsigned char inbuf[3] = {0, 0xff, 0};
     //outbuf[1] = 1;
-    printk("come into [%s]", __func__);
+    lidbg("come into [%s]", __func__);
 
     //gpio_direction_output(SHUTDOWN_PORT,0);
     msleep(20);
@@ -1804,11 +1804,11 @@ static  int gt811_reset( struct goodix_ts_data *ts )
             msleep(20);
             //gpio_direction_input(SHUTDOWN_PORT);
             msleep(20);
-            printk( "i2c address failed\n");
+            lidbg( "i2c address failed\n");
         }
 
     }
-    printk( "Detect address %0X\n", ts->client->addr);
+    lidbg( "Detect address %0X\n", ts->client->addr);
     //msleep(500);
     return ret;
 }
@@ -1821,7 +1821,7 @@ static  int gt811_reset2( struct goodix_ts_data *ts )
     //unsigned char outbuf[3] = {0,0xff,0};
     unsigned char inbuf[3] = {0, 0xff, 0};
     //outbuf[1] = 1;
-    printk("come into [%s]", __func__);
+    lidbg("come into [%s]", __func__);
 
     //gpio_direction_output(SHUTDOWN_PORT,0);
     msleep(20);
@@ -1846,7 +1846,7 @@ static  int gt811_reset2( struct goodix_ts_data *ts )
         }
 
     }
-    printk( "Detect address %0X\n", ts->client->addr);
+    lidbg( "Detect address %0X\n", ts->client->addr);
     //msleep(500);
     return ret;
 }
@@ -1854,16 +1854,16 @@ static  int gt811_set_address_2( struct goodix_ts_data *ts )
 {
     unsigned char inbuf[3] = {0, 0, 0};
     int i;
-    printk("come into [%s]", __func__);
+    lidbg("come into [%s]", __func__);
 
     for ( i = 0 ; i < 12 ; i++ )
     {
         if ( i2c_read_bytes( ts->client, inbuf, 3) )
         {
-            printk( "Got response\n");
+            lidbg( "Got response\n");
             return 1;
         }
-        printk( "wait for retry\n");
+        lidbg( "wait for retry\n");
         msleep(50);
     }
     return 0;
@@ -1878,10 +1878,10 @@ static u8  gt811_update_firmware( u8 *nvram, u16 start_addr, u16 length, struct 
     unsigned char i2c_data_buf[PACK_SIZE + 2] = {0,};
     unsigned char i2c_chk_data_buf[PACK_SIZE + 2] = {0,};
 
-    printk("come into [%s]", __func__);
+    lidbg("come into [%s]", __func__);
     if( length > NVRAM_LEN - NVRAM_BOOT_SECTOR_LEN )
     {
-        printk( "Fw length %d is bigger than limited length %d\n", length, NVRAM_LEN - NVRAM_BOOT_SECTOR_LEN );
+        lidbg( "Fw length %d is bigger than limited length %d\n", length, NVRAM_LEN - NVRAM_BOOT_SECTOR_LEN );
         return 0;
     }
 
@@ -1894,7 +1894,7 @@ static u8  gt811_update_firmware( u8 *nvram, u16 start_addr, u16 length, struct 
     {
         retry_time = 5;
 
-        printk( "PACK[%d]\n", cur_frame_num);
+        lidbg( "PACK[%d]\n", cur_frame_num);
         cur_code_addr = /*NVRAM_UPDATE_START_ADDR*/start_addr + cur_frame_num * PACK_SIZE;
         i2c_data_buf[0] = (cur_code_addr >> 8) & 0xff;
         i2c_data_buf[1] = cur_code_addr & 0xff;
@@ -1924,7 +1924,7 @@ static u8  gt811_update_firmware( u8 *nvram, u16 start_addr, u16 length, struct 
             ret = i2c_write_bytes(ts->client, i2c_data_buf, (cur_frame_len + 2));
             if ( ret <= 0 )
             {
-                printk( "write fail\n");
+                lidbg( "write fail\n");
                 err = 1;
             }
 
@@ -1932,13 +1932,13 @@ static u8  gt811_update_firmware( u8 *nvram, u16 start_addr, u16 length, struct 
             // ret = gt811_i2c_read( guitar_i2c_address, cur_code_addr, inbuf, cur_frame_len);
             if ( ret <= 0 )
             {
-                printk( "read fail\n");
+                lidbg( "read fail\n");
                 err = 1;
             }
 
             if( is_equal( &i2c_data_buf[2], &i2c_chk_data_buf[2], cur_frame_len ) == 0 )
             {
-                printk( "not equal\n");
+                lidbg( "not equal\n");
                 err = 1;
             }
 
@@ -1956,7 +1956,7 @@ static u8  gt811_update_firmware( u8 *nvram, u16 start_addr, u16 length, struct 
 
     if( err == 1 )
     {
-        printk( "write nvram fail\n");
+        lidbg( "write nvram fail\n");
         return 0;
     }
 
@@ -1966,7 +1966,7 @@ static u8  gt811_update_firmware( u8 *nvram, u16 start_addr, u16 length, struct 
 
     if( ret == 0 )
     {
-        printk( "nvram store fail\n");
+        lidbg( "nvram store fail\n");
         return 0;
     }
 
@@ -1976,7 +1976,7 @@ static u8  gt811_update_firmware( u8 *nvram, u16 start_addr, u16 length, struct 
 
     if( ret == 0 )
     {
-        printk( "nvram recall fail\n");
+        lidbg( "nvram recall fail\n");
         return 0;
     }
 
@@ -2029,7 +2029,7 @@ static u8  gt811_update_firmware( u8 *nvram, u16 start_addr, u16 length, struct 
 
     if( err == 1 )
     {
-        printk( "nvram validate fail\n");
+        lidbg( "nvram validate fail\n");
         return 0;
     }
 
@@ -2044,12 +2044,12 @@ static u8  gt811_update_proc( u8 *nvram, u16 start_addr , u16 length, struct goo
     //GT811_SET_INT_PIN( 0 );
     msleep( 20 );
 
-    printk("come into [%s]", __func__);
+    lidbg("come into [%s]", __func__);
     ret = gt811_reset(ts);
     if ( ret < 0 )
     {
         error = 1;
-        printk( "reset fail\n");
+        lidbg( "reset fail\n");
         goto end;
     }
 
@@ -2057,7 +2057,7 @@ static u8  gt811_update_proc( u8 *nvram, u16 start_addr , u16 length, struct goo
     if ( ret == 0 )
     {
         error = 1;
-        printk( "set address fail\n");
+        lidbg( "set address fail\n");
         goto end;
     }
 
@@ -2065,7 +2065,7 @@ static u8  gt811_update_proc( u8 *nvram, u16 start_addr , u16 length, struct goo
     if ( ret == 0 )
     {
         error = 1;
-        printk( "firmware update fail\n");
+        lidbg( "firmware update fail\n");
         goto end;
     }
 
@@ -2079,7 +2079,7 @@ end:
     if ( ret < 0 )
     {
         error = 1;
-        printk( "final reset fail\n");
+        lidbg( "final reset fail\n");
         goto end;
     }
     if ( error == 1 )
@@ -2122,7 +2122,7 @@ int  gt811_downloader( struct goodix_ts_data *ts,  unsigned char *data)
     unsigned char rd_rom_version;
     unsigned char rd_chip_type;
     unsigned char rd_nvram_flag;
-    printk("come into [%s]", __func__);
+    lidbg("come into [%s]", __func__);
 
     //struct file * file_data = NULL;
     //mm_segment_t old_fs;
@@ -2136,7 +2136,7 @@ int  gt811_downloader( struct goodix_ts_data *ts,  unsigned char *data)
     ret = i2c_write_bytes(ts->client, rd_buf, 3);
     if(ret < 0)
     {
-        printk( "i2c write failed\n");
+        lidbg( "i2c write failed\n");
         goto exit_downloader;
     }
     rd_buf[0] = 0x40;
@@ -2144,7 +2144,7 @@ int  gt811_downloader( struct goodix_ts_data *ts,  unsigned char *data)
     ret = i2c_read_bytes(ts->client, rd_buf, 3);
     if(ret <= 0)
     {
-        printk( "i2c request failed!\n");
+        lidbg( "i2c request failed!\n");
         goto exit_downloader;
     }
     rd_chip_type = rd_buf[2];
@@ -2153,7 +2153,7 @@ int  gt811_downloader( struct goodix_ts_data *ts,  unsigned char *data)
     ret = i2c_read_bytes(ts->client, rd_buf, 3);
     if(ret <= 0)
     {
-        printk( "i2c read failed!\n");
+        lidbg( "i2c read failed!\n");
         goto exit_downloader;
     }
     rd_rom_version = rd_buf[2];
@@ -2162,7 +2162,7 @@ int  gt811_downloader( struct goodix_ts_data *ts,  unsigned char *data)
     ret = i2c_read_bytes(ts->client, rd_buf, 3);
     if(ret <= 0)
     {
-        printk( "i2c read failed!\n");
+        lidbg( "i2c read failed!\n");
         goto exit_downloader;
     }
     rd_nvram_flag = rd_buf[2];
@@ -2172,20 +2172,20 @@ int  gt811_downloader( struct goodix_ts_data *ts,  unsigned char *data)
     fw_length = Little2BigEndian(fw_info->length);
     data_ptr = &(fw_info->data);
 
-    printk("chip_type=0x%02x\n", fw_info->chip_type);
-    printk("version=0x%04x\n", fw_version);
-    printk("rom_version=0x%02x\n", fw_info->rom_version);
-    printk("start_addr=0x%04x\n", fw_start_addr);
-    printk("file_size=0x%04x\n", fw_length);
+    lidbg("chip_type=0x%02x\n", fw_info->chip_type);
+    lidbg("version=0x%04x\n", fw_version);
+    lidbg("rom_version=0x%02x\n", fw_info->rom_version);
+    lidbg("start_addr=0x%04x\n", fw_start_addr);
+    lidbg("file_size=0x%04x\n", fw_length);
     fw_checksum = ((u32)fw_info->checksum[0] << 16) + ((u32)fw_info->checksum[1] << 8) + ((u32)fw_info->checksum[2]);
-    printk("fw_checksum=0x%06x\n", fw_checksum);
-    printk("%s\n", __func__ );
-    printk("current version 0x%04X, target verion 0x%04X\n", ts->version, fw_version );
+    lidbg("fw_checksum=0x%06x\n", fw_checksum);
+    lidbg("%s\n", __func__ );
+    lidbg("current version 0x%04X, target verion 0x%04X\n", ts->version, fw_version );
 
     //chk_chip_type:
     if(rd_chip_type != fw_info->chip_type)
     {
-        printk( "Chip type not match,exit downloader\n");
+        lidbg( "Chip type not match,exit downloader\n");
         goto exit_downloader;
     }
 
@@ -2194,68 +2194,68 @@ int  gt811_downloader( struct goodix_ts_data *ts,  unsigned char *data)
     {
         if(fw_info->rom_version != 0x45)
         {
-            printk( "Rom version not match,exit downloader\n");
+            lidbg( "Rom version not match,exit downloader\n");
             goto exit_downloader;
         }
-        printk( "Rom version E.\n");
+        lidbg( "Rom version E.\n");
         goto chk_fw_version;
     }
     else if(rd_rom_version != fw_info->rom_version);
     {
-        printk( "Rom version not match,exidownloader\n");
+        lidbg( "Rom version not match,exidownloader\n");
         goto exit_downloader;
     }
-    printk( "Rom version %c\n", rd_rom_version);
+    lidbg( "Rom version %c\n", rd_rom_version);
 
     //chk_nvram:
     if(rd_nvram_flag == 0x55)
     {
-        printk( "NVRAM correct!\n");
+        lidbg( "NVRAM correct!\n");
         goto chk_fw_version;
     }
     else if(rd_nvram_flag == 0xAA)
     {
-        printk( "NVRAM incorrect!Need update.\n");
+        lidbg( "NVRAM incorrect!Need update.\n");
         goto begin_upgrade;
     }
     else
     {
-        printk( "NVRAM other error![0x694]=0x%02x\n", rd_nvram_flag);
+        lidbg( "NVRAM other error![0x694]=0x%02x\n", rd_nvram_flag);
         goto begin_upgrade;
     }
 chk_fw_version:
     //	ts->version -= 1;               //test by andrew
     if( ts->version >= fw_version )   // current low byte higher than back-up low byte
     {
-        printk( "Fw verison not match.\n");
+        lidbg( "Fw verison not match.\n");
         goto chk_mandatory_upgrade;
     }
-    printk("Need to upgrade\n");
+    lidbg("Need to upgrade\n");
     goto begin_upgrade;
 chk_mandatory_upgrade:
-    //	printk( "%s\n", mandatory_base);
-    //	printk( "%s\n", fw_info->mandatory_flag);
+    //	lidbg( "%s\n", mandatory_base);
+    //	lidbg( "%s\n", fw_info->mandatory_flag);
     ret = memcmp(mandatory_base, fw_info->mandatory_flag, 6);
     if(ret)
     {
-        printk("Not meet mandatory upgrade,exit downloader!ret:%d\n", ret);
+        lidbg("Not meet mandatory upgrade,exit downloader!ret:%d\n", ret);
         goto exit_downloader;
     }
-    printk( "Mandatory upgrade!\n");
+    lidbg( "Mandatory upgrade!\n");
 begin_upgrade:
-    printk( "Begin upgrade!\n");
+    lidbg( "Begin upgrade!\n");
     //   goto exit_downloader;
-    printk("STEP_0:\n");
+    lidbg("STEP_0:\n");
     //gpio_free(INT_PORT);
     // ret = gpio_request(INT_PORT, "TS_INT");	//Request IO
     // if (ret < 0)
     // {
-    //     printk("Failed to request GPIO:%d, ERRNO:%d\n",(int)INT_PORT,ret);
+    //     lidbg("Failed to request GPIO:%d, ERRNO:%d\n",(int)INT_PORT,ret);
     //     err = -1;
     //     goto exit_downloader;
     // }
 
-    printk( "STEP_1:\n");
+    lidbg( "STEP_1:\n");
     err = -1;
     while( retry < 3 )
     {
@@ -2342,7 +2342,7 @@ int ts_nod_open (struct inode *inode, struct file *filp)
 {
     //do nothing
     filp->private_data = tsdev;
-    printk("[futengfei]==================ts_nod_open\n");
+    lidbg("[futengfei]==================ts_nod_open\n");
 
     return 0;          /* success */
 }
@@ -2354,20 +2354,20 @@ ssize_t ts_nod_write (struct file *filp, const char __user *buf, size_t count, l
 
     if (copy_from_user( data_rec, buf, count))
     {
-        printk("copy_from_user ERR\n");
+        lidbg("copy_from_user ERR\n");
     }
     data_rec[count] =  '\0';
-    printk("[futengfei]ts_nod_write:==%d====[%s]\n", count, data_rec);
+    lidbg("[futengfei]ts_nod_write:==%d====[%s]\n", count, data_rec);
     // processing data
     if(!(strnicmp(data_rec, "TSMODE_XYREVERT", count - 1)))
     {
         xy_revert_en = 1;
-        printk("[futengfei]ts_nod_write:==========TSMODE_XYREVERT\n");
+        lidbg("[futengfei]ts_nod_write:==========TSMODE_XYREVERT\n");
     }
     else if(!(strnicmp(data_rec, "TSMODE_NORMAL", count - 1)))
     {
         xy_revert_en = 0;
-        printk("[futengfei]ts_nod_write:==========TSMODE_NORMAL\n");
+        lidbg("[futengfei]ts_nod_write:==========TSMODE_NORMAL\n");
     }
 
     return count;
@@ -2389,7 +2389,7 @@ static int init_cdev_ts(void)
     if (tsdev == NULL)
     {
         ret = -ENOMEM;
-        printk("[futengfei]===========init_cdev_ts:kmalloc err \n");
+        lidbg("[futengfei]===========init_cdev_ts:kmalloc err \n");
         return ret;
     }
 
@@ -2402,20 +2402,20 @@ static int init_cdev_ts(void)
         result = alloc_chrdev_region(&dev_number, 0, 1, TS_DEVICE_NAME);
         major_number_ts = MAJOR(dev_number);
     }
-    printk("[futengfei]===========alloc_chrdev_region result:%d \n", result);
+    lidbg("[futengfei]===========alloc_chrdev_region result:%d \n", result);
 
     cdev_init(&tsdev->cdev, &ts_nod_fops);
     tsdev->cdev.owner = THIS_MODULE;
     tsdev->cdev.ops = &ts_nod_fops;
     err = cdev_add(&tsdev->cdev, dev_number, 1);
     if (err)
-        printk( "[futengfei]===========Error cdev_add\n");
+        lidbg( "[futengfei]===========Error cdev_add\n");
 
     //cread cdev node in /dev
     class_install_ts = class_create(THIS_MODULE, "tsnodclass");
     if(IS_ERR(class_install_ts))
     {
-        printk( "[futengfei]=======class_create err\n");
+        lidbg( "[futengfei]=======class_create err\n");
         return -1;
     }
     device_create(class_install_ts, NULL, dev_number, NULL, "%s%d", TS_DEVICE_NAME, 0);
@@ -2427,7 +2427,7 @@ static int __devinit goodix_ts_init(void)
     int ret = 0;
     is_ts_load = 1;
     LIDBG_GET;
-    printk("\n\n==in=GT811.KO=====1024580==========touch INFO===========futengfei\n");
+    lidbg("\n\n==in=GT811.KO=====1024580==========touch INFO===========futengfei\n");
 
     //V2????,V3??
 #ifdef BOARD_V2
@@ -2452,7 +2452,7 @@ static int __devinit goodix_ts_init(void)
 
         act_client = i2c_new_device(i2c_adap, i2c_gt811);
         if (!act_client)
-            printk(KERN_INFO "i2c_new_device fail!");
+            lidbg(KERN_INFO "i2c_new_device fail!");
 
 
         i2c_put_adapter(i2c_adap);
@@ -2464,16 +2464,16 @@ static int __devinit goodix_ts_init(void)
 
 #if 0
     uint8_t device_check[6] = {0x55};
-    printk("tvp5150 init+\n");
+    lidbg("tvp5150 init+\n");
     SOC_IO_Output(5, 11, 1);
     SOC_IO_Output(4, 8, 1);
 
 again:
     i2c_api_do_recv(1, 0x5d, 0x68, device_check, 6 );
-    printk("\ngoodix_ts_init:===device_check=[%x].[%x].[%x].[%x].[%x].[%x]\n", device_check[0], device_check[1], device_check[2], device_check[3], device_check[4], device_check[5]);
+    lidbg("\ngoodix_ts_init:===device_check=[%x].[%x].[%x].[%x].[%x].[%x]\n", device_check[0], device_check[1], device_check[2], device_check[3], device_check[4], device_check[5]);
     if( device_check[0] == 0xff && device_check[1] == 0xff && device_check[2] == 0xff && device_check[3] == 0xff && device_check[4] == 0xff && device_check[5] == 0xff)
     {
-        printk("\ngoodix_ts_init:not the 7cun gh_touch_GT811 devices or broken! skip this driver!_futengfei~\n\n\n");
+        lidbg("\ngoodix_ts_init:not the 7cun gh_touch_GT811 devices or broken! skip this driver!_futengfei~\n\n\n");
         ret++;
         if (ret >= 3)return -1;
         msleep(200);
@@ -2482,20 +2482,20 @@ again:
 
     if(device_check[0] == 0x00 && device_check[1] == 0x00)
     {
-        printk("IIC err: SDA is not hight!5150_  insmod err! futengfei~\n");
+        lidbg("IIC err: SDA is not hight!5150_  insmod err! futengfei~\n");
     }
 #endif
 
     goodix_wq = create_workqueue("goodix_wq");		//create a work queue and worker thread
     if (!goodix_wq)
     {
-        printk("creat workqueue faiked\n");
+        lidbg("creat workqueue faiked\n");
         return -ENOMEM;
     }
 
     ret = i2c_add_driver(&goodix_ts_driver);
 
-    printk("[futengfei]  init_cdev_ts();\n");
+    lidbg("[futengfei]  init_cdev_ts();\n");
     init_cdev_ts();
     return ret;
 }
@@ -2508,9 +2508,9 @@ again:
 ********************************************************/
 static void __exit goodix_ts_exit(void)
 {
-    printk("Touchscreen driver of guitar exited.\n");
+    lidbg("Touchscreen driver of guitar exited.\n");
 
-    printk("come into [%s]", __func__);
+    lidbg("come into [%s]", __func__);
     i2c_del_driver(&goodix_ts_driver);
     //if (goodix_wq)
     //destroy_workqueue(goodix_wq);		//release our work queue

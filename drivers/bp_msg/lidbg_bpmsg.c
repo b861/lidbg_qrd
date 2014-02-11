@@ -29,14 +29,14 @@ int thread_bp_msg(void *data)
             {
                 if((end_index + 1) < TOTAL_LOGS)
                 {
-                    printk("%s\n", smem_log_temp->log[end_index]);
+                    lidbg("%s\n", smem_log_temp->log[end_index]);
                     smem_log_temp->log[end_index][0] = '\0';
                     smem_log_temp->end_pos++;
                 }
                 else if((end_index + 1) == TOTAL_LOGS)
                 {
                     smem_log_temp->end_pos = 0;
-                    printk("%s\n", smem_log_temp->log[end_index]);
+                    lidbg("%s\n", smem_log_temp->log[end_index]);
                     smem_log_temp->log[end_index][0] = '\0';
                     smem_log_temp->end_pos++;
                 }
@@ -56,7 +56,7 @@ int thread_bp_msg(void *data)
 
             if(start_index != end_index)
             {
-                if(bp_msg_en)printk("[lidbg_bp] %s\n", smem_log_temp->log[end_index]);
+                if(bp_msg_en)lidbg("[lidbg_bp] %s\n", smem_log_temp->log[end_index]);
                 smem_log_temp->end_pos = (end_index + 1)  % TOTAL_LOGS;
                 msleep(BP_MSG_POLLING_TIME);
             }
@@ -78,7 +78,7 @@ int bp_msg_init(void)
 #if 0//def FLY_DEBUG
     lidbg("debug:bp_msg_init do nothing");
 #else
-    printk("\n[futengfei]  =bp_msg_init=IN===============================\n");
+    lidbg("\n[futengfei]  =bp_msg_init=IN===============================\n");
     smem_log_temp = (smem_log_deep *)smem_alloc(SMEM_ID_VENDOR1, sizeof(smem_log_deep));
     if(smem_log_temp == NULL)
     {
@@ -87,14 +87,14 @@ int bp_msg_init(void)
     }
 
     CREATE_KTHREAD(thread_bp_msg, NULL);
-    printk("[futengfei]  =bp_msg_init=OUT===============================\n");
+    lidbg("[futengfei]  =bp_msg_init=OUT===============================\n");
 #endif
     return 0;
 }
 
 void bp_msg_exit(void)
 {
-    printk("[futengfei]  ==OUT=================bp_msg_exit==============\n");
+    lidbg("[futengfei]  ==OUT=================bp_msg_exit==============\n");
 #if 0
     if(bp_msg_task)
     {

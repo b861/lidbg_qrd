@@ -20,7 +20,7 @@ unsigned int  soc_ad_read(unsigned int channel)
 
     if (p_fly_smem == NULL)
     {
-        //printk( "p_fly_smem == NULL\n");
+        //lidbg( "p_fly_smem == NULL\n");
         return 0xffffffff;
     }
     value = SMEM_AD[channel];

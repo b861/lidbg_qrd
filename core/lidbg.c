@@ -117,7 +117,7 @@ static ssize_t lidbg_read(struct file *filp, char __user *buf, size_t size,
 
     /*内核空间->用户空间*/
     memcpy(&read_value, (void *)(dev->mem), 4);
-    printk("lidbg_read:read_value=%x,read_count=%d\n", (u32)read_value, count);
+    lidbg("lidbg_read:read_value=%x,read_count=%d\n", (u32)read_value, count);
     if (copy_to_user(buf, (void *)(dev->mem), count))
     {
         ret =  - EFAULT;
@@ -143,7 +143,7 @@ static ssize_t lidbg_write(struct file *filp, const char __user *buf,
     /*用户空间->内核空间*/
     if(copy_from_user(dev->mem, buf, size))
     {
-        printk("copy_from_user ERR\n");
+        lidbg("copy_from_user ERR\n");
     }
 
     parse_cmd(dev->mem);
@@ -173,7 +173,7 @@ static ssize_t lidbg_write(struct file *filp, const char __user *buf,
     /*用户空间->内核空间*/
     if(copy_from_user(mem, buf, size))
     {
-        printk("copy_from_user ERR\n");
+        lidbg("copy_from_user ERR\n");
     }
 
     //lidbg("size:%d,%s\n",size,mem);

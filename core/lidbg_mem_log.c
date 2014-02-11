@@ -48,7 +48,6 @@ static ssize_t lidbg_msg_write (struct file *filp, const char __user *buf, size_
 		lidbg_msg_is_enough(len);
 		down(&dev->sem);
 		ret = kfifo_in(&dev->fifo, msg_write_buff, len);
-		up(&dev->sem);
 
 		memset(msg_write_buff, '\0', sizeof(msg_write_buff));	
 
@@ -59,7 +58,6 @@ static ssize_t lidbg_msg_write (struct file *filp, const char __user *buf, size_
 
 		lidbg_msg_is_enough(len);
 
- 		down(&dev->sem);	
 		ret = kfifo_in(&dev->fifo, msg_write_buff, len);
 		up(&dev->sem);
 		
@@ -166,7 +164,6 @@ int lidbg_msg_put( const char *fmt, ... )
 		lidbg_msg_is_enough(len);
 		down(&dev->sem);
 		ret = kfifo_in(&dev->fifo, msg_in_buff, len);
-		up(&dev->sem);
 
 		memset(msg_in_buff, '\0', sizeof(msg_in_buff));
 
@@ -178,7 +175,6 @@ int lidbg_msg_put( const char *fmt, ... )
 
 		lidbg_msg_is_enough(len);
 
- 		down(&dev->sem);	
 		ret = kfifo_in(&dev->fifo, msg_in_buff, len);
 		up(&dev->sem);
 		

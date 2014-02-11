@@ -58,7 +58,7 @@ void parse_cmd(char *pt)
             printk("%s ", argv[i]);
             i++;
         }
-        printk("\n");
+        lidbg("\n");
     }
     // ½âÎöÃüÁî
 

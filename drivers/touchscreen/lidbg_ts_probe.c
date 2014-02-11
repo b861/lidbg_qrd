@@ -80,9 +80,9 @@ void ts_scan(void)
                 lidbg_fs_log(TS_LOG_PATH, "loadts=%s\n", ts_probe_dev[i].name);
                 ts_should_revert = fs_find_string(&flyhal_config_list, "TSMODE_XYREVERT");
                 if(ts_should_revert > 0)
-                    printk("[futengfei]=======================TS.XY will revert\n");
+                    lidbg("[futengfei]=======================TS.XY will revert\n");
                 else
-                    printk("[futengfei]=======================TS.XY will normal\n");
+                    lidbg("[futengfei]=======================TS.XY will normal\n");
             }
             if (!strcmp(ts_probe_dev[i].name, "gt801.ko"))
             {
@@ -128,7 +128,7 @@ int ts_probe_thread(void *data)
 
         if(shutdown_flag_probe == 0)
         {
-            printk("[wang]:======begin to probe ts_driver.\n");
+            lidbg("[wang]:======begin to probe ts_driver.\n");
             if(scan_on == 1)
             {
                 SOC_IO_Output(0, 27, 1);
@@ -160,7 +160,7 @@ int ts_probe_thread(void *data)
         }
         else
         {
-            //printk("[wang]:=========is in updating.\n");
+            //lidbg("[wang]:=========is in updating.\n");
             shutdown_flag_probe = 2;
             msleep(ts_scan_delayms);
 

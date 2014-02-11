@@ -54,14 +54,14 @@ int soc_io_config(u32 index, bool direction, u32 pull, u32 drive_strength, bool 
     else if(direction == GPIO_CFG_INPUT)
         MDrv_GPIO_Pad_Odn(index);
     else
-        printk("Gpio direction is not supported!\n");
+        lidbg("Gpio direction is not supported!\n");
 
     if(pull == GPIO_CFG_PULL_UP)
         MDrv_GPIO_Pull_High(index);
     else if(pull == GPIO_CFG_PULL_DOWN)
         MDrv_GPIO_Pull_Low(index);
     else
-        printk("Gpio-%d no pull !\n", index);
+        lidbg("Gpio-%d no pull !\n", index);
 
 #if 0
     int rc;

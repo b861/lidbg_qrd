@@ -175,7 +175,7 @@ void lidbg_wakelock_stat(int argc, char **argv)
     int pid, uid;
     if(argc < 5)
     {
-        printk("%d[futengfei]err.lidbg_wakelock_stat:echo \"c wakelock lock count  pid uid name\" > /dev/mlidbg0\n", argc);
+        lidbg("%d[futengfei]err.lidbg_wakelock_stat:echo \"c wakelock lock count  pid uid name\" > /dev/mlidbg0\n", argc);
         return;
     }
 

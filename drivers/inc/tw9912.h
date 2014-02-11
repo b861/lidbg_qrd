@@ -16,11 +16,13 @@
 
 
 extern u8 tw9912_signal_unstabitily_for_tw9912_config_array_flag;
-#if 0
-#define tw9912_dbg(msg...)  do { printk( KERN_CRIT "TW9912: " msg); }while(0)
+#if 1
+#define tw9912_dbg(msg...)  do { lidbg( "TW9912: " msg); }while(0)
 #else
 #define tw9912_dbg(msg...)  do {}while(0)
 #endif
+#define tw9912_dbg_err(msg...)  do { lidbgerr( "TW9912: " msg); }while(0)
+
 #if 1
 
 //#ifdef BOARD_V1
@@ -137,18 +139,18 @@ bool flag;//true is neet again find the black line;
 bool this_is_first_open;//true is first
 }tw9912info_t;
 /**************************/
-int tw9912_config_array(vedio_format_t config_pramat, vedio_channel_t Channel);
+int tw9912_config_array( vedio_channel_t Channel);
 
 vedio_format_t camera_open_video_signal_test_in_2(void);
-int Tw9912_appoint_pin_tw9912_cvbs_signal_tsting(vedio_channel_t Channel);
+vedio_format_t Tw9912_appoint_pin_tw9912_cvbs_signal_tsting(vedio_channel_t Channel);
 vedio_format_t tw9912_cvbs_signal_tsting(vedio_channel_t Channel);
 i2c_ack tw9912_write(char *buf );
 int tw9912_read_chips_status(u8 cmd);
 i2c_ack Correction_Parameter_fun(vedio_format_t format);
 int tw9912_config_array_agin(void);
 vedio_format_t tw9912_yuv_signal_testing(void);
-void Disabel_video_data_out(void);
-void Enabel_video_data_out(void);
+//void Disabel_video_data_out(void);
+//void Enabel_video_data_out(void);
 vedio_format_t tw9912_testing_channal_signal(vedio_channel_t Channel);
 void tw9912_hardware_reset(void);
 int Tw9912_YIN3ToYUV_init_agin(void);

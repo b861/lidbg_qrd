@@ -22,7 +22,7 @@ unsigned int   soc_bl_set(u32 bl_level)
 #if (defined(BOARD_V1) || defined(BOARD_V2))
     if (p_fly_smem == NULL)
     {
-        printk( "p_fly_smem == NULL\n");
+        lidbg( "p_fly_smem == NULL\n");
         return 0;
     }
     SMEM_BL = (int)bl_level;
@@ -32,7 +32,7 @@ unsigned int   soc_bl_set(u32 bl_level)
     err = pmapp_disp_backlight_set_brightness(bl_level);
     if(err)
     {
-        printk("Backlight set brightness failed !\n");
+        lidbg("Backlight set brightness failed !\n");
         return 0;
     }
 

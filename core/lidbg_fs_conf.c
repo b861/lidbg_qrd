@@ -43,23 +43,23 @@ int launch_file_cmd(const char *filename)
     filep = filp_open(filename, O_RDONLY , 0);
     if(IS_ERR(filep))
     {
-        printk("[futengfei]err.open:<%s>\n", filename);
+        lidbg("[futengfei]err.open:<%s>\n", filename);
         return -1;
     }
-    printk("[futengfei]succeed.open:<%s>\n", filename);
+    lidbg("[futengfei]succeed.open:<%s>\n", filename);
 
     old_fs = get_fs();
     set_fs(get_ds());
 
     inode = filep->f_dentry->d_inode;
     file_len = inode->i_size;
-    printk("[futengfei]warn.File_length:<%d>\n", file_len);
+    lidbg("[futengfei]warn.File_length:<%d>\n", file_len);
     file_len = file_len + 1;
 
     file_ptr = (unsigned char *)kzalloc(file_len, GFP_KERNEL);
     if(file_ptr == NULL)
     {
-        printk( "[futengfei]err.vmalloc:<cannot kzalloc memory!>\n");
+        lidbg( "[futengfei]err.vmalloc:<cannot kzalloc memory!>\n");
         return -1;
     }
 
@@ -70,7 +70,7 @@ int launch_file_cmd(const char *filename)
     all_purpose = filep->f_op->read(filep, file_ptr, file_len, &filep->f_pos);
     if(all_purpose <= 0)
     {
-        printk( "[futengfei]err.f_op->read:<read file data failed>\n");
+        lidbg( "[futengfei]err.f_op->read:<read file data failed>\n");
         return -1;
     }
     set_fs(old_fs);

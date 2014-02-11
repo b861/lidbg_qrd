@@ -655,7 +655,7 @@ static void goodix_ts_work_func(struct work_struct *work)
     }
     else
     {
-        //printk("=======GT910=====gtp_i2c_read SUCCSEEFUL====\n");
+        //lidbg("=======GT910=====gtp_i2c_read SUCCSEEFUL====\n");
     }
     finger = point_data[GTP_ADDR_LENGTH];
 
@@ -669,9 +669,9 @@ static void goodix_ts_work_func(struct work_struct *work)
             goto exit_work_func;
         }
 
-        else //printk("=======GT910=====gtp_i2c  request status  right====\n");
+        else //lidbg("=======GT910=====gtp_i2c  request status  right====\n");
         {
-            //printk("=======rqst_buf[2]:%02x\n",rqst_buf[2]);
+            //lidbg("=======rqst_buf[2]:%02x\n",rqst_buf[2]);
         }
 
         switch (rqst_buf[2] & 0x0F)
@@ -817,7 +817,7 @@ static void goodix_ts_work_func(struct work_struct *work)
                 }
                 if(g_var.flag_for_15s_off < 0)
                 {
-                    printk("\nerr:FLAG_FOR_15S_OFF===[%d]\n", g_var.flag_for_15s_off);
+                    lidbg("\nerr:FLAG_FOR_15S_OFF===[%d]\n", g_var.flag_for_15s_off);
                 }
             }
             else
@@ -865,7 +865,7 @@ static void goodix_ts_work_func(struct work_struct *work)
         }
         if(g_var.flag_for_15s_off < 0)
         {
-            printk("\nerr:FLAG_FOR_15S_OFF===[%d]\n", g_var.flag_for_15s_off);
+            lidbg("\nerr:FLAG_FOR_15S_OFF===[%d]\n", g_var.flag_for_15s_off);
         }
     }
     else if (pre_touch)
@@ -936,7 +936,7 @@ static irqreturn_t goodix_ts_irq_handler(int irq, void *dev_id)
     struct goodix_ts_data *ts = dev_id;
 
     GTP_DEBUG_FUNC();
-    //printk("====gt910===enter goodix_ts_irq_handler=====\n");
+    //lidbg("====gt910===enter goodix_ts_irq_handler=====\n");
     gtp_irq_disable(ts);
 
     queue_work(goodix_wq, &ts->work);
@@ -1369,7 +1369,7 @@ static s32 gtp_init_panel(struct goodix_ts_data *ts)
     }
     else
     	{
-    printk("======Send config succseeful.======GT910===");
+    lidbg("======Send config succseeful.======GT910===");
     }
     msleep(10);*/
     return 0;
@@ -1461,7 +1461,7 @@ Output:
 static s8 gtp_request_io_port(struct goodix_ts_data *ts)
 {
     s32 ret = 0;
-    //printk("=======gtp_request_io_port====gt910=====\n");
+    //lidbg("=======gtp_request_io_port====gt910=====\n");
     ret = GTP_GPIO_REQUEST(GTP_INT_PORT, "GTP_INT_IRQ");
     if (ret < 0)
     {
@@ -1474,7 +1474,7 @@ static s8 gtp_request_io_port(struct goodix_ts_data *ts)
         gpio_get_value(GTP_INT_PORT);
         //GTP_GPIO_AS_INT(GTP_INT_PORT);
         ts->client->irq = GTP_INT_IRQ;
-        //printk("=====succeful to request== GT910INTGPIO:====\n");
+        //lidbg("=====succeful to request== GT910INTGPIO:====\n");
     }
 
     ret = GTP_GPIO_REQUEST(GTP_RST_PORT, "GTP_RST_PORT");
@@ -1515,7 +1515,7 @@ static s8 gtp_request_irq(struct goodix_ts_data *ts)
     ret  = request_irq(ts->client->irq, goodix_ts_irq_handler, irq_table[ts->int_trigger_type], ts->client->name, ts);
     if (ret)
     {
-        printk("======gtp_request_irq fail========GT910===\n");
+        lidbg("======gtp_request_irq fail========GT910===\n");
     }
 
     /* if (ret)
@@ -1531,7 +1531,7 @@ static s8 gtp_request_irq(struct goodix_ts_data *ts)
      }*/
     else
     {
-        //printk("====GT910 Request IRQ succseeful======");
+        //lidbg("====GT910 Request IRQ succseeful======");
         gtp_irq_disable(ts);
         ts->use_irq = 1;
         return 0;
@@ -1644,9 +1644,9 @@ void gtp_get_chiptype(struct i2c_client *client)
     /*
     for (i = 0; i < 32; ++i)
     {
-        printk("%c", type_buf[2 + i]);
+        lidbg("%c", type_buf[2 + i]);
     }
-    printk("\n");
+    lidbg("\n");
     */
 
     if (!memcmp(&type_buf[2], "GT900_MASK", 10))
@@ -1760,7 +1760,7 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     u16 version_info;
 
     GTP_DEBUG_FUNC();
-    printk("=======enter probe====gt910=====\n");
+    lidbg("=======enter probe====gt910=====\n");
     //do NOT remove these logs
     GTP_INFO("GTP Driver Version: %s", GTP_DRIVER_VERSION);
     GTP_INFO("GTP Driver Built@%s, %s", __TIME__, __DATE__);
@@ -1798,7 +1798,7 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     }
     else
     {
-        printk("===gtp_request_io_port====suc=====");
+        lidbg("===gtp_request_io_port====suc=====");
     }
     // flashless
     ret = gtp_flashless_init(ts);
@@ -1814,7 +1814,7 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     }
     else
     {
-        printk("======test succseful======GT910===\n");
+        lidbg("======test succseful======GT910===\n");
     }
     ret = gtp_init_panel(ts);
     if (ret < 0)
@@ -1823,7 +1823,7 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     }
     else
     {
-        printk("======GTP init panel succseful======GT910===\n");
+        lidbg("======GTP init panel succseful======GT910===\n");
     }
     ret = gtp_request_input_dev(ts);
     if (ret < 0)
@@ -1832,7 +1832,7 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     }
     else
     {
-        printk("======GTP request input dev  succseful======GT910===\n");
+        lidbg("======GTP request input dev  succseful======GT910===\n");
     }
     ret = gtp_request_irq(ts);
     if (ret < 0)
@@ -1869,7 +1869,7 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
         kthread_run(gup_update_proc, "update", "auto update");
     }
 #endif
-    printk("=======gt910=====goodix_ts_probe======\n");
+    lidbg("=======gt910=====goodix_ts_probe======\n");
     return 0;
 }
 
@@ -2180,7 +2180,7 @@ int ts_nod_open (struct inode *inode, struct file *filp)
 {
     //do nothing
     filp->private_data = tsdev;
-    printk("[futengfei]==================ts_nod_open\n");
+    lidbg("[futengfei]==================ts_nod_open\n");
 
     return 0;          /* success */
 }
@@ -2192,20 +2192,20 @@ ssize_t ts_nod_write (struct file *filp, const char __user *buf, size_t count, l
 
     if (copy_from_user( data_rec, buf, count))
     {
-        printk("copy_from_user ERR\n");
+        lidbg("copy_from_user ERR\n");
     }
     data_rec[count] =  '\0';
-    printk("gt910-ts_nod_write:==%d====[%s]\n", count, data_rec);
+    lidbg("gt910-ts_nod_write:==%d====[%s]\n", count, data_rec);
     // processing data
     if(!(strnicmp(data_rec, "TSMODE_XYREVERT", count - 1)))
     {
         xy_revert_en = 1;
-        printk("[gt910]ts_nod_write:==========TSMODE_XYREVERT\n");
+        lidbg("[gt910]ts_nod_write:==========TSMODE_XYREVERT\n");
     }
     else if(!(strnicmp(data_rec, "TSMODE_NORMAL", count - 1)))
     {
         xy_revert_en = 0;
-        printk("[gt910]ts_nod_write:==========TSMODE_NORMAL\n");
+        lidbg("[gt910]ts_nod_write:==========TSMODE_NORMAL\n");
     }
 
     return count;
@@ -2226,7 +2226,7 @@ static int init_cdev_ts(void)
     if (tsdev == NULL)
     {
         ret = -ENOMEM;
-        printk("gt910===========init_cdev_ts:kmalloc err \n");
+        lidbg("gt910===========init_cdev_ts:kmalloc err \n");
         return ret;
     }
 
@@ -2240,20 +2240,20 @@ static int init_cdev_ts(void)
         result = alloc_chrdev_region(&dev_number, 0, 1, TS_DEVICE_NAME);
         major_number_ts = MAJOR(dev_number);
     }
-    printk("gt910===========alloc_chrdev_region result:%d \n", result);
+    lidbg("gt910===========alloc_chrdev_region result:%d \n", result);
 
     cdev_init(&tsdev->cdev, &ts_nod_fops);
     tsdev->cdev.owner = THIS_MODULE;
     tsdev->cdev.ops = &ts_nod_fops;
     err = cdev_add(&tsdev->cdev, dev_number, 1);
     if (err)
-        printk( "gt910===========Error cdev_add\n");
+        lidbg( "gt910===========Error cdev_add\n");
 
     //cread cdev node in /dev
     class_install_ts = class_create(THIS_MODULE, "tsnodclass");
     if(IS_ERR(class_install_ts))
     {
-        printk( "gt910=======class_create err\n");
+        lidbg( "gt910=======class_create err\n");
         return -1;
     }
     device_create(class_install_ts, NULL, dev_number, NULL, "%s%d", TS_DEVICE_NAME, 0);
@@ -2296,7 +2296,7 @@ static int __devinit goodix_ts_init(void)
     }
     else
     {
-        printk("Creat workqueue succseeful!\n");
+        lidbg("Creat workqueue succseeful!\n");
     }
 #if GTP_ESD_PROTECT
     INIT_DELAYED_WORK(&gtp_esd_check_work, gtp_esd_check_func);

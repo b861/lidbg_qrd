@@ -78,7 +78,7 @@ static struct notifier_block gps_notifier =
 int gps_open (struct inode *inode, struct file *filp)
 {
     filp->private_data = dev;
-    printk("[ublox]gps_open\n");
+    lidbg("[ublox]gps_open\n");
     return 0;
 }
 
@@ -90,7 +90,7 @@ ssize_t gps_read (struct file *filp, char __user *buf, size_t count, loff_t *f_p
 
     if (!started)
     {
-        printk("[ublox] gps stoped but read\n");
+        lidbg("[ublox] gps stoped but read\n");
         return -1;
     }
 
@@ -120,7 +120,7 @@ ssize_t gps_read (struct file *filp, char __user *buf, size_t count, loff_t *f_p
         wake_up_interruptible(&dev->queue);
 
     if(gps_debug_en)
-        printk("[ublox]fifo_len: %d, jni_read: %d\n", fifo_len, read_len);
+        lidbg("[ublox]fifo_len: %d, jni_read: %d\n", fifo_len, read_len);
     return read_len;
 }
 
@@ -128,9 +128,9 @@ ssize_t gps_read (struct file *filp, char __user *buf, size_t count, loff_t *f_p
 ssize_t gps_write (struct file *filp, const char __user *buf, size_t count, loff_t *f_pos)
 {
     //struct gps_device *dev = filp->private_data;
-    printk("[ublox]gps_write\n");
+    lidbg("[ublox]gps_write\n");
 
-    printk("[ublox] gps_data=>%s\n", gps_data);
+    lidbg("[ublox] gps_data=>%s\n", gps_data);
 
     return count;
 }
@@ -140,13 +140,13 @@ static unsigned int gps_poll(struct file *filp, struct poll_table_struct *wait)
     struct gps_device *dev = filp->private_data;
     unsigned int mask = 0;
 
-    //   printk("ublox:gps_poll called");
+    //   lidbg("ublox:gps_poll called");
 
 
     poll_wait(filp, &dev->queue, wait);
     if (!started)
     {
-        //	printk("ublox:gps not start but poll");
+        //	lidbg("ublox:gps not start but poll");
         return 0;
     }
 
@@ -154,7 +154,7 @@ static unsigned int gps_poll(struct file *filp, struct poll_table_struct *wait)
     if(!kfifo_is_empty(&gps_data_fifo))
     {
         mask |= POLLIN | POLLRDNORM;
-        //	printk("ublox:gps poll have data");
+        //	lidbg("ublox:gps poll have data");
     }
     up(&dev->sem);
     return mask;
@@ -165,11 +165,11 @@ static long gps_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
     switch(cmd)
     {
     case GPS_START:
-        printk("[ublox]:ioctl GPS START\n");
+        lidbg("[ublox]:ioctl GPS START\n");
         started = 1;
         break;
     case GPS_STOP:
-        printk("[ublox]:ioctl GPS STOP\n");
+        lidbg("[ublox]:ioctl GPS STOP\n");
         started = 0;
         break;
     default:
@@ -217,21 +217,21 @@ int thread_gps_server(void *data)
         if((work_en == 0) || (started == 0))
         {
             if(gps_debug_en)
-                printk("[ublox]goto do_nothing:%d,%d\n", work_en, started);
+                lidbg("[ublox]goto do_nothing:%d,%d\n", work_en, started);
             goto do_nothing;
         }
         ret = SOC_I2C_Rec(1, 0x42, 0xfd, num_avi_gps_data, 2);
         if (ret < 0)
         {
             avi_gps_data_hl = 0;
-            printk("[ublox]get avi_gps_data_hl err!!\n");
+            lidbg("[ublox]get avi_gps_data_hl err!!\n");
         }
         else
             avi_gps_data_hl = (num_avi_gps_data[0] << 8) + num_avi_gps_data[1];
 
 
         if(gps_debug_en)
-            printk("[ublox]ublox_buf_len: %d\n", avi_gps_data_hl);
+            lidbg("[ublox]ublox_buf_len: %d\n", avi_gps_data_hl);
 
         if(avi_gps_data_hl > 0)
         {
@@ -240,21 +240,21 @@ int thread_gps_server(void *data)
                 ret = SOC_I2C_Rec_Simple(1, 0x42, gps_data, avi_gps_data_hl);
                 if (ret < 0)
                 {
-                    printk("[ublox]get gps data err!!\n");
+                    lidbg("[ublox]get gps data err!!\n");
                     goto do_nothing;
                 }
                 down(&dev->sem);
                 if(kfifo_is_full(&gps_data_fifo))
                 {
                     kfifo_reset(&gps_data_fifo);
-                    printk("[ublox]kfifo_reset!!!!!\n");
+                    lidbg("[ublox]kfifo_reset!!!!!\n");
                 }
                 kfifo_in(&gps_data_fifo, gps_data, avi_gps_data_hl);
                 up(&dev->sem);
             }
             else
             {
-                printk("[ublox]data len err!!!!!!\n");
+                lidbg("[ublox]data len err!!!!!!\n");
                 goto do_nothing;
             }
         }
@@ -267,13 +267,13 @@ int thread_gps_server(void *data)
         if (started)
         {
             if (gps_debug_en)
-                printk("ublox:have data need read\n");
+                lidbg("ublox:have data need read\n");
             wake_up_interruptible(&dev->queue);
         }
         if(gps_debug_en)
         {
             gps_data[avi_gps_data_hl ] = '\0';
-            printk("%s\n", gps_data);
+            lidbg("%s\n", gps_data);
         }
 
 do_nothing:
@@ -287,7 +287,7 @@ do_nothing:
 
 int read_proc(char *buf, char **start, off_t offset, int count, int *eof, void *data )
 {
-    printk("enable ublox print\n");
+    lidbg("enable ublox print\n");
     gps_debug_en = 1;
 
     return 1;
@@ -359,11 +359,11 @@ static int  gps_probe(struct platform_device *pdev)
 
     if(is_ublox_exist() < 0)
     {
-        printk("[ublox]ublox.miss\n\n");
+        lidbg("[ublox]ublox.miss\n\n");
     }
     else
     {
-        printk("[ublox]ublox.exist\n\n");
+        lidbg("[ublox]ublox.exist\n\n");
         fs_mem_log("ublox_exist=true\n");
 
     }
@@ -387,7 +387,7 @@ static int  gps_probe(struct platform_device *pdev)
     if (dev == NULL)
     {
         ret = -ENOMEM;
-        printk("[ublox]gps_server_driver_init:kmalloc err\n");
+        lidbg("[ublox]gps_server_driver_init:kmalloc err\n");
         return ret;
     }
 
@@ -400,20 +400,20 @@ static int  gps_probe(struct platform_device *pdev)
         result = alloc_chrdev_region(&dev_number, 0, 1, DEVICE_NAME);
         major_number = MAJOR(dev_number);
     }
-    printk("[ublox]alloc_chrdev_region result:%d\n", result);
+    lidbg("[ublox]alloc_chrdev_region result:%d\n", result);
 
     cdev_init(&dev->cdev, &gps_fops);
     dev->cdev.owner = THIS_MODULE;
     dev->cdev.ops = &gps_fops;
     err = cdev_add(&dev->cdev, dev_number, 1);
     if (err)
-        printk( "[ublox]Error cdev_add\n");
+        lidbg( "[ublox]Error cdev_add\n");
 
     //cread cdev node in /dev
     class_install = class_create(THIS_MODULE, "gpsclass");
     if(IS_ERR(class_install))
     {
-        printk( "[ublox]class_create err\n");
+        lidbg( "[ublox]class_create err\n");
         return -1;
     }
     device_create(class_install, NULL, dev_number, NULL, "%s%d", DEVICE_NAME, 0);
@@ -485,7 +485,7 @@ static struct platform_device lidbg_gps_device =
 
 static  int gps_server_init(void)
 {
-    printk(" \n[ublox] ==IN==gps_server_driver_init==\n");
+    lidbg(" \n[ublox] ==IN==gps_server_driver_init==\n");
 
     LIDBG_GET;
 
@@ -497,7 +497,7 @@ static  int gps_server_init(void)
 
 static void gps_server_exit(void)
 {
-    printk(" \n[ublox] ==IN==gps_server_driver_exit==\n");
+    lidbg(" \n[ublox] ==IN==gps_server_driver_exit==\n");
 
     // misc_deregister(&misc);
     // kfree(dev);

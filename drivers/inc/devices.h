@@ -121,13 +121,13 @@ enum
 // PANNE_PEN , RESET
 #define LCD_ON  do{    \
 		u8 buff[] = {0x02, 0x0d, 0x1};\
-		printk("LCD_ON\n");\
+		lidbg("LCD_ON\n");\
         SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\
 				}while(0)
 
 #define LCD_OFF   do{   \
 		u8 buff[] = {0x02, 0x0d, 0x0};\
-		printk("LCD_OFF\n");\
+		lidbg("LCD_OFF\n");\
         SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\
 				}while(0)
 
@@ -325,7 +325,7 @@ enum
 			}while(0)
 #else
 #define LCD_RESET do{\
-				printk("LCD_RESET\n");\
+				lidbg("LCD_RESET\n");\
 				SOC_IO_Output(0, GPIO_LCD3, 0);\
 				msleep(20);\
 				SOC_IO_Output(0, GPIO_LCD3, 1);\
@@ -353,13 +353,13 @@ enum
 
 #define USB_POWER_ON do{\
 		u8 buff[] = {0x02, 0x0e, 0x1};\
-		printk("\n\n========USB_POWER_ON======\n\n");\
+		lidbg("\n\n========USB_POWER_ON======\n\n");\
 		SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\
 						}while(0)
 
 #define USB_POWER_OFF do{\
 		u8 buff[] = {0x02, 0x0e, 0x0};\
-		printk("\n\n========USB_POWER_OFF======\n\n");\
+		lidbg("\n\n========USB_POWER_OFF======\n\n");\
 		SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\
 						}while(0)
 #endif

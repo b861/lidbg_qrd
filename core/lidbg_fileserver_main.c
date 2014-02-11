@@ -24,16 +24,16 @@ void test_fileserver_stability(void)
     fs_find_string(&kill_list_test, "cn.flyaudio.navigation");
     fs_find_string(&kill_list_test, "cn.flyaudio.navigationfutengfei");
     fs_get_intvalue(&lidbg_drivers_list, "futengfei", &ret, NULL);
-    printk("[futengfei]get key value:[%d]\n", ret );
+    lidbg("[futengfei]get key value:[%d]\n", ret );
     fs_get_intvalue(&lidbg_drivers_list, "mayanping", &ret, NULL);
-    printk("[futengfei]get key value:[%d]\n", ret );
+    lidbg("[futengfei]get key value:[%d]\n", ret );
     fs_get_intvalue(&lidbg_core_list, "fs_updatestate_ms", &ret, NULL);
-    printk("[futengfei]get key value:[%d]\n", ret );
+    lidbg("[futengfei]get key value:[%d]\n", ret );
 
     delay = "futengfei1";
     //fs_set_value(&lidbg_core_list, "fs_private_patch", delay);
     //fs_get_value(&lidbg_core_list, "fs_private_patch", &value);
-    //printk("[futengfei]warn.test_fileserver_stability:<value=%s>\n", value);
+    //lidbg("[futengfei]warn.test_fileserver_stability:<value=%s>\n", value);
     lidbg_get_current_time(tbuff, NULL);
     fs_mem_log("%s\n", tbuff);
 
@@ -76,19 +76,19 @@ void fileserver_thread_test(int zero_return)
     switch (zero_return)
     {
     case 3:
-        printk("[futengfei]======start_kthread_run1.2.3\n");
+        lidbg("[futengfei]======start_kthread_run1.2.3\n");
         fileserver_test_task3 = kthread_run(thread_fileserver_test, NULL, "ftf_fs_task3");
         msleep(88);
     case 2:
-        printk("[futengfei]======start_kthread_run1.2\n");
+        lidbg("[futengfei]======start_kthread_run1.2\n");
         fileserver_test_task2 = kthread_run(thread_fileserver_test, NULL, "ftf_fs_task2");
         msleep(230);
     case 1:
-        printk("[futengfei]======start_kthread_run1\n");
+        lidbg("[futengfei]======start_kthread_run1\n");
         fileserver_test_task = kthread_run(thread_fileserver_test, NULL, "ftf_fs_task");
         break;
     case 0:
-        printk("[futengfei]======stop_kthread_run1.2.3\n");
+        lidbg("[futengfei]======stop_kthread_run1.2.3\n");
         if (fileserver_test_task)
             kthread_stop(fileserver_test_task);
         if (fileserver_test_task2)
@@ -100,7 +100,7 @@ void fileserver_thread_test(int zero_return)
         fileserver_test_task3 = NULL;
         break;
     default:
-        printk("[futengfei]======thread_count:too much\n");
+        lidbg("[futengfei]======thread_count:too much\n");
     }
 }
 //zone end
@@ -112,7 +112,7 @@ void lidbg_fileserver_main(int argc, char **argv)
     int thread_count = 0;
     if(argc < 3)
     {
-        printk("[futengfei]err.lidbg_fileserver_main:echo \"c file 1 1 1\" > /dev/mlidbg0\n");
+        lidbg("[futengfei]err.lidbg_fileserver_main:echo \"c file 1 1 1\" > /dev/mlidbg0\n");
         return;
     }
 

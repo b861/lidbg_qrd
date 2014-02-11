@@ -136,7 +136,7 @@ bool get_file_mftime(const char *filename, struct rtc_time *ptm)
     filep = filp_open(filename, O_RDONLY , 0);
     if(IS_ERR(filep))
     {
-        printk("[futengfei]err.open:<%s>\n", filename);
+        lidbg("[futengfei]err.open:<%s>\n", filename);
         return false;
     }
     inode = filep->f_dentry->d_inode;

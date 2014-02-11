@@ -21,14 +21,14 @@ int i2c_io_config(unsigned int index, unsigned int direction, unsigned int pull,
         /*	if (gpio_is_valid(index))
         	{
         		gpio_free(index);
-        		printk("gpio_free(%d);\n",index);
+        		lidbg("gpio_free(%d);\n",index);
         	}
         */
         err = gpio_request(index, "video_io");
-        printk("gpio_request(%d)\n ", index);
+        lidbg("gpio_request(%d)\n ", index);
         if (err)
         {
-            printk("\n\nerr: gpio request failed!!!!!!\n\n\n");
+            lidbg("\n\nerr: gpio request failed!!!!!!\n\n\n");
             goto gpio_request_failed;
         }
 
@@ -37,7 +37,7 @@ int i2c_io_config(unsigned int index, unsigned int direction, unsigned int pull,
                                        drive_strength), GPIO_CFG_ENABLE);
         if (rc)
         {
-            printk("%s: gpio_tlmm_config for %d failed\n",
+            lidbg("%s: gpio_tlmm_config for %d failed\n",
                    __func__, index);
             return 0;
         }
@@ -54,7 +54,7 @@ int i2c_io_config(unsigned int index, unsigned int direction, unsigned int pull,
 
     if (err)
     {
-        printk("gpio_direction_set failed\n");
+        lidbg("gpio_direction_set failed\n");
         goto free_gpio;
     }
     return 1;
@@ -86,7 +86,7 @@ void i2c_io_config_init(void)
 #endif
     i2c_io_config(TW9912_RESET, GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA, 1); //tw9912 reset//43
     i2c_io_config(TC358746XBG_RESET, GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA, 1); // tc358746 reset
-    printk("first init GPIO_I2C_SDA and GPIO_I2C_SCL\n");
+    lidbg("first init GPIO_I2C_SDA and GPIO_I2C_SCL\n");
 }
 #ifndef FLY_VIDEO_BOARD_V3
 static void i2c_init(void)
@@ -228,7 +228,7 @@ static void i2c_write_chip_addr(u8 chip_addr, i2c_WR_flag flag)
     {
         chip_addr = chip_addr << 1;
         chip_addr = chip_addr | 0x01;
-        //    printk("READ:i2c_write(%.2x)",chip_addr);
+        //    lidbg("READ:i2c_write(%.2x)",chip_addr);
         i2c_write(chip_addr) ;
     }
 }
@@ -239,7 +239,7 @@ i2c_ack i2c_read_byte(int bus_id, char chip_addr, unsigned int sub_addr, char *b
     int ret = 0;
     //ret=i2c_api_do_recv(3,chip_addr, sub_addr , buf, size);
     ret = SOC_I2C_Rec(3, chip_addr, sub_addr , buf, size);
-    //printk("\n************ i2c_read_byte =%d*******\n",ret);
+    //lidbg("\n************ i2c_read_byte =%d*******\n",ret);
     //if(ret==size){
     if(ret > 0)
     {
@@ -265,7 +265,7 @@ i2c_ack i2c_read_byte(int bus_id, char chip_addr, unsigned int sub_addr, char *b
     {
         i2c_stop();
         i2c_free();
-        printk("at read funtion :i2c_write_chip_addr(%.2x, %d) ; is not ACK\n", chip_addr, hkj_WRITE);
+        lidbg("at read funtion :i2c_write_chip_addr(%.2x, %d) ; is not ACK\n", chip_addr, hkj_WRITE);
         mutex_unlock(&io_i2c_lock);
         return NACK;
     }
@@ -280,7 +280,7 @@ i2c_ack i2c_read_byte(int bus_id, char chip_addr, unsigned int sub_addr, char *b
     {
         i2c_stop();
         i2c_free();
-        printk("at read funtion :i2c_write (%.2x) is not ACK\n", sub_addr & 0xff);
+        lidbg("at read funtion :i2c_write (%.2x) is not ACK\n", sub_addr & 0xff);
         mutex_unlock(&io_i2c_lock);
         return NACK;
     }
@@ -293,7 +293,7 @@ i2c_ack i2c_read_byte(int bus_id, char chip_addr, unsigned int sub_addr, char *b
     {
         i2c_stop();
         i2c_free();
-        printk("at read funtion :i2c_write_chip_addr(%.2x, %d) ; is not ACK\n", sub_addr, hkj_READ);
+        lidbg("at read funtion :i2c_write_chip_addr(%.2x, %d) ; is not ACK\n", sub_addr, hkj_READ);
         mutex_unlock(&io_i2c_lock);
         return NACK;
     }
@@ -316,7 +316,7 @@ i2c_ack i2c_write_byte(int bus_id, char chip_addr, char *buf, unsigned int size)
 #ifdef FLY_VIDEO_BOARD_V3
     int ret_send = 0;
     ret_send = SOC_I2C_Send(3,  chip_addr, buf, size);
-    // printk("\n************i2c_write_byte =%d*******\n",ret_send);
+    // lidbg("\n************i2c_write_byte =%d*******\n",ret_send);
     if(ret_send > 0)
     {
 #ifdef  DEBUG_ACK
@@ -332,7 +332,7 @@ i2c_ack i2c_write_byte(int bus_id, char chip_addr, char *buf, unsigned int size)
 #else
     u8 i;
     mutex_lock(&io_i2c_lock);
-    //printk("i2c:write byte:addr =0x%.2x value=0x%.2x ",buf[0],buf[1]);
+    //lidbg("i2c:write byte:addr =0x%.2x value=0x%.2x ",buf[0],buf[1]);
     i2c_init();
 
     // start transmite
@@ -344,7 +344,7 @@ i2c_ack i2c_write_byte(int bus_id, char chip_addr, char *buf, unsigned int size)
         i2c_stop();
 
         i2c_free();
-        printk(" at write funtion: i2c_write_chip_addr(%.2x, %d) ; is not ACK\n", chip_addr, hkj_WRITE);
+        lidbg(" at write funtion: i2c_write_chip_addr(%.2x, %d) ; is not ACK\n", chip_addr, hkj_WRITE);
         mutex_unlock(&io_i2c_lock);
         return NACK;
     }
@@ -361,7 +361,7 @@ i2c_ack i2c_write_byte(int bus_id, char chip_addr, char *buf, unsigned int size)
         i2c_stop();
 
         i2c_free();
-        printk(" at write funtion:i2c_write(%.2x) ;is not ACK\n", buf[0]);
+        lidbg(" at write funtion:i2c_write(%.2x) ;is not ACK\n", buf[0]);
         mutex_unlock(&io_i2c_lock);
         return NACK;
     }
@@ -373,7 +373,7 @@ i2c_ack i2c_write_byte(int bus_id, char chip_addr, char *buf, unsigned int size)
         {
             i2c_stop();
             i2c_free();
-            printk(" at write funtion:i2c_write(%.2x) ;is not ACK\n", buf[i]);
+            lidbg(" at write funtion:i2c_write(%.2x) ;is not ACK\n", buf[i]);
             mutex_unlock(&io_i2c_lock);
             return NACK;
         }
@@ -394,7 +394,7 @@ i2c_ack i2c_read_2byte(int bus_id, char chip_addr, unsigned int sub_addr, char *
 #ifdef FLY_VIDEO_BOARD_V3
     int ret_rec = 0;
     ret_rec = SOC_I2C_Rec_2B_SubAddr(3, TC358746_I2C_ChipAdd, sub_addr, buf, size);
-    //printk("\n************i2c_read_2byte  ret_rec=%d *****************\n",ret_rec);
+    //lidbg("\n************i2c_read_2byte  ret_rec=%d *****************\n",ret_rec);
     if(ret_rec > 0)
     {
         return ACK;
@@ -414,7 +414,7 @@ i2c_ack i2c_read_2byte(int bus_id, char chip_addr, unsigned int sub_addr, char *
     {
         i2c_stop();
         i2c_free();
-        printk(" chip_addr devices is not ACK------i2c_write_chip_addr----r--\r\n");
+        lidbg(" chip_addr devices is not ACK------i2c_write_chip_addr----r--\r\n");
         mutex_unlock(&io_i2c_lock);
         return NACK;
     }
@@ -429,7 +429,7 @@ i2c_ack i2c_read_2byte(int bus_id, char chip_addr, unsigned int sub_addr, char *
     {
         i2c_stop();
         i2c_free();
-        printk(" chip_addr devices is not ACK-----subadder1-------\r\n");
+        lidbg(" chip_addr devices is not ACK-----subadder1-------\r\n");
         mutex_unlock(&io_i2c_lock);
         return NACK;
     }
@@ -438,7 +438,7 @@ i2c_ack i2c_read_2byte(int bus_id, char chip_addr, unsigned int sub_addr, char *
     {
         i2c_stop();
         i2c_free();
-        printk(" chip_addr devices is not ACK------subadder0------\r\n");
+        lidbg(" chip_addr devices is not ACK------subadder0------\r\n");
         mutex_unlock(&io_i2c_lock);
         return NACK;
     }
@@ -452,7 +452,7 @@ i2c_ack i2c_read_2byte(int bus_id, char chip_addr, unsigned int sub_addr, char *
         i2c_stop();
 
         i2c_free();
-        printk(" chip_addr devices is not ACK----- i2c_write_chip_addr-------\r\n");
+        lidbg(" chip_addr devices is not ACK----- i2c_write_chip_addr-------\r\n");
         mutex_unlock(&io_i2c_lock);
         return NACK;
     }
@@ -477,7 +477,7 @@ i2c_ack i2c_write_2byte(int bus_id, char chip_addr, char *buf, unsigned int size
 #ifdef FLY_VIDEO_BOARD_V3
     int ret_send = 0;
     ret_send = SOC_I2C_Send(3, chip_addr, buf, size);
-    //printk("\n*************i2c_write_2byt ret_send=%d**************\n",ret_send);
+    //lidbg("\n*************i2c_write_2byt ret_send=%d**************\n",ret_send);
     if(ret_send > 0)
     {
         return ACK;
@@ -500,7 +500,7 @@ i2c_ack i2c_write_2byte(int bus_id, char chip_addr, char *buf, unsigned int size
         i2c_stop();
 
         i2c_free();
-        printk(" chip_addr devices is not ACK--in-i2c_write_chip_addr(%.2x)----w-----\r\n", chip_addr);
+        lidbg(" chip_addr devices is not ACK--in-i2c_write_chip_addr(%.2x)----w-----\r\n", chip_addr);
         mutex_unlock(&io_i2c_lock);
         return NACK;
     }
@@ -511,7 +511,7 @@ i2c_ack i2c_write_2byte(int bus_id, char chip_addr, char *buf, unsigned int size
     {
         i2c_stop();
         i2c_free();
-        printk(" chip_addr devices is not ACK--in-i2c_write(sub[%d])=%.2x-----w----\r\n", 0, buf[0]);
+        lidbg(" chip_addr devices is not ACK--in-i2c_write(sub[%d])=%.2x-----w----\r\n", 0, buf[0]);
         mutex_unlock(&io_i2c_lock);
         return NACK;
     }
@@ -520,7 +520,7 @@ i2c_ack i2c_write_2byte(int bus_id, char chip_addr, char *buf, unsigned int size
     {
         i2c_stop();
         i2c_free();
-        printk("chip_addr devices is not ACK--in-i2c_write(sub[%d])=%.2x--w", 1, buf[1]);
+        lidbg("chip_addr devices is not ACK--in-i2c_write(sub[%d])=%.2x--w", 1, buf[1]);
         mutex_unlock(&io_i2c_lock);
         return NACK;
     }
@@ -533,7 +533,7 @@ i2c_ack i2c_write_2byte(int bus_id, char chip_addr, char *buf, unsigned int size
         {
             i2c_stop();
             i2c_free();
-            printk(" chip_addr devices is not ACK--in-i2c_write(buf[%d])=%.2x--w----\r\n", (i - 2), buf[i]);
+            lidbg(" chip_addr devices is not ACK--in-i2c_write(buf[%d])=%.2x--w----\r\n", (i - 2), buf[i]);
             mutex_unlock(&io_i2c_lock);
             return NACK;
         }

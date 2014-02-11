@@ -56,7 +56,7 @@ int bfs_file_amend(char *file2amend, char *str_append)
 
     if(str_append == NULL)
     {
-        printk("[futengfei]err.fileappend_mode:<str_append=null>\n");
+        lidbg("[futengfei]err.fileappend_mode:<str_append=null>\n");
         return -1;
     }
     flags = O_CREAT | O_RDWR | O_APPEND;
@@ -65,7 +65,7 @@ again:
     filep = filp_open(file2amend, flags , 0777);
     if(IS_ERR(filep))
     {
-        printk("[futengfei]err.open:<%s>\n", file2amend);
+        lidbg("[futengfei]err.open:<%s>\n", file2amend);
         return -1;
     }
 
@@ -79,7 +79,7 @@ again:
 
     if(file_len > max_file_len * MEM_SIZE_1_MB)
     {
-        printk("[futengfei]warn.fileappend_mode:< file>8M.goto.again >\n");
+        lidbg("[futengfei]warn.fileappend_mode:< file>8M.goto.again >\n");
         is_file_cleard = 1;
         flags = O_CREAT | O_RDWR | O_APPEND | O_TRUNC;
         set_fs(old_fs);

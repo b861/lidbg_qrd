@@ -39,7 +39,7 @@ tw9912info_t global_tw9912_info_for_PAL_I =
 #ifdef DEBUG_TC358
 void terminal_tc358746xbg_config(int argc, char **argv)
 {
-    printk("terminal_tc358746xbg_config()\n");
+    lidbg("terminal_tc358746xbg_config()\n");
     if(!strcmp(argv[1], "write"))
     {
         u8 buf[4] = {0, 0, 0, 0}, flag;
@@ -51,17 +51,17 @@ void terminal_tc358746xbg_config(int argc, char **argv)
         flag =  simple_strtoul(argv[4], 0, 0);
         if(flag == 16)
         {
-            printk("TC358 write in adder=0x%02x, valu=0x%02x\n", sub_addr, valu);
+            lidbg("TC358 write in adder=0x%02x, valu=0x%02x\n", sub_addr, valu);
             tc358746xbg_write(&sub_addr, &valu, register_value_width_16);
             tc358746xbg_read(sub_addr, buf, register_value_width_16);
-            printk("TC358 read back adder=0x%02x, valu=0x%02x%02x%02x%02x\n", sub_addr, buf[2], buf[3], buf[0], buf[1]);
+            lidbg("TC358 read back adder=0x%02x, valu=0x%02x%02x%02x%02x\n", sub_addr, buf[2], buf[3], buf[0], buf[1]);
         }
         else
         {
-            printk("TC358 write in adder=0x%02x, valu=0x%02x\n", sub_addr, valu);
+            lidbg("TC358 write in adder=0x%02x, valu=0x%02x\n", sub_addr, valu);
             tc358746xbg_write(&sub_addr, &valu, register_value_width_32);
             tc358746xbg_read(sub_addr, buf, register_value_width_32);
-            printk("TC358 read back adder=0x%02x, valu=0x%02x%02x%02x%02x\n", sub_addr, buf[2], buf[3], buf[0], buf[1]);
+            lidbg("TC358 read back adder=0x%02x, valu=0x%02x%02x%02x%02x\n", sub_addr, buf[2], buf[3], buf[0], buf[1]);
         }
 
     }
@@ -74,25 +74,25 @@ void terminal_tc358746xbg_config(int argc, char **argv)
         if(flag == 16)
         {
             tc358746xbg_read(sub_addr, buf, register_value_width_16);
-            printk("TC358 read back adder=0x%02x, valu=0x%02x%02x%02x%02x\n", sub_addr, buf[2], buf[3], buf[0], buf[1]);
+            lidbg("TC358 read back adder=0x%02x, valu=0x%02x%02x%02x%02x\n", sub_addr, buf[2], buf[3], buf[0], buf[1]);
         }
         else
         {
             tc358746xbg_read(sub_addr, buf, register_value_width_32);
-            printk("TC358 read back adder=0x%02x, valu=0x%02x%02x%02x%02x\n", sub_addr, buf[2], buf[3], buf[0], buf[1]);
+            lidbg("TC358 read back adder=0x%02x, valu=0x%02x%02x%02x%02x\n", sub_addr, buf[2], buf[3], buf[0], buf[1]);
         }
     }
     else if(!strcmp(argv[1], "ShowColor"))
     {
         u16 cmd;
-        printk("call tc358746xbg_config_begin();\n\n");
+        lidbg("call tc358746xbg_config_begin();\n\n");
         cmd = simple_strtoul(argv[2], 0, 0);
         tc358746xbg_config_begin(cmd);
     }
     else if(!strcmp(argv[1], "ShowColordebug"))
     {
         u16 cmd;
-        printk("call tc358746xbg_config_begin();\n\n");
+        lidbg("call tc358746xbg_config_begin();\n\n");
         cmd = simple_strtoul(argv[2], 0, 0);
         tc358746xbg_show_colorbar_config_user_tab[0].add_val = cmd;
         cmd = simple_strtoul(argv[3], 0, 0);
@@ -120,7 +120,7 @@ void terminal_tw9912_config(int argc, char **argv)
 #else
         i2c_write_byte(1, 0x44, buf , 2);
         i2c_read_byte(1, 0x44, sub_addr , (char *)&valu, 1);
-        printk("read adder=0x%02x, valu=0x%02x\n", buf[0], valu);
+        lidbg("read adder=0x%02x, valu=0x%02x\n", buf[0], valu);
 #endif
     }
     else if(!strcmp(argv[1], "Read"))
@@ -131,10 +131,10 @@ void terminal_tw9912_config(int argc, char **argv)
 #ifdef FLY_VIDEO_BOARD_V3
         int ret;
         i2c_read_byte(3, 0x44, sub_addr , buf, 1);
-        printk(" FLY_VIDEO_BOARD_V3 read adder=0x%02x,valu=0x%02x ret=%d \n", sub_addr, buf[0], ret);
+        lidbg(" FLY_VIDEO_BOARD_V3 read adder=0x%02x,valu=0x%02x ret=%d \n", sub_addr, buf[0], ret);
 #else
         i2c_read_byte(1, 0x44, sub_addr , buf, 1);
-        printk("read adder=0x%02x,valu=0x%02x\n", sub_addr, buf[0]);
+        lidbg("read adder=0x%02x,valu=0x%02x\n", sub_addr, buf[0]);
 #endif
     }
     else
@@ -146,7 +146,7 @@ void terminal_tw9912_config(int argc, char **argv)
 void terminal_echo_control_chips(int argc, char **argv)
 {
     u8 ret = 0;
-    printk("In lidbg_video_main()\n");
+    lidbg("In lidbg_video_main()\n");
     if(!strcmp(argv[0], "agian_initall"))
     {
         chips_config_begin(NTSC_P);
@@ -171,13 +171,13 @@ void terminal_echo_control_chips(int argc, char **argv)
         switch(ret)
         {
         case 1:
-            printk("TestingPresentChannalSignal format :NTSC_i\n");
+            lidbg("TestingPresentChannalSignal format :NTSC_i\n");
             break;
         case 2:
-            printk("TestingPresentChannalSignal format :PAL_i\n");
+            lidbg("TestingPresentChannalSignal format :PAL_i\n");
             break;
         case 3:
-            printk("TestingPresentChannalSignal format :NTSC_p\n");
+            lidbg("TestingPresentChannalSignal format :NTSC_p\n");
             break;
         }
     }
@@ -213,7 +213,7 @@ static int  video_early_suspend(struct early_suspend *h)
 }
 static int video_late_resume(struct early_suspend *h)
 {
-    printk("video_late_resume tw9912 reset\n");
+    lidbg("video_late_resume tw9912 reset\n");
     tw9912_hardware_reset();
     flyVideoChannelInitall(YIN2); // DVD
     chips_config_begin(NTSC_P);//first initall tw9912 all register
@@ -243,7 +243,7 @@ static int  video_dev_suspend(struct platform_device *pdev, pm_message_t state)
 }
 static int video_dev_resume(struct platform_device *pdev)
 {
-    printk("resume video chip environment variables reset\n");
+    lidbg("resume video chip environment variables reset\n");
     //tw9912_hardware_reset();
     global_tw9912_info_for_NTSC_I.flag = true; //true is neet again find the black line;
     global_tw9912_info_for_NTSC_I.reg_val = 0x17;
@@ -287,7 +287,7 @@ static int tw9912_node_ioctl(struct file *filp, unsigned
         break;
     case AGAIN_RESET_VIDEO_CONFIG_BEGIN :
 	chips_config_begin(NTSC_I);
-	printk("at last open backcar not signal but app opened camera,so, now again config the chips\n");
+	lidbg("at last open backcar not signal but app opened camera,so, now again config the chips\n");
 	break;
     default:
         return  - EINVAL;
@@ -305,12 +305,12 @@ static ssize_t tw9912_node_read(struct file *filp, char __user *buf, size_t size
         {
             if (copy_to_user(buf, (void *)(&global_tw9912_info_for_NTSC_I), count))
             {
-                printk("TW9912config : copy_to_user ERR\n");
+                lidbg("TW9912config : copy_to_user ERR\n");
                 ret =  - EFAULT;
             }
             else
             {
-                printk("TW9912config : NTSC_I paramter copy to user : %.2x%.2x\n", \
+                lidbg("TW9912config : NTSC_I paramter copy to user : %.2x%.2x\n", \
                        global_tw9912_info_for_NTSC_I.reg, global_tw9912_info_for_NTSC_I.reg_val);
                 ret = count;
             }
@@ -319,12 +319,12 @@ static ssize_t tw9912_node_read(struct file *filp, char __user *buf, size_t size
         {
             if (copy_to_user(buf, (void *)(&global_tw9912_info_for_PAL_I), count))
             {
-                printk("TW9912config : copy_to_user ERR\n");
+                lidbg("TW9912config : copy_to_user ERR\n");
                 ret =  - EFAULT;
             }
             else
             {
-                printk("TW9912config : PAL_I paramter copy to user : %.2x%.2x\n", \
+                lidbg("TW9912config : PAL_I paramter copy to user : %.2x%.2x\n", \
                        global_tw9912_info_for_PAL_I.reg, global_tw9912_info_for_PAL_I.reg_val);
                 ret = count;
             }
@@ -333,12 +333,12 @@ static ssize_t tw9912_node_read(struct file *filp, char __user *buf, size_t size
         {
             if (copy_to_user(buf, (void *)(&global_tw9912_info_for_PAL_I), count))
             {
-                printk("TW9912config : copy_to_user ERR\n");
+                lidbg("TW9912config : copy_to_user ERR\n");
                 ret =  - EFAULT;
             }
             else
             {
-                printk("TW9912config : PAL_I paramter copy to user : 0x%.2x\n", \
+                lidbg("TW9912config : PAL_I paramter copy to user : 0x%.2x\n", \
                        global_tw9912_info_for_PAL_I.this_is_first_open);
                 ret = count;
             }
@@ -352,12 +352,12 @@ static ssize_t tw9912_node_read(struct file *filp, char __user *buf, size_t size
         ret = read_chips_signal_status_fast(&valu);
         if(ret == NACK)
         {
-            printk("Worning read tw9912 NACK\n");
+            lidbg("Worning read tw9912 NACK\n");
             valu = 0x68;//the value representative vedio signal is good
         }
         if (copy_to_user(buf, (void *)(&valu), sizeof(u8)))
         {
-            printk("TW9912config : copy_to_user ERR\n");
+            lidbg("TW9912config : copy_to_user ERR\n");
             ret =  - EFAULT;
         }
     }
@@ -371,12 +371,12 @@ static ssize_t tw9912_node_write(struct file *filp, const char __user *buf, size
     {
         if (copy_from_user(&global_tw9912_info_for_NTSC_I, buf, count))
         {
-            printk("TW9912config : copy_from_user ERR\n");
+            lidbg("TW9912config : copy_from_user ERR\n");
         }
         if(global_tw9912_info_for_NTSC_I.reg_val  > 0x10 && global_tw9912_info_for_NTSC_I.reg == 0x8\
                 && info_com_top_Channel != SEPARATION && info_com_top_Channel != YIN2)
         {
-            printk("TW9912config : paramter is %.2x%.2x NOW write in the register\n", \
+            lidbg("TW9912config : paramter is %.2x%.2x NOW write in the register\n", \
                    global_tw9912_info_for_NTSC_I.reg, global_tw9912_info_for_NTSC_I.reg_val);
             para[0] = global_tw9912_info_for_NTSC_I.reg;
             para[1] = global_tw9912_info_for_NTSC_I.reg_val;
@@ -384,7 +384,7 @@ static ssize_t tw9912_node_write(struct file *filp, const char __user *buf, size
         }
         else
         {
-            printk("TW9912config : paramter is %.2x%.2x NOT write in the regitster\n", \
+            lidbg("TW9912config : paramter is %.2x%.2x NOT write in the regitster\n", \
                    global_tw9912_info_for_NTSC_I.reg, global_tw9912_info_for_NTSC_I.reg_val);
         }
     }
@@ -392,13 +392,13 @@ static ssize_t tw9912_node_write(struct file *filp, const char __user *buf, size
     {
         if (copy_from_user(&global_tw9912_info_for_PAL_I, buf, count))
         {
-            printk("TW9912config : copy_from_user ERR\n");
+            lidbg("TW9912config : copy_from_user ERR\n");
         }
 
         if(global_tw9912_info_for_PAL_I.reg_val  > 0x10 && global_tw9912_info_for_PAL_I.reg == 0x8\
                 && info_com_top_Channel != SEPARATION && info_com_top_Channel != YIN2)
         {
-            printk("TW9912config : paramter is %.2x%.2x NOW write in the register\n", \
+            lidbg("TW9912config : paramter is %.2x%.2x NOW write in the register\n", \
                    global_tw9912_info_for_PAL_I.reg, global_tw9912_info_for_PAL_I.reg_val);
             para[0] = global_tw9912_info_for_PAL_I.reg;
             para[1] = global_tw9912_info_for_PAL_I.reg_val;
@@ -406,7 +406,7 @@ static ssize_t tw9912_node_write(struct file *filp, const char __user *buf, size
         }
         else
         {
-            printk("TW9912config : paramter is %.2x%.2x NOT write in the regitster\n", \
+            lidbg("TW9912config : paramter is %.2x%.2x NOT write in the regitster\n", \
                    global_tw9912_info_for_PAL_I.reg, global_tw9912_info_for_PAL_I.reg_val);
         }
 
@@ -416,10 +416,10 @@ static ssize_t tw9912_node_write(struct file *filp, const char __user *buf, size
         tw9912info_t global_tw9912_info;
         if (copy_from_user(&global_tw9912_info, buf, count))
         {
-            printk("TW9912config : copy_from_user ERR\n");
+            lidbg("TW9912config : copy_from_user ERR\n");
         }
         global_tw9912_info_for_PAL_I.this_is_first_open = global_tw9912_info.this_is_first_open;
-        printk("TW9912config :Synchronous DVD open count\n");
+        lidbg("TW9912config :Synchronous DVD open count\n");
     }
     return 0;
 }
@@ -439,7 +439,7 @@ int tw9912_index_init(void)
     err = alloc_chrdev_region(&tw9912_dev, 0, 1, DEV_NAME); //\u5411\u5185\u6838\u6ce8\u518c\u4e00\u4e2a\u8bbe\u5907
     if(err < 0)
     {
-        printk("register_chrdev tw9912config is error!\n ");
+        lidbg("register_chrdev tw9912config is error!\n ");
         return err;
     }
     tw9912_cdev = cdev_alloc();
@@ -447,15 +447,15 @@ int tw9912_index_init(void)
     tw9912_cdev->ops = &tw9912_node_fops;
     err = cdev_add(tw9912_cdev, tw9912_dev, 1);
     if(err)
-        printk(KERN_NOTICE "Error for cdec_add() -->adding tw9912config %d \n", MINOR(tw9912_dev));
+        lidbg(KERN_NOTICE "Error for cdec_add() -->adding tw9912config %d \n", MINOR(tw9912_dev));
     tw9912_class = class_create(THIS_MODULE, "tw9912config_class");
     if(IS_ERR(tw9912_class))
     {
-        printk("Err: failed in creating mlidbg class.\n");
+        lidbg("Err: failed in creating mlidbg class.\n");
         goto fail_class_create;
     }
     device_create(tw9912_class, NULL, tw9912_dev, NULL, DEV_NAME); //\u521b\u5efa\u4e00\u4e2a\u8bbe\u5907\u8282\u70b9\uff0c\u8282\u70b9\u540d\u4e3aDEV_NAME "%d"
-    printk("tw9912config device_create ok\n");
+    lidbg("tw9912config device_create ok\n");
     lidbg_chmod("/dev/tw9912config");
     return 0;
 fail_class_create:
@@ -465,7 +465,7 @@ fail_class_create:
 int lidbg_video_init(void)
 {
     int err;
-    printk("lidbg_video_init modules ismod\n");
+    lidbg("lidbg_video_init modules ismod\n");
     LIDBG_GET;
     err = tw9912_index_init();
     if(err < 0)
@@ -482,7 +482,7 @@ int lidbg_video_init(void)
 }
 void tw9912_node_exit( void )
 {
-    printk("tw9912config_exit_now.....\n");
+    lidbg("tw9912config_exit_now.....\n");
     cdev_del(tw9912_cdev);
     device_destroy(tw9912_class, tw9912_dev);
     class_destroy(tw9912_class);
@@ -491,7 +491,7 @@ void tw9912_node_exit( void )
 
 void lidbg_video_deinit(void)
 {
-    printk("lidbg_video_deinit module exit.....\n");
+    lidbg("lidbg_video_deinit module exit.....\n");
     tw9912_node_exit();
 }
 

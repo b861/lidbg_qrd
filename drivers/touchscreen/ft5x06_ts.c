@@ -226,7 +226,7 @@ static void ft5x06_report_value(struct ft5x06_ts_data *data)
             touch_cnt++;
             if (!(touch_cnt % 50))
             {
-                printk("ts:[%d,%d]\n", event->y[i], event->x[i]);
+                lidbg("ts:[%d,%d]\n", event->y[i], event->x[i]);
             }
         }
         input_report_abs(data->input_dev, ABS_MT_PRESSURE,
@@ -242,10 +242,10 @@ static void ft5x06_report_value(struct ft5x06_ts_data *data)
         {
             g_var.flag_for_15s_off = 1000;
         }
-        //printk("\nFLAG_FOR_15S_OFF===[%d]\n",FLAG_FOR_15S_OFF);
+        //lidbg("\nFLAG_FOR_15S_OFF===[%d]\n",FLAG_FOR_15S_OFF);
         if(g_var.flag_for_15s_off < 0)
         {
-            printk("\nerr:FLAG_FOR_15S_OFF===[%d]\n", g_var.flag_for_15s_off);
+            lidbg("\nerr:FLAG_FOR_15S_OFF===[%d]\n", g_var.flag_for_15s_off);
         }
 #ifdef BUILD_FOR_RECOVERY
         if( ( event->y[0] >= 0) && ( event->x[0] >= 0) )
@@ -270,12 +270,12 @@ static void ft5x06_report_value(struct ft5x06_ts_data *data)
             touch.pressed = 0;
             set_touch_pos(&touch);
         }
-        //printk("[fuengfei]====finger release \n");
+        //lidbg("[fuengfei]====finger release \n");
 #endif
     }
     else
     {
-        //printk("[fuengfei]====finger press !!!fingerdown=[%d\n",!!!fingerdown);
+        //lidbg("[fuengfei]====finger press !!!fingerdown=[%d\n",!!!fingerdown);
     }
 
 
@@ -531,7 +531,7 @@ static int ft5x06_ts_probe(struct i2c_client *client,
     u8 reg_addr;
     int err;
 
-    printk( "Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);
+    lidbg( "Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);
 
     if (!pdata)
     {
@@ -594,7 +594,7 @@ static int ft5x06_ts_probe(struct i2c_client *client,
     input_set_abs_params(input_dev, ABS_MT_TOUCH_MAJOR, 0, FT_PRESS, 0, 0);
     input_set_abs_params(input_dev, ABS_MT_PRESSURE, 0, FT_PRESS, 0, 0);
 
-    printk("check your screen [%d*%d]=================futengfei===\n", screen_x, screen_y);
+    lidbg("check your screen [%d*%d]=================futengfei===\n", screen_x, screen_y);
     err = input_register_device(input_dev);
     if (err)
     {
@@ -804,8 +804,8 @@ static int __init ft5x06_ts_init(void)
     LIDBG_GET;
 
     is_ts_load = 1;
-    printk( "===================ft5x06_ts_init===========suspend-20==0225=futengfei \n");
-    printk( "Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);
+    lidbg( "===================ft5x06_ts_init===========suspend-20==0225=futengfei \n");
+    lidbg( "Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);
     return i2c_add_driver(&ft5x06_ts_driver);
 }
 module_init(ft5x06_ts_init);

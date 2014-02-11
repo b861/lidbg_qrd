@@ -4,8 +4,8 @@
 #include "tw9912.h"
 #include "TC358746XBG.h"
 #define CARD_TYPE_HONDA_XIYU
-#if 0
-#define video_config_debug(msg...)  do { printk( KERN_CRIT "flyvideo: " msg); }while(0)
+#if 1
+#define video_config_debug(msg...)  do { lidbg( "flyvideo: " msg); }while(0)
 #else
 #define video_config_debug(msg...)  do {}while(0)
 #endif

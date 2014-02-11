@@ -161,12 +161,12 @@ int i2c_api_set_rate(int  bus_id, int rate)
     {
 
         (*adap1).udelay = rate;
-        //printk("\n*****Set the i2c_rate sucessuful !\n\n");
+        //lidbg("\n*****Set the i2c_rate sucessuful !\n\n");
         return 0;
     }
     else
     {
-        //printk("\n*****Set the i2c_rate not sucessuful !\n\n");
+        //lidbg("\n*****Set the i2c_rate not sucessuful !\n\n");
     }
 
 #ifdef USE_I2C_LOCK
@@ -422,18 +422,18 @@ void mod_i2c_main(int argc, char **argv)
 
 #if 1
         lidbg("\nmod_i2c_main:w ");
-        printk("bus_id %d;", bus_id);
-        printk("dev_addr(8bit)=0x%x<<1%x;", dev_addr, dev_addr << 1);
-        printk("reg 0x%x;", psend_data[0]);
-        printk("data_num %d;\n", num); //包括reg和data
+        lidbg("bus_id %d;", bus_id);
+        lidbg("dev_addr(8bit)=0x%x<<1%x;", dev_addr, dev_addr << 1);
+        lidbg("reg 0x%x;", psend_data[0]);
+        lidbg("data_num %d;\n", num); //包括reg和data
 
         lidbg("data: ");
         for(i = 0; i < num; i++)
         {
-            printk("%x  ", psend_data[i]);
+            lidbg("%x  ", psend_data[i]);
         }
 
-        printk("\n");
+        lidbg("\n");
 
 #endif
 
@@ -456,10 +456,10 @@ void mod_i2c_main(int argc, char **argv)
         num = simple_strtoul(argv[4], 0, 0);
 #if 1
         lidbg("\nmod_i2c_main:r ");
-        printk("bus_id %d;", bus_id);
-        printk("dev_addr(8bit)=0x%x(7bit)<<1=0x%x;", dev_addr, dev_addr << 1);
-        printk("start_reg 0x%x;", start_reg);
-        printk("data_num %d;\n\n", num); //包括reg和data
+        lidbg("bus_id %d;", bus_id);
+        lidbg("dev_addr(8bit)=0x%x(7bit)<<1=0x%x;", dev_addr, dev_addr << 1);
+        lidbg("start_reg 0x%x;", start_reg);
+        lidbg("data_num %d;\n\n", num); //包括reg和data
 #endif
 
         psend_data = (char *)kzalloc(num, GFP_KERNEL);
@@ -468,7 +468,7 @@ void mod_i2c_main(int argc, char **argv)
 
         for(i = 0; i < num; i++)
         {
-            printk("reg 0x%x = 0x%x\n", start_reg + i, psend_data[i]);
+            lidbg("reg 0x%x = 0x%x\n", start_reg + i, psend_data[i]);
 
         }
 
@@ -490,7 +490,7 @@ void mod_i2c_main(int argc, char **argv)
         {
             i2c_api_do_recv(bus_id, dev_addr, i, psend_data + i, 1 );
 
-            printk("reg %x = %x\n", start_reg + i, psend_data[i]);
+            lidbg("reg %x = %x\n", start_reg + i, psend_data[i]);
 
         }
 
@@ -512,11 +512,11 @@ void mod_i2c_main(int argc, char **argv)
         num = simple_strtoul(argv[5], 0, 0);
 #if 1
         lidbg("\nmod_i2c_main:r_mult_sub_addr ");
-        printk("bus_id %d;", bus_id);
-        printk("dev_addr 0x%x<<1=0x%x;", dev_addr, dev_addr << 1);
-        printk("sub_addr_bytes %d;", sub_addr_bytes);
-        printk("start_reg %d;", start_reg);
-        printk("data_num %d;\n\n", num); //包括reg和data
+        lidbg("bus_id %d;", bus_id);
+        lidbg("dev_addr 0x%x<<1=0x%x;", dev_addr, dev_addr << 1);
+        lidbg("sub_addr_bytes %d;", sub_addr_bytes);
+        lidbg("start_reg %d;", start_reg);
+        lidbg("data_num %d;\n\n", num); //包括reg和data
 #endif
 
         psend_data = (char *)kzalloc(num, GFP_KERNEL);
@@ -528,7 +528,7 @@ void mod_i2c_main(int argc, char **argv)
 
         for(i = 0; i < num; i++)
         {
-            printk("reg %x = %x\n", start_reg + i, psend_data[i]);
+            lidbg("reg %x = %x\n", start_reg + i, psend_data[i]);
 
         }
 
@@ -569,15 +569,15 @@ void mod_i2c_main(int argc, char **argv)
                 msleep(PROBE_INTERVAL_TIME);
             }
         }
-        printk("\n");
+        lidbg("\n");
         lidbg("find <%d> i2c_devices:", j);
         for(i = 0; i < j; i++)
         {
-            printk("0x%x, ", i2c_devices[i]);
+            lidbg("0x%x, ", i2c_devices[i]);
 
         }
-        printk("\n");
-        printk("\n");
+        lidbg("\n");
+        lidbg("\n");
         kfree( i2c_devices);
     }
 

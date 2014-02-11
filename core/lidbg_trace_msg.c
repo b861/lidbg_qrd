@@ -73,7 +73,7 @@ static int thread_trace_msg_in(void *data)
 	
 	filep = filp_open("/proc/kmsg", O_RDONLY, 0644);
 	if(filep < 0)
-		printk("Open /proc/kmsg failed !\n");
+		lidbg("Open /proc/kmsg failed !\n");
 
 	memset(buff, '\0', sizeof(buff));
 	
@@ -91,7 +91,7 @@ static int thread_trace_msg_in(void *data)
 			kfifo_in(&pdev->fifo, buff, len);
 			up(&pdev->sem);
 
-			msleep(100);
+			msleep(500);
 		}
 		else
 			msleep(1000);
@@ -116,7 +116,7 @@ static int thread_trace_msg_out(void *data)
 		if(!pdev->disable_flag){
 			if(kfifo_is_empty(&pdev->fifo))
 			{
-				msleep(50);
+				msleep(100);
 				continue;
 			}
 
@@ -162,7 +162,7 @@ static ssize_t lidbg_trace_msg_write (struct file *filp, const char __user *buf,
 	memset(pbuff, '\0', sizeof(pbuff));
 
 	if (copy_from_user( pbuff, buf, count))
-		printk("Lidbg msg copy_from_user ERR\n");
+		lidbg("Lidbg msg copy_from_user ERR\n");
 
 	lidbg_trace_msg_is_enough(count);
 
@@ -196,13 +196,13 @@ static int  lidbg_trace_msg_probe(struct platform_device *ppdev)
 	if (pdev == NULL)
 	{
        	 ret = -ENOMEM;
-        	printk("Kmalloc space for lidbg msg failed.\n");
+        	lidbg("Kmalloc space for lidbg msg failed.\n");
         	return ret;
 	}
 	ret = kfifo_alloc(&pdev->fifo, LIDBG_TRACE_MSG_FIFO_SIZE, GFP_KERNEL);
 	if(ret)
 	{
-		printk("Alloc kfifo for lidbg dev failed.\n");
+		lidbg("Alloc kfifo for lidbg dev failed.\n");
 		return ret;
 	}	
 	pdev->disable_flag = 1;

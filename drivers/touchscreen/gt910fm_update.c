@@ -192,7 +192,7 @@ s32 gup_i2c_write(struct i2c_client *client, u8 *buf, s32 len)
     struct i2c_msg msg;
     s32 ret = -1;
     s32 retries = 0;
-    //printk( "====updata ==gup_i2c_write:client===.addr:0x%02X\n",   client->addr );
+    //lidbg( "====updata ==gup_i2c_write:client===.addr:0x%02X\n",   client->addr );
     GTP_DEBUG_FUNC();
     //GTP_DEBUG("i2c write 0x%04X, %d bytes(0x%02X, 0x%02X)", ((buf[0] << 8) | buf[1]), len - 2, buf[2], ((len > 3) ? buf[3] : 0xFF));
 
@@ -324,7 +324,7 @@ static u8 gup_set_ic_msg(struct i2c_client *client, u16 addr, u8 val)
     msg[0] = (addr >> 8) & 0xff;
     msg[1] = addr & 0xff;
     msg[2] = val;
-    printk( "==== gup_set_ic_msg:client===.addr:0x%02X\n",   client->addr );
+    lidbg( "==== gup_set_ic_msg:client===.addr:0x%02X\n",   client->addr );
     for (i = 0; i < 5; i++)
     {
         if (gup_i2c_write(client, msg, GTP_ADDR_LENGTH + 1) > 0)
@@ -347,7 +347,7 @@ s32 gup_hold_ss51_dsp(struct i2c_client *client)
     s32 ret = -1;
     s32 retry = 0;
     u8 rd_buf[3];
-    printk( "==== gup_hold_ss51_dsp:client.addr:0x%02X\n",   client->addr );
+    lidbg( "==== gup_hold_ss51_dsp:client.addr:0x%02X\n",   client->addr );
     while(retry++ < 200)
     {
         // step4:Hold ss51 & dsp
@@ -430,7 +430,7 @@ s32 gup_enter_update_mode(struct i2c_client *client)
     //s32 retry = 0;
     //u8 rd_buf[3];
     gtp_reset_guitar(i2c_connect_client, 20);
-    //printk("====gup_enter_update_mode======");
+    //lidbg("====gup_enter_update_mode======");
     //step1:RST output low last at least 2ms
     /* GTP_GPIO_OUTPUT(GTP_RST_PORT, 0);
 
@@ -953,7 +953,7 @@ s32 gup_fw_download_proc(void *dir, u8 dwn_mode)
     struct goodix_ts_data *ts;
 
     ts = i2c_get_clientdata(i2c_connect_client);
-    //printk( " client.addr:0x%02X\n",   client->addr );
+    //lidbg( " client.addr:0x%02X\n",   client->addr );
     if (NULL == dir)
     {
         if(GTP_FL_FW_BURN == dwn_mode)       // flashless firmware burn mode

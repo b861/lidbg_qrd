@@ -113,14 +113,14 @@ void cb_password_disable_usb(char *password )
 
 void unmute_ns(void)
 {
-    printk("[futengfei].unmute_ns");
+    lidbg("[futengfei].unmute_ns");
     audio_data_for_hal[0] = 0x01;
     audio_data_for_hal[1] = 0x00;
     wake_up_interruptible(&read_wait);
 }
 void mute_s(void)
 {
-    printk("[futengfei].mute_s");
+    lidbg("[futengfei].mute_s");
     audio_data_for_hal[0] = 0x01;
     audio_data_for_hal[1] = 0x01;
     wake_up_interruptible(&read_wait);
@@ -180,15 +180,15 @@ int i2c_devices_probe(int i2c_bus, unsigned char *i2c_devices_list)
             msleep(I2C_PROBE_INTERVAL_TIME);
         }
     }
-    printk("\n");
+    lidbg("\n");
     lidbg("find <%d> i2c_devices:", j);
     for(i = 0; i < j; i++)
     {
-        printk("0x%x, ", i2c_devices_list[i]);
+        lidbg("0x%x, ", i2c_devices_list[i]);
 
     }
-    printk("\n");
-    printk("\n");
+    lidbg("\n");
+    lidbg("\n");
     return j;
 }
 
@@ -344,7 +344,7 @@ void key_scan(void)
             SOC_ADC_Get(i, &val);
             lidbg("SOC_ADC_Get:ch%d=%d\n", i, val);
         }
-        printk("\n");
+        lidbg("\n");
 
     }
 #else
@@ -457,7 +457,7 @@ static int thread_thermal(void *data)
 
         log_temp();
         cur_temp = soc_temp_get();
-        // printk("MSM_THERM: %d *C\n",cur_temp);
+        // lidbg("MSM_THERM: %d *C\n",cur_temp);
         if( (cur_temp > fan_onoff_temp) && hal_fan_on && (suspend_flag == 0))//on
         {
             if(!flag_fan_run_statu)
@@ -1081,7 +1081,7 @@ static void parse_cmd(char *pt)
 
     else if(!strcmp(pt, "screen_on"))
     {
-        printk("******into screen_on********\n");
+        lidbg("******into screen_on********\n");
        // LCD_RESET;
         if(SOC_Hal_Acc_Callback)
         {
@@ -1091,7 +1091,7 @@ static void parse_cmd(char *pt)
     }
     else if(!strcmp(pt, "screen_off"))
     {
-        printk("******into screen_off********\n");
+        lidbg("******into screen_off********\n");
         if(SOC_Hal_Acc_Callback)
         {
         	lidbg("hal callback 0\n");
@@ -1100,7 +1100,7 @@ static void parse_cmd(char *pt)
     }
     else if(!strcmp(pt, "suspend_on"))
     {
-        printk("******into suspend_on********\n");
+        lidbg("******into suspend_on********\n");
         lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_SUSPEND_UNPREPARE));
         if(SOC_Hal_Acc_Callback)
         {
@@ -1110,7 +1110,7 @@ static void parse_cmd(char *pt)
     }
     else if(!strcmp(pt, "suspend_off"))
     {
-        printk("******into suspend_off********\n");
+        lidbg("******into suspend_off********\n");
         lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_SUSPEND_PREPARE));
         if(SOC_Hal_Acc_Callback)
         {
@@ -1206,7 +1206,7 @@ static ssize_t dev_write(struct file *filp, const char __user *buf,
 
     if(copy_from_user(mem, buf, size))
     {
-        printk("copy_from_user ERR\n");
+        lidbg("copy_from_user ERR\n");
     }
 
     if((p = memchr(mem, '\n', size)))

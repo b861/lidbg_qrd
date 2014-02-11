@@ -18,7 +18,7 @@ ssize_t  share_read(struct file *filp, char __user *buffer, size_t size, loff_t 
     while(plidbg_share == NULL)
         lidbg("plidbg_share == NULL\n");
 
-    printk("share_read:read_value=%x,read_count=%d\n", (u32)plidbg_share, 4);
+    lidbg("share_read:read_value=%x,read_count=%d\n", (u32)plidbg_share, 4);
     if (copy_to_user(buffer, (void *)&plidbg_share, 4))
     {
         ret =  - EFAULT;
@@ -100,7 +100,7 @@ void create_shm_proc(void)
 {
     if(NULL == (proc_shm_map_dir = proc_mkdir(PROC_SHM_MAP_DIR, NULL)) )
     {
-        printk("proc create error!\n");
+        lidbg("proc create error!\n");
         return ;
     }
     create_proc_read_entry(PROC_SHM_MAP_INFO, 0, proc_shm_map_dir, get_shm_proc_info, NULL);

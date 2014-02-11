@@ -189,32 +189,32 @@ a sample config, send this config should cause the chip cannot work normally*/
 #define SCREEN_X (1024)
 #define SCREEN_Y (600)
 //Log define
-#define GTP_INFO(fmt,arg...)           printk("<<-GTP-INFO->> "fmt"\n",##arg)
-#define GTP_ERROR(fmt,arg...)          printk("<<-GTP-ERROR->> "fmt"\n",##arg)
+#define GTP_INFO(fmt,arg...)           lidbg("<<-GTP-INFO->> "fmt"\n",##arg)
+#define GTP_ERROR(fmt,arg...)          lidbg("<<-GTP-ERROR->> "fmt"\n",##arg)
 #define GTP_DEBUG(fmt,arg...)          do{\
                                          if(GTP_DEBUG_ON)\
-                                         printk("<<-GTP-DEBUG->> [%d]"fmt"\n",__LINE__, ##arg);\
+                                         lidbg("<<-GTP-DEBUG->> [%d]"fmt"\n",__LINE__, ##arg);\
                                        }while(0)
 #define GTP_DEBUG_ARRAY(array, num)    do{\
                                          s32 i;\
                                          u8* a = array;\
                                          if(GTP_DEBUG_ARRAY_ON)\
                                          {\
-                                            printk("<<-GTP-DEBUG-ARRAY->>\n");\
+                                            lidbg("<<-GTP-DEBUG-ARRAY->>\n");\
                                             for (i = 0; i < (num); i++)\
                                             {\
-                                                printk("%02x   ", (a)[i]);\
+                                                lidbg("%02x   ", (a)[i]);\
                                                 if ((i + 1 ) %10 == 0)\
                                                 {\
-                                                    printk("\n");\
+                                                    lidbg("\n");\
                                                 }\
                                             }\
-                                            printk("\n");\
+                                            lidbg("\n");\
                                         }\
                                        }while(0)
 #define GTP_DEBUG_FUNC()               do{\
                                          if(GTP_DEBUG_FUNC_ON)\
-                                         printk("<<-GTP-FUNC->> Func:%s@Line:%d\n",__func__,__LINE__);\
+                                         lidbg("<<-GTP-FUNC->> Func:%s@Line:%d\n",__func__,__LINE__);\
                                        }while(0)
 #define GTP_SWAP(x, y)                 do{\
                                          typeof(x) z = x;\

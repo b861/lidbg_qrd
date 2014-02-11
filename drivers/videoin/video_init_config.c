@@ -36,7 +36,7 @@ void video_io_i2c_init_in(void)
 }
 void chips_hardware_reset(void)
 {
-    printk("reset tw9912 and tc358746\n");
+    lidbg("reset tw9912 and tc358746\n");
     //tw9912_hardware_reset();
     tc358746xbg_hardware_reset();
 }
@@ -46,9 +46,9 @@ void chips_hardware_reset(void)
 */
 int static video_signal_channel_switching_occurs(void)
 {
-    printk("TC358:video_signal_channel_switching_occurs() \n");
+    lidbg("TC358:video_signal_channel_switching_occurs() \n");
     tc358746xbg_data_out_enable(DISABLE);
-    printk("%s:tw9912_RESX_DOWN\n", __func__);
+    lidbg("%s:tw9912_RESX_DOWN\n", __func__);
 
     tw9912_RESX_DOWN;//\u8fd9\u91cc\u5bf9tw9912\u590d\u4f4d\u7684\u539f\u56e0\u662f\u89e3\u51b3\u5012\u8f66\u9000\u56deDVD\u65f6\u89c6\u9891\u5361\u6b7b\u3002
     tw9912_RESX_UP;
@@ -66,7 +66,7 @@ int static video_image_config_parameter_buffer(void)
         /**************************************Astren************************************************/
         if(TW9912_Image_Parameter_fly[1].valu == 240)//240 是和蒋工商量好的值，用于区别目前是倒车的配置
         {
-            printk("Astern 2 Normal \n");
+            lidbg("Astern 2 Normal \n");
             flag_now_config_channal_AUX_or_Astren = 0;
             if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
             {
@@ -75,7 +75,7 @@ int static video_image_config_parameter_buffer(void)
                 Tw9912_image_global_AUX_BACK[2][1] = 0x00;
                 Tw9912_image_global_AUX_BACK[3][1] = 0xff;
                 Tw9912_image_global_AUX_BACK[4][1] = 0xff;
-                // printk("Tw9912_image_global_AUX_BACK reset valu from NTSC_I\n");
+                // lidbg("Tw9912_image_global_AUX_BACK reset valu from NTSC_I\n");
             }
             else//PALi
             {
@@ -84,13 +84,13 @@ int static video_image_config_parameter_buffer(void)
                 Tw9912_image_global_AUX_BACK_PAL_I[2][1] = 0x00;
                 Tw9912_image_global_AUX_BACK_PAL_I[3][1] = 0xff;
                 Tw9912_image_global_AUX_BACK_PAL_I[4][1] = 0xff;
-                // printk("Tw9912_image_global_AUX_BACK reset valu from PAL_I\n");
+                // lidbg("Tw9912_image_global_AUX_BACK reset valu from PAL_I\n");
             }
             return 1;
         }
         else if(TW9912_Image_Parameter_fly[1].valu == 0xF1)
         {
-            printk("Astern 2 New Teana\n");
+            lidbg("Astern 2 New Teana\n");
             flag_now_config_channal_AUX_or_Astren = 0;
             if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
             {
@@ -99,7 +99,7 @@ int static video_image_config_parameter_buffer(void)
                 Tw9912_image_global_AUX_BACK[2][1] = 0x00;
                 Tw9912_image_global_AUX_BACK[3][1] = 0xff;
                 Tw9912_image_global_AUX_BACK[4][1] = 0xff;
-                // printk("Tw9912_image_global_AUX_BACK reset valu from NTSC_I\n");
+                // lidbg("Tw9912_image_global_AUX_BACK reset valu from NTSC_I\n");
             }
             else//PALi
             {
@@ -108,19 +108,19 @@ int static video_image_config_parameter_buffer(void)
                 Tw9912_image_global_AUX_BACK_PAL_I[2][1] = 0x00;
                 Tw9912_image_global_AUX_BACK_PAL_I[3][1] = 0xff;
                 Tw9912_image_global_AUX_BACK_PAL_I[4][1] = 0xff;
-                // printk("Tw9912_image_global_AUX_BACK reset valu from PAL_I\n");
+                // lidbg("Tw9912_image_global_AUX_BACK reset valu from PAL_I\n");
             }
             return 1;
         }
         else if(TW9912_Image_Parameter_fly[1].valu > 10)
         {
-            printk("Error at %s you input valu = %d paramter have Problems", __func__, TW9912_Image_Parameter_fly[1].valu);
+            lidbg("Error at %s you input valu = %d paramter have Problems", __func__, TW9912_Image_Parameter_fly[1].valu);
             return -1;
         }
         /**************************************AUX********************************************/
         else
         {
-            printk("AUX\n");
+            lidbg("AUX\n");
             flag_now_config_channal_AUX_or_Astren = 1;
             if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
             {
@@ -189,7 +189,7 @@ int static video_image_config_parameter_buffer(void)
     else
     {
         u8 i = 0;
-        printk("DVD\n");
+        lidbg("DVD\n");
         flag_now_config_channal_AUX_or_Astren = 2;
         for (i = BRIGHTNESS; i <= HUE; i++)
         {
@@ -226,7 +226,7 @@ int static video_image_config_begin(void)
     int ret;
     register int i = 0;
     u8 Tw9912_image[2] = {0x17, 0x87,}; //default input pin selet YIN0ss
-    printk("video_image_config_begin()\n");
+    lidbg("video_image_config_begin()\n");
     video_image_config_parameter_buffer();
     for(i = 0; i < 5; i++)
     {
@@ -287,7 +287,7 @@ int static video_image_config_begin(void)
 }
 int flyVideoImageQualityConfig_in(Vedio_Effect cmd , u8 valu)//valu的值的范围是0～10
 {
-    printk("flyvideo_image_config_begin(%d,%d)\n", cmd, valu);
+    lidbg("flyvideo_image_config_begin(%d,%d)\n", cmd, valu);
     switch(cmd)
     {
     case CONTRAST:
@@ -309,7 +309,7 @@ int flyVideoImageQualityConfig_in(Vedio_Effect cmd , u8 valu)//valu的值的范�
         TW9912_Image_Parameter_fly[HUE-1].valu = valu;
         break;
     default :
-        printk("Error at %s you input cmd = %d paramter have Problems", __func__, cmd);
+        lidbg("Error at %s you input cmd = %d paramter have Problems", __func__, cmd);
         break;
     }
     if(cmd == BRIGHTNESS)//wait all set doen befor application
@@ -321,7 +321,7 @@ int flyVideoInitall_in(u8 Channel)//给蒋工的视频通道切换接口
 {//该函数实际上是改变通道标志变量的值，没有实际改变芯片的通道
     int ret = 1 ;
     mutex_lock(&lock_chipe_config);
-    printk("flyVideoInitall_in(%d)\n", Channel);
+    lidbg("flyVideoInitall_in(%d)\n", Channel);
     if (Channel >= YIN0 && Channel <= NOTONE)
     {
         info_com_top_Channel = Channel;
@@ -330,7 +330,7 @@ int flyVideoInitall_in(u8 Channel)//给蒋工的视频通道切换接口
     }
     else
     {
-        printk("%s: you input TW9912 Channel=%d error!\n", __FUNCTION__, Channel);
+        lidbg("%s: you input TW9912 Channel=%d error!\n", __FUNCTION__, Channel);
     }
     mutex_unlock(&lock_chipe_config);
     return ret;
@@ -344,22 +344,22 @@ int tw9912_config_for_cvbs_signal(vedio_channel_t Channel)
     {
     case YIN0:
         info_vedio_channel_t = YIN0;
-        ret = tw9912_config_array(PAL_I, YIN0);
+        ret = tw9912_config_array( YIN0);
         video_config_debug("TW9912:Channel selet YIN0\n");
         break;
     case YIN1:
         info_vedio_channel_t = YIN1;
-        ret = tw9912_config_array(PAL_I, YIN1);
+        ret = tw9912_config_array( YIN1);
         video_config_debug("TW9912:Channel selet YIN1\n");
         break;
     case YIN2:
         info_vedio_channel_t = YIN2;
-        ret = tw9912_config_array(PAL_I, YIN2);
+        ret = tw9912_config_array( YIN2);
         video_config_debug("TW9912:Channel selet YIN2\n");
         break;
     case YIN3:
         info_vedio_channel_t = YIN3;
-        ret = tw9912_config_array(PAL_I, YIN3);
+        ret = tw9912_config_array( YIN3);
         video_config_debug("TW9912:Channel selet YIN3\n");
         break;
     default :
@@ -375,8 +375,8 @@ vedio_format_t camera_open_video_signal_test_in(void)
 }
 vedio_format_t flyVideoTestSignalPin_in(u8 Channel)//给蒋工的视频检测函数接口
 {
-    static vedio_format_t printk_count_flag_next = 0;
-    static u8 printk_format_count = 0;
+    static vedio_format_t lidbg_count_flag_next = 0;
+    static u8 lidbg_format_count = 0;
     vedio_format_t ret = NOTONE;
     static u8 Format_count = 0;
     static u8 Format_count_flag = 0;
@@ -418,20 +418,20 @@ AGAIN_TEST_FOR_BACK_NTSC_I:
             ret =  tw9912_cvbs_signal_tsting(SEPARATION);
             break;
         default :
-            printk("%s:you input TW9912 Channel=%d error!\n", __FUNCTION__, Channel);
+            lidbg("%s:you input TW9912 Channel=%d error!\n", __FUNCTION__, Channel);
             break;
         }
         if(ret == 1 && goto_agian_test <= 2 )
             goto AGAIN_TEST_FOR_BACK_NTSC_I;
         else goto_agian_test = 0;
     }
-    if (printk_count_flag_next != ret || printk_format_count > 20)
+    if (lidbg_count_flag_next != ret || lidbg_format_count > 20)
     {//打印屏蔽，同样的信息每20次输出一个，不一样马上输出
-        printk_format_count = 0;
-        printk_count_flag_next = ret;
-        printk("C=%d,F=%d\n", Channel, ret);
+        lidbg_format_count = 0;
+        lidbg_count_flag_next = ret;
+        lidbg("C=%d,F=%d\n", Channel, ret);
     }
-    else printk_format_count++;
+    else lidbg_format_count++;
     mutex_unlock(&lock_chipe_config);
 
     if( ret > 4 )
@@ -441,12 +441,12 @@ AGAIN_TEST_FOR_BACK_NTSC_I:
         {
             Format_count = 0 ;
             Format_count_flag = 1;
-            printk("warning : Test Input Signal Fail Now Reconfig Tw9912 \n");
+            lidbg("warning : Test Input Signal Fail Now Reconfig Tw9912 \n");
             // chips_config_begin( PAL_P);
             if(info_com_top_Channel == SEPARATION || info_com_top_Channel == YIN2)
                 tw9912_config_array_NTSCp();
             else
-                tw9912_config_array(PAL_I, YIN3);
+                tw9912_config_array( YIN3);
         }
     }
     else
@@ -547,7 +547,7 @@ static void chips_config_cvbs_begin()
     tw9912_config_for_cvbs_signal(info_com_top_Channel);
     video_image_config_begin();
 
-    printk("global_video_channel_flag = %x\n", global_video_channel_flag);
+    lidbg("global_video_channel_flag = %x\n", global_video_channel_flag);
     if(global_video_channel_flag == TV_4KO)
     {
         u8 Tw9912_register_valu[] = {0x08, 0x17,};
@@ -584,7 +584,7 @@ static void chips_config_cvbs_begin()
             tc358746xbg_config_begin(PAL_P);
             break;
         default :
-            printk("video not signal input..\n");
+            lidbg("video not signal input..\n");
             SOC_Write_Servicer(VIDEO_SHOW_BLACK);
             tc358746xbg_config_begin(COLORBAR + TC358746XBG_BLACK); //blue
             break;
@@ -592,7 +592,7 @@ static void chips_config_cvbs_begin()
     }//if(info_vedio_channel_t<=SEPARATION)
     else
     {
-        printk("Video_init_config:TW9912 not config!\n");
+        lidbg("Video_init_config:TW9912 not config!\n");
         tc358746xbg_config_begin(COLORBAR);
     }
 }
@@ -602,11 +602,11 @@ static void chips_config_yuv_begin()
     video_image_config_begin();
     SOC_Write_Servicer(VIDEO_NORMAL_SHOW);
     tc358746xbg_config_begin(NTSC_P);
-    printk("Vedio Format Is NTSCp\n");
+    lidbg("Vedio Format Is NTSCp\n");
 }
 void chips_config_begin(vedio_format_t config_pramat)// 配置主入口在内核的ov5647_truly_cm6868_v4l2.c 的xxx_setting_xx中调用
 {
-    printk("\n\nVideo Module Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);
+    lidbg("\n\nVideo Module Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);
     video_config_debug("tw9912:config channal is %d\n", info_com_top_Channel);
     mutex_lock(&lock_chipe_config);
     if(info_com_top_Channel == SEPARATION)
@@ -615,7 +615,7 @@ void chips_config_begin(vedio_format_t config_pramat)// 配置主入口在内核
         chips_config_cvbs_begin();
     else
     {
-        printk("TW9912:warning -->config_pramat == STOP_VIDEO\n");
+        lidbg("TW9912:warning -->config_pramat == STOP_VIDEO\n");
         tc358746xbg_config_begin(COLORBAR);
     }
     up(&sem);
@@ -624,7 +624,7 @@ void chips_config_begin(vedio_format_t config_pramat)// 配置主入口在内核
 void tc358746xbg_show_color(u8 color_flag)
 {
     mutex_lock(&lock_chipe_config);
-    printk("flyvideo:error tc358746xbg_show_color()\n");
+    lidbg("flyvideo:error tc358746xbg_show_color()\n");
     tc358746xbg_config_begin(color_flag);
     mutex_unlock(&lock_chipe_config);
 }

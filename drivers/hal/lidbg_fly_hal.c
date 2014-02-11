@@ -441,7 +441,7 @@ int hal_init(void *data)
 {
     if(fs_is_file_exist(HAL_SO))
     {
-        printk("=======is product=====\n");
+        lidbg("=======is product=====\n");
         g_var.is_fly = true;
     }
 	msleep(500);

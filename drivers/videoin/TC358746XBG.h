@@ -57,8 +57,8 @@ struct tc358746xbg_register_t_read
 #define register_value_width_32 32
 #define register_value_width_16 16
 #define TC358746_I2C_ChipAdd 0x07
-#if 0
-#define tc358746_dbg(msg...)  do { printk( KERN_CRIT "TC358746: " msg); }while(0)
+#if 1
+#define tc358746_dbg(msg...)  do { lidbg( "TC358746: " msg); }while(0)
 #else
 #define tc358746_dbg(msg...)  do {}while(0)
 #endif

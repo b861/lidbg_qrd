@@ -32,7 +32,7 @@ void parse_cmd(char *pt)
         printk("%s ", argv[i]);
         i++;
     }
-    printk("\n");
+    lidbg("\n");
 
 
     // µ÷ÓÃÆäËûÄ£¿éµÄº¯Êý

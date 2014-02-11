@@ -260,7 +260,7 @@ static void gtp_touch_down(struct goodix_ts_data *ts, s32 id, s32 x, s32 y, s32 
         GTP_SWAP(x, y);
 	if (1 == ts_should_revert)
 		GTP_REVERT(x, y);
-    //printk("xy_revert_en =%d\n",xy_revert_en );
+    //lidbg("xy_revert_en =%d\n",xy_revert_en );
 #if GTP_ICS_SLOT_REPORT
     input_mt_slot(ts->input_dev, id);
     input_report_abs(ts->input_dev, ABS_MT_TRACKING_ID, id);
@@ -280,7 +280,7 @@ static void gtp_touch_down(struct goodix_ts_data *ts, s32 id, s32 x, s32 y, s32 
     if (touch_cnt == 100)
     {
         touch_cnt = 0;
-        printk("%d[%d,%d];\n", id, x, y);
+        lidbg("%d[%d,%d];\n", id, x, y);
     }
 }
 /*******************************************************
@@ -338,14 +338,14 @@ static void goodix_ts_work_func(struct work_struct *work)
     ts = container_of(work, struct goodix_ts_data, work);
     if (ts->enter_update)
     {
-        printk("ts->enter_update\n");
+        lidbg("ts->enter_update\n");
         return;
     }
 
     ret = gtp_i2c_read(ts->client, point_data, 12);
     if (ret < 0)
     {
-        printk("I2C transfer error. errno:%d\n ", ret);
+        lidbg("I2C transfer error. errno:%d\n ", ret);
         goto exit_work_func;
     }
 
@@ -360,7 +360,7 @@ static void goodix_ts_work_func(struct work_struct *work)
     touch_num = finger & 0x0f;
     if (touch_num > GTP_MAX_TOUCH)
     {
-        printk("touch_num > GTP_MAX_TOUCH\n");
+        lidbg("touch_num > GTP_MAX_TOUCH\n");
         goto exit_work_func;
     }
 
@@ -424,7 +424,7 @@ static void goodix_ts_work_func(struct work_struct *work)
                 }
                 if(g_var.flag_for_15s_off < 0)
                 {
-                    printk("\n[GT911]:====err:FLAG_FOR_15S_OFF===[%d]\n", g_var.flag_for_15s_off);
+                    lidbg("\n[GT911]:====err:FLAG_FOR_15S_OFF===[%d]\n", g_var.flag_for_15s_off);
                 }
             }
             else// if (pre_touch & (0x01 << i))
@@ -449,7 +449,7 @@ static void goodix_ts_work_func(struct work_struct *work)
 					GTP_REVERT(touch.x, touch.y);
                     touch.pressed = 1;
                     set_touch_pos(&touch);
-                    printk("[%d,%d]==========%d\n", touch.x, touch.y, touch.pressed);
+                    lidbg("[%d,%d]==========%d\n", touch.x, touch.y, touch.pressed);
                 }
 #endif
 
@@ -462,7 +462,7 @@ static void goodix_ts_work_func(struct work_struct *work)
                 {
                     touch.pressed = 0;
                     set_touch_pos(&touch);
-                    printk("[%d,%d]==========%d\n", touch.x, touch.y, touch.pressed);
+                    lidbg("[%d,%d]==========%d\n", touch.x, touch.y, touch.pressed);
                 }
 #endif
             }
@@ -500,7 +500,7 @@ static void goodix_ts_work_func(struct work_struct *work)
             }
             if(g_var.flag_for_15s_off < 0)
             {
-                printk("\n[GT911]:====err:FLAG_FOR_15S_OFF===[%d]\n", g_var.flag_for_15s_off);
+                lidbg("\n[GT911]:====err:FLAG_FOR_15S_OFF===[%d]\n", g_var.flag_for_15s_off);
             }
         }
     }
@@ -783,7 +783,7 @@ static s32 gtp_init_panel(struct goodix_ts_data *ts,char *ic_type)
         }
         rd_cfg_buf[GTP_ADDR_LENGTH] &= 0x07;
     }
-    printk("SENSOR ID:%d", rd_cfg_buf[GTP_ADDR_LENGTH]);
+    lidbg("SENSOR ID:%d", rd_cfg_buf[GTP_ADDR_LENGTH]);
 	lidbg_fs_log(TS_LOG_PATH, "SENSOR ID:%d\n", rd_cfg_buf[GTP_ADDR_LENGTH]);
     memset(&config[GTP_ADDR_LENGTH], 0, GTP_CONFIG_MAX_LENGTH);
     memcpy(&config[GTP_ADDR_LENGTH], send_cfg_buf[rd_cfg_buf[GTP_ADDR_LENGTH]], ts->gtp_cfg_len);
@@ -1226,7 +1226,7 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     }
     else
     {
-        printk("=====GTP request IO port succeful======.\n" );
+        lidbg("=====GTP request IO port succeful======.\n" );
     }
     ret = gtp_i2c_test(client);
     if (ret < 0)
@@ -1490,7 +1490,7 @@ int ts_nod_open (struct inode *inode, struct file *filp)
 {
     //do nothing
     filp->private_data = tsdev;
-    printk("[futengfei]==================ts_nod_open\n");
+    lidbg("[futengfei]==================ts_nod_open\n");
 
     return 0;          /* success */
 }
@@ -1502,20 +1502,20 @@ ssize_t ts_nod_write (struct file *filp, const char __user *buf, size_t count, l
 
     if (copy_from_user( data_rec, buf, count))
     {
-        printk("copy_from_user ERR\n");
+        lidbg("copy_from_user ERR\n");
     }
     data_rec[count] =  '\0';
-    printk("gt910-ts_nod_write:==%d====[%s]\n", count, data_rec);
+    lidbg("gt910-ts_nod_write:==%d====[%s]\n", count, data_rec);
     // processing data
     if(!(strnicmp(data_rec, "TSMODE_XYREVERT", count - 1)))
     {
         xy_revert_en = 1;
-        printk("[gt910]ts_nod_write:==========TSMODE_XYREVERT\n");
+        lidbg("[gt910]ts_nod_write:==========TSMODE_XYREVERT\n");
     }
     else if(!(strnicmp(data_rec, "TSMODE_NORMAL", count - 1)))
     {
         xy_revert_en = 0;
-        printk("[gt910]ts_nod_write:==========TSMODE_NORMAL\n");
+        lidbg("[gt910]ts_nod_write:==========TSMODE_NORMAL\n");
     }
 
     return count;
@@ -1536,7 +1536,7 @@ static int init_cdev_ts(void)
     if (tsdev == NULL)
     {
         ret = -ENOMEM;
-        printk("gt911===========init_cdev_ts:kmalloc err \n");
+        lidbg("gt911===========init_cdev_ts:kmalloc err \n");
         return ret;
     }
 
@@ -1550,20 +1550,20 @@ static int init_cdev_ts(void)
         result = alloc_chrdev_region(&dev_number, 0, 1, TS_DEVICE_NAME);
         major_number_ts = MAJOR(dev_number);
     }
-    printk("gt911===========alloc_chrdev_region result:%d \n", result);
+    lidbg("gt911===========alloc_chrdev_region result:%d \n", result);
 
     cdev_init(&tsdev->cdev, &ts_nod_fops);
     tsdev->cdev.owner = THIS_MODULE;
     tsdev->cdev.ops = &ts_nod_fops;
     err = cdev_add(&tsdev->cdev, dev_number, 1);
     if (err)
-        printk( "gt911===========Error cdev_add\n");
+        lidbg( "gt911===========Error cdev_add\n");
 
     //cread cdev node in /dev
     class_install_ts = class_create(THIS_MODULE, "tsnodclass");
     if(IS_ERR(class_install_ts))
     {
-        printk( "gt911=======class_create err\n");
+        lidbg( "gt911=======class_create err\n");
         return -1;
     }
     device_create(class_install_ts, NULL, dev_number, NULL, "%s%d", TS_DEVICE_NAME, 0);
@@ -1596,7 +1596,7 @@ static int __devinit goodix_ts_init(void)
     s32 ret;
 
     GTP_DEBUG_FUNC();
-    printk("=====come into goodix_ts_init========\n");
+    lidbg("=====come into goodix_ts_init========\n");
     GTP_INFO("AAAAAAAAAAA.");
     goodix_wq = create_singlethread_workqueue("goodix_wq");
     if (!goodix_wq)

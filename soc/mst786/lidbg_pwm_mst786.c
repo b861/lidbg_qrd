@@ -21,7 +21,7 @@ unsigned int   soc_bl_set(u32 bl_level)
     ret = cedric_backlight_set_intensity(bd);
     if(ret)
     {
-        printk("[BL]: Set backlight failed !\n");
+        lidbg("[BL]: Set backlight failed !\n");
         return 0;
     }
     else

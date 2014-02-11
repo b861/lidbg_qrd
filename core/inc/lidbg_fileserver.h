@@ -99,7 +99,7 @@ extern struct list_head lidbg_drivers_list;
 extern struct list_head lidbg_core_list;
 extern struct list_head fs_filename_list;
 
-#define printk_fs(msg...)  do { printk( KERN_CRIT "lidbg_fs: " msg); }while(0)
+#define printk_fs(msg...)  do { lidbg(  "lidbg_fs: " msg); }while(0)
 
 
 #define lidbg_fs_log(path,fmt,...) do{	char buf[32];\
