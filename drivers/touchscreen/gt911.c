@@ -75,6 +75,7 @@ static void gtp_esd_check_func(struct work_struct *);
 extern  bool is_ts_load;
 extern int ts_should_revert;
 static bool xy_revert_en = 1;
+u8 gt911_config_version;
 /*******************************************************
 Function:
 	Read data from the i2c slave device.
@@ -751,15 +752,17 @@ static s32 gtp_init_panel(struct goodix_ts_data *ts,char *ic_type)
     u8 cfg_info_group4[] = CTP_CFG_GROUP4;
     u8 cfg_info_group5[] = CTP_CFG_GROUP5;
     u8 cfg_info_group6[] = CTP_CFG_GROUP6;
-    u8 *send_cfg_buf[6] = {cfg_info_group1, cfg_info_group2, cfg_info_group3, cfg_info_group4, cfg_info_group5, cfg_info_group6};
-    u8 cfg_info_len[6] = {sizeof(cfg_info_group1) / sizeof(cfg_info_group1[0]),
+	u8 cfg_info_group7[] = CTP_CFG_GROUP7;
+    u8 *send_cfg_buf[7] = {cfg_info_group1, cfg_info_group2, cfg_info_group3, cfg_info_group4, cfg_info_group5, cfg_info_group6,cfg_info_group7};
+    u8 cfg_info_len[7] = {sizeof(cfg_info_group1) / sizeof(cfg_info_group1[0]),
                           sizeof(cfg_info_group2) / sizeof(cfg_info_group2[0]),
                           sizeof(cfg_info_group3) / sizeof(cfg_info_group3[0]),
                           sizeof(cfg_info_group4) / sizeof(cfg_info_group4[0]),
                           sizeof(cfg_info_group5) / sizeof(cfg_info_group5[0]),
-                          sizeof(cfg_info_group6) / sizeof(cfg_info_group6[0])
+                          sizeof(cfg_info_group6) / sizeof(cfg_info_group6[0]),
+                          sizeof(cfg_info_group6) / sizeof(cfg_info_group7[0])
                          };
-    for(i = 0; i < 6; i++)
+    for(i = 0; i < 7; i++)
     {
         if(cfg_info_len[i] > ts->gtp_cfg_len)
         {
@@ -785,7 +788,15 @@ static s32 gtp_init_panel(struct goodix_ts_data *ts,char *ic_type)
     }
     lidbg("SENSOR ID:%d", rd_cfg_buf[GTP_ADDR_LENGTH]);
 	lidbg_fs_log(TS_LOG_PATH, "SENSOR ID:%d\n", rd_cfg_buf[GTP_ADDR_LENGTH]);
-    memset(&config[GTP_ADDR_LENGTH], 0, GTP_CONFIG_MAX_LENGTH);
+if(0==rd_cfg_buf[GTP_ADDR_LENGTH])
+		{
+		if(gt911_config_version==0x46)
+		   {
+		   rd_cfg_buf[GTP_ADDR_LENGTH]=rd_cfg_buf[GTP_ADDR_LENGTH]+6;
+		   }
+		}
+   
+	memset(&config[GTP_ADDR_LENGTH], 0, GTP_CONFIG_MAX_LENGTH);
     memcpy(&config[GTP_ADDR_LENGTH], send_cfg_buf[rd_cfg_buf[GTP_ADDR_LENGTH]], ts->gtp_cfg_len);
 
 #if GTP_CUSTOM_CFG
@@ -990,6 +1001,7 @@ static s8 gtp_i2c_test(struct i2c_client *client)
         ret = gtp_i2c_read(client, test, 3);
         if (ret > 0)
         {
+            gt911_config_version=test[2];
             return ret;
         }
         GTP_ERROR("GTP i2c test failed time %d.", retry);
@@ -1233,6 +1245,7 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     {
         GTP_ERROR("I2C communication ERROR!");
     }
+	lidbg("gt911_config_version:0x%02x",gt911_config_version);
     ret = gtp_read_version(client, &version_info,ic_type);
 #if GTP_AUTO_UPDATE
     ret = gup_init_update_proc(ts);
