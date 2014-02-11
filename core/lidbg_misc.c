@@ -81,7 +81,10 @@ void cb_password_mem_log(char *password )
 {
  	lidbg_msg_get("/data/lidbg/lidbg_mem_log.txt", 0);
 }
-
+void cb_int_mem_log(char *key, char *value )
+{
+    cb_password_mem_log(NULL);
+}
 static int thread_reboot(void *data)
 {
     allow_signal(SIGKILL);
@@ -173,7 +176,7 @@ int misc_init(void *data)
     te_regist_password("001121", cb_password_gui_state);
     te_regist_password("001200", cb_password_mem_log);
 
-    FS_REGISTER_INT(dump_mem_log, "dump_mem_log", 0, cb_password_mem_log);
+    FS_REGISTER_INT(dump_mem_log, "dump_mem_log", 0, cb_int_mem_log);
     FS_REGISTER_INT(logcat_en, "logcat_en", 0, logcat_lunch);
     FS_REGISTER_INT(reboot_delay_s, "reboot_delay_s", 0, NULL);
     FS_REGISTER_INT(cp_data_to_udisk_en, "cp_data_to_udisk_en", 0, cp_data_to_udisk);

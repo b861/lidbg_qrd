@@ -3,7 +3,7 @@
 
 #define DEVICE_NAME "lidbg_trace_msg"
 #define LIDBG_TRACE_MSG_FIFO_SIZE		(32  * 1024)
-#define LIDBG_TRACE_MSG_PATH "/data/lidbg/lidbg_trace_msg.txt"
+#define LIDBG_TRACE_MSG_PATH LIDBG_LOG_DIR"lidbg_trace_msg.txt"
 #define TRACE_MSG_FROM_KMSG 1
 
 static LIST_HEAD(lidbg_trace_msg_string_list);
@@ -41,7 +41,7 @@ static void lidbg_trace_key_word(char *string)
 		if(strlen(pmsg->yourkey))
 			ret = strstr(string, pmsg->yourkey);
 		if(ret) {
-			bfs_file_amend(LIDBG_TRACE_MSG_PATH, string);
+			fs_string2file(LIDBG_TRACE_MSG_PATH, "%s",string);
 			ret =NULL;
 		}
 	
