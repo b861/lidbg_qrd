@@ -10,7 +10,7 @@ static struct task_struct *fs_kmsgtask;
 static struct completion kmsg_wait;
 //zone end
 
-
+int delay_disable_tracemsg(void);
 //zone below [fs.log.driver]
 bool upload_machine_log(void)
 {
@@ -112,6 +112,7 @@ int dump_kmsg(char *node, char *save_msg_file, int size, int *always)
     mm_segment_t old_fs;
 
     int  ret = -1;
+    CREATE_KTHREAD(delay_disable_tracemsg, NULL);
     if(!size && !always)
     {
         FS_ERR("<size_k=null&&always=null>\n");
@@ -262,15 +263,11 @@ void fs_remount_system(void)
 
 int delay_disable_tracemsg(void)
 {
-	while(1)
-	{
-		if( !wait_for_completion_interruptible(&kmsg_wait))
 		{
-			msleep(3000);
 			lidbg("delay 3 s to disable  lidbg_trace_msg\n");
+			msleep(3000);
 			lidbg_readwrite_file("/dev/mlidbg0", NULL, "c lidbg_trace_msg disable", sizeof("c lidbg_trace_msg disable")-1);	 
 		}  //disable lidbg_trace_msg
-	}
 	return 1;
 }
 void lidbg_fs_log_init(void)
@@ -278,11 +275,10 @@ void lidbg_fs_log_init(void)
 
     init_completion(&kmsg_wait);
 	
-    CREATE_KTHREAD(delay_disable_tracemsg, NULL);
     FS_REGISTER_INT(g_pollkmsg_en, "fs_kmsg_en", 0, cb_kv_pollkmsg);
     if(g_pollkmsg_en == 1)
         complete(&kmsg_wait);
-	
+
     FS_REGISTER_INT(max_file_len, "fs_max_file_len", 1, NULL);
 
     fs_kmsgtask = kthread_run(thread_pollkmsg_func, NULL, "ftf_kmsgtask");
