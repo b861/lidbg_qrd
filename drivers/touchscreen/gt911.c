@@ -733,7 +733,7 @@ Input:
 Output:
 	Executive outcomes.0---succeed.
 *******************************************************/
-static s32 gtp_init_panel(struct goodix_ts_data *ts)
+static s32 gtp_init_panel(struct goodix_ts_data *ts,char *ic_type)
 {
     s32 ret = -1;
 
@@ -741,7 +741,10 @@ static s32 gtp_init_panel(struct goodix_ts_data *ts)
     s32 i;
     u8 check_sum = 0;
     u8 rd_cfg_buf[16];
-
+ if(!strcmp(ic_type,"911"))
+ 	{
+    printk("=====ic_type:911======\n");
+	
     u8 cfg_info_group1[] = CTP_CFG_GROUP1;
     u8 cfg_info_group2[] = CTP_CFG_GROUP2;
     u8 cfg_info_group3[] = CTP_CFG_GROUP3;
@@ -807,7 +810,77 @@ static s32 gtp_init_panel(struct goodix_ts_data *ts)
         check_sum += config[i];
     }
     config[ts->gtp_cfg_len] = (~check_sum) + 1;
+ 	}
+ 	
+	else
+	{
+	printk("=====ic_type:928======\n");
+	u8 cfg_info_group1[] = CTP928_CFG_GROUP1;
+    u8 cfg_info_group2[] = CTP928_CFG_GROUP2;
+    u8 cfg_info_group3[] = CTP928_CFG_GROUP3;
+    u8 cfg_info_group4[] = CTP928_CFG_GROUP4;
+    u8 cfg_info_group5[] = CTP928_CFG_GROUP5;
+    u8 cfg_info_group6[] = CTP928_CFG_GROUP6;
+    u8 *send_cfg_buf[6] = {cfg_info_group1, cfg_info_group2, cfg_info_group3, cfg_info_group4, cfg_info_group5, cfg_info_group6};
+    u8 cfg_info_len[6] = {sizeof(cfg_info_group1) / sizeof(cfg_info_group1[0]),
+                          sizeof(cfg_info_group2) / sizeof(cfg_info_group2[0]),
+                          sizeof(cfg_info_group3) / sizeof(cfg_info_group3[0]),
+                          sizeof(cfg_info_group4) / sizeof(cfg_info_group4[0]),
+                          sizeof(cfg_info_group5) / sizeof(cfg_info_group5[0]),
+                          sizeof(cfg_info_group6) / sizeof(cfg_info_group6[0])
+                         };
+    for(i = 0; i < 6; i++)
+    {
+        if(cfg_info_len[i] > ts->gtp_cfg_len)
+        {
+            ts->gtp_cfg_len = cfg_info_len[i];
+        }
+    }
+    GTP_DEBUG("len1=%d,len2=%d,len3=%d,send_len:%d", cfg_info_len[0], cfg_info_len[1], cfg_info_len[2], ts->gtp_cfg_len);
+    /*  if ((!cfg_info_len[1]) && (!cfg_info_len[2]))
+      {
+          rd_cfg_buf[GTP_ADDR_LENGTH] = 0;
+      }
+      else*/
+    {
+        rd_cfg_buf[0] = GTP_REG_SENSOR_ID >> 8;
+        rd_cfg_buf[1] = GTP_REG_SENSOR_ID & 0xff;
+        ret = gtp_i2c_read(ts->client, rd_cfg_buf, 3);
+        if (ret < 0)
+        {
+            GTP_ERROR("Read SENSOR ID failed,default use group1 config!");
+            rd_cfg_buf[GTP_ADDR_LENGTH] = 0;
+        }
+        rd_cfg_buf[GTP_ADDR_LENGTH] &= 0x07;
+    }
+    printk("SENSOR ID:%d", rd_cfg_buf[GTP_ADDR_LENGTH]);
+	lidbg_fs_log(TS_LOG_PATH, "SENSOR ID:%d\n", rd_cfg_buf[GTP_ADDR_LENGTH]);
+    memset(&config[GTP_ADDR_LENGTH], 0, GTP_CONFIG_MAX_LENGTH);
+    memcpy(&config[GTP_ADDR_LENGTH], send_cfg_buf[rd_cfg_buf[GTP_ADDR_LENGTH]], ts->gtp_cfg_len);
 
+#if GTP_CUSTOM_CFG
+    config[RESOLUTION_LOC]     = (u8)GTP_MAX_WIDTH;
+    config[RESOLUTION_LOC + 1] = (u8)(GTP_MAX_WIDTH >> 8);
+    config[RESOLUTION_LOC + 2] = (u8)GTP_MAX_HEIGHT;
+    config[RESOLUTION_LOC + 3] = (u8)(GTP_MAX_HEIGHT >> 8);
+
+    if (GTP_INT_TRIGGER == 0)  //RISING
+    {
+        config[TRIGGER_LOC] &= 0xfe;
+    }
+    else if (GTP_INT_TRIGGER == 1)  //FALLING
+    {
+        config[TRIGGER_LOC] |= 0x01;
+    }
+#endif  //endif GTP_CUSTOM_CFG
+
+    check_sum = 0;
+    for (i = GTP_ADDR_LENGTH; i < ts->gtp_cfg_len; i++)
+    {
+        check_sum += config[i];
+    }
+    config[ts->gtp_cfg_len] = (~check_sum) + 1;
+		}
 #else //else DRIVER NEED NOT SEND CONFIG
 
     if(ts->gtp_cfg_len == 0)
@@ -861,7 +934,7 @@ Input:
 Output:
 	Executive outcomes.0---succeed.
 *******************************************************/
-s32 gtp_read_version(struct i2c_client *client, u16 *version)
+s32 gtp_read_version(struct i2c_client *client, u16 *version,char *ic_type)
 {
     s32 ret = -1;
     s32 i = 0;
@@ -890,7 +963,7 @@ s32 gtp_read_version(struct i2c_client *client, u16 *version)
     }
     GTP_INFO("IC VERSION:%c%c%c%c_%02x%02x",
              buf[2], buf[3], buf[4], buf[5], buf[7], buf[6]);
-
+	sprintf(ic_type,"%c%c%c",buf[2],buf[3],buf[4]);
     return ret;
 }
 
@@ -1107,7 +1180,7 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     s32 ret = -1;
     struct goodix_ts_data *ts;
     u16 version_info;
-
+    char ic_type[3];
     GTP_DEBUG_FUNC();
 
     //do NOT remove these output log
@@ -1160,7 +1233,7 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     {
         GTP_ERROR("I2C communication ERROR!");
     }
-    ret = gtp_read_version(client, &version_info);
+    ret = gtp_read_version(client, &version_info,ic_type);
 #if GTP_AUTO_UPDATE
     ret = gup_init_update_proc(ts);
     if (ret < 0)
@@ -1169,7 +1242,7 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     }
 #endif
 
-    ret = gtp_init_panel(ts);
+    ret = gtp_init_panel(ts,ic_type);
     if (ret < 0)
     {
         GTP_ERROR("GTP init panel failed.");
@@ -1190,13 +1263,6 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     {
         GTP_INFO("GTP works in interrupt mode.");
     }
-
-    ret = gtp_read_version(client, &version_info);
-    if (ret < 0)
-    {
-        GTP_ERROR("Read version failed.");
-    }
-
     //    ts->irq_lock = SPIN_LOCK_UNLOCKED;
 
     gtp_irq_enable(ts);
