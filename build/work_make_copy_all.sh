@@ -11,14 +11,11 @@ dbg_soc=$DBG_WORK_PATH
 cd $dbg_soc
 cp -u *.conf     $DBG_OUT_PATH/
 
-for each_dir in `ls -l | grep "^d" | awk '{print $NF}'`
-
-	do
 	
-	dir=$dbg_soc/$each_dir
+	dir=$dbg_soc
 
 if [ -s $dir/Makefile ]; then
-	echo -e "\n\033[44;37m ----build    $each_dir    ko---- \033[0m"
+	echo -e "\n\033[44;37m ----build    drivers    ko---- \033[0m"
 	cd  $dir ; pwd          # ";"  do when ok or not   "&&" do when first no err
 	make modules -j4 > build_log
 
@@ -32,13 +29,19 @@ if [ -s $dir/Makefile ]; then
 		echo -e "\033[41;37m --------- $each_dir error codes --------- \033[0m"
 		read get_key
 	fi
-	#then copy to out dir 
-	cp -u $dir/*.ko     $DBG_OUT_PATH/
-	cp -u $dir/*.conf     $DBG_OUT_PATH/
-	clear
+
 else
 	echo -e "\033[43;37m ----build    $each_dir    ko---- \033[0m"
 	echo -e "skip:invalid Makefile"
 fi
+
+#then copy to out dir 
+for each_dir in `ls -l | grep "^d" | awk '{print $NF}'`
+
+	do
+	dir=$dbg_soc/$each_dir
+
+	cp -u $dir/*.ko     $DBG_OUT_PATH/
+	cp -u $dir/*.conf     $DBG_OUT_PATH/
 done
 
