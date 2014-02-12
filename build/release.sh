@@ -22,7 +22,7 @@ else
 	expect $DBG_TOOLS_PATH/pull
 	cp -ru $DBG_OUT_RELEASE_PATH/$BOARD_VERSION/out  $UPDATA_BIN_DIR
 	git add .
-	git add -f ./driver
+	git add -f ./
 	git commit -am $1
 	expect $DBG_TOOLS_PATH/push
 	gitk &
