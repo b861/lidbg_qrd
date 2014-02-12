@@ -31,7 +31,7 @@ i2c_ack tw9912_read(unsigned int sub_addr, char *buf )
 {
     i2c_ack ret;
     ret = i2c_read_byte(1, TW9912_I2C_ChipAdd, sub_addr, buf, 1);
-    tw9912_dbg("tw9912:read addr=0x%.2x value=0x%.2x\n", sub_addr, buf[0]);
+    //tw9912_dbg("tw9912:read addr=0x%.2x value=0x%.2x\n", sub_addr, buf[0]);
     return ret;
 }
 i2c_ack tw9912_write(char *buf )
@@ -212,14 +212,14 @@ vedio_format_t tw9912_testing_channal_signal(vedio_channel_t Channel)
     for(i = 0; i < 20; i++)
     {
         tw9912_read(0x01, &signal); //register 0x02 channel selete
-        if(signal & 0x80) lidbg("tw9912:fly_video at channal (%d) not find signal\n", Channel);
+        if(signal & 0x80) lidbgerr("tw9912:fly_video at channal (%d) not find signal\n", Channel);
         else
         {
             lidbg("tw9912:fly_video at channal (%d) find signal\n", Channel);
             goto break_for;
         }
         mutex_unlock(&lock_com_chipe_config);
-        msleep(20);
+        msleep(50);
         mutex_lock(&lock_com_chipe_config);
 
     }
@@ -434,6 +434,7 @@ vedio_format_t tw9912_cvbs_signal_tsting(vedio_channel_t Channel)
     mutex_lock(&lock_com_chipe_config);
     if(the_last_config.Channel != Channel)
     {
+    	lidbg("the_last_config.Channel=%d\n",the_last_config.Channel);
         tw9912_config_array_agin();
     }
 
@@ -467,9 +468,11 @@ vedio_format_t tw9912_cvbs_signal_tsting(vedio_channel_t Channel)
         {
             signal_is_how_1.Format = PAL_P;
         }
+		else
+			lidbgerr("tw9912_cvbs_signal_tsting err %d\n",format_1);
     }
 
-    tw9912_dbg("testing_signal(): back %d\n", signal_is_how_1.Format);
+    //tw9912_dbg("testing_signal(): back %d\n", signal_is_how_1.Format);
     mutex_unlock(&lock_com_chipe_config);
     return signal_is_how_1.Format;
 CHANNAL_ERROR:
@@ -701,6 +704,7 @@ SIGNAL_DELTE_AGAIN:
         mutex_lock(&lock_com_chipe_config);
         if(ret == STOP_VIDEO) //the channel is not signal input
         {
+        	lidbgerr("Tw9912_appoint_pin_tw9912_cvbs_signal_tsting fail,try another\n");
             tw9912_signal_unstabitily_for_tw9912_config_array_flag = 0;//find colobar flag signal bad
             mutex_unlock(&lock_com_chipe_config);
             ret_format = tw9912_testing_channal_signal(Channel);
@@ -708,7 +712,12 @@ SIGNAL_DELTE_AGAIN:
             if(ret_format == OTHER )
                 goto NOT_signal_input;
             else
+            {
+            	mutex_unlock(&lock_com_chipe_config);
+				ret_format = tw9912_cvbs_signal_tsting(Channel);
+				mutex_lock(&lock_com_chipe_config);
                 signal_is_how[Channel].Format = ret_format;
+            }
         }
         if(ret == -1)
             goto CONFIG_not_ack_fail;

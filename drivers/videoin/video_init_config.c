@@ -441,7 +441,7 @@ AGAIN_TEST_FOR_BACK_NTSC_I:
         {
             Format_count = 0 ;
             Format_count_flag = 1;
-            lidbg("warning : Test Input Signal Fail Now Reconfig Tw9912 \n");
+            lidbgerr("warning : Test Input Signal Fail Now Reconfig Tw9912 \n");
             // chips_config_begin( PAL_P);
             if(info_com_top_Channel == SEPARATION || info_com_top_Channel == YIN2)
                 tw9912_config_array_NTSCp();
