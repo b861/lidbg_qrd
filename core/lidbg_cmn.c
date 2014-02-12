@@ -331,7 +331,7 @@ bool lidbg_new_cdev(struct file_operations *cdev_fops, char *nodename)
     {
         char path[32];
         sprintf(path, "/dev/%s0", nodename);
-        msleep(500);
+        ssleep(1);
         lidbg_chmod(path);
         LIDBG_SUC("[%s]\n", path);
         return true;

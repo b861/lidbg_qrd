@@ -14,10 +14,10 @@ gt911.ko
 gt80x_update.ko
 lidbg_acc.ko
 lidbg_monkey.ko
+lidbg_test.ko
 fastboot_not_kill_list.conf
 drivers.conf
 state.conf
 wakelock_detail_list.conf
 lidbg_trace_msg_string_list.conf
-lidbg_monkey.conf
 ###############
