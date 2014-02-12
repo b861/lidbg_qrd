@@ -7,6 +7,7 @@
 #include <lidbg_bpmsg.h>
 #include <lidbg_fastboot.h>
 #include <lidbg_ts_probe.h>
+#include <lidbg_monkey.h>
 #include <lidbg_acc.h>
 #include <lidbg_lpc.h>
 #include <tw9912.h>

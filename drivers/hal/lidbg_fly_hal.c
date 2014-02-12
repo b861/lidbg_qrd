@@ -29,6 +29,8 @@ char *insmod_list[] =
  #else
 	 "lidbg_ts_probe_new.ko",
  #endif
+     "lidbg_monkey.ko",
+     "lidbg_test.ko",
     NULL,
 };
 
