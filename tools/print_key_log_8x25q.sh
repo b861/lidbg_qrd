@@ -33,7 +33,7 @@ do
 	echo ------------------------------------------------------------------------  >>  ./lidbg_log/bp_pwr.txt
 	echo --------------------------$i--------------------------------------------  >>  ./lidbg_log/bp_pwr.txt
 	echo ------------------------------------------------------------------------  >>  ./lidbg_log/bp_pwr.txt
-	cat $i | grep "bp:pwr" >> ./lidbg_log/bp_pwr.txt
+	cat $i | grep "bp:pwr=0x1" >> ./lidbg_log/bp_pwr.txt
 
 	echo ------------------------------------------------------------------------  >>  ./lidbg_log/acc_correct.txt
 	echo --------------------------$i--------------------------------------------  >>  ./lidbg_log/acc_correct.txt
@@ -60,7 +60,7 @@ do
 	echo ------------------------------------------------------------------------  >>  ./lidbg_log/I2C.txt
 	cat $i | grep "I2C slave addr" >> ./lidbg_log/I2C.txt
 
-	cat $i | grep -E "block unsafe clk:33|lock unsafe clk:34|block unsafe clk:14|block wakelock|send sigkill to|killing any children in process group|acc_correct:send power_key|bp:my|Linux version|bp:reset|bp:pwr=|clear user wakelock|f8_timeout|quick_resume" >>  ./lidbg_log/$i
+	cat $i | grep -E "block unsafe clk:33|lock unsafe clk:34|block unsafe clk:14|block wakelock|send sigkill to|killing any children in process group|acc_correct:send power_key|bp:my|Linux version|bp:reset|bp:pwr=0x1|clear user wakelock|f8_timeout|quick_resume" >>  ./lidbg_log/$i
 done
 
 	date >>  ./lidbg_log/finish.txt
