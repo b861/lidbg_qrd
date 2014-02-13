@@ -4,7 +4,7 @@
 #define NOTIFIER_MAJOR_SIGNAL_EVENT (0)
 #define NOTIFIER_MINOR_SIGNAL_BAKLIGHT_ACK (0)
 
-
+u32 lidbg_get_random_number(u32 num_max);
 int  lidbg_exe(char path[], char argv1[], char argv2[], char argv3[], char argv4[], char argv5[], char argv6[]);
 int  lidbg_mount(char path[]);
 int  lidbg_insmod(char path[]);

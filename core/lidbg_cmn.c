@@ -276,9 +276,15 @@ bool new_cdev(struct file_operations *cdev_fops, char *nodename)
     return true;
 }
 
+u32 lidbg_get_random_number(u32 num_max)
+{
+    u32 ret;
+    get_random_bytes(&ret, sizeof(ret));
+    return ret % num_max;
+}
 void lidbg_domineering_ack(void)
 {
-	DUMP_FUN;
+    DUMP_FUN;
     lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SIGNAL_EVENT, NOTIFIER_MINOR_SIGNAL_BAKLIGHT_ACK));
 }
 int  lidbg_exe(char path[], char argv1[], char argv2[], char argv3[], char argv4[], char argv5[], char argv6[])
@@ -395,6 +401,7 @@ MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Flyaudio Inc.");
 
 
+EXPORT_SYMBOL(lidbg_get_random_number);
 EXPORT_SYMBOL(lidbg_exe);
 EXPORT_SYMBOL(lidbg_mount);
 EXPORT_SYMBOL(lidbg_insmod);

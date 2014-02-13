@@ -3,30 +3,25 @@
 LIDBG_DEFINE;
 
 int g_monkey_dbg = 0;
-static bool is_monkey_inited = false;
 
 struct monkey_dev
 {
     struct completion monkey_wait;
     int monkey_enable;
-    bool random_on_en;
-    bool random_off_en;
+    int random_on_en;
+    int random_off_en;
     int gpio;
     int on_ms;
     int off_ms;
 };
 struct monkey_dev *g_monkey_dev;
 
-void monkey_work_func()
+void monkey_work_func(void)
 {
-    u32 ret;
     u32 delay = g_monkey_dev->on_ms;
     //on
     if(g_monkey_dev->random_on_en)
-    {
-        get_random_bytes(&ret, sizeof(ret));
-        delay = ret % g_monkey_dev->on_ms;
-    }
+        delay = lidbg_get_random_number(g_monkey_dev->on_ms);
     if(g_monkey_dbg)
         LIDBG_WARN("==on==%d=====\n", delay);
     SOC_IO_Output(0, g_monkey_dev->gpio, 1);
@@ -34,10 +29,7 @@ void monkey_work_func()
     //off
     delay = g_monkey_dev->off_ms;
     if(g_monkey_dev->random_off_en)
-    {
-        get_random_bytes(&ret, sizeof(ret));
-        delay = ret % g_monkey_dev->off_ms;
-    }
+        delay = lidbg_get_random_number(g_monkey_dev->off_ms);
     if(g_monkey_dbg)
         LIDBG_WARN("==off==%d=====\n", delay);
     SOC_IO_Output(0, g_monkey_dev->gpio, 0);

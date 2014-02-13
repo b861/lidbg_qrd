@@ -10,8 +10,8 @@ static struct task_struct *fs_kmsgtask;
 static struct completion kmsg_wait;
 //zone end
 
-int delay_disable_tracemsg(void);
 //zone below [fs.log.driver]
+int delay_disable_tracemsg(void *data);
 bool upload_machine_log(void)
 {
     if(lidbg_exe("/flysystem/lib/out/client_mobile", NULL, NULL, NULL, NULL, NULL, NULL) < 0)
@@ -261,7 +261,7 @@ void fs_remount_system(void)
 //zone end
 
 
-int delay_disable_tracemsg(void)
+int delay_disable_tracemsg(void *data)
 {
 		{
 			lidbg("delay 3 s to disable  lidbg_trace_msg\n");
