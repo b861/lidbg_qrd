@@ -6,6 +6,7 @@
 struct mutex lock_com_chipe_config;
 u8 tw9912_reset_flag_jam = 0;
 u8 tw9912_signal_unstabitily_for_tw9912_config_array_flag = 0;
+unsigned int car_backing_times_cnt = 0;
 
 tw9912_input_info_t tw9912_input_information;
 tw9912_run_flag_t tw912_run_sotp_flag;
@@ -748,6 +749,8 @@ SIGNAL_DELTE_AGAIN:
         case NTSC_I:
             tw9912_status.format = NTSC_I;
             config_pramat_piont = TW9912_INIT_NTSC_Interlaced_input;
+	     car_backing_times_cnt++;
+	     lidbg("tw9912_config_array: car_backing_times_cnt = %d\n", car_backing_times_cnt);
             break;
 
         case PAL_I:
