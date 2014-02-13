@@ -198,6 +198,7 @@ void check_conf_file(void)
 
     if(fs_is_file_updated(build_time_fly_path, PRE_CONF_INFO_FILE) || (!is_file_empty(driver_sd_path) || !is_file_empty(core_sd_path) || !is_file_empty(state_sd_path)|| !is_file_empty(PRE_CONF_INFO_FILE)))
     {
+    	msleep(1000);
         FS_WARN("<overwrite:push,update?>\n");
         is_out_updated = true;
         analysis_copylist("/flysystem/lib/out/copylist.conf");
@@ -263,6 +264,9 @@ void lidbg_fileserver_main_prepare(void)
 
     FS_WARN("<%s>\n", FS_VERSION);
 
+    lidbg_mkdir("/data/lidbg");
+    lidbg_mkdir("/data/lidbg_osd");
+
     check_conf_file();
 
     set_machine_id();
@@ -271,9 +275,6 @@ void lidbg_fileserver_main_prepare(void)
     fs_fill_list(driver_sd_path, FS_CMD_FILE_CONFIGMODE, &lidbg_drivers_list);
     fs_fill_list(core_sd_path, FS_CMD_FILE_CONFIGMODE, &lidbg_core_list);
     fs_fill_list(state_sd_path, FS_CMD_FILE_CONFIGMODE, &fs_state_list);
-
-    lidbg_mkdir("/data/lidbg_osd");
-    lidbg_mkdir("/data/lidbg");
 
     if(0)
         lidbg_new_cdev(&fs_nod_fops, "fs_node");
