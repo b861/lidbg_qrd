@@ -13,7 +13,8 @@ case "$DBG_PLATFORM" in
     msm8625)
 	BOARD_VERSION=v4
 	DBG_SYSTEM_DIR=/home/swlee/flyaudio/R8625QSOSKQLYA3060-v2
-	UPDATA_BIN_DIR=/8x25q-release/driver;;
+	UPDATA_BIN_DIR=/8x25q-release/driver
+	UPDATA_BASESYSTEM_DIR=8x25q-release/basesystem;;
     *) 
 	echo "exit,not find your platform:  $DBG_PLATFORM"
 	exit;;
@@ -35,4 +36,5 @@ export DBG_CROSS_COMPILE
 export BOARD_VERSION
 export BUILD_VERSION
 export UPDATA_BIN_DIR
+export UPDATA_BASESYSTEM_DIR
 
