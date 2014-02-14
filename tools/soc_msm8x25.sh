@@ -6,7 +6,7 @@ function build_android()
 		source build/envsetup.sh&&choosecombo release $DBG_PLATFORM eng
 	fi
 		make -j8
-		. $DBG_SHELL_PATH/kernel_release.sh $descriptors
+		. $DBG_TOOLS_PATH/basesystem_release.sh $descriptors
 }
 
 
@@ -67,7 +67,7 @@ function soc_menu_func()
 	echo [29] fastboot flash system
 	echo [30] fastboot reboot
 	echo [31] nautilus
-	echo [32] build android and push
+	echo [32] build basesystem and push
 	echo "[40] make kernel & reboot & flash"
 }
 

@@ -1,5 +1,5 @@
 
-	apt-get install expect	
+	apt-get install expect
 	cd $UPDATA_BASESYSTEM_DIR
 	pwd
 	git checkout master
