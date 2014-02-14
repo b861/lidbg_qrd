@@ -87,7 +87,7 @@ function soc_handle_func()
 	31)
 		nautilus $DBG_SYSTEM_DIR;;
 	40)
-		adb reboot bootloader && build_kernel && flash_kernel && fastboot reboot;;
+		build_kernel && adb reboot bootloader &&  flash_kernel && fastboot reboot;;
 	*)
 		echo
 	esac
