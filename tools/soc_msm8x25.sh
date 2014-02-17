@@ -54,6 +54,16 @@ function flash_system()
 
 }
 
+function make_package()
+{
+	echo make_package
+	expect $DBG_TOOLS_PATH/pull
+	cp -r $DBG_OUT_RELEASE_PATH/$BOARD_VERSION/out  $UPDATA_BIN_DIR
+	cp -r $DBG_SYSTEM_DIR/flyaudio/out/*  $UPDATA_BASESYSTEM_DIR
+	cd $UPDATA_BASESYSTEM_DIR/.. && pwd && expect $DBG_TOOLS_PATH/make_package
+}
+
+
 function soc_menu_func()
 {
 	echo [21] make bootimage
@@ -62,13 +72,15 @@ function soc_menu_func()
 	echo [24] git pull
 	echo [25] git push
 	echo [26] gitk
-	echo [27] adb reboot bootloader
-	echo [28] fastboot flash boot
-	echo [29] fastboot flash system
-	echo [30] fastboot reboot
-	echo [31] nautilus
-	echo [32] build basesystem and push
+	echo [27] git reset
+	echo [30] adb reboot bootloader
+	echo [31] fastboot flash boot
+	echo [32] fastboot flash system
+	echo [33] fastboot reboot
+	echo [35] nautilus
 	echo "[40] make kernel & reboot & flash"
+	echo [41] build basesystem and push
+	echo [42] 使用最新的ko和basesystem生成升级包
 }
 
 function soc_handle_func()
@@ -88,19 +100,23 @@ function soc_handle_func()
 	26)
 		gitk &;;
 	27)
-		adb reboot bootloader;;
-	28)
-		flash_kernel;;
-	29)
-		flash_system;;
+		git reset --hard;;
 	30)
-		fastboot reboot;;
+		adb reboot bootloader;;
 	31)
-		nautilus $DBG_SYSTEM_DIR;;
+		flash_kernel;;
 	32)
-		build_android;;
+		flash_system;;
+	33)
+		fastboot reboot;;
+	35)
+		nautilus $DBG_SYSTEM_DIR;;
 	40)
-		build_kernel && adb reboot bootloader &&  flash_kernel && fastboot reboot;;
+		build_kernel && adb wait-for-devices reboot bootloader &&  flash_kernel && fastboot reboot;;
+	41)
+		build_android;;
+	42)
+		make_package;;
 	*)
 		echo
 	esac

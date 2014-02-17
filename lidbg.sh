@@ -57,6 +57,11 @@ function push_lidbg_func()
 	expect $DBG_TOOLS_PATH/push_lidbg
 }
 
+function catch_log_func()
+{
+	echo catch_log_func
+}
+
 function menu_func()
 {
 	echo $DBG_ROOT_PATH
@@ -72,6 +77,7 @@ function menu_func()
 	echo [10] git log'                        '执行git log --oneline
 	echo [11] git reset'                      '执行git reset --hard	
 	echo [15] nautilus'                       '打开lidbg目录
+	echo [16] catch log'                      '抓取调试信息
 	echo 
 	echo $DBG_SYSTEM_DIR
 	soc_menu_func
@@ -105,6 +111,8 @@ function handle_func()
 			git reset --hard && chmod 777 * -R;;
 		15)
 			nautilus $DBG_ROOT_PATH;;
+		16)
+			catch_log_func;;
 		*)
 			echo
 		esac
