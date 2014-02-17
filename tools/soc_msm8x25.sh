@@ -2,6 +2,7 @@ function build_android()
 {
 	echo 编译android
 	read -p "输入提交到二进制仓库的说明文字：" descriptors
+	expect $DBG_TOOLS_PATH/pull
 	if [[ $TARGET_PRODUCT = "" ]];then		
 		source build/envsetup.sh&&choosecombo release $DBG_PLATFORM eng
 	fi

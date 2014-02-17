@@ -63,6 +63,7 @@ int static video_image_config_parameter_buffer(void)
 /*
 目前倒车的亮度等值，只有以下的一组。
 */
+//TW9912_Image_Parameter_fly[1].valu 等于240是一般倒车，0xF1是天籁倒车，小于10为AUX输入
         /**************************************Astren************************************************/
         if(TW9912_Image_Parameter_fly[1].valu == 240)//240 是和蒋工商量好的值，用于区别目前是倒车的配置
         {
@@ -120,6 +121,7 @@ int static video_image_config_parameter_buffer(void)
         /**************************************AUX********************************************/
         else
         {
+		//AUX和DVD参数需要根据上层（蒋工）传入的参数配置(范围0~10) 
             lidbg("AUX\n");
             flag_now_config_channal_AUX_or_Astren = 1;
             if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
@@ -240,6 +242,8 @@ int static video_image_config_begin(void)
         else //DVD SEPARATION
             ret = tw9912_write((char *)&Tw9912_image_global_separation[i]);
     }
+
+    //图像偏移量
     if(flag_now_config_channal_AUX_or_Astren == 0)//Astren
     {
         if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
@@ -285,6 +289,8 @@ int static video_image_config_begin(void)
 #endif
     return ret;
 }
+
+//蒋工直接调用传入的参数配置
 int flyVideoImageQualityConfig_in(Vedio_Effect cmd , u8 valu)//valu的值的范围是0～10
 {
     lidbg("flyvideo_image_config_begin(%d,%d)\n", cmd, valu);
@@ -312,6 +318,7 @@ int flyVideoImageQualityConfig_in(Vedio_Effect cmd , u8 valu)//valu的值的范�
         lidbg("Error at %s you input cmd = %d paramter have Problems", __func__, cmd);
         break;
     }
+   //蒋工每配一次参数最后写BRIGHTNESS
     if(cmd == BRIGHTNESS)//wait all set doen befor application
         video_image_config_begin();
     return 0;
