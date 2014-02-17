@@ -38,7 +38,7 @@ tw9912info_t global_tw9912_info_for_PAL_I =
 };
 #ifdef DEBUG_TC358
 void terminal_tc358746xbg_config(int argc, char **argv)
-{
+{//使用方法请阅读该文件目录下的README
     lidbg("terminal_tc358746xbg_config()\n");
     if(!strcmp(argv[1], "write"))
     {
@@ -200,8 +200,8 @@ static void set_func_tbl(void)
     plidbg_dev->soc_func_tbl.pfncamera_open_video_color = tc358746xbg_show_color;
     plidbg_dev->soc_func_tbl.pfnread_tw9912_chips_signal_status = read_chips_signal_status;
     plidbg_dev->soc_func_tbl.pfnVideoReset = chips_hardware_reset;
-    global_video_format_flag = NTSC_I;
-    global_video_channel_flag = TV_4KO;
+    global_video_format_flag = NTSC_I;//视频格式标志，在内核msm_sensor.c中使用
+    global_video_channel_flag = TV_4KO;//视频当前通道标志，TV AUX 倒车 用的都是YIN3通道，该标志可以区分
     global_camera_working_status = 0;
 }
 
@@ -251,6 +251,10 @@ static int video_dev_resume(struct platform_device *pdev)
     global_tw9912_info_for_PAL_I.flag = true; //true is neet again find the black line;
     global_tw9912_info_for_PAL_I.reg_val = 0x12;
     global_tw9912_info_for_PAL_I.this_is_first_open = true;//first open the camera
+//以上两个数组，是记录当前倒车状态下 图像向下移动寻找 黑线（用来判断分屏的参考）的9912寄存器的参素
+//这些值的修改在HAL文件：FlyCamera.cpp (qcom\lidbg_qrd\android\msm8x25\8x25q_camera)	40966	2014-1-22的函数
+//static int ToFindBlackLineAndSetTheTw9912VerticalDelayRegister(mm_camera_ch_data_buf_t *frame)中使用
+
     return 0;
 }
 static struct platform_driver video_driver =
@@ -275,7 +279,9 @@ int tw9912_node_open(struct inode *inode, struct file *filp)
 }
 static int tw9912_node_ioctl(struct file *filp, unsigned
                              int cmd, unsigned long arg)
-{
+{//这个函数的调用在HAL文件：FlyCamera.cpp (qcom\lidbg_qrd\android\msm8x25\8x25q_camera)	40966	2014-1-22文件中的函数
+//static int FlyCameraReadTw9912StatusRegitsterValue()中使用
+
     /*  if(_IOC_TYPE(cmd) != TW9912_IOC_MAGIC)//_IOC_TYPE()-->//kernel\include\asm-generic
     	 return -ENOTTY;
        if (_IOC_NR(cmd) > TW9912_IOC_MAXNR)
@@ -286,7 +292,7 @@ static int tw9912_node_ioctl(struct file *filp, unsigned
         tw9912_read_func_read_data = 1;
         break;
     case AGAIN_RESET_VIDEO_CONFIG_BEGIN :
-	chips_config_begin(NTSC_I);
+	chips_config_begin(NTSC_I);//FlyCamera.cpp 文件中控制视频芯片重新配置
 	lidbg("at last open backcar not signal but app opened camera,so, now again config the chips\n");
 	break;
     default:
@@ -299,7 +305,7 @@ static ssize_t tw9912_node_read(struct file *filp, char __user *buf, size_t size
 {
     unsigned int count = size;
     ssize_t ret;
-    if(!tw9912_read_func_read_data)
+    if(!tw9912_read_func_read_data)//该分支的执行流向受 tw9912_node_ioctl函数的控制
     {
         if(signal_is_how[info_vedio_channel_t].Format == NTSC_I)
         {
@@ -349,7 +355,7 @@ static ssize_t tw9912_node_read(struct file *filp, char __user *buf, size_t size
         u8 valu;
         int ret = 0;
         tw9912_read_func_read_data = 0 ;// at every turn have ioct once
-        ret = read_chips_signal_status_fast(&valu);
+        ret = read_chips_signal_status_fast(&valu);//读取现在视频信号的状态，判断信号的质量
         if(ret == NACK)
         {
             lidbg("Worning read tw9912 NACK\n");

@@ -2,8 +2,8 @@
 #include "video_init_config.h"
 #include "video_init_config_tab.h"
 static int flag_io_config = 0;
-vedio_channel_t info_vedio_channel_t = NOTONE;
-vedio_channel_t info_com_top_Channel = YIN2;
+vedio_channel_t info_vedio_channel_t = NOTONE;//用于记录现在状态下处理的对应通道
+vedio_channel_t info_com_top_Channel = YIN2;//用于记录当前最新的上层切换到的视频通道状态 YIN3(倒车、AUX、TV等) 或 SEPARATION（DVD）
 extern tw9912_signal_t signal_is_how[5];
 extern last_config_t the_last_config;
 extern tw9912info_t global_tw9912_info_for_NTSC_I;
@@ -11,7 +11,7 @@ extern tw9912info_t global_tw9912_info_for_PAL_I;
 static u8 flag_now_config_channal_AUX_or_Astren = 0; //0 is Sstren 1 is AUX 2 is DVD
 u8 global_debug_thread = 0;
 static TW9912_Image_Parameter TW9912_Image_Parameter_fly[6] =
-{
+{//用于记录 HAL层配置的 视频页面下“设置”标签 的参数 0～10 待到真正配置到色彩设置代码时将使用该函数的值
     {BRIGHTNESS, 5},
     {CONTRAST, 5},
     {SHARPNESS, 5},
@@ -61,7 +61,7 @@ int static video_image_config_parameter_buffer(void)
     if (info_com_top_Channel == YIN3)
     {
 /*
-目前倒车的亮度等值，只有一下的一组。
+目前倒车的亮度等值，只有以下的一组。
 */
         /**************************************Astren************************************************/
         if(TW9912_Image_Parameter_fly[1].valu == 240)//240 是和蒋工商量好的值，用于区别目前是倒车的配置

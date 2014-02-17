@@ -71,6 +71,8 @@ static inline int check_pt(void)
 //lpc
 #define  SOC_LPC_Send  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_LPC_Send))
 #define global_video_format_flag  (plidbg_dev->soc_func_tbl.pfnglobal_video_format_flag)
+//look home/Fly/3060pr/R8625QSOSKQLYA3060-v2/kernel/drivers/media/video/msm/sensors/msm_sensor.c
+//---int32_t msm_sensor_get_output_info(struct msm_sensor_ctrl_t *s_ctrl,
 #define global_video_channel_flag  (plidbg_dev->soc_func_tbl.pfnglobal_video_channel_flag)
 
 //dev
