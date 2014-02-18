@@ -15,7 +15,7 @@
 #else
 #define DEBUGLOG do{}while(0)
 #endif
-#define BCAR_BLACK_VALUE_UPERR_LIMIT /*0x42*/ 0x42
+#define BCAR_BLACK_VALUE_UPERR_LIMIT /*0x42*/ 0x42//如果有对视频色彩的亮度或颜色有修改 这个值需要重新取值
 namespace android {
 
 	typedef struct
@@ -39,7 +39,7 @@ namespace android {
 	char video_channel_status[10]="0";
 	float FlyCameraflymFps = 0;
 
-	static bool ToFindBlackLineAndSetTheTw9912VerticalDelayRegister_is_ok = false;
+	static bool ToFindBlackLineAndSetTheTw9912VerticalDelayRegister_is_ok = false;//在下一数据帧率到来时是否再次执行 寻找黑线的动作 ture 不用再找
 	static char video_format[10]="1";
 	static char video_show_status[10]="0";
 	static mm_camera_ch_data_buf_t *frame;
@@ -84,8 +84,8 @@ TW9912Info tw9912_info;
 		}
 
   property_get("fly.video.channel.status",video_channel_status,"1");//1:DVD 2:AUX 3:Astren
-  if(video_channel_status[1] == '3' && DetermineImageSplitScreen_do_not_or_yes == false)//在上次打开为找到黑线，这次打开再运行进行黑线寻找
-		{
+  if(video_channel_status[0] == '3' && DetermineImageSplitScreen_do_not_or_yes == false)//在上次打开为找到黑线，这次打开再运行进行黑线寻找
+		{//图像下移寻找黑线的动作未找到，下一次的倒车再找一遍
 			DEBUGLOG("Flyvideo-:在上次打开倒车中，未找到黑线，再找一次\n");
 			ToFindBlackLineAndSetTheTw9912VerticalDelayRegister_is_ok = false;
 			read(global_tw9912_file_fd, (void *)(&tw9912_info),sizeof(TW9912Info));
@@ -99,7 +99,7 @@ TW9912Info tw9912_info;
 void FlyCameraStop()
 {
 rePreview_count = 0;
-ToFindBlackLineAndSetTheTw9912VerticalDelayRegister_is_ok = false; //at next preview ,again run function
+ToFindBlackLineAndSetTheTw9912VerticalDelayRegister_is_ok = false; 
 open_dev_fail_count = 0;
 global_fram_at_one_sec_count = 0;
 LongitudinalInformationRemember.ThisIsFirstFind = true;
@@ -168,7 +168,7 @@ void FlyCameraThisIsFirstOpenAtDVD()//第一次打开DVD做一次重新的previe
 						 }
 						 read(file_fd, (void *)(&tw9912_info),sizeof(TW9912Info));
 						 if(tw9912_info.this_is_first_open == true)
-						 {
+						 {//这里的调用最好用线程方式调用
 							       DEBUGLOG("Flyvideo-x:第一次打开DVD\n");
 							       mHalCamCtrl->stopPreview();
 							      	usleep(1000);
@@ -182,7 +182,7 @@ void FlyCameraThisIsFirstOpenAtDVD()//第一次打开DVD做一次重新的previe
 						 global_Fream_is_first = false;
 			}
 }
-void FlyCameraNotSignalAtLastTime()//在上次的倒车时候 ，没检测到视频输入信号要重新配置下视频芯片和re preview
+void FlyCameraNotSignalAtLastTime()//在本次的倒车时候 ，开始还没检测到视频输入信号，后来信号来啦，要重新配置下视频芯片和re preview
 {
 	if(video_show_status[0] == '0' && rePreview_count > 100)
 		{//发现黑屏 且 视频在上次打开没有视频源输入
@@ -878,7 +878,7 @@ static bool DetermineImageSplitScreen(mm_camera_ch_data_buf_t *frame,QCameraHard
 		return 1;
 
 	// property_get("fly.video.channel.status",video_channel_status,"1");//1:DVD 2:AUX 3:Astren
-
+	//以下是横向分屏判断
 	/****************************Astren******************************/
 	if(video_channel_status[0] == '3')//Astren
 	//if(0)
@@ -895,7 +895,7 @@ static bool DetermineImageSplitScreen(mm_camera_ch_data_buf_t *frame,QCameraHard
 				for(i=0;i<20;i++)
 				{
 					piont_y = (unsigned char *)(frame->def.frame->buffer+frame->def.frame->y_off+180*j + i);
-					if((*piont_y) < 0x20 || (*piont_y) > BCAR_BLACK_VALUE_UPERR_LIMIT /*0x42*/ )
+					if((*piont_y) < 0x20 || (*piont_y) > BCAR_BLACK_VALUE_UPERR_LIMIT /*0x42*/ )//第一行不全是黑色数据，说明有分屏现象发生
 					{
 						dete_count++;//一行判断超过10个可疑点才认为是数据异常
 							if(dete_count > 5)
@@ -904,14 +904,16 @@ static bool DetermineImageSplitScreen(mm_camera_ch_data_buf_t *frame,QCameraHard
 							global_fram_count ++;//数据异常帧数统计
 								if(global_fram_count >50)//1sec
 								{
+									DEBUGLOG("Flyvideo-ERROR1，变量global_need_rePreview 无法达到条件，无法做恢复分屏的动作，现强制去改变这个变量值\n");
 									global_need_rePreview = false;//防止CameraRestartPreviewThread阻塞导致，global_need_rePreview无法赋值成true；
 									global_fram_count = 0;
+									
 								}
 								if(global_need_rePreview == false && (flynow - Astern_last_time) > ms2ns(2500))//离上次时间超过2.5s
 								{
 									Astern_last_time = flynow;
 									if(global_fram_count >= 1 && RowsOfDataTraversingTheFrameToFindTheBlackLine(frame)) //发现有一帧就重新preview
-									{
+									{// 第一行有非黑色数据，并且 能够找到黑色行（RowsOfDataTraversingTheFrameToFindTheBlackLine(frame)）
 										global_fram_count = 0;
 										global_need_rePreview = true;
 										//DEBUGLOG("Flyvideo-: need rePreview\n");
@@ -937,18 +939,19 @@ static bool DetermineImageSplitScreen(mm_camera_ch_data_buf_t *frame,QCameraHard
 		for(j=0;j<4;j++)
 		{
 			for(i=0;i<20;i++)
-			{
+			{//判断第一行的UV值 如何有颜色那么就触发分屏的判断（采用UV做判断的原因是AUX接后坐娱乐输入（CVBS）的顶部有白线）
 				piont_crcb = (unsigned char *)(frame->def.frame->buffer+frame->def.frame->cbcr_off+(180*j + i));
-				if((*piont_crcb) < (0x7f - 3) || (*piont_crcb) > (0x80+3) )//第一行有颜色说明发生啦分屏
+				if((*piont_crcb) < (0x7f - 3) || (*piont_crcb) > (0x80+3) )//第一行有颜色说明发生啦分屏,当用户重新调整颜色值后，该处可能有BUG，需要重新调整这两个
 				{//DEBUGLOG("Flyvideo-..");
 					dete_count++;//一行判断超过10个可疑点才认为是数据异常
 						if(dete_count > 9)
 						{
-						//DEBUGLOG("Flyvideo-异常数据积累个数达到啦设置值");
+						//DEBUGLOG("Flyvideo-异常数据积false累个数达到啦设置值");
 						//DEBUGLOG("DetermineImageSplitScreen:buf[%d]= 0x%.2x\n",((180*j) + i),(*piont_crcb) );
 						global_fram_count ++;//数据异常帧数统计
 							if(global_fram_count >50)//1sec
 							{
+								DEBUGLOG("Flyvideo-ERROR2，变量global_need_rePreview 无法达到条件，无法做恢复分屏的动作，现强制去改变这个变量值\n");
 								global_need_rePreview = false;//防止CameraRestartPreviewThread阻塞导致，global_need_rePreview无法赋值成true；
 								global_fram_count = 0;
 							}

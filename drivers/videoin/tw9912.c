@@ -4,9 +4,9 @@
 #include "lidbg.h"
 
 struct mutex lock_com_chipe_config;
-u8 tw9912_reset_flag_jam = 0;
-u8 tw9912_signal_unstabitily_for_tw9912_config_array_flag = 0;
 unsigned int car_backing_times_cnt = 0;
+u8 tw9912_reset_flag_jam = 0;//验证是否可以去除
+u8 tw9912_signal_unstabitily_for_tw9912_config_array_flag = 0;//改变量还未使用
 
 tw9912_input_info_t tw9912_input_information;
 tw9912_run_flag_t tw912_run_sotp_flag;
@@ -500,11 +500,11 @@ vedio_format_t Tw9912_appoint_pin_tw9912_cvbs_signal_tsting(vedio_channel_t Chan
             // or tw9912 is not have initall
         {
             if(tw9912_status.flag == TW9912_initall_not )
-            {
+            {//用来判断tw9912 是否有过初始化
                 tw9912_status.flag = TW9912_initall_yes;
                 tw9912_status.Channel = Channel;
                 tw9912_status.format = PAL_I;
-                tw9912_dbg("first initalll!\n");
+                tw9912_dbg("first initalll!\n");//应该取消这个逻辑，在数组const u8 TW9912_INIT_AGAIN[] = 添加必要的寄存器配置就可以
                 tw9912_config_array_PALi();//initall all register
             }
 
@@ -692,7 +692,7 @@ int tw9912_config_array( vedio_channel_t Channel)
     tw9912_get_chip_id();
     //if(config_pramat != STOP_VIDEO)
     {
-        tw9912_channel_choeces_again(Channel);
+        tw9912_channel_choeces_again(Channel);//切换通道
         tw9912_dbg("tw9912:tw9912_config_array()-->Tw9912_appoint_pin_tw9912_cvbs_signal_tsting(%d)\n", Channel);
         mutex_unlock(&lock_com_chipe_config);
 SIGNAL_DELTE_AGAIN:
@@ -715,9 +715,10 @@ SIGNAL_DELTE_AGAIN:
             else
             {
             	mutex_unlock(&lock_com_chipe_config);
-				ret_format = tw9912_cvbs_signal_tsting(Channel);
+				ret = tw9912_cvbs_signal_tsting(Channel);
+				      lidbg("tw9912_cvbs_signal_tsting Video Forma Is %d\n",ret);
 				mutex_lock(&lock_com_chipe_config);
-                signal_is_how[Channel].Format = ret_format;
+                signal_is_how[Channel].Format = ret;
             }
         }
         if(ret == -1)
@@ -745,7 +746,7 @@ SIGNAL_DELTE_AGAIN:
         tw9912_status.flag = TW9912_initall_yes;
         tw9912_status.Channel = Channel;
         switch(signal_is_how[Channel].Format)
-        {
+        {//根据检测到的视频制式 决定配置的数组
         case NTSC_I:
             tw9912_status.format = NTSC_I;
             config_pramat_piont = TW9912_INIT_NTSC_Interlaced_input;

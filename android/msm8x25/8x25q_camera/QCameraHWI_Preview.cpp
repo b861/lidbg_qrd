@@ -1377,7 +1377,7 @@ status_t QCameraStream_preview::processPreviewFrame (
 		float FrameCount_flag = 40.0;
 
 		FlyCameraGetInfo(frame,mHalCamCtrl);
-		FlyCameraNotSignalAtLastTime();
+		FlyCameraNotSignalAtLastTime();//在没视频强制打开摄像头时，要等信号来啦后重新配置视频芯片
 
 		if(video_channel_status[0] == '1')
 			FrameCount_flag = 60.0;
@@ -1387,7 +1387,7 @@ status_t QCameraStream_preview::processPreviewFrame (
 		if(FlyCameraImageDownFindBlackLine())
 			return processPreviewFrameWithOutDisplay(frame);
 
-		FlyCameraThisIsFirstOpenAtDVD();
+		FlyCameraThisIsFirstOpenAtDVD();//第一次打开DVD的时候，有黑屏现象\纵向分屏，要做多一次重新预览动作
 	
 		if (mHalCamCtrl->isNoDisplayMode()) {
 			return processPreviewFrameWithOutDisplay(frame);
@@ -1398,7 +1398,7 @@ status_t QCameraStream_preview::processPreviewFrame (
 											{
 												index =1;
 												if(FlyCameraFrameDisplayOrOutDisplay())
-													return processPreviewFrameWithOutDisplay(frame);
+													return processPreviewFrameWithOutDisplay(frame);//丢掉帧不显示
 												else
 													return processPreviewFrameWithDisplay(frame);
 											}

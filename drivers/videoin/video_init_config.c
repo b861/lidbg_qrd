@@ -5,7 +5,7 @@ static int flag_io_config = 0;
 vedio_channel_t info_vedio_channel_t = NOTONE;//用于记录现在状态下处理的对应通道
 vedio_channel_t info_com_top_Channel = YIN2;//用于记录当前最新的上层切换到的视频通道状态 YIN3(倒车、AUX、TV等) 或 SEPARATION（DVD）
 extern tw9912_signal_t signal_is_how[5];
-extern last_config_t the_last_config;
+extern last_config_t the_last_config;//上一次的通道状态
 extern tw9912info_t global_tw9912_info_for_NTSC_I;
 extern tw9912info_t global_tw9912_info_for_PAL_I;
 static u8 flag_now_config_channal_AUX_or_Astren = 0; //0 is Sstren 1 is AUX 2 is DVD
@@ -47,11 +47,11 @@ void chips_hardware_reset(void)
 int static video_signal_channel_switching_occurs(void)
 {
     lidbg("TC358:video_signal_channel_switching_occurs() \n");
-    tc358746xbg_data_out_enable(DISABLE);
+    tc358746xbg_data_out_enable(DISABLE);//禁用输出  让用户看不到切换过程
     lidbg("%s:tw9912_RESX_DOWN\n", __func__);
 
     tw9912_RESX_DOWN;//\u8fd9\u91cc\u5bf9tw9912\u590d\u4f4d\u7684\u539f\u56e0\u662f\u89e3\u51b3\u5012\u8f66\u9000\u56deDVD\u65f6\u89c6\u9891\u5361\u6b7b\u3002
-    tw9912_RESX_UP;
+    tw9912_RESX_UP;//在YIN3 切换 到DVD通道，如果不复位一下 视频回定住
     //msleep(20);
     //  mutex_unlock(&lock_chipe_config);
     return 0;
@@ -428,7 +428,7 @@ AGAIN_TEST_FOR_BACK_NTSC_I:
             lidbg("%s:you input TW9912 Channel=%d error!\n", __FUNCTION__, Channel);
             break;
         }
-        if(ret == 1 && goto_agian_test <= 2 )
+        if(ret == 1 && goto_agian_test <= 2 )//当时发现 NTSC_I 的检测不准确，到这里 当检测的是NTSC_I 再来做一次检测
             goto AGAIN_TEST_FOR_BACK_NTSC_I;
         else goto_agian_test = 0;
     }
@@ -442,7 +442,7 @@ AGAIN_TEST_FOR_BACK_NTSC_I:
     mutex_unlock(&lock_chipe_config);
 
     if( ret > 4 )
-    {
+    {//如果检测30次以上都没检测到信号 可能是tw9912工作不正常啦，做一次重新配置
         Format_count ++;
         if(Format_count > 30 && Format_count_flag == 0)
         {
@@ -555,7 +555,7 @@ static void chips_config_cvbs_begin()
     video_image_config_begin();
 
     lidbg("global_video_channel_flag = %x\n", global_video_channel_flag);
-    if(global_video_channel_flag == TV_4KO)
+    if(global_video_channel_flag == TV_4KO)//只针对TV的特殊配置
     {
         u8 Tw9912_register_valu[] = {0x08, 0x17,};
         tw9912_write((char *)Tw9912_register_valu);
@@ -563,7 +563,7 @@ static void chips_config_cvbs_begin()
         Tw9912_register_valu[1] = 0x1e;
         tw9912_write((char *)Tw9912_register_valu);
     }
-    else if(global_video_channel_flag == AUX_4KO)
+    else if(global_video_channel_flag == AUX_4KO)//只针对AUX的特殊配置
     {
         u8 Tw9912_register_valu[] = {0x08, 0x15,};
         tw9912_write((char *)Tw9912_register_valu);
@@ -592,7 +592,7 @@ static void chips_config_cvbs_begin()
             break;
         default :
             lidbg("video not signal input..\n");
-            SOC_Write_Servicer(VIDEO_SHOW_BLACK);
+            SOC_Write_Servicer(VIDEO_SHOW_BLACK);//若设置啦该属性，在flycamera.cpp中会使用到该属性，这在延时如干时间后将重做 chips_config_begin(vedio_format_t config_pramat)
             tc358746xbg_config_begin(COLORBAR + TC358746XBG_BLACK); //blue
             break;
         }
@@ -605,9 +605,9 @@ static void chips_config_cvbs_begin()
 }
 static void chips_config_yuv_begin()
 {
-    tw9912_config_array_NTSCp();
-    video_image_config_begin();
-    SOC_Write_Servicer(VIDEO_NORMAL_SHOW);
+    tw9912_config_array_NTSCp();//刷寄存器数组
+    video_image_config_begin();//刷颜色寄存器的配置
+    SOC_Write_Servicer(VIDEO_NORMAL_SHOW);//设置一个属性，该属性将在Flycamera.cpp中使用
     tc358746xbg_config_begin(NTSC_P);
     lidbg("Vedio Format Is NTSCp\n");
 }
@@ -616,16 +616,16 @@ void chips_config_begin(vedio_format_t config_pramat)// 配置主入口在内核
     lidbg("\n\nVideo Module Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);
     video_config_debug("tw9912:config channal is %d\n", info_com_top_Channel);
     mutex_lock(&lock_chipe_config);
-    if(info_com_top_Channel == SEPARATION)
-        chips_config_yuv_begin();
+    if(info_com_top_Channel == SEPARATION)//将工主动修改啦这个参数
+        chips_config_yuv_begin();//DVD
     else	if(config_pramat != STOP_VIDEO)
-        chips_config_cvbs_begin();
+        chips_config_cvbs_begin();//其他视频（倒车、TV、AUX。。。）
     else
     {
         lidbg("TW9912:warning -->config_pramat == STOP_VIDEO\n");
-        tc358746xbg_config_begin(COLORBAR);
-    }
-    up(&sem);
+        tc358746xbg_config_begin(COLORBAR);//这个流程目前没有使用，当时给TC358调试用的
+    } 
+    up(&sem);//该信号量目前还没有使用
     mutex_unlock(&lock_chipe_config);
 }
 void tc358746xbg_show_color(u8 color_flag)
