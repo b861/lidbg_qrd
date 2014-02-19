@@ -58,10 +58,11 @@ function flash_system()
 function make_package()
 {
 	echo make_package
+	cd $UPDATA_BASESYSTEM_DIR/..
 	expect $DBG_TOOLS_PATH/pull
-	cp -r $DBG_OUT_RELEASE_PATH/$BOARD_VERSION/out  $UPDATA_BIN_DIR
-	cp -r $DBG_SYSTEM_DIR/flyaudio/out/*  $UPDATA_BASESYSTEM_DIR
-	cd $UPDATA_BASESYSTEM_DIR/.. && pwd && expect $DBG_TOOLS_PATH/make_package
+	cp -r $DBG_OUT_RELEASE_PATH/$BOARD_VERSION/out  $UPDATA_BIN_DIR && echo "copy lidbg"
+	cp -r $DBG_SYSTEM_DIR/flyaudio/out/*  $UPDATA_BASESYSTEM_DIR && echo "copy basesystem"
+	pwd && expect $DBG_TOOLS_PATH/make_package
 }
 
 
