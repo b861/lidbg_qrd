@@ -32,9 +32,9 @@ function release_func()
 	read -p "是否提交到二进制仓库y/n:" choice
 	if [[ $choice = y ]];then
 		read -p "输入提交到二进制仓库的说明文字：" descriptor
-		./release.sh $descriptor
+		sh $DBG_TOOLS_PATH/release.sh $descriptor
 	else
-		./release.sh
+		sh $DBG_TOOLS_PATH/release.sh
 	fi
 }
 

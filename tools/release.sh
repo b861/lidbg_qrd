@@ -1,4 +1,4 @@
-
+cd ../build
 chmod 777 -R ./
 source ./env_entry.sh
 ./build_cfg.sh $BOARD_VERSION $BUILD_VERSION $DBG_SOC

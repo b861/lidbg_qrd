@@ -3,6 +3,7 @@
 	cd $UPDATA_BASESYSTEM_DIR
 	pwd
 	git checkout master
+	git reset --hard
 	expect $DBG_TOOLS_PATH/pull
 	expect $DBG_TOOLS_PATH/pull
 	cp -ru $DBG_SYSTEM_DIR/flyaudio/out/*  $UPDATA_BASESYSTEM_DIR
