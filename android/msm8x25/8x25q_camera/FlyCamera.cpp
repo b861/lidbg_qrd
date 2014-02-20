@@ -83,6 +83,7 @@ TW9912Info tw9912_info;
 	//global_last_critical_point = 50;
 	//global_last_bottom_critical_point = 435;
 	DEBUGLOG("Flyvideo-mFlyPreviewStatus =%d\n",globao_mFlyPreviewStatus);
+	ERR_LOG("Flyvideo Error:Camera Start Preview\n");
 	global_tw9912_file_fd = open("/dev/tw9912config",O_RDWR);
 	if(global_tw9912_file_fd ==-1)
 		{
@@ -94,6 +95,7 @@ TW9912Info tw9912_info;
   if(video_channel_status[0] == '3' && DetermineImageSplitScreen_do_not_or_yes == false)//在上次打开为找到黑线，这次打开再运行进行黑线寻找
 		{//图像下移寻找黑线的动作未找到，下一次的倒车再找一遍
 			DEBUGLOG("Flyvideo-:在上次打开倒车中，未找到黑线，再找一次\n");
+			ERR_LOG("Flyvideo Error:At last open camera find black line fail,now again find that\n");
 			ToFindBlackLineAndSetTheTw9912VerticalDelayRegister_is_ok = false;
 			read(global_tw9912_file_fd, (void *)(&tw9912_info),sizeof(TW9912Info));
 			tw9912_info.sta = false;
@@ -116,6 +118,7 @@ globao_mFlyPreviewStatus = 0;
 global_Fream_is_first = true;
 close(global_tw9912_file_fd);
 DEBUGLOG("Flyvideo-mFlyPreviewStatus =%d\n",globao_mFlyPreviewStatus);
+ERR_LOG("Flyvideo Error:Camera Preview stop\n");
 }
 void FlyCameraRelease()
 {
@@ -155,6 +158,7 @@ bool FlyCameraImageDownFindBlackLine()//下移动图像 寻找黑线
 				if(ToFindBlackLineAndSetTheTw9912VerticalDelayRegister(frame) == 1)
 					{
 					DEBUGLOG("Flyvideo-注意：图像静帧一帧");
+					ERR_LOG("Flyvideo Error:Find black line ,frame give up\n");
 					return 1;
 					}
 			}
@@ -170,6 +174,7 @@ void FlyCameraThisIsFirstOpenAtDVD()//第一次打开DVD做一次重新的previe
 						 if(file_fd ==-1)
 						 {
 							       DEBUGLOG("Flyvideo-错误，打开设备节点文件“/dev/tw9912config”失败");
+											ERR_LOG("Flyvideo Error:Open tw9912config node fail\n");
 							      // return -1;
 											goto OPEN_ERR;
 						 }
@@ -177,6 +182,7 @@ void FlyCameraThisIsFirstOpenAtDVD()//第一次打开DVD做一次重新的previe
 						 if(tw9912_info.this_is_first_open == true)
 						 {//这里的调用最好用线程方式调用
 							       DEBUGLOG("Flyvideo-x:第一次打开DVD\n");
+											ERR_LOG("Flyvideo Error:This is first open DVD and now restart Preview\n");
 							       mHalCamCtrl->stopPreview();
 							      	usleep(1000);
 							       mHalCamCtrl->startPreview();
@@ -189,7 +195,7 @@ void FlyCameraThisIsFirstOpenAtDVD()//第一次打开DVD做一次重新的previe
 						 global_Fream_is_first = false;
 			}
 }
-void FlyCameraNotSignalAtLastTime()//在本次的倒车时候 ，开始还没检测到视频输入信号，后来信号来啦，要重新配置下视频芯片和re preview
+void FlyCameraNotSignalAtLastTime()//在本次的倒车时候 ，开始还没检测到视频输入信号，后来信号来啦，要重新配置下视频芯片和repreview
 {
 	if(video_show_status[0] == '0' && rePreview_count > 100)
 		{//发现黑屏 且 视频在上次打开没有视频源输入
@@ -199,13 +205,16 @@ void FlyCameraNotSignalAtLastTime()//在本次的倒车时候 ，开始还没检
 			if (ioctl(global_tw9912_file_fd,cmd, &arg) < 0)
 		        {
 				DEBUGLOG("Flyvideo-: ioctl AGAIN_RESET_VIDEO_CONFIG_BEGIN 4 tw9912 node  fail\n");
+				ERR_LOG("Flyvideo Error:ioctl tw9912config node fail\n");
 			}
 			if(global_need_rePreview == false )
 			{
 					global_need_rePreview = true;
 					DEBUGLOG("Flyvideo-上次的open是碰到视频不稳定，再次配置chip后的再次预览");
+					ERR_LOG("Flyvideo Error:at open camera not video signal,so,again setting chip config\n");
 					if( pthread_create(&thread_DetermineImageSplitScreenID, NULL,CameraRestartPreviewThread, (void *)mHalCamCtrl) != 0)
-						DEBUGLOG("Flyvideo-创建线程重新预览失败！DVD\n");
+						{DEBUGLOG("Flyvideo-创建线程重新预览失败！DVD\n");
+						ERR_LOG("Flyvideo Error:CameraRestartPreviewThread fail\n");}
 					//else
 					//	DEBUGLOG("Flyvideo-发现分屏 DVD\n");
 			}
@@ -224,10 +233,12 @@ void *CameraRestartPreviewThread(void *mHalCamCtrl1)
 	if(globao_mFlyPreviewStatus == 1)
 	{
 		DEBUGLOG("Flyvideo-:stopPreview()-->\n");
+		ERR_LOG("Flyvideo Error:stop preview\n");
 		mHalCamCtrl->stopPreview();
 		//	sleep(1);
 		usleep(1000);
 		DEBUGLOG("Flyvideo-:startPreview()-->\n");
+		ERR_LOG("Flyvideo Error:start preview\n");
 		mHalCamCtrl->startPreview();
 		//	sleep(1);
 		usleep(500000);//500 ms
@@ -296,6 +307,7 @@ static int ToFindBlackLineAndSetTheTw9912VerticalDelayRegister(mm_camera_ch_data
 				if(open_dev_fail_count == 0)
 				{
 						DEBUGLOG("Flyvideo-错误x，打开设备节点文件“/dev/tw9912config”失败");
+						ERR_LOG("Flyvideo Error:open tw9912config fail\n");
 						//ToFindBlackLineAndSetTheTw9912VerticalDelayRegister_is_ok = true;
 						DEBUGLOG("Flyvideo-警告：重要！！由于节点/dev/tw9912config打开失败，相关配置无法完成，分屏判断将失效，请检查该节点的读写权限（>606）");
 						DetermineImageSplitScreen_do_not_or_yes = false;
@@ -332,6 +344,7 @@ static int ToFindBlackLineAndSetTheTw9912VerticalDelayRegister(mm_camera_ch_data
 			tw9912_info.flag = false;
 			write(file_fd, (const void *)(&tw9912_info),sizeof(TW9912Info));
 		DEBUGLOG("Flyvideo-找到了黑色数据行，图像下移策略不需再执行");
+		ERR_LOG("Flyvideo Error:first black line find\n");
 		ToFindBlackLineAndSetTheTw9912VerticalDelayRegister_is_ok = true;
 		DetermineImageSplitScreen_do_not_or_yes = true;
 		}
@@ -343,12 +356,14 @@ static int ToFindBlackLineAndSetTheTw9912VerticalDelayRegister(mm_camera_ch_data
 				tw9912_info.reg_val -= 1;
 				write(file_fd, (const void *)(&tw9912_info),sizeof(TW9912Info));
 				DEBUGLOG("Flyvideo-黑色数据行还未找到，图像下移一个像素点");
+				ERR_LOG("Flyvideo Error:first black line finding..\n");
 			}
 			else
 			{
 				DEBUGLOG("Flyvideo-警告：图像顶部腾出的黑线还未找到，但是图像下移数据的设置已经达到下限，不能再设置更小");
 				ToFindBlackLineAndSetTheTw9912VerticalDelayRegister_is_ok = true;
 				DEBUGLOG("Flyvideo-警告：重要！！由于腾出黑线的操作无法完成，分屏判断将失效");
+				ERR_LOG("Flyvideo Error:important find first black line faild\n");
 				DetermineImageSplitScreen_do_not_or_yes = false;
 			}
 		return 1;
@@ -454,6 +469,7 @@ static bool RowsOfDataTraversingTheFrameToFindTheBlackLineForDVDorAUX(mm_camera_
 	}
 	//else DEBUGLOG("Flyvideo-:视频制式是:NTSC，寻找范围是：9～477");
 			DEBUGLOG("Flyvideo-可能发生分屏，寻找黑边中。。。");
+			ERR_LOG("Flyvideo Error:Find black line..\n");
 			for(i=9;i<find_line;i++)//某列下的第几行，找 一个点 看数据是否是黑色；前10行和后10行放弃找，正常情况下前3行是黑色的数据
 			{
 				piont_y = (unsigned char *)(frame->def.frame->buffer+frame->def.frame->y_off+720*i + 300);//在第300列下的每行找黑点
@@ -478,6 +494,7 @@ static bool RowsOfDataTraversingTheFrameToFindTheBlackLineForDVDorAUX(mm_camera_
 			}
 //DEBUGLOG("Astern：经确认未发生黑屏");
 DEBUGLOG("Flyvideo-找不到黑边");
+ERR_LOG("Flyvideo Error:black line not find, so frame is ok\n");
 return 0;
 Break_The_Func:
 DEBUGLOG("Flyvideo-：%d行分屏，数据%d个,黑色数据0x%.2x",i,count,*piont_y);
@@ -496,6 +513,7 @@ static bool RowsOfDataTraversingTheFrameToFindTheBlackLine(mm_camera_ch_data_buf
 	}
 	//else DEBUGLOG("Flyvideo-:视频制式是:NTSC，寻找范围是：9～477");
 	DEBUGLOG("Flyvideo-可能发生分屏，寻找黑边中。。。");
+	ERR_LOG("Flyvideo Error:Find black line..\n");
 			for(i=9;i<find_line;i++)//某列下的第几行，找 一个点 看数据是否是黑色；前10行和后10行放弃找，正常情况下前3行是黑色的数据
 			{
 				piont_y = (unsigned char *)(frame->def.frame->buffer+frame->def.frame->y_off+720*i + 300);//在第300列下的每行找黑点
@@ -522,6 +540,7 @@ static bool RowsOfDataTraversingTheFrameToFindTheBlackLine(mm_camera_ch_data_buf
 			}
 //DEBUGLOG("Astern：经确认未发生黑屏");
 DEBUGLOG("Flyvideo-找不到黑边");
+ERR_LOG("Flyvideo Error:black line not find,so frame is ok\n");
 return 0;
 Break_The_Func:
 DEBUGLOG("Flyvideo-：在第 %d 行确定发生啦分屏,数据=%d 个,黑色=0x%.2x",i,count,*piont_y);
@@ -544,6 +563,7 @@ static bool DetermineImageSplitScreen_Longitudinal(mm_camera_ch_data_buf_t *fram
 		LongitudinalInformationRemember.BegingFindBlackFreamCount++;
 		if(LongitudinalInformationRemember.BegingFindBlackFreamCount > 6 || (6 - LongitudinalInformationRemember.BegingFindBlackFreamCount +LongitudinalInformationRemember.BlackFreamCount ) < 5 )//已经超过统计数，或者 剩下的加已经统计的少于10个
 		{DEBUGLOG("Flyvideo-:纵向分屏累计清零");
+			ERR_LOG("Flyvideo Error:longitudinal count clrean\n");
 			LongitudinalInformationRemember.BegingFindBlackFreamCount = 0;
 			LongitudinalInformationRemember.ThisIsFirstFind = true;
 		}
@@ -600,7 +620,8 @@ static bool DetermineImageSplitScreen_Longitudinal(mm_camera_ch_data_buf_t *fram
 											mHalCamCtrl->startPreview();
 									#else
 											if( pthread_create(&thread_DetermineImageSplitScreenID, NULL,CameraRestartPreviewThread, (void *)mHalCamCtrl) != 0)
-												DEBUGLOG("Flyvideo-:纵向分屏，创建线程重新预览失败！\n");
+												{DEBUGLOG("Flyvideo-:纵向分屏，创建线程重新预览失败！\n");
+												ERR_LOG("Flyvideo Error:CameraRestartPreviewThread faild\n");}
 											else
 												DEBUGLOG("Flyvideo-:纵向分屏，创建线程重新预览成功！\n");
 									#endif
@@ -674,9 +695,11 @@ static bool DetermineImageSplitScreen_Longitudinal(mm_camera_ch_data_buf_t *fram
 												mHalCamCtrl->startPreview();
 										#else
 												if( pthread_create(&thread_DetermineImageSplitScreenID, NULL,CameraRestartPreviewThread, (void *)mHalCamCtrl) != 0)
-													DEBUGLOG("Flyvideo-:纵向分屏，创建线程重新预览失败！\n");
+													{DEBUGLOG("Flyvideo-:纵向分屏，创建线程重新预览失败！\n");
+													ERR_LOG("Flyvideo Error:CameraRestartPreviewThread faild\n");}
 												else
-													DEBUGLOG("Flyvideo-:纵向分屏\n");
+													{DEBUGLOG("Flyvideo-:纵向分屏\n");
+													ERR_LOG("Flyvideo Error:Longitudinal spilt screen is happen\n");}
 										#endif
 										LongitudinalInformationRemember.ThisIsFirstFind = true;
 										LongitudinalInformationRemember.BegingFindBlackFreamCount = 0;
@@ -803,7 +826,9 @@ static bool DetermineImageSplitScreenDVD_16_9_Vedio(mm_camera_ch_data_buf_t *fra
 													global_need_rePreview = true;
 													DEBUGLOG("Flyvideo-xx: 16:9 视频边界不对称 分屏");
 													if( pthread_create(&thread_DetermineImageSplitScreenID, NULL,CameraRestartPreviewThread, (void *)mHalCamCtrl) != 0)
-														DEBUGLOG("Flyvideo-发现分屏，创建线程重新预览失败！DVD\n");
+														{DEBUGLOG("Flyvideo-发现分屏，创建线程重新预览失败！DVD\n");
+														ERR_LOG("Flyvideo Error:CameraRestartPreviewThread faild\n");
+														}
 													//else
 													//	DEBUGLOG("Flyvideo-发现分屏 DVD\n");
 											}
@@ -854,7 +879,7 @@ bottom_shift_count = new_bottom_critical_point > global_last_bottom_critical_poi
 					global_need_rePreview = true;
 					DEBUGLOG("Flyvideo-xx: 16：9视频分屏");
 					if( pthread_create(&thread_DetermineImageSplitScreenID, NULL,CameraRestartPreviewThread, (void *)mHalCamCtrl) != 0)
-						DEBUGLOG("Flyvideo-发现分屏，创建线程重新预览失败！DVD\n");
+						{DEBUGLOG("Flyvideo-发现分屏，创建线程重新预览失败！DVD\n");ERR_LOG("Flyvideo Error:CameraRestartPreviewThread faild\n");}
 					//else
 						//DEBUGLOG("Flyvideo-发现分屏 DVD\n");
 			}
@@ -926,7 +951,7 @@ static bool DetermineImageSplitScreen(mm_camera_ch_data_buf_t *frame,QCameraHard
 										//DEBUGLOG("Flyvideo-: need rePreview\n");
 
 										if( pthread_create(&thread_DetermineImageSplitScreenID, NULL,CameraRestartPreviewThread, (void *)mHalCamCtrl) != 0)
-											DEBUGLOG("Flyvideo-发现分屏，创建线程重新预览失败！Astren\n");
+											{DEBUGLOG("Flyvideo-发现分屏，创建线程重新预览失败！Astren\n");ERR_LOG("Flyvideo Error:CameraRestartPreviewThread faild\n");}
 										else
 											DEBUGLOG("Flyvideo-发现分屏 Astren\n");
 										return 1;//返回分屏信息
@@ -971,7 +996,7 @@ static bool DetermineImageSplitScreen(mm_camera_ch_data_buf_t *frame,QCameraHard
 									//DEBUGLOG("Flyvideo-: need rePreview\n");
 
 									if( pthread_create(&thread_DetermineImageSplitScreenID, NULL,CameraRestartPreviewThread, (void *)mHalCamCtrl) != 0)
-										DEBUGLOG("Flyvideo-发现分屏，创建线程重新预览失败！DVD or AUX\n");
+										{DEBUGLOG("Flyvideo-发现分屏，创建线程重新预览失败！DVD or AUX\n");ERR_LOG("Flyvideo Error:CameraRestartPreviewThread faild\n");}
 									else
 										DEBUGLOG("Flyvideo-发现分屏 DVD or AUX\n");
 									return 1;//返回分屏信息
@@ -1000,6 +1025,7 @@ static int FlyCameraReadTw9912StatusRegitsterValue()
 	if (ioctl(global_tw9912_file_fd,cmd, &arg) < 0)
         {
 		DEBUGLOG("Flyvideo-: Call cmd COPY_TW9912_STATUS_REGISTER_0X01_4USER fail\n");
+		ERR_LOG("Flyvideo Error:Call cmd COPY_TW9912_STATUS_REGISTER_0X01_4USER fail\n");
 		return 0;
 	}
 	read(global_tw9912_file_fd, (void *)(&value),sizeof(unsigned char));
@@ -1012,6 +1038,7 @@ static int FlyCameraReadTw9912StatusRegitsterValue()
 		if(global_fream_give_up < 10)
 		{
 		DEBUGLOG("Flyvideo-:Vedio singnal bad\n");
+		ERR_LOG("Flyvideo Error:Vedio singnal bad\n");
 		//memset((void *)(frame->def.frame->buffer+frame->def.frame->y_off),0,720*480);
 		//memset((void *)(frame->def.frame->buffer+frame->def.frame->cbcr_off),0,720*480);
 		return 1;
