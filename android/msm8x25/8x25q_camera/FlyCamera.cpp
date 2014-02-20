@@ -10,11 +10,17 @@
 #include <gralloc_priv.h>
 #include <linux/msm_mdp.h>
 #include <cutils/properties.h>
+#include "../inc/lidbg_servicer.h"
+
 #if 1
 #define DEBUGLOG ALOGE
 #else
 #define DEBUGLOG do{}while(0)
 #endif
+
+#define ERR_LOG LIDBG_PRINT
+//ERR_LOG("Flyvideo Error:...");
+
 #define BCAR_BLACK_VALUE_UPERR_LIMIT /*0x42*/ 0x42//如果有对视频色彩的亮度或颜色有修改 这个值需要重新取值
 namespace android {
 
@@ -81,6 +87,7 @@ TW9912Info tw9912_info;
 	if(global_tw9912_file_fd ==-1)
 		{
 		DEBUGLOG("Flyvideo-:Error FlyCameraStar() tw9912config faild\n");
+		ERR_LOG("Flyvideo Error:FlyCameraStar() tw9912config faild\n");
 		}
 
   property_get("fly.video.channel.status",video_channel_status,"1");//1:DVD 2:AUX 3:Astren
