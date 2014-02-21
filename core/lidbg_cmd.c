@@ -21,6 +21,7 @@ struct cmd_item lidbg_cmd_item[] =
 	{"cmm",mod_cmn_main},
 	{"file",lidbg_fileserver_main},
 	{"lidbg_trace_msg",trace_msg_main},
+	{"mem_log",mem_log_main},
 };
 
 void parse_cmd(char *pt)

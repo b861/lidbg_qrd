@@ -60,6 +60,13 @@ function push_lidbg_func()
 function catch_log_func()
 {
 	echo catch_log_func
+	mkdir -p $DBG_ROOT_PATH/log
+	adb wait-for-devices shell echo "c mem_log dump" > /dev/mlidbg0
+	adb shell echo "c lidbg_trace_msg disable" > /dev/mlidbg0
+	adb shell logcat >> $DBG_ROOT_PATH/log/logcat.txt &
+	adb shell cat /proc/kmsg >> $DBG_ROOT_PATH/log/kmsg.txt &
+	sleep 5
+	adb pull /data/lidbg/lidbg_mem_log.txt $DBG_ROOT_PATH/log
 }
 
 function menu_func()

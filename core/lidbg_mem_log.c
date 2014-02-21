@@ -330,6 +330,19 @@ static void lidbg_msg_exit(void)
 	platform_driver_unregister(&lidbg_mem_log_driver);
 }
 
+
+void mem_log_main(int argc, char **argv)
+{
+
+    if(!strcmp(argv[0], "dump"))
+    {
+    	lidbg("dump mem log\n");
+		lidbg_msg_get("/data/lidbg/lidbg_mem_log.txt", 0);
+    }
+
+}
+EXPORT_SYMBOL(mem_log_main);
+
 module_init(lidbg_msg_init);
 module_exit(lidbg_msg_exit);
 
