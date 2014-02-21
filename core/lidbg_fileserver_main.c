@@ -201,6 +201,7 @@ void check_conf_file(void)
     	msleep(1000);
         FS_WARN("<overwrite:push,update?>\n");
         is_out_updated = true;
+        fs_remount_system();
         analysis_copylist("/flysystem/lib/out/copylist.conf");
         copy_all_conf_file();
         lidbg_rm("/data/kmsg.txt");
