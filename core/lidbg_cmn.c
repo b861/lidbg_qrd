@@ -349,6 +349,28 @@ bool lidbg_new_cdev(struct file_operations *cdev_fops, char *nodename)
     }
 }
 
+/*
+input:  c io w 27 1
+output:  token[0]=c  token[4]=1  return:5
+*/
+int lidbg_token_string(char *buf, char *separator, char **token)
+{
+    char *token_tmp;
+    int pos = 0;
+    if(!buf || !separator)
+    {
+        LIDBG_ERR("buf||separator NULL?\n");
+        return pos;
+    }
+    while((token_tmp = strsep(&buf, separator)) != NULL )
+    {
+        *token = token_tmp;
+        token++;
+        pos++;
+    }
+    return pos;
+}
+	
 void mod_cmn_main(int argc, char **argv)
 {
 
@@ -401,6 +423,7 @@ MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Flyaudio Inc.");
 
 
+EXPORT_SYMBOL(lidbg_token_string);
 EXPORT_SYMBOL(lidbg_get_random_number);
 EXPORT_SYMBOL(lidbg_exe);
 EXPORT_SYMBOL(lidbg_mount);

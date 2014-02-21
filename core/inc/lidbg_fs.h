@@ -1,7 +1,7 @@
 
-#define FS_WARN(fmt, args...) pr_info("[futengfei.fs]warn.%s: " fmt,__func__,##args)
-#define FS_ERR(fmt, args...) pr_info("[futengfei.fs]err.%s: " fmt,__func__,##args)
-#define FS_SUC(fmt, args...) pr_info("[futengfei.fs]suceed.%s: " fmt,__func__,##args)
+#define FS_WARN(fmt, args...) printk("[futengfei.fs]warn.%s: " fmt,__func__,##args)
+#define FS_ERR(fmt, args...) printk("[futengfei.fs]err.%s: " fmt,__func__,##args)
+#define FS_SUC(fmt, args...) printk("[futengfei.fs]suceed.%s: " fmt,__func__,##args)
 
 #define DEBUG_MEM_FILE LIDBG_LOG_DIR"fs_private.txt"
 #define LIDBG_KMSG_FILE_PATH LIDBG_LOG_DIR"lidbg_kmsg.txt"

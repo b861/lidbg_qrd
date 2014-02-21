@@ -3,22 +3,7 @@
 
 
 LIDBG_DEFINE;
-/*
-input:  c monkey 1 123 0 1 1000 500
-output:  param1[0]=c  param1[7]=500  return:8
-*/
-static int get_parameters(char *buf, char **param1)
-{
-    char *token;
-    int pos = 0;
-    while((token = strsep(&buf, " ")) != NULL )
-    {
-        *param1 = token;
-        param1++;
-        pos++;
-    }
-    return pos;
-}
+
 int test_nod_open (struct inode *inode, struct file *filp)
 {
     return 0;
@@ -33,10 +18,11 @@ ssize_t test_nod_write (struct file *filp, const char __user *buf, size_t count,
         FS_ERR("<memdup_user>\n");
         return PTR_ERR(tmp);
     }
+    tmp[count-1]='\0';
     tmp_back = tmp;
     FS_WARN("%s\n", tmp_back);
 
-    pos = get_parameters(tmp, param);
+    pos = lidbg_token_string(tmp," ", param);
 
     if(pos < 8)
     {
