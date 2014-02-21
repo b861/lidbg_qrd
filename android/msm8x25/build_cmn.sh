@@ -2,7 +2,7 @@ LOCATE_PATH=`pwd`
 echo $LOCATE_PATH
 source ../../../dbg_cfg.sh
 cd ../../../build && source env_entry.sh && ./build_cfg.sh $BOARD_VERSION $BUILD_VERSION $DBG_SOC
-cd $DBG_SYSTEM_DIR/&&source build/envsetup.sh&&choosecombo release $DBG_PLATFORM eng
+cd $DBG_SYSTEM_DIR/&&source build/envsetup.sh&&choosecombo release $DBG_PLATFORM $SYSTEM_BUILD_TYPE
 mkdir -p $DBG_ANDROID_OUT_PATH
 cp -u $DBG_ANDROID_PATH/$DBG_SOC/*.conf    $DBG_ANDROID_OUT_PATH/
 mmm $LOCATE_PATH -B  && cp -u $DBG_ANDROID_OUT_PATH/*  $DBG_OUT_PATH/

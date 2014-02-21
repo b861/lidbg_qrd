@@ -4,7 +4,7 @@ function build_android()
 	read -p "输入提交到二进制仓库的说明文字：" descriptors
 	expect $DBG_TOOLS_PATH/pull
 	if [[ $TARGET_PRODUCT = "" ]];then		
-		source build/envsetup.sh&&choosecombo release $DBG_PLATFORM eng
+		source build/envsetup.sh&&choosecombo release $DBG_PLATFORM $SYSTEM_BUILD_TYPE
 	fi
 		make -j8
 		. $DBG_TOOLS_PATH/basesystem_release.sh $descriptors
@@ -14,7 +14,7 @@ function build_android()
 function build_system()
 {
 	if [[ $TARGET_PRODUCT = "" ]];then
-		source build/envsetup.sh&&choosecombo release $DBG_PLATFORM eng
+		source build/envsetup.sh&&choosecombo release $DBG_PLATFORM $SYSTEM_BUILD_TYPE
 	fi
 		make systemimage -j4
 }
@@ -22,7 +22,7 @@ function build_system()
 function build_kernel()
 {
 	if [[ $TARGET_PRODUCT = "" ]];then
-		source build/envsetup.sh&&choosecombo release $DBG_PLATFORM eng
+		source build/envsetup.sh&&choosecombo release $DBG_PLATFORM $SYSTEM_BUILD_TYPE
 	fi
 		make bootimage -j4
 }
@@ -30,7 +30,7 @@ function build_kernel()
 function build_all()
 {
 	if [[ $TARGET_PRODUCT = "" ]];then
-		source build/envsetup.sh&&choosecombo release $DBG_PLATFORM eng
+		source build/envsetup.sh&&choosecombo release $DBG_PLATFORM $SYSTEM_BUILD_TYPE
 	fi
 		make -j4
 }

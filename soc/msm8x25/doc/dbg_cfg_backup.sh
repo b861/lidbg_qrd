@@ -4,17 +4,18 @@ DBG_SOC=msm8x25
 DBG_PLATFORM=msm8625
 BUILD_VERSION=rel
 
-
 case "$DBG_PLATFORM" in
     msm7627a)
 	BOARD_VERSION=v2
 	DBG_SYSTEM_DIR=/home/swlee/qrd_451/R8625SSNSKQLYA10145451
-	UPDATA_BIN_DIR=/pack-for-8x25/driver;;
+	UPDATA_BIN_DIR=/pack-for-8x25/driver
+	SYSTEM_BUILD_TYPE=eng;;
     msm8625)
 	BOARD_VERSION=v4
 	DBG_SYSTEM_DIR=/home/swlee/flyaudio/R8625QSOSKQLYA3060-v2
 	UPDATA_BIN_DIR=/8x25q-release/driver
-	UPDATA_BASESYSTEM_DIR=8x25q-release/basesystem;;
+	UPDATA_BASESYSTEM_DIR=/8x25q-release/basesystem
+	SYSTEM_BUILD_TYPE=userdebug;;
     *) 
 	echo "exit,not find your platform:  $DBG_PLATFORM"
 	exit;;
@@ -36,5 +37,4 @@ export DBG_CROSS_COMPILE
 export BOARD_VERSION
 export BUILD_VERSION
 export UPDATA_BIN_DIR
-export UPDATA_BASESYSTEM_DIR
 
