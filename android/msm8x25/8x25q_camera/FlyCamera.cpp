@@ -179,6 +179,17 @@ void FlyCameraThisIsFirstOpenAtDVD()//第一次打开DVD做一次重新的previe
 											goto OPEN_ERR;
 						 }
 						 read(global_tw9912_file_fd, (void *)(&tw9912_info),sizeof(TW9912Info));
+
+						if(global_need_rePreview == false )
+						{
+							global_need_rePreview = true;
+							DEBUGLOG("Flyvideo-xx: 16：9视频分屏");
+							if( pthread_create(&thread_DetermineImageSplitScreenID, NULL,CameraRestartPreviewThread, (void *)mHalCamCtrl) != 0)
+							{DEBUGLOG("Flyvideo-发现分屏，创建线程重新预览失败！DVD\n");ERR_LOG("Flyvideo Error:CameraRestartPreviewThread faild\n");}
+							//else
+							//DEBUGLOG("Flyvideo-发现分屏 DVD\n");
+						}
+						/*
 						 if(tw9912_info.this_is_first_open == true)
 						 {//这里的调用最好用线程方式调用
 							       DEBUGLOG("Flyvideo-x:第一次打开DVD\n");
@@ -187,7 +198,7 @@ void FlyCameraThisIsFirstOpenAtDVD()//第一次打开DVD做一次重新的previe
 							      	usleep(1000);
 							       mHalCamCtrl->startPreview();
 							       //      sleep(1);
-						 }
+						 }*/
 						 tw9912_info.this_is_first_open = false;
 						 write(global_tw9912_file_fd, (const void *)(&tw9912_info),sizeof(TW9912Info));
 						 //close(file_fd);

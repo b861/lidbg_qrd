@@ -131,6 +131,50 @@ adb shell setprop persist.debug.sf.showfps 0
 
 
 
+																										DVD 代码执行流程
+video_init_config.c
+int flyVideoInitall_in(u8 Channel) //传入参数Channel == YIN2，切换通道到DVD
+
+/home/Fly/3060pr/R8625QSOSKQLYA3060-v2/kernel/drivers/media/video/msm/sensors/ov5647_truly_cm6868_v4l2.c
+video_init_config(PAL_P);
+	void chips_config_begin(vedio_format_t config_pramat)
+       chips_config_yuv_begin();
+					tw9912_config_array_NTSCp();
+						while(config_pramat_piont[i*2] != 0xfe)
+						{
+								if(tw9912_write((char *)&config_pramat_piont[i*2]) == NACK) goto CONFIG_not_ack_fail;
+								//		tw9912_dbg("w a=%x,v=%x\n",config_pramat_piont[i*2],config_pramat_piont[i*2+1]);
+								i++;
+						}
+
+
+
+
+
+																										倒车 代码执行流程
+
+//将工调用
+int flyVideoInitall_in(u8 Channel)
+vedio_format_t flyVideoTestSignalPin_in(u8 Channel)
+
+
+video_init_config(PAL_P);
+	chips_config_cvbs_begin();
+		tw9912_config_for_cvbs_signal(info_com_top_Channel);
+			ret = tw9912_config_array( YIN3);
+
+				tw9912_channel_choeces_again(Channel);
+				信号格式检测函数，检测视频格式
+        while(config_pramat_piont[i*2] != 0xfe)
+        {
+            if(tw9912_write((char *)&config_pramat_piont[i*2]) == NACK) goto CONFIG_not_ack_fail;
+            if(signal_is_how[Channel].Format == NTSC_P \
+                    && config_pramat_piont[i*2] > 0x24\
+                    && config_pramat_piont[i*2] < 0x2d)
+                usleep(100);
+            i++;
+        }
+
 
 
 

@@ -43,11 +43,11 @@ extern u8 tw9912_signal_unstabitily_for_tw9912_config_array_flag;
 
 typedef enum
 {
-    YIN0 = 0, //now is use Progressive Yin
+    YIN0 = 0, //not use
     YIN1,//not use
-    YIN2,// now is use Y of SEPARATION / DVD_CVBS
+    YIN2,// DVD
     YIN3,//now is use AUX/BACK_CVBS
-    SEPARATION,//Progressive
+    SEPARATION,//DVD
     NOTONE,
 } vedio_channel_t;
 typedef enum
