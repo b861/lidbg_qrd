@@ -177,5 +177,8 @@ video_init_config(PAL_P);
 
 
 
+如果要使用隔行数据  用软件做隔行转逐行只要将lidbg 的分支切换到 git checkout git checkout de-interlace即可，内核其它参数不用修改，
+注，目前分支de-interlace只实现啦NTSC的隔行搬运，PAL的还未做 需要做请参考NTSC修改的节点。
+
 
 
