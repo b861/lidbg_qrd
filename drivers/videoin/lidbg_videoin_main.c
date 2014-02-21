@@ -216,7 +216,7 @@ static int video_late_resume(struct early_suspend *h)
     lidbg("video_late_resume tw9912 reset\n");
     tw9912_hardware_reset();
     flyVideoChannelInitall(YIN2); // DVD
-    chips_config_begin(NTSC_P);//first initall tw9912 all register
+    chips_config_begin(OTHER);//first initall tw9912 all register
     return 0;
 }
 
@@ -292,7 +292,7 @@ static int tw9912_node_ioctl(struct file *filp, unsigned
         tw9912_read_func_read_data = 1;
         break;
     case AGAIN_RESET_VIDEO_CONFIG_BEGIN :
-	chips_config_begin(NTSC_I);//FlyCamera.cpp 文件中控制视频芯片重新配置
+	chips_config_begin(OTHER);//FlyCamera.cpp 文件中控制视频芯片重新配置
 	lidbg("at last open backcar not signal but app opened camera,so, now again config the chips\n");
 	break;
     default:
@@ -481,7 +481,7 @@ int lidbg_video_init(void)
     video_io_i2c_init();
     tw9912_hardware_reset();
     flyVideoChannelInitall(YIN2); // DVD
-    chips_config_begin(NTSC_P);//first initall tw9912 all register
+    chips_config_begin(OTHER);//first initall tw9912 all register
     platform_driver_register(&video_driver);
     platform_device_register(&video_devices);
     return 0;

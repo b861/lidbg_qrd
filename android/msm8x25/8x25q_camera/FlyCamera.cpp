@@ -197,7 +197,7 @@ void FlyCameraThisIsFirstOpenAtDVD()//第一次打开DVD做一次重新的previe
 }
 void FlyCameraNotSignalAtLastTime()//在本次的倒车时候 ，开始还没检测到视频输入信号，后来信号来啦，要重新配置下视频芯片和repreview
 {
-	if(video_show_status[0] == '0' && rePreview_count > 100)
+	if(video_show_status[0] == '0' && rePreview_count > 20)//应该调用 视频检测函数来代替 延时变量rePreview_count++ 
 		{//发现黑屏 且 视频在上次打开没有视频源输入
 			int arg = 0;
 			unsigned int cmd;
@@ -223,7 +223,7 @@ void FlyCameraNotSignalAtLastTime()//在本次的倒车时候 ，开始还没检
 		else if(video_show_status[0] == '0')
 		{
 			rePreview_count++;
-			if(rePreview_count >10000)rePreview_count = 101;
+			if(rePreview_count >10000)rePreview_count = 21;
 		}
 }
 void *CameraRestartPreviewThread(void *mHalCamCtrl1)
