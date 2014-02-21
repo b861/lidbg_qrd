@@ -85,6 +85,7 @@ function menu_func()
 	echo [11] git reset'                      '执行git reset --hard	
 	echo [15] nautilus'                       '打开lidbg目录
 	echo [16] catch log'                      '抓取调试信息
+	echo [17] catch kmsg'                     '抓取kmsg调试信息
 	echo 
 	echo $DBG_SYSTEM_DIR
 	soc_menu_func
@@ -120,6 +121,8 @@ function handle_func()
 			nautilus $DBG_ROOT_PATH;;
 		16)
 			catch_log_func;;
+		17)
+			expect $DBG_TOOLS_PATH/kmsg;;
 		*)
 			echo
 		esac

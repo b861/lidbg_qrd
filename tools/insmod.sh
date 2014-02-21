@@ -1,5 +1,6 @@
 
-adb  wait-for-device devices
+source ../build/env_entry.sh
+expect $DBG_TOOLS_PATH/root
 adb shell insmod /system/lib/modules/out/lidbg_soc_msm8x25.ko
 adb shell insmod /system/lib/modules/out/lidbg_msg.ko
 adb shell insmod /system/lib/modules/out/lidbg_common.ko

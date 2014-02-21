@@ -1,5 +1,6 @@
 
 source ../build/env_entry.sh
+expect $DBG_TOOLS_PATH/root
 adb  wait-for-device remount
 adb shell rm /flysystem/lib/out/*.ko
 adb shell sync
