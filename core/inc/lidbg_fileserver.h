@@ -53,8 +53,10 @@ struct fs_filename_item
     bool copy_en;
 };
 #define LIDBG_LOG_DIR "/data/lidbg/"
+#define LIDBG_MEM_DIR "/dev/log/"
+#define LIDBG_OSD_DIR "/data/lidbg_osd/"
 
-#define LIDBG_MEM_LOG_FILE "/dev/log/lidbg_log.txt"
+#define LIDBG_MEM_LOG_FILE LIDBG_MEM_DIR"lidbg_log.txt"
 #define PRE_CONF_INFO_FILE LIDBG_LOG_DIR"conf_info.txt"
 #define build_time_sd_path LIDBG_LOG_DIR"build_time.txt"
 #define build_time_fly_path "/flysystem/lib/out/build_time.conf"

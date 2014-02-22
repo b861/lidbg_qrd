@@ -245,7 +245,7 @@ int fs_mem_log( const char *fmt, ... )
 }
 bool fs_upload_machine_log(void)
 {
-    lidbg_rm("/dev/log/mobile.txt");
+    lidbg_rm(LIDBG_MEM_DIR"mobile.txt");
     remount_system();
     return upload_machine_log();
 }

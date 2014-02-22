@@ -79,7 +79,7 @@ void cb_password_gui_state(char *password )
 
 void cb_password_mem_log(char *password )
 {
- 	lidbg_msg_get("/data/lidbg/lidbg_mem_log.txt", 0);
+ 	lidbg_msg_get(LIDBG_LOG_DIR"lidbg_mem_log.txt", 0);
 }
 void cb_int_mem_log(char *key, char *value )
 {
@@ -184,7 +184,7 @@ int misc_init(void *data)
     FS_REGISTER_INT(delete_out_dir_after_update, "delete_out_dir_after_update", 0, NULL);
     FS_REGISTER_INT(loop_warning_en, "loop_warning_en", 0, NULL);
     fs_register_filename_list("/data/kmsg.txt", true);
-    fs_register_filename_list("/data/lidbg/lidbg_mem_log.txt", true);
+    fs_register_filename_list(LIDBG_LOG_DIR"lidbg_mem_log.txt", true);
 
     if(1 == logcat_en)
         logcat_lunch(NULL, NULL);

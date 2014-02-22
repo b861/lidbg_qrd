@@ -265,8 +265,8 @@ void lidbg_fileserver_main_prepare(void)
 
     FS_WARN("<%s>\n", FS_VERSION);
 
-    lidbg_mkdir("/data/lidbg");
-    lidbg_mkdir("/data/lidbg_osd");
+    lidbg_mkdir(LIDBG_LOG_DIR);
+    lidbg_mkdir(LIDBG_OSD_DIR);
 
     check_conf_file();
 
@@ -277,7 +277,7 @@ void lidbg_fileserver_main_prepare(void)
     fs_fill_list(core_sd_path, FS_CMD_FILE_CONFIGMODE, &lidbg_core_list);
     fs_fill_list(state_sd_path, FS_CMD_FILE_CONFIGMODE, &fs_state_list);
 
-    fs_copy_file(build_time_fly_path, "/dev/log/build_time.txt");
+    fs_copy_file(build_time_fly_path, LIDBG_MEM_DIR"build_time.txt");
 
     if(0)
         lidbg_new_cdev(&fs_nod_fops, "fs_node");

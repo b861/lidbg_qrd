@@ -19,7 +19,7 @@
 #define cmd_fly_path "/flysystem/lib/out/cmd.conf"
 #define cmd_lidbg_path "/system/lib/modules/out/cmd.conf"
 #define state_sd_path LIDBG_LOG_DIR"state.txt"
-#define state_mem_path "/dev/log/state.txt"
+#define state_mem_path LIDBG_MEM_DIR"state.txt"
 #define state_fly_path "/flysystem/lib/out/state.conf"
 #define state_lidbg_path "/system/lib/modules/out/state.conf"
 

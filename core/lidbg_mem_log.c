@@ -337,7 +337,7 @@ void mem_log_main(int argc, char **argv)
     if(!strcmp(argv[0], "dump"))
     {
     	lidbg("dump mem log\n");
-		lidbg_msg_get("/data/lidbg/lidbg_mem_log.txt", 0);
+		lidbg_msg_get(LIDBG_LOG_DIR"lidbg_mem_log.txt", 0);
     }
 
 }
