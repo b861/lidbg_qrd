@@ -56,6 +56,14 @@ bool suspend_flag = 0;
 wait_queue_head_t read_wait;
 u8 audio_data_for_hal[2];
 
+int thread_usb_delay_enable(void *data)
+{
+	//USB_WORK_DISENABLE;
+	ssleep(20);
+	USB_WORK_ENABLE;
+	fs_string2file(LIDBG_MEM_LOG_FILE, "usb_work_ssleep(20)\n" );
+	return 0;
+}
 int thread_usb_11(void *data)
 {
 	USB_WORK_DISENABLE;
@@ -1031,7 +1039,7 @@ void fly_devices_init(void)
         unmute_ns();
 
 	if(!fs_is_file_exist(USB_1_1))
-		USB_WORK_ENABLE;
+		CREATE_KTHREAD(thread_usb_delay_enable, NULL);
 	else{
 	#ifdef BUILD_FOR_RECOVERY
 		USB_WORK_ENABLE;
