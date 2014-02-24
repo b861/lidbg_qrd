@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#include <utils/Log.h>
+#include <utils/threads.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -26,6 +28,7 @@
 #include <sysutils/NetlinkEvent.h>
 #include "NetlinkHandler.h"
 #include "VolumeManager.h"
+#include "../inc/lidbg_servicer.h"
 
 NetlinkHandler::NetlinkHandler(int listenerSocket) :
                 NetlinkListener(listenerSocket) {
@@ -54,6 +57,11 @@ void NetlinkHandler::onEvent(NetlinkEvent *evt) {
 //add log by wangyihong for printing log
 SLOGW("NetlinkHandler::onEvent: subsys=%s, mPath=%s",  subsys, evt->findParam("DEVPATH"));
 SLOGW("NetlinkHandler::onEvent: action = %d,type =%s",  evt->getAction(),evt->findParam("DEVTYPE"));
+if(!strcmp(subsys, "block"))
+{
+	LIDBG_PRINT("NetlinkHandler::onEvent: subsys=%s, mPath=%s",  subsys, evt->findParam("DEVPATH"));
+	LIDBG_PRINT("NetlinkHandler::onEvent: action = %d,type =%s",  evt->getAction(),evt->findParam("DEVTYPE"));
+}
 
     if (!strcmp(subsys, "block")) {
         vm->handleBlockEvent(evt);

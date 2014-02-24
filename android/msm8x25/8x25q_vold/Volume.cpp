@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#include <utils/Log.h>
+#include <utils/threads.h>
+#include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
 #include <dirent.h>
@@ -51,6 +53,7 @@
 #include "cryptfs.h"
 #include "Ntfs.h"
 #include "Exfat.h"
+#include "../inc/lidbg_servicer.h"
 
 extern "C" void dos_partition_dec(void const *pp, struct dos_partition *d);
 extern "C" void dos_partition_enc(void *pp, struct dos_partition *d);
@@ -189,11 +192,14 @@ char *getFsType(const char * devicePath) {
     char *fstype = NULL;
     blkid_cache cache;
     SLOGD("Trying to get filesystem type for %s \n", devicePath);
+    LIDBG_PRINT("Trying to get filesystem type for %s \n", devicePath);
     fstype = blkid_get_tag_value(NULL, "TYPE", devicePath);
     if (fstype) {
         SLOGD("Found %s filesystem on %s\n", fstype, devicePath);
+	LIDBG_PRINT("Found %s filesystem on %s\n", fstype, devicePath);
     } else {
         SLOGE("None or unknown filesystem on %s\n", devicePath);
+	LIDBG_PRINT("None or unknown filesystem on %s\n", devicePath);
         return NULL;
     }
     return fstype;
@@ -205,6 +211,7 @@ void Volume::setState(int state) {
 
     if (oldState == state) {
         SLOGW("Duplicate state (%d)\n", state);
+	LIDBG_PRINT("Duplicate state (%d)\n", state);
         return;
     }
 
@@ -215,6 +222,8 @@ void Volume::setState(int state) {
     mState = state;
 
     SLOGD("Volume %s state changing %d (%s) -> %d (%s)", mLabel,
+         oldState, stateToStr(oldState), mState, stateToStr(mState));
+    LIDBG_PRINT("Volume %s state changing %d (%s) -> %d (%s)", mLabel,
          oldState, stateToStr(oldState), mState, stateToStr(mState));
     snprintf(msg, sizeof(msg),
              "Volume %s %s state changed from %d (%s) to %d (%s)", getLabel(),
@@ -308,13 +317,14 @@ char* Volume::createMountPoint(const char *path, int major, int minor) {
 	sprintf(mountpoint, "%s/disk_%d", path, minor);
 	if( access(mountpoint, F_OK) ){
 		SLOGI("Volume: file '%s' is not exist, create it", mountpoint);
-
+		LIDBG_PRINT("Volume: file '%s' is not exist, create it", mountpoint);
 		if(mkdir(mountpoint, 0777)){
 			SLOGW("Volume: create file '%s' failed, errno is %d", mountpoint, errno);
+			LIDBG_PRINT("Volume: create file '%s' failed, errno is %d", mountpoint, errno);
 			return NULL;
 		}
 	}else{
-	
+		LIDBG_PRINT("Volume: file '%s' is exist, can not create it", mountpoint);
 		SLOGW("Volume: file '%s' is exist, can not create it", mountpoint);
 		return mountpoint;
 	}
@@ -328,6 +338,7 @@ int Volume::deleteMountPoint(char* mountpoint) {
 			SLOGW("Volume::deleteMountPoint: %s", mountpoint);
 			if(rmdir(mountpoint)){
 				SLOGW("Volume: remove file '%s' failed, errno is %d", mountpoint, errno);
+				LIDBG_PRINT("Volume: remove file '%s' failed, errno is %d", mountpoint, errno);
 				return -1;
 			}
 		}
@@ -351,6 +362,7 @@ void Volume::saveUnmountPoint(char* mountpoint){
 
 	if(i >= MAX_UNMOUNT_PARTITIONS){
 		SLOGI("Volume::saveUnmountPoint: unmount point is over %d", MAX_UNMOUNT_PARTITIONS);
+		LIDBG_PRINT("Volume::saveUnmountPoint: unmount point is over %d", MAX_UNMOUNT_PARTITIONS);
 	}
 
 	return;
@@ -363,7 +375,7 @@ void Volume::deleteUnMountPoint(int clear){
 	for(i = 0; i < MAX_UNMOUNT_PARTITIONS; i++){
 		if(mUnMountPart[i]){
 			SLOGW("Volume::deleteUnMountPoint: %s", mUnMountPart[i]);
-
+			LIDBG_PRINT("Volume::deleteUnMountPoint: %s", mUnMountPart[i]);
 			if(deleteMountPoint(mUnMountPart[i]) == 0){
 				deleteDeviceNode(mUnMountPart[i]);
 				mUnMountPart[i] = NULL;
@@ -388,6 +400,7 @@ int Volume::formatVol() {
 
     if (isMountpointMounted(getMountpoint())) {
         SLOGW("Volume is idle but appears to be mounted - fixing");
+	LIDBG_PRINT("Volume is idle but appears to be mounted - fixing");
         setState(Volume::State_Mounted);
         // mCurrentlyMountedKdev = XXX
         errno = EBUSY;
@@ -415,6 +428,7 @@ int Volume::formatVol() {
 
         if (initializeMbr(devicePath)) {
             SLOGE("Failed to initialize MBR (%s)", strerror(errno));
+	    LIDBG_PRINT("Failed to initialize MBR (%s)", strerror(errno));
             goto err;
         }
     }
@@ -427,6 +441,7 @@ int Volume::formatVol() {
     }
 
     if (Fat::format(devicePath, 0)) {
+	LIDBG_PRINT("Failed to format (%s)", strerror(errno));
         SLOGE("Failed to format (%s)", strerror(errno));
         goto err;
     }
@@ -446,6 +461,7 @@ bool Volume::isMountpointMounted(const char *path) {
     char line[1024];
 
     if (!(fp = fopen("/proc/mounts", "r"))) {
+	LIDBG_PRINT("Error opening /proc/mounts (%s)", strerror(errno));
         SLOGE("Error opening /proc/mounts (%s)", strerror(errno));
         return false;
     }
@@ -488,7 +504,7 @@ int Volume::mountVol() {
                  getLabel(), getMountpoint());
 
 	SLOGE("=======come into primaryStorage branch-111!\n====\n");
-	
+	LIDBG_PRINT("=======come into primaryStorage branch-111!\n====\n");
         mVm->getBroadcaster()->sendBroadcast(
                                          ResponseCode::VolumeMountFailedNoMedia,
                                          errmsg, false);
@@ -512,6 +528,7 @@ int Volume::mountVol() {
 
     n = getDeviceNodes((dev_t *) &deviceNodes, 4);
     if (!n) {
+	LIDBG_PRINT("Failed to get device nodes (%s)\n", strerror(errno));
         SLOGE("Failed to get device nodes (%s)\n", strerror(errno));
         return -1;
     }
@@ -531,10 +548,11 @@ int Volume::mountVol() {
        int new_major, new_minor;
 
 	SLOGE("=======this isDecrypted branch-222!=======\n");
-
+	LIDBG_PRINT("=======this isDecrypted branch-222!=======\n");
        if (n != 1) {
            /* We only expect one device node returned when mounting encryptable volumes */
            SLOGE("Too many device nodes returned when mounting %d\n", getMountpoint());
+	    LIDBG_PRINT("Too many device nodes returned when mounting %s\n", getMountpoint());
            return -1;
        }
 
@@ -551,8 +569,10 @@ int Volume::mountVol() {
         snprintf(nodepath,
                  sizeof(nodepath), "/dev/block/vold/%d:%d",
                  new_major, new_minor);
-        if (createDeviceNode(nodepath, new_major, new_minor)) {
+        if (createDeviceNode(nodepath, new_major, new_minor)) {	
             SLOGE("Error making device node '%s' (%s)", nodepath,
+                                                       strerror(errno));
+	LIDBG_PRINT("Error making device node '%s' (%s)", nodepath,
                                                        strerror(errno));
         }
 
@@ -564,11 +584,13 @@ int Volume::mountVol() {
         n = getDeviceNodes((dev_t *) &deviceNodes, 4);
         if (!n) {
             SLOGE("Failed to get device nodes (%s)\n", strerror(errno));
+	LIDBG_PRINT("Failed to get device nodes (%s)\n", strerror(errno));
             return -1;
         }
     }
 
 	SLOGI("Volume::mountVol: mMountpoint %s\n", mMountpoint);
+	LIDBG_PRINT("Volume::mountVol: mMountpoint %s\n", mMountpoint);
 
     for (i = 0; i < n; i++) {
         char devicePath[255];
@@ -578,7 +600,7 @@ int Volume::mountVol() {
                 MINOR(deviceNodes[i]));
 
         SLOGI("%s being considered for volume %s\n", devicePath, getLabel());
-
+	LIDBG_PRINT("%s being considered for volume %s\n", devicePath, getLabel());
         errno = 0;
         setState(Volume::State_Checking);
 
@@ -599,7 +621,7 @@ int Volume::mountVol() {
         }
 
 SLOGE("******WANG YIHONG FLAG--2*****************");
-		
+LIDBG_PRINT("******WANG YIHONG FLAG--2*****************");	
  //add by wangyihong, support various file system
 	errno = 0;
 	gid = AID_SDCARD_RW;
@@ -607,22 +629,27 @@ SLOGE("******WANG YIHONG FLAG--2*****************");
 	if(Exfat::check(devicePath) == 0)
 	{
 		SLOGI("this is exfat filesystem, no process!\n");
+		LIDBG_PRINT("this is exfat filesystem, no process!\n");
 	}
 	else if(Ntfs::check(devicePath) == 0)
 	{
 		SLOGI("this is NTFS filesystem, ready to mount!\n");
+		LIDBG_PRINT("this is NTFS filesystem, ready to mount!\n");
 		if (Ntfs::doMount(devicePath, "/mnt/secure/staging", false, false, false, AID_SYSTEM, gid, 0702, true)) 
 		{
 		        SLOGE("%s failed to mount via NTFS (%s)\n", devicePath, strerror(errno));
+			LIDBG_PRINT("%s failed to mount via NTFS (%s)\n", devicePath, strerror(errno));
 		        continue;
 		}
 	}
 	else
 	{
 		SLOGI("this is VFAT filesystem, ready to mount!\n");
+		LIDBG_PRINT("this is VFAT filesystem, ready to mount!\n");
 		if (Fat::doMount(devicePath, "/mnt/secure/staging", false, false, false, AID_SYSTEM, gid, 0702, true))
 		{
                 	SLOGE("%s failed to mount via VFAT (%s)\n", devicePath, strerror(errno));
+			LIDBG_PRINT("%s failed to mount via VFAT (%s)\n", devicePath, strerror(errno));
                 	continue;
             	}
 	}
@@ -675,7 +702,7 @@ SLOGE("******WANG YIHONG FLAG--2*****************");
 	#endif
 
         SLOGI("Device %s, target %s mounted @ /mnt/secure/staging", devicePath, getMountpoint());
-
+	LIDBG_PRINT("Device %s, target %s mounted @ /mnt/secure/staging", devicePath, getMountpoint());
         protectFromAutorunStupidity();
 
         // only create android_secure on primary storage
@@ -706,15 +733,18 @@ SLOGE("******WANG YIHONG FLAG--2*****************");
 /* auto mount and much partition */
 		if((mPartIdx == -1) && (n > 1)){
 			SLOGI("[WANG]: this is muti partitions disk.\n");
+			LIDBG_PRINT("[WANG]: this is muti partitions disk.\n");
 			mMountPart[i] = createMountPoint( mMountpoint, MAJOR(deviceNodes[i]), MINOR(deviceNodes[i]) );
 			if(mMountPart[i] == NULL){
 				SLOGE("Part is already mount, can not mount again, (%s)\n", strerror(errno));
+				LIDBG_PRINT("Part is already mount, can not mount again, (%s)\n", strerror(errno));
 				umount("/mnt/secure/staging");
 				continue;
 			}
 
 			if (doMoveMount("/mnt/secure/staging", mMountPart[i], false)) {
 				SLOGE("Part(%s) failed to move mount (%s)\n", mMountPart[i], strerror(errno));
+				LIDBG_PRINT("Part(%s) failed to move mount (%s)\n", mMountPart[i], strerror(errno));
 				deleteMountPoint(mMountPart[i]);
 				mMountPart[i] = NULL;
 				umount("/mnt/secure/staging");
@@ -722,12 +752,14 @@ SLOGE("******WANG YIHONG FLAG--2*****************");
 			}
 
 			SLOGI("mountVlo: mount %s, successful\n", mMountPart[i]);
+			LIDBG_PRINT("mountVlo: mount %s, successful\n", mMountPart[i]);
 
 			mCurrentlyMountedKdev = deviceNodes[i];
 			mounted++;
 		}else{
 		if (doMoveMount("/mnt/secure/staging", getMountpoint(), false)) {
 	            	SLOGE("Failed to move mount (%s)\n", strerror(errno));
+			LIDBG_PRINT("Failed to move mount (%s)\n", strerror(errno));
 	            	umount("/mnt/secure/staging");
 	            	goto failed;
         	}
@@ -752,11 +784,13 @@ mMountedPartNum = n;
 	}
 
     SLOGI("Volume::mountVol: getState=%d, State_Mounted=%d\n", getState(), Volume::State_Mounted);
+    LIDBG_PRINT("Volume::mountVol: getState=%d, State_Mounted=%d\n", getState(), Volume::State_Mounted);
     return 0;
 
 
 failed:
     SLOGE("Volume %s found no suitable devices for mounting :(\n", getLabel());
+LIDBG_PRINT("Volume %s found no suitable devices for mounting :(\n", getLabel());
     setState(Volume::State_Idle);
 
     return -1;
@@ -772,6 +806,7 @@ int Volume::createBindMounts() {
          access(SEC_STG_SECIMGDIR, R_OK | X_OK)) {
         if (rename("/mnt/secure/staging/android_secure", SEC_STG_SECIMGDIR)) {
             SLOGE("Failed to rename legacy asec dir (%s)", strerror(errno));
+	    LIDBG_PRINT("Failed to rename legacy asec dir (%s)", strerror(errno));
         }
     }
 
@@ -782,10 +817,12 @@ int Volume::createBindMounts() {
         if (errno == ENOENT) {
             if (mkdir(SEC_STG_SECIMGDIR, 0777)) {
                 SLOGE("Failed to create %s (%s)", SEC_STG_SECIMGDIR, strerror(errno));
+		LIDBG_PRINT("Failed to create %s (%s)", SEC_STG_SECIMGDIR, strerror(errno));
                 return -1;
             }
         } else {
             SLOGE("Failed to access %s (%s)", SEC_STG_SECIMGDIR, strerror(errno));
+	LIDBG_PRINT("Failed to access %s (%s)", SEC_STG_SECIMGDIR, strerror(errno));
             return -1;
         }
     } else {
@@ -793,10 +830,12 @@ int Volume::createBindMounts() {
 
         if (stat(SEC_STG_SECIMGDIR, &sbuf)) {
             SLOGE("Failed to stat %s (%s)", SEC_STG_SECIMGDIR, strerror(errno));
+	    LIDBG_PRINT("Failed to stat %s (%s)", SEC_STG_SECIMGDIR, strerror(errno));
             return -1;
         }
         if (!S_ISDIR(sbuf.st_mode)) {
             SLOGE("%s is not a directory", SEC_STG_SECIMGDIR);
+	    LIDBG_PRINT("%s is not a directory", SEC_STG_SECIMGDIR);
             errno = ENOTDIR;
             return -1;
         }
@@ -850,12 +889,15 @@ int Volume::doMoveMount(const char *src, const char *dst, bool force) {
         }
         SLOGW("Failed to move %s -> %s (%s, retries %d, action %d)",
                 src, dst, strerror(errno), retries, action);
+	LIDBG_PRINT("Failed to move %s -> %s (%s, retries %d, action %d)",
+                src, dst, strerror(errno), retries, action);
         Process::killProcessesWithOpenFiles(src, action);
         usleep(1000*250);
     }
 
     errno = EBUSY;
     SLOGE("Giving up on move %s -> %s (%s)", src, dst, strerror(errno));
+    LIDBG_PRINT("Giving up on move %s -> %s (%s)", src, dst, strerror(errno));
     return -1;
 }
 
@@ -869,6 +911,7 @@ int Volume::doUnmount(const char *path, bool force) {
     while (retries--) {
         if (!umount(path) || errno == EINVAL || errno == ENOENT) {
             SLOGI("%s sucessfully unmounted", path);
+	    LIDBG_PRINT("%s sucessfully unmounted", path);
             return 0;
         }
 
@@ -884,12 +927,15 @@ int Volume::doUnmount(const char *path, bool force) {
 
         SLOGW("Failed to unmount %s (%s, retries %d, action %d)",
                 path, strerror(errno), retries, action);
+	LIDBG_PRINT("Failed to unmount %s (%s, retries %d, action %d)",
+                path, strerror(errno), retries, action);
 
         Process::killProcessesWithOpenFiles(path, action);
         usleep(1000*1000);
     }
     errno = EBUSY;
     SLOGE("Giving up on unmount %s (%s)", path, strerror(errno));
+    LIDBG_PRINT("Giving up on unmount %s (%s)", path, strerror(errno));
     return -1;
 }
 
@@ -907,6 +953,7 @@ int Volume::unmountVol(bool force, bool revert) {
     usleep(1000 * 1000); // Give the framework some time to react
 
     SLOGE("mPartIdx = %d, mMountedPartNum= %d\n", mPartIdx, mMountedPartNum);
+	LIDBG_PRINT("mPartIdx = %d, mMountedPartNum= %d\n", mPartIdx, mMountedPartNum);
 
     /*
      * First move the mountpoint back to our internal staging point
@@ -922,6 +969,7 @@ int Volume::unmountVol(bool force, bool revert) {
 	{
 		if(mMountPart[i]){
 			if (doMoveMount(mMountPart[i], SEC_STGDIR, force)) {
+				LIDBG_PRINT("Failed to move mount %s => %s (%s)", mMountPart[i], SEC_STGDIR, strerror(errno));
 				SLOGE("Failed to move mount %s => %s (%s)", mMountPart[i], SEC_STGDIR, strerror(errno));
 				setState(Volume::State_Mounted);
 				return -1;
@@ -940,6 +988,7 @@ int Volume::unmountVol(bool force, bool revert) {
 	else{
 		    if (doMoveMount(getMountpoint(), SEC_STGDIR, force)) {
 		        SLOGE("Failed to move mount %s => %s (%s)", getMountpoint(), SEC_STGDIR, strerror(errno));
+			LIDBG_PRINT("Failed to move mount %s => %s (%s)", getMountpoint(), SEC_STGDIR, strerror(errno));
 		        setState(Volume::State_Mounted);
 		        return -1;
 		    }
@@ -954,6 +1003,7 @@ int Volume::unmountVol(bool force, bool revert) {
     if (isPrimaryStorage()) {
         if (doUnmount(Volume::SEC_STG_SECIMGDIR, force)) {
             SLOGE("Failed to unmount tmpfs on %s (%s)", SEC_STG_SECIMGDIR, strerror(errno));
+	    LIDBG_PRINT("Failed to unmount tmpfs on %s (%s)", SEC_STG_SECIMGDIR, strerror(errno));
             goto fail_republish;
         }
         /*
@@ -969,12 +1019,15 @@ int Volume::unmountVol(bool force, bool revert) {
          */
         if (doUnmount(Volume::SEC_STGDIR, force)) {
             SLOGE("Failed to unmount %s (%s)", SEC_STGDIR, strerror(errno));
+	    LIDBG_PRINT("Failed to unmount %s (%s)", SEC_STGDIR, strerror(errno));
             goto fail_recreate_bindmount;
         }
         SLOGI("%s unmounted sucessfully", getMountpoint());
+	LIDBG_PRINT("%s unmounted sucessfully", getMountpoint());
     }else{
         if (doUnmount(Volume::SEC_STGDIR, force)) {
             SLOGE("Failed to unmount %s (%s)", SEC_STGDIR, strerror(errno));
+	    LIDBG_PRINT("Failed to unmount %s (%s)", SEC_STGDIR, strerror(errno));
             goto fail_republish;
         }
     }
@@ -994,6 +1047,7 @@ int Volume::unmountVol(bool force, bool revert) {
 if(mMountedPartNum>1){
 			if (doMoveMount(getMountpoint(), SEC_STGDIR, force)) {
 		        SLOGE("Failed to move mount %s => %s (%s)", getMountpoint(), SEC_STGDIR, strerror(errno));
+			LIDBG_PRINT("Failed to move mount %s => %s (%s)", getMountpoint(), SEC_STGDIR, strerror(errno));
 		        setState(Volume::State_Mounted);
 		        return -1;
 		    }
@@ -1063,6 +1117,7 @@ int Volume::initializeMbr(const char *deviceNode) {
 
     if (rc) {
         SLOGE("Failed to apply disk configuration (%d)", rc);
+	LIDBG_PRINT("Failed to apply disk configuration (%d)", rc);
         goto out;
     }
 

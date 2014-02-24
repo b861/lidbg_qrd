@@ -27,7 +27,7 @@
 
 #if 1
 
-#define LOG_BYTES   (100)
+#define LOG_BYTES   (256)
 
 #define LIDBG_PRINT(msg...) do{\
 	int fd;\
