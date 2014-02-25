@@ -66,6 +66,7 @@ extern void fs_file_separator(char *file2separator);
 extern void fs_regist_filedetec(char *filename, void (*cb_filedetec)(char *filename ));
 extern void fs_enable_kmsg( bool enable );
 extern void fs_save_state(void);
+extern int fs_get_file_size(char *file);
 extern int  lidbg_cp(char from[], char to[]);
 extern int get_machine_id(void);
 extern int fs_readwrite_file(const char *filename, char *wbuff, char *rbuff, int readlen);

@@ -25,7 +25,6 @@
 
 extern struct list_head fs_state_list;
 extern int g_mem_dbg;
-bool is_file_empty(char *file);
 int analysis_copylist(const char *copy_list);
 extern int readwrite_file(const char *filename, char *wbuff, char *rbuff, int readlen);
 extern int update_list(const char *filename, struct list_head *client_list);

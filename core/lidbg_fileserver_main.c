@@ -195,13 +195,22 @@ void copy_all_conf_file(void)
 }
 void check_conf_file(void)
 {
+    int size[6];
 
-    if(fs_is_file_updated(build_time_fly_path, PRE_CONF_INFO_FILE) || (!is_file_empty(driver_sd_path) || !is_file_empty(core_sd_path) || !is_file_empty(state_sd_path)|| !is_file_empty(PRE_CONF_INFO_FILE)))
+    //tmp:test
+    size[0] = fs_is_file_updated(build_time_fly_path, PRE_CONF_INFO_FILE);
+    size[1] = fs_get_file_size(driver_sd_path);
+    size[2] = fs_get_file_size(core_sd_path);
+    size[3] = fs_get_file_size(state_sd_path);
+    size[4] = fs_get_file_size(PRE_CONF_INFO_FILE);
+    fs_string2file(LIDBG_MEM_LOG_FILE, "<check_conf_file:%d,%d,%d,%d,%d>\n", size[0], size[1], size[2], size[3], size[4]);
+
+    if(size[0] || size[1] < 1 || size[2] < 1 || size[3] < 1 || size[4] < 1)
     {
-    	msleep(1000);
-        FS_WARN("<overwrite:push,update?>\n");
-        is_out_updated = true;
         fs_remount_system();
+        FS_WARN("<overwrite:push,update?>\n");
+        fs_string2file(LIDBG_MEM_LOG_FILE, "<overwrite:push,update?>\n");
+        is_out_updated = true;
         analysis_copylist("/flysystem/lib/out/copylist.conf");
         copy_all_conf_file();
         lidbg_rm("/data/kmsg.txt");

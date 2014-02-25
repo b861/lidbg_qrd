@@ -267,23 +267,20 @@ bool is_file_exist(char *file)
         return true;
     }
 }
-bool is_file_empty(char *file)
+int fs_get_file_size(char *file)
 {
     struct file *filep;
     struct inode *inodefrom = NULL;
     unsigned int file_len;
     filep = filp_open(file, O_RDONLY , 0);
     if(IS_ERR(filep))
-        return false;
+        return -1;
     else
     {
         inodefrom = filep->f_dentry->d_inode;
         file_len = inodefrom->i_size;
         filp_close(filep, 0);
-        if(file_len > 0)
-            return true;
-        else
-            return false;
+        return file_len;
     }
 }
 bool copy_file(char *from, char *to)
@@ -305,15 +302,15 @@ bool copy_file(char *from, char *to)
     pfileto = filp_open(to, O_CREAT | O_RDWR | O_TRUNC, 0777);
     if(IS_ERR(pfileto))
     {
-		lidbg_rm(to);
-		msleep(500);
-		pfileto = filp_open(to, O_CREAT | O_RDWR | O_TRUNC, 0777);
-		if(IS_ERR(pfileto))
-		{
-	        FS_ERR("fail to open <%s>\n", to);
-	        filp_close(pfilefrom, 0);
-	        return false;
-		}
+        lidbg_rm(to);
+        msleep(500);
+        pfileto = filp_open(to, O_CREAT | O_RDWR | O_TRUNC, 0777);
+        if(IS_ERR(pfileto))
+        {
+            FS_ERR("fail to open <%s>\n", to);
+            filp_close(pfilefrom, 0);
+            return false;
+        }
     }
     old_fs = get_fs();
     set_fs(get_ds());
@@ -356,21 +353,19 @@ bool get_file_tmstring(char *filename, char *tmstring)
 bool fs_is_file_updated(char *filename, char *infofile)
 {
     char pres[64], news[64];
+    memset(pres, '\0', sizeof(pres));
+    memset(news, '\0', sizeof(news));
 
     get_file_tmstring(filename, news);
 
-    if(!fs_is_file_exist(infofile))//first:check infofile
+    if(fs_get_file_size(infofile) > 0)
     {
-overwrite:
-        fs_clear_file(infofile);
-        bfs_file_amend(infofile, news);
-        return true;
+        if ( (readwrite_file(infofile, NULL, pres, sizeof(pres)) > 0) && (!strcmp(news, pres)))
+            return false;
     }
-
-    if ( (readwrite_file(infofile, NULL, pres, sizeof(pres)) > 0) && (strcmp(news, pres)))
-        goto overwrite;
-    else
-        return false;
+    fs_clear_file(infofile);
+    bfs_file_amend(infofile, news);
+    return true;
 }
 void cb_kv_filedetecen(char *key, char *value)
 {
@@ -446,4 +441,5 @@ EXPORT_SYMBOL(fs_clear_file);
 EXPORT_SYMBOL(fs_filename_list);
 EXPORT_SYMBOL(fs_register_filename_list);
 EXPORT_SYMBOL(fs_show_filename_list);
+EXPORT_SYMBOL(fs_get_file_size);
 
