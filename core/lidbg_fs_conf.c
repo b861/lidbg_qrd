@@ -21,15 +21,8 @@ static struct completion udisk_conf_wait;
 //zone below [fs.confops.driver]
 void clean_all(void)
 {
-    lidbg_rm("/system/app/fileserver.apk");
-    lidbg_rm("/flysystem/lilb/out/fileserver.apk");
-    lidbg_rm(driver_sd_path);
-    lidbg_rm(core_sd_path);
-    lidbg_rm(cmd_sd_path);
-    lidbg_rm(state_sd_path);
-    lidbg_rm(PRE_CONF_INFO_FILE);
-    lidbg_rm(LIDBG_LOG_DIR"log_fb.txt");
-    lidbg_rm(LIDBG_LOG_DIR"log_ct.txt");
+    fs_remove_apk();
+    lidbg_rmdir(LIDBG_LOG_DIR);
 }
 int launch_file_cmd(const char *filename)
 {

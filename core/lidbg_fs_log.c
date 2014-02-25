@@ -45,14 +45,11 @@ void chmod_for_apk(void)
     lidbg_mount("/system");
     lidbg_chmod("/data");
     lidbg_chmod("/system/app");
-    lidbg_chmod("/flysystem/lib/out/fileserver.apk");
-    lidbg_chmod("/system/lib/modules/out/fileserver.apk");
 }
 void call_apk(void)
 {
     chmod_for_apk();
-    if(!fs_copy_file("/flysystem/lib/out/fileserver.apk", "/system/app/fileserver.apk"))
-        fs_copy_file("/system/lib/modules/out/fileserver.apk", "/system/app/fileserver.apk");
+    analysis_copylist("/flysystem/lib/out/copylist_app.conf");
 }
 int bfs_file_amend(char *file2amend, char *str_append)
 {
@@ -261,6 +258,7 @@ void fs_call_apk(void)
 void fs_remove_apk(void)
 {
     lidbg_rm("/system/app/fileserver.apk");
+    lidbg_rm("/system/app/adbWireless.apk");
 }
 void fs_remount_system(void)
 {

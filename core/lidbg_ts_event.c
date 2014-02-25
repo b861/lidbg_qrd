@@ -263,6 +263,7 @@ bool te_is_ts_touched(void)
 
 
 //zone below [EXPORT_SYMBOL]
+EXPORT_SYMBOL(g_is_te_enable);
 EXPORT_SYMBOL(g_curr_tspara);
 EXPORT_SYMBOL(te_regist_password);
 EXPORT_SYMBOL(te_is_ts_touched);

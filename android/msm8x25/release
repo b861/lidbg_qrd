@@ -6,5 +6,6 @@ gps.msm7627a.so
 gps.msm8625.so
 camera.msm7627a.so
 copylist.conf
+copylist_app.conf
 vold
 ###############

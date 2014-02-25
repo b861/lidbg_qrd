@@ -7,7 +7,7 @@ struct tspara
     int y;
     bool press;
 } ;
-
+extern int g_is_te_enable;
 extern struct tspara g_curr_tspara;
 extern bool te_regist_password(char *password, void (*cb_password)(char *password ));
 extern bool te_is_ts_touched(void);
