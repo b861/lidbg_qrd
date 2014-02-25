@@ -14,8 +14,8 @@ DEFINE_SEMAPHORE(lidbg_msg_sem);
 
 static int thread_msg(void *data);
 
-#define TOTAL_LOGS  (100)
-#define LOG_BYTES   (100)
+#define TOTAL_LOGS  (50)
+#define LOG_BYTES   (256)
 
 typedef struct
 {
@@ -68,16 +68,13 @@ ssize_t  msg_write(struct file *filp, const char __user *buffer, size_t size, lo
 {
 
     down(&lidbg_msg_sem);
-    memset(&(plidbg_msg->log[plidbg_msg->w_pos]), '\0', LOG_BYTES);
-
     if(copy_from_user(&(plidbg_msg->log[plidbg_msg->w_pos]), buffer, size > LOG_BYTES ? LOG_BYTES : size))
     {
         lidbg("copy_from_user ERR\n");
     }
 
     //for safe
-    plidbg_msg->log[plidbg_msg->w_pos][LOG_BYTES - 2] = '\n';
-    plidbg_msg->log[plidbg_msg->w_pos][LOG_BYTES - 1] = '\0';
+	plidbg_msg->log[plidbg_msg->w_pos][(size > LOG_BYTES ? LOG_BYTES : size) - 1] = '\0';
 
     plidbg_msg->w_pos = (plidbg_msg->w_pos + 1)  % TOTAL_LOGS;
 
