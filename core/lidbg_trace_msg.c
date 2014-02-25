@@ -7,6 +7,7 @@
 #define TRACE_MSG_FROM_KMSG 1
 
 static LIST_HEAD(lidbg_trace_msg_string_list);
+static LIST_HEAD(lidbg_trace_msg_cb_list_head);
 
 struct lidbg_trace_message_device
 {
@@ -16,10 +17,12 @@ struct lidbg_trace_message_device
 	struct semaphore sem;
 };
 
-struct lidbg_trace_key_words
+struct lidbg_trace_msg_cb_list
 {
 	struct list_head tmp_list;
-	char *key_words;
+	char *key_word;
+	void *data;
+	void (*cb_func)(char *key_word, void *data);
 };
 
 static struct lidbg_trace_message_device *pdev;
@@ -30,11 +33,33 @@ void lidbg_trace_msg_disable(int flag)
 }
 EXPORT_SYMBOL(lidbg_trace_msg_disable);
 
+bool lidbg_trace_msg_cb_register(char *key_word, void *data, void (*cb_func)(char *key_word, void *data))
+{
+	struct lidbg_trace_msg_cb_list *cb_list;
+
+	cb_list = kzalloc(sizeof(struct lidbg_trace_msg_cb_list), GFP_KERNEL);
+	if(cb_list)
+	    lidbg("[%s]: Kzalloc mem for lidbg_trace_msg_cb_list faild !\n", __func__);
+	
+	if(key_word && cb_func)
+	{
+		cb_list->key_word = key_word;
+		cb_list->data = data;
+		cb_list->cb_func = cb_func;
+		list_add(&(cb_list->tmp_list), &lidbg_trace_msg_cb_list_head);		//attention: some protection on lidbg_trace_msg_cb_list_head will be better
+		return true;
+	}
+	else
+		return false;
+}
+EXPORT_SYMBOL(lidbg_trace_msg_cb_register);
+
 static void lidbg_trace_key_word(char *string)
 {
 	char *ret = NULL;
 	struct string_dev *pmsg;
-
+	struct lidbg_trace_msg_cb_list *cb_list;
+	
 	//down(&pdev->sem);
 	list_for_each_entry(pmsg, &lidbg_trace_msg_string_list, tmp_list)
 	{
@@ -44,7 +69,17 @@ static void lidbg_trace_key_word(char *string)
 			bfs_file_amend(LIDBG_TRACE_MSG_PATH,string);
 			ret =NULL;
 		}
-	
+	}
+
+	list_for_each_entry(cb_list, &lidbg_trace_msg_cb_list_head, tmp_list)	//attention: some protection on lidbg_trace_msg_cb_list_head will be better
+	{
+		if(strlen(cb_list->key_word))
+			ret = strstr(string, cb_list->key_word);
+		if(ret) {
+			cb_list->cb_func(cb_list->key_word, cb_list->data);
+			ret =NULL;
+		}
+
 	}
 	//up(&pdev->sem);
 }

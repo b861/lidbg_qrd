@@ -4,4 +4,5 @@
 
 void lidbg_trace_msg_disable(int flag);
 void trace_msg_main(int argc, char **argv);
+bool lidbg_trace_msg_cb_register(char *key_word, void *data, void (*cb_func)(char *key_word, void *data));
 #endif
