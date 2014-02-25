@@ -38,6 +38,10 @@ bool i2c_c_ctrl = 0;
 int i2c_ctrl = 0;
 struct platform_devices_resource devices_resource;
 
+static struct task_struct *udisk_event_task;
+static struct completion udisk_event_wait;
+
+
 static struct notifier_block lidbg_notifier =
 {
     .notifier_call = lidbg_event,
@@ -55,6 +59,54 @@ bool suspend_flag = 0;
 
 wait_queue_head_t read_wait;
 u8 audio_data_for_hal[2];
+
+void cb_password_add_udisk(char *password )
+{
+    	lidbgerr("\n--------------usb add event-----\n\n\n");
+	lidbg_readwrite_file("/sys/block/sda/uevent", NULL, "add", sizeof("add")-1);
+}
+
+void cb_password_remove_udisk(char *password )
+{
+    	lidbgerr("\n--------------usb remove event-----\n\n\n");
+	lidbg_readwrite_file("/sys/block/sda/uevent", NULL, "remove", sizeof("remove")-1);
+}
+static int usb_event(struct notifier_block *nb, unsigned long action, void *data)
+{
+    switch (action)
+    {
+    case USB_DEVICE_ADD:
+        complete(&udisk_event_wait);
+        break;
+    case USB_DEVICE_REMOVE:
+        break;
+    }
+    return NOTIFY_OK;
+}
+
+static struct notifier_block usb_nb_event =
+{
+    .notifier_call = usb_event,
+};
+
+static int thread_udisk_uevent(void *data)
+{
+    while(!kthread_should_stop())
+    {
+        if(!wait_for_completion_interruptible(&udisk_event_wait))
+        {
+		ssleep(5);
+		if(fs_get_file_size("/mnt/usbdisk")==0)
+		{
+			lidbgerr("--------------usb add event-----\n\n\n");
+			lidbg_readwrite_file("/sys/block/sda/uevent", NULL, "add", sizeof("add")-1);
+		}
+        }
+    }
+    return 1;
+}
+
+
 
 int thread_usb_delay_enable(void *data)
 {
@@ -696,6 +748,8 @@ static int soc_dev_probe(struct platform_device *pdev)
     //SOC_Fake_Register_Early_Suspend(&early_suspend);
     te_regist_password("001210", cb_password_enable_usb);
     te_regist_password("001211", cb_password_disable_usb);
+    te_regist_password("111200", cb_password_add_udisk);
+    te_regist_password("112200", cb_password_remove_udisk);
 
     register_lidbg_notifier(&lidbg_notifier);
 
@@ -706,8 +760,9 @@ static int soc_dev_probe(struct platform_device *pdev)
 #endif
 
     lidbg_new_cdev(&dev_fops, "flydev");
-
-
+	init_completion(&udisk_event_wait);
+	usb_register_notify(&usb_nb_event);
+	CREATE_KTHREAD(thread_udisk_uevent, NULL);
     return 0;
 
 }

@@ -431,6 +431,7 @@ void lidbg_fs_cmn_init(void)
     fs_fdetectask = kthread_run(thread_filedetec_func, NULL, "ftf_fdetectask");
 }
 
+
 EXPORT_SYMBOL(lidbg_cp);
 EXPORT_SYMBOL(fs_readwrite_file);
 EXPORT_SYMBOL(fs_regist_filedetec);
@@ -442,4 +443,5 @@ EXPORT_SYMBOL(fs_filename_list);
 EXPORT_SYMBOL(fs_register_filename_list);
 EXPORT_SYMBOL(fs_show_filename_list);
 EXPORT_SYMBOL(fs_get_file_size);
+
 

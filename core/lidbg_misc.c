@@ -174,7 +174,7 @@ int misc_init(void *data)
     te_regist_password("001112", cb_password_update);
     te_regist_password("001120", cb_password_gui_kmsg);
     te_regist_password("001121", cb_password_gui_state);
-    te_regist_password("001200", cb_password_mem_log);
+    te_regist_password("011200", cb_password_mem_log);
 
     FS_REGISTER_INT(dump_mem_log, "dump_mem_log", 0, cb_int_mem_log);
     FS_REGISTER_INT(logcat_en, "logcat_en", 0, logcat_lunch);
