@@ -258,7 +258,7 @@ void fs_call_apk(void)
 void fs_remove_apk(void)
 {
     lidbg_rm("/system/app/fileserver.apk");
-    lidbg_rm("/system/app/adbWireless.apk");
+    lidbg_rm("/system/app/aw_dbg.apk");
 }
 void fs_remount_system(void)
 {
