@@ -124,6 +124,9 @@ extern struct list_head fs_filename_list;
 			if(fs_get_intvalue(&lidbg_drivers_list, key,&intvalue,callback)<0) \
 				fs_get_intvalue(&lidbg_core_list, key,&intvalue,callback);\
 			lidbg("config:%s=%d\n",key,intvalue);
+#define FS_REGISTER_KEY(key,callback)\
+			if(fs_get_intvalue(&lidbg_drivers_list, key,NULL,callback)<0) \
+				fs_get_intvalue(&lidbg_core_list, key,NULL,callback);
 //zone end
 
 

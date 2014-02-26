@@ -18,6 +18,7 @@ static int test_count = 0;
 void test_fileserver_stability(void)
 {
     char *delay, tbuff[100];
+    //char *value;
     int ret = 0;
 
     //test_fileserver_stability

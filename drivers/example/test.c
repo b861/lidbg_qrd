@@ -18,13 +18,13 @@ ssize_t test_nod_write (struct file *filp, const char __user *buf, size_t count,
         FS_ERR("<memdup_user>\n");
         return PTR_ERR(tmp);
     }
-    tmp[count-1]='\0';
+    tmp[count - 1] = '\0';
     tmp_back = tmp;
     FS_WARN("%s\n", tmp_back);
 
-    pos = lidbg_token_string(tmp," ", param);
+    pos = lidbg_token_string(tmp, " ", param);
 
-    if(pos < 8)
+    if(pos < 2)
     {
         FS_ERR("echo \"c monkey 1 123 0 1 1000 500\" > /dev/test_node0\n");
         goto out;

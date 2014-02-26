@@ -11,7 +11,7 @@ int get_int_value(struct list_head *client_list, char *key, int *int_value, void
     struct string_dev *pos;
     if (list_empty(client_list))
     {
-        lidbg("[futengfei]err.fileserver_deal_cmd:<list_is_empty>\n");
+        lidbg("[futengfei]err.get_int_value:<list_is_empty>\n");
         return -2;
     }
     list_for_each_entry(pos, client_list, tmp_list)
@@ -32,7 +32,6 @@ int get_int_value(struct list_head *client_list, char *key, int *int_value, void
             }
             if(callback)
                 pos->callback = callback;
-            lidbg("[futengfei]succeed.find_key:<%s=%d>\n", key, *(pos->int_value) );
             return 1;
         }
     }
@@ -320,15 +319,24 @@ int update_list(const char *filename, struct list_head *client_list)
                     //start
                     list_for_each_entry(pos, client_list, tmp_list)
                     {
-                        if ( (!strcmp(pos->yourkey, key)) )//&& pos->yourvalue && (strcmp(pos->yourvalue, *string))
+                        if ( !strcmp(pos->yourkey, key))
                         {
-                            curren_intvalue = simple_strtoul(value, 0, 0);
-                            if (pos->int_value && (*(pos->int_value) != curren_intvalue))
+                            if (pos->int_value )
                             {
-                                *(pos->int_value) = curren_intvalue;
+                                curren_intvalue = simple_strtoul(value, 0, 0);
+                                if(*(pos->int_value) != curren_intvalue)
+                                {
+                                    *(pos->int_value) = curren_intvalue;
+                                    if (pos->callback)
+                                        pos->callback(key, value);
+                                    FS_SUC("<%s=%d>\n", key, *(pos->int_value));
+                                }
+                            }
+                            else if (pos->yourvalue && value && strcmp(pos->yourvalue, value))
+                            {
                                 if (pos->callback)
                                     pos->callback(key, value);
-                                FS_SUC("<%s=%d>\n", key, *(pos->int_value));
+                                FS_SUC("<%s=%s>\n", key, value);
                             }
                         }
                     }

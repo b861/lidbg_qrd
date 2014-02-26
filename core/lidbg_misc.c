@@ -9,7 +9,6 @@ static int delete_out_dir_after_update = 1;
 static int dump_mem_log = 0;
 static int loop_warning_en = 0;
 
-
 void cb_password_chmod(char *password )
 {
     fs_mem_log("<called:%s>\n", __func__ );
@@ -40,18 +39,18 @@ void cb_password_clean_all(char *password )
 }
 void cb_password_update(char *password )
 {
-	analysis_copylist("/mnt/usbdisk/conf/copylist.conf");
+    analysis_copylist("/mnt/usbdisk/conf/copylist.conf");
 
     if(fs_is_file_exist("/mnt/usbdisk/out/release"))
     {
         TE_WARN("<===============UPDATE_INFO =================>\n" );
         if( fs_update("/mnt/usbdisk/out/release", "/mnt/usbdisk/out", "/flysystem/lib/out") >= 0)
         {
-        	if(delete_out_dir_after_update)
-				lidbg_rmdir("/mnt/usbdisk/out");
+            if(delete_out_dir_after_update)
+                lidbg_rmdir("/mnt/usbdisk/out");
 
-			//lidbg_chmod("/flysystem/lib/out");
-			lidbg_launch_user(CHMOD_PATH, "777", "/flysystem/lib/out", "-R", NULL, NULL, NULL);
+            //lidbg_chmod("/flysystem/lib/out");
+            lidbg_launch_user(CHMOD_PATH, "777", "/flysystem/lib/out", "-R", NULL, NULL, NULL);
             lidbg_reboot();
         }
     }
@@ -79,7 +78,7 @@ void cb_password_gui_state(char *password )
 
 void cb_password_mem_log(char *password )
 {
- 	lidbg_msg_get(LIDBG_LOG_DIR"lidbg_mem_log.txt", 0);
+    lidbg_msg_get(LIDBG_LOG_DIR"lidbg_mem_log.txt", 0);
 }
 void cb_int_mem_log(char *key, char *value )
 {
@@ -145,23 +144,73 @@ void cp_data_to_udisk(char *key, char *value )
 
 int loop_warnning(void *data)
 {
-	while(1)
-	{
-		lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SIGNAL_EVENT, NOTIFIER_MINOR_SIGNAL_BAKLIGHT_ACK));
-		msleep(1000);
-	}
+    while(1)
+    {
+        lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SIGNAL_EVENT, NOTIFIER_MINOR_SIGNAL_BAKLIGHT_ACK));
+        msleep(1000);
+    }
     return 0;
 }
 
 void lidbg_loop_warning(void)
 {
-	if(loop_warning_en)
-	{
-		DUMP_FUN;
-		CREATE_KTHREAD(loop_warnning, NULL);
-	}
+    if(loop_warning_en)
+    {
+        DUMP_FUN;
+        CREATE_KTHREAD(loop_warnning, NULL);
+    }
 }
 
+char *cmd_string[] =
+{
+    "chmod",
+    "rmdir",
+    "mount",
+    "echo",
+};
+int parse_cmd_type(char *what)
+{
+    int i;
+    for (i = 0; i < ARRAY_SIZE(cmd_string); i++)
+    {
+        if (!strcmp(what, cmd_string[i]))
+            return i + 1;
+    }
+    return 0;
+}
+void cb_kv_cmd(char *key, char *value)
+{
+    if(value)
+    {
+        char *param[8];
+        int num = lidbg_token_string(value, ",", param) ;
+        if(num > 1)
+        {
+            switch (parse_cmd_type(param[0]))
+            {
+            case  1:
+                lidbg_chmod(param[1]);
+                break;
+            case  2:
+                lidbg_rmdir(param[1]);
+                break;
+            case  3:
+                lidbg_mount(param[1]);
+                break;
+            case  4:
+                if(num >= 3)
+                    fs_readwrite_file(param[2], param[1], NULL, 0);
+                else
+                    fs_mem_log("echo err:%d", num);
+                break;
+
+            default:
+                break;
+            }
+        }
+        fs_mem_log("test1:%s\n", value);
+    }
+}
 int misc_init(void *data)
 {
     TE_WARN("<==IN==>\n");
@@ -183,6 +232,9 @@ int misc_init(void *data)
     FS_REGISTER_INT(update_lidbg_out_dir_en, "update_lidbg_out_dir_en", 0, update_lidbg_out_dir);
     FS_REGISTER_INT(delete_out_dir_after_update, "delete_out_dir_after_update", 0, NULL);
     FS_REGISTER_INT(loop_warning_en, "loop_warning_en", 0, NULL);
+
+    FS_REGISTER_KEY( "cmdstring", cb_kv_cmd);
+
     fs_register_filename_list("/data/kmsg.txt", true);
     fs_register_filename_list(LIDBG_LOG_DIR"lidbg_mem_log.txt", true);
 
@@ -193,10 +245,10 @@ int misc_init(void *data)
         reboot_task = kthread_run(thread_reboot, NULL, "ftf_misc_reb");
     else
         lidbg("<reb.exit.%d>\n", reboot_delay_s);
-	
-	TE_WARN("<==OUT==>\n\n");
 
-	return 0;
+    TE_WARN("<==OUT==>\n\n");
+
+    return 0;
 
 
 }
@@ -204,9 +256,9 @@ int misc_init(void *data)
 
 static int __init lidbg_misc_init(void)
 {
-	
-	DUMP_FUN;
-	CREATE_KTHREAD(misc_init,NULL);
+
+    DUMP_FUN;
+    CREATE_KTHREAD(misc_init, NULL);
     return 0;
 }
 
