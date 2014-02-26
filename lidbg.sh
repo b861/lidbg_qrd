@@ -86,6 +86,7 @@ function menu_func()
 	echo [15] nautilus'                       '打开lidbg目录
 	echo [16] catch log'                      '抓取调试信息
 	echo [17] catch kmsg'                     '抓取kmsg调试信息
+	echo [18] remount'                        'remount文件系统 
 	echo 
 	echo $DBG_SYSTEM_DIR
 	soc_menu_func
@@ -123,6 +124,8 @@ function handle_func()
 			catch_log_func;;
 		17)
 			expect $DBG_TOOLS_PATH/kmsg;;
+		18)
+			expect $DBG_TOOLS_PATH/root;;
 		*)
 			echo
 		esac
