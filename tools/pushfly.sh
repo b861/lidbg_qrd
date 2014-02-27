@@ -2,7 +2,7 @@
 source ../build/env_entry.sh
 expect $DBG_TOOLS_PATH/root
 adb  wait-for-device remount
-adb shell rm /flysystem/lib/out/*.ko
+#adb shell rm /flysystem/lib/out/*.ko
 adb shell sync
 adb push $DBG_OUT_RELEASE_PATH/$BOARD_VERSION/out /flysystem/lib/out
 . $DBG_TOOLS_PATH/pushfly_$DBG_SOC.sh
