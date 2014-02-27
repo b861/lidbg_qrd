@@ -75,6 +75,7 @@ extern  bool is_ts_load;
 extern int ts_should_revert;
 static bool xy_revert_en = 1;
 u8 gt911_config_version;
+int gt911_choose_config = 99;
 /*******************************************************
 Function:
 	Read data from the i2c slave device.
@@ -736,12 +737,17 @@ Output:
 *******************************************************/
 static s32 gtp_init_panel(struct goodix_ts_data *ts,char *ic_type)
 {
-    s32 ret = -1;
+	s32 ret = -1;
+	s32 i;
+	u8 check_sum = 0;
+	u8 rd_cfg_buf[16];
 
+    if(!ts)
+    {
+		lidbg("ts=null");
+		return -1;
+	}
 #if GTP_DRIVER_SEND_CFG
-    s32 i;
-    u8 check_sum = 0;
-    u8 rd_cfg_buf[16];
  if(!strcmp(ic_type,"911"))
  	{
     lidbg("=====ic_type:911======\n");
@@ -775,6 +781,7 @@ static s32 gtp_init_panel(struct goodix_ts_data *ts,char *ic_type)
           rd_cfg_buf[GTP_ADDR_LENGTH] = 0;
       }
       else*/
+  if(99 == gt911_choose_config)
     {
         rd_cfg_buf[0] = GTP_REG_SENSOR_ID >> 8;
         rd_cfg_buf[1] = GTP_REG_SENSOR_ID & 0xff;
@@ -785,7 +792,7 @@ static s32 gtp_init_panel(struct goodix_ts_data *ts,char *ic_type)
             rd_cfg_buf[GTP_ADDR_LENGTH] = 0;
         }
         rd_cfg_buf[GTP_ADDR_LENGTH] &= 0x07;
-    }
+    
     lidbg("SENSOR ID:%d", rd_cfg_buf[GTP_ADDR_LENGTH]);
 	lidbg_fs_log(TS_LOG_PATH, "SENSOR ID:%d\n", rd_cfg_buf[GTP_ADDR_LENGTH]);
 if(0==rd_cfg_buf[GTP_ADDR_LENGTH])
@@ -795,7 +802,11 @@ if(0==rd_cfg_buf[GTP_ADDR_LENGTH])
 		   rd_cfg_buf[GTP_ADDR_LENGTH]=rd_cfg_buf[GTP_ADDR_LENGTH]+6;
 		   }
 		}
-   
+  	}
+  else
+  	{
+     rd_cfg_buf[GTP_ADDR_LENGTH]=gt911_choose_config;
+    }
 	memset(&config[GTP_ADDR_LENGTH], 0, GTP_CONFIG_MAX_LENGTH);
     memcpy(&config[GTP_ADDR_LENGTH], send_cfg_buf[rd_cfg_buf[GTP_ADDR_LENGTH]], ts->gtp_cfg_len);
 
@@ -1174,7 +1185,27 @@ static s8 gtp_request_input_dev(struct goodix_ts_data *ts)
 
     return 0;
 }
+/*******************************************************
+Function:
+	cb_int_ts_choose_config function.
 
+Input:
+
+
+Output:
+	Executive outcomes. 0---succeed.
+*******************************************************/
+    struct goodix_ts_data *ts_update;
+    char ic_type[3];
+void cb_int_ts_choose_config(char *key, char *value )
+{
+	int ret = gtp_init_panel(ts_update,ic_type);
+    if (ret < 0)
+    {
+        GTP_ERROR("GTP init panel failed.");
+    }
+    fs_mem_log("%s=%d,%d\n",key,ret,gt911_choose_config);
+}
 /*******************************************************
 Function:
 	Goodix touchscreen probe function.
@@ -1192,13 +1223,13 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     s32 ret = -1;
     struct goodix_ts_data *ts;
     u16 version_info;
-    char ic_type[3];
     GTP_DEBUG_FUNC();
 
     //do NOT remove these output log
     GTP_INFO("GTP Driver Version:%s", GTP_DRIVER_VERSION);
     GTP_INFO("GTP Driver build@%s,%s", __TIME__, __DATE__);
     GTP_INFO("GTP I2C Address:0x%02x", client->addr);
+    FS_REGISTER_INT(gt911_choose_config, "gt911_choose_config", 99, cb_int_ts_choose_config);
 
     i2c_connect_client = client;
     if (!i2c_check_functionality(client->adapter, I2C_FUNC_I2C))
@@ -1289,7 +1320,7 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     gtp_esd_check_workqueue = create_workqueue("gtp_esd_check");
     queue_delayed_work(gtp_esd_check_workqueue, &gtp_esd_check_work, GTP_ESD_CHECK_CIRCLE);
 #endif
-
+	ts_update=ts;
     return 0;
 }
 
