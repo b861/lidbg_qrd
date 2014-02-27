@@ -82,7 +82,7 @@ int thread_loader(void *data)
             sprintf(path, "%s%s", insmod_path[i], insmod_list[j]);
             //lidbg("load %s\n",path);
             	if( is_file_exist(RECOVERY_MODE_DIR))
-            	launch_user("/bin/insmod", path , NULL);
+            	launch_user("/sbin/insmod", path , NULL);
 				else
 				launch_user("/system/bin/insmod", path , NULL);
         }
