@@ -28,10 +28,9 @@
 #include "lidbg.h"
 LIDBG_DEFINE;
 
-#ifdef BUILD_FOR_RECOVERY
 #include "touch.h"
 touch_t touch = {0, 0, 0};
-#endif
+
 #if GTP_ICS_SLOT_REPORT
 #include <linux/input/mt.h>
 #endif
@@ -441,7 +440,8 @@ static void goodix_ts_work_func(struct work_struct *work)
                 g_curr_tspara.y = point_data[4] | (point_data[5] << 8);
                 g_curr_tspara.press = true;
 
-#ifdef BUILD_FOR_RECOVERY
+			if(1==recovery_mode)
+			{
                 if( (input_y >= 0) && (input_x >= 0) )
                 {
                     touch.x = point_data[6] | (point_data[7] << 8);
@@ -452,20 +452,20 @@ static void goodix_ts_work_func(struct work_struct *work)
                     set_touch_pos(&touch);
                     lidbg("[%d,%d]==========%d\n", touch.x, touch.y, touch.pressed);
                 }
-#endif
+			}
 
             }
             else
             {
                 g_curr_tspara.press = false;
 
-#ifdef BUILD_FOR_RECOVERY
+				if(1 == recovery_mode)
                 {
                     touch.pressed = 0;
                     set_touch_pos(&touch);
                     lidbg("[%d,%d]==========%d\n", touch.x, touch.y, touch.pressed);
                 }
-#endif
+
             }
         }
     }
@@ -483,7 +483,8 @@ static void goodix_ts_work_func(struct work_struct *work)
             input_w  = coor_data[5] | coor_data[6] << 8;
 
             gtp_touch_down(ts, id, input_x, input_y, input_w);
-#ifdef BUILD_FOR_RECOVERY
+		if(1 == recovery_mode)
+		{	
             if( (input_y >= 0) && (input_x >= 0) )
             {
                 touch.x = point_data[6] | (point_data[7] << 8);
@@ -493,7 +494,7 @@ static void goodix_ts_work_func(struct work_struct *work)
 				touch.pressed = 1;
                 set_touch_pos(&touch);
             }
-#endif
+ 	   }
             g_var.flag_for_15s_off++;
             if(g_var.flag_for_15s_off >= 1000)
             {
@@ -509,12 +510,11 @@ static void goodix_ts_work_func(struct work_struct *work)
     {
         GTP_DEBUG("Touch Release!");
         gtp_touch_up(ts, 0);
-#ifdef BUILD_FOR_RECOVERY
+		 if(1 == recovery_mode)
         {
             touch.pressed = 0;
             set_touch_pos(&touch);
         }
-#endif
     }
 
     pre_touch = touch_num;

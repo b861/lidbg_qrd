@@ -31,10 +31,9 @@
 #include "lidbg.h"
 LIDBG_DEFINE;
 
-#ifdef BUILD_FOR_RECOVERY
 #include "touch.h"
 touch_t touch = {0, 0, 0};
-#endif
+
 #define CFG_GROUP_LEN(p_cfg_grp)  (sizeof(p_cfg_grp) / sizeof(p_cfg_grp[0]))
 
 static const char *goodix_ts_name = "Goodix Flashless TS";
@@ -801,7 +800,8 @@ static void goodix_ts_work_func(struct work_struct *work)
                 pos += 8;
                 id = coor_data[pos] & 0x0F;
                 touch_index |= (0x01 << id);
-#ifdef BUILD_FOR_RECOVERY
+if(1==recovery_mode)
+		{
                 if( (input_y >= 0) && (input_x >= 0) )
                 {
                     touch.x = point_data[4] | (point_data[5] << 8);
@@ -809,7 +809,7 @@ static void goodix_ts_work_func(struct work_struct *work)
                     touch.pressed = 1;
                     set_touch_pos(&touch);
                 }
-#endif
+		}
                 g_var.flag_for_15s_off++;
                 if(g_var.flag_for_15s_off >= 1000)
                 {
@@ -824,16 +824,17 @@ static void goodix_ts_work_func(struct work_struct *work)
             {
                 gtp_touch_up(ts, i);
                 pre_touch &= ~(0x01 << i);
-#ifdef BUILD_FOR_RECOVERY
+if(1==recovery_mode)
+		{
                 {
                     touch.pressed = 0;
                     set_touch_pos(&touch);
                 }
-#endif
+		}
             }
         }
     }
-#else
+else
     input_report_key(ts->input_dev, BTN_TOUCH, (touch_num || key_value));   // 20130502
 
     if (touch_num)
@@ -848,7 +849,8 @@ static void goodix_ts_work_func(struct work_struct *work)
             input_w  = coor_data[5] | (coor_data[6] << 8);
 
             gtp_touch_down(ts, id, input_x, input_y, input_w);
-#ifdef BUILD_FOR_RECOVERY
+ if(1==recovery_mode)
+      {
             if( (input_y >= 0) && (input_x >= 0) )
             {
                 touch.x = point_data[4] | (point_data[5] << 8);
@@ -856,7 +858,7 @@ static void goodix_ts_work_func(struct work_struct *work)
                 touch.pressed = 1;
                 set_touch_pos(&touch);
             }
-#endif
+      }
         }
         g_var.flag_for_15s_off++;
         if(g_var.flag_for_15s_off >= 1000)
@@ -873,12 +875,12 @@ static void goodix_ts_work_func(struct work_struct *work)
 
         GTP_DEBUG("Touch Release!");
         gtp_touch_up(ts, 0);
-#ifdef BUILD_FOR_RECOVERY
+if(1==recovery_mode)
         {
             touch.pressed = 0;
             set_touch_pos(&touch);
         }
-#endif
+ 
     }
 
     pre_touch = touch_num;

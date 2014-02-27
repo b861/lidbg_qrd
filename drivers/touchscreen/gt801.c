@@ -19,10 +19,9 @@
 LIDBG_DEFINE;
 
 
-#ifdef BUILD_FOR_RECOVERY
 #include "touch.h"
 touch_t touch = {0, 0, 0};
-#endif
+
 
 
 #define 	RESOLUTION_X	(1024)  //this
@@ -632,7 +631,8 @@ BIT_NO_CHANGE:
             g_curr_tspara.y = finger_list.pointer[0].y;
             g_curr_tspara.press = true;
 
-#ifdef BUILD_FOR_RECOVERY
+if(1==recovery_mode)
+		{
             if( (finger_list.pointer[0].x >= 0) && (finger_list.pointer[0].y >= 0) )
             {
                 touch.x = finger_list.pointer[0].x;
@@ -640,7 +640,7 @@ BIT_NO_CHANGE:
                 touch.pressed = 1;
                 set_touch_pos(&touch);
             }
-#endif
+		}
             touch_cnt++;
             if (touch_cnt > 100)
             {
@@ -658,12 +658,13 @@ BIT_NO_CHANGE:
 
             g_curr_tspara.press = false;
 
-#ifdef BUILD_FOR_RECOVERY
+if(1==recovery_mode)
+    {
             {
                 touch.pressed = 0;
                 set_touch_pos(&touch);
             }
-#endif
+    }
             printk("%d[0,0]\n", xy_revert_en);
 
         }

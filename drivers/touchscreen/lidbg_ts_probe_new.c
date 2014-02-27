@@ -116,10 +116,8 @@ void ts_probe_prepare(void)
     else
         LIDBG_WARN("<TS.XY will normal>\n");
 
-#ifdef BUILD_FOR_RECOVERY
     lidbg_insmod("/system/lib/modules/out/lidbg_ts_to_recov.ko");
     lidbg_insmod("/flysystem/lib/out/lidbg_ts_to_recov.ko");
-#endif
 }
 //zone end
 

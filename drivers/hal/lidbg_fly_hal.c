@@ -4,7 +4,7 @@
 #define LIDBG_FLY_HAL
 
 #include "lidbg.h"
-
+bool recovery_mode=0;
 LIDBG_DEFINE;
 #define HAL_SO "/flysystem/lib/hw/flyfa.default.so"
 
@@ -59,7 +59,10 @@ int loader_thread(void *data)
     lidbg_readwrite_file("/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq", NULL, "700800", sizeof("700800") - 1);
 #endif
     SOC_Get_CpuFreq();
-
+	if( fs_is_file_exist(RECOVERY_MODE_DIR))
+		recovery_mode=1;
+	else
+        recovery_mode=0;
     for(i = 0; insmod_path[i] != NULL; i++)
     {
         for(j = 0; insmod_list[j] != NULL; j++)
@@ -501,7 +504,7 @@ void fly_hal_deinit(void)
 module_init(fly_hal_init);
 module_exit(fly_hal_deinit);
 
-
+EXPORT_SYMBOL(recovery_mode);
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Flyaudad Inc.");
 

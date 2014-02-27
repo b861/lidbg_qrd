@@ -34,7 +34,18 @@ char *insmod_path[] =
     "/flysystem/lib/out/",
     NULL,
 };
-
+bool is_file_exist(char *file)
+{
+    struct file *filep;
+    filep = filp_open(file, O_RDONLY , 0);
+    if(IS_ERR(filep))
+        return false;
+    else
+    {
+        filp_close(filep, 0);
+        return true;
+    }
+}
 void launch_user( char bin_path[], char argv1[], char argv2[])
 {
     char *argv[] = { bin_path, argv1, argv2, NULL };
@@ -70,7 +81,10 @@ int thread_loader(void *data)
         {
             sprintf(path, "%s%s", insmod_path[i], insmod_list[j]);
             //lidbg("load %s\n",path);
-            launch_user(INSMOD_PATH, path , NULL);
+            	if( is_file_exist(RECOVERY_MODE_DIR))
+            	launch_user("/bin/insmod", path , NULL);
+				else
+				launch_user("/system/bin/insmod", path , NULL);
         }
     }
 

@@ -4,7 +4,27 @@
 #include "lidbg.h"
 
 #define GET_INODE_FROM_FILEP(filp) ((filp)->f_path.dentry->d_inode)
-
+char g_binpath[50];
+bool is_file_exist(char *file)
+{
+    struct file *filep;
+    filep = filp_open(file, O_RDONLY , 0);
+    if(IS_ERR(filep))
+        return false;
+    else
+    {
+        filp_close(filep, 0);
+        return true;
+    }
+}
+char* get_bin_path( char* buf)
+{
+    char *path;
+	path = (is_file_exist(RECOVERY_MODE_DIR)) ? "/sbin/" : "/system/bin/";
+	sprintf(g_binpath,"%s%s",path,buf);
+	//printk("===fsprintf====:%s\n",g_binpath);
+	return g_binpath;
+}
 int lidbg_readwrite_file(const char *filename, char *rbuf,
                          const char *wbuf, size_t length)
 {
@@ -447,7 +467,7 @@ EXPORT_SYMBOL(lidbg_readwrite_file);
 EXPORT_SYMBOL(lidbg_task_kill_select);
 EXPORT_SYMBOL(lidbg_get_current_time);
 EXPORT_SYMBOL(set_power_state);
-
+EXPORT_SYMBOL(get_bin_path);
 
 
 

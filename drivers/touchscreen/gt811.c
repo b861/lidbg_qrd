@@ -23,10 +23,9 @@ LIDBG_DEFINE;
 #include "gt811.h"
 #include "gt811_firmware.h"
 
-#ifdef BUILD_FOR_RECOVERY
 #include "touch.h"
 touch_t touch = {0, 0, 0};
-#endif
+
 
 
 #define SCREEN_X (1024)
@@ -628,15 +627,16 @@ COORDINATE_POLL:
         g_curr_tspara.y = input_x;
         g_curr_tspara.press = true;
 
-#ifdef BUILD_FOR_RECOVERY
-        if( (input_y >= 0) && (input_x >= 0) )
-        {
-            touch.x = input_y;
-            touch.y = input_x;
-            touch.pressed = 1;
-            set_touch_pos(&touch);
-        }
-#endif
+		if(1==recovery_mode)
+			{	
+				if( (input_y >= 0) && (input_x >= 0) )
+				{
+				    touch.x = input_y;
+				    touch.y = input_x;
+				    touch.pressed = 1;
+				    set_touch_pos(&touch);
+				}
+			}
 
     }
     else
@@ -659,12 +659,13 @@ COORDINATE_POLL:
 
 #endif
 
-#ifdef BUILD_FOR_RECOVERY
+if(1==recovery_mode)
+ 	{
         {
             touch.pressed = 0;
             set_touch_pos(&touch);
         }
-#endif
+ 	}
         g_curr_tspara.press = false;
 
     }

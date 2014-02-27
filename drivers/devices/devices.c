@@ -36,6 +36,7 @@ static struct file_operations dev_fops;
 int platform_id;
 bool i2c_c_ctrl = 0;
 int i2c_ctrl = 0;
+
 struct platform_devices_resource devices_resource;
 
 static struct task_struct *udisk_event_task;
@@ -1062,8 +1063,8 @@ void fly_devices_init(void)
     {
 
 	
-#if (defined(FLY_DEBUG) || defined(BUILD_FOR_RECOVERY))
-
+#if (defined(FLY_DEBUG) || (1==recovery_mode))
+	{
         DVD_RESET_HIGH;
         TELL_LPC_PWR_ON;
         PWR_EN_ON;
@@ -1096,11 +1097,10 @@ void fly_devices_init(void)
 	if(!fs_is_file_exist(USB_1_1))
 		CREATE_KTHREAD(thread_usb_delay_enable, NULL);
 	else{
-	#ifdef BUILD_FOR_RECOVERY
+	if(1 == recovery_mode)
 		USB_WORK_ENABLE;
-	#else
+	else
 		CREATE_KTHREAD(thread_usb_11, NULL);
-	#endif
 		}
 	/*if( fs_is_file_exist(USB_1_1))
 	{

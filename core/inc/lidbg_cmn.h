@@ -29,24 +29,18 @@ int lidbg_get_current_time(char *time_string, struct rtc_time *ptm);
 bool lidbg_new_cdev(struct file_operations *cdev_fops, char *nodename);
 void set_power_state(int state);
 void lidbg_loop_warning(void);
+char* get_bin_path( char* buf);
 
-#ifdef BUILD_FOR_RECOVERY
-#define BIN_PATH  "/sbin/"
-#else
-#define BIN_PATH  "/system/bin/"
-#endif
-
-#define MOUNT_PATH BIN_PATH"mount"
-#define INSMOD_PATH BIN_PATH"insmod"
-#define CHMOD_PATH  BIN_PATH"chmod"
-#define MV_PATH  BIN_PATH"mv"
-#define RM_PATH  BIN_PATH"rm"
-#define RMDIR_PATH  BIN_PATH"rm"
-#define MKDIR_PATH  BIN_PATH"mkdir"
-#define TOUCH_PATH  BIN_PATH"touch"
-#define REBOOT_PATH  BIN_PATH"reboot"
-#define SETPROP_PATH BIN_PATH"setprop"
-
+#define MOUNT_PATH get_bin_path("mount")
+#define INSMOD_PATH get_bin_path("insmod")
+#define CHMOD_PATH  get_bin_path("chmod")
+#define MV_PATH  get_bin_path("mv")
+#define RM_PATH  get_bin_path("rm")
+#define RMDIR_PATH  get_bin_path("rm")
+#define MKDIR_PATH  get_bin_path("mkdir")
+#define TOUCH_PATH  get_bin_path("touch")
+#define REBOOT_PATH  get_bin_path("reboot")
+#define SETPROP_PATH get_bin_path("setprop")
 
 
 
