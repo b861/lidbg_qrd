@@ -51,8 +51,9 @@ int static video_signal_channel_switching_occurs(void)
     lidbg("%s:tw9912_RESX_DOWN\n", __func__);
 
     tw9912_RESX_DOWN;//\u8fd9\u91cc\u5bf9tw9912\u590d\u4f4d\u7684\u539f\u56e0\u662f\u89e3\u51b3\u5012\u8f66\u9000\u56deDVD\u65f6\u89c6\u9891\u5361\u6b7b\u3002
+    msleep(20);
     tw9912_RESX_UP;//在YIN3 切换 到DVD通道，如果不复位一下 视频回定住
-    //msleep(20);
+    msleep(20);
     //  mutex_unlock(&lock_chipe_config);
     return 0;
 }
