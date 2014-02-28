@@ -20,8 +20,8 @@ else
 	pwd
 	expect $DBG_TOOLS_PATH/pull
 	expect $DBG_TOOLS_PATH/pull
-	cp -ru $DBG_OUT_RELEASE_PATH/$BOARD_VERSION/out  $UPDATA_BIN_DIR
-	cp -ru $DBG_OUT_RELEASE_PATH/$BOARD_VERSION/out/*.so  $UPDATA_BIN_DIR/hw
+	cp -r $DBG_OUT_RELEASE_PATH/$BOARD_VERSION/out  $UPDATA_BIN_DIR
+	cp -r $DBG_OUT_RELEASE_PATH/$BOARD_VERSION/out/*.so  $UPDATA_BIN_DIR/hw
 	git add .
 	git add -f ./
 	git commit -am $1
