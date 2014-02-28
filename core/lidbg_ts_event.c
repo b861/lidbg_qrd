@@ -63,7 +63,7 @@ void new_password_dev(char *password, void (*cb_password)(char *password ))
     add_new_dev = kzalloc(sizeof(struct dev_password), GFP_KERNEL);
     if(g_debug_mem)
         fs_string2file(DEBUG_MEM_FILE, "%s.%s=%d \n", __func__, password, sizeof(struct dev_password));
-
+    fs_mem_log("SUC:[%s]==>%ps\n",password,cb_password);
     add_new_dev->password = password;
     add_new_dev->cb_password = cb_password;
     list_add(&(add_new_dev->tmp_list), &te_password_list);
@@ -129,8 +129,11 @@ bool regist_password(char *password, void (*cb_password)(char *password ))
         return true;
     }
     else
+    {
         TE_ERR("<existed :%s>\n", password);
-    return false;
+        fs_mem_log("ERR:[%s]==>%ps\n",password,cb_password);
+        return false;
+    }
 }
 int get_num(void)
 {
