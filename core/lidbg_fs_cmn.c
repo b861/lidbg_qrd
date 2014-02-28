@@ -169,7 +169,7 @@ void new_filedetec_dev(char *filename, void (*cb_filedetec)(char *filename))
     struct string_dev *add_new_dev;
     add_new_dev = kzalloc(sizeof(struct string_dev), GFP_KERNEL);
     if(g_mem_dbg)
-        fs_string2file(DEBUG_MEM_FILE, "%s=%d \n", __func__, sizeof(struct string_dev));
+        fs_string2file(0,DEBUG_MEM_FILE, "%s=%d \n", __func__, sizeof(struct string_dev));
 
     add_new_dev->filedetec = filename;
     add_new_dev->cb_filedetec = cb_filedetec;
@@ -322,7 +322,7 @@ bool copy_file(char *from, char *to)
         return false;
 
     if(g_mem_dbg)
-        fs_string2file(DEBUG_MEM_FILE, "free.%s=%d \n", __func__, file_len);
+        fs_string2file(0,DEBUG_MEM_FILE, "free.%s=%d \n", __func__, file_len);
 
     pfilefrom->f_op->llseek(pfilefrom, 0, 0);
     pfilefrom->f_op->read(pfilefrom, string, file_len, &pfilefrom->f_pos);
@@ -364,7 +364,7 @@ bool fs_is_file_updated(char *filename, char *infofile)
             return false;
     }
     fs_clear_file(infofile);
-    bfs_file_amend(infofile, news);
+    bfs_file_amend(infofile, news,0);
     return true;
 }
 void cb_kv_filedetecen(char *key, char *value)
@@ -373,6 +373,46 @@ void cb_kv_filedetecen(char *key, char *value)
     if ( (!strcmp(key, "fs_dbg_file_detect" ))  &&  (strcmp(value, "0" )) )
         show_filedetec_list();
 }
+void cp_data_to_udisk(void)
+{
+    struct list_head *client_list = &fs_filename_list;
+    if(!list_empty(client_list))
+    {
+        int index = 0;
+        char dir[128], tbuff[128];
+        int copy_delay = 300;
+        struct fs_filename_item *pos;
+
+        memset(dir, '\0', sizeof(dir));
+        memset(tbuff, '\0', sizeof(tbuff));
+
+        lidbg_get_current_time(tbuff, NULL);
+        sprintf(dir, "/mnt/usbdisk/ID%d-%s", get_machine_id(), tbuff);
+        lidbg_mkdir(dir);
+        msleep(1000);
+
+        list_for_each_entry(pos, client_list, tmp_list)
+        {
+            if (pos->filename && pos->copy_en)
+            {
+                char *file = strrchr(pos->filename, '/');
+                if(file)
+                {
+                    index++;
+                    memset(tbuff, '\0', sizeof(tbuff));
+                    sprintf(tbuff, "%s/%s", dir, ++file);
+                    fs_copy_file(pos->filename, tbuff);
+                    msleep(copy_delay);
+                }
+            }
+        }
+        lidbg_rm("/data/kmsg.txt");
+        lidbg_domineering_ack();
+    }
+    else
+        FS_ERR("<nobody_register>\n");
+}
+
 //zone end
 
 
@@ -419,6 +459,15 @@ void fs_show_filename_list(void)
 {
     show_filename_list(&fs_filename_list);
 }
+int thread_cp_data_to_udiskt(void *data)
+{
+    cp_data_to_udisk();
+    return 0;
+}
+void fs_cp_data_to_udisk(void)
+{
+    CREATE_KTHREAD(thread_cp_data_to_udiskt, NULL);
+}
 //zone end
 
 
@@ -433,6 +482,7 @@ void lidbg_fs_cmn_init(void)
 
 
 EXPORT_SYMBOL(lidbg_cp);
+EXPORT_SYMBOL(fs_cp_data_to_udisk);
 EXPORT_SYMBOL(fs_readwrite_file);
 EXPORT_SYMBOL(fs_regist_filedetec);
 EXPORT_SYMBOL(fs_copy_file);

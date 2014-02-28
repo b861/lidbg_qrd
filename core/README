@@ -1,6 +1,9 @@
 ----------通过core.txt来发一些shell指令---------
 打开/data/lidbg/core.txt文件修改如下内容可做些简单的命令;如下
-cmdstring=chmod,/flysystem修改/flysystem权限为777
-cmdstring=rmdir,/flysystem/lib/out删除out目录
-cmdstring=remount,/flysystem重新挂载/flysystem分区为读写
-cmdstring=echo,c io w 27 1,/dev/mlidbg0将c io w 27 1写到/dev/mlidbg0
+分号为指令分隔符，逗号为参数分隔符，如下四条指令均会执行
+cmdstring=chmod,/flysystem;echo,add,/sys/block/sda/uevent;remount,/flysystem;rmdir,/system/lib/modules/out11
+
+chmod,/flysystem修改/flysystem权限为777
+rmdir,/flysystem/lib/out删除out目录
+remount,/flysystem重新挂载/flysystem分区为读写
+echo,c io w 27 1,/dev/mlidbg0将c io w 27 1写到/dev/mlidbg0

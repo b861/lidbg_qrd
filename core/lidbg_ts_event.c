@@ -62,7 +62,7 @@ void new_password_dev(char *password, void (*cb_password)(char *password ))
     struct dev_password *add_new_dev;
     add_new_dev = kzalloc(sizeof(struct dev_password), GFP_KERNEL);
     if(g_debug_mem)
-        fs_string2file(DEBUG_MEM_FILE, "%s.%s=%d \n", __func__, password, sizeof(struct dev_password));
+        fs_string2file(0,DEBUG_MEM_FILE, "%s.%s=%d \n", __func__, password, sizeof(struct dev_password));
     fs_mem_log("SUC:[%s]==>%ps\n",password,cb_password);
     add_new_dev->password = password;
     add_new_dev->cb_password = cb_password;
@@ -236,7 +236,6 @@ void  touch_event_init(void)
     TE_WARN("<==IN==>\n");
 
     TE_WARN("<%s>\n", TE_VERSION);
-    fs_string2file(LIDBG_MEM_LOG_FILE, "%s\n", TE_VERSION );
     FS_REGISTER_INT(g_te_dbg_en, "te_dbg_en", 0, cb_kv_password);
     FS_REGISTER_INT(g_te_scandelay_ms, "te_scandelay_ms", 100, NULL);
 

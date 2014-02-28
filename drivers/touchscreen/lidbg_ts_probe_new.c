@@ -71,7 +71,7 @@ void parse_ts_info(struct probe_device *ts_info)
     lidbg_insmod( path );
 
     lidbg_fs_log(TS_LOG_PATH, "loadts=%s,%d,%d\n", ts_info->name, USE_TS_NUM,ts_should_revert);
-    fs_string2file(LIDBG_MEM_LOG_FILE, "loadts=%s,%d,%d\n", ts_info->name, USE_TS_NUM,ts_should_revert);
+    fs_mem_log("loadts=%s,%d,%d\n", ts_info->name, USE_TS_NUM,ts_should_revert);
 
 }
 

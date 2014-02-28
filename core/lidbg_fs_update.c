@@ -41,7 +41,7 @@ int analysis_copylist(const char *copy_list)
     }
 
     if(g_mem_dbg)
-        fs_string2file(DEBUG_MEM_FILE, "free.%s=%d \n", __func__, file_len);
+        fs_string2file(0,DEBUG_MEM_FILE, "free.%s=%d \n", __func__, file_len);
 
     filep->f_op->llseek(filep, 0, 0);
     all_purpose = filep->f_op->read(filep, file_ptr, file_len, &filep->f_pos);
@@ -104,7 +104,7 @@ int update_ko(const char *ko_list, const char *fromdir, const char *todir)
     }
 
     if(g_mem_dbg)
-        fs_string2file(DEBUG_MEM_FILE, "free.%s=%d \n", __func__, file_len);
+        fs_string2file(0,DEBUG_MEM_FILE, "free.%s=%d \n", __func__, file_len);
 
     filep->f_op->llseek(filep, 0, 0);
     all_purpose = filep->f_op->read(filep, file_ptr, file_len, &filep->f_pos);

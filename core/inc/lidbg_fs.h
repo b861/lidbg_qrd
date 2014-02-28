@@ -1,7 +1,8 @@
 
-#define FS_WARN(fmt, args...) printk("[futengfei.fs]warn.%s: " fmt,__func__,##args)
-#define FS_ERR(fmt, args...) printk("[futengfei.fs]err.%s: " fmt,__func__,##args)
-#define FS_SUC(fmt, args...) printk("[futengfei.fs]suceed.%s: " fmt,__func__,##args)
+#define FS_SUC(fmt, args...) do {if(fs_slient_level>=3)printk("[futengfei.fs]suceed.%s: " fmt,__func__,##args);} while (0)
+#define FS_WARN(fmt, args...) do {if(fs_slient_level>=2)printk("[futengfei.fs]warn.%s: " fmt,__func__,##args);} while (0)
+#define FS_ERR(fmt, args...) do {if(fs_slient_level>=1)printk("[futengfei.fs]err.%s: " fmt,__func__,##args);lidbg_msg_put("[futengfei.fs]err.%s: " fmt,__func__,##args);} while (0)
+
 
 #define DEBUG_MEM_FILE LIDBG_LOG_DIR"fs_private.txt"
 #define LIDBG_KMSG_FILE_PATH LIDBG_LOG_DIR"lidbg_kmsg.txt"
@@ -25,10 +26,10 @@
 
 extern struct list_head fs_state_list;
 extern int g_mem_dbg;
-int analysis_copylist(const char *copy_list);
+extern int analysis_copylist(const char *copy_list);
 extern int readwrite_file(const char *filename, char *wbuff, char *rbuff, int readlen);
 extern int update_list(const char *filename, struct list_head *client_list);
-extern int bfs_file_amend(char *file2amend, char *str_append);
+extern int bfs_file_amend(char *file2amend, char *str_append,int file_limit_M);
 extern void save_list_to_file(struct list_head *client_list, char *filename);
 extern void set_machine_id(void);
 extern void copy_all_conf_file(void);

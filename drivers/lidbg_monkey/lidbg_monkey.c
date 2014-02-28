@@ -48,17 +48,9 @@ int monkey_work(void *data)
     return 0;
 }
 
-void monkey_enable(int enable, int gpio, int on_en, int off_en, int on_ms, int off_ms)
+void monkey_run(int enable)
 {
-    LIDBG_WARN("<%d,%d,%d,%d,%d,%d>\n", enable, gpio, on_en, off_en, on_ms, off_ms);
-    if(enable == 2)
-    {
-        g_monkey_dev->gpio = gpio;
-        g_monkey_dev->random_on_en = on_en;
-        g_monkey_dev->random_off_en = off_en;
-        g_monkey_dev->on_ms = on_ms;
-        g_monkey_dev->off_ms = off_ms;
-    }
+    LIDBG_WARN("<%d>\n", enable);
     if(!enable)
         g_monkey_dev->monkey_enable = false;
     else
@@ -67,9 +59,18 @@ void monkey_enable(int enable, int gpio, int on_en, int off_en, int on_ms, int o
         complete(&g_monkey_dev->monkey_wait);
     }
 }
+void monkey_config(int gpio, int on_en, int off_en, int on_ms, int off_ms)
+{
+    LIDBG_WARN("<%d,%d,%d,%d,%d>\n",  gpio, on_en, off_en, on_ms, off_ms);
+    g_monkey_dev->gpio = gpio;
+    g_monkey_dev->random_on_en = on_en;
+    g_monkey_dev->random_off_en = off_en;
+    g_monkey_dev->on_ms = on_ms;
+    g_monkey_dev->off_ms = off_ms;
+}
 void cb_kv_monkey_enable(char *key, char *value)
 {
-    monkey_enable(g_monkey_dev->monkey_enable, 123, 0, 0, 1000, 1000);
+    monkey_run(g_monkey_dev->monkey_enable);
 }
 int monkey_init(void *data)
 {
@@ -112,5 +113,6 @@ module_exit(lidbg_monkey_exit);
 MODULE_LICENSE("GPL");
 
 
-EXPORT_SYMBOL(monkey_enable);
+EXPORT_SYMBOL(monkey_run);
+EXPORT_SYMBOL(monkey_config);
 

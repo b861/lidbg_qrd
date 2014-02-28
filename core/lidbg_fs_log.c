@@ -51,12 +51,12 @@ void call_apk(void)
     chmod_for_apk();
     analysis_copylist("/flysystem/lib/out/copylist_app.conf");
 }
-int bfs_file_amend(char *file2amend, char *str_append)
+int bfs_file_amend(char *file2amend, char *str_append,int file_limit_M)
 {
     struct file *filep;
     struct inode *inode = NULL;
     mm_segment_t old_fs;
-    int  flags, is_file_cleard = 0;
+    int  flags, is_file_cleard = 0,file_limit=max_file_len;
     unsigned int file_len;
 
     if(str_append == NULL)
@@ -65,6 +65,9 @@ int bfs_file_amend(char *file2amend, char *str_append)
         return -1;
     }
     flags = O_CREAT | O_RDWR | O_APPEND;
+
+if(file_limit_M>max_file_len)
+	file_limit=file_limit_M;
 
 again:
     filep = filp_open(file2amend, flags , 0777);
@@ -82,7 +85,7 @@ again:
     file_len = file_len + 1;
 
 
-    if(file_len > max_file_len * MEM_SIZE_1_MB)
+    if(file_len > file_limit * MEM_SIZE_1_MB)
     {
         lidbg("[futengfei]warn.fileappend_mode:< file>8M.goto.again >\n");
         is_file_cleard = 1;
@@ -109,7 +112,7 @@ void file_separator(char *file2separator)
 {
     char buf[32];
     lidbg_get_current_time(buf, NULL);
-    fs_string2file(file2separator, "------%s------\n", buf);
+    fs_string2file(0,file2separator, "------%s------\n", buf);
 }
 int dump_kmsg(char *node, char *save_msg_file, int size, int *always)
 {
@@ -117,6 +120,7 @@ int dump_kmsg(char *node, char *save_msg_file, int size, int *always)
     mm_segment_t old_fs;
 
     int  ret = -1;
+    int  kmsg_file_limit = 3;
     CREATE_KTHREAD(delay_disable_tracemsg, NULL);
     if(!size && !always)
     {
@@ -140,13 +144,13 @@ int dump_kmsg(char *node, char *save_msg_file, int size, int *always)
             }
 
             if(g_mem_dbg)
-                fs_string2file(DEBUG_MEM_FILE, "free.%s=%d \n", __func__, size);
+                fs_string2file(0,DEBUG_MEM_FILE, "free.%s=%d \n", __func__, size);
 
             ret = filep->f_op->read(filep, psize, size - 1, &filep->f_pos);
             if(ret > 0)
             {
                 psize[ret] = '\0';
-                bfs_file_amend(save_msg_file, psize);
+                bfs_file_amend(save_msg_file, psize,kmsg_file_limit);
             }
             vfree(psize);
         }
@@ -160,7 +164,7 @@ int dump_kmsg(char *node, char *save_msg_file, int size, int *always)
                 if(ret > 0)
                 {
                     buff[ret] = '\0';
-                    bfs_file_amend(save_msg_file, buff);
+                    bfs_file_amend(save_msg_file, buff,kmsg_file_limit);
                 }
             }
         }
@@ -199,7 +203,7 @@ int fs_dump_kmsg(char *tag, int size )
 {
     file_separator(LIDBG_KMSG_FILE_PATH);
     if(tag != NULL)
-        fs_string2file(LIDBG_KMSG_FILE_PATH, "fs_dump_kmsg: %s\n", tag);
+        fs_string2file(3,LIDBG_KMSG_FILE_PATH, "fs_dump_kmsg: %s\n", tag);
     return dump_kmsg(KMSG_NODE, LIDBG_KMSG_FILE_PATH, size, NULL);
 }
 void fs_enable_kmsg( bool enable )
@@ -213,7 +217,7 @@ void fs_enable_kmsg( bool enable )
     else
         g_pollkmsg_en = 0;
 }
-int fs_string2file(char *filename, const char *fmt, ... )
+int fs_string2file(int file_limit_M,char *filename, const char *fmt, ... )
 {
     va_list args;
     int n;
@@ -222,7 +226,7 @@ int fs_string2file(char *filename, const char *fmt, ... )
     n = vsprintf ( str_append, (const char *)fmt, args );
     va_end ( args );
 
-    return bfs_file_amend(filename, str_append);
+    return bfs_file_amend(filename, str_append,file_limit_M);
 }
 int fs_mem_log( const char *fmt, ... )
 {
@@ -236,7 +240,7 @@ int fs_mem_log( const char *fmt, ... )
 
     len = strlen(str_append);
 
-    bfs_file_amend(LIDBG_MEM_LOG_FILE, str_append);
+    bfs_file_amend(LIDBG_MEM_LOG_FILE, str_append,0);
 
     return 1;
 }

@@ -101,47 +101,10 @@ void logcat_lunch(char *key, char *value )
 {
     k2u_write(LOG_LOGCAT);
 }
-
-void cp_data_to_udisk(char *key, char *value )
+void cb_cp_data_to_udisk(char *key, char *value )
 {
-    struct list_head *client_list = &fs_filename_list;
-    if(!list_empty(client_list))
-    {
-        int index = 0;
-        char dir[128], tbuff[128];
-        int copy_delay = 300;
-        struct fs_filename_item *pos;
-
-        memset(dir, '\0', sizeof(dir));
-        memset(tbuff, '\0', sizeof(tbuff));
-
-        lidbg_get_current_time(tbuff, NULL);
-        sprintf(dir, "/mnt/usbdisk/ID%d-%s", get_machine_id(), tbuff);
-        lidbg_mkdir(dir);
-        msleep(1000);
-
-        list_for_each_entry(pos, client_list, tmp_list)
-        {
-            if (pos->filename && pos->copy_en)
-            {
-                char *file = strrchr(pos->filename, '/');
-                if(file)
-                {
-                    index++;
-                    memset(tbuff, '\0', sizeof(tbuff));
-                    sprintf(tbuff, "%s/%s", dir, ++file);
-                    fs_copy_file(pos->filename, tbuff);
-                    msleep(copy_delay);
-                }
-            }
-        }
-        lidbg_rm("/data/kmsg.txt");
-        lidbg_domineering_ack();
-    }
-    else
-        LIDBG_ERR("<nobody_register>\n");
+    fs_cp_data_to_udisk();
 }
-
 int loop_warnning(void *data)
 {
     while(1)
@@ -182,33 +145,42 @@ void cb_kv_cmd(char *key, char *value)
 {
     if(value)
     {
+        char *cmd[8];
         char *param[8];
-        int num = lidbg_token_string(value, ",", param) ;
-        if(num > 1)
-        {
-            switch (parse_cmd_type(param[0]))
-            {
-            case  1:
-                lidbg_chmod(param[1]);
-                break;
-            case  2:
-                lidbg_rmdir(param[1]);
-                break;
-            case  3:
-                lidbg_mount(param[1]);
-                break;
-            case  4:
-                if(num >= 3)
-                    fs_readwrite_file(param[2], param[1], NULL, 0);
-                else
-                    fs_mem_log("echo err:%d", num);
-                break;
+        int cmd_num, num, loop = 0;
+        cmd_num = lidbg_token_string(value, ";", cmd) ;
 
-            default:
-                break;
+        for(loop = 0; loop < cmd_num; loop++)
+        {
+            FS_WARN("cmd[%d]:%s\n", loop, cmd[loop]);
+            num = lidbg_token_string(cmd[loop], ",", param) ;
+            if(num > 1)
+            {
+                switch (parse_cmd_type(param[0]))
+                {
+                case  1:
+                    lidbg_chmod(param[1]);
+                    break;
+                case  2:
+                    lidbg_rmdir(param[1]);
+                    break;
+                case  3:
+                    lidbg_mount(param[1]);
+                    break;
+                case  4:
+                    if(num >= 3)
+                        fs_readwrite_file(param[2], param[1], NULL, 0);
+                    else
+                        fs_mem_log("echo err:%d", num);
+                    break;
+
+                default:
+                    break;
+                }
             }
         }
-        fs_mem_log("test1:%s\n", value);
+
+        fs_mem_log("cb_kv_cmd:%d\n", cmd_num);
     }
 }
 int misc_init(void *data)
@@ -228,7 +200,7 @@ int misc_init(void *data)
     FS_REGISTER_INT(dump_mem_log, "dump_mem_log", 0, cb_int_mem_log);
     FS_REGISTER_INT(logcat_en, "logcat_en", 0, logcat_lunch);
     FS_REGISTER_INT(reboot_delay_s, "reboot_delay_s", 0, NULL);
-    FS_REGISTER_INT(cp_data_to_udisk_en, "cp_data_to_udisk_en", 0, cp_data_to_udisk);
+    FS_REGISTER_INT(cp_data_to_udisk_en, "cp_data_to_udisk_en", 0, cb_cp_data_to_udisk);
     FS_REGISTER_INT(update_lidbg_out_dir_en, "update_lidbg_out_dir_en", 0, update_lidbg_out_dir);
     FS_REGISTER_INT(delete_out_dir_after_update, "delete_out_dir_after_update", 0, NULL);
     FS_REGISTER_INT(loop_warning_en, "loop_warning_en", 0, NULL);

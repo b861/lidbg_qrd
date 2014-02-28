@@ -20,7 +20,7 @@ ssize_t test_nod_write (struct file *filp, const char __user *buf, size_t count,
     }
     tmp[count - 1] = '\0';
     tmp_back = tmp;
-    FS_WARN("%s\n", tmp_back);
+    LIDBG_WARN("%s\n", tmp_back);
 
     pos = lidbg_token_string(tmp, " ", param);
 
@@ -40,7 +40,8 @@ ssize_t test_nod_write (struct file *filp, const char __user *buf, size_t count,
         off_en = simple_strtoul(param[5], 0, 0);
         on_ms = simple_strtoul(param[6], 0, 0);
         off_ms = simple_strtoul(param[7], 0, 0);
-        monkey_enable(enable, gpio, on_en, off_en, on_ms, off_ms);
+        monkey_run(enable);
+        monkey_config(gpio, on_en, off_en, on_ms, off_ms);
     }
     //zone end
 out:
