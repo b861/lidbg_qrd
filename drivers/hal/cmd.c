@@ -60,7 +60,22 @@ void parse_cmd(char *pt)
 	else if (!strcmp(argv[0], "appcmd"))
 	{
 		lidbg("%s:[%s]\n", argv[0],argv[1]);
+
 	
+		if (!strcmp(argv[1], "*158#000"))
+		{
+		//*#*#158999#*#*
+			fs_mem_log("*158#999--fs_call_apk\n");
+			fs_mem_log("*158#001--LOG_LOGCAT\n");
+			fs_mem_log("*158#002--LOG_DMESG\n");
+			fs_mem_log("*158#003--LOG_CLEAR_LOGCAT_KMSG\n");
+			fs_mem_log("*158#010--USB_ID_LOW_HOST\n");
+			fs_mem_log("*158#011--USB_ID_HIGH_DEV\n");
+			fs_mem_log("*158#012--lidbg_trace_msg_disable\n");
+			fs_mem_log("*158#013--dump log\n");
+
+
+		}
 		if (!strcmp(argv[1], "*158#999"))
 		{
 			is_fs_work_enable = true;
@@ -103,6 +118,16 @@ void parse_cmd(char *pt)
 		else if (!strcmp(argv[1], "*158#012"))
 		{
 			lidbg_trace_msg_disable(1);
+			lidbg_domineering_ack();
+		}
+
+		else if (!strcmp(argv[1], "*158#013"))
+		{
+			lidbg_chmod("/data");
+			lidbg_msg_get(LIDBG_LOG_DIR"lidbg_mem_log.txt", 0);
+			k2u_write(LOG_LOGCAT);
+			k2u_write(LOG_DMESG);
+
 			lidbg_domineering_ack();
 		}
 	}
