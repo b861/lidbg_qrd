@@ -46,12 +46,23 @@ bool is_file_exist(char *file)
         return true;
     }
 }
-void launch_user( char bin_path[], char argv1[], char argv2[])
+void lidbg_insmod( char argv1[])
 {
-    char *argv[] = { bin_path, argv1, argv2, NULL };
-    static char *envp[] = { "HOME=/", "TERM=linux", "PATH=/system/bin:/sbin", NULL };
-    int ret;
-    ret = call_usermodehelper(bin_path, argv, envp, UMH_WAIT_PROC);
+	static char *bin_path = NULL;
+	if(bin_path == NULL )
+	{
+		if( is_file_exist(RECOVERY_MODE_DIR))
+			bin_path = "/sbin/insmod";
+		else
+			bin_path = "/system/bin/insmod";
+	}
+	
+	{
+		int ret;
+		static char *envp[] = { "HOME=/", "TERM=linux", "PATH=/system/bin:/sbin", NULL };
+	    char *argv[] = { bin_path, argv1, NULL };
+	    ret = call_usermodehelper(bin_path, argv, envp, UMH_WAIT_PROC);
+	}
 }
 
 int thread_check_restart(void *data)
@@ -81,10 +92,7 @@ int thread_loader(void *data)
         {
             sprintf(path, "%s%s", insmod_path[i], insmod_list[j]);
             //lidbg("load %s\n",path);
-            	if( is_file_exist(RECOVERY_MODE_DIR))
-            	launch_user("/sbin/insmod", path , NULL);
-				else
-				launch_user("/system/bin/insmod", path , NULL);
+			lidbg_insmod(path);
         }
     }
 
@@ -108,6 +116,7 @@ module_init(loader_init);
 module_exit(loader_exit);
 
 EXPORT_SYMBOL(load_modules_count);
+EXPORT_SYMBOL(lidbg_insmod);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Flyaudio Inc.");

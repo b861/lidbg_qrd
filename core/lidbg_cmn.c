@@ -315,10 +315,12 @@ int  lidbg_mount(char path[])
 {
     return lidbg_launch_user(MOUNT_PATH, "-o", "remount", path, NULL, NULL, NULL);
 }
+/*
 int  lidbg_insmod(char path[])
 {
     return lidbg_launch_user(INSMOD_PATH, path, NULL, NULL, NULL, NULL, NULL);
 }
+*/
 int  lidbg_chmod(char path[])
 {
     return lidbg_launch_user(CHMOD_PATH, "777", path, NULL, NULL, NULL, NULL);
@@ -447,7 +449,7 @@ EXPORT_SYMBOL(lidbg_token_string);
 EXPORT_SYMBOL(lidbg_get_random_number);
 EXPORT_SYMBOL(lidbg_exe);
 EXPORT_SYMBOL(lidbg_mount);
-EXPORT_SYMBOL(lidbg_insmod);
+//EXPORT_SYMBOL(lidbg_insmod);
 EXPORT_SYMBOL(lidbg_chmod);
 EXPORT_SYMBOL(lidbg_new_cdev);
 EXPORT_SYMBOL(lidbg_mv);

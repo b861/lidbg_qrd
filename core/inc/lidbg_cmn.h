@@ -8,7 +8,6 @@ u32 lidbg_get_random_number(u32 num_max);
 int  lidbg_token_string(char *buf, char *separator, char **token);
 int  lidbg_exe(char path[], char argv1[], char argv2[], char argv3[], char argv4[], char argv5[], char argv6[]);
 int  lidbg_mount(char path[]);
-int  lidbg_insmod(char path[]);
 int  lidbg_chmod(char path[]);
 int  lidbg_mv(char from[], char to[]);
 int  lidbg_rm(char path[]);

@@ -41,6 +41,7 @@ char *insmod_path[] =
     NULL,
 };
 
+
 void hal_func_tbl_default(void)
 {
     lidbgerr("hal_func_tbl_default:this func not ready!\n");
@@ -60,17 +61,16 @@ int loader_thread(void *data)
 #endif
     SOC_Get_CpuFreq();
 	if( fs_is_file_exist(RECOVERY_MODE_DIR))
-		recovery_mode=1;
+		recovery_mode = 1;
 	else
-        recovery_mode=0;
+        recovery_mode = 0;
     for(i = 0; insmod_path[i] != NULL; i++)
     {
         for(j = 0; insmod_list[j] != NULL; j++)
         {
             sprintf(path, "%s%s", insmod_path[i], insmod_list[j]);
             //lidbg("load %s\n",path);
-            lidbg_insmod(path);
-            msleep(100);
+			lidbg_insmod(path);
         }
     }
 
