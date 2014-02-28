@@ -127,6 +127,8 @@ typedef enum {
 #define NOTIFIER_MINOR_SUSPEND_PREPARE  (2)
 #define NOTIFIER_MINOR_SUSPEND_UNPREPARE (3)
 #define NOTIFIER_MINOR_POWER_OFF (4)
+#define NOTIFIER_MINOR_BOOT_COMPLETE  (5)
+
 extern  bool recovery_mode;
 #else
 #define NOTIFIER_VALUE(major,minor)  (((major)&0xffff)<<16 | ((minor)&0xffff))

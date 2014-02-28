@@ -11,7 +11,14 @@
 	system(string);\
 }while(0)
 
-
+#define LIDBG_WRITE(node,buf) do{\
+	int fd;\
+	 fd = open(node, O_RDWR);\
+	 if(fd>=0){\
+	 write(fd, &buf, sizeof(buf));\
+	 close(fd);\
+	 }\
+}while(0)
 
 #define LIDBG_CALL(cmd,buf,ret_bytes) do{\
 	int fd;\

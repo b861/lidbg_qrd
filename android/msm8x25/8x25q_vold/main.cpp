@@ -33,6 +33,7 @@
 #include "NetlinkManager.h"
 #include "DirectVolume.h"
 #include "cryptfs.h"
+#include "../inc/lidbg_servicer.h"
 
 static int process_config(VolumeManager *vm);
 static void coldboot(const char *path);
@@ -76,7 +77,8 @@ int main() {
         SLOGE("Unable to start NetlinkManager (%s)", strerror(errno));
         exit(1);
     }
-
+    LIDBG_PRINT("vold:boot_complete\n");
+    LIDBG_WRITE("/dev/flydev0","boot_complete");
     coldboot("/sys/block");
 //    coldboot("/sys/class/switch");
 
