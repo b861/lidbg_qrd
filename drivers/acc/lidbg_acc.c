@@ -192,7 +192,7 @@ bool is_state_accon(void)
 static void fastboot_task_kill_exclude()
 {
     static char kill_process[32][25];
-    unsigned long flags_kill;
+    unsigned long flags_kill = 0;
 
     struct task_struct *p;
     struct mm_struct *mm;
@@ -303,7 +303,7 @@ int task_kill_select(char *task_name)
 {
     struct task_struct *p;
     struct task_struct *selected = NULL;
-    unsigned long flags_kill;
+    unsigned long flags_kill = 0;
     DUMP_FUN_ENTER;
 
     if(ptasklist_lock != NULL)
@@ -356,7 +356,7 @@ int task_find_by_pid(bool file_log,int pid)
 {
     struct task_struct *p;
     struct task_struct *selected = NULL;
-    unsigned long flags_kill;
+    unsigned long flags_kill = 0;
 	char name[64];
 	memset(name,'\0',sizeof(name));
     //DUMP_FUN_ENTER;

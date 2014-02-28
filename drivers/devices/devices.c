@@ -1063,7 +1063,7 @@ void fly_devices_init(void)
     {
 
 	
-#if (defined(FLY_DEBUG) || (1==recovery_mode))
+	if(1 == recovery_mode)
 	{
         DVD_RESET_HIGH;
         TELL_LPC_PWR_ON;
@@ -1071,9 +1071,8 @@ void fly_devices_init(void)
         LCD_ON;
         lidbg("turn lcd on!\n");
         BL_SET(BL_MAX / 2);
-
-#endif
-
+	}
+	
 #ifdef DEBUG_BUTTON
 		if(!g_var.is_fly)
 		{
