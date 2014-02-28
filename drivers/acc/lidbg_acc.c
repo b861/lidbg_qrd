@@ -629,7 +629,7 @@ static int acc_correct(void *data)
 		  )
 		{
 			
-			lidbgerr("\n\n\n\n\n\nacc_correct:send power_key\n\n\n\n\n\n");
+			lidbgerr("acc_correct:send power_key\n");
 			SOC_Key_Report(KEY_POWER,KEY_PRESSED_RELEASED);			
 			lidbg_fs_log(FASTBOOT_LOG_PATH,"acc_correct:acc_flag=%d, suspend_state=%d,tick=%d\n",g_var.acc_flag,suspend_state,tick);
 		}
@@ -679,7 +679,7 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
 		g_var.acc_flag = 1;
 		//if(suspend_state == PM_STATUS_LATE_RESUME_OK)
 			complete(&acc_status_correct);
-		g_var.fake_suspend = 0;
+		g_var.fake_suspend = 1;
         SOC_Write_Servicer(CMD_ACC_ON);
         lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_ACC_ON));
     }

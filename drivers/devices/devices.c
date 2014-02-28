@@ -818,7 +818,7 @@ static void devices_early_suspend(struct early_suspend *handler)
         AIRFAN_BACK_OFF;
 	if(g_var.fake_suspend == 0)
 	{
-		lidbg("\ndisable usb after kill process\n");
+		lidbg("disable usb after kill process\n");
 		USB_WORK_DISENABLE;
 	}
 #endif
