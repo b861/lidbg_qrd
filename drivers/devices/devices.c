@@ -77,7 +77,7 @@ static int usb_event(struct notifier_block *nb, unsigned long action, void *data
     switch (action)
     {
     case USB_DEVICE_ADD:
-        complete(&udisk_event_wait);
+        //complete(&udisk_event_wait);
         break;
     case USB_DEVICE_REMOVE:
         break;
