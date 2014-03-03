@@ -111,9 +111,14 @@ static int thread_udisk_uevent(void *data)
 
 int thread_usb_delay_enable(void *data)
 {
-	ssleep(20);
-	USB_WORK_ENABLE;
-	return 0;
+	if(!recovery_mode)
+	{
+		ssleep(20);
+		USB_WORK_ENABLE;
+	}
+	else
+		lidbg("diable thread_usb_delay_enable:%d\n",recovery_mode);
+return 0;
 }
 int thread_usb_11(void *data)
 {
