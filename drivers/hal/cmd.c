@@ -1,3 +1,12 @@
+
+int thread_dump_log(void *data)
+{
+	msleep(5000);
+	fs_cp_data_to_udisk();
+    return 0;
+}
+
+
 void parse_cmd(char *pt)
 {
     int argc = 0;
@@ -72,7 +81,7 @@ void parse_cmd(char *pt)
 			fs_mem_log("*158#010--USB_ID_LOW_HOST\n");
 			fs_mem_log("*158#011--USB_ID_HIGH_DEV\n");
 			fs_mem_log("*158#012--lidbg_trace_msg_disable\n");
-			fs_mem_log("*158#013--dump log\n");
+			fs_mem_log("*158#013--dump log and copy to udisk\n");
 
 
 		}
@@ -127,7 +136,7 @@ void parse_cmd(char *pt)
 			lidbg_msg_get(LIDBG_LOG_DIR"lidbg_mem_log.txt", 0);
 			k2u_write(LOG_LOGCAT);
 			k2u_write(LOG_DMESG);
-			fs_cp_data_to_udisk();
+			CREATE_KTHREAD(thread_dump_log, NULL);
 			lidbg_domineering_ack();
 		}
 	}

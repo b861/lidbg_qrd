@@ -406,7 +406,7 @@ void cp_data_to_udisk(void)
                 }
             }
         }
-        lidbg_rm("/data/kmsg.txt");
+        //lidbg_rm("/data/kmsg.txt");
         lidbg_domineering_ack();
     }
     else
