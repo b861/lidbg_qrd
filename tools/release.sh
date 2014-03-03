@@ -13,12 +13,10 @@ if [ "$1" = "" ]; then
 	echo "exit"
 else
 	apt-get install expect
-	#cp -u $DBG_TOOLS_PATH/pull  $UPDATA_BIN_DIR/pull
-	#cp -u $DBG_TOOLS_PATH/push  $UPDATA_BIN_DIR/push
-	
+
 	cd $UPDATA_BIN_DIR
 	pwd
-	expect $DBG_TOOLS_PATH/pull
+	git reset --hard
 	expect $DBG_TOOLS_PATH/pull
 	cp -r $DBG_OUT_RELEASE_PATH/$BOARD_VERSION/out  $UPDATA_BIN_DIR
 	cp -r $DBG_OUT_RELEASE_PATH/$BOARD_VERSION/out/*.so  $UPDATA_BIN_DIR/hw
