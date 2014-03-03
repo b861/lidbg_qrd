@@ -77,8 +77,8 @@ int main() {
         SLOGE("Unable to start NetlinkManager (%s)", strerror(errno));
         exit(1);
     }
-    LIDBG_PRINT("vold:boot_complete\n");
-    LIDBG_WRITE("/dev/flydev0","boot_complete");
+    //LIDBG_PRINT("vold:boot_complete\n");
+    //LIDBG_WRITE("/dev/flydev0","boot_complete");
     coldboot("/sys/block");
 //    coldboot("/sys/class/switch");
 

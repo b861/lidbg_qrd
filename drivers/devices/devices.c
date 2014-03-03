@@ -1186,10 +1186,7 @@ static void parse_cmd(char *pt)
 		msleep(200);
 		USB_WORK_ENABLE;
     }
-    else if(!strcmp(pt, "boot_complete"))
-    {
-        lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_BOOT_COMPLETE));
-    }
+
 	
 #endif
 
@@ -1231,11 +1228,6 @@ static int lidbg_event(struct notifier_block *this,
         SOC_BL_Set(BL_MIN);
         msleep(100);
         SOC_BL_Set(BL_MAX);
-        break;
-    case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_BOOT_COMPLETE):
-        lidbg("driver:boot_complete\n");
-        fs_mem_log("warn:boot_complete\n");
-        lidbg_readwrite_file("/sys/block/sda/uevent", NULL, "add", sizeof("add")-1);
         break;
     default:
         break;
