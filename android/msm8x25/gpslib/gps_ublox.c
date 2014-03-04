@@ -407,6 +407,21 @@ nmea_reader_update_altitude( NmeaReader  *r,
     r->fix.altitude = str2float(tok.p, tok.end);
     return 0;
 }
+static int
+nmea_reader_update_accuracy( NmeaReader  *r,
+                             Token        hdop )
+{
+    double  alt;
+    Token   tok = hdop;
+
+    if (tok.p >= tok.end)
+        return -1;
+
+    r->fix.flags   |= GPS_LOCATION_HAS_ACCURACY;
+    r->fix.accuracy = str2float(tok.p, tok.end);
+    D("[accuracy]accuracy=%lf", r->fix.accuracy);
+    return 0;
+}
 
 
 static int
@@ -456,6 +471,11 @@ static void nmea_reader_parse_gsa(NmeaReader *r, NmeaTokenizer *t)
     Token tok_prn;
 
     D("nmea_reader_parse_gsa");
+	if( t->count>15)
+	{
+		Token  tok_hdop = nmea_tokenizer_get(t, 15);
+		nmea_reader_update_accuracy(r, tok_hdop);
+	}
 
     for (i = 3; i < t->count; i++)
     {
@@ -547,7 +567,7 @@ nmea_reader_parse( NmeaReader  *r )
     Token          tok;
     unsigned int info;
 
-    D("Received: '%.*s'", r->pos, r->in);
+    D("[gpsdata]Received: '%.*s'", r->pos, r->in);
     if (r->pos < 9)
     {
         D("Too short. discarded.");
@@ -598,7 +618,7 @@ nmea_reader_parse( NmeaReader  *r )
     else if ( !memcmp(tok.p, "GSA", 3) )
     {
         // do something ?
-        nmea_reader_parse_gsa(r, tzer);
+		nmea_reader_parse_gsa(r, tzer);
     }
     else if ( !memcmp(tok.p, "GSV", 3) )
     {
@@ -636,7 +656,7 @@ nmea_reader_parse( NmeaReader  *r )
         D("unknown sentence '%.*s", tok.end - tok.p, tok.p);
     }
     info = GPS_LOCATION_HAS_LAT_LONG | GPS_LOCATION_HAS_ALTITUDE |
-           GPS_LOCATION_HAS_BEARING | GPS_LOCATION_HAS_SPEED;
+           GPS_LOCATION_HAS_BEARING | GPS_LOCATION_HAS_SPEED | GPS_LOCATION_HAS_ACCURACY;
     if ((r->fix.flags & info) == info)
     {
 #if GPS_DEBUG
@@ -671,7 +691,7 @@ nmea_reader_parse( NmeaReader  *r )
 #endif
         if (r->callback)
         {
-            D("Commit GpsLocation:latitude = %lf, longitude = %lf, altitude = %lf", r->fix.latitude, r->fix.longitude, r->fix.altitude);
+            D("[accuracy]Commit GpsLocation:latitude = %lf, longitude = %lf, altitude = %lf,accuracy=%lf", r->fix.latitude, r->fix.longitude, r->fix.altitude, r->fix.accuracy);
             r->callback( &r->fix );
             r->fix.flags = 0;
         }
@@ -1201,3 +1221,4 @@ struct hw_module_t HAL_MODULE_INFO_SYM =
     .author = "The Android Open Source Project",
     .methods = &gps_module_methods,
 };
+
