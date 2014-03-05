@@ -7,6 +7,8 @@
 #define LOG_DMESG  (1)
 #define LOG_LOGCAT (2)
 #define LOG_CLEAR_LOGCAT_KMSG (5)
+#define LOG_SHELL_TOP_DF_PS (6)
+
 
 #if 0
 

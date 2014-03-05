@@ -24,6 +24,7 @@
 #define LOG_ALL (3)
 #define LOG_CONT    (4)
 #define LOG_CLEAR_LOGCAT_KMSG (5)
+#define LOG_SHELL_TOP_DF_PS (6)
 
 #define WAKEUP_KERNEL (10)
 #define SUSPEND_KERNEL (11)
@@ -258,7 +259,19 @@ loop_read:
             lidbg("clear-logcat*&&kmsg*\n");
             break;
         }
-
+        case LOG_SHELL_TOP_DF_PS :
+        {
+            lidbg("\n\n\nLOG_SHELL_TOP_DF_PS+\n\n");
+            system("date > /data/machine.txt");
+            system("cat /proc/cmdline >> /data/machine.txt");
+            system("getprop fly.version.mcu >> /data/machine.txt");
+            system("top -n 3 -t >/data/top.txt &");
+            system("dumpsys > /data/dumpsys.txt &");
+            system("ps > /data/ps.txt");
+            system("df > /data/df.txt");
+            lidbg("\n\n\nLOG_SHELL_TOP_DF_PS-\n\n");
+            break;
+        }
 
         case VIDEO_SET_PAL:
         {

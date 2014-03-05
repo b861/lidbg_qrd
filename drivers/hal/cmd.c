@@ -78,11 +78,11 @@ void parse_cmd(char *pt)
 			fs_mem_log("*158#001--LOG_LOGCAT\n");
 			fs_mem_log("*158#002--LOG_DMESG\n");
 			fs_mem_log("*158#003--LOG_CLEAR_LOGCAT_KMSG\n");
+			fs_mem_log("*158#004--LOG_SHELL_TOP_DF_PS\n");
 			fs_mem_log("*158#010--USB_ID_LOW_HOST\n");
 			fs_mem_log("*158#011--USB_ID_HIGH_DEV\n");
 			fs_mem_log("*158#012--lidbg_trace_msg_disable\n");
 			fs_mem_log("*158#013--dump log and copy to udisk\n");
-
 
 		}
 		if (!strcmp(argv[1], "*158#999"))
@@ -106,6 +106,11 @@ void parse_cmd(char *pt)
 		else if (!strcmp(argv[1], "*158#003"))
 		{
 			k2u_write(LOG_CLEAR_LOGCAT_KMSG);
+			lidbg_domineering_ack();
+		}
+		else if (!strcmp(argv[1], "*158#004"))
+		{
+			k2u_write(LOG_SHELL_TOP_DF_PS);
 			lidbg_domineering_ack();
 		}
 	
