@@ -1,6 +1,6 @@
 #include "lidbg.h"
 
-#define BUFF_SIZE (256)
+#define BUFF_SIZE (4 * 1024 )
 #define DEVICE_NAME "lidbg_mem_log"
 #define LIDBG_FIFO_SIZE (4 * 1024 * 1024)
 #define MEM_LOG_EN
@@ -15,7 +15,7 @@ struct lidbg_msg_device
 
 static struct lidbg_msg_device *dev;
 int lidbg_mem_log_ready = 0;
-
+static char *msg_in_buff = NULL;
 
 static int lidbg_get_curr_time(char *time_string, struct rtc_time *ptm);
 static void lidbg_msg_is_enough(int len);
@@ -155,14 +155,14 @@ int lidbg_msg_put( const char *fmt, ... )
 
 		int len;
 		va_list args;
-		char msg_in_buff[BUFF_SIZE];
-		
+//		char msg_in_buff[BUFF_SIZE];
+
+		down(&dev->sem);		
 		lidbg_get_curr_time(msg_in_buff,NULL);
 	
 		len = strlen(msg_in_buff);
 
 		lidbg_msg_is_enough(len);
-		down(&dev->sem);
 		ret = kfifo_in(&dev->fifo, msg_in_buff, len);
 
 		memset(msg_in_buff, '\0', sizeof(msg_in_buff));
@@ -284,6 +284,12 @@ static int  lidbg_msg_probe(struct platform_device *pdev)
 	device_create(class_install, NULL, dev_number, NULL, "%s%d", DEVICE_NAME, 0);
 	
 	 sema_init(&dev->sem, 1);
+
+	msg_in_buff = kmalloc(BUFF_SIZE, GFP_KERNEL);
+	
+	down(&dev->sem);
+	memset(msg_in_buff, '\0', sizeof(msg_in_buff));
+	up(&dev->sem);
 
 	lidbg_mem_log_ready = 1;
 	
