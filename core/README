@@ -7,3 +7,8 @@ chmod,/flysystem修改/flysystem权限为777
 rmdir,/flysystem/lib/out删除out目录
 remount,/flysystem重新挂载/flysystem分区为读写
 echo,c io w 27 1,/dev/mlidbg0将c io w 27 1写到/dev/mlidbg0
+
+----------增加读文件夹内文件列表接口lidbg_readdir_and_dealfile---------
+接口描述:
+bool lidbg_readdir_and_dealfile(char *insure_is_dir, void *callback(char *dirname, char *filename))
+函数功能是读取文件夹内都有什么文件，生成文件链表，然后再遍历链表回调callback去处理.

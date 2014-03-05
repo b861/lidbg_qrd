@@ -17,13 +17,12 @@ bool is_file_exist(char *file)
         return true;
     }
 }
-char* get_bin_path( char* buf)
+char *get_bin_path( char *buf)
 {
     char *path;
-	path = (is_file_exist(RECOVERY_MODE_DIR)) ? "/sbin/" : "/system/bin/";
-	sprintf(g_binpath,"%s%s",path,buf);
-	//printk("===fsprintf====:%s\n",g_binpath);
-	return g_binpath;
+    path = (is_file_exist(RECOVERY_MODE_DIR)) ? "/sbin/" : "/system/bin/";
+    sprintf(g_binpath, "%s%s", path, buf);
+    return g_binpath;
 }
 int lidbg_readwrite_file(const char *filename, char *rbuf,
                          const char *wbuf, size_t length)
@@ -315,12 +314,6 @@ int  lidbg_mount(char path[])
 {
     return lidbg_launch_user(MOUNT_PATH, "-o", "remount", path, NULL, NULL, NULL);
 }
-/*
-int  lidbg_insmod(char path[])
-{
-    return lidbg_launch_user(INSMOD_PATH, path, NULL, NULL, NULL, NULL, NULL);
-}
-*/
 int  lidbg_chmod(char path[])
 {
     return lidbg_launch_user(CHMOD_PATH, "777", path, NULL, NULL, NULL, NULL);
@@ -352,6 +345,63 @@ int  lidbg_reboot(void)
 int  lidbg_setprop(char key[], char value[])
 {
     return lidbg_launch_user(SETPROP_PATH, key, value, NULL, NULL, NULL, NULL);
+}
+
+struct name_list
+{
+    char name[33];
+    struct list_head list;
+};
+static int readdir_build_namelist(void *arg, const char *name, int namlen,	loff_t offset, u64 ino, unsigned int d_type)
+{
+    struct list_head *names = arg;
+    struct name_list *entry;
+    entry = kzalloc(sizeof(struct name_list), GFP_KERNEL);
+    if (entry == NULL)
+        return -ENOMEM;
+    memcpy(entry->name, name, namlen);
+    entry->name[namlen] = '\0';
+    list_add(&entry->list, names);
+    return 0;
+}
+bool lidbg_readdir_and_dealfile(char *insure_is_dir, void *callback(char *dirname, char *filename))
+{
+    LIST_HEAD(names);
+    struct file *dir_file;
+    struct dentry *dir;
+    int status;
+
+    if(!insure_is_dir || !callback)
+        return false;
+
+    dir_file = filp_open(insure_is_dir, O_RDONLY | O_DIRECTORY, 0);
+    if (IS_ERR(dir_file))
+    {
+        LIDBG_ERR("open%s,%ld\n", insure_is_dir, PTR_ERR(dir_file));
+        return false;
+    }
+    else
+    {
+        struct name_list *entry;
+        LIDBG_SUC("open:<%s,%s>\n", insure_is_dir, dir_file->f_path.dentry->d_name.name);
+        dir = dir_file->f_path.dentry;
+        status = vfs_readdir(dir_file, readdir_build_namelist, &names);
+        if (dir_file)
+            fput(dir_file);
+        while (!list_empty(&names))
+        {
+            entry = list_entry(names.next, struct name_list, list);
+            if (!status && entry)
+            {
+                if(callback && entry->name[0] != '.') // ignore "." and ".."
+                    callback(insure_is_dir, entry->name);
+                list_del(&entry->list);
+                kfree(entry);
+            }
+            entry = NULL;
+        }
+        return true;
+    }
 }
 bool lidbg_new_cdev(struct file_operations *cdev_fops, char *nodename)
 {
@@ -392,7 +442,6 @@ int lidbg_token_string(char *buf, char *separator, char **token)
     }
     return pos;
 }
-	
 void mod_cmn_main(int argc, char **argv)
 {
 
@@ -445,11 +494,11 @@ MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Flyaudio Inc.");
 
 
+EXPORT_SYMBOL(lidbg_readdir_and_dealfile);
 EXPORT_SYMBOL(lidbg_token_string);
 EXPORT_SYMBOL(lidbg_get_random_number);
 EXPORT_SYMBOL(lidbg_exe);
 EXPORT_SYMBOL(lidbg_mount);
-//EXPORT_SYMBOL(lidbg_insmod);
 EXPORT_SYMBOL(lidbg_chmod);
 EXPORT_SYMBOL(lidbg_new_cdev);
 EXPORT_SYMBOL(lidbg_mv);
