@@ -31,6 +31,7 @@
 #include <cutils/log.h>
 
 #include "Process.h"
+#include "../inc/lidbg_servicer.h"
 
 int Process::readSymLink(const char *path, char *link, size_t max) {
     struct stat s;
@@ -212,9 +213,12 @@ void Process::killProcessesWithOpenFiles(const char *path, int action) {
         }
         if (action == 1) {
             SLOGW("Sending SIGHUP to process %d", pid);
+	    LIDBG_PRINT("lidbgerr: vold Sending SIGHUP to process %s, pid=%d",name,pid);	
             kill(pid, SIGTERM);
         } else if (action == 2) {
             SLOGE("Sending SIGKILL to process %d", pid);
+	    LIDBG_PRINT("lidbgerr: vold Sending SIGKILL to process %s, pid=%d",name,pid);	
+
             kill(pid, SIGKILL);
         }
     }

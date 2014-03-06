@@ -48,6 +48,8 @@
 #include "Process.h"
 #include "Asec.h"
 #include "cryptfs.h"
+#include "../inc/lidbg_servicer.h"
+
 
 //#define MASS_STORAGE_FILE_PATH  "/sys/class/android_usb/android0/f_mass_storage/lun/file"
 
@@ -719,6 +721,7 @@ int VolumeManager::unmountLoopImage(const char *id, const char *idHash,
                 action = 1; // SIGHUP
         }
 
+	LIDBG_PRINT("lidbgerr: vold unmountLoopImage.\n");	
         Process::killProcessesWithOpenFiles(mountPoint, action);
         usleep(UNMOUNT_SLEEP_BETWEEN_RETRY_MS);
     }

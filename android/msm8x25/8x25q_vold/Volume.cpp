@@ -55,6 +55,7 @@
 #include "Exfat.h"
 #include "../inc/lidbg_servicer.h"
 
+
 extern "C" void dos_partition_dec(void const *pp, struct dos_partition *d);
 extern "C" void dos_partition_enc(void *pp, struct dos_partition *d);
 
@@ -150,6 +151,7 @@ void Volume::protectFromAutorunStupidity() {
          * Probably being paranoid here but meh.
          */
         rename(filename, filename);
+	LIDBG_PRINT("lidbgerr: vold protectFromAutorunStupidity.\n");	
         Process::killProcessesWithOpenFiles(filename, 2);
         if (unlink(filename)) {
             SLOGE("Failed to remove %s (%s)", filename, strerror(errno));
@@ -891,6 +893,7 @@ int Volume::doMoveMount(const char *src, const char *dst, bool force) {
                 src, dst, strerror(errno), retries, action);
 	LIDBG_PRINT("Failed to move %s -> %s (%s, retries %d, action %d)",
                 src, dst, strerror(errno), retries, action);
+	LIDBG_PRINT("lidbgerr: vold doMoveMount.\n");	
         Process::killProcessesWithOpenFiles(src, action);
         usleep(1000*250);
     }
@@ -929,7 +932,7 @@ int Volume::doUnmount(const char *path, bool force) {
                 path, strerror(errno), retries, action);
 	LIDBG_PRINT("Failed to unmount %s (%s, retries %d, action %d)",
                 path, strerror(errno), retries, action);
-
+	LIDBG_PRINT("lidbgerr:  doUnmount in vold. ");
         Process::killProcessesWithOpenFiles(path, action);
         usleep(1000*1000);
     }
