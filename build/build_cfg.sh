@@ -82,7 +82,11 @@ echo input :"$1" "$2" "$3"
 	echo "EXTRA_CFLAGS += -DSOC_MSM8x60" >> $DBG_ROOT_PATH/build_cfg.mk
 	echo "LOCAL_CFLAGS += -DSOC_MSM8x60" >> $DBG_ROOT_PATH/build_cfg.mk
 	echo "msm8x60";;
-
+	
+   msm8226)
+	echo "EXTRA_CFLAGS += -DSOC_MSM8226" >> $DBG_ROOT_PATH/build_cfg.mk
+	echo "LOCAL_CFLAGS += -DSOC_MSM8226" >> $DBG_ROOT_PATH/build_cfg.mk
+	echo "msm8226";;
 	*)
 	echo -e "\033[41;37m  ===============support table====================\033[0m "  
 	echo "v1"
