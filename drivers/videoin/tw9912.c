@@ -433,7 +433,7 @@ vedio_format_t tw9912_cvbs_signal_tsting(vedio_channel_t Channel)
     tw9912_signal_t signal_is_how_1 = {NOTONE, OTHER, source_other};
     tw9912_input_info_t tw9912_input_information_1;
     mutex_lock(&lock_com_chipe_config);
-    if(the_last_config.Channel != Channel)
+    if((the_last_config.Channel != Channel))
     {
     	lidbg("the_last_config.Channel=%d\n",the_last_config.Channel);
         tw9912_config_array_agin();

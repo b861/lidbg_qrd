@@ -8,6 +8,7 @@ extern tw9912_signal_t signal_is_how[5];
 extern last_config_t the_last_config;//上一次的通道状态
 extern tw9912info_t global_tw9912_info_for_NTSC_I;
 extern tw9912info_t global_tw9912_info_for_PAL_I;
+vedio_channel_t_2 last_vide_format = OTHER_CHANNEL_4KO;
 static u8 flag_now_config_channal_AUX_or_Astren = 0; //0 is Sstren 1 is AUX 2 is DVD
 u8 global_debug_thread = 0;
 static TW9912_Image_Parameter TW9912_Image_Parameter_fly[6] =
@@ -397,6 +398,24 @@ vedio_format_t flyVideoTestSignalPin_in(u8 Channel)//给蒋工的视频检测函
         video_signal_channel_switching_occurs();
     }
 
+    /*
+     *ensure AGC configed right when channel or video format
+     *changed 
+     */
+    if(last_vide_format != global_video_channel_flag)
+    {
+   	u8 agc_val[] = {0x06, 0x03};
+
+	if(Channel == SEPARATION || Channel == YIN2)
+		agc_val[1] = 0x00;
+	
+	if(tw9912_write(agc_val) == NACK)
+		lidbg("I2c write err when video format changed .\n");
+	
+	lidbg("Video format changed : (last)-%d, (now)-%d\n", last_vide_format, global_video_channel_flag);
+	last_vide_format = global_video_channel_flag;
+    }
+	
     //mutex_unlock(&lock_chipe_config);
     // return NTSC_I;
     if(Channel == SEPARATION || Channel == YIN2)
@@ -563,11 +582,13 @@ static void chips_config_cvbs_begin()
         Tw9912_register_valu[0] = 0xa;
         Tw9912_register_valu[1] = 0x1e;
         tw9912_write((char *)Tw9912_register_valu);
+	 last_vide_format = TV_4KO;
     }
     else if(global_video_channel_flag == AUX_4KO)//只针对AUX的特殊配置
     {
         u8 Tw9912_register_valu[] = {0x08, 0x15,};
         tw9912_write((char *)Tw9912_register_valu);
+	 last_vide_format = AUX_4KO;
     }
 
     if(info_vedio_channel_t <= SEPARATION)
