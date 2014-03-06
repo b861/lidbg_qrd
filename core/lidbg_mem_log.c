@@ -165,12 +165,13 @@ int lidbg_msg_put( const char *fmt, ... )
 		lidbg_msg_is_enough(len);
 		ret = kfifo_in(&dev->fifo, msg_in_buff, len);
 
-		memset(msg_in_buff, '\0', sizeof(msg_in_buff));
+		//memset(msg_in_buff, '\0', sizeof(msg_in_buff));
 
 		va_start ( args, fmt );
 		ret = vsprintf (msg_in_buff, (const char *)fmt, args );
 		va_end ( args );
-		
+
+		msg_in_buff[BUFF_SIZE-1] = '\0';
 		len = strlen(msg_in_buff);
 
 		lidbg_msg_is_enough(len);
