@@ -382,6 +382,7 @@ vedio_format_t camera_open_video_signal_test_in(void)
     down(&sem);
     return camera_open_video_signal_test_in_2();
 }
+
 vedio_format_t flyVideoTestSignalPin_in(u8 Channel)//给蒋工的视频检测函数接口
 {
     static vedio_format_t lidbg_count_flag_next = 0;
@@ -399,18 +400,27 @@ vedio_format_t flyVideoTestSignalPin_in(u8 Channel)//给蒋工的视频检测函
     }
 
     /*
-     *ensure AGC configed right when channel or video format
-     *changed 
+     *ensure AGC configed right when  video format
+     *changed in YIN3 channel
      */
-    if(last_vide_format != global_video_channel_flag)
+    if((the_last_config.Channel == YIN3) && (Channel == YIN3) && (last_vide_format != global_video_channel_flag))
     {
-   	u8 agc_val[] = {0x06, 0x03};
+    	int i = 0;
+	const u8 video_format_changed_config[] = {0x02, 0x4C, 0x03, 0x20, 0x06, 0x03, 0xC0, 0x01, 0xE6, 0x00, 0xE8, 0x3F, 0xfe};
 
-	if(Channel == SEPARATION || Channel == YIN2)
-		agc_val[1] = 0x00;
-	
-	if(tw9912_write(agc_val) == NACK)
-		lidbg("I2c write err when video format changed .\n");
+	tc358746xbg_data_out_enable(DISABLE);
+
+	tw9912_RESX_DOWN;
+	msleep(10);
+	tw9912_RESX_UP;
+	msleep(10);
+
+	while(video_format_changed_config[i*2] != 0xfe)
+      {
+          if(tw9912_write((char *)&video_format_changed_config[i*2]) == NACK)
+		  	lidbg("I2C write err when video format changed.\n");
+          i++;
+      }	
 	
 	lidbg("Video format changed : (last)-%d, (now)-%d\n", last_vide_format, global_video_channel_flag);
 	last_vide_format = global_video_channel_flag;
