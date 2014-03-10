@@ -101,5 +101,3 @@ echo input :"$1" "$2" "$3"
 	esac
 
 mkdir $DBG_OUT_PATH
-mkdir -p $DBG_OUT_RELEASE_PATH/$1/out
-

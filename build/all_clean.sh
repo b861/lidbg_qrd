@@ -10,14 +10,8 @@ echo "exit:  DBG_OUT_PATH=null"
 exit
 fi
 
-if [ "$DBG_OUT_RELEASE_PATH " = "" ]; then
-echo "exit:  DBG_OUT_PATH=null"
-exit
-fi
-
 ./drv_clean.sh
 ./work_clean.sh
 rm -rf $DBG_OUT_PATH
-rm -rf $DBG_OUT_RELEASE_PATH 
 cd $DBG_ANDROID_PATH/$DBG_SOC && rm -rf out
 

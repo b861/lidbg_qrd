@@ -26,10 +26,9 @@ drivers下是在不同平台下的一些具体实际工作，为了保证其平�
 *编译脚本（build）
 build：编译使用到的脚本。
 
-输出目录（out/out_release）
+输出目录（out/）
 out：编译后自动生成，存放所有编译生成的模块。
-out_release：编译后自动生成，存放产品正式包需要的模块，由build/copy_out_release.sh脚本指定。
-注：提供产品正式包时，使用lidbg_qrd目录下的release.sh编译，然后提供out_release下的out给系统组打包(release.sh+"commit"会触发脚本自动同步到二进制仓库更新 )
+注：提供产品正式包时，使用lidbg_qrd目录下的release.sh编译
 
 ----------编译方法----------
 1.配置编译环境

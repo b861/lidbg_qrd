@@ -5,6 +5,4 @@
 #=======================================================================================
 
 source ./env_entry.sh
-./build_cfg.sh $BOARD_VERSION $BUILD_VERSION $DBG_SOC && ./all_make.sh
-./copy_out_release.sh
-
+./build_cfg.sh $BOARD_VERSION $BUILD_VERSION $DBG_SOC & ./all_make.sh
