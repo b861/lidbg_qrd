@@ -87,6 +87,7 @@
 
 ////////////
 //#define BUILD_FOR_RECOVERY
+#define USE_CALL_USERHELPER
 
 #include "lidbg_loader.h"
 #include "lidbg_io.h"
@@ -94,6 +95,7 @@
 #include "lidbg_ts.h"
 #include "lidbg_cmn.h"
 #include "lidbg_fileserver.h"
+#include "lidbg_uevent.h"
 #include "lidbg_ts_event.h"
 #include "lidbg_ad.h"
 #include "lidbg_def.h"

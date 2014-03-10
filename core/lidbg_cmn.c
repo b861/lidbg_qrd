@@ -211,6 +211,7 @@ int lidbg_get_current_time(char *time_string, struct rtc_time *ptm)
 }
 int  lidbg_launch_user( char bin_path[], char argv1[], char argv2[], char argv3[], char argv4[], char argv5[], char argv6[])
 {
+#ifdef USE_CALL_USERHELPER
     char *argv[] = { bin_path, argv1, argv2, argv3, argv4, argv5, argv6, NULL };
     static char *envp[] = { "HOME=/", "TERM=linux", "PATH=/system/bin:/sbin", NULL };//tell me sh where it is;
     int ret;
@@ -223,6 +224,12 @@ int  lidbg_launch_user( char bin_path[], char argv1[], char argv2[], char argv3[
     //else
     //    lidbg("lunch [%s %s] success!\n", bin_path, argv1);
     return ret;
+#else
+	char shell_cmd[256];
+	sprintf(shell_cmd, "%s %s %s %s %s %s ", argv1 == NULL ? " " : argv1, argv2 == NULL ? " " : argv2, argv3 == NULL ? " " : argv3, argv4 == NULL ? " " : argv4, argv5 == NULL ? " " : argv5, argv6 == NULL ? " " : argv6);
+	lidbg_uevent_shell(shell_cmd);
+    return 1;
+#endif
 }
 
 static struct class *lidbg_cdev_class = NULL;
