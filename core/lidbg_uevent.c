@@ -98,13 +98,6 @@ struct miscdevice lidbg_uevent_device =
     .name = DEV_NAME,
     .fops = &lidbg_uevent_fops,
 };
-int thread_wait_userver_ready(void *data)
-{
-    msleep(500);
-    lidbg_uevent_shell("insmod /flysystem/lib/out/lidbg_loader.ko");
-    lidbg_uevent_shell("insmod /system/lib/modules/out/lidbg_loader.ko");
-    return 0;
-}
 
 static int __init lidbg_uevent_init(void)
 {
@@ -114,7 +107,6 @@ static int __init lidbg_uevent_init(void)
         LIDBG_ERR("misc_register\n");
     else
         LIDBG_SUC("misc_register\n");
-    kthread_run(thread_wait_userver_ready, NULL, "ftf_userver_wait");
     LIDBG_WARN("<==OUT==>\n\n");
     return 0;
 }

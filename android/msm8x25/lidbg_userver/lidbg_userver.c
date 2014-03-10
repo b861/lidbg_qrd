@@ -169,11 +169,22 @@ static void lidbg_uevent_poll(bool (*uevent_callback)(int fd))
         LIDBG_PRINT2("err--------------- uevent_open_socket ---------------\n");
 
 }
+void *thread_wait_userver(void *arg)
+{
+    sleep(1);
+    pthread_detach(pthread_self());
+    system("insmod /flysystem/lib/out/lidbg_loader.ko");
+    system("insmod /system/lib/modules/out/lidbg_loader.ko");
+    pthread_exit(0);
+    return NULL;
+}
 int main(int argc, char **argv)
 {
+    pthread_t lidbg_uevent_tid;
     system("insmod /flysystem/lib/out/lidbg_uevent.ko");
     system("insmod /system/lib/modules/out/lidbg_uevent.ko");
     usleep(50 * 1000);
+    pthread_create(&lidbg_uevent_tid, NULL, thread_wait_userver, NULL);
     lidbg_uevent_poll(lidbg_uevent_callback);
     return 0;
 }

@@ -28,13 +28,13 @@ void remount_system(void)
         lidbg_mount("/system");
         lidbg_mount("/flysystem");
         msleep(300);
-        lidbg_chmod("chmod 777 /system");
-        lidbg_chmod("chmod 777 /flysystem");
-        lidbg_chmod("chmod 777 /system/bin");
-        lidbg_chmod("chmod 777 /flysystem/bin");
-        lidbg_chmod("chmod 777 /system/lib/hw");
-        lidbg_chmod("chmod 777 /flysystem/lib/hw");
-        lidbg_chmod("chmod 777 /flysystem/lib/out");
+        lidbg_chmod("/system");
+        lidbg_chmod("/flysystem");
+        lidbg_chmod("/system/bin");
+        lidbg_chmod("/flysystem/bin");
+        lidbg_chmod("/system/lib/hw");
+        lidbg_chmod("/flysystem/lib/hw");
+        lidbg_chmod("/flysystem/lib/out");
         msleep(200);
     }
 }

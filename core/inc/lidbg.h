@@ -87,7 +87,9 @@
 
 ////////////
 //#define BUILD_FOR_RECOVERY
+#ifdef SOC_MSM8x25
 #define USE_CALL_USERHELPER
+#endif
 
 #include "lidbg_loader.h"
 #include "lidbg_io.h"

@@ -19,10 +19,14 @@ bool is_file_exist(char *file)
 }
 char *get_bin_path( char *buf)
 {
+#ifdef USE_CALL_USERHELPER
     char *path;
     path = (is_file_exist(RECOVERY_MODE_DIR)) ? "/sbin/" : "/system/bin/";
     sprintf(g_binpath, "%s%s", path, buf);
     return g_binpath;
+#else
+    return buf;
+#endif
 }
 int lidbg_readwrite_file(const char *filename, char *rbuf,
                          const char *wbuf, size_t length)
@@ -226,7 +230,7 @@ int  lidbg_launch_user( char bin_path[], char argv1[], char argv2[], char argv3[
     return ret;
 #else
 	char shell_cmd[256];
-	sprintf(shell_cmd, "%s %s %s %s %s %s ", argv1 == NULL ? " " : argv1, argv2 == NULL ? " " : argv2, argv3 == NULL ? " " : argv3, argv4 == NULL ? " " : argv4, argv5 == NULL ? " " : argv5, argv6 == NULL ? " " : argv6);
+	sprintf(shell_cmd, "%s %s %s %s %s %s %s ", bin_path,argv1 == NULL ? "" : argv1, argv2 == NULL ? "" : argv2, argv3 == NULL ? "" : argv3, argv4 == NULL ? "" : argv4, argv5 == NULL ? "" : argv5, argv6 == NULL ? "" : argv6);
 	lidbg_uevent_shell(shell_cmd);
     return 1;
 #endif
