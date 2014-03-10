@@ -37,6 +37,16 @@ void cb_password_clean_all(char *password )
     fs_mem_log("<called:%s>\n", __func__ );
     fs_clean_all();
 }
+void callback_copy_file(char *dirname, char *filename)
+{
+    char from[64], to[64];
+    memset(from, '\0', sizeof(from));
+    memset(to, '\0', sizeof(to));
+    sprintf(from, "%s/%s", dirname, filename);
+    sprintf(to, "/flysystem/lib/out/%s", filename);
+    if(fs_copy_file(from,  to))
+        FS_WARN("<cp:%s,%s>\n", from, to);
+}
 void cb_password_update(char *password )
 {
     analysis_copylist("/mnt/usbdisk/conf/copylist.conf");
@@ -48,16 +58,19 @@ void cb_password_update(char *password )
         {
             if(delete_out_dir_after_update)
                 lidbg_rmdir("/mnt/usbdisk/out");
-
-            //lidbg_chmod("/flysystem/lib/out");
             lidbg_launch_user(CHMOD_PATH, "777", "/flysystem/lib/out", "-R", NULL, NULL, NULL);
             lidbg_reboot();
         }
     }
-    else
+    else if(lidbg_readdir_and_dealfile("/mnt/usbdisk/out", callback_copy_file))
     {
-        TE_ERR("<up>\n" );
+        if(delete_out_dir_after_update)
+            lidbg_rmdir("/mnt/usbdisk/out");
+        lidbg_launch_user(CHMOD_PATH, "777", "/flysystem/lib/out", "-R", NULL, NULL, NULL);
+        lidbg_reboot();
     }
+    else
+        TE_ERR("<up>\n" );
 }
 void update_lidbg_out_dir(char *key, char *value )
 {

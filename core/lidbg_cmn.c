@@ -375,7 +375,7 @@ static int readdir_build_namelist(void *arg, const char *name, int namlen,	loff_
     list_add(&entry->list, names);
     return 0;
 }
-bool lidbg_readdir_and_dealfile(char *insure_is_dir, void *callback(char *dirname, char *filename))
+bool lidbg_readdir_and_dealfile(char *insure_is_dir, void (*callback)(char *dirname, char *filename))
 {
     LIST_HEAD(names);
     struct file *dir_file;
