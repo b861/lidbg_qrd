@@ -600,11 +600,11 @@ int thread_led(void *data)
         {
             if(led_en)
                 led_on();
-#ifdef FLY_DEBUG
-            msleep(500);
-#else
-            msleep(2000);
-#endif
+	 	 if(!g_var.is_fly)
+	  		msleep(500);
+		else
+	      		msleep(2000);
+
         }
         else //Ìõ¼þÎª¼Ù
         {
@@ -709,8 +709,8 @@ static int soc_dev_probe(struct platform_device *pdev)
         CREATE_KTHREAD(thread_dev_init, NULL);
 
 
-#ifdef FLY_DEBUG
-
+if(!g_var.is_fly)
+{
         if(1) 	//LPCBackLightOn
         {
             u8 buff[] = {0x00, 0x94, 0x01, 0x99};
@@ -732,7 +732,7 @@ static int soc_dev_probe(struct platform_device *pdev)
         CREATE_KTHREAD(thread_pwr, NULL);
 #endif
 
-#endif
+}
 
     }
 
@@ -806,9 +806,8 @@ static void devices_early_suspend(struct early_suspend *handler)
     DUMP_FUN_ENTER;
     if(platform_id ==  PLATFORM_FLY)
     {
-#ifdef FLY_DEBUG
-        LCD_OFF;
-#endif
+ if(!g_var.is_fly)  LCD_OFF;
+
         LED_ON;
         TELL_LPC_PWR_ON;
         i2c_c_ctrl = 1;
@@ -841,27 +840,27 @@ static void devices_late_resume(struct early_suspend *handler)
         //SOC_IO_Config(MCU_IIC_REQ_I, GPIO_CFG_INPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA);
         //TELL_LPC_PWR_ON;
 
-#ifdef FLY_DEBUG
+	 if(!g_var.is_fly)
+	 {
+	        BL_SET(BL_MAX / 2);
+	        LCD_ON;
 
-        BL_SET(BL_MAX / 2);
-        LCD_ON;
+	        if(1) 	//LPCBackLightOn
+	        {
+	            u8 buff[] = {0x00, 0x94, 0x01, 0x99};
+	            SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
+	        }
 
-        if(1) 	//LPCBackLightOn
-        {
-            u8 buff[] = {0x00, 0x94, 0x01, 0x99};
-            SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
-        }
+	        if(0)
+	        {
+	            u8 buff[] = {0x00, 0x05, 0x01};//LPCControlPWREnable
+	            lidbg("LPCControlPWREnable\n");
+	            SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
+	        }
 
-        if(0)
-        {
-            u8 buff[] = {0x00, 0x05, 0x01};//LPCControlPWREnable
-            lidbg("LPCControlPWREnable\n");
-            SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
-        }
+	        CREATE_KTHREAD(thread_resume, NULL);
 
-        CREATE_KTHREAD(thread_resume, NULL);
-
-#endif
+ 	}
 
         //lidbg_fs_log(TEMP_LOG_PATH,"*\n");
     }
@@ -922,27 +921,23 @@ static void soc_dev_suspend_prepare(void)
 
     DUMP_FUN;
 
-#ifdef FLY_DEBUG
+    if(!g_var.is_fly)
     {
         //LPCBackLightOff
         u8 buff[] = {0x00, 0x94, 0x00, 0x98};
         SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
     }
-#endif
+
 
 #ifdef DEBUG_UMOUNT_USB
     SOC_Write_Servicer(UMOUNT_USB);
-#ifdef FLY_DEBUG
-    msleep(1000);
-#endif
+ if(!g_var.is_fly)    msleep(1000);
 #endif
 
     //disable usb first
     USB_WORK_DISENABLE;
 
-#ifdef FLY_DEBUG
-    msleep(3000);
-#endif
+ if(!g_var.is_fly)    msleep(3000);
 
 
 }

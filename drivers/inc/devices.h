@@ -142,8 +142,8 @@ enum
 
 #define DEBUG_BUTTON
 
-#ifdef FLY_DEBUG
-#define DEBUG_AD_KEY
+#if 0
+//#define DEBUG_AD_KEY
 
 
 #define DVD_RESET_HIGH  do{SOC_IO_Output(0, GPIO_DVD_RESET, 1); }while(0)
@@ -184,12 +184,8 @@ enum
 
 #define GPIO_LCD1  (31)
 #define GPIO_LCD2  (96)
-//becauseof i can't catch the msg ,so i do with it on the way below;
-#if 1 //#ifdef  FLY_DEBUG
 #define GPIO_LCD3  (97)
-#else
-#define GPIO_LCD3  (82)
-#endif
+
 
 #define GPIO_PWR_EN (23)
 #define GPIO_USB_HUB  (35)

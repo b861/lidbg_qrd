@@ -1,6 +1,6 @@
 
 source ./env_entry.sh
-./build_cfg.sh $BOARD_VERSION $BUILD_VERSION $DBG_SOC
+./build_cfg.sh $DBG_SOC $BOARD_VERSION
 
 hostname > $DBG_CORE_PATH/build_time.conf
 date >> $DBG_CORE_PATH/build_time.conf

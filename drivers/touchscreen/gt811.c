@@ -696,8 +696,7 @@ if(1==recovery_mode)
 #endif
 
 
-#ifdef FLY_DEBUG
-    {
+ if(!g_var.is_fly)    {
         static int key = 0;
         if(finger == 3)
             key = KEY_BACK;
@@ -712,7 +711,6 @@ if(1==recovery_mode)
             }
         }
     }
-#endif
 
 
     //#ifdef HAVE_TOUCH_KEY

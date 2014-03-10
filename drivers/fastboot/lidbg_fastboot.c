@@ -895,19 +895,20 @@ void fastboot_pwroff(void)
 
     //fs_save_state();
 
-#if 1//def FLY_DEBUG
-    msleep(1000);
+ if(!g_var.is_fly)
+ {
+	 msleep(1000);
 
 #ifdef RUN_FASTBOOT
 #if (defined(BOARD_V1) || defined(BOARD_V2))
-    //SOC_Write_Servicer(CMD_ACC_OFF_PROPERTY_SET);
-    SOC_Write_Servicer(CMD_FAST_POWER_OFF);
+	    //SOC_Write_Servicer(CMD_ACC_OFF_PROPERTY_SET);
+	    SOC_Write_Servicer(CMD_FAST_POWER_OFF);
 #endif
 #else
-    SOC_Key_Report(KEY_POWER, KEY_PRESSED_RELEASED);
+	    SOC_Key_Report(KEY_POWER, KEY_PRESSED_RELEASED);
 #endif
 
-#endif
+ }
     complete(&early_suspend_start);
 
 }
@@ -928,11 +929,11 @@ void fastboot_go_pwroff(void)
 
 static void set_func_tbl(void)
 {
-#ifdef FLY_DEBUG
-    plidbg_dev->soc_func_tbl.pfnSOC_PWR_ShutDown = fastboot_go_pwroff;
-#else
+ if(!g_var.is_fly)   
+   plidbg_dev->soc_func_tbl.pfnSOC_PWR_ShutDown = fastboot_go_pwroff;
+else
     plidbg_dev->soc_func_tbl.pfnSOC_PWR_ShutDown = fastboot_pwroff;
-#endif
+
     plidbg_dev->soc_func_tbl.pfnSOC_PWR_GetStatus = fastboot_get_status;
     plidbg_dev->soc_func_tbl.pfnSOC_PWR_SetStatus = fastboot_set_status;
     plidbg_dev->soc_func_tbl.pfnSOC_PWR_Ignore_Wakelock = fastboot_is_ignore_wakelock;

@@ -87,7 +87,7 @@
 
 ////////////
 //#define BUILD_FOR_RECOVERY
-#ifdef SOC_MSM8x25
+#ifdef SOC_msm8x25
 #define USE_CALL_USERHELPER
 #endif
 

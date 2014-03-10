@@ -75,9 +75,6 @@ int thread_bp_msg(void *data)
 int bp_msg_init(void)
 {
     DUMP_FUN;
-#if 0//def FLY_DEBUG
-    lidbg("debug:bp_msg_init do nothing");
-#else
     lidbg("\n[futengfei]  =bp_msg_init=IN===============================\n");
     smem_log_temp = (smem_log_deep *)smem_alloc(SMEM_ID_VENDOR1, sizeof(smem_log_deep));
     if(smem_log_temp == NULL)
@@ -88,7 +85,6 @@ int bp_msg_init(void)
 
     CREATE_KTHREAD(thread_bp_msg, NULL);
     lidbg("[futengfei]  =bp_msg_init=OUT===============================\n");
-#endif
     return 0;
 }
 

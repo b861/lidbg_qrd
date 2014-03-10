@@ -528,8 +528,9 @@ static void goodix_ts_work_func(struct work_struct *work)
     }
 
 
-#ifdef FLY_DEBUG
-    if(finger_list.length == 3)
+ if(!g_var.is_fly)
+ {
+	if(finger_list.length == 3)
     {
         SOC_Key_Report(KEY_BACK, KEY_PRESSED_RELEASED);
     }
@@ -542,7 +543,7 @@ static void goodix_ts_work_func(struct work_struct *work)
     {
         SOC_Key_Report(KEY_MENU, KEY_PRESSED_RELEASED);
     }
-#endif
+ }
 
 
 BIT_NO_CHANGE:
