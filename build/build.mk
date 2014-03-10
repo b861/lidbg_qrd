@@ -1,7 +1,7 @@
 
 KERNELDIR = $(DBG_KERNEL_SRC_DIR)
 INSTALLDIR = $(DBG_COPY_DIR)
-include $(DBG_SHELL_PATH)/config_$(DBG_SOC)
+
 # The current directory is passed to sub-makes as argument
 PWD := $(shell pwd)
 

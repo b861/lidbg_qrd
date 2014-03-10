@@ -13,5 +13,3 @@ ifeq ($(DBG_PLATFORM),msm7627a)
 else
 	CONFIG_ACC=m
 endif
-
-

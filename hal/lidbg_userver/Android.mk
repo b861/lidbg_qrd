@@ -6,7 +6,7 @@ LOCAL_MODULE_PATH := $(DBG_OUT_PATH)
 LOCAL_SHARED_LIBRARIES += libcutils libutils
 LOCAL_LDLIBS += -llog
 LOCAL_SRC_FILES:= \/par    lidbg_userver.c
-include $(LOCAL_PATH)/../../../build_cfg.mk
+include $(LOCAL_PATH)/../../build_cfg.mk
 LOCAL_MODULE_TAGS:= optional
 LOCAL_MODULE := lidbg_userver
 include $(BUILD_EXECUTABLE)

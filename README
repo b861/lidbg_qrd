@@ -7,16 +7,16 @@ linux debug(lidbg)
 密码：小写字母 l
 
 ----------代码结构--------------
-主要包含应用层（android），基础驱动模块（core），具体工作模块（drivers），编译脚本（build），输出目录（out/out_release）。
+主要包含应用层（hal），基础驱动模块（core），具体工作模块（drivers），编译脚本（build），输出目录（out）。
 
-*应用层（android）
-android/JAVA:提供一些函数模块，可直接用于上层java代码中（例如把java程序中的打印信息输出到串口）。
-详见android/soc/README
+*应用层（hal）
+hal/JAVA:提供一些函数模块，可直接用于上层java代码中（例如把java程序中的打印信息输出到串口）。
+详见hal/README
 
 *基础驱动模块（core）
 作用主要有两个：
 1.封装不同soc的底层实现（例如i2c / io / spi / ad / pwm等，在soc/soc目录），提供通用接口给其他模块。通过共享其包含指针函数的结构体地址，给其他模块（主要是drivers下的模块）调用。
-2.创建节点/dev/mlidbg0，提供在shell终端控制外设调试的命令，具体的命令参考soc\soc\doc\echo_shell_soc.txt。
+2.创建节点/dev/mlidbg0，提供在shell终端控制外设调试的命令，具体的命令参考soc\$soc\doc\echo_shell_soc.txt。
 
 *具体工作模块（drivers）
 drivers下是在不同平台下的一些具体实际工作，为了保证其平台可移植性，尽量不要调用soc的底层函数，而是调用core提供的通用接口：
@@ -26,20 +26,19 @@ drivers下是在不同平台下的一些具体实际工作，为了保证其平�
 *编译脚本（build）
 build：编译使用到的脚本。
 
-输出目录（out/）
+输出目录（out）
 out：编译后自动生成，存放所有编译生成的模块。
-注：提供产品正式包时，使用lidbg_qrd目录下的release.sh编译
 
 ----------编译方法----------
 1.配置编译环境
 cd lidbg_qrd
-(1) cp ./soc/soc/doc/dbg_cfg_backup.sh ./dbg_cfg.sh
+(1) cp ./soc/$soc/doc/dbg_cfg_backup.sh ./dbg_cfg.sh
 (2) 修改DBG_SYSTEM_DIR环境变量(指向的包的内核需编译过一遍(make bootimage))
 (3) chmod 777  ./* -R
 以上步骤只需配置一次
 
 dbg_cfg.sh编译环境变量配置说明：
-详见soc/soc/README
+详见soc/$soc/README
 
 
 2.编译
@@ -50,8 +49,8 @@ dbg_cfg.sh编译环境变量配置说明：
 ./make.sh core
 生成模块在out目录
 
-*应用层（android）的编译
-在android目录下的build_all.sh脚本,生成模块(apk、可执行文件等)在android/out目录
+*应用层（hal）的编译
+在hal目录下的build_all.sh脚本,生成模块(apk、可执行文件等)在out目录
 
 3.运行clean.sh可清除所有编译后产生的文件。
 
@@ -59,20 +58,20 @@ dbg_cfg.sh编译环境变量配置说明：
 --------------运行-------------
 正式产品包已经默认加载lidbg相关模块，要是想push自己的lidbg模块到机器执行，执行下面指令：
 原生系统执行 
-build/push.sh
+tools/push.sh
 
 产品系统执行 
-build/pushfly.sh
+tools/pushfly.sh
 
 以下两种方法均可运行模块
 1.在终端用insmod指令直接加载模块（默认加载的原生系统，/system/lib/modules目录）
-执行 build/insmod.sh  (正式产品是flysystem/lib/out目录)
+执行 tools/insmod.sh  (正式产品是flysystem/lib/out目录)
 
 2. 开机自动运行lidbg_servicer和lidbg_loader.ko加载模块
-详见soc/soc/README	
+详见soc/$soc/README	
 
 -------------集成到系统镜像-------------
-执行build/copy2img.sh后重新make编译系统即可
+执行tools/copy2img.sh后重新make编译系统即可
 
 
 -------------git使用注意事项-------------

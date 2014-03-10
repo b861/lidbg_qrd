@@ -146,7 +146,7 @@ function auto_build()
 	       	menu_do $1
 		menu_do $2
 	while :;do
-		cd $DBG_SHELL_PATH
+		cd $DBG_BUILD_PATH
 		menu_func
 		read -p "Enter your select:" name1 name2 name3 name4 name5
 	       	menu_do $name1

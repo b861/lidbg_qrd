@@ -1,9 +1,9 @@
 cd ../build
 chmod 777 -R ./
 source ./env_entry.sh
-./build_cfg.sh $BOARD_VERSION $BUILD_VERSION $DBG_SOC
+./build_cfg.sh $DBG_SOC $BUILD_VERSION 
 ./clean.sh
-cd $DBG_ANDROID_PATH/$DBG_SOC
+cd $DBG_HAL_PATH/$DBG_SOC
 ./build_all.sh
 
 cd -
