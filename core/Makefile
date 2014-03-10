@@ -34,8 +34,8 @@ lidbg_fileserver-objs :=  lidbg_fileserver_main.o lidbg_fs_cmn.o lidbg_fs_keyval
 lidbg_main-objs := lidbg.o 
 lidbg_i2c_gpio-objs := i2c-algo-bit.o i2c-gpio.o
 
-EXTRA_CFLAGS := -I$(DBG_DRV_PATH)/inc  -I$(DBG_SOC_PATH)/$(DBG_SOC)/inc  -I$(DBG_DEV_PATH)/$(DBG_SOC)
-include $(DBG_DRV_PATH)/core.mk
+EXTRA_CFLAGS := -I$(DBG_CORE_PATH)/inc  -I$(DBG_SOC_PATH)/$(DBG_SOC)/inc  -I$(DBG_DEV_PATH)/$(DBG_SOC)
+include $(DBG_CORE_PATH)/core.mk
 
 include $(DBG_ROOT_PATH)/build_cfg.mk
 KBUILD_EXTRA_SYMBOLS := $(DBG_SOC_PATH)/$(DBG_SOC)/Module.symvers
