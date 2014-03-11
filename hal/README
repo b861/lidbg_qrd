@@ -1,13 +1,13 @@
-*应用层（android）
-android/msm8x25/lidbg_servicer：       用于加载第三方模块，接收内核模块的消息作相应处理，在内核层不方便实现的功能在此处理。
-android/msm8x25/uart_send_rec_test：   用于串口稳定性测试。
-android/msm8x25/usb_sd_mount_test：    用于U盘和SD卡插拔稳定性测试。
-android/msm8x25/fileserver：           上层apk，用于在界面形式与lidbg中的驱动进行交互（需要在3G拨号界面输入*#*#158999#*#*）。
-android/msm8x25/client_mobile：        上层apk，采用socket通信将本机调试信息上传到服务器（192.168.9.222）。
-android/msm8x25/lidbg_gui：            用于将内核信息输出到LCD屏。
-android/msm8x25/8x25q_camera：         8x25q产品的关于摄像头的HAL模块代码。
-android/msm8x25/gpslib：               gps驱动对应的HAL模块代码
-android/msm8x25/out：                  编译后自动生成， 应用层生成的目标文件。
+*应用层（hal）
+hal/lidbg_servicer：       用于加载第三方模块，接收内核模块的消息作相应处理，在内核层不方便实现的功能在此处理。
+hal/uart_send_rec_test：   用于串口稳定性测试。
+hal/usb_sd_mount_test：    用于U盘和SD卡插拔稳定性测试。
+hal/fileserver：           上层apk，用于在界面形式与lidbg中的驱动进行交互（需要在3G拨号界面输入*#*#158999#*#*）。
+hal/client_mobile：        上层apk，采用socket通信将本机调试信息上传到服务器（192.168.9.222）。
+hal/lidbg_gui：            用于将内核信息输出到LCD屏。
+hal/8x25q_camera：         8x25q产品的关于摄像头的HAL模块代码。
+hal/gpslib：               gps驱动对应的HAL模块代码
+hal/out：                  编译后自动生成， 应用层生成的目标文件。
 
 ------------增加wifiadb调试模式（不影响U盘使用)------------------
 使用步骤:

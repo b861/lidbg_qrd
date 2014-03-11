@@ -30,7 +30,7 @@ void parse_cmd(char *pt)
     int i = 0;
 
     char *argv[32] = {NULL};
-
+#if 0
     // »ñÈ¡ÃüÁî ´æÈëargvÊý×é
     argv[0] = pt;
 
@@ -49,6 +49,9 @@ void parse_cmd(char *pt)
     }
 
     argv[argc] = NULL;
+#else
+	argc = lidbg_token_string(pt, " ", argv);
+#endif
 
     i = 0;
     if(debug_mask)
