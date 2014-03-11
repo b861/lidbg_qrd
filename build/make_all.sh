@@ -24,7 +24,7 @@ else
 fi
 }
 
-
+clear
 build_dir $DBG_SOC_PATH/$DBG_SOC
 build_dir $DBG_CORE_PATH
 build_dir $DBG_DRIVERS_PATH

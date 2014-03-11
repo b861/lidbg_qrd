@@ -86,10 +86,6 @@
 #include <linux/reboot.h>
 
 ////////////
-//#define BUILD_FOR_RECOVERY
-#ifdef SOC_msm8x25
-#define USE_CALL_USERHELPER
-#endif
 
 #include "lidbg_loader.h"
 #include "lidbg_io.h"
@@ -112,8 +108,10 @@
 #include "lidbg_wakelock_stat.h"
 #include "lidbg_mem_log.h"
 #include "lidbg_trace_msg.h"
-////////////
+
 #include "lidbg_soc.h"
+
+////////////
 
 #ifdef BUILD_DRIVERS
 #include "lidbg_enter.h"

@@ -63,6 +63,9 @@
 
 #include <mach/msm_rpcrouter.h>
 
+#ifdef SOC_msm8x25
+#define USE_CALL_USERHELPER
+#endif
 
 #if 0
 enum

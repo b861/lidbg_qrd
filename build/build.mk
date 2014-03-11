@@ -8,7 +8,7 @@ PWD := $(shell pwd)
 CROSS_COMPILE = $(DBG_CROSS_COMPILE)
 CC = $(CROSS_COMPILE)gcc
 
-
+include $(DBG_DRIVERS_PATH)/config_$(DBG_SOC)
 EXTRA_CFLAGS := -I$(DBG_CORE_PATH)/inc  -I$(DBG_SOC_PATH)/$(DBG_SOC)/inc  -I$(DBG_DEV_PATH)/$(DBG_SOC)
 
 include $(DBG_ROOT_PATH)/build_cfg.mk
