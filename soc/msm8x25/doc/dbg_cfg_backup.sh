@@ -11,13 +11,13 @@ DBG_PLATFORM=msm8625
 case "$DBG_PLATFORM" in
     msm7627a)
 	BOARD_VERSION=V2
-	DBG_SYSTEM_DIR=/home/swlee/qrd_451/R8625SSNSKQLYA10145451
+	DBG_SYSTEM_DIR=/home/flyaudio/R8625SSNSKQLYA10145451
 	DBG_CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilt/linux-x86/toolchain/arm-eabi-4.4.3/bin/arm-eabi-
 	SYSTEM_BUILD_TYPE=eng;;
 
     msm8625)
 	BOARD_VERSION=V4
-	DBG_SYSTEM_DIR=/home/swlee/flyaudio/R8625QSOSKQLYA3060-v2
+	DBG_SYSTEM_DIR=/home/flyaudio/R8625QSOSKQLYA3060-v2
 	DBG_CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilt/linux-x86/toolchain/arm-eabi-4.4.3/bin/arm-eabi-
 	SYSTEM_BUILD_TYPE=eng
 	UPDATA_BIN_DIR=/8x25q-release/driver
@@ -25,7 +25,7 @@ case "$DBG_PLATFORM" in
 
     msm8226)
 	BOARD_VERSION=V1
-	DBG_SYSTEM_DIR=/home/swlee/flyaudio/msm8226-1.8
+	DBG_SYSTEM_DIR=/home/flyaudio/msm8226-1.8
 	DBG_CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilts/gcc/linux-x86/arm/arm-eabi-4.7/bin/arm-eabi-
 	SYSTEM_BUILD_TYPE=eng;;
 
