@@ -33,38 +33,38 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //#define LOG_DEBUG 1
 
 #ifndef LOG_DEBUG
-#ifdef _ANDROID_
-#undef LOG_NIDEBUG
-#undef LOG_TAG
-#define LOG_NIDEBUG 0
-#define LOG_TAG "mm-libcamera2"
-#include <utils/Log.h>
+  #ifdef _ANDROID_
+    #undef LOG_NIDEBUG
+    #undef LOG_TAG
+    #define LOG_NIDEBUG 0
+    #define LOG_TAG "mm-libcamera2"
+    #include <utils/Log.h>
+  #else
+    #include <stdio.h>
+    #define LOGE CDBG
+  #endif
+  #undef CDBG
+  #define CDBG(fmt, args...) do{}while(0)
 #else
-#include <stdio.h>
-#define LOGE CDBG
-#endif
-#undef CDBG
-#define CDBG(fmt, args...) do{}while(0)
-#else
-#ifdef _ANDROID_
-#undef LOG_NIDEBUG
-#undef LOG_TAG
-#define LOG_NIDEBUG 0
-#define LOG_TAG "mm-libcamera2"
-#include <utils/Log.h>
-#define CDBG(fmt, args...) LOGE(fmt, ##args)
-#else
-#include <stdio.h>
-#define CDBG(fmt, args...) fprintf(stderr, fmt, ##args)
-#define LOGE(fmt, args...) fprintf(stderr, fmt, ##args)
-#endif
+  #ifdef _ANDROID_
+    #undef LOG_NIDEBUG
+    #undef LOG_TAG
+    #define LOG_NIDEBUG 0
+    #define LOG_TAG "mm-libcamera2"
+    #include <utils/Log.h>
+    #define CDBG(fmt, args...) LOGE(fmt, ##args)
+  #else
+    #include <stdio.h>
+    #define CDBG(fmt, args...) fprintf(stderr, fmt, ##args)
+    #define LOGE(fmt, args...) fprintf(stderr, fmt, ##args)
+  #endif
 #endif
 
 #ifdef _ANDROID_
-#define CDBG_HIGH(fmt, args...)  LOGE(fmt, ##args)
-#define CDBG_ERROR(fmt, args...)  LOGE(fmt, ##args)
+  #define CDBG_HIGH(fmt, args...)  LOGE(fmt, ##args)
+  #define CDBG_ERROR(fmt, args...)  LOGE(fmt, ##args)
 #else
-#define CDBG_HIGH(fmt, args...) fprintf(stderr, fmt, ##args)
-#define CDBG_ERROR(fmt, args...) fprintf(stderr, fmt, ##args)
+  #define CDBG_HIGH(fmt, args...) fprintf(stderr, fmt, ##args)
+  #define CDBG_ERROR(fmt, args...) fprintf(stderr, fmt, ##args)
 #endif
 #endif /* __MM_CAMERA_DBG_H__ */

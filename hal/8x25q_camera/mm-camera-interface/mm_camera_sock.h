@@ -32,8 +32,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <inttypes.h>
 
-typedef enum
-{
+typedef enum {
     MM_CAMERA_SOCK_TYPE_UDP,
     MM_CAMERA_SOCK_TYPE_TCP,
 } mm_camera_sock_type_t;
@@ -41,16 +40,16 @@ typedef enum
 int mm_camera_socket_create(int cam_id, mm_camera_sock_type_t sock_type);
 
 int mm_camera_socket_sendmsg(
-    int fd,
-    void *msg,
-    uint32_t buf_size,
-    int sendfd);
+  int fd,
+  void *msg,
+  uint32_t buf_size,
+  int sendfd);
 
 int mm_camera_socket_recvmsg(
-    int fd,
-    void *msg,
-    uint32_t buf_size,
-    int *rcvdfd);
+  int fd,
+  void *msg,
+  uint32_t buf_size,
+  int *rcvdfd);
 
 void mm_camera_socket_close(int fd);
 

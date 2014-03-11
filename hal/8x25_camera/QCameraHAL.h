@@ -23,14 +23,13 @@
 extern "C" {
 #include <mm_camera_interface2.h>
 }
-namespace android
-{
+namespace android {
 
-    /* HAL should return NULL if it fails to open camera hardware. */
-    extern "C" void *
-    QCameraHAL_openCameraHardware(int  cameraId, int mode);
-    extern "C" int HAL_getNumberOfCameras();
-    extern "C" void HAL_getCameraInfo(int cameraId, struct CameraInfo *cameraInfo);
+/* HAL should return NULL if it fails to open camera hardware. */
+extern "C" void *
+       QCameraHAL_openCameraHardware(int  cameraId, int mode);
+extern "C" int HAL_getNumberOfCameras();
+extern "C" void HAL_getCameraInfo(int cameraId, struct CameraInfo* cameraInfo);
 
 }; // namespace android
 

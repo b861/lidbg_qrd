@@ -2,18 +2,17 @@
 #include "video_init_config.h"
 #include "video_init_config_tab.h"
 static int flag_io_config = 0;
-vedio_channel_t info_vedio_channel_t = NOTONE;//????????????????
-vedio_channel_t info_com_top_Channel = YIN2;//????????????????????? YIN3(???AUX?TV?) ? SEPARATION(DVD)
+vedio_channel_t info_vedio_channel_t = NOTONE;//用于记录现在状态下处理的对应通道
+vedio_channel_t info_com_top_Channel = YIN2;//用于记录当前最新的上层切换到的视频通道状态 YIN3(倒车、AUX、TV等) 或 SEPARATION（DVD）
 extern tw9912_signal_t signal_is_how[5];
-extern last_config_t the_last_config;//????????
+extern last_config_t the_last_config;//上一次的通道状态
 extern tw9912info_t global_tw9912_info_for_NTSC_I;
 extern tw9912info_t global_tw9912_info_for_PAL_I;
 vedio_channel_t_2 last_vide_format = OTHER_CHANNEL_4KO;
 static u8 flag_now_config_channal_AUX_or_Astren = 0; //0 is Sstren 1 is AUX 2 is DVD
 u8 global_debug_thread = 0;
 static TW9912_Image_Parameter TW9912_Image_Parameter_fly[6] =
-{
-    //???? HAL???? ?????“??”?? ??? 0~10 ??????????????????????
+{//用于记录 HAL层配置的 视频页面下“设置”标签 的参数 0～10 待到真正配置到色彩设置代码时将使用该函数的值
     {BRIGHTNESS, 5},
     {CONTRAST, 5},
     {SHARPNESS, 5},
@@ -43,18 +42,18 @@ void chips_hardware_reset(void)
     tc358746xbg_hardware_reset();
 }
 /*
-???:int static video_signal_channel_switching_occurs(void)
-??:  ?????,??9912,(CVBS??YUV?,YUV?????,?????????)
+函数名：int static video_signal_channel_switching_occurs(void)
+功能：  通道变换时，复位9912，（CVBS切到YUV时，YUV解码出问题，来一次复位问题解决）
 */
 int static video_signal_channel_switching_occurs(void)
 {
     lidbg("TC358:video_signal_channel_switching_occurs() \n");
-    tc358746xbg_data_out_enable(DISABLE);//????  ??????????
+    tc358746xbg_data_out_enable(DISABLE);//禁用输出  让用户看不到切换过程
     lidbg("%s:tw9912_RESX_DOWN\n", __func__);
 
     tw9912_RESX_DOWN;//\u8fd9\u91cc\u5bf9tw9912\u590d\u4f4d\u7684\u539f\u56e0\u662f\u89e3\u51b3\u5012\u8f66\u9000\u56deDVD\u65f6\u89c6\u9891\u5361\u6b7b\u3002
     msleep(20);
-    tw9912_RESX_UP;//?YIN3 ?? ?DVD??,??????? ?????
+    tw9912_RESX_UP;//在YIN3 切换 到DVD通道，如果不复位一下 视频回定住
     msleep(20);
     //  mutex_unlock(&lock_chipe_config);
     return 0;
@@ -63,12 +62,12 @@ int static video_image_config_parameter_buffer(void)
 {
     if (info_com_top_Channel == YIN3)
     {
-        /*
-        ?????????,????????
-        */
-        //TW9912_Image_Parameter_fly[1].valu ??240?????,0xF1?????,??10?AUX??
+/*
+目前倒车的亮度等值，只有以下的一组。
+*/
+//TW9912_Image_Parameter_fly[1].valu 等于240是一般倒车，0xF1是天籁倒车，小于10为AUX输入
         /**************************************Astren************************************************/
-        if(TW9912_Image_Parameter_fly[1].valu == 240)//240 ?????????,????????????
+        if(TW9912_Image_Parameter_fly[1].valu == 240)//240 是和蒋工商量好的值，用于区别目前是倒车的配置
         {
             lidbg("Astern 2 Normal \n");
             flag_now_config_channal_AUX_or_Astren = 0;
@@ -83,8 +82,8 @@ int static video_image_config_parameter_buffer(void)
             }
             else//PALi
             {
-                Tw9912_image_global_AUX_BACK_PAL_I[0][1] = 0x0;
-                Tw9912_image_global_AUX_BACK_PAL_I[1][1] = 0x61;
+                Tw9912_image_global_AUX_BACK_PAL_I[0][1] = 0x0; 
+                Tw9912_image_global_AUX_BACK_PAL_I[1][1] = 0x61; 
                 Tw9912_image_global_AUX_BACK_PAL_I[2][1] = 0x00;
                 Tw9912_image_global_AUX_BACK_PAL_I[3][1] = 0xff;
                 Tw9912_image_global_AUX_BACK_PAL_I[4][1] = 0xff;
@@ -107,8 +106,8 @@ int static video_image_config_parameter_buffer(void)
             }
             else//PALi
             {
-                Tw9912_image_global_AUX_BACK_PAL_I[0][1] = 0x15;
-                Tw9912_image_global_AUX_BACK_PAL_I[1][1] = 0x61;
+                Tw9912_image_global_AUX_BACK_PAL_I[0][1] = 0x15; 
+                Tw9912_image_global_AUX_BACK_PAL_I[1][1] = 0x61; 
                 Tw9912_image_global_AUX_BACK_PAL_I[2][1] = 0x00;
                 Tw9912_image_global_AUX_BACK_PAL_I[3][1] = 0xff;
                 Tw9912_image_global_AUX_BACK_PAL_I[4][1] = 0xff;
@@ -124,7 +123,7 @@ int static video_image_config_parameter_buffer(void)
         /**************************************AUX********************************************/
         else
         {
-            //AUX?DVD????????(??)???????(??0~10)
+		//AUX和DVD参数需要根据上层（蒋工）传入的参数配置(范围0~10) 
             lidbg("AUX\n");
             flag_now_config_channal_AUX_or_Astren = 1;
             if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
@@ -136,21 +135,21 @@ int static video_image_config_parameter_buffer(void)
                     {
                     case BRIGHTNESS:
                         Tw9912_image_global_AUX_BACK[0][1] = \
-                                                             Image_Config_AUX_BACK[0][10 - TW9912_Image_Parameter_fly[BRIGHTNESS - 1].valu];
+                                                             Image_Config_AUX_BACK[0][10-TW9912_Image_Parameter_fly[BRIGHTNESS-1].valu];
                         break;
                     case CONTRAST:
                         Tw9912_image_global_AUX_BACK[1][1] = \
-                                                             Image_Config_AUX_BACK[1][TW9912_Image_Parameter_fly[CONTRAST - 1].valu];
+                                                             Image_Config_AUX_BACK[1][TW9912_Image_Parameter_fly[CONTRAST-1].valu];
                         break;
                     case HUE:
                         Tw9912_image_global_AUX_BACK[3][1] = \
-                                                             Image_Config_AUX_BACK[3][TW9912_Image_Parameter_fly[CHROMA_U - 1].valu];
+                                                             Image_Config_AUX_BACK[3][TW9912_Image_Parameter_fly[CHROMA_U-1].valu];
                         Tw9912_image_global_AUX_BACK[4][1] = \
-                                                             Image_Config_AUX_BACK[4][TW9912_Image_Parameter_fly[CHROMA_U - 1].valu];
+                                                             Image_Config_AUX_BACK[4][TW9912_Image_Parameter_fly[CHROMA_U-1].valu];
                         break;
                     case CHROMA_U:
                         Tw9912_image_global_AUX_BACK[2][1] = \
-                                                             Image_Config_AUX_BACK[2][10 - TW9912_Image_Parameter_fly[HUE - 1].valu];
+                                                             Image_Config_AUX_BACK[2][10-TW9912_Image_Parameter_fly[HUE-1].valu];
                         break;
                     default :
                         break;
@@ -166,21 +165,21 @@ int static video_image_config_parameter_buffer(void)
                     {
                     case BRIGHTNESS:
                         Tw9912_image_global_AUX_BACK_PAL_I[0][1] = \
-                                Image_Config_AUX_BACK_PAL_I[0][10 - TW9912_Image_Parameter_fly[BRIGHTNESS - 1].valu];
+                                Image_Config_AUX_BACK_PAL_I[0][10-TW9912_Image_Parameter_fly[BRIGHTNESS-1].valu];
                         break;
                     case CONTRAST:
                         Tw9912_image_global_AUX_BACK_PAL_I[1][1] = \
-                                Image_Config_AUX_BACK_PAL_I[1][TW9912_Image_Parameter_fly[CONTRAST - 1].valu];
+                                Image_Config_AUX_BACK_PAL_I[1][TW9912_Image_Parameter_fly[CONTRAST-1].valu];
                         break;
                     case CHROMA_U:
                         Tw9912_image_global_AUX_BACK_PAL_I[3][1] = \
-                                Image_Config_AUX_BACK_PAL_I[3][TW9912_Image_Parameter_fly[CHROMA_U - 1].valu];
+                                Image_Config_AUX_BACK_PAL_I[3][TW9912_Image_Parameter_fly[CHROMA_U-1].valu];
                         Tw9912_image_global_AUX_BACK_PAL_I[4][1] = \
-                                Image_Config_AUX_BACK_PAL_I[4][TW9912_Image_Parameter_fly[CHROMA_U - 1].valu];
+                                Image_Config_AUX_BACK_PAL_I[4][TW9912_Image_Parameter_fly[CHROMA_U-1].valu];
                         break;
                     case HUE:
                         Tw9912_image_global_AUX_BACK_PAL_I[2][1] = \
-                                Image_Config_AUX_BACK_PAL_I[2][10 - TW9912_Image_Parameter_fly[HUE - 1].valu];
+                                Image_Config_AUX_BACK_PAL_I[2][10-TW9912_Image_Parameter_fly[HUE-1].valu];
                         break;
                     default :
                         break;
@@ -202,21 +201,21 @@ int static video_image_config_parameter_buffer(void)
             {
             case  CONTRAST:
                 Tw9912_image_global_separation[0][1] = \
-                                                       Image_Config_separation[0][TW9912_Image_Parameter_fly[BRIGHTNESS - 1].valu];
+                                                       Image_Config_separation[0][TW9912_Image_Parameter_fly[BRIGHTNESS-1].valu];
                 break;
             case BRIGHTNESS:
                 Tw9912_image_global_separation[1][1] = \
-                                                       Image_Config_separation[1][TW9912_Image_Parameter_fly[CONTRAST - 1].valu];
+                                                       Image_Config_separation[1][TW9912_Image_Parameter_fly[CONTRAST-1].valu];
                 break;
             case HUE:
                 Tw9912_image_global_separation[2][1] = \
-                                                       Image_Config_separation[2][TW9912_Image_Parameter_fly[HUE - 1].valu];
+                                                       Image_Config_separation[2][TW9912_Image_Parameter_fly[HUE-1].valu];
                 break;
             case CHROMA_U:
                 Tw9912_image_global_separation[3][1] = \
-                                                       Image_Config_separation[3][TW9912_Image_Parameter_fly[CHROMA_U - 1].valu];
+                                                       Image_Config_separation[3][TW9912_Image_Parameter_fly[CHROMA_U-1].valu];
                 Tw9912_image_global_separation[4][1] = \
-                                                       Image_Config_separation[4][TW9912_Image_Parameter_fly[CHROMA_U - 1].valu];
+                                                       Image_Config_separation[4][TW9912_Image_Parameter_fly[CHROMA_U-1].valu];
                 break;
             default :
                 break;
@@ -246,7 +245,7 @@ int static video_image_config_begin(void)
             ret = tw9912_write((char *)&Tw9912_image_global_separation[i]);
     }
 
-    //?????
+    //图像偏移量
     if(flag_now_config_channal_AUX_or_Astren == 0)//Astren
     {
         if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
@@ -293,51 +292,50 @@ int static video_image_config_begin(void)
     return ret;
 }
 
-//?????????????
-int flyVideoImageQualityConfig_in(Vedio_Effect cmd , u8 valu)//valu??????0~10
+//蒋工直接调用传入的参数配置
+int flyVideoImageQualityConfig_in(Vedio_Effect cmd , u8 valu)//valu的值的范围是0～10
 {
     lidbg("flyvideo_image_config_begin(%d,%d)\n", cmd, valu);
     switch(cmd)
     {
     case CONTRAST:
-        TW9912_Image_Parameter_fly[CONTRAST - 1].valu = valu;
+        TW9912_Image_Parameter_fly[CONTRAST-1].valu = valu;
         break;
     case BRIGHTNESS:
-        TW9912_Image_Parameter_fly[BRIGHTNESS - 1].valu = valu;
+        TW9912_Image_Parameter_fly[BRIGHTNESS-1].valu = valu;
         break;
     case SHARPNESS:
-        TW9912_Image_Parameter_fly[SHARPNESS - 1].valu = valu;
+        TW9912_Image_Parameter_fly[SHARPNESS-1].valu = valu;
         break;
     case CHROMA_U:
-        TW9912_Image_Parameter_fly[CHROMA_U - 1].valu = valu;
+        TW9912_Image_Parameter_fly[CHROMA_U-1].valu = valu;
         break;
     case CHROMA_V:
-        TW9912_Image_Parameter_fly[CHROMA_V - 1].valu = valu;
+        TW9912_Image_Parameter_fly[CHROMA_V-1].valu = valu;
         break;
     case HUE:
-        TW9912_Image_Parameter_fly[HUE - 1].valu = valu;
+        TW9912_Image_Parameter_fly[HUE-1].valu = valu;
         break;
     default :
         lidbg("Error at %s you input cmd = %d paramter have Problems", __func__, cmd);
         break;
     }
-    //???????????BRIGHTNESS
+   //蒋工每配一次参数最后写BRIGHTNESS
     if(cmd == BRIGHTNESS)//wait all set doen befor application
         video_image_config_begin();
     return 0;
 }
 int tw9912_config_for_cvbs_signal(vedio_channel_t Channel);
-int flyVideoInitall_in(u8 Channel)//????????????
-{
-    //?????????????????,???????????
+int flyVideoInitall_in(u8 Channel)//给蒋工的视频通道切换接口
+{//该函数实际上是改变通道标志变量的值，没有实际改变芯片的通道
     int ret = 1 ;
     mutex_lock(&lock_chipe_config);
     lidbg("flyVideoInitall_in(%d)\n", Channel);
     if (Channel >= YIN0 && Channel <= NOTONE)
     {
         info_com_top_Channel = Channel;
-        if(Channel == YIN2)//DVD??
-            info_com_top_Channel = SEPARATION;//DVD ? ????
+        if(Channel == YIN2)//DVD通道
+            info_com_top_Channel = SEPARATION;//DVD 的 逐行视频
     }
     else
     {
@@ -385,7 +383,7 @@ vedio_format_t camera_open_video_signal_test_in(void)
     return camera_open_video_signal_test_in_2();
 }
 
-vedio_format_t flyVideoTestSignalPin_in(u8 Channel)//????????????
+vedio_format_t flyVideoTestSignalPin_in(u8 Channel)//给蒋工的视频检测函数接口
 {
     static vedio_format_t lidbg_count_flag_next = 0;
     static u8 lidbg_format_count = 0;
@@ -396,7 +394,7 @@ vedio_format_t flyVideoTestSignalPin_in(u8 Channel)//????????????
     if(
         ( (the_last_config.Channel == YIN2 || the_last_config.Channel == SEPARATION) && Channel == YIN3) || \
         (the_last_config.Channel == YIN3  && (Channel == YIN2 || Channel == SEPARATION))
-    )//??????????????
+    )//这次和上次的通道不是一个通道
     {
         video_signal_channel_switching_occurs();
     }
@@ -407,27 +405,27 @@ vedio_format_t flyVideoTestSignalPin_in(u8 Channel)//????????????
      */
     if((the_last_config.Channel == YIN3) && (Channel == YIN3) && (last_vide_format != global_video_channel_flag))
     {
-        int i = 0;
-        const u8 video_format_changed_config[] = {0x02, 0x4C, 0x03, 0x20, 0x06, 0x03, 0xC0, 0x01, 0xE6, 0x00, 0xE8, 0x3F, 0xfe};
+    	int i = 0;
+	const u8 video_format_changed_config[] = {0x02, 0x4C, 0x03, 0x20, 0x06, 0x03, 0xC0, 0x01, 0xE6, 0x00, 0xE8, 0x3F, 0xfe};
 
-        tc358746xbg_data_out_enable(DISABLE);
+	tc358746xbg_data_out_enable(DISABLE);
 
-        tw9912_RESX_DOWN;
-        msleep(10);
-        tw9912_RESX_UP;
-        msleep(10);
+	tw9912_RESX_DOWN;
+	msleep(10);
+	tw9912_RESX_UP;
+	msleep(10);
 
-        while(video_format_changed_config[i * 2] != 0xfe)
-        {
-            if(tw9912_write((char *)&video_format_changed_config[i * 2]) == NACK)
-                lidbg("I2C write err when video format changed.\n");
-            i++;
-        }
-
-        lidbg("Video format changed : (last)-%d, (now)-%d\n", last_vide_format, global_video_channel_flag);
-        last_vide_format = global_video_channel_flag;
+	while(video_format_changed_config[i*2] != 0xfe)
+      {
+          if(tw9912_write((char *)&video_format_changed_config[i*2]) == NACK)
+		  	lidbg("I2C write err when video format changed.\n");
+          i++;
+      }	
+	
+	lidbg("Video format changed : (last)-%d, (now)-%d\n", last_vide_format, global_video_channel_flag);
+	last_vide_format = global_video_channel_flag;
     }
-
+	
     //mutex_unlock(&lock_chipe_config);
     // return NTSC_I;
     if(Channel == SEPARATION || Channel == YIN2)
@@ -460,13 +458,12 @@ AGAIN_TEST_FOR_BACK_NTSC_I:
             lidbg("%s:you input TW9912 Channel=%d error!\n", __FUNCTION__, Channel);
             break;
         }
-        if(ret == 1 && goto_agian_test <= 2 )//???? NTSC_I ??????,??? ?????NTSC_I ???????
+        if(ret == 1 && goto_agian_test <= 2 )//当时发现 NTSC_I 的检测不准确，到这里 当检测的是NTSC_I 再来做一次检测
             goto AGAIN_TEST_FOR_BACK_NTSC_I;
         else goto_agian_test = 0;
     }
     if (lidbg_count_flag_next != ret || lidbg_format_count > 20)
-    {
-        //????,??????20?????,???????
+    {//打印屏蔽，同样的信息每20次输出一个，不一样马上输出
         lidbg_format_count = 0;
         lidbg_count_flag_next = ret;
         lidbg("C=%d,F=%d\n", Channel, ret);
@@ -475,8 +472,7 @@ AGAIN_TEST_FOR_BACK_NTSC_I:
     mutex_unlock(&lock_chipe_config);
 
     if( ret > 4 )
-    {
-        //????30?????????? ???tw9912??????,???????
+    {//如果检测30次以上都没检测到信号 可能是tw9912工作不正常啦，做一次重新配置
         Format_count ++;
         if(Format_count > 30 && Format_count_flag == 0)
         {
@@ -589,20 +585,20 @@ static void chips_config_cvbs_begin()
     video_image_config_begin();
 
     lidbg("global_video_channel_flag = %x\n", global_video_channel_flag);
-    if(global_video_channel_flag == TV_4KO)//???TV?????
+    if(global_video_channel_flag == TV_4KO)//只针对TV的特殊配置
     {
         u8 Tw9912_register_valu[] = {0x08, 0x17,};
         tw9912_write((char *)Tw9912_register_valu);
         Tw9912_register_valu[0] = 0xa;
         Tw9912_register_valu[1] = 0x1e;
         tw9912_write((char *)Tw9912_register_valu);
-        last_vide_format = TV_4KO;
+	 last_vide_format = TV_4KO;
     }
-    else if(global_video_channel_flag == AUX_4KO)//???AUX?????
+    else if(global_video_channel_flag == AUX_4KO)//只针对AUX的特殊配置
     {
         u8 Tw9912_register_valu[] = {0x08, 0x15,};
         tw9912_write((char *)Tw9912_register_valu);
-        last_vide_format = AUX_4KO;
+	 last_vide_format = AUX_4KO;
     }
 
     if(info_vedio_channel_t <= SEPARATION)
@@ -628,7 +624,7 @@ static void chips_config_cvbs_begin()
             break;
         default :
             lidbg("video not signal input..\n");
-            SOC_Write_Servicer(VIDEO_SHOW_BLACK);//???????,?flycamera.cpp????????,???????????? chips_config_begin(vedio_format_t config_pramat)
+            SOC_Write_Servicer(VIDEO_SHOW_BLACK);//若设置啦该属性，在flycamera.cpp中会使用到该属性，这在延时如干时间后将重做 chips_config_begin(vedio_format_t config_pramat)
             tc358746xbg_config_begin(COLORBAR + TC358746XBG_BLACK); //blue
             break;
         }
@@ -641,27 +637,27 @@ static void chips_config_cvbs_begin()
 }
 static void chips_config_yuv_begin()
 {
-    tw9912_config_array_NTSCp();//??????
-    video_image_config_begin();//?????????
-    SOC_Write_Servicer(VIDEO_NORMAL_SHOW);//??????,?????Flycamera.cpp???
+    tw9912_config_array_NTSCp();//刷寄存器数组
+    video_image_config_begin();//刷颜色寄存器的配置
+    SOC_Write_Servicer(VIDEO_NORMAL_SHOW);//设置一个属性，该属性将在Flycamera.cpp中使用
     tc358746xbg_config_begin(NTSC_P);
     lidbg("Vedio Format Is NTSCp\n");
 }
-void chips_config_begin(vedio_format_t config_pramat)// ?????????ov5647_truly_cm6868_v4l2.c ?xxx_setting_xx???
+void chips_config_begin(vedio_format_t config_pramat)// 配置主入口在内核的ov5647_truly_cm6868_v4l2.c 的xxx_setting_xx中调用
 {
     lidbg("\n\nVideo Module Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);
     video_config_debug("tw9912:config channal is %d\n", info_com_top_Channel);
     mutex_lock(&lock_chipe_config);
-    if(info_com_top_Channel == SEPARATION)//???????????
+    if(info_com_top_Channel == SEPARATION)//将工主动修改啦这个参数
         chips_config_yuv_begin();//DVD
     else	if(config_pramat != STOP_VIDEO)
-        chips_config_cvbs_begin();//????(???TV?AUX???)
+        chips_config_cvbs_begin();//其他视频（倒车、TV、AUX。。。）
     else
     {
         lidbg("TW9912:warning -->config_pramat == STOP_VIDEO\n");
-        tc358746xbg_config_begin(COLORBAR);//??????????,???TC358????
-    }
-    up(&sem);//???????????
+        tc358746xbg_config_begin(COLORBAR);//这个流程目前没有使用，当时给TC358调试用的
+    } 
+    up(&sem);//该信号量目前还没有使用
     mutex_unlock(&lock_chipe_config);
 }
 void tc358746xbg_show_color(u8 color_flag)

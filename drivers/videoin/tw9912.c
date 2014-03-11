@@ -5,12 +5,12 @@
 
 struct mutex lock_com_chipe_config;
 unsigned int car_backing_times_cnt = 0;
-u8 tw9912_reset_flag_jam = 0;//????????
-u8 tw9912_signal_unstabitily_for_tw9912_config_array_flag = 0;//???????
+u8 tw9912_reset_flag_jam = 0;//验证是否可以去除
+u8 tw9912_signal_unstabitily_for_tw9912_config_array_flag = 0;//改变量还未使用
 
 tw9912_input_info_t tw9912_input_information;
 tw9912_run_flag_t tw912_run_sotp_flag;
-tw9912_signal_t signal_is_how[5] = //???????????
+tw9912_signal_t signal_is_how[5] = //用于记录四个通道的信息
 {
     {NOTONE, OTHER, source_other}, //YIN0
     {NOTONE, OTHER, source_other}, //YIN1
@@ -103,7 +103,7 @@ void tw9912_analysis_input_signal(tw9912_input_info_t *input_information, vedio_
             {
                 signal_is_how[channel].Format = OTHER;
             }
-
+			
         }
         else
         {
@@ -177,7 +177,7 @@ static int tw9912_channel_choeces_again(vedio_channel_t channel)
     case SEPARATION: 	//	 YUV
         Tw9912_input_pin_selet[1] = 0x70;
         if(tw9912_write(Tw9912_input_pin_selet) == NACK) goto CONFIG_not_ack_fail;
-        Tw9912_input_pin_selet[0] = 0xe8;
+	 Tw9912_input_pin_selet[0] = 0xe8;
         Tw9912_input_pin_selet[1] = 0x30; //disable YOUT buffer
         if(tw9912_write(Tw9912_input_pin_selet) == NACK) goto CONFIG_not_ack_fail;
         break;
@@ -368,8 +368,8 @@ int tw9912_read_chips_status(u8 cmd)
         {
 
             lidbg("worning:macrovision_detection(0x30) have change --old = %d,new =%d\n",
-                  tw9912_input_information_status.macrovision_detection.valu,
-                  tw9912_input_information_status_next.macrovision_detection.valu);
+                   tw9912_input_information_status.macrovision_detection.valu,
+                   tw9912_input_information_status_next.macrovision_detection.valu);
 
             tw9912_input_information_status.macrovision_detection.valu =
                 tw9912_input_information_status_next.macrovision_detection.valu;
@@ -435,7 +435,7 @@ vedio_format_t tw9912_cvbs_signal_tsting(vedio_channel_t Channel)
     mutex_lock(&lock_com_chipe_config);
     if((the_last_config.Channel != Channel))
     {
-        lidbg("the_last_config.Channel=%d\n", the_last_config.Channel);
+    	lidbg("the_last_config.Channel=%d\n",the_last_config.Channel);
         tw9912_config_array_agin();
     }
 
@@ -469,8 +469,8 @@ vedio_format_t tw9912_cvbs_signal_tsting(vedio_channel_t Channel)
         {
             signal_is_how_1.Format = PAL_P;
         }
-        else
-            lidbgerr("tw9912_cvbs_signal_tsting err %d\n", format_1);
+		else
+			lidbgerr("tw9912_cvbs_signal_tsting err %d\n",format_1);
     }
 
     //tw9912_dbg("testing_signal(): back %d\n", signal_is_how_1.Format);
@@ -500,12 +500,11 @@ vedio_format_t Tw9912_appoint_pin_tw9912_cvbs_signal_tsting(vedio_channel_t Chan
             // or tw9912 is not have initall
         {
             if(tw9912_status.flag == TW9912_initall_not )
-            {
-                //????tw9912 ???????
+            {//用来判断tw9912 是否有过初始化
                 tw9912_status.flag = TW9912_initall_yes;
                 tw9912_status.Channel = Channel;
                 tw9912_status.format = PAL_I;
-                tw9912_dbg("first initalll!\n");//????????,???const u8 TW9912_INIT_AGAIN[] = ?????????????
+                tw9912_dbg("first initalll!\n");//应该取消这个逻辑，在数组const u8 TW9912_INIT_AGAIN[] = 添加必要的寄存器配置就可以
                 tw9912_config_array_PALi();//initall all register
             }
 
@@ -610,9 +609,9 @@ int tw9912_config_array_NTSCp(void)
     the_last_config.Channel = SEPARATION;
     the_last_config.format = NTSC_P;
     config_pramat_piont = TW9912_INIT_NTSC_Progressive_input;
-    while(config_pramat_piont[i * 2] != 0xfe)
+    while(config_pramat_piont[i*2] != 0xfe)
     {
-        if(tw9912_write((char *)&config_pramat_piont[i * 2]) == NACK) goto CONFIG_not_ack_fail;
+        if(tw9912_write((char *)&config_pramat_piont[i*2]) == NACK) goto CONFIG_not_ack_fail;
         //		tw9912_dbg("w a=%x,v=%x\n",config_pramat_piont[i*2],config_pramat_piont[i*2+1]);
         i++;
     }
@@ -630,9 +629,9 @@ int tw9912_config_array_agin(void)
     the_last_config.Channel = YIN3;
     the_last_config.format = NTSC_I;
     config_pramat_piont = TW9912_INIT_AGAIN;
-    while(config_pramat_piont[i * 2] != 0xfe)
+    while(config_pramat_piont[i*2] != 0xfe)
     {
-        if(tw9912_write((char *)&config_pramat_piont[i * 2]) == NACK) goto CONFIG_not_ack_fail;
+        if(tw9912_write((char *)&config_pramat_piont[i*2]) == NACK) goto CONFIG_not_ack_fail;
         i++;
     }
     tw9912_dbg("tw9912_config_array_agin -\n");
@@ -649,9 +648,9 @@ int Tw9912_YIN3ToYUV_init_agin(void)
     the_last_config.Channel = SEPARATION;
     the_last_config.format = NTSC_P;
     config_pramat_piont = TW9912_YIN3ToYUV_INIT_AGAIN;
-    while(config_pramat_piont[i * 2] != 0xfe)
+    while(config_pramat_piont[i*2] != 0xfe)
     {
-        if(tw9912_write((char *)&config_pramat_piont[i * 2]) == NACK) goto CONFIG_not_ack_fail;
+        if(tw9912_write((char *)&config_pramat_piont[i*2]) == NACK) goto CONFIG_not_ack_fail;
         i++;
     }
     tw9912_dbg("Tw9912_YIN3ToYUV_init_agin -\n");
@@ -669,9 +668,9 @@ int tw9912_config_array_PALi(void)
     the_last_config.Channel = YIN3;
     the_last_config.format = PAL_I;
     config_pramat_piont = TW9912_INIT_PAL_Interlaced_input;
-    while(config_pramat_piont[i * 2] != 0xfe)
+    while(config_pramat_piont[i*2] != 0xfe)
     {
-        if(tw9912_write((char *)&config_pramat_piont[i * 2]) == NACK) goto CONFIG_not_ack_fail;
+        if(tw9912_write((char *)&config_pramat_piont[i*2]) == NACK) goto CONFIG_not_ack_fail;
         i++;
     }
     tw9912_dbg("Tw9912_appoint_pin_tw9912_cvbs_signal_tsting initall tw9912-\n");
@@ -693,7 +692,7 @@ int tw9912_config_array( vedio_channel_t Channel)
     tw9912_get_chip_id();
     //if(config_pramat != STOP_VIDEO)
     {
-        tw9912_channel_choeces_again(Channel);//????
+        tw9912_channel_choeces_again(Channel);//切换通道
         tw9912_dbg("tw9912:tw9912_config_array()-->Tw9912_appoint_pin_tw9912_cvbs_signal_tsting(%d)\n", Channel);
         mutex_unlock(&lock_com_chipe_config);
 SIGNAL_DELTE_AGAIN:
@@ -706,7 +705,7 @@ SIGNAL_DELTE_AGAIN:
         mutex_lock(&lock_com_chipe_config);
         if(ret == STOP_VIDEO) //the channel is not signal input
         {
-            lidbgerr("Tw9912_appoint_pin_tw9912_cvbs_signal_tsting fail,try another\n");
+        	lidbgerr("Tw9912_appoint_pin_tw9912_cvbs_signal_tsting fail,try another\n");
             tw9912_signal_unstabitily_for_tw9912_config_array_flag = 0;//find colobar flag signal bad
             mutex_unlock(&lock_com_chipe_config);
             ret_format = tw9912_testing_channal_signal(Channel);
@@ -715,10 +714,10 @@ SIGNAL_DELTE_AGAIN:
                 goto NOT_signal_input;
             else
             {
-                mutex_unlock(&lock_com_chipe_config);
-                ret = tw9912_cvbs_signal_tsting(Channel);
-                lidbg("tw9912_cvbs_signal_tsting Video Forma Is %d\n", ret);
-                mutex_lock(&lock_com_chipe_config);
+            	mutex_unlock(&lock_com_chipe_config);
+				ret = tw9912_cvbs_signal_tsting(Channel);
+				      lidbg("tw9912_cvbs_signal_tsting Video Forma Is %d\n",ret);
+				mutex_lock(&lock_com_chipe_config);
                 signal_is_how[Channel].Format = ret;
             }
         }
@@ -747,13 +746,12 @@ SIGNAL_DELTE_AGAIN:
         tw9912_status.flag = TW9912_initall_yes;
         tw9912_status.Channel = Channel;
         switch(signal_is_how[Channel].Format)
-        {
-            //?????????? ???????
+        {//根据检测到的视频制式 决定配置的数组
         case NTSC_I:
             tw9912_status.format = NTSC_I;
             config_pramat_piont = TW9912_INIT_NTSC_Interlaced_input;
-            car_backing_times_cnt++;
-            lidbg("tw9912_config_array: car_backing_times_cnt = %d\n", car_backing_times_cnt);
+	     car_backing_times_cnt++;
+	     lidbg("tw9912_config_array: car_backing_times_cnt = %d\n", car_backing_times_cnt);
             break;
 
         case PAL_I:
@@ -783,12 +781,12 @@ SIGNAL_DELTE_AGAIN:
 
         the_last_config.Channel = Channel;
         the_last_config.format = signal_is_how[Channel].Format;
-        while(config_pramat_piont[i * 2] != 0xfe)
+        while(config_pramat_piont[i*2] != 0xfe)
         {
-            if(tw9912_write((char *)&config_pramat_piont[i * 2]) == NACK) goto CONFIG_not_ack_fail;
+            if(tw9912_write((char *)&config_pramat_piont[i*2]) == NACK) goto CONFIG_not_ack_fail;
             if(signal_is_how[Channel].Format == NTSC_P \
-                    && config_pramat_piont[i * 2] > 0x24\
-                    && config_pramat_piont[i * 2] < 0x2d)
+                    && config_pramat_piont[i*2] > 0x24\
+                    && config_pramat_piont[i*2] < 0x2d)
                 usleep(100);
             i++;
         }

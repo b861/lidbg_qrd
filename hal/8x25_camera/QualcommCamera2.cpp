@@ -55,530 +55,452 @@ extern "C" {
  * and openCameraHardware() is 0 to N-1.
  */
 
-static hw_module_methods_t camera_module_methods =
-{
-open:
-    camera_device_open,
+static hw_module_methods_t camera_module_methods = {
+    open: camera_device_open,
 };
 
-static hw_module_t camera_common  =
-{
-tag:
-    HARDWARE_MODULE_TAG,
-    version_major: 0,
-    version_minor: 01,
-id:
-    CAMERA_HARDWARE_MODULE_ID,
-name: "Qcamera"
-    ,
-author: "Qcom"
-    ,
-methods:
-    &camera_module_methods,
-dso:
-    NULL,
-    //reserved[0]:  0,
+static hw_module_t camera_common  = {
+  tag: HARDWARE_MODULE_TAG,
+  version_major: 0,
+  version_minor: 01,
+  id: CAMERA_HARDWARE_MODULE_ID,
+  name: "Qcamera",
+  author:"Qcom",
+  methods: &camera_module_methods,
+  dso: NULL,
+  //reserved[0]:  0,
 };
-camera_module_t HAL_MODULE_INFO_SYM =
-{
-common:
-    camera_common,
-get_number_of_cameras:
-    get_number_of_cameras,
-get_camera_info:
-    get_camera_info,
+camera_module_t HAL_MODULE_INFO_SYM = {
+  common: camera_common,
+  get_number_of_cameras: get_number_of_cameras,
+  get_camera_info: get_camera_info,
 };
 
-camera_device_ops_t camera_ops =
-{
-set_preview_window:
-    android::set_preview_window,
-set_callbacks:
-    android::set_CallBacks,
-enable_msg_type:
-    android::enable_msg_type,
-disable_msg_type:
-    android::disable_msg_type,
-msg_type_enabled:
-    android::msg_type_enabled,
+camera_device_ops_t camera_ops = {
+  set_preview_window:         android::set_preview_window,
+  set_callbacks:              android::set_CallBacks,
+  enable_msg_type:            android::enable_msg_type,
+  disable_msg_type:           android::disable_msg_type,
+  msg_type_enabled:           android::msg_type_enabled,
 
-start_preview:
-    android::start_preview,
-stop_preview:
-    android::stop_preview,
-preview_enabled:
-    android::preview_enabled,
-store_meta_data_in_buffers:
-    android::store_meta_data_in_buffers,
+  start_preview:              android::start_preview,
+  stop_preview:               android::stop_preview,
+  preview_enabled:            android::preview_enabled,
+  store_meta_data_in_buffers: android::store_meta_data_in_buffers,
 
-start_recording:
-    android::start_recording,
-stop_recording:
-    android::stop_recording,
-recording_enabled:
-    android::recording_enabled,
-release_recording_frame:
-    android::release_recording_frame,
+  start_recording:            android::start_recording,
+  stop_recording:             android::stop_recording,
+  recording_enabled:          android::recording_enabled,
+  release_recording_frame:    android::release_recording_frame,
 
-auto_focus:
-    android::auto_focus,
-cancel_auto_focus:
-    android::cancel_auto_focus,
+  auto_focus:                 android::auto_focus,
+  cancel_auto_focus:          android::cancel_auto_focus,
 
-take_picture:
-    android::take_picture,
-cancel_picture:
-    android::cancel_picture,
+  take_picture:               android::take_picture,
+  cancel_picture:             android::cancel_picture,
 
-set_parameters:
-    android::set_parameters,
-get_parameters:
-    android::get_parameters,
-put_parameters:
-    android::put_parameters,
-send_command:
-    android::send_command,
+  set_parameters:             android::set_parameters,
+  get_parameters:             android::get_parameters,
+  put_parameters:             android::put_parameters,
+  send_command:               android::send_command,
 
-release:
-    android::release,
-dump:
-    android::dump,
+  release:                    android::release,
+  dump:                       android::dump,
 };
 
-namespace android
+namespace android {
+
+typedef struct {
+  camera_device hw_dev;
+  //sp<CameraHardwareInterface> hardware;
+  QCameraHardwareInterface *hardware;
+  int camera_released;
+  int cameraId;
+  //CameraParameters parameters;
+} camera_hardware_t;
+
+typedef struct {
+  camera_memory_t mem;
+  int32_t msgType;
+  sp<IMemory> dataPtr;
+  void* user;
+  unsigned int index;
+} q_cam_memory_t;
+
+QCameraHardwareInterface *util_get_Hal_obj( struct camera_device * device)
 {
-
-    typedef struct
-    {
-        camera_device hw_dev;
-        //sp<CameraHardwareInterface> hardware;
-        QCameraHardwareInterface *hardware;
-        int camera_released;
-        int cameraId;
-        //CameraParameters parameters;
-    } camera_hardware_t;
-
-    typedef struct
-    {
-        camera_memory_t mem;
-        int32_t msgType;
-        sp<IMemory> dataPtr;
-        void *user;
-        unsigned int index;
-    } q_cam_memory_t;
-
-    QCameraHardwareInterface *util_get_Hal_obj( struct camera_device *device)
-    {
-        QCameraHardwareInterface *hardware = NULL;
-        if(device && device->priv)
-        {
-            camera_hardware_t *camHal = (camera_hardware_t *)device->priv;
-            hardware = camHal->hardware;
-        }
-        return hardware;
+    QCameraHardwareInterface *hardware = NULL;
+    if(device && device->priv){
+        camera_hardware_t *camHal = (camera_hardware_t *)device->priv;
+        hardware = camHal->hardware;
     }
+    return hardware;
+}
 
 #if 0 //mzhu
-    CameraParameters *util_get_HAL_parameter( struct camera_device *device)
-    {
-        CameraParameters *param = NULL;
-        if(device && device->priv)
-        {
-            camera_hardware_t *camHal = (camera_hardware_t *)device->priv;
-            param = &(camHal->parameters);
-        }
-        return param;
+CameraParameters* util_get_HAL_parameter( struct camera_device * device)
+{
+    CameraParameters *param = NULL;
+    if(device && device->priv){
+        camera_hardware_t *camHal = (camera_hardware_t *)device->priv;
+        param = &(camHal->parameters);
     }
+    return param;
+}
 #endif //mzhu
 
-    extern "C" int get_number_of_cameras()
-    {
-        /* try to query every time we get the call!*/
+extern "C" int get_number_of_cameras()
+{
+    /* try to query every time we get the call!*/
 
-        LOGE("Q%s: E", __func__);
-        return android::HAL_getNumberOfCameras( );
-    }
+    LOGE("Q%s: E", __func__);
+    return android::HAL_getNumberOfCameras( );
+}
 
-    extern "C" int get_camera_info(int camera_id, struct camera_info *info)
-    {
-        int rc = -1;
-        LOGE("Q%s: E", __func__);
-        if(info)
-        {
-            struct CameraInfo camInfo;
-            memset(&camInfo, -1, sizeof (struct CameraInfo));
-            android::HAL_getCameraInfo(camera_id, &camInfo);
-            if (camInfo.facing >= 0)
-            {
-                rc = 0;
-                info->facing = camInfo.facing;
-                info->orientation = camInfo.orientation;
-            }
-        }
-        LOGV("Q%s: X", __func__);
-        return rc;
-    }
-
-
-    /* HAL should return NULL if it fails to open camera hardware. */
-    extern "C" int  camera_device_open(
-        const struct hw_module_t *module, const char *id,
-        struct hw_device_t **hw_device)
-    {
-        int rc = -1;
-        int mode = 0; // TODO: need to add 3d/2d mode, etc
-        camera_device *device = NULL;
-        if(module && id && hw_device)
-        {
-            int cameraId = atoi(id);
-
-            if (!strcmp(module->name, camera_common.name))
-            {
-                camera_hardware_t *camHal =
-                    (camera_hardware_t *) malloc(sizeof (camera_hardware_t));
-                if(!camHal)
-                {
-                    *hw_device = NULL;
-                    LOGE("%s:  end in no mem", __func__);
-                    return rc;
-                }
-                /* we have the camera_hardware obj malloced */
-                memset(camHal, 0, sizeof (camera_hardware_t));
-                camHal->hardware = new QCameraHardwareInterface(cameraId, mode); //HAL_openCameraHardware(cameraId);
-                if (camHal->hardware && camHal->hardware->isCameraReady())
-                {
-                    camHal->cameraId = cameraId;
-                    device = &camHal->hw_dev;
-                    device->common.close = close_camera_device;
-                    device->ops = &camera_ops;
-                    device->priv = (void *)camHal;
-                    rc =  0;
-                }
-                else
-                {
-                    if (camHal->hardware)
-                    {
-                        delete camHal->hardware;
-                        camHal->hardware = NULL;
-                    }
-                    free(camHal);
-                    device = NULL;
-                }
-            }
-        }
-        /* pass actual hw_device ptr to framework. This amkes that we actally be use memberof() macro */
-        *hw_device = (hw_device_t *)&device->common;
-        LOGE("%s:  end rc %d", __func__, rc);
-        return rc;
-    }
-
-    extern "C"  int close_camera_device( hw_device_t *hw_dev)
-    {
-        LOGE("Q%s: device =%p E", __func__, hw_dev);
-        int rc =  -1;
-        camera_device_t *device = (camera_device_t *)hw_dev;
-
-        if(device)
-        {
-            camera_hardware_t *camHal = (camera_hardware_t *)device->priv;
-            if(camHal )
-            {
-                QCameraHardwareInterface *hardware = util_get_Hal_obj( device);
-                if(!camHal->camera_released)
-                {
-                    if(hardware != NULL)
-                    {
-                        hardware->release( );
-                    }
-                }
-                if(hardware != NULL)
-                    delete hardware;
-                free(camHal);
-            }
+extern "C" int get_camera_info(int camera_id, struct camera_info *info)
+{
+    int rc = -1;
+    LOGE("Q%s: E", __func__);
+    if(info) {
+        struct CameraInfo camInfo;
+        memset(&camInfo, -1, sizeof (struct CameraInfo));
+        android::HAL_getCameraInfo(camera_id, &camInfo);
+        if (camInfo.facing >= 0) {
             rc = 0;
-        }
-        return rc;
-    }
-
-
-    int set_preview_window(struct camera_device *device,
-                           struct preview_stream_ops *window)
-    {
-        int rc = -1;
-        QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
-
-        if(hardware != NULL)
-        {
-            rc = hardware->setPreviewWindow(window);
-        }
-        return rc;
-    }
-
-    void set_CallBacks(struct camera_device *device,
-                       camera_notify_callback notify_cb,
-                       camera_data_callback data_cb,
-                       camera_data_timestamp_callback data_cb_timestamp,
-                       camera_request_memory get_memory,
-                       void *user)
-    {
-        LOGE("Q%s: E", __func__);
-        QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
-        if(hardware != NULL)
-        {
-            hardware->setCallbacks(notify_cb, data_cb, data_cb_timestamp, get_memory, user);
+            info->facing = camInfo.facing;
+            info->orientation = camInfo.orientation;
         }
     }
+    LOGV("Q%s: X", __func__);
+    return rc;
+}
 
-    void enable_msg_type(struct camera_device *device, int32_t msg_type)
-    {
-        QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
-        if(hardware != NULL)
-        {
-            hardware->enableMsgType(msg_type);
+
+/* HAL should return NULL if it fails to open camera hardware. */
+extern "C" int  camera_device_open(
+  const struct hw_module_t* module, const char* id,
+          struct hw_device_t** hw_device)
+{
+    int rc = -1;
+	int mode = 0; // TODO: need to add 3d/2d mode, etc
+    camera_device *device = NULL;
+    if(module && id && hw_device) {
+        int cameraId = atoi(id);
+
+        if (!strcmp(module->name, camera_common.name)) {
+            camera_hardware_t *camHal =
+                (camera_hardware_t *) malloc(sizeof (camera_hardware_t));
+            if(!camHal) {
+                *hw_device = NULL;
+				    LOGE("%s:  end in no mem", __func__);
+				    return rc;
+		    }
+            /* we have the camera_hardware obj malloced */
+            memset(camHal, 0, sizeof (camera_hardware_t));
+            camHal->hardware = new QCameraHardwareInterface(cameraId, mode); //HAL_openCameraHardware(cameraId);
+            if (camHal->hardware && camHal->hardware->isCameraReady()) {
+				camHal->cameraId = cameraId;
+		        device = &camHal->hw_dev;
+                device->common.close = close_camera_device;
+                device->ops = &camera_ops;
+                device->priv = (void *)camHal;
+                rc =  0;
+            } else {
+                if (camHal->hardware) {
+                    delete camHal->hardware;
+                    camHal->hardware = NULL;
+                }
+                free(camHal);
+                device = NULL;
+            }
         }
     }
+	/* pass actual hw_device ptr to framework. This amkes that we actally be use memberof() macro */
+    *hw_device = (hw_device_t*)&device->common;
+    LOGE("%s:  end rc %d", __func__, rc);
+    return rc;
+}
 
-    void disable_msg_type(struct camera_device *device, int32_t msg_type)
-    {
-        QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
-        LOGE("Q%s: E", __func__);
-        if(hardware != NULL)
-        {
-            hardware->disableMsgType(msg_type);
+extern "C"  int close_camera_device( hw_device_t *hw_dev)
+{
+    LOGE("Q%s: device =%p E", __func__, hw_dev);
+    int rc =  -1;
+    camera_device_t *device = (camera_device_t *)hw_dev;
+
+    if(device) {
+        camera_hardware_t *camHal = (camera_hardware_t *)device->priv;
+        if(camHal ) {
+            QCameraHardwareInterface *hardware = util_get_Hal_obj( device);
+            if(!camHal->camera_released) {
+                if(hardware != NULL) {
+                    hardware->release( );
+                }
+            }
+            if(hardware != NULL)
+                delete hardware;
+            free(camHal);
         }
+        rc = 0;
     }
+    return rc;
+}
 
-    int msg_type_enabled(struct camera_device *device, int32_t msg_type)
-    {
-        LOGE("Q%s: E", __func__);
-        int rc = -1;
-        QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
-        if(hardware != NULL)
-        {
-            rc = hardware->msgTypeEnabled(msg_type);
-        }
-        return rc;
+
+int set_preview_window(struct camera_device * device,
+        struct preview_stream_ops *window)
+{
+    int rc = -1;
+    QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
+
+    if(hardware != NULL) {
+        rc = hardware->setPreviewWindow(window);
     }
+    return rc;
+}
 
-    int start_preview(struct camera_device *device)
-    {
-        LOGE("Q%s: E", __func__);
-        int rc = -1;
-        QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
-        if(hardware != NULL)
-        {
-            rc = hardware->startPreview( );
-        }
-        LOGE("Q%s: X", __func__);
-        return rc;
+void set_CallBacks(struct camera_device * device,
+        camera_notify_callback notify_cb,
+        camera_data_callback data_cb,
+        camera_data_timestamp_callback data_cb_timestamp,
+        camera_request_memory get_memory,
+        void *user)
+{
+    LOGE("Q%s: E", __func__);
+    QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
+    if(hardware != NULL){
+        hardware->setCallbacks(notify_cb,data_cb, data_cb_timestamp, get_memory, user);
     }
+}
 
-    void stop_preview(struct camera_device *device)
-    {
-        LOGE("Q%s: E", __func__);
-        QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
-        if(hardware != NULL)
-        {
-            hardware->stopPreview( );
-        }
+void enable_msg_type(struct camera_device * device, int32_t msg_type)
+{
+    QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
+    if(hardware != NULL){
+        hardware->enableMsgType(msg_type);
     }
+}
 
-    int preview_enabled(struct camera_device *device)
-    {
-        LOGE("Q%s: E", __func__);
-        int rc = -1;
-        QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
-        if(hardware != NULL)
-        {
-            rc = hardware->previewEnabled( );
-        }
-        return rc;
+void disable_msg_type(struct camera_device * device, int32_t msg_type)
+{
+    QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
+    LOGE("Q%s: E", __func__);
+    if(hardware != NULL){
+        hardware->disableMsgType(msg_type);
     }
+}
 
-    int store_meta_data_in_buffers(struct camera_device *device, int enable)
-    {
-        LOGE("Q%s: E", __func__);
-        int rc = -1;
-        QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
-        if(hardware != NULL)
-        {
-            rc = hardware->storeMetaDataInBuffers(enable);
-        }
-        return rc;
+int msg_type_enabled(struct camera_device * device, int32_t msg_type)
+{
+    LOGE("Q%s: E", __func__);
+    int rc = -1;
+    QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
+    if(hardware != NULL){
+        rc = hardware->msgTypeEnabled(msg_type);
     }
+    return rc;
+}
 
-    int start_recording(struct camera_device *device)
-    {
-        LOGE("Q%s: E", __func__);
-        int rc = -1;
-        QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
-        if(hardware != NULL)
-        {
-            rc = hardware->startRecording( );
-        }
-        return rc;
+int start_preview(struct camera_device * device)
+{
+    LOGE("Q%s: E", __func__);
+    int rc = -1;
+    QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
+    if(hardware != NULL){
+        rc = hardware->startPreview( );
     }
+    LOGE("Q%s: X", __func__);
+    return rc;
+}
 
-    void stop_recording(struct camera_device *device)
-    {
-        LOGE("Q%s: E", __func__);
-        QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
-        if(hardware != NULL)
-        {
-            hardware->stopRecording( );
-        }
+void stop_preview(struct camera_device * device)
+{
+    LOGE("Q%s: E", __func__);
+    QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
+    if(hardware != NULL){
+        hardware->stopPreview( );
     }
+}
 
-    int recording_enabled(struct camera_device *device)
-    {
-        LOGE("Q%s: E", __func__);
-        int rc = -1;
-        QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
-        if(hardware != NULL)
-        {
-            rc = hardware->recordingEnabled( );
-        }
-        return rc;
+int preview_enabled(struct camera_device * device)
+{
+    LOGE("Q%s: E", __func__);
+    int rc = -1;
+    QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
+    if(hardware != NULL){
+        rc = hardware->previewEnabled( );
     }
+    return rc;
+}
 
-    void release_recording_frame(struct camera_device *device,
-                                 const void *opaque)
-    {
-        LOGV("Q%s: E", __func__);
-        QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
-        if(hardware != NULL)
-        {
-            hardware->releaseRecordingFrame(opaque);
-        }
+int store_meta_data_in_buffers(struct camera_device * device, int enable)
+{
+    LOGE("Q%s: E", __func__);
+    int rc = -1;
+    QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
+    if(hardware != NULL){
+      rc = hardware->storeMetaDataInBuffers(enable);
     }
+    return rc;
+}
 
-    int auto_focus(struct camera_device *device)
-    {
-        LOGE("Q%s: E", __func__);
-        int rc = -1;
-        QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
-        if(hardware != NULL)
-        {
-            rc = hardware->autoFocus( );
-        }
-        return rc;
+int start_recording(struct camera_device * device)
+{
+    LOGE("Q%s: E", __func__);
+    int rc = -1;
+    QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
+    if(hardware != NULL){
+        rc = hardware->startRecording( );
     }
+    return rc;
+}
 
-    int cancel_auto_focus(struct camera_device *device)
-    {
-        LOGE("Q%s: E", __func__);
-        int rc = -1;
-        QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
-        if(hardware != NULL)
-        {
-            rc = hardware->cancelAutoFocus( );
-        }
-        return rc;
+void stop_recording(struct camera_device * device)
+{
+    LOGE("Q%s: E", __func__);
+    QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
+    if(hardware != NULL){
+        hardware->stopRecording( );
     }
+}
 
-    int take_picture(struct camera_device *device)
-    {
-        LOGE("Q%s: E", __func__);
-        int rc = -1;
-        QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
-        if(hardware != NULL)
-        {
-            rc = hardware->takePicture( );
-        }
-        return rc;
+int recording_enabled(struct camera_device * device)
+{
+    LOGE("Q%s: E", __func__);
+    int rc = -1;
+    QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
+    if(hardware != NULL){
+        rc = hardware->recordingEnabled( );
     }
+    return rc;
+}
 
-    int cancel_picture(struct camera_device *device)
-
-    {
-        LOGE("Q%s: E", __func__);
-        int rc = -1;
-        QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
-        if(hardware != NULL)
-        {
-            rc = hardware->cancelPicture( );
-        }
-        return rc;
+void release_recording_frame(struct camera_device * device,
+                const void *opaque)
+{
+    LOGV("Q%s: E", __func__);
+    QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
+    if(hardware != NULL){
+        hardware->releaseRecordingFrame(opaque);
     }
+}
 
-    int set_parameters(struct camera_device *device, const char *parms)
-
-    {
-        LOGE("Q%s: E", __func__);
-        int rc = -1;
-        QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
-        if(hardware != NULL && parms)
-        {
-            //CameraParameters param;// = util_get_HAL_parameter(device);
-            //String8 str = String8(parms);
-
-            //param.unflatten(str);
-            rc = hardware->setParameters(parms);
-            //rc = 0;
-        }
-        return rc;
+int auto_focus(struct camera_device * device)
+{
+    LOGE("Q%s: E", __func__);
+    int rc = -1;
+    QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
+    if(hardware != NULL){
+        rc = hardware->autoFocus( );
     }
+    return rc;
+}
 
-    char *get_parameters(struct camera_device *device)
-    {
-        LOGE("Q%s: E", __func__);
-        QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
-        if(hardware != NULL)
-        {
-            char *parms = NULL;
-            hardware->getParameters(&parms);
-            return parms;
-        }
-        return NULL;
+int cancel_auto_focus(struct camera_device * device)
+{
+    LOGE("Q%s: E", __func__);
+    int rc = -1;
+    QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
+    if(hardware != NULL){
+        rc = hardware->cancelAutoFocus( );
     }
+    return rc;
+}
 
-    void put_parameters(struct camera_device *device, char *parm)
-
-    {
-        LOGE("Q%s: E", __func__);
-        QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
-        if(hardware != NULL)
-        {
-            hardware->putParameters(parm);
-        }
+int take_picture(struct camera_device * device)
+{
+    LOGE("Q%s: E", __func__);
+    int rc = -1;
+    QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
+    if(hardware != NULL){
+        rc = hardware->takePicture( );
     }
+    return rc;
+}
 
-    int send_command(struct camera_device *device,
-                     int32_t cmd, int32_t arg1, int32_t arg2)
-    {
-        LOGE("Q%s: E", __func__);
-        int rc = -1;
-        QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
-        if(hardware != NULL)
-        {
-            rc = hardware->sendCommand( cmd, arg1, arg2);
-        }
-        return rc;
-    }
+int cancel_picture(struct camera_device * device)
 
-    void release(struct camera_device *device)
-    {
-        LOGE("Q%s: E", __func__);
-        QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
-        if(hardware != NULL)
-        {
-            camera_hardware_t *camHal = (camera_hardware_t *)device->priv;
-            hardware->release( );
-            camHal->camera_released = true;
-        }
+{
+    LOGE("Q%s: E", __func__);
+    int rc = -1;
+    QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
+    if(hardware != NULL){
+        rc = hardware->cancelPicture( );
     }
+    return rc;
+}
 
-    int dump(struct camera_device *device, int fd)
-    {
-        LOGE("Q%s: E", __func__);
-        int rc = -1;
-        QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
-        if(hardware != NULL)
-        {
-            rc = hardware->dump( fd );
-            //rc = 0;
-        }
-        return rc;
+int set_parameters(struct camera_device * device, const char *parms)
+
+{
+    LOGE("Q%s: E", __func__);
+    int rc = -1;
+    QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
+    if(hardware != NULL && parms){
+        //CameraParameters param;// = util_get_HAL_parameter(device);
+        //String8 str = String8(parms);
+
+        //param.unflatten(str);
+        rc = hardware->setParameters(parms);
+        //rc = 0;
+  }
+  return rc;
+}
+
+char* get_parameters(struct camera_device * device)
+{
+    LOGE("Q%s: E", __func__);
+    QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
+    if(hardware != NULL){
+		char *parms = NULL;
+        hardware->getParameters(&parms);
+		return parms;
     }
+    return NULL;
+}
+
+void put_parameters(struct camera_device * device, char *parm)
+
+{
+    LOGE("Q%s: E", __func__);
+    QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
+    if(hardware != NULL){
+      hardware->putParameters(parm);
+    }
+}
+
+int send_command(struct camera_device * device,
+            int32_t cmd, int32_t arg1, int32_t arg2)
+{
+    LOGE("Q%s: E", __func__);
+    int rc = -1;
+    QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
+    if(hardware != NULL){
+        rc = hardware->sendCommand( cmd, arg1, arg2);
+    }
+    return rc;
+}
+
+void release(struct camera_device * device)
+{
+    LOGE("Q%s: E", __func__);
+    QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
+    if(hardware != NULL){
+        camera_hardware_t *camHal = (camera_hardware_t *)device->priv;
+        hardware->release( );
+        camHal->camera_released = true;
+    }
+}
+
+int dump(struct camera_device * device, int fd)
+{
+    LOGE("Q%s: E", __func__);
+    int rc = -1;
+    QCameraHardwareInterface *hardware = util_get_Hal_obj(device);
+    if(hardware != NULL){
+        rc = hardware->dump( fd );
+      //rc = 0;
+    }
+    return rc;
+}
 
 }; // namespace android
