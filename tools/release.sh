@@ -3,7 +3,7 @@ chmod 777 -R ./
 source ./env_entry.sh
 ./build_cfg.sh $DBG_SOC $BUILD_VERSION 
 ./clean.sh
-cd $DBG_HAL_PATH/$DBG_SOC
+cd $DBG_HAL_PATH
 ./build_all.sh
 
 cd -
