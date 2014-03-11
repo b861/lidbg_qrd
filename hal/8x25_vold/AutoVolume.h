@@ -20,7 +20,8 @@
 #include "DirectVolume.h"
 
 
-class AutoVolume : public DirectVolume {
+class AutoVolume : public DirectVolume
+{
 public:
     AutoVolume(VolumeManager *vm, const char *label, const char *mount_point, const char *part_name = 0);
     virtual ~AutoVolume();

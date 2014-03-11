@@ -38,24 +38,28 @@
 
 #define DEVMAPPER_BUFFER_SIZE 4096
 
-int Devmapper::dumpState(SocketClient *c) {
+int Devmapper::dumpState(SocketClient *c)
+{
 
     char *buffer = (char *) malloc(1024 * 64);
-    if (!buffer) {
+    if (!buffer)
+    {
         SLOGE("Error allocating memory (%s)", strerror(errno));
         return -1;
     }
     memset(buffer, 0, (1024 * 64));
 
     char *buffer2 = (char *) malloc(DEVMAPPER_BUFFER_SIZE);
-    if (!buffer2) {
+    if (!buffer2)
+    {
         SLOGE("Error allocating memory (%s)", strerror(errno));
         free(buffer);
         return -1;
     }
 
     int fd;
-    if ((fd = open("/dev/device-mapper", O_RDWR)) < 0) {
+    if ((fd = open("/dev/device-mapper", O_RDWR)) < 0)
+    {
         SLOGE("Error opening devmapper (%s)", strerror(errno));
         free(buffer);
         free(buffer2);
@@ -65,7 +69,8 @@ int Devmapper::dumpState(SocketClient *c) {
     struct dm_ioctl *io = (struct dm_ioctl *) buffer;
     ioctlInit(io, (1024 * 64), NULL, 0);
 
-    if (ioctl(fd, DM_LIST_DEVICES, io)) {
+    if (ioctl(fd, DM_LIST_DEVICES, io))
+    {
         SLOGE("DM_LIST_DEVICES ioctl failed (%s)", strerror(errno));
         free(buffer);
         free(buffer2);
@@ -74,7 +79,8 @@ int Devmapper::dumpState(SocketClient *c) {
     }
 
     struct dm_name_list *n = (struct dm_name_list *) (((char *) buffer) + io->data_start);
-    if (!n->dev) {
+    if (!n->dev)
+    {
         free(buffer);
         free(buffer2);
         close(fd);
@@ -82,31 +88,38 @@ int Devmapper::dumpState(SocketClient *c) {
     }
 
     unsigned nxt = 0;
-    do {
+    do
+    {
         n = (struct dm_name_list *) (((char *) n) + nxt);
 
         memset(buffer2, 0, DEVMAPPER_BUFFER_SIZE);
         struct dm_ioctl *io2 = (struct dm_ioctl *) buffer2;
         ioctlInit(io2, DEVMAPPER_BUFFER_SIZE, n->name, 0);
-        if (ioctl(fd, DM_DEV_STATUS, io2)) {
-            if (errno != ENXIO) {
+        if (ioctl(fd, DM_DEV_STATUS, io2))
+        {
+            if (errno != ENXIO)
+            {
                 SLOGE("DM_DEV_STATUS ioctl failed (%s)", strerror(errno));
             }
             io2 = NULL;
         }
 
         char *tmp;
-        if (!io2) {
+        if (!io2)
+        {
             asprintf(&tmp, "%s %llu:%llu (no status available)", n->name, MAJOR(n->dev), MINOR(n->dev));
-        } else {
+        }
+        else
+        {
             asprintf(&tmp, "%s %llu:%llu %d %d 0x%.8x %llu:%llu", n->name, MAJOR(n->dev),
-                    MINOR(n->dev), io2->target_count, io2->open_count, io2->flags, MAJOR(io2->dev),
-                            MINOR(io2->dev));
+                     MINOR(n->dev), io2->target_count, io2->open_count, io2->flags, MAJOR(io2->dev),
+                     MINOR(io2->dev));
         }
         c->sendMsg(0, tmp, false);
         free(tmp);
         nxt = n->next;
-    } while (nxt);
+    }
+    while (nxt);
 
     free(buffer);
     free(buffer2);
@@ -115,7 +128,8 @@ int Devmapper::dumpState(SocketClient *c) {
 }
 
 void Devmapper::ioctlInit(struct dm_ioctl *io, size_t dataSize,
-                          const char *name, unsigned flags) {
+                          const char *name, unsigned flags)
+{
     memset(io, 0, dataSize);
     io->data_size = dataSize;
     io->data_start = sizeof(struct dm_ioctl);
@@ -123,32 +137,38 @@ void Devmapper::ioctlInit(struct dm_ioctl *io, size_t dataSize,
     io->version[1] = 0;
     io->version[2] = 0;
     io->flags = flags;
-    if (name) {
+    if (name)
+    {
         int ret = strlcpy(io->name, name, sizeof(io->name));
-	if (ret >= sizeof(io->name))
-		abort();
+        if (ret >= sizeof(io->name))
+            abort();
     }
 }
 
-int Devmapper::lookupActive(const char *name, char *ubuffer, size_t len) {
+int Devmapper::lookupActive(const char *name, char *ubuffer, size_t len)
+{
     char *buffer = (char *) malloc(DEVMAPPER_BUFFER_SIZE);
-    if (!buffer) {
+    if (!buffer)
+    {
         SLOGE("Error allocating memory (%s)", strerror(errno));
         return -1;
     }
 
     int fd;
-    if ((fd = open("/dev/device-mapper", O_RDWR)) < 0) {
+    if ((fd = open("/dev/device-mapper", O_RDWR)) < 0)
+    {
         SLOGE("Error opening devmapper (%s)", strerror(errno));
         free(buffer);
         return -1;
     }
 
     struct dm_ioctl *io = (struct dm_ioctl *) buffer;
- 
+
     ioctlInit(io, DEVMAPPER_BUFFER_SIZE, name, 0);
-    if (ioctl(fd, DM_DEV_STATUS, io)) {
-        if (errno != ENXIO) {
+    if (ioctl(fd, DM_DEV_STATUS, io))
+    {
+        if (errno != ENXIO)
+        {
             SLOGE("DM_DEV_STATUS ioctl failed for lookup (%s)", strerror(errno));
         }
         free(buffer);
@@ -164,26 +184,30 @@ int Devmapper::lookupActive(const char *name, char *ubuffer, size_t len) {
 }
 
 int Devmapper::create(const char *name, const char *loopFile, const char *key,
-                      unsigned int numSectors, char *ubuffer, size_t len) {
+                      unsigned int numSectors, char *ubuffer, size_t len)
+{
     char *buffer = (char *) malloc(DEVMAPPER_BUFFER_SIZE);
-    if (!buffer) {
+    if (!buffer)
+    {
         SLOGE("Error allocating memory (%s)", strerror(errno));
         return -1;
     }
 
     int fd;
-    if ((fd = open("/dev/device-mapper", O_RDWR)) < 0) {
+    if ((fd = open("/dev/device-mapper", O_RDWR)) < 0)
+    {
         SLOGE("Error opening devmapper (%s)", strerror(errno));
         free(buffer);
         return -1;
     }
 
     struct dm_ioctl *io = (struct dm_ioctl *) buffer;
- 
+
     // Create the DM device
     ioctlInit(io, DEVMAPPER_BUFFER_SIZE, name, 0);
 
-    if (ioctl(fd, DM_DEV_CREATE, io)) {
+    if (ioctl(fd, DM_DEV_CREATE, io))
+    {
         SLOGE("Error creating device mapping (%s)", strerror(errno));
         free(buffer);
         close(fd);
@@ -198,7 +222,8 @@ int Devmapper::create(const char *name, const char *loopFile, const char *key,
     strcpy(geoParams, "0 64 63 0");
     geoParams += strlen(geoParams) + 1;
     geoParams = (char *) _align(geoParams, 8);
-    if (ioctl(fd, DM_DEV_SET_GEOMETRY, io)) {
+    if (ioctl(fd, DM_DEV_SET_GEOMETRY, io))
+    {
         SLOGE("Error setting device geometry (%s)", strerror(errno));
         free(buffer);
         close(fd);
@@ -207,7 +232,8 @@ int Devmapper::create(const char *name, const char *loopFile, const char *key,
 
     // Retrieve the device number we were allocated
     ioctlInit(io, DEVMAPPER_BUFFER_SIZE, name, 0);
-    if (ioctl(fd, DM_DEV_STATUS, io)) {
+    if (ioctl(fd, DM_DEV_STATUS, io))
+    {
         SLOGE("Error retrieving devmapper status (%s)", strerror(errno));
         free(buffer);
         close(fd);
@@ -232,13 +258,14 @@ int Devmapper::create(const char *name, const char *loopFile, const char *key,
 
     char *cryptParams = buffer + sizeof(struct dm_ioctl) + sizeof(struct dm_target_spec);
     snprintf(cryptParams,
-            DEVMAPPER_BUFFER_SIZE - (sizeof(struct dm_ioctl) + sizeof(struct dm_target_spec)),
-            "twofish %s 0 %s 0", key, loopFile);
+             DEVMAPPER_BUFFER_SIZE - (sizeof(struct dm_ioctl) + sizeof(struct dm_target_spec)),
+             "twofish %s 0 %s 0", key, loopFile);
     cryptParams += strlen(cryptParams) + 1;
     cryptParams = (char *) _align(cryptParams, 8);
     tgt->next = cryptParams - buffer;
 
-    if (ioctl(fd, DM_TABLE_LOAD, io)) {
+    if (ioctl(fd, DM_TABLE_LOAD, io))
+    {
         SLOGE("Error loading mapping table (%s)", strerror(errno));
         free(buffer);
         close(fd);
@@ -248,7 +275,8 @@ int Devmapper::create(const char *name, const char *loopFile, const char *key,
     // Resume the new table
     ioctlInit(io, DEVMAPPER_BUFFER_SIZE, name, 0);
 
-    if (ioctl(fd, DM_DEV_SUSPEND, io)) {
+    if (ioctl(fd, DM_DEV_SUSPEND, io))
+    {
         SLOGE("Error Resuming (%s)", strerror(errno));
         free(buffer);
         close(fd);
@@ -261,27 +289,32 @@ int Devmapper::create(const char *name, const char *loopFile, const char *key,
     return 0;
 }
 
-int Devmapper::destroy(const char *name) {
+int Devmapper::destroy(const char *name)
+{
     char *buffer = (char *) malloc(DEVMAPPER_BUFFER_SIZE);
-    if (!buffer) {
+    if (!buffer)
+    {
         SLOGE("Error allocating memory (%s)", strerror(errno));
         return -1;
     }
 
     int fd;
-    if ((fd = open("/dev/device-mapper", O_RDWR)) < 0) {
+    if ((fd = open("/dev/device-mapper", O_RDWR)) < 0)
+    {
         SLOGE("Error opening devmapper (%s)", strerror(errno));
         free(buffer);
         return -1;
     }
 
     struct dm_ioctl *io = (struct dm_ioctl *) buffer;
- 
+
     // Create the DM device
     ioctlInit(io, DEVMAPPER_BUFFER_SIZE, name, 0);
 
-    if (ioctl(fd, DM_DEV_REMOVE, io)) {
-        if (errno != ENXIO) {
+    if (ioctl(fd, DM_DEV_REMOVE, io))
+    {
+        if (errno != ENXIO)
+        {
             SLOGE("Error destroying device mapping (%s)", strerror(errno));
         }
         free(buffer);
@@ -296,7 +329,7 @@ int Devmapper::destroy(const char *name) {
 
 void *Devmapper::_align(void *ptr, unsigned int a)
 {
-        register unsigned long agn = --a;
+    register unsigned long agn = --a;
 
-        return (void *) (((unsigned long) ptr + agn) & ~agn);
+    return (void *) (((unsigned long) ptr + agn) & ~agn);
 }

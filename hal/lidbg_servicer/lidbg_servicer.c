@@ -104,24 +104,25 @@ void get_time(char *datastring)
     if(datastring)
         strftime(datastring, 64, tmFormat, local);
 }
-void compose_log_name(char *logname, unsigned int log_type)  //log_type 0: logcat     1:kmsg 
+void compose_log_name(char *logname, unsigned int log_type)  //log_type 0: logcat     1:kmsg
 {
     char mchine_id[32];
     char current_time[32];
-	
+
     get_time(current_time);
-    if ( read_from_file("/data/lidbg/MIF.txt", mchine_id, sizeof(mchine_id)) > 0){
-	if(log_type==0)	
-        	sprintf(logname, "logcat_%s_%s.txt", mchine_id, current_time);
-	else 
-		sprintf(logname, "kmsg_%s_%s.txt", mchine_id, current_time);
+    if ( read_from_file("/data/lidbg/MIF.txt", mchine_id, sizeof(mchine_id)) > 0)
+    {
+        if(log_type == 0)
+            sprintf(logname, "logcat_%s_%s.txt", mchine_id, current_time);
+        else
+            sprintf(logname, "kmsg_%s_%s.txt", mchine_id, current_time);
     }
     else
     {
-    	if(log_type==0)
-        	sprintf(logname, "logcat_default_%s.txt", current_time);
-	else
-		sprintf(logname, "kmsg_default_%s.txt", current_time);
+        if(log_type == 0)
+            sprintf(logname, "logcat_default_%s.txt", current_time);
+        else
+            sprintf(logname, "kmsg_default_%s.txt", current_time);
     }
     lidbg("compose_log_name:new.[%s]\n", logname);
 }
@@ -192,22 +193,22 @@ loop_read:
             break;
         }
 
-		
-	case CMD_FLY_POWER_OFF:
-	{
-		lidbg("CMD_FLY_POWER_OFF+++\n");
-		system("am broadcast -a cn.flyaudio.intent.action.FAST_BOOT_START &");
-		lidbg("CMD_FLY_POWER_OFF---\n");
-		break;
+
+        case CMD_FLY_POWER_OFF:
+        {
+            lidbg("CMD_FLY_POWER_OFF+++\n");
+            system("am broadcast -a cn.flyaudio.intent.action.FAST_BOOT_START &");
+            lidbg("CMD_FLY_POWER_OFF---\n");
+            break;
         }
-	case CMD_IGNORE_WAKELOCK:
-	{
-		lidbg("CMD_IGNORE_WAKELOCK+++\n");
-		system("am broadcast -a com.android.FORCESUSPEND &");
-		lidbg("CMD_IGNORE_WAKELOCK---\n");
-		break;
-	}
-		
+        case CMD_IGNORE_WAKELOCK:
+        {
+            lidbg("CMD_IGNORE_WAKELOCK+++\n");
+            system("am broadcast -a com.android.FORCESUSPEND &");
+            lidbg("CMD_IGNORE_WAKELOCK---\n");
+            break;
+        }
+
         case LOG_LOGCAT :
         {
             static int flag = 0;
@@ -232,13 +233,13 @@ loop_read:
         case LOG_DMESG :
         {
             static int flag = 0;
-	    char cmd[128];
+            char cmd[128];
             if(flag)break;
             else flag = 1;
             lidbg("\n\n\nkmsg+\n\n");
 
-	   system("echo c lidbg_trace_msg disable > /dev/mlidbg0");
-            compose_log_name(kmsg_name,1);
+            system("echo c lidbg_trace_msg disable > /dev/mlidbg0");
+            compose_log_name(kmsg_name, 1);
 
             sprintf(cmd, "date >/data/%s", kmsg_name);
             system(cmd);

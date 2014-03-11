@@ -219,11 +219,11 @@ enum
 #define  MCU_IIC_REQ_ISR  (30)
 
 #if (defined(BOARD_V1) || defined(BOARD_V2) || defined(BOARD_V3))
-	#define BL_MAX (255)
-	#define BL_MIN (0)
+#define BL_MAX (255)
+#define BL_MIN (0)
 #else
-	#define BL_MAX (0)
-	#define BL_MIN (255)
+#define BL_MAX (0)
+#define BL_MIN (255)
 #endif
 
 #if 0//def FLY_DEBUG

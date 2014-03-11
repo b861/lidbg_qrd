@@ -19,7 +19,8 @@
 
 #include <sysutils/NetlinkListener.h>
 
-class NetlinkHandler: public NetlinkListener {
+class NetlinkHandler: public NetlinkListener
+{
 
 public:
     NetlinkHandler(int listenerSocket);

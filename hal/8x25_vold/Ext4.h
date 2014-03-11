@@ -19,10 +19,11 @@
 
 #include <unistd.h>
 
-class Ext4 {
+class Ext4
+{
 public:
     static int doMount(const char *fsPath, const char *mountPoint, bool ro, bool remount,
-            bool executable);
+                       bool executable);
     static int format(const char *fsPath);
     static int check(const char *fsPath);
 };

@@ -47,7 +47,8 @@ extern "C" int logwrap(int argc, const char **argv, int background);
 
 
 int Ext4::doMount(const char *fsPath, const char *mountPoint, bool ro, bool remount,
-        bool executable) {
+                  bool executable)
+{
     int rc;
     unsigned long flags;
 
@@ -59,7 +60,8 @@ int Ext4::doMount(const char *fsPath, const char *mountPoint, bool ro, bool remo
 
     rc = mount(fsPath, mountPoint, "ext4", flags, NULL);
 
-    if (rc && errno == EROFS) {
+    if (rc && errno == EROFS)
+    {
         SLOGE("%s appears to be a read only filesystem - retrying mount RO", fsPath);
         flags |= MS_RDONLY;
         rc = mount(fsPath, mountPoint, "ext4", flags, NULL);
@@ -68,7 +70,8 @@ int Ext4::doMount(const char *fsPath, const char *mountPoint, bool ro, bool remo
     return rc;
 }
 
-int Ext4::format(const char *fsPath) {
+int Ext4::format(const char *fsPath)
+{
     int fd;
     const char *args[4];
     int rc;
@@ -79,10 +82,13 @@ int Ext4::format(const char *fsPath) {
     args[3] = NULL;
     rc = logwrap(3, args, 1);
 
-    if (rc == 0) {
+    if (rc == 0)
+    {
         SLOGI("Filesystem (ext4) formatted OK");
         return 0;
-    } else {
+    }
+    else
+    {
         SLOGE("Format (ext4) failed (unknown exit code %d)", rc);
         errno = EIO;
         return -1;
@@ -90,15 +96,18 @@ int Ext4::format(const char *fsPath) {
     return 0;
 }
 
-int Ext4::check(const char *fsPath) {
+int Ext4::check(const char *fsPath)
+{
     bool rw = true;
-    if (access(E2FSCK_PATH, X_OK)) {
+    if (access(E2FSCK_PATH, X_OK))
+    {
         SLOGW("Skipping fs checks.\n");
         return 0;
     }
 
     int rc = -1;
-    do {
+    do
+    {
         const char *args[5];
         args[0] = E2FSCK_PATH;
         args[1] = "-y";
@@ -107,7 +116,8 @@ int Ext4::check(const char *fsPath) {
 
         rc = logwrap(4, args, 1);
 
-        switch(rc) {
+        switch(rc)
+        {
         case 0:
             SLOGI("EXT4 Filesystem check completed OK.\n");
             return 0;
@@ -129,7 +139,8 @@ int Ext4::check(const char *fsPath) {
             errno = -EIO;
             return -1;
         }
-    }while(0);
+    }
+    while(0);
 
     return 0;
 }

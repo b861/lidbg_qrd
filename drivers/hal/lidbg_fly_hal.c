@@ -4,7 +4,7 @@
 #define LIDBG_FLY_HAL
 
 #include "lidbg.h"
-bool recovery_mode=0;
+bool recovery_mode = 0;
 LIDBG_DEFINE;
 #define HAL_SO "/flysystem/lib/hw/flyfa.default.so"
 
@@ -26,11 +26,11 @@ char *insmod_list[] =
     "lidbg_videoin.ko",
 #if (defined(BOARD_V1) || defined(BOARD_V2) || defined(BOARD_V3))
     "lidbg_ts_probe.ko",
- #else
-	 "lidbg_ts_probe_new.ko",
- #endif
-     "lidbg_monkey.ko",
-     "lidbg_test.ko",
+#else
+    "lidbg_ts_probe_new.ko",
+#endif
+    "lidbg_monkey.ko",
+    "lidbg_test.ko",
     NULL,
 };
 
@@ -60,9 +60,9 @@ int loader_thread(void *data)
     lidbg_readwrite_file("/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq", NULL, "700800", sizeof("700800") - 1);
 #endif
     SOC_Get_CpuFreq();
-	if( fs_is_file_exist(RECOVERY_MODE_DIR))
-		recovery_mode = 1;
-	else
+    if( fs_is_file_exist(RECOVERY_MODE_DIR))
+        recovery_mode = 1;
+    else
         recovery_mode = 0;
     for(i = 0; insmod_path[i] != NULL; i++)
     {
@@ -70,7 +70,7 @@ int loader_thread(void *data)
         {
             sprintf(path, "%s%s", insmod_path[i], insmod_list[j]);
             //lidbg("load %s\n",path);
-			lidbg_insmod(path);
+            lidbg_insmod(path);
         }
     }
 
@@ -368,7 +368,7 @@ static void set_func_tbl(void)
 
     plidbg_dev->soc_func_tbl.pfnSOC_WakeLock_Stat = lidbg_wakelock_register;
 
-	
+
     plidbg_dev->soc_func_tbl.pfnNotifier_Call = lidbg_notifier_call_chain;
 
 }
@@ -449,12 +449,12 @@ int hal_init(void *data)
         lidbg("=======is product=====\n");
         g_var.is_fly = true;
     }
-	msleep(500);
+    msleep(500);
     lidbg_chmod("/dev/lidbg_hal");
-	msleep(500);
+    msleep(500);
 
-	CREATE_KTHREAD(loader_thread, NULL);
-	return 0;
+    CREATE_KTHREAD(loader_thread, NULL);
+    return 0;
 }
 
 
@@ -488,11 +488,11 @@ int fly_hal_init(void)
     g_var.machine_id = get_machine_id();
 
 
-	g_var.is_fly = 1;
-	g_var.fake_suspend = 0;
-	g_var.acc_flag = 1;
+    g_var.is_fly = 1;
+    g_var.fake_suspend = 0;
+    g_var.acc_flag = 1;
 
-	CREATE_KTHREAD(hal_init,NULL);
+    CREATE_KTHREAD(hal_init, NULL);
 
     return 0;
 }

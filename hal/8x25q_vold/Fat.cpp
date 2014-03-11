@@ -45,16 +45,19 @@ static char MKDOSFS_PATH[] = "/system/bin/newfs_msdos";
 extern "C" int logwrap(int argc, const char **argv, int background);
 extern "C" int mount(const char *, const char *, const char *, unsigned long, const void *);
 
-int Fat::check(const char *fsPath) {
+int Fat::check(const char *fsPath)
+{
     bool rw = true;
-    if (access(FSCK_MSDOS_PATH, X_OK)) {
+    if (access(FSCK_MSDOS_PATH, X_OK))
+    {
         SLOGW("Skipping fs checks\n");
         return 0;
     }
 
     int pass = 1;
     int rc = 0;
-    do {
+    do
+    {
         const char *args[5];
         args[0] = FSCK_MSDOS_PATH;
         args[1] = "-p";
@@ -64,7 +67,8 @@ int Fat::check(const char *fsPath) {
 
         rc = logwrap(4, args, 1);
 
-        switch(rc) {
+        switch(rc)
+        {
         case 0:
             SLOGI("Filesystem check completed OK");
             return 0;
@@ -75,9 +79,10 @@ int Fat::check(const char *fsPath) {
             return -1;
 
         case 4:
-            if (pass++ <= 3) {
+            if (pass++ <= 3)
+            {
                 SLOGW("Filesystem modified - rechecking (pass %d)",
-                        pass);
+                      pass);
                 continue;
             }
             SLOGE("Failing check after too many rechecks");
@@ -89,14 +94,16 @@ int Fat::check(const char *fsPath) {
             errno = EIO;
             return -1;
         }
-    } while (0);
+    }
+    while (0);
 
     return 0;
 }
 
 int Fat::doMount(const char *fsPath, const char *mountPoint,
                  bool ro, bool remount, bool executable,
-                 int ownerUid, int ownerGid, int permMask, bool createLost) {
+                 int ownerUid, int ownerGid, int permMask, bool createLost)
+{
     int rc;
     unsigned long flags;
     char mountData[255];
@@ -115,9 +122,10 @@ int Fat::doMount(const char *fsPath, const char *mountPoint,
      */
     char value[PROPERTY_VALUE_MAX];
     property_get("persist.sampling_profiler", value, "");
-    if (value[0] == '1') {
+    if (value[0] == '1')
+    {
         SLOGW("The SD card is world-writable because the"
-            " 'persist.sampling_profiler' system property is set to '1'.");
+              " 'persist.sampling_profiler' system property is set to '1'.");
         permMask = 0;
     }
 
@@ -127,21 +135,25 @@ int Fat::doMount(const char *fsPath, const char *mountPoint,
 
     rc = mount(fsPath, mountPoint, "vfat", flags, mountData);
 
-    if (rc && errno == EROFS) {
+    if (rc && errno == EROFS)
+    {
         SLOGE("%s appears to be a read only filesystem - retrying mount RO", fsPath);
         flags |= MS_RDONLY;
         rc = mount(fsPath, mountPoint, "vfat", flags, mountData);
     }
 
-    if (rc == 0 && createLost) {
+    if (rc == 0 && createLost)
+    {
         char *lost_path;
         asprintf(&lost_path, "%s/LOST.DIR", mountPoint);
-        if (access(lost_path, F_OK)) {
+        if (access(lost_path, F_OK))
+        {
             /*
              * Create a LOST.DIR in the root so we have somewhere to put
              * lost cluster chains (fsck_msdos doesn't currently do this)
              */
-            if (mkdir(lost_path, 0755)) {
+            if (mkdir(lost_path, 0755))
+            {
                 SLOGE("Unable to create LOST.DIR (%s)", strerror(errno));
             }
         }
@@ -151,7 +163,8 @@ int Fat::doMount(const char *fsPath, const char *mountPoint,
     return rc;
 }
 
-int Fat::format(const char *fsPath, unsigned int numSectors) {
+int Fat::format(const char *fsPath, unsigned int numSectors)
+{
     int fd;
     const char *args[11];
     int rc;
@@ -164,14 +177,19 @@ int Fat::format(const char *fsPath, unsigned int numSectors) {
     args[4] = "android";
     Indx = 5;
 
-    if (numSectors) {
+    if (numSectors)
+    {
         nr_sec = numSectors;
-    } else {
-        if ((fd = open(fsPath, O_RDWR)) < 0) {
+    }
+    else
+    {
+        if ((fd = open(fsPath, O_RDWR)) < 0)
+        {
             SLOGE("Error opening disk file (%s)", strerror(errno));
             return -1;
         }
-        if (ioctl(fd, BLKGETSIZE, &nr_sec)) {
+        if (ioctl(fd, BLKGETSIZE, &nr_sec))
+        {
             SLOGE("Unable to get device size (%s)", strerror(errno));
             close(fd);
             return -1;
@@ -187,28 +205,38 @@ int Fat::format(const char *fsPath, unsigned int numSectors) {
      * 32GB ~ 2TB	->	cluster size = 32KB
      * > 2TB		->	Not supported
      */
-    if ((nr_sec/2) < ((unsigned int) (1024*1024) * 8)) {		/* < 8GB  */
-            args[Indx++] = "-c";
-            args[Indx++] = "8";
-	    SLOGI("Format the disk with cluster size: 4KB\n");
-    } else if ((nr_sec/2) < ((unsigned int) (1024*1024) * 16)) {	/* 8GB ~ 16GB */
-            args[Indx++] = "-c";
-            args[Indx++] = "16";
-	    SLOGI("Format the disk with cluster size: 8KB\n");
-    } else if ((nr_sec/2) < ((unsigned int) (1024*1024) * 32)) {	/* 16GB ~ 32GB */
-	    args[Indx++] = "-c";
-	    args[Indx++] = "32";
-	    SLOGI("Format the disk with cluster size: 16KB\n");
-    } else if ((nr_sec/2) < ((unsigned int) (1024*1024*1024) * 2)) {	/* 32GB ~ 2TB */
-	    args[Indx++] = "-c";
-	    args[Indx++] = "64";
-	    SLOGI("Format the disk with cluster size: 32KB\n");
-    } else {								/* > 2TB */
-	    SLOGE("Unsupported disk\n");
-	    return -1;
+    if ((nr_sec / 2) < ((unsigned int) (1024 * 1024) * 8))  		/* < 8GB  */
+    {
+        args[Indx++] = "-c";
+        args[Indx++] = "8";
+        SLOGI("Format the disk with cluster size: 4KB\n");
+    }
+    else if ((nr_sec / 2) < ((unsigned int) (1024 * 1024) * 16))  	/* 8GB ~ 16GB */
+    {
+        args[Indx++] = "-c";
+        args[Indx++] = "16";
+        SLOGI("Format the disk with cluster size: 8KB\n");
+    }
+    else if ((nr_sec / 2) < ((unsigned int) (1024 * 1024) * 32))  	/* 16GB ~ 32GB */
+    {
+        args[Indx++] = "-c";
+        args[Indx++] = "32";
+        SLOGI("Format the disk with cluster size: 16KB\n");
+    }
+    else if ((nr_sec / 2) < ((unsigned int) (1024 * 1024 * 1024) * 2))  	/* 32GB ~ 2TB */
+    {
+        args[Indx++] = "-c";
+        args[Indx++] = "64";
+        SLOGI("Format the disk with cluster size: 32KB\n");
+    }
+    else  								/* > 2TB */
+    {
+        SLOGE("Unsupported disk\n");
+        return -1;
     }
 
-    if (numSectors) {
+    if (numSectors)
+    {
         char tmp[32];
         snprintf(tmp, sizeof(tmp), "%u", numSectors);
         const char *size = tmp;
@@ -217,16 +245,21 @@ int Fat::format(const char *fsPath, unsigned int numSectors) {
         args[9] = fsPath;
         args[10] = NULL;
         rc = logwrap(11, args, 1);
-    } else {
+    }
+    else
+    {
         args[7] = fsPath;
         args[8] = NULL;
         rc = logwrap(9, args, 1);
     }
 
-    if (rc == 0) {
+    if (rc == 0)
+    {
         SLOGI("Filesystem formatted OK");
         return 0;
-    } else {
+    }
+    else
+    {
         SLOGE("Format failed (unknown exit code %d)", rc);
         errno = EIO;
         return -1;

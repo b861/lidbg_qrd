@@ -36,15 +36,17 @@ static void usage(char *progname);
 static int do_monitor(int sock, int stop_after_cmd);
 static int do_cmd(int sock, int argc, char **argv);
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
     int sock;
 
     if (argc < 2)
         usage(argv[0]);
 
     if ((sock = socket_local_client("vold",
-                                     ANDROID_SOCKET_NAMESPACE_RESERVED,
-                                     SOCK_STREAM)) < 0) {
+                                    ANDROID_SOCKET_NAMESPACE_RESERVED,
+                                    SOCK_STREAM)) < 0)
+    {
         fprintf(stderr, "Error connecting (%s)\n", strerror(errno));
         exit(4);
     }
@@ -54,18 +56,20 @@ int main(int argc, char **argv) {
     exit(do_cmd(sock, argc, argv));
 }
 
-static int do_cmd(int sock, int argc, char **argv) {
+static int do_cmd(int sock, int argc, char **argv)
+{
     char final_cmd[255] = "0 "; /* 0 is a (now required) sequence number */
     int i;
     int ret;
 
-    for (i = 1; i < argc; i++) {
+    for (i = 1; i < argc; i++)
+    {
         char *cmp;
 
         if (!index(argv[i], ' '))
-            asprintf(&cmp, "%s%s", argv[i], (i == (argc -1)) ? "" : " ");
+            asprintf(&cmp, "%s%s", argv[i], (i == (argc - 1)) ? "" : " ");
         else
-            asprintf(&cmp, "\"%s\"%s", argv[i], (i == (argc -1)) ? "" : " ");
+            asprintf(&cmp, "\"%s\"%s", argv[i], (i == (argc - 1)) ? "" : " ");
 
         ret = strlcat(final_cmd, cmp, sizeof(final_cmd));
         if (ret >= sizeof(final_cmd))
@@ -73,7 +77,8 @@ static int do_cmd(int sock, int argc, char **argv) {
         free(cmp);
     }
 
-    if (write(sock, final_cmd, strlen(final_cmd) + 1) < 0) {
+    if (write(sock, final_cmd, strlen(final_cmd) + 1) < 0)
+    {
         perror("write");
         return errno;
     }
@@ -81,13 +86,15 @@ static int do_cmd(int sock, int argc, char **argv) {
     return do_monitor(sock, 1);
 }
 
-static int do_monitor(int sock, int stop_after_cmd) {
+static int do_monitor(int sock, int stop_after_cmd)
+{
     char *buffer = malloc(4096);
 
     if (!stop_after_cmd)
         printf("[Connected to Vold]\n");
 
-    while(1) {
+    while(1)
+    {
         fd_set read_fds;
         struct timeval to;
         int rc = 0;
@@ -98,17 +105,23 @@ static int do_monitor(int sock, int stop_after_cmd) {
         FD_ZERO(&read_fds);
         FD_SET(sock, &read_fds);
 
-        if ((rc = select(sock +1, &read_fds, NULL, NULL, &to)) < 0) {
+        if ((rc = select(sock + 1, &read_fds, NULL, NULL, &to)) < 0)
+        {
             fprintf(stderr, "Error in select (%s)\n", strerror(errno));
             free(buffer);
             return errno;
-        } else if (!rc) {
+        }
+        else if (!rc)
+        {
             continue;
             fprintf(stderr, "[TIMEOUT]\n");
             return ETIMEDOUT;
-        } else if (FD_ISSET(sock, &read_fds)) {
+        }
+        else if (FD_ISSET(sock, &read_fds))
+        {
             memset(buffer, 0, 4096);
-            if ((rc = read(sock, buffer, 4096)) <= 0) {
+            if ((rc = read(sock, buffer, 4096)) <= 0)
+            {
                 if (rc == 0)
                     fprintf(stderr, "Lost connection to Vold - did it crash?\n");
                 else
@@ -118,12 +131,14 @@ static int do_monitor(int sock, int stop_after_cmd) {
                     return ECONNRESET;
                 return errno;
             }
-            
+
             int offset = 0;
             int i = 0;
 
-            for (i = 0; i < rc; i++) {
-                if (buffer[i] == '\0') {
+            for (i = 0; i < rc; i++)
+            {
+                if (buffer[i] == '\0')
+                {
                     int code;
                     char tmp[4];
 
@@ -132,7 +147,8 @@ static int do_monitor(int sock, int stop_after_cmd) {
                     code = atoi(tmp);
 
                     printf("%s\n", buffer + offset);
-                    if (stop_after_cmd) {
+                    if (stop_after_cmd)
+                    {
                         if (code >= 200 && code < 600)
                             return 0;
                     }
@@ -145,7 +161,8 @@ static int do_monitor(int sock, int stop_after_cmd) {
     return 0;
 }
 
-static void usage(char *progname) {
+static void usage(char *progname)
+{
     fprintf(stderr, "Usage: %s <monitor>|<cmd> [arg1] [arg2...]\n", progname);
     exit(1);
 }

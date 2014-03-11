@@ -55,21 +55,23 @@ struct vm_area_struct;
 uint8_t *mm_camera_do_mmap(uint32_t size, int *pmemFd)
 {
     void *ret; /* returned virtual address */
-    int  pmem_fd = open("/dev/pmem_adsp", O_RDWR|O_SYNC);
+    int  pmem_fd = open("/dev/pmem_adsp", O_RDWR | O_SYNC);
 
-    if (pmem_fd <= 0) {
+    if (pmem_fd <= 0)
+    {
         CDBG("do_mmap: Open device /dev/pmem_adsp failed!\n");
         return NULL;
     }
     /* to make it page size aligned */
     size = (size + 4095) & (~4095);
-  ret = mmap(NULL,
-    size,
-    PROT_READ  | PROT_WRITE,
-    MAP_SHARED,
-    pmem_fd,
-    0);
-    if (ret == MAP_FAILED) {
+    ret = mmap(NULL,
+               size,
+               PROT_READ  | PROT_WRITE,
+               MAP_SHARED,
+               pmem_fd,
+               0);
+    if (ret == MAP_FAILED)
+    {
         CDBG("do_mmap: pmem mmap() failed: %s (%d)\n", strerror(errno), errno);
         close(pmem_fd);
         return NULL;
@@ -88,76 +90,80 @@ int mm_camera_do_munmap(int pmem_fd, void *addr, size_t size)
 {
     int rc;
 
-    if (pmem_fd <= 0) {
+    if (pmem_fd <= 0)
+    {
         CDBG("%s:invalid fd=%d\n", __func__, pmem_fd);
         return -1;
     }
     size = (size + 4095) & (~4095);
     CDBG("munmapped size = %d, virt_addr = 0x%p\n",
-    size, addr);
+         size, addr);
     rc = (munmap(addr, size));
     close(pmem_fd);
     CDBG("do_mmap: pmem munmap fd %d ptr %p len %u rc %d\n", pmem_fd, addr,
-    size, rc);
+         size, rc);
     return rc;
 }
 
 #ifdef USE_ION
 uint8_t *mm_camera_do_mmap_ion(int ion_fd, struct ion_allocation_data *alloc,
-		     struct ion_fd_data *ion_info_fd, int *mapFd)
+                               struct ion_fd_data *ion_info_fd, int *mapFd)
 {
-  void *ret; /* returned virtual address */
-  int rc = 0;
-  struct ion_handle_data handle_data;
+    void *ret; /* returned virtual address */
+    int rc = 0;
+    struct ion_handle_data handle_data;
 
-  /* to make it page size aligned */
-  alloc->len = (alloc->len + 4095) & (~4095);
+    /* to make it page size aligned */
+    alloc->len = (alloc->len + 4095) & (~4095);
 
-  rc = ioctl(ion_fd, ION_IOC_ALLOC, alloc);
-  if (rc < 0) {
-    CDBG_ERROR("ION allocation failed\n");
-    goto ION_ALLOC_FAILED;
-  }
+    rc = ioctl(ion_fd, ION_IOC_ALLOC, alloc);
+    if (rc < 0)
+    {
+        CDBG_ERROR("ION allocation failed\n");
+        goto ION_ALLOC_FAILED;
+    }
 
-  ion_info_fd->handle = alloc->handle;
-  rc = ioctl(ion_fd, ION_IOC_SHARE, ion_info_fd);
-  if (rc < 0) {
-    CDBG_ERROR("ION map failed %s\n", strerror(errno));
-    goto ION_MAP_FAILED;
-  }
-  *mapFd = ion_info_fd->fd;
-  ret = mmap(NULL,
-    alloc->len,
-    PROT_READ  | PROT_WRITE,
-    MAP_SHARED,
-    *mapFd,
-    0);
+    ion_info_fd->handle = alloc->handle;
+    rc = ioctl(ion_fd, ION_IOC_SHARE, ion_info_fd);
+    if (rc < 0)
+    {
+        CDBG_ERROR("ION map failed %s\n", strerror(errno));
+        goto ION_MAP_FAILED;
+    }
+    *mapFd = ion_info_fd->fd;
+    ret = mmap(NULL,
+               alloc->len,
+               PROT_READ  | PROT_WRITE,
+               MAP_SHARED,
+               *mapFd,
+               0);
 
-  if (ret == MAP_FAILED) {
-    CDBG_ERROR("ION_MMAP_FAILED: %s (%d)\n", strerror(errno), errno);
-    goto ION_MAP_FAILED;
-  }
+    if (ret == MAP_FAILED)
+    {
+        CDBG_ERROR("ION_MMAP_FAILED: %s (%d)\n", strerror(errno), errno);
+        goto ION_MAP_FAILED;
+    }
 
-  return ret;
+    return ret;
 
 ION_MAP_FAILED:
-  handle_data.handle = ion_info_fd->handle;
-  ioctl(ion_fd, ION_IOC_FREE, &handle_data);
+    handle_data.handle = ion_info_fd->handle;
+    ioctl(ion_fd, ION_IOC_FREE, &handle_data);
 ION_ALLOC_FAILED:
-  return NULL;
+    return NULL;
 }
 
 int mm_camera_do_munmap_ion (int ion_fd, struct ion_fd_data *ion_info_fd,
-                   void *addr, size_t size)
+                             void *addr, size_t size)
 {
-  int rc = 0;
-  rc = munmap(addr, size);
-  close(ion_info_fd->fd);
+    int rc = 0;
+    rc = munmap(addr, size);
+    close(ion_info_fd->fd);
 
-  struct ion_handle_data handle_data;
-  handle_data.handle = ion_info_fd->handle;
-  ioctl(ion_fd, ION_IOC_FREE, &handle_data);
-  return rc;
+    struct ion_handle_data handle_data;
+    handle_data.handle = ion_info_fd->handle;
+    ioctl(ion_fd, ION_IOC_FREE, &handle_data);
+    return rc;
 }
 #endif
 
@@ -167,16 +173,18 @@ int mm_camera_do_munmap_ion (int ion_fd, struct ion_fd_data *ion_info_fd,
 ==============================================================*/
 int mm_camera_dump_image(void *addr, uint32_t size, char *filename)
 {
-  int file_fd = open(filename, O_RDWR | O_CREAT, 0777);
+    int file_fd = open(filename, O_RDWR | O_CREAT, 0777);
 
-  if (file_fd < 0) {
-    CDBG_HIGH("%s: cannot open file\n", __func__);
-		return -1;
-	} else
-    write(file_fd, addr, size);
-  close(file_fd);
-	CDBG("%s: %s, size=%d\n", __func__, filename, size);
-	return 0;
+    if (file_fd < 0)
+    {
+        CDBG_HIGH("%s: cannot open file\n", __func__);
+        return -1;
+    }
+    else
+        write(file_fd, addr, size);
+    close(file_fd);
+    CDBG("%s: %s, size=%d\n", __func__, filename, size);
+    return 0;
 }
 
 uint32_t mm_camera_get_msm_frame_len(cam_format_t fmt_type,
@@ -192,23 +200,32 @@ uint32_t mm_camera_get_msm_frame_len(cam_format_t fmt_type,
     int local_height;
 
 
-    switch (fmt_type) {
+    switch (fmt_type)
+    {
     case CAMERA_YUV_420_NV12:
     case CAMERA_YUV_420_NV21:
         *num_planes = 2;
-        if(CAMERA_MODE_3D == mode) {
-            size = (uint32_t)(PAD_TO_2K(width*height)*3/2);
-            plane[0] = PAD_TO_WORD(width*height);
-        } else {
-            if (image_type == OUTPUT_TYPE_V) {
+        if(CAMERA_MODE_3D == mode)
+        {
+            size = (uint32_t)(PAD_TO_2K(width * height) * 3 / 2);
+            plane[0] = PAD_TO_WORD(width * height);
+        }
+        else
+        {
+            if (image_type == OUTPUT_TYPE_V)
+            {
                 plane[0] = PAD_TO_2K(width * height);
-                plane[1] = PAD_TO_2K(width * height/2);
-            } else if (image_type == OUTPUT_TYPE_P) {
+                plane[1] = PAD_TO_2K(width * height / 2);
+            }
+            else if (image_type == OUTPUT_TYPE_P)
+            {
                 plane[0] = PAD_TO_WORD(width * height);
-                plane[1] = PAD_TO_WORD(width * height/2);
-            } else {
+                plane[1] = PAD_TO_WORD(width * height / 2);
+            }
+            else
+            {
                 plane[0] = PAD_TO_WORD(width * CEILING16(height));
-                plane[1] = PAD_TO_WORD(width * CEILING16(height)/2);
+                plane[1] = PAD_TO_WORD(width * CEILING16(height) / 2);
             }
             size = plane[0] + plane[1];
         }
@@ -216,19 +233,22 @@ uint32_t mm_camera_get_msm_frame_len(cam_format_t fmt_type,
 
     case CAMERA_YUV_420_YV12:
 
-      if(CAMERA_MODE_3D == mode) {
+        if(CAMERA_MODE_3D == mode)
+        {
 
-        *num_planes = 1;
-          size = (uint32_t)(PAD_TO_2K(width*height)*3/2);
-          plane[0] = PAD_TO_WORD(width*height);
-      } else {
-          *num_planes = 3;
-          plane[0] = PAD_TO_2K(CEILING16(width) * height);
-          plane[1] = PAD_TO_2K(CEILING16(width/2) * height/2);
-          plane[2] = PAD_TO_2K(CEILING16(width/2) * height/2);
-          size = plane[0] + plane[1] + plane[2];
-      }
-      break;
+            *num_planes = 1;
+            size = (uint32_t)(PAD_TO_2K(width * height) * 3 / 2);
+            plane[0] = PAD_TO_WORD(width * height);
+        }
+        else
+        {
+            *num_planes = 3;
+            plane[0] = PAD_TO_2K(CEILING16(width) * height);
+            plane[1] = PAD_TO_2K(CEILING16(width / 2) * height / 2);
+            plane[2] = PAD_TO_2K(CEILING16(width / 2) * height / 2);
+            size = plane[0] + plane[1] + plane[2];
+        }
+        break;
     case CAMERA_BAYER_SBGGR10:
     case CAMERA_RDI:
         *num_planes = 1;
@@ -237,11 +257,14 @@ uint32_t mm_camera_get_msm_frame_len(cam_format_t fmt_type,
         break;
     case CAMERA_YUV_422_NV16:
     case CAMERA_YUV_422_NV61:
-      if( image_type == OUTPUT_TYPE_S || image_type == OUTPUT_TYPE_V) {
-        local_height = CEILING16(height);
-      } else {
-        local_height = height;
-      }
+        if( image_type == OUTPUT_TYPE_S || image_type == OUTPUT_TYPE_V)
+        {
+            local_height = CEILING16(height);
+        }
+        else
+        {
+            local_height = height;
+        }
         *num_planes = 2;
         plane[0] = PAD_TO_WORD(width * height);
         plane[1] = PAD_TO_WORD(width * height);
@@ -249,11 +272,11 @@ uint32_t mm_camera_get_msm_frame_len(cam_format_t fmt_type,
         break;
     default:
         CDBG_ERROR("%s: format %d not supported.\n",
-            __func__, fmt_type);
+                   __func__, fmt_type);
         size = 0;
     }
     CDBG("%s:fmt=%d,image_type=%d,width=%d,height=%d,frame_len=%d\n",
-        __func__, fmt_type, image_type, width, height, size);
+         __func__, fmt_type, image_type, width, height, size);
     return size;
 }
 
@@ -264,7 +287,7 @@ void mm_camera_util_profile(const char *str)
 
     clock_gettime(CLOCK_REALTIME, &cur_time);
     CDBG_HIGH("PROFILE %s: %ld.%09ld\n", str,
-    cur_time.tv_sec, cur_time.tv_nsec);
+              cur_time.tv_sec, cur_time.tv_nsec);
 #endif
 }
 
@@ -274,47 +297,50 @@ void mm_camera_util_profile(const char *str)
  * DESCRIPTION:
  *==========================================================================*/
 uint8_t *mm_camera_do_mmap_ion(int ion_fd, struct ion_allocation_data *alloc,
-  struct ion_fd_data *ion_info_fd, int *mapFd)
+                               struct ion_fd_data *ion_info_fd, int *mapFd)
 {
-  void *ret; /* returned virtual address */
-  int rc = 0;
-  struct ion_handle_data handle_data;
+    void *ret; /* returned virtual address */
+    int rc = 0;
+    struct ion_handle_data handle_data;
 
-  /* to make it page size aligned */
-  alloc->len = (alloc->len + 4095) & (~4095);
+    /* to make it page size aligned */
+    alloc->len = (alloc->len + 4095) & (~4095);
 
-  rc = ioctl(ion_fd, ION_IOC_ALLOC, alloc);
-  if (rc < 0) {
-    CDBG_ERROR("ION allocation failed %s\n", strerror(errno));
-    goto ION_ALLOC_FAILED;
-  }
+    rc = ioctl(ion_fd, ION_IOC_ALLOC, alloc);
+    if (rc < 0)
+    {
+        CDBG_ERROR("ION allocation failed %s\n", strerror(errno));
+        goto ION_ALLOC_FAILED;
+    }
 
-  ion_info_fd->handle = alloc->handle;
-  rc = ioctl(ion_fd, ION_IOC_SHARE, ion_info_fd);
-  if (rc < 0) {
-    CDBG_ERROR("ION map failed %s\n", strerror(errno));
-    goto ION_MAP_FAILED;
-  }
-  *mapFd = ion_info_fd->fd;
-  ret = mmap(NULL,
-    alloc->len,
-    PROT_READ  | PROT_WRITE,
-    MAP_SHARED,
-    *mapFd,
-    0);
+    ion_info_fd->handle = alloc->handle;
+    rc = ioctl(ion_fd, ION_IOC_SHARE, ion_info_fd);
+    if (rc < 0)
+    {
+        CDBG_ERROR("ION map failed %s\n", strerror(errno));
+        goto ION_MAP_FAILED;
+    }
+    *mapFd = ion_info_fd->fd;
+    ret = mmap(NULL,
+               alloc->len,
+               PROT_READ  | PROT_WRITE,
+               MAP_SHARED,
+               *mapFd,
+               0);
 
-  if (ret == MAP_FAILED) {
-    CDBG_ERROR("ION_MMAP_FAILED: %s (%d)\n", strerror(errno), errno);
-    goto ION_MAP_FAILED;
-  }
+    if (ret == MAP_FAILED)
+    {
+        CDBG_ERROR("ION_MMAP_FAILED: %s (%d)\n", strerror(errno), errno);
+        goto ION_MAP_FAILED;
+    }
 
-  return ret;
+    return ret;
 
 ION_MAP_FAILED:
-  handle_data.handle = ion_info_fd->handle;
-  ioctl(ion_fd, ION_IOC_FREE, &handle_data);
+    handle_data.handle = ion_info_fd->handle;
+    ioctl(ion_fd, ION_IOC_FREE, &handle_data);
 ION_ALLOC_FAILED:
-  return NULL;
+    return NULL;
 }
 
 /*===========================================================================
@@ -323,14 +349,14 @@ ION_ALLOC_FAILED:
  * DESCRIPTION:
  *==========================================================================*/
 int mm_camera_do_munmap_ion (int ion_fd, struct ion_fd_data *ion_info_fd,
-                   void *addr, size_t size)
+                             void *addr, size_t size)
 {
-  int rc = 0;
-  rc = munmap(addr, size);
-  close(ion_info_fd->fd);
+    int rc = 0;
+    rc = munmap(addr, size);
+    close(ion_info_fd->fd);
 
-  struct ion_handle_data handle_data;
-  handle_data.handle = ion_info_fd->handle;
-  ioctl(ion_fd, ION_IOC_FREE, &handle_data);
-  return rc;
+    struct ion_handle_data handle_data;
+    handle_data.handle = ion_info_fd->handle;
+    ioctl(ion_fd, ION_IOC_FREE, &handle_data);
+    return rc;
 }

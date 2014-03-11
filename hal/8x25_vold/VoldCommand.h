@@ -19,7 +19,8 @@
 
 #include <sysutils/FrameworkCommand.h>
 
-class VoldCommand : public FrameworkCommand {
+class VoldCommand : public FrameworkCommand
+{
 public:
     VoldCommand(const char *cmd);
     virtual ~VoldCommand() {}

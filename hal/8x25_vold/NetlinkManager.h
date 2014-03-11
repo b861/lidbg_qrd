@@ -22,7 +22,8 @@
 
 class NetlinkHandler;
 
-class NetlinkManager {
+class NetlinkManager
+{
 private:
     static NetlinkManager *sInstance;
 
@@ -37,8 +38,14 @@ public:
     int start();
     int stop();
 
-    void setBroadcaster(SocketListener *sl) { mBroadcaster = sl; }
-    SocketListener *getBroadcaster() { return mBroadcaster; }
+    void setBroadcaster(SocketListener *sl)
+    {
+        mBroadcaster = sl;
+    }
+    SocketListener *getBroadcaster()
+    {
+        return mBroadcaster;
+    }
 
     static NetlinkManager *Instance();
 

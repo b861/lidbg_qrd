@@ -33,28 +33,33 @@ const char *Xwarp::XWARP_CFG = "/sys/fs/yaffs/mtd3/xwarp-backing-store";
 const char *Xwarp::XWARP_READY = "/sys/fs/yaffs/mtd3/xwarp-ready";
 const char *Xwarp::XWARP_MIRROR_STATUS = "/sys/fs/yaffs/mtd3/xwarp-mirror";
 
-int Xwarp::enable() {
+int Xwarp::enable()
+{
     return doEnableDisable(true);
 }
 
-int Xwarp::disable() {
+int Xwarp::disable()
+{
     return doEnableDisable(false);
 }
 
-int Xwarp::status(bool *ready, unsigned *mirrorPos, unsigned *maxSize) {
+int Xwarp::status(bool *ready, unsigned *mirrorPos, unsigned *maxSize)
+{
     FILE *fp;
 
     *ready = false;
     *mirrorPos = 0;
     *maxSize = 0;
-    if (!(fp = fopen(XWARP_READY, "r"))) {
+    if (!(fp = fopen(XWARP_READY, "r")))
+    {
         return -1;
     }
 
     fscanf(fp, "%d", (int *) ready);
     fclose(fp);
 
-    if (!(fp = fopen(XWARP_MIRROR_STATUS, "r"))) {
+    if (!(fp = fopen(XWARP_MIRROR_STATUS, "r")))
+    {
         return -1;
     }
 
@@ -63,16 +68,18 @@ int Xwarp::status(bool *ready, unsigned *mirrorPos, unsigned *maxSize) {
     return 0;
 }
 
-int Xwarp::doEnableDisable(bool enable) {
+int Xwarp::doEnableDisable(bool enable)
+{
     const char *tmp;
     int fd = open(XWARP_CFG, O_WRONLY);
 
-    if (fd < 0) 
+    if (fd < 0)
         return -1;
 
     tmp = (enable ? XWARP_BACKINGFILE : "");
 
-    if (write(fd, tmp, strlen(tmp)+1) < 0) {
+    if (write(fd, tmp, strlen(tmp) + 1) < 0)
+    {
         SLOGE("Failed to write xwarp cfg (%s)", strerror(errno));
         close(fd);
         return -1;

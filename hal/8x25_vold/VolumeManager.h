@@ -34,15 +34,18 @@
 
 typedef enum { ASEC, OBB } container_type_t;
 
-class ContainerData {
+class ContainerData
+{
 public:
-    ContainerData(char* _id, container_type_t _type)
-            : id(_id)
-            , type(_type)
+    ContainerData(char *_id, container_type_t _type)
+        : id(_id)
+        , type(_type)
     {}
 
-    ~ContainerData() {
-        if (id != NULL) {
+    ~ContainerData()
+    {
+        if (id != NULL)
+        {
             free(id);
             id = NULL;
         }
@@ -52,9 +55,10 @@ public:
     container_type_t type;
 };
 
-typedef android::List<ContainerData*> AsecIdCollection;
+typedef android::List<ContainerData *> AsecIdCollection;
 
-class VolumeManager {
+class VolumeManager
+{
 
 public:
     static const int SECOND_LUN_NUM = CUSTOM_SECOND_LUN_NUM;
@@ -92,7 +96,10 @@ public:
     int unshareVolume(const char *label, const char *method);
     int shareEnabled(const char *path, const char *method, bool *enabled);
     int formatVolume(const char *label);
-    void disableVolumeManager(void) { mVolManagerDisabled = 1; }
+    void disableVolumeManager(void)
+    {
+        mVolManagerDisabled = 1;
+    }
 
     /* ASEC */
     int createAsec(const char *id, unsigned numSectors, const char *fstype,
@@ -106,22 +113,28 @@ public:
     int getAsecFilesystemPath(const char *id, char *buffer, int maxlen);
 
     /* Loopback images */
-    int listMountedObbs(SocketClient* cli);
+    int listMountedObbs(SocketClient *cli);
     int mountObb(const char *fileName, const char *key, int ownerUid);
     int unmountObb(const char *fileName, bool force);
     int getObbMountPath(const char *id, char *buffer, int maxlen);
 
     /* Shared between ASEC and Loopback images */
     int unmountLoopImage(const char *containerId, const char *loopId,
-            const char *fileName, const char *mountPoint, bool force);
+                         const char *fileName, const char *mountPoint, bool force);
 
     void setDebug(bool enable);
 
     // XXX: Post froyo this should be moved and cleaned up
     int cleanupAsec(Volume *v, bool force);
 
-    void setBroadcaster(SocketListener *sl) { mBroadcaster = sl; }
-    SocketListener *getBroadcaster() { return mBroadcaster; }
+    void setBroadcaster(SocketListener *sl)
+    {
+        mBroadcaster = sl;
+    }
+    SocketListener *getBroadcaster()
+    {
+        return mBroadcaster;
+    }
 
     static VolumeManager *Instance();
 

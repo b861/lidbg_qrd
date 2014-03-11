@@ -3,7 +3,8 @@
 
 #include <unistd.h>
 
-class Exfat {
+class Exfat
+{
 public:
     static int check(const char *fsPath);
     static int doMount(const char *fsPath, const char *mountPoint,

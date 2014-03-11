@@ -29,7 +29,7 @@ extern int g_mem_dbg;
 extern int analysis_copylist(const char *copy_list);
 extern int readwrite_file(const char *filename, char *wbuff, char *rbuff, int readlen);
 extern int update_list(const char *filename, struct list_head *client_list);
-extern int bfs_file_amend(char *file2amend, char *str_append,int file_limit_M);
+extern int bfs_file_amend(char *file2amend, char *str_append, int file_limit_M);
 extern void save_list_to_file(struct list_head *client_list, char *filename);
 extern void set_machine_id(void);
 extern void copy_all_conf_file(void);

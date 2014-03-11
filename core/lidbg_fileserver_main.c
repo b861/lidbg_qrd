@@ -107,9 +107,9 @@ void check_conf_file(void)
     size[2] = fs_get_file_size(core_sd_path);
     size[3] = fs_get_file_size(state_sd_path);
     size[4] = fs_get_file_size(PRE_CONF_INFO_FILE);
-	
+
     fs_mem_log("<check_conf_file:%d,%d,%d,%d,%d>\n", size[0], size[1], size[2], size[3], size[4]);
-	
+
     if(size[0] || size[1] < 1 || size[2] < 1 || size[3] < 1 || size[4] < 1)
     {
         FS_WARN( "<overwrite:push,update?>\n");

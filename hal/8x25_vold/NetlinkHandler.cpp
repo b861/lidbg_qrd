@@ -28,33 +28,40 @@
 #include "VolumeManager.h"
 
 NetlinkHandler::NetlinkHandler(int listenerSocket) :
-                NetlinkListener(listenerSocket) {
+    NetlinkListener(listenerSocket)
+{
 }
 
-NetlinkHandler::~NetlinkHandler() {
+NetlinkHandler::~NetlinkHandler()
+{
 }
 
-int NetlinkHandler::start() {
+int NetlinkHandler::start()
+{
     return this->startListener();
 }
 
-int NetlinkHandler::stop() {
+int NetlinkHandler::stop()
+{
     return this->stopListener();
 }
 
-void NetlinkHandler::onEvent(NetlinkEvent *evt) {
+void NetlinkHandler::onEvent(NetlinkEvent *evt)
+{
     VolumeManager *vm = VolumeManager::Instance();
     const char *subsys = evt->getSubsystem();
 
-    if (!subsys) {
+    if (!subsys)
+    {
         SLOGW("No subsystem found in netlink event");
         return;
     }
-//add log by wangyihong
-SLOGW("NetlinkHandler::onEvent: subsys=%s, mPath=%s",  subsys, evt->findParam("DEVPATH"));
-SLOGW("NetlinkHandler::onEvent: action = %d,type =%s",  evt->getAction(),evt->findParam("DEVTYPE"));
+    //add log by wangyihong
+    SLOGW("NetlinkHandler::onEvent: subsys=%s, mPath=%s",  subsys, evt->findParam("DEVPATH"));
+    SLOGW("NetlinkHandler::onEvent: action = %d,type =%s",  evt->getAction(), evt->findParam("DEVTYPE"));
 
-    if (!strcmp(subsys, "block")) {
+    if (!strcmp(subsys, "block"))
+    {
         vm->handleBlockEvent(evt);
     }
 }

@@ -27,7 +27,7 @@ extern u8 tw9912_signal_unstabitily_for_tw9912_config_array_flag;
 
 //#ifdef BOARD_V1
 //#define tw9912_RESX_UP do{i2c_io_config(TW9912_RESET,GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA,0);gpio_set_value(TW9912_RESET, 1);}while(0)//34
-//#define tw9912_RESX_DOWN do{i2c_io_config(TW9912_RESET,GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA,0);gpio_set_value(TW9912_RESET, 0);msleep(100);}while(0)//9912 reset output, active low 
+//#define tw9912_RESX_DOWN do{i2c_io_config(TW9912_RESET,GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA,0);gpio_set_value(TW9912_RESET, 0);msleep(100);}while(0)//9912 reset output, active low
 //#elif BOARD_V2
 #ifdef BOARD_V2
 #define tw9912_RESX_UP do{i2c_io_config(TW9912_RESET,GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA,0);gpio_set_value(TW9912_RESET, 0);}while(0)//34
@@ -132,12 +132,12 @@ typedef struct
 } last_config_t;
 typedef struct
 {
-unsigned char reg;
-unsigned char reg_val;
-bool sta;//true is find black line;
-bool flag;//true is neet again find the black line;
-bool this_is_first_open;//true is first
-}tw9912info_t;
+    unsigned char reg;
+    unsigned char reg_val;
+    bool sta;//true is find black line;
+    bool flag;//true is neet again find the black line;
+    bool this_is_first_open;//true is first
+} tw9912info_t;
 /**************************/
 int tw9912_config_array( vedio_channel_t Channel);
 

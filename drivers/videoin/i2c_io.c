@@ -38,7 +38,7 @@ int i2c_io_config(unsigned int index, unsigned int direction, unsigned int pull,
         if (rc)
         {
             lidbg("%s: gpio_tlmm_config for %d failed\n",
-                   __func__, index);
+                  __func__, index);
             return 0;
         }
 

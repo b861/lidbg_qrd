@@ -24,16 +24,26 @@
 
 #include "ResponseCode.h"
 
-int ResponseCode::convertFromErrno() {
-   if (errno == ENODEV) {
+int ResponseCode::convertFromErrno()
+{
+    if (errno == ENODEV)
+    {
         return(ResponseCode::OpFailedNoMedia);
-    } else if (errno == ENODATA) {
+    }
+    else if (errno == ENODATA)
+    {
         return(ResponseCode::OpFailedMediaBlank);
-    } else if (errno == EIO) {
+    }
+    else if (errno == EIO)
+    {
         return(ResponseCode::OpFailedMediaCorrupt);
-    } else if (errno == EBUSY) {
+    }
+    else if (errno == EBUSY)
+    {
         return(ResponseCode::OpFailedStorageBusy);
-    } else if (errno == ENOENT) {
+    }
+    else if (errno == ENOENT)
+    {
         return(ResponseCode::OpFailedStorageNotFound);
     }
 

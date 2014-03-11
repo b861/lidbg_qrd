@@ -17,7 +17,8 @@
 #ifndef _RESPONSECODE_H
 #define _RESPONSECODE_H
 
-class ResponseCode {
+class ResponseCode
+{
 public:
     // 100 series - Requestion action was initiated; expect another reply
     // before proceeding with a new command.

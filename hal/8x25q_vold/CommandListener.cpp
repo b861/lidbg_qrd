@@ -40,7 +40,8 @@
 #include "cryptfs.h"
 
 CommandListener::CommandListener() :
-                 FrameworkListener("vold", true) {
+    FrameworkListener("vold", true)
+{
     registerCmd(new DumpCmd());
     registerCmd(new VolumeCmd());
     registerCmd(new AsecCmd());
@@ -50,27 +51,33 @@ CommandListener::CommandListener() :
     registerCmd(new CryptfsCmd());
 }
 
-void CommandListener::dumpArgs(int argc, char **argv, int argObscure) {
+void CommandListener::dumpArgs(int argc, char **argv, int argObscure)
+{
     char buffer[4096];
     char *p = buffer;
 
     memset(buffer, 0, sizeof(buffer));
     int i;
-    for (i = 0; i < argc; i++) {
+    for (i = 0; i < argc; i++)
+    {
         unsigned int len = strlen(argv[i]) + 1; // Account for space
-        if (i == argObscure) {
+        if (i == argObscure)
+        {
             len += 2; // Account for {}
         }
-        if (((p - buffer) + len) < (sizeof(buffer)-1)) {
-            if (i == argObscure) {
+        if (((p - buffer) + len) < (sizeof(buffer) - 1))
+        {
+            if (i == argObscure)
+            {
                 *p++ = '{';
                 *p++ = '}';
                 *p++ = ' ';
                 continue;
             }
             strcpy(p, argv[i]);
-            p+= strlen(argv[i]);
-            if (i != (argc -1)) {
+            p += strlen(argv[i]);
+            if (i != (argc - 1))
+            {
                 *p++ = ' ';
             }
         }
@@ -79,25 +86,31 @@ void CommandListener::dumpArgs(int argc, char **argv, int argObscure) {
 }
 
 CommandListener::DumpCmd::DumpCmd() :
-                 VoldCommand("dump") {
+    VoldCommand("dump")
+{
 }
 
 int CommandListener::DumpCmd::runCommand(SocketClient *cli,
-                                         int argc, char **argv) {
+        int argc, char **argv)
+{
     cli->sendMsg(0, "Dumping loop status", false);
-    if (Loop::dumpState(cli)) {
+    if (Loop::dumpState(cli))
+    {
         cli->sendMsg(ResponseCode::CommandOkay, "Loop dump failed", true);
     }
     cli->sendMsg(0, "Dumping DM status", false);
-    if (Devmapper::dumpState(cli)) {
+    if (Devmapper::dumpState(cli))
+    {
         cli->sendMsg(ResponseCode::CommandOkay, "Devmapper dump failed", true);
     }
     cli->sendMsg(0, "Dumping mounted filesystems", false);
     FILE *fp = fopen("/proc/mounts", "r");
-    if (fp) {
+    if (fp)
+    {
         char line[1024];
-        while (fgets(line, sizeof(line), fp)) {
-            line[strlen(line)-1] = '\0';
+        while (fgets(line, sizeof(line), fp))
+        {
+            line[strlen(line) - 1] = '\0';
             cli->sendMsg(0, line, false);;
         }
         fclose(fp);
@@ -109,14 +122,17 @@ int CommandListener::DumpCmd::runCommand(SocketClient *cli,
 
 
 CommandListener::VolumeCmd::VolumeCmd() :
-                 VoldCommand("volume") {
+    VoldCommand("volume")
+{
 }
 
 int CommandListener::VolumeCmd::runCommand(SocketClient *cli,
-                                                      int argc, char **argv) {
+        int argc, char **argv)
+{
     dumpArgs(argc, argv, -1);
 
-    if (argc < 2) {
+    if (argc < 2)
+    {
         cli->sendMsg(ResponseCode::CommandSyntaxError, "Missing Argument", false);
         return 0;
     }
@@ -124,80 +140,113 @@ int CommandListener::VolumeCmd::runCommand(SocketClient *cli,
     VolumeManager *vm = VolumeManager::Instance();
     int rc = 0;
 
-    if (!strcmp(argv[1], "list")) {
+    if (!strcmp(argv[1], "list"))
+    {
         return vm->listVolumes(cli);
-    } else if (!strcmp(argv[1], "debug")) {
-        if (argc != 3 || (argc == 3 && (strcmp(argv[2], "off") && strcmp(argv[2], "on")))) {
+    }
+    else if (!strcmp(argv[1], "debug"))
+    {
+        if (argc != 3 || (argc == 3 && (strcmp(argv[2], "off") && strcmp(argv[2], "on"))))
+        {
             cli->sendMsg(ResponseCode::CommandSyntaxError, "Usage: volume debug <off/on>", false);
             return 0;
         }
         vm->setDebug(!strcmp(argv[2], "on") ? true : false);
-    } else if (!strcmp(argv[1], "mount")) {
-        if (argc != 3) {
+    }
+    else if (!strcmp(argv[1], "mount"))
+    {
+        if (argc != 3)
+        {
             cli->sendMsg(ResponseCode::CommandSyntaxError, "Usage: volume mount <path>", false);
             return 0;
         }
         rc = vm->mountVolume(argv[2]);
-    } else if (!strcmp(argv[1], "unmount")) {
+    }
+    else if (!strcmp(argv[1], "unmount"))
+    {
         if (argc < 3 || argc > 4 ||
-           ((argc == 4 && strcmp(argv[3], "force")) &&
-            (argc == 4 && strcmp(argv[3], "force_and_revert")))) {
+                ((argc == 4 && strcmp(argv[3], "force")) &&
+                 (argc == 4 && strcmp(argv[3], "force_and_revert"))))
+        {
             cli->sendMsg(ResponseCode::CommandSyntaxError, "Usage: volume unmount <path> [force|force_and_revert]", false);
             return 0;
         }
 
         bool force = false;
         bool revert = false;
-        if (argc >= 4 && !strcmp(argv[3], "force")) {
+        if (argc >= 4 && !strcmp(argv[3], "force"))
+        {
             force = true;
-        } else if (argc >= 4 && !strcmp(argv[3], "force_and_revert")) {
+        }
+        else if (argc >= 4 && !strcmp(argv[3], "force_and_revert"))
+        {
             force = true;
             revert = true;
         }
         rc = vm->unmountVolume(argv[2], force, revert);
-    } else if (!strcmp(argv[1], "format")) {
-        if (argc != 3) {
+    }
+    else if (!strcmp(argv[1], "format"))
+    {
+        if (argc != 3)
+        {
             cli->sendMsg(ResponseCode::CommandSyntaxError, "Usage: volume format <path>", false);
             return 0;
         }
         rc = vm->formatVolume(argv[2]);
-    } else if (!strcmp(argv[1], "share")) {
-        if (argc != 4) {
+    }
+    else if (!strcmp(argv[1], "share"))
+    {
+        if (argc != 4)
+        {
             cli->sendMsg(ResponseCode::CommandSyntaxError,
-                    "Usage: volume share <path> <method>", false);
+                         "Usage: volume share <path> <method>", false);
             return 0;
         }
         rc = vm->shareVolume(argv[2], argv[3]);
-    } else if (!strcmp(argv[1], "unshare")) {
-        if (argc != 4) {
+    }
+    else if (!strcmp(argv[1], "unshare"))
+    {
+        if (argc != 4)
+        {
             cli->sendMsg(ResponseCode::CommandSyntaxError,
-                    "Usage: volume unshare <path> <method>", false);
+                         "Usage: volume unshare <path> <method>", false);
             return 0;
         }
         rc = vm->unshareVolume(argv[2], argv[3]);
-    } else if (!strcmp(argv[1], "shared")) {
+    }
+    else if (!strcmp(argv[1], "shared"))
+    {
         bool enabled = false;
-        if (argc != 4) {
+        if (argc != 4)
+        {
             cli->sendMsg(ResponseCode::CommandSyntaxError,
-                    "Usage: volume shared <path> <method>", false);
+                         "Usage: volume shared <path> <method>", false);
             return 0;
         }
 
-        if (vm->shareEnabled(argv[2], argv[3], &enabled)) {
+        if (vm->shareEnabled(argv[2], argv[3], &enabled))
+        {
             cli->sendMsg(
-                    ResponseCode::OperationFailed, "Failed to determine share enable state", true);
-        } else {
+                ResponseCode::OperationFailed, "Failed to determine share enable state", true);
+        }
+        else
+        {
             cli->sendMsg(ResponseCode::ShareEnabledResult,
-                    (enabled ? "Share enabled" : "Share disabled"), false);
+                         (enabled ? "Share enabled" : "Share disabled"), false);
         }
         return 0;
-    } else {
+    }
+    else
+    {
         cli->sendMsg(ResponseCode::CommandSyntaxError, "Unknown volume cmd", false);
     }
 
-    if (!rc) {
+    if (!rc)
+    {
         cli->sendMsg(ResponseCode::CommandOkay, "volume operation succeeded", false);
-    } else {
+    }
+    else
+    {
         int erno = errno;
         rc = ResponseCode::convertFromErrno();
         cli->sendMsg(rc, "volume operation failed", true);
@@ -207,31 +256,38 @@ int CommandListener::VolumeCmd::runCommand(SocketClient *cli,
 }
 
 CommandListener::StorageCmd::StorageCmd() :
-                 VoldCommand("storage") {
+    VoldCommand("storage")
+{
 }
 
 int CommandListener::StorageCmd::runCommand(SocketClient *cli,
-                                                      int argc, char **argv) {
+        int argc, char **argv)
+{
     dumpArgs(argc, argv, -1);
 
-    if (argc < 2) {
+    if (argc < 2)
+    {
         cli->sendMsg(ResponseCode::CommandSyntaxError, "Missing Argument", false);
         return 0;
     }
 
-    if (!strcmp(argv[1], "users")) {
+    if (!strcmp(argv[1], "users"))
+    {
         DIR *dir;
         struct dirent *de;
 
-        if (!(dir = opendir("/proc"))) {
+        if (!(dir = opendir("/proc")))
+        {
             cli->sendMsg(ResponseCode::OperationFailed, "Failed to open /proc", true);
             return 0;
         }
 
-        while ((de = readdir(dir))) {
+        while ((de = readdir(dir)))
+        {
             int pid = Process::getPid(de->d_name);
 
-            if (pid < 0) {
+            if (pid < 0)
+            {
                 continue;
             }
 
@@ -239,10 +295,11 @@ int CommandListener::StorageCmd::runCommand(SocketClient *cli,
             Process::getProcessName(pid, processName, sizeof(processName));
 
             if (Process::checkFileDescriptorSymLinks(pid, argv[2]) ||
-                Process::checkFileMaps(pid, argv[2]) ||
-                Process::checkSymLink(pid, argv[2], "cwd") ||
-                Process::checkSymLink(pid, argv[2], "root") ||
-                Process::checkSymLink(pid, argv[2], "exe")) {
+                    Process::checkFileMaps(pid, argv[2]) ||
+                    Process::checkSymLink(pid, argv[2], "cwd") ||
+                    Process::checkSymLink(pid, argv[2], "root") ||
+                    Process::checkSymLink(pid, argv[2], "exe"))
+            {
 
                 char msg[1024];
                 snprintf(msg, sizeof(msg), "%d %s", pid, processName);
@@ -251,43 +308,51 @@ int CommandListener::StorageCmd::runCommand(SocketClient *cli,
         }
         closedir(dir);
         cli->sendMsg(ResponseCode::CommandOkay, "Storage user list complete", false);
-    } else {
+    }
+    else
+    {
         cli->sendMsg(ResponseCode::CommandSyntaxError, "Unknown storage cmd", false);
     }
     return 0;
 }
 
 CommandListener::AsecCmd::AsecCmd() :
-                 VoldCommand("asec") {
+    VoldCommand("asec")
+{
 }
 
-void CommandListener::AsecCmd::listAsecsInDirectory(SocketClient *cli, const char *directory) {
+void CommandListener::AsecCmd::listAsecsInDirectory(SocketClient *cli, const char *directory)
+{
     DIR *d = opendir(directory);
 
-    if (!d) {
+    if (!d)
+    {
         cli->sendMsg(ResponseCode::OperationFailed, "Failed to open asec dir", true);
         return;
     }
 
     size_t dirent_len = offsetof(struct dirent, d_name) +
-            pathconf(directory, _PC_NAME_MAX) + 1;
+                        pathconf(directory, _PC_NAME_MAX) + 1;
 
     struct dirent *dent = (struct dirent *) malloc(dirent_len);
-    if (dent == NULL) {
+    if (dent == NULL)
+    {
         cli->sendMsg(ResponseCode::OperationFailed, "Failed to allocate memory", true);
         return;
     }
 
     struct dirent *result;
 
-    while (!readdir_r(d, dent, &result) && result != NULL) {
+    while (!readdir_r(d, dent, &result) && result != NULL)
+    {
         if (dent->d_name[0] == '.')
             continue;
         if (dent->d_type != DT_REG)
             continue;
         size_t name_len = strlen(dent->d_name);
         if (name_len > 5 && name_len < 260 &&
-                !strcmp(&dent->d_name[name_len - 5], ".asec")) {
+                !strcmp(&dent->d_name[name_len - 5], ".asec"))
+        {
             char id[255];
             memset(id, 0, sizeof(id));
             strlcpy(id, dent->d_name, name_len - 4);
@@ -300,8 +365,10 @@ void CommandListener::AsecCmd::listAsecsInDirectory(SocketClient *cli, const cha
 }
 
 int CommandListener::AsecCmd::runCommand(SocketClient *cli,
-                                                      int argc, char **argv) {
-    if (argc < 2) {
+        int argc, char **argv)
+{
+    if (argc < 2)
+    {
         cli->sendMsg(ResponseCode::CommandSyntaxError, "Missing Argument", false);
         return 0;
     }
@@ -309,115 +376,153 @@ int CommandListener::AsecCmd::runCommand(SocketClient *cli,
     VolumeManager *vm = VolumeManager::Instance();
     int rc = 0;
 
-    if (!strcmp(argv[1], "list")) {
+    if (!strcmp(argv[1], "list"))
+    {
         dumpArgs(argc, argv, -1);
 
         listAsecsInDirectory(cli, Volume::SEC_ASECDIR_EXT);
         listAsecsInDirectory(cli, Volume::SEC_ASECDIR_INT);
-    } else if (!strcmp(argv[1], "create")) {
+    }
+    else if (!strcmp(argv[1], "create"))
+    {
         dumpArgs(argc, argv, 5);
-        if (argc != 8) {
+        if (argc != 8)
+        {
             cli->sendMsg(ResponseCode::CommandSyntaxError,
-                    "Usage: asec create <container-id> <size_mb> <fstype> <key> <ownerUid> "
-                    "<isExternal>", false);
+                         "Usage: asec create <container-id> <size_mb> <fstype> <key> <ownerUid> "
+                         "<isExternal>", false);
             return 0;
         }
 
         unsigned int numSectors = (atoi(argv[3]) * (1024 * 1024)) / 512;
         const bool isExternal = (atoi(argv[7]) == 1);
         rc = vm->createAsec(argv[2], numSectors, argv[4], argv[5], atoi(argv[6]), isExternal);
-    } else if (!strcmp(argv[1], "finalize")) {
+    }
+    else if (!strcmp(argv[1], "finalize"))
+    {
         dumpArgs(argc, argv, -1);
-        if (argc != 3) {
+        if (argc != 3)
+        {
             cli->sendMsg(ResponseCode::CommandSyntaxError, "Usage: asec finalize <container-id>", false);
             return 0;
         }
         rc = vm->finalizeAsec(argv[2]);
-    } else if (!strcmp(argv[1], "fixperms")) {
+    }
+    else if (!strcmp(argv[1], "fixperms"))
+    {
         dumpArgs(argc, argv, -1);
-        if  (argc != 5) {
+        if  (argc != 5)
+        {
             cli->sendMsg(ResponseCode::CommandSyntaxError, "Usage: asec fixperms <container-id> <gid> <filename>", false);
             return 0;
         }
 
         char *endptr;
         gid_t gid = (gid_t) strtoul(argv[3], &endptr, 10);
-        if (*endptr != '\0') {
+        if (*endptr != '\0')
+        {
             cli->sendMsg(ResponseCode::CommandSyntaxError, "Usage: asec fixperms <container-id> <gid> <filename>", false);
             return 0;
         }
 
         rc = vm->fixupAsecPermissions(argv[2], gid, argv[4]);
-    } else if (!strcmp(argv[1], "destroy")) {
+    }
+    else if (!strcmp(argv[1], "destroy"))
+    {
         dumpArgs(argc, argv, -1);
-        if (argc < 3) {
+        if (argc < 3)
+        {
             cli->sendMsg(ResponseCode::CommandSyntaxError, "Usage: asec destroy <container-id> [force]", false);
             return 0;
         }
         bool force = false;
-        if (argc > 3 && !strcmp(argv[3], "force")) {
+        if (argc > 3 && !strcmp(argv[3], "force"))
+        {
             force = true;
         }
         rc = vm->destroyAsec(argv[2], force);
-    } else if (!strcmp(argv[1], "mount")) {
+    }
+    else if (!strcmp(argv[1], "mount"))
+    {
         dumpArgs(argc, argv, 3);
-        if (argc != 5) {
+        if (argc != 5)
+        {
             cli->sendMsg(ResponseCode::CommandSyntaxError,
-                    "Usage: asec mount <namespace-id> <key> <ownerUid>", false);
+                         "Usage: asec mount <namespace-id> <key> <ownerUid>", false);
             return 0;
         }
         rc = vm->mountAsec(argv[2], argv[3], atoi(argv[4]));
-    } else if (!strcmp(argv[1], "unmount")) {
+    }
+    else if (!strcmp(argv[1], "unmount"))
+    {
         dumpArgs(argc, argv, -1);
-        if (argc < 3) {
+        if (argc < 3)
+        {
             cli->sendMsg(ResponseCode::CommandSyntaxError, "Usage: asec unmount <container-id> [force]", false);
             return 0;
         }
         bool force = false;
-        if (argc > 3 && !strcmp(argv[3], "force")) {
+        if (argc > 3 && !strcmp(argv[3], "force"))
+        {
             force = true;
         }
         rc = vm->unmountAsec(argv[2], force);
-    } else if (!strcmp(argv[1], "rename")) {
+    }
+    else if (!strcmp(argv[1], "rename"))
+    {
         dumpArgs(argc, argv, -1);
-        if (argc != 4) {
+        if (argc != 4)
+        {
             cli->sendMsg(ResponseCode::CommandSyntaxError,
-                    "Usage: asec rename <old_id> <new_id>", false);
+                         "Usage: asec rename <old_id> <new_id>", false);
             return 0;
         }
         rc = vm->renameAsec(argv[2], argv[3]);
-    } else if (!strcmp(argv[1], "path")) {
+    }
+    else if (!strcmp(argv[1], "path"))
+    {
         dumpArgs(argc, argv, -1);
-        if (argc != 3) {
+        if (argc != 3)
+        {
             cli->sendMsg(ResponseCode::CommandSyntaxError, "Usage: asec path <container-id>", false);
             return 0;
         }
         char path[255];
 
-        if (!(rc = vm->getAsecMountPath(argv[2], path, sizeof(path)))) {
+        if (!(rc = vm->getAsecMountPath(argv[2], path, sizeof(path))))
+        {
             cli->sendMsg(ResponseCode::AsecPathResult, path, false);
             return 0;
         }
-    } else if (!strcmp(argv[1], "fspath")) {
+    }
+    else if (!strcmp(argv[1], "fspath"))
+    {
         dumpArgs(argc, argv, -1);
-        if (argc != 3) {
+        if (argc != 3)
+        {
             cli->sendMsg(ResponseCode::CommandSyntaxError, "Usage: asec fspath <container-id>", false);
             return 0;
         }
         char path[255];
 
-        if (!(rc = vm->getAsecFilesystemPath(argv[2], path, sizeof(path)))) {
+        if (!(rc = vm->getAsecFilesystemPath(argv[2], path, sizeof(path))))
+        {
             cli->sendMsg(ResponseCode::AsecPathResult, path, false);
             return 0;
         }
-    } else {
+    }
+    else
+    {
         dumpArgs(argc, argv, -1);
         cli->sendMsg(ResponseCode::CommandSyntaxError, "Unknown asec cmd", false);
     }
 
-    if (!rc) {
+    if (!rc)
+    {
         cli->sendMsg(ResponseCode::CommandOkay, "asec operation succeeded", false);
-    } else {
+    }
+    else
+    {
         rc = ResponseCode::convertFromErrno();
         cli->sendMsg(rc, "asec operation failed", true);
     }
@@ -426,12 +531,15 @@ int CommandListener::AsecCmd::runCommand(SocketClient *cli,
 }
 
 CommandListener::ObbCmd::ObbCmd() :
-                 VoldCommand("obb") {
+    VoldCommand("obb")
+{
 }
 
 int CommandListener::ObbCmd::runCommand(SocketClient *cli,
-                                                      int argc, char **argv) {
-    if (argc < 2) {
+                                        int argc, char **argv)
+{
+    if (argc < 2)
+    {
         cli->sendMsg(ResponseCode::CommandSyntaxError, "Missing Argument", false);
         return 0;
     }
@@ -439,49 +547,66 @@ int CommandListener::ObbCmd::runCommand(SocketClient *cli,
     VolumeManager *vm = VolumeManager::Instance();
     int rc = 0;
 
-    if (!strcmp(argv[1], "list")) {
+    if (!strcmp(argv[1], "list"))
+    {
         dumpArgs(argc, argv, -1);
 
         rc = vm->listMountedObbs(cli);
-    } else if (!strcmp(argv[1], "mount")) {
-            dumpArgs(argc, argv, 3);
-            if (argc != 5) {
-                cli->sendMsg(ResponseCode::CommandSyntaxError,
-                        "Usage: obb mount <filename> <key> <ownerUid>", false);
-                return 0;
-            }
-            rc = vm->mountObb(argv[2], argv[3], atoi(argv[4]));
-    } else if (!strcmp(argv[1], "unmount")) {
+    }
+    else if (!strcmp(argv[1], "mount"))
+    {
+        dumpArgs(argc, argv, 3);
+        if (argc != 5)
+        {
+            cli->sendMsg(ResponseCode::CommandSyntaxError,
+                         "Usage: obb mount <filename> <key> <ownerUid>", false);
+            return 0;
+        }
+        rc = vm->mountObb(argv[2], argv[3], atoi(argv[4]));
+    }
+    else if (!strcmp(argv[1], "unmount"))
+    {
         dumpArgs(argc, argv, -1);
-        if (argc < 3) {
+        if (argc < 3)
+        {
             cli->sendMsg(ResponseCode::CommandSyntaxError, "Usage: obb unmount <source file> [force]", false);
             return 0;
         }
         bool force = false;
-        if (argc > 3 && !strcmp(argv[3], "force")) {
+        if (argc > 3 && !strcmp(argv[3], "force"))
+        {
             force = true;
         }
         rc = vm->unmountObb(argv[2], force);
-    } else if (!strcmp(argv[1], "path")) {
+    }
+    else if (!strcmp(argv[1], "path"))
+    {
         dumpArgs(argc, argv, -1);
-        if (argc != 3) {
+        if (argc != 3)
+        {
             cli->sendMsg(ResponseCode::CommandSyntaxError, "Usage: obb path <source file>", false);
             return 0;
         }
         char path[255];
 
-        if (!(rc = vm->getObbMountPath(argv[2], path, sizeof(path)))) {
+        if (!(rc = vm->getObbMountPath(argv[2], path, sizeof(path))))
+        {
             cli->sendMsg(ResponseCode::AsecPathResult, path, false);
             return 0;
         }
-    } else {
+    }
+    else
+    {
         dumpArgs(argc, argv, -1);
         cli->sendMsg(ResponseCode::CommandSyntaxError, "Unknown obb cmd", false);
     }
 
-    if (!rc) {
+    if (!rc)
+    {
         cli->sendMsg(ResponseCode::CommandOkay, "obb operation succeeded", false);
-    } else {
+    }
+    else
+    {
         rc = ResponseCode::convertFromErrno();
         cli->sendMsg(rc, "obb operation failed", true);
     }
@@ -490,42 +615,55 @@ int CommandListener::ObbCmd::runCommand(SocketClient *cli,
 }
 
 CommandListener::XwarpCmd::XwarpCmd() :
-                 VoldCommand("xwarp") {
+    VoldCommand("xwarp")
+{
 }
 
 int CommandListener::XwarpCmd::runCommand(SocketClient *cli,
-                                                      int argc, char **argv) {
-    if (argc < 2) {
+        int argc, char **argv)
+{
+    if (argc < 2)
+    {
         cli->sendMsg(ResponseCode::CommandSyntaxError, "Missing Argument", false);
         return 0;
     }
 
-    if (!strcmp(argv[1], "enable")) {
-        if (Xwarp::enable()) {
+    if (!strcmp(argv[1], "enable"))
+    {
+        if (Xwarp::enable())
+        {
             cli->sendMsg(ResponseCode::OperationFailed, "Failed to enable xwarp", true);
             return 0;
         }
 
         cli->sendMsg(ResponseCode::CommandOkay, "Xwarp mirroring started", false);
-    } else if (!strcmp(argv[1], "disable")) {
-        if (Xwarp::disable()) {
+    }
+    else if (!strcmp(argv[1], "disable"))
+    {
+        if (Xwarp::disable())
+        {
             cli->sendMsg(ResponseCode::OperationFailed, "Failed to disable xwarp", true);
             return 0;
         }
 
         cli->sendMsg(ResponseCode::CommandOkay, "Xwarp disabled", false);
-    } else if (!strcmp(argv[1], "status")) {
+    }
+    else if (!strcmp(argv[1], "status"))
+    {
         char msg[255];
         bool r;
         unsigned mirrorPos, maxSize;
 
-        if (Xwarp::status(&r, &mirrorPos, &maxSize)) {
+        if (Xwarp::status(&r, &mirrorPos, &maxSize))
+        {
             cli->sendMsg(ResponseCode::OperationFailed, "Failed to get xwarp status", true);
             return 0;
         }
         snprintf(msg, sizeof(msg), "%s %u %u", (r ? "ready" : "not-ready"), mirrorPos, maxSize);
         cli->sendMsg(ResponseCode::XwarpStatusResult, msg, false);
-    } else {
+    }
+    else
+    {
         cli->sendMsg(ResponseCode::CommandSyntaxError, "Unknown storage cmd", false);
     }
 
@@ -533,66 +671,89 @@ int CommandListener::XwarpCmd::runCommand(SocketClient *cli,
 }
 
 CommandListener::CryptfsCmd::CryptfsCmd() :
-                 VoldCommand("cryptfs") {
+    VoldCommand("cryptfs")
+{
 }
 
 int CommandListener::CryptfsCmd::runCommand(SocketClient *cli,
-                                                      int argc, char **argv) {
-    if ((cli->getUid() != 0) && (cli->getUid() != AID_SYSTEM)) {
+        int argc, char **argv)
+{
+    if ((cli->getUid() != 0) && (cli->getUid() != AID_SYSTEM))
+    {
         cli->sendMsg(ResponseCode::CommandNoPermission, "No permission to run cryptfs commands", false);
         return 0;
     }
 
-    if (argc < 2) {
+    if (argc < 2)
+    {
         cli->sendMsg(ResponseCode::CommandSyntaxError, "Missing Argument", false);
         return 0;
     }
 
     int rc = 0;
 
-    if (!strcmp(argv[1], "checkpw")) {
-        if (argc != 3) {
+    if (!strcmp(argv[1], "checkpw"))
+    {
+        if (argc != 3)
+        {
             cli->sendMsg(ResponseCode::CommandSyntaxError, "Usage: cryptfs checkpw <passwd>", false);
             return 0;
         }
         dumpArgs(argc, argv, 2);
         rc = cryptfs_check_passwd(argv[2]);
-    } else if (!strcmp(argv[1], "restart")) {
-        if (argc != 2) {
+    }
+    else if (!strcmp(argv[1], "restart"))
+    {
+        if (argc != 2)
+        {
             cli->sendMsg(ResponseCode::CommandSyntaxError, "Usage: cryptfs restart", false);
             return 0;
         }
         dumpArgs(argc, argv, -1);
         rc = cryptfs_restart();
-    } else if (!strcmp(argv[1], "cryptocomplete")) {
-        if (argc != 2) {
+    }
+    else if (!strcmp(argv[1], "cryptocomplete"))
+    {
+        if (argc != 2)
+        {
             cli->sendMsg(ResponseCode::CommandSyntaxError, "Usage: cryptfs cryptocomplete", false);
             return 0;
         }
         dumpArgs(argc, argv, -1);
         rc = cryptfs_crypto_complete();
-    } else if (!strcmp(argv[1], "enablecrypto")) {
-        if ( (argc != 4) || (strcmp(argv[2], "wipe") && strcmp(argv[2], "inplace")) ) {
+    }
+    else if (!strcmp(argv[1], "enablecrypto"))
+    {
+        if ( (argc != 4) || (strcmp(argv[2], "wipe") && strcmp(argv[2], "inplace")) )
+        {
             cli->sendMsg(ResponseCode::CommandSyntaxError, "Usage: cryptfs enablecrypto <wipe|inplace> <passwd>", false);
             return 0;
         }
         dumpArgs(argc, argv, 3);
         rc = cryptfs_enable(argv[2], argv[3]);
-    } else if (!strcmp(argv[1], "changepw")) {
-        if (argc != 3) {
+    }
+    else if (!strcmp(argv[1], "changepw"))
+    {
+        if (argc != 3)
+        {
             cli->sendMsg(ResponseCode::CommandSyntaxError, "Usage: cryptfs changepw <newpasswd>", false);
             return 0;
-        } 
+        }
         SLOGD("cryptfs changepw {}");
         rc = cryptfs_changepw(argv[2]);
-    } else if (!strcmp(argv[1], "verifypw")) {
-        if (argc != 3) {
+    }
+    else if (!strcmp(argv[1], "verifypw"))
+    {
+        if (argc != 3)
+        {
             cli->sendMsg(ResponseCode::CommandSyntaxError, "Usage: cryptfs verifypw <passwd>", false);
             return 0;
         }
         SLOGD("cryptfs verifypw {}");
         rc = cryptfs_verify_passwd(argv[2]);
-    } else {
+    }
+    else
+    {
         dumpArgs(argc, argv, -1);
         cli->sendMsg(ResponseCode::CommandSyntaxError, "Unknown cryptfs cmd", false);
     }

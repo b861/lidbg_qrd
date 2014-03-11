@@ -27,21 +27,27 @@
 #include "cutils/log.h"
 #include "cutils/sched_policy.h"
 
-int parent(const char *tag, int parent_read) {
+int parent(const char *tag, int parent_read)
+{
     int status;
     char buffer[4096];
 
     int a = 0;  // start index of unprocessed data
     int b = 0;  // end index of unprocessed data
     int sz;
-    while ((sz = read(parent_read, &buffer[b], sizeof(buffer) - 1 - b)) > 0) {
+    while ((sz = read(parent_read, &buffer[b], sizeof(buffer) - 1 - b)) > 0)
+    {
 
         sz += b;
         // Log one line at a time
-        for (b = 0; b < sz; b++) {
-            if (buffer[b] == '\r') {
+        for (b = 0; b < sz; b++)
+        {
+            if (buffer[b] == '\r')
+            {
                 buffer[b] = '\0';
-            } else if (buffer[b] == '\n') {
+            }
+            else if (buffer[b] == '\n')
+            {
                 buffer[b] = '\0';
 
                 ALOG(LOG_INFO, tag, "%s", &buffer[a]);
@@ -49,62 +55,75 @@ int parent(const char *tag, int parent_read) {
             }
         }
 
-        if (a == 0 && b == sizeof(buffer) - 1) {
+        if (a == 0 && b == sizeof(buffer) - 1)
+        {
             // buffer is full, flush
             buffer[b] = '\0';
             ALOG(LOG_INFO, tag, "%s", &buffer[a]);
             b = 0;
-        } else if (a != b) {
+        }
+        else if (a != b)
+        {
             // Keep left-overs
             b -= a;
             memmove(buffer, &buffer[a], b);
             a = 0;
-        } else {
+        }
+        else
+        {
             a = 0;
             b = 0;
         }
 
     }
     // Flush remaining data
-    if (a != b) {
+    if (a != b)
+    {
         buffer[b] = '\0';
         ALOG(LOG_INFO, tag, "%s", &buffer[a]);
     }
     status = 0xAAAA;
-    if (wait(&status) != -1) {  // Wait for child
-        if (WIFEXITED(status)) {
-            if (WEXITSTATUS(status) != 0) {
+    if (wait(&status) != -1)    // Wait for child
+    {
+        if (WIFEXITED(status))
+        {
+            if (WEXITSTATUS(status) != 0)
+            {
                 ALOG(LOG_INFO, "logwrapper", "%s terminated by exit(%d)", tag,
-                        WEXITSTATUS(status));
+                     WEXITSTATUS(status));
             }
             return WEXITSTATUS(status);
-        } else if (WIFSIGNALED(status))
+        }
+        else if (WIFSIGNALED(status))
             ALOG(LOG_INFO, "logwrapper", "%s terminated by signal %d", tag,
-                    WTERMSIG(status));
+                 WTERMSIG(status));
         else if (WIFSTOPPED(status))
             ALOG(LOG_INFO, "logwrapper", "%s stopped by signal %d", tag,
-                    WSTOPSIG(status));
-    } else
+                 WSTOPSIG(status));
+    }
+    else
         ALOG(LOG_INFO, "logwrapper", "%s wait() failed: %s (%d)", tag,
-                strerror(errno), errno);
+             strerror(errno), errno);
     return -EAGAIN;
 }
 
-void child(int argc, const char**argv) {
+void child(int argc, const char **argv)
+{
     // create null terminated argv_child array
-    char* argv_child[argc + 1];
+    char *argv_child[argc + 1];
     memcpy(argv_child, argv, argc * sizeof(char *));
     argv_child[argc] = NULL;
 
     // XXX: PROTECT FROM VIKING KILLER
-    if (execv(argv_child[0], argv_child)) {
+    if (execv(argv_child[0], argv_child))
+    {
         ALOG(LOG_ERROR, "logwrapper",
-            "executing %s failed: %s", argv_child[0], strerror(errno));
+             "executing %s failed: %s", argv_child[0], strerror(errno));
         exit(-1);
     }
 }
 
-int logwrap(int argc, const char* argv[], int background)
+int logwrap(int argc, const char *argv[], int background)
 {
     pid_t pid;
 
@@ -114,29 +133,35 @@ int logwrap(int argc, const char* argv[], int background)
 
     /* Use ptty instead of socketpair so that STDOUT is not buffered */
     parent_ptty = open("/dev/ptmx", O_RDWR);
-    if (parent_ptty < 0) {
+    if (parent_ptty < 0)
+    {
         ALOG(LOG_ERROR, "logwrapper", "Cannot create parent ptty");
         return -errno;
     }
 
     if (grantpt(parent_ptty) || unlockpt(parent_ptty) ||
-            ((child_devname = (char*)ptsname(parent_ptty)) == 0)) {
+            ((child_devname = (char *)ptsname(parent_ptty)) == 0))
+    {
         close(parent_ptty);
         ALOG(LOG_ERROR, "logwrapper", "Problem with /dev/ptmx");
         return -1;
     }
 
     pid = fork();
-    if (pid < 0) {
+    if (pid < 0)
+    {
         close(parent_ptty);
         ALOG(LOG_ERROR, "logwrapper", "Failed to fork");
         return -errno;
-    } else if (pid == 0) {
+    }
+    else if (pid == 0)
+    {
         /*
          * Child
          */
         child_ptty = open(child_devname, O_RDWR);
-        if (child_ptty < 0) {
+        if (child_ptty < 0)
+        {
             close(parent_ptty);
             ALOG(LOG_ERROR, "logwrapper", "Problem with child ptty");
             return -errno;
@@ -148,16 +173,20 @@ int logwrap(int argc, const char* argv[], int background)
         dup2(child_ptty, 2);
         close(child_ptty);
 
-        if (background) {
+        if (background)
+        {
             int err = set_sched_policy(getpid(), SP_BACKGROUND);
-            if (err < 0) {
+            if (err < 0)
+            {
                 ALOG(LOG_WARN, "logwrapper",
-                    "Unable to background process (%s)", strerror(-err));
+                     "Unable to background process (%s)", strerror(-err));
             }
         }
 
         child(argc, argv);
-    } else {
+    }
+    else
+    {
         /*
          * Parent
          */

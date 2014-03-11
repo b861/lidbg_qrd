@@ -22,7 +22,8 @@
 class NetlinkEvent;
 class VolumeManager;
 
-class Volume {
+class Volume
+{
 private:
     int mState;
 
@@ -57,7 +58,7 @@ protected:
     char *mMountPart[MAX_PARTITIONS];           //
     char *mUnMountPart[MAX_UNMOUNT_PARTITIONS]; //
     int mSharelun[MAX_PARTITIONS];
-	
+
     VolumeManager *mVm;
     bool mDebug;
     int mPartIdx;
@@ -77,9 +78,18 @@ public:
     int unmountVol(bool force, bool revert);
     int formatVol();
 
-    const char *getLabel() { return mLabel; }
-    const char *getMountpoint() { return mMountpoint; }
-    int getState() { return mState; }
+    const char *getLabel()
+    {
+        return mLabel;
+    }
+    const char *getMountpoint()
+    {
+        return mMountpoint;
+    }
+    int getState()
+    {
+        return mState;
+    }
     bool isPrimaryStorage();
 
     virtual int handleBlockEvent(NetlinkEvent *evt);
@@ -102,7 +112,7 @@ protected:
     virtual int getFlags(void) = 0;
 
     int createDeviceNode(const char *path, int major, int minor);
-	
+
 
 private:
     int initializeMbr(const char *deviceNode);
@@ -112,12 +122,12 @@ private:
     int doMoveMount(const char *src, const char *dst, bool force);
     void protectFromAutorunStupidity();
 
-	char* createMountPoint(const char *path, int major, int minor);
-	int deleteMountPoint(char* mountpoint);
-	void saveUnmountPoint(char* mountpoint);
-	void deleteUnMountPoint(int clear);
-	int deleteDeviceNode(const char *path);
-	int mMountedPartNum;
+    char *createMountPoint(const char *path, int major, int minor);
+    int deleteMountPoint(char *mountpoint);
+    void saveUnmountPoint(char *mountpoint);
+    void deleteUnMountPoint(int clear);
+    int deleteDeviceNode(const char *path);
+    int mMountedPartNum;
 };
 
 typedef android::List<Volume *> VolumeCollection;

@@ -800,16 +800,16 @@ static void goodix_ts_work_func(struct work_struct *work)
                 pos += 8;
                 id = coor_data[pos] & 0x0F;
                 touch_index |= (0x01 << id);
-if(1==recovery_mode)
-		{
-                if( (input_y >= 0) && (input_x >= 0) )
+                if(1 == recovery_mode)
                 {
-                    touch.x = point_data[4] | (point_data[5] << 8);
-                    touch.y = screen_y - (point_data[6] | (point_data[7] << 8));
-                    touch.pressed = 1;
-                    set_touch_pos(&touch);
+                    if( (input_y >= 0) && (input_x >= 0) )
+                    {
+                        touch.x = point_data[4] | (point_data[5] << 8);
+                        touch.y = screen_y - (point_data[6] | (point_data[7] << 8));
+                        touch.pressed = 1;
+                        set_touch_pos(&touch);
+                    }
                 }
-		}
                 g_var.flag_for_15s_off++;
                 if(g_var.flag_for_15s_off >= 1000)
                 {
@@ -824,18 +824,18 @@ if(1==recovery_mode)
             {
                 gtp_touch_up(ts, i);
                 pre_touch &= ~(0x01 << i);
-if(1==recovery_mode)
-		{
+                if(1 == recovery_mode)
                 {
-                    touch.pressed = 0;
-                    set_touch_pos(&touch);
+                    {
+                        touch.pressed = 0;
+                        set_touch_pos(&touch);
+                    }
                 }
-		}
             }
         }
     }
-else
-    input_report_key(ts->input_dev, BTN_TOUCH, (touch_num || key_value));   // 20130502
+    else
+        input_report_key(ts->input_dev, BTN_TOUCH, (touch_num || key_value));   // 20130502
 
     if (touch_num)
     {
@@ -849,16 +849,16 @@ else
             input_w  = coor_data[5] | (coor_data[6] << 8);
 
             gtp_touch_down(ts, id, input_x, input_y, input_w);
- if(1==recovery_mode)
-      {
-            if( (input_y >= 0) && (input_x >= 0) )
+            if(1 == recovery_mode)
             {
-                touch.x = point_data[4] | (point_data[5] << 8);
-                touch.y = screen_y - (point_data[6] | (point_data[7] << 8));
-                touch.pressed = 1;
-                set_touch_pos(&touch);
+                if( (input_y >= 0) && (input_x >= 0) )
+                {
+                    touch.x = point_data[4] | (point_data[5] << 8);
+                    touch.y = screen_y - (point_data[6] | (point_data[7] << 8));
+                    touch.pressed = 1;
+                    set_touch_pos(&touch);
+                }
             }
-      }
         }
         g_var.flag_for_15s_off++;
         if(g_var.flag_for_15s_off >= 1000)
@@ -875,12 +875,12 @@ else
 
         GTP_DEBUG("Touch Release!");
         gtp_touch_up(ts, 0);
-if(1==recovery_mode)
+        if(1 == recovery_mode)
         {
             touch.pressed = 0;
             set_touch_pos(&touch);
         }
- 
+
     }
 
     pre_touch = touch_num;

@@ -512,7 +512,7 @@ void mcuFirstInit(void)
     //SOC_IO_Input(0, MCU_IIC_REQ_I, GPIO_CFG_PULL_UP);
     SOC_IO_ISR_Add(MCU_IIC_REQ_ISR, IRQF_TRIGGER_FALLING | IRQF_ONESHOT, MCUIIC_isr, pGlobalHardwareInfo);
 
- if(!g_var.is_fly)    
+    if(!g_var.is_fly)
     {
         CREATE_KTHREAD(thread_lpc, NULL);
     }
@@ -557,11 +557,11 @@ static int  lpc_probe(struct platform_device *pdev)
 
     DUMP_FUN;
 
- if(g_var.is_fly)   
- {
-    lidbg("lpc_init do nothing\n");
-    return 0;
- }
+    if(g_var.is_fly)
+    {
+        lidbg("lpc_init do nothing\n");
+        return 0;
+    }
 
 
     lidbg("lpc communication+\n");

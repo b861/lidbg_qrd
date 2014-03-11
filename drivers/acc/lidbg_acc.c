@@ -16,7 +16,7 @@ LIDBG_DEFINE;
 #define HAL_SO "/flysystem/lib/hw/flyfa.default.so"
 #define FASTBOOT_LOG_PATH LIDBG_LOG_DIR"log_fb.txt"
 
-int mdp_flag = 0; 
+int mdp_flag = 0;
 LIDBG_FAST_PWROFF_STATUS suspend_state = PM_STATUS_LATE_RESUME_OK;
 u32 acc_triger_time = 0;
 u8 quick_resume_times = 0;
@@ -68,7 +68,7 @@ lidbg_acc *plidbg_acc = NULL;
 
 
 static int lidbg_acc_state(struct notifier_block *this,
-                       unsigned long event, void *ptr)
+                           unsigned long event, void *ptr)
 {
     DUMP_FUN;
 
@@ -76,14 +76,14 @@ static int lidbg_acc_state(struct notifier_block *this,
     {
 
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATE, NOTIFIER_MINOR_SYSTEM_OFF):
-		lidbg("====receive SYSTEM_STATE:%d\n",NOTIFIER_MINOR_SYSTEM_OFF);
-		suspend_state = PM_STATUS_EARLY_SUSPEND_PENDING;
+        lidbg("====receive SYSTEM_STATE:%d\n", NOTIFIER_MINOR_SYSTEM_OFF);
+        suspend_state = PM_STATUS_EARLY_SUSPEND_PENDING;
         break;
-	case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATE, NOTIFIER_MINOR_SYSTEM_ON):
-		lidbg("====receive SYSTEM_STATE:%d\n",NOTIFIER_MINOR_SYSTEM_ON);
-		suspend_state = PM_STATUS_LATE_RESUME_OK;
-		break;
-		
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATE, NOTIFIER_MINOR_SYSTEM_ON):
+        lidbg("====receive SYSTEM_STATE:%d\n", NOTIFIER_MINOR_SYSTEM_ON);
+        suspend_state = PM_STATUS_LATE_RESUME_OK;
+        break;
+
     default:
         break;
     }
@@ -119,7 +119,7 @@ int check_all_clk_disable(void)
 }
 
 
-int safe_clk[] = {113, 109, 106, 105, 104, 103, 102, 97 ,95, 53, 51, 37, 32, 31, 24, 23, 22, 21, 20, 16, 15, 12, 10, 8, 4, 3, 1};
+int safe_clk[] = {113, 109, 106, 105, 104, 103, 102, 97 , 95, 53, 51, 37, 32, 31, 24, 23, 22, 21, 20, 16, 15, 12, 10, 8, 4, 3, 1};
 
 bool find_unsafe_clk(void)
 {
@@ -141,31 +141,31 @@ bool find_unsafe_clk(void)
             }
             if(is_safe == 0)
             {
-	            if((i == 14) || (i == 33) || (i == 34))
-	            {
+                if((i == 14) || (i == 33) || (i == 34))
+                {
 
-					ret = 1;
-					lidbg_fs_log(FASTBOOT_LOG_PATH, "block unsafe clk:%d\n", i);
+                    ret = 1;
+                    lidbg_fs_log(FASTBOOT_LOG_PATH, "block unsafe clk:%d\n", i);
 
-					
-					if(i == 14)
-					{
-						lidbg("begin to mdp_pipe_ctr\n");
-						SOC_Call_mdp_pipe_ctrl(0,0,0);
-						mdp_flag = 1;
-						msleep(500);
-						if(!pc_clk_is_enabled(i))
-						{
-							lidbg("pc_clk_is_disabled:%3d\n", i);
-							ret = 0;
-						}
-						
-						lidbg_loop_warning();
-					}
-					
-	            }
-	            else
-					lidbg("block unsafe clk:%d\n", i);
+
+                    if(i == 14)
+                    {
+                        lidbg("begin to mdp_pipe_ctr\n");
+                        SOC_Call_mdp_pipe_ctrl(0, 0, 0);
+                        mdp_flag = 1;
+                        msleep(500);
+                        if(!pc_clk_is_enabled(i))
+                        {
+                            lidbg("pc_clk_is_disabled:%3d\n", i);
+                            ret = 0;
+                        }
+
+                        lidbg_loop_warning();
+                    }
+
+                }
+                else
+                    lidbg("block unsafe clk:%d\n", i);
 
                 //ret = 1;
                 //return ret;
@@ -238,9 +238,9 @@ static void fastboot_task_kill_exclude()
             (strncmp(p->comm, "ServiceHandler", sizeof("ServiceHandler") - 1) == 0) ||
             (strncmp(p->comm, "system", sizeof("system") - 1) == 0) ||
             (strncmp(p->comm, "ksoftirqd", sizeof("ksoftirqd") - 1) == 0) ||
-            (strncmp(p->comm, "ftf", sizeof("ftf") - 1) == 0)||         
-			(strncmp(p->comm, "lidbg_", sizeof("lidbg_") - 1) == 0) ||
-			(strncmp(p->comm, "thread", sizeof("thread") - 1) == 0)
+            (strncmp(p->comm, "ftf", sizeof("ftf") - 1) == 0) ||
+            (strncmp(p->comm, "lidbg_", sizeof("lidbg_") - 1) == 0) ||
+            (strncmp(p->comm, "thread", sizeof("thread") - 1) == 0)
         )
         {
             continue;
@@ -353,15 +353,15 @@ int task_kill_select(char *task_name)
 
 
 
-int task_find_by_pid(bool file_log,int pid)
+int task_find_by_pid(bool file_log, int pid)
 {
     struct task_struct *p;
     struct task_struct *selected = NULL;
     unsigned long flags_kill = 0;
-	char name[64];
-	memset(name,'\0',sizeof(name));
+    char name[64];
+    memset(name, '\0', sizeof(name));
     //DUMP_FUN_ENTER;
- 
+
     if(ptasklist_lock != NULL)
     {
         lidbg("read_lock+\n");
@@ -384,9 +384,9 @@ int task_find_by_pid(bool file_log,int pid)
 
         if (p->pid == pid)
         {
-           // lidbg("find %s by pid-%d\n", p->comm, pid);
+            // lidbg("find %s by pid-%d\n", p->comm, pid);
             //lidbg_fs_log(FASTBOOT_LOG_PATH,"find %s by pid-%d\n", p->comm, pid);
-		   strcpy(name,p->comm);
+            strcpy(name, p->comm);
 
             //if (selected)
             {
@@ -400,11 +400,11 @@ int task_find_by_pid(bool file_log,int pid)
         read_unlock(ptasklist_lock);
     else
         spin_unlock_irqrestore(&kill_lock, flags_kill);
-	if(file_log)
-		lidbg_fs_log(FASTBOOT_LOG_PATH,"find %s by pid-%d\n", name, pid);
-	else
-		lidbg("find %s by pid-%d\n", name, pid);
-		
+    if(file_log)
+        lidbg_fs_log(FASTBOOT_LOG_PATH, "find %s by pid-%d\n", name, pid);
+    else
+        lidbg("find %s by pid-%d\n", name, pid);
+
     //DUMP_FUN_LEAVE;
     return 0;
 }
@@ -428,15 +428,15 @@ void show_wakelock(bool file_log)
                 continue;
 
             index++;
-            lidbg("<THE%d:[%d,%d][%s][%s]>,%d,MAX:%d\n",  index, pos->pid, pos->uid, 
-				lock_type(pos->is_count_wakelock), pos->name,pos->cunt, pos->cunt_max );
+            lidbg("<THE%d:[%d,%d][%s][%s]>,%d,MAX:%d\n",  index, pos->pid, pos->uid,
+                  lock_type(pos->is_count_wakelock), pos->name, pos->cunt, pos->cunt_max );
             if(file_log)
             {
-                lidbg_fs_log(FASTBOOT_LOG_PATH, "block wakelock %s\n", pos->name);	
+                lidbg_fs_log(FASTBOOT_LOG_PATH, "block wakelock %s\n", pos->name);
             }
-			
-			if(pos->pid != 0)
-				task_find_by_pid(file_log,pos->pid);
+
+            if(pos->pid != 0)
+                task_find_by_pid(file_log, pos->pid);
         }
     }
 }
@@ -476,30 +476,30 @@ static void acc_early_suspend(struct early_suspend *handler)
 
     suspend_state = PM_STATUS_EARLY_SUSPEND_PENDING;
 
-	if((g_var.fake_suspend == 0)&&(g_var.acc_flag == 0))
-	{
-	    check_all_clk_disable();
-	    if(find_unsafe_clk()) 		
-	 		complete(&completion_quick_resume);
+    if((g_var.fake_suspend == 0) && (g_var.acc_flag == 0))
+    {
+        check_all_clk_disable();
+        if(find_unsafe_clk())
+            complete(&completion_quick_resume);
 
-	    fastboot_task_kill_exclude();
-	}
-	//wake_lock(&testwakelock);
-	//task_kill_select("tencent.qqmusic");
-	//task_kill_select(".flyaudio.media");
+        fastboot_task_kill_exclude();
+    }
+    //wake_lock(&testwakelock);
+    //task_kill_select("tencent.qqmusic");
+    //task_kill_select(".flyaudio.media");
 }
 
 static void acc_late_resume(struct early_suspend *handler)
 {
     DUMP_FUN_ENTER;
-	if(mdp_flag == 1)
-	{
-		lidbg("-----------mdp_pipe_ctr 0 1 0\n");
-		SOC_Call_mdp_pipe_ctrl(0,1,0);
-		mdp_flag = 0;
-	}
-    suspend_state = PM_STATUS_LATE_RESUME_OK; 
-	fs_save_state();
+    if(mdp_flag == 1)
+    {
+        lidbg("-----------mdp_pipe_ctr 0 1 0\n");
+        SOC_Call_mdp_pipe_ctrl(0, 1, 0);
+        mdp_flag = 0;
+    }
+    suspend_state = PM_STATUS_LATE_RESUME_OK;
+    fs_save_state();
     //wake_unlock(&testwakelock);
 
 }
@@ -507,33 +507,33 @@ static void acc_late_resume(struct early_suspend *handler)
 
 static int acc_quick_resume(void *data)
 {
-	while(1)
-	{
-		wait_for_completion(&completion_quick_resume);
-		quick_resume_times++;
-		lidbg_fs_log(FASTBOOT_LOG_PATH, "quick_resume:%d\n", quick_resume_times);
+    while(1)
+    {
+        wait_for_completion(&completion_quick_resume);
+        quick_resume_times++;
+        lidbg_fs_log(FASTBOOT_LOG_PATH, "quick_resume:%d\n", quick_resume_times);
 #if 0
-		if(quick_resume_times < 4)
-		{
-			set_power_state(1);
-			//continue;
-			msleep(5000);
-			if(g_var.acc_flag == 0)
-			{
-				lidbg("run fastboot again %d\n",quick_resume_times);
-				SOC_Write_Servicer(CMD_FAST_POWER_OFF);
-			}
-				
-		}
-		else
-		{
-			quick_resume_times = 0;
-		}
+        if(quick_resume_times < 4)
+        {
+            set_power_state(1);
+            //continue;
+            msleep(5000);
+            if(g_var.acc_flag == 0)
+            {
+                lidbg("run fastboot again %d\n", quick_resume_times);
+                SOC_Write_Servicer(CMD_FAST_POWER_OFF);
+            }
+
+        }
+        else
+        {
+            quick_resume_times = 0;
+        }
 #else
-		//msleep(7000);
-		set_power_state(1);	
+        //msleep(7000);
+        set_power_state(1);
 #endif
-	}
+    }
 }
 
 static int thread_acc_suspend(void *data)
@@ -548,7 +548,7 @@ static int thread_acc_suspend(void *data)
         {
             time_count = 0;
             wait_for_completion(&suspend_start);
-			msleep(5000);
+            msleep(5000);
             while(1)
             {
                 msleep(1000);
@@ -559,40 +559,40 @@ static int thread_acc_suspend(void *data)
                     if(time_count >= 10)
                     {
                         lidbgerr("thread_acc_suspend wait suspend timeout!\n");
-						
-						//task_kill_select("tencent.qqmusic");
-						//task_kill_select(".flyaudio.media");
+
+                        //task_kill_select("tencent.qqmusic");
+                        //task_kill_select(".flyaudio.media");
 
                         if(time_count % 5 == 0)
                         {
-                        	show_wakelock(0);
-                        	if(0)list_active_locks();
+                            show_wakelock(0);
+                            if(0)list_active_locks();
                         }
                         if(time_count % 10 == 0)
                         {
-							fastboot_task_kill_exclude();
+                            fastboot_task_kill_exclude();
                         }
 
-                        #if 0
+#if 0
                         if(time_count % 30 == 0)
                         {
-							task_kill_select("tencent.qqmusic");
-							task_kill_select(".flyaudio.media");
+                            task_kill_select("tencent.qqmusic");
+                            task_kill_select(".flyaudio.media");
                         }
-						#endif
-						
-						if(time_count== 115)
-						{
-						   lidbgerr("clear user wakelock\n");
-						   SOC_Write_Servicer(CMD_IGNORE_WAKELOCK);
-						}	
+#endif
+
+                        if(time_count == 115)
+                        {
+                            lidbgerr("clear user wakelock\n");
+                            SOC_Write_Servicer(CMD_IGNORE_WAKELOCK);
+                        }
                         if(time_count >= 120)
                         {
                             show_wakelock(1);
                             if(suspend_state == PM_STATUS_EARLY_SUSPEND_PENDING)
                             {
-                            	ignore_wakelock = 1;	
-			    			}
+                                ignore_wakelock = 1;
+                            }
                         }
                         //break;
                     }
@@ -609,31 +609,31 @@ static int thread_acc_suspend(void *data)
 
 static int acc_correct(void *data)
 {
-	u32 tick;
+    u32 tick;
     while(1)
     {
         wait_for_completion(&acc_status_correct);
         //msleep(100);//for test
-		DUMP_FUN;
-		lidbg("acc_correct1:acc_flag=%d, suspend_state=%d\n",g_var.acc_flag,suspend_state);
-		msleep(3000);
-		
-		tick = get_tick_count() - acc_triger_time;
-		lidbg("acc_correct:tick=%d\n",tick);
+        DUMP_FUN;
+        lidbg("acc_correct1:acc_flag=%d, suspend_state=%d\n", g_var.acc_flag, suspend_state);
+        msleep(3000);
+
+        tick = get_tick_count() - acc_triger_time;
+        lidbg("acc_correct:tick=%d\n", tick);
         if ( tick < 3000)
-			continue;
-		
-		lidbg("acc_correct2:acc_flag=%d, suspend_state=%d\n",g_var.acc_flag,suspend_state);
-		if(
-			((g_var.acc_flag == 1)&&(suspend_state != PM_STATUS_LATE_RESUME_OK)&&(suspend_state != PM_STATUS_RESUME_OK)) ||
-			((g_var.acc_flag == 0)&&(suspend_state != PM_STATUS_EARLY_SUSPEND_PENDING))
-		  )
-		{
-			
-			lidbgerr("acc_correct:send power_key\n");
-			SOC_Key_Report(KEY_POWER,KEY_PRESSED_RELEASED);			
-			lidbg_fs_log(FASTBOOT_LOG_PATH,"acc_correct:acc_flag=%d, suspend_state=%d,tick=%d\n",g_var.acc_flag,suspend_state,tick);
-		}
+            continue;
+
+        lidbg("acc_correct2:acc_flag=%d, suspend_state=%d\n", g_var.acc_flag, suspend_state);
+        if(
+            ((g_var.acc_flag == 1) && (suspend_state != PM_STATUS_LATE_RESUME_OK) && (suspend_state != PM_STATUS_RESUME_OK)) ||
+            ((g_var.acc_flag == 0) && (suspend_state != PM_STATUS_EARLY_SUSPEND_PENDING))
+        )
+        {
+
+            lidbgerr("acc_correct:send power_key\n");
+            SOC_Key_Report(KEY_POWER, KEY_PRESSED_RELEASED);
+            lidbg_fs_log(FASTBOOT_LOG_PATH, "acc_correct:acc_flag=%d, suspend_state=%d,tick=%d\n", g_var.acc_flag, suspend_state, tick);
+        }
     }
 }
 
@@ -647,9 +647,9 @@ ssize_t  acc_read(struct file *filp, char __user *buffer, size_t size, loff_t *o
 ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff_t *offset)
 {
 #if 1
-    char data_rec[32];//C99 variable length array 
+    char data_rec[32];//C99 variable length array
 #else
-    char data_rec[count+1];//C99 variable length array 
+    char data_rec[count + 1]; //C99 variable length array
 #endif
     char *p = NULL;
     int len = count;
@@ -675,23 +675,23 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
     if(!strcmp(data_rec, "acc_on"))
     {
         lidbg("******bp:goto acc_on********\n");
-		ignore_wakelock = 0;
-		acc_triger_time = get_tick_count();
-		g_var.acc_flag = 1;
-		//if(suspend_state == PM_STATUS_LATE_RESUME_OK)
-			complete(&acc_status_correct);
-		g_var.fake_suspend = 1;
+        ignore_wakelock = 0;
+        acc_triger_time = get_tick_count();
+        g_var.acc_flag = 1;
+        //if(suspend_state == PM_STATUS_LATE_RESUME_OK)
+        complete(&acc_status_correct);
+        g_var.fake_suspend = 1;
         SOC_Write_Servicer(CMD_ACC_ON);
         lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_ACC_ON));
     }
     else if(!strcmp(data_rec, "acc_off"))
     {
         lidbg("******bp:goto acc_off********\n");
-		acc_triger_time = get_tick_count();
-		g_var.acc_flag = 0;
-		//if(suspend_state == PM_STATUS_EARLY_SUSPEND_PENDING)
-			complete(&acc_status_correct);
-		g_var.fake_suspend = 1;
+        acc_triger_time = get_tick_count();
+        g_var.acc_flag = 0;
+        //if(suspend_state == PM_STATUS_EARLY_SUSPEND_PENDING)
+        complete(&acc_status_correct);
+        g_var.fake_suspend = 1;
         plidbg_acc->accoff_count ++;
         SOC_Write_Servicer(CMD_ACC_OFF);
         lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_ACC_OFF));
@@ -699,7 +699,7 @@ ssize_t  acc_write(struct file *filp, const char __user *buf, size_t count, loff
     else if(!strcmp(data_rec, "power"))
     {
         lidbg("******bp:goto fastboot********\n");
-		g_var.fake_suspend = 0;
+        g_var.fake_suspend = 0;
         lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_POWER_OFF));
         SOC_Write_Servicer(CMD_FLY_POWER_OFF);
         plidbg_acc->poweroff_count++;
@@ -741,12 +741,12 @@ static int  acc_probe(struct platform_device *pdev)
         ret = -ENODEV;
         goto fail_mem;
     }
-	
-	g_var.acc_flag = 1;
+
+    g_var.acc_flag = 1;
     plidbg_acc->resume_count = 0;
     plidbg_acc->accoff_count = 0;
     plidbg_acc->poweroff_count = 0;
-	g_var.fake_suspend = 1;
+    g_var.fake_suspend = 1;
 
     if(!fs_is_file_exist(HAL_SO))
     {
@@ -756,28 +756,28 @@ static int  acc_probe(struct platform_device *pdev)
     spin_lock_init(&active_wakelock_list_lock);
 
 
-  // wake_lock_init(&(testwakelock), WAKE_LOCK_SUSPEND, "test_wake_lock");
+    // wake_lock_init(&(testwakelock), WAKE_LOCK_SUSPEND, "test_wake_lock");
 #ifdef CONFIG_HAS_EARLYSUSPEND
-	{
-		early_suspend.level = EARLY_SUSPEND_LEVEL_DISABLE_FB + 5; //the later the better
-		early_suspend.suspend = acc_early_suspend;
-		early_suspend.resume = acc_late_resume;
-		register_early_suspend(&early_suspend);
-	}
+    {
+        early_suspend.level = EARLY_SUSPEND_LEVEL_DISABLE_FB + 5; //the later the better
+        early_suspend.suspend = acc_early_suspend;
+        early_suspend.resume = acc_late_resume;
+        register_early_suspend(&early_suspend);
+    }
 #endif
-	
-	INIT_COMPLETION(suspend_start);
-	CREATE_KTHREAD(thread_acc_suspend, NULL);
-	
-	INIT_COMPLETION(acc_status_correct);
-	CREATE_KTHREAD(acc_correct, NULL);
 
-	INIT_COMPLETION(completion_quick_resume);
-	CREATE_KTHREAD(acc_quick_resume, NULL);
+    INIT_COMPLETION(suspend_start);
+    CREATE_KTHREAD(thread_acc_suspend, NULL);
 
-	lidbg_chmod("/dev/lidbg_acc");
-	lidbg (DEVICE_NAME"acc dev_init\n");
-	fs_register_filename_list(FASTBOOT_LOG_PATH, true);
+    INIT_COMPLETION(acc_status_correct);
+    CREATE_KTHREAD(acc_correct, NULL);
+
+    INIT_COMPLETION(completion_quick_resume);
+    CREATE_KTHREAD(acc_quick_resume, NULL);
+
+    lidbg_chmod("/dev/lidbg_acc");
+    lidbg (DEVICE_NAME"acc dev_init\n");
+    fs_register_filename_list(FASTBOOT_LOG_PATH, true);
 
 
     fs_regist_state("acc_times", (int *)&plidbg_acc->accoff_count);
@@ -790,7 +790,7 @@ static int  acc_probe(struct platform_device *pdev)
         fs_fill_list("/system/lib/modules/out/fastboot_not_kill_list.conf", FS_CMD_FILE_LISTMODE, &fastboot_kill_list);
 
     spin_lock_init(&kill_lock);
-	
+
     register_lidbg_notifier(&acc_notifier);
 
     return 0;
@@ -829,7 +829,7 @@ static int acc_resume(struct device *dev)
     suspend_state = PM_STATUS_RESUME_OK;
 
     lidbg("fastboot_resume:%d\n", plidbg_acc->resume_count);
-   plidbg_acc->resume_count++;
+    plidbg_acc->resume_count++;
     if(plidbg_acc->poweroff_count != plidbg_acc->resume_count)
     {
         lidbg("err:poweroff_count:%d\n", plidbg_acc->poweroff_count);

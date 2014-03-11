@@ -20,7 +20,7 @@ bool upload_machine_log(void)
 }
 void remount_system(void)
 {
-	static int g_is_remountd_system = 0;
+    static int g_is_remountd_system = 0;
     if(!g_is_remountd_system)
     {
         g_is_remountd_system = 1;
@@ -51,12 +51,12 @@ void call_apk(void)
     chmod_for_apk();
     analysis_copylist("/flysystem/lib/out/copylist_app.conf");
 }
-int bfs_file_amend(char *file2amend, char *str_append,int file_limit_M)
+int bfs_file_amend(char *file2amend, char *str_append, int file_limit_M)
 {
     struct file *filep;
     struct inode *inode = NULL;
     mm_segment_t old_fs;
-    int  flags, is_file_cleard = 0,file_limit=max_file_len;
+    int  flags, is_file_cleard = 0, file_limit = max_file_len;
     unsigned int file_len;
 
     if(str_append == NULL)
@@ -66,8 +66,8 @@ int bfs_file_amend(char *file2amend, char *str_append,int file_limit_M)
     }
     flags = O_CREAT | O_RDWR | O_APPEND;
 
-if(file_limit_M>max_file_len)
-	file_limit=file_limit_M;
+    if(file_limit_M > max_file_len)
+        file_limit = file_limit_M;
 
 again:
     filep = filp_open(file2amend, flags , 0777);
@@ -112,7 +112,7 @@ void file_separator(char *file2separator)
 {
     char buf[32];
     lidbg_get_current_time(buf, NULL);
-    fs_string2file(0,file2separator, "------%s------\n", buf);
+    fs_string2file(0, file2separator, "------%s------\n", buf);
 }
 int dump_kmsg(char *node, char *save_msg_file, int size, int *always)
 {
@@ -144,13 +144,13 @@ int dump_kmsg(char *node, char *save_msg_file, int size, int *always)
             }
 
             if(g_mem_dbg)
-                fs_string2file(0,DEBUG_MEM_FILE, "free.%s=%d \n", __func__, size);
+                fs_string2file(0, DEBUG_MEM_FILE, "free.%s=%d \n", __func__, size);
 
             ret = filep->f_op->read(filep, psize, size - 1, &filep->f_pos);
             if(ret > 0)
             {
                 psize[ret] = '\0';
-                bfs_file_amend(save_msg_file, psize,kmsg_file_limit);
+                bfs_file_amend(save_msg_file, psize, kmsg_file_limit);
             }
             vfree(psize);
         }
@@ -164,7 +164,7 @@ int dump_kmsg(char *node, char *save_msg_file, int size, int *always)
                 if(ret > 0)
                 {
                     buff[ret] = '\0';
-                    bfs_file_amend(save_msg_file, buff,kmsg_file_limit);
+                    bfs_file_amend(save_msg_file, buff, kmsg_file_limit);
                 }
             }
         }
@@ -203,7 +203,7 @@ int fs_dump_kmsg(char *tag, int size )
 {
     file_separator(LIDBG_KMSG_FILE_PATH);
     if(tag != NULL)
-        fs_string2file(3,LIDBG_KMSG_FILE_PATH, "fs_dump_kmsg: %s\n", tag);
+        fs_string2file(3, LIDBG_KMSG_FILE_PATH, "fs_dump_kmsg: %s\n", tag);
     return dump_kmsg(KMSG_NODE, LIDBG_KMSG_FILE_PATH, size, NULL);
 }
 void fs_enable_kmsg( bool enable )
@@ -217,7 +217,7 @@ void fs_enable_kmsg( bool enable )
     else
         g_pollkmsg_en = 0;
 }
-int fs_string2file(int file_limit_M,char *filename, const char *fmt, ... )
+int fs_string2file(int file_limit_M, char *filename, const char *fmt, ... )
 {
     va_list args;
     int n;
@@ -226,7 +226,7 @@ int fs_string2file(int file_limit_M,char *filename, const char *fmt, ... )
     n = vsprintf ( str_append, (const char *)fmt, args );
     va_end ( args );
 
-    return bfs_file_amend(filename, str_append,file_limit_M);
+    return bfs_file_amend(filename, str_append, file_limit_M);
 }
 int fs_mem_log( const char *fmt, ... )
 {
@@ -240,7 +240,7 @@ int fs_mem_log( const char *fmt, ... )
 
     len = strlen(str_append);
 
-    bfs_file_amend(LIDBG_MEM_LOG_FILE, str_append,0);
+    bfs_file_amend(LIDBG_MEM_LOG_FILE, str_append, 0);
 
     return 1;
 }
@@ -273,18 +273,18 @@ void fs_remount_system(void)
 
 int delay_disable_tracemsg(void *data)
 {
-		{
-			lidbg("delay 3 s to disable  lidbg_trace_msg\n");
-			msleep(3000);
-			lidbg_readwrite_file("/dev/mlidbg0", NULL, "c lidbg_trace_msg disable", sizeof("c lidbg_trace_msg disable")-1);	 
-		}  //disable lidbg_trace_msg
-	return 1;
+    {
+        lidbg("delay 3 s to disable  lidbg_trace_msg\n");
+        msleep(3000);
+        lidbg_readwrite_file("/dev/mlidbg0", NULL, "c lidbg_trace_msg disable", sizeof("c lidbg_trace_msg disable") - 1);
+    }  //disable lidbg_trace_msg
+    return 1;
 }
 void lidbg_fs_log_init(void)
 {
 
     init_completion(&kmsg_wait);
-	
+
     FS_REGISTER_INT(g_pollkmsg_en, "fs_kmsg_en", 0, cb_kv_pollkmsg);
     if(g_pollkmsg_en == 1)
         complete(&kmsg_wait);

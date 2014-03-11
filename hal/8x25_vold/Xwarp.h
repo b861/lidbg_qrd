@@ -19,7 +19,8 @@
 
 #include <unistd.h>
 
-class Xwarp {
+class Xwarp
+{
     static const char *XWARP_BACKINGFILE;
     static const char *XWARP_CFG;
     static const char *XWARP_READY;

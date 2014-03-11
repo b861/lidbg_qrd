@@ -471,11 +471,11 @@ static void nmea_reader_parse_gsa(NmeaReader *r, NmeaTokenizer *t)
     Token tok_prn;
 
     D("nmea_reader_parse_gsa");
-	if( t->count>15)
-	{
-		Token  tok_hdop = nmea_tokenizer_get(t, 15);
-		nmea_reader_update_accuracy(r, tok_hdop);
-	}
+    if( t->count > 15)
+    {
+        Token  tok_hdop = nmea_tokenizer_get(t, 15);
+        nmea_reader_update_accuracy(r, tok_hdop);
+    }
 
     for (i = 3; i < t->count; i++)
     {
@@ -618,7 +618,7 @@ nmea_reader_parse( NmeaReader  *r )
     else if ( !memcmp(tok.p, "GSA", 3) )
     {
         // do something ?
-		nmea_reader_parse_gsa(r, tzer);
+        nmea_reader_parse_gsa(r, tzer);
     }
     else if ( !memcmp(tok.p, "GSV", 3) )
     {

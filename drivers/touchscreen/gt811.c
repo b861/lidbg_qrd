@@ -627,16 +627,16 @@ COORDINATE_POLL:
         g_curr_tspara.y = input_x;
         g_curr_tspara.press = true;
 
-		if(1==recovery_mode)
-			{	
-				if( (input_y >= 0) && (input_x >= 0) )
-				{
-				    touch.x = input_y;
-				    touch.y = input_x;
-				    touch.pressed = 1;
-				    set_touch_pos(&touch);
-				}
-			}
+        if(1 == recovery_mode)
+        {
+            if( (input_y >= 0) && (input_x >= 0) )
+            {
+                touch.x = input_y;
+                touch.y = input_x;
+                touch.pressed = 1;
+                set_touch_pos(&touch);
+            }
+        }
 
     }
     else
@@ -659,13 +659,13 @@ COORDINATE_POLL:
 
 #endif
 
-if(1==recovery_mode)
- 	{
+        if(1 == recovery_mode)
         {
-            touch.pressed = 0;
-            set_touch_pos(&touch);
+            {
+                touch.pressed = 0;
+                set_touch_pos(&touch);
+            }
         }
- 	}
         g_curr_tspara.press = false;
 
     }
@@ -696,7 +696,8 @@ if(1==recovery_mode)
 #endif
 
 
- if(!g_var.is_fly)    {
+    if(!g_var.is_fly)
+    {
         static int key = 0;
         if(finger == 3)
             key = KEY_BACK;

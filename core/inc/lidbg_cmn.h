@@ -29,7 +29,7 @@ int lidbg_get_current_time(char *time_string, struct rtc_time *ptm);
 bool lidbg_new_cdev(struct file_operations *cdev_fops, char *nodename);
 void set_power_state(int state);
 void lidbg_loop_warning(void);
-char* get_bin_path( char* buf);
+char *get_bin_path( char *buf);
 
 #define MOUNT_PATH get_bin_path("mount")
 #define INSMOD_PATH get_bin_path("insmod")

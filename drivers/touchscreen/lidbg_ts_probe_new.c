@@ -70,8 +70,8 @@ void parse_ts_info(struct probe_device *ts_info)
     sprintf(path, "/flysystem/lib/out/%s", ts_info->name);
     lidbg_insmod( path );
 
-    lidbg_fs_log(TS_LOG_PATH, "loadts=%s,%d,%d\n", ts_info->name, USE_TS_NUM,ts_should_revert);
-    fs_mem_log("loadts=%s,%d,%d\n", ts_info->name, USE_TS_NUM,ts_should_revert);
+    lidbg_fs_log(TS_LOG_PATH, "loadts=%s,%d,%d\n", ts_info->name, USE_TS_NUM, ts_should_revert);
+    fs_mem_log("loadts=%s,%d,%d\n", ts_info->name, USE_TS_NUM, ts_should_revert);
 
 }
 
@@ -88,7 +88,7 @@ struct probe_device *ts_scan(struct probe_device *tsdev, int size)
 
         rc1 = SOC_I2C_Rec_Simple(TS_I2C_BUS, tsdev->chip_addr, &tmp, 1 );
         rc2 = SOC_I2C_Rec(TS_I2C_BUS, tsdev->chip_addr, tsdev->sub_addr, &tmp, 1 );
-		SOC_I2C_Rec(TS_I2C_BUS, 0x12, 0x00, &tmp, 1 ); //let i2c bus release
+        SOC_I2C_Rec(TS_I2C_BUS, 0x12, 0x00, &tmp, 1 ); //let i2c bus release
 
         if ((rc1 < 0) && (rc2 < 0))
         {
@@ -135,7 +135,7 @@ int ts_probe_thread(void *data)
         if((ts = ts_scan(&ts_probe_dev, SIZE_OF_ARRAY(ts_probe_dev))))
         {
             parse_ts_info(ts);
-			msleep(5000);
+            msleep(5000);
             ts = NULL;
         }
         msleep(ts_scan_delayms);
@@ -143,7 +143,7 @@ int ts_probe_thread(void *data)
 #else
     parse_ts_info(&ts_probe_dev[USE_TS_NUM]);
 #endif
-	
+
     LIDBG_WARN("<disable ts scan work>\n");
     //while(1)
     ssleep(10);

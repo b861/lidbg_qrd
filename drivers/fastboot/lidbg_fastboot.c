@@ -105,7 +105,7 @@ static void list_active_locks(void)
 {
 #if 1//def EXPORT_ACTIVE_WAKE_LOCKS 
     struct wake_lock *lock;
-	unsigned long flags_kill;
+    unsigned long flags_kill;
 
     int type = 0;
     if(active_wake_locks == NULL) return;
@@ -207,11 +207,11 @@ int task_find_by_pid(int pid)
 {
     struct task_struct *p;
     struct task_struct *selected = NULL;
-	unsigned long flags_kill;
-	char name[64];
-	memset(name,'\0',sizeof(name));
-	
-   // DUMP_FUN_ENTER;	
+    unsigned long flags_kill;
+    char name[64];
+    memset(name, '\0', sizeof(name));
+
+    // DUMP_FUN_ENTER;
     if(ptasklist_lock != NULL)
     {
         lidbg("read_lock+\n");
@@ -234,9 +234,9 @@ int task_find_by_pid(int pid)
 
         if (p->pid == pid)
         {
-           // lidbg("find %s by pid-%d\n", p->comm, pid);
+            // lidbg("find %s by pid-%d\n", p->comm, pid);
             //lidbg_fs_log(FASTBOOT_LOG_PATH,"find %s by pid-%d\n", p->comm, pid);
-			strcpy(name,p->comm);
+            strcpy(name, p->comm);
             //if (selected)
             {
                 //force_sig(SIGKILL, selected);
@@ -249,10 +249,10 @@ int task_find_by_pid(int pid)
         read_unlock(ptasklist_lock);
     else
         spin_unlock_irqrestore(&kill_lock, flags_kill);
-	
-	lidbg_fs_log(FASTBOOT_LOG_PATH,"find %s by pid-%d\n", name, pid);
 
-   // DUMP_FUN_LEAVE;
+    lidbg_fs_log(FASTBOOT_LOG_PATH, "find %s by pid-%d\n", name, pid);
+
+    // DUMP_FUN_LEAVE;
     return 0;
 }
 
@@ -277,13 +277,13 @@ void show_wakelock(bool file_log)
                 continue;
 
             index++;
-            lidbg("<THE%d:[%d,%d][%s][%s]>,%d,MAX:%d\n",  index, pos->pid, pos->uid, lock_type(pos->is_count_wakelock), pos->name,pos->cunt, pos->cunt_max );
+            lidbg("<THE%d:[%d,%d][%s][%s]>,%d,MAX:%d\n",  index, pos->pid, pos->uid, lock_type(pos->is_count_wakelock), pos->name, pos->cunt, pos->cunt_max );
             if(file_log)
             {
                 lidbg_fs_log(FASTBOOT_LOG_PATH, "block wakelock %s\n", pos->name);
-				
-				if(pos->pid != 0)
-					task_find_by_pid(pos->pid);
+
+                if(pos->pid != 0)
+                    task_find_by_pid(pos->pid);
             }
         }
     }
@@ -339,7 +339,7 @@ bool find_unsafe_clk(void)
             {
                 lidbg_fs_log(FASTBOOT_LOG_PATH, "block unsafe clk:%d\n", i);
                 ret = 1;
-               // return ret;
+                // return ret;
             }
         }
         i--;
@@ -394,7 +394,7 @@ int fastboot_task_kill_select(char *task_name)
 {
     struct task_struct *p;
     struct task_struct *selected = NULL;
-	unsigned long flags_kill;
+    unsigned long flags_kill;
     DUMP_FUN_ENTER;
 
     if(ptasklist_lock != NULL)
@@ -442,7 +442,7 @@ int fastboot_task_kill_select(char *task_name)
 static void fastboot_task_kill_exclude(char *exclude_process[])
 {
     static char kill_process[32][25];
-	unsigned long flags_kill;
+    unsigned long flags_kill;
     struct task_struct *p;
     struct mm_struct *mm;
     struct signal_struct *sig;
@@ -487,8 +487,8 @@ static void fastboot_task_kill_exclude(char *exclude_process[])
             (strncmp(p->comm, "ServiceHandler", sizeof("ServiceHandler") - 1) == 0) ||
             (strncmp(p->comm, "system", sizeof("system") - 1) == 0) ||
             (strncmp(p->comm, "ksoftirqd", sizeof("ksoftirqd") - 1) == 0) ||
-            (strncmp(p->comm, "ftf", sizeof("ftf") - 1) == 0)||      
-			(strncmp(p->comm, "lidbg_", sizeof("lidbg_") - 1) == 0)
+            (strncmp(p->comm, "ftf", sizeof("ftf") - 1) == 0) ||
+            (strncmp(p->comm, "lidbg_", sizeof("lidbg_") - 1) == 0)
         )
         {
             continue;
@@ -794,15 +794,15 @@ static int thread_late_suspend(void *data)
                     if(time_count >= 10)
                     {
                         lidbgerr("late suspend wait early suspend timeout!\n");
-						#if 0
+#if 0
                         lidbg("start force suspend...\n");
                         ignore_wakelock = 1;
                         wake_lock(&(fb_data->flywakelock));
                         wake_unlock(&(fb_data->flywakelock));
-						#else
-						fastboot_set_status(PM_STATUS_RESUME_OK);
-						set_power_state(1);
-						#endif
+#else
+                        fastboot_set_status(PM_STATUS_RESUME_OK);
+                        set_power_state(1);
+#endif
                         break;
                     }
                 }
@@ -895,20 +895,20 @@ void fastboot_pwroff(void)
 
     //fs_save_state();
 
- if(!g_var.is_fly)
- {
-	 msleep(1000);
+    if(!g_var.is_fly)
+    {
+        msleep(1000);
 
 #ifdef RUN_FASTBOOT
 #if (defined(BOARD_V1) || defined(BOARD_V2))
-	    //SOC_Write_Servicer(CMD_ACC_OFF_PROPERTY_SET);
-	    SOC_Write_Servicer(CMD_FAST_POWER_OFF);
+        //SOC_Write_Servicer(CMD_ACC_OFF_PROPERTY_SET);
+        SOC_Write_Servicer(CMD_FAST_POWER_OFF);
 #endif
 #else
-	    SOC_Key_Report(KEY_POWER, KEY_PRESSED_RELEASED);
+        SOC_Key_Report(KEY_POWER, KEY_PRESSED_RELEASED);
 #endif
 
- }
+    }
     complete(&early_suspend_start);
 
 }
@@ -929,10 +929,10 @@ void fastboot_go_pwroff(void)
 
 static void set_func_tbl(void)
 {
- if(!g_var.is_fly)   
-   plidbg_dev->soc_func_tbl.pfnSOC_PWR_ShutDown = fastboot_go_pwroff;
-else
-    plidbg_dev->soc_func_tbl.pfnSOC_PWR_ShutDown = fastboot_pwroff;
+    if(!g_var.is_fly)
+        plidbg_dev->soc_func_tbl.pfnSOC_PWR_ShutDown = fastboot_go_pwroff;
+    else
+        plidbg_dev->soc_func_tbl.pfnSOC_PWR_ShutDown = fastboot_pwroff;
 
     plidbg_dev->soc_func_tbl.pfnSOC_PWR_GetStatus = fastboot_get_status;
     plidbg_dev->soc_func_tbl.pfnSOC_PWR_SetStatus = fastboot_set_status;
@@ -1026,7 +1026,7 @@ void kill_all_task(char *key, char *value)
 
 void cb_password_fastboot_pwroff(char *password )
 {
-	fastboot_pwroff();
+    fastboot_pwroff();
 }
 
 static int  fastboot_probe(struct platform_device *pdev)

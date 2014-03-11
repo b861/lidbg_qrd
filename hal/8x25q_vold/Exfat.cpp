@@ -31,8 +31,9 @@ extern "C" int mount(const char *, const char *, const char *, unsigned long, co
 
 int Exfat::check(const char *fsPath)
 {
-	SLOGI("Exfat::check");
-	if (access(FSCK_EXFAT_PATH, X_OK)) {
+    SLOGI("Exfat::check");
+    if (access(FSCK_EXFAT_PATH, X_OK))
+    {
         SLOGW("Skipping fs checks\n");
         return 0;
     }
@@ -45,11 +46,11 @@ int Exfat::check(const char *fsPath)
     args[2] = NULL;
 
     rc = logwrap(2, args, 1);
-	if( rc != 0 )
-	{
-       SLOGE("Filesystem check failed (unknown exit code %d)", rc);
+    if( rc != 0 )
+    {
+        SLOGE("Filesystem check failed (unknown exit code %d)", rc);
     }
 
-	return rc;
+    return rc;
 }
 

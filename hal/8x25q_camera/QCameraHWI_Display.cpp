@@ -29,48 +29,49 @@
 #include "QCameraHWI_Display.h"
 
 
-namespace android {
-
-int QCameraDisplay_Overlay::Display_prepare_buffers()
+namespace android
 {
-	return 0;
-}
+
+    int QCameraDisplay_Overlay::Display_prepare_buffers()
+    {
+        return 0;
+    }
 
 
-int QCameraDisplay_Overlay::Display_set_crop()
-{
-	return 0;
-}
+    int QCameraDisplay_Overlay::Display_set_crop()
+    {
+        return 0;
+    }
 
 
-int QCameraDisplay_Overlay::Display_set_geometry()
-{
-	return 0;
-}
+    int QCameraDisplay_Overlay::Display_set_geometry()
+    {
+        return 0;
+    }
 
 
-void QCameraDisplay_Overlay::Display_enqueue()
-{
-	return ;
-}
+    void QCameraDisplay_Overlay::Display_enqueue()
+    {
+        return ;
+    }
 
 
 
-void QCameraDisplay_Overlay::Display_dequeue()
-{
-	return ;
-}
+    void QCameraDisplay_Overlay::Display_dequeue()
+    {
+        return ;
+    }
 
 
-void QCameraDisplay_Overlay::Display_release_buffers()
-{
-	return ;
-}
+    void QCameraDisplay_Overlay::Display_release_buffers()
+    {
+        return ;
+    }
 
-QCameraDisplay::~QCameraDisplay(){}
+    QCameraDisplay::~QCameraDisplay() {}
 
-QCameraDisplay_Overlay::~QCameraDisplay_Overlay()
-{
-	return ;
-}
+    QCameraDisplay_Overlay::~QCameraDisplay_Overlay()
+    {
+        return ;
+    }
 }; // namespace android

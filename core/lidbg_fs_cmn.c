@@ -169,7 +169,7 @@ void new_filedetec_dev(char *filename, void (*cb_filedetec)(char *filename))
     struct string_dev *add_new_dev;
     add_new_dev = kzalloc(sizeof(struct string_dev), GFP_KERNEL);
     if(g_mem_dbg)
-        fs_string2file(0,DEBUG_MEM_FILE, "%s=%d \n", __func__, sizeof(struct string_dev));
+        fs_string2file(0, DEBUG_MEM_FILE, "%s=%d \n", __func__, sizeof(struct string_dev));
 
     add_new_dev->filedetec = filename;
     add_new_dev->cb_filedetec = cb_filedetec;
@@ -322,7 +322,7 @@ bool copy_file(char *from, char *to)
         return false;
 
     if(g_mem_dbg)
-        fs_string2file(0,DEBUG_MEM_FILE, "free.%s=%d \n", __func__, file_len);
+        fs_string2file(0, DEBUG_MEM_FILE, "free.%s=%d \n", __func__, file_len);
 
     pfilefrom->f_op->llseek(pfilefrom, 0, 0);
     pfilefrom->f_op->read(pfilefrom, string, file_len, &pfilefrom->f_pos);
@@ -364,7 +364,7 @@ bool fs_is_file_updated(char *filename, char *infofile)
             return false;
     }
     fs_clear_file(infofile);
-    bfs_file_amend(infofile, news,0);
+    bfs_file_amend(infofile, news, 0);
     return true;
 }
 void cb_kv_filedetecen(char *key, char *value)

@@ -63,14 +63,14 @@ u8 audio_data_for_hal[2];
 
 void cb_password_add_udisk(char *password )
 {
-    	lidbgerr("\n--------------usb add event-----\n\n\n");
-	lidbg_readwrite_file("/sys/block/sda/uevent", NULL, "add", sizeof("add")-1);
+    lidbgerr("\n--------------usb add event-----\n\n\n");
+    lidbg_readwrite_file("/sys/block/sda/uevent", NULL, "add", sizeof("add") - 1);
 }
 
 void cb_password_remove_udisk(char *password )
 {
-    	lidbgerr("\n--------------usb remove event-----\n\n\n");
-	lidbg_readwrite_file("/sys/block/sda/uevent", NULL, "remove", sizeof("remove")-1);
+    lidbgerr("\n--------------usb remove event-----\n\n\n");
+    lidbg_readwrite_file("/sys/block/sda/uevent", NULL, "remove", sizeof("remove") - 1);
 }
 static int usb_event(struct notifier_block *nb, unsigned long action, void *data)
 {
@@ -96,12 +96,12 @@ static int thread_udisk_uevent(void *data)
     {
         if(!wait_for_completion_interruptible(&udisk_event_wait))
         {
-		ssleep(5);
-		if(fs_get_file_size("/mnt/usbdisk")==0)
-		{
-			lidbgerr("--------------usb add event-----\n\n\n");
-			lidbg_readwrite_file("/sys/block/sda/uevent", NULL, "add", sizeof("add")-1);
-		}
+            ssleep(5);
+            if(fs_get_file_size("/mnt/usbdisk") == 0)
+            {
+                lidbgerr("--------------usb add event-----\n\n\n");
+                lidbg_readwrite_file("/sys/block/sda/uevent", NULL, "add", sizeof("add") - 1);
+            }
         }
     }
     return 1;
@@ -111,57 +111,58 @@ static int thread_udisk_uevent(void *data)
 
 int thread_usb_delay_enable(void *data)
 {
-	if(!recovery_mode)
-		ssleep(20);
-	else
-		lidbg("diable thread_usb_delay_enable:%d\n",recovery_mode);
-	USB_WORK_ENABLE;
-return 0;
+    if(!recovery_mode)
+        ssleep(20);
+    else
+        lidbg("diable thread_usb_delay_enable:%d\n", recovery_mode);
+    USB_WORK_ENABLE;
+    return 0;
 }
 int thread_usb_11(void *data)
 {
-	USB_WORK_DISENABLE;
-	g_var.is_usb11 = 0;
-	ssleep(15);
+    USB_WORK_DISENABLE;
+    g_var.is_usb11 = 0;
+    ssleep(15);
     while(1)
     {
         set_current_state(TASK_UNINTERRUPTIBLE);
         if(kthread_should_stop()) break;
-        if(1) 
+        if(1)
         {
-		if( !g_var.is_usb11)
-		{
-			lidbg("\n\nTranslate to usb1.1 modes\n\n");
-			USB_ID_HIGH_DEV;
-			msleep(1000);
-			//USB_WORK_ENABLE;
-			USB_ID_LOW_HOST;
-			msleep(1000);
-		}
-		else{
-			//USB_WORK_DISENABLE;
-			//msleep(1000);
-			ssleep(10);
-			USB_WORK_ENABLE;
-			break;
-		}
+            if( !g_var.is_usb11)
+            {
+                lidbg("\n\nTranslate to usb1.1 modes\n\n");
+                USB_ID_HIGH_DEV;
+                msleep(1000);
+                //USB_WORK_ENABLE;
+                USB_ID_LOW_HOST;
+                msleep(1000);
+            }
+            else
+            {
+                //USB_WORK_DISENABLE;
+                //msleep(1000);
+                ssleep(10);
+                USB_WORK_ENABLE;
+                break;
+            }
         }
-	else
+        else
             schedule_timeout(HZ);
     }
-	
-	return 0;
+
+    return 0;
 }
 
 int thread_usb(void *data)
 {
-	while(1)
-	{
-		wait_for_completion(&usb_resume);
-		msleep(5000);
-		USB_WORK_ENABLE;
-	}
-	return 0;
+    while(1)
+    {
+        wait_for_completion(&usb_resume);
+        msleep(5000);
+        USB_WORK_ENABLE;
+    }
+    return 0;
 }
 
 void cb_password_enable_usb(char *password )
@@ -526,7 +527,7 @@ static int thread_thermal(void *data)
             {
                 flag_fan_run_statu = true;
                 AIRFAN_BACK_ON;
-                lidbg_fs_log(TEMP_LOG_PATH, "AIR_ON:%d\n",cur_temp);
+                lidbg_fs_log(TEMP_LOG_PATH, "AIR_ON:%d\n", cur_temp);
             }
         }
         else //off
@@ -535,7 +536,7 @@ static int thread_thermal(void *data)
             {
                 flag_fan_run_statu = false;
                 AIRFAN_BACK_OFF;
-                lidbg_fs_log(TEMP_LOG_PATH, "AIR_OFF:%d\n",cur_temp);
+                lidbg_fs_log(TEMP_LOG_PATH, "AIR_OFF:%d\n", cur_temp);
             }
         }
     }
@@ -600,10 +601,10 @@ int thread_led(void *data)
         {
             if(led_en)
                 led_on();
-	 	 if(!g_var.is_fly)
-	  		msleep(500);
-		else
-	      		msleep(2000);
+            if(!g_var.is_fly)
+                msleep(500);
+            else
+                msleep(2000);
 
         }
         else //Ìõ¼þÎª¼Ù
@@ -688,9 +689,9 @@ static int soc_dev_probe(struct platform_device *pdev)
     FS_REGISTER_INT(i2c_ctrl, "i2c_ctrl", 0, NULL);
     FS_REGISTER_INT(temp_log_freq, "temp_log_freq", 5, NULL);
     fs_file_separator(TEMP_LOG_PATH);
-	
-	INIT_COMPLETION(usb_resume);
-	CREATE_KTHREAD(thread_usb, NULL);
+
+    INIT_COMPLETION(usb_resume);
+    CREATE_KTHREAD(thread_usb, NULL);
 
 
 #ifdef DEBUG_LED
@@ -709,30 +710,30 @@ static int soc_dev_probe(struct platform_device *pdev)
         CREATE_KTHREAD(thread_dev_init, NULL);
 
 
-if(!g_var.is_fly)
-{
-        if(1) 	//LPCBackLightOn
+        if(!g_var.is_fly)
         {
-            u8 buff[] = {0x00, 0x94, 0x01, 0x99};
-            SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
-        }
+            if(1) 	//LPCBackLightOn
+            {
+                u8 buff[] = {0x00, 0x94, 0x01, 0x99};
+                SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
+            }
 
-        {
-            u8 buff[] = {0x00, 0x05, 0x01};//LPCControlPWREnable
-            lidbg("LPCControlPWREnable\n");
-            SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
-        }
+            {
+                u8 buff[] = {0x00, 0x05, 0x01};//LPCControlPWREnable
+                lidbg("LPCControlPWREnable\n");
+                SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
+            }
 
 #ifdef DEBUG_AD_KEY
-        CREATE_KTHREAD(thread_key, NULL);
+            CREATE_KTHREAD(thread_key, NULL);
 
 #endif
 
 #ifdef DEBUG_POWER_KEY
-        CREATE_KTHREAD(thread_pwr, NULL);
+            CREATE_KTHREAD(thread_pwr, NULL);
 #endif
 
-}
+        }
 
     }
 
@@ -762,9 +763,9 @@ if(!g_var.is_fly)
 #endif
 
     lidbg_new_cdev(&dev_fops, "flydev");
-	init_completion(&udisk_event_wait);
-	usb_register_notify(&usb_nb_event);
-	CREATE_KTHREAD(thread_udisk_uevent, NULL);
+    init_completion(&udisk_event_wait);
+    usb_register_notify(&usb_nb_event);
+    CREATE_KTHREAD(thread_udisk_uevent, NULL);
     return 0;
 
 }
@@ -806,7 +807,7 @@ static void devices_early_suspend(struct early_suspend *handler)
     DUMP_FUN_ENTER;
     if(platform_id ==  PLATFORM_FLY)
     {
- if(!g_var.is_fly)  LCD_OFF;
+        if(!g_var.is_fly)  LCD_OFF;
 
         LED_ON;
         TELL_LPC_PWR_ON;
@@ -816,11 +817,11 @@ static void devices_early_suspend(struct early_suspend *handler)
 #else
         flag_fan_run_statu = false;
         AIRFAN_BACK_OFF;
-	if(g_var.fake_suspend == 0)
-	{
-		lidbg("disable usb after kill process\n");
-		USB_WORK_DISENABLE;
-	}
+        if(g_var.fake_suspend == 0)
+        {
+            lidbg("disable usb after kill process\n");
+            USB_WORK_DISENABLE;
+        }
 #endif
 
     }
@@ -840,27 +841,27 @@ static void devices_late_resume(struct early_suspend *handler)
         //SOC_IO_Config(MCU_IIC_REQ_I, GPIO_CFG_INPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA);
         //TELL_LPC_PWR_ON;
 
-	 if(!g_var.is_fly)
-	 {
-	        BL_SET(BL_MAX / 2);
-	        LCD_ON;
+        if(!g_var.is_fly)
+        {
+            BL_SET(BL_MAX / 2);
+            LCD_ON;
 
-	        if(1) 	//LPCBackLightOn
-	        {
-	            u8 buff[] = {0x00, 0x94, 0x01, 0x99};
-	            SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
-	        }
+            if(1) 	//LPCBackLightOn
+            {
+                u8 buff[] = {0x00, 0x94, 0x01, 0x99};
+                SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
+            }
 
-	        if(0)
-	        {
-	            u8 buff[] = {0x00, 0x05, 0x01};//LPCControlPWREnable
-	            lidbg("LPCControlPWREnable\n");
-	            SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
-	        }
+            if(0)
+            {
+                u8 buff[] = {0x00, 0x05, 0x01};//LPCControlPWREnable
+                lidbg("LPCControlPWREnable\n");
+                SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));
+            }
 
-	        CREATE_KTHREAD(thread_resume, NULL);
+            CREATE_KTHREAD(thread_resume, NULL);
 
- 	}
+        }
 
         //lidbg_fs_log(TEMP_LOG_PATH,"*\n");
     }
@@ -880,10 +881,10 @@ static int  soc_dev_suspend(struct platform_device *pdev, pm_message_t state)
         if(!g_var.is_fly)
         {
 #ifdef DEBUG_BUTTON
-        SOC_IO_ISR_Disable(BUTTON_LEFT_1);
-        SOC_IO_ISR_Disable(BUTTON_LEFT_2);
-        SOC_IO_ISR_Disable(BUTTON_RIGHT_1);
-        SOC_IO_ISR_Disable(BUTTON_RIGHT_2);
+            SOC_IO_ISR_Disable(BUTTON_LEFT_1);
+            SOC_IO_ISR_Disable(BUTTON_LEFT_2);
+            SOC_IO_ISR_Disable(BUTTON_RIGHT_1);
+            SOC_IO_ISR_Disable(BUTTON_RIGHT_2);
 #endif
         }
         i2c_c_ctrl = 0;
@@ -931,13 +932,13 @@ static void soc_dev_suspend_prepare(void)
 
 #ifdef DEBUG_UMOUNT_USB
     SOC_Write_Servicer(UMOUNT_USB);
- if(!g_var.is_fly)    msleep(1000);
+    if(!g_var.is_fly)    msleep(1000);
 #endif
 
     //disable usb first
     USB_WORK_DISENABLE;
 
- if(!g_var.is_fly)    msleep(3000);
+    if(!g_var.is_fly)    msleep(3000);
 
 
 }
@@ -956,15 +957,15 @@ static int soc_dev_resume(struct platform_device *pdev)
         //PWR_EN_ON;
 
         //USB_SWITCH_DISCONNECT;
-		if(!g_var.is_fly)
-		{
+        if(!g_var.is_fly)
+        {
 #ifdef DEBUG_BUTTON
-	        SOC_IO_ISR_Enable(BUTTON_LEFT_1);
-	        SOC_IO_ISR_Enable(BUTTON_LEFT_2);
-	        SOC_IO_ISR_Enable(BUTTON_RIGHT_1);
-	        SOC_IO_ISR_Enable(BUTTON_RIGHT_2);
+            SOC_IO_ISR_Enable(BUTTON_LEFT_1);
+            SOC_IO_ISR_Enable(BUTTON_LEFT_2);
+            SOC_IO_ISR_Enable(BUTTON_RIGHT_1);
+            SOC_IO_ISR_Enable(BUTTON_RIGHT_2);
 #endif
-		}
+        }
 
         //lidbg("turn lcd on!\n");
         //LCD_ON;
@@ -1058,52 +1059,53 @@ void fly_devices_init(void)
     if(platform_id ==  PLATFORM_FLY)
     {
 
-	
-	if(1 == recovery_mode)
-	{
-        DVD_RESET_HIGH;
-        TELL_LPC_PWR_ON;
-        PWR_EN_ON;
-        LCD_ON;
-        lidbg("turn lcd on!\n");
-        BL_SET(BL_MAX / 2);
-	}
-	
+
+        if(1 == recovery_mode)
+        {
+            DVD_RESET_HIGH;
+            TELL_LPC_PWR_ON;
+            PWR_EN_ON;
+            LCD_ON;
+            lidbg("turn lcd on!\n");
+            BL_SET(BL_MAX / 2);
+        }
+
 #ifdef DEBUG_BUTTON
-		if(!g_var.is_fly)
-		{
-			INIT_WORK(&work_left_button1, work_left_button1_fn);
-			INIT_WORK(&work_right_button1, work_right_button1_fn);
+        if(!g_var.is_fly)
+        {
+            INIT_WORK(&work_left_button1, work_left_button1_fn);
+            INIT_WORK(&work_right_button1, work_right_button1_fn);
 
-			SOC_IO_Input(BUTTON_LEFT_1, BUTTON_LEFT_1, GPIO_CFG_PULL_UP);
-			SOC_IO_Input(BUTTON_LEFT_2, BUTTON_LEFT_2, GPIO_CFG_PULL_UP);
-			SOC_IO_Input(BUTTON_RIGHT_1, BUTTON_RIGHT_1, GPIO_CFG_PULL_UP);
-			SOC_IO_Input(BUTTON_RIGHT_2, BUTTON_RIGHT_2, GPIO_CFG_PULL_UP);
+            SOC_IO_Input(BUTTON_LEFT_1, BUTTON_LEFT_1, GPIO_CFG_PULL_UP);
+            SOC_IO_Input(BUTTON_LEFT_2, BUTTON_LEFT_2, GPIO_CFG_PULL_UP);
+            SOC_IO_Input(BUTTON_RIGHT_1, BUTTON_RIGHT_1, GPIO_CFG_PULL_UP);
+            SOC_IO_Input(BUTTON_RIGHT_2, BUTTON_RIGHT_2, GPIO_CFG_PULL_UP);
 
-			SOC_IO_ISR_Add(BUTTON_LEFT_1, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT, irq_left_button1, NULL);
-			SOC_IO_ISR_Add(BUTTON_LEFT_2, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT, irq_left_button2, NULL);
-			SOC_IO_ISR_Add(BUTTON_RIGHT_1, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT, irq_right_button1, NULL);
-			SOC_IO_ISR_Add(BUTTON_RIGHT_2, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT, irq_right_button2, NULL);
-		}
+            SOC_IO_ISR_Add(BUTTON_LEFT_1, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT, irq_left_button1, NULL);
+            SOC_IO_ISR_Add(BUTTON_LEFT_2, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT, irq_left_button2, NULL);
+            SOC_IO_ISR_Add(BUTTON_RIGHT_1, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT, irq_right_button1, NULL);
+            SOC_IO_ISR_Add(BUTTON_RIGHT_2, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT, irq_right_button2, NULL);
+        }
 #endif
 
         unmute_ns();
 
-	if(!fs_is_file_exist(USB_1_1))
-		CREATE_KTHREAD(thread_usb_delay_enable, NULL);
-	else{
-	if(1 == recovery_mode)
-		USB_WORK_ENABLE;
-	else
-		CREATE_KTHREAD(thread_usb_11, NULL);
-		}
-	/*if( fs_is_file_exist(USB_1_1))
-	{
-		lidbg("Translate to usb1.1 modes\n");
-		USB_ID_HIGH_DEV;
-		ssleep(30);
-	}
-	USB_WORK_ENABLE;*/
+        if(!fs_is_file_exist(USB_1_1))
+            CREATE_KTHREAD(thread_usb_delay_enable, NULL);
+        else
+        {
+            if(1 == recovery_mode)
+                USB_WORK_ENABLE;
+            else
+                CREATE_KTHREAD(thread_usb_11, NULL);
+        }
+        /*if( fs_is_file_exist(USB_1_1))
+        {
+        	lidbg("Translate to usb1.1 modes\n");
+        	USB_ID_HIGH_DEV;
+        	ssleep(30);
+        }
+        USB_WORK_ENABLE;*/
     }
 }
 
@@ -1112,8 +1114,8 @@ static void set_func_tbl(void)
 {
     //lpc
     ((struct lidbg_hal *)plidbg_dev)->soc_func_tbl.pfnSOC_Dev_Suspend_Prepare = soc_dev_suspend_prepare;
-	if(!g_var.is_fly)
-    	((struct lidbg_hal *)plidbg_dev)->soc_func_tbl.pfnHal_Acc_Callback = NULL;
+    if(!g_var.is_fly)
+        ((struct lidbg_hal *)plidbg_dev)->soc_func_tbl.pfnHal_Acc_Callback = NULL;
 }
 
 
@@ -1140,10 +1142,10 @@ static void parse_cmd(char *pt)
     else if(!strcmp(pt, "screen_on"))
     {
         lidbg("******into screen_on********\n");
-       // LCD_RESET;
+        // LCD_RESET;
         if(SOC_Hal_Acc_Callback)
         {
-        	lidbg("hal callback 1\n");
+            lidbg("hal callback 1\n");
             SOC_Hal_Acc_Callback(1);
         }
     }
@@ -1152,7 +1154,7 @@ static void parse_cmd(char *pt)
         lidbg("******into screen_off********\n");
         if(SOC_Hal_Acc_Callback)
         {
-        	lidbg("hal callback 0\n");
+            lidbg("hal callback 0\n");
             SOC_Hal_Acc_Callback(0);
         }
     }
@@ -1162,7 +1164,7 @@ static void parse_cmd(char *pt)
         lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_SUSPEND_UNPREPARE));
         if(SOC_Hal_Acc_Callback)
         {
-        	lidbg("hal callback 2\n");
+            lidbg("hal callback 2\n");
             SOC_Hal_Acc_Callback(2);
         }
     }
@@ -1172,7 +1174,7 @@ static void parse_cmd(char *pt)
         lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_SUSPEND_PREPARE));
         if(SOC_Hal_Acc_Callback)
         {
-        	lidbg("hal callback 3\n");
+            lidbg("hal callback 3\n");
             SOC_Hal_Acc_Callback(3);
         }
     }
@@ -1180,12 +1182,12 @@ static void parse_cmd(char *pt)
     else if(!strcmp(pt, "usb_reset"))
     {
         lidbg("usb_reset\n");
-		USB_WORK_DISENABLE;
-		msleep(200);
-		USB_WORK_ENABLE;
+        USB_WORK_DISENABLE;
+        msleep(200);
+        USB_WORK_ENABLE;
     }
 
-	
+
 #endif
 
 }
@@ -1203,24 +1205,24 @@ static int lidbg_event(struct notifier_block *this,
         break;
 
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_SUSPEND_PREPARE):
-		//USB_WORK_DISENABLE;
-		mute_s();
+        //USB_WORK_DISENABLE;
+        mute_s();
         break;
 
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_POWER_OFF):
-	 mute_s();
+        mute_s();
         break;
 
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_ACC_ON):
         if(!g_var.is_fly)
-	{	
-		LCD_RESET;
-		LCD_ON;
-	}
+        {
+            LCD_RESET;
+            LCD_ON;
+        }
         unmute_ns();
         break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_SUSPEND_UNPREPARE):
-		complete(&usb_resume);
+        complete(&usb_resume);
         break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SIGNAL_EVENT, NOTIFIER_MINOR_SIGNAL_BAKLIGHT_ACK):
         SOC_BL_Set(BL_MIN);
@@ -1255,7 +1257,7 @@ static ssize_t dev_write(struct file *filp, const char __user *buf,
         is_alloc = 1;
     }
 #else
-    char tmp[size + 1];//C99 variable length array 
+    char tmp[size + 1];//C99 variable length array
     char *mem = tmp;
     bool is_alloc = 0;
 #endif
@@ -1346,10 +1348,10 @@ int dev_init(void)
     LIDBG_GET;
     set_func_tbl();
 
-	if(!g_var.is_fly)
-	    lidbg("debug version\n");
-	else
-	    lidbg("release version\n");
+    if(!g_var.is_fly)
+        lidbg("debug version\n");
+    else
+        lidbg("release version\n");
 
 
 #if 0

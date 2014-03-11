@@ -22,7 +22,8 @@
 
 class SocketClient;
 
-class Devmapper {
+class Devmapper
+{
 public:
     static int create(const char *name, const char *loopFile, const char *key,
                       unsigned int numSectors, char *buffer, size_t len);

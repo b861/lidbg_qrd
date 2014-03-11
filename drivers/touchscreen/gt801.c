@@ -528,22 +528,22 @@ static void goodix_ts_work_func(struct work_struct *work)
     }
 
 
- if(!g_var.is_fly)
- {
-	if(finger_list.length == 3)
+    if(!g_var.is_fly)
     {
-        SOC_Key_Report(KEY_BACK, KEY_PRESSED_RELEASED);
+        if(finger_list.length == 3)
+        {
+            SOC_Key_Report(KEY_BACK, KEY_PRESSED_RELEASED);
+        }
+        if (finger_list.length == 4)
+        {
+            //printk("SOC_Log_Dump\n");
+            //SOC_Log_Dump(LOG_DMESG);
+        }
+        if(finger_list.length == 5)
+        {
+            SOC_Key_Report(KEY_MENU, KEY_PRESSED_RELEASED);
+        }
     }
-    if (finger_list.length == 4)
-    {
-        //printk("SOC_Log_Dump\n");
-        //SOC_Log_Dump(LOG_DMESG);
-    }
-    if(finger_list.length == 5)
-    {
-        SOC_Key_Report(KEY_MENU, KEY_PRESSED_RELEASED);
-    }
- }
 
 
 BIT_NO_CHANGE:
@@ -632,16 +632,16 @@ BIT_NO_CHANGE:
             g_curr_tspara.y = finger_list.pointer[0].y;
             g_curr_tspara.press = true;
 
-if(1==recovery_mode)
-		{
-            if( (finger_list.pointer[0].x >= 0) && (finger_list.pointer[0].y >= 0) )
+            if(1 == recovery_mode)
             {
-                touch.x = finger_list.pointer[0].x;
-                touch.y = finger_list.pointer[0].y;
-                touch.pressed = 1;
-                set_touch_pos(&touch);
+                if( (finger_list.pointer[0].x >= 0) && (finger_list.pointer[0].y >= 0) )
+                {
+                    touch.x = finger_list.pointer[0].x;
+                    touch.y = finger_list.pointer[0].y;
+                    touch.pressed = 1;
+                    set_touch_pos(&touch);
+                }
             }
-		}
             touch_cnt++;
             if (touch_cnt > 100)
             {
@@ -659,13 +659,13 @@ if(1==recovery_mode)
 
             g_curr_tspara.press = false;
 
-if(1==recovery_mode)
-    {
+            if(1 == recovery_mode)
             {
-                touch.pressed = 0;
-                set_touch_pos(&touch);
+                {
+                    touch.pressed = 0;
+                    set_touch_pos(&touch);
+                }
             }
-    }
             printk("%d[0,0]\n", xy_revert_en);
 
         }

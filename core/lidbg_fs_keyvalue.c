@@ -188,7 +188,7 @@ int bfs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *cli
     }
 
     if(g_mem_dbg)
-        fs_string2file(0,DEBUG_MEM_FILE, "%s=%d \n", __func__, file_len);
+        fs_string2file(0, DEBUG_MEM_FILE, "%s=%d \n", __func__, file_len);
 
     filep->f_op->llseek(filep, 0, 0);
     all_purpose = filep->f_op->read(filep, file_ptr, file_len, &filep->f_pos);
@@ -217,7 +217,7 @@ int bfs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *cli
                 FS_WARN("%d[%s]\n", all_purpose, token);
             add_new_dev = kzalloc(sizeof(struct string_dev), GFP_KERNEL);
             if(g_mem_dbg)
-                fs_string2file(0,DEBUG_MEM_FILE, "%s=%d \n", __func__, sizeof(struct string_dev));
+                fs_string2file(0, DEBUG_MEM_FILE, "%s=%d \n", __func__, sizeof(struct string_dev));
             add_new_dev->yourkey = token;
             list_add(&(add_new_dev->tmp_list), client_list);
             all_purpose++;
@@ -296,7 +296,7 @@ int update_list(const char *filename, struct list_head *client_list)
     }
 
     if(g_mem_dbg)
-        fs_string2file(0,DEBUG_MEM_FILE, "free.%s=%d \n", __func__, file_len);
+        fs_string2file(0, DEBUG_MEM_FILE, "free.%s=%d \n", __func__, file_len);
 
     filep->f_op->llseek(filep, 0, 0);
     all_purpose = filep->f_op->read(filep, file_ptr, file_len, &filep->f_pos);

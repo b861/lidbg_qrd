@@ -49,25 +49,25 @@ bool is_file_exist(char *file)
 void lidbg_insmod( char argv1[])
 {
 #ifdef USE_CALL_USERHELPER
-	static char *bin_path = NULL;
-	if(bin_path == NULL )
-	{
-		if( is_file_exist(RECOVERY_MODE_DIR))
-			bin_path = "/sbin/insmod";
-		else
-			bin_path = "/system/bin/insmod";
-	}
-	
-	{
-		int ret;
-		static char *envp[] = { "HOME=/", "TERM=linux", "PATH=/system/bin:/sbin", NULL };
-	    char *argv[] = { bin_path, argv1, NULL };
-	    ret = call_usermodehelper(bin_path, argv, envp, UMH_WAIT_PROC);
-	}
+    static char *bin_path = NULL;
+    if(bin_path == NULL )
+    {
+        if( is_file_exist(RECOVERY_MODE_DIR))
+            bin_path = "/sbin/insmod";
+        else
+            bin_path = "/system/bin/insmod";
+    }
+
+    {
+        int ret;
+        static char *envp[] = { "HOME=/", "TERM=linux", "PATH=/system/bin:/sbin", NULL };
+        char *argv[] = { bin_path, argv1, NULL };
+        ret = call_usermodehelper(bin_path, argv, envp, UMH_WAIT_PROC);
+    }
 #else
-	char shell_cmd[256];
-	sprintf(shell_cmd, "insmod %s ", argv1 == NULL ? " " : argv1);
-	lidbg_uevent_shell(shell_cmd);
+    char shell_cmd[256];
+    sprintf(shell_cmd, "insmod %s ", argv1 == NULL ? " " : argv1);
+    lidbg_uevent_shell(shell_cmd);
 #endif
 }
 
@@ -98,7 +98,7 @@ int thread_loader(void *data)
         {
             sprintf(path, "%s%s", insmod_path[i], insmod_list[j]);
             //lidbg("load %s\n",path);
-			lidbg_insmod(path);
+            lidbg_insmod(path);
         }
     }
 

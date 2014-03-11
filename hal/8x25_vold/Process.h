@@ -17,7 +17,8 @@
 #ifndef _PROCESS_H
 #define _PROCESS_H
 
-class Process {
+class Process
+{
 public:
     static void killProcessesWithOpenFiles(const char *path, int action);
     static int getPid(const char *s);

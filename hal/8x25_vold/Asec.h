@@ -17,7 +17,8 @@
 #ifndef _ASEC_H
 #define _ASEC_H
 
-struct asec_superblock {
+struct asec_superblock
+{
 #define ASEC_SB_MAGIC 0xc0def00d
     unsigned int magic;
 

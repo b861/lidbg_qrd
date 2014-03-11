@@ -1,27 +1,27 @@
 struct cmd_item
 {
     char *cmd;
-	void (*func)(int argc, char **argv);
+    void (*func)(int argc, char **argv);
 };
 
 struct cmd_item lidbg_cmd_item[] =
 {
-	{"wakelock",lidbg_wakelock_stat},
-	{"mem",lidbg_mem_main},
-	{"i2c",mod_i2c_main},
-	{"io",mod_io_main},
-	{"ad",mod_ad_main},
-	//{"spi",mod_spi_main},
-	{"display",lidbg_display_main},
-	{"key",lidbg_key_main},
-	{"touch",lidbg_touch_main},
-	{"soc",lidbg_soc_main},
-	{"uart",lidbg_uart_main},
-	{"servicer",lidbg_servicer_main},
-	{"cmm",mod_cmn_main},
-	{"file",lidbg_fileserver_main},
-	{"lidbg_trace_msg",trace_msg_main},
-	{"mem_log",mem_log_main},
+    {"wakelock", lidbg_wakelock_stat},
+    {"mem", lidbg_mem_main},
+    {"i2c", mod_i2c_main},
+    {"io", mod_io_main},
+    {"ad", mod_ad_main},
+    //{"spi",mod_spi_main},
+    {"display", lidbg_display_main},
+    {"key", lidbg_key_main},
+    {"touch", lidbg_touch_main},
+    {"soc", lidbg_soc_main},
+    {"uart", lidbg_uart_main},
+    {"servicer", lidbg_servicer_main},
+    {"cmm", mod_cmn_main},
+    {"file", lidbg_fileserver_main},
+    {"lidbg_trace_msg", trace_msg_main},
+    {"mem_log", mem_log_main},
 };
 
 void parse_cmd(char *pt)
@@ -66,7 +66,7 @@ void parse_cmd(char *pt)
     // µ÷ÓÃÆäËûÄ£¿éµÄº¯Êý
     if (!strcmp(argv[0], "c"))
     {
-        int new_argc,i;
+        int new_argc, i;
         char **new_argv;
         new_argc = argc - 2;
         new_argv = argv + 2;
@@ -81,13 +81,13 @@ void parse_cmd(char *pt)
 
         }
 
-		for(i = 0; i < SIZE_OF_ARRAY(lidbg_cmd_item); i++)
-		{
-			if (!strcmp(argv[1], lidbg_cmd_item[i].cmd))
-			{
-				lidbg_cmd_item[i].func(new_argc, new_argv);
-				break;
-			}
-		}
+        for(i = 0; i < SIZE_OF_ARRAY(lidbg_cmd_item); i++)
+        {
+            if (!strcmp(argv[1], lidbg_cmd_item[i].cmd))
+            {
+                lidbg_cmd_item[i].func(new_argc, new_argv);
+                break;
+            }
+        }
     }
 }

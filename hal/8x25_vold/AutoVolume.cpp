@@ -29,14 +29,18 @@
 #include "AutoVolume.h"
 
 AutoVolume::AutoVolume(VolumeManager *vm, const char *label, const char *mount_point, const char *sdcard)
-          : DirectVolume(vm, label, mount_point, -1), mSdcard(0)
+    : DirectVolume(vm, label, mount_point, -1), mSdcard(0)
 {
-    if (sdcard && *sdcard) {
-        if (strncmp(sdcard, "/dev/", 5) && !access(sdcard, F_OK)) {
+    if (sdcard && *sdcard)
+    {
+        if (strncmp(sdcard, "/dev/", 5) && !access(sdcard, F_OK))
+        {
             char loopdev[256];
             if (!Loop::create(label, sdcard, loopdev, sizeof(loopdev)))
                 sdcard = loopdev;
-        } else if (!strcmp(sdcard, "ramdisk")) {
+        }
+        else if (!strcmp(sdcard, "ramdisk"))
+        {
             // FIXME: do not hardcode ramdisk device
             const char *ramdisk = "/dev/block/ram1";
             Fat::format(ramdisk, 0);
@@ -58,18 +62,22 @@ AutoVolume::~AutoVolume()
 static bool isExternalStorage(const char *dir, const char *syspath)
 {
     bool ret = false;
-    if (DIR *d = opendir(dir)) {
-        while (struct dirent *e = readdir(d)) {
+    if (DIR *d = opendir(dir))
+    {
+        while (struct dirent *e = readdir(d))
+        {
             char buf[256];
             if (e->d_name[0] != '.' &&
                     strcmp(e->d_name, "module") && strcmp(e->d_name, "uevent") &&
                     strcmp(e->d_name, "unbind") && strcmp(e->d_name, "bind") &&
-                    strcmp(e->d_name, "new_id") && strcmp(e->d_name, "remove_id")) {
+                    strcmp(e->d_name, "new_id") && strcmp(e->d_name, "remove_id"))
+            {
                 char p[256];
                 snprintf(p, sizeof(p), "%s/%s", dir, e->d_name);
                 ssize_t sz = readlink(p, buf, sizeof(buf));
                 // skip the beginning "../../../.."
-                if (sz > 11 && !strncmp(buf + 11, syspath, sz - 11)) {
+                if (sz > 11 && !strncmp(buf + 11, syspath, sz - 11))
+                {
                     ret = true;
                     break;
                 }
@@ -82,38 +90,52 @@ static bool isExternalStorage(const char *dir, const char *syspath)
 
 int AutoVolume::handleBlockEvent(NetlinkEvent *evt)
 {
-    if (evt->getAction() == NetlinkEvent::NlActionAdd) {
+    if (evt->getAction() == NetlinkEvent::NlActionAdd)
+    {
         const char *dt = evt->findParam("DEVTYPE");
         const char *dp = evt->findParam("DEVPATH");
         bool isdisk = !strcmp(dt, "disk");
-        if (mSdcard) {
-            if (const char *d = strrchr(dp, '/')) {
+        if (mSdcard)
+        {
+            if (const char *d = strrchr(dp, '/'))
+            {
                 int ret = strcmp(++d, mSdcard);
-                if (isdisk) {
-                    if (ret) {
+                if (isdisk)
+                {
+                    if (ret)
+                    {
                         char p[256];
                         snprintf(p, sizeof(p), "/sys%s/%s", dp, mSdcard);
                         ret = access(p, F_OK);
                     }
                     if (!ret)
                         addPath(dp);
-                } else {
-                    if (!ret) {
+                }
+                else
+                {
+                    if (!ret)
+                    {
                         const char *t = evt->findParam("PARTN");
                         mPartIdx = t ? atoi(t) : 1;
                     }
                 }
             }
-        } else {
-            if (isdisk) {
-                const char *storages[] = {
+        }
+        else
+        {
+            if (isdisk)
+            {
+                const char *storages[] =
+                {
                     "/sys/bus/mmc/drivers/mmcblk",      // MMC block device
                     "/sys/bus/usb/drivers/usb-storage", // USB Mass Storage
                 };
 
                 size_t i = 0;
-                while (i < sizeof(storages) / sizeof(const char *)) {
-                    if (isExternalStorage(storages[i++], dp)) {
+                while (i < sizeof(storages) / sizeof(const char *))
+                {
+                    if (isExternalStorage(storages[i++], dp))
+                    {
                         addPath(dp);
                         break;
                     }

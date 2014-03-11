@@ -63,7 +63,7 @@ extern int fs_get_intvalue(struct list_head *client_list, char *key, int *int_va
 extern int fs_get_value(struct list_head *client_list, char *key, char **string);
 extern int fs_set_value(struct list_head *client_list, char *key, char *string);
 extern int fs_find_string(struct list_head *client_list, char *string);
-extern int fs_string2file(int file_limit_M,char *filename, const char *fmt, ... );
+extern int fs_string2file(int file_limit_M, char *filename, const char *fmt, ... );
 extern int fs_show_list(struct list_head *client_list);
 extern int fs_mem_log( const char *fmt, ...);
 extern int fs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *client_list);

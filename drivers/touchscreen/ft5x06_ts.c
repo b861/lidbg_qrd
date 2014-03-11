@@ -193,16 +193,16 @@ static void ft5x06_report_value(struct ft5x06_ts_data *data)
     int i;
     int fingerdown = 0;
 
-	 if(!g_var.is_fly)
-	 {
-	    if(event->touch_point == 3)
-	        SOC_Key_Report(KEY_BACK, KEY_PRESSED_RELEASED);
-	    //else if(event->touch_point == 4)
-	    //    SOC_Key_Report(KEY_MENU,KEY_PRESSED_RELEASED);
-	    else if(event->touch_point == 5)
-	        SOC_Key_Report(KEY_MENU, KEY_PRESSED_RELEASED);
+    if(!g_var.is_fly)
+    {
+        if(event->touch_point == 3)
+            SOC_Key_Report(KEY_BACK, KEY_PRESSED_RELEASED);
+        //else if(event->touch_point == 4)
+        //    SOC_Key_Report(KEY_MENU,KEY_PRESSED_RELEASED);
+        else if(event->touch_point == 5)
+            SOC_Key_Report(KEY_MENU, KEY_PRESSED_RELEASED);
 
-	 }
+    }
 
     for (i = 0; i < event->touch_point; i++)
     {
@@ -245,16 +245,16 @@ static void ft5x06_report_value(struct ft5x06_ts_data *data)
         {
             lidbg("\nerr:FLAG_FOR_15S_OFF===[%d]\n", g_var.flag_for_15s_off);
         }
- if(1==recovery_mode)
- 	{
-        if( ( event->y[0] >= 0) && ( event->x[0] >= 0) )
+        if(1 == recovery_mode)
         {
-            touch.x = event->y[0];
-            touch.y = event->x[0];
-            touch.pressed = 1;
-            set_touch_pos(&touch);
+            if( ( event->y[0] >= 0) && ( event->x[0] >= 0) )
+            {
+                touch.x = event->y[0];
+                touch.y = event->x[0];
+                touch.pressed = 1;
+                set_touch_pos(&touch);
+            }
         }
- 	}
         //--------------------futengfei------------------------
     }
 
@@ -264,14 +264,14 @@ static void ft5x06_report_value(struct ft5x06_ts_data *data)
     //--------------------futengfei------------------------
     if(!!!fingerdown)
     {
-		if(1==recovery_mode)
-		{
-	        {
-	            touch.pressed = 0;
-	            set_touch_pos(&touch);
-	        }
-	        //lidbg("[fuengfei]====finger release \n");
-		}
+        if(1 == recovery_mode)
+        {
+            {
+                touch.pressed = 0;
+                set_touch_pos(&touch);
+            }
+            //lidbg("[fuengfei]====finger release \n");
+        }
     }
     else
     {

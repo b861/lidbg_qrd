@@ -44,16 +44,19 @@ static char MOUNT_NTFS_PATH[] = "/system/bin/ntfs-3g";
 extern "C" int logwrap(int argc, const char **argv, int background);
 extern "C" int mount(const char *, const char *, const char *, unsigned long, const void *);
 
-int Ntfs::check(const char *fsPath) {
+int Ntfs::check(const char *fsPath)
+{
     bool rw = true;
-    if (access(FSCK_NTFS_PATH, X_OK)) {
+    if (access(FSCK_NTFS_PATH, X_OK))
+    {
         SLOGW("Skipping fs checks\n");
         return 0;
     }
 
     int pass = 1;
     int rc = 0;
-    do {
+    do
+    {
         SLOGW("fsPath : %s" , fsPath);
         const char *args[5];
         args[0] = FSCK_NTFS_PATH;
@@ -64,7 +67,8 @@ int Ntfs::check(const char *fsPath) {
 
         rc = logwrap(4, args, 1);
 
-        switch(rc) {
+        switch(rc)
+        {
         case 0:
             SLOGI("Filesystem check completed OK");
             return 0;
@@ -84,21 +88,23 @@ int Ntfs::check(const char *fsPath) {
             return 0;
         case 6:
             SLOGW(" %s volume is not NTFS volume" , fsPath);
-	    errno = ENODATA;
+            errno = ENODATA;
             return 0;
         default:
             SLOGE("Filesystem check failed (unknown exit code %d)", rc);
             errno = EIO;
             return -1;
         }
-    } while (0);
+    }
+    while (0);
 
     return 0;
 }
 
 int Ntfs::doMount(const char *fsPath, const char *mountPoint,
-                 bool ro, bool remount, bool executable,
-                 int ownerUid, int ownerGid, int permMask, bool createLost) {
+                  bool ro, bool remount, bool executable,
+                  int ownerUid, int ownerGid, int permMask, bool createLost)
+{
     int rc;
     unsigned long flags;
     char mountData[255];
@@ -122,9 +128,10 @@ int Ntfs::doMount(const char *fsPath, const char *mountPoint,
      */
     char value[PROPERTY_VALUE_MAX];
     property_get("persist.sampling_profiler", value, "");
-    if (value[0] == '1') {
+    if (value[0] == '1')
+    {
         SLOGW("The SD card is world-writable because the"
-            " 'persist.sampling_profiler' system property is set to '1'.");
+              " 'persist.sampling_profiler' system property is set to '1'.");
         permMask = 0;
     }
 
@@ -132,7 +139,8 @@ int Ntfs::doMount(const char *fsPath, const char *mountPoint,
             "uid=%d,gid=%d,fmask=%o,dmask=%o",
             ownerUid, ownerGid, permMask, permMask);
 
-    if (!remount) {
+    if (!remount)
+    {
         SLOGI("Trying to use ntfs-3g program to mount %s", fsPath);
 
         if (ro)
@@ -149,19 +157,26 @@ int Ntfs::doMount(const char *fsPath, const char *mountPoint,
 
         rc = logwrap(6, args, 1);
 
-        if (rc == 0) {
-          SLOGI("ntfs-3g executed successfully.");
-        } else {
+        if (rc == 0)
+        {
+            SLOGI("ntfs-3g executed successfully.");
+        }
+        else
+        {
             SLOGE("Failed to execute ntfs-3g.");
         }
-    } else {
+    }
+    else
+    {
         rc = mount(fsPath, mountPoint, "fuseblk", flags, mountData);
     }
 
-    if (rc && errno == EROFS) {
+    if (rc && errno == EROFS)
+    {
         SLOGE("%s appears to be a read only filesystem - retrying mount RO", fsPath);
         flags |= MS_RDONLY;
-        if (!remount) {
+        if (!remount)
+        {
             SLOGI("Trying to use ntfs-3g program to mount %s as read-only", fsPath);
 
             snprintf(options, sizeof(options), "ro,%s", mountData);
@@ -175,12 +190,17 @@ int Ntfs::doMount(const char *fsPath, const char *mountPoint,
 
             rc = logwrap(6, args, 1);
 
-            if (rc == 0) {
+            if (rc == 0)
+            {
                 SLOGI("ntfs-3g executed successfully for read-only.");
-            } else {
+            }
+            else
+            {
                 SLOGE("Failed to execute ntfs-3g for read-only.");
             }
-        } else {
+        }
+        else
+        {
             rc = mount(fsPath, mountPoint, "fuseblk", flags, mountData);
         }
     }
@@ -188,7 +208,8 @@ int Ntfs::doMount(const char *fsPath, const char *mountPoint,
     return rc;
 }
 
-int Ntfs::format(const char *fsPath, unsigned int numSectors) {
+int Ntfs::format(const char *fsPath, unsigned int numSectors)
+{
     const char *args[5];
     char strNumOfSectors[16] = {};
     int rc;
@@ -197,23 +218,29 @@ int Ntfs::format(const char *fsPath, unsigned int numSectors) {
     args[1] = "-f";
     args[2] = fsPath;
 
-    if (numSectors) {
+    if (numSectors)
+    {
         snprintf(strNumOfSectors, sizeof(strNumOfSectors), "%u", numSectors);
         args[3] = strNumOfSectors;
         args[4] = NULL;
         rc = logwrap(5, args, 1);
-    } else {
+    }
+    else
+    {
         args[3] = NULL;
         rc = logwrap(4, args, 1);
     }
 
-    if (rc == 0) {
-	SLOGI("Filesystem formatted OK");
-	return 0;
-    } else {
-	SLOGE("Format failed (unknown exit code %d)", rc);
-	errno = EIO;
-	return -1;
+    if (rc == 0)
+    {
+        SLOGI("Filesystem formatted OK");
+        return 0;
+    }
+    else
+    {
+        SLOGE("Format failed (unknown exit code %d)", rc);
+        errno = EIO;
+        return -1;
     }
     return 0;
 }

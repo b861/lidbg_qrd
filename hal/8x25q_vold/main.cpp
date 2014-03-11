@@ -38,7 +38,8 @@
 static int process_config(VolumeManager *vm);
 static void coldboot(const char *path);
 
-int main() {
+int main()
+{
 
     VolumeManager *vm;
     CommandListener *cl;
@@ -49,12 +50,14 @@ int main() {
     mkdir("/dev/block/vold", 0755);
 
     /* Create our singleton managers */
-    if (!(vm = VolumeManager::Instance())) {
+    if (!(vm = VolumeManager::Instance()))
+    {
         SLOGE("Unable to create VolumeManager");
         exit(1);
     };
 
-    if (!(nm = NetlinkManager::Instance())) {
+    if (!(nm = NetlinkManager::Instance()))
+    {
         SLOGE("Unable to create NetlinkManager");
         exit(1);
     };
@@ -64,34 +67,39 @@ int main() {
     vm->setBroadcaster((SocketListener *) cl);
     nm->setBroadcaster((SocketListener *) cl);
 
-    if (vm->start()) {
+    if (vm->start())
+    {
         SLOGE("Unable to start VolumeManager (%s)", strerror(errno));
         exit(1);
     }
 
-    if (process_config(vm)) {
+    if (process_config(vm))
+    {
         SLOGE("Error reading configuration (%s)... continuing anyways", strerror(errno));
     }
 
-    if (nm->start()) {
+    if (nm->start())
+    {
         SLOGE("Unable to start NetlinkManager (%s)", strerror(errno));
         exit(1);
     }
     //LIDBG_PRINT("vold:boot_complete\n");
     //LIDBG_WRITE("/dev/flydev0","boot_complete");
     coldboot("/sys/block");
-//    coldboot("/sys/class/switch");
+    //    coldboot("/sys/class/switch");
 
     /*
      * Now that we're up, we can respond to commands
      */
-    if (cl->startListener()) {
+    if (cl->startListener())
+    {
         SLOGE("Unable to start CommandListener (%s)", strerror(errno));
         exit(1);
     }
 
     // Eventually we'll become the monitoring thread
-    while(1) {
+    while(1)
+    {
         sleep(1000);
     }
 
@@ -107,12 +115,14 @@ static void do_coldboot(DIR *d, int lvl)
     dfd = dirfd(d);
 
     fd = openat(dfd, "uevent", O_WRONLY);
-    if(fd >= 0) {
+    if(fd >= 0)
+    {
         write(fd, "add\n", 4);
         close(fd);
     }
 
-    while((de = readdir(d))) {
+    while((de = readdir(d)))
+    {
         DIR *d2;
 
         if (de->d_name[0] == '.')
@@ -128,7 +138,8 @@ static void do_coldboot(DIR *d, int lvl)
         d2 = fdopendir(fd);
         if(d2 == 0)
             close(fd);
-        else {
+        else
+        {
             do_coldboot(d2, lvl + 1);
             closedir(d2);
         }
@@ -138,7 +149,8 @@ static void do_coldboot(DIR *d, int lvl)
 static void coldboot(const char *path)
 {
     DIR *d = opendir(path);
-    if(d) {
+    if(d)
+    {
         do_coldboot(d, 0);
         closedir(d);
     }
@@ -149,18 +161,21 @@ static int parse_mount_flags(char *mount_flags)
     char *save_ptr;
     int flags = 0;
 
-    if (strcasestr(mount_flags, "encryptable")) {
+    if (strcasestr(mount_flags, "encryptable"))
+    {
         flags |= VOL_ENCRYPTABLE;
     }
 
-    if (strcasestr(mount_flags, "nonremovable")) {
+    if (strcasestr(mount_flags, "nonremovable"))
+    {
         flags |= VOL_NONREMOVABLE;
     }
 
     return flags;
 }
 #undef  VOLD_AUTO_SWITCH_FEATURE
-static int process_config(VolumeManager *vm) {
+static int process_config(VolumeManager *vm)
+{
     FILE *fp;
     int n = 0;
     char line[255];
@@ -169,20 +184,26 @@ static int process_config(VolumeManager *vm) {
     property_get("persist.sys.emmcsdcard.enabled", value, "");
     emmcsdcard_enabled = atoi(value);
     /*use internal emmc  as SD card*/
-    if(emmcsdcard_enabled){
+    if(emmcsdcard_enabled)
+    {
         if (!(fp = fopen("/etc/vold.emmc.fstab", "r")))
             return -1;
         SLOGI("Load /etc/vold.emmc.fstab, use internal emmc as SDCARD!");
-    }else{
+    }
+    else
+    {
 #ifdef VOLD_AUTO_SWITCH_FEATURE
         /*external SD card*/
-        if(!access("/dev/block/mmcblk1p1",F_OK) || !access("/dev/block/mmcblk1",F_OK)){
+        if(!access("/dev/block/mmcblk1p1", F_OK) || !access("/dev/block/mmcblk1", F_OK))
+        {
 #endif
             if (!(fp = fopen("/etc/vold.fstab", "r")))
                 return -1;
             SLOGI("Load /etc/vold.fstab, use external storage as SDCARD!");
 #ifdef VOLD_AUTO_SWITCH_FEATURE
-        } else {
+        }
+        else
+        {
             SLOGI("External Storage doesn't exist");
             if (!(fp = fopen("/etc/vold.emmc.fstab", "r")))
                 return -1;
@@ -190,58 +211,71 @@ static int process_config(VolumeManager *vm) {
         }
 #endif
     }
-    while(fgets(line, sizeof(line), fp)) {
+    while(fgets(line, sizeof(line), fp))
+    {
         const char *delim = " \t";
         char *save_ptr;
         char *type, *label, *mount_point, *mount_flags, *sysfs_path;
         int flags;
 
         n++;
-        line[strlen(line)-1] = '\0';
+        line[strlen(line) - 1] = '\0';
 
         if (line[0] == '#' || line[0] == '\0')
             continue;
 
-        if (!(type = strtok_r(line, delim, &save_ptr))) {
+        if (!(type = strtok_r(line, delim, &save_ptr)))
+        {
             SLOGE("Error parsing type");
             goto out_syntax;
         }
-        if (!(label = strtok_r(NULL, delim, &save_ptr))) {
+        if (!(label = strtok_r(NULL, delim, &save_ptr)))
+        {
             SLOGE("Error parsing label");
             goto out_syntax;
         }
-        if (!(mount_point = strtok_r(NULL, delim, &save_ptr))) {
+        if (!(mount_point = strtok_r(NULL, delim, &save_ptr)))
+        {
             SLOGE("Error parsing mount point");
             goto out_syntax;
         }
 
-        if (!strcmp(type, "dev_mount")) {
+        if (!strcmp(type, "dev_mount"))
+        {
             DirectVolume *dv = NULL;
             char *part;
 
-            if (!(part = strtok_r(NULL, delim, &save_ptr))) {
+            if (!(part = strtok_r(NULL, delim, &save_ptr)))
+            {
                 SLOGE("Error parsing partition");
                 goto out_syntax;
             }
-            if (strcmp(part, "auto") && atoi(part) == 0) {
+            if (strcmp(part, "auto") && atoi(part) == 0)
+            {
                 SLOGE("Partition must either be 'auto' or 1 based index instead of '%s'", part);
                 goto out_syntax;
             }
 
-            if (!strcmp(part, "auto")) {
+            if (!strcmp(part, "auto"))
+            {
                 dv = new DirectVolume(vm, label, mount_point, -1);
-            } else {
+            }
+            else
+            {
                 dv = new DirectVolume(vm, label, mount_point, atoi(part));
             }
 
-            while ((sysfs_path = strtok_r(NULL, delim, &save_ptr))) {
-                if (*sysfs_path != '/') {
+            while ((sysfs_path = strtok_r(NULL, delim, &save_ptr)))
+            {
+                if (*sysfs_path != '/')
+                {
                     /* If the first character is not a '/', it must be flags */
                     break;
                 }
-                if (dv->addPath(sysfs_path)) {
+                if (dv->addPath(sysfs_path))
+                {
                     SLOGE("Failed to add devpath %s to volume %s", sysfs_path,
-                         label);
+                          label);
                     goto out_fail;
                 }
             }
@@ -256,8 +290,12 @@ static int process_config(VolumeManager *vm) {
             dv->setFlags(flags);
 
             vm->addVolume(dv);
-        } else if (!strcmp(type, "map_mount")) {
-        } else {
+        }
+        else if (!strcmp(type, "map_mount"))
+        {
+        }
+        else
+        {
             SLOGE("Unknown type '%s'", type);
             goto out_syntax;
         }
@@ -271,5 +309,5 @@ out_syntax:
     errno = -EINVAL;
 out_fail:
     fclose(fp);
-    return -1;   
+    return -1;
 }

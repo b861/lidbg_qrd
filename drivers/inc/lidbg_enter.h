@@ -52,23 +52,25 @@
 
 #ifndef _MDP_STRUCT__
 #define _MDP_STRUCT__
-typedef enum {
-	MDP_BLOCK_POWER_OFF,
-	MDP_BLOCK_POWER_ON
+typedef enum
+{
+    MDP_BLOCK_POWER_OFF,
+    MDP_BLOCK_POWER_ON
 } MDP_BLOCK_POWER_STATE;
 
-typedef enum {
-	MDP_CMD_BLOCK,
-	MDP_OVERLAY0_BLOCK,
-	MDP_MASTER_BLOCK,
-	MDP_PPP_BLOCK,
-	MDP_DMA2_BLOCK,
-	MDP_DMA3_BLOCK,
-	MDP_DMA_S_BLOCK,
-	MDP_DMA_E_BLOCK,
-	MDP_OVERLAY1_BLOCK,
-	MDP_OVERLAY2_BLOCK,
-	MDP_MAX_BLOCK
+typedef enum
+{
+    MDP_CMD_BLOCK,
+    MDP_OVERLAY0_BLOCK,
+    MDP_MASTER_BLOCK,
+    MDP_PPP_BLOCK,
+    MDP_DMA2_BLOCK,
+    MDP_DMA3_BLOCK,
+    MDP_DMA_S_BLOCK,
+    MDP_DMA_E_BLOCK,
+    MDP_OVERLAY1_BLOCK,
+    MDP_OVERLAY2_BLOCK,
+    MDP_MAX_BLOCK
 } MDP_BLOCK_TYPE;
 
 #endif
@@ -380,7 +382,7 @@ struct lidbg_fn_t
 
     //screan_off :0 screan_on :1 suspendon:2 suspendoff:3
     void (*pfnHal_Acc_Callback)(int para);
-	
+
     int (*pfnNotifier_Call)(unsigned long val);
 
     bool (*pfnSOC_PWR_Status_Accon)(void);
@@ -407,14 +409,16 @@ struct lidbg_pvar_t
 
 struct lidbg_hal
 {
-union{
-	struct lidbg_fn_t soc_func_tbl;
-	unsigned char reserve[256];
-	};
-union{
-    struct lidbg_pvar_t soc_pvar_tbl;
-    unsigned char reserve1[128];
-	};
+    union
+    {
+        struct lidbg_fn_t soc_func_tbl;
+        unsigned char reserve[256];
+    };
+    union
+    {
+        struct lidbg_pvar_t soc_pvar_tbl;
+        unsigned char reserve1[128];
+    };
 };
 
 

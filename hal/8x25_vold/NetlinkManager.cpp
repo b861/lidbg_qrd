@@ -34,20 +34,24 @@
 
 NetlinkManager *NetlinkManager::sInstance = NULL;
 
-NetlinkManager *NetlinkManager::Instance() {
+NetlinkManager *NetlinkManager::Instance()
+{
     if (!sInstance)
         sInstance = new NetlinkManager();
     return sInstance;
 }
 
-NetlinkManager::NetlinkManager() {
+NetlinkManager::NetlinkManager()
+{
     mBroadcaster = NULL;
 }
 
-NetlinkManager::~NetlinkManager() {
+NetlinkManager::~NetlinkManager()
+{
 }
 
-int NetlinkManager::start() {
+int NetlinkManager::start()
+{
     struct sockaddr_nl nladdr;
     int sz = 64 * 1024;
     int on = 1;
@@ -58,36 +62,43 @@ int NetlinkManager::start() {
     nladdr.nl_groups = 0xffffffff;
 
     if ((mSock = socket(PF_NETLINK,
-                        SOCK_DGRAM,NETLINK_KOBJECT_UEVENT)) < 0) {
+                        SOCK_DGRAM, NETLINK_KOBJECT_UEVENT)) < 0)
+    {
         SLOGE("Unable to create uevent socket: %s", strerror(errno));
         return -1;
     }
 
-    if (setsockopt(mSock, SOL_SOCKET, SO_RCVBUFFORCE, &sz, sizeof(sz)) < 0) {
+    if (setsockopt(mSock, SOL_SOCKET, SO_RCVBUFFORCE, &sz, sizeof(sz)) < 0)
+    {
         SLOGE("Unable to set uevent socket SO_RECBUFFORCE option: %s", strerror(errno));
         return -1;
     }
 
-    if (setsockopt(mSock, SOL_SOCKET, SO_PASSCRED, &on, sizeof(on)) < 0) {
+    if (setsockopt(mSock, SOL_SOCKET, SO_PASSCRED, &on, sizeof(on)) < 0)
+    {
         SLOGE("Unable to set uevent socket SO_PASSCRED option: %s", strerror(errno));
         return -1;
     }
 
-    if (bind(mSock, (struct sockaddr *) &nladdr, sizeof(nladdr)) < 0) {
+    if (bind(mSock, (struct sockaddr *) &nladdr, sizeof(nladdr)) < 0)
+    {
         SLOGE("Unable to bind uevent socket: %s", strerror(errno));
         return -1;
     }
 
     mHandler = new NetlinkHandler(mSock);
-    if (mHandler->start()) {
+    if (mHandler->start())
+    {
         SLOGE("Unable to start NetlinkHandler: %s", strerror(errno));
         return -1;
     }
     return 0;
 }
 
-int NetlinkManager::stop() {
-    if (mHandler->stop()) {
+int NetlinkManager::stop()
+{
+    if (mHandler->stop())
+    {
         SLOGE("Unable to stop NetlinkHandler: %s", strerror(errno));
         return -1;
     }

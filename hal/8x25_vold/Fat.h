@@ -19,7 +19,8 @@
 
 #include <unistd.h>
 
-class Fat {
+class Fat
+{
 public:
     static int check(const char *fsPath);
     static int doMount(const char *fsPath, const char *mountPoint,

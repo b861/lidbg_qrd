@@ -169,9 +169,9 @@ void tc358746xbg_show_colorbar_config(void)
     {
         for(j = 180; j > 0; j--)
         {
-            ret = tc358746xbg_write((u16 *) & (tc358746xbg_show_colorbar_config_tab[2*i].add_reg), (u32 *) & (tc358746xbg_show_colorbar_config_tab[2*i].add_val), (u8)tc358746xbg_show_colorbar_config_tab[2*i].registet_width);
+            ret = tc358746xbg_write((u16 *) & (tc358746xbg_show_colorbar_config_tab[2 * i].add_reg), (u32 *) & (tc358746xbg_show_colorbar_config_tab[2 * i].add_val), (u8)tc358746xbg_show_colorbar_config_tab[2 * i].registet_width);
             if(ret == NACK) goto NACK_BREAK;
-            ret = tc358746xbg_write((u16 *) & (tc358746xbg_show_colorbar_config_tab[2*i+1].add_reg), (u32 *) & (tc358746xbg_show_colorbar_config_tab[2*i+1].add_val), (u8)tc358746xbg_show_colorbar_config_tab[2*i+1].registet_width);
+            ret = tc358746xbg_write((u16 *) & (tc358746xbg_show_colorbar_config_tab[2 * i + 1].add_reg), (u32 *) & (tc358746xbg_show_colorbar_config_tab[2 * i + 1].add_val), (u8)tc358746xbg_show_colorbar_config_tab[2 * i + 1].registet_width);
             if(ret == NACK) goto NACK_BREAK;
         }
     }
@@ -197,9 +197,9 @@ void tc358746xbg_show_colorbar_config_blue(u8 color_flag)
     i = color_flag - 1;
     for(j = 360; j > 0; j--)
     {
-        ret = tc358746xbg_write((u16 *) & (tc358746xbg_show_colorbar_config_tab[2*i].add_reg), (u32 *) & (tc358746xbg_show_colorbar_config_tab[2*i].add_val), (u8)tc358746xbg_show_colorbar_config_tab[2*i].registet_width);
+        ret = tc358746xbg_write((u16 *) & (tc358746xbg_show_colorbar_config_tab[2 * i].add_reg), (u32 *) & (tc358746xbg_show_colorbar_config_tab[2 * i].add_val), (u8)tc358746xbg_show_colorbar_config_tab[2 * i].registet_width);
         if(ret == NACK) goto NACK_BREAK;
-        ret = tc358746xbg_write((u16 *) & (tc358746xbg_show_colorbar_config_tab[2*i+1].add_reg), (u32 *) & (tc358746xbg_show_colorbar_config_tab[2*i+1].add_val), (u8)tc358746xbg_show_colorbar_config_tab[2*i+1].registet_width);
+        ret = tc358746xbg_write((u16 *) & (tc358746xbg_show_colorbar_config_tab[2 * i + 1].add_reg), (u32 *) & (tc358746xbg_show_colorbar_config_tab[2 * i + 1].add_val), (u8)tc358746xbg_show_colorbar_config_tab[2 * i + 1].registet_width);
         if(ret == NACK) goto NACK_BREAK;
     }
     add_reg_1 = 0x00e0; //Ê¹ÄÜcolobar

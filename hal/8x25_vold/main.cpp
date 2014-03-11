@@ -38,7 +38,8 @@
 static int process_config(VolumeManager *vm);
 static void coldboot(const char *path);
 
-int main() {
+int main()
+{
 
     VolumeManager *vm;
     CommandListener *cl;
@@ -49,12 +50,14 @@ int main() {
     mkdir("/dev/block/vold", 0755);
 
     /* Create our singleton managers */
-    if (!(vm = VolumeManager::Instance())) {
+    if (!(vm = VolumeManager::Instance()))
+    {
         SLOGE("Unable to create VolumeManager");
         exit(1);
     };
 
-    if (!(nm = NetlinkManager::Instance())) {
+    if (!(nm = NetlinkManager::Instance()))
+    {
         SLOGE("Unable to create NetlinkManager");
         exit(1);
     };
@@ -64,33 +67,38 @@ int main() {
     vm->setBroadcaster((SocketListener *) cl);
     nm->setBroadcaster((SocketListener *) cl);
 
-    if (vm->start()) {
+    if (vm->start())
+    {
         SLOGE("Unable to start VolumeManager (%s)", strerror(errno));
         exit(1);
     }
 
-    if (process_config(vm)) {
+    if (process_config(vm))
+    {
         SLOGE("Error reading configuration (%s)... continuing anyways", strerror(errno));
     }
 
-    if (nm->start()) {
+    if (nm->start())
+    {
         SLOGE("Unable to start NetlinkManager (%s)", strerror(errno));
         exit(1);
     }
 
     coldboot("/sys/block");
-//    coldboot("/sys/class/switch");
+    //    coldboot("/sys/class/switch");
 
     /*
      * Now that we're up, we can respond to commands
      */
-    if (cl->startListener()) {
+    if (cl->startListener())
+    {
         SLOGE("Unable to start CommandListener (%s)", strerror(errno));
         exit(1);
     }
 
     // Eventually we'll become the monitoring thread
-    while(1) {
+    while(1)
+    {
         sleep(1000);
     }
 
@@ -106,12 +114,14 @@ static void do_coldboot(DIR *d, int lvl)
     dfd = dirfd(d);
 
     fd = openat(dfd, "uevent", O_WRONLY);
-    if(fd >= 0) {
+    if(fd >= 0)
+    {
         write(fd, "add\n", 4);
         close(fd);
     }
 
-    while((de = readdir(d))) {
+    while((de = readdir(d)))
+    {
         DIR *d2;
 
         if (de->d_name[0] == '.')
@@ -127,7 +137,8 @@ static void do_coldboot(DIR *d, int lvl)
         d2 = fdopendir(fd);
         if(d2 == 0)
             close(fd);
-        else {
+        else
+        {
             do_coldboot(d2, lvl + 1);
             closedir(d2);
         }
@@ -137,7 +148,8 @@ static void do_coldboot(DIR *d, int lvl)
 static void coldboot(const char *path)
 {
     DIR *d = opendir(path);
-    if(d) {
+    if(d)
+    {
         do_coldboot(d, 0);
         closedir(d);
     }
@@ -148,30 +160,38 @@ static int parse_mount_flags(char *mount_flags)
     char *save_ptr;
     int flags = 0;
 
-    if (strcasestr(mount_flags, "encryptable")) {
+    if (strcasestr(mount_flags, "encryptable"))
+    {
         flags |= VOL_ENCRYPTABLE;
     }
 
-    if (strcasestr(mount_flags, "nonremovable")) {
+    if (strcasestr(mount_flags, "nonremovable"))
+    {
         flags |= VOL_NONREMOVABLE;
     }
 
     return flags;
 }
 
-static int process_config(VolumeManager *vm) {
+static int process_config(VolumeManager *vm)
+{
     FILE *fp;
     int n = 0;
     char line[255];
     Volume *vol = 0;
 
-    if ((fp = fopen("/proc/cmdline", "r"))) {
-        while (fscanf(fp, "%s", line) > 0) {
-            if (!strncmp(line, "SDCARD=", 7)) {
+    if ((fp = fopen("/proc/cmdline", "r")))
+    {
+        while (fscanf(fp, "%s", line) > 0)
+        {
+            if (!strncmp(line, "SDCARD=", 7))
+            {
                 const char *sdcard = line + 7;
-                if (*sdcard) {
+                if (*sdcard)
+                {
                     // FIXME: should not hardcode the label and mount_point
-                    if ((vol = new AutoVolume(vm, "sdcard", "/mnt/sdcard", sdcard))) {
+                    if ((vol = new AutoVolume(vm, "sdcard", "/mnt/sdcard", sdcard)))
+                    {
                         vm->addVolume(vol);
                         break;
                     }
@@ -181,10 +201,12 @@ static int process_config(VolumeManager *vm) {
         fclose(fp);
     }
 
-    if (!(fp = fopen("/etc/vold.fstab", "r"))) {
+    if (!(fp = fopen("/etc/vold.fstab", "r")))
+    {
         // no volume added yet, create a AutoVolume object
         // to mount USB/MMC/SD automatically
-        if (!vol) {
+        if (!vol)
+        {
             // FIXME: should not hardcode the label and mount_point
             vol = new AutoVolume(vm, "sdcard", "/mnt/sdcard");
             if (vol)
@@ -193,67 +215,82 @@ static int process_config(VolumeManager *vm) {
         return vol ? 0 : -ENOMEM;
     }
 
-    while(fgets(line, sizeof(line), fp)) {
+    while(fgets(line, sizeof(line), fp))
+    {
         const char *delim = " \t";
         char *save_ptr;
         char *type, *label, *mount_point, *mount_flags, *sysfs_path;
         int flags;
 
         n++;
-        line[strlen(line)-1] = '\0';
+        line[strlen(line) - 1] = '\0';
 
         if (line[0] == '#' || line[0] == '\0')
             continue;
 
-        if (!(type = strtok_r(line, delim, &save_ptr))) {
+        if (!(type = strtok_r(line, delim, &save_ptr)))
+        {
             SLOGE("Error parsing type");
             goto out_syntax;
         }
-        if (!(label = strtok_r(NULL, delim, &save_ptr))) {
+        if (!(label = strtok_r(NULL, delim, &save_ptr)))
+        {
             SLOGE("Error parsing label");
             goto out_syntax;
         }
-        if (!(mount_point = strtok_r(NULL, delim, &save_ptr))) {
+        if (!(mount_point = strtok_r(NULL, delim, &save_ptr)))
+        {
             SLOGE("Error parsing mount point");
             goto out_syntax;
         }
 
-        if (!strcmp(type, "dev_mount")) {
+        if (!strcmp(type, "dev_mount"))
+        {
             DirectVolume *dv = NULL;
             char *part;
 
-            if (!(part = strtok_r(NULL, delim, &save_ptr))) {
+            if (!(part = strtok_r(NULL, delim, &save_ptr)))
+            {
                 SLOGE("Error parsing partition");
                 goto out_syntax;
             }
-            if (strcmp(part, "auto") && atoi(part) == 0) {
+            if (strcmp(part, "auto") && atoi(part) == 0)
+            {
                 SLOGE("Partition must either be 'auto' or 1 based index instead of '%s'", part);
                 goto out_syntax;
             }
 
             const char *sdcard = 0;
-            while ((sysfs_path = strtok_r(NULL, delim, &save_ptr))) {
+            while ((sysfs_path = strtok_r(NULL, delim, &save_ptr)))
+            {
                 if ((sdcard = strncmp(sysfs_path, "SDCARD=", 7) ? 0 : sysfs_path + 7))
                     break;
-                if (!dv) {
-                     if (!strcmp(part, "auto")) {
+                if (!dv)
+                {
+                    if (!strcmp(part, "auto"))
+                    {
                         dv = new DirectVolume(vm, label, mount_point, -1);
-                    } else {
+                    }
+                    else
+                    {
                         dv = new DirectVolume(vm, label, mount_point, atoi(part));
                     }
                 }
-                if (*sysfs_path != '/') {
+                if (*sysfs_path != '/')
+                {
                     /* If the first character is not a '/', it must be flags */
                     break;
                 }
-                if (dv->addPath(sysfs_path)) {
+                if (dv->addPath(sysfs_path))
+                {
                     SLOGE("Failed to add devpath %s to volume %s", sysfs_path,
-                         label);
+                          label);
                     goto out_fail;
                 }
             }
 
-            if (!dv) {
+            if (!dv)
+            {
                 dv = new AutoVolume(vm, label, mount_point, sdcard);
             }
 
@@ -267,8 +304,12 @@ static int process_config(VolumeManager *vm) {
             dv->setFlags(flags);
 
             vm->addVolume(dv);
-        } else if (!strcmp(type, "map_mount")) {
-        } else {
+        }
+        else if (!strcmp(type, "map_mount"))
+        {
+        }
+        else
+        {
             SLOGE("Unknown type '%s'", type);
             goto out_syntax;
         }
@@ -282,5 +323,5 @@ out_syntax:
     errno = -EINVAL;
 out_fail:
     fclose(fp);
-    return -1;   
+    return -1;
 }

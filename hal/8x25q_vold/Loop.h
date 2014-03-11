@@ -22,7 +22,8 @@
 
 class SocketClient;
 
-class Loop {
+class Loop
+{
 public:
     static const int LOOP_MAX = 4096;
 public:

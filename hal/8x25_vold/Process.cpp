@@ -32,7 +32,8 @@
 
 #include "Process.h"
 
-int Process::readSymLink(const char *path, char *link, size_t max) {
+int Process::readSymLink(const char *path, char *link, size_t max)
+{
     struct stat s;
     int length;
 
@@ -40,18 +41,20 @@ int Process::readSymLink(const char *path, char *link, size_t max) {
         return 0;
     if ((s.st_mode & S_IFMT) != S_IFLNK)
         return 0;
-   
-    // we have a symlink    
-    length = readlink(path, link, max- 1);
-    if (length <= 0) 
+
+    // we have a symlink
+    length = readlink(path, link, max - 1);
+    if (length <= 0)
         return 0;
     link[length] = 0;
     return 1;
 }
 
-int Process::pathMatchesMountPoint(const char* path, const char* mountPoint) {
+int Process::pathMatchesMountPoint(const char *path, const char *mountPoint)
+{
     int length = strlen(mountPoint);
-    if (length > 1 && strncmp(path, mountPoint, length) == 0) {
+    if (length > 1 && strncmp(path, mountPoint, length) == 0)
+    {
         // we need to do extra checking if mountPoint does not end in a '/'
         if (mountPoint[length - 1] == '/')
             return 1;
@@ -59,28 +62,34 @@ int Process::pathMatchesMountPoint(const char* path, const char* mountPoint) {
         // there is one in the path to avoid partial matches.
         return (path[length] == 0 || path[length] == '/');
     }
-    
+
     return 0;
 }
 
-void Process::getProcessName(int pid, char *buffer, size_t max) {
+void Process::getProcessName(int pid, char *buffer, size_t max)
+{
     int fd;
     snprintf(buffer, max, "/proc/%d/cmdline", pid);
     fd = open(buffer, O_RDONLY);
-    if (fd < 0) {
+    if (fd < 0)
+    {
         strcpy(buffer, "???");
-    } else {
+    }
+    else
+    {
         int length = read(fd, buffer, max - 1);
         buffer[length] = 0;
         close(fd);
     }
 }
 
-int Process::checkFileDescriptorSymLinks(int pid, const char *mountPoint) {
+int Process::checkFileDescriptorSymLinks(int pid, const char *mountPoint)
+{
     return checkFileDescriptorSymLinks(pid, mountPoint, NULL, 0);
 }
 
-int Process::checkFileDescriptorSymLinks(int pid, const char *mountPoint, char *openFilename, size_t max) {
+int Process::checkFileDescriptorSymLinks(int pid, const char *mountPoint, char *openFilename, size_t max)
+{
 
 
     // compute path to process's directory of open files
@@ -95,22 +104,25 @@ int Process::checkFileDescriptorSymLinks(int pid, const char *mountPoint, char *
     // append a trailing '/'
     path[parent_length++] = '/';
 
-    struct dirent* de;
-    while ((de = readdir(dir))) {
+    struct dirent *de;
+    while ((de = readdir(dir)))
+    {
         if (!strcmp(de->d_name, ".") || !strcmp(de->d_name, "..")
                 || strlen(de->d_name) + parent_length + 1 >= PATH_MAX)
             continue;
-        
+
         // append the file name, after truncating to parent directory
         path[parent_length] = 0;
         strcat(path, de->d_name);
 
         char link[PATH_MAX];
 
-        if (readSymLink(path, link, sizeof(link)) && pathMatchesMountPoint(link, mountPoint)) {
-            if (openFilename) {
+        if (readSymLink(path, link, sizeof(link)) && pathMatchesMountPoint(link, mountPoint))
+        {
+            if (openFilename)
+            {
                 memset(openFilename, 0, max);
-                strncpy(openFilename, link, max-1);
+                strncpy(openFilename, link, max - 1);
             }
             closedir(dir);
             return 1;
@@ -121,11 +133,13 @@ int Process::checkFileDescriptorSymLinks(int pid, const char *mountPoint, char *
     return 0;
 }
 
-int Process::checkFileMaps(int pid, const char *mountPoint) {
+int Process::checkFileMaps(int pid, const char *mountPoint)
+{
     return checkFileMaps(pid, mountPoint, NULL, 0);
 }
 
-int Process::checkFileMaps(int pid, const char *mountPoint, char *openFilename, size_t max) {
+int Process::checkFileMaps(int pid, const char *mountPoint, char *openFilename, size_t max)
+{
     FILE *file;
     char buffer[PATH_MAX + 100];
 
@@ -133,37 +147,43 @@ int Process::checkFileMaps(int pid, const char *mountPoint, char *openFilename, 
     file = fopen(buffer, "r");
     if (!file)
         return 0;
-    
-    while (fgets(buffer, sizeof(buffer), file)) {
+
+    while (fgets(buffer, sizeof(buffer), file))
+    {
         // skip to the path
-        const char* path = strchr(buffer, '/');
-        if (path && pathMatchesMountPoint(path, mountPoint)) {
-            if (openFilename) {
+        const char *path = strchr(buffer, '/');
+        if (path && pathMatchesMountPoint(path, mountPoint))
+        {
+            if (openFilename)
+            {
                 memset(openFilename, 0, max);
-                strncpy(openFilename, path, max-1);
+                strncpy(openFilename, path, max - 1);
             }
             fclose(file);
             return 1;
         }
     }
-    
+
     fclose(file);
     return 0;
 }
 
-int Process::checkSymLink(int pid, const char *mountPoint, const char *name) {
+int Process::checkSymLink(int pid, const char *mountPoint, const char *name)
+{
     char    path[PATH_MAX];
     char    link[PATH_MAX];
 
     sprintf(path, "/proc/%d/%s", pid, name);
-    if (readSymLink(path, link, sizeof(link)) && pathMatchesMountPoint(link, mountPoint)) 
+    if (readSymLink(path, link, sizeof(link)) && pathMatchesMountPoint(link, mountPoint))
         return 1;
     return 0;
 }
 
-int Process::getPid(const char *s) {
+int Process::getPid(const char *s)
+{
     int result = 0;
-    while (*s) {
+    while (*s)
+    {
         if (!isdigit(*s)) return -1;
         result = 10 * result + (*s++ - '0');
     }
@@ -177,16 +197,19 @@ int Process::getPid(const char *s) {
  * action = 2 to SIGKILL
  */
 // hunt down and kill processes that have files open on the given mount point
-void Process::killProcessesWithOpenFiles(const char *path, int action) {
-    DIR*    dir;
-    struct dirent* de;
+void Process::killProcessesWithOpenFiles(const char *path, int action)
+{
+    DIR    *dir;
+    struct dirent *de;
 
-    if (!(dir = opendir("/proc"))) {
+    if (!(dir = opendir("/proc")))
+    {
         SLOGE("opendir failed (%s)", strerror(errno));
         return;
     }
 
-    while ((de = readdir(dir))) {
+    while ((de = readdir(dir)))
+    {
         int killed = 0;
         int pid = getPid(de->d_name);
         char name[PATH_MAX];
@@ -197,23 +220,37 @@ void Process::killProcessesWithOpenFiles(const char *path, int action) {
 
         char openfile[PATH_MAX];
 
-        if (checkFileDescriptorSymLinks(pid, path, openfile, sizeof(openfile))) {
+        if (checkFileDescriptorSymLinks(pid, path, openfile, sizeof(openfile)))
+        {
             SLOGE("Process %s (%d) has open file %s", name, pid, openfile);
-        } else if (checkFileMaps(pid, path, openfile, sizeof(openfile))) {
+        }
+        else if (checkFileMaps(pid, path, openfile, sizeof(openfile)))
+        {
             SLOGE("Process %s (%d) has open filemap for %s", name, pid, openfile);
-        } else if (checkSymLink(pid, path, "cwd")) {
+        }
+        else if (checkSymLink(pid, path, "cwd"))
+        {
             SLOGE("Process %s (%d) has cwd within %s", name, pid, path);
-        } else if (checkSymLink(pid, path, "root")) {
+        }
+        else if (checkSymLink(pid, path, "root"))
+        {
             SLOGE("Process %s (%d) has chroot within %s", name, pid, path);
-        } else if (checkSymLink(pid, path, "exe")) {
+        }
+        else if (checkSymLink(pid, path, "exe"))
+        {
             SLOGE("Process %s (%d) has executable path within %s", name, pid, path);
-        } else {
+        }
+        else
+        {
             continue;
         }
-        if (action == 1) {
+        if (action == 1)
+        {
             SLOGW("Sending SIGHUP to process %d", pid);
             kill(pid, SIGTERM);
-        } else if (action == 2) {
+        }
+        else if (action == 2)
+        {
             SLOGE("Sending SIGKILL to process %d", pid);
             kill(pid, SIGKILL);
         }

@@ -57,7 +57,7 @@ int launch_file_cmd(const char *filename)
     }
 
     if(g_mem_dbg)
-        fs_string2file(0,DEBUG_MEM_FILE, "free.%s=%d \n", __func__, file_len);
+        fs_string2file(0, DEBUG_MEM_FILE, "free.%s=%d \n", __func__, file_len);
 
     filep->f_op->llseek(filep, 0, 0);
     all_purpose = filep->f_op->read(filep, file_ptr, file_len, &filep->f_pos);
@@ -148,7 +148,7 @@ void set_machine_id(void)
         machine_id = ABS(machine_id);
         sprintf(string, "%d", machine_id);
         FS_WARN("new machine_id:%s\n", string);
-        bfs_file_amend(MACHINE_ID_FILE, string,0);
+        bfs_file_amend(MACHINE_ID_FILE, string, 0);
     }
 }
 static int thread_pollstate_func(void *data)

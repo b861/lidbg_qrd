@@ -35,75 +35,81 @@ extern "C" {
 
 #define PREVIEW_BUFFER_COUNT 5
 
-namespace android {
+namespace android
+{
 
-// This class represents a heap which maintains several contiguous
-// buffers.  The heap may be backed by pmem (when pmem_pool contains
-// the name of a /dev/pmem* file), or by ashmem (when pmem_pool == NULL).
+    // This class represents a heap which maintains several contiguous
+    // buffers.  The heap may be backed by pmem (when pmem_pool contains
+    // the name of a /dev/pmem* file), or by ashmem (when pmem_pool == NULL).
 
-struct MemPool : public RefBase {
-    MemPool(int buffer_size, int num_buffers,
-            int frame_size,
-            const char *name);
+    struct MemPool : public RefBase
+    {
+        MemPool(int buffer_size, int num_buffers,
+                int frame_size,
+                const char *name);
 
-    virtual ~MemPool() = 0;
+        virtual ~MemPool() = 0;
 
-    void completeInitialization();
-    bool initialized() const {
-        return mHeap != NULL && mHeap->base() != MAP_FAILED;
-    }
+        void completeInitialization();
+        bool initialized() const
+        {
+            return mHeap != NULL && mHeap->base() != MAP_FAILED;
+        }
 
-    virtual status_t dump(int fd, const Vector<String16>& args) const;
+        virtual status_t dump(int fd, const Vector<String16> &args) const;
 
-    int mBufferSize;
-    int mAlignedBufferSize;
-    int mNumBuffers;
-    int mFrameSize;
-    sp<MemoryHeapBase> mHeap;
-    sp<MemoryBase> *mBuffers;
+        int mBufferSize;
+        int mAlignedBufferSize;
+        int mNumBuffers;
+        int mFrameSize;
+        sp<MemoryHeapBase> mHeap;
+        sp<MemoryBase> *mBuffers;
 
-    const char *mName;
-};
+        const char *mName;
+    };
 
-class AshmemPool : public MemPool {
-public:
-    AshmemPool(int buffer_size, int num_buffers,
-               int frame_size,
-               const char *name);
-};
+    class AshmemPool : public MemPool
+    {
+    public:
+        AshmemPool(int buffer_size, int num_buffers,
+                   int frame_size,
+                   const char *name);
+    };
 
-class PmemPool : public MemPool {
-public:
-    PmemPool(const char *pmem_pool,
-             int flags, int pmem_type,
-             int buffer_size, int num_buffers,
-             int frame_size, int cbcr_offset,
-             int yoffset, const char *name);
-    virtual ~PmemPool();
-    int mFd;
-    int mPmemType;
-    int mCbCrOffset;
-    int myOffset;
-    int mCameraControlFd;
-    uint32_t mAlignedSize;
-    struct pmem_region mSize;
-};
+    class PmemPool : public MemPool
+    {
+    public:
+        PmemPool(const char *pmem_pool,
+                 int flags, int pmem_type,
+                 int buffer_size, int num_buffers,
+                 int frame_size, int cbcr_offset,
+                 int yoffset, const char *name);
+        virtual ~PmemPool();
+        int mFd;
+        int mPmemType;
+        int mCbCrOffset;
+        int myOffset;
+        int mCameraControlFd;
+        uint32_t mAlignedSize;
+        struct pmem_region mSize;
+    };
 
-class IonPool : public MemPool {
-public:
-    IonPool( int flags,
-             int buffer_size, int num_buffers,
-             int frame_size, int cbcr_offset,
-             int yoffset, const char *name);
-    virtual ~IonPool();
-    int mFd;
-    int mCbCrOffset;
-    int myOffset;
-    int mCameraControlFd;
-    uint32_t mAlignedSize;
-private:
-    static const char mIonDevName[];
-};
+    class IonPool : public MemPool
+    {
+    public:
+        IonPool( int flags,
+                 int buffer_size, int num_buffers,
+                 int frame_size, int cbcr_offset,
+                 int yoffset, const char *name);
+        virtual ~IonPool();
+        int mFd;
+        int mCbCrOffset;
+        int myOffset;
+        int mCameraControlFd;
+        uint32_t mAlignedSize;
+    private:
+        static const char mIonDevName[];
+    };
 
 };
 #endif

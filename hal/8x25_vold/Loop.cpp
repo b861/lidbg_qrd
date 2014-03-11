@@ -34,21 +34,27 @@
 #include <sysutils/SocketClient.h>
 #include "Loop.h"
 
-int Loop::dumpState(SocketClient *c) {
+int Loop::dumpState(SocketClient *c)
+{
     int i;
     int fd;
     char filename[256];
 
-    for (i = 0; i < LOOP_MAX; i++) {
+    for (i = 0; i < LOOP_MAX; i++)
+    {
         struct loop_info64 li;
         int rc;
 
         sprintf(filename, "/dev/block/loop%d", i);
 
-        if ((fd = open(filename, O_RDWR)) < 0) {
-            if (errno != ENOENT) {
+        if ((fd = open(filename, O_RDWR)) < 0)
+        {
+            if (errno != ENOENT)
+            {
                 SLOGE("Unable to open %s (%s)", filename, strerror(errno));
-            } else {
+            }
+            else
+            {
                 continue;
             }
             return -1;
@@ -56,43 +62,51 @@ int Loop::dumpState(SocketClient *c) {
 
         rc = ioctl(fd, LOOP_GET_STATUS64, &li);
         close(fd);
-        if (rc < 0 && errno == ENXIO) {
+        if (rc < 0 && errno == ENXIO)
+        {
             continue;
         }
 
-        if (rc < 0) {
+        if (rc < 0)
+        {
             SLOGE("Unable to get loop status for %s (%s)", filename,
-                 strerror(errno));
+                  strerror(errno));
             return -1;
         }
         char *tmp = NULL;
         asprintf(&tmp, "%s %d %lld:%lld %llu %lld:%lld %lld 0x%x {%s} {%s}", filename, li.lo_number,
-                MAJOR(li.lo_device), MINOR(li.lo_device), li.lo_inode, MAJOR(li.lo_rdevice),
-                        MINOR(li.lo_rdevice), li.lo_offset, li.lo_flags, li.lo_crypt_name,
-                        li.lo_file_name);
+                 MAJOR(li.lo_device), MINOR(li.lo_device), li.lo_inode, MAJOR(li.lo_rdevice),
+                 MINOR(li.lo_rdevice), li.lo_offset, li.lo_flags, li.lo_crypt_name,
+                 li.lo_file_name);
         c->sendMsg(0, tmp, false);
         free(tmp);
     }
     return 0;
 }
 
-int Loop::lookupActive(const char *id, char *buffer, size_t len) {
+int Loop::lookupActive(const char *id, char *buffer, size_t len)
+{
     int i;
     int fd;
     char filename[256];
 
     memset(buffer, 0, len);
 
-    for (i = 0; i < LOOP_MAX; i++) {
+    for (i = 0; i < LOOP_MAX; i++)
+    {
         struct loop_info64 li;
         int rc;
 
         sprintf(filename, "/dev/block/loop%d", i);
 
-        if ((fd = open(filename, O_RDWR)) < 0) {
-            if (errno != ENOENT) {
+        if ((fd = open(filename, O_RDWR)) < 0)
+        {
+            if (errno != ENOENT)
+            {
                 SLOGE("Unable to open %s (%s)", filename, strerror(errno));
-            } else {
+            }
+            else
+            {
                 continue;
             }
             return -1;
@@ -100,34 +114,40 @@ int Loop::lookupActive(const char *id, char *buffer, size_t len) {
 
         rc = ioctl(fd, LOOP_GET_STATUS64, &li);
         close(fd);
-        if (rc < 0 && errno == ENXIO) {
+        if (rc < 0 && errno == ENXIO)
+        {
             continue;
         }
 
-        if (rc < 0) {
+        if (rc < 0)
+        {
             SLOGE("Unable to get loop status for %s (%s)", filename,
-                 strerror(errno));
+                  strerror(errno));
             return -1;
         }
-        if (!strncmp((const char*) li.lo_crypt_name, id, LO_NAME_SIZE)) {
+        if (!strncmp((const char *) li.lo_crypt_name, id, LO_NAME_SIZE))
+        {
             break;
         }
     }
 
-    if (i == LOOP_MAX) {
+    if (i == LOOP_MAX)
+    {
         errno = ENOENT;
         return -1;
     }
-    strncpy(buffer, filename, len -1);
+    strncpy(buffer, filename, len - 1);
     return 0;
 }
 
-int Loop::create(const char *id, const char *loopFile, char *loopDeviceBuffer, size_t len) {
+int Loop::create(const char *id, const char *loopFile, char *loopDeviceBuffer, size_t len)
+{
     int i;
     int fd;
     char filename[256];
 
-    for (i = 0; i < LOOP_MAX; i++) {
+    for (i = 0; i < LOOP_MAX; i++)
+    {
         struct loop_info64 li;
         int rc;
 
@@ -139,14 +159,17 @@ int Loop::create(const char *id, const char *loopFile, char *loopDeviceBuffer, s
          */
         mode_t mode = 0660 | S_IFBLK;
         unsigned int dev = (0xff & i) | ((i << 12) & 0xfff00000) | (7 << 8);
-        if (mknod(filename, mode, dev) < 0) {
-            if (errno != EEXIST) {
+        if (mknod(filename, mode, dev) < 0)
+        {
+            if (errno != EEXIST)
+            {
                 SLOGE("Error creating loop device node (%s)", strerror(errno));
                 return -1;
             }
         }
 
-        if ((fd = open(filename, O_RDWR)) < 0) {
+        if ((fd = open(filename, O_RDWR)) < 0)
+        {
             SLOGE("Unable to open %s (%s)", filename, strerror(errno));
             return -1;
         }
@@ -157,30 +180,34 @@ int Loop::create(const char *id, const char *loopFile, char *loopDeviceBuffer, s
 
         close(fd);
 
-        if (rc < 0) {
+        if (rc < 0)
+        {
             SLOGE("Unable to get loop status for %s (%s)", filename,
-                 strerror(errno));
+                  strerror(errno));
             return -1;
         }
     }
 
-    if (i == LOOP_MAX) {
+    if (i == LOOP_MAX)
+    {
         SLOGE("Exhausted all loop devices");
         errno = ENOSPC;
         return -1;
     }
 
-    strncpy(loopDeviceBuffer, filename, len -1);
+    strncpy(loopDeviceBuffer, filename, len - 1);
 
     int file_fd;
 
-    if ((file_fd = open(loopFile, O_RDWR)) < 0) {
+    if ((file_fd = open(loopFile, O_RDWR)) < 0)
+    {
         SLOGE("Unable to open %s (%s)", loopFile, strerror(errno));
         close(fd);
         return -1;
     }
 
-    if (ioctl(fd, LOOP_SET_FD, file_fd) < 0) {
+    if (ioctl(fd, LOOP_SET_FD, file_fd) < 0)
+    {
         SLOGE("Error setting up loopback interface (%s)", strerror(errno));
         close(file_fd);
         close(fd);
@@ -190,10 +217,11 @@ int Loop::create(const char *id, const char *loopFile, char *loopDeviceBuffer, s
     struct loop_info64 li;
 
     memset(&li, 0, sizeof(li));
-    strlcpy((char*) li.lo_crypt_name, id, LO_NAME_SIZE);
-    strlcpy((char*) li.lo_file_name, loopFile, LO_NAME_SIZE);
+    strlcpy((char *) li.lo_crypt_name, id, LO_NAME_SIZE);
+    strlcpy((char *) li.lo_file_name, loopFile, LO_NAME_SIZE);
 
-    if (ioctl(fd, LOOP_SET_STATUS64, &li) < 0) {
+    if (ioctl(fd, LOOP_SET_STATUS64, &li) < 0)
+    {
         SLOGE("Error setting loopback status (%s)", strerror(errno));
         close(file_fd);
         close(fd);
@@ -206,16 +234,19 @@ int Loop::create(const char *id, const char *loopFile, char *loopDeviceBuffer, s
     return 0;
 }
 
-int Loop::destroyByDevice(const char *loopDevice) {
+int Loop::destroyByDevice(const char *loopDevice)
+{
     int device_fd;
 
     device_fd = open(loopDevice, O_RDONLY);
-    if (device_fd < 0) {
+    if (device_fd < 0)
+    {
         SLOGE("Failed to open loop (%d)", errno);
         return -1;
     }
 
-    if (ioctl(device_fd, LOOP_CLR_FD, 0) < 0) {
+    if (ioctl(device_fd, LOOP_CLR_FD, 0) < 0)
+    {
         SLOGE("Failed to destroy loop (%d)", errno);
         close(device_fd);
         return -1;
@@ -225,20 +256,24 @@ int Loop::destroyByDevice(const char *loopDevice) {
     return 0;
 }
 
-int Loop::destroyByFile(const char *loopFile) {
+int Loop::destroyByFile(const char *loopFile)
+{
     errno = ENOSYS;
     return -1;
 }
 
-int Loop::createImageFile(const char *file, unsigned int numSectors) {
+int Loop::createImageFile(const char *file, unsigned int numSectors)
+{
     int fd;
 
-    if ((fd = creat(file, 0600)) < 0) {
+    if ((fd = creat(file, 0600)) < 0)
+    {
         SLOGE("Error creating imagefile (%s)", strerror(errno));
         return -1;
     }
 
-    if (ftruncate(fd, numSectors * 512) < 0) {
+    if (ftruncate(fd, numSectors * 512) < 0)
+    {
         SLOGE("Error truncating imagefile (%s)", strerror(errno));
         close(fd);
         return -1;

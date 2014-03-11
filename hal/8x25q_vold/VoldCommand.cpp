@@ -17,5 +17,6 @@
 #include "VoldCommand.h"
 
 VoldCommand::VoldCommand(const char *cmd) :
-              FrameworkCommand(cmd)  {
+    FrameworkCommand(cmd)
+{
 }

@@ -28,40 +28,43 @@ extern "C" {
 #include <mm_camera_interface2.h>
 }
 
-namespace android {
+namespace android
+{
 
-/*===============================
-	Base Display Class
-================================*/
+    /*===============================
+    	Base Display Class
+    ================================*/
 
-class QCameraDisplay {
+    class QCameraDisplay
+    {
 
-public:
-	virtual int Display_prepare_buffers() = 0;
-	virtual int Display_set_crop( ) = 0;
-	virtual int Display_set_geometry( ) =0;
-	virtual void Display_enqueue( ) = 0;
-	virtual void Display_dequeue( ) = 0;
-	virtual void Display_release_buffers( ) =0;
-	virtual ~QCameraDisplay( );
-};
+    public:
+        virtual int Display_prepare_buffers() = 0;
+        virtual int Display_set_crop( ) = 0;
+        virtual int Display_set_geometry( ) = 0;
+        virtual void Display_enqueue( ) = 0;
+        virtual void Display_dequeue( ) = 0;
+        virtual void Display_release_buffers( ) = 0;
+        virtual ~QCameraDisplay( );
+    };
 
-/*================================
-	Overlay Derivative
-==================================*/
-class QCameraDisplay_Overlay: public QCameraDisplay {
+    /*================================
+    	Overlay Derivative
+    ==================================*/
+    class QCameraDisplay_Overlay: public QCameraDisplay
+    {
 
-public:
-	int Display_prepare_buffers();
-	int Display_set_crop( );
-	int Display_set_geometry( );
-	void Display_enqueue( );
-	void Display_dequeue( );
-	void Display_release_buffers( );
-	virtual ~QCameraDisplay_Overlay( );
+    public:
+        int Display_prepare_buffers();
+        int Display_set_crop( );
+        int Display_set_geometry( );
+        void Display_enqueue( );
+        void Display_dequeue( );
+        void Display_release_buffers( );
+        virtual ~QCameraDisplay_Overlay( );
 
 
-};
+    };
 
 
 }; // namespace android
