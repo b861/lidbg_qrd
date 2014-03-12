@@ -13,8 +13,8 @@ do
 done
 
 if [ "$DBG_OUT_PATH" = "" ]; then
-echo "exit:  DBG_OUT_PATH=null"
-exit
+	echo "exit:  DBG_OUT_PATH=null"
+	exit
 fi
 rm -rf $DBG_OUT_PATH
 

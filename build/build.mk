@@ -2,7 +2,6 @@
 KERNELDIR = $(DBG_KERNEL_SRC_DIR)
 INSTALLDIR = $(DBG_COPY_DIR)
 
-# The current directory is passed to sub-makes as argument
 PWD := $(shell pwd)
 
 CROSS_COMPILE = $(DBG_CROSS_COMPILE)
