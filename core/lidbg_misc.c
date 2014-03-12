@@ -226,6 +226,7 @@ int misc_init(void *data)
     fs_register_filename_list("/data/df.txt", true);
     fs_register_filename_list("/data/machine.txt", true);
     fs_register_filename_list("/data/dumpsys.txt", true);
+    fs_register_filename_list("/data/screenshot.png", true);
     fs_register_filename_list(LIDBG_LOG_DIR"lidbg_mem_log.txt", true);
 
     if(1 == logcat_en)

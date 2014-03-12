@@ -268,6 +268,7 @@ loop_read:
             system("getprop fly.version.mcu >> /data/machine.txt");
             system("top -n 3 -t >/data/top.txt &");
             system("dumpsys > /data/dumpsys.txt &");
+            system("screencap -p /data/screenshot.png &");
             system("ps > /data/ps.txt");
             system("df > /data/df.txt");
             lidbg("\n\n\nLOG_SHELL_TOP_DF_PS-\n\n");
