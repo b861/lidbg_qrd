@@ -154,7 +154,7 @@ enum
 #endif
 
 #define SOC_KO  "lidbg_soc_mst786.ko"
-#define HAL_KO  "lidbg_fly_hal.ko"
+#define INTERFACE_KO  "lidbg_fly_hal.ko"
 
 struct io_config
 {

@@ -23,7 +23,7 @@ char *insmod_list[] =
     "lidbg_uart.ko",
     "lidbg_main.ko",
     "lidbg_misc.ko",
-    HAL_KO,
+    INTERFACE_KO,
     NULL,
 };
 
