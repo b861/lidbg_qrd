@@ -1,21 +1,18 @@
 
-
 source ./env_entry.sh
 
 function build_dir()
 {
-	dir=$1
-	echo -e "\033[44;37m build $1 \033[0m"
-	cd  $dir
+	echo -e "\033[44;37mmake $1 \033[0m"
+	cd  $1
 	make modules -j8
 
 	if [ $? = 0 ]; then
 		echo
 	else
-		echo -e "\033[41;37m +++++++++ soc error codes +++++++++ \033[0m"
-		make modules 2 &> err_log
-		grep -C 1 "error:" err_log
-		echo -e "\033[41;37m --------- soc error codes --------- \033[0m"
+		echo -e "\033[41;37mmake $1 error!!\033[0m"
+		make modules | grep -C 1 "error:"
+		echo -e "\033[41;37mmake $1 error!!\033[0m"
 		read get_key
 	fi
 }

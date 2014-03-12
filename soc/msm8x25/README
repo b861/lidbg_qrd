@@ -3,17 +3,12 @@ dbg_cfg.sh编译环境变量配置说明：
 msm7627a--8x25平台
 msm8625--8x25q平台
 
-＊BUILD_VERSION
-dbg--编译出运行在原生系统的模块
-rel--编译出运行在发布产品系统的模块
 
 *BOARD_VERSION
 v1--适用于8x25第一版硬件（pcb）
 v2--适用于8x25第二版及最后量产硬件（pcb）
 v3--适用于8x25q车机第一版硬件（pcb）
 V4--新架构程序版本，适用于8x25q第一版硬件之后的版本（pcb）
-
-
 
 
 开机自动运行lidbg_servicer和lidbg_loader.ko加载模块:
