@@ -11,7 +11,7 @@ function build_dir()
 dir=$1
 echo -e "\033[44;37m ----build $1---- \033[0m"
 cd  $dir          # ";"  do when ok or not   "&&" do when first no err
-make modules -j4 > build_log
+make modules -j4
 
 if [ $? = 0 ]; then
 	echo "Make $1 Successful!"

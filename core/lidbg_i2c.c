@@ -679,7 +679,7 @@ static int __init i2c_api_init(void)
     LIDBG_MODULE_LOG;
 
 #ifdef LIDBG_I2C_GPIO
-#ifndef CONFIG_I2C_GPIO
+#if 0//ndef CONFIG_I2C_GPIO
     lidbg("load lidbg_i2c_gpio.ko\n");
     lidbg_insmod( "/system/lib/modules/out/lidbg_i2c_gpio.ko");
     lidbg_insmod( "/flysystem/lib/out/lidbg_i2c_gpio.ko");
