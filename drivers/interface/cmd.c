@@ -1,11 +1,11 @@
 
 int thread_dump_log(void *data)
 {
-    msleep(5000);
+    msleep(7000);
     fs_cp_data_to_udisk();
+    lidbg_domineering_ack();
     return 0;
 }
-
 
 void parse_cmd(char *pt)
 {
@@ -35,7 +35,7 @@ void parse_cmd(char *pt)
 
     argv[argc] = NULL;
 #else
-	argc = lidbg_token_string(pt, " ", argv);
+    argc = lidbg_token_string(pt, " ", argv);
 #endif
 
     i = 0;
@@ -47,8 +47,6 @@ void parse_cmd(char *pt)
     }
     lidbg("\n");
 
-
-    // µ÷ÓÃÆäËûÄ£¿éµÄº¯Êý
     if (!strcmp(argv[0], "c"))
     {
         int new_argc;
@@ -59,21 +57,17 @@ void parse_cmd(char *pt)
         if(argv[1] == NULL)
             return;
 
-
         if(!strcmp(argv[1], "video"))
         {
             if(((struct lidbg_hal *)plidbg_dev) != NULL)
                 ((struct lidbg_hal *)plidbg_dev)->soc_func_tbl.pfnlidbg_video_main(new_argc, new_argv);
         }
 
-
-
     }
 
     else if (!strcmp(argv[0], "appcmd"))
     {
         lidbg("%s:[%s]\n", argv[0], argv[1]);
-
 
         if (!strcmp(argv[1], "*158#000"))
         {
@@ -87,8 +81,8 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#011--USB_ID_HIGH_DEV\n");
             fs_mem_log("*158#012--lidbg_trace_msg_disable\n");
             fs_mem_log("*158#013--dump log and copy to udisk\n");
-
         }
+
         if (!strcmp(argv[1], "*158#999"))
         {
             is_fs_work_enable = true;
@@ -117,39 +111,33 @@ void parse_cmd(char *pt)
             k2u_write(LOG_SHELL_TOP_DF_PS);
             lidbg_domineering_ack();
         }
-
         else if (!strcmp(argv[1], "*158#010"))
         {
             lidbg("USB_ID_LOW_HOST\n");
-            \
             USB_ID_LOW_HOST;
             lidbg_domineering_ack();
         }
-
         else if (!strcmp(argv[1], "*158#011"))
         {
-
             lidbg("USB_ID_HIGH_DEV\n");
-            \
             USB_ID_HIGH_DEV;
             lidbg_domineering_ack();
         }
-
         else if (!strcmp(argv[1], "*158#012"))
         {
             lidbg_trace_msg_disable(1);
             lidbg_domineering_ack();
         }
-
         else if (!strcmp(argv[1], "*158#013"))
         {
             lidbg_chmod("/data");
             lidbg_msg_get(LIDBG_LOG_DIR"lidbg_mem_log.txt", 0);
             k2u_write(LOG_LOGCAT);
             k2u_write(LOG_DMESG);
+            k2u_write(LOG_SHELL_TOP_DF_PS);
             CREATE_KTHREAD(thread_dump_log, NULL);
-            lidbg_domineering_ack();
         }
+
     }
 
 }
