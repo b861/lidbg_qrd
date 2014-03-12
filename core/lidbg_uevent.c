@@ -3,7 +3,18 @@
 
 //zone below [tools]
 #define DEV_NAME "lidbg_uevent"
+struct uevent_dev
+{
+    struct list_head tmp_list;
+    char *focus;
+    void (*callback)(char *focus, char *uevent);
+};
+
+LIST_HEAD(uevent_list);
+static struct completion uevent_wait;
 struct miscdevice lidbg_uevent_device;
+static char last_uevent[1024] = {0};
+static int uevent_dbg = 0;
 //zone end
 
 /*
@@ -27,20 +38,56 @@ static int token_string(char *buf, char *separator, char **token)
     }
     return pos;
 }
-
-
-void lidbg_send_uevent(enum kobject_action action, char *envp_ext[])
+bool uevent_focus(char *focus, void(*callback)(char *focus, char *uevent))
+{
+    struct uevent_dev *add_new_dev=NULL;
+    add_new_dev = kzalloc(sizeof(struct uevent_dev), GFP_KERNEL);
+    if (add_new_dev != NULL && focus && callback)
+    {
+        add_new_dev->focus = focus;
+        add_new_dev->callback = callback;
+        list_add(&(add_new_dev->tmp_list), &uevent_list);
+        LIDBG_SUC("%s\n", focus);
+        return true;
+    }
+    LIDBG_ERR("add_new_dev != NULL && focus && callback?\n");
+    return false;
+}
+void uevent_send(enum kobject_action action, char *envp_ext[])
 {
     if(kobject_uevent_env(&lidbg_uevent_device.this_device->kobj, action, envp_ext) < 0)
         LIDBG_ERR("%s,%s\n", (envp_ext[0] == NULL ? "null" : envp_ext[0]), (envp_ext[1] == NULL ? "null" : envp_ext[1]));
 }
-void lidbg_uevent_shell(char *shell_cmd)
+void uevent_shell(char *shell_cmd)
 {
     char shellstring[256];
     char *envp[] = { "LIDBG_ACTION=shell", shellstring, NULL };
     snprintf(shellstring, 256, "LIDBG_PARAMETER=%s", shell_cmd );
-    lidbg_send_uevent(KOBJ_CHANGE, envp);
+    lidbg_uevent_send(KOBJ_CHANGE, envp);
 }
+
+static int thread_check_uevent_focus(void *data)
+{
+    struct list_head *client_list = &uevent_list;
+    allow_signal(SIGKILL);
+    allow_signal(SIGSTOP);
+    while(!kthread_should_stop())
+    {
+        if( !wait_for_completion_interruptible(&uevent_wait) && !list_empty(client_list))
+        {
+            struct uevent_dev *pos;
+            list_for_each_entry(pos, client_list, tmp_list)
+            {
+                if(uevent_dbg)
+                    LIDBG_WARN("INFO: %s  %ps\n", pos->focus, pos->callback);
+                if (pos->focus && pos->callback && strstr(last_uevent, pos->focus))
+                    pos->callback(pos->focus, last_uevent);
+            }
+        }
+    }
+    return 1;
+}
+
 
 int lidbg_uevent_open(struct inode *inode, struct file *filp)
 {
@@ -70,15 +117,21 @@ ssize_t  lidbg_uevent_write(struct file *filp, const char __user *buf, size_t co
     }
 
     //zone start [dosomething]
-    if(!strcmp(param[0], "uevent") )
-    {
+    if(!strcmp(param[0], "dbg") )
+        uevent_dbg = !uevent_dbg;
+    else if(!strcmp(param[0], "uevent") )
         lidbg_uevent_shell(param[1]);
-    }
-    if(!strcmp(param[0], "appmsg") )
+    else if(!strcmp(param[0], "appmsg") )
     {
         printk("[appmsg]:%s\n", param[1]);
     }
-
+    else if(!strcmp(param[0], "systemuevent") )
+    {
+        strcpy(last_uevent, param[1]);
+        if(uevent_dbg)
+            printk("==========%s\n", last_uevent);
+        complete(&uevent_wait);
+    }
     //zone end
 out:
     kfree(tmp_back);
@@ -103,10 +156,15 @@ static int __init lidbg_uevent_init(void)
 {
     LIDBG_WARN("<==IN==>\n");
 
+    init_completion(&uevent_wait);
+
     if (misc_register(&lidbg_uevent_device))
         LIDBG_ERR("misc_register\n");
     else
         LIDBG_SUC("misc_register\n");
+
+    kthread_run(thread_check_uevent_focus, NULL, "ftf_uevent");
+
     LIDBG_WARN("<==OUT==>\n\n");
     return 0;
 }
@@ -117,7 +175,23 @@ static void __exit lidbg_uevent_exit(void)
 }
 
 
-EXPORT_SYMBOL(lidbg_send_uevent);
+//zone below [interface]
+bool lidbg_uevent_focus(char *focus, void(*callback)(char *focus, char *uevent))
+{
+    return uevent_focus(focus, callback);
+}
+void lidbg_uevent_send(enum kobject_action action, char *envp_ext[])
+{
+    uevent_send(action, envp_ext);
+}
+void lidbg_uevent_shell(char *shell_cmd)
+{
+    uevent_shell(shell_cmd);
+}
+//zone end
+
+EXPORT_SYMBOL(lidbg_uevent_focus);
+EXPORT_SYMBOL(lidbg_uevent_send);
 EXPORT_SYMBOL(lidbg_uevent_shell);
 
 module_init(lidbg_uevent_init);

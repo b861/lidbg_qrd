@@ -224,7 +224,10 @@ static  struct file_operations lidbg_trace_msg_fops =
     .open = lidbg_trace_msg_open,
     .release = lidbg_trace_msg_release,
 };
-
+void callback_disable_trace_msg(char * focus, char * uevent)
+{
+    lidbg_trace_msg_disable(1);
+}
 static int  lidbg_trace_msg_probe(struct platform_device *ppdev)
 {
     int ret;
@@ -259,7 +262,9 @@ static int  lidbg_trace_msg_probe(struct platform_device *ppdev)
     CREATE_KTHREAD(thread_trace_msg_out, NULL);
 
     lidbg_new_cdev(&lidbg_trace_msg_fops, DEVICE_NAME);
-
+#ifndef USE_CALL_USERHELPER
+    lidbg_uevent_focus("USB_STATE=CONFIGURED",callback_disable_trace_msg );//USB_STATE=DISCONNECTED
+#endif
     return 0;
 }
 

@@ -48,11 +48,11 @@
 }while(0)
 #endif
 
-#define LIDBG_PRINT2(msg...) do{\
+#define LIDBG_UEVENT_MSG(mode,msg...) do{\
 	int fd;\
-	char s[LOG_BYTES];\
-	sprintf(s, "appmsg* " msg);\
-	s[LOG_BYTES - 1] = '\0';\
+	char s[512];\
+	sprintf(s, mode" "msg);\
+	s[512 - 1] = '\0';\
 	 fd = open("/dev/lidbg_uevent", O_RDWR);\
 	 if((fd == 0)||(fd == (int)0xfffffffe)|| (fd == (int)0xffffffff))break;\
 	 write(fd, s, /*sizeof(msg)*/strlen(s)/*LOG_BYTES*/);\
