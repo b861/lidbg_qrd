@@ -32,8 +32,8 @@ out：编译后自动生成，存放所有编译生成的模块。
 ----------编译方法----------
 1.配置编译环境
 cd lidbg_qrd
-(1) cp ./soc/$soc/doc/dbg_cfg_backup.sh ./dbg_cfg.sh
-(2) 修改DBG_SYSTEM_DIR环境变量(指向的包的内核需编译过一遍(make bootimage))
+(1) cp ./build/dbg_cfg_example.sh ./dbg_cfg.sh
+(2) 修改DBG_SYSTEM_DIR等环境变量(指向的包的内核需编译过一遍(make bootimage))
 (3) chmod 777  ./* -R
 以上步骤只需配置一次
 
@@ -43,16 +43,16 @@ dbg_cfg.sh编译环境变量配置说明：
 
 2.编译
 *模块提供两种方法
-(1) 编译所有模块，在lidbg根目录运行build.sh
+(1) 编译所有模块，在lidbg根目录运行lidbg.sh 2 (build.sh)
 (2) 编译单独模块，如在lidbg根目录执行:
-./make.sh drivers/gps
-./make.sh core
+./build/make.sh drivers/gps
+./build/make.sh core
 生成模块在out目录
 
 *应用层（hal）的编译
 在hal目录下的build_all.sh脚本,生成模块(apk、可执行文件等)在out目录
 
-3.运行clean.sh可清除所有编译后产生的文件。
+3.运行clean.sh(lidbg.sh 1)可清除所有编译后产生的文件。
 
 
 --------------运行-------------
