@@ -3,7 +3,6 @@ include $(DBG_CORE_PATH)/core.mk
 
 obj-m	+= lidbg_io.o
 obj-m	+= lidbg_uevent.o
-obj-m	+= lidbg_ad.o
 obj-m	+= lidbg_i2c.o
 #obj-m	+= lidbg_spi.o
 obj-m	+= lidbg_uart.o

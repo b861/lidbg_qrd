@@ -95,7 +95,6 @@
 #include "lidbg_fileserver.h"
 #include "lidbg_uevent.h"
 #include "lidbg_ts_event.h"
-#include "lidbg_ad.h"
 #include "lidbg_def.h"
 #include "lidbg_mem.h"
 #include "lidbg_i2c.h"

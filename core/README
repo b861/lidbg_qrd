@@ -1,3 +1,44 @@
+
+---------lidbg提供调试手段----------
+节点/dev/mlidbg0 写命令:
+mem:
+echo "c mem r 0xf020408c 1" > /dev/mlidbg0
+echo "c mem w 0xf040000c 0x200014" > /dev/mlidbg0
+echo "c mem rb 0xf04000c4 24 5" > /dev/mlidbg0
+echo "c mem wb 0xF08A0038 26 1 0" > /dev/mlidbg0
+
+i2c:
+echo "c i2c w 1 0x4a 2 0x5 0xa0" > /dev/mlidbg0
+echo "c i2c r 1 0x5c 0x0 20" > /dev/mlidbg0
+
+io:
+echo "c io r 30" > /dev/mlidbg0
+echo "c io w 108 1" > /dev/mlidbg0
+
+key:
+echo "c key home 2" > /dev/mlidbg0
+echo "c key 107 2" > /dev/mlidbg0
+
+touch:
+echo "c touch 100 480 1" > /dev/mlidbg0
+echo "c touch 100 480 0" > /dev/mlidbg0
+
+soc:
+echo "c soc ad 2" > /dev/mlidbg0
+echo "c soc bl 255" > /dev/mlidbg0
+
+
+mem_log:
+
+trace_msg:
+
+ts_event:
+
+fs_conf:
+
+cmd.conf
+
+core.conf
 ----------通过core.txt来发一些shell指令---------
 打开/data/lidbg/core.txt文件修改如下内容可做些简单的命令;如下
 分号为指令分隔符，逗号为参数分隔符，如下四条指令均会执行
@@ -7,6 +48,22 @@ chmod,/flysystem修改/flysystem权限为777
 rmdir,/flysystem/lib/out删除out目录
 remount,/flysystem重新挂载/flysystem分区为读写
 echo,c io w 27 1,/dev/mlidbg0将c io w 27 1写到/dev/mlidbg0
+
+
+state.conf
+
+
+drivers.conf
+
+fs_log:
+
+update:
+
+
+3G电话拨号:
+
+
+
 
 ----------增加读文件夹内文件列表接口lidbg_readdir_and_dealfile---------
 接口描述:
