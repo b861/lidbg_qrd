@@ -143,7 +143,7 @@ void terminal_tw9912_config(int argc, char **argv)
     }
 }
 #endif
-void terminal_echo_control_chips(int argc, char **argv)
+void lidbg_video_main(int argc, char **argv)
 {
     u8 ret = 0;
     lidbg("In lidbg_video_main()\n");
@@ -186,11 +186,12 @@ void terminal_echo_control_chips(int argc, char **argv)
         ;
     }
 }
+EXPORT_SYMBOL(lidbg_video_main);
 
 static void set_func_tbl(void)
 {
     //video
-    plidbg_dev->soc_func_tbl.pfnlidbg_video_main = terminal_echo_control_chips;
+    plidbg_dev->soc_func_tbl.pfnlidbg_video_main = lidbg_video_main;
     plidbg_dev->soc_func_tbl.pfnvideo_io_i2c_init = video_io_i2c_init_in;
     plidbg_dev->soc_func_tbl.pfnflyVideoInitall = flyVideoInitall_in;
     plidbg_dev->soc_func_tbl.pfnflyVideoTestSignalPin = flyVideoTestSignalPin_in;

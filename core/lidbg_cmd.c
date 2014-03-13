@@ -29,30 +29,8 @@ void parse_cmd(char *pt)
     int i = 0;
 
     char *argv[32] = {NULL};
-#if 0
-    // »ñÈ¡ÃüÁî ´æÈëargvÊý×é
-    argv[0] = pt;
-
-    while(*pt != '\0')
-    {
-        while(*pt != ' ')
-        {
-            pt++;
-            if((*pt == '\0') || (*pt == 0xa)) //½áÎ²ÊÇ0xa
-                break;
-        }
-        *pt = '\0';
-        pt++;
-        argc++;
-        argv[argc] = pt;
-    }
-
-    argv[argc] = NULL;
-#else
 	argc = lidbg_token_string(pt, " ", argv);
-#endif
-
-    i = 0;
+	
     if(debug_mask)
     {
         lidbg("cmd:");
@@ -63,9 +41,7 @@ void parse_cmd(char *pt)
         }
         lidbg("\n");
     }
-    // ½âÎöÃüÁî
-
-    // µ÷ÓÃÆäËûÄ£¿éµÄº¯Êý
+	
     if (!strcmp(argv[0], "c"))
     {
         int new_argc, i;
@@ -75,13 +51,6 @@ void parse_cmd(char *pt)
 
         if(argv[1] == NULL)
             return;
-
-        if(!strcmp(argv[1], "lidbg_get"))
-        {
-            lidbg("lidbg_devp addr = %x\n", (u32)(struct lidbg_dev *)global_lidbg_devp);
-            *(u32 *)(((struct lidbg_dev *)global_lidbg_devp)->mem) = (u32)NULL;//(u32)(struct lidbg_dev *)global_lidbg_devp;
-
-        }
 
         for(i = 0; i < SIZE_OF_ARRAY(lidbg_cmd_item); i++)
         {

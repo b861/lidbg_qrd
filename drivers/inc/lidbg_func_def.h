@@ -54,7 +54,7 @@ static inline int check_pt(void)
 #define SOC_Write_Servicer  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_Write_Servicer))
 
 //video
-#define lidbg_video_main  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnlidbg_video_main))
+//#define lidbg_video_main  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnlidbg_video_main))
 #define video_io_i2c_init  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnvideo_io_i2c_init))
 #define flyVideoChannelInitall  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnflyVideoInitall))
 #define flyVideoSignalPinTest  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnflyVideoTestSignalPin))

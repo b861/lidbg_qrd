@@ -1,3 +1,4 @@
+void lidbg_video_main(int argc, char **argv);
 
 int thread_dump_log(void *data)
 {
@@ -13,32 +14,8 @@ void parse_cmd(char *pt)
     int i = 0;
 
     char *argv[32] = {NULL};
-#if 0
-
-    // »ñÈ¡ÃüÁî ´æÈëargvÊý×é
-    argv[0] = pt;
-
-    while(*pt != '\0')
-    {
-        while(*pt != ' ')
-        {
-            pt++;
-            if((*pt == '\0') || (*pt == 0xa)) //½áÎ²ÊÇ0xa
-                break;
-
-        }
-        *pt = '\0';
-        pt++;
-        argc++;
-        argv[argc] = pt;
-    }
-
-    argv[argc] = NULL;
-#else
     argc = lidbg_token_string(pt, " ", argv);
-#endif
 
-    i = 0;
     lidbg("cmd:");
     while(i < argc)
     {
@@ -59,8 +36,7 @@ void parse_cmd(char *pt)
 
         if(!strcmp(argv[1], "video"))
         {
-            if(((struct lidbg_hal *)plidbg_dev) != NULL)
-                ((struct lidbg_hal *)plidbg_dev)->soc_func_tbl.pfnlidbg_video_main(new_argc, new_argv);
+           lidbg_video_main(new_argc, new_argv);
         }
 
     }
@@ -72,6 +48,7 @@ void parse_cmd(char *pt)
         if (!strcmp(argv[1], "*158#000"))
         {
             //*#*#158999#*#*
+            lidbg_chmod("/data");
             fs_mem_log("*158#999--fs_call_apk\n");
             fs_mem_log("*158#001--LOG_LOGCAT\n");
             fs_mem_log("*158#002--LOG_DMESG\n");
