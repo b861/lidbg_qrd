@@ -1,0 +1,16 @@
+
+################hal select####################
+CONFIG_HAL_GPSLIB=y
+CONFIG_HAL_USERVER=y
+
+export CONFIG_HAL_GPSLIB
+export CONFIG_HAL_USERVER
+
+
+################driver select####################
+CONFIG_BP_MSG=m
+CONFIG_GPS=m
+CONFIG_TOUCHSCREEN=m
+CONFIG_MONKEY=m
+CONFIG_ACC=m
+
