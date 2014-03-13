@@ -29,8 +29,15 @@ echo "c soc bl 255" > /dev/mlidbg0
 
 
 mem_log:
+----------保存lidbg信息到文件---------
+当没定义NOT_USE_MEM_LOG时，保存lidbg中通过lidbg(msg...)/lidbgerr(msg...)/FS_ERR(fmt, args...)接口打印的信息到kfifo，该kfifo由lidbg_mem_log.c维护，并默认最多只会保存截止当前最新的LIDBG_FIFO_SIZE(4k)信息；
+修改/data/lidbg/core.txt中dump_mem_log为“1”，或者adb shell执行echo "c mem_log dump" > /dev/mlidbg0，会将当前kfifo中的信息保存到/data/lidbg/lidbg_mem_log.txt中；
 
 trace_msg:
+----------过滤出包含关键字的内核打印信息---------
+在lidbg_qrd/soc/DBG_SOC/drivers_conf/lidbg_trace_msg_string_list.conf中添加要跟踪的关键字，以行为单位；
+该调试功能默认使能，当插上adb调试线时会disable该功能，或者修改/data/lidbg/core.txt中的trace_msg_disable为“1”，也会disable该功能；
+跟踪到包含关键字的整条打印信息会保存在/data/lidbg/lidbg_trace_msg.txt中；
 
 ts_event:
 
