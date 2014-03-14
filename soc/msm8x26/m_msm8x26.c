@@ -8,7 +8,7 @@ struct fly_smem *p_fly_smem = NULL;
 
 int soc_temp_get(void)
 {
-    return SMEM_TEMP;
+   return SMEM_TEMP;
 }
 
 void lidbg_soc_main(int argc, char **argv)
@@ -38,10 +38,10 @@ void lidbg_soc_main(int argc, char **argv)
 
 int msm8226_init(void)
 {
-    DUMP_BUILD_TIME;//LIDBG_MODULE_LOG;
+DUMP_BUILD_TIME;//LIDBG_MODULE_LOG;
 
     lidbg( "smem_alloc id = %d\n", SMEM_ID_VENDOR0);
-    // p_fly_smem = (struct fly_smem *)smem_alloc(SMEM_ID_VENDOR0, sizeof(struct fly_smem));
+   // p_fly_smem = (struct fly_smem *)smem_alloc(SMEM_ID_VENDOR0, sizeof(struct fly_smem));
 
     if (p_fly_smem == NULL)
     {

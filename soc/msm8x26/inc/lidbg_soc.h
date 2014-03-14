@@ -63,7 +63,8 @@
 
 #include <mach/msm_rpcrouter.h>
 #include <mach/irqs.h>
-
+#include <linux/qpnp/qpnp-adc.h>
+#include <linux/spmi.h>
 #if 0
 enum
 {
@@ -109,7 +110,7 @@ enum
 
 #endif
 
-#define SOC_KO  "lidbg_soc_msm8x25.ko"
+#define SOC_KO  "lidbg_soc_msm8x26.ko"
 #define INTERFACE_KO  "lidbg_fly_hal.ko"
 
 struct io_config
