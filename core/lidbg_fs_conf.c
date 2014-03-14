@@ -49,10 +49,10 @@ int launch_file_cmd(const char *filename)
     lidbg("[futengfei]warn.File_length:<%d>\n", file_len);
     file_len = file_len + 1;
 
-    file_ptr = (unsigned char *)kzalloc(file_len, GFP_KERNEL);
+    file_ptr = (unsigned char *)kmalloc(file_len, GFP_KERNEL);
     if(file_ptr == NULL)
     {
-        lidbg( "[futengfei]err.vmalloc:<cannot kzalloc memory!>\n");
+        lidbg( "[futengfei]err.kmalloc:<cannot kzalloc memory!>\n");
         return -1;
     }
 

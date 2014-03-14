@@ -178,7 +178,7 @@ int bfs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *cli
     FS_WARN("File_length:<%d>\n", file_len);
     file_len = file_len + 1;
 
-    file_ptr = (unsigned char *)vmalloc(file_len);
+    file_ptr = (unsigned char *)kmalloc(file_len,GFP_KERNEL);
     if(file_ptr == NULL)
     {
         FS_ERR( "vmalloc:<cannot malloc memory!>\n");
@@ -289,7 +289,7 @@ int update_list(const char *filename, struct list_head *client_list)
     file_ptr = (unsigned char *)kzalloc(file_len, GFP_KERNEL);
     if(file_ptr == NULL)
     {
-        FS_ERR( "vmalloc:<cannot kzalloc memory!>\n");
+        FS_ERR( "kmalloc:<cannot kzalloc memory!>\n");
         set_fs(old_fs);
         filp_close(filep, 0);
         return -1;

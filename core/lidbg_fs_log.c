@@ -136,10 +136,10 @@ int dump_kmsg(char *node, char *save_msg_file, int size, int *always)
         if(size)
         {
             char *psize = NULL;
-            psize = (unsigned char *)vmalloc(size);
+            psize = (unsigned char *)kmalloc(size,GFP_KERNEL);
             if(psize == NULL)
             {
-                FS_ERR("<cannot malloc memory!>\n");
+                FS_ERR("<cannot kmalloc memory!>\n");
                 return ret;
             }
 
@@ -152,7 +152,7 @@ int dump_kmsg(char *node, char *save_msg_file, int size, int *always)
                 psize[ret] = '\0';
                 bfs_file_amend(save_msg_file, psize, kmsg_file_limit);
             }
-            vfree(psize);
+            kfree(psize);
         }
         else
         {

@@ -317,9 +317,12 @@ bool copy_file(char *from, char *to)
     inodefrom = pfilefrom->f_dentry->d_inode;
     file_len = inodefrom->i_size;
 
-    string = (unsigned char *)vmalloc(file_len);
+    string = (unsigned char *)kmalloc(file_len,GFP_KERNEL);
     if(string == NULL)
-        return false;
+    	{
+    	    	FS_ERR(" <kmalloc>\n");
+    	    	return false;
+    	}
 
     if(g_mem_dbg)
         fs_string2file(0, DEBUG_MEM_FILE, "free.%s=%d \n", __func__, file_len);
@@ -336,7 +339,7 @@ bool copy_file(char *from, char *to)
     set_fs(old_fs);
     filp_close(pfileto, 0);
 
-    vfree(string);
+    kfree(string);
     return true;
 }
 bool get_file_tmstring(char *filename, char *tmstring)

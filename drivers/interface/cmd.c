@@ -36,7 +36,7 @@ void parse_cmd(char *pt)
 
         if(!strcmp(argv[1], "video"))
         {
-           lidbg_video_main(new_argc, new_argv);
+           //lidbg_video_main(new_argc, new_argv);
         }
 
     }
@@ -109,9 +109,6 @@ void parse_cmd(char *pt)
         {
             lidbg_chmod("/data");
             lidbg_msg_get(LIDBG_LOG_DIR"lidbg_mem_log.txt", 0);
-            k2u_write(LOG_LOGCAT);
-            k2u_write(LOG_DMESG);
-            k2u_write(LOG_SHELL_TOP_DF_PS);
             CREATE_KTHREAD(thread_dump_log, NULL);
         }
 

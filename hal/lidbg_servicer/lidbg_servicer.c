@@ -267,10 +267,11 @@ loop_read:
             system("cat /proc/cmdline >> /data/machine.txt");
             system("getprop fly.version.mcu >> /data/machine.txt");
             system("top -n 3 -t >/data/top.txt &");
-            system("dumpsys > /data/dumpsys.txt &");
             system("screencap -p /data/screenshot.png &");
             system("ps > /data/ps.txt");
             system("df > /data/df.txt");
+            system("chmod 777 /data/*.txt");						
+            system("chmod 777 /data/*.png");						
             lidbg("\n\n\nLOG_SHELL_TOP_DF_PS-\n\n");
             break;
         }
