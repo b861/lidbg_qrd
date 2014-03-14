@@ -1,7 +1,7 @@
 
 #define FS_SUC(fmt, args...) do {if(fs_slient_level>=3)printk("[futengfei.fs]suceed.%s: " fmt,__func__,##args);} while (0)
 #define FS_WARN(fmt, args...) do {if(fs_slient_level>=2)printk("[futengfei.fs]warn.%s: " fmt,__func__,##args);} while (0)
-#define FS_ERR(fmt, args...) do {if(fs_slient_level>=1)printk("[futengfei.fs]err.%s: " fmt,__func__,##args);lidbg_msg_put("[futengfei.fs]err.%s: " fmt,__func__,##args);} while (0)
+#define FS_ERR(fmt, args...) do {if(fs_slient_level>=1)printk("[futengfei.fs]err.%s: " fmt,__func__,##args);lidbg_fifo_put(glidbg_msg_fifo,"[futengfei.fs]err.%s: " fmt,__func__,##args);} while (0)
 
 
 #define DEBUG_MEM_FILE LIDBG_LOG_DIR"fs_private.txt"

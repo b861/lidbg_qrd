@@ -90,7 +90,7 @@ void parse_cmd(char *pt)
         else if (!strcmp(argv[1], "*158#013"))
         {
             lidbg_chmod("/data");
-            lidbg_msg_get(LIDBG_LOG_DIR"lidbg_mem_log.txt", 0);
+            lidbg_fifo_get(glidbg_msg_fifo,LIDBG_LOG_DIR"lidbg_mem_log.txt", 0);
             CREATE_KTHREAD(thread_dump_log, NULL);
         }
 

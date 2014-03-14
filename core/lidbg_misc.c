@@ -91,7 +91,7 @@ void cb_password_gui_state(char *password )
 
 void cb_password_mem_log(char *password )
 {
-    lidbg_msg_get(LIDBG_LOG_DIR"lidbg_mem_log.txt", 0);
+    lidbg_fifo_get(glidbg_msg_fifo,LIDBG_LOG_DIR"lidbg_mem_log.txt", 0);
 }
 void cb_int_mem_log(char *key, char *value )
 {

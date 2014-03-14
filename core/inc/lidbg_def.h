@@ -55,8 +55,8 @@ typedef unsigned int			uchar;
 #define lidbg(msg...)  do { printk( KERN_CRIT "[lidbg] " msg);}while(0)
 #define lidbgerr(msg...)  do { printk( KERN_CRIT "[lidbgerr] " msg); }while(0)
 #else
-#define lidbg(msg...)  do { printk( KERN_CRIT "[lidbg] " msg);lidbg_msg_put(msg);}while(0)
-#define lidbgerr(msg...)  do { printk( KERN_CRIT "[lidbgerr] " msg);lidbg_msg_put(msg);}while(0)
+#define lidbg(msg...)  do { printk( KERN_CRIT "[lidbg] " msg);lidbg_fifo_put(glidbg_msg_fifo,msg);}while(0)
+#define lidbgerr(msg...)  do { printk( KERN_CRIT "[lidbgerr] " msg);lidbg_fifo_put(glidbg_msg_fifo,msg);}while(0)
 #endif
 
 #define LIDBG_WARN(fmt, args...) do { printk("[lidbg]warn.%s: " fmt,__func__,##args);}while(0)
