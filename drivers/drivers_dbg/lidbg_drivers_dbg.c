@@ -1,14 +1,15 @@
 
 #include "lidbg.h"
 
+void lidbg_video_main(int argc, char **argv);
 
 LIDBG_DEFINE;
 
-int test_nod_open (struct inode *inode, struct file *filp)
+int drivers_dbg_open (struct inode *inode, struct file *filp)
 {
     return 0;
 }
-ssize_t test_nod_write (struct file *filp, const char __user *buf, size_t count, loff_t *f_pos)
+ssize_t drivers_dbg_write (struct file *filp, const char __user *buf, size_t count, loff_t *f_pos)
 {
     int pos = 0;
     char *tmp, *tmp_back, *param[20];
@@ -26,7 +27,7 @@ ssize_t test_nod_write (struct file *filp, const char __user *buf, size_t count,
 
     if(pos < 2)
     {
-        FS_ERR("echo \"c monkey 1 123 0 1 1000 500\" > /dev/test_node0\n");
+        FS_ERR("echo \"c monkey 1 123 0 1 1000 500\" > /dev/lidbg_drivers_dbg0\n");
         goto out;
     }
 
@@ -43,47 +44,47 @@ ssize_t test_nod_write (struct file *filp, const char __user *buf, size_t count,
         monkey_run(enable);
         monkey_config(gpio, on_en, off_en, on_ms, off_ms);
     }
+    else if(!strcmp(param[1], "video"))
+    {
+        lidbg_video_main(pos - 2, &param[2]);
+    }
     //zone end
+
 out:
     kfree(tmp_back);
     return count;
 }
 
-static  struct file_operations test_nod_fops =
+static  struct file_operations drivers_dbg_nod_fops =
 {
     .owner = THIS_MODULE,
-    .write = test_nod_write,
-    .open = test_nod_open,
+    .write = drivers_dbg_write,
+    .open = drivers_dbg_open,
 };
-int thread_test(void *data)
+int thread_drivers_dbg_init(void *data)
 {
-    lidbg_new_cdev(&test_nod_fops, "test_node");
+    lidbg_new_cdev(&drivers_dbg_nod_fops, "lidbg_drivers_dbg");
     return 0;
 }
 
-
-
-int lidbg_test_init(void)
+int lidbg_drivers_dbg_init(void)
 {
     DUMP_BUILD_TIME;
     LIDBG_GET;
 
-    CREATE_KTHREAD(thread_test, NULL);
+    CREATE_KTHREAD(thread_drivers_dbg_init, NULL);
 
     return 0;
 
 }
-void lidbg_test_deinit(void)
+void lidbg_drivers_dbg_deinit(void)
 {
-
-
 }
-
-
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Flyaudad Inc.");
 
-module_init(lidbg_test_init);
-module_exit(lidbg_test_deinit);
+module_init(lidbg_drivers_dbg_init);
+module_exit(lidbg_drivers_dbg_deinit);
+
 

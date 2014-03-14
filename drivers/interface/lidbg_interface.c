@@ -30,7 +30,7 @@ char *insmod_list[] =
     "lidbg_ts_probe_new.ko",
 #endif
     "lidbg_monkey.ko",
-    "lidbg_test.ko",
+    "lidbg_drivers_dbg.ko",
     NULL,
 };
 

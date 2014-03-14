@@ -1,4 +1,3 @@
-void lidbg_video_main(int argc, char **argv);
 
 int thread_dump_log(void *data)
 {
@@ -24,24 +23,7 @@ void parse_cmd(char *pt)
     }
     lidbg("\n");
 
-    if (!strcmp(argv[0], "c"))
-    {
-        int new_argc;
-        char **new_argv;
-        new_argc = argc - 2;
-        new_argv = argv + 2;
-
-        if(argv[1] == NULL)
-            return;
-
-        if(!strcmp(argv[1], "video"))
-        {
-           //lidbg_video_main(new_argc, new_argv);
-        }
-
-    }
-
-    else if (!strcmp(argv[0], "appcmd"))
+    if (!strcmp(argv[0], "appcmd"))
     {
         lidbg("%s:[%s]\n", argv[0], argv[1]);
 
