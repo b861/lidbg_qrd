@@ -27,7 +27,7 @@ struct fs_filename_item *get_filename_list_item(struct list_head *client_list, c
     spin_unlock_irqrestore(&new_item_lock, flags);
     return NULL;
 }
-bool new_filename_list_item(struct list_head *client_list, char *filename, bool copy_en)
+bool new_filename_list_item(struct list_head *client_list, char *filename, bool remove_after_copy)
 {
     struct fs_filename_item *add_new_item;
     unsigned long flags;
@@ -47,16 +47,15 @@ bool new_filename_list_item(struct list_head *client_list, char *filename, bool 
     }
 
     strcpy(add_new_item->filename, filename);
-    add_new_item->copy_en = copy_en;
+    add_new_item->remove_after_copy = remove_after_copy;
 
     spin_lock_irqsave(&new_item_lock, flags);
     list_add(&(add_new_item->tmp_list), client_list);
     spin_unlock_irqrestore(&new_item_lock, flags);
-    //FS_SUC("<NEW:[%s,%d]>\n",filename,copy_en);
     return true;
 }
 
-bool register_filename_list(struct list_head *client_list, char *filename, bool copy_en)
+bool register_filename_list(struct list_head *client_list, char *filename, bool remove_after_copy)
 {
     struct fs_filename_item *pos = get_filename_list_item(client_list, filename);
     if(pos)
@@ -65,7 +64,7 @@ bool register_filename_list(struct list_head *client_list, char *filename, bool 
         return false;
     }
     else
-        return new_filename_list_item(client_list, filename, copy_en);
+        return new_filename_list_item(client_list, filename, remove_after_copy);
 }
 void show_filename_list(struct list_head *client_list)
 {
@@ -79,7 +78,7 @@ void show_filename_list(struct list_head *client_list)
             if (pos->filename)
             {
                 index++;
-                FS_WARN("<%d.%dINFO:[%s]>\n", pos->copy_en, index, pos->filename);
+                FS_WARN("<%d.%dINFO:[%s]>\n", pos->remove_after_copy, index, pos->filename);
             }
         }
     }
@@ -390,7 +389,7 @@ void cp_data_to_udisk(void)
 
         list_for_each_entry(pos, client_list, tmp_list)
         {
-            if (pos->filename && pos->copy_en)
+            if (pos->filename)
             {
                 char *file = strrchr(pos->filename, '/');
                 if(file)
@@ -399,11 +398,13 @@ void cp_data_to_udisk(void)
                     memset(tbuff, '\0', sizeof(tbuff));
                     sprintf(tbuff, "%s/%s", dir, ++file);
                     fs_copy_file(pos->filename, tbuff);
-                    msleep(copy_delay);
                 }
+                if(pos->remove_after_copy)
+                    lidbg_rm(pos->filename);
+                msleep(copy_delay);
+
             }
         }
-        //lidbg_rm("/data/kmsg.txt");
         lidbg_domineering_ack();
     }
     else
@@ -442,10 +443,10 @@ int  lidbg_cp(char from[], char to[])
 {
     return fs_copy_file(from, to);
 }
-bool fs_register_filename_list(char *filename, bool copy_en)
+bool fs_register_filename_list(char *filename, bool remove_after_copy)
 {
     if(filename)
-        return register_filename_list(&fs_filename_list, filename, copy_en);
+        return register_filename_list(&fs_filename_list, filename, remove_after_copy);
     else
     {
         FS_ERR("<filename.null>\n");

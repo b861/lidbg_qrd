@@ -134,7 +134,7 @@ void check_conf_file(void)
 }
 void fs_msg_fifo_to_file(char *key, char *value)
 {
-    fs_mem_log("%s\n",__func__);
+    fs_mem_log("%s\n", __func__);
     lidbg_fifo_get(fs_msg_fifo, FS_FIFO_FILE, 0);
 }
 void lidbg_fileserver_main_prepare(void)
@@ -164,13 +164,13 @@ void lidbg_fileserver_main_prepare(void)
 }
 void lidbg_fileserver_main_init(void)
 {
-    fs_register_filename_list(LIDBG_MEM_LOG_FILE, true);
-    fs_register_filename_list(build_time_sd_path, true);
+    fs_register_filename_list(LIDBG_MEM_LOG_FILE, false);
+    fs_register_filename_list(build_time_sd_path, false);
     fs_register_filename_list(LIDBG_KMSG_FILE_PATH, true);
-    fs_register_filename_list(MACHINE_ID_FILE, true);
-    fs_register_filename_list(driver_sd_path, true);
-    fs_register_filename_list(core_sd_path, true);
-    fs_register_filename_list(LIDBG_LOG_DIR"fs_msg_fifo.txt", true);
+    fs_register_filename_list(MACHINE_ID_FILE, false);
+    fs_register_filename_list(driver_sd_path, false);
+    fs_register_filename_list(core_sd_path, false);
+    fs_register_filename_list(FS_FIFO_FILE, true);
 }
 //zone end
 

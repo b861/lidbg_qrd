@@ -34,7 +34,7 @@ struct fs_filename_item
 {
     struct list_head tmp_list;
     char *filename;
-    bool copy_en;
+    bool remove_after_copy;
 };
 #define LIDBG_LOG_DIR "/data/lidbg/"
 #define LIDBG_MEM_DIR "/dev/log/"
@@ -72,7 +72,7 @@ extern bool fs_is_file_exist(char *file);
 extern bool fs_is_file_updated(char *filename, char *infofile);
 extern bool fs_copy_file(char *from, char *to);
 extern bool fs_upload_machine_log(void);
-extern bool fs_register_filename_list(char *filename, bool copy_en);
+extern bool fs_register_filename_list(char *filename, bool remove_after_copy);
 extern void fs_show_filename_list(void);
 extern void fs_remount_system(void);
 extern void fs_call_apk(void);

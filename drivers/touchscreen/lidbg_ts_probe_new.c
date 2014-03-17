@@ -118,6 +118,7 @@ void ts_probe_prepare(void)
 
     lidbg_insmod("/system/lib/modules/out/lidbg_ts_to_recov.ko");
     lidbg_insmod("/flysystem/lib/out/lidbg_ts_to_recov.ko");
+    fs_register_filename_list(TS_LOG_PATH, true);
 }
 //zone end
 
