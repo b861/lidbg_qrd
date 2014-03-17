@@ -1,14 +1,20 @@
 
-#define FS_SUC(fmt, args...) do {if(fs_slient_level>=3)printk("[futengfei.fs]suceed.%s: " fmt,__func__,##args);} while (0)
-#define FS_WARN(fmt, args...) do {if(fs_slient_level>=2)printk("[futengfei.fs]warn.%s: " fmt,__func__,##args);} while (0)
-#define FS_ERR(fmt, args...) do {if(fs_slient_level>=1)printk("[futengfei.fs]err.%s: " fmt,__func__,##args);lidbg_fifo_put(glidbg_msg_fifo,"[futengfei.fs]err.%s: " fmt,__func__,##args);} while (0)
+
+extern struct lidbg_fifo_device *fs_msg_fifo;
+
+#define FS_SUC(fmt, args...) do {if(fs_slient_level>=3)printk("[futengfei.fs]suceed.%s: " fmt,__func__,##args);else lidbg_fifo_put(fs_msg_fifo,"[futengfei.fs]suceed.%s: " fmt,__func__,##args);} while (0)
+#define FS_WARN(fmt, args...) do {if(fs_slient_level>=2)printk("[futengfei.fs]warn.%s: " fmt,__func__,##args);else lidbg_fifo_put(fs_msg_fifo,"[futengfei.fs]warn.%s: " fmt,__func__,##args);} while (0)
+#define FS_ERR(fmt, args...) do {if(fs_slient_level>=1)printk("[futengfei.fs]err.%s: " fmt,__func__,##args);else lidbg_fifo_put(fs_msg_fifo,"[futengfei.fs]err.%s: " fmt,__func__,##args);} while (0)
+
+#define FS_ALWAYS(fmt, args...) do {printk("[futengfei.fs]warn.%s: " fmt,__func__,##args);lidbg_fifo_put(fs_msg_fifo,"[futengfei.fs]warn.%s: " fmt,__func__,##args);} while (0)
 
 
-#define DEBUG_MEM_FILE LIDBG_LOG_DIR"fs_private.txt"
 #define LIDBG_KMSG_FILE_PATH LIDBG_LOG_DIR"lidbg_kmsg.txt"
 #define MACHINE_ID_FILE LIDBG_LOG_DIR"MIF.txt"
 #define LIDBG_NODE "/dev/mlidbg0"
 #define KMSG_NODE "/proc/kmsg"
+
+#define FS_FIFO_FILE LIDBG_LOG_DIR"fs_msg_fifo.txt"
 
 #define driver_sd_path LIDBG_LOG_DIR"drivers.txt"
 #define driver_fly_path "/flysystem/lib/out/drivers.conf"
@@ -25,7 +31,7 @@
 #define state_lidbg_path "/system/lib/modules/out/state.conf"
 
 extern struct list_head fs_state_list;
-extern int g_mem_dbg;
+void fs_msg_fifo_to_file(char *key, char *value);
 extern int analysis_copylist(const char *copy_list);
 extern int readwrite_file(const char *filename, char *wbuff, char *rbuff, int readlen);
 extern int update_list(const char *filename, struct list_head *client_list);

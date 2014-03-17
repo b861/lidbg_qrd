@@ -56,9 +56,6 @@ int launch_file_cmd(const char *filename)
         return -1;
     }
 
-    if(g_mem_dbg)
-        fs_string2file(0, DEBUG_MEM_FILE, "free.%s=%d \n", __func__, file_len);
-
     filep->f_op->llseek(filep, 0, 0);
     all_purpose = filep->f_op->read(filep, file_ptr, file_len, &filep->f_pos);
     if(all_purpose <= 0)

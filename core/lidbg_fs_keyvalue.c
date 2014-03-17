@@ -11,7 +11,7 @@ int get_int_value(struct list_head *client_list, char *key, int *int_value, void
     struct string_dev *pos;
     if (list_empty(client_list))
     {
-        FS_ERR("<list_is_empty>\n");
+        FS_ERR("<list_is_empty>%pf\n",client_list);
         return -2;
     }
     list_for_each_entry(pos, client_list, tmp_list)
@@ -49,7 +49,7 @@ int fileserver_deal_cmd(struct list_head *client_list, enum string_dev_cmd cmd, 
         FS_WARN("cmd:[%d]\n", cmd);
     if (list_empty(client_list))
     {
-        FS_ERR("<list_is_empty>\n");
+        FS_ERR("<list_is_empty>%pf\n",client_list);
         return -2;
     }
     switch (cmd)
@@ -178,7 +178,7 @@ int bfs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *cli
     FS_WARN("File_length:<%d>\n", file_len);
     file_len = file_len + 1;
 
-    file_ptr = (unsigned char *)kmalloc(file_len,GFP_KERNEL);
+    file_ptr = (unsigned char *)kmalloc(file_len, GFP_KERNEL);
     if(file_ptr == NULL)
     {
         FS_ERR( "vmalloc:<cannot malloc memory!>\n");
@@ -186,9 +186,6 @@ int bfs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *cli
         filp_close(filep, 0);
         return -1;
     }
-
-    if(g_mem_dbg)
-        fs_string2file(0, DEBUG_MEM_FILE, "%s=%d \n", __func__, file_len);
 
     filep->f_op->llseek(filep, 0, 0);
     all_purpose = filep->f_op->read(filep, file_ptr, file_len, &filep->f_pos);
@@ -216,8 +213,6 @@ int bfs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *cli
             if(g_kvbug_on)
                 FS_WARN("%d[%s]\n", all_purpose, token);
             add_new_dev = kzalloc(sizeof(struct string_dev), GFP_KERNEL);
-            if(g_mem_dbg)
-                fs_string2file(0, DEBUG_MEM_FILE, "%s=%d \n", __func__, sizeof(struct string_dev));
             add_new_dev->yourkey = token;
             list_add(&(add_new_dev->tmp_list), client_list);
             all_purpose++;
@@ -294,9 +289,6 @@ int update_list(const char *filename, struct list_head *client_list)
         filp_close(filep, 0);
         return -1;
     }
-
-    if(g_mem_dbg)
-        fs_string2file(0, DEBUG_MEM_FILE, "free.%s=%d \n", __func__, file_len);
 
     filep->f_op->llseek(filep, 0, 0);
     all_purpose = filep->f_op->read(filep, file_ptr, file_len, &filep->f_pos);

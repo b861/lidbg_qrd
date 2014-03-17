@@ -2,11 +2,14 @@
 #include "lidbg.h"
 
 //zone below [tools]
+#define FS_BUFF_SIZE (1 * 1024 )
+#define FS_FIFO_SIZE (64 * 1024)
+
 #define FS_VERSION "FS.VERSION:  [20131031]"
 bool is_out_updated = false;
 bool is_fs_work_enable = false;
-int g_mem_dbg = 0;
-int fs_slient_level = 3;
+int fs_slient_level = 0;//level:0->mem_fifo    (1 err 2 warn 3suc)->uart
+struct lidbg_fifo_device *fs_msg_fifo;
 //zone end
 
 void lidbg_fileserver_main(int argc, char **argv)
@@ -25,7 +28,7 @@ void lidbg_fileserver_main(int argc, char **argv)
     cmd_para = simple_strtoul(argv[2], 0, 0);
 
     if(thread_count)
-        FS_ERR("thead_test:remove");
+        FS_ERR("thead_test:remove\n");
 
     switch (cmd)
     {
@@ -62,6 +65,10 @@ void lidbg_fileserver_main(int argc, char **argv)
     case 10:
         FS_WARN("<fs_show_filename_list>\n");
         fs_show_filename_list();
+        break;
+    case 11:
+        FS_ALWAYS("<fs_msg_fifo_to_file>\n");
+        fs_msg_fifo_to_file(NULL, NULL);
         break;
     default:
         FS_ERR("<check you cmd:%d>\n", cmd);
@@ -101,7 +108,6 @@ void check_conf_file(void)
 {
     int size[6];
 
-    //tmp:test
     size[0] = fs_is_file_updated(build_time_fly_path, PRE_CONF_INFO_FILE);
     size[1] = fs_get_file_size(driver_sd_path);
     size[2] = fs_get_file_size(core_sd_path);
@@ -112,7 +118,7 @@ void check_conf_file(void)
 
     if(size[0] || size[1] < 1 || size[2] < 1 || size[3] < 1 || size[4] < 1)
     {
-        FS_WARN( "<overwrite:push,update?>\n");
+        FS_ALWAYS( "<overwrite:push,update?>\n");
         fs_mem_log( "<overwrite:push,update?>\n");
         fs_remount_system();
         is_out_updated = true;
@@ -121,13 +127,20 @@ void check_conf_file(void)
         lidbg_rm("/data/kmsg.txt");
         lidbg_rm(LIDBG_KMSG_FILE_PATH);
         lidbg_rm(LIDBG_LOG_DIR"lidbg_mem_log.txt");
+        lidbg_rm(FS_FIFO_FILE);
         lidbg_rm(LIDBG_TRACE_MSG_PATH);
     }
 
 }
-
+void fs_msg_fifo_to_file(char *key, char *value)
+{
+    fs_mem_log("%s\n",__func__);
+    lidbg_fifo_get(fs_msg_fifo, FS_FIFO_FILE, 0);
+}
 void lidbg_fileserver_main_prepare(void)
 {
+
+    fs_msg_fifo = lidbg_fifo_alloc("fileserver", FS_FIFO_SIZE, FS_BUFF_SIZE);
 
     FS_WARN("<%s>\n", FS_VERSION);
 
@@ -137,32 +150,33 @@ void lidbg_fileserver_main_prepare(void)
     check_conf_file();
 
     set_machine_id();
-    FS_WARN("machine_id:%d\n", get_machine_id());
+    FS_ALWAYS("machine_id:%d\n", get_machine_id());
 
-    fs_fill_list(driver_sd_path, FS_CMD_FILE_CONFIGMODE, &lidbg_drivers_list);
     fs_fill_list(core_sd_path, FS_CMD_FILE_CONFIGMODE, &lidbg_core_list);
+    fs_fill_list(driver_sd_path, FS_CMD_FILE_CONFIGMODE, &lidbg_drivers_list);
     fs_fill_list(state_sd_path, FS_CMD_FILE_CONFIGMODE, &fs_state_list);
 
     fs_copy_file(build_time_fly_path, LIDBG_MEM_DIR"build_time.txt");
 
     fs_get_intvalue(&lidbg_core_list, "fs_slient_level", &fs_slient_level, NULL);
+    fs_get_intvalue(&lidbg_core_list, "fs_save_msg_fifo", NULL, fs_msg_fifo_to_file);
 
 }
 void lidbg_fileserver_main_init(void)
 {
-    fs_get_intvalue(&lidbg_core_list, "fs_mem_dbg", &g_mem_dbg, NULL);
     fs_register_filename_list(LIDBG_MEM_LOG_FILE, true);
     fs_register_filename_list(build_time_sd_path, true);
     fs_register_filename_list(LIDBG_KMSG_FILE_PATH, true);
     fs_register_filename_list(MACHINE_ID_FILE, true);
     fs_register_filename_list(driver_sd_path, true);
     fs_register_filename_list(core_sd_path, true);
+    fs_register_filename_list(LIDBG_LOG_DIR"fs_msg_fifo.txt", true);
 }
 //zone end
 
 static int __init lidbg_fileserver_init(void)
 {
-    FS_WARN("<==IN==>\n");
+    FS_ALWAYS("\n\n<==IN==>\n\n");
 
     lidbg_fileserver_main_prepare();
 
@@ -174,7 +188,7 @@ static int __init lidbg_fileserver_init(void)
 
     lidbg_fileserver_main_init();//note,put it in the end.
 
-    FS_WARN("<==OUT==>\n\n");
+    FS_ALWAYS("<==OUT==>\n");
     return 0;
 }
 

@@ -45,7 +45,7 @@ void callback_copy_file(char *dirname, char *filename)
     sprintf(from, "%s/%s", dirname, filename);
     sprintf(to, "/flysystem/lib/out/%s", filename);
     if(fs_copy_file(from,  to))
-        FS_WARN("<cp:%s,%s>\n", from, to);
+        LIDBG_WARN("<cp:%s,%s>\n", from, to);
 }
 void cb_password_update(char *password )
 {
@@ -53,7 +53,7 @@ void cb_password_update(char *password )
 
     if(fs_is_file_exist("/mnt/usbdisk/out/release"))
     {
-        TE_WARN("<===============UPDATE_INFO =================>\n" );
+        LIDBG_WARN("<===============UPDATE_INFO =================>\n" );
         if( fs_update("/mnt/usbdisk/out/release", "/mnt/usbdisk/out", "/flysystem/lib/out") >= 0)
         {
             if(delete_out_dir_after_update)
@@ -70,7 +70,7 @@ void cb_password_update(char *password )
         lidbg_reboot();
     }
     else
-        TE_ERR("<up>\n" );
+        LIDBG_ERR("<up>\n" );
 }
 void update_lidbg_out_dir(char *key, char *value )
 {
@@ -80,18 +80,18 @@ void update_lidbg_out_dir(char *key, char *value )
 void cb_password_gui_kmsg(char *password )
 {
     if(lidbg_exe("/flysystem/lib/out/lidbg_gui", "/proc/kmsg", "1", NULL, NULL, NULL, NULL) < 0)
-        TE_ERR("Exe lidbg_kmsg failed !\n");
+        LIDBG_ERR("Exe lidbg_kmsg failed !\n");
 }
 
 void cb_password_gui_state(char *password )
 {
     if(lidbg_exe("/flysystem/lib/out/lidbg_gui", "/dev/log/state.txt", "1", NULL, NULL, NULL, NULL) < 0)
-        TE_ERR("Exe status failed !\n");
+        LIDBG_ERR("Exe status failed !\n");
 }
 
 void cb_password_mem_log(char *password )
 {
-    lidbg_fifo_get(glidbg_msg_fifo,LIDBG_LOG_DIR"lidbg_mem_log.txt", 0);
+    lidbg_fifo_get(glidbg_msg_fifo, LIDBG_LOG_DIR"lidbg_mem_log.txt", 0);
 }
 void cb_int_mem_log(char *key, char *value )
 {
@@ -165,7 +165,7 @@ void cb_kv_cmd(char *key, char *value)
 
         for(loop = 0; loop < cmd_num; loop++)
         {
-            FS_WARN("cmd[%d]:%s\n", loop, cmd[loop]);
+            LIDBG_WARN("cmd[%d]:%s\n", loop, cmd[loop]);
             num = lidbg_token_string(cmd[loop], ",", param) ;
             if(num > 1)
             {
@@ -198,7 +198,7 @@ void cb_kv_cmd(char *key, char *value)
 }
 int misc_init(void *data)
 {
-    TE_WARN("<==IN==>\n");
+    LIDBG_WARN("<==IN==>\n");
 
     te_regist_password("001100", cb_password_remove_apk);
     te_regist_password("001101", cb_password_upload);
@@ -237,7 +237,7 @@ int misc_init(void *data)
     else
         lidbg("<reb.exit.%d>\n", reboot_delay_s);
 
-    TE_WARN("<==OUT==>\n\n");
+    LIDBG_WARN("<==OUT==>\n\n");
 
     return 0;
 

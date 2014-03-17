@@ -136,15 +136,12 @@ int dump_kmsg(char *node, char *save_msg_file, int size, int *always)
         if(size)
         {
             char *psize = NULL;
-            psize = (unsigned char *)kmalloc(size,GFP_KERNEL);
+            psize = (unsigned char *)kmalloc(size, GFP_KERNEL);
             if(psize == NULL)
             {
                 FS_ERR("<cannot kmalloc memory!>\n");
                 return ret;
             }
-
-            if(g_mem_dbg)
-                fs_string2file(0, DEBUG_MEM_FILE, "free.%s=%d \n", __func__, size);
 
             ret = filep->f_op->read(filep, psize, size - 1, &filep->f_pos);
             if(ret > 0)

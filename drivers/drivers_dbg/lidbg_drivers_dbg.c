@@ -16,7 +16,7 @@ ssize_t drivers_dbg_write (struct file *filp, const char __user *buf, size_t cou
     tmp = memdup_user(buf, count);
     if (IS_ERR(tmp))
     {
-        FS_ERR("<memdup_user>\n");
+        lidbg("<memdup_user>\n");
         return PTR_ERR(tmp);
     }
     tmp[count - 1] = '\0';
@@ -27,7 +27,7 @@ ssize_t drivers_dbg_write (struct file *filp, const char __user *buf, size_t cou
 
     if(pos < 2)
     {
-        FS_ERR("echo \"c monkey 1 123 0 1 1000 500\" > /dev/lidbg_drivers_dbg0\n");
+        lidbg("echo \"c monkey 1 123 0 1 1000 500\" > /dev/lidbg_drivers_dbg0\n");
         goto out;
     }
 

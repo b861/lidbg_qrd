@@ -168,9 +168,6 @@ void new_filedetec_dev(char *filename, void (*cb_filedetec)(char *filename))
 {
     struct string_dev *add_new_dev;
     add_new_dev = kzalloc(sizeof(struct string_dev), GFP_KERNEL);
-    if(g_mem_dbg)
-        fs_string2file(0, DEBUG_MEM_FILE, "%s=%d \n", __func__, sizeof(struct string_dev));
-
     add_new_dev->filedetec = filename;
     add_new_dev->cb_filedetec = cb_filedetec;
     list_add(&(add_new_dev->tmp_list), &fs_filedetec_list);
@@ -317,15 +314,12 @@ bool copy_file(char *from, char *to)
     inodefrom = pfilefrom->f_dentry->d_inode;
     file_len = inodefrom->i_size;
 
-    string = (unsigned char *)kmalloc(file_len,GFP_KERNEL);
+    string = (unsigned char *)kmalloc(file_len, GFP_KERNEL);
     if(string == NULL)
-    	{
-    	    	FS_ERR(" <kmalloc>\n");
-    	    	return false;
-    	}
-
-    if(g_mem_dbg)
-        fs_string2file(0, DEBUG_MEM_FILE, "free.%s=%d \n", __func__, file_len);
+    {
+        FS_ERR(" <kmalloc>\n");
+        return false;
+    }
 
     pfilefrom->f_op->llseek(pfilefrom, 0, 0);
     pfilefrom->f_op->read(pfilefrom, string, file_len, &pfilefrom->f_pos);
@@ -464,6 +458,7 @@ void fs_show_filename_list(void)
 }
 int thread_cp_data_to_udiskt(void *data)
 {
+    fs_msg_fifo_to_file(NULL, NULL);
     cp_data_to_udisk();
     return 0;
 }
