@@ -10,3 +10,4 @@ obj-$(CONFIG_TOUCHSCREEN)	+= lidbg_ts_probe_new.o
 obj-$(CONFIG_TOUCHSCREEN)	+= lidbg_ts_to_recov.o
 obj-$(CONFIG_TOUCHSCREEN)	+= gt811.o
 obj-$(CONFIG_TOUCHSCREEN)	+= gt911.o
+obj-$(CONFIG_TOUCHSCREEN)	+= ft5x06_ts.o
