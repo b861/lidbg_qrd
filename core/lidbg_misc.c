@@ -138,63 +138,30 @@ void lidbg_loop_warning(void)
     }
 }
 
-char *cmd_string[] =
-{
-    "chmod",
-    "rmdir",
-    "mount",
-    "echo",
-};
-int parse_cmd_type(char *what)
-{
-    int i;
-    for (i = 0; i < ARRAY_SIZE(cmd_string); i++)
-    {
-        if (!strcmp(what, cmd_string[i]))
-            return i + 1;
-    }
-    return 0;
-}
 void cb_kv_cmd(char *key, char *value)
 {
     if(value)
     {
-        char *cmd[8];
-        char *param[8];
+        char *cmd[8] = {NULL};
+        char *param[8] = {NULL};
         int cmd_num, num, loop = 0;
         cmd_num = lidbg_token_string(value, ";", cmd) ;
 
         for(loop = 0; loop < cmd_num; loop++)
         {
-            LIDBG_WARN("cmd[%d]:%s\n", loop, cmd[loop]);
-            num = lidbg_token_string(cmd[loop], ",", param) ;
+            num = lidbg_token_string(cmd[loop], ",", param);
             if(num > 1)
             {
-                switch (parse_cmd_type(param[0]))
-                {
-                case  1:
-                    lidbg_chmod(param[1]);
-                    break;
-                case  2:
-                    lidbg_rmdir(param[1]);
-                    break;
-                case  3:
-                    lidbg_mount(param[1]);
-                    break;
-                case  4:
-                    if(num >= 3)
-                        fs_readwrite_file(param[2], param[1], NULL, 0);
-                    else
-                        fs_mem_log("echo err:%d", num);
-                    break;
+                if(!strcmp(param[0], "echo"))
+                    (param[3] && param[1]) ? fs_readwrite_file(param[3], param[1], NULL, 0) : printk("echo err\n");
+                else
+                    lidbg_exe(param[0], param[1], param[2] ? param[2] : NULL, param[3] ? param[3] : NULL, param[4] ? param[4] : NULL, param[5] ? param[5] : NULL, param[6] ? param[6] : NULL);
 
-                default:
-                    break;
-                }
+                fs_mem_log("cb_kv_cmd:%d,%s,%s\n", num, param[0], param[1]);
+                msleep(20);
             }
         }
 
-        fs_mem_log("cb_kv_cmd:%d\n", cmd_num);
     }
 }
 int misc_init(void *data)

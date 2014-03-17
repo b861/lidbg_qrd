@@ -20,10 +20,15 @@ bool is_file_exist(char *file)
 char *get_bin_path( char *buf)
 {
 #ifdef USE_CALL_USERHELPER
-    char *path;
-    path = (is_file_exist(RECOVERY_MODE_DIR)) ? "/sbin/" : "/system/bin/";
-    sprintf(g_binpath, "%s%s", path, buf);
-    return g_binpath;
+    if(!strchr(buf, '/'))
+    {
+        char *path;
+        path = (is_file_exist(RECOVERY_MODE_DIR)) ? "/sbin/" : "/system/bin/";
+        sprintf(g_binpath, "%s%s", path, buf);
+        return g_binpath;
+    }
+    else
+        return buf;
 #else
     return buf;
 #endif
@@ -319,7 +324,7 @@ void lidbg_domineering_ack(void)
 }
 int  lidbg_exe(char path[], char argv1[], char argv2[], char argv3[], char argv4[], char argv5[], char argv6[])
 {
-    return lidbg_launch_user(path, argv1, argv2, argv3, argv4, argv5, argv6);
+    return lidbg_launch_user(get_bin_path(path), argv1, argv2, argv3, argv4, argv5, argv6);
 }
 int  lidbg_mount(char path[])
 {
