@@ -60,7 +60,11 @@ static void memreplace(char *drr, char dest, char replace, int len)
     if(drr)
     {
         while((loop < len))
-            (*(drr + loop) == dest) ? *(drr + loop) = replace : loop++;
+        	{
+				if((*(drr + loop) == dest))
+					*(drr + loop) = replace;
+				loop++;
+			}
     }
 }
 
@@ -72,22 +76,17 @@ static void lidbg_uevent_process( struct uevent *uevent)
         if (!strcmp(lidbg_parse_action[loop].action, uevent->lidbg_action))
         {
             lidbg_parse_action[loop].progress_action(uevent->lidbg_parameter);
-            LIDBG_UEVENT_MSG("appmsg*", "succeed action:['%s','%s']\n", uevent->lidbg_action, uevent->lidbg_parameter);
             return ;
         }
     }
-    LIDBG_UEVENT_MSG("appmsg*", "err action, check: { '%s', '%s', '%s', '%s', '%s', '%s' }%d\n", uevent->action, uevent->devpath, uevent->subsystem,
-                     uevent->devname, uevent->lidbg_action, uevent->lidbg_parameter, (uevent->lidbg_parameter != NULL));
+    LIDBG_PRINT( "err action, check: { '%s', '%s'}%d\n", uevent->lidbg_action, uevent->lidbg_parameter, (uevent->lidbg_parameter != NULL));
     return ;
 }
 static void system_uevent_transfer(char *msg, int len)
 {
-    //ignore this:offline@/devices/system/cpu/cpu1
-    int ignore = strlen(msg);
-    char *p = msg + ignore + 1;
-    memreplace(p, '\0', ' ', len - ignore);
+    memreplace(msg, '\0', ' ', len - 1);
 
-    LIDBG_UEVENT_MSG("systemuevent*", "%s\n",  p);
+    LIDBG_UEVENT("%s\n",msg);
 }
 
 static void parse_uevent(char *msg, struct uevent *uevent)
@@ -101,7 +100,6 @@ static void parse_uevent(char *msg, struct uevent *uevent)
 
     while (*msg)
     {
-        //LIDBG_UEVENT_MSG("appmsg*","uevent str: %s\n", msg);
         if (!strncmp(msg, "ACTION=", 7))
         {
             msg += 7;
@@ -148,9 +146,10 @@ static bool lidbg_uevent_callback(int fd)
         return -1;
 
     n = uevent_kernel_multicast_recv(fd, msg, LIDBG_UEVENT_MSG_LEN);
-    if (n >= LIDBG_UEVENT_MSG_LEN)
+    if (n >= 512-64)
     {
-        LIDBG_UEVENT_MSG("appmsg*", "ERR--------------- overflow -- discard ---------------\n");
+        LIDBG_PRINT( "ERR-overflow-%d,%s\n",n,msg);
+		return 0;
     }
     msg[n] = '\0';
     msg[n + 1] = '\0';
@@ -172,12 +171,12 @@ static void lidbg_uevent_poll(bool (*uevent_callback)(int fd))
     struct pollfd ufd;
     int ret, fd, i, nr;
 
-    LIDBG_UEVENT_MSG("appmsg*", "SUC--------------- FUTENGFEI UEVENT INIT ---------------\n");
+    LIDBG_PRINT( "SUC--------------- FUTENGFEI UEVENT INIT ---------------\n");
 
     fd = uevent_open_socket(64 * 1024, true);
     if (fd >= 0)
     {
-        LIDBG_UEVENT_MSG("appmsg*", "SUC--------------- uevent_open_socket ---------------\n");
+        LIDBG_PRINT( "SUC--------------- uevent_open_socket ---------------\n");
         fcntl(fd, F_SETFL, O_NONBLOCK);
         ufd.events = POLLIN;
         ufd.fd = fd;
@@ -192,7 +191,7 @@ static void lidbg_uevent_poll(bool (*uevent_callback)(int fd))
         }
     }
     else
-        LIDBG_UEVENT_MSG("appmsg*", "err--------------- uevent_open_socket ---------------\n");
+        LIDBG_PRINT( "err--------------- uevent_open_socket ---------------\n");
 
 }
 void *thread_wait_userver(void *arg)
@@ -209,6 +208,8 @@ int main(int argc, char **argv)
     pthread_t lidbg_uevent_tid;
     system("insmod /flysystem/lib/out/lidbg_uevent.ko");
     system("insmod /system/lib/modules/out/lidbg_uevent.ko");
+	sleep(1);
+	system("chmod 777 /dev/lidbg_uevent");
     usleep(50 * 1000);
     pthread_create(&lidbg_uevent_tid, NULL, thread_wait_userver, NULL);
     lidbg_uevent_poll(lidbg_uevent_callback);
