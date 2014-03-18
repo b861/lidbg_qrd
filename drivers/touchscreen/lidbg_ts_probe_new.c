@@ -25,7 +25,6 @@ struct probe_device
 {
     char chip_addr;
     unsigned int sub_addr;
-    int cmd;
     char *name;
     void (*reset)(void);
 };
@@ -35,10 +34,10 @@ void reset_low_active(void);
 
 struct probe_device ts_probe_dev[] =
 {
-    {0x14, 0x00, LOG_CAP_TS_GT911, "gt911.ko", reset_high_active},
-    {0x5d, 0x00, LOG_CAP_TS_GT811, "gt811.ko", reset_high_active},
-    {0x55, 0x00, LOG_CAP_TS_GT801, "gt801.ko", reset_low_active},
-    {0x38, 0x00, LOG_CAP_TS_FTX06, "ft5x06_ts.ko", reset_high_active}
+    {0x14, 0x00, "gt911.ko", reset_high_active},
+    {0x5d, 0x00, "gt811.ko", reset_high_active},
+    {0x55, 0x00, "gt801.ko", reset_low_active},
+    {0x38, 0x00, "ft5x06_ts.ko", reset_high_active}
     //{0x5d, 0x00, LOG_CAP_TS_GT910, "gt910new.ko",reset_high_active},
 };
 
