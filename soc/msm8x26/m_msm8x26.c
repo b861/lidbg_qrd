@@ -39,7 +39,7 @@ void lidbg_soc_main(int argc, char **argv)
 int msm8226_init(void)
 {
 DUMP_BUILD_TIME;//LIDBG_MODULE_LOG;
-
+/*
     lidbg( "smem_alloc id = %d\n", SMEM_ID_VENDOR0);
    // p_fly_smem = (struct fly_smem *)smem_alloc(SMEM_ID_VENDOR0, sizeof(struct fly_smem));
 
@@ -55,8 +55,8 @@ DUMP_BUILD_TIME;//LIDBG_MODULE_LOG;
     }
 
     soc_bl_init();
+    */
     soc_io_init();
-    soc_ad_init();
 
     return 0;
 }

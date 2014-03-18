@@ -8,5 +8,5 @@ export CONFIG_HAL_USERVER
 
 
 ################driver select####################
-CONFIG_BP_MSG=m
+
 

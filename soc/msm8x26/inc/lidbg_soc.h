@@ -110,7 +110,7 @@ enum
 
 #endif
 
-#define SOC_KO  "lidbg_soc_msm8x26.ko"
+#define SOC_KO  "lidbg_ad_msm8x26.ko","lidbg_soc_msm8x26.ko"
 #define INTERFACE_KO  "lidbg_fly_hal.ko"
 
 struct io_config
