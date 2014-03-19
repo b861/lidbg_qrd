@@ -9,9 +9,6 @@
 #define BOOL bool
 #define ULONG u32
 
-#define DBG0 lidbg
-#define DBG lidbg
-
 #define FALSE 0
 #define TRUE 1
 

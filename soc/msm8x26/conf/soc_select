@@ -5,5 +5,9 @@ export CONFIG_HAL_USERVER
 
 
 ################driver select####################
-
-
+CONFIG_BP_MSG=m
+CONFIG_LPC=m
+CONFIG_INTERFACE=m
+CONFIG_DRIVERS_DBG=m
+CONFIG_MONKEY=m
+CONFIG_GPS=m

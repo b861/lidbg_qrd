@@ -111,7 +111,7 @@ enum
 #endif
 
 #define SOC_KO  "lidbg_ad_msm8x26.ko","lidbg_soc_msm8x26.ko"
-#define INTERFACE_KO  "lidbg_fly_hal.ko"
+#define INTERFACE_KO  "lidbg_interface.ko"
 
 struct io_config
 {
@@ -203,7 +203,7 @@ extern struct fly_smem *p_fly_smem ;
 #define IO_CONFIG_INPUT(group,index) do{  soc_io_config( index,  GPIO_CFG_INPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA, 1);}while(0)
 
 //#define GPIO_TO_INT MSM_GPIO_TO_INT
-#define GPIO_TO_INT(x) x
+#define GPIO_TO_INT
 
 
 

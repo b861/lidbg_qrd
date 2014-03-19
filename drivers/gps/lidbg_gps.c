@@ -20,9 +20,9 @@ struct gps_device
 static int started = 0;
 static int  work_en = 1;
 module_param_named(work_en, work_en, int, 0644 );
-
+#ifdef CONFIG_HAS_EARLYSUSPEND
 struct early_suspend early_suspend;
-
+#endif
 #define GPS_BUF_SIZE (1024*4)
 u8 gps_data[GPS_BUF_SIZE];
 

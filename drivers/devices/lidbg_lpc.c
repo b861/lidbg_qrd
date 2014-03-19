@@ -126,7 +126,7 @@ void LPCPowerOnOK(void)
 {
     BYTE buff[] = {0x00, 0x00, 0x00};
 
-    DBG0("Control To MCU Power On######################");
+    lidbg("Control To MCU Power On######################");
     LPCCombinDataStream(buff, 3);
 }
 
@@ -218,7 +218,7 @@ extern bool late_resume_ok;
 
 static void LPCdealReadFromMCUAll(BYTE *p, UINT length)
 {
-#if 1
+#if 0
     static u32 acc_off_count = 0;
     if (iDriverResumeTime)
     {
@@ -352,7 +352,7 @@ static BOOL readFromMCUProcessor(BYTE *p, UINT length)
                 }
                 else
                 {
-                    DBG0("\nRead From MCU CRC Error");
+                    lidbg("\nRead From MCU CRC Error");
                 }
             }
             break;
@@ -380,7 +380,7 @@ BOOL actualReadFromMCU(BYTE *p, UINT length)
     {
 
 #ifdef LPC_DEBUG_LOG
-        DBG0("More ");
+        lidbg("More ");
 #endif
         return TRUE;
     }
@@ -417,6 +417,7 @@ static void workFlyMCUIIC(struct work_struct *work)
     //SOC_IO_ISR_Enable(MCU_IIC_REQ_ISR);
 }
 
+#if 0
 int thread_lpc(void *data)
 {
 
@@ -485,7 +486,7 @@ int thread_lpc(void *data)
     return 0;
 
 }
-
+#endif
 
 
 void mcuFirstInit(void)
@@ -514,7 +515,7 @@ void mcuFirstInit(void)
 
     if(!g_var.is_fly)
     {
-        CREATE_KTHREAD(thread_lpc, NULL);
+       // CREATE_KTHREAD(thread_lpc, NULL);
     }
 
 
@@ -563,15 +564,6 @@ static int  lpc_probe(struct platform_device *pdev)
         return 0;
     }
 
-
-    lidbg("lpc communication+\n");
-    mcuFirstInit();
-    LPCPowerOnOK();
-    LPCNoReset();
-    LPCBackLightOn();
-    lidbg("lpc communication-\n");
-    lpc_work_en = 1;
-
 #ifdef CONFIG_HAS_EARLYSUSPEND
     early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN;
     early_suspend.suspend = lpc_early_suspend;
@@ -596,21 +588,12 @@ static int  lpc_remove(struct platform_device *pdev)
 static void lpc_early_suspend(struct early_suspend *handler)
 {
     DUMP_FUN;
-    lpc_work_en = 0;
-    LPCSuspend();
-
 
 }
 static void lpc_late_resume(struct early_suspend *handler)
 {
     DUMP_FUN_ENTER;
-    LPCResume();
-    LPCPowerOnOK();
-    LPCNoReset();
-    LPCBackLightOn();
-    lpc_work_en = 1;
     DUMP_FUN_LEAVE;
-
 }
 
 #endif
@@ -622,20 +605,12 @@ static void lpc_late_resume(struct early_suspend *handler)
 static int lpc_suspend(struct device *dev)
 {
     DUMP_FUN;
-
-    //TELL_LPC_PWR_OFF;
-
     return 0;
 }
 
 static int lpc_resume(struct device *dev)
 {
     DUMP_FUN;
-
-    //TELL_LPC_PWR_ON;
-    //msleep(200);
-    resume_count++;
-
     return 0;
 }
 
@@ -671,8 +646,11 @@ static struct platform_driver lpc_driver =
 
 static void set_func_tbl(void)
 {
-    //lpc
+#ifdef SOC_msm8x25
     ((struct lidbg_hal *)plidbg_dev)->soc_func_tbl.pfnSOC_LPC_Send = LPCCombinDataStream;
+#else
+	((struct lidbg_interface *)plidbg_dev)->soc_func_tbl.pfnSOC_LPC_Send = LPCCombinDataStream;
+#endif
 
 }
 

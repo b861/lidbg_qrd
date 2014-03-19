@@ -113,7 +113,11 @@
 ////////////
 
 #ifdef BUILD_DRIVERS
+#ifdef SOC_msm8x25
 #include "lidbg_enter.h"
+#else
+#include "lidbg_interface.h"
+#endif
 #endif
 
 
