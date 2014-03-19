@@ -676,7 +676,6 @@ static int __init i2c_api_init(void)
 {
     //±éÀúadapter
     int ret;
-    LIDBG_MODULE_LOG;
 
 #ifdef LIDBG_I2C_GPIO
 #if 0//ndef CONFIG_I2C_GPIO
@@ -704,6 +703,7 @@ static int __init i2c_api_init(void)
 #ifdef USE_I2C_LOCK
     mutex_init(&i2c_lock);
 #endif
+    LIDBG_MODULE_LOG;
 
     return 0 ;
 }

@@ -5,9 +5,14 @@
 
 int load_modules_count = 0;
 
-char *insmod_list[] =
+char *insmod_soc_list[] =
 {
     SOC_KO,
+	NULL,
+};
+
+char *insmod_list[] =
+{
     "lidbg_mem_log.ko",
     "lidbg_common.ko",
     "lidbg_fileserver.ko",
@@ -19,7 +24,6 @@ char *insmod_list[] =
     "lidbg_key.ko",
     "lidbg_i2c.ko",
     "lidbg_io.ko",
-    "lidbg_ad.ko",
     "lidbg_uart.ko",
     "lidbg_main.ko",
     "lidbg_misc.ko",
@@ -46,6 +50,7 @@ bool is_file_exist(char *file)
         return true;
     }
 }
+
 void lidbg_insmod( char argv1[])
 {
 #ifdef USE_CALL_USERHELPER
@@ -89,20 +94,31 @@ int thread_loader(void *data)
 {
     int i, j;
     char path[100];
+	int tmp;
     DUMP_FUN_ENTER;
     CREATE_KTHREAD(thread_check_restart, NULL);
 
     for(i = 0; insmod_path[i] != NULL; i++)
     {
+    	sprintf(path, "%slidbg_loader.ko", insmod_path[i]);
+    	if(!is_file_exist(path))continue;
+
+		for(j = 0; insmod_soc_list[j] != NULL; j++)
+        {
+            sprintf(path, "%s%s", insmod_path[i], insmod_soc_list[j]);
+            lidbg_insmod(path);
+        }
+		
         for(j = 0; insmod_list[j] != NULL; j++)
         {
+        	tmp = load_modules_count;
             sprintf(path, "%s%s", insmod_path[i], insmod_list[j]);
             //lidbg("load %s\n",path);
             lidbg_insmod(path);
+			while(tmp == load_modules_count) msleep(50);
         }
     }
 
-    //launch_user("/system/bin/chmod", "0777", "/dev/mlidbg0");
     DUMP_FUN_LEAVE;
     return 0;
 

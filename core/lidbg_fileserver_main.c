@@ -176,7 +176,7 @@ void lidbg_fileserver_main_init(void)
 
 static int __init lidbg_fileserver_init(void)
 {
-    FS_ALWAYS("\n\n<==IN==>\n\n");
+    FS_ALWAYS("<==IN==>\n\n");
 
     lidbg_fileserver_main_prepare();
 
@@ -187,6 +187,8 @@ static int __init lidbg_fileserver_init(void)
     lidbg_fs_cmn_init();
 
     lidbg_fileserver_main_init();//note,put it in the end.
+    msleep(100);
+	LIDBG_MODULE_LOG;
 
     FS_ALWAYS("<==OUT==>\n");
     return 0;

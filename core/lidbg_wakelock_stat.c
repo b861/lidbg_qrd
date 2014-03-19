@@ -230,7 +230,7 @@ static int __init lidbg_wakelock_stat_init(void)
     FS_REGISTER_INT(g_wakelock_dbg, "wakelock_dbg", 0, cb_kv_show_list);
     FS_REGISTER_INT(g_wakelock_dbg_item, "wakelock_dbg_item", 0, NULL);
 
-
+	LIDBG_MODULE_LOG;
 
     return 0;
 }

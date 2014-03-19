@@ -44,7 +44,6 @@ int lidbg_key_init(void)
 {
     int error;
     int i;
-    LIDBG_MODULE_LOG;
 
     input = input_allocate_device();
     if (!input)
@@ -85,6 +84,11 @@ int lidbg_key_init(void)
 
         goto fail;
     }
+
+	
+    LIDBG_MODULE_LOG;
+
+	
     return 0;
 fail:
     input_free_device(input);

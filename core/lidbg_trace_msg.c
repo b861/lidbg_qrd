@@ -265,6 +265,9 @@ static int  lidbg_trace_msg_probe(struct platform_device *ppdev)
 #ifndef USE_CALL_USERHELPER
     lidbg_uevent_focus("USB_STATE=CONFIGURED",callback_disable_trace_msg );//USB_STATE=DISCONNECTED
 #endif
+
+	LIDBG_MODULE_LOG;
+
     return 0;
 }
 

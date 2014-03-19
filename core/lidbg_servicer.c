@@ -171,7 +171,6 @@ static int __init servicer_init(void)
     //下面的代码可以自动生成设备节点，但是该节点在/dev目录下，而不在/dev/misc目录下
     //其实misc_register就是用主设备号10调用register_chrdev()的 misc设备其实也就是特殊的字符设备。
     //注册驱动程序时采用misc_register函数注册，此函数中会自动创建设备节点，即设备文件。无需mknod指令创建设备文件。因为misc_register()会调用class_device_create()或者device_create()。
-    LIDBG_MODULE_LOG;
 
 
     ret = misc_register(&misc);
@@ -186,6 +185,8 @@ static int __init servicer_init(void)
     CREATE_KTHREAD(thread_u2k, NULL);
 
     lidbg_chmod("/dev/lidbg_servicer");
+	
+    LIDBG_MODULE_LOG;
     return ret;
 }
 

@@ -324,7 +324,8 @@ static struct platform_device lidbg_mem_log_device =
 
 static  int lidbg_msg_init(void)
 {
-    DUMP_BUILD_TIME;
+    
+    LIDBG_MODULE_LOG;
     platform_device_register(&lidbg_mem_log_device);
 
     return platform_driver_register(&lidbg_mem_log_driver);

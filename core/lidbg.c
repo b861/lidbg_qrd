@@ -263,7 +263,6 @@ int lidbg_init(void)
 {
     int result;
     dev_t devno = MKDEV(lidbg_major, 0);
-    LIDBG_MODULE_LOG;
 
     /* …Í«Î…Ë±∏∫≈*/
     if (lidbg_major)
@@ -308,6 +307,7 @@ int lidbg_init(void)
     lidbg_create_proc();
 
     lidbg_chmod("/dev/mlidbg0");
+    LIDBG_MODULE_LOG;
 
     return 0;
 

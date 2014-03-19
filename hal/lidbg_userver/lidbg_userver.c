@@ -16,7 +16,7 @@
 
 #include "lidbg_servicer.h"
 
-#define LIDBG_UEVENT_MSG_LEN  1024
+#define LIDBG_UEVENT_MSG_LEN  (512)
 #define LIDBG_UEVENT_NODE_NAME "lidbg_uevent"
 #define ARRAY_SIZE(ar) (sizeof(ar)/sizeof(ar[0]))
 
@@ -146,7 +146,7 @@ static bool lidbg_uevent_callback(int fd)
         return -1;
 
     n = uevent_kernel_multicast_recv(fd, msg, LIDBG_UEVENT_MSG_LEN);
-    if (n >= 512-64)
+    if (n >= LIDBG_UEVENT_MSG_LEN - 32)
     {
         LIDBG_PRINT( "ERR-overflow-%d,%s\n",n,msg);
 		return 0;
@@ -206,8 +206,13 @@ void *thread_wait_userver(void *arg)
 int main(int argc, char **argv)
 {
     pthread_t lidbg_uevent_tid;
-    system("insmod /flysystem/lib/out/lidbg_uevent.ko");
+    system("mkdir /data/lidbg");
+    system("mkdir /data/lidbg_osd");
+    system("chmod 777 /data/lidbg");
+    system("chmod 777 /data/lidbg_osd");
+	
     system("insmod /system/lib/modules/out/lidbg_uevent.ko");
+    system("insmod /flysystem/lib/out/lidbg_uevent.ko");
 	sleep(1);
 	system("chmod 777 /dev/lidbg_uevent");
     usleep(50 * 1000);

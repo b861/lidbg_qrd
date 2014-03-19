@@ -80,11 +80,11 @@ void lidbg_uart_main(int argc, char **argv)
 
 static int __init io_uart_init(void)
 {
-    LIDBG_MODULE_LOG;
     lidbg("io_uart_init\n");
     spin_lock_init(&uart_lock);
 
     FS_REGISTER_INT(io_uart_en, "io_uart_en", 0, NULL);
+    LIDBG_MODULE_LOG;
 
     return 0;
 }

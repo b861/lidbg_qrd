@@ -119,7 +119,6 @@ static struct miscdevice misc =
 static int __init msg_init(void)
 {
     int ret;
-    LIDBG_MODULE_LOG;
     ret = misc_register(&misc);
 
     INIT_COMPLETION(msg_ready);
@@ -127,6 +126,8 @@ static int __init msg_init(void)
     CREATE_KTHREAD(thread_msg, NULL);
 
     lidbg_chmod("/dev/lidbg_msg");
+	
+    LIDBG_MODULE_LOG;
 
     return ret;
 }

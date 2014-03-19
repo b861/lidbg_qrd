@@ -290,7 +290,7 @@ bool copy_file(char *from, char *to)
 
     if(!fs_is_file_exist(from))
     {
-        FS_ERR("<file_miss:%s>\n", from);
+        FS_ALWAYS("<file_miss:%s>\n", from);
         return false;
     }
 
@@ -303,7 +303,7 @@ bool copy_file(char *from, char *to)
         pfileto = filp_open(to, O_CREAT | O_RDWR | O_TRUNC, 0777);
         if(IS_ERR(pfileto))
         {
-            FS_ERR("fail to open <%s>\n", to);
+            FS_ALWAYS("fail to open <%s>\n", to);
             filp_close(pfilefrom, 0);
             return false;
         }
@@ -316,7 +316,7 @@ bool copy_file(char *from, char *to)
     string = (unsigned char *)kmalloc(file_len, GFP_KERNEL);
     if(string == NULL)
     {
-        FS_ERR(" <kmalloc>\n");
+        FS_ALWAYS(" <kmalloc>\n");
         return false;
     }
 

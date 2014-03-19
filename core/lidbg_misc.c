@@ -206,6 +206,7 @@ int misc_init(void *data)
         lidbg("<reb.exit.%d>\n", reboot_delay_s);
 
     LIDBG_WARN("<==OUT==>\n\n");
+	LIDBG_MODULE_LOG;
 
     return 0;
 
