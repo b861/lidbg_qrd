@@ -1,8 +1,7 @@
 
 #include "lidbg.h"
-
-//zone below [tools]
 #define DEV_NAME "lidbg_uevent"
+
 struct uevent_dev
 {
     struct list_head tmp_list;
@@ -11,33 +10,10 @@ struct uevent_dev
 };
 
 LIST_HEAD(uevent_list);
-static struct completion uevent_wait;
 struct miscdevice lidbg_uevent_device;
-static char last_uevent[1024] = {0};
-static int uevent_dbg = 0;
-//zone end
+int uevent_dbg = 0;
 
-/*
-input:  c io w 27 1
-output:  token[0]=c  token[4]=1  return:5
-*/
-static int token_string(char *buf, char *separator, char **token)
-{
-    char *token_tmp;
-    int pos = 0;
-    if(!buf || !separator)
-    {
-        LIDBG_ERR("buf||separator NULL?\n");
-        return pos;
-    }
-    while((token_tmp = strsep(&buf, separator)) != NULL )
-    {
-        *token = token_tmp;
-        token++;
-        pos++;
-    }
-    return pos;
-}
+
 bool uevent_focus(char *focus, void(*callback)(char *focus, char *uevent))
 {
     struct uevent_dev *add_new_dev=NULL;
@@ -53,11 +29,14 @@ bool uevent_focus(char *focus, void(*callback)(char *focus, char *uevent))
     LIDBG_ERR("add_new_dev != NULL && focus && callback?\n");
     return false;
 }
+
 void uevent_send(enum kobject_action action, char *envp_ext[])
 {
-    if(kobject_uevent_env(&lidbg_uevent_device.this_device->kobj, action, envp_ext) < 0)
-        LIDBG_ERR("%s,%s\n", (envp_ext[0] == NULL ? "null" : envp_ext[0]), (envp_ext[1] == NULL ? "null" : envp_ext[1]));
+	lidbg("%s,%s\n", (envp_ext[0] == NULL ? "null" : envp_ext[0]), (envp_ext[1] == NULL ? "null" : envp_ext[1]));
+    if(kobject_uevent_env(&lidbg_uevent_device.this_device->kobj, action, envp_ext) < 0)	
+    	LIDBG_ERR("uevent_send\n");
 }
+
 void uevent_shell(char *shell_cmd)
 {
     char shellstring[256];
@@ -66,29 +45,6 @@ void uevent_shell(char *shell_cmd)
     lidbg_uevent_send(KOBJ_CHANGE, envp);
 }
 
-static int thread_check_uevent_focus(void *data)
-{
-    struct list_head *client_list = &uevent_list;
-    allow_signal(SIGKILL);
-    allow_signal(SIGSTOP);
-    while(!kthread_should_stop())
-    {
-        if( !wait_for_completion_interruptible(&uevent_wait) && !list_empty(client_list))
-        {
-            struct uevent_dev *pos;
-            list_for_each_entry(pos, client_list, tmp_list)
-            {
-                if(uevent_dbg)
-                    LIDBG_WARN("INFO: %s  %ps\n", pos->focus, pos->callback);
-                if (pos->focus && pos->callback && strstr(last_uevent, pos->focus))
-                    pos->callback(pos->focus, last_uevent);
-            }
-        }
-    }
-    return 1;
-}
-
-
 int lidbg_uevent_open(struct inode *inode, struct file *filp)
 {
     return 0;
@@ -96,8 +52,9 @@ int lidbg_uevent_open(struct inode *inode, struct file *filp)
 
 ssize_t  lidbg_uevent_write(struct file *filp, const char __user *buf, size_t count, loff_t *offset)
 {
-    int pos = 0;
-    char *tmp, *tmp_back, *param[20];
+    char *tmp;
+	struct uevent_dev *pos;
+	struct list_head *client_list = &uevent_list;
     tmp = memdup_user(buf, count);
     if (IS_ERR(tmp))
     {
@@ -105,36 +62,18 @@ ssize_t  lidbg_uevent_write(struct file *filp, const char __user *buf, size_t co
         return PTR_ERR(tmp);
     }
     tmp[count - 1] = '\0';
-    tmp_back = tmp;
 
-    pos = token_string(tmp, "*", param);
+	if(uevent_dbg)
+		lidbg("%s\n", tmp);
 
-    if(pos < 2)
-    {
-        LIDBG_ERR("echo uevent*setprop futengfei.debug 1 > /dev/lidbg_uevent\n");
-        LIDBG_ERR("%s\n", tmp_back);
-        goto out;
-    }
-
-    //zone start [dosomething]
-    if(!strcmp(param[0], "dbg") )
-        uevent_dbg = !uevent_dbg;
-    else if(!strcmp(param[0], "uevent") )
-        lidbg_uevent_shell(param[1]);
-    else if(!strcmp(param[0], "appmsg") )
-    {
-        printk("[appmsg]:%s\n", param[1]);
-    }
-    else if(!strcmp(param[0], "systemuevent") )
-    {
-        strcpy(last_uevent, param[1]);
-        if(uevent_dbg)
-            printk("==========%s\n", last_uevent);
-        complete(&uevent_wait);
-    }
-    //zone end
-out:
-    kfree(tmp_back);
+	list_for_each_entry(pos, client_list, tmp_list)
+	{
+		if(uevent_dbg)
+			LIDBG_WARN("INFO: %s  %ps\n", pos->focus, pos->callback);
+		if (pos->focus && pos->callback && strstr(tmp, pos->focus))
+			pos->callback(pos->focus, tmp);
+	}
+    kfree(tmp);
     return count;
 }
 
@@ -154,18 +93,9 @@ struct miscdevice lidbg_uevent_device =
 
 static int __init lidbg_uevent_init(void)
 {
-    LIDBG_WARN("<==IN==>\n");
-
-    init_completion(&uevent_wait);
-
+    DUMP_BUILD_TIME;
     if (misc_register(&lidbg_uevent_device))
         LIDBG_ERR("misc_register\n");
-    else
-        LIDBG_SUC("misc_register\n");
-
-    kthread_run(thread_check_uevent_focus, NULL, "ftf_uevent");
-
-    LIDBG_WARN("<==OUT==>\n\n");
     return 0;
 }
 
@@ -188,11 +118,23 @@ void lidbg_uevent_shell(char *shell_cmd)
 {
     uevent_shell(shell_cmd);
 }
-//zone end
+
+void lidbg_uevent_main(int argc, char **argv)
+{
+    if(!strcmp(argv[0], "dbg"))
+    {
+		uevent_dbg = !uevent_dbg;
+    }
+	else if(!strcmp(argv[0], "uevent"))
+	{
+		lidbg_uevent_shell(argv[1]);
+	}
+}
 
 EXPORT_SYMBOL(lidbg_uevent_focus);
 EXPORT_SYMBOL(lidbg_uevent_send);
 EXPORT_SYMBOL(lidbg_uevent_shell);
+EXPORT_SYMBOL(lidbg_uevent_main);
 
 module_init(lidbg_uevent_init);
 module_exit(lidbg_uevent_exit);

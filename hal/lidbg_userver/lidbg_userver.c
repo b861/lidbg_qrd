@@ -18,7 +18,6 @@
 
 #define LIDBG_UEVENT_MSG_LEN  (512)
 #define LIDBG_UEVENT_NODE_NAME "lidbg_uevent"
-#define ARRAY_SIZE(ar) (sizeof(ar)/sizeof(ar[0]))
 
 
 struct parse_action_table
@@ -71,7 +70,7 @@ static void memreplace(char *drr, char dest, char replace, int len)
 static void lidbg_uevent_process( struct uevent *uevent)
 {
     int loop;
-    for(loop = 0; loop < ARRAY_SIZE(lidbg_parse_action); loop++)
+    for(loop = 0; loop < SIZE_OF_ARRAY(lidbg_parse_action); loop++)
     {
         if (!strcmp(lidbg_parse_action[loop].action, uevent->lidbg_action))
         {
