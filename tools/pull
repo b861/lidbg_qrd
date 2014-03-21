@@ -4,7 +4,7 @@ spawn git pull
 expect {
     "password" { 
 		 send "git\r"
-		 expect -re "files|Already" { send "pull finish\n"}
+		 expect -re "file|Already" { send "pull finish\n"}
 		}
         }
 expect eof
