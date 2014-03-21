@@ -1,22 +1,7 @@
-#include <stdio.h>
-#include <string.h>
-#include <sys/types.h>
-#include <errno.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <termios.h>
-#include <stdlib.h>
-#include <pthread.h>
-#include <utils/Log.h>
+
 #include "lidbg_servicer.h"
 
-//#define SHARE_MMAP_ENABLE
-
-
 #define LOG_COUNT_MAX (16)
-
-
 
 #define SERVICER_DONOTHING  (0)
 #define LOG_DMESG  (1)

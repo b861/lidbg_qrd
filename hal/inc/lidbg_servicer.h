@@ -1,6 +1,21 @@
 #ifndef _LIGDBG_SERVER_APP__
 #define _LIGDBG_SERVER_APP__
 
+#include <stdio.h>
+#include <string.h>
+#include <sys/types.h>
+#include <errno.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <termios.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <utils/Log.h>
+#include <cutils/uevent.h>
+#include <cutils/properties.h>
+#include <sys/poll.h>
+#include <time.h>
 
 //#undef printf
 #define lidbg  LIDBG_PRINT
@@ -78,6 +93,8 @@ LIDBG_PRINT("hello world\n");
 
 
 */
+
+#define SIZE_OF_ARRAY(array_name) (sizeof(array_name)/sizeof(array_name[0]))
 
 struct lidbg_dev_smem
 {

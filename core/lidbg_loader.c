@@ -71,7 +71,7 @@ void lidbg_insmod( char argv1[])
     }
 #else
     char shell_cmd[256];
-    sprintf(shell_cmd, "insmod %s ", argv1 == NULL ? " " : argv1);
+    sprintf(shell_cmd, "insmod %s", argv1 == NULL ? " " : argv1);
     lidbg_uevent_shell(shell_cmd);
 #endif
 }

@@ -1,24 +1,8 @@
-#include <stdio.h>
-#include <string.h>
-#include <sys/types.h>
-#include <errno.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <termios.h>
-#include <stdlib.h>
-#include <pthread.h>
-#include <utils/Log.h>
-#include <cutils/uevent.h>
-#include <cutils/properties.h>
-#include <sys/poll.h>
-#include <time.h>
 
 #include "lidbg_servicer.h"
 
 #define LIDBG_UEVENT_MSG_LEN  (512)
 #define LIDBG_UEVENT_NODE_NAME "lidbg_uevent"
-
 
 struct parse_action_table
 {
@@ -38,7 +22,6 @@ struct uevent
 static char uevent_ignore[256];
 
 
-
 //zone start [add a new item]
 void progress_action_shell(char *action_para)
 {
@@ -49,8 +32,6 @@ struct parse_action_table lidbg_parse_action[] =
     { "shell", progress_action_shell },
 };
 //zone end
-
-
 
 //@func: replace 'des't to 'replace' between drr to drr+len.
 static void memreplace(char *drr, char dest, char replace, int len)
@@ -69,74 +50,35 @@ static void memreplace(char *drr, char dest, char replace, int len)
 
 static void lidbg_uevent_process( struct uevent *uevent)
 {
-    int loop;
+    unsigned int loop;
     for(loop = 0; loop < SIZE_OF_ARRAY(lidbg_parse_action); loop++)
     {
-        if (!strcmp(lidbg_parse_action[loop].action, uevent->lidbg_action))
+        if (uevent->lidbg_action && uevent->lidbg_parameter && !strcmp(lidbg_parse_action[loop].action, uevent->lidbg_action))
         {
             lidbg_parse_action[loop].progress_action(uevent->lidbg_parameter);
             return ;
         }
     }
-    LIDBG_PRINT( "err action, check: { '%s', '%s'}%d\n", uevent->lidbg_action, uevent->lidbg_parameter, (uevent->lidbg_parameter != NULL));
-    return ;
+    lidbg( "err action, check: { '%s', '%s'}%d\n", uevent->lidbg_action, uevent->lidbg_parameter, (uevent->lidbg_parameter != NULL));
 }
-static void system_uevent_transfer(char *msg, int len)
+static void system_uevent_transfer(char *msg)
 {
-    memreplace(msg, '\0', ' ', len - 1);
-
-    LIDBG_UEVENT("%s\n",msg);
+    LIDBG_UEVENT(msg);
 }
 
 static void parse_uevent(char *msg, struct uevent *uevent)
 {
-    uevent->action = "null";
-    uevent->devpath = "null";
-    uevent->subsystem = "null";
-    uevent->devname = "null";
-    uevent->lidbg_action = "null";
-    uevent->lidbg_parameter = NULL;
-
-    while (*msg)
-    {
-        if (!strncmp(msg, "ACTION=", 7))
-        {
-            msg += 7;
-            uevent->action = msg;
-        }
-        else if (!strncmp(msg, "DEVPATH=", 8))
-        {
-            msg += 8;
-            uevent->devpath = msg;
-        }
-        else if (!strncmp(msg, "SUBSYSTEM=", 10))
-        {
-            msg += 10;
-            uevent->subsystem = msg;
-        }
-        else if (!strncmp(msg, "DEVNAME=", 8))
-        {
-            msg += 8;
-            uevent->devname = msg;
-        }
-        else if (!strncmp(msg, "LIDBG_ACTION=", 13))
-        {
-            msg += 13;
-            uevent->lidbg_action = msg;
-        }
-        else if (!strncmp(msg, "LIDBG_PARAMETER=", 16))
-        {
-            msg += 16;
-            uevent->lidbg_parameter = msg;
-        }
-        while (*msg++)
-            ;
-    }
+	uevent->action = strstr(msg,"ACTION=");
+	uevent->devpath = strstr(msg,"DEVPATH=");
+	uevent->subsystem = strstr(msg,"SUBSYSTEM=");
+	uevent->devname = strstr(msg,"DEVNAME=");
+	uevent->lidbg_action = strstr(msg,"LIDBG_ACTION=");
+	uevent->lidbg_parameter = strstr(msg,"LIDBG_PARAMETER=");
 }
 
 static bool lidbg_uevent_callback(int fd)
 {
-    char msg[LIDBG_UEVENT_MSG_LEN + 2];
+    static char msg[LIDBG_UEVENT_MSG_LEN + 1];
     struct uevent uevent;
     char *p = NULL;
     int n;
@@ -145,37 +87,38 @@ static bool lidbg_uevent_callback(int fd)
         return -1;
 
     n = uevent_kernel_multicast_recv(fd, msg, LIDBG_UEVENT_MSG_LEN);
-    if (n >= LIDBG_UEVENT_MSG_LEN - 32)
+    if (n > LIDBG_UEVENT_MSG_LEN )
     {
-        LIDBG_PRINT( "ERR-overflow-%d,%s\n",n,msg);
-		return 0;
+        lidbg( "ERR-overflow-%d,%s\n",n,msg);
+		return -1;
     }
     msg[n] = '\0';
-    msg[n + 1] = '\0';
+	
+	memreplace(msg, '\0', ' ', n - 1 );
 
     parse_uevent(msg, &uevent);
 
     property_get("lidbg.uevent.ignore", uevent_ignore, "null");
 
-
-    if (!strcmp(uevent.devname, LIDBG_UEVENT_NODE_NAME))
+    if (uevent.devname && !strcmp(uevent.devname, LIDBG_UEVENT_NODE_NAME))
         lidbg_uevent_process(&uevent);
-    else if (strstr(uevent_ignore, uevent.subsystem) == NULL)
-        system_uevent_transfer(msg, n);
+    else if (uevent.subsystem && strstr(uevent_ignore, uevent.subsystem) == NULL)
+        system_uevent_transfer(msg);
 
     return 0;
 }
+
 static void lidbg_uevent_poll(bool (*uevent_callback)(int fd))
 {
     struct pollfd ufd;
-    int ret, fd, i, nr;
+    int fd, nr;
 
-    LIDBG_PRINT( "SUC--------------- FUTENGFEI UEVENT INIT ---------------\n");
+    lidbg( "SUC,FUTENGFEI UEVENT INIT\n");
 
     fd = uevent_open_socket(64 * 1024, true);
     if (fd >= 0)
     {
-        LIDBG_PRINT( "SUC--------------- uevent_open_socket ---------------\n");
+        lidbg( "suc,uevent_open_socket\n");
         fcntl(fd, F_SETFL, O_NONBLOCK);
         ufd.events = POLLIN;
         ufd.fd = fd;
@@ -190,9 +133,10 @@ static void lidbg_uevent_poll(bool (*uevent_callback)(int fd))
         }
     }
     else
-        LIDBG_PRINT( "err--------------- uevent_open_socket ---------------\n");
+        lidbg( "err,uevent_open_socket\n");
 
 }
+
 void *thread_wait_userver(void *arg)
 {
     sleep(1);
@@ -205,6 +149,7 @@ void *thread_wait_userver(void *arg)
 int main(int argc, char **argv)
 {
     pthread_t lidbg_uevent_tid;
+	DUMP_BUILD_TIME_FILE;
     system("mkdir /data/lidbg");
     system("mkdir /data/lidbg_osd");
     system("chmod 777 /data/lidbg");
