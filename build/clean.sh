@@ -16,5 +16,17 @@ if [ "$DBG_OUT_PATH" = "" ]; then
 	echo "exit:  DBG_OUT_PATH=null"
 	exit
 fi
+
+#force clean
 rm -rf $DBG_OUT_PATH
+cd $DBG_ROOT_PATH 
+find . -name "*.ko" -type f -exec rm  {} \;
+find . -name "*.o" -type f -exec rm  {} \;
+find . -name "*.mod.c" -type f -exec rm  {} \;
+find . -name "*.symvers" -type f -exec rm  {} \;
+find . -name "*.order" -type f -exec rm  {} \;
+find . -name "*.depend" -type f -exec rm  {} \;
+find . -name "*~" -type f -exec rm  {} \;
+find . -name "*tmp_versions" -type f -exec rm  {} \;
+find . -name "*orig" -type f -exec rm  {} \;
 

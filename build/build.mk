@@ -22,7 +22,7 @@ modules_install:
 	cp *.ko $(INSTALLDIR)
 
 clean:
-	rm -rf *.o *~ core .depend .*.cmd *.ko *.mod.c .tmp_versions *.order *.symvers *_log *.orig *.tmp
+	rm -rf *.o *~ *.depend *.cmd *.ko *.mod.c *.tmp_versions *.order *.symvers *.orig *.tmp
 
 .PHONY: modules modules_install clean
 
