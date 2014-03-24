@@ -1,6 +1,5 @@
 #include "lidbg.h"
 
-static struct task_struct *reboot_task;
 static int logcat_en;
 static int reboot_delay_s = 0;
 static int cp_data_to_udisk_en = 0;
