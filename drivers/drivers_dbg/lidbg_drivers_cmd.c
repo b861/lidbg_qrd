@@ -6,6 +6,68 @@ int thread_dump_log(void *data)
     lidbg_domineering_ack();
     return 0;
 }
+static bool logcat_enabled = false;
+int thread_enable_logcat(void *data)
+{
+    char cmd[128] = {0};
+    char logcat_file_name[256] = {0};
+    char time_buf[32] = {0};
+
+    if(logcat_enabled)
+        goto out;
+    logcat_enabled = true;
+
+    lidbg("\n\n\nthread_enable_logcat:logcat+\n");
+
+    lidbg_get_current_time(time_buf, NULL);
+    sprintf(logcat_file_name, "logcat_%d_%s.txt", get_machine_id(), time_buf);
+
+    sprintf(cmd, "date >/data/%s", logcat_file_name);
+    lidbg_uevent_shell(cmd);
+    memset(cmd, '\0', sizeof(cmd));
+    ssleep(1);
+    lidbg_uevent_shell("chmod 777 /data/logcat*");
+    ssleep(1);
+    sprintf(cmd, "logcat  -v time>> /data/%s &", logcat_file_name);
+    lidbg_uevent_shell(cmd);
+    lidbg("logcat-\n");
+    return 0;
+out:
+    lidbg("logcat.skip\n");
+    return 0;
+}
+
+static bool dmesg_enabled = false;
+int thread_enable_dmesg(void *data)
+{
+    char cmd[128] = {0};
+    char dmesg_file_name[256] = {0};
+    char time_buf[32] = {0};
+
+    if(dmesg_enabled)
+        goto out;
+    dmesg_enabled = true;
+
+    lidbg("\n\n\nthread_enable_dmesg:kmsg+\n");
+
+    lidbg_trace_msg_disable(1);
+    lidbg_get_current_time(time_buf, NULL);
+    sprintf(dmesg_file_name, "kmsg_%d_%s.txt", get_machine_id(), time_buf);
+
+    sprintf(cmd, "date >/data/%s", dmesg_file_name);
+    lidbg_uevent_shell(cmd);
+    memset(cmd, '\0', sizeof(cmd));
+    ssleep(1);
+    lidbg_uevent_shell("chmod 777 /data/kmsg*");
+    ssleep(1);
+    sprintf(cmd, "cat /proc/kmsg >> /data/%s &", dmesg_file_name);
+    lidbg_uevent_shell(cmd);
+    lidbg("kmsg-\n");
+    return 0;
+out:
+    lidbg("kmsg.skip\n");
+    return 0;
+}
 
 void parse_cmd(char *pt)
 {
@@ -51,23 +113,55 @@ void parse_cmd(char *pt)
         else if (!strcmp(argv[1], "*158#001"))
         {
             lidbg_chmod("/data");
+
+#ifdef USE_CALL_USERHELPER
             k2u_write(LOG_LOGCAT);
+#else
+            CREATE_KTHREAD(thread_enable_logcat, NULL);
+#endif
             lidbg_domineering_ack();
         }
         else if (!strcmp(argv[1], "*158#002"))
         {
             lidbg_chmod("/data");
+
+#ifdef USE_CALL_USERHELPER
             k2u_write(LOG_DMESG);
+#else
+            CREATE_KTHREAD(thread_enable_dmesg, NULL);
+#endif
             lidbg_domineering_ack();
+
         }
         else if (!strcmp(argv[1], "*158#003"))
         {
+#ifdef USE_CALL_USERHELPER
             k2u_write(LOG_CLEAR_LOGCAT_KMSG);
+#else
+            lidbg("clear+logcat*&&kmsg*\n");
+            lidbg_uevent_shell("rm /data/logcat*");
+            lidbg_uevent_shell("rm /data/kmsg*");
+            lidbg("clear-logcat*&&kmsg*\n");
+#endif
             lidbg_domineering_ack();
         }
         else if (!strcmp(argv[1], "*158#004"))
         {
+#ifdef USE_CALL_USERHELPER
             k2u_write(LOG_SHELL_TOP_DF_PS);
+#else
+            lidbg("\n\nLOG_SHELL_TOP_DF_PS+\n");
+            lidbg_uevent_shell("date > /data/machine.txt");
+            lidbg_uevent_shell("cat /proc/cmdline >> /data/machine.txt");
+            lidbg_uevent_shell("getprop fly.version.mcu >> /data/machine.txt");
+            lidbg_uevent_shell("top -n 3 -t >/data/top.txt &");
+            lidbg_uevent_shell("screencap -p /data/screenshot.png &");
+            lidbg_uevent_shell("ps > /data/ps.txt");
+            lidbg_uevent_shell("df > /data/df.txt");
+            lidbg_uevent_shell("chmod 777 /data/*.txt");
+            lidbg_uevent_shell("chmod 777 /data/*.png");
+            lidbg("\n\nLOG_SHELL_TOP_DF_PS-\n");
+#endif
             lidbg_domineering_ack();
         }
         else if (!strcmp(argv[1], "*158#010"))
@@ -90,7 +184,7 @@ void parse_cmd(char *pt)
         else if (!strcmp(argv[1], "*158#013"))
         {
             lidbg_chmod("/data");
-            lidbg_fifo_get(glidbg_msg_fifo,LIDBG_LOG_DIR"lidbg_mem_log.txt", 0);
+            lidbg_fifo_get(glidbg_msg_fifo, LIDBG_LOG_DIR"lidbg_mem_log.txt", 0);
             CREATE_KTHREAD(thread_dump_log, NULL);
         }
 
