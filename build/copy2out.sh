@@ -17,10 +17,14 @@ cp -u $src_dir/*.conf	$dest_dir/	&> /dev/null
 
 cd $DBG_DRIVERS_PATH
 echo "##########################" > $dest_dir/drivers.conf
+echo "##########################" > $dest_dir/state.conf
 for each_dir in `ls -l | grep "^d" | awk '{print $NF}'`
 	do
 	src_dir=$DBG_DRIVERS_PATH/$each_dir
 	cp -u $src_dir/*.ko     $dest_dir/	&> /dev/null
-	cat $src_dir/dbg.conf  >> $dest_dir/drivers.conf
+	cp -u $src_dir/*.conf     $dest_dir/	&> /dev/null
+	cat $src_dir/dbg.confi  >> $dest_dir/drivers.conf
+	cat $src_dir/state.confi  >> $dest_dir/state.conf
 done
 echo "##########################" >> $dest_dir/drivers.conf
+echo "##########################" >> $dest_dir/state.conf
