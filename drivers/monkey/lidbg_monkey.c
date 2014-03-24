@@ -2,7 +2,7 @@
 
 LIDBG_DEFINE;
 
-int g_monkey_dbg = 0;
+int gpio_pin;
 
 struct monkey_dev
 {
@@ -10,30 +10,46 @@ struct monkey_dev
     int monkey_enable;
     int random_on_en;
     int random_off_en;
-    int gpio;
     int on_ms;
     int off_ms;
+    int sleep_ms;
+    bool (*callback)(struct monkey_dev *g_monkey_dev, bool on_off);
 };
 struct monkey_dev *g_monkey_dev;
 
-void monkey_work_func(void)
+
+bool monkey_cmn_callback(struct monkey_dev *dev, bool on_off)
 {
-    u32 delay = g_monkey_dev->on_ms;
+    bool abort_monkey = true;
+    if(on_off)
+    {
+        SOC_IO_Output(0, gpio_pin, 1);
+    }
+    else
+    {
+        SOC_IO_Output(0, gpio_pin, 0);
+    }
+    msleep(dev->sleep_ms);
+    return abort_monkey;
+}
+
+void monkey_work_func(struct monkey_dev *dev)
+{
     //on
-    if(g_monkey_dev->random_on_en)
-        delay = lidbg_get_random_number(g_monkey_dev->on_ms);
-    if(g_monkey_dbg)
-        LIDBG_WARN("==on==%d=====\n", delay);
-    SOC_IO_Output(0, g_monkey_dev->gpio, 1);
-    msleep(delay);
+    dev->sleep_ms = dev->on_ms;
+    if(dev->random_on_en)
+        dev->sleep_ms = lidbg_get_random_number(dev->on_ms);
+    LIDBG_WARN("==on==%d=====\n", dev->sleep_ms);
+    if(!dev->callback(dev, true))
+        monkey_run(false);
+
     //off
-    delay = g_monkey_dev->off_ms;
-    if(g_monkey_dev->random_off_en)
-        delay = lidbg_get_random_number(g_monkey_dev->off_ms);
-    if(g_monkey_dbg)
-        LIDBG_WARN("==off==%d=====\n", delay);
-    SOC_IO_Output(0, g_monkey_dev->gpio, 0);
-    msleep(delay);
+    dev->sleep_ms = dev->off_ms;
+    if(dev->random_off_en)
+        dev->sleep_ms = lidbg_get_random_number(dev->off_ms);
+    LIDBG_WARN("==off==%d=====\n", dev->sleep_ms);
+    if(!dev->callback(dev, false))
+        monkey_run(false);
 
 }
 int monkey_work(void *data)
@@ -41,7 +57,7 @@ int monkey_work(void *data)
     while(1)
     {
         if(g_monkey_dev->monkey_enable)
-            monkey_work_func();
+            monkey_work_func(g_monkey_dev);
         else
             wait_for_completion_interruptible(&g_monkey_dev->monkey_wait);
     }
@@ -62,7 +78,7 @@ void monkey_run(int enable)
 void monkey_config(int gpio, int on_en, int off_en, int on_ms, int off_ms)
 {
     LIDBG_WARN("<%d,%d,%d,%d,%d>\n",  gpio, on_en, off_en, on_ms, off_ms);
-    g_monkey_dev->gpio = gpio;
+    gpio_pin = gpio;
     g_monkey_dev->random_on_en = on_en;
     g_monkey_dev->random_off_en = off_en;
     g_monkey_dev->on_ms = on_ms;
@@ -72,25 +88,30 @@ void cb_kv_monkey_enable(char *key, char *value)
 {
     monkey_run(g_monkey_dev->monkey_enable);
 }
+
 int monkey_init(void *data)
 {
 
     g_monkey_dev = kzalloc(sizeof(struct monkey_dev), GFP_ATOMIC);
     if(g_monkey_dev == NULL)
-        LIDBG_ERR("<kzalloc.g_monkey_dev>\n");
+        goto mem_err;
 
     init_completion(&g_monkey_dev->monkey_wait);
+    g_monkey_dev->callback = monkey_cmn_callback;
 
-    FS_REGISTER_INT(g_monkey_dbg, "monkey_dbg", 0, NULL);
     FS_REGISTER_INT(g_monkey_dev->monkey_enable, "monkey_work_en", 0, cb_kv_monkey_enable);
     FS_REGISTER_INT(g_monkey_dev->random_on_en, "random_on_en", 0, NULL);
     FS_REGISTER_INT(g_monkey_dev->random_off_en, "random_off_en", 0, NULL);
-    FS_REGISTER_INT(g_monkey_dev->gpio, "gpio", 0 , NULL);
     FS_REGISTER_INT(g_monkey_dev->on_ms, "on_ms", 0, NULL);
     FS_REGISTER_INT(g_monkey_dev->off_ms, "off_ms", 0, NULL);
-    LIDBG_WARN("[%d,%d,%d,%d,%d]\n\n", g_monkey_dev->gpio, g_monkey_dev->random_on_en, g_monkey_dev->random_off_en, g_monkey_dev->on_ms, g_monkey_dev->off_ms);
+
+    FS_REGISTER_INT(gpio_pin, "gpio", 0 , NULL);
+
+    LIDBG_WARN("[%d,%d,%d,%d,%d]\n\n", gpio_pin, g_monkey_dev->random_on_en, g_monkey_dev->random_off_en, g_monkey_dev->on_ms, g_monkey_dev->off_ms);
     CREATE_KTHREAD(monkey_work, NULL);
 
+mem_err:
+    LIDBG_ERR("<kzalloc.g_monkey_dev>\n");
     return 0;
 }
 

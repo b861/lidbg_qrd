@@ -98,17 +98,23 @@ void cb_int_mem_log(char *key, char *value )
 {
     cb_password_mem_log(NULL);
 }
-static int thread_reboot(void *data)
+int thread_reboot(void *data)
 {
-    allow_signal(SIGKILL);
-    allow_signal(SIGSTOP);
-
+    bool volume_find;
+    if(!reboot_delay_s)
+    {
+        lidbg("<reb.exit.%d>\n", reboot_delay_s);
+        return 0;
+    }
     ssleep(reboot_delay_s);
-    if(!te_is_ts_touched())
-        lidbg_reboot();
-    else
-        lidbg("<reb.exit:%d,%d>\n", reboot_delay_s, te_is_ts_touched());
-    return 1;
+    volume_find = !!find_mounted_volume_by_mount_point("/mnt/usbdisk") ;
+    if(volume_find && !te_is_ts_touched())
+    {
+        lidbg("<lidbg:thread_reboot,call reboot,%d>\n", te_is_ts_touched());
+        msleep(100);
+        kernel_restart(NULL);
+    }
+    return 0;
 }
 
 void logcat_lunch(char *key, char *value )
@@ -200,13 +206,10 @@ int misc_init(void *data)
     if(1 == logcat_en)
         logcat_lunch(NULL, NULL);
 
-    if(reboot_delay_s)
-        reboot_task = kthread_run(thread_reboot, NULL, "ftf_misc_reb");
-    else
-        lidbg("<reb.exit.%d>\n", reboot_delay_s);
+    CREATE_KTHREAD(thread_reboot, NULL);
 
     LIDBG_WARN("<==OUT==>\n\n");
-	LIDBG_MODULE_LOG;
+    LIDBG_MODULE_LOG;
 
     return 0;
 

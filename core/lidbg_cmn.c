@@ -5,6 +5,7 @@
 
 #define GET_INODE_FROM_FILEP(filp) ((filp)->f_path.dentry->d_inode)
 char g_binpath[50];
+
 bool is_file_exist(char *file)
 {
     struct file *filep;
@@ -17,6 +18,7 @@ bool is_file_exist(char *file)
         return true;
     }
 }
+
 char *get_bin_path( char *buf)
 {
 #ifdef USE_CALL_USERHELPER
@@ -33,8 +35,7 @@ char *get_bin_path( char *buf)
     return buf;
 #endif
 }
-int lidbg_readwrite_file(const char *filename, char *rbuf,
-                         const char *wbuf, size_t length)
+int lidbg_readwrite_file(const char *filename, char *rbuf, const char *wbuf, size_t length)
 {
     int ret = 0;
     struct file *filp = (struct file *) - ENOENT;
@@ -46,56 +47,45 @@ int lidbg_readwrite_file(const char *filename, char *rbuf,
     {
         int mode = (wbuf) ? O_RDWR : O_RDONLY;
         filp = filp_open(filename, mode, S_IRUSR);
-
         if (IS_ERR(filp) || !filp->f_op)
         {
             ret = -ENOENT;
             break;
         }
-
         if (!filp->f_op->write || !filp->f_op->read)
         {
             filp_close(filp, NULL);
             ret = -ENOENT;
             break;
         }
-
         if (length == 0)
         {
-            /* Read the length of the file only */
             struct inode    *inode;
-
             inode = GET_INODE_FROM_FILEP(filp);
             if (!inode)
             {
-                lidbg(
-                    "kernel_readwrite_file: Error 2\n");
+                lidbg("kernel_readwrite_file: Error 2\n");
                 ret = -ENOENT;
                 break;
             }
             ret = i_size_read(inode->i_mapping->host);
             break;
         }
-
         if (wbuf)
         {
-            ret = filp->f_op->write(
-                      filp, wbuf, length, &filp->f_pos);
+            ret = filp->f_op->write(filp, wbuf, length, &filp->f_pos);
             if (ret < 0)
             {
-                lidbg(
-                    "kernel_readwrite_file: Error 3\n");
+                lidbg("kernel_readwrite_file: Error 3\n");
                 break;
             }
         }
         else
         {
-            ret = filp->f_op->read(
-                      filp, rbuf, length, &filp->f_pos);
+            ret = filp->f_op->read(filp, rbuf, length, &filp->f_pos);
             if (ret < 0)
             {
-                lidbg(
-                    "kernel_readwrite_file: Error 4\n");
+                lidbg("kernel_readwrite_file: Error 4\n");
                 break;
             }
         }
@@ -104,13 +94,9 @@ int lidbg_readwrite_file(const char *filename, char *rbuf,
 
     if (!IS_ERR(filp))
         filp_close(filp, NULL);
-
     set_fs(oldfs);
-    //lidbg( "kernel_readwrite_file: ret=%d\n", ret);
-
     return ret;
 }
-
 
 void set_power_state(int state)
 {
@@ -175,18 +161,6 @@ int lidbg_task_kill_select(char *task_name)
     return 0;
 }
 
-#if 0
-{
-    int tmp1, tmp2, tmp3;
-    tmp1 = lidbg_get_ns_count();
-    msleep(5);
-    tmp2 = lidbg_get_ns_count();
-    tmp3 = tmp2 - tmp1;
-    lidbg ("tmp3=%x \n", tmp3);
-
-}
-#endif
-
 u32 lidbg_get_ns_count(void)
 {
     struct timespec t_now;
@@ -195,14 +169,14 @@ u32 lidbg_get_ns_count(void)
 
 }
 
-u32 get_tick_count(void)//return how many ms since boot
+//return how many ms since boot
+u32 get_tick_count(void)
 {
     struct timespec t_now;
     do_posix_clock_monotonic_gettime(&t_now);
     monotonic_to_bootbased(&t_now);
     return t_now.tv_sec * 1000 + t_now.tv_nsec / 1000000;
 }
-
 
 int lidbg_get_current_time(char *time_string, struct rtc_time *ptm)
 {
@@ -212,8 +186,7 @@ int lidbg_get_current_time(char *time_string, struct rtc_time *ptm)
     getnstimeofday(&ts);
     rtc_time_to_tm(ts.tv_sec, &tm);
     if(time_string)
-        tlen = sprintf(time_string, "%d-%02d-%02d__%02d.%02d.%02d",
-                       tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour , tm.tm_min, tm.tm_sec);
+        tlen = sprintf(time_string, "%d-%02d-%02d__%02d.%02d.%02d", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour , tm.tm_min, tm.tm_sec);
     if(ptm)
         *ptm = tm;
     return tlen;
@@ -221,20 +194,18 @@ int lidbg_get_current_time(char *time_string, struct rtc_time *ptm)
 int  lidbg_launch_user( char bin_path[], char argv1[], char argv2[], char argv3[], char argv4[], char argv5[], char argv6[])
 {
 #ifdef USE_CALL_USERHELPER
-    char *argv[] = { bin_path, argv1, argv2, argv3, argv4, argv5, argv6, NULL };
-    static char *envp[] = { "HOME=/", "TERM=linux", "PATH=/system/bin:/sbin", NULL };//tell me sh where it is;
     int ret;
+    char *argv[] = { bin_path, argv1, argv2, argv3, argv4, argv5, argv6, NULL };
+    static char *envp[] = { "HOME=/", "TERM=linux", "PATH=/system/bin:/sbin", NULL };
     lidbg("%s ,%s\n", bin_path, argv1);
     ret = call_usermodehelper(bin_path, argv, envp, UMH_WAIT_EXEC);
     //NOTE:  I test that:use UMH_NO_WAIT can't lunch the exe; UMH_WAIT_PROCwill block the ko,
     //UMH_WAIT_EXEC  is recommended.
     if (ret < 0)
         lidbg("lunch [%s %s] fail!\n", bin_path, argv1);
-    //else
-    //    lidbg("lunch [%s %s] success!\n", bin_path, argv1);
     return ret;
 #else
-    char shell_cmd[256]={0};
+    char shell_cmd[256] = {0};
     sprintf(shell_cmd, "%s %s %s %s %s %s %s ", bin_path, argv1 == NULL ? "" : argv1, argv2 == NULL ? "" : argv2, argv3 == NULL ? "" : argv3, argv4 == NULL ? "" : argv4, argv5 == NULL ? "" : argv5, argv6 == NULL ? "" : argv6);
     lidbg_uevent_shell(shell_cmd);
     return 1;
@@ -458,6 +429,88 @@ int lidbg_token_string(char *buf, char *separator, char **token)
     }
     return pos;
 }
+
+#define ITEM_MAX (35)
+#define MOUNT_BUF_MAX (3 * 1024)
+static int invaled_mount_point = 0;
+static char buf_mount[MOUNT_BUF_MAX];
+static struct mounted_volume g_mounts_state[ITEM_MAX];
+static int read_file(const char *filename, char *rbuff, int readlen)
+{
+    struct file *filep;
+    mm_segment_t old_fs;
+    unsigned int read_len = 1;
+
+    filep = filp_open(filename,  O_RDWR, 0);
+    if(IS_ERR(filep))
+    {
+        printk("err:filp_open\n\n\n\n");
+        return -1;
+    }
+    old_fs = get_fs();
+    set_fs(get_ds());
+
+    filep->f_op->llseek(filep, 0, 0);
+    read_len = filep->f_op->read(filep, rbuff, readlen, &filep->f_pos);
+
+    set_fs(old_fs);
+    filp_close(filep, 0);
+    return read_len;
+}
+bool scan_mounted_volumes(char *info_path)
+{
+    char *mount_item[ITEM_MAX] = {NULL};
+    char 	*item_token[12] = {NULL};
+    char	 *p = buf_mount;
+    int	 ret = false;
+    int mount_item_max;
+    int item_token_len, loop;
+
+    memset(p, '\0', MOUNT_BUF_MAX);
+    if(read_file(info_path, p, MOUNT_BUF_MAX - 1) >= 0)
+    {
+        mount_item_max = lidbg_token_string(buf_mount, "\n", mount_item);
+        invaled_mount_point = mount_item_max;
+        for(loop = 0; loop < mount_item_max; loop++)
+        {
+            item_token_len = lidbg_token_string(mount_item[loop], " ", item_token);
+            if(item_token_len >= 4)
+            {
+                g_mounts_state[loop].device = item_token[0];
+                g_mounts_state[loop].mount_point = item_token[1];
+                g_mounts_state[loop].filesystem = item_token[2];
+                g_mounts_state[loop].others = item_token[3];
+                ret = true;
+            }
+        }
+    }
+    else
+        lidbg("err.scan_mounted_volumes:%d\n", invaled_mount_point);
+    return ret;
+}
+struct mounted_volume *find_mounted_volume_by_mount_point(char *mount_point)
+{
+    int i;
+    scan_mounted_volumes("/proc/mounts");
+    msleep(300);
+    if (invaled_mount_point <= 0)
+    {
+        lidbg("err.invaled_mount_point <= 0,%d\n", invaled_mount_point);
+        return NULL;
+    }
+
+    for (i = 0; i < invaled_mount_point; i++)
+    {
+        if (g_mounts_state[i].mount_point != NULL && !strcmp(g_mounts_state[i].mount_point, mount_point))
+        {
+            LIDBG_SUC("%s\n", mount_point);
+            return &g_mounts_state[i];
+        }
+    }
+    LIDBG_ERR("%s\n", mount_point);
+    return NULL;
+}
+
 void mod_cmn_main(int argc, char **argv)
 {
 
@@ -494,7 +547,6 @@ void mod_cmn_main(int argc, char **argv)
 static int __init cmn_init(void)
 {
     create_new_proc_entry();
-	
     LIDBG_MODULE_LOG;
     return 0;
 }
@@ -510,7 +562,7 @@ module_exit(cmn_exit);
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Flyaudio Inc.");
 
-
+EXPORT_SYMBOL(find_mounted_volume_by_mount_point);
 EXPORT_SYMBOL(lidbg_readdir_and_dealfile);
 EXPORT_SYMBOL(lidbg_token_string);
 EXPORT_SYMBOL(lidbg_get_random_number);
@@ -526,7 +578,6 @@ EXPORT_SYMBOL(lidbg_touch);
 EXPORT_SYMBOL(lidbg_reboot);
 EXPORT_SYMBOL(lidbg_setprop);
 EXPORT_SYMBOL(lidbg_domineering_ack);
-
 EXPORT_SYMBOL(mod_cmn_main);
 EXPORT_SYMBOL(lidbg_get_ns_count);
 EXPORT_SYMBOL(get_tick_count);
@@ -536,6 +587,4 @@ EXPORT_SYMBOL(lidbg_task_kill_select);
 EXPORT_SYMBOL(lidbg_get_current_time);
 EXPORT_SYMBOL(set_power_state);
 EXPORT_SYMBOL(get_bin_path);
-
-
 

@@ -4,6 +4,14 @@
 #define NOTIFIER_MAJOR_SIGNAL_EVENT (0)
 #define NOTIFIER_MINOR_SIGNAL_BAKLIGHT_ACK (0)
 
+struct mounted_volume
+{
+    char *device;
+    char *mount_point;
+    char *filesystem;
+    char *others;
+};
+struct mounted_volume *find_mounted_volume_by_mount_point(char *mount_point);
 bool lidbg_readdir_and_dealfile(char *insure_is_dir, void (*callback)(char *dirname, char *filename));
 u32 lidbg_get_random_number(u32 num_max);
 int  lidbg_token_string(char *buf, char *separator, char **token);
