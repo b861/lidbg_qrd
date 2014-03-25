@@ -20,10 +20,10 @@ function combination_handle()
 		read -p "输入提交到二进制仓库的说明文字：" descriptors
 		soc_build_all && depository_pull && depository_copy_basesystem && depository_add_push $descriptors;;
 	63)
-	        depository_pull && depository_copy_lidbg && depository_copy_basesystem && depository_make_package;;
+	        depository_pull && depository_copy_lidbg & depository_copy_basesystem && depository_make_package && gitk&;;
 
 	65)
-		soc_build_kernel && adb wait-for-devices reboot bootloader &&  soc_flash_kernel & fastboot reboot;;
+		soc_build_kernel && adb wait-for-devices reboot bootloader && soc_flash_kernel && fastboot reboot;;
 
 	*)
 		echo
