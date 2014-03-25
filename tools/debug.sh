@@ -2,7 +2,7 @@
 function debug_menu()
 {
 	cd $DBG_ROOT_PATH
-	echo debug
+	echo debug:
 	echo [51] kmsg
 	echo [52] remount
 	echo [53] adb reboot bootloader

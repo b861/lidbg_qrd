@@ -59,11 +59,6 @@ function soc_menu()
 	echo [21] make bootimage
 	echo [22] make system
 	echo [23] make
-	echo [24] git pull
-	echo [25] git push
-	echo [26] gitk
-	echo [27] git reset
-	echo [30] nautilus
 }
 
 function soc_handle()
@@ -76,16 +71,6 @@ function soc_handle()
 		soc_build_system;;
 	23)
 		soc_build_all;;
-	24)
-		expect $DBG_TOOLS_PATH/pull;;
-	25)
-		expect $DBG_TOOLS_PATH/push;;
-	26)
-		gitk &;;
-	27)
-		git reset --hard;;
-	30)
-		nautilus $DBG_SYSTEM_DIR;;
 	*)
 		echo
 	esac

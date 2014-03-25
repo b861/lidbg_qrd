@@ -60,15 +60,10 @@ function lidbg_menu()
 	echo $DBG_ROOT_PATH
 	echo [1] clean.sh'                        '清除生成文件	
 	echo [2] build.sh'                        '编译模块
-	echo [3] pushfly.sh'                      'push驱动模块到产品系统
-	echo [4] build all'                       '编译lidbg所有文件
-	echo [5] push.sh'                         'push驱动模块到原生系统
-	echo [6] pull'                            'git pull服务器的libg_qrd
-	echo [7] push'                            'git push服务器libg_qrd
-	echo [8] gitk'                            '执行gitk
-	echo [9] git log'                         '执行git log --oneline
-	echo [10] git reset'                      '执行git reset --hard	
-	echo [15] nautilus'                       '打开lidbg目录
+	echo [3] build all'                       '编译lidbg所有文件
+	echo [4] push.sh'                         'push驱动模块到原生系统
+	echo [5] pushfly.sh'                      'push驱动模块到产品系统
+
 	echo
 	soc_menu
 	echo
@@ -77,6 +72,8 @@ function lidbg_menu()
 	debug_menu
 	echo
 	combination_menu
+	echo
+	common_menu
 	echo
 }
 
@@ -87,25 +84,13 @@ function lidbg_handle()
 		1)	
 			lidbg_clean;;
 		2)
-			lidbg_build;;	
+			lidbg_build;;
 		3)
-			lidbg_pushfly_out;;
+			lidbg_build_all;;	
 		4)
-			lidbg_build_all;;
-		5)
 			lidbg_push_out;;
-		6)       
-		 	lidbg_pull;;
-		7)	
-			lidbg_push;;
-		8)
-			gitk &;;
-		9)
-			git log --oneline;;
-		10)
-			git reset --hard && chmod 777 * -R;;
-		15)
-			nautilus $DBG_ROOT_PATH;;
+		5)
+			lidbg_pushfly_out;;
 		*)
 			echo
 		esac
@@ -122,8 +107,10 @@ function menu_do()
 		depository_handle $1
 	elif [[ $1 -le 60 ]] ;then
 		debug_handle $1
-	else
+	elif [[ $1 -le 70 ]] ;then
 		combination_handle $1
+	else
+		common_handle $1
 	fi
 }
 
@@ -131,6 +118,9 @@ function auto_build()
 {
 	       	menu_do $1
 		menu_do $2
+		menu_do $3
+		menu_do $4
+		menu_do $5
 	while :;do
 		cd $DBG_BUILD_PATH
 		lidbg_menu
@@ -150,5 +140,6 @@ source ./env_entry.sh
 . $DBG_TOOLS_PATH/depository.sh
 . $DBG_TOOLS_PATH/debug.sh
 . $DBG_TOOLS_PATH/combination.sh
+. $DBG_TOOLS_PATH/common.sh
 auto_build $1 $2;
 
