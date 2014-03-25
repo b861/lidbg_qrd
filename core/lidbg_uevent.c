@@ -32,7 +32,7 @@ bool uevent_focus(char *focus, void(*callback)(char *focus, char *uevent))
 
 void uevent_send(enum kobject_action action, char *envp_ext[])
 {
-	lidbg("%s,%s\n", (envp_ext[0] == NULL ? "null" : envp_ext[0]), (envp_ext[1] == NULL ? "null" : envp_ext[1]));
+	LIDBG_WARN("%s,%s\n", (envp_ext[0] == NULL ? "null" : envp_ext[0]), (envp_ext[1] == NULL ? "null" : envp_ext[1]));
     if(kobject_uevent_env(&lidbg_uevent_device.this_device->kobj, action, envp_ext) < 0)	
     	LIDBG_ERR("uevent_send\n");
 }
@@ -64,7 +64,7 @@ ssize_t  lidbg_uevent_write(struct file *filp, const char __user *buf, size_t co
     tmp[count - 1] = '\0';
 
 	if(uevent_dbg)
-		lidbg("%s\n", tmp);
+		LIDBG_WARN("%s\n", tmp);
 
 	list_for_each_entry(pos, client_list, tmp_list)
 	{
@@ -93,7 +93,7 @@ struct miscdevice lidbg_uevent_device =
 
 static int __init lidbg_uevent_init(void)
 {
-    DUMP_BUILD_TIME;
+    //DUMP_BUILD_TIME;
     if (misc_register(&lidbg_uevent_device))
         LIDBG_ERR("misc_register\n");
     return 0;

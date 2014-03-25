@@ -80,10 +80,10 @@ int thread_check_restart(void *data)
 {
     DUMP_FUN_ENTER;
     msleep(5000);
-    lidbg("load_modules_count=%d\n", load_modules_count);
+    LIDBG_WARN("load_modules_count=%d\n", load_modules_count);
     if(load_modules_count == 0)
     {
-        lidbg("load_modules_count err,call kernel_restart!\n");
+        LIDBG_ERR("load_modules_count err,call kernel_restart!\n");
         kernel_restart(NULL);
     }
     DUMP_FUN_LEAVE;
@@ -113,7 +113,7 @@ int thread_loader(void *data)
         {
         	tmp = load_modules_count;
             sprintf(path, "%s%s", insmod_path[i], insmod_list[j]);
-            //lidbg("load %s\n",path);
+            //LIDBG_WARN("load %s\n",path);
             lidbg_insmod(path);
 			while(tmp == load_modules_count) msleep(50);
         }
