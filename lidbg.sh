@@ -1,51 +1,45 @@
 
-
-function platform_func()
+function lidbg_clean()
 {
-	echo 平台选择
-	if [ ! -n "$1" ] ;then
-		exit	
-	fi
-}
-
-function clean_func()
-{
+	echo $FUNCNAME
 	echo 清除生成文件
-	./clean.sh
+	cd $DBG_BUILD_PATH && ./clean.sh
 }
 
-function build_func()
+function lidbg_build()
 {
+	echo $FUNCNAME
 	echo 编译模块
-	./build.sh
+	cd $DBG_BUILD_PATH && ./build.sh
 }
 
-function pushfly_func()
+function lidbg_pushfly_out()
 {
+	echo $FUNCNAME
 	echo push驱动模块到产品系统
-	sh $DBG_TOOLS_PATH/pushfly.sh
+	cd  $DBG_TOOLS_PATH && ./pushfly.sh
 }
 
-function release_func()
+function lidbg_push_out()
 {
-	echo 编译lidbg所有文件
-	read -p "是否提交到二进制仓库y/n:" choice
-	if [[ $choice = y ]];then
-		read -p "输入提交到二进制仓库的说明文字：" descriptor
-		. $DBG_TOOLS_PATH/release.sh $descriptor
-	else
-		. $DBG_TOOLS_PATH/release.sh
-	fi
-}
-
-function push_func()
-{
+	echo $FUNCNAME
 	echo push到原生系统
-	sh $DBG_TOOLS_PATH/push.sh
+	cd  $DBG_TOOLS_PATH && ./push.sh
 }
 
-function pull_lidbg_func()
+function lidbg_build_all()
 {
+	echo $FUNCNAME
+	cd $DBG_BUILD_PATH
+	./build_cfg.sh $DBG_SOC $BUILD_VERSION 
+	cd $DBG_HAL_PATH   && ./build_all.sh
+	cd $DBG_BUILD_PATH && ./build.sh
+}
+
+
+function lidbg_pull()
+{
+	echo $FUNCNAME
 	echo git pull
 	expect $DBG_TOOLS_PATH/pull_lidbg
 	chmod 777 $DBG_ROOT_PATH -R
@@ -53,81 +47,65 @@ function pull_lidbg_func()
 	git gc
 }
 
-function push_lidbg_func()
+function lidbg_push()
 {
+	echo $FUNCNAME
 	echo push lidbg_qrd到服务器
 	expect $DBG_TOOLS_PATH/push_lidbg
 }
 
-function catch_log_func()
-{
-	echo catch_log_func
-	mkdir -p $DBG_ROOT_PATH/log
-	adb wait-for-devices shell echo "c mem_log dump" > /dev/mlidbg0
-	adb shell echo "c lidbg_trace_msg disable" > /dev/mlidbg0
-	adb shell logcat >> $DBG_ROOT_PATH/log/logcat.txt &
-	adb shell cat /proc/kmsg >> $DBG_ROOT_PATH/log/kmsg.txt &
-	sleep 5
-	adb pull /data/lidbg/lidbg_mem_log.txt $DBG_ROOT_PATH/log
-}
 
-function menu_func()
+function lidbg_menu()
 {
 	echo $DBG_ROOT_PATH
 	echo [1] clean.sh'                        '清除生成文件	
-	echo [2] buid.sh'                         '编译模块
+	echo [2] build.sh'                        '编译模块
 	echo [3] pushfly.sh'                      'push驱动模块到产品系统
-	echo [4] release.sh'                      '编译lidbg所有文件
+	echo [4] build all'                       '编译lidbg所有文件
 	echo [5] push.sh'                         'push驱动模块到原生系统
-	echo [6] choose platform'                 '选择平台
-	echo [7] pull'                            'git pull服务器的libg_qrd
-	echo [8] push'                            'git push服务器libg_qrd
-	echo [9] gitk'                            '执行gitk
-	echo [10] git log'                        '执行git log --oneline
-	echo [11] git reset'                      '执行git reset --hard	
+	echo [6] pull'                            'git pull服务器的libg_qrd
+	echo [7] push'                            'git push服务器libg_qrd
+	echo [8] gitk'                            '执行gitk
+	echo [9] git log'                         '执行git log --oneline
+	echo [10] git reset'                      '执行git reset --hard	
 	echo [15] nautilus'                       '打开lidbg目录
-	echo [16] catch log'                      '抓取调试信息
-	echo [17] catch kmsg'                     '抓取kmsg调试信息
-	echo [18] remount'                        'remount文件系统 
-	echo 
-	echo $DBG_SYSTEM_DIR
-	soc_menu_func
+	echo
+	soc_menu
+	echo
+	depository_menu
+	echo
+	debug_menu
+	echo
+	combination_menu
 	echo
 }
 
-function handle_func()
+function lidbg_handle()
 {
+		cd $DBG_ROOT_PATH
 		case $1 in
 		1)	
-			clean_func;;
+			lidbg_clean;;
 		2)
-			build_func;;	
+			lidbg_build;;	
 		3)
-			pushfly_func;;
+			lidbg_pushfly_out;;
 		4)
-			release_func;;
+			lidbg_build_all;;
 		5)
-			push_func;;
-		6)
-			platform_func;;
-		7)       
-		 	pull_lidbg_func;;
-		8)	
-			push_lidbg_func;;
-		9)
+			lidbg_push_out;;
+		6)       
+		 	lidbg_pull;;
+		7)	
+			lidbg_push;;
+		8)
 			gitk &;;
-		10)
+		9)
 			git log --oneline;;
-		11)
+		10)
 			git reset --hard && chmod 777 * -R;;
 		15)
 			nautilus $DBG_ROOT_PATH;;
-		16)
-			catch_log_func;;
-		17)
-			expect $DBG_TOOLS_PATH/kmsg;;
-		18)
-			expect $DBG_TOOLS_PATH/root;;
 		*)
 			echo
 		esac
@@ -137,9 +115,15 @@ function handle_func()
 function menu_do()
 {
 	if [[ $1 -le 20 ]] ;then
-		handle_func $1
+		lidbg_handle $1
+	elif [[ $1 -le 40 ]] ;then
+		soc_handle $1
+	elif [[ $1 -le 50 ]] ;then
+		depository_handle $1
+	elif [[ $1 -le 60 ]] ;then
+		debug_handle $1
 	else
-		soc_handle_func $1
+		combination_handle $1
 	fi
 }
 
@@ -149,7 +133,7 @@ function auto_build()
 		menu_do $2
 	while :;do
 		cd $DBG_BUILD_PATH
-		menu_func
+		lidbg_menu
 		read -p "Enter your select:" name1 name2 name3 name4 name5
 	       	menu_do $name1
 		menu_do $name2
@@ -163,5 +147,8 @@ function auto_build()
 cd build
 source ./env_entry.sh
 . $DBG_TOOLS_PATH/soc_$DBG_SOC.sh
+. $DBG_TOOLS_PATH/depository.sh
+. $DBG_TOOLS_PATH/debug.sh
+. $DBG_TOOLS_PATH/combination.sh
 auto_build $1 $2;
 
