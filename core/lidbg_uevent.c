@@ -55,13 +55,13 @@ ssize_t  lidbg_uevent_write(struct file *filp, const char __user *buf, size_t co
     char *tmp;
 	struct uevent_dev *pos;
 	struct list_head *client_list = &uevent_list;
-    tmp = memdup_user(buf, count);
+    tmp = memdup_user(buf, count + 1);
     if (IS_ERR(tmp))
     {
         LIDBG_ERR("<memdup_user>\n");
         return PTR_ERR(tmp);
     }
-    tmp[count - 1] = '\0';
+    tmp[count] = '\0';
 
 	if(uevent_dbg)
 		LIDBG_WARN("%s\n", tmp);
@@ -126,10 +126,6 @@ void lidbg_uevent_main(int argc, char **argv)
     {
 		uevent_dbg = !uevent_dbg;
     }
-	else if(!strcmp(argv[0], "uevent"))
-	{
-		lidbg_uevent_shell(argv[1]);
-	}
 }
 
 EXPORT_SYMBOL(lidbg_uevent_focus);

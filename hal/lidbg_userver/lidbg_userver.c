@@ -19,7 +19,8 @@ struct uevent
     char *lidbg_action;
     char *lidbg_parameter;
 };
-static char uevent_ignore[256];
+
+static char *uevent_ignore = "cpu,power_supply";
 
 
 //zone start [add a new item]
@@ -131,8 +132,6 @@ static bool lidbg_uevent_callback(int fd)
     msg[n] = '\0';
 	
     parse_uevent(msg, &uevent);
-
-    property_get("lidbg.uevent.ignore", uevent_ignore, "null");
 
     if (uevent.devname && !strcmp(uevent.devname, LIDBG_UEVENT_NODE_NAME))
         lidbg_uevent_process(&uevent);
