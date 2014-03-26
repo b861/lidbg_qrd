@@ -1,9 +1,10 @@
 
 function print_dir_num()
 {
-	echo 1--$DBG_ROOT_PATH
-	echo 2--$DBG_SYSTEM_DIR
-	echo 3--$RELEASE_REPOSITORY
+	echo
+	echo "<1> "$DBG_ROOT_PATH
+	echo "<2> "$DBG_SYSTEM_DIR
+	echo "<3> "$RELEASE_REPOSITORY
 }
 
 function get_dir()

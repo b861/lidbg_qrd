@@ -3,9 +3,9 @@ function combination_menu()
 {
 	cd $DBG_ROOT_PATH
 	echo 组合选项:
-	echo "[61] 完整编译lidbg并提交到产品二进制仓库           (1  3  81 41 82)"
-	echo "[62] 编译basesystem并提交到产品二进制仓库          (23 81 42 82)"
-	echo "[63] 拷贝lidbg和basesystem到二进制仓库后生成升级包 (81 41 42 43)"
+	echo "[61] 完整编译lidbg并提交到产品二进制仓库           (1  3  81(1) 41 82(3))"
+	echo "[62] 编译basesystem并提交到产品二进制仓库          (23 81(2) 42 82(3))"
+	echo "[63] 拷贝lidbg和basesystem到二进制仓库后生成升级包 (81(3) 41 42 43)"
 	echo "[65] 编译烧写内核后重启                            (21 53 54 56)"
 }
 
