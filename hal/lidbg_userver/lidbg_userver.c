@@ -68,12 +68,48 @@ static void system_uevent_transfer(char *msg)
 
 static void parse_uevent(char *msg, struct uevent *uevent)
 {
-	uevent->action = strstr(msg,"ACTION=");
-	uevent->devpath = strstr(msg,"DEVPATH=");
-	uevent->subsystem = strstr(msg,"SUBSYSTEM=");
-	uevent->devname = strstr(msg,"DEVNAME=");
-	uevent->lidbg_action = strstr(msg,"LIDBG_ACTION=");
-	uevent->lidbg_parameter = strstr(msg,"LIDBG_PARAMETER=");
+    uevent->action = "null";
+    uevent->devpath = "null";
+    uevent->subsystem = "null";
+    uevent->devname = "null";
+    uevent->lidbg_action = "null";
+    uevent->lidbg_parameter = NULL;
+
+    while (*msg)
+    {
+        if (!strncmp(msg, "ACTION=", 7))
+        {
+            msg += 7;
+            uevent->action = msg;
+        }
+        else if (!strncmp(msg, "DEVPATH=", 8))
+        {
+            msg += 8;
+            uevent->devpath = msg;
+        }
+        else if (!strncmp(msg, "SUBSYSTEM=", 10))
+        {
+            msg += 10;
+            uevent->subsystem = msg;
+        }
+        else if (!strncmp(msg, "DEVNAME=", 8))
+        {
+            msg += 8;
+            uevent->devname = msg;
+        }
+        else if (!strncmp(msg, "LIDBG_ACTION=", 13))
+        {
+            msg += 13;
+            uevent->lidbg_action = msg;
+        }
+        else if (!strncmp(msg, "LIDBG_PARAMETER=", 16))
+        {
+            msg += 16;
+            uevent->lidbg_parameter = msg;
+        }
+        while (*msg++)
+            ;
+    }
 }
 
 static bool lidbg_uevent_callback(int fd)
@@ -94,8 +130,6 @@ static bool lidbg_uevent_callback(int fd)
     }
     msg[n] = '\0';
 	
-	memreplace(msg, '\0', ' ', n - 1 );
-
     parse_uevent(msg, &uevent);
 
     property_get("lidbg.uevent.ignore", uevent_ignore, "null");
@@ -103,7 +137,10 @@ static bool lidbg_uevent_callback(int fd)
     if (uevent.devname && !strcmp(uevent.devname, LIDBG_UEVENT_NODE_NAME))
         lidbg_uevent_process(&uevent);
     else if (uevent.subsystem && strstr(uevent_ignore, uevent.subsystem) == NULL)
+	{
+		memreplace(msg, '\0', ' ', n - 1 );
         system_uevent_transfer(msg);
+	}
 
     return 0;
 }

@@ -15,6 +15,7 @@ struct monkey_dev
     int sleep_ms;
     bool (*callback)(struct monkey_dev *g_monkey_dev, bool on_off);
 };
+struct monkey_dev private_dev;
 struct monkey_dev *g_monkey_dev;
 
 
@@ -91,10 +92,7 @@ void cb_kv_monkey_enable(char *key, char *value)
 
 int monkey_init(void *data)
 {
-
-    g_monkey_dev = kzalloc(sizeof(struct monkey_dev), GFP_ATOMIC);
-    if(g_monkey_dev == NULL)
-        goto mem_err;
+	g_monkey_dev = &private_dev;
 
     init_completion(&g_monkey_dev->monkey_wait);
     g_monkey_dev->callback = monkey_cmn_callback;
@@ -109,9 +107,6 @@ int monkey_init(void *data)
 
     LIDBG_WARN("[%d,%d,%d,%d,%d]\n\n", gpio_pin, g_monkey_dev->random_on_en, g_monkey_dev->random_off_en, g_monkey_dev->on_ms, g_monkey_dev->off_ms);
     CREATE_KTHREAD(monkey_work, NULL);
-
-mem_err:
-    LIDBG_ERR("<kzalloc.g_monkey_dev>\n");
     return 0;
 }
 
