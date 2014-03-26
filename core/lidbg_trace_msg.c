@@ -255,7 +255,10 @@ static int  lidbg_trace_msg_probe(struct platform_device *ppdev)
 
     fs_file_separator(LIDBG_TRACE_MSG_PATH);
     fs_register_filename_list(LIDBG_TRACE_MSG_PATH, true);
+#ifndef TRACE_MSG_DISABLE
     FS_REGISTER_INT(pdev->disable_flag, "trace_msg_disable", 1, NULL);
+#endif
+
 #if  TRACE_MSG_FROM_KMSG
     CREATE_KTHREAD(thread_trace_msg_in, NULL);
 #endif

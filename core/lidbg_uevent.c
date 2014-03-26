@@ -68,10 +68,11 @@ ssize_t  lidbg_uevent_write(struct file *filp, const char __user *buf, size_t co
 
 	list_for_each_entry(pos, client_list, tmp_list)
 	{
-		if(uevent_dbg)
-			LIDBG_WARN("INFO: %s  %ps\n", pos->focus, pos->callback);
 		if (pos->focus && pos->callback && strstr(tmp, pos->focus))
+		{
+			LIDBG_SUC("called: %s  %ps\n", pos->focus, pos->callback);
 			pos->callback(pos->focus, tmp);
+		}
 	}
     kfree(tmp);
     return count;

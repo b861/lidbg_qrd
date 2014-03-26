@@ -19,7 +19,7 @@ struct cmd_item lidbg_cmd_item[] =
     {"servicer", lidbg_servicer_main},
     {"cmm", mod_cmn_main},
     {"file", lidbg_fileserver_main},
-    {"lidbg_trace_msg", trace_msg_main},
+    {"trace_msg", trace_msg_main},
     {"mem_log", mem_log_main},
 #ifndef USE_CALL_USERHELPER
     {"uevent", lidbg_uevent_main},
