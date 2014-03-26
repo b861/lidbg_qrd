@@ -49,18 +49,24 @@ int soc_io_irq(struct io_int_config *pio_int_config)//need set to input first?
 int soc_io_config(u32 index, bool direction, u32 pull, u32 drive_strength, bool force_reconfig)
 {
     int rc;
+	struct gpiomux_setting lidbg_setting_active = {
+	  .func = GPIOMUX_FUNC_GPIO, 
+	  .drv = drive_strength,
+	  .pull = pull,
+	  .dir = direction,
+	};
 
+	struct msm_gpiomux_config lidbg_configs[] = {
+	{
+		 .gpio = index,
+		 .settings = { 
+		    [GPIOMUX_ACTIVE] = &lidbg_setting_active,
+		},
+		},
+	};
     if(force_reconfig)
     {
-        rc = gpio_tlmm_config(GPIO_CFG(index, 0,
-                                       direction, pull,
-                                       drive_strength), GPIO_CFG_ENABLE);
-        if (rc)
-        {
-            lidbg("%s: gpio_tlmm_config for %d failed\n",
-                  __func__, index);
-            return 0;
-        }
+       msm_gpiomux_install(lidbg_configs, ARRAY_SIZE(lidbg_configs));
     }
 
     if(soc_io_config_log[index] == 1)
@@ -77,21 +83,7 @@ int soc_io_config(u32 index, bool direction, u32 pull, u32 drive_strength, bool 
 
         lidbg("gpio_request:index %d\n" , index);
 
-#ifndef CONFIG_IO_EVERY_TIMES
-        if(!force_reconfig)
-        {
-            rc = gpio_tlmm_config(GPIO_CFG(index, 0,
-                                           direction, pull,
-                                           drive_strength), GPIO_CFG_ENABLE);
-            if (rc)
-            {
-                lidbg("%s: gpio_tlmm_config for %d failed\n",
-                      __func__, index);
-                return 0;
-            }
-        }
-#endif
-
+        msm_gpiomux_install(lidbg_configs, ARRAY_SIZE(lidbg_configs));
         err = gpio_request(index, "lidbg_io");
         if (err)
         {
