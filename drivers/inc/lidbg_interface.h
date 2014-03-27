@@ -3,7 +3,7 @@
 #define _FLY_INTERFACE__
 
 #ifdef BUILD_DRIVERS
-#include <devices.h>
+#include <msm8226_devices.h>
 #include <lidbg_bpmsg.h>
 #include <lidbg_ts_probe.h>
 #include <lidbg_monkey.h>

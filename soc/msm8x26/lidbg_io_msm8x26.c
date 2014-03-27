@@ -48,7 +48,7 @@ int soc_io_irq(struct io_int_config *pio_int_config)//need set to input first?
 
 int soc_io_config(u32 index, bool direction, u32 pull, u32 drive_strength, bool force_reconfig)
 {
-    int rc;
+    //int rc;
 	struct gpiomux_setting lidbg_setting_active = {
 	  .func = GPIOMUX_FUNC_GPIO, 
 	  .drv = drive_strength,

@@ -379,7 +379,7 @@ void fly_interface_deinit(void)
 module_init(fly_interface_init);
 module_exit(fly_interface_deinit);
 EXPORT_SYMBOL(recovery_mode);
-
+EXPORT_SYMBOL(plidbg_dev);
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Flyaudad Inc.");
 
