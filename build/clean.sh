@@ -29,4 +29,5 @@ find . -name "*.depend" -type f -exec rm  {} \;
 find . -name "*~" -type f -exec rm  {} \;
 find . -name "*tmp_versions" -type f -exec rm  {} \;
 find . -name "*orig" -type f -exec rm  {} \;
+find . -name "*.cmd" -type f -exec rm  {} \;
 
