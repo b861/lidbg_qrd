@@ -46,7 +46,7 @@ struct fs_filename_item
 #define build_time_fly_path "/flysystem/lib/out/build_time.conf"
 #define build_time_lidbg_path "/system/lib/modules/out/build_time.conf"
 extern void lidbg_fileserver_main(int argc, char **argv);
-extern void fs_cp_data_to_udisk(void);
+extern void fs_cp_data_to_udisk(bool encode);
 extern void fs_file_separator(char *file2separator);
 extern void fs_regist_filedetec(char *filename, void (*cb_filedetec)(char *filename ));
 extern void fs_enable_kmsg( bool enable );
@@ -71,6 +71,7 @@ extern bool fs_clear_file(char *filename);
 extern bool fs_is_file_exist(char *file);
 extern bool fs_is_file_updated(char *filename, char *infofile);
 extern bool fs_copy_file(char *from, char *to);
+extern bool fs_copy_file_encode(char *from, char *to);
 extern bool fs_upload_machine_log(void);
 extern bool fs_register_filename_list(char *filename, bool remove_after_copy);
 extern void fs_show_filename_list(void);

@@ -122,7 +122,7 @@ void logcat_lunch(char *key, char *value )
 }
 void cb_cp_data_to_udisk(char *key, char *value )
 {
-    fs_cp_data_to_udisk();
+    fs_cp_data_to_udisk(false);
 }
 int loop_warnning(void *data)
 {

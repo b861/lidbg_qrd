@@ -279,7 +279,20 @@ int fs_get_file_size(char *file)
         return file_len;
     }
 }
-bool copy_file(char *from, char *to)
+void mem_encode(char *addr, int length, int step_size)
+{
+    int loop = 0;
+    char temp;
+    while(loop < length)
+    {
+        temp = *(addr + loop) + step_size;
+        if(temp > 0 && temp < 127)
+            *(addr + loop) = temp;
+        loop++;
+    }
+}
+
+bool copy_file(char *from, char *to, bool encode)
 {
     char *string = NULL;
     unsigned int file_len;
@@ -325,6 +338,9 @@ bool copy_file(char *from, char *to)
     set_fs(old_fs);
     filp_close(pfilefrom, 0);
 
+    if(encode)
+        mem_encode(string, file_len, 1);
+
     old_fs = get_fs();
     set_fs(get_ds());
     pfileto->f_op->llseek(pfileto, 0, 0);
@@ -369,9 +385,10 @@ void cb_kv_filedetecen(char *key, char *value)
     if ( (!strcmp(key, "fs_dbg_file_detect" ))  &&  (strcmp(value, "0" )) )
         show_filedetec_list();
 }
-void cp_data_to_udisk(void)
+void cp_data_to_udisk(bool encode)
 {
     struct list_head *client_list = &fs_filename_list;
+    FS_ALWAYS("encode:%d\n", encode);
     if(!list_empty(client_list))
     {
         int index = 0;
@@ -397,7 +414,10 @@ void cp_data_to_udisk(void)
                     index++;
                     memset(tbuff, '\0', sizeof(tbuff));
                     sprintf(tbuff, "%s/%s", dir, ++file);
-                    fs_copy_file(pos->filename, tbuff);
+                    if(encode)
+                        fs_copy_file_encode(pos->filename, tbuff);
+                    else
+                        fs_copy_file(pos->filename, tbuff);
                 }
                 if(pos->remove_after_copy)
                     lidbg_rm(pos->filename);
@@ -425,7 +445,11 @@ void fs_regist_filedetec(char *filename, void (*cb_filedetec)(char *filename ))
 }
 bool fs_copy_file(char *from, char *to)
 {
-    return copy_file(from, to);
+    return copy_file(from, to, false);
+}
+bool fs_copy_file_encode(char *from, char *to)
+{
+    return copy_file(from, to, true);
 }
 bool fs_is_file_exist(char *file)
 {
@@ -457,14 +481,16 @@ void fs_show_filename_list(void)
 {
     show_filename_list(&fs_filename_list);
 }
+static bool data_encode = false;
 int thread_cp_data_to_udiskt(void *data)
 {
     fs_msg_fifo_to_file(NULL, NULL);
-    cp_data_to_udisk();
+    cp_data_to_udisk(data_encode);
     return 0;
 }
-void fs_cp_data_to_udisk(void)
+void fs_cp_data_to_udisk(bool encode)
 {
+    data_encode = encode;
     CREATE_KTHREAD(thread_cp_data_to_udiskt, NULL);
 }
 //zone end
@@ -485,6 +511,7 @@ EXPORT_SYMBOL(fs_cp_data_to_udisk);
 EXPORT_SYMBOL(fs_readwrite_file);
 EXPORT_SYMBOL(fs_regist_filedetec);
 EXPORT_SYMBOL(fs_copy_file);
+EXPORT_SYMBOL(fs_copy_file_encode);
 EXPORT_SYMBOL(fs_is_file_exist);
 EXPORT_SYMBOL(fs_is_file_updated);
 EXPORT_SYMBOL(fs_clear_file);

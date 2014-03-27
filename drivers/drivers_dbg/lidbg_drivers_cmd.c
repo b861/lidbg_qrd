@@ -1,8 +1,8 @@
-
+static bool encode = false;
 int thread_dump_log(void *data)
 {
     msleep(7000);
-    fs_cp_data_to_udisk();
+    fs_cp_data_to_udisk(encode);
     lidbg_domineering_ack();
     return 0;
 }
@@ -183,6 +183,14 @@ void parse_cmd(char *pt)
         }
         else if (!strcmp(argv[1], "*158#013"))
         {
+            encode = false;
+            lidbg_chmod("/data");
+            lidbg_fifo_get(glidbg_msg_fifo, LIDBG_LOG_DIR"lidbg_mem_log.txt", 0);
+            CREATE_KTHREAD(thread_dump_log, NULL);
+        }
+        else if (!strcmp(argv[1], "*168#001"))
+        {
+            encode = true;
             lidbg_chmod("/data");
             lidbg_fifo_get(glidbg_msg_fifo, LIDBG_LOG_DIR"lidbg_mem_log.txt", 0);
             CREATE_KTHREAD(thread_dump_log, NULL);
