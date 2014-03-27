@@ -1,9 +1,9 @@
 
 #include "lidbg.h"
+LIDBG_DEFINE;
 int led_en ;
 int ad_en;
 int button_en;
-extern struct lidbg_interface *plidbg_dev;
 int thread_dev_init(void *data);
 int thread_led(void *data);
 int thread_key(void *data);
@@ -117,7 +117,7 @@ int thread_key(void *data)
 }
 static int soc_dev_probe(struct platform_device *pdev)
 {
-    printk("=====soc_dev_probe====\n");
+    lidbg("=====soc_dev_probe====\n");
     CREATE_KTHREAD(thread_dev_init, NULL);
 	
     FS_REGISTER_INT(led_en, "led_en", 1, NULL);
@@ -231,7 +231,8 @@ static struct platform_driver soc_devices_driver =
 };
 int dev_init(void)
 {
-	printk("=======msm826_dev_init========\n");
+	lidbg("=======msm826_dev_init========\n");
+	LIDBG_GET;
     platform_device_register(&soc_devices);
     platform_driver_register(&soc_devices_driver);
 	return 0;
