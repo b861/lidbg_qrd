@@ -23,7 +23,7 @@
  */
 
 
-#include "gt911.h"
+#include "gt911_25q.h"
 
 #include "lidbg.h"
 LIDBG_DEFINE;

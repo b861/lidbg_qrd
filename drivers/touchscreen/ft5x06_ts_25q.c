@@ -28,7 +28,7 @@
 #include <linux/gpio.h>
 #include <linux/regulator/consumer.h>
 #include <linux/input/mt.h>
-#include "ft5x06_ts.h"
+#include "ft5x06_ts_25q.h"
 
 #include "lidbg.h"
 

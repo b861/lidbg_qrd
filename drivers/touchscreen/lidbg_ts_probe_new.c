@@ -4,7 +4,13 @@
 LIDBG_DEFINE;
 
 //zone below [Variable area]
+#ifdef SOC_msm8x25
 #define RESET_GPIO (27)
+#define TS_I2C_BUS (1)
+else
+#define RESET_GPIO (16)
+#define TS_I2C_BUS (5)
+#endif
 #define RESET_GPIO_ACTIVE (1)
 #define USE_TS_NUM (-1)
 //zone end
@@ -14,7 +20,7 @@ LIDBG_DEFINE;
 #else
 #define FLYHAL_CONFIG_PATH "/flysystem/flyconfig/default/lidbgconfig/flylidbgconfig.txt"
 #endif
-#define TS_I2C_BUS (1)
+//#define TS_I2C_BUS (1)
 
 static LIST_HEAD(flyhal_config_list);
 static int ts_scan_delayms;
