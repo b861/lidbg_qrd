@@ -1,3 +1,10 @@
+#ifdef USE_CALL_USERHELPER
+void lidbg_uevent_shell(char *shell_cmd)
+{
+}
+#endif
+
+
 static bool encode = false;
 int thread_dump_log(void *data)
 {
