@@ -40,7 +40,7 @@ tw9912info_t global_tw9912_info_for_PAL_I =
 void terminal_tc358746xbg_config(int argc, char **argv)
 {//使用方法请阅读该文件目录下的README
     lidbg("terminal_tc358746xbg_config()\n");
-    if(!strcmp(argv[1], "write"))
+    if(!strcmp(argv[1], "w"))
     {
         u8 buf[4] = {0, 0, 0, 0}, flag;
         u16 sub_addr;
@@ -65,7 +65,7 @@ void terminal_tc358746xbg_config(int argc, char **argv)
         }
 
     }
-    else if(!strcmp(argv[1], "Read"))
+    else if(!strcmp(argv[1], "r"))
     {
         u8 flag, buf[4] = {0, 0, 0, 0};
         u16 sub_addr;
@@ -105,7 +105,7 @@ void terminal_tc358746xbg_config(int argc, char **argv)
 #ifdef DEBUG_TW9912
 void terminal_tw9912_config(int argc, char **argv)
 {
-    if(!strcmp(argv[1], "write"))
+    if(!strcmp(argv[1], "w"))
     {
         u8 buf[2];
 
@@ -117,24 +117,26 @@ void terminal_tw9912_config(int argc, char **argv)
         buf[1] = valu;
 #ifdef FLY_VIDEO_BOARD_V3
         i2c_write_byte(3, 0x44, buf , 2);
+        lidbg("FLY_VIDEO_BOARD_V3 write add=0x%02x, valu=0x%02x\n", sub_addr, valu);
 #else
         i2c_write_byte(1, 0x44, buf , 2);
         i2c_read_byte(1, 0x44, sub_addr , (char *)&valu, 1);
-        lidbg("read adder=0x%02x, valu=0x%02x\n", buf[0], valu);
+        lidbg("write add=0x%02x, valu=0x%02x\n", sub_addr, valu);
 #endif
     }
-    else if(!strcmp(argv[1], "Read"))
+    else if(!strcmp(argv[1], "r"))
     {
         u16 sub_addr;
         u8 buf[2] = {0, 0};
+	 int ret = 0;
+	 
         sub_addr = simple_strtoul(argv[2], 0, 0);
 #ifdef FLY_VIDEO_BOARD_V3
-        int ret;
         i2c_read_byte(3, 0x44, sub_addr , buf, 1);
-        lidbg(" FLY_VIDEO_BOARD_V3 read adder=0x%02x,valu=0x%02x ret=%d \n", sub_addr, buf[0], ret);
+        lidbg(" FLY_VIDEO_BOARD_V3 read add=0x%02x,valu=0x%02x ret=%d \n", sub_addr, buf[0], ret);
 #else
         i2c_read_byte(1, 0x44, sub_addr , buf, 1);
-        lidbg("read adder=0x%02x,valu=0x%02x\n", sub_addr, buf[0]);
+        lidbg("read add=0x%02x,valu=0x%02x\n", sub_addr, buf[0]);
 #endif
     }
     else
@@ -152,7 +154,7 @@ void lidbg_video_main(int argc, char **argv)
         chips_config_begin(NTSC_P);
     }
 #ifdef DEBUG_TW9912
-    else if(!strcmp(argv[0], "Tw9912"))
+    else if(!strcmp(argv[0], "9912"))
     {
         terminal_tw9912_config(argc, argv);
     }
@@ -160,7 +162,7 @@ void lidbg_video_main(int argc, char **argv)
     else  if(!strcmp(argv[0], "debug_thread_run"))
         global_debug_thread = !global_debug_thread;
 #ifdef DEBUG_TC358
-    else if(!strcmp(argv[0], "Tc358746"))
+    else if(!strcmp(argv[0], "358"))
     {
         terminal_tc358746xbg_config(argc, argv);
     }

@@ -221,8 +221,8 @@ void parse_cmd(char *pt)
     {
         int new_argc;
         char **new_argv;
-        new_argc = argc - 2;
-        new_argv = argv + 2;
+        new_argc = argc - 1;
+        new_argv = argv + 1;
         lidbg_video_main(new_argc, new_argv);
     }
 #endif
