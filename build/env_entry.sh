@@ -23,8 +23,8 @@ case "$DBG_PLATFORM" in
 	DBG_CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilt/linux-x86/toolchain/arm-eabi-4.4.3/bin/arm-eabi-
 	SYSTEM_BUILD_TYPE=eng
 	DBG_KERNEL_SRC_DIR=$DBG_SYSTEM_DIR/kernel
-	DBG_KERNEL_OBJ_DIR=$DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/obj/KERNEL_OBJ;;
-
+	DBG_KERNEL_OBJ_DIR=$DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/obj/KERNEL_OBJ
+	DBG_SOC=msm8x25;;
     msm8625)
 	BOARD_VERSION=V4
 	DBG_CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilt/linux-x86/toolchain/arm-eabi-4.4.3/bin/arm-eabi-
@@ -32,15 +32,15 @@ case "$DBG_PLATFORM" in
 	DBG_KERNEL_SRC_DIR=$DBG_SYSTEM_DIR/kernel
 	DBG_KERNEL_OBJ_DIR=$DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/obj/KERNEL_OBJ
 	UPDATA_BIN_DIR=/$RELEASE_REPOSITORY/driver
-	UPDATA_BASESYSTEM_DIR=/$RELEASE_REPOSITORY/basesystem;;
-
+	UPDATA_BASESYSTEM_DIR=/$RELEASE_REPOSITORY/basesystem
+	DBG_SOC=msm8x25;;
     msm8226)
 	BOARD_VERSION=V1
 	DBG_CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilts/gcc/linux-x86/arm/arm-eabi-4.7/bin/arm-eabi-
 	SYSTEM_BUILD_TYPE=eng
 	DBG_KERNEL_SRC_DIR=$DBG_SYSTEM_DIR/kernel
-	DBG_KERNEL_OBJ_DIR=$DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/obj/KERNEL_OBJ;;
-
+	DBG_KERNEL_OBJ_DIR=$DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/obj/KERNEL_OBJ
+	DBG_SOC=msm8x26;;
      su640)
 	BOARD_VERSION=V1
 	DBG_CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilt/linux-x86/toolchain/arm-eabi-4.4.3/bin/arm-eabi-

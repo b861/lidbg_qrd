@@ -1,10 +1,5 @@
-# msm8x25
-# msm8x26
-# msm8x60
-DBG_SOC=msm8x25
-
 # msm7627a
-# msm8625
+#Q平台 msm8625
 # msm8226
 DBG_PLATFORM=msm8625
 
