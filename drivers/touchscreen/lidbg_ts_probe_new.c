@@ -10,7 +10,7 @@ LIDBG_DEFINE;
 #ifdef SOC_msm8x25
 #define RESET_GPIO (27)
 #define TS_I2C_BUS (1)
-else
+#else
 #define RESET_GPIO (16)
 #define TS_I2C_BUS (5)
 #endif
