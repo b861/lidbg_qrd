@@ -4,6 +4,9 @@
 LIDBG_DEFINE;
 
 //zone below [Variable area]
+#define RESET_GPIO_ACTIVE (1)
+#define USE_TS_NUM (0)
+
 #ifdef SOC_msm8x25
 #define RESET_GPIO (27)
 #define TS_I2C_BUS (1)
@@ -11,8 +14,6 @@ else
 #define RESET_GPIO (16)
 #define TS_I2C_BUS (5)
 #endif
-#define RESET_GPIO_ACTIVE (1)
-#define USE_TS_NUM (-1)
 //zone end
 
 #if (defined(BOARD_V1) || defined(BOARD_V2) || defined(BOARD_V3))
@@ -137,7 +138,7 @@ int ts_probe_thread(void *data)
 
     ts_probe_prepare();
 
-    if (USE_TS_NUM == -1 && ts_choose_touchscreen == 0)
+    if (USE_TS_NUM == 0 && ts_choose_touchscreen == 0)
     {
         while(!is_ts_load)
         {
@@ -153,7 +154,7 @@ int ts_probe_thread(void *data)
     else
     {
         LIDBG_WARN("<disable ts scan work>\n");
-        parse_ts_info(&ts_probe_dev[ts_choose_touchscreen > 0 ? ts_choose_touchscreen - 1 : USE_TS_NUM]);
+        parse_ts_info(&ts_probe_dev[ts_choose_touchscreen > 0 ? ts_choose_touchscreen - 1 : USE_TS_NUM - 1 ]);
     }
 
     ssleep(10);

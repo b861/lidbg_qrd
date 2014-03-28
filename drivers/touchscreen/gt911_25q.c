@@ -75,7 +75,7 @@ extern  bool is_ts_load;
 extern int ts_should_revert;
 static bool xy_revert_en = 1;
 u8 gt911_config_version;
-int gt911_choose_config = 99;
+int gt911_choose_config = 0;
 /*******************************************************
 Function:
 	Read data from the i2c slave device.
@@ -781,7 +781,7 @@ static s32 gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
               rd_cfg_buf[GTP_ADDR_LENGTH] = 0;
           }
           else*/
-        if(99 == gt911_choose_config)
+        if(0 == gt911_choose_config)
         {
             rd_cfg_buf[0] = GTP_REG_SENSOR_ID >> 8;
             rd_cfg_buf[1] = GTP_REG_SENSOR_ID & 0xff;
@@ -805,7 +805,7 @@ static s32 gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
         }
         else
         {
-            rd_cfg_buf[GTP_ADDR_LENGTH] = gt911_choose_config;
+            rd_cfg_buf[GTP_ADDR_LENGTH] = gt911_choose_config-1;
         }
         memset(&config[GTP_ADDR_LENGTH], 0, GTP_CONFIG_MAX_LENGTH);
         memcpy(&config[GTP_ADDR_LENGTH], send_cfg_buf[rd_cfg_buf[GTP_ADDR_LENGTH]], ts->gtp_cfg_len);
@@ -1229,7 +1229,7 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     GTP_INFO("GTP Driver Version:%s", GTP_DRIVER_VERSION);
     GTP_INFO("GTP Driver build@%s,%s", __TIME__, __DATE__);
     GTP_INFO("GTP I2C Address:0x%02x", client->addr);
-    FS_REGISTER_INT(gt911_choose_config, "gt911_choose_config", 99, cb_int_ts_choose_config);
+    FS_REGISTER_INT(gt911_choose_config, "gt911_choose_config", 0, cb_int_ts_choose_config);
 
     i2c_connect_client = client;
     if (!i2c_check_functionality(client->adapter, I2C_FUNC_I2C))
