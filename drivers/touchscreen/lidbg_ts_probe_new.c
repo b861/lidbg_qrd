@@ -18,7 +18,7 @@ LIDBG_DEFINE;
 
 static LIST_HEAD(flyhal_config_list);
 static int ts_scan_delayms;
-static int ts_choose_touchscreen=0;
+static int ts_choose_touchscreen = 0;
 int ts_should_revert = -1;
 bool is_ts_load = false;
 
@@ -70,8 +70,8 @@ void parse_ts_info(struct probe_device *ts_info)
     sprintf(path, "/flysystem/lib/out/%s", ts_info->name);
     lidbg_insmod( path );
 
-    lidbg_fs_log(TS_LOG_PATH, "loadts=%s,USE_TS_NUM:%d,ts_choose_touchscreen:%d,ts_should_revert:%d\n", ts_info->name, USE_TS_NUM,ts_choose_touchscreen, ts_should_revert);
-    fs_mem_log("loadts=%s,USE_TS_NUM:%d,ts_choose_touchscreen:%d,ts_should_revert:%d\n", ts_info->name, USE_TS_NUM,ts_choose_touchscreen, ts_should_revert);
+    lidbg_fs_log(TS_LOG_PATH, "loadts=%s,USE_TS_NUM:%d,ts_choose_touchscreen:%d,ts_should_revert:%d\n", ts_info->name, USE_TS_NUM, ts_choose_touchscreen, ts_should_revert);
+    fs_mem_log("loadts=%s,USE_TS_NUM:%d,ts_choose_touchscreen:%d,ts_should_revert:%d\n", ts_info->name, USE_TS_NUM, ts_choose_touchscreen, ts_should_revert);
 
 }
 
@@ -131,24 +131,27 @@ int ts_probe_thread(void *data)
 
     ts_probe_prepare();
 
-#if (USE_TS_NUM==-1||ts_choose_touchscreen==0)
-    while(!is_ts_load)
+    if (USE_TS_NUM == -1 && ts_choose_touchscreen == 0)
     {
-        if((ts = ts_scan(&ts_probe_dev, SIZE_OF_ARRAY(ts_probe_dev))))
+        while(!is_ts_load)
         {
-            parse_ts_info(ts);
-            msleep(5000);
-            ts = NULL;
+            if((ts = ts_scan(&ts_probe_dev, SIZE_OF_ARRAY(ts_probe_dev))))
+            {
+                parse_ts_info(ts);
+                msleep(5000);
+                ts = NULL;
+            }
+            msleep(ts_scan_delayms);
         }
-        msleep(ts_scan_delayms);
     }
-#else
-    parse_ts_info(&ts_probe_dev[ts_choose_touchscreen>0?ts_choose_touchscreen-1:USE_TS_NUM]);
-#endif
+    else
+    {
+        LIDBG_WARN("<disable ts scan work>\n");
+        parse_ts_info(&ts_probe_dev[ts_choose_touchscreen > 0 ? ts_choose_touchscreen - 1 : USE_TS_NUM]);
+    }
 
-    LIDBG_WARN("<disable ts scan work>\n");
-    //while(1)
     ssleep(10);
+    LIDBG_WARN("<ts_probe_thread exited>\n");
 
     return 0;
 }
