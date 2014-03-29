@@ -28,3 +28,8 @@ for each_dir in `ls -l | grep "^d" | awk '{print $NF}'`
 done
 echo "##########################" >> $dest_dir/drivers.conf
 echo "##########################" >> $dest_dir/state.conf
+
+echo "##########################" > $dest_dir/release
+cd $dest_dir
+ls >> $dest_dir/release
+echo "##########################" >> $dest_dir/release
