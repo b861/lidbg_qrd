@@ -58,11 +58,11 @@ function lidbg_push()
 function lidbg_menu()
 {
 	echo $DBG_ROOT_PATH
-	echo [1] clean.sh'                        '清除生成文件	
-	echo [2] build.sh'                        '编译模块
-	echo [3] build all'                       '编译lidbg所有文件
-	echo [4] push.sh'                         'push驱动模块到原生系统
-	echo [5] pushfly.sh'                      'push驱动模块到产品系统
+	echo [1] clean'                        '清除生成文件	
+	echo [2] build'                        '编译模块
+	echo [3] build all'                    '编译lidbg所有文件
+	echo [4] push out'                     'push驱动模块到原生系统
+	echo [5] push out to fly'              'push驱动模块到产品系统
 
 	echo
 	soc_menu
