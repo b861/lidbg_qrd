@@ -6,6 +6,7 @@
 int max_file_len = 1;
 int g_iskmsg_ready = 1;
 int g_pollkmsg_en = 0;
+int g_pollkmsg_en_fclear = 0;
 static struct task_struct *fs_kmsgtask;
 static struct completion kmsg_wait;
 //zone end
@@ -185,9 +186,35 @@ static int thread_pollkmsg_func(void *data)
 void cb_kv_pollkmsg(char *key, char *value)
 {
     FS_WARN("<%s=%s>\n", key, value);
-    if ( (!strcmp(key, "fs_kmsg_en" ))  &&  (strcmp(value, "0" )) )
+    if (strcmp(value, "0" ))
         complete(&kmsg_wait);
 }
+
+static int fs_kmsg_reboot_notifier_func(struct notifier_block *nb, unsigned long event, void *unused)
+{
+    switch (event)
+    {
+    case SYS_RESTART:
+        if(g_pollkmsg_en_fclear)
+        {
+            lidbg_rm(LIDBG_KMSG_FILE_PATH);
+            FS_ALWAYS("<rm %s>\n", LIDBG_KMSG_FILE_PATH);
+            ssleep(1);
+        }
+        break;
+    case SYS_HALT:
+        break;
+    case SYS_POWER_OFF:
+        break;
+    default:
+        break;
+    }
+    return NOTIFY_DONE;
+}
+static struct notifier_block fs_kmsg_reboot_notifier =
+{
+    .notifier_call  = fs_kmsg_reboot_notifier_func,
+};
 //zone end
 
 
@@ -283,8 +310,17 @@ void lidbg_fs_log_init(void)
     init_completion(&kmsg_wait);
 
     FS_REGISTER_INT(g_pollkmsg_en, "fs_kmsg_en", 0, cb_kv_pollkmsg);
+    FS_REGISTER_INT(g_pollkmsg_en_fclear, "fs_kmsg_en_fclear", 0, cb_kv_pollkmsg);
+
+    if(g_pollkmsg_en_fclear)
+    {
+        g_pollkmsg_en = 1;
+        register_reboot_notifier(&fs_kmsg_reboot_notifier);
+    }
+
     if(g_pollkmsg_en == 1)
         complete(&kmsg_wait);
+
 
     FS_REGISTER_INT(max_file_len, "fs_max_file_len", 1, NULL);
 
