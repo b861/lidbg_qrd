@@ -10,9 +10,11 @@ LIDBG_DEFINE;
 #ifdef SOC_msm8x25
 #define RESET_GPIO (27)
 #define TS_I2C_BUS (1)
+#define INT_GPIO (48)
 #else
-#define RESET_GPIO (16)
+#define RESET_GPIO (24)
 #define TS_I2C_BUS (5)
+#define INT_GPIO (69)
 #endif
 //zone end
 
@@ -39,10 +41,10 @@ struct probe_device
 
 void reset_high_active(void);
 void reset_low_active(void);
-
+void gt9xx_reset_high_active(void);
 struct probe_device ts_probe_dev[] =
 {
-    {0x14, 0x00, "gt911.ko", reset_high_active},
+    {0x14, 0x00, "gt911.ko", gt9xx_reset_high_active},
     {0x5d, 0x00, "gt811.ko", reset_high_active},
     {0x55, 0x00, "gt801.ko", reset_low_active},
     {0x38, 0x00, "ft5x06_ts.ko", reset_high_active}
@@ -51,6 +53,15 @@ struct probe_device ts_probe_dev[] =
 
 
 //zone below [method]
+void gt9xx_reset_high_active(void)
+{	
+    SOC_IO_Output(0, RESET_GPIO, !RESET_GPIO_ACTIVE);
+    msleep(200);
+	SOC_IO_Output(0, INT_GPIO, 1);
+	usleep(200);
+    SOC_IO_Output(0, RESET_GPIO, RESET_GPIO_ACTIVE);
+    msleep(300);
+}
 void reset_high_active(void)
 {
     SOC_IO_Output(0, RESET_GPIO, !RESET_GPIO_ACTIVE);
