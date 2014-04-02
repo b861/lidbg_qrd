@@ -22,9 +22,9 @@ function debug_handle()
 	53)
 		adb reboot bootloader;;
 	54)
-		flash_kernel;;
+		soc_flash_kernel;;
 	55)
-		flash_system;;
+		soc_flash_system;;
 	56)
 		fastboot reboot;;
 	*)
