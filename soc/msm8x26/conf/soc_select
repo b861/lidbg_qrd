@@ -2,8 +2,8 @@
 ################hal select####################
 CONFIG_HAL_USERVER=y
 export CONFIG_HAL_USERVER
-
-
+CONFIG_HAL_GPSLIB=y
+export CONFIG_HAL_GPSLIB
 ################driver select####################
 CONFIG_BP_MSG=m
 CONFIG_LPC=m

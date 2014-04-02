@@ -1161,11 +1161,13 @@ ublox_gps_get_extension(const char *name)
     return NULL;
 }
 
-int
+#ifdef SOC_msm8x25
+static int
 ublox_gps_update_criteria(UlpLocationCriteria criteria)
 {
     return 0;
 }
+#endif
 
 static const GpsInterface  ubloxGpsInterface =
 {
@@ -1179,7 +1181,9 @@ static const GpsInterface  ubloxGpsInterface =
     ublox_gps_delete_aiding_data,
     ublox_gps_set_position_mode,
     ublox_gps_get_extension,
+#ifdef SOC_msm8x25
     ublox_gps_update_criteria,
+#endif
 };
 
 const GpsInterface *gps__get_gps_interface(struct gps_device_t *dev)
