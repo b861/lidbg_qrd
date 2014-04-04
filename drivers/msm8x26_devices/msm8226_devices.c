@@ -16,30 +16,20 @@ struct ad_key_remap
 };
 static struct ad_key_remap ad_key[] =
 {
-    //  CHANNAL_NO 11 13 15 16
-    //steering wheel   rem2_in  mpp2
-    {11, 2517, KEY_HOME},
-    {11, 2517, KEY_HOME},
-    {11, 2517, KEY_HOME},
-    {11, 2517, KEY_HOME},
+    
     //feel  key  x_ain_3   mpp4
-    {13, 1372, KEY_BACK},
-    {13, 1372, KEY_BACK},
-    {13, 1372, KEY_BACK},
-    {13, 1372, KEY_BACK},
+    //{35, 1000000, KEY_BACK},
+    //{35, 1500000, KEY_BACK},
+    //{35, 2000000, KEY_BACK},
+    {35, 2500000, KEY_HOME},
     //feel  key  x_ain_4  mpp6
-    {15, 1372, KEY_BACK},
-    {15, 1372, KEY_BACK},
-    {15, 1372, KEY_BACK},
-    {15, 1372, KEY_BACK},
-     //feel  key  rem1_in  mpp7
-    {16, 1108, KEY_MENU},
-    {16, 1372, KEY_BACK},
-    {16, 1108, KEY_MENU},
-    {16, 1372, KEY_BACK},
+    //{37, 1000000, KEY_BACK},
+    //{37, 1500000, KEY_BACK},
+    {37, 2000000, KEY_MENU},
+    {37, 2500000, KEY_BACK},
 };
-#define AD_OFFSET  (100)
-#define AD_VAL_MAX  (3300)
+#define AD_OFFSET  (100000)
+#define AD_VAL_MAX  (3300000)
 void led_on(void)
 {
      LED_ON;
@@ -86,14 +76,14 @@ void key_scan(void)
 {
     static int old_key = 0xff;
     int key = 0xff;
-    key = find_ad_key(4);
+    key = find_ad_key(35);
     if(key != 0xff) goto find_key;
-    key = find_ad_key(2);
+    key = find_ad_key(37);
     if(key != 0xff) goto find_key;
 
 find_key:
 
-    //if((old_key != 0xff) && (key == 0xff))
+    if((old_key != 0xff) && (key == 0xff))
     {
         SOC_Key_Report(ad_key[old_key].key, KEY_PRESSED_RELEASED);
     }
