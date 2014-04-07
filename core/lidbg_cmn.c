@@ -333,6 +333,14 @@ int  lidbg_setprop(char key[], char value[])
 {
     return lidbg_launch_user(SETPROP_PATH, key, value, NULL, NULL, NULL, NULL);
 }
+int  lidbg_start(char server[])
+{
+    return lidbg_launch_user(get_bin_path("start"), server, NULL, NULL, NULL, NULL, NULL);
+}
+int  lidbg_stop(char server[])
+{
+    return lidbg_launch_user(get_bin_path("stop"), server, NULL, NULL, NULL, NULL, NULL);
+}
 
 struct name_list
 {
@@ -577,6 +585,8 @@ EXPORT_SYMBOL(lidbg_mkdir);
 EXPORT_SYMBOL(lidbg_touch);
 EXPORT_SYMBOL(lidbg_reboot);
 EXPORT_SYMBOL(lidbg_setprop);
+EXPORT_SYMBOL(lidbg_start);
+EXPORT_SYMBOL(lidbg_stop);
 EXPORT_SYMBOL(lidbg_domineering_ack);
 EXPORT_SYMBOL(mod_cmn_main);
 EXPORT_SYMBOL(lidbg_get_ns_count);
