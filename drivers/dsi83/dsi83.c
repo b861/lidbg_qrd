@@ -1,16 +1,24 @@
 
 #include "lidbg.h"
 
-#define 	DSI83_GPIO_EN       (62)
+#ifdef SOC_msm8x26
+#define 	DSI83_GPIO_EN          (62)
+#define 	PANEL_GPIO_RESET       (25)
+#define 	DSI83_I2C_BUS  		   (2)
+#define 	DSI83_I2C_ADDR	       (0x2d)
+
+#define     TEST_PATTERN
+#define 	DSI83_TRACE_GPIO	   (60)
+
+#else  //8974
+#define 	DSI83_GPIO_EN          (62)
 #define 	PANEL_GPIO_RESET       (62)
+#define 	DSI83_I2C_BUS  		   (2)
+#define 	DSI83_I2C_ADDR	       (0x2d)
 
-#define 	DSI83_I2C_BUS  		(2)
-#define 	DSI83_I2C_ADDR	      (0x2d)
-
-//#define TEST_PATTERN
-
-#define 	DSI83_TRACE_GPIO	      (0)
-
+//#define     TEST_PATTERN
+#define 	DSI83_TRACE_GPIO	   (0)
+#endif
 
 unsigned char dsi83_settings[] =
 {
@@ -60,7 +68,7 @@ unsigned char dsi83_settings[] =
     0xff
 };
 
-static   struct i2c_adapter *adapter;
+static   struct i2c_adapter *adapter = NULL;
 
 static void dsi83_trace_trigger(void)
 {
@@ -69,7 +77,7 @@ static void dsi83_trace_trigger(void)
     static unsigned char  tmp;
     tmp = (flag ++ % 2);
     gpio_direction_output(DSI83_TRACE_GPIO, tmp );
-    printk("dsi83_trace_trigger %d , %d\n", flag , tmp);
+    printk(KERN_CRIT"dsi83_trace_trigger %d , %d\n", flag , tmp);
 #endif
 }
 
@@ -147,7 +155,7 @@ static int dsi83_match_id(void)
     for (i = 0x8, j = 0; i >= 0; i--, j++)
     {
         chip_id[j] = dsi83_i2c_read(i);
-        printk( "%s:reg 0x%x = 0x%x", __func__, i, chip_id[j]);
+        printk(KERN_CRIT "%s:reg 0x%x = 0x%x\n", __func__, i, chip_id[j]);
     }
 
     return memcmp(id, chip_id, 9);
@@ -186,7 +194,7 @@ int dsi83_io_config(u32 index)
     err = gpio_request(index, "dsi83_io");
     if (err)
     {
-        printk("err: gpio request failed!\n");
+        printk(KERN_CRIT"err: gpio request failed!\n");
         return 0;
     }
     return 1;
@@ -196,10 +204,14 @@ int dsi83_io_config(u32 index)
 
 static int dsi83_probe(struct platform_device *pdev)
 {
-    printk( "%s:enter\n", __func__);
+    printk(KERN_CRIT "%s:enter\n", __func__);
 
     adapter = i2c_get_adapter(DSI83_I2C_BUS);
-
+	if(adapter == NULL)
+	{
+		printk(KERN_CRIT "%s:i2c_get_adapter fail\n", __func__);
+		return 0;
+	}
     dsi83_io_config(DSI83_GPIO_EN);
     dsi83_io_config(PANEL_GPIO_RESET);
 #ifdef DSI83_TRACE_GPIO
@@ -210,8 +222,8 @@ static int dsi83_probe(struct platform_device *pdev)
     dsi83_enable();
     panel_reset();
 
-    if(dsi83_match_id() != 0)
-        printk("%s:dsi83_match_id fail\n", __func__);
+    //if(dsi83_match_id() != 0)
+    //    printk(KERN_CRIT"%s:dsi83_match_id fail\n", __func__);
 
     return 0;
 }
@@ -231,7 +243,7 @@ void dsi83_dump_reg(void)
     for (i = 0; i < 0x3d; i++)
     {
         read_val = dsi83_i2c_read(i);
-        printk("0x%x=0x%x\n", i, read_val);
+        printk(KERN_CRIT"0x%x=0x%x\n", i, read_val);
     }
 }
 
@@ -262,17 +274,17 @@ int dsi83_seq4(void)
     unsigned char read_val;
     char *buf_piont ;
     buf_piont = dsi83_settings;
-    printk( "%s:enter", __func__);
+    printk(KERN_CRIT "%s:enter\n", __func__);
     for(i = 0; buf_piont[i] != 0xff ; i += 2)
     {
         ret = dsi83_i2c_write(buf_piont[i], buf_piont[i + 1]);
-        printk("register 0x%x=0x%x\n", buf_piont[i], buf_piont[i+1]);
+        printk(KERN_CRIT"dsi83_w 0x%x=0x%x\n", buf_piont[i], buf_piont[i+1]);
 
 #if 1
         read_val = dsi83_i2c_read( buf_piont[i]);
         if(read_val != buf_piont[i+1])
         {
-            printk("dsi83: Warning regitster(0x%.2x),write(0x%.2x) and read back(0x%.2x) Unequal\n", \
+            printk(KERN_CRIT"dsi83: Warning regitster(0x%.2x),write(0x%.2x) and read back(0x%.2x) Unequal\n", \
                    buf_piont[i], buf_piont[i+1], read_val);
         }
 #endif
@@ -286,7 +298,7 @@ int dsi83_seq4(void)
 int dsi83_seq6(void)
 {
     int ret;
-    printk( "%s:enter", __func__);
+    printk(KERN_CRIT "%s:enter\n", __func__);
     ret = dsi83_i2c_write( 0x0d, 0x01);
     return ret;
 }
@@ -297,7 +309,7 @@ int dsi83_seq7(void)
     unsigned char read_val, i;
     bool is_pll_lock ;
 
-    printk( "%s:enter", __func__);
+    printk(KERN_CRIT "%s:enter\n", __func__);
 
     is_pll_lock = false;
     i = 0;
@@ -306,11 +318,11 @@ int dsi83_seq7(void)
         read_val = dsi83_i2c_read( 0x0a);
         is_pll_lock = read_val & 0x80;
         if(is_pll_lock)break;
-        printk("dsi83: wait for %d,r = 0x%.2x\n", i, read_val);
+        printk(KERN_CRIT"dsi83: wait for %d,r = 0x%.2x\n", i, read_val);
         i++;
         if(i > 10)
         {
-            printk("dsi83:Warning wait time out .. break\n");
+            printk(KERN_CRIT"dsi83:Warning wait time out .. break\n");
             break;
         }
         msleep(20);
@@ -324,7 +336,7 @@ int dsi83_seq7(void)
 int dsi83_seq8(void)
 {
     int ret;
-    printk( "%s:enter", __func__);
+    printk(KERN_CRIT "%s:enter\n", __func__);
 
     dsi83_dump_reg();
     ret = dsi83_i2c_write(0x09, 0x01);
@@ -334,7 +346,7 @@ int dsi83_seq8(void)
 
 void dsi83_test_pattern(void)
 {
-    printk( "%s:enter", __func__);
+    printk(KERN_CRIT "%s:enter\n", __func__);
     dsi83_seq4();
     dsi83_i2c_write(0x3c, 0xff);
 }
@@ -345,8 +357,8 @@ static int thread_trace_err_status(void *data)
     while(1)
     {
         read_val = dsi83_i2c_read( 0xe5);
-        printk("dsi83: 0xe5 = 0x%.2x\n",  read_val);
-	 dsi83_i2c_write( 0xe5 , read_val);
+        printk(KERN_CRIT"dsi83: 0xe5 = 0x%.2x\n",  read_val);
+	 	dsi83_i2c_write( 0xe5 , read_val);
         msleep(1000);
     }
     return 0;
@@ -408,6 +420,11 @@ static void parse_cmd(char *cmd_buf)
     dsi83_trace_trigger();
 }
 
+void dsi83_ioctl(char *cmd_buf)
+{
+	parse_cmd(cmd_buf);
+}
+
 ssize_t dsi83_write (struct file *filp, const char __user *buf, size_t size, loff_t *ppos)
 {
     char cmd_buf[32];
@@ -417,7 +434,7 @@ ssize_t dsi83_write (struct file *filp, const char __user *buf, size_t size, lof
 
     if(copy_from_user(cmd_buf, buf, size))
     {
-        printk("copy_from_user ERR\n");
+        printk(KERN_CRIT"copy_from_user ERR\n");
     }
     if((p = memchr(cmd_buf, '\n', size)))
     {
@@ -426,6 +443,8 @@ ssize_t dsi83_write (struct file *filp, const char __user *buf, size_t size, lof
     else
         cmd_buf[size] =  '\0';
 
+	printk(KERN_CRIT"dsi83_write:%s\n",cmd_buf);
+	
     parse_cmd(cmd_buf);
 
     return size;
@@ -476,16 +495,16 @@ static struct platform_driver dsi83_driver =
     },
 };
 
-static int __devinit dsi83_init(void)
+static int  dsi83_init(void)
 {
-    printk( "%s:enter", __func__);
+    printk(KERN_CRIT "%s:enter\n", __func__);
     platform_device_register(&dsi83_devices);
     platform_driver_register(&dsi83_driver);
     misc_register(&misc);
     return 0;
 }
 
-static void __exit dsi83_exit(void)
+static void  dsi83_exit(void)
 {
     misc_deregister(&misc);
 }

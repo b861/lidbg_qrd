@@ -6,81 +6,50 @@
 #include <linux/syscalls.h>
 #include <asm/system.h>
 
-#define GET_INODE_FROM_FILEP(filp) ((filp)->f_path.dentry->d_inode)
-
-inline int  kernel_read_write_file(const char *filename, char *rbuf,
-	const char *wbuf, size_t length)
+static inline bool is_file_exist(char *file)
 {
-	int ret = 0;
-	struct file *filp = (struct file *)-ENOENT;
-	mm_segment_t oldfs;
-	oldfs = get_fs();
-	set_fs(KERNEL_DS);
-
-	do {
-		int mode = (wbuf) ? O_RDWR : O_RDONLY;
-		filp = filp_open(filename, mode, S_IRUSR);
-
-		if (IS_ERR(filp) || !filp->f_op) {
-			ret = -ENOENT;
-			break;
-		}
-
-		if (!filp->f_op->write || !filp->f_op->read) {
-			filp_close(filp, NULL);
-			ret = -ENOENT;
-			break;
-		}
-
-		if (length == 0) {
-			/* Read the length of the file only */
-			struct inode    *inode;
-
-			inode = GET_INODE_FROM_FILEP(filp);
-			if (!inode) {
-				printk(
-					"kernel_readwrite_file: Error 2\n");
-				ret = -ENOENT;
-				break;
-			}
-			ret = i_size_read(inode->i_mapping->host);
-			break;
-		}
-
-		if (wbuf) {
-			ret = filp->f_op->write(
-				filp, wbuf, length, &filp->f_pos);
-			if (ret < 0) {
-				printk(
-					"kernel_readwrite_file: Error 3\n");
-				break;
-			}
-		} else {
-			ret = filp->f_op->read(
-				filp, rbuf, length, &filp->f_pos);
-			if (ret < 0) {
-				printk(
-					"kernel_readwrite_file: Error 4\n");
-				break;
-			}
-		}
-	} while (0);
-
-	if (!IS_ERR(filp))
-		filp_close(filp, NULL);
-
-	set_fs(oldfs);
-
-	return ret;
+    struct file *filep;
+    filep = filp_open(file, O_RDONLY , 0);
+    if(IS_ERR(filep))
+        return false;
+    else
+    {
+        filp_close(filep, 0);
+        return true;
+    }
 }
 
-#define SN65_Sequence_seq2() kernel_read_write_file("/dev/sn65dsi83", NULL, "seq2", sizeof("seq2")-1)
-#define SN65_Sequence_seq3() kernel_read_write_file("/dev/sn65dsi83", NULL, "seq3", sizeof("seq3")-1)
-#define SN65_Sequence_seq4() kernel_read_write_file("/dev/sn65dsi83", NULL, "seq4", sizeof("seq4")-1)
-#define SN65_Sequence_seq6() kernel_read_write_file("/dev/sn65dsi83", NULL, "seq6", sizeof("seq6")-1)
-#define SN65_Sequence_seq7() kernel_read_write_file("/dev/sn65dsi83", NULL, "seq7", sizeof("seq7")-1)
-#define SN65_Sequence_seq8() kernel_read_write_file("/dev/sn65dsi83", NULL, "seq8", sizeof("seq8")-1)
-#define SN65_Dump() 		  kernel_read_write_file("/dev/sn65dsi83", NULL, "dump", sizeof("dump")-1)
-#define SN65_Trace_Err() 		  kernel_read_write_file("/dev/sn65dsi83", NULL, "trace_err_status", sizeof("trace_err_status")-1)
+static inline int node_write(char *filename, char *wbuff)
+{
+    struct file *filep;
+    mm_segment_t old_fs;
+    unsigned int file_len = 1;
+    printk(KERN_CRIT "%s:in.%s.%d\n", __func__,filename,is_file_exist(filename));
+    filep = filp_open(filename,  O_RDWR, 0);
+    if(IS_ERR(filep))
+    {
+        printk(KERN_CRIT "lsw.%s:filp_open\n", __func__);
+        return -1;
+    }
+
+    old_fs = get_fs();
+    set_fs(get_ds());
+
+    if(wbuff)
+        filep->f_op->write(filep, wbuff, strlen(wbuff), &filep->f_pos);
+    set_fs(old_fs);
+    filp_close(filep, 0);
+    return file_len;
+}
+
+#define SN65_Sequence_seq2()	 do{node_write("/dev/sn65dsi83","seq2");}while(0)
+#define SN65_Sequence_seq3()	 do{node_write("/dev/sn65dsi83","seq3");}while(0)
+#define SN65_Sequence_seq4()	 do{node_write("/dev/sn65dsi83","seq4");}while(0)
+#define SN65_Sequence_seq6()	 do{node_write("/dev/sn65dsi83","seq6");}while(0)
+#define SN65_Sequence_seq7()	 do{node_write("/dev/sn65dsi83","seq7");}while(0)
+#define SN65_Sequence_seq8()	 do{node_write("/dev/sn65dsi83","seq8");}while(0)
+#define SN65_Dump()		 		 do{node_write("/dev/sn65dsi83","dump");}while(0)
+#define SN65_Trace_Err()	 	 do{node_write("/dev/sn65dsi83","trace_err_status");}while(0)
 
 #endif
+
