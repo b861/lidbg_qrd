@@ -37,10 +37,12 @@ function depository_make_package()
 
 function depository_menu()
 {
+if [[ $RELEASE_REPOSITORY != "" ]];then
 	echo $RELEASE_REPOSITORY
 	echo [41] copy lidbg out to depository
 	echo [42] copy basesystem to depository
 	echo [43] make package
+fi
 }
 
 function depository_handle()
