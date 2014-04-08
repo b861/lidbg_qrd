@@ -33,7 +33,6 @@ extern struct lidbg_fifo_device *fs_msg_fifo;
 extern struct list_head fs_state_list;
 void fs_msg_fifo_to_file(char *key, char *value);
 extern int analysis_copylist(const char *copy_list);
-extern int readwrite_file(const char *filename, char *wbuff, char *rbuff, int readlen);
 extern int update_list(const char *filename, struct list_head *client_list);
 extern int bfs_file_amend(char *file2amend, char *str_append, int file_limit_M);
 extern void save_list_to_file(struct list_head *client_list, char *filename);

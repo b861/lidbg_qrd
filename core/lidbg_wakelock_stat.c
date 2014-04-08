@@ -11,7 +11,6 @@ static struct task_struct *wl_item_dbg_task;
 static int g_wakelock_dbg = 0;
 static int g_wakelock_dbg_item = 0;
 
-
 struct wakelock_item *get_wakelock_item(struct list_head *client_list, const char *name)
 {
     struct wakelock_item *pos;
@@ -152,7 +151,7 @@ static int thread_wl_item_dbg(void *data)
     while(!kthread_should_stop())
     {
         sprintf(cmd_tmp, "c wakelock lock count 0 0 f%d", ++count);
-        fs_readwrite_file("/dev/mlidbg0", cmd_tmp, NULL, 0);
+        fs_file_write("/dev/mlidbg0", cmd_tmp);
         if(!g_wakelock_dbg_item)
             ssleep(30);
         else
