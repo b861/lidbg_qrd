@@ -160,6 +160,14 @@ void cb_kv_wifiadb(char *key, char *value)
     else
         set_wifi_adb_mode(false);
 }
+void cb_kv_app_install(char *key, char *value)
+{
+    if(value && *value == '1')
+        lidbg_pm_install_dir("/mnt/usbdisk/apps");
+    else
+        fs_mem_log("cb_kv_app_install:fail,%s\n", value);
+}
+
 void cb_kv_cmd(char *key, char *value)
 {
     if(value)
@@ -175,7 +183,7 @@ void cb_kv_cmd(char *key, char *value)
             if(num > 1)
             {
                 if(!strcmp(param[0], "echo"))
-                    (param[3] && param[1]) ?fs_file_write(param[3], param[1]) : printk("echo err\n");
+                    (param[3] && param[1]) ? fs_file_write(param[3], param[1]) : printk("echo err\n");
                 else
                     lidbg_exe(param[0], param[1], param[2] ? param[2] : NULL, param[3] ? param[3] : NULL, param[4] ? param[4] : NULL, param[5] ? param[5] : NULL, param[6] ? param[6] : NULL);
 
@@ -209,7 +217,8 @@ int misc_init(void *data)
     FS_REGISTER_INT(loop_warning_en, "loop_warning_en", 0, NULL);
 
     FS_REGISTER_KEY( "cmdstring", cb_kv_cmd);
-    FS_REGISTER_KEY( "wifiadb", cb_kv_wifiadb);
+    FS_REGISTER_KEY( "wifiadb_en", cb_kv_wifiadb);
+    FS_REGISTER_KEY( "app_install_en", cb_kv_app_install);
 
     fs_register_filename_list("/data/kmsg.txt", true);
     fs_register_filename_list("/data/top.txt", true);

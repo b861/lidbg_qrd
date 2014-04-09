@@ -27,6 +27,7 @@ int  lidbg_reboot(void);
 int  lidbg_setprop(char key[], char value[]);
 int  lidbg_start(char server[]);
 int  lidbg_stop(char server[]);
+int  lidbg_pm_install_dir(char apkpath_or_apkdirpath[]);
 
 void lidbg_domineering_ack(void);
 void mod_cmn_main(int argc, char **argv);
