@@ -4,10 +4,25 @@ LIDBG_DEFINE;
 int led_en ;
 int ad_en;
 int button_en;
+int temp_log_freq = 5;
+static struct task_struct *Thermal_task = NULL;
+//static int fan_onoff_temp;
 int thread_dev_init(void *data);
 int thread_led(void *data);
 int thread_key(void *data);
 void fly_devices_init(void);
+extern int fs_file_read(const char *filename, char *rbuff, int readlen);
+
+#define CPU_TEMP_PATH "/sys/class/thermal/thermal_zone5/temp"
+
+int soc_temp_get(void)
+{
+ char cpu_temp[3];
+ int temp=-1;
+ fs_file_read(CPU_TEMP_PATH, cpu_temp,sizeof(cpu_temp));
+ temp = simple_strtoul(cpu_temp, 0, 0);
+ return temp;
+}
 struct ad_key_remap
 {
     u32 ch;
@@ -105,19 +120,51 @@ int thread_key(void *data)
     }
     return 0;
 }
+#define TEMP_LOG_PATH LIDBG_LOG_DIR"log_ct.txt"
+
+void log_temp(void)
+{
+    static int old_temp, cur_temp;
+    int tmp;
+    g_var.temp =cur_temp = soc_temp_get();
+    tmp = cur_temp - old_temp;
+    if((temp_log_freq != 0) && (ABS(tmp) >= temp_log_freq))
+    {
+        lidbg_fs_log(TEMP_LOG_PATH, "%d\n", cur_temp);
+        old_temp = cur_temp;
+    }
+}
+static int thread_thermal(void *data)
+{
+    int cur_temp;
+    DUMP_FUN;
+    while(!kthread_should_stop())
+    {
+        msleep(1000);
+
+        log_temp();
+        cur_temp = soc_temp_get();
+        //lidbg("MSM_THERM: %d *C\n",cur_temp);
+    }
+    return 0;
+}
+
 static int soc_dev_probe(struct platform_device *pdev)
 {
-    lidbg("=====soc_dev_probe====\n");
+    //lidbg("=====soc_dev_probe====\n");
+    fs_register_filename_list(TEMP_LOG_PATH, true);
+    fs_regist_state("cpu_temp", &(g_var.temp));
     CREATE_KTHREAD(thread_dev_init, NULL);
 	
     FS_REGISTER_INT(led_en, "led_en", 1, NULL);
     if(led_en)
-        CREATE_KTHREAD(thread_led, NULL);
+    CREATE_KTHREAD(thread_led, NULL);
       
     FS_REGISTER_INT(ad_en, "ad_en", 0, NULL);
     if(ad_en)
-	   CREATE_KTHREAD(thread_key, NULL);
-
+	CREATE_KTHREAD(thread_key, NULL);
+    Thermal_task =  kthread_run(thread_thermal, NULL, "flythermalthread");
+    //FS_REGISTER_INT(fan_onoff_temp, "fan_onoff_temp", 65, NULL);
     return 0;
 
 }
