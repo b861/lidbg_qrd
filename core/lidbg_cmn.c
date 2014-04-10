@@ -475,7 +475,7 @@ static int read_file(const char *filename, char *rbuff, int readlen)
     mm_segment_t old_fs;
     unsigned int read_len = 1;
 
-    filep = filp_open(filename,  O_RDWR, 0);
+    filep = filp_open(filename,  O_RDONLY, 0);
     if(IS_ERR(filep))
     {
         printk("err:filp_open\n\n\n\n");

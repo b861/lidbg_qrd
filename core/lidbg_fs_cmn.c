@@ -94,7 +94,7 @@ int fs_file_write(char *filename, char *wbuff)
     mm_segment_t old_fs;
     unsigned int file_len = 1;
 
-    filep = filp_open(filename,  O_RDWR, 0);
+    filep = filp_open(filename,  O_WRONLY, 0);
     if(IS_ERR(filep))
     {
         printk("err:filp_open,%s\n\n\n\n",filename);
@@ -116,7 +116,7 @@ int fs_file_read(const char *filename, char *rbuff, int readlen)
     mm_segment_t old_fs;
     unsigned int read_len = 1;
 
-    filep = filp_open(filename,  O_RDWR, 0);
+    filep = filp_open(filename,  O_RDONLY, 0);
     if(IS_ERR(filep))
     {
         printk("err:filp_open,%s\n\n\n\n",filename);
