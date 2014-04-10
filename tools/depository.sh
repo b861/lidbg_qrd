@@ -1,12 +1,14 @@
 function depository_pull()
 {
 	echo $FUNCNAME
+	cd $RELEASE_REPOSITORY
 	expect $DBG_TOOLS_PATH/pull
 }
 
 function depository_add_push()
 {
 	echo $FUNCNAME
+	cd $RELEASE_REPOSITORY
 	git add .
 	git add -f $UPDATA_BIN_DIR
 	git commit -am $1
@@ -31,6 +33,7 @@ function depository_copy_basesystem()
 function depository_make_package()
 {
 	echo $FUNCNAME
+	cd $RELEASE_REPOSITORY
 	expect $DBG_TOOLS_PATH/make_package
 }
 

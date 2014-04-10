@@ -11,7 +11,6 @@ function combination_menu()
 
 function combination_handle()
 {
-	cd $RELEASE_REPOSITORY
 	case $1 in
 	61)
 		read -p "输入提交到二进制仓库的说明文字：" descriptors
