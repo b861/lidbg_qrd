@@ -1,55 +1,140 @@
-#ifndef __SN68DSI83QZER_H__
-#define __SN68DSI83QZER_H__
+#ifndef __DSI83_H__
+#define __DSI83_H__
 
 #include <asm/uaccess.h>
 #include <linux/file.h>
 #include <linux/syscalls.h>
 #include <asm/system.h>
 
-static inline bool is_file_exist(char *file)
+#include "lidbg.h"
+
+#ifdef SOC_msm8x26
+#define 	DSI83_GPIO_EN          (62)
+#define 	PANEL_GPIO_RESET       (25)
+#define 	DSI83_I2C_BUS  		   (2)
+#define 	DSI83_I2C_ADDR	       (0x2d)
+
+//#define     DSI83_DEBUG
+//#define     TEST_PATTERN
+#define 	DSI83_TRACE_GPIO	   (60)
+
+#else  //8974
+#define 	DSI83_GPIO_EN          (62)
+#define 	PANEL_GPIO_RESET       (62)
+#define 	DSI83_I2C_BUS  		   (2)
+#define 	DSI83_I2C_ADDR	       (0x2d)
+
+//#define     TEST_PATTERN
+#define 	DSI83_TRACE_GPIO	   (0)
+#endif
+
+#ifndef TEST_PATTERN
+char dsi83_conf[] =
 {
-    struct file *filep;
-    filep = filp_open(file, O_RDONLY , 0);
-    if(IS_ERR(filep))
-        return false;
-    else
-    {
-        filp_close(filep, 0);
-        return true;
-    }
-}
-
-static inline int node_write(char *filename, char *wbuff)
+0x09, 0x00,
+0x0A, 0x03,
+0x0B, 0x10,
+0x0D, 0x00,
+0x10, 0x26,
+0x11, 0x00,
+0x12, 0x19,
+0x13, 0x00,
+0x18, 0x78,
+0x19, 0x00,
+0x1A, 0x03,
+0x1B, 0x00,
+0x20, 0x00,
+0x21, 0x04,
+0x22, 0x00,
+0x23, 0x00,
+0x24, 0x00,
+0x25, 0x00,
+0x26, 0x00,
+0x27, 0x00,
+0x28, 0x21,
+0x29, 0x00,
+0x2A, 0x00,
+0x2B, 0x00,
+0x2C, 0x08,
+0x2D, 0x00,
+0x2E, 0x00,
+0x2F, 0x00,
+0x30, 0x03,
+0x31, 0x00,
+0x32, 0x00,
+0x33, 0x00,
+0x34, 0x2e,
+0x35, 0x00,
+0x36, 0x00,
+0x37, 0x00,
+0x38, 0x00,
+0x39, 0x00,
+0x3A, 0x00,
+0x3B, 0x00,
+0x3C, 0x00,
+0x3D, 0x00,
+0x3E, 0x00,
+0xff
+};
+#else
+char dsi83_conf[] =    //dsi83 test mode
 {
-    struct file *filep;
-    mm_segment_t old_fs;
-    unsigned int file_len = 1;
-    printk(KERN_CRIT "%s:in.%s.%d\n", __func__,filename,is_file_exist(filename));
-    filep = filp_open(filename,  O_RDWR, 0);
-    if(IS_ERR(filep))
-    {
-        printk(KERN_CRIT "lsw.%s:filp_open\n", __func__);
-        return -1;
-    }
+0x09, 0x00,
+0x0A, 0x03,
+0x0B, 0x10,
+0x0D, 0x00,
+0x10, 0x26,
+0x11, 0x00,
+0x12, 0x19,
+0x13, 0x00,
+0x18, 0x78,
+0x19, 0x00,
+0x1A, 0x03,
+0x1B, 0x00,
+0x20, 0x00,
+0x21, 0x04,
+0x22, 0x00,
+0x23, 0x00,
+0x24, 0x58,
+0x25, 0x02,
+0x26, 0x00,
+0x27, 0x00,
+0x28, 0x21,
+0x29, 0x00,
+0x2A, 0x00,
+0x2B, 0x00,
+0x2C, 0x08,
+0x2D, 0x00,
+0x2E, 0x00,
+0x2F, 0x00,
+0x30, 0x03,
+0x31, 0x00,
+0x32, 0x00,
+0x33, 0x00,
+0x34, 0x2e,
+0x35, 0x00,
+0x36, 0x06,
+0x37, 0x00,
+0x38, 0x32,
+0x39, 0x00,
+0x3A, 0x06,
+0x3B, 0x00,
+0x3C, 0x10,
+0x3D, 0x00,
+0x3E, 0x00,
+0xff
+};
+#endif
 
-    old_fs = get_fs();
-    set_fs(get_ds());
+#define I2C_API_XFER_MODE_SEND 1
+#define I2C_API_XFER_MODE_RECV 2
+#define I2C_API_XFER_MODE_RECV_SUBADDR_2BYTES 3
 
-    if(wbuff)
-        filep->f_op->write(filep, wbuff, strlen(wbuff), &filep->f_pos);
-    set_fs(old_fs);
-    filp_close(filep, 0);
-    return file_len;
-}
-
-#define SN65_Sequence_seq2()	 do{node_write("/dev/sn65dsi83","seq2");}while(0)
-#define SN65_Sequence_seq3()	 do{node_write("/dev/sn65dsi83","seq3");}while(0)
-#define SN65_Sequence_seq4()	 do{node_write("/dev/sn65dsi83","seq4");}while(0)
-#define SN65_Sequence_seq6()	 do{node_write("/dev/sn65dsi83","seq6");}while(0)
-#define SN65_Sequence_seq7()	 do{node_write("/dev/sn65dsi83","seq7");}while(0)
-#define SN65_Sequence_seq8()	 do{node_write("/dev/sn65dsi83","seq8");}while(0)
-#define SN65_Dump()		 		 do{node_write("/dev/sn65dsi83","dump");}while(0)
-#define SN65_Trace_Err()	 	 do{node_write("/dev/sn65dsi83","trace_err_status");}while(0)
+#ifdef DSI83_DEBUG
+#define lidbg_dsi83(msg...)  do { printk( KERN_CRIT "[lidbg] dsi83:" msg);}while(0)
+#else
+#define lidbg_dsi83(msg...)   do{ }while(0)
+#endif
 
 #endif
 
