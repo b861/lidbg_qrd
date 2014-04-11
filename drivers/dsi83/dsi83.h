@@ -11,6 +11,8 @@
 #ifdef SOC_msm8x26
 #define 	DSI83_GPIO_EN          (62)
 #define 	PANEL_GPIO_RESET       (25)
+#define 	T123_GPIO_RST          (28)
+
 #define 	DSI83_I2C_BUS  		   (2)
 #define 	DSI83_I2C_ADDR	       (0x2d)
 

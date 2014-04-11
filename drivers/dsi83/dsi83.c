@@ -297,6 +297,14 @@ static int SN65_devices_read_id(void)
 
 }
 
+static void T123_reset(void)
+{
+	gpio_direction_output(T123_GPIO_RST, 0);
+	mdelay(300);
+	gpio_direction_output(T123_GPIO_RST, 1);
+	mdelay(20);
+}
+
 
 static void panel_reset(void)
 {
@@ -319,14 +327,12 @@ static int dsi83_probe(struct platform_device *pdev)
 		printk(KERN_CRIT "dsi83:%s():i2c_get_adapter(%d) error!",__func__,DSI83_I2C_BUS);
 		return -ENODEV;
 	}
-
-/*	
+	
     ret = dsi83_io_config(DSI83_GPIO_EN, "dsi83_en");
 	if(ret)
 	{
 		return ret;
 	}
-*/
 
 	ret = dsi83_io_config(PANEL_GPIO_RESET, "lcd_reset");
 	if(ret)
@@ -334,10 +340,20 @@ static int dsi83_probe(struct platform_device *pdev)
 		gpio_free(DSI83_GPIO_EN);
 		return ret;
 	}
+	
+	ret = dsi83_io_config(T123_GPIO_RST, "T123_reset");
+	if(ret)
+	{
+		gpio_free(PANEL_GPIO_RESET);
+		gpio_free(DSI83_GPIO_EN);
+		return ret;
+	}
+
 
 	dsi83_enable();
 	panel_reset();
-	//mdelay(200);
+	//mdelay(100);
+	T123_reset();
 
 	ret = SN65_devices_read_id();
 	if (ret)
