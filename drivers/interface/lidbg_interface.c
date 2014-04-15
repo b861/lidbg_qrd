@@ -14,6 +14,7 @@ char *insmod_list[] =
     "lidbg_ts_probe_new.ko",
     "lidbg_monkey.ko",
     "lidbg_drivers_dbg.ko",
+    "dsi83.ko",
     NULL,
 };
 

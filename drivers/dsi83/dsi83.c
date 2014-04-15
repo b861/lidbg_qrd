@@ -1,6 +1,11 @@
 
 #include "dsi83.h"
 
+//struct work_struct  dsi83_work = NULL;
+static struct delayed_work dsi83_work;
+static struct workqueue_struct *dsi83_workqueue;
+
+
 struct i2c_adapter *adap_glb = NULL;
 
 static int32_t i2c_rw(unsigned char chipaddr,unsigned int sub_addr,int mode,
@@ -314,6 +319,33 @@ static void panel_reset(void)
 	mdelay(20);
 }
 
+static void dsi83_work_func(struct work_struct *work)
+{
+    int ret = 0;
+	
+	ret = SN65_devices_read_id();
+	if (ret)
+	{
+		printk(KERN_CRIT "dsi83:DSI83 match ID falied!\n");
+	}
+
+	printk(KERN_CRIT "dsi83:DSI83 match ID success!\n");
+
+	SN65_Sequence_seq4();
+	
+	ret = SN65_Sequence_seq6();
+	if(ret < 0)
+		printk(KERN_CRIT "dsi83:SN65_Sequence_seq6(),err,ret = %d.\n", ret);
+	
+	SN65_Sequence_seq7();
+	
+	ret = SN65_Sequence_seq8();
+	if(ret < 0)
+		printk(KERN_CRIT "dsi83:SN65_Sequence_seq8(),err,ret = %d.\n", ret);
+
+}
+
+
 static int dsi83_probe(struct platform_device *pdev)
 {
 	int ret = 0;
@@ -327,12 +359,13 @@ static int dsi83_probe(struct platform_device *pdev)
 		printk(KERN_CRIT "dsi83:%s():i2c_get_adapter(%d) error!",__func__,DSI83_I2C_BUS);
 		return -ENODEV;
 	}
-	
+/*	
     ret = dsi83_io_config(DSI83_GPIO_EN, "dsi83_en");
 	if(ret)
 	{
 		return ret;
 	}
+
 
 	ret = dsi83_io_config(PANEL_GPIO_RESET, "lcd_reset");
 	if(ret)
@@ -340,21 +373,28 @@ static int dsi83_probe(struct platform_device *pdev)
 		gpio_free(DSI83_GPIO_EN);
 		return ret;
 	}
-	
+*/	
 	ret = dsi83_io_config(T123_GPIO_RST, "T123_reset");
 	if(ret)
 	{
-		gpio_free(PANEL_GPIO_RESET);
-		gpio_free(DSI83_GPIO_EN);
+		//gpio_free(PANEL_GPIO_RESET);
+		//gpio_free(DSI83_GPIO_EN);
 		return ret;
 	}
 
+	//INIT_WORK(&dsi83_work, dsi83_work_func);
+	INIT_DELAYED_WORK(&dsi83_work, dsi83_work_func);
+	dsi83_workqueue = create_workqueue("dsi83");
 
 	dsi83_enable();
 	panel_reset();
 	//mdelay(100);
 	T123_reset();
 
+	//schedule_work(&dsi83_work);
+	queue_delayed_work(dsi83_workqueue, &dsi83_work, DSI83_DELAY_TIME);
+
+#if 0
 	ret = SN65_devices_read_id();
 	if (ret)
 	{
@@ -375,6 +415,7 @@ static int dsi83_probe(struct platform_device *pdev)
 	ret = SN65_Sequence_seq8();
 	if(ret < 0)
 		printk(KERN_CRIT "dsi83:SN65_Sequence_seq8(),err,ret = %d.\n", ret);
+#endif
 
 	return 0;
 
@@ -382,8 +423,13 @@ static int dsi83_probe(struct platform_device *pdev)
 
 static int dsi83_remove(struct platform_device *pdev)
 {
-    gpio_free(PANEL_GPIO_RESET);
-    gpio_free(DSI83_GPIO_EN);
+	cancel_work_sync(dsi83_workqueue);
+	flush_workqueue(dsi83_workqueue);
+	destroy_workqueue(dsi83_workqueue);
+
+	gpio_free(T123_GPIO_RST);
+    //gpio_free(PANEL_GPIO_RESET);
+    //gpio_free(DSI83_GPIO_EN);
     return 0;
 }
 

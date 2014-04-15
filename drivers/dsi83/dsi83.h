@@ -6,7 +6,12 @@
 #include <linux/syscalls.h>
 #include <asm/system.h>
 
+#include <linux/workqueue.h>
+
 #include "lidbg.h"
+
+//#define USB_SUSPEND_DELAY_TIME	(500 * HZ/1000) /* 500 msec */
+#define DSI83_DELAY_TIME	2//2000  //(500 * HZ/1000) /* 500 msec */
 
 #ifdef SOC_msm8x26
 #define 	DSI83_GPIO_EN          (62)
