@@ -1,5 +1,6 @@
 
 #include "lidbg.h"
+
 LIDBG_DEFINE;
 int led_en ;
 int ad_en;
@@ -165,6 +166,9 @@ static int soc_dev_probe(struct platform_device *pdev)
 	CREATE_KTHREAD(thread_key, NULL);
     Thermal_task =  kthread_run(thread_thermal, NULL, "flythermalthread");
     //FS_REGISTER_INT(fan_onoff_temp, "fan_onoff_temp", 65, NULL);
+
+	//register_lidbg_notifier(&lidbg_notifier);
+	LCD_ON;
     return 0;
 
 }
