@@ -213,25 +213,27 @@ static void work_right_button1_fn(struct work_struct *work)
 }
 irqreturn_t irq_left_button1(int irq, void *dev_id)
 {
-    lidbg("irq_left_button1: %d\n", irq);
+    //lidbg("irq_left_button1: %d\n", irq);
+    if(!work_pending(&work_left_button1))
     schedule_work(&work_left_button1);
     return IRQ_HANDLED;
 
 }
 irqreturn_t irq_left_button2(int irq, void *dev_id)
 {
-    lidbg("irq_left_button2: %d\n", irq);
+    //lidbg("irq_left_button2: %d\n", irq);
     return IRQ_HANDLED;
 }
 irqreturn_t irq_right_button1(int irq, void *dev_id)
 {
-    lidbg("irq_right_button1: %d\n", irq);
+    //lidbg("irq_right_button1: %d\n", irq);
+	if(!work_pending(&work_right_button1))
     schedule_work(&work_right_button1);
     return IRQ_HANDLED;
 }
 irqreturn_t irq_right_button2(int irq, void *dev_id)
 {
-    lidbg("irq_right_button2: %d\n", irq);
+    //lidbg("irq_right_button2: %d\n", irq);
     return IRQ_HANDLED;
 }
 void fly_devices_init(void)
