@@ -16,7 +16,7 @@ int uevent_dbg = 0;
 
 bool uevent_focus(char *focus, void(*callback)(char *focus, char *uevent))
 {
-    struct uevent_dev *add_new_dev=NULL;
+    struct uevent_dev *add_new_dev = NULL;
     add_new_dev = kzalloc(sizeof(struct uevent_dev), GFP_KERNEL);
     if (add_new_dev != NULL && focus && callback)
     {
@@ -32,9 +32,9 @@ bool uevent_focus(char *focus, void(*callback)(char *focus, char *uevent))
 
 void uevent_send(enum kobject_action action, char *envp_ext[])
 {
-	LIDBG_WARN("%s,%s\n", (envp_ext[0] == NULL ? "null" : envp_ext[0]), (envp_ext[1] == NULL ? "null" : envp_ext[1]));
-    if(kobject_uevent_env(&lidbg_uevent_device.this_device->kobj, action, envp_ext) < 0)	
-    	LIDBG_ERR("uevent_send\n");
+    LIDBG_WARN("%s,%s\n", (envp_ext[0] == NULL ? "null" : envp_ext[0]), (envp_ext[1] == NULL ? "null" : envp_ext[1]));
+    if(kobject_uevent_env(&lidbg_uevent_device.this_device->kobj, action, envp_ext) < 0)
+        LIDBG_ERR("uevent_send\n");
 }
 
 void uevent_shell(char *shell_cmd)
@@ -53,8 +53,8 @@ int lidbg_uevent_open(struct inode *inode, struct file *filp)
 ssize_t  lidbg_uevent_write(struct file *filp, const char __user *buf, size_t count, loff_t *offset)
 {
     char *tmp;
-	struct uevent_dev *pos;
-	struct list_head *client_list = &uevent_list;
+    struct uevent_dev *pos;
+    struct list_head *client_list = &uevent_list;
     tmp = memdup_user(buf, count + 1);
     if (IS_ERR(tmp))
     {
@@ -63,17 +63,17 @@ ssize_t  lidbg_uevent_write(struct file *filp, const char __user *buf, size_t co
     }
     tmp[count] = '\0';
 
-	if(uevent_dbg)
-		LIDBG_WARN("%s\n", tmp);
+    if(uevent_dbg)
+        LIDBG_WARN("%s\n", tmp);
 
-	list_for_each_entry(pos, client_list, tmp_list)
-	{
-		if (pos->focus && pos->callback && strstr(tmp, pos->focus))
-		{
-			LIDBG_SUC("called: %s  %ps\n", pos->focus, pos->callback);
-			pos->callback(pos->focus, tmp);
-		}
-	}
+    list_for_each_entry(pos, client_list, tmp_list)
+    {
+        if (pos->focus && pos->callback && strstr(tmp, pos->focus))
+        {
+            LIDBG_SUC("called: %s  %ps\n", pos->focus, pos->callback);
+            pos->callback(pos->focus, tmp);
+        }
+    }
     kfree(tmp);
     return count;
 }
@@ -124,7 +124,11 @@ void lidbg_uevent_main(int argc, char **argv)
 {
     if(!strcmp(argv[0], "dbg"))
     {
-		uevent_dbg = !uevent_dbg;
+        uevent_dbg = !uevent_dbg;
+    }
+    else if(!strcmp(argv[0], "uevent"))
+    {
+        lidbg_uevent_shell(argv[1]);
     }
 }
 
