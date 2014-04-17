@@ -341,6 +341,10 @@ int  lidbg_stop(char server[])
 {
     return lidbg_launch_user(get_bin_path("stop"), server, NULL, NULL, NULL, NULL, NULL);
 }
+int  lidbg_force_stop_apk(char packagename[])
+{
+    return lidbg_launch_user(get_bin_path("am"), "force-stop", packagename, NULL, NULL, NULL, NULL);
+}
 
 void pm_install_apk(char apkpath[])
 {
@@ -357,7 +361,6 @@ void callback_pm_install(char *dirname, char *filename)
     memset(apkpath, '\0', sizeof(apkpath));
     sprintf(apkpath, "'%s/%s'", dirname, filename);
     pm_install_apk(apkpath);
-    msleep(350);
 }
 int  lidbg_pm_install_dir(char apkpath_or_apkdirpath[])
 {
@@ -614,6 +617,7 @@ EXPORT_SYMBOL(lidbg_setprop);
 EXPORT_SYMBOL(lidbg_start);
 EXPORT_SYMBOL(lidbg_stop);
 EXPORT_SYMBOL(lidbg_pm_install_dir);
+EXPORT_SYMBOL(lidbg_force_stop_apk);
 EXPORT_SYMBOL(lidbg_domineering_ack);
 EXPORT_SYMBOL(mod_cmn_main);
 EXPORT_SYMBOL(lidbg_get_ns_count);
