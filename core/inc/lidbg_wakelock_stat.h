@@ -5,6 +5,7 @@ struct wakelock_item
 {
     struct list_head tmp_list;
     char *name;
+    char *package_name;
     int cunt;
     int cunt_max;
     bool is_count_wakelock;
