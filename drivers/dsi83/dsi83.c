@@ -319,6 +319,41 @@ static void panel_reset(void)
 	mdelay(20);
 }
 
+#if defined(CONFIG_FB)
+void dsi83_suspend(void)
+{
+	//printk(KERN_CRIT "[LSH-dsi83]:enter %s().\n", __func__);
+}
+
+void dsi83_resume(void)
+{
+	//printk(KERN_CRIT "[LSH-dsi83]:enter %s().\n", __func__);
+	queue_delayed_work(dsi83_workqueue, &dsi83_work, 0);
+}
+
+static int dsi83_fb_notifier_callback(struct notifier_block *self,
+				 unsigned long event, void *data)
+{
+	struct fb_event *evdata = data;
+	int *blank;
+	
+	//printk(KERN_CRIT "[LSH-dsi83]:enter %s().\n", __func__);
+	if (evdata && evdata->data && event == FB_EVENT_BLANK) 
+	{
+		blank = evdata->data;
+		
+		if (*blank == FB_BLANK_UNBLANK)
+			dsi83_resume();
+		else if (*blank == FB_BLANK_POWERDOWN)
+			dsi83_suspend();
+	}
+
+	return 0;
+}
+#elif defined(CONFIG_HAS_EARLYSUSPEND)
+
+#endif
+
 static void dsi83_work_func(struct work_struct *work)
 {
     int ret = 0;
@@ -416,6 +451,16 @@ static int dsi83_probe(struct platform_device *pdev)
 	if(ret < 0)
 		printk(KERN_CRIT "dsi83:SN65_Sequence_seq8(),err,ret = %d.\n", ret);
 #endif
+
+#if defined(CONFIG_FB)
+		dsi83_fb_notif.notifier_call = dsi83_fb_notifier_callback;
+		ret = fb_register_client(&dsi83_fb_notif);
+		if (ret)
+				lidbg("Unable to register dsi83_fb_notif: %d\n",ret);
+#elif defined(CONFIG_HAS_EARLYSUSPEND)
+
+#endif
+
 
 	return 0;
 

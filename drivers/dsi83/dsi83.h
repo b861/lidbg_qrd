@@ -8,6 +8,14 @@
 
 #include <linux/workqueue.h>
 
+#if defined(CONFIG_FB)
+#include <linux/notifier.h>
+#include <linux/fb.h>
+#elif defined(CONFIG_HAS_EARLYSUSPEND)
+#include <linux/earlysuspend.h>
+#endif
+
+
 #include "lidbg.h"
 
 //#define USB_SUSPEND_DELAY_TIME	(500 * HZ/1000) /* 500 msec */
@@ -142,6 +150,13 @@ char dsi83_conf[] =    //dsi83 test mode
 #else
 #define lidbg_dsi83(msg...)   do{ }while(0)
 #endif
+
+#if defined(CONFIG_FB)
+	struct notifier_block dsi83_fb_notif;
+#elif defined(CONFIG_HAS_EARLYSUSPEND)
+
+#endif
+
 
 #endif
 
