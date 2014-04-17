@@ -41,11 +41,11 @@ static void memreplace(char *drr, char dest, char replace, int len)
     if(drr)
     {
         while((loop < len))
-        	{
-				if((*(drr + loop) == dest))
-					*(drr + loop) = replace;
-				loop++;
-			}
+        {
+            if((*(drr + loop) == dest))
+                *(drr + loop) = replace;
+            loop++;
+        }
     }
 }
 
@@ -126,20 +126,20 @@ static bool lidbg_uevent_callback(int fd)
     n = uevent_kernel_multicast_recv(fd, msg, LIDBG_UEVENT_MSG_LEN);
     if (n > LIDBG_UEVENT_MSG_LEN )
     {
-        lidbg( "ERR-overflow-%d,%s\n",n,msg);
-		return -1;
+        lidbg( "ERR-overflow-%d,%s\n", n, msg);
+        return -1;
     }
     msg[n] = '\0';
-	
+
     parse_uevent(msg, &uevent);
 
     if (uevent.devname && !strcmp(uevent.devname, LIDBG_UEVENT_NODE_NAME))
         lidbg_uevent_process(&uevent);
     else if (uevent.subsystem && strstr(uevent_ignore, uevent.subsystem) == NULL)
-	{
-		memreplace(msg, '\0', ' ', n - 1 );
+    {
+        memreplace(msg, '\0', ' ', n - 1 );
         system_uevent_transfer(msg);
-	}
+    }
 
     return 0;
 }
@@ -173,28 +173,32 @@ static void lidbg_uevent_poll(bool (*uevent_callback)(int fd))
 
 }
 
+uid_t myuid;
 void *thread_wait_userver(void *arg)
 {
     sleep(1);
     pthread_detach(pthread_self());
     system("insmod /flysystem/lib/out/lidbg_loader.ko");
     system("insmod /system/lib/modules/out/lidbg_loader.ko");
+    sleep(20);
+    lidbg( "=====================%d\n\n\n\n", myuid);
     pthread_exit(0);
     return NULL;
 }
 int main(int argc, char **argv)
 {
     pthread_t lidbg_uevent_tid;
-	DUMP_BUILD_TIME_FILE;
+    DUMP_BUILD_TIME_FILE;
+    myuid = getuid();
     system("mkdir /data/lidbg");
     system("mkdir /data/lidbg_osd");
     system("chmod 777 /data/lidbg");
     system("chmod 777 /data/lidbg_osd");
-	
+
     system("insmod /system/lib/modules/out/lidbg_uevent.ko");
     system("insmod /flysystem/lib/out/lidbg_uevent.ko");
-	sleep(1);
-	system("chmod 777 /dev/lidbg_uevent");
+    sleep(1);
+    system("chmod 777 /dev/lidbg_uevent");
     usleep(50 * 1000);
     pthread_create(&lidbg_uevent_tid, NULL, thread_wait_userver, NULL);
     lidbg_uevent_poll(lidbg_uevent_callback);
