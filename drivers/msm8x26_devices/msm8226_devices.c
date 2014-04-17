@@ -37,12 +37,12 @@ static struct ad_key_remap ad_key[] =
     //{35, 1000000, KEY_BACK},
     //{35, 1500000, KEY_BACK},
     //{35, 2000000, KEY_BACK},
-    {35, 2500000, KEY_HOME},
+    {35, 2200000, KEY_HOME},
     //feel  key  x_ain_4  mpp6
     //{37, 1000000, KEY_BACK},
     //{37, 1500000, KEY_BACK},
     {37, 2000000, KEY_MENU},
-    {37, 2500000, KEY_BACK},
+    {37, 2200000, KEY_BACK},
 };
 #define AD_OFFSET  (100000)
 #define AD_VAL_MAX  (3300000)
@@ -208,7 +208,7 @@ static void work_left_button1_fn(struct work_struct *work)
 struct work_struct work_right_button1;
 static void work_right_button1_fn(struct work_struct *work)
 {
-    SOC_Key_Report(KEY_MENU, KEY_PRESSED_RELEASED);
+    SOC_Key_Report(KEY_BACK, KEY_PRESSED_RELEASED);
 
 }
 irqreturn_t irq_left_button1(int irq, void *dev_id)

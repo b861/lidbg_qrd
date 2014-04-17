@@ -11,12 +11,15 @@ static KEYCODE_T lidbg_keycode[] =
     KEY_DOWN,   KEY_UP,  KEY_RIGHT, KEY_LEFT,
     KEY_VOLUMEDOWN, KEY_VOLUMEUP, KEY_PAUSE, KEY_MUTE,
     KEY_POWER, KEY_SLEEP, KEY_WAKEUP,
-    KEY_ENTER, KEY_END
+    KEY_ENTER, KEY_END,KEY_HOMEPAGE
 };
 
 void lidbg_key_report(u32 key_value, u32 type)
 {
     lidbg("key - key_value:%d\n", key_value);
+
+if(key_value==102)
+	key_value=172;
 
     if(type == KEY_PRESSED)
         lidbg("key - press\n");
