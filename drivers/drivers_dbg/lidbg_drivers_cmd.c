@@ -216,6 +216,18 @@ void parse_cmd(char *pt)
         monkey_run(enable);
         monkey_config(gpio, on_en, off_en, on_ms, off_ms);
     }
+    else if(!strcmp(argv[0], "pm") )
+    {
+        int enable;
+        enable = simple_strtoul(argv[1], 0, 0);
+        SOC_PM_STEP((fly_pm_stat_step)enable, NULL);
+    }
+    else if(!strcmp(argv[0], "pm1") )
+    {
+        int enable;
+        enable = simple_strtoul(argv[1], 0, 0);
+        LINUX_TO_LIDBG_TRANSFER((linux_to_lidbg_transfer_t)enable, NULL);
+    }
 #ifdef SOC_msm8x25
     else if(!strcmp(argv[0], "video"))
     {

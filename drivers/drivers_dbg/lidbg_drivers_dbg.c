@@ -12,7 +12,7 @@ int drivers_dbg_open (struct inode *inode, struct file *filp)
 
 #include "lidbg_drivers_cmd.c"
 
-ssize_t drivers_dbg_write (struct file *filp, const char __user *buf,size_t size, loff_t *ppos)
+ssize_t drivers_dbg_write (struct file *filp, const char __user *buf, size_t size, loff_t *ppos)
 {
     char cmd_buf[512];
     memset(cmd_buf, '\0', 512);

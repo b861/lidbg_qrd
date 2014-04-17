@@ -7,7 +7,8 @@ LIDBG_DEFINE;
 
 char *insmod_list[] =
 {
-	"lidbg_lpc.ko",
+    "lidbg_pm_8226.ko",
+    "lidbg_lpc.ko",
     "lidbg_devices.ko",
     "lidbg_bpmsg.ko",
     "lidbg_gps.ko",
@@ -25,7 +26,6 @@ char *insmod_path[] =
     NULL,
 };
 
-
 void interface_func_tbl_default(void)
 {
     lidbgerr("interface_func_tbl_default:this func not ready!\n");
@@ -42,10 +42,10 @@ int loader_thread(void *data)
 
     for(i = 0; insmod_path[i] != NULL; i++)
     {
-    	sprintf(path, "%slidbg_loader.ko", insmod_path[i]);
-    	if(!fs_is_file_exist(path))continue;
+        sprintf(path, "%slidbg_loader.ko", insmod_path[i]);
+        if(!fs_is_file_exist(path))continue;
 
-		for(j = 0; insmod_list[j] != NULL; j++)
+        for(j = 0; insmod_list[j] != NULL; j++)
         {
             sprintf(path, "%s%s", insmod_path[i], insmod_list[j]);
             lidbg_insmod(path);
@@ -54,8 +54,6 @@ int loader_thread(void *data)
     DUMP_FUN_LEAVE;
     return 0;
 }
-
-
 
 bool iSOC_IO_ISR_Add(u32 irq, u32  interrupt_type, pinterrupt_isr func, void *dev)
 {
@@ -79,7 +77,6 @@ bool iSOC_IO_ISR_Enable(u32 irq)
     return 1;
 }
 
-
 bool iSOC_IO_ISR_Disable(u32 irq)
 {
     soc_irq_disable(GPIO_TO_INT(irq));
@@ -90,7 +87,6 @@ bool iSOC_IO_ISR_Del (u32 irq)
     free_irq(GPIO_TO_INT(irq), NULL);
     return 1;
 }
-
 
 bool iSOC_IO_Config(u32 index, bool direction, u32 pull, u32 drive_strength)
 {
@@ -118,9 +114,7 @@ bool iSOC_IO_Input(u32 group, u32 index, u32 pull)
 bool iSOC_ADC_Get (u32 channel , u32 *value)
 {
     *value = 0xffffffff;
-
     *value = soc_ad_read(channel);
-
     if(*value == 0xffffffff)
         return 0;
     return 1;
@@ -188,19 +182,15 @@ int iSOC_BL_Set( u32 bl_level)
 
 }
 
-
 int iSOC_Display_Get_Res(u32 *screen_x, u32 *screen_y)
 {
     return soc_get_screen_res(screen_x, screen_y);
 }
 
-
-
 struct fly_smem *iSOC_Get_Share_Mem(void)
 {
     return p_fly_smem;
 }
-
 
 void iSOC_System_Status(FLY_SYSTEM_STATUS status)
 {
@@ -208,9 +198,6 @@ void iSOC_System_Status(FLY_SYSTEM_STATUS status)
     g_var.system_status = status;
     //lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, g_var.system_status));
 }
-
-
-
 
 static void set_func_tbl(void)
 {
@@ -250,6 +237,7 @@ static void set_func_tbl(void)
 
     plidbg_dev->soc_func_tbl.pfnSOC_Get_Share_Mem = iSOC_Get_Share_Mem;
     plidbg_dev->soc_func_tbl.pfnSOC_System_Status = iSOC_System_Status;
+    plidbg_dev->soc_func_tbl.pfnSOC_WakeLock_Stat  = lidbg_wakelock_register;
 
 }
 
@@ -257,15 +245,11 @@ int interface_open(struct inode *inode, struct file *filp)
 {
     return 0;
 }
-
 int interface_release(struct inode *inode, struct file *filp)
 {
     return 0;
 }
-
-
-ssize_t interface_read(struct file *filp, char __user *buf, size_t size,
-                 loff_t *ppos)
+ssize_t interface_read(struct file *filp, char __user *buf, size_t size, loff_t *ppos)
 {
     unsigned int count = 4;
     int ret = 0;
@@ -284,17 +268,12 @@ ssize_t interface_read(struct file *filp, char __user *buf, size_t size,
 
     return count;
 }
-
-
-static ssize_t interface_write(struct file *filp, const char __user *buf,
-                         size_t size, loff_t *ppos)
+static ssize_t interface_write(struct file *filp, const char __user *buf, size_t size, loff_t *ppos)
 {
     return size;
 }
 
-
 #define DEVICE_NAME "lidbg_interface"
-
 static struct file_operations dev_fops =
 {
     .owner	=	THIS_MODULE,
@@ -359,9 +338,10 @@ int fly_interface_init(void)
     g_var.machine_id = get_machine_id();
 
 
-    g_var.is_fly = 1;
+    g_var.is_fly = 0;
     g_var.fake_suspend = 0;
     g_var.acc_flag = 1;
+    g_var.ws_lh = NULL;
 
     if( fs_is_file_exist(RECOVERY_MODE_DIR))
         recovery_mode = 1;

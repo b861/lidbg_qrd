@@ -48,14 +48,42 @@
 #endif
 
 
-
-
+#define PM_WARN(fmt, args...) do{printk("[ftf_pm]warn.%s: " fmt,__func__,##args);}while(0)
+#define PM_ERR(fmt, args...) do{printk("[ftf_pm]err.%s: " fmt,__func__,##args);}while(0)
+#define PM_SUC(fmt, args...) do{printk("[ftf_pm]suceed.%s: " fmt,__func__,##args);}while(0)
+#define PM_SLEEP_DBG(fmt, args...) do{printk("[ftf_pm]sleep_step: ++++++++++++++" fmt,##args);}while(0)
+#define PM_WAKE_DBG(fmt, args...) do{printk("[ftf_pm]wake_step: ===" fmt,##args);}while(0)
+typedef enum
+{
+    LTL_TRANSFER_RTC = 1,
+    LTL_TRANSFER_NULL
+} linux_to_lidbg_transfer_t;
+typedef enum
+{
+    PM_AUTOSLEEP_STORE1 = 1,
+    PM_AUTOSLEEP_SET_STATE2,
+    PM_QUEUE_UP_SUSPEND_WORK3,
+    PM_TRY_TO_SUSPEND4,
+    PM_TRY_TO_SUSPEND4P1,
+    PM_TRY_TO_SUSPEND4P2,
+    PM_TRY_TO_SUSPEND4P3,
+    PM_TRY_TO_SUSPEND4P4,
+    PM_TRY_TO_SUSPEND4P5,
+    PM_SUSPEND5,
+    PM_ENTER_STATE6,
+    PM_ENTER_STATE6P1,
+    PM_ENTER_STATE6P2,
+    PM_SUSPEND_DEVICES_AND_ENTER7,
+    PM_SUSPEND_ENTER8,
+    PM_SUSPEMD_OPS_ENTER9,
+    PM_SUSPEMD_OPS_ENTER9P1,
+    PM_NULL
+} fly_pm_stat_step;
 
 #if (defined(BUILD_SOC) || defined(BUILD_CORE) || defined(BUILD_DRIVERS))
 #define NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE (110)
 #define NOTIFIER_MINOR_ACC_ON (0)
 #define NOTIFIER_MINOR_ACC_OFF (1)
-
 #else
 #define NOTIFIER_VALUE(major,minor)  (((major)&0xffff)<<16 | ((minor)&0xffff))
 
@@ -76,8 +104,6 @@ struct fly_smem
     int reserved2;
     int bl_value;
 };
-
-
 #endif
 
 typedef enum
@@ -88,44 +114,21 @@ typedef enum
     FLY_SUSPEND,
 } FLY_SYSTEM_STATUS;
 
-
 struct lidbg_fn_t
 {
-    //io
-    /*
-     GPIO TLMM: Pullup/Pulldown
-    enum {
-    	GPIO_CFG_NO_PULL,
-    	GPIO_CFG_PULL_DOWN,
-    	GPIO_CFG_KEEPER,
-    	GPIO_CFG_PULL_UP,
-    };
 
-    GPIO TLMM: Drive Strength
-    enum {
-    	GPIO_CFG_2MA,
-    	GPIO_CFG_4MA,
-    	GPIO_CFG_6MA,
-    	GPIO_CFG_8MA,
-    	GPIO_CFG_10MA,
-    	GPIO_CFG_12MA,
-    	GPIO_CFG_14MA,
-    	GPIO_CFG_16MA,
-    };
+    struct fly_smem *(*pfnSOC_Get_Share_Mem)(void);
 
-    */
     void (*pfnSOC_IO_Output) (unsigned int group, unsigned int index, bool status);
     bool (*pfnSOC_IO_Input) (unsigned int group, unsigned int index, unsigned int pull);
     void (*pfnSOC_IO_Output_Ext)(unsigned int group, unsigned int index, bool status, unsigned int pull, unsigned int drive_strength);
     bool (*pfnSOC_IO_Config)(unsigned int index, bool direction, unsigned int pull, unsigned int drive_strength);
 
-    //i2c
-    /*
-    7bit i2c sub_addr
-    bus_id : 0/1
-    return how many bytes read/write
-    when err , <0
-    */
+    bool (*pfnSOC_IO_ISR_Add)(unsigned int irq, unsigned int interrupt_type, pinterrupt_isr func, void *dev);
+    bool (*pfnSOC_IO_ISR_Enable)(unsigned int irq);
+    bool (*pfnSOC_IO_ISR_Disable)(unsigned int irq);
+    bool (*pfnSOC_IO_ISR_Del )(unsigned int irq);
+
     int (*pfnSOC_I2C_Send) (int bus_id, char chip_addr, char *buf, unsigned int size);
     int (*pfnSOC_I2C_Rec)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
     int (*pfnSOC_I2C_Rec_Simple)(int bus_id, char chip_addr, char *buf, unsigned int size);
@@ -135,54 +138,21 @@ struct lidbg_fn_t
     int (*pfnSOC_I2C_Rec_TEF7000)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
     int (*pfnSOC_I2C_Rec_2B_SubAddr)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
 
-
-    //io-irq
-    //interrupt_type
-
-    /*
-
-    #define IRQF_TRIGGER_RISING	0x00000001
-    #define IRQF_TRIGGER_FALLING	0x00000002
-    #define IRQF_TRIGGER_HIGH	0x00000004
-    #define IRQF_TRIGGER_LOW	0x00000008
-
-    */
-    bool (*pfnSOC_IO_ISR_Add)(unsigned int irq, unsigned int interrupt_type, pinterrupt_isr func, void *dev);
-    bool (*pfnSOC_IO_ISR_Enable)(unsigned int irq);
-    bool (*pfnSOC_IO_ISR_Disable)(unsigned int irq);
-    bool (*pfnSOC_IO_ISR_Del )(unsigned int irq);
-
-    //ad
-    /*
-     return 0 when err
-    // 0-AIN2
-    // 1-AIN3
-    // 2-AIN4
-    // 3-REM1
-    // 4-REM2
-    */
     bool (*pfnSOC_ADC_Get)(unsigned int channel , unsigned int *value);
-
-    //key
     void (*pfnSOC_Key_Report)(unsigned int key_value, unsigned int type);
-    //bl
-    /*level : 0~255   0-dim, 255-bright*/
-    int (*pfnSOC_BL_Set)( unsigned int level);
-
-    //display/touch
-    int (*pfnSOC_Display_Get_Res)(unsigned int *screen_x, unsigned int *screen_y);
-
-    //lpc
+    int  (*pfnSOC_BL_Set)( unsigned int level);
+    int  (*pfnSOC_Display_Get_Res)(unsigned int *screen_x, unsigned int *screen_y);
     void (*pfnSOC_LPC_Send)(unsigned char *p, unsigned int len);
-
-	
     void (*pfnSOC_System_Status)(FLY_SYSTEM_STATUS status);
-    struct fly_smem *(*pfnSOC_Get_Share_Mem)(void);
+    void (*pfnSOC_WakeLock_Stat)(bool lock, const char *name);
+
+    void (*pfnSOC_PM_STEP)(fly_pm_stat_step step, void *data);
+    int (*pfnLINUX_TO_LIDBG_TRANSFER)(linux_to_lidbg_transfer_t _enum, void *data);
+
 };
 
 struct lidbg_pvar_t
 {
-    //all pointer
     int temp;
     FLY_SYSTEM_STATUS system_status;
     int machine_id;
@@ -192,7 +162,7 @@ struct lidbg_pvar_t
     bool is_usb11;
     bool fake_suspend;
     bool acc_flag;
-
+    struct list_head *ws_lh;
 };
 
 struct lidbg_interface
@@ -209,12 +179,8 @@ struct lidbg_interface
     };
 };
 
-
-
 #define LIDBG_DEV_CHECK_READY  (plidbg_dev != NULL)
-
 #define LIDBG_DEFINE  struct lidbg_interface *plidbg_dev = NULL
-
 #define g_var  plidbg_dev->soc_pvar_tbl
 
 #define LIDBG_GET  \
@@ -260,54 +226,54 @@ struct lidbg_interface
 
 
 extern struct lidbg_interface *plidbg_dev;
-	
 static inline int check_pt(void)
 {
-	while (plidbg_dev == NULL)
-	{
-		printk("lidbg:check if plidbg_dev==NULL\n");
-		printk("%s,line %d\n", __FILE__, __LINE__);
-		dump_stack();//provide some information
-		msleep(200);
-	}
-	return 0;
+    while (plidbg_dev == NULL)
+    {
+        printk("lidbg:check if plidbg_dev==NULL\n");
+        printk("%s,line %d\n", __FILE__, __LINE__);
+        dump_stack();
+        msleep(200);
+    }
+    return 0;
 }
-	
-//io
+
+
 #define SOC_IO_Output (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_IO_Output))
 #define SOC_IO_Input  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_IO_Input))
 #define SOC_IO_Output_Ext (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_IO_Output_Ext))
 #define SOC_IO_Config  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_IO_Config))
-//i2c
+
 #define SOC_I2C_Send  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_I2C_Send))
 #define SOC_I2C_Rec   (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_I2C_Rec))
 #define SOC_I2C_Rec_Simple   (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_I2C_Rec_Simple))
-	
+
 #define SOC_I2C_Rec_SAF7741  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_I2C_Rec_SAF7741))
 #define SOC_I2C_Send_TEF7000   (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_I2C_Send_TEF7000))
 #define SOC_I2C_Rec_TEF7000   (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_I2C_Rec_TEF7000))
 #define SOC_I2C_Rec_2B_SubAddr   (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_I2C_Rec_2B_SubAddr))
-//io-irq
+
 #define SOC_IO_ISR_Add  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_IO_ISR_Add))
 #define SOC_IO_ISR_Enable   (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_IO_ISR_Enable))
 #define SOC_IO_ISR_Disable  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_IO_ISR_Disable))
 #define SOC_IO_ISR_Del  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_IO_ISR_Del))
-//ad
-#define SOC_ADC_Get  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_ADC_Get))
-//key
-#define SOC_Key_Report  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_Key_Report))
-//bl
-#define SOC_BL_Set  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_BL_Set))
-	
-//display/touch
-#define SOC_Display_Get_Res  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_Display_Get_Res))
-	
-//lpc
-#define  SOC_LPC_Send  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_LPC_Send))
 
-#define FLAG_FOR_15S_OFF   (plidbg_dev->soc_pvar_tbl.flag_for_15s_off)	
-	
+#define SOC_ADC_Get  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_ADC_Get))
+
+#define SOC_Key_Report  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_Key_Report))
+
+#define SOC_BL_Set  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_BL_Set))
+
+#define SOC_Display_Get_Res  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_Display_Get_Res))
+
+#define SOC_LPC_Send  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_LPC_Send))
 #define SOC_Get_Share_Mem (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_Get_Share_Mem))
 #define SOC_System_Status (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_System_Status))
+#define SOC_WakeLock_Stat (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_WakeLock_Stat))
+
+#define FLAG_FOR_15S_OFF   (plidbg_dev->soc_pvar_tbl.flag_for_15s_off)
+
+#define LINUX_TO_LIDBG_TRANSFER (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnLINUX_TO_LIDBG_TRANSFER))
+#define SOC_PM_STEP (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_PM_STEP))
 
 #endif

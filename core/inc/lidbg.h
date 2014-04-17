@@ -51,6 +51,8 @@
 #include <linux/semaphore.h>
 #ifdef CONFIG_HAS_EARLYSUSPEND
 #include <linux/earlysuspend.h>
+#else
+#include <linux/pm_wakeup.h>
 #endif
 #include <asm/atomic.h>
 #include <asm/unistd.h>
