@@ -139,6 +139,16 @@ void terminal_tw9912_config(int argc, char **argv)
         lidbg("read add=0x%02x,valu=0x%02x\n", sub_addr, buf[0]);
 #endif
     }
+    else if(!strcmp(argv[1], "set"))
+    {
+    	Vedio_Effect cmd = 0;
+	u8 val = 0;
+
+	cmd = simple_strtoul(argv[2], 0, 0);
+	val = (u8)simple_strtoul(argv[3], 0, 0);
+	
+	flyVideoImageQualityConfig_in(cmd , val);
+    }
     else
     {
         ;

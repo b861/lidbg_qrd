@@ -67,26 +67,70 @@ int static video_image_config_parameter_buffer(void)
 */
 //TW9912_Image_Parameter_fly[1].valu 等于240是一般倒车，0xF1是天籁倒车，小于10为AUX输入
         /**************************************Astren************************************************/
-        if(TW9912_Image_Parameter_fly[1].valu == 240)//240 是和蒋工商量好的值，用于区别目前是倒车的配置
+        if(TW9912_Image_Parameter_fly[1].valu > 10)//240 是和蒋工商量好的值，用于区别目前是倒车的配置
         {
             lidbg("Astern 2 Normal \n");
             flag_now_config_channal_AUX_or_Astren = 0;
             if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
             {
-                Tw9912_image_global_AUX_BACK[0][1] = 0x0;
-                Tw9912_image_global_AUX_BACK[1][1] = 0x61;
-                Tw9912_image_global_AUX_BACK[2][1] = 0x00;
-                Tw9912_image_global_AUX_BACK[3][1] = 0xff;
-                Tw9912_image_global_AUX_BACK[4][1] = 0xff;
+                u8 i = 0;
+                for (i = BRIGHTNESS; i <= HUE; i++)
+                {
+                    switch (i)
+                    {
+                    case BRIGHTNESS:
+                        Tw9912_image_global_AUX_BACK[0][1] = \
+                                                             Image_Config_CarBacking_Normal[0][5];
+                        break;
+                    case CONTRAST:
+                        Tw9912_image_global_AUX_BACK[1][1] = \
+                                                             Image_Config_CarBacking_Normal[1][TW9912_Image_Parameter_fly[CONTRAST-1].valu - 240];
+                        break;
+                    case HUE:
+                        Tw9912_image_global_AUX_BACK[3][1] = \
+                                                             Image_Config_CarBacking_Normal[3][TW9912_Image_Parameter_fly[CHROMA_U-1].valu - 240];
+                        Tw9912_image_global_AUX_BACK[4][1] = \
+                                                             Image_Config_CarBacking_Normal[4][TW9912_Image_Parameter_fly[CHROMA_U-1].valu - 240];
+                        break;
+                    case CHROMA_U:
+                        Tw9912_image_global_AUX_BACK[2][1] = \
+                                                             Image_Config_CarBacking_Normal[2][10-(TW9912_Image_Parameter_fly[HUE-1].valu - 240)];
+                        break;
+                    default :
+                        break;
+                    }
+                }
                 // lidbg("Tw9912_image_global_AUX_BACK reset valu from NTSC_I\n");
             }
             else//PALi
             {
-                Tw9912_image_global_AUX_BACK_PAL_I[0][1] = 0x0; 
-                Tw9912_image_global_AUX_BACK_PAL_I[1][1] = 0x61; 
-                Tw9912_image_global_AUX_BACK_PAL_I[2][1] = 0x00;
-                Tw9912_image_global_AUX_BACK_PAL_I[3][1] = 0xff;
-                Tw9912_image_global_AUX_BACK_PAL_I[4][1] = 0xff;
+                u8 i = 0;
+                for (i = BRIGHTNESS; i <= HUE; i++)
+                {
+                    switch (i)
+                    {
+                    case BRIGHTNESS:
+                        Tw9912_image_global_AUX_BACK_PAL_I[0][1] = \
+                                Image_Config_AUX_BACK_PAL_I[0][5];
+                        break;
+                    case CONTRAST:
+                        Tw9912_image_global_AUX_BACK_PAL_I[1][1] = \
+                                Image_Config_AUX_BACK_PAL_I[1][TW9912_Image_Parameter_fly[CONTRAST-1].valu - 240];
+                        break;
+                    case CHROMA_U:
+                        Tw9912_image_global_AUX_BACK_PAL_I[3][1] = \
+                                Image_Config_AUX_BACK_PAL_I[3][TW9912_Image_Parameter_fly[CHROMA_U-1].valu - 240];
+                        Tw9912_image_global_AUX_BACK_PAL_I[4][1] = \
+                                Image_Config_AUX_BACK_PAL_I[4][TW9912_Image_Parameter_fly[CHROMA_U-1].valu - 240];
+                        break;
+                    case HUE:
+                        Tw9912_image_global_AUX_BACK_PAL_I[2][1] = \
+                                Image_Config_AUX_BACK_PAL_I[2][10-(TW9912_Image_Parameter_fly[HUE-1].valu - 240)];
+                        break;
+                    default :
+                        break;
+                    }
+                }
                 // lidbg("Tw9912_image_global_AUX_BACK reset valu from PAL_I\n");
             }
             return 1;
@@ -97,25 +141,69 @@ int static video_image_config_parameter_buffer(void)
             flag_now_config_channal_AUX_or_Astren = 0;
             if(signal_is_how[info_com_top_Channel].Format == NTSC_I)
             {
-                Tw9912_image_global_AUX_BACK[0][1] = 0x15;
-                Tw9912_image_global_AUX_BACK[1][1] = 0x61;
-                Tw9912_image_global_AUX_BACK[2][1] = 0x00;
-                Tw9912_image_global_AUX_BACK[3][1] = 0xff;
-                Tw9912_image_global_AUX_BACK[4][1] = 0xff;
+                u8 i = 0;
+                for (i = BRIGHTNESS; i <= HUE; i++)
+                {
+                    switch (i)
+                    {
+                    case BRIGHTNESS:
+                        Tw9912_image_global_AUX_BACK[0][1] = \
+                                                             Image_Config_CarBacking_NewTeana[0][5];
+                        break;
+                    case CONTRAST:
+                        Tw9912_image_global_AUX_BACK[1][1] = \
+                                                             Image_Config_CarBacking_NewTeana[1][TW9912_Image_Parameter_fly[CONTRAST-1].valu - 240];
+                        break;
+                    case HUE:
+                        Tw9912_image_global_AUX_BACK[3][1] = \
+                                                             Image_Config_CarBacking_NewTeana[3][TW9912_Image_Parameter_fly[CHROMA_U-1].valu - 240];
+                        Tw9912_image_global_AUX_BACK[4][1] = \
+                                                             Image_Config_CarBacking_NewTeana[4][TW9912_Image_Parameter_fly[CHROMA_U-1].valu - 240];
+                        break;
+                    case CHROMA_U:
+                        Tw9912_image_global_AUX_BACK[2][1] = \
+                                                             Image_Config_CarBacking_NewTeana[2][10-(TW9912_Image_Parameter_fly[HUE-1].valu - 240)];
+                        break;
+                    default :
+                        break;
+                    }
+                }
                 // lidbg("Tw9912_image_global_AUX_BACK reset valu from NTSC_I\n");
             }
             else//PALi
             {
-                Tw9912_image_global_AUX_BACK_PAL_I[0][1] = 0x15; 
-                Tw9912_image_global_AUX_BACK_PAL_I[1][1] = 0x61; 
-                Tw9912_image_global_AUX_BACK_PAL_I[2][1] = 0x00;
-                Tw9912_image_global_AUX_BACK_PAL_I[3][1] = 0xff;
-                Tw9912_image_global_AUX_BACK_PAL_I[4][1] = 0xff;
+                u8 i = 0;
+                for (i = BRIGHTNESS; i <= HUE; i++)
+                {
+                    switch (i)
+                    {
+                    case BRIGHTNESS:
+                        Tw9912_image_global_AUX_BACK_PAL_I[0][1] = \
+                                Image_Config_AUX_BACK_PAL_I[0][5];
+                        break;
+                    case CONTRAST:
+                        Tw9912_image_global_AUX_BACK_PAL_I[1][1] = \
+                                Image_Config_AUX_BACK_PAL_I[1][TW9912_Image_Parameter_fly[CONTRAST-1].valu - 240];
+                        break;
+                    case CHROMA_U:
+                        Tw9912_image_global_AUX_BACK_PAL_I[3][1] = \
+                                Image_Config_AUX_BACK_PAL_I[3][TW9912_Image_Parameter_fly[CHROMA_U-1].valu - 240];
+                        Tw9912_image_global_AUX_BACK_PAL_I[4][1] = \
+                                Image_Config_AUX_BACK_PAL_I[4][TW9912_Image_Parameter_fly[CHROMA_U-1].valu - 240];
+                        break;
+                    case HUE:
+                        Tw9912_image_global_AUX_BACK_PAL_I[2][1] = \
+                                Image_Config_AUX_BACK_PAL_I[2][10-(TW9912_Image_Parameter_fly[HUE-1].valu - 240)];
+                        break;
+                    default :
+                        break;
+                    }
+                }
                 // lidbg("Tw9912_image_global_AUX_BACK reset valu from PAL_I\n");
             }
             return 1;
         }
-        else if(TW9912_Image_Parameter_fly[1].valu > 10)
+        else if(TW9912_Image_Parameter_fly[1].valu > 250)
         {
             lidbg("Error at %s you input valu = %d paramter have Problems", __func__, TW9912_Image_Parameter_fly[1].valu);
             return -1;
@@ -579,7 +667,7 @@ SIGNALISGOOD:
 SIGNALINPUT:
     return 0;
 }
-static void chips_config_cvbs_begin()
+static void chips_config_cvbs_begin(void)
 {
     tw9912_config_for_cvbs_signal(info_com_top_Channel);
     video_image_config_begin();
@@ -635,7 +723,7 @@ static void chips_config_cvbs_begin()
         tc358746xbg_config_begin(COLORBAR);
     }
 }
-static void chips_config_yuv_begin()
+static void chips_config_yuv_begin(void)
 {
     tw9912_config_array_NTSCp();//刷寄存器数组
     video_image_config_begin();//刷颜色寄存器的配置
