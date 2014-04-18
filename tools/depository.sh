@@ -1,3 +1,10 @@
+function depository_clean()
+{
+	echo $FUNCNAME
+	cd $RELEASE_REPOSITORY
+	git reset --hard
+}
+
 function depository_pull()
 {
 	echo $FUNCNAME
