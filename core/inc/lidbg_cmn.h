@@ -29,6 +29,7 @@ int  lidbg_start(char server[]);
 int  lidbg_stop(char server[]);
 int  lidbg_pm_install_dir(char apkpath_or_apkdirpath[]);
 int  lidbg_force_stop_apk(char packagename[]);
+int  lidbg_toast_show(char *string, int int_value);
 void lidbg_domineering_ack(void);
 void mod_cmn_main(int argc, char **argv);
 u32 lidbg_get_ns_count(void);

@@ -205,7 +205,7 @@ int  lidbg_launch_user( char bin_path[], char argv1[], char argv2[], char argv3[
         lidbg("lunch [%s %s] fail!\n", bin_path, argv1);
     return ret;
 #else
-    char shell_cmd[256] = {0};
+    char shell_cmd[512] = {0};
     sprintf(shell_cmd, "%s %s %s %s %s %s %s ", bin_path, argv1 == NULL ? "" : argv1, argv2 == NULL ? "" : argv2, argv3 == NULL ? "" : argv3, argv4 == NULL ? "" : argv4, argv5 == NULL ? "" : argv5, argv6 == NULL ? "" : argv6);
     lidbg_uevent_shell(shell_cmd);
     return 1;
@@ -344,6 +344,12 @@ int  lidbg_stop(char server[])
 int  lidbg_force_stop_apk(char packagename[])
 {
     return lidbg_launch_user(get_bin_path("am"), "force-stop", packagename, NULL, NULL, NULL, NULL);
+}
+int  lidbg_toast_show(char *string, int int_value)
+{
+    char para[128] = {0};
+    sprintf(para, "--es action %s --ei int %d", string ? string : "null", int_value);
+    return lidbg_launch_user(get_bin_path("am"), "broadcast", "-a", "com.lidbg.broadcast", para, NULL, NULL);
 }
 
 void pm_install_apk(char apkpath[])
@@ -617,6 +623,7 @@ EXPORT_SYMBOL(lidbg_setprop);
 EXPORT_SYMBOL(lidbg_start);
 EXPORT_SYMBOL(lidbg_stop);
 EXPORT_SYMBOL(lidbg_pm_install_dir);
+EXPORT_SYMBOL(lidbg_toast_show);
 EXPORT_SYMBOL(lidbg_force_stop_apk);
 EXPORT_SYMBOL(lidbg_domineering_ack);
 EXPORT_SYMBOL(mod_cmn_main);
