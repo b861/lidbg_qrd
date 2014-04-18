@@ -33,6 +33,7 @@ void lidbg_device_main(int argc, char **argv);
 // PANNE_PEN , RESET
 #define LCD_ON  do{    \
 			u8 buff[] = {0x02, 0x0d, 0x1};\
+			lidbg("LCD_ON\n");\
 			SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\
 					}while(0)
 	
