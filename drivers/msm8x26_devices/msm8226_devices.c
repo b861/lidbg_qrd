@@ -57,10 +57,15 @@ void led_on(void)
 
 int thread_led(void *data)
 {
+	lidbg("LCD_ON every 2 sec\n");	
+
     while(1)
     {
           if(led_en)
+          {
                 led_on();
+				LCD_ON;
+          }
     }
     return 0;
 }
