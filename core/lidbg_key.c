@@ -18,9 +18,11 @@ void lidbg_key_report(u32 key_value, u32 type)
 {
     lidbg("key - key_value:%d\n", key_value);
 
+#ifdef SOC_msm8x25
+#else
 if(key_value == KEY_HOME)
 	key_value = KEY_HOMEPAGE;
-
+#endif
     if(type == KEY_PRESSED)
         lidbg("key - press\n");
     else if(type == KEY_RELEASED)
