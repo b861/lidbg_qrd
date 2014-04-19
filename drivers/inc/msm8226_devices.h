@@ -30,16 +30,7 @@ void lidbg_device_main(int argc, char **argv);
 								SOC_IO_Output(0, GPIO_USB_ID, 0);\
 							}while(0)
 
-// PANNE_PEN , RESET
-#define LCD_ON  do{    \
-			u8 buff[] = {0x02, 0x0d, 0x1};\
-			lidbg("LCD_ON\n");\
-			SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\
-					}while(0)
-	
-#define LCD_OFF   do{   \
-			u8 buff[] = {0x02, 0x0d, 0x0};\
-			lidbg("LCD_OFF\n");\
-			SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\
-					}while(0)
+// PANNE_PEN
+#define LCD_ON  do{lidbg("LCD_ON\n");LPC_CMD_LCD_ON;}while(0)
+#define LCD_OFF do{lidbg("LCD_OFF\n");LPC_CMD_LCD_OFF;}while(0)
 #endif
