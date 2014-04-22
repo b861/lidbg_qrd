@@ -1127,7 +1127,14 @@ int dev_open(struct inode *inode, struct file *filp)
 }
 static void parse_cmd(char *pt)
 {
+    int argc = 0;
+    int i = 0;
+    u8 lpc_buf[3];
+
     lidbg("%s\n", pt);
+    char *argv[32] = {NULL};
+    argc = lidbg_token_string(pt, " ", argv);
+	
 #if (defined(BOARD_V1) || defined(BOARD_V2) || defined(BOARD_V3))
 #else
     if (!strcmp(pt, "fan_on"))
@@ -1185,6 +1192,15 @@ static void parse_cmd(char *pt)
         USB_WORK_DISENABLE;
         msleep(200);
         USB_WORK_ENABLE;
+    }
+	else if (!strcmp(argv[0], "lpc"))
+    {
+		lidbg("%s:[%s] [%s] [%s]\n", argv[0], argv[1],argv[2],argv[3]);
+		lpc_buf[0] = simple_strtoul(argv[1], 0, 0);
+		lpc_buf[1] = simple_strtoul(argv[2], 0, 0);
+		lpc_buf[2] = simple_strtoul(argv[3], 0, 0);
+		lidbg("%s:[%d] [%d] [%d]\n", argv[0], lpc_buf[0],lpc_buf[1],lpc_buf[2]);
+		SOC_LPC_Send(lpc_buf, SIZE_OF_ARRAY(lpc_buf));
     }
 
 
