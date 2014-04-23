@@ -229,6 +229,16 @@ void parse_cmd(char *pt)
         enable = simple_strtoul(argv[1], 0, 0);
         LINUX_TO_LIDBG_TRANSFER((linux_to_lidbg_transfer_t)enable, NULL);
     }
+    else if (!strcmp(argv[0], "lpc"))
+    {
+		u8 lpc_buf[3]={0};
+		lidbg("%s:[%s] [%s] [%s]\n", argv[0], argv[1],argv[2],argv[3]);
+		lpc_buf[0] = simple_strtoul(argv[1], 0, 0);
+		lpc_buf[1] = simple_strtoul(argv[2], 0, 0);
+		lpc_buf[2] = simple_strtoul(argv[3], 0, 0);
+		lidbg("%s:[%d] [%d] [%d]\n", argv[0], lpc_buf[0],lpc_buf[1],lpc_buf[2]);
+		SOC_LPC_Send(lpc_buf, SIZE_OF_ARRAY(lpc_buf));
+    }	
 #endif
 
 #ifdef SOC_msm8x25
