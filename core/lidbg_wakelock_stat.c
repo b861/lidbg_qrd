@@ -126,16 +126,17 @@ bool unregister_wakelock(struct list_head *client_list, struct list_head *detail
         {
             if(!list_empty(client_list))
             {
-                lidbg_show_wakelock();
+                lidbg_show_wakelock(0);
             }
         }
         return false;
     }
 }
 
-void lidbg_show_wakelock(void)
+void lidbg_show_wakelock(int is_should_kill_apk)
 {
     int index = 0;
+    char *p1 = NULL, *p2 = NULL;
     struct wakelock_item *pos;
     struct list_head *client_list ;
 
@@ -148,7 +149,19 @@ void lidbg_show_wakelock(void)
             {
                 index++;
                 printk("[ftf_pm.wl]%d,MAX%d<THE%d:[%d,%d][%s][%s,%s]>\n", pos->cunt, pos->cunt_max, index, pos->pid, pos->uid, lock_type(pos->is_count_wakelock), pos->name, pos->package_name);
-            }
+                if(is_should_kill_apk == 1)
+                {
+                    p1 = strchr(pos->package_name, ',');
+                    p2 = strchr(pos->package_name, '.');
+
+                    if(p1)
+                        lidbg_force_stop_apk(p1 + 1);
+                    else if(p2)
+                        lidbg_force_stop_apk(pos->package_name);
+                }
+                if(is_should_kill_apk == 2)
+                    fs_string2file(1, LIDBG_OSD_DIR"can_t_sleep.txt", "[J]%d,[%s,%s]>\n", index, pos->name, pos->package_name);
+                }
         }
     }
     else
@@ -209,7 +222,7 @@ void lidbg_wakelock_stat(int argc, char **argv)
     else if (!strcmp(wakelock_action, "unlock"))
         unregister_wakelock(&lidbg_wakelock_list, &waklelock_detail_list, wakelock_name);
     else if (!strcmp(wakelock_action, "show"))
-        lidbg_show_wakelock();
+        lidbg_show_wakelock(0);
     else if (!strcmp(wakelock_action, "dbg"))
         start_wl_dbg_thread(wakelock_type);
 
@@ -235,7 +248,7 @@ void lidbg_wakelock_register(bool to_lock, const char *name)
 
 void cb_kv_show_list(char *key, char *value)
 {
-    lidbg_show_wakelock();
+    lidbg_show_wakelock(0);
 }
 
 static int __init lidbg_wakelock_stat_init(void)
