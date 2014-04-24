@@ -21,6 +21,8 @@ ssize_t drivers_dbg_write (struct file *filp, const char __user *buf, size_t siz
     {
         lidbg("copy_from_user ERR\n");
     }
+    if(cmd_buf[size - 1] == '\n')
+        cmd_buf[size - 1] = '\0';
     parse_cmd(cmd_buf);
     return size;
 
