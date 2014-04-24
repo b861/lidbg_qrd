@@ -2,9 +2,13 @@
 LIDBG_DEFINE;
 
 #define BUTTON_LED_NODE "/sys/class/leds/button-backlight/brightness"
+#define GPIO_WP (35)
+#define GPIO_APP_STATUS (36)
 static atomic_t is_in_sleep = ATOMIC_INIT(-1);
 static int list_count ;
-static struct completion sleep_observer_wait;
+static bool is_pm_toast_dbg_en = false;
+static DECLARE_COMPLETION(sleep_observer_wait);
+
 typedef enum
 {
     PM_ACTION_PRINT,
@@ -56,6 +60,7 @@ static int thread_observer(void *data)
         have_triggerd_sleep_S = 0;
         if( !wait_for_completion_interruptible(&sleep_observer_wait))
         {
+            ssleep(2);
             PM_action_entry("start:", PM_ACTION_PRINT);
             while((atomic_read(&is_in_sleep) == 1))
             {
@@ -73,7 +78,19 @@ static int thread_observer(void *data)
                     PM_action_entry("start15:", PM_ACTION_PRINT_KILL_HASLOCK_APK);
                     break;
                 case 25:
-                    PM_action_entry("start25:", PM_ACTION_SAVE_LOCK_MSG);
+                    PM_action_entry("start25:", PM_ACTION_PRINT);
+                    break;
+                case 30:
+                    PM_action_entry("start30:", PM_ACTION_PRINT_KILL_HASLOCK_APK);
+                    break;
+                case 40:
+                    PM_action_entry("start40:", PM_ACTION_PRINT);
+                    break;
+                case 45:
+                    PM_action_entry("start45:", PM_ACTION_PRINT_KILL_HASLOCK_APK);
+                    break;
+                case 50:
+                    PM_action_entry("start50:", PM_ACTION_SAVE_LOCK_MSG);
                     break;
 
                 default:
@@ -222,7 +239,7 @@ void lidbg_pm_step_call(fly_pm_stat_step step, void *data)
     {
         char *buff = data;
         if(!strcmp(buff, "mem"))
-            observer_start();
+            ;
         else if(!strcmp(buff, "off"))
             observer_stop();
         PM_WARN("PM_AUTOSLEEP_STORE1:[%s,%d]\n", buff, atomic_read(&is_in_sleep));
@@ -284,6 +301,18 @@ int linux_to_lidbg_receiver(linux_to_lidbg_transfer_t _enum, void *data)
     return 1;
 }
 
+
+static DECLARE_COMPLETION(thread_kernel_msg_completion);
+static int thread_kernel_msg_completion_func(void *data)
+{
+    while(1)
+    {
+        wait_for_completion(&thread_kernel_msg_completion);
+        lidbg_uevent_shell("am broadcast -a com.flyaudio.ap.broadcast --es powerkey longpress &");
+        observer_start();
+    }
+    return 1;
+}
 int pm_open (struct inode *inode, struct file *filp)
 {
     return 0;
@@ -301,9 +330,37 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
     }
     if(cmd_buf[size - 1] == '\n')
         cmd_buf[size - 1] = '\0';
-    PM_WARN("[%d,%s]\n", size, cmd_buf);
+    PM_WARN("\n\n\n-------------------------[%d,%s]----------------------------\n", size, cmd_buf);
 
     cmd_num = lidbg_token_string(cmd_buf, " ", cmd) ;
+
+    //kernel logic
+    if(!strcmp(cmd[0], "kernel"))
+    {
+        if(!strcmp(cmd[1], "short_press"))
+            SOC_Key_Report(KEY_POWER, KEY_PRESSED_RELEASED);
+        else  if(!strcmp(cmd[1], "long_press"))
+            complete(&thread_kernel_msg_completion);
+        else  if(!strcmp(cmd[1], "long_press_test"))
+        {
+            SOC_Key_Report(KEY_POWER, KEY_PRESSED);
+            msleep(530);
+            SOC_Key_Report(KEY_POWER, KEY_RELEASED);
+        }
+    }
+
+    //flyaudio logic
+    if(!strcmp(cmd[0], "flyaudio"))
+    {
+        if(is_pm_toast_dbg_en)
+            lidbg_toast_show(cmd[1], -1);
+        if(!strcmp(cmd[1], "android_up"))
+            SOC_IO_Output(0, GPIO_APP_STATUS, 1);
+        else  if(!strcmp(cmd[1], "android_down"))
+            SOC_IO_Output(0, GPIO_APP_STATUS, 0);
+        else if(!strcmp(cmd[1], "devices_down"))
+            ;
+    }
 
     //pm debug
     if(!strcmp(cmd[0], "ws"))
@@ -351,6 +408,10 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
             int  enum_value = simple_strtoul(cmd[3], 0, 0);
             lidbg_toast_show(cmd[2], enum_value);
         }
+        else  if(!strcmp(cmd[1], "dbgt"))
+        {
+            is_pm_toast_dbg_en = !is_pm_toast_dbg_en;
+        }
 
     }
     return size;
@@ -371,6 +432,8 @@ static void set_func_tbl(void)
 int thread_pm_init(void *data)
 {
     PM_WARN("<==IN==>\n");
+
+    CREATE_KTHREAD(thread_kernel_msg_completion_func, NULL);
 
     if(!g_var.is_fly)
     {
@@ -397,8 +460,9 @@ static int __init lidbg_pm_init(void)
     DUMP_FUN;
     LIDBG_GET;
     set_func_tbl();
-    init_completion(&sleep_observer_wait);
     CREATE_KTHREAD(thread_pm_init, NULL);
+    PM_WARN("<set GPIO_WP[%d] 1>\n\n", GPIO_WP);
+    SOC_IO_Output(0, GPIO_WP, 1);
     return 0;
 }
 
