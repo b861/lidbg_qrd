@@ -47,6 +47,32 @@
 #include <linux/vmalloc.h>
 #endif
 
+static inline int write_node(char *filename, char *wbuff)
+{
+    struct file *filep;
+    mm_segment_t old_fs;
+    unsigned int file_len = 1;
+
+    filep = filp_open(filename,  O_RDWR, 0);
+    if(IS_ERR(filep))
+        return -1;
+    old_fs = get_fs();
+    set_fs(get_ds());
+
+    if(wbuff)
+        filep->f_op->write(filep, wbuff, strlen(wbuff), &filep->f_pos);
+    set_fs(old_fs);
+    filp_close(filep, 0);
+    return file_len;
+}
+#define NOTIFIER_MAJOR_ACC_EVENT (111)
+#define NOTIFIER_MINOR_ACC_ON (0)
+#define NOTIFIER_MINOR_ACC_OFF (1)
+#define NOTIFIER_MINOR_SUSPEND_PREPARE  (2)
+#define NOTIFIER_MINOR_SUSPEND_UNPREPARE (3)
+#define NOTIFIER_MINOR_POWER_OFF (4)
+#define NOTIFIER_MINOR_BOOT_COMPLETE  (5)
+
 
 #define PM_WARN(fmt, args...) do{printk("[ftf_pm]warn.%s: " fmt,__func__,##args);}while(0)
 #define PM_ERR(fmt, args...) do{printk("[ftf_pm]err.%s: " fmt,__func__,##args);}while(0)

@@ -245,7 +245,7 @@ int fs_string2file(int file_limit_M, char *filename, const char *fmt, ... )
 {
     va_list args;
     int n;
-    char str_append[256];
+    char str_append[768];
     va_start ( args, fmt );
     n = vsprintf ( str_append, (const char *)fmt, args );
     va_end ( args );
