@@ -18,11 +18,11 @@ extern int fs_file_read(const char *filename, char *rbuff, int readlen);
 
 int soc_temp_get(void)
 {
- char cpu_temp[3];
- int temp=-1;
- fs_file_read(CPU_TEMP_PATH, cpu_temp,sizeof(cpu_temp));
- temp = simple_strtoul(cpu_temp, 0, 0);
- return temp;
+    char cpu_temp[3];
+    int temp = -1;
+    fs_file_read(CPU_TEMP_PATH, cpu_temp, sizeof(cpu_temp));
+    temp = simple_strtoul(cpu_temp, 0, 0);
+    return temp;
 }
 struct ad_key_remap
 {
@@ -32,7 +32,7 @@ struct ad_key_remap
 };
 static struct ad_key_remap ad_key[] =
 {
-    
+
     //feel  key  x_ain_3   mpp4
     //{35, 1000000, KEY_BACK},
     //{35, 1500000, KEY_BACK},
@@ -48,10 +48,10 @@ static struct ad_key_remap ad_key[] =
 #define AD_VAL_MAX  (3300000)
 void led_on(void)
 {
-     LED_ON;
-	 msleep(1000);
-	 LED_OFF;
-	 msleep(1000);
+    LED_ON;
+    msleep(1000);
+    LED_OFF;
+    msleep(1000);
 }
 
 
@@ -59,8 +59,8 @@ int thread_led(void *data)
 {
     while(1)
     {
-          if(led_en)
-                led_on();
+        if(led_en)
+            led_on();
     }
     return 0;
 }
@@ -112,12 +112,39 @@ int thread_dev_init(void *data)
     fly_devices_init();
     return 0;
 }
+
+static int is_key_scan_en = 0;
+#if defined(CONFIG_FB)
+struct notifier_block devices_notif;
+static int devices_notifier_callback(struct notifier_block *self,
+                                     unsigned long event, void *data)
+{
+    struct fb_event *evdata = data;
+    int *blank;
+
+    if (evdata && evdata->data && event == FB_EVENT_BLANK)
+    {
+        blank = evdata->data;
+        if (*blank == FB_BLANK_UNBLANK)
+            is_key_scan_en = 1;
+        else if (*blank == FB_BLANK_POWERDOWN)
+            is_key_scan_en = 0;
+    }
+
+    return 0;
+}
+#endif
 int thread_key(void *data)
 {
     while(1)
     {
-        key_scan();
-        msleep(100);
+        if(is_key_scan_en)
+        {
+            key_scan();
+            msleep(100);
+        }
+        else
+            msleep(1000);
     }
     return 0;
 }
@@ -127,7 +154,7 @@ void log_temp(void)
 {
     static int old_temp, cur_temp;
     int tmp;
-    g_var.temp =cur_temp = soc_temp_get();
+    g_var.temp = cur_temp = soc_temp_get();
     tmp = cur_temp - old_temp;
     if((temp_log_freq != 0) && (ABS(tmp) >= temp_log_freq))
     {
@@ -153,22 +180,28 @@ static int thread_thermal(void *data)
 static int soc_dev_probe(struct platform_device *pdev)
 {
     //lidbg("=====soc_dev_probe====\n");
+
+#if defined(CONFIG_FB)
+    devices_notif.notifier_call = devices_notifier_callback;
+    fb_register_client(&devices_notif);
+#endif
+
     fs_register_filename_list(TEMP_LOG_PATH, true);
     fs_regist_state("cpu_temp", &(g_var.temp));
     CREATE_KTHREAD(thread_dev_init, NULL);
-	
+
     FS_REGISTER_INT(led_en, "led_en", 1, NULL);
     if(led_en)
-    CREATE_KTHREAD(thread_led, NULL);
-      
+        CREATE_KTHREAD(thread_led, NULL);
+
     FS_REGISTER_INT(ad_en, "ad_en", 0, NULL);
     if(ad_en)
-	CREATE_KTHREAD(thread_key, NULL);
+        CREATE_KTHREAD(thread_key, NULL);
     Thermal_task =  kthread_run(thread_thermal, NULL, "flythermalthread");
     //FS_REGISTER_INT(fan_onoff_temp, "fan_onoff_temp", 65, NULL);
 
-	//register_lidbg_notifier(&lidbg_notifier);
-	LCD_ON;
+    //register_lidbg_notifier(&lidbg_notifier);
+    LCD_ON;
     return 0;
 
 }
@@ -195,9 +228,9 @@ static int soc_dev_resume(struct platform_device *pdev)
     SOC_IO_ISR_Enable(BUTTON_LEFT_1);
     SOC_IO_ISR_Enable(BUTTON_LEFT_2);
     SOC_IO_ISR_Enable(BUTTON_RIGHT_1);
-    SOC_IO_ISR_Enable(BUTTON_RIGHT_2);   
-	SOC_IO_Config(LED_GPIO, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_8MA);
-	return 0;
+    SOC_IO_ISR_Enable(BUTTON_RIGHT_2);
+    SOC_IO_Config(LED_GPIO, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_8MA);
+    return 0;
 }
 struct work_struct work_left_button1;
 static void work_left_button1_fn(struct work_struct *work)
@@ -215,7 +248,7 @@ irqreturn_t irq_left_button1(int irq, void *dev_id)
 {
     //lidbg("irq_left_button1: %d\n", irq);
     if(!work_pending(&work_left_button1))
-    schedule_work(&work_left_button1);
+        schedule_work(&work_left_button1);
     return IRQ_HANDLED;
 
 }
@@ -227,8 +260,8 @@ irqreturn_t irq_left_button2(int irq, void *dev_id)
 irqreturn_t irq_right_button1(int irq, void *dev_id)
 {
     //lidbg("irq_right_button1: %d\n", irq);
-	if(!work_pending(&work_right_button1))
-    schedule_work(&work_right_button1);
+    if(!work_pending(&work_right_button1))
+        schedule_work(&work_right_button1);
     return IRQ_HANDLED;
 }
 irqreturn_t irq_right_button2(int irq, void *dev_id)
@@ -240,21 +273,21 @@ void fly_devices_init(void)
 {
     lidbg("fly_devices_init\n");
     FS_REGISTER_INT(button_en, "button_en", 0, NULL);
-	if(button_en)
-	{
-	    INIT_WORK(&work_left_button1, work_left_button1_fn);
-	    INIT_WORK(&work_right_button1, work_right_button1_fn);
+    if(button_en)
+    {
+        INIT_WORK(&work_left_button1, work_left_button1_fn);
+        INIT_WORK(&work_right_button1, work_right_button1_fn);
 
-	    SOC_IO_Input(BUTTON_LEFT_1, BUTTON_LEFT_1, GPIO_CFG_PULL_UP);
-	    SOC_IO_Input(BUTTON_LEFT_2, BUTTON_LEFT_2, GPIO_CFG_PULL_UP);
-	    SOC_IO_Input(BUTTON_RIGHT_1, BUTTON_RIGHT_1, GPIO_CFG_PULL_UP);
-	    SOC_IO_Input(BUTTON_RIGHT_2, BUTTON_RIGHT_2, GPIO_CFG_PULL_UP);
+        SOC_IO_Input(BUTTON_LEFT_1, BUTTON_LEFT_1, GPIO_CFG_PULL_UP);
+        SOC_IO_Input(BUTTON_LEFT_2, BUTTON_LEFT_2, GPIO_CFG_PULL_UP);
+        SOC_IO_Input(BUTTON_RIGHT_1, BUTTON_RIGHT_1, GPIO_CFG_PULL_UP);
+        SOC_IO_Input(BUTTON_RIGHT_2, BUTTON_RIGHT_2, GPIO_CFG_PULL_UP);
 
-	    SOC_IO_ISR_Add(BUTTON_LEFT_1, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT, irq_left_button1, NULL);
-	    SOC_IO_ISR_Add(BUTTON_LEFT_2, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT, irq_left_button2, NULL);
-	    SOC_IO_ISR_Add(BUTTON_RIGHT_1, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT, irq_right_button1, NULL);
-	    SOC_IO_ISR_Add(BUTTON_RIGHT_2, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT, irq_right_button2, NULL);
-	}
+        SOC_IO_ISR_Add(BUTTON_LEFT_1, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT, irq_left_button1, NULL);
+        SOC_IO_ISR_Add(BUTTON_LEFT_2, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT, irq_left_button2, NULL);
+        SOC_IO_ISR_Add(BUTTON_RIGHT_1, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT, irq_right_button1, NULL);
+        SOC_IO_ISR_Add(BUTTON_RIGHT_2, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT, irq_right_button2, NULL);
+    }
 }
 struct platform_device soc_devices =
 {
@@ -274,11 +307,11 @@ static struct platform_driver soc_devices_driver =
 };
 int dev_init(void)
 {
-	lidbg("=======msm826_dev_init========\n");
-	LIDBG_GET;
+    lidbg("=======msm826_dev_init========\n");
+    LIDBG_GET;
     platform_device_register(&soc_devices);
     platform_driver_register(&soc_devices_driver);
-	return 0;
+    return 0;
 }
 
 void dev_exit(void)
