@@ -57,8 +57,10 @@ void gt9xx_reset_high_active(void)
 {	
     SOC_IO_Output(0, RESET_GPIO, !RESET_GPIO_ACTIVE);
     msleep(200);
+	#ifndef SOC_msm8x25
 	SOC_IO_Output(0, INT_GPIO, 1);
 	usleep(200);
+	#endif
     SOC_IO_Output(0, RESET_GPIO, RESET_GPIO_ACTIVE);
     msleep(300);
 }
