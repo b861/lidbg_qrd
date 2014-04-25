@@ -77,20 +77,17 @@ static int thread_observer(void *data)
                 case 15:
                     PM_action_entry("start15:", PM_ACTION_PRINT_KILL_HASLOCK_APK);
                     break;
+                case 20:
+                    PM_action_entry("start20:", PM_ACTION_PRINT_KILL_HASLOCK_APK);
+                    break;
                 case 25:
-                    PM_action_entry("start25:", PM_ACTION_PRINT);
+                    PM_action_entry("start25:", PM_ACTION_PRINT_KILL_HASLOCK_APK);
                     break;
-                case 30:
-                    PM_action_entry("start30:", PM_ACTION_PRINT_KILL_HASLOCK_APK);
+                case 27:
+                    PM_action_entry("start27:", PM_ACTION_PRINT_KILL_HASLOCK_APK);
                     break;
-                case 40:
-                    PM_action_entry("start40:", PM_ACTION_PRINT);
-                    break;
-                case 45:
-                    PM_action_entry("start45:", PM_ACTION_PRINT_KILL_HASLOCK_APK);
-                    break;
-                case 50:
-                    PM_action_entry("start50:", PM_ACTION_SAVE_LOCK_MSG);
+                case 43:
+                    PM_action_entry("start43:", PM_ACTION_PRINT_FORCE_UNLOCK);
                     break;
 
                 default:
@@ -330,7 +327,7 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
     }
     if(cmd_buf[size - 1] == '\n')
         cmd_buf[size - 1] = '\0';
-    PM_WARN("\n\n\n-------------------------[%d,%s]----------------------------\n", size, cmd_buf);
+    PM_WARN("-----FLYSTEP------------------[%s]---\n", cmd_buf);
 
     cmd_num = lidbg_token_string(cmd_buf, " ", cmd) ;
 
@@ -357,7 +354,7 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         if(!strcmp(cmd[1], "android_up"))
             SOC_IO_Output(0, GPIO_APP_STATUS, 1);
         else  if(!strcmp(cmd[1], "android_down"))
-            SOC_IO_Output(0, GPIO_APP_STATUS, 0);
+            complete(&thread_kernel_msg_completion);//SOC_IO_Output(0, GPIO_APP_STATUS, 0);
         else if(!strcmp(cmd[1], "devices_down"))
             ;
     }
@@ -452,6 +449,9 @@ int thread_pm_init(void *data)
     ssleep(5);
     fs_fill_list(LIDBG_LOG_DIR"pm_3.txt", FS_CMD_FILE_LISTMODE, &pm_list_3);
     fs_register_filename_list(LIDBG_LOG_DIR"pm_3.txt", true);
+
+    ssleep(10);
+    //SOC_Key_Report(KEY_POWER, KEY_PRESSED_RELEASED);
 
     return 0;
 }

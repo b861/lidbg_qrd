@@ -155,9 +155,9 @@ void lidbg_show_wakelock(int is_should_kill_apk)
                     p2 = strchr(pos->package_name, '.');
 
                     if(p1)
-                        lidbg_force_stop_apk(p1 + 1);
+                        ;//lidbg_force_stop_apk(p1 + 1);
                     else if(p2)
-                        lidbg_force_stop_apk(pos->package_name);
+                        ;//lidbg_force_stop_apk(pos->package_name);
                 }
                 if(is_should_kill_apk == 2)
                     fs_string2file(1, LIDBG_OSD_DIR"can_t_sleep.txt", "[J]%d,[%s,%s]>\n", index, pos->name, pos->package_name);
