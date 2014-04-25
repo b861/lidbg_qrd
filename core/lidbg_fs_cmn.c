@@ -97,7 +97,7 @@ int fs_file_write(char *filename, char *wbuff)
     filep = filp_open(filename,  O_WRONLY, 0);
     if(IS_ERR(filep))
     {
-        printk("err:filp_open,%s\n\n\n\n",filename);
+        printk(KERN_CRIT"err:filp_open,%s\n\n\n\n",filename);
         return -1;
     }
 
@@ -119,7 +119,7 @@ int fs_file_read(const char *filename, char *rbuff, int readlen)
     filep = filp_open(filename,  O_RDONLY, 0);
     if(IS_ERR(filep))
     {
-        printk("err:filp_open,%s\n\n\n\n",filename);
+        printk(KERN_CRIT"err:filp_open,%s\n\n\n\n",filename);
         return -1;
     }
     old_fs = get_fs();

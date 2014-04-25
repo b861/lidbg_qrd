@@ -134,7 +134,7 @@ static void LPCdealReadFromMCUAll(BYTE *p, UINT length)
         lidbg("From LPC:");//mode ,command,para
         for(i = 0; i < length; i++)
         {
-            printk("%x ", p[i]);
+            printk(KERN_CRIT"%x ", p[i]);
 
         }
         lidbg("\n");

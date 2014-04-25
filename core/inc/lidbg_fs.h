@@ -2,11 +2,11 @@
 
 extern struct lidbg_fifo_device *fs_msg_fifo;
 
-#define FS_SUC(fmt, args...) do {if(fs_slient_level>=3)printk("[futengfei.fs]suceed.%s: " fmt,__func__,##args);else lidbg_fifo_put(fs_msg_fifo,"[futengfei.fs]suceed.%s: " fmt,__func__,##args);} while (0)
-#define FS_WARN(fmt, args...) do {if(fs_slient_level>=2)printk("[futengfei.fs]warn.%s: " fmt,__func__,##args);else lidbg_fifo_put(fs_msg_fifo,"[futengfei.fs]warn.%s: " fmt,__func__,##args);} while (0)
-#define FS_ERR(fmt, args...) do {if(fs_slient_level>=1)printk("[futengfei.fs]err.%s: " fmt,__func__,##args);else lidbg_fifo_put(fs_msg_fifo,"[futengfei.fs]err.%s: " fmt,__func__,##args);} while (0)
+#define FS_SUC(fmt, args...) do {if(fs_slient_level>=3)printk(KERN_CRIT"[futengfei.fs]suceed.%s: " fmt,__func__,##args);else lidbg_fifo_put(fs_msg_fifo,"[futengfei.fs]suceed.%s: " fmt,__func__,##args);} while (0)
+#define FS_WARN(fmt, args...) do {if(fs_slient_level>=2)printk(KERN_CRIT"[futengfei.fs]warn.%s: " fmt,__func__,##args);else lidbg_fifo_put(fs_msg_fifo,"[futengfei.fs]warn.%s: " fmt,__func__,##args);} while (0)
+#define FS_ERR(fmt, args...) do {if(fs_slient_level>=1)printk(KERN_CRIT"[futengfei.fs]err.%s: " fmt,__func__,##args);else lidbg_fifo_put(fs_msg_fifo,"[futengfei.fs]err.%s: " fmt,__func__,##args);} while (0)
 
-#define FS_ALWAYS(fmt, args...) do {printk("[futengfei.fs]warn.%s: " fmt,__func__,##args);lidbg_fifo_put(fs_msg_fifo,"[futengfei.fs]warn.%s: " fmt,__func__,##args);} while (0)
+#define FS_ALWAYS(fmt, args...) do {printk(KERN_CRIT"[futengfei.fs]warn.%s: " fmt,__func__,##args);lidbg_fifo_put(fs_msg_fifo,"[futengfei.fs]warn.%s: " fmt,__func__,##args);} while (0)
 
 
 #define LIDBG_KMSG_FILE_PATH LIDBG_LOG_DIR"lidbg_kmsg.txt"

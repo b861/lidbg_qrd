@@ -448,7 +448,7 @@ struct lidbg_hal
 	filp_close(fd,0);\
 	if(plidbg_dev == NULL)\
 	{\
-		printk("LIDBG_GET fail!\n");\
+		printk(KERN_CRIT"LIDBG_GET fail!\n");\
 	}\
 }while(0)
 

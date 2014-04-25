@@ -183,7 +183,7 @@ void cb_kv_cmd(char *key, char *value)
             if(num > 1)
             {
                 if(!strcmp(param[0], "echo"))
-                    (param[3] && param[1]) ? fs_file_write(param[3], param[1]) : printk("echo err\n");
+                    (param[3] && param[1]) ? fs_file_write(param[3], param[1]) : printk(KERN_CRIT"echo err\n");
                 else
                     lidbg_exe(param[0], param[1], param[2] ? param[2] : NULL, param[3] ? param[3] : NULL, param[4] ? param[4] : NULL, param[5] ? param[5] : NULL, param[6] ? param[6] : NULL);
 

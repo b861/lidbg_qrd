@@ -18,7 +18,7 @@ void parse_cmd(char *pt)
     lidbg("cmd:");
     while(i < argc)
     {
-        printk("%s ", argv[i]);
+        printk(KERN_CRIT"%s ", argv[i]);
         i++;
     }
     lidbg("\n");

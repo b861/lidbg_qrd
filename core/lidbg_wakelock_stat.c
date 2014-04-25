@@ -148,7 +148,7 @@ void lidbg_show_wakelock(int is_should_kill_apk)
             if (pos->name && pos->cunt && pos->is_count_wakelock)
             {
                 index++;
-                printk("[ftf_pm.wl]%d,MAX%d<THE%d:[%d,%d][%s][%s,%s]>\n", pos->cunt, pos->cunt_max, index, pos->pid, pos->uid, lock_type(pos->is_count_wakelock), pos->name, pos->package_name);
+                printk(KERN_CRIT"[ftf_pm.wl]%d,MAX%d<THE%d:[%d,%d][%s][%s,%s]>\n", pos->cunt, pos->cunt_max, index, pos->pid, pos->uid, lock_type(pos->is_count_wakelock), pos->name, pos->package_name);
                 if(is_should_kill_apk == 1)
                 {
                     p1 = strchr(pos->package_name, ',');

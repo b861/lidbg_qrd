@@ -162,12 +162,12 @@ static  int my_input_driver_init(void)
     int ret;
 
     //printk("my_input_driver_init,write by hujian 2012/2/8 16:45");
-    printk("lidbg_ts_to_recov.ko  my_input_driver_init. \n");
+    printk(KERN_CRIT"lidbg_ts_to_recov.ko  my_input_driver_init. \n");
     dev = (struct test_input_dev *)kmalloc( sizeof(struct test_input_dev), GFP_KERNEL );
     if (dev == NULL)
     {
         ret = -ENOMEM;
-        printk(KERN_ERR "%s: Failed to allocate input device\n", __func__);
+        printk(KERN_CRIT "%s: Failed to allocate input device\n", __func__);
         return ret;
     }
 
@@ -190,7 +190,7 @@ static  int my_input_driver_init(void)
     add_timer(&dev->timer);
     printk("\n\nTest input driver has launch successfully!\n\n");
 #else
-    printk("\n\nTest input driver has launch successfully!_delete the time ==futengfei=1025\n\n");
+    printk(KERN_CRIT"\n\nTest input driver has launch successfully!_delete the time ==futengfei=1025\n\n");
 #endif
     return 0;
 

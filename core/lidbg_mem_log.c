@@ -18,7 +18,7 @@ static int fifo_to_file(char *file2amend, char *str_append)
 
     if(str_append == NULL)
     {
-        printk("[futengfei]err.fileappend_mode:<str_append=null>\n");
+        printk(KERN_CRIT"[futengfei]err.fileappend_mode:<str_append=null>\n");
         return -1;
     }
     flags = O_CREAT | O_RDWR | O_APPEND;
@@ -26,7 +26,7 @@ static int fifo_to_file(char *file2amend, char *str_append)
     filep = filp_open(file2amend, flags , 0777);
     if(IS_ERR(filep))
     {
-        printk("[futengfei]err.open:<%s>\n", file2amend);
+        printk(KERN_CRIT"[futengfei]err.open:<%s>\n", file2amend);
         return -1;
     }
 

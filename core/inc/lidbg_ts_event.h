@@ -13,8 +13,8 @@ extern bool te_regist_password(char *password, void (*cb_password)(char *passwor
 extern bool te_is_ts_touched(void);
 
 
-#define TE_WARN(fmt, args...) printk("[futengfei.te]warn.%s: " fmt,__func__,##args)
-#define TE_ERR(fmt, args...) printk("[futengfei.te]err.%s: " fmt,__func__,##args)
-#define TE_SUC(fmt, args...) printk("[futengfei.te]suceed.%s: " fmt,__func__,##args)
+#define TE_WARN(fmt, args...) printk(KERN_CRIT"[futengfei.te]warn.%s: " fmt,__func__,##args)
+#define TE_ERR(fmt, args...) printk(KERN_CRIT"[futengfei.te]err.%s: " fmt,__func__,##args)
+#define TE_SUC(fmt, args...) printk(KERN_CRIT"[futengfei.te]suceed.%s: " fmt,__func__,##args)
 
 #endif
