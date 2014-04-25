@@ -74,20 +74,20 @@ static int thread_observer(void *data)
                 case 10:
                     PM_action_entry("start10:", PM_ACTION_PRINT);
                     break;
-                case 15:
-                    PM_action_entry("start15:", PM_ACTION_PRINT_KILL_HASLOCK_APK);
+                case 13:
+                    PM_action_entry("start15:", PM_ACTION_PRINT);
                     break;
                 case 20:
-                    PM_action_entry("start20:", PM_ACTION_PRINT_KILL_HASLOCK_APK);
+                    PM_action_entry("start20:", PM_ACTION_PRINT);
                     break;
                 case 25:
-                    PM_action_entry("start25:", PM_ACTION_PRINT_KILL_HASLOCK_APK);
+                    PM_action_entry("start25:", PM_ACTION_PRINT);
                     break;
                 case 27:
-                    PM_action_entry("start27:", PM_ACTION_PRINT_KILL_HASLOCK_APK);
+                    PM_action_entry("start27:", PM_ACTION_PRINT);
                     break;
                 case 43:
-                    PM_action_entry("start43:", PM_ACTION_PRINT_FORCE_UNLOCK);
+                    PM_action_entry("start43:", PM_ACTION_PRINT);
                     break;
 
                 default:
@@ -236,7 +236,7 @@ void lidbg_pm_step_call(fly_pm_stat_step step, void *data)
     {
         char *buff = data;
         if(!strcmp(buff, "mem"))
-            ;
+            observer_start();
         else if(!strcmp(buff, "off"))
             observer_stop();
         PM_WARN("PM_AUTOSLEEP_STORE1:[%s,%d]\n", buff, atomic_read(&is_in_sleep));
@@ -354,7 +354,7 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         if(!strcmp(cmd[1], "android_up"))
             SOC_IO_Output(0, GPIO_APP_STATUS, 1);
         else  if(!strcmp(cmd[1], "android_down"))
-            complete(&thread_kernel_msg_completion);//SOC_IO_Output(0, GPIO_APP_STATUS, 0);
+            SOC_IO_Output(0, GPIO_APP_STATUS, 0);//complete(&thread_kernel_msg_completion);
         else if(!strcmp(cmd[1], "devices_down"))
             ;
     }
@@ -450,8 +450,12 @@ int thread_pm_init(void *data)
     fs_fill_list(LIDBG_LOG_DIR"pm_3.txt", FS_CMD_FILE_LISTMODE, &pm_list_3);
     fs_register_filename_list(LIDBG_LOG_DIR"pm_3.txt", true);
 
-    ssleep(10);
+
+    lidbg_uevent_shell("echo 7 7 7 7  > /proc/sys/kernel/printk");
+    ssleep(15);
+		lidbg_rm(LIDBG_LOG_DIR"lidbg_kmsg.txt");
     //SOC_Key_Report(KEY_POWER, KEY_PRESSED_RELEASED);
+    
 
     return 0;
 }
