@@ -4,6 +4,7 @@
 #include "lidbg.h"
 
 LIDBG_DEFINE;
+static bool lpc_work_en = true;
 
 
 #define  I2_ID  (0)
@@ -72,12 +73,13 @@ struct fly_hardware_info *pGlobalHardwareInfo;
 
 int thread_lpc(void *data)
 {
-	while(1)
-	{
-		LPC_CMD_NO_RESET;
-		msleep(5000);
-	}
-	return 0;
+    while(1)
+    {
+        if(lpc_work_en)
+            LPC_CMD_NO_RESET;
+        msleep(5000);
+    }
+    return 0;
 }
 
 void LPCCombinDataStream(BYTE *p, UINT len)
@@ -87,6 +89,10 @@ void LPCCombinDataStream(BYTE *p, UINT len)
     BYTE bufData[16];
     BYTE *buf;
     bool bMalloc = FALSE;
+
+    if(!lpc_work_en)
+        return;
+
     if (3 + len + 1 > 16)
     {
         buf = (BYTE *)kmalloc(sizeof(BYTE) * (4 + len), GFP_KERNEL);
@@ -144,7 +150,7 @@ static void LPCdealReadFromMCUAll(BYTE *p, UINT length)
     switch (p[0])
     {
     case LPC_SYSTEM_TYPE:
-         break;
+        break;
     case 0x96:
         switch (p[2])
         {
@@ -233,6 +239,9 @@ static BOOL readFromMCUProcessor(BYTE *p, UINT length)
 BOOL actualReadFromMCU(BYTE *p, UINT length)
 {
 
+    if(!lpc_work_en)
+        return FALSE;
+
     SOC_I2C_Rec_Simple(I2_ID, MCU_ADDR_R >> 1, p, length);
     if (readFromMCUProcessor(p, length))
     {
@@ -272,7 +281,7 @@ void mcuFirstInit(void)
 {
     pGlobalHardwareInfo = &GlobalHardwareInfo;
     INIT_WORK(&pGlobalHardwareInfo->FlyIICInfo.iic_work, workFlyMCUIIC);
-	MCU_WP_GPIO_SET;
+    MCU_WP_GPIO_SET;
 
     //let i2c_c high
     while (SOC_IO_Input(0, MCU_IIC_REQ_GPIO, GPIO_CFG_PULL_UP) == 0)
@@ -287,7 +296,7 @@ void mcuFirstInit(void)
             lidbg("exit mcuFirstInit!\n");
             break;
         }
-		msleep(100);
+        msleep(100);
     }
     SOC_IO_ISR_Add(MCU_IIC_REQ_GPIO, IRQF_TRIGGER_FALLING | IRQF_ONESHOT, MCUIIC_isr, pGlobalHardwareInfo);
 
@@ -336,7 +345,7 @@ static int  lpc_probe(struct platform_device *pdev)
     register_early_suspend(&early_suspend);
 #endif
 
-	mcuFirstInit();
+    mcuFirstInit();
     return 0;
 }
 
@@ -348,22 +357,29 @@ static int  lpc_remove(struct platform_device *pdev)
 
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
-static void lpc_early_suspend(struct early_suspend *handler){}
-static void lpc_late_resume(struct early_suspend *handler){}
+static void lpc_early_suspend(struct early_suspend *handler) {}
+static void lpc_late_resume(struct early_suspend *handler) {}
 #endif
 
-
+static int thread_lpc_delay_en(void *data)
+{
+    msleep(1000);
+    lpc_work_en=true;
+    return 1;
+}
 
 #ifdef CONFIG_PM
 static int lpc_suspend(struct device *dev)
 {
     DUMP_FUN;
+    lpc_work_en = false;
     return 0;
 }
 
 static int lpc_resume(struct device *dev)
 {
     DUMP_FUN;
+    CREATE_KTHREAD(thread_lpc_delay_en, NULL);
     return 0;
 }
 
@@ -400,7 +416,7 @@ static void set_func_tbl(void)
 #ifdef SOC_msm8x25
     ((struct lidbg_hal *)plidbg_dev)->soc_func_tbl.pfnSOC_LPC_Send = LPCCombinDataStream;
 #else
-	((struct lidbg_interface *)plidbg_dev)->soc_func_tbl.pfnSOC_LPC_Send = LPCCombinDataStream;
+    ((struct lidbg_interface *)plidbg_dev)->soc_func_tbl.pfnSOC_LPC_Send = LPCCombinDataStream;
 #endif
 
 }
@@ -410,7 +426,6 @@ static int __init lpc_init(void)
     DUMP_BUILD_TIME;
     LIDBG_GET;
     set_func_tbl();
-	
     platform_device_register(&lidbg_lpc);
     platform_driver_register(&lpc_driver);
     return 0;
