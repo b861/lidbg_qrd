@@ -420,14 +420,46 @@ static  struct file_operations pm_nod_fops =
     .open = pm_open,
 };
 
-
-static void set_func_tbl(void)
+static int thread_remove_wakeup_page(void *data)
 {
-    plidbg_dev->soc_func_tbl.pfnLINUX_TO_LIDBG_TRANSFER = linux_to_lidbg_receiver;
-    plidbg_dev->soc_func_tbl.pfnSOC_PM_STEP = lidbg_pm_step_call;
+    int i = 23;
+    SOC_Key_Report(KEY_BACK, KEY_PRESSED_RELEASED);
+    SOC_Key_Report(KEY_BACK, KEY_PRESSED_RELEASED);
+    msleep(500);
+    SOC_Key_Report(KEY_BACK, KEY_PRESSED_RELEASED);
+    SOC_Key_Report(KEY_BACK, KEY_PRESSED_RELEASED);
+    msleep(500);
+    while(i > 1)
+    {
+        SOC_Key_Report(KEY_BACK, KEY_PRESSED_RELEASED);
+        msleep(200);
+        i--;
+    }
+    SOC_IO_Output(0, GPIO_APP_STATUS, 1);
+    return 1;
 }
-int thread_pm_init(void *data)
+
+#ifdef CONFIG_PM
+static int pm_suspend(struct device *dev)
 {
+    DUMP_FUN;
+    return 0;
+}
+static int pm_resume(struct device *dev)
+{
+    DUMP_FUN;
+    CREATE_KTHREAD(thread_remove_wakeup_page, NULL);
+    return 0;
+}
+static struct dev_pm_ops lidbg_pm_ops =
+{
+    .suspend	= pm_suspend,
+    .resume		= pm_resume,
+};
+#endif
+static int  lidbg_pm_probe(struct platform_device *pdev)
+{
+    DUMP_FUN;
     PM_WARN("<==IN==>\n");
 
     CREATE_KTHREAD(thread_kernel_msg_completion_func, NULL);
@@ -455,16 +487,39 @@ int thread_pm_init(void *data)
     ssleep(15);
 		lidbg_rm(LIDBG_LOG_DIR"lidbg_kmsg.txt");
     //SOC_Key_Report(KEY_POWER, KEY_PRESSED_RELEASED);
-    
-
     return 0;
 }
+static struct platform_device lidbg_pm =
+{
+    .name               = "lidbg_pm",
+    .id                 = -1,
+};
+
+static struct platform_driver lidbg_pm_driver =
+{
+    .probe		= lidbg_pm_probe,
+    .driver         = {
+        .name = "lidbg_pm",
+        .owner = THIS_MODULE,
+#ifdef CONFIG_PM
+        .pm = &lidbg_pm_ops,
+#endif
+    },
+};
+
+static void set_func_tbl(void)
+{
+    plidbg_dev->soc_func_tbl.pfnLINUX_TO_LIDBG_TRANSFER = linux_to_lidbg_receiver;
+    plidbg_dev->soc_func_tbl.pfnSOC_PM_STEP = lidbg_pm_step_call;
+}
+
 static int __init lidbg_pm_init(void)
 {
     DUMP_FUN;
     LIDBG_GET;
     set_func_tbl();
-    CREATE_KTHREAD(thread_pm_init, NULL);
+    platform_device_register(&lidbg_pm);
+    platform_driver_register(&lidbg_pm_driver);
     PM_WARN("<set GPIO_WP[%d] 1>\n\n", GPIO_WP);
     SOC_IO_Output(0, GPIO_WP, 1);
     return 0;
