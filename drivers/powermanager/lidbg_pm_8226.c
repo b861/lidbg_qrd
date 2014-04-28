@@ -336,9 +336,9 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
     {
         if(!strcmp(cmd[1], "short_press"))
             SOC_Key_Report(KEY_POWER, KEY_PRESSED_RELEASED);
-        else  if(!strcmp(cmd[1], "long_press"))
+        else  if(!strcmp(cmd[1], "long_press_c"))
             complete(&thread_kernel_msg_completion);
-        else  if(!strcmp(cmd[1], "long_press_test"))
+        else  if(!strcmp(cmd[1], "long_press"))
         {
             SOC_Key_Report(KEY_POWER, KEY_PRESSED);
             msleep(530);
@@ -352,9 +352,9 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         if(is_pm_toast_dbg_en)
             lidbg_toast_show(cmd[1], -1);
         if(!strcmp(cmd[1], "android_up"))
-            SOC_IO_Output(0, GPIO_APP_STATUS, 1);
+            SOC_IO_Output(0, GPIO_APP_STATUS, 0);
         else  if(!strcmp(cmd[1], "android_down"))
-            SOC_IO_Output(0, GPIO_APP_STATUS, 0);//complete(&thread_kernel_msg_completion);
+            SOC_IO_Output(0, GPIO_APP_STATUS, 1);//complete(&thread_kernel_msg_completion);
         else if(!strcmp(cmd[1], "devices_down"))
             ;
     }
@@ -484,8 +484,9 @@ static int  lidbg_pm_probe(struct platform_device *pdev)
 
 
     lidbg_uevent_shell("echo 7 7 7 7  > /proc/sys/kernel/printk");
+    lidbg_chmod("/dev/lidbg*");
     ssleep(15);
-		lidbg_rm(LIDBG_LOG_DIR"lidbg_kmsg.txt");
+    lidbg_rm(LIDBG_LOG_DIR"lidbg_kmsg.txt");
     //SOC_Key_Report(KEY_POWER, KEY_PRESSED_RELEASED);
     return 0;
 }
@@ -521,7 +522,7 @@ static int __init lidbg_pm_init(void)
     platform_device_register(&lidbg_pm);
     platform_driver_register(&lidbg_pm_driver);
     PM_WARN("<set GPIO_WP[%d] 1>\n\n", GPIO_WP);
-    SOC_IO_Output(0, GPIO_WP, 1);
+    SOC_IO_Output(0, GPIO_WP, 0);
     return 0;
 }
 
