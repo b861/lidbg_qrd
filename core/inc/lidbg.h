@@ -71,6 +71,8 @@
 #include <linux/reboot.h>
 
 
+#include <linux/input/mt.h>
+
 //////lidbg//////
 #include "lidbg_loader.h"
 #include "lidbg_io.h"

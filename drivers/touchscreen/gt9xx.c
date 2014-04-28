@@ -373,11 +373,13 @@ static void gtp_touch_down(struct goodix_ts_data *ts, int id, int x, int y,
 	input_report_abs(ts->input_dev, ABS_MT_TOUCH_MAJOR, w);
 	input_report_abs(ts->input_dev, ABS_MT_WIDTH_MAJOR, w);
 	touch_cnt++;
-    if (touch_cnt == 100)
-    {
-        touch_cnt = 0;
-        lidbg("%d[%d,%d];\n", id, x, y);
-    }
+    	if (touch_cnt == 100)
+   	{
+       		touch_cnt = 0;
+        	lidbg("%d[%d,%d];\n", id, x, y);
+    	}
+     
+   
 }
 
 /*******************************************************
@@ -428,6 +430,7 @@ static void goodix_ts_work_func(struct work_struct *work)
 	s32 i = 0;
 	int ret = -1;
 	struct goodix_ts_data *ts = NULL;
+	struct lidbg_ts_data *pdata = kzalloc(sizeof(*pdata), GFP_KERNEL);
 
 #if GTP_SLIDE_WAKEUP
 	u8 doze_buf[3] = {0x81, 0x4B};
@@ -599,29 +602,22 @@ static void goodix_ts_work_func(struct work_struct *work)
 			if (pre_pen == 1)
 				break;
 #endif
-			if (touch_index & (0x01<<i)) {
-				input_x = coor_data[pos + 1] |
+				
+				pdata->x[i] = coor_data[pos + 1] |
 						coor_data[pos + 2] << 8;
-				input_y = coor_data[pos + 3] |
+				pdata->y[i] = coor_data[pos + 3] |
 						coor_data[pos + 4] << 8;
-				input_w = coor_data[pos + 5] |
+				pdata->w[i] = coor_data[pos + 5] |
 						coor_data[pos + 6] << 8;
-
-				gtp_touch_down(ts, id,
-						input_x, input_y, input_w);
-				pre_touch |= 0x01 << i;
-
+				pdata->id[i] = coor_data[pos] & 0x0F;
 				pos += 8;
-				id = coor_data[pos] & 0x0F;
-				touch_index |= (0x01<<id);
-			} else {
-				gtp_touch_up(ts, i);
-				pre_touch &= ~(0x01 << i);
 			}
-		}
+		pdata->touch_num = touch_num;
+		
+	//lidbg("touch_index = %d\n",touch_index);
+	
+	lidbg_touch_report(ts->input_dev,pdata);
 	}
-	input_sync(ts->input_dev);
-
 exit_work_func:
 	if (!ts->gtp_rawdiff_mode) {
 		ret = gtp_i2c_write(ts->client, end_cmd, 3);
@@ -1140,9 +1136,10 @@ static int gtp_request_io_port(struct goodix_ts_data *ts)
 	struct i2c_client *client = ts->client;
 	//struct goodix_ts_platform_data *pdata = ts->pdata;
 	int ret;
+	lidbg("%s:-----------------------------wsx--------------------",__FUNCTION__);
 	if (gpio_is_valid(GTP_INT_PORT)) {
 		ret = gpio_request(GTP_INT_PORT, "goodix_ts_irq_gpio");
-		if (ret) {
+		if (0) {
 			dev_err(&client->dev, "irq gpio request failed\n");
 			//goto pwr_off;
 		}
@@ -1654,6 +1651,7 @@ static int goodix_ts_probe(struct i2c_client *client,
 	struct goodix_ts_data *ts;
 	u16 version_info;
 	int ret;
+	struct lidbg_input_data *pdata = kzalloc(sizeof(*pdata), GFP_KERNEL);
     client->addr=0x14;
 	lidbg("GTP I2C Address: 0x%02x\n", client->addr);
 	/*if (client->dev.of_node) {
@@ -1715,7 +1713,7 @@ static int goodix_ts_probe(struct i2c_client *client,
 	}
 */
 	ret = gtp_request_io_port(ts);
-	if (ret) {
+	if (0) {
 		dev_err(&client->dev, "GTP request IO port failed.\n");
 		//goto exit_power_off;
 	}
@@ -1744,13 +1742,21 @@ static int goodix_ts_probe(struct i2c_client *client,
 		ts->abs_y_max = GTP_MAX_HEIGHT;
 		ts->int_trigger_type = GTP_INT_TRIGGER;
 	}
+	/*
 
 	ret = gtp_request_input_dev(ts);
 	if (ret) {
 		dev_err(&client->dev, "GTP request input dev failed.\n");
 		goto exit_free_inputdev;
 	}
-
+	*/
+	pdata->abs_x_max = ts->abs_x_max;
+	pdata->abs_y_max = ts->abs_y_max;
+	ret = lidbg_init_input(&(ts->input_dev),pdata);
+	if (ret) {
+		dev_err(&client->dev, "GTP request input dev failed.\n");
+		goto exit_free_inputdev;
+	}
 #if defined(CONFIG_FB)
 	ts->fb_notif.notifier_call = fb_notifier_callback;
 	ret = fb_register_client(&ts->fb_notif);
