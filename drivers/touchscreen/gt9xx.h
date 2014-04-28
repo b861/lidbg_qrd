@@ -199,7 +199,8 @@ extern u16 total_len;
 
 #define RESOLUTION_LOC			3
 #define TRIGGER_LOC				8
-
+#define SCREEN_X (1024)
+#define SCREEN_Y (600)
 #define CFG_GROUP_LEN(p_cfg_grp) (sizeof(p_cfg_grp) / sizeof(p_cfg_grp[0]))
 /* Log define */
 #define GTP_DEBUG(fmt, arg...)	do {\
@@ -234,6 +235,11 @@ extern u16 total_len;
 					x = y;\
 					y = z;\
 				} while (0)
+#define GTP_REVERT(x, y)     do{\
+         typeof(x) z = x;\
+         x = SCREEN_X-x;\
+         y = SCREEN_Y-y;\
+       }while (0)
 /*****************************End of Part III********************************/
 
 void gtp_esd_switch(struct i2c_client *client, int on);

@@ -49,6 +49,8 @@
 #include <linux/of_gpio.h>
 
 #include <linux/input/mt.h>
+#include "touch.h"
+touch_t touch = {0, 0, 0};
 
 #define GOODIX_DEV_NAME	"Goodix-CTP"
 #define CFG_MAX_TOUCH_POINTS	5
@@ -125,6 +127,8 @@ static u8 chip_gt9xxs;  /* true if ic is gt9xxs, like gt915s */
 u8 grp_cfg_version;
 extern  bool is_ts_load;
 unsigned int  touch_cnt = 0;
+extern int ts_should_revert;
+extern  bool recovery_mode;
 /*******************************************************
 Function:
 	Read data from the i2c slave device.
@@ -618,6 +622,33 @@ static void goodix_ts_work_func(struct work_struct *work)
 				gtp_touch_up(ts, i);
 				pre_touch &= ~(0x01 << i);
 			}
+			 if (touch_index & (0x01 << 0))
+            {
+                if(1 == recovery_mode)
+                {
+                    if( (input_y >= 0) && (input_x >= 0) )
+                    {
+                        touch.x = point_data[6] | (point_data[7] << 8);
+                        touch.y = point_data[4] | (point_data[5] << 8);
+                        if (1 == ts_should_revert)
+                            GTP_REVERT(touch.x, touch.y);
+                        touch.pressed = 1;
+                        set_touch_pos(&touch);
+                        lidbg("[%d,%d]==========%d\n", touch.x, touch.y, touch.pressed);
+                    }
+                }
+
+            }
+            else
+            {
+                if(1 == recovery_mode)
+                {
+                    touch.pressed = 0;
+                    set_touch_pos(&touch);
+                    lidbg("[%d,%d]==========%d\n", touch.x, touch.y, touch.pressed);
+                }
+
+            }
 		}
 	}
 	input_sync(ts->input_dev);
