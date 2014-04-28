@@ -113,7 +113,7 @@ int thread_dev_init(void *data)
     return 0;
 }
 
-static int is_key_scan_en = 0;
+static int is_key_scan_en = 1;
 #if defined(CONFIG_FB)
 struct notifier_block devices_notif;
 static int devices_notifier_callback(struct notifier_block *self,
@@ -235,14 +235,15 @@ static int soc_dev_resume(struct platform_device *pdev)
 struct work_struct work_left_button1;
 static void work_left_button1_fn(struct work_struct *work)
 {
+if(is_key_scan_en)
     SOC_Key_Report(KEY_HOME, KEY_PRESSED_RELEASED);
 }
 
 struct work_struct work_right_button1;
 static void work_right_button1_fn(struct work_struct *work)
 {
+if(is_key_scan_en)
     SOC_Key_Report(KEY_BACK, KEY_PRESSED_RELEASED);
-
 }
 irqreturn_t irq_left_button1(int irq, void *dev_id)
 {
