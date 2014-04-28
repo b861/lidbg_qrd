@@ -423,7 +423,6 @@ static int thread_remove_wakeup_page(void *data)
         msleep(200);
         i--;
     }
-    SOC_IO_Output(0, GPIO_APP_STATUS, 1);
     return 1;
 }
 
