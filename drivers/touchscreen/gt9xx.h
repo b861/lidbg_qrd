@@ -105,7 +105,7 @@ extern u16 total_len;
 
 /***************************PART1:ON/OFF define*******************************/
 #define GTP_CUSTOM_CFG			0
-#define GTP_CHANGE_X2Y			1
+//#define GTP_CHANGE_X2Y			1
 #define GTP_DRIVER_SEND_CFG		1
 #define GTP_HAVE_TOUCH_KEY		0
 #define GTP_POWER_CTRL_SLEEP	0

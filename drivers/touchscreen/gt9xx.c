@@ -129,6 +129,7 @@ extern  bool is_ts_load;
 unsigned int  touch_cnt = 0;
 extern int ts_should_revert;
 extern  bool recovery_mode;
+static bool xy_revert_en = 1;
 /*******************************************************
 Function:
 	Read data from the i2c slave device.
@@ -366,9 +367,10 @@ Output:
 static void gtp_touch_down(struct goodix_ts_data *ts, int id, int x, int y,
 		int w)
 {
-#if GTP_CHANGE_X2Y
-	GTP_SWAP(x, y);
-#endif
+	if (xy_revert_en)
+	    GTP_SWAP(x, y);
+	if (1 == ts_should_revert)
+	    GTP_REVERT(x, y);
 
 	input_mt_slot(ts->input_dev, id);
 	input_mt_report_slot_state(ts->input_dev, MT_TOOL_FINGER, true);
@@ -1311,9 +1313,9 @@ static int gtp_request_input_dev(struct goodix_ts_data *ts)
 	__set_bit(INPUT_PROP_POINTER, ts->input_dev->propbit);
 #endif
 
-#if GTP_CHANGE_X2Y
-	GTP_SWAP(ts->abs_x_max, ts->abs_y_max);
-#endif
+    if((xy_revert_en == 1) || (1 == ts_should_revert))
+
+        GTP_SWAP(ts->abs_x_max, ts->abs_y_max);
 
 	input_set_abs_params(ts->input_dev, ABS_MT_POSITION_X,
 				0, ts->abs_x_max, 0, 0);
@@ -2222,6 +2224,105 @@ static struct i2c_driver goodix_ts_driver = {
 	},
 };
 
+////////////////////////////////////////////////////
+#define feature_ts_nod
+
+#ifdef feature_ts_nod
+#define TS_DEVICE_NAME "tsnod"
+static int major_number_ts = 0;
+static struct class *class_install_ts;
+
+struct ts_device
+{
+    unsigned int counter;
+    struct cdev cdev;
+};
+struct ts_device *tsdev;
+
+int ts_nod_open (struct inode *inode, struct file *filp)
+{
+    //do nothing
+    filp->private_data = tsdev;
+    lidbg("[futengfei]==================ts_nod_open\n");
+
+    return 0;          /* success */
+}
+
+ssize_t ts_nod_write (struct file *filp, const char __user *buf, size_t count, loff_t *f_pos)
+{
+    char data_rec[20];
+    struct ts_device *tsdev = filp->private_data;
+
+    if (copy_from_user( data_rec, buf, count))
+    {
+        lidbg("copy_from_user ERR\n");
+    }
+    data_rec[count] =  '\0';
+    lidbg("gt910-ts_nod_write:==%d====[%s]\n", count, data_rec);
+    // processing data
+    if(!(strnicmp(data_rec, "TSMODE_XYREVERT", count - 1)))
+    {
+        xy_revert_en = 1;
+        lidbg("[gt910]ts_nod_write:==========TSMODE_XYREVERT\n");
+    }
+    else if(!(strnicmp(data_rec, "TSMODE_NORMAL", count - 1)))
+    {
+        xy_revert_en = 0;
+        lidbg("[gt910]ts_nod_write:==========TSMODE_NORMAL\n");
+    }
+
+    return count;
+}
+static  struct file_operations ts_nod_fops =
+{
+    .owner = THIS_MODULE,
+    .write = ts_nod_write,
+    .open = ts_nod_open,
+};
+
+static int init_cdev_ts(void)
+{
+    int ret, err, result;
+
+    //11creat cdev
+    tsdev = (struct ts_device *)kmalloc( sizeof(struct ts_device), GFP_KERNEL );
+    if (tsdev == NULL)
+    {
+        ret = -ENOMEM;
+        lidbg("gt911===========init_cdev_ts:kmalloc err \n");
+        return ret;
+    }
+
+    dev_t dev_number = MKDEV(major_number_ts, 0);
+    if(major_number_ts)
+    {
+        result = register_chrdev_region(dev_number, 1, TS_DEVICE_NAME);
+    }
+    else
+    {
+        result = alloc_chrdev_region(&dev_number, 0, 1, TS_DEVICE_NAME);
+        major_number_ts = MAJOR(dev_number);
+    }
+    lidbg("gt911===========alloc_chrdev_region result:%d \n", result);
+
+    cdev_init(&tsdev->cdev, &ts_nod_fops);
+    tsdev->cdev.owner = THIS_MODULE;
+    tsdev->cdev.ops = &ts_nod_fops;
+    err = cdev_add(&tsdev->cdev, dev_number, 1);
+    if (err)
+        lidbg( "gt911===========Error cdev_add\n");
+
+    //cread cdev node in /dev
+    class_install_ts = class_create(THIS_MODULE, "tsnodclass");
+    if(IS_ERR(class_install_ts))
+    {
+        lidbg( "gt911=======class_create err\n");
+        return -1;
+    }
+    device_create(class_install_ts, NULL, dev_number, NULL, "%s%d", TS_DEVICE_NAME, 0);
+}
+#endif
+///////////////////////////////////////////////////////
 /*******************************************************
 Function:
     Driver Install function.
@@ -2240,6 +2341,7 @@ static int __devinit goodix_ts_init(void)
 	gtp_esd_check_workqueue = create_workqueue("gtp_esd_check");
 #endif
 	ret = i2c_add_driver(&goodix_ts_driver);
+ 	init_cdev_ts();
 	return ret;
 }
 
