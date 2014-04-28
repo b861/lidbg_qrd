@@ -123,13 +123,7 @@ typedef enum
 typedef irqreturn_t (*pinterrupt_isr)(int irq, void *dev_id);
 
 #define ADC_MAX_CH (8)
-struct fly_smem
-{
-    unsigned char reserved[4];
-    unsigned int ch[ADC_MAX_CH];
-    int reserved2;
-    int bl_value;
-};
+
 #endif
 
 typedef enum
@@ -142,8 +136,6 @@ typedef enum
 
 struct lidbg_fn_t
 {
-
-    struct fly_smem *(*pfnSOC_Get_Share_Mem)(void);
 
     void (*pfnSOC_IO_Output) (unsigned int group, unsigned int index, bool status);
     bool (*pfnSOC_IO_Input) (unsigned int group, unsigned int index, unsigned int pull);
@@ -293,7 +285,6 @@ static inline int check_pt(void)
 #define SOC_Display_Get_Res  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_Display_Get_Res))
 
 #define SOC_LPC_Send  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_LPC_Send))
-#define SOC_Get_Share_Mem (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_Get_Share_Mem))
 #define SOC_System_Status (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_System_Status))
 #define SOC_WakeLock_Stat (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_WakeLock_Stat))
 

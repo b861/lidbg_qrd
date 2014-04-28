@@ -235,7 +235,7 @@ static void set_func_tbl(void)
     //display/touch
     plidbg_dev->soc_func_tbl.pfnSOC_Display_Get_Res = iSOC_Display_Get_Res;
 
-    plidbg_dev->soc_func_tbl.pfnSOC_Get_Share_Mem = iSOC_Get_Share_Mem;
+ //   plidbg_dev->soc_func_tbl.pfnSOC_Get_Share_Mem = iSOC_Get_Share_Mem;
     plidbg_dev->soc_func_tbl.pfnSOC_System_Status = iSOC_System_Status;
     plidbg_dev->soc_func_tbl.pfnSOC_WakeLock_Stat  = lidbg_wakelock_register;
 
