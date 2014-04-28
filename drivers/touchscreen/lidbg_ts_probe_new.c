@@ -118,7 +118,11 @@ struct probe_device *ts_scan(struct probe_device *tsdev, int size)
         else
         {
             lidbg("found:[0x%x,%s]\n", tsdev->chip_addr, tsdev->name);
-            return tsdev;
+	        #ifndef SOC_msm8x25
+	  		gpio_free(INT_GPIO);
+			gpio_free(RESET_GPIO);
+			#endif
+			return tsdev;
         }
         tsdev++;
     }
