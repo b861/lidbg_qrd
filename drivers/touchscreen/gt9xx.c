@@ -70,7 +70,7 @@
 #define GOODIX_VIO_LOAD_MAX_UA	10000
 
 #define RESET_DELAY_T3_US	200	/* T3: > 100us */
-#define RESET_DELAY_T4		20	/* T4: > 5ms */
+#define RESET_DELAY_T4		6	/* T4: > 5ms */
 
 #define	PHY_BUF_SIZE		32
 
@@ -719,7 +719,7 @@ static void gtp_reset_guitar(struct goodix_ts_data *ts, int ms)
 	gpio_direction_output(GTP_RST_PORT, 1);
 	msleep(RESET_DELAY_T4);
 
-	gpio_direction_input(GTP_RST_PORT);
+	//gpio_direction_input(GTP_RST_PORT);
 
 	gtp_int_sync(ts, 50);
 
@@ -1147,6 +1147,7 @@ static int gtp_request_io_port(struct goodix_ts_data *ts)
 			//goto pwr_off;
 		}
 		ret = gpio_direction_input(GTP_INT_PORT);
+		ts->client->irq = GPIO_TO_INT(GTP_INT_PORT);
 		if (ret) {
 			dev_err(&client->dev,
 					"set_direction for irq gpio failed\n");
@@ -1204,7 +1205,7 @@ static int gtp_request_irq(struct goodix_ts_data *ts)
 	int ret;
 	const u8 irq_table[] = GTP_IRQ_TAB;
 
-	GTP_DEBUG("INT trigger type:%x, irq=%d", ts->int_trigger_type,
+	lidbg("INT trigger type:%x, irq=%d", ts->int_trigger_type,
 			ts->client->irq);
 
 	ret = request_irq(ts->client->irq, goodix_ts_irq_handler,
