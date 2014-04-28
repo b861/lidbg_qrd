@@ -52,6 +52,7 @@ void observer_prepare(void)
 static int thread_observer(void *data)
 {
     int have_triggerd_sleep_S = 0;
+    char when[64] = {0};
     ssleep(10);
     observer_prepare();
 
@@ -69,28 +70,15 @@ static int thread_observer(void *data)
                 switch (have_triggerd_sleep_S)
                 {
                 case 5:
-                    PM_action_entry("start5:", PM_ACTION_PRINT);
-                    break;
-                case 10:
-                    PM_action_entry("start10:", PM_ACTION_PRINT);
-                    break;
-                case 13:
-                    PM_action_entry("start15:", PM_ACTION_PRINT);
-                    break;
-                case 20:
-                    PM_action_entry("start20:", PM_ACTION_PRINT);
-                    break;
-                case 25:
-                    PM_action_entry("start25:", PM_ACTION_PRINT);
-                    break;
-                case 27:
-                    PM_action_entry("start27:", PM_ACTION_PRINT);
-                    break;
-                case 43:
-                    PM_action_entry("start43:", PM_ACTION_PRINT);
+                    //PM_action_entry("start5:", PM_ACTION_PRINT);
                     break;
 
                 default:
+                    if(have_triggerd_sleep_S > 5 && !(have_triggerd_sleep_S % 5))
+                    {
+                        sprintf(when, "start%d:", have_triggerd_sleep_S);
+                        PM_action_entry(when,  PM_ACTION_PRINT);
+                    }
                     break;
                 }
 
@@ -457,6 +445,20 @@ static struct dev_pm_ops lidbg_pm_ops =
     .resume		= pm_resume,
 };
 #endif
+static int thread_pm_late_probe(void *data)//because of blocking other driver to insmod.
+{
+    ssleep(10);
+    lidbg_uevent_shell("pm list packages -3 > /data/lidbg/pm_3.txt");
+    ssleep(5);
+    fs_fill_list(LIDBG_LOG_DIR"pm_3.txt", FS_CMD_FILE_LISTMODE, &pm_list_3);
+    fs_register_filename_list(LIDBG_LOG_DIR"pm_3.txt", true);
+
+    lidbg_chmod("/dev/lidbg*");
+    ssleep(15);
+    lidbg_rm(LIDBG_LOG_DIR"lidbg_kmsg.txt");
+    return 1;
+}
+
 static int  lidbg_pm_probe(struct platform_device *pdev)
 {
     DUMP_FUN;
@@ -475,19 +477,8 @@ static int  lidbg_pm_probe(struct platform_device *pdev)
     LIDBG_MODULE_LOG;
 
     PM_WARN("<==OUT==>\n\n");
+    CREATE_KTHREAD(thread_pm_late_probe, NULL);
 
-    ssleep(10);
-    lidbg_uevent_shell("pm list packages -3 > /data/lidbg/pm_3.txt");
-    ssleep(5);
-    fs_fill_list(LIDBG_LOG_DIR"pm_3.txt", FS_CMD_FILE_LISTMODE, &pm_list_3);
-    fs_register_filename_list(LIDBG_LOG_DIR"pm_3.txt", true);
-
-
-    lidbg_uevent_shell("echo 7 7 7 7  > /proc/sys/kernel/printk");
-    lidbg_chmod("/dev/lidbg*");
-    ssleep(15);
-    lidbg_rm(LIDBG_LOG_DIR"lidbg_kmsg.txt");
-    //SOC_Key_Report(KEY_POWER, KEY_PRESSED_RELEASED);
     return 0;
 }
 static struct platform_device lidbg_pm =
@@ -519,6 +510,7 @@ static int __init lidbg_pm_init(void)
     DUMP_FUN;
     LIDBG_GET;
     set_func_tbl();
+    lidbg_uevent_shell("echo 7 7 7 7  > /proc/sys/kernel/printk");
     platform_device_register(&lidbg_pm);
     platform_driver_register(&lidbg_pm_driver);
     PM_WARN("<set GPIO_WP[%d] 1>\n\n", GPIO_WP);
