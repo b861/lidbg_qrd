@@ -923,7 +923,7 @@ Output:
 	Executive outcomes.
 	> =0: succeed, otherwise: failed
 *******************************************************/
-static int gtp_init_panel(struct goodix_ts_data *ts)
+static int gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
 {
 	struct i2c_client *client = ts->client;
 	unsigned char *config_data;
@@ -941,16 +941,28 @@ static int gtp_init_panel(struct goodix_ts_data *ts)
 	u8 cfg_info_group4[] = CTP_CFG_GROUP4;
 	u8 cfg_info_group5[] = CTP_CFG_GROUP5;
 	u8 cfg_info_group6[] = CTP_CFG_GROUP6;
+	u8 cfg_info_group7[] = CTP927_CFG_GROUP1;
+	u8 cfg_info_group8[] = CTP927_CFG_GROUP2;
+	u8 cfg_info_group9[] = CTP927_CFG_GROUP3;
+	u8 cfg_info_group10[] = CTP927_CFG_GROUP4;
+	u8 cfg_info_group11[] = CTP927_CFG_GROUP5;
+	u8 cfg_info_group12[] = CTP927_CFG_GROUP6;
 	u8 *send_cfg_buf[] = {cfg_info_group1, cfg_info_group2,
-		cfg_info_group3, cfg_info_group4,
-		cfg_info_group5, cfg_info_group6};
+		cfg_info_group3, cfg_info_group4,cfg_info_group5, cfg_info_group6,
+		cfg_info_group7, cfg_info_group8,cfg_info_group9, cfg_info_group10,cfg_info_group11, cfg_info_group12};
 
 	u8 cfg_info_len[] = {CFG_GROUP_LEN(cfg_info_group1),
 		CFG_GROUP_LEN(cfg_info_group2),
 		CFG_GROUP_LEN(cfg_info_group3),
 		CFG_GROUP_LEN(cfg_info_group4),
 		CFG_GROUP_LEN(cfg_info_group5),
-		CFG_GROUP_LEN(cfg_info_group6)};
+		CFG_GROUP_LEN(cfg_info_group6),
+		CFG_GROUP_LEN(cfg_info_group7),
+		CFG_GROUP_LEN(cfg_info_group8),
+		CFG_GROUP_LEN(cfg_info_group9),
+		CFG_GROUP_LEN(cfg_info_group10),
+		CFG_GROUP_LEN(cfg_info_group11),
+		CFG_GROUP_LEN(cfg_info_group12)};
 
 	lidbg("Config Groups\' Lengths: %d, %d, %d, %d, %d, %d",
 			cfg_info_len[0], cfg_info_len[1], cfg_info_len[2],
@@ -1030,7 +1042,11 @@ static int gtp_init_panel(struct goodix_ts_data *ts)
 					"Not enough memory for panel config data\n");
 			return -ENOMEM;
 		}
-
+		if(!strcmp(ic_type, "927"))
+            {
+              lidbg("ic_type, 927\n");
+              sensor_id = sensor_id + 6;
+            }
 		ts->config_data = config_data;
 		config_data[0] = GTP_REG_CONFIG_DATA >> 8;
 		config_data[1] = GTP_REG_CONFIG_DATA & 0xff;
@@ -1104,7 +1120,7 @@ Output:
 	read operation return.
 	2: succeed, otherwise: failed
 *******************************************************/
-int gtp_read_version(struct i2c_client *client, u16 *version)
+int gtp_read_version(struct i2c_client *client, u16 *version, char *ic_type)
 {
 	int ret = -EIO;
 	u8 buf[8] = { GTP_REG_VERSION >> 8, GTP_REG_VERSION & 0xff };
@@ -1129,6 +1145,7 @@ int gtp_read_version(struct i2c_client *client, u16 *version)
 		dev_dbg(&client->dev, "IC Version: %c%c%c%c_%02x%02x\n", buf[2],
 				buf[3], buf[4], buf[5], buf[7], buf[6]);
 	}
+	sprintf(ic_type, "%c%c%c", buf[2], buf[3], buf[4]);
 	return ret;
 }
 
@@ -1688,6 +1705,7 @@ static int goodix_ts_probe(struct i2c_client *client,
 	struct goodix_ts_data *ts;
 	u16 version_info;
 	int ret;
+	char ic_type[3];
     client->addr=0x14;
 	lidbg("GTP I2C Address: 0x%02x\n", client->addr);
 	/*if (client->dev.of_node) {
@@ -1770,8 +1788,12 @@ static int goodix_ts_probe(struct i2c_client *client,
 		goto exit_free_io_port;
 	}
 #endif
-
-	ret = gtp_init_panel(ts);
+	ret = gtp_read_version(client, &version_info,ic_type);
+		if (ret != 2) {
+			dev_err(&client->dev, "Read version failed.\n");
+			goto exit_free_irq;
+		}
+	ret = gtp_init_panel(ts,ic_type);
 	if (ret < 0) {
 		dev_err(&client->dev, "GTP init panel failed.\n");
 		ts->abs_x_max = GTP_MAX_WIDTH;
@@ -1807,12 +1829,6 @@ static int goodix_ts_probe(struct i2c_client *client,
 		dev_info(&client->dev, "GTP works in polling mode.\n");
 	else
 		dev_info(&client->dev, "GTP works in interrupt mode.\n");
-
-	ret = gtp_read_version(client, &version_info);
-	if (ret != 2) {
-		dev_err(&client->dev, "Read version failed.\n");
-		goto exit_free_irq;
-	}
 	if (ts->use_irq)
 		gtp_irq_enable(ts);
 
