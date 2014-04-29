@@ -408,23 +408,6 @@ static  struct file_operations pm_nod_fops =
     .open = pm_open,
 };
 
-static int thread_remove_wakeup_page(void *data)
-{
-    int i = 23;
-    SOC_Key_Report(KEY_BACK, KEY_PRESSED_RELEASED);
-    SOC_Key_Report(KEY_BACK, KEY_PRESSED_RELEASED);
-    msleep(500);
-    SOC_Key_Report(KEY_BACK, KEY_PRESSED_RELEASED);
-    SOC_Key_Report(KEY_BACK, KEY_PRESSED_RELEASED);
-    msleep(500);
-    while(i > 1)
-    {
-        SOC_Key_Report(KEY_BACK, KEY_PRESSED_RELEASED);
-        msleep(200);
-        i--;
-    }
-    return 1;
-}
 
 #ifdef CONFIG_PM
 static int pm_suspend(struct device *dev)
@@ -435,7 +418,6 @@ static int pm_suspend(struct device *dev)
 static int pm_resume(struct device *dev)
 {
     DUMP_FUN;
-    CREATE_KTHREAD(thread_remove_wakeup_page, NULL);
     return 0;
 }
 static struct dev_pm_ops lidbg_pm_ops =
