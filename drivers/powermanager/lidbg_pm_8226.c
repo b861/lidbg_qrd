@@ -21,12 +21,6 @@ typedef enum
 
 void PM_action_entry(char *info, ws_list_action_types type);
 
-bool set_factory_reset_mode(bool on)
-{
-    PM_WARN("%d\n", on);
-    lidbg_uevent_shell("am broadcast -a android.intent.action.MASTER_CLEAR &");
-    return true;
-}
 
 void observer_start(void)
 {
@@ -69,8 +63,7 @@ static int thread_observer(void *data)
                 have_triggerd_sleep_S++;
                 switch (have_triggerd_sleep_S)
                 {
-                case 5:
-                    //PM_action_entry("start5:", PM_ACTION_PRINT);
+                case 50:
                     break;
 
                 default:
@@ -90,7 +83,7 @@ static int thread_observer(void *data)
 }
 
 static LIST_HEAD(pm_list_3);
-void pm_list_kill_each(void)
+static int thread_pm_list_kill_each(void *data)
 {
     struct string_dev *pos;
     char *p = NULL;
@@ -104,10 +97,6 @@ void pm_list_kill_each(void)
         }
         p = NULL;
     }
-}
-static int thread_am_kill_apk(void *data)
-{
-    pm_list_kill_each();
     return 1;
 }
 static int thread_led_monitor(void *data)
@@ -202,7 +191,7 @@ void PM_action_entry(char *info, ws_list_action_types type)
         break;
     case PM_ACTION_PRINT_KILL_ALL_APK:
         deal_userspace_wakelock(1);
-        CREATE_KTHREAD(thread_am_kill_apk, NULL);
+        CREATE_KTHREAD(thread_pm_list_kill_each, NULL);
         deal_kernel_wakelock(info, PM_ACTION_PRINT);
         break;
     case PM_ACTION_SAVE_LOCK_MSG:
@@ -256,16 +245,14 @@ void lidbg_pm_step_call(fly_pm_stat_step step, void *data)
         //suspend_ops->enter.in
         break;
     case PM_SUSPEND_ENTER8:
-        fs_file_write(BUTTON_LED_NODE, "0");
         break;
     case PM_SUSPEMD_OPS_ENTER9:
         break;
     case PM_SUSPEMD_OPS_ENTER9P1:
         //suspend_ops->enter.out
-        fs_file_write(BUTTON_LED_NODE, "255");
         break;
     case PM_NULL:
-        PM_action_entry("test", PM_ACTION_PRINT_FORCE_UNLOCK);
+        PM_ERR("PM_NULL\n");
         break;
     default:
         break;
@@ -279,6 +266,7 @@ int linux_to_lidbg_receiver(linux_to_lidbg_transfer_t _enum, void *data)
     case LTL_TRANSFER_RTC:
         break;
     case LTL_TRANSFER_NULL:
+        PM_ERR("LTL_TRANSFER_NULL\n");
         break;
     default:
         break;
@@ -286,18 +274,6 @@ int linux_to_lidbg_receiver(linux_to_lidbg_transfer_t _enum, void *data)
     return 1;
 }
 
-
-static DECLARE_COMPLETION(thread_kernel_msg_completion);
-static int thread_kernel_msg_completion_func(void *data)
-{
-    while(1)
-    {
-        wait_for_completion(&thread_kernel_msg_completion);
-        lidbg_uevent_shell("am broadcast -a com.flyaudio.ap.broadcast --es powerkey longpress &");
-        observer_start();
-    }
-    return 1;
-}
 int pm_open (struct inode *inode, struct file *filp)
 {
     return 0;
@@ -324,8 +300,6 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
     {
         if(!strcmp(cmd[1], "short_press"))
             SOC_Key_Report(KEY_POWER, KEY_PRESSED_RELEASED);
-        else  if(!strcmp(cmd[1], "long_press_c"))
-            complete(&thread_kernel_msg_completion);
         else  if(!strcmp(cmd[1], "long_press"))
         {
             SOC_Key_Report(KEY_POWER, KEY_PRESSED);
@@ -342,7 +316,7 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         if(!strcmp(cmd[1], "android_up"))
             SOC_IO_Output(0, GPIO_APP_STATUS, 0);
         else  if(!strcmp(cmd[1], "android_down"))
-            SOC_IO_Output(0, GPIO_APP_STATUS, 1);//complete(&thread_kernel_msg_completion);
+            SOC_IO_Output(0, GPIO_APP_STATUS, 1);
         else if(!strcmp(cmd[1], "devices_down"))
             ;
     }
@@ -369,7 +343,7 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         }
         else  if(!strcmp(cmd[1], "fac"))
         {
-            set_factory_reset_mode(true);
+            PM_ERR("disabled,fac\n");
         }
         else  if(!strcmp(cmd[1], "reb"))
         {
@@ -382,7 +356,7 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         }
         else  if(!strcmp(cmd[1], "kill3"))
         {
-            CREATE_KTHREAD(thread_am_kill_apk, NULL);
+            CREATE_KTHREAD(thread_pm_list_kill_each, NULL);
         }
         else  if(!strcmp(cmd[1], "kill"))
         {
@@ -445,8 +419,6 @@ static int  lidbg_pm_probe(struct platform_device *pdev)
     DUMP_FUN;
     PM_WARN("<==IN==>\n");
 
-    CREATE_KTHREAD(thread_kernel_msg_completion_func, NULL);
-
     if(!g_var.is_fly)
     {
         CREATE_KTHREAD(thread_led_monitor, NULL);
@@ -457,8 +429,8 @@ static int  lidbg_pm_probe(struct platform_device *pdev)
     kthread_run(thread_observer, NULL, "ftf_pmtask");
     LIDBG_MODULE_LOG;
 
-    PM_WARN("<==OUT==>\n\n");
     CREATE_KTHREAD(thread_pm_late_probe, NULL);
+    PM_WARN("<==OUT==>\n\n");
 
     return 0;
 }
@@ -491,11 +463,11 @@ static int __init lidbg_pm_init(void)
     DUMP_FUN;
     LIDBG_GET;
     set_func_tbl();
+    PM_WARN("<set GPIO_WP[%d] 1>\n\n", GPIO_WP);
+    SOC_IO_Output(0, GPIO_WP, 0);
     lidbg_uevent_shell("echo 7 7 7 7  > /proc/sys/kernel/printk");
     platform_device_register(&lidbg_pm);
     platform_driver_register(&lidbg_pm_driver);
-    PM_WARN("<set GPIO_WP[%d] 1>\n\n", GPIO_WP);
-    SOC_IO_Output(0, GPIO_WP, 0);
     return 0;
 }
 
