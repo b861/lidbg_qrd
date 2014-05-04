@@ -411,6 +411,9 @@ static int thread_pm_late_probe(void *data)//because of blocking other driver to
     lidbg_chmod("/dev/lidbg*");
     ssleep(15);
     lidbg_rm(LIDBG_LOG_DIR"lidbg_kmsg.txt");
+
+    lidbg_enable_logcat();
+
     return 1;
 }
 
