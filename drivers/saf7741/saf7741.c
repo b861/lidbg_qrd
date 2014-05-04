@@ -507,7 +507,7 @@ void SAF7741_ReadGraphicalSpectrumAnalyzer(void)
 	I2C_Read_SAF7741(ADSP_X_Gsa_Bar321, Value, 3);
 }
 */
-void SendToSAF7741NormalWriteData(BYTE *pData)
+BOOL SendToSAF7741NormalWriteData(BYTE *pData)
 {
 	BYTE MChipAdd;
 	UINT iLength;
@@ -530,17 +530,36 @@ void SendToSAF7741NormalWriteData(BYTE *pData)
 		else
 		{
 			regAddr = (pData[0] << 16) + (pData[1] << 8) + pData[2];
-			I2C_Write_SAF7741(regAddr,&pData[3],iLength - 3);
+			if(!I2C_Write_SAF7741(regAddr,&pData[3],iLength - 3))
+			{
+				//lidbg("SAF7741 I2C comm error!\n");
+				return FALSE;
+			}
 			pData += iLength;
 		}
 	}
+
+	return TRUE;
 }
 
 
 void SAF7741_Init(void)
 {
+	int i;
 	//lidbg("%s:enter\n", __func__);
-	SendToSAF7741NormalWriteData(SAF7741_Audio_Init_Data);
+	for(i = 0; i < 3; ++i)
+	{
+		if(SendToSAF7741NormalWriteData(SAF7741_Audio_Init_Data))
+		{
+			break;
+		}
+		else
+		{
+			lidbg("SAF7741 I2C err num:%d\n",i);
+			msleep(1000);
+			continue;
+		}
+	}
 	//SendToSAF7741NormalWriteData(SAF7741_Audio_Init_Data_FM);
 	//SendToSAF7741NormalWriteData(SAF7741_Radio_Init_Data);
 
