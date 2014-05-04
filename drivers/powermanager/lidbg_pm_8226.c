@@ -465,7 +465,7 @@ static int __init lidbg_pm_init(void)
     set_func_tbl();
     PM_WARN("<set GPIO_WP[%d] 1>\n\n", GPIO_WP);
     SOC_IO_Output(0, GPIO_WP, 0);
-    lidbg_uevent_shell("echo 7 7 7 7  > /proc/sys/kernel/printk");
+    lidbg_uevent_shell("echo 8  > /proc/sys/kernel/printk");
     platform_device_register(&lidbg_pm);
     platform_driver_register(&lidbg_pm_driver);
     return 0;
