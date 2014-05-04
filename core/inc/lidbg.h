@@ -11,6 +11,7 @@
 #include <linux/usb.h>
 #include <linux/random.h>
 #include <linux/time.h>
+#include <linux/input/mt.h>
 #include <linux/rtc.h>
 #include <linux/fb.h>
 #include <linux/vmalloc.h>
