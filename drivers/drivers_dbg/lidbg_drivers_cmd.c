@@ -16,29 +16,10 @@ int thread_dump_log(void *data)
 static bool logcat_enabled = false;
 int thread_enable_logcat(void *data)
 {
-    char cmd[128] = {0};
-    char logcat_file_name[256] = {0};
-    char time_buf[32] = {0};
-
     if(logcat_enabled)
         goto out;
     logcat_enabled = true;
-
-    lidbg("\n\n\nthread_enable_logcat:logcat+\n");
-
-    lidbg_get_current_time(time_buf, NULL);
-    sprintf(logcat_file_name, "logcat_%d_%s.txt", get_machine_id(), time_buf);
-
-    sprintf(cmd, "date >/data/%s", logcat_file_name);
-    lidbg_uevent_shell(cmd);
-    memset(cmd, '\0', sizeof(cmd));
-    ssleep(1);
-    lidbg_uevent_shell("chmod 777 /data/logcat*");
-    ssleep(1);
-    sprintf(cmd, "logcat  -v time>> /data/%s &", logcat_file_name);
-    lidbg_uevent_shell(cmd);
-    lidbg("logcat-\n");
-    return 0;
+    lidbg_enable_logcat();
 out:
     lidbg("logcat.skip\n");
     return 0;
@@ -47,30 +28,10 @@ out:
 static bool dmesg_enabled = false;
 int thread_enable_dmesg(void *data)
 {
-    char cmd[128] = {0};
-    char dmesg_file_name[256] = {0};
-    char time_buf[32] = {0};
-
     if(dmesg_enabled)
         goto out;
     dmesg_enabled = true;
-
-    lidbg("\n\n\nthread_enable_dmesg:kmsg+\n");
-
-    lidbg_trace_msg_disable(1);
-    lidbg_get_current_time(time_buf, NULL);
-    sprintf(dmesg_file_name, "kmsg_%d_%s.txt", get_machine_id(), time_buf);
-
-    sprintf(cmd, "date >/data/%s", dmesg_file_name);
-    lidbg_uevent_shell(cmd);
-    memset(cmd, '\0', sizeof(cmd));
-    ssleep(1);
-    lidbg_uevent_shell("chmod 777 /data/kmsg*");
-    ssleep(1);
-    sprintf(cmd, "cat /proc/kmsg >> /data/%s &", dmesg_file_name);
-    lidbg_uevent_shell(cmd);
-    lidbg("kmsg-\n");
-    return 0;
+    lidbg_enable_kmsg();
 out:
     lidbg("kmsg.skip\n");
     return 0;
@@ -231,16 +192,16 @@ void parse_cmd(char *pt)
     }
     else if (!strcmp(argv[0], "lpc"))
     {
-    		int para_count = argc -1;
-		u8 lpc_buf[10]={0};
-		for(i=0; i<para_count; i++)
-		{
-			lpc_buf[i] = simple_strtoul(argv[i+1], 0, 0);
-			lidbg("%d ", lpc_buf[i]);
-		}
-		lidbg("para_count = %d\n", para_count);
-		SOC_LPC_Send(lpc_buf, para_count);
-    }	
+        int para_count = argc - 1;
+        u8 lpc_buf[10] = {0};
+        for(i = 0; i < para_count; i++)
+        {
+            lpc_buf[i] = simple_strtoul(argv[i + 1], 0, 0);
+            lidbg("%d ", lpc_buf[i]);
+        }
+        lidbg("para_count = %d\n", para_count);
+        SOC_LPC_Send(lpc_buf, para_count);
+    }
 #endif
 
 #ifdef SOC_msm8x25

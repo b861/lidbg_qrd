@@ -8,6 +8,59 @@ static int delete_out_dir_after_update = 1;
 static int dump_mem_log = 0;
 static int loop_warning_en = 0;
 
+#ifdef USE_CALL_USERHELPER
+void lidbg_uevent_shell(char *shell_cmd)
+{
+}
+#endif
+
+void lidbg_enable_logcat(void)
+{
+    char cmd[128] = {0};
+    char logcat_file_name[256] = {0};
+    char time_buf[32] = {0};
+
+    lidbg("\n\n\nthread_enable_logcat:logcat+\n");
+
+    lidbg_get_current_time(time_buf, NULL);
+    sprintf(logcat_file_name, "logcat_%d_%s.txt", get_machine_id(), time_buf);
+
+    sprintf(cmd, "date >/data/%s", logcat_file_name);
+    lidbg_uevent_shell(cmd);
+    memset(cmd, '\0', sizeof(cmd));
+    ssleep(1);
+    lidbg_uevent_shell("chmod 777 /data/logcat*");
+    ssleep(1);
+    sprintf(cmd, "logcat  -v time>> /data/%s &", logcat_file_name);
+    lidbg_uevent_shell(cmd);
+    lidbg("logcat-\n");
+
+}
+
+void lidbg_enable_kmsg(void)
+{
+    char cmd[128] = {0};
+    char dmesg_file_name[256] = {0};
+    char time_buf[32] = {0};
+
+    lidbg("\n\n\nthread_enable_dmesg:kmsg+\n");
+
+    lidbg_trace_msg_disable(1);
+    lidbg_get_current_time(time_buf, NULL);
+    sprintf(dmesg_file_name, "kmsg_%d_%s.txt", get_machine_id(), time_buf);
+
+    sprintf(cmd, "date >/data/%s", dmesg_file_name);
+    lidbg_uevent_shell(cmd);
+    memset(cmd, '\0', sizeof(cmd));
+    ssleep(1);
+    lidbg_uevent_shell("chmod 777 /data/kmsg*");
+    ssleep(1);
+    sprintf(cmd, "cat /proc/kmsg >> /data/%s &", dmesg_file_name);
+    lidbg_uevent_shell(cmd);
+    lidbg("kmsg-\n");
+}
+
+
 bool set_wifi_adb_mode(bool on)
 {
     LIDBG_WARN("<%d>\n", on);
@@ -129,7 +182,11 @@ int thread_reboot(void *data)
 
 void logcat_lunch(char *key, char *value )
 {
+#ifdef SOC_msm8x25
     k2u_write(LOG_LOGCAT);
+#else
+    lidbg_enable_logcat();
+#endif
 }
 void cb_cp_data_to_udisk(char *key, char *value )
 {
@@ -229,13 +286,14 @@ int misc_init(void *data)
     fs_register_filename_list("/data/screenshot.png", true);
     fs_register_filename_list(LIDBG_LOG_DIR"lidbg_mem_log.txt", true);
 
-    if(1 == logcat_en)
-        logcat_lunch(NULL, NULL);
-
     CREATE_KTHREAD(thread_reboot, NULL);
 
     LIDBG_WARN("<==OUT==>\n\n");
     LIDBG_MODULE_LOG;
+
+    if(1 == logcat_en)
+        logcat_lunch(NULL, NULL);
+
     return 0;
 }
 
@@ -256,6 +314,8 @@ module_init(lidbg_misc_init);
 module_exit(lidbg_misc_exit);
 
 EXPORT_SYMBOL(lidbg_loop_warning);
+EXPORT_SYMBOL(lidbg_enable_logcat);
+EXPORT_SYMBOL(lidbg_enable_kmsg);
 
 
 MODULE_AUTHOR("futengfei");
