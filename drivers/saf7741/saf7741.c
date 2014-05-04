@@ -568,6 +568,12 @@ void SAF7741_Init(void)
 static int saf7741_probe(struct platform_device *pdev)
 {
 	int ret = 0;
+
+    if(g_var.is_fly)
+    {
+        lidbg("saf7741_probe do nothing\n");
+        return 0;
+    }	
 	
 	//lidbg("%s:enter\n", __func__);
 /*
@@ -579,8 +585,7 @@ static int saf7741_probe(struct platform_device *pdev)
 	}
 
 	SAF7741_Reset();    //At LPC
-*/
-	LIDBG_GET;
+*/	
 
 	lidbg("SAF7741 init start!\n");
 	SAF7741_Init();
@@ -633,6 +638,7 @@ static struct platform_driver saf7741_driver =
 static int __devinit saf7741_module_init(void)
 {
     //lidbg("%s:enter\n", __func__);
+    LIDBG_GET;
     platform_device_register(&saf7741_devices);
     platform_driver_register(&saf7741_driver);
     //misc_register(&misc);
