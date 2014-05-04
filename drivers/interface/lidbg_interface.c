@@ -345,9 +345,15 @@ int fly_interface_init(void)
     g_var.ws_lh = NULL;
 
     if( fs_is_file_exist(RECOVERY_MODE_DIR))
+        {
         recovery_mode = 1;
+		lidbg("\n=====system mode is recovery_mode====\n");
+    	}
     else
+    	{
         recovery_mode = 0;
+		lidbg("\n=====system mode is normal_mode====\n");
+    	}
 
     CREATE_KTHREAD(interface_init, NULL);
 
