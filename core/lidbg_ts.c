@@ -13,6 +13,7 @@
 #define Y_MAX		600
 //struct input_dev *input = NULL;
 struct input_dev *input_dev = NULL;
+static int touch_cnt = 0;
 int lidbg_init_input(struct lidbg_input_data *pinput)
 {
     	int ret;
@@ -65,30 +66,35 @@ int lidbg_init_input(struct lidbg_input_data *pinput)
 void lidbg_touch_report(struct lidbg_ts_data *pdata)
 {
     	int i;
-	lidbg("%s:-----------wsx-----------",__FUNCTION__);
+	//lidbg("%s:-----------wsx-----------",__FUNCTION__);
 	for (i = 0; i < GTP_MAX_TOUCH; i++)  
     	{  
 		input_mt_slot(input_dev, pdata->id[i]);  
 		
             if ((pdata->touch_index) & (0x01<<i)) 
             	{  	   
-                      input_mt_slot(input_dev, pdata->id[i]);
-		        input_mt_report_slot_state(input_dev, MT_TOOL_FINGER, true);
-		        input_report_abs(input_dev, ABS_MT_POSITION_X, pdata->x[i]);
-		        input_report_abs(input_dev, ABS_MT_POSITION_Y, pdata->y[i]);
-		        input_report_abs(input_dev, ABS_MT_TOUCH_MAJOR, pdata->w[i]);
-			 input_report_abs(input_dev, ABS_MT_WIDTH_MAJOR, pdata->w[i]);
-		        //lidbg("%d,%d[%d,%d];\n", pdata->touch_num,pdata->id[i], pdata->x[i], pdata->y[i]);
-			*(pdata->pre_touch) |= 0x01 << i;
-			pdata->touch_index |= (0x01 << pdata->id[i+1]);  
-			
+				input_mt_slot(input_dev, pdata->id[i]);
+				input_mt_report_slot_state(input_dev, MT_TOOL_FINGER, true);
+				input_report_abs(input_dev, ABS_MT_POSITION_X, pdata->x[i]);
+				input_report_abs(input_dev, ABS_MT_POSITION_Y, pdata->y[i]);
+				input_report_abs(input_dev, ABS_MT_TOUCH_MAJOR, pdata->w[i]);
+				input_report_abs(input_dev, ABS_MT_WIDTH_MAJOR, pdata->w[i]);
+				touch_cnt++;
+				if (touch_cnt == 100)
+				{
+					touch_cnt = 0;
+					lidbg("%d[%d,%d];\n", pdata->id[i], pdata->x[i], pdata->y[i]);
+				}
+				*(pdata->pre_touch) |= 0x01 << i;
+				pdata->touch_index |= (0x01 << pdata->id[i+1]);  
+
         	}  
        		else  
         	{  
-			//lidbg("release\n");
-           	    	input_mt_slot(input_dev, i);
-		    	input_mt_report_slot_state(input_dev, MT_TOOL_FINGER, false);
-		    	*(pdata->pre_touch) &= ~(0x01 << i);
+				//lidbg("release\n");
+	           	    	input_mt_slot(input_dev, i);
+			    	input_mt_report_slot_state(input_dev, MT_TOOL_FINGER, false);
+			    	*(pdata->pre_touch) &= ~(0x01 << i);
         	}  
 		
 	}  
