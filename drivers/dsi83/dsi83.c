@@ -25,7 +25,7 @@ static int32_t i2c_rw(unsigned char chipaddr,unsigned int sub_addr,int mode,
 		 adap = i2c_get_adapter(DSI83_I2C_BUS);
 		 if(adap == NULL || adap->name==NULL){
 			 printk(KERN_CRIT "dsi83:%s():i2c_get_adapter(%d) error!",__func__,DSI83_I2C_BUS);
-			 return 0;
+			 return -1;
 		 }
 	 }
 
@@ -294,8 +294,10 @@ static int SN65_devices_read_id(void)
 
 	for (i = 0x8, j = 0; i >= 0; i--, j++) 
 	{
-		SN65_register_read(i,&chip_id[j]);
-		lidbg_dsi83("%s():reg 0x%x = 0x%x", __func__, i, chip_id[j]);
+		if(SN65_register_read(i,&chip_id[j]) < 0)
+			return -1;
+		else
+			lidbg_dsi83("%s():reg 0x%x = 0x%x", __func__, i, chip_id[j]);
 	}
 
 	return memcmp(id, chip_id, 9);
@@ -357,14 +359,24 @@ static int dsi83_fb_notifier_callback(struct notifier_block *self,
 static void dsi83_work_func(struct work_struct *work)
 {
     int ret = 0;
+	int i;
 	
-	ret = SN65_devices_read_id();
-	if (ret)
+	for(i = 0; i < 3; ++i)
 	{
-		printk(KERN_CRIT "dsi83:DSI83 match ID falied!\n");
+		ret = SN65_devices_read_id();
+		if (!ret)
+			break;
+		else
+		{
+			printk(KERN_CRIT "dsi83:DSI83 match ID falied,num:%d.\n", i+1);
+			continue;
+		}
 	}
 
-	printk(KERN_CRIT "dsi83:DSI83 match ID success!\n");
+	if(i == 3)
+		return;
+	else
+		printk(KERN_CRIT "dsi83:DSI83 match ID success!\n");
 
 	SN65_Sequence_seq4();
 	
