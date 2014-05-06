@@ -19,4 +19,8 @@ ifeq ($(CONFIG_HAL_USERVER),y)
 SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,lidbg_userver)
 endif
 
+ifeq ($(CONFIG_HAL_VOLD_8x26),y)
+SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,8x26_vold)
+endif
+
 include $(SUBDIR_MAKEFILES)
