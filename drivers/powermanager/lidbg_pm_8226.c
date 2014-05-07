@@ -4,6 +4,7 @@ LIDBG_DEFINE;
 #define BUTTON_LED_NODE "/sys/class/leds/button-backlight/brightness"
 #define GPIO_WP (35)
 #define GPIO_APP_STATUS (36)
+#define GPIO_USB_EN (109)
 static atomic_t is_in_sleep = ATOMIC_INIT(-1);
 static int list_count ;
 static bool is_pm_toast_dbg_en = false;
@@ -273,7 +274,26 @@ int linux_to_lidbg_receiver(linux_to_lidbg_transfer_t _enum, void *data)
     }
     return 1;
 }
-
+void usb_disk_enable(bool enable)
+{
+    PM_WARN("[%s]\n", enable ? "usb_enable" : "usb_disable");
+    if(enable)
+        SOC_IO_Output(0, GPIO_USB_EN, 0);
+    else
+        SOC_IO_Output(0, GPIO_USB_EN, 1);
+}
+static int thread_usb_disk_enable_delay(void *data)
+{
+    ssleep(2);
+    usb_disk_enable(true);
+    return 1;
+}
+static int thread_usb_disk_disable_delay(void *data)
+{
+    ssleep(2);
+    usb_disk_enable(false);
+    return 1;
+}
 int pm_open (struct inode *inode, struct file *filp)
 {
     return 0;
@@ -316,7 +336,10 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         if(!strcmp(cmd[1], "android_up"))
             SOC_IO_Output(0, GPIO_APP_STATUS, 0);
         else  if(!strcmp(cmd[1], "android_down"))
+        {
             SOC_IO_Output(0, GPIO_APP_STATUS, 1);
+            CREATE_KTHREAD(thread_usb_disk_disable_delay, NULL);
+        }
         else if(!strcmp(cmd[1], "devices_down"))
             ;
     }
@@ -392,6 +415,7 @@ static int pm_suspend(struct device *dev)
 static int pm_resume(struct device *dev)
 {
     DUMP_FUN;
+    CREATE_KTHREAD(thread_usb_disk_enable_delay, NULL);
     return 0;
 }
 static struct dev_pm_ops lidbg_pm_ops =
@@ -468,6 +492,7 @@ static int __init lidbg_pm_init(void)
     set_func_tbl();
     PM_WARN("<set GPIO_WP[%d] 1>\n\n", GPIO_WP);
     SOC_IO_Output(0, GPIO_WP, 0);
+    CREATE_KTHREAD(thread_usb_disk_enable_delay, NULL);
     lidbg_uevent_shell("echo 8  > /proc/sys/kernel/printk");
     platform_device_register(&lidbg_pm);
     platform_driver_register(&lidbg_pm_driver);
