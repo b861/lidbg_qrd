@@ -488,7 +488,7 @@ int fly_hal_init(void)
     g_var.machine_id = get_machine_id();
 
 
-    g_var.is_fly = 1;
+    g_var.is_fly = 0;
     g_var.fake_suspend = 0;
     g_var.acc_flag = 1;
 

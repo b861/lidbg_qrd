@@ -12,14 +12,13 @@ static bool lpc_work_en = true;
 #ifdef SOC_msm8x25
 #define  MCU_WP_GPIO 	  (29)
 #define  MCU_IIC_REQ_GPIO (30)
+#define MCU_WP_GPIO_SET  do{SOC_IO_Output(0, MCU_WP_GPIO, 1); }while(0)
 #elif defined(SOC_msm8x26)
-#define  MCU_WP_GPIO      (107)
+#define  MCU_WP_GPIO      (35)
 #define  MCU_IIC_REQ_GPIO (108)
+#define MCU_WP_GPIO_SET  do{SOC_IO_Output(0, MCU_WP_GPIO, 0); }while(0)
 #endif
 
-
-
-#define MCU_WP_GPIO_SET  do{SOC_IO_Output(0, MCU_WP_GPIO, 1); }while(0)
 
 
 #define DATA_BUFF_LENGTH_FROM_MCU   (128)
@@ -140,7 +139,7 @@ static void LPCdealReadFromMCUAll(BYTE *p, UINT length)
         lidbg("From LPC:");//mode ,command,para
         for(i = 0; i < length; i++)
         {
-            printk(KERN_CRIT"%x ", p[i]);
+            printk("%x ", p[i]);
 
         }
         lidbg("\n");
@@ -281,8 +280,7 @@ void mcuFirstInit(void)
 {
     pGlobalHardwareInfo = &GlobalHardwareInfo;
     INIT_WORK(&pGlobalHardwareInfo->FlyIICInfo.iic_work, workFlyMCUIIC);
-    MCU_WP_GPIO_SET;
-
+    
     //let i2c_c high
     while (SOC_IO_Input(0, MCU_IIC_REQ_GPIO, GPIO_CFG_PULL_UP) == 0)
     {
@@ -331,6 +329,8 @@ void LPCResume(void)
 static int  lpc_probe(struct platform_device *pdev)
 {
     DUMP_FUN;
+	
+	MCU_WP_GPIO_SET;
 
     if(g_var.is_fly)
     {
