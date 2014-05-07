@@ -79,8 +79,6 @@ touch_t touch = {0, 0, 0};
 #define GTP_MAX_TOUCH		5
 #define GTP_ESD_CHECK_CIRCLE_MS	2000
 
-struct lidbg_ts_data *pdata;
-
 #if GTP_HAVE_TOUCH_KEY
 static const u16 touch_key_array[] = {KEY_MENU, KEY_HOMEPAGE, KEY_BACK};
 #define GTP_MAX_KEY_NUM  (sizeof(touch_key_array)/sizeof(touch_key_array[0]))
@@ -369,10 +367,6 @@ Output:
 static void gtp_touch_down(struct goodix_ts_data *ts, int id, int x, int y,
 		int w)
 {
-	if (xy_revert_en)
-	    GTP_SWAP(x, y);
-	if (1 == ts_should_revert)
-	    GTP_REVERT(x, y);
 
 	input_mt_slot(ts->input_dev, id);
 	input_mt_report_slot_state(ts->input_dev, MT_TOOL_FINGER, true);
@@ -436,7 +430,6 @@ static void goodix_ts_work_func(struct work_struct *work)
 	s32 i = 0;
 	int ret = -1;
 	struct goodix_ts_data *ts = NULL;
-	
 
 #if GTP_SLIDE_WAKEUP
 	u8 doze_buf[3] = {0x81, 0x4B};
@@ -608,7 +601,7 @@ static void goodix_ts_work_func(struct work_struct *work)
 			if (pre_pen == 1)
 				break;
 #endif
-			/*if (touch_index & (0x01<<i)) {
+			if (touch_index & (0x01<<i)) {
 				input_x = coor_data[pos + 1] |
 						coor_data[pos + 2] << 8;
 				input_y = coor_data[pos + 3] |
@@ -616,17 +609,24 @@ static void goodix_ts_work_func(struct work_struct *work)
 				input_w = coor_data[pos + 5] |
 						coor_data[pos + 6] << 8;
 
-				gtp_touch_down(ts, id,
-						input_x, input_y, input_w);
+				//gtp_touch_down(ts, id,input_x, input_y, input_w);
+				
+				if (xy_revert_en)
+					GTP_SWAP(input_x, input_y);
+				if (1 == ts_should_revert)
+					GTP_REVERT(input_x, input_y);
+				
+				lidbg_touch_handle(TOUCH_DOWN, id,input_x, input_y, input_w);
 				pre_touch |= 0x01 << i;
 
 				pos += 8;
 				id = coor_data[pos] & 0x0F;
 				touch_index |= (0x01<<id);
 			} else {
-				gtp_touch_up(ts, i);
+				//gtp_touch_up(ts, i);
+				lidbg_touch_handle(TOUCH_UP, i,0,0,0);
 				pre_touch &= ~(0x01 << i);
-			}*/
+			}
 			 if (touch_index & (0x01 << 0))
             {
                 if(1 == recovery_mode)
@@ -654,28 +654,10 @@ static void goodix_ts_work_func(struct work_struct *work)
                 }
 
             }
-			pdata->x[i] = coor_data[pos + 1] |
-						coor_data[pos + 2] << 8;
-				pdata->y[i] = coor_data[pos + 3] |
-						coor_data[pos + 4] << 8;
-				pdata->w[i] = coor_data[pos + 5] |
-						coor_data[pos + 6] << 8;
-				pdata->id[i] = coor_data[pos] & 0x0F;
-				pos += 8;
-				if (xy_revert_en)
-	    			GTP_SWAP(pdata->x[i], pdata->y[i]);
-				if (1 == ts_should_revert)
-	    			GTP_REVERT(pdata->x[i], pdata->y[i]);
 		}
-		pdata->touch_num = touch_num;
-		pdata->touch_index = touch_index;
-		pdata->pre_touch = &pre_touch;
-	//lidbg("touch_index = %d\n",touch_index);
-	
-	lidbg_touch_report(pdata);
-
 	}
 	//input_sync(ts->input_dev);
+	lidbg_touch_handle(TOUCH_SYNC, 0,0,0,0);
 
 exit_work_func:
 	if (!ts->gtp_rawdiff_mode) {
@@ -1730,7 +1712,6 @@ static int goodix_ts_probe(struct i2c_client *client,
 	char ic_type[3];
     client->addr=0x14;
 	lidbg("GTP I2C Address: 0x%02x\n", client->addr);
-	pdata = kzalloc(sizeof(*pdata),GFP_KERNEL);
 	/*if (client->dev.of_node) {
 		pdata = devm_kzalloc(&client->dev,
 			sizeof(struct goodix_ts_platform_data), GFP_KERNEL);
@@ -1961,7 +1942,6 @@ static int goodix_ts_remove(struct i2c_client *client)
 	//	goodix_power_deinit(ts);
 		i2c_set_clientdata(client, NULL);
 		kfree(ts);
-		kfree(pdata);
 	}
 
 	return 0;
