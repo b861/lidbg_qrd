@@ -13,6 +13,12 @@ typedef enum
 	TOUCH_SYNC,
 } touch_type;
 
+struct lidbg_ts_runmode
+{
+	bool x2y;
+	int revert;
+	bool mode;
+};
 
 struct lidbg_ts_data
 {
@@ -35,7 +41,7 @@ struct lidbg_ts_data
 
 void lidbg_touch_main(int argc, char **argv);
 void lidbg_touch_report(struct lidbg_ts_data * pdata);
-void lidbg_touch_handle(touch_type t ,int id, int x, int y,int w);
+void lidbg_touch_handle(touch_type t,int id, int x, int y,int w, struct lidbg_ts_runmode ts_mode);
 
 
 #endif
