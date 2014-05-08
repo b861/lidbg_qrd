@@ -15,10 +15,11 @@ typedef enum
     PM_ACTION_PRINT_FORCE_UNLOCK,
     PM_ACTION_PRINT_KILL_HASLOCK_APK,
     PM_ACTION_SAVE_LOCK_MSG,
+    PM_ACTION_FIND_WAKELOCK,
     PM_ACTION_NULL
 } ws_list_action_types;
 
-void PM_action_entry(char *info, ws_list_action_types type);
+int PM_action_entry(char *info, ws_list_action_types type);
 
 
 void observer_start(void)
@@ -103,7 +104,7 @@ static int ws_func_print(char *info, struct wakeup_source *ws)
         list_count++;
     }
     spin_unlock_irq(&ws->lock);
-    return 1;
+    return 0;
 }
 static int ws_func_print_unlock(char *info, struct wakeup_source *ws)
 {
@@ -113,7 +114,7 @@ static int ws_func_print_unlock(char *info, struct wakeup_source *ws)
         __pm_relax(ws);
         list_count++;
     }
-    return 1;
+    return 0;
 }
 static int ws_func_save_log_msg(char *info, struct wakeup_source *ws)
 {
@@ -124,7 +125,16 @@ static int ws_func_save_log_msg(char *info, struct wakeup_source *ws)
         list_count++;
         rcu_read_lock();
     }
-    return 1;
+    return 0;
+}
+static int ws_func_find_wakelock(char *info, struct wakeup_source *ws)
+{
+    int exist = 0;
+    spin_lock_irq(&ws->lock);
+    if (!strcmp(ws->name, info))
+        exist = 1;
+    spin_unlock_irq(&ws->lock);
+    return exist;
 }
 
 static int (*wl_list_action_func[]) (char *info, struct wakeup_source *ws) =
@@ -132,31 +142,37 @@ static int (*wl_list_action_func[]) (char *info, struct wakeup_source *ws) =
     [PM_ACTION_PRINT] = ws_func_print,
     [PM_ACTION_PRINT_FORCE_UNLOCK] = ws_func_print_unlock,
     [PM_ACTION_SAVE_LOCK_MSG] = ws_func_save_log_msg,
+    [PM_ACTION_FIND_WAKELOCK] = ws_func_find_wakelock,
 };
-void deal_kernel_wakelock(char *info, ws_list_action_types type)
+int deal_kernel_wakelock(char *info, ws_list_action_types type)
 {
     struct wakeup_source *ws;
+    int result = 0;
     list_count = 0;
     if(g_var.ws_lh == NULL || type >= PM_ACTION_NULL)
     {
         PM_ERR("g_var.ws_lh==NULL||type.%d\n", type);
-        return ;
+        return -1;
     }
     rcu_read_lock();
     list_for_each_entry_rcu(ws, g_var.ws_lh, entry)
     {
-        wl_list_action_func[type] (info, ws);
+        result = wl_list_action_func[type] (info, ws);
+
+        if(type == PM_ACTION_FIND_WAKELOCK && result == 1)
+            break;
     }
     rcu_read_unlock();
+    return result;
 }
-void deal_userspace_wakelock(int is_should_kill_apk)
+void deal_userspace_wakelock(int action_enum)
 {
-    lidbg_show_wakelock(is_should_kill_apk);
+    lidbg_show_wakelock(action_enum);
 }
-void PM_action_entry(char *info, ws_list_action_types type)
+int PM_action_entry(char *info, ws_list_action_types type)
 {
+    int result = 0;
     PM_WARN("%s,%d\n", info, type);
-
     switch (type)
     {
     case PM_ACTION_PRINT:
@@ -176,10 +192,14 @@ void PM_action_entry(char *info, ws_list_action_types type)
         deal_userspace_wakelock(2);
         deal_kernel_wakelock(info, PM_ACTION_SAVE_LOCK_MSG);
         break;
+    case PM_ACTION_FIND_WAKELOCK:
+        result = deal_kernel_wakelock(info, PM_ACTION_FIND_WAKELOCK);
+        break;
     default:
         break;
     }
 
+    return result;
 }
 
 void lidbg_pm_step_call(fly_pm_stat_step step, void *data)

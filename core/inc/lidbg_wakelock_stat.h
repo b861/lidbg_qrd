@@ -19,7 +19,7 @@ static inline char *lock_type(bool cnt_wakelock)
 }
 extern struct list_head lidbg_wakelock_list;
 void lidbg_wakelock_stat(int argc, char **argv);
-void lidbg_show_wakelock(int is_should_kill_apk);
+void lidbg_show_wakelock(int action_enum);
 void lidbg_wakelock_register(bool to_lock, const char *name);
 
 #endif

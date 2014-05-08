@@ -132,11 +132,17 @@ bool unregister_wakelock(struct list_head *client_list, struct list_head *detail
         return false;
     }
 }
-
-void lidbg_show_wakelock(int is_should_kill_apk)
+bool is_safety_apk(char *apkname)
+{
+    if(strncmp(apkname, "com.fly.flybootservice", sizeof("com.fly.flybootservice") - 1) == 0)
+        return true;
+    else
+        return false;
+}
+void lidbg_show_wakelock(int action_enum)
 {
     int index = 0;
-    char *p1 = NULL, *p2 = NULL;
+    char *p1 = NULL, *p2 = NULL, *kill = NULL;
     struct wakelock_item *pos;
     struct list_head *client_list ;
 
@@ -149,19 +155,34 @@ void lidbg_show_wakelock(int is_should_kill_apk)
             {
                 index++;
                 printk(KERN_CRIT"[ftf_pm.wl]%d,MAX%d<THE%d:[%d,%d][%s][%s,%s]>\n", pos->cunt, pos->cunt_max, index, pos->pid, pos->uid, lock_type(pos->is_count_wakelock), pos->name, pos->package_name);
-                if(is_should_kill_apk == 1)
+                switch (action_enum)
+                {
+                case 0:
+                    break;
+                case 1:
                 {
                     p1 = strchr(pos->package_name, ',');
                     p2 = strchr(pos->package_name, '.');
+                    kill = NULL;
 
                     if(p1)
-                        ;//lidbg_force_stop_apk(p1 + 1);
+                        kill = p1 + 1;
                     else if(p2)
-                        ;//lidbg_force_stop_apk(pos->package_name);
+                        kill = pos->package_name;
+                    if(kill && !is_safety_apk(kill))
+                        lidbg_force_stop_apk(kill);
                 }
-                if(is_should_kill_apk == 2)
+                break;
+                case 2:
                     fs_string2file(1, LIDBG_OSD_DIR"can_t_sleep.txt", "[J]%d,[%s,%s]>\n", index, pos->name, pos->package_name);
+                    break;
+
+                default:
+                    lidbg("<lidbg_show_wakelock.err:%d>\n", action_enum );
+                    break;
                 }
+
+            }
         }
     }
     else
