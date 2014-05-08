@@ -15,7 +15,6 @@ typedef enum
     PM_ACTION_PRINT,
     PM_ACTION_PRINT_FORCE_UNLOCK,
     PM_ACTION_PRINT_KILL_HASLOCK_APK,
-    PM_ACTION_PRINT_KILL_ALL_APK,
     PM_ACTION_SAVE_LOCK_MSG,
     PM_ACTION_NULL
 } ws_list_action_types;
@@ -83,23 +82,6 @@ static int thread_observer(void *data)
     return 1;
 }
 
-static LIST_HEAD(pm_list_3);
-static int thread_pm_list_kill_each(void *data)
-{
-    struct string_dev *pos;
-    char *p = NULL;
-    list_for_each_entry(pos, &pm_list_3, tmp_list)
-    {
-        if(pos->yourkey && (p = strchr(pos->yourkey, ':')))
-        {
-            ++p;
-            lidbg_force_stop_apk(p);
-            msleep(30);
-        }
-        p = NULL;
-    }
-    return 1;
-}
 static int thread_led_monitor(void *data)
 {
     ssleep(8);
@@ -188,11 +170,6 @@ void PM_action_entry(char *info, ws_list_action_types type)
         break;
     case PM_ACTION_PRINT_KILL_HASLOCK_APK:
         deal_userspace_wakelock(1);
-        deal_kernel_wakelock(info, PM_ACTION_PRINT);
-        break;
-    case PM_ACTION_PRINT_KILL_ALL_APK:
-        deal_userspace_wakelock(1);
-        CREATE_KTHREAD(thread_pm_list_kill_each, NULL);
         deal_kernel_wakelock(info, PM_ACTION_PRINT);
         break;
     case PM_ACTION_SAVE_LOCK_MSG:
@@ -315,19 +292,6 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
 
     cmd_num = lidbg_token_string(cmd_buf, " ", cmd) ;
 
-    //kernel logic
-    if(!strcmp(cmd[0], "kernel"))
-    {
-        if(!strcmp(cmd[1], "short_press"))
-            SOC_Key_Report(KEY_POWER, KEY_PRESSED_RELEASED);
-        else  if(!strcmp(cmd[1], "long_press"))
-        {
-            SOC_Key_Report(KEY_POWER, KEY_PRESSED);
-            msleep(530);
-            SOC_Key_Report(KEY_POWER, KEY_RELEASED);
-        }
-    }
-
     //flyaudio logic
     if(!strcmp(cmd[0], "flyaudio"))
     {
@@ -364,10 +328,6 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
             else
                 observer_stop();
         }
-        else  if(!strcmp(cmd[1], "fac"))
-        {
-            PM_ERR("disabled,fac\n");
-        }
         else  if(!strcmp(cmd[1], "reb"))
         {
             msleep(100);
@@ -376,10 +336,6 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         else  if(!strcmp(cmd[1], "apk"))
         {
             lidbg_pm_install_dir(cmd[2]);
-        }
-        else  if(!strcmp(cmd[1], "kill3"))
-        {
-            CREATE_KTHREAD(thread_pm_list_kill_each, NULL);
         }
         else  if(!strcmp(cmd[1], "kill"))
         {
@@ -427,17 +383,9 @@ static struct dev_pm_ops lidbg_pm_ops =
 static int thread_pm_late_probe(void *data)//because of blocking other driver to insmod.
 {
     ssleep(10);
-    lidbg_uevent_shell("pm list packages -3 > /data/lidbg/pm_3.txt");
-    ssleep(5);
-    fs_fill_list(LIDBG_LOG_DIR"pm_3.txt", FS_CMD_FILE_LISTMODE, &pm_list_3);
-    fs_register_filename_list(LIDBG_LOG_DIR"pm_3.txt", true);
-
     lidbg_chmod("/dev/lidbg*");
-    ssleep(15);
-    lidbg_rm(LIDBG_LOG_DIR"lidbg_kmsg.txt");
-
+    ssleep(20);
     lidbg_enable_logcat();
-
     return 1;
 }
 
