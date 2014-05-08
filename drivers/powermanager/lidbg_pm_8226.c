@@ -7,7 +7,6 @@ LIDBG_DEFINE;
 #define GPIO_USB_EN (109)
 static atomic_t is_in_sleep = ATOMIC_INIT(-1);
 static int list_count ;
-static bool is_pm_toast_dbg_en = false;
 static DECLARE_COMPLETION(sleep_observer_wait);
 
 typedef enum
@@ -295,8 +294,6 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
     //flyaudio logic
     if(!strcmp(cmd[0], "flyaudio"))
     {
-        if(is_pm_toast_dbg_en)
-            lidbg_toast_show(cmd[1], -1);
         if(!strcmp(cmd[1], "android_up"))
             SOC_IO_Output(0, GPIO_APP_STATUS, 0);
         else  if(!strcmp(cmd[1], "android_down"))
@@ -347,10 +344,6 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         {
             int  enum_value = simple_strtoul(cmd[3], 0, 0);
             lidbg_toast_show(cmd[2], enum_value);
-        }
-        else  if(!strcmp(cmd[1], "dbgt"))
-        {
-            is_pm_toast_dbg_en = !is_pm_toast_dbg_en;
         }
         else  if(!strcmp(cmd[1], "udisk_reset"))
         {
@@ -406,6 +399,7 @@ static int  lidbg_pm_probe(struct platform_device *pdev)
     {
         CREATE_KTHREAD(thread_led_monitor, NULL);
         lidbg_chmod("/sys/power/*");
+        lidbg_chmod("/data");
     }
 
     lidbg_new_cdev(&pm_nod_fops, "lidbg_pm");
