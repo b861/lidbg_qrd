@@ -322,7 +322,7 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
             CREATE_KTHREAD(thread_usb_disk_disable_delay, NULL);
         }
         else if(!strcmp(cmd[1], "devices_up"))
-            ;
+            CREATE_KTHREAD(thread_usb_disk_enable_delay, NULL);
         else if(!strcmp(cmd[1], "devices_down"))
             ;
     }
@@ -392,7 +392,6 @@ static int pm_suspend(struct device *dev)
 static int pm_resume(struct device *dev)
 {
     DUMP_FUN;
-    CREATE_KTHREAD(thread_usb_disk_enable_delay, NULL);
     return 0;
 }
 static struct dev_pm_ops lidbg_pm_ops =
