@@ -1,30 +1,9 @@
 
 #include "lidbg.h"
 LIDBG_DEFINE;
-int led_en ;
-int ad_en;
 
 static struct task_struct *Thermal_task = NULL;
 //static int fan_onoff_temp;
-
-extern int fs_file_read(const char *filename, char *rbuff, int readlen);
-int button_suspend(void)
-{
-    SOC_IO_ISR_Disable(BUTTON_LEFT_1);
-    SOC_IO_ISR_Disable(BUTTON_LEFT_2);
-    SOC_IO_ISR_Disable(BUTTON_RIGHT_1);
-    SOC_IO_ISR_Disable(BUTTON_RIGHT_2);
-    return 0;
-}
-int button_resume(void)
-{
-    SOC_IO_ISR_Enable(BUTTON_LEFT_1);
-    SOC_IO_ISR_Enable(BUTTON_LEFT_2);
-    SOC_IO_ISR_Enable(BUTTON_RIGHT_1);
-    SOC_IO_ISR_Enable(BUTTON_RIGHT_2);
-    SOC_IO_Config(LED_GPIO, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_8MA);
-    return 0;
-}
 int is_key_scan_en = 1;
 #if defined(CONFIG_FB)
 struct notifier_block devices_notif;
@@ -59,14 +38,8 @@ static int soc_dev_probe(struct platform_device *pdev)
     fs_register_filename_list(TEMP_LOG_PATH, true);
     fs_regist_state("cpu_temp", &(g_var.temp));
     CREATE_KTHREAD(thread_button_init, NULL);
-
-    FS_REGISTER_INT(led_en, "led_en", 1, NULL);
-    if(led_en)
-        CREATE_KTHREAD(thread_led, NULL);
-
-    FS_REGISTER_INT(ad_en, "ad_en", 0, NULL);
-    if(ad_en)
-        CREATE_KTHREAD(thread_key, NULL);
+    CREATE_KTHREAD(thread_led, NULL);
+    CREATE_KTHREAD(thread_key, NULL);
     Thermal_task =  kthread_run(thread_thermal, NULL, "flythermalthread");
     //FS_REGISTER_INT(fan_onoff_temp, "fan_onoff_temp", 65, NULL);
 

@@ -17,6 +17,8 @@ void lidbg_device_main(int argc, char **argv);
 #define BUTTON_LEFT_2 (32)//k2
 #define BUTTON_RIGHT_1 (33)//k3
 #define BUTTON_RIGHT_2 (34)//k4
+int button_suspend(void);
+int button_resume(void);
 //USB
 #define GPIO_USB_ID (99)  // error ,notice!
 

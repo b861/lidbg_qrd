@@ -26,6 +26,8 @@ void log_temp(void)
 {
     int cur_temp;
     DUMP_FUN;
+    fs_register_filename_list(TEMP_LOG_PATH, true);
+    fs_regist_state("cpu_temp", &(g_var.temp));
     while(!kthread_should_stop())
     {
         msleep(1000);

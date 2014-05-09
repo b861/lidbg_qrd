@@ -40,6 +40,23 @@ irqreturn_t irq_right_button2(int irq, void *dev_id)
     //lidbg("irq_right_button2: %d\n", irq);
     return IRQ_HANDLED;
 }
+int button_suspend(void)
+{
+    SOC_IO_ISR_Disable(BUTTON_LEFT_1);
+    SOC_IO_ISR_Disable(BUTTON_LEFT_2);
+    SOC_IO_ISR_Disable(BUTTON_RIGHT_1);
+    SOC_IO_ISR_Disable(BUTTON_RIGHT_2);
+    return 0;
+}
+int button_resume(void)
+{
+    SOC_IO_ISR_Enable(BUTTON_LEFT_1);
+    SOC_IO_ISR_Enable(BUTTON_LEFT_2);
+    SOC_IO_ISR_Enable(BUTTON_RIGHT_1);
+    SOC_IO_ISR_Enable(BUTTON_RIGHT_2);
+    SOC_IO_Config(LED_GPIO, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_8MA);
+    return 0;
+}
 void button_init(void)
 {
     lidbg("button_init\n");

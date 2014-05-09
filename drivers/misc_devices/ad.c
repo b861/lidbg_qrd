@@ -3,6 +3,7 @@
 #define AD_OFFSET  (100000)
 #define AD_VAL_MAX  (3300000)
 extern int is_key_scan_en;
+int ad_en;
 struct ad_key_remap
 {
     u32 ch;
@@ -64,7 +65,9 @@ find_key:
     old_key = key;
 }
 int thread_key(void *data)
-{
+{  
+    FS_REGISTER_INT(ad_en, "ad_en", 0, NULL);
+    if(ad_en)
     while(1)
     {
         if(is_key_scan_en)
