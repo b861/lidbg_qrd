@@ -473,6 +473,8 @@ void SAF7741_Volume(BYTE Volume)
 	BYTE reg2[5] = {0x0D, 0x10, 0x6C, 0x00, 0x00};//ADSP_Y_Vol_Main2P
 #endif
 	UINT regAddr;
+
+	lidbg("SAF7741 Volume:%d\n", Volume);
 /*
 	if (GlobalShareMmapInfo.pShareMemoryCommonData->iVolumeMax > 0)
 	{
@@ -543,15 +545,16 @@ BOOL SendToSAF7741NormalWriteData(BYTE *pData)
 }
 
 
-void SAF7741_Init(void)
+BOOL SAF7741_Init(void)
 {
 	int i;
 	//lidbg("%s:enter\n", __func__);
+	lidbg("SAF7741 init start!\n");
 	for(i = 0; i < 3; ++i)
 	{
 		if(SendToSAF7741NormalWriteData(SAF7741_Audio_Init_Data))
 		{
-			break;
+			return TRUE;
 		}
 		else
 		{
@@ -560,9 +563,27 @@ void SAF7741_Init(void)
 			continue;
 		}
 	}
+
+	return FALSE;
 	//SendToSAF7741NormalWriteData(SAF7741_Audio_Init_Data_FM);
 	//SendToSAF7741NormalWriteData(SAF7741_Radio_Init_Data);
 
+}
+
+void send_cmds_to_lpc(void)
+{
+	lidbg("SAF7741:send some cmds to LPC\n");
+
+	LPC_CMD_4052A2_L;       //select MP3_L/MP3_R
+	
+	LPC_CMD_7388MUTE_H;     //forbid 7388 MUTE
+	msleep(100);
+	LPC_CMD_7388STANDBY_H;  //let 7388 work
+	
+	LPC_CMD_7741RST_L;      //7741 RESET
+	msleep(1000);
+	LPC_CMD_7741RST_H;
+	msleep(1000);
 }
 
 static int saf7741_probe(struct platform_device *pdev)
@@ -586,9 +607,14 @@ static int saf7741_probe(struct platform_device *pdev)
 
 	SAF7741_Reset();    //At LPC
 */	
-
-	lidbg("SAF7741 init start!\n");
-	SAF7741_Init();
+	
+	send_cmds_to_lpc();
+	
+	if(SAF7741_Init())
+		lidbg("SAF7741 init succeed!\n");
+	else
+		lidbg("SAF7741 init failed!\n");
+	
 /*	SAF7741_Input(IPOD);  //IPOD  TV  AUX
 	SAF7741_Balance_P(10);
 	SAF7741_Fader_P(10);
@@ -598,7 +624,6 @@ static int saf7741_probe(struct platform_device *pdev)
 	SAF7741_Mute(FALSE);  // TRUE
 	SAF7741_Volume(10);
 */
-	lidbg("SAF7741 init done!\n");
 	//SAF7741_ReadGraphicalSpectrumAnalyzer();
 	return 0;
 

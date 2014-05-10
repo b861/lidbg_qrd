@@ -20,6 +20,47 @@
 #endif
 
 #ifdef SOC_msm8x26
+#define LPC_CMD_7741RST_L  do{    \
+		u8 buff[] = {0x02, 0x0a, 0x00};\
+        SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\
+				}while(0)
+
+#define LPC_CMD_7741RST_H  do{    \
+		u8 buff[] = {0x02, 0x0a, 0x01};\
+        SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\
+				}while(0)
+
+#define LPC_CMD_7388STANDBY_L  do{    \
+		u8 buff[] = {0x02, 0x0b, 0x00};\
+        SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\
+				}while(0)
+
+#define LPC_CMD_7388STANDBY_H  do{    \
+		u8 buff[] = {0x02, 0x0b, 0x01};\
+        SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\
+				}while(0)
+
+#define LPC_CMD_7388MUTE_L  do{    \
+		u8 buff[] = {0x02, 0x0c, 0x00};\
+        SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\
+				}while(0)
+
+#define LPC_CMD_7388MUTE_H  do{    \
+		u8 buff[] = {0x02, 0x0c, 0x01};\
+        SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\
+				}while(0)
+
+#define LPC_CMD_4052A2_L  do{    \
+		u8 buff[] = {0x02, 0x0f, 0x00};\
+        SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\
+				}while(0)
+
+#define LPC_CMD_4052A2_H  do{    \
+		u8 buff[] = {0x02, 0x0f, 0x01};\
+        SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\
+				}while(0)
+
+
 #define I2C_API_XFER_MODE_SEND 1
 #define I2C_API_XFER_MODE_RECV 2
 #define I2C_API_XFER_MODE_RECV_SUBADDR_2BYTES 3
