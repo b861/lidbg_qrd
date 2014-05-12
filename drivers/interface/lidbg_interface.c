@@ -17,7 +17,7 @@ char *insmod_list[] =
     "lidbg_drivers_dbg.ko",
     "dsi83.ko",
     "saf7741.ko",
-    "flysemdriver.ko",
+    "lidbg_third_party.ko",
     NULL,
 };
 
