@@ -1062,7 +1062,7 @@ void fly_devices_init(void)
     {
 
 
-        if(1 == recovery_mode)
+        if((1 == recovery_mode) || (!g_var.is_fly))
         {
             DVD_RESET_HIGH;
             TELL_LPC_PWR_ON;
