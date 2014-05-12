@@ -12,8 +12,8 @@ LOCAL_SRC_FILES := \
 	debug_lcd_io.c \
 	lidbg_gui.c
 
+include $(DBG_BUILD_PATH)/build_cfg.mk
 LOCAL_MODULE_TAGS:= optional
-
 LOCAL_MODULE := lidbg_gui
 
 include $(BUILD_EXECUTABLE)
