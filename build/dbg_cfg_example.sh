@@ -11,6 +11,7 @@ case "$DBG_PLATFORM" in
 	DBG_SYSTEM_DIR=/home/flyaudio/R8625QSOSKQLYA3060-v2
 	RELEASE_REPOSITORY=/home/flyaudio/8x25q-release;;
     msm8226)
-	DBG_SYSTEM_DIR=/home/flyaudio/msm8226-1.8;;
+	DBG_SYSTEM_DIR=/home/flyaudio/msm8226-1.8
+	RELEASE_REPOSITORY=/home/flyaudio/8x26-release;;
 esac
 
