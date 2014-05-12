@@ -2,30 +2,12 @@
 #include "lidbg.h"
 
 #define GTP_MAX_TOUCH	5
-//#include "touch.h"
-touch_t touch = {0, 0, 0};
+
 #define X_MAX		1024
 #define Y_MAX		600
+
 struct lidbg_ts_data *ts_data = NULL;
-#define GTP_SWAP(x, y)		do {\
-					typeof(x) z = x;\
-					x = y;\
-					y = z;\
-				} while (0)
-#define GTP_REVERT(x, y)     do{\
-         x = X_MAX-x;\
-         y = Y_MAX-y;\
-       }while (0)
-void set_touch_pos(touch_t *t)
-{
-#if 0
-    int i = 0;
-    i = touch.x;
-    touch.x = touch.y;
-    touch.y = i;
-#endif
-    memcpy( &touch, t, sizeof(touch_t) );
-}
+
 int lidbg_init_input(struct lidbg_ts_data *pinput)
 {
     int ret;
@@ -76,13 +58,10 @@ int lidbg_init_input(struct lidbg_ts_data *pinput)
 }
 
 
-void lidbg_touch_handle(touch_type t,int id, int x, int y,int w, struct lidbg_ts_runmode ltrm )
+void lidbg_touch_handle(touch_type t,int id, int x, int y,int w)
 {
 	if(t == TOUCH_DOWN)
-		{if (ltrm.x2y)
-			GTP_SWAP(x,y);
-		if (1 == ltrm.revert)
-			GTP_REVERT(x,y);
+	{
 		input_mt_slot(ts_data->input_dev, id);
 		input_mt_report_slot_state(ts_data->input_dev, MT_TOOL_FINGER, true);
 		input_report_abs(ts_data->input_dev, ABS_MT_POSITION_X, x);
@@ -95,24 +74,12 @@ void lidbg_touch_handle(touch_type t,int id, int x, int y,int w, struct lidbg_ts
 	        ts_data->touch_cnt = 0;
 	        lidbg("%d[%d,%d,%d];\n", id, x, y,w);
 	    }
-		if ((1 == ltrm.mode)&&(0==id))
-		{
-			touch.x = x;
-	        touch.y = y;
-			touch.pressed = 1;
-			set_touch_pos(&touch);
-		}
 	}
 	else if (t == TOUCH_UP)
 	{
 	
 		input_mt_slot(ts_data->input_dev, id);
 		input_mt_report_slot_state(ts_data->input_dev, MT_TOOL_FINGER, false);
-		if((1 == ltrm.mode)&&(0==id))
-        {
-            touch.pressed = 0;
-            set_touch_pos(&touch);
-        }
 	}
 	else if (t == TOUCH_SYNC)
 	{
@@ -178,10 +145,6 @@ void lidbg_touch_deinit(void)
 void lidbg_touch_main(int argc, char **argv)
 {
     touch_type type;
-	struct lidbg_ts_runmode tm;
-	tm.x2y = 0;
-	tm.revert = 0;
-	tm.mode = 0;
 	u32 x,y;
     if(argc < 2)
     {
@@ -193,8 +156,8 @@ void lidbg_touch_main(int argc, char **argv)
     x = simple_strtoul(argv[0], 0, 0);
     y = simple_strtoul(argv[1], 0, 0);
     type = simple_strtoul(argv[2], 0, 0);
-    lidbg_touch_handle(type,0,x,y,30,tm);
-	lidbg_touch_handle(TOUCH_SYNC,0,0,0,0,tm);
+    lidbg_touch_handle(type,0,x,y,30);
+	lidbg_touch_handle(TOUCH_SYNC,0,0,0,0);
 
 }
 

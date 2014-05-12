@@ -49,7 +49,8 @@
 #include <linux/of_gpio.h>
 
 #include <linux/input/mt.h>
-
+#include "touch.h"
+touch_t touch = {0, 0, 0};
 
 #define GOODIX_DEV_NAME	"Goodix-CTP"
 #define CFG_MAX_TOUCH_POINTS	5
@@ -429,10 +430,7 @@ static void goodix_ts_work_func(struct work_struct *work)
 	s32 i = 0;
 	int ret = -1;
 	struct goodix_ts_data *ts = NULL;
-    struct lidbg_ts_runmode tsmd;
-	tsmd.revert = ts_should_revert;
-	tsmd.x2y = xy_revert_en;
-	tsmd.mode = recovery_mode;
+
 #if GTP_SLIDE_WAKEUP
 	u8 doze_buf[3] = {0x81, 0x4B};
 #endif
@@ -613,7 +611,12 @@ static void goodix_ts_work_func(struct work_struct *work)
 
 				//gtp_touch_down(ts, id,input_x, input_y, input_w);
 				
-				lidbg_touch_handle(TOUCH_DOWN, id,input_x, input_y, input_w,tsmd);
+				if (xy_revert_en)
+					GTP_SWAP(input_x, input_y);
+				if (1 == ts_should_revert)
+					GTP_REVERT(input_x, input_y);
+				
+				lidbg_touch_handle(TOUCH_DOWN, id,input_x, input_y, input_w);
 				pre_touch |= 0x01 << i;
 
 				pos += 8;
@@ -621,13 +624,40 @@ static void goodix_ts_work_func(struct work_struct *work)
 				touch_index |= (0x01<<id);
 			} else {
 				//gtp_touch_up(ts, i);
-				lidbg_touch_handle(TOUCH_UP, i,0,0,0,tsmd);
+				lidbg_touch_handle(TOUCH_UP, i,0,0,0);
 				pre_touch &= ~(0x01 << i);
 			}
+			 if (touch_index & (0x01 << 0))
+            {
+                if(1 == recovery_mode)
+                {
+                    if( (input_y >= 0) && (input_x >= 0) )
+                    {
+                        touch.x = point_data[6] | (point_data[7] << 8);
+                        touch.y = point_data[4] | (point_data[5] << 8);
+                        if (1 == ts_should_revert)
+                            GTP_REVERT(touch.x, touch.y);
+                        touch.pressed = 1;
+                        set_touch_pos(&touch);
+                        lidbg("[%d,%d]==========%d\n", touch.x, touch.y, touch.pressed);
+                    }
+                }
+
+            }
+            else
+            {
+                if(1 == recovery_mode)
+                {
+                    touch.pressed = 0;
+                    set_touch_pos(&touch);
+                    lidbg("[%d,%d]==========%d\n", touch.x, touch.y, touch.pressed);
+                }
+
+            }
 		}
 	}
 	//input_sync(ts->input_dev);
-	lidbg_touch_handle(TOUCH_SYNC, 0,0,0,0,tsmd);
+	lidbg_touch_handle(TOUCH_SYNC, 0,0,0,0);
 
 exit_work_func:
 	if (!ts->gtp_rawdiff_mode) {

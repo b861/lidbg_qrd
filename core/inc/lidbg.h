@@ -94,7 +94,7 @@
 #include "lidbg_mem_log.h"
 #include "lidbg_trace_msg.h"
 #include "lidbg_soc.h"
-#include "lidbg_touch.h"
+
 
 //////drivers//////
 #ifdef BUILD_DRIVERS
