@@ -36,7 +36,7 @@ struct lidbg_ts_data
 void lidbg_touch_main(int argc, char **argv);
 void lidbg_touch_report(struct lidbg_ts_data * pdata);
 void lidbg_touch_handle(touch_type t ,int id, int x, int y,int w);
-
+void ts_data_report(touch_type t,int id,int x,int y,int w);
 
 #endif
 

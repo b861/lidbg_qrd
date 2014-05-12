@@ -126,7 +126,6 @@ bool init_done;
 static u8 chip_gt9xxs;  /* true if ic is gt9xxs, like gt915s */
 u8 grp_cfg_version;
 extern  bool is_ts_load;
-unsigned int  touch_cnt = 0;
 extern int ts_should_revert;
 extern  bool recovery_mode;
 static bool xy_revert_en = 1;
@@ -364,7 +363,7 @@ Input:
 Output:
 	None.
 *********************************************************/
-static void gtp_touch_down(struct goodix_ts_data *ts, int id, int x, int y,
+/*static void gtp_touch_down(struct goodix_ts_data *ts, int id, int x, int y,
 		int w)
 {
 
@@ -381,7 +380,7 @@ static void gtp_touch_down(struct goodix_ts_data *ts, int id, int x, int y,
         lidbg("%d[%d,%d];\n", id, x, y);
     }
 }
-
+*/
 /*******************************************************
 Function:
 	Report touch release event
@@ -610,13 +609,7 @@ static void goodix_ts_work_func(struct work_struct *work)
 						coor_data[pos + 6] << 8;
 
 				//gtp_touch_down(ts, id,input_x, input_y, input_w);
-				
-				if (xy_revert_en)
-					GTP_SWAP(input_x, input_y);
-				if (1 == ts_should_revert)
-					GTP_REVERT(input_x, input_y);
-				
-				lidbg_touch_handle(TOUCH_DOWN, id,input_x, input_y, input_w);
+				ts_data_report(TOUCH_DOWN, id,input_x, input_y, input_w);
 				pre_touch |= 0x01 << i;
 
 				pos += 8;
@@ -639,7 +632,7 @@ static void goodix_ts_work_func(struct work_struct *work)
                             GTP_REVERT(touch.x, touch.y);
                         touch.pressed = 1;
                         set_touch_pos(&touch);
-                        lidbg("[%d,%d]==========%d\n", touch.x, touch.y, touch.pressed);
+                        //lidbg("[%d,%d]==========%d\n", touch.x, touch.y, touch.pressed);
                     }
                 }
 
@@ -650,7 +643,7 @@ static void goodix_ts_work_func(struct work_struct *work)
                 {
                     touch.pressed = 0;
                     set_touch_pos(&touch);
-                    lidbg("[%d,%d]==========%d\n", touch.x, touch.y, touch.pressed);
+                    //lidbg("[%d,%d]==========%d\n", touch.x, touch.y, touch.pressed);
                 }
 
             }

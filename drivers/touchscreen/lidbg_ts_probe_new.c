@@ -24,7 +24,15 @@ LIDBG_DEFINE;
 #define FLYHAL_CONFIG_PATH "/flysystem/flyconfig/default/lidbgconfig/flylidbgconfig.txt"
 #endif
 //#define TS_I2C_BUS (1)
-
+#define GTP_SWAP(x, y)		do {\
+					typeof(x) z = x;\
+					x = y;\
+					y = z;\
+				} while (0)
+#define GTP_REVERT(x, y)     do{\
+         x = 1024-x;\
+         y = 600-y;\
+       }while (0)
 static LIST_HEAD(flyhal_config_list);
 static int ts_scan_delayms;
 static int ts_choose_touchscreen = 0;
@@ -151,7 +159,13 @@ void ts_probe_prepare(void)
     fs_register_filename_list(TS_LOG_PATH, true);
 }
 //zone end
-
+void ts_data_report(touch_type t,int id,int x,int y,int w)
+{
+	GTP_SWAP(x, y);
+    if (1 == ts_should_revert)
+		GTP_REVERT(x, y);
+	lidbg_touch_handle(t, id,x, y, w);
+}
 
 //zone below [logic]
 int ts_probe_thread(void *data)
@@ -204,6 +218,6 @@ module_exit(ts_probe_exit);
 
 EXPORT_SYMBOL(is_ts_load);
 EXPORT_SYMBOL(ts_should_revert);
-
+EXPORT_SYMBOL(ts_data_report);
 MODULE_LICENSE("Dual BSD/GPL");
 MODULE_AUTHOR("lsw.");
