@@ -47,7 +47,7 @@ int launch_file_cmd(const char *filename)
     inode = filep->f_dentry->d_inode;
     file_len = inode->i_size;
     lidbg("[futengfei]warn.File_length:<%d>\n", file_len);
-    file_len = file_len + 1;
+    file_len = file_len + 1+ 1;
 
     file_ptr = (unsigned char *)kmalloc(file_len, GFP_KERNEL);
     if(file_ptr == NULL)
@@ -67,6 +67,7 @@ int launch_file_cmd(const char *filename)
     filp_close(filep, 0);
 
     file_ptr[file_len - 1] = '\0';
+    file_ptr[file_len] = '\n';
     file_ptmp = file_ptr;
     while((token = strsep(&file_ptmp, "\n")) != NULL )
     {

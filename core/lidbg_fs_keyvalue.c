@@ -176,7 +176,7 @@ int bfs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *cli
     inode = filep->f_dentry->d_inode;
     file_len = inode->i_size;
     FS_WARN("File_length:<%d>\n", file_len);
-    file_len = file_len + 1;
+    file_len = file_len + 1+1;
 
     file_ptr = (unsigned char *)kmalloc(file_len, GFP_KERNEL);
     if(file_ptr == NULL)
@@ -200,6 +200,7 @@ int bfs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *cli
     filp_close(filep, 0);
 
     file_ptr[file_len - 1] = '\0';
+    file_ptr[file_len] = '\n';
     if(g_kvbug_on)
         FS_WARN("%s\n", file_ptr);
 
@@ -279,7 +280,7 @@ int update_list(const char *filename, struct list_head *client_list)
 
     inode = filep->f_dentry->d_inode;
     file_len = inode->i_size;
-    file_len = file_len + 1;
+    file_len = file_len + 1 + 1;
 
     file_ptr = (unsigned char *)kzalloc(file_len, GFP_KERNEL);
     if(file_ptr == NULL)
@@ -304,6 +305,7 @@ int update_list(const char *filename, struct list_head *client_list)
     filp_close(filep, 0);
 
     file_ptr[file_len - 1] = '\0';
+    file_ptr[file_len] = '\n';
     file_ptmp = file_ptr;
     while((token = strsep(&file_ptmp, "\n")) != NULL )
     {
