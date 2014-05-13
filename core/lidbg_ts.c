@@ -60,6 +60,7 @@ int lidbg_init_input(struct lidbg_ts_data *pinput)
 
 void lidbg_touch_handle(touch_type t,int id, int x, int y,int w)
 {
+	
 	if(t == TOUCH_DOWN)
 	{
 		input_mt_slot(ts_data->input_dev, id);
@@ -74,12 +75,20 @@ void lidbg_touch_handle(touch_type t,int id, int x, int y,int w)
 	        ts_data->touch_cnt = 0;
 	        lidbg("%d[%d,%d,%d];\n", id, x, y,w);
 	    }
+		if(id == 0)
+		{
+			g_curr_tspara.x = x;
+			g_curr_tspara.y = y;
+			g_curr_tspara.press = true;
+		}
 	}
 	else if (t == TOUCH_UP)
 	{
 	
 		input_mt_slot(ts_data->input_dev, id);
 		input_mt_report_slot_state(ts_data->input_dev, MT_TOOL_FINGER, false);
+		if(id == 0)
+			g_curr_tspara.press = false;
 	}
 	else if (t == TOUCH_SYNC)
 	{
@@ -124,6 +133,7 @@ void lidbg_touch_report(struct lidbg_ts_data *pdata)
 #endif
 }
 
+void  touch_event_init(void);
 int lidbg_touch_init(void)
 {
 	ts_data = kzalloc(sizeof(struct lidbg_ts_data), GFP_KERNEL);
@@ -131,6 +141,7 @@ int lidbg_touch_init(void)
     ts_data->abs_x_max = X_MAX;
     ts_data->abs_y_max = Y_MAX;
     lidbg_init_input(ts_data);
+	touch_event_init();
     LIDBG_MODULE_LOG;
     return 0;
 }

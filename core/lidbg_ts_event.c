@@ -162,6 +162,8 @@ void launch_cmd(void)
 void getnum_andanalysis(void)
 {
     int num;
+    if(g_te_dbg_en)
+		TE_ERR("<%d,%d,%d>\n", g_curr_tspara.x,g_curr_tspara.y,g_curr_tspara.press);
     if(g_curr_tspara.press)
     {
         num = get_num();

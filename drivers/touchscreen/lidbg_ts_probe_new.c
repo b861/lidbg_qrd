@@ -166,7 +166,15 @@ void ts_data_report(touch_type t,int id,int x,int y,int w)
 		GTP_REVERT(x, y);
 	lidbg_touch_handle(t, id,x, y, w);
 
-	if((id == 4) && (t == TOUCH_DOWN) && (g_var.is_fly)) // 4 fingers
+	if(t == TOUCH_DOWN)
+	{
+		g_var.flag_for_15s_off++;
+		if(g_var.flag_for_15s_off >= 1000)
+		{
+			g_var.flag_for_15s_off = 1000;
+		}
+	}
+	if((id == 4) && (t == TOUCH_DOWN) && (!g_var.is_fly)) // 5 fingers
 	{
 		SOC_Key_Report(KEY_BACK,KEY_PRESSED_RELEASED);
 	}
