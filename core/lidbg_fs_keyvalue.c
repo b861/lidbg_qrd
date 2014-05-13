@@ -214,7 +214,7 @@ int bfs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *cli
                 FS_WARN("%d[%s]\n", all_purpose, token);
             add_new_dev = kzalloc(sizeof(struct string_dev), GFP_KERNEL);
             add_new_dev->yourkey = token;
-            list_add(&(add_new_dev->tmp_list), client_list);
+            list_add_tail(&(add_new_dev->tmp_list), client_list);
             all_purpose++;
         }
         else if(g_kvbug_on)
