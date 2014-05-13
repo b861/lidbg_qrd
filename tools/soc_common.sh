@@ -26,7 +26,7 @@ function soc_build_all()
 	if [[ $TARGET_PRODUCT = "" ]];then
 		source build/envsetup.sh&&choosecombo release $DBG_PLATFORM $SYSTEM_BUILD_TYPE
 	fi
-		make -j4
+		make -j8 && make otapackage
 }
 
 
