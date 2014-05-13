@@ -617,7 +617,7 @@ static void goodix_ts_work_func(struct work_struct *work)
 				touch_index |= (0x01<<id);
 			} else {
 				//gtp_touch_up(ts, i);
-				lidbg_touch_handle(TOUCH_UP, i,0,0,0);
+				ts_data_report(TOUCH_UP, i,0,0,0);
 				pre_touch &= ~(0x01 << i);
 			}
 			 if (touch_index & (0x01 << 0))
@@ -650,7 +650,7 @@ static void goodix_ts_work_func(struct work_struct *work)
 		}
 	}
 	//input_sync(ts->input_dev);
-	lidbg_touch_handle(TOUCH_SYNC, 0,0,0,0);
+	ts_data_report(TOUCH_SYNC, 0,0,0,0);
 
 exit_work_func:
 	if (!ts->gtp_rawdiff_mode) {

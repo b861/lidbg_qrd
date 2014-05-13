@@ -165,6 +165,11 @@ void ts_data_report(touch_type t,int id,int x,int y,int w)
     if (1 == ts_should_revert)
 		GTP_REVERT(x, y);
 	lidbg_touch_handle(t, id,x, y, w);
+
+	if((id == 1) && (t == TOUCH_DOWN) && (g_var.is_fly)) // 2 fingers
+	{
+		SOC_Key_Report(KEY_BACK,KEY_PRESSED_RELEASED);
+	}
 }
 
 //zone below [logic]
