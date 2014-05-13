@@ -29,6 +29,7 @@ void third_party_analyze(void)
 
             pos->yourvalue = ++p;
             lidbg_insmod(pos->yourkey);
+			msleep(100);
 
             if(pos->yourvalue && strchr(pos->yourvalue, '/'))
             {
