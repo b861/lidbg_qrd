@@ -54,6 +54,10 @@ function lidbg_push()
 	expect $DBG_TOOLS_PATH/push_lidbg
 }
 
+function lidbg_disable()
+{
+	adb wait-for-devices remount && adb shell rm /system/lib/modules/out/lidbg_loader.ko && adb shell rm /flysystem/lib/out/lidbg_loader.ko
+}
 
 function lidbg_menu()
 {
@@ -63,6 +67,7 @@ function lidbg_menu()
 	echo [3] build all'                    '编译lidbg所有文件
 	echo [4] push out'                     'push驱动模块到原生系统
 	echo [5] push out to fly'              'push驱动模块到产品系统
+	echo [6] del lidbg loader'             '删除lidbg loader驱动
 
 	echo
 	soc_menu
@@ -91,6 +96,8 @@ function lidbg_handle()
 			lidbg_push_out;;
 		5)
 			lidbg_pushfly_out;;
+		6)
+			lidbg_disable;;
 		*)
 			echo
 		esac
