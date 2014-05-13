@@ -3,9 +3,6 @@
 
 #define GTP_MAX_TOUCH	5
 
-#define X_MAX		1024
-#define Y_MAX		600
-
 struct lidbg_ts_data *ts_data = NULL;
 
 int lidbg_init_input(struct lidbg_ts_data *pinput)
@@ -138,8 +135,7 @@ int lidbg_touch_init(void)
 {
 	ts_data = kzalloc(sizeof(struct lidbg_ts_data), GFP_KERNEL);
 
-    ts_data->abs_x_max = X_MAX;
-    ts_data->abs_y_max = Y_MAX;
+    soc_get_screen_res(&(ts_data->abs_x_max),&(ts_data->abs_y_max));
     lidbg_init_input(ts_data);
 	touch_event_init();
     LIDBG_MODULE_LOG;

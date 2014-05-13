@@ -23,21 +23,21 @@ LIDBG_DEFINE;
 #else
 #define FLYHAL_CONFIG_PATH "/flysystem/flyconfig/default/lidbgconfig/flylidbgconfig.txt"
 #endif
-//#define TS_I2C_BUS (1)
-#define GTP_SWAP(x, y)		do {\
-					typeof(x) z = x;\
-					x = y;\
-					y = z;\
-				} while (0)
+
+#define GTP_SWAP SWAP
 #define GTP_REVERT(x, y)     do{\
-         x = 1024-x;\
-         y = 600-y;\
+         x = max_x-x;\
+         y = max_y-y;\
        }while (0)
+       
 static LIST_HEAD(flyhal_config_list);
 static int ts_scan_delayms;
 static int ts_choose_touchscreen = 0;
 int ts_should_revert = -1;
 bool is_ts_load = false;
+
+u32 max_x, max_y;
+
 
 struct probe_device
 {
@@ -45,7 +45,7 @@ struct probe_device
     unsigned int sub_addr;
     char *name;
     void (*reset)(void);
-	void (*free)(void);
+	void (*find_cb)(void);
 };
 
 void reset_high_active(void);
@@ -92,8 +92,8 @@ void reset_low_active(void)
 void ts_gpio_free(void)
 {
    #ifndef SOC_msm8x25
-   gpio_free(INT_GPIO);
-   gpio_free(RESET_GPIO);
+   //gpio_free(INT_GPIO);
+   //gpio_free(RESET_GPIO);
    #endif
 }
 void parse_ts_info(struct probe_device *ts_info)
@@ -134,7 +134,7 @@ struct probe_device *ts_scan(struct probe_device *tsdev, int size)
         else
         {
             lidbg("found:[0x%x,%s]\n", tsdev->chip_addr, tsdev->name);
-	        tsdev->free();
+	        tsdev->find_cb();
 			return tsdev;
         }
         tsdev++;
@@ -184,7 +184,9 @@ void ts_data_report(touch_type t,int id,int x,int y,int w)
 int ts_probe_thread(void *data)
 {
     struct probe_device *ts = NULL;
-
+	
+	SOC_Display_Get_Res(&max_x,&max_y);
+	
     ts_probe_prepare();
 
     if (USE_TS_NUM == 0 && ts_choose_touchscreen == 0)

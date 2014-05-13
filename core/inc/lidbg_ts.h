@@ -18,8 +18,8 @@ struct lidbg_ts_data
 {
 	struct input_dev *input_dev;
 
-	u16 abs_x_max;
-	u16 abs_y_max;
+	u32 abs_x_max;
+	u32 abs_y_max;
 
 	u32 x[10];
 	u32 y[10];
