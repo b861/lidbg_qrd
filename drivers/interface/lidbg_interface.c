@@ -1,7 +1,7 @@
 
 #include "lidbg.h"
 
-#define HAL_SO "/flysystem/lib/hw/flyfa.default.so"
+#define HAL_SO "/flysystem/lib/out/lidbg_loader.ko"
 bool recovery_mode = 0;
 LIDBG_DEFINE;
 
