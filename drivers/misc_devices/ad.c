@@ -2,7 +2,7 @@
 #include "lidbg.h"
 #define AD_OFFSET  (100000)
 #define AD_VAL_MAX  (3300000)
-extern int is_key_scan_en;
+extern int fb_on;
 int ad_en;
 struct ad_key_remap
 {
@@ -70,7 +70,7 @@ int thread_key(void *data)
     if(ad_en)
     while(1)
     {
-        if(is_key_scan_en)
+        if(fb_on)
         {
             key_scan();
             msleep(100);

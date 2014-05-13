@@ -1,18 +1,18 @@
 
 #include "lidbg.h"
-extern int is_key_scan_en;
+extern int fb_on;
 int button_en;
 struct work_struct work_left_button1;
 static void work_left_button1_fn(struct work_struct *work)
 {
-if(is_key_scan_en)
+if(fb_on)
     SOC_Key_Report(KEY_HOME, KEY_PRESSED_RELEASED);
 }
 
 struct work_struct work_right_button1;
 static void work_right_button1_fn(struct work_struct *work)
 {
-if(is_key_scan_en)
+if(fb_on)
     SOC_Key_Report(KEY_BACK, KEY_PRESSED_RELEASED);
 }
 irqreturn_t irq_left_button1(int irq, void *dev_id)

@@ -2,9 +2,8 @@
 #include "lidbg.h"
 LIDBG_DEFINE;
 
-static struct task_struct *Thermal_task = NULL;
-//static int fan_onoff_temp;
-int is_key_scan_en = 1;
+
+int fb_on = 1;
 #if defined(CONFIG_FB)
 struct notifier_block devices_notif;
 static int devices_notifier_callback(struct notifier_block *self,
@@ -17,9 +16,9 @@ static int devices_notifier_callback(struct notifier_block *self,
     {
         blank = evdata->data;
         if (*blank == FB_BLANK_UNBLANK)
-            is_key_scan_en = 1;
+            fb_on = 1;
         else if (*blank == FB_BLANK_POWERDOWN)
-            is_key_scan_en = 0;
+            fb_on = 0;
     }
 
     return 0;
@@ -35,13 +34,11 @@ static int soc_dev_probe(struct platform_device *pdev)
     fb_register_client(&devices_notif);
 #endif
 
-    fs_register_filename_list(TEMP_LOG_PATH, true);
-    fs_regist_state("cpu_temp", &(g_var.temp));
+
     CREATE_KTHREAD(thread_button_init, NULL);
     CREATE_KTHREAD(thread_led, NULL);
     CREATE_KTHREAD(thread_key, NULL);
-    Thermal_task =  kthread_run(thread_thermal, NULL, "flythermalthread");
-    //FS_REGISTER_INT(fan_onoff_temp, "fan_onoff_temp", 65, NULL);
+	temp_init();
 
     //register_lidbg_notifier(&lidbg_notifier);
     LCD_ON;

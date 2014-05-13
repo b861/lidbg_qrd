@@ -1,6 +1,10 @@
 
 #include "lidbg.h"
 int temp_log_freq = 5;
+//static int fan_onoff_temp;
+
+static struct task_struct *Thermal_task = NULL;
+
 int soc_temp_get(void)
 {
     char cpu_temp[3];
@@ -38,3 +42,15 @@ void log_temp(void)
     }
     return 0;
 }
+
+
+void temp_init(void)
+{
+    Thermal_task =  kthread_run(thread_thermal, NULL, "flythermalthread");
+    fs_register_filename_list(TEMP_LOG_PATH, true);
+    fs_regist_state("cpu_temp", &(g_var.temp));
+    //FS_REGISTER_INT(fan_onoff_temp, "fan_onoff_temp", 65, NULL);
+
+}
+
+ 

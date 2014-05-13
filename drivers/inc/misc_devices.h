@@ -40,4 +40,6 @@ int thread_key(void *data);
 int thread_button_init(void *data);
 int thread_led(void *data);
 int thread_thermal(void *data);
+
+void temp_init(void);
 #endif
