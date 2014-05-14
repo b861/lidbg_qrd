@@ -61,9 +61,10 @@ int loader_thread(void *data)
 #endif
     SOC_Get_CpuFreq();
     if( fs_is_file_exist(RECOVERY_MODE_DIR))
-        recovery_mode = 1;
+        g_var.recovery_mode = recovery_mode = 1;
     else
-        recovery_mode = 0;
+        g_var.recovery_mode = recovery_mode = 0;
+	
     for(i = 0; insmod_path[i] != NULL; i++)
     {
         for(j = 0; insmod_list[j] != NULL; j++)

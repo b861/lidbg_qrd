@@ -2,7 +2,6 @@
 #include "lidbg.h"
 
 #define HAL_SO "/flysystem/lib/out/lidbg_loader.ko"
-bool recovery_mode = 0;
 LIDBG_DEFINE;
 
 char *insmod_list[] =
@@ -346,15 +345,15 @@ int fly_interface_init(void)
     g_var.ws_lh = NULL;
 
     if( fs_is_file_exist(RECOVERY_MODE_DIR))
-        {
-        recovery_mode = 1;
+    {
+	    g_var.recovery_mode = 1;
 		lidbg("\n=====system mode is recovery_mode====\n");
-    	}
+	}
     else
-    	{
-        recovery_mode = 0;
+	{
+	    g_var.recovery_mode = 0;
 		lidbg("\n=====system mode is normal_mode====\n");
-    	}
+	}
 
     CREATE_KTHREAD(interface_init, NULL);
 
@@ -367,7 +366,6 @@ void fly_interface_deinit(void)
 
 module_init(fly_interface_init);
 module_exit(fly_interface_deinit);
-EXPORT_SYMBOL(recovery_mode);
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Flyaudad Inc.");
 

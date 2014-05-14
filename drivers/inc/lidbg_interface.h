@@ -181,6 +181,7 @@ struct lidbg_pvar_t
     bool fake_suspend;
     bool acc_flag;
     struct list_head *ws_lh;
+	bool recovery_mode;
 };
 
 struct lidbg_interface
@@ -244,6 +245,7 @@ struct lidbg_interface
 
 
 extern struct lidbg_interface *plidbg_dev;
+
 static inline int check_pt(void)
 {
     while (plidbg_dev == NULL)

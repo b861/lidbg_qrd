@@ -51,6 +51,7 @@
 #include <linux/input/mt.h>
 #include "touch.h"
 touch_t touch = {0, 0, 0};
+LIDBG_DEFINE;
 
 #define GOODIX_DEV_NAME	"Goodix-CTP"
 #define CFG_MAX_TOUCH_POINTS	5
@@ -127,7 +128,6 @@ static u8 chip_gt9xxs;  /* true if ic is gt9xxs, like gt915s */
 u8 grp_cfg_version;
 extern  bool is_ts_load;
 extern int ts_should_revert;
-extern  bool recovery_mode;
 static bool xy_revert_en = 1;
 /*******************************************************
 Function:
@@ -622,7 +622,7 @@ static void goodix_ts_work_func(struct work_struct *work)
 			}
 			 if (touch_index & (0x01 << 0))
             {
-                if(1 == recovery_mode)
+                if(1 == g_var.recovery_mode)
                 {
                     if( (input_y >= 0) && (input_x >= 0) )
                     {
@@ -635,11 +635,10 @@ static void goodix_ts_work_func(struct work_struct *work)
                         //lidbg("[%d,%d]==========%d\n", touch.x, touch.y, touch.pressed);
                     }
                 }
-
             }
             else
             {
-                if(1 == recovery_mode)
+                if(1 == g_var.recovery_mode)
                 {
                     touch.pressed = 0;
                     set_touch_pos(&touch);
@@ -2347,6 +2346,7 @@ Output:
 static int __devinit goodix_ts_init(void)
 {
 	int ret;
+	LIDBG_GET;
 	is_ts_load = 1;
 	GTP_DEBUG_FUNC();
 #if GTP_ESD_PROTECT

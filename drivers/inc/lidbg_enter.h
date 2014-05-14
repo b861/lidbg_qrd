@@ -405,7 +405,7 @@ struct lidbg_pvar_t
     bool is_usb11;
     bool fake_suspend;
     bool acc_flag;
-
+	bool recovery_mode;
 };
 
 struct lidbg_hal
