@@ -459,8 +459,14 @@ static int __init lidbg_pm_init(void)
     DUMP_FUN;
     LIDBG_GET;
     set_func_tbl();
-    PM_WARN("<set GPIO_WP[%d] 1>\n\n", GPIO_WP);
+
     SOC_IO_Output(0, GPIO_WP, 0);
+    PM_WARN("<set GPIO_WP[%d] 0>\n\n", GPIO_WP);
+    if(!g_var.is_fly)
+    {
+	    SOC_IO_Output(0, GPIO_APP_STATUS, 0);
+	    PM_WARN("<set GPIO_APP_STATUS [%d] 0>\n\n", GPIO_APP_STATUS);
+    }
     CREATE_KTHREAD(thread_usb_disk_enable_delay, NULL);
     lidbg_uevent_shell("echo 8  > /proc/sys/kernel/printk");
     platform_device_register(&lidbg_pm);
