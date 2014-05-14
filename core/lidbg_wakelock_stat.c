@@ -274,10 +274,11 @@ void cb_kv_show_list(char *key, char *value)
 
 static int __init lidbg_wakelock_stat_init(void)
 {
+    char buff[50] = {0};
     DUMP_BUILD_TIME;
 
-    if(fs_fill_list("/flysystem/lib/out/wakelock_detail_list.conf", FS_CMD_FILE_LISTMODE, &waklelock_detail_list) < 0)
-        fs_fill_list("/system/lib/modules/out/wakelock_detail_list.conf", FS_CMD_FILE_LISTMODE, &waklelock_detail_list);
+    if(fs_fill_list(get_lidbg_file_path(buff, "wakelock_detail_list.conf"), FS_CMD_FILE_LISTMODE, &waklelock_detail_list) < 0)
+        lidbg("<fail:lidbg_wakelock_stat_init:wakelock_detail_list.conf>\n");
 
     spin_lock_init(&new_item_lock);
     FS_REGISTER_INT(g_wakelock_dbg, "wakelock_dbg", 0, cb_kv_show_list);

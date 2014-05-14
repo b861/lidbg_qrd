@@ -359,9 +359,9 @@ int update_list(const char *filename, struct list_head *client_list)
 //zone below [fs.keyvalue.interface]
 void fs_save_list_to_file(void)
 {
-    save_list_to_file(&lidbg_core_list, core_sd_path);
-    save_list_to_file(&lidbg_drivers_list, driver_sd_path);
-    fs_copy_file(state_mem_path, state_sd_path);
+    save_list_to_file(&lidbg_core_list, PATH_CORE_CONF);
+    save_list_to_file(&lidbg_drivers_list, PATH_DRIVERS_CONF);
+    fs_copy_file(PATH_STATE_MEM, PATH_STATE_CONF);
     update_file_tm();
 }
 int fs_regist_state(char *key, int *value)

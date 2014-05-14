@@ -35,6 +35,22 @@ char *get_bin_path( char *buf)
     return buf;
 #endif
 }
+
+static int checked_result = 0;// 1 flysytem 2 system
+char *get_lidbg_file_path(char *buff, char *filename)
+{
+    char *path;
+    if(checked_result == 0)
+    {
+        if(is_file_exist(FLY_MODE_FILE))
+            checked_result = 1;
+        else
+            checked_result = 2;
+    }
+    path = (checked_result == 1) ? "/flysystem/lib/out/" : "/system/lib/modules/out/";
+    sprintf(buff, "%s%s", path, filename);
+    return buff;
+}
 int lidbg_readwrite_file(const char *filename, char *rbuf, const char *wbuf, size_t length)
 {
     int ret = 0;
@@ -635,4 +651,5 @@ EXPORT_SYMBOL(lidbg_task_kill_select);
 EXPORT_SYMBOL(lidbg_get_current_time);
 EXPORT_SYMBOL(set_power_state);
 EXPORT_SYMBOL(get_bin_path);
+EXPORT_SYMBOL(get_lidbg_file_path);
 

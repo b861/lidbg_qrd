@@ -4,8 +4,8 @@
 static LIST_HEAD(third_party_list);
 void third_party_prepare(void)
 {
-    fs_copy_file("/flysystem/lib/out/third_party.conf", LIDBG_LOG_DIR"third_party.txt");
-    fs_copy_file("/system/lib/modules/out/third_party.conf", LIDBG_LOG_DIR"third_party.txt");
+    char buff[50]={0};
+    fs_copy_file(get_lidbg_file_path(buff,"third_party.conf"), LIDBG_LOG_DIR"third_party.txt");
     ssleep(1);
     fs_fill_list(LIDBG_LOG_DIR"third_party.txt", FS_CMD_FILE_LISTMODE, &third_party_list);
     fs_register_filename_list(LIDBG_LOG_DIR"third_party.txt", true);

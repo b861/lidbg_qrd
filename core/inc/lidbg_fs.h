@@ -14,21 +14,15 @@ extern struct lidbg_fifo_device *fs_msg_fifo;
 #define LIDBG_NODE "/dev/mlidbg0"
 #define KMSG_NODE "/proc/kmsg"
 
-#define FS_FIFO_FILE LIDBG_LOG_DIR"fs_msg_fifo.txt"
+#define PATH_FS_FIFO_FILE LIDBG_LOG_DIR"fs_msg_fifo.txt"
 
-#define driver_sd_path LIDBG_LOG_DIR"drivers.txt"
-#define driver_fly_path "/flysystem/lib/out/drivers.conf"
-#define driver_lidbg_path "/system/lib/modules/out/drivers.conf"
-#define core_sd_path LIDBG_LOG_DIR"core.txt"
-#define core_fly_path "/flysystem/lib/out/core.conf"
-#define core_lidbg_path "/system/lib/modules/out/core.conf"
-#define cmd_sd_path LIDBG_LOG_DIR"cmd.txt"
-#define cmd_fly_path "/flysystem/lib/out/cmd.conf"
-#define cmd_lidbg_path "/system/lib/modules/out/cmd.conf"
-#define state_sd_path LIDBG_LOG_DIR"state.txt"
-#define state_mem_path LIDBG_MEM_DIR"state.txt"
-#define state_fly_path "/flysystem/lib/out/state.conf"
-#define state_lidbg_path "/system/lib/modules/out/state.conf"
+#define PATH_LIDBG_MEM_LOG_FILE LIDBG_MEM_DIR"lidbg_log.txt"
+#define PATH_PRE_CONF_INFO_FILE LIDBG_LOG_DIR"conf_info.txt"
+#define PATH_DRIVERS_CONF LIDBG_LOG_DIR"drivers.txt"
+#define PATH_CORE_CONF LIDBG_LOG_DIR"core.txt"
+#define PATH_CMD_CONF LIDBG_LOG_DIR"cmd.txt"
+#define PATH_STATE_CONF LIDBG_LOG_DIR"state.txt"
+#define PATH_STATE_MEM LIDBG_MEM_DIR"state.txt"
 
 extern struct list_head fs_state_list;
 void fs_msg_fifo_to_file(char *key, char *value);

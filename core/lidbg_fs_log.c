@@ -15,8 +15,9 @@ static struct completion kmsg_wait;
 int delay_disable_tracemsg(void *data);
 bool upload_machine_log(void)
 {
-    if(lidbg_exe("/flysystem/lib/out/client_mobile", NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-        lidbg_exe("/system/lib/modules/out/client_mobile", NULL, NULL, NULL, NULL, NULL, NULL);
+    char buff[50] = {0};
+    if(lidbg_exe(get_lidbg_file_path(buff, "client_mobile"), NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        FS_ERR("client_mobile");
     return true;
 }
 void remount_system(void)
@@ -264,7 +265,7 @@ int fs_mem_log( const char *fmt, ... )
 
     len = strlen(str_append);
 
-    bfs_file_amend(LIDBG_MEM_LOG_FILE, str_append, 0);
+    bfs_file_amend(PATH_LIDBG_MEM_LOG_FILE, str_append, 0);
 
     return 1;
 }

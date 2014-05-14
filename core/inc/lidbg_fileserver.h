@@ -40,11 +40,6 @@ struct fs_filename_item
 #define LIDBG_MEM_DIR "/dev/log/"
 #define LIDBG_OSD_DIR "/data/lidbg_osd/"
 
-#define LIDBG_MEM_LOG_FILE LIDBG_MEM_DIR"lidbg_log.txt"
-#define PRE_CONF_INFO_FILE LIDBG_LOG_DIR"conf_info.txt"
-#define build_time_sd_path LIDBG_LOG_DIR"build_time.txt"
-#define build_time_fly_path "/flysystem/lib/out/build_time.conf"
-#define build_time_lidbg_path "/system/lib/modules/out/build_time.conf"
 extern void lidbg_fileserver_main(int argc, char **argv);
 extern void fs_cp_data_to_udisk(bool encode);
 extern void fs_file_separator(char *file2separator);

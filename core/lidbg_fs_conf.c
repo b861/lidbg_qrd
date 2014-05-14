@@ -93,9 +93,9 @@ void show_tm(struct rtc_time *ptmp)
 }
 void update_file_tm(void)
 {
-    get_file_mftime(core_sd_path, &precorefile_tm);
-    get_file_mftime(driver_sd_path, &predriverfile_tm);
-    get_file_mftime(cmd_sd_path, &precmdfile_tm);
+    get_file_mftime(PATH_CORE_CONF, &precorefile_tm);
+    get_file_mftime(PATH_DRIVERS_CONF, &predriverfile_tm);
+    get_file_mftime(PATH_CMD_CONF, &precmdfile_tm);
 }
 static int thread_pollfile_func(void *data)
 {
@@ -108,22 +108,22 @@ static int thread_pollfile_func(void *data)
         if(g_pollfile_ms && is_fs_work_enable)
         {
             msleep(g_pollfile_ms);
-            if(is_file_tm_updated(core_sd_path, &precorefile_tm))
+            if(is_file_tm_updated(PATH_CORE_CONF, &precorefile_tm))
             {
                 show_tm(&precorefile_tm);
-                update_list(core_sd_path, &lidbg_core_list);
+                update_list(PATH_CORE_CONF, &lidbg_core_list);
             }
 
-            if(is_file_tm_updated(driver_sd_path, &predriverfile_tm))
+            if(is_file_tm_updated(PATH_DRIVERS_CONF, &predriverfile_tm))
             {
                 show_tm(&predriverfile_tm);
-                update_list(driver_sd_path, &lidbg_drivers_list);
+                update_list(PATH_DRIVERS_CONF, &lidbg_drivers_list);
             }
 
-            if(is_file_tm_updated(cmd_sd_path, &precmdfile_tm))
+            if(is_file_tm_updated(PATH_CMD_CONF, &precmdfile_tm))
             {
                 show_tm(&precmdfile_tm);
-                launch_file_cmd(cmd_sd_path);
+                launch_file_cmd(PATH_CMD_CONF);
             }
 
         }
@@ -158,7 +158,7 @@ static int thread_pollstate_func(void *data)
         if(g_pollstate_ms && is_fs_work_enable)
         {
             msleep(g_pollstate_ms);
-            save_list_to_file(&fs_state_list, state_mem_path);
+            save_list_to_file(&fs_state_list, PATH_STATE_MEM);
         }
         else
             ssleep(1);
@@ -212,7 +212,7 @@ int get_machine_id(void)
 void fs_save_state(void)
 {
     if(is_fs_work_enable)
-        fs_copy_file(state_mem_path, state_sd_path);
+        fs_copy_file(PATH_STATE_MEM, PATH_STATE_CONF);
 }
 //zone end
 

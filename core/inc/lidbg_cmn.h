@@ -44,7 +44,7 @@ void lidbg_loop_warning(void);
 void lidbg_enable_logcat(void);
 void lidbg_enable_kmsg(void);
 char *get_bin_path( char *buf);
-
+char *get_lidbg_file_path(char *buff, char *filename);
 #define MOUNT_PATH get_bin_path("mount")
 #define INSMOD_PATH get_bin_path("insmod")
 #define CHMOD_PATH  get_bin_path("chmod")
