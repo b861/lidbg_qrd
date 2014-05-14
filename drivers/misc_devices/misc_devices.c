@@ -2,8 +2,8 @@
 #include "lidbg.h"
 LIDBG_DEFINE;
 
-
 int fb_on = 1;
+
 #if defined(CONFIG_FB)
 struct notifier_block devices_notif;
 static int devices_notifier_callback(struct notifier_block *self,
@@ -27,41 +27,53 @@ static int devices_notifier_callback(struct notifier_block *self,
 
 static int soc_dev_probe(struct platform_device *pdev)
 {
-    //lidbg("=====soc_dev_probe====\n");
-
 #if defined(CONFIG_FB)
     devices_notif.notifier_call = devices_notifier_callback;
     fb_register_client(&devices_notif);
 #endif
 
+	CREATE_KTHREAD(thread_led, NULL);
+	CREATE_KTHREAD(thread_thermal, NULL);
 
-    CREATE_KTHREAD(thread_button_init, NULL);
-    CREATE_KTHREAD(thread_led, NULL);
-    CREATE_KTHREAD(thread_key, NULL);
-	temp_init();
-
-    //register_lidbg_notifier(&lidbg_notifier);
-    LCD_ON;
+	if(!g_var.is_fly)
+	{
+	    CREATE_KTHREAD(thread_button_init, NULL);
+	    CREATE_KTHREAD(thread_key, NULL);
+		
+	    LCD_ON;
+	}
     return 0;
 
 }
 static int soc_dev_remove(struct platform_device *pdev)
 {
     lidbg("soc_dev_remove\n");
-    return 0;
+	
+	if(!g_var.is_fly){}
+
+	return 0;
 
 }
 static int  soc_dev_suspend(struct platform_device *pdev, pm_message_t state)
 {
     lidbg("soc_dev_suspend\n");
-    button_suspend();
+	if(!g_var.is_fly)
+	{
+    	button_suspend();
+	}
     return 0;
 
 }
 static int soc_dev_resume(struct platform_device *pdev)
 {
     lidbg("soc_dev_resume\n");
-	button_resume();
+	
+	if(!g_var.is_fly)
+	{
+		button_resume();
+		led_resume();
+	}
+
     return 0;
 }
 struct platform_device soc_devices =
@@ -105,7 +117,7 @@ void lidbg_device_main(int argc, char **argv)
     }
 }
 EXPORT_SYMBOL(lidbg_device_main);
-MODULE_AUTHOR("lsw, <sw.lee.g2@gmail.com>");
+MODULE_AUTHOR("fly, <fly@gmail.com>");
 MODULE_DESCRIPTION("Devices Driver");
 MODULE_LICENSE("GPL");
 

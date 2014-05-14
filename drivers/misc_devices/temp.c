@@ -30,8 +30,9 @@ void log_temp(void)
 {
     int cur_temp;
     DUMP_FUN;
-    fs_register_filename_list(TEMP_LOG_PATH, true);
-    fs_regist_state("cpu_temp", &(g_var.temp));
+	
+	temp_init();
+
     while(!kthread_should_stop())
     {
         msleep(1000);
@@ -46,11 +47,9 @@ void log_temp(void)
 
 void temp_init(void)
 {
-    Thermal_task =  kthread_run(thread_thermal, NULL, "flythermalthread");
     fs_register_filename_list(TEMP_LOG_PATH, true);
     fs_regist_state("cpu_temp", &(g_var.temp));
     //FS_REGISTER_INT(fan_onoff_temp, "fan_onoff_temp", 65, NULL);
-
 }
 
  

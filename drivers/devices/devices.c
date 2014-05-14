@@ -971,7 +971,12 @@ static int soc_dev_resume(struct platform_device *pdev)
         //LCD_ON;
 
         //reconfig led
+        lidbg("reconfig gpio!\n");
         SOC_IO_Config(devices_resource.led_gpio, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_8MA);
+		IO_CONFIG_INPUT(0,BUTTON_LEFT_1);
+		IO_CONFIG_INPUT(0,BUTTON_LEFT_2);
+		IO_CONFIG_INPUT(0,BUTTON_RIGHT_1);
+		IO_CONFIG_INPUT(0,BUTTON_RIGHT_2);
 
     }
 

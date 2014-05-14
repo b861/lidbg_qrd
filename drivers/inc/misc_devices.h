@@ -40,6 +40,8 @@ int thread_key(void *data);
 int thread_button_init(void *data);
 int thread_led(void *data);
 int thread_thermal(void *data);
-
+void led_resume(void);
 void temp_init(void);
+extern int fb_on;
+
 #endif

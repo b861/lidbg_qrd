@@ -1,7 +1,5 @@
 
 #include "lidbg.h"
-extern int fb_on;
-int button_en;
 struct work_struct work_left_button1;
 static void work_left_button1_fn(struct work_struct *work)
 {
@@ -50,15 +48,23 @@ int button_suspend(void)
 }
 int button_resume(void)
 {
+
+	IO_CONFIG_INPUT(0,BUTTON_LEFT_1);
+	IO_CONFIG_INPUT(0,BUTTON_LEFT_2);
+	IO_CONFIG_INPUT(0,BUTTON_RIGHT_1);
+	IO_CONFIG_INPUT(0,BUTTON_RIGHT_2);
+	
     SOC_IO_ISR_Enable(BUTTON_LEFT_1);
     SOC_IO_ISR_Enable(BUTTON_LEFT_2);
     SOC_IO_ISR_Enable(BUTTON_RIGHT_1);
     SOC_IO_ISR_Enable(BUTTON_RIGHT_2);
-    SOC_IO_Config(LED_GPIO, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_8MA);
+
     return 0;
 }
 void button_init(void)
 {
+	int button_en;
+
     lidbg("button_init\n");
     FS_REGISTER_INT(button_en, "button_en", 0, NULL);
     if(button_en)
@@ -79,7 +85,6 @@ void button_init(void)
 }
 int thread_button_init(void *data)
 {
-
     button_init();
     return 0;
 }

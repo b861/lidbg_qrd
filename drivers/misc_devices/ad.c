@@ -2,14 +2,13 @@
 #include "lidbg.h"
 #define AD_OFFSET  (100000)
 #define AD_VAL_MAX  (3300000)
-extern int fb_on;
-int ad_en;
 struct ad_key_remap
 {
     u32 ch;
     u32 ad_value;
     u32 key;
 };
+
 static struct ad_key_remap ad_key[] =
 {
 
@@ -24,6 +23,7 @@ static struct ad_key_remap ad_key[] =
     {37, 2000000, KEY_MENU},
     {37, 2500000, KEY_BACK},
 };
+
 int find_ad_key(u32 ch)
 {
     int val = 0;
@@ -66,17 +66,20 @@ find_key:
 }
 int thread_key(void *data)
 {  
+	int ad_en;
     FS_REGISTER_INT(ad_en, "ad_en", 0, NULL);
     if(ad_en)
-    while(1)
     {
-        if(fb_on)
-        {
-            key_scan();
-            msleep(100);
-        }
-        else
-            msleep(1000);
+	    while(1)
+	    {
+	        if(fb_on)
+	        {
+	            key_scan();
+	            msleep(100);
+	        }
+	        else
+	            msleep(1000);
+	    }
     }
     return 0;
 }
