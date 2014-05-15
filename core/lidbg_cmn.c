@@ -461,9 +461,11 @@ bool lidbg_new_cdev(struct file_operations *cdev_fops, char *nodename)
     {
         char path[32];
         sprintf(path, "/dev/%s0", nodename);
+#ifdef SOC_msm8x25
         ssleep(1);
         lidbg_chmod(path);
-        LIDBG_SUC("[%s]\n", path);
+#endif
+        LIDBG_SUC("D[%s]\n", path);
         return true;
     }
     else

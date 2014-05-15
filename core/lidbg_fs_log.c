@@ -39,7 +39,6 @@ void remount_system(void)
         lidbg_chmod("/system/lib/hw");
         lidbg_chmod("/flysystem/lib/hw");
         lidbg_chmod("/flysystem/lib/out");
-        msleep(200);
     }
 }
 void chmod_for_apk(void)

@@ -4,56 +4,11 @@
 #define HAL_SO "/flysystem/lib/out/lidbg_loader.ko"
 LIDBG_DEFINE;
 
-char *insmod_list[] =
-{
-    "lidbg_pm_8226.ko",
-    "lidbg_lpc.ko",
-    "lidbg_devices.ko",
-    "lidbg_bpmsg.ko",
-    "lidbg_gps.ko",
-    "lidbg_ts_probe_new.ko",
-    "lidbg_monkey.ko",
-    "lidbg_drivers_dbg.ko",
-    "dsi83.ko",
-    "saf7741.ko",
-    "lidbg_third_party.ko",
-    NULL,
-};
-
-char *insmod_path[] =
-{
-    "/system/lib/modules/out/",
-    "/flysystem/lib/out/",
-    NULL,
-};
-
 void interface_func_tbl_default(void)
 {
     lidbgerr("interface_func_tbl_default:this func not ready!\n");
     //print who call this
     dump_stack();
-
-}
-
-int loader_thread(void *data)
-{
-    int i, j;
-    char path[100];
-    DUMP_FUN_ENTER;
-
-    for(i = 0; insmod_path[i] != NULL; i++)
-    {
-        sprintf(path, "%slidbg_loader.ko", insmod_path[i]);
-        if(!fs_is_file_exist(path))continue;
-
-        for(j = 0; insmod_list[j] != NULL; j++)
-        {
-            sprintf(path, "%s%s", insmod_path[i], insmod_list[j]);
-            lidbg_insmod(path);
-        }
-    }
-    DUMP_FUN_LEAVE;
-    return 0;
 }
 
 bool iSOC_IO_ISR_Add(u32 irq, u32  interrupt_type, pinterrupt_isr func, void *dev)
@@ -293,22 +248,6 @@ static struct miscdevice misc =
 
 };
 
-int interface_init(void *data)
-{
-    if(fs_is_file_exist(HAL_SO))
-    {
-        lidbg("=======is product=====\n");
-        g_var.is_fly = true;
-    }
-    msleep(500);
-    lidbg_chmod("/dev/lidbg_interface");
-    msleep(500);
-
-    CREATE_KTHREAD(loader_thread, NULL);
-    return 0;
-}
-
-
 int fly_interface_init(void)
 {
     int ret;
@@ -355,7 +294,11 @@ int fly_interface_init(void)
 		lidbg("\n=====system mode is normal_mode====\n");
 	}
 
-    CREATE_KTHREAD(interface_init, NULL);
+    if(fs_is_file_exist(HAL_SO))
+    {
+        lidbg("=======is product=====\n");
+        g_var.is_fly = true;
+    }
 
     return 0;
 }

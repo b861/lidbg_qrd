@@ -27,7 +27,11 @@ char *insmod_list[] =
     "lidbg_uart.ko",
     "lidbg_main.ko",
     "lidbg_misc.ko",
+#ifdef SOC_msm8x25
     INTERFACE_KO,
+#else
+    "lidbg_drivers_loader.ko",
+#endif
     NULL,
 };
 

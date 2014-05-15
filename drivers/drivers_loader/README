@@ -1,3 +1,4 @@
+修正：重新定义此模块会根据lidbg_qrd/soc/msm8x26/conf下的两个lidbg_drivers_list.conf和third_party_list.conf配置文件来执行，每个文件可以相当于一个shell脚本. 2014.5.15
 
 修正：重新定义此模块的作用旨在创建一个需要lidbg去配合但又不需要lidbg去配合的环境，让其他组的其他需求能在shell中就完成的集体在这边实现，而不需要修改lidbg的代码结构. 2014.5.14
 {
