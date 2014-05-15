@@ -119,7 +119,7 @@ int thread_loader(void *data)
             sprintf(path, "%s%s", insmod_path[i], insmod_list[j]);
             //LIDBG_WARN("load %s\n",path);
             lidbg_insmod(path);
-			while(tmp == load_modules_count) msleep(50);
+			while(tmp == load_modules_count) msleep(10);
         }
     }
 

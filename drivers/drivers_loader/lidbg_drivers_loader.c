@@ -6,13 +6,8 @@ static LIST_HEAD(third_modules_list);
 void drivers_loader_prepare(void)
 {
     char buff[50] = {0};
-    fs_copy_file(get_lidbg_file_path(buff, "lidbg_drivers_list.conf"), LIDBG_LOG_DIR"lidbg_drivers_list.txt");
-    fs_copy_file(get_lidbg_file_path(buff, "third_party_list.conf"), LIDBG_LOG_DIR"third_party_list.txt");
-    ssleep(1);
-    fs_fill_list(LIDBG_LOG_DIR"lidbg_drivers_list.txt", FS_CMD_FILE_LISTMODE, &lidbg_modules_list);
-    fs_fill_list(LIDBG_LOG_DIR"third_party_list.txt", FS_CMD_FILE_LISTMODE, &third_modules_list);
-    fs_register_filename_list(LIDBG_LOG_DIR"lidbg_drivers_list.txt", true);
-    fs_register_filename_list(LIDBG_LOG_DIR"third_party_list.txt", true);
+    fs_fill_list(get_lidbg_file_path(buff, "lidbg_drivers_list.conf"), FS_CMD_FILE_LISTMODE, &lidbg_modules_list);
+    fs_fill_list(get_lidbg_file_path(buff, "third_party_list.conf"), FS_CMD_FILE_LISTMODE, &third_modules_list);
 }
 
 void party_analyze(struct list_head *client_list)
