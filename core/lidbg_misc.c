@@ -8,12 +8,6 @@ static int delete_out_dir_after_update = 1;
 static int dump_mem_log = 0;
 static int loop_warning_en = 0;
 
-#ifdef USE_CALL_USERHELPER
-void lidbg_uevent_shell(char *shell_cmd)
-{
-}
-#endif
-
 void lidbg_enable_logcat(void)
 {
     char cmd[128] = {0};
@@ -26,13 +20,13 @@ void lidbg_enable_logcat(void)
     sprintf(logcat_file_name, "logcat_%d_%s.txt", get_machine_id(), time_buf);
 
     sprintf(cmd, "date >/data/%s", logcat_file_name);
-    lidbg_uevent_shell(cmd);
+    lidbg_shell_cmd(cmd);
     memset(cmd, '\0', sizeof(cmd));
     ssleep(1);
-    lidbg_uevent_shell("chmod 777 /data/logcat*");
+    lidbg_shell_cmd("chmod 777 /data/logcat*");
     ssleep(1);
     sprintf(cmd, "logcat  -v time>> /data/%s &", logcat_file_name);
-    lidbg_uevent_shell(cmd);
+    lidbg_shell_cmd(cmd);
     lidbg("logcat-\n");
 
 }
@@ -50,13 +44,13 @@ void lidbg_enable_kmsg(void)
     sprintf(dmesg_file_name, "kmsg_%d_%s.txt", get_machine_id(), time_buf);
 
     sprintf(cmd, "date >/data/%s", dmesg_file_name);
-    lidbg_uevent_shell(cmd);
+    lidbg_shell_cmd(cmd);
     memset(cmd, '\0', sizeof(cmd));
     ssleep(1);
-    lidbg_uevent_shell("chmod 777 /data/kmsg*");
+    lidbg_shell_cmd("chmod 777 /data/kmsg*");
     ssleep(1);
     sprintf(cmd, "cat /proc/kmsg >> /data/%s &", dmesg_file_name);
-    lidbg_uevent_shell(cmd);
+    lidbg_shell_cmd(cmd);
     lidbg("kmsg-\n");
 }
 

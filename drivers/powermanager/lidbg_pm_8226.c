@@ -40,7 +40,7 @@ void observer_prepare(void)
     ssleep(1);
     lidbg_chmod("/dev/lidbg*");
     sprintf(cmd, "cat /proc/interrupts > %sinterrupts.txt &", LIDBG_LOG_DIR);
-    lidbg_uevent_shell(cmd);
+    lidbg_shell_cmd(cmd);
     fs_register_filename_list(LIDBG_LOG_DIR"interrupts.txt", true);
 }
 static int thread_observer(void *data)
@@ -466,7 +466,7 @@ static int __init lidbg_pm_init(void)
 	PM_WARN("<set GPIO_APP_STATUS [%d] 0>\n\n", GPIO_APP_STATUS);
 
     CREATE_KTHREAD(thread_usb_disk_enable_delay, NULL);
-    lidbg_uevent_shell("echo 8  > /proc/sys/kernel/printk");
+    lidbg_shell_cmd("echo 8  > /proc/sys/kernel/printk");
     platform_device_register(&lidbg_pm);
     platform_driver_register(&lidbg_pm_driver);
     return 0;

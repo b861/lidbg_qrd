@@ -6,6 +6,12 @@
 #define GET_INODE_FROM_FILEP(filp) ((filp)->f_path.dentry->d_inode)
 char g_binpath[50];
 
+void lidbg_shell_cmd(char *shell_cmd)
+{
+#ifndef USE_CALL_USERHELPER
+	lidbg_uevent_shell(shell_cmd);
+#endif
+}
 bool is_file_exist(char *file)
 {
     struct file *filep;
@@ -223,7 +229,7 @@ int  lidbg_launch_user( char bin_path[], char argv1[], char argv2[], char argv3[
 #else
     char shell_cmd[512] = {0};
     sprintf(shell_cmd, "%s %s %s %s %s %s %s ", bin_path, argv1 == NULL ? "" : argv1, argv2 == NULL ? "" : argv2, argv3 == NULL ? "" : argv3, argv4 == NULL ? "" : argv4, argv5 == NULL ? "" : argv5, argv6 == NULL ? "" : argv6);
-    lidbg_uevent_shell(shell_cmd);
+    lidbg_shell_cmd(shell_cmd);
     return 1;
 #endif
 }
@@ -652,4 +658,5 @@ EXPORT_SYMBOL(lidbg_get_current_time);
 EXPORT_SYMBOL(set_power_state);
 EXPORT_SYMBOL(get_bin_path);
 EXPORT_SYMBOL(get_lidbg_file_path);
+EXPORT_SYMBOL(lidbg_shell_cmd);
 

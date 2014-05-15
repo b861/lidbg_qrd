@@ -1,9 +1,3 @@
-#ifdef USE_CALL_USERHELPER
-void lidbg_uevent_shell(char *shell_cmd)
-{
-}
-#endif
-
 
 static bool encode = false;
 int thread_dump_log(void *data)
@@ -107,8 +101,8 @@ void parse_cmd(char *pt)
             k2u_write(LOG_CLEAR_LOGCAT_KMSG);
 #else
             lidbg("clear+logcat*&&kmsg*\n");
-            lidbg_uevent_shell("rm /data/logcat*");
-            lidbg_uevent_shell("rm /data/kmsg*");
+            lidbg_shell_cmd("rm /data/logcat*");
+            lidbg_shell_cmd("rm /data/kmsg*");
             lidbg("clear-logcat*&&kmsg*\n");
 #endif
             lidbg_domineering_ack();
@@ -119,15 +113,15 @@ void parse_cmd(char *pt)
             k2u_write(LOG_SHELL_TOP_DF_PS);
 #else
             lidbg("\n\nLOG_SHELL_TOP_DF_PS+\n");
-            lidbg_uevent_shell("date > /data/machine.txt");
-            lidbg_uevent_shell("cat /proc/cmdline >> /data/machine.txt");
-            lidbg_uevent_shell("getprop fly.version.mcu >> /data/machine.txt");
-            lidbg_uevent_shell("top -n 3 -t >/data/top.txt &");
-            lidbg_uevent_shell("screencap -p /data/screenshot.png &");
-            lidbg_uevent_shell("ps > /data/ps.txt");
-            lidbg_uevent_shell("df > /data/df.txt");
-            lidbg_uevent_shell("chmod 777 /data/*.txt");
-            lidbg_uevent_shell("chmod 777 /data/*.png");
+            lidbg_shell_cmd("date > /data/machine.txt");
+            lidbg_shell_cmd("cat /proc/cmdline >> /data/machine.txt");
+            lidbg_shell_cmd("getprop fly.version.mcu >> /data/machine.txt");
+            lidbg_shell_cmd("top -n 3 -t >/data/top.txt &");
+            lidbg_shell_cmd("screencap -p /data/screenshot.png &");
+            lidbg_shell_cmd("ps > /data/ps.txt");
+            lidbg_shell_cmd("df > /data/df.txt");
+            lidbg_shell_cmd("chmod 777 /data/*.txt");
+            lidbg_shell_cmd("chmod 777 /data/*.png");
             lidbg("\n\nLOG_SHELL_TOP_DF_PS-\n");
 #endif
             lidbg_domineering_ack();

@@ -47,7 +47,7 @@ void third_party_analyze(void)
                     goto drop;
             }
             else
-                lidbg_uevent_shell(pos->yourkey);
+                lidbg_shell_cmd(pos->yourkey);
             continue;
 drop:
             LIDBG_WARN("bad cmd<%s>\n", pos->yourkey);
