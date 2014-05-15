@@ -286,12 +286,12 @@ int fly_interface_init(void)
     if( fs_is_file_exist(RECOVERY_MODE_DIR))
     {
 	    g_var.recovery_mode = 1;
-		lidbg("\n=====system mode is recovery_mode====\n");
+		lidbg("=====system mode is recovery_mode====\n");
 	}
     else
 	{
 	    g_var.recovery_mode = 0;
-		lidbg("\n=====system mode is normal_mode====\n");
+		lidbg("=====system mode is normal_mode====\n");
 	}
 
     if(fs_is_file_exist(HAL_SO))
@@ -299,13 +299,16 @@ int fly_interface_init(void)
         lidbg("=======is product=====\n");
         g_var.is_fly = true;
     }
+    else
+	{
+	    g_var.is_fly = false;
+		lidbg("=======is origin=====\n");
+	}
 
     return 0;
 }
 
-void fly_interface_deinit(void)
-{
-}
+void fly_interface_deinit(void){}
 
 module_init(fly_interface_init);
 module_exit(fly_interface_deinit);

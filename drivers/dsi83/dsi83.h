@@ -18,7 +18,6 @@
 
 #include "lidbg.h"
 
-//#define USB_SUSPEND_DELAY_TIME	(500 * HZ/1000) /* 500 msec */
 #define DSI83_DELAY_TIME	2//2000  //(500 * HZ/1000) /* 500 msec */
 
 #ifdef SOC_msm8x26
@@ -31,7 +30,6 @@
 
 //#define     DSI83_DEBUG
 //#define     TEST_PATTERN
-#define 	DSI83_TRACE_GPIO	   (60)
 
 #else  //8974
 #define 	DSI83_GPIO_EN          (62)
@@ -40,7 +38,6 @@
 #define 	DSI83_I2C_ADDR	       (0x2d)
 
 //#define     TEST_PATTERN
-#define 	DSI83_TRACE_GPIO	   (0)
 #endif
 
 #ifndef TEST_PATTERN

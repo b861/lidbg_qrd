@@ -1,109 +1,24 @@
 
+#include "lidbg.h"
 #include "dsi83.h"
 
-//struct work_struct  dsi83_work = NULL;
+LIDBG_DEFINE;
+
 static struct delayed_work dsi83_work;
 static struct workqueue_struct *dsi83_workqueue;
 
-
-struct i2c_adapter *adap_glb = NULL;
-
-static int32_t i2c_rw(unsigned char chipaddr,unsigned int sub_addr,int mode,
-	 unsigned char *buf, int size)
+static int SN65_register_read(unsigned char sub_addr,char *buf)
 {
-	int32_t ret =0;
-	struct i2c_adapter *adap = NULL;  //=i2c_get_adapter(DSI83_I2C_BUS);
-	uint16_t saddr =chipaddr;
-//	printk("adap name=%s\n",adap->name);
-
-	 if(adap_glb)
-	 {
-		 adap = adap_glb;
-	 }
-	 else
-	 {
-		 adap = i2c_get_adapter(DSI83_I2C_BUS);
-		 if(adap == NULL || adap->name==NULL){
-			 printk(KERN_CRIT "dsi83:%s():i2c_get_adapter(%d) error!",__func__,DSI83_I2C_BUS);
-			 return -1;
-		 }
-	 }
-
-	 switch (mode)
-    	{
-    	case I2C_API_XFER_MODE_SEND:
-   	 {
-        struct i2c_msg msg;
-
-        msg.addr = saddr ;
-        msg.flags = 0;
-        msg.len = size;
-        msg.buf = buf;
-
-        ret = i2c_transfer(adap, &msg, 1);
-        break;
-    }
-
-    case I2C_API_XFER_MODE_RECV:
-    {
-
-        struct i2c_msg msg[2];
-        char subaddr;
-        subaddr = sub_addr & 0xff;
-
-        msg[0].addr =saddr ;
-        msg[0].flags = 0;
-        msg[0].len = 1;
-        msg[0].buf = &subaddr;
-
-        msg[1].addr = saddr;
-        msg[1].flags = I2C_M_RD;
-        msg[1].len = size;
-        msg[1].buf = buf;
-
-
-        ret = i2c_transfer(adap, msg, 2);
-        break;
-    }
-   case I2C_API_XFER_MODE_RECV_SUBADDR_2BYTES:
-    {
-
-        struct i2c_msg msg[2];
-        char SubAddr[2];
-
-        SubAddr[0] = (sub_addr >> 8) & 0xff;
-        SubAddr[1] = sub_addr & 0xff;
-
-        msg[0].addr = saddr ;
-        msg[0].flags = 0;
-        msg[0].len = 2;
-        msg[0].buf = SubAddr;
-
-        msg[1].addr = saddr ;
-        msg[1].flags = I2C_M_RD;
-        msg[1].len = size;
-        msg[1].buf = buf;
-
-        ret = i2c_transfer(adap, msg, 2);
-        break;
-
-    }
-	default:
-        return -EINVAL;
-    }
+	int ret;
+	ret = SOC_I2C_Rec(DSI83_I2C_BUS,DSI83_I2C_ADDR,sub_addr,buf,1);
 	return ret;
 }
 
-static int SN65_register_read(unsigned char sub_addr,char *buf)
-{int ret;
-	ret = i2c_rw(DSI83_I2C_ADDR,sub_addr,I2C_API_XFER_MODE_RECV,buf,1);
-return ret;
-}
-
 static int SN65_register_write( char *buf)
-{int ret;
-	ret = i2c_rw(DSI83_I2C_ADDR,0,I2C_API_XFER_MODE_SEND,buf,2);
-return ret;
+{
+	int ret;
+	ret = SOC_I2C_Send(DSI83_I2C_BUS,DSI83_I2C_ADDR,buf,2);
+	return ret;
 }
 
 static int SN65_Sequence_seq4(void)
@@ -125,10 +40,10 @@ static int SN65_Sequence_seq4(void)
 		if(buf2[1] != buf_piont[i+1])
 		{
 			printk(KERN_CRIT "Warning regitster(0x%.2x),write(0x%.2x) and read back(0x%.2x) Unequal\n",\
-buf_piont[i],buf_piont[i+1],buf2[1]);
+			buf_piont[i],buf_piont[i+1],buf2[1]);
 		}
 	}
-return ret;
+	return ret;
 }
 
 static int SN65_Sequence_seq6(void)
@@ -139,7 +54,7 @@ static int SN65_Sequence_seq6(void)
 	buf2[1]=0x01;
 	printk(KERN_CRIT "dsi83:Sequence 6\n");
 	ret = SN65_register_write(buf2);
-return ret;
+	return ret;
 }
 static int SN65_Sequence_seq7(void)
 {
@@ -159,18 +74,39 @@ static int SN65_Sequence_seq7(void)
 			ret = SN65_register_read(buf2[0],&buf2[1]);
 			k = buf2[1]&0x80;
 			printk(KERN_CRIT "dsi83:Wait for %d,r = 0x%.2x\n",i,buf2[1]);
-			msleep(5);
 			i++;
-			if(i>10)
+			if(i>100)
 			{
 				printk(KERN_CRIT "dsi83:Warning wait time out .. break\n");
 				break;
 			}
-			mdelay(1000);
+			msleep(20);
 		}
 	}
 return ret;
 }
+
+static int SN65_Sequence_seq8(void)  /*seq 8 the bit must be set after the CSR`s are updated*/
+{
+	int ret;
+	char buf2[2];
+	
+#ifdef DSI83_DEBUG
+	dsi83_dump_reg();
+#endif
+	printk(KERN_CRIT "dsi83:Sequence 8\n");
+	buf2[0]=0x09;
+	buf2[1]=0x01;
+	ret = SN65_register_write(buf2);
+	lidbg_dsi83("write(0x09) = 0x%.2x\n",buf2[1]);
+	
+#ifdef DSI83_DEBUG
+	mdelay(100);
+	dsi83_dump_reg();
+#endif	
+	return ret;
+}
+
 
 #ifdef DSI83_DEBUG
 static void dsi83_dump_reg(void)
@@ -178,7 +114,6 @@ static void dsi83_dump_reg(void)
 	int i;
 	unsigned char reg;
 	
-	//int ret;
 	char buf1[2];
 	buf1[0]=0xe5;
 	buf1[1]=0xff;
@@ -189,6 +124,7 @@ static void dsi83_dump_reg(void)
 	}
 
 /*
+	int ret;
 	SN65_register_read(0xe1, &reg);
 	printk(KERN_CRIT "[LSH]:reg-0xE1=0x%x.\n",reg);
 	SN65_register_read(0xe5, &reg);
@@ -216,74 +152,6 @@ static void dsi83_dump_reg(void)
 }
 #endif
 
-static int SN65_Sequence_seq8(void)  /*seq 8 the bit must be set after the CSR`s are updated*/
-{
-	int ret;
-	char buf2[2];
-	
-#ifdef DSI83_DEBUG
-	dsi83_dump_reg();
-#endif
-	printk(KERN_CRIT "dsi83:Sequence 8\n");
-	buf2[0]=0x09;
-	buf2[1]=0x01;
-	ret = SN65_register_write(buf2);
-	lidbg_dsi83("write(0x09) = 0x%.2x\n",buf2[1]);
-	
-#ifdef DSI83_DEBUG
-	mdelay(100);
-	dsi83_dump_reg();
-#endif	
-	return ret;
-}
-
-#if 1
-int dsi83_io_config(u32 gpio_num, char *label)
-{
-	int rc = 0;
-	
-	if (!gpio_is_valid(gpio_num)) 
-	{
-		printk(KERN_CRIT "dsi83:gpio-%u isn't valid!\n",gpio_num);
-		return -ENODEV;
-	}
-	
-	rc = gpio_request(gpio_num, label);
-	if (rc) 
-	{
-		printk(KERN_CRIT "dsi83:request gpio-%u failed, rc=%d\n", gpio_num, rc);
-		//gpio_free(gpio_num);
-		return -ENODEV;
-	}
-	rc = gpio_tlmm_config(GPIO_CFG(
-			gpio_num, 0,
-			GPIO_CFG_OUTPUT,
-			GPIO_CFG_PULL_DOWN,
-			GPIO_CFG_2MA),
-			GPIO_CFG_ENABLE);
-
-	if (rc) 
-	{
-		printk(KERN_CRIT "dsi83:unable to config tlmm = %d\n", gpio_num);
-		gpio_free(gpio_num);
-		return -ENODEV;
-	}
-
-	return 0;
-}
-#endif
-
-static int dsi83_enable(void)
-{
-    return gpio_direction_output(DSI83_GPIO_EN, 1);
-}
-
-/*
-static int dsi83_disable(void)
-{
-    return gpio_direction_output(DSI83_GPIO_EN, 0);
-}
-*/
 
 static int SN65_devices_read_id(void)
 {
@@ -304,32 +172,34 @@ static int SN65_devices_read_id(void)
 
 }
 
+static void dsi83_enable(void)
+{
+	SOC_IO_Output(0, DSI83_GPIO_EN, 1);
+}
+
 static void T123_reset(void)
 {
-	gpio_direction_output(T123_GPIO_RST, 0);
-	mdelay(300);
-	gpio_direction_output(T123_GPIO_RST, 1);
-	mdelay(20);
+	SOC_IO_Output(0, T123_GPIO_RST, 0);
+	msleep(300);
+	SOC_IO_Output(0, T123_GPIO_RST, 1);
+	msleep(20);
 }
 
 
 static void panel_reset(void)
 {
-	gpio_direction_output(PANEL_GPIO_RESET, 0);
-	mdelay(10);
-	gpio_direction_output(PANEL_GPIO_RESET, 1);
-	mdelay(20);
+	SOC_IO_Output(0, PANEL_GPIO_RESET, 0);
+	msleep(10);
+	SOC_IO_Output(0, PANEL_GPIO_RESET, 1);
+	msleep(20);
 }
 
 #if defined(CONFIG_FB)
 void dsi83_suspend(void)
-{
-	//printk(KERN_CRIT "[LSH-dsi83]:enter %s().\n", __func__);
-}
+{}
 
 void dsi83_resume(void)
 {
-	//printk(KERN_CRIT "[LSH-dsi83]:enter %s().\n", __func__);
 	queue_delayed_work(dsi83_workqueue, &dsi83_work, 0);
 }
 
@@ -339,7 +209,6 @@ static int dsi83_fb_notifier_callback(struct notifier_block *self,
 	struct fb_event *evdata = data;
 	int *blank;
 	
-	//printk(KERN_CRIT "[LSH-dsi83]:enter %s().\n", __func__);
 	if (evdata && evdata->data && event == FB_EVENT_BLANK) 
 	{
 		blank = evdata->data;
@@ -360,7 +229,7 @@ static void dsi83_work_func(struct work_struct *work)
 {
     int ret = 0;
 	int i;
-	
+	DUMP_FUN;
 	for(i = 0; i < 3; ++i)
 	{
 		ret = SN65_devices_read_id();
@@ -393,76 +262,27 @@ static void dsi83_work_func(struct work_struct *work)
 }
 
 
+int dsi83_start(void *data)
+{
+	dsi83_enable();
+	panel_reset();
+	T123_reset();
+	queue_delayed_work(dsi83_workqueue, &dsi83_work, 0);
+	return 0;
+
+}
+
+
 static int dsi83_probe(struct platform_device *pdev)
 {
 	int ret = 0;
 	
 	lidbg_dsi83("%s:enter\n", __func__);
 
-	adap_glb = i2c_get_adapter(DSI83_I2C_BUS);
-
-	if(adap_glb == NULL || adap_glb->name==NULL)
-	{
-		printk(KERN_CRIT "dsi83:%s():i2c_get_adapter(%d) error!",__func__,DSI83_I2C_BUS);
-		return -ENODEV;
-	}
-/*	
-    ret = dsi83_io_config(DSI83_GPIO_EN, "dsi83_en");
-	if(ret)
-	{
-		return ret;
-	}
-
-
-	ret = dsi83_io_config(PANEL_GPIO_RESET, "lcd_reset");
-	if(ret)
-	{
-		gpio_free(DSI83_GPIO_EN);
-		return ret;
-	}
-*/	
-	ret = dsi83_io_config(T123_GPIO_RST, "T123_reset");
-	if(ret)
-	{
-		//gpio_free(PANEL_GPIO_RESET);
-		//gpio_free(DSI83_GPIO_EN);
-		return ret;
-	}
-
-	//INIT_WORK(&dsi83_work, dsi83_work_func);
 	INIT_DELAYED_WORK(&dsi83_work, dsi83_work_func);
 	dsi83_workqueue = create_workqueue("dsi83");
-
-	dsi83_enable();
-	panel_reset();
-	//mdelay(100);
-	T123_reset();
-
-	//schedule_work(&dsi83_work);
-	queue_delayed_work(dsi83_workqueue, &dsi83_work, DSI83_DELAY_TIME);
-
-#if 0
-	ret = SN65_devices_read_id();
-	if (ret)
-	{
-		printk(KERN_CRIT "dsi83:DSI83 match ID falied!\n");
-		return ret;
-	}
-
-	printk(KERN_CRIT "dsi83:DSI83 match ID success!\n");
-
-	SN65_Sequence_seq4();
 	
-	ret = SN65_Sequence_seq6();
-	if(ret < 0)
-		printk(KERN_CRIT "dsi83:SN65_Sequence_seq6(),err,ret = %d.\n", ret);
-	
-	SN65_Sequence_seq7();
-	
-	ret = SN65_Sequence_seq8();
-	if(ret < 0)
-		printk(KERN_CRIT "dsi83:SN65_Sequence_seq8(),err,ret = %d.\n", ret);
-#endif
+	CREATE_KTHREAD(dsi83_start, NULL);
 
 #if defined(CONFIG_FB)
 		dsi83_fb_notif.notifier_call = dsi83_fb_notifier_callback;
@@ -473,7 +293,6 @@ static int dsi83_probe(struct platform_device *pdev)
 
 #endif
 
-
 	return 0;
 
 }
@@ -483,22 +302,9 @@ static int dsi83_remove(struct platform_device *pdev)
 	cancel_work_sync(dsi83_workqueue);
 	flush_workqueue(dsi83_workqueue);
 	destroy_workqueue(dsi83_workqueue);
-
-	gpio_free(T123_GPIO_RST);
-    //gpio_free(PANEL_GPIO_RESET);
-    //gpio_free(DSI83_GPIO_EN);
     return 0;
 }
 
-
-/*
-static struct miscdevice misc =
-{
-    .minor = MISC_DYNAMIC_MINOR,
-    .name = DEVICE_NAME,
-    .fops = &dev_fops,
-};
-*/
 
 static struct platform_device dsi83_devices =
 {
@@ -518,18 +324,15 @@ static struct platform_driver dsi83_driver =
 
 static int __devinit dsi83_init(void)
 {
-    lidbg_dsi83("%s:enter\n", __func__);
+	DUMP_BUILD_TIME;
+	LIDBG_GET;
     platform_device_register(&dsi83_devices);
     platform_driver_register(&dsi83_driver);
-    //misc_register(&misc);
     return 0;
 
 }
 
-static void __exit dsi83_exit(void)
-{
-
-}
+static void __exit dsi83_exit(void){}
 
 
 module_init(dsi83_init);
