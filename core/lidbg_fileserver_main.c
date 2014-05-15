@@ -107,7 +107,7 @@ void check_conf_file(void)
         fs_mem_log( "<overwrite:push,update?>\n");
         fs_remount_system();
         is_out_updated = true;
-        analysis_copylist("/flysystem/lib/out/copylist.conf");
+        analysis_copylist(get_lidbg_file_path(buff,"copylist.conf"));
         copy_all_conf_file();
         lidbg_rm("/data/kmsg.txt");
         lidbg_rm(LIDBG_KMSG_FILE_PATH);

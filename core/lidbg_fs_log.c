@@ -26,10 +26,11 @@ void remount_system(void)
     if(!g_is_remountd_system)
     {
         g_is_remountd_system = 1;
+        lidbg_uevent_shell("setenforce Permissive");
         lidbg_chmod("/system/bin/mount");
         lidbg_mount("/system");
         lidbg_mount("/flysystem");
-        msleep(300);
+        msleep(5000);
         lidbg_chmod("/system");
         lidbg_chmod("/flysystem");
         lidbg_chmod("/system/bin");
