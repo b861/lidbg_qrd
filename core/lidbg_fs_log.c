@@ -26,11 +26,12 @@ void remount_system(void)
     if(!g_is_remountd_system)
     {
         g_is_remountd_system = 1;
-        lidbg_shell_cmd("setenforce Permissive");
         lidbg_chmod("/system/bin/mount");
         lidbg_mount("/system");
         lidbg_mount("/flysystem");
-        msleep(5000);
+#ifdef SOC_msm8x25
+		msleep(3000);
+#endif
         lidbg_chmod("/system");
         lidbg_chmod("/flysystem");
         lidbg_chmod("/system/bin");
