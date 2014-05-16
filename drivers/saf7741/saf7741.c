@@ -590,7 +590,7 @@ static int saf7741_probe(struct platform_device *pdev)
 {
 	int ret = 0;
 
-    if(g_var.is_fly)
+    if((g_var.is_fly) || (g_var.recovery_mode))
     {
         lidbg("saf7741_probe do nothing\n");
         return 0;

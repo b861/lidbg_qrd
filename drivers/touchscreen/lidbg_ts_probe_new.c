@@ -144,6 +144,7 @@ struct probe_device *ts_scan(struct probe_device *tsdev, int size)
 
 void ts_probe_prepare(void)
 {
+    char buff[50] = {0};
     fs_fill_list(FLYHAL_CONFIG_PATH, FS_CMD_FILE_LISTMODE, &flyhal_config_list);
     FS_REGISTER_INT(ts_scan_delayms, "ts_scan_delayms", 500, NULL);
     FS_REGISTER_INT(ts_choose_touchscreen, "ts_choose_touchscreen", 0, NULL);
@@ -154,8 +155,7 @@ void ts_probe_prepare(void)
     else
         LIDBG_WARN("<TS.XY will normal>\n");
 
-    lidbg_insmod("/system/lib/modules/out/lidbg_ts_to_recov.ko");
-    lidbg_insmod("/flysystem/lib/out/lidbg_ts_to_recov.ko");
+    lidbg_insmod(get_lidbg_file_path(buff, "lidbg_ts_to_recov.ko"));
     fs_register_filename_list(TS_LOG_PATH, true);
 }
 //zone end
@@ -174,7 +174,7 @@ void ts_data_report(touch_type t,int id,int x,int y,int w)
 			g_var.flag_for_15s_off = 1000;
 		}
 	}
-	if((id == 4) && (t == TOUCH_DOWN) && (!g_var.is_fly)) // 5 fingers
+	if((id == 4) && (t == TOUCH_DOWN) /*&& (!g_var.is_fly)*/) // 5 fingers
 	{
 		SOC_Key_Report(KEY_BACK,KEY_PRESSED_RELEASED);
 	}

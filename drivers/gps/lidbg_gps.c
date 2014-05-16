@@ -363,6 +363,12 @@ static int  gps_probe(struct platform_device *pdev)
     dev_t dev_number = MKDEV(major_number, 0);
 
     DUMP_FUN;
+	
+    if(g_var.recovery_mode)
+    {
+        lidbg("gps_probe do nothing\n");
+        return 0;
+    }
 
     if(is_ublox_exist() < 0)
     {
