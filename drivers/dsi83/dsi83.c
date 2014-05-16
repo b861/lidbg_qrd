@@ -1,11 +1,17 @@
 
 #include "lidbg.h"
-#include "dsi83.h"
+#include <dsi83.h>
 
 LIDBG_DEFINE;
 
 static struct delayed_work dsi83_work;
 static struct workqueue_struct *dsi83_workqueue;
+
+#if defined(CONFIG_FB)
+	struct notifier_block dsi83_fb_notif;
+#elif defined(CONFIG_HAS_EARLYSUSPEND)
+
+#endif
 
 static int SN65_register_read(unsigned char sub_addr,char *buf)
 {
@@ -67,7 +73,8 @@ static int SN65_Sequence_seq7(void)
 	ret = SN65_register_read(buf2[0],&buf2[1]);
 	lidbg_dsi83("read(0x0a) = 0x%.2x\n",buf2[1]);
 
-	{unsigned char k,i=0;
+	{
+		unsigned char k,i=0;
 		k = buf2[1]&0x80;
 		while(!k)
 		{
@@ -179,19 +186,12 @@ static void dsi83_enable(void)
 
 static void T123_reset(void)
 {
-	SOC_IO_Output(0, T123_GPIO_RST, 0);
-	msleep(300);
-	SOC_IO_Output(0, T123_GPIO_RST, 1);
-	msleep(20);
+	T123_RESET;
 }
-
 
 static void panel_reset(void)
 {
-	SOC_IO_Output(0, PANEL_GPIO_RESET, 0);
-	msleep(10);
-	SOC_IO_Output(0, PANEL_GPIO_RESET, 1);
-	msleep(20);
+	LCD_RESET;
 }
 
 #if defined(CONFIG_FB)
@@ -200,7 +200,7 @@ void dsi83_suspend(void)
 
 void dsi83_resume(void)
 {
-	queue_delayed_work(dsi83_workqueue, &dsi83_work, 0);
+	queue_delayed_work(dsi83_workqueue, &dsi83_work, DSI83_DELAY_TIME);
 }
 
 static int dsi83_fb_notifier_callback(struct notifier_block *self,
@@ -225,11 +225,22 @@ static int dsi83_fb_notifier_callback(struct notifier_block *self,
 
 #endif
 
+void dsi83_gpio_init()
+{
+	dsi83_enable();
+	panel_reset();
+	T123_reset();
+}
+
+
 static void dsi83_work_func(struct work_struct *work)
 {
     int ret = 0;
 	int i;
 	DUMP_FUN;
+
+	dsi83_gpio_init();
+	
 	for(i = 0; i < 3; ++i)
 	{
 		ret = SN65_devices_read_id();
@@ -262,27 +273,15 @@ static void dsi83_work_func(struct work_struct *work)
 }
 
 
-int dsi83_start(void *data)
-{
-	dsi83_enable();
-	panel_reset();
-	T123_reset();
-	queue_delayed_work(dsi83_workqueue, &dsi83_work, 0);
-	return 0;
-
-}
-
 
 static int dsi83_probe(struct platform_device *pdev)
 {
 	int ret = 0;
-	
 	lidbg_dsi83("%s:enter\n", __func__);
 
 	INIT_DELAYED_WORK(&dsi83_work, dsi83_work_func);
 	dsi83_workqueue = create_workqueue("dsi83");
-	
-	CREATE_KTHREAD(dsi83_start, NULL);
+	queue_delayed_work(dsi83_workqueue, &dsi83_work, DSI83_DELAY_TIME);
 
 #if defined(CONFIG_FB)
 		dsi83_fb_notif.notifier_call = dsi83_fb_notifier_callback;

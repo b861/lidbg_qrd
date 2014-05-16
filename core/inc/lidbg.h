@@ -70,6 +70,7 @@
 #include <linux/i2c-gpio.h>   //for i2c-gpio
 #include <linux/i2c-algo-bit.h>	//add by huangzongqiang
 #include <linux/reboot.h>
+#include <linux/workqueue.h>
 
 
 //////lidbg//////

@@ -1,44 +1,28 @@
 #ifndef __DSI83_H__
 #define __DSI83_H__
 
-#include <asm/uaccess.h>
-#include <linux/file.h>
-#include <linux/syscalls.h>
-#include <asm/system.h>
 
-#include <linux/workqueue.h>
-
-#if defined(CONFIG_FB)
-#include <linux/notifier.h>
-#include <linux/fb.h>
-#elif defined(CONFIG_HAS_EARLYSUSPEND)
-#include <linux/earlysuspend.h>
-#endif
-
-
-#include "lidbg.h"
-
-#define DSI83_DELAY_TIME	2//2000  //(500 * HZ/1000) /* 500 msec */
-
-#ifdef SOC_msm8x26
-#define 	DSI83_GPIO_EN          (62)
-#define 	PANEL_GPIO_RESET       (25)
-#define 	T123_GPIO_RST          (28)
-
-#define 	DSI83_I2C_BUS  		   (2)
-#define 	DSI83_I2C_ADDR	       (0x2d)
-
+#define DSI83_DELAY_TIME	(0)
 //#define     DSI83_DEBUG
 //#define     TEST_PATTERN
 
+#ifdef SOC_msm8x26
+#define 	DSI83_GPIO_EN          (62)
+#define 	DSI83_I2C_BUS  		   (2)
+#define 	DSI83_I2C_ADDR	       (0x2d)
 #else  //8974
 #define 	DSI83_GPIO_EN          (62)
 #define 	PANEL_GPIO_RESET       (62)
 #define 	DSI83_I2C_BUS  		   (2)
 #define 	DSI83_I2C_ADDR	       (0x2d)
-
-//#define     TEST_PATTERN
 #endif
+
+#ifdef DSI83_DEBUG
+#define lidbg_dsi83(msg...)  do { printk( KERN_CRIT "[lidbg] dsi83:" msg);}while(0)
+#else
+#define lidbg_dsi83(msg...)   do{ }while(0)
+#endif
+
 
 #ifndef TEST_PATTERN
 char dsi83_conf[] =
@@ -136,22 +120,6 @@ char dsi83_conf[] =    //dsi83 test mode
 0x3E, 0x00,
 0xff
 };
-#endif
-
-#define I2C_API_XFER_MODE_SEND 1
-#define I2C_API_XFER_MODE_RECV 2
-#define I2C_API_XFER_MODE_RECV_SUBADDR_2BYTES 3
-
-#ifdef DSI83_DEBUG
-#define lidbg_dsi83(msg...)  do { printk( KERN_CRIT "[lidbg] dsi83:" msg);}while(0)
-#else
-#define lidbg_dsi83(msg...)   do{ }while(0)
-#endif
-
-#if defined(CONFIG_FB)
-	struct notifier_block dsi83_fb_notif;
-#elif defined(CONFIG_HAS_EARLYSUSPEND)
-
 #endif
 
 
