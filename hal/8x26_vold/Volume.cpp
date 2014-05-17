@@ -49,6 +49,9 @@
 #include "Process.h"
 #include "cryptfs.h"
 
+#include "Ntfs.h"
+#include "Exfat.h"
+
 extern "C" void dos_partition_dec(void const *pp, struct dos_partition *d);
 extern "C" void dos_partition_enc(void *pp, struct dos_partition *d);
 
@@ -229,6 +232,149 @@ int Volume::createDeviceNode(const char *path, int major, int minor) {
     return 0;
 }
 
+
+//add by wangyihong for supporting multi partitions
+/* path: partition mount path. eg: '/mnt/usbhost1/8_1' */
+int Volume::deleteDeviceNode(const char *path){
+#if 0
+    int major = 0, minor = 0;
+	char devicePath[255];
+
+	char *temp_str1 = NULL;
+	char *temp_str2 = NULL;
+	char str_major[256];
+	char str_path[256];
+	int len = 0;
+
+	if(!path){
+		SLOGE("Volume::deleteDeviceNode: path(%s) is invalid\n", path);
+		return -1;
+	}
+
+	SLOGI("Volume::deleteDeviceNode: path=%s\n", path);
+
+	/* get device major and minor from path */
+	memset(str_major, 0, 256);
+	memset(str_path, 0, 256);
+	strcpy(str_path, path);
+
+	temp_str1 = strrchr(str_path, '/');
+	temp_str2 = strrchr(str_path, '_');
+	if(temp_str1 == NULL || temp_str2 == NULL){
+		SLOGE("Volume::deleteDeviceNode: path(%s) is invalid\n", path);
+		return -1;
+	}
+
+	/* delete '/' & '_' */
+	temp_str1++;
+	temp_str2++;
+	if(temp_str1 == NULL || temp_str2 == NULL){
+		SLOGE("Volume::deleteDeviceNode: path(%s) is invalid\n", path);
+		return -1;
+	}
+
+	len = strcspn(temp_str1, "_");
+	strncpy(str_major, temp_str1, len);
+
+	major = strtol(str_major, NULL, 10);
+	minor = strtol(temp_str2, NULL, 10);
+
+	SLOGI("Volume::deleteDeviceNode: major=%d, minor=%d\n", major, minor);
+
+	/* delete DeviceNode */
+	memset(devicePath, 0, 255);
+	sprintf(devicePath, "/dev/block/vold/%d:%d", major, minor);
+
+	if (unlink(devicePath)) {
+		SLOGE("Volume::deleteDeviceNode: Failed to remove %s (%s)", path, strerror(errno));
+		return -1;
+	}else{
+		SLOGI("Volume::deleteDeviceNode: delete DeviceNode '%s' successful\n", path);
+	}
+
+#endif
+
+	return 0;
+}
+
+char* Volume::createMountPoint(const char *path, int major, int minor) {
+	char* mountpoint = (char*) malloc(sizeof(char)*256);
+
+	memset(mountpoint, 0, sizeof(char)*256);
+	//sprintf(mountpoint, "%s/%d_%d", path, major, minor);
+	sprintf(mountpoint, "%s/disk_%d", path, minor);
+	if( access(mountpoint, F_OK) ){
+		SLOGI("Volume: file '%s' is not exist, create it", mountpoint);
+
+		if(mkdir(mountpoint, 0777)){
+			SLOGW("Volume: create file '%s' failed, errno is %d", mountpoint, errno);
+			return NULL;
+		}
+	}else{
+	
+		SLOGW("Volume: file '%s' is exist, can not create it", mountpoint);
+		return mountpoint;
+	}
+
+	return mountpoint;
+}
+
+int Volume::deleteMountPoint(char* mountpoint) {
+	if(mountpoint){
+		SLOGW("Volume::deleteMountPoint: %s exist", mountpoint); 
+		rmdir(mountpoint);
+		if( !access(mountpoint, F_OK) ){
+			SLOGW("Volume::deleteMountPoint: %s", mountpoint);
+			if(rmdir(mountpoint)){
+				SLOGW("Volume: remove file '%s' failed, errno is %d", mountpoint, errno);
+				return -1;
+			}
+		}
+
+	
+		free(mountpoint);
+		mountpoint = NULL;
+	}
+
+	return 0;
+}
+
+void Volume::saveUnmountPoint(char* mountpoint){
+	int i = 0;
+
+	for(i = 0; i < MAX_UNMOUNT_PARTITIONS; i++){
+		if(mUnMountPart[i] == NULL){
+			mUnMountPart[i] = mMountPart[i];
+		}
+	}
+
+	if(i >= MAX_UNMOUNT_PARTITIONS){
+		SLOGI("Volume::saveUnmountPoint: unmount point is over %d", MAX_UNMOUNT_PARTITIONS);
+	}
+
+	return;
+}
+
+
+void Volume::deleteUnMountPoint(int clear){
+	int i = 0;
+
+	for(i = 0; i < MAX_UNMOUNT_PARTITIONS; i++){
+		if(mUnMountPart[i]){
+			SLOGW("Volume::deleteUnMountPoint: %s", mUnMountPart[i]);
+
+			if(deleteMountPoint(mUnMountPart[i]) == 0){
+				deleteDeviceNode(mUnMountPart[i]);
+				mUnMountPart[i] = NULL;
+			}
+		}
+	}
+
+	return;
+}
+
+
+
 int Volume::formatVol(bool wipe) {
 
     if (getState() == Volume::State_NoMedia) {
@@ -316,7 +462,8 @@ int Volume::mountVol() {
     dev_t deviceNodes[4];
     int n, i, rc = 0;
     char errmsg[255];
-
+    int mounted = 0;
+	
     int flags = getFlags();
     bool providesAsec = (flags & VOL_PROVIDES_ASEC) != 0;
 
@@ -375,7 +522,7 @@ int Volume::mountVol() {
        char new_sys_path[MAXPATHLEN];
        char nodepath[256];
        int new_major, new_minor;
-
+	SLOGE("run into step 1...\n");
        if (n != 1) {
            /* We only expect one device node returned when mounting encryptable volumes */
            SLOGE("Too many device nodes returned when mounting %d\n", getMountpoint());
@@ -412,6 +559,7 @@ int Volume::mountVol() {
         }
     }
 
+    SLOGE("the num of devices nodes = %d\n", n);
     for (i = 0; i < n; i++) {
         char devicePath[255];
 
@@ -421,28 +569,157 @@ int Volume::mountVol() {
         SLOGI("%s being considered for volume %s\n", devicePath, getLabel());
 
         errno = 0;
+        int gid;
         setState(Volume::State_Checking);
+	mMountedPartNum = n;
 
-        if (Fat::check(devicePath)) {
-            if (errno == ENODATA) {
-                SLOGW("%s does not contain a FAT filesystem\n", devicePath);
-                continue;
-            }
-            errno = EIO;
-            /* Badness - abort the mount */
-            SLOGE("%s failed FS checks (%s)", devicePath, strerror(errno));
+if(n==1){
+	if(Ntfs::check(devicePath) == 0)
+	{
+		SLOGW("this is NTFS filesystem, ready to mount!\n");
+		if (Ntfs::doMount(devicePath, getMountpoint(), false, false, false, AID_MEDIA_RW, AID_MEDIA_RW, 0007, true))
+		{
+		        SLOGE("%s failed to mount via NTFS (%s)\n", devicePath, strerror(errno));
+		        continue;
+		}
+	}
+        else if (Fat::check(devicePath)==0) {
+		if (Fat::doMount(devicePath, getMountpoint(), false, false, false, AID_MEDIA_RW, AID_MEDIA_RW, 0007, true)) {
+    		 	SLOGE("%s failed to mount via VFAT (%s)\n", devicePath, strerror(errno));
+            		continue;
+        	}
+        }
+	else{
+		if (errno == ENODATA) {
+	                SLOGW("%s unkown filesystem\n", devicePath);
+	                continue;
+            	}
+	            errno = EIO;
+	            /* Badness - abort the mount */
+	            SLOGE("%s failed FS checks (%s)", devicePath, strerror(errno));
+	            setState(Volume::State_Idle);
+	            return -1;
+	}
+
+        extractMetadata(devicePath);
+
+        if (providesAsec && mountAsecExternal() != 0) {
+            SLOGE("Failed to mount secure area (%s)", strerror(errno));
+            umount(getMountpoint());
             setState(Volume::State_Idle);
             return -1;
         }
 
-        errno = 0;
-        int gid;
+        char service[64];
+        snprintf(service, 64, "fuse_%s", getLabel());
+  	 property_set("ctl.start", service);
 
-        if (Fat::doMount(devicePath, getMountpoint(), false, false, false,
-                AID_MEDIA_RW, AID_MEDIA_RW, 0007, true)) {
-            SLOGE("%s failed to mount via VFAT (%s)\n", devicePath, strerror(errno));
-            continue;
+        setState(Volume::State_Mounted);
+        mCurrentlyMountedKdev = deviceNodes[i];
+        return 0;
+}
+
+
+	if(n>1){
+	            SLOGI("[WANG]: this is muti partitions disk.\n");
+		    mFuseMountPart[i] = createMountPoint( "/storage/udisk", MAJOR(deviceNodes[i]), MINOR(deviceNodes[i]) );
+	            mMountPart[i] = createMountPoint( "/mnt/media_rw/udisk", MAJOR(deviceNodes[i]), MINOR(deviceNodes[i]) );
+	            if(mMountPart[i] == NULL)
+	            {
+	                SLOGE("Part is already mount, can not mount again, (%s)\n", strerror(errno));
+	                continue;
+	            }
+	 	if (Fat::check(devicePath)==0){
+		            if (Fat::doMount(devicePath, mMountPart[i], false, false, false, AID_MEDIA_RW, AID_MEDIA_RW, 0007, true))
+		            {
+		                SLOGE("Part(%s) failed to move mount (%s)\n", mMountPart[i], strerror(errno));
+		                deleteMountPoint(mMountPart[i]);
+		                mMountPart[i] = NULL;
+		                continue;
+		            }
+	 	}
+		else if(Ntfs::check(devicePath) == 0)
+		{
+			SLOGW("this is NTFS filesystem, ready to mount!\n");
+			if (Ntfs::doMount(devicePath, mMountPart[i], false, false, false, AID_MEDIA_RW, AID_MEDIA_RW, 0007, true))
+			{
+			    SLOGE("%s failed to mount via NTFS (%s)\n", mMountPart[i], strerror(errno));
+			    deleteMountPoint(mMountPart[i]);
+		            mMountPart[i] = NULL;
+			    continue;
+			}
+		}
+	            SLOGW("mountVol: mount %s, successful\n", mMountPart[i]);
+	            mCurrentlyMountedKdev = deviceNodes[i];
+	            mounted++;
+
+			if(n==(i+1)){
+				SLOGW("report app mounted  successful\n");
+			extractMetadata(devicePath);
+
+			if (providesAsec && mountAsecExternal() != 0) {
+			    SLOGE("Failed to mount secure area (%s)", strerror(errno));
+			    umount(getMountpoint());
+			    setState(Volume::State_Idle);
+			    return -1;
+			}
+
+			char service[64];
+			snprintf(service, 64, "fuse_%s", getLabel());
+			SLOGE("getlabel is %s\n", getLabel());
+			//property_set("ctl.start", service);
+			property_set("ctl.start", "fuse_disk1");
+			property_set("ctl.start", "fuse_disk2");
+			property_set("ctl.start", "fuse_disk3");
+			property_set("ctl.start", "fuse_disk4");
+
+			setState(Volume::State_Mounted);
+			return 0;
+			}
+		 
+	}
+
+
+ 
+
+
+
+
+	
+		
+
+	/*if(Exfat::check(devicePath) == 0)
+	{
+		SLOGW("this is exfat filesystem, no process!\n");
+	}	
+	else*/ 
+	#if 0
+	if(Ntfs::check(devicePath) == 0)
+	{
+		SLOGW("this is NTFS filesystem, ready to mount!\n");
+		if (Ntfs::doMount(devicePath, getMountpoint(), false, false, false, AID_MEDIA_RW, AID_MEDIA_RW, 0007, true))
+		{
+		        SLOGE("%s failed to mount via NTFS (%s)\n", devicePath, strerror(errno));
+		        continue;
+		}
+	}
+        else if (Fat::check(devicePath)==0) {
+		if (Fat::doMount(devicePath, getMountpoint(), false, false, false, AID_MEDIA_RW, AID_MEDIA_RW, 0007, true)) {
+    		 	SLOGE("%s failed to mount via VFAT (%s)\n", devicePath, strerror(errno));
+            		continue;
+        	}
         }
+	else{
+		if (errno == ENODATA) {
+	                SLOGW("%s unkown filesystem\n", devicePath);
+	                continue;
+            	}
+	            errno = EIO;
+	            /* Badness - abort the mount */
+	            SLOGE("%s failed FS checks (%s)", devicePath, strerror(errno));
+	            setState(Volume::State_Idle);
+	            return -1;
+	}
 
         extractMetadata(devicePath);
 
@@ -460,6 +737,7 @@ int Volume::mountVol() {
         setState(Volume::State_Mounted);
         mCurrentlyMountedKdev = deviceNodes[i];
         return 0;
+		#endif
     }
 
     SLOGE("Volume %s found no suitable devices for mounting :(\n", getLabel());
@@ -497,7 +775,7 @@ int Volume::mountAsecExternal() {
 }
 
 int Volume::doUnmount(const char *path, bool force) {
-    int retries = 10;
+    int retries = 5;
 
     if (mDebug) {
         SLOGD("Unmounting {%s}, force = %d", path, force);
@@ -548,15 +826,44 @@ int Volume::unmountVol(bool force, bool revert) {
     char service[64];
     snprintf(service, 64, "fuse_%s", getLabel());
     property_set("ctl.stop", service);
+	property_set("ctl.stop", "fuse_disk1");
+	property_set("ctl.stop", "fuse_disk2");
+	property_set("ctl.stop", "fuse_disk3");
+	property_set("ctl.stop", "fuse_disk4");
     /* Give it a chance to stop.  I wish we had a synchronous way to determine this... */
     sleep(1);
 
+	//add by flyaudio 
+	if(mMountedPartNum>1){
+		for(i = mMountedPartNum - 1; i >= 0; i--){
+			 SLOGW("fuseMountPart is %s", mFuseMountPart[i]);
+
+		    if (doUnmount(mFuseMountPart[i], force) != 0) {
+		        SLOGE("Failed to unmount %s (%s)", mFuseMountPart[i], strerror(errno));
+		    }
+			 deleteMountPoint(mFuseMountPart[i]);
+			if(mMountPart[i])
+		            {
+				if (doUnmount(mMountPart[i], force) != 0) {
+					SLOGE("Failed to unmount %s (%s)", getMountpoint(), strerror(errno));
+					deleteMountPoint(mMountPart[i]);
+					goto fail_remount_secure;
+				}
+
+		                if(deleteMountPoint(mMountPart[i]))
+		                	saveUnmountPoint(mMountPart[i]); 
+
+		                mMountPart[i] = NULL;
+		            }
+		}
+	}
     // TODO: determine failure mode if FUSE times out
 
     if (providesAsec && doUnmount(Volume::SEC_ASECDIR_EXT, force) != 0) {
         SLOGE("Failed to unmount secure area on %s (%s)", getMountpoint(), strerror(errno));
         goto out_mounted;
     }
+	SLOGI("begin to unmount  the last one");
 
     /* Now that the fuse daemon is dead, unmount it */
     if (doUnmount(getFuseMountpoint(), force) != 0) {
@@ -581,6 +888,7 @@ int Volume::unmountVol(bool force, bool revert) {
         revertDeviceInfo();
         SLOGI("Encrypted volume %s reverted successfully", getMountpoint());
     }
+
 
     setUuid(NULL);
     setUserLabel(NULL);

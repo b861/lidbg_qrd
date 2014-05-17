@@ -134,6 +134,11 @@ int DirectVolume::handleBlockEvent(NetlinkEvent *evt) {
                     handleDiskRemoved(dp, evt);
                 } else {
                     handlePartitionRemoved(dp, evt);
+	
+					rmdir("storage/udisk/disk_1");
+					rmdir("storage/udisk/disk_2");
+					rmdir("storage/udisk/disk_3");
+					rmdir("storage/udisk/disk_4");
                 }
             } else if (action == NetlinkEvent::NlActionChange) {
                 if (!strcmp(devtype, "disk")) {
@@ -335,6 +340,7 @@ void DirectVolume::handlePartitionRemoved(const char *devpath, NetlinkEvent *evt
         if (Volume::unmountVol(true, false)) {
             SLOGE("Failed to unmount volume on bad removal (%s)", 
                  strerror(errno));
+
             // XXX: At this point we're screwed for now
         } else {
             SLOGD("Crisis averted");
