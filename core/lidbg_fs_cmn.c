@@ -417,7 +417,7 @@ void cp_data_to_udisk(bool encode)
         memset(tbuff, '\0', sizeof(tbuff));
 
         lidbg_get_current_time(tbuff, NULL);
-        sprintf(dir, "/mnt/usbdisk/ID%d-%s", get_machine_id(), tbuff);
+        sprintf(dir, USB_MOUNT_POINT"/ID%d-%s", get_machine_id(), tbuff);
         lidbg_mkdir(dir);
         msleep(1000);
 
@@ -436,12 +436,14 @@ void cp_data_to_udisk(bool encode)
                     else
                         fs_copy_file(pos->filename, tbuff);
                 }
+                msleep(copy_delay);
                 if(pos->remove_after_copy)
                     lidbg_rm(pos->filename);
-                msleep(copy_delay);
 
             }
         }
+        sprintf(tbuff, "%s/*", dir);
+        lidbg_chmod(tbuff);
         lidbg_domineering_ack();
     }
     else
@@ -497,13 +499,13 @@ void fs_show_filename_list(void)
 static bool data_encode = false;
 int thread_cp_data_to_udiskt(void *data)
 {
-    fs_msg_fifo_to_file(NULL, NULL);
     cp_data_to_udisk(data_encode);
     return 0;
 }
 void fs_cp_data_to_udisk(bool encode)
 {
     data_encode = encode;
+    lidbg_chmod("/data/lidbg/*");
     CREATE_KTHREAD(thread_cp_data_to_udiskt, NULL);
 }
 //zone end

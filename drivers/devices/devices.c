@@ -97,7 +97,7 @@ static int thread_udisk_uevent(void *data)
         if(!wait_for_completion_interruptible(&udisk_event_wait))
         {
             ssleep(5);
-            if(fs_get_file_size("/mnt/usbdisk") == 0)
+            if(fs_get_file_size(USB_MOUNT_POINT) == 0)
             {
                 lidbgerr("--------------usb add event-----\n\n\n");
                 lidbg_readwrite_file("/sys/block/sda/uevent", NULL, "add", sizeof("add") - 1);

@@ -106,24 +106,25 @@ void callback_copy_file(char *dirname, char *filename)
 }
 void cb_password_update(char *password )
 {
-    analysis_copylist("/mnt/usbdisk/conf/copylist.conf");
+    analysis_copylist(USB_MOUNT_POINT"/conf/copylist.conf");
 
-    if(fs_is_file_exist("/mnt/usbdisk/out/release"))
+    LIDBG_WARN("<===============UPDATE_INFO =================>\n" );
+
+    if(fs_is_file_exist(USB_MOUNT_POINT"/out/release"))
     {
-        LIDBG_WARN("<===============UPDATE_INFO =================>\n" );
-        if( fs_update("/mnt/usbdisk/out/release", "/mnt/usbdisk/out", "/flysystem/lib/out") >= 0)
+        if( fs_update(USB_MOUNT_POINT"/out/release", USB_MOUNT_POINT"/out", "/flysystem/lib/out") >= 0)
         {
             if(delete_out_dir_after_update)
-                lidbg_rmdir("/mnt/usbdisk/out");
+                lidbg_rmdir(USB_MOUNT_POINT"/out");
             lidbg_launch_user(CHMOD_PATH, "777", "/flysystem/lib/out", "-R", NULL, NULL, NULL);
             lidbg_reboot();
         }
     }
-    else if(lidbg_readdir_and_dealfile("/mnt/usbdisk/out", callback_copy_file))
+    else if(lidbg_readdir_and_dealfile(USB_MOUNT_POINT"/out", callback_copy_file))
     {
         lidbg_rmdir(LIDBG_LOG_DIR);
         if(delete_out_dir_after_update)
-            lidbg_rmdir("/mnt/usbdisk/out");
+            lidbg_rmdir(USB_MOUNT_POINT"/out");
         lidbg_launch_user(CHMOD_PATH, "777", "/flysystem/lib/out", "-R", NULL, NULL, NULL);
         lidbg_reboot();
     }
@@ -164,7 +165,7 @@ int thread_reboot(void *data)
         return 0;
     }
     ssleep(reboot_delay_s);
-    volume_find = !!find_mounted_volume_by_mount_point("/mnt/usbdisk") ;
+    volume_find = !!find_mounted_volume_by_mount_point(USB_MOUNT_POINT) ;
     if(volume_find && !te_is_ts_touched())
     {
         lidbg("<lidbg:thread_reboot,call reboot,%d>\n", te_is_ts_touched());
@@ -214,7 +215,7 @@ void cb_kv_wifiadb(char *key, char *value)
 void cb_kv_app_install(char *key, char *value)
 {
     if(value && *value == '1')
-        lidbg_pm_install_dir("/mnt/usbdisk/apps");
+        lidbg_pm_install_dir(USB_MOUNT_POINT"/apps");
     else
         fs_mem_log("cb_kv_app_install:fail,%s\n", value);
 }

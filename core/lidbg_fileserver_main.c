@@ -8,7 +8,7 @@
 #define FS_VERSION "FS.VERSION:  [20131031]"
 bool is_out_updated = false;
 bool is_fs_work_enable = false;
-int fs_slient_level = 0;//level:0->mem_fifo    (1 err 2 warn 3suc)->uart
+int fs_slient_level = 0;//level:0->mem_fifo    (1 err 2 warn 3suc)->uart  4 debug
 struct lidbg_fifo_device *fs_msg_fifo;
 //zone end
 
@@ -145,8 +145,8 @@ void lidbg_fileserver_main_prepare(void)
     fs_fill_list(PATH_STATE_CONF, FS_CMD_FILE_CONFIGMODE, &fs_state_list);
 
     fs_copy_file(get_lidbg_file_path(buff, "build_time.conf"), LIDBG_MEM_DIR"build_time.txt");
-
-    fs_get_intvalue(&lidbg_core_list, "fs_slient_level", &fs_slient_level, NULL);
+    if(fs_slient_level!=4)
+        fs_get_intvalue(&lidbg_core_list, "fs_slient_level", &fs_slient_level, NULL);
     fs_get_intvalue(&lidbg_core_list, "fs_save_msg_fifo", NULL, fs_msg_fifo_to_file);
 
 }

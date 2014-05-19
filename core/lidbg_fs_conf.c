@@ -167,6 +167,7 @@ static int thread_pollstate_func(void *data)
 }
 static int usb_nc_conf(struct notifier_block *nb, unsigned long action, void *data)
 {
+    FS_WARN("get usb action:%d\n",(int)action);
     switch (action)
     {
     case USB_DEVICE_ADD:
@@ -191,8 +192,9 @@ static int thread_udisk_conf(void *data)
         if(!wait_for_completion_interruptible(&udisk_conf_wait))
         {
             ssleep(5);
-            update_list("/mnt/usbdisk/conf/core.conf", &lidbg_core_list);
-            update_list("/mnt/usbdisk/conf/drivers.conf", &lidbg_drivers_list);
+            FS_WARN("start\n");
+            update_list(USB_MOUNT_POINT"/conf/core.conf", &lidbg_core_list);
+            update_list(USB_MOUNT_POINT"/conf/drivers.conf", &lidbg_drivers_list);
         }
     }
     return 1;
