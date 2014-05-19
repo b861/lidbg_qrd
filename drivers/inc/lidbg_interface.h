@@ -167,6 +167,9 @@ struct lidbg_fn_t
     void (*pfnSOC_PM_STEP)(fly_pm_stat_step step, void *data);
     int (*pfnLINUX_TO_LIDBG_TRANSFER)(linux_to_lidbg_transfer_t _enum, void *data);
 
+    //screan_off :0 screan_on :1 suspendon:2 suspendoff:3
+    void (*pfnHal_Acc_Callback)(int para);
+
 };
 
 struct lidbg_pvar_t
@@ -294,5 +297,6 @@ static inline int check_pt(void)
 
 #define LINUX_TO_LIDBG_TRANSFER (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnLINUX_TO_LIDBG_TRANSFER))
 #define SOC_PM_STEP (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_PM_STEP))
+#define SOC_Hal_Acc_Callback (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnHal_Acc_Callback))
 
 #endif

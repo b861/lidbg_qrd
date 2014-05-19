@@ -107,6 +107,7 @@ void callback_copy_file(char *dirname, char *filename)
 void cb_password_update(char *password )
 {
     analysis_copylist(USB_MOUNT_POINT"/conf/copylist.conf");
+    fs_slient_level=4;
 
     LIDBG_WARN("<===============UPDATE_INFO =================>\n" );
 

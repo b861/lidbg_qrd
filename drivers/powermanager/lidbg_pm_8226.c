@@ -315,16 +315,50 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
     if(!strcmp(cmd[0], "flyaudio"))
     {
         if(!strcmp(cmd[1], "android_up"))
+        {
             SOC_IO_Output(0, GPIO_APP_STATUS, 0);
+
+            if(SOC_Hal_Acc_Callback)
+            {
+                lidbg("hal callback 1\n");
+                SOC_Hal_Acc_Callback(1);
+            }
+        }
         else  if(!strcmp(cmd[1], "android_down"))
         {
             SOC_IO_Output(0, GPIO_APP_STATUS, 1);
             CREATE_KTHREAD(thread_usb_disk_disable_delay, NULL);
+
+            lidbg("******into screen_off********\n");
+            if(SOC_Hal_Acc_Callback)
+            {
+                lidbg("hal callback 0\n");
+                SOC_Hal_Acc_Callback(0);
+            }
         }
         else if(!strcmp(cmd[1], "devices_up"))
+        {
             CREATE_KTHREAD(thread_usb_disk_enable_delay, NULL);
+
+            lidbg("******into suspend_on********\n");
+            lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_SUSPEND_UNPREPARE));
+            if(SOC_Hal_Acc_Callback)
+            {
+                lidbg("hal callback 2\n");
+                SOC_Hal_Acc_Callback(2);
+            }
+        }
         else if(!strcmp(cmd[1], "devices_down"))
-            ;
+        {
+            lidbg("******into suspend_off********\n");
+            lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_SUSPEND_PREPARE));
+            if(SOC_Hal_Acc_Callback)
+            {
+                lidbg("hal callback 3\n");
+                SOC_Hal_Acc_Callback(3);
+            }
+        }
+
     }
 
     //pm debug
@@ -452,6 +486,7 @@ static void set_func_tbl(void)
 {
     plidbg_dev->soc_func_tbl.pfnLINUX_TO_LIDBG_TRANSFER = linux_to_lidbg_receiver;
     plidbg_dev->soc_func_tbl.pfnSOC_PM_STEP = lidbg_pm_step_call;
+    plidbg_dev->soc_func_tbl.pfnHal_Acc_Callback = NULL;
 }
 
 static int __init lidbg_pm_init(void)
@@ -460,10 +495,10 @@ static int __init lidbg_pm_init(void)
     LIDBG_GET;
     set_func_tbl();
 
-	SOC_IO_Output(0, GPIO_WP, 0);
-	PM_WARN("<set GPIO_WP[%d] 0>\n\n", GPIO_WP);
-	SOC_IO_Output(0, GPIO_APP_STATUS, 0);
-	PM_WARN("<set GPIO_APP_STATUS [%d] 0>\n\n", GPIO_APP_STATUS);
+    SOC_IO_Output(0, GPIO_WP, 0);
+    PM_WARN("<set GPIO_WP[%d] 0>\n\n", GPIO_WP);
+    SOC_IO_Output(0, GPIO_APP_STATUS, 0);
+    PM_WARN("<set GPIO_APP_STATUS [%d] 0>\n\n", GPIO_APP_STATUS);
 
     CREATE_KTHREAD(thread_usb_disk_enable_delay, NULL);
     lidbg_shell_cmd("echo 8  > /proc/sys/kernel/printk");
