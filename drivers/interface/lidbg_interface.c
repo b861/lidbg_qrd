@@ -124,7 +124,25 @@ int iSOC_I2C_Rec_TEF7000(int bus_id, char chip_addr, unsigned int sub_addr, char
 {
     return  i2c_api_do_recv_TEF7000( bus_id,  chip_addr, sub_addr, buf,  size);
 }
+/////////spi
+int iSOC_SPI_MODE_Set(int bus_id, u8 mode,u8 bits_per_word,u32 max_speed_hz)
+{
+   return spi_api_do_set( bus_id,  mode,bits_per_word, max_speed_hz);
+}
+int iSOC_SPI_Rec(int bus_id,char *buf, unsigned int size)
+{
+    return   spi_api_do_read( bus_id, buf,  size);
+}
 
+int iSOC_SPI_Send(int bus_id,char *buf, unsigned int size)
+{
+    return   spi_api_do_write( bus_id, buf,  size);
+}
+
+int iSOC_SPI_Do_Write_Then_Read(int bus_id, const u8 *txbuf, unsigned n_tx, u8 *rxbuf, unsigned n_rx)
+{
+   return spi_api_do_write_then_read(bus_id, txbuf,  n_tx, rxbuf, n_rx);
+}
 void iSOC_PWM_Set(int pwm_id, int duty_ns, int period_ns)
 {
     soc_pwm_set(pwm_id, duty_ns, period_ns);
@@ -173,6 +191,12 @@ static void set_func_tbl(void)
     plidbg_dev->soc_func_tbl.pfnSOC_I2C_Send_TEF7000 = iSOC_I2C_Send_TEF7000;
     plidbg_dev->soc_func_tbl.pfnSOC_I2C_Rec_TEF7000 = iSOC_I2C_Rec_TEF7000;
 
+    //spi
+    plidbg_dev->soc_func_tbl.pfnSOC_SPI_MODE_Set=iSOC_SPI_MODE_Set;
+    plidbg_dev->soc_func_tbl.pfnSOC_SPI_Send =iSOC_SPI_Send;
+    plidbg_dev->soc_func_tbl.pfnSOC_SPI_Rec =iSOC_SPI_Rec;
+    plidbg_dev->soc_func_tbl.pfnSOC_SPI_Send_Rec = iSOC_SPI_Do_Write_Then_Read;
+	
     //io-irq
     plidbg_dev->soc_func_tbl.pfnSOC_IO_ISR_Add = iSOC_IO_ISR_Add;
     plidbg_dev->soc_func_tbl.pfnSOC_IO_ISR_Enable = iSOC_IO_ISR_Enable;

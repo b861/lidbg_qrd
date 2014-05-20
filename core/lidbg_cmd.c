@@ -10,7 +10,7 @@ struct cmd_item lidbg_cmd_item[] =
     {"mem", lidbg_mem_main},
     {"i2c", mod_i2c_main},
     {"io", mod_io_main},
-    //{"spi",mod_spi_main},
+    {"spi",mod_spi_main},
     {"display", lidbg_display_main},
     {"key", lidbg_key_main},
     {"touch", lidbg_touch_main},

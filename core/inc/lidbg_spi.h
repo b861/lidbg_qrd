@@ -7,7 +7,7 @@
 int spi_api_do_set(int bus_id,
                    u8 mode,
                    u8 bits_per_word,
-                   u8 max_speed_hz);
+                   u32 max_speed_hz);
 
 int spi_api_do_write(int bus_id, const u8 *buf, size_t len);
 int spi_api_do_read(int bus_id, u8 *buf, size_t len);
