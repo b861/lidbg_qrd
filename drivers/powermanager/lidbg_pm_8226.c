@@ -314,7 +314,16 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
     //flyaudio logic
     if(!strcmp(cmd[0], "flyaudio"))
     {
-        if(!strcmp(cmd[1], "android_up"))
+        if(!strcmp(cmd[1], "screen_off"))
+        {
+            lidbg("******into screen_off********\n");
+            if(SOC_Hal_Acc_Callback)
+            {
+                lidbg("hal callback 0\n");
+                SOC_Hal_Acc_Callback(0);
+            }
+        }
+        else  if(!strcmp(cmd[1], "android_up"))
         {
             SOC_IO_Output(0, GPIO_APP_STATUS, 0);
 
@@ -328,13 +337,6 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         {
             SOC_IO_Output(0, GPIO_APP_STATUS, 1);
             CREATE_KTHREAD(thread_usb_disk_disable_delay, NULL);
-
-            lidbg("******into screen_off********\n");
-            if(SOC_Hal_Acc_Callback)
-            {
-                lidbg("hal callback 0\n");
-                SOC_Hal_Acc_Callback(0);
-            }
         }
         else if(!strcmp(cmd[1], "devices_up"))
         {
