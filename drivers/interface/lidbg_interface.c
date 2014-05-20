@@ -70,7 +70,7 @@ bool iSOC_IO_Input(u32 group, u32 index, u32 pull)
 bool iSOC_ADC_Get (u32 channel , u32 *value)
 {
     *value = 0xffffffff;
-    *value = soc_ad_read(channel);
+    *value = soc_ad_read(channel)/1000;
     if(*value == 0xffffffff)
         return 0;
     return 1;
