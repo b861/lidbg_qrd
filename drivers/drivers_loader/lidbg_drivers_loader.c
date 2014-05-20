@@ -35,6 +35,7 @@ void party_analyze(struct list_head *client_list)
                 else
                     goto drop;
             }
+#ifdef SOC_msm8x25
             else if(strncmp(pos->yourkey, "cp", sizeof("cp") - 1) == 0)
             {
                 cmd_num = lidbg_token_string(pos->yourkey, " ", cmd) ;
@@ -46,6 +47,7 @@ void party_analyze(struct list_head *client_list)
                 else
                     goto drop;
             }
+#endif
             else
                 lidbg_shell_cmd(pos->yourkey);
             continue;
