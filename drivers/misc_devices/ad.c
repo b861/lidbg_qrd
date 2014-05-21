@@ -1,7 +1,7 @@
 
 #include "lidbg.h"
-#define AD_OFFSET  (100000)
-#define AD_VAL_MAX  (3300000)
+#define AD_OFFSET  (100)
+#define AD_VAL_MAX  (3300)
 struct ad_key_remap
 {
     u32 ch;
