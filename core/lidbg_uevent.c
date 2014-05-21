@@ -95,6 +95,7 @@ struct miscdevice lidbg_uevent_device =
 static int __init lidbg_uevent_init(void)
 {
     //DUMP_BUILD_TIME;
+    LIDBG_WARN("lidbg_uevent_init\n");
     if (misc_register(&lidbg_uevent_device))
         LIDBG_ERR("misc_register\n");
     return 0;
