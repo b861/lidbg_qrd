@@ -32,7 +32,7 @@ void lidbg_soc_main(int argc, char **argv)
     {
         u32 ch;
         ch = simple_strtoul(argv[1], 0, 0);
-        lidbg("ch%d = %x\n", ch, soc_ad_read(ch));
+        lidbg("ch%d = %d\n", ch, soc_ad_read(ch));
     }
 }
 
