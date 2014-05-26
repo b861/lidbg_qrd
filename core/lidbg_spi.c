@@ -138,19 +138,21 @@ static struct spi_driver spi_api_driver =
 static int __init spi_api_init(void)
 {
 int status;
+struct spi_board_info chip = {
+			.modalias	= "SPI-API",
+			.mode = 0x01,
+			.bus_num	=0,
+			.chip_select = 0,
+			.max_speed_hz = 19200000,
+};
+
+struct spi_master *master;
+
 //struct spi_device *spi;
 status = spi_register_driver(&spi_api_driver);
 if (status < 0)
 	return status;
-	struct spi_board_info chip = {
-				.modalias	= "SPI-API",
-				.mode = 0x01,
-				.bus_num	=0,
-				.chip_select = 0,
-				.max_speed_hz = 19200000,
-	};
 
-	struct spi_master *master;
 	master = spi_busnum_to_master(0);
 	if (!master) {
 		status = -ENODEV;
@@ -208,7 +210,7 @@ void mod_spi_main(int argc, char **argv)
 	mode = simple_strtoul(argv[3], 0, 0);
 	bits_per_word  = simple_strtoul(argv[4], 0, 0);
 	max_speed_hz  = simple_strtoul(argv[5], 0, 0);
-	lidbg("bus_id:%dnum:%dmode:%dbits_per_word:%dmax_speed_hz:%ld",bus_id,num,mode,bits_per_word,max_speed_hz);
+	lidbg("bus_id:%dnum:%dmode:%dbits_per_word:%dmax_speed_hz:%d\n",bus_id,num,mode,bits_per_word,max_speed_hz);
         if(argc - 6< num)
         {
             lidbg("input num err:\n");
