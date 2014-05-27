@@ -241,7 +241,9 @@ static void dsi83_work_func(struct work_struct *work)
 
 	dsi83_gpio_init();
 	
-	for(i = 0; i < 3; ++i)
+	msleep(50);
+	
+	for(i = 0; i < 5; ++i)
 	{
 		ret = SN65_devices_read_id();
 		if (!ret)
@@ -249,6 +251,7 @@ static void dsi83_work_func(struct work_struct *work)
 		else
 		{
 			printk(KERN_CRIT "dsi83:DSI83 match ID falied,num:%d.\n", i+1);
+			msleep(100);
 			continue;
 		}
 	}
