@@ -176,6 +176,7 @@ struct lidbg_fn_t
     int (*pfnSOC_SPI_Send_Rec)(int bus_id, const u8 *txbuf, unsigned n_tx, u8 *rxbuf, unsigned n_rx);
 
     int (*pfnSOC_Get_System_Sound_Status)(void *para,int length);
+    int (*pfnGPS_sound_status)(void);
 
 };
 
@@ -313,5 +314,6 @@ static inline int check_pt(void)
 #define SOC_Hal_Acc_Callback (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnHal_Acc_Callback))
 
 #define SOC_Get_System_Sound_Status (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_Get_System_Sound_Status))
+#define GPS_sound_status (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnGPS_sound_status))
 
 #endif

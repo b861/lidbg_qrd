@@ -96,6 +96,8 @@ static struct platform_driver soc_devices_driver =
 static void set_func_tbl(void)
 {
     plidbg_dev->soc_func_tbl.pfnSOC_Get_System_Sound_Status = SOC_Get_System_Sound_Status_func;
+	plidbg_dev->soc_func_tbl.pfnGPS_sound_status = iGPS_sound_status;
+		
 }
 int dev_init(void)
 {

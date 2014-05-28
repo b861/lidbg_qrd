@@ -8,10 +8,8 @@ static int has_called_user_on = 0;
 int gps_status = -1;
 
 struct completion GPS_status_sem;
-void GPS_sound_init(void)
-{
-}
-int  GPS_sound_status(void)
+
+int  iGPS_sound_status(void)
 {
     wait_for_completion(&GPS_status_sem);
     return gps_status;
@@ -59,6 +57,4 @@ int thread_sound_detect(void *data)
     return 0;
 }
 
-EXPORT_SYMBOL(GPS_sound_init);
-EXPORT_SYMBOL(GPS_sound_status);
 

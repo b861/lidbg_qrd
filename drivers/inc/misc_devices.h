@@ -15,6 +15,7 @@ int button_suspend(void);
 int button_resume(void);
 int thread_sound_detect(void *data);
 int SOC_Get_System_Sound_Status_func(void *para, int length);
+int  iGPS_sound_status(void);
 
 extern int fb_on;
 
