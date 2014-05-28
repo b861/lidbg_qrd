@@ -3,8 +3,6 @@
 #define _MISC_DEV_SOC__
 
 void lidbg_device_main(int argc, char **argv);
-#define TEMP_LOG_PATH LIDBG_LOG_DIR"log_ct.txt"
-#define CPU_TEMP_PATH "/sys/class/thermal/thermal_zone5/temp"
 int thread_key(void *data);
 int thread_button_init(void *data);
 int thread_led(void *data);
@@ -20,6 +18,17 @@ int  iGPS_sound_status(void);
 extern int fb_on;
 
 #ifdef SOC_msm8x26
+
+#define THRESHOLDS_STEP1    (100)
+
+#define FREQ_STEP1   	 	(1094400)
+#define FREQ_STEP1_STRING   ("1094400")
+
+#define FREQ_MAX     		(1401600)
+#define FREQ_MAX_STRING     ("1401600")
+
+#define CPU_TEMP_PATH 		"/sys/class/thermal/thermal_zone5/temp"
+
 
 //led
 #define LED_GPIO  (60)

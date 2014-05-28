@@ -3,7 +3,9 @@
 int temp_log_freq = 5;
 //static int fan_onoff_temp;
 
-static struct task_struct *Thermal_task = NULL;
+#define FREQ_MAX_NODE    "/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq"
+#define TEMP_LOG_PATH 	 LIDBG_LOG_DIR"log_ct.txt"
+
 
 int soc_temp_get(void)
 {
@@ -28,9 +30,9 @@ void log_temp(void)
 }
  int thread_thermal(void *data)
 {
-    int cur_temp;
+    int cur_frq,cur_temp;
     DUMP_FUN;
-	
+	cur_frq = FREQ_MAX;
 	temp_init();
 
     while(!kthread_should_stop())
@@ -39,7 +41,21 @@ void log_temp(void)
 
         log_temp();
         cur_temp = soc_temp_get();
-        //lidbg("MSM_THERM: %d *C\n",cur_temp);
+        //lidbg("MSM_THERM: %d\n",cur_temp);
+		
+		if((cur_temp > THRESHOLDS_STEP1 ) && (cur_frq != FREQ_STEP1))
+		{
+			lidbg_readwrite_file(FREQ_MAX_NODE, NULL, FREQ_STEP1_STRING, sizeof(FREQ_STEP1_STRING) - 1);
+			lidbg("set max freq to: %d\n",FREQ_STEP1);
+		    cur_frq = FREQ_STEP1;
+		}
+		else if ((cur_temp <= THRESHOLDS_STEP1 ) && (cur_frq != FREQ_MAX))
+		{
+			lidbg_readwrite_file(FREQ_MAX_NODE, NULL, FREQ_MAX_STRING, sizeof(FREQ_MAX_STRING) - 1);
+			lidbg("set max freq to: %d\n",FREQ_MAX);
+			cur_frq = FREQ_MAX;
+		}
+			
     }
     return 0;
 }
