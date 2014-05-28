@@ -13,6 +13,8 @@ void led_resume(void);
 void temp_init(void);
 int button_suspend(void);
 int button_resume(void);
+int thread_sound_detect(void *data);
+
 
 extern int fb_on;
 

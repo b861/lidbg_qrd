@@ -175,6 +175,8 @@ struct lidbg_fn_t
     int (*pfnSOC_SPI_Rec)(int bus_id, char *buf, unsigned int size);
     int (*pfnSOC_SPI_Send_Rec)(int bus_id, const u8 *txbuf, unsigned n_tx, u8 *rxbuf, unsigned n_rx);
 
+	int (*pfnSOC_Get_System_Sound_Status)(void);
+
 };
 
 struct lidbg_pvar_t
@@ -309,5 +311,7 @@ static inline int check_pt(void)
 #define LINUX_TO_LIDBG_TRANSFER (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnLINUX_TO_LIDBG_TRANSFER))
 #define SOC_PM_STEP (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_PM_STEP))
 #define SOC_Hal_Acc_Callback (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnHal_Acc_Callback))
+
+#define SOC_Get_System_Sound_Status (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_Get_System_Sound_Status))
 
 #endif

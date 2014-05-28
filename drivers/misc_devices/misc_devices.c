@@ -39,6 +39,7 @@ static int soc_dev_probe(struct platform_device *pdev)
 	{
 	    CREATE_KTHREAD(thread_button_init, NULL);
 	    CREATE_KTHREAD(thread_key, NULL);
+		CREATE_KTHREAD(thread_sound_detect, NULL);
 		
 	    LCD_ON;
 	}
