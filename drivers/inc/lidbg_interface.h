@@ -175,7 +175,7 @@ struct lidbg_fn_t
     int (*pfnSOC_SPI_Rec)(int bus_id, char *buf, unsigned int size);
     int (*pfnSOC_SPI_Send_Rec)(int bus_id, const u8 *txbuf, unsigned n_tx, u8 *rxbuf, unsigned n_rx);
 
-	int (*pfnSOC_Get_System_Sound_Status)(void);
+    int (*pfnSOC_Get_System_Sound_Status)(void *para,int length);
 
 };
 

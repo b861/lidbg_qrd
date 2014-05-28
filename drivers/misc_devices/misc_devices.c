@@ -34,12 +34,12 @@ static int soc_dev_probe(struct platform_device *pdev)
 
 	CREATE_KTHREAD(thread_led, NULL);
 	CREATE_KTHREAD(thread_thermal, NULL);
+	CREATE_KTHREAD(thread_sound_detect, NULL);
 
 	if((!g_var.is_fly)&&(g_var.recovery_mode == 0))
 	{
 	    CREATE_KTHREAD(thread_button_init, NULL);
 	    CREATE_KTHREAD(thread_key, NULL);
-		CREATE_KTHREAD(thread_sound_detect, NULL);
 		
 	    LCD_ON;
 	}
@@ -93,11 +93,16 @@ static struct platform_driver soc_devices_driver =
         .owner = THIS_MODULE,
     },
 };
+static void set_func_tbl(void)
+{
+    plidbg_dev->soc_func_tbl.pfnSOC_Get_System_Sound_Status = SOC_Get_System_Sound_Status_func;
+}
 int dev_init(void)
 {
     lidbg("=======misc_dev_init========\n");
     LIDBG_GET;
-    platform_device_register(&soc_devices);
+	set_func_tbl();
+	platform_device_register(&soc_devices);
     platform_driver_register(&soc_devices_driver);
     return 0;
 }

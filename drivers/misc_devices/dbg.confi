@@ -2,3 +2,4 @@
 led_en=1
 ad_en=1
 button_en=1
+sound_detect_dbg=0
