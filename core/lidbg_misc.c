@@ -94,16 +94,6 @@ void cb_password_clean_all(char *password )
     fs_mem_log("<called:%s>\n", __func__ );
     fs_clean_all();
 }
-void callback_copy_file(char *dirname, char *filename)
-{
-    char from[64], to[64];
-    memset(from, '\0', sizeof(from));
-    memset(to, '\0', sizeof(to));
-    sprintf(from, "%s/%s", dirname, filename);
-    sprintf(to, "/flysystem/lib/out/%s", filename);
-    if(fs_copy_file(from,  to))
-        LIDBG_WARN("<cp:%s,%s>\n", from, to);
-}
 void cb_password_update(char *password )
 {
     analysis_copylist(USB_MOUNT_POINT"/conf/copylist.conf");
@@ -120,14 +110,6 @@ void cb_password_update(char *password )
             lidbg_launch_user(CHMOD_PATH, "777", "/flysystem/lib/out", "-R", NULL, NULL, NULL);
             lidbg_reboot();
         }
-    }
-    else if(lidbg_readdir_and_dealfile(USB_MOUNT_POINT"/out", callback_copy_file))
-    {
-        lidbg_rmdir(LIDBG_LOG_DIR);
-        if(delete_out_dir_after_update)
-            lidbg_rmdir(USB_MOUNT_POINT"/out");
-        lidbg_launch_user(CHMOD_PATH, "777", "/flysystem/lib/out", "-R", NULL, NULL, NULL);
-        lidbg_reboot();
     }
     else
         LIDBG_ERR("<up>\n" );
@@ -216,7 +198,7 @@ void cb_kv_wifiadb(char *key, char *value)
 void cb_kv_app_install(char *key, char *value)
 {
     if(value && *value == '1')
-        lidbg_pm_install_dir(USB_MOUNT_POINT"/apps");
+        lidbg_pm_install_dir("/mnt/media_rw/udisk/apps");
     else
         fs_mem_log("cb_kv_app_install:fail,%s\n", value);
 }

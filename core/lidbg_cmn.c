@@ -387,7 +387,7 @@ void callback_pm_install(char *dirname, char *filename)
         return;
     }
     memset(apkpath, '\0', sizeof(apkpath));
-    sprintf(apkpath, "'%s/%s'", dirname, filename);
+    sprintf(apkpath, "'%s/apps/%s'", USB_MOUNT_POINT, filename);
     pm_install_apk(apkpath);
 }
 int  lidbg_pm_install_dir(char apkpath_or_apkdirpath[])
