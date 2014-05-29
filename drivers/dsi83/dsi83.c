@@ -35,7 +35,7 @@ static int SN65_Sequence_seq4(void)
 	buf_piont = dsi83_conf;
 	buf2[0]=0x00;
 	buf2[1]=0x00;
-	printk(KERN_CRIT "dsi83:Sequence 4\n");
+	lidbg(KERN_CRIT "dsi83:Sequence 4\n");
 	for(i=0;buf_piont[i] !=0xff ;i+=2)
 	{
 		ret = SN65_register_write(&buf_piont[i]);
@@ -45,7 +45,7 @@ static int SN65_Sequence_seq4(void)
 
 		if(buf2[1] != buf_piont[i+1])
 		{
-			printk(KERN_CRIT "Warning regitster(0x%.2x),write(0x%.2x) and read back(0x%.2x) Unequal\n",\
+			lidbg(KERN_CRIT "Warning regitster(0x%.2x),write(0x%.2x) and read back(0x%.2x) Unequal\n",\
 			buf_piont[i],buf_piont[i+1],buf2[1]);
 		}
 	}
@@ -58,7 +58,7 @@ static int SN65_Sequence_seq6(void)
 	char buf2[2];
 	buf2[0]=0x0d;
 	buf2[1]=0x01;
-	printk(KERN_CRIT "dsi83:Sequence 6\n");
+	lidbg(KERN_CRIT "dsi83:Sequence 6\n");
 	ret = SN65_register_write(buf2);
 	return ret;
 }
@@ -66,7 +66,7 @@ static int SN65_Sequence_seq7(void)
 {
 	int ret;
 	char buf2[2];
-	printk(KERN_CRIT "dsi83:Sequence 7\n");
+	lidbg(KERN_CRIT "dsi83:Sequence 7\n");
 
 	buf2[0]=0x0a;
 	buf2[1]=0x00;
@@ -80,14 +80,14 @@ static int SN65_Sequence_seq7(void)
 		{
 			ret = SN65_register_read(buf2[0],&buf2[1]);
 			k = buf2[1]&0x80;
-			printk(KERN_CRIT "dsi83:Wait for %d,r = 0x%.2x\n",i,buf2[1]);
+			lidbg(KERN_CRIT "dsi83:Wait for %d,r = 0x%.2x\n",i,buf2[1]);
 			i++;
 			if(i>100)
 			{
-				printk(KERN_CRIT "dsi83:Warning wait time out .. break\n");
+				lidbg(KERN_CRIT "dsi83:Warning wait time out .. break\n");
 				break;
 			}
-			msleep(20);
+			msleep(50);
 		}
 	}
 return ret;
@@ -101,7 +101,7 @@ static int SN65_Sequence_seq8(void)  /*seq 8 the bit must be set after the CSR`s
 #ifdef DSI83_DEBUG
 	dsi83_dump_reg();
 #endif
-	printk(KERN_CRIT "dsi83:Sequence 8\n");
+	lidbg(KERN_CRIT "dsi83:Sequence 8\n");
 	buf2[0]=0x09;
 	buf2[1]=0x01;
 	ret = SN65_register_write(buf2);
@@ -127,31 +127,31 @@ static void dsi83_dump_reg(void)
 
 	for (i = 0; i < 0x3d; i++) {
 		SN65_register_read(i, &reg);
-		printk(KERN_CRIT "dsi83:Read reg-0x%x=0x%x\n", i, reg);
+		lidbg(KERN_CRIT "dsi83:Read reg-0x%x=0x%x\n", i, reg);
 	}
 
 /*
 	int ret;
 	SN65_register_read(0xe1, &reg);
-	printk(KERN_CRIT "[LSH]:reg-0xE1=0x%x.\n",reg);
+	lidbg(KERN_CRIT "[LSH]:reg-0xE1=0x%x.\n",reg);
 	SN65_register_read(0xe5, &reg);
-	printk(KERN_CRIT "[LSH]:reg-0xE5=0x%x.\n",reg);
-	printk(KERN_CRIT "*****************************\n");
+	lidbg(KERN_CRIT "[LSH]:reg-0xE5=0x%x.\n",reg);
+	lidbg(KERN_CRIT "*****************************\n");
 
 	for(i = 0; i < 20; ++i)
 	{
 		
 		ret = SN65_register_write(buf1);
 		if(!ret)
-			printk(KERN_CRIT "[LSH]:write reg 0xe5 error.\n");
+			lidbg(KERN_CRIT "[LSH]:write reg 0xe5 error.\n");
 		msleep(50);
 		
 		SN65_register_read(0xe1, &reg);
-		printk(KERN_CRIT "[LSH]:reg-0xE1=0x%x.\n",reg);
+		lidbg(KERN_CRIT "[LSH]:reg-0xE1=0x%x.\n",reg);
 		SN65_register_read(0xe5, &reg);
-		printk(KERN_CRIT "[LSH]:reg-0xE5=0x%x.\n",reg);
+		lidbg(KERN_CRIT "[LSH]:reg-0xE5=0x%x.\n",reg);
 
-		printk(KERN_CRIT "------------------------\n");
+		lidbg(KERN_CRIT "------------------------\n");
 		msleep(10);
 	}
 */
@@ -250,7 +250,7 @@ static void dsi83_work_func(struct work_struct *work)
 			break;
 		else
 		{
-			printk(KERN_CRIT "dsi83:DSI83 match ID falied,num:%d.\n", i+1);
+			lidbg(KERN_CRIT "dsi83:DSI83 match ID falied,num:%d.\n", i+1);
 			msleep(100);
 			continue;
 		}
@@ -259,19 +259,19 @@ static void dsi83_work_func(struct work_struct *work)
 	if(i == 3)
 		return;
 	else
-		printk(KERN_CRIT "dsi83:DSI83 match ID success!\n");
+		lidbg(KERN_CRIT "dsi83:DSI83 match ID success!\n");
 
 	SN65_Sequence_seq4();
 	
 	ret = SN65_Sequence_seq6();
 	if(ret < 0)
-		printk(KERN_CRIT "dsi83:SN65_Sequence_seq6(),err,ret = %d.\n", ret);
+		lidbg(KERN_CRIT "dsi83:SN65_Sequence_seq6(),err,ret = %d.\n", ret);
 	
 	SN65_Sequence_seq7();
 	
 	ret = SN65_Sequence_seq8();
 	if(ret < 0)
-		printk(KERN_CRIT "dsi83:SN65_Sequence_seq8(),err,ret = %d.\n", ret);
+		lidbg(KERN_CRIT "dsi83:SN65_Sequence_seq8(),err,ret = %d.\n", ret);
 
 }
 
@@ -280,7 +280,7 @@ static void dsi83_work_func(struct work_struct *work)
 static int dsi83_probe(struct platform_device *pdev)
 {
 	int ret = 0;
-	lidbg_dsi83("%s:enter\n", __func__);
+	lidbg("%s:enter\n", __func__);
 
 	INIT_DELAYED_WORK(&dsi83_work, dsi83_work_func);
 	dsi83_workqueue = create_workqueue("dsi83");
