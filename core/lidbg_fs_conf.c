@@ -47,9 +47,8 @@ int launch_file_cmd(const char *filename)
     inode = filep->f_dentry->d_inode;
     file_len = inode->i_size;
     lidbg("[futengfei]warn.File_length:<%d>\n", file_len);
-    file_len = file_len + 1+ 1;
 
-    file_ptr = (unsigned char *)kmalloc(file_len, GFP_KERNEL);
+    file_ptr = (unsigned char *)kmalloc(file_len+1, GFP_KERNEL);
     if(file_ptr == NULL)
     {
         lidbg( "[futengfei]err.kmalloc:<cannot kzalloc memory!>\n");
@@ -66,8 +65,7 @@ int launch_file_cmd(const char *filename)
     set_fs(old_fs);
     filp_close(filep, 0);
 
-    file_ptr[file_len - 1] = '\0';
-    file_ptr[file_len] = '\n';
+    file_ptr[all_purpose] = '\0';
     file_ptmp = file_ptr;
     while((token = strsep(&file_ptmp, "\n")) != NULL )
     {
