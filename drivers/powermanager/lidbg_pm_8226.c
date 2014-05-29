@@ -37,8 +37,6 @@ void observer_prepare(void)
     lidbg_chmod("/sys/module/msm_show_resume_irq/parameters/debug_mask");
     ssleep(1);
     fs_file_write("/sys/module/msm_show_resume_irq/parameters/debug_mask", "1");
-    ssleep(1);
-    lidbg_chmod("/dev/lidbg*");
     sprintf(cmd, "cat /proc/interrupts > %sinterrupts.txt &", LIDBG_LOG_DIR);
     lidbg_shell_cmd(cmd);
     fs_register_filename_list(LIDBG_LOG_DIR"interrupts.txt", true);
@@ -438,9 +436,7 @@ static struct dev_pm_ops lidbg_pm_ops =
 #endif
 static int thread_pm_late_probe(void *data)//because of blocking other driver to insmod.
 {
-    ssleep(10);
-    lidbg_chmod("/dev/lidbg*");
-    ssleep(20);
+    ssleep(30);
     lidbg_enable_logcat();
     return 1;
 }
