@@ -220,6 +220,13 @@ void cb_kv_app_install(char *key, char *value)
     else
         fs_mem_log("cb_kv_app_install:fail,%s\n", value);
 }
+void cb_kv_reboot_recovery(char *key, char *value)
+{
+    if(value && *value == '1')
+        lidbg_shell_cmd("reboot recovery");
+    else
+        fs_mem_log("cb_kv_reboot_recovery:fail,%s\n", value);
+}
 
 void cb_kv_cmd(char *key, char *value)
 {
@@ -272,6 +279,7 @@ int misc_init(void *data)
     FS_REGISTER_KEY( "cmdstring", cb_kv_cmd);
     FS_REGISTER_KEY( "wifiadb_en", cb_kv_wifiadb);
     FS_REGISTER_KEY( "app_install_en", cb_kv_app_install);
+    FS_REGISTER_KEY( "reboot_recovery", cb_kv_reboot_recovery);
 
     fs_register_filename_list("/data/kmsg.txt", true);
     fs_register_filename_list("/data/top.txt", true);
