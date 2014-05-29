@@ -6,16 +6,7 @@
 //#define     DSI83_DEBUG
 //#define     TEST_PATTERN
 
-#ifdef SOC_msm8x26
-#define 	DSI83_GPIO_EN          (62)
-#define 	DSI83_I2C_BUS  		   (2)
 #define 	DSI83_I2C_ADDR	       (0x2d)
-#else  //8974
-#define 	DSI83_GPIO_EN          (62)
-#define 	PANEL_GPIO_RESET       (62)
-#define 	DSI83_I2C_BUS  		   (2)
-#define 	DSI83_I2C_ADDR	       (0x2d)
-#endif
 
 #ifdef DSI83_DEBUG
 #define lidbg_dsi83(msg...)  do { printk( KERN_CRIT "[lidbg] dsi83:" msg);}while(0)

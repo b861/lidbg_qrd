@@ -3,20 +3,8 @@
 
 LIDBG_DEFINE;
 
-//zone below [Variable area]
-#define RESET_GPIO_ACTIVE (1)
+#define GTP_RST_PORT_ACTIVE (1)
 #define USE_TS_NUM (0)
-
-#ifdef SOC_msm8x25
-#define RESET_GPIO (27)
-#define TS_I2C_BUS (1)
-#define INT_GPIO (48)
-#else
-#define RESET_GPIO (24)
-#define TS_I2C_BUS (5)
-#define INT_GPIO (69)
-#endif
-//zone end
 
 #if (defined(BOARD_V1) || defined(BOARD_V2) || defined(BOARD_V3))
 #define FLYHAL_CONFIG_PATH "/flydata/flyhalconfig"
@@ -65,35 +53,35 @@ struct probe_device ts_probe_dev[] =
 //zone below [method]
 void gt9xx_reset_high_active(void)
 {	
-    SOC_IO_Output(0, RESET_GPIO, !RESET_GPIO_ACTIVE);
+    SOC_IO_Output(0, GTP_RST_PORT, !GTP_RST_PORT_ACTIVE);
     msleep(200);
 	#ifndef SOC_msm8x25
-	SOC_IO_Output(0, INT_GPIO, 1);
+	SOC_IO_Output(0, GTP_INT_PORT, 1);
 	usleep(200);
 	#endif
-    SOC_IO_Output(0, RESET_GPIO, RESET_GPIO_ACTIVE);
+    SOC_IO_Output(0, GTP_RST_PORT, GTP_RST_PORT_ACTIVE);
     msleep(300);
 }
 void reset_high_active(void)
 {
-    SOC_IO_Output(0, RESET_GPIO, !RESET_GPIO_ACTIVE);
+    SOC_IO_Output(0, GTP_RST_PORT, !GTP_RST_PORT_ACTIVE);
     msleep(200);
-    SOC_IO_Output(0, RESET_GPIO, RESET_GPIO_ACTIVE);
+    SOC_IO_Output(0, GTP_RST_PORT, GTP_RST_PORT_ACTIVE);
     msleep(300);
 }
 
 void reset_low_active(void)
 {
-    SOC_IO_Output(0, RESET_GPIO, RESET_GPIO_ACTIVE);
+    SOC_IO_Output(0, GTP_RST_PORT, GTP_RST_PORT_ACTIVE);
     msleep(200);
-    SOC_IO_Output(0, RESET_GPIO, !RESET_GPIO_ACTIVE);
+    SOC_IO_Output(0, GTP_RST_PORT, !GTP_RST_PORT_ACTIVE);
     msleep(300);
 }
 void ts_gpio_free(void)
 {
    #ifndef SOC_msm8x25
-   //gpio_free(INT_GPIO);
-   //gpio_free(RESET_GPIO);
+   //gpio_free(GTP_INT_PORT);
+   //gpio_free(GTP_RST_PORT);
    #endif
 }
 void parse_ts_info(struct probe_device *ts_info)

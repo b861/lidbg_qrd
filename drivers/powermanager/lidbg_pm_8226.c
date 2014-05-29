@@ -2,9 +2,7 @@
 LIDBG_DEFINE;
 
 #define BUTTON_LED_NODE "/sys/class/leds/button-backlight/brightness"
-#define GPIO_WP (35)
-#define GPIO_APP_STATUS (36)
-#define GPIO_USB_EN (109)
+
 static atomic_t is_in_sleep = ATOMIC_INIT(-1);
 static int list_count ;
 static DECLARE_COMPLETION(sleep_observer_wait);
@@ -493,8 +491,8 @@ static int __init lidbg_pm_init(void)
     LIDBG_GET;
     set_func_tbl();
 
-    SOC_IO_Output(0, GPIO_WP, 0);
-    PM_WARN("<set GPIO_WP[%d] 0>\n\n", GPIO_WP);
+    SOC_IO_Output(0, MCU_WP_GPIO, 0);
+    PM_WARN("<set MCU_WP_GPIO[%d] 0>\n\n", MCU_WP_GPIO);
     SOC_IO_Output(0, GPIO_APP_STATUS, 0);
     PM_WARN("<set GPIO_APP_STATUS [%d] 0>\n\n", GPIO_APP_STATUS);
 

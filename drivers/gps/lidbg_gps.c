@@ -7,13 +7,6 @@ LIDBG_DEFINE;
 
 #define GPS_START	_IO('g', 1)
 #define GPS_STOP	_IO('g', 2)
-#ifdef SOC_msm8x25
-#define gps_i2c_bus 1
-#else 
-#define gps_i2c_bus 5
-#endif
-
-
 
 struct gps_device
 {
@@ -202,13 +195,13 @@ void clean_ublox_buf(void)
     int ret;
     DUMP_FUN_ENTER;
 
-    ret = SOC_I2C_Rec(gps_i2c_bus, 0x42, 0xfd, num_avi_gps_data, 2);
+    ret = SOC_I2C_Rec(GPS_I2C_BUS, 0x42, 0xfd, num_avi_gps_data, 2);
     if (ret < 0)
         return;
 
     avi_gps_data_hl = (num_avi_gps_data[0] << 8) + num_avi_gps_data[1];
     if(avi_gps_data_hl > 0)
-        SOC_I2C_Rec_Simple(gps_i2c_bus, 0x42, gps_data, avi_gps_data_hl);
+        SOC_I2C_Rec_Simple(GPS_I2C_BUS, 0x42, gps_data, avi_gps_data_hl);
 
     DUMP_FUN_LEAVE;
 
@@ -227,7 +220,7 @@ int thread_gps_server(void *data)
                 lidbg("[ublox]goto do_nothing:%d,%d\n", work_en, started);
             goto do_nothing;
         }
-        ret = SOC_I2C_Rec(gps_i2c_bus, 0x42, 0xfd, num_avi_gps_data, 2);
+        ret = SOC_I2C_Rec(GPS_I2C_BUS, 0x42, 0xfd, num_avi_gps_data, 2);
         if (ret < 0)
         {
             avi_gps_data_hl = 0;
@@ -244,7 +237,7 @@ int thread_gps_server(void *data)
         {
             if(avi_gps_data_hl <= GPS_BUF_SIZE)
             {
-                ret = SOC_I2C_Rec_Simple(gps_i2c_bus, 0x42, gps_data, avi_gps_data_hl);
+                ret = SOC_I2C_Rec_Simple(GPS_I2C_BUS, 0x42, gps_data, avi_gps_data_hl);
                 if (ret < 0)
                 {
                     lidbg("[ublox]get gps data err!!\n");
@@ -339,7 +332,7 @@ int is_ublox_exist(void)
     int exist, retry;
     for(retry = 0; retry < 10; retry++)
     {
-        exist = SOC_I2C_Rec_Simple(gps_i2c_bus, 0x42, gps_data, 1 );
+        exist = SOC_I2C_Rec_Simple(GPS_I2C_BUS, 0x42, gps_data, 1 );
         if (exist < 0)
         {
             msleep(100);

@@ -100,8 +100,7 @@ struct goodix_ts_data {
 
 extern u16 show_len;
 extern u16 total_len;
-#define GTP_RST_PORT    24  
-#define GTP_INT_PORT    69
+
 
 /***************************PART1:ON/OFF define*******************************/
 #define GTP_CUSTOM_CFG			0

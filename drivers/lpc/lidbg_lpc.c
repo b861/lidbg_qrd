@@ -6,21 +6,6 @@
 LIDBG_DEFINE;
 static bool lpc_work_en = true;
 
-
-#define  I2_ID  (0)
-
-#ifdef SOC_msm8x25
-#define  MCU_WP_GPIO 	  (29)
-#define  MCU_IIC_REQ_GPIO (30)
-#define MCU_WP_GPIO_SET  do{SOC_IO_Output(0, MCU_WP_GPIO, 1); }while(0)
-#elif defined(SOC_msm8x26)
-#define  MCU_WP_GPIO      (35)
-#define  MCU_IIC_REQ_GPIO (108)
-#define MCU_WP_GPIO_SET  do{SOC_IO_Output(0, MCU_WP_GPIO, 0); }while(0)
-#endif
-
-
-
 #define DATA_BUFF_LENGTH_FROM_MCU   (128)
 
 #define BYTE u8
@@ -120,7 +105,7 @@ void LPCCombinDataStream(BYTE *p, UINT len)
 #ifdef LPC_DEBUG_LOG
     lidbg("ToMCU:%x %x %x\n", p[0], p[1], p[2]);
 #endif
-    SOC_I2C_Send(I2_ID, MCU_ADDR_W >> 1, buf, 3 + i + 1);
+    SOC_I2C_Send(LPC_I2_ID, MCU_ADDR_W >> 1, buf, 3 + i + 1);
 
     if (bMalloc)
     {
@@ -241,7 +226,7 @@ BOOL actualReadFromMCU(BYTE *p, UINT length)
     if(!lpc_work_en)
         return FALSE;
 
-    SOC_I2C_Rec_Simple(I2_ID, MCU_ADDR_R >> 1, p, length);
+    SOC_I2C_Rec_Simple(LPC_I2_ID, MCU_ADDR_R >> 1, p, length);
     if (readFromMCUProcessor(p, length))
     {
 

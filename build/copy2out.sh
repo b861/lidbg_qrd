@@ -17,7 +17,7 @@ cp -u $src_dir/*.conf	$dest_dir/	&> /dev/null
 
 
 cd $DBG_DRIVERS_PATH
-cp -u ./inc/lidbg_interface.h $dest_dir
+cp -u ./inc/lidbg_interface.h $dest_dir/lidbg_interface.conf
 rm $dest_dir/drivers.conf
 rm $dest_dir/state.conf
 

@@ -67,6 +67,7 @@ bool iSOC_IO_Input(u32 group, u32 index, u32 pull)
     return soc_io_input(index);
 }
 
+//return mv
 bool iSOC_ADC_Get (u32 channel , u32 *value)
 {
     *value = 0xffffffff;

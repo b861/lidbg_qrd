@@ -16,12 +16,12 @@ static struct ad_key_remap ad_key[] =
     //{35, 1000000, KEY_BACK},
     //{35, 1500000, KEY_BACK},
     //{35, 2000000, KEY_BACK},
-    {35, 2500, KEY_HOME},
+    {AD_KEY_PORT_L, 2500, KEY_HOME},
     //feel  key  x_ain_4  mpp6
     //{37, 1000000, KEY_BACK},
     //{37, 1500000, KEY_BACK},
-    {37, 2000, KEY_MENU},
-    {37, 2500, KEY_BACK},
+    {AD_KEY_PORT_R, 2000, KEY_MENU},
+    {AD_KEY_PORT_R, 2500, KEY_BACK},
 };
 
 int find_ad_key(u32 ch)
@@ -51,9 +51,9 @@ void key_scan(void)
 {
     static int old_key = 0xff;
     int key = 0xff;
-    key = find_ad_key(35);
+    key = find_ad_key(AD_KEY_PORT_L);
     if(key != 0xff) goto find_key;
-    key = find_ad_key(37);
+    key = find_ad_key(AD_KEY_PORT_R);
     if(key != 0xff) goto find_key;
 
 find_key:
