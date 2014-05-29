@@ -2,6 +2,8 @@
 #define __IO_DEFINE_
 
 
+#define GPIO_NOTHING LED_GPIO
+
 #ifdef SOC_msm8x25
 //lpc
 #define  LPC_I2_ID  	  (0)
@@ -22,9 +24,10 @@
 #ifdef SOC_msm8x26
 //lpc
 #define  LPC_I2_ID        (0)
+#define  MCU_IIC_REQ_GPIO (108)
 #define  MCU_WP_GPIO      (35)
 #define  GPIO_APP_STATUS  (36)
-#define  MCU_IIC_REQ_GPIO (108)
+
 
 #define  MCU_WP_GPIO_SET  do{SOC_IO_Output(0, MCU_WP_GPIO, 0); }while(0)
 
@@ -34,6 +37,7 @@
 
 //gps
 #define GPS_I2C_BUS (5)
+#define GPS_INT	    (50)
 
 //led
 #define LED_GPIO  (60)
@@ -47,8 +51,8 @@
 #define BUTTON_RIGHT_2 (34)//k4
 
 //lcd
-#define PANEL_GPIO_RESET (25)
 #ifdef BOARD_V1
+#define PANEL_GPIO_RESET (25)
 #define LCD_RESET do{  \
 		SOC_IO_Output(0, PANEL_GPIO_RESET, 0);\
 		msleep(10);\
@@ -60,6 +64,7 @@
 #endif
 
 //t123
+#ifdef BOARD_V1
 #define T123_GPIO_RST  (28)
 #define T123_RESET do{  \
 		SOC_IO_Output(0, T123_GPIO_RST, 0);\
@@ -67,18 +72,40 @@
 		SOC_IO_Output(0, T123_GPIO_RST, 1);\
 		msleep(20);\
 	}while(0)
+#else
+#define T123_RESET
+#endif
+
 
 //usb
-#define GPIO_USB_ID 	(60)
-#define GPIO_USB_EN 	(109)
-#define USB_ID_HIGH_DEV do{\
-								SOC_IO_Config(GPIO_USB_ID,GPIO_CFG_INPUT,GPIO_CFG_PULL_UP,GPIO_CFG_16MA);\
-								SOC_IO_Output(0,GPIO_USB_ID,1);\
-							}while(0)
-#define USB_ID_LOW_HOST do{  \
-								SOC_IO_Config(GPIO_USB_ID,GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_16MA);\
-								SOC_IO_Output(0, GPIO_USB_ID, 0);\
-							}while(0)
+#ifdef BOARD_V1
+#define USB_ID_HIGH_DEV
+#define USB_ID_LOW_HOST
+
+#define GPIO_USB_EN 	   (109)
+#define USB_WORK_ENABLE    SOC_IO_Output(0, GPIO_USB_EN, 0)
+#define USB_WORK_DISENABLE SOC_IO_Output(0, GPIO_USB_EN, 1)
+
+#else
+#define USB_ID_HIGH_DEV 
+#define USB_ID_LOW_HOST
+
+#define USB_SWITCH_CONNECT SOC_IO_Output(0, 109, 0)
+#define USB_SWITCH_DISCONNECT SOC_IO_Output(0, 109, 0) //alway on for test
+
+#define GPIO_USB_EN 	(28)
+#define USB_POWER_ENABLE SOC_IO_Output(0, GPIO_USB_EN, 1)
+#define USB_POWER_DISABLE SOC_IO_Output(0, GPIO_USB_EN, 0)
+
+#define USB_WORK_ENABLE do{\
+				USB_SWITCH_CONNECT;\
+    			USB_POWER_ENABLE;\
+			}while(0)
+#define USB_WORK_DISENABLE  do{\
+			USB_SWITCH_DISCONNECT;\
+			USB_POWER_DISABLE;\
+			}while(0)
+#endif
 
 //ad
 #define AD_KEY_PORT_L   (35)

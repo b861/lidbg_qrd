@@ -270,9 +270,9 @@ void usb_disk_enable(bool enable)
 {
     PM_WARN("[%s]\n", enable ? "usb_enable" : "usb_disable");
     if(enable)
-        SOC_IO_Output(0, GPIO_USB_EN, 0);
+        USB_WORK_ENABLE;
     else
-        SOC_IO_Output(0, GPIO_USB_EN, 1);
+        USB_WORK_DISENABLE;
 }
 static int thread_usb_disk_enable_delay(void *data)
 {
