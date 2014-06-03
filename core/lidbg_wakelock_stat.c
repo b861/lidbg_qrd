@@ -151,7 +151,7 @@ void lidbg_show_wakelock(int action_enum)
     {
         list_for_each_entry(pos, client_list, tmp_list)
         {
-            if (pos->name && pos->cunt && pos->is_count_wakelock)
+            if (pos->name && pos->cunt)
             {
                 index++;
                 printk(KERN_CRIT"[ftf_pm.wl]%d,MAX%d<THE%d:[%d,%d][%s][%s,%s]>\n", pos->cunt, pos->cunt_max, index, pos->pid, pos->uid, lock_type(pos->is_count_wakelock), pos->name, pos->package_name);
@@ -252,10 +252,6 @@ void lidbg_wakelock_register(bool to_lock, const char *name)
 {
     if(g_wakelock_dbg)
         lidbg("<lidbg_wakelock_register:[%d][%s]>\n", to_lock, name);
-
-#ifndef SOC_msm8x25
-    return ;
-#endif
 
     if(to_lock)
     {
