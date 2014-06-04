@@ -43,11 +43,17 @@ void log_temp(void)
         cur_temp = soc_temp_get();
         //lidbg("MSM_THERM: %d\n",cur_temp);
 		
-		if((cur_temp > THRESHOLDS_STEP1 ) && (cur_frq != FREQ_STEP1))
+		if((cur_temp > THRESHOLDS_STEP1 ) && (cur_temp =< THRESHOLDS_STEP2 ) && (cur_frq != FREQ_STEP1))
 		{
 			lidbg_readwrite_file(FREQ_MAX_NODE, NULL, FREQ_STEP1_STRING, sizeof(FREQ_STEP1_STRING) - 1);
 			lidbg("set max freq to: %d\n",FREQ_STEP1);
 		    cur_frq = FREQ_STEP1;
+		}
+		else if((cur_temp > THRESHOLDS_STEP2 ) && (cur_frq != FREQ_STEP2))
+		{
+			lidbg_readwrite_file(FREQ_MAX_NODE, NULL, FREQ_STEP2_STRING, sizeof(FREQ_STEP2_STRING) - 1);
+			lidbg("set max freq to: %d\n",FREQ_STEP2);
+		    cur_frq = FREQ_STEP2;
 		}
 		else if ((cur_temp <= THRESHOLDS_STEP1 ) && (cur_frq != FREQ_MAX))
 		{
