@@ -39,20 +39,8 @@ void remount_system(void)
         lidbg_chmod("/system/lib/hw");
         lidbg_chmod("/flysystem/lib/hw");
         lidbg_chmod("/flysystem/lib/out");
+        lidbg_chmod("/system/app");
     }
-}
-void chmod_for_apk(void)
-{
-    remount_system();
-    lidbg_chmod("/system/bin/mount");
-    lidbg_mount("/system");
-    lidbg_chmod("/data");
-    lidbg_chmod("/system/app");
-}
-void call_apk(void)
-{
-    chmod_for_apk();
-    analysis_copylist("/flysystem/lib/out/copylist_app.conf");
 }
 int bfs_file_amend(char *file2amend, char *str_append, int file_limit_M)
 {
@@ -276,20 +264,6 @@ bool fs_upload_machine_log(void)
     remount_system();
     return upload_machine_log();
 }
-int thread_call_apk_init(void *data)
-{
-    call_apk();
-    return 0;
-}
-void fs_call_apk(void)
-{
-    CREATE_KTHREAD(thread_call_apk_init, NULL);
-}
-void fs_remove_apk(void)
-{
-    lidbg_rm("/system/app/fileserver.apk");
-    lidbg_rm("/system/app/aw_dbg.apk");
-}
 void fs_remount_system(void)
 {
     remount_system();
@@ -335,8 +309,6 @@ EXPORT_SYMBOL(fs_enable_kmsg);
 EXPORT_SYMBOL(fs_string2file);
 EXPORT_SYMBOL(fs_mem_log);
 EXPORT_SYMBOL(fs_upload_machine_log);
-EXPORT_SYMBOL(fs_call_apk);
-EXPORT_SYMBOL(fs_remove_apk);
 EXPORT_SYMBOL(fs_remount_system);
 EXPORT_SYMBOL(bfs_file_amend);
 

@@ -55,7 +55,6 @@ void parse_cmd(char *pt)
         {
             //*#*#158999#*#*
             lidbg_chmod("/data");
-            fs_mem_log("*158#999--fs_call_apk\n");
             fs_mem_log("*158#001--LOG_LOGCAT\n");
             fs_mem_log("*158#002--LOG_DMESG\n");
             fs_mem_log("*158#003--LOG_CLEAR_LOGCAT_KMSG\n");
@@ -66,13 +65,7 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#013--dump log and copy to udisk\n");
         }
 
-        if (!strcmp(argv[1], "*158#999"))
-        {
-            is_fs_work_enable = true;
-            g_is_te_enable = 1;
-            fs_call_apk();
-        }
-        else if (!strcmp(argv[1], "*158#001"))
+        if (!strcmp(argv[1], "*158#001"))
         {
             lidbg_chmod("/data");
 

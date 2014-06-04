@@ -313,7 +313,7 @@ int update_list(const char *filename, struct list_head *client_list)
             {
                 value = ptmp + 1;
                 *ptmp = '\0';
-                FS_WARN("<%s,%s>\n", key, value);
+                FS_ALWAYS("<%s,%s>\n", key, value);
                 {
                     //start
                     list_for_each_entry(pos, client_list, tmp_list)
@@ -328,14 +328,15 @@ int update_list(const char *filename, struct list_head *client_list)
                                     *(pos->int_value) = curren_intvalue;
                                     if (pos->callback)
                                         pos->callback(key, value);
-                                    FS_SUC("<%s=%d>\n", key, *(pos->int_value));
+                                    FS_ALWAYS("<INT:%s=%d>\n", key, *(pos->int_value));
                                 }
                             }
                             else if (pos->yourvalue && value && strcmp(pos->yourvalue, value))
                             {
+                                strncpy(pos->yourvalue, value, strlen(pos->yourvalue));
                                 if (pos->callback)
                                     pos->callback(key, value);
-                                FS_SUC("<%s=%s>\n", key, value);
+                                FS_ALWAYS("<STR:%s=%s>\n", key, value);
                             }
                         }
                     }
@@ -343,7 +344,7 @@ int update_list(const char *filename, struct list_head *client_list)
 
             }
             else if(g_kvbug_on)
-                FS_WARN("\ndroped[%s]\n", token);
+                FS_ALWAYS("\ndroped[%s]\n", token);
         }
     }
     kfree(file_ptr);

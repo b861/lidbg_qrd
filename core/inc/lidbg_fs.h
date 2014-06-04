@@ -37,7 +37,6 @@ extern void lidbg_fs_conf_init(void);
 extern void lidbg_fs_keyvalue_init(void);
 extern void lidbg_fs_log_init(void);
 extern void lidbg_fs_update_init(void);
-extern void chmod_for_apk(void);
 extern void update_file_tm(void);
 extern bool get_file_mftime(const char *filename, struct rtc_time *ptm);
 extern bool get_file_tmstring(char *filename, char *tmstring);

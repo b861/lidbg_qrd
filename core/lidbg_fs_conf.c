@@ -21,7 +21,6 @@ static struct completion udisk_conf_wait;
 //zone below [fs.confops.driver]
 void clean_all(void)
 {
-    fs_remove_apk();
     lidbg_rmdir(LIDBG_LOG_DIR);
 }
 int launch_file_cmd(const char *filename)

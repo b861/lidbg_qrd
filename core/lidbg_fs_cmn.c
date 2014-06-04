@@ -478,10 +478,6 @@ bool fs_clear_file(char *filename)
 {
     return clear_file(filename);
 }
-int  lidbg_cp(char from[], char to[])
-{
-    return fs_copy_file(from, to);
-}
 bool fs_register_filename_list(char *filename, bool remove_after_copy)
 {
     if(filename)
@@ -534,7 +530,4 @@ EXPORT_SYMBOL(fs_filename_list);
 EXPORT_SYMBOL(fs_register_filename_list);
 EXPORT_SYMBOL(fs_show_filename_list);
 EXPORT_SYMBOL(fs_get_file_size);
-EXPORT_SYMBOL(lidbg_cp);
-
-
 

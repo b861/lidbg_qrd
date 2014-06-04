@@ -79,16 +79,6 @@ void cb_password_upload(char *password )
     fs_mem_log("<called:%s>\n", __func__ );
     fs_upload_machine_log();
 }
-void cb_password_call_apk(char *password )
-{
-    fs_mem_log("<called:%s>\n", __func__ );
-    fs_call_apk();
-}
-void cb_password_remove_apk(char *password )
-{
-    fs_mem_log("<called:%s>\n", __func__ );
-    fs_remove_apk();
-}
 void cb_password_clean_all(char *password )
 {
     fs_mem_log("<called:%s>\n", __func__ );
@@ -213,36 +203,16 @@ void cb_kv_reboot_recovery(char *key, char *value)
 void cb_kv_cmd(char *key, char *value)
 {
     if(value)
-    {
-        char *cmd[8] = {NULL};
-        char *param[8] = {NULL};
-        int cmd_num, num, loop = 0;
-        cmd_num = lidbg_token_string(value, ";", cmd) ;
-
-        for(loop = 0; loop < cmd_num; loop++)
-        {
-            num = lidbg_token_string(cmd[loop], ",", param);
-            if(num > 1)
-            {
-                if(!strcmp(param[0], "echo"))
-                    (param[3] && param[1]) ? fs_file_write(param[3], param[1]) : printk(KERN_CRIT"echo err\n");
-                else
-                    lidbg_exe(param[0], param[1], param[2] ? param[2] : NULL, param[3] ? param[3] : NULL, param[4] ? param[4] : NULL, param[5] ? param[5] : NULL, param[6] ? param[6] : NULL);
-
-                fs_mem_log("cb_kv_cmd:%d,%s,%s\n", num, param[0], param[1]);
-                msleep(20);
-            }
-        }
-
-    }
+    	{
+        lidbg_shell_cmd(value);
+        fs_mem_log("cb_kv_cmd:%s\n", value);
+	}
 }
 int misc_init(void *data)
 {
     LIDBG_WARN("<==IN==>\n");
 
-    te_regist_password("001100", cb_password_remove_apk);
     te_regist_password("001101", cb_password_upload);
-    te_regist_password("001102", cb_password_call_apk);
     te_regist_password("001110", cb_password_clean_all);
     te_regist_password("001111", cb_password_chmod);
     te_regist_password("001112", cb_password_update);

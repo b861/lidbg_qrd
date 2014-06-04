@@ -47,8 +47,6 @@ void lidbg_fileserver_main(int argc, char **argv)
         fs_save_list_to_file();
         break;
     case 6:
-        fs_mem_log("chmod_for_apk\n");
-        chmod_for_apk();
         break;
     case 7:
         fs_mem_log("fs_upload_machine_log\n");

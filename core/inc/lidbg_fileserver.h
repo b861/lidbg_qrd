@@ -47,7 +47,6 @@ extern void fs_regist_filedetec(char *filename, void (*cb_filedetec)(char *filen
 extern void fs_enable_kmsg( bool enable );
 extern void fs_save_state(void);
 extern int fs_get_file_size(char *file);
-extern int  lidbg_cp(char from[], char to[]);
 extern int get_machine_id(void);
 extern int fs_file_read(const char *filename, char *rbuff, int readlen);
 extern int fs_file_write(char *filename, char *wbuff);
@@ -72,8 +71,6 @@ extern bool fs_upload_machine_log(void);
 extern bool fs_register_filename_list(char *filename, bool remove_after_copy);
 extern void fs_show_filename_list(void);
 extern void fs_remount_system(void);
-extern void fs_call_apk(void);
-extern void fs_remove_apk(void);
 extern void fs_clean_all(void);
 extern void fs_save_list_to_file(void);
 
