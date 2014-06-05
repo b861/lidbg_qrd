@@ -2,12 +2,12 @@
 
 
 static LIST_HEAD(lidbg_modules_list);
-static LIST_HEAD(third_modules_list);
+static LIST_HEAD(flyaudio_modules_list);
 void drivers_loader_prepare(void)
 {
     char buff[50] = {0};
-    fs_fill_list(get_lidbg_file_path(buff, "lidbg_drivers_list.conf"), FS_CMD_FILE_LISTMODE, &lidbg_modules_list);
-    fs_fill_list(get_lidbg_file_path(buff, "third_party_list.conf"), FS_CMD_FILE_LISTMODE, &third_modules_list);
+    fs_fill_list(get_lidbg_file_path(buff, "lidbg_modules_list.conf"), FS_CMD_FILE_LISTMODE, &lidbg_modules_list);
+    fs_fill_list(get_lidbg_file_path(buff, "flyaudio_modules_list.conf"), FS_CMD_FILE_LISTMODE, &flyaudio_modules_list);
 }
 
 void party_analyze(struct list_head *client_list)
@@ -66,12 +66,11 @@ drop:
 static int thread_drivers_loader_analyze(void *data)
 {
     drivers_loader_prepare();
-    party_analyze(&lidbg_modules_list);
 
-    if(g_var.is_fly)
-        party_analyze(&third_modules_list);
+    if(fs_is_file_exist(FLY_MODE_FILE))
+        party_analyze(&flyaudio_modules_list);
     else
-        LIDBG_WARN("<skip:third_modules_list>\n");
+        party_analyze(&lidbg_modules_list);
 
     return 0;
 }
