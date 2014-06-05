@@ -98,8 +98,8 @@
 #define USB_POWER_DISABLE SOC_IO_Output(0, GPIO_USB_EN, 0)
 
 
-#define USB_ID_LOW_HOST SOC_IO_Output(0, 32, 0)
-#define USB_ID_HIGH_DEV SOC_IO_Output(0, 32, 1)
+#define USB_ID_LOW_HOST SOC_IO_Output(0, 23, 0)
+#define USB_ID_HIGH_DEV SOC_IO_Output(0, 23, 1)
 
 #define USB_WORK_ENABLE do{\
 				USB_SWITCH_CONNECT;\
