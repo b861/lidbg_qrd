@@ -16,6 +16,12 @@ void party_analyze(struct list_head *client_list)
     char *cmd[8] = {NULL};
     int cmd_num  = 0, tsleep = 0;
 
+    if (list_empty(client_list))
+    {
+        LIDBG_ERR("<list_is_empty>%pf\n", client_list);
+        return ;
+    }
+
     list_for_each_entry(pos, client_list, tmp_list)
     {
         if(pos->yourkey)
@@ -61,7 +67,12 @@ static int thread_drivers_loader_analyze(void *data)
 {
     drivers_loader_prepare();
     party_analyze(&lidbg_modules_list);
-    party_analyze(&third_modules_list);
+
+    if(g_var.is_fly)
+        party_analyze(&third_modules_list);
+    else
+        LIDBG_WARN("<skip:third_modules_list>\n");
+
     return 0;
 }
 static int __init lidbg_drivers_loader_init(void)
