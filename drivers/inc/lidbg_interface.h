@@ -3,7 +3,7 @@
 #define _FLY_INTERFACE__
 
 #ifdef BUILD_DRIVERS
-#include <lidbg_io_def.h>
+#include <lidbg_target.h>
 #include <misc_devices.h>
 #include <lidbg_bpmsg.h>
 #include <lidbg_ts_probe.h>

@@ -17,43 +17,8 @@ int  iGPS_sound_status(void);
 
 extern int fb_on;
 
-#ifdef SOC_msm8x26
-
-
-
-
-#ifdef BOARD_V1
-#define THRESHOLDS_STEP1    (100)
-#define FREQ_STEP1   	 	(1094400)
-#define FREQ_STEP1_STRING   ("1094400")
-
-#define THRESHOLDS_STEP2    (100)
-#define FREQ_STEP2   	 	(1094400)
-#define FREQ_STEP2_STRING   ("1094400")
-#else
-#define THRESHOLDS_STEP1    (80)
-#define FREQ_STEP1   	 	(1094400)
-#define FREQ_STEP1_STRING   ("1094400")
-
-#define THRESHOLDS_STEP2    (100)
-#define FREQ_STEP2   	 	(600000)
-#define FREQ_STEP2_STRING   ("600000")
-#endif
-
-
-
-
-#define FREQ_MAX     		(1401600)
-#define FREQ_MAX_STRING     ("1401600")
-
-#define CPU_TEMP_PATH 		"/sys/class/thermal/thermal_zone5/temp"
-
-
 // PANNE_PEN
 #define LCD_ON  do{lidbg("LCD_ON\n");LPC_CMD_LCD_ON;}while(0)
 #define LCD_OFF do{lidbg("LCD_OFF\n");LPC_CMD_LCD_OFF;}while(0)
-
-#endif
-
 
 #endif
