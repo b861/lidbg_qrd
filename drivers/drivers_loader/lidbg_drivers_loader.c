@@ -1,14 +1,8 @@
 #include "lidbg.h"
 
 
-static LIST_HEAD(lidbg_modules_list);
-static LIST_HEAD(flyaudio_modules_list);
-void drivers_loader_prepare(void)
-{
-    char buff[50] = {0};
-    fs_fill_list(get_lidbg_file_path(buff, "lidbg_modules_list.conf"), FS_CMD_FILE_LISTMODE, &lidbg_modules_list);
-    fs_fill_list(get_lidbg_file_path(buff, "flyaudio_modules_list.conf"), FS_CMD_FILE_LISTMODE, &flyaudio_modules_list);
-}
+static LIST_HEAD(lidbg_list);
+static LIST_HEAD(flyaudio_list);
 
 void party_analyze(struct list_head *client_list)
 {
@@ -18,7 +12,7 @@ void party_analyze(struct list_head *client_list)
 
     if (list_empty(client_list))
     {
-        LIDBG_ERR("<list_is_empty>%pf\n", client_list);
+        LIDBG_ERR("<list_is_empty>\n");
         return ;
     }
 
@@ -65,13 +59,19 @@ drop:
 
 static int thread_drivers_loader_analyze(void *data)
 {
-    drivers_loader_prepare();
+    char buff[50] = {0};
 
     if(fs_is_file_exist(FLY_MODE_FILE))
-        party_analyze(&flyaudio_modules_list);
+    {
+        fs_fill_list(get_lidbg_file_path(buff, "flyaudio.init.rc.conf"), FS_CMD_FILE_LISTMODE, &flyaudio_list);
+        party_analyze(&flyaudio_list);
+    }
     else
-        party_analyze(&lidbg_modules_list);
-
+    {
+        fs_fill_list(get_lidbg_file_path(buff, "lidbg.init.rc.conf"), FS_CMD_FILE_LISTMODE, &lidbg_list);
+        party_analyze(&lidbg_list);
+    }
+    ssleep(30);//later,exit
     return 0;
 }
 static int __init lidbg_drivers_loader_init(void)
