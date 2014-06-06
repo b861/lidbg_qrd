@@ -36,7 +36,7 @@ static int soc_dev_probe(struct platform_device *pdev)
 	CREATE_KTHREAD(thread_thermal, NULL);
 	CREATE_KTHREAD(thread_sound_detect, NULL);
 
-	if((!g_var.is_fly)&&(g_var.recovery_mode == 0))
+	if((g_var.is_fly == 0) || (g_var.recovery_mode == 1))
 	{
 	    CREATE_KTHREAD(thread_button_init, NULL);
 	    CREATE_KTHREAD(thread_key, NULL);
