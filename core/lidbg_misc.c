@@ -8,6 +8,9 @@ static int delete_out_dir_after_update = 1;
 static int dump_mem_log = 0;
 static int loop_warning_en = 0;
 
+
+#define ORIGIN_APP_PATH "/system/lib/modules/origin_app/"
+
 void lidbg_enable_logcat(void)
 {
     char cmd[128] = {0};
@@ -87,7 +90,7 @@ void cb_password_clean_all(char *password )
 void cb_password_update(char *password )
 {
     analysis_copylist(USB_MOUNT_POINT"/conf/copylist.conf");
-    fs_slient_level=4;
+    fs_slient_level = 4;
 
     LIDBG_WARN("<===============UPDATE_INFO =================>\n" );
 
@@ -199,18 +202,84 @@ void cb_kv_reboot_recovery(char *key, char *value)
     else
         fs_mem_log("cb_kv_reboot_recovery:fail,%s\n", value);
 }
+void cb_kv_lidbg_origin_system(char *key, char *value)
+{
+    LIDBG_WARN("\n\n<------------------system switch -%s----------->\n\n", value);
+    if(value && *value == '1')//origin
+    {
+        lidbg_toast_show("\"swtich to [origin system]\"", 0);
+
+        lidbg_shell_cmd("cp /flysystem/app/FlyBootService.apk /system/app/");
+        lidbg_shell_cmd("cp /flysystem/app/FastBoot.apk /system/app/");
+        lidbg_shell_cmd("chmod 777 /system/app/F*");
+
+        lidbg_shell_cmd("mkdir -p /system/lib/modules/out");
+        lidbg_shell_cmd("cp /flysystem/lib/out/* /system/lib/modules/out");
+
+        lidbg_shell_cmd("mkdir -p /flyapdata/out/temp");
+        lidbg_shell_cmd("mv /flyapdata/* /flyapdata/out/temp");
+
+        lidbg_shell_cmd("mkdir -p /flysystem/out/temp");
+        lidbg_shell_cmd("mv /flysystem/* /flysystem/out/temp");
+
+        lidbg_shell_cmd("cp "ORIGIN_APP_PATH"* /system/priv-app");
+        lidbg_shell_cmd("cp "ORIGIN_APP_PATH"Nfc.apk /system/app");
+        lidbg_shell_cmd("rm /system/priv-app/Nfc.apk ");
+        lidbg_shell_cmd("rm /system/priv-app/Launcher3.apk");
+        lidbg_shell_cmd("chmod 777 /system/priv-app/*");
+        goto suc;
+    }
+    else   if(value && *value == '2')//flyaudio
+    {
+        lidbg_toast_show("\"swtich to [flyaudio system]\"", 0);
+
+        lidbg_shell_cmd("rm /system/app/FlyBootService.apk");
+        lidbg_shell_cmd("rm /system/app/FastBoot.apk");
+
+        lidbg_shell_cmd("rm -r /system/lib/modules/out");
+        lidbg_shell_cmd("mv /flyapdata/out/temp/* /flyapdata ");
+        lidbg_shell_cmd("mv /flysystem/out/temp/* /flysystem");
+        lidbg_shell_cmd("cp /flysystem/app/sys-app1/* /system/priv-app");
+        lidbg_shell_cmd("rm /system/priv-app/Launcher2.apk");
+        lidbg_shell_cmd("rm /system/app/Nfc.apk ");
+        lidbg_shell_cmd("chmod 777 /system/priv-app/*");
+        goto suc;
+    }
+
+    LIDBG_WARN("<err>\n");
+    return ;
+suc:
+    lidbg_shell_cmd("rm -r /data");
+    ssleep(10);
+    lidbg_reboot();
+}
 
 void cb_kv_cmd(char *key, char *value)
 {
     if(value)
-    	{
+    {
         lidbg_shell_cmd(value);
         fs_mem_log("cb_kv_cmd:%s\n", value);
-	}
+    }
 }
+
 int misc_init(void *data)
 {
     LIDBG_WARN("<==IN==>\n");
+
+    lidbg_shell_cmd("mkdir -p "ORIGIN_APP_PATH);
+
+    if(!fs_is_file_exist(ORIGIN_APP_PATH"SystemUI.apk"))
+    {
+        lidbg_shell_cmd("cp /system/priv-app/SystemUI.apk "ORIGIN_APP_PATH"SystemUI.apk" );
+        lidbg_shell_cmd("cp /system/priv-app/Contacts.apk "ORIGIN_APP_PATH"Contacts.apk" );
+        lidbg_shell_cmd("cp /system/priv-app/Dialer.apk "ORIGIN_APP_PATH"Dialer.apk" );
+        lidbg_shell_cmd("cp /system/priv-app/Keyguard.apk "ORIGIN_APP_PATH"Keyguard.apk" );
+        lidbg_shell_cmd("cp /system/priv-app/Mms.apk "ORIGIN_APP_PATH"Mms.apk" );
+        lidbg_shell_cmd("cp /system/priv-app/Settings.apk "ORIGIN_APP_PATH"Settings.apk" );
+        lidbg_shell_cmd("cp /system/priv-app/Launcher2.apk "ORIGIN_APP_PATH"Launcher2.apk &" );
+        lidbg_shell_cmd("cp /system/priv-app/Nfc.apk "ORIGIN_APP_PATH"Nfc.apk &" );
+    }
 
     te_regist_password("001101", cb_password_upload);
     te_regist_password("001110", cb_password_clean_all);
@@ -232,6 +301,7 @@ int misc_init(void *data)
     FS_REGISTER_KEY( "wifiadb_en", cb_kv_wifiadb);
     FS_REGISTER_KEY( "app_install_en", cb_kv_app_install);
     FS_REGISTER_KEY( "reboot_recovery", cb_kv_reboot_recovery);
+    FS_REGISTER_KEY( "lidbg_origin_system", cb_kv_lidbg_origin_system);
 
     fs_register_filename_list("/data/kmsg.txt", true);
     fs_register_filename_list("/data/top.txt", true);
