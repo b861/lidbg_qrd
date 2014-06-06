@@ -15,9 +15,10 @@
 #define GPS_I2C_BUS 	  (1)
 
 //touch
-#define TS_I2C_BUS (1)
-#define RESET_GPIO (27)
-#define INT_GPIO   (48)
+#define TS_I2C_BUS 		(1)
+#define GTP_RST_PORT    (27)
+#define GTP_INT_PORT    (48)
+
 #endif
 
 

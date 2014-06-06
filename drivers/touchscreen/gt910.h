@@ -143,8 +143,6 @@ extern u16 total_len;
 
 
 // STEP_2(REQUIRED): Customize your I/O ports & I/O operations
-#define GTP_RST_PORT    27   //S5PV210_GPJ3(6)
-#define GTP_INT_PORT    48    //S5PV210_GPH1(3)
 #define GTP_INT_IRQ     MSM_GPIO_TO_INT(GTP_INT_PORT)//gpio_to_irq(GTP_INT_PORT)
 //#define GTP_INT_CFG     S3C_GPIO_SFN(0xF)
 

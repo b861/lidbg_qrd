@@ -3,7 +3,7 @@
 #define _FLY_HAL__
 
 #ifdef BUILD_DRIVERS
-#include <lidbg_io_def.h>
+#include <lidbg_target.h>
 #include <devices.h>
 #include <lidbg_bpmsg.h>
 #include <lidbg_fastboot.h>
