@@ -1,3 +1,12 @@
+function soc_make_otapackage()
+{
+	echo $FUNCNAME
+	cd $DBG_SYSTEM_DIR
+	if [[ $TARGET_PRODUCT = "" ]];then
+		source build/envsetup.sh&&choosecombo release $DBG_PLATFORM $SYSTEM_BUILD_TYPE
+	fi
+		make otapackage -j8
+}
 
 function soc_build_system()
 {
@@ -6,7 +15,7 @@ function soc_build_system()
 	if [[ $TARGET_PRODUCT = "" ]];then
 		source build/envsetup.sh&&choosecombo release $DBG_PLATFORM $SYSTEM_BUILD_TYPE
 	fi
-		make systemimage -j4
+		make systemimage -j8
 }
 
 function soc_build_kernel()
@@ -16,7 +25,7 @@ function soc_build_kernel()
 	if [[ $TARGET_PRODUCT = "" ]];then
 		source build/envsetup.sh&&choosecombo release $DBG_PLATFORM $SYSTEM_BUILD_TYPE
 	fi
-		make bootimage -j4
+		make bootimage -j8
 }
 
 function soc_build_all()
@@ -26,7 +35,7 @@ function soc_build_all()
 	if [[ $TARGET_PRODUCT = "" ]];then
 		source build/envsetup.sh&&choosecombo release $DBG_PLATFORM $SYSTEM_BUILD_TYPE
 	fi
-		make -j8 && make otapackage
+		make -j8
 }
 
 
