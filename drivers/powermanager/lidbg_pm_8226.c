@@ -330,10 +330,10 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         else  if(!strcmp(cmd[1], "android_down"))
         {
             SOC_IO_Output(0, GPIO_APP_STATUS, 1);
-            CREATE_KTHREAD(thread_usb_disk_disable_delay, NULL);
         }
         else  if(!strcmp(cmd[1], "gotosleep"))
         {
+            CREATE_KTHREAD(thread_usb_disk_disable_delay, NULL);
         }
         else if(!strcmp(cmd[1], "devices_up"))
         {
