@@ -43,12 +43,6 @@ case "$DBG_PLATFORM" in
 	UPDATA_BIN_DIR=$RELEASE_REPOSITORY/driver
 	UPDATA_BASESYSTEM_DIR=$RELEASE_REPOSITORY/basesystem
 	DBG_SOC=msm8x26;;
-     su640)
-	BOARD_VERSION=V1
-	DBG_CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilt/linux-x86/toolchain/arm-eabi-4.4.3/bin/arm-eabi-
-	SYSTEM_BUILD_TYPE=eng
-	DBG_KERNEL_SRC_DIR=/home/android/su640/system/kernel/lge/iproj
-	DBG_KERNEL_OBJ_DIR=$DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/obj/KERNEL_OBJ;;
 esac
 
 

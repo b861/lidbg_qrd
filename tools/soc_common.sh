@@ -1,12 +1,4 @@
-function soc_make_otapackage()
-{
-	echo $FUNCNAME
-	cd $DBG_SYSTEM_DIR
-	if [[ $TARGET_PRODUCT = "" ]];then
-		source build/envsetup.sh&&choosecombo release $DBG_PLATFORM $SYSTEM_BUILD_TYPE
-	fi
-		make otapackage -j8
-}
+
 
 function soc_build_system()
 {
@@ -68,6 +60,7 @@ function soc_menu()
 	echo [21] make bootimage
 	echo [22] make system
 	echo [23] make
+	echo [24] make otapackage
 }
 
 function soc_handle()
@@ -80,6 +73,8 @@ function soc_handle()
 		soc_build_system;;
 	23)
 		soc_build_all;;
+	24)
+		soc_make_otapackage;;
 	*)
 		echo
 	esac
