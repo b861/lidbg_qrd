@@ -433,12 +433,6 @@ static struct dev_pm_ops lidbg_pm_ops =
     .resume		= pm_resume,
 };
 #endif
-static int thread_pm_late_probe(void *data)//because of blocking other driver to insmod.
-{
-    ssleep(30);
-    lidbg_enable_logcat();
-    return 1;
-}
 
 static int  lidbg_pm_probe(struct platform_device *pdev)
 {
@@ -456,7 +450,6 @@ static int  lidbg_pm_probe(struct platform_device *pdev)
     kthread_run(thread_observer, NULL, "ftf_pmtask");
     LIDBG_MODULE_LOG;
 
-    CREATE_KTHREAD(thread_pm_late_probe, NULL);
     PM_WARN("<==OUT==>\n\n");
 
     return 0;
