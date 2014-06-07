@@ -8,7 +8,6 @@ obj-m	+= lidbg_spi.o
 obj-m	+= lidbg_uart.o
 obj-m	+= lidbg_key.o
 obj-m	+= lidbg_touch.o
-obj-m	+= lidbg_misc.o
 obj-m	+= lidbg_fileserver.o
 obj-m	+= lidbg_common.o
 obj-m	+= lidbg_wakelock_stat.o

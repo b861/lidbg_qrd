@@ -2,5 +2,5 @@
 include $(DBG_ROOT_PATH)/build/build.mk
 include $(DBG_DRIVERS_PATH)/drivers.mk
 
-obj-y	:= acc/ bp_msg/ devices/ drivers_dbg/ fastboot/ suspend_monitor/ gps/ touchscreen/ videoin/ monkey/ hal/ interface/ misc_devices/ powermanager/ dsi83/ lpc/ saf7741/  flysemdriver/ drivers_loader/
+obj-y	:= acc/ bp_msg/ devices/ drivers_dbg/ fastboot/ suspend_monitor/ gps/ touchscreen/ videoin/ monkey/ hal/ interface/ misc_devices/ powermanager/ dsi83/ lpc/ saf7741/  flysemdriver/ drivers_loader/ misc_for_core/
 
