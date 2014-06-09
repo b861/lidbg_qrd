@@ -147,6 +147,8 @@
 #define FREQ_MAX_STRING     ("1401600")
 
 #define CPU_TEMP_PATH 		"/sys/class/thermal/thermal_zone5/temp"
+#define TEMP_FREQ_TEST_STR	 "300000,384000,600000,787200,998400,1094400,1190400,1305600,1344000,1401600"
+
 
 #endif
 

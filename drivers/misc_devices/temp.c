@@ -7,7 +7,6 @@ static bool is_cpu_temp_enabled = false;
 
 #define FREQ_MAX_NODE    "/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq"
 #define TEMP_LOG_PATH 	 LIDBG_LOG_DIR"log_ct.txt"
-#define TEMP_FREQ_TEST_STR	 "300000,384000,600000,787200,998400,1094400,1190400,1305600,1344000,1401600"
 #define TEMP_FREQ_TEST_RESULT LIDBG_LOG_DIR"lidbg_temp_freq.txt"
 #define TEMP_FREQ_COUNTER LIDBG_LOG_DIR"freq_tmp.txt"
 
@@ -20,11 +19,17 @@ int get_file_int(char *file)
     return temp;
 }
 
+int soc_temp_get(void)
+{
+	get_file_int(CPU_TEMP_PATH);
+}
+
+
 void log_temp(void)
 {
     static int old_temp, cur_temp;
     int tmp;
-    g_var.temp = cur_temp = get_file_int(CPU_TEMP_PATH);
+    g_var.temp = cur_temp = soc_temp_get();
     tmp = cur_temp - old_temp;
     if((temp_log_freq != 0) && (ABS(tmp) >= temp_log_freq))
     {
@@ -50,7 +55,7 @@ int thread_thermal(void *data)
         msleep(1000);
 
         log_temp();
-        cur_temp = get_file_int(CPU_TEMP_PATH);
+        cur_temp = soc_temp_get();
         //lidbg("MSM_THERM: %d\n",cur_temp);
 
         if((cur_temp > THRESHOLDS_STEP1 ) && (cur_temp <= THRESHOLDS_STEP2 ) && (cur_frq != FREQ_STEP1))
@@ -109,7 +114,7 @@ int thread_start_cpu_tmp_test(void *data)
     {
         int cur_temp;
         int_time_count++;
-        cur_temp = get_file_int(CPU_TEMP_PATH);
+        cur_temp = soc_temp_get();
         fs_string2file(100, TEMP_FREQ_TEST_RESULT, "%d,temp=%d,time=%d,freq=%s:\n", freq_pos, cur_temp, int_time_count * 2, group[freq_pos]);
         lidbg("%d,temp=%d,time=%d,freq=%s:\n", freq_pos, cur_temp, int_time_count * 2, group[freq_pos]);
         ssleep(2);
