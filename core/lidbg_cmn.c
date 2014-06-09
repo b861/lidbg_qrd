@@ -370,7 +370,7 @@ int  lidbg_force_stop_apk(char packagename[])
 int  lidbg_toast_show(char *string, int int_value)
 {
     char para[128] = {0};
-    sprintf(para, "--es action %s --ei int %d &", string ? string : "null", int_value);
+    sprintf(para, "--es action \"%s\" --ei int %d &", string ? string : "null", int_value);
     return lidbg_launch_user(get_bin_path("am"), "broadcast", "-a", "com.lidbg.broadcast", para, NULL, NULL);
 }
 
