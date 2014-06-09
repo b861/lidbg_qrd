@@ -31,7 +31,8 @@ function lidbg_build_all()
 {
 	echo $FUNCNAME
 	cd $DBG_BUILD_PATH
-	./build_cfg.sh $DBG_SOC $BUILD_VERSION 
+	./build_cfg.sh $DBG_SOC $BUILD_VERSION
+	cd $DBG_BUILD_PATH && ./clean.sh
 	cd $DBG_HAL_PATH   && ./build_all.sh
 	cd $DBG_BUILD_PATH && ./build.sh
 }
