@@ -59,11 +59,12 @@ static int thread_observer(void *data)
                 have_triggerd_sleep_S++;
                 switch (have_triggerd_sleep_S)
                 {
-                case 50:
+                case 20:
+                        PM_action_entry("unlock",  PM_ACTION_PRINT_FORCE_UNLOCK);
                     break;
 
                 default:
-                    if(have_triggerd_sleep_S > 5 && !(have_triggerd_sleep_S % 5))
+                    if(have_triggerd_sleep_S >= 5 && !(have_triggerd_sleep_S % 5))
                     {
                         sprintf(when, "start%d:", have_triggerd_sleep_S);
                         PM_action_entry(when,  PM_ACTION_PRINT);
@@ -206,7 +207,7 @@ void lidbg_pm_step_call(fly_pm_stat_step step, void *data)
     {
         char *buff = data;
         if(!strcmp(buff, "mem"))
-            observer_start();
+            ;
         else if(!strcmp(buff, "off"))
             observer_stop();
         PM_WARN("PM_AUTOSLEEP_STORE1:[%s,%d]\n", buff, atomic_read(&is_in_sleep));
@@ -333,6 +334,7 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         }
         else  if(!strcmp(cmd[1], "gotosleep"))
         {
+            observer_start();
             CREATE_KTHREAD(thread_usb_disk_disable_delay, NULL);
         }
         else if(!strcmp(cmd[1], "devices_up"))
