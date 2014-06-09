@@ -204,15 +204,21 @@ void cb_kv_reboot_recovery(char *key, char *value)
 }
 void cb_kv_lidbg_origin_system(char *key, char *value)
 {
-    LIDBG_WARN("\n\n<------------------system switch -%s----------->\n\n", value);
+    LIDBG_WARN("\n\n<------------------system switch -%s----------->\n\n", value == '1' ? "origin system" : "flyaudio system");
     if(value && *value == '1')//origin
     {
         lidbg_toast_show("\"swtich to [origin system]\"", 0);
 
+        lidbg_shell_cmd("cp /flyapdata/app/ESFileExplorer.apk /system/app/");
         lidbg_shell_cmd("cp /flysystem/app/FlyBootService.apk /system/app/");
         lidbg_shell_cmd("cp /flysystem/app/FastBoot.apk /system/app/");
-        lidbg_shell_cmd("chmod 777 /system/app/F*");
 
+        lidbg_shell_cmd("cp "ORIGIN_APP_PATH"* /system/priv-app &");
+        lidbg_shell_cmd("cp "ORIGIN_APP_PATH"NfcNci.apk /system/app");
+        lidbg_shell_cmd("rm /system/priv-app/NfcNci.apk ");
+        lidbg_shell_cmd("rm /system/priv-app/Launcher3.apk");
+
+        ssleep(10);//give sometime for cp
         lidbg_shell_cmd("mkdir -p /system/lib/modules/out");
         lidbg_shell_cmd("cp /flysystem/lib/out/* /system/lib/modules/out");
 
@@ -222,27 +228,39 @@ void cb_kv_lidbg_origin_system(char *key, char *value)
         lidbg_shell_cmd("mkdir -p /flysystem/out/temp");
         lidbg_shell_cmd("mv /flysystem/* /flysystem/out/temp");
 
-        lidbg_shell_cmd("cp "ORIGIN_APP_PATH"* /system/priv-app");
-        lidbg_shell_cmd("cp "ORIGIN_APP_PATH"Nfc.apk /system/app");
-        lidbg_shell_cmd("rm /system/priv-app/Nfc.apk ");
-        lidbg_shell_cmd("rm /system/priv-app/Launcher3.apk");
-        lidbg_shell_cmd("chmod 777 /system/priv-app/*");
+        lidbg_shell_cmd("chmod 777 /system/app/F*");
+        lidbg_shell_cmd("chmod 777 /system/app/ESFileExplorer.apk");
+        lidbg_shell_cmd("chmod 777 /system/app/NfcNci.apk");
+
+        if(!fs_is_file_exist("/system/priv-app/Launcher2.apk"))
+        {
+            lidbg_shell_cmd("cp "ORIGIN_APP_PATH"Launcher2.apk /system/priv-app/ &");
+            ssleep(5);
+        }
         goto suc;
     }
     else   if(value && *value == '2')//flyaudio
     {
         lidbg_toast_show("\"swtich to [flyaudio system]\"", 0);
 
+        lidbg_shell_cmd("cp /flysystem/out/temp/app/sys-app1/* /system/priv-app &");
+
+        ssleep(10);//give sometime for cp
+        lidbg_shell_cmd("rm /system/app/ESFileExplorer.apk");
         lidbg_shell_cmd("rm /system/app/FlyBootService.apk");
         lidbg_shell_cmd("rm /system/app/FastBoot.apk");
 
-        lidbg_shell_cmd("rm -r /system/lib/modules/out");
-        lidbg_shell_cmd("mv /flyapdata/out/temp/* /flyapdata ");
         lidbg_shell_cmd("mv /flysystem/out/temp/* /flysystem");
-        lidbg_shell_cmd("cp /flysystem/app/sys-app1/* /system/priv-app");
+        lidbg_shell_cmd("mv /flyapdata/out/temp/* /flyapdata ");
         lidbg_shell_cmd("rm /system/priv-app/Launcher2.apk");
-        lidbg_shell_cmd("rm /system/app/Nfc.apk ");
-        lidbg_shell_cmd("chmod 777 /system/priv-app/*");
+        lidbg_shell_cmd("rm /system/app/NfcNci.apk ");
+        lidbg_shell_cmd("rm -r /system/lib/modules/out");
+
+        if(!fs_is_file_exist("/system/priv-app/Launcher3.apk"))
+        {
+            lidbg_shell_cmd("cp /flysystem/out/temp/app/sys-app1/Launcher3.apk /system/priv-app/ &");
+            ssleep(5);
+        }
         goto suc;
     }
 
@@ -250,7 +268,8 @@ void cb_kv_lidbg_origin_system(char *key, char *value)
     return ;
 suc:
     lidbg_shell_cmd("rm -r /data");
-    ssleep(10);
+    lidbg_shell_cmd("chmod 777 /system/priv-app/*");
+    ssleep(5);
     lidbg_reboot();
 }
 
@@ -278,7 +297,7 @@ int misc_init(void *data)
         lidbg_shell_cmd("cp /system/priv-app/Mms.apk "ORIGIN_APP_PATH"Mms.apk" );
         lidbg_shell_cmd("cp /system/priv-app/Settings.apk "ORIGIN_APP_PATH"Settings.apk" );
         lidbg_shell_cmd("cp /system/priv-app/Launcher2.apk "ORIGIN_APP_PATH"Launcher2.apk &" );
-        lidbg_shell_cmd("cp /system/priv-app/Nfc.apk "ORIGIN_APP_PATH"Nfc.apk &" );
+        lidbg_shell_cmd("cp /system/app/NfcNci.apk "ORIGIN_APP_PATH"NfcNci.apk" );
     }
 
     te_regist_password("001101", cb_password_upload);
