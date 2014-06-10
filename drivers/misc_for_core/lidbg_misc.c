@@ -9,7 +9,8 @@ static int dump_mem_log = 0;
 static int loop_warning_en = 0;
 
 
-#define ORIGIN_APP_PATH "/system/lib/modules/origin_app/"
+#define ORIGIN_APP_PATH "/system/origin_app/"
+#define ORIGIN_TMP_PATH "/system/origin_tmp/"
 
 void lidbg_enable_logcat(void)
 {
@@ -204,71 +205,69 @@ void cb_kv_reboot_recovery(char *key, char *value)
 }
 void cb_kv_lidbg_origin_system(char *key, char *value)
 {
-    LIDBG_WARN("\n\n<------------------system switch -%s----------->\n\n", value == '1' ? "origin system" : "flyaudio system");
+    LIDBG_WARN("\n\n<------------------system switch -%s----------->\n\n", value[0] == '1' ? "origin system" : "flyaudio system");
     if(value && *value == '1')//origin
     {
         lidbg_toast_show("\"swtich to [origin system]\"", 0);
-
-        lidbg_shell_cmd("cp /flyapdata/app/ESFileExplorer.apk /system/app/");
-        lidbg_shell_cmd("cp /flysystem/app/FlyBootService.apk /system/app/");
-        lidbg_shell_cmd("cp /flysystem/app/FastBoot.apk /system/app/");
-
-        lidbg_shell_cmd("cp "ORIGIN_APP_PATH"* /system/priv-app &");
-        lidbg_shell_cmd("cp "ORIGIN_APP_PATH"NfcNci.apk /system/app");
-        lidbg_shell_cmd("rm /system/priv-app/NfcNci.apk ");
-        lidbg_shell_cmd("rm /system/priv-app/Launcher3.apk");
-
-        ssleep(10);//give sometime for cp
-        lidbg_shell_cmd("mkdir -p /system/lib/modules/out");
-        lidbg_shell_cmd("cp /flysystem/lib/out/* /system/lib/modules/out");
-
         lidbg_shell_cmd("mkdir -p /flyapdata/out/temp");
-        lidbg_shell_cmd("mv /flyapdata/* /flyapdata/out/temp");
-
         lidbg_shell_cmd("mkdir -p /flysystem/out/temp");
-        lidbg_shell_cmd("mv /flysystem/* /flysystem/out/temp");
 
+        fs_remount_system();
+
+        lidbg_shell_cmd("cp -rf "ORIGIN_APP_PATH"* /system/priv-app/ &");
+        lidbg_shell_cmd("cp -rf "ORIGIN_TMP_PATH"NfcNci.apk /system/app/ &");
+        lidbg_shell_cmd("cp -r /flyapdata/app/ESFileExplorer.apk /system/app/ &");
+        lidbg_shell_cmd("cp -r /flysystem/app/FlyBootService.apk /system/app/ &");
+        lidbg_shell_cmd("cp -r /flysystem/app/FastBoot.apk /system/app/ &");
+        ssleep(10);//give sometime for cp
+        if(!fs_is_file_exist("/system/priv-app/Launcher2.apk"))
+        {
+            lidbg_shell_cmd("cp -r "ORIGIN_APP_PATH"Launcher2.apk /system/priv-app/ &");
+            ssleep(5);
+        }
+
+        lidbg_shell_cmd("mv /system/lib/modules/out1 system/lib/modules/out");
+        lidbg_shell_cmd("mv /flyapdata/* /flyapdata/out/temp &");
+        lidbg_shell_cmd("mv /flysystem/* /flysystem/out/temp &");
+
+        lidbg_shell_cmd("rm -r /system/priv-app/Launcher3.apk");
         lidbg_shell_cmd("chmod 777 /system/app/F*");
         lidbg_shell_cmd("chmod 777 /system/app/ESFileExplorer.apk");
         lidbg_shell_cmd("chmod 777 /system/app/NfcNci.apk");
-
-        if(!fs_is_file_exist("/system/priv-app/Launcher2.apk"))
-        {
-            lidbg_shell_cmd("cp "ORIGIN_APP_PATH"Launcher2.apk /system/priv-app/ &");
-            ssleep(5);
-        }
+        lidbg_shell_cmd("mv /system/lib/modules/out1 system/lib/modules/out");
         goto suc;
     }
     else   if(value && *value == '2')//flyaudio
     {
         lidbg_toast_show("\"swtich to [flyaudio system]\"", 0);
 
-        lidbg_shell_cmd("cp /flysystem/out/temp/app/sys-app1/* /system/priv-app &");
+        lidbg_shell_cmd("cp -rf  /flysystem/out/temp/app/sys-app1/* /system/priv-app &");
 
         ssleep(10);//give sometime for cp
-        lidbg_shell_cmd("rm /system/app/ESFileExplorer.apk");
-        lidbg_shell_cmd("rm /system/app/FlyBootService.apk");
-        lidbg_shell_cmd("rm /system/app/FastBoot.apk");
-
-        lidbg_shell_cmd("mv /flysystem/out/temp/* /flysystem");
-        lidbg_shell_cmd("mv /flyapdata/out/temp/* /flyapdata ");
-        lidbg_shell_cmd("rm /system/priv-app/Launcher2.apk");
-        lidbg_shell_cmd("rm /system/app/NfcNci.apk ");
-        lidbg_shell_cmd("rm -r /system/lib/modules/out");
-
         if(!fs_is_file_exist("/system/priv-app/Launcher3.apk"))
         {
-            lidbg_shell_cmd("cp /flysystem/out/temp/app/sys-app1/Launcher3.apk /system/priv-app/ &");
+            lidbg_shell_cmd("cp -r /flysystem/out/temp/app/sys-app1/Launcher3.apk /system/priv-app/ &");
             ssleep(5);
         }
+        lidbg_shell_cmd("mv /flysystem/out/temp/* /flysystem &");
+        lidbg_shell_cmd("mv /flyapdata/out/temp/* /flyapdata  &");
+        ssleep(5);//give sometime for cp
+
+        lidbg_shell_cmd("rm -r /system/app/ESFileExplorer.apk");
+        lidbg_shell_cmd("rm -r /system/app/FlyBootService.apk");
+        lidbg_shell_cmd("rm -r /system/app/FastBoot.apk");
+        lidbg_shell_cmd("rm -r /system/app/NfcNci.apk ");
+        lidbg_shell_cmd("mv /system/lib/modules/out system/lib/modules/out1");
+        lidbg_shell_cmd("rm -r /system/priv-app/Launcher2.apk");
         goto suc;
     }
 
     LIDBG_WARN("<err>\n");
     return ;
 suc:
+    lidbg_shell_cmd("chmod 777 /system/priv-app/* &");
+    ssleep(3);
     lidbg_shell_cmd("rm -r /data");
-    lidbg_shell_cmd("chmod 777 /system/priv-app/*");
     ssleep(5);
     lidbg_reboot();
 }
@@ -286,7 +285,9 @@ int misc_init(void *data)
 {
     LIDBG_WARN("<==IN==>\n");
 
-    lidbg_shell_cmd("mkdir -p "ORIGIN_APP_PATH);
+    lidbg_shell_cmd("mkdir  "ORIGIN_APP_PATH);
+    lidbg_shell_cmd("mkdir  "ORIGIN_TMP_PATH);
+    lidbg_shell_cmd("mkdir  /system/lib/modules/out1");
 
     if(!fs_is_file_exist(ORIGIN_APP_PATH"SystemUI.apk"))
     {
@@ -297,7 +298,14 @@ int misc_init(void *data)
         lidbg_shell_cmd("cp /system/priv-app/Mms.apk "ORIGIN_APP_PATH"Mms.apk" );
         lidbg_shell_cmd("cp /system/priv-app/Settings.apk "ORIGIN_APP_PATH"Settings.apk" );
         lidbg_shell_cmd("cp /system/priv-app/Launcher2.apk "ORIGIN_APP_PATH"Launcher2.apk &" );
-        lidbg_shell_cmd("cp /system/app/NfcNci.apk "ORIGIN_APP_PATH"NfcNci.apk" );
+        lidbg_shell_cmd("cp /system/app/NfcNci.apk "ORIGIN_TMP_PATH"NfcNci.apk" );
+        lidbg_shell_cmd("chmod 777  "ORIGIN_APP_PATH"*" );
+        lidbg_shell_cmd("chmod 777  "ORIGIN_TMP_PATH"*" );
+    }
+    if(is_out_updated || !fs_is_file_exist("/system/lib/modules/out1/build_time.conf"))
+    {
+        lidbg_shell_cmd("cp -rf /flysystem/lib/out/* /system/lib/modules/out1/ &");
+        lidbg_shell_cmd("chmod 777 /system/lib/modules/out1/*");
     }
 
     te_regist_password("001101", cb_password_upload);
@@ -366,4 +374,5 @@ EXPORT_SYMBOL(lidbg_enable_kmsg);
 MODULE_AUTHOR("futengfei");
 MODULE_DESCRIPTION("misc zone");
 MODULE_LICENSE("GPL");
+
 
