@@ -4,7 +4,7 @@
 #define TEST_MODE     11
 #define KEYCODE_MODE  22
 
-//#define MODE_SEL  KEYCODE_MODE//TEST_MODE
+#define MODE_SEL  0//KEYCODE_MODE//TEST_MODE
 
 #ifdef __cplusplus
 extern "C"

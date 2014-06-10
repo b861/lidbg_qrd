@@ -919,6 +919,19 @@ Output:
 	Executive outcomes.
 	> =0: succeed, otherwise: failed
 *******************************************************/
+u8 cfg_info_group1[] = CTP_CFG_GROUP1;
+u8 cfg_info_group2[] = CTP_CFG_GROUP2;
+u8 cfg_info_group3[] = CTP_CFG_GROUP3;
+u8 cfg_info_group4[] = CTP_CFG_GROUP4;
+u8 cfg_info_group5[] = CTP_CFG_GROUP5;
+u8 cfg_info_group6[] = CTP_CFG_GROUP6;
+u8 cfg_info_group7[] = CTP927_CFG_GROUP1;
+u8 cfg_info_group8[] = CTP927_CFG_GROUP2;
+u8 cfg_info_group9[] = CTP927_CFG_GROUP3;
+u8 cfg_info_group10[] = CTP927_CFG_GROUP4;
+u8 cfg_info_group11[] = CTP927_CFG_GROUP5;
+u8 cfg_info_group12[] = CTP927_CFG_GROUP6;
+
 static int gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
 {
 	struct i2c_client *client = ts->client;
@@ -931,18 +944,6 @@ static int gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
 	u8 opr_buf[16];
 	u8 sensor_id = 0;
 
-	u8 cfg_info_group1[] = CTP_CFG_GROUP1;
-	u8 cfg_info_group2[] = CTP_CFG_GROUP2;
-	u8 cfg_info_group3[] = CTP_CFG_GROUP3;
-	u8 cfg_info_group4[] = CTP_CFG_GROUP4;
-	u8 cfg_info_group5[] = CTP_CFG_GROUP5;
-	u8 cfg_info_group6[] = CTP_CFG_GROUP6;
-	u8 cfg_info_group7[] = CTP927_CFG_GROUP1;
-	u8 cfg_info_group8[] = CTP927_CFG_GROUP2;
-	u8 cfg_info_group9[] = CTP927_CFG_GROUP3;
-	u8 cfg_info_group10[] = CTP927_CFG_GROUP4;
-	u8 cfg_info_group11[] = CTP927_CFG_GROUP5;
-	u8 cfg_info_group12[] = CTP927_CFG_GROUP6;
 	u8 *send_cfg_buf[] = {cfg_info_group1, cfg_info_group2,
 		cfg_info_group3, cfg_info_group4,cfg_info_group5, cfg_info_group6,
 		cfg_info_group7, cfg_info_group8,cfg_info_group9, cfg_info_group10,cfg_info_group11, cfg_info_group12};
@@ -2263,7 +2264,7 @@ int ts_nod_open (struct inode *inode, struct file *filp)
 ssize_t ts_nod_write (struct file *filp, const char __user *buf, size_t count, loff_t *f_pos)
 {
     char data_rec[20];
-    struct ts_device *tsdev = filp->private_data;
+//    struct ts_device *tsdev = filp->private_data;
 
     if (copy_from_user( data_rec, buf, count))
     {
@@ -2295,6 +2296,7 @@ static  struct file_operations ts_nod_fops =
 static int init_cdev_ts(void)
 {
     int ret, err, result;
+    dev_t dev_number = MKDEV(major_number_ts, 0);
 
     //11creat cdev
     tsdev = (struct ts_device *)kmalloc( sizeof(struct ts_device), GFP_KERNEL );
@@ -2305,7 +2307,6 @@ static int init_cdev_ts(void)
         return ret;
     }
 
-    dev_t dev_number = MKDEV(major_number_ts, 0);
     if(major_number_ts)
     {
         result = register_chrdev_region(dev_number, 1, TS_DEVICE_NAME);
@@ -2332,6 +2333,7 @@ static int init_cdev_ts(void)
         return -1;
     }
     device_create(class_install_ts, NULL, dev_number, NULL, "%s%d", TS_DEVICE_NAME, 0);
+	return 0;
 }
 #endif
 ///////////////////////////////////////////////////////

@@ -1,3 +1,5 @@
+
+
 /*
  * 12linux/drivers/serial/tcc_dev_cypress.c
  anxiao_cap_dev.ko
@@ -61,9 +63,11 @@
 
 #include <linux/cdev.h>
 #include "touch.h"
+#ifdef SOC_msm8x25
+
+static touch_t touch = {0, 0, 0};
 
 #define DEVICE_NAME "fenzhi"
-static touch_t touch = {0, 0, 0};
 
 struct test_input_dev
 {
@@ -213,4 +217,9 @@ module_exit(my_input_driver_exit);
 MODULE_AUTHOR("hujian");
 MODULE_DESCRIPTION("input driver,just for test");
 MODULE_LICENSE("GPL");
+#else
 
+void set_touch_pos(touch_t *t){}
+EXPORT_SYMBOL_GPL(set_touch_pos);
+
+#endif

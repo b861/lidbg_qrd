@@ -171,7 +171,7 @@ struct lidbg_fn_t
     //screan_off :0 screan_on :1 suspendon:2 suspendoff:3
     void (*pfnHal_Acc_Callback)(int para);
 
-    int (*pfnSOC_SPI_MODE_Set) (int bus_id, u8 mode,u8 bits_per_word,u8 max_speed_hz);
+    int (*pfnSOC_SPI_MODE_Set) (int bus_id, u8 mode,u8 bits_per_word,u32 max_speed_hz);
     int (*pfnSOC_SPI_Send) (int bus_id, char *buf, unsigned int size);
     int (*pfnSOC_SPI_Rec)(int bus_id, char *buf, unsigned int size);
     int (*pfnSOC_SPI_Send_Rec)(int bus_id, const u8 *txbuf, unsigned n_tx, u8 *rxbuf, unsigned n_rx);

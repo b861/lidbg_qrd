@@ -21,7 +21,7 @@ int get_file_int(char *file)
 
 int soc_temp_get(void)
 {
-	get_file_int(CPU_TEMP_PATH);
+	return get_file_int(CPU_TEMP_PATH);
 }
 
 

@@ -81,7 +81,7 @@ BOOL I2C_Read_SAF7741(UINT ulRegAddr, BYTE *pRegValBuf, UINT uiValBufLen)
 
 BOOL I2C_Write_SAF7741(UINT ulRegAddr, BYTE *pRegValBuf, UINT uiValBufLen)
 {
-	BYTE i;
+	//BYTE i;
 	BYTE buff[300];
 
 	buff[2] = ulRegAddr & 0xff;
@@ -121,7 +121,7 @@ static BYTE getInuptGain(BYTE input)
 	return SAF7741_audioChannelGainTab[i].gain;
 }
 
-void SAF7741_EnableTape()
+void SAF7741_EnableTape(void)
 {
 #if SAF7741_SILICON_SEL == SAF7741_SILICON_140
 	UINT regAddr;
@@ -343,7 +343,7 @@ void SAF7741_DesScalBMT_P(void)
 	BYTE reg[5] = {0x0D, 0x10, 0x77, 0x00, 0x00};//ADSP_Y_Vol_DesScalBMTP
 	UINT regAddr;
 
-	UINT Temp1=0,Temp2=6;
+	UINT /*Temp1=0,*/Temp2=6;
 	//Temp1 = LARGER(pFlyAudioInfo->sFlyAudioInfo.curBassLevel,pFlyAudioInfo->sFlyAudioInfo.curMidLevel);
 	//Temp2 = LARGER(Temp1,pFlyAudioInfo->sFlyAudioInfo.curTrebleLevel);
 
@@ -588,7 +588,7 @@ void send_cmds_to_lpc(void)
 
 static int saf7741_probe(struct platform_device *pdev)
 {
-	int ret = 0;
+	//int ret = 0;
 
     if((g_var.is_fly) || (g_var.recovery_mode))
     {

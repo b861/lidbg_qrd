@@ -225,7 +225,7 @@ static int dsi83_fb_notifier_callback(struct notifier_block *self,
 
 #endif
 
-void dsi83_gpio_init()
+void dsi83_gpio_init(void)
 {
 	dsi83_enable();
 	panel_reset();
@@ -301,9 +301,9 @@ static int dsi83_probe(struct platform_device *pdev)
 
 static int dsi83_remove(struct platform_device *pdev)
 {
-	cancel_work_sync(dsi83_workqueue);
-	flush_workqueue(dsi83_workqueue);
-	destroy_workqueue(dsi83_workqueue);
+//	cancel_work_sync(dsi83_workqueue);
+//	flush_workqueue(dsi83_workqueue);
+//	destroy_workqueue(dsi83_workqueue);
     return 0;
 }
 

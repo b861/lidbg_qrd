@@ -276,6 +276,7 @@ static struct miscdevice misc =
 int fly_interface_init(void)
 {
     int ret;
+	int p = (int) & (plidbg_dev->soc_func_tbl);
     DUMP_BUILD_TIME;
     ret = misc_register(&misc);
 
@@ -290,8 +291,8 @@ int fly_interface_init(void)
         int i;
         for(i = 0; i < sizeof(plidbg_dev->soc_func_tbl) / 4; i++)
         {
-            ((int *) & (plidbg_dev->soc_func_tbl))[i] = interface_func_tbl_default;
-
+           // (((int *) & (plidbg_dev->soc_func_tbl))[i]) = interface_func_tbl_default;
+           *((int*)(p+i*4)) = (int)interface_func_tbl_default;
         }
     }
     memset(&(plidbg_dev->soc_pvar_tbl), (int)NULL, sizeof(struct lidbg_pvar_t));

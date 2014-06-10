@@ -88,9 +88,6 @@
 #define USB_WORK_DISENABLE SOC_IO_Output(0, GPIO_USB_EN, 1)
 
 #else
-#define USB_ID_HIGH_DEV 
-#define USB_ID_LOW_HOST
-
 #define USB_SWITCH_CONNECT SOC_IO_Output(0, 109, 0)
 #define USB_SWITCH_DISCONNECT SOC_IO_Output(0, 109, 0) //alway on for test
 
@@ -98,16 +95,17 @@
 #define USB_POWER_ENABLE SOC_IO_Output(0, GPIO_USB_EN, 1)
 #define USB_POWER_DISABLE SOC_IO_Output(0, GPIO_USB_EN, 0)
 
-
 #define USB_ID_LOW_HOST SOC_IO_Output(0, 23, 0)
 #define USB_ID_HIGH_DEV SOC_IO_Output(0, 23, 1)
 
 #define USB_WORK_ENABLE do{\
+				lidbg("USB_WORK_ENABLE\n");\
 				USB_SWITCH_CONNECT;\
     			USB_POWER_ENABLE;\
     			USB_ID_LOW_HOST;\
 			}while(0)
 #define USB_WORK_DISENABLE  do{\
+			lidbg("USB_WORK_DISENABLE\n");\
 			USB_SWITCH_DISCONNECT;\
 			USB_POWER_DISABLE;\
 			USB_ID_HIGH_DEV;\

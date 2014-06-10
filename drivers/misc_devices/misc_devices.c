@@ -25,12 +25,53 @@ static int devices_notifier_callback(struct notifier_block *self,
 }
 #endif
 
+static int lidbg_event(struct notifier_block *this,
+                       unsigned long event, void *ptr)
+{
+    DUMP_FUN;
+
+    switch (event)
+    {
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_ACC_OFF):
+        break;
+
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_SUSPEND_PREPARE):
+        break;
+
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_POWER_OFF):
+        break;
+
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_ACC_ON):
+        break;
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_SUSPEND_UNPREPARE):
+        break;
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_SIGNAL_EVENT, NOTIFIER_MINOR_SIGNAL_BAKLIGHT_ACK):
+        LCD_OFF;
+        msleep(100);
+        LCD_ON;
+        break;
+    default:
+        break;
+    }
+
+    return NOTIFY_DONE;
+}
+
+
+static struct notifier_block lidbg_notifier =
+{
+    .notifier_call = lidbg_event,
+};
+
+
 static int soc_dev_probe(struct platform_device *pdev)
 {
 #if defined(CONFIG_FB)
     devices_notif.notifier_call = devices_notifier_callback;
     fb_register_client(&devices_notif);
 #endif
+
+    register_lidbg_notifier(&lidbg_notifier);
 
 	CREATE_KTHREAD(thread_led, NULL);
 	CREATE_KTHREAD(thread_thermal, NULL);
@@ -99,6 +140,9 @@ static void set_func_tbl(void)
 	plidbg_dev->soc_func_tbl.pfnGPS_sound_status = iGPS_sound_status;
 		
 }
+
+
+
 int dev_init(void)
 {
     lidbg("=======misc_dev_init========\n");

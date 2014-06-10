@@ -181,7 +181,7 @@ int ts_probe_thread(void *data)
     {
         while(!is_ts_load)
         {
-            if((ts = ts_scan(&ts_probe_dev, SIZE_OF_ARRAY(ts_probe_dev))))
+            if((ts = ts_scan(ts_probe_dev, SIZE_OF_ARRAY(ts_probe_dev))))
             {
                 parse_ts_info(ts);
                 msleep(5000);

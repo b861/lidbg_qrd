@@ -49,12 +49,12 @@ int flysemdriver_open (struct inode *inode, struct file *filp)
 
 ssize_t flysemdriver_read (struct file *filp,char __user *buf, size_t size, loff_t *ppos)
 {
-	printk(KERN_INFO "flysemdriver_read begin\n");
-	unsigned long p = *ppos;
-	unsigned int count = size;
+	//unsigned long p = *ppos;
+	//unsigned int count = size;
 	int ret = 0;
 	struct sem_dev *dev = filp->private_data;
 	
+	printk(KERN_INFO "flysemdriver_read begin\n");
 	printk(KERN_INFO "wait the dev_sem ing...\n");
 	if(down_interruptible(&dev->dev_sem)) //获取信号量1
     {
@@ -71,14 +71,14 @@ ssize_t flysemdriver_read (struct file *filp,char __user *buf, size_t size, loff
 
 ssize_t flysemdriver_write (struct file *filp, const char __user *buf,size_t size, loff_t *ppos)
 {
-	printk(KERN_INFO "flysemdriver_write begin\n");
 	
 	struct sem_dev *dev = filp->private_data;
 	
 	
-	unsigned long p = *ppos;
-	unsigned int count = size; 
+	//unsigned long p = *ppos;
+	//unsigned int count = size; 
 	int ret = 0;
+	printk(KERN_INFO "flysemdriver_write begin\n");
 		
 	printk(KERN_INFO "wait the dev_sem ing...\n");
 	if(down_interruptible(&dev->dev_sem)) //获取信号量1
@@ -103,14 +103,14 @@ int flysemdriver_release(struct inode *inode, struct file *filp)
 
 //flysemdriver_ioctl函数
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,35) 
-static int flysemdriver_ioctl(struct file *filp,unsigned int cmd, unsigned long arg)
+static long flysemdriver_ioctl(struct file *filp,unsigned int cmd, unsigned long arg)
 #else
 static int flysemdriver_ioctl(struct inode *inodep, struct file *filp,unsigned int cmd, unsigned long arg)
 #endif
 {
 	int ret = 0;
 	struct sem_dev *dev = filp->private_data;
-	printk(KERN_INFO "cmd11:%d,pageid_or_add:%x\n",cmd,arg);
+	printk(KERN_INFO "cmd11:%d,pageid_or_add:%lx\n",cmd,arg);
 	
 	switch (cmd)
 	{
@@ -143,14 +143,14 @@ static int flysemdriver_ioctl(struct inode *inodep, struct file *filp,unsigned i
                 return -ERESTARTSYS;
         	}  	   
         	*/
-        	if (copy_to_user(arg,(void *)&(dev->c_page_id),sizeof(dev->c_page_id)))
+        	if (copy_to_user((void *)arg,(void *)&(dev->c_page_id),sizeof(dev->c_page_id)))
         	{
         		printk(KERN_INFO "copy_to_user error\n");
 				ret = -EFAULT;
 			}
 			else
 			{
-				printk(KERN_INFO "copy_to_user:%x to %x value:%x\n",dev->c_page_id,arg,*(int*)arg);
+				printk(KERN_INFO "copy_to_user:%x to %lx value:%x\n",dev->c_page_id,arg,*(int*)arg);
 			}
 			up(&dev->c_mutex_sem);
 			break;
@@ -181,14 +181,14 @@ static int flysemdriver_ioctl(struct inode *inodep, struct file *filp,unsigned i
                 return -ERESTARTSYS;
         	}  
         	*/	
-        	if (copy_to_user(arg,(void *)&(dev->java_page_id),sizeof(dev->java_page_id)))
+        	if (copy_to_user((void *)arg,(void *)&(dev->java_page_id),sizeof(dev->java_page_id)))
         	{
         		printk(KERN_INFO "copy_to_user error\n");
 				ret = -EFAULT;
 			}
 			else
 			{
-				printk(KERN_INFO "copy_to_user:%x to %x value:%x\n",dev->java_page_id,arg,*(int*)arg);
+				printk(KERN_INFO "copy_to_user:%x to %lx value:%x\n",dev->java_page_id,arg,*(int*)arg);
 			}
 			up(&dev->java_mutex_sem);   
 			break;
