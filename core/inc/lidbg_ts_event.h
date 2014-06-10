@@ -5,7 +5,7 @@ struct tspara
 {
     int x;
     int y;
-    bool press;
+    int press;
 } ;
 extern int g_is_te_enable;
 extern struct tspara g_curr_tspara;

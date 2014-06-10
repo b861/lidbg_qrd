@@ -162,9 +162,22 @@ void ts_data_report(touch_type t,int id,int x,int y,int w)
 			g_var.flag_for_15s_off = 1000;
 		}
 	}
+	
 	if((id == 4) && (t == TOUCH_DOWN) /*&& (!g_var.is_fly)*/) // 5 fingers
 	{
 		SOC_Key_Report(KEY_BACK,KEY_PRESSED_RELEASED);
+	}
+	
+	if((id == 0)&&(1 == g_var.recovery_mode))
+	{
+		static struct tspara touch = {0, 0, 0} ;
+		if(t == TOUCH_DOWN)
+			touch.press = 0;
+		else 
+			touch.press = 1;
+		touch.x = x;
+		touch.y = y;
+		SOC_Set_Touch_Pos(&touch);
 	}
 }
 

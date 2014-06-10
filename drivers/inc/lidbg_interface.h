@@ -178,6 +178,8 @@ struct lidbg_fn_t
 
     int (*pfnSOC_Get_System_Sound_Status)(void *para,int length);
     int (*pfnGPS_sound_status)(void);
+	
+    int (*pfnSOC_Set_Touch_Pos)(struct tspara *touch);
 
 };
 
@@ -316,5 +318,7 @@ static inline int check_pt(void)
 
 #define SOC_Get_System_Sound_Status (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_Get_System_Sound_Status))
 #define GPS_sound_status (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnGPS_sound_status))
+
+#define SOC_Set_Touch_Pos (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_Set_Touch_Pos))
 
 #endif

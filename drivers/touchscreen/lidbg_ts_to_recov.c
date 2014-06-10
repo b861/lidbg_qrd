@@ -218,6 +218,18 @@ MODULE_AUTHOR("hujian");
 MODULE_DESCRIPTION("input driver,just for test");
 MODULE_LICENSE("GPL");
 #else
+#include "lidbg.h"
+
+LIDBG_DEFINE;
+static  int my_input_driver_init(void)
+{
+    LIDBG_GET;
+    plidbg_dev->soc_func_tbl.pfnSOC_Set_Touch_Pos = set_touch_pos;
+
+	return 0;
+}
+module_init(my_input_driver_init);
+
 
 void set_touch_pos(touch_t *t){}
 EXPORT_SYMBOL_GPL(set_touch_pos);
