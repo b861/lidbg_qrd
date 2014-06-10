@@ -37,7 +37,7 @@ int SOC_Get_System_Sound_Status_func(void *para, int length)
 	}
 
 	//is_system_sound_on = 0;
-	g_length = 0;
+	//g_length = 0;
 	if(sound_detect_dbg)lidbg("data_all_zero\n");
 	
 	return 0;
