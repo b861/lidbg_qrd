@@ -219,19 +219,20 @@ MODULE_DESCRIPTION("input driver,just for test");
 MODULE_LICENSE("GPL");
 #else
 #include "lidbg.h"
-
 LIDBG_DEFINE;
+
+void set_touch_pos(touch_t *t){}
+void set_touch_pos2(struct tspara *touch){}
+
 static  int my_input_driver_init(void)
 {
     LIDBG_GET;
-    plidbg_dev->soc_func_tbl.pfnSOC_Set_Touch_Pos = set_touch_pos;
+    plidbg_dev->soc_func_tbl.pfnSOC_Set_Touch_Pos = set_touch_pos2;
 
 	return 0;
 }
 module_init(my_input_driver_init);
 
-
-void set_touch_pos(touch_t *t){}
 EXPORT_SYMBOL_GPL(set_touch_pos);
 
 #endif

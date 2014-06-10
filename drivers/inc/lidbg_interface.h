@@ -179,7 +179,7 @@ struct lidbg_fn_t
     int (*pfnSOC_Get_System_Sound_Status)(void *para,int length);
     int (*pfnGPS_sound_status)(void);
 	
-    int (*pfnSOC_Set_Touch_Pos)(struct tspara *touch);
+    void (*pfnSOC_Set_Touch_Pos)(struct tspara *touch);
 
 };
 
