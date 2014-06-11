@@ -60,7 +60,7 @@ static int thread_observer(void *data)
                 switch (have_triggerd_sleep_S)
                 {
                 case 20:
-                        PM_action_entry("unlock",  PM_ACTION_PRINT_FORCE_UNLOCK);
+                    PM_action_entry("unlock",  PM_ACTION_PRINT_FORCE_UNLOCK);
                     break;
 
                 default:
@@ -318,15 +318,20 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
                 SOC_Hal_Acc_Callback(0);
             }
         }
-        else  if(!strcmp(cmd[1], "android_up"))
+        if(!strcmp(cmd[1], "screen_on"))
         {
-            SOC_IO_Output(0, GPIO_APP_STATUS, 0);
-
+            lidbg("******into screen_on********\n");
+            if(!g_var.is_fly)
+                LCD_ON;
             if(SOC_Hal_Acc_Callback)
             {
                 lidbg("hal callback 1\n");
                 SOC_Hal_Acc_Callback(1);
             }
+        }
+        else  if(!strcmp(cmd[1], "android_up"))
+        {
+            SOC_IO_Output(0, GPIO_APP_STATUS, 0);
         }
         else  if(!strcmp(cmd[1], "android_down"))
         {
