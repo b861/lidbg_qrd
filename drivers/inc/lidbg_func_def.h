@@ -120,5 +120,7 @@ static inline int check_pt(void)
 
 #define SOC_Call_mdp_pipe_ctrl (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfn_Call_mdp_pipe_ctrl))
 
+#define SOC_Set_Touch_Pos (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_Set_Touch_Pos))
+
 #endif
 

@@ -391,6 +391,8 @@ struct lidbg_fn_t
 
     void(*pfn_Call_mdp_pipe_ctrl)(MDP_BLOCK_TYPE block, MDP_BLOCK_POWER_STATE state, unsigned int isr);
 
+    void (*pfnSOC_Set_Touch_Pos)(struct tspara *touch);
+
 };
 
 struct lidbg_pvar_t
