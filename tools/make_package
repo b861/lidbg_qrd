@@ -1,5 +1,5 @@
  #!/usr/bin/expect
-set timeout 30 
+set timeout -1 
 spawn ./make.sh
 expect "TYPE"
 send "1\r"

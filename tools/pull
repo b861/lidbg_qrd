@@ -1,6 +1,6 @@
  #!/usr/bin/expect
 set timeout -1
-spawn git pull
+spawn git pull origin master
 expect {
     "password" { 
 		 send "git\r"
