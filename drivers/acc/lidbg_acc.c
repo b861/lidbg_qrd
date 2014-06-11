@@ -189,7 +189,7 @@ bool is_state_accon(void)
 }
 
 
-static void fastboot_task_kill_exclude()
+static void fastboot_task_kill_exclude(void)
 {
     static char kill_process[32][25];
     unsigned long flags_kill = 0;
@@ -489,6 +489,22 @@ static void acc_early_suspend(struct early_suspend *handler)
     //task_kill_select(".flyaudio.media");
 }
 
+void log_resume_times(void)
+{
+    static char dmesg_file_name[32] = {0};
+    static char time_buf[64] = {0};
+	static bool flag = 0;
+	if(flag == 0)
+	{
+		lidbg_mkdir("/data/lidbg/resume_cnt");
+	    lidbg_get_current_time(time_buf, NULL);
+	    sprintf(dmesg_file_name, "/data/lidbg/resume_cnt/%s", time_buf);
+		flag = 1;
+	}
+	fs_clear_file(dmesg_file_name);
+	lidbg_fs_log(dmesg_file_name, "%d\n", plidbg_acc->resume_count);
+}
+
 static void acc_late_resume(struct early_suspend *handler)
 {
     DUMP_FUN_ENTER;
@@ -500,6 +516,7 @@ static void acc_late_resume(struct early_suspend *handler)
     }
     suspend_state = PM_STATUS_LATE_RESUME_OK;
     fs_save_state();
+	log_resume_times();
     //wake_unlock(&testwakelock);
 
 }
@@ -534,6 +551,7 @@ static int acc_quick_resume(void *data)
         set_power_state(1);
 #endif
     }
+	return 0;
 }
 
 static int thread_acc_suspend(void *data)
@@ -635,6 +653,7 @@ static int acc_correct(void *data)
             lidbg_fs_log(FASTBOOT_LOG_PATH, "acc_correct:acc_flag=%d, suspend_state=%d,tick=%d\n", g_var.acc_flag, suspend_state, tick);
         }
     }
+	return 0;
 }
 
 
