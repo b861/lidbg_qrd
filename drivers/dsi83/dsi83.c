@@ -214,9 +214,9 @@ static int dsi83_fb_notifier_callback(struct notifier_block *self,
 		blank = evdata->data;
 		
 		if (*blank == FB_BLANK_UNBLANK)
-			dsi83_resume();
+			;//dsi83_resume();
 		else if (*blank == FB_BLANK_POWERDOWN)
-			dsi83_suspend();
+			;//dsi83_suspend();
 	}
 
 	return 0;
@@ -284,7 +284,7 @@ static int dsi83_probe(struct platform_device *pdev)
 
 	INIT_DELAYED_WORK(&dsi83_work, dsi83_work_func);
 	dsi83_workqueue = create_workqueue("dsi83");
-	queue_delayed_work(dsi83_workqueue, &dsi83_work, DSI83_DELAY_TIME);
+//	queue_delayed_work(dsi83_workqueue, &dsi83_work, DSI83_DELAY_TIME);
 
 #if defined(CONFIG_FB)
 		dsi83_fb_notif.notifier_call = dsi83_fb_notifier_callback;
@@ -307,6 +307,25 @@ static int dsi83_remove(struct platform_device *pdev)
     return 0;
 }
 
+#ifdef CONFIG_PM
+static int dsi83_ops_suspend(struct device *dev)
+{
+    DUMP_FUN;
+    dsi83_suspend();
+    return 0;
+}
+static int dsi83_ops_resume(struct device *dev)
+{
+    DUMP_FUN;
+    dsi83_resume();
+    return 0;
+}
+static struct dev_pm_ops dsi83_ops =
+{
+    .suspend	= dsi83_ops_suspend,
+    .resume		= dsi83_ops_resume,
+};
+#endif
 
 static struct platform_device dsi83_devices =
 {
@@ -321,6 +340,9 @@ static struct platform_driver dsi83_driver =
     .driver = {
         .name = "dsi83",
         .owner = THIS_MODULE,
+#ifdef CONFIG_PM
+        .pm = &dsi83_ops,
+#endif
     },
 };
 
