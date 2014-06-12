@@ -280,6 +280,13 @@ static int thread_usb_disk_enable_delay(void *data)
     usb_disk_enable(true);
     return 1;
 }
+static int thread_gpio_app_status_delay(void *data)
+{
+    ssleep(30);
+    SOC_IO_Output(0, GPIO_APP_STATUS, 0);
+    PM_WARN("<set GPIO_APP_STATUS [%d] 0>\n\n", GPIO_APP_STATUS);
+    return 1;
+}
 static int thread_usb_disk_disable_delay(void *data)
 {
     usb_disk_enable(false);
@@ -493,9 +500,8 @@ static int __init lidbg_pm_init(void)
     set_func_tbl();
 
     SOC_IO_Output(0, MCU_WP_GPIO, 0);
-    PM_WARN("<set MCU_WP_GPIO[%d] 0>\n\n", MCU_WP_GPIO);
-    SOC_IO_Output(0, GPIO_APP_STATUS, 0);
-    PM_WARN("<set GPIO_APP_STATUS [%d] 0>\n\n", GPIO_APP_STATUS);
+    PM_WARN("<set MCU_WP_GPIO[%d] 0 30S>\n\n", MCU_WP_GPIO);
+    CREATE_KTHREAD(thread_gpio_app_status_delay, NULL);
 
     CREATE_KTHREAD(thread_usb_disk_enable_delay, NULL);
     lidbg_shell_cmd("echo 8  > /proc/sys/kernel/printk");
