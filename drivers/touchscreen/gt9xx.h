@@ -116,7 +116,7 @@ extern u16 total_len;
 #define GTP_HEADER_FW_UPDATE	0
 
 #define GTP_CREATE_WR_NODE		0
-#define GTP_ESD_PROTECT			0
+#define GTP_ESD_PROTECT			1
 #define GTP_WITH_PEN			0
 
 #define GTP_SLIDE_WAKEUP		0

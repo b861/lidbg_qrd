@@ -860,6 +860,7 @@ static s8 gtp_wakeup_sleep(struct goodix_ts_data *ts)
 	s8 ret = -1;
 
 	GTP_DEBUG_FUNC();
+	gtp_reset_guitar(ts, 20);
 
 #if GTP_POWER_CTRL_SLEEP
 	gtp_reset_guitar(ts, 20);
@@ -1904,9 +1905,9 @@ static int goodix_ts_remove(struct i2c_client *client)
 #endif
 
 #if GTP_ESD_PROTECT
-	cancel_work_sync(gtp_esd_check_workqueue);
-	flush_workqueue(gtp_esd_check_workqueue);
-	destroy_workqueue(gtp_esd_check_workqueue);
+//	cancel_work_sync(gtp_esd_check_workqueue);
+//	flush_workqueue(gtp_esd_check_workqueue);
+//	destroy_workqueue(gtp_esd_check_workqueue);
 #endif
 
 	if (ts) {
