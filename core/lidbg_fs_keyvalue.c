@@ -177,7 +177,7 @@ int bfs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *cli
     file_len = inode->i_size;
     FS_WARN("File_length:<%d>\n", file_len);
 
-    file_ptr = (unsigned char *)kmalloc(file_len+1, GFP_KERNEL);
+    file_ptr = (unsigned char *)kmalloc(file_len + 1, GFP_KERNEL);
     if(file_ptr == NULL)
     {
         FS_ERR( "vmalloc:<cannot malloc memory!>\n");
@@ -198,7 +198,7 @@ int bfs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *cli
     set_fs(old_fs);
     filp_close(filep, 0);
 
-	file_ptr[all_purpose] = '\0';
+    file_ptr[all_purpose] = '\0';
     if(g_kvbug_on)
         FS_WARN("%s\n", file_ptr);
 
@@ -289,7 +289,7 @@ int update_list(const char *filename, struct list_head *client_list)
     }
 
     filep->f_op->llseek(filep, 0, 0);
-    all_purpose = filep->f_op->read(filep, file_ptr, file_len+1, &filep->f_pos);
+    all_purpose = filep->f_op->read(filep, file_ptr, file_len + 1, &filep->f_pos);
     if(all_purpose <= 0)
     {
         FS_ERR( "f_op->read:<read file data failed>\n");
@@ -331,12 +331,12 @@ int update_list(const char *filename, struct list_head *client_list)
                                     FS_ALWAYS("<INT:%s=%d>\n", key, *(pos->int_value));
                                 }
                             }
-                            else if (pos->yourvalue && value && strcmp(pos->yourvalue, value))
+                            else if (pos->yourvalue && value && strncmp(pos->yourvalue, value, sizeof(*pos->yourvalue)) != 0)
                             {
+                                FS_ALWAYS("<STR:%s=%s,%s,%d,%d,%d>\n", key, value, pos->yourvalue, sizeof(*value), sizeof(*pos->yourvalue), strncmp(pos->yourvalue, value, sizeof(*pos->yourvalue)));
                                 strncpy(pos->yourvalue, value, strlen(pos->yourvalue));
                                 if (pos->callback)
                                     pos->callback(key, value);
-                                FS_ALWAYS("<STR:%s=%s>\n", key, value);
                             }
                         }
                     }
