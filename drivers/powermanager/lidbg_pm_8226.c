@@ -1,202 +1,171 @@
 #include "lidbg.h"
 LIDBG_DEFINE;
 
-#define BUTTON_LED_NODE "/sys/class/leds/button-backlight/brightness"
+#define PM_FILE_INFO LIDBG_LOG_DIR"pm_info.txt"
+#define PM_FILE_INFO_SIZE (5)
 
-static atomic_t is_in_sleep = ATOMIC_INIT(-1);
-static int list_count ;
 static DECLARE_COMPLETION(sleep_observer_wait);
+static atomic_t is_in_sleep = ATOMIC_INIT(-1);
+static int sleep_counter = 0;
+void observer_start(void);
+void observer_stop(void);
 
-typedef enum
+bool is_safety_apk(char *apkname)
 {
-    PM_ACTION_PRINT,
-    PM_ACTION_PRINT_FORCE_UNLOCK,
-    PM_ACTION_PRINT_KILL_HASLOCK_APK,
-    PM_ACTION_SAVE_LOCK_MSG,
-    PM_ACTION_FIND_WAKELOCK,
-    PM_ACTION_NULL
-} ws_list_action_types;
-
-int PM_action_entry(char *info, ws_list_action_types type);
-
-
-void observer_start(void)
-{
-    atomic_set(&is_in_sleep, 1);
-    complete(&sleep_observer_wait);
+    if(strncmp(apkname, "com.fly.flybootservice", sizeof("com.fly.flybootservice") - 1) == 0)
+        return true;
+    else
+        return false;
 }
-void observer_stop(void)
-{
-    atomic_set(&is_in_sleep, 0);
-}
-void observer_prepare(void)
-{
-    char cmd[128] = {0};
-    lidbg_chmod("/sys/module/msm_show_resume_irq/parameters/debug_mask");
-    ssleep(1);
-    fs_file_write("/sys/module/msm_show_resume_irq/parameters/debug_mask", "1");
-    sprintf(cmd, "cat /proc/interrupts > %sinterrupts.txt &", LIDBG_LOG_DIR);
-    lidbg_shell_cmd(cmd);
-    fs_register_filename_list(LIDBG_LOG_DIR"interrupts.txt", true);
-}
-static int thread_observer(void *data)
-{
-    int have_triggerd_sleep_S = 0;
-    char when[64] = {0};
-    ssleep(10);
-    observer_prepare();
 
-    while(!kthread_should_stop())
+/*	0:show wakelock		1:kill has lock apk		2:save has lock apk package*/
+void userspace_wakelock_action(int action_enum)
+{
+    int index = 0;
+    char *p1 = NULL, *p2 = NULL, *kill = NULL;
+    struct wakelock_item *pos;
+    struct list_head *client_list ;
+
+    client_list = &lidbg_wakelock_list;
+    if(!list_empty(client_list))
     {
-        have_triggerd_sleep_S = 0;
-        if( !wait_for_completion_interruptible(&sleep_observer_wait))
+        list_for_each_entry(pos, client_list, tmp_list)
         {
-            ssleep(2);
-            PM_action_entry("start:", PM_ACTION_PRINT);
-            while((atomic_read(&is_in_sleep) == 1))
+            if (pos->name && pos->cunt)
             {
-                ssleep(1);
-                have_triggerd_sleep_S++;
-                switch (have_triggerd_sleep_S)
+                index++;
+                printk(KERN_CRIT"[ftf_pm.wl]%d,MAX%d<THE%d:[%d,%d][%s][%s,%s]>\n", pos->cunt, pos->cunt_max, index, pos->pid, pos->uid, lock_type(pos->is_count_wakelock), pos->name, pos->package_name);
+                switch (action_enum)
                 {
-                case 20:
-                    PM_action_entry("unlock",  PM_ACTION_PRINT_FORCE_UNLOCK);
+                case 0:
+                    break;
+                case 1:
+                {
+                    p1 = strchr(pos->package_name, ',');
+                    p2 = strchr(pos->package_name, '.');
+                    kill = NULL;
+
+                    if(p1)
+                        kill = p1 + 1;
+                    else if(p2)
+                        kill = pos->package_name;
+                    if(kill && !is_safety_apk(kill))
+                        lidbg_force_stop_apk(kill);
+                }
+                break;
+                case 2:
+                    if ( pos->is_count_wakelock)
+                        fs_string2file(PM_FILE_INFO_SIZE, PM_FILE_INFO, "[J]%d,[%s,%s]>\n", index, pos->name, pos->package_name);
                     break;
 
                 default:
-                    if(have_triggerd_sleep_S >= 5 && !(have_triggerd_sleep_S % 5))
-                    {
-                        sprintf(when, "start%d:", have_triggerd_sleep_S);
-                        PM_action_entry(when,  PM_ACTION_PRINT);
-                    }
+                    lidbg("<lidbg_show_wakelock.err:%d>\n", action_enum );
                     break;
                 }
 
             }
-            PM_action_entry("stop:", PM_ACTION_PRINT);
         }
     }
-    return 1;
+    else
+        lidbg("<err.lidbg_show_wakelock:nobody_register>\n");
 }
 
-static int thread_led_monitor(void *data)
-{
-    ssleep(8);
-    while(!kthread_should_stop())
-    {
-        fs_file_write(BUTTON_LED_NODE, "0");
-        ssleep(1);
-        fs_file_write(BUTTON_LED_NODE, "255");
-        ssleep(1);
-    }
-    PM_WARN("stop\n");
-    return 1;
-}
-static int ws_func_print(char *info, struct wakeup_source *ws)
-{
-    spin_lock_irq(&ws->lock);
-    if (ws->active)
-    {
-        PM_WARN("[%s]:%d:%s,ps.%lld,ac.%lu,rc%lu,wc.%lu\n", info, list_count, ws->name, ktime_to_ms(ws->prevent_sleep_time), ws->active_count, ws->relax_count, ws->wakeup_count);
-        list_count++;
-    }
-    spin_unlock_irq(&ws->lock);
-    return 0;
-}
-static int ws_func_print_unlock(char *info, struct wakeup_source *ws)
-{
-    if ( ws->active)
-    {
-        PM_WARN("[%s]:%d:%s,ps.%lld,ac.%lu,rc%lu,wc.%lu\n", info, list_count, ws->name, ktime_to_ms(ws->prevent_sleep_time), ws->active_count, ws->relax_count, ws->wakeup_count);
-        __pm_relax(ws);
-        list_count++;
-    }
-    return 0;
-}
-static int ws_func_save_log_msg(char *info, struct wakeup_source *ws)
-{
-    if (ws->active)
-    {
-        rcu_read_unlock();
-        fs_string2file(1, LIDBG_OSD_DIR"can_t_sleep.txt", "[K]%d:%s\n", list_count, ws->name);
-        list_count++;
-        rcu_read_lock();
-    }
-    return 0;
-}
-static int ws_func_find_wakelock(char *info, struct wakeup_source *ws)
-{
-    int exist = 0;
-    spin_lock_irq(&ws->lock);
-    if (!strcmp(ws->name, info))
-        exist = 1;
-    spin_unlock_irq(&ws->lock);
-    return exist;
-}
 
-static int (*wl_list_action_func[]) (char *info, struct wakeup_source *ws) =
-{
-    [PM_ACTION_PRINT] = ws_func_print,
-    [PM_ACTION_PRINT_FORCE_UNLOCK] = ws_func_print_unlock,
-    [PM_ACTION_SAVE_LOCK_MSG] = ws_func_save_log_msg,
-    [PM_ACTION_FIND_WAKELOCK] = ws_func_find_wakelock,
-};
-int deal_kernel_wakelock(char *info, ws_list_action_types type)
+int kernel_wakelock_print(char *info)
 {
     struct wakeup_source *ws;
-    int result = 0;
-    list_count = 0;
-    if(g_var.ws_lh == NULL || type >= PM_ACTION_NULL)
+    int list_count = 0;
+    if(g_var.ws_lh == NULL)
     {
-        PM_ERR("g_var.ws_lh==NULL||type.%d\n", type);
+        PM_ERR("g_var.ws_lh==NULL\n");
         return -1;
     }
     rcu_read_lock();
     list_for_each_entry_rcu(ws, g_var.ws_lh, entry)
     {
-        result = wl_list_action_func[type] (info, ws);
-
-        if(type == PM_ACTION_FIND_WAKELOCK && result == 1)
-            break;
+        spin_lock_irq(&ws->lock);
+        if (ws->active)
+        {
+            PM_WARN("[%s]:%d:%s,ps.%lld,ac.%lu,rc%lu,wc.%lu\n", info, list_count, ws->name, ktime_to_ms(ws->prevent_sleep_time), ws->active_count, ws->relax_count, ws->wakeup_count);
+            list_count++;
+        }
+        spin_unlock_irq(&ws->lock);
     }
     rcu_read_unlock();
-    return result;
+    return 1;
 }
-void deal_userspace_wakelock(int action_enum)
-{
-    lidbg_show_wakelock(action_enum);
-}
-int PM_action_entry(char *info, ws_list_action_types type)
-{
-    int result = 0;
-    PM_WARN("%s,%d\n", info, type);
-    switch (type)
-    {
-    case PM_ACTION_PRINT:
-        deal_userspace_wakelock(0);
-        deal_kernel_wakelock(info, PM_ACTION_PRINT);
-        break;
-    case PM_ACTION_PRINT_FORCE_UNLOCK:
-        deal_userspace_wakelock(1);
-        deal_kernel_wakelock(info, PM_ACTION_PRINT_FORCE_UNLOCK);
-        break;
-    case PM_ACTION_PRINT_KILL_HASLOCK_APK:
-        deal_userspace_wakelock(1);
-        deal_kernel_wakelock(info, PM_ACTION_PRINT);
-        break;
-    case PM_ACTION_SAVE_LOCK_MSG:
-        fs_clear_file(LIDBG_OSD_DIR"can_t_sleep.txt");
-        deal_userspace_wakelock(2);
-        deal_kernel_wakelock(info, PM_ACTION_SAVE_LOCK_MSG);
-        break;
-    case PM_ACTION_FIND_WAKELOCK:
-        result = deal_kernel_wakelock(info, PM_ACTION_FIND_WAKELOCK);
-        break;
-    default:
-        break;
-    }
 
-    return result;
+int kernel_wakelock_force_unlock(char *info)
+{
+    struct wakeup_source *ws;
+    int list_count = 0;
+    if(g_var.ws_lh == NULL)
+    {
+        PM_ERR("g_var.ws_lh==NULL\n");
+        return -1;
+    }
+    rcu_read_lock();
+    list_for_each_entry_rcu(ws, g_var.ws_lh, entry)
+    {
+        if ( ws->active)
+        {
+            PM_WARN("[%s]:%d:%s,ps.%lld,ac.%lu,rc%lu,wc.%lu\n", info, list_count, ws->name, ktime_to_ms(ws->prevent_sleep_time), ws->active_count, ws->relax_count, ws->wakeup_count);
+            __pm_relax(ws);
+            list_count++;
+        }
+    }
+    rcu_read_unlock();
+    return 1;
+}
+
+int kernel_wakelock_save_wakelock(char *info)
+{
+    struct wakeup_source *ws;
+    int list_count = 0;
+    if(g_var.ws_lh == NULL)
+    {
+        PM_ERR("g_var.ws_lh==NULL\n");
+        return -1;
+    }
+    rcu_read_lock();
+    list_for_each_entry_rcu(ws, g_var.ws_lh, entry)
+    {
+        if (ws->active)
+        {
+            rcu_read_unlock();
+            fs_string2file(PM_FILE_INFO_SIZE, PM_FILE_INFO, "[K]%d:%s\n", list_count, ws->name);
+            list_count++;
+            rcu_read_lock();
+        }
+    }
+    rcu_read_unlock();
+    return 1;
+}
+
+struct wakeup_source *kernel_wakelock_find_wakelock(char *info)
+{
+    struct wakeup_source *ws;
+    int exist = 0;
+    if(g_var.ws_lh == NULL)
+    {
+        PM_ERR("g_var.ws_lh==NULL\n");
+        return NULL;
+    }
+    rcu_read_lock();
+    list_for_each_entry_rcu(ws, g_var.ws_lh, entry)
+    {
+        spin_lock_irq(&ws->lock);
+        if (!strcmp(ws->name, info))
+            exist = 1;
+        spin_unlock_irq(&ws->lock);
+
+        if(exist == 1)
+            break;
+        else
+            ws = NULL;
+    }
+    rcu_read_unlock();
+    return ws;
 }
 
 void lidbg_pm_step_call(fly_pm_stat_step step, void *data)
@@ -207,10 +176,13 @@ void lidbg_pm_step_call(fly_pm_stat_step step, void *data)
     {
         char *buff = data;
         if(!strcmp(buff, "mem"))
-            ;
+        {
+        }
         else if(!strcmp(buff, "off"))
+        {
             observer_stop();
-        PM_WARN("PM_AUTOSLEEP_STORE1:[%s,%d]\n", buff, atomic_read(&is_in_sleep));
+        }
+        PM_WARN("PM_AUTOSLEEP_STORE1:[%d,%s,%d]\n", sleep_counter, buff, atomic_read(&is_in_sleep));
     }
     break;
     case PM_AUTOSLEEP_SET_STATE2:
@@ -218,14 +190,16 @@ void lidbg_pm_step_call(fly_pm_stat_step step, void *data)
     case PM_QUEUE_UP_SUSPEND_WORK3:
         break;
     case PM_TRY_TO_SUSPEND4:
-        // PM_action_entry("start1",PM_ACTION_PRINT);
+        //   kernel_wakelock_print("start1:");
+        //   userspace_wakelock_action(0);
         break;
     case PM_TRY_TO_SUSPEND4P1:
     case PM_TRY_TO_SUSPEND4P2:
     case PM_TRY_TO_SUSPEND4P3:
     case PM_TRY_TO_SUSPEND4P4:
     case PM_TRY_TO_SUSPEND4P5:
-        //PM_action_entry("stop1",PM_ACTION_PRINT);
+        //   kernel_wakelock_print("stop1:");
+        //   userspace_wakelock_action(0);
         break;
     case PM_SUSPEND5:
         break;
@@ -280,16 +254,16 @@ static int thread_usb_disk_enable_delay(void *data)
     usb_disk_enable(true);
     return 1;
 }
-static int thread_gpio_app_status_delay(void *data)
-{
-    ssleep(30);
-    SOC_IO_Output(0, GPIO_APP_STATUS, 0);
-    PM_WARN("<set GPIO_APP_STATUS [%d] 0>\n\n", GPIO_APP_STATUS);
-    return 1;
-}
 static int thread_usb_disk_disable_delay(void *data)
 {
     usb_disk_enable(false);
+    return 1;
+}
+static int thread_gpio_app_status_delay(void *data)
+{
+    ssleep(45);
+    SOC_IO_Output(0, GPIO_APP_STATUS, 0);
+    PM_WARN("<set GPIO_APP_STATUS [%d] 0>\n\n", GPIO_APP_STATUS);
     return 1;
 }
 int pm_open (struct inode *inode, struct file *filp)
@@ -384,7 +358,35 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         else  if(!strcmp(cmd[1], "list"))
         {
             int  ws_action_type = simple_strtoul(cmd[2], 0, 0);
-            PM_action_entry("app", (ws_list_action_types)ws_action_type);
+            /*	0:show wakelock		1:force unlock		2:kill has lock apk		3:save lock		4:find wakelock*/
+            switch (ws_action_type)
+            {
+            case 0:
+                kernel_wakelock_print("test:");
+                userspace_wakelock_action(0);
+                break;
+            case 1:
+                kernel_wakelock_force_unlock("test:");
+                userspace_wakelock_action(1);
+                break;
+            case 2:
+                kernel_wakelock_print("test:");
+                userspace_wakelock_action(1);
+                break;
+            case 3:
+                kernel_wakelock_save_wakelock("test:");
+                userspace_wakelock_action(2);
+                break;
+            case 4:
+                if(cmd[3] && kernel_wakelock_find_wakelock(cmd[3]) != NULL)
+                    PM_WARN("<find:%s>\n", cmd[3]);
+                userspace_wakelock_action(0);
+                break;
+
+            default:
+                break;
+            }
+
         }
         else  if(!strcmp(cmd[1], "pm"))
         {
@@ -434,6 +436,7 @@ static  struct file_operations pm_nod_fops =
 static int pm_suspend(struct device *dev)
 {
     DUMP_FUN;
+    sleep_counter++;
     return 0;
 }
 static int pm_resume(struct device *dev)
@@ -448,24 +451,81 @@ static struct dev_pm_ops lidbg_pm_ops =
 };
 #endif
 
+void observer_prepare(void)
+{
+    char cmd[128] = {0};
+    lidbg_chmod("/sys/module/msm_show_resume_irq/parameters/debug_mask");
+    ssleep(1);
+    fs_file_write("/sys/module/msm_show_resume_irq/parameters/debug_mask", "1");
+    sprintf(cmd, "cat /proc/interrupts > %sinterrupts.txt &", LIDBG_LOG_DIR);
+    lidbg_shell_cmd(cmd);
+    fs_register_filename_list(LIDBG_LOG_DIR"interrupts.txt", true);
+    fs_register_filename_list(PM_FILE_INFO, true);
+}
+void observer_start(void)
+{
+    atomic_set(&is_in_sleep, 1);
+    complete(&sleep_observer_wait);
+}
+void observer_stop(void)
+{
+    atomic_set(&is_in_sleep, 0);
+}
+static int thread_observer(void *data)
+{
+    int have_triggerd_sleep_S = 0;
+    char when[64] = {0};
+
+    observer_prepare();
+
+    while(!kthread_should_stop())
+    {
+        have_triggerd_sleep_S = 0;
+        if( !wait_for_completion_interruptible(&sleep_observer_wait))
+        {
+            kernel_wakelock_print("start:");
+            userspace_wakelock_action(0);
+            while((atomic_read(&is_in_sleep) == 1))
+            {
+                ssleep(1);
+                if(atomic_read(&is_in_sleep) != 1)
+                    break;
+                have_triggerd_sleep_S++;
+                switch (have_triggerd_sleep_S)
+                {
+                case 20:
+                    sprintf(when, "unlock:%d:", sleep_counter);
+                    kernel_wakelock_save_wakelock(when);
+                    kernel_wakelock_force_unlock(when);
+                    userspace_wakelock_action(2);
+                    break;
+
+                default:
+                    if(have_triggerd_sleep_S >= 5 && !(have_triggerd_sleep_S % 5) && (atomic_read(&is_in_sleep) == 1))
+                    {
+                        sprintf(when, "start%d:", have_triggerd_sleep_S);
+                        kernel_wakelock_print(when);
+                        userspace_wakelock_action(0);
+                    }
+                    break;
+                }
+            }
+            PM_WARN("\n\n<stop>\n\n");
+        }
+    }
+    return 1;
+}
+
 static int  lidbg_pm_probe(struct platform_device *pdev)
 {
     DUMP_FUN;
     PM_WARN("<==IN==>\n");
-
-    if(!g_var.is_fly)
-    {
-        CREATE_KTHREAD(thread_led_monitor, NULL);
-        lidbg_chmod("/sys/power/*");
-        lidbg_chmod("/data");
-    }
-
+    fs_file_separator(PM_FILE_INFO);
     lidbg_new_cdev(&pm_nod_fops, "lidbg_pm");
     kthread_run(thread_observer, NULL, "ftf_pmtask");
     LIDBG_MODULE_LOG;
 
     PM_WARN("<==OUT==>\n\n");
-
     return 0;
 }
 static struct platform_device lidbg_pm =
