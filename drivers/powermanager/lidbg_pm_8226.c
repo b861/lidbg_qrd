@@ -127,6 +127,7 @@ int kernel_wakelock_save_wakelock(char *info)
         PM_ERR("g_var.ws_lh==NULL\n");
         return -1;
     }
+	PM_WARN("<%s>\n", info);
     rcu_read_lock();
     list_for_each_entry_rcu(ws, g_var.ws_lh, entry)
     {
