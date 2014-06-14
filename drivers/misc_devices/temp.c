@@ -41,7 +41,7 @@ int thread_thermal(void *data)
 {
     int cur_frq, cur_temp;
     DUMP_FUN;
-    cur_frq = FREQ_MAX;
+    cur_frq = FREQ_STEP0;
     temp_init();
 
     while(is_cpu_temp_enabled)
@@ -57,24 +57,30 @@ int thread_thermal(void *data)
         log_temp();
         cur_temp = soc_temp_get();
         //lidbg("MSM_THERM: %d\n",cur_temp);
-
-        if((cur_temp > THRESHOLDS_STEP1 ) && (cur_temp <= THRESHOLDS_STEP2 ) && (cur_frq != FREQ_STEP1))
+        
+        if     ((cur_temp > THRESHOLDS_STEP0 ) && (cur_temp <= THRESHOLDS_STEP1 ) && (cur_frq != FREQ_STEP0))
+        {
+            lidbg_readwrite_file(FREQ_MAX_NODE, NULL, FREQ_STEP0_STRING, sizeof(FREQ_STEP0_STRING) - 1);
+            lidbg("set max freq to: %d,temp:%d\n", FREQ_STEP0,cur_temp);
+            cur_frq = FREQ_STEP0;
+        }
+        else if((cur_temp > THRESHOLDS_STEP1 ) && (cur_temp <= THRESHOLDS_STEP2 ) && (cur_frq != FREQ_STEP1))
         {
             lidbg_readwrite_file(FREQ_MAX_NODE, NULL, FREQ_STEP1_STRING, sizeof(FREQ_STEP1_STRING) - 1);
-            lidbg("set max freq to: %d\n", FREQ_STEP1);
+            lidbg("set max freq to: %d,temp:%d\n", FREQ_STEP1,cur_temp);
             cur_frq = FREQ_STEP1;
         }
-        else if((cur_temp > THRESHOLDS_STEP2 ) && (cur_frq != FREQ_STEP2))
+        else if((cur_temp > THRESHOLDS_STEP2 ) && (cur_temp <= THRESHOLDS_STEP3 ) && (cur_frq != FREQ_STEP2))
         {
             lidbg_readwrite_file(FREQ_MAX_NODE, NULL, FREQ_STEP2_STRING, sizeof(FREQ_STEP2_STRING) - 1);
-            lidbg("set max freq to: %d\n", FREQ_STEP2);
+            lidbg("set max freq to: %d,temp:%d\n", FREQ_STEP2,cur_temp);
             cur_frq = FREQ_STEP2;
         }
-        else if ((cur_temp <= THRESHOLDS_STEP1 ) && (cur_frq != FREQ_MAX))
+		else if((cur_temp > THRESHOLDS_STEP3 ) && (cur_frq != FREQ_STEP3))
         {
-            lidbg_readwrite_file(FREQ_MAX_NODE, NULL, FREQ_MAX_STRING, sizeof(FREQ_MAX_STRING) - 1);
-            lidbg("set max freq to: %d\n", FREQ_MAX);
-            cur_frq = FREQ_MAX;
+            lidbg_readwrite_file(FREQ_MAX_NODE, NULL, FREQ_STEP3_STRING, sizeof(FREQ_STEP3_STRING) - 1);
+            lidbg("set max freq to: %d,temp:%d\n", FREQ_STEP3,cur_temp);
+            cur_frq = FREQ_STEP3;
         }
 
     }
@@ -87,7 +93,7 @@ int thread_start_cpu_tmp_test(void *data)
     char *group[15] = {NULL}, buff[56] = {0};
     int group_num  = 0, freq_pos = 0, int_time_count = 0;
 
-    ssleep(30);//waritting for system boot complete
+    ssleep(60);//waritting for system boot complete
     strcpy(temp_freq_test_str, TEMP_FREQ_TEST_STR);
     group_num = lidbg_token_string(temp_freq_test_str, ",", group) ;
 
@@ -98,10 +104,12 @@ int thread_start_cpu_tmp_test(void *data)
     fs_clear_file(TEMP_FREQ_COUNTER);
     fs_string2file(0, TEMP_FREQ_COUNTER, "%d", freq_pos + 1);
 
+	freq_pos = group_num - freq_pos - 1;
+
     lidbg("%d,start_cpu_tmp_test: %s\n", cpu_temp_time_minute, TEMP_FREQ_TEST_STR);
 
     lidbg_shell_cmd("am start -n com.into.stability/com.into.stability.Run");
-    ssleep(1);
+    ssleep(2);
     lidbg_shell_cmd("am start -n com.into.stability/.TestClassic");
 
     lidbg_readwrite_file(FREQ_MAX_NODE, NULL, group[freq_pos], strlen(group[freq_pos]));

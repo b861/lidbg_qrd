@@ -123,15 +123,10 @@
 #define GTP_INT_PORT    (69)
 
 //temp
-#ifdef BOARD_V1
-#define THRESHOLDS_STEP1    (100)
-#define FREQ_STEP1   	 	(1094400)
-#define FREQ_STEP1_STRING   ("1094400")
+#define THRESHOLDS_STEP0    (0)
+#define FREQ_STEP0     		(1401600)
+#define FREQ_STEP0_STRING   ("1401600")
 
-#define THRESHOLDS_STEP2    (100)
-#define FREQ_STEP2   	 	(1094400)
-#define FREQ_STEP2_STRING   ("1094400")
-#else
 #define THRESHOLDS_STEP1    (90)
 #define FREQ_STEP1   	 	(1094400)
 #define FREQ_STEP1_STRING   ("1094400")
@@ -139,10 +134,11 @@
 #define THRESHOLDS_STEP2    (100)
 #define FREQ_STEP2   	 	(600000)
 #define FREQ_STEP2_STRING   ("600000")
-#endif
 
-#define FREQ_MAX     		(1401600)
-#define FREQ_MAX_STRING     ("1401600")
+#define THRESHOLDS_STEP3    (110)
+#define FREQ_STEP3   	 	(300000)
+#define FREQ_STEP3_STRING   ("300000")
+
 
 #define CPU_TEMP_PATH 		"/sys/class/thermal/thermal_zone5/temp"
 #define TEMP_FREQ_TEST_STR	 "300000,384000,600000,787200,998400,1094400,1190400,1305600,1344000,1401600"
