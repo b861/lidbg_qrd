@@ -134,7 +134,7 @@ void set_machine_id(void)
     char string[64];
     if(fs_is_file_exist(MACHINE_ID_FILE))
     {
-        fs_file_write(MACHINE_ID_FILE, string);
+        fs_file_read(MACHINE_ID_FILE, string,sizeof(string));
         machine_id = simple_strtoul(string, 0, 0);
     }
     else
