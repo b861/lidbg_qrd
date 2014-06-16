@@ -122,6 +122,16 @@
 #define GTP_RST_PORT    (24)  
 #define GTP_INT_PORT    (69)
 
+/*
+//TBD
+struct thermal_ctrl thermal_ctrl[] =
+{
+	{0,1401600,"1401600"},
+	{90,1094400,"1094400"},
+	{100,600000,"600000"},
+	{110,300000,"300000"}
+}
+*/
 //temp
 #define THRESHOLDS_STEP0    (0)
 #define FREQ_STEP0     		(1401600)

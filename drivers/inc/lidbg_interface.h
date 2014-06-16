@@ -171,7 +171,7 @@ struct lidbg_fn_t
     //screan_off :0 screan_on :1 suspendon:2 suspendoff:3
     void (*pfnHal_Acc_Callback)(int para);
 
-    int (*pfnSOC_SPI_MODE_Set) (int bus_id, u8 mode,u8 bits_per_word,u32 max_speed_hz);
+    int (*pfnSOC_SPI_Mode_Set) (int bus_id, u8 mode,u8 bits_per_word,u32 max_speed_hz);
     int (*pfnSOC_SPI_Send) (int bus_id, char *buf, unsigned int size);
     int (*pfnSOC_SPI_Rec)(int bus_id, char *buf, unsigned int size);
     int (*pfnSOC_SPI_Send_Rec)(int bus_id, const u8 *txbuf, unsigned n_tx, u8 *rxbuf, unsigned n_rx);
@@ -288,7 +288,7 @@ static inline int check_pt(void)
 #define SOC_I2C_Rec_2B_SubAddr   (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_I2C_Rec_2B_SubAddr))
 
 //SPI
-#define SOC_SPI_MODE_Set (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_SPI_MODE_Set))
+#define SOC_SPI_Mode_Set (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_SPI_Mode_Set))
 #define SOC_SPI_Send  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_SPI_Send))
 #define SOC_SPI_Rec   (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_SPI_Rec))
 #define SOC_SPI_Rec_Send   (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_SPI_Send_Rec))
@@ -316,7 +316,6 @@ static inline int check_pt(void)
 #define SOC_PM_STEP (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_PM_STEP))
 #define SOC_Hal_Acc_Callback (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnHal_Acc_Callback))
 
-#define SOC_Get_System_Sound_Status (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_Get_System_Sound_Status))
 #define GPS_sound_status (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnGPS_sound_status))
 
 #define SOC_Set_Touch_Pos (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_Set_Touch_Pos))
