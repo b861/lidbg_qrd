@@ -80,6 +80,7 @@ int kernel_wakelock_print(char *info)
         PM_ERR("g_var.ws_lh==NULL\n");
         return -1;
     }
+    PM_WARN("<%s>\n", info);
     rcu_read_lock();
     list_for_each_entry_rcu(ws, g_var.ws_lh, entry)
     {
@@ -104,6 +105,7 @@ int kernel_wakelock_force_unlock(char *info)
         PM_ERR("g_var.ws_lh==NULL\n");
         return -1;
     }
+    PM_WARN("<%s>\n", info);
     rcu_read_lock();
     list_for_each_entry_rcu(ws, g_var.ws_lh, entry)
     {
@@ -127,14 +129,14 @@ int kernel_wakelock_save_wakelock(char *info)
         PM_ERR("g_var.ws_lh==NULL\n");
         return -1;
     }
-	PM_WARN("<%s>\n", info);
+    PM_WARN("<%s>\n", info);
     rcu_read_lock();
     list_for_each_entry_rcu(ws, g_var.ws_lh, entry)
     {
         if (ws->active)
         {
             rcu_read_unlock();
-            fs_string2file(PM_FILE_INFO_SIZE, PM_FILE_INFO, "[K]%d:%s\n", list_count, ws->name);
+            fs_string2file(PM_FILE_INFO_SIZE, PM_FILE_INFO, "%s[K].%d:%s\n", info, list_count, ws->name);
             list_count++;
             rcu_read_lock();
         }
@@ -559,11 +561,12 @@ static int __init lidbg_pm_init(void)
     DUMP_FUN;
     LIDBG_GET;
     set_func_tbl();
+    if(is_out_updated)
+        fs_clear_file(PM_FILE_INFO);
 
     SOC_IO_Output(0, MCU_WP_GPIO, 0);
     PM_WARN("<set MCU_WP_GPIO[%d] 0 30S>\n\n", MCU_WP_GPIO);
     CREATE_KTHREAD(thread_gpio_app_status_delay, NULL);
-
     CREATE_KTHREAD(thread_usb_disk_enable_delay, NULL);
     lidbg_shell_cmd("echo 8  > /proc/sys/kernel/printk");
     platform_device_register(&lidbg_pm);
