@@ -574,7 +574,14 @@ int Volume::mountVol() {
 	mMountedPartNum = n;
 
 if(n==1){
-	if(Ntfs::check(devicePath) == 0)
+
+	if (Fat::check(devicePath)==0) {
+		if (Fat::doMount(devicePath, getMountpoint(), false, false, false, AID_MEDIA_RW, AID_MEDIA_RW, 0007, true)) {
+		 	SLOGE("%s failed to mount via VFAT (%s)\n", devicePath, strerror(errno));
+				continue;
+		}
+	}
+	else if(Ntfs::check(devicePath) == 0)
 	{
 		SLOGW("this is NTFS filesystem, ready to mount!\n");
 		if (Ntfs::doMount(devicePath, getMountpoint(), false, false, false, AID_MEDIA_RW, AID_MEDIA_RW, 0007, true))
@@ -583,12 +590,6 @@ if(n==1){
 		        continue;
 		}
 	}
-        else if (Fat::check(devicePath)==0) {
-		if (Fat::doMount(devicePath, getMountpoint(), false, false, false, AID_MEDIA_RW, AID_MEDIA_RW, 0007, true)) {
-    		 	SLOGE("%s failed to mount via VFAT (%s)\n", devicePath, strerror(errno));
-            		continue;
-        	}
-        }
 	else{
 		if (errno == ENODATA) {
 	                SLOGW("%s unkown filesystem\n", devicePath);
