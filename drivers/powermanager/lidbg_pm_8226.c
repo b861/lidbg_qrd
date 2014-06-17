@@ -1,7 +1,8 @@
 #include "lidbg.h"
 LIDBG_DEFINE;
 
-#define PM_FILE_INFO LIDBG_LOG_DIR"pm_info.txt"
+#define PM_DIR LIDBG_LOG_DIR"pm_info/"
+#define PM_FILE_INFO PM_DIR"pm_info.txt"
 #define PM_FILE_INFO_SIZE (5)
 
 static DECLARE_COMPLETION(sleep_observer_wait);
@@ -434,7 +435,27 @@ static  struct file_operations pm_nod_fops =
     .open = pm_open,
 };
 
-
+void log_resume_times(int sleep_counter)
+{
+    static char dmesg_file_name[32] = {0};
+    static char time_buf[64] = {0};
+    static bool flag = 0;
+    if(flag == 0)
+    {
+        lidbg_mkdir(PM_DIR);
+        ssleep(2);
+        lidbg_get_current_time(time_buf, NULL);
+        sprintf(dmesg_file_name, PM_DIR"last_acc%s.txt", time_buf);
+        flag = 1;
+    }
+    fs_clear_file(dmesg_file_name);
+    fs_string2file(0, dmesg_file_name, "%d", sleep_counter);
+}
+static int thread_save_acc_times(void *data)
+{
+    log_resume_times(sleep_counter);
+    return 1;
+}
 #ifdef CONFIG_PM
 static int pm_suspend(struct device *dev)
 {
@@ -445,6 +466,7 @@ static int pm_suspend(struct device *dev)
 static int pm_resume(struct device *dev)
 {
     DUMP_FUN;
+    CREATE_KTHREAD(thread_save_acc_times, NULL);
     return 0;
 }
 static struct dev_pm_ops lidbg_pm_ops =
@@ -561,8 +583,11 @@ static int __init lidbg_pm_init(void)
     DUMP_FUN;
     LIDBG_GET;
     set_func_tbl();
+
+    lidbg_mkdir(PM_DIR);
+
     if(is_out_updated)
-        fs_clear_file(PM_FILE_INFO);
+        lidbg_shell_cmd("rm -r "PM_DIR"*");
 
     SOC_IO_Output(0, MCU_WP_GPIO, 0);
     PM_WARN("<set MCU_WP_GPIO[%d] 0 30S>\n\n", MCU_WP_GPIO);

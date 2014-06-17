@@ -106,7 +106,7 @@ void check_conf_file(void)
         fs_remount_system();
         is_out_updated = true;
 #ifdef SOC_msm8x25
-        analysis_copylist(get_lidbg_file_path(buff,"copylist.conf"));
+        analysis_copylist(get_lidbg_file_path(buff, "copylist.conf"));
 #endif
         copy_all_conf_file();
         lidbg_rm(MACHINE_ID_FILE);
@@ -144,7 +144,7 @@ void lidbg_fileserver_main_prepare(void)
     fs_fill_list(PATH_STATE_CONF, FS_CMD_FILE_CONFIGMODE, &fs_state_list);
 
     fs_copy_file(get_lidbg_file_path(buff, "build_time.conf"), LIDBG_MEM_DIR"build_time.txt");
-    if(fs_slient_level!=4)
+    if(fs_slient_level != 4)
         fs_get_intvalue(&lidbg_core_list, "fs_slient_level", &fs_slient_level, NULL);
     fs_get_intvalue(&lidbg_core_list, "fs_save_msg_fifo", NULL, fs_msg_fifo_to_file);
 

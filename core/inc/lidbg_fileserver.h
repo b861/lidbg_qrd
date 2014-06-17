@@ -38,7 +38,7 @@ struct fs_filename_item
 };
 #define LIDBG_LOG_DIR "/data/lidbg/"
 #define LIDBG_MEM_DIR "/dev/log/"
-#define LIDBG_OSD_DIR "/data/lidbg_osd/"
+#define LIDBG_OSD_DIR LIDBG_LOG_DIR"lidbg_osd/"
 
 extern void lidbg_fileserver_main(int argc, char **argv);
 extern void fs_cp_data_to_udisk(bool encode);

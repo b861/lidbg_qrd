@@ -200,18 +200,17 @@ u32 get_tick_count(void)
     return t_now.tv_sec * 1000 + t_now.tv_nsec / 1000000;
 }
 
-int lidbg_get_current_time(char *time_string, struct rtc_time *ptm)
+char * lidbg_get_current_time(char *time_string, struct rtc_time *ptm)
 {
-    int  tlen = -1;
     struct timespec ts;
     struct rtc_time tm;
     getnstimeofday(&ts);
     rtc_time_to_tm(ts.tv_sec, &tm);
     if(time_string)
-        tlen = sprintf(time_string, "%d-%02d-%02d__%02d.%02d.%02d", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour , tm.tm_min, tm.tm_sec);
+        sprintf(time_string, "%d-%02d-%02d__%02d.%02d.%02d", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour , tm.tm_min, tm.tm_sec);
     if(ptm)
         *ptm = tm;
-    return tlen;
+    return time_string;
 }
 int  lidbg_launch_user( char bin_path[], char argv1[], char argv2[], char argv3[], char argv4[], char argv5[], char argv6[])
 {
