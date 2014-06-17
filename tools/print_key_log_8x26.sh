@@ -15,17 +15,12 @@ do
 	echo --------------------------$i--------------------------------------------  >>  ./lidbg_log/lowmemkill.txt
 	cat $i | grep "send sigkill to" >> ./lidbg_log/lowmemkill.txt
 
-	echo --------------------------$i--------------------------------------------  >>  ./lidbg_log/I2C.txt
-	cat $i | grep "I2C slave addr" >> ./lidbg_log/i2c_err.txt
 
-
-
-	echo --------------------------$i--------------------------------------------  >>  ./lidbg_log/wakelock.txt
+	echo --------------------------$i--------------------------------------------  >>  ./lidbg_log/force_unlock.txt
 	cat $i | grep -E "force_unlock" >> ./lidbg_log/force_unlock.txt
 
 	echo ---------------------------$i---------------------------------------------  >> ./lidbg_log/acc_count.txt
-	cat $i | grep "PM_AUTOSLEEP_STORE1" >>  ./lidbg_log/acc_count.txt
-
+	cat $i | grep "7.suspend_devices_and_enter" >>  ./lidbg_log/acc_count.txt
 
 
 	cat $i | grep -E "send sigkill to|killing any children in process group|Linux version|force_unlock" >>  ./lidbg_log/$i
