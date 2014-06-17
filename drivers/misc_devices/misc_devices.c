@@ -63,6 +63,67 @@ static struct notifier_block lidbg_notifier =
     .notifier_call = lidbg_event,
 };
 
+int dev_open(struct inode *inode, struct file *filp)
+{
+    return 0;
+}
+int dev_close(struct inode *inode, struct file *filp)
+{
+    return 0;
+}
+
+static void parse_cmd(char *pt)
+{
+    int argc = 0;
+    char *argv[32] = {NULL};
+
+    lidbg("%s\n", pt);
+    argc = lidbg_token_string(pt, " ", argv);
+	
+	if (!strcmp(pt, "lcd_on"))
+    {
+    }
+    else if (!strcmp(pt, "lcd_off"))
+    {
+    }
+}
+
+
+static ssize_t dev_write(struct file *filp, const char __user *buf,
+                         size_t size, loff_t *ppos)
+{
+    char *p = NULL;
+    int len = size;
+    char tmp[size + 1];//C99 variable length array
+    char *mem = tmp;
+
+    memset(mem, '\0', size + 1);
+
+    if(copy_from_user(mem, buf, size))
+    {
+        lidbg("copy_from_user ERR\n");
+    }
+
+    if((p = memchr(mem, '\n', size)))
+    {
+        len = p - mem;
+        *p = '\0';
+    }
+    else
+        mem[len] =  '\0';
+
+    parse_cmd(mem);
+
+    return size;//warn:don't forget it;
+}
+
+static struct file_operations dev_fops =
+{
+    .owner = THIS_MODULE,
+    .open = dev_open,
+    .write = dev_write,
+    .release = dev_close,
+};
 
 static int soc_dev_probe(struct platform_device *pdev)
 {
@@ -84,6 +145,7 @@ static int soc_dev_probe(struct platform_device *pdev)
 		
 	    LCD_ON;
 	}
+	lidbg_new_cdev(&dev_fops, "flydev");
     return 0;
 
 }
