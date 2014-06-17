@@ -30,6 +30,25 @@ function soc_build_all()
 		make -j8
 }
 
+function soc_build_origin()
+{
+	echo $FUNCNAME
+	cd $RELEASE_REPOSITORY
+	expect $DBG_TOOLS_PATH/pull
+	cd $DBG_SYSTEM_DIR
+	expect $DBG_TOOLS_PATH/pull
+	cp -r $RELEASE_REPOSITORY/driver/out $DBG_SYSTEM_DIR/out/target/product/msm8226/system/lib/modules/
+	cp $RELEASE_REPOSITORY/driver/out/vold $DBG_SYSTEM_DIR/out/target/product/msm8226/system/bin/
+	cp $RELEASE_REPOSITORY/app/FastBoot.apk $DBG_SYSTEM_DIR/out/target/product/msm8226/system/app/
+	cp $RELEASE_REPOSITORY/app/FlyBootService.apk $DBG_SYSTEM_DIR/out/target/product/msm8226/system/app/
+	echo 123 > $DBG_SYSTEM_DIR/out/target/product/msm8226/system/lib/modules/out/origin
+	soc_build_all 
+	rm -rf $DBG_SYSTEM_DIR/out/target/product/msm8226/system/lib/modules/out
+	rm -f $DBG_SYSTEM_DIR/out/target/product/msm8226/system/bin/vold
+	rm -f $DBG_SYSTEM_DIR/out/target/product/msm8226/system/app/FastBoot.apk
+	rm -f $DBG_SYSTEM_DIR/out/target/product/msm8226/system/app/FlyBootService.apk
+}
+
 
 function soc_flash_kernel()
 {
@@ -61,6 +80,7 @@ function soc_menu()
 	echo [22] make system
 	echo [23] make
 	echo [24] make otapackage
+	echo [25] make origin_system
 }
 
 function soc_handle()
@@ -75,6 +95,8 @@ function soc_handle()
 		soc_build_all;;
 	24)
 		soc_make_otapackage;;
+	25)
+		soc_build_origin;;
 	*)
 		echo
 	esac

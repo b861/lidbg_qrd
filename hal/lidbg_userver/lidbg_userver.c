@@ -191,6 +191,14 @@ int main(int argc, char **argv)
     pthread_t lidbg_uevent_tid;
     DUMP_BUILD_TIME_FILE;
     myuid = getuid();
+
+	if(access("/system/lib/modules/out/origin",F_OK) == 0)
+	{
+		system("rm -r /flysystem/*");
+
+		sleep(1);
+	}
+
     system("mkdir /data/lidbg");
     system("mkdir /data/lidbg_osd");
     system("chmod 777 /data/lidbg");
