@@ -496,7 +496,7 @@ static int thread_observer(void *data)
                 have_triggerd_sleep_S++;
                 switch (have_triggerd_sleep_S)
                 {
-                case 20:
+                case 60:
                     sprintf(when, "unlock:%d:", sleep_counter);
                     kernel_wakelock_save_wakelock(when);
                     kernel_wakelock_force_unlock(when);
