@@ -31,6 +31,19 @@ out:
     return 0;
 }
 
+
+int thread_screenshot(void *data)
+{
+	SOC_Key_Report(KEY_POWER,KEY_PRESSED);
+	SOC_Key_Report(KEY_VOLUMEDOWN,KEY_PRESSED);
+	msleep(3000);
+	SOC_Key_Report(KEY_POWER,KEY_RELEASED);
+	SOC_Key_Report(KEY_VOLUMEDOWN,KEY_RELEASED);
+
+    return 0;
+}
+
+
 void parse_cmd(char *pt)
 {
     int argc = 0;
@@ -189,6 +202,10 @@ void parse_cmd(char *pt)
         lidbg("para_count = %d\n", para_count);
         SOC_LPC_Send(lpc_buf, para_count);
     }
+    else if (!strcmp(argv[0], "screen_shot"))
+    {
+    	CREATE_KTHREAD(thread_screenshot, NULL);
+	}
 #endif
 
 #ifdef SOC_msm8x25
