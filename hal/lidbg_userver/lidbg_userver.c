@@ -173,40 +173,11 @@ static void lidbg_uevent_poll(bool (*uevent_callback)(int fd))
 
 }
 
-uid_t myuid;
-void *thread_wait_userver(void *arg)
-{
-    pthread_detach(pthread_self());
-    usleep(500 * 1000);
-    system("chmod 777 /dev/lidbg_uevent");
-    system("insmod /flysystem/lib/out/lidbg_loader.ko");
-    system("insmod /system/lib/modules/out/lidbg_loader.ko");
-    sleep(20);
-    lidbg( "=====================%d\n\n\n\n", myuid);
-    pthread_exit(0);
-    return NULL;
-}
 int main(int argc, char **argv)
 {
     pthread_t lidbg_uevent_tid;
     DUMP_BUILD_TIME_FILE;
-    myuid = getuid();
 
-	if(access("/system/lib/modules/out/origin",F_OK) == 0)
-	{
-		system("rm -r /flysystem/*");
-
-		sleep(1);
-	}
-
-    system("mkdir /data/lidbg");
-    system("mkdir /data/lidbg_osd");
-    system("chmod 777 /data/lidbg");
-    system("chmod 777 /data/lidbg_osd");
-
-    system("insmod /system/lib/modules/out/lidbg_uevent.ko");
-    system("insmod /flysystem/lib/out/lidbg_uevent.ko");
-    pthread_create(&lidbg_uevent_tid, NULL, thread_wait_userver, NULL);
     lidbg_uevent_poll(lidbg_uevent_callback);
     return 0;
 }

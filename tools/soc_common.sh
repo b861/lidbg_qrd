@@ -41,12 +41,9 @@ function soc_build_origin()
 	cp $RELEASE_REPOSITORY/driver/out/vold $DBG_SYSTEM_DIR/out/target/product/msm8226/system/bin/
 	cp $RELEASE_REPOSITORY/app/FastBoot.apk $DBG_SYSTEM_DIR/out/target/product/msm8226/system/app/
 	cp $RELEASE_REPOSITORY/app/FlyBootService.apk $DBG_SYSTEM_DIR/out/target/product/msm8226/system/app/
-	echo 123 > $DBG_SYSTEM_DIR/out/target/product/msm8226/system/lib/modules/out/origin
-	soc_build_all 
-	rm -rf $DBG_SYSTEM_DIR/out/target/product/msm8226/system/lib/modules/out
-	rm -f $DBG_SYSTEM_DIR/out/target/product/msm8226/system/bin/vold
-	rm -f $DBG_SYSTEM_DIR/out/target/product/msm8226/system/app/FastBoot.apk
-	rm -f $DBG_SYSTEM_DIR/out/target/product/msm8226/system/app/FlyBootService.apk
+	cp $RELEASE_REPOSITORY/driver/out/lidbg_iserver $DBG_SYSTEM_DIR/out/target/product/msm8226/system/bin/
+	soc_build_all
+	soc_make_otapackage 
 }
 
 
