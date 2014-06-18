@@ -34,11 +34,11 @@ out:
 
 int thread_screenshot(void *data)
 {
-	SOC_Key_Report(KEY_POWER,KEY_PRESSED);
-	SOC_Key_Report(KEY_VOLUMEDOWN,KEY_PRESSED);
-	msleep(3000);
-	SOC_Key_Report(KEY_POWER,KEY_RELEASED);
-	SOC_Key_Report(KEY_VOLUMEDOWN,KEY_RELEASED);
+    SOC_Key_Report(KEY_POWER, KEY_PRESSED);
+    SOC_Key_Report(KEY_VOLUMEDOWN, KEY_PRESSED);
+    msleep(3000);
+    SOC_Key_Report(KEY_POWER, KEY_RELEASED);
+    SOC_Key_Report(KEY_VOLUMEDOWN, KEY_RELEASED);
 
     return 0;
 }
@@ -76,6 +76,8 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#011--USB_ID_HIGH_DEV\n");
             fs_mem_log("*158#012--lidbg_trace_msg_disable\n");
             fs_mem_log("*158#013--dump log and copy to udisk\n");
+            fs_mem_log("*158#014--origin system\n");
+            fs_mem_log("*158#015--flyaudio system\n");
         }
 
         if (!strcmp(argv[1], "*158#001"))
@@ -156,6 +158,10 @@ void parse_cmd(char *pt)
             lidbg_fifo_get(glidbg_msg_fifo, LIDBG_LOG_DIR"lidbg_mem_log.txt", 0);
             CREATE_KTHREAD(thread_dump_log, NULL);
         }
+        else if (!strcmp(argv[1], "*158#014"))
+            lidbg_system_switch(true);
+        else if (!strcmp(argv[1], "*158#015"))
+            lidbg_system_switch(false);
         else if (!strcmp(argv[1], "*168#001"))
         {
             encode = true;
@@ -204,8 +210,8 @@ void parse_cmd(char *pt)
     }
     else if (!strcmp(argv[0], "screen_shot"))
     {
-    	CREATE_KTHREAD(thread_screenshot, NULL);
-	}
+        CREATE_KTHREAD(thread_screenshot, NULL);
+    }
 #endif
 
 #ifdef SOC_msm8x25

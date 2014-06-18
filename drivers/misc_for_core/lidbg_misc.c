@@ -9,9 +9,27 @@ static int dump_mem_log = 0;
 static int loop_warning_en = 0;
 
 
-#define ORIGIN_APP_PATH "/system/origin_app/"
-#define ORIGIN_TMP_PATH "/system/origin_tmp/"
+#define ORIGIN_APP_PATH "/system/.origin_app/"
+#define ORIGIN_TMP_PATH "/system/.origin_tmp/"
 
+void cb_kv_lidbg_origin_system(char *key, char *value);
+int thread_switch_to_origin_system(void *data)
+{
+    cb_kv_lidbg_origin_system(NULL, "1");
+    return 0;
+}
+int thread_switch_to_flyaudio_system(void *data)
+{
+    cb_kv_lidbg_origin_system(NULL, "2");
+    return 0;
+}
+void lidbg_system_switch(bool origin_system)
+{
+    if(origin_system)
+        CREATE_KTHREAD(thread_switch_to_origin_system, NULL);
+    else
+        CREATE_KTHREAD(thread_switch_to_flyaudio_system, NULL);
+}
 void lidbg_enable_logcat(void)
 {
     char cmd[128] = {0};
@@ -219,8 +237,8 @@ void cb_kv_lidbg_origin_system(char *key, char *value)
     if(value && *value == '1')//origin
     {
         lidbg_toast_show("\"swtich to [origin system]\"", 0);
-        lidbg_shell_cmd("mkdir -p /flyapdata/out/temp");
-        lidbg_shell_cmd("mkdir -p /flysystem/out/temp");
+        lidbg_shell_cmd("mkdir -p /flyapdata/.out/temp");
+        lidbg_shell_cmd("mkdir -p /flysystem/.out/temp");
 
         fs_remount_system();
 
@@ -229,45 +247,37 @@ void cb_kv_lidbg_origin_system(char *key, char *value)
         lidbg_shell_cmd("cp -r /flyapdata/app/ESFileExplorer.apk /system/app/ &");
         lidbg_shell_cmd("cp -r /flysystem/app/FlyBootService.apk /system/app/ &");
         lidbg_shell_cmd("cp -r /flysystem/app/FastBoot.apk /system/app/ &");
-        ssleep(10);//give sometime for cp
-        if(!fs_is_file_exist("/system/priv-app/Launcher2.apk"))
-        {
-            lidbg_shell_cmd("cp -r "ORIGIN_APP_PATH"Launcher2.apk /system/priv-app/ &");
-            ssleep(5);
-        }
+        ssleep(15);//give sometime for cp
 
-        lidbg_shell_cmd("mv /system/lib/modules/out1 system/lib/modules/out");
-        lidbg_shell_cmd("mv /flyapdata/* /flyapdata/out/temp &");
-        lidbg_shell_cmd("mv /flysystem/* /flysystem/out/temp &");
+        lidbg_shell_cmd("mv /flyapdata/* /flyapdata/.out/temp &");
+        lidbg_shell_cmd("mv /flysystem/* /flysystem/.out/temp &");
 
         lidbg_shell_cmd("rm -r /system/priv-app/Launcher3.apk");
         lidbg_shell_cmd("chmod 777 /system/app/F*");
         lidbg_shell_cmd("chmod 777 /system/app/ESFileExplorer.apk");
         lidbg_shell_cmd("chmod 777 /system/app/NfcNci.apk");
-        lidbg_shell_cmd("mv /system/lib/modules/out1 system/lib/modules/out");
         goto suc;
     }
     else   if(value && *value == '2')//flyaudio
     {
         lidbg_toast_show("\"swtich to [flyaudio system]\"", 0);
 
-        lidbg_shell_cmd("cp -rf  /flysystem/out/temp/app/sys-app1/* /system/priv-app &");
+        lidbg_shell_cmd("cp -rf  /flysystem/.out/temp/app/.sys-app1/* /system/priv-app &");
 
         ssleep(10);//give sometime for cp
         if(!fs_is_file_exist("/system/priv-app/Launcher3.apk"))
         {
-            lidbg_shell_cmd("cp -r /flysystem/out/temp/app/sys-app1/Launcher3.apk /system/priv-app/ &");
+            lidbg_shell_cmd("cp -r /flysystem/.out/temp/app/.sys-app1/Launcher3.apk /system/priv-app/ &");
             ssleep(5);
         }
-        lidbg_shell_cmd("mv /flysystem/out/temp/* /flysystem &");
-        lidbg_shell_cmd("mv /flyapdata/out/temp/* /flyapdata  &");
+        lidbg_shell_cmd("mv /flysystem/.out/temp/* /flysystem &");
+        lidbg_shell_cmd("mv /flyapdata/.out/temp/* /flyapdata  &");
         ssleep(5);//give sometime for cp
 
         lidbg_shell_cmd("rm -r /system/app/ESFileExplorer.apk");
         lidbg_shell_cmd("rm -r /system/app/FlyBootService.apk");
         lidbg_shell_cmd("rm -r /system/app/FastBoot.apk");
         lidbg_shell_cmd("rm -r /system/app/NfcNci.apk ");
-        lidbg_shell_cmd("mv /system/lib/modules/out system/lib/modules/out1");
         lidbg_shell_cmd("rm -r /system/priv-app/Launcher2.apk");
         goto suc;
     }
@@ -297,25 +307,19 @@ int misc_init(void *data)
 
     lidbg_shell_cmd("mkdir  "ORIGIN_APP_PATH);
     lidbg_shell_cmd("mkdir  "ORIGIN_TMP_PATH);
-    lidbg_shell_cmd("mkdir  /system/lib/modules/out1");
 
     if(!fs_is_file_exist(ORIGIN_APP_PATH"SystemUI.apk"))
     {
-        lidbg_shell_cmd("cp /system/priv-app/SystemUI.apk "ORIGIN_APP_PATH"SystemUI.apk" );
-        lidbg_shell_cmd("cp /system/priv-app/Contacts.apk "ORIGIN_APP_PATH"Contacts.apk" );
-        lidbg_shell_cmd("cp /system/priv-app/Dialer.apk "ORIGIN_APP_PATH"Dialer.apk" );
-        lidbg_shell_cmd("cp /system/priv-app/Keyguard.apk "ORIGIN_APP_PATH"Keyguard.apk" );
-        lidbg_shell_cmd("cp /system/priv-app/Mms.apk "ORIGIN_APP_PATH"Mms.apk" );
-        lidbg_shell_cmd("cp /system/priv-app/Settings.apk "ORIGIN_APP_PATH"Settings.apk" );
-        lidbg_shell_cmd("cp /system/priv-app/Launcher2.apk "ORIGIN_APP_PATH"Launcher2.apk &" );
-        lidbg_shell_cmd("cp /system/app/NfcNci.apk "ORIGIN_TMP_PATH"NfcNci.apk" );
+        lidbg_shell_cmd("mv /system/priv-app/SystemUI.apk "ORIGIN_APP_PATH"SystemUI.apk" );
+        lidbg_shell_cmd("mv /system/priv-app/Contacts.apk "ORIGIN_APP_PATH"Contacts.apk" );
+        lidbg_shell_cmd("mv /system/priv-app/Dialer.apk "ORIGIN_APP_PATH"Dialer.apk" );
+        lidbg_shell_cmd("mv /system/priv-app/Keyguard.apk "ORIGIN_APP_PATH"Keyguard.apk" );
+        lidbg_shell_cmd("mv /system/priv-app/Mms.apk "ORIGIN_APP_PATH"Mms.apk" );
+        lidbg_shell_cmd("mv /system/priv-app/Settings.apk "ORIGIN_APP_PATH"Settings.apk" );
+        lidbg_shell_cmd("mv /system/priv-app/Launcher2.apk "ORIGIN_APP_PATH"Launcher2.apk &" );
+        lidbg_shell_cmd("mv /system/app/NfcNci.apk "ORIGIN_TMP_PATH"NfcNci.apk" );
         lidbg_shell_cmd("chmod 777  "ORIGIN_APP_PATH"*" );
         lidbg_shell_cmd("chmod 777  "ORIGIN_TMP_PATH"*" );
-    }
-    if(is_out_updated || !fs_is_file_exist("/system/lib/modules/out1/build_time.conf"))
-    {
-        lidbg_shell_cmd("cp -rf /flysystem/lib/out/* /system/lib/modules/out1/ &");
-        lidbg_shell_cmd("chmod 777 /system/lib/modules/out1/*");
     }
 
     te_regist_password("001101", cb_password_upload);
@@ -379,6 +383,7 @@ module_exit(lidbg_misc_exit);
 EXPORT_SYMBOL(lidbg_loop_warning);
 EXPORT_SYMBOL(lidbg_enable_logcat);
 EXPORT_SYMBOL(lidbg_enable_kmsg);
+EXPORT_SYMBOL(lidbg_system_switch);
 
 
 MODULE_AUTHOR("futengfei");

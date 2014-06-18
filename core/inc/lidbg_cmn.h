@@ -41,6 +41,7 @@ char * lidbg_get_current_time(char *time_string, struct rtc_time *ptm);
 bool lidbg_new_cdev(struct file_operations *cdev_fops, char *nodename);
 void set_power_state(int state);
 void lidbg_loop_warning(void);
+void lidbg_system_switch(bool origin_system);
 void lidbg_enable_logcat(void);
 void lidbg_enable_kmsg(void);
 void lidbg_shell_cmd(char *shell_cmd);
