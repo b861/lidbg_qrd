@@ -8,7 +8,7 @@ int load_modules_count = 0;
 char *insmod_soc_list[] =
 {
     SOC_KO,
-	NULL,
+    NULL,
 };
 
 char *insmod_list[] =
@@ -38,13 +38,6 @@ char *insmod_list[] =
     NULL,
 };
 
-char *insmod_path[] =
-{
-    "/sdcard/out/",
-    "/system/lib/modules/out/",
-    "/flysystem/lib/out/",
-    NULL,
-};
 bool is_file_exist(char *file)
 {
     struct file *filep;
@@ -99,32 +92,31 @@ int thread_check_restart(void *data)
 
 int thread_loader(void *data)
 {
-    int i, j;
-    char path[100];
-	int tmp;
+    int  j;
+    char path[128] = {0}, *kopath = NULL;
+    int tmp;
     DUMP_FUN_ENTER;
     CREATE_KTHREAD(thread_check_restart, NULL);
 
-    for(i = 0; insmod_path[i] != NULL; i++)
-    {
-    	sprintf(path, "%slidbg_loader.ko", insmod_path[i]);
-    	if(!is_file_exist(path))continue;
+    if(is_file_exist(FLY_MODE_FILE))
+        kopath = "/flysystem/lib/out/";
+    else
+        kopath = "/system/lib/modules/out/";
 
-		for(j = 0; insmod_soc_list[j] != NULL; j++)
-        {
-            sprintf(path, "%s%s", insmod_path[i], insmod_soc_list[j]);
-            lidbg_insmod(path);
-        }
-		
-        for(j = 0; insmod_list[j] != NULL; j++)
-        {
-        	tmp = load_modules_count;
-            sprintf(path, "%s%s", insmod_path[i], insmod_list[j]);
-            //LIDBG_WARN("load %s\n",path);
-            lidbg_insmod(path);
-			while(tmp == load_modules_count) msleep(10);
-        }
+    for(j = 0; insmod_soc_list[j] != NULL; j++)
+    {
+        sprintf(path, "%s%s", kopath, insmod_soc_list[j]);
+        lidbg_insmod(path);
     }
+
+    for(j = 0; insmod_list[j] != NULL; j++)
+    {
+        tmp = load_modules_count;
+        sprintf(path, "%s%s", kopath, insmod_list[j]);
+        lidbg_insmod(path);
+        while(tmp == load_modules_count) msleep(10);
+    }
+
 
     DUMP_FUN_LEAVE;
     return 0;
