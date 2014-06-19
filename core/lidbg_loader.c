@@ -104,7 +104,7 @@ int thread_loader(void *data)
         kopath = "/system/lib/modules/out/";
 
     for(j = 0; insmod_soc_list[j] != NULL; j++)
-    {
+    {	
         sprintf(path, "%s%s", kopath, insmod_soc_list[j]);
         lidbg_insmod(path);
     }

@@ -177,7 +177,7 @@ int main(int argc, char **argv)
 {
     pthread_t lidbg_uevent_tid;
     DUMP_BUILD_TIME_FILE;
-
+	ALOGI("lidbg_userver: uevent thread start\n");
     lidbg_uevent_poll(lidbg_uevent_callback);
     return 0;
 }

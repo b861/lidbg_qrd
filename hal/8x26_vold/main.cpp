@@ -97,42 +97,6 @@ int main() {
         exit(1);
     }
 	
-	while(1)
-	{
-	    if(access("/flysystem/lib/out/lidbg_userver", X_OK) == 0)
-	    {
-	        system("/flysystem/lib/out/lidbg_userver &");
-	        SLOGI("futengfei=======/flysystem/lib/out/lidbg_userver======");
-	        break;
-	    }
-	    else if(access("/system/lib/modules/out/lidbg_userver", X_OK) == 0)
-	    {
-	        system("/system/lib/modules/out/lidbg_userver &");
-	        SLOGI("futengfei=======/system/lib/modules/out/lidbg_userver======");
-	        break;
-	    }
-	    SLOGI("futengfei=============lidbg_userver.check1===============");
-	    system("chmod 777 /system/lib/modules/out/lidbg_userver");
-	    system("chmod 777 /system/lib/modules/out/*");
-	    system("chmod 777 /flysystem/lib/out/lidbg_userver");
-	    system("chmod 777 /flysystem/lib/out/*");
-	    sleep(1);
-	}
-
-        sleep(10);
-        system("chmod 777 /system/lib/modules/out/lidbg_userver");
-        system("chmod 777 /system/lib/modules/out/*");
-        system("chmod 777 /flysystem/lib/out/lidbg_userver");
-        system("chmod 777 /flysystem/lib/out/*");
-        sleep(1);
-        sleep(10);
-         system("chmod 777 /system/lib/modules/out/lidbg_userver");
-         sleep(1);
-
-//    if(access("/flysystem/lib/out/lidbg_userver", R_OK) == 0)
-//        system("/flysystem/lib/out/lidbg_userver");
-//    else
-//        system("/system/lib/modules/out/lidbg_userver");
 
     // Eventually we'll become the monitoring thread
     while(1) {

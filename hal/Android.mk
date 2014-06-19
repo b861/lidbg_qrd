@@ -16,12 +16,15 @@ SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,8x25q_camera)
 endif
 
 ifeq ($(CONFIG_HAL_USERVER),y)
-SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,lidbg_identify_system)
 SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,lidbg_userver)
 endif
 
 ifeq ($(CONFIG_HAL_VOLD_8x26),y)
 SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,8x26_vold)
+endif
+
+ifeq ($(CONFIG_HAL_LOAD),y)
+SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,lidbg_load)
 endif
 
 include $(SUBDIR_MAKEFILES)

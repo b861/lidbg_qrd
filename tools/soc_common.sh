@@ -30,7 +30,7 @@ function soc_build_all()
 		make -j8
 }
 
-function soc_build_origin()
+function soc_build_multi()
 {
 	echo $FUNCNAME
 	cd $RELEASE_REPOSITORY
@@ -42,8 +42,7 @@ function soc_build_origin()
 	cp $RELEASE_REPOSITORY/app/FastBoot.apk $DBG_SYSTEM_DIR/out/target/product/msm8226/system/app/
 	cp $RELEASE_REPOSITORY/app/FlyBootService.apk $DBG_SYSTEM_DIR/out/target/product/msm8226/system/app/
 	cp $RELEASE_REPOSITORY/driver/out/lidbg_iserver $DBG_SYSTEM_DIR/out/target/product/msm8226/system/bin/
-	soc_build_all
-	soc_make_otapackage 
+	soc_build_all 
 }
 
 
@@ -77,7 +76,7 @@ function soc_menu()
 	echo [22] make system
 	echo [23] make
 	echo [24] make otapackage
-	echo [25] make origin_system
+	echo [25] make multi_system
 }
 
 function soc_handle()
@@ -93,7 +92,7 @@ function soc_handle()
 	24)
 		soc_make_otapackage;;
 	25)
-		soc_build_origin;;
+		soc_build_multi;;
 	*)
 		echo
 	esac
