@@ -41,7 +41,7 @@ function soc_build_multi()
 	cp $RELEASE_REPOSITORY/driver/out/vold $DBG_SYSTEM_DIR/out/target/product/msm8226/system/bin/
 	cp $RELEASE_REPOSITORY/app/FastBoot.apk $DBG_SYSTEM_DIR/out/target/product/msm8226/system/app/
 	cp $RELEASE_REPOSITORY/app/FlyBootService.apk $DBG_SYSTEM_DIR/out/target/product/msm8226/system/app/
-	cp $RELEASE_REPOSITORY/driver/out/lidbg_iserver $DBG_SYSTEM_DIR/out/target/product/msm8226/system/bin/
+	cp $RELEASE_REPOSITORY/driver/out/lidbg_load $DBG_SYSTEM_DIR/out/target/product/msm8226/system/bin/
 	soc_build_all 
 }
 
