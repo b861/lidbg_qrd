@@ -41,7 +41,7 @@ void uevent_shell(char *shell_cmd)
 {
     char shellstring[256];
     char *envp[] = { "LIDBG_ACTION=shell", shellstring, NULL };
-    snprintf(shellstring, 256, "LIDBG_PARAMETER=%s", shell_cmd );
+    snprintf(shellstring, 256, "LIDBG_PARAMETER=%s 2> /dev/lidbg_msg", shell_cmd );
     lidbg_uevent_send(KOBJ_CHANGE, envp);
 }
 
