@@ -353,8 +353,6 @@ int misc_init(void *data)
 
     if(1 == logcat_en)
         logcat_lunch(NULL, NULL);
-    if(fs_get_file_size(SHELL_ERRS_FILE) > MEM_SIZE_1_MB)
-        fs_clear_file(SHELL_ERRS_FILE);
     return 0;
 }
 

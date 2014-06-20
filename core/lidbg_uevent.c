@@ -9,6 +9,7 @@ struct uevent_dev
     void (*callback)(char *focus, char *uevent);
 };
 
+#define SHELL_ERRS_FILE LIDBG_MEM_DIR"lidbg_shell_errs.txt"
 LIST_HEAD(uevent_list);
 struct miscdevice lidbg_uevent_device;
 int uevent_dbg = 0;
