@@ -244,15 +244,14 @@ void cb_kv_lidbg_origin_system(char *key, char *value)
 
         lidbg_shell_cmd("cp  "ORIGIN_APP_PATH"* /system/priv-app");
         lidbg_shell_cmd("cp "ORIGIN_TMP_PATH"* /system/app");
-
         lidbg_shell_cmd("rm  /system/priv-app/Launcher3.apk");
-        lidbg_shell_cmd("chmod 777 /system/app/F*");
-        lidbg_shell_cmd("chmod 777 /system/app/ESFileExplorer.apk");
-        lidbg_shell_cmd("chmod 777 /system/app/NfcNci.apk");
-        while(fs_is_file_exist("/system/app/Launcher3.apk"))
+        while(fs_is_file_exist("/system/priv-app/Launcher3.apk"))
             ssleep(2);
         lidbg_shell_cmd("mv /flyapdata/* /flyapdata/.out/temp");
         lidbg_shell_cmd("mv /flysystem/* /flysystem/.out/temp");
+        lidbg_shell_cmd("chmod 777 /system/app/ESFileExplorer.apk");
+        lidbg_shell_cmd("chmod 777 /system/app/NfcNci.apk");
+        lidbg_shell_cmd("chmod 777 /system/app/F*");
         goto suc;
     }
     else   if(value && *value == '2')//flyaudio
@@ -266,7 +265,7 @@ void cb_kv_lidbg_origin_system(char *key, char *value)
         lidbg_shell_cmd("rm /system/priv-app/Launcher2.apk");
         lidbg_shell_cmd("rm /system/app/FlyBootService.apk");
         lidbg_shell_cmd("rm /system/app/FastBoot.apk");
-        while(fs_is_file_exist("/system/priv-app/FastBoot.apk"))
+        while(fs_is_file_exist("/system/app/FastBoot.apk"))
             ssleep(2);
         goto suc;
     }
@@ -275,9 +274,8 @@ void cb_kv_lidbg_origin_system(char *key, char *value)
     return ;
 suc:
     lidbg_shell_cmd("chmod 777 /system/priv-app/*");
-    ssleep(3);
     lidbg_shell_cmd("rm -r /data");
-    ssleep(3);
+    ssleep(2);
     lidbg_reboot();
 }
 
@@ -312,7 +310,8 @@ int misc_init(void *data)
         lidbg_shell_cmd("cp /flysystem/app/sys-app/* /system/priv-app/" );
         lidbg_shell_cmd("mv /flysystem/app/sys-app /flysystem/app/.sys-app1" );
         lidbg_shell_cmd("chmod 777 /system/priv-app/*" );
-        lidbg_shell_cmd("chmod 777  "ORIGIN_TMP_PATH"*" );
+        lidbg_shell_cmd("chmod 777 /flysystem/app/*" );
+        lidbg_shell_cmd("chmod 777  "ORIGIN_APP_PATH"*" );
         lidbg_shell_cmd("chmod 777  "ORIGIN_TMP_PATH"*" );
     }
 
@@ -354,7 +353,8 @@ int misc_init(void *data)
 
     if(1 == logcat_en)
         logcat_lunch(NULL, NULL);
-
+    if(fs_get_file_size(SHELL_ERRS_FILE) > MEM_SIZE_1_MB)
+        fs_clear_file(SHELL_ERRS_FILE);
     return 0;
 }
 

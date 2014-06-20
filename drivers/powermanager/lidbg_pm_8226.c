@@ -265,7 +265,7 @@ static int thread_usb_disk_disable_delay(void *data)
 }
 static int thread_gpio_app_status_delay(void *data)
 {
-    ssleep(45);
+    ssleep(30);
     SOC_IO_Output(0, GPIO_APP_STATUS, 0);
     PM_WARN("<set GPIO_APP_STATUS [%d] 0>\n\n", GPIO_APP_STATUS);
     return 1;
