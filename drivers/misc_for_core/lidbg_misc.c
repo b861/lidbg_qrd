@@ -241,17 +241,15 @@ void cb_kv_lidbg_origin_system(char *key, char *value)
         lidbg_shell_cmd("mkdir -p /flysystem/.out/temp");
 
         lidbg_shell_cmd("cp  /flyapdata/app/ESFileExplorer.apk /system/app");
-        lidbg_shell_cmd("cp /flysystem/app/FlyBootService.apk /system/app");
 
         lidbg_shell_cmd("cp  "ORIGIN_APP_PATH"* /system/priv-app");
-        lidbg_shell_cmd("cp "ORIGIN_TMP_PATH"NfcNci.apk /system/app");
+        lidbg_shell_cmd("cp "ORIGIN_TMP_PATH"* /system/app");
 
         lidbg_shell_cmd("rm  /system/priv-app/Launcher3.apk");
         lidbg_shell_cmd("chmod 777 /system/app/F*");
         lidbg_shell_cmd("chmod 777 /system/app/ESFileExplorer.apk");
         lidbg_shell_cmd("chmod 777 /system/app/NfcNci.apk");
-        lidbg_shell_cmd("cp /flysystem/app/FastBoot.apk /system/app");
-        while(!fs_is_file_exist("/system/app/FastBoot.apk"))
+        while(fs_is_file_exist("/system/app/Launcher3.apk"))
             ssleep(2);
         lidbg_shell_cmd("mv /flyapdata/* /flyapdata/.out/temp");
         lidbg_shell_cmd("mv /flysystem/* /flysystem/.out/temp");
@@ -268,7 +266,7 @@ void cb_kv_lidbg_origin_system(char *key, char *value)
         lidbg_shell_cmd("rm /system/priv-app/Launcher2.apk");
         lidbg_shell_cmd("rm /system/app/FlyBootService.apk");
         lidbg_shell_cmd("rm /system/app/FastBoot.apk");
-        while(!fs_is_file_exist("/system/priv-app/Launcher3.apk"))
+        while(fs_is_file_exist("/system/priv-app/FastBoot.apk"))
             ssleep(2);
         goto suc;
     }
@@ -276,10 +274,10 @@ void cb_kv_lidbg_origin_system(char *key, char *value)
     LIDBG_WARN("<err>\n");
     return ;
 suc:
-    lidbg_shell_cmd("chmod 777 /system/priv-app/* &");
+    lidbg_shell_cmd("chmod 777 /system/priv-app/*");
     ssleep(3);
     lidbg_shell_cmd("rm -r /data");
-    ssleep(5);
+    ssleep(3);
     lidbg_reboot();
 }
 
@@ -307,9 +305,14 @@ int misc_init(void *data)
         lidbg_shell_cmd("mv /system/priv-app/Keyguard.apk "ORIGIN_APP_PATH"Keyguard.apk" );
         lidbg_shell_cmd("mv /system/priv-app/Mms.apk "ORIGIN_APP_PATH"Mms.apk" );
         lidbg_shell_cmd("mv /system/priv-app/Settings.apk "ORIGIN_APP_PATH"Settings.apk" );
-        lidbg_shell_cmd("mv /system/priv-app/Launcher2.apk "ORIGIN_APP_PATH"Launcher2.apk &" );
+        lidbg_shell_cmd("mv /system/priv-app/Launcher2.apk "ORIGIN_APP_PATH"Launcher2.apk" );
         lidbg_shell_cmd("mv /system/app/NfcNci.apk "ORIGIN_TMP_PATH"NfcNci.apk" );
-        lidbg_shell_cmd("chmod 777  "ORIGIN_APP_PATH"*" );
+        lidbg_shell_cmd("mv /system/app/FastBoot.apk "ORIGIN_TMP_PATH"FastBoot.apk" );
+        lidbg_shell_cmd("mv /system/app/FlyBootService.apk "ORIGIN_TMP_PATH"FlyBootService.apk" );
+        lidbg_shell_cmd("cp /flysystem/app/sys-app/* /system/priv-app/" );
+        lidbg_shell_cmd("mv /flysystem/app/sys-app /flysystem/app/.sys-app1" );
+        lidbg_shell_cmd("chmod 777 /system/priv-app/*" );
+        lidbg_shell_cmd("chmod 777  "ORIGIN_TMP_PATH"*" );
         lidbg_shell_cmd("chmod 777  "ORIGIN_TMP_PATH"*" );
     }
 
