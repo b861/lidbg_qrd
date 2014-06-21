@@ -246,9 +246,10 @@ return:
 static int i2c_read_bytes(struct i2c_client *client, uint8_t *buf, int len)
 {
     //add logic for update gt801
+
     if(shutdown_flag_ts != 0)
     {
-        shutdown_flag_ts = 2;
+        //shutdown_flag_ts = 2;
         return -1;
     }
 
@@ -287,7 +288,7 @@ static int i2c_write_bytes(struct i2c_client *client, uint8_t *data, int len)
     //add logic for update gt801
     if(shutdown_flag_ts != 0)
     {
-        shutdown_flag_ts = 2;
+        //shutdown_flag_ts = 2;
         return -1;
     }
 

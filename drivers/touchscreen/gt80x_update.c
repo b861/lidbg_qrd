@@ -50,14 +50,13 @@ int version_check = 0;
 static void update_early_suspend(struct early_suspend *h)
 {
     printk("\n==[wang]==in========update_early_suspend===========\n");
-    work_en = 0;
+	work_en = 0;
 }
 
 static void update_late_resume(struct early_suspend *h)
 {
-    printk("\n==[wang]==in========update_late_resume===========\n"
-          );
-    work_en = 1;
+    printk("\n==[wang]==in========update_late_resume===========\n");
+    work_en = 1;	
 }
 #endif
 //测试升级检查和升级过程用时
@@ -71,8 +70,9 @@ static void update_late_resume(struct early_suspend *h)
 /*add value to do the logic for update gt801*/
 extern  unsigned int shutdown_flag_ts;
 extern  unsigned int shutdown_flag_probe;
-extern  unsigned int shutdown_flag_gt811;
+//extern  unsigned int shutdown_flag_gt811;
 extern unsigned int irq_signal;
+
 
 static uint8_t Guitar_ReadBuf[10];
 static uint8_t Guitar_WriteBuf[10];
@@ -1232,10 +1232,11 @@ static int gt80x_iap_kthread(void *data)
         unsigned long last_time = get_jiffies_64();
 #endif
 
-        if(work_en == 0)
+	if(work_en == 0)
             goto do_nothing;
 
         work_en = 0;
+
         irq_signal = 0;
         set_current_state(TASK_UNINTERRUPTIBLE);
         if(kthread_should_stop())
@@ -1245,8 +1246,8 @@ static int gt80x_iap_kthread(void *data)
         msleep(10000);
         debug_printk(LEVEL_DEBUG, "Start to Check the GT80X's fimeware.\n");
 
-        if(shutdown_flag_gt811 == 1)
-            goto do_nothing;
+      //  if(shutdown_flag_gt811 == 1)
+     //       goto do_nothing;
 
         gt80x_code_version();
 
@@ -1289,21 +1290,9 @@ static int gt80x_iap_kthread(void *data)
         int count = 0;
         shutdown_flag_ts = 1;
         shutdown_flag_probe = 1;
-        while(1)
-        {
-            msleep(500);
-            if((2 == shutdown_flag_ts) || (2 == shutdown_flag_probe))
-                break;
-            else
-                count++;
-            if(count > 10)
-            {
-                count = 0;
-                shutdown_flag_ts = 0;
-                shutdown_flag_probe = 0;
-                goto do_nothing;
-            }
-        }
+
+        msleep(1000);
+
 
 
 
@@ -1311,6 +1300,8 @@ static int gt80x_iap_kthread(void *data)
         *************************************************************/
         //Than we must start to update firmwarm on chip.
         goodix_ts_set(GOODIX_TS_STOP);
+
+UPDATE_AGAIN:
 
         for(retry = MAX_IAP_RETRY; retry > 0; retry--)
         {
@@ -1394,13 +1385,15 @@ static int gt80x_iap_kthread(void *data)
             irq_signal = 1;
             ssleep(600);
 
+
             ret = 0;
         }
         else
         {
-            debug_printk(LEVEL_INFO, "GT80X Updating is interrupted. State:%d, return:%d.\n", kernel_state, ret);
-            shutdown_flag_ts = 0;
-            shutdown_flag_probe = 0;
+            debug_printk(LEVEL_INFO, "GT80X Updating is interrupted, Update again. State:%d, return:%d.\n", kernel_state, ret);
+	    goto UPDATE_AGAIN;
+            //shutdown_flag_ts = 0;
+            //shutdown_flag_probe = 0;
             kernel_state = STATE_FINASH;
         }
 
