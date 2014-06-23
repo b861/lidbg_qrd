@@ -148,7 +148,7 @@ int kernel_wakelock_save_wakelock(char *info)
 
 struct wakeup_source *kernel_wakelock_find_wakelock(char *info)
 {
-    struct wakeup_source *ws;
+    struct wakeup_source *ws, *tmp = NULL;
     int exist = 0;
     if(g_var.ws_lh == NULL)
     {
@@ -159,17 +159,18 @@ struct wakeup_source *kernel_wakelock_find_wakelock(char *info)
     list_for_each_entry_rcu(ws, g_var.ws_lh, entry)
     {
         spin_lock_irq(&ws->lock);
-        if (!strcmp(ws->name, info))
+        if (ws->active && !strcmp(ws->name, info))
             exist = 1;
         spin_unlock_irq(&ws->lock);
 
         if(exist == 1)
+        {
+            tmp = ws;
             break;
-        else
-            ws = NULL;
+        }
     }
     rcu_read_unlock();
-    return ws;
+    return tmp;
 }
 
 void lidbg_pm_step_call(fly_pm_stat_step step, void *data)
