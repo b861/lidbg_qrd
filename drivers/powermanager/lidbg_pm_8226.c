@@ -302,6 +302,8 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
                 lidbg("hal callback 0\n");
                 SOC_Hal_Acc_Callback(0);
             }
+            if(!g_var.is_fly && fs_is_file_exist("/system/app/NfcNci.apk"))
+                lidbg_rm("/system/app/NfcNci.apk");
         }
         if(!strcmp(cmd[1], "screen_on"))
         {
