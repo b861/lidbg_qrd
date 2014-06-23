@@ -319,5 +319,5 @@ static inline int check_pt(void)
 #define GPS_sound_status (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnGPS_sound_status))
 
 #define SOC_Set_Touch_Pos (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_Set_Touch_Pos))
-
+#define SOC_Get_System_Sound_Status (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_Get_System_Sound_Status))
 #endif
