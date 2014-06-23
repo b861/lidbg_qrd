@@ -70,7 +70,6 @@ static void update_late_resume(struct early_suspend *h)
 /*add value to do the logic for update gt801*/
 extern  unsigned int shutdown_flag_ts;
 extern  unsigned int shutdown_flag_probe;
-//extern  unsigned int shutdown_flag_gt811;
 extern unsigned int irq_signal;
 
 
@@ -1392,8 +1391,6 @@ UPDATE_AGAIN:
         {
             debug_printk(LEVEL_INFO, "GT80X Updating is interrupted, Update again. State:%d, return:%d.\n", kernel_state, ret);
 	    goto UPDATE_AGAIN;
-            //shutdown_flag_ts = 0;
-            //shutdown_flag_probe = 0;
             kernel_state = STATE_FINASH;
         }
 

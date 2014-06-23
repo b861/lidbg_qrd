@@ -32,8 +32,11 @@ static bool xy_revert_en = 0;
 unsigned int  touch_cnt = 0;
 extern  bool is_ts_load;
 extern int ts_should_revert;
-extern unsigned int shutdown_flag_ts;
-extern unsigned int irq_signal;
+
+/*add 4 variable to make  logic of update 801*/
+unsigned int shutdown_flag_ts = 0;
+unsigned int shutdown_flag_probe = 0;
+unsigned int irq_signal = 0;
 
 //extern void SOC_Log_Dump(int cmd);
 /******************************************************
@@ -249,7 +252,6 @@ static int i2c_read_bytes(struct i2c_client *client, uint8_t *buf, int len)
 
     if(shutdown_flag_ts != 0)
     {
-        //shutdown_flag_ts = 2;
         return -1;
     }
 
@@ -288,7 +290,6 @@ static int i2c_write_bytes(struct i2c_client *client, uint8_t *data, int len)
     //add logic for update gt801
     if(shutdown_flag_ts != 0)
     {
-        //shutdown_flag_ts = 2;
         return -1;
     }
 
@@ -1274,6 +1275,21 @@ static struct i2c_driver goodix_ts_driver =
     },
 };
 
+
+int thread_update(void *data)
+{
+        if(1) 
+        {
+		lidbg_insmod("/system/lib/modules/out/gt80x_update.ko");
+		lidbg_insmod("/flysystem/lib/out/gt80x_update.ko");
+        }
+        else 
+            schedule_timeout(HZ);
+
+    return 0;
+}
+
+
 /*******************************************************
 ??:
 	??????
@@ -1285,6 +1301,8 @@ static int __devinit goodix_ts_init(void)
     int ret;
 
     LIDBG_GET;
+
+	CREATE_KTHREAD(thread_update, NULL);
 
     is_ts_load = 1;
     printk("================into Gt801.ko=1024590==============2013.07.12==\n");
@@ -1339,6 +1357,10 @@ static void __exit goodix_ts_exit(void)
 
 late_initcall(goodix_ts_init);
 module_exit(goodix_ts_exit);
+
+EXPORT_SYMBOL(shutdown_flag_ts);
+EXPORT_SYMBOL(shutdown_flag_probe);
+EXPORT_SYMBOL(irq_signal);
 
 MODULE_DESCRIPTION("Goodix Touchscreen Driver");
 MODULE_LICENSE("GPL");

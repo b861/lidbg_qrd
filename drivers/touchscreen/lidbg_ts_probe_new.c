@@ -7,13 +7,6 @@ LIDBG_DEFINE;
 #define GTP_RST_PORT_ACTIVE (1)
 #define USE_TS_NUM (0)
 
-//zone end
-/*add 4 variable to make  logic of update 801*/
-unsigned int shutdown_flag_ts = 0;
-unsigned int shutdown_flag_probe = 0;
-//unsigned int shutdown_flag_gt811 = 0;
-unsigned int irq_signal = 0;
-
 
 #if (defined(BOARD_V1) || defined(BOARD_V2) || defined(BOARD_V3))
 #define FLYHAL_CONFIG_PATH "/flydata/flyhalconfig"
@@ -132,11 +125,6 @@ struct probe_device *ts_scan(struct probe_device *tsdev, int size)
         {
             lidbg("found:[0x%x,%s]\n", tsdev->chip_addr, tsdev->name);
 
-	    if (!strcmp(tsdev->name, "gt801.ko"))
-            {
-                lidbg_insmod("/system/lib/modules/out/gt80x_update.ko");
-                lidbg_insmod("/flysystem/lib/out/gt80x_update.ko");
-            }
     	     tsdev->find_cb();
 		return tsdev;
         }
@@ -145,9 +133,8 @@ struct probe_device *ts_scan(struct probe_device *tsdev, int size)
 
     if(loop == 30)
     {
-        lidbg_insmod("/system/lib/modules/out/gt80x_update.ko");
-        lidbg_insmod("/flysystem/lib/out/gt80x_update.ko");
-	shutdown_flag_probe = 1;
+        lidbg_insmod("/system/lib/modules/out/gt801.ko");
+        lidbg_insmod("/flysystem/lib/out/gt801.ko");
 	loop = 0;
     }
 	
@@ -219,21 +206,13 @@ int ts_probe_thread(void *data)
         while(!is_ts_load)
         {
 
-	    	if(shutdown_flag_probe == 0){
-		        if((ts = ts_scan(&ts_probe_dev, SIZE_OF_ARRAY(ts_probe_dev))))
-		        {
-		            parse_ts_info(ts);
-					msleep(5000);
-		            ts = NULL;
-		        }
-		        msleep(ts_scan_delayms);
-	    	}
-		else
+	        if((ts = ts_scan(&ts_probe_dev, SIZE_OF_ARRAY(ts_probe_dev))))
 	        {
-	            //lidbg("[wang]:=========is in updating.\n");
-	            //shutdown_flag_probe = 1;
-	            msleep(ts_scan_delayms);
+	            parse_ts_info(ts);
+				msleep(5000);
+	            ts = NULL;
 	        }
+	        msleep(ts_scan_delayms);
     	}
    }
     else
@@ -269,11 +248,6 @@ EXPORT_SYMBOL(is_ts_load);
 EXPORT_SYMBOL(ts_should_revert);
 
 EXPORT_SYMBOL(ts_data_report);
-
-EXPORT_SYMBOL(shutdown_flag_ts);
-EXPORT_SYMBOL(shutdown_flag_probe);
-//EXPORT_SYMBOL(shutdown_flag_gt811);
-EXPORT_SYMBOL(irq_signal);
 
 MODULE_LICENSE("Dual BSD/GPL");
 MODULE_AUTHOR("lsw.");
