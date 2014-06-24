@@ -6,7 +6,7 @@ function combination_menu()
 	echo "[61] 完整编译lidbg并提交到产品二进制仓库           (1  3  81(1) 41 82(3))"
 	echo "[62] 编译basesystem并提交到产品二进制仓库          (81(2) 25 81(3) 42 82(3))"
 	echo "[63] 拷贝lidbg和basesystem到二进制仓库后生成升级包 (81(3) 41 42 43)"
-	echo "[65] 编译烧写内核后重启                            (21 53 54 56)"
+	echo "[65] 编译烧写boot.img后重启                        (21 53 54 56)"
 }
 
 function combination_handle()

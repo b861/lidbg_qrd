@@ -68,7 +68,7 @@ function lidbg_menu()
 	echo [3] build all'                    '编译lidbg所有文件
 	echo [4] push out'                     'push驱动模块到原生系统
 	echo [5] push out to fly'              'push驱动模块到产品系统
-	echo [6] del lidbg loader'             '删除lidbg loader驱动
+	echo [6] del lidbg loader'             '删除lidbg_loader.ko驱动
 
 	echo
 	soc_menu

@@ -51,7 +51,7 @@ if [[ $RELEASE_REPOSITORY != "" ]];then
 	echo $RELEASE_REPOSITORY
 	echo [41] copy lidbg out to depository
 	echo [42] copy basesystem to depository
-	echo [43] make package
+	echo [43] make update package
 fi
 }
 
