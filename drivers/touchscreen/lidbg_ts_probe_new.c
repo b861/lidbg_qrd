@@ -3,10 +3,8 @@
 
 LIDBG_DEFINE;
 
-
 #define GTP_RST_PORT_ACTIVE (1)
 #define USE_TS_NUM (0)
-
 
 #if (defined(BOARD_V1) || defined(BOARD_V2) || defined(BOARD_V3))
 #define FLYHAL_CONFIG_PATH "/flydata/flyhalconfig"
@@ -90,12 +88,16 @@ void parse_ts_info(struct probe_device *ts_info)
 {
     char path[100];
 
-    sprintf(path, "/system/lib/modules/out/%s", ts_info->name);
-    lidbg_insmod( path );
-
-    sprintf(path, "/flysystem/lib/out/%s", ts_info->name);
-    lidbg_insmod( path );
-
+	if(g_var.is_fly)
+	{
+	    sprintf(path, "/flysystem/lib/out/%s", ts_info->name);
+	    lidbg_insmod( path );
+	}
+	else
+	{
+		sprintf(path, "/system/lib/modules/out/%s", ts_info->name);
+		lidbg_insmod( path );
+	}
     lidbg_fs_log(TS_LOG_PATH, "loadts=%s,USE_TS_NUM:%d,ts_choose_touchscreen:%d,ts_should_revert:%d\n", ts_info->name, USE_TS_NUM, ts_choose_touchscreen, ts_should_revert);
     fs_mem_log("loadts=%s,USE_TS_NUM:%d,ts_choose_touchscreen:%d,ts_should_revert:%d\n", ts_info->name, USE_TS_NUM, ts_choose_touchscreen, ts_should_revert);
 
@@ -124,20 +126,21 @@ struct probe_device *ts_scan(struct probe_device *tsdev, int size)
         else
         {
             lidbg("found:[0x%x,%s]\n", tsdev->chip_addr, tsdev->name);
-
-    	     tsdev->find_cb();
-		return tsdev;
+	        tsdev->find_cb();
+			return tsdev;
         }
         tsdev++;
     }
-
+#ifdef SOC_msm8x25
     if(loop == 30)
     {
-        lidbg_insmod("/system/lib/modules/out/gt801.ko");
-        lidbg_insmod("/flysystem/lib/out/gt801.ko");
-	loop = 0;
+		if(g_var.is_fly)
+			lidbg_insmod("/flysystem/lib/out/gt801.ko");
+		else
+	        lidbg_insmod("/system/lib/modules/out/gt801.ko");
     }
-	
+#endif
+
     return NULL;
 }
 
@@ -174,7 +177,7 @@ void ts_data_report(touch_type t,int id,int x,int y,int w)
 		}
 	}
 	
-	if((id == 4) && (t == TOUCH_DOWN) /*&& (!g_var.is_fly)*/) // 5 fingers
+	if((id == 4) && (t == TOUCH_DOWN) && (!g_var.is_fly)) // 5 fingers
 	{
 		SOC_Key_Report(KEY_BACK,KEY_PRESSED_RELEASED);
 	}
@@ -205,16 +208,15 @@ int ts_probe_thread(void *data)
     {
         while(!is_ts_load)
         {
-
-	        if((ts = ts_scan(ts_probe_dev, SIZE_OF_ARRAY(ts_probe_dev))))
-	        {
-	            parse_ts_info(ts);
-				msleep(5000);
-	            ts = NULL;
-	        }
-	        msleep(ts_scan_delayms);
-    	}
-   }
+            if((ts = ts_scan(ts_probe_dev, SIZE_OF_ARRAY(ts_probe_dev))))
+            {
+                parse_ts_info(ts);
+                msleep(5000);
+                ts = NULL;
+            }
+            msleep(ts_scan_delayms);
+        }
+    }
     else
     {
         LIDBG_WARN("<disable ts scan work>\n");
@@ -246,8 +248,6 @@ module_exit(ts_probe_exit);
 
 EXPORT_SYMBOL(is_ts_load);
 EXPORT_SYMBOL(ts_should_revert);
-
 EXPORT_SYMBOL(ts_data_report);
-
 MODULE_LICENSE("Dual BSD/GPL");
 MODULE_AUTHOR("lsw.");

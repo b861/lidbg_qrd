@@ -1,6 +1,6 @@
 
 #include "lidbg.h"
-int temp_log_freq = 5;
+int temp_log_freq = 10;
 //static int fan_onoff_temp;
 static int cpu_temp_time_minute = 20;
 static bool is_cpu_temp_enabled = false;

@@ -20,7 +20,7 @@ int SOC_Get_System_Sound_Status_func(void *para, int length)
 {
 	int i;
 	char *p = (char *)para;
-	if(length < 20)
+	if((length < 20) || (para == NULL))
 		return 0;
 	
     if(sound_detect_dbg)
