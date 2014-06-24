@@ -7,7 +7,6 @@ delete_out_dir_after_update=1
 update_lidbg_out_dir_en=0
 loop_warning_en=0
 cmdstring=echo ws udisk_reset > /dev/lidbg_pm01
-wifiadb_en=0
 app_install_en=0
 reboot_recovery=0
 lidbg_origin_system=0

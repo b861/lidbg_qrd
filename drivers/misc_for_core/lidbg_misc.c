@@ -57,19 +57,6 @@ void lidbg_enable_kmsg(void)
     lidbg_shell_cmd(cmd);
     lidbg("kmsg-\n");
 }
-
-
-bool set_wifi_adb_mode(bool on)
-{
-    LIDBG_WARN("<%d>\n", on);
-    if(on)
-        lidbg_setprop("service.adb.tcp.port", "5555");
-    else
-        lidbg_setprop("service.adb.tcp.port", "-1");
-    lidbg_stop("adbd");
-    lidbg_start("adbd");
-    return true;
-}
 void cb_password_chmod(char *password )
 {
     fs_mem_log("<called:%s>\n", __func__ );
@@ -192,13 +179,6 @@ void lidbg_loop_warning(void)
         CREATE_KTHREAD(loop_warnning, NULL);
     }
 }
-void cb_kv_wifiadb(char *key, char *value)
-{
-    if(value && *value == '1')
-        set_wifi_adb_mode(true);
-    else
-        set_wifi_adb_mode(false);
-}
 void cb_kv_app_install(char *key, char *value)
 {
     if(value && *value == '1')
@@ -247,7 +227,6 @@ int misc_init(void *data)
     FS_REGISTER_INT(loop_warning_en, "loop_warning_en", 0, NULL);
 
     FS_REGISTER_KEY( "cmdstring", cb_kv_cmd);
-    FS_REGISTER_KEY( "wifiadb_en", cb_kv_wifiadb);
     FS_REGISTER_KEY( "app_install_en", cb_kv_app_install);
     FS_REGISTER_KEY( "reboot_recovery", cb_kv_reboot_recovery);
     FS_REGISTER_KEY( "lidbg_origin_system", cb_kv_lidbg_origin_system);

@@ -20,7 +20,7 @@ bool is_safety_apk(char *apkname)
 }
 
 /*	0:show wakelock		1:kill has lock apk		2:save has lock apk package*/
-void userspace_wakelock_action(int action_enum)
+void userspace_wakelock_action(int action_enum, char *file_path)
 {
     int index = 0;
     char *p1 = NULL, *p2 = NULL, *kill = NULL;
@@ -55,8 +55,8 @@ void userspace_wakelock_action(int action_enum)
                 }
                 break;
                 case 2:
-                    if ( pos->is_count_wakelock)
-                        fs_string2file(PM_FILE_INFO_SIZE, PM_FILE_INFO, "[J]%d,[%s,%s]>\n", index, pos->name, pos->package_name);
+                    if (file_path && pos->is_count_wakelock)
+                        fs_string2file(PM_FILE_INFO_SIZE, file_path, "[J]%d,[%s,%s]>\n", index, pos->name, pos->package_name);
                     break;
 
                 default:
@@ -121,7 +121,7 @@ int kernel_wakelock_force_unlock(char *info)
     return 1;
 }
 
-int kernel_wakelock_save_wakelock(char *info)
+int kernel_wakelock_save_wakelock(char *info, char *path)
 {
     struct wakeup_source *ws;
     int list_count = 0;
@@ -137,7 +137,7 @@ int kernel_wakelock_save_wakelock(char *info)
         if (ws->active)
         {
             rcu_read_unlock();
-            fs_string2file(PM_FILE_INFO_SIZE, PM_FILE_INFO, "%s[K].%d:%s\n", info, list_count, ws->name);
+            fs_string2file(PM_FILE_INFO_SIZE, path, "%s[K].%d:%s\n", info, list_count, ws->name);
             list_count++;
             rcu_read_lock();
         }
@@ -370,24 +370,25 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
             {
             case 0:
                 kernel_wakelock_print("test:");
-                userspace_wakelock_action(0);
+                userspace_wakelock_action(0, NULL);
                 break;
             case 1:
                 kernel_wakelock_force_unlock("test:");
-                userspace_wakelock_action(1);
+                userspace_wakelock_action(1, NULL);
                 break;
             case 2:
                 kernel_wakelock_print("test:");
-                userspace_wakelock_action(1);
+                userspace_wakelock_action(1, NULL);
                 break;
             case 3:
-                kernel_wakelock_save_wakelock("test:");
-                userspace_wakelock_action(2);
+                fs_clear_file(LIDBG_OSD_DIR"pm_info.txt");
+                kernel_wakelock_save_wakelock("test:", LIDBG_OSD_DIR"pm_info.txt");
+                userspace_wakelock_action(2, LIDBG_OSD_DIR"pm_info.txt");
                 break;
             case 4:
                 if(cmd[3] && kernel_wakelock_find_wakelock(cmd[3]) != NULL)
                     PM_WARN("<find:%s>\n", cmd[3]);
-                userspace_wakelock_action(0);
+                userspace_wakelock_action(0, NULL);
                 break;
 
             default:
@@ -405,8 +406,23 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         }
         else  if(!strcmp(cmd[1], "reb"))
         {
+            int  ws_action_type = simple_strtoul(cmd[2], 0, 0);
             msleep(100);
-            lidbg_reboot();
+            /*	0:normal reboot		1:reboot recovery		2:reboot bootloader	*/
+            switch (ws_action_type)
+            {
+            case 0:
+                lidbg_shell_cmd("reboot");
+                break;
+            case 1:
+                lidbg_shell_cmd("reboot recovery");
+                break;
+            case 2:
+                lidbg_shell_cmd("reboot bootloader");
+                break;
+            default:
+                break;
+            }
         }
         else  if(!strcmp(cmd[1], "apk"))
         {
@@ -512,7 +528,7 @@ static int thread_observer(void *data)
         if( !wait_for_completion_interruptible(&sleep_observer_wait))
         {
             kernel_wakelock_print("start:");
-            userspace_wakelock_action(0);
+            userspace_wakelock_action(0, NULL);
             while((atomic_read(&is_in_sleep) == 1))
             {
                 ssleep(1);
@@ -523,9 +539,9 @@ static int thread_observer(void *data)
                 {
                 case 60:
                     sprintf(when, "unlock:%d:", sleep_counter);
-                    kernel_wakelock_save_wakelock(when);
+                    kernel_wakelock_save_wakelock(when, PM_FILE_INFO);
                     kernel_wakelock_force_unlock(when);
-                    userspace_wakelock_action(2);
+                    userspace_wakelock_action(2, PM_FILE_INFO);
                     break;
 
                 default:
@@ -533,7 +549,7 @@ static int thread_observer(void *data)
                     {
                         sprintf(when, "start%d:", have_triggerd_sleep_S);
                         kernel_wakelock_print(when);
-                        userspace_wakelock_action(0);
+                        userspace_wakelock_action(0, NULL);
                     }
                     break;
                 }

@@ -9,7 +9,7 @@ char g_binpath[50];
 void lidbg_shell_cmd(char *shell_cmd)
 {
 #ifndef USE_CALL_USERHELPER
-	lidbg_uevent_shell(shell_cmd);
+    lidbg_uevent_shell(shell_cmd);
 #endif
 }
 bool is_file_exist(char *file)
@@ -200,7 +200,7 @@ u32 get_tick_count(void)
     return t_now.tv_sec * 1000 + t_now.tv_nsec / 1000000;
 }
 
-char * lidbg_get_current_time(char *time_string, struct rtc_time *ptm)
+char *lidbg_get_current_time(char *time_string, struct rtc_time *ptm)
 {
     struct timespec ts;
     struct rtc_time tm;
@@ -391,6 +391,8 @@ void callback_pm_install(char *dirname, char *filename)
 }
 int  lidbg_pm_install_dir(char apkpath_or_apkdirpath[])
 {
+    if(!apkpath_or_apkdirpath)
+        return 0;
     if(strstr(apkpath_or_apkdirpath, "apk") == NULL)
         lidbg_readdir_and_dealfile(apkpath_or_apkdirpath, callback_pm_install);
     else

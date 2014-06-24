@@ -1,9 +1,30 @@
 
+bool set_wifi_adb_mode(bool on)
+{
+    LIDBG_WARN("<%d>\n", on);
+    if(on)
+        lidbg_setprop("service.adb.tcp.port", "5555");
+    else
+        lidbg_setprop("service.adb.tcp.port", "-1");
+    lidbg_stop("adbd");
+    lidbg_start("adbd");
+    return true;
+}
 static bool encode = false;
 int thread_dump_log(void *data)
 {
+#ifdef SOC_msm8x25
     msleep(7000);
-    fs_cp_data_to_udisk(encode);
+    fs_cp_data_to_udisk(true);
+#else
+    char shell_cmd[128] = {0}, tbuff[128] = {0};
+    lidbg_get_current_time(tbuff, NULL);
+    sprintf(shell_cmd, "mkdir "USB_MOUNT_POINT"/ID-%d-%s", get_machine_id() , tbuff);
+    lidbg_shell_cmd(shell_cmd);
+    sprintf(shell_cmd, "cp -rf "LIDBG_LOG_DIR"* "USB_MOUNT_POINT"/ID-%d-%s", get_machine_id() , tbuff);
+    lidbg_shell_cmd(shell_cmd);
+    ssleep(2);
+#endif
     lidbg_domineering_ack();
     return 0;
 }
@@ -68,6 +89,7 @@ void parse_cmd(char *pt)
         {
             //*#*#158999#*#*
             lidbg_chmod("/data");
+            fs_mem_log("*158#999--call apk\n");
             fs_mem_log("*158#001--LOG_LOGCAT\n");
             fs_mem_log("*158#002--LOG_DMESG\n");
             fs_mem_log("*158#003--LOG_CLEAR_LOGCAT_KMSG\n");
@@ -78,9 +100,16 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#013--dump log and copy to udisk\n");
             fs_mem_log("*158#014--origin system\n");
             fs_mem_log("*158#015--flyaudio system\n");
+            fs_mem_log("*158#016--enable wifi adb\n");
+            fs_mem_log("*158#017--disable wifi adb\n");
         }
 
-        if (!strcmp(argv[1], "*158#001"))
+        if (!strcmp(argv[1], "*158#999"))
+        {
+            char buff[50] = {0};
+            lidbg_pm_install_dir(get_lidbg_file_path(buff, "fileserver.apk"));
+        }
+        else if (!strcmp(argv[1], "*158#001"))
         {
             lidbg_chmod("/data");
 
@@ -162,6 +191,11 @@ void parse_cmd(char *pt)
             lidbg_system_switch(true);
         else if (!strcmp(argv[1], "*158#015"))
             lidbg_system_switch(false);
+        else if (!strcmp(argv[1], "*158#016"))
+            set_wifi_adb_mode(true);
+        else if (!strcmp(argv[1], "*158#017"))
+            set_wifi_adb_mode(false);
+
         else if (!strcmp(argv[1], "*168#001"))
         {
             encode = true;
