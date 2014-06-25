@@ -214,9 +214,9 @@ static int dsi83_fb_notifier_callback(struct notifier_block *self,
 		blank = evdata->data;
 		
 		if (*blank == FB_BLANK_UNBLANK)
-			;//dsi83_resume();
+			dsi83_resume();
 		else if (*blank == FB_BLANK_POWERDOWN)
-			;//dsi83_suspend();
+			dsi83_suspend();
 	}
 
 	return 0;
@@ -311,13 +311,13 @@ static int dsi83_remove(struct platform_device *pdev)
 static int dsi83_ops_suspend(struct device *dev)
 {
     DUMP_FUN;
-    dsi83_suspend();
+    //dsi83_suspend();
     return 0;
 }
 static int dsi83_ops_resume(struct device *dev)
 {
     DUMP_FUN;
-    dsi83_resume();
+    //dsi83_resume();
     return 0;
 }
 static struct dev_pm_ops dsi83_ops =
