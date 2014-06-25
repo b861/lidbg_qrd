@@ -209,7 +209,7 @@ int misc_init(void *data)
     LIDBG_WARN("<==IN==>\n");
 
     system_switch_init();
-	
+
     te_regist_password("001101", cb_password_upload);
     te_regist_password("001110", cb_password_clean_all);
     te_regist_password("001111", cb_password_chmod);
@@ -254,7 +254,7 @@ int misc_init(void *data)
 static int __init lidbg_misc_init(void)
 {
     DUMP_FUN;
-	LIDBG_GET;
+    LIDBG_GET;
     CREATE_KTHREAD(misc_init, NULL);
     return 0;
 }
