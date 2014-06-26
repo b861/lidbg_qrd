@@ -75,11 +75,6 @@ static inline int write_node(char *filename, char *wbuff)
 #define NOTIFIER_MINOR_BOOT_COMPLETE  (5)
 
 
-#define PM_WARN(fmt, args...) do{printk(KERN_CRIT"[ftf_pm]warn.%s: " fmt,__func__,##args);}while(0)
-#define PM_ERR(fmt, args...) do{printk(KERN_CRIT"[ftf_pm]err.%s: " fmt,__func__,##args);}while(0)
-#define PM_SUC(fmt, args...) do{printk(KERN_CRIT"[ftf_pm]suceed.%s: " fmt,__func__,##args);}while(0)
-#define PM_SLEEP_DBG(fmt, args...) do{printk(KERN_CRIT"[ftf_pm]sleep_step: ++++++++++++++" fmt,##args);}while(0)
-#define PM_WAKE_DBG(fmt, args...) do{printk(KERN_CRIT"[ftf_pm]wake_step: ===" fmt,##args);}while(0)
 typedef enum
 {
     LTL_TRANSFER_RTC = 1,
@@ -111,7 +106,20 @@ typedef enum
 #define NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE (110)
 #define NOTIFIER_MINOR_ACC_ON (0)
 #define NOTIFIER_MINOR_ACC_OFF (1)
+
+#define PM_WARN(fmt, args...) do{lidbg("[ftf_pm]warn.%s: " fmt,__func__,##args);}while(0)
+#define PM_ERR(fmt, args...) do{lidbgerr("[ftf_pm]err.%s: " fmt,__func__,##args);}while(0)
+#define PM_SUC(fmt, args...) do{lidbg("[ftf_pm]suceed.%s: " fmt,__func__,##args);}while(0)
+#define PM_SLEEP_DBG(fmt, args...) do{lidbg("[ftf_pm]sleep_step: ++++++++++++++" fmt,##args);}while(0)
+#define PM_WAKE_DBG(fmt, args...) do{lidbg("[ftf_pm]wake_step: ===" fmt,##args);}while(0)
+
 #else
+#define PM_WARN(fmt, args...) do{printk(KERN_CRIT"[ftf_pm]warn.%s: " fmt,__func__,##args);}while(0)
+#define PM_ERR(fmt, args...) do{printk(KERN_CRIT"[ftf_pm]err.%s: " fmt,__func__,##args);}while(0)
+#define PM_SUC(fmt, args...) do{printk(KERN_CRIT"[ftf_pm]suceed.%s: " fmt,__func__,##args);}while(0)
+#define PM_SLEEP_DBG(fmt, args...) do{printk(KERN_CRIT"[ftf_pm]sleep_step: ++++++++++++++" fmt,##args);}while(0)
+#define PM_WAKE_DBG(fmt, args...) do{printk(KERN_CRIT"[ftf_pm]wake_step: ===" fmt,##args);}while(0)
+
 #define NOTIFIER_VALUE(major,minor)  (((major)&0xffff)<<16 | ((minor)&0xffff))
 
 #define BEGIN_KMEM do{old_fs = get_fs();set_fs(get_ds());}while(0)

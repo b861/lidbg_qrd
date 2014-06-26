@@ -115,8 +115,6 @@ enum
 #define USB_MOUNT_POINT  "/storage/udisk"
 
 
-#define TRACE_MSG_DISABLE
-
 struct io_config
 {
     __u32 index;
