@@ -44,6 +44,15 @@ int thread_thermal(void *data)
     cur_frq = FREQ_STEP0;
     temp_init();
 
+	if(g_var.recovery_mode == 1)
+	{
+		while(1)
+		{
+			lidbg_readwrite_file(FREQ_MAX_NODE, NULL, FREQ_RECOVERY_STRING, sizeof(FREQ_RECOVERY_STRING) - 1);
+			ssleep(10);
+		}
+	}
+
     while(is_cpu_temp_enabled)
     {
         lidbg("set max freq to: disabled\n");

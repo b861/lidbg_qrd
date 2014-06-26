@@ -150,6 +150,9 @@ struct thermal_ctrl thermal_ctrl[] =
 #define FREQ_STEP3_STRING   ("300000")
 
 
+#define FREQ_RECOVERY_STRING   ("600000")
+
+
 #define CPU_TEMP_PATH 		"/sys/class/thermal/thermal_zone5/temp"
 #define TEMP_FREQ_TEST_STR	 "300000,384000,600000,787200,998400,1094400,1190400,1305600,1344000,1401600"
 
