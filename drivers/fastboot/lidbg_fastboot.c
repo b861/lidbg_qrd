@@ -149,37 +149,6 @@ static void list_active_locks(void)
 #endif
 }
 
-
-void set_cpu_governor(int state)
-{
-    char buf[16];
-    int len = -1;
-    lidbg("set_cpu_governor:%d\n", state);
-
-#if 0
-    {
-        lidbg("do nothing\n");
-        return;
-    }
-#endif
-
-    if(state == 0)
-    {
-        len = sprintf(buf, "%s", "ondemand");
-    }
-    else if(state == 1)
-    {
-        len = sprintf(buf, "%s", "performance");
-
-    }
-    else if(state == 2)
-    {
-        len = sprintf(buf, "%s", "powersave");
-
-    }
-    lidbg_readwrite_file("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor", NULL, buf, len);
-}
-
 void wakelock_stat(bool lock, const char *name)
 {
 #if 0

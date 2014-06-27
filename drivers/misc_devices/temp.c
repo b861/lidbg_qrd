@@ -50,6 +50,7 @@ int thread_thermal(void *data)
 		while(1)
 		{
 			lidbg_readwrite_file(FREQ_MAX_NODE, NULL, FREQ_RECOVERY_STRING, sizeof(FREQ_RECOVERY_STRING) - 1);
+			set_cpu_governor(0);
 			ssleep(5);
 			cpu_freq = SOC_Get_CpuFreq();
 			lidbg("cpufreq=%d\n", cpu_freq);

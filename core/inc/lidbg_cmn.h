@@ -47,6 +47,8 @@ void lidbg_enable_kmsg(void);
 void lidbg_shell_cmd(char *shell_cmd);
 char *get_bin_path( char *buf);
 char *get_lidbg_file_path(char *buff, char *filename);
+void set_cpu_governor(int state);
+
 #define MOUNT_PATH get_bin_path("mount")
 #define INSMOD_PATH get_bin_path("insmod")
 #define CHMOD_PATH  get_bin_path("chmod")

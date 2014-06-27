@@ -177,7 +177,7 @@ void ts_data_report(touch_type t,int id,int x,int y,int w)
 		}
 	}
 	
-	if((id == 4) && (t == TOUCH_DOWN) && (!g_var.is_fly)) // 5 fingers
+	if((id == 4) && (t == TOUCH_DOWN) && (!g_var.is_fly) && (!g_var.recovery_mode)) // 5 fingers
 	{
 		SOC_Key_Report(KEY_BACK,KEY_PRESSED_RELEASED);
 	}
@@ -191,7 +191,7 @@ void ts_data_report(touch_type t,int id,int x,int y,int w)
 			touch.press = 1;
 		touch.x = x;
 		touch.y = y;
-		SOC_Set_Touch_Pos(&touch);
+		//SOC_Set_Touch_Pos(&touch);  //not ready
 	}
 }
 

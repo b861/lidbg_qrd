@@ -130,6 +130,38 @@ void set_power_state(int state)
         lidbg_readwrite_file("/sys/power/state", NULL, "on", sizeof("on") - 1);
 }
 
+
+void set_cpu_governor(int state)
+{
+    char buf[16];
+    int len = -1;
+    lidbg("set_cpu_governor:%d\n", state);
+
+#if 0
+    {
+        lidbg("do nothing\n");
+        return;
+    }
+#endif
+
+    if(state == 0)
+    {
+        len = sprintf(buf, "%s", "ondemand");
+    }
+    else if(state == 1)
+    {
+        len = sprintf(buf, "%s", "performance");
+
+    }
+    else if(state == 2)
+    {
+        len = sprintf(buf, "%s", "powersave");
+
+    }
+    lidbg_readwrite_file("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor", NULL, buf, len);
+}
+
+
 int read_proc(char *buf, char **start, off_t offset, int count, int *eof, void *data )
 {
     int len = 0;
@@ -662,4 +694,5 @@ EXPORT_SYMBOL(set_power_state);
 EXPORT_SYMBOL(get_bin_path);
 EXPORT_SYMBOL(get_lidbg_file_path);
 EXPORT_SYMBOL(lidbg_shell_cmd);
+EXPORT_SYMBOL(set_cpu_governor);
 
