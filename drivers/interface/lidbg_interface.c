@@ -174,6 +174,18 @@ void iSOC_System_Status(FLY_SYSTEM_STATUS status)
     //lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, g_var.system_status));
 }
 
+int iSOC_Get_CpuFreq(void)
+{
+    char buf[16];
+    int cpu_freq;
+    lidbg_readwrite_file("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_cur_freq", buf, NULL, 16);
+    cpu_freq = simple_strtoul(buf, 0, 0);
+    g_var.cpu_freq = cpu_freq;
+
+    return cpu_freq;
+}
+
+
 static void set_func_tbl(void)
 {
     //io
@@ -219,6 +231,9 @@ static void set_func_tbl(void)
  //   plidbg_dev->soc_func_tbl.pfnSOC_Get_Share_Mem = iSOC_Get_Share_Mem;
     plidbg_dev->soc_func_tbl.pfnSOC_System_Status = iSOC_System_Status;
     plidbg_dev->soc_func_tbl.pfnSOC_WakeLock_Stat  = lidbg_wakelock_register;
+    plidbg_dev->soc_func_tbl.pfnSOC_Get_CpuFreq  = iSOC_Get_CpuFreq;
+
+	
 
 }
 
