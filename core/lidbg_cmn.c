@@ -136,14 +136,6 @@ void set_cpu_governor(int state)
     char buf[16];
     int len = -1;
     lidbg("set_cpu_governor:%d\n", state);
-
-#if 0
-    {
-        lidbg("do nothing\n");
-        return;
-    }
-#endif
-
     if(state == 0)
     {
         len = sprintf(buf, "%s", "ondemand");

@@ -53,7 +53,8 @@ int thread_thermal(void *data)
 			set_cpu_governor(0);
 			ssleep(5);
 			cpu_freq = SOC_Get_CpuFreq();
-			lidbg("cpufreq=%d\n", cpu_freq);
+			cur_temp = soc_temp_get();
+			lidbg("cpufreq=%d,temp=%d\n", cpu_freq,cur_temp);
 		}
 	}
 
