@@ -137,7 +137,7 @@ struct thermal_ctrl thermal_ctrl[] =
 #define FREQ_STEP0     		(1401600)
 #define FREQ_STEP0_STRING   ("1401600")
 
-#define THRESHOLDS_STEP1    (90)
+#define THRESHOLDS_STEP1    (85)
 #define FREQ_STEP1   	 	(1094400)
 #define FREQ_STEP1_STRING   ("1094400")
 
