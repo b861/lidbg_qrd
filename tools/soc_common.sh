@@ -14,6 +14,8 @@ function soc_build_kernel()
 {
 	echo $FUNCNAME
 	cd $DBG_SYSTEM_DIR
+	mkdir $DBG_SYSTEM_DIR/kernel/drivers/flyaudio/
+	cp -ru $DBG_DRIVERS_PATH/build_in/*	        $DBG_SYSTEM_DIR/kernel/drivers/flyaudio/
 	if [[ $TARGET_PRODUCT = "" ]];then
 		source build/envsetup.sh&&choosecombo release $DBG_PLATFORM $SYSTEM_BUILD_TYPE
 	fi
