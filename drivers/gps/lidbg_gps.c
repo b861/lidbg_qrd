@@ -8,6 +8,8 @@ LIDBG_DEFINE;
 #define GPS_START	_IO('g', 1)
 #define GPS_STOP	_IO('g', 2)
 
+#define FLY_GPS_SO  "gps.msm8226.so"
+
 struct gps_device
 {
     char *name;
@@ -356,6 +358,8 @@ static int  gps_probe(struct platform_device *pdev)
     dev_t dev_number = MKDEV(major_number, 0);
 
     DUMP_FUN;
+ 
+        lidbg_shell_cmd("mount -o remount /system");
 	
     if(g_var.recovery_mode)
     {
@@ -365,10 +369,17 @@ static int  gps_probe(struct platform_device *pdev)
 
     if(is_ublox_exist() < 0)
     {
+	lidbg_shell_cmd("rm /flysystem/lib/out/"FLY_GPS_SO);
+	lidbg_shell_cmd("rm /system/lib/modules/out/"FLY_GPS_SO);
+	lidbg_shell_cmd("mv /flysystem/lib/hw/"FLY_GPS_SO"  /flysystem/lib/hw/gps.msm8226.bak");
+
         lidbg("[ublox]ublox.miss\n\n");
     }
     else
     {
+
+	lidbg_shell_cmd("mv /flysystem/lib/hw/gps.msm8226.bak  /flysystem/lib/hw/"FLY_GPS_SO);
+	
         lidbg("[ublox]ublox.exist\n\n");
         fs_mem_log("ublox_exist=true\n");
 
@@ -494,7 +505,6 @@ static  int gps_server_init(void)
     lidbg(" \n[ublox] ==IN==gps_server_driver_init==\n");
 
     LIDBG_GET;
-
     platform_device_register(&lidbg_gps_device);
 
     return platform_driver_register(&gps_driver);
