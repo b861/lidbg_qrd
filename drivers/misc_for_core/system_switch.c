@@ -75,7 +75,7 @@ void system_switch_init(void)
 {
     lidbg_shell_cmd("mkdir  "ORIGIN_APP_PATH);
     lidbg_shell_cmd("mkdir  "ORIGIN_TMP_PATH);
-    if(g_var.is_fly)
+    if((g_var.is_fly)&&(!g_var.recovery_mode))
     {
         if(!fs_is_file_exist(ORIGIN_APP_PATH"SystemUI.apk"))
         {
