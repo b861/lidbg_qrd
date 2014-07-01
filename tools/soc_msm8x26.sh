@@ -1,3 +1,19 @@
+
+function soc_build_release()
+{
+	echo $FUNCNAME
+	cd $RELEASE_REPOSITORY
+	expect $DBG_TOOLS_PATH/pull
+	cd $DBG_SYSTEM_DIR
+	expect $DBG_TOOLS_PATH/pull
+	cp -r $RELEASE_REPOSITORY/driver/out $DBG_SYSTEM_DIR/out/target/product/msm8226/system/lib/modules/
+	cp $RELEASE_REPOSITORY/driver/out/vold $DBG_SYSTEM_DIR/out/target/product/msm8226/system/bin/
+	cp $RELEASE_REPOSITORY/app/FastBoot.apk $DBG_SYSTEM_DIR/out/target/product/msm8226/system/app/
+	cp $RELEASE_REPOSITORY/app/FlyBootService.apk $DBG_SYSTEM_DIR/out/target/product/msm8226/system/app/
+	cp $RELEASE_REPOSITORY/driver/out/lidbg_load $DBG_SYSTEM_DIR/out/target/product/msm8226/system/bin/
+	soc_build_all 
+}
+
 function soc_make_otapackage()
 {
 	echo $FUNCNAME

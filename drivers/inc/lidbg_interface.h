@@ -46,6 +46,8 @@
 #include <linux/input.h>
 #include <linux/wakelock.h>
 #include <linux/vmalloc.h>
+#include <linux/cpufreq.h>
+
 #endif
 
 static inline int write_node(char *filename, char *wbuff)
@@ -128,6 +130,13 @@ typedef enum
 #define KEY_RELEASED    (0)
 #define KEY_PRESSED      (1)
 #define KEY_PRESSED_RELEASED   ( 2)
+struct tspara
+{
+    int x;
+    int y;
+    int press;
+} ;
+
 
 typedef irqreturn_t (*pinterrupt_isr)(int irq, void *dev_id);
 

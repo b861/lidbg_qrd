@@ -157,6 +157,9 @@ struct thermal_ctrl thermal_ctrl[] =
 #define TEMP_FREQ_TEST_STR	 "300000,384000,600000,787200,998400,1094400,1190400,1305600,1344000,1401600"
 
 
+#define FLY_GPS_SO  "gps.msm8226.so"
+
+
 #endif
 
 

@@ -1,6 +1,7 @@
 #ifndef _LIGDBG_CMN__
 #define _LIGDBG_CMN__
 
+#include "cmn_func.h"
 #define NOTIFIER_MAJOR_SIGNAL_EVENT (0)
 #define NOTIFIER_MINOR_SIGNAL_BAKLIGHT_ACK (0)
 
@@ -35,7 +36,6 @@ void mod_cmn_main(int argc, char **argv);
 u32 lidbg_get_ns_count(void);
 u32 get_tick_count(void);
 int  lidbg_launch_user( char bin_path[], char argv1[], char argv2[], char argv3[], char argv4[], char argv5[], char argv6[]);
-int lidbg_readwrite_file(const char *filename, char *rbuf, const char *wbuf, size_t length);
 int lidbg_task_kill_select(char *task_name);
 char * lidbg_get_current_time(char *time_string, struct rtc_time *ptm);
 bool lidbg_new_cdev(struct file_operations *cdev_fops, char *nodename);
