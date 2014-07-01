@@ -102,6 +102,7 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#015--flyaudio system\n");
             fs_mem_log("*158#016--enable wifi adb\n");
             fs_mem_log("*158#017--disable wifi adb\n");
+            fs_mem_log("*158#018--origin gps\n");
         }
 
         if (!strcmp(argv[1], "*158#999"))
@@ -195,6 +196,15 @@ void parse_cmd(char *pt)
             set_wifi_adb_mode(true);
         else if (!strcmp(argv[1], "*158#017"))
             set_wifi_adb_mode(false);
+        else if (!strcmp(argv[1], "*158#018"))
+        {
+			lidbg_shell_cmd("rm /flysystem/lib/out/"FLY_GPS_SO);
+			lidbg_shell_cmd("rm /system/lib/modules/out/"FLY_GPS_SO);
+			lidbg_shell_cmd("rm /flysystem/lib/hw/"FLY_GPS_SO);
+		    lidbg_domineering_ack();
+			msleep(3000);
+			lidbg_reboot();
+		}
 
         else if (!strcmp(argv[1], "*168#001"))
         {
