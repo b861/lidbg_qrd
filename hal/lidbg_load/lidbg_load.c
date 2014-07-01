@@ -6,16 +6,25 @@ int main(int argc, char **argv)
     pthread_t lidbg_uevent_tid;
     int checkout = 0; //checkout=1 origin ; checkout=2 flyaudio
     DUMP_BUILD_TIME_FILE;
-    ALOGE("lidbg_iserver: iserver start\n");
+    SLOGI("lidbg_iserver: iserver start\n");
+
+    while(access("/flysystem/lib", F_OK) != 0)
+    {
+		static int cnt = 0;
+		sleep(1);
+		if(++cnt>=20)
+			break;
+	}
+
     if(access("/flysystem/lib/out/lidbg_loader.ko", F_OK) == 0)
     {
         checkout = 2;
-        ALOGE("lidbg_iserver: this is flyaudio system\n");
+        SLOGI("lidbg_iserver: this is flyaudio system\n");
     }
     else
     {
         checkout = 1;
-        ALOGE("lidbg_iserver: this is origin system\n");
+        SLOGI("lidbg_iserver: this is origin system\n");
     }
 
     system("mkdir /data/lidbg");
@@ -32,12 +41,12 @@ int main(int argc, char **argv)
             if(access("/system/lib/modules/out/lidbg_userver", X_OK) == 0)
             {
                 system("/system/lib/modules/out/lidbg_userver &");
-                ALOGE("lidbg_iserver: origin iserver start\n");
+                SLOGI("lidbg_iserver: origin iserver start\n");
                 break;
             }
             system("chmod 777 /system/lib/modules/out/lidbg_userver");
             system("chmod 777 /system/lib/modules/out/*");
-            ALOGE("lidbg_iserver: origin iserver loop\n");
+            SLOGI("lidbg_iserver: origin iserver loop\n");
             sleep(1);
         }
         system("insmod /system/lib/modules/out/lidbg_loader.ko");
@@ -50,12 +59,12 @@ int main(int argc, char **argv)
             if(access("/flysystem/lib/out/lidbg_userver", X_OK) == 0)
             {
                 system("/flysystem/lib/out/lidbg_userver &");
-                ALOGE("lidbg_iserver: flyaudio iserver start\n");
+                SLOGI("lidbg_iserver: flyaudio iserver start\n");
                 break;
             }
             system("chmod 777 /flysystem/lib/out/lidbg_userver");
             system("chmod 777 /flysystem/lib/out/*");
-            ALOGE("lidbg_iserver: flyaudio iserver loop\n");
+            SLOGI("lidbg_iserver: flyaudio iserver loop\n");
             sleep(1);
         }
         system("insmod /flysystem/lib/out/lidbg_loader.ko");
