@@ -15,7 +15,7 @@ int main(int argc, char **argv)
 		if(++cnt>=20)
 			break;
 	}
-
+	sleep(5);
     if(access("/flysystem/lib/out/lidbg_loader.ko", F_OK) == 0)
     {
         checkout = 2;
