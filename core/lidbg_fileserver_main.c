@@ -82,12 +82,13 @@ void copy_all_conf_file(void)
     fs_copy_file(get_lidbg_file_path(buff, "build_time.conf"), LIDBG_LOG_DIR"build_time.txt");
     fs_copy_file(get_lidbg_file_path(buff, "core.conf"), PATH_CORE_CONF);
     fs_copy_file(get_lidbg_file_path(buff, "drivers.conf"), PATH_DRIVERS_CONF) ;
+    fs_copy_file(get_lidbg_file_path(buff, "machine_info.conf"), PATH_MACHINE_INFO_FILE) ;
     fs_copy_file(get_lidbg_file_path(buff, "state.conf"), PATH_STATE_CONF);
     fs_copy_file(get_lidbg_file_path(buff, "cmd.conf"), PATH_CMD_CONF);
 }
 void check_conf_file(void)
 {
-    int size[6];
+    int size[10];
     char buff[50] = {0};
 
     size[0] = fs_is_file_updated(get_lidbg_file_path(buff, "build_time.conf"), PATH_PRE_CONF_INFO_FILE);
@@ -95,11 +96,12 @@ void check_conf_file(void)
     size[2] = fs_get_file_size(PATH_CORE_CONF);
     size[3] = fs_get_file_size(PATH_STATE_CONF);
     size[4] = fs_get_file_size(PATH_PRE_CONF_INFO_FILE);
+    size[5] = fs_get_file_size(PATH_MACHINE_INFO_FILE);
 
-    fs_mem_log("<check_conf_file:%d,%d,%d,%d,%d>\n", size[0], size[1], size[2], size[3], size[4]);
-    FS_ALWAYS("<check_conf_file:%d,%d,%d,%d,%d>\n", size[0], size[1], size[2], size[3], size[4]);
+    fs_mem_log("<check_conf_file:%d,%d,%d,%d,%d,%d>\n", size[0], size[1], size[2], size[3], size[4], size[5]);
+    FS_ALWAYS("<check_conf_file:%d,%d,%d,%d,%d,%d>\n", size[0], size[1], size[2], size[3], size[4], size[5]);
 
-    if(size[0] || size[1] < 1 || size[2] < 1 || size[3] < 1 || size[4] < 1)
+    if(size[0] || size[1] < 1 || size[2] < 1 || size[3] < 1 || size[4] < 1 || size[5] < 1)
     {
         FS_ALWAYS( "<overwrite:push,update?>\n");
         fs_mem_log( "<overwrite:push,update?>\n");
@@ -141,6 +143,7 @@ void lidbg_fileserver_main_prepare(void)
 
     fs_fill_list(PATH_CORE_CONF, FS_CMD_FILE_CONFIGMODE, &lidbg_core_list);
     fs_fill_list(PATH_DRIVERS_CONF, FS_CMD_FILE_CONFIGMODE, &lidbg_drivers_list);
+    fs_fill_list(PATH_MACHINE_INFO_FILE, FS_CMD_FILE_CONFIGMODE, &lidbg_machine_info_list);
     fs_fill_list(PATH_STATE_CONF, FS_CMD_FILE_CONFIGMODE, &fs_state_list);
 
     fs_copy_file(get_lidbg_file_path(buff, "build_time.conf"), LIDBG_MEM_DIR"build_time.txt");

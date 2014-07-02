@@ -2,6 +2,7 @@
 #define _LIGDBG_FILESERVER__
 
 #define __LOG_BUF_LEN	(1 << CONFIG_LOG_BUF_SHIFT)
+#define PATH_MACHINE_INFO_FILE LIDBG_LOG_DIR"machine_info.conf"
 
 //zone start
 enum string_dev_cmd
@@ -82,6 +83,7 @@ extern int fs_slient_level;
 extern struct list_head lidbg_drivers_list;
 extern struct list_head lidbg_core_list;
 extern struct list_head fs_filename_list;
+extern struct list_head lidbg_machine_info_list;
 
 #define printk_fs(msg...)  do { lidbg(  "lidbg_fs: " msg); }while(0)
 
@@ -102,12 +104,14 @@ extern struct list_head fs_filename_list;
 								}while(0)
 
 #define FS_REGISTER_INT(intvalue,key,def_value,callback) intvalue=def_value; \
-			if(fs_get_intvalue(&lidbg_drivers_list, key,&intvalue,callback)<0) \
-				fs_get_intvalue(&lidbg_core_list, key,&intvalue,callback);\
+			if((fs_get_intvalue(&lidbg_drivers_list, key,&intvalue,callback)<0)&&(fs_get_intvalue(&lidbg_core_list, key,&intvalue,callback)<0)) \
+					fs_get_intvalue(&lidbg_machine_info_list, key,&intvalue,callback);\
 			lidbg("config:%s=%d\n",key,intvalue);
+
 #define FS_REGISTER_KEY(key,callback)\
-			if(fs_get_intvalue(&lidbg_drivers_list, key,NULL,callback)<0) \
-				fs_get_intvalue(&lidbg_core_list, key,NULL,callback);
+			if((fs_get_intvalue(&lidbg_drivers_list, key,NULL,callback)<0)&&(fs_get_intvalue(&lidbg_core_list, key,NULL,callback)<0)) \
+					fs_get_intvalue(&lidbg_machine_info_list, key,NULL,callback);
+			
 //zone end
 
 

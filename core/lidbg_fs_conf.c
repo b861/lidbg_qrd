@@ -4,6 +4,7 @@
 //zone below [fs.confops.tools]
 LIST_HEAD(lidbg_drivers_list);
 LIST_HEAD(lidbg_core_list);
+LIST_HEAD(lidbg_machine_info_list);
 LIST_HEAD(fs_state_list);
 static int g_pollfile_ms = 7000;
 static int g_pollstate_ms = 1000;
@@ -11,6 +12,7 @@ static int machine_id = 0;
 struct rtc_time precorefile_tm;
 struct rtc_time predriverfile_tm;
 struct rtc_time precmdfile_tm;
+struct rtc_time pre_machine_info_tm;
 static struct task_struct *fs_statetask;
 static struct task_struct *filepoll_task;
 static struct task_struct *udisk_conf_task;
@@ -117,6 +119,12 @@ static int thread_pollfile_func(void *data)
                 update_list(PATH_DRIVERS_CONF, &lidbg_drivers_list);
             }
 
+            if(is_file_tm_updated(PATH_MACHINE_INFO_FILE, &pre_machine_info_tm))
+            {
+                show_tm(&pre_machine_info_tm);
+                update_list(PATH_MACHINE_INFO_FILE, &lidbg_machine_info_list);
+            }
+
             if(is_file_tm_updated(PATH_CMD_CONF, &precmdfile_tm))
             {
                 show_tm(&precmdfile_tm);
@@ -192,6 +200,7 @@ static int thread_udisk_conf(void *data)
             FS_WARN("start\n");
             update_list(USB_MOUNT_POINT"/conf/core.conf", &lidbg_core_list);
             update_list(USB_MOUNT_POINT"/conf/drivers.conf", &lidbg_drivers_list);
+            update_list(USB_MOUNT_POINT"/conf/machine_info.conf", &lidbg_machine_info_list);
         }
     }
     return 1;
@@ -227,6 +236,7 @@ void lidbg_fs_conf_init(void)
     udisk_conf_task = kthread_run(thread_udisk_conf, NULL, "ftf_fs_uconf");
 }
 
+EXPORT_SYMBOL(lidbg_machine_info_list);
 EXPORT_SYMBOL(lidbg_drivers_list);
 EXPORT_SYMBOL(lidbg_core_list);
 EXPORT_SYMBOL(fs_clean_all);
