@@ -22,7 +22,7 @@ function combination_handle()
 	        depository_pull && depository_copy_lidbg & depository_copy_basesystem && depository_make_package && gitk&;;
 
 	65)
-		soc_build_kernel && adb wait-for-devices reboot bootloader && soc_flash_kernel && fastboot reboot;;
+		soc_build_kernel && adb wait-for-devices reboot bootloader && soc_flash_kernel && sudo fastboot reboot;;
 
 	*)
 		echo

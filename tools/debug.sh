@@ -26,7 +26,7 @@ function debug_handle()
 	55)
 		soc_flash_system;;
 	56)
-		fastboot reboot;;
+		sudo fastboot reboot;;
 	*)
 		echo
 	esac

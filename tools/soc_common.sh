@@ -22,9 +22,9 @@ function soc_flash_kernel()
 {
 	echo $FUNCNAME
 	if [ $DBG_PLATFORM = msm7627a ];then
-		echo $DBG_PLATFORM&&fastboot flash boot $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/2kpagenand_images/boot.2knand.img
+		echo $DBG_PLATFORM&& sudo fastboot flash boot $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/2kpagenand_images/boot.2knand.img
 	else
-		echo $DBG_PLATFORM&&fastboot flash boot $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/boot.img
+		echo $DBG_PLATFORM&& sudo fastboot flash boot $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/boot.img
 	fi
 }
 
@@ -32,9 +32,9 @@ function soc_flash_system()
 {
 	echo $FUNCNAME
 	if [ $DBG_PLATFORM = msm7627a ];then
-		echo $DBG_PLATFORM&&fastboot flash system $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/2kpagenand_images/system.2knand.img
+		echo $DBG_PLATFORM&& sudo fastboot flash system $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/2kpagenand_images/system.2knand.img
 	else
-		echo $DBG_PLATFORM&&fastboot flash system $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system.img
+		echo $DBG_PLATFORM&& sudo fastboot flash system $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system.img
 	fi
 
 }

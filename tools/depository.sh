@@ -41,6 +41,7 @@ function depository_make_package()
 {
 	echo $FUNCNAME
 	cd $RELEASE_REPOSITORY
+	rm -r $RELEASE_REPOSITORY/out/*
 	expect $DBG_TOOLS_PATH/make_package
 	nautilus $RELEASE_REPOSITORY/out
 }
