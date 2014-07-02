@@ -155,6 +155,8 @@ static void lidbg_uevent_poll(bool (*uevent_callback)(int fd))
     if (fd >= 0)
     {
         lidbg( "suc,uevent_open_socket\n");
+        system("echo 1 > /dev/log/userver_ok.txt");
+        system("chmod 777 /dev/log/userver_ok.txt");
         fcntl(fd, F_SETFL, O_NONBLOCK);
         ufd.events = POLLIN;
         ufd.fd = fd;

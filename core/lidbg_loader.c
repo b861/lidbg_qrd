@@ -79,7 +79,7 @@ void lidbg_insmod( char argv1[])
 int thread_check_restart(void *data)
 {
     DUMP_FUN_ENTER;
-    msleep(5000);
+    ssleep(10);
     LIDBG_WARN("load_modules_count=%d\n", load_modules_count);
     if(load_modules_count == 0)
     {
@@ -96,7 +96,11 @@ int thread_loader(void *data)
     char path[128] = {0}, *kopath = NULL;
     int tmp;
     DUMP_FUN_ENTER;
+		
     CREATE_KTHREAD(thread_check_restart, NULL);
+
+    while(!is_file_exist("/dev/log/userver_ok.txt"))
+			ssleep(1);
 
     if(is_file_exist(FLY_MODE_FILE))
         kopath = "/flysystem/lib/out/";

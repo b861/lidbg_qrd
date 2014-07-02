@@ -115,6 +115,7 @@ int main(int argc, char **argv)
 		//ret = module_insmod("/system/lib/modules/out/lidbg_uevent.ko");
 		//if(ret<0){ lidbg("module_insmod fail\n");}
         system("insmod /system/lib/modules/out/lidbg_uevent.ko");
+        system("insmod /system/lib/modules/out/lidbg_loader.ko");
         while(1)
         {
             if(access("/system/lib/modules/out/lidbg_userver", X_OK) == 0)
@@ -130,12 +131,11 @@ int main(int argc, char **argv)
             lidbg("lidbg_iserver: waitting origin lidbg_uevent...\n");
             sleep(1);
         }
-		sleep(2);
-        system("insmod /system/lib/modules/out/lidbg_loader.ko");
     }
     else if(checkout == 2)
     {
         system("insmod /flysystem/lib/out/lidbg_uevent.ko");
+        system("insmod /flysystem/lib/out/lidbg_loader.ko");
         while(1)
         {
             if(access("/flysystem/lib/out/lidbg_userver", X_OK) == 0)
@@ -149,8 +149,6 @@ int main(int argc, char **argv)
             lidbg("lidbg_iserver: waitting flyaudio lidbg_uevent...\n");
             sleep(1);
         }
-		sleep(2);
-        system("insmod /flysystem/lib/out/lidbg_loader.ko");
     }
 
     sleep(1);
