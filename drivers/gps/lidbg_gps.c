@@ -363,7 +363,8 @@ static int  gps_probe(struct platform_device *pdev)
         lidbg("gps_probe do nothing\n");
         return 0;
     }
-
+	
+#ifndef SOC_msm8x25
     if(is_ublox_exist() < 0)
     {
 		lidbg_shell_cmd("rm /flysystem/lib/out/"FLY_GPS_SO);
@@ -379,6 +380,7 @@ static int  gps_probe(struct platform_device *pdev)
         fs_mem_log("ublox_exist=true\n");
 
     }
+#endif
 
     FS_REGISTER_INT(gps_debug_en, "gps_debug_en", 0, NULL);
 

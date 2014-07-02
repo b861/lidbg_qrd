@@ -995,6 +995,13 @@ static int gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
 		}
 	}
 	lidbg("Sensor_ID: %d", sensor_id);
+
+	if(g_var.hw_info.ts_config != 0)
+	{
+		sensor_id = g_var.hw_info.ts_config - 1;
+		lidbg("Sensor_ID change to: %d", sensor_id);
+	}
+	
     lidbg_fs_log(TS_LOG_PATH, "SENSOR ID:%d\n", sensor_id);
 	ts->gtp_cfg_len = cfg_info_len[sensor_id];
 

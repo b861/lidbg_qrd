@@ -6,10 +6,15 @@ LIDBG_DEFINE;
 #define GTP_RST_PORT_ACTIVE (1)
 #define USE_TS_NUM (0)
 
-#if (defined(BOARD_V1) || defined(BOARD_V2) || defined(BOARD_V3))
-#define FLYHAL_CONFIG_PATH "/flydata/flyhalconfig"
+
+#ifdef SOC_msm8x25
+ #if (defined(BOARD_V1) || defined(BOARD_V2) || defined(BOARD_V3))
+  #define FLYHAL_CONFIG_PATH "/flydata/flyhalconfig"
+ #else
+  #define FLYHAL_CONFIG_PATH "/flysystem/flyconfig/default/lidbgconfig/flylidbgconfig.txt"
+ #endif
 #else
-#define FLYHAL_CONFIG_PATH "/flysystem/flyconfig/default/lidbgconfig/flylidbgconfig.txt"
+ #define FLYHAL_CONFIG_PATH "/flysystem/flyconfig/default/lidbgconfig/flylidbgconfig.txt"
 #endif
 
 #define GTP_SWAP SWAP
@@ -20,7 +25,7 @@ LIDBG_DEFINE;
        
 static LIST_HEAD(flyhal_config_list);
 static int ts_scan_delayms;
-static int ts_choose_touchscreen = 0;
+
 int ts_should_revert = -1;
 bool is_ts_load = false;
 
@@ -98,8 +103,8 @@ void parse_ts_info(struct probe_device *ts_info)
 		sprintf(path, "/system/lib/modules/out/%s", ts_info->name);
 		lidbg_insmod( path );
 	}
-    lidbg_fs_log(TS_LOG_PATH, "loadts=%s,USE_TS_NUM:%d,ts_choose_touchscreen:%d,ts_should_revert:%d\n", ts_info->name, USE_TS_NUM, ts_choose_touchscreen, ts_should_revert);
-    fs_mem_log("loadts=%s,USE_TS_NUM:%d,ts_choose_touchscreen:%d,ts_should_revert:%d\n", ts_info->name, USE_TS_NUM, ts_choose_touchscreen, ts_should_revert);
+    lidbg_fs_log(TS_LOG_PATH, "loadts=%s,USE_TS_NUM:%d,g_var.hw_info.ts_type:%d,ts_should_revert:%d\n", ts_info->name, USE_TS_NUM, g_var.hw_info.ts_type, ts_should_revert);
+    fs_mem_log("loadts=%s,USE_TS_NUM:%d,g_var.hw_info.ts_type:%d,ts_should_revert:%d\n", ts_info->name, USE_TS_NUM, g_var.hw_info.ts_type, ts_should_revert);
 
 }
 
@@ -149,7 +154,9 @@ void ts_probe_prepare(void)
     char buff[50] = {0};
     fs_fill_list(FLYHAL_CONFIG_PATH, FS_CMD_FILE_LISTMODE, &flyhal_config_list);
     FS_REGISTER_INT(ts_scan_delayms, "ts_scan_delayms", 500, NULL);
-    FS_REGISTER_INT(ts_choose_touchscreen, "ts_choose_touchscreen", 0, NULL);
+    FS_REGISTER_INT(g_var.hw_info.ts_type, "ts_type", 0, NULL);
+    FS_REGISTER_INT(g_var.hw_info.ts_config, "ts_config", 0, NULL);
+
 
     ts_should_revert = fs_find_string(&flyhal_config_list, "TSMODE_XYREVERT");
     if(ts_should_revert > 0)
@@ -204,7 +211,7 @@ int ts_probe_thread(void *data)
 	
     ts_probe_prepare();
 
-    if (USE_TS_NUM == 0 && ts_choose_touchscreen == 0)
+    if (USE_TS_NUM == 0 && g_var.hw_info.ts_type == 0)
     {
         while(!is_ts_load)
         {
@@ -220,7 +227,7 @@ int ts_probe_thread(void *data)
     else
     {
         LIDBG_WARN("<disable ts scan work>\n");
-        parse_ts_info(&ts_probe_dev[ts_choose_touchscreen > 0 ? ts_choose_touchscreen - 1 : USE_TS_NUM - 1 ]);
+        parse_ts_info(&ts_probe_dev[g_var.hw_info.ts_type > 0 ? g_var.hw_info.ts_type - 1 : USE_TS_NUM - 1 ]);
     }
 
     ssleep(10);

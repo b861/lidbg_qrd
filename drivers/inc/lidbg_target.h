@@ -19,6 +19,8 @@
 #define GTP_RST_PORT    (27)
 #define GTP_INT_PORT    (48)
 
+#define FLY_GPS_SO  "gps.msm8625.so"
+
 #endif
 
 

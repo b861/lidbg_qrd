@@ -492,6 +492,8 @@ int fly_hal_init(void)
     g_var.is_fly = 0;
     g_var.fake_suspend = 0;
     g_var.acc_flag = 1;
+	
+    memset(&g_var.hw_info, 0, sizeof(struct hw_info));
 
     CREATE_KTHREAD(hal_init, NULL);
 

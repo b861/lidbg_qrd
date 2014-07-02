@@ -395,6 +395,14 @@ struct lidbg_fn_t
 
 };
 
+
+struct hw_info
+{
+	int hw_version;
+	int ts_type;
+	int ts_config;
+};
+
 struct lidbg_pvar_t
 {
     //all pointer
@@ -409,6 +417,8 @@ struct lidbg_pvar_t
     bool fake_suspend;
     bool acc_flag;
 	bool recovery_mode;
+	
+	struct hw_info hw_info;
 };
 
 struct lidbg_hal

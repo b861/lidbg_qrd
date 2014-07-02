@@ -75,7 +75,7 @@ extern  bool is_ts_load;
 extern int ts_should_revert;
 static bool xy_revert_en = 1;
 u8 gt911_config_version;
-int gt911_choose_config = 0;
+int ts_config = 0;
 char Firmware_version[2];
 /*******************************************************
 Function:
@@ -786,7 +786,7 @@ static s32 gtp_init_panel(struct goodix_ts_data *ts, char *ic_type,char *Firmwar
               rd_cfg_buf[GTP_ADDR_LENGTH] = 0;
           }
           else*/
-        if(0 == gt911_choose_config)
+        if(0 == ts_config)
         {
             rd_cfg_buf[0] = GTP_REG_SENSOR_ID >> 8;
             rd_cfg_buf[1] = GTP_REG_SENSOR_ID & 0xff;
@@ -817,7 +817,7 @@ static s32 gtp_init_panel(struct goodix_ts_data *ts, char *ic_type,char *Firmwar
         }
         else
         {
-            rd_cfg_buf[GTP_ADDR_LENGTH] = gt911_choose_config-1;
+            rd_cfg_buf[GTP_ADDR_LENGTH] = ts_config-1;
         }
         memset(&config[GTP_ADDR_LENGTH], 0, GTP_CONFIG_MAX_LENGTH);
         memcpy(&config[GTP_ADDR_LENGTH], send_cfg_buf[rd_cfg_buf[GTP_ADDR_LENGTH]], ts->gtp_cfg_len);
@@ -1218,7 +1218,7 @@ void cb_int_ts_choose_config(char *key, char *value )
     {
         GTP_ERROR("GTP init panel failed.");
     }
-    fs_mem_log("%s=%d,%d\n", key, ret, gt911_choose_config);
+    fs_mem_log("%s=%d,%d\n", key, ret, ts_config);
 }
 /*******************************************************
 Function:
@@ -1243,7 +1243,7 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     GTP_INFO("GTP Driver Version:%s", GTP_DRIVER_VERSION);
     GTP_INFO("GTP Driver build@%s,%s", __TIME__, __DATE__);
     GTP_INFO("GTP I2C Address:0x%02x", client->addr);
-    FS_REGISTER_INT(gt911_choose_config, "gt911_choose_config", 0, cb_int_ts_choose_config);
+    FS_REGISTER_INT(ts_config, "ts_config", 0, cb_int_ts_choose_config);
 
     i2c_connect_client = client;
     if (!i2c_check_functionality(client->adapter, I2C_FUNC_I2C))

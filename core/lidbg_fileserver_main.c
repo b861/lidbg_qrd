@@ -82,9 +82,10 @@ void copy_all_conf_file(void)
     fs_copy_file(get_lidbg_file_path(buff, "build_time.conf"), LIDBG_LOG_DIR"build_time.txt");
     fs_copy_file(get_lidbg_file_path(buff, "core.conf"), PATH_CORE_CONF);
     fs_copy_file(get_lidbg_file_path(buff, "drivers.conf"), PATH_DRIVERS_CONF) ;
-    fs_copy_file(get_lidbg_file_path(buff, "machine_info.conf"), PATH_MACHINE_INFO_FILE) ;
     fs_copy_file(get_lidbg_file_path(buff, "state.conf"), PATH_STATE_CONF);
     fs_copy_file(get_lidbg_file_path(buff, "cmd.conf"), PATH_CMD_CONF);
+	
+    fs_copy_file("/persist/machine_info.conf", PATH_MACHINE_INFO_FILE) ;
 }
 void check_conf_file(void)
 {

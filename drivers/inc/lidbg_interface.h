@@ -201,6 +201,14 @@ struct lidbg_fn_t
 
 };
 
+
+struct hw_info
+{
+	int hw_version;
+	int ts_type;
+	int ts_config;
+};
+
 struct lidbg_pvar_t
 {
     int temp;
@@ -214,6 +222,7 @@ struct lidbg_pvar_t
     bool acc_flag;
     struct list_head *ws_lh;
 	bool recovery_mode;
+	struct hw_info hw_info;
 };
 
 struct lidbg_interface

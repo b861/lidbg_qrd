@@ -349,6 +349,8 @@ int fly_interface_init(void)
 		lidbg("=======is origin=====\n");
 	}
 
+    memset(&g_var.hw_info, 0, sizeof(struct hw_info));
+	
     return 0;
 }
 
