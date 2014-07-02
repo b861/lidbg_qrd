@@ -124,13 +124,13 @@ int main(int argc, char **argv)
                 break;
             }
 			system("mount -o remount /system");
-			
             system("chmod 777 /system/lib/modules/out/lidbg_userver");
             system("chmod 777 /system/lib/modules/out/*");
+			system("mount -o remount,ro /system");
             lidbg("lidbg_iserver: waitting origin lidbg_uevent...\n");
             sleep(1);
         }
-		sleep(1);
+		sleep(2);
         system("insmod /system/lib/modules/out/lidbg_loader.ko");
     }
     else if(checkout == 2)
@@ -149,7 +149,7 @@ int main(int argc, char **argv)
             lidbg("lidbg_iserver: waitting flyaudio lidbg_uevent...\n");
             sleep(1);
         }
-		sleep(1);
+		sleep(2);
         system("insmod /flysystem/lib/out/lidbg_loader.ko");
     }
 
