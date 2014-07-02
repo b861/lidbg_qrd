@@ -364,7 +364,6 @@ void fs_save_list_to_file(void)
 {
     save_list_to_file(&lidbg_core_list, PATH_CORE_CONF);
     save_list_to_file(&lidbg_drivers_list, PATH_DRIVERS_CONF);
-    save_list_to_file(&lidbg_machine_info_list, PATH_MACHINE_INFO_FILE);
     fs_copy_file(PATH_STATE_MEM, PATH_STATE_CONF);
     update_file_tm();
 }
