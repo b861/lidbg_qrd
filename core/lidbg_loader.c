@@ -102,7 +102,8 @@ int thread_loader(void *data)
         kopath = "/flysystem/lib/out/";
     else
         kopath = "/system/lib/modules/out/";
-
+	
+	lidbg("thread_loader start\n");
     for(j = 0; insmod_soc_list[j] != NULL; j++)
     {	
         sprintf(path, "%s%s", kopath, insmod_soc_list[j]);

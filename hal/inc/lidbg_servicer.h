@@ -54,9 +54,9 @@
 #define LIDBG_PRINT(msg...) do{\
 	int fd;\
 	char s[LOG_BYTES];\
-	sprintf(s, "lidbg_msg: " msg);\
+	sprintf(s, "hal_msg: " msg);\
 	s[LOG_BYTES - 1] = '\0';\
-	 fd = open("/dev/lidbg_msg", O_RDWR);\
+	 fd = open("/dev/dbg_msg", O_RDWR);\
 	 if((fd == 0)||(fd == (int)0xfffffffe)|| (fd == (int)0xffffffff))break;\
 	 write(fd, s, /*sizeof(msg)*/strlen(s)/*LOG_BYTES*/);\
 	 close(fd);\

@@ -9,7 +9,7 @@ struct uevent_dev
     void (*callback)(char *focus, char *uevent);
 };
 
-#define SHELL_ERRS_FILE LIDBG_MEM_DIR"lidbg_shell_errs.txt"
+#define SHELL_ERRS_FILE "/dev/dbg_msg"
 LIST_HEAD(uevent_list);
 struct miscdevice lidbg_uevent_device;
 int uevent_dbg = 0;
@@ -33,7 +33,7 @@ bool uevent_focus(char *focus, void(*callback)(char *focus, char *uevent))
 
 void uevent_send(enum kobject_action action, char *envp_ext[])
 {
-    LIDBG_WARN("%s,%s\n", (envp_ext[0] == NULL ? "null" : envp_ext[0]), (envp_ext[1] == NULL ? "null" : envp_ext[1]));
+    //LIDBG_WARN("%s,%s\n", (envp_ext[0] == NULL ? "null" : envp_ext[0]), (envp_ext[1] == NULL ? "null" : envp_ext[1]));
     if(kobject_uevent_env(&lidbg_uevent_device.this_device->kobj, action, envp_ext) < 0)
         LIDBG_ERR("uevent_send\n");
 }
