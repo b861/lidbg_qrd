@@ -109,7 +109,6 @@ int main(int argc, char **argv)
     system("mkdir /data/lidbg/lidbg_osd");
     system("chmod 777 /data/lidbg");
     system("chmod 777 /data/lidbg/lidbg_osd");
-    system("mount -o remount /system");
 
     if(checkout == 1)
     {
@@ -124,6 +123,8 @@ int main(int argc, char **argv)
                 lidbg("lidbg_iserver: origin userver start\n");
                 break;
             }
+			system("mount -o remount /system");
+			
             system("chmod 777 /system/lib/modules/out/lidbg_userver");
             system("chmod 777 /system/lib/modules/out/*");
             lidbg("lidbg_iserver: waitting origin lidbg_uevent...\n");
