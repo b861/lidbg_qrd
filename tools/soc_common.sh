@@ -1,23 +1,4 @@
 
-function soc_prebuild()
-{
-	echo $FUNCNAME
-	cd $DBG_SYSTEM_DIR
-
-	rm -rf $DBG_SYSTEM_DIR/kernel/drivers/flyaudio
-	mkdir -p $DBG_SYSTEM_DIR/kernel/drivers/flyaudio
-	cp -ru $DBG_DRIVERS_PATH/build_in/*	        $DBG_SYSTEM_DIR/kernel/drivers/flyaudio/
-	cp -u $DBG_DRIVERS_PATH/inc/lidbg_interface.h   $DBG_SYSTEM_DIR/kernel/drivers/flyaudio/
-	cp -u $DBG_CORE_PATH/cmn_func.c   $DBG_SYSTEM_DIR/kernel/drivers/flyaudio/
-	cp -u $DBG_CORE_PATH/inc/cmn_func.h   $DBG_SYSTEM_DIR/kernel/drivers/flyaudio/
-	cp -u $DBG_CORE_PATH/inc/lidbg_def.h   $DBG_SYSTEM_DIR/kernel/drivers/flyaudio/
-
-	if [[ $TARGET_PRODUCT = "" ]];then
-		source build/envsetup.sh&&choosecombo release $DBG_PLATFORM $SYSTEM_BUILD_TYPE
-	fi
-}
-
-
 function soc_build_system()
 {
 	echo $FUNCNAME

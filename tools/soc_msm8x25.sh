@@ -1,3 +1,12 @@
+function soc_prebuild()
+{
+	echo $FUNCNAME
+	if [[ $TARGET_PRODUCT = "" ]];then
+		source build/envsetup.sh&&choosecombo release $DBG_PLATFORM $SYSTEM_BUILD_TYPE
+	fi
+}
+
+
 function soc_build_release()
 {
 	echo $FUNCNAME
