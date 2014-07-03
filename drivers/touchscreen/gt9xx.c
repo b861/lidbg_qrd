@@ -1160,12 +1160,12 @@ int gtp_read_version(struct i2c_client *client, u16 *version, char *ic_type)
 		*version = (buf[7] << 8) | buf[6];
 
 	if (buf[5] == 0x00) {
-		dev_dbg(&client->dev, "IC Version: %c%c%c_%02x%02x\n", buf[2],
+		lidbg("==IC Version: %c%c%c_%02x%02x\n", buf[2],
 				buf[3], buf[4], buf[7], buf[6]);
 	} else {
 		if (buf[5] == 'S' || buf[5] == 's')
 			chip_gt9xxs = 1;
-		dev_dbg(&client->dev, "IC Version: %c%c%c%c_%02x%02x\n", buf[2],
+		lidbg("****IC Version: %c%c%c%c_%02x%02x\n", buf[2],
 				buf[3], buf[4], buf[5], buf[7], buf[6]);
 	}
 	sprintf(ic_type, "%c%c%c", buf[2], buf[3], buf[4]);
