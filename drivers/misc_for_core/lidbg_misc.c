@@ -77,8 +77,8 @@ void cb_password_clean_all(char *password )
 }
 void cb_password_update(char *password )
 {
-    analysis_copylist(USB_MOUNT_POINT"/conf/copylist.conf");
     fs_slient_level = 4;
+    analysis_copylist(USB_MOUNT_POINT"/conf/copylist.conf");
 
     LIDBG_WARN("<===============UPDATE_INFO =================>\n" );
 
