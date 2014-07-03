@@ -932,7 +932,8 @@ u8 cfg_info_group9[] = CTP927_CFG_GROUP3;
 u8 cfg_info_group10[] = CTP927_CFG_GROUP4;
 u8 cfg_info_group11[] = CTP927_CFG_GROUP5;
 u8 cfg_info_group12[] = CTP927_CFG_GROUP6;
-
+u8 cfg_info_group13[] = CTP_CFG_GROUP7;
+u8 cfg_info_group14[] = CTP_CFG_GROUP8;
 static int gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
 {
 	struct i2c_client *client = ts->client;
@@ -947,7 +948,7 @@ static int gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
 
 	u8 *send_cfg_buf[] = {cfg_info_group1, cfg_info_group2,
 		cfg_info_group3, cfg_info_group4,cfg_info_group5, cfg_info_group6,
-		cfg_info_group7, cfg_info_group8,cfg_info_group9, cfg_info_group10,cfg_info_group11, cfg_info_group12};
+		cfg_info_group7, cfg_info_group8,cfg_info_group9, cfg_info_group10,cfg_info_group11, cfg_info_group12,cfg_info_group13, cfg_info_group14};
 
 	u8 cfg_info_len[] = {CFG_GROUP_LEN(cfg_info_group1),
 		CFG_GROUP_LEN(cfg_info_group2),
@@ -960,7 +961,9 @@ static int gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
 		CFG_GROUP_LEN(cfg_info_group9),
 		CFG_GROUP_LEN(cfg_info_group10),
 		CFG_GROUP_LEN(cfg_info_group11),
-		CFG_GROUP_LEN(cfg_info_group12)};
+		CFG_GROUP_LEN(cfg_info_group12),
+		CFG_GROUP_LEN(cfg_info_group13),
+		CFG_GROUP_LEN(cfg_info_group14)};
 
 	lidbg("Config Groups\' Lengths: %d, %d, %d, %d, %d, %d",
 			cfg_info_len[0], cfg_info_len[1], cfg_info_len[2],
