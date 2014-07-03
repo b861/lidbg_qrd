@@ -1,7 +1,6 @@
 #ifndef  __IO_DEFINE_
 #define __IO_DEFINE_
 
-
 #define GPIO_NOTHING LED_GPIO
 
 #ifdef SOC_msm8x25
@@ -24,7 +23,19 @@
 #endif
 
 
+struct hw_version_specific
+{
+	int gpio_lcd_reset;
+	int gpio_t123_reset;
+
+	int gpio_usb_id;
+	int gpio_usb_power;
+	int gpio_usb_switch;
+};
+
+
 #ifdef SOC_msm8x26
+
 //lpc
 #define  LPC_I2_ID        (0)
 #define  MCU_IIC_REQ_GPIO (108)
@@ -54,51 +65,76 @@
 #define BUTTON_RIGHT_2 (34)//k4
 
 //lcd
-#ifdef BOARD_V1
-#define PANEL_GPIO_RESET (25)
-#define LCD_RESET do{  \
-		SOC_IO_Output(0, PANEL_GPIO_RESET, 0);\
-		msleep(10);\
-		SOC_IO_Output(0, PANEL_GPIO_RESET, 1);\
-		msleep(20);\
-	}while(0)
-#else
-#define LCD_RESET
-#endif
+
+#define LCD_RESET do{\
+			if(g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_lcd_reset == -1 )\
+				break ;\
+			SOC_IO_Output(0, g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_lcd_reset, 0);\
+			msleep(20);\
+			SOC_IO_Output(0, g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_lcd_reset, 1);\
+}while(0)\
+
+
 
 //t123
-#ifdef BOARD_V1
-#define T123_GPIO_RST  (28)
-#define T123_RESET do{  \
-		SOC_IO_Output(0, T123_GPIO_RST, 0);\
+#define T123_RESET do{\
+		if(g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_t123_reset == -1 )\
+			break ;\
+		SOC_IO_Output(0, g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_t123_reset, 0);\
 		msleep(300);\
-		SOC_IO_Output(0, T123_GPIO_RST, 1);\
+		SOC_IO_Output(0, g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_t123_reset, 1);\
 		msleep(20);\
 	}while(0)
-#else
-#define T123_RESET
-#endif
 
 
 //usb
-#ifdef BOARD_V1
-#define USB_ID_HIGH_DEV
-#define USB_ID_LOW_HOST
+#define USB_SWITCH_CONNECT  do{\
+		if(g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_usb_switch == -1 )\
+			break ;\
+			SOC_IO_Output(0, g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_usb_switch, 0);\
+	}while(0)
 
-#define GPIO_USB_EN 	   (109)
-#define USB_WORK_ENABLE    SOC_IO_Output(0, GPIO_USB_EN, 0)
-#define USB_WORK_DISENABLE SOC_IO_Output(0, GPIO_USB_EN, 1)
+		
+#define USB_SWITCH_DISCONNECT do{\
+		if(g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_usb_switch == -1 )\
+			break ;\
+			SOC_IO_Output(0, g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_usb_switch, 1);\
+	}while(0)
 
-#else
-#define USB_SWITCH_CONNECT SOC_IO_Output(0, 109, 0)
-#define USB_SWITCH_DISCONNECT SOC_IO_Output(0, 109, 0) //alway on for test
 
-#define GPIO_USB_EN 	(28)
-#define USB_POWER_ENABLE SOC_IO_Output(0, GPIO_USB_EN, 1)
-#define USB_POWER_DISABLE SOC_IO_Output(0, GPIO_USB_EN, 0)
+#define USB_POWER_ENABLE do{\
+		if(g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_usb_power == -1 )\
+			break ;\
+			if(g_var.hw_info.hw_version == 1)\
+				SOC_IO_Output(0, g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_usb_power, 0);\
+			else\
+				SOC_IO_Output(0, g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_usb_power, 1);\
+	}while(0)
 
-#define USB_ID_LOW_HOST SOC_IO_Output(0, 23, 0)
-#define USB_ID_HIGH_DEV SOC_IO_Output(0, 23, 1)
+
+#define USB_POWER_DISABLE do{\
+		if(g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_usb_power == -1 )\
+			break ;\
+			if(g_var.hw_info.hw_version == 1)\
+				SOC_IO_Output(0, g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_usb_power, 1);\
+			else\
+				SOC_IO_Output(0, g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_usb_power, 0);\
+	}while(0)
+
+
+
+#define USB_ID_LOW_HOST do{\
+		if(g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_usb_id == -1 )\
+			break ;\
+			SOC_IO_Output(0, g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_usb_id, 0);\
+	}while(0)
+
+#define USB_ID_HIGH_DEV do{\
+		if(g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_usb_id == -1 )\
+			break ;\
+			SOC_IO_Output(0, g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_usb_id, 1);\
+	}while(0)
+
 
 #define USB_WORK_ENABLE do{\
 				lidbg("USB_WORK_ENABLE\n");\
@@ -112,8 +148,6 @@
 			USB_POWER_DISABLE;\
 			USB_ID_HIGH_DEV;\
 			}while(0)
-#endif
-
 //ad
 #define AD_KEY_PORT_L   (35)
 #define AD_KEY_PORT_R   (37)
@@ -164,5 +198,6 @@ struct thermal_ctrl thermal_ctrl[] =
 
 #endif
 
+extern struct hw_version_specific g_hw_version_specific[];
 
 #endif

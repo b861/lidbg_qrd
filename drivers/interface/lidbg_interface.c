@@ -1,5 +1,6 @@
 
 #include "lidbg.h"
+#include "lidbg_target.c"
 
 #define HAL_SO "/flysystem/lib/out/lidbg_loader.ko"
 LIDBG_DEFINE;
@@ -330,26 +331,49 @@ int fly_interface_init(void)
     if( fs_is_file_exist(RECOVERY_MODE_DIR))
     {
 	    g_var.recovery_mode = 1;
-		lidbg("=====system mode is recovery_mode====\n");
+		lidbg("system mode is recovery_mode\n");
 	}
     else
 	{
 	    g_var.recovery_mode = 0;
-		lidbg("=====system mode is normal_mode====\n");
+		lidbg("system mode is normal_mode\n");
 	}
 
     if(fs_is_file_exist(HAL_SO))
     {
-        lidbg("=======is product=====\n");
+        lidbg("is product\n");
         g_var.is_fly = true;
     }
     else
 	{
 	    g_var.is_fly = false;
-		lidbg("=======is origin=====\n");
+		lidbg("is origin\n");
 	}
 
     memset(&g_var.hw_info, 0, sizeof(struct hw_info));
+	
+    FS_REGISTER_INT(g_var.hw_info.hw_version, "hw_version", 0, NULL);
+	
+	if(g_var.hw_info.hw_version == 0)
+	{
+#ifdef BOARD_V1
+	g_var.hw_info.hw_version = 1;
+#endif
+#ifdef BOARD_V2
+	g_var.hw_info.hw_version = 2;
+#endif
+#ifdef BOARD_V3
+	g_var.hw_info.hw_version = 3;
+#endif
+#ifdef BOARD_V4
+	g_var.hw_info.hw_version = 4;
+#endif
+#ifdef BOARD_V5
+	g_var.hw_info.hw_version = 5;
+#endif
+
+	}
+	lidbg("hw_version=%d\n",g_var.hw_info.hw_version);
 	
     return 0;
 }

@@ -920,6 +920,9 @@ Output:
 	Executive outcomes.
 	> =0: succeed, otherwise: failed
 *******************************************************/
+u8 cfg_info_group1_v1[] = CTP_CFG_GROUP1_V1;
+u8 cfg_info_group2_v1[] = CTP_CFG_GROUP2_V1;
+
 u8 cfg_info_group1[] = CTP_CFG_GROUP1;
 u8 cfg_info_group2[] = CTP_CFG_GROUP2;
 u8 cfg_info_group3[] = CTP_CFG_GROUP3;
@@ -945,7 +948,7 @@ static int gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
 	u8 check_sum = 0;
 	u8 opr_buf[16];
 	u8 sensor_id = 0;
-
+	
 	u8 *send_cfg_buf[] = {cfg_info_group1, cfg_info_group2,
 		cfg_info_group3, cfg_info_group4,cfg_info_group5, cfg_info_group6,
 		cfg_info_group7, cfg_info_group8,cfg_info_group9, cfg_info_group10,cfg_info_group11, cfg_info_group12,cfg_info_group13, cfg_info_group14};
@@ -964,6 +967,18 @@ static int gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
 		CFG_GROUP_LEN(cfg_info_group12),
 		CFG_GROUP_LEN(cfg_info_group13),
 		CFG_GROUP_LEN(cfg_info_group14)};
+
+#ifdef SOC_msm8x26
+	if(g_var.hw_info.hw_version == 1)
+	{
+		send_cfg_buf[0] = cfg_info_group1_v1;
+ 		send_cfg_buf[1] = cfg_info_group2_v1;
+
+		cfg_info_len[0] = CFG_GROUP_LEN(cfg_info_group1_v1);
+ 		cfg_info_len[1] = CFG_GROUP_LEN(cfg_info_group2_v1);
+	}
+#endif
+
 
 	lidbg("Config Groups\' Lengths: %d, %d, %d, %d, %d, %d",
 			cfg_info_len[0], cfg_info_len[1], cfg_info_len[2],

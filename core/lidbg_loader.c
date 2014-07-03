@@ -98,10 +98,10 @@ int thread_loader(void *data)
     DUMP_FUN_ENTER;
 		
     CREATE_KTHREAD(thread_check_restart, NULL);
-
+#ifndef SOC_msm8x25
     while(!is_file_exist("/dev/log/userver_ok.txt"))
 			ssleep(1);
-
+#endif
     if(is_file_exist(FLY_MODE_FILE))
         kopath = "/flysystem/lib/out/";
     else
