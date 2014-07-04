@@ -1,6 +1,6 @@
 
 source ./env_entry.sh
-./build_cfg.sh $DBG_SOC $BOARD_VERSION
+./build_cfg.sh $DBG_SOC $BOARD_VERSION $DBG_PLATFORM
 mkdir -p $DBG_OUT_PATH
 
 build_log=$DBG_OUT_PATH/build_time.conf
