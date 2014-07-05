@@ -36,6 +36,9 @@
 *.jpg
 *.dex
 *.class
+*.tar
+*.cpio
+*.gzip
 
 err_log
 copy_log

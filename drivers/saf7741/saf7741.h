@@ -19,7 +19,6 @@
 #define TRUE 1
 #endif
 
-#ifdef SOC_msm8x26
 #define LPC_CMD_7741RST_L  do{    \
 		u8 buff[] = {0x02, 0x0a, 0x00};\
         SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\
@@ -67,7 +66,6 @@
 
 #define 	SAF7741_GPIO_RST          (LPC)  //no use
 
-#define 	SAF7741_I2C_BUS  		  (5)
 #define 	SAF7741_I2C_ADDR	      0x1c
 
 #define     SAF7741_ADDR_W			  0x38
@@ -102,11 +100,6 @@ enum audio_source{Init=0,MediaCD,CDC,RADIO,AUX,IPOD,TV,MediaMP3,SRADIO,A2DP,EXT_
 #define T_FREQ_12K              1
 #define T_FREQ_15K              2
 #define T_FREQ_17K5             3
-
-
-#else  //8974
-
-#endif
 
 
 #endif  //__SAF7741_H__

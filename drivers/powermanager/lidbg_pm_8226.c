@@ -280,7 +280,7 @@ static int thread_gpio_app_status_delay(void *data)
 {
     ssleep(30);
     SOC_IO_Output(0, GPIO_APP_STATUS, 0);
-    PM_WARN("<set GPIO_APP_STATUS [%d] 0>\n\n", GPIO_APP_STATUS);
+    PM_WARN("<set GPIO_APP_STATUS [%d] 0>\n", GPIO_APP_STATUS);
     return 1;
 }
 int pm_open (struct inode *inode, struct file *filp)
@@ -560,7 +560,7 @@ static int thread_observer(void *data)
                     break;
                 }
             }
-            PM_WARN("\n\n<stop>\n\n");
+            PM_WARN("\n<stop>\n");
         }
     }
     return 1;
@@ -575,7 +575,7 @@ static int  lidbg_pm_probe(struct platform_device *pdev)
     kthread_run(thread_observer, NULL, "ftf_pmtask");
     LIDBG_MODULE_LOG;
 
-    PM_WARN("<==OUT==>\n\n");
+    PM_WARN("<==OUT==>\n");
     return 0;
 }
 static struct platform_device lidbg_pm =
@@ -615,7 +615,7 @@ static int __init lidbg_pm_init(void)
         lidbg_shell_cmd("rm -r "PM_DIR"*");
 
     SOC_IO_Output(0, MCU_WP_GPIO, 0);
-    PM_WARN("<set MCU_WP_GPIO[%d] 0 30S>\n\n", MCU_WP_GPIO);
+    PM_WARN("<set MCU_WP_GPIO[%d] 0 30S>\n", MCU_WP_GPIO);
     CREATE_KTHREAD(thread_gpio_app_status_delay, NULL);
     CREATE_KTHREAD(thread_usb_disk_enable_delay, NULL);
     lidbg_shell_cmd("echo 8  > /proc/sys/kernel/printk");

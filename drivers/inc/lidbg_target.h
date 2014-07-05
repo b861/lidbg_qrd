@@ -158,6 +158,10 @@ struct hw_version_specific
 #define GTP_RST_PORT    (24)  
 #define GTP_INT_PORT    (69)
 
+
+//
+#define  SAF7741_I2C_BUS  (5)
+
 /*
 //TBD
 struct thermal_ctrl thermal_ctrl[] =
@@ -193,8 +197,11 @@ struct thermal_ctrl thermal_ctrl[] =
 #define TEMP_FREQ_TEST_STR	 "300000,384000,600000,787200,998400,1094400,1190400,1305600,1344000,1401600"
 
 
+#ifdef PLATFORM_msm8226
 #define FLY_GPS_SO  "gps.msm8226.so"
-
+#elif defined(PLATFORM_msm8974)
+#define FLY_GPS_SO  "gps.msm8974.so"
+#endif
 
 #endif
 

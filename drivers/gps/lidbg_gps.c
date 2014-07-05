@@ -502,7 +502,7 @@ static struct platform_device lidbg_gps_device =
 
 static  int gps_server_init(void)
 {
-    lidbg(" \n[ublox] ==IN==gps_server_driver_init==\n");
+    lidbg("[ublox] ==IN==gps_server_driver_init==\n");
 
     LIDBG_GET;
     platform_device_register(&lidbg_gps_device);
@@ -513,7 +513,7 @@ static  int gps_server_init(void)
 
 static void gps_server_exit(void)
 {
-    lidbg(" \n[ublox] ==IN==gps_server_driver_exit==\n");
+    lidbg("[ublox] ==IN==gps_server_driver_exit==\n");
 
     // misc_deregister(&misc);
     // kfree(dev);

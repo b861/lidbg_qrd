@@ -275,13 +275,36 @@ static void dsi83_work_func(struct work_struct *work)
 
 }
 
+int is_dsi83_exist(void)
+{
+    int exist, retry;
+    for(retry = 0; retry < 10; retry++)
+    {
+        exist = SN65_devices_read_id();
+        if (exist != 0)
+        {
+            msleep(100);
+            continue;
+        }
+        else
+        {
+            return 1;
+        }
+    }
+    return -1;
+}
 
 
 static int dsi83_probe(struct platform_device *pdev)
 {
 	int ret = 0;
 	lidbg("%s:enter\n", __func__);
-
+    if(is_dsi83_exist() < 0)
+   	{
+   		lidbg("dsi83.miss\n");
+		return 0;
+   	}
+	
 	INIT_DELAYED_WORK(&dsi83_work, dsi83_work_func);
 	dsi83_workqueue = create_workqueue("dsi83");
 //	queue_delayed_work(dsi83_workqueue, &dsi83_work, DSI83_DELAY_TIME);

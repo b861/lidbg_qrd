@@ -45,9 +45,11 @@ void reset_high_active(void);
 void reset_low_active(void);
 void gt9xx_reset_high_active(void);
 void ts_gpio_free(void);
+void ts_gpio_free_gt911(void);
+
 struct probe_device ts_probe_dev[] =
 {
-    {0x14, 0x00, "gt911.ko", gt9xx_reset_high_active, ts_gpio_free},
+    {0x14, 0x00, "gt911.ko", gt9xx_reset_high_active, ts_gpio_free_gt911},
     {0x5d, 0x00, "gt811.ko", reset_high_active, ts_gpio_free},
     {0x55, 0x00, "gt801.ko", reset_low_active, ts_gpio_free},
     {0x38, 0x00, "ft5x06_ts.ko", reset_high_active, ts_gpio_free}
@@ -89,6 +91,16 @@ void ts_gpio_free(void)
    //gpio_free(GTP_RST_PORT);
    #endif
 }
+
+
+void ts_gpio_free_gt911(void)
+{
+   #ifndef SOC_msm8x25
+   gpio_free(GTP_INT_PORT);
+   gpio_free(GTP_RST_PORT);
+   #endif
+}
+
 void parse_ts_info(struct probe_device *ts_info)
 {
     char path[100];
