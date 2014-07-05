@@ -28,11 +28,11 @@ function soc_prebuild()
 
 function soc_build_release()
 {
-
+	echo $FUNCNAME
 	cd $RELEASE_REPOSITORY
-	expect $DBG_TOOLS_PATH/pull
+	expect $DBG_TOOLS_PATH/pull $DBG_REPO_PASSWORD
 	cd $DBG_SYSTEM_DIR
-	expect $DBG_TOOLS_PATH/pull
+	expect $DBG_TOOLS_PATH/pull $DBG_PASSWORD
 
 	soc_build_all 
 }

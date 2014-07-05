@@ -9,7 +9,7 @@ function depository_pull()
 {
 	echo $FUNCNAME
 	cd $RELEASE_REPOSITORY
-	expect $DBG_TOOLS_PATH/pull
+	expect $DBG_TOOLS_PATH/pull $DBG_REPO_PASSWORD
 }
 
 function depository_add_push()

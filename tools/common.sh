@@ -43,9 +43,9 @@ function common_handle()
 			$DBG_ROOT_PATH)	
 				cd $dir && lidbg_pull;;
 			$DBG_SYSTEM_DIR)
-				cd $dir && expect $DBG_TOOLS_PATH/pull;;
+				cd $dir && expect $DBG_TOOLS_PATH/pull $DBG_PASSWORD;;
 			$RELEASE_REPOSITORY)
-				cd $dir && expect $DBG_TOOLS_PATH/pull;;
+				cd $dir && expect $DBG_TOOLS_PATH/pull $DBG_REPO_PASSWORD;;
 			*)
 				echo
 		esac ;;

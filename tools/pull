@@ -3,7 +3,7 @@ set timeout -1
 spawn git pull origin master
 expect {
     "password" { 
-		 send "git\r"
+		 send "$argv\r"
 		 expect -re "file|Already" { send "pull finish\n"}
 		}
         }
