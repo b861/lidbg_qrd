@@ -28,6 +28,7 @@ void cb_kv_lidbg_origin_system(char *key, char *value)
     if(value && *value == '1')//origin
     {
         lidbg_shell_cmd("mount -o remount /system");
+        lidbg_shell_cmd("mount -o remount /flysystem");
         lidbg_shell_cmd("mkdir -p /flyapdata/.out/temp");
         lidbg_shell_cmd("mkdir -p /flysystem/.out/temp");
 
@@ -48,6 +49,7 @@ void cb_kv_lidbg_origin_system(char *key, char *value)
     else   if(value && *value == '2')//flyaudio
     {
         lidbg_shell_cmd("mount -o remount /system");
+        lidbg_shell_cmd("mount -o remount /flysystem");
         lidbg_shell_cmd("mv /flysystem/.out/temp/* /flysystem");
         lidbg_shell_cmd("mv /flyapdata/.out/temp/* /flyapdata");
         lidbg_shell_cmd("cp  /flysystem/app/.sys-app1/* /system/priv-app");

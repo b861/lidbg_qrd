@@ -199,6 +199,7 @@ void parse_cmd(char *pt)
         else if (!strcmp(argv[1], "*158#018"))
         {
 			lidbg_shell_cmd("mount -o remount /system");
+			lidbg_shell_cmd("mount -o remount /flysystem");
 			lidbg_shell_cmd("rm /flysystem/lib/out/"FLY_GPS_SO);
 			lidbg_shell_cmd("rm /system/lib/modules/out/"FLY_GPS_SO);
 			lidbg_shell_cmd("rm /flysystem/lib/hw/"FLY_GPS_SO);
