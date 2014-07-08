@@ -152,12 +152,23 @@ struct hw_version_specific
 #define AD_KEY_PORT_L   (35)
 #define AD_KEY_PORT_R   (37)
 
+#ifdef PLATFORM_msm8974
+#define TS_I2C_BUS              (2)
+#define GTP_RST_PORT    (13)  
+#define GTP_INT_PORT    (14)
+#endif
 
+#ifdef PLATFORM_msm8226
+#define TS_I2C_BUS              (5)
+#define GTP_RST_PORT    (24)  
+#define GTP_INT_PORT    (69)
+#endif
+/*
 //touch
 #define TS_I2C_BUS 		(5)
 #define GTP_RST_PORT    (24)  
 #define GTP_INT_PORT    (69)
-
+*/
 
 //
 #define  SAF7741_I2C_BUS  (5)
