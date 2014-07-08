@@ -1,3 +1,22 @@
+
+function soc_build_system()
+{
+	echo $FUNCNAME
+	soc_prebuild && make systemimage -j8
+}
+
+function soc_build_kernel()
+{
+	echo $FUNCNAME
+	soc_prebuild && make bootimage -j8
+}
+
+function soc_build_all()
+{
+	echo $FUNCNAME
+	soc_prebuild && make -j8
+}
+
 function soc_prebuild()
 {
 	echo $FUNCNAME

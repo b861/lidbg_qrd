@@ -16,5 +16,8 @@ case "$DBG_PLATFORM" in
     msm8974)
 	DBG_SYSTEM_DIR=/home/hongbo/code/msm8974
 	RELEASE_REPOSITORY=/home/hongbo/code/msm8974;;
+    mt3360)
+	DBG_SYSTEM_DIR=/home/flyaudio/mtk/mtk3360
+	RELEASE_REPOSITORY=;;
 esac
 

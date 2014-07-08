@@ -1,5 +1,5 @@
-#ifndef _LIGDBG_MSM8x25__
-#define _LIGDBG_MSM8x25__
+#ifndef _LIGDBG_MSM8226__
+#define _LIGDBG_MSM8226__
 
 
 #include <linux/init.h>
@@ -10,7 +10,7 @@
 #include <linux/platform_device.h>
 #include <linux/debugfs.h>
 #include <linux/fb.h>
-
+#include <mach/mt33xx_gpio_pinmux.h>
 
 #include "mach/hardware.h"
 #include "mach/irqs.h"
@@ -32,43 +32,39 @@
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/gpio_event.h>
-#include <linux/usb/android.h>
+#include <config/android.h>
 #include <linux/platform_device.h>
 #include <linux/io.h>
 #include <linux/gpio.h>
 #include <linux/mtd/nand.h>
 #include <linux/mtd/partitions.h>
 #include <linux/i2c.h>
-#include <linux/android_pmem.h>
+//#include <linux/android_pmem.h>
 #include <linux/bootmem.h>
-#include <linux/mfd/marimba.h>
+//#include <linux/mfd/marimba.h>
 #include <linux/regulator/consumer.h>
 #include <linux/memblock.h>
-#include <mach/board.h>
-#include <mach/msm_iomap.h>
-#include <mach/msm_hsusb.h>
-#include <mach/rpc_hsusb.h>
-#include <mach/rpc_pmapp.h>
-#include <mach/usbdiag.h>
-#include <mach/msm_memtypes.h>
-#include <mach/msm_serial_hs.h>
+//#include <mach/board.h>
+//#include <mach/msm_iomap.h>
+//#include <mach/msm_hsusb.h>
+//#include <mach/rpc_hsusb.h>
+//#include <mach/rpc_pmapp.h>
+//#include <mach/usbdiag.h>
+//#include <mach/msm_memtypes.h>
+//#include <mach/msm_serial_hs.h>
 //#include <mach/pmic.h>
-#include <mach/socinfo.h>
-#include <mach/vreg.h>
-#include <mach/rpc_pmapp.h>
+//#include <mach/socinfo.h>
+//#include <mach/vreg.h>
+//#include <mach/rpc_pmapp.h>
 //#include <mach/msm_battery.h>
-#include <mach/rpc_server_handset.h>
-#include <mach/socinfo.h>
-#include <mach/msm_smsm.h>
+//#include <mach/rpc_server_handset.h>
+//#include <mach/socinfo.h>
+//#include <mach/msm_smsm.h>
 
-#include <mach/msm_rpcrouter.h>
-#include <mach/msm_smsm.h>
-
-#ifdef SOC_msm8x25
-#define USE_CALL_USERHELPER
-#endif
-
-#if 0
+//#include <mach/msm_rpcrouter.h>
+//#include <mach/irqs.h>
+//#include <linux/qpnp/qpnp-adc.h>
+//#include <linux/spmi.h>
 enum
 {
     GPIO_CFG_INPUT,
@@ -102,6 +98,7 @@ enum
     GPIO_CFG_ENABLE,
     GPIO_CFG_DISABLE,
 };
+#if 0
 
 #define GPIO_CFG(gpio, func, dir, pull, drvstr) \
 	((((gpio) & 0x3FF) << 4)        |	\
@@ -113,9 +110,10 @@ enum
 
 #endif
 
-#define SOC_KO  "lidbg_soc_msm8x25.ko"
-#define INTERFACE_KO  "lidbg_fly_hal.ko"
-#define USB_MOUNT_POINT  "/mnt/usbdisk"
+#define SOC_KO  "lidbg_ad_msm8x26.ko","lidbg_soc_msm8x26.ko"
+#define INTERFACE_KO  "lidbg_interface.ko"
+#define USB_MOUNT_POINT  "/storage/udisk"
+
 
 struct io_config
 {
@@ -140,7 +138,7 @@ struct io_int_config
 } ;
 
 //#define MAKE_GPIO_LOG(group,index)   ((group<<5)|(index))
-#define IO_LOG_NUM  (132)
+#define IO_LOG_NUM  (116)
 #define AD_LOG_NUM  (16)
 #define TTY_DEV "msm-uart"
 
@@ -203,10 +201,11 @@ struct fly_smem
 
 extern struct fly_smem *p_fly_smem ;
 
-#define IO_CONFIG_OUTPUT(group,index) do{  soc_io_config( index,  GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_16MA, 1);}while(0)
-#define IO_CONFIG_INPUT(group,index) do{  soc_io_config( index,  GPIO_CFG_INPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA, 1);}while(0)
+#define IO_CONFIG_OUTPUT(group,index) do{/*  soc_io_config( index,  GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_16MA, 1);*/}while(0)
+#define IO_CONFIG_INPUT(group,index) do{/*  soc_io_config( index,  GPIO_CFG_INPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA, 1);*/}while(0)
 
-#define GPIO_TO_INT MSM_GPIO_TO_INT
+//#define GPIO_TO_INT MSM_GPIO_TO_INT
+#define GPIO_TO_INT gpio_to_irq
 
 
 
@@ -227,16 +226,16 @@ extern struct fly_smem *p_fly_smem ;
 
 
 
-#define I2C_GPIO_CONFIG do{	 \
+#define I2C_GPIO_CONFIG do{	/* \
 	 gpio_tlmm_config(GPIO_CFG(LIDBG_I2C_GPIO_SDA, 0, (GPIO_CFG_OUTPUT | GPIO_CFG_INPUT), GPIO_CFG_PULL_UP, GPIO_CFG_16MA), GPIO_CFG_ENABLE);\
 	 gpio_tlmm_config(GPIO_CFG(LIDBG_I2C_GPIO_SCL, 0, GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA), GPIO_CFG_ENABLE);\
-}while(0)
+*/}while(0)
 
 //io_uart
 #define TX_GPIO (123)  //27
 #define TX_H  do{soc_io_output(0,TX_GPIO, 1);}while(0)
 #define TX_L  do{soc_io_output(0,TX_GPIO, 0);}while(0)
-#define TX_CFG  do{soc_io_config(TX_GPIO, GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_16MA,1);}while(0)
+#define TX_CFG  do{/*soc_io_config(TX_GPIO, GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_16MA,1);*/}while(0)
 
 // 1.2Gh
 #define IO_UART_DELAY_1200_115200 (14)

@@ -4,7 +4,6 @@
 //futengfei add for bpmsg_to_ap_print  2012.12.12.12:00
 
 //up always online
-#include <mach/msm_smsm.h>
 
 #define TOTAL_LOGS 500UL
 #define LOG_BYTES  32UL

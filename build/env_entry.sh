@@ -58,6 +58,15 @@ case "$DBG_PLATFORM" in
 	DBG_PASSWORD=ct
 	DBG_REPO_PASSWORD=git
 	DBG_SOC=msm8x26;;
+   mt3360)
+	BOARD_VERSION=V1
+	DBG_CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilts/gcc/linux-x86/arm/arm-eabi-4.6/bin/arm-eabi-
+	SYSTEM_BUILD_TYPE=eng
+	DBG_KERNEL_SRC_DIR=$DBG_SYSTEM_DIR/kernel
+	DBG_KERNEL_OBJ_DIR=/home/flyaudio/mtk/mtk3360/kernel
+	UPDATA_BIN_DIR=$RELEASE_REPOSITORY/driver
+	UPDATA_BASESYSTEM_DIR=$RELEASE_REPOSITORY/basesystem
+	DBG_SOC=mt3360;;
 esac
 
 

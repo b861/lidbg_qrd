@@ -3,5 +3,8 @@ source ../soc/$DBG_SOC/conf/soc_select
 LOCATE_PATH=`pwd`
 clear
 cd ../build && source env_entry.sh && ./build_cfg.sh  $DBG_SOC $BUILD_VERSION $DBG_PLATFORM
+if [ $DBG_PLATFORM = mt3360 ];then
+cd $DBG_SYSTEM_DIR/&&source ./selfenv&&lunch 5  && mmm $DBG_HAL_PATH -B
+else
 cd $DBG_SYSTEM_DIR/&&source build/envsetup.sh&&choosecombo release $DBG_PLATFORM $SYSTEM_BUILD_TYPE && mmm $DBG_HAL_PATH -B
-
+fi

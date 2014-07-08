@@ -1,4 +1,22 @@
 
+function soc_build_system()
+{
+	echo $FUNCNAME
+	soc_prebuild && make systemimage -j8
+}
+
+function soc_build_kernel()
+{
+	echo $FUNCNAME
+	soc_prebuild && make bootimage -j8
+}
+
+function soc_build_all()
+{
+	echo $FUNCNAME
+	soc_prebuild && make -j8
+}
+
 function soc_prebuild()
 {
 	echo $FUNCNAME
@@ -13,11 +31,11 @@ function soc_prebuild()
 	cp -u $DBG_CORE_PATH/inc/lidbg_def.h   $DBG_SYSTEM_DIR/kernel/drivers/flyaudio/
 
 
-	cp -r $RELEASE_REPOSITORY/driver/out $DBG_SYSTEM_DIR/out/target/product/msm8226/system/lib/modules/
-	cp $RELEASE_REPOSITORY/driver/out/vold $DBG_SYSTEM_DIR/out/target/product/msm8226/system/bin/
-	cp $RELEASE_REPOSITORY/app/FastBoot.apk $DBG_SYSTEM_DIR/out/target/product/msm8226/system/app/
-	cp $RELEASE_REPOSITORY/app/FlyBootService.apk $DBG_SYSTEM_DIR/out/target/product/msm8226/system/app/
-	cp $RELEASE_REPOSITORY/driver/out/lidbg_load $DBG_SYSTEM_DIR/out/target/product/msm8226/system/bin/
+	cp -r $RELEASE_REPOSITORY/driver/out $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/lib/modules/
+	cp $RELEASE_REPOSITORY/driver/out/vold $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/bin/
+	cp $RELEASE_REPOSITORY/app/FastBoot.apk $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/app/
+	cp $RELEASE_REPOSITORY/app/FlyBootService.apk $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/app/
+	cp $RELEASE_REPOSITORY/driver/out/lidbg_load $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/bin/
 
 
 	if [[ $TARGET_PRODUCT = "" ]];then

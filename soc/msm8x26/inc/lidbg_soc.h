@@ -65,6 +65,8 @@
 #include <mach/irqs.h>
 #include <linux/qpnp/qpnp-adc.h>
 #include <linux/spmi.h>
+#include <mach/msm_smsm.h>
+
 #if 0
 enum
 {
