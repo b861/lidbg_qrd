@@ -46,8 +46,13 @@ struct hw_version_specific
 #define  MCU_WP_GPIO_SET  do{SOC_IO_Output(0, MCU_WP_GPIO, 0); }while(0)
 
 //dsi83
+#ifdef PLATFORM_msm8226
 #define 	DSI83_I2C_BUS  		   (2)
 #define 	DSI83_GPIO_EN          (62)
+#elif defined(PLATFORM_msm8974)
+#define 	DSI83_I2C_BUS  		   (3)
+#define 	DSI83_GPIO_EN          (58)
+#endif
 
 //gps
 #define GPS_I2C_BUS (5)
