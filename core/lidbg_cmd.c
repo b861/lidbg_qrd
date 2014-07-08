@@ -11,7 +11,7 @@ struct cmd_item lidbg_cmd_item[] =
     {"i2c", mod_i2c_main},
     {"io", mod_io_main},
 #ifndef SOC_msm8x25
-    {"spi",mod_spi_main},
+ //   {"spi",mod_spi_main},
 #endif
     {"display", lidbg_display_main},
     {"key", lidbg_key_main},

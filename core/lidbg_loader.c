@@ -22,7 +22,7 @@ char *insmod_list[] =
     "lidbg_servicer.ko",
     "lidbg_touch.ko",
 #ifndef SOC_msm8x25
-    "lidbg_spi.ko",
+ //   "lidbg_spi.ko",
 #endif
     "lidbg_key.ko",
     "lidbg_i2c.ko",
