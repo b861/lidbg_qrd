@@ -309,6 +309,7 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         if(!strcmp(cmd[1], "screen_off"))
         {
             lidbg("******into screen_off********\n");
+            lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_SCREEN_OFF));
             if(SOC_Hal_Acc_Callback)
             {
                 lidbg("hal callback 0\n");
@@ -320,6 +321,7 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         if(!strcmp(cmd[1], "screen_on"))
         {
             lidbg("******into screen_on********\n");
+            lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_SCREEN_ON));
             CREATE_KTHREAD(thread_wait_for_dsi83_delay, NULL);
         }
         else  if(!strcmp(cmd[1], "android_up"))

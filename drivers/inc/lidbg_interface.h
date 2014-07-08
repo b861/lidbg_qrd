@@ -77,7 +77,8 @@ static inline int write_node(char *filename, char *wbuff)
 #define NOTIFIER_MINOR_SUSPEND_PREPARE  (2)
 #define NOTIFIER_MINOR_SUSPEND_UNPREPARE (3)
 #define NOTIFIER_MINOR_POWER_OFF (4)
-#define NOTIFIER_MINOR_BOOT_COMPLETE  (5)
+#define NOTIFIER_MINOR_SCREEN_ON  (5)
+#define NOTIFIER_MINOR_SCREEN_OFF  (6)
 
 
 typedef enum

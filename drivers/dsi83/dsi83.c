@@ -214,9 +214,10 @@ static int dsi83_fb_notifier_callback(struct notifier_block *self,
 		blank = evdata->data;
 		
 		if (*blank == FB_BLANK_UNBLANK)
-			dsi83_resume();
+			lidbg(KERN_CRIT "dsi83:FB_BLANK_UNBLANK\n");
+		//dsi83_resume();
 		else if (*blank == FB_BLANK_POWERDOWN)
-			dsi83_suspend();
+			;//dsi83_suspend();
 	}
 
 	return 0;
@@ -294,7 +295,26 @@ int is_dsi83_exist(void)
     return -1;
 }
 
-
+static int lidbg_event_dsi83(struct notifier_block *this, unsigned long event, void *ptr)
+{
+    DUMP_FUN;
+    switch (event)
+    {
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_SCREEN_OFF):
+		dsi83_suspend();
+        break;
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_SCREEN_ON):
+		dsi83_resume();
+        break;
+    default:
+        break;
+    }
+    return NOTIFY_DONE;
+}
+static struct notifier_block lidbg_notifier_dsi83 =
+{
+    .notifier_call = lidbg_event_dsi83,
+};
 static int dsi83_probe(struct platform_device *pdev)
 {
 	int ret = 0;
@@ -304,7 +324,7 @@ static int dsi83_probe(struct platform_device *pdev)
    		lidbg("dsi83.miss\n");
 		return 0;
    	}
-	
+   	register_lidbg_notifier(&lidbg_notifier_dsi83);
 	INIT_DELAYED_WORK(&dsi83_work, dsi83_work_func);
 	dsi83_workqueue = create_workqueue("dsi83");
 	
