@@ -184,8 +184,13 @@ extern struct hw_version_specific g_hw_version_specific[];
 			USB_ID_HIGH_DEV;\
 			}while(0)
 //ad
+#ifdef PLATFORM_msm8226
 #define AD_KEY_PORT_L   (35)//(g_hw.ap_key_left)
 #define AD_KEY_PORT_R   (37)//(g_hw.ap_key_right)
+#elif defined(PLATFORM_msm8974)
+#define AD_KEY_PORT_L   (38)//(g_hw.ap_key_left)
+#define AD_KEY_PORT_R   (39)//(g_hw.ap_key_right)
+#endif
 
 #define TS_I2C_BUS      (g_hw.i2c_bus_ts)
 #define GTP_RST_PORT    (g_hw.gpio_ts_rst)  
