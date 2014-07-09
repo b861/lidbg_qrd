@@ -97,10 +97,10 @@ struct hw_version_specific g_hw_version_specific[] =
 	
 	.gpio_int_gps = 50,
 
-	.gpio_int_button_left1 = 31,
-	.gpio_int_button_left2 = 32,
-	.gpio_int_button_right1 = 33,
-	.gpio_int_button_right2 = 34,
+	.gpio_int_button_left1 = 54,
+	.gpio_int_button_left2 = 53,
+	.gpio_int_button_right1 = 56,
+	.gpio_int_button_right2 = 55,
 
 	.gpio_led1 = 60,
 	.gpio_led2 = -1,
@@ -135,10 +135,10 @@ struct hw_version_specific g_hw_version_specific[] =
 	
 	.gpio_int_gps = 50,
 	
-	.gpio_int_button_left1 = 31,
-	.gpio_int_button_left2 = 32,
-	.gpio_int_button_right1 = 33,
-	.gpio_int_button_right2 = 34,
+	.gpio_int_button_left1 = 54,
+	.gpio_int_button_left2 = 53,
+	.gpio_int_button_right1 = 56,
+	.gpio_int_button_right2 = 55,
 	
 	.gpio_led1 = 60,
 	.gpio_led2 = -1,
