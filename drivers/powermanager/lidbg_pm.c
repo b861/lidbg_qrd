@@ -256,7 +256,6 @@ void usb_disk_enable(bool enable)
 }
 static int thread_wait_for_dsi83_delay(void *data)
 {
-	msleep(1000);
 	if(!g_var.is_fly)
 	    LCD_ON;
 	if(SOC_Hal_Acc_Callback)
