@@ -279,8 +279,8 @@ static int thread_usb_disk_disable_delay(void *data)
 static int thread_gpio_app_status_delay(void *data)
 {
     ssleep(30);
-    SOC_IO_Output(0, GPIO_APP_STATUS, 0);
-    PM_WARN("<set GPIO_APP_STATUS [%d] 0>\n", GPIO_APP_STATUS);
+    MCU_APP_GPIO_ON;
+    PM_WARN("<set MCU_APP_GPIO_ON >\n");
     return 1;
 }
 int pm_open (struct inode *inode, struct file *filp)
@@ -325,11 +325,11 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         }
         else  if(!strcmp(cmd[1], "android_up"))
         {
-            SOC_IO_Output(0, GPIO_APP_STATUS, 0);
+			MCU_APP_GPIO_ON;
         }
         else  if(!strcmp(cmd[1], "android_down"))
         {
-            SOC_IO_Output(0, GPIO_APP_STATUS, 1);
+			MCU_APP_GPIO_OFF;
         }
         else  if(!strcmp(cmd[1], "gotosleep"))
         {
@@ -614,8 +614,8 @@ static int __init lidbg_pm_init(void)
     if(is_out_updated)
         lidbg_shell_cmd("rm -r "PM_DIR"*");
 
-    SOC_IO_Output(0, MCU_WP_GPIO, 0);
-    PM_WARN("<set MCU_WP_GPIO[%d] 0 30S>\n", MCU_WP_GPIO);
+	MCU_WP_GPIO_ON;
+    PM_WARN("<set MCU_WP_GPIO_ON>\n");
     CREATE_KTHREAD(thread_gpio_app_status_delay, NULL);
     CREATE_KTHREAD(thread_usb_disk_enable_delay, NULL);
     lidbg_shell_cmd("echo 8  > /proc/sys/kernel/printk");

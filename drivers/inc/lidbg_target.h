@@ -3,6 +3,12 @@
 
 #define GPIO_NOTHING LED_GPIO
 
+#define g_hw g_hw_version_specific[g_var.hw_info.hw_version - 1]  
+#define check_gpio(gpio) if(gpio == -1 ) break
+
+
+
+
 #ifdef SOC_msm8x25
 //lpc
 #define  LPC_I2_ID  	  (0)
@@ -25,119 +31,143 @@
 
 struct hw_version_specific
 {
+//gpio
 	int gpio_lcd_reset;
 	int gpio_t123_reset;
+	int gpio_dsi83_en;
 
 	int gpio_usb_id;
 	int gpio_usb_power;
 	int gpio_usb_switch;
+	
+	int gpio_int_gps;
+
+	int gpio_int_button_left1;
+	int gpio_int_button_left2;
+	int gpio_int_button_right1;
+	int gpio_int_button_right2;
+	
+	int gpio_led1;
+	int gpio_led2;
+
+	int gpio_int_mcu_i2c_request;
+	int gpio_mcu_wp;
+	int gpio_mcu_app;
+	
+	int gpio_ts_int;
+	int gpio_ts_rst;
+
+
+//i2c
+	int i2c_bus_dsi83;
+	int i2c_bus_ts;
+	int i2c_bus_gps;
+	int i2c_bus_saf7741;
+	int i2c_bus_lpc;
+
+//ad
+	int ap_key_left;
+	int ap_key_right;
+
 };
+extern struct hw_version_specific g_hw_version_specific[];
 
 
 #ifdef SOC_msm8x26
 
 //lpc
-#define  LPC_I2_ID        (0)
-#define  MCU_IIC_REQ_GPIO (108)
-#define  MCU_WP_GPIO      (35)
-#define  GPIO_APP_STATUS  (36)
+#define  LPC_I2_ID        (g_hw.i2c_bus_lpc)
+#define  MCU_IIC_REQ_GPIO (g_hw.gpio_int_mcu_i2c_request)
 
 
-#define  MCU_WP_GPIO_SET  do{SOC_IO_Output(0, MCU_WP_GPIO, 0); }while(0)
+#define  MCU_WP_GPIO_ON  do{check_gpio(g_hw.gpio_mcu_wp);SOC_IO_Output(0, g_hw.gpio_mcu_wp, 0);}while(0)
+#define  MCU_WP_GPIO_OFF  do{check_gpio(g_hw.gpio_mcu_wp);SOC_IO_Output(0, g_hw.gpio_mcu_wp, 1);}while(0)
+
+#define  MCU_APP_GPIO_ON  do{check_gpio(g_hw.gpio_mcu_app);SOC_IO_Output(0, g_hw.gpio_mcu_app, 0);}while(0)
+#define  MCU_APP_GPIO_OFF  do{check_gpio(g_hw.gpio_mcu_app);SOC_IO_Output(0, g_hw.gpio_mcu_app, 1);}while(0)
 
 //dsi83
-#ifdef PLATFORM_msm8226
-#define 	DSI83_I2C_BUS  		   (2)
-#define 	DSI83_GPIO_EN          (62)
-#elif defined(PLATFORM_msm8974)
-#define 	DSI83_I2C_BUS  		   (3)
-#define 	DSI83_GPIO_EN          (58)
-#endif
+#define  DSI83_I2C_BUS  		   (g_hw.i2c_bus_dsi83)
+#define  DSI83_GPIO_EN          (g_hw.gpio_dsi83_en)
+
 
 //gps
-#define GPS_I2C_BUS (5)
-#define GPS_INT	    (50)
+#define GPS_I2C_BUS (g_hw.i2c_bus_gps)
+#define GPS_INT	    (g_hw.gpio_int_gps)
 
 //led
-#define LED_GPIO  (60)
-#define LED_ON  do{SOC_IO_Output(0, LED_GPIO, 0); }while(0)
-#define LED_OFF  do{SOC_IO_Output(0, LED_GPIO, 1); }while(0)
+#define LED_GPIO (g_hw.gpio_led1)
+#define LED_ON  do{check_gpio(g_hw.gpio_led1);SOC_IO_Output(0, g_hw.gpio_led1, 0); }while(0)
+#define LED_OFF  do{check_gpio(g_hw.gpio_led1);SOC_IO_Output(0, g_hw.gpio_led1, 1); }while(0)
 
 //button
-#define BUTTON_LEFT_1 (31)//k1
-#define BUTTON_LEFT_2 (32)//k2
-#define BUTTON_RIGHT_1 (33)//k3
-#define BUTTON_RIGHT_2 (34)//k4
+#define BUTTON_LEFT_1 (g_hw.gpio_int_button_left1)//k1
+#define BUTTON_LEFT_2 (g_hw.gpio_int_button_left2)//k2
+#define BUTTON_RIGHT_1 (g_hw.gpio_int_button_right1)//k3
+#define BUTTON_RIGHT_2 (g_hw.gpio_int_button_right2)//k4
 
 //lcd
 
 #define LCD_RESET do{\
-			if(g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_lcd_reset == -1 )\
-				break ;\
-			SOC_IO_Output(0, g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_lcd_reset, 0);\
+			check_gpio(g_hw.gpio_lcd_reset);\
+			SOC_IO_Output(0, g_hw.gpio_lcd_reset, 0);\
 			msleep(20);\
-			SOC_IO_Output(0, g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_lcd_reset, 1);\
+			SOC_IO_Output(0, g_hw.gpio_lcd_reset, 1);\
 }while(0)\
 
 
 
 //t123
 #define T123_RESET do{\
-		if(g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_t123_reset == -1 )\
-			break ;\
-		SOC_IO_Output(0, g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_t123_reset, 0);\
+		check_gpio(g_hw.gpio_t123_reset);\
+		SOC_IO_Output(0, g_hw.gpio_t123_reset, 0);\
 		msleep(300);\
-		SOC_IO_Output(0, g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_t123_reset, 1);\
+		SOC_IO_Output(0, g_hw.gpio_t123_reset, 1);\
 		msleep(20);\
 	}while(0)
 
 
 //usb
 #define USB_SWITCH_CONNECT  do{\
-		if(g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_usb_switch == -1 )\
-			break ;\
-			SOC_IO_Output(0, g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_usb_switch, 0);\
+			check_gpio(g_hw.gpio_usb_switch);\
+			SOC_IO_Output(0, g_hw.gpio_usb_switch, 0);\
 	}while(0)
 
 		
 #define USB_SWITCH_DISCONNECT do{\
-		if(g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_usb_switch == -1 )\
-			break ;\
-			SOC_IO_Output(0, g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_usb_switch, 1);\
+			check_gpio(g_hw.gpio_usb_switch);\
+			SOC_IO_Output(0, g_hw.gpio_usb_switch, 1);\
 	}while(0)
 
 
 #define USB_POWER_ENABLE do{\
-		if(g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_usb_power == -1 )\
+		if(g_hw.gpio_usb_power == -1 )\
 			break ;\
 			if(g_var.hw_info.hw_version == 1)\
-				SOC_IO_Output(0, g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_usb_power, 0);\
+				SOC_IO_Output(0, g_hw.gpio_usb_power, 0);\
 			else\
-				SOC_IO_Output(0, g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_usb_power, 1);\
+				SOC_IO_Output(0, g_hw.gpio_usb_power, 1);\
 	}while(0)
 
 
 #define USB_POWER_DISABLE do{\
-		if(g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_usb_power == -1 )\
-			break ;\
+			check_gpio(g_hw.gpio_usb_power);\
 			if(g_var.hw_info.hw_version == 1)\
-				SOC_IO_Output(0, g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_usb_power, 1);\
+				SOC_IO_Output(0, g_hw.gpio_usb_power, 1);\
 			else\
-				SOC_IO_Output(0, g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_usb_power, 0);\
+				SOC_IO_Output(0, g_hw.gpio_usb_power, 0);\
 	}while(0)
 
 
 
 #define USB_ID_LOW_HOST do{\
-		if(g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_usb_id == -1 )\
-			break ;\
-			SOC_IO_Output(0, g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_usb_id, 0);\
+			check_gpio(g_hw.gpio_usb_id);\
+			SOC_IO_Output(0, g_hw.gpio_usb_id, 0);\
 	}while(0)
 
 #define USB_ID_HIGH_DEV do{\
-		if(g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_usb_id == -1 )\
-			break ;\
-			SOC_IO_Output(0, g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_usb_id, 1);\
+			check_gpio(g_hw.gpio_usb_id);\
+			SOC_IO_Output(0, g_hw.gpio_usb_id, 1);\
 	}while(0)
 
 
@@ -154,29 +184,15 @@ struct hw_version_specific
 			USB_ID_HIGH_DEV;\
 			}while(0)
 //ad
-#define AD_KEY_PORT_L   (35)
-#define AD_KEY_PORT_R   (37)
+#define AD_KEY_PORT_L   (35)//(g_hw.ap_key_left)
+#define AD_KEY_PORT_R   (37)//(g_hw.ap_key_right)
 
-#ifdef PLATFORM_msm8974
-#define TS_I2C_BUS              (2)
-#define GTP_RST_PORT    (13)  
-#define GTP_INT_PORT    (14)
-#endif
+#define TS_I2C_BUS      (g_hw.i2c_bus_ts)
+#define GTP_RST_PORT    (g_hw.gpio_ts_rst)  
+#define GTP_INT_PORT    (g_hw.gpio_ts_int)
 
-#ifdef PLATFORM_msm8226
-#define TS_I2C_BUS              (5)
-#define GTP_RST_PORT    (24)  
-#define GTP_INT_PORT    (69)
-#endif
-/*
-//touch
-#define TS_I2C_BUS 		(5)
-#define GTP_RST_PORT    (24)  
-#define GTP_INT_PORT    (69)
-*/
-
-//
-#define  SAF7741_I2C_BUS  (5)
+//7741
+#define SAF7741_I2C_BUS  (g_hw.i2c_bus_saf7741)
 
 /*
 //TBD
@@ -221,105 +237,106 @@ struct thermal_ctrl thermal_ctrl[] =
 
 #endif
 
+
+
+
+
+
+
 #ifdef SOC_mt3360
-
 //lpc
-#define  LPC_I2_ID        (0)
-#define  MCU_IIC_REQ_GPIO (108)
-#define  MCU_WP_GPIO      (35)
-#define  GPIO_APP_STATUS  (36)
+#define  LPC_I2_ID        (g_hw.i2c_bus_lpc)
+#define  MCU_IIC_REQ_GPIO (g_hw.gpio_int_mcu_i2c_request)
 
 
-#define  MCU_WP_GPIO_SET  do{SOC_IO_Output(0, MCU_WP_GPIO, 0); }while(0)
+#define  MCU_WP_GPIO_ON  do{check_gpio(g_hw.gpio_mcu_wp);SOC_IO_Output(0, g_hw.gpio_mcu_wp, 0);}while(0)
+#define  MCU_WP_GPIO_OFF  do{check_gpio(g_hw.gpio_mcu_wp);SOC_IO_Output(0, g_hw.gpio_mcu_wp, 1);}while(0)
+
+#define  MCU_APP_GPIO_ON  do{check_gpio(g_hw.gpio_mcu_app);SOC_IO_Output(0, g_hw.gpio_mcu_app, 0);}while(0)
+#define  MCU_APP_GPIO_OFF  do{check_gpio(g_hw.gpio_mcu_app);SOC_IO_Output(0, g_hw.gpio_mcu_app, 1);}while(0)
 
 //dsi83
-#define 	DSI83_I2C_BUS  		   (2)
-#define 	DSI83_GPIO_EN          (62)
+#define  DSI83_I2C_BUS  		   (g_hw.i2c_bus_dsi83)
+#define  DSI83_GPIO_EN          (g_hw.gpio_dsi83_en)
+
 
 //gps
-#define GPS_I2C_BUS (5)
-#define GPS_INT	    (50)
+#define GPS_I2C_BUS (g_hw.i2c_bus_gps)
+#define GPS_INT	    (g_hw.gpio_int_gps)
 
 //led
-#define LED_GPIO  (60)
-#define LED_ON  do{SOC_IO_Output(0, LED_GPIO, 0); }while(0)
-#define LED_OFF  do{SOC_IO_Output(0, LED_GPIO, 1); }while(0)
+#define LED_GPIO (g_hw.gpio_led1)
+#define LED_ON  do{check_gpio(g_hw.gpio_led1);SOC_IO_Output(0, g_hw.gpio_led1, 0); }while(0)
+#define LED_OFF  do{check_gpio(g_hw.gpio_led1);SOC_IO_Output(0, g_hw.gpio_led1, 1); }while(0)
 
 //button
-#define BUTTON_LEFT_1 (31)//k1
-#define BUTTON_LEFT_2 (32)//k2
-#define BUTTON_RIGHT_1 (33)//k3
-#define BUTTON_RIGHT_2 (34)//k4
+#define BUTTON_LEFT_1 (g_hw.gpio_int_button_left1)//k1
+#define BUTTON_LEFT_2 (g_hw.gpio_int_button_left2)//k2
+#define BUTTON_RIGHT_1 (g_hw.gpio_int_button_right1)//k3
+#define BUTTON_RIGHT_2 (g_hw.gpio_int_button_right2)//k4
 
 //lcd
 
 #define LCD_RESET do{\
-			if(g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_lcd_reset == -1 )\
-				break ;\
-			SOC_IO_Output(0, g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_lcd_reset, 0);\
+			check_gpio(g_hw.gpio_lcd_reset);\
+			SOC_IO_Output(0, g_hw.gpio_lcd_reset, 0);\
 			msleep(20);\
-			SOC_IO_Output(0, g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_lcd_reset, 1);\
+			SOC_IO_Output(0, g_hw.gpio_lcd_reset, 1);\
 }while(0)\
 
 
 
 //t123
 #define T123_RESET do{\
-		if(g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_t123_reset == -1 )\
-			break ;\
-		SOC_IO_Output(0, g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_t123_reset, 0);\
+		check_gpio(g_hw.gpio_t123_reset);\
+		SOC_IO_Output(0, g_hw.gpio_t123_reset, 0);\
 		msleep(300);\
-		SOC_IO_Output(0, g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_t123_reset, 1);\
+		SOC_IO_Output(0, g_hw.gpio_t123_reset, 1);\
 		msleep(20);\
 	}while(0)
 
 
 //usb
 #define USB_SWITCH_CONNECT  do{\
-		if(g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_usb_switch == -1 )\
-			break ;\
-			SOC_IO_Output(0, g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_usb_switch, 0);\
+			check_gpio(g_hw.gpio_usb_switch);\
+			SOC_IO_Output(0, g_hw.gpio_usb_switch, 0);\
 	}while(0)
 
 		
 #define USB_SWITCH_DISCONNECT do{\
-		if(g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_usb_switch == -1 )\
-			break ;\
-			SOC_IO_Output(0, g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_usb_switch, 1);\
+			check_gpio(g_hw.gpio_usb_switch);\
+			SOC_IO_Output(0, g_hw.gpio_usb_switch, 1);\
 	}while(0)
 
 
 #define USB_POWER_ENABLE do{\
-		if(g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_usb_power == -1 )\
+		if(g_hw.gpio_usb_power == -1 )\
 			break ;\
 			if(g_var.hw_info.hw_version == 1)\
-				SOC_IO_Output(0, g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_usb_power, 0);\
+				SOC_IO_Output(0, g_hw.gpio_usb_power, 0);\
 			else\
-				SOC_IO_Output(0, g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_usb_power, 1);\
+				SOC_IO_Output(0, g_hw.gpio_usb_power, 1);\
 	}while(0)
 
 
 #define USB_POWER_DISABLE do{\
-		if(g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_usb_power == -1 )\
-			break ;\
+			check_gpio(g_hw.gpio_usb_power);\
 			if(g_var.hw_info.hw_version == 1)\
-				SOC_IO_Output(0, g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_usb_power, 1);\
+				SOC_IO_Output(0, g_hw.gpio_usb_power, 1);\
 			else\
-				SOC_IO_Output(0, g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_usb_power, 0);\
+				SOC_IO_Output(0, g_hw.gpio_usb_power, 0);\
 	}while(0)
 
 
 
 #define USB_ID_LOW_HOST do{\
-		if(g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_usb_id == -1 )\
-			break ;\
-			SOC_IO_Output(0, g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_usb_id, 0);\
+			check_gpio(g_hw.gpio_usb_id);\
+			SOC_IO_Output(0, g_hw.gpio_usb_id, 0);\
 	}while(0)
 
 #define USB_ID_HIGH_DEV do{\
-		if(g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_usb_id == -1 )\
-			break ;\
-			SOC_IO_Output(0, g_hw_version_specific[g_var.hw_info.hw_version - 1].gpio_usb_id, 1);\
+			check_gpio(g_hw.gpio_usb_id);\
+			SOC_IO_Output(0, g_hw.gpio_usb_id, 1);\
 	}while(0)
 
 
@@ -336,14 +353,15 @@ struct thermal_ctrl thermal_ctrl[] =
 			USB_ID_HIGH_DEV;\
 			}while(0)
 //ad
-#define AD_KEY_PORT_L   (35)
-#define AD_KEY_PORT_R   (37)
+#define AD_KEY_PORT_L   (35)//(g_hw.ap_key_left)
+#define AD_KEY_PORT_R   (37)//(g_hw.ap_key_right)
 
+#define TS_I2C_BUS      (g_hw.i2c_bus_ts)
+#define GTP_RST_PORT    (g_hw.gpio_ts_rst)  
+#define GTP_INT_PORT    (g_hw.gpio_ts_int)
 
-//touch
-#define TS_I2C_BUS 		(5)
-#define GTP_RST_PORT    (24)  
-#define GTP_INT_PORT    (69)
+//7741
+#define SAF7741_I2C_BUS  (g_hw.i2c_bus_saf7741)
 
 /*
 //TBD
@@ -379,12 +397,8 @@ struct thermal_ctrl thermal_ctrl[] =
 #define CPU_TEMP_PATH 		"/sys/class/thermal/thermal_zone5/temp"
 #define TEMP_FREQ_TEST_STR	 "300000,384000,600000,787200,998400,1094400,1190400,1305600,1344000,1401600"
 
-
 #define FLY_GPS_SO  "gps.msm8226.so"
 
-
 #endif
-
-extern struct hw_version_specific g_hw_version_specific[];
 
 #endif

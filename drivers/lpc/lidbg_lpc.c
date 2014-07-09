@@ -315,8 +315,6 @@ static int  lpc_probe(struct platform_device *pdev)
 {
     DUMP_FUN;
 	
-	MCU_WP_GPIO_SET;
-
     if((g_var.is_fly) || (g_var.recovery_mode))
     {
         lidbg("lpc_init do nothing\n");
