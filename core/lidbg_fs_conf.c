@@ -95,7 +95,7 @@ void update_file_tm(void)
     get_file_mftime(PATH_CORE_CONF, &precorefile_tm);
     get_file_mftime(PATH_DRIVERS_CONF, &predriverfile_tm);
     get_file_mftime(PATH_CMD_CONF, &precmdfile_tm);
-    get_file_mftime(PATH_DRIVERS_CONF, &pre_machine_info_tm);
+    get_file_mftime(PATH_MACHINE_INFO_FILE, &pre_machine_info_tm);
 }
 static int thread_pollfile_func(void *data)
 {
