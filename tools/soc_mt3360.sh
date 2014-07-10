@@ -53,6 +53,6 @@ function soc_make_otapackage()
 	if [[ $TARGET_PRODUCT = "" ]];then
 		source ./selfenv&&lunch 5
 	fi
-		./selfbuild
+		./selfbuild makeimage
 }
 . $DBG_TOOLS_PATH/soc_common.sh
