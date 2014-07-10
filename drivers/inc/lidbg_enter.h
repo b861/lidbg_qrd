@@ -3,6 +3,9 @@
 #define _FLY_HAL__
 
 #ifdef BUILD_DRIVERS
+#include <flymeg.h>
+
+#include <lidbg_flyparameter.h>
 #include <lidbg_target.h>
 #include <devices.h>
 #include <lidbg_bpmsg.h>
