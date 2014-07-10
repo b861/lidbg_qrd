@@ -33,6 +33,7 @@ struct hw_version_specific g_hw_version_specific[] =
 
 	
 	.i2c_bus_dsi83 = 2,
+	.i2c_bus_bx5b3a= 2,
 	.i2c_bus_ts = 5,
 	.i2c_bus_gps = 5,
 	.i2c_bus_saf7741 = 5,
@@ -70,6 +71,7 @@ struct hw_version_specific g_hw_version_specific[] =
 
 	
 	.i2c_bus_dsi83 = 2,
+	.i2c_bus_bx5b3a= 2,
 	.i2c_bus_ts = 5,
 	.i2c_bus_gps = 5,
 	.i2c_bus_saf7741 = 5,
@@ -114,6 +116,7 @@ struct hw_version_specific g_hw_version_specific[] =
 
 	
 	.i2c_bus_dsi83 = 3,
+	.i2c_bus_bx5b3a= 3,
 	.i2c_bus_ts = 2,
 	.i2c_bus_gps = 2,
 	.i2c_bus_saf7741 = 2,
@@ -152,6 +155,7 @@ struct hw_version_specific g_hw_version_specific[] =
 	
 	
 	.i2c_bus_dsi83 = 3,
+	.i2c_bus_bx5b3a= 3,
 	.i2c_bus_ts = 2,
 	.i2c_bus_gps = 2,
 	.i2c_bus_saf7741 = 2,

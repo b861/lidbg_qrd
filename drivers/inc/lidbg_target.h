@@ -60,6 +60,7 @@ struct hw_version_specific
 
 //i2c
 	int i2c_bus_dsi83;
+	int i2c_bus_bx5b3a;
 	int i2c_bus_ts;
 	int i2c_bus_gps;
 	int i2c_bus_saf7741;
@@ -74,7 +75,9 @@ extern struct hw_version_specific g_hw_version_specific[];
 
 
 #ifdef SOC_msm8x26
-
+#ifdef PLATFORM_msm8226
+#define FREQ_CTRL_BY_TEMP
+#endif
 //lpc
 #define  LPC_I2_ID        (g_hw.i2c_bus_lpc)
 #define  MCU_IIC_REQ_GPIO (g_hw.gpio_int_mcu_i2c_request)
@@ -90,6 +93,8 @@ extern struct hw_version_specific g_hw_version_specific[];
 #define  DSI83_I2C_BUS  		   (g_hw.i2c_bus_dsi83)
 #define  DSI83_GPIO_EN          (g_hw.gpio_dsi83_en)
 
+#define  BX5B3A_I2C_BUS  		   (g_hw.i2c_bus_bx5b3a)
+#define  BX5B3A_GPIO_EN  DSI83_GPIO_EN
 
 //gps
 #define GPS_I2C_BUS (g_hw.i2c_bus_gps)
@@ -231,7 +236,9 @@ struct thermal_ctrl thermal_ctrl[] =
 
 
 #define CPU_TEMP_PATH 		"/sys/class/thermal/thermal_zone5/temp"
+//cat sys/devices/system/cpu/cpu0/cpufreq/scaling_available_frequencies
 #define TEMP_FREQ_TEST_STR	 "300000,384000,600000,787200,998400,1094400,1190400,1305600,1344000,1401600"
+//300000 422400 652800 729600 883200 960000 1036800 1190400 1267200 1497600 1574400 1728000 1958400 2265600
 
 
 #ifdef PLATFORM_msm8226

@@ -149,12 +149,12 @@ void logcat_lunch(char *key, char *value )
 }
 void cb_cp_data_to_udisk(char *key, char *value )
 {
+    char shell_cmd[128] = {0}, tbuff[128] = {0};
 #ifdef SOC_msm8x25
     fs_cp_data_to_udisk(false);
 #else
     fs_file_write("/dev/lidbg_drivers_dbg0",false, "appcmd *158#004", strlen("appcmd *158#004"));
     ssleep(7);
-    char shell_cmd[128] = {0}, tbuff[128] = {0};
     lidbg_get_current_time(tbuff, NULL);
     sprintf(shell_cmd, "mkdir "USB_MOUNT_POINT"/ID-%d-%s", get_machine_id() , tbuff);
     lidbg_shell_cmd(shell_cmd);

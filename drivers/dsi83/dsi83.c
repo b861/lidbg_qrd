@@ -279,12 +279,12 @@ static void dsi83_work_func(struct work_struct *work)
 int is_dsi83_exist(void)
 {
     int exist, retry;
-    for(retry = 0; retry < 10; retry++)
+    for(retry = 0; retry < 5; retry++)
     {
         exist = SN65_devices_read_id();
         if (exist != 0)
         {
-            msleep(100);
+            msleep(50);
             continue;
         }
         else
@@ -322,6 +322,15 @@ static int dsi83_probe(struct platform_device *pdev)
     if(is_dsi83_exist() < 0)
    	{
    		lidbg("dsi83.miss\n");
+		
+		if(g_var.is_fly)
+		{
+			lidbg_insmod("/flysystem/lib/out/bx5b3a.ko");
+		}
+		else
+		{
+			lidbg_insmod("/system/lib/modules/out/bx5b3a.ko");
+		}
 		return 0;
    	}
    	register_lidbg_notifier(&lidbg_notifier_dsi83);

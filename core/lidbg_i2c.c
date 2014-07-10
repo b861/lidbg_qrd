@@ -672,6 +672,15 @@ int i2c_api_detach(struct i2c_adapter *adap)
 }
 
 
+ struct i2c_client * i2c_get_client(int bus_id)
+ {
+	 struct i2c_api *i2c_api ;
+	 i2c_api = get_i2c_api(bus_id);
+	 return i2c_api->client;
+
+ }
+
+
 static int __init i2c_api_init(void)
 {
     //±éÀúadapter
@@ -732,5 +741,7 @@ EXPORT_SYMBOL(lidbg_i2c_running);
 EXPORT_SYMBOL(i2c_api_do_recv_SAF7741);
 EXPORT_SYMBOL(i2c_api_do_send_TEF7000);
 EXPORT_SYMBOL(i2c_api_do_recv_TEF7000);
-EXPORT_SYMBOL(i2c_api_set_rate);//add by huangzongqiang
+EXPORT_SYMBOL(i2c_api_set_rate);
+EXPORT_SYMBOL(i2c_get_client);
+
 
