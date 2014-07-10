@@ -160,6 +160,7 @@ void parse_cmd(char *pt)
             lidbg_shell_cmd("screencap -p /data/screenshot.png &");
             lidbg_shell_cmd("ps > /data/ps.txt");
             lidbg_shell_cmd("df > /data/df.txt");
+            lidbg_shell_cmd("lsmod > /data/lsmod.txt");
             lidbg_shell_cmd("chmod 777 /data/*.txt");
             lidbg_shell_cmd("chmod 777 /data/*.png");
             lidbg("\n\nLOG_SHELL_TOP_DF_PS-\n");
