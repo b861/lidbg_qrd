@@ -88,13 +88,13 @@ void show_filename_list(struct list_head *client_list)
 //zone end
 
 //zone below [fs.cmn.driver]
-int fs_file_write(char *filename, char *wbuff)
+int fs_file_write(char *filename,bool creat, void *wbuff, int len)
 {
     struct file *filep;
     mm_segment_t old_fs;
     unsigned int file_len = 1;
 
-    filep = filp_open(filename,  O_CREAT | O_WRONLY, 0);
+    filep = filp_open(filename, creat? O_CREAT | O_WRONLY:O_WRONLY, 0);
     if(IS_ERR(filep))
     {
         printk(KERN_CRIT"err:filp_open,%s\n\n\n\n",filename);
@@ -105,7 +105,7 @@ int fs_file_write(char *filename, char *wbuff)
     set_fs(get_ds());
 
     if(wbuff)
-        filep->f_op->write(filep, wbuff, strlen(wbuff), &filep->f_pos);
+        filep->f_op->write(filep, wbuff, len, &filep->f_pos);
     set_fs(old_fs);
     filp_close(filep, 0);
     return file_len;

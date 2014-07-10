@@ -78,7 +78,7 @@ int launch_file_cmd(const char *filename)
             p[1] = '\0';
             loop = simple_strtoul(p, 0, 0);
             for(; loop > 0; loop--)
-                fs_file_write(LIDBG_NODE, token + 1);
+                fs_file_write(LIDBG_NODE,false, token + 1,strlen(token + 1));
         }
     }
     kfree(file_ptr);

@@ -103,6 +103,8 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#016--enable wifi adb\n");
             fs_mem_log("*158#017--disable wifi adb\n");
             fs_mem_log("*158#018--origin gps\n");
+            fs_mem_log("*158#019--enable system print\n");
+            fs_mem_log("*158#020--disable system print\n");
         }
 
         if (!strcmp(argv[1], "*158#999"))
@@ -198,16 +200,35 @@ void parse_cmd(char *pt)
             set_wifi_adb_mode(false);
         else if (!strcmp(argv[1], "*158#018"))
         {
-			lidbg_shell_cmd("mount -o remount /system");
-			lidbg_shell_cmd("mount -o remount /flysystem");
-			lidbg_shell_cmd("rm /flysystem/lib/out/"FLY_GPS_SO);
-			lidbg_shell_cmd("rm /system/lib/modules/out/"FLY_GPS_SO);
-			lidbg_shell_cmd("rm /flysystem/lib/hw/"FLY_GPS_SO);
-		    lidbg_domineering_ack();
-			msleep(3000);
-			lidbg_reboot();
-		}
-
+            lidbg_shell_cmd("mount -o remount /system");
+            lidbg_shell_cmd("mount -o remount /flysystem");
+            lidbg_shell_cmd("rm /flysystem/lib/out/"FLY_GPS_SO);
+            lidbg_shell_cmd("rm /system/lib/modules/out/"FLY_GPS_SO);
+            lidbg_shell_cmd("rm /flysystem/lib/hw/"FLY_GPS_SO);
+            lidbg_domineering_ack();
+            msleep(3000);
+            lidbg_reboot();
+        }
+        else if (!strcmp(argv[1], "*158#019"))
+        {
+            g_recovery_meg->bootParam.upName.val = 1;
+            if(flyparameter_info_save(g_recovery_meg))
+            {
+                lidbg_domineering_ack();
+                msleep(3000);
+                lidbg_reboot();
+            }
+        }
+        else if (!strcmp(argv[1], "*158#020"))
+        {
+            g_recovery_meg->bootParam.upName.val = 0;
+            if(flyparameter_info_save(g_recovery_meg))
+            {
+                lidbg_domineering_ack();
+                msleep(3000);
+                lidbg_reboot();
+            }
+        }
         else if (!strcmp(argv[1], "*168#001"))
         {
             encode = true;

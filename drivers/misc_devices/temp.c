@@ -158,7 +158,7 @@ void cb_kv_cpu_temp_test(char *key, char *value)
     if(value && *value == '1')
     {
         lidbg_rm(TEMP_FREQ_TEST_RESULT);
-        fs_file_write(TEMP_FREQ_COUNTER, "0");
+        fs_file_write(TEMP_FREQ_COUNTER,true, "0",strlen("0"));
         ssleep(1);
         lidbg_reboot();
     }

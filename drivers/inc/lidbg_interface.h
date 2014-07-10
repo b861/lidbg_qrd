@@ -3,10 +3,13 @@
 #define _FLY_INTERFACE__
 
 #ifdef BUILD_DRIVERS
+#include <flymeg.h>
+
 #include <lidbg_target.h>
 #include <misc_devices.h>
 #include <lidbg_bpmsg.h>
 #include <lidbg_ts_probe.h>
+#include <lidbg_flyparameter.h>
 #include <lidbg_monkey.h>
 #include <lidbg_lpc.h>
 #else
