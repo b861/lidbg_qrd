@@ -71,7 +71,7 @@ int thread_thermal(void *data)
         log_temp();
         cur_temp = soc_temp_get();
         //lidbg("MSM_THERM: %d\n",cur_temp);
-        
+ #ifdef FREQ_CTRL_BY_TEMP     
         if     ((cur_temp > THRESHOLDS_STEP0 ) && (cur_temp <= THRESHOLDS_STEP1 ) && (cur_frq != FREQ_STEP0))
         {
             lidbg_readwrite_file(FREQ_MAX_NODE, NULL, FREQ_STEP0_STRING, sizeof(FREQ_STEP0_STRING) - 1);
@@ -96,7 +96,7 @@ int thread_thermal(void *data)
             lidbg("set max freq to: %d,temp:%d\n", FREQ_STEP3,cur_temp);
             cur_frq = FREQ_STEP3;
         }
-
+#endif
     }
     return 0;
 }

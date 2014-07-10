@@ -90,7 +90,7 @@ int main(int argc, char **argv)
     {
 		static int cnt = 0;
 		sleep(1);
-		if(++cnt>=20)
+		if(++cnt>=5)
 			break;
 	}
 	

@@ -234,5 +234,8 @@ static  int my_input_driver_init(void)
 module_init(my_input_driver_init);
 
 EXPORT_SYMBOL_GPL(set_touch_pos);
+MODULE_AUTHOR("fly");
+MODULE_DESCRIPTION("input driver,just for test");
+MODULE_LICENSE("GPL");
 
 #endif
