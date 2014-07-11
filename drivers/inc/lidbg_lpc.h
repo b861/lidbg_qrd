@@ -12,10 +12,12 @@
         SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\
 				}while(0)
 
+#define LPC_CMD_NO_RESET
+/*
 #define LPC_CMD_NO_RESET   do{   \
 		u8 buff[] = {0x00,0x03,0x01,0xff};\
         SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\
 				}while(0)
-
+*/
 
 #endif
