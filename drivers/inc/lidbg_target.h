@@ -10,6 +10,10 @@
 
 
 #ifdef SOC_msm8x25
+//config
+#define TRACE_MSG_FROM_KMSG
+
+
 //lpc
 #define  LPC_I2_ID  	  (0)
 #define  MCU_WP_GPIO 	  (29)
@@ -75,8 +79,12 @@ extern struct hw_version_specific g_hw_version_specific[];
 
 
 #ifdef SOC_msm8x26
+//config
+
 #ifdef PLATFORM_msm8226
 #define FREQ_CTRL_BY_TEMP
+#define SYSTEM_SWITCH_EN
+#define TRACE_MSG_FROM_KMSG
 #endif
 //lpc
 #define  LPC_I2_ID        (g_hw.i2c_bus_lpc)

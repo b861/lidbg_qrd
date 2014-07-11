@@ -3,7 +3,6 @@
 
 #define DEVICE_NAME "lidbg_trace_msg"
 #define LIDBG_TRACE_MSG_FIFO_SIZE		(32  * 1024)
-#define TRACE_MSG_FROM_KMSG 1
 
 static LIST_HEAD(lidbg_trace_msg_string_list);
 static LIST_HEAD(lidbg_trace_msg_cb_list_head);
@@ -100,6 +99,7 @@ static void lidbg_trace_msg_is_enough(int len)
 
 }
 
+#ifdef  TRACE_MSG_FROM_KMSG
 static int thread_trace_msg_in(void *data)
 {
     int len;
@@ -139,6 +139,7 @@ static int thread_trace_msg_in(void *data)
     filp_close(filep, 0);
     return 0;
 }
+#endif
 
 static int thread_trace_msg_out(void *data)
 {
@@ -257,7 +258,7 @@ static int  lidbg_trace_msg_probe(struct platform_device *ppdev)
     fs_register_filename_list(LIDBG_TRACE_MSG_PATH, true);
     FS_REGISTER_INT(pdev->disable_flag, "trace_msg_disable", 1, NULL);
 
-#if  TRACE_MSG_FROM_KMSG
+#ifdef  TRACE_MSG_FROM_KMSG
     CREATE_KTHREAD(thread_trace_msg_in, NULL);
 #endif
     CREATE_KTHREAD(thread_trace_msg_out, NULL);

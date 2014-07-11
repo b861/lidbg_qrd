@@ -213,7 +213,7 @@ void cb_kv_cmd(char *key, char *value)
 int misc_init(void *data)
 {
     LIDBG_WARN("<==IN==>\n");
-#ifdef PLATFORM_msm8226
+#ifdef SYSTEM_SWITCH_EN
     system_switch_init();
 #endif
     te_regist_password("001101", cb_password_upload);
