@@ -311,13 +311,11 @@ int update_list(const char *filename, struct list_head *client_list)
             ptmp = memchr(key, '=', strlen(key));
             if(ptmp != NULL)
             {
-                char *p = NULL;
                 value = ptmp + 1;
                 *ptmp = '\0';
 
-                //del '\n' or else [strcmp]will give the err result.
-                if((p = strchr(value, '\n')) != NULL)
-                    * p = '\0';
+                if(value[strlen(value) - 1] == 13)
+                    value[strlen(value) - 1] = '\0';
 
                 FS_ALWAYS("<%s,%s>\n", key, value);
                 {
@@ -339,7 +337,7 @@ int update_list(const char *filename, struct list_head *client_list)
                             }
                             else if (pos->yourvalue && value && strcmp(pos->yourvalue, value))
                             {
-                                FS_ALWAYS("<--call.string:%s=%s,%s,%d,%d,%d>\n", key, value, pos->yourvalue, strlen(value), strlen(pos->yourvalue), strncmp(pos->yourvalue, value, sizeof(*pos->yourvalue)));
+                                FS_ALWAYS("<--call.string:%s=%s,%s,%d,%d,%d>\n", key, value, pos->yourvalue, strlen(value), strlen(pos->yourvalue), strcmp(pos->yourvalue, value));
                                 strncpy(pos->yourvalue, value, strlen(pos->yourvalue));
                                 if (pos->callback)
                                     pos->callback(key, value);
