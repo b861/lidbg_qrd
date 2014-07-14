@@ -33,7 +33,7 @@
 
 
 
-struct i2c_client *i2c_quick_client;
+struct i2c_client *i2c_quick_client = NULL;
 
 
 LIDBG_DEFINE;
@@ -280,7 +280,13 @@ static int bx5b3a_probe(struct platform_device *pdev)
 	lidbg("%s:enter\n", __func__);
 	
 	i2c_quick_client = i2c_get_client(BX5B3A_I2C_BUS);
+	if(i2c_quick_client == NULL)
+	{
+		lidbgerr("bx5b3a.get i2c_client fail\n");
+		return 0;
+	}
 	i2c_quick_client->addr = BX5B3A_I2C_ADDR;
+		
 #if 0
     if(is_bx5b3a_exist() < 0)
    	{
