@@ -14,7 +14,7 @@ int get_file_int(char *file)
 {
     char cpu_temp[3];
     int temp = -1;
-    fs_file_read(file, cpu_temp, sizeof(cpu_temp));
+    fs_file_read(file, cpu_temp, 0,sizeof(cpu_temp));
     temp = simple_strtoul(cpu_temp, 0, 0);
     return temp;
 }
@@ -158,7 +158,7 @@ void cb_kv_cpu_temp_test(char *key, char *value)
     if(value && *value == '1')
     {
         lidbg_rm(TEMP_FREQ_TEST_RESULT);
-        fs_file_write(TEMP_FREQ_COUNTER,true, "0",strlen("0"));
+        fs_file_write(TEMP_FREQ_COUNTER,true, "0",0,strlen("0"));
         ssleep(1);
         lidbg_reboot();
     }

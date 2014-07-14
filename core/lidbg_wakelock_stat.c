@@ -163,7 +163,7 @@ static int thread_wl_item_dbg(void *data)
     while(!kthread_should_stop())
     {
         sprintf(cmd_tmp, "c wakelock lock count 0 0 f%d", ++count);
-        fs_file_write("/dev/mlidbg0",false, cmd_tmp,strlen(cmd_tmp));
+        fs_file_write("/dev/mlidbg0",false, cmd_tmp,0,strlen(cmd_tmp));
         if(!g_wakelock_dbg_item)
             ssleep(30);
         else

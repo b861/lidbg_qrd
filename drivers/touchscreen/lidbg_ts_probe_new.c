@@ -96,8 +96,8 @@ void ts_gpio_free(void)
 void ts_gpio_free_gt911(void)
 {
    #ifndef SOC_msm8x25
-   gpio_free(GTP_INT_PORT);
-   gpio_free(GTP_RST_PORT);
+   //gpio_free(GTP_INT_PORT);
+   //gpio_free(GTP_RST_PORT);
    #endif
 }
 

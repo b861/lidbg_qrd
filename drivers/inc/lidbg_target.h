@@ -10,6 +10,9 @@
 
 
 #ifdef SOC_msm8x25
+
+#define FLYPARAMETER_NODE "/dev/block/mmcblk0p25"
+
 //config
 #define TRACE_MSG_FROM_KMSG
 
@@ -255,6 +258,13 @@ struct thermal_ctrl thermal_ctrl[] =
 #define FLY_GPS_SO  "gps.msm8974.so"
 #endif
 
+#ifdef PLATFORM_msm8226
+#define FLYPARAMETER_NODE "/dev/block/mmcblk0p25"
+#elif defined(PLATFORM_msm8974)
+#define FLYPARAMETER_NODE "/dev/block/mmcblk0p25"
+#endif
+
+
 #endif
 
 
@@ -264,6 +274,10 @@ struct thermal_ctrl thermal_ctrl[] =
 
 
 #ifdef SOC_mt3360
+
+#define FLYPARAMETER_NODE "/dev/block/mmcblk0p25"
+
+
 //lpc
 #define  LPC_I2_ID        (g_hw.i2c_bus_lpc)
 #define  MCU_IIC_REQ_GPIO (g_hw.gpio_int_mcu_i2c_request)

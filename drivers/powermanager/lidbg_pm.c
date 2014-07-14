@@ -507,7 +507,7 @@ void observer_prepare(void)
     char cmd[128] = {0};
     lidbg_chmod("/sys/module/msm_show_resume_irq/parameters/debug_mask");
     ssleep(1);
-    fs_file_write("/sys/module/msm_show_resume_irq/parameters/debug_mask",false, "1",strlen("1"));
+    fs_file_write("/sys/module/msm_show_resume_irq/parameters/debug_mask",false, "1",0,strlen("1"));
     sprintf(cmd, "cat /proc/interrupts > %sinterrupts.txt &", LIDBG_LOG_DIR);
     lidbg_shell_cmd(cmd);
     fs_register_filename_list(LIDBG_LOG_DIR"interrupts.txt", true);

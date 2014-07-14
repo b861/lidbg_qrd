@@ -211,6 +211,8 @@ struct hw_info
 	int hw_version;
 	int ts_type;
 	int ts_config;
+	int lcd_type;
+	int reserve[12];
 };
 
 struct lidbg_pvar_t
@@ -229,6 +231,11 @@ struct lidbg_pvar_t
 	struct hw_info hw_info;
 };
 
+typedef struct {
+	int flag;
+	struct hw_info hw_info;
+}fly_hw_data;
+
 struct lidbg_interface
 {
     union
@@ -239,7 +246,7 @@ struct lidbg_interface
     union
     {
         struct lidbg_pvar_t soc_pvar_tbl;
-        unsigned char reserve1[128];
+        unsigned char reserve1[512];
     };
 };
 

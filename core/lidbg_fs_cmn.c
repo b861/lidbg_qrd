@@ -88,7 +88,7 @@ void show_filename_list(struct list_head *client_list)
 //zone end
 
 //zone below [fs.cmn.driver]
-int fs_file_write(char *filename,bool creat, void *wbuff, int len)
+int fs_file_write(char *filename,bool creat, void *wbuff, loff_t offset, int len)
 {
     struct file *filep;
     mm_segment_t old_fs;
@@ -103,6 +103,8 @@ int fs_file_write(char *filename,bool creat, void *wbuff, int len)
 
     old_fs = get_fs();
     set_fs(get_ds());
+	
+    filep->f_op->llseek(filep, offset, SEEK_SET);
 
     if(wbuff)
         filep->f_op->write(filep, wbuff, len, &filep->f_pos);
@@ -110,7 +112,7 @@ int fs_file_write(char *filename,bool creat, void *wbuff, int len)
     filp_close(filep, 0);
     return file_len;
 }
-int fs_file_read(const char *filename, char *rbuff, int readlen)
+int fs_file_read(const char *filename, char *rbuff, loff_t offset,int readlen)
 {
     struct file *filep;
     mm_segment_t old_fs;
@@ -125,7 +127,7 @@ int fs_file_read(const char *filename, char *rbuff, int readlen)
     old_fs = get_fs();
     set_fs(get_ds());
 
-    filep->f_op->llseek(filep, 0, 0);
+    filep->f_op->llseek(filep, offset, SEEK_SET);
     read_len = filep->f_op->read(filep, rbuff, readlen, &filep->f_pos);
 
     set_fs(old_fs);
@@ -389,7 +391,7 @@ bool fs_is_file_updated(char *filename, char *infofile)
     if(fs_get_file_size(infofile) > 0)
     {
     
-        if ( (fs_file_read(infofile, pres, sizeof(pres)) > 0) && (!strcmp(news, pres)))
+        if ( (fs_file_read(infofile, pres, 0 ,sizeof(pres)) > 0) && (!strcmp(news, pres)))
             return false;
     }
     fs_clear_file(infofile);

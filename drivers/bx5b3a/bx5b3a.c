@@ -278,7 +278,7 @@ static int bx5b3a_probe(struct platform_device *pdev)
 {
 	int ret = 0;
 	lidbg("%s:enter\n", __func__);
-	
+
 	i2c_quick_client = i2c_get_client(BX5B3A_I2C_BUS);
 	if(i2c_quick_client == NULL)
 	{

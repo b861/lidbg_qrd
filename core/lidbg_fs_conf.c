@@ -78,7 +78,7 @@ int launch_file_cmd(const char *filename)
             p[1] = '\0';
             loop = simple_strtoul(p, 0, 0);
             for(; loop > 0; loop--)
-                fs_file_write(LIDBG_NODE,false, token + 1,strlen(token + 1));
+                fs_file_write(LIDBG_NODE,false, token + 1,0,strlen(token + 1));
         }
     }
     kfree(file_ptr);
@@ -143,7 +143,7 @@ void set_machine_id(void)
     char string[64];
     if(fs_is_file_exist(MACHINE_ID_FILE))
     {
-        fs_file_read(MACHINE_ID_FILE, string,sizeof(string));
+        fs_file_read(MACHINE_ID_FILE, string,0,sizeof(string));
         machine_id = simple_strtoul(string, 0, 0);
     }
     else

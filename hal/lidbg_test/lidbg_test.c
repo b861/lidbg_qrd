@@ -4,6 +4,8 @@
 
 int main(int argc, char **argv)
 {
+	
+	system("su");
 	system("chmod 777 /sys/class/leds/button-backlight/brightness");
 	system("chmod 777 /sys/power/wake_lock");
 	system("chmod 777 /sys/power/wake_unlock");
