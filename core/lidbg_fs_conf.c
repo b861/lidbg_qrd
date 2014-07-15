@@ -201,7 +201,7 @@ static int thread_udisk_conf(void *data)
             FS_WARN("start\n");
             update_list(USB_MOUNT_POINT"/conf/core.conf", &lidbg_core_list);
             update_list(USB_MOUNT_POINT"/conf/drivers.conf", &lidbg_drivers_list);
-            update_list(USB_MOUNT_POINT"/conf/machine_info.conf", &lidbg_machine_info_list);
+ //           update_list(USB_MOUNT_POINT"/conf/machine_info.conf", &lidbg_machine_info_list);
         }
     }
     return 1;
