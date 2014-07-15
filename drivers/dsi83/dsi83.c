@@ -304,6 +304,7 @@ static int lidbg_event_dsi83(struct notifier_block *this, unsigned long event, v
 		dsi83_suspend();
         break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_SCREEN_ON):
+		msleep(100);
 		dsi83_resume();
         break;
     default:
@@ -315,6 +316,14 @@ static struct notifier_block lidbg_notifier_dsi83 =
 {
     .notifier_call = lidbg_event_dsi83,
 };
+
+int dsi83_rst_proc(char *buf, char **start, off_t offset, int count, int *eof, void *data )
+{
+    fs_mem_log("call:%s\n",__func__);
+	lidbg("%s:enter\n", __func__);
+	dsi83_resume();
+    return 1;
+}
 static int dsi83_probe(struct platform_device *pdev)
 {
 	int ret = 0;
@@ -333,6 +342,9 @@ static int dsi83_probe(struct platform_device *pdev)
 		}
 		return 0;
    	}
+		
+   	create_proc_read_entry("dsi83_rst", 0, NULL, dsi83_rst_proc, NULL);
+		
    	register_lidbg_notifier(&lidbg_notifier_dsi83);
 	INIT_DELAYED_WORK(&dsi83_work, dsi83_work_func);
 	dsi83_workqueue = create_workqueue("dsi83");
