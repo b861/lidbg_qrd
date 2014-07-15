@@ -1,23 +1,34 @@
 
 #include "lidbg.h"
 #define PATH_FLY_HW_INFO_CONFIG USB_MOUNT_POINT"/machine_info.conf"
-#define PATH_FLY_HW_INFO_CONFIG2 USB_MOUNT_POINT"/conf/machine_info.conf"
 
 LIDBG_DEFINE;
 
 static fly_hw_data *g_fly_hw_data = NULL;
-static struct completion usb_flyparameter_wait;
 recovery_meg_t *g_recovery_meg = NULL;
 char *p_kmem = NULL;
+int update_hw_info = 0;
 
 void fly_hw_info_show(char *when, fly_hw_data *p_info)
 {
-    lidbg("flyparameter:--------%s:g_fly_hw_data:flag=%x,hw=%d,ts=%d,%d,lcd=%d\n", when,
+    lidbg("flyparameter:%s:g_fly_hw_data:flag=%x,hw=%d,ts=%d,%d,lcd=%d\n", when,
           p_info->flag,
           p_info->hw_info.hw_version,
           p_info->hw_info.ts_type,
           p_info->hw_info.ts_config,
           p_info->hw_info.lcd_type);
+}
+
+void read_fly_hw_config_file(fly_hw_data *p_info)
+{
+    LIST_HEAD(hw_config_list);
+    fs_fill_list(PATH_FLY_HW_INFO_CONFIG, FS_CMD_FILE_CONFIGMODE, &hw_config_list);
+    fs_get_intvalue(&hw_config_list, "hw_version", &(p_info->hw_info.hw_version), NULL);
+    fs_get_intvalue(&hw_config_list, "ts_type", &(p_info->hw_info.ts_type), NULL);
+    fs_get_intvalue(&hw_config_list, "ts_config", &(p_info->hw_info.ts_config), NULL);
+    fs_get_intvalue(&hw_config_list, "lcd_type", &(p_info->hw_info.lcd_type), NULL);
+	g_fly_hw_data->flag = 0x12345678;
+	fly_hw_info_show("fs_fill_list", p_info);
 }
 
 bool fly_hw_info_get(fly_hw_data *p_info)
@@ -32,6 +43,8 @@ bool fly_hw_info_get(fly_hw_data *p_info)
 
 bool fly_hw_info_save(fly_hw_data *p_info)
 {
+	DUMP_FUN;
+	read_fly_hw_config_file(p_info);
     if( p_info && fs_file_write(FLYPARAMETER_NODE, false, (void *) p_info, MEM_SIZE_512_KB , sizeof(fly_hw_data)) >= 0)
     {
         lidbg("fly_hw_data:save success\n");
@@ -41,6 +54,10 @@ bool fly_hw_info_save(fly_hw_data *p_info)
     return false;
 }
 
+void cb_fly_hw_info_save(char *key, char *value )
+{
+	fly_hw_info_save(g_fly_hw_data);
+}
 
 bool flyparameter_info_get(void)
 {
@@ -64,30 +81,21 @@ bool flyparameter_info_save(recovery_meg_t *p_info)
     return false;
 }
 
-static void read_fly_hw_config_file(fly_hw_data *p_info)
+int thread_lidbg_fly_hw_info_update(void *data)
 {
-    LIST_HEAD(hw_config_list);
-    fs_fill_list(PATH_FLY_HW_INFO_CONFIG, FS_CMD_FILE_CONFIGMODE, &hw_config_list);
-    fs_get_intvalue(&hw_config_list, "hw_version", &(p_info->hw_info.hw_version), NULL);
-    fs_get_intvalue(&hw_config_list, "ts_type", &(p_info->hw_info.ts_type), NULL);
-    fs_get_intvalue(&hw_config_list, "ts_config", &(p_info->hw_info.ts_config), NULL);
-    fs_get_intvalue(&hw_config_list, "lcd_type", &(p_info->hw_info.lcd_type), NULL);
-    fly_hw_info_show("fs_fill_list", p_info);
+	while(!fs_is_file_exist(PATH_FLY_HW_INFO_CONFIG))
+		msleep(100);
+	
+	fly_hw_info_save(g_fly_hw_data);
+	return 0;
 }
 
-//from cmd line
-int update_hw_info = 0;
-__setup("update_hw_info", update_hw_info);
-void hw_info_check_and_save(fly_hw_data *p_info)
-{
-    if((g_var.recovery_mode && update_hw_info && fs_is_file_exist(PATH_FLY_HW_INFO_CONFIG))
-            || fs_is_file_exist(PATH_FLY_HW_INFO_CONFIG2))
-    {
-        read_fly_hw_config_file(p_info);
 
-        p_info->flag = 0x12345678;
-        fly_hw_info_save(p_info);
-    }
+static bool get_cmdline(void)
+{
+	char cmdline[512];
+	fs_file_read("/proc/cmdline", cmdline, 0, sizeof(cmdline));
+	return ((strstr(cmdline,"update_hw_info")==NULL)?false:true);
 }
 
 int lidbg_fly_hw_info_init(void)
@@ -102,9 +110,10 @@ int lidbg_fly_hw_info_init(void)
         return -1;
     }
 
-    lidbg("update_hw_info = %d\n", update_hw_info);
-
-    hw_info_check_and_save(g_fly_hw_data);
+    if(g_var.recovery_mode && get_cmdline())
+    {
+		CREATE_KTHREAD(thread_lidbg_fly_hw_info_update, NULL);
+    }
 
     if(!fly_hw_info_get(g_fly_hw_data))
         lidbgerr("fly_hw_info_get\n");
@@ -112,43 +121,10 @@ int lidbg_fly_hw_info_init(void)
     if(g_fly_hw_data->flag == 0x12345678)
         g_var.hw_info = g_fly_hw_data->hw_info;
 
-    fly_hw_info_show("result", g_fly_hw_data);
     return 0;
 }
 
-static int thread_usb_notify_flyparameter(void *data)
-{
-    allow_signal(SIGKILL);
-    allow_signal(SIGSTOP);
-    while(!kthread_should_stop())
-    {
-        if(!wait_for_completion_interruptible(&usb_flyparameter_wait))
-        {
-            ssleep(20);
-            lidbg("thread_usb_notify_flyparameter\n");
-		   hw_info_check_and_save(g_fly_hw_data);
-        }
-    }
-    return 1;
-}
-static int usb_notify_flyparameter_func(struct notifier_block *nb, unsigned long action, void *data)
-{
-    switch (action)
-    {
-    case USB_DEVICE_ADD:
-        complete(&usb_flyparameter_wait);
-        break;
-    case USB_DEVICE_REMOVE:
-        break;
-    }
-    return NOTIFY_OK;
-}
-
-static struct notifier_block usb_notify_flyparameter =
-{
-    .notifier_call = usb_notify_flyparameter_func,
-};
-int thread_lidbg_flyparameter_init(void *data)
+int flyparameter_init(void)
 {
     p_kmem = kzalloc(sizeof(recovery_meg_t), GFP_KERNEL);
     if(!p_kmem)
@@ -157,20 +133,16 @@ int thread_lidbg_flyparameter_init(void *data)
     if(!flyparameter_info_get())
         lidbgerr("flyparameter_info_get\n");
 
-    usb_register_notify(&usb_notify_flyparameter);
-
     return 0;
-
 }
 
 int lidbg_flyparameter_init(void)
 {
     DUMP_BUILD_TIME;
     LIDBG_GET;
-    init_completion(&usb_flyparameter_wait);
+	FS_REGISTER_INT(update_hw_info, "update_hw_info", 0, cb_fly_hw_info_save);
 
-    CREATE_KTHREAD(thread_lidbg_flyparameter_init, NULL);
-    CREATE_KTHREAD(thread_usb_notify_flyparameter, NULL);
+	flyparameter_init();
     lidbg_fly_hw_info_init();//block other ko before hw_info set
 
     return 0;
