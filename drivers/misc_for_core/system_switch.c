@@ -92,6 +92,7 @@ void system_switch_init(void)
             lidbg_shell_cmd("mv /system/app/NfcNci.apk "ORIGIN_TMP_PATH"NfcNci.apk" );
             lidbg_shell_cmd("mv /system/app/FastBoot.apk "ORIGIN_TMP_PATH"FastBoot.apk" );
             lidbg_shell_cmd("mv /system/app/FlyBootService.apk "ORIGIN_TMP_PATH"FlyBootService.apk" );
+            lidbg_shell_cmd("mv /system/app/PackageInstaller.apk "ORIGIN_TMP_PATH"PackageInstaller.apk" );
             lidbg_shell_cmd("chmod 777 /system/priv-app/*" );
             lidbg_shell_cmd("chmod 777 /flysystem/app/*" );
             lidbg_shell_cmd("chmod 777  "ORIGIN_APP_PATH"*" );
