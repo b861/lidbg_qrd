@@ -84,8 +84,7 @@ void copy_all_conf_file(void)
     fs_copy_file(get_lidbg_file_path(buff, "drivers.conf"), PATH_DRIVERS_CONF) ;
     fs_copy_file(get_lidbg_file_path(buff, "state.conf"), PATH_STATE_CONF);
     fs_copy_file(get_lidbg_file_path(buff, "cmd.conf"), PATH_CMD_CONF);
-	
-    fs_copy_file(PATH_MACHINE_INFO_FILE, LIDBG_LOG_DIR"machine_info.conf") ;
+    fs_copy_file(get_lidbg_file_path(buff, "machine_info.conf"), PATH_MACHINE_INFO_FILE);
 }
 void check_conf_file(void)
 {
@@ -102,7 +101,7 @@ void check_conf_file(void)
     fs_mem_log("<check_conf_file:%d,%d,%d,%d,%d,%d>\n", size[0], size[1], size[2], size[3], size[4], size[5]);
     FS_ALWAYS("<check_conf_file:%d,%d,%d,%d,%d,%d>\n", size[0], size[1], size[2], size[3], size[4], size[5]);
 
-    if(size[0] || size[1] < 1 || size[2] < 1 || size[3] < 1 || size[4] < 1)
+    if(size[0] || size[1] < 1 || size[2] < 1 || size[3] < 1 || size[4] < 1 || size[5] < 1)
     {
         FS_ALWAYS( "<overwrite:push,update?>\n");
         fs_mem_log( "<overwrite:push,update?>\n");

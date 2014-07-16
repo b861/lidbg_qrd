@@ -2,7 +2,7 @@
 #define _LIGDBG_FILESERVER__
 
 #define __LOG_BUF_LEN	(1 << CONFIG_LOG_BUF_SHIFT)
-#define PATH_MACHINE_INFO_FILE "/persist/machine_info.conf"
+#define PATH_MACHINE_INFO_FILE LIDBG_LOG_DIR"machine_info.conf"
 
 //zone start
 enum string_dev_cmd

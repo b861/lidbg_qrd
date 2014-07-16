@@ -113,6 +113,7 @@ enum
 #define SOC_KO  "lidbg_ad_mt3360.ko","lidbg_soc_mt3360.ko"
 #define INTERFACE_KO  "lidbg_interface.ko"
 #define USB_MOUNT_POINT  "/storage/udisk"
+#define RECOVERY_USB_MOUNT_POINT "/usb"
 
 
 struct io_config

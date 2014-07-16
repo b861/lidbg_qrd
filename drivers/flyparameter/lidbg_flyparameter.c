@@ -1,6 +1,7 @@
 
 #include "lidbg.h"
 #define PATH_FLY_HW_INFO_CONFIG USB_MOUNT_POINT"/machine_info.conf"
+#define RECOVERY_PATH_FLY_HW_INFO_CONFIG RECOVERY_USB_MOUNT_POINT"/machine_info.conf"
 
 LIDBG_DEFINE;
 
@@ -19,10 +20,25 @@ void fly_hw_info_show(char *when, fly_hw_data *p_info)
           p_info->hw_info.lcd_type);
 }
 
+
+void g_hw_info_show(void)
+{
+    lidbg("g_hw_info:hw=%d,ts=%d,%d,lcd=%d\n",	  
+          g_var.hw_info.hw_version,
+          g_var.hw_info.ts_type,
+          g_var.hw_info.ts_config,
+          g_var.hw_info.lcd_type);
+}
+
+
 void read_fly_hw_config_file(fly_hw_data *p_info)
 {
     LIST_HEAD(hw_config_list);
-    fs_fill_list(PATH_FLY_HW_INFO_CONFIG, FS_CMD_FILE_CONFIGMODE, &hw_config_list);
+	if(g_var.recovery_mode)
+    	fs_fill_list(RECOVERY_PATH_FLY_HW_INFO_CONFIG, FS_CMD_FILE_CONFIGMODE, &hw_config_list);
+	else
+    	fs_fill_list(PATH_FLY_HW_INFO_CONFIG, FS_CMD_FILE_CONFIGMODE, &hw_config_list);
+		
     fs_get_intvalue(&hw_config_list, "hw_version", &(p_info->hw_info.hw_version), NULL);
     fs_get_intvalue(&hw_config_list, "ts_type", &(p_info->hw_info.ts_type), NULL);
     fs_get_intvalue(&hw_config_list, "ts_config", &(p_info->hw_info.ts_config), NULL);
@@ -83,8 +99,8 @@ bool flyparameter_info_save(recovery_meg_t *p_info)
 
 int thread_lidbg_fly_hw_info_update(void *data)
 {
-	while(!fs_is_file_exist(PATH_FLY_HW_INFO_CONFIG))
-		msleep(100);
+	while(!fs_is_file_exist(RECOVERY_PATH_FLY_HW_INFO_CONFIG))
+		msleep(20);
 	
 	fly_hw_info_save(g_fly_hw_data);
 	return 0;
@@ -95,6 +111,8 @@ static bool get_cmdline(void)
 {
 	char cmdline[512];
 	fs_file_read("/proc/cmdline", cmdline, 0, sizeof(cmdline));
+	cmdline[512 - 1] = '\0';
+	lidbg("kernel cmdline = %s",cmdline);
 	return ((strstr(cmdline,"update_hw_info")==NULL)?false:true);
 }
 
@@ -119,8 +137,22 @@ int lidbg_fly_hw_info_init(void)
         lidbgerr("fly_hw_info_get\n");
 
     if(g_fly_hw_data->flag == 0x12345678)
-        g_var.hw_info = g_fly_hw_data->hw_info;
+       // g_var.hw_info = g_fly_hw_data->hw_info;
+    {
+    	int i;
+		for(i=0; i < sizeof(struct hw_info)/4; i++)
+		{
+			//lidbg("i=%d,val1=%d,val2=%d\n",i,((int*)(&g_fly_hw_data->hw_info))[i],((int*)(&g_var.hw_info))[i]);
+			if(((int*)(&g_fly_hw_data->hw_info))[i] != 0)
+			{
+				((int*)(&g_var.hw_info))[i] = ((int*)(&g_fly_hw_data->hw_info))[i];
+			}
+		}
+	}
 
+	g_hw_info_show();
+
+	
     return 0;
 }
 

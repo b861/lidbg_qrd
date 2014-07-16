@@ -14,7 +14,7 @@ int SOC_Get_CpuFreq(void);
 
 char *insmod_list[] =
 {
-	
+	"lidbg_flyparameter.ko",
     "lidbg_misc.ko",
     "lidbg_lpc.ko",
 #if (defined(BOARD_V1) || defined(BOARD_V2) || defined(BOARD_V3))

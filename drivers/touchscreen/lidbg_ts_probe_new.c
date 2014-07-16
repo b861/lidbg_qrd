@@ -166,8 +166,6 @@ void ts_probe_prepare(void)
     char buff[50] = {0};
     fs_fill_list(FLYHAL_CONFIG_PATH, FS_CMD_FILE_LISTMODE, &flyhal_config_list);
     FS_REGISTER_INT(ts_scan_delayms, "ts_scan_delayms", 500, NULL);
-    FS_REGISTER_INT(g_var.hw_info.ts_type, "ts_type", 0, NULL);
-    FS_REGISTER_INT(g_var.hw_info.ts_config, "ts_config", 0, NULL);
 
 
     ts_should_revert = fs_find_string(&flyhal_config_list, "TSMODE_XYREVERT");
