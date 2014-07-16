@@ -120,18 +120,17 @@ static int thread_pollfile_func(void *data)
                 update_list(PATH_DRIVERS_CONF, &lidbg_drivers_list);
             }
 
-            if(is_file_tm_updated(PATH_MACHINE_INFO_FILE, &pre_machine_info_tm))
-            {
-                show_tm(&pre_machine_info_tm);
-                update_list(PATH_MACHINE_INFO_FILE, &lidbg_machine_info_list);
-            }
-
             if(is_file_tm_updated(PATH_CMD_CONF, &precmdfile_tm))
             {
                 show_tm(&precmdfile_tm);
                 launch_file_cmd(PATH_CMD_CONF);
             }
 
+            if(fs_is_file_exist(PATH_MACHINE_INFO_FILE) && is_file_tm_updated(PATH_MACHINE_INFO_FILE, &pre_machine_info_tm))
+            {
+                show_tm(&pre_machine_info_tm);
+                update_list(PATH_MACHINE_INFO_FILE, &lidbg_machine_info_list);
+            }
         }
         else
             ssleep(1);
