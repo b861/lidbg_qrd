@@ -246,7 +246,7 @@ struct lidbg_interface
     union
     {
         struct lidbg_pvar_t soc_pvar_tbl;
-        unsigned char reserve1[512];
+        unsigned char reserve1[256];
     };
 };
 

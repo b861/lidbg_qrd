@@ -404,6 +404,7 @@ struct hw_info
 	int hw_version;
 	int ts_type;
 	int ts_config;
+	int lcd_type;
 };
 
 struct lidbg_pvar_t
@@ -423,6 +424,11 @@ struct lidbg_pvar_t
 	
 	struct hw_info hw_info;
 };
+
+typedef struct {
+	int flag;
+	struct hw_info hw_info;
+}fly_hw_data;
 
 struct lidbg_hal
 {
