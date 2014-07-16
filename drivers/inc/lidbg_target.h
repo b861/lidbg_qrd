@@ -157,6 +157,7 @@ extern struct hw_version_specific g_hw_version_specific[];
 
 
 #define USB_POWER_ENABLE do{\
+		LPC_CMD_USB5V_ON;\
 		if(g_hw.gpio_usb_power == -1 )\
 			break ;\
 			if(g_var.hw_info.hw_version == 1)\
@@ -167,6 +168,7 @@ extern struct hw_version_specific g_hw_version_specific[];
 
 
 #define USB_POWER_DISABLE do{\
+			LPC_CMD_USB5V_OFF;\
 			check_gpio(g_hw.gpio_usb_power);\
 			if(g_var.hw_info.hw_version == 1)\
 				SOC_IO_Output(0, g_hw.gpio_usb_power, 1);\
@@ -344,6 +346,7 @@ struct thermal_ctrl thermal_ctrl[] =
 
 
 #define USB_POWER_ENABLE do{\
+		LPC_CMD_USB5V_ON;
 		if(g_hw.gpio_usb_power == -1 )\
 			break ;\
 			if(g_var.hw_info.hw_version == 1)\
@@ -354,6 +357,7 @@ struct thermal_ctrl thermal_ctrl[] =
 
 
 #define USB_POWER_DISABLE do{\
+			LPC_CMD_USB5V_OFF;\
 			check_gpio(g_hw.gpio_usb_power);\
 			if(g_var.hw_info.hw_version == 1)\
 				SOC_IO_Output(0, g_hw.gpio_usb_power, 1);\
