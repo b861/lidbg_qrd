@@ -74,8 +74,12 @@ bool fly_hw_info_save(fly_hw_data *p_info)
 
 void cb_fly_hw_info_save(char *key, char *value )
 {
-	g_fly_hw_data->flag_hw_info_valid = FLAG_HW_INFO_VALID;
-	fly_hw_info_save(g_fly_hw_data);
+	if(update_hw_info != 0)
+	{
+		g_fly_hw_data->flag_need_update = 0;
+		g_fly_hw_data->flag_hw_info_valid = FLAG_HW_INFO_VALID;
+		fly_hw_info_save(g_fly_hw_data);
+	}
 }
 
 bool flyparameter_info_get(void)
@@ -103,7 +107,7 @@ bool flyparameter_info_save(recovery_meg_t *p_info)
 int thread_lidbg_fly_hw_info_update(void *data)
 {
 	while(!fs_is_file_exist(RECOVERY_PATH_FLY_HW_INFO_CONFIG))
-		msleep(20);
+		msleep(50);
 	
 	fly_hw_info_save(g_fly_hw_data);
 	return 0;
