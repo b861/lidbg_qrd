@@ -321,6 +321,10 @@ static int  lpc_probe(struct platform_device *pdev)
         return 0;
     }
 
+#ifdef SOC_mt3360
+	return 0;
+#endif
+
 #ifdef CONFIG_HAS_EARLYSUSPEND
     early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN;
     early_suspend.suspend = lpc_early_suspend;
