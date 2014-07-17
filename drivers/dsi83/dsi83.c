@@ -4,6 +4,7 @@
 
 LIDBG_DEFINE;
 
+static bool is_dsi83_inited = false;
 static struct delayed_work dsi83_work;
 static struct workqueue_struct *dsi83_workqueue;
 
@@ -240,6 +241,13 @@ static void dsi83_work_func(struct work_struct *work)
 	int i;
 	DUMP_FUN;
 
+	if(is_dsi83_inited)
+	{
+	    lidbg(KERN_CRIT "dsi83_work_func:skip\n");
+	    return;
+	}
+	is_dsi83_inited = true;
+		
 	dsi83_gpio_init();
 	
 	msleep(50);
@@ -301,10 +309,10 @@ static int lidbg_event_dsi83(struct notifier_block *this, unsigned long event, v
     switch (event)
     {
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_SCREEN_OFF):
+		is_dsi83_inited = false;
 		dsi83_suspend();
         break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_SCREEN_ON):
-		msleep(100);
 		dsi83_resume();
         break;
     default:
@@ -378,14 +386,15 @@ static int dsi83_remove(struct platform_device *pdev)
 static int dsi83_ops_suspend(struct device *dev)
 {
     DUMP_FUN;
+    is_dsi83_inited = false;
     //dsi83_suspend();
     return 0;
 }
 static int dsi83_ops_resume(struct device *dev)
 {
-    DUMP_FUN;
-    //dsi83_resume();
-    return 0;
+	DUMP_FUN;
+	queue_delayed_work(dsi83_workqueue, &dsi83_work, DSI83_DELAY_TIME);
+	return 0;
 }
 static struct dev_pm_ops dsi83_ops =
 {

@@ -254,18 +254,7 @@ void usb_disk_enable(bool enable)
     else
         USB_WORK_DISENABLE;
 }
-static int thread_wait_for_dsi83_delay(void *data)
-{
-	msleep(100);
-	if(!g_var.is_fly)
-	    LCD_ON;
-	if(SOC_Hal_Acc_Callback)
-	{
-	    lidbg("hal callback 1\n");
-	    SOC_Hal_Acc_Callback(1);
-	}
-    return 1;
-}
+
 static int thread_usb_disk_enable_delay(void *data)
 {
     usb_disk_enable(true);
@@ -323,7 +312,13 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         {
             lidbg("******into screen_on********\n");
             lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_SCREEN_ON));
-            CREATE_KTHREAD(thread_wait_for_dsi83_delay, NULL);
+			if(!g_var.is_fly)
+			    LCD_ON;
+			if(SOC_Hal_Acc_Callback)
+			{
+			    lidbg("hal callback 1\n");
+			    SOC_Hal_Acc_Callback(1);
+			}
         }
         else  if(!strcmp(cmd[1], "android_up"))
         {
