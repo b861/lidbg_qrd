@@ -3,6 +3,8 @@
 #define PATH_FLY_HW_INFO_CONFIG USB_MOUNT_POINT"/machine_info.conf"
 #define RECOVERY_PATH_FLY_HW_INFO_CONFIG RECOVERY_USB_MOUNT_POINT"/machine_info.conf"
 
+#define FLAG_HW_INFO_VALID (0x12345678)
+
 LIDBG_DEFINE;
 
 static fly_hw_data *g_fly_hw_data = NULL;
@@ -12,8 +14,9 @@ int update_hw_info = 0;
 
 void fly_hw_info_show(char *when, fly_hw_data *p_info)
 {
-    lidbg("flyparameter:%s:g_fly_hw_data:flag=%x,hw=%d,ts=%d,%d,lcd=%d\n", when,
-          p_info->flag,
+    lidbg("flyparameter:%s:g_fly_hw_data:flag=%x,%x,hw=%d,ts=%d,%d,lcd=%d\n", when,
+          p_info->flag_hw_info_valid,
+		  p_info->flag_need_update,
           p_info->hw_info.hw_version,
           p_info->hw_info.ts_type,
           p_info->hw_info.ts_config,
@@ -43,7 +46,6 @@ void read_fly_hw_config_file(fly_hw_data *p_info)
     fs_get_intvalue(&hw_config_list, "ts_type", &(p_info->hw_info.ts_type), NULL);
     fs_get_intvalue(&hw_config_list, "ts_config", &(p_info->hw_info.ts_config), NULL);
     fs_get_intvalue(&hw_config_list, "lcd_type", &(p_info->hw_info.lcd_type), NULL);
-	g_fly_hw_data->flag = 0x12345678;
 	fly_hw_info_show("fs_fill_list", p_info);
 }
 
@@ -128,15 +130,25 @@ int lidbg_fly_hw_info_init(void)
         return -1;
     }
 
-    if(g_var.recovery_mode && get_cmdline())
-    {
-		CREATE_KTHREAD(thread_lidbg_fly_hw_info_update, NULL);
-    }
+	if(!fly_hw_info_get(g_fly_hw_data))
+		lidbgerr("fly_hw_info_get\n");
 
-    if(!fly_hw_info_get(g_fly_hw_data))
-        lidbgerr("fly_hw_info_get\n");
-
-    if(g_fly_hw_data->flag == 0x12345678)
+	if(g_var.recovery_mode)
+	{
+	    if(get_cmdline())
+	    {
+	    	g_fly_hw_data->flag_need_update = FLAG_HW_INFO_VALID;
+			fly_hw_info_save(g_fly_hw_data);
+	    }
+	    else if(g_fly_hw_data->flag_need_update == FLAG_HW_INFO_VALID)
+	    {
+	    	g_fly_hw_data->flag_need_update = 0;
+			g_fly_hw_data->flag_hw_info_valid = FLAG_HW_INFO_VALID;
+			CREATE_KTHREAD(thread_lidbg_fly_hw_info_update, NULL);
+	    }
+	}
+	
+    if((g_fly_hw_data->flag_hw_info_valid == FLAG_HW_INFO_VALID))
        // g_var.hw_info = g_fly_hw_data->hw_info;
     {
     	int i;
@@ -148,10 +160,8 @@ int lidbg_fly_hw_info_init(void)
 				((int*)(&g_var.hw_info))[i] = ((int*)(&g_fly_hw_data->hw_info))[i];
 			}
 		}
+		g_hw_info_show();		
 	}
-
-	g_hw_info_show();
-
 	
     return 0;
 }

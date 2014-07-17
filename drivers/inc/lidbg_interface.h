@@ -232,7 +232,8 @@ struct lidbg_pvar_t
 };
 
 typedef struct {
-	int flag;
+	int flag_hw_info_valid;
+	int flag_need_update;
 	struct hw_info hw_info;
 }fly_hw_data;
 
