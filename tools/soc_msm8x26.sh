@@ -66,6 +66,6 @@ function soc_make_otapackage()
 	if [[ $TARGET_PRODUCT = "" ]];then
 		source build/envsetup.sh&&choosecombo release $DBG_PLATFORM $SYSTEM_BUILD_TYPE
 	fi
-		make otapackage -j8
+		soc_prebuild && make otapackage -j8
 }
 . $DBG_TOOLS_PATH/soc_common.sh
