@@ -117,6 +117,7 @@ enum
 #define USB_MOUNT_POINT  "/storage/udisk"
 #define RECOVERY_USB_MOUNT_POINT "/usb"
 
+#define TRACE_MSG_FROM_KMSG
 
 struct io_config
 {

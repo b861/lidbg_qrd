@@ -67,6 +67,7 @@
 #ifdef SOC_msm8x25
 #define USE_CALL_USERHELPER
 #endif
+#define TRACE_MSG_FROM_KMSG
 
 #if 0
 enum

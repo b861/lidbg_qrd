@@ -87,7 +87,6 @@ extern struct hw_version_specific g_hw_version_specific[];
 #ifdef PLATFORM_msm8226
 #define FREQ_CTRL_BY_TEMP
 #define SYSTEM_SWITCH_EN
-#define TRACE_MSG_FROM_KMSG
 #endif
 //lpc
 #define  LPC_I2_ID        (g_hw.i2c_bus_lpc)
