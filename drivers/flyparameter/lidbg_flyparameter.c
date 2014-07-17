@@ -74,6 +74,7 @@ bool fly_hw_info_save(fly_hw_data *p_info)
 
 void cb_fly_hw_info_save(char *key, char *value )
 {
+	g_fly_hw_data->flag_hw_info_valid = FLAG_HW_INFO_VALID;
 	fly_hw_info_save(g_fly_hw_data);
 }
 
