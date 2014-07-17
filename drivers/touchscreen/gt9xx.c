@@ -1013,6 +1013,12 @@ static int gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
 		}
 	}
 	lidbg("Sensor_ID: %d", sensor_id);
+	
+	if(!strcmp(ic_type, "927"))
+		{
+		  lidbg("ic_type, 927\n");
+		  sensor_id = sensor_id + 6;
+		}
 
 	if(g_var.hw_info.ts_config != 0)
 	{
@@ -1065,11 +1071,6 @@ static int gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
 					"Not enough memory for panel config data\n");
 			return -ENOMEM;
 		}
-		if(!strcmp(ic_type, "927"))
-            {
-              lidbg("ic_type, 927\n");
-              sensor_id = sensor_id + 6;
-            }
 		ts->config_data = config_data;
 		config_data[0] = GTP_REG_CONFIG_DATA >> 8;
 		config_data[1] = GTP_REG_CONFIG_DATA & 0xff;
