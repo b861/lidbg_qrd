@@ -20,6 +20,7 @@ function soc_build_all()
 function soc_prebuild()
 {
 	echo $FUNCNAME
+	cd $DBG_SYSTEM_DIR
 	if [[ $TARGET_PRODUCT = "" ]];then
 		source build/envsetup.sh&&choosecombo release $DBG_PLATFORM $SYSTEM_BUILD_TYPE
 	fi

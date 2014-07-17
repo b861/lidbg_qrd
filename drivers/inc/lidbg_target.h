@@ -32,6 +32,7 @@
 #define GTP_INT_PORT    (48)
 
 #define FLY_GPS_SO  "gps.msm8625.so"
+//"245760 320000 480000 700800 1008000 1209600"
 
 #endif
 
