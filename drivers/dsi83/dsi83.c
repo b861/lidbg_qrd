@@ -247,6 +247,7 @@ static void dsi83_work_func(struct work_struct *work)
 	    return;
 	}
 	is_dsi83_inited = true;
+	lidbg(KERN_CRIT "dsi83_work_func:enter\n");
 		
 	dsi83_gpio_init();
 	
@@ -327,10 +328,19 @@ static struct notifier_block lidbg_notifier_dsi83 =
 
 int dsi83_rst_proc(char *buf, char **start, off_t offset, int count, int *eof, void *data )
 {
+    is_dsi83_inited = false;
     fs_mem_log("call:%s\n",__func__);
 	lidbg("%s:enter\n", __func__);
 	dsi83_resume();
     return 1;
+}
+static int kv_dsi83_rst = 0;
+void cb_dsi83_rst(char *key, char *value )
+{
+	is_dsi83_inited = false;
+    fs_mem_log("call:%s\n",__func__);
+	lidbg("%s:enter\n", __func__);
+	dsi83_resume();
 }
 static int dsi83_probe(struct platform_device *pdev)
 {
@@ -352,7 +362,7 @@ static int dsi83_probe(struct platform_device *pdev)
    	}
 		
    	create_proc_read_entry("dsi83_rst", 0, NULL, dsi83_rst_proc, NULL);
-		
+    FS_REGISTER_INT(kv_dsi83_rst, "kv_dsi83_rst", 0, cb_dsi83_rst);
    	register_lidbg_notifier(&lidbg_notifier_dsi83);
 	INIT_DELAYED_WORK(&dsi83_work, dsi83_work_func);
 	dsi83_workqueue = create_workqueue("dsi83");
@@ -390,10 +400,16 @@ static int dsi83_ops_suspend(struct device *dev)
     //dsi83_suspend();
     return 0;
 }
+static int thread_dsi83_ops_resume(void *data)
+{
+    msleep(100);
+    dsi83_work_func(NULL);
+    return 1;
+}
 static int dsi83_ops_resume(struct device *dev)
 {
 	DUMP_FUN;
-	queue_delayed_work(dsi83_workqueue, &dsi83_work, DSI83_DELAY_TIME);
+	CREATE_KTHREAD(thread_dsi83_ops_resume, NULL);
 	return 0;
 }
 static struct dev_pm_ops dsi83_ops =
