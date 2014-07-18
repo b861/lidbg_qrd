@@ -74,7 +74,7 @@ bool fly_hw_info_save(fly_hw_data *p_info)
 
 void cb_fly_hw_info_save(char *key, char *value )
 {
-	if(update_hw_info != 0)
+	if((update_hw_info != 0)&&(fs_is_file_exist(PATH_FLY_HW_INFO_CONFIG)))
 	{
 		g_fly_hw_data->flag_need_update = 0;
 		g_fly_hw_data->flag_hw_info_valid = FLAG_HW_INFO_VALID;
