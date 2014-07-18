@@ -53,7 +53,13 @@ function soc_build_release()
 	cd $DBG_SYSTEM_DIR
 	expect $DBG_TOOLS_PATH/pull $DBG_PASSWORD
 
-	soc_build_all 
+	soc_build_all
+
+	if [ -s $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/bin/lidbg_load ]; then
+		echo "soc_build_release ok"
+	else
+		soc_build_all
+	fi
 }
 
 function soc_make_otapackage()
