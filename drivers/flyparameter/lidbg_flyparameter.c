@@ -129,12 +129,13 @@ int lidbg_fly_hw_info_init(void)
     if(!g_fly_hw_data)
         lidbgerr("kzalloc.g_fly_hw_data\n");
 
+/*
     if(fs_is_file_exist(PATH_MACHINE_INFO_FILE))
     {
         lidbgerr("return.%s,miss\n", PATH_MACHINE_INFO_FILE);
         return -1;
     }
-
+*/
 	if(!fly_hw_info_get(g_fly_hw_data))
 		lidbgerr("fly_hw_info_get\n");
 
