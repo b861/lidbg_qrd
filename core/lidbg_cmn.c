@@ -189,6 +189,10 @@ int  lidbg_launch_user( char bin_path[], char argv1[], char argv2[], char argv3[
 }
 
 static struct class *lidbg_cdev_class = NULL;
+loff_t node_default_lseek(struct file *file, loff_t offset, int origin)
+{
+	return 0;
+}
 bool new_cdev(struct file_operations *cdev_fops, char *nodename)
 {
     struct cdev *new_cdev = NULL;
@@ -222,6 +226,9 @@ bool new_cdev(struct file_operations *cdev_fops, char *nodename)
         return false;
     }
     major_number_ts = MAJOR(dev_number);
+
+	if(!cdev_fops->llseek)
+		cdev_fops->llseek=node_default_lseek;
 
     cdev_init(new_cdev, cdev_fops);
     new_cdev->owner = cdev_fops->owner;
