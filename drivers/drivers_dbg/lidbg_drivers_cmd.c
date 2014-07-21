@@ -18,6 +18,7 @@ int thread_dump_log(void *data)
     fs_cp_data_to_udisk(true);
 #else
     char shell_cmd[128] = {0}, tbuff[128] = {0};
+    msleep(7000);
     lidbg_get_current_time(tbuff, NULL);
     sprintf(shell_cmd, "mkdir "USB_MOUNT_POINT"/ID-%d-%s", get_machine_id() , tbuff);
     lidbg_shell_cmd(shell_cmd);

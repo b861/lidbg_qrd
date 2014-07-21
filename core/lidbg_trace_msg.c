@@ -7,6 +7,64 @@
 static LIST_HEAD(lidbg_trace_msg_string_list);
 static LIST_HEAD(lidbg_trace_msg_cb_list_head);
 
+struct kfifo fifo_kmsg_collect, *p_kmsg_collect = NULL;
+spinlock_t spinlock_kmsg_collect;
+struct mutex mutex_kmsg_collect;
+void kmsg_fifo_collect(char *buff, int buff_len)
+{
+    int ret;
+    char tmp_buff[buff_len];
+
+    if(p_kmsg_collect == NULL)
+    {
+        mutex_init(&mutex_kmsg_collect);
+        spin_lock_init(&spinlock_kmsg_collect);
+        if(kfifo_alloc(&fifo_kmsg_collect, 5 * 1024 * 1024, GFP_KERNEL))
+            lidbgerr("[%s]:kfifo_alloc \n", __func__);
+        p_kmsg_collect = &fifo_kmsg_collect;
+        kfifo_reset(p_kmsg_collect);
+    }
+
+    if(kfifo_is_full(p_kmsg_collect) || kfifo_avail(p_kmsg_collect) < buff_len)
+        ret = kfifo_out_spinlocked(p_kmsg_collect, tmp_buff, buff_len , &spinlock_kmsg_collect);
+
+    mutex_lock(&mutex_kmsg_collect);
+    kfifo_in_spinlocked(p_kmsg_collect, buff, buff_len, &spinlock_kmsg_collect);
+    mutex_unlock(&mutex_kmsg_collect);
+
+}
+
+void kmsg_fifo_save(void)
+{
+    int ret;
+
+    if(p_kmsg_collect && !kfifo_is_empty(p_kmsg_collect))
+    {
+        char *file_ptr = NULL;
+        int fifo_len = 0;
+        fifo_len = kfifo_len(p_kmsg_collect);
+        lidbg("[%s]:save start %d\n", __func__, fifo_len);
+
+        file_ptr = vmalloc(fifo_len + 1);
+        if(!file_ptr || fifo_len <= 0)
+        {
+            lidbgerr( "vmalloc|%d\n", fifo_len);
+            return ;
+        }
+
+        ret = kfifo_out(p_kmsg_collect, file_ptr, fifo_len);
+        file_ptr[ret] = '\0';
+        fs_clear_file(LIDBG_LOG_DIR"lidbg_kmsg_5M.txt");
+        bfs_file_amend(LIDBG_LOG_DIR"lidbg_kmsg_5M.txt", file_ptr, 6);
+        vfree(file_ptr);
+        lidbg("[%s]:save complete %d\n", __func__, ret);
+    }
+    else
+        lidbg("[%s]:skip: %d  %d\n", __func__, p_kmsg_collect == NULL, kfifo_is_empty(p_kmsg_collect));
+}
+
+
+
 struct lidbg_trace_message_device
 {
     char *name;
@@ -28,6 +86,7 @@ static struct lidbg_trace_message_device *pdev;
 void lidbg_trace_msg_disable(int flag)
 {
     pdev->disable_flag = flag;
+	lidbg("lidbg_trace_msg_disable\n");
 }
 EXPORT_SYMBOL(lidbg_trace_msg_disable);
 
@@ -114,28 +173,31 @@ static int thread_trace_msg_in(void *data)
     memset(buff, '\0', sizeof(buff));
 
     while(1)
-    {
-        old_fs = get_fs();
-        set_fs(get_ds());
+	{
+	    old_fs = get_fs();
+	    set_fs(get_ds());
 
-        if(!pdev->disable_flag)
-        {
-            len = filep->f_op->read(filep, buff, 512, &filep->f_pos);
+	    if(!pdev->disable_flag)
+	    {
+	        len = filep->f_op->read(filep, buff, 512, &filep->f_pos);
 
-            lidbg_trace_msg_is_enough(len);
+	        if(len >= 0)
+	        {
+	            kmsg_fifo_collect(buff, len);
+	            lidbg_trace_msg_is_enough(len);
 
-            down(&pdev->sem);
-            kfifo_in(&pdev->fifo, buff, len);
-            up(&pdev->sem);
+	            down(&pdev->sem);
+	            kfifo_in(&pdev->fifo, buff, len);
+	            up(&pdev->sem);
+	        }
 
-            msleep(500);
-        }
-        else
-            msleep(1000);
+	        msleep(500);
+	    }
+	    else
+	        msleep(1000);
 
-        set_fs(old_fs);
-    }
-
+	    set_fs(old_fs);
+	}
     filp_close(filep, 0);
     return 0;
 }
@@ -229,6 +291,12 @@ void callback_disable_trace_msg(char * focus, char * uevent)
 {
     lidbg_trace_msg_disable(1);
 }
+
+static int tmp=0;
+void cb_int_kmsg_fifo_save(char *key, char *value )
+{
+    kmsg_fifo_save();
+}
 static int  lidbg_trace_msg_probe(struct platform_device *ppdev)
 {
     int ret;
@@ -257,6 +325,7 @@ static int  lidbg_trace_msg_probe(struct platform_device *ppdev)
     fs_file_separator(LIDBG_TRACE_MSG_PATH);
     fs_register_filename_list(LIDBG_TRACE_MSG_PATH, true);
     FS_REGISTER_INT(pdev->disable_flag, "trace_msg_disable", 1, NULL);
+    FS_REGISTER_INT(tmp, "kmsg_fifo_save", 0, cb_int_kmsg_fifo_save);
 
 #ifdef  TRACE_MSG_FROM_KMSG
     CREATE_KTHREAD(thread_trace_msg_in, NULL);
@@ -311,18 +380,15 @@ static void __exit lidbg_trace_msg_exit(void)
     platform_driver_unregister(&lidbg_trace_msg_driver);
 }
 
-
-
-
-
 void trace_msg_main(int argc, char **argv)
 {
-
-    if(!strcmp(argv[0], "disable"))
-    {
-        lidbg("\n============disable======\n\n\n");
-        lidbg_trace_msg_disable(1);
-    }
+	lidbg("trace_msg_main:%s\n",argv[0]);
+	if(!strncmp(argv[0], "disable",strlen("disable")))
+	    lidbg_trace_msg_disable(1);
+	else if(!strncmp(argv[0], "save",strlen("save")))
+	    kmsg_fifo_save();
+	else if(!strncmp(argv[0], "len",strlen("len")))
+		lidbg("[%s]:kfifo_len: %d\n", __func__, kfifo_len(p_kmsg_collect));
 
 }
 
@@ -332,5 +398,6 @@ module_exit(lidbg_trace_msg_exit);
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Flyaudad Inc.");
 EXPORT_SYMBOL(trace_msg_main);
+EXPORT_SYMBOL(kmsg_fifo_save);
 
 

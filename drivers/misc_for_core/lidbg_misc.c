@@ -114,6 +114,7 @@ void cb_password_gui_state(char *password )
 
 void cb_password_mem_log(char *password )
 {
+    kmsg_fifo_save();
     lidbg_fifo_get(glidbg_msg_fifo, LIDBG_LOG_DIR"lidbg_mem_log.txt", 0);
 }
 void cb_int_mem_log(char *key, char *value )
@@ -154,6 +155,7 @@ void cb_cp_data_to_udisk(char *key, char *value )
 #ifdef SOC_msm8x25
     fs_cp_data_to_udisk(false);
 #else
+    kmsg_fifo_save();
     fs_file_write("/dev/lidbg_drivers_dbg0",false, "appcmd *158#004", 0, strlen("appcmd *158#004"));
     ssleep(7);
     lidbg_get_current_time(tbuff, NULL);
