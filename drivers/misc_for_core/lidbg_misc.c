@@ -118,7 +118,8 @@ void cb_password_mem_log(char *password )
 }
 void cb_int_mem_log(char *key, char *value )
 {
-    cb_password_mem_log(NULL);
+	if(dump_mem_log != 0)
+    	cb_password_mem_log(NULL);
 }
 int thread_reboot(void *data)
 {

@@ -24,9 +24,9 @@ void fly_hw_info_show(char *when, fly_hw_data *p_info)
 }
 
 
-void g_hw_info_show(void)
+void g_hw_info_store(void)
 {
-    lidbg("g_hw_info:hw=%d,ts=%d,%d,lcd=%d\n",	  
+    lidbg_fs_mem("g_hw_info:hw=%d,ts=%d,%d,lcd=%d\n",	  
           g_var.hw_info.hw_version,
           g_var.hw_info.ts_type,
           g_var.hw_info.ts_config,
@@ -166,9 +166,9 @@ int lidbg_fly_hw_info_init(void)
 				((int*)(&g_var.hw_info))[i] = ((int*)(&g_fly_hw_data->hw_info))[i];
 			}
 		}
-		g_hw_info_show();		
 	}
 	
+	g_hw_info_store();		
     return 0;
 }
 
