@@ -77,13 +77,27 @@ void cb_password_clean_all(char *password )
 }
 void cb_password_update(char *password )
 {
+    LIDBG_WARN("<===============UPDATE_INFO =================>\n" );
     fs_slient_level = 4;
     analysis_copylist(USB_MOUNT_POINT"/conf/copylist.conf");
 
-    LIDBG_WARN("<===============UPDATE_INFO =================>\n" );
-
-    if(fs_is_file_exist(USB_MOUNT_POINT"/out/release"))
+    if(fs_is_file_exist(USB_MOUNT_POINT"/conf/lidbg_udisk_shell.conf"))
     {
+        LIST_HEAD(lidbg_udisk_shell_list);
+        LIDBG_WARN("use:conf/lidbg_udisk_shell.conf\n" );
+        fs_fill_list(USB_MOUNT_POINT"/conf/lidbg_udisk_shell.conf", FS_CMD_FILE_LISTMODE, &lidbg_udisk_shell_list);
+        if(analyze_list_cmd(&lidbg_udisk_shell_list))
+        {
+            LIDBG_WARN("exe success\n" );
+            if(delete_out_dir_after_update)
+                lidbg_rmdir(USB_MOUNT_POINT"/out");
+            lidbg_launch_user(CHMOD_PATH, "777", "/flysystem/lib/out", "-R", NULL, NULL, NULL);
+            lidbg_reboot();
+        }
+    }
+    else if(fs_is_file_exist(USB_MOUNT_POINT"/out/release"))
+    {
+        LIDBG_WARN("use:release\n" );
         if( fs_update(USB_MOUNT_POINT"/out/release", USB_MOUNT_POINT"/out", "/flysystem/lib/out") >= 0)
         {
             if(delete_out_dir_after_update)
@@ -93,8 +107,9 @@ void cb_password_update(char *password )
         }
     }
     else
-        LIDBG_ERR("<up>\n" );
+        LIDBG_ERR("<skip>\n" );
 }
+
 void update_lidbg_out_dir(char *key, char *value )
 {
     cb_password_update(NULL);
@@ -156,7 +171,6 @@ void cb_cp_data_to_udisk(char *key, char *value )
     fs_cp_data_to_udisk(false);
 #else
     kmsg_fifo_save();
-    fs_file_write("/dev/lidbg_drivers_dbg0",false, "appcmd *158#004", 0, strlen("appcmd *158#004"));
     ssleep(7);
     lidbg_get_current_time(tbuff, NULL);
     sprintf(shell_cmd, "mkdir "USB_MOUNT_POINT"/ID-%d-%s", get_machine_id() , tbuff);

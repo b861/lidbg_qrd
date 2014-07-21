@@ -5,6 +5,7 @@
 #ifdef BUILD_DRIVERS
 #include <flymeg.h>
 
+#include <lidbg_drivers_loader.h>
 #include <lidbg_target.h>
 #include <misc_devices.h>
 #include <lidbg_bpmsg.h>

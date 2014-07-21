@@ -4,7 +4,7 @@
 static LIST_HEAD(lidbg_list);
 static LIST_HEAD(flyaudio_list);
 
-void party_analyze(struct list_head *client_list)
+bool analyze_list_cmd(struct list_head *client_list)
 {
     struct string_dev *pos;
     char *cmd[8] = {NULL};
@@ -13,7 +13,7 @@ void party_analyze(struct list_head *client_list)
     if (list_empty(client_list))
     {
         LIDBG_ERR("<list_is_empty>\n");
-        return ;
+        return false;
     }
 
     list_for_each_entry(pos, client_list, tmp_list)
@@ -55,6 +55,8 @@ drop:
             LIDBG_WARN("bad cmd<%s>\n", pos->yourkey);
         }
     }
+
+    return true;
 }
 
 static int thread_drivers_loader_analyze(void *data)
@@ -64,12 +66,12 @@ static int thread_drivers_loader_analyze(void *data)
     if(fs_is_file_exist(FLY_MODE_FILE))
     {
         fs_fill_list(get_lidbg_file_path(buff, "flyaudio.init.rc.conf"), FS_CMD_FILE_LISTMODE, &flyaudio_list);
-        party_analyze(&flyaudio_list);
+        analyze_list_cmd(&flyaudio_list);
     }
     else
     {
         fs_fill_list(get_lidbg_file_path(buff, "lidbg.init.rc.conf"), FS_CMD_FILE_LISTMODE, &lidbg_list);
-        party_analyze(&lidbg_list);
+        analyze_list_cmd(&lidbg_list);
     }
     ssleep(30);//later,exit
     return 0;
@@ -94,4 +96,7 @@ module_exit(lidbg_drivers_loader_exit);
 MODULE_AUTHOR("futengfei");
 MODULE_DESCRIPTION("for hal or other group to insmod their KO or something else,2014.5.12");
 MODULE_LICENSE("GPL");
+
+EXPORT_SYMBOL(analyze_list_cmd);
+
 
