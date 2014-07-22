@@ -511,9 +511,11 @@ int Volume::mountVol() {
 
     if (isMountpointMounted(getMountpoint())) {
         SLOGW("Volume is idle but appears to be mounted - fixing");
-        setState(Volume::State_Mounted);
+	LIDBG_PRINT("Volume is idle but appears to be mounted - fixing");
+	doUnmount(getMountpoint(), true);
+      //  setState(Volume::State_Mounted);
         // mCurrentlyMountedKdev = XXX
-        return 0;
+       // return 0;
     }
 
     n = getDeviceNodes((dev_t *) &deviceNodes, 4);
