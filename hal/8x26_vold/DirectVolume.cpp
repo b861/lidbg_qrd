@@ -30,6 +30,7 @@
 #include "VolumeManager.h"
 #include "ResponseCode.h"
 #include "cryptfs.h"
+#include "../inc/lidbg_servicer.h"
 
 // #define PARTITION_DEBUG
 
@@ -113,6 +114,8 @@ int DirectVolume::handleBlockEvent(NetlinkEvent *evt) {
                 if (createDeviceNode(nodepath, major, minor)) {
                     SLOGE("Error making device node '%s' (%s)", nodepath,
                                                                strerror(errno));
+		LIDBG_PRINT("Error making device node '%s' (%s)", nodepath,
+                                strerror(errno));
                 }
                 if (!strcmp(devtype, "disk")) {
                     handleDiskAdded(dp, evt);
@@ -148,6 +151,7 @@ int DirectVolume::handleBlockEvent(NetlinkEvent *evt) {
                 }
             } else {
                     SLOGW("Ignoring non add/remove/change event");
+		LIDBG_PRINT("Ignoring non add/remove/change event");
             }
 
             return 0;
@@ -165,6 +169,7 @@ void DirectVolume::handleDiskAdded(const char *devpath, NetlinkEvent *evt) {
     if (tmp) {
         mDiskNumParts = atoi(tmp);
     } else {
+        LIDBG_PRINT("Kernel block uevent missing 'NPARTS'");
         SLOGW("Kernel block uevent missing 'NPARTS'");
         mDiskNumParts = 1;
     }
@@ -178,12 +183,15 @@ void DirectVolume::handleDiskAdded(const char *devpath, NetlinkEvent *evt) {
 
     if (mDiskNumParts == 0) {
 #ifdef PARTITION_DEBUG
+LIDBG_PRINT("Dv::diskIns - No partitions - good to go son!");
         SLOGD("Dv::diskIns - No partitions - good to go son!");
 #endif
         setState(Volume::State_Idle);
     } else {
 #ifdef PARTITION_DEBUG
         SLOGD("Dv::diskIns - waiting for %d partitions (mask 0x%x)",
+             mDiskNumParts, mPendingPartMap);
+LIDBG_PRINT("Dv::diskIns - waiting for %d partitions (mask 0x%x)",
              mDiskNumParts, mPendingPartMap);
 #endif
         setState(Volume::State_Pending);
@@ -206,6 +214,7 @@ void DirectVolume::handlePartitionAdded(const char *devpath, NetlinkEvent *evt) 
     }
 
     if (part_num > MAX_PARTITIONS || part_num < 1) {
+	LIDBG_PRINT("Invalid 'PARTN' value");
         SLOGE("Invalid 'PARTN' value");
         return;
     }
@@ -216,13 +225,16 @@ void DirectVolume::handlePartitionAdded(const char *devpath, NetlinkEvent *evt) 
 
     if (major != mDiskMajor) {
         SLOGE("Partition '%s' has a different major than its disk!", devpath);
+	LIDBG_PRINT("Partition '%s' has a different major than its disk!", devpath);
         return;
     }
 #ifdef PARTITION_DEBUG
     SLOGD("Dv:partAdd: part_num = %d, minor = %d\n", part_num, minor);
+LIDBG_PRINT("Dv:partAdd: part_num = %d, minor = %d\n", part_num, minor);
 #endif
     if (part_num >= MAX_PARTITIONS) {
         SLOGE("Dv:partAdd: ignoring part_num = %d (max: %d)\n", part_num, MAX_PARTITIONS-1);
+	LIDBG_PRINT("Dv:partAdd: ignoring part_num = %d (max: %d)\n", part_num, MAX_PARTITIONS-1);
     } else {
         mPartMinors[part_num -1] = minor;
     }
@@ -231,6 +243,7 @@ void DirectVolume::handlePartitionAdded(const char *devpath, NetlinkEvent *evt) 
     if (!mPendingPartMap) {
 #ifdef PARTITION_DEBUG
         SLOGD("Dv:partAdd: Got all partitions - ready to rock!");
+	LIDBG_PRINT("Dv:partAdd: Got all partitions - ready to rock!");
 #endif
         if (getState() != Volume::State_Formatting) {
             setState(Volume::State_Idle);
@@ -241,6 +254,7 @@ void DirectVolume::handlePartitionAdded(const char *devpath, NetlinkEvent *evt) 
         }
     } else {
 #ifdef PARTITION_DEBUG
+	LIDBG_PRINT("Dv:partAdd: pending mask now = 0x%x", mPendingPartMap);
         SLOGD("Dv:partAdd: pending mask now = 0x%x", mPendingPartMap);
 #endif
     }
@@ -255,11 +269,13 @@ void DirectVolume::handleDiskChanged(const char *devpath, NetlinkEvent *evt) {
     }
 
     SLOGI("Volume %s disk has changed", getLabel());
+    LIDBG_PRINT("Volume %s disk has changed", getLabel());
     const char *tmp = evt->findParam("NPARTS");
     if (tmp) {
         mDiskNumParts = atoi(tmp);
     } else {
         SLOGW("Kernel block uevent missing 'NPARTS'");
+	LIDBG_PRINT("Kernel block uevent missing 'NPARTS'");	
         mDiskNumParts = 1;
     }
 
@@ -283,6 +299,7 @@ void DirectVolume::handlePartitionChanged(const char *devpath, NetlinkEvent *evt
     int major = atoi(evt->findParam("MAJOR"));
     int minor = atoi(evt->findParam("MINOR"));
     SLOGD("Volume %s %s partition %d:%d changed\n", getLabel(), getMountpoint(), major, minor);
+    LIDBG_PRINT("Volume %s %s partition %d:%d changed\n", getLabel(), getMountpoint(), major, minor);	
 }
 
 void DirectVolume::handleDiskRemoved(const char *devpath, NetlinkEvent *evt) {
@@ -295,6 +312,7 @@ void DirectVolume::handleDiskRemoved(const char *devpath, NetlinkEvent *evt) {
         mVm->unshareVolume(getLabel(), "ums");
     }
 
+LIDBG_PRINT("Volume %s %s disk %d:%d removed\n", getLabel(), getMountpoint(), major, minor);
     SLOGD("Volume %s %s disk %d:%d removed\n", getLabel(), getMountpoint(), major, minor);
     snprintf(msg, sizeof(msg), "Volume %s %s disk removed (%d:%d)",
              getLabel(), getFuseMountpoint(), major, minor);
@@ -310,7 +328,7 @@ void DirectVolume::handlePartitionRemoved(const char *devpath, NetlinkEvent *evt
     int state;
 
     SLOGD("Volume %s %s partition %d:%d removed\n", getLabel(), getMountpoint(), major, minor);
-
+    LIDBG_PRINT("Volume %s %s partition %d:%d removed\n", getLabel(), getMountpoint(), major, minor);
     /*
      * The framework doesn't need to get notified of
      * partition removal unless it's mounted. Otherwise
@@ -340,6 +358,7 @@ void DirectVolume::handlePartitionRemoved(const char *devpath, NetlinkEvent *evt
         if (Volume::unmountVol(true, false)) {
             SLOGE("Failed to unmount volume on bad removal (%s)", 
                  strerror(errno));
+		LIDBG_PRINT("Failed to unmount volume on bad removal (%s)", strerror(errno));
 
             // XXX: At this point we're screwed for now
         } else {
@@ -355,6 +374,7 @@ void DirectVolume::handlePartitionRemoved(const char *devpath, NetlinkEvent *evt
         if (mVm->unshareVolume(getLabel(), "ums")) {
             SLOGE("Failed to unshare volume on bad removal (%s)",
                 strerror(errno));
+	LIDBG_PRINT("Failed to unshare volume on bad removal (%s)", strerror(errno));
         } else {
             SLOGD("Crisis averted");
         }

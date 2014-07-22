@@ -26,6 +26,7 @@
 #include <sysutils/NetlinkEvent.h>
 #include "NetlinkHandler.h"
 #include "VolumeManager.h"
+#include "../inc/lidbg_servicer.h"
 
 NetlinkHandler::NetlinkHandler(int listenerSocket) :
                 NetlinkListener(listenerSocket) {
@@ -48,11 +49,15 @@ void NetlinkHandler::onEvent(NetlinkEvent *evt) {
 
     if (!subsys) {
         SLOGW("No subsystem found in netlink event");
+	LIDBG_PRINT("No subsystem found in netlink event");
         return;
     }
 	
 SLOGW("NetlinkHandler::onEvent: subsys=%s, mPath=%s",  subsys, evt->findParam("DEVPATH"));
 SLOGW("NetlinkHandler::onEvent: action = %d,type =%s",  evt->getAction(),evt->findParam("DEVTYPE"));
+
+LIDBG_PRINT("NetlinkHandler::onEvent: subsys=%s, mPath=%s",  subsys, evt->findParam("DEVPATH"));
+LIDBG_PRINT("NetlinkHandler::onEvent: action = %d,type =%s",  evt->getAction(), evt->findParam("DEVTYPE"));
 	
     if (!strcmp(subsys, "block")) {
         vm->handleBlockEvent(evt);
