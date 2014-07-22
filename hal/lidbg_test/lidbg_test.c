@@ -1,6 +1,7 @@
 
 #include "lidbg_servicer.h"
 
+//"cat /sys/power/autosleep"
 
 int main(int argc, char **argv)
 {
