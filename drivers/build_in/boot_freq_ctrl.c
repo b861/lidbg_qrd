@@ -1,7 +1,5 @@
 
 #define BOOT_LIMIT_FREQ (600000)
-#define MAX_FREQ (1401600)
-#define MAX_FREQS ("1401600")
 
 int ctrl_max_freq = BOOT_LIMIT_FREQ;
 
@@ -23,7 +21,6 @@ static int thread_freq_limit(void *data)
 		if(count >= 45)
 		{
 			ctrl_max_freq = 0;
-			lidbg_readwrite_file("/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq", NULL, MAX_FREQS, sizeof(MAX_FREQS) - 1);
 			lidbg("thread_freq_limit stoped\n");
 			return 1;
 		}

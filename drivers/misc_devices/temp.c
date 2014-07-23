@@ -37,11 +37,21 @@ void log_temp(void)
         old_temp = cur_temp;
     }
 }
+
+u32 get_scaling_max_freq(void)
+{
+	static char max_freq[32];
+	static u32 tmp;
+	lidbg_readwrite_file(FREQ_MAX_NODE, max_freq, NULL, 32);
+    tmp = simple_strtoul(max_freq, 0, 0);
+//	lidbg("scaling_max_freq=%d,%s\n", tmp,max_freq);
+	return tmp;
+}
+
 int thread_thermal(void *data)
 {
-    int cur_frq, cur_temp;
+    int  cur_temp;
     DUMP_FUN;
-    cur_frq = FREQ_STEP0;
     temp_init();
 
 	if(g_var.recovery_mode == 1)
@@ -64,6 +74,11 @@ int thread_thermal(void *data)
         ssleep(10);
     }
 
+	
+	msleep(1000*30);//wait boot_freq_ctrl finish
+	cur_temp = soc_temp_get();
+	lidbg("lidbg freq ctrl start,%d,%d\n",cur_temp,get_scaling_max_freq());
+
     while(!kthread_should_stop())
     {
         msleep(1000);
@@ -72,29 +87,25 @@ int thread_thermal(void *data)
         cur_temp = soc_temp_get();
         //lidbg("MSM_THERM: %d\n",cur_temp);
  #ifdef FREQ_CTRL_BY_TEMP     
-        if     ((cur_temp > THRESHOLDS_STEP0 ) && (cur_temp <= THRESHOLDS_STEP1 ) && (cur_frq != FREQ_STEP0))
+        if     ((cur_temp > THRESHOLDS_STEP0 ) && (cur_temp <= THRESHOLDS_STEP1 ) && (get_scaling_max_freq() != FREQ_STEP0))
         {
             lidbg_readwrite_file(FREQ_MAX_NODE, NULL, FREQ_STEP0_STRING, sizeof(FREQ_STEP0_STRING) - 1);
             lidbg("set max freq to: %d,temp:%d\n", FREQ_STEP0,cur_temp);
-            cur_frq = FREQ_STEP0;
         }
-        else if((cur_temp > THRESHOLDS_STEP1 ) && (cur_temp <= THRESHOLDS_STEP2 ) && (cur_frq != FREQ_STEP1))
+        else if((cur_temp > THRESHOLDS_STEP1 ) && (cur_temp <= THRESHOLDS_STEP2 ) && (get_scaling_max_freq() != FREQ_STEP1))
         {
             lidbg_readwrite_file(FREQ_MAX_NODE, NULL, FREQ_STEP1_STRING, sizeof(FREQ_STEP1_STRING) - 1);
             lidbg("set max freq to: %d,temp:%d\n", FREQ_STEP1,cur_temp);
-            cur_frq = FREQ_STEP1;
         }
-        else if((cur_temp > THRESHOLDS_STEP2 ) && (cur_temp <= THRESHOLDS_STEP3 ) && (cur_frq != FREQ_STEP2))
+        else if((cur_temp > THRESHOLDS_STEP2 ) && (cur_temp <= THRESHOLDS_STEP3 ) && (get_scaling_max_freq() != FREQ_STEP2))
         {
             lidbg_readwrite_file(FREQ_MAX_NODE, NULL, FREQ_STEP2_STRING, sizeof(FREQ_STEP2_STRING) - 1);
             lidbg("set max freq to: %d,temp:%d\n", FREQ_STEP2,cur_temp);
-            cur_frq = FREQ_STEP2;
         }
-		else if((cur_temp > THRESHOLDS_STEP3 ) && (cur_frq != FREQ_STEP3))
+		else if((cur_temp > THRESHOLDS_STEP3 ) && (get_scaling_max_freq() != FREQ_STEP3))
         {
             lidbg_readwrite_file(FREQ_MAX_NODE, NULL, FREQ_STEP3_STRING, sizeof(FREQ_STEP3_STRING) - 1);
             lidbg("set max freq to: %d,temp:%d\n", FREQ_STEP3,cur_temp);
-            cur_frq = FREQ_STEP3;
         }
 #endif
     }
