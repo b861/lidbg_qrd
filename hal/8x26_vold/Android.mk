@@ -1,6 +1,7 @@
 LOCAL_PATH:= $(call my-dir)
 
 common_src_files := \
+	lidbg_vold/Lidbg_vold.cpp \
 	VolumeManager.cpp \
 	CommandListener.cpp \
 	VoldCommand.cpp \
@@ -18,8 +19,10 @@ common_src_files := \
 	VoldUtil.c \
 	fstrim.c \
 	cryptfs.c \
-	Ntfs.cpp \
-	Exfat.cpp
+	lidbg_vold/Ntfs.cpp \
+	lidbg_vold/Exfat.cpp 
+
+
 
 common_c_includes := \
 	$(KERNEL_HEADERS) \
@@ -27,7 +30,7 @@ common_c_includes := \
 	external/openssl/include \
 	external/stlport/stlport \
 	bionic \
-	external/scrypt/lib/crypto
+	external/scrypt/lib/crypto \
 
 common_shared_libraries := \
 	libsysutils \

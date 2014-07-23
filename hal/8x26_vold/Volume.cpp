@@ -49,14 +49,15 @@
 #include "Process.h"
 #include "cryptfs.h"
 
-#include "Ntfs.h"
-#include "Exfat.h"
+#include "lidbg_vold/Ntfs.h"
+#include "lidbg_vold/Exfat.h"
 #include "../inc/lidbg_servicer.h"
+#include "lidbg_vold/Lidbg_vold.h"
 
 extern "C" void dos_partition_dec(void const *pp, struct dos_partition *d);
 extern "C" void dos_partition_enc(void *pp, struct dos_partition *d);
 
-
+Lidbg_vold lidbg_vold;
 /*
  * Media directory - stuff that only media_rw user can see
  */
@@ -235,154 +236,6 @@ int Volume::createDeviceNode(const char *path, int major, int minor) {
     return 0;
 }
 
-
-//add by wangyihong for supporting multi partitions
-/* path: partition mount path. eg: '/mnt/usbhost1/8_1' */
-int Volume::deleteDeviceNode(const char *path){
-#if 0
-    int major = 0, minor = 0;
-	char devicePath[255];
-
-	char *temp_str1 = NULL;
-	char *temp_str2 = NULL;
-	char str_major[256];
-	char str_path[256];
-	int len = 0;
-
-	if(!path){
-		SLOGE("Volume::deleteDeviceNode: path(%s) is invalid\n", path);
-		return -1;
-	}
-
-	SLOGI("Volume::deleteDeviceNode: path=%s\n", path);
-
-	/* get device major and minor from path */
-	memset(str_major, 0, 256);
-	memset(str_path, 0, 256);
-	strcpy(str_path, path);
-
-	temp_str1 = strrchr(str_path, '/');
-	temp_str2 = strrchr(str_path, '_');
-	if(temp_str1 == NULL || temp_str2 == NULL){
-		SLOGE("Volume::deleteDeviceNode: path(%s) is invalid\n", path);
-		return -1;
-	}
-
-	/* delete '/' & '_' */
-	temp_str1++;
-	temp_str2++;
-	if(temp_str1 == NULL || temp_str2 == NULL){
-		SLOGE("Volume::deleteDeviceNode: path(%s) is invalid\n", path);
-		return -1;
-	}
-
-	len = strcspn(temp_str1, "_");
-	strncpy(str_major, temp_str1, len);
-
-	major = strtol(str_major, NULL, 10);
-	minor = strtol(temp_str2, NULL, 10);
-
-	SLOGI("Volume::deleteDeviceNode: major=%d, minor=%d\n", major, minor);
-
-	/* delete DeviceNode */
-	memset(devicePath, 0, 255);
-	sprintf(devicePath, "/dev/block/vold/%d:%d", major, minor);
-
-	if (unlink(devicePath)) {
-		SLOGE("Volume::deleteDeviceNode: Failed to remove %s (%s)", path, strerror(errno));
-		return -1;
-	}else{
-		SLOGI("Volume::deleteDeviceNode: delete DeviceNode '%s' successful\n", path);
-	}
-
-#endif
-
-	return 0;
-}
-
-char* Volume::createMountPoint(const char *path, int major, int minor) {
-	char* mountpoint = (char*) malloc(sizeof(char)*256);
-
-	memset(mountpoint, 0, sizeof(char)*256);
-	//sprintf(mountpoint, "%s/%d_%d", path, major, minor);
-	sprintf(mountpoint, "%s/disk_%d", path, minor);
-	if( access(mountpoint, F_OK) ){
-		SLOGI("Volume: file '%s' is not exist, create it", mountpoint);
-
-		if(mkdir(mountpoint, 0777)){
-			SLOGW("Volume: create file '%s' failed, errno is %d", mountpoint, errno);
-			LIDBG_PRINT("Volume: create file '%s' failed, errno is %d", mountpoint, errno);
-			return NULL;
-		}
-	}else{
-	
-		SLOGW("Volume: file '%s' is exist, can not create it", mountpoint);
-		LIDBG_PRINT("Volume: file '%s' is exist, can not create it", mountpoint);
-		return mountpoint;
-	}
-
-	return mountpoint;
-}
-
-int Volume::deleteMountPoint(char* mountpoint) {
-	if(mountpoint){
-		SLOGW("Volume::deleteMountPoint: %s exist", mountpoint); 
-		LIDBG_PRINT("Volume::deleteMountPoint: %s exist", mountpoint); 
-		rmdir(mountpoint);
-		if( !access(mountpoint, F_OK) ){
-			LIDBG_PRINT("Volume::deleteMountPoint: %s", mountpoint);
-			SLOGW("Volume::deleteMountPoint: %s", mountpoint);
-			if(rmdir(mountpoint)){
-				SLOGW("Volume: remove file '%s' failed, errno is %d", mountpoint, errno);
-				LIDBG_PRINT("Volume: remove file '%s' failed, errno is %d", mountpoint, errno);
-				return -1;
-			}
-		}
-
-	
-		free(mountpoint);
-		mountpoint = NULL;
-	}
-
-	return 0;
-}
-
-void Volume::saveUnmountPoint(char* mountpoint){
-	int i = 0;
-
-	for(i = 0; i < MAX_UNMOUNT_PARTITIONS; i++){
-		if(mUnMountPart[i] == NULL){
-			mUnMountPart[i] = mMountPart[i];
-		}
-	}
-
-	if(i >= MAX_UNMOUNT_PARTITIONS){
-		SLOGI("Volume::saveUnmountPoint: unmount point is over %d", MAX_UNMOUNT_PARTITIONS);
-	}
-
-	return;
-}
-
-
-void Volume::deleteUnMountPoint(int clear){
-	int i = 0;
-
-	for(i = 0; i < MAX_UNMOUNT_PARTITIONS; i++){
-		if(mUnMountPart[i]){
-			SLOGW("Volume::deleteUnMountPoint: %s", mUnMountPart[i]);
-			LIDBG_PRINT("Volume::deleteUnMountPoint: %s", mUnMountPart[i]);
-			if(deleteMountPoint(mUnMountPart[i]) == 0){
-				deleteDeviceNode(mUnMountPart[i]);
-				mUnMountPart[i] = NULL;
-			}
-		}
-	}
-
-	return;
-}
-
-
-
 int Volume::formatVol(bool wipe) {
 
     if (getState() == Volume::State_NoMedia) {
@@ -484,6 +337,8 @@ int Volume::mountVol() {
     char decrypt_state[PROPERTY_VALUE_MAX];
     char crypto_state[PROPERTY_VALUE_MAX];
     char encrypt_progress[PROPERTY_VALUE_MAX];
+
+LIDBG_PRINT("\n\n\nxxxxxxxxxxxxxxxxxx\n\n\n");
 
     property_get("vold.decrypt", decrypt_state, "");
     property_get("vold.encrypt_progress", encrypt_progress, "");
@@ -593,7 +448,7 @@ int Volume::mountVol() {
         errno = 0;
         int gid;
         setState(Volume::State_Checking);
-	mMountedPartNum = n;
+	lidbg_vold.mMountedPartNum = n;
 
 if(n==1){
 
@@ -652,21 +507,21 @@ if(n==1){
 	if(n>1){
 	            SLOGI("[WANG]: this is muti partitions disk.\n");
 		    LIDBG_PRINT("[WANG]: this is muti partitions disk.\n");
-		    mFuseMountPart[i] = createMountPoint( "/storage/udisk", MAJOR(deviceNodes[i]), MINOR(deviceNodes[i]) );
-	            mMountPart[i] = createMountPoint( "/mnt/media_rw/udisk", MAJOR(deviceNodes[i]), MINOR(deviceNodes[i]) );
-	            if(mMountPart[i] == NULL)
+		    lidbg_vold.mFuseMountPart[i] =lidbg_vold.createMountPoint( "/storage/udisk", MAJOR(deviceNodes[i]), MINOR(deviceNodes[i]) );
+	            lidbg_vold.mMountPart[i] =lidbg_vold.createMountPoint( "/mnt/media_rw/udisk", MAJOR(deviceNodes[i]), MINOR(deviceNodes[i]) );
+	            if(lidbg_vold.mMountPart[i] == NULL)
 	            {
 	                SLOGE("Part is already mount, can not mount again, (%s)\n", strerror(errno));
 		      LIDBG_PRINT("Part is already mount, can not mount again, (%s)\n", strerror(errno));
 	                continue;
 	            }
 	 	if (Fat::check(devicePath)==0){
-		            if (Fat::doMount(devicePath, mMountPart[i], false, false, false, AID_MEDIA_RW, AID_MEDIA_RW, 0007, true))
+		            if (Fat::doMount(devicePath, lidbg_vold.mMountPart[i], false, false, false, AID_MEDIA_RW, AID_MEDIA_RW, 0007, true))
 		            {
-		                SLOGE("Part(%s) failed to move mount (%s)\n", mMountPart[i], strerror(errno));
-				LIDBG_PRINT("Part(%s) failed to move mount (%s)\n", mMountPart[i], strerror(errno));
-		                deleteMountPoint(mMountPart[i]);
-		                mMountPart[i] = NULL;
+		                SLOGE("Part(%s) failed to move mount (%s)\n", lidbg_vold.mMountPart[i], strerror(errno));
+				LIDBG_PRINT("Part(%s) failed to move mount (%s)\n", lidbg_vold.mMountPart[i], strerror(errno));
+		               lidbg_vold.deleteMountPoint(lidbg_vold.mMountPart[i]);
+		                lidbg_vold.mMountPart[i] = NULL;
 		                continue;
 		            }
 	 	}
@@ -674,17 +529,17 @@ if(n==1){
 		{
 			SLOGW("this is NTFS filesystem, ready to mount!\n");
 			LIDBG_PRINT("this is NTFS filesystem, ready to mount!\n");
-			if (Ntfs::doMount(devicePath, mMountPart[i], false, false, false, AID_MEDIA_RW, AID_MEDIA_RW, 0007, true))
+			if (Ntfs::doMount(devicePath, lidbg_vold.mMountPart[i], false, false, false, AID_MEDIA_RW, AID_MEDIA_RW, 0007, true))
 			{
-			    SLOGE("%s failed to mount via NTFS (%s)\n", mMountPart[i], strerror(errno));
-			LIDBG_PRINT("%s failed to mount via NTFS (%s)\n", mMountPart[i], strerror(errno));
-			    deleteMountPoint(mMountPart[i]);
-		            mMountPart[i] = NULL;
+			    SLOGE("%s failed to mount via NTFS (%s)\n", lidbg_vold.mMountPart[i], strerror(errno));
+			LIDBG_PRINT("%s failed to mount via NTFS (%s)\n", lidbg_vold.mMountPart[i], strerror(errno));
+			    lidbg_vold.deleteMountPoint(lidbg_vold.mMountPart[i]);
+		            lidbg_vold.mMountPart[i] = NULL;
 			    continue;
 			}
 		}
-	            SLOGW("mountVol: mount %s, successful\n", mMountPart[i]);
-		    LIDBG_PRINT("mountVol: mount %s, successful\n", mMountPart[i]);
+	            SLOGW("mountVol: mount %s, successful\n", lidbg_vold.mMountPart[i]);
+		    LIDBG_PRINT("mountVol: mount %s, successful\n", lidbg_vold.mMountPart[i]);
 	            mCurrentlyMountedKdev = deviceNodes[i];
 	            mounted++;
 
@@ -704,10 +559,7 @@ if(n==1){
 			snprintf(service, 64, "fuse_%s", getLabel());
 			SLOGE("getlabel is %s\n", getLabel());
 			//property_set("ctl.start", service);
-			property_set("ctl.start", "fuse_disk1");
-			property_set("ctl.start", "fuse_disk2");
-			property_set("ctl.start", "fuse_disk3");
-			property_set("ctl.start", "fuse_disk4");
+			lidbg_vold.startFuse();
 
 			setState(Volume::State_Mounted);
 			return 0;
@@ -871,36 +723,33 @@ int Volume::unmountVol(bool force, bool revert) {
     char service[64];
     snprintf(service, 64, "fuse_%s", getLabel());
     property_set("ctl.stop", service);
-	property_set("ctl.stop", "fuse_disk1");
-	property_set("ctl.stop", "fuse_disk2");
-	property_set("ctl.stop", "fuse_disk3");
-	property_set("ctl.stop", "fuse_disk4");
+   lidbg_vold.stopFuse();
+
     /* Give it a chance to stop.  I wish we had a synchronous way to determine this... */
     sleep(1);
 
-	//add by flyaudio 
-	if(mMountedPartNum>1){
-		for(i = mMountedPartNum - 1; i >= 0; i--){
-			 SLOGW("fuseMountPart is %s", mFuseMountPart[i]);
-			LIDBG_PRINT("fuseMountPart is %s", mFuseMountPart[i]);
-		    if (doUnmount(mFuseMountPart[i], force) != 0) {
-		        SLOGE("Failed to unmount %s (%s)", mFuseMountPart[i], strerror(errno));
-			LIDBG_PRINT("Failed to unmount %s (%s)", mFuseMountPart[i], strerror(errno));
+	//add by flyaudio
+	if(lidbg_vold.mMountedPartNum>1)
+	{
+		for(i = lidbg_vold.mMountedPartNum - 1; i >= 0; i--){
+			 SLOGW("fuseMountPart is %s", lidbg_vold.mFuseMountPart[i]);
+
+		    if (doUnmount(lidbg_vold.mFuseMountPart[i], force) != 0) {
+		        SLOGE("Failed to unmount %s (%s)", lidbg_vold.mFuseMountPart[i], strerror(errno));
 		    }
-			 deleteMountPoint(mFuseMountPart[i]);
-			if(mMountPart[i])
+			lidbg_vold.deleteMountPoint(lidbg_vold.mFuseMountPart[i]);
+			if(lidbg_vold.mMountPart[i])
 		            {
-				if (doUnmount(mMountPart[i], force) != 0) {
+				if (doUnmount(lidbg_vold.mMountPart[i], force) != 0) {
 					SLOGE("Failed to unmount %s (%s)", getMountpoint(), strerror(errno));
-					LIDBG_PRINT("Failed to unmount %s (%s)", getMountpoint(), strerror(errno));
-					deleteMountPoint(mMountPart[i]);
+					lidbg_vold.deleteMountPoint(lidbg_vold.mMountPart[i]);
 					goto fail_remount_secure;
 				}
 
-		                if(deleteMountPoint(mMountPart[i]))
-		                	saveUnmountPoint(mMountPart[i]); 
+		                if(lidbg_vold.deleteMountPoint(lidbg_vold.mMountPart[i]))
+		                	lidbg_vold.saveUnmountPoint(lidbg_vold.mMountPart[i]); 
 
-		                mMountPart[i] = NULL;
+		                lidbg_vold.mMountPart[i] = NULL;
 		            }
 		}
 	}
