@@ -371,8 +371,7 @@ static int  gps_probe(struct platform_device *pdev)
 		lidbg_shell_cmd("rm /flysystem/lib/out/"FLY_GPS_SO);
 		lidbg_shell_cmd("rm /system/lib/modules/out/"FLY_GPS_SO);
 		lidbg_shell_cmd("mv /flysystem/lib/hw/"FLY_GPS_SO"  /flysystem/lib/hw/gps.soc.bak");
-		lidbg_shell_cmd("mount -o remount,ro /system");
-        lidbg("[ublox]ublox.miss\n\n");
+		lidbg("[ublox]ublox.miss\n\n");
 		return 0;
     }
     else

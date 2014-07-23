@@ -75,7 +75,7 @@ suc:
 
 void system_switch_init(void)
 {
-	lidbg_shell_cmd("mount -o remount /system");
+    lidbg_shell_cmd("mount -o remount /system");
     lidbg_shell_cmd("mkdir  "ORIGIN_APP_PATH);
     lidbg_shell_cmd("mkdir  "ORIGIN_TMP_PATH);
     if((g_var.is_fly)&&(!g_var.recovery_mode))
@@ -105,6 +105,5 @@ void system_switch_init(void)
         if(is_out_updated)
             lidbg_shell_cmd("cp /flysystem/lib/out/* /system/lib/modules/out" );
         lidbg_shell_cmd("chmod 777 /system/priv-app/*" );
-		lidbg_shell_cmd("mount -o remount,ro /system");
     }
 }

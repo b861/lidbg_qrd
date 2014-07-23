@@ -127,7 +127,6 @@ int main(int argc, char **argv)
 			system("mount -o remount /system");
             system("chmod 777 /system/lib/modules/out/lidbg_userver");
             system("chmod 777 /system/lib/modules/out/*");
-			system("mount -o remount,ro /system");
             lidbg("lidbg_iserver: waitting origin lidbg_uevent...\n");
             sleep(1);
         }
