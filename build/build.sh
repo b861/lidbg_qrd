@@ -11,7 +11,7 @@ echo $BOARD_VERSION >> $build_log
 echo $BUILD_VERSION >> $build_log
 git log --oneline | sed -n '1,10p' >> $build_log
 
-#find ../ -name "Module.symvers" -exec rm -rf {} \;
+find ../ -name "Module.symvers" -exec rm -rf {} \;
 ./make_all.sh  && . $DBG_BUILD_PATH/copy2out.sh 
 
 

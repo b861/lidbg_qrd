@@ -42,6 +42,17 @@ struct hw_version_specific g_hw_version_specific[] =
 	
 	.ap_key_left = 35,
 	.ap_key_right = 37,
+	
+	.thermal_ctrl = 
+	{
+		{1,  80,  1401600,"1401600"},
+		{81, 90,  1094400,"1094400"},
+		{91, 100, 787200, "787200"},
+		{101,150, 600000, "600000"},
+		{151,500, 300000, "300000"},
+		{0,0, 0, "0"},//end flag
+	},
+
 	},
 {//v2
 	.gpio_lcd_reset = -1,
@@ -80,6 +91,17 @@ struct hw_version_specific g_hw_version_specific[] =
 
 	.ap_key_left = 35,
 	.ap_key_right = 37,
+
+	.thermal_ctrl = 
+	{
+		{1,  80,  1401600,"1401600"},
+		{81, 90,  1094400,"1094400"},
+		{91, 100, 787200, "787200"},
+		{101,150, 600000, "600000"},
+		{151,500, 300000, "300000"},
+		{0,0, 0, "0"},//end flag
+	},
+	
 	},
 
 };
@@ -126,6 +148,11 @@ struct hw_version_specific g_hw_version_specific[] =
 	.ap_key_left = 38,
 	.ap_key_right = 39,
 
+	.thermal_ctrl = 
+	{
+		{0,0, 0, "0"},//end flag
+	},
+
 	},
 {//v2
 	.gpio_lcd_reset = 25,
@@ -164,6 +191,12 @@ struct hw_version_specific g_hw_version_specific[] =
 	
 	.ap_key_left = 38,
 	.ap_key_right = 39,
+
+	
+	.thermal_ctrl = 
+	{
+		{0,0, 0, "0"},//end flag
+	},
 	},
 
 };
@@ -212,6 +245,11 @@ struct hw_version_specific g_hw_version_specific[] =
 	.ap_key_left = -1,
 	.ap_key_right = -1,
 
+	.thermal_ctrl = 
+	{
+		{0,0, 0, "0"},//end flag
+	},
+
 	},
 {//v2
 	.gpio_lcd_reset = -1,
@@ -250,6 +288,12 @@ struct hw_version_specific g_hw_version_specific[] =
 
 	.ap_key_left = -1,
 	.ap_key_right = -1,
+
+	
+	.thermal_ctrl = 
+	{
+		{0,0, 0, "0"},//end flag
+	},
 	},
 
 };

@@ -36,6 +36,13 @@
 
 #endif
 
+struct thermal_ctrl
+{
+	int temp_low;
+	int temp_high;
+	u32 limit_freq;
+	char* limit_freq_string;
+};
 
 struct hw_version_specific
 {
@@ -78,6 +85,9 @@ struct hw_version_specific
 	int ap_key_left;
 	int ap_key_right;
 
+//temp
+	struct thermal_ctrl thermal_ctrl[10];
+
 };
 extern struct hw_version_specific g_hw_version_specific[];
 
@@ -86,7 +96,6 @@ extern struct hw_version_specific g_hw_version_specific[];
 //config
 
 #ifdef PLATFORM_msm8226
-#define FREQ_CTRL_BY_TEMP
 #define SYSTEM_SWITCH_EN
 #endif
 //lpc
@@ -217,34 +226,8 @@ extern struct hw_version_specific g_hw_version_specific[];
 //7741
 #define SAF7741_I2C_BUS  (g_hw.i2c_bus_saf7741)
 
-/*
-//TBD
-struct thermal_ctrl thermal_ctrl[] =
-{
-	{0,1401600,"1401600"},
-	{90,1094400,"1094400"},
-	{100,600000,"600000"},
-	{110,300000,"300000"}
-}
-*/
+
 //temp
-#define THRESHOLDS_STEP0    (0)
-#define FREQ_STEP0     		(1401600)
-#define FREQ_STEP0_STRING   ("1401600")
-
-#define THRESHOLDS_STEP1    (80)
-#define FREQ_STEP1   	 	(1094400)
-#define FREQ_STEP1_STRING   ("1094400")
-
-#define THRESHOLDS_STEP2    (90)
-#define FREQ_STEP2   	 	(787200)
-#define FREQ_STEP2_STRING   ("787200")
-
-#define THRESHOLDS_STEP3    (100)
-#define FREQ_STEP3   	 	(600000)
-#define FREQ_STEP3_STRING   ("600000")
-
-
 #define FREQ_RECOVERY_STRING   ("600000")
 
 
@@ -268,8 +251,6 @@ struct thermal_ctrl thermal_ctrl[] =
 
 
 #endif
-
-
 
 
 
@@ -401,33 +382,7 @@ struct thermal_ctrl thermal_ctrl[] =
 //7741
 #define SAF7741_I2C_BUS  (g_hw.i2c_bus_saf7741)
 
-/*
-//TBD
-struct thermal_ctrl thermal_ctrl[] =
-{
-	{0,1401600,"1401600"},
-	{90,1094400,"1094400"},
-	{100,600000,"600000"},
-	{110,300000,"300000"}
-}
-*/
 //temp
-#define THRESHOLDS_STEP0    (0)
-#define FREQ_STEP0     		(1401600)
-#define FREQ_STEP0_STRING   ("1401600")
-
-#define THRESHOLDS_STEP1    (80)
-#define FREQ_STEP1   	 	(1094400)
-#define FREQ_STEP1_STRING   ("1094400")
-
-#define THRESHOLDS_STEP2    (90)
-#define FREQ_STEP2   	 	(787200)
-#define FREQ_STEP2_STRING   ("787200")
-
-#define THRESHOLDS_STEP3    (100)
-#define FREQ_STEP3   	 	(600000)
-#define FREQ_STEP3_STRING   ("600000")
-
 
 #define FREQ_RECOVERY_STRING   ("600000")
 
