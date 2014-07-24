@@ -36,7 +36,7 @@ static int SN65_Sequence_seq4(void)
 	buf_piont = dsi83_conf;
 	buf2[0]=0x00;
 	buf2[1]=0x00;
-	lidbg(KERN_CRIT "dsi83:Sequence 4\n");
+	lidbg( "dsi83:Sequence 4\n");
 	for(i=0;buf_piont[i] !=0xff ;i+=2)
 	{
 		ret = SN65_register_write(&buf_piont[i]);
@@ -46,7 +46,7 @@ static int SN65_Sequence_seq4(void)
 
 		if(buf2[1] != buf_piont[i+1])
 		{
-			lidbg(KERN_CRIT "Warning regitster(0x%.2x),write(0x%.2x) and read back(0x%.2x) Unequal\n",\
+			lidbg( "Warning regitster(0x%.2x),write(0x%.2x) and read back(0x%.2x) Unequal\n",\
 			buf_piont[i],buf_piont[i+1],buf2[1]);
 		}
 	}
@@ -59,7 +59,7 @@ static int SN65_Sequence_seq6(void)
 	char buf2[2];
 	buf2[0]=0x0d;
 	buf2[1]=0x01;
-	lidbg(KERN_CRIT "dsi83:Sequence 6\n");
+	lidbg( "dsi83:Sequence 6\n");
 	ret = SN65_register_write(buf2);
 	return ret;
 }
@@ -67,7 +67,7 @@ static int SN65_Sequence_seq7(void)
 {
 	int ret;
 	char buf2[2];
-	lidbg(KERN_CRIT "dsi83:Sequence 7\n");
+	lidbg( "dsi83:Sequence 7\n");
 
 	buf2[0]=0x0a;
 	buf2[1]=0x00;
@@ -81,11 +81,11 @@ static int SN65_Sequence_seq7(void)
 		{
 			ret = SN65_register_read(buf2[0],&buf2[1]);
 			k = buf2[1]&0x80;
-			lidbg(KERN_CRIT "dsi83:Wait for %d,r = 0x%.2x\n",i,buf2[1]);
+			lidbg( "dsi83:Wait for %d,r = 0x%.2x\n",i,buf2[1]);
 			i++;
 			if(i>100)
 			{
-				lidbg(KERN_CRIT "dsi83:Warning wait time out .. break\n");
+				lidbg( "dsi83:Warning wait time out .. break\n");
 				break;
 			}
 			msleep(50);
@@ -102,7 +102,7 @@ static int SN65_Sequence_seq8(void)  /*seq 8 the bit must be set after the CSR`s
 #ifdef DSI83_DEBUG
 	dsi83_dump_reg();
 #endif
-	lidbg(KERN_CRIT "dsi83:Sequence 8\n");
+	lidbg( "dsi83:Sequence 8\n");
 	buf2[0]=0x09;
 	buf2[1]=0x01;
 	ret = SN65_register_write(buf2);
@@ -116,49 +116,25 @@ static int SN65_Sequence_seq8(void)  /*seq 8 the bit must be set after the CSR`s
 }
 
 
-#ifdef DSI83_DEBUG
 static void dsi83_dump_reg(void)
 {
-	int i;
-	unsigned char reg;
-	
-	char buf1[2];
-	buf1[0]=0xe5;
-	buf1[1]=0xff;
+    int i;
+    unsigned char reg;
+    lidbg("%s:enter\n", __func__);
 
-	for (i = 0; i < 0x3d; i++) {
-		SN65_register_read(i, &reg);
-		lidbg(KERN_CRIT "dsi83:Read reg-0x%x=0x%x\n", i, reg);
-	}
-
-/*
-	int ret;
-	SN65_register_read(0xe1, &reg);
-	lidbg(KERN_CRIT "[LSH]:reg-0xE1=0x%x.\n",reg);
-	SN65_register_read(0xe5, &reg);
-	lidbg(KERN_CRIT "[LSH]:reg-0xE5=0x%x.\n",reg);
-	lidbg(KERN_CRIT "*****************************\n");
-
-	for(i = 0; i < 20; ++i)
-	{
-		
-		ret = SN65_register_write(buf1);
-		if(!ret)
-			lidbg(KERN_CRIT "[LSH]:write reg 0xe5 error.\n");
-		msleep(50);
-		
-		SN65_register_read(0xe1, &reg);
-		lidbg(KERN_CRIT "[LSH]:reg-0xE1=0x%x.\n",reg);
-		SN65_register_read(0xe5, &reg);
-		lidbg(KERN_CRIT "[LSH]:reg-0xE5=0x%x.\n",reg);
-
-		lidbg(KERN_CRIT "------------------------\n");
-		msleep(10);
-	}
-*/
+    for (i = 0; i < 0x3d; i++)
+    {
+        SN65_register_read(i, &reg);
+        lidbg( "dsi83:Read reg-0x%x=0x%x\n", i, reg);
+    }
+    SN65_register_read(0xe0, &reg);
+    lidbg( "dsi83:Read reg-0xe0=0x%x\n", reg);
+    SN65_register_read(0xe1, &reg);
+    lidbg( "dsi83:Read reg-0xe1=0x%x\n", reg);
+    SN65_register_read(0xe5, &reg);
+    lidbg( "dsi83:Read reg-0xe5=0x%x\n", reg);
 
 }
-#endif
 
 
 static int SN65_devices_read_id(void)
@@ -199,7 +175,10 @@ static void panel_reset(void)
 
 #if defined(CONFIG_FB)
 void dsi83_suspend(void)
-{}
+{
+	is_dsi83_inited = false;
+
+}
 
 void dsi83_resume(void)
 {
@@ -217,10 +196,17 @@ static int dsi83_fb_notifier_callback(struct notifier_block *self,
 		blank = evdata->data;
 		
 		if (*blank == FB_BLANK_UNBLANK)
-			lidbg(KERN_CRIT "dsi83:FB_BLANK_UNBLANK\n");
-		//dsi83_resume();
+		{
+			lidbg( "dsi83:FB_BLANK_UNBLANK\n");
+			g_var.fb_on = true;
+			dsi83_resume();
+		}
 		else if (*blank == FB_BLANK_POWERDOWN)
-			;//dsi83_suspend();
+		{
+			lidbg( "dsi83:FB_BLANK_POWERDOWN\n");
+			g_var.fb_on = false;
+			dsi83_suspend();
+		}
 	}
 
 	return 0;
@@ -236,7 +222,37 @@ void dsi83_gpio_init(void)
 	T123_reset();
 }
 
+int thread_dsi83_check(void *data)
+{
+    unsigned char reg;
+    char buf1[2];
+    int ret,count = 0;
+    buf1[0] = 0xe5;
+    buf1[1] = 0xff;
 
+	while((count < 5) && (g_var.fb_on == true))
+	{
+		reg = 0xff;
+	    ret = SN65_register_write(buf1);
+	    if(ret < 0)
+	        lidbgerr( "[dsi83.check]:write reg 0xe5 error.\n");
+		else
+	    	msleep(100);
+		
+	    ret = SN65_register_read(0xe5, &reg);
+	    
+	    if((reg != 0x00) || (ret< 0))
+	    {
+	        lidbgerr( "[dsi83.check.err]reg-0xe5=0x%x,ret=%d\n", reg,ret);
+			is_dsi83_inited = 0;
+	        dsi83_resume();
+	    }
+
+		 msleep(1000);
+		 count++;
+	}
+	return 0;
+}
 static void dsi83_work_func(struct work_struct *work)
 {
     int ret = 0;
@@ -245,11 +261,11 @@ static void dsi83_work_func(struct work_struct *work)
 
 	if(is_dsi83_inited)
 	{
-	    lidbg(KERN_CRIT "dsi83_work_func:skip\n");
+	    lidbg( "dsi83_work_func:skip\n");
 	    return;
 	}
 	is_dsi83_inited = true;
-	lidbg(KERN_CRIT "dsi83_work_func:enter\n");
+	lidbg( "dsi83_work_func:enter\n");
 		
 	dsi83_gpio_init();
 	
@@ -262,7 +278,7 @@ static void dsi83_work_func(struct work_struct *work)
 			break;
 		else
 		{
-			lidbg(KERN_CRIT "dsi83:DSI83 match ID falied,num:%d.\n", i+1);
+			lidbg( "dsi83:DSI83 match ID falied,num:%d.\n", i+1);
 			msleep(100);
 			continue;
 		}
@@ -271,41 +287,22 @@ static void dsi83_work_func(struct work_struct *work)
 	if(i == 3)
 		return;
 	else
-		lidbg(KERN_CRIT "dsi83:DSI83 match ID success!\n");
+		lidbg( "dsi83:DSI83 match ID success!\n");
 
 	SN65_Sequence_seq4();
 	
 	ret = SN65_Sequence_seq6();
 	if(ret < 0)
-		lidbg(KERN_CRIT "dsi83:SN65_Sequence_seq6(),err,ret = %d.\n", ret);
+		lidbg( "dsi83:SN65_Sequence_seq6(),err,ret = %d.\n", ret);
 	
 	SN65_Sequence_seq7();
 	
 	ret = SN65_Sequence_seq8();
 	if(ret < 0)
-		lidbg(KERN_CRIT "dsi83:SN65_Sequence_seq8(),err,ret = %d.\n", ret);
+		lidbg( "dsi83:SN65_Sequence_seq8(),err,ret = %d.\n", ret);
 	
-
-	{
-	    unsigned char reg;
-	    char buf1[2];
-	    int ret;
-	    msleep(50);
-	    buf1[0] = 0xe5;
-	    buf1[1] = 0xff;
-	    ret = SN65_register_write(buf1);
-	    if(!ret)
-	        lidbg( "[dsi83.check]:write reg 0xe5 error.\n");
-	    msleep(50);
-	    SN65_register_read(0xe5, &reg);
-	    lidbg( "[dsi83.check]:reg-0xE5=0x%x.\n", reg);
-	    if(reg != 0x00)
-	    {
-	        lidbg( "[dsi83.check.err]dsi83:again:%d\n", reg);
-	        dsi83_resume();
-	    }
-	}
-
+	msleep(100); //wait for sigal/reg stable
+	CREATE_KTHREAD(thread_dsi83_check, NULL);
 }
 
 int is_dsi83_exist(void)
@@ -327,27 +324,6 @@ int is_dsi83_exist(void)
     return -1;
 }
 
-static int lidbg_event_dsi83(struct notifier_block *this, unsigned long event, void *ptr)
-{
-    DUMP_FUN;
-    switch (event)
-    {
-    case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_SCREEN_OFF):
-		is_dsi83_inited = false;
-		dsi83_suspend();
-        break;
-    case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_SCREEN_ON):
-		dsi83_resume();
-        break;
-    default:
-        break;
-    }
-    return NOTIFY_DONE;
-}
-static struct notifier_block lidbg_notifier_dsi83 =
-{
-    .notifier_call = lidbg_event_dsi83,
-};
 
 int dsi83_rst_proc(char *buf, char **start, off_t offset, int count, int *eof, void *data )
 {
@@ -359,21 +335,8 @@ int dsi83_rst_proc(char *buf, char **start, off_t offset, int count, int *eof, v
 }
 int dsi83_dump_proc(char *buf, char **start, off_t offset, int count, int *eof, void *data )
 {
-    int i;
-    unsigned char reg;
     lidbg("%s:enter\n", __func__);
-
-    for (i = 0; i < 0x3d; i++)
-    {
-        SN65_register_read(i, &reg);
-        lidbg( "dsi83:Read reg-0x%x=0x%x\n", i, reg);
-    }
-    SN65_register_read(0xe0, &reg);
-    lidbg( "dsi83:Read reg-0xe0=0x%x\n", reg);
-    SN65_register_read(0xe1, &reg);
-    lidbg( "dsi83:Read reg-0xe1=0x%x\n", reg);
-    SN65_register_read(0xe5, &reg);
-    lidbg( "dsi83:Read reg-0xe5=0x%x\n", reg);
+	dsi83_dump_reg();
     return 1;
 }
 static int kv_dsi83_rst = 0;
@@ -406,13 +369,13 @@ static int dsi83_probe(struct platform_device *pdev)
    	create_proc_read_entry("dsi83_rst", 0, NULL, dsi83_rst_proc, NULL);
    	create_proc_read_entry("dsi83_dump", 0, NULL, dsi83_dump_proc, NULL);
     FS_REGISTER_INT(kv_dsi83_rst, "kv_dsi83_rst", 0, cb_dsi83_rst);
-   	register_lidbg_notifier(&lidbg_notifier_dsi83);
 	INIT_DELAYED_WORK(&dsi83_work, dsi83_work_func);
 	dsi83_workqueue = create_workqueue("dsi83");
 	
 #ifdef PLATFORM_msm8974
 	queue_delayed_work(dsi83_workqueue, &dsi83_work, DSI83_DELAY_TIME);
 #endif	
+	CREATE_KTHREAD(thread_dsi83_check, NULL);
 
 #if defined(CONFIG_FB)
 		dsi83_fb_notif.notifier_call = dsi83_fb_notifier_callback;

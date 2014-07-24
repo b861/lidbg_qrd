@@ -72,7 +72,7 @@ int thread_key(void *data)
     {
 	    while(1)
 	    {
-	        if(fb_on)
+	        if(g_var.fb_on)
 	        {
 	            key_scan();
 	            msleep(100);

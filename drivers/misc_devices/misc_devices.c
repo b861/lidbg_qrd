@@ -2,7 +2,6 @@
 #include "lidbg.h"
 LIDBG_DEFINE;
 
-int fb_on = 1;
 
 #if defined(CONFIG_FB)
 struct notifier_block devices_notif;
@@ -16,9 +15,9 @@ static int devices_notifier_callback(struct notifier_block *self,
     {
         blank = evdata->data;
         if (*blank == FB_BLANK_UNBLANK)
-            fb_on = 1;
+            g_var.fb_on = 1;
         else if (*blank == FB_BLANK_POWERDOWN)
-            fb_on = 0;
+            g_var.fb_on = 0;
     }
 
     return 0;

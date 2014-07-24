@@ -230,6 +230,7 @@ struct lidbg_pvar_t
     struct list_head *ws_lh;
 	bool recovery_mode;
 	struct hw_info hw_info;
+	bool fb_on;
 };
 
 typedef struct {

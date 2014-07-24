@@ -3,15 +3,15 @@
 struct work_struct work_left_button1;
 static void work_left_button1_fn(struct work_struct *work)
 {
-if(fb_on)
-    SOC_Key_Report(KEY_HOME, KEY_PRESSED_RELEASED);
+	if(g_var.fb_on)
+	    SOC_Key_Report(KEY_HOME, KEY_PRESSED_RELEASED);
 }
 
 struct work_struct work_right_button1;
 static void work_right_button1_fn(struct work_struct *work)
 {
-if(fb_on)
-    SOC_Key_Report(KEY_BACK, KEY_PRESSED_RELEASED);
+	if(g_var.fb_on)
+	    SOC_Key_Report(KEY_BACK, KEY_PRESSED_RELEASED);
 }
 irqreturn_t irq_left_button1(int irq, void *dev_id)
 {

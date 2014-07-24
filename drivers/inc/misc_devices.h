@@ -15,8 +15,6 @@ int thread_sound_detect(void *data);
 int SOC_Get_System_Sound_Status_func(void *para, int length);
 int  iGPS_sound_status(void);
 
-extern int fb_on;
-
 // PANNE_PEN
 #define LCD_ON  do{lidbg("LCD_ON\n");LPC_CMD_LCD_ON;}while(0)
 #define LCD_OFF do{lidbg("LCD_OFF\n");LPC_CMD_LCD_OFF;}while(0)
