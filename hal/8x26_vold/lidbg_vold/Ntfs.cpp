@@ -46,21 +46,51 @@
 #include <logwrap/logwrap.h>
 #include "Fat.h"
 #include "VoldUtil.h"
+#include "../../inc/lidbg_servicer.h"
 
-static char FSCK_NTFS_PATH[] = "/system/bin/chkntfs";
-static char MKNTFS_PATH[] = "/system/bin/mkntfs";
-static char MOUNT_NTFS_PATH[] = "/system/bin/ntfs-3g";
+static char *FLY_PRODUCT_PATH = "/flysystem/lib/out/chkntfs";
+static char *NATIVE_SYSTEM_PATH = "/system/lib/modules/out/chkntfs";
+
+static char *FSCK_NTFS_PATH = "/system/bin/chkntfs";
+static char *MKNTFS_PATH = "/system/bin/mkntfs";
+static char *MOUNT_NTFS_PATH = "/system/bin/ntfs-3g";
 extern "C" int mount(const char *, const char *, const char *, unsigned long, const void *);
+
+
+int Ntfs::selectPath(void){
+	if(!access(FLY_PRODUCT_PATH, X_OK))
+	{
+		FSCK_NTFS_PATH = "/flysystem/lib/out/chkntfs";
+		MKNTFS_PATH = "/flysystem/lib/out/mkntfs";
+		MOUNT_NTFS_PATH = "/flysystem/lib/out/ntfs-3g";
+		return 0;
+	}
+	else if(!access(NATIVE_SYSTEM_PATH, X_OK))
+	{
+		FSCK_NTFS_PATH = "/system/lib/modules/out/chkntfs";
+		MKNTFS_PATH = "/system/lib/modules/out/mkntfs";
+		MOUNT_NTFS_PATH = "/system/lib/modules/out/ntfs-3g";
+		return 0;
+	}
+	else if(!access(FSCK_NTFS_PATH, X_OK))
+	{
+		return 0;
+	}
+	else 
+		return -1;
+}
 
 int Ntfs::check(const char *fsPath) {
     bool rw = true;
-    if (access(FSCK_NTFS_PATH, X_OK)) {
-        SLOGW("Skipping fs checks\n");
-        return 0;
-    }
-
     int pass = 1;
     int rc = 0;
+
+   if(selectPath() != 0)
+   {
+   	LIDBG_PRINT("Skipping fs checks, NTFS Tools can't find!\n");
+	return -1;
+   }
+   LIDBG_PRINT("\n\n\nxxxxxx FSCK_NTFS_PATH is %s\n",FSCK_NTFS_PATH);
     do {
         SLOGW("fsPath : %s" , fsPath);
         const char *args[5];
@@ -74,11 +104,13 @@ int Ntfs::check(const char *fsPath) {
         rc = android_fork_execvp(ARRAY_SIZE(args), (char **)args, &status,false, true);
         if (rc != 0) {
             SLOGE("Filesystem check failed due to logwrap error");
+	    LIDBG_PRINT("Filesystem check failed due to logwrap error");
             errno = EIO;
             return -1;
         }
         if (!WIFEXITED(status)) {
             SLOGE("Filesystem check did not exit properly");
+	    LIDBG_PRINT("Filesystem check did not exit properly");	
             errno = EIO;
             return -1;
         }
@@ -108,6 +140,7 @@ int Ntfs::check(const char *fsPath) {
             return 0;
         default:
             SLOGE("Filesystem check failed (unknown exit code %d)", rc);
+	    LIDBG_PRINT("Filesystem check failed (unknown exit code %d)", rc);
             errno = EIO;
             return -1;
         }
@@ -200,6 +233,7 @@ int Ntfs::doMount(const char *fsPath, const char *mountPoint,
                 SLOGI("ntfs-3g executed successfully for read-only.");
             } else {
                 SLOGE("Failed to execute ntfs-3g for read-only.");
+		LIDBG_PRINT("Failed to execute ntfs-3g for read-only.");
             }
         } else {
             rc = mount(fsPath, mountPoint, "fuseblk", flags, mountData);

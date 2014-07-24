@@ -50,6 +50,7 @@ common_static_libraries := \
 
 include $(CLEAR_VARS)
 
+
 LOCAL_MODULE := libvold
 
 LOCAL_SRC_FILES := $(common_src_files)
@@ -96,3 +97,5 @@ LOCAL_CFLAGS :=
 LOCAL_SHARED_LIBRARIES := libcutils
 
 include $(BUILD_EXECUTABLE)
+
+include $(call all-makefiles-under, $(LOCAL_PATH))
