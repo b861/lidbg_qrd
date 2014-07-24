@@ -284,6 +284,27 @@ static void dsi83_work_func(struct work_struct *work)
 	ret = SN65_Sequence_seq8();
 	if(ret < 0)
 		lidbg(KERN_CRIT "dsi83:SN65_Sequence_seq8(),err,ret = %d.\n", ret);
+	
+
+	{
+	    unsigned char reg;
+	    char buf1[2];
+	    int ret;
+	    msleep(50);
+	    buf1[0] = 0xe5;
+	    buf1[1] = 0xff;
+	    ret = SN65_register_write(buf1);
+	    if(!ret)
+	        lidbg( "[dsi83.check]:write reg 0xe5 error.\n");
+	    msleep(50);
+	    SN65_register_read(0xe5, &reg);
+	    lidbg( "[dsi83.check]:reg-0xE5=0x%x.\n", reg);
+	    if(reg != 0x00)
+	    {
+	        lidbg( "[dsi83.check.err]dsi83:again:%d\n", reg);
+	        dsi83_resume();
+	    }
+	}
 
 }
 
@@ -336,6 +357,25 @@ int dsi83_rst_proc(char *buf, char **start, off_t offset, int count, int *eof, v
 	dsi83_resume();
     return 1;
 }
+int dsi83_dump_proc(char *buf, char **start, off_t offset, int count, int *eof, void *data )
+{
+    int i;
+    unsigned char reg;
+    lidbg("%s:enter\n", __func__);
+
+    for (i = 0; i < 0x3d; i++)
+    {
+        SN65_register_read(i, &reg);
+        lidbg( "dsi83:Read reg-0x%x=0x%x\n", i, reg);
+    }
+    SN65_register_read(0xe0, &reg);
+    lidbg( "dsi83:Read reg-0xe0=0x%x\n", reg);
+    SN65_register_read(0xe1, &reg);
+    lidbg( "dsi83:Read reg-0xe1=0x%x\n", reg);
+    SN65_register_read(0xe5, &reg);
+    lidbg( "dsi83:Read reg-0xe5=0x%x\n", reg);
+    return 1;
+}
 static int kv_dsi83_rst = 0;
 void cb_dsi83_rst(char *key, char *value )
 {
@@ -364,6 +404,7 @@ static int dsi83_probe(struct platform_device *pdev)
    	}
 		
    	create_proc_read_entry("dsi83_rst", 0, NULL, dsi83_rst_proc, NULL);
+   	create_proc_read_entry("dsi83_dump", 0, NULL, dsi83_dump_proc, NULL);
     FS_REGISTER_INT(kv_dsi83_rst, "kv_dsi83_rst", 0, cb_dsi83_rst);
    	register_lidbg_notifier(&lidbg_notifier_dsi83);
 	INIT_DELAYED_WORK(&dsi83_work, dsi83_work_func);
@@ -404,7 +445,7 @@ static int dsi83_ops_suspend(struct device *dev)
 }
 static int thread_dsi83_ops_resume(void *data)
 {
-    msleep(100);
+    msleep(200);
     dsi83_work_func(NULL);
     return 1;
 }
