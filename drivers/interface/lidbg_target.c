@@ -1,7 +1,7 @@
 //dts
 
-#ifdef PLATFORM_msm8226
 
+#ifdef PLATFORM_msm8226
 struct hw_version_specific g_hw_version_specific[] = 
 {
 
@@ -43,7 +43,7 @@ struct hw_version_specific g_hw_version_specific[] =
 	.ap_key_left = 35,
 	.ap_key_right = 37,
 	
-	.thermal_ctrl = 
+	.cpu_freq_thermal = 
 	{
 		{1,  80,  1401600,"1401600"},
 		{81, 90,  1094400,"1094400"},
@@ -52,6 +52,13 @@ struct hw_version_specific g_hw_version_specific[] =
 		{151,500, 300000, "300000"},
 		{0,0, 0, "0"},//end flag
 	},
+	
+	.cpu_freq_list = "300000,384000,600000,787200,998400,1094400,1190400,1305600,1344000,1401600",
+	.cpu_freq_temp_node = "/sys/class/thermal/thermal_zone5/temp",
+	.cpu_freq_recovery_limit = "600000",
+
+	.fly_parameter_node = "/dev/block/mmcblk0p25",
+	.system_switch_en = 1,
 
 	},
 {//v2
@@ -92,7 +99,7 @@ struct hw_version_specific g_hw_version_specific[] =
 	.ap_key_left = 35,
 	.ap_key_right = 37,
 
-	.thermal_ctrl = 
+	.cpu_freq_thermal = 
 	{
 		{1,  80,  1401600,"1401600"},
 		{81, 90,  1094400,"1094400"},
@@ -102,6 +109,13 @@ struct hw_version_specific g_hw_version_specific[] =
 		{0,0, 0, "0"},//end flag
 	},
 	
+	.cpu_freq_list = "300000,384000,600000,787200,998400,1094400,1190400,1305600,1344000,1401600",
+	.cpu_freq_temp_node = "/sys/class/thermal/thermal_zone5/temp",
+	.cpu_freq_recovery_limit = "600000",
+
+	.fly_parameter_node = "/dev/block/mmcblk0p25",
+	
+	.system_switch_en = 1,
 	},
 
 };
@@ -148,11 +162,16 @@ struct hw_version_specific g_hw_version_specific[] =
 	.ap_key_left = 38,
 	.ap_key_right = 39,
 
-	.thermal_ctrl = 
+	.cpu_freq_thermal = 
 	{
 		{0,0, 0, "0"},//end flag
 	},
+	
+	.cpu_freq_list = "300000,422400,652800,729600,883200,960000,1036800,1190400,1267200,1497600,1574400,1728000,1958400,2265600",
+	.cpu_freq_temp_node = "/sys/class/thermal/thermal_zone5/temp",
+	.cpu_freq_recovery_limit = "600000",
 
+	.fly_parameter_node = "/dev/block/mmcblk0p25",
 	},
 {//v2
 	.gpio_lcd_reset = 25,
@@ -193,10 +212,16 @@ struct hw_version_specific g_hw_version_specific[] =
 	.ap_key_right = 39,
 
 	
-	.thermal_ctrl = 
+	.cpu_freq_thermal = 
 	{
 		{0,0, 0, "0"},//end flag
 	},
+	
+	.cpu_freq_list = "300000,422400,652800,729600,883200,960000,1036800,1190400,1267200,1497600,1574400,1728000,1958400,2265600",
+	.cpu_freq_temp_node = "/sys/class/thermal/thermal_zone5/temp",
+	.cpu_freq_recovery_limit = "600000",
+
+	.fly_parameter_node = "/dev/block/mmcblk0p25",
 	},
 
 };
@@ -245,7 +270,7 @@ struct hw_version_specific g_hw_version_specific[] =
 	.ap_key_left = -1,
 	.ap_key_right = -1,
 
-	.thermal_ctrl = 
+	.cpu_freq_thermal = 
 	{
 		{0,0, 0, "0"},//end flag
 	},
@@ -290,7 +315,7 @@ struct hw_version_specific g_hw_version_specific[] =
 	.ap_key_right = -1,
 
 	
-	.thermal_ctrl = 
+	.cpu_freq_thermal = 
 	{
 		{0,0, 0, "0"},//end flag
 	},

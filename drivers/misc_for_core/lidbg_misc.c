@@ -230,9 +230,8 @@ void cb_kv_cmd(char *key, char *value)
 int misc_init(void *data)
 {
     LIDBG_WARN("<==IN==>\n");
-#ifdef SYSTEM_SWITCH_EN
-    system_switch_init();
-#endif
+	if(SYSTEM_SWITCH_EN == 1)
+    	system_switch_init();
     te_regist_password("001101", cb_password_upload);
     te_regist_password("001110", cb_password_clean_all);
     te_regist_password("001111", cb_password_chmod);

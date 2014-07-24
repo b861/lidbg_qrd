@@ -9,6 +9,15 @@
 
 void lidbg_device_main(int argc, char **argv);
 
+#define FLY_GPS_SO  "gps.msm8625.so"
+#define FLYPARAMETER_NODE "/dev/block/mmcblk0p25"
+#define GPS_I2C_BUS (1)
+#define LPC_I2_ID (0)
+#define TS_I2C_BUS (1)
+#define MCU_IIC_REQ_GPIO (30)
+#define SYSTEM_SWITCH_EN (0)
+#define GTP_RST_PORT    (27)  
+#define GTP_INT_PORT    (48)
 
 
 struct platform_devices_resource

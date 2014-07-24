@@ -6,36 +6,6 @@
 #define g_hw g_hw_version_specific[g_var.hw_info.hw_version - 1]  
 #define check_gpio(gpio) if(gpio == -1 ) break
 
-
-
-
-#ifdef SOC_msm8x25
-
-#define FLYPARAMETER_NODE "/dev/block/mmcblk0p25"
-
-//config
-#define TRACE_MSG_FROM_KMSG
-
-
-//lpc
-#define  LPC_I2_ID  	  (0)
-#define  MCU_WP_GPIO 	  (29)
-#define  MCU_IIC_REQ_GPIO (30)
-#define  MCU_WP_GPIO_SET  do{SOC_IO_Output(0, MCU_WP_GPIO, 1); }while(0)
-
-//gps
-#define GPS_I2C_BUS 	  (1)
-
-//touch
-#define TS_I2C_BUS 		(1)
-#define GTP_RST_PORT    (27)
-#define GTP_INT_PORT    (48)
-
-#define FLY_GPS_SO  "gps.msm8625.so"
-//"245760 320000 480000 700800 1008000 1209600"
-
-#endif
-
 struct thermal_ctrl
 {
 	int temp_low;
@@ -86,35 +56,42 @@ struct hw_version_specific
 	int ap_key_right;
 
 //temp
-	struct thermal_ctrl thermal_ctrl[10];
+	struct thermal_ctrl cpu_freq_thermal[10];
+			//cat sys/devices/system/cpu/cpu0/cpufreq/scaling_available_frequencies
+	char * cpu_freq_list;
+	char * cpu_freq_temp_node;
+	char * cpu_freq_recovery_limit;
+
+//parameter
+	char * fly_parameter_node;
+
+//system_switch
+	int system_switch_en;
 
 };
 extern struct hw_version_specific g_hw_version_specific[];
 
+#define FLYPARAMETER_NODE g_hw.fly_parameter_node
+#define SYSTEM_SWITCH_EN  g_hw.system_switch_en
 
-#ifdef SOC_msm8x26
-//config
+//touch
+#define TS_I2C_BUS      (g_hw.i2c_bus_ts)
+#define GTP_RST_PORT    (g_hw.gpio_ts_rst)  
+#define GTP_INT_PORT    (g_hw.gpio_ts_int)
 
-#ifdef PLATFORM_msm8226
-#define SYSTEM_SWITCH_EN
-#endif
+//7741
+#define SAF7741_I2C_BUS  (g_hw.i2c_bus_saf7741)
+
 //lpc
 #define  LPC_I2_ID        (g_hw.i2c_bus_lpc)
 #define  MCU_IIC_REQ_GPIO (g_hw.gpio_int_mcu_i2c_request)
 
-
-#define  MCU_WP_GPIO_ON  do{check_gpio(g_hw.gpio_mcu_wp);SOC_IO_Output(0, g_hw.gpio_mcu_wp, 0);}while(0)
-#define  MCU_WP_GPIO_OFF  do{check_gpio(g_hw.gpio_mcu_wp);SOC_IO_Output(0, g_hw.gpio_mcu_wp, 1);}while(0)
-
-#define  MCU_APP_GPIO_ON  do{check_gpio(g_hw.gpio_mcu_app);SOC_IO_Output(0, g_hw.gpio_mcu_app, 0);}while(0)
-#define  MCU_APP_GPIO_OFF  do{check_gpio(g_hw.gpio_mcu_app);SOC_IO_Output(0, g_hw.gpio_mcu_app, 1);}while(0)
-
 //dsi83
-#define  DSI83_I2C_BUS  		   (g_hw.i2c_bus_dsi83)
+#define  DSI83_I2C_BUS  		(g_hw.i2c_bus_dsi83)
 #define  DSI83_GPIO_EN          (g_hw.gpio_dsi83_en)
 
-#define  BX5B3A_I2C_BUS  		   (g_hw.i2c_bus_bx5b3a)
-#define  BX5B3A_GPIO_EN  DSI83_GPIO_EN
+#define  BX5B3A_I2C_BUS  		(g_hw.i2c_bus_bx5b3a)
+#define  BX5B3A_GPIO_EN  		DSI83_GPIO_EN
 
 //gps
 #define GPS_I2C_BUS (g_hw.i2c_bus_gps)
@@ -130,6 +107,16 @@ extern struct hw_version_specific g_hw_version_specific[];
 #define BUTTON_LEFT_2 (g_hw.gpio_int_button_left2)//k2
 #define BUTTON_RIGHT_1 (g_hw.gpio_int_button_right1)//k3
 #define BUTTON_RIGHT_2 (g_hw.gpio_int_button_right2)//k4
+
+
+#ifdef SOC_msm8x26
+
+#define  MCU_WP_GPIO_ON  do{check_gpio(g_hw.gpio_mcu_wp);SOC_IO_Output(0, g_hw.gpio_mcu_wp, 0);}while(0)
+#define  MCU_WP_GPIO_OFF  do{check_gpio(g_hw.gpio_mcu_wp);SOC_IO_Output(0, g_hw.gpio_mcu_wp, 1);}while(0)
+
+#define  MCU_APP_GPIO_ON  do{check_gpio(g_hw.gpio_mcu_app);SOC_IO_Output(0, g_hw.gpio_mcu_app, 0);}while(0)
+#define  MCU_APP_GPIO_OFF  do{check_gpio(g_hw.gpio_mcu_app);SOC_IO_Output(0, g_hw.gpio_mcu_app, 1);}while(0)
+
 
 //lcd
 
@@ -210,6 +197,7 @@ extern struct hw_version_specific g_hw_version_specific[];
 			USB_POWER_DISABLE;\
 			USB_ID_HIGH_DEV;\
 			}while(0)
+			
 //ad
 #ifdef PLATFORM_msm8226
 #define AD_KEY_PORT_L   (35)//(g_hw.ap_key_left)
@@ -219,23 +207,6 @@ extern struct hw_version_specific g_hw_version_specific[];
 #define AD_KEY_PORT_R   (39)//(g_hw.ap_key_right)
 #endif
 
-#define TS_I2C_BUS      (g_hw.i2c_bus_ts)
-#define GTP_RST_PORT    (g_hw.gpio_ts_rst)  
-#define GTP_INT_PORT    (g_hw.gpio_ts_int)
-
-//7741
-#define SAF7741_I2C_BUS  (g_hw.i2c_bus_saf7741)
-
-
-//temp
-#define FREQ_RECOVERY_STRING   ("600000")
-
-
-#define CPU_TEMP_PATH 		"/sys/class/thermal/thermal_zone5/temp"
-//cat sys/devices/system/cpu/cpu0/cpufreq/scaling_available_frequencies
-#define TEMP_FREQ_TEST_STR	 "300000,384000,600000,787200,998400,1094400,1190400,1305600,1344000,1401600"
-//300000 422400 652800 729600 883200 960000 1036800 1190400 1267200 1497600 1574400 1728000 1958400 2265600
-
 
 #ifdef PLATFORM_msm8226
 #define FLY_GPS_SO  "gps.msm8226.so"
@@ -243,28 +214,10 @@ extern struct hw_version_specific g_hw_version_specific[];
 #define FLY_GPS_SO  "gps.msm8974.so"
 #endif
 
-#ifdef PLATFORM_msm8226
-#define FLYPARAMETER_NODE "/dev/block/mmcblk0p25"
-#elif defined(PLATFORM_msm8974)
-#define FLYPARAMETER_NODE "/dev/block/mmcblk0p25"
 #endif
-
-
-#endif
-
-
-
 
 
 #ifdef SOC_mt3360
-
-#define FLYPARAMETER_NODE "/dev/block/mmcblk0p25"
-
-
-//lpc
-#define  LPC_I2_ID        (g_hw.i2c_bus_lpc)
-#define  MCU_IIC_REQ_GPIO (g_hw.gpio_int_mcu_i2c_request)
-
 
 #define  MCU_WP_GPIO_ON  do{check_gpio(g_hw.gpio_mcu_wp);SOC_IO_Output(0, g_hw.gpio_mcu_wp, 0);}while(0)
 #define  MCU_WP_GPIO_OFF  do{check_gpio(g_hw.gpio_mcu_wp);SOC_IO_Output(0, g_hw.gpio_mcu_wp, 1);}while(0)
@@ -272,25 +225,6 @@ extern struct hw_version_specific g_hw_version_specific[];
 #define  MCU_APP_GPIO_ON  do{check_gpio(g_hw.gpio_mcu_app);SOC_IO_Output(0, g_hw.gpio_mcu_app, 0);}while(0)
 #define  MCU_APP_GPIO_OFF  do{check_gpio(g_hw.gpio_mcu_app);SOC_IO_Output(0, g_hw.gpio_mcu_app, 1);}while(0)
 
-//dsi83
-#define  DSI83_I2C_BUS  		   (g_hw.i2c_bus_dsi83)
-#define  DSI83_GPIO_EN          (g_hw.gpio_dsi83_en)
-
-
-//gps
-#define GPS_I2C_BUS (g_hw.i2c_bus_gps)
-#define GPS_INT	    (g_hw.gpio_int_gps)
-
-//led
-#define LED_GPIO (g_hw.gpio_led1)
-#define LED_ON  do{check_gpio(g_hw.gpio_led1);SOC_IO_Output(0, g_hw.gpio_led1, 0); }while(0)
-#define LED_OFF  do{check_gpio(g_hw.gpio_led1);SOC_IO_Output(0, g_hw.gpio_led1, 1); }while(0)
-
-//button
-#define BUTTON_LEFT_1 (g_hw.gpio_int_button_left1)//k1
-#define BUTTON_LEFT_2 (g_hw.gpio_int_button_left2)//k2
-#define BUTTON_RIGHT_1 (g_hw.gpio_int_button_right1)//k3
-#define BUTTON_RIGHT_2 (g_hw.gpio_int_button_right2)//k4
 
 //lcd
 
@@ -300,18 +234,6 @@ extern struct hw_version_specific g_hw_version_specific[];
 			msleep(20);\
 			SOC_IO_Output(0, g_hw.gpio_lcd_reset, 1);\
 }while(0)\
-
-
-
-//t123
-#define T123_RESET do{\
-		check_gpio(g_hw.gpio_t123_reset);\
-		SOC_IO_Output(0, g_hw.gpio_t123_reset, 0);\
-		msleep(300);\
-		SOC_IO_Output(0, g_hw.gpio_t123_reset, 1);\
-		msleep(20);\
-	}while(0)
-
 
 //usb
 #define USB_SWITCH_CONNECT  do{\
@@ -375,20 +297,6 @@ extern struct hw_version_specific g_hw_version_specific[];
 #define AD_KEY_PORT_L   (35)//(g_hw.ap_key_left)
 #define AD_KEY_PORT_R   (37)//(g_hw.ap_key_right)
 
-#define TS_I2C_BUS      (g_hw.i2c_bus_ts)
-#define GTP_RST_PORT    (g_hw.gpio_ts_rst)  
-#define GTP_INT_PORT    (g_hw.gpio_ts_int)
-
-//7741
-#define SAF7741_I2C_BUS  (g_hw.i2c_bus_saf7741)
-
-//temp
-
-#define FREQ_RECOVERY_STRING   ("600000")
-
-
-#define CPU_TEMP_PATH 		"/sys/class/thermal/thermal_zone5/temp"
-#define TEMP_FREQ_TEST_STR	 "300000,384000,600000,787200,998400,1094400,1190400,1305600,1344000,1401600"
 
 #define FLY_GPS_SO  "gps.msm8226.so"
 

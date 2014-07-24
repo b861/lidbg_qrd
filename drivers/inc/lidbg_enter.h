@@ -7,7 +7,7 @@
 
 #include <lidbg_drivers_loader.h>
 #include <lidbg_flyparameter.h>
-#include <lidbg_target.h>
+//#include <lidbg_target.h>
 #include <devices.h>
 #include <lidbg_bpmsg.h>
 #include <lidbg_fastboot.h>
