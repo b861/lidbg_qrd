@@ -256,7 +256,7 @@ void usb_disk_enable(bool enable)
 }
 static int thread_usb_disk_enable_delay(void *data)
 {
-    ssleep(1);
+    ssleep(3);
     usb_disk_enable(true);
     return 1;
 }
