@@ -310,7 +310,7 @@ void LPCResume(void)
     }
 }
 
-static int lpc_linux_sync_S = 10;
+static int lpc_linux_sync_S = 5;
 void lpc_linux_sync(char *extra_info)
 {
     static char buff[64] = {0x00, 0xfd};
@@ -320,11 +320,11 @@ void lpc_linux_sync(char *extra_info)
     snprintf(&buff[2], sizeof(buff) - 3, "%s:%d.%d", extra_info, mtime / 1000, mtime % 1000);
 
     SOC_LPC_Send(buff, strlen(buff + 2) + 2);
-    lidbg("[%s]\n", buff + 2);
+    //lidbg("[%s]\n", buff + 2);
 }
 static int thread_lpc_linux_sync(void *data)
 {
-    FS_REGISTER_INT(lpc_linux_sync_S, "lpc_linux_sync_S", 10, NULL);
+    FS_REGISTER_INT(lpc_linux_sync_S, "lpc_linux_sync_S", 5, NULL);
     while(1)
     {
         lpc_linux_sync("XJS");
