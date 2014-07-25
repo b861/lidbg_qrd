@@ -292,6 +292,14 @@ static struct miscdevice misc =
 
 };
 
+static int thread_dump_trace_msg(void *data)
+{
+	msleep(1000*200);
+	kmsg_fifo_save();
+	return 0;
+}
+
+
 int fly_interface_init(void)
 {
     int ret;
@@ -380,7 +388,21 @@ int fly_interface_init(void)
 
 	}
 	lidbg("hw_version=%d\n",g_var.hw_info.hw_version);
+
+
+    //if((g_var.recovery_mode == 0) && ( fs_is_file_exist(LIDBG_PATH)))
+    {
+		g_var.is_first_update = is_out_updated;
+		lidbg("g_var.is_first_update=%d\n",g_var.is_first_update);
+    }
+
 	
+#if 1 //for test
+	if(g_var.is_first_update == 1)
+	{
+		CREATE_KTHREAD(thread_dump_trace_msg, NULL);
+	}
+#endif
     return 0;
 }
 
