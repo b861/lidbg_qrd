@@ -231,6 +231,7 @@ struct lidbg_pvar_t
 	bool recovery_mode;
 	struct hw_info hw_info;
 	bool fb_on;
+	bool is_first_update;
 };
 
 typedef struct {

@@ -83,9 +83,10 @@ static int SN65_Sequence_seq7(void)
 			k = buf2[1]&0x80;
 			lidbg( "dsi83:Wait for %d,r = 0x%.2x\n",i,buf2[1]);
 			i++;
-			if(i>100)
+			if(i>40)
 			{
 				lidbg( "dsi83:Warning wait time out .. break\n");
+				is_dsi83_inited = 0;
 				break;
 			}
 			msleep(50);
@@ -230,29 +231,34 @@ int thread_dsi83_check(void *data)
     buf1[0] = 0xe5;
     buf1[1] = 0xff;
 
-	while((count < 5) && (g_var.fb_on == true))
+	while(count < 5)
 	{
-		reg = 0xff;
-	    ret = SN65_register_write(buf1);
-	    if(ret < 0)
-	        lidbgerr( "[dsi83.check]:write reg 0xe5 error.\n");
-		else
-	    	msleep(100);
-		
-	    ret = SN65_register_read(0xe5, &reg);
-	    
-	    if((reg != 0x00) || (ret< 0))
-	    {
-	        lidbgerr( "[dsi83.check.err]reg-0xe5=0x%x,ret=%d\n", reg,ret);
-			is_dsi83_inited = 0;
-	        dsi83_resume();
-	    }
-
-		 msleep(1000);
+		if(g_var.fb_on == true)
+		{
+			reg = 0xff;
+			ret = SN65_register_write(buf1);
+			if(ret < 0)
+				lidbgerr( "[dsi83.check]:write reg 0xe5 error.\n");
+			else
+				msleep(100);
+			
+			ret = SN65_register_read(0xe5, &reg);
+			
+			if((reg != 0x00) || (ret< 0) || (is_dsi83_inited == 0) )
+			{
+				lidbgerr( "[dsi83.check.err]reg-0xe5=0x%x,ret=%d\n", reg,ret);
+				is_dsi83_inited = 0;
+				dsi83_resume();
+				msleep(2000);
+			}
+		}
+		 msleep(500);
 		 count++;
 	}
 	return 0;
 }
+
+
 static void dsi83_work_func(struct work_struct *work)
 {
     int ret = 0;
@@ -372,9 +378,6 @@ static int dsi83_probe(struct platform_device *pdev)
 	INIT_DELAYED_WORK(&dsi83_work, dsi83_work_func);
 	dsi83_workqueue = create_workqueue("dsi83");
 	
-#ifdef PLATFORM_msm8974
-	queue_delayed_work(dsi83_workqueue, &dsi83_work, DSI83_DELAY_TIME);
-#endif	
 	CREATE_KTHREAD(thread_dsi83_check, NULL);
 
 #if defined(CONFIG_FB)
