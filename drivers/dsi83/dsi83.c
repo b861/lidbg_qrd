@@ -83,7 +83,7 @@ static int SN65_Sequence_seq7(void)
 			k = buf2[1]&0x80;
 			lidbg( "dsi83:Wait for %d,r = 0x%.2x\n",i,buf2[1]);
 			i++;
-			if(i>40)
+			if(i>30)
 			{
 				lidbg( "dsi83:Warning wait time out .. break\n");
 				is_dsi83_inited = 0;
@@ -92,7 +92,7 @@ static int SN65_Sequence_seq7(void)
 			msleep(50);
 		}
 	}
-return ret;
+	return ret;
 }
 
 static int SN65_Sequence_seq8(void)  /*seq 8 the bit must be set after the CSR`s are updated*/
@@ -174,6 +174,36 @@ static void panel_reset(void)
 	LCD_RESET;
 }
 
+int dsi83_check(void)
+{
+    unsigned char reg;
+    char buf1[2];
+    int ret = 0;
+    buf1[0] = 0xe5;
+    buf1[1] = 0xff;
+
+	reg = 0xff;
+	ret = SN65_register_write(buf1);
+	if(ret < 0)
+		lidbgerr( "[dsi83.check]:write reg 0xe5 error.\n");
+	else
+		msleep(100);
+	
+	ret = SN65_register_read(0xe5, &reg);
+	lidbg("[dsi83.check]reg-0xe5=0x%x\n",reg);
+	
+	if((reg != 0x00) || (ret< 0) || (is_dsi83_inited == 0) )
+	{
+		lidbgerr( "[dsi83.check.err]reg-0xe5=0x%x,ret=%d\n", reg,ret);
+		is_dsi83_inited = 0;
+		queue_delayed_work(dsi83_workqueue, &dsi83_work, DSI83_DELAY_TIME);
+	}
+
+	return 0;
+}
+
+
+
 #if defined(CONFIG_FB)
 void dsi83_suspend(void)
 {
@@ -183,7 +213,7 @@ void dsi83_suspend(void)
 
 void dsi83_resume(void)
 {
-	queue_delayed_work(dsi83_workqueue, &dsi83_work, DSI83_DELAY_TIME);
+	queue_delayed_work(dsi83_workqueue, &dsi83_work, DSI83_DELAY_TIME);	
 }
 
 static int dsi83_fb_notifier_callback(struct notifier_block *self,
@@ -223,40 +253,6 @@ void dsi83_gpio_init(void)
 	T123_reset();
 }
 
-int thread_dsi83_check(void *data)
-{
-    unsigned char reg;
-    char buf1[2];
-    int ret,count = 0;
-    buf1[0] = 0xe5;
-    buf1[1] = 0xff;
-
-	while(count < 5)
-	{
-		if(g_var.fb_on == true)
-		{
-			reg = 0xff;
-			ret = SN65_register_write(buf1);
-			if(ret < 0)
-				lidbgerr( "[dsi83.check]:write reg 0xe5 error.\n");
-			else
-				msleep(100);
-			
-			ret = SN65_register_read(0xe5, &reg);
-			
-			if((reg != 0x00) || (ret< 0) || (is_dsi83_inited == 0) )
-			{
-				lidbgerr( "[dsi83.check.err]reg-0xe5=0x%x,ret=%d\n", reg,ret);
-				is_dsi83_inited = 0;
-				dsi83_resume();
-				msleep(2000);
-			}
-		}
-		 msleep(500);
-		 count++;
-	}
-	return 0;
-}
 
 
 static void dsi83_work_func(struct work_struct *work)
@@ -306,9 +302,9 @@ static void dsi83_work_func(struct work_struct *work)
 	ret = SN65_Sequence_seq8();
 	if(ret < 0)
 		lidbg( "dsi83:SN65_Sequence_seq8(),err,ret = %d.\n", ret);
-	
-	msleep(100); //wait for sigal/reg stable
-	CREATE_KTHREAD(thread_dsi83_check, NULL);
+
+	msleep(200);//wait for sigal/reg stable
+	dsi83_check();
 }
 
 int is_dsi83_exist(void)
@@ -377,8 +373,9 @@ static int dsi83_probe(struct platform_device *pdev)
     FS_REGISTER_INT(kv_dsi83_rst, "kv_dsi83_rst", 0, cb_dsi83_rst);
 	INIT_DELAYED_WORK(&dsi83_work, dsi83_work_func);
 	dsi83_workqueue = create_workqueue("dsi83");
-	
-	CREATE_KTHREAD(thread_dsi83_check, NULL);
+		
+	is_dsi83_inited=true;
+	dsi83_check();
 
 #if defined(CONFIG_FB)
 		dsi83_fb_notif.notifier_call = dsi83_fb_notifier_callback;
@@ -412,7 +409,7 @@ static int dsi83_ops_suspend(struct device *dev)
 static int thread_dsi83_ops_resume(void *data)
 {
     msleep(200);
-    dsi83_work_func(NULL);
+	dsi83_resume();
     return 1;
 }
 static int dsi83_ops_resume(struct device *dev)

@@ -338,6 +338,7 @@ int fly_interface_init(void)
     g_var.fake_suspend = 0;
     g_var.acc_flag = 1;
     g_var.ws_lh = NULL;
+	g_var.fb_on = true;
 
     if( fs_is_file_exist(RECOVERY_MODE_DIR))
     {
