@@ -1,6 +1,6 @@
 #include "lidbg.h"
 
-#define BUFF_SIZE (4 * 1024 )
+#define BUFF_SIZE (512)
 #define DEVICE_NAME "lidbg_mem_log"
 #define LIDBG_FIFO_SIZE (4 * 1024 * 1024)
 #define MEM_LOG_EN
@@ -73,29 +73,32 @@ static void fifo_is_enough(struct lidbg_fifo_device *dev, int len)
 int lidbg_fifo_put( struct lidbg_fifo_device *dev, const char *fmt, ... )
 {
     int ret = 0;
+	unsigned long flags;
+	char msg_in_buff[BUFF_SIZE];
     if(dev && dev->is_inited)
     {
         int len;
         va_list args;
 
-        down(&dev->sem);
+        lidbg_get_curr_time(msg_in_buff, NULL);
+        len = strlen(msg_in_buff);
 
-        lidbg_get_curr_time(dev->msg_in_buff, NULL);
-        len = strlen(dev->msg_in_buff);
+        spin_lock_irqsave(&dev->fifo_lock, flags);
         fifo_is_enough(dev, len);
-
-        ret = kfifo_in(&dev->fifo, dev->msg_in_buff, len);
+        ret = kfifo_in(&dev->fifo, msg_in_buff, len);
+        spin_unlock_irqrestore(&dev->fifo_lock, flags);
 
         va_start ( args, fmt );
-        ret = vsprintf (dev->msg_in_buff, (const char *)fmt, args );
+        ret = vsprintf (msg_in_buff, (const char *)fmt, args );
         va_end ( args );
 
-        dev->msg_in_buff[BUFF_SIZE - 1] = '\0';
-        len = strlen(dev->msg_in_buff);
+        msg_in_buff[BUFF_SIZE - 1] = '\0';
+        len = strlen(msg_in_buff);
+		
+        spin_lock_irqsave(&dev->fifo_lock, flags);
         fifo_is_enough(dev, len);
-        ret = kfifo_in(&dev->fifo, dev->msg_in_buff, len);
-
-        up(&dev->sem);
+        ret = kfifo_in(&dev->fifo, msg_in_buff, len);
+        spin_unlock_irqrestore(&dev->fifo_lock, flags);
 
         ret = 1;
     }
@@ -110,12 +113,13 @@ int lidbg_fifo_get(struct lidbg_fifo_device *dev, char *to_file, int out_mode)
     int len = 0;
     unsigned int ret = 1;
     char *msg_out_buff = NULL;
+	unsigned long flags;
 
     if(dev && dev->is_inited)
     {
-        down(&dev->sem);
+        spin_lock_irqsave(&dev->fifo_lock, flags);
         len = kfifo_len(&dev->fifo);
-        up(&dev->sem);
+        spin_unlock_irqrestore(&dev->fifo_lock, flags);
 
         LIDBG_WARN("%s:kfifo_len=%d\n", dev->owner, len);
 
@@ -128,9 +132,9 @@ int lidbg_fifo_get(struct lidbg_fifo_device *dev, char *to_file, int out_mode)
         }
 
         memset(msg_out_buff, '\0', sizeof(msg_out_buff));
-        down(&dev->sem);
+        spin_lock_irqsave(&dev->fifo_lock, flags);
         ret = kfifo_out(&dev->fifo, msg_out_buff, len);
-        up(&dev->sem);
+        spin_unlock_irqrestore(&dev->fifo_lock, flags);
 
         ret = fifo_to_file(to_file, msg_out_buff);
         if(ret != 1)
@@ -164,7 +168,8 @@ struct lidbg_fifo_device *lidbg_fifo_alloc(char *owner, int fifo_size, int buff_
     }
     dev->is_inited = false;
     dev->owner = NULL;
-    dev->msg_in_buff = NULL;
+	
+	spin_lock_init(&dev->fifo_lock);
 
     if(kfifo_alloc(&dev->fifo, fifo_size, GFP_KERNEL))
     {
@@ -172,22 +177,9 @@ struct lidbg_fifo_device *lidbg_fifo_alloc(char *owner, int fifo_size, int buff_
         kfree(dev);
         return NULL;
     }
-    sema_init(&dev->sem, 1);
 
-    dev->msg_in_buff = kmalloc(buff_size, GFP_KERNEL);
-    if (dev->msg_in_buff == NULL)
-    {
-        kfifo_free(&dev->fifo);
-        kfree(dev);
-        LIDBG_ERR("kmalloc.msg_in_buff(%s)\n", owner);
-        return NULL;
-    }
-
-    down(&dev->sem);
-    dev->is_inited = true;
     dev->owner = owner;
-    memset(dev->msg_in_buff, '\0', sizeof(dev->msg_in_buff));
-    up(&dev->sem);
+    dev->is_inited = true;
 
     LIDBG_SUC("new:<%s,fifo.%d,buff.%d>\n", dev->owner, fifo_size, buff_size);
 
@@ -211,27 +203,33 @@ static ssize_t lidbg_msg_read (struct file *filp, char __user *buf, size_t count
 static ssize_t lidbg_msg_write (struct file *filp, const char __user *buf, size_t count, loff_t *f_pos)
 {
     int ret = 0;
+	unsigned long flags;
+	char msg_in_buff[BUFF_SIZE];
 
     if((count > 0) && glidbg_msg_fifo->is_inited)
     {
         int len;
+		
 
-        down(&glidbg_msg_fifo->sem);
-
-        lidbg_get_curr_time(glidbg_msg_fifo->msg_in_buff, NULL);
-        len = strlen(glidbg_msg_fifo->msg_in_buff);
+        lidbg_get_curr_time(msg_in_buff, NULL);
+        len = strlen(msg_in_buff);
+		
+        spin_lock_irqsave(&glidbg_msg_fifo->fifo_lock, flags);
         fifo_is_enough(glidbg_msg_fifo, len);
-        ret = kfifo_in(&glidbg_msg_fifo->fifo, glidbg_msg_fifo->msg_in_buff, len);
+        ret = kfifo_in(&glidbg_msg_fifo->fifo, msg_in_buff, len);
+        spin_unlock_irqrestore(&glidbg_msg_fifo->fifo_lock, flags);
 
-        if (copy_from_user( glidbg_msg_fifo->msg_in_buff, buf, count))
+        if (copy_from_user( msg_in_buff, buf, count))
             LIDBG_ERR("copy_from_user\n");
-        glidbg_msg_fifo->msg_in_buff[BUFF_SIZE - 1] = '\0';
+        msg_in_buff[BUFF_SIZE - 1] = '\0';
 
-        len = strlen(glidbg_msg_fifo->msg_in_buff);
+        len = strlen(msg_in_buff);
+
+		
+        spin_lock_irqsave(&glidbg_msg_fifo->fifo_lock, flags);
         fifo_is_enough(glidbg_msg_fifo, len);
-        ret = kfifo_in(&glidbg_msg_fifo->fifo, glidbg_msg_fifo->msg_in_buff, len);
-
-        up(&glidbg_msg_fifo->sem);
+        ret = kfifo_in(&glidbg_msg_fifo->fifo, msg_in_buff, len);
+        spin_unlock_irqrestore(&glidbg_msg_fifo->fifo_lock, flags);
 
         ret = 1;
     }

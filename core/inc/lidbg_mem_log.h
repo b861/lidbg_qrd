@@ -5,9 +5,8 @@
 struct lidbg_fifo_device
 {
     struct kfifo fifo;
-    struct semaphore sem;
+    spinlock_t fifo_lock;
     char *owner;
-    char *msg_in_buff;
     bool is_inited;
 };
 

@@ -274,7 +274,7 @@ int thread_gps_server(void *data)
         if(gps_debug_en)
         {
             gps_data[avi_gps_data_hl ] = '\0';
-            lidbg("%s\n", gps_data);
+            printk(KERN_CRIT"%s\n", gps_data);
         }
 
 do_nothing:
