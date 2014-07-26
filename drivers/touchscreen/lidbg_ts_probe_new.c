@@ -223,12 +223,12 @@ int ts_probe_thread(void *data)
 
     if (USE_TS_NUM == 0 && g_var.hw_info.ts_type == 0)
     {
-        while(!is_ts_load)
+        while(1)
         {
             if((ts = ts_scan(ts_probe_dev, SIZE_OF_ARRAY(ts_probe_dev))))
             {
                 parse_ts_info(ts);
-                msleep(5000);
+                break;
                 ts = NULL;
             }
             msleep(ts_scan_delayms);

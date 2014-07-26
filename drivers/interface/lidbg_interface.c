@@ -292,14 +292,6 @@ static struct miscdevice misc =
 
 };
 
-static int thread_dump_trace_msg(void *data)
-{
-	msleep(1000*200);
-	kmsg_fifo_save();
-	return 0;
-}
-
-
 int fly_interface_init(void)
 {
     int ret;
@@ -397,14 +389,7 @@ int fly_interface_init(void)
 		lidbg("g_var.is_first_update=%d\n",g_var.is_first_update);
     }
 
-	
-#if 1 //for test
-	if(g_var.is_first_update == 1)
-	{
-		CREATE_KTHREAD(thread_dump_trace_msg, NULL);
-	}
-#endif
-    return 0;
+	return 0;
 }
 
 void fly_interface_deinit(void){}

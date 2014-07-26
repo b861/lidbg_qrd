@@ -54,7 +54,7 @@ void kmsg_fifo_save(void)
 
         ret = kfifo_out(p_kmsg_collect, file_ptr, fifo_len);
         file_ptr[ret] = '\0';
-        fs_clear_file(LIDBG_LOG_DIR"lidbg_kmsg_5M.txt");
+        fs_file_separator(LIDBG_LOG_DIR"lidbg_kmsg_5M.txt");
         bfs_file_amend(LIDBG_LOG_DIR"lidbg_kmsg_5M.txt", file_ptr, 6);
         vfree(file_ptr);
         lidbg("[%s]:save complete %d\n", __func__, ret);
