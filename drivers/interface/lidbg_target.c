@@ -39,9 +39,28 @@ struct hw_version_specific g_hw_version_specific[] =
 	.i2c_bus_saf7741 = 5,
 	.i2c_bus_lpc = 0,
 
-	
-	.ap_key_left = 35,
-	.ap_key_right = 37,
+	.ad_key = 
+	{
+		{   
+			.ch = 35,
+			.offset = 100,
+			.max = 3300,
+			.key_item = {
+						{2500, KEY_HOME},
+						}
+		},
+		
+		{    
+		    .ch = 37,
+			.offset = 100,
+			.max = 3300,
+			.key_item = {
+						{2000, KEY_MENU},
+						{2500, KEY_BACK},
+						}
+		},
+	},
+
 	
 	.cpu_freq_thermal = 
 	{
@@ -96,8 +115,27 @@ struct hw_version_specific g_hw_version_specific[] =
 	.i2c_bus_lpc = 0,
 
 
-	.ap_key_left = 35,
-	.ap_key_right = 37,
+	.ad_key = 
+	{
+		{   
+			.ch = 35,
+			.offset = 100,
+			.max = 3300,
+			.key_item = {
+						{2500, KEY_HOME},
+						}
+		},
+		
+		{    
+		    .ch = 37,
+			.offset = 100,
+			.max = 3300,
+			.key_item = {
+						{2000, KEY_MENU},
+						{2500, KEY_BACK},
+						}
+		},
+	},
 
 	.cpu_freq_thermal = 
 	{
@@ -162,6 +200,29 @@ struct hw_version_specific g_hw_version_specific[] =
 	.ap_key_left = 38,
 	.ap_key_right = 39,
 
+	.ad_key = 
+	{
+		{   
+			.ch = 38,
+			.offset = 100,
+			.max = 3300,
+			.key_item = {
+						{2500, KEY_HOME},
+						}
+		},
+		
+		{    
+		    .ch = 39,
+			.offset = 100,
+			.max = 3300,
+			.key_item = {
+						{2000, KEY_MENU},
+						{2500, KEY_BACK},
+						}
+		},
+	},
+
+
 	.cpu_freq_thermal = 
 	{
 		{0,0, 0, "0"},//end flag
@@ -210,6 +271,28 @@ struct hw_version_specific g_hw_version_specific[] =
 	
 	.ap_key_left = 38,
 	.ap_key_right = 39,
+
+	.ad_key = 
+	{
+		{   
+			.ch = 38,
+			.offset = 100,
+			.max = 3300,
+			.key_item = {
+						{2500, KEY_HOME},
+						}
+		},
+		
+		{    
+		    .ch = 39,
+			.offset = 100,
+			.max = 3300,
+			.key_item = {
+						{2000, KEY_MENU},
+						{2500, KEY_BACK},
+						}
+		},
+	},
 
 	
 	.cpu_freq_thermal = 

@@ -1,66 +1,46 @@
 
 #include "lidbg.h"
-#define AD_OFFSET  (100)
-#define AD_VAL_MAX  (3300)
-struct ad_key_remap
-{
-    u32 ch;
-    u32 ad_value;
-    u32 key;
-};
 
-static struct ad_key_remap ad_key[] =
-{
 
-    //feel  key  x_ain_3   mpp4
-    //{35, 1000000, KEY_BACK},
-    //{35, 1500000, KEY_BACK},
-    //{35, 2000000, KEY_BACK},
-    {AD_KEY_PORT_L, 2500, KEY_HOME},
-    //feel  key  x_ain_4  mpp6
-    //{37, 1000000, KEY_BACK},
-    //{37, 1500000, KEY_BACK},
-    {AD_KEY_PORT_R, 2000, KEY_MENU},
-    {AD_KEY_PORT_R, 2500, KEY_BACK},
-};
-
-int find_ad_key(u32 ch)
+int find_ad_key(struct ad_key_remap *p)
 {
     int val = 0;
     int i;
 
-    SOC_ADC_Get(ch, &val);
-    if(val > AD_VAL_MAX)
-        return 0xff;
+    SOC_ADC_Get(p->ch, &val);
+    if(val > p->max)
+        return 0xffffffff;
 
-    for(i = 0; i < SIZE_OF_ARRAY(ad_key); i++)
+    for(i = 0; i < SIZE_OF_ARRAY(p->key_item); i++)
     {
-        if(ch == ad_key[i].ch)
-            if((val > ad_key[i].ad_value - AD_OFFSET) && (val < ad_key[i].ad_value + AD_OFFSET))
+            if((val > p->key_item[i].ad_value - p->offset) && (val < p->key_item[i].ad_value + p->offset))
             {
-                lidbg("find_ad_key:ch%d=%d,key_id=%d,sendkey=%d\n", ch, val, i, ad_key[i].key);
-                return i;
+                lidbg("find_ad_key:ch%d=%d,key_id=%d,sendkey=%d\n", p->ch, val, i, p->key_item[i].send_key);
+                return p->key_item[i].send_key;
             }
     }
 
-    return 0xff;
+    return 0xffffffff;
 
 }
 
 void key_scan(void)
 {
-    static int old_key = 0xff;
-    int key = 0xff;
-    key = find_ad_key(AD_KEY_PORT_L);
-    if(key != 0xff) goto find_key;
-    key = find_ad_key(AD_KEY_PORT_R);
-    if(key != 0xff) goto find_key;
+    static int old_key = 0xffffffff;
+    int key = 0xffffffff;
+	int i;
+
+	for(i=0;i<SIZE_OF_ARRAY(g_hw.ad_key);i++)
+	{
+	    key = find_ad_key(&(g_hw.ad_key[i]));
+	    if(key != 0xffffffff) goto find_key;
+	}
 
 find_key:
 
-    if((old_key != 0xff) && (key == 0xff))
+    if((old_key == 0xffffffff) && (key != 0xffffffff))
     {
-        SOC_Key_Report(ad_key[old_key].key, KEY_PRESSED_RELEASED);
+        SOC_Key_Report(key, KEY_PRESSED_RELEASED);
     }
     old_key = key;
 }

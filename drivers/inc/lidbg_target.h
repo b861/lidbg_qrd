@@ -6,6 +6,22 @@
 #define g_hw g_hw_version_specific[g_var.hw_info.hw_version - 1]  
 #define check_gpio(gpio) if(gpio == -1 ) break
 
+struct ad_key_item
+{
+    int ad_value;
+    int send_key;
+};
+
+struct ad_key_remap
+{
+    u32 ch;
+	int offset;
+	int max;
+	struct ad_key_item key_item[5];
+
+};
+
+
 struct thermal_ctrl
 {
 	int temp_low;
@@ -52,8 +68,7 @@ struct hw_version_specific
 	int i2c_bus_lpc;
 
 //ad
-	int ap_key_left;
-	int ap_key_right;
+	struct ad_key_remap ad_key[2];
 
 //temp
 	struct thermal_ctrl cpu_freq_thermal[10];
@@ -198,15 +213,6 @@ extern struct hw_version_specific g_hw_version_specific[];
 			USB_ID_HIGH_DEV;\
 			}while(0)
 			
-//ad
-#ifdef PLATFORM_msm8226
-#define AD_KEY_PORT_L   (35)//(g_hw.ap_key_left)
-#define AD_KEY_PORT_R   (37)//(g_hw.ap_key_right)
-#elif defined(PLATFORM_msm8974)
-#define AD_KEY_PORT_L   (38)//(g_hw.ap_key_left)
-#define AD_KEY_PORT_R   (39)//(g_hw.ap_key_right)
-#endif
-
 
 #ifdef PLATFORM_msm8226
 #define FLY_GPS_SO  "gps.msm8226.so"
