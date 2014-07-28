@@ -26,6 +26,17 @@
 	system(string);\
 }while(0)
 
+
+inline bool is_file_exist(char *file)
+{
+	if(access(file, F_OK) == 0)
+		return 1;
+	else
+		return 0;
+
+}
+
+
 #define LIDBG_WRITE(node,buf) do{\
 	int fd;\
 	 fd = open(node, O_RDWR);\
@@ -56,7 +67,10 @@
 	char s[LOG_BYTES];\
 	sprintf(s, "hal_msg: " msg);\
 	s[LOG_BYTES - 1] = '\0';\
-	 fd = open("/dev/dbg_msg", O_RDWR);\
+	if(is_file_exist("/dev/lidbg_msg"))\
+		fd = open("/dev/lidbg_msg", O_RDWR);\
+	else\
+	    fd = open("/dev/dbg_msg", O_RDWR);\
 	 if((fd == 0)||(fd == (int)0xfffffffe)|| (fd == (int)0xffffffff))break;\
 	 write(fd, s, /*sizeof(msg)*/strlen(s)/*LOG_BYTES*/);\
 	 close(fd);\

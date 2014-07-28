@@ -349,6 +349,14 @@ void cb_dsi83_rst(char *key, char *value )
 	lidbg("%s:enter\n", __func__);
 	dsi83_resume();
 }
+
+
+static int thread_dsi83_check(void *data)
+{
+	dsi83_check();
+	return 0;
+}
+
 static int dsi83_probe(struct platform_device *pdev)
 {
 	int ret = 0;
@@ -375,7 +383,8 @@ static int dsi83_probe(struct platform_device *pdev)
 	dsi83_workqueue = create_workqueue("dsi83");
 		
 	is_dsi83_inited=true;
-	dsi83_check();
+	
+	CREATE_KTHREAD(thread_dsi83_check, NULL);
 
 #if defined(CONFIG_FB)
 		dsi83_fb_notif.notifier_call = dsi83_fb_notifier_callback;

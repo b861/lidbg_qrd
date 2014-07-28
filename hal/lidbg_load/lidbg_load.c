@@ -86,7 +86,7 @@ int main(int argc, char **argv)
 	int ret;
 	
 	//wait flysystem mount
-    while(access("/flysystem/lib", F_OK) != 0)
+    while(is_file_exist("/flysystem/lib") == 0)
     {
 		static int cnt = 0;
 		sleep(1);
@@ -94,7 +94,7 @@ int main(int argc, char **argv)
 			break;
 	}
 	
-    if(access("/flysystem/lib/out/lidbg_loader.ko", F_OK) == 0)
+    if(is_file_exist("/flysystem/lib/out/lidbg_loader.ko"))
     {
         checkout = 2;
         lidbg("lidbg_iserver: this is flyaudio system\n");

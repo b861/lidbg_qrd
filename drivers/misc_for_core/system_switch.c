@@ -108,5 +108,5 @@ void system_switch_init(void)
             lidbg_shell_cmd("cp /flysystem/lib/out/* /system/lib/modules/out" );
         lidbg_shell_cmd("chmod 777 /system/priv-app/*" );
     }
-    lidbg_shell_cmd("echo ====system_switch_init:stop==== > /dev/lidbg_msg" );
+    lidbg_shell_cmd("echo ====system_switch_init:finish==== > /dev/lidbg_msg" );
 }

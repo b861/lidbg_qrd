@@ -708,7 +708,6 @@ static int __init i2c_api_init(void)
         lidbg(KERN_ERR "[%s] Driver registration failed, module not inserted.\n", __func__);
         return ret;
     }
-    DUMP_BUILD_TIME;
 #ifdef USE_I2C_LOCK
     mutex_init(&i2c_lock);
 #endif
