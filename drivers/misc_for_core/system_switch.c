@@ -75,6 +75,7 @@ suc:
 
 void system_switch_init(void)
 {
+    lidbg_shell_cmd("echo ====system_switch_init:start==== > /dev/lidbg_msg" );
     lidbg_shell_cmd("mount -o remount /system");
     lidbg_shell_cmd("mkdir  "ORIGIN_APP_PATH);
     lidbg_shell_cmd("mkdir  "ORIGIN_TMP_PATH);
@@ -82,6 +83,7 @@ void system_switch_init(void)
     {
         if(!fs_is_file_exist(ORIGIN_APP_PATH"SystemUI.apk"))
         {
+            LIDBG_WARN("<====system_switch_init:update====>\n");
             lidbg_shell_cmd("mv /system/priv-app/SystemUI.apk "ORIGIN_APP_PATH"SystemUI.apk" );
             lidbg_shell_cmd("mv /system/priv-app/Contacts.apk "ORIGIN_APP_PATH"Contacts.apk" );
             lidbg_shell_cmd("mv /system/priv-app/Dialer.apk "ORIGIN_APP_PATH"Dialer.apk" );
@@ -106,4 +108,5 @@ void system_switch_init(void)
             lidbg_shell_cmd("cp /flysystem/lib/out/* /system/lib/modules/out" );
         lidbg_shell_cmd("chmod 777 /system/priv-app/*" );
     }
+    lidbg_shell_cmd("echo ====system_switch_init:stop==== > /dev/lidbg_msg" );
 }
