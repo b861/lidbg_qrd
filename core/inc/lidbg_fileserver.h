@@ -45,7 +45,6 @@ extern void lidbg_fileserver_main(int argc, char **argv);
 extern void fs_cp_data_to_udisk(bool encode);
 extern void fs_file_separator(char *file2separator);
 extern void fs_regist_filedetec(char *filename, void (*cb_filedetec)(char *filename ));
-extern void fs_enable_kmsg( bool enable );
 extern void fs_save_state(void);
 extern int fs_get_file_size(char *file);
 extern int get_machine_id(void);
@@ -53,7 +52,6 @@ extern int fs_file_read(const char *filename, char *rbuff, loff_t offset, int re
 int fs_file_write(char *filename,bool creat, void *wbuff, loff_t offset,int len);
 extern int fs_update(const char *ko_list, const char *fromdir, const char *todir);
 extern int analysis_copylist(const char *copy_list);
-extern int fs_dump_kmsg(char *tag, int size );
 extern int fs_regist_state(char *key, int *value);
 extern int fs_get_intvalue(struct list_head *client_list, char *key, int *int_value, void (*callback)(char *key, char *value));
 extern int fs_get_value(struct list_head *client_list, char *key, char **string);

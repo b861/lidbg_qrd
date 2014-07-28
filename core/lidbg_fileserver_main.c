@@ -35,10 +35,8 @@ void lidbg_fileserver_main(int argc, char **argv)
     case 1:
         break;
     case 2:
-        fs_enable_kmsg(cmd_para);
         break;
     case 3:
-        fs_dump_kmsg((char *)__FUNCTION__, cmd_para * 1024);
         break;
     case 4:
         FS_WARN("machine_id:%d\n", get_machine_id());

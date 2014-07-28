@@ -5,14 +5,10 @@
 //zone below [fs.log.tools]
 int max_file_len = 1;
 int g_iskmsg_ready = 1;
-int g_pollkmsg_en = 0;
-int g_pollkmsg_en_fclear = 0;
-static struct task_struct *fs_kmsgtask;
-static struct completion kmsg_wait;
 //zone end
 
 //zone below [fs.log.driver]
-int delay_disable_tracemsg(void *data);
+
 bool upload_machine_log(void)
 {
     char buff[50] = {0};
@@ -105,106 +101,6 @@ void file_separator(char *file2separator)
     lidbg_get_current_time(buf, NULL);
     fs_string2file(0, file2separator, "------%s------\n", buf);
 }
-int dump_kmsg(char *node, char *save_msg_file, int size, int *always)
-{
-    struct file *filep;
-    mm_segment_t old_fs;
-
-    int  ret = -1;
-    int  kmsg_file_limit = 3;
-    CREATE_KTHREAD(delay_disable_tracemsg, NULL);
-    if(!size && !always)
-    {
-        FS_ERR("<size_k=null&&always=null>\n");
-        return -1;
-    }
-    filep = filp_open(node,  O_RDONLY , 0);
-    if(!IS_ERR(filep))
-    {
-        old_fs = get_fs();
-        set_fs(get_ds());
-
-        if(size)
-        {
-            char *psize = NULL;
-            psize = (unsigned char *)kmalloc(size, GFP_KERNEL);
-            if(psize == NULL)
-            {
-                FS_ERR("<cannot kmalloc memory!>\n");
-                return ret;
-            }
-
-            ret = filep->f_op->read(filep, psize, size - 1, &filep->f_pos);
-            if(ret > 0)
-            {
-                psize[ret] = '\0';
-                bfs_file_amend(save_msg_file, psize, kmsg_file_limit);
-            }
-            kfree(psize);
-        }
-        else
-        {
-            char buff[512];
-            memset(buff, 0, sizeof(buff));
-            while( (!always ? 0 : *always) )
-            {
-                ret = filep->f_op->read(filep, buff, 512 - 1, &filep->f_pos);
-                if(ret > 0)
-                {
-                    buff[ret] = '\0';
-                    bfs_file_amend(save_msg_file, buff, kmsg_file_limit);
-                }
-            }
-        }
-
-        set_fs(old_fs);
-        filp_close(filep, 0);
-    }
-    return ret;
-}
-static int thread_pollkmsg_func(void *data)
-{
-    allow_signal(SIGKILL);
-    allow_signal(SIGSTOP);
-    while(!kthread_should_stop())
-    {
-        if( !wait_for_completion_interruptible(&kmsg_wait))
-            dump_kmsg(KMSG_NODE, LIDBG_KMSG_FILE_PATH, 0, &g_pollkmsg_en);
-    }
-    return 1;
-}
-void cb_kv_pollkmsg(char *key, char *value)
-{
-    FS_WARN("<%s=%s>\n", key, value);
-    if (strcmp(value, "0" ))
-        complete(&kmsg_wait);
-}
-
-static int fs_kmsg_reboot_notifier_func(struct notifier_block *nb, unsigned long event, void *unused)
-{
-    switch (event)
-    {
-    case SYS_RESTART:
-        if(g_pollkmsg_en_fclear)
-        {
-            lidbg_rm(LIDBG_KMSG_FILE_PATH);
-            FS_ALWAYS("<rm %s>\n", LIDBG_KMSG_FILE_PATH);
-            ssleep(1);
-        }
-        break;
-    case SYS_HALT:
-        break;
-    case SYS_POWER_OFF:
-        break;
-    default:
-        break;
-    }
-    return NOTIFY_DONE;
-}
-static struct notifier_block fs_kmsg_reboot_notifier =
-{
-    .notifier_call  = fs_kmsg_reboot_notifier_func,
-};
 //zone end
 
 
@@ -212,24 +108,6 @@ static struct notifier_block fs_kmsg_reboot_notifier =
 void fs_file_separator(char *file2separator)
 {
     file_separator(file2separator);
-}
-int fs_dump_kmsg(char *tag, int size )
-{
-    file_separator(LIDBG_KMSG_FILE_PATH);
-    if(tag != NULL)
-        fs_string2file(3, LIDBG_KMSG_FILE_PATH, "fs_dump_kmsg: %s\n", tag);
-    return dump_kmsg(KMSG_NODE, LIDBG_KMSG_FILE_PATH, size, NULL);
-}
-void fs_enable_kmsg( bool enable )
-{
-    if(enable)
-    {
-        g_pollkmsg_en = 1;
-        if(g_iskmsg_ready)
-            complete(&kmsg_wait);
-    }
-    else
-        g_pollkmsg_en = 0;
 }
 int fs_string2file(int file_limit_M, char *filename, const char *fmt, ... )
 {
@@ -271,41 +149,12 @@ void fs_remount_system(void)
 //zone end
 
 
-int delay_disable_tracemsg(void *data)
-{
-    {
-        lidbg("delay 3 s to disable  lidbg_trace_msg\n");
-        msleep(3000);
-        lidbg_readwrite_file("/dev/mlidbg0", NULL, "c lidbg_trace_msg disable", sizeof("c lidbg_trace_msg disable") - 1);
-    }  //disable lidbg_trace_msg
-    return 1;
-}
 void lidbg_fs_log_init(void)
 {
-
-    init_completion(&kmsg_wait);
-
-    FS_REGISTER_INT(g_pollkmsg_en, "fs_kmsg_en", 0, cb_kv_pollkmsg);
-    FS_REGISTER_INT(g_pollkmsg_en_fclear, "fs_kmsg_en_fclear", 0, cb_kv_pollkmsg);
-
-    if(g_pollkmsg_en_fclear)
-    {
-        g_pollkmsg_en = 1;
-        register_reboot_notifier(&fs_kmsg_reboot_notifier);
-    }
-
-    if(g_pollkmsg_en == 1)
-        complete(&kmsg_wait);
-
-
     FS_REGISTER_INT(max_file_len, "fs_max_file_len", 1, NULL);
-
-    fs_kmsgtask = kthread_run(thread_pollkmsg_func, NULL, "ftf_kmsgtask");
 }
 
 EXPORT_SYMBOL(fs_file_separator);
-EXPORT_SYMBOL(fs_dump_kmsg);
-EXPORT_SYMBOL(fs_enable_kmsg);
 EXPORT_SYMBOL(fs_string2file);
 EXPORT_SYMBOL(fs_mem_log);
 EXPORT_SYMBOL(fs_upload_machine_log);
