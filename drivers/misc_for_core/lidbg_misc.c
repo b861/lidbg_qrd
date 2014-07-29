@@ -115,7 +115,6 @@ void cb_password_gui_state(char *password )
 
 void cb_password_mem_log(char *password )
 {
-    kmsg_fifo_save();
     lidbg_fifo_get(glidbg_msg_fifo, LIDBG_LOG_DIR"lidbg_mem_log.txt", 0);
 }
 void cb_int_mem_log(char *key, char *value )
@@ -156,7 +155,6 @@ void cb_cp_data_to_udisk(char *key, char *value )
 #ifdef SOC_msm8x25
     fs_cp_data_to_udisk(false);
 #else
-    kmsg_fifo_save();
     ssleep(7);
     lidbg_get_current_time(tbuff, NULL);
     sprintf(shell_cmd, "mkdir "USB_MOUNT_POINT"/ID-%d-%s", get_machine_id() , tbuff);
