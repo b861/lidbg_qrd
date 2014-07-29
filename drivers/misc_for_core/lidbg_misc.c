@@ -81,21 +81,7 @@ void cb_password_update(char *password )
     fs_slient_level = 4;
     analysis_copylist(USB_MOUNT_POINT"/conf/copylist.conf");
 
-    if(fs_is_file_exist(USB_MOUNT_POINT"/conf/lidbg_udisk_shell.conf"))
-    {
-        LIST_HEAD(lidbg_udisk_shell_list);
-        LIDBG_WARN("use:conf/lidbg_udisk_shell.conf\n" );
-        fs_fill_list(USB_MOUNT_POINT"/conf/lidbg_udisk_shell.conf", FS_CMD_FILE_LISTMODE, &lidbg_udisk_shell_list);
-        if(analyze_list_cmd(&lidbg_udisk_shell_list))
-        {
-            LIDBG_WARN("exe success\n" );
-            if(delete_out_dir_after_update)
-                lidbg_rmdir(USB_MOUNT_POINT"/out");
-            lidbg_launch_user(CHMOD_PATH, "777", "/flysystem/lib/out", "-R", NULL, NULL, NULL);
-            lidbg_reboot();
-        }
-    }
-    else if(fs_is_file_exist(USB_MOUNT_POINT"/out/release"))
+    if(fs_is_file_exist(USB_MOUNT_POINT"/out/release"))
     {
         LIDBG_WARN("use:release\n" );
         if( fs_update(USB_MOUNT_POINT"/out/release", USB_MOUNT_POINT"/out", "/flysystem/lib/out") >= 0)
@@ -134,8 +120,8 @@ void cb_password_mem_log(char *password )
 }
 void cb_int_mem_log(char *key, char *value )
 {
-	if(dump_mem_log != 0)
-    	cb_password_mem_log(NULL);
+    if(dump_mem_log != 0)
+        cb_password_mem_log(NULL);
 }
 int thread_reboot(void *data)
 {
@@ -226,12 +212,55 @@ void cb_kv_cmd(char *key, char *value)
     }
 }
 
+static struct completion udisk_misc_wait;
+static int thread_udisk_misc(void *data)
+{
+    allow_signal(SIGKILL);
+    allow_signal(SIGSTOP);
+    while(!kthread_should_stop())
+    {
+        if(!wait_for_completion_interruptible(&udisk_misc_wait))
+        {
+            ssleep(5);
 
+            if(fs_is_file_exist(USB_MOUNT_POINT"/conf/lidbg_udisk_shell.conf"))
+            {
+                LIST_HEAD(lidbg_udisk_shell_list);
+                LIDBG_WARN("use:conf/lidbg_udisk_shell.conf\n" );
+                fs_fill_list(USB_MOUNT_POINT"/conf/lidbg_udisk_shell.conf", FS_CMD_FILE_LISTMODE, &lidbg_udisk_shell_list);
+                if(analyze_list_cmd(&lidbg_udisk_shell_list))
+                    LIDBG_WARN("exe success\n" );
+            }
+
+        }
+    }
+    return 1;
+}
+static int usb_nb_misc_func(struct notifier_block *nb, unsigned long action, void *data)
+{
+    FS_WARN("get usb action:%d\n", (int)action);
+    switch (action)
+    {
+    case USB_DEVICE_ADD:
+        complete(&udisk_misc_wait);
+        break;
+    case USB_DEVICE_REMOVE:
+        break;
+    }
+    return NOTIFY_OK;
+}
+static struct notifier_block usb_nb_misc =
+{
+    .notifier_call = usb_nb_misc_func,
+};
 int misc_init(void *data)
 {
     LIDBG_WARN("<==IN==>\n");
-	if(SYSTEM_SWITCH_EN == 1)
-    	system_switch_init();
+    init_completion(&udisk_misc_wait);
+
+    if(SYSTEM_SWITCH_EN == 1)
+        system_switch_init();
+
     te_regist_password("001101", cb_password_upload);
     te_regist_password("001110", cb_password_clean_all);
     te_regist_password("001111", cb_password_chmod);
@@ -263,6 +292,9 @@ int misc_init(void *data)
     fs_register_filename_list(LIDBG_LOG_DIR"lidbg_mem_log.txt", true);
 
     CREATE_KTHREAD(thread_reboot, NULL);
+
+    CREATE_KTHREAD(thread_udisk_misc, NULL);
+    usb_register_notify(&usb_nb_misc);
 
     LIDBG_WARN("<==OUT==>\n\n");
     LIDBG_MODULE_LOG;
