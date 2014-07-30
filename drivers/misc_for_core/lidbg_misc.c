@@ -236,7 +236,6 @@ static int thread_udisk_misc(void *data)
 }
 static int usb_nb_misc_func(struct notifier_block *nb, unsigned long action, void *data)
 {
-    FS_WARN("get usb action:%d\n", (int)action);
     switch (action)
     {
     case USB_DEVICE_ADD:

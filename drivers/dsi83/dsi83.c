@@ -83,7 +83,7 @@ static int SN65_Sequence_seq7(void)
 			k = buf2[1]&0x80;
 			lidbg( "dsi83:Wait for %d,r = 0x%.2x\n",i,buf2[1]);
 			i++;
-			if(i>30)
+			if(i>20)
 			{
 				lidbg( "dsi83:Warning wait time out .. break\n");
 				is_dsi83_inited = 0;
