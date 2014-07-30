@@ -196,10 +196,6 @@ struct hw_version_specific g_hw_version_specific[] =
 	.i2c_bus_saf7741 = 2,
 	.i2c_bus_lpc = 0,
 
-	
-	.ap_key_left = 38,
-	.ap_key_right = 39,
-
 	.ad_key = 
 	{
 		{   
@@ -267,10 +263,7 @@ struct hw_version_specific g_hw_version_specific[] =
 	.i2c_bus_gps = 2,
 	.i2c_bus_saf7741 = 2,
 	.i2c_bus_lpc = 0,
-	
-	
-	.ap_key_left = 38,
-	.ap_key_right = 39,
+
 
 	.ad_key = 
 	{
