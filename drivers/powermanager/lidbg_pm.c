@@ -1,5 +1,6 @@
 #include "lidbg.h"
 LIDBG_DEFINE;
+//#define CONTROL_PM_IO_BY_BP
 
 #define PM_DIR LIDBG_LOG_DIR"pm_info/"
 #define PM_FILE_INFO PM_DIR"pm_info.txt"
@@ -269,6 +270,10 @@ static int thread_gpio_app_status_delay(void *data)
 {
     ssleep(30);
     MCU_APP_GPIO_ON;
+#ifdef CONTROL_PM_IO_BY_BP
+		MCU_SET_APP_GPIO_SUSPEND;
+#endif
+
     PM_WARN("<set MCU_APP_GPIO_ON >\n");
     return 1;
 }
@@ -612,6 +617,9 @@ static int __init lidbg_pm_init(void)
         lidbg_shell_cmd("rm -r "PM_DIR"*");
 
 	MCU_WP_GPIO_ON;
+#ifdef CONTROL_PM_IO_BY_BP
+	MCU_SET_WP_GPIO_SUSPEND;
+#endif
     PM_WARN("<set MCU_WP_GPIO_ON>\n");
     CREATE_KTHREAD(thread_gpio_app_status_delay, NULL);
     CREATE_KTHREAD(thread_usb_disk_enable_delay, NULL);

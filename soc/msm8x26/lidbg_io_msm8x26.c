@@ -164,9 +164,9 @@ int soc_io_config(u32 index, bool direction, u32 pull, u32 drive_strength, bool 
 		
 		
 		lidbg_setting_suspend->func = GPIOMUX_FUNC_GPIO;
-		lidbg_setting_suspend->drv = GPIO_CFG_2MA;
-		lidbg_setting_suspend->pull = GPIO_CFG_NO_PULL;
-		lidbg_setting_suspend->dir = GPIO_CFG_INPUT;
+		lidbg_setting_suspend->drv = GPIOMUX_DRV_2MA;
+		lidbg_setting_suspend->pull = GPIOMUX_PULL_NONE;
+		lidbg_setting_suspend->dir = GPIOMUX_IN;
 		
 		
 		soc_io_config_log[index].gpio = index;
@@ -191,7 +191,7 @@ int soc_io_config(u32 index, bool direction, u32 pull, u32 drive_strength, bool 
 	        }
 		}
 
-        if(direction == GPIO_CFG_INPUT)
+        if(direction == GPIOMUX_IN)
         {
             err = gpio_direction_input(index);
             if (err)

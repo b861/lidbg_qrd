@@ -57,19 +57,27 @@ bool iSOC_IO_Suspend_Config(u32 index, bool direction, u32 pull, u32 drive_stren
 
 void iSOC_IO_Output_Ext(u32 group, u32 index, bool status, u32 pull, u32 drive_strength)
 {
-    soc_io_config( index,  GPIO_CFG_OUTPUT, pull, drive_strength, 1);
+	if(status == 1)
+    	soc_io_config( index,  GPIOMUX_OUT_HIGH, pull, drive_strength, 1);
+	else if (status == 0)
+    	soc_io_config( index,  GPIOMUX_OUT_LOW, pull, drive_strength, 1);
+		
     soc_io_output(group, index,  status);
 }
 
 void iSOC_IO_Output(u32 group, u32 index, bool status)
 {
-    soc_io_config( index,  GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_8MA, 0);
+	if(status == 1)
+    	soc_io_config( index,  GPIOMUX_OUT_HIGH, GPIOMUX_PULL_NONE, GPIOMUX_DRV_8MA, 0);
+	else if (status == 0)
+    	soc_io_config( index,  GPIOMUX_OUT_LOW, GPIOMUX_PULL_NONE, GPIOMUX_DRV_8MA, 0);
+		
     soc_io_output(group, index,  status);
 }
 
 bool iSOC_IO_Input(u32 group, u32 index, u32 pull)
 {
-    soc_io_config( index,  GPIO_CFG_INPUT, pull/*GPIO_CFG_NO_PULL*/, GPIO_CFG_16MA, 0);
+    soc_io_config( index,  GPIOMUX_IN, pull/*GPIO_CFG_NO_PULL*/, GPIOMUX_DRV_2MA, 0);
     return soc_io_input(index);
 }
 
