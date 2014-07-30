@@ -46,6 +46,12 @@ int soc_io_irq(struct io_int_config *pio_int_config)//need set to input first?
     return 1;
 }
 
+int soc_io_suspend_config(u32 index, bool direction, u32 pull, u32 drive_strength)
+{
+	return 0;
+
+}
+
 int soc_io_config(u32 index, bool direction, u32 pull, u32 drive_strength, bool force_reconfig)
 {
     int rc;
@@ -139,3 +145,5 @@ EXPORT_SYMBOL(soc_io_irq);
 EXPORT_SYMBOL(soc_irq_enable);
 EXPORT_SYMBOL(soc_irq_disable);
 EXPORT_SYMBOL(soc_io_config);
+EXPORT_SYMBOL(soc_io_suspend_config);
+

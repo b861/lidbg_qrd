@@ -36,28 +36,61 @@ void lidbg_soc_main(int argc, char **argv)
     }
 }
 
+
+static int  lidbg_soc_probe(struct platform_device *pdev)
+{
+    DUMP_FUN;
+    soc_io_init();
+    return 0;
+}
+#ifdef CONFIG_PM
+
+static int soc_suspend(struct device *dev)
+{
+    DUMP_FUN;
+	soc_io_suspend();
+    return 0;
+}
+static int soc_resume(struct device *dev)
+{
+    DUMP_FUN;
+	soc_io_resume();
+    return 0;
+}
+
+
+static struct dev_pm_ops lidbg_soc_ops =
+{
+    .suspend	= soc_suspend,
+    .resume		= soc_resume,
+};
+#endif
+
+static struct platform_device lidbg_soc =
+{
+    .name               = "lidbg_soc",
+    .id                 = -1,
+};
+
+static struct platform_driver lidbg_soc_driver =
+{
+    .probe		= lidbg_soc_probe,
+    .driver         = {
+        .name = "lidbg_soc",
+        .owner = THIS_MODULE,
+#ifdef CONFIG_PM
+        .pm = &lidbg_soc_ops,
+#endif
+    },
+};
+
+
 int msm8226_init(void)
 {
-DUMP_BUILD_TIME;//LIDBG_MODULE_LOG;
-/*
-    lidbg( "smem_alloc id = %d\n", SMEM_ID_VENDOR0);
-   // p_fly_smem = (struct fly_smem *)smem_alloc(SMEM_ID_VENDOR0, sizeof(struct fly_smem));
+	DUMP_BUILD_TIME;
 
-    if (p_fly_smem == NULL)
-    {
-        lidbg( "smem_alloc fail,kmalloc mem!\n");
-        p_fly_smem = (struct fly_smem *)kmalloc(sizeof(struct fly_smem), GFP_KERNEL);
-        if(p_fly_smem == NULL)
-        {
-            LIDBG_ERR("<err.register_wakelock:kzalloc.name>\n");
-        }
-        memset(p_fly_smem, 0, sizeof(struct fly_smem));
-    }
-
-    soc_bl_init();
-    */
-    soc_io_init();
-
+    platform_device_register(&lidbg_soc);
+    platform_driver_register(&lidbg_soc_driver);
     return 0;
 }
 

@@ -50,6 +50,11 @@ bool iSOC_IO_Config(u32 index, bool direction, u32 pull, u32 drive_strength)
     return soc_io_config( index,  direction, pull, drive_strength, 1);
 }
 
+bool iSOC_IO_Suspend_Config(u32 index, bool direction, u32 pull, u32 drive_strength)
+{
+    return soc_io_suspend_config( index,  direction, pull, drive_strength);
+}
+
 void iSOC_IO_Output_Ext(u32 group, u32 index, bool status, u32 pull, u32 drive_strength)
 {
     soc_io_config( index,  GPIO_CFG_OUTPUT, pull, drive_strength, 1);
@@ -196,6 +201,7 @@ static void set_func_tbl(void)
     plidbg_dev->soc_func_tbl.pfnSOC_IO_Input = iSOC_IO_Input;
     plidbg_dev->soc_func_tbl.pfnSOC_IO_Output_Ext = iSOC_IO_Output_Ext;
     plidbg_dev->soc_func_tbl.pfnSOC_IO_Config = iSOC_IO_Config;
+    plidbg_dev->soc_func_tbl.pfnSOC_IO_Suspend_Config = iSOC_IO_Suspend_Config;
 
     //i2c
     plidbg_dev->soc_func_tbl.pfnSOC_I2C_Send = iSOC_I2C_Send;

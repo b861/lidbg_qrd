@@ -144,6 +144,8 @@ static int soc_dev_probe(struct platform_device *pdev)
 		
 	    LCD_ON;
 	}
+	USB_WORK_ENABLE;
+	SET_USB_ID_SUSPEND;
 	lidbg_new_cdev(&dev_fops, "flydev");
     return 0;
 

@@ -142,7 +142,7 @@ struct io_int_config
 } ;
 
 //#define MAKE_GPIO_LOG(group,index)   ((group<<5)|(index))
-#define IO_LOG_NUM  (116)
+#define IO_LOG_NUM  (117)//0~116
 #define AD_LOG_NUM  (16)
 #define TTY_DEV "msm-uart"
 
@@ -170,7 +170,9 @@ void soc_irq_enable(unsigned int irq);
 int soc_io_output(u32 group, u32 index, bool status);
 bool soc_io_input(u32 index);
 int soc_io_config(u32 index, bool direction, u32 pull, u32 drive_strength, bool force_reconfig);
-
+int soc_io_suspend_config(u32 index, bool direction, u32 pull, u32 drive_strength);
+int soc_io_suspend(void);
+int soc_io_resume(void);
 int soc_temp_get(void);
 void lidbg_soc_main(int argc, char **argv);
 

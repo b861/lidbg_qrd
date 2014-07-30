@@ -5,7 +5,7 @@
 struct hw_version_specific g_hw_version_specific[] = 
 {
 
-{//v1
+{//msm8226 v1
 	.gpio_lcd_reset = 25,
 	.gpio_t123_reset = 28,
 	.gpio_dsi83_en = 62,
@@ -80,7 +80,7 @@ struct hw_version_specific g_hw_version_specific[] =
 	.system_switch_en = 1,
 
 	},
-{//v2
+{//msm8226 v2
 	.gpio_lcd_reset = -1,
 	.gpio_t123_reset = -1,
 	.gpio_dsi83_en = 62,
@@ -162,7 +162,7 @@ struct hw_version_specific g_hw_version_specific[] =
 struct hw_version_specific g_hw_version_specific[] = 
 {
 
-{//v1
+{//msm8974 v1
 	.gpio_lcd_reset = 25,
 	.gpio_t123_reset = 28,
 	.gpio_dsi83_en = 58,
@@ -230,7 +230,7 @@ struct hw_version_specific g_hw_version_specific[] =
 
 	.fly_parameter_node = "/dev/block/mmcblk0p25",
 	},
-{//v2
+{//msm8974 v2
 	.gpio_lcd_reset = 80,
 	.gpio_t123_reset = -1,
 	.gpio_dsi83_en = 58,
@@ -308,7 +308,7 @@ struct hw_version_specific g_hw_version_specific[] =
 struct hw_version_specific g_hw_version_specific[] =
 {
 
-{//v1
+{//mt3360 v1
 	.gpio_lcd_reset = -1,
 	.gpio_t123_reset = -1,
 	.gpio_dsi83_en = -1,
@@ -352,7 +352,7 @@ struct hw_version_specific g_hw_version_specific[] =
 	},
 
 	},
-{//v2
+{//mt3360 v2
 	.gpio_lcd_reset = -1,
 	.gpio_t123_reset = -1,
 	.gpio_dsi83_en = -1,

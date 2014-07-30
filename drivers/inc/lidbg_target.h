@@ -198,6 +198,11 @@ extern struct hw_version_specific g_hw_version_specific[];
 			check_gpio(g_hw.gpio_usb_id);\
 			SOC_IO_Output(0, g_hw.gpio_usb_id, 1);\
 	}while(0)
+	
+#define SET_USB_ID_SUSPEND do{\
+				check_gpio(g_hw.gpio_usb_id);\
+				SOC_IO_Suspend_Config(g_hw.gpio_usb_id,GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_2MA);\
+		}while(0)
 
 
 #define USB_WORK_ENABLE do{\

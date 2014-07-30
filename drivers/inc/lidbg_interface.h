@@ -203,6 +203,8 @@ struct lidbg_fn_t
 	
     void (*pfnSOC_Set_Touch_Pos)(struct tspara *touch);
     int (*pfnSOC_Get_CpuFreq)(void);
+	
+    bool (*pfnSOC_IO_Suspend_Config)(unsigned int index, bool direction, unsigned int pull, unsigned int drive_strength);
 
 };
 
@@ -319,6 +321,7 @@ static inline int check_pt(void)
 #define SOC_IO_Input  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_IO_Input))
 #define SOC_IO_Output_Ext (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_IO_Output_Ext))
 #define SOC_IO_Config  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_IO_Config))
+#define SOC_IO_Suspend_Config  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_IO_Suspend_Config))
 
 #define SOC_I2C_Send  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_I2C_Send))
 #define SOC_I2C_Rec   (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_I2C_Rec))
