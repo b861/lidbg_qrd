@@ -235,12 +235,12 @@ struct hw_version_specific g_hw_version_specific[] =
 	.fly_parameter_node = "/dev/block/mmcblk0p25",
 	},
 {//v2
-	.gpio_lcd_reset = 25,
-	.gpio_t123_reset = 28,
+	.gpio_lcd_reset = 80,
+	.gpio_t123_reset = -1,
 	.gpio_dsi83_en = 58,
-	
+
 	.gpio_usb_id = -1,
-	.gpio_usb_power = 109,
+	.gpio_usb_power = 78,
 	.gpio_usb_switch = -1,
 	
 	.gpio_int_gps = 50,
@@ -250,12 +250,12 @@ struct hw_version_specific g_hw_version_specific[] =
 	.gpio_int_button_right1 = 56,
 	.gpio_int_button_right2 = 55,
 	
-	.gpio_led1 = 60,
-	.gpio_led2 = -1,
+	.gpio_led1 = 75,
+	.gpio_led2 = 81,
 	
-	.gpio_int_mcu_i2c_request = 108,
-	.gpio_mcu_wp = 35,
-	.gpio_mcu_app = 36,
+	.gpio_int_mcu_i2c_request = 76,
+	.gpio_mcu_wp = 79,
+	.gpio_mcu_app = 68,
 	
 	.gpio_ts_int= 14,
 	.gpio_ts_rst= 12,
