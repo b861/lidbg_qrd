@@ -219,10 +219,16 @@ void lidbg_pm_step_call(fly_pm_stat_step step, void *data)
         //suspend_ops->enter.in
         break;
     case PM_SUSPEND_ENTER8:
+		g_var.system_status = FLY_KERNEL_DOWN;
+		MCU_WP_GPIO_OFF;
+        PM_SLEEP_DBG("SLEEP8.suspend_enter.sleep.SOC_IO_Output(0, 35, 1);sleep_count:%d\n",(*(int *)data));
         break;
     case PM_SUSPEMD_OPS_ENTER9:
         break;
     case PM_SUSPEMD_OPS_ENTER9P1:
+		g_var.system_status = FLY_KERNEL_UP;
+		MCU_WP_GPIO_ON;
+		PM_SLEEP_DBG("WAKEUP9.1.suspend_enter.wakeup.SOC_IO_Output(0, 35, 0);\n");
         //suspend_ops->enter.out
         break;
     case PM_NULL:
@@ -304,6 +310,7 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         if(!strcmp(cmd[1], "screen_off"))
         {
             lidbg("******into screen_off********\n");
+			g_var.system_status = FLY_SCREEN_OFF;
             lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_SCREEN_OFF));
             if(SOC_Hal_Acc_Callback)
             {
@@ -316,6 +323,7 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         if(!strcmp(cmd[1], "screen_on"))
         {
             lidbg("******into screen_on********\n");
+			g_var.system_status = FLY_SCREEN_ON;
 			if(!g_var.is_fly)
 			    LCD_ON;
 			if(SOC_Hal_Acc_Callback)
@@ -327,19 +335,26 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         }
         else  if(!strcmp(cmd[1], "android_up"))
         {
+			g_var.system_status = FLY_ANDROID_UP;
 			MCU_APP_GPIO_ON;
         }
         else  if(!strcmp(cmd[1], "android_down"))
         {
+        	
+			g_var.system_status = FLY_ANDROID_DOWN;
 			MCU_APP_GPIO_OFF;
         }
         else  if(!strcmp(cmd[1], "gotosleep"))
         {
+        	
+			g_var.system_status = FLY_GOTO_SLEEP;
             observer_start();
             CREATE_KTHREAD(thread_usb_disk_disable_delay, NULL);
         }
         else if(!strcmp(cmd[1], "devices_up"))
         {
+        	
+			g_var.system_status = FLY_DEVICE_UP;
             CREATE_KTHREAD(thread_usb_disk_enable_delay, NULL);
 
             lidbg("******into suspend_on********\n");
@@ -353,6 +368,8 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         else if(!strcmp(cmd[1], "devices_down"))
         {
             lidbg("******into suspend_off********\n");
+			
+			g_var.system_status = FLY_DEVICE_DOWN;
             lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_SUSPEND_PREPARE));
             if(SOC_Hal_Acc_Callback)
             {

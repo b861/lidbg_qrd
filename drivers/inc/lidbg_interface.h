@@ -5,6 +5,7 @@
 #ifdef BUILD_DRIVERS
 #include <flymeg.h>
 
+#include <lidbg_pm.h>
 #include <lidbg_drivers_loader.h>
 #include <lidbg_target.h>
 #include <misc_devices.h>
@@ -117,8 +118,8 @@ typedef enum
 #define PM_WARN(fmt, args...) do{lidbg("[ftf_pm]warn.%s: " fmt,__func__,##args);}while(0)
 #define PM_ERR(fmt, args...) do{lidbgerr("[ftf_pm]err.%s: " fmt,__func__,##args);}while(0)
 #define PM_SUC(fmt, args...) do{lidbg("[ftf_pm]suceed.%s: " fmt,__func__,##args);}while(0)
-#define PM_SLEEP_DBG(fmt, args...) do{lidbg("[ftf_pm]sleep_step: ++++++++++++++" fmt,##args);}while(0)
-#define PM_WAKE_DBG(fmt, args...) do{lidbg("[ftf_pm]wake_step: ===" fmt,##args);}while(0)
+#define PM_SLEEP_DBG(fmt, args...) do{printk(KERN_CRIT"[ftf_pm]sleep_step: ++++++++++++++" fmt,##args);}while(0)
+#define PM_WAKE_DBG(fmt, args...) do{printk(KERN_CRIT"[ftf_pm]wake_step: ===" fmt,##args);}while(0)
 
 #else
 #define PM_WARN(fmt, args...) do{printk(KERN_CRIT"[ftf_pm]warn.%s: " fmt,__func__,##args);}while(0)
@@ -151,10 +152,17 @@ typedef irqreturn_t (*pinterrupt_isr)(int irq, void *dev_id);
 
 typedef enum
 {
-    FLY_ACC_ON,
-    FLY_ACC_OFF,
-    FLY_READY_TO_SUSPEND,
-    FLY_SUSPEND,
+    FLY_SCREEN_OFF,
+    FLY_DEVICE_DOWN,
+	FLY_ANDROID_DOWN,
+	
+	FLY_GOTO_SLEEP,
+	FLY_KERNEL_DOWN,
+	FLY_KERNEL_UP,
+	
+	FLY_ANDROID_UP,
+	FLY_DEVICE_UP,
+    FLY_SCREEN_ON,
 } FLY_SYSTEM_STATUS;
 
 struct lidbg_fn_t

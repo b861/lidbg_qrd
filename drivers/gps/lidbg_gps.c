@@ -49,6 +49,7 @@ static int gps_event_handle(struct notifier_block *this,
                             unsigned long event, void *ptr)
 {
     DUMP_FUN;
+#ifdef SOC_msm8x25
 
     switch (event)
     {
@@ -64,7 +65,7 @@ static int gps_event_handle(struct notifier_block *this,
     default:
         break;
     }
-
+#endif
     return NOTIFY_DONE;
 }
 

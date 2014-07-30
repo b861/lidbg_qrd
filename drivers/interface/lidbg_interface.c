@@ -336,7 +336,7 @@ int fly_interface_init(void)
     set_func_tbl();
 
     g_var.temp = 0;
-    g_var.system_status = FLY_ACC_ON;
+    g_var.system_status = FLY_SCREEN_ON;
     g_var.machine_id = get_machine_id();
 
 

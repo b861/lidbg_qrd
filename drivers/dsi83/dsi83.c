@@ -261,16 +261,19 @@ static void dsi83_work_func(struct work_struct *work)
 	int i;
 	DUMP_FUN;
 
-	if(is_dsi83_inited)
+	lidbg( "dsi83_work_func:enter %d,%d\n",g_var.system_status,is_dsi83_inited);
+
+	if(
+		((g_var.system_status==FLY_ANDROID_DOWN)||(g_var.system_status==FLY_GOTO_SLEEP))
+		|| is_dsi83_inited
+		)
 	{
-	    lidbg( "dsi83_work_func:skip\n");
+	    lidbg( "dsi83_work_func:skip %d,%d\n",g_var.system_status,is_dsi83_inited);
 	    return;
 	}
-	is_dsi83_inited = true;
-	lidbg( "dsi83_work_func:enter\n");
-		
-	dsi83_gpio_init();
 	
+	is_dsi83_inited = true;
+	dsi83_gpio_init();
 	msleep(50);
 	
 	for(i = 0; i < 5; ++i)
