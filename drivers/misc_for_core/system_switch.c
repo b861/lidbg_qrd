@@ -77,16 +77,16 @@ void system_switch_init(void)
 {
 
     lidbg_shell_cmd("echo ====system_switch_init:start==== > /dev/lidbg_msg" );
-
+	
     if(SYSTEM_SWITCH_EN == 1)
     {
-	    lidbg_shell_cmd("mount -o remount /system");
-	    lidbg_shell_cmd("mkdir  "ORIGIN_APP_PATH);
-	    lidbg_shell_cmd("mkdir  "ORIGIN_TMP_PATH);
 	    if((g_var.is_fly)&&(!g_var.recovery_mode))
 	    {
-	        if(!fs_is_file_exist(ORIGIN_APP_PATH"SystemUI.apk"))
+	        if(g_var.is_first_update)
 	        {
+	        	lidbg_shell_cmd("mount -o remount /system");
+				lidbg_shell_cmd("mkdir	"ORIGIN_APP_PATH);
+				lidbg_shell_cmd("mkdir	"ORIGIN_TMP_PATH);
 	            LIDBG_WARN("<====system_switch_init:update====>\n");
 	            lidbg_shell_cmd("mv /system/priv-app/SystemUI.apk "ORIGIN_APP_PATH"SystemUI.apk" );
 	            lidbg_shell_cmd("mv /system/priv-app/Contacts.apk "ORIGIN_APP_PATH"Contacts.apk" );
@@ -104,23 +104,34 @@ void system_switch_init(void)
 	            lidbg_shell_cmd("chmod 777  "ORIGIN_APP_PATH"*" );
 	            lidbg_shell_cmd("chmod 777  "ORIGIN_TMP_PATH"*" );
 	            lidbg_shell_cmd("cp /flysystem/app/.sys-app1/* /system/priv-app/" );
+				
+		        lidbg_shell_cmd("cp /flysystem/app/sys-app/* /system/priv-app/" );
+		        lidbg_shell_cmd("cp /flysystem/app/PackageInstaller.apk /system/app/PackageInstaller.apk" );
+		        lidbg_shell_cmd("chmod 777 /system/app/PackageInstaller.apk" );
+		        lidbg_shell_cmd("mv /flysystem/app/sys-app /flysystem/app/.sys-app1" );
+				lidbg_shell_cmd("chmod 777 /system/priv-app/*");
 	        }
-	        lidbg_shell_cmd("cp /flysystem/app/sys-app/* /system/priv-app/" );
-	        lidbg_shell_cmd("mv /flysystem/app/PackageInstaller.apk /system/app/PackageInstaller.apk" );
-	        lidbg_shell_cmd("chmod 777 /system/app/PackageInstaller.apk" );
-	        lidbg_shell_cmd("mv /flysystem/app/sys-app /flysystem/app/.sys-app1" );
 
 	        if(is_out_updated)
+	        {
+	        	lidbg_shell_cmd("mount -o remount /system");
 	            lidbg_shell_cmd("cp /flysystem/lib/out/* /system/lib/modules/out" );
-	        lidbg_shell_cmd("chmod 777 /system/priv-app/*" );
+	        }
 	    }
     	}
 	else
 	{
-		if((g_var.is_fly)&&(!g_var.recovery_mode))
+		if((g_var.is_fly)&&(!g_var.recovery_mode)&&(g_var.is_first_update))
 		{
-			lidbg_shell_cmd("mv /flysystem/app/sys-app/* /system/priv-app/" );
-			lidbg_shell_cmd("mv /flysystem/app/PackageInstaller.apk /system/app/PackageInstaller.apk" );	
+		
+			lidbg_shell_cmd("echo ====copy apk ==== > /dev/lidbg_msg" );
+			lidbg_shell_cmd("mount -o remount /system");
+			lidbg_shell_cmd("cp /flysystem/app/sys-app/* /system/priv-app/" );
+			lidbg_shell_cmd("rm -rf /flysystem/app/sys-app" );
+			
+			lidbg_shell_cmd("cp /flysystem/app/PackageInstaller.apk /system/app/PackageInstaller.apk" );
+			lidbg_shell_cmd("rm /flysystem/app/PackageInstaller.apk" );
+			
 	        lidbg_shell_cmd("chmod 777 /system/priv-app/*" );
 	        lidbg_shell_cmd("chmod 777 /system/app/PackageInstaller.apk" );
 		}
