@@ -255,9 +255,8 @@ int misc_init(void *data)
     LIDBG_WARN("<==IN==>\n");
     init_completion(&udisk_misc_wait);
 
-    if(SYSTEM_SWITCH_EN == 1)
-        system_switch_init();
-
+    system_switch_init();
+	
     te_regist_password("001101", cb_password_upload);
     te_regist_password("001110", cb_password_clean_all);
     te_regist_password("001111", cb_password_chmod);
