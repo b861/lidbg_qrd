@@ -57,6 +57,8 @@ struct fly_hardware_info *pGlobalHardwareInfo;
 
 int thread_lpc(void *data)
 {
+	LPC_PRINT(true,-1,"thread_lpc start");
+
     while(1)
     {
         if(lpc_work_en)
@@ -310,35 +312,23 @@ void LPCResume(void)
     }
 }
 
-static int lpc_linux_sync_S = 5;
-void lpc_linux_sync(char *extra_info)
+void lpc_linux_sync(bool print,int mint,char *extra_info)
 {
     static char buff[64] = {0x00, 0xfd};
     int mtime = 0;
     memset(&buff[2], '\0', sizeof(buff) - 2);
     mtime = ktime_to_ms(ktime_get_boottime());
-    snprintf(&buff[2], sizeof(buff) - 3, "%s:%d.%d", extra_info, mtime / 1000, mtime % 1000);
+    snprintf(&buff[2], sizeof(buff) - 3, "%s:%d %d.%d", extra_info,mint, mtime / 1000, mtime % 1000);
 
     SOC_LPC_Send(buff, strlen(buff + 2) + 2);
-    //lidbg("[%s]\n", buff + 2);
+	if(print)
+    	lidbg("[%s]\n", buff + 2);
 }
-static int thread_lpc_linux_sync(void *data)
-{
-    FS_REGISTER_INT(lpc_linux_sync_S, "lpc_linux_sync_S", 5, NULL);
-    while(1)
-    {
-        lpc_linux_sync("XJS");
-        ssleep(lpc_linux_sync_S);
-    }
-    return 1;
-}
+
 static int  lpc_probe(struct platform_device *pdev)
 {
     DUMP_FUN;
 		
-	if((!g_var.recovery_mode))
-	    CREATE_KTHREAD(thread_lpc_linux_sync, NULL);	
-
     if((g_var.is_fly) || (g_var.recovery_mode))
     {
         lidbg("lpc_init do nothing\n");
@@ -456,4 +446,5 @@ MODULE_LICENSE("GPL");
 
 MODULE_DESCRIPTION("lidbg lpc driver");
 
+EXPORT_SYMBOL(lpc_linux_sync);
 

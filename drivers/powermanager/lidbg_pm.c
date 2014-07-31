@@ -221,7 +221,8 @@ void lidbg_pm_step_call(fly_pm_stat_step step, void *data)
     case PM_SUSPEND_ENTER8:
 		g_var.system_status = FLY_KERNEL_DOWN;
 		MCU_WP_GPIO_OFF;
-        PM_SLEEP_DBG("SLEEP8.suspend_enter.sleep.SOC_IO_Output(0, 35, 1);sleep_count:%d\n",(*(int *)data));
+		sleep_counter++;
+        PM_SLEEP_DBG("SLEEP8.suspend_enter.sleep.SOC_IO_Output(0, 35, 1);sleep_count:%d,%d\n",(*(int *)data),sleep_counter);
         break;
     case PM_SUSPEMD_OPS_ENTER9:
         break;
@@ -319,6 +320,7 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
             }
             if(!g_var.is_fly && fs_is_file_exist("/system/app/NfcNci.apk"))
                 lidbg_rm("/system/app/NfcNci.apk");
+			LPC_PRINT(true,sleep_counter,"PM:screen_off");
         }
         if(!strcmp(cmd[1], "screen_on"))
         {
@@ -332,6 +334,7 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
 			    SOC_Hal_Acc_Callback(1);
 			}
             lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_SCREEN_ON));
+			LPC_PRINT(true,sleep_counter,"PM:screen_on");
         }
         else  if(!strcmp(cmd[1], "android_up"))
         {
@@ -504,7 +507,6 @@ static int thread_save_acc_times(void *data)
 static int pm_suspend(struct device *dev)
 {
     DUMP_FUN;
-    sleep_counter++;
     return 0;
 }
 static int pm_resume(struct device *dev)
