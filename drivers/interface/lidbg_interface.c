@@ -45,12 +45,12 @@ bool iSOC_IO_ISR_Del (u32 irq)
     return 1;
 }
 
-bool iSOC_IO_Config(u32 index, bool direction, u32 pull, u32 drive_strength)
+bool iSOC_IO_Config(u32 index, u32 direction, u32 pull, u32 drive_strength)
 {
     return soc_io_config( index,  direction, pull, drive_strength, 1);
 }
 
-bool iSOC_IO_Suspend_Config(u32 index, bool direction, u32 pull, u32 drive_strength)
+bool iSOC_IO_Suspend_Config(u32 index, u32 direction, u32 pull, u32 drive_strength)
 {
     return soc_io_suspend_config( index,  direction, pull, drive_strength);
 }

@@ -639,7 +639,6 @@ static int __init lidbg_pm_init(void)
 #endif
     PM_WARN("<set MCU_WP_GPIO_ON>\n");
     CREATE_KTHREAD(thread_gpio_app_status_delay, NULL);
-    CREATE_KTHREAD(thread_usb_disk_enable_delay, NULL);
     lidbg_shell_cmd("echo 8  > /proc/sys/kernel/printk");
     platform_device_register(&lidbg_pm);
     platform_driver_register(&lidbg_pm_driver);

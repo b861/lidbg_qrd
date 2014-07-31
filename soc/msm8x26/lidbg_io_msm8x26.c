@@ -99,7 +99,7 @@ int soc_io_irq(struct io_int_config *pio_int_config)//need set to input first?
 }
 
 
-int soc_io_suspend_config(u32 index, bool direction, u32 pull, u32 drive_strength)
+int soc_io_suspend_config(u32 index, u32 direction, u32 pull, u32 drive_strength)
 {
 	
 	if((soc_io_config_log[index].gpio == 0xffffffff))
@@ -119,6 +119,11 @@ int soc_io_suspend_config(u32 index, bool direction, u32 pull, u32 drive_strengt
 		lidbg_setting_suspend->dir = direction;
 		
 		lidbg("soc_io_suspend_config:index %d\n" , index);
+		lidbg("soc_io_suspend_config %d %d %d\n",
+			            lidbg_setting_suspend->drv,
+						lidbg_setting_suspend->pull,
+						lidbg_setting_suspend->dir
+		);
 
 		msm_gpiomux_install(&soc_io_config_log[index], 1);
 		
@@ -126,7 +131,7 @@ int soc_io_suspend_config(u32 index, bool direction, u32 pull, u32 drive_strengt
 	}
 }
 
-int soc_io_config(u32 index, bool direction, u32 pull, u32 drive_strength, bool force_reconfig)
+int soc_io_config(u32 index, u32 direction, u32 pull, u32 drive_strength, bool force_reconfig)
 {
 	bool is_first_init = 0;
 	
@@ -179,6 +184,14 @@ int soc_io_config(u32 index, bool direction, u32 pull, u32 drive_strength, bool 
 
 
         lidbg("gpio_request:index %d\n" , index);
+		lidbg("soc_io_config %d %d %d\n",
+			            lidbg_setting_active->drv,
+						lidbg_setting_active->pull,
+						lidbg_setting_active->dir
+		);
+
+
+
 
         msm_gpiomux_install(&soc_io_config_log[index], 1);
 		
