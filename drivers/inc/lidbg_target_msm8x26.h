@@ -47,7 +47,7 @@
 
 #define USB_POWER_ENABLE do{\
 			LPC_CMD_USB5V_ON;\
-			check_gpio(g_hw.gpio_usb_power)\
+			check_gpio(g_hw.gpio_usb_power);\
 			if(g_var.hw_info.hw_version == 1)\
 				SOC_IO_Output(0, g_hw.gpio_usb_power, 0);\
 			else\
