@@ -46,3 +46,6 @@ ft5x06_ts-objs :=ft5406_ts.o
 #obj-$(CONFIG_TOUCHSCREEN)      += ft5x06_ts.o
 #ft5x06_ts-objs :=ft5336_ts.o     
 endif
+ifeq ($(DBG_PLATFORM),mt3360)
+obj-$(CONFIG_TOUCHSCREEN)       += gt911_mt3360.o
+endif

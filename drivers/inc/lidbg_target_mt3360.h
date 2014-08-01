@@ -32,7 +32,7 @@
 
 
 #define USB_POWER_ENABLE do{\
-		LPC_CMD_USB5V_ON;
+		LPC_CMD_USB5V_ON;\
 		if(g_hw.gpio_usb_power == -1 )\
 			break ;\
 			if(g_var.hw_info.hw_version == 1)\
@@ -63,6 +63,10 @@
 			SOC_IO_Output(0, g_hw.gpio_usb_id, 1);\
 	}while(0)
 
+#define SET_USB_ID_SUSPEND do{\
+				check_gpio(g_hw.gpio_usb_id);\
+				SOC_IO_Suspend_Config(g_hw.gpio_usb_id,GPIOMUX_OUT_HIGH,GPIO_CFG_NO_PULL,GPIOMUX_DRV_2MA);\
+		}while(0)
 
 #define USB_WORK_ENABLE do{\
 				lidbg("USB_WORK_ENABLE\n");\

@@ -46,6 +46,12 @@ int soc_io_irq(struct io_int_config *pio_int_config)//need set to input first?
     return 1;
 }
 
+int soc_io_suspend_config(u32 index, u32 direction, u32 pull, u32 drive_strength)
+{
+	return 0;
+
+}
+
 int soc_io_config(u32 index, bool direction, u32 pull, u32 drive_strength, bool force_reconfig)
 {
 #if 0
@@ -115,15 +121,16 @@ free_gpio:
 
 int soc_io_output(u32 group, u32 index, bool status)
 {
-    gpio_direction_output(index, status);
-    gpio_set_value(index, status);
+//    gpio_direction_output(index, status);
+//    gpio_set_value(index, status);
     return 1;
 
 }
 
 bool soc_io_input( u32 index)
 {
-    return gpio_get_value(index);
+//    return gpio_get_value(index);
+return 0;
 }
 
 
@@ -133,3 +140,4 @@ EXPORT_SYMBOL(soc_io_irq);
 EXPORT_SYMBOL(soc_irq_enable);
 EXPORT_SYMBOL(soc_irq_disable);
 EXPORT_SYMBOL(soc_io_config);
+EXPORT_SYMBOL(soc_io_suspend_config);
