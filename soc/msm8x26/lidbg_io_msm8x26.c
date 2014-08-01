@@ -9,31 +9,47 @@ int soc_io_suspend(void)
 {
 	int i;
     io_ready = 0;
-	
 	for(i=0; i < IO_LOG_NUM; i++)
 	{
 		if(soc_io_config_log[i].gpio != 0xffffffff)
 		{
+		#if 0
 			int val1,val2;
 			val1 = gpio_get_value(soc_io_config_log[i].gpio);
 			gpio_free(i);
 			val2 = gpio_get_value(soc_io_config_log[i].gpio);
 			
 			lidbg("gpio_free:%d,%d,%d\n",soc_io_config_log[i].gpio,val1,val2);
+		#else
+			SWAP2(struct gpiomux_setting *,soc_io_config_log[i].settings[GPIOMUX_ACTIVE], soc_io_config_log[i].settings[GPIOMUX_SUSPENDED]);
+			msm_gpiomux_install(&soc_io_config_log[i], 1);
+			lidbg("gpio_suspend_set:%d,%d\n",soc_io_config_log[i].gpio,soc_io_config_log[i].settings[GPIOMUX_ACTIVE]->dir);
+
+		#endif
+		
 		}
 	}
+
     return 0;
 }
 int soc_io_resume(void)
 {
-	int i,err;
+	int i;
 
 	for(i=0; i < IO_LOG_NUM; i++)
 	{
+	#if 0
 		if(soc_io_config_log[i].gpio != 0xffffffff)
-			err = gpio_request(soc_io_config_log[i].gpio, "lidbg_io");
+			gpio_request(soc_io_config_log[i].gpio, "lidbg_io");
+	#else
+		if(soc_io_config_log[i].gpio != 0xffffffff)
+		{
+			SWAP2(struct gpiomux_setting *,soc_io_config_log[i].settings[GPIOMUX_ACTIVE], soc_io_config_log[i].settings[GPIOMUX_SUSPENDED]);
+			msm_gpiomux_install(&soc_io_config_log[i], 1);
+		}
+
+	#endif
 	}
-	
     io_ready = 1;
     return 0;
 }
@@ -125,7 +141,7 @@ int soc_io_suspend_config(u32 index, u32 direction, u32 pull, u32 drive_strength
 						lidbg_setting_suspend->dir
 		);
 
-		msm_gpiomux_install(&soc_io_config_log[index], 1);
+		//msm_gpiomux_install(&soc_io_config_log[index], 1);
 		
 		return 0;
 	}
@@ -228,6 +244,13 @@ int soc_io_output(u32 group, u32 index, bool status)
 {
    
 	if(io_ready == 0)  {lidbg("%d,%d io not ready\n",group,index);return 0;}
+	
+	if(status == 1)
+		soc_io_config_log[index].settings[GPIOMUX_ACTIVE]->dir = GPIOMUX_OUT_HIGH;
+	else
+		soc_io_config_log[index].settings[GPIOMUX_ACTIVE]->dir = GPIOMUX_OUT_LOW;
+	
+		
     gpio_direction_output(index, status);
     gpio_set_value(index, status);
     return 1;
@@ -236,7 +259,7 @@ int soc_io_output(u32 group, u32 index, bool status)
 
 bool soc_io_input( u32 index)
 {
-	if(io_ready == 0)  {lidbg("%d io not ready\n",index);return 0;}
+	if(io_ready == 0)  {lidbg("%d io not ready\n",index);return 1;}
     return gpio_get_value(index);
 }
 

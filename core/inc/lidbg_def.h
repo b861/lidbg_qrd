@@ -113,7 +113,7 @@ typedef unsigned int			uchar;
 #define SIZE_OF_ARRAY(array_name) (sizeof(array_name)/sizeof(array_name[0]))
 
 //交换两个int的值
-//#define SWAP(a,b) do {int tmp;tmp = (a);(a) = (b);(b) = tmp;}while(0)
+#define SWAP2(type,a,b) do {type tmp;tmp = (a);(a) = (b);(b) = tmp;}while(0)
 
 //交换两个的值
 #define SWAP(x, y) { \
