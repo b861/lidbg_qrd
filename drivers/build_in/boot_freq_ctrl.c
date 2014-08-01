@@ -1,7 +1,9 @@
 
 #define BOOT_LIMIT_FREQ (600000)
+//#define BOOT_LIMIT_FREQ (652800)    //8974
 
 int ctrl_max_freq = BOOT_LIMIT_FREQ;
+
 
 static int thread_freq_limit(void *data)
 {

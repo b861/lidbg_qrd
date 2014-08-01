@@ -10,6 +10,8 @@ static bool is_cpu_temp_enabled = false;
 #define TEMP_FREQ_TEST_RESULT LIDBG_LOG_DIR"lidbg_temp_freq.txt"
 #define TEMP_FREQ_COUNTER LIDBG_LOG_DIR"freq_tmp.txt"
 
+
+
 int get_file_int(char *file)
 {
     char cpu_temp[3];
@@ -27,20 +29,6 @@ int soc_temp_get(void)
 		return 0;
 }
 
-
-void log_temp(void)
-{
-    static int old_temp, cur_temp;
-    int tmp;
-    g_var.temp = cur_temp = soc_temp_get();
-    tmp = cur_temp - old_temp;
-    if((temp_log_freq != 0) && (ABS(tmp) >= temp_log_freq))
-    {
-        lidbg_fs_log(TEMP_LOG_PATH, "%d\n", cur_temp);
-        old_temp = cur_temp;
-    }
-}
-
 u32 get_scaling_max_freq(void)
 {
 	static char max_freq[32];
@@ -50,6 +38,20 @@ u32 get_scaling_max_freq(void)
 	//lidbg("scaling_max_freq=%d,%s\n", tmp,max_freq);
 	return tmp;
 }
+
+void log_temp(void)
+{
+    static int old_temp, cur_temp;
+    int tmp;
+    g_var.temp = cur_temp = soc_temp_get();
+    tmp = cur_temp - old_temp;
+    if(((temp_log_freq != 0) && (ABS(tmp) >= temp_log_freq)) || (g_var.temp > 110))
+    {
+        lidbg_fs_log(TEMP_LOG_PATH, "%d,%d,%d\n", cur_temp, get_scaling_max_freq(),cpufreq_get(0));
+        old_temp = cur_temp;
+    }
+}
+
 
 int thread_thermal(void *data)
 {

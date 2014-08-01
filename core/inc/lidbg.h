@@ -71,6 +71,7 @@
 #include <linux/i2c-algo-bit.h>	//add by huangzongqiang
 #include <linux/reboot.h>
 #include <linux/workqueue.h>
+#include <linux/cpufreq.h>
 
 
 //////lidbg//////
