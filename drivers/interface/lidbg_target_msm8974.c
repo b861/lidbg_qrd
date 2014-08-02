@@ -40,7 +40,7 @@ struct hw_version_specific g_hw_version_specific[] =
 	.ad_key = 
 	{
 		{   
-			.ch = 38,
+			.ch = 39,
 			.offset = 100,
 			.max = 3300,
 			.key_item = {
@@ -49,7 +49,7 @@ struct hw_version_specific g_hw_version_specific[] =
 		},
 		
 		{    
-		    .ch = 39,
+		    .ch = 38,
 			.offset = 100,
 			.max = 3300,
 			.key_item = {
@@ -109,7 +109,7 @@ struct hw_version_specific g_hw_version_specific[] =
 	.ad_key = 
 	{
 		{   
-			.ch = 38,
+			.ch = 39,
 			.offset = 100,
 			.max = 3300,
 			.key_item = {
@@ -118,7 +118,7 @@ struct hw_version_specific g_hw_version_specific[] =
 		},
 		
 		{    
-		    .ch = 39,
+		    .ch = 38,
 			.offset = 100,
 			.max = 3300,
 			.key_item = {
