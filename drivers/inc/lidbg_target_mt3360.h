@@ -1,6 +1,13 @@
 #ifndef  __TARGET_MT3360__DEFINE_
 #define __TARGET_MT3360__DEFINE_
 
+#ifdef PLATFORM_mt3360
+#define UART_SEND_DATA_TO_LPC
+#define UART_SEND_DATA "/system/bin/lidbg_uart_send_data"
+#define UART_BAUD_REATE "115200"
+#define LPC_UART_PORT "/dev/ttyMT0"
+#define SEND_DATA_WITH_UART
+#endif
 
 #define  MCU_WP_GPIO_ON  do{check_gpio(g_hw.gpio_mcu_wp);SOC_IO_Output(0, g_hw.gpio_mcu_wp, 0);}while(0)
 #define  MCU_WP_GPIO_OFF  do{check_gpio(g_hw.gpio_mcu_wp);SOC_IO_Output(0, g_hw.gpio_mcu_wp, 1);}while(0)

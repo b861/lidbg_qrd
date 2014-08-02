@@ -201,6 +201,16 @@ int iSOC_Get_CpuFreq(void)
     return cpu_freq;
 }
 
+int iSOC_Uart_Send(char *arg)
+{
+    char cmd[128] = {0};
+
+#ifdef UART_SEND_DATA_TO_LPC
+    sprintf(cmd, "/system/lib/modules/out/lidbg_uart_send_data "LPC_UART_PORT" "UART_BAUD_REATE" %d %d %d %d %d", arg[0], arg[1], arg[3], arg[4], arg[5]);
+#endif
+
+    lidbg_shell_cmd(cmd);
+}
 
 static void set_func_tbl(void)
 {
@@ -251,6 +261,7 @@ static void set_func_tbl(void)
     plidbg_dev->soc_func_tbl.pfnSOC_WakeLock_Stat  = lidbg_wakelock_register;
     plidbg_dev->soc_func_tbl.pfnSOC_Get_CpuFreq  = iSOC_Get_CpuFreq;
 
+    plidbg_dev->soc_func_tbl.pfnSOC_Uart_Send = iSOC_Uart_Send;
 	
 
 }

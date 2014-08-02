@@ -27,4 +27,8 @@ ifeq ($(CONFIG_HAL_LOAD),y)
 SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,lidbg_load)
 endif
 
+ifeq ($(CONFIG_HAL_UART_SEND_DATA),y)
+SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,lidbg_uart_send_data)
+endif
+
 include $(SUBDIR_MAKEFILES)

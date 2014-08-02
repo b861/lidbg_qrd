@@ -44,7 +44,7 @@ struct fly_hardware_info
 #define  MCU_ADDR_R  0xA1
 
 
-//#define LPC_DEBUG_LOG
+#define LPC_DEBUG_LOG
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
 static void lpc_early_suspend(struct early_suspend *handler);
@@ -107,7 +107,12 @@ void LPCCombinDataStream(BYTE *p, UINT len)
 #ifdef LPC_DEBUG_LOG
     lidbg("ToMCU:%x %x %x\n", p[0], p[1], p[2]);
 #endif
+
+#ifdef SEND_DATA_WITH_UART
+    SOC_Uart_Send(buf);
+#else
     SOC_I2C_Send(LPC_I2_ID, MCU_ADDR_W >> 1, buf, 3 + i + 1);
+#endif
 
     if (bMalloc)
     {

@@ -78,12 +78,14 @@ static void parse_cmd(char *pt)
 
     lidbg("%s\n", pt);
     argc = lidbg_token_string(pt, " ", argv);
-	
+
 	if (!strcmp(pt, "lcd_on"))
     {
+		LCD_ON;
     }
     else if (!strcmp(pt, "lcd_off"))
     {
+		LCD_OFF;
     }
 }
 
