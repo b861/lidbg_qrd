@@ -20,6 +20,8 @@ int main(int argc, char **argv)
 	    system("echo 0 > /sys/class/leds/button-backlight/brightness");
 	    system("echo lidbg > /sys/power/wake_unlock");
 	    sleep(2);
+		
+		//system("echo 100 > /sys/class/timed_output/vibrator/enable");
 	}
    	 return 0;
 }

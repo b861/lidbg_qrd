@@ -210,6 +210,7 @@ int iSOC_Uart_Send(char *arg)
 #endif
 
     lidbg_shell_cmd(cmd);
+	return 0;
 }
 
 static void set_func_tbl(void)

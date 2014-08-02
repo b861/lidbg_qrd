@@ -423,7 +423,7 @@ void mod_i2c_main(int argc, char **argv)
 #if 1
         lidbg("\nmod_i2c_main:w ");
         lidbg("bus_id %d;", bus_id);
-        lidbg("dev_addr(8bit)=0x%x<<1%x;", dev_addr, dev_addr << 1);
+        lidbg("dev_addr(8bit)=0x%x(7bit)<<1=0x%x;", dev_addr, dev_addr << 1);
         lidbg("reg 0x%x;", psend_data[0]);
         lidbg("data_num %d;\n", num); //°üÀ¨regºÍdata
 
