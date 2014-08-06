@@ -20,7 +20,12 @@ void kmsg_fifo_collect(char *buff, int buff_len)
         mutex_init(&mutex_kmsg_collect);
         spin_lock_init(&spinlock_kmsg_collect);
         if(kfifo_alloc(&fifo_kmsg_collect, 5 * 1024 * 1024, GFP_KERNEL))
+	{
             lidbgerr("[%s]:kfifo_alloc \n", __func__);
+	    #ifdef PLATFORM_msm8974
+	    return;
+	    #endif
+	}
         p_kmsg_collect = &fifo_kmsg_collect;
         kfifo_reset(p_kmsg_collect);
     }
