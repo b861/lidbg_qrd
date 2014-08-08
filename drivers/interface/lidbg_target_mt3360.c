@@ -37,7 +37,7 @@ struct hw_version_specific g_hw_version_specific[] =
 	.i2c_bus_saf7741 = -1,
 	.i2c_bus_lpc = -1,
 
-
+	.thermal_ctrl_en = 0,
 	.cpu_freq_thermal = 
 	{
 		{0,0, 0, "0"},//end flag
@@ -79,6 +79,7 @@ struct hw_version_specific g_hw_version_specific[] =
 	.i2c_bus_lpc = -1,
 
 	
+	.thermal_ctrl_en = 0,
 	.cpu_freq_thermal = 
 	{
 		{0,0, 0, "0"},//end flag

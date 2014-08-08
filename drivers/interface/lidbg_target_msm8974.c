@@ -59,7 +59,7 @@ struct hw_version_specific g_hw_version_specific[] =
 		},
 	},
 
-
+	.thermal_ctrl_en = 0,
 	.cpu_freq_thermal = 
 	{
 		{1,  70,  2265600,"2265600"},
@@ -139,6 +139,7 @@ struct hw_version_specific g_hw_version_specific[] =
 	},
 
 	
+	.thermal_ctrl_en = 0,
 	.cpu_freq_thermal = 
 	{
                 {1,  70,  2265600,"2265600"},

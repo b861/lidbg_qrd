@@ -78,6 +78,7 @@ struct hw_version_specific
 	struct ad_key_remap ad_key[2];
 	struct ad_key ad_key_map[32];
 //temp
+	bool thermal_ctrl_en;
 	struct thermal_ctrl cpu_freq_thermal[10];
 			//cat sys/devices/system/cpu/cpu0/cpufreq/scaling_available_frequencies
 	char * cpu_freq_list;

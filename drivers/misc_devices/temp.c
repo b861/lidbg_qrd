@@ -59,11 +59,15 @@ void log_temp(void)
     g_var.temp = cur_temp = soc_temp_get();
     tmp = cur_temp - old_temp;
 
-	if(((temp_log_freq != 0) && (ABS(tmp) >= temp_log_freq)) || (g_var.temp > 110))
+	if(((temp_log_freq != 0) && (ABS(tmp) >= temp_log_freq)) )
     {
-        lidbg_fs_log(TEMP_LOG_PATH, "%d,%d,%d\n", cur_temp, get_scaling_max_freq(),cpufreq_get(0));
+    	
+		lidbg( "%d,%d,%d\n", cur_temp, get_scaling_max_freq(),cpufreq_get(0));
         old_temp = cur_temp;
     }
+	
+	if(g_var.temp > 85)
+		lidbg_fs_log(TEMP_LOG_PATH, "%d,%d,%d\n", cur_temp, get_scaling_max_freq(),cpufreq_get(0));
 }
 
 int thread_show_temp(void *data)
@@ -147,15 +151,12 @@ int thread_thermal(void *data)
         cur_temp = soc_temp_get();
 
 			
-#ifdef PLATFORM_msm8974
-		if(g_var.recovery_mode != 1)
+		if(g_hw.thermal_ctrl_en == 0)
 		{
-			lidbg("temp:%d,freq:%d\n",cur_temp,cpufreq_get(0));
-			msleep(3000);
+			if(cur_temp > 80)
+				lidbg("temp:%d,freq:%d\n",cur_temp,cpufreq_get(0));
 			continue;
-			
 		}
-#endif
 	
 		max_freq = get_scaling_max_freq();
         //lidbg("MSM_THERM: %d\n",cur_temp);
