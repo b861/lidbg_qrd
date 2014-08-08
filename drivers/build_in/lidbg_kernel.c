@@ -1,6 +1,7 @@
 #include <../drivers/flyaudio/lidbg_interface.h>
 #include "lidbg_def.h"
 #include "cmn_func.h"
+#include <linux/msm_tsens.h>
 
 #include "cmn_func.c"
 #include "boot_freq_ctrl.c"

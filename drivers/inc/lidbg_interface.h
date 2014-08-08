@@ -43,7 +43,6 @@
 #include <linux/poll.h>
 #include <linux/semaphore.h>
 #include <linux/kfifo.h>
-#include <linux/msm_tsens.h>
 #ifdef CONFIG_HAS_EARLYSUSPEND
 #include <linux/earlysuspend.h>
 #endif
