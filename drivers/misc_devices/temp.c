@@ -68,7 +68,7 @@ void log_temp(void)
 
 	if(g_hw.thermal_ctrl_en == 0)
 	{
-		if(g_var.temp > 85)
+		if(g_var.temp > 95)
 			lidbg_fs_log(TEMP_LOG_PATH, "%d,%d,%d\n", cur_temp, get_scaling_max_freq(),cpufreq_get(0));
 	}
 	else
