@@ -385,9 +385,11 @@ static int dsi83_probe(struct platform_device *pdev)
 	INIT_DELAYED_WORK(&dsi83_work, dsi83_work_func);
 	dsi83_workqueue = create_workqueue("dsi83");
 		
-	is_dsi83_inited=true;
 	
-	CREATE_KTHREAD(thread_dsi83_check, NULL);
+	if(g_var.is_fly == 0)
+		queue_delayed_work(dsi83_workqueue, &dsi83_work, DSI83_DELAY_TIME);
+	else	
+		CREATE_KTHREAD(thread_dsi83_check, NULL);
 
 #if defined(CONFIG_FB)
 		dsi83_fb_notif.notifier_call = dsi83_fb_notifier_callback;

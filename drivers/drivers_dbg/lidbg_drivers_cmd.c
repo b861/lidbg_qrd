@@ -65,6 +65,12 @@ int thread_screenshot(void *data)
     return 0;
 }
 
+int thread_kmsg_fifo_save(void *data)
+{
+	kmsg_fifo_save();
+
+    return 0;
+}
 
 void parse_cmd(char *pt)
 {
@@ -106,6 +112,9 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#018--origin gps\n");
             fs_mem_log("*158#019--enable system print\n");
             fs_mem_log("*158#020--disable system print\n");
+			fs_mem_log("*158#021--save fifo msg\n");
+			fs_mem_log("*158#022--log2sd to save qxdm\n");
+			lidbg_domineering_ack();
         }
 
         if (!strcmp(argv[1], "*158#999"))
@@ -231,6 +240,26 @@ void parse_cmd(char *pt)
                 lidbg_reboot();
             }
         }
+        else if (!strcmp(argv[1], "*158#021"))
+        {
+            encode = false;
+            lidbg_chmod("/data");
+            lidbg_fifo_get(glidbg_msg_fifo, LIDBG_LOG_DIR"lidbg_mem_log.txt", 0);
+			CREATE_KTHREAD(thread_kmsg_fifo_save, NULL);
+			lidbg_domineering_ack();
+        }
+		
+        else if (!strcmp(argv[1], "*158#022"))
+        {
+			lidbg_shell_cmd("mount -o remount /system");
+			lidbg_shell_cmd("mkdir /sdcard/diag_logs");
+			lidbg_shell_cmd("chmod 777 /sdcard/diag_logs");
+			lidbg_shell_cmd("cp /flysystem/lib/out/DIAG.conf /sdcard/diag_logs/DIAG.cfg");
+			lidbg_shell_cmd("chmod 777 /sdcard/diag_logs/DIAG.cfg &");
+			lidbg_shell_cmd("/system/bin/diag_mdlog");
+			lidbg_domineering_ack();
+        }
+		
         else if (!strcmp(argv[1], "*168#001"))
         {
             encode = true;

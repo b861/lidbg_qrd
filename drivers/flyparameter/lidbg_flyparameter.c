@@ -1,6 +1,6 @@
 
 #include "lidbg.h"
-#define PATH_FLY_HW_INFO_CONFIG USB_MOUNT_POINT"/machine_info.conf"
+#define PATH_FLY_HW_INFO_CONFIG USB_MOUNT_POINT"/conf/machine_info.conf"
 #define RECOVERY_PATH_FLY_HW_INFO_CONFIG RECOVERY_USB_MOUNT_POINT"/machine_info.conf"
 
 #define FLAG_HW_INFO_VALID (0x12345678)
