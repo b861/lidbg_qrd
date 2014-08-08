@@ -231,15 +231,23 @@ int thread_antutu_test(void *data)
 	int cnt = 0;
 	ssleep(50);
 	set_system_performance(1);
-	lidbg_shell_cmd("am start -n com.antutu.ABenchMark/com.antutu.ABenchMark.ABenchMarkStart");
-	ssleep(2);
+
 
 	while(1)
 	{
 		cnt++;
 		lidbg("antutu test start: %d\n",cnt);
+
+		lidbg_shell_cmd("pm uninstall com.antutu.ABenchMark");
+		lidbg_pm_install_dir("/data/antutu.apk");
+		ssleep(5);
+		
+		lidbg_shell_cmd("am start -n com.antutu.ABenchMark/com.antutu.ABenchMark.ABenchMarkStart");
+		ssleep(2);
 		lidbg_shell_cmd("am start -n com.antutu.ABenchMark/com.antutu.benchmark.activity.ScoreBenchActivity");
-		ssleep(60*5);// 4 min loop
+		ssleep(60*4);// 4 min loop
+		
+
 	}
 
 }
