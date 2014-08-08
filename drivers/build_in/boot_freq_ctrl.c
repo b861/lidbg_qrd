@@ -9,6 +9,10 @@ static int thread_freq_limit(void *data)
 {
 	int count = 0;
 	
+		struct tsens_device tsens_dev;
+	//cpu0 temp_sensor_id
+	tsens_dev.sensor_num = 5;
+
 	lidbg("create kthread \n");
 	
 	while(1)
@@ -16,8 +20,10 @@ static int thread_freq_limit(void *data)
 		ctrl_max_freq = BOOT_LIMIT_FREQ;
 		{
 			int tmp;
+			long temp;
 			tmp = cpufreq_get(0); //cpufreq.c
-			lidbg("cpufreq=%d\n", tmp);
+			tsens_get_temp(&tsens_dev, &temp);//cpu0 temp
+			lidbg("cpufreq=%d,cpu0_temp = %ld\n", tmp,temp);
 		}
 		count++;
 		if(count >= 45)
