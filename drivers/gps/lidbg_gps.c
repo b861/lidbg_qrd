@@ -392,6 +392,7 @@ static int  gps_probe(struct platform_device *pdev)
 #ifndef SOC_msm8x25
     if(is_ublox_exist() < 0)
     {
+#if 0
 	    if(g_var.is_first_update)
 	    {
 			lidbg_shell_cmd("mount -o remount /system");
@@ -401,16 +402,19 @@ static int  gps_probe(struct platform_device *pdev)
 			lidbg_shell_cmd("rm /system/lib/modules/out/"FLY_GPS_SO);
 			lidbg_shell_cmd("mv /flysystem/lib/hw/"FLY_GPS_SO"  /flysystem/lib/hw/gps.soc.bak");
 	    }
+#endif
 		lidbg("[ublox]ublox.miss\n\n");
 		return 0;
     }
     else
     {
+#if 0
 	    if(g_var.is_first_update)
 	    {
 	    	lidbg_shell_cmd("mount -o remount /flysystem");
 			lidbg_shell_cmd("mv /flysystem/lib/hw/gps.soc.bak  /flysystem/lib/hw/"FLY_GPS_SO);
 	    }
+#endif
         lidbg("[ublox]ublox.exist\n\n");
         fs_mem_log("ublox_exist=true\n");
 

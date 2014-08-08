@@ -1,12 +1,10 @@
 
 ################hal select####################
 CONFIG_HAL_USERVER=y
-CONFIG_HAL_GPSLIB=y
 CONFIG_HAL_VOLD_8x26=y
 CONFIG_HAL_LOAD=y
 
 export CONFIG_HAL_USERVER
-export CONFIG_HAL_GPSLIB
 export CONFIG_HAL_VOLD_8x26
 export CONFIG_HAL_LOAD
 ################driver select####################
