@@ -393,10 +393,15 @@ static int dsi83_probe(struct platform_device *pdev)
 		
 	
 	if(g_var.is_fly == 0)
+	{
+		is_dsi83_inited = 0;
 		queue_delayed_work(dsi83_workqueue, &dsi83_work, DSI83_DELAY_TIME);
-	else	
+	}
+	else
+	{
+		is_dsi83_inited = 1;
 		CREATE_KTHREAD(thread_dsi83_check, NULL);
-
+	}
 #if defined(CONFIG_FB)
 		dsi83_fb_notif.notifier_call = dsi83_fb_notifier_callback;
 		ret = fb_register_client(&dsi83_fb_notif);
