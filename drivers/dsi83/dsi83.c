@@ -7,7 +7,7 @@ LIDBG_DEFINE;
 static bool is_dsi83_inited = false;
 static struct delayed_work dsi83_work;
 static struct workqueue_struct *dsi83_workqueue;
-
+int check_times = 0;
 #if defined(CONFIG_FB)
 	struct notifier_block dsi83_fb_notif;
 #elif defined(CONFIG_HAS_EARLYSUSPEND)
@@ -194,11 +194,17 @@ int dsi83_check(void)
 	
 	if((reg != 0x00) || (ret< 0) || (is_dsi83_inited == 0) )
 	{
-		lidbgerr( "[dsi83.check.err]reg-0xe5=0x%x,ret=%d\n", reg,ret);
+		check_times ++;
+		lidbgerr( "[dsi83.check.err]reg-0xe5=0x%x,ret=%d,check_times=%d\n", reg,ret,check_times);
 		is_dsi83_inited = 0;
-		queue_delayed_work(dsi83_workqueue, &dsi83_work, DSI83_DELAY_TIME);
+		
+		if(check_times <= 5)
+			queue_delayed_work(dsi83_workqueue, &dsi83_work, DSI83_DELAY_TIME);
 	}
-
+	else//check ok
+	{
+		check_times = 0;
+	}
 	return 0;
 }
 

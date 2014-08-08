@@ -1,4 +1,5 @@
-#define PLATFORM_MSM8226   1
+#define PLATFORM_MSM8226 1
+//#define PLATFORM_MSM8974 1
 
 
 struct thermal_ctrl
@@ -12,12 +13,12 @@ struct thermal_ctrl
 #ifdef PLATFORM_MSM8226
 struct thermal_ctrl cpu_thermal[] = 
 {
-		{1,  70,  1401600,"1401600"},
-		{71, 80,  1094400,"1094400"},
-		{81, 90, 787200, "787200"},
-		{91,100, 600000, "600000"},
-		{101,150, 300000, "300000"},
-		{0,0, 0, "0"}//end flag
+	{1,  80,  1593600,"1593600"},
+	{81, 90,  1094400,"1094400"},
+	{91, 100, 787200, "787200"},
+	{101,105, 600000, "600000"},
+	{105,500, 300000, "300000"},
+	{0,0, 0, "0"}//end flag
 };
 
 #define BOOT_LIMIT_FREQ (1401600)
@@ -28,12 +29,12 @@ struct thermal_ctrl cpu_thermal[] =
 
 struct thermal_ctrl cpu_thermal[] = 
 {
-                {1,  60,  2265600,"2265600"},
-                {61, 70,  1728000,"1728000"},
-                {71, 80,  1267200,"1267200"},
-                {81, 90, 960000,"960000"},
-                {91,100, 652800, "652800"},
-                {101,150, 300000, "300000"},
+        {1,  60,  2265600,"2265600"},
+        {61, 70,  1728000,"1728000"},
+        {71, 80,  1267200,"1267200"},
+        {81, 90, 960000,"960000"},
+        {91,100, 652800, "652800"},
+        {101,150, 300000, "300000"},
 		{0,0, 0, "0"}//end flag
 };
 
@@ -69,13 +70,14 @@ static int thread_freq_limit(void *data)
 	
 	while(1)
 	{
-//		ctrl_max_freq = BOOT_LIMIT_FREQ;
 		{
 			int tmp;
 			long temp;
+			u32 max_freq;
 			tmp = cpufreq_get(0); //cpufreq.c
+			max_freq = get_scaling_max_freq();
 			tsens_get_temp(&tsens_dev, &temp);//cpu0 temp
-			lidbg("cpufreq=%d,cpu0_temp = %ld\n", tmp,temp);
+			lidbg("cpufreq=%d,maxfreq=%d,cpu0_temp = %ld\n", tmp,max_freq,temp);
 
 			for(i = 0; i < SIZE_OF_ARRAY(cpu_thermal); i++)
 			{
@@ -83,16 +85,14 @@ static int thread_freq_limit(void *data)
 					break;
 			
 				if((temp >= cpu_thermal[i].temp_low ) && (temp <= cpu_thermal[i].temp_high ) 
-					  && (get_scaling_max_freq() != cpu_thermal[i].limit_freq))
+					  && (max_freq != cpu_thermal[i].limit_freq))
 				{
 					lidbg_readwrite_file(FREQ_MAX_NODE, NULL, cpu_thermal[i].limit_freq_string, strlen(cpu_thermal[i].limit_freq_string));
-					lidbg("set max freq to: %d,temp:%ld\n", cpu_thermal[i].limit_freq,temp);
+					lidbg("kernel:set max freq to: %d,temp:%ld\n", cpu_thermal[i].limit_freq,temp);
 					ctrl_max_freq = cpu_thermal[i].limit_freq;
 					break;
 				}
 			}
-//			ctrl_max_freq = cpu_thermal[i].limit_freq;
-//			lidbg_readwrite_file("/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq", NULL, MAX_FREQS, sizeof(MAX_FREQS) - 1);
 		}
 		count++;
 		if(count >= 45)

@@ -75,7 +75,7 @@ void cb_kv_show_temp(char *key, char *value)
 
 int thread_thermal(void *data)
 {
-    int cur_temp,i;
+    int cur_temp,i,max_freq;
     DUMP_FUN;
     temp_init();
 
@@ -116,6 +116,7 @@ int thread_thermal(void *data)
 
         log_temp();
         cur_temp = soc_temp_get();
+		max_freq = get_scaling_max_freq();
         //lidbg("MSM_THERM: %d\n",cur_temp);
 		for(i = 0; i < SIZE_OF_ARRAY(g_hw.cpu_freq_thermal); i++)
 		{
@@ -123,7 +124,7 @@ int thread_thermal(void *data)
 				break;
 			
 			if((cur_temp >= g_hw.cpu_freq_thermal[i].temp_low ) && (cur_temp <= g_hw.cpu_freq_thermal[i].temp_high ) 
-			      && (get_scaling_max_freq() != g_hw.cpu_freq_thermal[i].limit_freq))
+			      && (max_freq != g_hw.cpu_freq_thermal[i].limit_freq))
 			{
 				lidbg_readwrite_file(FREQ_MAX_NODE, NULL, g_hw.cpu_freq_thermal[i].limit_freq_string, strlen(g_hw.cpu_freq_thermal[i].limit_freq_string));
 				lidbg("set max freq to: %d,temp:%d\n", g_hw.cpu_freq_thermal[i].limit_freq,cur_temp);
