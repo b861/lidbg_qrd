@@ -2,14 +2,7 @@
 function soc_build_system()
 {
 	echo $FUNCNAME
-if [ $DBG_PLATFORM = msm8226 ];then
-	soc_prebuild && make systemimage -j8
-	if [ -s $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/bin/lidbg_load ]; then
-		echo "soc_build_system ok"
-	else
-		make systemimage -j8
-	fi
-fi
+	soc_prebuild && make systemimage -j8 && soc_postbuild
 }
 
 function soc_build_kernel()
@@ -21,13 +14,26 @@ function soc_build_kernel()
 function soc_build_all()
 {
 	echo $FUNCNAME
-	soc_prebuild && make -j8
+	soc_prebuild && make -j8 && soc_postbuild
+}
+
+
+function soc_postbuild()
+{
 if [ $DBG_PLATFORM = msm8226 ];then
 	if [ -s $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/bin/lidbg_load ]; then
-		echo "soc_build_all ok"
+		echo "/system/bin/lidbg_load exist"
 	else
 		make -j8
 	fi
+
+	if [ -s $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/lib/libdiskconfig.so ]; then
+		echo "system/lib/libdiskconfig.so exist"
+	else
+		mmm $DBG_SYSTEM_DIR/system/core/libdiskconfig -B
+		make -j8
+	fi
+	echo "soc_build_all ok"
 fi
 }
 
