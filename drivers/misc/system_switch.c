@@ -121,6 +121,7 @@ void system_switch_init(void)
     	}
 	else
 	{
+#if 0
 		if((g_var.is_fly)&&(!g_var.recovery_mode)&&(g_var.is_first_update))
 		{
 		
@@ -135,6 +136,7 @@ void system_switch_init(void)
 	        lidbg_shell_cmd("chmod 777 /system/priv-app/*" );
 	        lidbg_shell_cmd("chmod 777 /system/app/PackageInstaller.apk" );
 		}
+#endif
 	}
 	
 	lidbg_shell_cmd("echo ====system_switch_init:finish==== > /dev/lidbg_msg" );
