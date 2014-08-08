@@ -5,6 +5,7 @@ int temp_log_freq = 10;
 static int cpu_temp_time_minute = 20;
 static bool is_cpu_temp_enabled = false;
 int cpu_temp_show = 0;
+static int temp_offset = 0;
 
 #define FREQ_MAX_NODE    "/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq"
 #define TEMP_LOG_PATH 	 LIDBG_LOG_DIR"log_ct.txt"
@@ -82,6 +83,21 @@ void cb_kv_show_temp(char *key, char *value)
     CREATE_KTHREAD(thread_show_temp, NULL);
 }
 
+void set_system_performance(bool enable)
+{
+	lidbg("set_system_performance:%d\n",enable);
+	if(enable)
+	{
+		set_cpu_governor(1);
+		temp_offset = 10;
+	}
+	else
+	{
+		set_cpu_governor(0);
+		temp_offset = 0;
+		
+	}
+}
 
 int thread_thermal(void *data)
 {
@@ -133,7 +149,7 @@ int thread_thermal(void *data)
 			if((g_hw.cpu_freq_thermal[i].temp_low == 0)||(g_hw.cpu_freq_thermal[i].temp_high == 0))
 				break;
 			
-			if((cur_temp >= g_hw.cpu_freq_thermal[i].temp_low ) && (cur_temp <= g_hw.cpu_freq_thermal[i].temp_high ) 
+			if((cur_temp >= (g_hw.cpu_freq_thermal[i].temp_low + temp_offset) ) && (cur_temp <= (g_hw.cpu_freq_thermal[i].temp_high + temp_offset) ) 
 			      && (max_freq != g_hw.cpu_freq_thermal[i].limit_freq))
 			{
 				lidbg_readwrite_file(FREQ_MAX_NODE, NULL, g_hw.cpu_freq_thermal[i].limit_freq_string, strlen(g_hw.cpu_freq_thermal[i].limit_freq_string));

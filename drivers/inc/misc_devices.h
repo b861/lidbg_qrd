@@ -14,6 +14,8 @@ int button_resume(void);
 int thread_sound_detect(void *data);
 int SOC_Get_System_Sound_Status_func(void *para, int length);
 int  iGPS_sound_status(void);
+void set_system_performance(bool enable);
+
 
 // PANNE_PEN
 #define LCD_ON  do{lidbg("LCD_ON\n");LPC_CMD_LCD_ON;}while(0)

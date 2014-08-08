@@ -120,6 +120,14 @@ static void parse_cmd(char *pt)
     {
 		LCD_OFF;
     }
+	else if (!strcmp(pt, "performance_on"))
+    {
+		set_system_performance(1);
+    }
+	else if (!strcmp(pt, "performance_off"))
+    {
+		set_system_performance(0);
+    }
 }
 
 
