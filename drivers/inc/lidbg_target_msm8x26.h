@@ -12,24 +12,32 @@
 #define  MCU_APP_GPIO_OFF  do{check_gpio(g_hw.gpio_mcu_app);SOC_IO_Output(0, g_hw.gpio_mcu_app, 1);}while(0)
 #define  MCU_SET_APP_GPIO_SUSPEND  do{check_gpio(g_hw.gpio_mcu_app);SOC_IO_Suspend_Config(g_hw.gpio_mcu_app,GPIOMUX_OUT_LOW,GPIO_CFG_NO_PULL,GPIOMUX_DRV_2MA);}while(0)
 
+
 //gps
+#ifdef PLATFORM_msm8226
+
 #define MSM_GPS_POWER_ON do{\
-	lidbg("MSM_GPS_POWER_ON\n"); \
-#ifdef PLATFORM_msm8226 \
-	lidbg_shell_cmd("echo 1 > /sys/kernel/debug/regulator/8226_l18/enable"); \
-#elif defined(PLATFORM_msm8974)\
-	lidbg_shell_cmd("echo 1 > /sys/kernel/debug/regulator/8941_l18/enable"); \
-#endif \
+	lidbg("MSM_GPS_POWER_ON\n");\
+	lidbg_shell_cmd("echo 1 > /sys/kernel/debug/regulator/8226_l18/enable");\
 }while(0)
 
 #define MSM_GPS_POWER_OFF do{\
-	lidbg("MSM_GPS_POWER_OFF"); \
-#ifdef PLATFORM_msm8226 \
-		lidbg_shell_cmd("echo 0 > /sys/kernel/debug/regulator/8226_l18/enable"); \
-#elif defined(PLATFORM_msm8974)\
-		lidbg_shell_cmd("echo 0 > /sys/kernel/debug/regulator/8941_l18/enable"); \
-#endif \
+	lidbg("MSM_GPS_POWER_OFF");\
+	lidbg_shell_cmd("echo 0 > /sys/kernel/debug/regulator/8226_l18/enable");\
 }while(0)
+
+#elif defined(PLATFORM_msm8974)
+#define MSM_GPS_POWER_ON do{\
+	lidbg("MSM_GPS_POWER_ON\n");\
+	lidbg_shell_cmd("echo 1 > /sys/kernel/debug/regulator/8941_l18/enable");\
+}while(0)
+
+#define MSM_GPS_POWER_OFF do{\
+	lidbg("MSM_GPS_POWER_OFF");\
+	lidbg_shell_cmd("echo 0 > /sys/kernel/debug/regulator/8941_l18/enable");\
+}while(0)
+#endif
+
 
 //lcd
 

@@ -189,7 +189,7 @@ static int soc_dev_probe(struct platform_device *pdev)
 	}
 	USB_WORK_ENABLE;
 	SET_USB_ID_SUSPEND;
-#ifdef PLATFORM_msm8226
+#ifdef SOC_msm8x26
 	MSM_GPS_POWER_ON;
 #endif
 	lidbg_new_cdev(&dev_fops, "flydev");
