@@ -12,11 +12,13 @@
 
 //gps
 #define MSM_GPS_POWER_ON do{\
+	if(g_var.hw_info.hw_version < 3)break;\
 	lidbg("MSM_GPS_POWER_ON\n"); \
 	lidbg_shell_cmd("echo 1 > /sys/kernel/debug/regulator/8226_l18/enable"); \
 }while(0)
 
 #define MSM_GPS_POWER_OFF do{\
+	if(g_var.hw_info.hw_version < 3)break;\
 	lidbg("MSM_GPS_POWER_OFF"); \
 	lidbg_shell_cmd("echo 0 > /sys/kernel/debug/regulator/8226_l18/enable"); \
 }while(0)

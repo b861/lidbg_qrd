@@ -115,9 +115,9 @@ typedef enum
 #define NOTIFIER_MINOR_ACC_ON (0)
 #define NOTIFIER_MINOR_ACC_OFF (1)
 
-#define PM_WARN(fmt, args...) do{printk("[ftf_pm]warn.%s: " fmt,__func__,##args);}while(0)
-#define PM_ERR(fmt, args...) do{printk("[ftf_pm]err.%s: " fmt,__func__,##args);}while(0)
-#define PM_SUC(fmt, args...) do{printk("[ftf_pm]suceed.%s: " fmt,__func__,##args);}while(0)
+#define PM_WARN(fmt, args...) do{printk(KERN_CRIT"[ftf_pm]warn.%s: " fmt,__func__,##args);}while(0)
+#define PM_ERR(fmt, args...) do{printk(KERN_CRIT"[ftf_pm]err.%s: " fmt,__func__,##args);}while(0)
+#define PM_SUC(fmt, args...) do{printk(KERN_CRIT"[ftf_pm]suceed.%s: " fmt,__func__,##args);}while(0)
 #define PM_SLEEP_DBG(fmt, args...) do{printk(KERN_CRIT"[ftf_pm]sleep_step: ++++++++++++++" fmt,##args);}while(0)
 #define PM_WAKE_DBG(fmt, args...) do{printk(KERN_CRIT"[ftf_pm]wake_step: ===" fmt,##args);}while(0)
 

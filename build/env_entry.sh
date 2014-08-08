@@ -37,7 +37,7 @@ case "$DBG_PLATFORM" in
 	DBG_REPO_PASSWORD=git
 	DBG_SOC=msm8x25;;
     msm8226)
-	BOARD_VERSION=V3
+	BOARD_VERSION=V2
 	DBG_CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilts/gcc/linux-x86/arm/arm-eabi-4.7/bin/arm-eabi-
 	SYSTEM_BUILD_TYPE=eng
 	DBG_KERNEL_SRC_DIR=$DBG_SYSTEM_DIR/kernel

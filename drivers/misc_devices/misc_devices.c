@@ -51,7 +51,7 @@ static int lidbg_event(struct notifier_block *this,
         break;
 
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_DEVICE_DOWN):
-		#ifdef SOC_msm8x26
+		#ifdef PLATFORM_msm8226
 		MSM_GPS_POWER_OFF;
 		#endif
         break;
@@ -67,7 +67,7 @@ static int lidbg_event(struct notifier_block *this,
 	case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_ANDROID_UP):
 		break;
 	case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_DEVICE_UP):
-		#ifdef SOC_msm8x26
+		#ifdef PLATFORM_msm8226
 		MSM_GPS_POWER_ON;
 		#endif
 		CREATE_KTHREAD(thread_usb_disk_enable_delay, NULL);
@@ -181,7 +181,7 @@ static int soc_dev_probe(struct platform_device *pdev)
 	}
 	USB_WORK_ENABLE;
 	SET_USB_ID_SUSPEND;
-#ifdef SOC_msm8x26
+#ifdef PLATFORM_msm8226
 	MSM_GPS_POWER_ON;
 #endif
 	lidbg_new_cdev(&dev_fops, "flydev");
