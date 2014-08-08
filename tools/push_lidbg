@@ -1,6 +1,6 @@
  #!/usr/bin/expect
 set timeout -1
-spawn git push
+spawn git push origin master
 expect "password"
 send "l\r"
 expect eof
