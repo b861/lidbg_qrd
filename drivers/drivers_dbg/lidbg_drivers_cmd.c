@@ -255,8 +255,8 @@ void parse_cmd(char *pt)
 			lidbg_shell_cmd("mkdir /sdcard/diag_logs");
 			lidbg_shell_cmd("chmod 777 /sdcard/diag_logs");
 			lidbg_shell_cmd("cp /flysystem/lib/out/DIAG.conf /sdcard/diag_logs/DIAG.cfg");
-			lidbg_shell_cmd("chmod 777 /sdcard/diag_logs/DIAG.cfg &");
-			lidbg_shell_cmd("/system/bin/diag_mdlog");
+			lidbg_shell_cmd("chmod 777 /sdcard/diag_logs/DIAG.cfg");
+			lidbg_shell_cmd("/system/bin/diag_mdlog &");
 			lidbg_domineering_ack();
         }
 		
