@@ -20,7 +20,7 @@ function debug_handle()
 	52)
 		expect $DBG_TOOLS_PATH/remount;;
 	53)
-		adb reboot-bootloader;;
+		adb wait-for-device reboot-bootloader;;
 	54)
 		soc_flash_kernel;;
 	55)

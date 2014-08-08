@@ -17,7 +17,7 @@ function combination_handle()
 		lidbg_build_all && depository_clean && depository_pull && rm -rf $UPDATA_BIN_DIR/out && depository_copy_lidbg && depository_add_push $descriptors;;
 	62)
 		read -p "输入提交到二进制仓库的说明文字：" descriptors
-		cd $DBG_SYSTEM_DIR && expect $DBG_TOOLS_PATH/pull $DBG_PASSWORD && soc_build_release && depository_clean && depository_pull && soc_make_otapackage && depository_copy_basesystem && depository_add_push $descriptors;;
+		cd $DBG_SYSTEM_DIR && expect $DBG_TOOLS_PATH/pull $DBG_PASSWORD  && depository_clean && depository_pull && soc_build_release && depository_copy_basesystem && depository_add_push $descriptors;;
 	63)
 	        depository_pull && depository_copy_lidbg & depository_copy_basesystem && depository_make_package && gitk&;;
 

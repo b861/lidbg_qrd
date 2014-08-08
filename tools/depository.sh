@@ -10,6 +10,7 @@ function depository_pull()
 	echo $FUNCNAME
 	cd $RELEASE_REPOSITORY
 	expect $DBG_TOOLS_PATH/pull $DBG_REPO_PASSWORD
+	expect $DBG_TOOLS_PATH/pull $DBG_REPO_PASSWORD
 }
 
 function depository_add_push()
@@ -19,6 +20,7 @@ function depository_add_push()
 	git add .
 	git add -f $UPDATA_BIN_DIR
 	git commit -am $1
+	expect $DBG_TOOLS_PATH/push
 	expect $DBG_TOOLS_PATH/push
 	gitk &
 }

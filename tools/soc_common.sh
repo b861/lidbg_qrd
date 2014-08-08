@@ -28,7 +28,7 @@ function soc_menu()
 	echo [22] make system
 	echo [23] make
 	echo [24] make otapackage
-	echo [25] make release system
+	echo [25] make release basesystem
 }
 
 function soc_handle()

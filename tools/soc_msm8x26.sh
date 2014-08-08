@@ -60,6 +60,7 @@ function soc_build_release()
 	else
 		soc_build_all
 	fi
+	soc_make_otapackage
 }
 
 function soc_make_otapackage()
