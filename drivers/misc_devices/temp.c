@@ -137,7 +137,7 @@ int thread_thermal(void *data)
 
 	if(cpu_temp_show == 1)
 		CREATE_KTHREAD(thread_show_temp, NULL);
-	
+
 
     while(!kthread_should_stop())
     {
@@ -145,6 +145,18 @@ int thread_thermal(void *data)
 
         log_temp();
         cur_temp = soc_temp_get();
+
+			
+#ifdef PLATFORM_msm8974
+		if(g_var.recovery_mode != 1)
+		{
+			lidbg("temp:%d,freq:%d\n",cur_temp,cpufreq_get(0));
+			msleep(3000);
+			continue;
+			
+		}
+#endif
+	
 		max_freq = get_scaling_max_freq();
         //lidbg("MSM_THERM: %d\n",cur_temp);
 		for(i = 0; i < SIZE_OF_ARRAY(g_hw.cpu_freq_thermal); i++)
@@ -156,13 +168,6 @@ int thread_thermal(void *data)
 			      && (max_freq != g_hw.cpu_freq_thermal[i].limit_freq))
 			{
 
-#ifdef PLATFORM_msm8974
-				if(g_var.recovery_mode != 1)
-				{
-					lidbg("temp:%d,freq:%d\n",cur_temp,cpufreq_get(0));
-					break;
-				}
-#endif
 				lidbg_readwrite_file(FREQ_MAX_NODE, NULL, g_hw.cpu_freq_thermal[i].limit_freq_string, strlen(g_hw.cpu_freq_thermal[i].limit_freq_string));
 				if(g_hw.gpu_max_freq_node != NULL)
 					lidbg_readwrite_file(g_hw.gpu_max_freq_node, NULL, g_hw.cpu_freq_thermal[i].limit_gpu_freq_string, strlen(g_hw.cpu_freq_thermal[i].limit_gpu_freq_string));
