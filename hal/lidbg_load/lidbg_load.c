@@ -1,6 +1,6 @@
 
 #include "lidbg_servicer.h"
-#if 0
+#if 1
 static void *read_file( char *filename, ssize_t *_size)
 {
 	int ret, fd;
@@ -55,7 +55,7 @@ int module_insmod(char *file)
 		{
 			if (0 == memcmp("File exists",strerror(errno),sizeof(strerror(errno))))
 			{
-				lidbg("\nflyV2Recovery insmod -> %s File exists",file);
+				lidbg("insmod -> %s File exists",file);
 				free(module);
 				return 0;
 			}
@@ -112,10 +112,10 @@ int main(int argc, char **argv)
 
     if(checkout == 1)
     {
-		//ret = module_insmod("/system/lib/modules/out/lidbg_uevent.ko");
-		//if(ret<0){ lidbg("module_insmod fail\n");}
-        system("insmod /system/lib/modules/out/lidbg_uevent.ko");
-        system("insmod /system/lib/modules/out/lidbg_loader.ko");
+		module_insmod("/system/lib/modules/out/lidbg_uevent.ko");
+		module_insmod("/system/lib/modules/out/lidbg_loader.ko");
+        //system("insmod /system/lib/modules/out/lidbg_uevent.ko");
+        //system("insmod /system/lib/modules/out/lidbg_loader.ko");
         while(1)
         {
             if(access("/system/lib/modules/out/lidbg_userver", X_OK) == 0)
@@ -133,8 +133,11 @@ int main(int argc, char **argv)
     }
     else if(checkout == 2)
     {
-        system("insmod /flysystem/lib/out/lidbg_uevent.ko");
-        system("insmod /flysystem/lib/out/lidbg_loader.ko");
+    	
+		module_insmod("/flysystem/lib/out/lidbg_uevent.ko");
+		module_insmod("/flysystem/lib/out/lidbg_loader.ko");
+        //system("insmod /flysystem/lib/out/lidbg_uevent.ko");
+        //system("insmod /flysystem/lib/out/lidbg_loader.ko");
         while(1)
         {
             if(access("/flysystem/lib/out/lidbg_userver", X_OK) == 0)
