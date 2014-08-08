@@ -17,15 +17,13 @@ void kmsg_fifo_collect(char *buff, int buff_len)
 
     if(p_kmsg_collect == NULL)
     {
+        if(kfifo_alloc(&fifo_kmsg_collect, 5 * 1024 * 1024, GFP_KERNEL))
+        {
+            lidbgerr("[%s]:kfifo_alloc \n", __func__);
+			return;
+        }
         mutex_init(&mutex_kmsg_collect);
         spin_lock_init(&spinlock_kmsg_collect);
-        if(kfifo_alloc(&fifo_kmsg_collect, 5 * 1024 * 1024, GFP_KERNEL))
-	{
-            lidbgerr("[%s]:kfifo_alloc \n", __func__);
-	    #ifdef PLATFORM_msm8974
-	    return;
-	    #endif
-	}
         p_kmsg_collect = &fifo_kmsg_collect;
         kfifo_reset(p_kmsg_collect);
     }
@@ -188,7 +186,9 @@ static int thread_trace_msg_in(void *data)
 
 	        if(len >= 0)
 	        {
+#ifndef PLATFORM_msm8974 //need to be debug
 	            kmsg_fifo_collect(buff, len);
+#endif
 	            lidbg_trace_msg_is_enough(len);
 
 	            down(&pdev->sem);
@@ -333,7 +333,8 @@ static int  lidbg_trace_msg_probe(struct platform_device *ppdev)
     FS_REGISTER_INT(tmp, "kmsg_fifo_save", 0, cb_int_kmsg_fifo_save);
 
 #ifdef  TRACE_MSG_FROM_KMSG
-    CREATE_KTHREAD(thread_trace_msg_in, NULL);
+	if(fs_is_file_exist(FLY_MODE_FILE))
+    	CREATE_KTHREAD(thread_trace_msg_in, NULL);
 #endif
     CREATE_KTHREAD(thread_trace_msg_out, NULL);
 
