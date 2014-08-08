@@ -114,6 +114,7 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#020--disable system print\n");
 			fs_mem_log("*158#021--save fifo msg\n");
 			fs_mem_log("*158#022--log2sd to save qxdm\n");
+			fs_mem_log("*158#023--show cpu temp\n");
 			lidbg_domineering_ack();
         }
 
@@ -259,7 +260,11 @@ void parse_cmd(char *pt)
 			lidbg_shell_cmd("/system/bin/diag_mdlog &");
 			lidbg_domineering_ack();
         }
-		
+        else if (!strcmp(argv[1], "*158#023"))
+        {
+			cb_kv_show_temp(NULL,NULL);
+			lidbg_domineering_ack();
+        }		
         else if (!strcmp(argv[1], "*168#001"))
         {
             encode = true;

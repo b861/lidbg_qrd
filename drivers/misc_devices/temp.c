@@ -82,6 +82,7 @@ void cb_kv_show_temp(char *key, char *value)
 {
     CREATE_KTHREAD(thread_show_temp, NULL);
 }
+EXPORT_SYMBOL(cb_kv_show_temp);
 
 void set_system_performance(bool enable)
 {
