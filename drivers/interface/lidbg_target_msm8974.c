@@ -83,7 +83,7 @@ struct hw_version_specific g_hw_version_specific[] =
 	.gpio_t123_reset = -1,
 	.gpio_dsi83_en = 58,
 
-	.gpio_usb_id = -1,
+	.gpio_usb_id = 73,
 	.gpio_usb_power = 78,
 	.gpio_usb_switch = -1,
 	
