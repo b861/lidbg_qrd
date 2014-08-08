@@ -86,6 +86,7 @@ struct hw_version_specific
 	char * gpu_max_freq_node;
 	char * cpu_freq_recovery_limit;
 	int sensor_num;
+	int fan_onoff_temp;
 //parameter
 	char * fly_parameter_node;
 

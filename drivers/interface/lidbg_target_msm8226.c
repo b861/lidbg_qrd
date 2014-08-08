@@ -252,6 +252,7 @@ struct hw_version_specific g_hw_version_specific[] =
 	.gpu_max_freq_node = "/sys/class/kgsl/kgsl-3d0/max_gpuclk",
 	.cpu_freq_recovery_limit = "600000",
 	.sensor_num = 5,
+	.fan_onoff_temp = 90,
 
 	.fly_parameter_node = "/dev/block/mmcblk0p25",
 	

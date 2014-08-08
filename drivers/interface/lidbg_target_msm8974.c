@@ -155,6 +155,7 @@ struct hw_version_specific g_hw_version_specific[] =
 	.cpu_freq_temp_node = "/sys/class/thermal/thermal_zone5/temp",
 	.cpu_freq_recovery_limit = "600000",
 	.sensor_num = 5,
+	.fan_onoff_temp = 75,
 
 	.fly_parameter_node = "/dev/block/mmcblk0p25",
 	},

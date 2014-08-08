@@ -7,6 +7,7 @@ static bool is_cpu_temp_enabled = false;
 int cpu_temp_show = 0;
 static int temp_offset = 0;
 int antutu_test= 0;
+bool fan_run_status = false;
 
 #define FREQ_MAX_NODE    "/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq"
 #define TEMP_LOG_PATH 	 LIDBG_LOG_DIR"log_ct.txt"
@@ -159,7 +160,36 @@ int thread_thermal(void *data)
         log_temp();
         cur_temp = soc_temp_get();
 
-			
+//fan ctrl
+    	{
+			if( (cur_temp > g_hw.fan_onoff_temp)  && 
+				(g_var.system_status!=FLY_DEVICE_DOWN) &&
+				(g_var.system_status!=FLY_ANDROID_DOWN) &&
+				(g_var.system_status!=FLY_GOTO_SLEEP) && 
+				(g_var.system_status!=FLY_KERNEL_DOWN)
+
+			)//on
+			{
+				if(fan_run_status == false)
+				{
+					fan_run_status = true;
+					LPC_CMD_FAN_ON;
+					lidbg("AIR_ON:%d\n", cur_temp);
+				}
+			}
+			else //off
+			{
+				if(fan_run_status)
+				{
+					fan_run_status = false;
+					LPC_CMD_FAN_OFF;
+					lidbg( "AIR_OFF:%d\n", cur_temp);
+				}
+			}
+
+
+		}	
+		
 		if(g_hw.thermal_ctrl_en == 0)
 		{
 			if(cur_temp > 80)
