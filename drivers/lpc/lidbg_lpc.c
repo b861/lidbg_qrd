@@ -70,25 +70,34 @@ int thread_lpc(void *data)
 
 u32 ping_data = 0;
 bool ping_repay = 0;
+#define LPC_LOG_PATH LIDBG_LOG_DIR"lpc_log.txt"
 
 int thread_lpc_ping_test(void *data)
 {
  	u32 ping_wait_cnt = 0;
-	msleep(1000*10);
+	
+ 	u32 err_cnt = 0;
+	msleep(1000*20);
     while(1)
     {
 		LPC_CMD_PING_TEST(ping_data & 0xff);
+
 		while(ping_repay == 0)
 		{
 			msleep(50);
 			ping_wait_cnt ++;
-			if(ping_wait_cnt > 20) 
-				lidbgerr("lpc_ping_test err !!\n");
+			if(ping_wait_cnt > 20*5) 
+			{
+				lidbg_fs_log(LPC_LOG_PATH,"lpc_ping_test err %d\n",err_cnt);
+				err_cnt++;
+				break;
+			}
+			
 		}
 		ping_data++;
 		ping_wait_cnt = 0;
 		ping_repay = 0;
-		//msleep(20);
+		//msleep(1000);
 
     }
     return 0;
