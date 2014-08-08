@@ -37,6 +37,17 @@ static  struct file_operations drivers_dbg_nod_fops =
 int thread_drivers_dbg_init(void *data)
 {
     lidbg_new_cdev(&drivers_dbg_nod_fops, "lidbg_drivers_dbg");
+
+	if(!g_var.is_fly)
+	{
+		lidbg("enable system print\n");
+		g_recovery_meg->bootParam.upName.val = 1;
+		flyparameter_info_save(g_recovery_meg);
+		
+		lidbg("enable wifi adb\n");
+		set_wifi_adb_mode(true);
+	}
+	
     return 0;
 }
 
