@@ -155,6 +155,14 @@ int thread_thermal(void *data)
 			if((cur_temp >= (g_hw.cpu_freq_thermal[i].temp_low + temp_offset) ) && (cur_temp <= (g_hw.cpu_freq_thermal[i].temp_high + temp_offset) ) 
 			      && (max_freq != g_hw.cpu_freq_thermal[i].limit_freq))
 			{
+
+#ifdef PLATFORM_msm8974
+				if(g_var.recovery_mode != 1)
+				{
+					lidbg("temp:%d,freq:%d\n",cur_temp,cpufreq_get(0));
+					break;
+				}
+#endif
 				lidbg_readwrite_file(FREQ_MAX_NODE, NULL, g_hw.cpu_freq_thermal[i].limit_freq_string, strlen(g_hw.cpu_freq_thermal[i].limit_freq_string));
 				if(g_hw.gpu_max_freq_node != NULL)
 					lidbg_readwrite_file(g_hw.gpu_max_freq_node, NULL, g_hw.cpu_freq_thermal[i].limit_gpu_freq_string, strlen(g_hw.cpu_freq_thermal[i].limit_gpu_freq_string));

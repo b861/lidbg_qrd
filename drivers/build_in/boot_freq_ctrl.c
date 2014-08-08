@@ -1,5 +1,6 @@
 #define PLATFORM_MSM8226 1
 //#define PLATFORM_MSM8974 1
+#define  RECOVERY_MODE_DIR "/sbin/recovery"
 
 
 struct thermal_ctrl
@@ -86,6 +87,13 @@ static int thread_freq_limit(void *data)
 				if((temp >= cpu_thermal[i].temp_low ) && (temp <= cpu_thermal[i].temp_high ) 
 					  && (max_freq != cpu_thermal[i].limit_freq))
 				{
+
+#ifdef PLATFORM_MSM8974
+					if(!is_file_exist(RECOVERY_MODE_DIR))
+					{
+						break;
+					}
+#endif
 					lidbg_readwrite_file(FREQ_MAX_NODE, NULL, cpu_thermal[i].limit_freq_string, strlen(cpu_thermal[i].limit_freq_string));
 					lidbg("kernel:set max freq to: %d,temp:%ld\n", cpu_thermal[i].limit_freq,temp);
 					ctrl_max_freq = cpu_thermal[i].limit_freq;

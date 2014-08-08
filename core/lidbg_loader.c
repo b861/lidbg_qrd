@@ -83,7 +83,10 @@ int thread_check_restart(void *data)
     if(load_modules_count == 0)
     {
         LIDBG_ERR("load_modules_count err,call kernel_restart!\n");
+	
+#ifdef SOC_msm8x25
         kernel_restart(NULL);
+#endif
     }
     DUMP_FUN_LEAVE;
     return 0;
