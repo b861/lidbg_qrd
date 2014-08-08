@@ -44,6 +44,7 @@ int thread_gps_server(void *data);
 int gps_debug_en = 0;
 
 struct gps_device *dev;
+void clean_ublox_buf(void);
 
 static int gps_event_handle(struct notifier_block *this,
                             unsigned long event, void *ptr)
@@ -58,13 +59,36 @@ static int gps_event_handle(struct notifier_block *this,
         work_en = 1;
         break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_ACC_OFF):
-        lidbg("set work_en = 0\n");
+        lidbg("gps set work_en = 0\n");
         work_en = 0;
         break;
 
     default:
         break;
     }
+#else
+	switch (event)
+	{
+	case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_DEVICE_UP):
+		
+		clean_ublox_buf();
+	    down(&dev->sem);
+	    kfifo_reset(&gps_data_fifo);
+	    up(&dev->sem);
+		
+		lidbg("gps set work_en = 1\n");
+		work_en = 1;
+		break;
+	case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_DEVICE_DOWN):
+		lidbg("gps set work_en = 0\n");
+		work_en = 0;
+		break;
+
+	default:
+		break;
+	}
+
+
 #endif
     return NOTIFY_DONE;
 }

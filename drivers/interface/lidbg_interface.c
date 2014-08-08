@@ -187,7 +187,7 @@ void iSOC_System_Status(FLY_SYSTEM_STATUS status)
 {
     lidbg("SOC_System_Status=%d\n", status);
     g_var.system_status = status;
-    //lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, g_var.system_status));
+    lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, g_var.system_status));
 }
 
 int iSOC_Get_CpuFreq(void)
