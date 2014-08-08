@@ -24,14 +24,14 @@ if [ $DBG_PLATFORM = msm8226 ];then
 	if [ -s $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/bin/lidbg_load ]; then
 		echo "/system/bin/lidbg_load exist"
 	else
-		make -j8
+		soc_prebuild && make -j8
 	fi
 
 	if [ -s $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/lib/libdiskconfig.so ]; then
 		echo "system/lib/libdiskconfig.so exist"
 	else
 		mmm $DBG_SYSTEM_DIR/system/core/libdiskconfig -B
-		make -j8
+		soc_prebuild && make -j8
 	fi
 	echo "soc_build_all ok"
 fi
@@ -52,6 +52,7 @@ if [ $DBG_PLATFORM = msm8226 ];then
 	cp -u $DBG_CORE_PATH/inc/cmn_func.h   $DBG_SYSTEM_DIR/kernel/drivers/flyaudio/
 	cp -u $DBG_CORE_PATH/inc/lidbg_def.h   $DBG_SYSTEM_DIR/kernel/drivers/flyaudio/
 
+	rm -rf $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/lib/modules/out
 	cp -r $RELEASE_REPOSITORY/driver/out $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/lib/modules/
 	cp $RELEASE_REPOSITORY/driver/out/vold $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/bin/
 	cp $RELEASE_REPOSITORY/app/FastBoot.apk $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/app/

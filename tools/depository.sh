@@ -29,13 +29,13 @@ function depository_copy_lidbg()
 {
 	echo $FUNCNAME
 	cp -r $DBG_OUT_PATH  $UPDATA_BIN_DIR
-	cp -r $DBG_OUT_PATH/*.so  $UPDATA_BIN_DIR/hw
+	cp -r $DBG_OUT_PATH/*.so  $UPDATA_BIN_DIR/hw/
 }
 
 function depository_copy_basesystem()
 {
 	echo $FUNCNAME
-	cp -r $DBG_SYSTEM_DIR/flyaudio/out/*  $UPDATA_BASESYSTEM_DIR
+	cp -r $DBG_SYSTEM_DIR/flyaudio/out/*  $UPDATA_BASESYSTEM_DIR/
 }
 
 
