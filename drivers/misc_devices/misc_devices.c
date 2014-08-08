@@ -24,6 +24,22 @@ static int devices_notifier_callback(struct notifier_block *self,
 }
 #endif
 
+void usb_disk_enable(bool enable)
+{
+    lidbg("[%s]\n", enable ? "usb_enable" : "usb_disable");
+    if(enable)
+        USB_WORK_ENABLE;
+    else
+        USB_WORK_DISENABLE;
+}
+static int thread_usb_disk_enable_delay(void *data)
+{
+    msleep(3000);
+    usb_disk_enable(true);
+    return 1;
+}
+
+
 static int lidbg_event(struct notifier_block *this,
                        unsigned long event, void *ptr)
 {
@@ -31,19 +47,31 @@ static int lidbg_event(struct notifier_block *this,
 
     switch (event)
     {
-    case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_ACC_OFF):
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_SCREEN_OFF):
         break;
 
-    case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_SUSPEND_PREPARE):
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_DEVICE_DOWN):
         break;
 
-    case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_POWER_OFF):
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_ANDROID_DOWN):
         break;
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_GOTO_SLEEP):
+		 usb_disk_enable(false);
+        break;
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_KERNEL_DOWN):
+		break;
+	case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_KERNEL_UP):
+		break;
+	case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_ANDROID_UP):
+		break;
+	case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_DEVICE_UP):
+		CREATE_KTHREAD(thread_usb_disk_enable_delay, NULL);
+		break;
+	case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_SCREEN_ON):
+		if(!g_var.is_fly)
+    		LCD_ON;
+		break;
 
-    case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_ACC_ON):
-        break;
-    case NOTIFIER_VALUE(NOTIFIER_MAJOR_ACC_EVENT, NOTIFIER_MINOR_SUSPEND_UNPREPARE):
-        break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SIGNAL_EVENT, NOTIFIER_MINOR_SIGNAL_BAKLIGHT_ACK):
         LCD_OFF;
         msleep(100);

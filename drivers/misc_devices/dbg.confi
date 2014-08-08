@@ -5,4 +5,4 @@ button_en=1
 sound_detect_dbg=0
 cpu_temp_test=0
 cpu_temp_time_minute=20
-
+cpu_temp_show=0

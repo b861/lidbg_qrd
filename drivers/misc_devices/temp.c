@@ -4,6 +4,7 @@ int temp_log_freq = 10;
 //static int fan_onoff_temp;
 static int cpu_temp_time_minute = 20;
 static bool is_cpu_temp_enabled = false;
+int cpu_temp_show = 0;
 
 #define FREQ_MAX_NODE    "/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq"
 #define TEMP_LOG_PATH 	 LIDBG_LOG_DIR"log_ct.txt"
@@ -45,11 +46,30 @@ void log_temp(void)
     int tmp;
     g_var.temp = cur_temp = soc_temp_get();
     tmp = cur_temp - old_temp;
-    if(((temp_log_freq != 0) && (ABS(tmp) >= temp_log_freq)) || (g_var.temp > 110))
+
+	if(((temp_log_freq != 0) && (ABS(tmp) >= temp_log_freq)) || (g_var.temp > 110))
     {
         lidbg_fs_log(TEMP_LOG_PATH, "%d,%d,%d\n", cur_temp, get_scaling_max_freq(),cpufreq_get(0));
         old_temp = cur_temp;
     }
+}
+
+int thread_show_temp(void *data)
+{
+	while(1)
+	{
+		char cpufrq[50];
+		int tmp = cpufreq_get(0);
+		int cur_temp = soc_temp_get();
+		sprintf(cpufrq, "%d", tmp);
+		lidbg_toast_show(cpufrq, cur_temp);
+        lidbg( "%d,%d,%d\n", cur_temp, get_scaling_max_freq(),cpufreq_get(0));
+		msleep(1000*10);
+	}
+}
+void cb_kv_show_temp(char *key, char *value)
+{
+    CREATE_KTHREAD(thread_show_temp, NULL);
 }
 
 
@@ -59,7 +79,7 @@ int thread_thermal(void *data)
     DUMP_FUN;
     temp_init();
 
-	if(g_var.recovery_mode == 1)
+	if(0)//if(g_var.recovery_mode == 1)
 	{
 		int cpu_freq;
 		while(1)
@@ -86,6 +106,9 @@ int thread_thermal(void *data)
 	msleep(1000*20);//wait boot_freq_ctrl finish
 	cur_temp = soc_temp_get();
 	lidbg("lidbg freq ctrl start,%d,%d\n",cur_temp,get_scaling_max_freq());
+
+	if(cpu_temp_show == 1)
+		CREATE_KTHREAD(thread_show_temp, NULL);
 
     while(!kthread_should_stop())
     {
@@ -186,6 +209,8 @@ void temp_init(void)
     FS_REGISTER_KEY( "cpu_temp_test", cb_kv_cpu_temp_test);
     fs_register_filename_list(TEMP_FREQ_TEST_RESULT, true);
     FS_REGISTER_INT(cpu_temp_time_minute, "cpu_temp_time_minute", 20, NULL);
+    FS_REGISTER_INT(temp_log_freq, "temp_log_freq", 10, NULL);
+    FS_REGISTER_INT(cpu_temp_show, "cpu_temp_show", 0, cb_kv_show_temp);
 
     if(fs_is_file_exist(TEMP_FREQ_COUNTER))
     {
