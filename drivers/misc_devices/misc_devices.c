@@ -176,6 +176,7 @@ static int soc_dev_probe(struct platform_device *pdev)
 	}
 	USB_WORK_ENABLE;
 	SET_USB_ID_SUSPEND;
+	MSM_GPS_POWER_ON;
 	lidbg_new_cdev(&dev_fops, "flydev");
     return 0;
 
@@ -196,6 +197,7 @@ static int  soc_dev_suspend(struct platform_device *pdev, pm_message_t state)
 	{
     	button_suspend();
 	}
+	MSM_GPS_POWER_OFF;
     return 0;
 
 }
@@ -208,6 +210,7 @@ static int soc_dev_resume(struct platform_device *pdev)
 		button_resume();
 		led_resume();
 	}
+	MSM_GPS_POWER_ON;
 
     return 0;
 }

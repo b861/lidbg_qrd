@@ -10,6 +10,16 @@
 #define  MCU_APP_GPIO_OFF  do{check_gpio(g_hw.gpio_mcu_app);SOC_IO_Output(0, g_hw.gpio_mcu_app, 1);}while(0)
 #define  MCU_SET_APP_GPIO_SUSPEND  do{check_gpio(g_hw.gpio_mcu_app);SOC_IO_Suspend_Config(g_hw.gpio_mcu_app,GPIOMUX_OUT_LOW,GPIO_CFG_NO_PULL,GPIOMUX_DRV_2MA);}while(0)
 
+//gps
+#define MSM_GPS_POWER_ON do{\
+	lidbg("MSM_GPS_POWER_ON\n"); \
+	lidbg_uevent_shell("echo 1 > /sys/kernel/debug/regulator/8226_l18/enable"); \
+}while(0)
+
+#define MSM_GPS_POWER_OFF do{\
+	lidbg("MSM_GPS_POWER_OFF"); \
+	lidbg_uevent_shell("echo 0 > /sys/kernel/debug/regulator/8226_l18/enable"); \
+}while(0)
 
 //lcd
 
