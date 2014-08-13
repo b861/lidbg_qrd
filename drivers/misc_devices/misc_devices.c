@@ -51,8 +51,10 @@ static int lidbg_event(struct notifier_block *this,
         break;
 
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_DEVICE_DOWN):
+		#ifdef SOC_msm8x26
+		MSM_GPS_POWER_OFF;
+		#endif
         break;
-
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_ANDROID_DOWN):
         break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_GOTO_SLEEP):
@@ -65,6 +67,9 @@ static int lidbg_event(struct notifier_block *this,
 	case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_ANDROID_UP):
 		break;
 	case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_DEVICE_UP):
+		#ifdef SOC_msm8x26
+		MSM_GPS_POWER_ON;
+		#endif
 		CREATE_KTHREAD(thread_usb_disk_enable_delay, NULL);
 		break;
 	case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_SCREEN_ON):
@@ -199,9 +204,7 @@ static int  soc_dev_suspend(struct platform_device *pdev, pm_message_t state)
 	{
     	button_suspend();
 	}
-#ifdef SOC_msm8x26
-	MSM_GPS_POWER_OFF;
-#endif
+
     return 0;
 
 }
@@ -214,9 +217,7 @@ static int soc_dev_resume(struct platform_device *pdev)
 		button_resume();
 		led_resume();
 	}
-#ifdef SOC_msm8x26
-	MSM_GPS_POWER_ON;
-#endif
+
     return 0;
 }
 struct platform_device soc_devices =
