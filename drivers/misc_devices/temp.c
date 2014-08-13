@@ -24,10 +24,18 @@ int get_file_int(char *file)
 
 int soc_temp_get(void)
 {
+#ifdef SOC_msm8x26
+	static long temp;
+	static struct tsens_device tsens_dev;
+	tsens_dev.sensor_num = g_hw.sensor_num;
+	tsens_get_temp(&tsens_dev, &temp);
+	return (int)temp;
+#else
 	if(g_hw.cpu_freq_temp_node != NULL)
 		return get_file_int(g_hw.cpu_freq_temp_node);
 	else
 		return 0;
+#endif
 }
 
 u32 get_scaling_max_freq(void)

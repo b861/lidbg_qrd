@@ -73,6 +73,7 @@ struct hw_version_specific g_hw_version_specific[] =
 	.cpu_freq_list = "300000,384000,600000,787200,998400,1094400,1190400,1305600,1344000,1401600",
 	.cpu_freq_temp_node = "/sys/class/thermal/thermal_zone5/temp",
 	.cpu_freq_recovery_limit = "600000",
+	.sensor_num = 5,
 
 	.fly_parameter_node = "/dev/block/mmcblk0p25",
 	.system_switch_en = 1,
@@ -148,7 +149,8 @@ struct hw_version_specific g_hw_version_specific[] =
 	.cpu_freq_list = "300000,384000,600000,787200,998400,1094400,1190400,1305600,1344000,1401600",
 	.cpu_freq_temp_node = "/sys/class/thermal/thermal_zone5/temp",
 	.cpu_freq_recovery_limit = "600000",
-
+	.sensor_num = 5,
+	
 	.fly_parameter_node = "/dev/block/mmcblk0p25",
 	
 	.system_switch_en = 1,
@@ -213,8 +215,10 @@ struct hw_version_specific g_hw_version_specific[] =
 	.cpu_freq_thermal = 
 	{
 		{1,  80,  1593600,"1593600"},
-		{81, 90,  1094400,"1094400"},
-		{91, 100, 787200, "787200"},
+		{81, 85,  1344000,"1344000"},
+		{86, 90,  1190400,"1190400"},
+		{91, 95,  998400, "998400"},
+		{96, 100, 787200, "787200"},
 		{101,105, 600000, "600000"},
 		{105,500, 300000, "300000"},
 		{0,0, 0, "0"},//end flag
@@ -223,6 +227,7 @@ struct hw_version_specific g_hw_version_specific[] =
 	.cpu_freq_list = "300000,384000,600000,787200,998400,1094400,1190400,1305600,1344000,1401600,1497600,1593600",
 	.cpu_freq_temp_node = "/sys/class/thermal/thermal_zone5/temp",
 	.cpu_freq_recovery_limit = "600000",
+	.sensor_num = 5,
 
 	.fly_parameter_node = "/dev/block/mmcblk0p25",
 	

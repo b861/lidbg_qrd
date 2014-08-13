@@ -76,7 +76,7 @@ struct hw_version_specific
 	char * cpu_freq_list;
 	char * cpu_freq_temp_node;
 	char * cpu_freq_recovery_limit;
-
+	int sensor_num;
 //parameter
 	char * fly_parameter_node;
 

@@ -14,11 +14,14 @@ struct thermal_ctrl
 struct thermal_ctrl cpu_thermal[] = 
 {
 	{1,  80,  1593600,"1593600"},
-	{81, 90,  1094400,"1094400"},
-	{91, 100, 787200, "787200"},
+	{81, 85,  1344000,"1344000"},
+	{86, 90,  1190400,"1190400"},
+	{91, 95,  998400, "998400"},
+	{96, 100, 787200, "787200"},
 	{101,105, 600000, "600000"},
 	{105,500, 300000, "300000"},
-	{0,0, 0, "0"}//end flag
+	{0,0, 0, "0"},//end flag
+
 };
 
 #define BOOT_LIMIT_FREQ (1401600)
@@ -90,18 +93,19 @@ static int thread_freq_limit(void *data)
 					lidbg_readwrite_file(FREQ_MAX_NODE, NULL, cpu_thermal[i].limit_freq_string, strlen(cpu_thermal[i].limit_freq_string));
 					lidbg("kernel:set max freq to: %d,temp:%ld\n", cpu_thermal[i].limit_freq,temp);
 					ctrl_max_freq = cpu_thermal[i].limit_freq;
+					cpufreq_update_policy(0);
 					break;
 				}
 			}
 		}
 		count++;
-		if(count >= 45)
+		if(count >= 45*2)
 		{
 			ctrl_max_freq = 0;
 			lidbg("thread_freq_limit stoped\n");
 			return 1;
 		}
-		msleep(1000);
+		msleep(500);
 
 	}
     return 1;
