@@ -326,8 +326,9 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         }
         else  if(!strcmp(cmd[1], "android_up"))
         {
-			SOC_System_Status(FLY_ANDROID_UP);
+			MCU_WP_GPIO_ON;
 			MCU_APP_GPIO_ON;
+			SOC_System_Status(FLY_ANDROID_UP);
         }
         else  if(!strcmp(cmd[1], "android_down"))
         {       	
@@ -337,7 +338,8 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         else  if(!strcmp(cmd[1], "gotosleep"))
         {
 			SOC_System_Status(FLY_GOTO_SLEEP);
-            observer_start();
+			observer_start();
+			LPC_PRINT(true,sleep_counter,"PM:gotosleep");
         }
         else if(!strcmp(cmd[1], "devices_up"))
         {	
