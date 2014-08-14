@@ -2,7 +2,14 @@
 function soc_build_system()
 {
 	echo $FUNCNAME
+if [ $DBG_PLATFORM = msm8226 ];then
 	soc_prebuild && make systemimage -j8
+	if [ -s $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/bin/lidbg_load ]; then
+		echo "soc_build_system ok"
+	else
+		make systemimage -j8
+	fi
+fi
 }
 
 function soc_build_kernel()
@@ -15,6 +22,13 @@ function soc_build_all()
 {
 	echo $FUNCNAME
 	soc_prebuild && make -j8
+if [ $DBG_PLATFORM = msm8226 ];then
+	if [ -s $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/bin/lidbg_load ]; then
+		echo "soc_build_all ok"
+	else
+		make -j8
+	fi
+fi
 }
 
 function soc_prebuild()
@@ -54,12 +68,6 @@ function soc_build_release()
 	expect $DBG_TOOLS_PATH/pull $DBG_PASSWORD
 
 	soc_build_all
-
-	if [ -s $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/bin/lidbg_load ]; then
-		echo "soc_build_release ok"
-	else
-		soc_build_all
-	fi
 	soc_make_otapackage
 }
 
