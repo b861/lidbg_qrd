@@ -11,7 +11,13 @@ static fly_hw_data *g_fly_hw_data = NULL;
 recovery_meg_t *g_recovery_meg = NULL;
 char *p_kmem = NULL;
 int update_hw_info = 0;
-
+enum update_info {
+	NO_FLIE = 0,
+	UPDATE_SUC = 1,
+	UPDATE_FAIL = 2,
+	NOT_NEED_UPDATE=3,
+};
+update_info  = NO_FLIE;
 void fly_hw_info_show(char *when, fly_hw_data *p_info)
 {
     lidbg("flyparameter:%s:g_fly_hw_data:flag=%x,%x,hw=%d,ts=%d,%d,lcd=%d\n", when,
@@ -66,10 +72,12 @@ bool fly_hw_info_save(fly_hw_data *p_info)
     if( p_info && fs_file_write(FLYPARAMETER_NODE, false, (void *) p_info, MEM_SIZE_512_KB , sizeof(fly_hw_data)) >= 0)
     {
         lidbg("fly_hw_data:save success\n");
+	update_info = UPDATE_SUC;
         return true;
     }
-    lidbg("fly_hw_data:save err\n");
-    return false;
+	lidbg("fly_hw_data:save err\n");
+	update_info = UPDATE_FAIL;
+	return false;
 }
 
 void cb_fly_hw_info_save(char *key, char *value )
@@ -113,6 +121,15 @@ int thread_lidbg_fly_hw_info_update(void *data)
 	return 0;
 }
 
+int thread_fix_fly_update_info(void *data)
+{
+    char info[1];
+    int c_info = -1;
+    fs_file_read("/dev/fly_upate_info0", info, 0,sizeof(info));
+    c_info = simple_strtoul(info, 0, 0);
+    lidbg("read info is %d\n",c_info);
+    return info;
+}
 
 static bool get_cmdline(void)
 {
@@ -152,6 +169,7 @@ int lidbg_fly_hw_info_init(void)
 			g_fly_hw_data->flag_hw_info_valid = FLAG_HW_INFO_VALID;
 			CREATE_KTHREAD(thread_lidbg_fly_hw_info_update, NULL);
 	    }
+		update_info = NOT_NEED_UPDATE;
 	}
 	
     if((g_fly_hw_data->flag_hw_info_valid == FLAG_HW_INFO_VALID))
@@ -171,7 +189,28 @@ int lidbg_fly_hw_info_init(void)
 	g_hw_info_store();		
     return 0;
 }
+int fly_upate_info_open(struct inode *inode, struct file *filp)
+{
+    return 0;
+}
 
+ssize_t  fly_upate_info_read(struct file *filp, const char __user *buf, size_t count, loff_t *offset)
+{
+	 if (copy_to_user(buf, &update_info, count))
+		{
+			lidbg("copy_to_user ERR\n");
+		}
+	  lidbg("update_info = %d\n",update_info);
+	  lidbg("user_buf = %d\n",*buf);
+	 return count;
+}
+
+static  struct file_operations fly_upate_info_fops =
+{
+    .owner = THIS_MODULE,
+    .open =fly_upate_info_open,
+    .read = fly_upate_info_read,
+};
 int flyparameter_init(void)
 {
     p_kmem = kzalloc(sizeof(recovery_meg_t), GFP_KERNEL);
@@ -197,8 +236,10 @@ int lidbg_flyparameter_init(void)
 		 return 0;
 	}
 	flyparameter_init();
-    lidbg_fly_hw_info_init();//block other ko before hw_info set
-
+	lidbg_fly_hw_info_init();//block other ko before hw_info set
+	lidbg_new_cdev(&fly_upate_info_fops, "fly_upate_info");
+	msleep(20000);
+        CREATE_KTHREAD(thread_fix_fly_update_info, NULL);
     return 0;
 
 }
