@@ -73,7 +73,7 @@ int module_insmod(char *file)
 	}
 }
 #endif
-
+#ifdef SOC_mt3360
 int main(int argc, char **argv)
 {
     pthread_t lidbg_uevent_tid;
@@ -86,7 +86,7 @@ int main(int argc, char **argv)
 	int ret;
 	
 	//wait flysystem mount
-    while(is_file_exist("/flysystem/lib") == 0)
+    while(is_file_exist("/data4write/flysystem/lib") == 0)
     {
 		static int cnt = 0;
 		sleep(1);
@@ -94,6 +94,87 @@ int main(int argc, char **argv)
 			break;
 	}
 	
+    if(is_file_exist("/data4write/flysystem/lib/out/lidbg_loader.ko"))
+    {
+        checkout = 2;
+        lidbg("lidbg_iserver: this is flyaudio system\n");
+    }
+    else
+    {
+        checkout = 1;
+        lidbg("lidbg_iserver: this is origin system\n");
+    }
+
+    system("mkdir /data4write/data/lidbg");
+    system("mkdir /data4write/data/lidbg/lidbg_osd");
+    system("chmod 777 /data4write/data/lidbg");
+    system("chmod 777 /data4write/data/lidbg/lidbg_osd");
+
+    if(checkout == 1)
+    {
+		//ret = module_insmod("/system/lib/modules/out/lidbg_uevent.ko");
+		//if(ret<0){ lidbg("module_insmod fail\n");}
+        system("insmod /data4write/system/lib/modules/out/lidbg_uevent.ko");
+        system("insmod /data4write/system/lib/modules/out/lidbg_loader.ko");
+        while(1)
+        {
+            if(access("/data4write/system/lib/modules/out/lidbg_userver", X_OK) == 0)
+            {
+                system("/data4write/system/lib/modules/out/lidbg_userver &");
+                lidbg("lidbg_iserver: origin userver start\n");
+                break;
+            }
+			system("mount -o remount /data4write/system");
+            system("chmod 777 /data4write/system/lib/modules/out/lidbg_userver");
+            system("chmod 777 /data4write/system/lib/modules/out/*");
+            lidbg("lidbg_iserver: waitting origin lidbg_uevent...\n");
+            sleep(1);
+        }
+    }
+    else if(checkout == 2)
+    {
+        system("insmod /data4write/flysystem/lib/out/lidbg_uevent.ko");
+        system("insmod /data4write/flysystem/lib/out/lidbg_loader.ko");
+        while(1)
+        {
+            if(access("/data4write/flysystem/lib/out/lidbg_userver", X_OK) == 0)
+            {
+                system("/data4write/flysystem/lib/out/lidbg_userver &");
+                lidbg("lidbg_iserver: flyaudio userver start\n");
+                break;
+            }
+            system("chmod 777 /data4write/flysystem/lib/out/lidbg_userver");
+            system("chmod 777 /data4write/flysystem/lib/out/*");
+            lidbg("lidbg_iserver: waitting flyaudio lidbg_uevent...\n");
+            sleep(1);
+        }
+    }
+
+    sleep(1);
+    system("chmod 777 /dev/lidbg_uevent");
+    return 0;
+}
+#else
+int main(int argc, char **argv)
+{
+    pthread_t lidbg_uevent_tid;
+    int checkout = 0; //checkout=1 origin ; checkout=2 flyaudio
+
+    system("chmod 777 /dev/dbg_msg");
+
+    DUMP_BUILD_TIME_FILE;
+    lidbg("lidbg_iserver: iserver start\n");
+	int ret;
+
+	//wait flysystem mount
+    while(is_file_exist("/flysystem/lib") == 0)
+    {
+		static int cnt = 0;
+		sleep(1);
+		if(++cnt>=5)
+			break;
+	}
+
     if(is_file_exist("/flysystem/lib/out/lidbg_loader.ko"))
     {
         checkout = 2;
@@ -157,4 +238,4 @@ int main(int argc, char **argv)
     system("chmod 777 /dev/lidbg_uevent");
     return 0;
 }
-
+#endif

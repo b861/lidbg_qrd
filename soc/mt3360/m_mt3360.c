@@ -36,7 +36,7 @@ void lidbg_soc_main(int argc, char **argv)
     }
 }
 
-int msm8226_init(void)
+int mt3360_init(void)
 {
 DUMP_BUILD_TIME;//LIDBG_MODULE_LOG;
 /*
@@ -56,13 +56,15 @@ DUMP_BUILD_TIME;//LIDBG_MODULE_LOG;
 
     soc_bl_init();
     */
+    soc_bl_init();
+
     soc_io_init();
 
     return 0;
 }
 
 /*Ä£¿éÐ¶ÔØº¯Êý*/
-void msm8226_exit(void)
+void mt3360_exit(void)
 {
     lidbg("msm8226_exit\n");
 
@@ -76,5 +78,5 @@ EXPORT_SYMBOL(soc_temp_get);
 MODULE_AUTHOR("Lsw");
 MODULE_LICENSE("GPL");
 
-module_init(msm8226_init);
-module_exit(msm8226_exit);
+module_init(mt3360_init);
+module_exit(mt3360_exit);

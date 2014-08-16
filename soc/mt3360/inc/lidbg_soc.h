@@ -11,6 +11,7 @@
 #include <linux/debugfs.h>
 #include <linux/fb.h>
 #include <mach/mt33xx_gpio_pinmux.h>
+#include <mach/83xx_irqs_vector.h>
 
 #include "mach/hardware.h"
 #include "mach/irqs.h"
@@ -230,7 +231,7 @@ extern struct fly_smem *p_fly_smem ;
 #define IO_CONFIG_INPUT(group,index) do{/*  soc_io_config( index,  GPIO_CFG_INPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA, 1);*/}while(0)
 
 //#define GPIO_TO_INT MSM_GPIO_TO_INT
-#define GPIO_TO_INT gpio_to_irq
+#define GPIO_TO_INT(x) (x)
 
 
 

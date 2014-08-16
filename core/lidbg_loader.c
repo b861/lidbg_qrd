@@ -101,11 +101,18 @@ int thread_loader(void *data)
     while(!is_file_exist("/dev/log/userver_ok.txt"))
 			ssleep(1);
 #endif
+#ifdef SOC_mt3360
+    if(is_file_exist(FLY_MODE_FILE))
+        kopath = "/data4write/flysystem/lib/out/";
+    else
+        kopath = "/data4write/system/lib/modules/out/";
+#else
     if(is_file_exist(FLY_MODE_FILE))
         kopath = "/flysystem/lib/out/";
     else
         kopath = "/system/lib/modules/out/";
-	
+#endif
+
 	lidbg("thread_loader start\n");
     for(j = 0; insmod_soc_list[j] != NULL; j++)
     {	

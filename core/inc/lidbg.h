@@ -40,7 +40,10 @@
 #include <linux/syscalls.h>
 #include <asm/system.h>
 #include <linux/time.h>
+#ifdef SOC_mt3360
+#else
 #include <linux/pwm.h>
+#endif
 #include <linux/hrtimer.h>
 #include <linux/stat.h>
 #include <linux/kprobes.h>

@@ -11,13 +11,13 @@ void soc_io_init(void)
 
 void soc_irq_disable(unsigned int irq)
 {
-    disable_irq(irq);
+//    disable_irq(irq);
 
 }
 
 void soc_irq_enable(unsigned int irq)
 {
-    enable_irq(irq);
+//    enable_irq(irq);
 }
 
 
@@ -55,26 +55,6 @@ int soc_io_suspend_config(u32 index, u32 direction, u32 pull, u32 drive_strength
 int soc_io_config(u32 index, bool direction, u32 pull, u32 drive_strength, bool force_reconfig)
 {
 #if 0
-    //int rc;
-	struct gpiomux_setting lidbg_setting_active = {
-	  .func = GPIOMUX_FUNC_GPIO, 
-	  .drv = drive_strength,
-	  .pull = pull,
-	  .dir = direction,
-	};
-
-	struct msm_gpiomux_config lidbg_configs[] = {
-	{
-		 .gpio = index,
-		 .settings = { 
-		    [GPIOMUX_ACTIVE] = &lidbg_setting_active,
-		},
-		},
-	};
-    if(force_reconfig)
-    {
-       msm_gpiomux_install(lidbg_configs, ARRAY_SIZE(lidbg_configs));
-    }
 
     if(soc_io_config_log[index] == 1)
     {
@@ -90,7 +70,6 @@ int soc_io_config(u32 index, bool direction, u32 pull, u32 drive_strength, bool 
 
         lidbg("gpio_request:index %d\n" , index);
 
-        msm_gpiomux_install(lidbg_configs, ARRAY_SIZE(lidbg_configs));
         err = gpio_request(index, "lidbg_io");
         if (err)
         {
