@@ -7,4 +7,12 @@ if [ $DBG_PLATFORM = mt3360 ];then
 cd $DBG_SYSTEM_DIR/&&source ./selfenv&&lunch 5  && mmm $DBG_HAL_PATH -B
 else
 cd $DBG_SYSTEM_DIR/&&source build/envsetup.sh&&choosecombo release $DBG_PLATFORM $SYSTEM_BUILD_TYPE && mmm $DBG_HAL_PATH -B
+if [ $? = 0 ]; then
+	echo
+else
+	echo -e "\033[41;37mmake $1 error!!\033[0m"
+	make modules | grep -C 1 "error:"
+	echo -e "\033[41;37mmake $1 error!!\033[0m"
+	read get_key
+fi
 fi
