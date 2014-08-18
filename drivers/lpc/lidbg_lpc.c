@@ -71,6 +71,7 @@ int thread_lpc(void *data)
 void LPCCombinDataStream(BYTE *p, UINT len)
 {
     UINT i = 0;
+    int ret ;
     BYTE checksum = 0;
     BYTE bufData[16];
     BYTE *buf;
@@ -104,14 +105,15 @@ void LPCCombinDataStream(BYTE *p, UINT len)
     }
 
     buf[3 + i] = checksum;
-#ifdef LPC_DEBUG_LOG
-    lidbg("ToMCU:%x %x %x\n", p[0], p[1], p[2]);
-#endif
 
 #ifdef SEND_DATA_WITH_UART
-    SOC_Uart_Send(buf);
+    ret=SOC_Uart_Send(buf);
 #else
-    SOC_I2C_Send(LPC_I2_ID, MCU_ADDR_W >> 1, buf, 3 + i + 1);
+    ret=SOC_I2C_Send(LPC_I2_ID, MCU_ADDR_W >> 1, buf, 3 + i + 1);
+#endif
+
+#ifdef LPC_DEBUG_LOG
+    lidbg("ToMCU.%d:%x %x %x\n", ret, p[0], p[1], p[2]);
 #endif
 
     if (bMalloc)
