@@ -125,6 +125,7 @@ int thread_fix_fly_update_info(void *data)
 {
     char info[1];
     int c_info = -1;
+	msleep(20000);
     fs_file_read("/dev/fly_upate_info0", info, 0,sizeof(info));
     c_info = simple_strtoul(info, 0, 0);
     lidbg("read info is %d\n",c_info);
@@ -240,7 +241,6 @@ int lidbg_flyparameter_init(void)
 	flyparameter_init();
 	lidbg_fly_hw_info_init();//block other ko before hw_info set
 	lidbg_new_cdev(&fly_upate_info_fops, "fly_upate_info");
-	msleep(20000);
         CREATE_KTHREAD(thread_fix_fly_update_info, NULL);
     return 0;
 
