@@ -162,6 +162,7 @@ int lidbg_fly_hw_info_init(void)
 	    {
 	    	g_fly_hw_data->flag_need_update = FLAG_HW_INFO_VALID;
 			fly_hw_info_save(g_fly_hw_data);
+			update_info = NOT_NEED_UPDATE;
 	    }
 	    else if(g_fly_hw_data->flag_need_update == FLAG_HW_INFO_VALID)
 	    {
@@ -169,6 +170,7 @@ int lidbg_fly_hw_info_init(void)
 			g_fly_hw_data->flag_hw_info_valid = FLAG_HW_INFO_VALID;
 			CREATE_KTHREAD(thread_lidbg_fly_hw_info_update, NULL);
 	    }
+	   else
 		update_info = NOT_NEED_UPDATE;
 	}
 	
