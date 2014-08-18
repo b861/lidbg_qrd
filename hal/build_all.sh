@@ -11,8 +11,6 @@ if [ $? = 0 ]; then
 	echo
 else
 	echo -e "\033[41;37mmake $1 error!!\033[0m"
-	make modules | grep -C 1 "error:"
-	echo -e "\033[41;37mmake $1 error!!\033[0m"
 	read get_key
 fi
 fi
