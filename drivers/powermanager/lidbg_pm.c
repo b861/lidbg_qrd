@@ -301,7 +301,7 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
     if(!strcmp(cmd[0], "flyaudio"))
     {
     
-		lidbg("******into %s********\n",cmd[1]);
+		lidbg("case:[%s]\n",cmd[1]);
         if(!strcmp(cmd[1], "screen_off"))
         {
 			SOC_System_Status(FLY_SCREEN_OFF);
@@ -314,7 +314,7 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
                 lidbg_rm("/system/app/NfcNci.apk");
 			LPC_PRINT(true,sleep_counter,"PM:screen_off");
         }
-        if(!strcmp(cmd[1], "screen_on"))
+       else  if(!strcmp(cmd[1], "screen_on"))
         {
 			SOC_System_Status(FLY_SCREEN_ON);
 			if(SOC_Hal_Acc_Callback)
@@ -334,6 +334,13 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         {       	
 			SOC_System_Status(FLY_ANDROID_DOWN);
 			MCU_APP_GPIO_OFF;
+        }
+        else  if(!strcmp(cmd[1], "kill"))
+        {       	
+			char shellcmd[64]={0};
+			sprintf(&shellcmd[0],  "kill %s &",cmd[2]);
+			lidbg_shell_cmd(shellcmd);
+			PM_WARN("[%s]\n",shellcmd);
         }
         else  if(!strcmp(cmd[1], "gotosleep"))
         {
