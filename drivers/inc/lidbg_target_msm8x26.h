@@ -1,6 +1,8 @@
 #ifndef  __TARGET_MSM8x26__DEFINE_
 #define __TARGET_MSM8x26__DEFINE_
 
+#define  SOC_IO_SUSPEND  do{soc_io_suspend();}while(0)
+#define  SOC_IO_RESUME  do{soc_io_resume();}while(0)
 
 #define  MCU_WP_GPIO_ON  do{check_gpio(g_hw.gpio_mcu_wp);SOC_IO_Output(0, g_hw.gpio_mcu_wp, 0);}while(0)
 #define  MCU_WP_GPIO_OFF  do{check_gpio(g_hw.gpio_mcu_wp);SOC_IO_Output(0, g_hw.gpio_mcu_wp, 1);}while(0)

@@ -35,7 +35,7 @@ int soc_io_suspend(void)
 int soc_io_resume(void)
 {
 	int i;
-
+	lidbg("soc_io_resume\n");
 	for(i=0; i < IO_LOG_NUM; i++)
 	{
 	#if 0
@@ -271,4 +271,6 @@ EXPORT_SYMBOL(soc_irq_enable);
 EXPORT_SYMBOL(soc_irq_disable);
 EXPORT_SYMBOL(soc_io_config);
 EXPORT_SYMBOL(soc_io_suspend_config);
+EXPORT_SYMBOL(soc_io_suspend);
+EXPORT_SYMBOL(soc_io_resume);
 

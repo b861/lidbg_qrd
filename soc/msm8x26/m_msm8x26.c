@@ -48,13 +48,13 @@ static int  lidbg_soc_probe(struct platform_device *pdev)
 static int soc_suspend(struct device *dev)
 {
     DUMP_FUN;
-	soc_io_suspend();
+//	soc_io_suspend();
     return 0;
 }
 static int soc_resume(struct device *dev)
 {
     DUMP_FUN;
-	soc_io_resume();
+//	soc_io_resume();
     return 0;
 }
 

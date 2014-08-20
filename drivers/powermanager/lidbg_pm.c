@@ -221,6 +221,7 @@ void lidbg_pm_step_call(fly_pm_stat_step step, void *data)
     case PM_SUSPEND_ENTER8:
 		SOC_System_Status(FLY_KERNEL_DOWN);
 		MCU_WP_GPIO_OFF;
+		SOC_IO_SUSPEND;
 		sleep_counter++;
         PM_SLEEP_DBG("SLEEP8.suspend_enter.MCU_WP_GPIO_OFF;sleep_count:%d\n",sleep_counter);
         break;
@@ -228,6 +229,7 @@ void lidbg_pm_step_call(fly_pm_stat_step step, void *data)
         break;
     case PM_SUSPEMD_OPS_ENTER9P1:
 		SOC_System_Status(FLY_KERNEL_UP);
+		SOC_IO_RESUME;
 		MCU_WP_GPIO_ON;
 		PM_SLEEP_DBG("WAKEUP9.1.suspend_enter.wakeup.MCU_WP_GPIO_ON;\n");
         //suspend_ops->enter.out
