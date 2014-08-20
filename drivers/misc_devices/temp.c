@@ -22,6 +22,7 @@ int get_file_int(char *file)
     return temp;
 }
 
+#if 0
 int soc_temp_get(void)
 {
 #ifdef SOC_msm8x26
@@ -37,6 +38,7 @@ int soc_temp_get(void)
 		return 0;
 #endif
 }
+#endif
 
 u32 get_scaling_max_freq(void)
 {
@@ -135,6 +137,8 @@ int thread_thermal(void *data)
 			      && (max_freq != g_hw.cpu_freq_thermal[i].limit_freq))
 			{
 				lidbg_readwrite_file(FREQ_MAX_NODE, NULL, g_hw.cpu_freq_thermal[i].limit_freq_string, strlen(g_hw.cpu_freq_thermal[i].limit_freq_string));
+				if(g_hw.gpu_max_freq_node != NULL)
+					lidbg_readwrite_file(g_hw.gpu_max_freq_node, NULL, g_hw.cpu_freq_thermal[i].limit_gpu_freq_string, strlen(g_hw.cpu_freq_thermal[i].limit_gpu_freq_string));
 				lidbg("set max freq to: %d,temp:%d\n", g_hw.cpu_freq_thermal[i].limit_freq,cur_temp);
 				break;
 			}

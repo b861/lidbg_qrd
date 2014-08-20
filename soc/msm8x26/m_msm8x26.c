@@ -8,7 +8,11 @@ struct fly_smem *p_fly_smem = NULL;
 
 int soc_temp_get(void)
 {
-   return SMEM_TEMP;
+	static long temp;
+	static struct tsens_device tsens_dev;
+	tsens_dev.sensor_num = 5;
+	tsens_get_temp(&tsens_dev, &temp);
+	return (int)temp;
 }
 
 void lidbg_soc_main(int argc, char **argv)

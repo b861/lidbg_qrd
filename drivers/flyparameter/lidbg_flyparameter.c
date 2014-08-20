@@ -17,7 +17,7 @@ enum update_info_enum {
 	UPDATE_FAIL = 2,
 	NOT_NEED_UPDATE=3,
 };
-enum update_info_enum update_info  = NO_FLIE;
+enum update_info_enum update_info  = NOT_NEED_UPDATE;
 void fly_hw_info_show(char *when, fly_hw_data *p_info)
 {
     lidbg("flyparameter:%s:g_fly_hw_data:flag=%x,%x,hw=%d,ts=%d,%d,lcd=%d\n", when,
@@ -115,20 +115,20 @@ bool flyparameter_info_save(recovery_meg_t *p_info)
 int thread_lidbg_fly_hw_info_update(void *data)
 {
 	while(!fs_is_file_exist(RECOVERY_PATH_FLY_HW_INFO_CONFIG))
+	{
+		update_info  = NO_FLIE;
 		msleep(50);
-	
+	}
 	fly_hw_info_save(g_fly_hw_data);
 	return 0;
 }
 
 int thread_fix_fly_update_info(void *data)
 {
-    char info[1];
-    int c_info = -1;
+    char info;
 	msleep(20000);
-    fs_file_read("/dev/fly_upate_info0", info, 0,sizeof(info));
-    c_info = simple_strtoul(info, 0, 0);
-    lidbg("read info is %d\n",c_info);
+    fs_file_read("/dev/fly_upate_info0", &info, 0, sizeof(info));
+    lidbg("read info is %c\n",info);
     return 1;
 }
 
@@ -206,8 +206,7 @@ ssize_t  fly_upate_info_read(struct file *filp, char __user *buffer, size_t size
     {
         lidbg("copy_to_user ERR\n");
     }
-    lidbg("update_info = %d\n", update_info);
-    lidbg("user_buf = %d,%s\n", *buffer,tmp);
+    lidbg("update_info = %d,read size =%d\n\n", update_info,size);
     return size;
 
 }

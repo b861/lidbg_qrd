@@ -28,6 +28,8 @@ struct thermal_ctrl
 	int temp_high;
 	u32 limit_freq;
 	char* limit_freq_string;
+	char* limit_gpu_freq_string;
+
 };
 
 struct hw_version_specific
@@ -75,6 +77,7 @@ struct hw_version_specific
 			//cat sys/devices/system/cpu/cpu0/cpufreq/scaling_available_frequencies
 	char * cpu_freq_list;
 	char * cpu_freq_temp_node;
+	char * gpu_max_freq_node;
 	char * cpu_freq_recovery_limit;
 	int sensor_num;
 //parameter
