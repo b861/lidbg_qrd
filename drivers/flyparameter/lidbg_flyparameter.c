@@ -11,13 +11,13 @@ static fly_hw_data *g_fly_hw_data = NULL;
 recovery_meg_t *g_recovery_meg = NULL;
 char *p_kmem = NULL;
 int update_hw_info = 0;
-enum update_info {
+enum update_info_enum {
 	NO_FLIE = 0,
 	UPDATE_SUC = 1,
 	UPDATE_FAIL = 2,
 	NOT_NEED_UPDATE=3,
 };
-update_info  = NO_FLIE;
+enum update_info_enum update_info  = NO_FLIE;
 void fly_hw_info_show(char *when, fly_hw_data *p_info)
 {
     lidbg("flyparameter:%s:g_fly_hw_data:flag=%x,%x,hw=%d,ts=%d,%d,lcd=%d\n", when,
@@ -129,7 +129,7 @@ int thread_fix_fly_update_info(void *data)
     fs_file_read("/dev/fly_upate_info0", info, 0,sizeof(info));
     c_info = simple_strtoul(info, 0, 0);
     lidbg("read info is %d\n",c_info);
-    return info;
+    return 1;
 }
 
 static bool get_cmdline(void)
@@ -192,22 +192,25 @@ int lidbg_fly_hw_info_init(void)
 	g_hw_info_store();		
     return 0;
 }
+
 int fly_upate_info_open(struct inode *inode, struct file *filp)
 {
     return 0;
 }
 
-ssize_t  fly_upate_info_read(struct file *filp, const char __user *buf, size_t count, loff_t *offset)
+ssize_t  fly_upate_info_read(struct file *filp, char __user *buffer, size_t size, loff_t *offset)
 {
-	 if (copy_to_user(buf, &update_info, count))
-		{
-			lidbg("copy_to_user ERR\n");
-		}
-	  lidbg("update_info = %d\n",update_info);
-	  lidbg("user_buf = %d\n",*buf);
-	 return count;
-}
+    char tmp[2];
+    sprintf(tmp, "%d", update_info);
+    if (copy_to_user(buffer, tmp, sizeof(tmp)))
+    {
+        lidbg("copy_to_user ERR\n");
+    }
+    lidbg("update_info = %d\n", update_info);
+    lidbg("user_buf = %d,%s\n", *buffer,tmp);
+    return size;
 
+}
 static  struct file_operations fly_upate_info_fops =
 {
     .owner = THIS_MODULE,
