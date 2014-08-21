@@ -43,7 +43,10 @@ void uevent_shell(char *shell_cmd)
 {
     char shellstring[256];
     char *envp[] = { "LIDBG_ACTION=shell", shellstring, NULL };
-    snprintf(shellstring, 256, "LIDBG_PARAMETER=%s 2>> "SHELL_ERRS_FILE, shell_cmd );
+    if(strstr(shell_cmd, "insmod"))
+    	snprintf(shellstring, 256, "LIDBG_PARAMETER=%s", shell_cmd );
+	else
+    	snprintf(shellstring, 256, "LIDBG_PARAMETER=%s 2>> "SHELL_ERRS_FILE, shell_cmd );
     lidbg_uevent_send(KOBJ_CHANGE, envp);
 }
 

@@ -1,5 +1,6 @@
 
 #include "lidbg_servicer.h"
+#include "lidbg_insmod.h"
 
 #define LIDBG_UEVENT_MSG_LEN  (512)
 #define LIDBG_UEVENT_NODE_NAME "lidbg_uevent"
@@ -23,10 +24,18 @@ struct uevent
 static char *uevent_ignore = "cpu,power_supply";
 
 
+
 //zone start [add a new item]
 void progress_action_shell(char *action_para)
 {
-    system(action_para);
+	
+	if (!strncmp(action_para, "insmod",sizeof("insmod")-1))
+	{
+		lidbg( "find cmd:%s\n",action_para);
+		module_insmod((action_para + sizeof("insmod ")));
+	}
+    else
+		system(action_para);
 }
 struct parse_action_table lidbg_parse_action[] =
 {

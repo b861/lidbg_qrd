@@ -10,8 +10,22 @@ int soc_temp_get(void)
 {
 	static long temp;
 	static struct tsens_device tsens_dev;
+	
 	tsens_dev.sensor_num = 5;
 	tsens_get_temp(&tsens_dev, &temp);
+#if 0
+	lidbg("\n");
+	lidbg("sensor5_temp=%d\n",temp);
+
+	tsens_dev.sensor_num = 2;
+	tsens_get_temp(&tsens_dev, &temp);
+	lidbg("sensor2_temp=%d\n",temp);
+	
+	tsens_dev.sensor_num = 3;
+	tsens_get_temp(&tsens_dev, &temp);
+	lidbg("sensor3_temp=%d\n",temp);
+	lidbg("\n");
+#endif
 	return (int)temp;
 }
 

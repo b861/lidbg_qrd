@@ -1,78 +1,7 @@
 
 #include "lidbg_servicer.h"
-#if 1
-static void *read_file( char *filename, ssize_t *_size)
-{
-	int ret, fd;
-	struct stat sb;
-	ssize_t size;
-	void *buffer = NULL;
+#include "lidbg_insmod.h"
 
-	/* open the file */
-	fd = open(filename, O_RDONLY);
-	if (fd < 0)
-		return NULL;
-
-	/* find out how big it is */
-	if (fstat(fd, &sb) < 0)
-		goto bail;
-	size = sb.st_size;
-
-	/* allocate memory for it to be read into */
-	buffer = malloc(size);
-	if (!buffer)
-		goto bail;
-
-	/* slurp it into our buffer */
-	ret = read(fd, buffer, size);
-	if (ret != size)
-		goto bail;
-
-	/* let the caller know how big it is */
-	*_size = size;
-
-bail:
-	close(fd);
-	return buffer;
-}
-
-
-int module_insmod(char *file)
-{
-	void *module = NULL;
-	ssize_t size;
-	int ret;
-	module = read_file(file, &size);
-	if(!module)
-	{
-		lidbg("not found module : \"%s\" \n",file);
-		return -1;
-	}
-	else
-	{
-		ret = init_module(module, size, "");
-		if(ret < 0)
-		{
-			if (0 == memcmp("File exists",strerror(errno),sizeof(strerror(errno))))
-			{
-				lidbg("insmod -> %s File exists",file);
-				free(module);
-				return 0;
-			}
-
-		  	lidbg("init module \"%s\" fail!\n",file);
-			free(module);
-			return -1;
-		  }
-		else
-		{
-			lidbg("init module success! \"%s\" \n",file);
-			free(module);
-			return 0;
-		}
-	}
-}
-#endif
 #ifdef SOC_mt3360
 int main(int argc, char **argv)
 {
