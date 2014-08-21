@@ -219,19 +219,19 @@ void lidbg_pm_step_call(fly_pm_stat_step step, void *data)
         //suspend_ops->enter.in
         break;
     case PM_SUSPEND_ENTER8:
-		SOC_System_Status(FLY_KERNEL_DOWN);
-		MCU_WP_GPIO_OFF;
-		SOC_IO_SUSPEND;
-		sleep_counter++;
-        PM_SLEEP_DBG("SLEEP8.suspend_enter.MCU_WP_GPIO_OFF;sleep_count:%d\n",sleep_counter);
+        SOC_System_Status(FLY_KERNEL_DOWN);
+        MCU_WP_GPIO_OFF;
+        SOC_IO_SUSPEND;
+        sleep_counter++;
+        PM_SLEEP_DBG("SLEEP8.suspend_enter.MCU_WP_GPIO_OFF;sleep_count:%d\n", sleep_counter);
         break;
     case PM_SUSPEMD_OPS_ENTER9:
         break;
     case PM_SUSPEMD_OPS_ENTER9P1:
-		SOC_System_Status(FLY_KERNEL_UP);
-		SOC_IO_RESUME;
-		MCU_WP_GPIO_ON;
-		PM_SLEEP_DBG("WAKEUP9.1.suspend_enter.wakeup.MCU_WP_GPIO_ON;\n");
+        SOC_System_Status(FLY_KERNEL_UP);
+        SOC_IO_RESUME;
+        MCU_WP_GPIO_ON;
+        PM_SLEEP_DBG("WAKEUP9.1.suspend_enter.wakeup.MCU_WP_GPIO_ON;\n");
         //suspend_ops->enter.out
         break;
     case PM_NULL:
@@ -272,11 +272,59 @@ static int thread_gpio_app_status_delay(void *data)
     ssleep(30);
     MCU_APP_GPIO_ON;
 #ifdef CONTROL_PM_IO_BY_BP
-		MCU_SET_APP_GPIO_SUSPEND;
+    MCU_SET_APP_GPIO_SUSPEND;
 #endif
 
     PM_WARN("<set MCU_APP_GPIO_ON >\n");
     return 1;
+}
+static int test_task_flag(struct task_struct *p, int flag)
+{
+    struct task_struct *t = p;
+    do
+    {
+        task_lock(t);
+        if (test_tsk_thread_flag(t, flag))
+        {
+            task_unlock(t);
+            return 1;
+        }
+        task_unlock(t);
+    }
+    while_each_thread(p, t);
+    return 0;
+}
+struct task_struct *find_task_by_name_or_kill(bool enable_filter, bool enable_dbg, bool enable_kill, char *taskname)
+{
+    int total = 0;
+    struct task_struct *p;
+    struct task_struct *selected = NULL;
+    for_each_process(p)
+    {
+        if(enable_filter)
+        {
+            if (p->flags & PF_KTHREAD || !(p->flags & PF_FORKNOEXEC))
+                continue;
+            if (test_task_flag(p, TIF_MM_RELEASED) || test_task_flag(p, TIF_MEMDIE))
+                continue;
+        }
+        if(enable_dbg)
+        {
+            total++;
+            PM_WARN("<task%d:0x%x,[%s],%d>\n", total, p->flags, p->comm, p->pid);
+        }
+        if(taskname && (!strncmp(taskname, p->comm, strlen(taskname))))
+        {
+            selected = p;
+            break;
+        }
+    }
+    if(enable_kill && selected)
+    {
+        send_sig(SIGKILL, selected, 0);
+        PM_WARN("<killtask:0x%x,%d,%s>\n", selected->flags, selected->pid, selected->comm);
+    }
+    return selected;
 }
 int pm_open (struct inode *inode, struct file *filp)
 {
@@ -302,11 +350,11 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
     //flyaudio logic
     if(!strcmp(cmd[0], "flyaudio"))
     {
-    
-		lidbg("case:[%s]\n",cmd[1]);
+
+        lidbg("case:[%s]\n", cmd[1]);
         if(!strcmp(cmd[1], "screen_off"))
         {
-			SOC_System_Status(FLY_SCREEN_OFF);
+            SOC_System_Status(FLY_SCREEN_OFF);
             if(SOC_Hal_Acc_Callback)
             {
                 lidbg("hal callback 0\n");
@@ -314,45 +362,45 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
             }
             if(!g_var.is_fly && fs_is_file_exist("/system/app/NfcNci.apk"))
                 lidbg_rm("/system/app/NfcNci.apk");
-			LPC_PRINT(true,sleep_counter,"PM:screen_off");
+            LPC_PRINT(true, sleep_counter, "PM:screen_off");
         }
-       else  if(!strcmp(cmd[1], "screen_on"))
+        else  if(!strcmp(cmd[1], "screen_on"))
         {
-			SOC_System_Status(FLY_SCREEN_ON);
-			if(SOC_Hal_Acc_Callback)
-			{
-			    lidbg("hal callback 1\n");
-			    SOC_Hal_Acc_Callback(1);
-			}
-			LPC_PRINT(true,sleep_counter,"PM:screen_on");
+            SOC_System_Status(FLY_SCREEN_ON);
+            if(SOC_Hal_Acc_Callback)
+            {
+                lidbg("hal callback 1\n");
+                SOC_Hal_Acc_Callback(1);
+            }
+            LPC_PRINT(true, sleep_counter, "PM:screen_on");
         }
         else  if(!strcmp(cmd[1], "android_up"))
         {
-			MCU_WP_GPIO_ON;
-			MCU_APP_GPIO_ON;
-			SOC_System_Status(FLY_ANDROID_UP);
+            MCU_WP_GPIO_ON;
+            MCU_APP_GPIO_ON;
+            SOC_System_Status(FLY_ANDROID_UP);
         }
         else  if(!strcmp(cmd[1], "android_down"))
-        {       	
-			SOC_System_Status(FLY_ANDROID_DOWN);
-			MCU_APP_GPIO_OFF;
+        {
+            SOC_System_Status(FLY_ANDROID_DOWN);
+            MCU_APP_GPIO_OFF;
         }
         else  if(!strcmp(cmd[1], "kill"))
-        {       	
-			char shellcmd[64]={0};
-			sprintf(&shellcmd[0],  "kill %s &",cmd[2]);
-			lidbg_shell_cmd(shellcmd);
-			PM_WARN("[%s]\n",shellcmd);
+        {
+            char shellcmd[64] = {0};
+            sprintf(&shellcmd[0],  "kill %s &", cmd[2]);
+            lidbg_shell_cmd(shellcmd);
+            PM_WARN("[%s]\n", shellcmd);
         }
         else  if(!strcmp(cmd[1], "gotosleep"))
         {
-			SOC_System_Status(FLY_GOTO_SLEEP);
-			observer_start();
-			LPC_PRINT(true,sleep_counter,"PM:gotosleep");
+            SOC_System_Status(FLY_GOTO_SLEEP);
+            observer_start();
+            LPC_PRINT(true, sleep_counter, "PM:gotosleep");
         }
         else if(!strcmp(cmd[1], "devices_up"))
-        {	
-			SOC_System_Status(FLY_DEVICE_UP);
+        {
+            SOC_System_Status(FLY_DEVICE_UP);
             if(SOC_Hal_Acc_Callback)
             {
                 lidbg("hal callback 2\n");
@@ -361,7 +409,7 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         }
         else if(!strcmp(cmd[1], "devices_down"))
         {
-			SOC_System_Status(FLY_DEVICE_DOWN);
+            SOC_System_Status(FLY_DEVICE_DOWN);
             if(SOC_Hal_Acc_Callback)
             {
                 lidbg("hal callback 3\n");
@@ -374,6 +422,7 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
     //pm debug
     if(!strcmp(cmd[0], "ws"))
     {
+        lidbg("ws:case:[%s]\n", cmd[1]);
         if(!strcmp(cmd[1], "chmod"))
             lidbg_chmod(cmd[2]);
         else if(!strcmp(cmd[1], "rm"))
@@ -459,10 +508,25 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
             ssleep(2);
             usb_disk_enable(true);
         }
+        else  if(!strcmp(cmd[1], "task"))
+        {
+            find_task_by_name_or_kill(true, false, true, "c2739.mainframe");
+
+            if(cmd[5])
+            {
+                int  enable_filter = simple_strtoul(cmd[3], 0, 0);
+                int  enable_dbg = simple_strtoul(cmd[4], 0, 0);
+                int  enable_kill = simple_strtoul(cmd[5], 0, 0);
+                PM_WARN("<kill,in,%s,%d,%d,%d>\n", cmd[2], enable_filter, enable_dbg, enable_kill);
+                find_task_by_name_or_kill(enable_filter, enable_dbg, enable_kill, cmd[2]);
+            }
+            else
+                PM_WARN("< echo ws task c2739.mainframe 1 1 1 > /dev/lidbg_pm0 >\n");
+        }
 
     }
 #endif
-	return size;
+    return size;
 }
 static  struct file_operations pm_nod_fops =
 {
@@ -516,7 +580,7 @@ void observer_prepare(void)
     char cmd[128] = {0};
     lidbg_chmod("/sys/module/msm_show_resume_irq/parameters/debug_mask");
     ssleep(1);
-    fs_file_write("/sys/module/msm_show_resume_irq/parameters/debug_mask",false, "1",0,strlen("1"));
+    fs_file_write("/sys/module/msm_show_resume_irq/parameters/debug_mask", false, "1", 0, strlen("1"));
     sprintf(cmd, "cat /proc/interrupts > %sinterrupts.txt &", LIDBG_LOG_DIR);
     lidbg_shell_cmd(cmd);
     fs_register_filename_list(LIDBG_LOG_DIR"interrupts.txt", true);
@@ -543,12 +607,14 @@ static int thread_observer(void *data)
         have_triggerd_sleep_S = 0;
         if( !wait_for_completion_interruptible(&sleep_observer_wait))
         {
+            find_task_by_name_or_kill(true, false, true, "c2739.mainframe");
             kernel_wakelock_print("start:");
             userspace_wakelock_action(0, NULL);
-            while((atomic_read(&is_in_sleep) == 1))
+            find_task_by_name_or_kill(true, true, false, NULL);
+            while(1) //atomic_read(&is_in_sleep) == 1
             {
                 ssleep(1);
-                if(atomic_read(&is_in_sleep) != 1)
+                if(g_var.system_status != FLY_GOTO_SLEEP)
                     break;
                 have_triggerd_sleep_S++;
                 switch (have_triggerd_sleep_S)
@@ -624,9 +690,9 @@ static int __init lidbg_pm_init(void)
     if(is_out_updated)
         lidbg_shell_cmd("rm -r "PM_DIR"*");
 
-	MCU_WP_GPIO_ON;
+    MCU_WP_GPIO_ON;
 #ifdef CONTROL_PM_IO_BY_BP
-	MCU_SET_WP_GPIO_SUSPEND;
+    MCU_SET_WP_GPIO_SUSPEND;
 #endif
     PM_WARN("<set MCU_WP_GPIO_ON>\n");
     CREATE_KTHREAD(thread_gpio_app_status_delay, NULL);
