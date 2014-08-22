@@ -99,6 +99,11 @@ int main(int argc, char **argv)
     while(is_file_exist("/flysystem/lib") == 0)
     {
 		static int cnt = 0;
+		if(is_file_exist("/sbin/recovery")) 
+			{
+			lidbg("lidbg_iserver: this is flyaudio recovery\n");
+			break;
+			}
 		sleep(1);
 		if(++cnt>=5)
 			break;
@@ -165,6 +170,9 @@ int main(int argc, char **argv)
 
     sleep(1);
     system("chmod 777 /dev/lidbg_uevent");
+	while(1){
+		 sleep(10);
+	}
     return 0;
 }
 #endif

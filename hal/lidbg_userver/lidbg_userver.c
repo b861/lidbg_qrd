@@ -32,7 +32,7 @@ void progress_action_shell(char *action_para)
 	if (!strncmp(action_para, "insmod",sizeof("insmod")-1))
 	{
 		lidbg( "find cmd:%s\n",action_para);
-		module_insmod((action_para + sizeof("insmod ")));
+		module_insmod((action_para + sizeof("insmod")));
 	}
     else
 		system(action_para);
