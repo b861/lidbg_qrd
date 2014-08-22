@@ -343,6 +343,14 @@ static int  lidbg_trace_msg_probe(struct platform_device *ppdev)
     lidbg_uevent_focus("USB_STATE=CONFIGURED",callback_disable_trace_msg );//USB_STATE=DISCONNECTED
 #endif
 
+	{
+	    char buff[32] = {0};
+	    fs_file_read("/sys/class/android_usb/android0/state", buff, 0, sizeof(buff));
+	    lidbg("state:%s\n", buff);
+	    if(!strncmp(buff, "CONFIGURED", strlen("CONFIGURED")))
+	        lidbg_trace_msg_disable(1);
+	}
+
 	LIDBG_MODULE_LOG;
 
     return 0;
