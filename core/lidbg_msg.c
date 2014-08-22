@@ -30,13 +30,6 @@ lidbg_msg *plidbg_msg = NULL;
 int thread_msg(void *data)
 {
 
-    plidbg_msg = ( lidbg_msg *)kmalloc(sizeof( lidbg_msg), GFP_KERNEL);
-    if (plidbg_msg == NULL)
-    {
-        LIDBG_ERR("kmalloc.\n");
-    }
-    memset(plidbg_msg->log, '\0', /*sizeof( lidbg_msg)*/TOTAL_LOGS * LOG_BYTES);
-    plidbg_msg->w_pos = plidbg_msg->r_pos = 0;
 
     while(1)
     {
@@ -119,6 +112,16 @@ static struct miscdevice misc =
 static int __init msg_init(void)
 {
     int ret;
+
+    plidbg_msg = ( lidbg_msg *)kmalloc(sizeof( lidbg_msg), GFP_KERNEL);
+    if (plidbg_msg == NULL)
+    {
+        LIDBG_ERR("kmalloc.\n");
+    }
+    memset(plidbg_msg->log, '\0', /*sizeof( lidbg_msg)*/TOTAL_LOGS * LOG_BYTES);
+    plidbg_msg->w_pos = plidbg_msg->r_pos = 0;
+
+
     ret = misc_register(&misc);
 
     INIT_COMPLETION(msg_ready);
