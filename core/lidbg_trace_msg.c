@@ -63,7 +63,7 @@ void kmsg_fifo_save(void)
         lidbg("[%s]:save complete %d\n", __func__, ret);
     }
     else
-        lidbg("[%s]:skip: %d  %d\n", __func__, p_kmsg_collect == NULL, kfifo_is_empty(p_kmsg_collect));
+        lidbg("[%s]:skip: %d  %d\n", __func__, p_kmsg_collect == NULL, p_kmsg_collect != NULL ? kfifo_is_empty(p_kmsg_collect) : -1);
 }
 
 
