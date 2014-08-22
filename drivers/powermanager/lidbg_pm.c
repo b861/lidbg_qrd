@@ -311,7 +311,7 @@ struct task_struct *find_task_by_name_or_kill(bool enable_filter, bool enable_db
         if(enable_dbg)
         {
             total++;
-            PM_WARN("<task%d:0x%x,[%s],%d>\n", total, p->flags, p->comm, p->pid);
+            PM_WARN("<task%d:0x%x,%ld,[%s],%d>\n", total, p->flags, p->state, p->comm, p->pid);
         }
         if(taskname && (!strncmp(taskname, p->comm, strlen(taskname))))
         {
