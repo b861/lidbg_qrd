@@ -175,6 +175,8 @@ static ssize_t lidbg_write(struct file *filp, const char __user *buf,
     {
         lidbg("copy_from_user ERR\n");
     }
+    if(mem[size - 1] == '\n')
+        mem[size - 1] = '\0';
 
     //lidbg("size:%d,%s\n",size,mem);
     parse_cmd(mem);

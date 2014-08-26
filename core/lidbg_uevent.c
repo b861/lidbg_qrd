@@ -128,6 +128,7 @@ void lidbg_uevent_shell(char *shell_cmd)
 
 void lidbg_uevent_main(int argc, char **argv)
 {
+    LIDBG_WARN("lidbg_uevent_main:%d,%s\n",uevent_dbg,argv[0]);
     if(!strcmp(argv[0], "dbg"))
     {
         uevent_dbg = !uevent_dbg;
