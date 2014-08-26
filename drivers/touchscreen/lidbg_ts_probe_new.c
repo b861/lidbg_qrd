@@ -7,6 +7,36 @@ LIDBG_DEFINE;
 #define USE_TS_NUM (0)
 
 
+static LIST_HEAD(lidbg_ts_config_list);
+enum key_enum
+{
+    TS_KEY_POWER = 0,
+    TS_KEY_BACK,
+    TS_KEY_HOME,
+    TS_KEY_VOLUMEDOWN,
+    TS_KEY_VOLUMEUP,
+    TS_KEY_NAVI,
+};
+struct ts_devices_key
+{
+    bool is_depend_key;
+    enum key_enum key_value;
+    bool key_pressed;
+    s32 key_x;
+    s32 key_y;
+    s32 offset_x;
+    s32 offset_y;
+};
+struct ts_devices
+{
+    char ts_description[64];
+    s32 lcd_origin_x;
+    s32 lcd_origin_y;
+    s32 key_nums;
+    struct ts_devices_key key[15];
+};
+struct ts_devices g_ts_devices;
+
 #ifdef SOC_msm8x25
  #if (defined(BOARD_V1) || defined(BOARD_V2) || defined(BOARD_V3))
   #define FLYHAL_CONFIG_PATH "/flydata/flyhalconfig"
@@ -161,6 +191,85 @@ struct probe_device *ts_scan(struct probe_device *tsdev, int size)
     return NULL;
 }
 
+#define TS_CONFIG_FILE "/data/lidbg/ts_config.txt"
+#define TS_TAG "ts_config:"
+void ts_devices_show(char *whocalls)
+{
+    int loop;
+    if(!whocalls)
+        return;
+    LIDBG_WARN(TS_TAG"====%s====\n", whocalls);
+    LIDBG_WARN(TS_TAG"x,y,nums,desc:%d,%d,%d,%s\n", g_ts_devices.lcd_origin_x, g_ts_devices.lcd_origin_y, g_ts_devices.key_nums, g_ts_devices.ts_description);
+    for(loop = 0; loop < g_ts_devices.key_nums; loop++)
+    {
+        LIDBG_WARN(TS_TAG"key%d:%d,%d,%d,%d,%d,%d,%d\n", loop,
+                   g_ts_devices.key[loop].is_depend_key,
+                   g_ts_devices.key[loop].key_value,
+                   g_ts_devices.key[loop].key_pressed,
+                   g_ts_devices.key[loop].key_x,
+                   g_ts_devices.key[loop].key_y,
+                   g_ts_devices.key[loop].offset_x,
+                   g_ts_devices.key[loop].offset_y);
+    }
+}
+
+void ts_devices_init(void)
+{
+    if(fs_is_file_exist(TS_CONFIG_FILE))
+    {
+        char *ts_devices_key_map = NULL, *ts_description = NULL;
+        fs_fill_list(TS_CONFIG_FILE, FS_CMD_FILE_CONFIGMODE, &lidbg_ts_config_list);
+
+        if((fs_get_intvalue(&lidbg_ts_config_list, "lcd_origin_x", &g_ts_devices.lcd_origin_x, NULL) < 0) || (fs_get_intvalue(&lidbg_ts_config_list, "lcd_origin_y", &g_ts_devices.lcd_origin_y, NULL) < 0)
+        || fs_get_intvalue(&lidbg_ts_config_list, "key_nums", &g_ts_devices.key_nums, NULL) < 0)
+            LIDBG_WARN(TS_TAG"<err:lcd_origin_x>\n");
+        else
+            LIDBG_WARN(TS_TAG"suc:%d,%d,%d\n", g_ts_devices.lcd_origin_x, g_ts_devices.lcd_origin_y, g_ts_devices.key_nums);
+
+        if(fs_get_value(&lidbg_ts_config_list, "ts_devices_key_map", &ts_devices_key_map) < 0 || fs_get_value(&lidbg_ts_config_list, "ts_description", &ts_description) < 0)
+            LIDBG_WARN(TS_TAG"<err,ts_devices_key_map>\n");
+        else
+        {
+            char *key_item[32] = {NULL};
+            int key_count = 0, loop = 0;
+            if(ts_description)
+                strncpy(g_ts_devices.ts_description, ts_description, sizeof(g_ts_devices.ts_description));
+
+            LIDBG_WARN(TS_TAG"<ts_description:%s>\n", g_ts_devices.ts_description);
+            LIDBG_WARN(TS_TAG"<map:%s>\n", ts_devices_key_map);
+
+            key_count = lidbg_token_string(ts_devices_key_map, "@", key_item);
+            LIDBG_WARN(TS_TAG"<key_count:%d,%d>\n", key_count, g_ts_devices.key_nums);
+
+            for(loop = 0; loop < key_count; loop++)//toke keymap
+            {
+                int item_token_len = 0;
+                char *item_intvalue[32] = {NULL};
+                if(!key_item[loop])
+                    continue;
+                LIDBG_WARN(TS_TAG"<%d.toke:%s>\n", loop, key_item[loop]);
+                item_token_len = lidbg_token_string(key_item[loop], ",", item_intvalue);
+                if(item_token_len >= 7)
+                {
+                    g_ts_devices.key[loop].is_depend_key = simple_strtoul(item_intvalue[0], 0, 0);
+                    g_ts_devices.key[loop].key_value = simple_strtoul(item_intvalue[1], 0, 0);
+                    g_ts_devices.key[loop].key_pressed = simple_strtoul(item_intvalue[2], 0, 0);
+                    g_ts_devices.key[loop].key_x = simple_strtoul(item_intvalue[3], 0, 0);
+                    g_ts_devices.key[loop].key_y = simple_strtoul(item_intvalue[4], 0, 0);
+                    g_ts_devices.key[loop].offset_x = simple_strtoul(item_intvalue[5], 0, 0);
+                    g_ts_devices.key[loop].offset_y = simple_strtoul(item_intvalue[6], 0, 0);
+                }
+                else
+                    LIDBG_WARN(TS_TAG"err:item_token_len<7.%dn", item_token_len);
+            }
+        }
+        ts_devices_show("ts_devices_init");
+    }
+    else
+        LIDBG_WARN("<file miss:%s>\n", TS_CONFIG_FILE);
+}
+
+
 void ts_probe_prepare(void)
 {
     char buff[50] = {0};
@@ -173,9 +282,10 @@ void ts_probe_prepare(void)
         LIDBG_WARN("<TS.XY will revert>\n");
     else
         LIDBG_WARN("<TS.XY will normal>\n");
-
+	
     lidbg_insmod(get_lidbg_file_path(buff, "lidbg_ts_to_recov.ko"));
     fs_register_filename_list(TS_LOG_PATH, true);
+    ts_devices_init();
 }
 //zone end
 void ts_data_report(touch_type t,int id,int x,int y,int w)
