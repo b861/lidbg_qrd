@@ -310,8 +310,13 @@ struct task_struct *find_task_by_name_or_kill(bool enable_filter, bool enable_db
         {
             if (p->flags & PF_KTHREAD || !(p->flags & PF_FORKNOEXEC))
                 continue;
+	     #ifdef SOC_mt3360
+	     if (test_task_flag(p, TIF_MEMDIE))  // TIF_MM_RELEASED is not defined on MT3360 kernel
+                continue;
+	     #else
             if (test_task_flag(p, TIF_MM_RELEASED) || test_task_flag(p, TIF_MEMDIE))
                 continue;
+	     #endif
         }
         if(enable_dbg)
         {

@@ -2,7 +2,11 @@
 #include "lidbg.h"
 #include "lidbg_target.c"
 
+#ifdef SOC_mt3360
+#define HAL_SO "/data4write/flysystem/lib/out/lidbg_loader.ko"
+#else
 #define HAL_SO "/flysystem/lib/out/lidbg_loader.ko"
+#endif
 LIDBG_DEFINE;
 
 //ad_key_map[ts_active_key].ad_value
