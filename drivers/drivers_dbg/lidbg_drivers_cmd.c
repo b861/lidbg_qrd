@@ -53,7 +53,6 @@ out:
     return 0;
 }
 
-
 int thread_screenshot(void *data)
 {
     SOC_Key_Report(KEY_POWER, KEY_PRESSED);
@@ -61,17 +60,16 @@ int thread_screenshot(void *data)
     msleep(3000);
     SOC_Key_Report(KEY_POWER, KEY_RELEASED);
     SOC_Key_Report(KEY_VOLUMEDOWN, KEY_RELEASED);
-
     return 0;
 }
 
 int thread_kmsg_fifo_save(void *data)
 {
-	kmsg_fifo_save();
-
+    kmsg_fifo_save();
     return 0;
 }
 
+static bool fan_enable = false;
 void parse_cmd(char *pt)
 {
     int argc = 0;
@@ -112,10 +110,11 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#018--origin gps\n");
             fs_mem_log("*158#019--enable system print\n");
             fs_mem_log("*158#020--disable system print\n");
-			fs_mem_log("*158#021--save fifo msg\n");
-			fs_mem_log("*158#022--log2sd to save qxdm\n");
-			fs_mem_log("*158#023--show cpu temp\n");
-			lidbg_domineering_ack();
+            fs_mem_log("*158#021--save fifo msg\n");
+            fs_mem_log("*158#022--log2sd to save qxdm\n");
+            fs_mem_log("*158#023--show cpu temp\n");
+            fs_mem_log("*158#024--!fan enalbe\n");
+            lidbg_domineering_ack();
         }
 
         if (!strcmp(argv[1], "*158#999"))
@@ -246,25 +245,33 @@ void parse_cmd(char *pt)
             encode = false;
             lidbg_chmod("/data");
             lidbg_fifo_get(glidbg_msg_fifo, LIDBG_LOG_DIR"lidbg_mem_log.txt", 0);
-			CREATE_KTHREAD(thread_kmsg_fifo_save, NULL);
-			lidbg_domineering_ack();
+            CREATE_KTHREAD(thread_kmsg_fifo_save, NULL);
+            lidbg_domineering_ack();
         }
-		
         else if (!strcmp(argv[1], "*158#022"))
         {
-			lidbg_shell_cmd("mount -o remount /system");
-			lidbg_shell_cmd("mkdir /sdcard/diag_logs");
-			lidbg_shell_cmd("chmod 777 /sdcard/diag_logs");
-			lidbg_shell_cmd("cp /flysystem/lib/out/DIAG.conf /sdcard/diag_logs/DIAG.cfg");
-			lidbg_shell_cmd("chmod 777 /sdcard/diag_logs/DIAG.cfg");
-			lidbg_shell_cmd("/system/bin/diag_mdlog &");
-			lidbg_domineering_ack();
+            lidbg_shell_cmd("mount -o remount /system");
+            lidbg_shell_cmd("mkdir /sdcard/diag_logs");
+            lidbg_shell_cmd("chmod 777 /sdcard/diag_logs");
+            lidbg_shell_cmd("cp /flysystem/lib/out/DIAG.conf /sdcard/diag_logs/DIAG.cfg");
+            lidbg_shell_cmd("chmod 777 /sdcard/diag_logs/DIAG.cfg");
+            lidbg_shell_cmd("/system/bin/diag_mdlog &");
+            lidbg_domineering_ack();
         }
         else if (!strcmp(argv[1], "*158#023"))
         {
-			cb_kv_show_temp(NULL,NULL);
-			lidbg_domineering_ack();
-        }		
+            cb_kv_show_temp(NULL, NULL);
+            lidbg_domineering_ack();
+        }
+        else if (!strcmp(argv[1], "*158#024"))
+        {
+            fan_enable = !fan_enable;
+            if(fan_enable)
+                LPC_CMD_FAN_ON;
+            else
+                LPC_CMD_FAN_OFF;
+            lidbg_domineering_ack();
+        }
         else if (!strcmp(argv[1], "*168#001"))
         {
             encode = true;
