@@ -88,6 +88,31 @@ void show_filename_list(struct list_head *client_list)
 //zone end
 
 //zone below [fs.cmn.driver]
+int fs_file_write2(char *filename, char *wbuff)
+{
+    struct file *filep;
+    mm_segment_t old_fs;
+    unsigned int file_len = 1;
+
+    filep = filp_open(filename,  O_CREAT | O_WRONLY, 0);
+    if(IS_ERR(filep))
+    {
+        printk(KERN_CRIT"err:filp_open,%s\n\n\n\n",filename);
+        return -1;
+    }
+
+    old_fs = get_fs();
+    set_fs(get_ds());
+
+    filep->f_op->llseek(filep, 0, SEEK_END);
+    if(wbuff)
+        filep->f_op->write(filep, wbuff, strlen(wbuff), &filep->f_pos);
+    set_fs(old_fs);
+    filp_close(filep, 0);
+    return file_len;
+}
+
+//do not use this interface to write a real file,use fs_file_write2() instead.
 int fs_file_write(char *filename,bool creat, void *wbuff, loff_t offset, int len)
 {
     struct file *filep;
@@ -521,6 +546,7 @@ void lidbg_fs_cmn_init(void)
 
 EXPORT_SYMBOL(fs_file_read);
 EXPORT_SYMBOL(fs_file_write);
+EXPORT_SYMBOL(fs_file_write2);
 EXPORT_SYMBOL(fs_cp_data_to_udisk);
 EXPORT_SYMBOL(fs_regist_filedetec);
 EXPORT_SYMBOL(fs_copy_file);

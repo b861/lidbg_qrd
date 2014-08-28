@@ -159,6 +159,7 @@ void parse_cmd(char *pt)
             lidbg_shell_cmd("rm /data/logcat*");
             lidbg_shell_cmd("rm /data/kmsg*");
             lidbg("clear-logcat*&&kmsg*\n");
+            fs_file_write2("/dev/lidbg_pm0","flyaudio acc_history");
 #endif
             lidbg_domineering_ack();
         }
@@ -311,6 +312,14 @@ void parse_cmd(char *pt)
         enable = simple_strtoul(argv[1], 0, 0);
         LINUX_TO_LIDBG_TRANSFER((linux_to_lidbg_transfer_t)enable, NULL);
     }
+	else if(!strcmp(argv[0], "fread") )
+	{
+	    char buff[64] = {0};
+		int len=fs_file_read(argv[1], buff, 0, sizeof(buff));
+		buff[len-1]='\0';
+	    lidbg("%d,%s:[%s]\n",len,argv[1], buff);
+	}
+
     else if (!strcmp(argv[0], "lpc"))
     {
         int para_count = argc - 1;

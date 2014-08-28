@@ -3,12 +3,17 @@ LIDBG_DEFINE;
 //#define CONTROL_PM_IO_BY_BP
 
 #define PM_DIR LIDBG_LOG_DIR"pm_info/"
-#define PM_FILE_INFO PM_DIR"pm_info.txt"
+#define PM_INFO_FILE PM_DIR"pm_info.txt"
+#define PM_ACC_FILE PM_DIR"pm_acc.txt"
+#define PM_ACC_HISTORY_FILE PM_DIR"pm_acc_history.txt"
+
 #define PM_FILE_INFO_SIZE (5)
 
 static DECLARE_COMPLETION(sleep_observer_wait);
 static atomic_t is_in_sleep = ATOMIC_INIT(-1);
 static int sleep_counter = 0;
+static char g_acc_history_state[512];
+
 void observer_start(void);
 void observer_stop(void);
 
@@ -416,7 +421,11 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
                 SOC_Hal_Acc_Callback(3);
             }
         }
-
+        else if(!strcmp(cmd[1], "acc_history"))
+        {
+            lidbg_shell_cmd("rm -r "PM_DIR"*");
+            g_acc_history_state[0] = '\0';
+        }
     }
 #if 1 //for debug
     //pm debug
@@ -528,28 +537,30 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
 #endif
     return size;
 }
+ssize_t  pm_read(struct file *filp, char __user *buffer, size_t size, loff_t *offset)
+{
+    char acc_state[128 + 8] = {0};
+    sprintf(acc_state, "%s%d", g_acc_history_state, sleep_counter);
+    if (copy_to_user(buffer, acc_state, strlen(acc_state)))
+    {
+        lidbg("copy_to_user ERR\n");
+    }
+    PM_WARN("<%s>\n", acc_state);
+    return size;
+}
+
 static  struct file_operations pm_nod_fops =
 {
     .owner = THIS_MODULE,
-    .write = pm_write,
     .open = pm_open,
+    .read = pm_read,
+    .write = pm_write,
 };
 
 void log_resume_times(int sleep_counter)
 {
-    static char dmesg_file_name[32] = {0};
-    static char time_buf[64] = {0};
-    static bool flag = 0;
-    if(flag == 0)
-    {
-        lidbg_mkdir(PM_DIR);
-        ssleep(2);
-        lidbg_get_current_time(time_buf, NULL);
-        sprintf(dmesg_file_name, PM_DIR"last_acc%s.txt", time_buf);
-        flag = 1;
-    }
-    fs_clear_file(dmesg_file_name);
-    fs_string2file(0, dmesg_file_name, "%d", sleep_counter);
+    fs_clear_file(PM_ACC_FILE);
+    fs_string2file(0, PM_ACC_FILE, "%d/", sleep_counter);
 }
 static int thread_save_acc_times(void *data)
 {
@@ -584,7 +595,7 @@ void observer_prepare(void)
     sprintf(cmd, "cat /proc/interrupts > %sinterrupts.txt &", LIDBG_LOG_DIR);
     lidbg_shell_cmd(cmd);
     fs_register_filename_list(LIDBG_LOG_DIR"interrupts.txt", true);
-    fs_register_filename_list(PM_FILE_INFO, true);
+    fs_register_filename_list(PM_INFO_FILE, true);
 }
 void observer_start(void)
 {
@@ -621,9 +632,9 @@ static int thread_observer(void *data)
                 {
                 case 60:
                     sprintf(when, "unlock:%d:", sleep_counter);
-                    kernel_wakelock_save_wakelock(when, PM_FILE_INFO);
+                    kernel_wakelock_save_wakelock(when, PM_INFO_FILE);
                     kernel_wakelock_force_unlock(when);
-                    userspace_wakelock_action(2, PM_FILE_INFO);
+                    userspace_wakelock_action(2, PM_INFO_FILE);
                     break;
 
                 default:
@@ -646,7 +657,31 @@ static int  lidbg_pm_probe(struct platform_device *pdev)
 {
     DUMP_FUN;
     PM_WARN("<==IN==>\n");
-    fs_file_separator(PM_FILE_INFO);
+    fs_file_separator(PM_INFO_FILE);
+
+    if(is_out_updated)
+    {
+        lidbg_shell_cmd("rm -r "PM_DIR"*");
+        PM_WARN("clear acc history\n");
+    }
+    else
+    {
+        char buff[32] = {0};
+        int file_len = 0;
+        lidbg_shell_cmd("chmod 777  "PM_DIR"*");
+        if((file_len = fs_file_read(PM_ACC_FILE, buff, 0, sizeof(buff))) > 0)
+        {
+            fs_file_write2(PM_ACC_HISTORY_FILE, buff);
+            PM_WARN("save acc history:%d,%s\n", file_len, buff);
+        }
+        fs_clear_file(PM_ACC_FILE);
+
+        if(fs_file_read(PM_ACC_HISTORY_FILE, g_acc_history_state, 0, sizeof(g_acc_history_state)) > 5 * 1024)
+            fs_clear_file(PM_ACC_HISTORY_FILE);
+
+        PM_WARN("acc history:%s\n", g_acc_history_state);
+    }
+
     lidbg_new_cdev(&pm_nod_fops, "lidbg_pm");
     kthread_run(thread_observer, NULL, "ftf_pmtask");
     LIDBG_MODULE_LOG;
@@ -687,9 +722,6 @@ static int __init lidbg_pm_init(void)
 
     lidbg_mkdir(PM_DIR);
 
-    if(is_out_updated)
-        lidbg_shell_cmd("rm -r "PM_DIR"*");
-
     MCU_WP_GPIO_ON;
 #ifdef CONTROL_PM_IO_BY_BP
     MCU_SET_WP_GPIO_SUSPEND;
@@ -697,6 +729,7 @@ static int __init lidbg_pm_init(void)
     PM_WARN("<set MCU_WP_GPIO_ON>\n");
     CREATE_KTHREAD(thread_gpio_app_status_delay, NULL);
     lidbg_shell_cmd("echo 8  > /proc/sys/kernel/printk");
+
     platform_device_register(&lidbg_pm);
     platform_driver_register(&lidbg_pm_driver);
     return 0;
