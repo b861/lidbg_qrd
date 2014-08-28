@@ -373,17 +373,21 @@ struct name_list
 };
 static int readdir_build_namelist(void *arg, const char *name, int namlen,	loff_t offset, u64 ino, unsigned int d_type)
 {
-    struct list_head *names = arg;
-    struct name_list *entry;
-    entry = kzalloc(sizeof(struct name_list), GFP_KERNEL);
-    if (entry == NULL)
-        return -ENOMEM;
-    memcpy(entry->name, name, namlen);
-    entry->name[namlen] = '\0';
-    list_add(&entry->list, names);
+    if(!(name[0] == '.' || (name[0] == '.' && name[1] == '.'))) // ignore "." and ".."
+    {
+        struct list_head *names = arg;
+        struct name_list *entry;
+        entry = kzalloc(sizeof(struct name_list), GFP_KERNEL);
+        if (entry == NULL)
+            return -ENOMEM;
+        memcpy(entry->name, name, namlen);
+        entry->name[namlen] = '\0';
+        list_add(&entry->list, names);
+    }
     return 0;
 }
-bool lidbg_readdir_and_dealfile(char *insure_is_dir, void (*callback)(char *dirname, char *filename))
+
+int lidbg_readdir_and_dealfile(char *insure_is_dir, void (*callback)(char *dirname, char *filename))
 {
     LIST_HEAD(names);
     struct file *dir_file;
@@ -391,17 +395,18 @@ bool lidbg_readdir_and_dealfile(char *insure_is_dir, void (*callback)(char *dirn
     int status;
 
     if(!insure_is_dir || !callback)
-        return false;
+        return -1;
 
     dir_file = filp_open(insure_is_dir, O_RDONLY | O_DIRECTORY, 0);
     if (IS_ERR(dir_file))
     {
         LIDBG_ERR("open%s,%ld\n", insure_is_dir, PTR_ERR(dir_file));
-        return false;
+        return -1;
     }
     else
     {
         struct name_list *entry;
+		int count=0;
         LIDBG_SUC("open:<%s,%s>\n", insure_is_dir, dir_file->f_path.dentry->d_name.name);
         dir = dir_file->f_path.dentry;
         status = vfs_readdir(dir_file, readdir_build_namelist, &names);
@@ -412,14 +417,15 @@ bool lidbg_readdir_and_dealfile(char *insure_is_dir, void (*callback)(char *dirn
             entry = list_entry(names.next, struct name_list, list);
             if (!status && entry)
             {
-                if(callback && entry->name[0] != '.') // ignore "." and ".."
+                count++;
+                if(callback) 
                     callback(insure_is_dir, entry->name);
                 list_del(&entry->list);
                 kfree(entry);
             }
             entry = NULL;
         }
-        return true;
+        return count;
     }
 }
 bool lidbg_new_cdev(struct file_operations *cdev_fops, char *nodename)

@@ -69,6 +69,11 @@ int thread_kmsg_fifo_save(void *data)
     return 0;
 }
 
+void callback_func_test_readdir(char *dirname, char *filename)
+{
+	LIDBG_WARN("%s<---%s\n",dirname,filename);
+}
+
 static bool fan_enable = false;
 void parse_cmd(char *pt)
 {
@@ -322,6 +327,13 @@ void parse_cmd(char *pt)
     {
         CREATE_KTHREAD(thread_screenshot, NULL);
     }
+    else if (!strcmp(argv[0], "readdir"))
+	{
+	    if(argv[1])
+	        LIDBG_WARN("%s:file count=%d\n", argv[1], lidbg_readdir_and_dealfile(argv[1], callback_func_test_readdir));
+	    else
+	        LIDBG_ERR("err:echo readdir /storage/udisk/conf > /dev/lidbg_drivers_dbg0\n");
+	}
 #endif
 
 #ifdef SOC_msm8x25
