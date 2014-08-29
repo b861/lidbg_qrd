@@ -6,6 +6,14 @@ LIDBG_DEFINE;
 #define GTP_RST_PORT_ACTIVE (1)
 #define USE_TS_NUM (0)
 
+//new feature: if(ts_config >TS_CONFIG_TRIGGER),insmod ts ko directly
+#define TS_CONFIG_TRIGGER (500)
+static char *ts_config_map[] =
+{
+    "gt911.ko",//ts_config[500-999]
+};
+
+
 
 static LIST_HEAD(lidbg_ts_config_list);
 enum key_enum
@@ -191,7 +199,6 @@ struct probe_device *ts_scan(struct probe_device *tsdev, int size)
     return NULL;
 }
 
-#define TS_CONFIG_FILE "/data/lidbg/ts_config.txt"
 #define TS_TAG "ts_config:"
 void ts_devices_show(char *whocalls)
 {
@@ -215,10 +222,16 @@ void ts_devices_show(char *whocalls)
 
 void ts_devices_init(void)
 {
-    if(fs_is_file_exist(TS_CONFIG_FILE))
+    char ts_config_file[64]={0},tmp[32]={0};
+    snprintf(tmp, sizeof(tmp), "ts_config_%d.conf",g_var.hw_info.ts_config);
+
+    get_lidbg_file_path(ts_config_file, tmp);
+
+    if(fs_is_file_exist(ts_config_file))
     {
         char *ts_devices_key_map = NULL, *ts_description = NULL;
-        fs_fill_list(TS_CONFIG_FILE, FS_CMD_FILE_CONFIGMODE, &lidbg_ts_config_list);
+        LIDBG_WARN(TS_TAG"<use:%s>\n",ts_config_file);
+        fs_fill_list(ts_config_file, FS_CMD_FILE_CONFIGMODE, &lidbg_ts_config_list);
 
         if((fs_get_intvalue(&lidbg_ts_config_list, "lcd_origin_x", &g_ts_devices.lcd_origin_x, NULL) < 0) || (fs_get_intvalue(&lidbg_ts_config_list, "lcd_origin_y", &g_ts_devices.lcd_origin_y, NULL) < 0)
         || fs_get_intvalue(&lidbg_ts_config_list, "key_nums", &g_ts_devices.key_nums, NULL) < 0)
@@ -266,7 +279,7 @@ void ts_devices_init(void)
         ts_devices_show("ts_devices_init");
     }
     else
-        LIDBG_WARN("<file miss:%s>\n", TS_CONFIG_FILE);
+        LIDBG_WARN("<file miss:%s>\n", ts_config_file);
 }
 
 
@@ -326,13 +339,14 @@ void ts_data_report(touch_type t,int id,int x,int y,int w)
 int ts_probe_thread(void *data)
 {
     struct probe_device *ts = NULL;
-	
-	SOC_Display_Get_Res(&max_x,&max_y);
-	
+
+    SOC_Display_Get_Res(&max_x, &max_y);
+
     ts_probe_prepare();
 
-    if (USE_TS_NUM == 0 && g_var.hw_info.ts_type == 0)
+    if (USE_TS_NUM == 0 && g_var.hw_info.ts_type == 0 &&  g_var.hw_info.ts_config < TS_CONFIG_TRIGGER)
     {
+        LIDBG_WARN("<mode:scan enable[%d,%d,%d]>\n", USE_TS_NUM, g_var.hw_info.ts_type, g_var.hw_info.ts_config);
         while(1)
         {
             if((ts = ts_scan(ts_probe_dev, SIZE_OF_ARRAY(ts_probe_dev))))
@@ -346,13 +360,29 @@ int ts_probe_thread(void *data)
     }
     else
     {
-        LIDBG_WARN("<disable ts scan work>\n");
-        parse_ts_info(&ts_probe_dev[g_var.hw_info.ts_type > 0 ? g_var.hw_info.ts_type - 1 : USE_TS_NUM - 1 ]);
+        LIDBG_WARN("<mode:scan disable[%d,%d,%d]>\n", USE_TS_NUM, g_var.hw_info.ts_type, g_var.hw_info.ts_config);
+        if(g_var.hw_info.ts_config < TS_CONFIG_TRIGGER)
+        {
+            parse_ts_info(&ts_probe_dev[g_var.hw_info.ts_type > 0 ? g_var.hw_info.ts_type - 1 : USE_TS_NUM - 1 ]);
+            LIDBG_WARN("<old style:%d>\n", g_var.hw_info.ts_config);
+        }
+        else
+        {
+            char buff[50] = {0};
+            int item = g_var.hw_info.ts_config / TS_CONFIG_TRIGGER - 1;
+            if(item >= 0 && item < ARRAY_SIZE(ts_config_map))
+            {
+                lidbg_insmod( get_lidbg_file_path(buff, ts_config_map[item]));
+                LIDBG_WARN("<new style:%d,%d,%d,%s>\n", item, ARRAY_SIZE(ts_config_map), g_var.hw_info.ts_config, buff);
+            }
+            else
+                LIDBG_WARN("<new style:overline.%d,%d,%d,%d>\n", item, ARRAY_SIZE(ts_config_map), g_var.hw_info.ts_config, TS_CONFIG_TRIGGER);
+        }
     }
+
 
     ssleep(10);
     LIDBG_WARN("<ts_probe_thread exited>\n");
-
     return 0;
 }
 //zone end
