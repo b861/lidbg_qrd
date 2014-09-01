@@ -72,7 +72,7 @@ bool fly_hw_info_save(fly_hw_data *p_info)
     if( p_info && fs_file_write(FLYPARAMETER_NODE, false, (void *) p_info, MEM_SIZE_512_KB , sizeof(fly_hw_data)) >= 0)
     {
         lidbg("fly_hw_data:save success\n");
-	update_info = UPDATE_SUC;
+		update_info = UPDATE_SUC;
         return true;
     }
 	lidbg("fly_hw_data:save err\n");
@@ -168,11 +168,13 @@ int lidbg_fly_hw_info_init(void)
 	    else if(g_fly_hw_data->flag_need_update == FLAG_HW_INFO_VALID)
 	    {
 	    	g_fly_hw_data->flag_need_update = 0;
+			fly_hw_info_save(g_fly_hw_data);//clear need_update  flag first
+			
 			g_fly_hw_data->flag_hw_info_valid = FLAG_HW_INFO_VALID;
 			CREATE_KTHREAD(thread_lidbg_fly_hw_info_update, NULL);
 	    }
 	   else
-		update_info = NOT_NEED_UPDATE;
+			update_info = NOT_NEED_UPDATE;
 	}
 	
     if((g_fly_hw_data->flag_hw_info_valid == FLAG_HW_INFO_VALID))

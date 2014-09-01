@@ -243,7 +243,7 @@ int thread_antutu_test(void *data)
 		ssleep(5);
 		
 		lidbg_shell_cmd("am start -n com.antutu.ABenchMark/com.antutu.ABenchMark.ABenchMarkStart");
-		ssleep(2);
+		ssleep(5);
 		lidbg_shell_cmd("am start -n com.antutu.ABenchMark/com.antutu.benchmark.activity.ScoreBenchActivity");
 		ssleep(60*4);// 4 min loop
 		

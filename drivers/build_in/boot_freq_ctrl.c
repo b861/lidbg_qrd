@@ -24,11 +24,7 @@ struct thermal_ctrl cpu_thermal[] =
 
 };
 
-#define BOOT_LIMIT_FREQ (1401600)
-
 #elif defined(PLATFORM_MSM8974)
-
-#define BOOT_LIMIT_FREQ (2265600)    //8974
 
 struct thermal_ctrl cpu_thermal[] = 
 {
@@ -47,7 +43,7 @@ struct thermal_ctrl cpu_thermal[] =
 
 #define FREQ_MAX_NODE "/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq"
 
-int ctrl_max_freq = BOOT_LIMIT_FREQ;
+int ctrl_max_freq = 0;
 
 u32 get_scaling_max_freq(void)
 {
