@@ -55,6 +55,39 @@
 
 #endif
 
+
+enum key_enum
+{
+    TS_NO_KEY=0,
+    TS_KEY_POWER,
+    TS_KEY_BACK,
+    TS_KEY_HOME,
+    TS_KEY_VOLUMEDOWN,
+    TS_KEY_VOLUMEUP,
+    TS_KEY_NAVI,
+    
+
+};
+struct ts_devices_key
+{
+    bool is_depend_key;
+    enum key_enum key_value;
+    bool key_pressed;
+    s32 key_x;
+    s32 key_y;
+    s32 offset_x;
+    s32 offset_y;
+};
+struct ts_devices
+{
+    char ts_description[64];
+    s32 lcd_origin_x;
+    s32 lcd_origin_y;
+    s32 key_nums;
+    struct ts_devices_key key[15];
+};
+extern enum key_enum ts_active_key;
+extern bool file_exist;
 static inline int write_node(char *filename, char *wbuff)
 {
     struct file *filep;
@@ -142,8 +175,6 @@ struct tspara
     int y;
     int press;
 } ;
-
-
 typedef irqreturn_t (*pinterrupt_isr)(int irq, void *dev_id);
 
 #define ADC_MAX_CH (8)
@@ -242,6 +273,8 @@ struct lidbg_pvar_t
 	struct hw_info hw_info;
 	bool fb_on;
 	bool is_first_update;
+	
+
 };
 
 typedef struct {

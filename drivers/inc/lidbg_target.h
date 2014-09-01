@@ -6,6 +6,7 @@
 #define g_hw g_hw_version_specific[g_var.hw_info.hw_version - 1]  
 #define check_gpio(gpio) if(gpio == -1 ) break
 
+
 struct ad_key_item
 {
     int ad_value;
@@ -21,6 +22,10 @@ struct ad_key_remap
 
 };
 
+struct ad_key{
+	int chanel;
+	int ad_value;
+} ;
 
 struct thermal_ctrl
 {
@@ -71,7 +76,7 @@ struct hw_version_specific
 
 //ad
 	struct ad_key_remap ad_key[2];
-
+	struct ad_key ad_key_map[32];
 //temp
 	struct thermal_ctrl cpu_freq_thermal[10];
 			//cat sys/devices/system/cpu/cpu0/cpufreq/scaling_available_frequencies

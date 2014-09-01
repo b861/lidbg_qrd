@@ -13,37 +13,10 @@ static char *ts_config_map[] =
     "gt911.ko",//ts_config[500-999]
 };
 
-
-
 static LIST_HEAD(lidbg_ts_config_list);
-enum key_enum
-{
-    TS_KEY_POWER = 0,
-    TS_KEY_BACK,
-    TS_KEY_HOME,
-    TS_KEY_VOLUMEDOWN,
-    TS_KEY_VOLUMEUP,
-    TS_KEY_NAVI,
-};
-struct ts_devices_key
-{
-    bool is_depend_key;
-    enum key_enum key_value;
-    bool key_pressed;
-    s32 key_x;
-    s32 key_y;
-    s32 offset_x;
-    s32 offset_y;
-};
-struct ts_devices
-{
-    char ts_description[64];
-    s32 lcd_origin_x;
-    s32 lcd_origin_y;
-    s32 key_nums;
-    struct ts_devices_key key[15];
-};
+
 struct ts_devices g_ts_devices;
+
 
 #ifdef SOC_msm8x25
  #if (defined(BOARD_V1) || defined(BOARD_V2) || defined(BOARD_V3))
@@ -66,9 +39,7 @@ static int ts_scan_delayms;
 
 int ts_should_revert = -1;
 bool is_ts_load = false;
-
 u32 max_x, max_y;
-
 
 struct probe_device
 {
@@ -229,6 +200,7 @@ void ts_devices_init(void)
 
     if(fs_is_file_exist(ts_config_file))
     {
+         file_exist = 1;
         char *ts_devices_key_map = NULL, *ts_description = NULL;
         LIDBG_WARN(TS_TAG"<use:%s>\n",ts_config_file);
         fs_fill_list(ts_config_file, FS_CMD_FILE_CONFIGMODE, &lidbg_ts_config_list);
@@ -281,7 +253,47 @@ void ts_devices_init(void)
     else
         LIDBG_WARN("<file miss:%s>\n", ts_config_file);
 }
-
+int get_input_key(enum key_enum key_value)
+{
+switch(key_value){
+	case TS_KEY_HOME :
+		return KEY_HOME;
+	case TS_KEY_POWER:
+		return KEY_HOME;	
+	case TS_KEY_BACK:
+		return KEY_BACK;
+	case    TS_KEY_VOLUMEDOWN:
+		return KEY_VOLUMEDOWN;
+	case   TS_KEY_VOLUMEUP:
+		return KEY_VOLUMEUP;
+	case   TS_KEY_NAVI:
+		return KEY_HOME;
+	default:
+		return KEY_BACK;
+	
+}
+}
+/*enum key_enum get_ts_key(bool *key_status)
+{
+     if (g_ts_devices.key->key_pressed)
+      return g_ts_devices.key;
+}*/
+void ts_key_report(s32 input_x,s32 input_y,struct ts_devices_key *tskey,int size)
+{
+    int i;  
+    for(i = 0; i < size; i++)
+	{
+		if( (abs( input_x - tskey->key_x)<=tskey->offset_x)&&(abs( input_y - tskey->key_y)<=tskey->offset_y))
+			{
+			//SOC_Key_Report(get_input_key(tskey->key_value),KEY_PRESSED_RELEASED);
+			ts_active_key = tskey->key_value;
+			lidbg("tskey->key_value% d", tskey->key_value);
+			return;
+			}
+		tskey++;
+	}
+	ts_active_key=TS_NO_KEY;
+}
 
 void ts_probe_prepare(void)
 {
@@ -304,11 +316,24 @@ void ts_probe_prepare(void)
 void ts_data_report(touch_type t,int id,int x,int y,int w)
 {
 	GTP_SWAP(x, y);
-    if (1 == ts_should_revert)
+   	 if (1 == ts_should_revert)
 		GTP_REVERT(x, y);
-	lidbg_touch_handle(t, id,x, y, w);
+	if(file_exist==1)
+	{
+		if( (g_ts_devices.lcd_origin_x<x)&& (x<1024+g_ts_devices.lcd_origin_x)&&(g_ts_devices.lcd_origin_y<y)&& (y<g_ts_devices.lcd_origin_y+600)||(t == TOUCH_SYNC)||(t== TOUCH_UP))
 
-	if(t == TOUCH_DOWN)
+			{
+				 lidbg_touch_handle(t, id,x-g_ts_devices.lcd_origin_x, y-g_ts_devices.lcd_origin_y, w);
+				if( (t== TOUCH_UP)&&(id==0))
+				ts_active_key=TS_NO_KEY;
+			}
+		else
+		ts_key_report(x,y, g_ts_devices.key,SIZE_OF_ARRAY(g_ts_devices.key));
+	}
+	else
+		 lidbg_touch_handle(t, id,x, y, w);
+	
+    if(t == TOUCH_DOWN)
 	{
 		g_var.flag_for_15s_off++;
 		if(g_var.flag_for_15s_off >= 1000)

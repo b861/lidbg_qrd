@@ -59,7 +59,6 @@ struct hw_version_specific g_hw_version_specific[] =
 		},
 	},
 
-	
 	.cpu_freq_thermal = 
 	{
 		{1,  80,  1401600,"1401600","450000000"},
@@ -217,6 +216,16 @@ struct hw_version_specific g_hw_version_specific[] =
 						{2500, KEY_BACK},
 						}
 		},
+	},
+
+	.ad_key_map = {
+		 [TS_NO_KEY] = { 0,3300 },
+		 [TS_KEY_POWER]=	{37,2800},
+		 [TS_KEY_BACK] = { 35,2500 },
+		 [TS_KEY_HOME] = { 37,2500 },
+		 [TS_KEY_VOLUMEDOWN]={37,200},
+		 [TS_KEY_VOLUMEUP]={35,2800},
+	   	 [TS_KEY_NAVI]={37,1000},
 	},
 
 	.cpu_freq_thermal = 

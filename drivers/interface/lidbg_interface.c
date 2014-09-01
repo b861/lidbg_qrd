@@ -1,10 +1,14 @@
 
 #include "lidbg.h"
 #include "lidbg_target.c"
-
+#define TS_CONFIG_FILE "/data/lidbg/ts_config.txt"
 #define HAL_SO "/flysystem/lib/out/lidbg_loader.ko"
 LIDBG_DEFINE;
+bool file_exist=0;
 
+enum key_enum ts_active_key = TS_NO_KEY;
+
+//ad_key_map[ts_active_key].ad_value
 void interface_func_tbl_default(void)
 {
     lidbgerr("interface_func_tbl_default:this func not ready!\n");
@@ -83,12 +87,32 @@ bool iSOC_IO_Input(u32 group, u32 index, u32 pull)
 
 //return mv
 bool iSOC_ADC_Get (u32 channel , u32 *value)
-{
-    *value = 0xffffffff;
-    *value = soc_ad_read(channel)/1000;
-    if(*value == 0xffffffff)
+{	
+ if((file_exist)&&( (channel==g_hw.ad_key[0].ch)||  (channel==g_hw.ad_key[1].ch)))
+ 	{
+ 	*value = 0xffffffff;
+	if( ts_active_key==TS_NO_KEY)
+	{
+		*value =3300;
+		return 1;
+	}
+	if (g_hw.ad_key_map[ts_active_key].chanel==channel)
+
+		*value =g_hw.ad_key_map[ts_active_key].ad_value;
+	else
+		*value == 3300;
+	if(*value == 0xffffffff)	
         return 0;
-    return 1;
+        return 1;
+ 	}
+ else
+ 	{
+		*value = 0xffffffff;
+		*value = soc_ad_read(channel)/1000;
+		if(*value == 0xffffffff)
+		return 0;
+		return 1;
+	}
 }
 
 void iSOC_Key_Report(u32 key_value, u32 type)
@@ -324,7 +348,6 @@ int fly_interface_init(void)
 	int p ; 
     DUMP_BUILD_TIME;
     ret = misc_register(&misc);
-
     plidbg_dev = kmalloc(sizeof(struct lidbg_interface), GFP_KERNEL);
 		
     if (plidbg_dev == NULL)
@@ -422,6 +445,8 @@ void fly_interface_deinit(void){}
 
 module_init(fly_interface_init);
 module_exit(fly_interface_deinit);
+EXPORT_SYMBOL(ts_active_key);
+EXPORT_SYMBOL(file_exist);
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Flyaudad Inc.");
 
