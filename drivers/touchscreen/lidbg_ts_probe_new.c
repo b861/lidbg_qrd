@@ -285,8 +285,10 @@ void ts_key_report(s32 input_x,s32 input_y,struct ts_devices_key *tskey,int size
 	{
 		if( (abs( input_x - tskey->key_x)<=tskey->offset_x)&&(abs( input_y - tskey->key_y)<=tskey->offset_y))
 			{
-			//SOC_Key_Report(get_input_key(tskey->key_value),KEY_PRESSED_RELEASED);
-			ts_active_key = tskey->key_value;
+			if(!g_var.is_fly)
+				SOC_Key_Report(get_input_key(tskey->key_value),KEY_PRESSED_RELEASED);
+			else
+				ts_active_key = tskey->key_value;
 			lidbg("tskey->key_value% d", tskey->key_value);
 			return;
 			}
