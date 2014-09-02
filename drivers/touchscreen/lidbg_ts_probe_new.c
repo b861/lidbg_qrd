@@ -5,7 +5,7 @@ LIDBG_DEFINE;
 
 #define GTP_RST_PORT_ACTIVE (1)
 #define USE_TS_NUM (0)
-
+#define TS_CONFIG_FILE  "/flysystem/flyconfig/default/panelwheel/ts_config.conf"
 //new feature: if(ts_config >TS_CONFIG_TRIGGER),insmod ts ko directly
 #define TS_CONFIG_TRIGGER (500)
 static char *ts_config_map[] =
@@ -193,17 +193,17 @@ void ts_devices_show(char *whocalls)
 
 void ts_devices_init(void)
 {
-    char ts_config_file[64]={0},tmp[32]={0};
-    snprintf(tmp, sizeof(tmp), "ts_config_%d.conf",g_var.hw_info.ts_config);
+ //   char ts_config_file[64]={0},tmp[32]={0};
+  //  snprintf(tmp, sizeof(tmp), "ts_config_%d.conf",g_var.hw_info.ts_config);
 
-    get_lidbg_file_path(ts_config_file, tmp);
+  //  get_lidbg_file_path(ts_config_file, tmp);
 
-    if(fs_is_file_exist(ts_config_file))
+    if(fs_is_file_exist(TS_CONFIG_FILE))
     {
-         file_exist = 1;
         char *ts_devices_key_map = NULL, *ts_description = NULL;
-        LIDBG_WARN(TS_TAG"<use:%s>\n",ts_config_file);
-        fs_fill_list(ts_config_file, FS_CMD_FILE_CONFIGMODE, &lidbg_ts_config_list);
+        g_var.virtual_key_file_exist = 1;
+        LIDBG_WARN(TS_TAG"<use:%s>\n",TS_CONFIG_FILE);
+        fs_fill_list(TS_CONFIG_FILE, FS_CMD_FILE_CONFIGMODE, &lidbg_ts_config_list);
 
         if((fs_get_intvalue(&lidbg_ts_config_list, "lcd_origin_x", &g_ts_devices.lcd_origin_x, NULL) < 0) || (fs_get_intvalue(&lidbg_ts_config_list, "lcd_origin_y", &g_ts_devices.lcd_origin_y, NULL) < 0)
         || fs_get_intvalue(&lidbg_ts_config_list, "key_nums", &g_ts_devices.key_nums, NULL) < 0)
@@ -251,7 +251,7 @@ void ts_devices_init(void)
         ts_devices_show("ts_devices_init");
     }
     else
-        LIDBG_WARN("<file miss:%s>\n", ts_config_file);
+        LIDBG_WARN("<file miss:%s>\n", TS_CONFIG_FILE);
 }
 int get_input_key(enum key_enum key_value)
 {
@@ -288,13 +288,13 @@ void ts_key_report(s32 input_x,s32 input_y,struct ts_devices_key *tskey,int size
 			if(!g_var.is_fly)
 				SOC_Key_Report(get_input_key(tskey->key_value),KEY_PRESSED_RELEASED);
 			else
-				ts_active_key = tskey->key_value;
+				 g_var.ts_active_key = tskey->key_value;
 			lidbg("tskey->key_value% d", tskey->key_value);
 			return;
 			}
 		tskey++;
 	}
-	ts_active_key=TS_NO_KEY;
+	 g_var.ts_active_key = TS_NO_KEY;
 }
 
 void ts_probe_prepare(void)
@@ -320,14 +320,14 @@ void ts_data_report(touch_type t,int id,int x,int y,int w)
 	GTP_SWAP(x, y);
    	 if (1 == ts_should_revert)
 		GTP_REVERT(x, y);
-	if(file_exist==1)
+	if(g_var.virtual_key_file_exist==1)
 	{
-		if( (g_ts_devices.lcd_origin_x<x)&& (x<1024+g_ts_devices.lcd_origin_x)&&(g_ts_devices.lcd_origin_y<y)&& (y<g_ts_devices.lcd_origin_y+600)||(t == TOUCH_SYNC)||(t== TOUCH_UP))
+		if( ((g_ts_devices.lcd_origin_x<x)&& (x<1024+g_ts_devices.lcd_origin_x)&&(g_ts_devices.lcd_origin_y<y)&& (y<g_ts_devices.lcd_origin_y+600))||(t == TOUCH_SYNC)||(t== TOUCH_UP))
 
 			{
 				 lidbg_touch_handle(t, id,x-g_ts_devices.lcd_origin_x, y-g_ts_devices.lcd_origin_y, w);
 				if( (t== TOUCH_UP)&&(id==0))
-				ts_active_key=TS_NO_KEY;
+				 g_var.ts_active_key = TS_NO_KEY;
 			}
 		else
 		ts_key_report(x,y, g_ts_devices.key,SIZE_OF_ARRAY(g_ts_devices.key));

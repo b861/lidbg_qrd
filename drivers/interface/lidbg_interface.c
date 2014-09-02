@@ -1,12 +1,9 @@
 
 #include "lidbg.h"
 #include "lidbg_target.c"
-#define TS_CONFIG_FILE "/data/lidbg/ts_config.txt"
+
 #define HAL_SO "/flysystem/lib/out/lidbg_loader.ko"
 LIDBG_DEFINE;
-bool file_exist=0;
-
-enum key_enum ts_active_key = TS_NO_KEY;
 
 //ad_key_map[ts_active_key].ad_value
 void interface_func_tbl_default(void)
@@ -88,19 +85,19 @@ bool iSOC_IO_Input(u32 group, u32 index, u32 pull)
 //return mv
 bool iSOC_ADC_Get (u32 channel , u32 *value)
 {	
- if((file_exist)&&( (channel==g_hw.ad_key[0].ch)||  (channel==g_hw.ad_key[1].ch)))
+ if((g_var.virtual_key_file_exist)&&( (channel==g_hw.ad_key[0].ch)||  (channel==g_hw.ad_key[1].ch)))
  	{
  	*value = 0xffffffff;
-	if( ts_active_key==TS_NO_KEY)
+	if(g_var.ts_active_key==TS_NO_KEY)
 	{
 		*value =3300;
 		return 1;
 	}
-	if (g_hw.ad_key_map[ts_active_key].chanel==channel)
+	if (g_hw.ad_key_map[g_var.ts_active_key].chanel==channel)
 
-		*value =g_hw.ad_key_map[ts_active_key].ad_value;
+		*value =g_hw.ad_key_map[g_var.ts_active_key].ad_value;
 	else
-		*value == 3300;
+		*value = 3300;
 	if(*value == 0xffffffff)	
         return 0;
         return 1;
@@ -383,7 +380,8 @@ int fly_interface_init(void)
     g_var.acc_flag = 1;
     g_var.ws_lh = NULL;
 	g_var.fb_on = true;
-
+    g_var.ts_active_key = TS_NO_KEY;
+    g_var.virtual_key_file_exist = 0;
     if( fs_is_file_exist(RECOVERY_MODE_DIR))
     {
 	    g_var.recovery_mode = 1;
@@ -448,8 +446,6 @@ void fly_interface_deinit(void){}
 
 module_init(fly_interface_init);
 module_exit(fly_interface_deinit);
-EXPORT_SYMBOL(ts_active_key);
-EXPORT_SYMBOL(file_exist);
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Flyaudad Inc.");
 

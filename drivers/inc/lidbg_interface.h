@@ -86,8 +86,7 @@ struct ts_devices
     s32 key_nums;
     struct ts_devices_key key[15];
 };
-extern enum key_enum ts_active_key;
-extern bool file_exist;
+//extern enum key_enum ts_active_key;
 static inline int write_node(char *filename, char *wbuff)
 {
     struct file *filep;
@@ -273,8 +272,8 @@ struct lidbg_pvar_t
 	struct hw_info hw_info;
 	bool fb_on;
 	bool is_first_update;
-	
-
+	enum key_enum ts_active_key ;
+        bool virtual_key_file_exist;
 };
 
 typedef struct {
@@ -300,6 +299,7 @@ struct lidbg_interface
 #define LIDBG_DEV_CHECK_READY  (plidbg_dev != NULL)
 #define LIDBG_DEFINE  struct lidbg_interface *plidbg_dev = NULL
 #define g_var  plidbg_dev->soc_pvar_tbl
+
 
 #define LIDBG_GET  \
  	do{\
