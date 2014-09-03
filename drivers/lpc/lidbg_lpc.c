@@ -43,7 +43,7 @@ struct fly_hardware_info
 #define  MCU_ADDR_W  0xA0
 #define  MCU_ADDR_R  0xA1
 
-
+int lpc_ping_test = 0;
 #define LPC_DEBUG_LOG
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
@@ -67,6 +67,33 @@ int thread_lpc(void *data)
     }
     return 0;
 }
+
+u32 ping_data = 0;
+bool ping_repay = 0;
+
+int thread_lpc_ping_test(void *data)
+{
+ 	u32 ping_wait_cnt = 0;
+	msleep(1000*10);
+    while(1)
+    {
+		LPC_CMD_PING_TEST(ping_data & 0xff);
+		while(ping_repay == 0)
+		{
+			msleep(50);
+			ping_wait_cnt ++;
+			if(ping_wait_cnt > 20) 
+				lidbgerr("lpc_ping_test err !!\n");
+		}
+		ping_data++;
+		ping_wait_cnt = 0;
+		ping_repay = 0;
+		//msleep(20);
+
+    }
+    return 0;
+}
+
 
 void LPCCombinDataStream(BYTE *p, UINT len)
 {
@@ -143,6 +170,13 @@ static void LPCdealReadFromMCUAll(BYTE *p, UINT length)
     switch (p[0])
     {
     case LPC_SYSTEM_TYPE:
+		if((p[1] ==0x44) && (p[2] == (ping_data & 0xff))
+						&&	 (p[3] == (ping_data & 0xff))
+						&&	(p[4] == (ping_data & 0xff))
+						&&	(p[5] == (ping_data & 0xff))
+						&&	(p[6] == (ping_data & 0xff))
+		)
+			ping_repay = 1;
         break;
     case 0x96:
         switch (p[2])
@@ -294,6 +328,12 @@ void mcuFirstInit(void)
 
     CREATE_KTHREAD(thread_lpc, NULL);
 
+	
+    FS_REGISTER_INT(lpc_ping_test, "lpc_ping_test", 0, NULL);
+	
+	if(lpc_ping_test)
+    	CREATE_KTHREAD(thread_lpc_ping_test, NULL);
+
 }
 
 
@@ -335,7 +375,6 @@ void lpc_linux_sync(bool print,int mint,char *extra_info)
 static int  lpc_probe(struct platform_device *pdev)
 {
     DUMP_FUN;
-		
     if((g_var.is_fly) || (g_var.recovery_mode))
     {
         lidbg("lpc_init do nothing\n");
@@ -369,12 +408,6 @@ static void lpc_early_suspend(struct early_suspend *handler) {}
 static void lpc_late_resume(struct early_suspend *handler) {}
 #endif
 
-static int thread_lpc_delay_en(void *data)
-{
-    msleep(1000);
-    lpc_work_en=true;
-    return 1;
-}
 
 #ifdef CONFIG_PM
 static int lpc_suspend(struct device *dev)
@@ -387,7 +420,7 @@ static int lpc_suspend(struct device *dev)
 static int lpc_resume(struct device *dev)
 {
     DUMP_FUN;
-    CREATE_KTHREAD(thread_lpc_delay_en, NULL);
+	lpc_work_en = true;
     return 0;
 }
 

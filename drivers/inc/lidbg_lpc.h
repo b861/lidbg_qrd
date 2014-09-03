@@ -39,6 +39,12 @@
         lidbg("LPC_CMD_FAN_OFF\n");\
 				}while(0)
 
+#define LPC_CMD_PING_TEST(x)  do{    \
+		u8 buff[] = {0x00, 0x44, x ,x,x,x,x};\
+        SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\
+				}while(0)
+
+
 #define LPC_PRINT(x,y,z)  do{lpc_linux_sync(x,y,z);}while(0)
 void lpc_linux_sync(bool print,int mint,char *extra_info);
 
