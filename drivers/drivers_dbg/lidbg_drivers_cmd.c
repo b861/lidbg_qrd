@@ -119,6 +119,7 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#022--log2sd to save qxdm\n");
             fs_mem_log("*158#023--show cpu temp\n");
             fs_mem_log("*158#024--!fan enalbe\n");
+            fs_mem_log("*158#025--LPC_CMD_ACC_SWITCH_START\n");
             lidbg_domineering_ack();
         }
 
@@ -276,6 +277,11 @@ void parse_cmd(char *pt)
                 LPC_CMD_FAN_ON;
             else
                 LPC_CMD_FAN_OFF;
+            lidbg_domineering_ack();
+        }
+        else if (!strcmp(argv[1], "*158#025"))
+        {
+            LPC_CMD_ACC_SWITCH_START;
             lidbg_domineering_ack();
         }
         else if (!strcmp(argv[1], "*168#001"))
