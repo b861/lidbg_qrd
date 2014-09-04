@@ -621,7 +621,7 @@ static int thread_observer(void *data)
             find_task_by_name_or_kill(true, false, true, "c2739.mainframe");
             kernel_wakelock_print("start:");
             userspace_wakelock_action(0, NULL);
-            find_task_by_name_or_kill(true, true, false, NULL);
+            //find_task_by_name_or_kill(true, true, false, NULL);
             while(1) //atomic_read(&is_in_sleep) == 1
             {
                 ssleep(1);

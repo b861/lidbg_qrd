@@ -120,6 +120,7 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#023--show cpu temp\n");
             fs_mem_log("*158#024--!fan enalbe\n");
             fs_mem_log("*158#025--LPC_CMD_ACC_SWITCH_START\n");
+            fs_mem_log("*158#026--clear acc history\n");
             lidbg_domineering_ack();
         }
 
@@ -160,7 +161,6 @@ void parse_cmd(char *pt)
             lidbg_shell_cmd("rm /data/logcat*");
             lidbg_shell_cmd("rm /data/kmsg*");
             lidbg("clear-logcat*&&kmsg*\n");
-            fs_file_write2("/dev/lidbg_pm0","flyaudio acc_history");
 #endif
             lidbg_domineering_ack();
         }
@@ -282,6 +282,11 @@ void parse_cmd(char *pt)
         else if (!strcmp(argv[1], "*158#025"))
         {
             LPC_CMD_ACC_SWITCH_START;
+            lidbg_domineering_ack();
+        }
+        else if (!strcmp(argv[1], "*158#026"))
+        {
+            fs_file_write2("/dev/lidbg_pm0","flyaudio acc_history");
             lidbg_domineering_ack();
         }
         else if (!strcmp(argv[1], "*168#001"))
