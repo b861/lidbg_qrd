@@ -943,6 +943,9 @@ u8 cfg_info_group17[] = CTP_CFG_GROUP11;
 u8 cfg_info_group18[] = CTP_CFG_GROUP12;
 u8 cfg_info_group19[] = CTP_CFG_GROUP13;
 u8 cfg_info_group20[] = CTP_CFG_GROUP14;
+u8 cfg_info_group21[] = CTP_CFG_GROUP15;
+u8 cfg_info_group22[] = CTP_CFG_GROUP16;
+u8 cfg_info_group23[] = CTP_CFG_GROUP17;
 static int gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
 {
 	struct i2c_client *client = ts->client;
@@ -959,7 +962,7 @@ static int gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
 		cfg_info_group3, cfg_info_group4,cfg_info_group5, cfg_info_group6,
 		cfg_info_group7, cfg_info_group8,cfg_info_group9, cfg_info_group10,cfg_info_group11, 
 		cfg_info_group12,cfg_info_group13, cfg_info_group14,cfg_info_group15, cfg_info_group16,
-		cfg_info_group17, cfg_info_group18,cfg_info_group19, cfg_info_group20};
+		cfg_info_group17, cfg_info_group18,cfg_info_group19, cfg_info_group20,cfg_info_group21,cfg_info_group22, cfg_info_group23};
 
 	u8 cfg_info_len[] = {CFG_GROUP_LEN(cfg_info_group1),
 		CFG_GROUP_LEN(cfg_info_group2),
@@ -980,7 +983,11 @@ static int gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
 		CFG_GROUP_LEN(cfg_info_group17),
 		CFG_GROUP_LEN(cfg_info_group18),
 		CFG_GROUP_LEN(cfg_info_group19),
-		CFG_GROUP_LEN(cfg_info_group20)};
+		CFG_GROUP_LEN(cfg_info_group20),
+		CFG_GROUP_LEN(cfg_info_group21),
+		CFG_GROUP_LEN(cfg_info_group22),
+		CFG_GROUP_LEN(cfg_info_group23),
+		};
 
 #ifdef SOC_msm8x26
 	if(g_var.hw_info.hw_version == 1)
