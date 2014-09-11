@@ -85,11 +85,12 @@ bool iSOC_IO_Input(u32 group, u32 index, u32 pull)
 //return mv
 bool iSOC_ADC_Get (u32 channel , u32 *value)
 {	
- if((g_var.virtual_key_file_exist)&&( (channel==g_hw.ad_key[0].ch)||  (channel==g_hw.ad_key[1].ch)))
+ if((!g_var.key_is_virtual_key)&&( (channel==g_hw.ad_key[0].ch)||  (channel==g_hw.ad_key[1].ch)))
  	{
  	*value = 0xffffffff;
 	if(g_var.ts_active_key==TS_NO_KEY)
 	{
+	         g_var.key_is_virtual_key=1;
 		*value =3300;
 		return 1;
 	}
@@ -382,6 +383,7 @@ int fly_interface_init(void)
 	g_var.fb_on = true;
     g_var.ts_active_key = TS_NO_KEY;
     g_var.virtual_key_file_exist = 0;
+    g_var.key_is_virtual_key=1;
     if( fs_is_file_exist(RECOVERY_MODE_DIR))
     {
 	    g_var.recovery_mode = 1;

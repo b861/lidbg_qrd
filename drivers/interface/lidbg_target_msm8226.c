@@ -229,6 +229,8 @@ struct hw_version_specific g_hw_version_specific[] =
 		 [TS_KEY_VOLUMEDOWN]={37,200},
 		 [TS_KEY_VOLUMEUP]={35,2800},
 	   	 [TS_KEY_NAVI]={37,1000},
+	   	 [TS_KEY_SEEKUP]={37,1500},
+	   	 [TS_KEY_SEEKDOWN]={37,2000},
 	},
 
 	.thermal_ctrl_en = 0,

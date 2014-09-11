@@ -288,7 +288,11 @@ void ts_key_report(s32 input_x,s32 input_y,struct ts_devices_key *tskey,int size
 			if(!g_var.is_fly)
 				SOC_Key_Report(get_input_key(tskey->key_value),KEY_PRESSED_RELEASED);
 			else
+				{
+				 g_var.key_is_virtual_key=0;
 				 g_var.ts_active_key = tskey->key_value;
+				}
+			//g_ts_devices.key[loop].is_depend_key,
 			lidbg("tskey->key_value% d", tskey->key_value);
 			return;
 			}
@@ -328,6 +332,7 @@ void ts_data_report(touch_type t,int id,int x,int y,int w)
 				 lidbg_touch_handle(t, id,x-g_ts_devices.lcd_origin_x, y-g_ts_devices.lcd_origin_y, w);
 				if( (t== TOUCH_UP)&&(id==0))
 				 g_var.ts_active_key = TS_NO_KEY;
+				// g_var.key_is_virtual_key=1;
 			}
 		else
 		ts_key_report(x,y, g_ts_devices.key,SIZE_OF_ARRAY(g_ts_devices.key));

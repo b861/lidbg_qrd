@@ -65,8 +65,8 @@ enum key_enum
     TS_KEY_VOLUMEDOWN,
     TS_KEY_VOLUMEUP,
     TS_KEY_NAVI,
-    
-
+    TS_KEY_SEEKUP,
+TS_KEY_SEEKDOWN,
 };
 struct ts_devices_key
 {
@@ -274,6 +274,7 @@ struct lidbg_pvar_t
 	bool is_first_update;
 	enum key_enum ts_active_key ;
         bool virtual_key_file_exist;
+	bool key_is_virtual_key;
 };
 
 typedef struct {
