@@ -1,6 +1,6 @@
 
 #include "lidbg.h"
-int temp_log_freq = 10;
+int temp_log_freq = 50;
 //static int fan_onoff_temp;
 static int cpu_temp_time_minute = 20;
 static bool is_cpu_temp_enabled = false;
@@ -54,7 +54,7 @@ u32 get_scaling_max_freq(void)
 
 void log_temp(void)
 {
-    static int old_temp, cur_temp;
+    static int old_temp = 0, cur_temp = 0;
     int tmp;
     g_var.temp = cur_temp = soc_temp_get();
     tmp = cur_temp - old_temp;
@@ -62,12 +62,21 @@ void log_temp(void)
 	if(((temp_log_freq != 0) && (ABS(tmp) >= temp_log_freq)) )
     {
     	
-		lidbg( "%d,%d,%d\n", cur_temp, get_scaling_max_freq(),cpufreq_get(0));
+		lidbg_fs_log(TEMP_LOG_PATH, "%d,%d,%d\n", cur_temp, get_scaling_max_freq(),cpufreq_get(0));
         old_temp = cur_temp;
     }
-	
-	if(g_var.temp > 85)
-		lidbg_fs_log(TEMP_LOG_PATH, "%d,%d,%d\n", cur_temp, get_scaling_max_freq(),cpufreq_get(0));
+
+	if(g_hw.thermal_ctrl_en == 0)
+	{
+		if(g_var.temp > 85)
+			lidbg_fs_log(TEMP_LOG_PATH, "%d,%d,%d\n", cur_temp, get_scaling_max_freq(),cpufreq_get(0));
+	}
+	else
+	{
+		if(g_var.temp > 105)
+			lidbg_fs_log(TEMP_LOG_PATH, "%d,%d,%d\n", cur_temp, get_scaling_max_freq(),cpufreq_get(0));
+	}
+		
 }
 
 int thread_show_temp(void *data)
@@ -95,7 +104,7 @@ void set_system_performance(bool enable)
 	if(enable)
 	{
 		set_cpu_governor(1);
-		temp_offset = 10;
+		temp_offset = 5;
 	}
 	else
 	{
@@ -283,7 +292,7 @@ void temp_init(void)
     FS_REGISTER_KEY( "cpu_temp_test", cb_kv_cpu_temp_test);
     fs_register_filename_list(TEMP_FREQ_TEST_RESULT, true);
     FS_REGISTER_INT(cpu_temp_time_minute, "cpu_temp_time_minute", 20, NULL);
-    FS_REGISTER_INT(temp_log_freq, "temp_log_freq", 10, NULL);
+    FS_REGISTER_INT(temp_log_freq, "temp_log_freq", 50, NULL);
     FS_REGISTER_INT(cpu_temp_show, "cpu_temp_show", 0, cb_kv_show_temp);
     FS_REGISTER_INT(antutu_test, "antutu_test", 0, NULL);
 
