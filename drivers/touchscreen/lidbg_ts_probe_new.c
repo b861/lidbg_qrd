@@ -6,12 +6,6 @@ LIDBG_DEFINE;
 #define GTP_RST_PORT_ACTIVE (1)
 #define USE_TS_NUM (0)
 #define TS_CONFIG_FILE  "/flysystem/flyconfig/default/panelwheel/ts_config.conf"
-//new feature: if(ts_config >TS_CONFIG_TRIGGER),insmod ts ko directly
-#define TS_CONFIG_TRIGGER (500)
-static char *ts_config_map[] =
-{
-    "gt911.ko",//ts_config[500-999]
-};
 
 static LIST_HEAD(lidbg_ts_config_list);
 
@@ -376,7 +370,7 @@ int ts_probe_thread(void *data)
 
     ts_probe_prepare();
 
-    if (USE_TS_NUM == 0 && g_var.hw_info.ts_type == 0 &&  g_var.hw_info.ts_config < TS_CONFIG_TRIGGER)
+    if (USE_TS_NUM == 0 && g_var.hw_info.ts_type == 0 )
     {
         LIDBG_WARN("<mode:scan enable[%d,%d,%d]>\n", USE_TS_NUM, g_var.hw_info.ts_type, g_var.hw_info.ts_config);
         while(1)
@@ -393,25 +387,8 @@ int ts_probe_thread(void *data)
     else
     {
         LIDBG_WARN("<mode:scan disable[%d,%d,%d]>\n", USE_TS_NUM, g_var.hw_info.ts_type, g_var.hw_info.ts_config);
-        if(g_var.hw_info.ts_config < TS_CONFIG_TRIGGER)
-        {
-            parse_ts_info(&ts_probe_dev[g_var.hw_info.ts_type > 0 ? g_var.hw_info.ts_type - 1 : USE_TS_NUM - 1 ]);
-            LIDBG_WARN("<old style:%d>\n", g_var.hw_info.ts_config);
-        }
-        else
-        {
-            char buff[50] = {0};
-            int item = g_var.hw_info.ts_config / TS_CONFIG_TRIGGER - 1;
-            if(item >= 0 && item < ARRAY_SIZE(ts_config_map))
-            {
-                lidbg_insmod( get_lidbg_file_path(buff, ts_config_map[item]));
-                LIDBG_WARN("<new style:%d,%d,%d,%s>\n", item, ARRAY_SIZE(ts_config_map), g_var.hw_info.ts_config, buff);
-            }
-            else
-                LIDBG_WARN("<new style:overline.%d,%d,%d,%d>\n", item, ARRAY_SIZE(ts_config_map), g_var.hw_info.ts_config, TS_CONFIG_TRIGGER);
-        }
+        parse_ts_info(&ts_probe_dev[g_var.hw_info.ts_type > 0 ? g_var.hw_info.ts_type - 1 : USE_TS_NUM - 1 ]);
     }
-
 
     ssleep(10);
     LIDBG_WARN("<ts_probe_thread exited>\n");
