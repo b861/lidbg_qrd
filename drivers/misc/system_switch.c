@@ -77,7 +77,8 @@ void system_switch_init(void)
 {
 
     lidbg_shell_cmd("echo ====system_switch_init:start==== > /dev/lidbg_msg" );
-	
+
+retry:
     if(SYSTEM_SWITCH_EN == 1)
     {
 	    if((g_var.is_fly)&&(!g_var.recovery_mode))
@@ -106,7 +107,7 @@ void system_switch_init(void)
 	            lidbg_shell_cmd("mv /system/app/FastBoot.apk "ORIGIN_TMP_PATH"FastBoot.apk" );
 	            lidbg_shell_cmd("mv /system/app/FlyBootService.apk "ORIGIN_TMP_PATH"FlyBootService.apk" );
 	            lidbg_shell_cmd("mv /system/app/PackageInstaller.apk "ORIGIN_TMP_PATH"PackageInstaller.apk" );
-		    lidbg_shell_cmd("mv /system/app/Provision.apk "ORIGIN_TMP_PATH"Provision.apk" );
+		    	lidbg_shell_cmd("mv /system/app/Provision.apk "ORIGIN_TMP_PATH"Provision.apk" );
 	            lidbg_shell_cmd("chmod 777 /system/priv-app/*" );
 	            lidbg_shell_cmd("chmod 777 /flysystem/app/*" );
 	            lidbg_shell_cmd("chmod 777  "ORIGIN_APP_PATH"*" );
@@ -119,12 +120,22 @@ void system_switch_init(void)
 		        lidbg_shell_cmd("mv /flysystem/app/sys-app /flysystem/app/.sys-app1" );
 				lidbg_shell_cmd("chmod 777 /system/priv-app/*");
 	        }
-
 	        if(is_out_updated)
 	        {
 	        	lidbg_shell_cmd("mount -o remount /system");
 	            lidbg_shell_cmd("cp /flysystem/lib/out/* /system/lib/modules/out" );
 	        }
+			
+			lidbg_shell_cmd("echo ====system_switch_init:finish==== > /dev/lidbg_msg" );
+			//check
+			ssleep(10);
+			if(fs_is_file_exist("/flysystem/app/sys-app/Launcher3.apk") || fs_is_file_exist("/system/priv-app/Launcher2.apk"))
+			{
+				lidbg("system_switch_init fail, retry\n");
+				goto retry;
+			}
+
+
 	    }
     	}
 	else
@@ -147,5 +158,5 @@ void system_switch_init(void)
 #endif
 	}
 	
-	lidbg_shell_cmd("echo ====system_switch_init:finish==== > /dev/lidbg_msg" );
+	
 }
