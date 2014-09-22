@@ -6,6 +6,7 @@ typedef unsigned short uint16;
 typedef  short int16;
 typedef unsigned char uint8;
 typedef  char int8;
+typedef unsigned char BYTE;
 
 typedef  unsigned int UINT;
 
@@ -85,7 +86,12 @@ typedef struct mbr_header{
 	UINT offset;
 }mbr_header_t;
 
-
+typedef struct osd_header{
+	char flags[16];
+	UINT data_size;
+	BYTE version[4];
+	UINT offset;
+}osd_header_t;
 typedef struct _FLY_RESTORE_DATA{
 	char flags[16];
 	uint8 iblock30FsTyepe;
@@ -94,6 +100,11 @@ typedef struct _FLY_RESTORE_DATA{
 
 }FLY_RESTORE_DATA;
 
+typedef struct hw_recinfo
+{
+	int bValid;
+	char info[32];
+} hw_info_t;
 
 //-----------------------------------------
 
@@ -110,8 +121,10 @@ typedef struct recovery_meg{
 	bp_time_t bpTimes;
 	recovery_language_t recoveryLanguage;
 	mbr_header_t mbrHeader;
+	osd_header_t osdHeader;
 	FLY_RESTORE_DATA flyRestoreData;
 	//-----------------------------------------
+	hw_info_t hwInfo;
 }recovery_meg_t;
 
 

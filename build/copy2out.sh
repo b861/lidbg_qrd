@@ -18,6 +18,7 @@ cp $src_dir/*.conf	$dest_dir/	&> /dev/null
 
 cd $DBG_DRIVERS_PATH
 cp -u ./inc/lidbg_interface.h $dest_dir/lidbg_interface.conf
+cp -ru ./touchscreen/ts_config $dest_dir/  &> /dev/null
 rm $dest_dir/drivers.conf  &> /dev/null
 rm $dest_dir/state.conf    &> /dev/null
 

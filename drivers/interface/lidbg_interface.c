@@ -390,6 +390,8 @@ int fly_interface_init(void)
     FS_REGISTER_INT(g_var.hw_info.ts_type, "ts_type", 0, NULL);
     FS_REGISTER_INT(g_var.hw_info.ts_config, "ts_config", 0, NULL);
     FS_REGISTER_INT(g_var.hw_info.lcd_type, "lcd_type", 0, NULL);
+    FS_REGISTER_INT(g_var.hw_info.virtual_key, "virtual_key", 0, NULL);
+
 	
 	if(g_var.hw_info.hw_version == 0)
 	{

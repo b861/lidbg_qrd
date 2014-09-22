@@ -254,6 +254,7 @@ struct hw_info
 	int ts_type;
 	int ts_config;
 	int lcd_type;
+	int virtual_key;
 	int reserve[12];
 };
 

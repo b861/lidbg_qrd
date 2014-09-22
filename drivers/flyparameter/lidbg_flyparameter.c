@@ -94,13 +94,19 @@ bool flyparameter_info_get(void)
 {
     if(p_kmem && fs_file_read(FLYPARAMETER_NODE, p_kmem, 0, sizeof(recovery_meg_t)) >= 0)
     {
+         u32 ts_flyparameter;
         g_recovery_meg = (recovery_meg_t *)p_kmem;
         lidbg("flyparameter1:%s,%s,%s\n", g_recovery_meg->recoveryLanguage.flags, g_recovery_meg->bootParam.bootParamsLen.flags, g_recovery_meg->bootParam.upName.flags);
         lidbg("flyparameter2:%d,%s,%x\n", g_recovery_meg->bootParam.upName.val, g_recovery_meg->bootParam.autoUp.flags, g_recovery_meg->bootParam.autoUp.val);
-        return true;
+	lidbg("flyparameter3 :%d,%d,%d,%d,%d",g_recovery_meg->hwInfo.info[0]-'0',g_recovery_meg->hwInfo.info[1]-'0',g_recovery_meg->hwInfo.info[2]-'0',g_recovery_meg->hwInfo.info[3]-'0',g_recovery_meg->hwInfo.info[4]-'0');
+	g_var.hw_info.ts_config = 10*(g_recovery_meg->hwInfo.info[0]-'0')+g_recovery_meg->hwInfo.info[1]-'0';
+	g_var.hw_info.virtual_key = 10*(g_recovery_meg->hwInfo.info[2]-'0')+g_recovery_meg->hwInfo.info[3]-'0';
+        lidbg("ts_config:%d,virtual_key:%d\n", g_var.hw_info.ts_config,g_var.hw_info.virtual_key);
+	return true;
     }
     return false;
 }
+//simple_strtoul(argv[0], 0, 0);
 bool flyparameter_info_save(recovery_meg_t *p_info)
 {
     if( p_info && fs_file_write(FLYPARAMETER_NODE, false, (void *) p_info, 0, sizeof(recovery_meg_t)) >= 0)
@@ -203,6 +209,7 @@ int fly_upate_info_open(struct inode *inode, struct file *filp)
 ssize_t  fly_upate_info_read(struct file *filp, char __user *buffer, size_t size, loff_t *offset)
 {
     char tmp[2];
+    update_info  = NOT_NEED_UPDATE;
     sprintf(tmp, "%d", update_info);
     if (copy_to_user(buffer, tmp, sizeof(tmp)))
     {
