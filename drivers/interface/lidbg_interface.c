@@ -85,34 +85,12 @@ bool iSOC_IO_Input(u32 group, u32 index, u32 pull)
 //return mv
 bool iSOC_ADC_Get (u32 channel , u32 *value)
 {	
- if((!g_var.key_is_virtual_key)&&( (channel==g_hw.ad_key[0].ch)||  (channel==g_hw.ad_key[1].ch)))
- 	{
- 	*value = 0xffffffff;
-	if(g_var.ts_active_key==TS_NO_KEY)
-	{
-	         g_var.key_is_virtual_key=1;
-		*value =3300;
-		return 1;
-	}
-	if (g_hw.ad_key_map[g_var.ts_active_key].chanel==channel)
-
-		*value =g_hw.ad_key_map[g_var.ts_active_key].ad_value;
-	else
-		*value = 3300;
-	if(*value == 0xffffffff)	
-        return 0;
-        return 1;
- 	}
- else
- 	{
-		*value = 0xffffffff;
-		*value = soc_ad_read(channel)/1000;
-		if(*value == 0xffffffff)
-		return 0;
-		return 1;
-	}
+	*value = 0xffffffff;
+	*value = soc_ad_read(channel)/1000;
+	if(*value == 0xffffffff)
+	return 0;
+	return 1;
 }
-
 void iSOC_Key_Report(u32 key_value, u32 type)
 {
     lidbg_key_report(key_value, type);
@@ -288,7 +266,7 @@ static void set_func_tbl(void)
     plidbg_dev->soc_func_tbl.pfnSOC_Get_CpuFreq  = iSOC_Get_CpuFreq;
 
     plidbg_dev->soc_func_tbl.pfnSOC_Uart_Send = iSOC_Uart_Send;
-	
+    plidbg_dev->soc_func_tbl.pfnHal_Ts_Callback = NULL;
 
 }
 

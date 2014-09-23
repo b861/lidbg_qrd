@@ -244,6 +244,7 @@ struct lidbg_fn_t
 	
     bool (*pfnSOC_IO_Suspend_Config)(unsigned int index, u32 direction, unsigned int pull, unsigned int drive_strength);
     int (*pfnSOC_Uart_Send)(char *arg);
+    void (*pfnHal_Ts_Callback)(int para);
 };
 
 
@@ -409,5 +410,6 @@ static inline int check_pt(void)
 #define SOC_Get_System_Sound_Status (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_Get_System_Sound_Status))
 #define SOC_Get_CpuFreq (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_Get_CpuFreq))
 #define SOC_Uart_Send  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_Uart_Send))
+#define SOC_Hal_Ts_Callback (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnHal_Ts_Callback))
 
 #endif
