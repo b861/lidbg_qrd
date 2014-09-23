@@ -360,8 +360,6 @@ int fly_interface_init(void)
     g_var.ws_lh = NULL;
 	g_var.fb_on = true;
     g_var.ts_active_key = TS_NO_KEY;
-    g_var.virtual_key_file_exist = 0;
-    g_var.key_is_virtual_key=1;
     if( fs_is_file_exist(RECOVERY_MODE_DIR))
     {
 	    g_var.recovery_mode = 1;

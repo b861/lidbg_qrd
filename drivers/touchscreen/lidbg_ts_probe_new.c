@@ -277,7 +277,6 @@ void ts_key_report(s32 input_x,s32 input_y,struct ts_devices_key *tskey,int size
 				SOC_Key_Report(get_input_key(tskey->key_value),KEY_PRESSED_RELEASED);
 			else
 				{
-				 g_var.key_is_virtual_key=0;
 				 g_var.ts_active_key = tskey->key_value;
 			 	if(SOC_Hal_Ts_Callback)
 					{
