@@ -5,7 +5,6 @@ LIDBG_DEFINE;
 
 #define GTP_RST_PORT_ACTIVE (1)
 #define USE_TS_NUM (0)
-#define TS_CONFIG_FILE  "/flysystem/flyconfig/default/panelwheel/ts_config.conf"
 
 static LIST_HEAD(lidbg_ts_config_list);
 
@@ -244,7 +243,7 @@ void ts_devices_init(void)
         ts_devices_show("ts_devices_init");
     }
     else
-        LIDBG_WARN("<file miss:%s>\n", TS_CONFIG_FILE);
+        LIDBG_WARN("<file miss:%s>\n", ts_config_file);
 }
 int get_input_key(enum key_enum key_value)
 {
@@ -266,11 +265,7 @@ switch(key_value){
 	
 }
 }
-/*enum key_enum get_ts_key(bool *key_status)
-{
-     if (g_ts_devices.key->key_pressed)
-      return g_ts_devices.key;
-}*/
+
 void ts_key_report(s32 input_x,s32 input_y,struct ts_devices_key *tskey,int size)
 {
     int i;  
@@ -286,21 +281,19 @@ void ts_key_report(s32 input_x,s32 input_y,struct ts_devices_key *tskey,int size
 				 g_var.ts_active_key = tskey->key_value;
 			 	if(SOC_Hal_Ts_Callback)
 					{
-			                  lidbg("SOC_Hal_Ts_Callbacking:%d",g_var.ts_active_key);
-					 SOC_Hal_Ts_Callback( g_var.ts_active_key);
+						// lidbg("SOC_Hal_Ts_Callbacking:%d",g_var.ts_active_key);
+						SOC_Hal_Ts_Callback( g_var.ts_active_key);
 					}
 				}
-			//g_ts_devices.key[loop].is_depend_key,
 			lidbg("tskey->key_value% d", tskey->key_value);
 			return;
 			}
 		tskey++;
 	}
-	// g_var.ts_active_key = TS_NO_KEY;
 	 	if(SOC_Hal_Ts_Callback)
 					{
-			                  lidbg("SOC_Hal_Ts_Callbacking:%d",g_var.ts_active_key);
-					 SOC_Hal_Ts_Callback(TS_NO_KEY);
+						//lidbg("SOC_Hal_Ts_Callbacking:%d",TS_NO_KEY);
+						SOC_Hal_Ts_Callback(TS_NO_KEY);
 					}
 }
 
@@ -336,13 +329,11 @@ void ts_data_report(touch_type t,int id,int x,int y,int w)
 				if( (t== TOUCH_UP)&&(id==0))
 					{
 					if(SOC_Hal_Ts_Callback)
-					{
-			                  lidbg("SOC_Hal_Ts_Callbacking:%d",g_var.ts_active_key);
-					 SOC_Hal_Ts_Callback(TS_NO_KEY);
+						{
+							//lidbg("SOC_Hal_Ts_Callbacking:%d",TS_NO_KEY);
+							SOC_Hal_Ts_Callback(TS_NO_KEY);
+						}
 					}
-					}
-				// g_var.ts_active_key = TS_NO_KEY;
-				// g_var.key_is_virtual_key=1;
 			}
 		else
 		ts_key_report(x,y, g_ts_devices.key,SIZE_OF_ARRAY(g_ts_devices.key));
