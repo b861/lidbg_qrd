@@ -54,7 +54,6 @@ int soc_io_suspend_config(u32 index, u32 direction, u32 pull, u32 drive_strength
 
 int soc_io_config(u32 index, bool direction, u32 pull, u32 drive_strength, bool force_reconfig)
 {
-#if 0
 
     if(soc_io_config_log[index] == 1)
     {
@@ -94,22 +93,20 @@ free_gpio:
             gpio_free(index);
         return 0;
     }
-#endif
 }
 
 
 int soc_io_output(u32 group, u32 index, bool status)
 {
-//    gpio_direction_output(index, status);
-//    gpio_set_value(index, status);
+    gpio_direction_output(index, status);
+    gpio_set_value(index, status);
     return 1;
 
 }
 
 bool soc_io_input( u32 index)
 {
-//    return gpio_get_value(index);
-return 0;
+    return gpio_get_value(index);
 }
 
 
