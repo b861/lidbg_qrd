@@ -1,12 +1,14 @@
 #include "lidbg_recovery.h"
 #include "lidbg.h"
 
+
+
 //#include "../../globalDef.h"
 #define TOUCH_MODE_MMAP    11
 #define TOUCH_MODE_NORMAL  22
 #define TOUCH_MODE_SEL     TOUCH_MODE_NORMAL
 #define DEVICE_NAME "fenzhi"
-volatile touch_t *touch;
+ touch_t *touch;
 
 touch_t *touchtemp;
 
@@ -49,6 +51,7 @@ EXPORT_SYMBOL(set_touch_pos);
 struct test_input_dev *dev;
 int fenzhi_major;
 int data = 8;
+#if 0
 static void dev_timer_func(unsigned long arg)
 {
     mod_timer(&dev->timer, jiffies + HZ);
@@ -60,6 +63,7 @@ static void dev_timer_func(unsigned long arg)
     //input_report_abs(dev->input_dev, ABS_Y, dev->counter);
     //input_sync(dev->input_dev);
 }
+#endif 
 
 unsigned int fenzhi_poll(struct file *filp, poll_table *wait)
 {
@@ -108,7 +112,6 @@ static int fenzhi_mmap(struct file *filp, struct vm_area_struct *vma)
 /*
  * Data management: read and write
  */
-static status = 0;
 ssize_t fenzhi_read (struct file *filp, char __user *buf, size_t count, loff_t *f_pos)
 {
 	//printk("\n fenzhi_read %d",bNeedRead);
@@ -117,14 +120,15 @@ ssize_t fenzhi_read (struct file *filp, char __user *buf, size_t count, loff_t *
 	{
 		bNeedRead = false;
 		spin_unlock(&touchlock);
-		copy_to_user(buf, touch, sizeof(touch_t));
-		return sizeof(touch_t);
+		if(copy_to_user(buf, touch, sizeof(touch_t)) == 0)
+			return sizeof(touch_t);
 	}
 	else
 	{
 		spin_unlock(&touchlock);
-		return 0;
+		//return 0;
 	}
+	return 0;
 }
 
 
@@ -163,7 +167,6 @@ int thread_recov_init(void *data)
 
 static  int my_input_driver_init(void)
 {
-    int ret;
     DUMP_BUILD_TIME;
     //LIDBG_GET;
 \
