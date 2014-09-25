@@ -71,11 +71,13 @@ void mod_io_main(int argc, char **argv)
 
             pio_int_config->ext_int_num = simple_strtoul(argv[2], 0, 0);
             lidbg("request ext_int_num: %d\n", pio_int_config->ext_int_num);
+#ifdef SOC_mt3360
+#else
             pio_int_config->ext_int_num = GPIO_TO_INT(pio_int_config->ext_int_num);
             lidbg("request ext_int_num: %d\n", pio_int_config->ext_int_num);
 
             pio_int_config->irqflags =  IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT;
-
+#endif
             pio_int_config->pisr = io_test_irq;
             pio_int_config->dev = (void *)pio_int_config;
             soc_io_irq(pio_int_config);

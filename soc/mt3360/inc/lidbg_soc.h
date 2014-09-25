@@ -11,7 +11,10 @@
 #include <linux/debugfs.h>
 #include <linux/fb.h>
 #include <mach/ac83xx_gpio_pinmux.h>
+#include <mach/ac83xx_pinmux_table.h>
 #include <mach/83xx_irqs_vector.h>
+#include <mach/pinmux.h>
+
 
 #include "mach/hardware.h"
 #include "mach/irqs.h"

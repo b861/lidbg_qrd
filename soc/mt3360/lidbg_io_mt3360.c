@@ -36,9 +36,11 @@ static irqreturn_t interrupt_isr(int irq, void *dev_id)
 
 int soc_io_irq(struct io_int_config *pio_int_config)//need set to input first?
 {
+    GPIO_MultiFun_Set(pio_int_config->ext_int_num, PINMUX_LEVEL_GPIO_END_FLAG);
+    pio_int_config->ext_int_num = GPIO_TO_INT(pio_int_config->ext_int_num);
+    pio_int_config->irqflags =  IRQF_TRIGGER_RISING;
 
-
-    if (request_irq(pio_int_config->ext_int_num, pio_int_config->pisr, pio_int_config->irqflags /*IRQF_ONESHOT |*//*IRQF_DISABLED*/, "lidbg_irq", pio_int_config->dev ))
+    if (request_gpio_irq(pio_int_config->ext_int_num , pio_int_config->pisr , IRQ_TYPE_EDGE_RISING , "lidbg_irq", NULL))
     {
         lidbg("request_irq err!\n");
         return 0;
