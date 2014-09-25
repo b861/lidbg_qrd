@@ -45,11 +45,8 @@ char *get_lidbg_file_path(char *buff, char *filename)
         else
             checked_result = 2;
     }
-    #ifdef SOC_mt3360
-    path = (checked_result == 1) ? "/data4write/flysystem/lib/out/" : "/data4write/system/lib/modules/out/";
-    #else
+
     path = (checked_result == 1) ? "/flysystem/lib/out/" : "/system/lib/modules/out/";
-    #endif
     sprintf(buff, "%s%s", path, filename);
     return buff;
 }
