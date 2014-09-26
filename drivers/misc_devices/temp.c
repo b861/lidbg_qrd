@@ -189,13 +189,19 @@ int thread_thermal(void *data)
 
 
 		}	
-		
+#ifdef PLATFORM_msm8974
+	if(g_var.recovery_mode == 1)
+		goto thermal_ctrl;
+#endif
+
 		if(g_hw.thermal_ctrl_en == 0)
 		{
 			if(cur_temp > 80)
 				lidbg("temp:%d,freq:%d\n",cur_temp,cpufreq_get(0));
 			continue;
 		}
+		
+thermal_ctrl:	
 	
 		max_freq = get_scaling_max_freq();
         //lidbg("MSM_THERM: %d\n",cur_temp);
