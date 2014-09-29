@@ -3,8 +3,4 @@ include $(DBG_DRIVERS_PATH)/drivers.mk
 
 obj-$(CONFIG_DEVICE_NEW)	+= lidbg_devices.o
 
-ifneq ($(DBG_PLATFORM),mt3360)
 lidbg_devices-objs := misc_devices.o  ad.o button.o temp.o led.o sound_det.o
-else
-lidbg_devices-objs := misc_devices.o  ad.o button.o led.o sound_det.o
-endif
