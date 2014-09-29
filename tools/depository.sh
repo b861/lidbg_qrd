@@ -49,6 +49,15 @@ function depository_make_package()
 }
 
 
+function push_flyFastBoot_apk
+{
+	expect $DBG_TOOLS_PATH/remount
+	adb push $RELEASE_REPOSITORY/app/FastBoot.apk /system/app/
+	adb push $RELEASE_REPOSITORY/app/FlyBootService.apk /system/app/
+	adb shell chmod 777 /system/app/FastBoot.apk
+	adb shell chmod 777 /system/app/FlyBootService.apk
+}
+
 function depository_menu()
 {
 if [[ $RELEASE_REPOSITORY != "" ]];then
@@ -56,6 +65,7 @@ if [[ $RELEASE_REPOSITORY != "" ]];then
 	echo [41] copy lidbg out to depository
 	echo [42] copy basesystem to depository
 	echo [43] make update package
+	echo [44] push flyFastBoot apk
 fi
 }
 
@@ -69,6 +79,8 @@ function depository_handle()
 		depository_copy_basesystem;;
 	43)
 		depository_make_package;;
+	44)
+		push_flyFastBoot_apk;;
 	*)
 		echo
 	esac
