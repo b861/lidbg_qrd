@@ -191,7 +191,11 @@ int thread_thermal(void *data)
 		}	
 #ifdef PLATFORM_msm8974
 	if(g_var.recovery_mode == 1)
+	{
+		lidbg("temp:%d,freq:%d\n",cur_temp,cpufreq_get(0));
+		msleep(500);
 		goto thermal_ctrl;
+	}
 #endif
 
 		if(g_hw.thermal_ctrl_en == 0)
@@ -295,7 +299,7 @@ int thread_antutu_test(void *data)
 	while(1)
 	{
 		cnt++;
-		lidbg("antutu test start: %d\n",cnt);
+		lidbg_fs_log(TEMP_LOG_PATH,"antutu test start: %d\n",cnt);
 
 		//lidbg_shell_cmd("pm uninstall com.antutu.ABenchMark");
 		//lidbg_pm_install_dir("/data/antutu.apk");
@@ -346,5 +350,7 @@ void temp_init(void)
 
     //FS_REGISTER_INT(fan_onoff_temp, "fan_onoff_temp", 65, NULL);
 }
+
+EXPORT_SYMBOL(thread_antutu_test);
 
 

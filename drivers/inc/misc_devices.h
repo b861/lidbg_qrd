@@ -16,6 +16,7 @@ int SOC_Get_System_Sound_Status_func(void *para, int length);
 int  iGPS_sound_status(void);
 void set_system_performance(bool enable);
 void cb_kv_show_temp(char *key, char *value);
+int thread_antutu_test(void *data);
 
 
 // PANNE_PEN

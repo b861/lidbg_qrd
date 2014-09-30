@@ -121,6 +121,7 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#024--!fan enalbe\n");
             fs_mem_log("*158#025--LPC_CMD_ACC_SWITCH_START\n");
             fs_mem_log("*158#026--clear acc history\n");
+            fs_mem_log("*158#027--antutu auto test\n");
             lidbg_domineering_ack();
         }
 
@@ -289,6 +290,12 @@ void parse_cmd(char *pt)
             fs_file_write2("/dev/lidbg_pm0","flyaudio acc_history");
             lidbg_domineering_ack();
         }
+        else if (!strcmp(argv[1], "*158#027"))
+        {
+        	CREATE_KTHREAD(thread_antutu_test, NULL);
+            lidbg_domineering_ack();
+        }
+
         else if (!strcmp(argv[1], "*168#001"))
         {
             encode = true;
