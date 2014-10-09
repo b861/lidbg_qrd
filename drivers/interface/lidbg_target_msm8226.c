@@ -256,7 +256,7 @@ struct hw_version_specific g_hw_version_specific[] =
 
 	.fly_parameter_node = "/dev/block/mmcblk0p25",
 	
-	.system_switch_en = 1,
+	.system_switch_en = 0,
 	},
 
 };

@@ -210,9 +210,11 @@ void parse_cmd(char *pt)
             CREATE_KTHREAD(thread_dump_log, NULL);
         }
         else if (!strcmp(argv[1], "*158#014"))
-            lidbg_system_switch(true);
+			if(0)
+            	lidbg_system_switch(true);
         else if (!strcmp(argv[1], "*158#015"))
-            lidbg_system_switch(false);
+			if(0)
+            	lidbg_system_switch(false);
         else if (!strcmp(argv[1], "*158#016"))
             set_wifi_adb_mode(true);
         else if (!strcmp(argv[1], "*158#017"))
