@@ -186,9 +186,7 @@ static int thread_trace_msg_in(void *data)
 
 	        if(len >= 0)
 	        {
-#ifndef PLATFORM_msm8974 //need to be debug
 	            kmsg_fifo_collect(buff, len);
-#endif
 	            lidbg_trace_msg_is_enough(len);
 
 	            down(&pdev->sem);

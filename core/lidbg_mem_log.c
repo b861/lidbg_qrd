@@ -123,7 +123,7 @@ int lidbg_fifo_get(struct lidbg_fifo_device *dev, char *to_file, int out_mode)
 
         LIDBG_WARN("%s:kfifo_len=%d\n", dev->owner, len);
 
-        msg_out_buff = kmalloc(len, GFP_KERNEL);
+        msg_out_buff = kmalloc(len+1, GFP_KERNEL);
         if (msg_out_buff == NULL)
         {
             ret = -1;
@@ -131,7 +131,7 @@ int lidbg_fifo_get(struct lidbg_fifo_device *dev, char *to_file, int out_mode)
             return ret;
         }
 
-        memset(msg_out_buff, '\0', sizeof(msg_out_buff));
+        memset(msg_out_buff, '\0', len+1);
         spin_lock_irqsave(&dev->fifo_lock, flags);
         ret = kfifo_out(&dev->fifo, msg_out_buff, len);
         spin_unlock_irqrestore(&dev->fifo_lock, flags);
