@@ -209,12 +209,12 @@ void parse_cmd(char *pt)
             lidbg_fifo_get(glidbg_msg_fifo, LIDBG_LOG_DIR"lidbg_mem_log.txt", 0);
             CREATE_KTHREAD(thread_dump_log, NULL);
         }
+		
         else if (!strcmp(argv[1], "*158#014"))
-			if(0)
             	lidbg_system_switch(true);
         else if (!strcmp(argv[1], "*158#015"))
-			if(0)
             	lidbg_system_switch(false);
+            	
         else if (!strcmp(argv[1], "*158#016"))
             set_wifi_adb_mode(true);
         else if (!strcmp(argv[1], "*158#017"))

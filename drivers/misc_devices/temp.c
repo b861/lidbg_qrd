@@ -205,6 +205,9 @@ int thread_thermal(void *data)
 			continue;
 		}
 		
+		if(0)goto thermal_ctrl;
+
+		
 thermal_ctrl:	
 	
 		max_freq = get_scaling_max_freq();
