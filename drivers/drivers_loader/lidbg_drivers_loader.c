@@ -49,7 +49,11 @@ bool analyze_list_cmd(struct list_head *client_list)
             }
 #endif
             else
-                lidbg_shell_cmd(pos->yourkey);
+        	{
+        		msleep(100);
+        		lidbg_shell_cmd(pos->yourkey);
+			}
+                
             continue;
 drop:
             LIDBG_WARN("bad cmd<%s>\n", pos->yourkey);
