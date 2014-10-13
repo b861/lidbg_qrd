@@ -31,4 +31,8 @@ ifeq ($(CONFIG_HAL_UART_SEND_DATA),y)
 SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,lidbg_uart_send_data)
 endif
 
+ifeq ($(CONFIG_HAL_ANDROID_SERVER),y)
+SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,lidbg_android_server)
+endif
+
 include $(SUBDIR_MAKEFILES)

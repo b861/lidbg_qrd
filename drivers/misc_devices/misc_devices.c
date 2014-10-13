@@ -112,19 +112,25 @@ static void parse_cmd(char *pt)
     lidbg("%s\n", pt);
     argc = lidbg_token_string(pt, " ", argv);
 
-	if (!strcmp(pt, "lcd_on"))
+    if (!strcmp(argv[0], "sound"))
+    {
+        bool enable;
+        enable = simple_strtoul(argv[1], 0, 0);
+        sound_detect_event(enable);
+    }
+	else if (!strcmp(argv[0], "lcd_on"))
     {
 		LCD_ON;
     }
-    else if (!strcmp(pt, "lcd_off"))
+    else if (!strcmp(argv[0], "lcd_off"))
     {
 		LCD_OFF;
     }
-	else if (!strcmp(pt, "performance_on"))
+	else if (!strcmp(argv[0], "performance_on"))
     {
 		set_system_performance(1);
     }
-	else if (!strcmp(pt, "performance_off"))
+	else if (!strcmp(argv[0], "performance_off"))
     {
 		set_system_performance(0);
     }
@@ -178,8 +184,8 @@ static int soc_dev_probe(struct platform_device *pdev)
 
 	CREATE_KTHREAD(thread_led, NULL);
 	CREATE_KTHREAD(thread_thermal, NULL);
-	CREATE_KTHREAD(thread_sound_detect, NULL);
-
+	sound_detect_init();
+	
 	if((g_var.is_fly == 0) || (g_var.recovery_mode == 1))
 	{
 	    CREATE_KTHREAD(thread_button_init, NULL);
@@ -248,7 +254,6 @@ static void set_func_tbl(void)
 {
     plidbg_dev->soc_func_tbl.pfnSOC_Get_System_Sound_Status = SOC_Get_System_Sound_Status_func;
 	plidbg_dev->soc_func_tbl.pfnGPS_sound_status = iGPS_sound_status;
-		
 }
 
 

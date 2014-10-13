@@ -1,14 +1,42 @@
 #include "lidbg.h"
 
-static int sound_detect_dbg = 0;
-static int sound_detect_delay_ms = 200;
-static int is_system_sound_on = 0;
-static int has_called_user_on = 0;
-int g_length;
+#define TAG "sound:"
 
+static int sound_detect_dbg = 0;
 int gps_status = -1;
 
 struct completion GPS_status_sem;
+
+int sound_detect_event(bool started)
+{
+    if(started)
+    {
+        lidbg(TAG"music_start,%d\n", started);
+        gps_status = 1;
+        complete(&GPS_status_sem);
+    }
+    else
+    {
+        lidbg(TAG"music_stop,%d\n", started);
+        gps_status = 2;
+        complete(&GPS_status_sem);
+    }
+	return 1;
+}
+
+void cb_sound_detect(char *key, char *value )
+{
+	lidbg_setprop("persist.lidbg.sound.dbg", value);
+	lidbg(TAG"persist.lidbg.sound.dbg=%s\n", value);
+}
+int sound_detect_init(void)
+{
+    init_completion(&GPS_status_sem);
+    FS_REGISTER_INT(sound_detect_dbg, "sound_detect_dbg", 0, cb_sound_detect);
+    lidbg(TAG"sound_detect_init\n");
+
+	return 1;
+}
 
 int  iGPS_sound_status(void)
 {
@@ -18,88 +46,8 @@ int  iGPS_sound_status(void)
 
 int SOC_Get_System_Sound_Status_func(void *para, int length)
 {
-	int i;
-	char *p = (char *)para;
-	if((length < 20) || (para == NULL))
-		return 0;
-	
-    if(sound_detect_dbg)
-        lidbg("%d\n " , length);
-
-	for(i=0;i<20;i++)
-	{
-		if(p[i] != 0)
-			goto data_not_all_zero;
-	}
-
-	for(i=1;i<20;i++)
-	{
-		if(p[length - i] != 0)
-			goto data_not_all_zero;
-	}
-
-	//is_system_sound_on = 0;
-	//g_length = 0;
-	if(sound_detect_dbg)lidbg("data_all_zero\n");
-	
-	return 0;
-
-
-data_not_all_zero:	
-    is_system_sound_on = 1;
-    g_length = length;
     return 1;
 }
 
-int thread_sound_detect(void *data)
-{
-	int i;
-    init_completion(&GPS_status_sem);
-    FS_REGISTER_INT(sound_detect_dbg, "sound_detect_dbg", 0, NULL);
-    lidbg("System_Sound_Status.start\n");
-    while(1)
-    {
-        if(is_system_sound_on == 1)
-        {
-            is_system_sound_on = 0;
-            if(!has_called_user_on)
-            {
-                has_called_user_on = 1;
-                lidbg("music_start,len=%d\n",g_length);
-                gps_status = 1;
-                complete(&GPS_status_sem);
-            }
-        }
-        else if(has_called_user_on)
-        {
-            has_called_user_on = 0;
-            lidbg("music_stop,len=%d\n",g_length);
-            gps_status = 2;
-            complete(&GPS_status_sem);
-        }
-
-		if(0)
-		{
-			int len;
-			len = g_length;
-			sound_detect_delay_ms = (2000 * g_length / 32768) / 50 ;
-	        if(sound_detect_dbg)
-	            lidbg("msleep=%d times\n " ,  sound_detect_delay_ms);
-			
-			for(i = 0; i < sound_detect_delay_ms ; i++)
-			{
-				if(g_length != len)
-					break;
-	        	msleep(50);
-			}
-		}
-		else
-		{
-			msleep(sound_detect_delay_ms);
-		}
-		
-   }
-    return 0;
-}
 
 
