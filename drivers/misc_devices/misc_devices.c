@@ -264,10 +264,7 @@ int dev_init(void)
     LIDBG_GET;
 	set_func_tbl();
 	platform_device_register(&soc_devices);
-    platform_driver_register(&soc_devices_driver);
-	#ifdef PLATFORM_msm8974
-		gpio_free(0);     //release  uart1_tx gpio
-	#endif
+	platform_driver_register(&soc_devices_driver);
     return 0;
 }
 
