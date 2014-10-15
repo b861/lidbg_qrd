@@ -370,10 +370,13 @@ static int dsi83_probe(struct platform_device *pdev)
 {
 	int ret = 0;
 	lidbg("%s:enter\n", __func__);
+	
+	MSM_DSI83_POWER_ON;
+	
     if(is_dsi83_exist() < 0)
    	{
    		lidbg("dsi83.miss\n");
-		
+		/*
 		if(g_var.is_fly)
 		{
 			lidbg_insmod("/flysystem/lib/out/bx5b3a.ko");
@@ -383,6 +386,7 @@ static int dsi83_probe(struct platform_device *pdev)
 			lidbg_insmod("/system/lib/modules/out/bx5b3a.ko");
 		}
 		return 0;
+		*/
    	}
 		
    	create_proc_read_entry("dsi83_rst", 0, NULL, dsi83_rst_proc, NULL);
@@ -428,11 +432,15 @@ static int dsi83_ops_suspend(struct device *dev)
 {
     DUMP_FUN;
     is_dsi83_inited = false;
+	
+	MSM_DSI83_POWER_OFF;
     //dsi83_suspend();
     return 0;
 }
 static int thread_dsi83_ops_resume(void *data)
 {
+	MSM_DSI83_POWER_ON;
+
     msleep(200);
 	dsi83_resume();
     return 1;
