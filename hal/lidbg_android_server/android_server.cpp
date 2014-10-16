@@ -23,7 +23,7 @@ bool dbg = false;
 bool playing_old = false;
 int loop_count = 0;
 
-static sp<IAudioPolicyService> gAudioPolicyService;
+static sp<IAudioPolicyService> gAudioPolicyService = 0;
 
 void GetAudioPolicyService(void)
 {
@@ -37,35 +37,43 @@ void GetAudioPolicyService(void)
         if (binder != 0)
             break;
         lidbg(TAG" waiting...");
-        usleep(500000);
+        usleep(1000000);
     }
     while (true);
     gAudioPolicyService = interface_cast<IAudioPolicyService>(binder);
     if(gAudioPolicyService == 0)
-        lidbg(TAG "GetAudioPolicyService.fail");
+        lidbg(TAG "GetAudioPolicyService.fail1");
     else
-        lidbg( TAG"GetAudioPolicyService.succes");
+        lidbg( TAG"GetAudioPolicyService.succes1");
 }
 
+bool playing = false;
 int main(int argc, char **argv)
 {
-    bool playing = false;
+    lidbg( TAG"lidbg_android_server:main");
 
-    lidbg( "lidbg_android_server:main");
-
+    sleep(20);
     GetAudioPolicyService();
 
-    sp<IAudioPolicyService> &aps = gAudioPolicyService;
     while(1)
     {
-        playing = aps->isStreamActive((audio_stream_type_t)3, 0) |
-                  aps->isStreamActive((audio_stream_type_t)0, 0) |
-                  aps->isStreamActive((audio_stream_type_t)1, 0) |
-                  aps->isStreamActive((audio_stream_type_t)2, 0) |
-                  aps->isStreamActive((audio_stream_type_t)4, 0) |
-                  aps->isStreamActive((audio_stream_type_t)5, 0);
-        if(dbg)
-            lidbg(TAG"playing=%d\n", playing);
+        if(gAudioPolicyService != 0)
+        {
+            sp<IAudioPolicyService> &aps = gAudioPolicyService;
+            playing = aps->isStreamActive((audio_stream_type_t)3, 0) |
+                      aps->isStreamActive((audio_stream_type_t)0, 0) |
+                      aps->isStreamActive((audio_stream_type_t)2, 0) |
+                      aps->isStreamActive((audio_stream_type_t)1, 0) |
+                      aps->isStreamActive((audio_stream_type_t)5, 0);
+            if(dbg)
+                lidbg(TAG"playing=%d\n", playing);
+        }
+        else
+        {
+            lidbg( TAG"gAudioPolicyService == 0");
+            GetAudioPolicyService();
+        }
+
         if(playing != playing_old)
         {
             char cmd[16];
@@ -77,9 +85,10 @@ int main(int argc, char **argv)
 
         }
         loop_count++;
-        if(loop_count > 100)
+        if(loop_count > 30)
         {
             char value[PROPERTY_VALUE_MAX];
+            GetAudioPolicyService();
             property_get("persist.lidbg.sound.dbg", value, "0");
             if (value[0] == '1')
                 dbg = 1;
@@ -87,7 +96,7 @@ int main(int argc, char **argv)
                 dbg = 0;
             loop_count = 0;
         }
-        usleep(200000);
+        usleep(700000);
     }
 
 }
