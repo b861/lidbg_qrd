@@ -276,8 +276,8 @@ int thread_start_cpu_tmp_test(void *data)
         cur_temp = soc_temp_get();
         fs_string2file(100, TEMP_FREQ_TEST_RESULT, "%d,temp=%d,time=%d,freq=%s:\n", freq_pos, cur_temp, int_time_count * 2, group[freq_pos]);
         lidbg("%d,temp=%d,time=%d,freq=%s:\n", freq_pos, cur_temp, int_time_count * 2, group[freq_pos]);
-        ssleep(2);
-        if(int_time_count * 2 > cpu_temp_time_minute * 60)
+        msleep(1000);
+        if(int_time_count  > cpu_temp_time_minute * 60)
             lidbg_reboot();
     }
     return 0;
