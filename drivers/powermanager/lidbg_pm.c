@@ -310,13 +310,13 @@ struct task_struct *find_task_by_name_or_kill(bool enable_filter, bool enable_db
         {
             if (p->flags & PF_KTHREAD || !(p->flags & PF_FORKNOEXEC))
                 continue;
-	     #ifdef SOC_mt3360
-	     if (test_task_flag(p, TIF_MEMDIE))  // TIF_MM_RELEASED is not defined on MT3360 kernel
+#ifdef SOC_mt3360
+            if (test_task_flag(p, TIF_MEMDIE))  // TIF_MM_RELEASED is not defined on MT3360 kernel
                 continue;
-	     #else
+#else
             if (test_task_flag(p, TIF_MM_RELEASED) || test_task_flag(p, TIF_MEMDIE))
                 continue;
-	     #endif
+#endif
         }
         if(enable_dbg)
         {
@@ -626,6 +626,8 @@ static int thread_observer(void *data)
             find_task_by_name_or_kill(true, false, true, "c2739.mainframe");
             kernel_wakelock_print("start:");
             userspace_wakelock_action(0, NULL);
+            lidbg_shell_cmd("echo airplane_mode_on:$(getprop persist.radio.airplane_mode_on) > /dev/lidbg_msg");
+            lidbg_shell_cmd("echo wlan.driver.status:$(getprop wlan.driver.status) > /dev/lidbg_msg");
             //find_task_by_name_or_kill(true, true, false, NULL);
             while(1) //atomic_read(&is_in_sleep) == 1
             {
