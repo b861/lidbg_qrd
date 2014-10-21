@@ -103,9 +103,86 @@ static struct platform_driver lidbg_soc_driver =
 };
 
 
+
+int lidbg_write_file(const char *filename, const char *wbuf, size_t length)
+{
+    int ret = 0;
+    struct file *filp = (struct file *) - ENOENT;
+    mm_segment_t oldfs;
+    oldfs = get_fs();
+    set_fs(KERNEL_DS);
+
+    filp = filp_open(filename, O_RDWR | O_CREAT, 0666);
+    if (IS_ERR(filp) || !filp->f_op)
+    {
+    
+		lidbg("kernel_write_file:filp_open Error\n");
+        ret = -ENOENT;
+        return ret;
+    }
+
+    ret = filp->f_op->write(filp, wbuf, length, &filp->f_pos);
+    if (ret < 0)
+    {
+        lidbg("kernel_write_file:write Error\n");
+        return ret;
+    }
+
+    if (!IS_ERR(filp))
+        filp_close(filp, NULL);
+    set_fs(oldfs);
+    return ret;
+}
+
+int thread_get_mac_addr(void *data)
+{
+try_get_smem:
+	if (p_fly_smem == NULL)
+		p_fly_smem = (struct fly_smem *)smem_alloc(SMEM_ID_VENDOR0, sizeof(struct fly_smem));
+	
+	if (p_fly_smem == NULL)
+	{
+		msleep(500);
+		goto try_get_smem;
+	}
+	
+	msleep(100);
+	
+	lidbg( "SMEM_ID_VENDOR0 ok!\n");
+	
+	
+	{
+		int i; u8 *p;
+		p = (u8 *)p_fly_smem;
+		lidbg( "smem_data = ");
+		for(i = 0; i < sizeof(struct fly_smem); i ++ )
+		{
+			lidbg("%d ",p[i]);
+		}
+		lidbg("\n");
+	}
+
+
+	/*
+		p_fly_smem->mac_addr[0] = 1;
+		p_fly_smem->mac_addr[1] = 2;
+		p_fly_smem->mac_addr[2] = 3;
+		p_fly_smem->mac_addr[3] = 4;
+		p_fly_smem->mac_addr[4] = 5;
+		p_fly_smem->mac_addr[5] = 6;
+	*/
+	lidbg_write_file("/data/lidbg/wlan_mac",p_fly_smem->mac_addr,6);
+
+	 return 0;
+}
+
+
+
 int msm8226_init(void)
 {
 	DUMP_BUILD_TIME;
+
+    CREATE_KTHREAD(thread_get_mac_addr, NULL);
 
     platform_device_register(&lidbg_soc);
     platform_driver_register(&lidbg_soc_driver);

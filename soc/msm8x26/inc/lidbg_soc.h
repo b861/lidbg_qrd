@@ -183,15 +183,8 @@ void lidbg_soc_main(int argc, char **argv);
 #if 1
 struct fly_smem
 {
-    u8 reserved[4];
-    u32 ch[ADC_MAX_CH];
-    int reserved2;
-    int bl_value;
+    char mac_addr[32];
 };
-#define SMEM_AD  p_fly_smem->ch
-#define SMEM_BL  p_fly_smem->bl_value
-#define SMEM_TEMP  p_fly_smem->ch[6]
-#define STRICT_SUSPEND  p_fly_smem->reserved[0]
 
 #else
 struct fly_smem
