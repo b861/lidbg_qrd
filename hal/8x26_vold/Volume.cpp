@@ -459,6 +459,20 @@ if(n==1){
 				continue;
 		}
 	}
+
+
+	else if(Exfat::check(devicePath)==0)
+	{
+		SLOGW("this is Exfat filesystem, ready to mount!\n");
+		LIDBG_PRINT("this is Exfat filesystem, ready to mount!\n");
+		if (Exfat::doMount(devicePath, getMountpoint(), false, false, false, AID_MEDIA_RW, AID_MEDIA_RW, 0007, true))
+		{
+		        SLOGE("%s failed to mount via Exfat (%s)\n", devicePath, strerror(errno));
+			LIDBG_PRINT("%s failed to mount via Exfat (%s)\n", devicePath, strerror(errno));
+		        continue;
+		}
+	}
+
 	else if(Ntfs::check(devicePath) == 0)
 	{
 		SLOGW("this is NTFS filesystem, ready to mount!\n");
@@ -470,6 +484,10 @@ if(n==1){
 		        continue;
 		}
 	}
+
+
+
+
 	else{
 		if (errno == ENODATA) {
 	                SLOGW("%s unkown filesystem\n", devicePath);
@@ -477,7 +495,7 @@ if(n==1){
 	                continue;
             	}
 	            errno = EIO;
-	            /* Badness - abort the mount */
+
 	            SLOGE("%s failed FS checks (%s)", devicePath, strerror(errno));
 		LIDBG_PRINT("%s failed FS checks (%s)", devicePath, strerror(errno));
 	            setState(Volume::State_Idle);

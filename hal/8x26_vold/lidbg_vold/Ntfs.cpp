@@ -96,19 +96,21 @@ int Ntfs::check(const char *fsPath) {
         const char *args[5];
 	int status;
         args[0] = FSCK_NTFS_PATH;
-        args[1] = fsPath;
-        args[2] = "-a";
-        args[3] = "-f";
-        args[4] = NULL;
+	args[1] = "--readwrite";
+        args[2] = fsPath;	
+       // args[1] = fsPath;
+      //  args[2] = "-a";
+       // args[3] = "-f";
+        args[3] = NULL;
 
         rc = android_fork_execvp(ARRAY_SIZE(args), (char **)args, &status,false, true);
         if (rc != 0) {
             SLOGE("Filesystem check failed due to logwrap error");
-	    LIDBG_PRINT("Filesystem check failed due to logwrap error");
+	    LIDBG_PRINT("Filesystem check failed due to logwrap error, rc = %d",rc);
             errno = EIO;
             return -1;
         }
-        if (!WIFEXITED(status)) {
+       if (!WIFEXITED(status)) {
             SLOGE("Filesystem check did not exit properly");
 	    LIDBG_PRINT("Filesystem check did not exit properly");	
             errno = EIO;
@@ -116,6 +118,7 @@ int Ntfs::check(const char *fsPath) {
         }
         status = WEXITSTATUS(status);
 
+	LIDBG_PRINT("status is %d\n", status);
         switch(status) {
         case 0:
             SLOGI("Filesystem check completed OK");
