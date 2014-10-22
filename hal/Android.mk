@@ -35,4 +35,6 @@ ifeq ($(CONFIG_HAL_ANDROID_SERVER),y)
 SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,lidbg_android_server)
 endif
 
+SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,apk)
+
 include $(SUBDIR_MAKEFILES)

@@ -46,6 +46,12 @@ int thread_drivers_dbg_init(void *data)
 		
 		lidbg("enable wifi adb\n");
 		set_wifi_adb_mode(true);
+
+		{
+            char buff[50] = {0};
+            lidbg_pm_install_dir(get_lidbg_file_path(buff, "fileserver.apk"));
+            lidbg_pm_install_dir(get_lidbg_file_path(buff, "MobileRateFlow.apk"));
+        }
 	}
 	
     return 0;

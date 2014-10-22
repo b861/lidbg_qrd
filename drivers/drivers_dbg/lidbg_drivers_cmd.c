@@ -129,6 +129,7 @@ void parse_cmd(char *pt)
         {
             char buff[50] = {0};
             lidbg_pm_install_dir(get_lidbg_file_path(buff, "fileserver.apk"));
+            lidbg_pm_install_dir(get_lidbg_file_path(buff, "MobileRateFlow.apk"));
         }
         else if (!strcmp(argv[1], "*158#001"))
         {
