@@ -188,6 +188,12 @@ static unsigned int gps_poll(struct file *filp, struct poll_table_struct *wait)
 
 static long gps_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 {
+	static bool flag = 1;
+	if(flag)
+	{
+		fs_mem_log("ublox_so_load=true\n");
+		flag = 0;
+	}
     switch(cmd)
     {
     case GPS_START:
