@@ -122,6 +122,8 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#025--LPC_CMD_ACC_SWITCH_START\n");
             fs_mem_log("*158#026--clear acc history\n");
             fs_mem_log("*158#027--antutu auto test\n");
+            fs_mem_log("*158#028--delete ublox so && reboot\n");
+
             lidbg_domineering_ack();
         }
 
@@ -297,6 +299,15 @@ void parse_cmd(char *pt)
         {
         	CREATE_KTHREAD(thread_antutu_test, NULL);
             lidbg_domineering_ack();
+        }
+        else if (!strcmp(argv[1], "*158#028"))
+        {
+			lidbg_shell_cmd("mount -o remount /flysystem");	
+			lidbg_shell_cmd("rm /flysystem/lib/out/"FLY_GPS_SO);
+			lidbg_shell_cmd("mount -o remount,ro /flysystem");	
+            lidbg_domineering_ack();
+			msleep(3000);
+			lidbg_reboot();
         }
 
         else if (!strcmp(argv[1], "*168#001"))
