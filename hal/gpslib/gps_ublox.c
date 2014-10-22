@@ -787,6 +787,7 @@ gps_state_start( GpsState  *s )
 {
     char  cmd = CMD_START;
     int   ret;
+	lidbg("[ublox]gps_state_start\n");
 
     do
     {
@@ -805,6 +806,7 @@ gps_state_stop( GpsState  *s )
 {
     char  cmd = CMD_STOP;
     int   ret;
+	lidbg("[ublox]gps_state_start\n");
 
     do
     {
@@ -1010,6 +1012,7 @@ gps_state_init( GpsState  *state, GpsCallbacks *callbacks )
     state->control[0] = -1;
     state->control[1] = -1;
     state->fd         = -1;
+	lidbg("[ublox]gps_state_init\n");
 
 again:
     state->fd = open(GPS_DEV_NAME, O_RDONLY);
