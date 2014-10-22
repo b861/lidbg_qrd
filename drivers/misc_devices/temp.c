@@ -189,14 +189,14 @@ int thread_thermal(void *data)
 
 
 		}	
-#ifdef PLATFORM_msm8974
-	if(g_var.recovery_mode == 1)
-	{
-		lidbg("temp:%d,freq:%d\n",cur_temp,cpufreq_get(0));
-		msleep(500);
-		goto thermal_ctrl;
-	}
-#endif
+
+
+		if(g_var.recovery_mode == 1)
+		{
+			lidbg("temp:%d,freq:%d\n",cur_temp,cpufreq_get(0));
+			msleep(500);
+			goto thermal_ctrl;
+		}
 
 		if(g_hw.thermal_ctrl_en == 0)
 		{

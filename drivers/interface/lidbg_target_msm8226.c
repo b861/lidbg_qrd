@@ -233,7 +233,8 @@ struct hw_version_specific g_hw_version_specific[] =
 	   	 [TS_KEY_SEEKDOWN]={37,2000},
 	},
 
-	.thermal_ctrl_en = 1,
+	.thermal_ctrl_en = 0,
+	/*
 	.cpu_freq_thermal = 
 	{
 		
@@ -246,7 +247,20 @@ struct hw_version_specific g_hw_version_specific[] =
 		{106,500, 300000, "300000","200000000"},
 		{0,0, 0, "0"},//end flag
 	},
-	
+	*/
+     //for recovery
+	.cpu_freq_thermal = 
+	{
+		
+		{1,  50,  1593600,"1593600","450000000"},
+		{51, 60,  1401600,"1401600","450000000"},
+		{61, 65,  1305600,"1305600","450000000"},
+		{66, 80,  998400, "998400","450000000"},
+		{81, 85,  787200, "787200","450000000"},
+		{86, 90,  600000, "600000","320000000"},
+		{91, 500, 300000, "300000","200000000"},
+		{0,0, 0, "0"},//end flag
+	},		 
 	.cpu_freq_list = "300000,384000,600000,787200,998400,1094400,1190400,1305600,1344000,1401600,1497600,1593600",
 	.cpu_freq_temp_node = "/sys/class/thermal/thermal_zone5/temp",
 	.gpu_max_freq_node = "/sys/class/kgsl/kgsl-3d0/max_gpuclk",
