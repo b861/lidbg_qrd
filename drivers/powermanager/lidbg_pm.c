@@ -274,6 +274,12 @@ void usb_disk_enable(bool enable)
 
 static int thread_gpio_app_status_delay(void *data)
 {
+#if defined(PLATFORM_msm8974)
+	PM_WARN("<FlySwitching.apk>\n");
+	lidbg_shell_cmd("mount -o remount /flysystem");
+	lidbg_shell_cmd("mv /flysystem/lib/out/FlySwitching.apk /flysystem/app/");
+#endif
+
     ssleep(30);
     MCU_APP_GPIO_ON;
 #ifdef CONTROL_PM_IO_BY_BP
