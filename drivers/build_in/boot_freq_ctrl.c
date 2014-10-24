@@ -2,7 +2,7 @@
 //#define PLATFORM_MSM8974 1
 #define  RECOVERY_MODE_DIR "/sbin/recovery"
 
-
+bool ctrl_en = 1;
 struct thermal_ctrl
 {
 	int temp_low;
@@ -105,10 +105,11 @@ static int thread_freq_limit(void *data)
 		count++;
 		if(count >= 45*4)
 		{
-			ctrl_max_freq = 0;
 #ifdef PLATFORM_MSM8226
-			lidbg_readwrite_file(FREQ_MAX_NODE, NULL, "1593600", strlen("1593600"));
+			ctrl_max_freq = 1593600;
+			//lidbg_readwrite_file(FREQ_MAX_NODE, NULL, "1593600", strlen("1593600"));
 #endif
+			ctrl_en = 0;
 			lidbg("thread_freq_limit stoped\n");
 			return 1;
 		}
@@ -118,7 +119,7 @@ static int thread_freq_limit(void *data)
     return 1;
 }
 
-/*
+
 static int  cpufreq_callback(struct notifier_block *nfb,
 		unsigned long event, void *data)
 {
@@ -126,7 +127,7 @@ static int  cpufreq_callback(struct notifier_block *nfb,
 
 	switch (event) {
 	case CPUFREQ_NOTIFY:
-		if(ctrl_max_freq != 0)
+		if((ctrl_max_freq != 0) && (ctrl_en))
 		{
 			policy->max = ctrl_max_freq;
 			lidbg("%s: mitigating cpu %d to freq max: %u min: %u\n",
@@ -140,18 +141,18 @@ static int  cpufreq_callback(struct notifier_block *nfb,
 static struct notifier_block cpufreq_notifier = {
 	.notifier_call = cpufreq_callback,
 };
-*/
+
 void freq_ctrl_start(void)
 {
 	struct task_struct *task;
-/*
+
 	int ret = 0;
 	ret = cpufreq_register_notifier(&cpufreq_notifier,
 			CPUFREQ_POLICY_NOTIFIER);
 	if (ret)
 		pr_err("%s: cannot register cpufreq notifier\n",
 			KBUILD_MODNAME);
-*/
+
 	task = kthread_create(thread_freq_limit, NULL, "thread_freq_limit");
 	if(IS_ERR(task))
 	{

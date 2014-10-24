@@ -69,12 +69,12 @@ void log_temp(void)
 
 	if(g_hw.thermal_ctrl_en == 0)
 	{
-		if(g_var.temp > 95)
+		if(g_var.temp > 85)
 			lidbg_fs_log(TEMP_LOG_PATH, "%d,%d,%d\n", cur_temp, get_scaling_max_freq(),cpufreq_get(0));
 	}
 	else
 	{
-		if(g_var.temp > 105)
+		if(g_var.temp > 90)
 			lidbg_fs_log(TEMP_LOG_PATH, "%d,%d,%d\n", cur_temp, get_scaling_max_freq(),cpufreq_get(0));
 	}
 		
@@ -193,6 +193,7 @@ int thread_thermal(void *data)
 
 		if(g_var.recovery_mode == 1)
 		{
+			temp_offset = -10;
 			lidbg("temp:%d,freq:%d\n",cur_temp,cpufreq_get(0));
 			msleep(500);
 			goto thermal_ctrl;
