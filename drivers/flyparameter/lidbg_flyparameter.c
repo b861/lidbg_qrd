@@ -244,7 +244,7 @@ int flyparameter_init(void)
         lidbgerr("kzalloc.p_kmem\n");
 
     if(!flyparameter_info_get())
-        lidbgerr("flyparameter_info_get\n");
+        lidbg("flyparameter_info_get\n");
 
     return 0;
 }

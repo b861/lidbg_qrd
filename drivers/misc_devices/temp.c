@@ -193,7 +193,7 @@ int thread_thermal(void *data)
 
 		if(g_var.recovery_mode == 1)
 		{
-			temp_offset = -10;
+			temp_offset = -20;
 			lidbg("temp:%d,freq:%d\n",cur_temp,cpufreq_get(0));
 			msleep(500);
 			goto thermal_ctrl;
