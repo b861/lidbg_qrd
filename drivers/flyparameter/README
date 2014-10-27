@@ -1,11 +1,7 @@
-1.Lk红屏，传内核启动命令行“update_hw_info=1”
-2.进back-recovery ，升级正常recovery 后重启。lidbg检测到命令行有update_hw_info=1，写标志位flag_need_update。
-3.复位后自动进正常recovery，自动升级。Lidbg检测到flag_need_update标志位，升级硬件信息(/storage/udisk/machine_info.conf),
-    置位flag_hw_info_valid标志位，表示分区信息已经有效。
-4.正常启动系统，读/data/machine_info.conf硬件信息。检测flag_hw_info_valid标志位，若有效则使用分区的信息。
 
 
 hwInfo.info  前两字节表示GT9XX强制下发一特定IC配置时对应的sensor_id 编号,第三四字节代表10.1寸屏所用到的ts_config_xx.conf文件
 编号.第5位给LCD用,0x01 表示7寸,0X02 表示8寸,0x03 表示10.1寸LCD显示屏
+第6位代表是否使用ublox,0用ublox，1用高通本身的gps
 
 

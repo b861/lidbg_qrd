@@ -398,7 +398,7 @@ static int  gps_probe(struct platform_device *pdev)
 #ifndef SOC_msm8x25
     if(is_ublox_exist() < 0)
     {
-#if 1
+#if 0
 	    if(g_var.is_first_update)
 	    {
 			lidbg_shell_cmd("mount -o remount /flysystem");	

@@ -108,7 +108,9 @@ bool flyparameter_info_get(void)
 			return true;
 		}
 
-		if(1)
+		
+		lidbg("ts_config:5:%c\n", g_recovery_meg->hwInfo.info[5] );
+		if(g_recovery_meg->hwInfo.info[5] == '0')
 		{
 			lidbg("rm ublox so\n");
 			lidbg_shell_cmd("mount -o remount /flysystem"); 
