@@ -190,6 +190,7 @@ int thread_thermal(void *data)
 
 		}	
 
+		temp_offset = -15;
 
 		if(g_var.recovery_mode == 1)
 		{
