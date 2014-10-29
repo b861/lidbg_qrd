@@ -278,6 +278,8 @@ static int thread_gpio_app_status_delay(void *data)
 	PM_WARN("<FlySwitching.apk>\n");
 	lidbg_shell_cmd("mount -o remount /flysystem");
 	lidbg_shell_cmd("mv /flysystem/lib/out/FlySwitching.apk /flysystem/app/");
+	PM_ERR("<more delay ssleep(10)>\n");
+	ssleep(10);
 #endif
 
     ssleep(30);
