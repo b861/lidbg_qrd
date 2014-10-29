@@ -101,21 +101,26 @@ bool flyparameter_info_get(void)
 		
 		if(g_recovery_meg->hwInfo.bValid==0x12345678)
 		{
+			
+			fs_mem_log("flyparameter=%c%c%c%c%c%c\n",g_recovery_meg->hwInfo.info[0],g_recovery_meg->hwInfo.info[1],
+													g_recovery_meg->hwInfo.info[2],g_recovery_meg->hwInfo.info[3],
+													g_recovery_meg->hwInfo.info[4],g_recovery_meg->hwInfo.info[5]);
+			
 			lidbg("flyparameter3 :%d,%d,%d,%d,%d\n",g_recovery_meg->hwInfo.info[0]-'0',g_recovery_meg->hwInfo.info[1]-'0',g_recovery_meg->hwInfo.info[2]-'0',g_recovery_meg->hwInfo.info[3]-'0',g_recovery_meg->hwInfo.info[4]-'0');
 			g_var.hw_info.ts_config = 10*(g_recovery_meg->hwInfo.info[0]-'0')+g_recovery_meg->hwInfo.info[1]-'0';
 			g_var.hw_info.virtual_key = 10*(g_recovery_meg->hwInfo.info[2]-'0')+g_recovery_meg->hwInfo.info[3]-'0';
 		    lidbg("ts_config:%d,virtual_key:%d\n", g_var.hw_info.ts_config,g_var.hw_info.virtual_key);
-			return true;
-		}
+			
+			lidbg("ts_config5:gps:%c\n", g_recovery_meg->hwInfo.info[5] );
+			if(g_recovery_meg->hwInfo.info[5] == '1')// 0 - ublox ,1 -qualcomm gps
+			{
+				lidbg("rm ublox so\n");
+				lidbg_shell_cmd("mount -o remount /flysystem"); 
+				lidbg_shell_cmd("rm /flysystem/lib/out/"FLY_GPS_SO);
+				lidbg_shell_cmd("mount -o remount,ro /flysystem");	
+			}
 
-		
-		lidbg("ts_config:5:%c\n", g_recovery_meg->hwInfo.info[5] );
-		if(g_recovery_meg->hwInfo.info[5] == '1')// 0 - ublox ,1 -qualcomm gps
-		{
-			lidbg("rm ublox so\n");
-			lidbg_shell_cmd("mount -o remount /flysystem"); 
-			lidbg_shell_cmd("rm /flysystem/lib/out/"FLY_GPS_SO);
-			lidbg_shell_cmd("mount -o remount,ro /flysystem");	
+			return true;
 		}
     }
     return false;
