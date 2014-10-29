@@ -172,6 +172,9 @@ int thread_thermal(void *data)
 	if(cpu_temp_show == 1)
 		CREATE_KTHREAD(thread_show_temp, NULL);
 
+#ifdef PLATFORM_msm8974
+	lidbg_readwrite_file(g_hw.gpu_max_freq_node, NULL, "1728000", strlen("1728000"));
+#endif
 
     while(!kthread_should_stop())
     {
