@@ -123,6 +123,7 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#026--clear acc history\n");
             fs_mem_log("*158#027--antutu auto test\n");
             fs_mem_log("*158#028--delete ublox so && reboot\n");
+		    fs_mem_log("*158#029--log cpu temp\n");
 
             lidbg_domineering_ack();
         }
@@ -308,6 +309,11 @@ void parse_cmd(char *pt)
             lidbg_domineering_ack();
 			msleep(3000);
 			lidbg_reboot();
+        }
+        else if (!strcmp(argv[1], "*158#029"))
+        {
+            cb_kv_log_temp(NULL, NULL);
+            lidbg_domineering_ack();
         }
 
         else if (!strcmp(argv[1], "*168#001"))
