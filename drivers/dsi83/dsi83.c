@@ -365,6 +365,40 @@ static int thread_dsi83_check(void *data)
 	dsi83_check();
 	return 0;
 }
+int dsi83_open (struct inode *inode, struct file *filp)
+{
+    return 0;
+}
+
+ssize_t dsi83_write (struct file *filp, const char __user *buf, size_t size, loff_t *ppos)
+{
+    char cmd_buf[512];
+    memset(cmd_buf, '\0', 512);
+   
+	
+    if(copy_from_user(cmd_buf, buf, size))
+    {
+        lidbg("copy_from_user ERR\n");
+    }
+    if(cmd_buf[size - 1] == '\n')
+        cmd_buf[size - 1] = '\0';
+	
+	
+	LCD_OFF;
+	lidbg("dsi83.rst\n");
+	is_dsi83_inited = false;
+	dsi83_work_func(NULL);
+	LCD_ON;
+    return size;
+
+}
+
+static  struct file_operations dsi83_nod_fops =
+{
+    .owner = THIS_MODULE,
+    .write = dsi83_write,
+    .open = dsi83_open,
+};
 
 static int dsi83_probe(struct platform_device *pdev)
 {
@@ -414,6 +448,7 @@ static int dsi83_probe(struct platform_device *pdev)
 #elif defined(CONFIG_HAS_EARLYSUSPEND)
 
 #endif
+	lidbg_new_cdev(&dsi83_nod_fops, "lidbg_dsi83");
 
 	return 0;
 
