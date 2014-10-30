@@ -173,7 +173,7 @@ int thread_thermal(void *data)
 		CREATE_KTHREAD(thread_show_temp, NULL);
 
 #ifdef PLATFORM_msm8974
-	lidbg_readwrite_file(g_hw.gpu_max_freq_node, NULL, "1728000", strlen("1728000"));
+	lidbg_readwrite_file(g_hw.gpu_max_freq_node, NULL, "1958400", strlen("1958400"));
 #endif
 
     while(!kthread_should_stop())
@@ -217,7 +217,7 @@ int thread_thermal(void *data)
 
 		if(g_var.recovery_mode == 1)
 		{
-			temp_offset = -20;
+			temp_offset = -25;
 			lidbg("temp:%d,freq:%d\n",cur_temp,cpufreq_get(0));
 			msleep(500);
 			goto thermal_ctrl;
