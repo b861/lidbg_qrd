@@ -119,19 +119,24 @@ EXPORT_SYMBOL(cb_kv_log_temp);
 
 
 
-void set_system_performance(bool enable)
+void set_system_performance(int type)
 {
-	lidbg("set_system_performance:%d\n",enable);
-	if(enable)
+	fs_mem_log("set_system_performance:%d\n",type);
+
+	if(type == 3)
 	{
 		set_cpu_governor(1);
-		temp_offset = 5;
+		temp_offset = 0;
 	}
-	else
+	else if(type == 2)
 	{
 		set_cpu_governor(0);
-		temp_offset = 0;
-		
+		temp_offset = -15;
+	}
+	else if(type == 1)
+	{
+		set_cpu_governor(0);
+		temp_offset = -20;
 	}
 }
 
@@ -164,6 +169,7 @@ int thread_thermal(void *data)
         ssleep(10);
     }
 
+	set_system_performance(1);
 	
 	msleep(1000*20);//wait boot_freq_ctrl finish
 	cur_temp = soc_temp_get();
@@ -213,7 +219,7 @@ int thread_thermal(void *data)
 
 		}	
 
-		temp_offset = -25;
+		//temp_offset = -25;
 
 		if(g_var.recovery_mode == 1)
 		{
