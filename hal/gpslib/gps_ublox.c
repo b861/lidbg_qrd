@@ -1003,7 +1003,7 @@ gps_state_thread( void  *arg )
     }
 }
 
-
+int retry=0;
 static void
 gps_state_init( GpsState  *state, GpsCallbacks *callbacks )
 {
@@ -1021,6 +1021,11 @@ again:
         LOGD("[ublox]futengfei err_access.again=======[%s]", GPS_DEV_NAME);
         lidbg("[ublox]futengfei err_access.again=======[%s]\n", GPS_DEV_NAME);
         sleep(1);
+		if(++retry>10)
+			{
+			lidbg("[ublox]futengfei ublox.so stop=======[%s]\n", GPS_DEV_NAME);
+			goto Fail;
+			}
         goto again;
     }
     D("gps will read from '%s'", GPS_DEV_NAME);
