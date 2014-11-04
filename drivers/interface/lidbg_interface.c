@@ -205,6 +205,14 @@ int iSOC_Get_CpuFreq(void)
     return cpu_freq;
 }
 
+
+int iSOC_Temp_Get(void)
+{
+	return soc_temp_get();
+}
+
+
+
 int iSOC_Uart_Send(char *arg)
 {
     char cmd[128] = {0};
@@ -268,6 +276,8 @@ static void set_func_tbl(void)
 
     plidbg_dev->soc_func_tbl.pfnSOC_Uart_Send = iSOC_Uart_Send;
     plidbg_dev->soc_func_tbl.pfnHal_Ts_Callback = NULL;
+	
+    plidbg_dev->soc_func_tbl.pfnSOC_Temp_Get = iSOC_Temp_Get;
 
 }
 
