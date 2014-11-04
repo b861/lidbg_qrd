@@ -20,6 +20,7 @@ void set_system_performance(int type);
 void cb_kv_show_temp(char *key, char *value);
 void cb_kv_log_temp(char *key, char *value);
 int thread_antutu_test(void *data);
+void set_system_performance(int type);
 
 
 // PANNE_PEN

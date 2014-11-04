@@ -124,6 +124,7 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#027--antutu auto test\n");
             fs_mem_log("*158#028--delete ublox so && reboot\n");
 		    fs_mem_log("*158#029--log cpu temp\n");
+		    fs_mem_log("*158#030--cpu top performance mode\n");
 
             lidbg_domineering_ack();
         }
@@ -313,6 +314,11 @@ void parse_cmd(char *pt)
         else if (!strcmp(argv[1], "*158#029"))
         {
             cb_kv_log_temp(NULL, NULL);
+            lidbg_domineering_ack();
+        }
+        else if (!strcmp(argv[1], "*158#030"))
+        {
+        	set_system_performance(3);
             lidbg_domineering_ack();
         }
 

@@ -67,16 +67,10 @@ void log_temp(void)
         old_temp = cur_temp;
     }
 
-	if(g_hw.thermal_ctrl_en == 0)
-	{
-		if(g_var.temp > 85)
-			lidbg_fs_log(TEMP_LOG_PATH, "%d,%d,%d\n", cur_temp, get_scaling_max_freq(),cpufreq_get(0));
-	}
-	else
-	{
-		if(g_var.temp > 90)
-			lidbg_fs_log(TEMP_LOG_PATH, "%d,%d,%d\n", cur_temp, get_scaling_max_freq(),cpufreq_get(0));
-	}
+
+	if(g_var.temp > 85)
+		lidbg_fs_log(TEMP_LOG_PATH, "%d,%d,%d\n", cur_temp, get_scaling_max_freq(),cpufreq_get(0));
+
 		
 }
 
@@ -391,5 +385,6 @@ void temp_init(void)
 }
 
 EXPORT_SYMBOL(thread_antutu_test);
+EXPORT_SYMBOL(set_system_performance);
 
 
