@@ -123,18 +123,27 @@ void set_system_performance(int type)
 {
 	fs_mem_log("set_system_performance:%d\n",type);
 
-	if(type == 3)
+	if(type == 3)//top performance
 	{
+#ifdef PLATFORM_msm8974		
+		lidbg_readwrite_file(FREQ_MAX_NODE, NULL, "2265600", strlen("2265600"));
+#endif
 		set_cpu_governor(1);
 		temp_offset = 0;
 	}
 	else if(type == 2)
 	{
+#ifdef PLATFORM_msm8974		
+		lidbg_readwrite_file(FREQ_MAX_NODE, NULL, "1958400", strlen("1958400"));
+#endif
 		set_cpu_governor(0);
 		temp_offset = -15;
 	}
-	else if(type == 1)
+	else if(type == 1)//low performance
 	{
+#ifdef PLATFORM_msm8974		
+		lidbg_readwrite_file(FREQ_MAX_NODE, NULL, "1958400", strlen("1958400"));
+#endif
 		set_cpu_governor(0);
 		temp_offset = -20;
 	}
@@ -177,10 +186,6 @@ int thread_thermal(void *data)
 
 	if(cpu_temp_show == 1)
 		CREATE_KTHREAD(thread_show_temp, NULL);
-
-#ifdef PLATFORM_msm8974
-	lidbg_readwrite_file(FREQ_MAX_NODE, NULL, "1958400", strlen("1958400"));
-#endif
 
     while(!kthread_should_stop())
     {
