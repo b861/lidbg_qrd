@@ -55,6 +55,7 @@ u32 get_scaling_max_freq(void)
 
 void log_temp(void)
 {
+/*
     static int old_temp = 0, cur_temp = 0;
     int tmp;
     g_var.temp = cur_temp = soc_temp_get();
@@ -70,7 +71,7 @@ void log_temp(void)
 
 	if(g_var.temp > 85)
 		lidbg_fs_log(TEMP_LOG_PATH, "%d,%d,%d\n", cur_temp, get_scaling_max_freq(),cpufreq_get(0));
-
+*/
 		
 }
 
@@ -123,7 +124,7 @@ void set_system_performance(int type)
 		lidbg_readwrite_file(FREQ_MAX_NODE, NULL, "2265600", strlen("2265600"));
 #endif
 		set_cpu_governor(1);
-		temp_offset = 0;
+		temp_offset = -10;
 	}
 	else if(type == 2)
 	{
@@ -140,6 +141,7 @@ void set_system_performance(int type)
 #endif
 		set_cpu_governor(0);
 		temp_offset = -20;
+		//temp_offset = -25;//better for some machine
 	}
 }
 
