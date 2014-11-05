@@ -25,11 +25,12 @@ int loop_count = 0;
 
 static sp<IAudioPolicyService> gAudioPolicyService = 0;
 
-void GetAudioPolicyService(void)
+void GetAudioPolicyService(bool dbg)
 {
     sp<IServiceManager> sm = defaultServiceManager();
     sp<IBinder> binder;
-    lidbg( TAG"GetAudioPolicyService.in");
+    if(dbg)
+        lidbg( TAG"GetAudioPolicyService.in");
 
     do
     {
@@ -43,7 +44,7 @@ void GetAudioPolicyService(void)
     gAudioPolicyService = interface_cast<IAudioPolicyService>(binder);
     if(gAudioPolicyService == 0)
         lidbg(TAG "GetAudioPolicyService.fail1");
-    else
+    else if(dbg)
         lidbg( TAG"GetAudioPolicyService.succes1");
 }
 
@@ -53,7 +54,7 @@ int main(int argc, char **argv)
     lidbg( TAG"lidbg_android_server:main");
 
     sleep(20);
-    GetAudioPolicyService();
+    GetAudioPolicyService(true);
 
     while(1)
     {
@@ -71,7 +72,7 @@ int main(int argc, char **argv)
         else
         {
             lidbg( TAG"gAudioPolicyService == 0");
-            GetAudioPolicyService();
+            GetAudioPolicyService(true);
         }
 
         if(playing != playing_old)
@@ -88,7 +89,7 @@ int main(int argc, char **argv)
         if(loop_count > 30)
         {
             char value[PROPERTY_VALUE_MAX];
-            GetAudioPolicyService();
+            GetAudioPolicyService(false);
             property_get("persist.lidbg.sound.dbg", value, "0");
             if (value[0] == '1')
                 dbg = 1;
