@@ -8,6 +8,7 @@ irqreturn_t io_test_irq(int irq, void *dev_id)
 {
 
     lidbg("io_test_irq: %d \n", irq);
+    soc_irq_disable(irq);
     return IRQ_HANDLED;
 
 }

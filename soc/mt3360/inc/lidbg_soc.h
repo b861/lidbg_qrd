@@ -155,6 +155,13 @@ struct io_config
 
 } ;
 
+struct mtk_ext_int
+{
+	int ext_int_gpio_num;
+	int ext_int_number;
+	int vector_irq_num;
+	int pinmux_function;
+};
 
 //typedef irqreturn_t (*pinterrupt_isr)(int irq, void *dev_id);
 
@@ -234,7 +241,7 @@ extern struct fly_smem *p_fly_smem ;
 #define IO_CONFIG_INPUT(group,index) do{ soc_io_config( index,  GPIO_CFG_INPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA, 1);}while(0)
 
 //#define GPIO_TO_INT MSM_GPIO_TO_INT
-#define GPIO_TO_INT gpio_to_irq
+#define GPIO_TO_INT(x) (x)
 
 
 

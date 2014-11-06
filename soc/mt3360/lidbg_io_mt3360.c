@@ -1,7 +1,19 @@
 
 #include "lidbg.h"
+#include "x_bim_83xx.h"
 
 u8 soc_io_config_log[IO_LOG_NUM];
+
+static struct mtk_ext_int ext_int_config[] = {
+	{ PIN_35_EINT0, 0, VECTOR_EXT, EINT0_SEL},
+	{ PIN_36_EINT1, 1, VECTOR_EXT2, EINT1_SEL},
+	{ PIN_37_EINT2, 2, VECTOR_EXT3, EINT2_SEL},
+	{ PIN_38_EINT3, 3, VECTOR_EXT4, EINT3_SEL},
+	{ PIN_70_GPIO70, 4, VECTOR_EXT5, EINT4_SEL},
+	{ PIN_71_GPIO71, 5, VECTOR_EXT6, EINT5_SEL},
+	{ PIN_72_GPIO72, 6, VECTOR_EXT7, EINT6_SEL},
+	{ PIN_42_GPIO42, 7, VECTOR_EXT8, EINT7_SEL},
+};
 
 void soc_io_init(void)
 {
@@ -11,15 +23,51 @@ void soc_io_init(void)
 
 void soc_irq_disable(unsigned int irq)
 {
-//    disable_irq(irq);
+    int i = 0;
+    int ext_int_flag = 0;
+    int ext_int_number;
 
+    for(i=0; i<ARRAY_SIZE(ext_int_config); i++)
+		if(irq == ext_int_config[i].ext_int_gpio_num){
+			ext_int_number = ext_int_config[i].ext_int_number;
+			ext_int_flag = 1;
+			break;
+		}
+
+    if(ext_int_flag){
+		BIM_DisableEInt(ext_int_number);
+		ext_int_flag = 1;
+    }
+    BIM_ClearIrq(irq);
 }
 
 void soc_irq_enable(unsigned int irq)
 {
-//    enable_irq(irq);
+    int i = 0;
+    int ext_int_flag = 0;
+    int ext_int_number;
+
+    for(i=0; i<ARRAY_SIZE(ext_int_config); i++)
+		if(irq == ext_int_config[i].ext_int_gpio_num){
+			ext_int_number = ext_int_config[i].ext_int_number;
+			ext_int_flag = 1;
+			break;
+		}
+
+    if(ext_int_flag){
+		BIM_EnableEInt(ext_int_number);
+		ext_int_flag = 1;
+    }
 }
 
+static irqreturn_t ext_int_test(int irq, void *dev_id)
+{
+    lidbg("********** ext_int %d test **********\n", irq);
+    soc_irq_disable(irq);
+
+    return IRQ_HANDLED;
+
+}
 
 #if 0
 // for test
@@ -33,17 +81,53 @@ static irqreturn_t interrupt_isr(int irq, void *dev_id)
 }
 #endif
 
-
 int soc_io_irq(struct io_int_config *pio_int_config)//need set to input first?
 {
-    GPIO_MultiFun_Set(pio_int_config->ext_int_num, PINMUX_LEVEL_GPIO_END_FLAG);
-    pio_int_config->ext_int_num = GPIO_TO_INT(pio_int_config->ext_int_num);
-    pio_int_config->irqflags =  IRQF_TRIGGER_RISING;
+    int ext_int_flag = 0;
+    int i = 0;
 
-    if (request_gpio_irq(pio_int_config->ext_int_num , pio_int_config->pisr , IRQ_TYPE_EDGE_RISING , "lidbg_irq", NULL))
-    {
-        lidbg("request_irq err!\n");
-        return 0;
+    int ext_int_gpio_num;
+    int ext_int_number;
+    int vector_irq_num;
+    int pinmux_function;
+
+    for(i=0; i<ARRAY_SIZE(ext_int_config); i++)
+		if(pio_int_config->ext_int_num == ext_int_config[i].ext_int_gpio_num){
+			ext_int_gpio_num = ext_int_config[i].ext_int_gpio_num;
+			ext_int_number = ext_int_config[i].ext_int_number;
+			vector_irq_num = ext_int_config[i].vector_irq_num;
+			pinmux_function = ext_int_config[i].pinmux_function;
+
+			ext_int_flag = 1;
+			break;
+		}
+
+    if(ext_int_flag){
+		printk("***** set gpio = %d, ext_int_num = %d, irq = %d as ext_int ******\n", ext_int_gpio_num, ext_int_number, vector_irq_num);
+		BIM_SetEInt(ext_int_number, IRQ_TYPE_EDGE_RISING | EINT_TYPE_NEGEDGE, 10);
+		GPIO_MultiFun_Set(ext_int_gpio_num, pinmux_function);
+
+		pio_int_config->irqflags = IRQ_TYPE_EDGE_RISING | EINT_TYPE_NEGEDGE;
+		ext_int_flag = 0;
+
+	      if (request_irq(vector_irq_num, pio_int_config->pisr , pio_int_config->irqflags, "lidbg_irq", NULL ))
+	      {
+	          lidbg("request_irq err!\n");
+	          return 0;
+	      }
+
+	      BIM_EnableEInt(ext_int_number);
+    }
+    else{
+	    GPIO_MultiFun_Set(pio_int_config->ext_int_num, PINMUX_LEVEL_GPIO_END_FLAG);
+	    pio_int_config->ext_int_num = GPIO_TO_INT(pio_int_config->ext_int_num);
+	    pio_int_config->irqflags =  IRQF_TRIGGER_RISING;
+
+	    if (request_gpio_irq(pio_int_config->ext_int_num , pio_int_config->pisr , IRQ_TYPE_EDGE_RISING , "lidbg_irq", NULL))
+	    {
+	        lidbg("request_irq err!\n");
+	        return 0;
+	    }
     }
     return 1;
 }
