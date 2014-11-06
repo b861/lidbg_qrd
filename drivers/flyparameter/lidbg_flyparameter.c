@@ -112,7 +112,7 @@ bool flyparameter_info_get(void)
 		    lidbg("ts_config:%d,virtual_key:%d\n", g_var.hw_info.ts_config,g_var.hw_info.virtual_key);
 			
 			lidbg("ts_config5:gps:%c\n", g_recovery_meg->hwInfo.info[5] );
-			if(g_recovery_meg->hwInfo.info[5] == '1')// 0 - ublox ,1 -qualcomm gps
+			if((g_recovery_meg->hwInfo.info[5] == '1') && (g_var.is_first_update))// 0 - ublox ,1 -qualcomm gps
 			{
 				lidbg("rm ublox so\n");
 				lidbg_shell_cmd("mount -o remount /flysystem"); 

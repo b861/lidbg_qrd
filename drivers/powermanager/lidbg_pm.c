@@ -275,9 +275,13 @@ void usb_disk_enable(bool enable)
 static int thread_gpio_app_status_delay(void *data)
 {
 #if defined(PLATFORM_msm8974)
-	PM_WARN("<FlySwitching.apk>\n");
-	lidbg_shell_cmd("mount -o remount /flysystem");
-	lidbg_shell_cmd("mv /flysystem/lib/out/FlySwitching.apk /flysystem/app/");
+	if(g_var.is_first_update)
+	{
+		PM_WARN("<FlySwitching.apk>\n");
+		lidbg_shell_cmd("mount -o remount /flysystem");
+		lidbg_shell_cmd("mv /flysystem/lib/out/FlySwitching.apk /flysystem/app/");
+	}
+	
 	PM_ERR("<more delay ssleep(10)>\n");
 	ssleep(10);
 #endif
