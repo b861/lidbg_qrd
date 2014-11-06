@@ -383,12 +383,15 @@ ssize_t dsi83_write (struct file *filp, const char __user *buf, size_t size, lof
     if(cmd_buf[size - 1] == '\n')
         cmd_buf[size - 1] = '\0';
 	
-	
-	LCD_OFF;
-	lidbg("dsi83.rst\n");
-	is_dsi83_inited = false;
-	dsi83_work_func(NULL);
-	LCD_ON;
+	if(0)
+	{
+	    LCD_OFF;
+	    lidbg("dsi83.rst\n");
+	    is_dsi83_inited = false;
+	    dsi83_work_func(NULL);
+	    LCD_ON;
+	}
+
     return size;
 
 }
