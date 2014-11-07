@@ -60,15 +60,6 @@ void soc_irq_enable(unsigned int irq)
     }
 }
 
-static irqreturn_t ext_int_test(int irq, void *dev_id)
-{
-    lidbg("********** ext_int %d test **********\n", irq);
-    soc_irq_disable(irq);
-
-    return IRQ_HANDLED;
-
-}
-
 #if 0
 // for test
 static irqreturn_t interrupt_isr(int irq, void *dev_id)
@@ -103,12 +94,12 @@ int soc_io_irq(struct io_int_config *pio_int_config)//need set to input first?
 		}
 
     if(ext_int_flag){
-		printk("***** set gpio = %d, ext_int_num = %d, irq = %d as ext_int ******\n", ext_int_gpio_num, ext_int_number, vector_irq_num);
-		BIM_SetEInt(ext_int_number, IRQ_TYPE_EDGE_RISING | EINT_TYPE_NEGEDGE, 10);
+		BIM_SetEInt(ext_int_number, EINT_TYPE_DUALEDGE, 10);
 		GPIO_MultiFun_Set(ext_int_gpio_num, pinmux_function);
 
-		pio_int_config->irqflags = IRQ_TYPE_EDGE_RISING | EINT_TYPE_NEGEDGE;
+		pio_int_config->irqflags = EINT_TYPE_DUALEDGE;
 		ext_int_flag = 0;
+		printk("***** set ext_int = %d, ext_int_num = %d, irq = %d, irq_flag = %d ******\n", ext_int_gpio_num, ext_int_number, vector_irq_num, pio_int_config->irqflags);
 
 	      if (request_irq(vector_irq_num, pio_int_config->pisr , pio_int_config->irqflags, "lidbg_irq", NULL ))
 	      {
