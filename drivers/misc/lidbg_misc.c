@@ -250,13 +250,48 @@ static struct notifier_block usb_nb_misc =
 {
     .notifier_call = usb_nb_misc_func,
 };
+
+int misc_open (struct inode *inode, struct file *filp)
+{
+    return 0;
+}
+ssize_t misc_write (struct file *filp, const char __user *buf, size_t size, loff_t *ppos)
+{
+    char cmd_buf[512];
+    int argc = 0;
+    char *argv[32] = {NULL};
+    memset(cmd_buf, '\0', 512);
+
+    if(copy_from_user(cmd_buf, buf, size))
+    {
+        lidbg("copy_from_user ERR\n");
+    }
+    if(cmd_buf[size - 1] == '\n')
+        cmd_buf[size - 1] = '\0';
+
+    argc = lidbg_token_string(cmd_buf, "*", argv);
+    if(argc >= 2 && argv[1] != NULL && (!strcmp(argv[0], "apk")))
+    {
+        lidbg_shell_cmd(argv[1]);
+    }
+    else
+        LIDBG_ERR("%d\n", argc);
+    return size;
+}
+
+static  struct file_operations misc_nod_fops =
+{
+    .owner = THIS_MODULE,
+    .write = misc_write,
+    .open = misc_open,
+};
 int misc_init(void *data)
 {
     LIDBG_WARN("<==IN==>\n");
     init_completion(&udisk_misc_wait);
 
     system_switch_init();
-	
+
     te_regist_password("001101", cb_password_upload);
     te_regist_password("001110", cb_password_clean_all);
     te_regist_password("001111", cb_password_chmod);
@@ -297,6 +332,7 @@ int misc_init(void *data)
 
     if(1 == logcat_en)
         logcat_lunch(NULL, NULL);
+    lidbg_new_cdev(&misc_nod_fops, "lidbg_misc");
     return 0;
 }
 
