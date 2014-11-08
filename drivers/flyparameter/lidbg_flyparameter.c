@@ -92,6 +92,7 @@ void cb_fly_hw_info_save(char *key, char *value )
 
 bool flyparameter_info_get(void)
 {
+	bool is_ublox_so_exist=false;
     if(p_kmem && fs_file_read(FLYPARAMETER_NODE, p_kmem, 0, sizeof(recovery_meg_t)) >= 0)
     {
         g_recovery_meg = (recovery_meg_t *)p_kmem;
@@ -110,9 +111,10 @@ bool flyparameter_info_get(void)
 			g_var.hw_info.ts_config = 10*(g_recovery_meg->hwInfo.info[0]-'0')+g_recovery_meg->hwInfo.info[1]-'0';
 			g_var.hw_info.virtual_key = 10*(g_recovery_meg->hwInfo.info[2]-'0')+g_recovery_meg->hwInfo.info[3]-'0';
 		    lidbg("ts_config:%d,virtual_key:%d\n", g_var.hw_info.ts_config,g_var.hw_info.virtual_key);
-			
-			lidbg("ts_config5:gps:%c\n", g_recovery_meg->hwInfo.info[5] );
-			if((g_recovery_meg->hwInfo.info[5] == '1') && (g_var.is_first_update))// 0 - ublox ,1 -qualcomm gps
+
+			is_ublox_so_exist=fs_is_file_exist("/flysystem/lib/out/"FLY_GPS_SO);
+			lidbg("ts_config5:gps:%c,%d\n", g_recovery_meg->hwInfo.info[5] ,is_ublox_so_exist);
+			if((g_recovery_meg->hwInfo.info[5] == '1') && (is_ublox_so_exist))// 0 - ublox ,1 -qualcomm gps
 			{
 				lidbg("rm ublox so\n");
 				lidbg_shell_cmd("mount -o remount /flysystem"); 
