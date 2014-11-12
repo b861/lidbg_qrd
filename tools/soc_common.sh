@@ -29,10 +29,12 @@ function soc_menu()
 	echo [23] make
 	echo [24] make otapackage
 	echo [25] make release basesystem
+	echo [26] mmm
 }
 
 function soc_handle()
 {
+	echo $DBG_SYSTEM_DIR $1 $2 $3 $4
 	cd $DBG_SYSTEM_DIR
 	case $1 in
 	21)	
@@ -45,6 +47,8 @@ function soc_handle()
 		soc_make_otapackage;;
 	25)
 		soc_build_release;;
+	26)
+		soc_build_common "$2 $3 $4";;
 	*)
 		echo
 	esac

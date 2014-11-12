@@ -110,7 +110,7 @@ function menu_do()
 	if [[ $1 -le 20 ]] ;then
 		lidbg_handle $1
 	elif [[ $1 -le 40 ]] ;then
-		soc_handle $1
+		soc_handle $1 $2 $3 $4
 	elif [[ $1 -le 50 ]] ;then
 		depository_handle $1
 	elif [[ $1 -le 60 ]] ;then
@@ -124,20 +124,20 @@ function menu_do()
 
 function auto_build()
 {
-	       	menu_do $1
-		menu_do $2
-		menu_do $3
-		menu_do $4
-		menu_do $5
+	       	menu_do $1 $2 $3
+		menu_do $2 $3 $4 2>/dev/null
+		menu_do $3 $4 $5 2>/dev/null
+		menu_do $4 $5 2>/dev/null
+		menu_do $5 2>/dev/null
 	while :;do
 		cd $DBG_BUILD_PATH
 		lidbg_menu
 		read -p "Enter your select:" name1 name2 name3 name4 name5
-	       	menu_do $name1
-		menu_do $name2
-		menu_do $name3
-		menu_do $name4
-		menu_do $name5
+	       	menu_do $name1 $name2 $name3
+		menu_do $name2 $name3 $name4 2>/dev/null
+		menu_do $name3 $name4 $name5 2>/dev/null
+		menu_do $name4 $name5 2>/dev/null
+		menu_do $name5 2>/dev/null
 	done
 }
 
@@ -149,5 +149,5 @@ source ./env_entry.sh
 . $DBG_TOOLS_PATH/debug.sh
 . $DBG_TOOLS_PATH/combination.sh
 . $DBG_TOOLS_PATH/common.sh
-auto_build $1 $2;
+auto_build $1 $2 $3 $4 $5;
 
