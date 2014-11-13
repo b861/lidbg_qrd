@@ -8,7 +8,7 @@ function soc_build_system()
 function soc_build_kernel()
 {
 	echo $FUNCNAME
-	soc_prebuild && soc_build_commen 'make bootimage -j8'
+	soc_prebuild && soc_build_common 'make bootimage -j16'
 }
 
 function soc_build_common()

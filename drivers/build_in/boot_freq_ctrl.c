@@ -16,12 +16,10 @@ struct thermal_ctrl cpu_thermal[] =
 {
 	//{1,  60,  1401600,"1401600"},
 	{1, 50,  1344000,"1344000"},
-	{51,60,  1190400,"1190400"},
-	{61,65,  998400, "998400"},
-	{66,70,  787200, "787200"},
-	{71,75, 600000, "600000"},
-	{76,85, 384000, "384000"},
-	{86,500, 300000, "300000"},
+	{51,55,  1190400,"1190400"},
+	{56,60,  998400, "998400"},
+	{61,70,  600000, "600000"},
+	{71,500, 300000, "300000"},
 	{0,0, 0, "0"},//end flag
 
 };
@@ -150,6 +148,9 @@ void freq_ctrl_start(void)
 	struct task_struct *task;
 
 	int ret = 0;
+#ifdef PLATFORM_MSM8974
+	return;
+#endif
 	ret = cpufreq_register_notifier(&cpufreq_notifier,
 			CPUFREQ_POLICY_NOTIFIER);
 	if (ret)
