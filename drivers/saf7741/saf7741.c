@@ -624,7 +624,7 @@ static int saf7741_probe(struct platform_device *pdev)
 	SAF7741_Mute(FALSE);  // TRUE
 	SAF7741_Volume(10);
 */
-	SAF7741_Volume(2);
+	SAF7741_Volume(20);
 	//SAF7741_ReadGraphicalSpectrumAnalyzer();
 	return 0;
 
