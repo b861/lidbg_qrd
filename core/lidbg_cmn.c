@@ -356,10 +356,15 @@ int  lidbg_pm_install_dir(char apkpath_or_apkdirpath[])
 {
     if(!apkpath_or_apkdirpath)
         return 0;
-    if(strstr(apkpath_or_apkdirpath, "apk") == NULL)
-        lidbg_readdir_and_dealfile(apkpath_or_apkdirpath, callback_pm_install);
-    else
-        pm_install_apk(apkpath_or_apkdirpath);
+    lidbg_readdir_and_dealfile(apkpath_or_apkdirpath, callback_pm_install);
+    return 1;
+}
+
+int  lidbg_pm_install(char apkpath_or_apkdirpath[])
+{
+    if(!apkpath_or_apkdirpath)
+        return 0;
+    pm_install_apk(apkpath_or_apkdirpath);
     return 1;
 }
 
@@ -617,6 +622,7 @@ EXPORT_SYMBOL(lidbg_setprop);
 EXPORT_SYMBOL(lidbg_start);
 EXPORT_SYMBOL(lidbg_stop);
 EXPORT_SYMBOL(lidbg_pm_install_dir);
+EXPORT_SYMBOL(lidbg_pm_install);
 EXPORT_SYMBOL(lidbg_toast_show);
 EXPORT_SYMBOL(lidbg_force_stop_apk);
 EXPORT_SYMBOL(lidbg_domineering_ack);

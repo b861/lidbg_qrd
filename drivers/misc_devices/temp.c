@@ -338,7 +338,7 @@ int thread_antutu_test(void *data)
 		lidbg_fs_log(TEMP_LOG_PATH,"antutu test start: %d\n",cnt);
 
 		//lidbg_shell_cmd("pm uninstall com.antutu.ABenchMark");
-		//lidbg_pm_install_dir("/data/antutu.apk");
+		//lidbg_pm_install("/data/antutu.apk");
 		//ssleep(5);
 		
 		lidbg_shell_cmd("am start -n com.antutu.ABenchMark/com.antutu.ABenchMark.ABenchMarkStart");

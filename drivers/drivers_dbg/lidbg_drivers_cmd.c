@@ -134,10 +134,10 @@ void parse_cmd(char *pt)
             char buff[50] = {0};
             lidbg_shell_cmd("cp /flysystem/lib/out/lidbg_udisk_shell.conf /dev/log/");
             lidbg_shell_cmd("chmod 777 /dev/log/lidbg_udisk_shell.conf");
-            lidbg_pm_install_dir(get_lidbg_file_path(buff, "fileserver.apk"));
-            lidbg_pm_install_dir(get_lidbg_file_path(buff, "MobileRateFlow.apk"));
-			lidbg_pm_install_dir(get_lidbg_file_path(buff, "ES.ko"));
-			lidbg_pm_install_dir(get_lidbg_file_path(buff, "TS.ko"));
+            lidbg_pm_install(get_lidbg_file_path(buff, "fileserver.apk"));
+            lidbg_pm_install(get_lidbg_file_path(buff, "MobileRateFlow.apk"));
+			lidbg_pm_install(get_lidbg_file_path(buff, "ES.ko"));
+			lidbg_pm_install(get_lidbg_file_path(buff, "TS.ko"));
         }
         else if (!strcmp(argv[1], "*158#001"))
         {

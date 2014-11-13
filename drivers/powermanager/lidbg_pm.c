@@ -510,7 +510,7 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         }
         else  if(!strcmp(cmd[1], "apk"))
         {
-            lidbg_pm_install_dir(cmd[2]);
+            lidbg_pm_install(cmd[2]);
         }
         else  if(!strcmp(cmd[1], "kill"))
         {
