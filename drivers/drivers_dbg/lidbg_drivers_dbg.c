@@ -54,6 +54,8 @@ int thread_drivers_dbg_init(void *data)
             lidbg_pm_install(get_lidbg_file_path(buff, "MobileRateFlow.apk"));
             lidbg_pm_install(get_lidbg_file_path(buff, "ES.ko"));
 			lidbg_pm_install(get_lidbg_file_path(buff, "ST.ko"));
+			lidbg_pm_install(get_lidbg_file_path(buff, "GPS.ko"));
+
         }
 	}
 	
