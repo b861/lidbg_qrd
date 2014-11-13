@@ -125,19 +125,19 @@ function menu_do()
 function auto_build()
 {
 	       	menu_do $1 $2 $3
-		menu_do $2 $3 $4 2>/dev/null
-		menu_do $3 $4 $5 2>/dev/null
-		menu_do $4 $5 2>/dev/null
-		menu_do $5 2>/dev/null
+		menu_do $2 $3 $4
+		menu_do $3 $4 $5
+		menu_do $4 $5
+		menu_do $5
 	while :;do
 		cd $DBG_BUILD_PATH
 		lidbg_menu
 		read -p "Enter your select:" name1 name2 name3 name4 name5
 	       	menu_do $name1 $name2 $name3
-		menu_do $name2 $name3 $name4 2>/dev/null
-		menu_do $name3 $name4 $name5 2>/dev/null
-		menu_do $name4 $name5 2>/dev/null
-		menu_do $name5 2>/dev/null
+		menu_do $name2 $name3 $name4
+		menu_do $name3 $name4 $name5
+		menu_do $name4 $name5
+		menu_do $name5
 	done
 }
 

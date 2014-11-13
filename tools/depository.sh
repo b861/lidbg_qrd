@@ -35,7 +35,8 @@ function depository_copy_lidbg()
 function depository_copy_basesystem()
 {
 	echo $FUNCNAME
-	cp -r $DBG_SYSTEM_DIR/flyaudio/out/*  $UPDATA_BASESYSTEM_DIR/
+	#cp -r $DBG_SYSTEM_DIR/flyaudio/out/*  $UPDATA_BASESYSTEM_DIR/
+	cp $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/*.zip $UPDATA_BASESYSTEM_DIR/baseqcom.flb
 }
 
 
