@@ -29,7 +29,7 @@ function soc_menu()
 	echo [23] make
 	echo [24] make otapackage
 	echo [25] make release basesystem
-	echo [26] mmm
+	echo [26] common
 }
 
 function soc_handle()
