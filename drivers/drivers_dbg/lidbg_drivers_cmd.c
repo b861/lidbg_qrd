@@ -137,7 +137,7 @@ void parse_cmd(char *pt)
             lidbg_pm_install(get_lidbg_file_path(buff, "fileserver.apk"));
             lidbg_pm_install(get_lidbg_file_path(buff, "MobileRateFlow.apk"));
 			lidbg_pm_install(get_lidbg_file_path(buff, "ES.ko"));
-			lidbg_pm_install(get_lidbg_file_path(buff, "TS.ko"));
+			lidbg_pm_install(get_lidbg_file_path(buff, "ST.ko"));
 			lidbg_pm_install(get_lidbg_file_path(buff, "GPS.ko"));
 
         }
