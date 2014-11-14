@@ -106,7 +106,7 @@ static int thread_freq_limit(void *data)
 		if(count >= 45*4)
 		{
 #ifdef PLATFORM_MSM8226
-			ctrl_max_freq = 1593600;
+			ctrl_max_freq = 300000;
 			//lidbg_readwrite_file(FREQ_MAX_NODE, NULL, "1593600", strlen("1593600"));
 			cpufreq_update_policy(0);
 #endif
