@@ -55,7 +55,14 @@ int thread_drivers_dbg_init(void *data)
             lidbg_pm_install(get_lidbg_file_path(buff, "ES.ko"));
 			lidbg_pm_install(get_lidbg_file_path(buff, "ST.ko"));
 			lidbg_pm_install(get_lidbg_file_path(buff, "GPS.ko"));
-
+			//lidbg_pm_install(get_lidbg_file_path(buff, "FastBoot.apk"));
+			//lidbg_pm_install(get_lidbg_file_path(buff, "FlyBootService.apk"));
+			lidbg_shell_cmd("mount -o remount /system");
+			lidbg_shell_cmd("mv /system/lib/modules/out/FastBoot.apk /system/app/FastBoot.apk");
+			lidbg_shell_cmd("mv /system/lib/modules/out/FlyBootService.apk /system/app/FlyBootService.apk");
+			lidbg_shell_cmd("chmod 777 /system/app/FastBoot.apk");
+			lidbg_shell_cmd("chmod 777 /system/app/FlyBootService.apk");
+			
         }
 	}
 	
