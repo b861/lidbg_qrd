@@ -99,7 +99,9 @@ void parse_cmd(char *pt)
         {
             //*#*#158999#*#*
             lidbg_chmod("/data");
-            fs_mem_log("*158#999--call apk\n");
+			
+            fs_mem_log("*158#998--install third apk\n");
+            fs_mem_log("*158#999--install debug apk\n");
             fs_mem_log("*158#001--LOG_LOGCAT\n");
             fs_mem_log("*158#002--LOG_DMESG\n");
             fs_mem_log("*158#003--LOG_CLEAR_LOGCAT_KMSG\n");
@@ -128,17 +130,25 @@ void parse_cmd(char *pt)
 
             lidbg_domineering_ack();
         }
+        if (!strcmp(argv[1], "*158#998"))
+        {
+        
+			lidbg_pm_install(get_lidbg_file_path(buff, "ES.ko"));
+			lidbg_pm_install(get_lidbg_file_path(buff, "ST.ko"));
+			lidbg_pm_install(get_lidbg_file_path(buff, "GPS.ko"));
+			lidbg_domineering_ack();
 
+		
+        }
         if (!strcmp(argv[1], "*158#999"))
         {
             char buff[50] = {0};
             lidbg_shell_cmd("cp /flysystem/lib/out/lidbg_udisk_shell.conf /dev/log/");
             lidbg_shell_cmd("chmod 777 /dev/log/lidbg_udisk_shell.conf");
-            lidbg_pm_install(get_lidbg_file_path(buff, "fileserver.apk"));
+			
+			lidbg_pm_install(get_lidbg_file_path(buff, "fileserver.apk"));
             lidbg_pm_install(get_lidbg_file_path(buff, "MobileRateFlow.apk"));
-			lidbg_pm_install(get_lidbg_file_path(buff, "ES.ko"));
-			lidbg_pm_install(get_lidbg_file_path(buff, "ST.ko"));
-			lidbg_pm_install(get_lidbg_file_path(buff, "GPS.ko"));
+			lidbg_domineering_ack();
 
         }
         else if (!strcmp(argv[1], "*158#001"))

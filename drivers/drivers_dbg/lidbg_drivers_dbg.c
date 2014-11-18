@@ -47,22 +47,30 @@ int thread_drivers_dbg_init(void *data)
 		lidbg("enable wifi adb\n");
 		set_wifi_adb_mode(true);
 		
-		if(g_var.is_first_update)
+		//if(g_var.is_first_update)
 		{
             char buff[50] = {0};
-            lidbg_pm_install(get_lidbg_file_path(buff, "fileserver.apk"));
-            lidbg_pm_install(get_lidbg_file_path(buff, "MobileRateFlow.apk"));
-            lidbg_pm_install(get_lidbg_file_path(buff, "ES.ko"));
-			lidbg_pm_install(get_lidbg_file_path(buff, "ST.ko"));
-			lidbg_pm_install(get_lidbg_file_path(buff, "GPS.ko"));
+            //lidbg_pm_install(get_lidbg_file_path(buff, "fileserver.apk"));
+            //lidbg_pm_install(get_lidbg_file_path(buff, "MobileRateFlow.apk"));
+            //lidbg_pm_install(get_lidbg_file_path(buff, "ES.ko"));
+			
+			//lidbg_pm_install(get_lidbg_file_path(buff, "GPS.ko"));
 			//lidbg_pm_install(get_lidbg_file_path(buff, "FastBoot.apk"));
 			//lidbg_pm_install(get_lidbg_file_path(buff, "FlyBootService.apk"));
 			lidbg_shell_cmd("mount -o remount /system");
-			lidbg_shell_cmd("mv /system/lib/modules/out/FastBoot.apk /system/app/FastBoot.apk");
-			lidbg_shell_cmd("mv /system/lib/modules/out/FlyBootService.apk /system/app/FlyBootService.apk");
-			lidbg_shell_cmd("chmod 777 /system/app/FastBoot.apk");
-			lidbg_shell_cmd("chmod 777 /system/app/FlyBootService.apk");
-			
+
+			lidbg_shell_cmd("cp /system/lib/modules/out/fileserver.apk /system/app/fileserver.apk");
+			lidbg_shell_cmd("cp /system/lib/modules/out/MobileRateFlow.apk /system/app/MobileRateFlow.apk");
+			lidbg_shell_cmd("cp /system/lib/modules/out/ES.ko /system/app/ES.apk");
+			//lidbg_shell_cmd("cp /system/lib/modules/out/ST.ko /system/app/ST.apk");
+			lidbg_shell_cmd("cp /system/lib/modules/out/GPS.ko /system/app/GPS.apk");
+
+			lidbg_shell_cmd("cp /system/lib/modules/out/FastBoot.apk /system/app/FastBoot.apk");
+			lidbg_shell_cmd("cp /system/lib/modules/out/FlyBootService.apk /system/app/FlyBootService.apk");
+			lidbg_shell_cmd("chmod 777 /system/app/*");
+
+			msleep(10*1000);
+			lidbg_pm_install(get_lidbg_file_path(buff, "ST.ko"));
         }
 	}
 	
