@@ -220,7 +220,11 @@ void DirectVolume::handlePartitionAdded(const char *devpath, NetlinkEvent *evt) 
     }
 
     if (part_num > mDiskNumParts) {
-        mDiskNumParts = part_num;
+		LIDBG_PRINT("ftf20141118.handlePartitionAdded.%s MAJOR.%d MINOR.%d PARTN.%d mDiskNumParts.%d", devpath,major,minor,part_num,mDiskNumParts);
+		if(mDiskNumParts==1)
+			part_num=1;
+		else
+			mDiskNumParts = part_num;
     }
 
     if (major != mDiskMajor) {
