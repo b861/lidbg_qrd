@@ -274,12 +274,7 @@ void usb_disk_enable(bool enable)
 
 static int thread_gpio_app_status_delay(void *data)
 {
-#if defined(PLATFORM_msm8974)
-	PM_ERR("< more delay ssleep(10).del >\n");
-	ssleep(10);
-#endif
-
-    ssleep(30);
+    ssleep(50);
     MCU_APP_GPIO_ON;
 #ifdef CONTROL_PM_IO_BY_BP
     MCU_SET_APP_GPIO_SUSPEND;
