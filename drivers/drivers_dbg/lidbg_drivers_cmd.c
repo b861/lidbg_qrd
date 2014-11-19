@@ -71,7 +71,7 @@ int thread_kmsg_fifo_save(void *data)
 
 void callback_func_test_readdir(char *dirname, char *filename)
 {
-	LIDBG_WARN("%s<---%s\n",dirname,filename);
+    LIDBG_WARN("%s<---%s\n", dirname, filename);
 }
 
 static bool fan_enable = false;
@@ -99,7 +99,7 @@ void parse_cmd(char *pt)
         {
             //*#*#158999#*#*
             lidbg_chmod("/data");
-			
+
             fs_mem_log("*158#998--install third apk\n");
             fs_mem_log("*158#999--install debug apk\n");
             fs_mem_log("*158#001--LOG_LOGCAT\n");
@@ -125,30 +125,28 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#026--clear acc history\n");
             fs_mem_log("*158#027--antutu auto test\n");
             fs_mem_log("*158#028--delete ublox so && reboot\n");
-		    fs_mem_log("*158#029--log cpu temp\n");
-		    fs_mem_log("*158#030--cpu top performance mode\n");
+            fs_mem_log("*158#029--log cpu temp\n");
+            fs_mem_log("*158#030--cpu top performance mode\n");
 
             lidbg_domineering_ack();
         }
         if (!strcmp(argv[1], "*158#998"))
         {
-        
-			lidbg_pm_install(get_lidbg_file_path(buff, "ES.ko"));
-			lidbg_pm_install(get_lidbg_file_path(buff, "ST.ko"));
-			lidbg_pm_install(get_lidbg_file_path(buff, "GPS.ko"));
-			lidbg_domineering_ack();
-
-		
+            char buff[50] = {0};
+            lidbg_pm_install(get_lidbg_file_path(buff, "ES.ko"));
+            lidbg_pm_install(get_lidbg_file_path(buff, "ST.ko"));
+            lidbg_pm_install(get_lidbg_file_path(buff, "GPS.ko"));
+            lidbg_domineering_ack();
         }
         if (!strcmp(argv[1], "*158#999"))
         {
             char buff[50] = {0};
             lidbg_shell_cmd("cp /flysystem/lib/out/lidbg_udisk_shell.conf /dev/log/");
             lidbg_shell_cmd("chmod 777 /dev/log/lidbg_udisk_shell.conf");
-			
-			lidbg_pm_install(get_lidbg_file_path(buff, "fileserver.apk"));
+
+            lidbg_pm_install(get_lidbg_file_path(buff, "fileserver.apk"));
             lidbg_pm_install(get_lidbg_file_path(buff, "MobileRateFlow.apk"));
-			lidbg_domineering_ack();
+            lidbg_domineering_ack();
 
         }
         else if (!strcmp(argv[1], "*158#001"))
@@ -230,12 +228,12 @@ void parse_cmd(char *pt)
             lidbg_fifo_get(glidbg_msg_fifo, LIDBG_LOG_DIR"lidbg_mem_log.txt", 0);
             CREATE_KTHREAD(thread_dump_log, NULL);
         }
-		
+
         else if (!strcmp(argv[1], "*158#014"))
-            	lidbg_system_switch(true);
+            lidbg_system_switch(true);
         else if (!strcmp(argv[1], "*158#015"))
-            	lidbg_system_switch(false);
-            	
+            lidbg_system_switch(false);
+
         else if (!strcmp(argv[1], "*158#016"))
             set_wifi_adb_mode(true);
         else if (!strcmp(argv[1], "*158#017"))
@@ -310,22 +308,22 @@ void parse_cmd(char *pt)
         }
         else if (!strcmp(argv[1], "*158#026"))
         {
-            fs_file_write2("/dev/lidbg_pm0","flyaudio acc_history");
+            fs_file_write2("/dev/lidbg_pm0", "flyaudio acc_history");
             lidbg_domineering_ack();
         }
         else if (!strcmp(argv[1], "*158#027"))
         {
-        	CREATE_KTHREAD(thread_antutu_test, NULL);
+            CREATE_KTHREAD(thread_antutu_test, NULL);
             lidbg_domineering_ack();
         }
         else if (!strcmp(argv[1], "*158#028"))
         {
-			lidbg_shell_cmd("mount -o remount /flysystem");	
-			lidbg_shell_cmd("rm /flysystem/lib/out/"FLY_GPS_SO);
-			lidbg_shell_cmd("mount -o remount,ro /flysystem");	
+            lidbg_shell_cmd("mount -o remount /flysystem");
+            lidbg_shell_cmd("rm /flysystem/lib/out/"FLY_GPS_SO);
+            lidbg_shell_cmd("mount -o remount,ro /flysystem");
             lidbg_domineering_ack();
-			msleep(3000);
-			lidbg_reboot();
+            msleep(3000);
+            lidbg_reboot();
         }
         else if (!strcmp(argv[1], "*158#029"))
         {
@@ -334,7 +332,7 @@ void parse_cmd(char *pt)
         }
         else if (!strcmp(argv[1], "*158#030"))
         {
-        	set_system_performance(3);
+            set_system_performance(3);
             lidbg_domineering_ack();
         }
 
@@ -372,13 +370,13 @@ void parse_cmd(char *pt)
         enable = simple_strtoul(argv[1], 0, 0);
         LINUX_TO_LIDBG_TRANSFER((linux_to_lidbg_transfer_t)enable, NULL);
     }
-	else if(!strcmp(argv[0], "fread") )
-	{
-	    char buff[64] = {0};
-		int len=fs_file_read(argv[1], buff, 0, sizeof(buff));
-		buff[len-1]='\0';
-	    lidbg("%d,%s:[%s]\n",len,argv[1], buff);
-	}
+    else if(!strcmp(argv[0], "fread") )
+    {
+        char buff[64] = {0};
+        int len = fs_file_read(argv[1], buff, 0, sizeof(buff));
+        buff[len - 1] = '\0';
+        lidbg("%d,%s:[%s]\n", len, argv[1], buff);
+    }
 
     else if (!strcmp(argv[0], "lpc"))
     {
@@ -397,12 +395,12 @@ void parse_cmd(char *pt)
         CREATE_KTHREAD(thread_screenshot, NULL);
     }
     else if (!strcmp(argv[0], "readdir"))
-	{
-	    if(argv[1])
-	        LIDBG_WARN("%s:file count=%d\n", argv[1], lidbg_readdir_and_dealfile(argv[1], callback_func_test_readdir));
-	    else
-	        LIDBG_ERR("err:echo readdir /storage/udisk/conf > /dev/lidbg_drivers_dbg0\n");
-	}
+    {
+        if(argv[1])
+            LIDBG_WARN("%s:file count=%d\n", argv[1], lidbg_readdir_and_dealfile(argv[1], callback_func_test_readdir));
+        else
+            LIDBG_ERR("err:echo readdir /storage/udisk/conf > /dev/lidbg_drivers_dbg0\n");
+    }
 #endif
 
 #ifdef SOC_msm8x25
