@@ -227,8 +227,12 @@ int thread_thermal(void *data)
 		{
 			temp_offset = -30;
 			lidbg("temp:%d,freq:%d\n",cur_temp,cpufreq_get(0));
+#ifdef PLATFORM_msm8974		
+			lidbg_readwrite_file(FREQ_MAX_NODE, NULL, "1036800", strlen("1036800"));
+#endif
+
 			msleep(500);
-			goto thermal_ctrl;
+			//goto thermal_ctrl;
 		}
 
 		if(g_hw.thermal_ctrl_en == 0)
