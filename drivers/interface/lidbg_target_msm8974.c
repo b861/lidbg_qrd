@@ -123,7 +123,7 @@ struct hw_version_specific g_hw_version_specific[] =
 						{2500, KEY_HOME},	
 						{1535, KEY_VOLUMEUP} ,
 						{2015, KEY_VOLUMEDOWN} ,
-						{543, KEY_POWER} ,
+						{543, KEY_BACK} ,
 					}
 		},
 		

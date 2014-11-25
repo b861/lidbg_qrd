@@ -73,6 +73,16 @@ int thread_drivers_dbg_init(void *data)
 			lidbg_pm_install(get_lidbg_file_path(buff, "ST.ko"));
         }
 	}
+
+#if 0
+		msleep(60*1000);
+		//else if (!strcmp(argv[1], "*158#025"))
+		{
+			LPC_CMD_ACC_SWITCH_START;
+			lidbg_domineering_ack();
+		}
+#endif
+
 	
     return 0;
 }
