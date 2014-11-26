@@ -432,8 +432,7 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
             g_acc_history_state[0] = '\0';
         }
     }
-#if 1 //for debug
-    //pm debug
+#if 1 //pm debug
     if(!strcmp(cmd[0], "ws"))
     {
         lidbg("ws:case:[%s]\n", cmd[1]);
@@ -473,7 +472,6 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
             default:
                 break;
             }
-
         }
         else  if(!strcmp(cmd[1], "pm"))
         {
@@ -537,9 +535,9 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
             else
                 PM_WARN("< echo ws task c2739.mainframe 1 1 1 > /dev/lidbg_pm0 >\n");
         }
-
     }
 #endif
+
     return size;
 }
 ssize_t  pm_read(struct file *filp, char __user *buffer, size_t size, loff_t *offset)
@@ -624,10 +622,10 @@ static int thread_observer(void *data)
         if( !wait_for_completion_interruptible(&sleep_observer_wait))
         {
             find_task_by_name_or_kill(true, false, true, "c2739.mainframe");
-            kernel_wakelock_print("start:");
-            userspace_wakelock_action(0, NULL);
-            lidbg_shell_cmd("echo airplane_mode_on:$(getprop persist.radio.airplane_mode_on) > /dev/lidbg_msg");
-            lidbg_shell_cmd("echo wlan.driver.status:$(getprop wlan.driver.status) > /dev/lidbg_msg");
+            //kernel_wakelock_print("start:");
+            //userspace_wakelock_action(0, NULL);
+            lidbg_shell_cmd("echo msg airplane_mode_on:$(getprop persist.radio.airplane_mode_on) > /dev/lidbg_pm0");
+            lidbg_shell_cmd("echo msg wlan.driver.status:$(getprop wlan.driver.status) > /dev/lidbg_pm0");
             //find_task_by_name_or_kill(true, true, false, NULL);
             while(1) //atomic_read(&is_in_sleep) == 1
             {
