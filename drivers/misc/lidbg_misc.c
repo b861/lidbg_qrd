@@ -219,7 +219,12 @@ static int thread_udisk_misc(void *data)
     {
         if(!wait_for_completion_interruptible(&udisk_misc_wait))
         {
-            ssleep(5);
+            int i = 0;
+            while(i < 3 && !fs_is_file_exist(USB_MOUNT_POINT"/conf/lidbg_udisk_shell.conf"))
+            {
+                ssleep(5);
+                i++;
+            }
 
             if(fs_is_file_exist(USB_MOUNT_POINT"/conf/lidbg_udisk_shell.conf"))
             {
@@ -229,7 +234,8 @@ static int thread_udisk_misc(void *data)
                 if(analyze_list_cmd(&lidbg_udisk_shell_list))
                     LIDBG_WARN("exe success\n" );
             }
-
+            else
+                LIDBG_ERR("miss:lidbg_udisk_shell\n" );
         }
     }
     return 1;
