@@ -23,6 +23,10 @@ ifeq ($(CONFIG_HAL_VOLD_8x26),y)
 SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,8x26_vold)
 endif
 
+ifeq ($(CONFIG_HAL_VOLD_mt3360),y)
+SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,mt3360_vold)
+endif
+
 ifeq ($(CONFIG_HAL_LOAD),y)
 SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,lidbg_load)
 endif

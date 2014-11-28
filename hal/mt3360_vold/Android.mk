@@ -53,6 +53,7 @@ include $(BUILD_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 
+LOCAL_MODULE_PATH := $(DBG_OUT_PATH)
 LOCAL_MODULE:= vold
 
 LOCAL_SRC_FILES := \
@@ -82,3 +83,5 @@ LOCAL_CFLAGS :=
 LOCAL_SHARED_LIBRARIES := libcutils
 
 include $(BUILD_EXECUTABLE)
+
+include $(call all-makefiles-under, $(LOCAL_PATH))
