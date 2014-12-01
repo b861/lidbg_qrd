@@ -39,6 +39,7 @@
 #include <cutils/properties.h>
 
 #include "Vfs.h"
+#include "../inc/lidbg_servicer.h"
 
 static char FSCK_MSDOS_PATH[] = "/system/bin/fsck_msdos";
 static char MKDOSFS_PATH[] = "/system/bin/newfs_msdos";
@@ -139,8 +140,12 @@ int Vfs::check(const char *fsPath, const int fsType)
 	switch(fsType){
 	case FILE_SYS_TYPE_FAT32:
 		rc = Fat::check(fsPath);
+		LIDBG_PRINT("[flyaudio vold]: Vfs check ,fs type is FAT32\n");
 		break;
 	case FILE_SYS_TYPE_EXFAT:
+		rc = ExFat::check(fsPath);
+		LIDBG_PRINT("[flyaudio vold]: Vfs check ,fs type is EXFAT\n");
+		break;
 	case FILE_SYS_TYPE_NTFS:
 	case FILE_SYS_TYPE_UNKNOWN:
 		rc = 0;
@@ -162,14 +167,17 @@ int Vfs::doMount(const char *fsPath, const char *mountPoint,
 	case FILE_SYS_TYPE_FAT32:
 		rc = Fat::doMount(fsPath, mountPoint, false, false, false,
                      1015, 1015, 0702, false);
+		LIDBG_PRINT("[flyaudio vold]: Vfs doMount ,fs type is FAT32\n");
 		break;
 	case FILE_SYS_TYPE_NTFS:
 		rc = Ntfs_3g::doMount(fsPath, mountPoint, false, false, false,
                      	1015, 1015, 0702, false);
+		LIDBG_PRINT("[flyaudio vold]: Vfs doMount ,fs type is NTFS\n");
 		break;
 	case FILE_SYS_TYPE_EXFAT:
 		rc = ExFat::doMount(fsPath, mountPoint, false, false, false,
                         1015, 1015, 0702, false); 
+		LIDBG_PRINT("[flyaudio vold]: Vfs doMount ,fs type is EXFAT\n");
 		break;
 	case FILE_SYS_TYPE_UNKNOWN:
 		rc = Fat::doMount(fsPath, mountPoint, false, false, false,

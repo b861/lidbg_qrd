@@ -46,6 +46,7 @@
 #include "Vfs.h"
 #include "Process.h"
 #include "cryptfs.h"
+#include "../inc/lidbg_servicer.h"
 
 extern "C" void dos_partition_dec(void const *pp, struct dos_partition *d);
 extern "C" void dos_partition_enc(void *pp, struct dos_partition *d);
@@ -420,6 +421,7 @@ int Volume::mountVol() {
             setState(Volume::State_Idle);
             return -1;
         }
+	LIDBG_PRINT("[flyaudio vold]: mountVol get fs type is %d\n", fsType);
         if (mDiskReserve) {
 	          //if (Fat::check(devicePath)) {
 	          if(Vfs::check(devicePath, fsType)){
