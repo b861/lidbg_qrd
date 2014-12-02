@@ -501,6 +501,9 @@ void SAF7741_Volume(BYTE Volume)
 	regAddr = (reg2[0] << 16) + (reg2[1] << 8) + reg2[2];
 	I2C_Write_SAF7741(regAddr,&reg2[3],2);
 }
+
+EXPORT_SYMBOL(SAF7741_Volume);
+
 /*
 void SAF7741_ReadGraphicalSpectrumAnalyzer(void)
 {
@@ -509,6 +512,7 @@ void SAF7741_ReadGraphicalSpectrumAnalyzer(void)
 	I2C_Read_SAF7741(ADSP_X_Gsa_Bar321, Value, 3);
 }
 */
+
 BOOL SendToSAF7741NormalWriteData(BYTE *pData)
 {
 	BYTE MChipAdd;
@@ -624,7 +628,7 @@ static int saf7741_probe(struct platform_device *pdev)
 	SAF7741_Mute(FALSE);  // TRUE
 	SAF7741_Volume(10);
 */
-	SAF7741_Volume(40);
+	SAF7741_Volume(20);
 	//SAF7741_ReadGraphicalSpectrumAnalyzer();
 	return 0;
 

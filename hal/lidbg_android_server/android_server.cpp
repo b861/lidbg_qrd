@@ -86,7 +86,7 @@ int main(int argc, char **argv)
 
         }
         loop_count++;
-        if(loop_count > 30)
+        if(loop_count > 200)
         {
             char value[PROPERTY_VALUE_MAX];
             GetAudioPolicyService(false);
@@ -97,7 +97,7 @@ int main(int argc, char **argv)
                 dbg = 0;
             loop_count = 0;
         }
-        usleep(700000);
+        usleep(100000);
     }
 
 }

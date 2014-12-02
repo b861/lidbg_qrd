@@ -1,4 +1,6 @@
 
+extern void SAF7741_Volume(BYTE Volume);
+
 bool set_wifi_adb_mode(bool on)
 {
     LIDBG_WARN("<%d>\n", on);
@@ -389,6 +391,12 @@ void parse_cmd(char *pt)
         }
         lidbg("para_count = %d\n", para_count);
         SOC_LPC_Send(lpc_buf, para_count);
+    }
+	else if (!strcmp(argv[0], "vol"))
+    {
+        int vol;
+        vol = simple_strtoul(argv[1], 0, 0);
+        SAF7741_Volume(vol);
     }
     else if (!strcmp(argv[0], "screen_shot"))
     {

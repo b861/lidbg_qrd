@@ -7,18 +7,29 @@ int gps_status = -1;
 
 struct completion GPS_status_sem;
 
+//#define SOUND_DET_TEST
+#ifdef SOUND_DET_TEST
+void SAF7741_Volume(BYTE Volume);
+#endif
+
 int sound_detect_event(bool started)
 {
     if(started)
     {
         lidbg(TAG"music_start,%d\n", started);
         gps_status = 1;
+#ifdef SOUND_DET_TEST
+		SAF7741_Volume(0);
+#endif
         complete(&GPS_status_sem);
     }
     else
     {
         lidbg(TAG"music_stop,%d\n", started);
         gps_status = 2;
+#ifdef SOUND_DET_TEST
+		SAF7741_Volume(20);
+#endif
         complete(&GPS_status_sem);
     }
 	return 1;
