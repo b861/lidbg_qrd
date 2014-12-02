@@ -1,7 +1,7 @@
 #========注意:您给的参数需按照如下参数给出==========
-#1 SYSTEM_PLATFORM SYSTEM_BUILD_TYPE SYSTEM_DIR SYSTEM_DIR_PASSWORD BIN_DIR BIN_DIR_PASSWORD BASESYSTEM_DIR_IN_BIN_DIR LIDBG_DRIVERS_DIR BIN_GIT_COMMIT_DESCRIPTION
+#1 SYSTEM_PLATFORM SYSTEM_BUILD_TYPE SYSTEM_DIR SYSTEM_DIR_PASSWORD BIN_DIR BIN_DIR_PASSWORD BASESYSTEM_DIR_IN_BIN_DIR BIN_GIT_COMMIT_DESCRIPTION
 #========注意:如下是一个例子==========
-#./basesystem.sh 1 msm8974 userdebug /home/swlee/flyaudio/M8974AAAAANLYD4120 git /home/swlee/flyaudio/8x26-release git /home/swlee/flyaudio/8x26-release/others/8974/basesystem /home/swlee/flyaudio/8x26-release/others/8974/driver 一个例子
+#./basesystem.sh 1 msm8974 userdebug /home/swlee/flyaudio/M8974AAAAANLYD4120 git /home/swlee/flyaudio/8x26-release git /home/swlee/flyaudio/8x26-release/others/8974/basesystem 一个例子
 
 DIR_LIDBG_PATH=`cd ../ && pwd`
 DIR_BUILD_PATH=$DIR_LIDBG_PATH/build
@@ -14,18 +14,16 @@ SYSTEM_DIR_PASSWORD="null"
 BIN_DIR="null"
 BIN_DIR_PASSWORD="null"
 BASESYSTEM_DIR_IN_BIN_DIR="null"
-LIDBG_DRIVERS_DIR="null"
 BIN_GIT_COMMIT_DESCRIPTION="NULL"
 
 
-#$1-$BIN_DIR $2-$LIDBG_DRIVERS_DIR $3-BIN_GIT_COMMIT_DESCRIPTION
+#$1-$BIN_DIR $2-$BIN_GIT_COMMIT_DESCRIPTION
 function git_add_push()
 {
-	echo ====IN=====$FUNCNAME $1 $2 $3
+	echo ====IN=====$FUNCNAME $1 $2
 	cd $1
 	git add .
-	git add -f $2
-	git commit -am $3
+	git commit -am $2
 #	expect $DIR_TOOLS_PATH/push
 #	expect $DIR_TOOLS_PATH/push
 	gitk &
@@ -82,14 +80,13 @@ function show_env()
 	echo $BIN_DIR
 	echo $BIN_DIR_PASSWORD
 	echo $BASESYSTEM_DIR_IN_BIN_DIR
-	echo $LIDBG_DRIVERS_DIR
 	echo $BIN_GIT_COMMIT_DESCRIPTION
 	echo ===============show_env====================
 }
 
 function basesystem_launch()
 {
-	echo $1 $2 $3 $4 $5 $6 $7 $8 $9 ${10}
+	echo $1 $2 $3 $4 $5 $6 $7 $8 $9
 	SYSTEM_PLATFORM=$2
 	SYSTEM_BUILD_TYPE=$3
 	SYSTEM_DIR=$4
@@ -97,19 +94,18 @@ function basesystem_launch()
 	BIN_DIR=$6
 	BIN_DIR_PASSWORD=$7
 	BASESYSTEM_DIR_IN_BIN_DIR=$8
-	LIDBG_DRIVERS_DIR=$9
-	BIN_GIT_COMMIT_DESCRIPTION=${10}
+	BIN_GIT_COMMIT_DESCRIPTION=$9
 	
 	show_env
 	case $1 in
 	1)
 		git_pull $SYSTEM_DIR $SYSTEM_DIR_PASSWORD && git_reset_hard $BIN_DIR&& git_pull $BIN_DIR $BIN_DIR_PASSWORD&&git_pull $BIN_DIR $BIN_DIR_PASSWORD&&
 		system_dir_build && git_pull $BIN_DIR $BIN_DIR_PASSWORD && 
-		copy_basesystem_system_to_bin_dir && git_add_push $BIN_DIR $LIDBG_DRIVERS_DIR $BIN_GIT_COMMIT_DESCRIPTION;;
+		copy_basesystem_system_to_bin_dir && git_add_push $BIN_DIR $BIN_GIT_COMMIT_DESCRIPTION;;
 	*)
 		echo =========stop.mind your input:$1=============
 	esac
 }
 
-basesystem_launch $1 $2 $3 $4 $5 $6 $7 $8 $9 ${10}
+basesystem_launch $1 $2 $3 $4 $5 $6 $7 $8 $9
 
