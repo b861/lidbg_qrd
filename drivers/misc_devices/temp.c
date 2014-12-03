@@ -177,7 +177,7 @@ int thread_thermal(void *data)
 
 	set_system_performance(1);
 	
-	msleep(1000*20);//wait boot_freq_ctrl finish
+	msleep(1000*40);//wait boot_freq_ctrl finish
 	cur_temp = soc_temp_get();
 	lidbg("lidbg freq ctrl start,%d,%d\n",cur_temp,get_scaling_max_freq());
 

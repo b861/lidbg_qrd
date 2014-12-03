@@ -28,13 +28,15 @@ struct thermal_ctrl cpu_thermal[] =
 
 struct thermal_ctrl cpu_thermal[] = 
 {
-        //{1,  60,  2265600,"2265600"},
-        { 1, 50,  1728000,"1728000"},
-        {51, 60, 1267200,"1267200"},
-        {61, 65, 960000,"960000"},
-        {66, 70, 652800, "652800"},
-		{71, 80, 422400, "422400"},
-        {81, 500, 300000, "300000"},
+        {1,  50,  2265600,"2265600"},
+		{51, 55,  1958400,"1958400"},
+        {56, 60,  1728000,"1728000"},
+        {61, 65,  1497600,"1497600"},
+        {66, 70,  1267200,"1267200"},
+		{71, 75,  1190400,"1190400"},
+		{76, 80,  960000, "960000"},
+        {81, 90,  729600, "729600"},
+		{91, 500, 300000, "300000"},
 		{0,0, 0, "0"}//end flag
 };
 
@@ -70,7 +72,6 @@ static int thread_freq_limit(void *data)
 	
 	while(1)
 	{
-		{
 			int tmp;
 			long temp;
 			u32 max_freq;
@@ -87,13 +88,6 @@ static int thread_freq_limit(void *data)
 				if((temp >= cpu_thermal[i].temp_low ) && (temp <= cpu_thermal[i].temp_high ) 
 					  && (max_freq != cpu_thermal[i].limit_freq))
 				{
-
-#ifdef PLATFORM_MSM8974
-					if(!is_file_exist(RECOVERY_MODE_DIR))
-					{
-						break;
-					}
-#endif
 					lidbg_readwrite_file(FREQ_MAX_NODE, NULL, cpu_thermal[i].limit_freq_string, strlen(cpu_thermal[i].limit_freq_string));
 					lidbg("kernel:set max freq to: %d,temp:%ld\n", cpu_thermal[i].limit_freq,temp);
 					ctrl_max_freq = cpu_thermal[i].limit_freq;
@@ -101,15 +95,27 @@ static int thread_freq_limit(void *data)
 					break;
 				}
 			}
-		}
 		count++;
-		if(count >= 45*4)
+		if(count >= 60*4)
 		{
 #ifdef PLATFORM_MSM8226
-			ctrl_max_freq = 300000;
 			//lidbg_readwrite_file(FREQ_MAX_NODE, NULL, "1593600", strlen("1593600"));
+			ctrl_max_freq = 300000;
+			cpufreq_update_policy(0);
+
+#else
+			lidbg_readwrite_file(FREQ_MAX_NODE, NULL, "2265600", strlen("2265600"));
+			
+			if(temp > 100)
+				ctrl_max_freq = 300000;
+			else
+				ctrl_max_freq = 2265600;
 			cpufreq_update_policy(0);
 #endif
+
+			
+
+
 			ctrl_en = 0;
 			lidbg("thread_freq_limit stoped\n");
 			return 1;
@@ -148,9 +154,7 @@ void freq_ctrl_start(void)
 	struct task_struct *task;
 
 	int ret = 0;
-#ifdef PLATFORM_MSM8974
-	return;
-#endif
+
 	ret = cpufreq_register_notifier(&cpufreq_notifier,
 			CPUFREQ_POLICY_NOTIFIER);
 	if (ret)

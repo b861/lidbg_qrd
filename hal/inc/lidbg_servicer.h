@@ -27,7 +27,7 @@
 }while(0)
 
 
-inline bool is_file_exist(char *file)
+static inline bool is_file_exist(char *file)
 {
 	if(access(file, F_OK) == 0)
 		return 1;
