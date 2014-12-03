@@ -24,8 +24,8 @@ function git_add_push()
 	cd $1
 	git add .
 	git commit -am $2
-	#expect $DIR_TOOLS_PATH/push
-	#expect $DIR_TOOLS_PATH/push
+	expect $DIR_TOOLS_PATH/push
+	expect $DIR_TOOLS_PATH/push
 	#gitk &
 }
 
@@ -50,6 +50,7 @@ function system_dir_build()
 		source build/envsetup.sh&&choosecombo release $SYSTEM_PLATFORM $SYSTEM_BUILD_TYPE
 	fi
 	echo ====IN.4make-j8=====$FUNCNAME
+	rm -rf ./out/target/product/$SYSTEM_PLATFORM/system
 	make -j8
 	echo ====IN5make otapackage -j8=====$FUNCNAME
 	make otapackage -j8

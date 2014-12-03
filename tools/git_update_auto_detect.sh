@@ -51,5 +51,5 @@ echo "============loops:$main_loop_times  status:["${commit_times[0]}"] ["${comm
 	let thiswhile_loop++
 	done <$DIR_TOOLS_PATH/git_update_auto_detect.conf
 let main_loop_times++
-sleep 1
+sleep 30
 done
