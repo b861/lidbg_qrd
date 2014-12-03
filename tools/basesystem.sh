@@ -20,18 +20,18 @@ BIN_GIT_COMMIT_DESCRIPTION="NULL"
 #$1-$BIN_DIR $2-$BIN_GIT_COMMIT_DESCRIPTION
 function git_add_push()
 {
-	echo ====IN=====$FUNCNAME $1 $2
+	echo ==$FUNCNAME $1 $2
 	cd $1
 	git add .
 	git commit -am $2
-#	expect $DIR_TOOLS_PATH/push
-#	expect $DIR_TOOLS_PATH/push
-	gitk &
+	#expect $DIR_TOOLS_PATH/push
+	#expect $DIR_TOOLS_PATH/push
+	#gitk &
 }
 
 function copy_basesystem_system_to_bin_dir()
 {
-	echo ====IN=====$FUNCNAME $SYSTEM_DIR $SYSTEM_PLATFORM $BASESYSTEM_DIR_IN_BIN_DIR
+	echo ==$FUNCNAME $SYSTEM_DIR $SYSTEM_PLATFORM $BASESYSTEM_DIR_IN_BIN_DIR
 	#cp -r $SYSTEM_DIR/flyaudio/out/*  $BASESYSTEM_DIR_IN_BIN_DIR/
 	cp $SYSTEM_DIR/out/target/product/$SYSTEM_PLATFORM/*.zip $BASESYSTEM_DIR_IN_BIN_DIR/baseqcom.flb
 }
@@ -57,7 +57,7 @@ function system_dir_build()
 
 function git_reset_hard()
 {
-	echo ====IN=====$FUNCNAME $1
+	echo ==$FUNCNAME $1
 	cd $1
 	git reset --hard
 }
@@ -65,7 +65,7 @@ function git_reset_hard()
 #$SYSTEM_DIR $SYSTEM_DIR_PASSWORD
 function git_pull()
 {
-	echo ====IN=====$FUNCNAME $1 $2
+	echo ==$FUNCNAME $1 $2
 	cd $1
 	expect $DIR_TOOLS_PATH/pull $2
 }
@@ -84,9 +84,30 @@ function show_env()
 	echo ===============show_env====================
 }
 
+function save_log()
+{
+	echo ========$(date)======== >> /dev/shm/basesystem.txt
+	echo step=$1 reason=$2 >> /dev/shm/basesystem.txt
+	show_env >> /dev/shm/basesystem.txt
+}
+
+#step  description
+function show_err_save_exit()
+{
+	save_log "$1" "$2"
+	echo "!!!!!!!!!!!!!!!!step:$1!!!!!!!!!!!!!!!!!!!!"
+	echo "!!           参数不正确              !!"
+	echo "!!	   已停止此次运行            !!"
+	echo "!!!!!!!!!!!!!!!!step:$1!!!!!!!!!!!!!!!!!!!!"
+	echo [$(date)]========[$2]========
+	exit 1
+}
+
+
 function basesystem_launch()
 {
-	echo $1 $2 $3 $4 $5 $6 $7 $8 $9
+	#echo $1 $2 $3 $4 $5 $6 $7 $8 $9
+	
 	SYSTEM_PLATFORM=$2
 	SYSTEM_BUILD_TYPE=$3
 	SYSTEM_DIR=$4
@@ -95,15 +116,23 @@ function basesystem_launch()
 	BIN_DIR_PASSWORD=$7
 	BASESYSTEM_DIR_IN_BIN_DIR=$8
 	BIN_GIT_COMMIT_DESCRIPTION=$9
-	
 	show_env
+	
+	if [ $# != 9 ];then
+		show_err_save_exit 1 "input num < 9"
+	fi
+	
+	if [ $9 == '' ];then
+		show_err_save_exit 2 "num 9 = null"
+	fi
+	
 	case $1 in
 	1)
 		git_pull $SYSTEM_DIR $SYSTEM_DIR_PASSWORD && git_reset_hard $BIN_DIR&& git_pull $BIN_DIR $BIN_DIR_PASSWORD&&git_pull $BIN_DIR $BIN_DIR_PASSWORD&&
 		system_dir_build && git_pull $BIN_DIR $BIN_DIR_PASSWORD && 
 		copy_basesystem_system_to_bin_dir && git_add_push $BIN_DIR $BIN_GIT_COMMIT_DESCRIPTION;;
 	*)
-		echo =========stop.mind your input:$1=============
+		show_err_save_exit 3 "not find case:$1" 
 	esac
 }
 
