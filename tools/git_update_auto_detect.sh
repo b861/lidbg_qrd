@@ -36,11 +36,19 @@ echo "============loops:$main_loop_times  status:["${commit_times[0]}"] ["${comm
 	else
 		if [[ "$thiscommit_info" != "$new_commitinfo" ]]; then
 		let thiscommit_times++
-		echo $(date) $thiscommit_times/$main_loop_times ${compel_info[1]} ["$thiscommit_info"] ["$new_commitinfo"]  >> /dev/shm/lidbg_git_history.txt
+		echo $(date) $thiscommit_times/$main_loop_times ${compel_info[1]} ["$thiscommit_info"] ["$new_commitinfo"]  >> /dev/shm/git_autodetec_log.txt
 		echo "detect a new commit: "$thiscommit_times ["$thiscommit_info"] ["$new_commitinfo"]
 		sleep 1
+
+		basesystem9=$new_commitinfo
+		#check is "Merge branch of..." ?
+		if [[ $basesystem9 =~ "Merge" ]]; then
+		basesystem9=$(sed -n '2p' /dev/shm/${compel_info[1]}.txt)
+		echo "find a Merge:" ["$new_commitinfo"] ["$basesystem9"]  >> /dev/shm/git_autodetec_log.txt
+		fi
+		
 		cd $DIR_TOOLS_PATH
-		./basesystem.sh ${compel_info[0]} ${compel_info[1]} ${compel_info[2]} ${compel_info[3]} ${compel_info[4]} ${compel_info[5]} ${compel_info[6]} ${compel_info[7]} ${compel_info[8]} "${new_commitinfo#* }"
+		./basesystem.sh ${compel_info[0]} ${compel_info[1]} ${compel_info[2]} ${compel_info[3]} ${compel_info[4]} ${compel_info[5]} ${compel_info[6]} ${compel_info[7]} ${compel_info[8]} "${basesystem9#* }"
 		fi
 	fi
 
