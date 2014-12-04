@@ -116,7 +116,7 @@ function basesystem_launch()
 	BIN_DIR=$6
 	BIN_DIR_PASSWORD=$7
 	BASESYSTEM_DIR_IN_BIN_DIR=$8
-	BIN_GIT_COMMIT_DESCRIPTION=$9
+	BIN_GIT_COMMIT_DESCRIPTION="$9 ${10} ${11} ${12} ${13} ${14} ${15} ${16} ${17} ${18} ${19} ${20}"
 	show_env
 	
 	if [ $# < 9 ];then
@@ -137,5 +137,5 @@ function basesystem_launch()
 	esac
 }
 
-basesystem_launch $1 $2 $3 $4 $5 $6 $7 $8 $9
+basesystem_launch $1 $2 $3 $4 $5 $6 $7 $8 $9 ${10} ${11} ${12} ${13} ${14} ${15} ${16} ${17} ${18} ${19} ${20}
 
