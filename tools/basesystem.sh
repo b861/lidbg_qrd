@@ -119,7 +119,7 @@ function basesystem_launch()
 	BIN_GIT_COMMIT_DESCRIPTION="$9 ${10} ${11} ${12} ${13} ${14} ${15} ${16} ${17} ${18} ${19} ${20}"
 	show_env
 	
-	if [ $# < 9 ];then
+	if [ $# -lt 9 ];then
 		show_err_save_exit 1 "input num < 9 $#"
 	fi
 	
