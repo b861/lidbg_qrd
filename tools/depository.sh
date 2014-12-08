@@ -19,7 +19,7 @@ function depository_add_push()
 	cd $RELEASE_REPOSITORY
 	git add .
 	git add -f $UPDATA_BIN_DIR
-	git commit -am $1
+	git commit -am "$1"
 	expect $DBG_TOOLS_PATH/push
 	expect $DBG_TOOLS_PATH/push
 	gitk &

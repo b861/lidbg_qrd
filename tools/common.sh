@@ -56,7 +56,7 @@ function common_handle()
 				cd $dir && lidbg_push;;
 			$DBG_SYSTEM_DIR)
 				read -p "输入提交到二进制仓库的说明文字：" descriptors
-				depository_add_push $descriptors;;
+				depository_add_push "$descriptors";;
 			$RELEASE_REPOSITORY)
 				cd $dir && expect $DBG_TOOLS_PATH/push;;
 			*)

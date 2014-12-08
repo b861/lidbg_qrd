@@ -23,7 +23,7 @@ function git_add_push()
 	echo ==$FUNCNAME $1 $2
 	cd $1
 	git add .
-	git commit -am $2
+	git commit -am "$2"
 	expect $DIR_TOOLS_PATH/push
 	expect $DIR_TOOLS_PATH/push
 	#gitk &
@@ -132,7 +132,7 @@ function basesystem_launch()
 	1)
 		git_pull $SYSTEM_DIR $SYSTEM_DIR_PASSWORD && git_reset_hard $BIN_DIR&& git_pull $BIN_DIR $BIN_DIR_PASSWORD&&git_pull $BIN_DIR $BIN_DIR_PASSWORD&&
 		system_dir_build && git_pull $BIN_DIR $BIN_DIR_PASSWORD && 
-		copy_basesystem_system_to_bin_dir && git_pull $BIN_DIR $BIN_DIR_PASSWORD&& git_add_push $BIN_DIR $BIN_GIT_COMMIT_DESCRIPTION;;
+		copy_basesystem_system_to_bin_dir && git_pull $BIN_DIR $BIN_DIR_PASSWORD&& git_add_push $BIN_DIR "$BIN_GIT_COMMIT_DESCRIPTION";;
 	*)
 		show_err_save_exit 3 "not find case:$1" 
 	esac
