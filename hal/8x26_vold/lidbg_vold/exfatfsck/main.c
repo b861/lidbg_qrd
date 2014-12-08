@@ -24,7 +24,7 @@
 #include <exfatfs.h>
 #include <inttypes.h>
 #include <unistd.h>
-
+#include "../../../inc/lidbg_servicer.h"
 #define exfat_debug(format, ...)
 
 uint64_t files_count, directories_count;
@@ -120,12 +120,12 @@ static void dirck(struct exfat* ef, const char* path)
 static void fsck(struct exfat* ef)
 {
 	exfat_print_info(ef->sb, exfat_count_free_clusters(ef));
-	dirck(ef, "");
+	//dirck(ef, "");
 }
 
 static void usage(const char* prog)
 {
-	fprintf(stderr, "Usage: %s [-V] <device>\n", prog);
+	LIDBG_PRINT("Usage: %s [-V] <device>\n", prog);
 	exit(1);
 }
 
@@ -135,7 +135,7 @@ int main(int argc, char* argv[])
 	const char* spec = NULL;
 	struct exfat ef;
 
-	printf("exfatfsck %u.%u.%u\n",
+	LIDBG_PRINT("====exfatfsck %u.%u.%u\n",
 			EXFAT_VERSION_MAJOR, EXFAT_VERSION_MINOR, EXFAT_VERSION_PATCH);
 
 	while ((opt = getopt(argc, argv, "V")) != -1)
@@ -157,16 +157,17 @@ int main(int argc, char* argv[])
 	if (exfat_mount(&ef, spec, "ro") != 0)
 		return 1;
 
-	printf("Checking file system on %s.\n", spec);
+	LIDBG_PRINT("Checking file system on %s.\n", spec);
 	fsck(&ef);
+	LIDBG_PRINT("========exfatfsck=======1");
 	exfat_unmount(&ef);
-	printf("Totally %"PRIu64" directories and %"PRIu64" files.\n",
+	LIDBG_PRINT("Totally %"PRIu64" directories and %"PRIu64" files.\n",
 			directories_count, files_count);
 
 	fputs("File system checking finished. ", stdout);
 	if (exfat_errors != 0)
 	{
-		printf("ERRORS FOUND: %d.\n", exfat_errors);
+		LIDBG_PRINT("ERRORS FOUND: %d.\n", exfat_errors);
 		return 1;
 	}
 	puts("No errors found.");
