@@ -451,8 +451,9 @@ LIDBG_PRINT("\n\n\nxxxxxxxxxxxxxxxxxx\n\n\n");
 	lidbg_vold.mMountedPartNum = n;
 
 if(n==1){
-
+        LIDBG_PRINT("start checking...\n");
 	if (Fat::check(devicePath)==0) {
+		  LIDBG_PRINT("this is fat filesystem, ready to mount!\n");
 		if (Fat::doMount(devicePath, getMountpoint(), false, false, false, AID_MEDIA_RW, AID_MEDIA_RW, 0007, true)) {
 		 	SLOGE("%s failed to mount via VFAT (%s)\n", devicePath, strerror(errno));
 			LIDBG_PRINT("%s failed to mount via VFAT (%s)\n", devicePath, strerror(errno));
@@ -484,10 +485,6 @@ if(n==1){
 		        continue;
 		}
 	}
-
-
-
-
 	else{
 		if (errno == ENODATA) {
 	                SLOGW("%s unkown filesystem\n", devicePath);
@@ -501,8 +498,10 @@ if(n==1){
 	            setState(Volume::State_Idle);
 	            return -1;
 	}
+		LIDBG_PRINT("=====================0");
 
         extractMetadata(devicePath);
+		LIDBG_PRINT("=====================1");
 
         if (providesAsec && mountAsecExternal() != 0) {
             SLOGE("Failed to mount secure area (%s)", strerror(errno));
@@ -511,13 +510,19 @@ if(n==1){
             setState(Volume::State_Idle);
             return -1;
         }
+		LIDBG_PRINT("=====================2");
 
         char service[64];
         snprintf(service, 64, "fuse_%s", getLabel());
   	 property_set("ctl.start", service);
+	 	LIDBG_PRINT("=====================3");
 
         setState(Volume::State_Mounted);
+		
+		LIDBG_PRINT("=====================4");
         mCurrentlyMountedKdev = deviceNodes[i];
+		
+		LIDBG_PRINT("=====================5");
         return 0;
 }
 
@@ -876,6 +881,7 @@ int Volume::initializeMbr(const char *deviceNode) {
  */
 int Volume::extractMetadata(const char* devicePath) {
     int res = 0;
+	return res;
 
     std::string cmd;
     cmd = BLKID_PATH;
