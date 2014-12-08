@@ -61,6 +61,7 @@ function git_reset_hard()
 	echo ==$FUNCNAME $1
 	cd $1
 	git reset --hard
+	git checkout master
 }
 
 #$SYSTEM_DIR $SYSTEM_DIR_PASSWORD
