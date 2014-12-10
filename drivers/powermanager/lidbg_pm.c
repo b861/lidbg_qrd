@@ -405,8 +405,17 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         else  if(!strcmp(cmd[1], "gotosleep"))
         {
             SOC_System_Status(FLY_GOTO_SLEEP);
+       	#ifdef SOC_mt3360
+			ssleep(1);
+	   		lidbg("fly power key gotosleep ++\n");
+		   	lidbg_key_report(KEY_POWER, KEY_PRESSED);
+			msleep(250);
+			lidbg_key_report(KEY_POWER, KEY_RELEASED);
+			lidbg("fly power key gotosleep --\n");
+		#else
             observer_start();
             LPC_PRINT(true, sleep_counter, "PM:gotosleep");
+		#endif		
         }
         else if(!strcmp(cmd[1], "devices_up"))
         {
@@ -602,8 +611,12 @@ void observer_prepare(void)
 }
 void observer_start(void)
 {
+#ifdef SOC_mt3360
+	return ;
+#else
     atomic_set(&is_in_sleep, 1);
     complete(&sleep_observer_wait);
+#endif
 }
 void observer_stop(void)
 {
