@@ -6,6 +6,8 @@
 DIR_LIDBG_PATH=`cd ../ && pwd`
 DIR_BUILD_PATH=$DIR_LIDBG_PATH/build
 DIR_TOOLS_PATH=$DIR_LIDBG_PATH/tools
+DIR_CORE_PATH=$DIR_LIDBG_PATH/core
+DIR_DRIVERS_PATH=$DIR_LIDBG_PATH/drivers
 
 SYSTEM_PLATFORM="null"
 SYSTEM_BUILD_TYPE="null"
@@ -16,6 +18,34 @@ BIN_DIR_PASSWORD="null"
 BASESYSTEM_DIR_IN_BIN_DIR="null"
 BIN_GIT_COMMIT_DESCRIPTION="NULL"
 
+function soc_postbuild()
+{
+	echo ==$FUNCNAME
+	if [ $SYSTEM_PLATFORM = msm8226 ];then
+		echo ==$FUNCNAME $SYSTEM_PLATFORM
+		if [ -s $SYSTEM_DIR/out/target/product/$SYSTEM_PLATFORM/system/lib/libdiskconfig.so ]; then
+			echo "system/lib/libdiskconfig.so exist"
+		else
+			mmm $SYSTEM_DIR/system/core/libdiskconfig -B
+			make -j8
+		fi
+	fi
+}
+
+function soc_prebuild()
+{
+	echo ==$FUNCNAME $SYSTEM_PLATFORM
+	if [ $SYSTEM_PLATFORM = msm8226 ];then
+		echo $FUNCNAME $SYSTEM_PLATFORM
+		rm -rf $SYSTEM_DIR/kernel/drivers/flyaudio
+		mkdir -p $SYSTEM_DIR/kernel/drivers/flyaudio
+		cp -ru $DIR_DRIVERS_PATH/build_in/*	        $SYSTEM_DIR/kernel/drivers/flyaudio/
+		cp -u $DIR_DRIVERS_PATH/inc/lidbg_interface.h   $SYSTEM_DIR/kernel/drivers/flyaudio/
+		cp -u $DIR_CORE_PATH/cmn_func.c   $SYSTEM_DIR/kernel/drivers/flyaudio/
+		cp -u $DIR_CORE_PATH/inc/cmn_func.h   $SYSTEM_DIR/kernel/drivers/flyaudio/
+		cp -u $DIR_CORE_PATH/inc/lidbg_def.h   $SYSTEM_DIR/kernel/drivers/flyaudio/
+	fi
+}
 
 #$1-$BIN_DIR $2-$BIN_GIT_COMMIT_DESCRIPTION
 function git_add_push()
@@ -51,7 +81,10 @@ function system_dir_build()
 	fi
 	echo ====IN.4make-j8=====$FUNCNAME
 	rm -rf ./out/target/product/$SYSTEM_PLATFORM/system
+
+	soc_prebuild
 	make -j8
+	soc_postbuild
 	echo ====IN5make otapackage -j8=====$FUNCNAME
 	make otapackage -j8
 }
