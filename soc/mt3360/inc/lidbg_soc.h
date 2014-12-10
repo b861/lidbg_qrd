@@ -174,7 +174,7 @@ struct io_int_config
 } ;
 
 //#define MAKE_GPIO_LOG(group,index)   ((group<<5)|(index))
-#define IO_LOG_NUM  (116)
+#define IO_LOG_NUM  (180)
 #define AD_LOG_NUM  (16)
 #define TTY_DEV "msm-uart"
 
