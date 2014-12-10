@@ -94,12 +94,12 @@ int soc_io_irq(struct io_int_config *pio_int_config)//need set to input first?
 		}
 
     if(ext_int_flag){
-		BIM_SetEInt(ext_int_number, EINT_TYPE_DUALEDGE, 10);
+		BIM_SetEInt(ext_int_number, pio_int_config->irqflags, 10);
 		GPIO_MultiFun_Set(ext_int_gpio_num, pinmux_function);
 
-		pio_int_config->irqflags = EINT_TYPE_DUALEDGE;
+		//pio_int_config->irqflags = EINT_TYPE_DUALEDGE;
 		ext_int_flag = 0;
-		printk("***** set ext_int = %d, ext_int_num = %d, irq = %d, irq_flag = %d ******\n", ext_int_gpio_num, ext_int_number, vector_irq_num, pio_int_config->irqflags);
+		printk("***** set ext_int = %d, ext_int_num = %d, irq = %d, irq_flag = %d ******\n", ext_int_gpio_num, ext_int_number, vector_irq_num, (pio_int_config->irqflags >> 10));
 
 	      if (request_irq(vector_irq_num, pio_int_config->pisr , pio_int_config->irqflags, "lidbg_irq", NULL ))
 	      {
