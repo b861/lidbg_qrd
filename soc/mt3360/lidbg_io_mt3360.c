@@ -128,7 +128,58 @@ int soc_io_suspend_config(u32 index, u32 direction, u32 pull, u32 drive_strength
 	return 0;
 
 }
+int soc_io_resume_config(u32 index, u32 direction, u32 pull, u32 drive_strength)
+{
+#define I2C1_SEL                  (192 + 26)
+	    int ext_int_flag = 0;
+	    int i = 0;
 
+	    int ext_int_gpio_num;
+	    int ext_int_number;
+	    int vector_irq_num;
+	    int pinmux_function;
+	
+	GPIO_MultiFun_Set(113, I2C1_SEL);// for I2C1 not use when resume
+	GPIO_MultiFun_Set(118, I2C1_SEL);
+
+	ext_int_gpio_num = ext_int_config[0].ext_int_gpio_num;
+	ext_int_number = ext_int_config[0].ext_int_number;
+	vector_irq_num = ext_int_config[0].vector_irq_num;
+	pinmux_function = ext_int_config[0].pinmux_function;
+	BIM_SetEInt(ext_int_number, EINT_TYPE_DUALEDGE, 10);
+	GPIO_MultiFun_Set(ext_int_gpio_num, pinmux_function);
+	printk("====== set ext_int = %d, ext_int_num = %d, irq = %d ======\n", ext_int_gpio_num, ext_int_number, vector_irq_num);
+	BIM_EnableEInt(ext_int_number);
+
+	ext_int_gpio_num = ext_int_config[1].ext_int_gpio_num;
+	ext_int_number = ext_int_config[1].ext_int_number;
+	vector_irq_num = ext_int_config[1].vector_irq_num;
+	pinmux_function = ext_int_config[1].pinmux_function;
+	BIM_SetEInt(ext_int_number, EINT_TYPE_DUALEDGE, 10);
+	GPIO_MultiFun_Set(ext_int_gpio_num, pinmux_function);
+	printk("====== set ext_int = %d, ext_int_num = %d, irq = %d ======\n", ext_int_gpio_num, ext_int_number, vector_irq_num);
+	BIM_EnableEInt(ext_int_number);
+
+	ext_int_gpio_num = ext_int_config[4].ext_int_gpio_num;
+	ext_int_number = ext_int_config[4].ext_int_number;
+	vector_irq_num = ext_int_config[4].vector_irq_num;
+	pinmux_function = ext_int_config[4].pinmux_function;
+	BIM_SetEInt(ext_int_number, EINT_TYPE_DUALEDGE, 10);
+	GPIO_MultiFun_Set(ext_int_gpio_num, pinmux_function);
+	printk("====== set ext_int = %d, ext_int_num = %d, irq = %d ======\n", ext_int_gpio_num, ext_int_number, vector_irq_num);
+	BIM_EnableEInt(ext_int_number);
+
+	ext_int_gpio_num = ext_int_config[7].ext_int_gpio_num;
+	ext_int_number = ext_int_config[7].ext_int_number;
+	vector_irq_num = ext_int_config[7].vector_irq_num;
+	pinmux_function = ext_int_config[7].pinmux_function;
+	BIM_SetEInt(ext_int_number, EINT_TYPE_DUALEDGE, 10);
+	GPIO_MultiFun_Set(ext_int_gpio_num, pinmux_function);
+	printk("====== set ext_int = %d, ext_int_num = %d, irq = %d ======\n", ext_int_gpio_num, ext_int_number, vector_irq_num);
+	BIM_EnableEInt(ext_int_number);	
+	
+	return 0;
+}
 int soc_io_config(u32 index, bool direction, u32 pull, u32 drive_strength, bool force_reconfig)
 {
 
@@ -194,3 +245,4 @@ EXPORT_SYMBOL(soc_irq_enable);
 EXPORT_SYMBOL(soc_irq_disable);
 EXPORT_SYMBOL(soc_io_config);
 EXPORT_SYMBOL(soc_io_suspend_config);
+EXPORT_SYMBOL(soc_io_resume_config);

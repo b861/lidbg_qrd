@@ -16,7 +16,7 @@ static char g_acc_history_state[512];
 
 void observer_start(void);
 void observer_stop(void);
-
+extern int soc_io_resume_config(u32 index, u32 direction, u32 pull, u32 drive_strength);
 bool is_safety_apk(char *apkname)
 {
     if(strncmp(apkname, "com.fly.flybootservice", sizeof("com.fly.flybootservice") - 1) == 0)
@@ -588,6 +588,9 @@ static int pm_suspend(struct device *dev)
 static int pm_resume(struct device *dev)
 {
     DUMP_FUN;
+#ifdef SOC_mt3360 	
+	soc_io_resume_config(0, 0, 0, 0);
+#endif
     CREATE_KTHREAD(thread_save_acc_times, NULL);
     return 0;
 }
