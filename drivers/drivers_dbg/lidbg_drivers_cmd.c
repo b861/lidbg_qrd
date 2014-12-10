@@ -379,6 +379,11 @@ void parse_cmd(char *pt)
         buff[len - 1] = '\0';
         lidbg("%d,%s:[%s]\n", len, argv[1], buff);
     }
+    else if(!strcmp(argv[0], "fwrite") )
+    {
+        fs_file_write2(argv[1], argv[2]);
+        lidbg("%s:[%s]\n", argv[1], argv[2]);
+    }
 
     else if (!strcmp(argv[0], "lpc"))
     {

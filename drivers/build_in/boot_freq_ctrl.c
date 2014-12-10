@@ -137,6 +137,7 @@ static int  cpufreq_callback(struct notifier_block *nfb,
 		if((ctrl_max_freq != 0) && (ctrl_en))
 		{
 			policy->max = ctrl_max_freq;
+			policy->min = 300000;
 			lidbg("%s: mitigating cpu %d to freq max: %u min: %u\n",
 			KBUILD_MODNAME, policy->cpu, policy->max, policy->min);
 			break;

@@ -87,10 +87,10 @@ int Ntfs::check(const char *fsPath) {
 
    if(selectPath() != 0)
    {
-   	LIDBG_PRINT("Skipping fs checks, NTFS Tools can't find!\n");
+   	lidbg("Skipping fs checks, NTFS Tools can't find!\n");
 	return -1;
    }
-   LIDBG_PRINT("\n\n\nxxxxxx FSCK_NTFS_PATH is %s\n",FSCK_NTFS_PATH);
+   lidbg("\n\n\nxxxxxx FSCK_NTFS_PATH is %s\n",FSCK_NTFS_PATH);
     do {
         SLOGW("fsPath : %s" , fsPath);
         const char *args[5];
@@ -106,19 +106,19 @@ int Ntfs::check(const char *fsPath) {
         rc = android_fork_execvp(ARRAY_SIZE(args), (char **)args, &status,false, true);
         if (rc != 0) {
             SLOGE("Filesystem check failed due to logwrap error");
-	    LIDBG_PRINT("Filesystem check failed due to logwrap error, rc = %d",rc);
+	    lidbg("Filesystem check failed due to logwrap error, rc = %d",rc);
             errno = EIO;
             return -1;
         }
        if (!WIFEXITED(status)) {
             SLOGE("Filesystem check did not exit properly");
-	    LIDBG_PRINT("Filesystem check did not exit properly");	
+	    lidbg("Filesystem check did not exit properly");	
             errno = EIO;
             return -1;
         }
         status = WEXITSTATUS(status);
 
-	LIDBG_PRINT("status is %d\n", status);
+	lidbg("status is %d\n", status);
         switch(status) {
         case 0:
             SLOGI("Filesystem check completed OK");
@@ -143,7 +143,7 @@ int Ntfs::check(const char *fsPath) {
             return 0;
         default:
             SLOGE("Filesystem check failed (unknown exit code %d)", rc);
-	    LIDBG_PRINT("Filesystem check failed (unknown exit code %d)", rc);
+	    lidbg("Filesystem check failed (unknown exit code %d)", rc);
             errno = EIO;
             return -1;
         }
@@ -236,7 +236,7 @@ int Ntfs::doMount(const char *fsPath, const char *mountPoint,
                 SLOGI("ntfs-3g executed successfully for read-only.");
             } else {
                 SLOGE("Failed to execute ntfs-3g for read-only.");
-		LIDBG_PRINT("Failed to execute ntfs-3g for read-only.");
+		lidbg("Failed to execute ntfs-3g for read-only.");
             }
         } else {
             rc = mount(fsPath, mountPoint, "fuseblk", flags, mountData);

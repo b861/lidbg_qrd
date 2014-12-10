@@ -17,7 +17,7 @@ int Lidbg_vold::deleteDeviceNode(const char *path){
 		return -1;
 	}
 
-	SLOGI("Volume::deleteDeviceNode: path=%s\n", path);
+	lidbg("Volume::deleteDeviceNode: path=%s\n", path);
 
 	/* get device major and minor from path */
 	memset(str_major, 0, 256);
@@ -45,7 +45,7 @@ int Lidbg_vold::deleteDeviceNode(const char *path){
 	major = strtol(str_major, NULL, 10);
 	minor = strtol(temp_str2, NULL, 10);
 
-	SLOGI("Volume::deleteDeviceNode: major=%d, minor=%d\n", major, minor);
+	lidbg("Volume::deleteDeviceNode: major=%d, minor=%d\n", major, minor);
 
 	/* delete DeviceNode */
 	memset(devicePath, 0, 255);
@@ -55,7 +55,7 @@ int Lidbg_vold::deleteDeviceNode(const char *path){
 		SLOGE("Volume::deleteDeviceNode: Failed to remove %s (%s)", path, strerror(errno));
 		return -1;
 	}else{
-		SLOGI("Volume::deleteDeviceNode: delete DeviceNode '%s' successful\n", path);
+		lidbg("Volume::deleteDeviceNode: delete DeviceNode '%s' successful\n", path);
 	}
 
 #endif
@@ -70,15 +70,15 @@ char* Lidbg_vold::createMountPoint(const char *path, int major, int minor) {
 	//sprintf(mountpoint, "%s/%d_%d", path, major, minor);
 	sprintf(mountpoint, "%s/disk_%d", path, minor);
 	if( access(mountpoint, F_OK) ){
-		SLOGI("Volume: file '%s' is not exist, create it", mountpoint);
+		lidbg("Volume: file '%s' is not exist, create it", mountpoint);
 
 		if(mkdir(mountpoint, 0777)){
-			SLOGW("Volume: create file '%s' failed, errno is %d", mountpoint, errno);
+			lidbg("Volume: create file '%s' failed, errno is %d", mountpoint, errno);
 			return NULL;
 		}
 	}else{
 	
-		SLOGW("Volume: file '%s' is exist, can not create it", mountpoint);
+		lidbg("Volume: file '%s' is exist, can not create it", mountpoint);
 		return mountpoint;
 	}
 
@@ -87,12 +87,12 @@ char* Lidbg_vold::createMountPoint(const char *path, int major, int minor) {
 
 int Lidbg_vold::deleteMountPoint(char* mountpoint) {
 	if(mountpoint){
-		SLOGW("Volume::deleteMountPoint: %s exist", mountpoint); 
+		lidbg("Volume::deleteMountPoint: %s exist", mountpoint); 
 		rmdir(mountpoint);
 		if( !access(mountpoint, F_OK) ){
-			SLOGW("Volume::deleteMountPoint: %s", mountpoint);
+			lidbg("Volume::deleteMountPoint: %s", mountpoint);
 			if(rmdir(mountpoint)){
-				SLOGW("Volume: remove file '%s' failed, errno is %d", mountpoint, errno);
+				lidbg("Volume: remove file '%s' failed, errno is %d", mountpoint, errno);
 				return -1;
 			}
 		}
@@ -115,7 +115,7 @@ void Lidbg_vold::saveUnmountPoint(char* mountpoint){
 	}
 
 	if(i >= MAX_UNMOUNT_PARTITIONS){
-		SLOGI("Volume::saveUnmountPoint: unmount point is over %d", MAX_UNMOUNT_PARTITIONS);
+		lidbg("Volume::saveUnmountPoint: unmount point is over %d", MAX_UNMOUNT_PARTITIONS);
 	}
 
 	return;
@@ -127,7 +127,7 @@ void Lidbg_vold::deleteUnMountPoint(int clear){
 
 	for(i = 0; i < MAX_UNMOUNT_PARTITIONS; i++){
 		if(mUnMountPart[i]){
-			SLOGW("Volume::deleteUnMountPoint: %s", mUnMountPart[i]);
+			lidbg("Volume::deleteUnMountPoint: %s", mUnMountPart[i]);
 
 			if(deleteMountPoint(mUnMountPart[i]) == 0){
 				deleteDeviceNode(mUnMountPart[i]);

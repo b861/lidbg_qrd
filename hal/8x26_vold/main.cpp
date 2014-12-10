@@ -36,6 +36,7 @@
 #include "NetlinkManager.h"
 #include "DirectVolume.h"
 #include "cryptfs.h"
+#include "lidbg_vold/Lidbg_vold.h"
 
 static int process_config(VolumeManager *vm);
 static void coldboot(const char *path);
@@ -49,7 +50,7 @@ int main() {
     CommandListener *cl;
     NetlinkManager *nm;
 
-    SLOGI("Vold 2.1 (the revenge) firing up");
+    lidbg("Vold 2.1 (the revenge) firing up");
 
     mkdir("/dev/block/vold", 0755);
 
@@ -58,12 +59,12 @@ int main() {
 
     /* Create our singleton managers */
     if (!(vm = VolumeManager::Instance())) {
-        SLOGE("Unable to create VolumeManager");
+        lidbg("Unable to create VolumeManager");
         exit(1);
     };
 
     if (!(nm = NetlinkManager::Instance())) {
-        SLOGE("Unable to create NetlinkManager");
+        lidbg("Unable to create NetlinkManager");
         exit(1);
     };
 
@@ -73,16 +74,16 @@ int main() {
     nm->setBroadcaster((SocketListener *) cl);
 
     if (vm->start()) {
-        SLOGE("Unable to start VolumeManager (%s)", strerror(errno));
+        lidbg("Unable to start VolumeManager (%s)", strerror(errno));
         exit(1);
     }
 
     if (process_config(vm)) {
-        SLOGE("Error reading configuration (%s)... continuing anyways", strerror(errno));
+        lidbg("Error reading configuration (%s)... continuing anyways", strerror(errno));
     }
 
     if (nm->start()) {
-        SLOGE("Unable to start NetlinkManager (%s)", strerror(errno));
+        lidbg("Unable to start NetlinkManager (%s)", strerror(errno));
         exit(1);
     }
 
@@ -93,7 +94,7 @@ int main() {
      * Now that we're up, we can respond to commands
      */
     if (cl->startListener()) {
-        SLOGE("Unable to start CommandListener (%s)", strerror(errno));
+        lidbg("Unable to start CommandListener (%s)", strerror(errno));
         exit(1);
     }
 	
@@ -103,7 +104,7 @@ int main() {
         sleep(1000);
     }
 
-    SLOGI("Vold exiting");
+    lidbg("Vold exiting");
     exit(0);
 }
 
@@ -165,7 +166,7 @@ static int process_config(VolumeManager *vm)
 
     fstab = fs_mgr_read_fstab(fstab_filename);
     if (!fstab) {
-        SLOGE("failed to open %s\n", fstab_filename);
+        lidbg("failed to open %s\n", fstab_filename);
         return -1;
     }
 
@@ -190,7 +191,7 @@ static int process_config(VolumeManager *vm)
             dv = new DirectVolume(vm, &(fstab->recs[i]), flags);
 
             if (dv->addPath(fstab->recs[i].blk_device)) {
-                SLOGE("Failed to add devpath %s to volume %s",
+                lidbg("Failed to add devpath %s to volume %s",
                       fstab->recs[i].blk_device, fstab->recs[i].label);
                 goto out_fail;
             }

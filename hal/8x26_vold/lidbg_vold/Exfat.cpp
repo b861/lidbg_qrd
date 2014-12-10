@@ -43,7 +43,7 @@ int Exfat::check(const char *fsPath)
 {
 	SLOGI("Exfat::check");
 	if (access(FSCK_EXFAT_PATH, X_OK)) {
-        LIDBG_PRINT("Skipping fs checks\n");
+        lidbg("Skipping fs checks\n");
         return 0;
     }
 
@@ -58,18 +58,18 @@ int Exfat::check(const char *fsPath)
 	if( rc != 0 )
 	{
        SLOGE("Filesystem check failed (unknown exit code %d)", rc);
-	 LIDBG_PRINT("Filesystem check failed (unknown exit code %d)", rc);
+	 lidbg("Filesystem check failed (unknown exit code %d)", rc);
     }
 
 	if (!WIFEXITED(status)) {
 			   SLOGE("Filesystem check did not exit properly");
-		   LIDBG_PRINT("Filesystem check did not exit properly");  
+		   lidbg("Filesystem check did not exit properly");  
 			   errno = EIO;
 			   return -1;
 		   }
 		   status = WEXITSTATUS(status);
 	
-	   LIDBG_PRINT("status is %d\n", status);
+	   lidbg("status is %d\n", status);
 		   switch(status) {
 		   case 0:
 			   SLOGI("Filesystem check completed OK");
@@ -95,7 +95,7 @@ int Exfat::check(const char *fsPath)
 			   return 0;
 		   default:
 			   SLOGE("Filesystem check failed (unknown exit code %d)", rc);
-		   LIDBG_PRINT("Filesystem check failed (unknown exit code %d)", rc);
+		   lidbg("Filesystem check failed (unknown exit code %d)", rc);
 			   errno = EIO;
 			   return -1;
 		   }
@@ -136,7 +136,7 @@ int Exfat::doMount(const char *fsPath, const char *mountPoint,
             ownerUid, ownerGid, permMask, permMask);
 
     if (!remount) {
-        LIDBG_PRINT("Trying to use exfat program to mount %s", fsPath);
+        lidbg("Trying to use exfat program to mount %s", fsPath);
 
         args[0] = MK_EXFAT_PATH;
         args[1] = fsPath;
@@ -146,11 +146,11 @@ int Exfat::doMount(const char *fsPath, const char *mountPoint,
          rc = android_fork_execvp(ARRAY_SIZE(args), (char **)args, &status,false, true);
 
         if (rc == 0) {
-	LIDBG_PRINT("mkfs.exfat executed successfully.");
+	lidbg("mkfs.exfat executed successfully.");
           SLOGI("ntfs-3g executed successfully.");
         } else {
             SLOGE("Failed to execute ntfs-3g.");
-	LIDBG_PRINT("Failed to execute ntfs-3g.");
+	lidbg("Failed to execute ntfs-3g.");
         }
     } else {
         rc = mount(fsPath, mountPoint, "fuseblk", flags, mountData);
@@ -176,10 +176,10 @@ int Exfat::doMount(const char *fsPath, const char *mountPoint,
 
             if (rc == 0) {
                 SLOGI("ntfs-3g executed successfully for read-only.");
-		LIDBG_PRINT("exfat executed successfully for read-only.");
+		lidbg("exfat executed successfully for read-only.");
             } else {
                 SLOGE("Failed to execute ntfs-3g for read-only.");
-		LIDBG_PRINT("Failed to execute exfat for read-only.");
+		lidbg("Failed to execute exfat for read-only.");
             }
         } else {
             rc = mount(fsPath, mountPoint, "fuseblk", flags, mountData);
