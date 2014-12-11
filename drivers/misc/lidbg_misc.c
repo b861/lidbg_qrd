@@ -122,21 +122,53 @@ void cb_int_mem_log(char *key, char *value )
     if(dump_mem_log != 0)
         cb_password_mem_log(NULL);
 }
+
+
+void unhandled_monitor(char *key_word, void *data)
+{
+	//DUMP_FUN;
+	lidbg("find key word\n");
+	if( !fs_is_file_exist("/dev/log/no_reboot"))
+	{
+		lidbg_fs_log("/dev/log/no_reboot","unhandled find");
+		lidbg_chmod("/data");
+		kmsg_fifo_save();
+		lidbg_enable_logcat();
+		lidbg_loop_warning();
+	}
+}
+
 int thread_reboot(void *data)
 {
-    bool volume_find;
+
     if(!reboot_delay_s)
     {
         lidbg("<reb.exit.%d>\n", reboot_delay_s);
         return 0;
     }
     ssleep(reboot_delay_s);
-    volume_find = !!find_mounted_volume_by_mount_point(USB_MOUNT_POINT) ;
-    if(volume_find && !te_is_ts_touched())
-    {
-        lidbg("<lidbg:thread_reboot,call reboot,%d>\n", te_is_ts_touched());
-        msleep(100);
-        kernel_restart(NULL);
+
+	
+	if(0)//cool boot usb mount test
+	{
+	    bool volume_find;
+	    volume_find = !!find_mounted_volume_by_mount_point(USB_MOUNT_POINT) ;
+	    if(volume_find && !te_is_ts_touched())
+	    {
+	        lidbg("<lidbg:thread_reboot,call reboot,%d>\n", te_is_ts_touched());
+	        msleep(100);
+	        kernel_restart(NULL);
+	    }
+    }
+
+	if(0)
+	{
+	    
+    	if( !fs_is_file_exist("/dev/log/no_reboot"))
+	    {
+	        lidbg("<lidbg:thread_reboot,call reboot>\n");
+	        kernel_restart(NULL);
+	    }
     }
     return 0;
 }
@@ -338,6 +370,9 @@ int misc_init(void *data)
 
     if(1 == logcat_en)
         logcat_lunch(NULL, NULL);
+
+	//lidbg_trace_msg_cb_register("unhandled",NULL,unhandled_monitor);
+
     lidbg_new_cdev(&misc_nod_fops, "lidbg_misc");
     return 0;
 }
