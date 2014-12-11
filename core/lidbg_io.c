@@ -73,6 +73,7 @@ void mod_io_main(int argc, char **argv)
             pio_int_config->ext_int_num = simple_strtoul(argv[2], 0, 0);
             lidbg("request ext_int_num: %d\n", pio_int_config->ext_int_num);
 #ifdef SOC_mt3360
+            pio_int_config->irqflags =  simple_strtoul(argv[3], 0, 0);
 #else
             pio_int_config->ext_int_num = GPIO_TO_INT(pio_int_config->ext_int_num);
             lidbg("request ext_int_num: %d\n", pio_int_config->ext_int_num);

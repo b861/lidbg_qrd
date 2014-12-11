@@ -36,7 +36,7 @@ void soc_irq_disable(unsigned int irq)
 
     if(ext_int_flag){
 		BIM_DisableEInt(ext_int_number);
-		ext_int_flag = 1;
+		ext_int_flag = 0;
     }
     BIM_ClearIrq(irq);
 }
@@ -56,7 +56,7 @@ void soc_irq_enable(unsigned int irq)
 
     if(ext_int_flag){
 		BIM_EnableEInt(ext_int_number);
-		ext_int_flag = 1;
+		ext_int_flag = 0;
     }
 }
 
@@ -101,7 +101,7 @@ int soc_io_irq(struct io_int_config *pio_int_config)//need set to input first?
 		ext_int_flag = 0;
 		printk("***** set ext_int = %d, ext_int_num = %d, irq = %d, irq_flag = %d ******\n", ext_int_gpio_num, ext_int_number, vector_irq_num, (pio_int_config->irqflags >> 10));
 
-	      if (request_irq(vector_irq_num, pio_int_config->pisr , pio_int_config->irqflags, "lidbg_irq", NULL ))
+	      if (request_irq(vector_irq_num, pio_int_config->pisr , pio_int_config->irqflags, "lidbg_irq", pio_int_config->dev ))
 	      {
 	          lidbg("request_irq err!\n");
 	          return 0;
@@ -112,9 +112,9 @@ int soc_io_irq(struct io_int_config *pio_int_config)//need set to input first?
     else{
 	    GPIO_MultiFun_Set(pio_int_config->ext_int_num, PINMUX_LEVEL_GPIO_END_FLAG);
 	    pio_int_config->ext_int_num = GPIO_TO_INT(pio_int_config->ext_int_num);
-	    pio_int_config->irqflags =  IRQF_TRIGGER_RISING;
-
-	    if (request_gpio_irq(pio_int_config->ext_int_num , pio_int_config->pisr , IRQ_TYPE_EDGE_RISING , "lidbg_irq", NULL))
+//	    pio_int_config->irqflags =  GPIO_IRQTYPE_RISINGEDGE;
+		printk("***** set gpio int: gpio_num = %d, irq = %d, irq_flag = %d ******\n", pio_int_config->ext_int_num, pio_int_config->ext_int_num, pio_int_config->irqflags);
+	    if (request_gpio_irq(pio_int_config->ext_int_num , pio_int_config->pisr , pio_int_config->irqflags , "lidbg_irq", pio_int_config->dev))
 	    {
 	        lidbg("request_irq err!\n");
 	        return 0;
