@@ -62,7 +62,7 @@ other/
 out_release/
 log/
 
-
+!soc/mt3360/bin/*.ko
 
 
 #

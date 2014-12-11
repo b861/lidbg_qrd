@@ -34,6 +34,9 @@ char *insmod_list[] =
 #else
     "lidbg_drivers_loader.ko",
 #endif
+#ifdef SOC_mt3360
+	"ac83xxpowerkey.ko",
+#endif
     NULL,
 };
 
@@ -111,14 +114,6 @@ int thread_loader(void *data)
         kopath = "/system/lib/modules/out/";
 
 	lidbg("thread_loader start\n");
-#ifdef SOC_mt3360 	
-	// for mtk adc ++
-        sprintf(path, "%s",  "/system/drivers/ac83xxinput.ko");
-        lidbg_insmod(path);		
- 	 lidbg("insmod for mtk = %s\n", path);
-	 ssleep(1); 
-	 // for mtk adc --
-#endif	
     for(j = 0; insmod_soc_list[j] != NULL; j++)
     {	
         sprintf(path, "%s%s", kopath, insmod_soc_list[j]);
@@ -133,14 +128,6 @@ int thread_loader(void *data)
         while(tmp == load_modules_count) msleep(10);
     }
 
-#ifdef SOC_mt3360 	
-	// for mtk pwrkey ++
-        sprintf(path, "%s",  "/system/drivers/ac83xxpowerkey.ko");
-        lidbg_insmod(path);		
- 	 lidbg("insmod for mtk = %s\n", path);
-	 //ssleep(1); 
-	 // for mtk pwrkey --
-#endif
     DUMP_FUN_LEAVE;
     return 0;
 

@@ -9,6 +9,7 @@ src_dir=$DBG_SOC_PATH/$DBG_SOC
 dest_dir=$DBG_OUT_PATH
 
 cp -u $src_dir/*.ko	$dest_dir/	&> /dev/null
+cp -u $src_dir/bin/*.ko	$dest_dir/	&> /dev/null
 cp $src_dir/conf/*.conf	$dest_dir/	&> /dev/null
 
 src_dir=$DBG_CORE_PATH

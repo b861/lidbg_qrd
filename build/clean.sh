@@ -20,7 +20,7 @@ fi
 #force clean
 rm -rf $DBG_OUT_PATH
 cd $DBG_ROOT_PATH 
-find . -name "*.ko" -type f -exec rm  {} \;
+find . -path "$DBG_SOC_PATH/$DBG_SOC/bin" -prune -name "*.ko" -type f -exec rm  {} \;
 find . -name "*.o" -type f -exec rm  {} \;
 find . -name "*.mod.c" -type f -exec rm  {} \;
 find . -name "*.symvers" -type f -exec rm  {} \;
