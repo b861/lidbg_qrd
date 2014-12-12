@@ -34,9 +34,6 @@ char *insmod_list[] =
 #else
     "lidbg_drivers_loader.ko",
 #endif
-#ifdef SOC_mt3360
-	"ac83xxpowerkey.ko",
-#endif
     NULL,
 };
 
