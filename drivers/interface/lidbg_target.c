@@ -1,13 +1,13 @@
 
 #ifdef PLATFORM_msm8226
-#include "lidbg_target_msm8226.c"
+#include "../../soc/msm8x26/lidbg_target_msm8226.c"
 #elif defined(PLATFORM_msm8974)
-#include "lidbg_target_msm8974.c"
+#include "../../soc/msm8x26/lidbg_target_msm8974.c"
 #endif
 
 
 #ifdef SOC_mt3360
-#include "lidbg_target_mt3360.c"
+#include "../../soc/mt3360/lidbg_target_mt3360.c"
 #endif
 
 
