@@ -123,6 +123,12 @@ void cb_int_mem_log(char *key, char *value )
         cb_password_mem_log(NULL);
 }
 
+int thread_kmsg_fifo_save(void *data)
+{
+	ssleep(30);
+    kmsg_fifo_save();
+    return 0;
+}
 
 void unhandled_monitor(char *key_word, void *data)
 {
@@ -132,7 +138,7 @@ void unhandled_monitor(char *key_word, void *data)
 	{
 		lidbg_fs_log("/dev/log/no_reboot","unhandled find");
 		lidbg_chmod("/data");
-		kmsg_fifo_save();
+		CREATE_KTHREAD(thread_kmsg_fifo_save, NULL);
 		lidbg_enable_logcat();
 		lidbg_loop_warning();
 	}
