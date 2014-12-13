@@ -17,15 +17,17 @@ DBG_HAL_PATH=$DBG_ROOT_PATH/hal
 DBG_PLATFORM_DIR=$DBG_SOC_DIR/$DBG_PLATFORM
 
 
-case "$DBG_PLATFORM" in
-    msm7627a)
+case "$DBG_PLATFORM_ID" in
+    	0)
+	DBG_PLATFORM=msm7627a
 	BOARD_VERSION=V2
 	DBG_CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilt/linux-x86/toolchain/arm-eabi-4.4.3/bin/arm-eabi-
 	SYSTEM_BUILD_TYPE=eng
 	DBG_KERNEL_SRC_DIR=$DBG_SYSTEM_DIR/kernel
 	DBG_KERNEL_OBJ_DIR=$DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/obj/KERNEL_OBJ
 	DBG_SOC=msm8x25;;
-    msm8625)
+    	1)
+	DBG_PLATFORM=msm8625
 	BOARD_VERSION=V4
 	DBG_CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilt/linux-x86/toolchain/arm-eabi-4.4.3/bin/arm-eabi-
 	SYSTEM_BUILD_TYPE=userdebug
@@ -36,7 +38,8 @@ case "$DBG_PLATFORM" in
 	DBG_PASSWORD=git
 	DBG_REPO_PASSWORD=git
 	DBG_SOC=msm8x25;;
-    msm8226)
+    	2)
+	DBG_PLATFORM=msm8226
 	BOARD_VERSION=V3
 	DBG_CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilts/gcc/linux-x86/arm/arm-eabi-4.7/bin/arm-eabi-
 	SYSTEM_BUILD_TYPE=userdebug
@@ -47,7 +50,20 @@ case "$DBG_PLATFORM" in
 	DBG_PASSWORD=git
 	DBG_REPO_PASSWORD=git
 	DBG_SOC=msm8x26;;
-    msm8974)
+    	3)
+	DBG_PLATFORM=msm8226
+	BOARD_VERSION=V4
+	DBG_CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilts/gcc/linux-x86/arm/arm-eabi-4.7/bin/arm-eabi-
+	SYSTEM_BUILD_TYPE=userdebug
+	DBG_KERNEL_SRC_DIR=$DBG_SYSTEM_DIR/kernel
+	DBG_KERNEL_OBJ_DIR=$DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/obj/KERNEL_OBJ
+	UPDATA_BIN_DIR=$RELEASE_REPOSITORY/others/8926/driver
+	UPDATA_BASESYSTEM_DIR=$RELEASE_REPOSITORY/others/8926/basesystem
+	DBG_PASSWORD=git
+	DBG_REPO_PASSWORD=git
+	DBG_SOC=msm8x26;;
+    	4)
+	DBG_PLATFORM=msm8974
 	BOARD_VERSION=V2
 	DBG_CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilts/gcc/linux-x86/arm/arm-eabi-4.7/bin/arm-eabi-
 	SYSTEM_BUILD_TYPE=userdebug
@@ -58,7 +74,7 @@ case "$DBG_PLATFORM" in
 	DBG_PASSWORD=git
 	DBG_REPO_PASSWORD=git
 	DBG_SOC=msm8x26;;
-   mt3360)
+   	5)
 	BOARD_VERSION=V1
 	DBG_CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilts/gcc/linux-x86/arm/arm-eabi-4.6/bin/arm-eabi-
 	SYSTEM_BUILD_TYPE=eng
