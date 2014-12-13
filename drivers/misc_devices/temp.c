@@ -8,6 +8,8 @@ int cpu_temp_show = 0;
 static int temp_offset = 0;
 int antutu_test = 0;
 int antutu_temp_offset = 0;
+int normal_temp_offset = 0;
+
 bool fan_run_status = false;
 
 #define FREQ_MAX_NODE    "/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq"
@@ -141,7 +143,7 @@ void set_system_performance(int type)
 		//lidbg_readwrite_file(FREQ_MAX_NODE, NULL, "1958400", strlen("1958400"));
 #endif
 		set_cpu_governor(0);
-		temp_offset = -20;
+		temp_offset = -normal_temp_offset;
 		//temp_offset = -25;//better for some machine
 	}
 }
@@ -376,6 +378,7 @@ void temp_init(void)
     FS_REGISTER_INT(cpu_temp_show, "cpu_temp_show", 0, cb_kv_show_temp);
     FS_REGISTER_INT(antutu_test, "antutu_test", 0, NULL);
     FS_REGISTER_INT(antutu_temp_offset, "antutu_temp_offset", 10, NULL);
+    FS_REGISTER_INT(normal_temp_offset, "normal_temp_offset", 25, NULL);
 
     if(fs_is_file_exist(TEMP_FREQ_COUNTER))
     {
