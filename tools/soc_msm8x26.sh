@@ -96,4 +96,22 @@ function soc_make_otapackage()
 	fi
 		soc_prebuild && make otapackage -j8
 }
+
+function soc_build_origin_image
+{
+	echo $FUNCNAME
+	soc_build_all
+
+	cp $DBG_SOC_PATH/$DBG_SOC/init.lidbg.rc        $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/root/init.lidbg.rc
+	cp $DBG_OUT_PATH/lidbg_load		       $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/bin/lidbg_load
+	cp $DBG_OUT_PATH/vold		       	       $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/bin/vold
+	cp -rf $DBG_OUT_PATH                           $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/lib/modules/out
+	cp -rf $DBG_SYSTEM_DIR/origin-app/priv-app/*   $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/priv-app/
+	cp -rf $DBG_SYSTEM_DIR/origin-app/app/*        $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/app/
+
+	soc_make_otapackage
+	rm -rf $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system
+}
+
+
 . $DBG_TOOLS_PATH/soc_common.sh

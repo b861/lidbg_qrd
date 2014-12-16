@@ -29,7 +29,8 @@ function soc_menu()
 	echo [23] make
 	echo [24] make otapackage
 	echo [25] make release basesystem
-	echo [26] common
+	echo [26] make origin system image
+	echo [30] common
 }
 
 function soc_handle()
@@ -48,6 +49,8 @@ function soc_handle()
 	25)
 		soc_build_release;;
 	26)
+		soc_build_origin_image;;
+	30)
 		soc_build_common "$2 $3 $4";;
 	*)
 		echo
