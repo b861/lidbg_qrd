@@ -8,4 +8,4 @@ cpu_temp_time_minute=20
 cpu_temp_show=0
 antutu_test=0
 antutu_temp_offset=10
-normal_temp_offset=25
+normal_temp_offset=20

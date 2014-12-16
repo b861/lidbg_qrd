@@ -378,7 +378,7 @@ void temp_init(void)
     FS_REGISTER_INT(cpu_temp_show, "cpu_temp_show", 0, cb_kv_show_temp);
     FS_REGISTER_INT(antutu_test, "antutu_test", 0, NULL);
     FS_REGISTER_INT(antutu_temp_offset, "antutu_temp_offset", 10, NULL);
-    FS_REGISTER_INT(normal_temp_offset, "normal_temp_offset", 25, NULL);
+    FS_REGISTER_INT(normal_temp_offset, "normal_temp_offset", 20, NULL);
 
     if(fs_is_file_exist(TEMP_FREQ_COUNTER))
     {
