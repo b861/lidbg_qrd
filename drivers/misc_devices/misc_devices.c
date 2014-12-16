@@ -51,6 +51,13 @@ static int lidbg_event(struct notifier_block *this,
         break;
 
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_DEVICE_DOWN):
+#ifdef VENDOR_QCOM
+		lidbg("set uart to gpio\n");
+		SOC_IO_Output_Ext(0, g_hw.gpio_dvd_tx, 1,GPIOMUX_PULL_NONE,GPIOMUX_DRV_8MA);
+		SOC_IO_Output_Ext(0, g_hw.gpio_dvd_rx, 1,GPIOMUX_PULL_NONE,GPIOMUX_DRV_8MA);
+		SOC_IO_Output_Ext(0, g_hw.gpio_bt_tx, 1,GPIOMUX_PULL_NONE,GPIOMUX_DRV_8MA);
+		SOC_IO_Output_Ext(0, g_hw.gpio_bt_rx, 1,GPIOMUX_PULL_NONE,GPIOMUX_DRV_8MA);
+#endif
 		#ifdef PLATFORM_msm8226
 		MSM_GPS_POWER_OFF;
 		#endif
@@ -67,6 +74,13 @@ static int lidbg_event(struct notifier_block *this,
 	case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_ANDROID_UP):
 		break;
 	case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_DEVICE_UP):
+#ifdef VENDOR_QCOM
+		lidbg("set gpio to uart\n");
+		SOC_IO_Config(g_hw.gpio_dvd_tx,GPIOMUX_FUNC_2,GPIOMUX_OUT_HIGH,GPIOMUX_PULL_NONE,GPIOMUX_DRV_16MA);
+		SOC_IO_Config(g_hw.gpio_dvd_rx,GPIOMUX_FUNC_2,GPIOMUX_OUT_HIGH,GPIOMUX_PULL_NONE,GPIOMUX_DRV_16MA);
+		SOC_IO_Config(g_hw.gpio_bt_tx,GPIOMUX_FUNC_2,GPIOMUX_OUT_HIGH,GPIOMUX_PULL_NONE,GPIOMUX_DRV_16MA);
+		SOC_IO_Config(g_hw.gpio_bt_rx,GPIOMUX_FUNC_2,GPIOMUX_OUT_HIGH,GPIOMUX_PULL_NONE,GPIOMUX_DRV_16MA);
+#endif
 		#ifdef PLATFORM_msm8226
 		MSM_GPS_POWER_ON;
 		#endif

@@ -1,6 +1,6 @@
 
 source ./env_entry.sh
-./build_cfg.sh $DBG_SOC $BOARD_VERSION $DBG_PLATFORM
+./build_cfg.sh $DBG_SOC $BOARD_VERSION $DBG_PLATFORM $DBG_VENDOR
 mkdir -p $DBG_OUT_PATH
 
 find ../ -name "Module.symvers" -exec rm -rf {} \;

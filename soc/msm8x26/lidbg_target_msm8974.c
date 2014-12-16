@@ -101,9 +101,14 @@ struct hw_version_specific g_hw_version_specific[] =
 	.gpio_mcu_wp = 79,
 	.gpio_mcu_app = 68,
 	
-	.gpio_ts_int= 14,
-	.gpio_ts_rst= 12,
-	
+	.gpio_ts_int = 14,
+	.gpio_ts_rst = 12,
+
+	.gpio_dvd_tx = 8,
+	.gpio_dvd_rx = 9,
+
+	.gpio_bt_tx = 0,
+	.gpio_bt_rx = 1,
 	
 	.i2c_bus_dsi83 = 3,
 	.i2c_bus_bx5b3a= 3,

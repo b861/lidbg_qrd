@@ -147,7 +147,7 @@ int soc_io_suspend_config(u32 index, u32 direction, u32 pull, u32 drive_strength
 	}
 }
 
-int soc_io_config(u32 index, u32 direction, u32 pull, u32 drive_strength, bool force_reconfig)
+int soc_io_config(u32 index, int func, u32 direction,  u32 pull, u32 drive_strength, bool force_reconfig)
 {
 	bool is_first_init = 0;
 	
@@ -178,7 +178,7 @@ int soc_io_config(u32 index, u32 direction, u32 pull, u32 drive_strength, bool f
 			lidbg_setting_suspend = soc_io_config_log[index].settings[GPIOMUX_SUSPENDED];
 		}
 
-		lidbg_setting_active->func = GPIOMUX_FUNC_GPIO;
+		lidbg_setting_active->func = func;
 		lidbg_setting_active->drv = drive_strength;
 		lidbg_setting_active->pull = pull;
 		lidbg_setting_active->dir = direction;
@@ -196,8 +196,10 @@ int soc_io_config(u32 index, u32 direction, u32 pull, u32 drive_strength, bool f
 
 
         if (!gpio_is_valid(index))
+        {
+        	lidbg("gpio_is_valid fail\n");
             return 0;
-
+        }
 
         lidbg("gpio_request:index %d\n" , index);
 		lidbg("soc_io_config %d %d %d\n",
@@ -206,30 +208,29 @@ int soc_io_config(u32 index, u32 direction, u32 pull, u32 drive_strength, bool f
 						lidbg_setting_active->dir
 		);
 
-
-
-
         msm_gpiomux_install(&soc_io_config_log[index], 1);
 		
-		if(is_first_init)
+		if(func == GPIOMUX_FUNC_GPIO)
 		{
-	        err = gpio_request(index, "lidbg_io");
-	        if (err)
+			if(is_first_init)
+			{
+		        err = gpio_request(index, "lidbg_io");
+		        if (err)
+		        {
+		            lidbg("\n\nerr: gpio request failed!!!!!!\n\n\n");
+		        }
+			}
+
+	        if(direction == GPIOMUX_IN)
 	        {
-	            lidbg("\n\nerr: gpio request failed!!!!!!\n\n\n");
+	            err = gpio_direction_input(index);
+	            if (err)
+	            {
+	                lidbg("gpio_direction_set failed\n");
+	                goto free_gpio;
+	            }
 	        }
 		}
-
-        if(direction == GPIOMUX_IN)
-        {
-            err = gpio_direction_input(index);
-            if (err)
-            {
-                lidbg("gpio_direction_set failed\n");
-                goto free_gpio;
-            }
-        }
-
         return 1;
 
 free_gpio:

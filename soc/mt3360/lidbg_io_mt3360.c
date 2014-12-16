@@ -180,7 +180,7 @@ int soc_io_resume_config(u32 index, u32 direction, u32 pull, u32 drive_strength)
 	
 	return 0;
 }
-int soc_io_config(u32 index, bool direction, u32 pull, u32 drive_strength, bool force_reconfig)
+int soc_io_config(u32 index, int func,bool direction,u32 pull, u32 drive_strength, bool force_reconfig)
 {
 
     if(soc_io_config_log[index] == 1)

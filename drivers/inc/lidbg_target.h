@@ -65,6 +65,11 @@ struct hw_version_specific
 	int gpio_ts_int;
 	int gpio_ts_rst;
 
+	int gpio_dvd_rx;
+	int gpio_dvd_tx;
+	
+	int gpio_bt_rx;
+	int gpio_bt_tx;
 
 //i2c
 	int i2c_bus_dsi83;

@@ -201,7 +201,7 @@ struct lidbg_fn_t
     void (*pfnSOC_IO_Output) (unsigned int group, unsigned int index, bool status);
     bool (*pfnSOC_IO_Input) (unsigned int group, unsigned int index, unsigned int pull);
     void (*pfnSOC_IO_Output_Ext)(unsigned int group, unsigned int index, bool status, unsigned int pull, unsigned int drive_strength);
-    bool (*pfnSOC_IO_Config)(unsigned int index, u32 direction, unsigned int pull, unsigned int drive_strength);
+    bool (*pfnSOC_IO_Config)(unsigned int index, int func,u32 direction, unsigned int pull, unsigned int drive_strength);
 
     bool (*pfnSOC_IO_ISR_Add)(unsigned int irq, unsigned int interrupt_type, pinterrupt_isr func, void *dev);
     bool (*pfnSOC_IO_ISR_Enable)(unsigned int irq);

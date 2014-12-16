@@ -170,7 +170,7 @@ void soc_irq_enable(unsigned int irq);
 
 int soc_io_output(u32 group, u32 index, bool status);
 bool soc_io_input(u32 index);
-int soc_io_config(u32 index, u32 direction, u32 pull, u32 drive_strength, bool force_reconfig);
+int soc_io_config(u32 index, int func,u32 direction,  u32 pull, u32 drive_strength, bool force_reconfig);
 int soc_io_suspend_config(u32 index, u32 direction, u32 pull, u32 drive_strength);
 int soc_io_suspend(void);
 int soc_io_resume(void);
@@ -201,8 +201,8 @@ struct fly_smem
 
 extern struct fly_smem *p_fly_smem ;
 
-#define IO_CONFIG_OUTPUT(group,index) do{  soc_io_config( index,  GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_16MA, 1);}while(0)
-#define IO_CONFIG_INPUT(group,index) do{  soc_io_config( index,  GPIO_CFG_INPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA, 1);}while(0)
+#define IO_CONFIG_OUTPUT(group,index) do{  soc_io_config( index, GPIOMUX_FUNC_GPIO, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_16MA, 1);}while(0)
+#define IO_CONFIG_INPUT(group,index) do{  soc_io_config( index, GPIOMUX_FUNC_GPIO, GPIO_CFG_INPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA, 1);}while(0)
 
 //#define GPIO_TO_INT MSM_GPIO_TO_INT
 #define GPIO_TO_INT gpio_to_irq
@@ -235,7 +235,7 @@ extern struct fly_smem *p_fly_smem ;
 #define TX_GPIO (123)  //27
 #define TX_H  do{soc_io_output(0,TX_GPIO, 1);}while(0)
 #define TX_L  do{soc_io_output(0,TX_GPIO, 0);}while(0)
-#define TX_CFG  do{soc_io_config(TX_GPIO, GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_16MA,1);}while(0)
+#define TX_CFG  do{soc_io_config(TX_GPIO, GPIOMUX_FUNC_GPIO,GPIO_CFG_OUTPUT,GPIO_CFG_NO_PULL,GPIO_CFG_16MA,1);}while(0)
 
 // 1.2Gh
 #define IO_UART_DELAY_1200_115200 (14)
