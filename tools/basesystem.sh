@@ -81,7 +81,7 @@ function system_dir_build()
 	fi
 	echo ====IN.4make-j8=====$FUNCNAME
 	rm -rf ./out/target/product/$SYSTEM_PLATFORM/system
-
+	rm -rf ./out/target/product/$SYSTEM_PLATFORM/root
 	soc_prebuild
 	make -j8
 	soc_postbuild

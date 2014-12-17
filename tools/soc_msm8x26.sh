@@ -20,6 +20,8 @@ function soc_build_common()
 function soc_build_all()
 {
 	echo $FUNCNAME
+	rm -rf $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system
+	rm -rf $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/root
 	soc_prebuild && make -j8 && soc_postbuild
 }
 
@@ -111,6 +113,7 @@ function soc_build_origin_image
 
 	soc_make_otapackage
 	rm -rf $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system
+	rm -rf $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/root
 }
 
 
