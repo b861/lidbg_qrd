@@ -1,7 +1,7 @@
 LOCATE_PATH=`pwd`
 echo $LOCATE_PATH
 source ../../dbg_cfg.sh
-cd ../../build && source env_entry.sh && ./build_cfg.sh $DBG_SOC $BUILD_VERSION $DBG_PLATFORM
+cd ../../build && source env_entry.sh && ./build_cfg.sh $DBG_SOC $BOARD_VERSION $DBG_PLATFORM $DBG_VENDOR
 
 if [ $DBG_PLATFORM = mt3360 ];then
 cd $DBG_SYSTEM_DIR/&&source ./selfenv&&lunch 5

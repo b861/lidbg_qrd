@@ -2,7 +2,7 @@ source ../dbg_cfg.sh
 source ../soc/$DBG_SOC/conf/soc_select
 LOCATE_PATH=`pwd`
 clear
-cd ../build && source env_entry.sh && ./build_cfg.sh  $DBG_SOC $BUILD_VERSION $DBG_PLATFORM
+cd ../build && source env_entry.sh && ./build_cfg.sh  $DBG_SOC $BOARD_VERSION $DBG_PLATFORM $DBG_VENDOR
 if [ $DBG_PLATFORM = mt3360 ];then
 cd $DBG_SYSTEM_DIR/&&source ./selfenv&&lunch 5  && mmm $DBG_HAL_PATH -B
 else

@@ -1,6 +1,6 @@
 
 source ./env_entry.sh
-echo input :"$1" "$2" "$3"
+echo input :"$1" "$2" "$3" "$4"
 
 echo EXTRA_CFLAGS += -DSOC_${1} > $DBG_BUILD_PATH/build_cfg.mk
 echo LOCAL_CFLAGS += -DSOC_${1} >> $DBG_BUILD_PATH/build_cfg.mk
