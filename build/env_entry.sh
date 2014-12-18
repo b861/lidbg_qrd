@@ -39,6 +39,7 @@ case "$DBG_PLATFORM_ID" in
 	DBG_PASSWORD=git
 	DBG_REPO_PASSWORD=git
 	DBG_VENDOR=VENDOR_QCOM
+	OTA_PACKAGE_NAME=msm8625-ota-eng.root_mmc.zip
 	DBG_SOC=msm8x25;;
     	2)
 	DBG_PLATFORM=msm8226
@@ -52,6 +53,7 @@ case "$DBG_PLATFORM_ID" in
 	DBG_PASSWORD=git
 	DBG_REPO_PASSWORD=git
 	DBG_VENDOR=VENDOR_QCOM
+	OTA_PACKAGE_NAME=msm8226-ota-eng.root.zip
 	DBG_SOC=msm8x26;;
     	3)
 	DBG_PLATFORM=msm8226
@@ -65,6 +67,7 @@ case "$DBG_PLATFORM_ID" in
 	DBG_PASSWORD=git
 	DBG_REPO_PASSWORD=git
 	DBG_VENDOR=VENDOR_QCOM
+	OTA_PACKAGE_NAME=msm8226-ota-eng.root.zip
 	DBG_SOC=msm8x26;;
     	4)
 	DBG_PLATFORM=msm8974
@@ -78,8 +81,9 @@ case "$DBG_PLATFORM_ID" in
 	DBG_PASSWORD=git
 	DBG_REPO_PASSWORD=git
 	DBG_VENDOR=VENDOR_QCOM
+	OTA_PACKAGE_NAME=msm8974-ota-eng.root.zip
 	DBG_SOC=msm8x26;;
-   		5)
+   	5)
 	DBG_PLATFORM=mt3360
 	BOARD_VERSION=V1
 	DBG_CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilts/gcc/linux-x86/arm/arm-eabi-4.6/bin/arm-eabi-
@@ -94,7 +98,7 @@ case "$DBG_PLATFORM_ID" in
 	DBG_SOC=mt3360;;
 esac
 
-
+export OTA_PACKAGE_NAME
 export DBG_VENDOR
 export DBG_ROOT_PATH
 export DBG_TOOLS_PATH
