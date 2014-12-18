@@ -380,6 +380,9 @@ int misc_init(void *data)
 	//lidbg_trace_msg_cb_register("unhandled",NULL,unhandled_monitor);
 
     lidbg_new_cdev(&misc_nod_fops, "lidbg_misc");
+
+	ssleep(30);
+	complete(&udisk_misc_wait);
     return 0;
 }
 
