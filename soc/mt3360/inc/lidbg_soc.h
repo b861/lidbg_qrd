@@ -80,6 +80,25 @@ enum gpiomux_drv {
 	GPIOMUX_DRV_16MA,
 };
 
+enum gpiomux_func {
+	GPIOMUX_FUNC_GPIO = 0,
+	GPIOMUX_FUNC_1,
+	GPIOMUX_FUNC_2,
+	GPIOMUX_FUNC_3,
+	GPIOMUX_FUNC_4,
+	GPIOMUX_FUNC_5,
+	GPIOMUX_FUNC_6,
+	GPIOMUX_FUNC_7,
+	GPIOMUX_FUNC_8,
+	GPIOMUX_FUNC_9,
+	GPIOMUX_FUNC_A,
+	GPIOMUX_FUNC_B,
+	GPIOMUX_FUNC_C,
+	GPIOMUX_FUNC_D,
+	GPIOMUX_FUNC_E,
+	GPIOMUX_FUNC_F,
+};
+
 enum gpiomux_pull {
 	GPIOMUX_PULL_NONE = 0,
 	GPIOMUX_PULL_DOWN,
@@ -201,7 +220,7 @@ void soc_irq_enable(unsigned int irq);
 
 int soc_io_output(u32 group, u32 index, bool status);
 bool soc_io_input(u32 index);
-int soc_io_config(u32 index, int func,bool direction, int func,u32 pull, u32 drive_strength, bool force_reconfig);
+int soc_io_config(u32 index, int func,bool direction, u32 pull, u32 drive_strength, bool force_reconfig);
 int soc_io_suspend_config(u32 index, u32 direction, u32 pull, u32 drive_strength);
 int soc_temp_get(void);
 void lidbg_soc_main(int argc, char **argv);

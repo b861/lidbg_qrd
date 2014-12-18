@@ -79,7 +79,8 @@ case "$DBG_PLATFORM_ID" in
 	DBG_REPO_PASSWORD=git
 	DBG_VENDOR=VENDOR_QCOM
 	DBG_SOC=msm8x26;;
-   	5)
+   		5)
+	DBG_PLATFORM=mt3360
 	BOARD_VERSION=V1
 	DBG_CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilts/gcc/linux-x86/arm/arm-eabi-4.6/bin/arm-eabi-
 	SYSTEM_BUILD_TYPE=eng
