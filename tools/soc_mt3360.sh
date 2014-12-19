@@ -38,9 +38,9 @@ function soc_build_release()
 {
 
 	cd $RELEASE_REPOSITORY
-	expect $DBG_TOOLS_PATH/pull
+	expect $DBG_TOOLS_PATH/pull master $DBG_REPO_PASSWORD
 	cd $DBG_SYSTEM_DIR
-	expect $DBG_TOOLS_PATH/pull
+	expect $DBG_TOOLS_PATH/pull master $DBG_PASSWORD
 
 	soc_build_all 
 }

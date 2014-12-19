@@ -1,6 +1,8 @@
  #!/usr/bin/expect
 set timeout -1
-spawn git push origin master
+set branch [lindex $argv 0]
+set password [lindex $argv 1]
+spawn git push origin $branch:$branch
 expect "password"
-send "git\r"
+send "$password\r"
 expect eof

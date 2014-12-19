@@ -20,8 +20,6 @@ function soc_build_common()
 function soc_build_all()
 {
 	echo $FUNCNAME
-	rm -rf $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system
-	rm -rf $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/root
 	soc_prebuild && make -j8 && soc_postbuild
 }
 
@@ -68,6 +66,9 @@ if [ $DBG_PLATFORM = msm8226 ];then
 #	cp $RELEASE_REPOSITORY/driver/out/lidbg_load $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/bin/
 fi
 
+	rm -rf $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system
+	rm -rf $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/root
+
 	if [[ $TARGET_PRODUCT = "" ]];then
 		source build/envsetup.sh&&choosecombo release $DBG_PLATFORM $SYSTEM_BUILD_TYPE
 	fi
@@ -78,9 +79,9 @@ function soc_build_release()
 {
 	echo $FUNCNAME
 	cd $RELEASE_REPOSITORY
-	expect $DBG_TOOLS_PATH/pull $DBG_REPO_PASSWORD
+	expect $DBG_TOOLS_PATH/pull master $DBG_REPO_PASSWORD
 	cd $DBG_SYSTEM_DIR
-	expect $DBG_TOOLS_PATH/pull $DBG_PASSWORD
+	expect $DBG_TOOLS_PATH/pull master $DBG_PASSWORD
 
 	soc_build_all
 	soc_make_otapackage
@@ -93,10 +94,7 @@ function soc_make_otapackage()
 	#cp -u $RELEASE_REPOSITORY/lk/emmc_appsboot.mbn  $DBG_SYSTEM_DIR/device/qcom/msm8226/radio/
 	#cp -u $RELEASE_REPOSITORY/radio/* 	        $DBG_SYSTEM_DIR/device/qcom/msm8226/radio/
 	cd $DBG_SYSTEM_DIR
-	if [[ $TARGET_PRODUCT = "" ]];then
-		source build/envsetup.sh&&choosecombo release $DBG_PLATFORM $SYSTEM_BUILD_TYPE
-	fi
-		soc_prebuild && make otapackage -j8
+	soc_prebuild && make otapackage -j8
 }
 
 function soc_build_origin_image
@@ -111,9 +109,8 @@ function soc_build_origin_image
 	cp -rf $DBG_SYSTEM_DIR/origin-app/priv-app/*   $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/priv-app/
 	cp -rf $DBG_SYSTEM_DIR/origin-app/app/*        $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/app/
 
-	soc_make_otapackage
-	rm -rf $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system
-	rm -rf $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/root
+	make otapackage -j8
+
 }
 
 

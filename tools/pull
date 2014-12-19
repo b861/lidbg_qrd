@@ -1,9 +1,11 @@
  #!/usr/bin/expect
 set timeout -1
-spawn git pull origin master
+set branch [lindex $argv 0]
+set password [lindex $argv 1]
+spawn git pull origin $branch
 expect {
     "password" { 
-		 send "$argv\r"
+		 send "$password\r"
 		 expect -re "file|Already" { send "pull finish\n"}
 		}
         }

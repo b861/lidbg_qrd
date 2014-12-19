@@ -54,8 +54,8 @@ function git_add_push()
 	cd $1
 	git add .
 	git commit -am "$2"
-	expect $DIR_TOOLS_PATH/push
-	expect $DIR_TOOLS_PATH/push
+	expect $DIR_TOOLS_PATH/push master $2
+	expect $DIR_TOOLS_PATH/push master $2
 	#gitk &
 }
 
@@ -102,7 +102,7 @@ function git_pull()
 {
 	echo ==$FUNCNAME $1 $2
 	cd $1
-	expect $DIR_TOOLS_PATH/pull $2
+	expect $DIR_TOOLS_PATH/pull master $2
 }
 
 function show_env()

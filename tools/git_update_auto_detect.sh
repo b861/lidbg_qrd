@@ -11,7 +11,7 @@ commit_times=(0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 function git_pull()
 {
 	cd $1
-	expect $DIR_TOOLS_PATH/pull $2 
+	expect $DIR_TOOLS_PATH/pull master $2 
 }
 
 while true ;do
