@@ -48,3 +48,25 @@ import java.io.FileOutputStream;
 //	lidbg_write("c wakelock lock " + tag);
 //	lidbg_write("c wakelock unlock " + tag);
 
+
+//C++ file write
+#include <fcntl.h>
+void file_write(char *name,char *info)
+{
+	int fd,ret;
+	char buf[256];
+	 fd = open(name, O_CREAT | O_RDWR | O_APPEND, 0777);
+    if (fd < 0) {
+        strerror_r(errno, buf, sizeof(buf));
+        LOC_LOGE("NMEAfu2.Error opening %s: %s\n", name, buf);
+        return ;
+    }
+
+    ret = write(fd, info, strlen(info));
+    if (ret < 0) {
+        strerror_r(errno, buf, sizeof(buf));
+       LOC_LOGE("NMEAfu2.Error write %s: %s\n", name, buf);
+       return ;
+    }
+close(fd);
+}
