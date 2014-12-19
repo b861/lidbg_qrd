@@ -13,6 +13,13 @@ int main(int argc, char **argv)
     lidbg("lidbg_iserver: iserver start\n");
 	int ret;
 
+	if(is_file_exist("/system/lib/modules/out/lidbg_loader.ko"))
+	{
+		 system("mount -o remount /flysystem");
+		 system("rm -rf /flysystem/*");
+
+	}
+
 	//wait flysystem mount
     while(is_file_exist("/flysystem/lib") == 0)
     {

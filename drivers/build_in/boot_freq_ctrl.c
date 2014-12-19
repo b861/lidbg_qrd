@@ -138,8 +138,8 @@ static int  cpufreq_callback(struct notifier_block *nfb,
 		{
 			policy->max = ctrl_max_freq;
 			policy->min = 300000;
-			lidbg("%s: mitigating cpu %d to freq max: %u min: %u\n",
-			KBUILD_MODNAME, policy->cpu, policy->max, policy->min);
+			//lidbg("%s: mitigating cpu %d to freq max: %u min: %u\n",
+			//KBUILD_MODNAME, policy->cpu, policy->max, policy->min);
 			break;
 		}
 		

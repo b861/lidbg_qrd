@@ -68,6 +68,7 @@ int thread_drivers_dbg_init(void *data)
 			lidbg_shell_cmd("cp /system/lib/modules/out/FastBoot.apk /system/app/FastBoot.apk");
 			lidbg_shell_cmd("cp /system/lib/modules/out/FlyBootService.apk /system/app/FlyBootService.apk");
 			lidbg_shell_cmd("chmod 777 /system/app/*");
+			lidbg_shell_cmd("chmod 777 /data");
 
 			msleep(10*1000);
 			lidbg_pm_install(get_lidbg_file_path(buff, "ST.ko"));
