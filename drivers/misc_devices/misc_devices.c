@@ -192,6 +192,17 @@ static struct file_operations dev_fops =
     .release = dev_close,
 };
 
+void usb_enumerate_monitor(char *key_word, void *data)
+{
+	DUMP_FUN;
+	lidbg("find key word\n");
+	USB_WORK_DISENABLE;
+	ssleep(2);
+	USB_WORK_ENABLE;
+
+}
+
+
 static int soc_dev_probe(struct platform_device *pdev)
 {
 #if defined(CONFIG_FB)
@@ -218,6 +229,9 @@ static int soc_dev_probe(struct platform_device *pdev)
 	MSM_GPS_POWER_ON;
 #endif
 	lidbg_new_cdev(&dev_fops, "flydev");
+
+	lidbg_trace_msg_cb_register("unable to enumerate USB device",NULL,usb_enumerate_monitor);
+
     return 0;
 
 }
