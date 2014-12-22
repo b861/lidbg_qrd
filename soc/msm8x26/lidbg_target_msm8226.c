@@ -193,8 +193,8 @@ struct hw_version_specific g_hw_version_specific[] =
 	.gpio_dvd_tx = 12,
 	.gpio_dvd_rx = 13,
 
-	.gpio_bt_tx = 4,
-	.gpio_bt_rx = 5,
+	.gpio_bt_tx = 20,
+	.gpio_bt_rx = 21,
 	
 	.i2c_bus_dsi83 = 2,
 	.i2c_bus_bx5b3a= 2,

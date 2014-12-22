@@ -15,8 +15,8 @@ int main(int argc, char **argv)
 
 	if(is_file_exist("/system/lib/modules/out/lidbg_loader.ko"))
 	{
-		 system("mount -o remount /flysystem");
-		 system("rm -rf /flysystem/*");
+		// system("mount -o remount /flysystem");
+		// system("rm -rf /flysystem/*");
 
 	}
 
