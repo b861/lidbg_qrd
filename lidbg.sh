@@ -149,5 +149,6 @@ source ./env_entry.sh
 . $DBG_TOOLS_PATH/debug.sh
 . $DBG_TOOLS_PATH/combination.sh
 . $DBG_TOOLS_PATH/common.sh
+. $DBG_TOOLS_PATH/branch_for_test.sh
 auto_build $1 $2 $3 $4 $5;
 

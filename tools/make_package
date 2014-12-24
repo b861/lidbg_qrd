@@ -1,6 +1,7 @@
  #!/usr/bin/expect
 set timeout -1 
-spawn ./make.sh
+set make_num [lindex $argv 0]
+spawn ./make.sh 
 expect "TYPE"
-send "1\r"
+send "$make_num\r"
 expect eof
