@@ -70,3 +70,45 @@ void file_write(char *name,char *info)
     }
 close(fd);
 }
+
+//跟踪当前使用GPS监听的包名
+LocationManagerService.java (z:\home\wqrftf99\futengfei\work1_qucom\msm8226\frameworks\base\services\java\com\android\server)	105740	12/25/2014
+import java.io.FileOutputStream;
+
+	private void lidbg_write(String msg)
+	{
+	    final String LOG_E = "LIDBG_WRITE";
+	    byte b[] = msg.getBytes();
+	    FileOutputStream stateOutputMsg;
+	    try
+	    {
+	        stateOutputMsg = new FileOutputStream("/dev/lidbg_pm0", true);
+	        stateOutputMsg.write(b);
+	        stateOutputMsg.close();
+	    }
+	    catch (Exception e )
+	    {
+	        Log.e(LOG_E, "Failed to lidbg_write");
+	    }
+	}
+	protected BroadcastReceiver mtestBroadcastReceiver = new BroadcastReceiver()
+	{
+	    @Override
+	    public void onReceive(Context context, Intent intent)
+	    {
+	        // TODO Auto-generated method stub
+	        int i = 0;
+	        String stateString = "";
+		for (Receiver receiver : mReceivers.values())
+	        {
+	            if (receiver.isListener() && !(receiver.mPackageName).equals("android"))
+	            {
+	                i++;
+	                stateString += (" " + receiver.mPackageName);
+	            }
+	        }
+	        lidbg_write("flyaudio gpsUser " + i + stateString);
+	    }
+	};
+	mContext.registerReceiver(mtestBroadcastReceiver, new IntentFilter("com.lidbg.broadcast.gps.activeruser"));
+lidbg_shell_cmd("am broadcast -a com.lidbg.broadcast.gps.activeruser &");
