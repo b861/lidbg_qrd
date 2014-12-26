@@ -12,9 +12,6 @@ spinlock_t spinlock_kmsg_collect;
 struct mutex mutex_kmsg_collect;
 void kmsg_fifo_collect(char *buff, int buff_len)
 {
-    int ret;
-    char tmp_buff[buff_len];
-
     if(p_kmsg_collect == NULL)
     {
         if(kfifo_alloc(&fifo_kmsg_collect, 5 * 1024 * 1024, GFP_KERNEL))
@@ -29,8 +26,15 @@ void kmsg_fifo_collect(char *buff, int buff_len)
     }
 
     if(kfifo_is_full(p_kmsg_collect) || kfifo_avail(p_kmsg_collect) < buff_len)
+    {
+    #if 0
+    	int ret;
+		char tmp_buff[buff_len];
         ret = kfifo_out_spinlocked(p_kmsg_collect, tmp_buff, buff_len , &spinlock_kmsg_collect);
-
+	#else
+		kfifo_reset(p_kmsg_collect);
+	#endif
+    }
     mutex_lock(&mutex_kmsg_collect);
     kfifo_in_spinlocked(p_kmsg_collect, buff, buff_len, &spinlock_kmsg_collect);
     mutex_unlock(&mutex_kmsg_collect);
@@ -150,13 +154,19 @@ static void lidbg_trace_msg_is_enough(int len)
 {
     if(kfifo_is_full(&pdev->fifo) || (kfifo_avail(&pdev->fifo) < len))
     {
+#if 0
         int ret;
         char msg_clean_buff[len];
 
         down(&pdev->sem);
         ret = kfifo_out(&pdev->fifo, msg_clean_buff, len);
         up(&pdev->sem);
+#else
+		down(&pdev->sem);
+		kfifo_reset(&pdev->fifo);
+		up(&pdev->sem);
 
+#endif
     }
 
 }
@@ -165,25 +175,26 @@ static void lidbg_trace_msg_is_enough(int len)
 static int thread_trace_msg_in(void *data)
 {
     int len;
-    char buff[512];
+    char *buff;
     struct file *filep;
     mm_segment_t old_fs;
+    buff = (char *)kmalloc( MEM_SIZE_4_KB, GFP_KERNEL);
 
     filep = filp_open("/proc/kmsg", O_RDONLY, 0644);
     if(filep < 0)
         lidbg("Open /proc/kmsg failed !\n");
 
-    memset(buff, '\0', sizeof(buff));
+    memset(buff, '\0', MEM_SIZE_4_KB);
+	
+	old_fs = get_fs();
+	set_fs(get_ds());
 
     while(1)
 	{
-	    old_fs = get_fs();
-	    set_fs(get_ds());
-
 	    if(!pdev->disable_flag)
 	    {
-	        len = filep->f_op->read(filep, buff, 512, &filep->f_pos);
-
+	        len = filep->f_op->read(filep, buff, MEM_SIZE_4_KB, &filep->f_pos);
+			
 	        if(len >= 0)
 	        {
 	            kmsg_fifo_collect(buff, len);
@@ -196,11 +207,10 @@ static int thread_trace_msg_in(void *data)
 
 	        msleep(500);
 	    }
-	    else
-	        msleep(1000);
-
-	    set_fs(old_fs);
 	}
+
+	set_fs(old_fs);
+
     filp_close(filep, 0);
     return 0;
 }
