@@ -82,13 +82,13 @@ int thread_show_temp(void *data)
 {
 	while(1)
 	{
-		char cpufrq[50];
-		int tmp = cpufreq_get(0);
+		//char cpufrq[50];
+		//int tmp = cpufreq_get(0);
 		int cur_temp = soc_temp_get();
-		sprintf(cpufrq, "%d", tmp);
-		lidbg_toast_show(cpufrq, cur_temp);
+		//sprintf(cpufrq, "%d", tmp);
+		//lidbg_toast_show(cpufrq, cur_temp);
         lidbg( "%d,%d,%d\n", cur_temp, get_scaling_max_freq(),cpufreq_get(0));
-		msleep(1000*10);
+		msleep(1000);
 	}
 }
 void cb_kv_show_temp(char *key, char *value)
