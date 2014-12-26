@@ -144,6 +144,13 @@ void unhandled_monitor(char *key_word, void *data)
 	}
 }
 
+void lidbgerr_monitor(char *key_word, void *data)
+{
+	//DUMP_FUN;
+	lidbg("find key word\n");
+	lidbg_loop_warning();
+}
+
 int thread_reboot(void *data)
 {
 
@@ -218,7 +225,7 @@ int loop_warnning(void *data)
 
 void lidbg_loop_warning(void)
 {
-    if(loop_warning_en)
+    if((loop_warning_en)||(g_var.is_debug_mode == 1))
     {
         DUMP_FUN;
         CREATE_KTHREAD(loop_warnning, NULL);
@@ -378,6 +385,7 @@ int misc_init(void *data)
         logcat_lunch(NULL, NULL);
 
 	//lidbg_trace_msg_cb_register("unhandled",NULL,unhandled_monitor);
+	lidbg_trace_msg_cb_register("lidbgerr",NULL,lidbgerr_monitor);
 
     lidbg_new_cdev(&misc_nod_fops, "lidbg_misc");
 

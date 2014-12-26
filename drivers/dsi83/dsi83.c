@@ -148,7 +148,11 @@ static int SN65_devices_read_id(void)
 	for (i = 0x8, j = 0; i >= 0; i--, j++) 
 	{
 		if(SN65_register_read(i,&chip_id[j]) < 0)
+		{
+		
+			lidbgerr("SN65_devices_read_id fail\n");
 			return -1;
+		}
 		else
 			lidbg_dsi83("%s():reg 0x%x = 0x%x", __func__, i, chip_id[j]);
 	}

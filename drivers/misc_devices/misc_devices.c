@@ -152,7 +152,10 @@ static void parse_cmd(char *pt)
     {
 		set_system_performance(1);
     }
-		
+	else if (!strcmp(argv[0], "debug_mode"))
+    {
+	    g_var.is_debug_mode = 1;
+    }		
 }
 
 

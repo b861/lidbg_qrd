@@ -433,6 +433,8 @@ int fly_interface_init(void)
 		g_var.is_first_update = is_out_updated;
 		lidbg("g_var.is_first_update=%d\n",g_var.is_first_update);
     }
+	
+	g_var.is_debug_mode = fs_is_file_exist("/data/lidbg/set_debug_mode");
 
 	return 0;
 }

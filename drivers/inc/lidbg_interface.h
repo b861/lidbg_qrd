@@ -278,6 +278,8 @@ struct lidbg_pvar_t
 	bool fb_on;
 	bool is_first_update;
 	enum key_enum ts_active_key ;
+	
+	bool is_debug_mode;
 };
 
 typedef struct {

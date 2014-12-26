@@ -225,7 +225,8 @@ void lidbg_pm_step_call(fly_pm_stat_step step, void *data)
         break;
     case PM_SUSPEND_ENTER8:
         SOC_System_Status(FLY_KERNEL_DOWN);
-        MCU_WP_GPIO_OFF;
+		//if(g_var.is_debug_mode == 0)
+        	MCU_WP_GPIO_OFF;
         SOC_IO_SUSPEND;
         sleep_counter++;
         PM_SLEEP_DBG("SLEEP8.suspend_enter.MCU_WP_GPIO_OFF;sleep_count:%d\n", sleep_counter);
@@ -625,6 +626,8 @@ void observer_stop(void)
 {
     atomic_set(&is_in_sleep, 0);
 }
+
+
 static int thread_observer(void *data)
 {
     int have_triggerd_sleep_S = 0;
@@ -656,6 +659,11 @@ static int thread_observer(void *data)
                     kernel_wakelock_save_wakelock(when, PM_INFO_FILE);
                     kernel_wakelock_force_unlock(when);
                     userspace_wakelock_action(2, PM_INFO_FILE);
+					if(g_var.is_debug_mode == 1)
+					{
+						lidbg_loop_warning();
+
+					}
                     break;
 
                 default:
