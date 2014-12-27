@@ -12,7 +12,7 @@ if [[ $which_combine -eq "1" ]];then
 elif [[ $which_combine -eq "2" ]];then
 
     echo "打包 libdg zip 包"
-    lidbg_build_all && depository_copy_lidbg && depository_copy_lidbg
+    lidbg_build_all && depository_copy_lidbg
 #for test
 #    cd $RELEASE_REPOSITORY
 #    echo "libdg.zip" > libdg.txt
@@ -21,7 +21,7 @@ elif [[ $which_combine -eq "3" ]];then
  
     echo "打包所有"
     soc_build_all && soc_make_otapackage && depository_copy_basesystem
-    lidbg_build_all && depository_copy_lidbg && depository_copy_lidbg
+    lidbg_build_all && depository_copy_lidbg
 #for test   
 #    cd $RELEASE_REPOSITORY
 #    echo "all.zip" > all.txt
@@ -53,3 +53,13 @@ function new_branch_remove()
 }
 
 
+function copy_package_to_smb()
+{
+
+	#if [ ! -d /mnt/smb_$DBG_PLATFORM];then
+	    mkdir /mnt/smb_$DBG_PLATFORM
+	    mount -t smbfs -o codepage=cp936,username=lisuwei,password=123456 $TEST_PACKAGE_PATH /mnt/smb_$DBG_PLATFORM
+	#fi
+	mkdir /mnt/smb_$DBG_PLATFORM/$commit
+	cp $RELEASE_REPOSITORY/out/*.fup  /mnt/smb_$DBG_PLATFORM/$commit/ && nautilus /mnt/smb_$DBG_PLATFORM/$commit
+}

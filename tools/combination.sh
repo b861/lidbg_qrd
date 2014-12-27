@@ -32,7 +32,7 @@ function combination_handle()
         read -p "  输入编译选项：" which_combine
         read -p "  自定义提交到二进制仓库测试分支的名字：" branch_name
         read -p "  提交说明：" commit
-        judge_which_combine && depository_make_package && new_remote_test_branch && new_branch_remove;; 
+        judge_which_combine && depository_make_package && new_remote_test_branch && new_branch_remove && copy_package_to_smb;; 
         #for test
         #judge_which_combine && new_remote_test_branch && new_branch_remove;; 
 	*)
