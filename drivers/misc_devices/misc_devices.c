@@ -199,10 +199,12 @@ void usb_enumerate_monitor(char *key_word, void *data)
 {
 	DUMP_FUN;
 	lidbg("find key word\n");
-	USB_WORK_DISENABLE;
-	ssleep(2);
-	USB_WORK_ENABLE;
-
+	if(g_var.system_status >= FLY_ANDROID_UP)
+	{
+		usb_disk_enable(0);
+		ssleep(2);
+		usb_disk_enable(1);
+	}
 }
 
 
