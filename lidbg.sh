@@ -69,6 +69,7 @@ function lidbg_menu()
 	echo [4] push out'                     'push驱动模块到原生系统
 	echo [5] push out to fly'              'push驱动模块到产品系统
 	echo [6] del lidbg loader'             '删除lidbg_loader.ko驱动
+	echo [7] open dbg_cfg.sh
 
 	echo
 	soc_menu
@@ -99,6 +100,8 @@ function lidbg_handle()
 			lidbg_pushfly_out;;
 		6)
 			lidbg_disable;;
+		7)
+			gedit $DBG_ROOT_PATH/dbg_cfg.sh &;;
 		*)
 			echo
 		esac
