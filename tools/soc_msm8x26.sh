@@ -26,21 +26,8 @@ function soc_build_all()
 
 function soc_postbuild()
 {
-if [ $DBG_PLATFORM = msm8226 ];then
-#	if [ -s $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/bin/lidbg_load ]; then
-#		echo "/system/bin/lidbg_load exist"
-#	else
-#		soc_prebuild && make -j8
-#	fi
-
-	if [ -s $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/lib/libdiskconfig.so ]; then
-		echo "system/lib/libdiskconfig.so exist"
-	else
-		mmm $DBG_SYSTEM_DIR/system/core/libdiskconfig -B
-		soc_prebuild && make -j8
-	fi
+	echo $FUNCNAME
 	echo "soc_build_all ok"
-fi
 }
 
 function soc_prebuild()
@@ -72,6 +59,10 @@ fi
 	if [[ $TARGET_PRODUCT = "" ]];then
 		source build/envsetup.sh&&choosecombo release $DBG_PLATFORM $SYSTEM_BUILD_TYPE
 	fi
+
+	if [ $DBG_PLATFORM = msm8226 ];then	
+		mmm $DBG_SYSTEM_DIR/system/core/libdiskconfig -B
+	fi
 }
 
 
@@ -94,7 +85,12 @@ function soc_make_otapackage()
 	#cp -u $RELEASE_REPOSITORY/lk/emmc_appsboot.mbn  $DBG_SYSTEM_DIR/device/qcom/msm8226/radio/
 	#cp -u $RELEASE_REPOSITORY/radio/* 	        $DBG_SYSTEM_DIR/device/qcom/msm8226/radio/
 	cd $DBG_SYSTEM_DIR
-	soc_prebuild && make otapackage -j8
+
+	if [[ $TARGET_PRODUCT = "" ]];then
+		source build/envsetup.sh&&choosecombo release $DBG_PLATFORM $SYSTEM_BUILD_TYPE
+	fi
+
+	make otapackage -j8
 }
 
 function soc_build_origin_image
