@@ -225,7 +225,7 @@ void lidbg_pm_step_call(fly_pm_stat_step step, void *data)
         break;
     case PM_SUSPEND_ENTER8:
         SOC_System_Status(FLY_KERNEL_DOWN);
-		//if(g_var.is_debug_mode == 0)
+		//if(g_var.is_debug_mode == 1)
         	MCU_WP_GPIO_OFF;
         SOC_IO_SUSPEND;
         sleep_counter++;

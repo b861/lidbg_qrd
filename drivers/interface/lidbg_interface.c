@@ -423,6 +423,18 @@ int fly_interface_init(void)
 #ifdef BOARD_V5
 	g_var.hw_info.hw_version = 5;
 #endif
+#ifdef BOARD_V6
+	g_var.hw_info.hw_version = 6;
+#endif
+#ifdef BOARD_V7
+	g_var.hw_info.hw_version = 7;
+#endif
+#ifdef BOARD_V8
+	g_var.hw_info.hw_version = 8;
+#endif
+#ifdef BOARD_V9
+	g_var.hw_info.hw_version = 9;
+#endif
 
 	}
 	lidbg("hw_version=%d\n",g_var.hw_info.hw_version);

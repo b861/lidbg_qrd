@@ -152,8 +152,9 @@ static void parse_cmd(char *pt)
     {
 		set_system_performance(1);
     }
-	else if (!strcmp(argv[0], "debug_mode"))
+	else if (!strcmp(argv[0], "acc_debug_mode"))
     {
+    	lidbg("acc_debug_mode enable!");
 	    g_var.is_debug_mode = 1;
     }		
 }
