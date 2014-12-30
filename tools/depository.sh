@@ -9,6 +9,7 @@ function depository_pull()
 {
 	echo $FUNCNAME
 	cd $RELEASE_REPOSITORY
+#	git checkout master
 	expect $DBG_TOOLS_PATH/pull master $DBG_REPO_PASSWORD
 	expect $DBG_TOOLS_PATH/pull master $DBG_REPO_PASSWORD
 }

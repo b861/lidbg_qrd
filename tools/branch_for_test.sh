@@ -6,13 +6,13 @@ if [[ $which_combine -eq "1" ]];then
         
     echo "打包basesystem zip 包"
     cd $RELEASE_REPOSITORY
-    soc_build_all && soc_make_otapackage && depository_copy_basesystem
+    soc_build_all && soc_make_otapackage && depository_clean && depository_pull && depository_copy_basesystem
 #for test
 #    echo "baseqcom.flb" > basesystem.txt
 elif [[ $which_combine -eq "2" ]];then
 
     echo "打包 libdg zip 包"
-    lidbg_build_all && depository_copy_lidbg
+    lidbg_build_all && depository_clean && depository_pull && depository_copy_lidbg
 #for test
 #    cd $RELEASE_REPOSITORY
 #    echo "libdg.zip" > libdg.txt
@@ -20,6 +20,7 @@ elif [[ $which_combine -eq "2" ]];then
 elif [[ $which_combine -eq "3" ]];then
  
     echo "打包所有"
+    depository_clean && depository_pull
     soc_build_all && soc_make_otapackage && depository_copy_basesystem
     lidbg_build_all && depository_copy_lidbg
 #for test   
