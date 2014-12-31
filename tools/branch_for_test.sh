@@ -58,10 +58,10 @@ function copy_package_to_smb()
 {
 
 #	if [ ! -d /mnt/smb_$DBG_PLATFORM];then
-	    mkdir /mnt/smb_$DBG_PLATFORM
-	    mount -t smbfs -o codepage=cp936,username=lisuwei,password=123456 $TEST_PACKAGE_PATH /mnt/smb_$DBG_PLATFORM
+	    mkdir /mnt/smb-$DBG_PLATFORM_ID-$DBG_PLATFORM
+	    mount -t smbfs -o codepage=cp936,username=lisuwei,password=123456 $TEST_PACKAGE_PATH /mnt/smb-$DBG_PLATFORM_ID-$DBG_PLATFORM
 #	fi
 	mkdir /mnt/smb_$DBG_PLATFORM/$commit
-	cp -v $RELEASE_REPOSITORY/out/*.fup  /mnt/smb_$DBG_PLATFORM/$commit/ && nautilus /mnt/smb_$DBG_PLATFORM/$commit
+	cp -v $RELEASE_REPOSITORY/out/*.fup  /mnt/smb-$DBG_PLATFORM_ID-$DBG_PLATFORM/$commit/ && nautilus /mnt/smb-$DBG_PLATFORM_ID-$DBG_PLATFORM/$commit
 	#rsync --progress $RELEASE_REPOSITORY/out/*.fup  /mnt/smb_$DBG_PLATFORM/$commit/ && nautilus /mnt/smb_$DBG_PLATFORM/$commit
 }

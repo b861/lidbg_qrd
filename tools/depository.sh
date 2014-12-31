@@ -2,6 +2,7 @@ function depository_clean()
 {
 	echo $FUNCNAME
 	cd $RELEASE_REPOSITORY
+	git checkout $REPOSITORY_WORK_BRANCH
 	git reset --hard
 }
 
@@ -9,26 +10,28 @@ function depository_pull()
 {
 	echo $FUNCNAME
 	cd $RELEASE_REPOSITORY
-#	git checkout master
-	expect $DBG_TOOLS_PATH/pull master $DBG_REPO_PASSWORD
-	expect $DBG_TOOLS_PATH/pull master $DBG_REPO_PASSWORD
+	git checkout $REPOSITORY_WORK_BRANCH
+	expect $DBG_TOOLS_PATH/pull $REPOSITORY_WORK_BRANCH $DBG_REPO_PASSWORD
+	expect $DBG_TOOLS_PATH/pull $REPOSITORY_WORK_BRANCH $DBG_REPO_PASSWORD
 }
 
 function depository_add_push()
 {
 	echo $FUNCNAME
 	cd $RELEASE_REPOSITORY
+	git checkout $REPOSITORY_WORK_BRANCH
 	git add .
 	git add -f $UPDATA_BIN_DIR
 	git commit -am "$1"
-	expect $DBG_TOOLS_PATH/push master $DBG_REPO_PASSWORD
-	expect $DBG_TOOLS_PATH/push master $DBG_REPO_PASSWORD
+	expect $DBG_TOOLS_PATH/push $REPOSITORY_WORK_BRANCH $DBG_REPO_PASSWORD
+	expect $DBG_TOOLS_PATH/push $REPOSITORY_WORK_BRANCH $DBG_REPO_PASSWORD
 	gitk &
 }
 
 function depository_copy_lidbg()
 {
 	echo $FUNCNAME
+	git checkout $REPOSITORY_WORK_BRANCH
 	cp -r $DBG_OUT_PATH  $UPDATA_BIN_DIR
 	#cp -r $DBG_OUT_PATH/*.so  $UPDATA_BIN_DIR/hw/
 }
@@ -36,6 +39,7 @@ function depository_copy_lidbg()
 function depository_copy_basesystem()
 {
 	echo $FUNCNAME
+	git checkout $REPOSITORY_WORK_BRANCH
 	#cp -r $DBG_SYSTEM_DIR/flyaudio/out/*  $UPDATA_BASESYSTEM_DIR/
 	cp $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/$OTA_PACKAGE_NAME $UPDATA_BASESYSTEM_DIR/baseqcom.flb
 }
