@@ -152,6 +152,10 @@ int thread_thermal(void *data)
 {
     int cur_temp,i,max_freq;
     DUMP_FUN;
+	
+	if(g_var.recovery_mode == 1)
+		return 1;
+	
     temp_init();
 
 	if(0)//if(g_var.recovery_mode == 1)
@@ -229,10 +233,6 @@ int thread_thermal(void *data)
 		{
 			temp_offset = -30;
 			lidbg("temp:%d,freq:%d\n",cur_temp,cpufreq_get(0));
-#ifdef PLATFORM_msm8974		
-			lidbg_readwrite_file(FREQ_MAX_NODE, NULL, "1036800", strlen("1036800"));
-#endif
-
 			msleep(500);
 			//goto thermal_ctrl;
 		}

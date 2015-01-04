@@ -2,8 +2,7 @@ function depository_clean()
 {
 	echo $FUNCNAME
 	cd $RELEASE_REPOSITORY
-	git checkout $REPOSITORY_WORK_BRANCH
-	git reset --hard
+	git checkout $REPOSITORY_WORK_BRANCH && git reset --hard
 }
 
 function depository_pull()

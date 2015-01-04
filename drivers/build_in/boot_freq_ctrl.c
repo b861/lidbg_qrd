@@ -2,6 +2,7 @@
 //#define PLATFORM_MSM8974 1
 #define  RECOVERY_MODE_DIR "/sbin/recovery"
 
+bool is_recovery_mode = 0;
 bool ctrl_en = 1;
 struct thermal_ctrl
 {
@@ -98,12 +99,19 @@ static int thread_freq_limit(void *data)
 		count++;
 		if(count >= 60*4)
 		{
+			if(is_recovery_mode == 0)
+				is_recovery_mode = is_file_exist(RECOVERY_MODE_DIR);
+			if(is_recovery_mode == 1)
+			{
+				msleep(1000);
+				continue;
+			}
 #ifdef PLATFORM_MSM8226
 			//lidbg_readwrite_file(FREQ_MAX_NODE, NULL, "1593600", strlen("1593600"));
 			ctrl_max_freq = 300000;
 			cpufreq_update_policy(0);
-
 #else
+
 			lidbg_readwrite_file(FREQ_MAX_NODE, NULL, "2265600", strlen("2265600"));
 			
 			if(temp > 100)
@@ -155,6 +163,7 @@ void freq_ctrl_start(void)
 	struct task_struct *task;
 
 	int ret = 0;
+	is_recovery_mode = 0;
 
 	ret = cpufreq_register_notifier(&cpufreq_notifier,
 			CPUFREQ_POLICY_NOTIFIER);
