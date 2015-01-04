@@ -374,7 +374,7 @@ struct hw_version_specific g_hw_version_specific[] =
 	.sensor_num = 5,
 	.fan_onoff_temp = 90,
 
-	.fly_parameter_node = "/dev/block/mmcblk0p25",
+	.fly_parameter_node = "/dev/block/mmcblk0p26",
 	
 	.system_switch_en = 0,
 	},
