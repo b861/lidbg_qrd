@@ -14,7 +14,7 @@ function soc_build_kernel()
 function soc_build_common()
 {
 	echo $FUNCNAME $1 $2 $3
-	soc_prebuild && $1 $2 $3
+	set_env && $1 $2 $3
 }
 
 function soc_build_all()
@@ -28,6 +28,15 @@ function soc_postbuild()
 {
 	echo $FUNCNAME
 	echo "soc_build_all ok"
+}
+
+
+function set_env()
+{
+	echo $FUNCNAME
+	if [[ $TARGET_PRODUCT = "" ]];then
+		source build/envsetup.sh&&choosecombo release $DBG_PLATFORM $SYSTEM_BUILD_TYPE
+	fi
 }
 
 function soc_prebuild()
@@ -56,9 +65,7 @@ fi
 	rm -rf $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system
 	rm -rf $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/root
 
-	if [[ $TARGET_PRODUCT = "" ]];then
-		source build/envsetup.sh&&choosecombo release $DBG_PLATFORM $SYSTEM_BUILD_TYPE
-	fi
+	set_env
 
 	if [ $DBG_PLATFORM = msm8226 ];then	
 		mmm $DBG_SYSTEM_DIR/system/core/libdiskconfig -B
@@ -70,9 +77,9 @@ function soc_build_release()
 {
 	echo $FUNCNAME
 	cd $RELEASE_REPOSITORY
-	expect $DBG_TOOLS_PATH/pull master $DBG_REPO_PASSWORD
+	expect $DBG_TOOLS_PATH/pull $REPOSITORY_WORK_BRANCH $DBG_REPO_PASSWORD
 	cd $DBG_SYSTEM_DIR
-	expect $DBG_TOOLS_PATH/pull master $DBG_PASSWORD
+	expect $DBG_TOOLS_PATH/pull $SYSTEM_WORK_BRANCH $DBG_PASSWORD
 
 	soc_build_all
 	soc_make_otapackage

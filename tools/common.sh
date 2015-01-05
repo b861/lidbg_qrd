@@ -43,9 +43,9 @@ function common_handle()
 			$DBG_ROOT_PATH)	
 				cd $dir && lidbg_pull;;
 			$DBG_SYSTEM_DIR)
-				cd $dir && expect $DBG_TOOLS_PATH/pull master $DBG_PASSWORD;;
+				cd $dir && expect $DBG_TOOLS_PATH/pull $SYSTEM_WORK_BRANCH $DBG_PASSWORD;;
 			$RELEASE_REPOSITORY)
-				cd $dir && expect $DBG_TOOLS_PATH/pull master $DBG_REPO_PASSWORD;;
+				cd $dir && expect $DBG_TOOLS_PATH/pull $REPOSITORY_WORK_BRANCH $DBG_REPO_PASSWORD;;
 			*)
 				echo
 		esac ;;
@@ -58,7 +58,7 @@ function common_handle()
 				read -p "输入提交到二进制仓库的说明文字：" descriptors
 				depository_add_push "$descriptors";;
 			$RELEASE_REPOSITORY)
-				cd $dir && expect $DBG_TOOLS_PATH/push master $DBG_REPO_PASSWORD;;
+				cd $dir && expect $DBG_TOOLS_PATH/push $REPOSITORY_WORK_BRANCH $DBG_REPO_PASSWORD;;
 			*)
 				echo
 		esac ;;
