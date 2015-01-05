@@ -124,7 +124,7 @@ void set_system_performance(int type)
 	if(type == 3)//top performance
 	{
 #ifdef PLATFORM_msm8974		
-		lidbg_readwrite_file(FREQ_MAX_NODE, NULL, "2265600", strlen("2265600"));
+		//lidbg_readwrite_file(FREQ_MAX_NODE, NULL, "2265600", strlen("2265600"));
 #endif
 		set_cpu_governor(1);
 		temp_offset = - antutu_temp_offset;
@@ -132,7 +132,7 @@ void set_system_performance(int type)
 	else if(type == 2)
 	{
 #ifdef PLATFORM_msm8974		
-		lidbg_readwrite_file(FREQ_MAX_NODE, NULL, "1958400", strlen("1958400"));
+		//lidbg_readwrite_file(FREQ_MAX_NODE, NULL, "1958400", strlen("1958400"));
 #endif
 		set_cpu_governor(0);
 		temp_offset = -15;

@@ -71,7 +71,7 @@ struct hw_version_specific g_hw_version_specific[] =
 		{0,0, 0, "0"},//end flag
 	},
 	
-	.cpu_freq_list = "300000,422400,652800,729600,883200,960000,1036800,1190400,1267200,1497600,1574400,1728000,1958400,2265600",
+	.cpu_freq_list = "300000,422400,652800,729600,883200,960000,1036800,1190400,1267200,1497600,1574400,1728000,1958400,2265600,2457600",/*8974ac*/
 	.cpu_freq_temp_node = "/sys/class/thermal/thermal_zone5/temp",
 	.cpu_freq_recovery_limit = "600000",
 	.sensor_num = 5,

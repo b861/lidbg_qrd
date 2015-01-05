@@ -29,7 +29,7 @@ struct thermal_ctrl cpu_thermal[] =
 
 struct thermal_ctrl cpu_thermal[] = 
 {
-        {-500,  50,  2265600,"2265600"},
+        {-500,  50,  2457600,"2457600"},
 		{51, 55,  1958400,"1958400"},
         {56, 60,  1728000,"1728000"},
         {61, 65,  1497600,"1497600"},
@@ -112,7 +112,7 @@ static int thread_freq_limit(void *data)
 			cpufreq_update_policy(0);
 #else
 
-			lidbg_readwrite_file(FREQ_MAX_NODE, NULL, "2265600", strlen("2265600"));
+			lidbg_readwrite_file(FREQ_MAX_NODE, NULL, "2457600", strlen("2457600"));
 			
 			if(temp > 100)
 				ctrl_max_freq = 300000;
