@@ -66,7 +66,11 @@ void gt9xx_reset_high_active(void)
     msleep(200);
 	#ifndef SOC_msm8x25
 	SOC_IO_Output(0, GTP_INT_PORT, 1);
+	#ifdef SOC_mt3360
+	udelay(200);
+	#else
 	usleep(200);
+	#endif
 	#endif
     SOC_IO_Output(0, GTP_RST_PORT, GTP_RST_PORT_ACTIVE);
     msleep(300);

@@ -42,9 +42,12 @@
  *          2. new esd & slide wakeup optimization
  *                  By Meta, 2013/06/08
  */
-
+#ifdef SOC_mt3360
+#include "gt9xx_mt3360.h"
+#else
 #include <linux/regulator/consumer.h>
 #include "gt9xx.h"
+#endif
 #include "lidbg.h"
 #include <linux/of_gpio.h>
 
@@ -92,6 +95,19 @@ static const char *const key_names[] = {
 	"Key_Home", "Key_Back", "Key_Menu", "Key_Search"
 };
 #endif
+#endif
+
+#ifdef SOC_mt3360
+static int scan_int_config(int ext_in);
+extern void BIM_SetEInt(unsigned int EIntNumber, unsigned int type, unsigned int debunceTime);
+extern void BIM_EnableEInt(unsigned int EIntNumber);
+extern void BIM_DisableEInt(unsigned int EIntNumber);
+extern void ac83xx_mask_ack_bim_irq(unsigned int irq);
+
+static struct mtk_ext_int ctp_int_config[] = {
+		{ PIN_37_EINT2, 2, VECTOR_EXT3, EINT2_SEL},
+		NULL,
+};
 #endif
 
 static void gtp_reset_guitar(struct goodix_ts_data *ts, int ms);
@@ -318,13 +334,25 @@ Output:
 void gtp_irq_disable(struct goodix_ts_data *ts)
 {
 	unsigned long irqflags;
+#ifdef SOC_mt3360
+	int index = 0;
+	struct mtk_ext_int ctp_int;
 
+	index = scan_int_config(ts->client->irq);
+	ctp_int = ctp_int_config[index];
+#endif
 	GTP_DEBUG_FUNC();
+
 
 	spin_lock_irqsave(&ts->irq_lock, irqflags);
 	if (!ts->irq_is_disabled) {
 		ts->irq_is_disabled = true;
+#ifdef SOC_mt3360
+		disable_irq_nosync(ctp_int.vector_irq_num);
+		BIM_DisableEInt(ctp_int.ext_int_number);
+#else
 		disable_irq_nosync(ts->client->irq);
+#endif
 	}
 	spin_unlock_irqrestore(&ts->irq_lock, irqflags);
 }
@@ -340,12 +368,23 @@ Output:
 void gtp_irq_enable(struct goodix_ts_data *ts)
 {
 	unsigned long irqflags = 0;
+#ifdef SOC_mt3360
+	int index = 0;
+	struct mtk_ext_int ctp_int;
 
+	index = scan_int_config(ts->client->irq);
+	ctp_int = ctp_int_config[index];
+#endif
 	GTP_DEBUG_FUNC();
 
 	spin_lock_irqsave(&ts->irq_lock, irqflags);
 	if (ts->irq_is_disabled) {
+#ifdef SOC_mt3360
+		enable_irq(ctp_int.vector_irq_num);
+		BIM_EnableEInt(ctp_int.ext_int_number);
+#else
 		enable_irq(ts->client->irq);
+#endif
 		ts->irq_is_disabled = false;
 	}
 	spin_unlock_irqrestore(&ts->irq_lock, irqflags);
@@ -501,6 +540,15 @@ static void goodix_ts_work_func(struct work_struct *work)
 	}
 
 	finger = point_data[GTP_ADDR_LENGTH];
+#ifdef SOC_mt3360
+	if (finger == 0x00) {
+		if (ts->use_irq)
+		{
+			gtp_irq_enable(ts);
+		}
+		return;
+	}
+#endif
 	if ((finger & 0x80) == 0)
 		goto exit_work_func;
 
@@ -703,7 +751,9 @@ static irqreturn_t goodix_ts_irq_handler(int irq, void *dev_id)
 	GTP_DEBUG_FUNC();
 
 	gtp_irq_disable(ts);
-
+#ifdef SOC_mt3360
+	ac83xx_mask_ack_bim_irq(irq);
+#endif
 	queue_work(ts->goodix_wq, &ts->work);
 
 	return IRQ_HANDLED;
@@ -734,7 +784,11 @@ Output:
 static void gtp_reset_guitar(struct goodix_ts_data *ts, int ms)
 {
 	GTP_DEBUG_FUNC();
+#ifdef SOC_mt3360
+	int ret = -1000;
 
+	ret  = GPIO_MultiFun_Set(GTP_RST_PORT, PINMUX_LEVEL_GPIO_END_FLAG);
+#endif
 	/* This reset sequence will selcet I2C slave address */
 	gpio_direction_output(GTP_RST_PORT, 0);
 	msleep(ms);
@@ -744,7 +798,11 @@ static void gtp_reset_guitar(struct goodix_ts_data *ts, int ms)
 	else
 		gpio_direction_output(GTP_INT_PORT, 0);
 
+#ifdef SOC_mt3360
+	udelay(RESET_DELAY_T3_US);
+#else
 	usleep(RESET_DELAY_T3_US);
+#endif
 	gpio_direction_output(GTP_RST_PORT, 1);
 	msleep(RESET_DELAY_T4);
 
@@ -830,7 +888,11 @@ static s8 gtp_enter_sleep(struct goodix_ts_data  *ts)
 	GTP_DEBUG_FUNC();
 
 	ret = gpio_direction_output(GTP_INT_PORT, 0);
+#ifdef SOC_mt3360
+	mdelay(5);
+#else
 	usleep(5000);
+#endif
 	while (retry++ < 5) {
 		ret = gtp_i2c_write(ts->client, i2c_control_buf, 3);
 		if (ret > 0) {
@@ -885,7 +947,11 @@ static s8 gtp_wakeup_sleep(struct goodix_ts_data *ts)
 			gtp_reset_guitar(ts, 10);
 		} else {
 			ret = gpio_direction_output(GTP_INT_PORT, 1);
+	#ifdef SOC_mt3360
+			msleep(5);
+	#else
 			usleep(5000);
+	#endif
 		}
 #endif
 		ret = gtp_i2c_test(ts->client);
@@ -1288,6 +1354,22 @@ pwr_off:
 	return ret;*/
 }
 
+#ifdef SOC_mt3360
+static int scan_int_config(int ext_in)
+{
+	 int ext_int_flag = 0;
+    int i = 0;
+
+    for(i=0; i<ARRAY_SIZE(ctp_int_config); i++)
+		if(ext_in == ctp_int_config[i].ext_int_gpio_num){
+
+			ext_int_flag = 1;
+			break;
+		}
+	ext_int_flag = 0;
+	return i;
+}
+#endif
 /*******************************************************
 Function:
 	Request interrupt.
@@ -1301,13 +1383,26 @@ static int gtp_request_irq(struct goodix_ts_data *ts)
 {
 	int ret;
 	const u8 irq_table[] = GTP_IRQ_TAB;
+#ifdef SOC_mt3360
+	struct mtk_ext_int ctp_int;
+	int index = 0;
 
+	index = scan_int_config(ts->client->irq);
+	ctp_int = ctp_int_config[index];
+
+	BIM_SetEInt(ctp_int.ext_int_number , EINT_TYPE_HIGHLEVEL , 500);
+	GPIO_MultiFun_Set(GTP_INT_PORT, ctp_int.pinmux_function);
+
+	ret = request_irq(ctp_int.vector_irq_num, goodix_ts_irq_handler,
+			IRQ_TYPE_LEVEL_HIGH , ts->client->name, ts);
+#else
 	lidbg("INT trigger type:%x, irq=%d", ts->int_trigger_type,
 			ts->client->irq);
 
 	ret = request_irq(ts->client->irq, goodix_ts_irq_handler,
 			irq_table[ts->int_trigger_type],
 			ts->client->name, ts);
+#endif
 	if (ret) {
 		dev_err(&ts->client->dev, "Request IRQ failed!ERRNO:%d.\n",
 				ret);

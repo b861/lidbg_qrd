@@ -160,6 +160,15 @@ int soc_io_resume_config(u32 index, u32 direction, u32 pull, u32 drive_strength)
 	printk("====== set ext_int = %d, ext_int_num = %d, irq = %d ======\n", ext_int_gpio_num, ext_int_number, vector_irq_num);
 	BIM_EnableEInt(ext_int_number);
 
+	ext_int_gpio_num = ext_int_config[2].ext_int_gpio_num;
+	ext_int_number = ext_int_config[2].ext_int_number;
+	vector_irq_num = ext_int_config[2].vector_irq_num;
+	pinmux_function = ext_int_config[2].pinmux_function;
+	BIM_SetEInt(ext_int_number, EINT_TYPE_HIGHLEVEL, 500);
+	GPIO_MultiFun_Set(ext_int_gpio_num, pinmux_function);
+	printk("====== set ext_int = %d, ext_int_num = %d, irq = %d ======\n", ext_int_gpio_num, ext_int_number, vector_irq_num);
+	BIM_EnableEInt(ext_int_number);
+
 	ext_int_gpio_num = ext_int_config[4].ext_int_gpio_num;
 	ext_int_number = ext_int_config[4].ext_int_number;
 	vector_irq_num = ext_int_config[4].vector_irq_num;

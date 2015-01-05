@@ -26,13 +26,13 @@ struct hw_version_specific g_hw_version_specific[] =
 	.gpio_mcu_wp = -1,
 	.gpio_mcu_app = 53,
 
-	.gpio_ts_int= -1,
-	.gpio_ts_rst= -1,
+	.gpio_ts_int= 37,
+	.gpio_ts_rst= 55,
 
 
 	.i2c_bus_dsi83 = -1,
 	.i2c_bus_bx5b3a= -1,
-	.i2c_bus_ts = -1,
+	.i2c_bus_ts = 0,
 	.i2c_bus_gps = -1,
 	.i2c_bus_saf7741 = -1,
 	.i2c_bus_lpc = -1,

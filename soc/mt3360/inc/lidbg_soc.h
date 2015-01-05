@@ -157,6 +157,12 @@ enum
 
 #endif
 
+#define EINT_TYPE_POSEDGE             (0 << 10)
+#define EINT_TYPE_NEGEDGE             (1 << 10)
+#define EINT_TYPE_HIGHLEVEL             (2 << 10)
+#define EINT_TYPE_LOWLEVEL             (3 << 10)
+#define EINT_TYPE_DUALEDGE             (4 << 10)
+
 #define SOC_KO  "ac83xxinput.ko","lidbg_soc_mt3360.ko"
 #define INTERFACE_KO  "lidbg_interface.ko"
 #define USB_MOUNT_POINT  "/storage/udisk"

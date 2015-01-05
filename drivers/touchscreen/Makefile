@@ -47,5 +47,8 @@ ft5x06_ts-objs :=ft5406_ts.o
 #ft5x06_ts-objs :=ft5336_ts.o     
 endif
 ifeq ($(DBG_PLATFORM),mt3360)
-obj-$(CONFIG_TOUCHSCREEN)       += gt911_mt3360.o
+obj-$(CONFIG_TOUCHSCREEN)       += lidbg_ts_probe_new.o
+obj-$(CONFIG_TOUCHSCREEN)       += lidbg_ts_to_recov.o
+obj-$(CONFIG_TOUCHSCREEN)       += gt911.o
+gt911-objs :=gt9xx.o
 endif
