@@ -48,7 +48,7 @@ echo "============loops:$main_loop_times  status:["${commit_times[0]}"] ["${comm
 		fi
 		
 		cd $DIR_TOOLS_PATH
-		./basesystem.sh ${compel_info[0]} ${compel_info[1]} ${compel_info[2]} ${compel_info[3]} ${compel_info[4]} ${compel_info[5]} ${compel_info[6]} ${compel_info[7]} ${compel_info[8]} "${basesystem9#* }"
+		./basesystem.sh ${compel_info[0]} ${compel_info[1]} ${compel_info[2]} ${compel_info[3]} ${compel_info[4]} ${compel_info[5]} ${compel_info[6]} ${compel_info[7]} ${compel_info[8]} ${compel_info[9]} ${compel_info[10]} "${basesystem9#* }"
 		fi
 	fi
 

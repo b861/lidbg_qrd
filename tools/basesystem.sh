@@ -1,7 +1,7 @@
 #========注意:您给的参数需按照如下参数给出==========
-#1 SYSTEM_PLATFORM SYSTEM_BUILD_TYPE SYSTEM_DIR SYSTEM_DIR_PASSWORD BIN_DIR BIN_DIR_PASSWORD BASESYSTEM_DIR_IN_BIN_DIR BIN_GIT_COMMIT_DESCRIPTION
+#1 SYSTEM_PLATFORM SYSTEM_BUILD_TYPE SYSTEM_DIR SYSTEM_DIR_PASSWORD BIN_DIR BIN_DIR_PASSWORD BASESYSTEM_DIR_IN_BIN_DIR GIT_MASTER_BRANCH BIN_GIT_COMMIT_DESCRIPTION
 #========注意:如下是一个例子==========
-#./basesystem.sh 1 msm8974 userdebug /home/swlee/flyaudio/M8974AAAAANLYD4120 git /home/swlee/flyaudio/8x26-release git /home/swlee/flyaudio/8x26-release/others/8974/basesystem 一个例子
+#./basesystem.sh 1 msm8974 userdebug /home/swlee/flyaudio/M8974AAAAANLYD4120 git /home/swlee/flyaudio/8x26-release git /home/swlee/flyaudio/8x26-release/others/8974/basesystem master 一个例子
 
 DIR_LIDBG_PATH=`cd ../ && pwd`
 DIR_BUILD_PATH=$DIR_LIDBG_PATH/build
@@ -17,6 +17,8 @@ BIN_DIR="null"
 BIN_DIR_PASSWORD="null"
 BASESYSTEM_DIR_IN_BIN_DIR="null"
 BIN_GIT_COMMIT_DESCRIPTION="NULL"
+GIT_MASTER_BRANCH="NULL"
+OUT_BASESYSTEM_NAME="NULL"
 
 function soc_postbuild()
 {
@@ -50,12 +52,12 @@ function soc_prebuild()
 #$1-$BIN_DIR $2-$BIN_GIT_COMMIT_DESCRIPTION
 function git_add_push()
 {
-	echo ==$FUNCNAME $1 $2
+	echo ==$FUNCNAME $1 $2 $3
 	cd $1
 	git add .
 	git commit -am "$2"
-	expect $DIR_TOOLS_PATH/push master $2
-	expect $DIR_TOOLS_PATH/push master $2
+	expect $DIR_TOOLS_PATH/push "$3" "$2"
+	expect $DIR_TOOLS_PATH/push "$3" "$2"
 	#gitk &
 }
 
@@ -63,16 +65,16 @@ function copy_basesystem_system_to_bin_dir()
 {
 	echo ==$FUNCNAME $SYSTEM_DIR $SYSTEM_PLATFORM $BASESYSTEM_DIR_IN_BIN_DIR
 	#cp -r $SYSTEM_DIR/flyaudio/out/*  $BASESYSTEM_DIR_IN_BIN_DIR/
-	cp $SYSTEM_DIR/out/target/product/$SYSTEM_PLATFORM/*.zip $BASESYSTEM_DIR_IN_BIN_DIR/baseqcom.flb
+	cp $SYSTEM_DIR/out/target/product/$SYSTEM_PLATFORM/$OUT_BASESYSTEM_NAME $BASESYSTEM_DIR_IN_BIN_DIR/baseqcom.flb
 }
 
 function system_dir_build()
 {
 	echo ====IN.1pull_bin_dir=====$FUNCNAME
-	git_pull $BIN_DIR $BIN_DIR_PASSWORD
+	git_pull $BIN_DIR $BIN_DIR_PASSWORD $GIT_MASTER_BRANCH
 	
 	echo ====IN.2pull_system_dir=====$FUNCNAME
-	git_pull $SYSTEM_DIR $SYSTEM_DIR_PASSWORD
+	git_pull $SYSTEM_DIR $SYSTEM_DIR_PASSWORD "master"
 
 	echo ====IN.3choosecombo=====$FUNCNAME
 	cd $SYSTEM_DIR
@@ -94,7 +96,8 @@ function git_reset_hard()
 	echo ==$FUNCNAME $1
 	cd $1
 	git reset --hard
-	git checkout master
+	git checkout $GIT_MASTER_BRANCH
+	git reset --hard
 }
 
 #$SYSTEM_DIR $SYSTEM_DIR_PASSWORD
@@ -102,7 +105,7 @@ function git_pull()
 {
 	echo ==$FUNCNAME $1 $2
 	cd $1
-	expect $DIR_TOOLS_PATH/pull master $2
+	expect $DIR_TOOLS_PATH/pull $3 $2
 }
 
 function show_env()
@@ -115,6 +118,7 @@ function show_env()
 	echo $BIN_DIR
 	echo $BIN_DIR_PASSWORD
 	echo $BASESYSTEM_DIR_IN_BIN_DIR
+	echo $GIT_MASTER_BRANCH
 	echo $BIN_GIT_COMMIT_DESCRIPTION
 	echo ===============show_env====================
 }
@@ -150,22 +154,24 @@ function basesystem_launch()
 	BIN_DIR=$6
 	BIN_DIR_PASSWORD=$7
 	BASESYSTEM_DIR_IN_BIN_DIR=$8
-	BIN_GIT_COMMIT_DESCRIPTION="$9 ${10} ${11} ${12} ${13} ${14} ${15} ${16} ${17} ${18} ${19} ${20}"
+	GIT_MASTER_BRANCH=$9
+	OUT_BASESYSTEM_NAME=${10}
+	BIN_GIT_COMMIT_DESCRIPTION="${11} ${12} ${13} ${14} ${15} ${16} ${17} ${18} ${19} ${20}"
 	show_env
 	
 	if [ $# -lt 9 ];then
 		show_err_save_exit 1 "input num < 9 $#"
 	fi
 	
-	if [ $9 == '' ];then
+	if [ $11 == '' ];then
 		show_err_save_exit 2 "num 9 = null"
 	fi
 	
 	case $1 in
 	1)
-		git_pull $SYSTEM_DIR $SYSTEM_DIR_PASSWORD && git_reset_hard $BIN_DIR&& git_pull $BIN_DIR $BIN_DIR_PASSWORD&&git_pull $BIN_DIR $BIN_DIR_PASSWORD&&
-		system_dir_build && git_pull $BIN_DIR $BIN_DIR_PASSWORD && 
-		copy_basesystem_system_to_bin_dir && git_pull $BIN_DIR $BIN_DIR_PASSWORD&& git_add_push $BIN_DIR "$BIN_GIT_COMMIT_DESCRIPTION";;
+		git_pull $SYSTEM_DIR $SYSTEM_DIR_PASSWORD "master" && git_reset_hard $BIN_DIR&& git_pull $BIN_DIR $BIN_DIR_PASSWORD $GIT_MASTER_BRANCH&&git_pull $BIN_DIR $BIN_DIR_PASSWORD $GIT_MASTER_BRANCH&&
+		system_dir_build && git_pull $BIN_DIR $BIN_DIR_PASSWORD $GIT_MASTER_BRANCH&& 
+		copy_basesystem_system_to_bin_dir && git_pull $BIN_DIR $BIN_DIR_PASSWORD $GIT_MASTER_BRANCH&& git_add_push $BIN_DIR "$BIN_DIR_PASSWORD" "$GIT_MASTER_BRANCH";;
 	*)
 		show_err_save_exit 3 "not find case:$1" 
 	esac
