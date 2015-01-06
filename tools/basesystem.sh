@@ -52,10 +52,10 @@ function soc_prebuild()
 #$1-$BIN_DIR $2-$BIN_GIT_COMMIT_DESCRIPTION
 function git_add_push()
 {
-	echo ==$FUNCNAME $1 $2 $3
+	echo ==$FUNCNAME $1 $2 $3 $4
 	cd $1
 	git add .
-	git commit -am "$2"
+	git commit -am "$4"
 	expect $DIR_TOOLS_PATH/push "$3" "$2"
 	expect $DIR_TOOLS_PATH/push "$3" "$2"
 	#gitk &
@@ -171,7 +171,7 @@ function basesystem_launch()
 	1)
 		git_pull $SYSTEM_DIR $SYSTEM_DIR_PASSWORD "master" && git_reset_hard $BIN_DIR&& git_pull $BIN_DIR $BIN_DIR_PASSWORD $GIT_MASTER_BRANCH&&git_pull $BIN_DIR $BIN_DIR_PASSWORD $GIT_MASTER_BRANCH&&
 		system_dir_build && git_pull $BIN_DIR $BIN_DIR_PASSWORD $GIT_MASTER_BRANCH&& 
-		copy_basesystem_system_to_bin_dir && git_pull $BIN_DIR $BIN_DIR_PASSWORD $GIT_MASTER_BRANCH&& git_add_push $BIN_DIR "$BIN_DIR_PASSWORD" "$GIT_MASTER_BRANCH";;
+		copy_basesystem_system_to_bin_dir && git_pull $BIN_DIR $BIN_DIR_PASSWORD $GIT_MASTER_BRANCH&& git_add_push $BIN_DIR "$BIN_DIR_PASSWORD" "$GIT_MASTER_BRANCH" "$BIN_GIT_COMMIT_DESCRIPTION";;
 	*)
 		show_err_save_exit 3 "not find case:$1" 
 	esac
