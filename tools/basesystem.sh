@@ -1,7 +1,7 @@
 #========注意:您给的参数需按照如下参数给出==========
 #1 SYSTEM_PLATFORM SYSTEM_BUILD_TYPE SYSTEM_DIR SYSTEM_DIR_PASSWORD BIN_DIR BIN_DIR_PASSWORD BASESYSTEM_DIR_IN_BIN_DIR GIT_MASTER_BRANCH BIN_GIT_COMMIT_DESCRIPTION
 #========注意:如下是一个例子==========
-#./basesystem.sh 1 msm8974 userdebug /home/swlee/flyaudio/M8974AAAAANLYD4120 git /home/swlee/flyaudio/8x26-release git /home/swlee/flyaudio/8x26-release/others/8974/basesystem master 一个例子
+#./basesystem.sh 1 msm8974 userdebug /home/swlee/flyaudio/M8974AAAAANLYD4120 git /home/swlee/flyaudio/8x26-release git /home/swlee/flyaudio/8x26-release/others/8974/basesystem master msm8974-ota-eng.root.zip 一个例子
 
 DIR_LIDBG_PATH=`cd ../ && pwd`
 DIR_BUILD_PATH=$DIR_LIDBG_PATH/build
