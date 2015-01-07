@@ -407,10 +407,10 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         {
             SOC_System_Status(FLY_GOTO_SLEEP);
        	#ifdef SOC_mt3360
-			ssleep(1);
+			//ssleep(1);
 	   		lidbg("fly power key gotosleep ++\n");
 		   	lidbg_key_report(KEY_POWER, KEY_PRESSED);
-			msleep(250);
+			msleep(100);
 			lidbg_key_report(KEY_POWER, KEY_RELEASED);
 			lidbg("fly power key gotosleep --\n");
 		#else
