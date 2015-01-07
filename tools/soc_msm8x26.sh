@@ -64,6 +64,7 @@ fi
 
 	rm -rf $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system
 	rm -rf $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/root
+	rm -rf $DBG_SYSTEM_DIR/out/target/product/msm8226/obj/EXECUTABLES/vold_intermediates
 
 	set_env
 
@@ -103,7 +104,7 @@ function soc_make_otapackage()
 function soc_build_origin_image
 {
 	echo $FUNCNAME
-#	lidbg_build_all
+	lidbg_build_all
 	soc_build_all
 
 	cp $DBG_SOC_PATH/$DBG_SOC/init.lidbg.rc        $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/root/init.lidbg.rc
