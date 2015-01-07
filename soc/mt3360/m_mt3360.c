@@ -47,9 +47,10 @@ int thread_gpio_ctrl(void *data)
 		//set_current_state(TASK_UNINTERRUPTIBLE);        
 		if(kthread_should_stop()) 			
 			break;		
-		//GPIO_MultiFun_Set(162, 0xFF);		
+		GPIO_MultiFun_Set(127, 0xFF);		
 		msleep(2000);		
-		//gpio_direction_input(162); 		
+		gpio_direction_output(127, 1); 	
+		lidbg("fly gpio[%d]==%d\r\n", 127, 1);	
 		//val = gpio_get_value(162);    		
 		//soc_io_config( 162,  GPIOMUX_IN, GPIO_CFG_NO_PULL, GPIOMUX_DRV_2MA, 0);    		
 		//val = soc_io_input(162);				

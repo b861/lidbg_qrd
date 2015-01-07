@@ -226,6 +226,7 @@ free_gpio:
 
 int soc_io_output(u32 group, u32 index, bool status)
 {
+	GPIO_MultiFun_Set(index, 0xFF);//config for gpio
     gpio_direction_output(index, status);
     gpio_set_value(index, status);
     return 1;

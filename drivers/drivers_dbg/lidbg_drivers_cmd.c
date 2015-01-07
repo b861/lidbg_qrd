@@ -399,9 +399,11 @@ void parse_cmd(char *pt)
     }
 	else if (!strcmp(argv[0], "vol"))
     {
+    #ifndef SOC_mt3360
         int vol;
         vol = simple_strtoul(argv[1], 0, 0);
         SAF7741_Volume(vol);
+    #endif
     }
     else if (!strcmp(argv[0], "screen_shot"))
     {
