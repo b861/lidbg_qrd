@@ -134,10 +134,13 @@ static void parse_cmd(char *pt)
     }
 	else if (!strcmp(argv[0], "lcd_on"))
     {
+        g_var.led_app_status = 1;
+        if(g_var.led_app_status && g_var.led_hal_status)
 		LCD_ON;
     }
     else if (!strcmp(argv[0], "lcd_off"))
     {
+        g_var.led_app_status = 0;
 		LCD_OFF;
     }
 	else if (!strcmp(argv[0], "performance_high"))

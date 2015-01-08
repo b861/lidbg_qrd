@@ -173,6 +173,19 @@ void iSOC_PWM_Set(int pwm_id, int duty_ns, int period_ns)
 //0~255
 int iSOC_BL_Set( u32 bl_level)
 {
+    if(bl_level == 1)
+     {
+        g_var.led_hal_status = 1;
+        if(g_var.led_hal_status && g_var.led_app_status)
+            LPC_CMD_LCD_ON;
+     }
+        
+    else if(bl_level == 0)
+    {
+        g_var.led_hal_status = 0;
+        LPC_CMD_LCD_OFF;
+    }
+    else       
     soc_bl_set(bl_level);
     return 1;
 
