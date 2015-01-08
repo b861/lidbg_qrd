@@ -25,7 +25,7 @@ echo "============loops:$main_loop_times  status:["${commit_times[0]}"] ["${comm
 	#echo ==${compel_info[0]} ${compel_info[1]} ${compel_info[2]} ${compel_info[3]} ${compel_info[4]} ${compel_info[5]} ${compel_info[6]} ${compel_info[7]} ${compel_info[8]}
 	
 	cd ${compel_info[3]}
-	git log --oneline | sed -n '1,5p' > /dev/shm/${compel_info[1]}.txt && new_commitinfo=$(head /dev/shm/${compel_info[1]}.txt --lines 1)
+	git log --oneline | sed -n '1,5p' > /dev/shm/${compel_info[1]}_$thiswhile_loop.txt && new_commitinfo=$(head /dev/shm/${compel_info[1]}_$thiswhile_loop.txt --lines 1)
 	
 	thiscommit_info=${pre_commit[$thiswhile_loop]}
 	thiscommit_times=${commit_times[$thiswhile_loop]}
@@ -43,7 +43,7 @@ echo "============loops:$main_loop_times  status:["${commit_times[0]}"] ["${comm
 		basesystem9=$new_commitinfo
 		#check is "Merge branch of..." ?
 		if [[ $basesystem9 =~ "Merge" ]]; then
-		basesystem9=$(sed -n '2p' /dev/shm/${compel_info[1]}.txt)
+		basesystem9=$(sed -n '2p' /dev/shm/${compel_info[1]}_$thiswhile_loop.txt)
 		echo "find a Merge:" ["$new_commitinfo"] ["$basesystem9"]  >> /dev/shm/git_autodetec_log.txt
 		fi
 		
