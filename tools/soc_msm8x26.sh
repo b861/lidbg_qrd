@@ -28,6 +28,9 @@ function soc_postbuild()
 {
 	echo $FUNCNAME
 	echo "soc_build_all ok"
+	#if [ $DBG_PLATFORM = msm8226 ];then	
+	#	mmm $DBG_SYSTEM_DIR/system/core/libdiskconfig -B
+	#fi
 }
 
 
@@ -67,10 +70,6 @@ fi
 	rm -rf $DBG_SYSTEM_DIR/out/target/product/msm8226/obj/EXECUTABLES/vold_intermediates
 
 	set_env
-
-	if [ $DBG_PLATFORM = msm8226 ];then	
-		mmm $DBG_SYSTEM_DIR/system/core/libdiskconfig -B
-	fi
 }
 
 
@@ -113,7 +112,13 @@ function soc_build_origin_image
 	cp -rf $DBG_OUT_PATH                           $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/lib/modules/out
 	cp -rf $DBG_SYSTEM_DIR/origin-app/priv-app/*   $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/priv-app/
 	cp -rf $DBG_SYSTEM_DIR/origin-app/app/*        $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/app/
+	#copy fastboot apk
+	cd $RELEASE_REPOSITORY
+	git checkout $REPOSITORY_WORK_BRANCH
+	cp $RELEASE_REPOSITORY/app/FastBoot.apk        $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/app/FastBoot.apk
+	cp $RELEASE_REPOSITORY/app/FlyBootService.apk  $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/app/FlyBootService.apk
 
+	cd $DBG_SYSTEM_DIR
 	make otapackage -j8
 
 }

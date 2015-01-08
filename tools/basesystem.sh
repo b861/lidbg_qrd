@@ -23,15 +23,6 @@ OUT_BASESYSTEM_NAME="NULL"
 function soc_postbuild()
 {
 	echo ==$FUNCNAME
-	if [ $SYSTEM_PLATFORM = msm8226 ];then
-		echo ==$FUNCNAME $SYSTEM_PLATFORM
-		if [ -s $SYSTEM_DIR/out/target/product/$SYSTEM_PLATFORM/system/lib/libdiskconfig.so ]; then
-			echo "system/lib/libdiskconfig.so exist"
-		else
-			mmm $SYSTEM_DIR/system/core/libdiskconfig -B
-			make -j8
-		fi
-	fi
 }
 
 function soc_prebuild()
