@@ -758,6 +758,7 @@ static int __init lidbg_pm_init(void)
     MCU_SET_WP_GPIO_SUSPEND;
 #endif
     PM_WARN("<set MCU_WP_GPIO_ON>\n");
+    LPC_PRINT(true, sleep_counter, "PM:MCU_WP_GPIO_ON");
     CREATE_KTHREAD(thread_gpio_app_status_delay, NULL);
     lidbg_shell_cmd("echo 8  > /proc/sys/kernel/printk");
 
