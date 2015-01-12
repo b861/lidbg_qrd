@@ -1,4 +1,14 @@
+cd ../build
+source ./env_entry.sh
 
+. $DBG_TOOLS_PATH/soc_$DBG_SOC.sh
+. $DBG_TOOLS_PATH/depository.sh
+. $DBG_TOOLS_PATH/debug.sh
+. $DBG_TOOLS_PATH/combination.sh
+. $DBG_TOOLS_PATH/common.sh
+. $DBG_TOOLS_PATH/branch_for_test.sh
+
+cd $DBG_TOOLS_PATH
 DIR_LIDBG_PATH=`cd ../ && pwd`
 DIR_BUILD_PATH=$DIR_LIDBG_PATH/build
 DIR_TOOLS_PATH=$DIR_LIDBG_PATH/tools
@@ -15,7 +25,7 @@ function git_pull()
 }
 
 while true ;do
-
+depository_request
 echo "============loops:$main_loop_times  status:["${commit_times[0]}"] ["${commit_times[1]}"] ["${commit_times[2]}"] ["${commit_times[3]}"] ["${commit_times[4]}"]  ==============="
 	thiswhile_loop=0
 	while read line
@@ -59,5 +69,6 @@ echo "============loops:$main_loop_times  status:["${commit_times[0]}"] ["${comm
 	let thiswhile_loop++
 	done <$DIR_TOOLS_PATH/git_update_auto_detect.conf
 let main_loop_times++
+depository_release
 sleep 30
 done

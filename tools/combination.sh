@@ -12,18 +12,17 @@ function combination_menu()
 
 function combination_handle()
 {
+	depository_request
 	case $1 in
 	61)
 		read -p "输入提交到二进制仓库的说明文字：" descriptors
-		lidbg_build_all && depository_clean && depository_pull && rm -rf $UPDATA_BIN_DIR/out && rm -rf $UPDATA_BIN_DIR/hw/* && depository_copy_lidbg  && depository_add_push "$descriptors";;
+		lidbg_build_all && depository_clean && depository_pull && rm -rf $UPDATA_BIN_DIR/out && rm -rf $UPDATA_BIN_DIR/hw/* && depository_copy_lidbg  && depository_add_push "$descriptors" ;;
 	62)
 		read -p "输入提交到二进制仓库的说明文字：" descriptors
 		cd $DBG_SYSTEM_DIR && expect $DBG_TOOLS_PATH/pull $SYSTEM_WORK_BRANCH $DBG_PASSWORD  && depository_clean && depository_pull && soc_build_release && depository_pull && depository_copy_basesystem && depository_add_push "$descriptors";;
 	63)
 	    depository_pull && rm -rf $UPDATA_BIN_DIR/out && rm -rf $UPDATA_BIN_DIR/hw/* && depository_copy_lidbg && depository_copy_basesystem && depository_make_package && gitk&;;
-	65)
-		soc_build_kernel && adb wait-for-devices reboot bootloader && soc_flash_kernel && sudo fastboot reboot;;
-    66)
+        66)
         echo "  编译选项如下"
         echo "  (1) 编译basesystem并拷贝到二进制仓库"
         echo "  (2) 编译lidbg并拷贝到二进制仓库"
@@ -35,8 +34,13 @@ function combination_handle()
         judge_which_combine && depository_make_package && new_remote_test_branch && new_branch_remove && copy_package_to_smb;; 
         #for test
         #judge_which_combine && new_remote_test_branch && new_branch_remove;; 
+	70)
+		soc_build_kernel && adb wait-for-devices reboot bootloader && soc_flash_kernel && sudo fastboot reboot;;
 	*)
 		echo
+
 	esac
+
+	depository_release
 }
 

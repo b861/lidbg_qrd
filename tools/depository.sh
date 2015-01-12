@@ -1,3 +1,24 @@
+function depository_request()
+{
+while :
+do
+        if [ -s /dev/shm/depository_lock ]
+        then
+	      echo depository waiting...
+	      cat /dev/shm/depository_lock
+	      sleep 1 
+	else
+              echo working > /dev/shm/depository_lock
+              break
+        fi
+done
+}
+
+function depository_release()
+{
+  rm /dev/shm/depository_lock
+}
+
 function depository_clean()
 {
 	echo $FUNCNAME
