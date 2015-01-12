@@ -110,9 +110,11 @@ static inline int write_node(char *filename, char *wbuff)
 #define NOTIFIER_MINOR_ACC_OFF (1)
 #define NOTIFIER_MINOR_SUSPEND_PREPARE  (2)
 #define NOTIFIER_MINOR_SUSPEND_UNPREPARE (3)
-#define NOTIFIER_MINOR_POWER_OFF (4)
+#define NOTIFIER_MINOR_POWER_OFF  (4)
 #define NOTIFIER_MINOR_SCREEN_ON  (5)
-#define NOTIFIER_MINOR_SCREEN_OFF  (6)
+#define NOTIFIER_MINOR_SCREEN_OFF (6)
+#define NOTIFIER_MINOR_BL_LCD_ON  (7)
+#define NOTIFIER_MINOR_BL_LCD_OFF (8)
 
 
 typedef enum
@@ -144,8 +146,14 @@ typedef enum
 
 #if (defined(BUILD_SOC) || defined(BUILD_CORE) || defined(BUILD_DRIVERS))
 #define NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE (110)
+#define NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE	(111)
 #define NOTIFIER_MINOR_ACC_ON (0)
 #define NOTIFIER_MINOR_ACC_OFF (1)
+#define NOTIFIER_MINOR_BL_HAL_ON	(2)
+#define NOTIFIER_MINOR_BL_HAL_OFF	(3)
+#define NOTIFIER_MINOR_BL_APP_ON	(4)
+#define NOTIFIER_MINOR_BL_APP_OFF	(5)
+
 
 #define PM_WARN(fmt, args...) do{printk(KERN_CRIT"[ftf_pm]warn.%s: " fmt,__func__,##args);}while(0)
 #define PM_ERR(fmt, args...) do{printk(KERN_CRIT"[ftf_pm]err.%s: " fmt,__func__,##args);}while(0)

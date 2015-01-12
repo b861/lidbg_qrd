@@ -134,14 +134,11 @@ static void parse_cmd(char *pt)
     }
 	else if (!strcmp(argv[0], "lcd_on"))
     {
-        g_var.led_app_status = 1;
-        if(g_var.led_app_status && g_var.led_hal_status)
-		LCD_ON;
+     	lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_APP_ON));
     }
     else if (!strcmp(argv[0], "lcd_off"))
     {
-        g_var.led_app_status = 0;
-		LCD_OFF;
+     	lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_APP_OFF));
     }
 	else if (!strcmp(argv[0], "performance_high"))
     {

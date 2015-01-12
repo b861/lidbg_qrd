@@ -1,10 +1,43 @@
 
 #include "lidbg.h"
 #include "lidbg_target.c"
-
-
 #define HAL_SO "/flysystem/lib/out/lidbg_loader.ko"
 LIDBG_DEFINE;
+
+
+static int bl_event_handle(struct notifier_block *this,
+                            unsigned long event, void *ptr)
+{
+	switch(event)
+	{
+		case NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_HAL_ON): 
+		 	g_var.led_hal_status = 1;
+			break;
+		case NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_HAL_OFF):
+			g_var.led_hal_status = 0;
+			break;
+		case NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_APP_ON): 
+			g_var.led_app_status = 1;
+			break;
+		case NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_APP_OFF): 
+			g_var.led_app_status = 0;
+			break;
+		default:
+			break;
+	}
+	if(g_var.led_hal_status && g_var.led_app_status == 1)
+		LPC_CMD_LCD_ON;
+	else
+		LPC_CMD_LCD_OFF;
+	
+		return NOTIFY_DONE;
+}
+
+static struct notifier_block bl_ctl_bn =
+{
+    .notifier_call = bl_event_handle,
+};
+
 
 //ad_key_map[ts_active_key].ad_value
 void interface_func_tbl_default(void)
@@ -174,16 +207,14 @@ void iSOC_PWM_Set(int pwm_id, int duty_ns, int period_ns)
 int iSOC_BL_Set( u32 bl_level)
 {
     if(bl_level == 1)
-     {
-        g_var.led_hal_status = 1;
-        if(g_var.led_hal_status && g_var.led_app_status)
-            LPC_CMD_LCD_ON;
-     }
+    {  
+     	lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SIGNAL_EVENT, NOTIFIER_MINOR_BL_HAL_ON));
+    }
         
     else if(bl_level == 0)
     {
-        g_var.led_hal_status = 0;
-        LPC_CMD_LCD_OFF;
+		lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SIGNAL_EVENT, NOTIFIER_MINOR_BL_HAL_OFF));
+
     }
     else       
     soc_bl_set(bl_level);
@@ -461,6 +492,8 @@ int fly_interface_init(void)
 	
 	g_var.is_debug_mode = fs_is_file_exist("/data/lidbg/set_debug_mode");
 
+	register_lidbg_notifier(&bl_ctl_bn);
+	
 	return 0;
 }
 
