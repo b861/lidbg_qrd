@@ -26,9 +26,9 @@ static int bl_event_handle(struct notifier_block *this,
 			break;
 	}
 	if(g_var.led_hal_status & g_var.led_app_status)
-		LPC_CMD_LCD_ON;
+		LCD_ON;
 	else
-		LPC_CMD_LCD_OFF;
+		LCD_OFF;
 	
 	return NOTIFY_DONE;
 }
@@ -208,12 +208,12 @@ int iSOC_BL_Set( u32 bl_level)
 {
     if(bl_level == 1)
     {  
-     	lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SIGNAL_EVENT, NOTIFIER_MINOR_BL_HAL_ON));
+     	lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_HAL_ON));
     }
         
     else if(bl_level == 0)
     {
-		lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SIGNAL_EVENT, NOTIFIER_MINOR_BL_HAL_OFF));
+		lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_HAL_OFF));
 
     }
     else       
@@ -419,6 +419,7 @@ int fly_interface_init(void)
     g_var.ws_lh = NULL;
 	g_var.fb_on = true;
     g_var.ts_active_key = TS_NO_KEY;
+	
     if( fs_is_file_exist(RECOVERY_MODE_DIR))
     {
 	    g_var.recovery_mode = 1;
