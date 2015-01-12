@@ -744,7 +744,21 @@ static void set_func_tbl(void)
     plidbg_dev->soc_func_tbl.pfnSOC_PM_STEP = lidbg_pm_step_call;
     plidbg_dev->soc_func_tbl.pfnHal_Acc_Callback = NULL;
 }
-
+#ifdef PLATFORM_msm8226
+void find_fb_open_err(char *key_word, void *data)
+{
+	DUMP_FUN;
+	lidbg("find key word:find_fb_open_err\n");
+	if(g_var.system_status >= FLY_KERNEL_UP)
+	{
+		SOC_Key_Report(KEY_POWER, KEY_PRESSED_RELEASED);
+		ssleep(2);
+		SOC_Key_Report(KEY_POWER, KEY_PRESSED_RELEASED);
+	}
+	else
+		lidbg("find key word:find_fb_open_err.drop.%d\n",g_var.system_status );	
+}
+#endif
 static int __init lidbg_pm_init(void)
 {
     DUMP_FUN;
@@ -761,7 +775,9 @@ static int __init lidbg_pm_init(void)
     LPC_PRINT(true, sleep_counter, "PM:MCU_WP_GPIO_ON");
     CREATE_KTHREAD(thread_gpio_app_status_delay, NULL);
     lidbg_shell_cmd("echo 8  > /proc/sys/kernel/printk");
-
+#ifdef PLATFORM_msm8226
+	lidbg_trace_msg_cb_register("mdss_mdp_overlay_on: Failed to turn on fb0",NULL,find_fb_open_err);
+#endif
     platform_device_register(&lidbg_pm);
     platform_driver_register(&lidbg_pm_driver);
     return 0;
