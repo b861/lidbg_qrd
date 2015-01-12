@@ -144,15 +144,20 @@ typedef enum
     PM_NULL
 } fly_pm_stat_step;
 
+#define NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE	(120)
+#define NOTIFIER_MINOR_BL_HAL_ON	(0)
+#define NOTIFIER_MINOR_BL_HAL_OFF	(1)
+#define NOTIFIER_MINOR_BL_APP_ON	(2)
+#define NOTIFIER_MINOR_BL_APP_OFF	(3)
+
+
+
 #if (defined(BUILD_SOC) || defined(BUILD_CORE) || defined(BUILD_DRIVERS))
 #define NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE (110)
-#define NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE	(111)
+
 #define NOTIFIER_MINOR_ACC_ON (0)
 #define NOTIFIER_MINOR_ACC_OFF (1)
-#define NOTIFIER_MINOR_BL_HAL_ON	(2)
-#define NOTIFIER_MINOR_BL_HAL_OFF	(3)
-#define NOTIFIER_MINOR_BL_APP_ON	(4)
-#define NOTIFIER_MINOR_BL_APP_OFF	(5)
+
 
 
 #define PM_WARN(fmt, args...) do{printk(KERN_CRIT"[ftf_pm]warn.%s: " fmt,__func__,##args);}while(0)

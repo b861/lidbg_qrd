@@ -25,12 +25,12 @@ static int bl_event_handle(struct notifier_block *this,
 		default:
 			break;
 	}
-	if(g_var.led_hal_status && g_var.led_app_status == 1)
+	if(g_var.led_hal_status & g_var.led_app_status)
 		LPC_CMD_LCD_ON;
 	else
 		LPC_CMD_LCD_OFF;
 	
-		return NOTIFY_DONE;
+	return NOTIFY_DONE;
 }
 
 static struct notifier_block bl_ctl_bn =
