@@ -8,6 +8,8 @@ LIDBG_DEFINE;
 static int bl_event_handle(struct notifier_block *this,
                             unsigned long event, void *ptr)
 {
+	DUMP_FUN;
+	
 	switch(event)
 	{
 		case NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_HAL_ON): 
@@ -23,8 +25,9 @@ static int bl_event_handle(struct notifier_block *this,
 			g_var.led_app_status = 0;
 			break;
 		default:
-			break;
+			return NOTIFY_DONE;
 	}
+	lidbg("hal=%d,app=%d\n",g_var.led_hal_status,g_var.led_app_status);
 	if(g_var.led_hal_status & g_var.led_app_status)
 		LCD_ON;
 	else
@@ -206,6 +209,7 @@ void iSOC_PWM_Set(int pwm_id, int duty_ns, int period_ns)
 //0~255
 int iSOC_BL_Set( u32 bl_level)
 {
+	lidbg("SOC_BL_Set:%d\n",bl_level);
     if(bl_level == 1)
     {  
      	lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_HAL_ON));
