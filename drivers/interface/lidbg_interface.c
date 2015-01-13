@@ -122,6 +122,11 @@ bool iSOC_IO_Input(u32 group, u32 index, u32 pull)
 //return mv
 bool iSOC_ADC_Get (u32 channel , u32 *value)
 {	
+	if(g_var.system_status <= FLY_KERNEL_DOWN)
+	{
+		return 0;
+	}
+
 	*value = 0xffffffff;
 #ifdef SOC_mt3360
 	*value = soc_ad_read(channel);

@@ -215,21 +215,27 @@ void cb_cp_data_to_udisk(char *key, char *value )
 }
 int loop_warnning(void *data)
 {
+	
     while(1)
     {
         lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SIGNAL_EVENT, NOTIFIER_MINOR_SIGNAL_BAKLIGHT_ACK));
-        msleep(1000);
+        msleep(5000);
     }
     return 0;
 }
 
 void lidbg_loop_warning(void)
 {
-    if((loop_warning_en)||(g_var.is_debug_mode == 1))
-    {
-        DUMP_FUN;
-        CREATE_KTHREAD(loop_warnning, NULL);
-    }
+	static bool is_loop_warning = 0;
+	if(is_loop_warning == 0)
+	{
+	    if((loop_warning_en)||(g_var.is_debug_mode == 1))
+	    {
+	        DUMP_FUN;
+	        CREATE_KTHREAD(loop_warnning, NULL);
+			is_loop_warning = 1;
+	    }
+	}
 }
 void cb_kv_app_install(char *key, char *value)
 {
