@@ -25,7 +25,7 @@ function git_pull()
 }
 
 while true ;do
-depository_request
+#depository_request
 echo "============loops:$main_loop_times  status:["${commit_times[0]}"] ["${commit_times[1]}"] ["${commit_times[2]}"] ["${commit_times[3]}"] ["${commit_times[4]}"]  ==============="
 	thiswhile_loop=0
 	while read line
@@ -69,6 +69,6 @@ echo "============loops:$main_loop_times  status:["${commit_times[0]}"] ["${comm
 	let thiswhile_loop++
 	done <$DIR_TOOLS_PATH/git_update_auto_detect.conf
 let main_loop_times++
-depository_release
+#depository_release
 sleep 30
 done
