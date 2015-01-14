@@ -196,7 +196,7 @@ int dsi83_check(void)
 	ret = SN65_register_read(0xe5, &reg);
 	lidbg("[dsi83.check]reg-0xe5=0x%x\n",reg);
 	
-	if((reg != 0x00) || (ret< 0) || (is_dsi83_inited == 0) )
+	if(((reg != 0x00) || (ret< 0) || (is_dsi83_inited == 0) ) && (g_var.system_status >= FLY_KERNEL_UP))
 	{
 		check_times ++;
 		lidbgerr( "[dsi83.check.err]reg-0xe5=0x%x,ret=%d,check_times=%d\n", reg,ret,check_times);
