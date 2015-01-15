@@ -164,7 +164,7 @@ static bool get_cmdline(void)
 	char cmdline[512];
 	fs_file_read("/proc/cmdline", cmdline, 0, sizeof(cmdline));
 	cmdline[512 - 1] = '\0';
-	lidbg("kernel cmdline = %s",cmdline);
+	printk( KERN_CRIT "kernel cmdline = %s",cmdline);
 	return ((strstr(cmdline,"update_hw_info")==NULL)?false:true);
 }
 

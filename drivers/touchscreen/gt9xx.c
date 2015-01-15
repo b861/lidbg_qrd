@@ -42,12 +42,11 @@
  *          2. new esd & slide wakeup optimization
  *                  By Meta, 2013/06/08
  */
-#ifdef SOC_mt3360
-#include "gt9xx_mt3360.h"
-#else
+ #ifdef SOC_mt3360
+ #else
 #include <linux/regulator/consumer.h>
-#include "gt9xx.h"
 #endif
+#include "gt9xx.h"
 #include "lidbg.h"
 #include <linux/of_gpio.h>
 
@@ -1018,6 +1017,7 @@ static int gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
 	struct i2c_client *client = ts->client;
 	unsigned char *config_data;
 	int ret = -EIO;
+	u8 irq_cfg = 0;
 
 #if GTP_DRIVER_SEND_CFG
 	int i;
@@ -1163,6 +1163,11 @@ static int gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
 		ts->config_data = config_data;
 		config_data[0] = GTP_REG_CONFIG_DATA >> 8;
 		config_data[1] = GTP_REG_CONFIG_DATA & 0xff;
+		#ifdef SOC_mt3360
+		irq_cfg = send_cfg_buf[sensor_id][6];
+		send_cfg_buf[sensor_id][6] = send_cfg_buf[sensor_id][6] | 0x07;	//confirm ctp irq config is IRQ_TYPE_LEVEL_HIGH on AC8317
+		lidbg("********** Change ctp irq config 0x%x -> 0x%x **********\n", irq_cfg, send_cfg_buf[sensor_id][6]);
+		#endif
 		memset(&config_data[GTP_ADDR_LENGTH], 0, GTP_CONFIG_MAX_LENGTH);
 		memcpy(&config_data[GTP_ADDR_LENGTH], send_cfg_buf[sensor_id],
 				ts->gtp_cfg_len);
