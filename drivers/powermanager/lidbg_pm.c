@@ -748,7 +748,7 @@ static void set_func_tbl(void)
 void find_fb_open_err(char *key_word, void *data)
 {
 	DUMP_FUN;
-	lidbg("find key word:find_fb_open_err\n");
+	lidbgerr("find key word:find_fb_open_err\n");
 	if(g_var.system_status >= FLY_KERNEL_UP)
 	{
 		SOC_Key_Report(KEY_POWER, KEY_PRESSED_RELEASED);

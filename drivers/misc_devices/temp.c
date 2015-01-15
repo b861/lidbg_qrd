@@ -153,8 +153,16 @@ int thread_thermal(void *data)
     int cur_temp,i,max_freq;
     DUMP_FUN;
 	
+	set_cpu_governor(0);
+	
 	if(g_var.recovery_mode == 1)
-		return 1;
+	{
+		while(1)
+		{
+			set_cpu_governor(0);
+			ssleep(5);
+		}
+	}
 	
     temp_init();
 
