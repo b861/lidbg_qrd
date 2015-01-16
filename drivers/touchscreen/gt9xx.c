@@ -2090,6 +2090,98 @@ static int goodix_ts_remove(struct i2c_client *client)
 	return 0;
 }
 
+#ifdef SOC_mt3360
+static int goodix_ac_ts_suspend(struct device *dev)
+{
+	struct goodix_ts_data *ts = dev_get_drvdata(dev);
+	int ret = 0, i;
+
+	if (ts->gtp_is_suspend) {
+		dev_dbg(&ts->client->dev, "Already in suspend state.\n");
+		return 0;
+	}
+
+//	mutex_lock(&ts->lock);
+#if GTP_ESD_PROTECT
+	gtp_esd_switch(ts->client, SWITCH_OFF);
+#endif
+
+#if GTP_SLIDE_WAKEUP
+	ret = gtp_enter_doze(ts);
+#else
+	if (ts->use_irq) {
+                ac83xx_mask_ack_bim_irq(ts->client->irq);
+		gtp_irq_disable(ts);
+         }
+	else
+		hrtimer_cancel(&ts->timer);
+
+	for (i = 0; i < GTP_MAX_TOUCH; i++)
+		gtp_touch_up(ts, i);
+
+	input_sync(ts->input_dev);
+
+	ret = gtp_enter_sleep(ts);
+#endif
+	if (ret < 0)
+		dev_err(&ts->client->dev, "GTP early suspend failed.\n");
+	/* to avoid waking up while not sleeping,
+	 * delay 48 + 10ms to ensure reliability
+	 */
+	msleep(58);
+//	mutex_unlock(&ts->lock);
+	ts->gtp_is_suspend = 1;
+        printk("[TP] goodix_ts_suspend ret=%d\n", ret);
+	return ret;
+}
+
+static int goodix_ac_ts_resume(struct device *dev)
+{
+	struct goodix_ts_data *ts = dev_get_drvdata(dev);
+	int ret = 0;
+
+	if (!ts->gtp_is_suspend) {
+		dev_dbg(&ts->client->dev, "Already in awake state.\n");
+		return 0;
+	}
+
+//	mutex_lock(&ts->lock);
+	ret = gtp_wakeup_sleep(ts);
+
+#if GTP_SLIDE_WAKEUP
+	doze_status = DOZE_DISABLED;
+#endif
+
+	if (ret <= 0)
+		dev_err(&ts->client->dev, "GTP resume failed.\n");
+
+	if (ts->use_irq) {
+		gtp_irq_enable(ts);
+        } else {
+		hrtimer_start(&ts->timer,
+			ktime_set(1, 0), HRTIMER_MODE_REL);
+        }
+#if GTP_ESD_PROTECT
+	gtp_esd_switch(ts->client, SWITCH_ON);
+#endif
+//	mutex_unlock(&ts->lock);
+	ts->gtp_is_suspend = 0;
+
+        printk("[TP] goodix_ts_resume ret=%d\n", ret);
+	return ret;
+}
+
+static const struct dev_pm_ops goodix_ts_dev_pm_ops = {
+	.suspend = goodix_ac_ts_suspend,
+	.resume = goodix_ac_ts_resume,
+};
+#else
+static const struct dev_pm_ops goodix_ts_dev_pm_ops = {
+	.suspend = NULL,
+	.resume = NULL,
+};
+#endif
+
 #if defined(CONFIG_HAS_EARLYSUSPEND) || defined(CONFIG_FB)
 /*******************************************************
 Function:
@@ -2384,6 +2476,7 @@ static struct i2c_driver goodix_ts_driver = {
 		.name     = GTP_I2C_NAME,
 		.owner    = THIS_MODULE,
 		.of_match_table = goodix_match_table,
+		.pm = &goodix_ts_dev_pm_ops,
 	},
 };
 

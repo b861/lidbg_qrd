@@ -131,6 +131,8 @@ int soc_io_suspend_config(u32 index, u32 direction, u32 pull, u32 drive_strength
 int soc_io_resume_config(u32 index, u32 direction, u32 pull, u32 drive_strength)
 {
 #define I2C1_SEL                  (192 + 26)
+#define I2C0_SEL                  (3)
+
 	    int ext_int_flag = 0;
 	    int i = 0;
 
@@ -141,6 +143,9 @@ int soc_io_resume_config(u32 index, u32 direction, u32 pull, u32 drive_strength)
 	
 	GPIO_MultiFun_Set(113, I2C1_SEL);// for I2C1 not use when resume
 	GPIO_MultiFun_Set(118, I2C1_SEL);
+
+	GPIO_MultiFun_Set(112, I2C0_SEL);// for I2C0 not use when resume
+	GPIO_MultiFun_Set(117, I2C0_SEL);
 
 	ext_int_gpio_num = ext_int_config[0].ext_int_gpio_num;
 	ext_int_number = ext_int_config[0].ext_int_number;
