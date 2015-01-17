@@ -284,6 +284,8 @@ static int thread_gpio_app_status_delay(void *data)
 #endif
 
     PM_WARN("<set MCU_APP_GPIO_ON >\n");
+    LPC_PRINT(true, sleep_counter, "PM:MCU_APP_GPIO_ON");
+
     return 1;
 }
 static int test_task_flag(struct task_struct *p, int flag)

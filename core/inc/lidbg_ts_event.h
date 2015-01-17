@@ -11,7 +11,7 @@ extern int g_is_te_enable;
 extern struct tspara g_curr_tspara;
 extern bool te_regist_password(char *password, void (*cb_password)(char *password ));
 extern bool te_is_ts_touched(void);
-
+extern bool show_password_list(void);
 
 #define TE_WARN(fmt, args...) printk(KERN_CRIT"[futengfei.te]warn.%s: " fmt,__func__,##args)
 #define TE_ERR(fmt, args...) printk(KERN_CRIT"[futengfei.te]err.%s: " fmt,__func__,##args)

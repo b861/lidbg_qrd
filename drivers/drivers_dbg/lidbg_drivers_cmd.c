@@ -129,7 +129,7 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#028--delete ublox so && reboot\n");
             fs_mem_log("*158#029--log cpu temp\n");
             fs_mem_log("*158#030--cpu top performance mode\n");
-
+            show_password_list();
             lidbg_domineering_ack();
         }
         if (!strcmp(argv[1], "*158#998"))

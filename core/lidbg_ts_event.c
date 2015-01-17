@@ -59,7 +59,6 @@ void new_password_dev(char *password, void (*cb_password)(char *password ))
 {
     struct dev_password *add_new_dev;
     add_new_dev = kzalloc(sizeof(struct dev_password), GFP_KERNEL);
-    fs_mem_log("SUC:[%s]==>%ps\n", password, cb_password);
     add_new_dev->password = password;
     add_new_dev->cb_password = cb_password;
     list_add(&(add_new_dev->tmp_list), &te_password_list);
@@ -85,13 +84,13 @@ bool show_password_list(void)
 
     if(list_empty(client_list))
     {
-        TE_ERR("<nobody_register>\n");
+        fs_mem_log("<nobody_register>\n");
         return false;
     }
     list_for_each_entry(pos, client_list, tmp_list)
     {
-        if (pos->password )
-            TE_WARN("<registerd_list:%s>\n", pos->password);
+        if (pos && pos->password && pos->cb_password)
+            fs_mem_log("SUC:[%s]==>[%ps]\n", pos->password, pos->cb_password);
     }
     return true;
 }
@@ -163,7 +162,7 @@ void getnum_andanalysis(void)
 {
     int num;
     if(g_te_dbg_en)
-		TE_ERR("<%d,%d,%d>\n", g_curr_tspara.x,g_curr_tspara.y,g_curr_tspara.press);
+        TE_ERR("<%d,%d,%d>\n", g_curr_tspara.x, g_curr_tspara.y, g_curr_tspara.press);
     if(g_curr_tspara.press)
     {
         num = get_num();
@@ -266,5 +265,6 @@ EXPORT_SYMBOL(g_is_te_enable);
 EXPORT_SYMBOL(g_curr_tspara);
 EXPORT_SYMBOL(te_regist_password);
 EXPORT_SYMBOL(te_is_ts_touched);
+EXPORT_SYMBOL(show_password_list);
 //zone end
 
