@@ -1017,7 +1017,9 @@ static int gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
 	struct i2c_client *client = ts->client;
 	unsigned char *config_data;
 	int ret = -EIO;
+#ifdef SOC_mt3360
 	u8 irq_cfg = 0;
+#endif
 
 #if GTP_DRIVER_SEND_CFG
 	int i;
