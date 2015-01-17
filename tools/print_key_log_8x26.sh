@@ -32,10 +32,19 @@ do
 	echo ---------------------------$i---------------------------------------------  >> ./lidbg_log/lidbgerr.txt
 	cat $i | grep "lidbgerr" >>  ./lidbg_log/lidbgerr.txt
 
-	echo ---------------------------$i---------------------------------------------  >> ./lidbg_log/slimbus.txt
+	echo ---------------------------$i---------------------------------------------  >> ./lidbg_log/slimbuserr.txt
 	cat $i | grep "slimbus Read error" >>  ./lidbg_log/slimbuserr.txt
 
-	cat $i | grep -E "send sigkill to|killing any children in process group|Linux version|force_unlock|WARNING: at|slimbus Read error|unhandled page|lidbgerr" >>  ./lidbg_log/$i
+	echo ---------------------------$i---------------------------------------------  >> ./lidbg_log/lpc.txt
+	cat $i | grep "LPC reset reason" >>  ./lidbg_log/lpc.txt
+
+	echo ---------------------------$i---------------------------------------------  >> ./lidbg_log/Watchdog.txt
+	cat $i | grep "Watchdog bark" >>  ./lidbg_log/Watchdog.txt
+
+	echo ---------------------------$i---------------------------------------------  >> ./lidbg_log/rejecting_io.txt
+	cat $i | grep "rejecting I/O to offline device" >>  ./lidbg_log/rejecting_io.txt
+
+	cat $i | grep -E "send sigkill to|killing any children in process group|Linux version|force_unlock|WARNING: at|slimbus Read error|unhandled page|lidbgerr|LPC reset reason|overflow error|msm_gpio_show_resume_irq|rejecting I/O to offline device|Watchdog bark" >>  ./lidbg_log/$i
 done
 
 	date >>  ./lidbg_log/finish.txt
