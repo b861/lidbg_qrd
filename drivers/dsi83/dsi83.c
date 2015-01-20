@@ -366,6 +366,7 @@ void cb_dsi83_rst(char *key, char *value )
 
 static int thread_dsi83_check(void *data)
 {
+	dsi83_dump_reg();
 	dsi83_check();
 	return 0;
 }
@@ -474,7 +475,7 @@ static int dsi83_ops_suspend(struct device *dev)
 {
     DUMP_FUN;
     is_dsi83_inited = false;
-	
+	SOC_IO_Output(0, DSI83_GPIO_EN, 0);
 	MSM_DSI83_POWER_OFF;
     //dsi83_suspend();
     return 0;
