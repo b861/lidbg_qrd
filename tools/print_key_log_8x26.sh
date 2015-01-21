@@ -44,7 +44,7 @@ do
 	echo ---------------------------$i---------------------------------------------  >> ./lidbg_log/rejecting_io.txt
 	cat $i | grep "rejecting I/O to offline device" >>  ./lidbg_log/rejecting_io.txt
 
-	cat $i | grep -E "send sigkill to|killing any children in process group|Linux version|force_unlock|WARNING: at|slimbus Read error|unhandled page|lidbgerr|LPC reset reason|overflow error|msm_gpio_show_resume_irq|rejecting I/O to offline device|Watchdog bark" >>  ./lidbg_log/$i
+	cat $i | grep -E "send sigkill to|killing any children in process group|Linux version|force_unlock|WARNING: at|slimbus Read error|unhandled page|lidbgerr|LPC reset reason|overflow error|msm_gpio_show_resume_irq|rejecting I/O to offline device|Watchdog bark|find key word" >>  ./lidbg_log/$i
 done
 
 	date >>  ./lidbg_log/finish.txt
