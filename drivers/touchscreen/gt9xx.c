@@ -889,6 +889,7 @@ static s8 gtp_enter_sleep(struct goodix_ts_data  *ts)
 	ret = gpio_direction_output(GTP_INT_PORT, 0);
 #ifdef SOC_mt3360
 	mdelay(5);
+	return 0;
 #else
 	usleep(5000);
 #endif
@@ -2097,6 +2098,11 @@ static int goodix_ac_ts_suspend(struct device *dev)
 {
 	struct goodix_ts_data *ts = dev_get_drvdata(dev);
 	int ret = 0, i;
+	int index = 0;
+	struct mtk_ext_int ctp_int;
+
+	index = scan_int_config(ts->client->irq);
+	ctp_int = ctp_int_config[index];
 
 	if (ts->gtp_is_suspend) {
 		dev_dbg(&ts->client->dev, "Already in suspend state.\n");
@@ -2112,16 +2118,16 @@ static int goodix_ac_ts_suspend(struct device *dev)
 	ret = gtp_enter_doze(ts);
 #else
 	if (ts->use_irq) {
-                ac83xx_mask_ack_bim_irq(ts->client->irq);
+                ac83xx_mask_ack_bim_irq(ctp_int.vector_irq_num);
 		gtp_irq_disable(ts);
          }
 	else
 		hrtimer_cancel(&ts->timer);
 
-	for (i = 0; i < GTP_MAX_TOUCH; i++)
-		gtp_touch_up(ts, i);
+//	for (i = 0; i < GTP_MAX_TOUCH; i++)
+//		gtp_touch_up(ts, i);
 
-	input_sync(ts->input_dev);
+//	input_sync(ts->input_dev);
 
 	ret = gtp_enter_sleep(ts);
 #endif
