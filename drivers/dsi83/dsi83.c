@@ -7,7 +7,6 @@ LIDBG_DEFINE;
 static bool is_dsi83_inited = false;
 static struct delayed_work dsi83_work;
 static struct workqueue_struct *dsi83_workqueue;
-int check_times = 0;
 #if defined(CONFIG_FB)
 	struct notifier_block dsi83_fb_notif;
 #elif defined(CONFIG_HAS_EARLYSUSPEND)
@@ -181,6 +180,7 @@ static void panel_reset(void)
 int dsi83_check(void)
 {
     unsigned char reg;
+	static int check_times = 0;
     char buf1[2];
     int ret = 0;
     buf1[0] = 0xe5;
@@ -199,11 +199,13 @@ int dsi83_check(void)
 	if(((reg != 0x00) || (ret< 0) || (is_dsi83_inited == 0) ) && (g_var.system_status >= FLY_KERNEL_UP))
 	{
 		check_times ++;
-		lidbgerr( "[dsi83.check.err]reg-0xe5=0x%x,ret=%d,check_times=%d\n", reg,ret,check_times);
+		lidbg( "[dsi83.check.err]reg-0xe5=0x%x,ret=%d,check_times=%d\n", reg,ret,check_times);
 		is_dsi83_inited = 0;
 		
 		if(check_times <= 5)
 			queue_delayed_work(dsi83_workqueue, &dsi83_work, DSI83_DELAY_TIME);
+		else
+			lidbgerr( "[dsi83.check.err.fail]reg-0xe5=0x%x,ret=%d,check_times=%d\n", reg,ret,check_times);
 	}
 	else//check ok
 	{
