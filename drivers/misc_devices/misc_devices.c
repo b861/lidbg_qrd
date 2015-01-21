@@ -38,7 +38,12 @@ static int thread_usb_disk_enable_delay(void *data)
     usb_disk_enable(true);
     return 1;
 }
-
+static int thread_usb_disk_disable_delay(void *data)
+{
+    msleep(1000);
+    usb_disk_enable(false);
+    return 1;
+}
 
 static int lidbg_event(struct notifier_block *this,
                        unsigned long event, void *ptr)
@@ -71,7 +76,7 @@ static int lidbg_event(struct notifier_block *this,
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_ANDROID_DOWN):
         break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_GOTO_SLEEP):
-		 usb_disk_enable(false);
+		 CREATE_KTHREAD(thread_usb_disk_disable_delay, NULL);
         break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_KERNEL_DOWN):
 		break;
