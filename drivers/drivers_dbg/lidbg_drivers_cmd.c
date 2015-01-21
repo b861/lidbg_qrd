@@ -180,8 +180,13 @@ void parse_cmd(char *pt)
             k2u_write(LOG_CLEAR_LOGCAT_KMSG);
 #else
             lidbg("clear+logcat*&&kmsg*\n");
+#ifdef SOC_mt3360
+            lidbg_shell_cmd("rm /sdcard/logcat*");
+            lidbg_shell_cmd("rm /sdcard/kmsg*");
+#else
             lidbg_shell_cmd("rm /data/logcat*");
             lidbg_shell_cmd("rm /data/kmsg*");
+#endif
             lidbg("clear-logcat*&&kmsg*\n");
 #endif
             lidbg_domineering_ack();

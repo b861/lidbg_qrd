@@ -74,10 +74,10 @@ unsigned int   soc_bl_set(u32 bl_level)
     UINT32 u4PwmH_FB = 0x800;
 	UINT32 dty_cyc = bl_level;
 
-	if(bl_level <= 100)
-		dty_cyc = 100 - bl_level;
-	else
-		dty_cyc = 50;
+//	if(bl_level <= 100)
+//		dty_cyc = 100 - bl_level;
+//	else
+//		dty_cyc = 50;
 
  /************************************************************
     *                   Step3:  Configure Backlight PWM                               *

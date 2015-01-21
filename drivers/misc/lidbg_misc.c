@@ -23,6 +23,16 @@ void lidbg_enable_logcat(void)
     lidbg_get_current_time(time_buf, NULL);
     sprintf(logcat_file_name, "logcat_%d_%s.txt", get_machine_id(), time_buf);
 
+#ifdef SOC_mt3360
+    sprintf(cmd, "date >/sdcard/%s", logcat_file_name);
+    lidbg_shell_cmd(cmd);
+    memset(cmd, '\0', sizeof(cmd));
+    ssleep(1);
+    lidbg_shell_cmd("chmod 777 /sdcard/logcat*");
+    ssleep(1);
+    sprintf(cmd, "logcat  -v time>> /sdcard/%s &", logcat_file_name);
+    lidbg_shell_cmd(cmd);
+#else
     sprintf(cmd, "date >/data/%s", logcat_file_name);
     lidbg_shell_cmd(cmd);
     memset(cmd, '\0', sizeof(cmd));
@@ -30,6 +40,7 @@ void lidbg_enable_logcat(void)
     lidbg_shell_cmd("chmod 777 /data/logcat*");
     ssleep(1);
     sprintf(cmd, "logcat  -v time>> /data/%s &", logcat_file_name);
+#endif
     lidbg_shell_cmd(cmd);
     lidbg("logcat-\n");
 
@@ -47,6 +58,15 @@ void lidbg_enable_kmsg(void)
     lidbg_get_current_time(time_buf, NULL);
     sprintf(dmesg_file_name, "kmsg_%d_%s.txt", get_machine_id(), time_buf);
 
+#ifdef SOC_mt3360
+    sprintf(cmd, "date >/sdcard/%s", dmesg_file_name);
+    lidbg_shell_cmd(cmd);
+    memset(cmd, '\0', sizeof(cmd));
+    ssleep(1);
+    lidbg_shell_cmd("chmod 777 /sdcard/kmsg*");
+    ssleep(1);
+    sprintf(cmd, "cat /proc/kmsg >> /sdcard/%s &", dmesg_file_name);
+#else
     sprintf(cmd, "date >/data/%s", dmesg_file_name);
     lidbg_shell_cmd(cmd);
     memset(cmd, '\0', sizeof(cmd));
@@ -54,6 +74,7 @@ void lidbg_enable_kmsg(void)
     lidbg_shell_cmd("chmod 777 /data/kmsg*");
     ssleep(1);
     sprintf(cmd, "cat /proc/kmsg >> /data/%s &", dmesg_file_name);
+#endif
     lidbg_shell_cmd(cmd);
     lidbg("kmsg-\n");
 }
