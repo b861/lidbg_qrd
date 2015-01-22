@@ -99,10 +99,10 @@ EXPORT_SYMBOL(lidbg_trace_msg_disable);
 
 bool lidbg_trace_msg_cb_register(char *key_word, void *data, void (*cb_func)(char *key_word, void *data))
 {
-    struct lidbg_trace_msg_cb_list *cb_list;
+    struct lidbg_trace_msg_cb_list *cb_list = NULL;
 
     cb_list = kzalloc(sizeof(struct lidbg_trace_msg_cb_list), GFP_KERNEL);
-    if(cb_list)
+    if(!cb_list)
         lidbg("[%s]: Kzalloc mem for lidbg_trace_msg_cb_list faild !\n", __func__);
 
     if(key_word && cb_func)
