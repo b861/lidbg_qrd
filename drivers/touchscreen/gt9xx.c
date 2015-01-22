@@ -1013,6 +1013,10 @@ u8 cfg_info_group21[] = CTP_CFG_GROUP15;
 u8 cfg_info_group22[] = CTP_CFG_GROUP16;
 u8 cfg_info_group23[] = CTP_CFG_GROUP17;
 u8 cfg_info_group24[] = CTP_CFG_GROUP18;
+u8 cfg_info_group25[] = CTP_CFG_GROUP19;
+u8 cfg_info_group26[] = CTP_CFG_GROUP20;
+
+
 static int gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
 {
 	struct i2c_client *client = ts->client;
@@ -1032,7 +1036,8 @@ static int gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
 		cfg_info_group3, cfg_info_group4,cfg_info_group5, cfg_info_group6,
 		cfg_info_group7, cfg_info_group8,cfg_info_group9, cfg_info_group10,cfg_info_group11, 
 		cfg_info_group12,cfg_info_group13, cfg_info_group14,cfg_info_group15, cfg_info_group16,
-		cfg_info_group17, cfg_info_group18,cfg_info_group19, cfg_info_group20,cfg_info_group21,cfg_info_group22, cfg_info_group23,cfg_info_group24};
+		cfg_info_group17, cfg_info_group18,cfg_info_group19, cfg_info_group20,cfg_info_group21,
+		cfg_info_group22, cfg_info_group23,cfg_info_group24,cfg_info_group25,cfg_info_group26};
 
 	u8 cfg_info_len[] = {CFG_GROUP_LEN(cfg_info_group1),
 		CFG_GROUP_LEN(cfg_info_group2),
@@ -1058,6 +1063,8 @@ static int gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
 		CFG_GROUP_LEN(cfg_info_group22),
 		CFG_GROUP_LEN(cfg_info_group23),
 		CFG_GROUP_LEN(cfg_info_group24),
+		CFG_GROUP_LEN(cfg_info_group25),
+		CFG_GROUP_LEN(cfg_info_group26),
 		};
 
 #ifdef SOC_msm8x26
@@ -1117,7 +1124,6 @@ static int gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
 		sensor_id = g_var.hw_info.ts_config - 1;
 		lidbg("Sensor_ID change to: %d", sensor_id);
 	}
-	
     lidbg_fs_log(TS_LOG_PATH, "SENSOR ID:%d\n", sensor_id);
 	ts->gtp_cfg_len = cfg_info_len[sensor_id];
 
