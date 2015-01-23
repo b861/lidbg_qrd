@@ -275,7 +275,9 @@ void usb_disk_enable(bool enable)
 
 static int thread_gpio_app_status_delay(void *data)
 {
-    ssleep(50);
+	ssleep(10);
+	LPC_PRINT(true, sleep_counter, "PM:MCU_WP_GPIO_ON");
+    ssleep(40);
     MCU_APP_GPIO_ON;
 #ifdef CONTROL_PM_IO_BY_BP
     MCU_SET_APP_GPIO_SUSPEND;
@@ -772,7 +774,7 @@ static int __init lidbg_pm_init(void)
     MCU_SET_WP_GPIO_SUSPEND;
 #endif
     PM_WARN("<set MCU_WP_GPIO_ON>\n");
-    LPC_PRINT(true, sleep_counter, "PM:MCU_WP_GPIO_ON");
+    
     CREATE_KTHREAD(thread_gpio_app_status_delay, NULL);
     lidbg_shell_cmd("echo 8  > /proc/sys/kernel/printk");
 #ifdef PLATFORM_msm8226
