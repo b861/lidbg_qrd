@@ -429,6 +429,8 @@ int fly_interface_init(void)
 	g_var.fb_on = true;
     g_var.ts_active_key = TS_NO_KEY;
 	
+	g_var.led_app_status = 1;
+	g_var.led_hal_status = 1;
     if( fs_is_file_exist(RECOVERY_MODE_DIR))
     {
 	    g_var.recovery_mode = 1;
