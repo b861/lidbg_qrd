@@ -80,8 +80,9 @@ function lidbg_menu()
 	echo
 	combination_menu
 	echo
-	common_menu
+	bp_combine_menu
 	echo
+	common_menu
 }
 
 function lidbg_handle()
@@ -120,6 +121,8 @@ function menu_do()
 		debug_handle $1
 	elif [[ $1 -le 70 ]] ;then
 		combination_handle $1
+	elif [[ $1 -le 80 ]] ;then
+		bp_combination_handle $1
 	else
 		common_handle $1
 	fi
@@ -144,6 +147,53 @@ function auto_build()
 	done
 }
 
+function bp_combine_menu()
+{
+    echo $BP_SOURCE_PATH
+    echo [71] build MPSS
+    echo [72] build Bootloader
+    echo [73] build ADSP
+    echo [74] build RPM
+    echo [75] build WCNSS
+    echo [76] build TZ
+    echo [77] update bp info'                     '汇总编译
+    echo [78] build ALL'                          '编译全部
+}
+
+function bp_combination_handle()
+{
+    echo $FUNCNAME
+    cd $BP_SOURCE_PATH
+    case $1 in
+    71)
+        build_mpss;;
+    72)
+        build_bootloader;;
+    73)
+        build_adsp;;
+    74)
+        build_rpm;;
+    75)
+        build_wcnss;;
+    76)
+        build_trustzone_image;;
+    77)
+	build_update;;
+    78)
+	build_all_handle;;
+    *)
+        echo
+    esac
+}
+
+function build_all_handle()
+{
+    echo $FUNCNAME
+    cd $BP_SOURCE_PATH && build_mpss && build_bootloader && build_adsp && build_rpm && build_wcnss && build_trustzone_image && build_update
+
+}
+
+
 # apt-get install expect
 cd build
 source ./env_entry.sh
@@ -153,5 +203,6 @@ source ./env_entry.sh
 . $DBG_TOOLS_PATH/combination.sh
 . $DBG_TOOLS_PATH/common.sh
 . $DBG_TOOLS_PATH/branch_for_test.sh
+. $DBG_TOOLS_PATH/bp_combination.sh
 auto_build $1 $2 $3 $4 $5;
 

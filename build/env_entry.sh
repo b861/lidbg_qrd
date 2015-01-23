@@ -94,7 +94,23 @@ case "$DBG_PLATFORM_ID" in
 	TEST_PACKAGE_PATH=//192.168.128.128/8974/升级包发布/专项测试包
 	REPOSITORY_WORK_BRANCH=master
 	SYSTEM_WORK_BRANCH=master
-        MAKE_PAKG_NUM=6;;
+        MAKE_PAKG_NUM=6
+	#for bp
+	MPSS_BUILD_PATH=$BP_SOURCE_PATH/modem_proc/build/ms
+	BOOT_IMAGE_PATH=$BP_SOURCE_PATH/boot_images/build/ms
+	ADSP_PATH=$BP_SOURCE_PATH/adsp_proc/build
+	RPM_PATH=$BP_SOURCE_PATH/rpm_proc/build
+	WCNSS_PATH=$BP_SOURCE_PATH/wcnss_proc/Pronto/bsp/build
+	TZ_PATH=$BP_SOURCE_PATH/trustzone_images/build/ms
+	UPDATE_INFO=$BP_SOURCE_PATH/common/build
+	MPSS_BUILD_CMD='./build.sh 8974.gen.prod -k'
+	BOOTLOADER_BUILD_CMD='./build.sh TARGET_FAMILY=8974 BUILD_ID=AAAAANAZ'
+	ADSP_BUILD_CMD='python build.py'
+	RPM_BUILD_CMD='./rpm_proc/build/build_8974.sh'
+	WCNSS_BUILD_CMD='./wcnss_build.sh 8974 pronto BUILD_ID=SCAQBAZ'
+	TZ_BUILD_CMD='./build.sh CHIPSET=msm8974 tz sampleapp tzbsp_no_xpu'
+	UPDATE_BUILD_CMD='python update_common_info.py';; 
+	
    	5)
 	DBG_PLATFORM=mt3360
 	BOARD_VERSION=V1
@@ -137,3 +153,21 @@ export BUILD_VERSION
 export DBG_REPO_PASSWORD
 export DBG_PASSWORD
 export MAKE_PAKG_NUM
+#for bp
+export MPSS_BUILD_PATH
+export BOOT_IMAGE_PATH
+export ADSP_PATH
+export RPM_PATH
+export WCNSS_PATH
+export TZ_PATH
+export UPDATE_INFO
+export MPSS_BUILD_CMD
+export BOOTLOADER_BUILD_CMD
+export ADSP_BUILD_CMD
+export RPM_BUILD_CMD
+export WCNSS_BUILD_CMD
+export TZ_BUILD_CMD
+export UPDATE_BUILD_CMD
+
+
+
