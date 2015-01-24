@@ -15,9 +15,16 @@ static int devices_notifier_callback(struct notifier_block *self,
     {
         blank = evdata->data;
         if (*blank == FB_BLANK_UNBLANK)
+        {
+			if(g_var.system_status >= FLY_KERNEL_UP)
+        		LCD_ON;
             g_var.fb_on = 1;
+        }
         else if (*blank == FB_BLANK_POWERDOWN)
+        {
+        	LCD_OFF;
             g_var.fb_on = 0;
+        }
     }
 
     return 0;
