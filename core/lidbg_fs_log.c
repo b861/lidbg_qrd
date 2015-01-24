@@ -125,11 +125,12 @@ int fs_mem_log( const char *fmt, ... )
     int len;
     va_list args;
     int n;
-    char str_append[256];
+    char str_append[512];
     va_start ( args, fmt );
     n = vsprintf ( str_append, (const char *)fmt, args );
     va_end ( args );
 
+	str_append[512-1] = '\0';
     len = strlen(str_append);
 
     bfs_file_amend(PATH_LIDBG_MEM_LOG_FILE, str_append, 0);
