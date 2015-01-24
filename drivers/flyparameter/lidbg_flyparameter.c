@@ -93,6 +93,7 @@ void cb_fly_hw_info_save(char *key, char *value )
 bool flyparameter_info_get(void)
 {
 	bool is_ublox_so_exist=false;
+
     if(p_kmem && fs_file_read(FLYPARAMETER_NODE, p_kmem, 0, sizeof(recovery_meg_t)) >= 0)
     {
         g_recovery_meg = (recovery_meg_t *)p_kmem;
@@ -102,7 +103,16 @@ bool flyparameter_info_get(void)
 		
 		if(g_recovery_meg->hwInfo.bValid==0x12345678)
 		{
+			int ret;
+			char parameter[256];
+			memset(parameter,'\0',sizeof(parameter));
 			
+			ret = sprintf(parameter,"setprop HWINFO.FLY.Parameter %s",g_recovery_meg->hwInfo.info);
+			if(ret < 0)
+			{
+				lidbg("fail to cpy parameter\n");
+			}
+			lidbg_shell_cmd( parameter );
 			fs_mem_log("flyparameter=%c%c%c%c%c%c\n",g_recovery_meg->hwInfo.info[0],g_recovery_meg->hwInfo.info[1],
 													g_recovery_meg->hwInfo.info[2],g_recovery_meg->hwInfo.info[3],
 													g_recovery_meg->hwInfo.info[4],g_recovery_meg->hwInfo.info[5]);
