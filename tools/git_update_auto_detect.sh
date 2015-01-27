@@ -30,42 +30,40 @@ echo "============loops:$main_loop_times  status:["${commit_times[0]}"] ["${comm
 	thiswhile_loop=0
 	while read line
 	do
-	compel_info=$line
-	compel_info=($compel_info)
-	#echo ==${compel_info[0]} ${compel_info[1]} ${compel_info[2]} ${compel_info[3]} ${compel_info[4]} ${compel_info[5]} ${compel_info[6]} ${compel_info[7]} ${compel_info[8]}
+	compile_info=$line
+	compile_info=($compile_info)
+	#echo ==${compile_info[0]} ${compile_info[1]} ${compile_info[2]} ${compile_info[3]} ${compile_info[4]} ${compile_info[5]} ${compile_info[6]} ${compile_info[7]} ${compile_info[8]}
 	
-	cd ${compel_info[3]}
-	git log --oneline | sed -n '1,5p' > /dev/shm/${compel_info[1]}_$thiswhile_loop.txt && new_commitinfo=$(head /dev/shm/${compel_info[1]}_$thiswhile_loop.txt --lines 1)
+	cd ${compile_info[3]}
+	git log --oneline  > /dev/shm/${compile_info[1]}_$thiswhile_loop.txt && new_commitinfo=$(head /dev/shm/${compile_info[1]}_$thiswhile_loop.txt --lines 1)
 	
 	thiscommit_info=${pre_commit[$thiswhile_loop]}
 	thiscommit_times=${commit_times[$thiswhile_loop]}
-	echo "==$thiswhile_loop==["${compel_info[1]}"]==== "
+	echo "==$thiswhile_loop==["${compile_info[1]}"]==== "
 	
 	if [[ $thiscommit_info == "" ]]; then
 		echo "pre_commit[$thiswhile_loop] is NULL"
 	else
 		if [[ "$thiscommit_info" != "$new_commitinfo" ]]; then
 		let thiscommit_times++
-		echo $(date) $thiscommit_times/$main_loop_times ${compel_info[1]} ["$thiscommit_info"] ["$new_commitinfo"]  >> /dev/shm/git_autodetec_log.txt
+		echo $(date) $thiscommit_times/$main_loop_times ${compile_info[1]} ["$thiscommit_info"] ["$new_commitinfo"]  >> /dev/shm/git_autodetec_log.txt
 		echo "detect a new commit: "$thiscommit_times ["$thiscommit_info"] ["$new_commitinfo"]
 		sleep 1
 
-		basesystem9=$new_commitinfo
-		#check is "Merge branch of..." ?
-		if [[ $basesystem9 =~ "Merge" ]]; then
-		basesystem9=$(sed -n '2p' /dev/shm/${compel_info[1]}_$thiswhile_loop.txt)
-		echo "find a Merge:" ["$new_commitinfo"] ["$basesystem9"]  >> /dev/shm/git_autodetec_log.txt
-		fi
+		awk '{print $0}' /dev/shm/${compile_info[1]}_$thiswhile_loop-old.txt /dev/shm/${compile_info[1]}_$thiswhile_loop.txt |sort|uniq -u > /dev/shm/diff_commit.txt  
+		diff_commit=$(cat /dev/shm/diff_commit.txt)
+		#echo @@@@@@@@@@@@@@ $diff_commit @@@@@@@@@@@@@@
 		
 		cd $DIR_TOOLS_PATH
-		./basesystem.sh ${compel_info[0]} ${compel_info[1]} ${compel_info[2]} ${compel_info[3]} ${compel_info[4]} ${compel_info[5]} ${compel_info[6]} ${compel_info[7]} ${compel_info[8]} ${compel_info[9]} ${compel_info[10]} "${basesystem9#* }"
+		./basesystem.sh ${compile_info[0]} ${compile_info[1]} ${compile_info[2]} ${compile_info[3]} ${compile_info[4]} ${compile_info[5]} ${compile_info[6]} ${compile_info[7]} ${compile_info[8]} ${compile_info[9]} ${compile_info[10]} "${diff_commit}" && exit
 		fi
 	fi
-
+	
 	pre_commit[$thiswhile_loop]=$new_commitinfo
 	commit_times[$thiswhile_loop]=$thiscommit_times
-	
-	git_pull ${compel_info[3]} ${compel_info[4]}
+	cp /dev/shm/${compile_info[1]}_$thiswhile_loop.txt /dev/shm/${compile_info[1]}_$thiswhile_loop-old.txt
+
+	git_pull ${compile_info[3]} ${compile_info[4]}
 	let thiswhile_loop++
 	done <$DIR_TOOLS_PATH/git_update_auto_detect.conf
 let main_loop_times++

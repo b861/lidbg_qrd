@@ -23,6 +23,7 @@ OUT_BASESYSTEM_NAME="NULL"
 function soc_postbuild()
 {
 	echo ==$FUNCNAME
+	git log --oneline | sed -n '1,5p' > $SYSTEM_DIR/out/target/product/$SYSTEM_PLATFORM/system/etc/build_time.conf
 }
 
 function soc_prebuild()
@@ -147,7 +148,7 @@ function basesystem_launch()
 	BASESYSTEM_DIR_IN_BIN_DIR=$8
 	GIT_MASTER_BRANCH=$9
 	OUT_BASESYSTEM_NAME=${10}
-	BIN_GIT_COMMIT_DESCRIPTION="${11} ${12} ${13} ${14} ${15} ${16} ${17} ${18} ${19} ${20}"
+	BIN_GIT_COMMIT_DESCRIPTION="${11} ${12} ${13} ${14} ${15} ${16} ${17} ${18} ${19} ${20} ${21} ${22} ${23} ${24} ${25} ${26} ${27} ${28} ${29} ${30}"
 	show_env
 	
 	if [ $# -lt 9 ];then
@@ -168,5 +169,5 @@ function basesystem_launch()
 	esac
 }
 
-basesystem_launch $1 $2 $3 $4 $5 $6 $7 $8 $9 ${10} ${11} ${12} ${13} ${14} ${15} ${16} ${17} ${18} ${19} ${20}
+basesystem_launch $1 $2 $3 $4 $5 $6 $7 $8 $9 ${10} ${11} ${12} ${13} ${14} ${15} ${16} ${17} ${18} ${19} ${20} ${21} ${22} ${23} ${24} ${25} ${26} ${27} ${28} ${29} ${30}
 

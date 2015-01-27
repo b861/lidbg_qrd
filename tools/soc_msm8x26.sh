@@ -2,24 +2,28 @@
 function soc_build_system()
 {
 	echo $FUNCNAME
+	cd $DBG_SYSTEM_DIR
 	soc_prebuild && make systemimage -j8 && soc_postbuild
 }
 
 function soc_build_kernel()
 {
 	echo $FUNCNAME
+	cd $DBG_SYSTEM_DIR
 	soc_prebuild && soc_build_common 'make bootimage -j16'
 }
 
 function soc_build_common()
 {
 	echo $FUNCNAME $1 $2 $3
+	cd $DBG_SYSTEM_DIR
 	set_env && $1 $2 $3
 }
 
 function soc_build_all()
 {
 	echo $FUNCNAME
+	cd $DBG_SYSTEM_DIR
 	soc_prebuild && make -j8 && soc_postbuild
 }
 
@@ -27,6 +31,7 @@ function soc_build_all()
 function soc_postbuild()
 {
 	echo $FUNCNAME
+	git log --oneline | sed -n '1,5p' > $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/etc/build_time.conf
 	echo "soc_build_all ok"
 	#if [ $DBG_PLATFORM = msm8226 ];then	
 	#	mmm $DBG_SYSTEM_DIR/system/core/libdiskconfig -B
