@@ -7,7 +7,8 @@ int find_ad_key(struct ad_key_remap *p)
     int val = 0;
     int i;
 
-    SOC_ADC_Get(p->ch, &val);
+    if(SOC_ADC_Get(p->ch, &val)==0)
+		return 0xffffffff;
     if(val > p->max)
         return 0xffffffff;
 
