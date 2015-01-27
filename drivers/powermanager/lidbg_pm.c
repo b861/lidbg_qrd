@@ -277,6 +277,11 @@ static int thread_gpio_app_status_delay(void *data)
 {
 	ssleep(10);
 	LPC_PRINT(true, sleep_counter, "PM:MCU_WP_GPIO_ON");
+	if((g_var.is_fly == 0) && (g_var.recovery_mode == 0))
+	{
+		LPC_CMD_ACC_NO_RESET;
+	}
+		
     ssleep(40);
     MCU_APP_GPIO_ON;
 #ifdef CONTROL_PM_IO_BY_BP
