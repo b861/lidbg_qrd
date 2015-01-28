@@ -123,6 +123,11 @@ function soc_build_origin_image
 	cp $RELEASE_REPOSITORY/app/FastBoot.apk        $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/app/FastBoot.apk
 	cp $RELEASE_REPOSITORY/app/FlyBootService.apk  $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/app/FlyBootService.apk
 
+	cp $UPDATA_BIN_PLATFORM_DIR/app/FastBoot.apk        $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/app/FastBoot.apk
+	cp $UPDATA_BIN_PLATFORM_DIR/app/FlyBootService.apk        $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/app/FlyBootService.apk
+
+	echo "build_origin" > $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/etc/build_origin
+
 	cd $DBG_SYSTEM_DIR
 	make otapackage -j8
 

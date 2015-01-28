@@ -37,15 +37,15 @@ static  struct file_operations drivers_dbg_nod_fops =
 int thread_drivers_dbg_init(void *data)
 {
     lidbg_new_cdev(&drivers_dbg_nod_fops, "lidbg_drivers_dbg");
-
+	
 	if(!g_var.is_fly)
 	{
 		lidbg("enable system print\n");
 		g_recovery_meg->bootParam.upName.val = 1;
 		flyparameter_info_save(g_recovery_meg);
 		
-		lidbg("enable wifi adb\n");
-		set_wifi_adb_mode(true);
+		//lidbg("enable wifi adb\n");
+		//set_wifi_adb_mode(true);
 		
 		//if(g_var.is_first_update)
 		{
@@ -64,9 +64,13 @@ int thread_drivers_dbg_init(void *data)
 			lidbg_shell_cmd("cp /system/lib/modules/out/ES.ko /system/app/ES.apk");
 			//lidbg_shell_cmd("cp /system/lib/modules/out/ST.ko /system/app/ST.apk");
 			lidbg_shell_cmd("cp /system/lib/modules/out/GPS.ko /system/app/GPS.apk");
-
-			lidbg_shell_cmd("cp /system/lib/modules/out/FastBoot.apk /system/app/FastBoot.apk");
-			lidbg_shell_cmd("cp /system/lib/modules/out/FlyBootService.apk /system/app/FlyBootService.apk");
+			
+			if( !fs_is_file_exist("/system/app/FastBoot.apk"))
+				lidbg_shell_cmd("cp /system/lib/modules/out/FastBoot.apk /system/app/FastBoot.apk");
+			
+			if( !fs_is_file_exist("/system/app/FlyBootService.apk"))
+				lidbg_shell_cmd("cp /system/lib/modules/out/FlyBootService.apk /system/app/FlyBootService.apk");
+			
 			lidbg_shell_cmd("chmod 777 /system/app/*");
 			lidbg_shell_cmd("chmod 777 /data");
 

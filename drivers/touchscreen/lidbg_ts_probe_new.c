@@ -355,7 +355,8 @@ void ts_data_report(touch_type t,int id,int x,int y,int w)
 	
 	if((id == 4) && (t == TOUCH_DOWN) && (!g_var.is_fly) && (!g_var.recovery_mode)) // 5 fingers
 	{
-		SOC_Key_Report(KEY_BACK,KEY_PRESSED_RELEASED);
+		if(g_var.system_status >= FLY_KERNEL_UP)
+			SOC_Key_Report(KEY_BACK,KEY_PRESSED_RELEASED);
 	}
 	
 	if((id == 0)&&(1 == g_var.recovery_mode))

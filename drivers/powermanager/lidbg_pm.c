@@ -277,11 +277,7 @@ static int thread_gpio_app_status_delay(void *data)
 {
 	ssleep(10);
 	LPC_PRINT(true, sleep_counter, "PM:MCU_WP_GPIO_ON");
-	if((g_var.is_fly == 0) && (g_var.recovery_mode == 0))
-	{
-		LPC_CMD_ACC_NO_RESET;
-	}
-		
+
     ssleep(40);
     MCU_APP_GPIO_ON;
 #ifdef CONTROL_PM_IO_BY_BP
@@ -290,6 +286,13 @@ static int thread_gpio_app_status_delay(void *data)
 
     PM_WARN("<set MCU_APP_GPIO_ON >\n");
     LPC_PRINT(true, sleep_counter, "PM:MCU_APP_GPIO_ON");
+	
+	if((g_var.is_fly == 0) && (g_var.recovery_mode == 0))
+	{
+		//ssleep(40);
+		//LPC_CMD_ACC_NO_RESET;
+		//LPC_CMD_ACC_SWITCH_START;
+	}
 
     return 1;
 }
@@ -381,7 +384,11 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
                 SOC_Hal_Acc_Callback(0);
             }
             if(!g_var.is_fly && fs_is_file_exist("/system/app/NfcNci.apk"))
+            {
                 lidbg_rm("/system/app/NfcNci.apk");
+               // lidbg_rm("/system/priv-app/Keyguard.apk");
+				
+            }
             LPC_PRINT(true, sleep_counter, "PM:screen_off");
         }
         else  if(!strcmp(cmd[1], "screen_on"))

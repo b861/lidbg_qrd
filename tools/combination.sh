@@ -6,8 +6,10 @@ function combination_menu()
 	echo "[61] 完整编译lidbg并提交到产品二进制仓库           (1  3  81(1) 41 82(3))"
 	echo "[62] 编译basesystem并提交到产品二进制仓库          (81(2) 25 81(3) 42 82(3))"
 	echo "[63] 拷贝lidbg和basesystem到二进制仓库后生成升级包 (81(3) 41 42 43)"
-	echo "[65] 编译烧写boot.img后重启                        (21 53 54 56)"
-    echo "[66] 编译拷贝lidbg或basesystem并生成升级包提交到测试分支"
+
+    	echo "[66] 编译拷贝lidbg或basesystem并生成升级包提交到测试分支"
+    	echo "[67] 编译拷贝lidbg和basesystem并生成原生系统的升级包,拷贝到服务器"
+	echo "[70] 编译烧写boot.img后重启                        (21 53 54 56)"
 }
 
 function combination_handle()
@@ -34,6 +36,9 @@ function combination_handle()
         judge_which_combine && depository_make_package && new_remote_test_branch && new_branch_remove && copy_package_to_smb;; 
         #for test
         #judge_which_combine && new_remote_test_branch && new_branch_remove;; 
+	67)
+		read -p "  提交说明：" commit
+	    	soc_build_origin_image && depository_copy_basesystem && depository_make_package && copy_package_to_smb;; 
 	70)
 		soc_build_kernel && adb wait-for-devices reboot bootloader && soc_flash_kernel && sudo fastboot reboot;;
 	*)
