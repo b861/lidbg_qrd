@@ -2,5 +2,8 @@
 #define __LIDBG_PM_
 
 
+//#define LIDBG_PM_MONITOR
+//#define LIDBG_PM_AUTO_ACC
+
 #endif
 

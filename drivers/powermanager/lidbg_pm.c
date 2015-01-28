@@ -10,7 +10,7 @@ LIDBG_DEFINE;
 #define PM_FILE_INFO_SIZE (5)
 
 static DECLARE_COMPLETION(sleep_observer_wait);
-static atomic_t is_in_sleep = ATOMIC_INIT(-1);
+static atomic_t is_in_sleep = ATOMIC_INIT(0);
 static int sleep_counter = 0;
 static char g_acc_history_state[512];
 
@@ -188,10 +188,11 @@ void lidbg_pm_step_call(fly_pm_stat_step step, void *data)
         char *buff = data;
         if(!strcmp(buff, "mem"))
         {
+            atomic_set(&is_in_sleep, 1);
         }
         else if(!strcmp(buff, "off"))
         {
-            observer_stop();
+            atomic_set(&is_in_sleep, 0);
         }
         PM_WARN("PM_AUTOSLEEP_STORE1:[%d,%s,%d]\n", sleep_counter, buff, atomic_read(&is_in_sleep));
     }
@@ -225,8 +226,8 @@ void lidbg_pm_step_call(fly_pm_stat_step step, void *data)
         break;
     case PM_SUSPEND_ENTER8:
         SOC_System_Status(FLY_KERNEL_DOWN);
-		//if(g_var.is_debug_mode == 1)
-        	MCU_WP_GPIO_OFF;
+        //if(g_var.is_debug_mode == 1)
+        MCU_WP_GPIO_OFF;
         SOC_IO_SUSPEND;
         sleep_counter++;
         PM_SLEEP_DBG("SLEEP8.suspend_enter.MCU_WP_GPIO_OFF;sleep_count:%d\n", sleep_counter);
@@ -272,30 +273,90 @@ void usb_disk_enable(bool enable)
         USB_WORK_DISENABLE;
 }
 
+#ifdef LIDBG_PM_MONITOR
+static struct wakeup_source *autosleep_ws;
+static int thread_lidbg_pm_monitor(void *data)
+{
+    PM_WARN("<thread_lidbg_pm_monitor.in>\n");
+    autosleep_ws = wakeup_source_register("autosleep");
+    if (!autosleep_ws)
+        autosleep_ws = wakeup_source_register("autosleep");
+    PM_WARN("<0=====LPC_CMD_ACC_SWITCH_START>\n");
+    while(1)
+    {
+    
+        PM_WARN("<1=====hold the lock.usb enable>\n");
+        //hold the lock
+        MCU_APP_GPIO_ON;
+        __pm_stay_awake(autosleep_ws);
+        usb_disk_enable(true);
+
+        PM_WARN("<2=====cold boot wait ACC start>\n");
+        //cold boot wait ACC start
+        while(atomic_read(&is_in_sleep) == 0)
+            msleep(500);
+
+        PM_WARN("<3=====usb disable>\n");
+        usb_disk_enable(false);
+        msleep(5000);
+
+        PM_WARN("<4=====trigger LPC short and long press>\n");
+        //trigger LPC short and long press
+        MCU_APP_GPIO_OFF;
+
+        PM_WARN("<5=====wait LPC short and long press>\n");
+        //wait LPC short and long press
+        msleep(300 + 5000 + 600 + 5000);
+
+        PM_WARN("<6=====release lock and send power key>\n");
+        //release lock and send power key
+        SOC_Key_Report(KEY_POWER, KEY_PRESSED_RELEASED);
+        __pm_relax(autosleep_ws);
+
+        PM_WARN("<7=====wait power key enable>\n");
+        //wait power key enable
+        while(atomic_read(&is_in_sleep) == 0)
+            msleep(500);
+
+        PM_WARN("<8=====wait until wake up>\n");
+        //wait until wake up
+        observer_start();
+        while(atomic_read(&is_in_sleep) == 1)
+            msleep(500);
+
+    }
+    wakeup_source_unregister(autosleep_ws);
+    usb_disk_enable(true);
+    PM_WARN("<thread_lidbg_pm_monitor.exit>\n");
+    return 1;
+}
+#endif
 
 static int thread_gpio_app_status_delay(void *data)
 {
-	ssleep(10);
-	LPC_PRINT(true, sleep_counter, "PM:MCU_WP_GPIO_ON");
-
+    ssleep(10);
+    LPC_PRINT(true, sleep_counter, "PM:MCU_WP_GPIO_ON");
     ssleep(40);
     MCU_APP_GPIO_ON;
 #ifdef CONTROL_PM_IO_BY_BP
     MCU_SET_APP_GPIO_SUSPEND;
 #endif
 
+
+#ifdef LIDBG_PM_AUTO_ACC
+	LPC_CMD_ACC_SWITCH_START;
+#endif
+
+#ifdef LIDBG_PM_MONITOR
+    CREATE_KTHREAD(thread_lidbg_pm_monitor, NULL);
+#endif
+
     PM_WARN("<set MCU_APP_GPIO_ON >\n");
     LPC_PRINT(true, sleep_counter, "PM:MCU_APP_GPIO_ON");
-	
-	if((g_var.is_fly == 0) && (g_var.recovery_mode == 0))
-	{
-		//ssleep(40);
-		//LPC_CMD_ACC_NO_RESET;
-		//LPC_CMD_ACC_SWITCH_START;
-	}
 
     return 1;
 }
+
 static int test_task_flag(struct task_struct *p, int flag)
 {
     struct task_struct *t = p;
@@ -384,11 +445,7 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
                 SOC_Hal_Acc_Callback(0);
             }
             if(!g_var.is_fly && fs_is_file_exist("/system/app/NfcNci.apk"))
-            {
                 lidbg_rm("/system/app/NfcNci.apk");
-               // lidbg_rm("/system/priv-app/Keyguard.apk");
-				
-            }
             LPC_PRINT(true, sleep_counter, "PM:screen_off");
         }
         else  if(!strcmp(cmd[1], "screen_on"))
@@ -422,17 +479,17 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         else  if(!strcmp(cmd[1], "gotosleep"))
         {
             SOC_System_Status(FLY_GOTO_SLEEP);
-       	#ifdef SOC_mt3360
-			//ssleep(1);
-	   		lidbg("fly power key gotosleep ++\n");
-		   	lidbg_key_report(KEY_POWER, KEY_PRESSED);
-			msleep(100);
-			lidbg_key_report(KEY_POWER, KEY_RELEASED);
-			lidbg("fly power key gotosleep --\n");
-		#else
+#ifdef SOC_mt3360
+            //ssleep(1);
+            lidbg("fly power key gotosleep ++\n");
+            lidbg_key_report(KEY_POWER, KEY_PRESSED);
+            msleep(100);
+            lidbg_key_report(KEY_POWER, KEY_RELEASED);
+            lidbg("fly power key gotosleep --\n");
+#else
             observer_start();
             LPC_PRINT(true, sleep_counter, "PM:gotosleep");
-		#endif		
+#endif
         }
         else if(!strcmp(cmd[1], "devices_up"))
         {
@@ -605,8 +662,8 @@ static int pm_suspend(struct device *dev)
 static int pm_resume(struct device *dev)
 {
     DUMP_FUN;
-#ifdef SOC_mt3360 	
-	soc_io_resume_config(0, 0, 0, 0);
+#ifdef SOC_mt3360
+    soc_io_resume_config(0, 0, 0, 0);
 #endif
     CREATE_KTHREAD(thread_save_acc_times, NULL);
     return 0;
@@ -632,17 +689,14 @@ void observer_prepare(void)
 void observer_start(void)
 {
 #ifdef SOC_mt3360
-	return ;
+    return ;
 #else
-    atomic_set(&is_in_sleep, 1);
     complete(&sleep_observer_wait);
 #endif
 }
 void observer_stop(void)
 {
-    atomic_set(&is_in_sleep, 0);
 }
-
 
 static int thread_observer(void *data)
 {
@@ -671,17 +725,17 @@ static int thread_observer(void *data)
                 switch (have_triggerd_sleep_S)
                 {
                 case 60:
-				case 120:
-				case 150:
-                    sprintf(when, "unlock%d,%d:", have_triggerd_sleep_S,sleep_counter);
+                case 120:
+                case 150:
+                    sprintf(when, "unlock%d,%d:", have_triggerd_sleep_S, sleep_counter);
                     kernel_wakelock_save_wakelock(when, PM_INFO_FILE);
                     kernel_wakelock_force_unlock(when);
                     userspace_wakelock_action(2, PM_INFO_FILE);
-					if(g_var.is_debug_mode == 1)
-					{
-						lidbg_loop_warning();
+                    if(g_var.is_debug_mode == 1)
+                    {
+                        lidbg_loop_warning();
 
-					}
+                    }
                     break;
 
                 default:
@@ -705,6 +759,18 @@ static int  lidbg_pm_probe(struct platform_device *pdev)
     DUMP_FUN;
     PM_WARN("<==IN==>\n");
     fs_file_separator(PM_INFO_FILE);
+	
+#ifdef LIDBG_PM_MONITOR
+		PM_WARN("<rm,FlyBootService>\n");
+		lidbg_uevent_shell("mount -o remount /system");
+		lidbg_uevent_shell("rm	-rf /system/app/FlyBootService.apk");
+		lidbg_uevent_shell("rm	-rf /system/lib/modules/out/FlyBootService.apk");
+		if(g_var.is_first_update)
+		{
+			ssleep(5);
+			kernel_restart(NULL);
+		}
+#endif
 
     if(is_out_updated)
     {
@@ -763,18 +829,19 @@ static void set_func_tbl(void)
 #ifdef PLATFORM_msm8226
 void find_fb_open_err(char *key_word, void *data)
 {
-	DUMP_FUN;
-	lidbgerr("find key word:find_fb_open_err\n");
-	if(g_var.system_status >= FLY_KERNEL_UP)
-	{
-		SOC_Key_Report(KEY_POWER, KEY_PRESSED_RELEASED);
-		ssleep(2);
-		SOC_Key_Report(KEY_POWER, KEY_PRESSED_RELEASED);
-	}
-	else
-		lidbg("find key word:find_fb_open_err.drop.%d\n",g_var.system_status );	
+    DUMP_FUN;
+    lidbgerr("find key word:find_fb_open_err\n");
+    if(g_var.system_status >= FLY_KERNEL_UP)
+    {
+        SOC_Key_Report(KEY_POWER, KEY_PRESSED_RELEASED);
+        ssleep(2);
+        SOC_Key_Report(KEY_POWER, KEY_PRESSED_RELEASED);
+    }
+    else
+        lidbg("find key word:find_fb_open_err.drop.%d\n", g_var.system_status );
 }
 #endif
+
 static int __init lidbg_pm_init(void)
 {
     DUMP_FUN;
@@ -788,12 +855,13 @@ static int __init lidbg_pm_init(void)
     MCU_SET_WP_GPIO_SUSPEND;
 #endif
     PM_WARN("<set MCU_WP_GPIO_ON>\n");
-    
+
     CREATE_KTHREAD(thread_gpio_app_status_delay, NULL);
     lidbg_shell_cmd("echo 8  > /proc/sys/kernel/printk");
 #ifdef PLATFORM_msm8226
-	lidbg_trace_msg_cb_register("mdss_mdp_overlay_on: Failed to turn on fb0",NULL,find_fb_open_err);
+    lidbg_trace_msg_cb_register("mdss_mdp_overlay_on: Failed to turn on fb0", NULL, find_fb_open_err);
 #endif
+
     platform_device_register(&lidbg_pm);
     platform_driver_register(&lidbg_pm_driver);
     return 0;
