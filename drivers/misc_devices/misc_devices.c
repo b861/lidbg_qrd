@@ -2,6 +2,8 @@
 #include "lidbg.h"
 LIDBG_DEFINE;
 
+int udisk_stability_test = 0;
+
 
 #if defined(CONFIG_FB)
 struct notifier_block devices_notif;
@@ -231,6 +233,22 @@ void usb_enumerate_monitor(char *key_word, void *data)
 	}
 }
 
+int thread_udisk_stability_test(void *data)
+{
+	u32 cnt = 0;
+	ssleep(10);
+	while(1)
+	{
+		USB_WORK_ENABLE;
+		ssleep(5);
+		USB_WORK_DISENABLE;
+		ssleep(5);
+		cnt++;
+		lidbg("udisk_stability_test times=%d\n",cnt);
+	}
+
+}
+
 
 static int soc_dev_probe(struct platform_device *pdev)
 {
@@ -264,7 +282,14 @@ static int soc_dev_probe(struct platform_device *pdev)
 	lidbg_new_cdev(&dev_fops, "flydev");
 
 	lidbg_trace_msg_cb_register("unable to enumerate USB device",NULL,usb_enumerate_monitor);
+	
+    FS_REGISTER_INT(udisk_stability_test, "udisk_stability_test", 0, NULL);
 
+	if(udisk_stability_test == 1)
+	{
+		CREATE_KTHREAD(thread_udisk_stability_test, NULL);
+	}
+	
     return 0;
 
 }

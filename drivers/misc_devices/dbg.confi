@@ -9,3 +9,4 @@ cpu_temp_show=0
 antutu_test=0
 antutu_temp_offset=10
 normal_temp_offset=20
+udisk_stability_test=0

@@ -3,7 +3,7 @@ function soc_build_system()
 {
 	echo $FUNCNAME
 	cd $DBG_SYSTEM_DIR
-	soc_prebuild && make systemimage -j8 && soc_postbuild
+	soc_prebuild && make systemimage -j16 && soc_postbuild
 }
 
 function soc_build_kernel()
@@ -24,7 +24,7 @@ function soc_build_all()
 {
 	echo $FUNCNAME
 	cd $DBG_SYSTEM_DIR
-	soc_prebuild && make -j8 && soc_postbuild
+	soc_prebuild && make -j16 && soc_postbuild
 }
 
 
@@ -102,7 +102,7 @@ function soc_make_otapackage()
 		source build/envsetup.sh&&choosecombo release $DBG_PLATFORM $SYSTEM_BUILD_TYPE
 	fi
 
-	make otapackage -j8
+	make otapackage -j16
 }
 
 function soc_build_origin_image
@@ -129,7 +129,7 @@ function soc_build_origin_image
 	echo "build_origin" > $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/etc/build_origin
 
 	cd $DBG_SYSTEM_DIR
-	make otapackage -j8
+	make otapackage -j16
 
 }
 

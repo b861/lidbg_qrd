@@ -77,10 +77,10 @@ function system_dir_build()
 	rm -rf ./out/target/product/$SYSTEM_PLATFORM/system
 	rm -rf ./out/target/product/$SYSTEM_PLATFORM/root
 	soc_prebuild
-	make -j16
+	make -j8
 	soc_postbuild
 	echo ====IN5make otapackage -j8=====$FUNCNAME
-	make otapackage -j16
+	make otapackage -j8
 }
 
 function git_reset_hard()
