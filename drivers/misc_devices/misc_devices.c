@@ -1,5 +1,7 @@
 
 #include "lidbg.h"
+//#define DISABLE_USB_WHEN_DEVICE_DOWN
+
 LIDBG_DEFINE;
 
 int udisk_stability_test = 0;
@@ -71,6 +73,9 @@ static int lidbg_event(struct notifier_block *this,
         break;
 
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_DEVICE_DOWN):
+		#ifdef DISABLE_USB_WHEN_DEVICE_DOWN
+			CREATE_KTHREAD(thread_usb_disk_disable_delay, NULL);
+		#endif
 #if 0//def VENDOR_QCOM
 		lidbg("set uart to gpio\n");
 		SOC_IO_Output_Ext(0, g_hw.gpio_dvd_tx, 1,GPIOMUX_PULL_NONE,GPIOMUX_DRV_8MA);
@@ -240,7 +245,7 @@ int thread_udisk_stability_test(void *data)
 	while(1)
 	{
 		USB_WORK_ENABLE;
-		ssleep(5);
+		ssleep(10);
 		USB_WORK_DISENABLE;
 		ssleep(5);
 		cnt++;
