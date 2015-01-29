@@ -13,6 +13,7 @@ static DECLARE_COMPLETION(sleep_observer_wait);
 static atomic_t is_in_sleep = ATOMIC_INIT(0);
 static int sleep_counter = 0;
 static char g_acc_history_state[512];
+int power_on_off_test = 0;
 
 void observer_start(void);
 void observer_stop(void);
@@ -754,6 +755,30 @@ static int thread_observer(void *data)
     return 1;
 }
 
+
+int thread_power_press_test(void *data)
+{
+	u32 cnt = 0;
+	struct wakeup_source *autosleep_ws;
+	
+	ssleep(30);
+
+    autosleep_ws = wakeup_source_register("autosleep");
+    if (!autosleep_ws)
+        autosleep_ws = wakeup_source_register("autosleep");
+
+	while(1)
+	{
+        SOC_Key_Report(KEY_POWER, KEY_PRESSED_RELEASED);
+		ssleep(3);
+        SOC_Key_Report(KEY_POWER, KEY_PRESSED_RELEASED);
+		ssleep(3);
+		cnt++;
+		lidbg("power_press_test times=%d\n",cnt);
+	}
+
+}
+
 static int  lidbg_pm_probe(struct platform_device *pdev)
 {
     DUMP_FUN;
@@ -798,6 +823,13 @@ static int  lidbg_pm_probe(struct platform_device *pdev)
     lidbg_new_cdev(&pm_nod_fops, "lidbg_pm");
     kthread_run(thread_observer, NULL, "ftf_pmtask");
     LIDBG_MODULE_LOG;
+	
+    FS_REGISTER_INT(power_on_off_test, "power_on_off_test", 0, NULL);
+
+	if(power_on_off_test == 1)
+	{
+		CREATE_KTHREAD(thread_power_press_test, NULL);
+	}
 
     PM_WARN("<==OUT==>\n");
     return 0;
