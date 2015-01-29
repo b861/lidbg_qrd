@@ -285,7 +285,7 @@ static int thread_lidbg_pm_monitor(void *data)
     PM_WARN("<0=====LPC_CMD_ACC_SWITCH_START>\n");
     while(1)
     {
-    
+
         PM_WARN("<1=====hold the lock.usb enable>\n");
         //hold the lock
         MCU_APP_GPIO_ON;
@@ -345,7 +345,7 @@ static int thread_gpio_app_status_delay(void *data)
 
 
 #ifdef LIDBG_PM_AUTO_ACC
-	LPC_CMD_ACC_SWITCH_START;
+    LPC_CMD_ACC_SWITCH_START;
 #endif
 
 #ifdef LIDBG_PM_MONITOR
@@ -415,6 +415,14 @@ int pm_open (struct inode *inode, struct file *filp)
 {
     return 0;
 }
+#ifdef LIDBG_PM_CHECK_SLEEPED
+static int thread_send_power_key(void *data)
+{
+    PM_WARN("PM:send power key\n");
+    SOC_Key_Report(KEY_POWER, KEY_PRESSED_RELEASED);
+    return 1;
+}
+#endif
 ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t *ppos)
 {
     char *cmd[8] = {NULL};
@@ -461,6 +469,11 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         }
         else  if(!strcmp(cmd[1], "android_up"))
         {
+            PM_WARN("PM:g_var.system_status.%d,%d\n", g_var.system_status, (g_var.system_status == FLY_GOTO_SLEEP));
+#ifdef LIDBG_PM_CHECK_SLEEPED
+            if(g_var.system_status == FLY_GOTO_SLEEP)
+                CREATE_KTHREAD(thread_send_power_key, NULL);
+#endif
             MCU_WP_GPIO_ON;
             MCU_APP_GPIO_ON;
             SOC_System_Status(FLY_ANDROID_UP);
@@ -758,24 +771,24 @@ static int thread_observer(void *data)
 
 int thread_power_press_test(void *data)
 {
-	u32 cnt = 0;
-	struct wakeup_source *autosleep_ws;
-	
-	ssleep(30);
+    u32 cnt = 0;
+    struct wakeup_source *autosleep_ws;
+
+    ssleep(30);
 
     autosleep_ws = wakeup_source_register("autosleep");
     if (!autosleep_ws)
         autosleep_ws = wakeup_source_register("autosleep");
 
-	while(1)
-	{
+    while(1)
+    {
         SOC_Key_Report(KEY_POWER, KEY_PRESSED_RELEASED);
-		ssleep(3);
+        ssleep(3);
         SOC_Key_Report(KEY_POWER, KEY_PRESSED_RELEASED);
-		ssleep(3);
-		cnt++;
-		lidbg("power_press_test times=%d\n",cnt);
-	}
+        ssleep(3);
+        cnt++;
+        lidbg("power_press_test times=%d\n", cnt);
+    }
 
 }
 
@@ -784,17 +797,17 @@ static int  lidbg_pm_probe(struct platform_device *pdev)
     DUMP_FUN;
     PM_WARN("<==IN==>\n");
     fs_file_separator(PM_INFO_FILE);
-	
+
 #ifdef LIDBG_PM_MONITOR
-		PM_WARN("<rm,FlyBootService>\n");
-		lidbg_uevent_shell("mount -o remount /system");
-		lidbg_uevent_shell("rm	-rf /system/app/FlyBootService.apk");
-		lidbg_uevent_shell("rm	-rf /system/lib/modules/out/FlyBootService.apk");
-		if(g_var.is_first_update)
-		{
-			ssleep(5);
-			kernel_restart(NULL);
-		}
+    PM_WARN("<rm,FlyBootService>\n");
+    lidbg_uevent_shell("mount -o remount /system");
+    lidbg_uevent_shell("rm	-rf /system/app/FlyBootService.apk");
+    lidbg_uevent_shell("rm	-rf /system/lib/modules/out/FlyBootService.apk");
+    if(g_var.is_first_update)
+    {
+        ssleep(5);
+        kernel_restart(NULL);
+    }
 #endif
 
     if(is_out_updated)
@@ -823,13 +836,13 @@ static int  lidbg_pm_probe(struct platform_device *pdev)
     lidbg_new_cdev(&pm_nod_fops, "lidbg_pm");
     kthread_run(thread_observer, NULL, "ftf_pmtask");
     LIDBG_MODULE_LOG;
-	
+
     FS_REGISTER_INT(power_on_off_test, "power_on_off_test", 0, NULL);
 
-	if(power_on_off_test == 1)
-	{
-		CREATE_KTHREAD(thread_power_press_test, NULL);
-	}
+    if(power_on_off_test == 1)
+    {
+        CREATE_KTHREAD(thread_power_press_test, NULL);
+    }
 
     PM_WARN("<==OUT==>\n");
     return 0;
