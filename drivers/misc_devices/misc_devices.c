@@ -1,6 +1,7 @@
 
 #include "lidbg.h"
 //#define DISABLE_USB_WHEN_DEVICE_DOWN
+#define DISABLE_USB_WHEN_ANDROID_DOWN
 
 LIDBG_DEFINE;
 
@@ -37,7 +38,7 @@ static int devices_notifier_callback(struct notifier_block *self,
 
 void usb_disk_enable(bool enable)
 {
-    lidbg("[%s]\n", enable ? "usb_enable" : "usb_disable");
+    lidbg("60.[%s]\n", enable ? "usb_enable" : "usb_disable");
     if(enable)
         USB_WORK_ENABLE;
     else
@@ -49,6 +50,7 @@ static int thread_usb_disk_enable_delay(void *data)
     usb_disk_enable(true);
     return 1;
 }
+
 static int thread_usb_disk_disable_delay(void *data)
 {
     msleep(1000);
@@ -74,7 +76,8 @@ static int lidbg_event(struct notifier_block *this,
 
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_DEVICE_DOWN):
 		#ifdef DISABLE_USB_WHEN_DEVICE_DOWN
-			CREATE_KTHREAD(thread_usb_disk_disable_delay, NULL);
+			//CREATE_KTHREAD(thread_usb_disk_disable_delay, NULL);
+			usb_disk_enable(false);
 		#endif
 #if 0//def VENDOR_QCOM
 		lidbg("set uart to gpio\n");
@@ -88,9 +91,11 @@ static int lidbg_event(struct notifier_block *this,
 		#endif
         break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_ANDROID_DOWN):
+		#ifdef DISABLE_USB_WHEN_ANDROID_DOWN
+		CREATE_KTHREAD(thread_usb_disk_disable_delay, NULL);
+		#endif
         break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_GOTO_SLEEP):
-		 CREATE_KTHREAD(thread_usb_disk_disable_delay, NULL);
         break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_KERNEL_DOWN):
 		break;

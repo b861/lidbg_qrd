@@ -18,6 +18,7 @@ int power_on_off_test = 0;
 void observer_start(void);
 void observer_stop(void);
 extern int soc_io_resume_config(u32 index, u32 direction, u32 pull, u32 drive_strength);
+
 bool is_safety_apk(char *apkname)
 {
     if(strncmp(apkname, "com.fly.flybootservice", sizeof("com.fly.flybootservice") - 1) == 0)
@@ -336,7 +337,7 @@ static int thread_lidbg_pm_monitor(void *data)
 static int thread_gpio_app_status_delay(void *data)
 {
     ssleep(10);
-    LPC_PRINT(true, sleep_counter, "PM:MCU_WP_GPIO_ON");
+    LPC_PRINT(true, sleep_counter, "PM:MCU_WP_GPIO_ON1");
     ssleep(40);
     MCU_APP_GPIO_ON;
 #ifdef CONTROL_PM_IO_BY_BP
@@ -345,6 +346,7 @@ static int thread_gpio_app_status_delay(void *data)
 
 
 #ifdef LIDBG_PM_AUTO_ACC
+	ssleep(20);
     LPC_CMD_ACC_SWITCH_START;
 #endif
 
@@ -353,7 +355,7 @@ static int thread_gpio_app_status_delay(void *data)
 #endif
 
     PM_WARN("<set MCU_APP_GPIO_ON >\n");
-    LPC_PRINT(true, sleep_counter, "PM:MCU_APP_GPIO_ON");
+    LPC_PRINT(true, sleep_counter, "PM:MCU_APP_GPIO_ON2");
 
     return 1;
 }
@@ -805,7 +807,9 @@ static int  lidbg_pm_probe(struct platform_device *pdev)
     lidbg_uevent_shell("rm	-rf /system/lib/modules/out/FlyBootService.apk");
     if(g_var.is_first_update)
     {
+		lidbg_uevent_shell("sync");
         ssleep(5);
+		lidbg("lidbg_pm_probe call kernel_restart\n");
         kernel_restart(NULL);
     }
 #endif

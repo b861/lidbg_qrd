@@ -140,10 +140,13 @@
     			USB_ID_LOW_HOST;\
 			}while(0)
 #define USB_WORK_DISENABLE  do{\
-			lidbg("USB_WORK_DISENABLE\n");\
+			lidbg("USB_WORK_DISENABLE.200.unmount\n");\
+			lidbg_shell_cmd("umount /storage/udisk");\
+			msleep(200);\
+			USB_ID_HIGH_DEV;\
+			msleep(200);\
 			USB_SWITCH_DISCONNECT;\
 			USB_POWER_DISABLE;\
-			USB_ID_HIGH_DEV;\
 			}while(0)
 			
 
