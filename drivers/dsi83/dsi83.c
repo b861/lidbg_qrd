@@ -12,6 +12,7 @@ static struct workqueue_struct *dsi83_workqueue;
 #elif defined(CONFIG_HAS_EARLYSUSPEND)
 
 #endif
+char *buf_piont = NULL;
 
 static int SN65_register_read(unsigned char sub_addr,char *buf)
 {
@@ -31,8 +32,6 @@ static int SN65_Sequence_seq4(void)
 {
 	int ret = 0,i;
 	char buf2[2];
-	char *buf_piont = NULL;
-	buf_piont = dsi83_conf;
 	buf2[0]=0x00;
 	buf2[1]=0x00;
 	lidbg( "dsi83:Sequence 4\n");
@@ -266,7 +265,24 @@ void dsi83_gpio_init(void)
 }
 
 
+void dsi83_config(void)
+{
+    int ret = 0;
 
+	SN65_Sequence_seq4();
+	
+	ret = SN65_Sequence_seq6();
+	if(ret < 0)
+		lidbg( "dsi83:SN65_Sequence_seq6(),err,ret = %d.\n", ret);
+	
+	SN65_Sequence_seq7();
+	
+	ret = SN65_Sequence_seq8();
+	if(ret < 0)
+		lidbg( "dsi83:SN65_Sequence_seq8(),err,ret = %d.\n", ret);
+
+
+}
 static void dsi83_work_func(struct work_struct *work)
 {
     int ret = 0;
@@ -306,17 +322,7 @@ static void dsi83_work_func(struct work_struct *work)
 	else
 		lidbg( "dsi83:DSI83 match ID success!\n");
 
-	SN65_Sequence_seq4();
-	
-	ret = SN65_Sequence_seq6();
-	if(ret < 0)
-		lidbg( "dsi83:SN65_Sequence_seq6(),err,ret = %d.\n", ret);
-	
-	SN65_Sequence_seq7();
-	
-	ret = SN65_Sequence_seq8();
-	if(ret < 0)
-		lidbg( "dsi83:SN65_Sequence_seq8(),err,ret = %d.\n", ret);
+	dsi83_config();
 
 	msleep(200);//wait for sigal/reg stable
 	dsi83_check();
@@ -356,6 +362,31 @@ int dsi83_dump_proc(char *buf, char **start, off_t offset, int count, int *eof, 
 	dsi83_dump_reg();
     return 1;
 }
+
+
+int dsi83_set_normal_proc(char *buf, char **start, off_t offset, int count, int *eof, void *data )
+{
+    lidbg("%s:enter\n", __func__);
+	buf_piont = dsi83_conf_normol;
+	
+	dsi83_config();
+    return 1;
+}
+
+
+int dsi83_set_pattern_proc(char *buf, char **start, off_t offset, int count, int *eof, void *data )
+{
+    lidbg("%s:enter\n", __func__);
+	buf_piont = dsi83_conf_pattern;
+	
+	dsi83_config();
+
+    return 1;
+}
+
+
+
+
 static int kv_dsi83_rst = 0;
 void cb_dsi83_rst(char *key, char *value )
 {
@@ -435,6 +466,9 @@ static int dsi83_probe(struct platform_device *pdev)
 		
    	create_proc_read_entry("dsi83_rst", 0, NULL, dsi83_rst_proc, NULL);
    	create_proc_read_entry("dsi83_dump", 0, NULL, dsi83_dump_proc, NULL);
+   	create_proc_read_entry("dsi83_n", 0, NULL, dsi83_set_normal_proc, NULL);
+   	create_proc_read_entry("dsi83_p", 0, NULL, dsi83_set_pattern_proc, NULL);
+
     FS_REGISTER_INT(kv_dsi83_rst, "kv_dsi83_rst", 0, cb_dsi83_rst);
 	INIT_DELAYED_WORK(&dsi83_work, dsi83_work_func);
 	dsi83_workqueue = create_workqueue("dsi83");
@@ -526,6 +560,8 @@ static int __devinit dsi83_init(void)
 {
 	DUMP_BUILD_TIME;
 	LIDBG_GET;
+	
+	buf_piont = dsi83_conf_normol;
     platform_device_register(&dsi83_devices);
     platform_driver_register(&dsi83_driver);
     return 0;

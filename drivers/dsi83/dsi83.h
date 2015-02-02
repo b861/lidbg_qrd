@@ -4,7 +4,6 @@
 
 #define DSI83_DELAY_TIME	(0)
 //#define     DSI83_DEBUG
-//#define     TEST_PATTERN
 
 #define 	DSI83_I2C_ADDR	       (0x2d)
 
@@ -15,8 +14,7 @@
 #endif
 
 
-#ifndef TEST_PATTERN
-char dsi83_conf[] =
+char dsi83_conf_normol[] =
 {
 0x09, 0x00,
 0x0A, 0x03,
@@ -63,8 +61,8 @@ char dsi83_conf[] =
 0x3E, 0x00,
 0xff
 };
-#else
-char dsi83_conf[] =    //dsi83 test mode
+
+char dsi83_conf_pattern[] =    //dsi83 test mode
 {
 0x09, 0x00,
 0x0A, 0x03,
@@ -111,7 +109,6 @@ char dsi83_conf[] =    //dsi83 test mode
 0x3E, 0x00,
 0xff
 };
-#endif
 
 
 #endif
