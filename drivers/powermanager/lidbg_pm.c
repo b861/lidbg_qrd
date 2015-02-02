@@ -673,12 +673,16 @@ static int thread_save_acc_times(void *data)
 static int pm_suspend(struct device *dev)
 {
     DUMP_FUN;
+#ifdef SOC_mt3360	
+	MCU_WP_GPIO_OFF;
+#endif
     return 0;
 }
 static int pm_resume(struct device *dev)
 {
     DUMP_FUN;
 #ifdef SOC_mt3360
+	MCU_WP_GPIO_ON;
     soc_io_resume_config(0, 0, 0, 0);
 #endif
     CREATE_KTHREAD(thread_save_acc_times, NULL);
