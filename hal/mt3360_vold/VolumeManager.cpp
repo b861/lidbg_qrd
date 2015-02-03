@@ -52,6 +52,8 @@
 
 #define MASS_STORAGE_FILE_PATH  "/sys/class/android_usb/android0/f_mass_storage/lun/file"
 
+int fgFirst = 0;
+
 VolumeManager *VolumeManager::sInstance = NULL;
 
 VolumeManager *VolumeManager::Instance() {
@@ -282,8 +284,10 @@ int VolumeManager::doUsbModeSwitch(NetlinkEvent *evt)
     bool ret = false;
     FILE *file;
     FILE *fileRil;
+	FILE *fileTable;
 
     char atportname[32],modemportname[32],devicename[64],type[32];
+	char tmp[10] = {0};
 
     int action = evt->getAction();
     
@@ -322,8 +326,10 @@ int VolumeManager::doUsbModeSwitch(NetlinkEvent *evt)
 		sprintf(fbuf,"/system/etc/usb_modeswitch.d/%s_%s",usb_vid, usb_pid); 
 		file = fopen(fbuf,"r");
 		if(!file) {
-			SLOGI("Warning! Configuration file %s_%s doesn't exist!",usb_vid, usb_pid);
-	  		return 1;
+			SLOGI("Warning! 1, Configuration file %s_%s doesn't exist!",usb_vid, usb_pid);
+			if (fgFirst) {
+	  			return 1;
+			}
 		} else {
 			LOGD("-----> Call usb_modeswitch to change 3G Dongle mode  <-----");
 			//property_set("gsm.ril.switch.running","1");
@@ -342,10 +348,77 @@ int VolumeManager::doUsbModeSwitch(NetlinkEvent *evt)
 		memset(fbuf, 0, 256);
 		sprintf(fbuf,"/system/etc/dongle_ril.d/%s_%s",usb_vid, usb_pid);
 		fileRil = fopen(fbuf,"r");
+		
 		if(!fileRil) {
-			SLOGI("Warning! dongle Configuration file %s_%s doesn't exist!",usb_vid, usb_pid);
-	  		return 1;
+			LOGD ("dongle_ril.d no pid vid \n");
+			if (!fgFirst) {
+				//LOGD ("dongle_ril.d, 1\n");
+				memset(fbuf, 0, 256);
+				fileTable = fopen("/system/etc/dongle_ril.d/table","r");
+				if (fileTable) {
+					//LOGD ("dongle_ril.d, 2\n");
+					while (fgets(fbuf, 256, fileTable)) {
+						//LOGD ("dongle_ril.d, 3, fbuf [%s]\n", fbuf);
+						memset (tmp, 0, sizeof(tmp));
+						ret = search (fbuf, "pid2", tmp, sizeof(tmp));
+						//LOGD ("pid2 is: [%s]\n", tmp);
+						if (!strcmp(tmp, usb_pid)) {
+							memset (tmp, 0, sizeof(tmp));
+							//LOGD ("pid2 & usb_pid is: [%s]\n", usb_pid);
+							fgFirst = 1;
+							ret = search (fbuf, "pid1", tmp, sizeof(tmp));
+							
+							memset(fbuf, 0, 256);
+							sprintf(fbuf,"/system/etc/dongle_ril.d/%s_%s",usb_vid, tmp);
+							LOGD ("open file [%s]\n", fbuf);
+							fileRil = fopen(fbuf,"r");
+							if (fileRil) {
+								while (fgets(fbuf, 256, fileRil)) {
+									SLOGI("++, fbuf[%s] \n", fbuf);	
+									memset (atportname, 0, sizeof(atportname));
+									ret = search (fbuf, "ATPort", atportname, sizeof(atportname));
+									CONTINUE_LOOP(ret);
+									SLOGI("find AT Port:%s\n", atportname);
+								
+									memset (modemportname, 0, sizeof(modemportname));
+									ret = search (fbuf, "ModemPort", modemportname, sizeof(modemportname));
+									CONTINUE_LOOP(ret);
+									SLOGI("find Modem Port:%s\n", modemportname);
+								
+									memset (devicename, 0, sizeof(devicename));
+									ret = search (fbuf, "Device", devicename, sizeof(devicename));
+									CONTINUE_LOOP(ret);
+									SLOGI("find Device Name:%s\n", devicename);
+								
+									memset (type, 0, sizeof(type));
+									ret = search (fbuf, "Type", type, sizeof(type));
+									CONTINUE_LOOP(ret);
+									SLOGI("find Type:%s\n", type);
+								
+									break;
+								}
+								//SLOGI("++++++++++++++++++++ 2 \n");
+								property_set("net.3gdongle.exist", "true");
+								property_set("net.3gdongle.devicename", devicename);
+								property_set("net.3gdongle.portname.at", atportname);
+								property_set("net.3gdongle.portname.modem", modemportname);
+								property_set("net.3gdongle.type", type);
+								
+								fclose(fileRil); 
+							}
+							break;
+						}
+						CONTINUE_LOOP(ret);
+					}
+					fclose(fileTable); 
+				}
+				
+			} else {
+				SLOGI("Warning! 2, dongle Configuration file %s_%s doesn't exist!",usb_vid, usb_pid);
+		  		return 1;
+			}
 		} else {
+			fgFirst = 1;
 			while (fgets(fbuf, 256, fileRil)) {
 				//SLOGI("++, fbuf[%s] \n", fbuf);   
 				memset (atportname, 0, sizeof(atportname));

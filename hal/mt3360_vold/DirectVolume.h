@@ -40,9 +40,9 @@ protected:
     unsigned char  mPendingPartMap;
     int            mIsDecrypted;
     int            mFlags;
-
+    int            mHubNum;
 public:
-    DirectVolume(VolumeManager *vm, const char *label, const char *mount_point, int partIdx);
+    DirectVolume(VolumeManager *vm, const char *label, const char *mount_point, int partIdx, int hub);
     virtual ~DirectVolume();
 
     int addPath(const char *path);

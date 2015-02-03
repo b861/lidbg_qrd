@@ -20,6 +20,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <string.h>
 
 #include <fcntl.h>
 #include <dirent.h>
@@ -36,6 +37,84 @@
 
 static int process_config(VolumeManager *vm);
 static void coldboot(const char *path);
+const int MaxNumMountPartition =15;
+char* ParitionMountPoints[MaxNumMountPartition*5]={
+ "/udisk1_partition1",
+ "/udisk1_partition2",
+ "/udisk1_partition3",
+ "/udisk1_partition4",
+ "/udisk1_partition5",
+ "/udisk1_partition6",
+ "/udisk1_partition7",
+ "/udisk1_partition8",
+ "/udisk1_partition9",
+ "/udisk1_partition10",
+ "/udisk1_partition11",
+ "/udisk1_partition12",
+ "/udisk1_partition13",
+ "/udisk1_partition14",
+ "/udisk1_partition15",
+ "/udisk2_partition1",
+ "/udisk2_partition2",
+ "/udisk2_partition3",
+ "/udisk2_partition4",
+ "/udisk2_partition5",
+ "/udisk2_partition6",
+ "/udisk2_partition7",
+ "/udisk2_partition8",
+ "/udisk2_partition9",
+ "/udisk2_partition10",
+ "/udisk2_partition11",
+ "/udisk2_partition12",
+ "/udisk2_partition13",
+ "/udisk2_partition14",
+ "/udisk2_partition15",
+ "/udisk3_partition1",
+ "/udisk3_partition2",
+ "/udisk3_partition3",
+ "/udisk3_partition4",
+ "/udisk3_partition5",
+ "/udisk3_partition6",
+ "/udisk3_partition7",
+ "/udisk3_partition8",
+ "/udisk3_partition9",
+ "/udisk3_partition10",
+ "/udisk3_partition11",
+ "/udisk3_partition12",
+ "/udisk3_partition13",
+ "/udisk3_partition14",
+ "/udisk3_partition15",
+ "/udisk4_partition1",
+ "/udisk4_partition2",
+ "/udisk4_partition3",
+ "/udisk4_partition4",
+ "/udisk4_partition5",
+ "/udisk4_partition6",
+ "/udisk4_partition7",
+ "/udisk4_partition8",
+ "/udisk4_partition9",
+ "/udisk4_partition10",
+ "/udisk4_partition11",
+ "/udisk4_partition12",
+ "/udisk4_partition13",
+ "/udisk4_partition14",
+ "/udisk4_partition15",
+ "/udisk5_partition1",
+ "/udisk5_partition2",
+ "/udisk5_partition3",
+ "/udisk5_partition4",
+ "/udisk5_partition5",
+ "/udisk5_partition6",
+ "/udisk5_partition7",
+ "/udisk5_partition8",
+ "/udisk5_partition9",
+ "/udisk5_partition10",
+ "/udisk5_partition11",
+ "/udisk5_partition12",
+ "/udisk5_partition13",
+ "/udisk5_partition14",
+ "/udisk5_partition15"
+ };
 
 int main() {
 
@@ -161,6 +240,7 @@ static int parse_mount_flags(char *mount_flags)
 static int process_config(VolumeManager *vm) {
     FILE *fp;
     int n = 0;
+    int usb1hubnum=0;
     char line[255];
 
     if (!(fp = fopen("/etc/vold.fstab", "r"))) {
@@ -204,7 +284,13 @@ static int process_config(VolumeManager *vm) {
             if (!strcmp(type, "dev_mount")) {
                 DirectVolume *dv = NULL;
                 char *part;
-
+                char *hub;
+		
+		if (!(hub = strtok_r(NULL, delim, &save_ptr))) {
+                    SLOGE("Can't get hub number\r\n");
+                    goto out_syntax;
+                }
+		
                 if (!(part = strtok_r(NULL, delim, &save_ptr))) {
                     SLOGE("internal: Error parsing partition");
                     goto out_syntax;
@@ -215,9 +301,9 @@ static int process_config(VolumeManager *vm) {
                 }
 
                 if (!strcmp(part, "auto")) {
-                    dv = new DirectVolume(vm, label, mount_point, -1);
+                    dv = new DirectVolume(vm, label, mount_point, -1, atoi(hub));
                 } else {
-                    dv = new DirectVolume(vm, label, mount_point, atoi(part));
+                    dv = new DirectVolume(vm, label, mount_point, atoi(part), atoi(hub));
                 }
 
                 while ((sysfs_path = strtok_r(NULL, delim, &save_ptr))) {
@@ -253,7 +339,14 @@ static int process_config(VolumeManager *vm) {
             if (!strcmp(type, "dev_mount")) {
                 DirectVolume *dv = NULL;
                 char *part;
-
+		char *sysfs_path2;
+		char *hub;
+		
+		if (!(hub = strtok_r(NULL, delim, &save_ptr))) {
+                    SLOGE("Can't get hub number\r\n");
+                    goto out_syntax;
+                }
+		
                 if (!(part = strtok_r(NULL, delim, &save_ptr))) {
                     SLOGE("external: Error parsing partition");
                     goto out_syntax;
@@ -264,9 +357,9 @@ static int process_config(VolumeManager *vm) {
                 }
 
                 if (!strcmp(part, "auto")) {
-                    dv = new DirectVolume(vm, label, mount_point, -1);
+                    dv = new DirectVolume(vm, label, mount_point, -1, atoi(hub));
                 } else {
-                    dv = new DirectVolume(vm, label, mount_point, atoi(part));
+                    dv = new DirectVolume(vm, label, mount_point, atoi(part), atoi(hub));
                 }
 
                 while ((sysfs_path = strtok_r(NULL, delim, &save_ptr))) {
@@ -278,6 +371,8 @@ static int process_config(VolumeManager *vm) {
                         SLOGE("external: Failed to add devpath %s to volume %s", sysfs_path,
                             label);
                         goto out_fail;
+                    }else{
+ 			sysfs_path2=sysfs_path;
                     }
                 }
 
@@ -292,6 +387,39 @@ static int process_config(VolumeManager *vm) {
                 dv->setReserveMedia(0);
 
                 vm->addVolume(dv);
+		if(strcmp(label,"udisk")==0)
+		{
+			int j;
+			int offset;
+			int iRet;
+			char path[255];
+			errno=0;
+
+			if(strstr(sysfs_path2,"usb1")!=NULL){
+			    if(usb1hubnum==0)
+			        offset=0;
+			    else
+				offset=(usb1hubnum+1)*MaxNumMountPartition;
+				
+			     usb1hubnum++;
+			}
+			else if (strstr(sysfs_path2,"usb2")!=NULL)
+			   offset=MaxNumMountPartition;
+			else{
+			    SLOGE("Invalide usb port\r\n");
+			    return -1;
+			}
+			for(j=0;j<MaxNumMountPartition;j++){
+			    strcpy(path,mount_point);
+			    strcat(path,ParitionMountPoints[offset+j]);
+			 
+			    dv = new DirectVolume(vm, label, path, j+1, atoi(hub));	
+			    dv->addPath(sysfs_path2);
+			    dv->setFlags(flags);
+                	    dv->setReserveMedia(0);
+			    vm->addVolume(dv);
+			}
+		}
             } else if (!strcmp(type, "map_mount")) {
             } else {
                 SLOGE("external: Unknown type '%s'", type);

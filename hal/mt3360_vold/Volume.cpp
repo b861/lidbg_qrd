@@ -254,7 +254,7 @@ int Volume::formatVol() {
 #endif
 
     sprintf(devicePath, "/dev/block/vold/%d:%d",
-            MAJOR(diskNode), MINOR(diskNode));
+            MAJOR(diskNode), mMountableMinior);
 
     if (mDebug) {
         SLOGI("Formatting volume %s (%s)", getLabel(), devicePath);
@@ -406,6 +406,9 @@ int Volume::mountVol() {
             continue;
         }
 
+        if (deviceNodes[i] == -1) {
+            continue;
+        }
         sprintf(devicePath, "/dev/block/vold/%d:%d", MAJOR(deviceNodes[i]),
                 MINOR(deviceNodes[i]));
 
@@ -421,7 +424,7 @@ int Volume::mountVol() {
             setState(Volume::State_Idle);
             return -1;
         }
-	LIDBG_PRINT("[flyaudio vold]: mountVol get fs type is %d\n", fsType);
+		 LIDBG_PRINT("[flyaudio vold]: mountVol get fs type is %d\n", fsType);
         if (mDiskReserve) {
 	          //if (Fat::check(devicePath)) {
 	          if(Vfs::check(devicePath, fsType)){
@@ -495,6 +498,7 @@ int Volume::mountVol() {
         //setState(Volume::State_Mounted);
         setState(Volume::State_Mounted);
         mCurrentlyMountedKdev = deviceNodes[i];
+	mMountableMinior=MINOR(deviceNodes[i]);
         return 0;
     }
 

@@ -18,6 +18,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <sys/mount.h>
+#include <sys/stat.h>
 
 #include <linux/kdev_t.h>
 
@@ -34,7 +36,7 @@
 // #define PARTITION_DEBUG
 
 DirectVolume::DirectVolume(VolumeManager *vm, const char *label,
-                           const char *mount_point, int partIdx) :
+                           const char *mount_point, int partIdx, int hub) :
               Volume(vm, label, mount_point) {
     mPartIdx = partIdx;
 
@@ -45,7 +47,8 @@ DirectVolume::DirectVolume(VolumeManager *vm, const char *label,
     mDiskMajor = -1;
     mDiskMinor = -1;
     mDiskNumParts = 0;
-
+    mHubNum= hub;
+	
     setState(Volume::State_NoMedia);
 }
 
@@ -86,12 +89,77 @@ void DirectVolume::handleVolumeUnshared() {
     setState(Volume::State_Idle);
 }
 
+int shouldenter=0;
+int isUSB=0;
+int isDisk=0;
+int isMultiDisk=0;
 int DirectVolume::handleBlockEvent(NetlinkEvent *evt) {
     const char *dp = evt->findParam("DEVPATH");
 
     PathCollection::iterator  it;
     for (it = mPaths->begin(); it != mPaths->end(); ++it) {
         if (!strncmp(dp, *it, strlen(*it))) {
+	    //start usb check
+	    if(strstr(*it,"usb")!=NULL){
+		isUSB=1;
+		if(strstr(*it,"Hub")!=NULL){
+		    //const char *devname = evt->findParam("DEVNAME");
+		    if((strstr(dp, "1-1.1:1.0")!=NULL)||(strstr(dp, "1-1:1.0")!=NULL)){
+			if(mHubNum==1)
+				goto endHub;
+			else
+				continue;
+		    }else if(strstr(dp, "1-1.2:1.0")!=NULL){
+			if(mHubNum==2)
+				goto endHub;
+			else
+				continue;
+		    }else if(strstr(dp, "1-1.3:1.0")!=NULL){
+                     	if(mHubNum==3)
+				goto endHub;
+			else
+				continue;
+		    }else if(strstr(dp, "1-1.4:1.0")!=NULL){
+          		if(mHubNum==4)
+				goto endHub;
+			else
+				continue;
+		    }else {
+			SLOGE("Unsupported usb device,devpath=%s\r\n",dp);
+			continue;
+		    }
+		}
+		
+endHub:		
+	        int u4minor=(atoi(evt->findParam("MINOR"))%16);
+	
+		if(!strcmp(evt->findParam("DEVTYPE"), "disk")) //it is disk
+			goto start;
+
+		//now it is partition
+		if(evt->getAction()==NetlinkEvent::NlActionAdd){
+		    if(shouldenter==0) goto start;  //single partition
+	    	    if((mPartIdx!=u4minor))  //multiple partition
+			continue;
+		}else if(evt->getAction()==NetlinkEvent::NlActionRemove){
+		    if(u4minor>1){  //multiple partition
+			isMultiDisk=1;
+			if((mPartIdx!=u4minor))
+			    continue;
+		    }else{
+			if(isMultiDisk==0) 
+				goto start;
+			else
+				if((mPartIdx!=u4minor))
+			    		continue;
+			isMultiDisk=0;
+		    }
+		}
+	    }else{
+		isUSB=0;
+	    }
+	    //end usb check
+start:
             /* We can handle this disk */
             int action = evt->getAction();
             const char *devtype = evt->findParam("DEVTYPE");
@@ -110,13 +178,54 @@ int DirectVolume::handleBlockEvent(NetlinkEvent *evt) {
                 }
                 if (!strcmp(devtype, "disk")) {
                     handleDiskAdded(dp, evt);
+		    isDisk=1;
                 } else {
                     handlePartitionAdded(dp, evt);
+		    isDisk=0;
                 }
                 /* Send notification iff disk is ready (ie all partitions found) */
                 if (getState() == Volume::State_Idle) {
                     char msg[255];
+		    if((strcmp(getLabel(),"udisk")==0)&&(shouldenter==1)){
+			int uR;
 
+			if(isDisk==1) break;
+			
+			errno=0;
+			uR=access(getMountpoint(),F_OK);
+			if(uR<0){
+			    int iRet;
+			    errno=0;
+				
+Loop:		    iRet=mkdir(getMountpoint(),0755);
+			    if (iRet == -1 && errno != EEXIST) {
+				if(errno==EROFS){
+				    char path[255];
+				    int len,k;
+				    strcpy(path,getMountpoint());
+				    len=strlen(path);
+				    for(k=len-1;k>0;k--)
+				        if(path[k]=='/'){
+					    path[k]=path[len];	
+					    break;
+					}
+				
+				    if(mount("tmpfs", path, "tmpfs", MS_NOSUID, "mode=0775")<0)
+			    	    {
+					SLOGE("mount %s fail\r\n",getMountpoint());
+					return -1;
+			    	    }else{
+			    	        SLOGI("mount %s ok\r\n",path);
+					goto Loop;
+				    }
+				}
+			    }
+			}else if(uR==0){
+				SLOGI("File exist\r\n");
+			}
+			
+		    }
+			
                     snprintf(msg, sizeof(msg),
                              "Volume %s %s disk inserted (%d:%d)", getLabel(),
                              getMountpoint(), mDiskMajor, mDiskMinor);
@@ -157,7 +266,11 @@ void DirectVolume::handleDiskAdded(const char *devpath, NetlinkEvent *evt) {
         SLOGW("Kernel block uevent missing 'NPARTS'");
         mDiskNumParts = 1;
     }
-
+    if(mDiskNumParts>1)
+	shouldenter=1;
+    else 
+	shouldenter=0;
+	
     char msg[255];
 
     int partmask = 0;
@@ -178,7 +291,10 @@ void DirectVolume::handleDiskAdded(const char *devpath, NetlinkEvent *evt) {
         SLOGD("Dv::diskIns - waiting for %d partitions (mask 0x%x)",
              mDiskNumParts, mPendingPartMap);
 #endif
-        setState(Volume::State_Pending);
+	if((isUSB==1)&&(shouldenter==1))
+	    setState(Volume::State_Idle);
+	else
+            setState(Volume::State_Pending);
     }
 
     //snprintf(msg, sizeof(msg), "Volume %s %s disk inserted (%d:%d)",
@@ -194,7 +310,8 @@ void DirectVolume::handlePartitionAdded(const char *devpath, NetlinkEvent *evt) 
     int part_num;
 
     const char *tmp = evt->findParam("PARTN");
-
+    mDiskMajor=major;
+    mDiskMinor=minor;
     if (tmp) {
         part_num = atoi(tmp);
     } else {
@@ -203,7 +320,7 @@ void DirectVolume::handlePartitionAdded(const char *devpath, NetlinkEvent *evt) 
     }
 
     if (part_num > MAX_PARTITIONS || part_num < 1) {
-        SLOGE("Invalid 'PARTN' value");
+        SLOGE("Invalid 'PARTN' value:%d",part_num);
         return;
     }
 
@@ -212,7 +329,7 @@ void DirectVolume::handlePartitionAdded(const char *devpath, NetlinkEvent *evt) 
     }
 
     if (major != mDiskMajor) {
-        SLOGE("Partition '%s' has a different major than its disk!", devpath);
+        SLOGE("Partition '%s' has a different major than its disk:%d,%d", devpath,major,mDiskMajor);
         return;
     }
 #ifdef PARTITION_DEBUG
@@ -226,7 +343,7 @@ void DirectVolume::handlePartitionAdded(const char *devpath, NetlinkEvent *evt) 
     //mPendingPartMap &= ~(1 << part_num);
     mPendingPartMap--;
 
-    if (!mPendingPartMap) {
+    if (!0) {
 #ifdef PARTITION_DEBUG
         SLOGD("Dv:partAdd: Got all partitions - ready to rock!");
 #endif
@@ -305,6 +422,9 @@ void DirectVolume::handleDiskRemoved(const char *devpath, NetlinkEvent *evt) {
     mVm->getBroadcaster()->sendBroadcast(ResponseCode::VolumeDiskRemoved,
                                              msg, false);
     setState(Volume::State_NoMedia);
+    if(strcmp(getLabel(),"udisk")==0){
+	umount(getMountpoint());
+    }
 }
 
 void DirectVolume::handlePartitionRemoved(const char *devpath, NetlinkEvent *evt) {
@@ -360,6 +480,13 @@ void DirectVolume::handlePartitionRemoved(const char *devpath, NetlinkEvent *evt
                 strerror(errno));
         } else {
             SLOGD("Crisis averted");
+        }
+    }
+    if((strcmp(getLabel(),"udisk")==0)&&(mDiskNumParts>1)){
+	int Ret=0;
+	Ret=rmdir(getMountpoint());
+	if(Ret<0){
+		SLOGE("delete dir fail,%s\r\n",getMountpoint());
         }
     }
 }
