@@ -807,6 +807,40 @@ out_err:
             ALOGE("%s: VIDIOC_S_CROP failed", __func__);
         }
 
+        {
+            struct v4l2_streamparm Stream_Parm;
+            memset(&Stream_Parm, 0, sizeof(struct v4l2_streamparm));
+            Stream_Parm.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+            if (0 == ioctlLoop(camHal->fd, VIDIOC_G_PARM, &Stream_Parm))
+            {
+                ALOGD("%s: VIDIOC_G_PARM success,%d,%d,%d,%d", __func__, Stream_Parm.parm.capture.capability, Stream_Parm.parm.capture.capturemode,
+                      Stream_Parm.parm.capture.timeperframe.denominator, Stream_Parm.parm.capture.timeperframe.numerator);
+                Stream_Parm.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+                Stream_Parm.parm.capture.timeperframe.denominator = 120;;
+                Stream_Parm.parm.capture.timeperframe.numerator = 1;
+                if (-1 == ioctlLoop(camHal->fd, VIDIOC_S_PARM, &Stream_Parm))
+                {
+                    switch (errno)
+                    {
+                    case EINVAL:
+                        /* Cropping not supported. */
+                        break;
+                    default:
+                        /* Errors ignored. */
+                        break;
+                    }
+                }
+                ALOGD("%s: VIDIOC_S_PARM success", __func__);
+                if (0 == ioctlLoop(camHal->fd, VIDIOC_G_PARM, &Stream_Parm))
+                    ALOGD("%s: VIDIOC_G_PARM success,%d,%d,%d,%d", __func__, Stream_Parm.parm.capture.capability, Stream_Parm.parm.capture.capturemode,
+                          Stream_Parm.parm.capture.timeperframe.denominator, Stream_Parm.parm.capture.timeperframe.numerator);
+            }
+            else
+            {
+                ALOGE("%s: VIDIOC_G_PARM failed", __func__);
+            }
+        }
+
 
         memset(&v4l2format, 0, sizeof(v4l2format));
 
@@ -1158,7 +1192,7 @@ out_err:
     }
     static void *previewloop(void *hcamHal)
     {
-        int                 rc;
+        int                 rc, threadPriority;
         int                 buffer_id   = 0;
         pid_t               tid         = 0;
         camera_hardware_t   *camHal     = NULL;
@@ -1166,6 +1200,12 @@ out_err:
         camera_memory_t     *data       = NULL;
         camera_frame_metadata_t *metadata = NULL;
         camera_memory_t     *previewMem = NULL;
+
+        static int loop_count = 0;
+        struct timespec start ;
+        start.tv_sec = start.tv_nsec = 0;
+        clock_gettime(CLOCK_MONOTONIC, &start);
+
 
         camHal = (camera_hardware_t *)hcamHal;
         if(is_debug)
@@ -1177,14 +1217,33 @@ out_err:
             return NULL ;
         }
 
-        tid  = gettid();
-        androidSetThreadPriority(tid, ANDROID_PRIORITY_NORMAL);
+
+        tid = androidGetTid();
+        //tid  = gettid();
+        androidSetThreadPriority(tid, ANDROID_PRIORITY_AUDIO);
         prctl(PR_SET_NAME, (unsigned long)"Camera HAL preview thread", 0, 0, 0);
+        threadPriority = androidGetThreadPriority(tid);
         while(1)
         {
             fd_set fds;
             struct timeval tv;
             int r = 0;
+
+            loop_count++;
+            if(loop_count >= 100)//
+            {
+                int diff, FPS;
+                struct timespec stop ;
+                stop.tv_sec = stop.tv_nsec = 0;
+                clock_gettime(CLOCK_MONOTONIC, &stop);
+                diff = (stop.tv_sec * 1000 + stop.tv_nsec / 1000000) - (start.tv_sec * 1000 + start.tv_nsec / 1000000);
+                FPS = 1000 * loop_count / diff;
+                ALOGE("%s.%d: FPS.%d,[%d,%d ms]", __func__, threadPriority, FPS, loop_count, diff);
+                loop_count = 0;
+                clock_gettime(CLOCK_MONOTONIC, &start);
+                //usleep(670 * 1000);
+                //continue;
+            }
 
             FD_ZERO(&fds);
             FD_SET(camHal->fd, &fds);
