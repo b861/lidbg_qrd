@@ -740,6 +740,37 @@ out_err:
         ALOGD("%s: X", __func__);
         return 0;
     }
+
+    int v4l2_vidio_s_ctrl(int fd, const char *idchar, int id, int value)
+    {
+        struct v4l2_control ctrl;
+        memset(&ctrl, 0, sizeof(ctrl));
+        ctrl.id = id;
+        ctrl.value = value;
+        if (-1 == ioctlLoop(fd, VIDIOC_S_CTRL, &ctrl))
+        {
+            ALOGE("%s:  [%s]failed,%s", __func__, idchar, strerror(errno));
+            return -1;
+        }
+        else
+            ALOGD("%s:  [%s.%d]success", __func__, idchar, value);
+        return 0;
+    }
+    int v4l2_vidio_g_ctrl(int fd, const char *idchar, int id)
+    {
+        struct v4l2_control ctrl;
+        memset(&ctrl, 0, sizeof(ctrl));
+        ctrl.id = id;
+        if (-1 == ioctl(fd, VIDIOC_G_CTRL, &ctrl))
+        {
+            ALOGE("%s: [%s] failed,%s", __func__, idchar, strerror(errno));
+            return -1;
+        }
+        else
+            ALOGD("%s: [%s] success,%d", __func__, idchar, ctrl.value);
+        return 0;
+    }
+
     static int initUsbCamera(camera_hardware_t *camHal, int width, int height,
                              int pixelFormat)
     {
@@ -778,6 +809,11 @@ out_err:
             return -1;
         }
 
+        if (cap.capabilities & V4L2_CAP_DEVICE_CAPS)
+            ALOGE("%s: support:V4L2_CAP_DEVICE_CAPS\n", __func__);
+        else
+            ALOGE("%s: not.support:V4L2_CAP_DEVICE_CAPS\n", __func__);
+
         memset(&cropcap, 0, sizeof(cropcap));
         cropcap.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         if (0 == ioctlLoop(camHal->fd, VIDIOC_CROPCAP, &cropcap))
@@ -807,6 +843,7 @@ out_err:
             ALOGE("%s: VIDIOC_S_CROP failed", __func__);
         }
 
+        //add  for FPS contrl
         {
             struct v4l2_streamparm Stream_Parm;
             memset(&Stream_Parm, 0, sizeof(struct v4l2_streamparm));
@@ -841,6 +878,11 @@ out_err:
             }
         }
 
+        //        v4l2_vidio_s_ctrl(camHal->fd, "V4L2_CID_EXPOSURE_AUTO", V4L2_CID_EXPOSURE_AUTO,V4L2_EXPOSURE_AUTO );
+        v4l2_vidio_g_ctrl(camHal->fd, "V4L2_CID_EXPOSURE_AUTO_PRIORITY", V4L2_CID_EXPOSURE_AUTO_PRIORITY);
+        v4l2_vidio_s_ctrl(camHal->fd, "V4L2_CID_EXPOSURE_AUTO_PRIORITY", V4L2_CID_EXPOSURE_AUTO_PRIORITY, 0);
+        v4l2_vidio_g_ctrl(camHal->fd, "V4L2_CID_EXPOSURE", V4L2_CID_EXPOSURE);
+        v4l2_vidio_g_ctrl(camHal->fd, "V4L2_CID_EXPOSURE_ABSOLUTE", V4L2_CID_EXPOSURE_ABSOLUTE);
 
         memset(&v4l2format, 0, sizeof(v4l2format));
 
