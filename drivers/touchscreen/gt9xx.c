@@ -2169,6 +2169,9 @@ static int goodix_ac_ts_resume(struct device *dev)
 	if (ret <= 0)
 		dev_err(&ts->client->dev, "GTP resume failed.\n");
 
+	if(ret == GTP_ADDR_LENGTH)
+		ret = 0;
+
 	if (ts->use_irq) {
 		gtp_irq_enable(ts);
         } else {
