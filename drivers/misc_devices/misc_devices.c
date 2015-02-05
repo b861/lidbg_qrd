@@ -2,6 +2,7 @@
 #include "lidbg.h"
 //#define DISABLE_USB_WHEN_DEVICE_DOWN
 #define DISABLE_USB_WHEN_ANDROID_DOWN
+//#define FORCE_UMOUNT_UDISK
 
 LIDBG_DEFINE;
 
@@ -42,7 +43,19 @@ void usb_disk_enable(bool enable)
     if(enable)
         USB_WORK_ENABLE;
     else
+    {
+#ifdef FORCE_UMOUNT_UDISK
+    	lidbg("call lidbg_umount\n");
+    	lidbg_shell_cmd("/system/lib/modules/out/lidbg_umount &");
+		lidbg_shell_cmd("/flysystem/lib/out/lidbg_umount &");
+		msleep(4000);
+#else
+		lidbg("USB_WORK_DISENABLE.200.unmount\n");
+		lidbg_shell_cmd("umount /storage/udisk");
+		msleep(200);
+#endif
         USB_WORK_DISENABLE;
+    }
 }
 static int thread_usb_disk_enable_delay(void *data)
 {
@@ -249,9 +262,9 @@ int thread_udisk_stability_test(void *data)
 	ssleep(10);
 	while(1)
 	{
-		USB_WORK_ENABLE;
+		usb_disk_enable(1);
 		ssleep(10);
-		USB_WORK_DISENABLE;
+		usb_disk_enable(0);
 		ssleep(5);
 		cnt++;
 		lidbg("udisk_stability_test times=%d\n",cnt);
