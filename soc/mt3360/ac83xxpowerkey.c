@@ -55,6 +55,7 @@ void powerkey_timer(unsigned long data)
     	{
 		printk("fly power wakeup down (%d)\r\n", fly_pwrkey_flag);
 		fly_pwrkey_flag = 0;
+		fly_acc_step = 0;
 		acc_lock = 2;
 	    	input_report_key(input,POWER_KEY,1);
 	    	input_sync(input);
