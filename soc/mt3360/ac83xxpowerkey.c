@@ -125,8 +125,7 @@ static irqreturn_t powerkey_isr_handler(int irq, void *dev_id)
 
 }
 // add by flyaudio --
-
-int  ac83xxpowerkey_init(void)
+static __init int  ac83xxpowerkey_init(void)
 {
     int ret = -1;
     fly_pwrkey_flag = 0;
@@ -143,9 +142,16 @@ int  ac83xxpowerkey_init(void)
     return ret;
 }
 
-//module_init(ac83xxpowerkey_init);
-//module_exit(ac83xxpowerkey_exit);
+static __exit int  ac83xxpowerkey_exit(void)
+{
+	printk("[PWRKEY]: ac83xxpowerkey_exit\n");
 
-//MODULE_LICENSE("GPL");
-//MODULE_DESCRIPTION("AC83XX PwrKey Driver");
+    return 0;
+}
+module_init(ac83xxpowerkey_init);
+module_exit(ac83xxpowerkey_exit);
+
+MODULE_LICENSE("GPL");
+MODULE_DESCRIPTION("AC83XX PwrKey Driver");
+EXPORT_SYMBOL(fly_acc_step);
 

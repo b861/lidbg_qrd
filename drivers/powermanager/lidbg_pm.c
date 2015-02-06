@@ -484,6 +484,10 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         {
             SOC_System_Status(FLY_ANDROID_DOWN);
             MCU_APP_GPIO_OFF;
+#ifdef SOC_mt3360	
+		extern unsigned int fly_acc_step;
+		fly_acc_step = 1;
+#endif
         }
         else  if(!strcmp(cmd[1], "kill"))
         {
