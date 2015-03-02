@@ -160,10 +160,37 @@ namespace android
     static int get_uvc_device(char *devname)
     {
         char    temp_devname[FILENAME_LENGTH];
-        FILE    *fp = NULL;
         int     i = 0, ret = 0, fd;
+        struct  v4l2_capability     cap;
+
         ALOGE("%s: E", __func__);
-        strncpy(devname, "/dev/video1", FILENAME_LENGTH);
+        *devname = '\0';
+        while(1)
+        {
+            sprintf(temp_devname, "/dev/video%d", i);
+            fd = open(temp_devname, O_RDWR  | O_NONBLOCK, 0);
+            if(-1 != fd)
+            {
+                ret = ioctl(fd, VIDIOC_QUERYCAP, &cap);
+                if((0 == ret) || (ret && (ENOENT == errno)))
+                {
+                    ALOGD("%s: Found UVC node: %s\n", __func__, temp_devname);
+                    strncpy(devname, temp_devname, FILENAME_LENGTH);
+                    break;
+                }
+                close(fd);
+            }
+            else
+                ALOGD("%s.%d: Probing.%s: ret: %d, errno: %d,%s", __func__, i, temp_devname, ret, errno, strerror(errno));
+
+            if(i++ > 10)
+            {
+                strncpy(devname, "/dev/video1", FILENAME_LENGTH);
+                ALOGD("%s.%d: Probing fail:%s \n", __func__, i, devname);
+                break;
+            }
+        }
+
         ALOGE("%s: X,%s", __func__, devname);
         return 0;
     }
@@ -1467,6 +1494,13 @@ out_err:
         VALIDATE_DEVICE_HDL(camHal, device, -1);
         Mutex::Autolock autoLock(camHal->lock);
 
+        //return while there is not exsit a uvc camera.
+        if(camHal->fd < 0)
+        {
+            ALOGI("%s: no uvc device:return", __func__);
+            return 0;
+        }
+
         /* If preivew is already running, nothing to be done */
         if(camHal->previewEnabledFlag)
         {
@@ -2167,11 +2201,10 @@ ION_OPEN_FAILED:
     char *usbcam_get_parameters(struct camera_device *device)
     {
         char *parms;
-        ALOGI("%s: E", __func__);
+        //ALOGI("%s: E", __func__);
 
         camera_hardware_t *camHal;
         VALIDATE_DEVICE_HDL(camHal, device, NULL);
-
         Mutex::Autolock autoLock(camHal->lock);
 
         if(false)
@@ -2193,16 +2226,14 @@ ION_OPEN_FAILED:
             strcpy(parms, params_str8.string());
         }
 
-
-        ALOGI("%s: X,%s", __func__, parms);
+        //ALOGI("%s: X,%s", __func__, parms);
         return parms;
     }
 
     void usbcam_put_parameters(struct camera_device *device, char *parm)
     {
-        ALOGE("%s: E", __func__);
-
-        ALOGE("%s: X", __func__);
+        //       ALOGE("%s: E", __func__);
+        //      ALOGE("%s: X", __func__);
         return;
     }
 
