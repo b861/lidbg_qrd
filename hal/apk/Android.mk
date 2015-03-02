@@ -35,18 +35,18 @@ LOCAL_MODULE_PATH := $(DBG_OUT_PATH)
 include $(BUILD_PREBUILT)
 
 
-include $(CLEAR_VARS)
-LOCAL_MODULE := FastBoot.apk
-LOCAL_SRC_FILES := FastBoot.apk
-LOCAL_MODULE_CLASS := bin
-LOCAL_MODULE_TAGS := optional debug eng tests samples
-LOCAL_MODULE_PATH := $(DBG_OUT_PATH)
-include $(BUILD_PREBUILT)
+#include $(CLEAR_VARS)
+#LOCAL_MODULE := FastBoot.apk
+#LOCAL_SRC_FILES := FastBoot.apk
+#LOCAL_MODULE_CLASS := bin
+#LOCAL_MODULE_TAGS := optional debug eng tests samples
+#LOCAL_MODULE_PATH := $(DBG_OUT_PATH)
+#include $(BUILD_PREBUILT)
 
-include $(CLEAR_VARS)
-LOCAL_MODULE := FlyBootService.apk
-LOCAL_SRC_FILES := FlyBootService.apk
-LOCAL_MODULE_CLASS := bin
-LOCAL_MODULE_TAGS := optional debug eng tests samples
-LOCAL_MODULE_PATH := $(DBG_OUT_PATH)
-include $(BUILD_PREBUILT)
+#include $(CLEAR_VARS)
+#LOCAL_MODULE := FlyBootService.apk
+#LOCAL_SRC_FILES := FlyBootService.apk
+#LOCAL_MODULE_CLASS := bin
+#LOCAL_MODULE_TAGS := optional debug eng tests samples
+#LOCAL_MODULE_PATH := $(DBG_OUT_PATH)
+#include $(BUILD_PREBUILT)

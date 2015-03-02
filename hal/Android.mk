@@ -46,4 +46,6 @@ endif
 SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,lidbg_umount)
 SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,apk)
 
+SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,apps)
+
 include $(SUBDIR_MAKEFILES)

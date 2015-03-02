@@ -23,6 +23,10 @@ cp -ru ./touchscreen/ts_config $dest_dir/  &> /dev/null
 rm $dest_dir/drivers.conf  &> /dev/null
 rm $dest_dir/state.conf    &> /dev/null
 
+#cp fastboot app
+cp -u $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/app/FastBoot.apk  $DBG_OUT_PATH/
+cp -u $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/app/FlyBootService.apk $DBG_OUT_PATH/
+
 for each_dir in `ls -l | grep "^d" | awk '{print $NF}'`
 	do
 	src_dir=$DBG_DRIVERS_PATH/$each_dir
