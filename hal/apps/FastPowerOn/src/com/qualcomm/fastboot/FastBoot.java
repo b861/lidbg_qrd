@@ -97,7 +97,7 @@ public class FastBoot extends Activity {
         super.onCreate(icicle);
         setContentView(R.layout.connectivity);
 
-        LIDBG_PRINT("FastBoot onCreate+");
+        LIDBG_PRINT("*** FastBoot onCreate start ***");
         mFastBoot = this;
         IntentFilter finishFilter = new IntentFilter();
         finishFilter.addAction("FinishActivity");
@@ -105,7 +105,7 @@ public class FastBoot extends Activity {
 
         LIDBG_PRINT("before startService+");
         startService(new Intent(this, localSerice.class));
-        LIDBG_PRINT("FastBoot onCreate-");
+        LIDBG_PRINT("*** FastBoot onCreate end ***");
     }
 
     @Override

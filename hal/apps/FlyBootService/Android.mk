@@ -7,7 +7,7 @@ LOCAL_SRC_FILES := $(call all-subdir-java-files)
 
 LOCAL_PACKAGE_NAME := FlyBootService
 LOCAL_CERTIFICATE := platform
-
+LOCAL_MODULE_PATH := $(DBG_OUT_PATH)
 include $(BUILD_PACKAGE)
 
 #ifeq ($(strip $(LOCAL_PACKAGE_OVERRIDES)),)

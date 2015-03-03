@@ -10,6 +10,7 @@ import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentFilter.MalformedMimeTypeException;
@@ -255,8 +256,21 @@ public class FlyBootService extends Service {
             LIDBG_PRINT("get action:" + action + " state:" + mState);
             if (action.equals(FLYFASTBOOTSTART)) {
                 LIDBG_PRINT(" start fastpower on ");
-                sendBroadcast(new Intent(
-                        "android.intent.action.FAST_BOOT_START"));// 启动FastBootPowerOn
+//                sendBroadcast(new Intent(
+//                        "android.intent.action.FAST_BOOT_START"));// 启动FastBootPowerOn
+/******************************************* start another app *******************************************/
+					LIDBG_PRINT("********** FlyBootService start FastBoot app **********");
+//					Intent mIntent = new Intent("android.intent.action.MAIN");
+					Intent mIntent = new Intent();
+					ComponentName comp = new ComponentName(  
+					        "com.qualcomm.fastboot",  
+					        "com.qualcomm.fastboot.FastBoot");
+					mIntent.setComponent(comp);   
+					mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);  
+					mIntent.addCategory("android.intent.category.LAUNCHER");   
+					startActivity(mIntent);
+/*************************************************** end ***************************************************/
+
                 LIDBG_PRINT(" FLYFASTBOOTSTART-");
                 mState = emState.Sleep;
 

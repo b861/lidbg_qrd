@@ -122,11 +122,8 @@ function soc_build_origin_image
 	#copy fastboot apk
 	cd $RELEASE_REPOSITORY
 	git checkout $REPOSITORY_WORK_BRANCH
-	cp $RELEASE_REPOSITORY/app/FastBoot.apk        $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/app/FastBoot.apk
-	cp $RELEASE_REPOSITORY/app/FlyBootService.apk  $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/app/FlyBootService.apk
-
-	cp $UPDATA_BIN_PLATFORM_DIR/app/FastBoot.apk        $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/app/FastBoot.apk
-	cp $UPDATA_BIN_PLATFORM_DIR/app/FlyBootService.apk        $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/app/FlyBootService.apk
+	cp $DBG_OUT_PATH/FastBoot.apk        $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/app/FastBoot.apk
+	cp $DBG_OUT_PATH/FlyBootService.apk  $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/app/FlyBootService.apk
 
 	echo "build_origin" > $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/etc/build_origin
 

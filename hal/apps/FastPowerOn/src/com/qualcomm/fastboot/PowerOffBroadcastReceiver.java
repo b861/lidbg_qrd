@@ -40,13 +40,14 @@ public class PowerOffBroadcastReceiver extends BroadcastReceiver{
     public final static String LOG_TAG = "PowerOffBroadcastReceiver";
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (intent.getAction().equals("android.intent.action.FAST_BOOT_START")) {
+       /* if (intent.getAction().equals("android.intent.action.FAST_BOOT_START")) {
             Log.d(LOG_TAG, "receive Intent.ACTION_FAST_BOOT_START");
             Intent powerOffIntent = new Intent(context, FastBoot.class);
             powerOffIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(powerOffIntent);
 	    LIDBG_PRINT("PowerOffBroadcastReceiver startActivity-");
-        }else if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)) {
+        }else */
+       if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)) {
 		LIDBG_PRINT("receive Intent.ACTION_BOOT_COMPLETED");
             try {
                 Context fastBootContext = context.createPackageContext("com.qualcomm.fastboot",
