@@ -183,6 +183,7 @@ void parse_cmd(char *pt)
 #ifdef SOC_mt3360
             lidbg_shell_cmd("rm /sdcard/logcat*");
             lidbg_shell_cmd("rm /sdcard/kmsg*");
+	     logcat_enabled = false;
 #else
             lidbg_shell_cmd("rm /data/logcat*");
             lidbg_shell_cmd("rm /data/kmsg*");
