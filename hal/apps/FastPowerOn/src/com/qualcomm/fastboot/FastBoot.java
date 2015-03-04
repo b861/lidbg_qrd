@@ -34,6 +34,8 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
@@ -48,6 +50,8 @@ public class FastBoot extends Activity {
     private static FastBoot mFastBoot;
     private static final String SYSTEM_RESUME = "com.flyaudio.system.resume";
     private static boolean bIsKLDRunning = true;
+    public static PowerManager pm;
+    public static WakeLock mFbWakeLock = null;
 
     private static void LIDBG_PRINT(String msg) {
         Log.d(TAG, msg);
@@ -106,6 +110,7 @@ public class FastBoot extends Activity {
         LIDBG_PRINT("before startService+");
         startService(new Intent(this, localSerice.class));
         LIDBG_PRINT("*** FastBoot onCreate end ***");
+		 acquireWakeLock();
     }
 
     @Override
@@ -116,6 +121,27 @@ public class FastBoot extends Activity {
     @Override
     public void onResume() {
         super.onResume();
+    }
+
+    public void acquireWakeLock() {
+        if (mFbWakeLock == null) {
+            LIDBG_PRINT("*** acquire fastboot WakeLock ***");
+            pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+
+            mFbWakeLock = (WakeLock) pm.newWakeLock(
+                    PowerManager.PARTIAL_WAKE_LOCK, "fastbootWakeLock");
+            if (mFbWakeLock != null && !mFbWakeLock.isHeld())
+                mFbWakeLock.acquire();
+        }
+    }
+
+    private static void releaseWakeLock() {
+        LIDBG_PRINT("---release fastboot WakeLock ---");
+        if (mFbWakeLock != null && mFbWakeLock.isHeld()) {
+            LIDBG_PRINT(" release WakeLock ok ");
+            mFbWakeLock.release();
+            mFbWakeLock = null;
+        }
     }
 
     @Override
@@ -398,6 +424,7 @@ public class FastBoot extends Activity {
             SystemClock.sleep(1000);
             LIDBG_PRINT("powerOffSystem step7");
             mPm.goToSleep(SystemClock.uptimeMillis());
+			  releaseWakeLock();
             LIDBG_PRINT("powerOffSystem-");
             // Intent iFinish = new Intent("FinishActivity");
             // sendBroadcast(iFinish);

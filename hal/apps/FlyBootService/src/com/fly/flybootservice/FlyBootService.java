@@ -254,11 +254,10 @@ public class FlyBootService extends Service {
             // TODO Auto-generated method stub
             String action = intent.getAction();
             LIDBG_PRINT("get action:" + action + " state:" + mState);
-            if (action.equals(FLYFASTBOOTSTART)) {
+/*            if (action.equals(FLYFASTBOOTSTART)) {
                 LIDBG_PRINT(" start fastpower on ");
 //                sendBroadcast(new Intent(
 //                        "android.intent.action.FAST_BOOT_START"));// 启动FastBootPowerOn
-/******************************************* start another app *******************************************/
 					LIDBG_PRINT("********** FlyBootService start FastBoot app **********");
 //					Intent mIntent = new Intent("android.intent.action.MAIN");
 					Intent mIntent = new Intent();
@@ -269,20 +268,32 @@ public class FlyBootService extends Service {
 					mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);  
 					mIntent.addCategory("android.intent.category.LAUNCHER");   
 					startActivity(mIntent);
-/*************************************************** end ***************************************************/
 
                 LIDBG_PRINT(" FLYFASTBOOTSTART-");
                 mState = emState.Sleep;
 
-            } else if (action.equals(Intent.ACTION_SCREEN_ON)) {
+            } else */if (action.equals(Intent.ACTION_SCREEN_ON)) {
                 procScreenOn();
             } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
                 procScreenOff();
             } else if (action.equals(ACTON_FINAL_SLEEP)) {
                 SendBroadcastToService(KeyBootState, keyFastSusupendOFF);
                 setAndroidState(false);// 向底层请求FAST_BOOT_START广播
-                delay(100);
-                mState = emState.Going2Sleep;
+
+    				LIDBG_PRINT("********** FlyBootService start FastBoot app **********");
+    				Intent mIntent = new Intent();
+    				ComponentName comp = new ComponentName(  
+    				        "com.qualcomm.fastboot",  
+    				        "com.qualcomm.fastboot.FastBoot");
+    				mIntent.setComponent(comp);   
+    				mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);  
+    				mIntent.addCategory("android.intent.category.LAUNCHER");   
+    				startActivity(mIntent);
+
+                LIDBG_PRINT(" FLYFASTBOOTSTART-");
+
+                delay(2000);
+                mState = emState.Sleep;
                 releaseWakeLock();
                 LIDBG_PRINT("going to sleep");
             } else if (action.equals("android.provider.Telephony.SECRET_CODE")) {
