@@ -259,11 +259,11 @@ void usb_enumerate_monitor(char *key_word, void *data)
 int thread_udisk_stability_test(void *data)
 {
 	u32 cnt = 0;
-	ssleep(10);
+	ssleep(30);
 	while(1)
 	{
 		usb_disk_enable(1);
-		ssleep(10);
+		ssleep(15);
 		usb_disk_enable(0);
 		ssleep(5);
 		cnt++;

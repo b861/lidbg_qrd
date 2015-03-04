@@ -35,7 +35,8 @@ int main(int argc, char **argv)
 	
 	printf("enter %s\n",__FILE__);
 	//system("su");
-	system("chmod 777 /sys/class/leds/button-backlight/brightness");
+	//system("chmod 777 /sys/class/leds/button-backlight/brightness");
+	system("chmod 777 /sys/class/leds/kpdbl-pwm-1/brightness");
 	system("chmod 777 /sys/power/wake_lock");
 	system("chmod 777 /sys/power/wake_unlock");
 	system("chmod 777 /dev");
@@ -49,11 +50,13 @@ int main(int argc, char **argv)
 	while(1)
 	{
 	    system("echo lidbg > /sys/power/wake_lock");
-	    system("echo 1 > /sys/class/leds/button-backlight/brightness");
+	    //system("echo 1 > /sys/class/leds/button-backlight/brightness");
+		system("echo 255 > /sys/class/leds/kpdbl-pwm-1/brightness");
 	    sleep(1);
 
 
-	    system("echo 0 > /sys/class/leds/button-backlight/brightness");
+	    //system("echo 0 > /sys/class/leds/button-backlight/brightness");
+		system("echo 0 > /sys/class/leds/kpdbl-pwm-1/brightness");
 	    system("echo lidbg > /sys/power/wake_unlock");
 	    sleep(2);
 
