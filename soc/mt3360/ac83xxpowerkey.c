@@ -59,7 +59,7 @@ void powerkey_timer(unsigned long data)
 		acc_lock = 2;
 	    	input_report_key(input,POWER_KEY,1);
 	    	input_sync(input);
-		lidbg_shell_cmd("am broadcast -a com.flyaudio.devices.acc_on &");
+		lidbg_shell_cmd("am broadcast -a com.flyaudio.devices.acc_on ");
 		mdelay(250);
 		delay_wakeup = 20;
 		while(delay_wakeup--)
@@ -74,9 +74,9 @@ void powerkey_timer(unsigned long data)
     		printk("fly power acc off ++ (%d)\r\n", fly_pwrkey_flag);
 		fly_pwrkey_flag = 0;
 		if(fly_acc_step == 0)
-			lidbg_shell_cmd("am broadcast -a com.flyaudio.devices.acc_off &");
+			lidbg_shell_cmd("am broadcast -a com.flyaudio.devices.acc_off ");
 		else{
-			lidbg_shell_cmd("am broadcast -a com.flyaudio.ap.broadcast &");
+			lidbg_shell_cmd("am broadcast -a com.flyaudio.ap.broadcast ");
 			fly_acc_step = 0;
 		}		
 		printk("fly power acc off --\r\n");    	
@@ -86,9 +86,9 @@ void powerkey_timer(unsigned long data)
 		printk("fly power acc on ++ (%d)\r\n", fly_pwrkey_flag);
 		fly_pwrkey_flag = 0;
 		if(fly_acc_step == 0)
-			lidbg_shell_cmd("am broadcast -a com.flyaudio.devices.acc_on &");
+			lidbg_shell_cmd("am broadcast -a com.flyaudio.devices.acc_on ");
 		else{
-			lidbg_shell_cmd("am broadcast -a com.flyaudio.ap.broadcast &");
+			lidbg_shell_cmd("am broadcast -a com.flyaudio.ap.broadcast ");
 			fly_acc_step = 0;
 		}
 		printk("fly power acc on --\r\n");    
@@ -98,7 +98,7 @@ void powerkey_timer(unsigned long data)
 		printk("fly power suspend down (%d)\r\n", fly_pwrkey_flag);
 		fly_pwrkey_flag = 0;
 		acc_lock = 0;
-		lidbg_shell_cmd("am broadcast -a com.flyaudio.ap.broadcast &");
+		lidbg_shell_cmd("am broadcast -a com.flyaudio.ap.broadcast ");
 		printk("fly ac8317_suspend_counts=%u\r\n", ++ac8317_suspend_counts);
 		printk("fly power suspend release\r\n");    	
     	}
