@@ -329,6 +329,24 @@ public class FlyBootService extends Service {
             Settings.System.putInt(resolver, "EALYSUSPEND_TIME", 60);
             EALYSUSPEND_TIME = 10;
             DEBUG_ONCE = false;
+        }else if (secretHost.equals("4631")) {
+				LIDBG_PRINT(" Enter flyaudio  oncetimes debug mode!!!! ");
+
+				Settings.System.putInt(resolver, "flyaudio_debug", 0);
+
+				Settings.System.putInt(resolver, "EALYSUSPEND_TIME", 60);
+				ALERM_TIME = 10;
+				EALYSUSPEND_TIME = 10;
+				DEBUG_ONCE = false;
+        }else if (secretHost.equals("4630")) {
+				LIDBG_PRINT(" Enter flyaudio  oncetimes debug mode!!!! ");
+
+				Settings.System.putInt(resolver, "flyaudio_debug", 0);
+
+				Settings.System.putInt(resolver, "EALYSUSPEND_TIME", 60);
+				ALERM_TIME = 5;
+				EALYSUSPEND_TIME = 5;
+				DEBUG_ONCE = false;
         } else if (secretHost.equals("4600")) {
             LIDBG_PRINT(" Enter flyaudio  oncetimes debug fast mode!!!! ");
             ALERM_TIME = 0;
