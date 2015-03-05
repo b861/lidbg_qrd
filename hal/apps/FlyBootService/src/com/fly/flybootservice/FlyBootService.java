@@ -4,6 +4,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningTaskInfo;
+import android.app.WallpaperInfo;
+import android.app.WallpaperManager;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -26,7 +31,9 @@ import android.os.SystemClock;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.util.Log;
+import android.text.TextUtils;
 
+import java.util.List;
 /*
  * ScreenOn ScreenOff DeviceOff Going2Sleep 四种状态分别表示：1.表示正常开屏状态2.表示关屏，但没关外设的状态
  * 0'~30'的阶段3.表示关屏关外设，但没到点进入深度休眠 30'~60'的阶段4.表示发出休眠请求到执行快速休眠 60'后,即进入深度休眠
@@ -75,7 +82,16 @@ public class FlyBootService extends Service {
     private boolean DEBUG_ONCE = true;
     private Handler sleppHandler;
     private String SYSTEM_RESUME = "com.flyaudio.system.resume";
-
+	private ActivityManager mDbgActivityManager = null;
+    String dbgSystemLevelProcess[] = {
+            "com.android.flyaudioui",
+            "cn.flyaudio.android.flyaudioservice",
+            "cn.flyaudio.navigation", "com.android.launcher",
+            "cn.flyaudio.osd.service", "android.process.acore",
+            "android.process.media", "com.android.systemui",
+            "com.android.deskclock", "sys.DeviceHealth", "system",
+            "com.fly.flybootservice","com.android.keyguard","android.policy"
+    };
     private enum emState {
         Init, ScreenOn, ScreenOff, DeviceOff, Going2Sleep, Sleep
     };
@@ -145,7 +161,7 @@ public class FlyBootService extends Service {
      */
     public void acquireWakeLock() {
         if (mWakeLock == null) {
-            LIDBG_PRINT("acquirePartialWakeLock  ");
+            LIDBG_PRINT("+++ acquire FlyBootService WakeLock +++");
             pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
             // mWakeLock = (WakeLock) pm.newWakeLock(
             // PowerManager.PARTIAL_WAKE_LOCK
@@ -160,11 +176,14 @@ public class FlyBootService extends Service {
     }
 
     public void releaseWakeLock() {
-        LIDBG_PRINT("---releaseWakeLock ---");
+        LIDBG_PRINT("---release FlyBootService WakeLock ---");
         if (mWakeLock != null && mWakeLock.isHeld()) {
-            LIDBG_PRINT(" releaseWakeLock ");
-            mWakeLock.release();
-            mWakeLock = null;
+			mWakeLock.release();
+			if(mWakeLock.isHeld()){
+				LIDBG_PRINT("Error: release WakeLock failed,do it again");
+				mWakeLock.release();
+			}
+			mWakeLock = null;
         }
     }
 
@@ -347,6 +366,12 @@ public class FlyBootService extends Service {
 				ALERM_TIME = 5;
 				EALYSUSPEND_TIME = 5;
 				DEBUG_ONCE = false;
+        }else if (secretHost.equals("4629")) {
+				LIDBG_PRINT("Debug mode starting ...");
+
+				mDbgActivityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+				delay(100);
+				dbgKillProcess();
         } else if (secretHost.equals("4600")) {
             LIDBG_PRINT(" Enter flyaudio  oncetimes debug fast mode!!!! ");
             ALERM_TIME = 0;
@@ -359,6 +384,59 @@ public class FlyBootService extends Service {
                         + " ALERM_TIME:" + ALERM_TIME + " EALYSUSPEND_TIME:"
                         + EALYSUSPEND_TIME);
 
+    }
+
+    private void dbgKillProcess() {
+        List<ActivityManager.RunningAppProcessInfo> appProcessList = null;
+
+        appProcessList = mDbgActivityManager.getRunningAppProcesses();
+
+        LIDBG_PRINT("Debug to kill process.");
+        for (ActivityManager.RunningAppProcessInfo appProcessInfo : appProcessList) {
+            int pid = appProcessInfo.pid;
+            int uid = appProcessInfo.uid;
+            String processName = appProcessInfo.processName;
+            if (ifKillableProcess(processName)) {
+                // mActivityManager.killBackgroundProcesses(processName);
+                LIDBG_PRINT(processName +"."+pid +" will be killed");
+                mDbgActivityManager.forceStopPackage(processName);
+	    /*if(processName.equals("cld.navi.c2739.mainframe")){
+		msgTokenal("flyaudio kill "+pid);
+		LIDBG_PRINT(pid + " cld.navi.c2739.mainframe"+" will be kill by the kenal");	
+		}*/
+
+            }
+        }
+    }
+
+    private boolean ifKillableProcess(String packageName) {
+        for (String processName : dbgSystemLevelProcess) {
+            if (processName.equals(packageName)) {
+                return false;
+            }
+        }
+        String currentProcess = getApplicationInfo().processName;
+        if (currentProcess.equals(packageName)) {
+            return false;
+        }
+
+        // couldn't kill the live wallpaper process, if kill it, the system
+        // will set the wallpaper as the default.
+        WallpaperInfo info = WallpaperManager.getInstance(this)
+                .getWallpaperInfo();
+        if (info != null && !TextUtils.isEmpty(packageName)
+                && packageName.equals(info.getPackageName())) {
+            return false;
+        }
+
+        // couldn't kill the IME process.
+        String currentInputMethod = Settings.Secure.getString(
+                getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD);
+        if (!TextUtils.isEmpty(currentInputMethod)
+                && currentInputMethod.startsWith(packageName)) {
+            return false;
+        }
+        return true;
     }
 
     private void setAndroidState(boolean bUpDown) {

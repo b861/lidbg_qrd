@@ -125,22 +125,36 @@ public class FastBoot extends Activity {
 
     public void acquireWakeLock() {
         if (mFbWakeLock == null) {
-            LIDBG_PRINT("*** acquire fastboot WakeLock ***");
+            LIDBG_PRINT("+++ acquire fastboot WakeLock +++");
             pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 
             mFbWakeLock = (WakeLock) pm.newWakeLock(
                     PowerManager.PARTIAL_WAKE_LOCK, "fastbootWakeLock");
-            if (mFbWakeLock != null && !mFbWakeLock.isHeld())
-                mFbWakeLock.acquire();
+				if (mFbWakeLock != null && !mFbWakeLock.isHeld()){
+					LIDBG_PRINT("New wakelock ok");
+					mFbWakeLock.acquire();
+					if(!mFbWakeLock.isHeld())
+						LIDBG_PRINT("Error: acquire WakeLock failed");
+				}
+				else{
+					LIDBG_PRINT("New wakelock failed, acquire again");
+					mFbWakeLock = (WakeLock) pm.newWakeLock(
+						PowerManager.PARTIAL_WAKE_LOCK, "fastbootWakeLock");
+					if (mFbWakeLock != null && !mFbWakeLock.isHeld())
+					mFbWakeLock.acquire();
+				}
         }
     }
 
     private static void releaseWakeLock() {
         LIDBG_PRINT("---release fastboot WakeLock ---");
         if (mFbWakeLock != null && mFbWakeLock.isHeld()) {
-            LIDBG_PRINT(" release WakeLock ok ");
-            mFbWakeLock.release();
-            mFbWakeLock = null;
+			mFbWakeLock.release();
+			if(mFbWakeLock.isHeld()){
+				LIDBG_PRINT("Error: release WakeLock failed,do it again");
+				mFbWakeLock.release();
+			}
+			mFbWakeLock = null;
         }
     }
 
@@ -423,7 +437,7 @@ public class FastBoot extends Activity {
             LIDBG_PRINT("powerOffSystem step6");
             SystemClock.sleep(1000);
             LIDBG_PRINT("powerOffSystem step7");
-            mPm.goToSleep(SystemClock.uptimeMillis());
+//            mPm.goToSleep(SystemClock.uptimeMillis());
 			  releaseWakeLock();
             LIDBG_PRINT("powerOffSystem-");
             // Intent iFinish = new Intent("FinishActivity");
