@@ -514,6 +514,8 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         else if(!strcmp(cmd[1], "devices_up"))
         {
             SOC_System_Status(FLY_DEVICE_UP);
+            PM_WARN("mediascan.en.0\n");
+            lidbg_shell_cmd("setprop persist.lidbg.mediascan.en 0");
             if(SOC_Hal_Acc_Callback)
             {
                 lidbg("hal callback 2\n");
@@ -523,6 +525,8 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         else if(!strcmp(cmd[1], "devices_down"))
         {
             SOC_System_Status(FLY_DEVICE_DOWN);
+            PM_WARN("mediascan.en.1\n");
+            lidbg_shell_cmd("setprop persist.lidbg.mediascan.en 1");
             if(SOC_Hal_Acc_Callback)
             {
                 lidbg("hal callback 3\n");
@@ -915,6 +919,9 @@ static int __init lidbg_pm_init(void)
 
     CREATE_KTHREAD(thread_gpio_app_status_delay, NULL);
     lidbg_shell_cmd("echo 8  > /proc/sys/kernel/printk");
+    PM_WARN("mediascan.en.0\n");
+    lidbg_shell_cmd("setprop persist.lidbg.mediascan.en 0");
+
 #ifdef PLATFORM_msm8226
     lidbg_trace_msg_cb_register("mdss_mdp_overlay_on: Failed to turn on fb0", NULL, find_fb_open_err);
 #endif
