@@ -76,7 +76,7 @@ struct hw_version_specific g_hw_version_specific[] =
 	.cpu_freq_recovery_limit = "600000",
 	.sensor_num = 5,
 
-	.fly_parameter_node = "/dev/block/mmcblk0p18",
+	.fly_parameter_node = "/dev/block/platform/msm_sdcc.1/by-name/flyparameter",
 	},
 {//msm8974 v2
 	.gpio_lcd_reset = 80,
@@ -164,7 +164,7 @@ struct hw_version_specific g_hw_version_specific[] =
 	.sensor_num = 5,
 	.fan_onoff_temp = 75,
 
-	.fly_parameter_node = "/dev/block/mmcblk0p18",
+	.fly_parameter_node = "/dev/block/platform/msm_sdcc.1/by-name/flyparameter",
 	},
 
 };
