@@ -90,15 +90,14 @@ public class FlyBootService extends Service {
     private static String FLYFASTBOOTSTART = "com.flyaudio.ap.broadcast";
 
     private PowerBroadcastReceiver powerBroadcastReceiver = null;
+    private FbAirplanModeReceiver fbAirplanModeReceiver = null;
     private final int DEBUG_VALUE = 1;
     private static int ALERM_TIME = 20;
     private int EALYSUSPEND_TIME = 30;
     private ContentResolver resolver = null;
     private boolean DEBUG_ONCE = true;
     private Handler sleppHandler;
-    private String SYSTEM_RESUME = "com.flyaudio.system.resume";
-	private ActivityManager mDbgActivityManager = null;
-    String dbgSystemLevelProcess[] = {
+    private ActivityManager mDbgActivityManager = null;
     private static String SYSTEM_RESUME = "com.flyaudio.system.resume";
 //    private static FastBoot mFastBoot;
     private static FlyBootService mFlyBootService;
@@ -116,6 +115,8 @@ public class FlyBootService extends Service {
     private HandlerThread mHandlerThread;
     private Handler mmHandler;
     Thread sendBroadcastThread = null;
+    private static boolean firstBootFlag = false;
+
     // add launcher in protected list
     String systemLevelProcess[] = {
             "com.android.flyaudioui",
@@ -160,6 +161,8 @@ public class FlyBootService extends Service {
         registerReceiver(powerBroadcastReceiver, filter);
         registerReceiver(powerBroadcastReceiver, filter_secret);
 
+        mFlyBootService = this;
+
         fbHandlerThread = new HandlerThread(TAG);
         fbHandlerThread.start();
         fbHandler = new Handler(fbHandlerThread.getLooper(), fbHandlerCallback);
@@ -175,6 +178,7 @@ public class FlyBootService extends Service {
         // TODO Auto-generated method stub
         super.onDestroy();
         unregisterReceiver(powerBroadcastReceiver);
+        unregisterReceiver(fbAirplanModeReceiver);
         LIDBG_PRINT("flybootservice destory...");
     }
 
@@ -217,15 +221,6 @@ public class FlyBootService extends Service {
         }
     }
 
-    public void releaseWakeLock() {
-        LIDBG_PRINT("---release FlyBootService WakeLock ---");
-        if (mWakeLock != null && mWakeLock.isHeld()) {
-			mWakeLock.release();
-			if(mWakeLock.isHeld()){
-				LIDBG_PRINT("Error: release WakeLock failed,do it again");
-				mWakeLock.release();
-			}
-			mWakeLock = null;
     public static void releaseWakeLock() {
         LIDBG_PRINT(" ----- release flybootservice wakelock ----- ");
         if (mWakeLock != null && mWakeLock.isHeld()) {
@@ -235,6 +230,7 @@ public class FlyBootService extends Service {
             mWakeLock = null;
         }
     }
+
 
     public static void restoreAirplaneMode(Context context) {
         LIDBG_PRINT("restoreAirplaneMode+");
@@ -247,21 +243,23 @@ public class FlyBootService extends Service {
         LIDBG_PRINT("ON  LOCATION_MODE: " + Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.LOCATION_MODE,
                         -100));
 	*/
+	
+        boolean b = Settings.Global.putInt(context.getContentResolver(),
+                Settings.Global.AIRPLANE_MODE_ON, 0);
 
-			boolean b = Settings.Global.putInt(context.getContentResolver(),
-				Settings.Global.AIRPLANE_MODE_ON, 0);
+        LIDBG_PRINT("restoreAirplane isSet:"+b);
+        
+        Intent intentAirplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        intentAirplane.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+        intentAirplane.putExtra("state", false);
 
-			LIDBG_PRINT("restoreAirplane isSet:"+b);
+        context.sendBroadcastAsUser(intentAirplane, UserHandle.ALL);
+        Settings.Global.putInt(context.getContentResolver(), "fastboot_airplane_mode", -1);
 
-			Intent intentAirplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-			intentAirplane.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
-			intentAirplane.putExtra("state", false);
-
-			context.sendBroadcastAsUser(intentAirplane, UserHandle.ALL);
-			Settings.Global.putInt(context.getContentResolver(), "fastboot_airplane_mode", -1);
-
-			LIDBG_PRINT("restoreAirplaneMode end");
+        LIDBG_PRINT("restoreAirplaneMode end");
+        
     }
+
 
     Runnable ealysuspend = new Runnable() {
         @Override
@@ -343,7 +341,15 @@ public class FlyBootService extends Service {
     }
 
 	private void start_fastboot(){
-		     LIDBG_PRINT(" ********** start fastboot ********** ");
+            LIDBG_PRINT(" ********** start fastboot ********** ");
+
+            firstBootFlag = true;
+
+            IntentFilter filter_fbAirplaneMode = new IntentFilter();
+            filter_fbAirplaneMode.addAction(Intent.ACTION_BOOT_COMPLETED);
+            fbAirplanModeReceiver = new FbAirplanModeReceiver();
+            registerReceiver(fbAirplanModeReceiver, filter_fbAirplaneMode);
+
 		     fbPm = (PowerManager) getSystemService(Context.POWER_SERVICE);
             mActivityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
 
@@ -363,6 +369,18 @@ public class FlyBootService extends Service {
             registerReceiver(systemResumeBroadcast, new IntentFilter(SYSTEM_RESUME));
 
 	}
+    class FbAirplanModeReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // TODO Auto-generated method stub
+            String action = intent.getAction();
+            LIDBG_PRINT("===== FbAirplanModeReceiver =====");
+
+            if (action.equals(Intent.ACTION_BOOT_COMPLETED))
+					restoreAirplaneMode(context);
+        }
+    }
+
     // 动态注册广播 ，接收screen_of及screen_on.
     class PowerBroadcastReceiver extends BroadcastReceiver {
         @Override
@@ -464,7 +482,7 @@ public class FlyBootService extends Service {
 	        public void onReceive(Context context, Intent intent) {
 	            Log.d(TAG, "Send Broadcast finish in " + SystemClock.elapsedRealtime());
 	            String action = intent.getAction();
-	            if (action.equals(SYSTEM_RESUME)) {
+	            if ((action.equals(SYSTEM_RESUME)) && (firstBootFlag)) {
 	                // receiver the system resume msg ,show logo and finish fastboot.
 	                LIDBG_PRINT("systemResumeBroadcast  resume, fast power on.");
 	                enableShowLogo(true);
@@ -475,8 +493,8 @@ public class FlyBootService extends Service {
 	                powerOnSystem(mFlyBootService);
 
 	        
-	                Intent iFinish = new Intent("FinishActivity");
-	                sendBroadcastAsUser(iFinish,UserHandle.ALL);
+//	                Intent iFinish = new Intent("FinishActivity");
+//	                sendBroadcastAsUser(iFinish,UserHandle.ALL);
 	                unregisterReceiver(systemResumeBroadcast);
 	                LIDBG_PRINT("unregisterReceiver sendBroadcasResult-");
 	    }
@@ -593,7 +611,7 @@ public class FlyBootService extends Service {
 
     private void powerOnSystem(Context context) {
         LIDBG_PRINT("qf powerOnSystem+");
-    //msgTokenal("bootcompleted");
+    	 //msgTokenal("bootcompleted");
         //sendBootCompleted(false);
         LIDBG_PRINT("powerOnSystem step 1");
         restoreAirplaneMode(context);
@@ -771,7 +789,7 @@ public class FlyBootService extends Service {
 
 				mDbgActivityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
 				delay(100);
-				dbgKillProcess();
+				KillProcess();
         } else if (secretHost.equals("4600")) {
             LIDBG_PRINT(" Enter flyaudio  oncetimes debug fast mode!!!! ");
             ALERM_TIME = 0;
@@ -784,59 +802,6 @@ public class FlyBootService extends Service {
                         + " ALERM_TIME:" + ALERM_TIME + " EALYSUSPEND_TIME:"
                         + EALYSUSPEND_TIME);
 
-    }
-
-    private void dbgKillProcess() {
-        List<ActivityManager.RunningAppProcessInfo> appProcessList = null;
-
-        appProcessList = mDbgActivityManager.getRunningAppProcesses();
-
-        LIDBG_PRINT("Debug to kill process.");
-        for (ActivityManager.RunningAppProcessInfo appProcessInfo : appProcessList) {
-            int pid = appProcessInfo.pid;
-            int uid = appProcessInfo.uid;
-            String processName = appProcessInfo.processName;
-            if (ifKillableProcess(processName)) {
-                // mActivityManager.killBackgroundProcesses(processName);
-                LIDBG_PRINT(processName +"."+pid +" will be killed");
-                mDbgActivityManager.forceStopPackage(processName);
-	    /*if(processName.equals("cld.navi.c2739.mainframe")){
-		msgTokenal("flyaudio kill "+pid);
-		LIDBG_PRINT(pid + " cld.navi.c2739.mainframe"+" will be kill by the kenal");	
-		}*/
-
-            }
-        }
-    }
-
-    private boolean ifKillableProcess(String packageName) {
-        for (String processName : dbgSystemLevelProcess) {
-            if (processName.equals(packageName)) {
-                return false;
-            }
-        }
-        String currentProcess = getApplicationInfo().processName;
-        if (currentProcess.equals(packageName)) {
-            return false;
-        }
-
-        // couldn't kill the live wallpaper process, if kill it, the system
-        // will set the wallpaper as the default.
-        WallpaperInfo info = WallpaperManager.getInstance(this)
-                .getWallpaperInfo();
-        if (info != null && !TextUtils.isEmpty(packageName)
-                && packageName.equals(info.getPackageName())) {
-            return false;
-        }
-
-        // couldn't kill the IME process.
-        String currentInputMethod = Settings.Secure.getString(
-                getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD);
-        if (!TextUtils.isEmpty(currentInputMethod)
-                && currentInputMethod.startsWith(packageName)) {
-            return false;
-        }
-        return true;
     }
 
     private void setAndroidState(boolean bUpDown) {
