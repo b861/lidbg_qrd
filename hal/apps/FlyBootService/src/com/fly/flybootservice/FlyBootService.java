@@ -116,6 +116,7 @@ public class FlyBootService extends Service {
     private Handler mmHandler;
     Thread sendBroadcastThread = null;
     private static boolean firstBootFlag = false;
+    private static boolean originPmMode = true;
 
     // add launcher in protected list
     String systemLevelProcess[] = {
@@ -385,29 +386,60 @@ public class FlyBootService extends Service {
     class PowerBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            // TODO Auto-generated method stub
-            String action = intent.getAction();
-            LIDBG_PRINT("get action:" + action + " state:" + mState);
+			// TODO Auto-generated method stub
+			String action = intent.getAction();
+			LIDBG_PRINT("get action:" + action + " state:" + mState);
+			if(originPmMode)
+			{
+				LIDBG_PRINT("<<<<<<<<<< FlyBootService originPmMode >>>>>>>>>>");
+				if (action.equals(FLYFASTBOOTSTART)) {
+					LIDBG_PRINT(" start fastpower on ");
+//                sendBroadcast(new Intent(
+//                        "android.intent.action.FAST_BOOT_START"));// \u542f\u52a8FastBootPowerOn
+					LIDBG_PRINT("+++ send fastboot message +++");
+					fbHandler.sendMessage(Message.obtain(fbHandler, FASTBOOT_THREAD));
+					LIDBG_PRINT(" FLYFASTBOOTSTART-");
 
-            if (action.equals(Intent.ACTION_SCREEN_ON)) {
-                procScreenOn();
-            } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
-                procScreenOff();
-            } else if (action.equals(ACTON_FINAL_SLEEP)) {
+					firstBootFlag = true;
+					mState = emState.Sleep;
+
+				} else if (action.equals(Intent.ACTION_SCREEN_ON)) {
+					procScreenOn();
+				} else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
+					procScreenOff();
+				} else if (action.equals(ACTON_FINAL_SLEEP)) {
+					SendBroadcastToService(KeyBootState, keyFastSusupendOFF);
+					setAndroidState(false);// \u5411\u5e95\u5c42\u8bf7\u6c42FAST_BOOT_START\u5e7f\u64ad
+					delay(100);
+					mState = emState.Going2Sleep;
+//					releaseWakeLock();
+					LIDBG_PRINT("going to sleep");
+				} else if (action.equals("android.provider.Telephony.SECRET_CODE")) {
+					procSecretCode(intent);
+				}
+			}
+			else{
+				LIDBG_PRINT("<<<<<<<<<< FlyBootService testPmMode >>>>>>>>>>");
+				if (action.equals(Intent.ACTION_SCREEN_ON)) {
+					procScreenOn();
+				} else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
+					procScreenOff();
+				} else if (action.equals(ACTON_FINAL_SLEEP)) {
 					SendBroadcastToService(KeyBootState, keyFastSusupendOFF);
 					setAndroidState(false);// 向底层请求FAST_BOOT_START广播
 
 					LIDBG_PRINT("+++ send fastboot message +++");
-			       fbHandler.sendMessage(Message.obtain(fbHandler, FASTBOOT_THREAD));
+					fbHandler.sendMessage(Message.obtain(fbHandler, FASTBOOT_THREAD));
 
 					mState = emState.Sleep;
 					delay(100);
-//					releaseWakeLock();
+					//					releaseWakeLock();
 					LIDBG_PRINT("going to sleep");
-            } else if (action.equals("android.provider.Telephony.SECRET_CODE")) {
-                procSecretCode(intent);
-            }
-        }
+				} else if (action.equals("android.provider.Telephony.SECRET_CODE")) {
+					procSecretCode(intent);
+				}
+			}
+			}
     }
 
 	private Handler.Callback fbHandlerCallback = new Handler.Callback() {
@@ -602,7 +634,8 @@ public class FlyBootService extends Service {
 		LIDBG_PRINT("powerOffSystem step6");
 		SystemClock.sleep(1000);
 		LIDBG_PRINT("powerOffSystem step7");
-//		fbPm.goToSleep(SystemClock.uptimeMillis());
+		if(originPmMode)
+			fbPm.goToSleep(SystemClock.uptimeMillis());
 		releaseWakeLock();
 		LIDBG_PRINT("powerOffSystem-");
 		// Intent iFinish = new Intent("FinishActivity");
@@ -735,22 +768,6 @@ public class FlyBootService extends Service {
                     "EALYSUSPEND_TIME", 60);
 
         } else if (secretHost.equals("4634")) {
-            LIDBG_PRINT(" Enter FLYAUDIO DEBUG MODE!!!! ");
-
-            Settings.System.putInt(resolver, "flyaudio_debug", 1);
-            Settings.System.putInt(resolver, "EALYSUSPEND_TIME", 10);
-            EALYSUSPEND_TIME = Settings.System.getInt(resolver,
-                    "EALYSUSPEND_TIME", 10);
-
-        } else if (secretHost.equals("4634")) {
-            LIDBG_PRINT(" Enter FLYAUDIO DEBUG MODE!!!! ");
-
-            Settings.System.putInt(resolver, "flyaudio_debug", 1);
-            Settings.System.putInt(resolver, "EALYSUSPEND_TIME", 10);
-            EALYSUSPEND_TIME = Settings.System.getInt(resolver,
-                    "EALYSUSPEND_TIME", 10);
-
-        }else if (secretHost.equals("4634")) {
             LIDBG_PRINT(" Enter FLYAUDIO DEBUG MODE!!!! ");
 
             Settings.System.putInt(resolver, "flyaudio_debug", 1);
