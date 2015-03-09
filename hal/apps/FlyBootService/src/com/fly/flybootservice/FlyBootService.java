@@ -90,7 +90,7 @@ public class FlyBootService extends Service {
     private static String FLYFASTBOOTSTART = "com.flyaudio.ap.broadcast";
 
     private PowerBroadcastReceiver powerBroadcastReceiver = null;
-    private FbAirplanModeReceiver fbAirplanModeReceiver = null;
+//    private FbAirplanModeReceiver fbAirplanModeReceiver = null;
     private final int DEBUG_VALUE = 1;
     private static int ALERM_TIME = 20;
     private int EALYSUSPEND_TIME = 30;
@@ -179,7 +179,7 @@ public class FlyBootService extends Service {
         // TODO Auto-generated method stub
         super.onDestroy();
         unregisterReceiver(powerBroadcastReceiver);
-        unregisterReceiver(fbAirplanModeReceiver);
+//        unregisterReceiver(fbAirplanModeReceiver);
         LIDBG_PRINT("flybootservice destory...");
     }
 
@@ -346,10 +346,10 @@ public class FlyBootService extends Service {
 
             firstBootFlag = true;
 
-            IntentFilter filter_fbAirplaneMode = new IntentFilter();
-            filter_fbAirplaneMode.addAction(Intent.ACTION_BOOT_COMPLETED);
-            fbAirplanModeReceiver = new FbAirplanModeReceiver();
-            registerReceiver(fbAirplanModeReceiver, filter_fbAirplaneMode);
+//            IntentFilter filter_fbAirplaneMode = new IntentFilter();
+//            filter_fbAirplaneMode.addAction(Intent.ACTION_BOOT_COMPLETED);
+//            fbAirplanModeReceiver = new FbAirplanModeReceiver();
+//            registerReceiver(fbAirplanModeReceiver, filter_fbAirplaneMode);
 
 		     fbPm = (PowerManager) getSystemService(Context.POWER_SERVICE);
             mActivityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
@@ -370,17 +370,6 @@ public class FlyBootService extends Service {
             registerReceiver(systemResumeBroadcast, new IntentFilter(SYSTEM_RESUME));
 
 	}
-    class FbAirplanModeReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // TODO Auto-generated method stub
-            String action = intent.getAction();
-            LIDBG_PRINT("===== FbAirplanModeReceiver =====");
-
-            if (action.equals(Intent.ACTION_BOOT_COMPLETED))
-					restoreAirplaneMode(context);
-        }
-    }
 
     // 动态注册广播 ，接收screen_of及screen_on.
     class PowerBroadcastReceiver extends BroadcastReceiver {
