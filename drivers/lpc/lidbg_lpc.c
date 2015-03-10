@@ -44,6 +44,8 @@ struct fly_hardware_info
 #define  MCU_ADDR_R  0xA1
 
 int lpc_ping_test = 0;
+int lpc_ctrl_by_app = 0;
+
 #define LPC_DEBUG_LOG
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
@@ -54,6 +56,7 @@ struct early_suspend early_suspend;
 
 struct fly_hardware_info GlobalHardwareInfo;
 struct fly_hardware_info *pGlobalHardwareInfo;
+static DECLARE_COMPLETION(lpc_read_wait); 
 
 int thread_lpc(void *data)
 {
@@ -61,7 +64,7 @@ int thread_lpc(void *data)
 
     while(1)
     {
-        if(lpc_work_en)
+        if((lpc_work_en)&&(lpc_ctrl_by_app == 0))
             LPC_CMD_NO_RESET;
         msleep(5000);
     }
@@ -296,7 +299,10 @@ BOOL actualReadFromMCU(BYTE *p, UINT length)
 //MCUµÄIIC¶Á´¦Àí
 irqreturn_t MCUIIC_isr(int irq, void *dev_id)
 {
-    schedule_work(&pGlobalHardwareInfo->FlyIICInfo.iic_work);
+	if(lpc_ctrl_by_app)
+		complete(&lpc_read_wait);
+	else	
+    	schedule_work(&pGlobalHardwareInfo->FlyIICInfo.iic_work);
     return IRQ_HANDLED;
 }
 
@@ -381,13 +387,93 @@ void lpc_linux_sync(bool print,int mint,char *extra_info)
     	lidbg("[%s]\n", buff + 2);
 }
 
+
+
+ int lpc_open(struct inode *inode, struct file *filp)
+{
+	DUMP_FUN;
+	lpc_ctrl_by_app = 1;
+	return 0;
+}
+
+ int lpc_close(struct inode *inode, struct file *filp)
+{
+	DUMP_FUN;
+	return 0;
+}
+
+ssize_t  lpc_read(struct file *filp, char __user *buffer, size_t size, loff_t *offset)
+{
+	int read_cnt;
+    char *mem = NULL;
+	if(size <= 0)
+		return 0;
+	
+	mem = kzalloc(size, GFP_KERNEL);
+    if (!mem)
+    {
+        LIDBG_ERR("kzalloc \n");
+        return false;
+    }
+
+	lidbg("lpc_read size = %d+\n", size);
+	wait_for_completion(&lpc_read_wait);
+	lidbg("lpc_read size = %d-\n", size);
+
+    read_cnt = SOC_I2C_Rec_Simple(LPC_I2_ID, MCU_ADDR_R >> 1, mem, size);
+
+
+	if (copy_to_user(buffer, mem, size))
+	{
+		lidbg("copy_to_user ERR\n");
+	}
+	kfree(mem);
+
+	return read_cnt;
+
+}
+static ssize_t lpc_write(struct file *filp, const char __user *buf,
+                         size_t size, loff_t *ppos)
+{
+	int write_cnt;
+    char *mem = kzalloc(size, GFP_KERNEL);
+    if (!mem)
+    {
+        LIDBG_ERR("kzalloc \n");
+        return false;
+    }
+
+	lidbg("lpc_write size = %d\n", size);
+
+	if(copy_from_user(mem, buf, size))
+	{
+		lidbg("copy_from_user ERR\n");
+	}
+	
+    write_cnt = SOC_I2C_Send(LPC_I2_ID, MCU_ADDR_W >> 1, mem, size);
+	kfree(mem);
+	return write_cnt;
+}
+
+
+
+static struct file_operations lpc_fops =
+{
+    .owner = THIS_MODULE,
+    .open = lpc_open,
+    .read = lpc_read,
+    .write = lpc_write,
+    .release = lpc_close,
+};
+
+
 static int  lpc_probe(struct platform_device *pdev)
 {
     DUMP_FUN;
     if(g_var.is_fly)
     {
         lidbg("lpc_init do nothing\n");
-        return 0;
+       // return 0;
     }
 
 #ifdef SOC_mt3360
@@ -402,6 +488,10 @@ static int  lpc_probe(struct platform_device *pdev)
 #endif
 
     mcuFirstInit();
+
+	INIT_COMPLETION(lpc_read_wait);
+	lidbg_new_cdev(&lpc_fops, "fly_lpc");
+
     return 0;
 }
 
