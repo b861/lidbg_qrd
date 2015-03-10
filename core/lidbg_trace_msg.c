@@ -204,9 +204,9 @@ static int thread_trace_msg_in(void *data)
 	            kfifo_in(&pdev->fifo, buff, len);
 	            up(&pdev->sem);
 	        }
-
-	        msleep(500);
 	    }
+		
+		msleep(500);
 	}
 
 	set_fs(old_fs);
