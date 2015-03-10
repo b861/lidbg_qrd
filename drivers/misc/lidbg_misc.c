@@ -295,22 +295,33 @@ static int thread_udisk_misc(void *data)
         if(!wait_for_completion_interruptible(&udisk_misc_wait))
         {
             int i = 0;
-            while(i < 3 && !fs_is_file_exist(USB_MOUNT_POINT"/conf/lidbg_udisk_shell.conf"))
-            {
-                ssleep(5);
-                i++;
-            }
 
-            if(fs_is_file_exist(USB_MOUNT_POINT"/conf/lidbg_udisk_shell.conf"))
-            {
-                LIST_HEAD(lidbg_udisk_shell_list);
-                LIDBG_WARN("use:conf/lidbg_udisk_shell.conf\n" );
-                fs_fill_list(USB_MOUNT_POINT"/conf/lidbg_udisk_shell.conf", FS_CMD_FILE_LISTMODE, &lidbg_udisk_shell_list);
-                if(analyze_list_cmd(&lidbg_udisk_shell_list))
-                    LIDBG_WARN("exe success\n" );
-            }
-            else
-                LIDBG_ERR("miss:lidbg_udisk_shell\n" );
+			if(g_var.recovery_mode == 1)
+			{
+				//ssleep(2);
+				lidbg("mount /usb \n");
+				lidbg_shell_cmd("mkdir -m 777 /usb");
+				lidbg_shell_cmd("mount -t vfat /dev/block/sda1 /usb");
+			}
+			else
+			{
+	            while(i < 3 && !fs_is_file_exist(USB_MOUNT_POINT"/conf/lidbg_udisk_shell.conf"))
+	            {
+	                ssleep(5);
+	                i++;
+	            }
+
+	            if(fs_is_file_exist(USB_MOUNT_POINT"/conf/lidbg_udisk_shell.conf"))
+	            {
+	                LIST_HEAD(lidbg_udisk_shell_list);
+	                LIDBG_WARN("use:conf/lidbg_udisk_shell.conf\n" );
+	                fs_fill_list(USB_MOUNT_POINT"/conf/lidbg_udisk_shell.conf", FS_CMD_FILE_LISTMODE, &lidbg_udisk_shell_list);
+	                if(analyze_list_cmd(&lidbg_udisk_shell_list))
+	                    LIDBG_WARN("exe success\n" );
+	            }
+	            else
+	                LIDBG_ERR("miss:lidbg_udisk_shell\n" );
+			}
         }
     }
     return 1;
@@ -323,6 +334,11 @@ static int usb_nb_misc_func(struct notifier_block *nb, unsigned long action, voi
         complete(&udisk_misc_wait);
         break;
     case USB_DEVICE_REMOVE:
+		if(g_var.recovery_mode == 1)
+		{
+			lidbg("unmount /usb \n");
+			lidbg_shell_cmd("unmount /usb");
+		}
         break;
     }
     return NOTIFY_OK;
