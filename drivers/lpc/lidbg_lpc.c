@@ -384,7 +384,7 @@ void lpc_linux_sync(bool print,int mint,char *extra_info)
 static int  lpc_probe(struct platform_device *pdev)
 {
     DUMP_FUN;
-    if((g_var.is_fly) || (g_var.recovery_mode))
+    if(g_var.is_fly)
     {
         lidbg("lpc_init do nothing\n");
         return 0;
