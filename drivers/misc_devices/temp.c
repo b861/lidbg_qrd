@@ -198,6 +198,8 @@ int thread_thermal(void *data)
 	if(cpu_temp_show == 1)
 		CREATE_KTHREAD(thread_show_temp, NULL);
 
+	 lidbg_shell_cmd("chmod 444 /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq &");
+	 
     while(!kthread_should_stop())
     {
         msleep(500);
