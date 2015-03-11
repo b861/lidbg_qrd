@@ -101,8 +101,11 @@ static int thread_pollfile_func(void *data)
 {
     allow_signal(SIGKILL);
     allow_signal(SIGSTOP);
-    ssleep(20);
-    update_file_tm();
+
+    if(fs_is_file_exist(PATH_CORE_CONF)){
+        ssleep(20);
+        update_file_tm();
+    }
     while(!kthread_should_stop())
     {
         if(g_pollfile_ms && is_fs_work_enable)
