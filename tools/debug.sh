@@ -8,12 +8,12 @@ function debug_menu()
 	echo [53] adb reboot bootloader
 	echo [54] fastboot flash boot
 	echo [55] fastboot flash system
-	echo [56] fastboot reboot
+	echo [56] fastboot flash recovery
+	echo [57] fastboot reboot
 }
 
 function debug_handle()
 {
-	cd $RELEASE_REPOSITORY
 	case $1 in
 	51)
 		expect $DBG_TOOLS_PATH/kmsg;;
@@ -26,6 +26,8 @@ function debug_handle()
 	55)
 		soc_flash_system;;
 	56)
+		soc_flash_recovery;;
+	57)
 		sudo fastboot reboot;;
 	*)
 		echo

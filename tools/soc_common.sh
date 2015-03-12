@@ -19,6 +19,14 @@ function soc_flash_system()
 
 }
 
+function soc_flash_recovery()
+{
+	echo $FUNCNAME
+	echo $DBG_PLATFORM&& sudo fastboot flash recovery $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/recovery.img
+	
+
+}
+
 
 
 function soc_menu()
@@ -30,6 +38,8 @@ function soc_menu()
 	echo [24] make otapackage
 	echo [25] make release basesystem
 	echo [26] make origin system image
+	echo [27] make recovery
+	echo [28] make recoveryimage
 	echo [30] common
 }
 
@@ -50,6 +60,10 @@ function soc_handle()
 		soc_build_release;;
 	26)
 		soc_build_origin_image;;
+	27)
+		soc_build_recovery;;
+	28)
+		soc_build_recoveryimage;;
 	30)
 		soc_build_common "$2 $3 $4";;
 	*)
