@@ -9,7 +9,10 @@ static void work_left_button1_fn(struct work_struct *work)
     /* 1、判断是否是顺时针旋转 */
     if(val)
     {
-        SOC_Key_Report(KEY_VOLUMEUP, KEY_PRESSED_RELEASED);
+    	 if(g_var.recovery_mode == 1)
+		 	SOC_Key_Report(KEY_UP, KEY_PRESSED_RELEASED);
+		 else
+        	SOC_Key_Report(KEY_VOLUMEUP, KEY_PRESSED_RELEASED);
 
     }
 
@@ -18,7 +21,10 @@ static void work_left_button1_fn(struct work_struct *work)
     /* 2、判断是否是逆时针旋转 */
     if(val == 0)
     {
-        SOC_Key_Report(KEY_VOLUMEDOWN, KEY_PRESSED_RELEASED);
+        if(g_var.recovery_mode == 1)
+		 	SOC_Key_Report(KEY_DOWN, KEY_PRESSED_RELEASED);
+		 else
+        	SOC_Key_Report(KEY_VOLUMEDOWN, KEY_PRESSED_RELEASED);
     }
 
 }
@@ -28,7 +34,10 @@ static void work_left_button2_fn(struct work_struct *work)
     /* 1、判断是否是顺时针旋转 */
     if(val)
     {
-        SOC_Key_Report(KEY_VOLUMEUP, KEY_PRESSED_RELEASED);
+        if(g_var.recovery_mode == 1)
+		 	SOC_Key_Report(KEY_UP, KEY_PRESSED_RELEASED);
+		 else
+        	SOC_Key_Report(KEY_VOLUMEUP, KEY_PRESSED_RELEASED);
     }
 
 
@@ -36,7 +45,10 @@ static void work_left_button2_fn(struct work_struct *work)
     /* 2、判断是否是逆时针旋转 */
     if(val == 0)
     {
-        SOC_Key_Report(KEY_VOLUMEDOWN, KEY_PRESSED_RELEASED);
+        if(g_var.recovery_mode == 1)
+		 	SOC_Key_Report(KEY_DOWN, KEY_PRESSED_RELEASED);
+		 else
+        	SOC_Key_Report(KEY_VOLUMEDOWN, KEY_PRESSED_RELEASED);
     }
 
 }

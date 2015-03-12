@@ -41,7 +41,10 @@ find_key:
 
     if((old_key == 0xffffffff) && (key != 0xffffffff))
     {
-        SOC_Key_Report(key, KEY_PRESSED_RELEASED);
+	    if(g_var.recovery_mode == 1)
+			 SOC_Key_Report(KEY_POWER, KEY_PRESSED_RELEASED);
+		 else
+	        SOC_Key_Report(key, KEY_PRESSED_RELEASED);
     }
     old_key = key;
 }

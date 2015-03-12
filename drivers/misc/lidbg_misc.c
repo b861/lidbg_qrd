@@ -298,10 +298,19 @@ static int thread_udisk_misc(void *data)
 
 			if(g_var.recovery_mode == 1)
 			{
-				//ssleep(2);
+				ssleep(2);
 				lidbg("mount /usb \n");
+				lidbg_shell_cmd("umount /usb");
 				lidbg_shell_cmd("mkdir -m 777 /usb");
-				lidbg_shell_cmd("mount -t vfat /dev/block/sda1 /usb");
+				
+				lidbg_shell_cmd("mount -t vfat /dev/block/sd*1 /usb");
+				lidbg_shell_cmd("mount -t vfat /dev/block/sd*2 /usb");
+				lidbg_shell_cmd("mount -t vfat /dev/block/sd*3 /usb");
+				lidbg_shell_cmd("mount -t vfat /dev/block/sd*4 /usb");
+				lidbg_shell_cmd("mount -t vfat /dev/block/sd*5 /usb");
+				lidbg_shell_cmd("mount -t vfat /dev/block/sd*6 /usb");
+				lidbg_shell_cmd("mount -t vfat /dev/block/sd*7 /usb");
+				lidbg_shell_cmd("mount -t vfat /dev/block/sd*8 /usb");
 			}
 			else
 			{
@@ -336,8 +345,8 @@ static int usb_nb_misc_func(struct notifier_block *nb, unsigned long action, voi
     case USB_DEVICE_REMOVE:
 		if(g_var.recovery_mode == 1)
 		{
-			lidbg("unmount /usb \n");
-			lidbg_shell_cmd("unmount /usb");
+			lidbg("umount /usb \n");
+			lidbg_shell_cmd("umount /usb");
 		}
         break;
     }

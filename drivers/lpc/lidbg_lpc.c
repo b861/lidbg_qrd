@@ -392,7 +392,6 @@ void lpc_linux_sync(bool print,int mint,char *extra_info)
  int lpc_open(struct inode *inode, struct file *filp)
 {
 	DUMP_FUN;
-	lpc_ctrl_by_app = 1;
 	return 0;
 }
 
@@ -408,7 +407,7 @@ ssize_t  lpc_read(struct file *filp, char __user *buffer, size_t size, loff_t *o
     char *mem = NULL;
 	if(size <= 0)
 		return 0;
-	
+	lpc_ctrl_by_app = 1;
 	mem = kzalloc(size, GFP_KERNEL);
     if (!mem)
     {
@@ -436,6 +435,7 @@ static ssize_t lpc_write(struct file *filp, const char __user *buf,
                          size_t size, loff_t *ppos)
 {
 	int write_cnt;
+	lpc_ctrl_by_app = 1;
     char *mem = kzalloc(size, GFP_KERNEL);
     if (!mem)
     {
