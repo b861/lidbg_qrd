@@ -444,7 +444,11 @@ int misc_init(void *data)
 
     lidbg_new_cdev(&misc_nod_fops, "lidbg_misc");
 
-	ssleep(30);
+	if(g_var.recovery_mode == 1)
+		ssleep(5);
+	else
+		ssleep(30);
+	
 	complete(&udisk_misc_wait);
     return 0;
 }

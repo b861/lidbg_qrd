@@ -1,7 +1,7 @@
 
 source ./env_entry.sh
 ./build_cfg.sh $DBG_SOC $BOARD_VERSION $DBG_PLATFORM $DBG_VENDOR
-mkdir -p $DBG_OUT_PATH
+mkdir -pm 777 $DBG_OUT_PATH
 
 find ../ -name "Module.symvers" -exec rm -rf {} \;
 ./make_all.sh  && . $DBG_BUILD_PATH/copy2out.sh 

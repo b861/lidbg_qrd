@@ -435,13 +435,13 @@ static ssize_t lpc_write(struct file *filp, const char __user *buf,
                          size_t size, loff_t *ppos)
 {
 	int write_cnt;
-	lpc_ctrl_by_app = 1;
     char *mem = kzalloc(size, GFP_KERNEL);
     if (!mem)
     {
         LIDBG_ERR("kzalloc \n");
         return false;
     }
+	lpc_ctrl_by_app = 1;
 
 	lidbg("lpc_write size = %d\n", size);
 
