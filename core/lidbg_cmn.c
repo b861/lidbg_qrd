@@ -283,6 +283,7 @@ int  lidbg_exe(char path[], char argv1[], char argv2[], char argv3[], char argv4
 }
 int  lidbg_mount(char path[])
 {
+	lidbg("warnning,remount is unsafe!\n");
     return lidbg_launch_user(MOUNT_PATH, "-o", "remount", path, NULL, NULL, NULL);
 }
 int  lidbg_chmod(char path[])

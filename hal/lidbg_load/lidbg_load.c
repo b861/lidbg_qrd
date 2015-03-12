@@ -5,26 +5,15 @@
 int main(int argc, char **argv)
 {
     pthread_t lidbg_uevent_tid;
-    int checkout = 0; //checkout=1 origin ; checkout=2 flyaudio
+    int checkout = 0; //checkout=1 origin ; checkout=2 old flyaudio;checkout=3 new flyaudio
+	 int ret;
 
     system("chmod 777 /dev/dbg_msg");
 
     DUMP_BUILD_TIME_FILE;
     lidbg("lidbg_iserver: iserver start\n");
-	int ret;
 
-	if(is_file_exist("/system/lib/modules/out/lidbg_loader.ko"))
-	{
-		if(is_file_exist("/system/etc/build_origin"))
-		{
-			 system("mount -o remount /flysystem");
-			 system("rm -rf /flysystem/bin");
-			 system("rm -rf /flysystem/lib");
-			 system("rm -rf /flysystem/app");
-		}
-
-	}
-
+#if 0
 	//wait flysystem mount
     while(is_file_exist("/flysystem/lib") == 0)
     {
@@ -38,13 +27,20 @@ int main(int argc, char **argv)
 		if(++cnt>=5)
 			break;
 	}
+#endif
 
     if(is_file_exist("/flysystem/lib/out/lidbg_loader.ko"))
     {
         checkout = 2;
-        lidbg("lidbg_iserver: this is flyaudio system\n");
+        lidbg("lidbg_iserver: this is old flyaudio system\n");
     }
-    else
+    else if(is_file_exist("/system/vendor/lib/out/lidbg_loader.ko"))
+    {
+        checkout = 3;
+        lidbg("lidbg_iserver: this is new flyaudio system\n");
+
+	 }
+	else
     {
         checkout = 1;
         lidbg("lidbg_iserver: this is origin system\n");
@@ -57,6 +53,14 @@ int main(int argc, char **argv)
 
     if(checkout == 1)
     {
+    	if(is_file_exist("/system/etc/build_origin"))
+		{
+			 system("mount -o remount /flysystem");
+			 system("rm -rf /flysystem/bin");
+			 system("rm -rf /flysystem/lib");
+			 system("rm -rf /flysystem/app");
+		}
+		
 		module_insmod("/system/lib/modules/out/lidbg_uevent.ko");
 		module_insmod("/system/lib/modules/out/lidbg_loader.ko");
         //system("insmod /system/lib/modules/out/lidbg_uevent.ko");
@@ -69,14 +73,25 @@ int main(int argc, char **argv)
                 lidbg("lidbg_iserver: origin userver start\n");
                 break;
             }
-			system("mount -o remount /system");
+			 system("mount -o remount /system");
             system("chmod 777 /system/lib/modules/out/lidbg_userver");
             system("chmod 777 /system/lib/modules/out/*");
             lidbg("lidbg_iserver: waitting origin lidbg_uevent...\n");
             sleep(1);
         }
     }
-    else if(checkout == 2)
+    else if(checkout == 3)
+    {
+		system("mkdir -p /flysystem/lib/out");
+		system("chmod 777 /flysystem");
+		system("chmod 777 /flysystem/lib");
+		system("chmod 777 /flysystem/lib/out");
+
+		system("cp -rf /system/vendor/lib/out/* /flysystem/lib/out/*");
+		checkout = 2;
+    }
+
+    if(checkout == 2)
     {
     	
 		module_insmod("/flysystem/lib/out/lidbg_uevent.ko");
