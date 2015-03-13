@@ -97,7 +97,6 @@ public class FlyBootService extends Service {
     private ContentResolver resolver = null;
     private boolean DEBUG_ONCE = true;
     private Handler sleppHandler;
-    private ActivityManager mDbgActivityManager = null;
     private static String SYSTEM_RESUME = "com.flyaudio.system.resume";
 //    private static FastBoot mFastBoot;
     private static FlyBootService mFlyBootService;
@@ -793,7 +792,7 @@ public class FlyBootService extends Service {
         }else if (secretHost.equals("4629")) {
 				LIDBG_PRINT("Debug mode starting ...");
 
-				mDbgActivityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+				mActivityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
 				delay(100);
 				KillProcess();
         } else if (secretHost.equals("4600")) {
