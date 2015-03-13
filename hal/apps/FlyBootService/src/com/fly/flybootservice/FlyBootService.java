@@ -361,16 +361,15 @@ public class FlyBootService extends Service {
             mHandlerThread.start();
 
             mmHandler = new Handler(mHandlerThread.getLooper(), mHandlerCallback);
-
-            new Thread() {
-                @Override
-                public void run() {
-                    LIDBG_PRINT("start fastbboot thread.");
-                    powerOffSystem();
-                }
-            }.start();
-            
             registerReceiver(systemResumeBroadcast, new IntentFilter(SYSTEM_RESUME));
+
+//            new Thread() {
+//                @Override
+//                public void run() {
+//                    LIDBG_PRINT("start fastbboot thread.");
+                    powerOffSystem();
+//                }
+//            }.start();
 
 	}
 
