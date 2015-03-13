@@ -5,13 +5,24 @@
 int main(int argc, char **argv)
 {
     pthread_t lidbg_uevent_tid;
-    int checkout = 0; //checkout=1 origin ; checkout=2 old flyaudio;checkout=3 new flyaudio
+    int recovery_mode,checkout = 0; //checkout=1 origin ; checkout=2 old flyaudio;checkout=3 new flyaudio
 	 int ret;
 
     system("chmod 777 /dev/dbg_msg");
 
     DUMP_BUILD_TIME_FILE;
     lidbg("lidbg_iserver: iserver start\n");
+
+
+	if(is_file_exist("/sbin/recovery")) 
+	{
+		recovery_mode = 1;
+		lidbg("recovery_mode=1\n");
+	}
+	else
+	{
+		recovery_mode = 0;
+	}
 
 #if 0
 	//wait flysystem mount
@@ -115,6 +126,14 @@ int main(int argc, char **argv)
 
     sleep(1);
     system("chmod 777 /dev/lidbg_uevent");
+
+	if(recovery_mode == 1)
+	{
+	    sleep(5);// wait for ts load
+		system("setprop service.recovery.start 1");
+		//system("/sbin/recovery &");
+	}
+	
 	while(1){
 		 sleep(10);
 	}
