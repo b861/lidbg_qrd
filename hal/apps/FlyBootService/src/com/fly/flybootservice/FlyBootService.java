@@ -341,10 +341,8 @@ public class FlyBootService extends Service {
     }
 
 	private void start_fastboot(){
-            LIDBG_PRINT(" ********** start fastboot ********** ");
 
             firstBootFlag = true;
-
 //            IntentFilter filter_fbAirplaneMode = new IntentFilter();
 //            filter_fbAirplaneMode.addAction(Intent.ACTION_BOOT_COMPLETED);
 //            fbAirplanModeReceiver = new FbAirplanModeReceiver();
@@ -353,6 +351,12 @@ public class FlyBootService extends Service {
 		     fbPm = (PowerManager) getSystemService(Context.POWER_SERVICE);
             mActivityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
 
+            if(originPmMode){
+	            delay(8000);
+	            mState = emState.Sleep;
+            }
+
+            LIDBG_PRINT(" ********** start fastboot ********** ");
             mHandlerThread = new HandlerThread("fastboot");
             mHandlerThread.start();
 
@@ -380,18 +384,19 @@ public class FlyBootService extends Service {
 			if(originPmMode)
 			{
 				LIDBG_PRINT("<<<<<<<<<< FlyBootService originPmMode >>>>>>>>>>");
-				if (action.equals(FLYFASTBOOTSTART)) {
-					LIDBG_PRINT(" start fastpower on ");
+//				if (action.equals(FLYFASTBOOTSTART)) {
+//					LIDBG_PRINT(" start fastpower on ");
 //                sendBroadcast(new Intent(
 //                        "android.intent.action.FAST_BOOT_START"));// \u542f\u52a8FastBootPowerOn
-					LIDBG_PRINT("+++ send fastboot message +++");
-					fbHandler.sendMessage(Message.obtain(fbHandler, FASTBOOT_THREAD));
-					LIDBG_PRINT(" FLYFASTBOOTSTART-");
+//					LIDBG_PRINT("+++ send fastboot message +++");
+//					fbHandler.sendMessage(Message.obtain(fbHandler, FASTBOOT_THREAD));
+//					LIDBG_PRINT(" FLYFASTBOOTSTART-");
 
-					firstBootFlag = true;
-					mState = emState.Sleep;
+//					firstBootFlag = true;
+//					mState = emState.Sleep;
 
-				} else if (action.equals(Intent.ACTION_SCREEN_ON)) {
+//				} else if (action.equals(Intent.ACTION_SCREEN_ON)) {
+              if (action.equals(Intent.ACTION_SCREEN_ON)) {
 					procScreenOn();
 				} else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
 					procScreenOff();
@@ -400,6 +405,9 @@ public class FlyBootService extends Service {
 					setAndroidState(false);// \u5411\u5e95\u5c42\u8bf7\u6c42FAST_BOOT_START\u5e7f\u64ad
 					delay(100);
 					mState = emState.Going2Sleep;
+
+					LIDBG_PRINT("+++ send fastboot message +++");
+					fbHandler.sendMessage(Message.obtain(fbHandler, FASTBOOT_THREAD));
 //					releaseWakeLock();
 					LIDBG_PRINT("going to sleep");
 				} else if (action.equals("android.provider.Telephony.SECRET_CODE")) {
