@@ -9,10 +9,8 @@
 
 DBG_PLATFORM_ID=4
 DBG_PLATFORM_PATH=/home/cks/msm8974/msm8974_4.4.4
-#FOR BP 
+#bp的源码目录，将对应的bp环境配置文件放在此源码路径下. 
 BP_SOURCE_PATH=/home/ctb/cks/AMSS_M8974_40_R4120
-#bp 环境配置文件所在位置
-BP_ENV_PATH=/home/ctb/cks
 case "$DBG_PLATFORM_ID" in
    	0)
 	DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/R8625SSNSKQLYA10145451;;

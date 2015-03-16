@@ -166,20 +166,28 @@ function bp_combination_handle()
     cd $BP_SOURCE_PATH
     case $1 in
     71)
+	source setenv.sh
         build_mpss;;
     72)
+	source setenv.sh
         build_bootloader;;
     73)
+	source setenv.sh
         build_adsp;;
     74)
+	source setenv.sh
         build_rpm;;
     75)
+	source setenv.sh
         build_wcnss;;
     76)
+	source setenv.sh
         build_trustzone_image;;
     77)
+	source setenv.sh
 	build_update;;
     78)
+	source setenv.sh
 	build_all_handle;;
     *)
         echo
@@ -189,8 +197,13 @@ function bp_combination_handle()
 function build_all_handle()
 {
     echo $FUNCNAME
-    cd $BP_SOURCE_PATH && build_mpss && build_bootloader && build_adsp && build_rpm && build_wcnss && build_trustzone_image && build_update
-
+    case "$DBG_PLATFORM_ID" in
+    2)
+    echo "进入编译8226"
+    cd $BP_SOURCE_PATH && source setenv.sh && build_mpss && build_bootloader && build_adsp && build_rpm && build_trustzone_image && build_debug_image && copy_android_image && build_update;;
+    4)
+    cd $BP_SOURCE_PATH && source setenv-modem.sh && build_mpss && source setenv.sh && build_bootloader && build_adsp && build_rpm && build_wcnss && build_trustzone_image && copy_android_image && build_update;;
+    esac
 }
 
 
