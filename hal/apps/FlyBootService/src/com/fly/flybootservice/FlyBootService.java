@@ -522,6 +522,8 @@ public class FlyBootService extends Service {
 	        
 //	                Intent iFinish = new Intent("FinishActivity");
 //	                sendBroadcastAsUser(iFinish,UserHandle.ALL);
+	                mHandlerThread.quit();
+	                LIDBG_PRINT("quit fastboot thread.");
 	                unregisterReceiver(systemResumeBroadcast);
 	                LIDBG_PRINT("unregisterReceiver sendBroadcasResult-");
 	    }
