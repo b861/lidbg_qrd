@@ -472,8 +472,8 @@ static int  lpc_probe(struct platform_device *pdev)
     DUMP_FUN;
     if(g_var.is_fly)
     {
-        lidbg("lpc_init do nothing\n");
-       // return 0;
+        lidbg("lpc_init do nothing.disable\n");
+        return 0;
     }
 
 #ifdef SOC_mt3360

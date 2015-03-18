@@ -115,7 +115,7 @@ public class FlyBootService extends Service {
     private Handler mmHandler;
     Thread sendBroadcastThread = null;
     private static boolean firstBootFlag = false;
-    private static boolean originPmMode = true;
+    private static boolean originPmMode = false;
 
     // add launcher in protected list
     String systemLevelProcess[] = {
