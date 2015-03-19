@@ -42,8 +42,16 @@ int main(int argc, char **argv)
 
     if(is_file_exist("/flysystem/lib/out/lidbg_loader.ko"))
     {
-        checkout = 2;
-        lidbg("lidbg_iserver: this is old flyaudio system\n");
+    	if(is_file_exist("/system/etc/build_origin"))
+    	{
+			checkout = 1;
+			lidbg("lidbg_iserver: this is origin system\n");
+    	}
+		else
+		{
+	        checkout = 2;
+	        lidbg("lidbg_iserver: this is old flyaudio system\n");
+		}
     }
     else if(is_file_exist("/system/vendor/lib/out/lidbg_loader.ko"))
     {
