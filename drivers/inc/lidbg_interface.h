@@ -66,7 +66,9 @@ enum key_enum
     TS_KEY_VOLUMEUP,
     TS_KEY_NAVI,
     TS_KEY_SEEKUP,
-TS_KEY_SEEKDOWN,
+    TS_KEY_SEEKDOWN,
+	TS_KEY_MUTE,
+
 };
 struct ts_devices_key
 {

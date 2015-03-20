@@ -1015,6 +1015,7 @@ u8 cfg_info_group23[] = CTP_CFG_GROUP17;
 u8 cfg_info_group24[] = CTP_CFG_GROUP18;
 u8 cfg_info_group25[] = CTP_CFG_GROUP19;
 u8 cfg_info_group26[] = CTP_CFG_GROUP20;
+u8 cfg_info_group27[] = CTP_CFG_GROUP21;
 
 
 static int gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
@@ -1037,7 +1038,7 @@ static int gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
 		cfg_info_group7, cfg_info_group8,cfg_info_group9, cfg_info_group10,cfg_info_group11, 
 		cfg_info_group12,cfg_info_group13, cfg_info_group14,cfg_info_group15, cfg_info_group16,
 		cfg_info_group17, cfg_info_group18,cfg_info_group19, cfg_info_group20,cfg_info_group21,
-		cfg_info_group22, cfg_info_group23,cfg_info_group24,cfg_info_group25,cfg_info_group26};
+		cfg_info_group22, cfg_info_group23,cfg_info_group24,cfg_info_group25,cfg_info_group26,cfg_info_group27};
 
 	u8 cfg_info_len[] = {CFG_GROUP_LEN(cfg_info_group1),
 		CFG_GROUP_LEN(cfg_info_group2),
@@ -1065,6 +1066,7 @@ static int gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
 		CFG_GROUP_LEN(cfg_info_group24),
 		CFG_GROUP_LEN(cfg_info_group25),
 		CFG_GROUP_LEN(cfg_info_group26),
+		CFG_GROUP_LEN(cfg_info_group27),
 		};
 
 #ifdef SOC_msm8x26
