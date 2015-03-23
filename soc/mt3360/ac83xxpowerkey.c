@@ -78,6 +78,7 @@ void powerkey_timer(unsigned long data)
 		else{
 			lidbg_shell_cmd("am broadcast -a com.flyaudio.ap.broadcast ");
 			fly_acc_step = 0;
+			acc_lock = 0;
 		}		
 		printk("fly power acc off --\r\n");    	
     	}
@@ -90,6 +91,7 @@ void powerkey_timer(unsigned long data)
 		else{
 			lidbg_shell_cmd("am broadcast -a com.flyaudio.ap.broadcast ");
 			fly_acc_step = 0;
+			acc_lock = 0;
 		}
 		printk("fly power acc on --\r\n");    
     	}

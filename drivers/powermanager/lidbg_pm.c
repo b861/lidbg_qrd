@@ -8,7 +8,11 @@ LIDBG_DEFINE;
 #define PM_ACC_HISTORY_FILE PM_DIR"pm_acc_history.txt"
 
 #define PM_FILE_INFO_SIZE (5)
-
+#ifdef SOC_mt3360
+#define SUSPEND_KEY_POLLING_TIME   (jiffies + 100*(HZ/1000))  /* 100ms */
+void suspendkey_timer_isr(unsigned long data);
+static DEFINE_TIMER(suspendkey_timer,suspendkey_timer_isr,0,0);
+#endif
 static DECLARE_COMPLETION(sleep_observer_wait);
 static atomic_t is_in_sleep = ATOMIC_INIT(0);
 static int sleep_counter = 0;
@@ -425,6 +429,13 @@ static int thread_send_power_key(void *data)
     return 1;
 }
 #endif
+#ifdef SOC_mt3360
+void suspendkey_timer_isr(unsigned long data)
+{
+	lidbg_key_report(KEY_POWER, KEY_RELEASED);
+	lidbg("fly power key gotosleep --\n");
+}
+#endif
 ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t *ppos)
 {
     char *cmd[8] = {NULL};
@@ -503,9 +514,10 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
             //ssleep(1);
             lidbg("fly power key gotosleep ++\n");
             lidbg_key_report(KEY_POWER, KEY_PRESSED);
-            msleep(100);
-            lidbg_key_report(KEY_POWER, KEY_RELEASED);
-            lidbg("fly power key gotosleep --\n");
+            //msleep(100);
+            //lidbg_key_report(KEY_POWER, KEY_RELEASED);
+            //lidbg("fly power key gotosleep --\n");
+            mod_timer(&suspendkey_timer,SUSPEND_KEY_POLLING_TIME);
 #else
             observer_start();
             LPC_PRINT(true, sleep_counter, "PM:gotosleep");
@@ -926,6 +938,12 @@ static int __init lidbg_pm_init(void)
     lidbg_trace_msg_cb_register("mdss_mdp_overlay_on: Failed to turn on fb0", NULL, find_fb_open_err);
 #endif
 
+#ifdef SOC_mt3360
+    	init_timer(&suspendkey_timer);
+	suspendkey_timer.data = 0;
+	suspendkey_timer.expires = 0;
+	suspendkey_timer.function = suspendkey_timer_isr;
+#endif	
     platform_device_register(&lidbg_pm);
     platform_driver_register(&lidbg_pm_driver);
     return 0;
