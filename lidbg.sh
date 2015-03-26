@@ -150,23 +150,29 @@ function auto_build()
 function bp_combine_menu()
 {
     echo $BP_SOURCE_PATH
-    echo [71] build MPSS
-    echo [72] build Bootloader
-    echo [73] build ADSP
-    echo [74] build RPM
-    echo [75] build WCNSS
-    echo [76] build TZ
-    echo [77] update bp info'                     '汇总编译
+    echo [71] build MPSS'                         'NON-HLOS.bin_1
+    echo [72] build Bootloader'                   'sbl1.mbn
+    echo [73] build ADSP'                         'NON-HLOS.bin_2
+    echo [74] build RPM'                          'rpm.mbn
+    echo [75] build WCNSS'                        'wcnss.mbn
+    echo [76] build TZ'                           'tz.mbn
+    echo [77] update bp info'                     '汇总编译NON-HLOS.bin
     echo [78] build ALL'                          '编译全部
 }
 
+# 分离
 function bp_combination_handle()
 {
     echo $FUNCNAME
     cd $BP_SOURCE_PATH
     case $1 in
     71)
-	source setenv.sh
+ #   	case "$DBG_PLATFORM_ID" in
+ #	4)
+#		source setenv-modem.sh;;
+	
+		source setenv.sh
+#	esac
         build_mpss;;
     72)
 	source setenv.sh
@@ -185,6 +191,7 @@ function bp_combination_handle()
         build_trustzone_image;;
     77)
 	source setenv.sh
+	copy_android_image
 	build_update;;
     78)
 	source setenv.sh
@@ -194,16 +201,24 @@ function bp_combination_handle()
     esac
 }
 
+#move
 function build_all_handle()
 {
     echo $FUNCNAME
     case "$DBG_PLATFORM_ID" in
     2)
     echo "进入编译8226"
+   # insmod xx && 
+    cd $BP_SOURCE_PATH && source setenv.sh && build_mpss && build_bootloader && build_adsp && build_rpm && build_trustzone_image && build_debug_image && copy_android_image && build_update;;
+    3)
+    echo "进入编译8926"
+   # insmod xx && 
     cd $BP_SOURCE_PATH && source setenv.sh && build_mpss && build_bootloader && build_adsp && build_rpm && build_trustzone_image && build_debug_image && copy_android_image && build_update;;
     4)
-    cd $BP_SOURCE_PATH && source setenv-modem.sh && build_mpss && source setenv.sh && build_bootloader && build_adsp && build_rpm && build_wcnss && build_trustzone_image && copy_android_image && build_update;;
+    cd $BP_SOURCE_PATH && source $BP_SOURCE_PATH/setenv-modem.sh && build_mpss && source $BP_SOURCE_PATH/setenv.sh && build_bootloader && build_adsp && build_rpm && build_wcnss && build_trustzone_image && copy_android_image && build_update;;
     esac
+
+#    cp all image to ./out
 }
 
 

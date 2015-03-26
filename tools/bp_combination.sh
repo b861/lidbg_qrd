@@ -46,29 +46,38 @@ function build_trustzone_image()
 
 function copy_android_image()
 {
+
+#   ln 
    echo $FUNCNAME
    mkdir -p $BP_SOURCE_PATH/LINUX/android/out/target/product/$DBG_PLATFORM
    cd $BP_SOURCE_PATH/LINUX/android/out/target/product/$DBG_PLATFORM
-   cp $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system.img ./
-   cp $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/userdata.img ./
-   cp $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/persist.img ./
-   cp $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/cache.img ./
-   cp $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/boot.img ./
-   cp $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/bootloader ./
-   cp $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/clean_steps.mk ./
-   cp $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/dt.img ./
-   cp $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/emmc_appsboot.mbn ./
-   cp $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/emmc_appsboot.raw ./
-   cp $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/EMMCBOOT.MBN ./
-   cp $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/filesmap ./
-   cp $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/kernel ./
-   cp $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/previous_build_config.mk ./
-   cp $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/ramdisk.img ./
-   cp $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/ramdisk-recovery.img ./
-   cp $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/recovery.img ./
+   cp -vu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system.img ./
+   cp -vu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/userdata.img ./
+   cp -vu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/persist.img ./
+   cp -vu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/cache.img ./
+   cp -vu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/boot.img ./
+   cp -vu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/bootloader ./
+   cp -vu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/clean_steps.mk ./
+   cp -vu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/dt.img ./
+   cp -vu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/emmc_appsboot.mbn ./
+   cp -vu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/emmc_appsboot.raw ./
+   cp -vu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/EMMCBOOT.MBN ./
+   cp -vu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/filesmap ./
+   cp -vu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/kernel ./
+   cp -vu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/previous_build_config.mk ./
+   cp -vu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/ramdisk.img ./
+   cp -vu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/ramdisk-recovery.img ./
+   cp -vu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/recovery.img ./
+#if exist
+   cp -vu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/flysystem.img ./
+   cp -vu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/flyrecovery.img ./
+   cp -vu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/flyapdata.img ./
+   cp -vu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/flash.img ./
    mkdir ./obj
-   cp -a $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/obj/KERNEL_OBJ ./obj/
-   cp -a $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/obj/EMMC_BOOTLOADER_OBJ ./obj/
+   cp -avu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/obj/KERNEL_OBJ ./obj/
+   cp -avu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/obj/EMMC_BOOTLOADER_OBJ ./obj/
+
+#  cp qcn
 }
 
 
@@ -79,8 +88,21 @@ function build_update()
 }
 
 
+function factory_bin()
+{
+
+}
+
+function flash_bin()
+{
+
+}
 
 
+function clean()
+{
+
+}
 
 
 

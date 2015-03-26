@@ -68,12 +68,13 @@ case "$DBG_PLATFORM_ID" in
 	UPDATE_INFO=$BP_SOURCE_PATH/common/build
 	DEBUG_IMAGE_PATH=$BP_SOURCE_PATH/debug_image/build/ms
 	#以下命令用于bp v1.0.3
-	MPSS_BUILD_CMD='./build.sh 8626.gen BUILD_ID=AAAAANAZ'
-	BOOTLOADER_BUILD_CMD='./build.sh --prod TARGET_FAMILY=8x26'
+	#MPSS_BUILD_CMD='./build.sh 8626.gen BUILD_ID=AAAAANAZ'
+	MPSS_BUILD_CMD='./build.sh 8626.gen.prod 8626.gps.prod BUILD_VER=01780 -k'
+	BOOTLOADER_BUILD_CMD='./build.sh --prod TARGET_FAMILY=8x26 -j1'
 	ADSP_BUILD_CMD='python build.py'
-	RPM_BUILD_CMD='./rpm_proc/build/build_8x26.sh'
+	RPM_BUILD_CMD='./rpm_proc/build/build_8x26.sh -j1'
 	DEBUG_IMAGE_CMD='./b8x26.sh TARGET_FAMILY=8x26 sdi BUILD_ID=AAAAANAZ BUILD_VER=54 BUILD_MIN=1 -j1'
-	TZ_BUILD_CMD='./build.sh CHIPSET=msm8x26 tz'
+	TZ_BUILD_CMD='./build.sh CHIPSET=msm8x26 tz -j1'
 	UPDATE_BUILD_CMD='python update_common_info.py';; 
 	
     	3)
@@ -94,7 +95,23 @@ case "$DBG_PLATFORM_ID" in
 	TEST_PACKAGE_PATH=//192.168.128.128/8928/升级包发布/专项测试包
 	REPOSITORY_WORK_BRANCH=master
 	SYSTEM_WORK_BRANCH=master
-        MAKE_PAKG_NUM=10;;
+        MAKE_PAKG_NUM=10
+	MPSS_BUILD_PATH=$BP_SOURCE_PATH/modem_proc/build/ms
+	BOOT_IMAGE_PATH=$BP_SOURCE_PATH/boot_images/build/ms
+	ADSP_PATH=$BP_SOURCE_PATH/adsp_proc/build
+	RPM_PATH=$BP_SOURCE_PATH/rpm_proc/build
+	TZ_PATH=$BP_SOURCE_PATH/trustzone_images/build/ms
+	UPDATE_INFO=$BP_SOURCE_PATH/common/build
+	DEBUG_IMAGE_PATH=$BP_SOURCE_PATH/debug_image/build/ms
+
+	MPSS_BUILD_CMD='./build.sh 8926.gen.prod BUILD_ID=DAAAANAZ'
+	BOOTLOADER_BUILD_CMD='./build.sh TARGET_FAMILY=8x26 BUILD_ID=FAAAANAZ -j1'
+	ADSP_BUILD_CMD='python build.py'
+	RPM_BUILD_CMD='./rpm_proc/build/build_8x26.sh -j1'
+	DEBUG_IMAGE_CMD='./b8x26.sh TARGET_FAMILY=8x26 sdi BUILD_ID=AAAAANAZ BUILD_VER=5 BUILD_MIN=1 -j1'
+	TZ_BUILD_CMD='./build.sh CHIPSET=msm8x26 tz sampleapp tzbsp_no_xpu playready widevine isdbtmm securitytest keymaster commonlib -j1'
+	UPDATE_BUILD_CMD='python update_common_info.py';;
+
     	4)
 	DBG_PLATFORM=msm8974
 	BOARD_VERSION=V2
@@ -123,11 +140,11 @@ case "$DBG_PLATFORM_ID" in
 	TZ_PATH=$BP_SOURCE_PATH/trustzone_images/build/ms
 	UPDATE_INFO=$BP_SOURCE_PATH/common/build
 	MPSS_BUILD_CMD='./build.sh 8974.gen.prod -k'
-	BOOTLOADER_BUILD_CMD='./build.sh TARGET_FAMILY=8974 BUILD_ID=AAAAANAZ'
+	BOOTLOADER_BUILD_CMD='./build.sh TARGET_FAMILY=8974 BUILD_ID=AAAAANAZ -j1'
 	ADSP_BUILD_CMD='python build.py'
-	RPM_BUILD_CMD='./rpm_proc/build/build_8974.sh'
-	WCNSS_BUILD_CMD='./wcnss_build.sh 8974 pronto BUILD_ID=SCAQBAZ'
-	TZ_BUILD_CMD='./build.sh CHIPSET=msm8974 tz sampleapp tzbsp_no_xpu'
+	RPM_BUILD_CMD='./rpm_proc/build/build_8974.sh -j1'
+	WCNSS_BUILD_CMD='./wcnss_build.sh 8974 pronto BUILD_ID=SCAQBAZ -j1'
+	TZ_BUILD_CMD='./build.sh CHIPSET=msm8974 tz sampleapp tzbsp_no_xpu -j1'
 	UPDATE_BUILD_CMD='python update_common_info.py';; 
 	
    	5)
