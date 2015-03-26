@@ -120,7 +120,7 @@ void button_init(void)
     int button_en;
 
     lidbg("button_init\n");
-    FS_REGISTER_INT(button_en, "button_en", 0, NULL);
+    FS_REGISTER_INT(button_en, "button_en", 1, NULL);
     if(button_en)
     {
         INIT_WORK(&work_left_button1, work_left_button1_fn);
