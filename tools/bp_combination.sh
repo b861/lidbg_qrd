@@ -90,18 +90,18 @@ function build_update()
 
 function factory_bin()
 {
-
+	echo $FUNCNAME
 }
 
 function flash_bin()
 {
-
+	echo $FUNCNAME
 }
 
 
 function clean()
 {
-
+	echo $FUNCNAME
 }
 
 
