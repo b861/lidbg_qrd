@@ -133,6 +133,9 @@ bool iSOC_ADC_Get (u32 channel , u32 *value)
 #else
 	*value = soc_ad_read(channel)/1000;
 #endif
+#if 0
+	lidbg("iSOC_ADC_Get=%d\n",*value);
+#endif
 	if(*value == 0xffffffff)
 	return 0;
 	return 1;

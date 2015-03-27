@@ -352,8 +352,12 @@ void ts_data_report(touch_type t,int id,int x,int y,int w)
 			g_var.flag_for_15s_off = 1000;
 		}
 	}
+
+	if((id == 1) && (t == TOUCH_DOWN) && (g_var.recovery_mode == 1)) // 2 fingers in recovery send power key
+		SOC_Key_Report(KEY_POWER,KEY_PRESSED_RELEASED);
+
 	
-	if((id == 4) && (t == TOUCH_DOWN) && (!g_var.is_fly) && (!g_var.recovery_mode)) // 5 fingers
+	if((id == 4) && (t == TOUCH_DOWN) && (!g_var.is_fly) ) // 5 fingers in origin system send back key
 	{
 		if(g_var.system_status >= FLY_KERNEL_UP)
 			SOC_Key_Report(KEY_BACK,KEY_PRESSED_RELEASED);

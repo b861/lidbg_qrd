@@ -51,6 +51,7 @@ find_key:
 int thread_key(void *data)
 {  
 	int ad_en;
+	DUMP_FUN;
     FS_REGISTER_INT(ad_en, "ad_en", 1, NULL);
     if(ad_en)
     {
