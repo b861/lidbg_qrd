@@ -216,7 +216,6 @@ case "$DBG_PLATFORM_ID" in
 	export UPDATE_BUILD_CMD='python update_common_info.py';; 
 esac
 
-env
 
 
 

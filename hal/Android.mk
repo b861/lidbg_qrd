@@ -41,6 +41,7 @@ endif
 
 ifeq ($(CONFIG_HAL_USB_CAMERA),y)
 SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,hal_camera_usb)
+SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,hal_camera_study_v4l2)
 endif
 
 SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,lidbg_umount)

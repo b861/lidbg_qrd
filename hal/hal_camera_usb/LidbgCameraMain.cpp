@@ -49,9 +49,7 @@ get_camera_info:
 set_callbacks:
     NULL,
 get_vendor_tag_ops:
-    NULL,
-reserved:
-    {0}
+    NULL
 };
 
 namespace android

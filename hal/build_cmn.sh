@@ -14,5 +14,5 @@ while :;do
 	echo
 	echo -e "\033[41;20m 任意键继续，ctrl+c退出 \033[0m"
 	read Parameter0
-	mmm $LOCATE_PATH
+	mmm $LOCATE_PATH -B
 done
