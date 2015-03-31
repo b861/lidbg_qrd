@@ -186,8 +186,8 @@ void button_init(void)
 
         SOC_IO_ISR_Add(BUTTON_LEFT_1, IRQF_TRIGGER_RISING , irq_left_button1, NULL);
         SOC_IO_ISR_Add(BUTTON_LEFT_2, IRQF_TRIGGER_FALLING, irq_left_button2, NULL);
-        SOC_IO_ISR_Add(BUTTON_RIGHT_1, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT, irq_right_button1, NULL);
-        SOC_IO_ISR_Add(BUTTON_RIGHT_2, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT, irq_right_button2, NULL);
+        SOC_IO_ISR_Add(BUTTON_RIGHT_1, IRQF_TRIGGER_RISING, irq_right_button1, NULL);
+        SOC_IO_ISR_Add(BUTTON_RIGHT_2, IRQF_TRIGGER_FALLING, irq_right_button2, NULL);
     }
 }
 int thread_button_init(void *data)
