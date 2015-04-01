@@ -27,7 +27,7 @@
 }while(0)
 
 
-static inline bool is_file_exist(char *file)
+static inline bool is_file_exist(const char *file)
 {
 	if(access(file, F_OK) == 0)
 		return 1;
@@ -41,7 +41,6 @@ static inline int get_file_size(char *file)
 	if(is_file_exist(file))
 	{
 		int fd;
-		char *read_buf;
 		struct stat st;
 		fd = open(file, O_RDONLY);
 		if (fd < 0)
@@ -86,19 +85,28 @@ static inline int get_file_size(char *file)
 
 #define LOG_BYTES   (512)
 
-#define LIDBG_PRINT(msg...) do{\
-	int fd;\
-	char s[LOG_BYTES];\
-	sprintf(s, "hal_msg: " msg);\
-	s[LOG_BYTES - 1] = '\0';\
-	if(is_file_exist("/dev/lidbg_msg"))\
-		fd = open("/dev/lidbg_msg", O_RDWR);\
-	else\
-	    fd = open("/dev/dbg_msg", O_RDWR);\
-	 if((fd == 0)||(fd == (int)0xfffffffe)|| (fd == (int)0xffffffff))break;\
-	 write(fd, s, /*sizeof(msg)*/strlen(s)/*LOG_BYTES*/);\
-	 close(fd);\
-}while(0)
+static inline void LIDBG_PRINT(const char *fmt, ...)
+{
+    int fd;
+    char buf[LOG_BYTES];
+    char buf1[LOG_BYTES];
+    va_list ap;
+    va_start(ap, fmt);
+    vsnprintf(buf, LOG_BYTES, fmt, ap);
+    va_end(ap);
+    sprintf(buf1, "hal_msg:%s", buf);
+    buf1[LOG_BYTES - 1] = '\0';
+    if(is_file_exist("/dev/lidbg_msg"))
+        fd = open("/dev/lidbg_msg", O_RDWR);
+    else
+        fd = open("/dev/dbg_msg", O_RDWR);
+    if((fd == 0) || (fd == (int)0xfffffffe) || (fd == (int)0xffffffff))
+        return;
+    write(fd, buf1, /*sizeof(msg)*/strlen(buf1)/*LOG_BYTES*/);
+    close(fd);
+    return;
+}
+
 #endif
 
 #define LIDBG_UEVENT(msg) do{\
