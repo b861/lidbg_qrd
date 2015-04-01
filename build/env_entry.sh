@@ -4,9 +4,10 @@
 #       Date:         2010/04/27
 #=======================================================================================
 
-source users_conf.sh
+
 
 export DBG_ROOT_PATH=`cd ../ && pwd`
+source $DBG_ROOT_PATH/build/users_conf.sh
 export DBG_BUILD_PATH=$DBG_ROOT_PATH/build
 export DBG_TOOLS_PATH=$DBG_ROOT_PATH/tools
 export DBG_OUT_PATH=$DBG_ROOT_PATH/out
