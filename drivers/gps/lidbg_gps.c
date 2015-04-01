@@ -309,7 +309,7 @@ int thread_gps_server(void *data)
         }
 
 do_nothing:
-        msleep(500);
+        msleep(250);
 
     }
     DUMP_FUN_LEAVE;
