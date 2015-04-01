@@ -138,7 +138,7 @@ function auto_build()
 	while :;do
 		cd $DBG_BUILD_PATH
 		lidbg_menu
-		read -p "[USERID:$USERS_ID  PLATFORMID:$DBG_PLATFORM_ID ]Enter your select:" name1 name2 name3 name4 name5
+		read -p "[USERID:$USERS_ID  PLATFORMID:$DBG_PLATFORM_ID]Enter your select:" name1 name2 name3 name4 name5
 	       	menu_do $name1 $name2 $name3 $name4
 		menu_do $name2 $name3 $name4 $name5
 		menu_do $name3 $name4 $name5

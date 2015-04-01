@@ -1,5 +1,5 @@
 source ../dbg_cfg.sh
-source ../soc/$DBG_SOC/conf/soc_select
+source ../soc/$DBG_SOC/conf/soc_select_hal
 LOCATE_PATH=`pwd`
 clear
 cd ../build && source env_entry.sh && ./build_cfg.sh  $DBG_SOC $BOARD_VERSION $DBG_PLATFORM $DBG_VENDOR
