@@ -23,7 +23,8 @@ static int devices_notifier_callback(struct notifier_block *self,
         if (*blank == FB_BLANK_UNBLANK)
         {
 			if(g_var.system_status >= FLY_KERNEL_UP)
-        		LCD_ON;
+				if(g_var.led_hal_status & g_var.led_app_status)
+        			LCD_ON;
             g_var.fb_on = 1;
         }
         else if (*blank == FB_BLANK_POWERDOWN)
