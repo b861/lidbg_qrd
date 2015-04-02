@@ -179,11 +179,24 @@ static int thread_trace_msg_in(void *data)
     struct file *filep;
     mm_segment_t old_fs;
     buff = (char *)kmalloc( MEM_SIZE_4_KB, GFP_KERNEL);
+    if(buff == NULL)
+    {
+        lidbg("thread_trace_msg_in.ERR.kmalloc.exit\n");
+        return 0;
+    }
 
     filep = filp_open("/proc/kmsg", O_RDONLY, 0644);
-    if(filep < 0)
-        lidbg("Open /proc/kmsg failed !\n");
-
+    if(filep&&!IS_ERR(filep)&&filep->f_op&&filep->f_op->read)
+    {
+    	lidbg("thread_trace_msg_in.while\n");
+    }
+    else
+    {
+        lidbg("thread_trace_msg_in.ERR.filp_open.exit\n");
+        return 0;
+    }
+	
+    
     memset(buff, '\0', MEM_SIZE_4_KB);
 	
 	old_fs = get_fs();
