@@ -299,8 +299,11 @@ BOOL actualReadFromMCU(BYTE *p, UINT length)
 //MCUµÄIIC¶Á´¦Àí
 irqreturn_t MCUIIC_isr(int irq, void *dev_id)
 {
-	if(lpc_ctrl_by_app)
-		complete(&lpc_read_wait);
+	if(g_var.recovery_mode)
+	{
+		if(lpc_ctrl_by_app)
+			complete(&lpc_read_wait);
+	}
 	else	
     	schedule_work(&pGlobalHardwareInfo->FlyIICInfo.iic_work);
     return IRQ_HANDLED;
