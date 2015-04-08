@@ -32,9 +32,9 @@ void lidbg_enable_logcat(void)
     ssleep(1);
     sprintf(cmd, "logcat  -v time>> /sdcard/%s &", logcat_file_name);
     lidbg_shell_cmd(cmd);
-	
+
     lidbg_enable_kmsg();
-	
+
 #else
     sprintf(cmd, "date >/data/%s", logcat_file_name);
     lidbg_shell_cmd(cmd);
@@ -149,30 +149,30 @@ void cb_int_mem_log(char *key, char *value )
 
 int thread_kmsg_fifo_save(void *data)
 {
-	ssleep(30);
+    ssleep(30);
     kmsg_fifo_save();
     return 0;
 }
 
 void unhandled_monitor(char *key_word, void *data)
 {
-	//DUMP_FUN;
-	lidbg("find key word\n");
-	if( !fs_is_file_exist("/dev/log/no_reboot"))
-	{
-		lidbg_fs_log("/dev/log/no_reboot","unhandled find");
-		lidbg_chmod("/data");
-		CREATE_KTHREAD(thread_kmsg_fifo_save, NULL);
-		lidbg_enable_logcat();
-		lidbg_loop_warning();
-	}
+    //DUMP_FUN;
+    lidbg("find key word\n");
+    if( !fs_is_file_exist("/dev/log/no_reboot"))
+    {
+        lidbg_fs_log("/dev/log/no_reboot", "unhandled find");
+        lidbg_chmod("/data");
+        CREATE_KTHREAD(thread_kmsg_fifo_save, NULL);
+        lidbg_enable_logcat();
+        lidbg_loop_warning();
+    }
 }
 
 void lidbgerr_monitor(char *key_word, void *data)
 {
-	//DUMP_FUN;
-	lidbg("find key word\n");
-	lidbg_loop_warning();
+    //DUMP_FUN;
+    lidbg("find key word\n");
+    lidbg_loop_warning();
 }
 
 int thread_reboot(void *data)
@@ -185,27 +185,27 @@ int thread_reboot(void *data)
     }
     ssleep(reboot_delay_s);
 
-	
-	if(0)//cool boot usb mount test
-	{
-	    bool volume_find;
-	    volume_find = !!find_mounted_volume_by_mount_point(USB_MOUNT_POINT) ;
-	    if(volume_find && !te_is_ts_touched())
-	    {
-	        lidbg("<lidbg:thread_reboot,call reboot,%d>\n", te_is_ts_touched());
-	        msleep(100);
-	        kernel_restart(NULL);
-	    }
+
+    if(0)//cool boot usb mount test
+    {
+        bool volume_find;
+        volume_find = !!find_mounted_volume_by_mount_point(USB_MOUNT_POINT) ;
+        if(volume_find && !te_is_ts_touched())
+        {
+            lidbg("<lidbg:thread_reboot,call reboot,%d>\n", te_is_ts_touched());
+            msleep(100);
+            kernel_restart(NULL);
+        }
     }
 
-	if(0)
-	{
-	    
-    	if( !fs_is_file_exist("/dev/log/no_reboot"))
-	    {
-	        lidbg("<lidbg:thread_reboot,call reboot>\n");
-	        kernel_restart(NULL);
-	    }
+    if(0)
+    {
+
+        if( !fs_is_file_exist("/dev/log/no_reboot"))
+        {
+            lidbg("<lidbg:thread_reboot,call reboot>\n");
+            kernel_restart(NULL);
+        }
     }
     return 0;
 }
@@ -239,7 +239,7 @@ void cb_cp_data_to_udisk(char *key, char *value )
 }
 int loop_warnning(void *data)
 {
-	
+
     while(1)
     {
         lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SIGNAL_EVENT, NOTIFIER_MINOR_SIGNAL_BAKLIGHT_ACK));
@@ -250,16 +250,16 @@ int loop_warnning(void *data)
 
 void lidbg_loop_warning(void)
 {
-	static bool is_loop_warning = 0;
-	if(is_loop_warning == 0)
-	{
-	    if((loop_warning_en)||(g_var.is_debug_mode == 1))
-	    {
-	        DUMP_FUN;
-	        CREATE_KTHREAD(loop_warnning, NULL);
-			is_loop_warning = 1;
-	    }
-	}
+    static bool is_loop_warning = 0;
+    if(is_loop_warning == 0)
+    {
+        if((loop_warning_en) || (g_var.is_debug_mode == 1))
+        {
+            DUMP_FUN;
+            CREATE_KTHREAD(loop_warnning, NULL);
+            is_loop_warning = 1;
+        }
+    }
 }
 void cb_kv_app_install(char *key, char *value)
 {
@@ -296,58 +296,69 @@ static int thread_udisk_misc(void *data)
         {
             int i = 0;
 
-			if(g_var.recovery_mode == 1)
-			{
-				ssleep(2);
-				lidbg("mount /usb \n");
-				lidbg_shell_cmd("umount /usb");
-				lidbg_shell_cmd("mkdir -m 777 /usb");
-				
-				lidbg_shell_cmd("mount -t vfat /dev/block/sd*1 /usb");
-				lidbg_shell_cmd("mount -t vfat /dev/block/sd*2 /usb");
-				lidbg_shell_cmd("mount -t vfat /dev/block/sd*3 /usb");
-				lidbg_shell_cmd("mount -t vfat /dev/block/sd*4 /usb");
-				lidbg_shell_cmd("mount -t vfat /dev/block/sd*5 /usb");
-				lidbg_shell_cmd("mount -t vfat /dev/block/sd*6 /usb");
-				lidbg_shell_cmd("mount -t vfat /dev/block/sd*7 /usb");
-				lidbg_shell_cmd("mount -t vfat /dev/block/sd*8 /usb");
-			}
-			else
-			{
-	            while(i < 3 && !fs_is_file_exist(USB_MOUNT_POINT"/conf/lidbg_udisk_shell.conf"))
-	            {
-	                ssleep(5);
-	                i++;
-	            }
+            if(g_var.recovery_mode == 1)
+            {
+                ssleep(2);
+                lidbg("mount /usb \n");
+                lidbg_shell_cmd("umount /usb");
+                lidbg_shell_cmd("mkdir -m 777 /usb");
 
-	            if(fs_is_file_exist(USB_MOUNT_POINT"/conf/lidbg_udisk_shell.conf"))
-	            {
-	                LIST_HEAD(lidbg_udisk_shell_list);
-	                LIDBG_WARN("use:conf/lidbg_udisk_shell.conf\n" );
-	                fs_fill_list(USB_MOUNT_POINT"/conf/lidbg_udisk_shell.conf", FS_CMD_FILE_LISTMODE, &lidbg_udisk_shell_list);
-	                if(analyze_list_cmd(&lidbg_udisk_shell_list))
-	                    LIDBG_WARN("exe success\n" );
-	            }
-	            else
-	                LIDBG_ERR("miss:lidbg_udisk_shell\n" );
-			}
+                lidbg_shell_cmd("mount -t vfat /dev/block/sd*1 /usb");
+                lidbg_shell_cmd("mount -t vfat /dev/block/sd*2 /usb");
+                lidbg_shell_cmd("mount -t vfat /dev/block/sd*3 /usb");
+                lidbg_shell_cmd("mount -t vfat /dev/block/sd*4 /usb");
+                lidbg_shell_cmd("mount -t vfat /dev/block/sd*5 /usb");
+                lidbg_shell_cmd("mount -t vfat /dev/block/sd*6 /usb");
+                lidbg_shell_cmd("mount -t vfat /dev/block/sd*7 /usb");
+                lidbg_shell_cmd("mount -t vfat /dev/block/sd*8 /usb");
+            }
+            else
+            {
+                while(i < 3 && !fs_is_file_exist(USB_MOUNT_POINT"/conf/lidbg_udisk_shell.conf"))
+                {
+                    ssleep(5);
+                    i++;
+                }
+
+                if(fs_is_file_exist(USB_MOUNT_POINT"/conf/lidbg_udisk_shell.conf"))
+                {
+                    LIST_HEAD(lidbg_udisk_shell_list);
+                    LIDBG_WARN("use:conf/lidbg_udisk_shell.conf\n" );
+                    fs_fill_list(USB_MOUNT_POINT"/conf/lidbg_udisk_shell.conf", FS_CMD_FILE_LISTMODE, &lidbg_udisk_shell_list);
+                    if(analyze_list_cmd(&lidbg_udisk_shell_list))
+                        LIDBG_WARN("exe success\n" );
+                }
+                else
+                    LIDBG_ERR("miss:lidbg_udisk_shell\n" );
+            }
         }
     }
     return 1;
 }
+static __le16 udiskvender[2];
 static int usb_nb_misc_func(struct notifier_block *nb, unsigned long action, void *data)
 {
+    struct usb_device *dev = data;
     switch (action)
     {
     case USB_DEVICE_ADD:
+        if(dev && dev->product && dev->descriptor.idVendor && dev->descriptor.idProduct)
+        {
+            if(strstr(dev->product, "EHCI Host Controller") == NULL && udiskvender[0] != dev->descriptor.idVendor && udiskvender[1] != dev->descriptor.idProduct)
+            {
+                g_var.is_udisk_needreset = 1;
+                udiskvender[0] = dev->descriptor.idVendor;
+                udiskvender[1] = dev->descriptor.idProduct;
+            }
+        }
         complete(&udisk_misc_wait);
         break;
     case USB_DEVICE_REMOVE:
-		if(g_var.recovery_mode == 1)
-		{
-			lidbg("umount /usb \n");
-			lidbg_shell_cmd("umount /usb");
-		}
+        if(g_var.recovery_mode == 1)
+        {
+            lidbg("umount /usb \n");
+            lidbg_shell_cmd("umount /usb");
+        }
         break;
     }
     return NOTIFY_OK;
@@ -439,17 +450,17 @@ int misc_init(void *data)
     if(1 == logcat_en)
         logcat_lunch(NULL, NULL);
 
-	//lidbg_trace_msg_cb_register("unhandled",NULL,unhandled_monitor);
-	lidbg_trace_msg_cb_register("lidbgerr",NULL,lidbgerr_monitor);
+    //lidbg_trace_msg_cb_register("unhandled",NULL,unhandled_monitor);
+    lidbg_trace_msg_cb_register("lidbgerr", NULL, lidbgerr_monitor);
 
     lidbg_new_cdev(&misc_nod_fops, "lidbg_misc");
 
-	if(g_var.recovery_mode == 1)
-		ssleep(5);
-	else
-		ssleep(30);
-	
-	complete(&udisk_misc_wait);
+    if(g_var.recovery_mode == 1)
+        ssleep(5);
+    else
+        ssleep(30);
+
+    complete(&udisk_misc_wait);
     return 0;
 }
 

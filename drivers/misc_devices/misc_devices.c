@@ -248,7 +248,13 @@ static struct file_operations dev_fops =
 void usb_enumerate_monitor(char *key_word, void *data)
 {
 	DUMP_FUN;
-	lidbg("find key word\n");
+	if(!g_var.is_udisk_needreset)
+	{
+	    lidbg("find key word.return\n");
+	    return;
+	}
+	g_var.is_udisk_needreset=0;
+	lidbg("find key word.in\n");
 	if(g_var.system_status >= FLY_ANDROID_UP)
 	{
 		usb_disk_enable(0);
