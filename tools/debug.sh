@@ -16,6 +16,7 @@ function debug_handle()
 {
 	case $1 in
 	51)
+		$DBG_TOOLS_PATH/serial_log.sh
 		expect $DBG_TOOLS_PATH/kmsg;;
 	52)
 		expect $DBG_TOOLS_PATH/remount;;
