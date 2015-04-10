@@ -32,13 +32,11 @@ out：编译后自动生成，存放所有编译生成的模块。
 ----------编译方法----------
 1.配置编译环境
 cd lidbg_qrd
-(1) cp ./build/dbg_cfg_example.sh ./dbg_cfg.sh
-(2) 修改DBG_SYSTEM_DIR等环境变量(指向的包的内核需编译过一遍(make bootimage))
-(3) chmod 777  ./* -R
+(1) cp ./build/dbg_cfg.sh ./dbg_cfg.sh
+(2) 修改DBG_PLATFORM_ID,USERS_ID环境变量
+(3) 配置build/users_conf.sh文件
+(4) chmod 777  ./* -R
 以上步骤只需配置一次
-
-dbg_cfg.sh编译环境变量配置说明：
-详见soc/$soc/README
 
 
 2.编译
@@ -58,10 +56,10 @@ dbg_cfg.sh编译环境变量配置说明：
 --------------运行-------------
 正式产品包已经默认加载lidbg相关模块，要是想push自己的lidbg模块到机器执行，执行下面指令：
 原生系统执行 
-tools/push.sh
+tools/push.sh (lidbg.sh 4)
 
 产品系统执行 
-tools/pushfly.sh
+tools/pushfly.sh (lidbg.sh 5)
 
 以下两种方法均可运行模块
 1.在终端用insmod指令直接加载模块（默认加载的原生系统，/system/lib/modules目录）
