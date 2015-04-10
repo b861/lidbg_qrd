@@ -97,7 +97,7 @@ static int thread_freq_limit(void *data)
 				}
 			}
 		count++;
-		if(count >= 60*4)
+		if((count >= 90*4) && (temp < 100))
 		{
 			if(is_recovery_mode == 0)
 				is_recovery_mode = is_file_exist(RECOVERY_MODE_DIR);
