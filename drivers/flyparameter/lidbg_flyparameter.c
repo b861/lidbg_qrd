@@ -9,6 +9,7 @@ LIDBG_DEFINE;
 
 static fly_hw_data *g_fly_hw_data = NULL;
 recovery_meg_t *g_recovery_meg = NULL;
+recovery_meg_t default_recovery_meg ;
 char *p_kmem = NULL;
 int update_hw_info = 0;
 enum update_info_enum {
@@ -135,6 +136,11 @@ bool flyparameter_info_get(void)
 			return true;
 		}
     }
+	else
+    {
+		lidbgerr("\n===flyparameter.disable===\n");
+		g_recovery_meg=&default_recovery_meg;
+	}
     return false;
 }
 //simple_strtoul(argv[0], 0, 0);

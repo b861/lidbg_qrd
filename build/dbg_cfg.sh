@@ -9,6 +9,8 @@
 
 ## USERS_ID ###
 # 0--root@192.168.9.222
+# 1--futengfei.Notebook.huasuo
+# 2--gaobenneng.Notebook
 
 
 export DBG_PLATFORM_ID=6
