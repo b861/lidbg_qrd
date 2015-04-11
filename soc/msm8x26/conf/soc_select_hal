@@ -9,6 +9,10 @@ CONFIG_HAL_USB_CAMERA=y
     case $DBG_PLATFORM_ID in
     2)
         CONFIG_HAL_VOLD_8x26=y;;
+    3)
+        CONFIG_HAL_VOLD_8x26=y;;
+    4)
+        CONFIG_HAL_VOLD_8x26=y;;
     *)
         CONFIG_HAL_VOLD_8x26=n;;
     esac
