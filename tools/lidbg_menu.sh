@@ -45,7 +45,7 @@ function lidbg_pull()
 	expect $DBG_TOOLS_PATH/pull_lidbg
 	chmod 777 $DBG_ROOT_PATH -R
 	git config core.filemode false
-	git gc
+	#git gc
 }
 
 function lidbg_push()
