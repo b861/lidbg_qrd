@@ -17,7 +17,7 @@ export DBG_DRIVERS_PATH=$DBG_ROOT_PATH/drivers
 export DBG_HAL_PATH=$DBG_ROOT_PATH/hal
 export DBG_PLATFORM_DIR=$DBG_SOC_DIR/$DBG_PLATFORM
 
-
+#export USE_CCACHE=1
 
 case "$DBG_PLATFORM_ID" in
     	0)

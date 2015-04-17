@@ -6,6 +6,8 @@ PWD := $(shell pwd)
 
 CROSS_COMPILE = $(DBG_CROSS_COMPILE)
 CC = $(CROSS_COMPILE)gcc
+#apt-get install ccache;ccache -M 50G;ccache -s
+#CC = ccache $(CROSS_COMPILE)gcc
 
 include $(DBG_SOC_PATH)/$(DBG_SOC)/conf/soc_select_drivers
 EXTRA_CFLAGS := -I$(DBG_CORE_PATH)/inc  -I$(DBG_SOC_PATH)/$(DBG_SOC)/inc  -I$(DBG_DEV_PATH)/$(DBG_SOC)
