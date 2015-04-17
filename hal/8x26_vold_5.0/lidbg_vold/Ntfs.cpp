@@ -48,12 +48,12 @@
 #include "VoldUtil.h"
 #include "../../inc/lidbg_servicer.h"
 
-static char *FLY_PRODUCT_PATH = "/flysystem/lib/out/chkntfs";
-static char *NATIVE_SYSTEM_PATH = "/system/lib/modules/out/chkntfs";
+static const char *FLY_PRODUCT_PATH = "/flysystem/lib/out/chkntfs";
+static const char *NATIVE_SYSTEM_PATH = "/system/lib/modules/out/chkntfs";
 
-static char *FSCK_NTFS_PATH = "/system/bin/chkntfs";
-static char *MKNTFS_PATH = "/system/bin/mkntfs";
-static char *MOUNT_NTFS_PATH = "/system/bin/ntfs-3g";
+static const char *FSCK_NTFS_PATH = "/system/bin/chkntfs";
+static const char *MKNTFS_PATH = "/system/bin/mkntfs";
+static const char *MOUNT_NTFS_PATH = "/system/bin/ntfs-3g";
 extern "C" int mount(const char *, const char *, const char *, unsigned long, const void *);
 
 
@@ -160,7 +160,7 @@ int Ntfs::doMount(const char *fsPath, const char *mountPoint,
     char mountData[255];
     char options[255] = {};
     const char *args[6];
-
+    createLost = createLost;
     flags = MS_NODEV | MS_NOSUID | MS_DIRSYNC;
 
     flags |= (executable ? 0 : MS_NOEXEC);
@@ -206,11 +206,9 @@ int Ntfs::doMount(const char *fsPath, const char *mountPoint,
          rc = android_fork_execvp(ARRAY_SIZE(args), (char **)args, &status,false, true);
 
         if (rc == 0) {
-          SLOGI("Excute %s mount %s to %s .", MOUNT_NTFS_PATH, fsPath, mountPoint);
-          LIDBG_PRINT("Excute %s mount %s to %s .", MOUNT_NTFS_PATH, fsPath, mountPoint);
+          SLOGI("ntfs-3g executed successfully.");
         } else {
-          SLOGI("Excute %s failed to doMount.", MOUNT_NTFS_PATH);
-          LIDBG_PRINT("Excute %s successfully to doMount.", MOUNT_NTFS_PATH);
+            SLOGE("Failed to execute ntfs-3g.");
         }
     } else {
         rc = mount(fsPath, mountPoint, "fuseblk", flags, mountData);

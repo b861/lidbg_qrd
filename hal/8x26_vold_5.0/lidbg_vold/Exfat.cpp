@@ -112,7 +112,7 @@ int Exfat::doMount(const char *fsPath, const char *mountPoint,
     unsigned long flags;
     char mountData[255];
     const char *args[4];
-
+    createLost = createLost;
     flags = MS_NODEV | MS_NOSUID | MS_DIRSYNC;
 
     flags |= (executable ? 0 : MS_NOEXEC);
@@ -146,11 +146,11 @@ int Exfat::doMount(const char *fsPath, const char *mountPoint,
          rc = android_fork_execvp(ARRAY_SIZE(args), (char **)args, &status,false, true);
 
         if (rc == 0) {
-          LIDBG_PRINT("Excute %s mount %s to %s.", MK_EXFAT_PATH, fsPath, mountPoint);
-          SLOGI("Excute %s successfully to doMount.", MK_EXFAT_PATH);
+	lidbg("mkfs.exfat executed successfully.");
+          SLOGI("ntfs-3g executed successfully.");
         } else {
-            SLOGE("Excute %s failed to doMount.", MK_EXFAT_PATH);
-            LIDBG_PRINT("Excute %s failed to doMount.", MK_EXFAT_PATH);
+            SLOGE("Failed to execute ntfs-3g.");
+	lidbg("Failed to execute ntfs-3g.");
         }
     } else {
         rc = mount(fsPath, mountPoint, "fuseblk", flags, mountData);
