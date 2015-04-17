@@ -779,7 +779,7 @@ static int thread_observer(void *data)
                     break;
 
                 default:
-                    if(have_triggerd_sleep_S >= 5 && !(have_triggerd_sleep_S % 5) && (atomic_read(&is_in_sleep) == 1))
+                    if(have_triggerd_sleep_S >= 5 && !(have_triggerd_sleep_S % 5) && (g_var.system_status == FLY_GOTO_SLEEP))//atomic_read(&is_in_sleep) == 1
                     {
                         sprintf(when, "start%d:", have_triggerd_sleep_S);
                         kernel_wakelock_print(when);
