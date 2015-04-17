@@ -413,10 +413,8 @@ void yuyv422toABGRY(unsigned char *src)
 
 void 
 Java_com_camera_simplewebcam_CameraPreview_pixeltobmp( JNIEnv* env,jobject thiz,jobject bitmap){
-
+	jobject mthiz=thiz;
 	jboolean bo;
-
-
 	AndroidBitmapInfo  info;
 	void*              pixels;
 	int                ret;
@@ -459,7 +457,8 @@ Java_com_camera_simplewebcam_CameraPreview_pixeltobmp( JNIEnv* env,jobject thiz,
 
 jint 
 Java_com_camera_simplewebcam_CameraPreview_prepareCamera( JNIEnv* env,jobject thiz, jint videoid){
-
+	JNIEnv* menv=env;
+	jobject mthiz=thiz;
 	int ret;
 
 	if(camerabase<0){
@@ -506,12 +505,16 @@ Java_com_camera_simplewebcam_CameraPreview_prepareCameraWithBase( JNIEnv* env,jo
 void 
 Java_com_camera_simplewebcam_CameraPreview_processCamera( JNIEnv* env,
 										jobject thiz){
+	JNIEnv* menv=env;
+	jobject mthiz=thiz;
 
 	readframeonce();
 }
 
 void 
 Java_com_camera_simplewebcam_CameraPreview_stopCamera(JNIEnv* env,jobject thiz){
+	JNIEnv* menv=env;
+	jobject mthiz=thiz;
 
 	stopcapturing ();
 

@@ -40,17 +40,16 @@ reserved:
 };
 camera_module_t HAL_MODULE_INFO_SYM =
 {
-common:
-    camera_common,
-get_number_of_cameras:
-    get_number_of_cameras,
-get_camera_info:
-    get_camera_info,
-set_callbacks:
-    NULL,
-get_vendor_tag_ops:
-    NULL
+    common: camera_common,
+    get_number_of_cameras: get_number_of_cameras,
+    get_camera_info:get_camera_info,
+    set_callbacks:NULL,
+    get_vendor_tag_ops:NULL,
+    open_legacy:NULL,
+    reserved:   {0},
 };
+
+
 
 namespace android
 {
