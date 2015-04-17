@@ -143,6 +143,8 @@ void parse_cmd(char *pt)
         if (!strcmp(argv[1], "*158#999"))
         {
             char buff[50] = {0};
+			
+            lidbg_shell_cmd("setenforce 0");
             lidbg_shell_cmd("cp /flysystem/lib/out/lidbg_udisk_shell.conf /dev/log/");
             lidbg_shell_cmd("chmod 777 /dev/log/lidbg_udisk_shell.conf");
 

@@ -8,8 +8,10 @@ int main(int argc, char **argv)
     argv=argv;
     pthread_t lidbg_uevent_tid;
     int recovery_mode,checkout = 0; //checkout=1 origin ; checkout=2 old flyaudio;checkout=3 new flyaudio
-	 int ret;
-
+	int ret;
+	 
+	system("setenforce 0");
+	
     system("chmod 777 /dev/dbg_msg");
 
     DUMP_BUILD_TIME_FILE;
