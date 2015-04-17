@@ -51,6 +51,8 @@ void GetAudioPolicyService(bool dbg)
 bool playing = false;
 int main(int argc, char **argv)
 {
+    argc=argc;
+    argv=argv;
     lidbg( TAG"lidbg_android_server:main");
 
     sleep(20);

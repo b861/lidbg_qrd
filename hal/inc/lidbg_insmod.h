@@ -35,7 +35,8 @@ bail:
 	return buffer;
 }
 
-
+ int init_module(void *module_image, unsigned long len,
+                       const char *param_values);
 inline int module_insmod(char *file)
 {
 	void *module = NULL;
@@ -52,7 +53,7 @@ inline int module_insmod(char *file)
 		ret = init_module(module, size, "");
 		if(ret < 0)
 		{
-			if (0 == memcmp("File exists",strerror(errno),sizeof(strerror(errno))))
+			if (0 == memcmp("File exists",strerror(errno),strlen(strerror(errno))))
 			{
 				lidbg("insmod -> %s File exists",file);
 				free(module);

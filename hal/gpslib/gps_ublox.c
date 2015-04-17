@@ -280,7 +280,7 @@ static int
 nmea_reader_update_time( NmeaReader  *r, Token  tok )
 {
     int        hour, minute;
-    double     seconds;
+    int		  seconds;
     struct tm  tm;
     time_t     fix_time;
 
@@ -399,7 +399,7 @@ nmea_reader_update_altitude( NmeaReader  *r,
 {
     double  alt;
     Token   tok = altitude;
-
+    units=units;
     if (tok.p >= tok.end)
         return -1;
 
@@ -855,7 +855,7 @@ epoll_deregister( int  epoll_fd, int  fd )
 
 static void gps_fake_test(NmeaReader *reader)
 {
-    int i;
+    unsigned int i;
     char data[] =
         "$GPRMC,024910.00,A,2303.63577,N,11330.82974,E,3.643,281.61,080313,,,A*65\n"
         "$GPVTG,281.61,T,,M,3.643,N,6.747,K,A*31\n"
@@ -903,7 +903,7 @@ gps_state_thread( void  *arg )
         if (nevents < 0)
         {
             if (errno != EINTR)
-                D("epoll_wait() unexpected error: %s", strerror(errno));
+                {D("epoll_wait() unexpected error: %s", strerror(errno));}
             continue;
         }
         // D("[futengfei]===HCPUgps thread received %d events", nevents);
@@ -1141,24 +1141,38 @@ ublox_gps_stop()
 
 static int
 ublox_gps_inject_time(GpsUtcTime time, int64_t timeReference, int uncertainty)
-{
+{   
+	time=time;
+	timeReference=timeReference;
+	uncertainty=uncertainty;
     return 0;
 }
 
 static int
 ublox_gps_inject_location(double latitude, double longitude, float accuracy)
 {
+	latitude = latitude;
+	longitude = longitude;
+	accuracy = accuracy;
     return 0;
 }
 
 static void
 ublox_gps_delete_aiding_data(GpsAidingData flags)
 {
+	flags=flags;
 }
 
-static int ublox_gps_set_position_mode(GpsPositionMode mode, int fix_frequency)
+static int ublox_gps_set_position_mode(GpsPositionMode mode, GpsPositionRecurrence recurrence,  
+            uint32_t min_interval, uint32_t preferred_accuracy, uint32_t preferred_time)
 {
     // FIXME - support fix_frequency
+    mode=mode;
+    recurrence=recurrence;
+    min_interval=min_interval;
+    preferred_accuracy=preferred_accuracy;
+    preferred_time=preferred_time;
+   // fix_frequency=fix_frequency;
     return 0;
 }
 
@@ -1166,6 +1180,7 @@ static const void *
 ublox_gps_get_extension(const char *name)
 {
     // no extensions supported
+    name=name;
     return NULL;
 }
 
@@ -1196,6 +1211,7 @@ static const GpsInterface  ubloxGpsInterface =
 
 const GpsInterface *gps__get_gps_interface(struct gps_device_t *dev)
 {
+	 dev=dev;
     return &ubloxGpsInterface;
 }
 
@@ -1205,7 +1221,7 @@ static int open_gps(const struct hw_module_t *module, char const *name,
     struct gps_device_t *dev = malloc(sizeof(struct gps_device_t));
     D("%s", __FUNCTION__);
     memset(dev, 0, sizeof(*dev));
-
+    name=name;
     dev->common.tag = HARDWARE_DEVICE_TAG;
     dev->common.version = 0;
     dev->common.module = (struct hw_module_t *)module;

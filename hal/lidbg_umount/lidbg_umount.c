@@ -12,13 +12,17 @@
 #include <poll.h>
 #include <sys/stat.h>
 #include <signal.h>
+#include <sys/mount.h>
 
-#define LOG_TAG "ProcessKiller"
+#undef   LOG_TAG
+#define  LOG_TAG "ProcessKiller"
 #include <cutils/log.h>
 
 
 bool mDebug = true;
 bool force = true;
+int checkFileMaps(int pid, const char *mountPoint, char *openFilename, size_t max);
+int checkSymLink(int pid, const char *mountPoint, const char *name);
 
 int pathMatchesMountPoint(const char *path, const char *mountPoint)
 {
@@ -229,9 +233,11 @@ int checkFileMaps(int pid, const char *mountPoint, char *openFilename, size_t ma
 
 int main(int argc, char **argv)
 {
+    argc=argc;
+    argv=argv;
     int retries = 5;
     int action = 2;//1.SIGHUP 2.SIGKILL
-    char *path = "/storage/udisk";
+    const char *path = "/storage/udisk";
     if (mDebug)
     {
         SLOGD("Unmounting {%s}, force = %d", path, force);
@@ -240,7 +246,7 @@ int main(int argc, char **argv)
 
     while (retries--)
     {
-        if (!umount(path) || errno == EINVAL || errno == ENOENT)
+        if ((!umount(path)) || (errno == EINVAL) || (errno == ENOENT))
         {
             SLOGI("%s sucessfully unmounted!!", path);
             lidbg("%s sucessfully unmounted!!", path);

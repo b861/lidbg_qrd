@@ -186,6 +186,8 @@ static void lidbg_uevent_poll(bool (*uevent_callback)(int fd))
 
 int main(int argc, char **argv)
 {
+    argc=argc;
+    argv=argv;
     pthread_t lidbg_uevent_tid;
     DUMP_BUILD_TIME_FILE;
 	lidbg("lidbg_userver: uevent thread start\n");
