@@ -10,9 +10,11 @@ find ../ -name "Module.symvers" -exec rm -rf {} \;
 build_log=$DBG_OUT_PATH/build_time.conf
 hostname > $build_log
 date >> $build_log
+echo $DBG_PLATFORM_ID >> $build_log
+echo $USERS_ID >> $build_log
 echo $DBG_PLATFORM >> $build_log
 echo $BOARD_VERSION >> $build_log
-echo $BUILD_VERSION >> $build_log
+
 git log --oneline | sed -n '1,10p' >> $build_log
 
 
