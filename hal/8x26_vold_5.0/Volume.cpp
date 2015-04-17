@@ -48,6 +48,10 @@
 #include "Fat.h"
 #include "Process.h"
 #include "cryptfs.h"
+#include "lidbg_vold/Ntfs.h"
+#include "lidbg_vold/Exfat.h"
+#include "../inc/lidbg_servicer.h"
+#include "lidbg_vold/Lidbg_vold.h"
 
 extern "C" void dos_partition_dec(void const *pp, struct dos_partition *d);
 extern "C" void dos_partition_enc(void *pp, struct dos_partition *d);
@@ -209,6 +213,8 @@ void Volume::setState(int state) {
 
     SLOGD("Volume %s state changing %d (%s) -> %d (%s)", mLabel,
          oldState, stateToStr(oldState), mState, stateToStr(mState));
+    LIDBG_PRINT("Volume %s state changing %d (%s) -> %d (%s)", mLabel,
+         oldState, stateToStr(oldState), mState, stateToStr(mState));
     snprintf(msg, sizeof(msg),
              "Volume %s %s state changed from %d (%s) to %d (%s)", getLabel(),
              getFuseMountpoint(), oldState, stateToStr(oldState), mState,
@@ -325,6 +331,7 @@ int Volume::mountVol() {
     char decrypt_state[PROPERTY_VALUE_MAX];
     char crypto_state[PROPERTY_VALUE_MAX];
     char encrypt_progress[PROPERTY_VALUE_MAX];
+    LIDBG_PRINT("Start volume mount ..........\n");
 
     property_get("vold.decrypt", decrypt_state, "");
     property_get("vold.encrypt_progress", encrypt_progress, "");
@@ -379,6 +386,7 @@ int Volume::mountVol() {
        if (n != 1) {
            /* We only expect one device node returned when mounting encryptable volumes */
            SLOGE("Too many device nodes returned when mounting %s\n", getMountpoint());
+           LIDBG_PRINT("Too many device nodes returned when mounting %s\n", getMountpoint());
            return -1;
        }
 
@@ -419,32 +427,75 @@ int Volume::mountVol() {
                 minor(deviceNodes[i]));
 
         SLOGI("%s being considered for volume %s\n", devicePath, getLabel());
-
+        LIDBG_PRINT("%s being considered for volume %s\n", devicePath, getLabel());
         errno = 0;
         setState(Volume::State_Checking);
 
-        if (Fat::check(devicePath)) {
-            if (errno == ENODATA) {
-                SLOGW("%s does not contain a FAT filesystem\n", devicePath);
-                continue;
-            }
-            errno = EIO;
-            /* Badness - abort the mount */
-            SLOGE("%s failed FS checks (%s)", devicePath, strerror(errno));
-            setState(Volume::State_Idle);
-            return -1;
-        }
+		if(n==1){
+		LIDBG_PRINT("start checking ..........\n");
+		if (Fat::check(devicePath)==0) {
+			LIDBG_PRINT("this is fat filesystem, ready to mount!\n");
+			if (Fat::doMount(devicePath, getMountpoint(), false, false, false, AID_MEDIA_RW, AID_MEDIA_RW, 0007, true)) {
+				SLOGE("%s failed to mount via VFAT (%s)\n", devicePath, strerror(errno));
+				LIDBG_PRINT("%s failed to mount via VFAT (%s)\n", devicePath, strerror(errno));
+				continue;
+			}
+		}
+		else if(Exfat::check(devicePath)==0)
+		{
+			SLOGW("this is Exfat filesystem, ready to mount!\n");
+			LIDBG_PRINT("this is Exfat filesystem, ready to mount!\n");
+			if (Exfat::doMount(devicePath, getMountpoint(), false, false, false, AID_MEDIA_RW, AID_MEDIA_RW, 0007, true))
+			{
+				SLOGE("%s failed to mount via Exfat (%s)\n", devicePath, strerror(errno));
+				LIDBG_PRINT("%s failed to mount via Exfat (%s)\n", devicePath, strerror(errno));
+				continue;
+			}
+		}
+		else if(Ntfs::check(devicePath) == 0)
+		{
+			SLOGW("this is NTFS filesystem, ready to mount!\n");
+			LIDBG_PRINT("this is NTFS filesystem, ready to mount!\n");
+			if (Ntfs::doMount(devicePath, getMountpoint(), false, false, false, AID_MEDIA_RW, AID_MEDIA_RW, 0007, true))
+			{
+				SLOGE("%s failed to mount via NTFS (%s)\n", devicePath, strerror(errno));
+				LIDBG_PRINT("%s failed to mount via NTFS (%s)\n", devicePath, strerror(errno));
+				continue;
+			}
+		}
+		else{
+			if (errno == ENODATA) {
+				SLOGW("%s unkown filesystem\n", devicePath);
+				LIDBG_PRINT("%s unkown filesystem\n", devicePath);
+				continue;
+			}
+			errno = EIO;
 
-        errno = 0;
-        int gid;
+			SLOGE("%s failed FS checks (%s)", devicePath, strerror(errno));
+			LIDBG_PRINT("%s failed FS checks (%s)", devicePath, strerror(errno));
+			setState(Volume::State_Idle);
+			return -1;
+		}
 
-        if (Fat::doMount(devicePath, getMountpoint(), false, false, false,
-                AID_MEDIA_RW, AID_MEDIA_RW, 0007, true)) {
-            SLOGE("%s failed to mount via VFAT (%s)\n", devicePath, strerror(errno));
-            continue;
-        }
+		extractMetadata(devicePath);
 
-        extractMetadata(devicePath);
+		if (providesAsec && mountAsecExternal() != 0) {
+			SLOGE("Failed to mount secure area (%s)", strerror(errno));
+			LIDBG_PRINT("Failed to mount secure area (%s)", strerror(errno));
+			umount(getMountpoint());
+			setState(Volume::State_Idle);
+			return -1;
+		}
+
+		char service[64];
+		snprintf(service, 64, "fuse_%s", getLabel());
+		property_set("ctl.start", service);
+
+		setState(Volume::State_Mounted);
+		mCurrentlyMountedKdev = deviceNodes[i];
+
+		return 0;
+		}
 
         if (providesAsec && mountAsecExternal() != 0) {
             SLOGE("Failed to mount secure area (%s)", strerror(errno));

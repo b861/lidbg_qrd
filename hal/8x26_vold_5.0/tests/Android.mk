@@ -1,9 +1,9 @@
 # Build the unit tests.
-LOCAL_PATH := $(call my-dir)
+#LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
-test_src_files := \
-	VolumeManager_test.cpp
+#test_src_files := \
+#	VolumeManager_test.cpp
 
 shared_libraries := \
 	liblog \

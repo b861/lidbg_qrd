@@ -146,11 +146,11 @@ int Exfat::doMount(const char *fsPath, const char *mountPoint,
          rc = android_fork_execvp(ARRAY_SIZE(args), (char **)args, &status,false, true);
 
         if (rc == 0) {
-	lidbg("mkfs.exfat executed successfully.");
-          SLOGI("ntfs-3g executed successfully.");
+          LIDBG_PRINT("Excute %s mount %s to %s.", MK_EXFAT_PATH, fsPath, mountPoint);
+          SLOGI("Excute %s successfully to doMount.", MK_EXFAT_PATH);
         } else {
-            SLOGE("Failed to execute ntfs-3g.");
-	lidbg("Failed to execute ntfs-3g.");
+            SLOGE("Excute %s failed to doMount.", MK_EXFAT_PATH);
+            LIDBG_PRINT("Excute %s failed to doMount.", MK_EXFAT_PATH);
         }
     } else {
         rc = mount(fsPath, mountPoint, "fuseblk", flags, mountData);

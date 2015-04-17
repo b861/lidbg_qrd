@@ -135,9 +135,6 @@ int main(int argc, char* argv[])
 	const char* spec = NULL;
 	struct exfat ef;
 
-	LIDBG_PRINT("====exfatfsck %u.%u.%u\n",
-			EXFAT_VERSION_MAJOR, EXFAT_VERSION_MINOR, EXFAT_VERSION_PATCH);
-
 	while ((opt = getopt(argc, argv, "V")) != -1)
 	{
 		switch (opt)
@@ -157,12 +154,9 @@ int main(int argc, char* argv[])
 	if (exfat_mount(&ef, spec, "ro") != 0)
 		return 1;
 
-	LIDBG_PRINT("Checking file system on %s.\n", spec);
+	LIDBG_PRINT("Exfatfsck checking file system on %s.\n", spec);
 	fsck(&ef);
-	LIDBG_PRINT("========exfatfsck=======1");
 	exfat_unmount(&ef);
-	LIDBG_PRINT("Totally %"PRIu64" directories and %"PRIu64" files.\n",
-			directories_count, files_count);
 
 	fputs("File system checking finished. ", stdout);
 	if (exfat_errors != 0)

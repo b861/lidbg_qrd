@@ -206,9 +206,11 @@ int Ntfs::doMount(const char *fsPath, const char *mountPoint,
          rc = android_fork_execvp(ARRAY_SIZE(args), (char **)args, &status,false, true);
 
         if (rc == 0) {
-          SLOGI("ntfs-3g executed successfully.");
+          SLOGI("Excute %s mount %s to %s .", MOUNT_NTFS_PATH, fsPath, mountPoint);
+          LIDBG_PRINT("Excute %s mount %s to %s .", MOUNT_NTFS_PATH, fsPath, mountPoint);
         } else {
-            SLOGE("Failed to execute ntfs-3g.");
+          SLOGI("Excute %s failed to doMount.", MOUNT_NTFS_PATH);
+          LIDBG_PRINT("Excute %s successfully to doMount.", MOUNT_NTFS_PATH);
         }
     } else {
         rc = mount(fsPath, mountPoint, "fuseblk", flags, mountData);

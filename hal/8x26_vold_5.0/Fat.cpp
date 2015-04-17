@@ -41,7 +41,7 @@
 #include <cutils/properties.h>
 
 #include <logwrap/logwrap.h>
-
+#include "../inc/lidbg_servicer.h"
 #include "Fat.h"
 #include "VoldUtil.h"
 
@@ -143,6 +143,7 @@ int Fat::doMount(const char *fsPath, const char *mountPoint,
             "utf8,uid=%d,gid=%d,fmask=%o,dmask=%o,shortname=mixed",
             ownerUid, ownerGid, permMask, permMask);
 
+    LIDBG_PRINT("Excute vfat mount %s to %s.",fsPath, mountPoint);
     rc = mount(fsPath, mountPoint, "vfat", flags, mountData);
 
     if (rc && errno == EROFS) {

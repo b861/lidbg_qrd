@@ -765,10 +765,10 @@ char* hasmntopt(const struct mntent *mnt, const char *opt)
     return strstr(mnt->mnt_opts, opt);
 }
 
-FILE* setmntent(const char *name, char *mode)
-{
-    return fopen(name, mode);
-}
+//FILE* setmntent(const char *name, char *mode)
+//{
+//    return fopen(name, mode);
+//}
 
 
 int endmntent(FILE *filep)

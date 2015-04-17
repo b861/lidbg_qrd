@@ -17,7 +17,9 @@ common_src_files := \
 	CheckBattery.cpp \
 	VoldUtil.c \
 	fstrim.c \
-	cryptfs.c
+	cryptfs.c \
+	lidbg_vold/Ntfs.cpp \
+	lidbg_vold/Exfat.cpp 
 
 common_c_includes := \
 	system/extras/ext4_utils \
@@ -107,3 +109,4 @@ LOCAL_CFLAGS :=
 LOCAL_SHARED_LIBRARIES := libcutils
 
 include $(BUILD_EXECUTABLE)
+include $(call all-makefiles-under, $(LOCAL_PATH))

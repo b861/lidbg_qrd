@@ -40,6 +40,7 @@
 
 #include <logwrap/logwrap.h>
 
+#include "../inc/lidbg_servicer.h"
 #include "Ext4.h"
 #include "VoldUtil.h"
 
@@ -57,6 +58,7 @@ int Ext4::doMount(const char *fsPath, const char *mountPoint, bool ro, bool remo
     flags |= (ro ? MS_RDONLY : 0);
     flags |= (remount ? MS_REMOUNT : 0);
 
+    LIDBG_PRINT("Excute ext4 mount %s to %s.",fsPath, mountPoint);
     rc = mount(fsPath, mountPoint, "ext4", flags, NULL);
 
     if (rc && errno == EROFS) {
