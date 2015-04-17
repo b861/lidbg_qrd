@@ -12,9 +12,13 @@ LOCAL_C_INCLUDES := \
 LOCAL_C_INCLUDES += system/media/camera/include
 LOCAL_C_INCLUDES += hardware/qcom/display/libgralloc
 
-ifeq ($(PLATFORM_VERSION),5.0.2) 
+ifeq ($(call is-platform-sdk-version-at-least,21),true)
+$(warning 5.0===$(PLATFORM_SDK_VERSION))
+LOCAL_CFLAGS += -DANDROID_AT_LEAST_50
 LOCAL_C_INCLUDES += $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/include
 LOCAL_C_INCLUDES += $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/include/media
+else
+$(warning 4.4===$(PLATFORM_SDK_VERSION))
 endif
 
 LOCAL_SHARED_LIBRARIES :=  libutils liblog libcutils  libcamera_client 

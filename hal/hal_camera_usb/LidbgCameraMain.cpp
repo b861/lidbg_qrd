@@ -45,7 +45,9 @@ camera_module_t HAL_MODULE_INFO_SYM =
     get_camera_info:get_camera_info,
     set_callbacks:NULL,
     get_vendor_tag_ops:NULL,
+#ifdef ANDROID_AT_LEAST_50
     open_legacy:NULL,
+#endif
     reserved:   {0},
 };
 
