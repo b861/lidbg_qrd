@@ -31,7 +31,6 @@ void lidbg_enable_logcat(void)
     lidbg_shell_cmd("chmod 777 /sdcard/logcat*");
     ssleep(1);
     sprintf(cmd, "logcat  -v time>> /sdcard/%s &", logcat_file_name);
-    lidbg_shell_cmd(cmd);
 
     lidbg_enable_kmsg();
 
