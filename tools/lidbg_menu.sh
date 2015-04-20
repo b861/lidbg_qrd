@@ -226,6 +226,8 @@ function build_all_handle()
 cd build
 source env_entry.sh
 
+git config gc.auto 0
+
 . $DBG_TOOLS_PATH/soc_$DBG_SOC.sh
 . $DBG_TOOLS_PATH/depository.sh
 . $DBG_TOOLS_PATH/debug.sh
