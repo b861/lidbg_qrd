@@ -48,12 +48,12 @@
 #include "VoldUtil.h"
 #include "../../inc/lidbg_servicer.h"
 
-static char *FLY_PRODUCT_PATH = "/flysystem/lib/out/chkntfs";
-static char *NATIVE_SYSTEM_PATH = "/system/lib/modules/out/chkntfs";
+static const char *FLY_PRODUCT_PATH = "/flysystem/lib/out/chkntfs";
+static const char *NATIVE_SYSTEM_PATH = "/system/lib/modules/out/chkntfs";
 
-static char *FSCK_NTFS_PATH = "/system/bin/chkntfs";
-static char *MKNTFS_PATH = "/system/bin/mkntfs";
-static char *MOUNT_NTFS_PATH = "/system/bin/ntfs-3g";
+static const char *FSCK_NTFS_PATH = "/system/bin/chkntfs";
+static const char *MKNTFS_PATH = "/system/bin/mkntfs";
+static const char *MOUNT_NTFS_PATH = "/system/bin/ntfs-3g";
 extern "C" int mount(const char *, const char *, const char *, unsigned long, const void *);
 
 

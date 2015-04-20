@@ -32,8 +32,8 @@
 #include "VoldUtil.h"
 #include "../../inc/lidbg_servicer.h"
 
-static char FSCK_EXFAT_PATH[] = "/flysystem/lib/out/fsck.exfat";
-static char MK_EXFAT_PATH[] = "/flysystem/lib/out/mkfs.exfat";
+static const char FSCK_EXFAT_PATH[] = "/flysystem/lib/out/fsck.exfat";
+static const char MK_EXFAT_PATH[] = "/flysystem/lib/out/mkfs.exfat";
 
 
 extern "C" int logwrap(int argc, const char **argv, int background);
