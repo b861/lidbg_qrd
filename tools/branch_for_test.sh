@@ -59,7 +59,9 @@ function copy_package_to_smb()
 
 #	if [ ! -d /mnt/smb_$DBG_PLATFORM];then
 	    mkdir /mnt/smb-$DBG_PLATFORM_ID-$DBG_PLATFORM
-	    mount -t smbfs -o codepage=cp936,username=lisuwei,password=123456 $TEST_PACKAGE_PATH /mnt/smb-$DBG_PLATFORM_ID-$DBG_PLATFORM
+	  #  mount -t smbfs -o codepage=cp936,username=lisuwei,password=123456 $TEST_PACKAGE_PATH /mnt/smb-$DBG_PLATFORM_ID-$DBG_PLATFORM
+#ubuntu 12.10 later cifs replace smbfs 
+	    mount -t cifs -o username=lisuwei,password=123456 $TEST_PACKAGE_PATH /mnt/smb-$DBG_PLATFORM_ID-$DBG_PLATFORM
 #	fi
 	mkdir /mnt/smb-$DBG_PLATFORM_ID-$DBG_PLATFORM/$commit
 	cp -v $RELEASE_REPOSITORY/out/*.fup  /mnt/smb-$DBG_PLATFORM_ID-$DBG_PLATFORM/$commit/ && nautilus /mnt/smb-$DBG_PLATFORM_ID-$DBG_PLATFORM/$commit
