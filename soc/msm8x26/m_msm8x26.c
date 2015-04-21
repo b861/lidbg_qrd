@@ -10,7 +10,9 @@ int soc_temp_get(void)
 {
 	static long temp;
 	static struct tsens_device tsens_dev;
-	
+	//{"tsens_tz_sensor5", "cpu0-1" },
+	//{"tsens_tz_sensor1", "cpu2-3" },
+	//{"tsens_tz_sensor3", "pop_mem" },
 	tsens_dev.sensor_num = 3;
 	tsens_get_temp(&tsens_dev, &temp);
 #if 0

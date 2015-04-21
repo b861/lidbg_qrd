@@ -1,6 +1,6 @@
 
 #include "lidbg.h"
-int temp_log_freq = 50;
+int temp_log_freq = 10;
 //static int fan_onoff_temp;
 static int cpu_temp_time_minute = 20;
 static bool is_cpu_temp_enabled = false;
@@ -58,23 +58,24 @@ u32 get_scaling_max_freq(void)
 
 void log_temp(void)
 {
-/*
+
     static int old_temp = 0, cur_temp = 0;
     int tmp;
     g_var.temp = cur_temp = soc_temp_get();
     tmp = cur_temp - old_temp;
 
-	if(((temp_log_freq != 0) && (ABS(tmp) >= temp_log_freq)) )
+	if(
+		   ((temp_log_freq != 0) && (ABS(tmp) >= temp_log_freq)) 
+		|| ((g_var.temp > 100) && (ABS(tmp) >= 2))
+		|| ((g_var.temp > 90) && (ABS(tmp) >= 3))
+		|| ((g_var.temp > 80) && (ABS(tmp) >= 5))
+		)
     {
     	
 		lidbg_fs_log(TEMP_LOG_PATH, "%d,%d,%d\n", cur_temp, get_scaling_max_freq(),cpufreq_get(0));
         old_temp = cur_temp;
     }
 
-
-	if(g_var.temp > 85)
-		lidbg_fs_log(TEMP_LOG_PATH, "%d,%d,%d\n", cur_temp, get_scaling_max_freq(),cpufreq_get(0));
-*/
 		
 }
 

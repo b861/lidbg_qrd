@@ -90,8 +90,8 @@ extern struct list_head lidbg_machine_info_list;
 #define lidbg_fs_log(path,fmt,...) do{	char buf[32];\
 								printk_fs(fmt,##__VA_ARGS__);\
 								lidbg_get_current_time(buf,NULL);\
-								fs_string2file(0,path,"[%s] ",buf);\
-								fs_string2file(0,path,fmt,##__VA_ARGS__);\
+								fs_string2file(1,path,"[%s] ",buf);\
+								fs_string2file(1,path,fmt,##__VA_ARGS__);\
 								}while(0)
 
 
