@@ -3,13 +3,14 @@ function combination_menu()
 {
 	cd $DBG_ROOT_PATH
 	echo 组合选项:
-	echo "[61] 完整编译lidbg并提交到产品二进制仓库           (1  3  81(1) 41 82(3))"
-	echo "[62] 编译basesystem并提交到产品二进制仓库          (81(2) 25 81(3) 42 82(3))"
-	echo "[63] 拷贝lidbg和basesystem到二进制仓库后生成升级包 (81(3) 41 42 43)"
+	echo "[61] 完整编译lidbg并提交到产品二进制仓库"
+	echo "[62] 编译basesystem并提交到产品二进制仓库"
+	echo "[63] 编译lidbg和basesystem并提交到产品二进制仓库"
+	echo "[64] 拷贝lidbg和basesystem到二进制仓库后生成升级包"
 
     	echo "[66] 编译拷贝lidbg或basesystem并生成升级包提交到测试分支"
     	echo "[67] 编译拷贝lidbg和basesystem并生成原生系统的升级包,拷贝到服务器"
-	echo "[70] 编译烧写boot.img后重启                        (21 53 54 56)"
+	echo "[70] 编译烧写boot.img后重启"
 }
 
 function combination_handle()
@@ -23,6 +24,9 @@ function combination_handle()
 		read -p "输入提交到二进制仓库的说明文字：" descriptors
 		cd $DBG_SYSTEM_DIR && expect $DBG_TOOLS_PATH/pull $SYSTEM_WORK_BRANCH $DBG_PASSWORD  && depository_clean && depository_pull && soc_build_release && depository_pull && depository_copy_basesystem && depository_add_push "$descriptors";;
 	63)
+		read -p "输入提交到二进制仓库的说明文字：" descriptors
+		lidbg_build_all && cd $DBG_SYSTEM_DIR && expect $DBG_TOOLS_PATH/pull $SYSTEM_WORK_BRANCH $DBG_PASSWORD  && depository_clean && depository_pull && soc_build_release && depository_pull && rm -rf $UPDATA_BIN_DIR/out && rm -rf $UPDATA_BIN_DIR/hw/* && depository_copy_lidbg && depository_copy_basesystem && depository_add_push "$descriptors";;
+	64)
 	    depository_pull && rm -rf $UPDATA_BIN_DIR/out && rm -rf $UPDATA_BIN_DIR/hw/* && depository_copy_lidbg && depository_copy_basesystem && depository_make_package && gitk&;;
         66)
         echo "  编译选项如下"
