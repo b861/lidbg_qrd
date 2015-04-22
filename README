@@ -7,11 +7,11 @@ linux debug(lidbg)
 密码：小写字母 l
 
 ----------代码结构--------------
-主要包含应用层（hal），基础驱动模块（core），具体工作模块（drivers），编译脚本（build），输出目录（out）。
+主要包含应用层（app），基础驱动模块（core），具体工作模块（drivers），编译脚本（build），输出目录（out）。
 
-*应用层（hal）
-hal/JAVA:提供一些函数模块，可直接用于上层java代码中（例如把java程序中的打印信息输出到串口）。
-详见hal/README
+*应用层（app）
+app/JAVA:提供一些函数模块，可直接用于上层java代码中（例如把java程序中的打印信息输出到串口）。
+详见app/README
 
 *基础驱动模块（core）
 作用主要有两个：
@@ -47,8 +47,8 @@ cd lidbg_qrd
 ./build/make.sh core
 生成模块在out目录
 
-*应用层（hal）的编译
-在hal目录下的build_all.sh脚本,生成模块(apk、可执行文件等)在out目录
+*应用层（app）的编译
+在app目录下的build_all.sh脚本,生成模块(apk、可执行文件等)在out目录
 
 3.运行clean.sh(lidbg.sh 1)可清除所有编译后产生的文件。
 
