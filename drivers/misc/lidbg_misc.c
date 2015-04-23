@@ -174,15 +174,65 @@ void lidbgerr_monitor(char *key_word, void *data)
     lidbg_loop_warning();
 }
 
+#define REBOOT_SIG_FILE LIDBG_LOG_DIR"thread_reboot.txt"
+
 int thread_reboot(void *data)
 {
 
-    if(!reboot_delay_s)
+    if(!reboot_delay_s )
     {
-        lidbg("<reb.exit.%d>\n", reboot_delay_s);
+        lidbg("<reb.exit0.%d>\n", reboot_delay_s);
         return 0;
     }
+
+    //if exist,means:the last time between current-reboot_delay_s had reboot.
+    if(fs_is_file_exist(REBOOT_SIG_FILE))
+    {
+        lidbg("<reb.exit1.%d,%d>\n", reboot_delay_s, fs_is_file_exist(REBOOT_SIG_FILE));
+        g_var.is_debug_mode = 1;
+        lidbg_loop_warning();
+        return 0;
+    }
+
+    //write signal file in current time
+    fs_file_write2(REBOOT_SIG_FILE, "right");
+    ssleep(3);
+    LIDBG_WARN("reb.warn.%s:%d,%d", LIDBG_LOG_DIR"thread_reboot.txt", reboot_delay_s, fs_is_file_exist(REBOOT_SIG_FILE));
+
+    //make sure above is succeed.
+    if( !fs_is_file_exist(REBOOT_SIG_FILE))
+    {
+        lidbg("<reb.exit2.%d,%d>\n", reboot_delay_s, fs_is_file_exist(REBOOT_SIG_FILE));
+        return 0;
+    }
+
+    //wait
     ssleep(reboot_delay_s);
+
+
+    //detect after sleep
+    if(1)
+    {
+        char shell_cmd[64] = {0};
+        sprintf(shell_cmd, "rm -rf %s", REBOOT_SIG_FILE);
+        lidbg_shell_cmd(shell_cmd);
+        ssleep(2);
+        if(!fs_is_file_exist(REBOOT_SIG_FILE))
+        {
+            lidbg("<reb.succeed.%d>\n", reboot_delay_s);
+            lidbg_shell_cmd("reboot");
+            ssleep(2);
+            //if above way failed ,try the way below again.
+            lidbg_shell_cmd("sync");
+            ssleep(3);
+            kernel_restart(NULL);
+            return 0;
+        }
+        else
+        {
+            lidbg("<reb.exit3.%d,%d>\n", reboot_delay_s, fs_is_file_exist(REBOOT_SIG_FILE));
+        }
+    }
 
 
     if(0)//cool boot usb mount test
@@ -199,13 +249,13 @@ int thread_reboot(void *data)
 
     if(0)
     {
-
         if( !fs_is_file_exist("/dev/log/no_reboot"))
         {
             lidbg("<lidbg:thread_reboot,call reboot>\n");
             kernel_restart(NULL);
         }
     }
+
     return 0;
 }
 

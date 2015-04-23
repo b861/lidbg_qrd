@@ -94,7 +94,7 @@ int fs_file_write2(char *filename, char *wbuff)
     mm_segment_t old_fs;
     unsigned int file_len = 1;
 
-    filep = filp_open(filename,  O_CREAT | O_WRONLY, 0);
+    filep = filp_open(filename,  O_CREAT | O_RDWR, 0);
     if(IS_ERR(filep))
     {
         printk(KERN_CRIT"err:filp_open,%s\n\n\n\n",filename);
