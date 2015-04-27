@@ -293,11 +293,13 @@ void ts_key_report(s32 input_x,s32 input_y,struct ts_devices_key *tskey,int size
 			}
 		tskey++;
 	}
+#if 0
 	 	if(SOC_Hal_Ts_Callback)
 					{
 						//lidbg("SOC_Hal_Ts_Callbacking:%d",TS_NO_KEY);
 						SOC_Hal_Ts_Callback(TS_NO_KEY);
 					}
+#endif
 }
 
 void ts_probe_prepare(void)
