@@ -66,6 +66,7 @@ case "$DBG_PLATFORM_ID" in
 	export REPOSITORY_WORK_BRANCH=master
 	export SYSTEM_WORK_BRANCH=master
         export MAKE_PAKG_NUM=1
+	export LINUX_android_PATH=$BP_SOURCE_PATH/LINUX/android
 	export MPSS_BUILD_PATH=$BP_SOURCE_PATH/modem_proc/build/ms
 	export BOOT_IMAGE_PATH=$BP_SOURCE_PATH/boot_images/build/ms
 	export ADSP_PATH=$BP_SOURCE_PATH/adsp_proc/build
@@ -106,6 +107,7 @@ case "$DBG_PLATFORM_ID" in
 	export REPOSITORY_WORK_BRANCH=master
 	export SYSTEM_WORK_BRANCH=master
         export MAKE_PAKG_NUM=10
+	export LINUX_android_PATH=$BP_SOURCE_PATH/LINUX/android
 	export MPSS_BUILD_PATH=$BP_SOURCE_PATH/modem_proc/build/ms
 	export BOOT_IMAGE_PATH=$BP_SOURCE_PATH/boot_images/build/ms
 	export ADSP_PATH=$BP_SOURCE_PATH/adsp_proc/build
@@ -145,6 +147,7 @@ case "$DBG_PLATFORM_ID" in
 	export SYSTEM_WORK_BRANCH=master
         export  MAKE_PAKG_NUM=6
 	#for bp
+	export LINUX_android_PATH=$BP_SOURCE_PATH/LINUX/android
 	export MPSS_BUILD_PATH=$BP_SOURCE_PATH/modem_proc/build/ms
 	export BOOT_IMAGE_PATH=$BP_SOURCE_PATH/boot_images/build/ms
 	export ADSP_PATH=$BP_SOURCE_PATH/adsp_proc/build
@@ -200,6 +203,7 @@ case "$DBG_PLATFORM_ID" in
 	export REPOSITORY_WORK_BRANCH=master
 	export SYSTEM_WORK_BRANCH=master
         export MAKE_PAKG_NUM=11
+	export LINUX_android_PATH=$BP_SOURCE_PATH/LINUX/android
 	export MPSS_BUILD_PATH=$BP_SOURCE_PATH/modem_proc/build/ms
 	export BOOT_IMAGE_PATH=$BP_SOURCE_PATH/boot_images/build/ms
 	export ADSP_PATH=$BP_SOURCE_PATH/adsp_proc/build
@@ -209,7 +213,7 @@ case "$DBG_PLATFORM_ID" in
 	export DEBUG_IMAGE_PATH=$BP_SOURCE_PATH/debug_image/build/ms
 
 	export MPSS_BUILD_CMD='./build.sh 8626.gen.prod 8626.gps.prod BUILD_VER=01780 -k'
-	export BOOTLOADER_BUILD_CMD='./build.sh --prod TARGET_FAMILY=8x26 -j1'
+	export BOOTLOADER_BUILD_CMD='./build.sh TARGET_FAMILY=8x26 BUILD_ID=FAAAANAZ -j1'
 	export ADSP_BUILD_CMD='python build.py'
 	export RPM_BUILD_CMD='./rpm_proc/build/build_8x26.sh -j1'
 	export DEBUG_IMAGE_CMD='./b8x26.sh TARGET_FAMILY=8x26 sdi BUILD_ID=AAAAANAZ BUILD_VER=54 BUILD_MIN=1 -j1'
@@ -239,6 +243,7 @@ case "$DBG_PLATFORM_ID" in
         export SYSTEM_WORK_BRANCH=master
         export  MAKE_PAKG_NUM=6
         #for bp
+	export LINUX_android_PATH=$BP_SOURCE_PATH/LINUX/android
         export MPSS_BUILD_PATH=$BP_SOURCE_PATH/modem_proc/build/ms
         export BOOT_IMAGE_PATH=$BP_SOURCE_PATH/boot_images/build/ms
         export ADSP_PATH=$BP_SOURCE_PATH/adsp_proc/build

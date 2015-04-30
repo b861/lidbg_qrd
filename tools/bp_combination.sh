@@ -44,39 +44,10 @@ function build_trustzone_image()
     cd $TZ_PATH && $TZ_BUILD_CMD
 }
 
-function copy_android_image()
+function build_ln_get_image()
 {
-
-#   ln 
-   echo $FUNCNAME
-   mkdir -p $BP_SOURCE_PATH/LINUX/android/out/target/product/$DBG_PLATFORM
-   cd $BP_SOURCE_PATH/LINUX/android/out/target/product/$DBG_PLATFORM
-   cp -vu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system.img ./
-   cp -vu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/userdata.img ./
-   cp -vu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/persist.img ./
-   cp -vu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/cache.img ./
-   cp -vu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/boot.img ./
-   cp -vu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/bootloader ./
-   cp -vu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/clean_steps.mk ./
-   cp -vu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/dt.img ./
-   cp -vu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/emmc_appsboot.mbn ./
-   cp -vu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/emmc_appsboot.raw ./
-   cp -vu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/EMMCBOOT.MBN ./
-   cp -vu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/filesmap ./
-   cp -vu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/kernel ./
-   cp -vu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/previous_build_config.mk ./
-   cp -vu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/ramdisk.img ./
-   cp -vu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/ramdisk-recovery.img ./
-   cp -vu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/recovery.img ./
-#if exist
-   cp -vu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/flysystem.img ./
-   cp -vu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/flyrecovery.img ./
-   cp -vu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/flyapdata.img ./
-   cp -vu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/flash.img ./
-   mkdir ./obj
-   cp -avu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/obj/KERNEL_OBJ ./obj/
-   cp -avu $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/obj/EMMC_BOOTLOADER_OBJ ./obj/
-
+    echo $FUNCNAME
+    cd $LINUX_android_PATH && ln -s $DBG_SYSTEM_DIR/out out
 #  cp qcn
 }
 
@@ -87,22 +58,88 @@ function build_update()
     cd $UPDATE_INFO && $UPDATE_BUILD_CMD
 }
 
-
+#生成工厂镜像
 function factory_bin()
 {
 	echo $FUNCNAME
 }
-
+#用fastboot烧写bp的镜像
 function flash_bin()
 {
 	echo $FUNCNAME
 }
 
-
+#清理bp镜像
 function clean()
 {
 	echo $FUNCNAME
 }
 
+
+function bp_combination_handle()
+{
+    echo $FUNCNAME
+    cd $BP_SOURCE_PATH
+    case $1 in
+    71)
+ #   	case "$DBG_PLATFORM_ID" in
+ #	4)
+#		source setenv-modem.sh;;
+	
+		source setenv.sh
+#	esac
+        build_mpss;;
+    72)
+	source setenv.sh
+        build_bootloader;;
+    73)
+	source setenv.sh
+        build_adsp;;
+    74)
+	source setenv.sh
+        build_rpm;;
+    75)
+	source setenv.sh
+	case "$DBG_PLATFORM" in
+	msm8226)
+	build_debug_image;;
+	msm8974)
+        build_wcnss;;
+	esac;;
+    76)
+	source setenv.sh
+        build_trustzone_image;;
+    77) 
+	build_ln_get_image;;
+	
+    78)
+	source setenv.sh
+	build_update;;
+    79)
+	source setenv.sh
+	build_all_handle;;
+    *)
+        echo
+    esac
+}
+
+function build_all_handle()
+{
+    echo $FUNCNAME
+    case "$DBG_PLATFORM" in
+    msm8226)
+    echo "进入编译8226"
+   # insmod xx && 
+    cd $BP_SOURCE_PATH && source setenv.sh && build_mpss && build_bootloader && build_adsp && build_rpm && build_trustzone_image && build_debug_image && build_ln_get_image && build_update;;
+    ndefine)
+    echo "进入编译8926"
+   # insmod xx && 
+    cd $BP_SOURCE_PATH && source setenv.sh && build_mpss && build_bootloader && build_adsp && build_rpm && build_trustzone_image && build_debug_image && build_ln_get_image && build_update;;
+    msm8974)
+    cd $BP_SOURCE_PATH && source $BP_SOURCE_PATH/setenv-modem.sh && build_mpss && source $BP_SOURCE_PATH/setenv.sh && build_bootloader && build_adsp && build_rpm && build_wcnss && build_trustzone_image && build_ln_get_image && build_update;;
+    esac
+
+#    cp all image to ./out
+}
 
 
