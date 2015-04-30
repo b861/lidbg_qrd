@@ -16,6 +16,14 @@ export DBG_SOC_PATH=$DBG_ROOT_PATH/soc
 export DBG_DRIVERS_PATH=$DBG_ROOT_PATH/drivers
 export DBG_HAL_PATH=$DBG_ROOT_PATH/app
 export DBG_PLATFORM_DIR=$DBG_SOC_DIR/$DBG_PLATFORM
+export LINUX_android_PATH=$BP_SOURCE_PATH/LINUX/android
+export MPSS_BUILD_PATH=$BP_SOURCE_PATH/modem_proc/build/ms
+export BOOT_IMAGE_PATH=$BP_SOURCE_PATH/boot_images/build/ms
+export ADSP_PATH=$BP_SOURCE_PATH/adsp_proc/build
+export RPM_PATH=$BP_SOURCE_PATH/rpm_proc/build
+export TZ_PATH=$BP_SOURCE_PATH/trustzone_images/build/ms
+export UPDATE_INFO=$BP_SOURCE_PATH/common/build
+export DEBUG_IMAGE_PATH=$BP_SOURCE_PATH/debug_image/build/ms
 
 #export USE_CCACHE=1
 
@@ -66,14 +74,6 @@ case "$DBG_PLATFORM_ID" in
 	export REPOSITORY_WORK_BRANCH=master
 	export SYSTEM_WORK_BRANCH=master
         export MAKE_PAKG_NUM=1
-	export LINUX_android_PATH=$BP_SOURCE_PATH/LINUX/android
-	export MPSS_BUILD_PATH=$BP_SOURCE_PATH/modem_proc/build/ms
-	export BOOT_IMAGE_PATH=$BP_SOURCE_PATH/boot_images/build/ms
-	export ADSP_PATH=$BP_SOURCE_PATH/adsp_proc/build
-	export RPM_PATH=$BP_SOURCE_PATH/rpm_proc/build
-	export TZ_PATH=$BP_SOURCE_PATH/trustzone_images/build/ms
-	export UPDATE_INFO=$BP_SOURCE_PATH/common/build
-	export DEBUG_IMAGE_PATH=$BP_SOURCE_PATH/debug_image/build/ms
 	#以下命令用于bp v1.0.3
 	#MPSS_BUILD_CMD='./build.sh 8626.gen BUILD_ID=AAAAANAZ'
 	export MPSS_BUILD_CMD='./build.sh 8626.gen.prod 8626.gps.prod BUILD_VER=01780 -k'
@@ -107,14 +107,6 @@ case "$DBG_PLATFORM_ID" in
 	export REPOSITORY_WORK_BRANCH=master
 	export SYSTEM_WORK_BRANCH=master
         export MAKE_PAKG_NUM=10
-	export LINUX_android_PATH=$BP_SOURCE_PATH/LINUX/android
-	export MPSS_BUILD_PATH=$BP_SOURCE_PATH/modem_proc/build/ms
-	export BOOT_IMAGE_PATH=$BP_SOURCE_PATH/boot_images/build/ms
-	export ADSP_PATH=$BP_SOURCE_PATH/adsp_proc/build
-	export RPM_PATH=$BP_SOURCE_PATH/rpm_proc/build
-	export TZ_PATH=$BP_SOURCE_PATH/trustzone_images/build/ms
-	export UPDATE_INFO=$BP_SOURCE_PATH/common/build
-	export DEBUG_IMAGE_PATH=$BP_SOURCE_PATH/debug_image/build/ms
 	export MPSS_BUILD_CMD='./build.sh 8926.gen.prod BUILD_ID=DAAAANAZ'
 	export BOOTLOADER_BUILD_CMD='./build.sh TARGET_FAMILY=8x26 BUILD_ID=FAAAANAZ -j1'
 	export ADSP_BUILD_CMD='python build.py'
@@ -147,14 +139,6 @@ case "$DBG_PLATFORM_ID" in
 	export SYSTEM_WORK_BRANCH=master
         export  MAKE_PAKG_NUM=6
 	#for bp
-	export LINUX_android_PATH=$BP_SOURCE_PATH/LINUX/android
-	export MPSS_BUILD_PATH=$BP_SOURCE_PATH/modem_proc/build/ms
-	export BOOT_IMAGE_PATH=$BP_SOURCE_PATH/boot_images/build/ms
-	export ADSP_PATH=$BP_SOURCE_PATH/adsp_proc/build
-	export RPM_PATH=$BP_SOURCE_PATH/rpm_proc/build
-	export WCNSS_PATH=$BP_SOURCE_PATH/wcnss_proc/Pronto/bsp/build
-	export TZ_PATH=$BP_SOURCE_PATH/trustzone_images/build/ms
-	export UPDATE_INFO=$BP_SOURCE_PATH/common/build
 	export MPSS_BUILD_CMD='./build.sh 8974.gen.prod -k'
 	export BOOTLOADER_BUILD_CMD='./build.sh TARGET_FAMILY=8974 BUILD_ID=AAAAANAZ -j1'
 	export ADSP_BUILD_CMD='python build.py'
@@ -203,14 +187,6 @@ case "$DBG_PLATFORM_ID" in
 	export REPOSITORY_WORK_BRANCH=master
 	export SYSTEM_WORK_BRANCH=master
         export MAKE_PAKG_NUM=11
-	export LINUX_android_PATH=$BP_SOURCE_PATH/LINUX/android
-	export MPSS_BUILD_PATH=$BP_SOURCE_PATH/modem_proc/build/ms
-	export BOOT_IMAGE_PATH=$BP_SOURCE_PATH/boot_images/build/ms
-	export ADSP_PATH=$BP_SOURCE_PATH/adsp_proc/build
-	export RPM_PATH=$BP_SOURCE_PATH/rpm_proc/build
-	export TZ_PATH=$BP_SOURCE_PATH/trustzone_images/build/ms
-	export UPDATE_INFO=$BP_SOURCE_PATH/common/build
-	export DEBUG_IMAGE_PATH=$BP_SOURCE_PATH/debug_image/build/ms
 
 	export MPSS_BUILD_CMD='./build.sh 8626.gen.prod 8626.gps.prod BUILD_VER=01780 -k'
 	export BOOTLOADER_BUILD_CMD='./build.sh TARGET_FAMILY=8x26 BUILD_ID=FAAAANAZ -j1'
@@ -243,14 +219,6 @@ case "$DBG_PLATFORM_ID" in
         export SYSTEM_WORK_BRANCH=master
         export  MAKE_PAKG_NUM=6
         #for bp
-	export LINUX_android_PATH=$BP_SOURCE_PATH/LINUX/android
-        export MPSS_BUILD_PATH=$BP_SOURCE_PATH/modem_proc/build/ms
-        export BOOT_IMAGE_PATH=$BP_SOURCE_PATH/boot_images/build/ms
-        export ADSP_PATH=$BP_SOURCE_PATH/adsp_proc/build
-        export RPM_PATH=$BP_SOURCE_PATH/rpm_proc/build
-        export WCNSS_PATH=$BP_SOURCE_PATH/wcnss_proc/Pronto/bsp/build
-        export TZ_PATH=$BP_SOURCE_PATH/trustzone_images/build/ms
-        export UPDATE_INFO=$BP_SOURCE_PATH/common/build
         export MPSS_BUILD_CMD='./build.sh 8974.gen.prod -k'
         export BOOTLOADER_BUILD_CMD='./build.sh TARGET_FAMILY=8974 BUILD_ID=AAAAANAZ -j1'
         export ADSP_BUILD_CMD='python build.py'

@@ -130,16 +130,38 @@ function build_all_handle()
     msm8226)
     echo "进入编译8226"
    # insmod xx && 
-    cd $BP_SOURCE_PATH && source setenv.sh && build_mpss && build_bootloader && build_adsp && build_rpm && build_trustzone_image && build_debug_image && build_ln_get_image && build_update;;
+    cd $BP_SOURCE_PATH && source setenv.sh && build_mpss && build_bootloader && build_adsp && build_rpm && build_trustzone_image && build_debug_image && build_ln_get_image & build_update;;
     ndefine)
     echo "进入编译8926"
    # insmod xx && 
-    cd $BP_SOURCE_PATH && source setenv.sh && build_mpss && build_bootloader && build_adsp && build_rpm && build_trustzone_image && build_debug_image && build_ln_get_image && build_update;;
+    cd $BP_SOURCE_PATH && source setenv.sh && build_mpss && build_bootloader && build_adsp && build_rpm && build_trustzone_image && build_debug_image && build_ln_get_image & build_update;;
     msm8974)
-    cd $BP_SOURCE_PATH && source $BP_SOURCE_PATH/setenv-modem.sh && build_mpss && source $BP_SOURCE_PATH/setenv.sh && build_bootloader && build_adsp && build_rpm && build_wcnss && build_trustzone_image && build_ln_get_image && build_update;;
+    cd $BP_SOURCE_PATH && source $BP_SOURCE_PATH/setenv-modem.sh && build_mpss && source $BP_SOURCE_PATH/setenv.sh && build_bootloader && build_adsp && build_rpm && build_wcnss && build_trustzone_image && build_ln_get_image & build_update;;
     esac
 
 #    cp all image to ./out
 }
 
+function bp_combine_menu()
+{
+    echo $BP_SOURCE_PATH
+    echo [71] build MPSS'                         'NON-HLOS.bin_1
+    echo [72] build Bootloader'                   'sbl1.mbn
+    echo [73] build ADSP'                         'NON-HLOS.bin_2
+    echo [74] build RPM'                          'rpm.mbn
+
+    case "$DBG_PLATFORM" in
+    #编译8974需要编译wcnss
+    msm8974)
+    echo [75] build WCNSS'                        'wcnss.mbn;;
+    #编译8226需要编译debug image
+    msm8226)
+    echo [75] build debug_image'                  'debug image;;
+    esac
+
+    echo [76] build TZ'                           'tz.mbn
+    echo [77] ln out ap image'                    'ln -s AP/out bp/LINUX/android/out
+    echo [78] update bp info'                     '汇总编译NON-HLOS.bin
+    echo [79] build ALL'                          '编译全部
+}
 
