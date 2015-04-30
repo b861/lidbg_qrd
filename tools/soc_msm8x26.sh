@@ -126,7 +126,7 @@ function soc_make_otapackage()
 	make otapackage -j16
 }
 
-function soc_build_origin_image
+function soc_build_origin_image()
 {
 	echo $FUNCNAME
 	lidbg_build_all
