@@ -21,6 +21,7 @@ export MPSS_BUILD_PATH=$BP_SOURCE_PATH/modem_proc/build/ms
 export BOOT_IMAGE_PATH=$BP_SOURCE_PATH/boot_images/build/ms
 export ADSP_PATH=$BP_SOURCE_PATH/adsp_proc/build
 export RPM_PATH=$BP_SOURCE_PATH/rpm_proc/build
+export WCNSS_PATH=$BP_SOURCE_PATH/wcnss_proc/Pronto/bsp/build
 export TZ_PATH=$BP_SOURCE_PATH/trustzone_images/build/ms
 export UPDATE_INFO=$BP_SOURCE_PATH/common/build
 export DEBUG_IMAGE_PATH=$BP_SOURCE_PATH/debug_image/build/ms
@@ -188,7 +189,7 @@ case "$DBG_PLATFORM_ID" in
 	export SYSTEM_WORK_BRANCH=master
         export MAKE_PAKG_NUM=11
 
-	export MPSS_BUILD_CMD='./build.sh 8626.gen.prod 8626.gps.prod BUILD_VER=01780 -k'
+	export MPSS_BUILD_CMD='./build.sh 8626.gen.prod BUILD_VER=01780 -k'
 	export BOOTLOADER_BUILD_CMD='./build.sh TARGET_FAMILY=8x26 BUILD_ID=FAAAANAZ -j1'
 	export ADSP_BUILD_CMD='python build.py'
 	export RPM_BUILD_CMD='./rpm_proc/build/build_8x26.sh -j1'
