@@ -141,7 +141,8 @@ case "$DBG_PLATFORM_ID" in
         export  MAKE_PAKG_NUM=6
 	#for bp
 	export MPSS_BUILD_CMD='./build.sh 8974.gen.prod -k'
-	export BOOTLOADER_BUILD_CMD='./build.sh TARGET_FAMILY=8974 BUILD_ID=AAAAANAZ -j1'
+	export BOOTLOADER_BUILD_CMD='./build.sh --prod TARGET_FAMILY=8974 -j1'
+	#boot_image can also use command : ./build.sh TARGET_FAMILY=8974 BUILD_ID=AAAAANAZ;
 	export ADSP_BUILD_CMD='python build.py'
 	export RPM_BUILD_CMD='./rpm_proc/build/build_8974.sh -j1'
 	export WCNSS_BUILD_CMD='./wcnss_build.sh 8974 pronto BUILD_ID=SCAQBAZ -j1'
