@@ -76,6 +76,14 @@ function depository_copy_basesystem()
 	cp $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/$OTA_PACKAGE_NAME $UPDATA_BASESYSTEM_DIR/baseqcom.flb
 }
 
+function depository_copy_bpfile()
+{
+	echo $FUNCNAME
+        cp $NON_HLOS_FILE_PATH/NON-HLOS.bin        $UPDATA_BIN_PLATFORM_DIR 
+        cp $RPM_FILE_PATH/rpm.mbn                  $UPDATA_BIN_PLATFORM_DIR  
+        cp $SBL_FILE_PATH/sbl1.mbn    	           $UPDATA_BIN_PLATFORM_DIR  
+        cp $TZ_FILE_PATH/tz.mbn    		   $UPDATA_BIN_PLATFORM_DIR  
+}
 
 function depository_make_package()
 {
