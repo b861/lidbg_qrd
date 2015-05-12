@@ -67,6 +67,7 @@ void lidbg_touch_handle(touch_type t,int id, int x, int y,int w)
 		input_report_abs(ts_data->input_dev, ABS_MT_TOUCH_MAJOR, w);
 		input_report_abs(ts_data->input_dev, ABS_MT_WIDTH_MAJOR, w);
 		ts_data->touch_cnt++;
+	         pr_debug("%d[%d,%d,%d];\n", id, x, y,w);
 	    if (ts_data->touch_cnt == 100)
 	    {
 	        ts_data->touch_cnt = 0;

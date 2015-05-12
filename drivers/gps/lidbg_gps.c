@@ -253,6 +253,7 @@ int thread_gps_server(void *data)
             goto do_nothing;
         }
         ret = SOC_I2C_Rec(GPS_I2C_BUS, 0x42, 0xfd, num_avi_gps_data, 2);
+	      pr_debug("num_avi_gps_data: %d\n",num_avi_gps_data);
         if (ret < 0)
         {
             avi_gps_data_hl = 0;
@@ -270,6 +271,8 @@ int thread_gps_server(void *data)
             if(avi_gps_data_hl <= GPS_BUF_SIZE)
             {
                 ret = SOC_I2C_Rec_Simple(GPS_I2C_BUS, 0x42, gps_data, avi_gps_data_hl);
+	       	gps_data[avi_gps_data_hl ] = '\0';
+	        pr_debug("gps_data=%s\n",gps_data);
                 if (ret < 0)
                 {
                     lidbg("[ublox]get gps data err!!\n");
