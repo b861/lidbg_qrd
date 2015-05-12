@@ -290,13 +290,13 @@ static int soc_dev_probe(struct platform_device *pdev)
     register_lidbg_notifier(&lidbg_notifier);
 
 	CREATE_KTHREAD(thread_led, NULL);
-	CREATE_KTHREAD(thread_thermal, NULL);
+	//CREATE_KTHREAD(thread_thermal, NULL);
 	sound_detect_init();
 	
 	if((g_var.is_fly == 0) || (g_var.recovery_mode == 1))
 	{
-	    CREATE_KTHREAD(thread_button_init, NULL);
-	    CREATE_KTHREAD(thread_key, NULL);
+	   // CREATE_KTHREAD(thread_button_init, NULL);
+	    //CREATE_KTHREAD(thread_key, NULL);
 		
 	    //LCD_ON;
 	}
