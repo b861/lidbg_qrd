@@ -253,7 +253,6 @@ int thread_gps_server(void *data)
             goto do_nothing;
         }
         ret = SOC_I2C_Rec(GPS_I2C_BUS, 0x42, 0xfd, num_avi_gps_data, 2);
-	      pr_debug("num_avi_gps_data: %d\n",num_avi_gps_data);
         if (ret < 0)
         {
             avi_gps_data_hl = 0;
@@ -263,8 +262,8 @@ int thread_gps_server(void *data)
             avi_gps_data_hl = (num_avi_gps_data[0] << 8) + num_avi_gps_data[1];
 
 
-        if(gps_debug_en)
-            lidbg("[ublox]ublox_buf_len: %d\n", avi_gps_data_hl);
+  //      if(gps_debug_en)
+            pr_debug("[ublox]ublox_buf_len: %d\n", avi_gps_data_hl);
 
         if(avi_gps_data_hl > 0)
         {
