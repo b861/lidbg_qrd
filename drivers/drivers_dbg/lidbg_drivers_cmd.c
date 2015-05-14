@@ -1,12 +1,13 @@
 
 #define TEMP_LOG_PATH 	 LIDBG_LOG_DIR"log_ct.txt"
-extern void SAF7741_Volume(BYTE Volume);
+//extern void SAF7741_Volume(BYTE Volume);
 int thread_antutu_test(void *data)
 {
 	int cnt = 0;
 	ssleep(50);
+#ifdef SOC_msm8x26
 	set_system_performance(1);
-
+#endif
 
 	while(1)
 	{
@@ -371,8 +372,10 @@ void parse_cmd(char *pt)
         }
         else if (!strcmp(argv[1], "*158#030"))
         {
-            //set_system_performance(3);
-            //lidbg_domineering_ack();
+#ifdef SOC_msm8x26
+            set_system_performance(3);
+            lidbg_domineering_ack();
+#endif
         }
 	else if (!strcmp(argv[1], "*158#031"))
         {	
@@ -457,11 +460,11 @@ void parse_cmd(char *pt)
     }
 	else if (!strcmp(argv[0], "vol"))
     {
-    #ifndef SOC_mt3360
-        int vol;
-        vol = simple_strtoul(argv[1], 0, 0);
-        SAF7741_Volume(vol);
-    #endif
+ //   #ifndef SOC_mt3360
+ //       int vol;
+ //       vol = simple_strtoul(argv[1], 0, 0);
+ //       SAF7741_Volume(vol);
+ //   #endif
     }
     else if (!strcmp(argv[0], "screen_shot"))
     {

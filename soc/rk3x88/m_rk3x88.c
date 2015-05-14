@@ -124,7 +124,7 @@ int thread_get_mac_addr(void *data)
 
 
 
-int msm8226_init(void)
+int rk3x88_init(void)
 {
 	DUMP_BUILD_TIME;
 
@@ -136,9 +136,8 @@ int msm8226_init(void)
 }
 
 /*Ä£¿éÐ¶ÔØº¯Êý*/
-void msm8226_exit(void)
+void rk3x88_exit(void)
 {
-    lidbg("msm8226_exit\n");
 
 }
 
@@ -150,5 +149,5 @@ EXPORT_SYMBOL(soc_temp_get);
 MODULE_AUTHOR("Lsw");
 MODULE_LICENSE("GPL");
 
-module_init(msm8226_init);
-module_exit(msm8226_exit);
+module_init(rk3x88_init);
+module_exit(rk3x88_exit);

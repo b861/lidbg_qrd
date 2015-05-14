@@ -191,15 +191,21 @@ static void parse_cmd(char *pt)
     }
 	else if (!strcmp(argv[0], "performance_high"))
     {
+#ifdef SOC_msm8x26
 		set_system_performance(3);
+#endif
     }
 	else if (!strcmp(argv[0], "performance_middle"))
     {
+#ifdef SOC_msm8x26
 		set_system_performance(2);
+#endif
     }
 	else if (!strcmp(argv[0], "performance_low"))
     {
+#ifdef SOC_msm8x26
 		set_system_performance(1);
+#endif
     }
 	else if (!strcmp(argv[0], "acc_debug_mode"))
     {
