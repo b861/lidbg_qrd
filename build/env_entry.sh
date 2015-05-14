@@ -265,7 +265,7 @@ case "$DBG_PLATFORM_ID" in
         export UPDATA_BASESYSTEM_DIR=$UPDATA_BIN_PLATFORM_DIR/basesystem
         export DBG_PASSWORD=git
         export DBG_REPO_PASSWORD=git
-        export DBG_VENDOR=VENDOR_QCOM
+        export DBG_VENDOR=VENDOR_ROCKCHIP
         export OTA_PACKAGE_NAME=msm8974-ota-eng.*.zip
         export DBG_SOC=rk3x88
         export TEST_PACKAGE_PATH=//192.168.128.128/px3/升级包发布/专项测试包
