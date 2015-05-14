@@ -10,6 +10,9 @@
 #include "../../soc/mt3360/lidbg_target_mt3360.c"
 #endif
 
+#ifdef SOC_rk3x88
+#include "../../soc/rk3x88/lidbg_target_rk3188.c"
+#endif
 
 EXPORT_SYMBOL(g_hw_version_specific);
 

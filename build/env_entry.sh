@@ -259,7 +259,7 @@ case "$DBG_PLATFORM_ID" in
         export PATH=$JAVA_HOME/bin:$JRE_HOME/bin:$PATH
         export SYSTEM_BUILD_TYPE=eng
         export DBG_KERNEL_SRC_DIR=$DBG_SYSTEM_DIR/kernel
-        export DBG_KERNEL_OBJ_DIR=$DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/obj/KERNEL_OBJ
+        export DBG_KERNEL_OBJ_DIR=$DBG_SYSTEM_DIR/kernel/
         export UPDATA_BIN_PLATFORM_DIR=$RELEASE_REPOSITORY/others/px3
         export UPDATA_BIN_DIR=$UPDATA_BIN_PLATFORM_DIR/driver
         export UPDATA_BASESYSTEM_DIR=$UPDATA_BIN_PLATFORM_DIR/basesystem

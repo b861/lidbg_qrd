@@ -148,6 +148,10 @@ extern struct hw_version_specific g_hw_version_specific[];
 #include "lidbg_target_mt3360.h"
 #endif
 
+#ifdef SOC_rk3x88
+#include "lidbg_target_rk3188.h"
+#endif
+
 
 
 #endif

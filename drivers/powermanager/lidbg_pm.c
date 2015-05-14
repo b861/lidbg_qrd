@@ -100,7 +100,7 @@ int kernel_wakelock_print(char *info)
         spin_lock_irq(&ws->lock);
         if (ws->active)
         {
-            PM_WARN("[%s]:%d:%s,ps.%lld,ac.%lu,rc%lu,wc.%lu\n", info, list_count, ws->name, ktime_to_ms(ws->prevent_sleep_time), ws->active_count, ws->relax_count, ws->wakeup_count);
+            PM_WARN("[%s]:%d:%s,ac.%lu,rc%lu\n", info, list_count, ws->name, ws->active_count, ws->relax_count);
             list_count++;
         }
         spin_unlock_irq(&ws->lock);
@@ -124,7 +124,7 @@ int kernel_wakelock_force_unlock(char *info)
     {
         if ( ws->active)
         {
-            PM_WARN("[%s]:%d:%s,ps.%lld,ac.%lu,rc%lu,wc.%lu\n", info, list_count, ws->name, ktime_to_ms(ws->prevent_sleep_time), ws->active_count, ws->relax_count, ws->wakeup_count);
+            PM_WARN("[%s]:%d:%s,ac.%lu,rc%lu\n", info, list_count, ws->name, ws->active_count, ws->relax_count);
             __pm_relax(ws);
             list_count++;
         }
@@ -391,13 +391,8 @@ struct task_struct *find_task_by_name_or_kill(bool enable_filter, bool enable_db
         {
             if (p->flags & PF_KTHREAD || !(p->flags & PF_FORKNOEXEC))
                 continue;
-#ifdef SOC_mt3360
             if (test_task_flag(p, TIF_MEMDIE))  // TIF_MM_RELEASED is not defined on MT3360 kernel
                 continue;
-#else
-            if (test_task_flag(p, TIF_MM_RELEASED) || test_task_flag(p, TIF_MEMDIE))
-                continue;
-#endif
         }
         if(enable_dbg)
         {
