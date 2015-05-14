@@ -7,6 +7,7 @@
 # 5--mt3360
 # 6--msm8226 M8626AAAAANLYD1431 Android_5.0
 # 7--msm8974 M8974AAAAANLYD4275 Android_5.1
+# 8--rk3188 Radxa Rock Pro 4.4.2
 ## USERS_ID ###
 # 0--root@192.168.9.222
 # 1--futengfei.Notebook.huasuo
