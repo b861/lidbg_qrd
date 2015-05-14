@@ -61,7 +61,6 @@ int thread_key(void *data)
 	        if(g_var.fb_on)
 	        {
 	            key_scan();
-                    lidbg("ad_driver\n");
 	            msleep(100);
 	        }
 	        else
@@ -75,11 +74,13 @@ int thread_key(void *data)
 
 static int  ad_init(void)
 {
-	printk(KERN_WARNING "chdrv_init\n");
-	lidbg("ad_driver\n");
-          
+	lidbg("ad_driver");
         LIDBG_GET;
+     	if((g_var.is_fly == 0) || (g_var.recovery_mode == 1))
+	{
         CREATE_KTHREAD(thread_key, NULL);
+	}
+
 	
 	
 	return 0;

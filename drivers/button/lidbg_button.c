@@ -210,7 +210,10 @@ static int  button_dev_init(void)
 	lidbg("hello_button\n");
           
         LIDBG_GET;
+	if((g_var.is_fly == 0) || (g_var.recovery_mode == 1))
+	{
         CREATE_KTHREAD(thread_button_init, NULL);
+	}
 	
 	return 0;
 

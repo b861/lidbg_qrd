@@ -346,31 +346,7 @@ err:
 }
 
 
-int thread_antutu_test(void *data)
-{
-	int cnt = 0;
-	ssleep(50);
-	set_system_performance(1);
 
-
-	while(1)
-	{
-		cnt++;
-		lidbg_fs_log(TEMP_LOG_PATH,"antutu test start: %d\n",cnt);
-
-		//lidbg_shell_cmd("pm uninstall com.antutu.ABenchMark");
-		//lidbg_pm_install("/data/antutu.apk");
-		//ssleep(5);
-		
-		lidbg_shell_cmd("am start -n com.antutu.ABenchMark/com.antutu.ABenchMark.ABenchMarkStart");
-		ssleep(5);
-		lidbg_shell_cmd("am start -n com.antutu.ABenchMark/com.antutu.benchmark.activity.ScoreBenchActivity");
-		ssleep(60*5);// 4 min loop
-		
-
-	}
-
-}
 
 void cb_kv_cpu_temp_test(char *key, char *value)
 {
@@ -391,7 +367,7 @@ void temp_init(void)
     FS_REGISTER_INT(cpu_temp_time_minute, "cpu_temp_time_minute", 20, NULL);
     FS_REGISTER_INT(temp_log_freq, "temp_log_freq", 50, NULL);
     FS_REGISTER_INT(cpu_temp_show, "cpu_temp_show", 0, cb_kv_show_temp);
-    FS_REGISTER_INT(antutu_test, "antutu_test", 0, NULL);
+    //FS_REGISTER_INT(antutu_test, "antutu_test", 0, NULL);
     FS_REGISTER_INT(antutu_temp_offset, "antutu_temp_offset", 10, NULL);
     FS_REGISTER_INT(normal_temp_offset, "normal_temp_offset", 20, NULL);
 
@@ -401,8 +377,8 @@ void temp_init(void)
         CREATE_KTHREAD(thread_start_cpu_tmp_test, NULL);
     }
 	
-	if(antutu_test)
-		CREATE_KTHREAD(thread_antutu_test, NULL);
+	//if(antutu_test)
+	//	CREATE_KTHREAD(thread_antutu_test, NULL);
 
     fs_register_filename_list(TEMP_LOG_PATH, true);
     fs_regist_state("cpu_temp", &(g_var.temp));
@@ -436,7 +412,7 @@ static void  cpu_temp_exit(void)
 module_init(cpu_temp_init);
 module_exit(cpu_temp_exit);
 
-EXPORT_SYMBOL(thread_antutu_test);
+//EXPORT_SYMBOL(thread_antutu_test);
 EXPORT_SYMBOL(set_system_performance);
 
 

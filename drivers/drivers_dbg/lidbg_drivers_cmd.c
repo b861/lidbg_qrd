@@ -1,6 +1,31 @@
 
+#define TEMP_LOG_PATH 	 LIDBG_LOG_DIR"log_ct.txt"
 extern void SAF7741_Volume(BYTE Volume);
+int thread_antutu_test(void *data)
+{
+	int cnt = 0;
+	ssleep(50);
+	set_system_performance(1);
 
+
+	while(1)
+	{
+		cnt++;
+		lidbg_fs_log(TEMP_LOG_PATH,"antutu test start: %d\n",cnt);
+
+		//lidbg_shell_cmd("pm uninstall com.antutu.ABenchMark");
+		//lidbg_pm_install("/data/antutu.apk");
+		//ssleep(5);
+		
+		lidbg_shell_cmd("am start -n com.antutu.ABenchMark/com.antutu.ABenchMark.ABenchMarkStart");
+		ssleep(5);
+		lidbg_shell_cmd("am start -n com.antutu.ABenchMark/com.antutu.benchmark.activity.ScoreBenchActivity");
+		ssleep(60*5);// 4 min loop
+		
+
+	}
+
+}
 bool set_wifi_adb_mode(bool on)
 {
     LIDBG_WARN("<%d>\n", on);
@@ -129,6 +154,10 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#028--delete ublox so && reboot\n");
             fs_mem_log("*158#029--log cpu temp\n");
             fs_mem_log("*158#030--cpu top performance mode\n");
+	    fs_mem_log("*158#031--pr_debug GPS_val\n");
+	    fs_mem_log("*158#032--pr_debug AD_val\n");
+	    fs_mem_log("*158#033--pr_debug TS_val\n");
+	    fs_mem_log("*158#034--pr_debug cpu_temp\n");
             show_password_list();
             lidbg_domineering_ack();
         }
@@ -342,10 +371,31 @@ void parse_cmd(char *pt)
         }
         else if (!strcmp(argv[1], "*158#030"))
         {
-            set_system_performance(3);
-            lidbg_domineering_ack();
+            //set_system_performance(3);
+            //lidbg_domineering_ack();
         }
-
+	else if (!strcmp(argv[1], "*158#031"))
+        {	
+		lidbg("gps_debug\n");
+		lidbg_shell_cmd("echo -n 'file lidbg_gps.c +p' > /sys/kernel/debug/dynamic_debug/control");
+                 
+        }
+	else if (!strcmp(argv[1], "*158#032"))
+        {
+	   lidbg("AD_debug\n");    
+           lidbg_shell_cmd("echo -n 'file lidbg_ad_msm8x26.c +p' > /sys/kernel/debug/dynamic_debug/control");
+        }
+	else if (!strcmp(argv[1], "*158#033"))
+        {
+	   lidbg("ts_debug\n");   
+           lidbg_shell_cmd("echo -n 'file lidbg_ts.c +p' > /sys/kernel/debug/dynamic_debug/control");
+        }
+	else if (!strcmp(argv[1], "*158#034"))
+        {
+           lidbg("temp_debug\n");  
+           lidbg_shell_cmd("echo -n 'file lidbg_temp.c +p' > /sys/kernel/debug/dynamic_debug/control");
+	
+        }
         else if (!strcmp(argv[1], "*168#001"))
         {
             encode = true;
