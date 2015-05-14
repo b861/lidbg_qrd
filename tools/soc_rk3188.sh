@@ -65,6 +65,7 @@ function soc_postbuild()
 function set_env()
 {
 	echo $FUNCNAME
+	cd $DBG_SYSTEM_DIR
 	if [[ $TARGET_PRODUCT = "" ]];then
 		source build/envsetup.sh && lunch radxa_rock_pro-$SYSTEM_BUILD_TYPE
 	fi

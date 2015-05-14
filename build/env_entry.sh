@@ -250,7 +250,7 @@ case "$DBG_PLATFORM_ID" in
         export UPDATE_BUILD_CMD='python update_common_info.py';;
 
         8)
-        export DBG_PLATFORM=rk3188
+        export DBG_PLATFORM=radxa_rock_pro
         export BOARD_VERSION=V1
         export DBG_CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilts/gcc/linux-x86/arm/arm-eabi-4.7/bin/arm-eabi-
         export JAVA_HOME=$PATHJAVA1P6
@@ -267,7 +267,7 @@ case "$DBG_PLATFORM_ID" in
         export DBG_REPO_PASSWORD=git
         export DBG_VENDOR=VENDOR_QCOM
         export OTA_PACKAGE_NAME=msm8974-ota-eng.*.zip
-        export DBG_SOC=rk3188
+        export DBG_SOC=rk3x88
         export TEST_PACKAGE_PATH=//192.168.128.128/px3/升级包发布/专项测试包
         export REPOSITORY_WORK_BRANCH=master
         export SYSTEM_WORK_BRANCH=master
