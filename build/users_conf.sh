@@ -30,6 +30,8 @@ case "$USERS_ID" in
 		export RELEASE_REPOSITORY=$DBG_PLATFORM_PATH/8x26-release;;
 		8)
 		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/rk3188/rk3188_rk3066_r-box_android4.4.2_sdk;;
+		9)
+		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/rk3188/px3_git;;
 	esac;;
 	
    	1)

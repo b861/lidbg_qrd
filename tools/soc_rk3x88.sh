@@ -10,7 +10,7 @@ function soc_build_kernel()
 {
 	echo $FUNCNAME
 	cd $DBG_SYSTEM_DIR/kernel
-	make rk3188_box_radxa_rock_pro_hdmi_defconfig && make kernel.img -j16
+	make $KERNEL_DEFCONFIG && make kernel.img -j16
 }
 
 
@@ -67,7 +67,7 @@ function set_env()
 	echo $FUNCNAME
 	cd $DBG_SYSTEM_DIR
 	if [[ $TARGET_PRODUCT = "" ]];then
-		source build/envsetup.sh && lunch radxa_rock_pro-$SYSTEM_BUILD_TYPE
+		source build/envsetup.sh && lunch $DBG_PLATFORM-$SYSTEM_BUILD_TYPE
 	fi
 }
 

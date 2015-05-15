@@ -258,6 +258,32 @@ case "$DBG_PLATFORM_ID" in
         export CLASSPATH=$JAVA_HOME/lib:$JRE_HOME/lib:$CLASSPATH
         export PATH=$JAVA_HOME/bin:$JRE_HOME/bin:$PATH
         export SYSTEM_BUILD_TYPE=eng
+	export KERNEL_DEFCONFIG=rk3188_box_radxa_rock_pro_hdmi_defconfig
+        export DBG_KERNEL_SRC_DIR=$DBG_SYSTEM_DIR/kernel
+        export DBG_KERNEL_OBJ_DIR=$DBG_SYSTEM_DIR/kernel/
+        export UPDATA_BIN_PLATFORM_DIR=$RELEASE_REPOSITORY/others/px3
+        export UPDATA_BIN_DIR=$UPDATA_BIN_PLATFORM_DIR/driver
+        export UPDATA_BASESYSTEM_DIR=$UPDATA_BIN_PLATFORM_DIR/basesystem
+        export DBG_PASSWORD=git
+        export DBG_REPO_PASSWORD=git
+        export DBG_VENDOR=VENDOR_ROCKCHIP
+        export OTA_PACKAGE_NAME=msm8974-ota-eng.*.zip
+        export DBG_SOC=rk3x88
+        export TEST_PACKAGE_PATH=//192.168.128.128/px3/升级包发布/专项测试包
+        export REPOSITORY_WORK_BRANCH=master
+        export SYSTEM_WORK_BRANCH=master
+        export MAKE_PAKG_NUM=6
+
+        9)
+        export DBG_PLATFORM=rkpx3
+        export BOARD_VERSION=V1
+        export DBG_CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilts/gcc/linux-x86/arm/arm-eabi-4.7/bin/arm-eabi-
+        export JAVA_HOME=$PATHJAVA1P6
+        export JRE_HOME=$JAVA_HOME/jre
+        export CLASSPATH=$JAVA_HOME/lib:$JRE_HOME/lib:$CLASSPATH
+        export PATH=$JAVA_HOME/bin:$JRE_HOME/bin:$PATH
+        export SYSTEM_BUILD_TYPE=eng
+	export KERNEL_DEFCONFIG=rkpx3_sdk_android-4.4_defconfig
         export DBG_KERNEL_SRC_DIR=$DBG_SYSTEM_DIR/kernel
         export DBG_KERNEL_OBJ_DIR=$DBG_SYSTEM_DIR/kernel/
         export UPDATA_BIN_PLATFORM_DIR=$RELEASE_REPOSITORY/others/px3
