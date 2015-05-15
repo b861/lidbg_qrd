@@ -34,20 +34,11 @@ char *get_bin_path( char *buf)
 #endif
 }
 
-static int checked_result = 0;// 1 flysytem 2 system
 char *get_lidbg_file_path(char *buff, char *filename)
 {
     char *path;
-    if(checked_result == 0)
-    {
-        if(is_file_exist(FLY_MODE_FILE))
-            checked_result = 1;
-        else
-            checked_result = 2;
-    }
-
-    path = (checked_result == 1) ? "/flysystem/lib/out/" : "/system/lib/modules/out/";
-    sprintf(buff, "%s%s", path, filename);
+    path = (gboot_mode==MD_FLYSYSTEM) ? "/flysystem/lib/out/" : "/system/lib/modules/out/";
+    sprintf(buff, "%s%s\0", path, filename);
     return buff;
 }
 

@@ -3,7 +3,12 @@
 
 #include "lidbg.h"
 
+#define  RECOVERY_MODE_DIR "/sbin/recovery"
+#define  FLY_MODE_FILE "/flysystem/lib/out/lidbg_loader.ko"
+
+
 int load_modules_count = 0;
+enum boot_mode gboot_mode;
 
 char *insmod_soc_list[] =
 {
@@ -105,12 +110,19 @@ int thread_loader(void *data)
 			ssleep(1);
 #endif
 
-    if(is_file_exist(FLY_MODE_FILE))
-        kopath = "/flysystem/lib/out/";
+    if(is_file_exist(RECOVERY_MODE_DIR))
+		gboot_mode=MD_RECOVERY;
+    else if(is_file_exist(FLY_MODE_FILE))
+		gboot_mode=MD_FLYSYSTEM;
     else
+		gboot_mode=MD_ORIGIN;
+
+		if(gboot_mode==MD_FLYSYSTEM)
+        kopath = "/flysystem/lib/out/";
+		else
         kopath = "/system/lib/modules/out/";
 
-	lidbg("thread_loader start\n");
+	lidbg("thread_loader start,%d\n",gboot_mode);
     for(j = 0; insmod_soc_list[j] != NULL; j++)
     {	
         sprintf(path, "%s%s", kopath, insmod_soc_list[j]);
@@ -143,6 +155,7 @@ void __exit loader_exit(void)
 module_init(loader_init);
 module_exit(loader_exit);
 
+EXPORT_SYMBOL(gboot_mode);
 EXPORT_SYMBOL(load_modules_count);
 EXPORT_SYMBOL(lidbg_insmod);
 

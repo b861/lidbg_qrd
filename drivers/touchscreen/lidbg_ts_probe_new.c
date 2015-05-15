@@ -111,7 +111,7 @@ void parse_ts_info(struct probe_device *ts_info)
 {
     char path[100];
 
-	if(g_var.is_fly)
+    if(gboot_mode==MD_FLYSYSTEM)
 	{
 	    sprintf(path, "/flysystem/lib/out/%s", ts_info->name);
 	    lidbg_insmod( path );

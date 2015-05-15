@@ -435,7 +435,7 @@ int fly_interface_init(void)
 	g_var.led_app_status = 1;
 	g_var.led_hal_status = 1;
 	g_var.is_udisk_needreset = 1;
-    if( fs_is_file_exist(RECOVERY_MODE_DIR))
+    if(gboot_mode==MD_RECOVERY)
     {
 	    g_var.recovery_mode = 1;
 		lidbg("system mode is recovery_mode\n");

@@ -17,17 +17,6 @@ int main(int argc, char **argv)
     DUMP_BUILD_TIME_FILE;
     lidbg("lidbg_iserver: iserver start\n");
 
-
-	if(is_file_exist("/sbin/recovery")) 
-	{
-		recovery_mode = 1;
-		lidbg("recovery_mode=1\n");
-	}
-	else
-	{
-		recovery_mode = 0;
-	}
-
 #if 0
 	//wait flysystem mount
     while(is_file_exist("/flysystem/lib") == 0)
@@ -68,6 +57,17 @@ int main(int argc, char **argv)
         checkout = 1;
         lidbg("lidbg_iserver: this is origin system\n");
     }
+
+	if(is_file_exist("/sbin/recovery")) 
+	{
+		recovery_mode = 1;
+		checkout = 1;
+		lidbg("recovery_mode=1\n=====force use origin system=====\n");
+	}
+	else
+	{
+		recovery_mode = 0;
+	}
 
     system("mkdir /data/lidbg");
     system("mkdir /data/lidbg/lidbg_osd");
