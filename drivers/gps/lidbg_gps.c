@@ -25,7 +25,7 @@ module_param_named(work_en, work_en, int, 0644 );
 struct early_suspend early_suspend;
 #endif
 #define GPS_BUF_SIZE (1024*4)
-u8 gps_data[GPS_BUF_SIZE];
+u8 gps_data[GPS_BUF_SIZE+1];
 
 
 #define HAL_BUF_SIZE (512)
@@ -270,8 +270,8 @@ int thread_gps_server(void *data)
             if(avi_gps_data_hl <= GPS_BUF_SIZE)
             {
                 ret = SOC_I2C_Rec_Simple(GPS_I2C_BUS, 0x42, gps_data, avi_gps_data_hl);
-	       	gps_data[avi_gps_data_hl ] = '\0';
-	        pr_debug("gps_data=%s\n",gps_data);
+	       		gps_data[avi_gps_data_hl ] = '\0';
+	        	pr_debug("gps_data=%s\n",gps_data);
                 if (ret < 0)
                 {
                     lidbg("[ublox]get gps data err!!\n");

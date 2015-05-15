@@ -177,8 +177,8 @@ struct io_int_config
 
 
 #define LIDBG_GPIO_PULLUP  GPIO_CFG_PULL_UP
-
-
+#define SOC_TARGET_PATH "../../soc/rk3x88/lidbg_target_rk3188.c"
+#define SOC_TARGET_DEFINE_PATH "lidbg_target_rk3188.h"
 
 //#define LIDBG_GPIO_PULLDOWN  GPIO_PULLDOWN
 

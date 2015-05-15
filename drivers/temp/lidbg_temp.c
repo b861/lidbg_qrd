@@ -99,25 +99,9 @@ void cb_kv_show_temp(char *key, char *value)
 {
     CREATE_KTHREAD(thread_show_temp, NULL);
 }
-EXPORT_SYMBOL(cb_kv_show_temp);
+//EXPORT_SYMBOL(cb_kv_show_temp);
 
 
-int thread_log_temp(void *data)
-{
-	int tmp,cur_temp;
-	while(1)
-	{
-		tmp = cpufreq_get(0);
-		cur_temp = soc_temp_get();
-        lidbg_fs_log(TEMP_LOG_PATH,  "%d,%d,%d\n", cur_temp, get_scaling_max_freq(),cpufreq_get(0));
-		msleep(1000);
-	}
-}
-void cb_kv_log_temp(char *key, char *value)
-{
-    CREATE_KTHREAD(thread_log_temp, NULL);
-}
-EXPORT_SYMBOL(cb_kv_log_temp);
 
 
 

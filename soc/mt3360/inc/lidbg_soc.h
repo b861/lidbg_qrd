@@ -168,7 +168,8 @@ enum
 #define USB_MOUNT_POINT  "/storage/udisk"
 #define RECOVERY_USB_MOUNT_POINT "/usb"
 
-
+#define SOC_TARGET_PATH "../../soc/mt3360/lidbg_target_mt3360.c"
+#define SOC_TARGET_DEFINE_PATH "lidbg_target_mt3360.h"
 struct io_config
 {
     __u32 index;

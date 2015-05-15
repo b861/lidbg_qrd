@@ -150,7 +150,12 @@ struct io_int_config
 
 #define LIDBG_GPIO_PULLUP  GPIO_CFG_PULL_UP
 
-
+#ifdef PLATFORM_msm8226
+#define SOC_TARGET_PATH "../../soc/msm8x26/lidbg_target_msm8226.c"
+#elif defined(PLATFORM_msm8974)
+#define SOC_TARGET_PATH "../../soc/msm8x26/lidbg_target_msm8974.c"
+#endif
+#define SOC_TARGET_DEFINE_PATH "lidbg_target_msm8x26.h"
 
 //#define LIDBG_GPIO_PULLDOWN  GPIO_PULLDOWN
 

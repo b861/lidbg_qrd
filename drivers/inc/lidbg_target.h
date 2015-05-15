@@ -140,18 +140,7 @@ extern struct hw_version_specific g_hw_version_specific[];
 
 
 
-#ifdef SOC_msm8x26
-#include "lidbg_target_msm8x26.h"
-#endif
-
-#ifdef SOC_mt3360
-#include "lidbg_target_mt3360.h"
-#endif
-
-#ifdef SOC_rk3x88
-#include "lidbg_target_rk3188.h"
-#endif
-
+#include SOC_TARGET_DEFINE_PATH
 
 
 #endif

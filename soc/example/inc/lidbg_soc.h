@@ -145,6 +145,9 @@ enum
 #define INTERFACE_KO  "lidbg_interface.ko"
 #define USB_MOUNT_POINT  "/storage/udisk"
 #define RECOVERY_USB_MOUNT_POINT "/usb"
+#define SOC_TARGET_PATH "../../soc/rk3x88/lidbg_target_example.c"
+#define SOC_TARGET_DEFINE_PATH "lidbg_target_example.h"
+
 
 #define TRACE_MSG_FROM_KMSG
 
