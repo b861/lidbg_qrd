@@ -191,7 +191,7 @@ void ts_devices_show(char *whocalls)
 void ts_devices_init(void)
 {
     char ts_config_file[64]={0},tmp[32]={0};
-    snprintf(tmp, sizeof(tmp), "/ts_config/ts_config_%d.conf",g_var.hw_info.virtual_key );
+    snprintf(tmp, sizeof(tmp), "ts_config/ts_config_%d.conf",g_var.hw_info.virtual_key );
 
     get_lidbg_file_path(ts_config_file, tmp);
 
