@@ -11,6 +11,7 @@ function combination_menu()
     	echo "[66] 编译拷贝lidbg或basesystem并生成升级包提交到测试分支"
     	echo "[67] 编译拷贝lidbg和basesystem并生成原生系统的升级包,拷贝到服务器"
       echo "[68] 完整编译BP并提交到二进制仓库"
+	echo "[69] 编译拷贝lidbg或basesystem并生成升级包提交到远程分支"
 	echo "[70] 编译烧写boot.img后重启"
 }
 
@@ -49,7 +50,17 @@ function combination_handle()
         build_all_handle
         echo "combile bp src over"                 
         read -p "输入提交到二进制仓库的说明文字：" descriptors
-        depository_clean && depository_pull && depository_copy_bpfile && depository_add_push "$descriptors";;                
+        depository_clean && depository_pull && depository_copy_bpfile && depository_add_push "$descriptors";; 
+         69)
+        echo "  编译选项如下"
+        echo "  (1) 编译basesystem并拷贝到远程分支"
+        echo "  (2) 编译lidbg并拷贝到远程分支"
+        echo "  (3) 编译basesystem和lidbg并拷贝到远程分支"
+
+        read -p "  输入编译选项：" which_combine
+        read -p "  自定义提交到二进制仓库测试分支的名字：" branch_name
+        read -p "  提交说明：" commit
+	go_remote_test_branch && judge_which_combine_test && depository_make_package && remote_test_branch && new_branch_remove && copy_package_to_smb;;                
 	70)
 		soc_build_kernel && adb wait-for-devices reboot bootloader && soc_flash_kernel && sudo fastboot reboot;;
 	*)

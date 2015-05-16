@@ -27,6 +27,13 @@ function depository_clean()
 	cd $RELEASE_REPOSITORY
 	git checkout $REPOSITORY_WORK_BRANCH && git reset --hard
 }
+function depository_clean_test()
+{
+	echo $FUNCNAME
+	cd $RELEASE_REPOSITORY
+ #      git checkout $REPOSITORY_WORK_BRANCH &&
+       git reset --hard
+}
 
 function depository_pull()
 {
@@ -37,6 +44,14 @@ function depository_pull()
 	expect $DBG_TOOLS_PATH/pull $REPOSITORY_WORK_BRANCH $DBG_REPO_PASSWORD
 }
 
+function depository_pull_test()
+{
+	echo $FUNCNAME
+	cd $RELEASE_REPOSITORY
+#	git checkout $branch_name
+	expect $DBG_TOOLS_PATH/pull $branch_name $DBG_REPO_PASSWORD
+	expect $DBG_TOOLS_PATH/pull $branch_name $DBG_REPO_PASSWORD
+}
 function depository_add_push()
 {
 	echo $FUNCNAME
@@ -67,11 +82,35 @@ function depository_copy_lidbg()
 	fi
 	#cp -r $DBG_OUT_PATH/*.so  $UPDATA_BIN_DIR/hw/
 }
-
+function depository_copy_lidbg_test()
+{
+	echo $FUNCNAME $DBG_OUT_PATH $UPDATA_BIN_DIR $UPDATA_BIN_PLATFORM_DIR
+#	git checkout $branch_name
+	cp -r $DBG_OUT_PATH  $UPDATA_BIN_DIR
+	if [ -s $DBG_OUT_PATH/FlyBootService.apk ]
+	    then
+		echo $FUNCNAME  $UPDATA_BIN_PLATFORM_DIR
+		cp -r $DBG_OUT_PATH/FlyBootService.apk  $RELEASE_REPOSITORY/app/
+	fi
+	if [ -s $DBG_OUT_PATH/FastBoot.apk ]
+	    then
+		echo $FUNCNAME  $UPDATA_BIN_PLATFORM_DIR
+		cp -r $DBG_OUT_PATH/FastBoot.apk  $RELEASE_REPOSITORY/app/
+	fi
+	#cp -r $DBG_OUT_PATH/*.so  $UPDATA_BIN_DIR/hw/
+}
 function depository_copy_basesystem()
 {
 	echo $FUNCNAME
 	git checkout $REPOSITORY_WORK_BRANCH
+	#cp -r $DBG_SYSTEM_DIR/flyaudio/out/*  $UPDATA_BASESYSTEM_DIR/
+	cp $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/$OTA_PACKAGE_NAME $UPDATA_BASESYSTEM_DIR/baseqcom.flb
+}
+
+function depository_copy_basesystem_test()
+{
+	echo $FUNCNAME
+#	git checkout $REPOSITORY_WORK_BRANCH
 	#cp -r $DBG_SYSTEM_DIR/flyaudio/out/*  $UPDATA_BASESYSTEM_DIR/
 	cp $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/$OTA_PACKAGE_NAME $UPDATA_BASESYSTEM_DIR/baseqcom.flb
 }
