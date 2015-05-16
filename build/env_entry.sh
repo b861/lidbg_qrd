@@ -272,7 +272,7 @@ case "$DBG_PLATFORM_ID" in
         export TEST_PACKAGE_PATH=//192.168.128.128/px3/升级包发布/专项测试包
         export REPOSITORY_WORK_BRANCH=master
         export SYSTEM_WORK_BRANCH=master
-        export MAKE_PAKG_NUM=6
+        export MAKE_PAKG_NUM=6;;
 
         9)
         export DBG_PLATFORM=rkpx3
@@ -297,7 +297,7 @@ case "$DBG_PLATFORM_ID" in
         export TEST_PACKAGE_PATH=//192.168.128.128/px3/升级包发布/专项测试包
         export REPOSITORY_WORK_BRANCH=master
         export SYSTEM_WORK_BRANCH=master
-        export MAKE_PAKG_NUM=6
+        export MAKE_PAKG_NUM=6;;
 
 esac
 
