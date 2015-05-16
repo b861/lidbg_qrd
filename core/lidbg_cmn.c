@@ -38,7 +38,7 @@ char *get_lidbg_file_path(char *buff, char *filename)
 {
     char *path;
     path = (gboot_mode==MD_FLYSYSTEM) ? "/flysystem/lib/out/" : "/system/lib/modules/out/";
-    sprintf(buff, "%s%s\0", path, filename);
+    sprintf(buff, "%s%s", path, filename);
     return buff;
 }
 
