@@ -6,7 +6,7 @@ unsigned int  soc_ad_read(unsigned int channel)  //temp-alarm channel is 8  ,nam
 {
 	struct qpnp_vadc_result adc_result;
     qpnp_vadc_read(vadc_chip, channel, &adc_result);
-    pr_debug("result:%lld\n",adc_result.physical);
+    pr_debug("channel:%d,result:%d\n",channel,(int)adc_result.physical);
 	return adc_result.physical;
 }
 

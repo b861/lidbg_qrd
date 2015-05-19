@@ -260,7 +260,7 @@ case "$DBG_PLATFORM_ID" in
         export SYSTEM_BUILD_TYPE=eng
 	export KERNEL_DEFCONFIG=rk3188_box_radxa_rock_pro_hdmi_defconfig
         export DBG_KERNEL_SRC_DIR=$DBG_SYSTEM_DIR/kernel
-        export DBG_KERNEL_OBJ_DIR=$DBG_SYSTEM_DIR/kernel/
+        export DBG_KERNEL_OBJ_DIR=$DBG_SYSTEM_DIR/kernel
         export UPDATA_BIN_PLATFORM_DIR=$RELEASE_REPOSITORY/others/px3
         export UPDATA_BIN_DIR=$UPDATA_BIN_PLATFORM_DIR/driver
         export UPDATA_BASESYSTEM_DIR=$UPDATA_BIN_PLATFORM_DIR/basesystem
@@ -285,7 +285,7 @@ case "$DBG_PLATFORM_ID" in
         export SYSTEM_BUILD_TYPE=eng
 	export KERNEL_DEFCONFIG=rkpx3_sdk_android-4.4_defconfig
         export DBG_KERNEL_SRC_DIR=$DBG_SYSTEM_DIR/kernel
-        export DBG_KERNEL_OBJ_DIR=$DBG_SYSTEM_DIR/kernel/
+        export DBG_KERNEL_OBJ_DIR=$DBG_SYSTEM_DIR/kernel
         export UPDATA_BIN_PLATFORM_DIR=$RELEASE_REPOSITORY/others/px3
         export UPDATA_BIN_DIR=$UPDATA_BIN_PLATFORM_DIR/driver
         export UPDATA_BASESYSTEM_DIR=$UPDATA_BIN_PLATFORM_DIR/basesystem
@@ -299,7 +299,7 @@ case "$DBG_PLATFORM_ID" in
         export SYSTEM_WORK_BRANCH=master
         export MAKE_PAKG_NUM=6;;
 
-esac
+esac 
 
 
 
