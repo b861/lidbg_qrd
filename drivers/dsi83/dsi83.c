@@ -441,6 +441,11 @@ static  struct file_operations dsi83_nod_fops =
     .open = dsi83_open,
 };
 
+void disable_dsi83(char *key_word, void *data)
+{
+    lidbg("==disable_dsi83==\n");
+	SOC_IO_Output(0, DSI83_GPIO_EN, 0);
+}
 static int dsi83_probe(struct platform_device *pdev)
 {
 	int ret = 0;
@@ -493,6 +498,8 @@ static int dsi83_probe(struct platform_device *pdev)
 
 #endif
 	lidbg_new_cdev(&dsi83_nod_fops, "lidbg_dsi83");
+
+    lidbg_trace_msg_cb_register("ShutdownThread-cpu", NULL, disable_dsi83);
 
 	return 0;
 
