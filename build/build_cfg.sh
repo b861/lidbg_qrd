@@ -13,3 +13,6 @@ echo LOCAL_CFLAGS += -DPLATFORM_${3} >> $DBG_BUILD_PATH/build_cfg.mk
 
 echo EXTRA_CFLAGS += -D${4} >> $DBG_BUILD_PATH/build_cfg.mk
 echo LOCAL_CFLAGS += -D${4} >> $DBG_BUILD_PATH/build_cfg.mk
+
+echo EXTRA_CFLAGS += -DPLATFORM_ID_$DBG_PLATFORM_ID >> $DBG_BUILD_PATH/build_cfg.mk
+echo LOCAL_CFLAGS += -DPLATFORM_ID_$DBG_PLATFORM_ID >> $DBG_BUILD_PATH/build_cfg.mk
