@@ -534,6 +534,10 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
             SOC_System_Status(FLY_DEVICE_DOWN);
             PM_WARN("mediascan.en.1\n");
             lidbg_shell_cmd("setprop persist.lidbg.mediascan.en 1");
+#ifdef SOC_msm8x26
+            PM_WARN("<bootanim.exit>\n");
+            lidbg_shell_cmd("setprop service.bootanim.exit 0");
+#endif
             if(SOC_Hal_Acc_Callback)
             {
                 lidbg("hal callback 3\n");
