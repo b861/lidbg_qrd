@@ -17,7 +17,13 @@ static KEYCODE_T lidbg_keycode[] =
 void lidbg_key_report(u32 key_value, u32 type)
 {
     lidbg("key - key_value:%d\n", key_value);
-
+/*	
+	if(key_value == KEY_HOME)
+	{
+		lidbg_shell_cmd("am start -a android.intent.action.MAIN -c android.intent.category.HOME");
+		return ;
+	}
+*/
 #ifdef SOC_msm8x25
 #else
 if(key_value == KEY_HOME)

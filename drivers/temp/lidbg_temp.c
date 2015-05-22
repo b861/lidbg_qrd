@@ -194,7 +194,7 @@ int thread_thermal(void *data)
 
         log_temp();
         cur_temp = soc_temp_get();
-	pr_debug("cpu_temp=%d",cur_temp);
+		pr_debug("cpu_temp=%d,freq=%d,max_freq=%d\n",cur_temp,cpufreq_get(0),max_freq);
 
 //fan ctrl
     	{
@@ -377,11 +377,7 @@ static int  cpu_temp_init(void)
 {
 	printk(KERN_WARNING "chdrv_init\n");
 	LIDBG_GET;
-        CREATE_KTHREAD(thread_thermal, NULL);   
-       
-       
-	
-	
+    CREATE_KTHREAD(thread_thermal, NULL);  
 	return 0;
 
 

@@ -108,6 +108,7 @@ function copy_package_to_smb()
 	    mkdir /mnt/smb-$DBG_PLATFORM_ID-$DBG_PLATFORM
 	  #  mount -t smbfs -o codepage=cp936,username=lisuwei,password=123456 $TEST_PACKAGE_PATH /mnt/smb-$DBG_PLATFORM_ID-$DBG_PLATFORM
 #ubuntu 12.10 later cifs replace smbfs 
+	    echo /mnt/smb-$DBG_PLATFORM_ID-$DBG_PLATFORM --> $TEST_PACKAGE_PATH 
 	    mount -t cifs -o username=lisuwei,password=123456 $TEST_PACKAGE_PATH /mnt/smb-$DBG_PLATFORM_ID-$DBG_PLATFORM
 #	fi
 	mkdir /mnt/smb-$DBG_PLATFORM_ID-$DBG_PLATFORM/$commit

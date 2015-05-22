@@ -75,10 +75,10 @@ case "$DBG_PLATFORM_ID" in
 	export REPOSITORY_WORK_BRANCH=master
 	export SYSTEM_WORK_BRANCH=master
         export MAKE_PAKG_NUM=1
-   export NON_HLOS_FILE_PATH=$BP_SOURCE_PATH/common/build/bin/asic
-   export RPM_FILE_PATH=$RPM_PATH/ms/bin/AAAAANAAR
-   export SBL_FILE_PATH=$BOOT_IMAGE_PATH/bin/8x26
-   export TZ_FILE_PATH=$TZ_PATH/bin/FARAANBA
+	export NON_HLOS_FILE_PATH=$BP_SOURCE_PATH/common/build/bin/asic
+	export RPM_FILE_PATH=$RPM_PATH/ms/bin/AAAAANAAR
+	export SBL_FILE_PATH=$BOOT_IMAGE_PATH/bin/8x26
+	export TZ_FILE_PATH=$TZ_PATH/bin/FARAANBA
 	#以下命令用于bp v1.0.3
 	#MPSS_BUILD_CMD='./build.sh 8626.gen BUILD_ID=AAAAANAZ'
 	export MPSS_BUILD_CMD='./build.sh 8626.gen.prod 8626.gps.prod BUILD_VER=01780 -k'
@@ -112,10 +112,10 @@ case "$DBG_PLATFORM_ID" in
 	export REPOSITORY_WORK_BRANCH=master
 	export SYSTEM_WORK_BRANCH=master
         export MAKE_PAKG_NUM=10
-   export NON_HLOS_FILE_PATH=$BP_SOURCE_PATH/common/build/bin/asic
-   export RPM_FILE_PATH=$RPM_PATH/ms/bin/AAAAANAAR
-   export SBL_FILE_PATH=$BOOT_IMAGE_PATH/bin/8x26
-   export TZ_FILE_PATH=$TZ_PATH/bin/FARAANBA
+	export NON_HLOS_FILE_PATH=$BP_SOURCE_PATH/common/build/bin/asic
+	export RPM_FILE_PATH=$RPM_PATH/ms/bin/AAAAANAAR
+	export SBL_FILE_PATH=$BOOT_IMAGE_PATH/bin/8x26
+        export TZ_FILE_PATH=$TZ_PATH/bin/FARAANBA
 	export MPSS_BUILD_CMD='./build.sh 8926.gen.prod BUILD_ID=DAAAANAZ'
 	export BOOTLOADER_BUILD_CMD='./build.sh TARGET_FAMILY=8x26 BUILD_ID=FAAAANAZ -j1'
 	export ADSP_BUILD_CMD='python build.py'
@@ -146,11 +146,11 @@ case "$DBG_PLATFORM_ID" in
 	export TEST_PACKAGE_PATH=//192.168.128.128/8974/升级包发布/专项测试包
 	export REPOSITORY_WORK_BRANCH=master
 	export SYSTEM_WORK_BRANCH=master
-   export  MAKE_PAKG_NUM=6
-   export NON_HLOS_FILE_PATH=$BP_SOURCE_PATH/common/build/bin/asic
-   export RPM_FILE_PATH=$RPM_PATH/ms/bin/AAAAANAAR
-   export SBL_FILE_PATH=$BOOT_IMAGE_PATH/bin/8974
-   export TZ_FILE_PATH=$TZ_PATH/bin/AAAAANAA
+        export MAKE_PAKG_NUM=6
+        export NON_HLOS_FILE_PATH=$BP_SOURCE_PATH/common/build/bin/asic
+        export RPM_FILE_PATH=$RPM_PATH/ms/bin/AAAAANAAR
+        export SBL_FILE_PATH=$BOOT_IMAGE_PATH/bin/8974
+        export TZ_FILE_PATH=$TZ_PATH/bin/AAAAANAA
 	#for bp
 	export MPSS_BUILD_CMD='./build.sh 8974.gen.prod -k'
 	export BOOTLOADER_BUILD_CMD='./build.sh --prod TARGET_FAMILY=8974 -j1'
@@ -202,10 +202,10 @@ case "$DBG_PLATFORM_ID" in
 	export SYSTEM_WORK_BRANCH=master
         export MAKE_PAKG_NUM=11
 
-   export NON_HLOS_FILE_PATH=$BP_SOURCE_PATH/common/build/bin/asic
-   export RPM_FILE_PATH=$RPM_PATH/ms/bin/AAAAANAAR
-   export SBL_FILE_PATH=$BOOT_IMAGE_PATH/bin/8x26
-   export TZ_FILE_PATH=$TZ_PATH/bin/FARAANBA
+	export NON_HLOS_FILE_PATH=$BP_SOURCE_PATH/common/build/bin/asic
+	export RPM_FILE_PATH=$RPM_PATH/ms/bin/AAAAANAAR
+	export SBL_FILE_PATH=$BOOT_IMAGE_PATH/bin/8x26
+	export TZ_FILE_PATH=$TZ_PATH/bin/FARAANBA
 	export MPSS_BUILD_CMD='./build.sh 8626.gen.prod BUILD_VER=01780 -k'
 	export BOOTLOADER_BUILD_CMD='./build.sh TARGET_FAMILY=8x26 BUILD_ID=FAAAANAZ -j1'
 	export ADSP_BUILD_CMD='python build.py'
