@@ -130,6 +130,7 @@ function soc_build_origin_image()
 {
 	echo $FUNCNAME
 	lidbg_build_all
+	soc_build_recoveryimage
 	soc_build_all
 
 	cp $DBG_SOC_PATH/$DBG_SOC/init.lidbg.rc        $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/root/init.lidbg.rc

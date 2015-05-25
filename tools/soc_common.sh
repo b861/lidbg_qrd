@@ -46,7 +46,16 @@ function soc_menu()
 	echo [26] make origin system image
 	echo [27] make recovery
 	echo [28] make recoveryimage
+	echo [29] make bootloader
 	echo [30] common
+	echo [31] make git commit image
+}
+
+function soc_build_git_commit_image()
+{
+	echo $DBG_SYSTEM_DIR
+	cd $DBG_SYSTEM_DIR
+
 }
 
 function soc_handle()
@@ -72,6 +81,8 @@ function soc_handle()
 		soc_build_recoveryimage;;
 	30)
 		soc_build_common "$2 $3 $4";;
+	31)
+		soc_build_git_commit_image;;
 	*)
 		echo
 	esac
