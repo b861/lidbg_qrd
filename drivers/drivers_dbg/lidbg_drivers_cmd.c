@@ -116,6 +116,23 @@ int thread_kmsg_fifo_save(void *data)
     return 0;
 }
 
+
+int thread_monkey_test(void *data)
+{
+	u32 loop = 0;
+	lidbg("monkey test start !\n"); 
+	while(1)
+	{
+		lidbg("monkey loop = %d\n",loop); 
+		loop++;
+		lidbg_shell_cmd("monkey --ignore-crashes --ignore-timeouts --throttle 200 500");
+		msleep(60*1000);
+	}
+
+    return 0;
+}
+
+
 void callback_func_test_readdir(char *dirname, char *filename)
 {
     LIDBG_WARN("%s<---%s\n", dirname, filename);
@@ -178,6 +195,8 @@ void parse_cmd(char *pt)
 		    fs_mem_log("*158#032--pr_debug AD_val\n");
 		    fs_mem_log("*158#033--pr_debug TS_val\n");
 		    fs_mem_log("*158#034--pr_debug cpu_temp\n");
+		    fs_mem_log("*158#040--monkey test\n");
+
             show_password_list();
             lidbg_domineering_ack();
         }
@@ -418,6 +437,12 @@ void parse_cmd(char *pt)
             lidbg_shell_cmd("echo -n 'file lidbg_temp.c +p' > /sys/kernel/debug/dynamic_debug/control");
 	
         }
+		else if (!strcmp(argv[1], "*158#040"))
+        {
+        	CREATE_KTHREAD(thread_monkey_test, NULL);
+	
+        }
+
         else if (!strcmp(argv[1], "*168#001"))
         {
             encode = true;
