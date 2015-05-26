@@ -48,6 +48,10 @@ SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,hal_camera_usb)
 SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,hal_camera_study_v4l2)
 endif
 
+ifeq ($(CONFIG_HAL_PARTED),y)
+SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,lidbg_parted)
+endif
+
 SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,lidbg_umount)
 SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,apk)
 
