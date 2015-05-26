@@ -1,12 +1,12 @@
 
 #!bin/sh
-for file in $1
+times=0
+for file in $1/*
 do
     if test -f $file
     then
-        echo $file
+    let times++
+        echo =========$times=============$file
         adb install $file
-    else
-        echo $file 是目录
     fi
 done
