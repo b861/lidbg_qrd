@@ -15,6 +15,12 @@ int main(int argc, char **argv)
 {
 	int parted_size = GPT_SIEZ_ORIGIN;
 
+	if(argc < 1)
+	{
+		printf("usage:lidbg_parted argv\n");
+		return -1;
+	}
+
 	parted_size = strtoul(argv[1], 0, 0);
 
 	if(parted_size != GPT_SIEZ_ORIGIN)
