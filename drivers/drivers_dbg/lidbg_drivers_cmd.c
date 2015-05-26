@@ -125,7 +125,7 @@ int thread_monkey_test(void *data)
 	{
 		lidbg("monkey loop = %d\n",loop); 
 		loop++;
-		lidbg_shell_cmd("monkey --ignore-crashes --ignore-timeouts --throttle 200 500");
+		lidbg_shell_cmd("monkey --ignore-crashes --ignore-timeouts --throttle 300 500");
 		msleep(60*1000);
 	}
 
@@ -195,6 +195,7 @@ void parse_cmd(char *pt)
 		    fs_mem_log("*158#032--pr_debug AD_val\n");
 		    fs_mem_log("*158#033--pr_debug TS_val\n");
 		    fs_mem_log("*158#034--pr_debug cpu_temp\n");
+		    fs_mem_log("*158#035--pr_debug lowmemorykillprotecter\n");
 		    fs_mem_log("*158#040--monkey test\n");
 
             show_password_list();
@@ -435,8 +436,12 @@ void parse_cmd(char *pt)
         {
             lidbg("temp_debug\n");  
             lidbg_shell_cmd("echo -n 'file lidbg_temp.c +p' > /sys/kernel/debug/dynamic_debug/control");
-	
         }
+		else if (!strcmp(argv[1], "*158#035"))
+        {
+            lidbg("lowmemorykill debug\n");  
+            lidbg_shell_cmd("echo -n 'file lowmemorykillprotecter.c +p' > /sys/kernel/debug/dynamic_debug/control");
+        }		
 		else if (!strcmp(argv[1], "*158#040"))
         {
         	CREATE_KTHREAD(thread_monkey_test, NULL);
