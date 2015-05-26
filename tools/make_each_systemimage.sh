@@ -1,3 +1,8 @@
+#para:$1---times limit
+#
+#
+
+
 cd ../build
 source ./env_entry.sh
 
@@ -32,8 +37,6 @@ do
  rm /out/target/product/$DBG_PLATFORM/boot.img
  rm /out/target/product/$DBG_PLATFORM/system.img
  rm /out/target/product/$DBG_PLATFORM/emmc_appsboot.img
- commit=$myline
- git reset ${commit:0:5} --hard
  
  #STEP2:
  cd $DIR_LIDBG_PATH
@@ -45,11 +48,18 @@ do
   cp -rf $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system.img /home/systemimage/$DBG_PLATFORM"_"$DBG_PLATFORM_ID/"$myline"
   cp -rf $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/emmc_appsboot.mbn /home/systemimage/$DBG_PLATFORM"_"$DBG_PLATFORM_ID/"$myline"
 
-  echo "stop:=======$main_loop_times=======:"$myline
-  
-sleep 5
+ sleep 300
  let main_loop_times++
- 
+
+ #STEP4:
+ cd $DBG_SYSTEM_DIR
+ git reset --hard HEAD^
+
+ #STEP5:for safe
+ if [ $main_loop_times -eq $1 ];then
+  exit 1
+ fi
+
 done < /home/systemimage/gitoneline.txt
 
 
