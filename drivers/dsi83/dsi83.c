@@ -445,12 +445,13 @@ void disable_dsi83(char *key_word, void *data)
 {
     lidbg("==disable_dsi83==\n");
 	SOC_IO_Output(0, DSI83_GPIO_EN, 0);
+/*
 	ssleep(4);
-	
     lidbg("==reboot==\n");
 	lidbg_shell_cmd("reboot");
 	ssleep(2);
     kernel_restart(NULL);
+ */
 }
 static int dsi83_probe(struct platform_device *pdev)
 {

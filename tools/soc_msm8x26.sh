@@ -82,7 +82,7 @@ if [ $DBG_PLATFORM = msm8226 ];then
 	cp -u $DBG_CORE_PATH/cmn_func.c   $DBG_SYSTEM_DIR/kernel/drivers/flyaudio/
 	cp -u $DBG_CORE_PATH/inc/cmn_func.h   $DBG_SYSTEM_DIR/kernel/drivers/flyaudio/
 	cp -u $DBG_CORE_PATH/inc/lidbg_def.h   $DBG_SYSTEM_DIR/kernel/drivers/flyaudio/
-	cp -u $DBG_SOC_PATH/$DBG_SOC/conf/lidbg.selinux.te   $DBG_SYSTEM_DIR//external/sepolicy/
+#	cp -u $DBG_SOC_PATH/$DBG_SOC/conf/lidbg.selinux.te   $DBG_SYSTEM_DIR//external/sepolicy/
 
 #	rm -rf $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/lib/modules/out
 #	cp -r $RELEASE_REPOSITORY/driver/out $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/lib/modules/

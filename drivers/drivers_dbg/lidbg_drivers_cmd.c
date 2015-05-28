@@ -125,9 +125,10 @@ int thread_monkey_test(void *data)
 	{
 		lidbg("monkey loop = %d\n",loop); 
 		loop++;
-		lidbg_shell_cmd("monkey --ignore-crashes --ignore-timeouts --throttle 300 500");
+		lidbg_shell_cmd("monkey --ignore-crashes --ignore-timeouts --throttle 300 500 &");
 		msleep(60*1000);
 	}
+	lidbg("thread_monkey_test end\n"); 
 
     return 0;
 }
@@ -176,7 +177,7 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#013--dump log and copy to udisk\n");
             fs_mem_log("*158#014--origin system\n");
             fs_mem_log("*158#015--flyaudio system\n");
-            fs_mem_log("*158#016--enable wifi adb\n");
+            fs_mem_log("*158#016--enable wifi adb\n");//adb connect ip
             fs_mem_log("*158#017--disable wifi adb\n");
             fs_mem_log("*158#018--origin gps\n");
             fs_mem_log("*158#019--enable system print\n");
@@ -197,6 +198,7 @@ void parse_cmd(char *pt)
 		    fs_mem_log("*158#034--pr_debug cpu_temp\n");
 		    fs_mem_log("*158#035--pr_debug lowmemorykillprotecter\n");
 		    fs_mem_log("*158#040--monkey test\n");
+		    fs_mem_log("*158#041--disable uart debug\n");
 
             show_password_list();
             lidbg_domineering_ack();
@@ -431,6 +433,7 @@ void parse_cmd(char *pt)
         {
 	   		lidbg("ts_debug\n");   
             lidbg_shell_cmd("echo -n 'file lidbg_ts.c +p' > /sys/kernel/debug/dynamic_debug/control");
+			lidbg_shell_cmd("echo -n 'file lidbg_ts_probe_new.c +p' > /sys/kernel/debug/dynamic_debug/control");
         }
 		else if (!strcmp(argv[1], "*158#034"))
         {
@@ -445,6 +448,11 @@ void parse_cmd(char *pt)
 		else if (!strcmp(argv[1], "*158#040"))
         {
         	CREATE_KTHREAD(thread_monkey_test, NULL);
+	
+        }
+		else if (!strcmp(argv[1], "*158#041"))
+        {
+			lidbg_shell_cmd("echo 0 > /proc/sys/kernel/printk");
 	
         }
 

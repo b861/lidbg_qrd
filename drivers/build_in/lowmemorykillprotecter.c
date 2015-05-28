@@ -35,12 +35,36 @@ static char *lmk_white_list[] =
 		skip = 0;
 		for(j = 0; lmk_white_list[j] != NULL; j++)
 		{
+	
 			if (strncmp(p->comm, lmk_white_list[j], sizeof(lmk_white_list[j]) - 1) == 0)
 			{
 				pr_debug("lmkp:protect %s\n",lmk_white_list[j]);
 				skip = 1;
 				break;
 			}
+			
+			if (strstr(p->comm, "fly"))
+			{
+				pr_debug("lmkp:protect %s\n",p->comm);
+				skip = 1;
+				break;
+			}
+			
+			if (strstr(p->comm, "qualcomm"))
+			{
+				pr_debug("lmkp:protect %s\n",p->comm);
+				skip = 1;
+				break;
+			}
+			
+			if (strstr(p->comm, "lidbg"))
+			{
+				pr_debug("lmkp:protect %s\n",p->comm);
+				skip = 1;
+				break;
+			}
+
+			
 		}
 		
 		if(skip == 1)

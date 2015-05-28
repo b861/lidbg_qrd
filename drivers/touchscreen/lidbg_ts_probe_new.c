@@ -281,10 +281,10 @@ void ts_key_report(s32 input_x,s32 input_y,struct ts_devices_key *tskey,int size
 				SOC_Key_Report(get_input_key(tskey->key_value),KEY_PRESSED_RELEASED);
 			else
 				{
-				 g_var.ts_active_key = tskey->key_value;
-			 	if(SOC_Hal_Ts_Callback)
+					g_var.ts_active_key = tskey->key_value;
+					if(SOC_Hal_Ts_Callback)
 					{
-						// lidbg("SOC_Hal_Ts_Callbacking:%d",g_var.ts_active_key);
+						pr_debug("SOC_Hal_Ts_Callbacking:%d\n",g_var.ts_active_key);
 						SOC_Hal_Ts_Callback( g_var.ts_active_key);
 					}
 				}
@@ -322,26 +322,26 @@ void ts_probe_prepare(void)
 //zone end
 void ts_data_report(touch_type t,int id,int x,int y,int w)
 {
+	pr_debug("%s:%d,%d[%d,%d,%d]\n", __FUNCTION__,t,id, x, y,w);
 	GTP_SWAP(x, y);
    	 if (1 == ts_should_revert)
 		GTP_REVERT(x, y);
 	if(g_var.hw_info.virtual_key>0)
 	{
 		if( ((g_ts_devices.lcd_origin_x<x)&& (x<1024+g_ts_devices.lcd_origin_x)&&(g_ts_devices.lcd_origin_y<y)&& (y<g_ts_devices.lcd_origin_y+600))||(t == TOUCH_SYNC)||(t== TOUCH_UP))
-
+		{
+			lidbg_touch_handle(t, id,x-g_ts_devices.lcd_origin_x, y-g_ts_devices.lcd_origin_y, w);
+			if( (t== TOUCH_UP)&&(id==0))
 			{
-				 lidbg_touch_handle(t, id,x-g_ts_devices.lcd_origin_x, y-g_ts_devices.lcd_origin_y, w);
-				if( (t== TOUCH_UP)&&(id==0))
-					{
-					if(SOC_Hal_Ts_Callback)
-						{
-							//lidbg("SOC_Hal_Ts_Callbacking:%d",TS_NO_KEY);
-							SOC_Hal_Ts_Callback(TS_NO_KEY);
-						}
-					}
+				if(SOC_Hal_Ts_Callback)
+				{
+					pr_debug("SOC_Hal_Ts_Callbacking:%d\n",TS_NO_KEY);
+					SOC_Hal_Ts_Callback(TS_NO_KEY);
+				}
 			}
+		}
 		else
-		ts_key_report(x,y, g_ts_devices.key,SIZE_OF_ARRAY(g_ts_devices.key));
+			ts_key_report(x,y, g_ts_devices.key,SIZE_OF_ARRAY(g_ts_devices.key));
 	}
 	else
 		 lidbg_touch_handle(t, id,x, y, w);
