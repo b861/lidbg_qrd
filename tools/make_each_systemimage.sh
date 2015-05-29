@@ -56,7 +56,7 @@ do
  git reset --hard HEAD^
 
  #STEP5:for safe
- if [ $main_loop_times -eq $1 ];then
+ if [[ $main_loop_times -eq $1 ]];then
   exit 1
  fi
 

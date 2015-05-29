@@ -138,7 +138,7 @@ function auto_build()
 		menu_do $3 $4 $5
 		menu_do $4 $5
 		menu_do $5
-		if [ $2 -eq -1 ];then
+		if [[ $2 -eq "-1" ]];then
 			exit 1
 		fi
 	while :;do
