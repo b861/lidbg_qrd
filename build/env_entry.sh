@@ -241,12 +241,13 @@ case "$DBG_PLATFORM_ID" in
         export SBL_FILE_PATH=$BOOT_IMAGE_PATH/bin/8974
         export TZ_FILE_PATH=$TZ_PATH/bin/AAAAANAA
         #for bp
-        export MPSS_BUILD_CMD='./build.sh 8974.gen.prod -k'
-        export BOOTLOADER_BUILD_CMD='./build.sh TARGET_FAMILY=8974 BUILD_ID=AAAAANAZ -j1'
+        export MPSS_BUILD_CMD='./build.sh 8974.gen.prod BUILD_VER=00161 -k'
+        export BOOTLOADER_BUILD_CMD=' ./build.sh TARGET_FAMILY=8974 BUILD_ID=AAAAANAZ -j1'
         export ADSP_BUILD_CMD='python build.py'
         export RPM_BUILD_CMD='./rpm_proc/build/build_8974.sh -j1'
         export WCNSS_BUILD_CMD='./wcnss_build.sh 8974 pronto BUILD_ID=SCAQBAZ -j1'
-        export TZ_BUILD_CMD='./build.sh CHIPSET=msm8974 tz sampleapp tzbsp_no_xpu -j1'
+        export TZ_BUILD_CMD='./build.sh CHIPSET=msm8974 tz sampleapp tzbsp_no_xpu playready widevine isdbtmm securitytest keymaster commonlib mobicore sse -j1'
+		export DEBUG_IMAGE_CMD='./build.sh TARGET_FAMILY=8974 sdi BUILD_ID=AAAAANAZ BUILD_VER=8 BUILD_MIN=1 -j1'
         export UPDATE_BUILD_CMD='python update_common_info.py';;
 
         8)

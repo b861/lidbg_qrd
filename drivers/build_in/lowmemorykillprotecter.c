@@ -28,6 +28,9 @@ static char *lmk_white_list[] =
 	"mediaserver",
 	"ndroid.systemui",
 	"system_server",
+	"lyaudio.Weather",
+	"oadcastreceiver",
+	"c2739.mainframe",
 	NULL,
 };
 

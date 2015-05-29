@@ -1,7 +1,8 @@
  #!/usr/bin/expect
 set timeout -1
-set branch [lindex $argv 0]
-spawn git clone $branch
+#set branch [lindex $argv 0]
+spawn git clone git clone https://chipmaster2.qti.qualcomm.com/home2/git/flyaudio-corporation/msm8626-la-1-0-4_amss_device_oem.git
+# --depth=1
 expect {
     "Username" { 
 		 send "lisuwei@flyaudio.cn\r"
