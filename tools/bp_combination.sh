@@ -67,6 +67,14 @@ function factory_bin()
 function flash_bin()
 {
 	echo $FUNCNAME
+	sudo fastboot flash rpm rpm.mbn
+	sudo fastboot flash modem NON-HLOS.bin
+	sudo fastboot flash tz tz.mbn
+	sudo fastboot flash dbi sdi.mbn
+	sudo fastboot flash sbl1 sbl1.mbn
+	sudo fastboot flash aboot emmc_appsboot.mbn
+	sudo fastboot flash boot boot.img
+	sudo fastboot flash system system.img
 }
 
 #清理bp镜像
