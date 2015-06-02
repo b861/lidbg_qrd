@@ -365,6 +365,14 @@ void ts_data_report(touch_type t,int id,int x,int y,int w)
 			SOC_Key_Report(KEY_BACK,KEY_PRESSED_RELEASED);
 	}
 	
+#ifdef PLATFORM_ID_7
+	if((id == 4) && (t == TOUCH_DOWN) ) // 5 fingers in origin system send back key
+	{
+		if(g_var.system_status >= FLY_KERNEL_UP)
+			SOC_Key_Report(KEY_BACK,KEY_PRESSED_RELEASED);
+	}
+#endif
+	
 	if((id == 0)&&(1 == g_var.recovery_mode))
 	{
 		static struct tspara touch = {0, 0, 0} ;
