@@ -2,6 +2,9 @@
 //#define PLATFORM_MSM8974 1
 #define  RECOVERY_MODE_DIR "/sbin/recovery"
 
+#define ANDROID_5_LATER
+
+
 bool is_recovery_mode = 0;
 bool ctrl_en = 1;
 struct thermal_ctrl
@@ -75,12 +78,13 @@ static int thread_freq_limit(void *data)
 	{
 			int tmp;
 			long temp;
-			u32 max_freq;
+			u32 max_freq = 0;
 			tmp = cpufreq_get(0); //cpufreq.c
+#ifndef ANDROID_5_LATER
 			max_freq = get_scaling_max_freq();
+#endif
 			tsens_get_temp(&tsens_dev, &temp);//cpu0 temp
 			lidbg("cpufreq=%d,maxfreq=%d,cpu0_temp = %ld\n", tmp,max_freq,temp);
-
 			for(i = 0; i < SIZE_OF_ARRAY(cpu_thermal); i++)
 			{
 				if((cpu_thermal[i].temp_low == 0)||(cpu_thermal[i].temp_high == 0))
@@ -89,13 +93,16 @@ static int thread_freq_limit(void *data)
 				if((temp >= cpu_thermal[i].temp_low ) && (temp <= cpu_thermal[i].temp_high ) 
 					  && (max_freq != cpu_thermal[i].limit_freq))
 				{
+#ifndef ANDROID_5_LATER
 					lidbg_readwrite_file(FREQ_MAX_NODE, NULL, cpu_thermal[i].limit_freq_string, strlen(cpu_thermal[i].limit_freq_string));
 					lidbg("kernel:set max freq to: %d,temp:%ld\n", cpu_thermal[i].limit_freq,temp);
+#endif
 					ctrl_max_freq = cpu_thermal[i].limit_freq;
 					cpufreq_update_policy(0);
 					break;
 				}
 			}
+
 		count++;
 		if((count >= 90*4) && (temp < 100))
 		{
@@ -111,9 +118,9 @@ static int thread_freq_limit(void *data)
 			ctrl_max_freq = 300000;
 			cpufreq_update_policy(0);
 #else
-
+	#ifndef ANDROID_5_LATER
 			lidbg_readwrite_file(FREQ_MAX_NODE, NULL, "2265600", strlen("2265600"));
-			
+	#endif			
 			if(temp > 100)
 				ctrl_max_freq = 300000;
 			else
