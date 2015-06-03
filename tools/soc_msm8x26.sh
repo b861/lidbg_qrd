@@ -21,6 +21,13 @@ function soc_build_recovery()
 	soc_prebuild && soc_build_common 'make recovery -j16'
 }
 
+function soc_build_bootloader()
+{
+	echo $FUNCNAME
+	cd $DBG_SYSTEM_DIR
+	soc_prebuild && soc_build_common 'make aboot -j16'
+}
+
 function soc_build_recoveryimage()
 {
 	echo $FUNCNAME
@@ -94,7 +101,7 @@ fi
 
 	rm -rf $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system
 	rm -rf $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/root
-	rm -rf $DBG_SYSTEM_DIR/out/target/product/msm8226/obj/EXECUTABLES/vold_intermediates
+	rm -rf $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/obj/EXECUTABLES/vold_intermediates
 
 	set_env
 }
@@ -145,7 +152,7 @@ function soc_build_origin_image()
 	#git checkout $REPOSITORY_WORK_BRANCH
 	#cp $DBG_OUT_PATH/FastBoot.apk        $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/app/FastBoot.apk
 	cp $DBG_OUT_PATH/FlyBootService.apk  $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/app/FlyBootService.apk
-
+	cp -rf $DBG_OUT_PATH/FlyBootService  $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/app/FlyBootService
 	echo "build_origin" > $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/etc/build_origin
 
 	cd $DBG_SYSTEM_DIR

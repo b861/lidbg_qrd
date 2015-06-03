@@ -33,7 +33,12 @@ function soc_flash_recovery()
 	fi
 }
 
+function soc_flash_bootloader()
+{
+	echo $FUNCNAME
+	echo $DBG_PLATFORM&& sudo fastboot flash aboot $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/emmc_appsboot.mbn
 
+}
 
 function soc_menu()
 {
@@ -79,6 +84,8 @@ function soc_handle()
 		soc_build_recovery;;
 	28)
 		soc_build_recoveryimage;;
+	29)
+		soc_build_bootloader;;
 	30)
 		soc_build_common "$2 $3 $4";;
 	31)

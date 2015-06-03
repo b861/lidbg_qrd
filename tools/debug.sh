@@ -10,6 +10,7 @@ function debug_menu()
 	echo [55] fastboot flash system
 	echo [56] fastboot flash recovery
 	echo [57] fastboot reboot
+	echo [58] fastboot bootloader
 }
 
 function debug_handle()
@@ -30,6 +31,8 @@ function debug_handle()
 		soc_flash_recovery;;
 	57)
 		sudo fastboot reboot;;
+	58)
+		soc_flash_bootloader;;
 	*)
 		echo
 	esac
