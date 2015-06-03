@@ -285,6 +285,16 @@ int thread_udisk_stability_test(void *data)
 
 }
 
+int thread_udisk_en(void *data)
+{
+	DUMP_FUN_ENTER;
+	ssleep(5);
+	USB_WORK_ENABLE;
+	return 0;
+}
+
+
+
 
 static int soc_dev_probe(struct platform_device *pdev)
 {
@@ -326,6 +336,10 @@ static int soc_dev_probe(struct platform_device *pdev)
 		CREATE_KTHREAD(thread_udisk_stability_test, NULL);
 	}
 	
+#ifdef PLATFORM_ID_7
+	if(g_var.recovery_mode == 1)
+		CREATE_KTHREAD(thread_udisk_en, NULL);
+#endif
     return 0;
 
 }
