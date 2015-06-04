@@ -105,11 +105,14 @@ void iSOC_IO_Output_Ext(u32 group, u32 index, bool status, u32 pull, u32 drive_s
 
 void iSOC_IO_Output(u32 group, u32 index, bool status)
 {
+#ifdef PLATFORM_ID_7
+	soc_io_config( index, GPIOMUX_FUNC_GPIO, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_16MA, 0);
+#else
 	if(status == 1)
     	soc_io_config( index,  GPIOMUX_FUNC_GPIO,GPIOMUX_OUT_HIGH, GPIOMUX_PULL_NONE, GPIOMUX_DRV_8MA, 0);
 	else if (status == 0)
     	soc_io_config( index,  GPIOMUX_FUNC_GPIO,GPIOMUX_OUT_LOW, GPIOMUX_PULL_NONE, GPIOMUX_DRV_8MA, 0);
-		
+#endif	
     soc_io_output(group, index,  status);
 }
 
