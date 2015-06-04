@@ -112,7 +112,8 @@ function bp_combination_handle()
 	msm8226)
 	build_debug_image;;
 	msm8974)
-        build_wcnss;;
+        build_wcnss
+	build_debug_image;;
 	esac;;
     76)
 	source setenv.sh
@@ -144,7 +145,9 @@ function build_all_handle()
    # insmod xx && 
     cd $BP_SOURCE_PATH && source setenv.sh && build_mpss && build_bootloader && build_adsp && build_rpm && build_trustzone_image && build_debug_image && build_ln_get_image & build_update;;
     msm8974)
-    cd $BP_SOURCE_PATH && source $BP_SOURCE_PATH/setenv-modem.sh && build_mpss && source $BP_SOURCE_PATH/setenv.sh && build_bootloader && build_adsp && build_rpm && build_wcnss && build_trustzone_image && build_ln_get_image & build_update;;
+    cd $BP_SOURCE_PATH && source setenv-modem.sh 
+    build_mpss && source $BP_SOURCE_PATH/setenv.sh && build_bootloader && build_adsp && build_debug_image 
+    build_rpm && build_wcnss && build_trustzone_image && build_ln_get_image & build_update;;
     esac
 
 #    cp all image to ./out
@@ -161,7 +164,7 @@ function bp_combine_menu()
     case "$DBG_PLATFORM" in
     #编译8974需要编译wcnss
     msm8974)
-    echo [75] build WCNSS'                        'wcnss.mbn;;
+    echo [75] build WCNSS debug_imag'             'wcnss.mbn;;
     #编译8226需要编译debug image
     msm8226)
     echo [75] build debug_image'                  'debug image;;
