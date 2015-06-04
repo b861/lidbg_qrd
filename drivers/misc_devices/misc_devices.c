@@ -285,16 +285,33 @@ int thread_udisk_stability_test(void *data)
 
 }
 
+static bool  is_udisk_added = 0;
+static int usb_nb_misc_func(struct notifier_block *nb, unsigned long action, void *data)
+{
+    if(!is_udisk_added)
+        lidbg("stop.thread_udisk_en\n");
+    is_udisk_added = 1;
+    return NOTIFY_OK;
+}
+static struct notifier_block usb_nb_misc =
+{
+    .notifier_call = usb_nb_misc_func,
+};
 int thread_udisk_en(void *data)
 {
-	DUMP_FUN_ENTER;
-	ssleep(5);
-	USB_WORK_ENABLE;
-	return 0;
+    int loop = 0;
+    DUMP_FUN_ENTER;
+    ssleep(3);
+    while(!is_udisk_added)
+    {
+        lidbg("thread_udisk_en====%d\n", ++loop);
+        IO_CONFIG_OUTPUT(0, 73);
+        soc_io_output(0, 73, 0);
+        ssleep(2);
+    }
+    lidbg("thread_udisk_en===exit=%d\n", loop);
+    return 0;
 }
-
-
-
 
 static int soc_dev_probe(struct platform_device *pdev)
 {
@@ -338,7 +355,10 @@ static int soc_dev_probe(struct platform_device *pdev)
 	
 #ifdef PLATFORM_ID_7
 	if(g_var.recovery_mode == 1)
-		CREATE_KTHREAD(thread_udisk_en, NULL);
+	{
+	    usb_register_notify(&usb_nb_misc);
+	    CREATE_KTHREAD(thread_udisk_en, NULL);
+	}
 #endif
     return 0;
 
