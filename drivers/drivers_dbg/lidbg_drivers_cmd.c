@@ -123,6 +123,13 @@ int thread_monkey_test(void *data)
 	lidbg("monkey test start !\n"); 
 	while(1)
 	{
+		if(te_is_ts_touched())
+		{
+			lidbg_domineering_ack();
+			lidbg("thread_monkey_test:te_is_ts_touched.pause\n"); 
+			ssleep(60);
+			continue;
+		}
 		lidbg("monkey loop = %d\n",loop); 
 		loop++;
 		lidbg_shell_cmd("monkey --ignore-crashes --ignore-timeouts --throttle 300 500 &");
