@@ -12,10 +12,12 @@
 "system",
 "com.fly.flybootservice"
 */
+
 {
 static int j,skip;
 static char *lmk_white_list[] =
 {
+	"d.process.acore",
 	"ndroid.launcher",
 	"d.process.media",
 	"roid.flyaudioui",
