@@ -501,6 +501,8 @@ int fly_interface_init(void)
 
 	}
 	lidbg("hw_version=%d\n",g_var.hw_info.hw_version);
+	
+	lidbg("android_version=%d\n",ANDROID_VERSION);
 
 
     //if((g_var.recovery_mode == 0) && ( fs_is_file_exist(LIDBG_PATH)))

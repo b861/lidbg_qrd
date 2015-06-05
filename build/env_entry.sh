@@ -55,6 +55,7 @@ case "$DBG_PLATFORM_ID" in
     	2)
 	export DBG_PLATFORM=msm8226
 	export BOARD_VERSION=V3
+	export ANDROID_VERSION=442
 	export DBG_CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilts/gcc/linux-x86/arm/arm-eabi-4.7/bin/arm-eabi-
 	export JAVA_HOME=$PATHJAVA1P6
 	export JRE_HOME=$JAVA_HOME/jre
@@ -92,6 +93,7 @@ case "$DBG_PLATFORM_ID" in
     	3)
 	export DBG_PLATFORM=msm8226
 	export BOARD_VERSION=V4
+	export ANDROID_VERSION=442
 	export DBG_CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilts/gcc/linux-x86/arm/arm-eabi-4.7/bin/arm-eabi-
 	export JAVA_HOME=$PATHJAVA1P6
 	export JRE_HOME=$JAVA_HOME/jre
@@ -127,6 +129,7 @@ case "$DBG_PLATFORM_ID" in
     	4)
 	export DBG_PLATFORM=msm8974
 	export BOARD_VERSION=V2
+	export ANDROID_VERSION=444
 	export DBG_CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilts/gcc/linux-x86/arm/arm-eabi-4.7/bin/arm-eabi-
 	export JAVA_HOME=$PATHJAVA1P6
 	export JRE_HOME=$JAVA_HOME/jre
@@ -164,6 +167,7 @@ case "$DBG_PLATFORM_ID" in
    	5)
 	export DBG_PLATFORM=mt3360
 	export BOARD_VERSION=V1
+	export ANDROID_VERSION=422
 	export DBG_CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilts/gcc/linux-x86/arm/arm-eabi-4.6/bin/arm-eabi-
 	export SYSTEM_BUILD_TYPE=eng
 	export DBG_KERNEL_SRC_DIR=$DBG_SYSTEM_DIR/kernel
@@ -181,6 +185,7 @@ case "$DBG_PLATFORM_ID" in
     	6)
 	export DBG_PLATFORM=msm8226
 	export BOARD_VERSION=V3
+	export ANDROID_VERSION=502
 	export DBG_CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilts/gcc/linux-x86/arm/arm-eabi-4.8/bin/arm-eabi-
 	export JAVA_HOME=$PATHJAVA1P7
 	export JRE_HOME=$JAVA_HOME/jre
@@ -216,6 +221,7 @@ case "$DBG_PLATFORM_ID" in
         7)
         export DBG_PLATFORM=msm8974
         export BOARD_VERSION=V2
+	export ANDROID_VERSION=511
         export DBG_CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilts/gcc/linux-x86/arm/arm-eabi-4.8/bin/arm-eabi-
         export JAVA_HOME=$PATHJAVA1P7
         export JRE_HOME=$JAVA_HOME/jre
@@ -253,6 +259,7 @@ case "$DBG_PLATFORM_ID" in
         8)
         export DBG_PLATFORM=radxa_rock_pro
         export BOARD_VERSION=V1
+	export ANDROID_VERSION=442
         export DBG_CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilts/gcc/linux-x86/arm/arm-eabi-4.7/bin/arm-eabi-
         export JAVA_HOME=$PATHJAVA1P6
         export JRE_HOME=$JAVA_HOME/jre
@@ -278,6 +285,7 @@ case "$DBG_PLATFORM_ID" in
         9)
         export DBG_PLATFORM=rkpx3
         export BOARD_VERSION=V1
+	export ANDROID_VERSION=444
         export DBG_CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilts/gcc/linux-x86/arm/arm-eabi-4.7/bin/arm-eabi-
         export JAVA_HOME=$PATHJAVA1P6
         export JRE_HOME=$JAVA_HOME/jre
@@ -303,6 +311,7 @@ case "$DBG_PLATFORM_ID" in
     	10)
 	export DBG_PLATFORM=msm8226
 	export BOARD_VERSION=V3
+	export ANDROID_VERSION=511
 	export DBG_CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilts/gcc/linux-x86/arm/arm-eabi-4.8/bin/arm-eabi-
 	export JAVA_HOME=$PATHJAVA1P7
 	export JRE_HOME=$JAVA_HOME/jre
