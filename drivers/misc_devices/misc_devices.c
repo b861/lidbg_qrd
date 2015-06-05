@@ -285,6 +285,7 @@ int thread_udisk_stability_test(void *data)
 
 }
 
+#ifdef PLATFORM_ID_7
 static bool  is_udisk_added = 0;
 static int usb_nb_misc_func(struct notifier_block *nb, unsigned long action, void *data)
 {
@@ -312,6 +313,7 @@ int thread_udisk_en(void *data)
     lidbg("thread_udisk_en===exit=%d\n", loop);
     return 0;
 }
+#endif
 
 static int soc_dev_probe(struct platform_device *pdev)
 {
