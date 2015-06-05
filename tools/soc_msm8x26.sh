@@ -70,7 +70,7 @@ function soc_postbuild()
 function set_env()
 {
 	echo $FUNCNAME
-	if [[ $TARGET_PRODUCT = "" ]];then
+	if [[ $TARGET_PRODUCT != $DBG_PLATFOR ]];then
 		source build/envsetup.sh&&choosecombo release $DBG_PLATFORM $SYSTEM_BUILD_TYPE
 	fi
 }
