@@ -194,7 +194,7 @@ int thread_reboot(void *data)
 
 
     //detect after sleep
-    if(1)
+    while(1)
     {
         char shell_cmd[64] = {0};
         sprintf(shell_cmd, "rm -rf %s", REBOOT_SIG_FILE);
