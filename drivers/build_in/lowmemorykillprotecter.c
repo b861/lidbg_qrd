@@ -33,6 +33,12 @@ static char *lmk_white_list[] =
 	"lyaudio.Weather",
 	"oadcastreceiver",
 	"c2739.mainframe",
+	"alcomm.fastboot",
+	"udio.navigation",
+	"dio.osd.service",
+	"droid.deskclock",
+	"ys.DeviceHealth",
+	"system",
 	NULL,
 };
 
