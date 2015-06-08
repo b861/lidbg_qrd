@@ -66,9 +66,9 @@ function set_env()
 {
 	echo $FUNCNAME
 	cd $DBG_SYSTEM_DIR
-	if [[ $TARGET_PRODUCT = "" ]];then
+#	if [[ $TARGET_PRODUCT = "" ]];then
 		source build/envsetup.sh && lunch $DBG_PLATFORM-$SYSTEM_BUILD_TYPE
-	fi
+#	fi
 }
 
 function soc_prebuild()

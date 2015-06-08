@@ -69,10 +69,11 @@ function soc_postbuild()
 
 function set_env()
 {
-	echo $FUNCNAME
-	if [[ $TARGET_PRODUCT != $DBG_PLATFOR ]];then
+	echo $FUNCNAME $TARGET_PRODUCT $DBG_PLATFORM $SYSTEM_BUILD_TYPE
+#	if [[ $TARGET_PRODUCT != $DBG_PLATFOR ]];then
+		echo "do source/choosecombo"
 		source build/envsetup.sh&&choosecombo release $DBG_PLATFORM $SYSTEM_BUILD_TYPE
-	fi
+#	fi
 }
 
 function soc_prebuild()
