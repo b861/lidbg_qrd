@@ -55,7 +55,7 @@ echo "============loops:$main_loop_times  status:["${commit_times[0]}"] ["${comm
 		#echo @@@@@@@@@@@@@@ $diff_commit @@@@@@@@@@@@@@
 		
 		cd $DIR_TOOLS_PATH
-		./basesystem.sh ${compile_info[0]} ${compile_info[1]} ${compile_info[2]} ${compile_info[3]} ${compile_info[4]} ${compile_info[5]} ${compile_info[6]} ${compile_info[7]} ${compile_info[8]} ${compile_info[9]} ${compile_info[10]} "${diff_commit}" && exit
+		./basesystem.sh ${compile_info[0]} ${compile_info[1]} ${compile_info[2]} ${compile_info[3]} ${compile_info[4]} ${compile_info[5]} ${compile_info[6]} ${compile_info[7]} ${compile_info[8]} ${compile_info[9]} ${compile_info[10]} "${diff_commit}" 
 		fi
 	fi
 	
