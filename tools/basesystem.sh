@@ -70,9 +70,9 @@ function system_dir_build()
 
 	echo ====IN.3choosecombo=====$FUNCNAME
 	cd $SYSTEM_DIR
-	if [[ $TARGET_PRODUCT = "" ]];then
+#	if [[ $TARGET_PRODUCT = "" ]];then
 		source build/envsetup.sh&&choosecombo release $SYSTEM_PLATFORM $SYSTEM_BUILD_TYPE
-	fi
+#	fi
 	echo ====IN.4make-j8=====$FUNCNAME
 	rm -rf ./out/target/product/$SYSTEM_PLATFORM/system
 	rm -rf ./out/target/product/$SYSTEM_PLATFORM/root

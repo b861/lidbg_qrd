@@ -386,6 +386,73 @@ void ts_data_report(touch_type t,int id,int x,int y,int w)
 	}
 }
 
+int ts_probe_open(struct inode *inode, struct file *filp)
+{
+    return 0;
+}
+int ts_probe_close(struct inode *inode, struct file *filp)
+{
+    return 0;
+}
+
+
+static void parse_cmd(char *pt)
+{
+    int argc = 0;
+    char *argv[32] = {NULL};
+
+    lidbg("parse_cmd:%s\n", pt);
+    argc = lidbg_token_string(pt, " ", argv);
+
+    if (!strcmp(argv[0], "revert"))
+    {
+		ts_should_revert = 1;
+    }
+	else if (!strcmp(argv[0], "no_revert"))
+    {
+		ts_should_revert = 0;
+    }	
+}
+
+
+static ssize_t ts_probe_write(struct file *filp, const char __user *buf,
+                         size_t size, loff_t *ppos)
+{
+    char *p = NULL;
+    int len = size;
+    char tmp[size + 1];//C99 variable length array
+    char *mem = tmp;
+
+    memset(mem, '\0', size + 1);
+
+    if(copy_from_user(mem, buf, size))
+    {
+        lidbg("copy_from_user ERR\n");
+    }
+
+    if((p = memchr(mem, '\n', size)))
+    {
+        len = p - mem;
+        *p = '\0';
+    }
+    else
+        mem[len] =  '\0';
+
+    parse_cmd(mem);
+
+    return size;//warn:don't forget it;
+}
+
+
+static struct file_operations dev_fops =
+{
+    .owner = THIS_MODULE,
+    .open = ts_probe_open,
+    .write = ts_probe_write,
+    .release = ts_probe_close,
+};
+
+
 //zone below [logic]
 int ts_probe_thread(void *data)
 {
@@ -414,6 +481,8 @@ int ts_probe_thread(void *data)
         LIDBG_WARN("<mode:scan disable[%d,%d,%d]>\n", USE_TS_NUM, g_var.hw_info.ts_type, g_var.hw_info.ts_config);
         parse_ts_info(&ts_probe_dev[g_var.hw_info.ts_type > 0 ? g_var.hw_info.ts_type - 1 : USE_TS_NUM - 1 ]);
     }
+	
+	lidbg_new_cdev(&dev_fops, "ts_probe");
 
     ssleep(10);
     LIDBG_WARN("<ts_probe_thread exited>\n");
