@@ -148,17 +148,29 @@ function basesystem_launch()
 	BASESYSTEM_DIR_IN_BIN_DIR=$8
 	GIT_MASTER_BRANCH=$9
 	OUT_BASESYSTEM_NAME=${10}
-	BIN_GIT_COMMIT_DESCRIPTION="${11} ${12} ${13} ${14} ${15} ${16} ${17} ${18} ${19} ${20} ${21} ${22} ${23} ${24} ${25} ${26} ${27} ${28} ${29} ${30}"
+	BIN_GIT_COMMIT_DESCRIPTION="${12} ${13} ${14} ${15} ${16} ${17} ${18} ${19} ${20} ${21} ${22} ${23} ${24} ${25} ${26} ${27} ${28} ${29} ${30}"
 	show_env
 	
 	if [ $# -lt 9 ];then
 		show_err_save_exit 1 "input num < 9 $#"
 	fi
 	
-	if [ $11 == '' ];then
+	if [ $12 == '' ];then
 		show_err_save_exit 2 "num 9 = null"
 	fi
-	
+
+	PATHJAVA1P6=/home/flyaudio/jdk1.6.0_31
+	PATHJAVA1P7=/home/flyaudio/java-7-openjdk-amd64
+	if [ ${11} == "16" ];then
+		export JAVA_HOME=$PATHJAVA1P6
+		echo "!!JAVA_HOME=$PATHJAVA1P6!!!!!!!!!"
+	fi
+	if [ ${11} == "17" ];then
+		export JAVA_HOME=$PATHJAVA1P7
+		echo "!!JAVA_HOME=$PATHJAVA1P7!!!!!!!!!"
+	fi
+	export JRE_HOME=$JAVA_HOME/jre
+
 	case $1 in
 	1)
 		git_pull $SYSTEM_DIR $SYSTEM_DIR_PASSWORD "master" && git_reset_hard $BIN_DIR&& git_pull $BIN_DIR $BIN_DIR_PASSWORD $GIT_MASTER_BRANCH&&git_pull $BIN_DIR $BIN_DIR_PASSWORD $GIT_MASTER_BRANCH&&
