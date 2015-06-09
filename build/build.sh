@@ -16,5 +16,6 @@ echo $DBG_PLATFORM >> $build_log
 echo $BOARD_VERSION >> $build_log
 
 git log --oneline | sed -n '1,10p' >> $build_log
+#git log --pretty=format:"|%s" | sed -n '1,10p' >> $build_log
 
 
