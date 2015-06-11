@@ -22,8 +22,8 @@ main_loop_times=0
 
 mkdir -p /home/systemimage/
 cd $DBG_SYSTEM_DIR
-git log --oneline  > /home/systemimage/gitoneline.txt
-
+#git log --oneline  > /home/systemimage/gitoneline.txt
+git log --pretty=format:"%s" > /home/systemimage/gitoneline.txt
 
 echo "=======$DBG_SOC $DBG_PLATFORM $DBG_PLATFORM_ID======="
 

@@ -35,7 +35,7 @@ echo "============loops:$main_loop_times  status:["${commit_times[0]}"] ["${comm
 	#echo ==${compile_info[0]} ${compile_info[1]} ${compile_info[2]} ${compile_info[3]} ${compile_info[4]} ${compile_info[5]} ${compile_info[6]} ${compile_info[7]} ${compile_info[8]}
 	
 	cd ${compile_info[3]}
-	git log --pretty=format:"%s,"  > /dev/shm/${compile_info[1]}_$thiswhile_loop.txt && new_commitinfo=$(head /dev/shm/${compile_info[1]}_$thiswhile_loop.txt --lines 1)
+	git log --pretty=format:"%s "  > /dev/shm/${compile_info[1]}_$thiswhile_loop.txt && new_commitinfo=$(head /dev/shm/${compile_info[1]}_$thiswhile_loop.txt --lines 1)
 	
 	thiscommit_info=${pre_commit[$thiswhile_loop]}
 	thiscommit_times=${commit_times[$thiswhile_loop]}

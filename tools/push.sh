@@ -9,6 +9,8 @@ adb shell rm -rf /flysystem/lib/out
 adb push $DBG_OUT_PATH /system/lib/modules/out
 adb push $DBG_OUT_PATH/vold /system/bin/
 adb push $DBG_OUT_PATH/lidbg_load /system/bin/
+adb push $DBG_OUT_PATH/FlyBootService.apk /system/app/FlyBootService.apk
+adb push $DBG_OUT_PATH/FlyBootService  /system/app/FlyBootService
 adb shell chmod 777 /system/bin/vold
 adb shell chmod 777 /system/bin/lidbg_load
 adb shell chmod 777 /system/lib/modules/out/*.ko

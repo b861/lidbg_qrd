@@ -111,6 +111,7 @@ function lidbg_handle()
 
 function menu_do()
 {
+	chmod 777 $DBG_ROOT_PATH -R
 	if [[ $1 -le 20 ]] ;then
 		lidbg_handle $1
 	elif [[ $1 -le 40 ]] ;then
@@ -142,6 +143,7 @@ function auto_build()
 			exit 1
 		fi
 	while :;do
+		chmod 777 $DBG_ROOT_PATH -R
 		cd $DBG_BUILD_PATH
 		lidbg_menu
 		read -p "[USERID:$USERS_ID  PLATFORMID:$DBG_PLATFORM_ID]Enter your select:" name1 name2 name3 name4 name5
