@@ -125,7 +125,7 @@ public class FlyBootService extends Service {
             "cn.flyaudio.osd.service", "android.process.acore",
             "android.process.media", "com.android.systemui",
             "com.android.deskclock", "sys.DeviceHealth", "system",
-            "com.fly.flybootservice","com.android.keyguard","android.policy"
+            "com.fly.flybootservice","com.android.keyguard","android.policy","com.android.launcher3"
     };
 
 
