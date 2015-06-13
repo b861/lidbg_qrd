@@ -469,14 +469,16 @@ static struct file_operations lpc_fops =
     .release = lpc_close,
 };
 
+#define FLY_HAL_FILE "/flysystem/lib/hw/servicehal.default.so"
+
 static int lpc_ping_en = 0;
 static int  lpc_probe(struct platform_device *pdev)
 {
     DUMP_FUN;
     FS_REGISTER_INT(lpc_ping_en, "lpc_ping_en", 0, NULL);
-    if((g_var.recovery_mode)||(g_var.is_fly&&!lpc_ping_en))//origin system and fly mode when lpc_ping_en enable,lpc driver will go on;
+    if((g_var.recovery_mode)||(g_var.is_fly && fs_is_file_exist(FLY_HAL_FILE) && !lpc_ping_en))//origin system and fly mode when lpc_ping_en enable,lpc driver will go on;
     {
-        lidbg("lpc_init do nothing.disable,[%d,%d,%d]\n",g_var.is_fly,lpc_ping_en,g_var.recovery_mode);
+        lidbg("lpc_init do nothing.disable,[%d,%d,%d,%d]\n",g_var.is_fly,lpc_ping_en,g_var.recovery_mode,fs_is_file_exist(FLY_HAL_FILE));
         return 0;
     }
 
