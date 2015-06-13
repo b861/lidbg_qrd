@@ -73,12 +73,12 @@ function depository_copy_lidbg()
 	if [ -s $DBG_OUT_PATH/FlyBootService.apk ]
 	    then
 		echo $FUNCNAME  $UPDATA_BIN_PLATFORM_DIR
-		cp -r $DBG_OUT_PATH/FlyBootService.apk  $RELEASE_REPOSITORY/app/
+		cp -r $DBG_OUT_PATH/FlyBootService.apk  $UPDATA_BIN_PLATFORM_DIR/app/
 	fi
 	if [ -s $DBG_OUT_PATH/FastBoot.apk ]
 	    then
 		echo $FUNCNAME  $UPDATA_BIN_PLATFORM_DIR
-		cp -r $DBG_OUT_PATH/FastBoot.apk  $RELEASE_REPOSITORY/app/
+		cp -r $DBG_OUT_PATH/FastBoot.apk  $UPDATA_BIN_PLATFORM_DIR/app/
 	fi
 	#cp -r $DBG_OUT_PATH/*.so  $UPDATA_BIN_DIR/hw/
 }
@@ -90,12 +90,12 @@ function depository_copy_lidbg_test()
 	if [ -s $DBG_OUT_PATH/FlyBootService.apk ]
 	    then
 		echo $FUNCNAME  $UPDATA_BIN_PLATFORM_DIR
-		cp -r $DBG_OUT_PATH/FlyBootService.apk  $RELEASE_REPOSITORY/app/
+		cp -r $DBG_OUT_PATH/FlyBootService.apk  $UPDATA_BIN_PLATFORM_DIR/app/
 	fi
 	if [ -s $DBG_OUT_PATH/FastBoot.apk ]
 	    then
 		echo $FUNCNAME  $UPDATA_BIN_PLATFORM_DIR
-		cp -r $DBG_OUT_PATH/FastBoot.apk  $RELEASE_REPOSITORY/app/
+		cp -r $DBG_OUT_PATH/FastBoot.apk  $UPDATA_BIN_PLATFORM_DIR/app/
 	fi
 	#cp -r $DBG_OUT_PATH/*.so  $UPDATA_BIN_DIR/hw/
 }
@@ -118,10 +118,11 @@ function depository_copy_basesystem_test()
 function depository_copy_bpfile()
 {
 	echo $FUNCNAME
-        cp $NON_HLOS_FILE_PATH/NON-HLOS.bin        $UPDATA_BIN_PLATFORM_DIR 
-        cp $RPM_FILE_PATH/rpm.mbn                  $UPDATA_BIN_PLATFORM_DIR  
-        cp $SBL_FILE_PATH/sbl1.mbn    	           $UPDATA_BIN_PLATFORM_DIR  
-        cp $TZ_FILE_PATH/tz.mbn    		   $UPDATA_BIN_PLATFORM_DIR  
+        cp $NON_HLOS_FILE_PATH/NON-HLOS.bin        $UPDATA_BIN_PLATFORM_DIR/radio
+        cp $RPM_FILE_PATH/rpm.mbn                  $UPDATA_BIN_PLATFORM_DIR/radio  
+        cp $SBL_FILE_PATH/sbl1.mbn    	           $UPDATA_BIN_PLATFORM_DIR/radio  
+        cp $TZ_FILE_PATH/tz.mbn    		   $UPDATA_BIN_PLATFORM_DIR/radio
+        cp $TZ_FILE_PATH/sdi.mbn    		   $UPDATA_BIN_PLATFORM_DIR/radio 
 }
 
 function depository_make_package()
