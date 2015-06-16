@@ -40,7 +40,7 @@ do
  
  #STEP2:
  cd $DIR_LIDBG_PATH
- ./lidbg.sh 26 -1
+ ./lidbg.sh 23 -1
 
   
  #STEP3:

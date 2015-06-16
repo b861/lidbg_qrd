@@ -87,6 +87,16 @@ out:
     lidbg("logcat.skip\n");
     return 0;
 }
+int thread_enable_logcat2(void *data)
+{
+    if(logcat_enabled)
+        goto out;
+    logcat_enabled = true;
+    lidbg_enable_logcat2();
+out:
+    lidbg("logcat.skip\n");
+    return 0;
+}
 
 static bool dmesg_enabled = false;
 int thread_enable_dmesg(void *data)
@@ -206,6 +216,8 @@ void parse_cmd(char *pt)
 		    fs_mem_log("*158#035--pr_debug lowmemorykillprotecter\n");
 		    fs_mem_log("*158#040--monkey test\n");
 		    fs_mem_log("*158#041--disable uart debug\n");
+			
+            fs_mem_log("*158#051--LOG_LOGCAT2\n");
 
             show_password_list();
             lidbg_domineering_ack();
@@ -242,6 +254,14 @@ void parse_cmd(char *pt)
 #endif
             lidbg_domineering_ack();
         }
+		else if (!strcmp(argv[1], "*158#051"))
+		{
+			lidbg_chmod("/sdcard");
+			CREATE_KTHREAD(thread_enable_logcat2, NULL);
+			lidbg_domineering_ack();
+		}
+
+		
         else if (!strcmp(argv[1], "*158#002"))
         {
             lidbg_chmod("/data");

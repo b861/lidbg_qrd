@@ -469,7 +469,7 @@ static struct file_operations lpc_fops =
     .release = lpc_close,
 };
 
-#define FLY_HAL_FILE "/flysystem/lib/hw/servicehal.default.so"
+#define FLY_HAL_FILE "/flysystem/lib/modules/FlyHardware.ko"
 
 static int lpc_ping_en = 0;
 static int  lpc_probe(struct platform_device *pdev)

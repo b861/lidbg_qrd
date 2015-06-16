@@ -44,6 +44,8 @@ void set_power_state(int state);
 void lidbg_loop_warning(void);
 void lidbg_system_switch(bool origin_system);
 void lidbg_enable_logcat(void);
+void lidbg_enable_logcat2(void);
+
 void lidbg_enable_kmsg(void);
 void lidbg_shell_cmd(char *shell_cmd);
 char *get_bin_path( char *buf);
