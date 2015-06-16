@@ -28,6 +28,7 @@ ifeq ($(DBG_PLATFORM),msm8226)
 obj-$(CONFIG_TOUCHSCREEN)	+= lidbg_ts_probe_new.o
 obj-$(CONFIG_TOUCHSCREEN)	+= lidbg_ts_to_recov.o
 obj-$(CONFIG_TOUCHSCREEN)	+= gt911.o
+obj-$(CONFIG_TOUCHSCREEN)	+= gt811.o
 gt911-objs :=gt9xx.o
 obj-$(CONFIG_TOUCHSCREEN)	+= ft5x06_ts.o
 ft5x06_ts-objs :=ft5406_ts.o

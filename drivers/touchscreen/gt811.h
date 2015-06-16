@@ -30,7 +30,11 @@
 #define GT801_PLUS
 #define GT801_NUVOTON
 #define GUITAR_UPDATE_STATE 0x02
+#ifdef PLATFORM_ID_2
+#define GPIOEIT (69)
+#else
 #define GPIOEIT (48)
+#endif
 //#define DEBUG
 //define resolution of the touchscreen
 #define TOUCH_MAX_HEIGHT 	600
@@ -119,7 +123,11 @@ struct goodix_ts_data
     unsigned int version;
     /////////////////////////////// UPDATE STEP 6 END /////////////////////////////////////////////////////////////////
 
-    struct early_suspend early_suspend;
+    #if defined(CONFIG_FB)
+	struct notifier_block fb_notif;
+#elif defined(CONFIG_HAS_EARLYSUSPEND)
+	struct early_suspend early_suspend;
+#endif
     int (*power)(struct goodix_ts_data *ts, int on);
 };
 

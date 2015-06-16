@@ -37,8 +37,11 @@ extern int ts_should_revert;
 //SOC_Log_Dumpextern void SOC_Log_Dump(int cmd);
 
 static int have_load = 0;    // 1: have load ,do't load again
-static int sensor_id = 2;	    //0:  8cunTS;      2: 7cunTS ;   7cun for default
-
+#ifdef PLATFORM_ID_2
+static int sensor_id = 0;	    //0:  8cunTS;      2: 7cunTS ;   7cun for default
+#else
+static int sensor_id = 2;
+#endif
 
 #define LOG_DMESG (1)
 
@@ -52,11 +55,18 @@ static struct proc_dir_entry *goodix_proc_entry;
 static short  goodix_read_version(struct goodix_ts_data *ts);
 //static int tpd_button(struct goodix_ts_data *ts, unsigned int x, unsigned int y, unsigned int down);
 
-#ifdef CONFIG_HAS_EARLYSUSPEND
+#if defined(CONFIG_FB)
+static int fb_notifier_callback(struct notifier_block *self,
+				 unsigned long event, void *data);
+static void goodix_ts_early_suspend(struct early_suspend *h);
+static void goodix_ts_late_resume(struct early_suspend *h);
+int  gt811_downloader( struct goodix_ts_data *ts, unsigned char *data);
+#elif defined(CONFIG_HAS_EARLYSUSPEND)
 static void goodix_ts_early_suspend(struct early_suspend *h);
 static void goodix_ts_late_resume(struct early_suspend *h);
 int  gt811_downloader( struct goodix_ts_data *ts, unsigned char *data);
 #endif
+
 //used by firmware update CRC
 unsigned int oldcrc32 = 0xFFFFFFFF;
 unsigned int crc32_table[256];
@@ -627,7 +637,7 @@ COORDINATE_POLL:
         g_curr_tspara.y = input_x;
         g_curr_tspara.press = true;
 
-        if(1 == recovery_mode)
+        if(1 == g_var.recovery_mode)
         {
             if( (input_y >= 0) && (input_x >= 0) )
             {
@@ -659,7 +669,7 @@ COORDINATE_POLL:
 
 #endif
 
-        if(1 == recovery_mode)
+        if(1 == g_var.recovery_mode)
         {
             {
                 touch.pressed = 0;
@@ -845,7 +855,6 @@ Parameters:
 return:
 	Results of the implementation code, 0 for normal execution
 ********************************************************/
-
 static int screen_x = 0;
 static int screen_y = 0;
 static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id *id)
@@ -953,10 +962,11 @@ err_gpio_request_failed:
         if(ret != 0)	//Initiall failed
         {
             lidbg("[futengfei]goodix_ts_probe.goodix_init_panel fail and again----------->GT811the %d times\n", retry);
-#ifdef BOARD_V2
-            SOC_IO_Output(0, 27, 1);
+#ifdef PLATFORM_ID_2
+
+            SOC_IO_Output(0, 24, 0);
             msleep(300);
-            SOC_IO_Output(0, 27, 0);//NOTE:GT811 SHUTDOWN PIN ,set hight to work.
+            SOC_IO_Output(0, 24, 1);//NOTE:GT811 SHUTDOWN PIN ,set hight to work.
             msleep(700);
 #else
             SOC_IO_Output(0, 27, 0);
@@ -964,6 +974,7 @@ err_gpio_request_failed:
             SOC_IO_Output(0, 27, 1);//NOTE:GT811 SHUTDOWN PIN ,set hight to work.
             msleep(700);
 #endif
+
 
             continue;
         }
@@ -1083,8 +1094,14 @@ err_gpio_request_failed:
 
     goodix_read_version(ts);
 #endif
-
-#ifdef CONFIG_HAS_EARLYSUSPEND
+#if defined(CONFIG_FB)
+	ts->fb_notif.notifier_call = fb_notifier_callback;
+	ret = fb_register_client(&ts->fb_notif);
+	if (ret)
+		dev_err(&ts->client->dev,
+			"Unable to register fb_notifier: %d\n",
+			ret);
+#elif defined(CONFIG_HAS_EARLYSUSPEND)
     ts->early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN - 20;
     ts->early_suspend.suspend = goodix_ts_early_suspend;
     ts->early_suspend.resume = goodix_ts_late_resume;
@@ -1114,8 +1131,11 @@ err_gpio_request_failed:
     //	lidbg("Start %s in %s mode,Driver Modify Date:2012-01-05\n", ts->input_dev->name, ts->use_irq ? "interrupt" : "polling");
 
     //SOC_IO_ISR_Disable(GPIOEIT);
+    #ifdef PLATFORM_ID_2
+    ret = gpio_direction_input(GPIOEIT);
+    #else
     SOC_IO_Input(0, GPIOEIT, GPIO_CFG_PULL_UP);
-
+    #endif
     ret = SOC_IO_ISR_Add(GPIOEIT, IRQF_TRIGGER_FALLING, goodix_ts_irq_handler, ts);
     if(ret == 0)
     {
@@ -1263,13 +1283,14 @@ static int goodix_ts_resume(struct i2c_client *client)
         if(ret != 0)	//Initiall failed
         {
             lidbg("[futengfei]goodix_init_panel:goodix_init_panel failed=========retry=[%d]===ret[%d]\n", retry, ret);
-#ifdef BOARD_V2
-            SOC_IO_Output(0, 27, 1);
+#ifdef PLATFORM_ID_2
+
+            SOC_IO_Output(0, 24, 0);
             msleep(300);
-            SOC_IO_Output(0, 27, 0);//NOTE:GT811 SHUTDOWN PIN ,set hight to work.
+            SOC_IO_Output(0, 24, 1);//NOTE:GT811 SHUTDOWN PIN ,set hight to work.
             msleep(700);
 #else
-            SOC_IO_Output(0, 27, 0);
+      	    SOC_IO_Output(0, 27, 0);
             msleep(300);
             SOC_IO_Output(0, 27, 1);//NOTE:GT811 SHUTDOWN PIN ,set hight to work.
             msleep(700);
@@ -1310,8 +1331,30 @@ static int goodix_ts_resume(struct i2c_client *client)
     */
     return 0;
 }
+#if defined(CONFIG_FB)
+static int fb_notifier_callback(struct notifier_block *self,
+				 unsigned long event, void *data)
+{
+	lidbg("callback_fun\n");
+	struct fb_event *evdata = data;
+	int *blank;
+	struct goodix_ts_data *ts =
+		container_of(self, struct goodix_ts_data, fb_notif);
 
-#ifdef CONFIG_HAS_EARLYSUSPEND
+	if (evdata && evdata->data && event == FB_EVENT_BLANK &&
+			ts && ts->client) {
+		blank = evdata->data;
+		if (*blank == FB_BLANK_UNBLANK)
+			goodix_ts_resume(ts);
+		else if (*blank == FB_BLANK_POWERDOWN)
+			goodix_ts_suspend(ts,PMSG_SUSPEND);
+	}
+
+	return 0;
+}
+#elif defined(CONFIG_HAS_EARLYSUSPEND)
+#endif
+#ifdef CONFIG_HAS_EARLYSUSPEND || defined(CONFIG_FB)
 static void goodix_ts_early_suspend(struct early_suspend *h)
 {
     struct goodix_ts_data *ts;
@@ -2288,7 +2331,12 @@ static const struct i2c_device_id goodix_ts_id[] =
     { GOODIX_I2C_NAME, 0 },
     { }
 };
-
+#ifdef PLATFORM_ID_2
+static struct of_device_id goodix_match_table[] = {
+	{ .compatible = "goodix,gt9xx", },
+	{ },
+};
+#endif
 //???????
 static struct i2c_driver goodix_ts_driver =
 {
@@ -2302,6 +2350,9 @@ static struct i2c_driver goodix_ts_driver =
     .driver = {
         .name	= GOODIX_I2C_NAME,
         .owner = THIS_MODULE,
+#ifdef PLATFORM_ID_2
+	.of_match_table = goodix_match_table,
+#endif
     },
 };
 
@@ -2430,16 +2481,18 @@ static int __devinit goodix_ts_init(void)
     lidbg("\n\n==in=GT811.KO=====1024580==========touch INFO===========futengfei\n");
 
     //V2????,V3??
-#ifdef BOARD_V2
-    SOC_IO_Output(0, 27, 1);
-    msleep(200);
-    SOC_IO_Output(0, 27, 0);//NOTE:GT811 SHUTDOWN PIN ,set hight to work.
-    msleep(300);
+#ifdef PLATFORM_ID_2
+            SOC_IO_Output(0, 24, 1);
+            msleep(300);
+            SOC_IO_Output(0, 24, 0);//NOTE:GT811 SHUTDOWN PIN ,set hight to work.
+            msleep(700);
+
 #else
-    SOC_IO_Output(0, 27, 0);
-    msleep(200);
-    SOC_IO_Output(0, 27, 1);//NOTE:GT811 SHUTDOWN PIN ,set hight to work.
-    msleep(300);
+
+            SOC_IO_Output(0, 27, 0);
+            msleep(300);
+            SOC_IO_Output(0, 27, 1);//NOTE:GT811 SHUTDOWN PIN ,set hight to work.
+            msleep(700);
 #endif
 
 #if 0
