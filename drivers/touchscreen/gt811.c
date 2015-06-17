@@ -1095,6 +1095,7 @@ err_gpio_request_failed:
     goodix_read_version(ts);
 #endif
 #if defined(CONFIG_FB)
+#ifdef PLATFORM_ID_2
 	ts->fb_notif.notifier_call = fb_notifier_callback;
 	ret = fb_register_client(&ts->fb_notif);
 	if (ret)
@@ -1106,6 +1107,7 @@ err_gpio_request_failed:
     ts->early_suspend.suspend = goodix_ts_early_suspend;
     ts->early_suspend.resume = goodix_ts_late_resume;
     register_early_suspend(&ts->early_suspend);
+#endif
 #endif
     //fake suspend
     //SOC_Fake_Register_Early_Suspend(&ts->early_suspend);
@@ -1254,11 +1256,11 @@ static int goodix_ts_suspend(struct i2c_client *client, pm_message_t mesg)
     return 0;
 }
 
-static int goodix_ts_resume(struct i2c_client *client)
+static int goodix_ts_resume(struct goodix_ts_data *ts)
 {
     int ret = 0, retry = 0, init_err = 0;
     uint8_t GT811_check[6] = {0x55};
-    struct goodix_ts_data *ts = i2c_get_clientdata(client);
+   // struct goodix_ts_data *ts = i2c_get_clientdata(client);
     lidbg("come into [%s]========futengfei===fukesi===0829forGT811 RESUME RESET [futengfei]=\n", __func__);
     lidbg(KERN_INFO "Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);
 
@@ -1304,7 +1306,7 @@ static int goodix_ts_resume(struct i2c_client *client)
         lidbg("[futengfei] goodix_ts_resume:if this is appear ,that is say the continue no goto for directly!\n");
 
     }
-
+   ret = gpio_direction_input(GPIOEIT);
     if(ret != 0)
     {
         lidbg("goodix_init_panel:Initiall failed============");
@@ -2342,9 +2344,12 @@ static struct i2c_driver goodix_ts_driver =
 {
     .probe		= goodix_ts_probe,
     .remove		= goodix_ts_remove,
+#ifdef BOARD_V2
+else
 #ifndef CONFIG_HAS_EARLYSUSPEND
     .suspend	= goodix_ts_suspend,
     .resume		= goodix_ts_resume,
+#endif
 #endif
     .id_table	= goodix_ts_id,
     .driver = {
