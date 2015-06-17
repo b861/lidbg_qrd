@@ -315,6 +315,13 @@ void ts_probe_prepare(void)
     else
         LIDBG_WARN("<TS.XY will normal>\n");
 	
+	if(fs_is_file_exist(LIDBG_LOG_DIR"no_revert.txt"))
+	{
+	LIDBG_WARN("<TS.XY will no_revert./data/lidbg/no_revert.txt>\n");
+	ts_should_revert = 0;
+	}
+
+
     lidbg_insmod(get_lidbg_file_path(buff, "lidbg_ts_to_recov.ko"));
     fs_register_filename_list(TS_LOG_PATH, true);
     ts_devices_init();
@@ -407,10 +414,12 @@ static void parse_cmd(char *pt)
     if (!strcmp(argv[0], "revert"))
     {
 		ts_should_revert = 1;
+		lidbg_shell_cmd("rm -rf "LIDBG_LOG_DIR"no_revert.txt");
     }
 	else if (!strcmp(argv[0], "no_revert"))
     {
 		ts_should_revert = 0;
+		lidbg_shell_cmd("echo 123 > "LIDBG_LOG_DIR"no_revert.txt");
     }	
 }
 
