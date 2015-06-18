@@ -356,8 +356,11 @@ static int soc_dev_probe(struct platform_device *pdev)
 	}
 	
 #ifdef PLATFORM_ID_7
-	    usb_register_notify(&usb_nb_misc);
-	    CREATE_KTHREAD(thread_udisk_en, NULL);
+		if(0)
+		{
+		    usb_register_notify(&usb_nb_misc);
+		    CREATE_KTHREAD(thread_udisk_en, NULL);
+		}
 #endif
     return 0;
 
