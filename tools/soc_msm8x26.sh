@@ -32,10 +32,10 @@ function soc_build_recoveryimage()
 {
 	echo $FUNCNAME
 	cd $DBG_SYSTEM_DIR
-	rm $DBG_OUT_PATH/*.apk $DBG_OUT_PATH/ES.ko $DBG_OUT_PATH/ST.ko $DBG_OUT_PATH/mkfs.exfat $DBG_OUT_PATH/GPS.ko
+	rm $DBG_OUT_PATH/*.apk $DBG_OUT_PATH/ES.ko $DBG_OUT_PATH/ST.ko $DBG_OUT_PATH/mkfs.exfat $DBG_OUT_PATH/GPS.ko $DBG_OUT_PATH/*.so $DBG_OUT_PATH/FlyBootService
 	rm -rf $DBG_SYSTEM_DIR/bootable/recovery/flyaudio/lib/modules/out
 	mkdir -p $DBG_SYSTEM_DIR/bootable/recovery/flyaudio/lib/modules
-	cp -rf $DBG_OUT_PATH  $DBG_SYSTEM_DIR/bootable/recovery/flyaudio/lib/modules/out
+	cp -rfv $DBG_OUT_PATH  $DBG_SYSTEM_DIR/bootable/recovery/flyaudio/lib/modules/out
 	soc_prebuild && soc_build_common 'make recoveryimage -j16'
 }
 
@@ -140,7 +140,7 @@ function soc_build_origin_image()
 {
 	echo $FUNCNAME
 	lidbg_build_all
-	soc_build_recoveryimage
+#	soc_build_recoveryimage
 	soc_build_all
 
 	cp $DBG_SOC_PATH/$DBG_SOC/init.lidbg.rc        $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/root/init.lidbg.rc
