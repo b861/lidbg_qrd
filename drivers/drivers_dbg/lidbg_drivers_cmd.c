@@ -504,6 +504,23 @@ void parse_cmd(char *pt)
         monkey_run(enable);
         monkey_config(gpio, on_en, off_en, on_ms, off_ms);
     }
+    else if(!strcmp(argv[0], "flyparameter") )
+    {
+        int para_count = argc - 1;
+        char pre='N';
+        for(i = 0; i < para_count; i++)
+        {
+            pre=g_recovery_meg->hwInfo.info[i];
+            g_recovery_meg->hwInfo.info[i] = (int)simple_strtoul(argv[i + 1], 0, 0)+'0';
+            lidbg("flyparameter-char.info[%d]:old,now[%d,%d]",i,pre-'0', g_recovery_meg->hwInfo.info[i]-'0');
+        }
+        if(flyparameter_info_save(g_recovery_meg))
+        {
+            lidbg_domineering_ack();
+            msleep(3000);
+            lidbg_reboot();
+        }
+    }
 #ifndef SOC_msm8x25
     else if(!strcmp(argv[0], "pm") )
     {
