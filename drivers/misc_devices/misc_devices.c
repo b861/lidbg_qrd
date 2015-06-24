@@ -338,9 +338,7 @@ static int soc_dev_probe(struct platform_device *pdev)
 	LCD_ON;
     //lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_APP_ON));
 	//lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_HAL_ON));
-#ifndef PLATFORM_ID_7
 	USB_WORK_ENABLE;
-#endif
 
 	SET_USB_ID_SUSPEND;
 #ifdef SOC_msm8x26

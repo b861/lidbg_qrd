@@ -515,9 +515,6 @@ int fly_interface_init(void)
 
 	register_lidbg_notifier(&bl_ctl_bn);
 	
-#ifdef PLATFORM_ID_7
-	USB_WORK_ENABLE;
-#endif	
 	return 0;
 }
 
