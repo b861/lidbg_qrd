@@ -1,12 +1,13 @@
 #define PLATFORM_MSM8226 1
 //#define PLATFORM_MSM8974 1
-#define  RECOVERY_MODE_DIR "/sbin/recovery"
-
 #define ANDROID_5_LATER
+
+#define  RECOVERY_MODE_DIR "/sbin/recovery"
 
 
 bool is_recovery_mode = 0;
 bool ctrl_en = 1;
+
 struct thermal_ctrl
 {
 	int temp_low;
@@ -29,7 +30,21 @@ struct thermal_ctrl cpu_thermal[] =
 };
 
 #elif defined(PLATFORM_MSM8974)
-
+#ifdef ANDROID_5_LATER
+struct thermal_ctrl cpu_thermal[] = 
+{
+        {-500,  50,  2265600,"2265600"},
+		{61, 65,  1958400,"1958400"},
+        {66, 70,  1728000,"1728000"},
+        {71, 75,  1497600,"1497600"},
+        {76, 80,  1267200,"1267200"},
+		{81, 85,  1190400,"1190400"},
+		{86, 90,  960000, "960000"},
+        {91, 95,  729600, "729600"},
+		{96, 500, 300000, "300000"},
+		{0,0, 0, "0"}//end flag
+};
+#else
 struct thermal_ctrl cpu_thermal[] = 
 {
         {-500,  50,  2265600,"2265600"},
@@ -43,7 +58,7 @@ struct thermal_ctrl cpu_thermal[] =
 		{91, 500, 300000, "300000"},
 		{0,0, 0, "0"}//end flag
 };
-
+#endif
 
 #endif
 
@@ -104,6 +119,10 @@ static int thread_freq_limit(void *data)
 			}
 
 		count++;
+		
+		if(count >= 20*4)
+			is_recovery_mode = is_file_exist(RECOVERY_MODE_DIR);
+		
 		if((count >= 90*4) && (temp < 100))
 		{
 			if(is_recovery_mode == 0)
@@ -128,9 +147,6 @@ static int thread_freq_limit(void *data)
 			cpufreq_update_policy(0);
 #endif
 
-			
-
-
 			ctrl_en = 0;
 			lidbg("thread_freq_limit stoped\n");
 			return 1;
@@ -153,6 +169,14 @@ static int  cpufreq_callback(struct notifier_block *nfb,
 		{
 			policy->max = ctrl_max_freq;
 			policy->min = 300000;
+
+#ifdef ANDROID_5_LATER
+	#ifdef PLATFORM_MSM8974
+			if(is_recovery_mode == 1)
+				policy->min = ctrl_max_freq;
+	#endif
+#endif
+
 			//lidbg("%s: mitigating cpu %d to freq max: %u min: %u\n",
 			//KBUILD_MODNAME, policy->cpu, policy->max, policy->min);
 			break;
