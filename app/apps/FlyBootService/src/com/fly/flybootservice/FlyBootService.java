@@ -382,7 +382,7 @@ public class FlyBootService extends Service {
 			LIDBG_PRINT("get action:" + action + " state:" + mState);
 			if(originPmMode)
 			{
-				LIDBG_PRINT("<<<<<<<<<< FlyBootService originPmMode >>>>>>>>>>");
+				LIDBG_PRINT("<<<<<<<<<< FlyBootService originPmMode 1111>>>>>>>>>>");
 //				if (action.equals(FLYFASTBOOTSTART)) {
 //					LIDBG_PRINT(" start fastpower on ");
 //                sendBroadcast(new Intent(
@@ -400,6 +400,10 @@ public class FlyBootService extends Service {
 				} else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
 					procScreenOff();
 				} else if (action.equals(ACTON_FINAL_SLEEP)) {
+				        if (mState != emState.DeviceOff) {
+					LIDBG_PRINT("====skip :[mState != emState.DeviceOff]["+mState+"]==\n\n\n\n");
+					return;
+				        	}
 					SendBroadcastToService(KeyBootState, keyFastSusupendOFF);
 					setAndroidState(false);// \u5411\u5e95\u5c42\u8bf7\u6c42FAST_BOOT_START\u5e7f\u64ad
 					delay(100);
