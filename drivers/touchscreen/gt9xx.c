@@ -1016,7 +1016,8 @@ u8 cfg_info_group24[] = CTP_CFG_GROUP18;
 u8 cfg_info_group25[] = CTP_CFG_GROUP19;
 u8 cfg_info_group26[] = CTP_CFG_GROUP20;
 u8 cfg_info_group27[] = CTP_CFG_GROUP21;
-
+u8 cfg_info_group28[] = CTP927_CFG_GROUP7;
+u8 cfg_info_group29[] = CTP927_CFG_GROUP8;
 
 static int gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
 {
@@ -1038,7 +1039,8 @@ static int gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
 		cfg_info_group7, cfg_info_group8,cfg_info_group9, cfg_info_group10,cfg_info_group11, 
 		cfg_info_group12,cfg_info_group13, cfg_info_group14,cfg_info_group15, cfg_info_group16,
 		cfg_info_group17, cfg_info_group18,cfg_info_group19, cfg_info_group20,cfg_info_group21,
-		cfg_info_group22, cfg_info_group23,cfg_info_group24,cfg_info_group25,cfg_info_group26,cfg_info_group27};
+		cfg_info_group22, cfg_info_group23,cfg_info_group24,cfg_info_group25,cfg_info_group26,cfg_info_group27,
+                cfg_info_group28,cfg_info_group29};
 
 	u8 cfg_info_len[] = {CFG_GROUP_LEN(cfg_info_group1),
 		CFG_GROUP_LEN(cfg_info_group2),
@@ -1067,6 +1069,8 @@ static int gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
 		CFG_GROUP_LEN(cfg_info_group25),
 		CFG_GROUP_LEN(cfg_info_group26),
 		CFG_GROUP_LEN(cfg_info_group27),
+		CFG_GROUP_LEN(cfg_info_group28),
+		CFG_GROUP_LEN(cfg_info_group29),
 		};
 
 #ifdef SOC_msm8x26
@@ -1223,8 +1227,11 @@ static int gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
 	if ((ts->abs_x_max == 0) && (ts->abs_y_max == 0)) {
 		ts->abs_x_max = (config_data[RESOLUTION_LOC + 1] << 8)
 				+ config_data[RESOLUTION_LOC];
+			
 		ts->abs_y_max = (config_data[RESOLUTION_LOC + 3] << 8)
 				+ config_data[RESOLUTION_LOC + 2];
+                        lidbg("RESOLUTION_LOC=%d\n",RESOLUTION_LOC);
+			
 		ts->int_trigger_type = (config_data[TRIGGER_LOC]) & 0x03;
 	}
 	ret = gtp_send_cfg(ts);
@@ -1234,7 +1241,6 @@ static int gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
 	GTP_DEBUG("X_MAX = %d, Y_MAX = %d, TRIGGER = 0x%02x",
 			ts->abs_x_max, ts->abs_y_max,
 			ts->int_trigger_type);
-
 	msleep(20);
 	return ret;
 }
