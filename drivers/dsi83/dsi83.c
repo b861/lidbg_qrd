@@ -218,7 +218,7 @@ int dsi83_check(void)
 #if defined(CONFIG_FB)
 void dsi83_suspend(void)
 {
-	is_dsi83_inited = false;
+	//is_dsi83_inited = false;
 
 }
 
@@ -291,10 +291,7 @@ static void dsi83_work_func(struct work_struct *work)
 
 	lidbg( "dsi83_work_func:enter %d,%d\n",g_var.system_status,is_dsi83_inited);
 
-	if(
-		((g_var.system_status==FLY_ANDROID_DOWN)||(g_var.system_status==FLY_GOTO_SLEEP))
-		|| is_dsi83_inited
-		)
+	if(((g_var.system_status==FLY_ANDROID_DOWN)||(g_var.system_status==FLY_GOTO_SLEEP))|| is_dsi83_inited)
 	{
 	    lidbg( "dsi83_work_func:skip %d,%d\n",g_var.system_status,is_dsi83_inited);
 	    return;
