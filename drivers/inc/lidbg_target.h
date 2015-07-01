@@ -4,7 +4,7 @@
 #define GPIO_NOTHING LED_GPIO
 
 #define g_hw g_hw_version_specific[g_var.hw_info.hw_version - 1]  
-#define check_gpio(gpio) if(gpio == -1 ) break
+#define check_gpio(gpio) if((gpio == -1 )|| (gpio == 0)) break
 
 
 struct ad_key_item

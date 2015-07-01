@@ -10,7 +10,8 @@ function soc_build_kernel()
 {
 	echo $FUNCNAME
 	cd $DBG_SYSTEM_DIR/kernel
-	make $KERNEL_DEFCONFIG && make kernel.img -j16
+	#make $KERNEL_DEFCONFIG && make kernel.img -j16
+	make kernel.img -j16
 }
 
 

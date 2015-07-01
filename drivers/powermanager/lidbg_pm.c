@@ -719,6 +719,7 @@ static struct dev_pm_ops lidbg_pm_ops =
 
 void observer_prepare(void)
 {
+#ifdef VENDOR_QCOM
     char cmd[128] = {0};
     lidbg_chmod("/sys/module/msm_show_resume_irq/parameters/debug_mask");
     ssleep(1);
@@ -726,6 +727,7 @@ void observer_prepare(void)
     sprintf(cmd, "cat /proc/interrupts > %sinterrupts.txt &", LIDBG_LOG_DIR);
     lidbg_shell_cmd(cmd);
     fs_register_filename_list(LIDBG_LOG_DIR"interrupts.txt", true);
+#endif
     fs_register_filename_list(PM_INFO_FILE, true);
 }
 void observer_start(void)
