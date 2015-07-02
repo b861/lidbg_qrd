@@ -175,6 +175,11 @@ int gtp_i2c_read(struct i2c_client *client, u8 *buf, int len)
 	msgs[1].len = len - GTP_ADDR_LENGTH;
 	msgs[1].buf = &buf[GTP_ADDR_LENGTH];
 
+#ifdef  VENDOR_ROCKCHIP
+	msgs[0].scl_rate = RXPX3_I2C_RATE;
+	msgs[1].scl_rate = RXPX3_I2C_RATE;
+#endif  
+
 	while (retries < 5) {
 		ret = i2c_transfer(client->adapter, msgs, 2);
 		if (ret == 2)
@@ -223,6 +228,10 @@ int gtp_i2c_write(struct i2c_client *client, u8 *buf, int len)
 	msg.addr = client->addr;
 	msg.len = len;
 	msg.buf = buf;
+
+#ifdef  VENDOR_ROCKCHIP
+	msg.scl_rate = RXPX3_I2C_RATE;
+#endif  
 
 	while (retries < 5) {
 		ret = i2c_transfer(client->adapter, &msg, 1);
@@ -797,7 +806,7 @@ static void gtp_reset_guitar(struct goodix_ts_data *ts, int ms)
 	else
 		gpio_direction_output(GTP_INT_PORT, 0);
 
-#ifdef SOC_mt3360
+#if (defined SOC_mt3360) || (defined VENDOR_ROCKCHIP)
 	udelay(RESET_DELAY_T3_US);
 #else
 	usleep(RESET_DELAY_T3_US);
@@ -887,9 +896,11 @@ static s8 gtp_enter_sleep(struct goodix_ts_data  *ts)
 	GTP_DEBUG_FUNC();
 
 	ret = gpio_direction_output(GTP_INT_PORT, 0);
-#ifdef SOC_mt3360
+#if (defined SOC_mt3360) 
 	mdelay(5);
 	return 0;
+#elif (defined VENDOR_ROCKCHIP)
+	mdelay(5);
 #else
 	usleep(5000);
 #endif
@@ -947,7 +958,7 @@ static s8 gtp_wakeup_sleep(struct goodix_ts_data *ts)
 			gtp_reset_guitar(ts, 10);
 		} else {
 			ret = gpio_direction_output(GTP_INT_PORT, 1);
-	#ifdef SOC_mt3360
+	#if (defined SOC_mt3360) || (defined VENDOR_ROCKCHIP)
 			msleep(5);
 	#else
 			usleep(5000);
@@ -1083,7 +1094,6 @@ static int gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
  		cfg_info_len[1] = CFG_GROUP_LEN(cfg_info_group2_v1);
 	}
 #endif
-
 
 	lidbg("Config Groups\' Lengths: %d, %d, %d, %d, %d, %d",
 			cfg_info_len[0], cfg_info_len[1], cfg_info_len[2],
@@ -2400,6 +2410,10 @@ static int gtp_init_ext_watchdog(struct i2c_client *client)
 	msg.len   = 4;
 	msg.buf   = opr_buffer;
 
+#ifdef  VENDOR_ROCKCHIP
+	msg.scl_rate = RXPX3_I2C_RATE;
+#endif  
+
 	while (retries < 5) {
 		ret = i2c_transfer(client->adapter, &msg, 1);
 		if (ret == 1)
@@ -2492,7 +2506,8 @@ static struct of_device_id goodix_match_table[] = {
 static struct i2c_driver goodix_ts_driver = {
 	.probe      = goodix_ts_probe,
 	.remove     = goodix_ts_remove,
-#ifdef CONFIG_HAS_EARLYSUSPEND
+#if   defined (VENDOR_ROCKCHIP)
+#elif defined (CONFIG_HAS_EARLYSUSPEND)
 	.suspend    = goodix_ts_early_suspend,
 	.resume     = goodix_ts_late_resume,
 #endif
@@ -2616,6 +2631,7 @@ Output:
 static int __devinit goodix_ts_init(void)
 {
 	int ret;
+	
 	LIDBG_GET;
 	is_ts_load = 1;
 	GTP_DEBUG_FUNC();

@@ -281,5 +281,8 @@ extern struct fly_smem *p_fly_smem ;
 #else
 #define lidbg_io(fmt,...) do{SOC_IO_Uart_Send(IO_UART_DELAY_1200_115200,fmt,##__VA_ARGS__);}while(0)
 #endif
+
+#define RXPX3_I2C_RATE 100000
+
 #endif
 

@@ -5,14 +5,11 @@ struct hw_version_specific g_hw_version_specific[] =
 {
 	
 	.gpio_led1 = -1,
-
-	.gpio_ts_int= -1,
-	.gpio_ts_rst= -1,
-
-	.i2c_bus_ts = 0,
-	.fly_parameter_node = "/dev/block/flyparameter",
+	.gpio_ts_int= RK30_PIN0_PA7,
+	.gpio_ts_rst= RK30_PIN0_PA6,
+	.i2c_bus_ts = 2,
+	.fly_parameter_node = "/dev/block/platform/msm_sdcc.1/by-name/flyparameter",
 	.lpc_disable = 1,
-
 	},
 };
 

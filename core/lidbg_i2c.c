@@ -230,7 +230,9 @@ static int i2c_api_do_xfer(int bus_id, char chip_addr, unsigned int sub_addr, in
         msg.flags = 0;
         msg.len = size;
         msg.buf = buf;
-
+#ifdef  VENDOR_ROCKCHIP
+	msg.scl_rate = RXPX3_I2C_RATE;
+#endif
         ret = i2c_transfer(adap, &msg, 1);
         break;
     }
@@ -252,7 +254,10 @@ static int i2c_api_do_xfer(int bus_id, char chip_addr, unsigned int sub_addr, in
         msg[1].len = size;
         msg[1].buf = buf;
 
-
+#ifdef  VENDOR_ROCKCHIP
+	msg[0].scl_rate = RXPX3_I2C_RATE;
+	msg[1].scl_rate = RXPX3_I2C_RATE;
+#endif
         ret = i2c_transfer(adap, msg, 2);
         break;
     }
@@ -279,6 +284,10 @@ static int i2c_api_do_xfer(int bus_id, char chip_addr, unsigned int sub_addr, in
         msg[1].len = size;
         msg[1].buf = buf;
 
+#ifdef  VENDOR_ROCKCHIP
+	msg[0].scl_rate = RXPX3_I2C_RATE;
+	msg[1].scl_rate = RXPX3_I2C_RATE;
+#endif
         ret = i2c_transfer(adap, msg, 2);
         break;
 
@@ -293,6 +302,10 @@ static int i2c_api_do_xfer(int bus_id, char chip_addr, unsigned int sub_addr, in
         msg[0].flags = I2C_M_RD;
         msg[0].len = size;
         msg[0].buf = buf;
+
+#ifdef  VENDOR_ROCKCHIP
+	msg[0].scl_rate = RXPX3_I2C_RATE;
+#endif
         ret = i2c_transfer(adap, msg, 1);
         break;
     }
@@ -317,6 +330,11 @@ static int i2c_api_do_xfer(int bus_id, char chip_addr, unsigned int sub_addr, in
         msg[1].flags = I2C_M_RD;
         msg[1].len = size;
         msg[1].buf = buf;
+
+#ifdef  VENDOR_ROCKCHIP
+	msg[0].scl_rate = RXPX3_I2C_RATE;
+	msg[1].scl_rate = RXPX3_I2C_RATE;
+#endif
 
         ret = i2c_transfer(adap, msg, 2);
         break;
@@ -343,6 +361,10 @@ static int i2c_api_do_xfer(int bus_id, char chip_addr, unsigned int sub_addr, in
         msg[1].len = size;
         msg[1].buf = buf;
 
+#ifdef  VENDOR_ROCKCHIP
+	msg[0].scl_rate = RXPX3_I2C_RATE;
+	msg[1].scl_rate = RXPX3_I2C_RATE;
+#endif
         ret = i2c_transfer(adap, msg, 2);
         break;
     }
@@ -367,6 +389,10 @@ static int i2c_api_do_xfer(int bus_id, char chip_addr, unsigned int sub_addr, in
         msg[1].len = size;
         msg[1].buf = buf;
 
+#ifdef  VENDOR_ROCKCHIP
+	msg[0].scl_rate = RXPX3_I2C_RATE;
+	msg[1].scl_rate = RXPX3_I2C_RATE;
+#endif
         ret = i2c_transfer(adap, msg, 2);
         break;
 
