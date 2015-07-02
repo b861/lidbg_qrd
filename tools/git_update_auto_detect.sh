@@ -1,14 +1,4 @@
-cd ../build
-source ./env_entry.sh
 
-. $DBG_TOOLS_PATH/soc_$DBG_SOC.sh
-. $DBG_TOOLS_PATH/depository.sh
-. $DBG_TOOLS_PATH/debug.sh
-. $DBG_TOOLS_PATH/combination.sh
-. $DBG_TOOLS_PATH/common.sh
-. $DBG_TOOLS_PATH/branch_for_test.sh
-
-cd $DBG_TOOLS_PATH
 DIR_LIDBG_PATH=`cd ../ && pwd`
 DIR_BUILD_PATH=$DIR_LIDBG_PATH/build
 DIR_TOOLS_PATH=$DIR_LIDBG_PATH/tools
@@ -23,7 +13,8 @@ function git_pull()
 	cd $1
 	expect $DIR_TOOLS_PATH/pull master $2 
 }
-
+mkdir -p /dev/shm/auto_git
+rm /dev/shm/auto_git/*
 while true ;do
 #depository_request
 echo "============loops:$main_loop_times  status:["${commit_times[0]}"] ["${commit_times[1]}"] ["${commit_times[2]}"] ["${commit_times[3]}"] ["${commit_times[4]}"]  ==============="
@@ -35,7 +26,7 @@ echo "============loops:$main_loop_times  status:["${commit_times[0]}"] ["${comm
 	#echo ==${compile_info[0]} ${compile_info[1]} ${compile_info[2]} ${compile_info[3]} ${compile_info[4]} ${compile_info[5]} ${compile_info[6]} ${compile_info[7]} ${compile_info[8]}
 	
 	cd ${compile_info[3]}
-	git log --pretty=format:"%s  "  > /dev/shm/${compile_info[1]}_$thiswhile_loop.txt && new_commitinfo=$(head /dev/shm/${compile_info[1]}_$thiswhile_loop.txt --lines 1)
+	git log --pretty=format:"%s  "  > /dev/shm/auto_git/${compile_info[1]}_$thiswhile_loop.txt && new_commitinfo=$(head /dev/shm/auto_git/${compile_info[1]}_$thiswhile_loop.txt --lines 1)
 	
 	thiscommit_info=${pre_commit[$thiswhile_loop]}
 	thiscommit_times=${commit_times[$thiswhile_loop]}
@@ -46,12 +37,12 @@ echo "============loops:$main_loop_times  status:["${commit_times[0]}"] ["${comm
 	else
 		if [[ "$thiscommit_info" != "$new_commitinfo" ]]; then
 		let thiscommit_times++
-		echo $(date) $thiscommit_times/$main_loop_times ${compile_info[1]} ["$thiscommit_info"] ["$new_commitinfo"]  >> /dev/shm/git_autodetec_log.txt
+		echo $(date) $thiscommit_times/$main_loop_times ${compile_info[1]} ["$thiscommit_info"] ["$new_commitinfo"]  >> /dev/shm/auto_git/git_autodetec_log.txt
 		echo "detect a new commit: "$thiscommit_times ["$thiscommit_info"] ["$new_commitinfo"]
 		sleep 1
 
-		awk '{print $0}' /dev/shm/${compile_info[1]}_$thiswhile_loop-old.txt /dev/shm/${compile_info[1]}_$thiswhile_loop.txt |sort|uniq -u > /dev/shm/diff_commit.txt  
-		diff_commit=$(cat /dev/shm/diff_commit.txt)
+		awk '{print $0}' /dev/shm/auto_git/${compile_info[1]}_$thiswhile_loop-old.txt /dev/shm/auto_git/${compile_info[1]}_$thiswhile_loop.txt |sort|uniq -u > /dev/shm/auto_git/diff_commit.txt  
+		diff_commit=$(cat /dev/shm/auto_git/diff_commit.txt)
 		#echo @@@@@@@@@@@@@@ $diff_commit @@@@@@@@@@@@@@
 		
 		cd $DIR_TOOLS_PATH
@@ -61,7 +52,7 @@ echo "============loops:$main_loop_times  status:["${commit_times[0]}"] ["${comm
 	
 	pre_commit[$thiswhile_loop]=$new_commitinfo
 	commit_times[$thiswhile_loop]=$thiscommit_times
-	cp /dev/shm/${compile_info[1]}_$thiswhile_loop.txt /dev/shm/${compile_info[1]}_$thiswhile_loop-old.txt
+	cp /dev/shm/auto_git/${compile_info[1]}_$thiswhile_loop.txt /dev/shm/auto_git/${compile_info[1]}_$thiswhile_loop-old.txt
 
 	git_pull ${compile_info[3]} ${compile_info[4]}
 	let thiswhile_loop++
