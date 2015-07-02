@@ -58,6 +58,11 @@ void read_fly_hw_config_file(fly_hw_data *p_info)
 
 bool fly_hw_info_get(fly_hw_data *p_info)
 {
+	if(FLYPARAMETER_NODE == NULL)
+	{
+		 lidbg("g_hw.fly_parameter_node == NULL,return\n");
+		 return 0;
+	}
     if(p_info && fs_file_read(FLYPARAMETER_NODE, (char *)p_info, MEM_SIZE_512_KB , sizeof(fly_hw_data)) >= 0)
     {
         fly_hw_info_show("fly_hw_info_get", p_info);
@@ -69,6 +74,11 @@ bool fly_hw_info_get(fly_hw_data *p_info)
 bool fly_hw_info_save(fly_hw_data *p_info)
 {
 	DUMP_FUN;
+	if(FLYPARAMETER_NODE == NULL)
+	{
+		 lidbg("g_hw.fly_parameter_node == NULL,return\n");
+		 return 0;
+	}
 	read_fly_hw_config_file(p_info);
     if( p_info && fs_file_write(FLYPARAMETER_NODE, false, (void *) p_info, MEM_SIZE_512_KB , sizeof(fly_hw_data)) >= 0)
     {
@@ -94,6 +104,12 @@ void cb_fly_hw_info_save(char *key, char *value )
 bool flyparameter_info_get(void)
 {
 	bool is_ublox_so_exist=false;
+	
+	if(FLYPARAMETER_NODE == NULL)
+	{
+		 lidbg("g_hw.fly_parameter_node == NULL,return\n");
+		 return 0;
+	}
 
     if(p_kmem && fs_file_read(FLYPARAMETER_NODE, p_kmem, 0, sizeof(recovery_meg_t)) >= 0)
     {
@@ -146,6 +162,11 @@ bool flyparameter_info_get(void)
 //simple_strtoul(argv[0], 0, 0);
 bool flyparameter_info_save(recovery_meg_t *p_info)
 {
+	if(FLYPARAMETER_NODE == NULL)
+	{
+		 lidbg("g_hw.fly_parameter_node == NULL,return\n");
+		 return 0;
+	}
     if( p_info && fs_file_write(FLYPARAMETER_NODE, false, (void *) p_info, 0, sizeof(recovery_meg_t)) >= 0)
     {
         lidbg("flyparameter:save success\n");
@@ -278,17 +299,12 @@ int lidbg_flyparameter_init(void)
 {
     DUMP_BUILD_TIME;
     LIDBG_GET;
+	
 	FS_REGISTER_INT(update_hw_info, "update_hw_info", 0, cb_fly_hw_info_save);
 	flyparameter_init();
-
-	if(FLYPARAMETER_NODE == NULL)
-	{
-		 lidbg("g_hw.fly_parameter_node == NULL,return\n");
-		 return 0;
-	}
 	lidbg_fly_hw_info_init();//block other ko before hw_info set
 	lidbg_new_cdev(&fly_upate_info_fops, "fly_upate_info");
-        CREATE_KTHREAD(thread_fix_fly_update_info, NULL);
+    CREATE_KTHREAD(thread_fix_fly_update_info, NULL);
     return 0;
 
 }

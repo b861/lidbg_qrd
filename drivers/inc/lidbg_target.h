@@ -98,6 +98,8 @@ struct hw_version_specific
 //system_switch
 	int system_switch_en;
 
+//lpc_en
+	int lpc_disable;
 };
 extern struct hw_version_specific g_hw_version_specific[];
 
