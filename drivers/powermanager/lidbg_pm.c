@@ -18,6 +18,7 @@ static atomic_t is_in_sleep = ATOMIC_INIT(0);
 static int sleep_counter = 0;
 static char g_acc_history_state[512];
 int power_on_off_test = 0;
+static struct wake_lock pm_wakelock;
 
 void observer_start(void);
 void observer_stop(void);
@@ -467,6 +468,7 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         }
         else  if(!strcmp(cmd[1], "screen_on"))
         {
+            wake_lock(&pm_wakelock);
             SOC_System_Status(FLY_SCREEN_ON);
             if(SOC_Hal_Acc_Callback)
             {
@@ -517,6 +519,7 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
             observer_start();
             LPC_PRINT(true, sleep_counter, "PM:gotosleep");
 #endif
+            wake_unlock(&pm_wakelock);
         }
         else if(!strcmp(cmd[1], "devices_up"))
         {
@@ -926,8 +929,10 @@ static int __init lidbg_pm_init(void)
     DUMP_FUN;
     LIDBG_GET;
     set_func_tbl();
-
     lidbg_mkdir(PM_DIR);
+
+    wake_lock_init(&pm_wakelock, WAKE_LOCK_SUSPEND, "lidbg_pm");
+    wake_lock(&pm_wakelock);
 
     MCU_WP_GPIO_ON;
 #ifdef CONTROL_PM_IO_BY_BP
