@@ -216,6 +216,8 @@ void parse_cmd(char *pt)
 		    fs_mem_log("*158#035--pr_debug lowmemorykillprotecter\n");
 		    fs_mem_log("*158#040--monkey test\n");
 		    fs_mem_log("*158#041--disable uart debug\n");
+		    fs_mem_log("*158#042--disable adb\n");
+		    fs_mem_log("*158#043--enable adb\n");
 			
             fs_mem_log("*158#051--LOG_LOGCAT2\n");
 
@@ -482,7 +484,19 @@ void parse_cmd(char *pt)
 			lidbg_shell_cmd("echo 0 > /proc/sys/kernel/printk");
 	
         }
+        else if (!strcmp(argv[1], "*158#042"))
+        {
+			lidbg("disable adb\n");	
+			lidbg_stop("adbd");
+			
+        }
+        else if (!strcmp(argv[1], "*158#043"))
+        {
+			lidbg("enable adb\n");
+			lidbg_start("adbd");
+        }
 
+		
         else if (!strcmp(argv[1], "*168#001"))
         {
             encode = true;

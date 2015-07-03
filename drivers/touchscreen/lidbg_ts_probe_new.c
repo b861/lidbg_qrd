@@ -372,7 +372,7 @@ void ts_data_report(touch_type t,int id,int x,int y,int w)
 			SOC_Key_Report(KEY_BACK,KEY_PRESSED_RELEASED);
 	}
 	
-#ifdef PLATFORM_ID_7
+#if 0
 	if((id == 4) && (t == TOUCH_DOWN) ) // 5 fingers in origin system send back key
 	{
 		if(g_var.system_status >= FLY_KERNEL_UP)

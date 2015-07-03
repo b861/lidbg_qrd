@@ -1,7 +1,7 @@
 ## DBG_PLATFORM_ID ##
 # 0--msm7627a
 # 1--msm8625
-# 2--msm8226 Android_4.4.2
+# 2--msm8226 Android_4.4.2(Android_4.4.4)
 # 3--msm8926 Android_4.4.4
 # 4--msm8974 Android_4.4.4
 # 5--mt3360  Android_4.2
@@ -17,5 +17,5 @@
 # 2--gaobenneng.Notebook
 
 
-export DBG_PLATFORM_ID=6
+export DBG_PLATFORM_ID=4
 export USERS_ID=0

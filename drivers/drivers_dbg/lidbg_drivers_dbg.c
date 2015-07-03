@@ -73,7 +73,9 @@ int thread_drivers_dbg_init(void *data)
 #endif	
 			lidbg_shell_cmd("chmod 777 /system/app/*");
 			lidbg_shell_cmd("chmod 777 /data");
-
+#if 0
+			lidbg_stop("adbd");//for baidu carlife
+#endif
 			msleep(10*1000);
 			lidbg_pm_install(get_lidbg_file_path(buff, "ST.ko"));
         }
