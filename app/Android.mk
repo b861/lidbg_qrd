@@ -3,6 +3,10 @@ ifeq ($(CONFIG_HAL_GPSLIB),y)
 SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,gpslib)
 endif
 
+ifeq ($(CONFIG_HAL_PX3_GPS),y)
+SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,px3_gps)
+endif
+
 ifeq ($(CONFIG_HAL_SERVER),y)
 SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,lidbg_servicer)
 endif

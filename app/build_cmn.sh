@@ -5,6 +5,8 @@ cd ../../build && source env_entry.sh && ./build_cfg.sh $DBG_SOC $BOARD_VERSION 
 
 if [ $DBG_PLATFORM = mt3360 ];then
 cd $DBG_SYSTEM_DIR/&&source ./selfenv&&lunch 5
+elif [ $DBG_PLATFORM = rkpx3 ];then
+cd $DBG_SYSTEM_DIR/&&source ./build/envsetup.sh&&lunch rkpx3-$SYSTEM_BUILD_TYPE
 else
 cd $DBG_SYSTEM_DIR/&&source build/envsetup.sh&&choosecombo release $DBG_PLATFORM $SYSTEM_BUILD_TYPE
 fi
