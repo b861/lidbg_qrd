@@ -247,20 +247,23 @@ void parse_cmd(char *pt)
         }
         else if (!strcmp(argv[1], "*158#001"))
         {
-            lidbg_chmod("/data");
-
-#ifdef USE_CALL_USERHELPER
-            k2u_write(LOG_LOGCAT);
-#else
-            CREATE_KTHREAD(thread_enable_logcat, NULL);
-#endif
-            lidbg_domineering_ack();
-        }
-		else if (!strcmp(argv[1], "*158#051"))
-		{
 			lidbg_chmod("/sdcard");
 			CREATE_KTHREAD(thread_enable_logcat2, NULL);
 			lidbg_domineering_ack();
+        }
+		else if (!strcmp(argv[1], "*158#051"))
+		{
+
+			lidbg_chmod("/data");
+
+#ifdef USE_CALL_USERHELPER
+			k2u_write(LOG_LOGCAT);
+#else
+			CREATE_KTHREAD(thread_enable_logcat, NULL);
+#endif
+			lidbg_domineering_ack();
+
+			
 		}
 
 		
