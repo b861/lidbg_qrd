@@ -306,7 +306,7 @@ case "$DBG_PLATFORM_ID" in
         export TEST_PACKAGE_PATH=//192.168.128.128/px3/升级包发布/专项测试包
         export REPOSITORY_WORK_BRANCH=master
         export SYSTEM_WORK_BRANCH=master
-        export MAKE_PAKG_NUM=6;;
+        export MAKE_PAKG_NUM= ;;
 
     	10)
 	export DBG_PLATFORM=msm8226
@@ -332,6 +332,43 @@ case "$DBG_PLATFORM_ID" in
 	export REPOSITORY_WORK_BRANCH=master
 	export SYSTEM_WORK_BRANCH=master
         export MAKE_PAKG_NUM=11
+
+	export NON_HLOS_FILE_PATH=$BP_SOURCE_PATH/common/build/bin/asic
+	export RPM_FILE_PATH=$RPM_PATH/ms/bin/AAAAANAAR
+	export SBL_FILE_PATH=$BOOT_IMAGE_PATH/bin/8x26
+	export TZ_FILE_PATH=$TZ_PATH/bin/FARAANBA
+	export MPSS_BUILD_CMD='./build.sh 8626.gen.prod BUILD_VER=01780 -k'
+	export BOOTLOADER_BUILD_CMD='./build.sh TARGET_FAMILY=8x26 BUILD_ID=FAAAANAZ -j1'
+	export ADSP_BUILD_CMD='python build.py'
+	export RPM_BUILD_CMD='./rpm_proc/build/build_8x26.sh -j1'
+	export DEBUG_IMAGE_CMD='./b8x26.sh TARGET_FAMILY=8x26 sdi BUILD_ID=AAAAANAZ BUILD_VER=54 BUILD_MIN=1 -j1'
+	export TZ_BUILD_CMD='./build.sh CHIPSET=msm8x26 tz -j1'
+	export UPDATE_BUILD_CMD='python update_common_info.py';;
+
+    	11)
+	export DBG_PLATFORM=msm8909
+	export BOARD_VERSION=V1
+	export ANDROID_VERSION=511
+	export DBG_CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilts/gcc/linux-x86/arm/arm-eabi-4.8/bin/arm-eabi-
+	export JAVA_HOME=$PATHJAVA1P7
+	export JRE_HOME=$JAVA_HOME/jre
+	export CLASSPATH=$JAVA_HOME/lib:$JRE_HOME/lib:$CLASSPATH
+	export PATH=$JAVA_HOME/bin:$JRE_HOME/bin:$PATH
+	export SYSTEM_BUILD_TYPE=userdebug
+	export DBG_KERNEL_SRC_DIR=$DBG_SYSTEM_DIR/kernel
+	export DBG_KERNEL_OBJ_DIR=$DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/obj/KERNEL_OBJ
+	export UPDATA_BIN_PLATFORM_DIR=$RELEASE_REPOSITORY
+	export UPDATA_BIN_DIR=$UPDATA_BIN_PLATFORM_DIR/others/8909/driver
+	export UPDATA_BASESYSTEM_DIR=$UPDATA_BIN_PLATFORM_DIR/others/8909/basesystem
+	export DBG_PASSWORD=git
+	export DBG_REPO_PASSWORD=git
+	export DBG_VENDOR=VENDOR_QCOM
+	export OTA_PACKAGE_NAME=msm8909-ota-eng.*.zip
+	export DBG_SOC=msm8x26
+	export TEST_PACKAGE_PATH=//192.168.128.128/8909/升级包发布/专项测试包
+	export REPOSITORY_WORK_BRANCH=master
+	export SYSTEM_WORK_BRANCH=master
+        export MAKE_PAKG_NUM=
 
 	export NON_HLOS_FILE_PATH=$BP_SOURCE_PATH/common/build/bin/asic
 	export RPM_FILE_PATH=$RPM_PATH/ms/bin/AAAAANAAR
