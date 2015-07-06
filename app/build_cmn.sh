@@ -10,7 +10,6 @@ cd $DBG_SYSTEM_DIR/&&source ./build/envsetup.sh&&lunch rkpx3-$SYSTEM_BUILD_TYPE
 else
 cd $DBG_SYSTEM_DIR/&&source build/envsetup.sh&&choosecombo release $DBG_PLATFORM $SYSTEM_BUILD_TYPE
 fi
-
 mmm $LOCATE_PATH -B
 while :;do		
 	echo

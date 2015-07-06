@@ -1,6 +1,7 @@
 LOCAL_PATH:= $(call my-dir)
 
 common_src_files := \
+	lidbg_vold/Lidbg_vold.cpp\
 	VolumeManager.cpp \
 	CommandListener.cpp \
 	VoldCommand.cpp \
@@ -18,7 +19,8 @@ common_src_files := \
 	Xwarp.cpp \
 	VoldUtil.c \
 	fstrim.c \
-	cryptfs.c
+	cryptfs.c\
+	lidbg_vold/Exfat.cpp 
 
 common_c_includes := \
 	$(KERNEL_HEADERS) \
@@ -70,7 +72,7 @@ LOCAL_MODULE_TAGS := eng tests
 include $(BUILD_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
-
+LOCAL_MODULE_PATH := $(DBG_OUT_PATH)
 LOCAL_MODULE:= vold
 
 LOCAL_SRC_FILES := \
@@ -98,7 +100,7 @@ include $(BUILD_EXECUTABLE)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= vdc.c
-
+LOCAL_MODULE_PATH := $(DBG_OUT_PATH)
 LOCAL_MODULE:= vdc
 
 LOCAL_C_INCLUDES := $(KERNEL_HEADERS)
@@ -108,3 +110,6 @@ LOCAL_CFLAGS :=
 LOCAL_SHARED_LIBRARIES := libcutils
 
 include $(BUILD_EXECUTABLE)
+include $(call all-makefiles-under, $(LOCAL_PATH))
+
+

@@ -49,6 +49,10 @@
 #include "Fat.h"
 #include "Process.h"
 #include "cryptfs.h"
+/*******add cks *********/
+#include "lidbg_vold/Exfat.h"
+#include "../inc/lidbg_servicer.h"
+#include "lidbg_vold/Lidbg_vold.h"
 
 #ifdef SUPPORTED_MULTI_USB_PARTITIONS 
 #include "blkid/blkid.h"  
@@ -242,8 +246,7 @@ void Volume::setState(int state) {
 
     mState = state;
 	notifyStateKernel(1);//add by xbw
-
-    SLOGD("Volume %s state changing %d (%s) -> %d (%s)", mLabel,
+	SLOGD("Volume %s state changing %d (%s) -> %d (%s)", mLabel,
          oldState, stateToStr(oldState), mState, stateToStr(mState));
     snprintf(msg, sizeof(msg),
              "Volume %s %s state changed from %d (%s) to %d (%s)", getLabel(),
@@ -461,7 +464,7 @@ UDISKNOMOUNTED:
 
        if (n != 1) {
            /* We only expect one device node returned when mounting encryptable volumes */
-           SLOGE("Too many device nodes returned when mounting %d\n", getMountpoint());
+          SLOGI("Too many device nodes returned when mounting %s", getMountpoint());
            return -1;
        }
 
@@ -501,20 +504,22 @@ UDISKNOMOUNTED:
         sprintf(devicePath, "/dev/block/vold/%d:%d", MAJOR(deviceNodes[i]),
                 MINOR(deviceNodes[i]));
 
-        SLOGI("%s being considered for volume %s,%d\n ", devicePath, getLabel(),isSupNtfs);
+        SLOGI("%s being considered for volume %s,%d ", devicePath, getLabel(),isSupNtfs);
 
         errno = 0;
         setState(Volume::State_Checking);
-
+     
+	SLOGI("[cks]<<<<<<start checking>>>>>>>>\n");
         if (Fat::check(devicePath) && !isSupNtfs) {
             if (errno == ENODATA) {
-                SLOGW("%s does not contain a FAT filesystem\n", devicePath);
+                SLOGW("%s does not contain a FAT filesystem continue", devicePath);
                 continue;
             }
             errno = EIO;
             /* Badness - abort the mount */
             SLOGE("%s failed FS checks (%s)", devicePath, strerror(errno));
             setState(Volume::State_Idle);
+            SLOGW("%s does not contain a FAT return -1", devicePath);
             return -1;
         }
 
@@ -541,8 +546,22 @@ UDISKNOMOUNTED:
         {
             const char *mountpoint = getMountpoint();
             strcpy(mount_point,mountpoint);
+	
+                SLOGD("mountVol,mountpoint : %s",mount_point);
         }
-	    if(!strcmp("true",has_ums))//has UMS function ,set group to AID_SDCARD_RW
+	//add by cks
+	if (Exfat::check(devicePath)==0)
+	{
+		SLOGW("this is Exfat filesystem, ready to mount!\n");
+		if (Exfat::doMount(devicePath, mount_point, false, false, false, AID_MEDIA_RW, AID_MEDIA_RW, 0007, true))
+		{
+			SLOGE("%s failed to mount via Exfat (%s)\n", devicePath, strerror(errno));
+			continue;
+		}
+		SLOGI("this is Exfat filesystem, mount successfully!");
+		
+	}
+	    if (!strcmp("true",has_ums))//has UMS function ,set group to AID_SDCARD_RW
 	    {
         	if (Fat::doMount(devicePath, mount_point, false, false, false,
         	        AID_SYSTEM,AID_SDCARD_RW, 0002, true)) {
@@ -552,6 +571,7 @@ UDISKNOMOUNTED:
 						mSkipAsec = true;
 						SLOGE("---------set mSkipAsec to disable app2sd because mount Vfat fail for %s, mountpoint =%s",getLabel(),getMountpoint());
 					}
+
                 	if(Ntfs::doMount(devicePath, mount_point, false,AID_SYSTEM,AID_SDCARD_RW)){ 
                			SLOGE("%s failed to mount via VNTFS (%s)\n", devicePath, strerror(errno));
 #ifdef SUPPORTED_MULTI_USB_PARTITIONS
@@ -569,7 +589,7 @@ UDISKNOMOUNTED:
 				mSkipAsec = false;
 				SLOGE("---------set mSkipAsec to enable app2sd because mount Vfat succeed for %s, mountpoint =%s",getLabel(),getMountpoint());
 			}
-	    }
+	}
 	    else //do not has ums,set group to AID_MEDIA_RW
 	    {
         	if (Fat::doMount(devicePath, mount_point, false, false, false,
