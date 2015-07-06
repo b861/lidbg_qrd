@@ -71,6 +71,7 @@ function flash_bin()
 	sudo fastboot flash modem NON-HLOS.bin
 	sudo fastboot flash tz tz.mbn
 	sudo fastboot flash dbi sdi.mbn
+	sudo fastboot flash sdi sdi.mbn
 	sudo fastboot flash sbl1 sbl1.mbn
 	sudo fastboot flash aboot emmc_appsboot.mbn
 	sudo fastboot flash boot boot.img
