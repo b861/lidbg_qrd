@@ -1334,7 +1334,7 @@ static int gtp_request_io_port(struct goodix_ts_data *ts)
 {
 	struct i2c_client *client = ts->client;
 	//struct goodix_ts_platform_data *pdata = ts->pdata;
-	int ret;
+	int ret=0;
 	if (gpio_is_valid(GTP_INT_PORT)) {
 		ret = gpio_request(GTP_INT_PORT, "goodix_ts_irq_gpio");
 		if (ret) {
@@ -1878,7 +1878,7 @@ static int goodix_ts_probe(struct i2c_client *client,
 	//struct goodix_ts_platform_data *pdata;
 	struct goodix_ts_data *ts;
 	u16 version_info;
-	int ret;
+	int ret = 0;
 	char ic_type[3];
     client->addr=0x14;
 	lidbg("GTP I2C Address: 0x%02x\n", client->addr);
