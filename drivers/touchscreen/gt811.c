@@ -51,15 +51,16 @@ static const char *s3c_ts_name = "Goodix Capacitive TouchScreen";
 //static struct point_queue finger_list;
 struct i2c_client *i2c_connect_client = NULL;
 //EXPORT_SYMBOL(i2c_connect_client);
-static struct proc_dir_entry *goodix_proc_entry;
+//static struct proc_dir_entry *goodix_proc_entry;
 static short  goodix_read_version(struct goodix_ts_data *ts);
 //static int tpd_button(struct goodix_ts_data *ts, unsigned int x, unsigned int y, unsigned int down);
 
 #if defined(CONFIG_FB)
 static int fb_notifier_callback(struct notifier_block *self,
 				 unsigned long event, void *data);
-static void goodix_ts_early_suspend(struct early_suspend *h);
-static void goodix_ts_late_resume(struct early_suspend *h);
+//static void goodix_ts_early_suspend(struct early_suspend *h);
+
+
 int  gt811_downloader( struct goodix_ts_data *ts, unsigned char *data);
 #elif defined(CONFIG_HAS_EARLYSUSPEND)
 static void goodix_ts_early_suspend(struct early_suspend *h);
@@ -156,6 +157,7 @@ Parameters:
 return:
 	Results of the implementation code, 0 for normal execution
 *******************************************************/
+/****
 static int i2c_pre_cmd(struct goodix_ts_data *ts)
 {
     int ret;
@@ -168,7 +170,7 @@ static int i2c_pre_cmd(struct goodix_ts_data *ts)
     //msleep(2);
     return ret;
 }
-
+******/
 /*******************************************************
 Function:
 	Send a suffix command
@@ -233,7 +235,7 @@ return:
 static int goodix_init_panel(struct goodix_ts_data *ts)
 {
     short ret = -1;
-    lidbg("come to goodix_init_panel=======7.8heti===========futengfei=\n");
+   
 #ifdef BOARD_V2
     uint8_t config_info7[] =
     {
@@ -279,7 +281,7 @@ static int goodix_init_panel(struct goodix_ts_data *ts)
     // config_info[64] = TOUCH_MAX_HEIGHT >> 8;
     // config_info[63] = TOUCH_MAX_HEIGHT & 0xff;
 
-
+     lidbg("come to goodix_init_panel=======7.8heti===========futengfei=\n");
     //sensor_id [0:  8cunTS;      2: 7cunTS ;   7cun for default]
     if(sensor_id == 0) //0:  8cunTS;
     {
@@ -371,7 +373,7 @@ static short  goodix_read_version(struct goodix_ts_data *ts)
     return ret;
 
 }
-/******************start add by kuuga*******************/
+/******************start add by kuuga*******************
 static void gt811_irq_enable(struct goodix_ts_data *ts)
 {
     unsigned long irqflags;
@@ -400,9 +402,9 @@ static void gt811_irq_disable(struct goodix_ts_data *ts)
     spin_unlock_irqrestore(&ts->irq_lock, irqflags);
 }
 
-/*****************end add by kuuga****************/
 
-/*******************************************************
+
+
 Function:
 	Touch-screen work function
 	Triggered by the interruption, to accept a set of coordinate data,
@@ -421,12 +423,12 @@ static void goodix_ts_work_func(struct work_struct *work)
     uint8_t  point_index = 0;
     uint8_t  point_tmp = 0;
     uint8_t  point_count = 0;
-    uint8_t  input_w = 0;
+  //  uint8_t  input_w = 0;
     uint8_t  finger = 0;
-    uint8_t  key = 0;
+ //   uint8_t  key = 0;
     uint16_t input_x = 0;
     uint16_t input_y = 0;
-    static uint8_t  last_key = 0;
+//    static uint8_t  last_key = 0;
     unsigned int  count = 0;
     unsigned int position = 0;
     int finger_up_cunt = 0;
@@ -451,7 +453,7 @@ static void goodix_ts_work_func(struct work_struct *work)
 
 #ifndef INT_PORT
 #endif
-COORDINATE_POLL:
+//COORDINATE_POLL:
 
     if( tmp > 9)
     {
@@ -754,7 +756,7 @@ Parameters:
 	timer: the timer function is associated
 return:
 	Timer mode, HRTIMER_NORESTART that do not automatically restart
-********************************************************/
+********************************************************
 static enum hrtimer_restart goodix_ts_timer_func(struct hrtimer *timer)
 {
     struct goodix_ts_data *ts = container_of(timer, struct goodix_ts_data, timer);
@@ -765,7 +767,7 @@ static enum hrtimer_restart goodix_ts_timer_func(struct hrtimer *timer)
     return HRTIMER_NORESTART;
 }
 
-/*******************************************************
+
 Function:
 	Interrupt response function
 	Triggered by an interrupt, the scheduler runs the touch screen handler
@@ -794,7 +796,7 @@ Parameters:
 return:
 	Is set successfully, 0 for success
 	Error code: -1 for the i2c error, -2 for the GPIO error;-EINVAL on error as a parameter
-********************************************************/
+********************************************************
 static int goodix_ts_power(struct goodix_ts_data *ts, int on)
 {
     int ret = -1;
@@ -844,7 +846,7 @@ static int goodix_ts_power(struct goodix_ts_data *ts, int on)
     }
 
 }
-/*******************************************************
+
 Function:
 	Touch-screen detection function
 	Called when the registration drive (required for a corresponding client);
@@ -861,8 +863,8 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
 {
     int ret = 0;
     int retry = 0;
-    char test_data = 1;
-    const char irq_table[2] = {IRQ_TYPE_EDGE_FALLING, IRQ_TYPE_EDGE_RISING};
+  //  char test_data = 1;
+   // const char irq_table[2] = {IRQ_TYPE_EDGE_FALLING, IRQ_TYPE_EDGE_RISING};
     struct goodix_ts_data *ts;
     struct goodix_i2c_rmi_platform_data *pdata;
 
@@ -953,7 +955,7 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     }
 #endif
 #if 1
-err_gpio_request_failed:
+//err_gpio_request_failed:
     //lidbg("goodix_init_panel:come to send init_panel==============futengfei=\n");
     for(retry = 0; retry < 5; retry++)
     {
@@ -1149,7 +1151,7 @@ err_gpio_request_failed:
     lidbg("=OUT==============touch INFO==================%s\n\n", __func__);
     return 0;
 
-err_init_godix_ts:
+//err_init_godix_ts:
     i2c_end_cmd(ts);
     if(ts->use_irq)
     {
@@ -1168,12 +1170,12 @@ err_input_register_device_failed:
 
 err_input_dev_alloc_failed:
     i2c_set_clientdata(client, NULL);
-err_gpio_request:
-err_i2c_failed:
+//err_gpio_request:
+//err_i2c_failed:
     kfree(ts);
 err_alloc_data_failed:
 err_check_functionality_failed:
-err_create_proc_entry:
+//err_create_proc_entry:
 
     lidbg("\nerr_init_godix_ts==================futengfei=========\n");
     return ret;
@@ -1222,10 +1224,10 @@ static int goodix_ts_remove(struct i2c_client *client)
 }
 
 //????
-static int goodix_ts_suspend(struct i2c_client *client, pm_message_t mesg)
+static int goodix_ts_suspend(struct goodix_ts_data *ts, pm_message_t mesg)
 {
-    int ret;
-    struct goodix_ts_data *ts = i2c_get_clientdata(client);
+  //  int ret;
+ //   struct goodix_ts_data *ts = i2c_get_clientdata(client);
 
     lidbg(" [%s]========futengfei=======\n\n\n", __func__);
     /*
@@ -1337,12 +1339,12 @@ static int goodix_ts_resume(struct goodix_ts_data *ts)
 static int fb_notifier_callback(struct notifier_block *self,
 				 unsigned long event, void *data)
 {
-	lidbg("callback_fun\n");
+	
 	struct fb_event *evdata = data;
 	int *blank;
 	struct goodix_ts_data *ts =
 		container_of(self, struct goodix_ts_data, fb_notif);
-
+	lidbg("callback_fun\n");
 	if (evdata && evdata->data && event == FB_EVENT_BLANK &&
 			ts && ts->client) {
 		blank = evdata->data;
@@ -1356,7 +1358,7 @@ static int fb_notifier_callback(struct notifier_block *self,
 }
 #elif defined(CONFIG_HAS_EARLYSUSPEND)
 #endif
-#ifdef CONFIG_HAS_EARLYSUSPEND || defined(CONFIG_FB)
+#ifdef CONFIG_HAS_EARLYSUSPEND 
 static void goodix_ts_early_suspend(struct early_suspend *h)
 {
     struct goodix_ts_data *ts;
@@ -1381,6 +1383,7 @@ static void goodix_ts_late_resume(struct early_suspend *h)
 #endif
 /////////////////////////////// UPDATE STEP 4 START/////////////////////////////////////////////////////////////////
 //******************************Begin of firmware update surpport*******************************
+/**************
 #ifdef CONFIG_TOUCHSCREEN_GOODIX_IAP
 static struct file *update_file_open(char *path, mm_segment_t *old_fs_p)
 {
@@ -1411,6 +1414,7 @@ static void update_file_close(struct file *filp, mm_segment_t old_fs)
     if(filp)
         filp_close(filp, NULL);
 }
+
 static int update_get_flen(char *path)
 {
     struct file *file_ck = NULL;
@@ -1586,12 +1590,13 @@ static int goodix_update_write(struct file *filp, const char __user *buff, unsig
 
 static int goodix_update_read( char *page, char **start, off_t off, int count, int *eof, void *data )
 {
-    int ret = -1, i = 0;
+    int ret = -1;
     int len = 0;
     int read_times = 0;
+    unsigned char read_data[360] = {0};
     struct goodix_ts_data *ts;
     lidbg("come into [%s]", __func__);
-    unsigned char read_data[360] = {80, };
+    
 
     ts = i2c_get_clientdata(i2c_connect_client);
     if(ts == NULL)
@@ -1613,7 +1618,7 @@ static int goodix_update_read( char *page, char **start, off_t off, int count, i
         read_data[0] = (char)((ts->version >> 8) & 0xff);
 
         memcpy(page, read_data, 2);
-        //*eof = 1;
+        // *eof = 1;
         return 2;
     }
     else if (ts->read_mode == MODE_RD_CHIP_TYPE)
@@ -1709,10 +1714,10 @@ RETRY:
             lidbg("Read raw data failed!\n");
             return 0;
         }
-        memcpy(&page[160], read_data + 2, len);
+        memcpy(&page[160], read_data + 2, len);update_file_cl
 
 #ifdef DEBUG
-        //**************
+  
         for (i = 0; i < 300; i++)
         {
             lidbg("%6x", page[i]);
@@ -1722,7 +1727,7 @@ RETRY:
                 lidbg("\n");
             }
         }
-        //********************/
+        
 #endif
         raw_data_ready = RAW_DATA_NON_ACTIVE;
 
@@ -1732,6 +1737,7 @@ RETRY:
     return 0;
 #endif
 }
+*******************/
 //********************************************************************************************
 static u8  is_equal( u8 *src , u8 *dst , int len )
 {
@@ -2361,7 +2367,7 @@ else
     },
 };
 
-
+/**
 static struct i2c_board_info i2c_gt811[]  =
 {
     {
@@ -2371,7 +2377,7 @@ static struct i2c_board_info i2c_gt811[]  =
     },
 
 };
-
+***************/
 /*******************************************************
 ??:
 	??????
@@ -2406,7 +2412,7 @@ int ts_nod_open (struct inode *inode, struct file *filp)
 ssize_t ts_nod_write (struct file *filp, const char __user *buf, size_t count, loff_t *f_pos)
 {
     char data_rec[20];
-    struct ts_device *tsdev = filp->private_data;
+ //   struct ts_device *tsdev = filp->private_data;
 
     if (copy_from_user( data_rec, buf, count))
     {
@@ -2475,6 +2481,7 @@ static int init_cdev_ts(void)
         return -1;
     }
     device_create(class_install_ts, NULL, dev_number, NULL, "%s%d", TS_DEVICE_NAME, 0);
+    return 0;
 }
 #endif
 

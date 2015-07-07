@@ -85,7 +85,7 @@
 #define READ_BYTES_NUM 2+34
 #endif
 
-#define swap(x, y) do { typeof(x) z = x; x = y; y = z; } while (0)
+//#define swap(x, y) do { typeof(x) z = x; x = y; y = z; } while (0)
 
 #define READ_TOUCH_ADDR_H 0x07
 #define READ_TOUCH_ADDR_L 0x21				//GT811 0x721
@@ -180,8 +180,8 @@ s32 key_center[MAX_KEY_NUM][2] =
 
 #define CONFIG_TOUCHSCREEN_GOODIX_IAP
 #ifdef CONFIG_TOUCHSCREEN_GOODIX_IAP
-static int goodix_update_write(struct file *filp, const char __user *buff, unsigned long len, void *data);
-static int goodix_update_read( char *page, char **start, off_t off, int count, int *eof, void *data );
+//static int goodix_update_write(struct file *filp, const char __user *buff, unsigned long len, void *data);
+//static int goodix_update_read( char *page, char **start, off_t off, int count, int *eof, void *data );
 
 #define PACK_SIZE 					64					//update file package size
 //#define MAX_TIMEOUT					30000				//update time out conut
