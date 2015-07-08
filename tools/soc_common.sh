@@ -3,7 +3,7 @@ function soc_flash_kernel()
 	echo $FUNCNAME
 	if [ $DBG_PLATFORM = msm7627a ];then
 		echo $DBG_PLATFORM&& sudo fastboot flash boot $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/2kpagenand_images/boot.2knand.img
-	elif [ $DBG_PLATFORM = radxa_rock_pro ];then
+	elif [ $DBG_VENDOR = VENDOR_ROCKCHIP ];then
 		echo $DBG_PLATFORM && sudo $DBG_SYSTEM_DIR/RKTools/linux/Linux_Upgrade_Tool_v1.16/upgrade_tool di boot $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/boot.img
 	else
 		echo $DBG_PLATFORM&& sudo fastboot flash boot $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/boot.img
@@ -15,7 +15,7 @@ function soc_flash_system()
 	echo $FUNCNAME
 	if [ $DBG_PLATFORM = msm7627a ];then
 		echo $DBG_PLATFORM&& sudo fastboot flash system $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/2kpagenand_images/system.2knand.img
-	elif [ $DBG_PLATFORM = radxa_rock_pro ];then
+	elif [ $DBG_VENDOR = VENDOR_ROCKCHIP ];then
 		echo $DBG_PLATFORM && sudo $DBG_SYSTEM_DIR/RKTools/linux/Linux_Upgrade_Tool_v1.16/upgrade_tool di system $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system.img
 	else
 		echo $DBG_PLATFORM&& sudo fastboot flash system $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system.img
@@ -26,7 +26,7 @@ function soc_flash_system()
 function soc_flash_recovery()
 {
 	echo $FUNCNAME
-	if [ $DBG_PLATFORM = radxa_rock_pro ];then
+	if [ $DBG_VENDOR = VENDOR_ROCKCHIP ];then
 		echo $DBG_PLATFORM && sudo $DBG_SYSTEM_DIR/RKTools/linux/Linux_Upgrade_Tool_v1.16/upgrade_tool di recovery $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/recovery.img
 	else
 		echo $DBG_PLATFORM&& sudo fastboot flash recovery $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/recovery.img

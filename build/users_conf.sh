@@ -100,9 +100,9 @@ case "$USERS_ID" in
 	esac;;
 
 	3)
-	export DBG_PLATFORM_PATH=/home/w
+	export DBG_PLATFORM_PATH=/home2/wuerwen
 	export PATHJAVA1P6=/usr/lib/jvm/jdk1.6.0_45
-	export PATHJAVA1P7=/usr/lib/jvm/java-7-openjdk-amd64
+	export PATHJAVA1P7=/opt/JDK/java-7-openjdk-amd64
 	case "$DBG_PLATFORM_ID" in
 			0)
 		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/R8625SSNSKQLYA10145451;;
@@ -125,6 +125,9 @@ case "$USERS_ID" in
 		export BP_SOURCE_PATH=$DBG_PLATFORM_PATH/AMSS_M8974_40_R4120
 		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/M8626AAAAANLYD1431
 		export RELEASE_REPOSITORY=$DBG_PLATFORM_PATH/8x26-release;;
+                        9)
+                export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/px3;;
+
 	esac;;
         4)  
         export DBG_PLATFORM_PATH=/home/ctb/wu/

@@ -3,7 +3,7 @@ function soc_build_system()
 {
 	echo $FUNCNAME
 	cd $DBG_SYSTEM_DIR
-	soc_prebuild && make systemimage -j16 && soc_postbuild
+         make systemimage -j16 && soc_postbuild
 }
 
 function soc_build_kernel()
@@ -12,6 +12,10 @@ function soc_build_kernel()
 	cd $DBG_SYSTEM_DIR/kernel
 	#make $KERNEL_DEFCONFIG && make kernel.img -j16
 	make kernel.img -j16
+        cp $DBG_SYSTEM_DIR/kernel/arch/arm/boot/Image $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/kernel
+        cd $DBG_SYSTEM_DIR
+        ./mkimage.sh ota
+        cp $DBG_SYSTEM_DIR/rockdev/Image-rkpx3/boot.img $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/
 }
 
 
@@ -33,6 +37,13 @@ function soc_build_recoveryimage()
 	soc_prebuild && soc_build_common 'make recoveryimage -j16'
 }
 
+function soc_build_bootloader()
+{
+        echo $FUNCNAME
+        cd $DBG_SYSTEM_DIR/uboot
+        make rk30xx -j16
+}
+
 function soc_build_common()
 {
 	echo $FUNCNAME $1 $2 $3
@@ -43,7 +54,7 @@ function soc_build_common()
 function soc_build_all()
 {
 	echo $FUNCNAME
-	cd $DBG_SYSTEM_DIR
+        soc_build_bootloader
 	soc_build_kernel
 	set_env && make -j16 && soc_postbuild
 }
@@ -67,9 +78,7 @@ function set_env()
 {
 	echo $FUNCNAME
 	cd $DBG_SYSTEM_DIR
-#	if [[ $TARGET_PRODUCT = "" ]];then
-		source build/envsetup.sh && lunch $DBG_PLATFORM-$SYSTEM_BUILD_TYPE
-#	fi
+        source build/envsetup.sh && lunch $DBG_PLATFORM-$SYSTEM_BUILD_TYPE
 }
 
 function soc_prebuild()
