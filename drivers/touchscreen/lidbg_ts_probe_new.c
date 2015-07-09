@@ -66,11 +66,7 @@ void gt9xx_reset_high_active(void)
     msleep(200);
 	#ifndef SOC_msm8x25
 	SOC_IO_Output(0, GTP_INT_PORT, 1);
-	#if (defined SOC_mt3360) || (defined VENDOR_ROCKCHIP)
 	udelay(200);
-	#else
-	usleep(200);
-	#endif
 	#endif
     SOC_IO_Output(0, GTP_RST_PORT, GTP_RST_PORT_ACTIVE);
     msleep(300);
@@ -421,6 +417,24 @@ static void parse_cmd(char *pt)
 		ts_should_revert = 0;
 		lidbg_shell_cmd("echo 123 > "LIDBG_LOG_DIR"no_revert.txt");
     }	
+     else if(!strcmp(argv[0], "flyparameter") )
+    {
+        int para_count = argc - 1;
+        char pre='N';
+	     int i;
+        for(i = 0; i < para_count; i++)
+        {
+            pre=g_recovery_meg->hwInfo.info[i];
+            g_recovery_meg->hwInfo.info[i] = (int)simple_strtoul(argv[i + 1], 0, 0)+'0';
+            lidbg("flyparameter-char.info[%d]:old,now[%d,%d]",i,pre-'0', g_recovery_meg->hwInfo.info[i]-'0');
+        }
+        if(flyparameter_info_save(g_recovery_meg))
+        {
+            lidbg_domineering_ack();
+            msleep(3000);
+            lidbg_reboot();
+        }
+    }
 }
 
 

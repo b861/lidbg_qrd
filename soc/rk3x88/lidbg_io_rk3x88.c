@@ -110,6 +110,7 @@ int soc_io_output(u32 group, u32 index, bool status)
 
 bool soc_io_input( u32 index)
 {
+    gpio_direction_input(index);
     return gpio_get_value(index);
 }
 

@@ -159,29 +159,17 @@ Output:
 int gtp_i2c_read(struct i2c_client *client, u8 *buf, int len)
 {
 	struct goodix_ts_data *ts = i2c_get_clientdata(client);
-	struct i2c_msg msgs[2];
 	int ret = -EIO;
 	int retries = 0;
+	unsigned int sub_addr;
 
 	GTP_DEBUG_FUNC();
 
-	msgs[0].flags = !I2C_M_RD;
-	msgs[0].addr = client->addr;
-	msgs[0].len = GTP_ADDR_LENGTH;
-	msgs[0].buf = &buf[0];
-
-	msgs[1].flags = I2C_M_RD;
-	msgs[1].addr = client->addr;
-	msgs[1].len = len - GTP_ADDR_LENGTH;
-	msgs[1].buf = &buf[GTP_ADDR_LENGTH];
-
-#ifdef  VENDOR_ROCKCHIP
-	msgs[0].scl_rate = RXPX3_I2C_RATE;
-	msgs[1].scl_rate = RXPX3_I2C_RATE;
-#endif  
+	sub_addr = (unsigned int)(buf[0]<<8) + buf[1];
 
 	while (retries < 5) {
-		ret = i2c_transfer(client->adapter, msgs, 2);
+			
+	ret = SOC_I2C_Rec_2B_SubAddr(TS_I2C_BUS,client->addr,sub_addr ,buf+2, len-2);
 		if (ret == 2)
 			break;
 		retries++;
@@ -218,23 +206,13 @@ Output:
 int gtp_i2c_write(struct i2c_client *client, u8 *buf, int len)
 {
 	struct goodix_ts_data *ts = i2c_get_clientdata(client);
-	struct i2c_msg msg;
 	int ret = -EIO;
 	int retries = 0;
 
 	GTP_DEBUG_FUNC();
 
-	msg.flags = !I2C_M_RD;
-	msg.addr = client->addr;
-	msg.len = len;
-	msg.buf = buf;
-
-#ifdef  VENDOR_ROCKCHIP
-	msg.scl_rate = RXPX3_I2C_RATE;
-#endif  
-
 	while (retries < 5) {
-		ret = i2c_transfer(client->adapter, &msg, 1);
+		ret = SOC_I2C_Send(TS_I2C_BUS,client->addr, buf, len);
 		if (ret == 1)
 			break;
 		retries++;
@@ -776,9 +754,9 @@ Output:
 *******************************************************/
 void gtp_int_sync(struct goodix_ts_data *ts, int ms)
 {
-	gpio_direction_output(GTP_INT_PORT, 0);
+	SOC_IO_Output(0,GTP_INT_PORT,0);
 	msleep(ms);
-	gpio_direction_input(GTP_INT_PORT);
+	SOC_IO_Input(0,GTP_INT_PORT,0);
 }
 
 /*******************************************************
@@ -798,23 +776,20 @@ static void gtp_reset_guitar(struct goodix_ts_data *ts, int ms)
 	ret  = GPIO_MultiFun_Set(GTP_RST_PORT, PINMUX_LEVEL_GPIO_END_FLAG);
 #endif
 	/* This reset sequence will selcet I2C slave address */
-	gpio_direction_output(GTP_RST_PORT, 0);
+	SOC_IO_Output(0,GTP_RST_PORT,0);
 	msleep(ms);
 
 	if (ts->client->addr == GTP_I2C_ADDRESS_HIGH)
-		gpio_direction_output(GTP_INT_PORT, 1);
+		SOC_IO_Output(0,GTP_INT_PORT,1);
 	else
-		gpio_direction_output(GTP_INT_PORT, 0);
+		SOC_IO_Output(0,GTP_INT_PORT,0);
 
-#if (defined SOC_mt3360) || (defined VENDOR_ROCKCHIP)
 	udelay(RESET_DELAY_T3_US);
-#else
-	usleep(RESET_DELAY_T3_US);
-#endif
-	gpio_direction_output(GTP_RST_PORT, 1);
+
+	SOC_IO_Output(0,GTP_RST_PORT,1);
 	msleep(RESET_DELAY_T4);
 
-	//gpio_direction_input(GTP_RST_PORT);
+	//SOC_IO_Input(0,GTP_RST_PORT,0);
 
 	gtp_int_sync(ts, 50);
 
@@ -895,14 +870,10 @@ static s8 gtp_enter_sleep(struct goodix_ts_data  *ts)
 
 	GTP_DEBUG_FUNC();
 
-	ret = gpio_direction_output(GTP_INT_PORT, 0);
+	SOC_IO_Output(0,GTP_INT_PORT,0);
+	mdelay(5);
 #if (defined SOC_mt3360) 
-	mdelay(5);
 	return 0;
-#elif (defined VENDOR_ROCKCHIP)
-	mdelay(5);
-#else
-	usleep(5000);
 #endif
 	while (retry++ < 5) {
 		ret = gtp_i2c_write(ts->client, i2c_control_buf, 3);
@@ -957,12 +928,8 @@ static s8 gtp_wakeup_sleep(struct goodix_ts_data *ts)
 		if (chip_gt9xxs == 1) {
 			gtp_reset_guitar(ts, 10);
 		} else {
-			ret = gpio_direction_output(GTP_INT_PORT, 1);
-	#if (defined SOC_mt3360) || (defined VENDOR_ROCKCHIP)
+			SOC_IO_Output(0,GTP_INT_PORT,1);
 			msleep(5);
-	#else
-			usleep(5000);
-	#endif
 		}
 #endif
 		ret = gtp_i2c_test(ts->client);
@@ -1177,7 +1144,7 @@ static int gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
 		ts->gtp_cfg_len = ts->pdata->gtp_cfg_len;
 	} else*/
 	{
-		config_data = devm_kzalloc(&client->dev,
+		config_data = kzalloc(
 			GTP_CONFIG_MAX_LENGTH + GTP_ADDR_LENGTH,
 				GFP_KERNEL);
 		if (!config_data) {
@@ -1321,71 +1288,6 @@ static int gtp_i2c_test(struct i2c_client *client)
 	return ret;
 }
 
-/*******************************************************
-Function:
-	Request gpio(INT & RST) ports.
-Input:
-	ts: private data.
-Output:
-	Executive outcomes.
-	= 0: succeed, != 0: failed
-*******************************************************/
-static int gtp_request_io_port(struct goodix_ts_data *ts)
-{
-	struct i2c_client *client = ts->client;
-	//struct goodix_ts_platform_data *pdata = ts->pdata;
-	int ret=0;
-	if (gpio_is_valid(GTP_INT_PORT)) {
-		ret = gpio_request(GTP_INT_PORT, "goodix_ts_irq_gpio");
-		if (ret) {
-			dev_err(&client->dev, "irq gpio request failed\n");
-			//goto pwr_off;
-		}
-		ret = gpio_direction_input(GTP_INT_PORT);
-		ts->client->irq = GPIO_TO_INT(GTP_INT_PORT);
-		if (ret) {
-			dev_err(&client->dev,
-					"set_direction for irq gpio failed\n");
-			//goto free_irq_gpio;
-		}
-	} else {
-		dev_err(&client->dev, "irq gpio is invalid!\n");
-		//ret = -EINVAL;
-		//goto free_irq_gpio;
-	}
-
-	if (gpio_is_valid(GTP_RST_PORT)) {
-		ret = gpio_request(GTP_RST_PORT, "goodix_ts__reset_gpio");
-		if (ret) {
-			dev_err(&client->dev, "reset gpio request failed\n");
-			//goto free_irq_gpio;
-		}
-
-		ret = gpio_direction_output(GTP_RST_PORT, 0);
-		if (ret) {
-			dev_err(&client->dev,
-					"set_direction for reset gpio failed\n");
-			//goto free_reset_gpio;
-		}
-	} else {
-		dev_err(&client->dev, "reset gpio is invalid!\n");
-		//ret = -EINVAL;
-		//goto free_reset_gpio;
-	}
-	gpio_direction_input(GTP_RST_PORT);
-
-	return ret;
-
-/*free_reset_gpio:
-	if (gpio_is_valid(pdata->reset_gpio))
-		gpio_free(pdata->reset_gpio);
-free_irq_gpio:
-	if (gpio_is_valid(pdata->irq_gpio))
-		gpio_free(pdata->irq_gpio);
-pwr_off:
-	return ret;*/
-}
-
 #ifdef SOC_mt3360
 static int scan_int_config(int ext_in)
 {
@@ -1438,7 +1340,7 @@ static int gtp_request_irq(struct goodix_ts_data *ts)
 	if (ret) {
 		dev_err(&ts->client->dev, "Request IRQ failed!ERRNO:%d.\n",
 				ret);
-		gpio_direction_input(GTP_INT_PORT);
+		SOC_IO_Input(0,GTP_INT_PORT,0);
 
 		hrtimer_init(&ts->timer, CLOCK_MONOTONIC,
 				HRTIMER_MODE_REL);
@@ -1872,15 +1774,23 @@ Output:
 	0: succeed.
 *******************************************************/
 
-static int goodix_ts_probe(struct i2c_client *client,
-			   const struct i2c_device_id *id)
+static int goodix_ts_probe(struct platform_device *pdev)
 {
 	//struct goodix_ts_platform_data *pdata;
 	struct goodix_ts_data *ts;
+	struct i2c_client *client;
 	u16 version_info;
 	int ret = 0;
 	char ic_type[3];
-    client->addr=0x14;
+
+	client = (struct i2c_client*)kzalloc( sizeof(struct i2c_client), GFP_KERNEL);
+	if (!client) {
+		dev_err(&client->dev, "GTP not enough memory for client\n");
+		return -ENOMEM;
+	}
+	client->addr=0x14;
+	client->dev = pdev->dev;
+
 	lidbg("GTP I2C Address: 0x%02x\n", client->addr);
 	/*if (client->dev.of_node) {
 		pdata = devm_kzalloc(&client->dev,
@@ -1907,10 +1817,6 @@ static int goodix_ts_probe(struct i2c_client *client,
 	i2c_connect_client = client;
 #endif
 
-	if (!i2c_check_functionality(client->adapter, I2C_FUNC_I2C)) {
-		dev_err(&client->dev, "GTP I2C not supported\n");
-		return -ENODEV;
-	}
 
 	ts = kzalloc(sizeof(*ts), GFP_KERNEL);
 	if (!ts) {
@@ -1940,11 +1846,6 @@ static int goodix_ts_probe(struct i2c_client *client,
 		goto exit_deinit_power;
 	}
 */
-	ret = gtp_request_io_port(ts);
-	if (ret) {
-		dev_err(&client->dev, "GTP request IO port failed.\n");
-		//goto exit_power_off;
-	}
 
 	gtp_reset_guitar(ts, 20);
 
@@ -2039,10 +1940,6 @@ exit_free_irq:
 exit_free_inputdev:
 	kfree(ts->config_data);
 exit_free_io_port:
-	if (gpio_is_valid(GTP_RST_PORT))
-		gpio_free(GTP_RST_PORT);
-	if (gpio_is_valid(GTP_INT_PORT))
-		gpio_free(GTP_INT_PORT);
 /*
 exit_power_off:
 	goodix_power_off(ts);
@@ -2063,57 +1960,8 @@ Input:
 Output:
 	Executive outcomes. 0---succeed.
 *******************************************************/
-static int goodix_ts_remove(struct i2c_client *client)
+static int goodix_ts_remove(struct platform_device *pdev)
 {
-	struct goodix_ts_data *ts = i2c_get_clientdata(client);
-
-	GTP_DEBUG_FUNC();
-#if defined(CONFIG_FB)
-	if (fb_unregister_client(&ts->fb_notif))
-		dev_err(&client->dev,
-			"Error occurred while unregistering fb_notifier.\n");
-#elif defined(CONFIG_HAS_EARLYSUSPEND)
-	unregister_early_suspend(&ts->early_suspend);
-#endif
-
-#if GTP_CREATE_WR_NODE
-	uninit_wr_node();
-#endif
-
-#if GTP_ESD_PROTECT
-//	cancel_work_sync(gtp_esd_check_workqueue);
-//	flush_workqueue(gtp_esd_check_workqueue);
-//	destroy_workqueue(gtp_esd_check_workqueue);
-#endif
-
-	if (ts) {
-		if (ts->use_irq)
-			free_irq(client->irq, ts);
-		else
-			hrtimer_cancel(&ts->timer);
-
-		cancel_work_sync(&ts->work);
-		flush_workqueue(ts->goodix_wq);
-		destroy_workqueue(ts->goodix_wq);
-
-		input_unregister_device(ts->input_dev);
-		if (ts->input_dev) {
-			input_free_device(ts->input_dev);
-			ts->input_dev = NULL;
-		}
-		kfree(ts->config_data);
-
-		if (gpio_is_valid(GTP_RST_PORT))
-			gpio_free(GTP_RST_PORT);
-		if (gpio_is_valid(GTP_INT_PORT))
-			gpio_free(GTP_INT_PORT);
-
-	//	goodix_power_off(ts);
-	//	goodix_power_deinit(ts);
-		i2c_set_clientdata(client, NULL);
-		kfree(ts);
-	}
-
 	return 0;
 }
 
@@ -2397,7 +2245,6 @@ Output:
 static int gtp_init_ext_watchdog(struct i2c_client *client)
 {
 	/* in case of recursively reset by calling gtp_i2c_write*/
-	struct i2c_msg msg;
 	u8 opr_buffer[4] = {0x80, 0x40, 0xAA, 0xAA};
 	int ret;
 	int retries = 0;
@@ -2405,17 +2252,8 @@ static int gtp_init_ext_watchdog(struct i2c_client *client)
 	GTP_DEBUG("Init external watchdog...");
 	GTP_DEBUG_FUNC();
 
-	msg.flags = !I2C_M_RD;
-	msg.addr  = client->addr;
-	msg.len   = 4;
-	msg.buf   = opr_buffer;
-
-#ifdef  VENDOR_ROCKCHIP
-	msg.scl_rate = RXPX3_I2C_RATE;
-#endif  
-
 	while (retries < 5) {
-		ret = i2c_transfer(client->adapter, &msg, 1);
+		ret = SOC_I2C_Send(TS_I2C_BUS,client->addr, opr_buffer, 4);
 		if (ret == 1)
 			return 1;
 		retries++;
@@ -2493,25 +2331,14 @@ static void gtp_esd_check_func(struct work_struct *work)
 }
 #endif
 
-static const struct i2c_device_id goodix_ts_id[] = {
-	{ GTP_I2C_NAME, 0 },
-	{ }
-};
-
 static struct of_device_id goodix_match_table[] = {
 	{ .compatible = "goodix,gt9xx", },
 	{ },
 };
 
-static struct i2c_driver goodix_ts_driver = {
+static struct platform_driver goodix_ts_driver = {
 	.probe      = goodix_ts_probe,
 	.remove     = goodix_ts_remove,
-#if   defined (VENDOR_ROCKCHIP)
-#elif defined (CONFIG_HAS_EARLYSUSPEND)
-	.suspend    = goodix_ts_early_suspend,
-	.resume     = goodix_ts_late_resume,
-#endif
-	.id_table   = goodix_ts_id,
 	.driver = {
 		.name     = GTP_I2C_NAME,
 		.owner    = THIS_MODULE,
@@ -2628,6 +2455,13 @@ Input:
 Output:
     Executive Outcomes. 0---succeed.
 ********************************************************/
+
+static struct platform_device goodix_ts_devices =
+{
+    .name			= GTP_I2C_NAME,
+    .id 			= 0,
+};
+
 static int __devinit goodix_ts_init(void)
 {
 	int ret;
@@ -2639,7 +2473,8 @@ static int __devinit goodix_ts_init(void)
 	INIT_DELAYED_WORK(&gtp_esd_check_work, gtp_esd_check_func);
 	gtp_esd_check_workqueue = create_workqueue("gtp_esd_check");
 #endif
-	ret = i2c_add_driver(&goodix_ts_driver);
+	ret = platform_device_register(&goodix_ts_devices);
+   	ret = platform_driver_register(&goodix_ts_driver);
  	init_cdev_ts();
 	return ret;
 }
@@ -2654,8 +2489,6 @@ Output:
 ********************************************************/
 static void __exit goodix_ts_exit(void)
 {
-	GTP_DEBUG_FUNC();
-	i2c_del_driver(&goodix_ts_driver);
 }
 
 late_initcall(goodix_ts_init);
