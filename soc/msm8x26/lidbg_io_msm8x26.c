@@ -264,6 +264,8 @@ int soc_io_output(u32 group, u32 index, bool status)
 bool soc_io_input( u32 index)
 {
 	if(io_ready == 0)  {lidbg("%d io not ready\n",index);return 1;}
+	
+    gpio_direction_input(index);
     return gpio_get_value(index);
 }
 
