@@ -1,8 +1,9 @@
 
 source ../build/env_entry.sh
 expect $DBG_TOOLS_PATH/remount
-adb  wait-for-device root
-adb  wait-for-device remount
+adb wait-for-device root
+adb wait-for-device root
+adb wait-for-device remount
 adb shell sync
 adb shell rm -rf /data/lidbg
 adb shell rm -rf /flysystem/lib/out
