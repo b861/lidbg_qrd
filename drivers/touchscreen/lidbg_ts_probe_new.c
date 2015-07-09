@@ -487,8 +487,9 @@ int ts_probe_thread(void *data)
 
     if (USE_TS_NUM == 0 && g_var.hw_info.ts_type == 0 )
     {
+    	int cnt = 10;
         LIDBG_WARN("<mode:scan enable[%d,%d,%d]>\n", USE_TS_NUM, g_var.hw_info.ts_type, g_var.hw_info.ts_config);
-        while(1)
+        while(cnt--)
         {
             if((ts = ts_scan(ts_probe_dev, SIZE_OF_ARRAY(ts_probe_dev))))
             {
@@ -507,7 +508,6 @@ int ts_probe_thread(void *data)
 	
 	lidbg_new_cdev(&dev_fops, "ts_probe");
 
-    ssleep(10);
     LIDBG_WARN("<ts_probe_thread exited>\n");
     return 0;
 }
