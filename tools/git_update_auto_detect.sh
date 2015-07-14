@@ -16,6 +16,7 @@ function git_pull()
 mkdir -p /dev/shm/auto_git
 rm /dev/shm/auto_git/*
 while true ;do
+chmod 777 $DIR_LIDBG_PATH -R
 #depository_request
 echo "============loops:$main_loop_times  status:["${commit_times[0]}"] ["${commit_times[1]}"] ["${commit_times[2]}"] ["${commit_times[3]}"] ["${commit_times[4]}"]  ==============="
 	thiswhile_loop=0
@@ -60,4 +61,5 @@ echo "============loops:$main_loop_times  status:["${commit_times[0]}"] ["${comm
 let main_loop_times++
 #depository_release
 sleep 30
+chmod 777 $DIR_LIDBG_PATH -R
 done
