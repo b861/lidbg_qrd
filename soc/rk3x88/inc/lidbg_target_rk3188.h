@@ -9,8 +9,8 @@
 #define SEND_DATA_WITH_UART
 #endif
 
-#define  SOC_IO_SUSPEND
-#define  SOC_IO_RESUME
+#define  SOC_IO_SUSPEND  do{soc_io_suspend();}while(0)
+#define  SOC_IO_RESUME	 do{soc_io_resume();}while(0)
 
 #define  MCU_WP_GPIO_ON  do{check_gpio(g_hw.gpio_mcu_wp);SOC_IO_Output(0, g_hw.gpio_mcu_wp, 1);lidbg("===== gpio wp = 1\n");}while(0)
 #define  MCU_WP_GPIO_OFF  do{check_gpio(g_hw.gpio_mcu_wp);SOC_IO_Output(0, g_hw.gpio_mcu_wp, 0);lidbg("===== gpio wp = 0\n");}while(0)

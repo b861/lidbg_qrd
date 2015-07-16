@@ -7,6 +7,12 @@ LIDBG_DEFINE;
 #define PM_ACC_FILE PM_DIR"pm_acc.txt"
 #define PM_ACC_HISTORY_FILE PM_DIR"pm_acc_history.txt"
 
+#if defined(CONFIG_HAS_EARLYSUSPEND)
+#define WAKE_LOCK_ACTIVE                 (1U << 9)
+#define WAKE_LOCK_AUTO_EXPIRE            (1U << 10)
+static LIST_HEAD(inactive_locks);
+#endif
+
 #define PM_FILE_INFO_SIZE (5)
 #ifdef SOC_mt3360
 #define SUSPEND_KEY_POLLING_TIME   (jiffies + 100*(HZ/1000))  /* 100ms */
@@ -19,7 +25,6 @@ static int sleep_counter = 0;
 static char g_acc_history_state[512];
 int power_on_off_test = 0;
 static struct wake_lock pm_wakelock;
-
 void observer_start(void);
 void observer_stop(void);
 extern int soc_io_resume_config(u32 index, u32 direction, u32 pull, u32 drive_strength);
@@ -87,13 +92,28 @@ void userspace_wakelock_action(int action_enum, char *file_path)
 
 int kernel_wakelock_print(char *info)
 {
+#if defined(CONFIG_HAS_EARLYSUSPEND)
+    //add for px3
+    struct wake_lock *lock;
+#else
     struct wakeup_source *ws;
+#endif
     int list_count = 0;
-    if(g_var.ws_lh == NULL)
+    
+   if(g_var.ws_lh == NULL)
     {
         PM_ERR("g_var.ws_lh==NULL\n");
         return -1;
     }
+
+#if defined(CONFIG_HAS_EARLYSUSPEND)
+	//add for px3 wakelog print
+	list_for_each_entry(lock, g_var.ws_lh, link)
+	{
+		PM_WARN("[%s]:%d:%s", info, list_count, lock->name);
+		list_count++;
+	}
+#else
     PM_WARN("<%s>\n", info);
     rcu_read_lock();
     list_for_each_entry_rcu(ws, g_var.ws_lh, entry)
@@ -107,18 +127,30 @@ int kernel_wakelock_print(char *info)
         spin_unlock_irq(&ws->lock);
     }
     rcu_read_unlock();
-    return 1;
+#endif
+  return 1;
 }
 
 int kernel_wakelock_force_unlock(char *info)
 {
     struct wakeup_source *ws;
     int list_count = 0;
+    struct wake_lock *lock,*n;
     if(g_var.ws_lh == NULL)
     {
         PM_ERR("g_var.ws_lh==NULL\n");
         return -1;
     }
+#if defined(CONFIG_HAS_EARLYSUSPEND)
+	list_for_each_entry_safe(lock,n, g_var.ws_lh, link)
+	{
+		PM_WARN("force unlock:[%s]:%d:%s\n", info, list_count, lock->name);	
+		lock->flags &= ~(WAKE_LOCK_ACTIVE | WAKE_LOCK_AUTO_EXPIRE);
+		list_del(&lock->link);
+		list_add(&lock->link, &inactive_locks);		
+		list_count++;
+	}
+#else
     PM_WARN("<%s>\n", info);
     rcu_read_lock();
     list_for_each_entry_rcu(ws, g_var.ws_lh, entry)
@@ -131,6 +163,7 @@ int kernel_wakelock_force_unlock(char *info)
         }
     }
     rcu_read_unlock();
+#endif
     return 1;
 }
 
