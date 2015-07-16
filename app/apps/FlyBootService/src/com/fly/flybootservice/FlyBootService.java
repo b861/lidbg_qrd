@@ -266,8 +266,10 @@ public class FlyBootService extends Service {
         public void run() {
             // 发送广播
             SendBroadcastToService(KeyBootState, keyEearlySusupendOFF);
-            LIDBG_PRINT("Device Off");
+            LIDBG_PRINT("Device Off [enterAirplaneMode]");
             sendBroadcast(new Intent(ACC_OFF_FLYUI));
+			
+            enterAirplaneMode();			
             writeToFile(file, DEVICES_DOWN);
             delay(500);
             sleppHandler.postDelayed(runnable, ALERM_TIME * 1000);
@@ -294,6 +296,7 @@ public class FlyBootService extends Service {
             sleppHandler.removeCallbacks(runnable);
             acquireWakeLock();
 
+            restoreAirplaneMode(mFlyBootService);
             writeToFile(file, SCREEN_ON);// 正常ACC，开背光
             LIDBG_PRINT("writeToFile Screen On");
             SendBroadcastToService(KeyBootState, keyScreenOn);
@@ -302,6 +305,7 @@ public class FlyBootService extends Service {
             mHandler.removeCallbacks(ealysuspend);
             sleppHandler.removeCallbacks(runnable);
 
+            restoreAirplaneMode(mFlyBootService);
             writeToFile(file, DEVICES_ON);// 唤醒
             writeToFile(file, SCREEN_ON);// 开背光
             LIDBG_PRINT("writeToFile Device On");
@@ -316,6 +320,8 @@ public class FlyBootService extends Service {
 	    SendBroadcastToService(KeyBootState, keyFastSusupendON);
             sendBroadcast(new Intent(SYSTEM_RESUME));
             setAndroidState(true);
+
+            restoreAirplaneMode(mFlyBootService);
             writeToFile(file, DEVICES_ON);// 唤醒
             writeToFile(file, SCREEN_ON);// 开背光
 
@@ -612,7 +618,7 @@ public class FlyBootService extends Service {
 		SystemProperties.set("ctl.start", "bootanim");
 		LIDBG_PRINT("powerOffSystem step 2");
 
-		enterAirplaneMode();
+//		enterAirplaneMode();
 		LIDBG_PRINT("powerOffSystem step 3");
 		getLastPackage();
 		// flyaudio
