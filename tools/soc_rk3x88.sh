@@ -3,19 +3,17 @@ function soc_build_system()
 {
 	echo $FUNCNAME
 	cd $DBG_SYSTEM_DIR
-         make systemimage -j16 && soc_postbuild
+        make systemimage -j16 && soc_postbuild
 }
 
 function soc_build_kernel()
 {
 	echo $FUNCNAME
-	cd $DBG_SYSTEM_DIR/kernel
-	#make $KERNEL_DEFCONFIG && make kernel.img -j16
-	make kernel.img -j16
-        cp $DBG_SYSTEM_DIR/kernel/arch/arm/boot/Image $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/kernel
-        cd $DBG_SYSTEM_DIR
+        cd $DBG_SYSTEM_DIR/kernel
+        make kernel.img -j16
+	cd $DBG_SYSTEM_DIR
+	make bootimage -j16
         ./mkimage.sh ota
-        cp $DBG_SYSTEM_DIR/rockdev/Image-rkpx3/boot.img $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/
 }
 
 
@@ -68,9 +66,7 @@ function soc_postbuild()
 	date >> $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/etc/build_time.conf
 	git log --oneline | sed -n '1,5p' >> $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/etc/build_time.conf
 	echo "soc_build_all ok"
-	#if [ $DBG_PLATFORM = msm8226 ];then	
-	#	mmm $DBG_SYSTEM_DIR/system/core/libdiskconfig -B
-	#fi
+	cp $DBG_SYSTEM_DIR/rockdev/Image-rkpx3/system.img $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/
 }
 
 
