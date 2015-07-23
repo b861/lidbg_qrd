@@ -11,6 +11,7 @@
 # 9--rk3188 PX3 Pro 4.4.4
 # 10--msm8226 Android_5.1.1
 # 11--msm8909 Android_5.1.1
+# 12--msm8226 Android_4.4.4
 
 ## USERS_ID ###
 # 0--root@192.168.9.222

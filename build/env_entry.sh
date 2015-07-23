@@ -194,9 +194,9 @@ case "$DBG_PLATFORM_ID" in
 	export SYSTEM_BUILD_TYPE=userdebug
 	export DBG_KERNEL_SRC_DIR=$DBG_SYSTEM_DIR/kernel
 	export DBG_KERNEL_OBJ_DIR=$DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/obj/KERNEL_OBJ
-	export UPDATA_BIN_PLATFORM_DIR=$RELEASE_REPOSITORY
-	export UPDATA_BIN_DIR=$UPDATA_BIN_PLATFORM_DIR/others/8228_5.0/driver
-	export UPDATA_BASESYSTEM_DIR=$UPDATA_BIN_PLATFORM_DIR/others/8228_5.0/basesystem
+	export UPDATA_BIN_PLATFORM_DIR=$RELEASE_REPOSITORY/others/8228_5.0
+	export UPDATA_BIN_DIR=$UPDATA_BIN_PLATFORM_DIR/driver
+	export UPDATA_BASESYSTEM_DIR=$UPDATA_BIN_PLATFORM_DIR/basesystem
 	export DBG_PASSWORD=git
 	export DBG_REPO_PASSWORD=git
 	export DBG_VENDOR=VENDOR_QCOM
@@ -320,9 +320,9 @@ case "$DBG_PLATFORM_ID" in
 	export SYSTEM_BUILD_TYPE=userdebug
 	export DBG_KERNEL_SRC_DIR=$DBG_SYSTEM_DIR/kernel
 	export DBG_KERNEL_OBJ_DIR=$DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/obj/KERNEL_OBJ
-	export UPDATA_BIN_PLATFORM_DIR=$RELEASE_REPOSITORY
-	export UPDATA_BIN_DIR=$UPDATA_BIN_PLATFORM_DIR/others/8228_5.0/driver
-	export UPDATA_BASESYSTEM_DIR=$UPDATA_BIN_PLATFORM_DIR/others/8228_5.0/basesystem
+	export UPDATA_BIN_PLATFORM_DIR=$RELEASE_REPOSITORY/others/8228_5.0
+	export UPDATA_BIN_DIR=$UPDATA_BIN_PLATFORM_DIR/driver
+	export UPDATA_BASESYSTEM_DIR=$UPDATA_BIN_PLATFORM_DIR/basesystem
 	export DBG_PASSWORD=git
 	export DBG_REPO_PASSWORD=git
 	export DBG_VENDOR=VENDOR_QCOM
@@ -357,9 +357,9 @@ case "$DBG_PLATFORM_ID" in
 	export SYSTEM_BUILD_TYPE=userdebug
 	export DBG_KERNEL_SRC_DIR=$DBG_SYSTEM_DIR/kernel
 	export DBG_KERNEL_OBJ_DIR=$DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/obj/KERNEL_OBJ
-	export UPDATA_BIN_PLATFORM_DIR=$RELEASE_REPOSITORY
-	export UPDATA_BIN_DIR=$UPDATA_BIN_PLATFORM_DIR/others/8909/driver
-	export UPDATA_BASESYSTEM_DIR=$UPDATA_BIN_PLATFORM_DIR/others/8909/basesystem
+	export UPDATA_BIN_PLATFORM_DIR=$RELEASE_REPOSITORY/others/8909
+	export UPDATA_BIN_DIR=$UPDATA_BIN_PLATFORM_DIR/driver
+	export UPDATA_BASESYSTEM_DIR=$UPDATA_BIN_PLATFORM_DIR/basesystem
 	export DBG_PASSWORD=git
 	export DBG_REPO_PASSWORD=git
 	export DBG_VENDOR=VENDOR_QCOM
@@ -380,7 +380,45 @@ case "$DBG_PLATFORM_ID" in
 	export RPM_BUILD_CMD='./rpm_proc/build/build_8x26.sh -j1'
 	export DEBUG_IMAGE_CMD='./b8x26.sh TARGET_FAMILY=8x26 sdi BUILD_ID=AAAAANAZ BUILD_VER=54 BUILD_MIN=1 -j1'
 	export TZ_BUILD_CMD='./build.sh CHIPSET=msm8x26 tz -j1'
-	export UPDATE_BUILD_CMD='python update_common_info.py';; 
+	export UPDATE_BUILD_CMD='python update_common_info.py';;
+
+    	12)
+	export DBG_PLATFORM=msm8226
+	export BOARD_VERSION=V3
+	export ANDROID_VERSION=444
+	export DBG_CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilts/gcc/linux-x86/arm/arm-eabi-4.7/bin/arm-eabi-
+	export JAVA_HOME=$PATHJAVA1P6
+	export JRE_HOME=$JAVA_HOME/jre
+	export CLASSPATH=$JAVA_HOME/lib:$JRE_HOME/lib:$CLASSPATH
+	export PATH=$JAVA_HOME/bin:$JRE_HOME/bin:$PATH
+	export SYSTEM_BUILD_TYPE=userdebug
+	export DBG_KERNEL_SRC_DIR=$DBG_SYSTEM_DIR/kernel
+	export DBG_KERNEL_OBJ_DIR=$DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/obj/KERNEL_OBJ
+	export UPDATA_BIN_PLATFORM_DIR=$RELEASE_REPOSITORY/others/8228_4.4.4
+	export UPDATA_BIN_DIR=$UPDATA_BIN_PLATFORM_DIR/driver
+	export UPDATA_BASESYSTEM_DIR=$UPDATA_BIN_PLATFORM_DIR/basesystem
+	export DBG_PASSWORD=git
+	export DBG_REPO_PASSWORD=git
+	export DBG_VENDOR=VENDOR_QCOM
+	export OTA_PACKAGE_NAME=msm8226-ota-eng.*.zip
+	export DBG_SOC=msm8x26
+	export TEST_PACKAGE_PATH=//192.168.128.128/8x28/升级包发布/专项测试包
+	export REPOSITORY_WORK_BRANCH=master
+	export SYSTEM_WORK_BRANCH=android4.4.4
+        export MAKE_PAKG_NUM=17
+	export NON_HLOS_FILE_PATH=$BP_SOURCE_PATH/common/build/bin/asic
+	export RPM_FILE_PATH=$RPM_PATH/ms/bin/AAAAANAAR
+	export SBL_FILE_PATH=$BOOT_IMAGE_PATH/bin/8x26
+	export TZ_FILE_PATH=$TZ_PATH/bin/FARAANBA
+	#以下命令用于bp v1.0.3
+	#MPSS_BUILD_CMD='./build.sh 8626.gen BUILD_ID=AAAAANAZ'
+	export MPSS_BUILD_CMD='./build.sh 8626.gen.prod 8626.gps.prod BUILD_VER=01780 -k'
+	export BOOTLOADER_BUILD_CMD='./build.sh --prod TARGET_FAMILY=8x26 -j1'
+	export ADSP_BUILD_CMD='python build.py'
+	export RPM_BUILD_CMD='./rpm_proc/build/build_8x26.sh -j1'
+	export DEBUG_IMAGE_CMD='./b8x26.sh TARGET_FAMILY=8x26 sdi BUILD_ID=AAAAANAZ BUILD_VER=54 BUILD_MIN=1 -j1'
+	export TZ_BUILD_CMD='./build.sh CHIPSET=msm8x26 tz -j1'
+	export UPDATE_BUILD_CMD='python update_common_info.py';;
 esac 
 
 
