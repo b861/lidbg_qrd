@@ -1,0 +1,17 @@
+TEF6638的驱动由SAF7741驱动修改而成，控制方法类似，只需对I2C通信序列做少量改动即可。其修改的地方如下：
+一，根据NXP提供的调试GUI数据，修改了TEF6638的初始化I2C控制序列。
+二，TEF6638与SAF7741在I2C控制中到不同点是：SAF7741在写动作中无论是low_level或者是high_level都使用3个字节的子地址；而TEF6638写动作中low_level使用3个字节的子地址，high_level使用1个字节的子地址。
+三，因为TEF6638只有三个模拟输入（AIN0～AIN2）,相比SAF7741少了一个模拟输入端口。在驱动中EXT_TEL和GR_AUDIO输入做了注释，该问题保留处理。
+四，TEF6638到Volumn数组中的数据跟SAF7741不完全一样，因调试GUI控制到数据不同，新的TEF6638驱动减少量级到54。该问题保留处理。
+五，驱动增加了file_operation结构体，使用Write函数进行驱动调试。
+六，判断high_level或low_level的数据0XF2是否做宏定义处理。
+七，调试提供了以下命令：
+echo "ain0" > dev/tef66380    #AIN0                             			echo "radio" > dev/tef66380  #RADIO                                 
+echo "vol50" > dev/tef66380  #Volume = 50 (Max54)                                 
+echo "vol30" > dev/tef66380  #Volume = 30 (Max54)
+
+v2:
+一，修改SOC函数定义（SOC_I2C_Rec_TEF6638）到最末尾，防止产生地址偏移量读取出错的问题。
+二，I2C_BUS定义加到所有平台上，若平台不使用该功能，则赋值为-1。
+三，修改逻辑，probe函数中先把TEF6638初始化成功后再执行其他动作。
+四，根据原理图修改了input函数。

@@ -197,6 +197,11 @@ int SOC_I2C_Rec_SAF7741(int bus_id, char chip_addr, unsigned int sub_addr, char 
     return  i2c_api_do_recv_SAF7741( bus_id,  chip_addr, sub_addr, buf,  size);
 }
 
+int SOC_I2C_Rec_TEF6638(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size)
+{
+    return  i2c_api_do_recv_TEF6638( bus_id,  chip_addr, sub_addr, buf,  size);
+}
+
 int SOC_I2C_Send_TEF7000(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size)
 {
     return  i2c_api_do_send_TEF7000( bus_id,  chip_addr, sub_addr, buf,  size);

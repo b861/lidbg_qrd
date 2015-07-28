@@ -193,6 +193,8 @@ static int i2c_api_do_xfer(int bus_id, char chip_addr, unsigned int sub_addr, in
 #define I2C_API_XFER_MODE_SEND_TEF7000    0x5 /* send for TEF7000 */
 #define I2C_API_XFER_MODE_RECV_TEF7000    0x6 /* receive for TEF7000 */
 
+#define I2C_API_XFER_MODE_RECV_TEF6638    0x9 /* receive for TEF6638 */
+
     int ret = 0;
     struct i2c_api *i2c_api ;
 
@@ -236,7 +238,7 @@ static int i2c_api_do_xfer(int bus_id, char chip_addr, unsigned int sub_addr, in
         ret = i2c_transfer(adap, &msg, 1);
         break;
     }
-
+    case I2C_API_XFER_MODE_RECV_TEF6638:
     case I2C_API_XFER_MODE_RECV:
     {
         struct i2c_adapter *adap = i2c_api->client->adapter;
@@ -642,6 +644,12 @@ int i2c_api_do_recv_SAF7741(int bus_id, char chip_addr, unsigned int sub_addr, c
 {
     return i2c_api_do_xfer(bus_id, chip_addr, sub_addr, I2C_API_XFER_MODE_RECV_SAF7741, buf, size);
 }
+
+int i2c_api_do_recv_TEF6638(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size)
+{
+    return i2c_api_do_xfer(bus_id, chip_addr, sub_addr, I2C_API_XFER_MODE_RECV_TEF6638, buf, size);
+}
+
 
 int i2c_api_do_send_TEF7000(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size)
 {

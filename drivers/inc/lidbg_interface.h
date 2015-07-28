@@ -263,6 +263,7 @@ struct lidbg_fn_t
 
 	
     int (*pfnSOC_Temp_Get)(void);
+    int (*pfnSOC_I2C_Rec_TEF6638)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
 };
 
 
@@ -433,5 +434,7 @@ static inline int check_pt(void)
 #define SOC_Uart_Send  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_Uart_Send))
 #define SOC_Hal_Ts_Callback (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnHal_Ts_Callback))
 #define SOC_Temp_Get (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_Temp_Get))
+
+#define SOC_I2C_Rec_TEF6638  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_I2C_Rec_TEF6638))
 
 #endif

@@ -77,6 +77,7 @@ struct hw_version_specific
 	int i2c_bus_ts;
 	int i2c_bus_gps;
 	int i2c_bus_saf7741;
+	int i2c_bus_tef6638;
 	int i2c_bus_lpc;
 
 //ad
@@ -113,6 +114,9 @@ extern struct hw_version_specific g_hw_version_specific[];
 
 //7741
 #define SAF7741_I2C_BUS  (g_hw.i2c_bus_saf7741)
+
+//6638
+#define TEF6638_I2C_BUS  (g_hw.i2c_bus_tef6638)
 
 //lpc
 #define  LPC_I2_ID        (g_hw.i2c_bus_lpc)

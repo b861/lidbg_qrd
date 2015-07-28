@@ -122,5 +122,7 @@ static inline int check_pt(void)
 
 #define SOC_Set_Touch_Pos (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_Set_Touch_Pos))
 
+#define SOC_I2C_Rec_TEF6638  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_I2C_Rec_TEF6638))
+
 #endif
 
