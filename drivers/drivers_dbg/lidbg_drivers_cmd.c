@@ -218,6 +218,7 @@ void parse_cmd(char *pt)
 		    fs_mem_log("*158#041--disable uart debug\n");
 		    fs_mem_log("*158#042--disable adb\n");
 		    fs_mem_log("*158#043--enable adb\n");
+		    fs_mem_log("*158#044--start SleepTest acc test,可带参数,如*158#0448010\n");
 			
             fs_mem_log("*158#051--LOG_LOGCAT2\n");
 
@@ -499,6 +500,20 @@ void parse_cmd(char *pt)
 			lidbg_start("adbd");
         }
 
+        else if (!strncmp(argv[1], "*158#044", 8))
+        {
+			//可带参数,如*158#0448010,前两位代表关ACC后等待时间，需大于70S，后两位为开ACC后等待时间，不传值则采用默认80，10S间隔
+			char s[100];
+			int n;
+			n = strlen(argv[1]);
+			if(n != 12)
+				strcpy(argv[1],"*158#0448010");	
+			
+			lidbg("start SleepTest acc test %s\n",(argv[1]+8));
+			sprintf(s,"am start -n com.example.sleeptest/com.example.sleeptest.SleepTest --ei time %s",(argv[1]+8));	
+			lidbg_shell_cmd(s);
+			lidbg("cmd : %s",s);
+	}
 		
         else if (!strcmp(argv[1], "*168#001"))
         {
