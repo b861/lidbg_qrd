@@ -135,20 +135,22 @@ int kernel_wakelock_force_unlock(char *info)
 {
     struct wakeup_source *ws;
     int list_count = 0;
-    struct wake_lock *lock,*n;
     if(g_var.ws_lh == NULL)
     {
         PM_ERR("g_var.ws_lh==NULL\n");
         return -1;
     }
 #if defined(CONFIG_HAS_EARLYSUSPEND)
-	list_for_each_entry_safe(lock,n, g_var.ws_lh, link)
 	{
-		PM_WARN("force unlock:[%s]:%d:%s\n", info, list_count, lock->name);	
-		lock->flags &= ~(WAKE_LOCK_ACTIVE | WAKE_LOCK_AUTO_EXPIRE);
-		list_del(&lock->link);
-		list_add(&lock->link, &inactive_locks);		
-		list_count++;
+	    struct wake_lock *lock,*n;
+		list_for_each_entry_safe(lock,n, g_var.ws_lh, link)
+		{
+			PM_WARN("force unlock:[%s]:%d:%s\n", info, list_count, lock->name);	
+			lock->flags &= ~(WAKE_LOCK_ACTIVE | WAKE_LOCK_AUTO_EXPIRE);
+			list_del(&lock->link);
+			list_add(&lock->link, &inactive_locks);		
+			list_count++;
+		}
 	}
 #else
     PM_WARN("<%s>\n", info);
