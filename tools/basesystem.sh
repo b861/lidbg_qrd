@@ -19,6 +19,7 @@ BASESYSTEM_DIR_IN_BIN_DIR="null"
 BIN_GIT_COMMIT_DESCRIPTION="NULL"
 GIT_MASTER_BRANCH="NULL"
 OUT_BASESYSTEM_NAME="NULL"
+MASTER_BRANCH_SYSTEM="NULL"
 
 function soc_postbuild()
 {
@@ -57,7 +58,7 @@ function copy_basesystem_system_to_bin_dir()
 {
 	echo ==$FUNCNAME $SYSTEM_DIR $SYSTEM_PLATFORM $BASESYSTEM_DIR_IN_BIN_DIR
 	#cp -r $SYSTEM_DIR/flyaudio/out/*  $BASESYSTEM_DIR_IN_BIN_DIR/
-	cp $SYSTEM_DIR/out/target/product/$SYSTEM_PLATFORM/$OUT_BASESYSTEM_NAME $BASESYSTEM_DIR_IN_BIN_DIR/baseqcom.flb
+	cp -f $SYSTEM_DIR/out/target/product/$SYSTEM_PLATFORM/$OUT_BASESYSTEM_NAME $BASESYSTEM_DIR_IN_BIN_DIR/baseqcom.flb
 }
 
 function system_dir_build()
@@ -66,7 +67,7 @@ function system_dir_build()
 	git_pull $BIN_DIR $BIN_DIR_PASSWORD $GIT_MASTER_BRANCH
 	
 	echo ====IN.2pull_system_dir=====$FUNCNAME
-	git_pull $SYSTEM_DIR $SYSTEM_DIR_PASSWORD "master"
+	git_pull $SYSTEM_DIR $SYSTEM_DIR_PASSWORD $MASTER_BRANCH_SYSTEM
 
 	echo ====IN.3choosecombo=====$FUNCNAME
 	cd $SYSTEM_DIR
@@ -85,10 +86,10 @@ function system_dir_build()
 
 function git_reset_hard()
 {
-	echo ==$FUNCNAME $1
+	echo ==$FUNCNAME $1 $2
 	cd $1
 	git reset --hard
-	git checkout $GIT_MASTER_BRANCH
+	git checkout $2
 	git reset --hard
 }
 
@@ -112,6 +113,7 @@ function show_env()
 	echo $BASESYSTEM_DIR_IN_BIN_DIR
 	echo $GIT_MASTER_BRANCH
 	echo $BIN_GIT_COMMIT_DESCRIPTION
+	echo $MASTER_BRANCH_SYSTEM
 	echo ===============show_env====================
 }
 
@@ -137,8 +139,6 @@ function show_err_save_exit()
 
 function basesystem_launch()
 {
-	#echo $1 $2 $3 $4 $5 $6 $7 $8 $9
-	
 	SYSTEM_PLATFORM=$2
 	SYSTEM_BUILD_TYPE=$3
 	SYSTEM_DIR=$4
@@ -148,15 +148,16 @@ function basesystem_launch()
 	BASESYSTEM_DIR_IN_BIN_DIR=$8
 	GIT_MASTER_BRANCH=$9
 	OUT_BASESYSTEM_NAME=${10}
-	BIN_GIT_COMMIT_DESCRIPTION="${12} ${13} ${14} ${15} ${16} ${17} ${18} ${19} ${20} ${21} ${22} ${23} ${24} ${25} ${26} ${27} ${28} ${29} ${30}"
+	MASTER_BRANCH_SYSTEM=${12}
+	BIN_GIT_COMMIT_DESCRIPTION="${13} ${14} ${15} ${16} ${17} ${18} ${19} ${20} ${21} ${22} ${23} ${24} ${25} ${26} ${27} ${28} ${29} ${30}"
 	show_env
 	
-	if [ $# -lt 9 ];then
-		show_err_save_exit 1 "input num < 9 $#"
+	if [ $# -lt 13 ];then
+		show_err_save_exit 1 "input num < 13 $#"
 	fi
 	
-	if [ $12 == '' ];then
-		show_err_save_exit 2 "num 9 = null"
+	if [ $# == '' ];then
+		show_err_save_exit 2 "the last num = null"
 	fi
 
 	PATHJAVA1P6=/home/flyaudio/jdk1.6.0_31
@@ -173,7 +174,7 @@ function basesystem_launch()
 
 	case $1 in
 	1)
-		git_pull $SYSTEM_DIR $SYSTEM_DIR_PASSWORD "master" && git_reset_hard $BIN_DIR&& git_pull $BIN_DIR $BIN_DIR_PASSWORD $GIT_MASTER_BRANCH&&git_pull $BIN_DIR $BIN_DIR_PASSWORD $GIT_MASTER_BRANCH&&
+		cd $SYSTEM_DIR && git reset --hard origin/$MASTER_BRANCH_SYSTEM &&git_pull $SYSTEM_DIR $SYSTEM_DIR_PASSWORD $MASTER_BRANCH_SYSTEM && git_reset_hard $BIN_DIR $GIT_MASTER_BRANCH&& git_pull $BIN_DIR $BIN_DIR_PASSWORD $GIT_MASTER_BRANCH&&git_pull $BIN_DIR $BIN_DIR_PASSWORD $GIT_MASTER_BRANCH&&
 		system_dir_build && git_pull $BIN_DIR $BIN_DIR_PASSWORD $GIT_MASTER_BRANCH&& 
 		copy_basesystem_system_to_bin_dir && git_pull $BIN_DIR $BIN_DIR_PASSWORD $GIT_MASTER_BRANCH&& git_add_push $BIN_DIR "$BIN_DIR_PASSWORD" "$GIT_MASTER_BRANCH" "$BIN_GIT_COMMIT_DESCRIPTION";;
 	*)
