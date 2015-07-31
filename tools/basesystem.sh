@@ -160,17 +160,10 @@ function basesystem_launch()
 		show_err_save_exit 2 "the last num = null"
 	fi
 
-	PATHJAVA1P6=/home/flyaudio/jdk1.6.0_31
-	PATHJAVA1P7=/home/flyaudio/java-7-openjdk-amd64
-	if [ ${11} == "16" ];then
-		export JAVA_HOME=$PATHJAVA1P6
-		echo "!!JAVA_HOME=$PATHJAVA1P6!!!!!!!!!"
-	fi
-	if [ ${11} == "17" ];then
-		export JAVA_HOME=$PATHJAVA1P7
-		echo "!!JAVA_HOME=$PATHJAVA1P7!!!!!!!!!"
-	fi
+	JDKPath=${11}
+	export JAVA_HOME=$JDKPath
 	export JRE_HOME=$JAVA_HOME/jre
+	echo "=============[JAVA_HOME=$JDKPath]============"
 
 	case $1 in
 	1)
