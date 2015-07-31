@@ -66,7 +66,6 @@ function soc_postbuild()
 	#fi
 }
 
-
 function set_env()
 {
 	echo $FUNCNAME $TARGET_PRODUCT $DBG_PLATFORM $SYSTEM_BUILD_TYPE
@@ -160,6 +159,13 @@ function soc_build_origin_image()
 	cd $DBG_SYSTEM_DIR
 	make otapackage -j16
 
+}
+
+function soc_build_bootloader()
+{
+	cp -rf $DBG_ROOT_PATH/fly_bootloader/* $DBG_SYSTEM_DIR/bootable/bootloader/lk/flyaudio
+	set_env
+	make aboot -j16
 }
 
 

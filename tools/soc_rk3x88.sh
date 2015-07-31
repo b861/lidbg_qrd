@@ -38,6 +38,7 @@ function soc_build_recoveryimage()
 function soc_build_bootloader()
 {
         echo $FUNCNAME
+        cp -rf $DBG_ROOT_PATH/fly_bootloader/* $DBG_SYSTEM_DIR/uboot/flyaudio
         cd $DBG_SYSTEM_DIR/uboot
         make rk30xx -j16
 }
