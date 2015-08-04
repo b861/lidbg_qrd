@@ -29,9 +29,9 @@ function soc_build_recoveryimage()
 	echo $FUNCNAME
 	cd $DBG_SYSTEM_DIR
 	rm $DBG_OUT_PATH/*.apk $DBG_OUT_PATH/ES.ko $DBG_OUT_PATH/ST.ko $DBG_OUT_PATH/mkfs.exfat $DBG_OUT_PATH/GPS.ko
-	rm -rf $DBG_SYSTEM_DIR/bootable/recovery/flyaudio/lib/modules/out
-	mkdir -p $DBG_SYSTEM_DIR/bootable/recovery/flyaudio/lib/modules
-	cp -rf $DBG_OUT_PATH  $DBG_SYSTEM_DIR/bootable/recovery/flyaudio/lib/modules/out
+	rm -rf $DBG_SYSTEM_DIR/bootable/recovery/flyRecovery/out
+	mkdir -p $DBG_SYSTEM_DIR/bootable/recovery/flyRecovery
+	cp -rf $DBG_OUT_PATH  $DBG_SYSTEM_DIR/bootable/recovery/flyRecovery/out
 	soc_prebuild && soc_build_common 'make recoveryimage -j16'
 }
 
@@ -82,8 +82,7 @@ function soc_prebuild()
 {
 	echo $FUNCNAME
 	echo $DBG_PLATFORM
-	cd $DBG_SYSTEM_DIR
-	
+	cd $DBG_SYSTEM_DIR	
 }
 
 
@@ -102,9 +101,6 @@ function soc_build_release()
 function soc_make_otapackage()
 {
 	echo $FUNCNAME
-# cp lk,bp to /device/qcom/msm8226/radio
-	#cp -u $RELEASE_REPOSITORY/lk/emmc_appsboot.mbn  $DBG_SYSTEM_DIR/device/qcom/msm8226/radio/
-	#cp -u $RELEASE_REPOSITORY/radio/* 	        $DBG_SYSTEM_DIR/device/qcom/msm8226/radio/
 	cd $DBG_SYSTEM_DIR
 
 	if [[ $TARGET_PRODUCT = "" ]];then
@@ -135,8 +131,7 @@ function soc_build_origin_image()
 	echo "build_origin" > $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/etc/build_origin
 
 	cd $DBG_SYSTEM_DIR
-	make otapackage -j16
-
+	make otapackage -j16 && soc_postbuild
 }
 
 
