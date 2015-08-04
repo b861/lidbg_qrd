@@ -1,65 +1,10 @@
-#include <assert.h>
-#include <bits.h>
-#include <stdlib.h>
-#include <string.h>
-#include <dev/keys.h>
-#include <dev/gpio.h>
-#include <dev/gpio_keypad.h>
-#include <kernel/event.h>
-#include <kernel/timer.h>
-#include <reg.h>
-#include <platform/iomap.h>
-#include <platform/timer.h>
-#include <platform.h>
-
-
-#include <app.h>
-#include <debug.h>
-#include <arch/arm.h>
-#include <dev/udc.h>
-#include <string.h>
-#include <kernel/thread.h>
-#include <arch/ops.h>
-
-#include <dev/flash.h>
-#include <lib/ptable.h>
-#include <dev/keys.h>
-#include <dev/fbcon.h>
-#include <baseband.h>
-#include <target.h>
-#include <mmc.h>
-#include <partition_parser.h>
-#include <platform.h>
-#include <assert.h>
-#include <bits.h>
-#include <stdlib.h>
-#include <string.h>
-#include <dev/keys.h>
-#include <dev/gpio.h>
-#include <dev/gpio_keypad.h>
-
-#include <kernel/event.h>
-#include <kernel/timer.h>
-#include <reg.h>
-#include <platform/iomap.h>
-#include <platform/timer.h>
-#include <platform.h>
-#include <boot_stats.h>
 
 #if DEVICE_TREE
 #include <libfdt.h>
 #include <dev_tree.h>
 #endif
 
-#include <crypto_hash.h>
-#include <smem.h> //ML
-#include <soc.h>
-#include "image_verify.h"
-#include "bootimg.h"
 #include "fastboot.h"
-#include "sparse_format.h"
-#include "mmc.h"
-#include "scm.h"
 #include "fly_private.h"
 #include "fly_common.h"
 /*
@@ -311,6 +256,7 @@ void erase_flypartition()
 extern unsigned page_size ;
 int test_system()
 {
+#if 0
 	struct boot_img_hdr *hdr = (void*) buf;
 	struct ptentry *ptn;
 	struct ptable *ptable;
@@ -342,11 +288,13 @@ int test_system()
 
 	return  0x869;
 
-
+#endif
 }
 
 int boot_flyrecovery_from_mmc(void)
 {
+#if 0
+	unsigned *boot_into_recovery = 0;
 	struct boot_img_hdr *hdr = (void*) buf;
 	struct boot_img_hdr *uhdr;
 	unsigned offset = 0;
@@ -675,6 +623,7 @@ unified_boot:
 		   (void *)hdr->ramdisk_addr, hdr->ramdisk_size);
 
 	return 0;
+#endif
 }
 
 char *dbg_msg_set(const char *system_cmd)

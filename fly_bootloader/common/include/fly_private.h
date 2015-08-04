@@ -2,16 +2,12 @@
 #ifndef __FLYLK_H__
 #define __FLYLK_H__
 
-#include <stdlib.h>
-#include <string.h>
 #include "flyaboot.h"
 #include "flymeg.h"
-#include "i2c_screen.h"
-#include <dev/fbcon.h>
-
-#include "devinfo.h"
-#include "recovery.h"
 #include "i2c_gpio.h"
+#include "i2c_screen.h"
+#include "soc.h"
+
 #define DEFAULT_CMDLINE "mem=100M console=null";
 #define FLY_SCREEN_SIZE_1024 1
 #define      flyblk_a  20
@@ -20,10 +16,11 @@
 
 #define CLEAN_SCREEN_WRITE 0
 
-#define 	u32		unsigned int
-#define  	u16		unsigned short
 #define   	u8 		unsigned char
+#define  	u16		unsigned short
+#define 	u32		unsigned int
 
+#define uint32_t u32
 
 extern int show_logo();
 extern void displaylight();
@@ -63,11 +60,10 @@ extern const char *INTO_FLYREC;
 extern const char *open_system_print_message;
 extern const char *android_system_unprintf;
 
-extern struct fbcon_config *config;
 extern unsigned page_mask;
 extern unsigned page_size;
 
 extern char ffbm_mode_string[FFBM_MODE_BUF_SIZE];
 extern bool boot_into_ffbm;
 extern device_info device;
- #endif
+#endif

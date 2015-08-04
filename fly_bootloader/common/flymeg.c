@@ -1,33 +1,10 @@
 #define __LIB_FS_H
 
-#include <debug.h>
-#include <arch/arm.h>
-#include <dev/udc.h>
-#include <string.h>
-#include <kernel/thread.h>
-#include <arch/ops.h>
-
-#include <dev/flash.h>
-#include <lib/ptable.h>
-#include <dev/keys.h>
-#include <platform.h>
-#include <partition_parser.h>
-#include <mmc.h>
-
-#include "recovery.h"
-#include "bootimg.h"
-#include "smem.h"
 #include <config.h>
 #include "flymeg.h"
-#include "lib/fs.h"
 
-#include <debug.h>
-#include <string.h>
-#include <lib/console.h>
-#include <lib/fs.h>
-#include <stdlib.h>
-#include <platform.h>
 #include "flyaboot.h"
+#include "soc.h"
 
 #define ROUND_TO_PAGE(x,y) (((x) + (y)) & (~(y)))
 static const int EXTRA_PAGE = 0;
@@ -362,7 +339,7 @@ int set_extra_recovery_message(const recovery_meg_t *in)
 	}
 
 	n = pagesize * (EXTRA_PAGE + 1);
-
+#if 0
 	if (flash_read(ptn, offset, SCRATCH_ADDR, n)) {
 		dprintf(CRITICAL, "ERROR: Cannot read recovery_header\n");
 		return -1;
@@ -375,6 +352,7 @@ int set_extra_recovery_message(const recovery_meg_t *in)
 		dprintf(CRITICAL, "ERROR: flash write fail!\n");
 		return -1;
 	}
+#endif
 }
 /*******************************************/
 /**EMMC***/

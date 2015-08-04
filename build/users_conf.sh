@@ -76,7 +76,7 @@ case "$USERS_ID" in
 	esac;;
 
 	2)
-	export DBG_PLATFORM_PATH=/media/D/flyaudio/msm8226-5.0
+	export DBG_PLATFORM_PATH=/media/D/flyaudio
 	export PATHJAVA1P6=/usr/lib/java-6/jdk1.6.0_31
 	export PATHJAVA1P7=/usr/lib/java-7/java-7-openjdk-amd64
 	case "$DBG_PLATFORM_ID" in
@@ -100,6 +100,23 @@ case "$USERS_ID" in
 			6)
 		export BP_SOURCE_PATH=$DBG_PLATFORM_PATH/AMSS_M8974_40_R4120
 		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/M8626AAAAANLYD1431
+		export RELEASE_REPOSITORY=$DBG_PLATFORM_PATH/8x26-release;;
+	    	7)
+		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/M8974AAAAANLYD4275
+		export RELEASE_REPOSITORY=$DBG_PLATFORM_PATH/8x26-release;;
+		8)
+		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/rk3188/rk3188_rk3066_r-box_android4.4.2_sdk;;
+		9)
+		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/px3;;
+		10)
+		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/M8974AAAAANLYD4120
+		export BP_SOURCE_PATH=~/swlee/msm8626-la-1-0-4_amss_oem-xtra_no-l1-tds;;
+		11)
+		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/M8974AAAAANLYD4120
+		export BP_SOURCE_PATH=~/swlee/msm8626-la-1-0-4_amss_oem-xtra_no-l1-tds;;
+	    	12)
+		export BP_SOURCE_PATH=$DBG_PLATFORM_PATH/8228_bp_v103
+		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/msm8226
 		export RELEASE_REPOSITORY=$DBG_PLATFORM_PATH/8x26-release;;
 	esac;;
 

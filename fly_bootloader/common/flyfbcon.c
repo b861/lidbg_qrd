@@ -1,4 +1,4 @@
-#include <soc.h>
+#include "soc.h"
 #include "fly_private.h"
 #include "ascii24.h"
 #include "fly_ascii16.h"

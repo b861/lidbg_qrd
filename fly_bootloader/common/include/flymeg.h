@@ -1,15 +1,18 @@
+#ifndef __FLYCOMMON_H__
+#define __FLYCOMMON_H__
+
 #define FLY_MISC_COMMAND_PAGE 2
 
-//typedef unsigned int uint32;
+//typedef unsigned int u_int32_;
 
-typedef unsigned char BYTE;
-typedef  int int32;
-typedef unsigned short uint16;
-typedef  short int16;
-typedef unsigned char uint8;
-typedef  char int8;
+typedef unsigned char _BYTE_;
+typedef  int _int32_;
+typedef unsigned short _uint16_;
+typedef  short _int16_;
+typedef unsigned char _uint8_;
+typedef  char _int8_;
 
-typedef  unsigned int UINT;
+typedef  unsigned int _UINT_;
 
 
 typedef struct paramItem{
@@ -25,7 +28,7 @@ typedef struct bootParams{
 
 typedef struct verStatus{
 	char name[12];
-	uint8 ver[4];
+	_uint8_ ver[4];
 	unsigned int  subVer;
 }verStatus_t;
 
@@ -42,7 +45,7 @@ typedef struct verParams{
 typedef struct recovery_header{
 	char flags[16];
 	unsigned int  data_size;
-	uint8 version[4];
+	_uint8_ version[4];
 	unsigned int  offset;
 }recovery_header_t;
 
@@ -50,62 +53,62 @@ typedef struct recovery_header{
 
 typedef struct qcn_header{
 	char flags[16];
-	UINT data_size;
-	uint8 version[4];
-	UINT offset;
+	_UINT_ data_size;
+	_uint8_ version[4];
+	_UINT_ offset;
 }qcn_header_t;
 
 typedef struct bp_header{
 	char flags[16];
-	UINT data_size;
-	uint8 version[4];
-	UINT offset;
+	_UINT_ data_size;
+	_uint8_ version[4];
+	_UINT_ offset;
 }bp_header_t;
 
 typedef struct bp_time{
 	char flags[16];
-	uint8 version[4];
-	UINT subVer;
+	_uint8_ version[4];
+	_UINT_ subVer;
 }bp_time_t;
 
 typedef struct recovery_language{
 	char flags[16];
-	UINT language;
+	_UINT_ language;
 }recovery_language_t;
 
 typedef struct lk_header{
 	char flags[16];
-	UINT data_size;
-	uint8 version[4];
-	UINT offset;
+	_UINT_ data_size;
+	_uint8_ version[4];
+	_UINT_ offset;
 }lk_header_t;
 
 typedef struct mbr_header{
 	char flags[16];
-	UINT data_size;
-	uint8 version[4];
-	UINT offset;
+	_UINT_ data_size;
+	_uint8_ version[4];
+	_UINT_ offset;
 }mbr_header_t;
 
 
 typedef struct _FLY_RESTORE_DATA{
 	char flags[16];
-	uint8 iblock30FsTyepe;
-	int32 bCheckBlock;
-	uint8 save[512];
+	_uint8_ iblock30FsTyepe;
+	_int32_ bCheckBlock;
+	_uint8_ save[512];
 
 }FLY_RESTORE_DATA;
 
 typedef struct hw_info{
-	int32 bValid;
+	_int32_ bValid;
 	char info[32];
 }hw_info_t;
 
 typedef struct osd_header{
 	char flags[16];
-	UINT data_size;
-	BYTE version[4];
-	UINT offset;
+	_UINT_ data_size;
+	_BYTE_ version[4];
+	_UINT_ offset;
 }osd_header_t;
 //-----------------------------------------
 
@@ -145,5 +148,5 @@ int emmc_get_extra_recovery_msg2(char *ptn_name,unsigned  long len,unsigned char
 
 //#define WITH_DEBUG_GLOBAL_RAM 1
 
-
+#endif
 

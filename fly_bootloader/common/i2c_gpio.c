@@ -22,19 +22,8 @@
 /* With some changes from Frodo Looijaard <frodol@dds.nl>, Ky\u679asti M\u76f2lkki
    <kmalkki@cc.hut.fi> and Jean Delvare <khali@linux-fr.org> */
 
-#include <stdio.h>
-#include <reg.h>
-#include <debug.h>
-#include <kernel/thread.h>
-#include <platform/debug.h>
-#include <platform/iomap.h>
-#include <platform/irqs.h>
-#include <mddi.h>
-#include <dev/fbcon.h>
-#include <platform/gpio.h>
-#include <i2c_qup.h>
 #include "i2c_gpio.h"
-#include <soc.h>
+#include "soc.h"
 
 #define	setsda_in(dev)			gpio_set_direction(dev->sda_pin, GPIO_INPUT)
 #define	setsda_out(dev)			gpio_set_direction(dev->sda_pin, GPIO_OUTPUT)

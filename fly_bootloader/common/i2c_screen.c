@@ -1,29 +1,5 @@
-#include <stdio.h>
-#include <reg.h>
-#include <debug.h>
-#include <kernel/thread.h>
-#include <platform/debug.h>
-#include <platform/iomap.h>
-#include <platform/irqs.h>
-#include <mddi.h>
-#include <dev/fbcon.h>
-#include <platform/gpio.h>
-#include <smem.h>
-#include <mmu.h>
-#include <arch/arm/mmu.h>
 
-#include <dev/lcdc.h>
-
-#include <dev/fbcon.h>
-#include <platform/clock.h>
-#include <qgic.h>
-#include <i2c_qup.h>
-//#include <i2c_qup.c>
-
-
-#include <gsbi.h>
-#include <uart_dm.h>
-#include <dev/i2c.h>
+#include "soc.h"
 
 /***********************************************
 *  flyaudio  i2c   to constrol the screen
@@ -58,6 +34,7 @@ UINT8	PORT_STATE = 0;
 
 #define	IO_GPIO_READ_INPUT     gpio_status(SDA_GPIO)
 
+bool WaitAck(void);
 
 
 void my_delay()

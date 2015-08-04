@@ -1,3 +1,6 @@
+#ifndef _FLYABOOT_H_
+#define _FLYABOOT_H_
+
 //#include "flymeg.h"
 
 #define FLY_SCREEN_SIZE_1024 1
@@ -19,7 +22,7 @@
 #define		PINK_COL 		0XFF8080
 
 //#define 		fontsize16		10	
-#define 		fontsize		13	
-int FLYKEYREBOOT;
+#define 		fontsize		13
 
 void display_fastboot_meg();
+#endif

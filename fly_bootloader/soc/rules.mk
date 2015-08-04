@@ -1,6 +1,4 @@
-LOCAL_DIR := $(GET_LOCAL_DIR)
+BASE_INCLUDE_DIRS += $(DBG_SYSTEM_DIR)/uboot/flyaudio/common
+BASE_INCLUDE_DIRS += $(DBG_SYSTEM_DIR)/uboot/flyaudio/soc
 
-INCLUDES += -I$(LK_TOP_DIR)/flyaudio/soc/$(DBG_SOC)
-
-include  $(LOCAL_DIR)/$(DBG_SOC)/rules.mk
-
+include $(DBG_SYSTEM_DIR)/uboot/flyaudio/soc/$(DBG_SOC)/rules.mk

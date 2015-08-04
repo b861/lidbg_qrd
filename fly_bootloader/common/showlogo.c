@@ -1,48 +1,6 @@
-//#include<stdio.h>
-#include <assert.h>
-#include <bits.h>
-#include <stdlib.h>
-#include <string.h>
-#include <dev/keys.h>
-#include <dev/gpio.h>
-#include <dev/gpio_keypad.h>
-#include <dev/ssbi.h>
-#include <kernel/event.h>
-#include <kernel/timer.h>
-#include <reg.h>
-#include <platform/iomap.h>
-#include <platform/timer.h>
-#include <platform.h>
-
-#include <app.h>
-#include <debug.h>
-#include <arch/arm.h>
-#include <dev/udc.h>
-#include <string.h>
-#include <kernel/thread.h>
-#include <arch/ops.h>
-
-#include <dev/flash.h>
-#include <lib/ptable.h>
-#include <dev/keys.h>
-#include <dev/fbcon.h>
-#include <baseband.h>
-#include <target.h>
-#include <mmc.h>
-#include <partition_parser.h>
-#include <platform.h>
-#include <crypto_hash.h>
-#include <smem.h> //ML
-#include "image_verify.h"
-#include "recovery.h"
-#include "bootimg.h"
 #include "fastboot.h"
-#include "sparse_format.h"
-#include "mmc.h"
-#include "devinfo.h"
 
-#include <soc.h>
-#include "scm.h"
+#include "soc.h"
 #include "fly_private.h"
 
 //#include "defaultLogo.h"
@@ -147,7 +105,7 @@ int  show_logo()
 	dprintf(INFO,"[FLYAUDIO]dcz====>>hdr->index: %s\n",hdr->index);
 	if (memcmp(hdr->index, "FLYBOOTLOADER", strlen("FLYBOOTLOADER")))
 	{
-		dprintf(INFO, "ERROR: Invalid image header found !\n");
+		dprintf(INFO, "err_out: Invalid image header found !\n");
 		free(logo_buff);
 		free(temp_buff);
 		free(pRGB888);
@@ -230,7 +188,7 @@ int getEmmcData(char* Partition,unsigned long len,unsigned char* buf)
 	//if (mmc_read(emmc_ptn , (void *)buf, (n*page_size))) 
 	if (mmc_read(emmc_ptn , (unsigned int *)buf, n)) 
 	{
-		dprintf(INFO, "ERROR: Cannot read flylogo  logodata:0x%x\n",n);
+		dprintf(INFO, "err_out: Cannot read flylogo  logodata:0x%x\n",n);
 		return FALSE;
 	}
 
@@ -248,14 +206,14 @@ int rgb565To888(unsigned char *p888, unsigned char *p565,unsigned long pixel)
 
 	if (NULL == p888 || NULL == p565)
 	{
-		dprintf(INFO,"\n ERROR: rgb565To888 p888 or p565 is NULL");
-		goto ERROR;
+		dprintf(INFO,"\n err_out: rgb565To888 p888 or p565 is NULL");
+		goto err_out;
 	}
 
 	if (pixel == 0)
 	{
-		dprintf(INFO,"\n ERROR: rgb565To888 pixel == 0");
-		goto ERROR;
+		dprintf(INFO,"\n err_out: rgb565To888 pixel == 0");
+		goto err_out;
 	}
 
 	for (i=0;i<pixel;i++)
@@ -275,7 +233,7 @@ int rgb565To888(unsigned char *p888, unsigned char *p565,unsigned long pixel)
 
 	ret = TRUE;
 
-ERROR:
+err_out:
 	return ret;
 }
 
@@ -297,13 +255,13 @@ int logoDataDecompress(
 
 	if (NULL == pLogoFileData || NULL == pdataBufRBG565)
 	{
-		dprintf(INFO,"error: pLogoFileData or pdataBufRBG565 is NULL");
-		goto ERROR;
+		dprintf(INFO,"err_out: pLogoFileData or pdataBufRBG565 is NULL");
+		goto err_out;
 	}
 
 	if (0 == lenBufRBG565)
 	{
-		dprintf(INFO,"error: lenBufRBG565 == 0\n");
+		dprintf(INFO,"err_out: lenBufRBG565 == 0\n");
 	}
 
 	dprintf(INFO,"logoDataDecompress lenBufRBG565 -> %u\n",lenBufRBG565);
@@ -354,7 +312,7 @@ int logoDataDecompress(
 
 	ret = TRUE;
 
-ERROR:
+err_out:
 	return ret;
 }
 
@@ -397,7 +355,7 @@ int  show_logo()
 	//if(emmc_ptn == 0) 
 	//{
 	//	dprintf(INFO,"partition logo doesn't exist\n");
-	//	goto ERROR;
+	//	goto err_out;
 	//}
 
 	dprintf(INFO,"***** Starting show logo *****\n");
@@ -406,21 +364,21 @@ int  show_logo()
 	if(NULL == tempBuf)
 	{
 		dprintf(INFO,"Fail: malloc for tempBuf !\n");
-		goto ERROR;
+		goto err_out;
 	}
 	pflyBootloaderInfo = (flybootloader_header_t*)tempBuf;
 
 	if (ptn_read("logo",4096,tempBuf))
 	{
-		dprintf(INFO, "ERROR: Cannot read flylogo  logodata:0x%x\n",n);
-		goto ERROR;
+		dprintf(INFO, "err_out: Cannot read flylogo  logodata:0x%x\n",n);
+		goto err_out;
 	}
 
 	dprintf(INFO,"pflyBootloaderInfo->index: %s\n",pflyBootloaderInfo->index);
 	if (memcmp(pflyBootloaderInfo->index, "FLYBOOTLOADER", strlen("FLYBOOTLOADER")))
 	{
-		dprintf(INFO, "ERROR: Invalid image header found !\n");
-		goto ERROR;
+		dprintf(INFO, "err_out: Invalid image header found !\n");
+		goto err_out;
 	}
 
 	pfileBuf = tempBuf + sizeof(flybootloader_header_t);
@@ -430,7 +388,7 @@ int  show_logo()
 		)
 	{
 		dprintf(INFO,"\n fail: check logo flag!");
-		goto ERROR;
+		goto err_out;
 	}
 
 	pLogoInfo = (sLogo*)(pfileBuf + sizeof("FLYAUDIOLOGOFLY"));
@@ -447,7 +405,7 @@ int  show_logo()
 	if (0 == logoPixel)
 	{
 		dprintf(INFO,"fail: logoPixel == 0\n");
-		goto ERROR;
+		goto err_out;
 	}
 	dprintf(INFO,"logo pixel -> %u\n",logoPixel);
 
@@ -467,14 +425,14 @@ int  show_logo()
 	//if (NULL == pPartitionData)
 	//{
 	//	printf("\n Fail: malloc for pPartitionData !");
-	//	goto ERROR;
+	//	goto err_out;
 	//}
 	//memset(pPartitionData,0,lenTotal);
 
 	if (ptn_read("logo",lenTotal,pPartitionData))
 	{
 		dprintf(INFO,"FAILED: failed to read date for /logo\n");
-		goto ERROR;
+		goto err_out;
 	}	
 
 	pfileBuf = pPartitionData + sizeof(flybootloader_header_t);
@@ -483,7 +441,7 @@ int  show_logo()
 	//if (NULL == pDataRGB565)
 	//{
 	//	dprintf(INFO,"\n Fail: malloc for dataRGB565 !");
-	//	goto ERROR;
+	//	goto err_out;
 	//}
 	//memset(pDataRGB565,0,logoPixel*2+1);
 
@@ -491,7 +449,7 @@ int  show_logo()
 	//if (NULL == pDataRGB888)
 	//{
 	//	printf("\n Fail: malloc for dataRGB888 !");
-	//	goto ERROR;
+	//	goto err_out;
 	//}
 	//memset(pDataRGB888,0,logoPixel*3+1);
 
@@ -503,13 +461,13 @@ int  show_logo()
 	if (FALSE == logoDataDecompress(pixelDataStartIndex,pixelDataEndIndex,pfileBuf,pDataRGB565,logoPixel*2))
 	{
 		dprintf(INFO,"fail to logoDataDecompress\n");
-		goto ERROR;
+		goto err_out;
 	}
 
 	if (FALSE == rgb565To888(pDataRGB888,pDataRGB565,logoPixel))
 	{
 		dprintf(INFO,"fail to rgb565To888\n");
-		goto ERROR;
+		goto err_out;
 	}
 
 	LogoRGB888Info.x_position = pLogoInfo->x_position;
@@ -526,7 +484,7 @@ int  show_logo()
 
 	ret = TRUE;
 
-ERROR:
+err_out:
 	//if (NULL != pDataRGB565)
 	//{
 	//	free(pDataRGB565);
