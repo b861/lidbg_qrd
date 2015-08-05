@@ -1,13 +1,17 @@
 #ifndef __FLYPLATFORM_H__
 #define __FLYPLATFORM_H__
 
+#include <common.h>
 #include <stdarg.h>
 #include <bedbug/bedbug.h>
-//#include <asm/global_data.h>
+#include <armlinux/config.h>
+#include "rkloader.h"	//flash read/write
 
 #define bool int
 #define FALSE 0
 #define TRUE 1
+
+DECLARE_GLOBAL_DATA_PTR;
 
 /* debug levels */
 #define CRITICAL 0

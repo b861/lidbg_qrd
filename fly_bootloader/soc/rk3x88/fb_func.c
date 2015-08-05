@@ -6,7 +6,7 @@ void fb_config()
 {
 	config->width = 1024;
 	config->height = 600;
-//	config->base = (void *) gd->fb_base;
+	config->base = (void *) gd->fb_base;
 }
 
 void *fb_base_get()

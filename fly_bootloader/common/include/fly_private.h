@@ -16,11 +16,11 @@
 
 #define CLEAN_SCREEN_WRITE 0
 
-#define   	u8 		unsigned char
-#define  	u16		unsigned short
-#define 	u32		unsigned int
+//#define   	u8 		unsigned char
+//#define  	u16		unsigned short
+//#define 	u32		unsigned int
 
-#define uint32_t u32
+//#define uint32_t u32
 
 extern int show_logo();
 extern void displaylight();

@@ -19,8 +19,8 @@
 #define EMMC_BOOT_IMG_HEADER_ADDR 0xFF000
 #endif
 
-#define u8 unsigned char
-#define u16 unsigned short
+//#define u8 unsigned char
+//#define u16 unsigned short
 
 static int last_press_flag = 0;
 

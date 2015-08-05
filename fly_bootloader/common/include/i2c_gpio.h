@@ -1,8 +1,8 @@
 #ifndef __I2C_GPIO_H__
 #define __I2C_GPIO_H__
 
-#define u8 unsigned char
-#define  	u16		unsigned short
+//#define u8 unsigned char
+//#define  	u16		unsigned short
 
 struct i2c_gpio_dev {
 	char *name;
