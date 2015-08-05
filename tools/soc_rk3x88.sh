@@ -2,8 +2,7 @@
 function soc_build_system()
 {
 	echo $FUNCNAME
-	cd $DBG_SYSTEM_DIR
-        make systemimage -j16 && soc_postbuild
+        soc_prebuild && make systemimage -j16 && soc_postbuild
 }
 
 function soc_build_kernel()
@@ -11,16 +10,13 @@ function soc_build_kernel()
 	echo $FUNCNAME
         cd $DBG_SYSTEM_DIR/kernel
         make kernel.img -j16
-	cd $DBG_SYSTEM_DIR
-	make bootimage -j16
-        ./mkimage.sh ota
+        soc_prebuild && make bootimage -j16
 }
 
 
 function soc_build_recovery()
 {
 	echo $FUNCNAME
-	cd $DBG_SYSTEM_DIR
 	soc_prebuild && soc_build_common 'make recovery -j16'
 }
 
@@ -82,7 +78,9 @@ function soc_prebuild()
 {
 	echo $FUNCNAME
 	echo $DBG_PLATFORM
-	cd $DBG_SYSTEM_DIR	
+        cd $DBG_SYSTEM_DIR
+        rm -rf $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system
+	rm -rf $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/root
 }
 
 
