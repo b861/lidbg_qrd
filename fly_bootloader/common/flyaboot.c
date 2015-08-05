@@ -1,4 +1,3 @@
-
 #if DEVICE_TREE
 #include <libfdt.h>
 #include <dev_tree.h>
@@ -688,7 +687,8 @@ void flyaboot_init(unsigned *boot_into_recovery,bool *boot_into_fastboot)
 		RecoveryMeg.bootParam.upName.val = 2;
 	}
 	/****************************************************************/
-	hw_info = atoi(&RecoveryMeg.hwInfo.info[4]);
+//	hw_info = atoi(&RecoveryMeg.hwInfo.info[4]);
+	hw_info = (RecoveryMeg.hwInfo.info[4]-'0');
 	if(hw_info < 0)
 		dprintf(INFO,"Error hardware information type !\n");
 	else

@@ -335,9 +335,9 @@ int  show_logo()
 	unsigned char* pDataRGB888 = NULL;
 
 //	pPartitionData = 0x30000000;
-	pPartitionData = (unsigned char*)target_get_scratch_address();
-	pDataRGB565 = pPartitionData + 0x100000;
-	pDataRGB888 = pDataRGB565 + 0x100000;
+//	pPartitionData = (unsigned char*)target_get_scratch_address();
+//	pDataRGB565 = pPartitionData + 0x100000;
+//	pDataRGB888 = pDataRGB565 + 0x100000;
 
 	unsigned long pixelDataStartIndex;
 	unsigned long pixelDataEndIndex;
@@ -421,13 +421,15 @@ int  show_logo()
 
 	n = ROUND_TO_PAGE(lenTotal, page_mask);
 
-	//pPartitionData = (unsigned char*)malloc(n*4);
-	//if (NULL == pPartitionData)
-	//{
-	//	printf("\n Fail: malloc for pPartitionData !");
-	//	goto err_out;
-	//}
-	//memset(pPartitionData,0,lenTotal);
+	pPartitionData = (unsigned char*)malloc(n*4);
+	if (NULL == pPartitionData)
+	{
+		printf("\n Fail: malloc for pPartitionData !");
+		goto err_out;
+	}
+	memset(pPartitionData,0,lenTotal);
+	pDataRGB565 = pPartitionData + 0x100000;
+	pDataRGB888 = pDataRGB565 + 0x100000;
 
 	if (ptn_read("logo",lenTotal,pPartitionData))
 	{

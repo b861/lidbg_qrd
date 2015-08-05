@@ -6,8 +6,8 @@
 #include <bedbug/bedbug.h>
 #include <armlinux/config.h>
 #include "rkloader.h"	//flash read/write
+#include "fbcon.h"
 
-#define bool int
 #define FALSE 0
 #define TRUE 1
 
@@ -50,6 +50,8 @@ DECLARE_GLOBAL_DATA_PTR;
 #define DEVICE_MAGIC "ANDROID-BOOT!"
 #define DEVICE_MAGIC_SIZE 13
 
+#define dprintf(level, x...) printf(x)
+
 struct device_info
 {
 	unsigned char magic[DEVICE_MAGIC_SIZE];
@@ -59,19 +61,10 @@ struct device_info
 };
 typedef struct device_info device_info;
 
-/* fbcon */
-struct fbcon_config {
-	void		*base;
-	unsigned	width;
-	unsigned	height;
-	unsigned	stride;
-	unsigned	bpp;
-	unsigned	format;
-
-	void		(*update_start)(void);
-	int		(*update_done)(void);
-};
-
 extern struct fbcon_config *config;
+
+extern unsigned page_mask;
+
+void fb_config();
 #endif
 

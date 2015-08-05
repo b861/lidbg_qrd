@@ -19,20 +19,20 @@ UINT8	PORT_STATE = 0;
 
 #define SDA_GPIO   2
 #define SCL_GPIO   3
-#define	I2C_SCL_OUT	      gpio_set(SCL_GPIO, GPIO_OUTPUT)
-#define	I2C_SCL_IN           gpio_set(SCL_GPIO, GPIO_INPUT)
-#define	I2C_SDA_OUT       gpio_set(SDA_GPIO, GPIO_OUTPUT)
-#define	I2C_SDA_IN          gpio_set(SDA_GPIO, GPIO_INPUT)
+#define	I2C_SCL_OUT		do{gpio_set_direction(SCL_GPIO, GPIO_OUTPUT);}while(0)
+#define	I2C_SCL_IN		do{gpio_set_direction(SCL_GPIO, GPIO_INPUT);}while(0)
+#define	I2C_SDA_OUT		do{gpio_set_direction(SDA_GPIO, GPIO_OUTPUT);}while(0)
+#define	I2C_SDA_IN		do{gpio_set_direction(SDA_GPIO, GPIO_INPUT);}while(0)
 
-#define	I2C_SCL_ONE	       gpio_set_value(SCL_GPIO,1)
-#define	I2C_SCL_ZERO			gpio_set_value(SCL_GPIO,0)
-#define	I2C_SDA_ONE         gpio_set_value(SDA_GPIO,1)
-#define	I2C_SDA_ZERO			gpio_set_value(SDA_GPIO,0)
+#define	I2C_SCL_ONE		gpio_set_val(SCL_GPIO,1)
+#define	I2C_SCL_ZERO	gpio_set_val(SCL_GPIO,0)
+#define	I2C_SDA_ONE		gpio_set_val(SDA_GPIO,1)
+#define	I2C_SDA_ZERO	gpio_set_val(SDA_GPIO,0)
 
 #define	dd()				my_delay() //GPIO\u64cd\u4f5c\u5ef6\u65f6
 //#define	dd()				mdelay(1) //GPIO\u64cd\u4f5c\u5ef6\u65f6
 
-#define	IO_GPIO_READ_INPUT     gpio_status(SDA_GPIO)
+#define	IO_GPIO_READ_INPUT	gpio_get_val(SDA_GPIO)
 
 bool WaitAck(void);
 
@@ -580,8 +580,8 @@ void displayclose( )
 	UINT8 Check_Sum = 0;
 	UINT8 back_light[9]= {0xff,0x55,0x6,0x02, 0x0d,0x00,0x13,0x88};  //delayed  5s
 	int i;
-	gpio_tlmm_config(SDA_GPIO, 0, 1, 0, 0, 0);
-	gpio_tlmm_config(SCL_GPIO, 0, 1, 0, 0, 0);
+	gpio_set_direction(SDA_GPIO, GPIO_OUTPUT);
+	gpio_set_direction(SCL_GPIO, GPIO_OUTPUT);
 	
 	for(i= 2;i<9;i++)
 	{
@@ -598,8 +598,9 @@ void resetSystemSeccess(void)
 	UINT8 Check_Sum = 0;
 	UINT8 buf[7]= {0xff,0x55,0x4,0x00,0x06,0x01,0x00};
 	int i;
-	gpio_tlmm_config(SDA_GPIO, 0, 1, 0, 0, 0);
-	gpio_tlmm_config(SCL_GPIO, 0, 1, 0, 0, 0);
+	gpio_set_direction(SDA_GPIO, GPIO_OUTPUT);
+	gpio_set_direction(SCL_GPIO, GPIO_OUTPUT);
+
 	
 	for(i= 2;i<6;i++)
 	{
@@ -616,8 +617,9 @@ void send_hw_info(char hw_info)
 	int i;
 
 	dprintf(CRITICAL,"send hardware info {0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x}\n", hwInfo[0], hwInfo[1], hwInfo[2], hwInfo[3], hwInfo[4], hwInfo[5]);
-	gpio_tlmm_config(SDA_GPIO, 0, 1, 0, 0, 0);
-	gpio_tlmm_config(SCL_GPIO, 0, 1, 0, 0, 0);
+	gpio_set_direction(SDA_GPIO, GPIO_OUTPUT);
+	gpio_set_direction(SCL_GPIO, GPIO_OUTPUT);
+
 
 	for(i= 2;i<6;i++)
 	{
@@ -634,8 +636,9 @@ void displaylight()
 	int i,j;
 
 	dprintf(CRITICAL,"Open backlight !\n");	
-	gpio_tlmm_config(SDA_GPIO, 0, 1, 0, 0, 0);
-	gpio_tlmm_config(SCL_GPIO, 0, 1, 0, 0, 0);
+	gpio_set_direction(SDA_GPIO, GPIO_OUTPUT);
+	gpio_set_direction(SCL_GPIO, GPIO_OUTPUT);
+
 	
 	for(i= 2;i<6;i++)
 	{
@@ -656,8 +659,9 @@ void SendReadLpcVersionsMeg()
 	UINT8 Check_Sum = 0;
 	UINT8 back_light[7]= {0xff,0x55,0x4,0x37,0x00,0x00};
 	int i;
-	gpio_tlmm_config(SDA_GPIO, 0, 1, 0, 0, 0);
-	gpio_tlmm_config(SCL_GPIO, 0, 1, 0, 0, 0);
+	gpio_set_direction(SDA_GPIO, GPIO_OUTPUT);
+	gpio_set_direction(SCL_GPIO, GPIO_OUTPUT);
+
 	
 	for(i= 2;i<6;i++)
 	{
@@ -697,8 +701,9 @@ void close_lpc_watchdog( )
 	UINT8 Check_Sum = 0;
 	UINT8 back_light[7]= {0xff,0x55,0x4,0x00,0x97,0x01};
 	int i;
-	gpio_tlmm_config(SDA_GPIO, 0, 1, 0, 0, 0);
-	gpio_tlmm_config(SCL_GPIO, 0, 1, 0, 0, 0);
+	gpio_set_direction(SDA_GPIO, GPIO_OUTPUT);
+	gpio_set_direction(SCL_GPIO, GPIO_OUTPUT);
+
 	
 	for(i= 2;i<6;i++)
 	{

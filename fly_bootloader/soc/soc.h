@@ -1,3 +1,6 @@
+#ifndef _FLYBOOTLOADER_SOC_
+#define _FLYBOOTLOADER_SOC_
+
 #include "fly_platform.h"
 
 /*gpio operatios*/
@@ -21,3 +24,5 @@ void flyaudio_display_init(void);
 unsigned char ctp_read(char *buf,  unsigned char *sub_addr,unsigned int size);
 unsigned char ctp_write( char *buf, unsigned int size);
 int ctp_reset(void);
+
+#endif
