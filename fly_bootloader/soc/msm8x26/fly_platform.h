@@ -61,5 +61,18 @@
 
 #define FFBM_MODE_BUF_SIZE   8
 
+/* ctp def */
+#define CTP_I2C_ADDR 0x5d
+
+#define CTP_SDA_GPIO 6
+#define CTP_SCL_GPIO 7
+#define CTP_RST_GPIO 12
+#define CTP_INT_GPIO 14
+
+//#define CTP_DBG
+#define GTP_ADDR_LENGTH       2
+#define GTP_CONFIG_MAX_LENGTH 240
+#define GTP_REG_CONFIG_DATA   0x8047
+
 #endif
 

@@ -1,18 +1,6 @@
 #include "i2c_gpio.h"
 #include "../soc.h"
 
-#define CTP_I2C_ADDR 0x5d
-
-#define CTP_SDA_GPIO 6
-#define CTP_SCL_GPIO 7
-#define CTP_RST_GPIO 12
-#define CTP_INT_GPIO 14
-
-//#define CTP_DBG
-#define GTP_ADDR_LENGTH       2
-#define GTP_CONFIG_MAX_LENGTH 240
-#define GTP_REG_CONFIG_DATA   0x8047
-
 static struct i2c_gpio_dev *devp = NULL;
 
 static u8 config_data[GTP_ADDR_LENGTH]
