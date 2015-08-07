@@ -30,7 +30,7 @@ void lidbg_enable_logcat(void)
     lidbg_shell_cmd("chmod 777 /sdcard/logcat*");
     ssleep(1);
     sprintf(cmd, "logcat  -v time>> /sdcard/%s &", logcat_file_name);
-	
+
 #ifdef SOC_mt3360
     lidbg_enable_kmsg();
 #endif
@@ -45,25 +45,25 @@ void lidbg_enable_logcat2(void)
 
     lidbg("logcat+\n");
     lidbg_shell_cmd("date >/sdcard/logcat.txt");
-	ssleep(1);
+    ssleep(1);
     lidbg_shell_cmd("chmod 777 /sdcard/logcat.txt");
-	ssleep(1);
+    ssleep(1);
     lidbg_shell_cmd("logcat -v time >> /sdcard/logcat.txt &");
-	while(1)
-	{
-		if(fs_get_file_size("/sdcard/logcat.txt") >= MEM_SIZE_1_MB * 300)
-		{
-			lidbg("file_len over\n");
-			lidbg_shell_cmd("rm /sdcard/logcat_old.txt");
-			ssleep(1);
-			lidbg_shell_cmd("cp -rf /sdcard/logcat.txt /sdcard/logcat_old.txt");
-			ssleep(5);
-			lidbg_shell_cmd("date > /sdcard/logcat.txt");
-			ssleep(1);
-    			lidbg_shell_cmd("chmod 777 /sdcard/logcat.txt");
-		}
-		ssleep(60);
-	}
+    while(1)
+    {
+        if(fs_get_file_size("/sdcard/logcat.txt") >= MEM_SIZE_1_MB * 300)
+        {
+            lidbg("file_len over\n");
+            lidbg_shell_cmd("rm /sdcard/logcat_old.txt");
+            ssleep(1);
+            lidbg_shell_cmd("cp -rf /sdcard/logcat.txt /sdcard/logcat_old.txt");
+            ssleep(5);
+            lidbg_shell_cmd("date > /sdcard/logcat.txt");
+            ssleep(1);
+            lidbg_shell_cmd("chmod 777 /sdcard/logcat.txt");
+        }
+        ssleep(60);
+    }
     lidbg("logcat-\n");
 
 }
@@ -422,7 +422,7 @@ static int usb_nb_misc_func(struct notifier_block *nb, unsigned long action, voi
             lidbg_shell_cmd("umount /usb");
         }
         lidbg("stop fuse udisk server \n");
-        lidbg_shell_cmd("setprop persist.fuseusb.enable 0");	
+        lidbg_shell_cmd("setprop persist.fuseusb.enable 0");
         break;
     }
     return NOTIFY_OK;
@@ -466,6 +466,22 @@ static  struct file_operations misc_nod_fops =
     .write = misc_write,
     .open = misc_open,
 };
+void checkif_wifiap_error(void)
+{
+    int size = fs_get_file_size("/data/misc/wifi/hostapd.conf");
+    LIDBG_WARN("<%d>\n\n", size);
+    if(size < 20000)
+    {
+#ifdef PLATFORM_ID_2
+        LIDBG_WARN("<find error>\n\n");
+        lidbg_shell_cmd("cp -rf /flysystem/lib/out/hostapd_g8_4.4.2.conf /data/misc/wifi/hostapd.conf");
+#endif
+#ifdef PLATFORM_ID_4
+        LIDBG_WARN("<find error>\n\n");
+        lidbg_shell_cmd("cp -rf /flysystem/lib/out/hostapd_g9_4.4.4.conf /data/misc/wifi/hostapd.conf");
+#endif
+    }
+}
 int misc_init(void *data)
 {
     LIDBG_WARN("<==IN==>\n");
@@ -507,6 +523,8 @@ int misc_init(void *data)
 
     CREATE_KTHREAD(thread_udisk_misc, NULL);
     usb_register_notify(&usb_nb_misc);
+
+    checkif_wifiap_error();
 
     LIDBG_WARN("<==OUT==>\n\n");
     LIDBG_MODULE_LOG;
