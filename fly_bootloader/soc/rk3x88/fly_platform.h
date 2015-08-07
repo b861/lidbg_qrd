@@ -53,6 +53,11 @@ DECLARE_GLOBAL_DATA_PTR;
 #define ETIMEDOUT   110
 #define I2C_SMBUS_BLOCK_MAX 32
 
+/*lpc i2c config*/
+#define LPC_I2C_ADDR 0xa0
+#define LPC_SDA_GPIO   2
+#define LPC_SCL_GPIO   3
+
 /* img flags*/
 #define BOOT_MAGIC "ANDROID!"
 #define BOOT_MAGIC_SIZE 8

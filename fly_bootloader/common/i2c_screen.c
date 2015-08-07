@@ -629,7 +629,7 @@ void send_hw_info(char hw_info)
 	SendData(hwInfo, 7);
 }
 
-void displaylight()
+void backlight_enable()
 {
 	UINT8 Check_Sum = 0;
 	UINT8 back_light[7]= {0xff,0x55,0x4,0x02, 0x0d, 0x1};

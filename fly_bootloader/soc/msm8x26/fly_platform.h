@@ -74,5 +74,9 @@
 #define GTP_CONFIG_MAX_LENGTH 240
 #define GTP_REG_CONFIG_DATA   0x8047
 
+/*lpc i2c config*/
+#define LPC_I2C_ADDR 0xa0
+#define LPC_SDA_GPIO   2
+#define LPC_SCL_GPIO   3
 #endif
 

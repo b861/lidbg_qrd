@@ -23,7 +23,7 @@
 //#define uint32_t u32
 
 extern int show_logo();
-extern void displaylight();
+void backlight_enable();
 extern void fly_setBcol(unsigned long int backcolor);
 extern void fly_text_lk(int x, int y, const char * s, unsigned long fontcol);
 extern int judge_key_state();

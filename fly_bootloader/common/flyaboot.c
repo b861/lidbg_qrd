@@ -715,7 +715,7 @@ void flyaboot_init(unsigned *boot_into_recovery,bool *boot_into_fastboot)
 		if(*boot_into_fastboot == 0)
 		show_logo();
 		}
-	displaylight();
+	backlight_enable();
     if((arg == FlySystemModel)){
                if(*boot_into_fastboot == 0){
                        while(--bofore_recovery_time)
@@ -787,7 +787,7 @@ void flyaboot_init(unsigned *boot_into_recovery,bool *boot_into_fastboot)
 	if(!*boot_into_recovery)
 			{
  			show_logo();
-			displaylight();
+			backlight_enable();
 	}
 	else
 	{
