@@ -11,5 +11,5 @@ void fb_config()
 void *fb_base_get()
 {
 	fb_config();
-	return NULL;
+	return gd->fb_base;
 }

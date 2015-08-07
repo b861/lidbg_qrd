@@ -7,16 +7,16 @@ int ptn_read(char *ptn_name,unsigned  long len,unsigned char *buf)
     fbt_partition_t* ptn;
 
 	ptn = fastboot_find_ptn(ptn_name);
-	printf("Read partition %s, ptn = %d \n", ptn_name, ptn);
+	printf("Read partition %s, ptn = 0x%x \n", ptn_name, ptn->offset);
 
 	if(ptn){
-		if(CopyFlash2Memory(buf, ptn, DIV_ROUND_UP(len, RK_BLK_SIZE))<0)
+		if(CopyFlash2Memory(buf, ptn->offset, DIV_ROUND_UP(len, RK_BLK_SIZE))<0)
 		{
-			printf("read %s filad\n", ptn_name);
+			printf("read %s failed\n", ptn_name);
 			return -1;
 		}
 	}else{
-		printf("Find %s ptn filad\n", ptn_name);
+		printf("Find %s ptn failed\n", ptn_name);
 		return -1;
 	}
 

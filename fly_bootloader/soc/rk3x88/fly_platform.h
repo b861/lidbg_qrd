@@ -33,10 +33,10 @@ DECLARE_GLOBAL_DATA_PTR;
 /* ctp def */
 #define CTP_I2C_ADDR 0x5d
 
-#define CTP_SDA_GPIO 6
-#define CTP_SCL_GPIO 7
-#define CTP_RST_GPIO 12
-#define CTP_INT_GPIO 14
+#define CTP_SDA_GPIO 28
+#define CTP_SCL_GPIO 29
+#define CTP_RST_GPIO 6
+#define CTP_INT_GPIO 7
 
 //#define CTP_DBG
 #define GTP_ADDR_LENGTH       2

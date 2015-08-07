@@ -113,7 +113,7 @@ int  get_boot_mode(void)
 		}
 		if(pass_time>=70 && pass_time<120)
 		{
-			dprintf(INFO,"FastbootModel BLUE_COL\r\n");
+			dprintf(INFO,"LoaderModel BLUE_COL\r\n");
 			read_num = FastbootModel;
 			fly_setBcol(BLUE_COL);
 		}

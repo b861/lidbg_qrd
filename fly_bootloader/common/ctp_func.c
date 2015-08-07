@@ -65,6 +65,7 @@ int ctp_reset()
 	//reset ctp
 	gpio_set_direction(CTP_RST_GPIO,GPIO_OUTPUT);
 	//	gpio_set(rst_pin, GPIO_OUTPUT);
+	gpio_set_val(CTP_RST_GPIO, 0);
 
 	gpio_set_direction(CTP_INT_GPIO,GPIO_OUTPUT);
 	//	gpio_set(int_pin, GPIO_OUTPUT);

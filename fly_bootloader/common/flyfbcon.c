@@ -111,7 +111,7 @@ void display_logo_on_screen(sLogo *plogoparameter)
 
 	}
 #endif
-	fbcon_flush();
+	//fbcon_flush();
 /*
 	if(is_cmd_mode_enabled())
 		mipi_dsi_cmd_mode_trigger();

@@ -764,7 +764,7 @@ void flyaboot_init(unsigned *boot_into_recovery,bool *boot_into_fastboot)
 			break;
 		case FastbootModel:
 			*boot_into_fastboot = true;
-			dprintf(INFO,"Boot into FastbootModel\r\n");
+			dprintf(INFO,"Boot into LoaderModel\r\n");
 			break;
 		case 0:
 			dprintf(INFO,"Boot into NormalModel\r\n");

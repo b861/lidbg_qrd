@@ -267,8 +267,11 @@ int logoDataDecompress(
 	dprintf(INFO,"logoDataDecompress lenBufRBG565 -> %u\n",lenBufRBG565);
 
 	i = pixelDataStartIndex;
+
+
 	while (i < pixelDataEndIndex)
 	{
+
 		pixelDataMark = pLogoFileData[i+1];
 		pixelDataMark = (pixelDataMark << 8) + pLogoFileData[i];
 
@@ -278,21 +281,28 @@ int logoDataDecompress(
 		//dprintf(INFO,"\n i->%u pixelDataMark->%u bufRBG565Index->%u",i,pixelDataMark,bufRBG565Index);
 
 		if ((bufRBG565Index + lenForMark*2) <= lenBufRBG565)
-		{
+		{	
 			if (pixelDataMark > 0x8000)
 			{
 				for (j=0;j<lenForMark;j++)
-				{
+				{	
+					if(i==1400) 
+					{
+						//dprintf(INFO,"\n pdataBufRBG565->%u bufRBG565Index->%u",pdataBufRBG565,bufRBG565Index);
+					}
+
 					pdataBufRBG565[bufRBG565Index++] = pLogoFileData[i+2];
 					pdataBufRBG565[bufRBG565Index++] = pLogoFileData[i+3];
 				}
 
+				if(i==1400) dprintf(INFO,"\n002h");
+
 				i = i + 4;
 			}
 			else
-			{
+			{	
 				for (j=0;j<lenForMark;j++)
-				{
+				{	
 					i = i + 2;
 					pdataBufRBG565[bufRBG565Index++] = pLogoFileData[i];
 					pdataBufRBG565[bufRBG565Index++] = pLogoFileData[i+1];
@@ -309,7 +319,6 @@ int logoDataDecompress(
 
 	dprintf(INFO,"i -> %u\n",i);
 	dprintf(INFO,"bufRBG565Index -> %u\n",bufRBG565Index);
-
 	ret = TRUE;
 
 err_out:
@@ -428,8 +437,21 @@ int  show_logo()
 		goto err_out;
 	}
 	memset(pPartitionData,0,lenTotal);
-	pDataRGB565 = pPartitionData + 0x100000;
-	pDataRGB888 = pDataRGB565 + 0x100000;
+//	pDataRGB565 = pPartitionData + 0x100000;
+//	pDataRGB888 = pDataRGB565 + 0x100000;
+	pDataRGB565 = (unsigned char*)malloc(logoPixel*2);
+	if (NULL == pDataRGB565)
+	{
+		printf("\n Fail: malloc for pDataRGB565 !");
+		goto err_out;
+	}
+
+	pDataRGB888 = (unsigned char*)malloc(logoPixel);
+	if (NULL == pDataRGB888)
+	{
+		printf("\n Fail: malloc for pDataRGB888 !");
+		goto err_out;
+	}
 
 	if (ptn_read("logo",lenTotal,pPartitionData))
 	{
@@ -483,6 +505,30 @@ int  show_logo()
 	LogoRGB888Info.pdata = (unsigned char*)pDataRGB888;
 
 	display_logo_on_screen(&LogoRGB888Info);
+
+	if (NULL != pDataRGB565)
+	{
+		free(pDataRGB565);
+		pDataRGB565 = NULL;
+	}
+
+	if (NULL != pDataRGB888)
+	{
+		free(pDataRGB888);
+		pDataRGB888 = NULL;
+	}
+
+	if (NULL != pPartitionData)
+	{
+		free(pPartitionData);
+		pPartitionData = NULL;
+	}
+
+	if (NULL != tempBuf)
+	{
+		free(tempBuf);
+		tempBuf = NULL;
+	}
 
 	ret = TRUE;
 
