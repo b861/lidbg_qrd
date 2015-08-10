@@ -1,5 +1,6 @@
 #include "i2c_gpio.h"
 #include "../soc.h"
+#include "fly_private.h"
 
 static struct i2c_gpio_dev *devp = NULL;
 

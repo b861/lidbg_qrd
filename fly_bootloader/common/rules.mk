@@ -1,2 +1,12 @@
-BASE_INCLUDE_DIRS += $(DBG_SYSTEM_DIR)/uboot/flyaudio/common
-BASE_INCLUDE_DIRS += $(DBG_SYSTEM_DIR)/uboot/flyaudio/soc
+INCLUDES += -I$(DBG_BOOTLOADER_DIR)/flyaudio/common/include -I$(DBG_BOOTLOADER_DIR)/app/aboot -I$(DBG_BOOTLOADER_DIR)/dev/ssbi/include
+INCLUDES += -I$(DBG_BOOTLOADER_DIR)/flyaudio/soc
+
+OBJS +=\
+	$(DBG_BOOTLOADER_DIR)/flyaudio/common/ctp_func.o \
+	$(DBG_BOOTLOADER_DIR)/flyaudio/common/flyaboot.o \
+	$(DBG_BOOTLOADER_DIR)/flyaudio/common/flykey.o	\
+	$(DBG_BOOTLOADER_DIR)/flyaudio/common/flymeg.o	\
+	$(DBG_BOOTLOADER_DIR)/flyaudio/common/showlogo.o \
+	$(DBG_BOOTLOADER_DIR)/flyaudio/common/i2c_screen.o \
+	$(DBG_BOOTLOADER_DIR)/flyaudio/common/flyfbcon.o\
+	$(DBG_BOOTLOADER_DIR)/flyaudio/common/i2c_gpio.o

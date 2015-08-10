@@ -1,4 +1,3 @@
-BASE_INCLUDE_DIRS += $(DBG_SYSTEM_DIR)/uboot/flyaudio/common
-BASE_INCLUDE_DIRS += $(DBG_SYSTEM_DIR)/uboot/flyaudio/soc
 
-
+include  $(DBG_BOOTLOADER_DIR)/flyaudio/common/rules.mk
+include  $(DBG_BOOTLOADER_DIR)/flyaudio/soc/rules.mk

@@ -1,3 +1,3 @@
-include $(DBG_SYSTEM_DIR)/uboot/flyaudio/soc/rules.mk
+include $(DBG_BOOTLOADER_DIR)/flyaudio/soc/rules.mk
 
 obj-y += $(DBG_SOC)/

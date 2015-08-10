@@ -1,5 +1,5 @@
 
-include $(DBG_SYSTEM_DIR)/uboot/flyaudio/common/rules.mk
+include $(DBG_BOOTLOADER_DIR)/flyaudio/common/rules.mk
 
 obj-y += ctp_func.o
 obj-y += flyaboot.o

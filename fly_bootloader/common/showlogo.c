@@ -330,42 +330,24 @@ int  show_logo()
 {
 	int ret = FALSE;
 
-	unsigned char* pPartitionData = NULL;
-	unsigned char* tempBuf = NULL;
-
-	unsigned long fileLen;
-	unsigned char* pfileBuf = NULL;
-
+	int alloc_flag = 0;
 	sLogo * pLogoInfo;
 	sLogo LogoRGB888Info;
 
+	unsigned long fileLen;
+	unsigned long lenTotal;
 	unsigned long logoPixel;
+
+	unsigned char* tempBuf = NULL;
+	unsigned char* pfileBuf = NULL;
 	unsigned char* pDataRGB565 = NULL;
 	unsigned char* pDataRGB888 = NULL;
-
-//	pPartitionData = 0x30000000;
-//	pPartitionData = (unsigned char*)target_get_scratch_address();
-//	pDataRGB565 = pPartitionData + 0x100000;
-//	pDataRGB888 = pDataRGB565 + 0x100000;
+	unsigned char* pPartitionData = NULL;
 
 	unsigned long pixelDataStartIndex;
 	unsigned long pixelDataEndIndex;
 
-	unsigned long lenTotal;
-	unsigned n = 0;
 	flybootloader_header_t* pflyBootloaderInfo;
-	
-	//int index = INVALID_PTN;
-	//unsigned long long emmc_ptn = 0;
-
-	//index = partition_get_index("logo");
-	//emmc_ptn = partition_get_offset(index);
-
-	//if(emmc_ptn == 0) 
-	//{
-	//	dprintf(INFO,"partition logo doesn't exist\n");
-	//	goto err_out;
-	//}
 
 	dprintf(INFO,"***** Starting show logo *****\n");
 	
@@ -379,7 +361,7 @@ int  show_logo()
 
 	if (ptn_read("logo",4096,tempBuf))
 	{
-		dprintf(INFO, "err_out: Cannot read flylogo  logodata:0x%x\n",n);
+		dprintf(INFO, "err_out: Cannot read flylogo  logodata:0x%x\n");
 		goto err_out;
 	}
 
@@ -423,33 +405,11 @@ int  show_logo()
 	lenTotal = pflyBootloaderInfo->len + sizeof(flybootloader_header_t);
 
 	dprintf(INFO,"fileLen -> %ld\n",fileLen);
-
 	dprintf(INFO,"lenTotal: %u\n",lenTotal);
 
-	dprintf(INFO,"pPartitionData need to malloc : %u\n",n);
-
-	n = ROUND_TO_PAGE(lenTotal, page_mask);
-
-	pPartitionData = (unsigned char*)malloc(n*4);
-	if (NULL == pPartitionData)
-	{
-		printf("\n Fail: malloc for pPartitionData !");
-		goto err_out;
-	}
-	memset(pPartitionData,0,lenTotal);
-//	pDataRGB565 = pPartitionData + 0x100000;
-//	pDataRGB888 = pDataRGB565 + 0x100000;
-	pDataRGB565 = (unsigned char*)malloc(logoPixel*2);
-	if (NULL == pDataRGB565)
-	{
-		printf("\n Fail: malloc for pDataRGB565 !");
-		goto err_out;
-	}
-
-	pDataRGB888 = (unsigned char*)malloc(logoPixel);
-	if (NULL == pDataRGB888)
-	{
-		printf("\n Fail: malloc for pDataRGB888 !");
+	ret = logo_addr_get(&pPartitionData, lenTotal, &pDataRGB565, logoPixel*2, &pDataRGB888, logoPixel, &alloc_flag);
+	if(ret){
+		dprintf(INFO,"Error::: get logo addr failed !\n");
 		goto err_out;
 	}
 
@@ -460,22 +420,6 @@ int  show_logo()
 	}	
 
 	pfileBuf = pPartitionData + sizeof(flybootloader_header_t);
-
-	//pDataRGB565 = (unsigned char*)malloc(logoPixel*2+1);
-	//if (NULL == pDataRGB565)
-	//{
-	//	dprintf(INFO,"\n Fail: malloc for dataRGB565 !");
-	//	goto err_out;
-	//}
-	//memset(pDataRGB565,0,logoPixel*2+1);
-
-	//pDataRGB888 = (unsigned char*)malloc(logoPixel*3+1);
-	//if (NULL == pDataRGB888)
-	//{
-	//	printf("\n Fail: malloc for dataRGB888 !");
-	//	goto err_out;
-	//}
-	//memset(pDataRGB888,0,logoPixel*3+1);
 
 	pixelDataStartIndex = sizeof("FLYAUDIOLOGOFLY") + sizeof(sLogo) - sizeof(unsigned char*);
 	pixelDataEndIndex = fileLen-strlen("FLYAUDIO");
@@ -506,28 +450,30 @@ int  show_logo()
 
 	display_logo_on_screen(&LogoRGB888Info);
 
-	if (NULL != pDataRGB565)
-	{
-		free(pDataRGB565);
-		pDataRGB565 = NULL;
-	}
+	if(alloc_flag == 1){
+		if (NULL != pDataRGB565)
+		{
+			free(pDataRGB565);
+			pDataRGB565 = NULL;
+		}
 
-	if (NULL != pDataRGB888)
-	{
-		free(pDataRGB888);
-		pDataRGB888 = NULL;
-	}
+		if (NULL != pDataRGB888)
+		{
+			free(pDataRGB888);
+			pDataRGB888 = NULL;
+		}
 
-	if (NULL != pPartitionData)
-	{
-		free(pPartitionData);
-		pPartitionData = NULL;
-	}
+		if (NULL != pPartitionData)
+		{
+			free(pPartitionData);
+			pPartitionData = NULL;
+		}
 
-	if (NULL != tempBuf)
-	{
-		free(tempBuf);
-		tempBuf = NULL;
+		if (NULL != tempBuf)
+		{
+			free(tempBuf);
+			tempBuf = NULL;
+		}
 	}
 
 	ret = TRUE;

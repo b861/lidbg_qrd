@@ -42,7 +42,6 @@
 #include <platform/clock.h>
 #include <platform/debug.h>
 #include <platform/iomap.h>
-#include <platform/gpio.h>
 #include <platform/irqs.h>
 #include <platform/timer.h>
 #include <partition_parser.h>
@@ -52,12 +51,21 @@
 #include <target.h>
 #include <uart_dm.h>
 
+#if DEVICE_TREE
+#include <libfdt.h>
+#include <dev_tree.h>
+#endif
+
 #include "bootimg.h"
 #include "devinfo.h"
 #include "image_verify.h"
 #include "recovery.h"
 #include "scm.h"
 #include "sparse_format.h"
+
+#define u8 	unsigned char
+#define u16 unsigned short
+#define u32	unsigned int
 
 #define FFBM_MODE_BUF_SIZE   8
 
@@ -78,5 +86,23 @@
 #define LPC_I2C_ADDR 0xa0
 #define LPC_SDA_GPIO   2
 #define LPC_SCL_GPIO   3
+
+#define ROUND_TO_PAGE(x,y) (((x) + (y)) & (~(y)))
+
+#ifdef MEMBASE
+#define EMMC_BOOT_IMG_HEADER_ADDR (0xFF000+(MEMBASE))
+#else
+#define EMMC_BOOT_IMG_HEADER_ADDR 0xFF000
+#endif
+
+extern struct fbcon_config *config;
+extern unsigned page_mask;
+extern unsigned page_size;
+
+extern char ffbm_mode_string[FFBM_MODE_BUF_SIZE];
+extern bool boot_into_ffbm;
+extern device_info device;
+
+extern int bp_meg;
 #endif
 

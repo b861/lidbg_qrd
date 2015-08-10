@@ -14,15 +14,21 @@ int adc_get(void);
 /*get fb base addr*/
 void *fb_base_get(void);
 
+/*platform logo addr get*/
+int logo_addr_get(unsigned char **partition_add, int partition_add_len,
+					unsigned char **rgb565_add, int rgb565_add_len,
+					unsigned char **rgb888_add, int rgb888_add_len, int *need_alloc_flag);
+
 /*ptn operations*/
 int ptn_read(char *ptn_name,unsigned  long len,unsigned char *buf);
 
 /*display init*/
 void flyaudio_display_init(void);
 
-/*ctp reset*/
-unsigned char ctp_read(char *buf,  unsigned char *sub_addr,unsigned int size);
-unsigned char ctp_write( char *buf, unsigned int size);
-int ctp_reset(void);
+/* flyrecovery */
+int boot_flyrecovery_from_mmc(void);
+
+/* dbg msg enable or disable*/
+char *dbg_msg_en(const char *system_cmd, int dbg_msg_en);
 
 #endif
