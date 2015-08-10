@@ -3,7 +3,11 @@
 
 int boot_flyrecovery_from_mmc()
 {
+	char *const boot_flyrecovery_cmd[] = {"booti", "flyrecovery"};
+	do_booti(NULL, 0, ARRAY_SIZE(boot_flyrecovery_cmd), boot_flyrecovery_cmd);
 
+	/* returns if recovery.img is bad */
+	FBTERR("\nfastboot: Error: Invalid recovery img\n");
 }
 
 int logo_addr_get(unsigned char **partition_add, int partition_add_len,

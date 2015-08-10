@@ -286,17 +286,9 @@ int logoDataDecompress(
 			{
 				for (j=0;j<lenForMark;j++)
 				{	
-					if(i==1400) 
-					{
-						//dprintf(INFO,"\n pdataBufRBG565->%u bufRBG565Index->%u",pdataBufRBG565,bufRBG565Index);
-					}
-
 					pdataBufRBG565[bufRBG565Index++] = pLogoFileData[i+2];
 					pdataBufRBG565[bufRBG565Index++] = pLogoFileData[i+3];
 				}
-
-				if(i==1400) dprintf(INFO,"\n002h");
-
 				i = i + 4;
 			}
 			else
@@ -307,7 +299,6 @@ int logoDataDecompress(
 					pdataBufRBG565[bufRBG565Index++] = pLogoFileData[i];
 					pdataBufRBG565[bufRBG565Index++] = pLogoFileData[i+1];
 				}
-
 				i = i + 2;
 			}
 		}
