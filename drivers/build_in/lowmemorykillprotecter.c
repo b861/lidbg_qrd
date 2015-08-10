@@ -27,9 +27,7 @@ static char *lmk_white_list[] =
 	"mediatorservice",
 	"droid.launcher3",
 	".flyaudio.media",
-	"mediaserver",
 	"ndroid.systemui",
-	"system_server",
 	"lyaudio.Weather",
 	"oadcastreceiver",
 	"c2739.mainframe",
@@ -38,7 +36,11 @@ static char *lmk_white_list[] =
 	"dio.osd.service",
 	"droid.deskclock",
 	"ys.DeviceHealth",
+	"io.proxyservice",
+	"mediaserver",
+	"system_server",
 	"system",
+	"logcat",
 	NULL,
 };
 
