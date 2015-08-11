@@ -1,11 +1,5 @@
-#include "soc.h"
+#include "../soc.h"
 #include "fly_platform.h"
-
-#if DEVICE_TREE
-BUF_DMA_ALIGN(dt_buf, 4096);
-#endif
-
-static unsigned char buf[4096]; //Equal to max-supported pagesize
 
 int boot_flyrecovery_from_mmc()
 {

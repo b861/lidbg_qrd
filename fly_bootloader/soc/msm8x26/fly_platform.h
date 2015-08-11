@@ -19,7 +19,6 @@
 #include <dev/keys.h>
 #include <dev/udc.h>
 #include <dev/lcdc.h>
-#include <dev/i2c.h>
 #include <dev/gpio.h>
 #include <dev/ssbi.h>
 #include <dev/fbcon.h>
@@ -29,7 +28,6 @@
 #include <lib/console.h>
 #include <lib/fs.h>
 #include <lib/ptable.h>
-#include <i2c_qup.h>
 #include <kernel/thread.h>
 #include <kernel/event.h>
 #include <kernel/timer.h>

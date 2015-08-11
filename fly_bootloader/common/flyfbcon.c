@@ -47,7 +47,7 @@ void display_logo_on_screen(sLogo *plogoparameter)
 	total_y = logo_show->y_position;
 	image_base_hdpi = logo_show->height;
 	image_base_wdpi = logo_show->width;
-	bytes_per_bpp = ((config->bpp) / 8);//config->bpp
+	bytes_per_bpp = (FBCON_BPP / 8);//config->bpp
 
 	dprintf(INFO,"******************************************************************************************\n");
 	dprintf(INFO,"**flyaudio logo ===>>>> total_x:%d total_y:%d  image_base_hdpi:%d image_base_wdpi:%d**\n",
@@ -56,7 +56,7 @@ void display_logo_on_screen(sLogo *plogoparameter)
 
 //set logo back color
 	//FlySetLogoBcol(logo_show->back_color);
-	   fbcon_clear();
+	   fly_fbcon_clear();
 
 #ifdef  DISPLAY_TYPE_MIPI
 	if (bytes_per_bpp == 3)
@@ -99,12 +99,12 @@ void display_logo_on_screen(sLogo *plogoparameter)
 	if (bytes_per_bpp == 2)// 2
 	{
 		if (CLEAN_SCREEN_WRITE) {
-		    memset (fb_base_get(), 0xf1, config->width * config->height * bytes_per_bpp);
+		    memset (fb_base_get(), 0xf1, FBCON_WIDTH * FBCON_HEIGHT * bytes_per_bpp);
 		}
 
 		for (i = 0; i <480; i++)
 		{
-		    memcpy (fb_base_get() + ((0 + (i * (config->width))) * bytes_per_bpp),
+		    memcpy (fb_base_get() + ((0 + (i * FBCON_WIDTH)) * bytes_per_bpp),
 		    pImageBuffer + (i * 800 * bytes_per_bpp),
 		   800* bytes_per_bpp);
 		}
@@ -118,7 +118,15 @@ void display_logo_on_screen(sLogo *plogoparameter)
 */
 }
 
+/* TODO: take stride into account */
+void fly_fbcon_clear(void)
+{
+	unsigned count = 0;
 
+	count = FBCON_WIDTH * FBCON_HEIGHT;
+	dprintf(INFO, "Fbcon clear, width[%d] height[%d] base[%d]\n", FBCON_WIDTH, FBCON_HEIGHT, fb_base_get());
+	memset(fb_base_get(), 0x000000, count * (FBCON_BPP / 8));
+}
 
 void fly_setBcol(unsigned long int backcolor)
 {
@@ -165,7 +173,7 @@ void fly_setBcol(unsigned long int backcolor)
 		}
       for (i = 0; i < 600; i++)
         {
-          memcpy (fb_base_get() + ((0 + (i * (config->width))) * 3),
+          memcpy (fb_base_get() + ((0 + (i * FBCON_WIDTH)) * 3),
         tem,
           1024 * 3);
          }
@@ -199,7 +207,7 @@ void FlySetLogoBcol(unsigned short  backcolor)
 
       for (i = 0; i < 600; i++)
         {
-          memcpy (fb_base_get() + ((0 + (i * (config->width))) * 3),
+          memcpy (fb_base_get() + ((0 + (i * FBCON_WIDTH)) * 3),
         tem,
           1024 * 3);
          }
@@ -234,7 +242,7 @@ void fly_putpext(int x,int y,unsigned long  color)
 		}
 //set RGB888 DATA TO SREEN
 
-          memcpy (fb_base_get() + ((x + (y * (config->width))) * 3),tem, 1 * 3);
+          memcpy (fb_base_get() + ((x + (y * FBCON_WIDTH)) * 3),tem, 1 * 3);
 	 free(tem);
 }
 
@@ -354,7 +362,7 @@ int  flyprint(char *pmat)
 	}
 print:
 	strcat(flyrecord[i],dbuff);
-	fbcon_clear();
+	fly_fbcon_clear();
 
 	for(;i>=0;i--)
 	{

@@ -15,12 +15,12 @@
 
 
 #define CLEAN_SCREEN_WRITE 0
+#define DEVICE_MAGIC_SIZE 13
 
-//#define   	u8 		unsigned char
-//#define  	u16		unsigned short
-//#define 	u32		unsigned int
+#define FBCON_WIDTH 1024
+#define FBCON_HEIGHT 600
+#define FBCON_BPP 24
 
-//#define uint32_t u32
 /*ctp reset*/
 extern unsigned char ctp_read(char *buf,  unsigned char *sub_addr,unsigned int size);
 extern unsigned char ctp_write( char *buf, unsigned int size);
@@ -40,6 +40,7 @@ extern void boot_linux(void *kernel, unsigned *tags,
 		const char *cmdline, unsigned machtype,
 		void *ramdisk, unsigned ramdisk_size);
 
+void fly_fbcon_clear(void);
 void fly_setBcol(unsigned long int backcolor);
 void fly_text_lk(int x, int y, const char * s, unsigned long fontcol);
 void fly_version(int x, int y, const char * s, unsigned long fontcol,...);
