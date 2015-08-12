@@ -44,6 +44,10 @@ void lidbg_enable_logcat2(void)
 {
 
     lidbg("logcat+\n");
+    lidbg_shell_cmd("rm /sdcard/logcat.txt");
+    lidbg_shell_cmd("rm /sdcard/logcat_old.txt");
+    ssleep(2);
+	
     lidbg_shell_cmd("date >/sdcard/logcat.txt");
     ssleep(1);
     lidbg_shell_cmd("chmod 777 /sdcard/logcat.txt");
