@@ -337,26 +337,6 @@ unified_boot:
 	return 0;
 }
 
-int logo_addr_get(unsigned char **partition_add, int partition_add_len,
-					unsigned char **rgb565_add, int rgb565_add_len,
-					unsigned char **rgb888_add, int rgb888_add_len, int *need_alloc_flag)
-{
-	rgb565_add_len = 0x100000;
-	rgb888_add_len = 0x100000;
-
-	*need_alloc_flag = 0;
-	if(*need_alloc_flag)
-		dprintf(INFO,"*** Need to alloc space for logo.\n");
-	else
-		dprintf(INFO,"*** No need to alloc space for logo.\n");
-
-	*partition_add = (unsigned char*)target_get_scratch_address();
-	*rgb565_add = *partition_add + rgb565_add_len;
-	*rgb888_add = *rgb565_add + rgb888_add_len;
-
-	return 0;
-}
-
 char *dbg_msg_en(const char *system_cmd, int dbg_msg_en)
 {
 	char *cmdline;

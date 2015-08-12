@@ -2,7 +2,7 @@
 
 unsigned page_mask = 0;
 
-int ptn_read(char *ptn_name,unsigned  long len,unsigned char *buf)
+int ptn_read(char *ptn_name,unsigned int offset, unsigned long len,unsigned char *buf)
 {
     fbt_partition_t* ptn;
 
@@ -10,7 +10,7 @@ int ptn_read(char *ptn_name,unsigned  long len,unsigned char *buf)
 	printf("Read partition %s, ptn = 0x%x \n", ptn_name, ptn->offset);
 
 	if(ptn){
-		if(CopyFlash2Memory(buf, ptn->offset, DIV_ROUND_UP(len, RK_BLK_SIZE))<0)
+		if(CopyFlash2Memory(buf, ptn->offset + offset, DIV_ROUND_UP(len, RK_BLK_SIZE))<0)
 		{
 			printf("read %s failed\n", ptn_name);
 			return -1;

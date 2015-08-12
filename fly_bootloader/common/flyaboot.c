@@ -292,7 +292,7 @@ void flyaboot_init(unsigned *boot_into_recovery,bool *boot_into_fastboot)
 	dprintf(INFO, "----- LK Build Time: %s %s -----\n", __DATE__, __TIME__);
 	fly_fbcon_clear();
 	//if(get_extra_recovery_message(&RecoveryMeg))
-	if(ptn_read("flyparameter",sizeof(RecoveryMeg),&RecoveryMeg))
+	if(ptn_read("flyparameter", 0, sizeof(RecoveryMeg), &RecoveryMeg))
 	{
 		dprintf(INFO,"flyaboot init autoUp.val = %d  upName.val = %d\n",RecoveryMeg.bootParam.autoUp.val,RecoveryMeg.bootParam.upName.val);
 	}

@@ -1,5 +1,6 @@
 #include "i2c_gpio.h"
 #include "soc.h"
+#include "fly_private.h"
 
 static struct i2c_gpio_dev *lpc_i2c_devp = NULL;
 
@@ -8,7 +9,7 @@ unsigned char lpc_read(char *buf, unsigned int size)
 	int ret;
 
 	struct i2c_msg msg_buf[] = {
-		{LPC_I2C_ADDR, I2C_M_RD, size, buf}
+		{g_bootloader_hw.lpc_info.lpc_slave_add, I2C_M_RD, size, buf}
 	};
 	ret = bit_xfer(lpc_i2c_devp, msg_buf, 1);
 
@@ -18,7 +19,7 @@ unsigned char lpc_read(char *buf, unsigned int size)
 unsigned char lpc_write( char *buf, unsigned int size)
 {
     int ret;
-	struct i2c_msg msg_buf[] = { {LPC_I2C_ADDR,
+	struct i2c_msg msg_buf[] = { {g_bootloader_hw.lpc_info.lpc_slave_add,
 				      I2C_M_WR, size, buf}
 	};
 	ret  = bit_xfer(lpc_i2c_devp, msg_buf, 1);
@@ -32,8 +33,8 @@ static void lpc_i2c_config()
 	int i =0;
 	dprintf(INFO, "><><>< config lpc i2c bus ><><><\n");
 
-	gpio_set_direction(LPC_SDA_GPIO,GPIO_OUTPUT);
-	gpio_set_direction(LPC_SCL_GPIO,GPIO_OUTPUT);
+	gpio_set_direction(g_bootloader_hw.lpc_info.lpc_sda,GPIO_OUTPUT);
+	gpio_set_direction(g_bootloader_hw.lpc_info.lpc_scl,GPIO_OUTPUT);
 	lpc_i2c_devp = malloc(sizeof(struct i2c_gpio_dev));
 	if (!lpc_i2c_devp) {
 		dprintf(INFO, "Malloc space for lpc_i2c_devp failed.\n");
@@ -42,8 +43,8 @@ static void lpc_i2c_config()
 	lpc_i2c_devp = memset(lpc_i2c_devp, 0, sizeof(struct i2c_gpio_dev));
 
 	lpc_i2c_devp->name = "lpc_i2c_gpio";
-	lpc_i2c_devp->scl_pin = LPC_SCL_GPIO;
-	lpc_i2c_devp->sda_pin = LPC_SDA_GPIO;
+	lpc_i2c_devp->scl_pin = g_bootloader_hw.lpc_info.lpc_scl;
+	lpc_i2c_devp->sda_pin = g_bootloader_hw.lpc_info.lpc_sda;
 	lpc_i2c_devp->retries = 5;
 	lpc_i2c_devp->udelay = 1;
 }

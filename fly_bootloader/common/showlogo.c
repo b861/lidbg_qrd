@@ -316,6 +316,60 @@ err_out:
 	return ret;
 }
 
+int logo_addr_get(unsigned char **partition_add, int partition_add_len,
+					unsigned char **rgb565_add, int rgb565_add_len,
+					unsigned char **rgb888_add, int rgb888_add_len)
+{
+	unsigned n = 0;
+
+	n = ROUND_TO_PAGE(partition_add_len, page_mask);
+
+	*partition_add = (unsigned char*)malloc(n*4);
+	if (NULL == *partition_add)
+	{
+		printf("Fail: malloc for partition_add !\n");
+		goto err_out;
+	}
+	memset(*partition_add,0,partition_add_len);
+
+	*rgb565_add = (unsigned char*)malloc(rgb565_add_len);
+	if (NULL == *rgb565_add)
+	{
+		printf("Fail: malloc for rgb565_add !\n");
+		goto err_out;
+	}
+
+	*rgb888_add = (unsigned char*)malloc(rgb888_add_len);
+	if (NULL == *rgb888_add)
+	{
+		printf("Fail: malloc for rgb888_add !\n");
+		goto err_out;
+	}
+
+	return 0;
+
+err_out:
+	if (NULL != *partition_add)
+	{
+		free(*partition_add);
+		*partition_add = NULL;
+	}
+
+	if (NULL != *rgb565_add)
+	{
+		free(rgb565_add);
+		*rgb565_add = NULL;
+	}
+
+	if (NULL != *rgb888_add)
+	{
+		free(*rgb888_add);
+		*rgb888_add = NULL;
+	}
+
+	return -1;
+}
+
 /*****************edit by flychan*********************/
 int  show_logo()
 {
@@ -350,7 +404,7 @@ int  show_logo()
 	}
 	pflyBootloaderInfo = (flybootloader_header_t*)tempBuf;
 
-	if (ptn_read("logo",4096,tempBuf))
+	if (ptn_read("logo", 0, 4096, tempBuf))
 	{
 		dprintf(INFO, "err_out: Cannot read flylogo  logodata:0x%x\n");
 		goto err_out;
@@ -398,13 +452,19 @@ int  show_logo()
 	dprintf(INFO,"fileLen -> %ld\n",fileLen);
 	dprintf(INFO,"lenTotal: %u\n",lenTotal);
 
-	ret = logo_addr_get(&pPartitionData, lenTotal, &pDataRGB565, logoPixel*2, &pDataRGB888, logoPixel, &alloc_flag);
+#ifdef LOGO_ADD_ALLOCED
+	pPartitionData = LOGO_MALLOCED_ADDR;
+	pDataRGB565 = pPartitionData + RGB565_DATA_LEN;
+	pDataRGB888 = pDataRGB565 + RGB888_DATA_LEN;
+#else
+	ret = logo_addr_get(&pPartitionData, lenTotal, &pDataRGB565, logoPixel*2, &pDataRGB888, logoPixel);
 	if(ret){
-		dprintf(INFO,"Error::: get logo addr failed !\n");
+		dprintf(INFO,"Error::: set logo addr failed !\n");
 		goto err_out;
 	}
+#endif
 
-	if (ptn_read("logo",lenTotal,pPartitionData))
+	if (ptn_read("logo", 0, lenTotal,pPartitionData))
 	{
 		dprintf(INFO,"FAILED: failed to read date for /logo\n");
 		goto err_out;
@@ -441,7 +501,7 @@ int  show_logo()
 
 	display_logo_on_screen(&LogoRGB888Info);
 
-	if(alloc_flag == 1){
+#ifndef LOGO_ADD_ALLOCED
 		if (NULL != pDataRGB565)
 		{
 			free(pDataRGB565);
@@ -465,8 +525,7 @@ int  show_logo()
 			free(tempBuf);
 			tempBuf = NULL;
 		}
-	}
-
+#endif
 	ret = TRUE;
 
 err_out:

@@ -7,6 +7,15 @@
 #include "i2c_gpio.h"
 #include "i2c_screen.h"
 #include "soc.h"
+#include "fly_target.h"
+
+/* GPIO TLMM: Direction */
+#ifndef GPIO_INPUT
+#define GPIO_INPUT      0
+#endif
+#ifndef GPIO_OUTPUT
+#define GPIO_OUTPUT     1
+#endif
 
 #define DEFAULT_CMDLINE "mem=100M console=null";
 #define FLY_SCREEN_SIZE_1024 1

@@ -3,6 +3,7 @@ INCLUDES += -I$(DBG_BOOTLOADER_DIR)/include -I$(DBG_BOOTLOADER_DIR)/dev/pmic/pm8
 INCLUDES += -I$(DBG_BOOTLOADER_DIR)/flyaudio/common/include
 
 OBJS +=\
+	$(DBG_BOOTLOADER_DIR)/flyaudio/soc/$(DBG_SOC)/bootloader_target_msm8x26.o	\
 	$(DBG_BOOTLOADER_DIR)/flyaudio/soc/$(DBG_SOC)/fly_interface.o	\
 	$(DBG_BOOTLOADER_DIR)/flyaudio/soc/$(DBG_SOC)/adc_func.o	\
 	$(DBG_BOOTLOADER_DIR)/flyaudio/soc/$(DBG_SOC)/gpio_func.o	\

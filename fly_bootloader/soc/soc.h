@@ -14,13 +14,8 @@ int adc_get(void);
 /*get fb base addr*/
 void *fb_base_get(void);
 
-/*platform logo addr get*/
-int logo_addr_get(unsigned char **partition_add, int partition_add_len,
-					unsigned char **rgb565_add, int rgb565_add_len,
-					unsigned char **rgb888_add, int rgb888_add_len, int *need_alloc_flag);
-
 /*ptn operations*/
-int ptn_read(char *ptn_name,unsigned  long len,unsigned char *buf);
+int ptn_read(char *ptn_name,unsigned int offset, unsigned long len,unsigned char *buf);
 
 /*display init*/
 void flyaudio_display_init(void);
