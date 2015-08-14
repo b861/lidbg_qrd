@@ -47,7 +47,11 @@ function build_trustzone_image()
 function build_ln_get_image()
 {
     echo $FUNCNAME
-    cd $LINUX_android_PATH && ln -s $DBG_SYSTEM_DIR/out out
+    cd $LINUX_android_PATH
+	if [ -d "out" ]; then
+	rm out
+	fi
+	ln -s $DBG_SYSTEM_DIR/out out
 #  cp qcn
 }
 
@@ -149,6 +153,10 @@ function build_all_handle()
     cd $BP_SOURCE_PATH && source setenv-modem.sh 
     build_mpss && source $BP_SOURCE_PATH/setenv.sh && build_bootloader && build_adsp && build_debug_image 
     build_rpm && build_wcnss && build_trustzone_image && build_ln_get_image & build_update;;
+	msm8909)
+    echo "进入编译8909"
+   # insmod xx && 
+    cd $BP_SOURCE_PATH && source setenv.sh && build_mpss && build_bootloader && build_rpm && build_trustzone_image &&  build_ln_get_image && build_update;;
     esac
 
 #    cp all image to ./out
@@ -159,9 +167,13 @@ function bp_combine_menu()
     echo $BP_SOURCE_PATH
     echo [71] build MPSS'                         'NON-HLOS.bin_1
     echo [72] build Bootloader'                   'sbl1.mbn
-    echo [73] build ADSP'                         'NON-HLOS.bin_2
-    echo [74] build RPM'                          'rpm.mbn
+	case "$DBG_PLATFORM" in
+	msm8909)	;;
+	*)
+    echo [73] build ADSP'                         'NON-HLOS.bin_2;;
+	esac
 
+    echo [74] build RPM'                          'rpm.mbn
     case "$DBG_PLATFORM" in
     #编译8974需要编译wcnss
     msm8974)

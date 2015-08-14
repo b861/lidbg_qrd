@@ -381,12 +381,10 @@ case "$DBG_PLATFORM_ID" in
 	export RPM_FILE_PATH=$RPM_PATH/ms/bin/AAAAANAAR
 	export SBL_FILE_PATH=$BOOT_IMAGE_PATH/bin/8x26
 	export TZ_FILE_PATH=$TZ_PATH/bin/FARAANBA
-	export MPSS_BUILD_CMD='./build.sh 8626.gen.prod BUILD_VER=01780 -k'
-	export BOOTLOADER_BUILD_CMD='./build.sh TARGET_FAMILY=8x26 BUILD_ID=FAAAANAZ -j1'
-	export ADSP_BUILD_CMD='python build.py'
-	export RPM_BUILD_CMD='./rpm_proc/build/build_8x26.sh -j1'
-	export DEBUG_IMAGE_CMD='./b8x26.sh TARGET_FAMILY=8x26 sdi BUILD_ID=AAAAANAZ BUILD_VER=54 BUILD_MIN=1 -j1'
-	export TZ_BUILD_CMD='./build.sh CHIPSET=msm8x26 tz -j1'
+	export MPSS_BUILD_CMD='./build.sh 8909.gen.prod -k'
+	export BOOTLOADER_BUILD_CMD='./build.sh TARGET_FAMILY=8909 --prod -j1'
+	export RPM_BUILD_CMD='./rpm_proc/build/build_8909.sh -j1'
+	export TZ_BUILD_CMD='./build.sh CHIPSET=msm8909 tz sampleapp tzbsp_no_xpu playready widevine keymaster commonlib -j1'
 	export UPDATE_BUILD_CMD='python update_common_info.py';;
 
     	12)

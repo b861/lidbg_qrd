@@ -79,8 +79,10 @@ function lidbg_menu()
 	debug_menu
 	echo
 	combination_menu
+	if [ $DBG_VENDOR = VENDOR_QCOM ];then
 	echo
 	bp_combine_menu
+	fi
 	echo
 	common_menu
 }

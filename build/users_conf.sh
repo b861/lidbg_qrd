@@ -254,7 +254,7 @@ case "$USERS_ID" in
 		export BP_SOURCE_PATH=~/swlee/msm8626-la-1-0-4_amss_oem-xtra_no-l1-tds;;
 		11)
 		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/M8974AAAAANLYD4275
-		export BP_SOURCE_PATH=~/swlee/msm8626-la-1-0-4_amss_oem-xtra_no-l1-tds;;
+		export BP_SOURCE_PATH=~/lwy/msm8909-la-1-1_amss_oem_milestone-major;;
 	esac;;
 	7)
 	export DBG_PLATFORM_PATH=/home2/liangyihong/projDir
