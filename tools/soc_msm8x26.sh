@@ -33,9 +33,9 @@ function soc_build_recoveryimage()
 	echo $FUNCNAME
 	cd $DBG_SYSTEM_DIR
 	rm $DBG_OUT_PATH/*.apk $DBG_OUT_PATH/ES.ko $DBG_OUT_PATH/ST.ko $DBG_OUT_PATH/mkfs.exfat $DBG_OUT_PATH/GPS.ko $DBG_OUT_PATH/*.so $DBG_OUT_PATH/FlyBootService
-	rm -rf $DBG_SYSTEM_DIR/bootable/recovery/flyaudio/lib/modules/out
-	mkdir -p $DBG_SYSTEM_DIR/bootable/recovery/flyaudio/lib/modules
-	cp -rfv $DBG_OUT_PATH  $DBG_SYSTEM_DIR/bootable/recovery/flyaudio/lib/modules/out
+	rm -rf $DBG_SYSTEM_DIR/bootable/recovery/flyRecovery/out
+	mkdir -p $DBG_SYSTEM_DIR/bootable/recovery/flyRecovery
+	cp -rf $DBG_OUT_PATH  $DBG_SYSTEM_DIR/bootable/recovery/flyRecovery/out
 	soc_prebuild && soc_build_common 'make recoveryimage -j16'
 }
 
