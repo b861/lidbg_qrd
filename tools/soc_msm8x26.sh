@@ -163,7 +163,19 @@ function soc_build_origin_image()
 
 function soc_build_bootloader()
 {
-	cp -rf $DBG_ROOT_PATH/fly_bootloader/* $DBG_SYSTEM_DIR/bootable/bootloader/lk/flyaudio
+	echo $FUNCNAME
+
+	if [ ! -d "$DBG_BOOTLOADER_DIR/flyaudio" ]; then
+		mkdir "$DBG_BOOTLOADER_DIR/flyaudio"
+	else
+		rm -rf "$DBG_BOOTLOADER_DIR/flyaudio"
+		mkdir "$DBG_BOOTLOADER_DIR/flyaudio"
+	fi
+
+	cp -rf $DBG_ROOT_PATH/fly_bootloader/* $DBG_BOOTLOADER_DIR/flyaudio
+	cp -f $DBG_ROOT_PATH/build/build_cfg.mk $DBG_BOOTLOADER_DIR/flyaudio/common/build_cfg.mk
+	echo DEFINES += $(echo BOOTLOADER_$DBG_PLATFORM | tr '[a-z]' '[A-Z]') >> $DBG_BOOTLOADER_DIR/flyaudio/common/build_cfg.mk
+
 	set_env
 	make aboot -j16
 }

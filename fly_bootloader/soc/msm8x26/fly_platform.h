@@ -61,7 +61,14 @@
 #include "scm.h"
 #include "sparse_format.h"
 
+#ifdef BOOTLOADER_MSM8226
 #define BOARD_VERSION 0
+#endif
+#ifdef BOOTLOADER_MSM8974
+#define BOARD_VERSION 1
+#endif
+
+#define ADC_KEY_CHNL 2
 
 #define u8 	unsigned char
 #define u16 unsigned short

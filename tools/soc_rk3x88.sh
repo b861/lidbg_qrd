@@ -33,10 +33,19 @@ function soc_build_recoveryimage()
 
 function soc_build_bootloader()
 {
-        echo $FUNCNAME
-        cp -rf $DBG_ROOT_PATH/fly_bootloader/* $DBG_SYSTEM_DIR/uboot/flyaudio
-        cd $DBG_SYSTEM_DIR/uboot
-        make rk30xx -j16
+	echo $FUNCNAME
+
+	if [ ! -d "$DBG_BOOTLOADER_DIR/flyaudio" ]; then
+		mkdir "$DBG_BOOTLOADER_DIR/flyaudio"
+	else
+		rm -rf "$DBG_BOOTLOADER_DIR/flyaudio"
+		mkdir "$DBG_BOOTLOADER_DIR/flyaudio"
+	fi
+
+	cp -rf $DBG_ROOT_PATH/fly_bootloader/* $DBG_SYSTEM_DIR/uboot/flyaudio
+	cp -f $DBG_ROOT_PATH/build/build_cfg.mk $DBG_BOOTLOADER_DIR/flyaudio/common/build_cfg.mk
+	cd $DBG_SYSTEM_DIR/uboot
+	make rk30xx -j16
 }
 
 function soc_build_common()

@@ -1,6 +1,8 @@
 INCLUDES += -I$(DBG_BOOTLOADER_DIR)/flyaudio/common/include -I$(DBG_BOOTLOADER_DIR)/app/aboot -I$(DBG_BOOTLOADER_DIR)/dev/ssbi/include
 INCLUDES += -I$(DBG_BOOTLOADER_DIR)/flyaudio/soc
 
+include $(DBG_BOOTLOADER_DIR)/flyaudio/common/build_cfg.mk
+
 OBJS +=\
 	$(DBG_BOOTLOADER_DIR)/flyaudio/common/ctp_func.o \
 	$(DBG_BOOTLOADER_DIR)/flyaudio/common/flyaboot.o \

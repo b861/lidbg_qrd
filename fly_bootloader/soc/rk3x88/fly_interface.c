@@ -12,5 +12,5 @@ int boot_flyrecovery_from_mmc()
 
 char *dbg_msg_en(const char *system_cmd, int dbg_msg_en)
 {
-
+	return NULL;
 }

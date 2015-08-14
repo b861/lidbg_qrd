@@ -1,5 +1,6 @@
 #include "../soc.h"
 #include <pm8x41_adc.h>
+#include "fly_target.h"
 
 uint32_t fly_get_adc(uint16_t ch_num ,uint16_t mpp_num)
 {
@@ -11,17 +12,14 @@ uint32_t fly_get_adc(uint16_t ch_num ,uint16_t mpp_num)
 
 int adc_get(void)
 {
-	int ch1_val = 0;
-	int ch2_val = 0;
+	int ac_ch_val[ADC_KEY_CHNL] = {0};
+	int i=0;
 
-	ch1_val = fly_get_adc(38 , 6);
-	ch2_val = fly_get_adc(39 , 7);
-
-	if((ch1_val <= 3200000) || (ch2_val <= 3200000)){
-		ch1_val = 0;
-		ch2_val = 0;
-		return 1;
+	for(i=0; i<ADC_KEY_CHNL; i++){
+		ac_ch_val[i] = fly_get_adc(g_bootloader_hw.adc_info[i].ad_ch, g_bootloader_hw.adc_info[i].ad_ctrl_ch);
+		if(ac_ch_val[i] <= g_bootloader_hw.adc_info[i].ad_vol)
+			return 1;
 	}
-	else
-		return 0;
+
+	return 0;
 }

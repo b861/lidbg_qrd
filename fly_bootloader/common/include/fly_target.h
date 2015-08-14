@@ -3,6 +3,13 @@
 
 #include "fly_private.h"
 
+struct adc_config
+{
+	int ad_ch;
+	int ad_ctrl_ch;
+	int ad_vol;
+};
+
 struct ctp_config
 {
 	int ctp_slave_add;
@@ -23,6 +30,7 @@ struct lpc_config
 
 struct bootloader_hw_config
 {
+	struct adc_config adc_info[ADC_KEY_CHNL];
 	struct ctp_config ctp_info;
 	struct lpc_config lpc_info;
 };
