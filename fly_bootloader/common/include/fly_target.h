@@ -3,6 +3,15 @@
 
 #include "fly_private.h"
 
+struct display_config
+{
+	int dsi83_slave_add;
+	int dsi83_en_pin;
+
+	int i2c_blsp_id;
+	int i2c_qup_id;
+};
+
 struct adc_config
 {
 	int ad_ch;
@@ -30,6 +39,7 @@ struct lpc_config
 
 struct bootloader_hw_config
 {
+	struct display_config display_info;
 	struct adc_config adc_info[ADC_KEY_CHNL];
 	struct ctp_config ctp_info;
 	struct lpc_config lpc_info;

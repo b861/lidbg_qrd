@@ -17,8 +17,8 @@ void *fb_base_get(void);
 /*ptn operations*/
 int ptn_read(char *ptn_name,unsigned int offset, unsigned long len,unsigned char *buf);
 
-/*display init*/
-void flyaudio_display_init(void);
+/*hardware init*/
+void flyaudio_hw_init(void);
 
 /* flyrecovery */
 int boot_flyrecovery_from_mmc(void);

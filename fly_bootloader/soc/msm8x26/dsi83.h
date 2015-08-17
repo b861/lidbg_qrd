@@ -1,28 +1,13 @@
 #ifndef __DSI83_H__
 #define __DSI83_H__
 
+#include "fly_platform.h"
+#include "fly_private.h"
 
-#define DSI83_DELAY_TIME	(0)
-#define 	PANEL_GPIO_RESET       (25)
-#define 	DSI83_GPIO_EN          (58)
-#define 	DSI83_I2C_ADDR	       (0x2d)
-#define T123_GPIO_RST          (28)
-#define T123_RESET do{  \
-	gpio_tlmm_config(T123_GPIO_RST, 0, GPIO_OUTPUT, GPIO_NO_PULL,GPIO_8MA, GPIO_ENABLE);\
-	gpio_set_value(T123_GPIO_RST, 0);\
-	mdelay(300);\
-	gpio_tlmm_config(T123_GPIO_RST, 0, GPIO_OUTPUT, GPIO_NO_PULL,GPIO_8MA, GPIO_ENABLE);\
-	gpio_set_value(T123_GPIO_RST, 1);\
-	mdelay(30);\
-	}while(0)
-#define LCD_RESET do{  \
-	gpio_tlmm_config(PANEL_GPIO_RESET, 0, GPIO_OUTPUT, GPIO_NO_PULL,GPIO_8MA, GPIO_ENABLE);\
-	gpio_set_value(PANEL_GPIO_RESET, 0);\
-	mdelay(20);\
-	gpio_tlmm_config(PANEL_GPIO_RESET, 0, GPIO_OUTPUT, GPIO_NO_PULL,GPIO_8MA, GPIO_ENABLE);\
-	gpio_set_value(PANEL_GPIO_RESET, 1);\
-	mdelay(30);\
-	}while(0)
+#define DSI83_I2C_ADDR		(g_bootloader_hw.display_info.dsi83_slave_add)
+#define DSI83_GPIO_EN		(g_bootloader_hw.display_info.dsi83_en_pin)
+#define I2C_BLSP_ID			(g_bootloader_hw.display_info.i2c_blsp_id)
+#define I2C_QUP_ID			(g_bootloader_hw.display_info.i2c_qup_id)
 
 #ifndef TEST_PATTERN
 char dsi83_conf[] =

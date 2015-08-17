@@ -1,7 +1,4 @@
-#include <i2c_qup.h>
 #include <blsp_qup.h>
-#include <debug.h>
-#include <reg.h>
 #include <platform/iomap.h>
 #include <platform/gpio.h>
 #include "dsi83.h"
@@ -224,21 +221,9 @@ static void dsi83_enable(void)
 	mdelay(50);
 }
 
-static void T123_reset(void)
-{
-	T123_RESET;
-}
-
-static void panel_reset(void)
-{
-	LCD_RESET;
-}
-
 void dsi83_gpio_init()
 {
 	dsi83_enable();
-	panel_reset();
-	T123_reset();
 }
 
 
@@ -249,7 +234,7 @@ void dsi83_init()
 	int cnt = 0;
 	
 	dprintf(INFO,"dsi83_init.\n");
-	dev = qup_blsp_i2c_init(BLSP_ID_1, QUP_ID_5, 100000, 19200000);
+	dev = qup_blsp_i2c_init(I2C_BLSP_ID, I2C_QUP_ID, 100000, 19200000);
 	if (!dev) {
 		dprintf(INFO, "Failed initializing I2c\n");
 		return;

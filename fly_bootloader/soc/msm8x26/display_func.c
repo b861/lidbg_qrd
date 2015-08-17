@@ -2,7 +2,7 @@
 
 extern void dsi83_init();
 
-void flyaudio_display_init(void)
+void flyaudio_hw_init(void)
 {
 	dsi83_init();
 }

@@ -4,6 +4,13 @@ struct bootloader_hw_config g_hw_info[] =
 {
 	//msm8226
 	{
+		.display_info = {
+			.dsi83_slave_add = 0x2d,
+			.dsi83_en_pin = 62,
+			.i2c_blsp_id = 1,
+			.i2c_qup_id = 2,
+		},
+
 		.adc_info[0] = {
 			.ad_ch = 35,
 			.ad_ctrl_ch = 3,
@@ -34,6 +41,13 @@ struct bootloader_hw_config g_hw_info[] =
 	},
 	//msm8974
 	{
+		.display_info = {
+			.dsi83_slave_add = 0x2d,
+			.dsi83_en_pin = 58,
+			.i2c_blsp_id = 1,
+			.i2c_qup_id = 5,
+		},
+
 		.adc_info[0] = {
 			.ad_ch = 38,
 			.ad_ctrl_ch = 6,
