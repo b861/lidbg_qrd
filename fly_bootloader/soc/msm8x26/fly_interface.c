@@ -17,7 +17,7 @@ int boot_flyrecovery_from_mmc()
 	int rcode;
 	unsigned long long ptn = 0;
 	int index = INVALID_PTN;
-	const char *cmdline;
+	char *cmdline;
 
 	unsigned char *image_addr = 0;
 	unsigned kernel_actual;
@@ -325,11 +325,8 @@ int boot_flyrecovery_from_mmc()
 
 unified_boot:
 
-	cmdline = open_system_print_redScreen;
-	dprintf(INFO, "cmdline = '%s'\n", cmdline);
-	char buff[4];
-	emmc_get_extra_recovery_msg2("flyparameter", 4, buff);
-	dprintf(INFO, "buff = %x,%x,%x,%x\n", buff[0],buff[1],buff[2],buff[3]);
+	cmdline = dbg_msg_en(hdr->cmdline, bp_meg);
+
 	boot_linux((void *)hdr->kernel_addr, (void *)hdr->tags_addr,
 		   (const char *)cmdline, board_machtype(),
 		   (void *)hdr->ramdisk_addr, hdr->ramdisk_size);

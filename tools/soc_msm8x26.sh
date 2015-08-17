@@ -21,13 +21,6 @@ function soc_build_recovery()
 	soc_prebuild && soc_build_common 'make recovery -j16'
 }
 
-function soc_build_bootloader()
-{
-	echo $FUNCNAME
-	cd $DBG_SYSTEM_DIR
-	soc_prebuild && soc_build_common 'make aboot -j16'
-}
-
 function soc_build_recoveryimage()
 {
 	echo $FUNCNAME
@@ -51,6 +44,11 @@ function soc_build_all()
 {
 	echo $FUNCNAME
 	cd $DBG_SYSTEM_DIR
+
+	if [ -d "$DBG_BOOTLOADER_DIR/flyaudio" ]; then
+		rm -rf "$DBG_BOOTLOADER_DIR/flyaudio"
+	fi
+
 	soc_prebuild && make -j16 && soc_postbuild
 }
 
@@ -128,6 +126,10 @@ function soc_make_otapackage()
 	#cp -u $RELEASE_REPOSITORY/lk/emmc_appsboot.mbn  $DBG_SYSTEM_DIR/device/qcom/msm8226/radio/
 	#cp -u $RELEASE_REPOSITORY/radio/* 	        $DBG_SYSTEM_DIR/device/qcom/msm8226/radio/
 	cd $DBG_SYSTEM_DIR
+
+	if [ -d "$DBG_BOOTLOADER_DIR/flyaudio" ]; then
+		rm -rf "$DBG_BOOTLOADER_DIR/flyaudio"
+	fi
 
 	if [[ $TARGET_PRODUCT = "" ]];then
 		source build/envsetup.sh&&choosecombo release $DBG_PLATFORM $SYSTEM_BUILD_TYPE

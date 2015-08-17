@@ -3,8 +3,6 @@
 #include <partition_parser.h>
 #include "../soc.h"
 
-#define ROUND_TO_PAGE(x,y) (((x) + (y)) & (~(y)))
-
 extern unsigned page_mask;
 
 int ptn_read(char *ptn_name,unsigned int offset, unsigned long len,unsigned char *buf)

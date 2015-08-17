@@ -54,7 +54,6 @@ function soc_menu()
 	echo [29] make bootloader
 	echo [30] common
 	echo [31] make git commit image
-	echo [32] make bootloader
 }
 
 function soc_build_git_commit_image()
@@ -91,8 +90,6 @@ function soc_handle()
 		soc_build_common "$2 $3 $4";;
 	31)
 		soc_build_git_commit_image;;
-	32)
-		soc_build_bootloader;;
 	*)
 		echo
 	esac

@@ -6,7 +6,6 @@
 #include "flyaboot.h"
 #include "soc.h"
 
-#define ROUND_TO_PAGE(x,y) (((x) + (y)) & (~(y)))
 static const int EXTRA_PAGE = 0;
 
 recovery_meg_t RecoveryMeg = {

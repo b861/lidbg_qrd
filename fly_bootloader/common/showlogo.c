@@ -16,7 +16,6 @@ extern unsigned page_size;
 #define 	u32		unsigned int 
 #define  	u16		unsigned short  
 #define   u8 		unsigned char
-#define ROUND_TO_PAGE(x,y) (((x) + (y)) & (~(y)))
 
 typedef struct flybootloader_header{
 	char index[16];
