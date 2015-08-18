@@ -3,6 +3,17 @@
 
 LIDBG_DEFINE;
 
+static int flyts_hal_init(void);
+static struct semaphore sem;
+static wait_queue_head_t wait_queue;
+
+u8 flyts_hal_data;
+
+#define FIFO_SIZE (256)
+u8 flyts_hal_fifo_buffer[FIFO_SIZE];
+static struct kfifo flyts_hal_data_fifo;
+
+
 #define GTP_RST_PORT_ACTIVE (1)
 #define USE_TS_NUM (0)
 
@@ -268,7 +279,8 @@ switch(key_value){
 
 void ts_key_report(s32 input_x,s32 input_y,struct ts_devices_key *tskey,int size)
 {
-    int i;  
+    int i;
+    u8 fifo_out,bytes;
     for(i = 0; i < size; i++)
 	{
 		if( (abs( input_x - tskey->key_x)<=tskey->offset_x)&&(abs( input_y - tskey->key_y)<=tskey->offset_y))
@@ -282,6 +294,22 @@ void ts_key_report(s32 input_x,s32 input_y,struct ts_devices_key *tskey,int size
 					{
 						pr_debug("SOC_Hal_Ts_Callbacking:%d\n",g_var.ts_active_key);
 						SOC_Hal_Ts_Callback( g_var.ts_active_key);
+					}
+					else
+					{
+						flyts_hal_data = g_var.ts_active_key;
+
+						down(&sem);
+						if(kfifo_is_full(&flyts_hal_data_fifo))
+						{
+							bytes = kfifo_out(&flyts_hal_data_fifo, &fifo_out, 1);
+							lidbg("[ts_hal]kfifo_full!!!!!\n");
+						}
+						kfifo_in(&flyts_hal_data_fifo, &flyts_hal_data, 1);
+						up(&sem);
+
+						wake_up_interruptible(&wait_queue);
+						lidbg("flyts_hal_data = %x\n",flyts_hal_data);
 					}
 				}
 			lidbg("tskey->key_value% d", tskey->key_value);
@@ -325,6 +353,7 @@ void ts_probe_prepare(void)
 //zone end
 void ts_data_report(touch_type t,int id,int x,int y,int w)
 {
+	u8 fifo_out,bytes;
 	pr_debug("%s:%d,%d[%d,%d,%d]\n", __FUNCTION__,t,id, x, y,w);
 	GTP_SWAP(x, y);
    	 if (1 == ts_should_revert)
@@ -340,6 +369,21 @@ void ts_data_report(touch_type t,int id,int x,int y,int w)
 				{
 					pr_debug("SOC_Hal_Ts_Callbacking:%d\n",TS_NO_KEY);
 					SOC_Hal_Ts_Callback(TS_NO_KEY);
+				}
+				else
+				{
+					flyts_hal_data = TS_NO_KEY;
+					down(&sem);
+					if(kfifo_is_full(&flyts_hal_data_fifo))
+					{
+						bytes = kfifo_out(&flyts_hal_data_fifo, &fifo_out, 1);
+						lidbg("[ts_hal]kfifo_full!!!!!\n");
+					}
+					kfifo_in(&flyts_hal_data_fifo, &flyts_hal_data, 1);
+					up(&sem);
+
+					wake_up_interruptible(&wait_queue);
+					lidbg("flyts_hal_data = %x\n",flyts_hal_data);
 				}
 			}
 		}
@@ -519,12 +563,120 @@ static int ts_probe_init(void)
     DUMP_BUILD_TIME;
     LIDBG_GET;
     CREATE_KTHREAD(ts_probe_thread, NULL);
+    flyts_hal_init();
     return 0;
 }
 
 static void ts_probe_exit(void)
 {
 }
+
+//###############################-<ts for hal>-###############################
+
+/**
+ * flyts_hal_poll - poll function
+ * @filp:module file struct
+ * @wait:poll table
+ *
+ * poll function.
+ *
+ */
+static unsigned int flyts_hal_poll(struct file *filp, struct poll_table_struct *wait)
+{
+    unsigned int mask = 0;
+    lidbg("[flyts_hal_poll]wait begin\n");
+    poll_wait(filp, &wait_queue, wait);
+    lidbg("[flyts_hal_poll]wait done\n");
+    down(&sem);
+    if(!kfifo_is_empty(&flyts_hal_data_fifo))
+    {
+        mask |= POLLIN | POLLRDNORM;
+    }
+    up(&sem);
+    return mask;
+}
+
+/**
+ * ts_hal_probe - probe function
+ * @filp:file struct
+ * @buf:user buffer
+ * @count:bytes count
+ * @f_pos:file pos
+ *
+ * read function.
+ *
+ */
+ssize_t flyts_hal_read (struct file *filp, char __user *buf, size_t count, loff_t *f_pos)
+{
+	int read_len,fifo_len,bytes;
+	lidbg("ts_hal read start.\n");
+	if(kfifo_is_empty(&flyts_hal_data_fifo))
+	{
+	    if(wait_event_interruptible(wait_queue, !kfifo_is_empty(&flyts_hal_data_fifo)))
+	        return -ERESTARTSYS;
+	}
+	down(&sem);
+
+	fifo_len = kfifo_len(&flyts_hal_data_fifo);
+
+	if(count > fifo_len)
+	    read_len = fifo_len;
+	else
+	    read_len = count;
+
+	bytes = kfifo_out(&flyts_hal_data_fifo, flyts_hal_fifo_buffer, read_len);
+	up(&sem);
+
+	if(copy_to_user(buf, flyts_hal_fifo_buffer, read_len))
+	{
+	    return -1;
+	}
+
+	if(kfifo_len(&flyts_hal_data_fifo) > 0)
+	    wake_up_interruptible(&wait_queue);
+
+	return read_len;
+}
+
+/**
+ * flyts_hal_open - open function
+ * @inode:inode
+ * @filp:file struct
+ *
+ * open function.
+ *
+ */
+int flyts_hal_open (struct inode *inode, struct file *filp)
+{
+    lidbg("[ts_hal]flyts_hal_open\n");
+    return 0;
+}
+
+static  struct file_operations flyts_hal_fops =
+{
+    .owner = THIS_MODULE,
+    .read = flyts_hal_read,
+    .poll = flyts_hal_poll,
+    .open = flyts_hal_open,
+};
+
+/**
+ * ts_hal_probe - probe function
+ * @pdev:platform_device
+ *
+ * probe function.
+ *
+ */
+static int  flyts_hal_init(void)
+{
+	lidbg_new_cdev(&flyts_hal_fops, "flyts_hal");//add cdev
+	init_waitqueue_head(&wait_queue);
+	sema_init(&sem, 1);
+	kfifo_init(&flyts_hal_data_fifo, flyts_hal_fifo_buffer, FIFO_SIZE);
+	lidbg_chmod("/dev/flyts_hal0");
+	return 0;
+}
+
 
 module_init(ts_probe_init);
 module_exit(ts_probe_exit);
