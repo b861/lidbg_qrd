@@ -2,12 +2,13 @@
  *
  */
 #include "lidbg.h"
-
+#define DEVICE_NAME "fly_lpc"
 LIDBG_DEFINE;
 static bool lpc_work_en = true;
-
+static struct kfifo lpc_data_fifo;
 #define DATA_BUFF_LENGTH_FROM_MCU   (128)
-
+#define FIFO_SIZE (1024*4)
+u8 fifo_buffer[FIFO_SIZE];
 #define BYTE u8
 #define UINT u32
 #define UINT32 u32
@@ -16,9 +17,17 @@ static bool lpc_work_en = true;
 
 #define FALSE 0
 #define TRUE 1
-
+#define HAL_BUF_SIZE (1024*4)
+u8 lpc_data_for_hal[HAL_BUF_SIZE];
 #define LPC_SYSTEM_TYPE 0x00
-
+struct lpc_device
+{
+	char *name;
+	unsigned int counter;
+	wait_queue_head_t queue;
+	struct semaphore sem;
+	struct cdev cdev;
+};
 typedef struct _FLY_IIC_INFO
 {
     struct work_struct iic_work;
@@ -39,13 +48,12 @@ struct fly_hardware_info
     BYTE buffFromMCUBak[DATA_BUFF_LENGTH_FROM_MCU];
 
 };
-
+struct lpc_device *dev;
 #define  MCU_ADDR_W  0xA0
 #define  MCU_ADDR_R  0xA1
 
 int lpc_ping_test = 0;
 int lpc_ctrl_by_app = 0;
-
 #define LPC_DEBUG_LOG
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
@@ -115,7 +123,7 @@ void LPCCombinDataStream(BYTE *p, UINT len)
     BYTE bufData[16];
     BYTE *buf;
     bool bMalloc = FALSE;
-
+  
     if(!lpc_work_en)
         return;
 
@@ -277,10 +285,37 @@ static BOOL readFromMCUProcessor(BYTE *p, UINT length)
 
 BOOL actualReadFromMCU(BYTE *p, UINT length)
 {
-
+   
     if(!lpc_work_en)
         return FALSE;
-
+    if(g_var.recovery_mode)
+	{
+        BYTE buff[128];
+		BYTE iReadLen = 128;
+		int read_cnt,fifo_len;
+        pr_debug("-------recovery_irq-------\n");
+		read_cnt = SOC_I2C_Rec_Simple(LPC_I2_ID, MCU_ADDR_R >> 1, buff, iReadLen);
+        down(&dev->sem);		
+		kfifo_in(&lpc_data_fifo, buff,iReadLen); 
+		if(kfifo_is_full(&lpc_data_fifo))
+		{
+			kfifo_reset(&lpc_data_fifo);
+			lidbg("kfifo_reset!!!!!\n");
+		}           
+		fifo_len = kfifo_len(&lpc_data_fifo);
+		up(&dev->sem);
+		if(fifo_len>0)
+		{
+			wake_up_interruptible(&dev->queue);
+		    return true;  
+		}
+        else
+		{
+			return false;
+		}
+    }
+    else
+	{
     SOC_I2C_Rec_Simple(LPC_I2_ID, MCU_ADDR_R >> 1, p, length);
     if (readFromMCUProcessor(p, length))
     {
@@ -294,17 +329,14 @@ BOOL actualReadFromMCU(BYTE *p, UINT length)
     {
         return FALSE;
     }
+	}
+  
 }
 
 //MCUµÄIIC¶Á´¦Àí
 irqreturn_t MCUIIC_isr(int irq, void *dev_id)
 {
-	if(g_var.recovery_mode)
-	{
-		if(lpc_ctrl_by_app)
-			complete(&lpc_read_wait);
-	}
-	else	
+		
     	schedule_work(&pGlobalHardwareInfo->FlyIICInfo.iic_work);
     return IRQ_HANDLED;
 }
@@ -343,8 +375,10 @@ void mcuFirstInit(void)
         msleep(100);
     }
     SOC_IO_ISR_Add(MCU_IIC_REQ_GPIO, IRQF_TRIGGER_FALLING | IRQF_ONESHOT, MCUIIC_isr, pGlobalHardwareInfo);
-
-    CREATE_KTHREAD(thread_lpc, NULL);
+    if(!g_var.recovery_mode&&!g_var.is_fly)
+    {
+	    CREATE_KTHREAD(thread_lpc, NULL);
+    }
 
 	
     FS_REGISTER_INT(lpc_ping_test, "lpc_ping_test", 0, NULL);
@@ -395,6 +429,7 @@ void lpc_linux_sync(bool print,int mint,char *extra_info)
  int lpc_open(struct inode *inode, struct file *filp)
 {
 	DUMP_FUN;
+	filp->private_data = dev;
 	return 0;
 }
 
@@ -406,33 +441,24 @@ void lpc_linux_sync(bool print,int mint,char *extra_info)
 
 ssize_t  lpc_read(struct file *filp, char __user *buffer, size_t size, loff_t *offset)
 {
-	int read_cnt;
-    char *mem = NULL;
-	if(size <= 0)
-		return 0;
-	lpc_ctrl_by_app = 1;
-	mem = kzalloc(size, GFP_KERNEL);
-    if (!mem)
-    {
-        LIDBG_ERR("kzalloc \n");
-        return false;
-    }
+	struct lpc_device *dev = filp->private_data;
+	int bytes;
+	int read_len, fifo_len;	
+	down(&dev->sem);
+	fifo_len = kfifo_len(&lpc_data_fifo);
 
-	lidbg("lpc_read size = %d+\n", size);
-	wait_for_completion(&lpc_read_wait);
-	lidbg("lpc_read size = %d-\n", size);
-
-    read_cnt = SOC_I2C_Rec_Simple(LPC_I2_ID, MCU_ADDR_R >> 1, mem, size);
-
-
-	if (copy_to_user(buffer, mem, size))
+	if(fifo_len < size)
+		read_len = fifo_len;
+	else
+		read_len = size;
+	bytes = kfifo_out(&lpc_data_fifo, &lpc_data_for_hal, read_len);
+	up(&dev->sem);
+	if (copy_to_user(buffer, lpc_data_for_hal, read_len))
 	{
 		lidbg("copy_to_user ERR\n");
 	}
-	kfree(mem);
 
-	return read_cnt;
-
+	return read_len;
 }
 static ssize_t lpc_write(struct file *filp, const char __user *buf,
                          size_t size, loff_t *ppos)
@@ -444,10 +470,7 @@ static ssize_t lpc_write(struct file *filp, const char __user *buf,
         LIDBG_ERR("kzalloc \n");
         return false;
     }
-	lpc_ctrl_by_app = 1;
-
-	lidbg("lpc_write size = %d\n", size);
-
+	
 	if(copy_from_user(mem, buf, size))
 	{
 		lidbg("copy_from_user ERR\n");
@@ -457,7 +480,21 @@ static ssize_t lpc_write(struct file *filp, const char __user *buf,
 	kfree(mem);
 	return write_cnt;
 }
+static unsigned int lpc_poll(struct file *filp, struct poll_table_struct *wait)
+{
+	unsigned int mask = 0;
+	struct lpc_device *dev = filp->private_data;
+	poll_wait(filp, &dev->queue, wait);
+	down(&dev->sem);
+	if(!kfifo_is_empty(&lpc_data_fifo))
+	{
+		mask |= POLLIN | POLLRDNORM;
+		pr_debug("plc poll have data!!!\n");
+	}
+	up(&dev->sem);
+	return mask;
 
+}
 
 
 static struct file_operations lpc_fops =
@@ -466,6 +503,7 @@ static struct file_operations lpc_fops =
     .open = lpc_open,
     .read = lpc_read,
     .write = lpc_write,
+    .poll = lpc_poll,
     .release = lpc_close,
 };
 
@@ -475,13 +513,13 @@ static int lpc_ping_en = 0;
 static int  lpc_probe(struct platform_device *pdev)
 {
     DUMP_FUN;
-    FS_REGISTER_INT(lpc_ping_en, "lpc_ping_en", 0, NULL);
-    if((g_var.recovery_mode)||(g_var.is_fly && fs_is_file_exist(FLY_HAL_FILE) && !lpc_ping_en) || g_hw.lpc_disable)//origin system and fly mode when lpc_ping_en enable,lpc driver will go on;
+    FS_REGISTER_INT(lpc_ping_en, "lpc_ping_en", 0, NULL);     
+    if((!g_var.recovery_mode&&g_var.is_fly)|| g_hw.lpc_disable)//origin system and fly mode when lpc_ping_en enable,lpc driver will go on;
     {
         lidbg("lpc_init do nothing.disable,[%d,%d,%d,%d]\n",g_var.is_fly,lpc_ping_en,g_var.recovery_mode,fs_is_file_exist(FLY_HAL_FILE));
         return 0;
     }
-
+    
 #ifdef SOC_mt3360
 	return 0;
 #endif
@@ -492,9 +530,11 @@ static int  lpc_probe(struct platform_device *pdev)
     early_suspend.resume = lpc_late_resume;
     register_early_suspend(&early_suspend);
 #endif
-
+    dev = (struct lpc_device *)kmalloc( sizeof(struct lpc_device), GFP_KERNEL);
+	sema_init(&dev->sem, 1);
+	init_waitqueue_head(&dev->queue);
+	kfifo_init(&lpc_data_fifo, fifo_buffer, FIFO_SIZE);
     mcuFirstInit();
-
 	INIT_COMPLETION(lpc_read_wait);
 	lidbg_new_cdev(&lpc_fops, "fly_lpc");
 
