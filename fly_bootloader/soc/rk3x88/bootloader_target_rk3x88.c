@@ -4,8 +4,11 @@ struct bootloader_hw_config g_hw_info[] =
 {
 	{
 		.ctp_info = {
-			.ctp_slave_add = 0x5d,
-			.point_data_add = 0x804e,
+			.chip_data[CTP_USED_VAR - 1] = {
+				.name = "gt911",
+				.ctp_slave_add = 0x5d,
+				.point_data_add = 0x814e,
+			},
 
 			.ctp_int = 7,
 			.ctp_rst = 6,

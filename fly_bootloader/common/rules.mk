@@ -9,6 +9,6 @@ OBJS +=\
 	$(DBG_BOOTLOADER_DIR)/flyaudio/common/flykey.o	\
 	$(DBG_BOOTLOADER_DIR)/flyaudio/common/flymeg.o	\
 	$(DBG_BOOTLOADER_DIR)/flyaudio/common/showlogo.o \
-	$(DBG_BOOTLOADER_DIR)/flyaudio/common/i2c_screen.o \
+	$(DBG_BOOTLOADER_DIR)/flyaudio/common/lpc_i2c.o \
 	$(DBG_BOOTLOADER_DIR)/flyaudio/common/flyfbcon.o\
 	$(DBG_BOOTLOADER_DIR)/flyaudio/common/i2c_gpio.o

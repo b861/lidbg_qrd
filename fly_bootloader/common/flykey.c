@@ -3,12 +3,6 @@
 
 #define	LDHOPEN		0
 
-
-#define adc_chan38 = 38;
-#define adc_chan39 = 39;
-#define adc_mmp_38 = 6;
-#define adc_mmp_39 = 7;
-
 #define EXPAND(NAME) #NAME
 #define TARGET(NAME) EXPAND(NAME)
 #define DEFAULT_CMDLINE "mem=100M console=null";
@@ -19,35 +13,40 @@
 #define EMMC_BOOT_IMG_HEADER_ADDR 0xFF000
 #endif
 
-//#define u8 unsigned char
-//#define u16 unsigned short
-
 static int last_press_flag = 0;
+extern int ctp_config_index;
 
 int touch_points_get()
 {
 	u8 touch_points_reg[] = {0x81, 0x4E};
 	u8 clear_data[] = {0x81, 0x4E, 0x00};
 
-	char points_data[2] = {0};
-	int points = 0;
-	int cnt = 0;
-	int press_confirm = 0;
 	int i = 0;
+	int cnt = 0;
+	int points = 0;
+	int press_confirm = 0;
+	char points_data[2] = {0};
+	int ctp_addr = 0;
+
+	ctp_addr = g_bootloader_hw.ctp_info.chip_data[ctp_config_index].ctp_slave_add;
+	clear_data[0] = g_bootloader_hw.ctp_info.chip_data[ctp_config_index].point_data_add >> 8;
+	clear_data[1] = g_bootloader_hw.ctp_info.chip_data[ctp_config_index].point_data_add & 0xff;
+	touch_points_reg[0] = g_bootloader_hw.ctp_info.chip_data[ctp_config_index].point_data_add >> 8;
+	touch_points_reg[1] = g_bootloader_hw.ctp_info.chip_data[ctp_config_index].point_data_add & 0xff;
 
 	while(cnt < 20){
 			mdelay(50);
-			ctp_read(points_data,  touch_points_reg ,2);
+			ctp_read(ctp_addr, touch_points_reg, points_data, 2);
 			points = points_data[0] & 0xf;
-			ctp_write(clear_data, sizeof(clear_data));
-//			dprintf(INFO, "***** cnt = %d, points = %d , ad38 = %d, ad39 = %d *****\n",cnt ,points, fly_get_adc(38 , 6), fly_get_adc(39 , 7));
+			ctp_write(ctp_addr, clear_data, sizeof(clear_data)/sizeof(clear_data[0]));
+//			dprintf(INFO, "***** cnt = %d, points = %d *****\n", cnt, points);
 			//released
 			if((points == 0) && (!adc_get()) && (last_press_flag != 0)){
 					for(i=0; i<50; i++){
 							mdelay(10);
-							ctp_read(points_data,  touch_points_reg ,2);
+							ctp_read(ctp_addr, touch_points_reg, points_data, 2);
 							press_confirm = points_data[0] & 0xf;
-							ctp_write(clear_data, sizeof(clear_data));
+							ctp_write(ctp_addr, clear_data, sizeof(clear_data)/sizeof(clear_data[0]));
 							if(press_confirm){
 								dprintf(INFO, "*****  press released confirm, press_confirm=%d, i=%d *****\n",press_confirm ,i );
 								last_press_flag = 1;
@@ -97,7 +96,7 @@ int  get_boot_mode(void)
 	pass_time = 0;   //press_time
 	dprintf(INFO,"get boot mode !\n");
 
-	while(pass_time < 180)
+	while(pass_time < 240)
 	{
 		if(!fly_back_key())
 		{
@@ -117,14 +116,14 @@ int  get_boot_mode(void)
 			read_num = FastbootModel;
 			fly_setBcol(BLUE_COL);
 		}
-		if(pass_time>=120 && pass_time<160)
+		if(pass_time>=120 && pass_time<220)
 		{
 			dprintf(INFO,"FastbootModel RED_COL\r\n");
 			read_num = FlyRecoveryModel;
 			fly_setBcol(RED_COL);
 		}
 
-		if( pass_time>=160)
+		if( pass_time>=220)
 		{
 				read_num = 0;
 				dprintf(INFO,"*** Read key timeout, read_num = %d ***\n", read_num);

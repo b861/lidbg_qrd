@@ -24,8 +24,19 @@ struct bootloader_hw_config g_hw_info[] =
 		},
 
 		.ctp_info = {
-			.ctp_slave_add = 0x5d,
-			.point_data_add = 0x804e,
+			//gt911
+			.chip_data[0] = {
+				.name = "gt911",
+				.ctp_slave_add = 0x14,
+				.point_data_add = 0x814e,
+			},
+
+			//gt811
+			.chip_data[CTP_USED_VAR - 1] = {
+				.name = "gt811",
+				.ctp_slave_add = 0x5d,
+				.point_data_add = 0x0721,
+			},
 
 			.ctp_int = 69,
 			.ctp_rst = 24,
@@ -35,8 +46,8 @@ struct bootloader_hw_config g_hw_info[] =
 
 		.lpc_info = {
 			.lpc_slave_add = 0xa0,
-			.lpc_sda = 2,
-			.lpc_scl = 3,
+			.lpc_sda = 6,
+			.lpc_scl = 7,
 		},
 	},
 	//msm8974
@@ -61,8 +72,11 @@ struct bootloader_hw_config g_hw_info[] =
 		},
 
 		.ctp_info = {
-			.ctp_slave_add = 0x5d,
-			.point_data_add = 0x804e,
+			.chip_data[CTP_USED_VAR - 1] = {
+				.name = "gt911",
+				.ctp_slave_add = 0x5d,
+				.point_data_add = 0x814e,
+			},
 
 			.ctp_int = 14,
 			.ctp_rst = 12,

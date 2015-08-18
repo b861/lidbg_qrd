@@ -51,8 +51,8 @@ static void lpc_i2c_config()
 
 void send_hw_info(char hw_info)
 {
-	UINT8 Check_Sum = 0;
-	UINT8 hwInfo[7]= {0xff,0x55,0x4,0x00, 0x25, hw_info};
+	u8 Check_Sum = 0;
+	u8 hwInfo[7]= {0xff,0x55,0x4,0x00, 0x25, hw_info};
 	int i;
 
 	lpc_i2c_config();
@@ -69,8 +69,8 @@ void send_hw_info(char hw_info)
 
 void backlight_enable()
 {
-	UINT8 Check_Sum = 0;
-	UINT8 back_light[7]= {0xff,0x55,0x4,0x02, 0x0d, 0x1};
+	u8 Check_Sum = 0;
+	u8 back_light[7]= {0xff,0x55,0x4,0x02, 0x0d, 0x1};
 	int i,j;
 
 	dprintf(CRITICAL,"Open backlight !\n");	
@@ -82,5 +82,9 @@ void backlight_enable()
 	
 	back_light[6] = Check_Sum;
 
-	lpc_write(back_light, sizeof(back_light));
+	for(j= 0;j<3;j++)
+		{
+			lpc_write(back_light, sizeof(back_light));
+			mdelay(10);
+		}
 }
