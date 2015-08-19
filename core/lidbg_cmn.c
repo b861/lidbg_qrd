@@ -464,6 +464,63 @@ int lidbg_token_string(char *buf, char *separator, char **token)
     return pos;
 }
 
+/*
+input:  "123/456/789"
+output:  "123456789"
+*/
+void lidbg_strrpl(char originalString[], char key[], char swap[])
+{
+    int lengthOfOriginalString, lengthOfKey, lengthOfSwap, i, j , flag;
+    char tmp[1000];
+
+    lengthOfOriginalString = strlen(originalString);
+    lengthOfKey = strlen(key);
+    lengthOfSwap = strlen(swap);
+
+    for( i = 0; i <= lengthOfOriginalString - lengthOfKey; i++)
+    {
+        flag = 1;
+        for(j  = 0; j < lengthOfKey; j ++)
+        {
+            if(originalString[i + j] != key[j])
+            {
+                flag = 0;
+                break;
+            }
+        }
+        if(flag)
+        {
+            strcpy(tmp, originalString);
+            strcpy(&tmp[i], swap);
+            strcpy(&tmp[i + lengthOfSwap], &originalString[i  + lengthOfKey]);
+            strcpy(originalString, tmp);
+            i += lengthOfSwap - 1;
+            lengthOfOriginalString = strlen(originalString);
+        }
+    }
+}
+
+/*
+input:  "123 456 789"
+output:  "123456789"
+*/
+char *lidbgstrtrim(char *s)
+{
+    char *p, *q, *o;
+    while(*s != '\0' && *s == ' ')s++;
+    p = q = o = s;
+    while(*p != '\0')
+    {
+        if(*p != ' ')
+        {
+            *q = *p;
+            q++;
+        }
+        p++;
+    }
+    *q = '\0';
+    return o;
+}
 #define ITEM_MAX (35)
 #define MOUNT_BUF_MAX (3 * 1024)
 static int invaled_mount_point = 0;
@@ -599,6 +656,8 @@ MODULE_AUTHOR("Flyaudio Inc.");
 EXPORT_SYMBOL(find_mounted_volume_by_mount_point);
 EXPORT_SYMBOL(lidbg_readdir_and_dealfile);
 EXPORT_SYMBOL(lidbg_token_string);
+EXPORT_SYMBOL(lidbg_strrpl);
+EXPORT_SYMBOL(lidbgstrtrim);
 EXPORT_SYMBOL(lidbg_get_random_number);
 EXPORT_SYMBOL(lidbg_exe);
 EXPORT_SYMBOL(lidbg_mount);
