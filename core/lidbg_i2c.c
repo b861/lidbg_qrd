@@ -60,7 +60,10 @@ static struct i2c_driver i2c_api_driver =
     .id_table       = id,
 #endif
     .attach_adapter = i2c_api_attach,
-    .detach_adapter	= i2c_api_detach,
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,10,0)
+	.detach_adapter	= i2c_api_detach,
+#else
+#endif
     .command        = NULL,
     .driver         = {
         .name  = "I2C-API",

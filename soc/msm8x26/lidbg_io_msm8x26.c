@@ -54,26 +54,36 @@ int soc_io_resume(void)
     return 0;
 }
 
-int io_free_proc(char *buf, char **start, off_t offset, int count, int *eof, void *data )
+ssize_t io_free_proc(struct file *file, char __user *buf, size_t size, loff_t *ppos)
 {
 	lidbg("%s:enter\n", __func__);
 	soc_io_suspend();
     return 1;
 }
 
-int io_request_proc(char *buf, char **start, off_t offset, int count, int *eof, void *data )
+ssize_t io_request_proc(struct file *file, char __user *buf, size_t size, loff_t *ppos)
 {
 	lidbg("%s:enter\n", __func__);
 	soc_io_resume();
     return 1;
 }
 
+static const struct file_operations io_free_fops =
+{
+    .read  = io_free_proc,
+};
+
+static const struct file_operations io_request_fops =
+{
+    .read  = io_request_proc,
+};
+
 void soc_io_init(void)
 {
 	memset(soc_io_config_log, 0xff, sizeof(soc_io_config_log));
 	
-   	create_proc_read_entry("io_free", 0, NULL, io_free_proc, NULL);
-   	create_proc_read_entry("io_request", 0, NULL, io_request_proc, NULL);
+	proc_create("io_free", 0, NULL, &io_free_fops);
+	proc_create("io_request", 0, NULL, &io_request_fops);
 }
 
 

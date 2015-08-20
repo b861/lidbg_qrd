@@ -2485,7 +2485,7 @@ static int init_cdev_ts(void)
 }
 #endif
 
-static int __devinit goodix_ts_init(void)
+static int goodix_ts_init(void)
 {
     int ret = 0;
     is_ts_load = 1;

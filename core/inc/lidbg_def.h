@@ -188,5 +188,6 @@ int checkCPUendian()
 //结构体成员偏移量的计算
 #define OFFSETOF(type, field) ((size_t)&(((type *)0)->field))
 
+#define PROC_READ_CHECK {static int len_check = 0;if ((len_check++)%2) return 0;}
 
 #endif

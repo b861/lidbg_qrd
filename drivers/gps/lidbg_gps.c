@@ -319,17 +319,23 @@ do_nothing:
 }
 
 
-int read_proc(char *buf, char **start, off_t offset, int count, int *eof, void *data )
+int read_proc(struct file *file, char __user *buf, size_t size, loff_t *ppos)
 {
+	PROC_READ_CHECK;
     lidbg("enable ublox print\n");
     gps_debug_en = 1;
 
     return 1;
 }
 
+static const struct file_operations ublox_dbg_fops =
+{
+    .read  = read_proc,
+};
+
 void create_new_proc_entry(void)
 {
-    create_proc_read_entry("ublox_dbg", 0, NULL, read_proc, NULL);
+    proc_create("ublox_dbg", 0, NULL, &ublox_dbg_fops);
     // /cat proc/ublox_dbg
 }
 

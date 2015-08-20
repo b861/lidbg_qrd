@@ -59,6 +59,19 @@
 	lidbg_shell_cmd("echo 0 > /sys/kernel/debug/regulator/8941_l23/enable");\
 }while(0)
 
+#elif defined(PLATFORM_msm8909)
+#define MSM_GPS_POWER_ON do{\
+}while(0)
+
+#define MSM_GPS_POWER_OFF do{\
+}while(0)
+
+#define MSM_DSI83_POWER_ON do{\
+}while(0)
+
+#define MSM_DSI83_POWER_OFF do{\
+}while(0)
+
 #endif
 
 
@@ -166,6 +179,8 @@
 #define FLY_GPS_SO  "gps.msm8226.so"
 #elif defined(PLATFORM_msm8974)
 #define FLY_GPS_SO  "gps.msm8974.so"
+#elif defined(PLATFORM_msm8909)
+#define FLY_GPS_SO  "gps.msm8909.so"
 #endif
 
 

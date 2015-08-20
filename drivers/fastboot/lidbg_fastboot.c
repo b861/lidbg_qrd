@@ -526,21 +526,27 @@ u32 GetTickCount(void)
 }
 
 
-int kill_proc(char *buf, char **start, off_t offset, int count, int *eof, void *data )
+int kill_proc(struct file *file, char __user *buf, size_t size, loff_t *ppos)
 {
-
+	PROC_READ_CHECK;
     fastboot_task_kill_exclude(NULL);
     return 1;
 }
 
+static const struct file_operations kill_task_fops =
+{
+    .read  = kill_proc,
+};
+
 void create_new_proc_entry(void)
 {
-    create_proc_read_entry("kill_task", 0, NULL, kill_proc, NULL);
+    proc_create("kill_task", 0, NULL, &kill_task_fops);
 
 }
 
-int pwroff_proc(char *buf, char **start, off_t offset, int count, int *eof, void *data )
+int pwroff_proc(struct file *file, char __user *buf, size_t size, loff_t *ppos)
 {
+	PROC_READ_CHECK;
     DUMP_FUN_ENTER;
     if(PM_STATUS_LATE_RESUME_OK == fastboot_get_status())
         fastboot_pwroff();
@@ -548,10 +554,14 @@ int pwroff_proc(char *buf, char **start, off_t offset, int count, int *eof, void
     return 0;
 }
 
+static const struct file_operations fastboot_pwroff_fops =
+{
+    .read  = pwroff_proc,
+};
 
 void create_new_proc_entry2(void)
 {
-    create_proc_read_entry("fastboot_pwroff", 0, NULL, pwroff_proc, NULL);
+    proc_create("fastboot_pwroff", 0, NULL, &fastboot_pwroff_fops);
 }
 
 

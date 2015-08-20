@@ -346,24 +346,27 @@ int is_dsi83_exist(void)
 }
 
 
-int dsi83_rst_proc(char *buf, char **start, off_t offset, int count, int *eof, void *data )
+int dsi83_rst_proc(struct file *file, char __user *buf, size_t size, loff_t *ppos)
 {
+	PROC_READ_CHECK;
     is_dsi83_inited = false;
     fs_mem_log("call:%s\n",__func__);
 	lidbg("%s:enter\n", __func__);
 	dsi83_resume();
     return 1;
 }
-int dsi83_dump_proc(char *buf, char **start, off_t offset, int count, int *eof, void *data )
+int dsi83_dump_proc(struct file *file, char __user *buf, size_t size, loff_t *ppos)
 {
+	PROC_READ_CHECK;
     lidbg("%s:enter\n", __func__);
 	dsi83_dump_reg();
     return 1;
 }
 
 
-int dsi83_set_normal_proc(char *buf, char **start, off_t offset, int count, int *eof, void *data )
+int dsi83_set_normal_proc(struct file *file, char __user *buf, size_t size, loff_t *ppos)
 {
+	PROC_READ_CHECK;
     lidbg("%s:enter\n", __func__);
 	buf_piont = dsi83_conf_normol;
 	
@@ -372,8 +375,9 @@ int dsi83_set_normal_proc(char *buf, char **start, off_t offset, int count, int 
 }
 
 
-int dsi83_set_pattern_proc(char *buf, char **start, off_t offset, int count, int *eof, void *data )
+int dsi83_set_pattern_proc(struct file *file, char __user *buf, size_t size, loff_t *ppos)
 {
+	PROC_READ_CHECK;
     lidbg("%s:enter\n", __func__);
 	buf_piont = dsi83_conf_pattern;
 	
@@ -382,8 +386,25 @@ int dsi83_set_pattern_proc(char *buf, char **start, off_t offset, int count, int
     return 1;
 }
 
+static const struct file_operations dsi83_rst_fops =
+{
+    .read  = dsi83_rst_proc,
+};
 
+static const struct file_operations dsi83_dump_fops =
+{
+    .read  = dsi83_dump_proc,
+};
 
+static const struct file_operations dsi83_n_fops =
+{
+    .read  = dsi83_set_normal_proc,
+};
+
+static const struct file_operations dsi83_p_fops =
+{
+    .read  = dsi83_set_pattern_proc,
+};
 
 static int kv_dsi83_rst = 0;
 void cb_dsi83_rst(char *key, char *value )
@@ -474,10 +495,10 @@ static int dsi83_probe(struct platform_device *pdev)
 		*/
    	}
 		
-   	create_proc_read_entry("dsi83_rst", 0, NULL, dsi83_rst_proc, NULL);
-   	create_proc_read_entry("dsi83_dump", 0, NULL, dsi83_dump_proc, NULL);
-   	create_proc_read_entry("dsi83_n", 0, NULL, dsi83_set_normal_proc, NULL);
-   	create_proc_read_entry("dsi83_p", 0, NULL, dsi83_set_pattern_proc, NULL);
+   	proc_create("dsi83_rst", 0, NULL, &dsi83_rst_fops);
+   	proc_create("dsi83_dump", 0, NULL, &dsi83_dump_fops);
+   	proc_create("dsi83_n", 0, NULL, &dsi83_n_fops);
+   	proc_create("dsi83_p", 0, NULL, &dsi83_p_fops);
 
     FS_REGISTER_INT(kv_dsi83_rst, "kv_dsi83_rst", 0, cb_dsi83_rst);
 	INIT_DELAYED_WORK(&dsi83_work, dsi83_work_func);
@@ -568,7 +589,7 @@ static struct platform_driver dsi83_driver =
     },
 };
 
-static int __devinit dsi83_init(void)
+static int dsi83_init(void)
 {
 	DUMP_BUILD_TIME;
 	LIDBG_GET;

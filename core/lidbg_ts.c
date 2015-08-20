@@ -21,7 +21,11 @@ int lidbg_init_input(struct lidbg_ts_data *pinput)
     set_bit(BTN_TOOL_FINGER, (ts_data->input_dev)->keybit);
     __set_bit(INPUT_PROP_DIRECT, (ts_data->input_dev)->propbit);
 
-    input_mt_init_slots(ts_data->input_dev, GTP_MAX_TOUCH);
+	#if LINUX_VERSION_CODE < KERNEL_VERSION(3,7,0)
+	input_mt_init_slots(ts_data->input_dev, GTP_MAX_TOUCH);
+	#else
+	input_mt_init_slots(ts_data->input_dev, GTP_MAX_TOUCH, 0);
+	#endif
     input_set_abs_params(ts_data->input_dev, ABS_MT_POSITION_X,
                          0, pinput->abs_x_max, 0, 0);
     input_set_abs_params(ts_data->input_dev, ABS_MT_POSITION_Y,

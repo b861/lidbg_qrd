@@ -140,8 +140,13 @@ int thread_get_mac_addr(void *data)
 {
 try_get_smem:
 	if (p_fly_smem == NULL)
+
+		#if LINUX_VERSION_CODE < KERNEL_VERSION(3,10,0)
 		p_fly_smem = (struct fly_smem *)smem_alloc(SMEM_ID_VENDOR0, sizeof(struct fly_smem));
-	
+		#else
+		p_fly_smem = (struct fly_smem *)smem_alloc(SMEM_ID_VENDOR0, sizeof(struct fly_smem), 0, 1);
+		#endif
+
 	if (p_fly_smem == NULL)
 	{
 		msleep(500);

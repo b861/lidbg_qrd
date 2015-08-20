@@ -28,7 +28,8 @@
 #include <linux/of_platform.h>
 #include <linux/of_gpio.h>
 
-//msm8x25
+//compatible
+
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/gpio_event.h>
@@ -41,33 +42,38 @@
 #include <linux/i2c.h>
 #include <linux/android_pmem.h>
 #include <linux/bootmem.h>
-#include <linux/mfd/marimba.h>
 #include <linux/regulator/consumer.h>
 #include <linux/memblock.h>
 #include <mach/board.h>
 #include <mach/msm_iomap.h>
+#include <mach/msm_memtypes.h>
+#include <mach/vreg.h>
+#include <mach/irqs.h>
+#include <linux/qpnp/qpnp-adc.h>
+#include <linux/spmi.h>
+#include <linux/msm_tsens.h>
+
+#ifdef PLATFORM_msm8909
+#include <soc/qcom/smem.h>
+#else
+
+#include <linux/mfd/marimba.h>
 #include <mach/msm_hsusb.h>
 #include <mach/rpc_hsusb.h>
 #include <mach/rpc_pmapp.h>
 #include <mach/usbdiag.h>
-#include <mach/msm_memtypes.h>
 #include <mach/msm_serial_hs.h>
 //#include <mach/pmic.h>
 #include <mach/socinfo.h>
-#include <mach/vreg.h>
 #include <mach/rpc_pmapp.h>
 //#include <mach/msm_battery.h>
 #include <mach/rpc_server_handset.h>
 #include <mach/socinfo.h>
 #include <mach/msm_smsm.h>
-
 #include <mach/msm_rpcrouter.h>
-#include <mach/irqs.h>
-#include <linux/qpnp/qpnp-adc.h>
-#include <linux/spmi.h>
 #include <mach/msm_smsm.h>
-#include <linux/msm_tsens.h>
 
+#endif
 #if 0
 enum
 {
@@ -154,6 +160,8 @@ struct io_int_config
 #define SOC_TARGET_PATH "../../soc/msm8x26/lidbg_target_msm8226.c"
 #elif defined(PLATFORM_msm8974)
 #define SOC_TARGET_PATH "../../soc/msm8x26/lidbg_target_msm8974.c"
+#elif defined(PLATFORM_msm8909)
+#define SOC_TARGET_PATH "../../soc/msm8x26/lidbg_target_msm8909.c"
 #endif
 #define SOC_TARGET_DEFINE_PATH "lidbg_target_msm8x26.h"
 

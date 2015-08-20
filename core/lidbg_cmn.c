@@ -3,7 +3,6 @@
  */
 #include "lidbg.h"
 
-
 char g_binpath[50];
 
 
@@ -77,21 +76,29 @@ void set_cpu_governor(int state)
 }
 
 
-int read_proc(char *buf, char **start, off_t offset, int count, int *eof, void *data )
+int read_proc(struct file *file, char __user *buf, size_t size, loff_t *ppos)
 {
+	
     int len = 0;
     struct task_struct *task_list;
+	PROC_READ_CHECK;
 
     for_each_process(task_list)
     {
         len  += sprintf(buf + len, "%s %d \n", task_list->comm, task_list->pid);
     }
+	*ppos += len;
     return len;
 }
 
+static const struct file_operations ps_list_fops =
+{
+    .read  = read_proc,
+};
+
 void create_new_proc_entry(void)
 {
-    create_proc_read_entry("ps_list", 0, NULL, read_proc, NULL);
+    proc_create("ps_list", 0, NULL, &ps_list_fops);
 }
 
 int lidbg_task_kill_select(char *task_name)

@@ -189,9 +189,10 @@ void mute_s(void)
     wake_up_interruptible(&read_wait);
 }
 
-int read_proc_dev(char *buf, char **start, off_t offset, int count, int *eof, void *data )
+int read_proc_dev(struct file *file, char __user *buf, size_t size, loff_t *ppos)
 {
     int len = 0;
+	PROC_READ_CHECK;
 
     lidbg("USB_ID_HIGH_DEV\n");
     USB_ID_HIGH_DEV;
@@ -200,23 +201,35 @@ int read_proc_dev(char *buf, char **start, off_t offset, int count, int *eof, vo
     return len;
 }
 
-int read_proc_host(char *buf, char **start, off_t offset, int count, int *eof, void *data )
+int read_proc_host(struct file *file, char __user *buf, size_t size, loff_t *ppos)
 {
     int len = 0;
+	PROC_READ_CHECK;
+
     lidbg("USB_ID_LOW_HOST\n");
     USB_ID_LOW_HOST;
     len  = sprintf(buf, "usb_set_host\n");
     return len;
 }
 
+static const struct file_operations usb_dev_fops =
+{
+    .read  = read_proc_dev,
+};
+
+static const struct file_operations usb_host_fops =
+{
+    .read  = read_proc_host,
+};
+
 static void create_new_proc_entry_usb_dev(void)
 {
-    create_proc_read_entry("usb_dev", 0, NULL, read_proc_dev, NULL);
+    proc_create("usb_dev", 0, NULL, &usb_dev_fops);
 }
 
 static void create_new_proc_entry_usb_host(void)
 {
-    create_proc_read_entry("usb_host", 0, NULL, read_proc_host, NULL);
+    proc_create("usb_host", 0, NULL, &usb_host_fops);
 }
 
 
@@ -591,13 +604,13 @@ int thread_dev_init(void *data)
 int thread_led(void *data)
 {
 
-    //linux驱动开发之内核线程
+    //linux脟媒露炉驴陋路垄脰庐脛脷潞脣脧脽鲁脤
     //http://hi.baidu.com/zzcqh/blog/item/36b2b2eabebcf9ded539c9ec.html
     while(1)
     {
         set_current_state(TASK_UNINTERRUPTIBLE);
         if(kthread_should_stop()) break;
-        if(1) //条件为真
+        if(1) //脤玫录镁脦陋脮忙
         {
             if(led_en)
                 led_on();
@@ -607,9 +620,9 @@ int thread_led(void *data)
                 msleep(2000);
 
         }
-        else //条件为假
+        else //脤玫录镁脦陋录脵
         {
-            //让出CPU运行其他线程，并在指定的时间内重新被调度
+            //脠脙鲁枚CPU脭脣脨脨脝盲脣没脧脽鲁脤拢卢虏垄脭脷脰赂露篓碌脛脢卤录盲脛脷脰脴脨脗卤禄碌梅露脠
             schedule_timeout(HZ);
         }
     }
@@ -620,21 +633,21 @@ int thread_led(void *data)
 int thread_key(void *data)
 {
 
-    //linux驱动开发之内核线程
+    //linux脟媒露炉驴陋路垄脰庐脛脷潞脣脧脽鲁脤
     //http://hi.baidu.com/zzcqh/blog/item/36b2b2eabebcf9ded539c9ec.html
     while(1)
     {
         set_current_state(TASK_UNINTERRUPTIBLE);
         if(kthread_should_stop()) break;
-        if(1) //条件为真
+        if(1) //脤玫录镁脦陋脮忙
         {
             key_scan();
             msleep(AD_KEY_READ_POLLING_TIME);
             // msleep(10);
         }
-        else //条件为假
+        else //脤玫录镁脦陋录脵
         {
-            //让出CPU运行其他线程，并在指定的时间内重新被调度
+            //脠脙鲁枚CPU脭脣脨脨脝盲脣没脧脽鲁脤拢卢虏垄脭脷脰赂露篓碌脛脢卤录盲脛脷脰脴脨脗卤禄碌梅露脠
             schedule_timeout(HZ);
         }
     }

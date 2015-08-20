@@ -351,7 +351,8 @@ BOOL TEF6638_Init(void)
 	int i;
 	//lidbg("%s:enter\n", __func__);
 	lidbg("TEF6638 init start!\n");
-	for(i = 0; i < 3; ++i)
+	for(i = 0; i < 3; ++i)
+
 	{
 		if(SendToTEF6638NormalWriteData(TEF6638_Audio_Init_Data))
 		{
@@ -445,8 +446,7 @@ static struct platform_driver tef6638_driver =
     },
 };
 
-
-static int __devinit tef6638_module_init(void)
+static int tef6638_module_init(void)
 {
     //lidbg("%s:enter\n", __func__);
     LIDBG_GET;

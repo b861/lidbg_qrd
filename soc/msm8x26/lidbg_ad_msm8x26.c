@@ -10,7 +10,7 @@ unsigned int  soc_ad_read(unsigned int channel)  //temp-alarm channel is 8  ,nam
 	return adc_result.physical;
 }
 
-static int __devinit qpnp_lidbg_probe(struct spmi_device *spmi)
+static int qpnp_lidbg_probe(struct spmi_device *spmi)
 {
 	int rc = 0;
 	vadc_chip= qpnp_get_vadc(&spmi->dev,"lidbg");

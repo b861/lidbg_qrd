@@ -12,7 +12,6 @@ struct lidbg_dev_smem
     unsigned long valid_offset;
 };
 
-
 /*lidbg设备结构体*/
 struct lidbg_dev
 {
@@ -338,39 +337,53 @@ void lidbg_exit(void)
 
 
 #define LIDBG_DEVICE_PROC_NAME  "lidbg"
-ssize_t lidbg_proc_read(char *page, char **start, off_t off, int count, int *eof, void *data)
+ssize_t lidbg_proc_read(struct file *file, char __user *buf, size_t size, loff_t *ppos)
 {
     int len;
+	char *hello_str = "Hello, world!\n";
+	PROC_READ_CHECK
 
-    char *hello_str = "Hello, world!\n";
     lidbg("lidbg_proc_read\n");
     len = strlen(hello_str);
-    strcpy(page, hello_str);
+    strcpy(buf, hello_str);
     /*     * Signal EOF.     */
-    *eof = 1;
+    *ppos += len;
     return len;
 
 }
 
-ssize_t lidbg_proc_write(struct file *filp, const char __user *buff, unsigned long len, void *data)
+ssize_t lidbg_proc_write(struct file *filp, const char __user *userbuf, size_t count, loff_t *ppos)
 {
     lidbg("lidbg_proc_write\n");
 
     filp->private_data = (struct lidbg_dev *)global_lidbg_devp;
-    lidbg_write(filp, buff, len, 0);
-    return len;
+    lidbg_write(filp, userbuf, count, 0);
+    return count;
 }
+
+static int proc_show_ver(struct seq_file *file, void *v)
+{
+	int cnt = 0;
+	lidbg("lidbg_proc_read\n");
+	seq_printf(file, "Time: %s %s\n", __DATE__, __TIME__);
+	return cnt; 
+}
+
+static int proc_key_open(struct inode *inode, struct file *file)
+{
+	 single_open(file, proc_show_ver, NULL);
+	 return 0;
+}
+
+static const struct file_operations lidbg_proc_fops =
+{
+	.read  = lidbg_proc_read,
+	.write = lidbg_proc_write,
+};
 
 void lidbg_create_proc(void)
 {
-    struct proc_dir_entry *entry;
-
-    entry = create_proc_entry(LIDBG_DEVICE_PROC_NAME, 0, NULL);
-    if(entry)
-    {
-        entry->read_proc = lidbg_proc_read;
-        entry->write_proc = lidbg_proc_write;
-    }
+	proc_create(LIDBG_DEVICE_PROC_NAME, 0, NULL, &lidbg_proc_fops);
 }
 
 void lidbg_remove_proc(void)

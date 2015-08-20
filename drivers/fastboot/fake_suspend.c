@@ -112,9 +112,9 @@ static void fake_late_resume(void)
 
 
 
-int fake_suspend(char *buf, char **start, off_t offset, int count, int *eof, void *data )
+int fake_suspend(struct file *file, char __user *buf, size_t size, loff_t *ppos)
 {
-
+	PROC_READ_CHECK;
     DUMP_FUN_ENTER;
     if(is_fake_suspend == 0)
     {
@@ -132,15 +132,20 @@ int fake_suspend(char *buf, char **start, off_t offset, int count, int *eof, voi
     return sprintf(buf, "is_fake_suspend:%d\n", is_fake_suspend);
 }
 
+static const struct file_operations fake_suspend_fops =
+{
+    .read  = fake_suspend,
+};
+
 void create_proc_entry_fake_suspend(void)
 {
-    create_proc_read_entry("fake_suspend", 0, NULL, fake_suspend, NULL);
+    proc_create("fake_suspend", 0, NULL, &fake_suspend_fops);
 
 }
 
-int fake_wakeup(char *buf, char **start, off_t offset, int count, int *eof, void *data )
+int fake_wakeup(struct file *file, char __user *buf, size_t size, loff_t *ppos)
 {
-
+	PROC_READ_CHECK;
     DUMP_FUN_ENTER;
     if(is_fake_suspend == 1)
     {
@@ -154,9 +159,14 @@ int fake_wakeup(char *buf, char **start, off_t offset, int count, int *eof, void
 
 }
 
+static const struct file_operations fake_wakeup_fops =
+{
+    .read  = fake_wakeup,
+};
+
 void create_proc_entry_fake_wakeup(void)
 {
-    create_proc_read_entry("fake_wakeup", 0, NULL, fake_wakeup, NULL);
+    proc_create("fake_wakeup", 0, NULL, &fake_wakeup_fops);
 
 }
 

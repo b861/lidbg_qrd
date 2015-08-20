@@ -554,7 +554,8 @@ BOOL SAF7741_Init(void)
 	int i;
 	//lidbg("%s:enter\n", __func__);
 	lidbg("SAF7741 init start!\n");
-	for(i = 0; i < 3; ++i)
+	for(i = 0; i < 3; ++i)
+
 	{
 		if(SendToSAF7741NormalWriteData(SAF7741_Audio_Init_Data))
 		{
@@ -665,7 +666,7 @@ static struct platform_driver saf7741_driver =
     },
 };
 
-static int __devinit saf7741_module_init(void)
+static int saf7741_module_init(void)
 {
     //lidbg("%s:enter\n", __func__);
     LIDBG_GET;

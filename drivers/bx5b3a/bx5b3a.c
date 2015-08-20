@@ -361,7 +361,7 @@ static struct platform_driver bx5b3a_driver =
     },
 };
 
-static int __devinit bx5b3a_init(void)
+static int bx5b3a_init(void)
 {
 	DUMP_BUILD_TIME;
 	LIDBG_GET;

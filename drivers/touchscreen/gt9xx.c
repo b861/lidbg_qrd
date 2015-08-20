@@ -1386,7 +1386,12 @@ static int gtp_request_input_dev(struct goodix_ts_data *ts)
 		BIT_MASK(EV_SYN) | BIT_MASK(EV_KEY) | BIT_MASK(EV_ABS) ;
 	set_bit(BTN_TOOL_FINGER, ts->input_dev->keybit);
 	__set_bit(INPUT_PROP_DIRECT, ts->input_dev->propbit);
+
+	#if LINUX_VERSION_CODE < KERNEL_VERSION(3,10,0)
 	input_mt_init_slots(ts->input_dev, 10);/* in case of "out of memory" */
+	#else
+	input_mt_init_slots(ts->input_dev, 10, 0);/* in case of "out of memory" */
+	#endif		
 
 #if GTP_HAVE_TOUCH_KEY
 	for (index = 0; index < GTP_MAX_KEY_NUM; index++) {
@@ -2462,7 +2467,7 @@ static struct platform_device goodix_ts_devices =
     .id 			= 0,
 };
 
-static int __devinit goodix_ts_init(void)
+static int goodix_ts_init(void)
 {
 	int ret;
 	

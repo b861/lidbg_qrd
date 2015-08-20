@@ -1296,7 +1296,7 @@ int thread_update(void *data)
 return:
 	?????,0??????
 ********************************************************/
-static int __devinit goodix_ts_init(void)
+static int goodix_ts_init(void)
 {
     int ret;
 
