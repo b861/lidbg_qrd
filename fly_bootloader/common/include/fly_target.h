@@ -8,8 +8,8 @@ struct display_config
 	int dsi83_slave_add;
 	int dsi83_en_pin;
 
-	int i2c_blsp_id;
-	int i2c_qup_id;
+	int dsi83_sda;
+	int dsi83_scl;
 };
 
 struct adc_config

@@ -7,8 +7,8 @@ struct bootloader_hw_config g_hw_info[] =
 		.display_info = {
 			.dsi83_slave_add = 0x2d,
 			.dsi83_en_pin = 62,
-			.i2c_blsp_id = 1,
-			.i2c_qup_id = 2,
+			.dsi83_sda = 10,
+			.dsi83_scl = 11,
 		},
 
 		.adc_info[0] = {
@@ -55,8 +55,8 @@ struct bootloader_hw_config g_hw_info[] =
 		.display_info = {
 			.dsi83_slave_add = 0x2d,
 			.dsi83_en_pin = 58,
-			.i2c_blsp_id = 1,
-			.i2c_qup_id = 5,
+			.dsi83_sda = 29,
+			.dsi83_scl = 30,
 		},
 
 		.adc_info[0] = {

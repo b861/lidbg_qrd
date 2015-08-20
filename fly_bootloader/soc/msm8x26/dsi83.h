@@ -4,10 +4,10 @@
 #include "fly_platform.h"
 #include "fly_private.h"
 
-#define DSI83_I2C_ADDR		(g_bootloader_hw.display_info.dsi83_slave_add)
-#define DSI83_GPIO_EN		(g_bootloader_hw.display_info.dsi83_en_pin)
-#define I2C_BLSP_ID			(g_bootloader_hw.display_info.i2c_blsp_id)
-#define I2C_QUP_ID			(g_bootloader_hw.display_info.i2c_qup_id)
+#define DSI83_I2C_ADDR	(g_bootloader_hw.display_info.dsi83_slave_add)
+#define DSI83_GPIO_EN	(g_bootloader_hw.display_info.dsi83_en_pin)
+#define DSI83_SCL			(g_bootloader_hw.display_info.dsi83_scl)
+#define DSI83_SDA		(g_bootloader_hw.display_info.dsi83_sda)
 
 #ifndef TEST_PATTERN
 char dsi83_conf[] =

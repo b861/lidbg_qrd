@@ -2,7 +2,30 @@
 #include <platform/iomap.h>
 #include <platform/gpio.h>
 #include "dsi83.h"
-static struct qup_i2c_dev *dev = NULL;
+
+static struct i2c_gpio_dev *dsi83_dev = NULL;
+
+static void dsi83_i2c_config()
+{
+	int ret = 0;
+	int i =0;
+	dprintf(INFO, "><><>< config dsi83 i2c bus ><><><\n");
+
+	gpio_set_direction(DSI83_SDA, GPIO_OUTPUT);
+	gpio_set_direction(DSI83_SCL, GPIO_OUTPUT);
+	dsi83_dev = malloc(sizeof(struct i2c_gpio_dev));
+	if (!dsi83_dev) {
+		return NULL;
+	}
+	dsi83_dev = memset(dsi83_dev, 0, sizeof(struct i2c_gpio_dev));
+
+	dsi83_dev->name = "dsi83_i2c_gpio";
+	dsi83_dev->scl_pin = DSI83_SCL;
+	dsi83_dev->sda_pin = DSI83_SDA;
+	dsi83_dev->retries = 5;
+	dsi83_dev->udelay = 4;
+}
+
 
 uint8_t DSI83_read(char *buf,  unsigned int sub_addr,unsigned int size)
 {
@@ -12,19 +35,20 @@ uint8_t DSI83_read(char *buf,  unsigned int sub_addr,unsigned int size)
 		{DSI83_I2C_ADDR, I2C_M_WR, 1, &sub_addr},
 		{DSI83_I2C_ADDR, I2C_M_RD, size, buf}
 	};
-	ret = qup_i2c_xfer(dev, msg_buf, 2);
+	ret = bit_xfer(dsi83_dev, msg_buf, 2);
 	return ret;
 }
 
 uint8_t DSI83_write( char *buf, unsigned int size)
 {
-       int ret;
+	int ret;
 	struct i2c_msg msg_buf[] = { {DSI83_I2C_ADDR,
-				      I2C_M_WR, size, buf}
+			      I2C_M_WR, size, buf}
 	};
-	ret  = qup_i2c_xfer(dev, msg_buf, 1);
+	ret  = bit_xfer(dsi83_dev, msg_buf, 1);
 	return ret;
 }
+
 static int SN65_register_read(unsigned char sub_addr,char *buf)
 {
 	int ret;
@@ -234,11 +258,8 @@ void dsi83_init()
 	int cnt = 0;
 	
 	dprintf(INFO,"dsi83_init.\n");
-	dev = qup_blsp_i2c_init(I2C_BLSP_ID, I2C_QUP_ID, 100000, 19200000);
-	if (!dev) {
-		dprintf(INFO, "Failed initializing I2c\n");
-		return;
-	}	
+
+	dsi83_i2c_config();
 	dsi83_gpio_init();
 	mdelay(200);
 dsi83_config_start:
