@@ -84,7 +84,7 @@ int main(int argc, char **argv)
 
             sprintf(cmd, "sound %d", playing);
             lidbg(TAG"write.[%d,%s]\n", playing, cmd);
-            LIDBG_WRITE("/dev/flydev0", cmd);
+            LIDBG_WRITE("/dev/fly_sound0", cmd);
 
         }
         loop_count++;
