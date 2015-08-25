@@ -561,7 +561,7 @@ ssize_t knob_read (struct file *filp, char __user *buf, size_t count, loff_t *f_
 	    return -1;
 	}
 
-	if(fifo_len >= 1)
+	if(fifo_len > bytes)
 	    wake_up_interruptible(&pfly_KeyEncoderInfo->wait_queue);
 
 	return read_len;
