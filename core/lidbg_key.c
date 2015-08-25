@@ -44,7 +44,7 @@ if(key_value == KEY_HOME)
     else
     {
         input_report_key(input, key_value, KEY_PRESSED);
-        input_sync(input);
+        //input_sync(input);
         input_report_key(input, key_value, KEY_RELEASED);
         input_sync(input);
     }

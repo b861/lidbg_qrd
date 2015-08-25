@@ -372,7 +372,7 @@ static int  soc_dev_suspend(struct platform_device *pdev, pm_message_t state)
     lidbg("soc_dev_suspend\n");
 	if(!g_var.is_fly)
 	{
-    	button_suspend();
+    		//button_suspend();
 	}
 
     return 0;
@@ -384,7 +384,7 @@ static int soc_dev_resume(struct platform_device *pdev)
 	
 	if(!g_var.is_fly)
 	{
-		button_resume();
+		//button_resume();
 		led_resume();
 	}
 

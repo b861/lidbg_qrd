@@ -1,0 +1,23 @@
+lidbg_button驱动已弃用，使用lidbg_knob代替。
+本驱动提供/dev/knob0设备节点以供HAL层做读操作，直接读取1个字节解析即可。
+读取数据格式：
+    LEFT            RIGHT
+   /    \          /     \
+  dec   inc      dec     inc
+ 0x02  0x01     0x08    0x04
+
+    如上图所示，左右旋钮的左旋和右旋动作，一共四个信号，分别存储到字节数据的
+低4位。即|右旋钮左旋|右旋钮右旋|左旋钮左旋|左旋钮右旋|。
+    在HAL层只需做POLL轮询查询是否可读，可读则读取一个字节数据解析即可。
+    需要修改适配车型旋钮配置，则修改g_hw.EK_Value数组即可。（应与驱动中宏
+KB_VOL_*，KB_TUNE_*值对应）
+
+V2:
+1，使用pr_debug替换原来的lidbg打印输出，可通过
+echo -n 'file lidbg_knob.c +p' > /sys/kernel/debug/dynamic_debug/control切换。（关闭-p）
+2，由原来的只读一个字节切换为HAL可控，传入长度参数即可,返回长度为实际从缓存中拿到的数据
+长度。。
+3，增加了缓存fifo大小到1024B。
+4，屏蔽了原来外部控制的suspend和resume函数，把两者加入驱动的platform_driver中。
+5，fifo满时只扔出一个字节数据，减少丢失。
+6，增加原生系统按键上报处理。
