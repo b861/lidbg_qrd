@@ -4,6 +4,7 @@ INCLUDES += -I$(DBG_BOOTLOADER_DIR)/flyaudio/soc
 include $(DBG_BOOTLOADER_DIR)/flyaudio/common/build_cfg.mk
 
 OBJS +=\
+	$(DBG_BOOTLOADER_DIR)/flyaudio/common/dsi83.o \
 	$(DBG_BOOTLOADER_DIR)/flyaudio/common/ctp_func.o \
 	$(DBG_BOOTLOADER_DIR)/flyaudio/common/flyaboot.o \
 	$(DBG_BOOTLOADER_DIR)/flyaudio/common/flykey.o	\

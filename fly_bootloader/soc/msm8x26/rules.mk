@@ -7,7 +7,6 @@ OBJS +=\
 	$(DBG_BOOTLOADER_DIR)/flyaudio/soc/$(DBG_SOC)/fly_interface.o	\
 	$(DBG_BOOTLOADER_DIR)/flyaudio/soc/$(DBG_SOC)/adc_func.o	\
 	$(DBG_BOOTLOADER_DIR)/flyaudio/soc/$(DBG_SOC)/gpio_func.o	\
-	$(DBG_BOOTLOADER_DIR)/flyaudio/soc/$(DBG_SOC)/dsi83.o	\
 	$(DBG_BOOTLOADER_DIR)/flyaudio/soc/$(DBG_SOC)/fb_func.o	\
 	$(DBG_BOOTLOADER_DIR)/flyaudio/soc/$(DBG_SOC)/ptn_func.o	\
-	$(DBG_BOOTLOADER_DIR)/flyaudio/soc/$(DBG_SOC)/display_func.o
+	$(DBG_BOOTLOADER_DIR)/flyaudio/soc/$(DBG_SOC)/hw_func.o
