@@ -369,11 +369,7 @@ static int proc_show_ver(struct seq_file *file, void *v)
 	return cnt; 
 }
 
-static int proc_key_open(struct inode *inode, struct file *file)
-{
-	 single_open(file, proc_show_ver, NULL);
-	 return 0;
-}
+
 
 static const struct file_operations lidbg_proc_fops =
 {
