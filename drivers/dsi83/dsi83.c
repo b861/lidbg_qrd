@@ -13,6 +13,7 @@ static struct workqueue_struct *dsi83_workqueue;
 
 #endif
 char *buf_piont = NULL;
+static u8 dsi83_conf_num;
 
 static int SN65_register_read(unsigned char sub_addr,char *buf)
 {
@@ -368,7 +369,7 @@ int dsi83_set_normal_proc(struct file *file, char __user *buf, size_t size, loff
 {
 	PROC_READ_CHECK;
     lidbg("%s:enter\n", __func__);
-	buf_piont = dsi83_conf_normol;
+	buf_piont = dsi83_conf[2*dsi83_conf_num];
 	
 	dsi83_config();
     return 1;
@@ -379,7 +380,7 @@ int dsi83_set_pattern_proc(struct file *file, char __user *buf, size_t size, lof
 {
 	PROC_READ_CHECK;
     lidbg("%s:enter\n", __func__);
-	buf_piont = dsi83_conf_pattern;
+	buf_piont = dsi83_conf[2*dsi83_conf_num + 1];
 	
 	dsi83_config();
 
@@ -591,10 +592,22 @@ static struct platform_driver dsi83_driver =
 
 static int dsi83_init(void)
 {
+	int ret;
+	static u32 screen_x,screen_y;
 	DUMP_BUILD_TIME;
 	LIDBG_GET;
-	
-	buf_piont = dsi83_conf_normol;
+
+	ret = soc_get_screen_res(&screen_x, &screen_y);
+	if (!ret)
+		lidbg("dsi83 get screen res ERR\n");
+
+	if ((screen_x == 1280) && (screen_y == 400))
+		dsi83_conf_num = 1;
+	else 					
+		dsi83_conf_num = 0;		//1024x600 default
+
+	buf_piont = dsi83_conf[2*dsi83_conf_num];
+
     platform_device_register(&dsi83_devices);
     platform_driver_register(&dsi83_driver);
     return 0;
