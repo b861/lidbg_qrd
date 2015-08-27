@@ -289,7 +289,7 @@ case "$DBG_PLATFORM_ID" in
 
         9)
         export DBG_PLATFORM=rkpx3
-        export BOARD_VERSION=V1
+        export BOARD_VERSION=V2
 	export ANDROID_VERSION=444
         export DBG_CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilts/gcc/linux-x86/arm/arm-eabi-4.7/bin/arm-eabi-
         export JAVA_HOME=$PATHJAVA1P6
