@@ -14,39 +14,23 @@
 #endif
 
 static int last_press_flag = 0;
-extern int ctp_config_index;
 
 int touch_points_get()
 {
-	u8 touch_points_reg[] = {0x81, 0x4E};
-	u8 clear_data[] = {0x81, 0x4E, 0x00};
-
 	int i = 0;
 	int cnt = 0;
 	int points = 0;
 	int press_confirm = 0;
-	char points_data[2] = {0};
-	int ctp_addr = 0;
-
-	ctp_addr = g_bootloader_hw.ctp_info.chip_data[ctp_config_index].ctp_slave_add;
-	clear_data[0] = g_bootloader_hw.ctp_info.chip_data[ctp_config_index].point_data_add >> 8;
-	clear_data[1] = g_bootloader_hw.ctp_info.chip_data[ctp_config_index].point_data_add & 0xff;
-	touch_points_reg[0] = g_bootloader_hw.ctp_info.chip_data[ctp_config_index].point_data_add >> 8;
-	touch_points_reg[1] = g_bootloader_hw.ctp_info.chip_data[ctp_config_index].point_data_add & 0xff;
 
 	while(cnt < 20){
 			mdelay(50);
-			ctp_read(ctp_addr, touch_points_reg, points_data, 2);
-			points = points_data[0] & 0xf;
-			ctp_write(ctp_addr, clear_data, sizeof(clear_data)/sizeof(clear_data[0]));
+			points = ctp_points_get();
 //			dprintf(INFO, "***** cnt = %d, points = %d *****\n", cnt, points);
 			//released
 			if((points == 0) && (!adc_get()) && (last_press_flag != 0)){
 					for(i=0; i<50; i++){
 							mdelay(10);
-							ctp_read(ctp_addr, touch_points_reg, points_data, 2);
-							press_confirm = points_data[0] & 0xf;
-							ctp_write(ctp_addr, clear_data, sizeof(clear_data)/sizeof(clear_data[0]));
+							press_confirm = ctp_points_get();
 							if(press_confirm){
 								dprintf(INFO, "*****  press released confirm, press_confirm=%d, i=%d *****\n",press_confirm ,i );
 								last_press_flag = 1;

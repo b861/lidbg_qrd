@@ -24,20 +24,6 @@ struct bootloader_hw_config g_hw_info[] =
 		},
 
 		.ctp_info = {
-			//gt911
-			.chip_data[0] = {
-				.name = "gt911",
-				.ctp_slave_add = 0x14,
-				.point_data_add = 0x814e,
-			},
-
-			//gt811
-			.chip_data[CTP_USED_VAR - 1] = {
-				.name = "gt811",
-				.ctp_slave_add = 0x5d,
-				.point_data_add = 0x0721,
-			},
-
 			.ctp_int = 69,
 			.ctp_rst = 24,
 			.ctp_sda = 18,
@@ -72,12 +58,6 @@ struct bootloader_hw_config g_hw_info[] =
 		},
 
 		.ctp_info = {
-			.chip_data[CTP_USED_VAR - 1] = {
-				.name = "gt911",
-				.ctp_slave_add = 0x5d,
-				.point_data_add = 0x814e,
-			},
-
 			.ctp_int = 14,
 			.ctp_rst = 12,
 			.ctp_sda = 6,

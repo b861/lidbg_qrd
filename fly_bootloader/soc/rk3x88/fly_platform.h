@@ -9,7 +9,6 @@
 
 #define BOARD_VERSION 0
 #define ADC_KEY_CHNL 0
-#define CTP_USED_VAR 1
 
 DECLARE_GLOBAL_DATA_PTR;
 

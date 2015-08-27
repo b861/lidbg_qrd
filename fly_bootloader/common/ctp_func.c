@@ -17,6 +17,16 @@ static u8 configed_data[GTP_CONFIG_MAX_LENGTH + GTP_ADDR_LENGTH]
 #endif
 
 int ctp_config_index = 0;
+void gt811_cb(int config_index);
+void gt911_cb(int config_index);
+int ctp_la_reset(void);
+int ctp_ha_reset(void);
+
+ctp_chip_t ctp_chips[] =
+{
+	{"gt911", 0x14, 0x814e, ctp_ha_reset, gt911_cb},
+	{"gt811", 0x5d, 0x0721, ctp_ha_reset, gt811_cb}
+};
 
 unsigned char ctp_read(unsigned char chip_addr, unsigned char *sub_addr, char *buf, unsigned int size)
 {
@@ -77,44 +87,15 @@ void gt811_cb(int config_index)
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01
 	};
 
-	ctp_write(g_bootloader_hw.ctp_info.chip_data[config_index].ctp_slave_add, ctp_config, sizeof(ctp_config)/sizeof(ctp_config[0]));
+	ctp_write(ctp_chips[config_index].ctp_slave_add, ctp_config, sizeof(ctp_config)/sizeof(ctp_config[0]));
 }
 
-void gt911_cb()
+void gt911_cb(int config_index)
 {
 	dprintf(CRITICAL, "Do nothing for gt911.\n");
 }
 
-int ctp_confirm()
-{
-	int ret = 0;
-	int i = 0;
-
-	u8 buff0[] = {0, 0};
-	u8 buff1[] = {0, 0};
-
-	for(i=0; i<CTP_USED_VAR; i++){
-		buff0[0] = g_bootloader_hw.ctp_info.chip_data[i].point_data_add >> 8;
-		buff0[1] = g_bootloader_hw.ctp_info.chip_data[i].point_data_add & 0xff;
-
-		ret = ctp_read(g_bootloader_hw.ctp_info.chip_data[i].ctp_slave_add, buff0, buff1, 2);
-		if(ret == 2){
-			dprintf(INFO, "Ctp info: i=%d, chip_add[0x%x], point_add[0x%x], name[%s]\n", \
-				i, g_bootloader_hw.ctp_info.chip_data[i].ctp_slave_add, g_bootloader_hw.ctp_info.chip_data[i].point_data_add, g_bootloader_hw.ctp_info.chip_data[i].name);
-
-			if(!strcmp(g_bootloader_hw.ctp_info.chip_data[i].name, "gt811"))
-				gt811_cb(i);
-			else
-				gt911_cb();
-
-			return i;
-		}
-	}
-	dprintf(INFO, "Set ctp to gt911 as default config.\n");
-	return 0;
-}
-
-int ctp_reset()
+int ctp_la_reset(void)
 {
 	//reset ctp
 	gpio_set_direction(g_bootloader_hw.ctp_info.ctp_rst,GPIO_OUTPUT);
@@ -126,11 +107,7 @@ int ctp_reset()
 
 	mdelay(100);
 
-#ifdef BOOTLOADER_MSM8226
-	gpio_set_val(g_bootloader_hw.ctp_info.ctp_int, 1);
-#else
 	gpio_set_val(g_bootloader_hw.ctp_info.ctp_int, 0);
-#endif
 	udelay(200);
 	gpio_set_val(g_bootloader_hw.ctp_info.ctp_rst, 1);
 	mdelay(100);
@@ -138,18 +115,90 @@ int ctp_reset()
 	//pul down int_rst
 	gpio_set_val(g_bootloader_hw.ctp_info.ctp_int, 0);
 	//	gpio_set(gpio, 0);
+}
+
+int ctp_ha_reset(void)
+{
+	//reset ctp
+	gpio_set_direction(g_bootloader_hw.ctp_info.ctp_rst,GPIO_OUTPUT);
+	//	gpio_set(rst_pin, GPIO_OUTPUT);
+	gpio_set_val(g_bootloader_hw.ctp_info.ctp_rst, 0);
+
+	gpio_set_direction(g_bootloader_hw.ctp_info.ctp_int,GPIO_OUTPUT);
+	//	gpio_set(int_pin, GPIO_OUTPUT);
+
+	mdelay(100);
+
+	gpio_set_val(g_bootloader_hw.ctp_info.ctp_int, 1);
+	udelay(200);
+	gpio_set_val(g_bootloader_hw.ctp_info.ctp_rst, 1);
+	mdelay(100);
+
+	//pul down int_rst
+	gpio_set_val(g_bootloader_hw.ctp_info.ctp_int, 0);
+	//	gpio_set(gpio, 0);
+}
+
+int ctp_points_get(void)
+{
+	u8 touch_points_reg[] = {0x81, 0x4E};
+	u8 clear_data[] = {0x81, 0x4E, 0x00};
+
+	int points = 0;
+	int ctp_addr = 0;
+	char points_data[2] = {0};
+
+	ctp_addr = ctp_chips[ctp_config_index].ctp_slave_add;
+	clear_data[0] = ctp_chips[ctp_config_index].point_data_add >> 8;
+	clear_data[1] = ctp_chips[ctp_config_index].point_data_add & 0xff;
+	touch_points_reg[0] = ctp_chips[ctp_config_index].point_data_add >> 8;
+	touch_points_reg[1] = ctp_chips[ctp_config_index].point_data_add & 0xff;
+
+	ctp_read(ctp_addr, touch_points_reg, points_data, 2);
+	points = points_data[0] & 0xf;
+	ctp_write(ctp_addr, clear_data, sizeof(clear_data)/sizeof(clear_data[0]));
+//	dprintf(INFO, "<++ points = %d ++>\n", points);
+
+	return points;
+}
+
+int ctp_type_get(void)
+{
+	int ret = 0;
+	int i = 0;
+
+	u8 buff0[] = {0, 0};
+	u8 buff1[] = {0, 0};
 
 	mdelay(50);
 	ctp_i2c_config();
-	mdelay(100);
 
-	ctp_config_index = ctp_confirm();
+	for(i=0; i<(sizeof(ctp_chips) /sizeof(ctp_chips[0])); i++){
+		buff0[0] = ctp_chips[i].point_data_add >> 8;
+		buff0[1] = ctp_chips[i].point_data_add & 0xff;
 
-#ifdef CTP_DBG
-	int i = 0;
-	ret = ctp_read(g_bootloader_hw.ctp_info.chip_data[ctp_config_index].ctp_slave_add, config_data, configed_data, 186);
+		ctp_chips[i].ctp_reset();
+		mdelay(100);
 
-    for(i=0; i<188; i++)
-		dprintf(INFO, " reg[%x] = %x\n",(0x8047+i), configed_data[i+2]);
-#endif
+		ret = ctp_read(ctp_chips[i].ctp_slave_add, buff0, buff1, 2);
+		if(ret == 2){
+			dprintf(INFO, "Ctp info: i=%d, chip_add[0x%x], point_add[0x%x], name[%s]\n", \
+				i, ctp_chips[i].ctp_slave_add, ctp_chips[i].point_data_add, ctp_chips[i].name);
+
+			ctp_chips[i].ctp_cb(i);
+			ctp_config_index = i;
+
+			#ifdef CTP_DBG
+				int j = 0;
+				ret = ctp_read(ctp_chips[i].ctp_slave_add, config_data, configed_data, 186);
+
+			    for(j=0; j<188; j++)
+					dprintf(INFO, " reg[%x] = %x\n",(0x8047+j), configed_data[j+2]);
+			#endif
+
+			return i;
+		}
+	}
+	dprintf(INFO, "Set ctp to gt911 as default config.\n");
+	return 0;
 }

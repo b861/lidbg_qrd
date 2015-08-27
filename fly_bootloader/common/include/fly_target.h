@@ -19,17 +19,17 @@ struct adc_config
 	int ad_vol;
 };
 
-struct ctp_chip
+typedef struct ctp_chip
 {
 	char *name;
 	int ctp_slave_add;
 	int point_data_add;
-};
+	void (*ctp_reset)(void);
+	void (*ctp_cb)(int index);
+}ctp_chip_t;
 
 struct ctp_config
 {
-	struct ctp_chip chip_data[CTP_USED_VAR];
-
 	int ctp_int;
 	int ctp_rst;
 	int ctp_sda;

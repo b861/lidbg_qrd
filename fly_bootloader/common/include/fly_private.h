@@ -25,7 +25,8 @@
 /*ctp reset*/
 extern unsigned char ctp_read(unsigned char chip_addr, unsigned char *sub_addr, char *buf, unsigned int size);
 extern unsigned char ctp_write(unsigned char chip_addr, char *buf, unsigned int size);
-extern int ctp_reset(void);
+extern int ctp_type_get(void);
+extern int ctp_points_get(void);
 
 extern int show_logo();
 void backlight_enable();

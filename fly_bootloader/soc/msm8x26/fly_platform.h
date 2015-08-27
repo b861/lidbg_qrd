@@ -63,11 +63,9 @@
 
 #ifdef BOOTLOADER_MSM8226
 #define BOARD_VERSION 0
-#define CTP_USED_VAR 2
 #endif
 #ifdef BOOTLOADER_MSM8974
 #define BOARD_VERSION 1
-#define CTP_USED_VAR 1
 #endif
 
 #define ADC_KEY_CHNL 2

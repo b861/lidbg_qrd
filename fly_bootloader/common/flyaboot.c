@@ -339,7 +339,7 @@ void flyaboot_init(unsigned *boot_into_recovery,bool *boot_into_fastboot)
 	dprintf(INFO,"flyaboot init bp_meg = %d\n",bp_meg);
 
 	send_hw_info(hw_info);
-	ctp_reset();
+	ctp_type_get();
 	/*
 	*don't show static logo before displaying green screen when auto-up
 	*/

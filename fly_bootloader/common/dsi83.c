@@ -1,7 +1,5 @@
-#include <blsp_qup.h>
-#include <platform/iomap.h>
-#include <platform/gpio.h>
 #include "dsi83.h"
+#include "fly_private.h"
 
 static struct i2c_gpio_dev *dsi83_dev = NULL;
 
@@ -225,10 +223,10 @@ static int SN65_devices_read_id(void)
 
 static void dsi83_reset(void)
 {
-	gpio_tlmm_config(DSI83_GPIO_EN, 0, GPIO_OUTPUT, GPIO_NO_PULL, GPIO_8MA, GPIO_ENABLE);
-	gpio_set_value(DSI83_GPIO_EN,0);
+	gpio_set_direction(DSI83_GPIO_EN, GPIO_OUTPUT);
+	gpio_set_val(DSI83_GPIO_EN,0);
 	mdelay(50);
-	gpio_set_value(DSI83_GPIO_EN,1);
+	gpio_set_val(DSI83_GPIO_EN,1);
 	mdelay(50);
 }
 
@@ -238,10 +236,10 @@ static void dsi83_enable(void)
 	//gpio_tlmm_config(DSI83_GPIO_EN, 0, GPIO_OUTPUT, GPIO_NO_PULL,
 //GPIO_8MA, GPIO_ENABLE);
 	// gpio_set_value(DSI83_GPIO_EN,1);
-	gpio_tlmm_config(DSI83_GPIO_EN, 0, GPIO_OUTPUT, GPIO_NO_PULL,GPIO_8MA, GPIO_ENABLE);
-	gpio_set_value(DSI83_GPIO_EN,0);
+	gpio_set_direction(DSI83_GPIO_EN, GPIO_OUTPUT);
+	gpio_set_val(DSI83_GPIO_EN,0);
 	mdelay(50);
-	gpio_set_value(DSI83_GPIO_EN,1);
+	gpio_set_val(DSI83_GPIO_EN,1);
 	mdelay(50);
 }
 
