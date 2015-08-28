@@ -35,25 +35,9 @@ ft5x06_ts-objs :=ft5406_ts.o
 #ft5336_ts对应26手机触摸屏驱动，仅初期验证时使用,车机不要编译进来！
 #obj-$(CONFIG_TOUCHSCREEN)	+= ft5x06_ts.o
 #ft5x06_ts-objs :=ft5336_ts.o     
-
-else ifeq ($(DBG_PLATFORM),msm8974)
-obj-$(CONFIG_TOUCHSCREEN)       += lidbg_ts_probe_new.o
-obj-$(CONFIG_TOUCHSCREEN)       += lidbg_ts_to_recov.o
-obj-$(CONFIG_TOUCHSCREEN)       += gt911.o
-gt911-objs :=gt9xx.o
-obj-$(CONFIG_TOUCHSCREEN)       += ft5x06_ts.o
-ft5x06_ts-objs :=ft5406_ts.o
-#ft5336_ts对应26手机触摸屏驱动，仅初期验证时使用,车机不要编译进来！
-#obj-$(CONFIG_TOUCHSCREEN)      += ft5x06_ts.o
-#ft5x06_ts-objs :=ft5336_ts.o     
+    
 
 else
-obj-$(CONFIG_TOUCHSCREEN)       += lidbg_ts_probe_new.o
-obj-$(CONFIG_TOUCHSCREEN)       += lidbg_ts_to_recov.o
-obj-$(CONFIG_TOUCHSCREEN)       += gt911.o
-gt911-objs :=gt9xx.o
-endif
-ifeq ($(DBG_PLATFORM),msm8909)
 obj-$(CONFIG_TOUCHSCREEN)       += lidbg_ts_probe_new.o
 obj-$(CONFIG_TOUCHSCREEN)       += lidbg_ts_to_recov.o
 obj-$(CONFIG_TOUCHSCREEN)       += gt911.o

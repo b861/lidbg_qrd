@@ -361,13 +361,6 @@ ssize_t lidbg_proc_write(struct file *filp, const char __user *userbuf, size_t c
     return count;
 }
 
-static int proc_show_ver(struct seq_file *file, void *v)
-{
-	int cnt = 0;
-	lidbg("lidbg_proc_read\n");
-	seq_printf(file, "Time: %s %s\n", __DATE__, __TIME__);
-	return cnt; 
-}
 
 
 
