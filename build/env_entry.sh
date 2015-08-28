@@ -424,6 +424,32 @@ case "$DBG_PLATFORM_ID" in
 	export DEBUG_IMAGE_CMD='./b8x26.sh TARGET_FAMILY=8x26 sdi BUILD_ID=AAAAANAZ BUILD_VER=54 BUILD_MIN=1 -j1'
 	export TZ_BUILD_CMD='./build.sh CHIPSET=msm8x26 tz -j1'
 	export UPDATE_BUILD_CMD='python update_common_info.py';;
+    13)
+    export DBG_PLATFORM=kylin_hummingbird
+    export BOARD_VERSION=V1
+    export ANDROID_VERSION=444
+    export DBG_CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilts/gcc/linux-x86/arm/arm-eabi-4.7/bin/arm-eabi-
+    export JAVA_HOME=$PATHJAVA1P6
+    export JRE_HOME=$JAVA_HOME/jre
+    export CLASSPATH=$JAVA_HOME/lib:$JRE_HOME/lib:$CLASSPATH
+    export PATH=$JAVA_HOME/bin:$JRE_HOME/bin:$PATH
+    export SYSTEM_BUILD_TYPE=eng
+    export KERNEL_DEFCONFIG=sun7i_defconfig
+    export DBG_BOOTLOADER_DIR=$DBG_SYSTEM_DIR/../lichee/brandy/u-boot-2011.09
+    export DBG_KERNEL_SRC_DIR=$DBG_SYSTEM_DIR/../lichee/linux-3.4
+    export DBG_KERNEL_OBJ_DIR=$DBG_SYSTEM_DIR/../lichee/linux-3.4
+    export UPDATA_BIN_PLATFORM_DIR=$RELEASE_REPOSITORY/others/tx
+    export UPDATA_BIN_DIR=$UPDATA_BIN_PLATFORM_DIR/driver
+    export UPDATA_BASESYSTEM_DIR=$UPDATA_BIN_PLATFORM_DIR/basesystem
+    export DBG_PASSWORD=git
+    export DBG_REPO_PASSWORD=git
+    export DBG_VENDOR=VENDOR_WINNER
+    export OTA_PACKAGE_NAME=msm8974-ota-eng.*.zip
+    export DBG_SOC=tx
+    export TEST_PACKAGE_PATH=//192.168.128.128/tx/升级包发布/专项测试包
+    export REPOSITORY_WORK_BRANCH=master
+    export SYSTEM_WORK_BRANCH=master
+    export MAKE_PAKG_NUM= ;;
 esac 
 
 

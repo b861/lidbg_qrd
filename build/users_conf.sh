@@ -257,7 +257,9 @@ case "$USERS_ID" in
 		export BP_SOURCE_PATH=~/lwy/msm8909-la-1-1_amss_oem_milestone-major;;
 	esac;;
 	7)
-	export DBG_PLATFORM_PATH=/home2/liangyihong/projDir
+	#export DBG_PLATFORM_PATH=/home2/liangyihong/projDir
+	export DBG_PLATFORM_PATH=/home2/liangyihong/basicGit
+	#export DBG_PLATFORM_PATH_CCS=/home2/chenchangsheng
 	export PATHJAVA1P6=/opt/JDK/jdk1.6.0_31
 	export PATHJAVA1P7=/opt/JDK/java-7-openjdk-amd64
 	case "$DBG_PLATFORM_ID" in
@@ -295,6 +297,8 @@ case "$USERS_ID" in
 		11)
 		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/M8974AAAAANLYD4120
 		export BP_SOURCE_PATH=~/swlee/msm8626-la-1-0-4_amss_oem-xtra_no-l1-tds;;
+		13)
+		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/AllwinnerA80/android;;
 	esac;;
 	
 esac

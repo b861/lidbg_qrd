@@ -42,10 +42,7 @@
  *          2. new esd & slide wakeup optimization
  *                  By Meta, 2013/06/08
  */
- #ifdef SOC_mt3360
- #else
-#include <linux/regulator/consumer.h>
-#endif
+
 #include "gt9xx.h"
 #include "lidbg.h"
 #include <linux/of_gpio.h>

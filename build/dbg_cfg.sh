@@ -12,6 +12,7 @@
 # 10--msm8226 Android_5.1.1
 # 11--msm8909 Android_5.1.1
 # 12--msm8226 Android_4.4.4
+# 13--A80 Android_4.4
 
 ## USERS_ID ###
 # 0--root@192.168.9.222
@@ -19,5 +20,5 @@
 # 2--gaobenneng.Notebook
 
 
-export DBG_PLATFORM_ID=4
-export USERS_ID=0
+export DBG_PLATFORM_ID=13
+export USERS_ID=7
