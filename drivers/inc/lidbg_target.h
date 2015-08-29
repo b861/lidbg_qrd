@@ -101,6 +101,8 @@ struct hw_version_specific
 
 //lpc_en
 	int lpc_disable;
+//ad_get_val
+        int ad_val_mcu;
 };
 extern struct hw_version_specific g_hw_version_specific[];
 

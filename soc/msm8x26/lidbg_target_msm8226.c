@@ -37,7 +37,7 @@ struct hw_version_specific g_hw_version_specific[] =
 	.i2c_bus_saf7741 = 5,
 	.i2c_bus_tef6638 = -1,
 	.i2c_bus_lpc = 0,
-
+	.ad_val_mcu = 0,
 	.ad_key = 
 	{
 		{   
@@ -117,7 +117,7 @@ struct hw_version_specific g_hw_version_specific[] =
 	.i2c_bus_gps = 5,
 	.i2c_bus_saf7741 = 5,
 	.i2c_bus_lpc = 0,
-
+	.ad_val_mcu = 0,
 
 	.ad_key = 
 	{
@@ -203,7 +203,7 @@ struct hw_version_specific g_hw_version_specific[] =
 	.i2c_bus_gps = 5,
 	.i2c_bus_saf7741 = 5,
 	.i2c_bus_lpc = 0,
-
+	.ad_val_mcu = 0,
 
 	.ad_key = 
 	{

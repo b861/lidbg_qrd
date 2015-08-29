@@ -37,7 +37,7 @@ struct hw_version_specific g_hw_version_specific[] =
 	.i2c_bus_saf7741 = -1,
 	.i2c_bus_tef6638 = -1,
 	.i2c_bus_lpc = -1,
-
+	.ad_val_mcu = 0,
 	.thermal_ctrl_en = 0,
 	.cpu_freq_thermal = 
 	{
@@ -79,7 +79,7 @@ struct hw_version_specific g_hw_version_specific[] =
 	.i2c_bus_gps = -1,
 	.i2c_bus_saf7741 = -1,
 	.i2c_bus_lpc = -1,
-
+	.ad_val_mcu = 0,
 	
 	.thermal_ctrl_en = 0,
 	.cpu_freq_thermal = 
