@@ -142,5 +142,16 @@ function soc_build_origin_image()
 	make otapackage -j16 && soc_postbuild
 }
 
+function soc_build_origin_bootimage()
+{
+	echo $FUNCNAME
+
+	mv $DBG_SYSTEM_DIR/system/core/rootdir/init.lidbg.rc  $DBG_SYSTEM_DIR/system/core/rootdir/init.lidbg.rc.backup   
+	cp $DBG_SOC_PATH/$DBG_SOC/init.lidbg.rc        $DBG_SYSTEM_DIR/system/core/rootdir/init.lidbg.rc
+	soc_build_kernel
+	rm $DBG_SYSTEM_DIR/system/core/rootdir/init.lidbg.rc
+	mv $DBG_SYSTEM_DIR/system/core/rootdir/init.lidbg.rc.backup   $DBG_SYSTEM_DIR/system/core/rootdir/init.lidbg.rc	
+
+}
 
 . $DBG_TOOLS_PATH/soc_common.sh

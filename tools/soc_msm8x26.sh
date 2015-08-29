@@ -164,6 +164,19 @@ function soc_build_origin_image()
 
 }
 
+
+function soc_build_origin_bootimage()
+{
+	echo $FUNCNAME
+
+	mv $DBG_SYSTEM_DIR/system/core/rootdir/init.lidbg.rc  $DBG_SYSTEM_DIR/system/core/rootdir/init.lidbg.rc.backup   
+	cp $DBG_SOC_PATH/$DBG_SOC/init.lidbg.rc        $DBG_SYSTEM_DIR/system/core/rootdir/init.lidbg.rc
+	soc_build_kernel
+	rm $DBG_SYSTEM_DIR/system/core/rootdir/init.lidbg.rc
+	mv $DBG_SYSTEM_DIR/system/core/rootdir/init.lidbg.rc.backup   $DBG_SYSTEM_DIR/system/core/rootdir/init.lidbg.rc	
+
+}
+
 function soc_build_bootloader()
 {
 	echo $FUNCNAME
