@@ -68,7 +68,7 @@ void key_scan(void)
 		
 	}
 }
-int thread_key(void *data)
+int thread_check_key(void *data)
 {  
 	int ad_en;
 	DUMP_FUN;
@@ -89,7 +89,7 @@ int thread_key(void *data)
     return 0;
 }
 
-int thread_ad_key(void *data)
+int thread_handle_key(void *data)
 {
 	int i,k,bytes;
 	while(1)
@@ -210,18 +210,16 @@ static int ad_probe(struct platform_device *pdev)
     kfifo_init(&ad_data_fifo, fifo_buffer, FIFO_SIZE);
 	lidbg_new_cdev(&ad_nod_fops, "lidbg_ad");
 	init_completion(&ad_val);
-	if(g_hw.ad_val_mcu)
-	{
-		if((g_var.recovery_mode==1)||(g_var.is_fly==0))
-		CREATE_KTHREAD(thread_key, NULL);
-    }
-        else
-	{
-		CREATE_KTHREAD(thread_key, NULL);
-	}
 	if((g_var.recovery_mode==1)||(g_var.is_fly==0))
 	{
-		CREATE_KTHREAD(thread_ad_key, NULL);
+		CREATE_KTHREAD(thread_check_key, NULL);
+		CREATE_KTHREAD(thread_handle_key, NULL);
+	}
+	else
+	{
+		if(g_hw.ad_val_mcu==0)
+			CREATE_KTHREAD(thread_check_key, NULL);
+			
 	}
 	return 0;	
 }
@@ -240,11 +238,11 @@ static struct platform_driver ad_driver =
     .probe = ad_probe,
     .remove = ad_remove,
     .driver = {
-        .name = "ad",
-        .owner = THIS_MODULE,
-	.pm = &ad_ops,
+        		.name = "ad",
+        		.owner = THIS_MODULE,
+				.pm = &ad_ops,
 
-    },
+    		  },
 };
 
 static int  ad_init(void)
