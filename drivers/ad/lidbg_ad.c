@@ -217,8 +217,8 @@ static int ad_probe(struct platform_device *pdev)
 	}
 	else
 	{
-		if(g_hw.ad_val_mcu==0)
-			CREATE_KTHREAD(thread_check_key, NULL);
+		//if(g_hw.ad_val_mcu==0)
+		//	CREATE_KTHREAD(thread_check_key, NULL);
 			
 	}
 	return 0;	
