@@ -124,7 +124,7 @@ void LPCCombinDataStream(BYTE *p, UINT len)
     BYTE *buf;
     bool bMalloc = FALSE;
   
-    if(!lpc_work_en)
+    if(!lpc_work_en | g_hw.lpc_disable)
         return;
 
     if (3 + len + 1 > 16)
