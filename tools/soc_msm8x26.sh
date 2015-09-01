@@ -45,10 +45,6 @@ function soc_build_all()
 	echo $FUNCNAME
 	cd $DBG_SYSTEM_DIR
 
-	if [ -d "$DBG_BOOTLOADER_DIR/flyaudio" ]; then
-		rm -rf "$DBG_BOOTLOADER_DIR/flyaudio"
-	fi
-
 	soc_prebuild && make -j16 && soc_postbuild
 }
 

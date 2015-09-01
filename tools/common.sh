@@ -24,11 +24,11 @@ function get_dir()
 
 function common_menu()
 {
-	echo [81] pull                       
-	echo [82] push
-	echo [83] gitk
-	echo [84] git log
-	echo [85] git reset
+#	echo [81] pull                       
+#	echo [82] push
+#	echo [83] gitk
+#	echo [84] git log
+#	echo [85] git reset
 	echo [86] nautilus
 }
 
