@@ -4,16 +4,16 @@ struct bootloader_hw_config g_hw_info[] =
 {
 	{
 		.ctp_info = {
-			.ctp_int = 7,
-			.ctp_rst = 6,
-			.ctp_sda = 28,
-			.ctp_scl = 29,
+			.ctp_int = 0x010f,//GPIO1_B7
+			.ctp_rst = 0x000e,//GPIO0_B6
+			.ctp_sda = 0x011c,//GPIO1_D4
+			.ctp_scl = 0x011d,//GPIO1_D5
 		},
 
 		.lpc_info = {
 			.lpc_slave_add = 0xa0,
-			.lpc_sda = 2,
-			.lpc_scl = 3,
+			.lpc_sda = 0x0118,//GPIO1_D0
+			.lpc_scl = 0x0119,//GPIO1_D1
 		},
 	}
 };
