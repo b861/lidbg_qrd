@@ -13,13 +13,8 @@ CONFIG_HAL_USB_CAMERA=n
         CONFIG_HAL_VOLD_8x26=y;;
     4)
         CONFIG_HAL_VOLD_8x26=y;;
-    6)
-        CONFIG_HAL_VOLD_8x26_5_0=y;;
-    7)
-        CONFIG_HAL_VOLD_8x26_5_0=y;;
     *)
-        CONFIG_HAL_VOLD_8x26=n
-        CONFIG_HAL_VOLD_8x26_5_0=n;;
+        CONFIG_HAL_VOLD_8x26_5_0=y;;
     esac
 
 
