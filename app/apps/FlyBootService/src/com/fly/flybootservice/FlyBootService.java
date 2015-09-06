@@ -429,6 +429,7 @@ public class FlyBootService extends Service {
 //					releaseWakeLock();
 					LIDBG_PRINT("going to sleep");
 				} else if (action.equals("android.provider.Telephony.SECRET_CODE")) {
+					LIDBG_PRINT("SECRET_CODE :::" + action + " state:" + mState);
 					procSecretCode(intent);
 				}
 			}
@@ -818,16 +819,24 @@ public class FlyBootService extends Service {
 				EALYSUSPEND_TIME = 5;
 				DEBUG_ONCE = false;
         }else if (secretHost.equals("4629")) {
-				LIDBG_PRINT("Debug mode starting ...");
+				LIDBG_PRINT("Debug mode starting, mState: %s" + mState);
 
-				mActivityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-				delay(100);
-				KillProcess();
+				if(mState == emState.Sleep){
+					mActivityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+					delay(100);
+					KillProcess();
+				}
         } else if (secretHost.equals("4600")) {
             LIDBG_PRINT(" Enter flyaudio  oncetimes debug fast mode!!!! ");
             ALERM_TIME = 0;
             EALYSUSPEND_TIME = 0;
             DEBUG_ONCE = false;
+        }
+		else if (secretHost.equals("4700")) {
+				LIDBG_PRINT("Debug mode starting ...");
+				mActivityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+				delay(100);
+				KillProcess();
         }
         Log.d(TAG,
                 " value :"
