@@ -15,6 +15,9 @@ int adc_get(void)
 	int ac_ch_val[ADC_KEY_CHNL] = {0};
 	int i=0;
 
+#ifdef BOOTLOADER_MSM8909
+	return 0;
+#else
 	for(i=0; i<ADC_KEY_CHNL; i++){
 		ac_ch_val[i] = fly_get_adc(g_bootloader_hw.adc_info[i].ad_ch, g_bootloader_hw.adc_info[i].ad_ctrl_ch);
 		if(ac_ch_val[i] <= g_bootloader_hw.adc_info[i].ad_vol)
@@ -22,4 +25,5 @@ int adc_get(void)
 	}
 
 	return 0;
+#endif
 }

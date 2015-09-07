@@ -140,7 +140,7 @@ static int SN65_Sequence_seq8(void)  /*seq 8 the bit must be set after the CSR`s
 	int ret;
 	char buf2[2];
 	
-#ifdef DSI83_DEBUG
+#if 0
 	dsi83_dump_reg();
 #endif
 	dprintf(INFO, "dsi83:Sequence 8\n");
@@ -158,11 +158,11 @@ static int SN65_Sequence_seq8(void)  /*seq 8 the bit must be set after the CSR`s
 
 
 #ifdef DSI83_DEBUG
-static void dsi83_dump_reg(void)
+void dsi83_dump_reg(void)
 {
 	int i;
 	unsigned char reg;
-	
+
 	char buf1[2];
 	buf1[0]=0xe5;
 	buf1[1]=0xff;
@@ -171,6 +171,7 @@ static void dsi83_dump_reg(void)
 		SN65_register_read(i, &reg);
 		dprintf(INFO,"dsi83:Read reg-0x%x=0x%x\n", i, reg);
 	}
+
 
 /*
 	int ret;
@@ -249,6 +250,29 @@ void dsi83_gpio_init()
 }
 
 
+void check_dsi83_init(void)
+{
+	int ret = 0;
+	unsigned char reg = 0;
+
+	char buf[2];
+	buf[0]=0xe5;
+	buf[1]=0xff;
+
+	ret = SN65_register_write(buf);
+	if(ret < 0)
+               lidbgerr( "[dsi83.check]:write reg 0xe5 error.\n");
+	else
+               mdelay(100);
+
+	ret = SN65_register_read(0xe5, &reg);
+	if(((reg != 0x00) || (ret< 0) ))
+               dprintf(INFO,"Error::: dis83 check error, reg[0xe5]=0x%x\n", reg);
+	else
+               dprintf(INFO,"Dis83 check successfully, reg[0xe5]=0x%x\n", reg);
+
+}
+
 void dsi83_init()
 {
 	int ret = 0;
@@ -298,6 +322,8 @@ dsi83_config_start:
 	ret = SN65_Sequence_seq8();
 	if(ret < 0)
 		dprintf(INFO,"dsi83:SN65_Sequence_seq8(),err,ret = %d.\n", ret);
+
+	check_dsi83_init();
 
 }
 
