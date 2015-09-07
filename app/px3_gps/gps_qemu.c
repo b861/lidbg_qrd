@@ -1009,7 +1009,7 @@ tcc_channel_open_tty( GpsState*      state)
         return -1;
     }
 #endif
-	strcpy(state->device,"/dev/ttyS0");
+	strcpy(state->device,"/dev/ttyS3");
 	D("gps device:%s\n", state->device);
 	lidbg("gps device:%s\n", state->device);
     return 0;
@@ -1071,8 +1071,8 @@ gps_state_init( GpsState*  state, GpsCallbacks* callbacks )
 	tcflush(state->fd, TCIOFLUSH);
 	tcflush(state->fd, TCIOFLUSH);
 
-	cfsetospeed(&termios, B9600);
-	cfsetispeed(&termios, B9600);
+	cfsetospeed(&termios, B115200);
+	cfsetispeed(&termios, B115200);
 	tcsetattr(state->fd, TCSANOW, &termios);
 
     #if GPS_GPIO_INCLUDE
