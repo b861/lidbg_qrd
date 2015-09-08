@@ -54,7 +54,9 @@ bool iSOC_IO_ISR_Add(u32 irq, u32  interrupt_type, pinterrupt_isr func, void *de
 {
     bool ret = 0;
     struct io_int_config io_int_config1;
-
+#ifdef PLATFORM_ID_11
+    return 1;
+#endif
     io_int_config1.ext_int_num = GPIO_TO_INT(irq);
     io_int_config1.irqflags = interrupt_type;
     io_int_config1.pisr = func;
@@ -68,17 +70,26 @@ bool iSOC_IO_ISR_Add(u32 irq, u32  interrupt_type, pinterrupt_isr func, void *de
 
 bool iSOC_IO_ISR_Enable(u32 irq)
 {
+#ifdef PLATFORM_ID_11
+    return 1;
+#endif
     soc_irq_enable(GPIO_TO_INT(irq));
     return 1;
 }
 
 bool iSOC_IO_ISR_Disable(u32 irq)
 {
+#ifdef PLATFORM_ID_11
+    return 1;
+#endif
     soc_irq_disable(GPIO_TO_INT(irq));
     return 1;
 }
 bool iSOC_IO_ISR_Del (u32 irq)
 {
+#ifdef PLATFORM_ID_11
+    return 1;
+#endif
     free_irq(GPIO_TO_INT(irq), NULL);
     return 1;
 }
@@ -118,6 +129,9 @@ void iSOC_IO_Output(u32 group, u32 index, bool status)
 
 bool iSOC_IO_Input(u32 group, u32 index, u32 pull)
 {
+#ifdef PLATFORM_ID_11
+    return 1;
+#endif
     soc_io_config( index,  GPIOMUX_FUNC_GPIO,GPIOMUX_IN, pull/*GPIO_CFG_NO_PULL*/, GPIOMUX_DRV_2MA, 0);
     return soc_io_input(index);
 }

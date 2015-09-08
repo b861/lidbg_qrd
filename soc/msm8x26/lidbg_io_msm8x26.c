@@ -127,7 +127,9 @@ int soc_io_irq(struct io_int_config *pio_int_config)//need set to input first?
 
 int soc_io_suspend_config(u32 index, u32 direction, u32 pull, u32 drive_strength)
 {
-	
+	#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0)
+	return 1;
+	#endif
 	if((soc_io_config_log[index].gpio == 0xffffffff))
 	{
 		lidbgerr("soc_io_suspend_config ,gpio not config:index %d\n" , index);
@@ -160,7 +162,9 @@ int soc_io_suspend_config(u32 index, u32 direction, u32 pull, u32 drive_strength
 int soc_io_config(u32 index, int func, u32 direction,  u32 pull, u32 drive_strength, bool force_reconfig)
 {
 	bool is_first_init = 0;
-	
+	#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0)
+	return 1;
+	#endif
 	is_first_init = (soc_io_config_log[index].gpio == 0xffffffff)?1:0;
 
 	if(force_reconfig == 1)
@@ -256,6 +260,28 @@ free_gpio:
 
 int soc_io_output(u32 group, u32 index, bool status)
 {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0)
+int err;
+index+=911;
+if (gpio_is_valid(index))
+{
+    err = gpio_request(index, "lidbg_io");
+    if (err)
+    {
+        lidbg("reset gpio request failed");
+    }
+    err = gpio_direction_output(index, status);
+    if (err)
+    {
+        lidbg( "set_direction for reset gpio failed\n");
+    }
+    gpio_set_value(index, status);
+}
+else
+{
+        lidbg("gpio_is_valid  failed");
+}
+#else
    
 	if(io_ready == 0)  {lidbg("%d,%d io not ready\n",group,index);return 0;}
 	
@@ -264,9 +290,9 @@ int soc_io_output(u32 group, u32 index, bool status)
 	else
 		soc_io_config_log[index].settings[GPIOMUX_ACTIVE]->dir = GPIOMUX_OUT_LOW;
 	
-		
     gpio_direction_output(index, status);
     gpio_set_value(index, status);
+#endif
     return 1;
 
 }
