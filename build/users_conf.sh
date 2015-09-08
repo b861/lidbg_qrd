@@ -232,6 +232,16 @@ case "$USERS_ID" in
                 export BP_SOURCE_PATH=$DBG_PLATFORM_PATH/AMSS_M8974_40_R4120
                 export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/M8974AAAAANLYD4275
                 export RELEASE_REPOSITORY=$DBG_PLATFORM_PATH/8x26-release;;
+		8)
+		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/rk3188_rk3066_r-box_android4.4.2_sdk;;
+		9)
+		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/px3/px3;;
+		10)
+		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/M8974AAAAANLYD4120
+		export BP_SOURCE_PATH=~/swlee/msm8626-la-1-0-4_amss_oem-xtra_no-l1-tds;;
+		11)
+		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/M8974AAAAANLYD4275
+		export BP_SOURCE_PATH=~/lwy/msm8909-la-1-1_amss_oem_milestone-major;;
         esac;;
 	6)
 	export DBG_PLATFORM_PATH=/home2/luoweiye

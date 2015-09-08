@@ -25,11 +25,18 @@ int find_ad_key(struct ad_key_remap *p)
     static int count=0;
     int val = 0;
     int i;
-   
-    if(SOC_ADC_Get(p->ch, &val)==0)
-       val=p->max;
+    if(g_hw.ad_val_mcu==1)
+    {
+    	if(LPC_ADC_Get(p->ch, &val)==0)
+		val=p->max;
+     }
+    else
+    {
+    	if(SOC_ADC_Get(p->ch, &val)==0)
+        	val=p->max;
+    }
     if(val > p->max)
-       val=p->max;
+		val=p->max;
 	 	pr_debug("ch=%d,val=%d",p->ch,val);		
         val_buf[count++]=val;              
         if(count<4)

@@ -81,7 +81,7 @@ struct hw_version_specific
 	int i2c_bus_lpc;
 
 //ad
-	struct ad_key_remap ad_key[2];
+	struct ad_key_remap ad_key[4];
 	struct ad_key ad_key_map[32];
 //temp
 	bool thermal_ctrl_en;

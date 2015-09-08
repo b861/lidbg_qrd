@@ -264,6 +264,7 @@ struct lidbg_fn_t
 	
     int (*pfnSOC_Temp_Get)(void);
     int (*pfnSOC_I2C_Rec_TEF6638)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
+    bool (*pfnLPC_ADC_Get)(unsigned int channel , unsigned int *value);
 };
 
 
@@ -436,5 +437,5 @@ static inline int check_pt(void)
 #define SOC_Temp_Get (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_Temp_Get))
 
 #define SOC_I2C_Rec_TEF6638  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnSOC_I2C_Rec_TEF6638))
-
+#define LPC_ADC_Get  (check_pt()?NULL:(plidbg_dev->soc_func_tbl.pfnLPC_ADC_Get))
 #endif

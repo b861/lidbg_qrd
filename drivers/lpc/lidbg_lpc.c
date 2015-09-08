@@ -6,9 +6,12 @@
 LIDBG_DEFINE;
 static bool lpc_work_en = true;
 static struct kfifo lpc_data_fifo;
+static struct kfifo lpc_ad_fifo;
 #define DATA_BUFF_LENGTH_FROM_MCU   (128)
 #define FIFO_SIZE (1024*4)
 u8 fifo_buffer[FIFO_SIZE];
+#define AD_FIFO_SIZE (1024)
+u32 ad_fifo_buff[AD_FIFO_SIZE];
 #define BYTE u8
 #define UINT u32
 #define UINT32 u32
@@ -64,7 +67,6 @@ struct early_suspend early_suspend;
 
 struct fly_hardware_info GlobalHardwareInfo;
 struct fly_hardware_info *pGlobalHardwareInfo;
-static DECLARE_COMPLETION(lpc_read_wait); 
 
 int thread_lpc(void *data)
 {
@@ -176,14 +178,32 @@ static void LPCdealReadFromMCUAll(BYTE *p, UINT length)
 #if 1
 #ifdef LPC_DEBUG_LOG
     {
-        u32 i;
-        lidbg("From LPC:");//mode ,command,para
-        for(i = 0; i < length; i++)
-        {
-            printk("%x ", p[i]);
+    u32 i;	
+	u8 val[4]={0};
+    lidbg("From LPC:");//mode ,command,para
+    for(i = 0; i < length; i++)
+    {
+        printk("%x ", p[i]);
 
-        }
-        lidbg("\n");
+    }
+    lidbg("\n");
+      if(p[0]==0x05&&p[1]==0x05)    
+    {
+		val[0]=p[2];
+		val[1]=p[3];
+		val[2]=p[4];
+		val[3]=p[5];
+		down(&dev->sem);
+		if(kfifo_is_full(&lpc_ad_fifo))
+		{
+		kfifo_reset(&lpc_ad_fifo);
+		lidbg("kfifo_reset!!!!!\n");
+		} 
+		kfifo_in(&lpc_ad_fifo,val,4); 
+		up(&dev->sem); 		
+    }
+        
+    
     }
 #endif
 
@@ -534,8 +554,8 @@ static int  lpc_probe(struct platform_device *pdev)
 	sema_init(&dev->sem, 1);
 	init_waitqueue_head(&dev->queue);
 	kfifo_init(&lpc_data_fifo, fifo_buffer, FIFO_SIZE);
+ 	kfifo_init(&lpc_ad_fifo, fifo_buffer, AD_FIFO_SIZE);
     mcuFirstInit();
-	INIT_COMPLETION(lpc_read_wait);
 	lidbg_new_cdev(&lpc_fops, "fly_lpc");
 
     return 0;
@@ -596,9 +616,31 @@ static struct platform_driver lpc_driver =
     },
 };
 
-
+bool iLPC_ADC_Get (u32 channel , u32 *value)
+{
+	int bytes;
+	u32 val_temp=0;
+	u32 ad_val=0;
+	u8 lpc_ad_buff[2]={0};
+    if(kfifo_len(&lpc_ad_fifo))
+    {
+		down(&dev->sem);
+        bytes = kfifo_out(&lpc_ad_fifo, &lpc_ad_buff,2);
+		up(&dev->sem);
+		val_temp=(u32)lpc_ad_buff[1];
+		val_temp=(val_temp<<8);
+		ad_val=val_temp+(u32)lpc_ad_buff[0];
+		*value=ad_val;
+    }
+	else
+	{	    	
+		return 0;
+	}
+	return 1;
+}
 static void set_func_tbl(void)
 {
+plidbg_dev->soc_func_tbl.pfnLPC_ADC_Get = iLPC_ADC_Get;
 #ifdef SOC_msm8x25
     ((struct lidbg_hal *)plidbg_dev)->soc_func_tbl.pfnSOC_LPC_Send = LPCCombinDataStream;
 #else
