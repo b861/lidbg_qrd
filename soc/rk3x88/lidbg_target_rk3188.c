@@ -23,6 +23,8 @@ struct hw_version_specific g_hw_version_specific[] =
 	.ad_val_mcu = 1,
 	.gpio_int_mcu_i2c_request = RK30_PIN0_PB7 ,
 	.i2c_bus_lpc = 0,
+        .gpio_mcu_wp = RK30_PIN0_PA2,
+        .gpio_mcu_app = RK30_PIN0_PB1,
 	 .ad_key = 
 	{
 		{   
