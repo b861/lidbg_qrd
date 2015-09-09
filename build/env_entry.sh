@@ -310,7 +310,7 @@ case "$DBG_PLATFORM_ID" in
         export OTA_PACKAGE_NAME=msm8974-ota-eng.*.zip
         export DBG_SOC=rk3x88
         export TEST_PACKAGE_PATH=//192.168.128.128/px3/升级包发布/专项测试包
-        export REPOSITORY_WORK_BRANCH=master
+        export REPOSITORY_WORK_BRANCH=PX3
         export SYSTEM_WORK_BRANCH=master
         export MAKE_PAKG_NUM= ;;
 
