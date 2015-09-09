@@ -38,7 +38,7 @@ int thread_drivers_dbg_init(void *data)
 {
     lidbg_new_cdev(&drivers_dbg_nod_fops, "lidbg_drivers_dbg");
 	
-	if(!g_var.is_fly)
+	if((!g_var.is_fly)&&(g_var.recovery_mode==0)&&( !fs_is_file_exist("/system/app/GPS.apk")))
 	{
 		lidbg("enable system print\n");
 		g_recovery_meg->bootParam.upName.val = 1;
