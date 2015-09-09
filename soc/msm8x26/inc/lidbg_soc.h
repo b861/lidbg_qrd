@@ -223,7 +223,7 @@ extern struct fly_smem *p_fly_smem ;
 
 
 //i2c-gpio
-//#define LIDBG_I2C_GPIO
+#define LIDBG_I2C_GPIO
 
 #if	0
 #define LIDBG_I2C_GPIO_SDA (107)
