@@ -249,7 +249,7 @@ int thread_thermal(void *data)
 
 		
 thermal_ctrl:	
-	
+
 		max_freq = get_scaling_max_freq();
         //lidbg("MSM_THERM: %d\n",cur_temp);
 		for(i = 0; i < SIZE_OF_ARRAY(g_hw.cpu_freq_thermal); i++)
@@ -374,12 +374,96 @@ void temp_init(void)
 
 
 
+ssize_t  temp_read(struct file *filp, char __user *buffer, size_t size, loff_t *offset)
+{
+	int temp_val;
+	temp_val = soc_temp_get(); 
+	if(size>4)
+		size=4;
+ 	if (copy_to_user(buffer,&temp_val, size))
+	{
+		lidbg("copy_to_user ERR\n");
+	}	   
+	return size;
+}
+
+ssize_t  temp_write (struct file *filp, const char __user *buf, size_t size, loff_t *ppos)
+{
+ 
+ 	return size;
+} 
+
+int temp_open (struct inode *inode, struct file *filp)
+{
+	return 0;
+}
+
+
+static  struct file_operations temp_nod_fops =
+{
+    .owner = THIS_MODULE,
+    .write = temp_write,
+    .read = temp_read,
+    .open =  temp_open,
+   
+};
+
+static int temp_ops_suspend(struct device *dev)
+{
+	lidbg("-----------temp_suspend------------\n");
+	DUMP_FUN;
+
+    return 0;
+}
+
+static int temp_ops_resume(struct device *dev)
+{
+	
+    lidbg("-----------temp_resume------------\n");
+    DUMP_FUN;
+	
+	return 0;
+}
+static struct dev_pm_ops temp_ops =
+{
+    .suspend	= temp_ops_suspend,
+    .resume	= temp_ops_resume,
+};
+static int temp_probe(struct platform_device *pdev)
+{       
+	lidbg("-----------temp_probe------------\n");
+	lidbg_new_cdev(&temp_nod_fops, "lidbg_temp");
+	
+	return 0;	 
+}
+static int temp_remove(struct platform_device *pdev)
+{
+	return 0;
+}
+static struct platform_device temp_devices =
+{
+    .name			= "lidbg_temp",
+    .id 			= 0,
+};
+
+static struct platform_driver temp_driver =
+{
+    .probe = temp_probe,
+    .remove = temp_remove,
+    .driver = 	{
+		        .name = "lidbg_temp",
+		        .owner = THIS_MODULE,
+				.pm = &temp_ops,
+    			},
+};
 	
 static int  cpu_temp_init(void)
 {
 	printk(KERN_WARNING "chdrv_init\n");
 	LIDBG_GET;
-    CREATE_KTHREAD(thread_thermal, NULL);  
+    CREATE_KTHREAD(thread_thermal, NULL); 
+    platform_device_register(&temp_devices);
+    platform_driver_register(&temp_driver); 
 	return 0;
 
 
