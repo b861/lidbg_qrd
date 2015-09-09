@@ -1327,12 +1327,8 @@ static int gtp_request_irq(struct goodix_ts_data *ts)
 	ret = request_irq(ctp_int.vector_irq_num, goodix_ts_irq_handler,
 			IRQ_TYPE_LEVEL_HIGH , ts->client->name, ts);
 #else
-#ifdef PLATFORM_ID_11
-	ts->client->irq = GPIO_TO_INT((GTP_INT_PORT+911));
-#else
-	ts->client->irq = GPIO_TO_INT((GTP_INT_PORT));
-#endif
 
+	ts->client->irq = GPIO_TO_INT(GTP_INT_PORT);
 	lidbg("INT trigger type:%x, irq=%d", ts->int_trigger_type,
 			ts->client->irq);
 
