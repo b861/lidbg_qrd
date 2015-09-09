@@ -300,7 +300,11 @@ else
 bool soc_io_input( u32 index)
 {
 	if(io_ready == 0)  {lidbg("%d io not ready\n",index);return 1;}
-	
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0)
+index+=911;
+gpio_request(index, "lidbg_io");
+#endif
+
     gpio_direction_input(index);
     return gpio_get_value(index);
 }

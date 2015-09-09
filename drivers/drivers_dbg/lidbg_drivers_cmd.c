@@ -156,6 +156,12 @@ void callback_func_test_readdir(char *dirname, char *filename)
     LIDBG_WARN("%s<---%s\n", dirname, filename);
 }
 
+irqreturn_t TEST_isr(int irq, void *dev_id)
+{
+    lidbg("TEST_isr================%d ",irq);
+    return IRQ_HANDLED;
+}
+
 static bool fan_enable = false;
 void parse_cmd(char *pt)
 {
@@ -577,6 +583,14 @@ void parse_cmd(char *pt)
     {
         fs_file_write2(argv[1], argv[2]);
         lidbg("%s:[%s]\n", argv[1], argv[2]);
+    }
+    else if(!strcmp(argv[0], "irq") )
+    {
+        int irq;
+        irq = simple_strtoul(argv[1], 0, 0);
+        SOC_IO_ISR_Add(irq, IRQF_TRIGGER_FALLING|IRQF_TRIGGER_RISING | IRQF_ONESHOT, TEST_isr, NULL);
+        SOC_IO_ISR_Enable(irq);
+        lidbg("SOC_IO_ISR_Add[%d]\n", irq);
     }
 
     else if (!strcmp(argv[0], "lpc"))
