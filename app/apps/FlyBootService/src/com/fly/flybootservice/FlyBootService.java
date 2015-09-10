@@ -345,11 +345,6 @@ public class FlyBootService extends Service {
             mHandler.postDelayed(ealysuspend, EALYSUSPEND_TIME * 1000);
             mState = emState.ScreenOff;
         }
-        if (mState == emState.Going2Sleep)
-        {
-			mState = emState.Sleep;
-			LIDBG_PRINT("mState = emState.Sleep");
-		}
     }
 
 	private void start_fastboot(){
@@ -364,14 +359,11 @@ public class FlyBootService extends Service {
             mActivityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
 
             if(originPmMode){
-	            delay(6000);
+	            delay(8000);
+	            mState = emState.Sleep;
             }
 
-            LIDBG_PRINT(" ********** start fastboot 6S********** ");
-        if (mState != emState.Going2Sleep) {
-	LIDBG_PRINT("====skip :[mState != emState.Going2Sleep]["+mState+"]==\n\n\n\n");
-	return;
-        	}
+            LIDBG_PRINT(" ********** start fastboot ********** ");
             mHandlerThread = new HandlerThread("fastboot");
             mHandlerThread.start();
 
