@@ -204,6 +204,8 @@ int soc_io_config(u32 index, int func, u32 direction,  u32 pull, u32 drive_stren
 		soc_io_config_log[index].settings[GPIOMUX_ACTIVE] = lidbg_setting_active ;
 		soc_io_config_log[index].settings[GPIOMUX_SUSPENDED] = lidbg_setting_suspend ;
 
+    	index+=GPIO_MAP_OFFSET;
+
 
         if (!gpio_is_valid(index))
         {
@@ -264,7 +266,7 @@ int soc_io_output(u32 group, u32 index, bool status)
 	else
 		soc_io_config_log[index].settings[GPIOMUX_ACTIVE]->dir = GPIOMUX_OUT_LOW;
 	
-		
+    index+=GPIO_MAP_OFFSET;
     gpio_direction_output(index, status);
     gpio_set_value(index, status);
     return 1;
@@ -275,6 +277,7 @@ bool soc_io_input( u32 index)
 {
 	if(io_ready == 0)  {lidbg("%d io not ready\n",index);return 1;}
 	
+    index+=GPIO_MAP_OFFSET;
     gpio_direction_input(index);
     return gpio_get_value(index);
 }

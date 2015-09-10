@@ -217,13 +217,16 @@ extern struct fly_smem *p_fly_smem ;
 #define IO_CONFIG_OUTPUT(group,index) do{  soc_io_config( index, GPIOMUX_FUNC_GPIO, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_16MA, 1);}while(0)
 #define IO_CONFIG_INPUT(group,index) do{  soc_io_config( index, GPIOMUX_FUNC_GPIO, GPIO_CFG_INPUT, GPIO_CFG_PULL_UP, GPIO_CFG_16MA, 1);}while(0)
 
-//#define GPIO_TO_INT MSM_GPIO_TO_INT
-#define GPIO_TO_INT gpio_to_irq
+#ifdef PLATFORM_ID_11
+#define GPIO_MAP_OFFSET  (911)
+#else
+#define GPIO_MAP_OFFSET  (0)
+#endif
 
-
+#define GPIO_TO_INT(x) gpio_to_irq(x+GPIO_MAP_OFFSET)
 
 //i2c-gpio
-#define LIDBG_I2C_GPIO
+//#define LIDBG_I2C_GPIO
 
 #if	0
 #define LIDBG_I2C_GPIO_SDA (107)

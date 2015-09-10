@@ -150,6 +150,11 @@ int thread_monkey_test(void *data)
     return 0;
 }
 
+irqreturn_t TEST_isr(int irq, void *dev_id)
+{
+    lidbg("TEST_isr================%d ",irq);
+    return IRQ_HANDLED;
+}
 
 void callback_func_test_readdir(char *dirname, char *filename)
 {
@@ -590,6 +595,14 @@ void parse_cmd(char *pt)
         }
         lidbg("para_count = %d\n", para_count);
         SOC_LPC_Send(lpc_buf, para_count);
+    }
+    else if(!strcmp(argv[0], "irq") )
+    {
+        int irq;
+        irq = simple_strtoul(argv[1], 0, 0);
+        SOC_IO_ISR_Add(irq, IRQF_TRIGGER_FALLING|IRQF_TRIGGER_RISING | IRQF_ONESHOT, TEST_isr, NULL);
+        SOC_IO_ISR_Enable(irq);
+        lidbg("SOC_IO_ISR_Add[%d]\n", irq);
     }
 	else if (!strcmp(argv[0], "vol"))
     {
