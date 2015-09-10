@@ -114,7 +114,7 @@ function soc_make_otapackage()
 	if [[ $TARGET_PRODUCT = "" ]];then
 		source build/envsetup.sh&&choosecombo release $DBG_PLATFORM $SYSTEM_BUILD_TYPE
 	fi
-
+        soc_build_all
 	make otapackage -j16
 }
 
