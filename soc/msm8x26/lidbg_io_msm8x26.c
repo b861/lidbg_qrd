@@ -204,7 +204,8 @@ int soc_io_config(u32 index, int func, u32 direction,  u32 pull, u32 drive_stren
 		soc_io_config_log[index].settings[GPIOMUX_ACTIVE] = lidbg_setting_active ;
 		soc_io_config_log[index].settings[GPIOMUX_SUSPENDED] = lidbg_setting_suspend ;
 
-    	index+=GPIO_MAP_OFFSET;
+        msm_gpiomux_install(&soc_io_config_log[index], 1);
+        index+=GPIO_MAP_OFFSET;
 
 
         if (!gpio_is_valid(index))
@@ -219,8 +220,6 @@ int soc_io_config(u32 index, int func, u32 direction,  u32 pull, u32 drive_stren
 						lidbg_setting_active->pull,
 						lidbg_setting_active->dir
 		);
-
-        msm_gpiomux_install(&soc_io_config_log[index], 1);
 		
 		if(func == GPIOMUX_FUNC_GPIO)
 		{
