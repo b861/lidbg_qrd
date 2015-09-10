@@ -168,10 +168,10 @@
 
 #define USB_WORK_DISENABLE  do{\
 			lidbg("USB_WORK_DISENABLE\n");\
-			USB_ID_HIGH_DEV;\
-			msleep(200);\
-			USB_SWITCH_DISCONNECT;\
 			USB_POWER_DISABLE;\
+			msleep(500);\
+			USB_SWITCH_DISCONNECT;\
+			USB_ID_HIGH_DEV;\
 			}while(0)
 			
 
