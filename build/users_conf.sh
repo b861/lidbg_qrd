@@ -170,6 +170,10 @@ case "$USERS_ID" in
                         9)
                 export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/px3
                 export RELEASE_REPOSITORY=$DBG_PLATFORM_PATH/8x26-release;;
+			11)
+                export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/Android8909
+                export RELEASE_REPOSITORY=$DBG_PLATFORM_PATH/8x26-release;;
+
 
 
 	esac;;
