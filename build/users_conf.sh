@@ -290,8 +290,9 @@ case "$USERS_ID" in
 		export BP_SOURCE_PATH=~/lwy/msm8909-la-1-1_amss_oem_milestone-major;;
 	esac;;
 	7)
-	#export DBG_PLATFORM_PATH=/home2/liangyihong/projDir
-	export DBG_PLATFORM_PATH=/home2/liangyihong/basicGit
+	export DBG_PLATFORM_PATH=/home2/liangyihong/projDir
+	export DBG_PLATFORM_PATH_BASIC=/home2/liangyihong/basicGit
+	export DBG_PLATFORM_PATH_WWF=/home2/wuweifeng
 	#export DBG_PLATFORM_PATH_CCS=/home2/chenchangsheng
 	export PATHJAVA1P6=/opt/JDK/jdk1.6.0_31
 	export PATHJAVA1P7=/opt/JDK/java-7-openjdk-amd64
@@ -323,7 +324,7 @@ case "$USERS_ID" in
 		8)
 		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/rk3188/rk3188_rk3066_r-box_android4.4.2_sdk;;
 		9)
-		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/rk3188/px3_git;;
+		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/px3;;
 		10)
 		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/M8974AAAAANLYD4120
 		export BP_SOURCE_PATH=~/swlee/msm8626-la-1-0-4_amss_oem-xtra_no-l1-tds;;
@@ -331,7 +332,7 @@ case "$USERS_ID" in
 		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/M8974AAAAANLYD4120
 		export BP_SOURCE_PATH=~/swlee/msm8626-la-1-0-4_amss_oem-xtra_no-l1-tds;;
 		13)
-		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/AllwinnerA80/android;;
+		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH_BASIC/AllwinnerA80/android;;
 	esac;;
 	
 esac

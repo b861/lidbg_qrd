@@ -63,6 +63,11 @@ struct hw_version_specific g_hw_version_specific[] =
 						},
 		},
 	},
+	.gpio_int_button_left1 = RK30_PIN0_PA6,
+	.gpio_int_button_left2 = RK30_PIN0_PA5,
+	.gpio_int_button_right1 = RK30_PIN0_PA1,
+	.gpio_int_button_right2 = RK30_PIN0_PA0,
+	.is_single_edge = 1,
 	},
 };
 

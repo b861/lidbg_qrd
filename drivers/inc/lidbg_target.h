@@ -103,6 +103,8 @@ struct hw_version_specific
 	int lpc_disable;
 //ad_get_val
         int ad_val_mcu;
+//is_singleEdge
+	bool is_single_edge;
 };
 extern struct hw_version_specific g_hw_version_specific[];
 
