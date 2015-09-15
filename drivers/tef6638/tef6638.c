@@ -35,6 +35,12 @@ ssize_t tef6638_write (struct file *filp, const char __user *buf, size_t size, l
 
 	cmd_num = lidbg_token_string(cmd_buf, " ", cmd) ;
 
+	if(!strcmp(cmd[0], "i2s"))
+	{
+		lidbg("case:[%s]\n", cmd[0]);
+		TEF6638_Input(MediaMP3);
+	}
+
 	if(!strcmp(cmd[0], "radio"))
 	{
 		lidbg("case:[%s]\n", cmd[0]);
@@ -180,53 +186,43 @@ void TEF6638_Input(BYTE channel)
 	switch(channel)
 	{
 	case Init:
-		reg[1] = 0x00;	//Radio
+		reg[1] = INIT_INPUT_ADDR;	
 		printk(KERN_CRIT "Init");
 		break;
-	/*
-	case MediaMP3:									//IIS 0
-	case MediaSystem:
-	case SYSTEM_RING:
-	case BT_RING:
-		reg[1] = 0x10;	
+	IIS1_INPUT_CASE				//IIS1
+		reg[1] = I2S1_SUBADDR;	
 		regGain[3]=TEF6638_InputGain_Data_PS[InputGain*2+1];
 		regGain[4]=TEF6638_InputGain_Data_PS[InputGain*2+2];
 		printk(KERN_CRIT "MediaMP3");
 		break;
-	*/	                                      
-	case IPOD :  				//AIN0
-	case TV:
-	case VAP:
-		reg[1] = 0x08;	
+	AIN0_INPUT_CASE				//AIN0
+		reg[1] = AIN0_SUBADDR;	
 		regGain[3]=TEF6638_InputGain_Data_PS[InputGain*2+1];
 		regGain[4]=TEF6638_InputGain_Data_PS[InputGain*2+2];
 		printk(KERN_CRIT "AUX");
 		break;
 		break;
-	case A2DP:                               //AIN1								
-	case BT:
-		reg[1] = 0x09;	
+	AIN1_INPUT_CASE                               //AIN1								
+		reg[1] = AIN1_SUBADDR;	
 		regGain[3]=TEF6638_InputGain_Data_PS[InputGain*2+1];
 		regGain[4]=TEF6638_InputGain_Data_PS[InputGain*2+2];
 		printk(KERN_CRIT "IPOD / Exbox / SYSTEM_RING");
 		lidbg("Select AIN1\n");
-		break;										    	  
-	case AUX : 				//AIN2&AIN3
-	case EXT_TEL:
-	case GR_AUDIO:
-		reg[1] = 0x10;	
+		break;										    	  	 				
+	AIN2_3_INPUT_CASE				//AIN2&AIN3
+		reg[1] = AIN2_3_SUBADDR;	
 		regGain[3]=TEF6638_InputGain_Data_PS[InputGain*2+1];
 		regGain[4]=TEF6638_InputGain_Data_PS[InputGain*2+2];
 		printk(KERN_CRIT "A2DP / BT");
 		break;		
-	case MediaCD:									//SPDIF0
-		reg[1] = 0x15;	
+	SPDIF0_INPUT_CASE					//SPDIF0
+		reg[1] = SPDIF_SUBADDR;	
 		regGain[3]=TEF6638_InputGain_Data_PS[InputGain*2+1];
 		regGain[4]=TEF6638_InputGain_Data_PS[InputGain*2+2];
 		printk(KERN_CRIT "MediaCD");
 		break;
-	case RADIO:										//Radio
-		reg[1] = 0x00;	
+	RADIO_INPUT_CASE					//Radio
+		reg[1] = RADIO_SUBADDR;	
 		regGain[3]=TEF6638_InputGain_Data_PS[InputGain*2+1];
 		regGain[4]=TEF6638_InputGain_Data_PS[InputGain*2+2];
 		printk(KERN_CRIT "RADIO");
@@ -409,8 +405,8 @@ static int tef6638_probe(struct platform_device *pdev)
 	else
 		lidbg("TEF6638 init failed!\n");
 	
-	//TEF6638_Input(MediaMP3);
-	//TEF6638_Volume(50);
+	TEF6638_Input(MediaMP3);
+	TEF6638_Volume(20);
 	return 0;
 
 }

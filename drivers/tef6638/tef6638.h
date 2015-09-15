@@ -98,6 +98,59 @@ enum audio_source{Init=0,MediaCD,CDC,RADIO,AUX,IPOD,TV,MediaMP3,SRADIO,A2DP,EXT_
 #define T_FREQ_15K              2
 #define T_FREQ_17K5             3
 
+//primary & sec input subaddr(sec don't have SineGen)
+#define RADIO_SUBADDR	0x00
+#define AIN0_SUBADDR		0x08
+#define AIN1_SUBADDR		0x09
+#define AIN2_3_SUBADDR	0x0A
+#define I2S0_SUBADDR		0x10
+#define I2S1_SUBADDR		0x11
+#define I2S2_SUBADDR		0x12
+#define HOST_I2S0_SUBADDR	0x13
+#define HOST_I2S1_SUBADDR	0x14
+#define SPDIF_SUBADDR		0x15
+#define NOISEGEN_P_SUBADDR	0x1E
+#define NOISEGEN_S_SUBADDR	0x1F
+#define SINEGEN_SUBADDR		0x1F
+
+#define NOTUSED_CASE		254	//or -1(suppress warning)
+
+#ifdef SOC_rk3x88
+#define INIT_INPUT_ADDR		I2S1_SUBADDR
+#define IIS1_INPUT_CASE		case IPOD:\
+							case TV:\
+							case VAP:\
+							case MediaMP3:\
+							case MediaSystem:\
+							case SYSTEM_RING:\
+							case BT_RING:
+#define AIN0_INPUT_CASE		case AUX:
+#define AIN1_INPUT_CASE		case A2DP:\
+							case BT:
+#define AIN2_3_INPUT_CASE	case EXT_TEL:\
+							case GR_AUDIO:
+#define SPDIF0_INPUT_CASE	case MediaCD:
+#define RADIO_INPUT_CASE		case RADIO:
+#endif
+
+#ifdef SOC_msm8x26
+#define INIT_INPUT_ADDR		AIN0_SUBADDR
+#define IIS1_INPUT_CASE		case NOTUSED_CASE://not used
+#define AIN0_INPUT_CASE		case IPOD:\
+							case TV:\
+							case VAP:\
+							case MediaMP3:\
+							case MediaSystem:\
+							case SYSTEM_RING:\
+							case BT_RING:
+#define AIN1_INPUT_CASE		case A2DP:\
+							case BT:
+#define AIN2_3_INPUT_CASE	case EXT_TEL:\
+							case GR_AUDIO:\
+							case AUX:
+#define SPDIF0_INPUT_CASE	case MediaCD:
+#define RADIO_INPUT_CASE		case RADIO:
+#endif
 
 #endif  //__TEF6638_H__
 
