@@ -410,7 +410,7 @@ static int usb_nb_misc_func(struct notifier_block *nb, unsigned long action, voi
     case USB_DEVICE_ADD:
         if(dev && dev->product && dev->descriptor.idVendor && dev->descriptor.idProduct)
         {
-            if(strstr(dev->product, "EHCI Host Controller") == NULL && udiskvender[0] != dev->descriptor.idVendor && udiskvender[1] != dev->descriptor.idProduct)
+            if(strstr(dev->product, "troller") == NULL && udiskvender[0] != dev->descriptor.idVendor && udiskvender[1] != dev->descriptor.idProduct)
             {
                 g_var.is_udisk_needreset = 1;
                 udiskvender[0] = dev->descriptor.idVendor;
