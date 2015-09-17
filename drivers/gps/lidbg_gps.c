@@ -25,15 +25,15 @@ module_param_named(work_en, work_en, int, 0644 );
 struct early_suspend early_suspend;
 #endif
 #define GPS_BUF_SIZE (1024*4)
-u8 gps_data[GPS_BUF_SIZE+1];
+u8 *gps_data;
 
 
 #define HAL_BUF_SIZE (512)
-u8 gps_data_for_hal[HAL_BUF_SIZE];
+u8 *gps_data_for_hal;
 
 
 #define FIFO_SIZE (1024*4)
-u8 fifo_buffer[FIFO_SIZE];
+u8 *fifo_buffer;
 static struct kfifo gps_data_fifo;
 
 
@@ -134,7 +134,7 @@ ssize_t gps_read (struct file *filp, char __user *buf, size_t count, loff_t *f_p
     else
         read_len = fifo_len;
 
-    bytes = kfifo_out(&gps_data_fifo, &gps_data_for_hal, read_len);
+    bytes = kfifo_out(&gps_data_fifo, gps_data_for_hal, read_len);
     up(&dev->sem);
 
     if(copy_to_user(buf, gps_data_for_hal, read_len))
@@ -394,7 +394,14 @@ static int  gps_probe(struct platform_device *pdev)
     static struct class *class_install;
     static int major_number = 0;
     dev_t dev_number = MKDEV(major_number, 0);
-
+    gps_data = (u8 *)kmalloc(GPS_BUF_SIZE+1, GFP_KERNEL);
+    gps_data_for_hal = (u8 *)kmalloc(HAL_BUF_SIZE, GFP_KERNEL);
+    fifo_buffer = (u8 *)kmalloc(FIFO_SIZE, GFP_KERNEL);
+    if((gps_data==NULL)||(gps_data_for_hal==NULL)||(fifo_buffer==NULL))
+    {
+    	lidbg("gps_probe kmalloc err\n");
+		return 0;
+    }
     DUMP_FUN;
  	
     if(g_var.recovery_mode)

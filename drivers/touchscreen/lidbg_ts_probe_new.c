@@ -10,7 +10,7 @@ static wait_queue_head_t wait_queue;
 u8 flyts_hal_data;
 
 #define FIFO_SIZE (256)
-u8 flyts_hal_fifo_buffer[FIFO_SIZE];
+u8 *flyts_hal_fifo_buffer;
 static struct kfifo flyts_hal_data_fifo;
 
 
@@ -669,6 +669,12 @@ static  struct file_operations flyts_hal_fops =
  */
 static int  flyts_hal_init(void)
 {
+    flyts_hal_fifo_buffer = (u8 *)kmalloc(FIFO_SIZE + 1, GFP_KERNEL);
+	if(flyts_hal_fifo_buffer==NULL)
+    {
+		lidbg("flyts_hal_init kmalloc err\n");
+        	return 0;
+    }
 	lidbg_new_cdev(&flyts_hal_fops, "flyts_hal");//add cdev
 	init_waitqueue_head(&wait_queue);
 	sema_init(&sem, 1);

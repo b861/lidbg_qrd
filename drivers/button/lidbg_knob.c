@@ -49,10 +49,10 @@ struct completion origin_completion;
 
 //u8 knob_data_for_hal;
 #define HAL_BUF_SIZE (512)
-u8 knob_data_for_hal[HAL_BUF_SIZE];
+u8 *knob_data_for_hal;
 
 #define FIFO_SIZE (512)
-u8 knob_fifo_buffer[FIFO_SIZE];
+u8 *knob_fifo_buffer;
 static struct kfifo knob_data_fifo;
 
 spinlock_t irq_lock;
@@ -735,6 +735,13 @@ static int  knob_probe(struct platform_device *pdev)
 	int ret;
 	DUMP_FUN;
 	// 1creat cdev
+	knob_fifo_buffer = (u8 *)kmalloc(FIFO_SIZE , GFP_KERNEL);
+	knob_data_for_hal = (u8 *)kmalloc(HAL_BUF_SIZE , GFP_KERNEL);
+	if((knob_data_for_hal==NULL)||(knob_fifo_buffer==NULL))
+    {
+		lidbg("knob_probe kmalloc err\n");
+        return 0;
+    }
 	pfly_KeyEncoderInfo = (struct fly_KeyEncoderInfo *)kmalloc( sizeof(struct fly_KeyEncoderInfo), GFP_KERNEL );
 	if (pfly_KeyEncoderInfo == NULL)
 	{
@@ -798,7 +805,7 @@ ssize_t knob_read (struct file *filp, char __user *buf, size_t count, loff_t *f_
 	bytes = kfifo_out(&knob_data_fifo, knob_data_for_hal, read_len);
 	up(&pfly_KeyEncoderInfo->sem);
 
-	if(copy_to_user(buf, &knob_data_for_hal, read_len))
+	if(copy_to_user(buf, knob_data_for_hal, read_len))
 	{
 	    return -1;
 	}

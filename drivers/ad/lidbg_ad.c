@@ -10,10 +10,10 @@ struct ad_device
         
 };
 static struct kfifo ad_data_fifo;
-#define FIFO_SIZE (1024)
-u32 fifo_buffer[FIFO_SIZE];
-#define DATA_SIZE (1024)
-u32 ad_data_for_app[DATA_SIZE];
+#define FIFO_SIZE (256)
+u32 *fifo_buffer;
+#define DATA_SIZE (256)
+u32 *ad_data_for_app;
 
 struct ad_device *dev;
 struct completion ad_val;
@@ -105,7 +105,7 @@ int thread_handle_key(void *data)
 		while(kfifo_len(&ad_data_fifo))
 		{
 			down(&dev->sem);
-	        bytes = kfifo_out(&ad_data_fifo, &ad_data_for_app,16);
+	        bytes = kfifo_out(&ad_data_fifo, ad_data_for_app,16);
 			up(&dev->sem);
 		   	for(k=0;k<SIZE_OF_ARRAY(g_hw.ad_key);k++)
 		   	{
@@ -139,7 +139,7 @@ ssize_t  ad_read(struct file *filp, char __user *buffer, size_t size, loff_t *of
 		read_len=fifo_len;
 	else
 		read_len=size;
-    bytes = kfifo_out(&ad_data_fifo, &ad_data_for_app,read_len);
+    bytes = kfifo_out(&ad_data_fifo, ad_data_for_app,read_len);
 	up(&dev->sem);
 	if (copy_to_user(buffer,ad_data_for_app, read_len))
 	{
@@ -212,6 +212,13 @@ static int ad_probe(struct platform_device *pdev)
 {       
 	lidbg("-----------ad_probe------------\n");
     dev = (struct ad_device *)kmalloc( sizeof(struct ad_device), GFP_KERNEL );
+	ad_data_for_app = (u32 *)kmalloc(DATA_SIZE*4, GFP_KERNEL);
+	fifo_buffer = (u32 *)kmalloc(FIFO_SIZE*4, GFP_KERNEL);
+	if((ad_data_for_app==NULL)||(fifo_buffer==NULL))
+    {
+    	lidbg("ad_probe kmalloc err\n");
+    	return 0;
+    }
     init_waitqueue_head(&dev->queue);
     sema_init(&dev->sem, 1);
     kfifo_init(&ad_data_fifo, fifo_buffer, FIFO_SIZE);

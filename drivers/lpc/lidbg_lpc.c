@@ -9,9 +9,9 @@ static struct kfifo lpc_data_fifo;
 static struct kfifo lpc_ad_fifo;
 #define DATA_BUFF_LENGTH_FROM_MCU   (128)
 #define FIFO_SIZE (1024*4)
-u8 fifo_buffer[FIFO_SIZE];
-#define AD_FIFO_SIZE (1024)
-u32 ad_fifo_buff[AD_FIFO_SIZE];
+u8 *fifo_buffer;
+#define AD_FIFO_SIZE (256)
+u32 *ad_fifo_buff;
 #define BYTE u8
 #define UINT u32
 #define UINT32 u32
@@ -21,7 +21,7 @@ u32 ad_fifo_buff[AD_FIFO_SIZE];
 #define FALSE 0
 #define TRUE 1
 #define HAL_BUF_SIZE (1024*4)
-u8 lpc_data_for_hal[HAL_BUF_SIZE];
+u8 *lpc_data_for_hal;
 #define LPC_SYSTEM_TYPE 0x00
 struct lpc_device
 {
@@ -471,7 +471,7 @@ ssize_t  lpc_read(struct file *filp, char __user *buffer, size_t size, loff_t *o
 		read_len = fifo_len;
 	else
 		read_len = size;
-	bytes = kfifo_out(&lpc_data_fifo, &lpc_data_for_hal, read_len);
+	bytes = kfifo_out(&lpc_data_fifo, lpc_data_for_hal, read_len);
 	up(&dev->sem);
 	if (copy_to_user(buffer, lpc_data_for_hal, read_len))
 	{
@@ -532,6 +532,14 @@ static struct file_operations lpc_fops =
 static int lpc_ping_en = 0;
 static int  lpc_probe(struct platform_device *pdev)
 {
+	lpc_data_for_hal = (u8 *)kmalloc(HAL_BUF_SIZE, GFP_KERNEL);
+	fifo_buffer = (u8 *)kmalloc(FIFO_SIZE, GFP_KERNEL);
+	ad_fifo_buff = (u32 *)kmalloc(AD_FIFO_SIZE*4, GFP_KERNEL);
+	if((lpc_data_for_hal==NULL)||(fifo_buffer==NULL)||(ad_fifo_buff==NULL))
+    {
+		lidbg("knob_probe kmalloc err\n");
+        return 0;
+    }
     DUMP_FUN;
     FS_REGISTER_INT(lpc_ping_en, "lpc_ping_en", 0, NULL);     
     if((!g_var.recovery_mode&&g_var.is_fly)|| g_hw.lpc_disable)//origin system and fly mode when lpc_ping_en enable,lpc driver will go on;
@@ -554,7 +562,7 @@ static int  lpc_probe(struct platform_device *pdev)
 	sema_init(&dev->sem, 1);
 	init_waitqueue_head(&dev->queue);
 	kfifo_init(&lpc_data_fifo, fifo_buffer, FIFO_SIZE);
- 	kfifo_init(&lpc_ad_fifo, fifo_buffer, AD_FIFO_SIZE);
+ 	kfifo_init(&lpc_ad_fifo, ad_fifo_buff, AD_FIFO_SIZE);
     mcuFirstInit();
 	lidbg_new_cdev(&lpc_fops, "fly_lpc");
 
