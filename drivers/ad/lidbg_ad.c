@@ -10,9 +10,9 @@ struct ad_device
         
 };
 static struct kfifo ad_data_fifo;
-#define FIFO_SIZE (256)
+#define FIFO_SIZE (1024)
 u32 *fifo_buffer;
-#define DATA_SIZE (256)
+#define DATA_SIZE (1024)
 u32 *ad_data_for_app;
 
 struct ad_device *dev;
@@ -25,7 +25,7 @@ int find_ad_key(struct ad_key_remap *p)
     static int count=0;
     int val = 0;
     int i;
-    if(g_hw.ad_val_mcu==1)
+    if((g_hw.ad_val_mcu==1)&&(g_var.is_fly==0))
     {
     	if(LPC_ADC_Get(p->ch, &val)==0)
 		val=p->max;
@@ -212,8 +212,8 @@ static int ad_probe(struct platform_device *pdev)
 {       
 	lidbg("-----------ad_probe------------\n");
     dev = (struct ad_device *)kmalloc( sizeof(struct ad_device), GFP_KERNEL );
-	ad_data_for_app = (u32 *)kmalloc(DATA_SIZE*4, GFP_KERNEL);
-	fifo_buffer = (u32 *)kmalloc(FIFO_SIZE*4, GFP_KERNEL);
+	ad_data_for_app = (u32 *)kmalloc(DATA_SIZE, GFP_KERNEL);
+	fifo_buffer = (u32 *)kmalloc(FIFO_SIZE, GFP_KERNEL);
 	if((ad_data_for_app==NULL)||(fifo_buffer==NULL))
     {
     	lidbg("ad_probe kmalloc err\n");

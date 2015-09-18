@@ -422,6 +422,9 @@ static int  gps_probe(struct platform_device *pdev)
 	    }
 #endif
 		lidbg("[ublox]ublox.miss\n\n");
+		kfree(gps_data);
+ 		kfree(gps_data_for_hal);
+		kfree(fifo_buffer);
 		return 0;
     }
     else
