@@ -97,9 +97,8 @@ enum
 enum
 {
     GPIO_CFG_NO_PULL,
-    GPIO_CFG_PULL_DOWN,
-    GPIO_CFG_KEEPER,
     GPIO_CFG_PULL_UP,
+    GPIO_CFG_PULL_DOWN,
 };
 
 /* GPIO TLMM: Drive Strength */

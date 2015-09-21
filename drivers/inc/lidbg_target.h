@@ -71,6 +71,8 @@ struct hw_version_specific
 	int gpio_bt_rx;
 	int gpio_bt_tx;
 
+	int gpio_wifi_pwr;
+
 //i2c
 	int i2c_bus_dsi83;
 	int i2c_bus_bx5b3a;
@@ -148,7 +150,8 @@ extern struct hw_version_specific g_hw_version_specific[];
 #define BUTTON_RIGHT_1 (g_hw.gpio_int_button_right1)//k3
 #define BUTTON_RIGHT_2 (g_hw.gpio_int_button_right2)//k4
 
-
+//wifi
+#define WIFI_PWR (g_hw.gpio_wifi_pwr)
 
 #include SOC_TARGET_DEFINE_PATH
 

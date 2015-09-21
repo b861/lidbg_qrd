@@ -133,7 +133,7 @@ int kernel_wakelock_print(char *info)
 
 int kernel_wakelock_force_unlock(char *info)
 {
-    struct wakeup_source *ws;
+    //struct wakeup_source *ws;
     int list_count = 0;
     if(g_var.ws_lh == NULL)
     {

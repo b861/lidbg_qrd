@@ -281,7 +281,8 @@ case "$USERS_ID" in
 		8)
 		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/rk3188_rk3066_r-box_android4.4.2_sdk;;
 		9)
-		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/px3_git;;
+		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/px3_git
+		export RELEASE_REPOSITORY=$DBG_PLATFORM_PATH/8x26-release;;
 		10)
 		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/M8974AAAAANLYD4120
 		export BP_SOURCE_PATH=~/swlee/msm8626-la-1-0-4_amss_oem-xtra_no-l1-tds;;

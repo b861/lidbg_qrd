@@ -334,6 +334,7 @@ static int soc_dev_probe(struct platform_device *pdev)
 	USB_WORK_ENABLE;
 
 	SET_USB_ID_SUSPEND;
+
 #ifdef SOC_msm8x26
 	MSM_GPS_POWER_ON;
 #endif
@@ -370,9 +371,13 @@ static int soc_dev_remove(struct platform_device *pdev)
 static int  soc_dev_suspend(struct platform_device *pdev, pm_message_t state)
 {
     lidbg("soc_dev_suspend\n");
+
+#ifdef SOC_rk3x88
+	soc_io_output(0, WIFI_PWR, 0);
+#endif
 	if(!g_var.is_fly)
 	{
-    		//button_suspend();
+		//button_suspend();
 	}
 
     return 0;
@@ -381,7 +386,10 @@ static int  soc_dev_suspend(struct platform_device *pdev, pm_message_t state)
 static int soc_dev_resume(struct platform_device *pdev)
 {
     lidbg("soc_dev_resume\n");
-	
+
+#ifdef SOC_rk3x88
+	soc_io_output(0, WIFI_PWR, 1);
+#endif
 	if(!g_var.is_fly)
 	{
 		//button_resume();
