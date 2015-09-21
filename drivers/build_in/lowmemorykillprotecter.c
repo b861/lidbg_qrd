@@ -39,6 +39,7 @@ static char *lmk_white_list[] =
 	"io.proxyservice",
 	"mediaserver",
 	"system_server",
+	"com.sygic.aura",
 	"system",
 	"logcat",
 	NULL,
