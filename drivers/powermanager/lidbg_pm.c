@@ -133,7 +133,11 @@ int kernel_wakelock_print(char *info)
 
 int kernel_wakelock_force_unlock(char *info)
 {
-    //struct wakeup_source *ws;
+#if defined(CONFIG_HAS_EARLYSUSPEND)
+#else
+    struct wakeup_source *ws;
+#endif
+
     int list_count = 0;
     if(g_var.ws_lh == NULL)
     {
