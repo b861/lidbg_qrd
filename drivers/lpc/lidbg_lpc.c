@@ -533,19 +533,19 @@ static int lpc_ping_en = 0;
 static int  lpc_probe(struct platform_device *pdev)
 {
 	
-	if((lpc_data_for_hal==NULL)||(fifo_buffer==NULL)||(ad_fifo_buff==NULL))
-    {
-		lidbg("knob_probe kmalloc err\n");
-        return 0;
-    }
-    lpc_data_for_hal = (u8 *)kmalloc(HAL_BUF_SIZE, GFP_KERNEL);
-    fifo_buffer = (u8 *)kmalloc(FIFO_SIZE, GFP_KERNEL);
-    ad_fifo_buff = (u32 *)kmalloc(AD_FIFO_SIZE, GFP_KERNEL);
     DUMP_FUN;
     FS_REGISTER_INT(lpc_ping_en, "lpc_ping_en", 0, NULL);     
     if((!g_var.recovery_mode&&g_var.is_fly)|| g_hw.lpc_disable)//origin system and fly mode when lpc_ping_en enable,lpc driver will go on;
     {
         lidbg("lpc_init do nothing.disable,[%d,%d,%d,%d]\n",g_var.is_fly,lpc_ping_en,g_var.recovery_mode,fs_is_file_exist(FLY_HAL_FILE));
+        return 0;
+    }
+    lpc_data_for_hal = (u8 *)kmalloc(HAL_BUF_SIZE, GFP_KERNEL);
+    fifo_buffer = (u8 *)kmalloc(FIFO_SIZE, GFP_KERNEL);
+    ad_fifo_buff = (u32 *)kmalloc(AD_FIFO_SIZE, GFP_KERNEL);
+	if((lpc_data_for_hal==NULL)||(fifo_buffer==NULL)||(ad_fifo_buff==NULL))
+    {
+		lidbg("knob_probe kmalloc err\n");
         return 0;
     }
     
