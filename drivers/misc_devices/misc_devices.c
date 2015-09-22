@@ -245,16 +245,18 @@ static struct file_operations dev_fops =
     .release = dev_close,
 };
 
+int usb_enumerate_limit=5;
 void usb_enumerate_monitor(char *key_word, void *data)
 {
 	DUMP_FUN;
-	if(!g_var.is_udisk_needreset)
+	if(!g_var.is_udisk_needreset||usb_enumerate_limit<=0)
 	{
-	    lidbg("find key word.return\n");
+	    lidbg("find key word.return %d,%d\n",!g_var.is_udisk_needreset,usb_enumerate_limit);
 	    return;
 	}
+	lidbg("find key word.in %d\n",usb_enumerate_limit);
 	g_var.is_udisk_needreset=0;
-	lidbg("find key word.in\n");
+	usb_enumerate_limit--;
 	if(g_var.system_status >= FLY_ANDROID_UP)
 	{
 		usb_disk_enable(0);
@@ -385,8 +387,8 @@ static int  soc_dev_suspend(struct platform_device *pdev, pm_message_t state)
 }
 static int soc_dev_resume(struct platform_device *pdev)
 {
-    lidbg("soc_dev_resume\n");
-
+    lidbg("soc_dev_resume usb_enumerate_limit=5\n");
+	usb_enumerate_limit=5;
 #ifdef SOC_rk3x88
 	soc_io_output(0, WIFI_PWR, 1);
 #endif
