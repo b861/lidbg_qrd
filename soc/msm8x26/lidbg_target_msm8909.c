@@ -41,6 +41,44 @@ struct hw_version_specific g_hw_version_specific[] =
 		.i2c_bus_lpc = 3,
 		.ad_val_mcu = 1,
 		.fly_parameter_node = "/dev/block/platform/msm_sdcc.1/by-name/flyparameter",
+		 .ad_key = 
+		{
+		{   
+			.ch = 39,
+			.offset = 100,
+			.max = 3300,
+			.key_item = {
+						{2500, KEY_HOME},	
+						{1535, KEY_VOLUMEUP} ,
+						{2015, KEY_VOLUMEDOWN} ,
+						
+					}
+		},
+		
+		{    
+		    .ch = 38,
+			.offset = 100,
+			.max = 3300,
+			.key_item = {
+						{2500, KEY_BACK},
+						}
+		},
+		{   
+			.ch = 37,
+			.offset = 100,
+			.max = 3300,
+			.key_item = {						
+						},
+		},
+		
+		{    
+		    .ch = 36,
+			.offset = 100,
+			.max = 3300,
+			.key_item = {
+						},
+		},
+	},
 	},
 
 };
