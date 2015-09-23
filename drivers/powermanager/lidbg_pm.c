@@ -28,6 +28,8 @@ static struct wake_lock pm_wakelock;
 void observer_start(void);
 void observer_stop(void);
 extern int soc_io_resume_config(u32 index, u32 direction, u32 pull, u32 drive_strength);
+extern void grf_backup(void);
+extern void grf_restore(void);
 
 bool is_safety_apk(char *apkname)
 {
@@ -276,11 +278,17 @@ void lidbg_pm_step_call(fly_pm_stat_step step, void *data)
         MCU_WP_GPIO_OFF;
         SOC_IO_SUSPEND;
         sleep_counter++;
+#ifdef SOC_rk3x88
+		grf_backup();
+#endif
         PM_SLEEP_DBG("SLEEP8.suspend_enter.MCU_WP_GPIO_OFF;sleep_count:%d\n", sleep_counter);
         break;
     case PM_SUSPEMD_OPS_ENTER9:
         break;
     case PM_SUSPEMD_OPS_ENTER9P1:
+#ifdef SOC_rk3x88
+		grf_restore();
+#endif
         SOC_System_Status(FLY_KERNEL_UP);
         SOC_IO_RESUME;
         MCU_WP_GPIO_ON;

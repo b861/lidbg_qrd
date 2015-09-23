@@ -5,6 +5,64 @@
 
 struct fly_smem *p_fly_smem = NULL;
 
+#define grf_readl(offset)		readl_relaxed(RK30_GRF_BASE + offset)
+#define grf_writel(v, offset)	do { writel_relaxed(v, RK30_GRF_BASE + offset); dsb(); } while (0)
+#define REG_NUM 106
+static int reg_bak[REG_NUM];
+static int reg_change[REG_NUM] = {0};
+
+void grf_backup(void)
+{
+	DUMP_FUN;
+	int i,j,reg_tmp[REG_NUM];
+
+	for(i = 0; i < REG_NUM; i++ )
+		reg_bak[i] = grf_readl(4*i);
+
+	//soc_io_output(0, WIFI_PWR, 0);
+
+	for(i = 0; i < 40; i++ )
+	{
+		if(4*i == 0x74)
+			grf_writel(0xFFF00000, 4*i);
+		else
+			grf_writel(0xFFFF0000, 4*i);
+	}
+	for(i = 0; i < 15; i++ )
+		grf_writel(0xFFFF0000, 4*i + 0x164);
+
+	for(i = 0,j = 0; i < REG_NUM; i++ )
+	{
+		reg_tmp[i] = grf_readl(4*i);
+		if(reg_tmp[i] != reg_bak[i])
+		{
+			lidbg("reg value diff offset[0x%x] -> REG_BAK:[0x%x] REG_TMP:[0x%x] \n", 4*i, reg_bak[i], reg_tmp[i]);
+			reg_change[j++] = i;
+		}
+	}
+	return;
+}
+
+void grf_restore(void)
+{
+	DUMP_FUN;
+	int i,j,reg_tmp[REG_NUM];
+
+	for(j = 0; j < REG_NUM; j++)
+	{
+		if(reg_change[j] == 0) break;
+		i = reg_change[j];
+		grf_writel(( reg_bak[i] | 0xFFFF0000 ), 4*i);
+	}
+
+	for(i = 0; i < REG_NUM; i++ )
+	{
+		reg_tmp[i] = grf_readl(4*i);
+		if(reg_tmp[i] != reg_bak[i])
+			lidbg("reg value diff offset[0x%x] -> REG_BAK:[0x%x] REG_TMP:[0x%x] \n", 4*i, reg_bak[i], reg_tmp[i]);
+	}
+
+}
 
 int soc_temp_get(void)
 {
@@ -141,7 +199,8 @@ void rk3x88_exit(void)
 
 }
 
-
+EXPORT_SYMBOL(grf_backup);
+EXPORT_SYMBOL(grf_restore);
 EXPORT_SYMBOL(lidbg_soc_main);
 EXPORT_SYMBOL(p_fly_smem);
 EXPORT_SYMBOL(soc_temp_get);

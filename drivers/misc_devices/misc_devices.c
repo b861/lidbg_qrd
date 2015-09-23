@@ -374,9 +374,6 @@ static int  soc_dev_suspend(struct platform_device *pdev, pm_message_t state)
 {
     lidbg("soc_dev_suspend\n");
 
-#ifdef SOC_rk3x88
-	soc_io_output(0, WIFI_PWR, 0);
-#endif
 	if(!g_var.is_fly)
 	{
 		//button_suspend();
@@ -387,11 +384,10 @@ static int  soc_dev_suspend(struct platform_device *pdev, pm_message_t state)
 }
 static int soc_dev_resume(struct platform_device *pdev)
 {
-    lidbg("soc_dev_resume usb_enumerate_limit=5\n");
+
+    	lidbg("soc_dev_resume usb_enumerate_limit=5\n");
 	usb_enumerate_limit=5;
-#ifdef SOC_rk3x88
-	soc_io_output(0, WIFI_PWR, 1);
-#endif
+
 	if(!g_var.is_fly)
 	{
 		//button_resume();
