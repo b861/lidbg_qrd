@@ -307,7 +307,7 @@ case "$DBG_PLATFORM_ID" in
         export DBG_PASSWORD=git
         export DBG_REPO_PASSWORD=git
         export DBG_VENDOR=VENDOR_ROCKCHIP
-        export OTA_PACKAGE_NAME=msm8974-ota-eng.*.zip
+        export OTA_PACKAGE_NAME=rkpx3-ota-eng.*.zip
         export DBG_SOC=rk3x88
         export TEST_PACKAGE_PATH=//192.168.128.128/px3/升级包发布/专项测试包
         export REPOSITORY_WORK_BRANCH=PX3
