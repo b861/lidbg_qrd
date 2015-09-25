@@ -362,8 +362,9 @@ static int thread_udisk_misc(void *data)
         {
             int i = 0;
 
-            if(g_var.recovery_mode == 1)
-            {
+            if((g_var.recovery_mode == 1)&& !fs_is_file_exist("recovery.conf"))
+            	{
+#if 0
                 ssleep(2);
                 lidbg("mount /usb \n");
                 lidbg_shell_cmd("umount /usb");
@@ -377,6 +378,7 @@ static int thread_udisk_misc(void *data)
                 lidbg_shell_cmd("mount -t vfat /dev/block/sd*6 /usb");
                 lidbg_shell_cmd("mount -t vfat /dev/block/sd*7 /usb");
                 lidbg_shell_cmd("mount -t vfat /dev/block/sd*8 /usb");
+#endif
             }
             else
             {
