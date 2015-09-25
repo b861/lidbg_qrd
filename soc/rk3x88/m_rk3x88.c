@@ -13,9 +13,9 @@ static int reg_change[REG_NUM] = {0};
 
 void grf_backup(void)
 {
-	DUMP_FUN;
+	
 	int i,j,reg_tmp[REG_NUM];
-
+	DUMP_FUN;
 	for(i = 0; i < REG_NUM; i++ )
 		reg_bak[i] = grf_readl(4*i);
 
@@ -45,9 +45,9 @@ void grf_backup(void)
 
 void grf_restore(void)
 {
-	DUMP_FUN;
+	
 	int i,j,reg_tmp[REG_NUM];
-
+	DUMP_FUN;
 	for(j = 0; j < REG_NUM; j++)
 	{
 		if(reg_change[j] == 0) break;

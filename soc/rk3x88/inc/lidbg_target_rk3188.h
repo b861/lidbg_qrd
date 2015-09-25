@@ -18,7 +18,8 @@
 #define  MCU_APP_GPIO_ON  do{check_gpio(g_hw.gpio_mcu_app);SOC_IO_Output(0, g_hw.gpio_mcu_app, 0);lidbg("===== gpio app = 0\n");}while(0)
 #define  MCU_APP_GPIO_OFF  do{check_gpio(g_hw.gpio_mcu_app);SOC_IO_Output(0, g_hw.gpio_mcu_app, 1);lidbg("===== gpio app = 1\n");}while(0)
 
-
+#define  GPS_POWER_ON  do{check_gpio(g_hw.gpio_gps_rst);SOC_IO_Output(0, g_hw.gpio_gps_rst, 1);}while(0)
+#define  GPS_POWER_OFF
 //lcd
 
 #define LCD_RESET do{\

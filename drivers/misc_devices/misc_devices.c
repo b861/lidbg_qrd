@@ -100,9 +100,7 @@ static int lidbg_event(struct notifier_block *this,
 		SOC_IO_Output_Ext(0, g_hw.gpio_bt_tx, 1,GPIOMUX_PULL_NONE,GPIOMUX_DRV_8MA);
 		SOC_IO_Output_Ext(0, g_hw.gpio_bt_rx, 1,GPIOMUX_PULL_NONE,GPIOMUX_DRV_8MA);
 #endif
-		#ifdef PLATFORM_msm8226
-		MSM_GPS_POWER_OFF;
-		#endif
+		GPS_POWER_OFF;
         break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_ANDROID_DOWN):
 		#ifdef DISABLE_USB_WHEN_ANDROID_DOWN
@@ -125,9 +123,8 @@ static int lidbg_event(struct notifier_block *this,
 		SOC_IO_Config(g_hw.gpio_bt_tx,GPIOMUX_FUNC_2,GPIOMUX_OUT_HIGH,GPIOMUX_PULL_NONE,GPIOMUX_DRV_16MA);
 		SOC_IO_Config(g_hw.gpio_bt_rx,GPIOMUX_FUNC_2,GPIOMUX_OUT_HIGH,GPIOMUX_PULL_NONE,GPIOMUX_DRV_16MA);
 #endif
-		#ifdef PLATFORM_msm8226
-		MSM_GPS_POWER_ON;
-		#endif
+		
+		GPS_POWER_ON;
 		CREATE_KTHREAD(thread_usb_disk_enable_delay, NULL);
 		break;
 	case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_SCREEN_ON):
@@ -336,10 +333,7 @@ static int soc_dev_probe(struct platform_device *pdev)
 	USB_WORK_ENABLE;
 
 	SET_USB_ID_SUSPEND;
-
-#ifdef SOC_msm8x26
-	MSM_GPS_POWER_ON;
-#endif
+	GPS_POWER_ON;
 	lidbg_new_cdev(&dev_fops, "flydev");
 
 	lidbg_trace_msg_cb_register("unable to enumerate USB device",NULL,usb_enumerate_monitor);

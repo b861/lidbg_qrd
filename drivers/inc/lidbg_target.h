@@ -61,7 +61,7 @@ struct hw_version_specific
 	int gpio_int_mcu_i2c_request;
 	int gpio_mcu_wp;
 	int gpio_mcu_app;
-	
+	int gpio_gps_rst;
 	int gpio_ts_int;
 	int gpio_ts_rst;
 
