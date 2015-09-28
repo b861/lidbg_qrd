@@ -66,7 +66,7 @@
 #define GPS_POWER_OFF do{\
 }while(0)
 
-#define DSI83_POWER_ON do{\
+#define MSM_DSI83_POWER_ON do{\
 }while(0)
 
 #define MSM_DSI83_POWER_OFF do{\
