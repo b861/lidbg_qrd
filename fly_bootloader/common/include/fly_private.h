@@ -20,7 +20,11 @@
 
 #define FBCON_WIDTH 1024
 #define FBCON_HEIGHT 600
+#if (LOGO_FORMAT== RGB888)
 #define FBCON_BPP 24
+#else
+#define FBCON_BPP 16
+#endif
 
 /*ctp reset*/
 extern unsigned char ctp_read(unsigned char chip_addr, unsigned char *sub_addr, char *buf, unsigned int size);

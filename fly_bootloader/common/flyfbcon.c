@@ -27,6 +27,10 @@ typedef struct
 #define      asc16       ascii16
 #define      asc24       ascii24
 
+#define GET_COLOR_RGB555(r,g,b)  ((((r)&0x1F)<<11)|(((g)&0x3F)<<6)|((b)&0x1F))//555
+#define GET_COLOR_RGB565(r,g,b)  ((((r)&0x1F)<<11)|(((g)&0x3F)<<5)|((b)&0x1F))//565
+#define GET_COLOR_RGB888(r,g,b)  ((((r)&0xFF)<<16)|(((g)&0xFF)<<8)|((b)&0xFF))//888
+
 char *text[20];
 int text_row = 0;
 
@@ -101,14 +105,24 @@ void display_logo_on_screen(sLogo *plogoparameter)
 		if (CLEAN_SCREEN_WRITE) {
 		    memset (fb_base_get(), 0xf1, FBCON_WIDTH * FBCON_HEIGHT * bytes_per_bpp);
 		}
-
-		for (i = 0; i <480; i++)
+		if(FLY_SCREEN_SIZE_1024)
 		{
-		    memcpy (fb_base_get() + ((0 + (i * FBCON_WIDTH)) * bytes_per_bpp),
-		    pImageBuffer + (i * 800 * bytes_per_bpp),
-		   800* bytes_per_bpp);
+			for (i = 0; i < image_base_hdpi ; i++)
+			{
+				memcpy ((fb_base_get() + (((1024 - image_base_wdpi)/2 +  ((i+(600-image_base_hdpi)/2) * 1024)) * bytes_per_bpp)),
+				pImageBuffer + (i * image_base_wdpi * bytes_per_bpp) ,
+				image_base_wdpi * bytes_per_bpp);
+			}
 		}
-
+		else
+		{
+			for (i = 0; i <480; i++)
+			{
+				memcpy (fb_base_get() + ((0 + (i * FBCON_WIDTH)) * bytes_per_bpp),
+				pImageBuffer + (i * 800 * bytes_per_bpp),
+			   800* bytes_per_bpp);
+			}
+		}
 	}
 #endif
 	//fbcon_flush();
@@ -154,6 +168,7 @@ void fly_setBcol(unsigned long int backcolor)
 		j+=3;
 	}
 */
+#if (LOGO_FORMAT == RGB888)
 		unsigned char *tem = malloc(1024*3);
 		int i=0,m=0;
 
@@ -179,7 +194,20 @@ void fly_setBcol(unsigned long int backcolor)
          }
 
 	  free(tem);
+#else
+		u16 *ptr;
+		int i,j;
+		unsigned char R = backcolor>>16&0xff;
+		unsigned char G = backcolor>>8&0xff;
+		unsigned char B = backcolor&0xff;
 
+		ptr = gd->fb_base;
+
+		ptr = gd->fb_base;
+		for(i = 0;i < 1024;i++)
+			   for(j = 0;j < 600;j++)
+				*ptr++ = GET_COLOR_RGB565(R,G,B);
+#endif
 }
 
 
@@ -234,6 +262,7 @@ void fly_putpext(int x,int y,unsigned long  color)
 		B	=	color&0x00FF;
 //STORE RGB888 DATA TO tem
 
+#if (LOGO_FORMAT == RGB888)
 		for(i = 0,m = 0;i<1;i++)
 		{
 			tem[m++] = B;
@@ -244,6 +273,15 @@ void fly_putpext(int x,int y,unsigned long  color)
 
           memcpy (fb_base_get() + ((x + (y * FBCON_WIDTH)) * 3),tem, 1 * 3);
 	 free(tem);
+#else
+		for(i = 0,m = 0;i<1;i++)
+		{
+			tem[m++] = GET_COLOR_RGB565(R,G,B);
+			tem[m++] = GET_COLOR_RGB565(R,G,B)>>8;
+		}
+		memcpy (fb_base_get() + ((x + (y * FBCON_WIDTH)) * 2),tem, 1 * 2);
+		free(tem);
+#endif
 }
 
 

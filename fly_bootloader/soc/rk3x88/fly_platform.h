@@ -32,6 +32,11 @@ DECLARE_GLOBAL_DATA_PTR;
 
 #define ROUND_TO_PAGE(x,y) (((x) + (y)) & (~(y)))
 
+/* logo format */
+#define RGB565 1
+#define RGB888 2
+#define LOGO_FORMAT RGB565
+
 extern struct fbcon_config *config;
 extern unsigned page_mask;
 #endif

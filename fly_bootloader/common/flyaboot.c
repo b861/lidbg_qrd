@@ -156,7 +156,11 @@ void display_colour(int model)
 void display_enter_recovery_count(int count)
 {
        drawRect(1024-30,fly_screen_h -30,40,30,BLACK_COL,BLACK_COL);
+#if (LOGO_FORMAT== RGB888)
        fly_version(1024-30, fly_screen_h -10,"%d",0X818181,count);
+#else
+       fly_version(1024-30, fly_screen_h -10,"%d",0Xffffff,count);
+#endif
 
        return ;
 }
@@ -344,10 +348,12 @@ void flyaboot_init(unsigned *boot_into_recovery,bool *boot_into_fastboot)
 	*don't show static logo before displaying green screen when auto-up
 	*/
 	if(arg == FlySystemModel)
-		{
+	{
 		if(*boot_into_fastboot == 0)
 		show_logo();
-		}
+	}
+	mdelay(1000);
+	mdelay(500);
 	backlight_enable();
     if((arg == FlySystemModel)){
                if(*boot_into_fastboot == 0){

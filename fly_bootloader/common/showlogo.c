@@ -482,12 +482,15 @@ int  show_logo()
 		goto err_out;
 	}
 
+#if (LOGO_FORMAT == RGB888)
 	if (FALSE == rgb565To888(pDataRGB888,pDataRGB565,logoPixel))
 	{
 		dprintf(INFO,"fail to rgb565To888\n");
 		goto err_out;
 	}
 
+#else
+#endif
 	LogoRGB888Info.x_position = pLogoInfo->x_position;
 	LogoRGB888Info.y_position = pLogoInfo->y_position;
 	LogoRGB888Info.width = pLogoInfo->width;
@@ -496,8 +499,11 @@ int  show_logo()
 	LogoRGB888Info.reserved = pLogoInfo->reserved;
 	LogoRGB888Info.data_len = pLogoInfo->data_len;
 
+#if (LOGO_FORMAT == RGB888)
 	LogoRGB888Info.pdata = (unsigned char*)pDataRGB888;
-
+#else
+	LogoRGB888Info.pdata = (unsigned char*)pDataRGB565;
+#endif
 	display_logo_on_screen(&LogoRGB888Info);
 
 #ifndef LOGO_ADD_ALLOCED

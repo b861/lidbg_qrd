@@ -95,6 +95,11 @@
 #define RGB888_DATA_LEN 0x100000
 #endif
 
+/* logo format */
+#define RGB565 1
+#define RGB888 2
+#define LOGO_FORMAT RGB888
+
 extern struct fbcon_config *config;
 extern unsigned page_mask;
 extern unsigned page_size;
