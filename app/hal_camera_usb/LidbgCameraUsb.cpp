@@ -1704,7 +1704,7 @@ out_err:
         ALOGE("%s: E", __func__);
 
         ALOGE("%s: X", __func__);
-        return -1;
+        return 0;
     }
 
     void usbcam_release_recording_frame(struct camera_device *device,
