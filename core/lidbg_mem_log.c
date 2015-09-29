@@ -123,11 +123,11 @@ int lidbg_fifo_get(struct lidbg_fifo_device *dev, char *to_file, int out_mode)
 
         LIDBG_WARN("%s:kfifo_len=%d\n", dev->owner, len);
 
-        msg_out_buff = kmalloc(len+1, GFP_KERNEL);
+        msg_out_buff = vmalloc(len+1);
         if (msg_out_buff == NULL)
         {
             ret = -1;
-            LIDBG_ERR("kmalloc\n");
+            LIDBG_ERR("vmalloc\n");
             return ret;
         }
 
@@ -143,7 +143,7 @@ int lidbg_fifo_get(struct lidbg_fifo_device *dev, char *to_file, int out_mode)
             return -1;
         }
 
-        kfree(msg_out_buff);
+        vfree(msg_out_buff);
     }
     else
         LIDBG_ERR("dev->is_inited(%s)\n", dev ? dev->owner : "null");

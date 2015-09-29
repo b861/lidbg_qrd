@@ -14,7 +14,7 @@ void kmsg_fifo_collect(char *buff, int buff_len)
 {
     if(p_kmsg_collect == NULL)
     {
-        if(kfifo_alloc(&fifo_kmsg_collect, 5 * 1024 * 1024, GFP_KERNEL))
+        if(kfifo_alloc(&fifo_kmsg_collect, 1 * 1024 * 1024, GFP_KERNEL))
         {
             lidbgerr("[%s]:kfifo_alloc \n", __func__);
 			return;
@@ -178,7 +178,7 @@ static int thread_trace_msg_in(void *data)
     char *buff;
     struct file *filep;
     mm_segment_t old_fs;
-    buff = (char *)kmalloc( MEM_SIZE_4_KB, GFP_KERNEL);
+    buff = (char *)vmalloc( MEM_SIZE_4_KB);
     if(buff == NULL)
     {
         lidbg("thread_trace_msg_in.ERR.kmalloc.exit\n");

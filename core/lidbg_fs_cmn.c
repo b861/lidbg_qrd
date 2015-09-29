@@ -369,10 +369,10 @@ bool copy_file(char *from, char *to, bool encode)
     inodefrom = pfilefrom->f_dentry->d_inode;
     file_len = inodefrom->i_size;
 
-    string = (unsigned char *)kmalloc(file_len, GFP_KERNEL);
+    string = (unsigned char *)vmalloc(file_len);
     if(string == NULL)
     {
-        FS_ALWAYS(" <kmalloc>\n");
+        FS_ALWAYS(" <vmalloc>\n");
         return false;
     }
 
@@ -391,7 +391,7 @@ bool copy_file(char *from, char *to, bool encode)
     set_fs(old_fs);
     filp_close(pfileto, 0);
 
-    kfree(string);
+    vfree(string);
     return true;
 }
 bool get_file_tmstring(char *filename, char *tmstring)

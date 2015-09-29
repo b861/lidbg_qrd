@@ -177,7 +177,7 @@ int bfs_fill_list(char *filename, enum string_dev_cmd cmd, struct list_head *cli
     file_len = inode->i_size;
     FS_WARN("File_length:<%d>\n", file_len);
 
-    file_ptr = (unsigned char *)kmalloc(file_len + 1, GFP_KERNEL);
+    file_ptr = (unsigned char *)vmalloc(file_len + 1);
     if(file_ptr == NULL)
     {
         FS_ERR( "vmalloc:<cannot malloc memory!>\n");

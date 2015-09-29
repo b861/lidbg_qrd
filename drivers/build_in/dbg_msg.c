@@ -28,10 +28,10 @@ lidbg_msg *plidbg_msg = NULL;
 int thread_msg(void *data)
 {
 
-    plidbg_msg = ( lidbg_msg *)kmalloc(sizeof( lidbg_msg), GFP_KERNEL);
+    plidbg_msg = ( lidbg_msg *)vmalloc(sizeof( lidbg_msg));
     if (plidbg_msg == NULL)
     {
-        LIDBG_ERR("kmalloc.\n");
+        LIDBG_ERR("vmalloc.\n");
     }
     memset(plidbg_msg->log, '\0', /*sizeof( lidbg_msg)*/TOTAL_LOGS * LOG_BYTES);
     plidbg_msg->w_pos = plidbg_msg->r_pos = 0;

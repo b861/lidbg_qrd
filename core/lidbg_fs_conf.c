@@ -49,10 +49,10 @@ int launch_file_cmd(const char *filename)
     file_len = inode->i_size;
     lidbg("[futengfei]warn.File_length:<%d>\n", file_len);
 
-    file_ptr = (unsigned char *)kmalloc(file_len+1, GFP_KERNEL);
+    file_ptr = (unsigned char *)vmalloc(file_len+1);
     if(file_ptr == NULL)
     {
-        lidbg( "[futengfei]err.kmalloc:<cannot kzalloc memory!>\n");
+        lidbg( "[futengfei]err.vmalloc:<cannot kzalloc memory!>\n");
         return -1;
     }
 
@@ -81,7 +81,7 @@ int launch_file_cmd(const char *filename)
                 fs_file_write(LIDBG_NODE,false, token + 1,0,strlen(token + 1));
         }
     }
-    kfree(file_ptr);
+    vfree(file_ptr);
     lidbg_domineering_ack();
     return 1;
 }

@@ -10,9 +10,9 @@ struct ad_device
         
 };
 static struct kfifo ad_data_fifo;
-#define FIFO_SIZE (1024)
+#define FIFO_SIZE (512)
 u32 *fifo_buffer;
-#define DATA_SIZE (1024)
+#define DATA_SIZE (512)
 u32 *ad_data_for_app;
 
 struct ad_device *dev;
