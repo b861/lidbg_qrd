@@ -373,9 +373,9 @@ case "$DBG_PLATFORM_ID" in
 	export OTA_PACKAGE_NAME=msm8909-ota-eng.*.zip
 	export DBG_SOC=msm8x26
 	export TEST_PACKAGE_PATH=//192.168.128.128/8909/升级包发布/专项测试包
-	export REPOSITORY_WORK_BRANCH=master
-	export SYSTEM_WORK_BRANCH=master
-        export MAKE_PAKG_NUM=
+	export REPOSITORY_WORK_BRANCH=dev-8909
+	export SYSTEM_WORK_BRANCH=msm8909-master
+        export MAKE_PAKG_NUM=18
 
 	export NON_HLOS_FILE_PATH=$BP_SOURCE_PATH/common/build/bin/asic
 	export RPM_FILE_PATH=$RPM_PATH/ms/bin/AAAAANAAR
