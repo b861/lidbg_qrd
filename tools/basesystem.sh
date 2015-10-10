@@ -70,6 +70,10 @@ function system_dir_build()
 	git_pull $SYSTEM_DIR $SYSTEM_DIR_PASSWORD $MASTER_BRANCH_SYSTEM
 
 	echo ====IN.3choosecombo=====$FUNCNAME
+	if [ $SYSTEM_PLATFORM = rkpx3 ];then
+              cd $SYSTEM_DIR/kernel/
+              make kernel.img -j16
+        fi
 	cd $SYSTEM_DIR
 #	if [[ $TARGET_PRODUCT = "" ]];then
 		source build/envsetup.sh&&choosecombo release $SYSTEM_PLATFORM $SYSTEM_BUILD_TYPE
