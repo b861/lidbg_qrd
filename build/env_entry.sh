@@ -296,7 +296,7 @@ case "$DBG_PLATFORM_ID" in
         export JRE_HOME=$JAVA_HOME/jre
         export CLASSPATH=$JAVA_HOME/lib:$JRE_HOME/lib:$CLASSPATH
         export PATH=$JAVA_HOME/bin:$JRE_HOME/bin:$PATH
-        export SYSTEM_BUILD_TYPE=eng
+        export SYSTEM_BUILD_TYPE=userdebug
 	export KERNEL_DEFCONFIG=rkpx3_sdk_android-4.4_defconfig
         export DBG_BOOTLOADER_DIR=$DBG_SYSTEM_DIR/uboot
         export DBG_KERNEL_SRC_DIR=$DBG_SYSTEM_DIR/kernel
