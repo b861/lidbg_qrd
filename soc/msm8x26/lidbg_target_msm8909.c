@@ -39,7 +39,7 @@ struct hw_version_specific g_hw_version_specific[] =
 		.i2c_bus_tef6638 = 5,
 		.i2c_bus_lpc = 3,
 		.ad_val_mcu = 1,
-		.fly_parameter_node = "/dev/block/platform/msm_sdcc.1/by-name/flyparameter",
+		.fly_parameter_node = "/dev/block/platform/7824900.sdhci/by-name/flyparameter",
 		 .ad_key = 
 		{
 		{   
