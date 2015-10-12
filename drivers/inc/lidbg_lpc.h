@@ -17,29 +17,11 @@
         SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\
         lidbg("LPC_CMD_USB5V_ON\n");\
 				}while(0)
-
-//#if((defined PLATFORM_msm8909) && (defined BOARD_V1) )
-//#endif
-
-#if(defined SOC_msm8909) && (defined BOARD_V1)
-#define LPC_CMD_USB5V_OFF   do{   \
-		u8 buff[] = {0x02, 0x14, 0x0};\
-		u8 buff1[] = {0x02, 0x0E, 0x0};\
-        SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\
-        lidbg("LPC_CMD_USB5V_OFF\n");\
-        SOC_LPC_Send(buff1, SIZE_OF_ARRAY(buff1));\
-        lidbg("LPC_CMD_TPS43330_5V_OFF\n");\
-				}while(0)
-#else
 #define LPC_CMD_USB5V_OFF   do{   \
 		u8 buff[] = {0x02, 0x14, 0x0};\
         SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\
         lidbg("LPC_CMD_USB5V_OFF\n");\
 				}while(0)
-#endif
-
-
-
 
 #define LPC_CMD_NO_RESET   do{   \
 		u8 buff[] = {0x00,0x02,0x01};\
