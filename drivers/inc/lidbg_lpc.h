@@ -18,8 +18,10 @@
         lidbg("LPC_CMD_USB5V_ON\n");\
 				}while(0)
 
+//#if((defined PLATFORM_msm8909) && (defined BOARD_V1) )
+//#endif
 
-#if(defined PLATFORM_msm8909) && (defined BOARD_V1)
+#if(defined SOC_msm8909) && (defined BOARD_V1)
 #define LPC_CMD_USB5V_OFF   do{   \
 		u8 buff[] = {0x02, 0x14, 0x0};\
 		u8 buff1[] = {0x02, 0x0E, 0x0};\
