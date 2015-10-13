@@ -49,6 +49,8 @@ struct bootloader_hw_config
 	struct adc_config adc_info[ADC_KEY_CHNL];
 	struct ctp_config ctp_info;
 	struct lpc_config lpc_info;
+	
+	char *dbg_uart_port;
 };
 
 extern struct bootloader_hw_config g_hw_info[];

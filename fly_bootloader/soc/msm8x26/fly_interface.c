@@ -1,5 +1,8 @@
 #include "soc.h"
 #include "fly_platform.h"
+#include "fly_target.h"
+
+#define DBG_UART_PORT g_bootloader_hw.dbg_uart_port
 
 #if DEVICE_TREE
 BUF_DMA_ALIGN(dt_buf, 4096);
@@ -342,7 +345,7 @@ char *dbg_msg_en(const char *system_cmd, int dbg_msg_en)
 	if(dbg_msg_en == 1){
 		dprintf(INFO,"System print is enabled !\n");
 
-		cmd_size = strlen("console=ttyHSL0,115200,n8 ") + strlen(system_cmd);
+		cmd_size = strlen(DBG_UART_PORT) + strlen(system_cmd);
 
 		cmdline = malloc(cmd_size);
 		if(!cmdline){
@@ -350,7 +353,7 @@ char *dbg_msg_en(const char *system_cmd, int dbg_msg_en)
 			return system_cmd;
 		}
 
-		cmdline = "console=ttyHSL0,115200,n8 ";
+		cmdline = DBG_UART_PORT;
 		strcat(cmdline, system_cmd);
 	}else{
 		dprintf(INFO,"System print is disabled !\n");
