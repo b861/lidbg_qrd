@@ -36,6 +36,10 @@ echo -e "\033[41;37m============loops:$main_loop_times  status:["${commit_times[
 		echo -e "\033[41;37m=error=branch=null=$thiswhile_loop==["${compile_info[3]}"]==== \033[0m"
 		continue 
 		fi
+		if [ ! -d "${compile_info[3]}" ]; then
+		echo -e "\033[41;37m=error=dir not exist=$thiswhile_loop==["${compile_info[3]}"]==== \033[0m"
+		continue
+		fi
 		git log --pretty=format:"%s  " origin/${compile_info[11]}  > /dev/shm/auto_git/${compile_info[1]}_$thiswhile_loop.txt && new_commitinfo=$(head /dev/shm/auto_git/${compile_info[1]}_$thiswhile_loop.txt --lines 1)
 	
 		thiscommit_info=${pre_commit[$thiswhile_loop]}
