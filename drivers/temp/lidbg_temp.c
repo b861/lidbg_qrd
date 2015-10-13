@@ -140,7 +140,7 @@ int thread_thermal(void *data)
 {
     int cur_temp,i,max_freq;
     DUMP_FUN;
-	
+    lidbg_shell_cmd("chmod 444 /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq &");
 	set_cpu_governor(0);
 	
 	if(g_var.recovery_mode == 1)
@@ -187,8 +187,6 @@ int thread_thermal(void *data)
 
 	if(cpu_temp_show == 1)
 		CREATE_KTHREAD(thread_show_temp, NULL);
-
-	 lidbg_shell_cmd("chmod 444 /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq &");
 	 
     while(!kthread_should_stop())
     {
