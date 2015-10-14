@@ -61,6 +61,10 @@
 #include "scm.h"
 #include "sparse_format.h"
 
+#ifdef BOOTLOADER_MSM8909
+#include <arch/ops.h>
+#endif
+
 #ifdef BOOTLOADER_MSM8226
 #define BOARD_VERSION 0
 #endif

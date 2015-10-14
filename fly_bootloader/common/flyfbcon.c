@@ -125,6 +125,10 @@ void display_logo_on_screen(sLogo *plogoparameter)
 		}
 	}
 #endif
+#ifdef BOOTLOADER_MSM8909
+       arch_clean_invalidate_cache_range((unsigned long)fb_base_get(), FBCON_WIDTH * FBCON_HEIGHT * 3);
+#endif
+
 	//fbcon_flush();
 /*
 	if(is_cmd_mode_enabled())
@@ -138,7 +142,7 @@ void fly_fbcon_clear(void)
 	unsigned count = 0;
 
 	count = FBCON_WIDTH * FBCON_HEIGHT;
-	dprintf(INFO, "Fbcon clear, width[%d] height[%d] base[%d]\n", FBCON_WIDTH, FBCON_HEIGHT, fb_base_get());
+	dprintf(INFO, "Fbcon clear, width[%d] height[%d] base[0x%x]\n", FBCON_WIDTH, FBCON_HEIGHT, fb_base_get());
 	memset(fb_base_get(), 0x000000, count * (FBCON_BPP / 8));
 }
 
@@ -235,10 +239,12 @@ void FlySetLogoBcol(unsigned short  backcolor)
 
       for (i = 0; i < 600; i++)
         {
-          memcpy (fb_base_get() + ((0 + (i * FBCON_WIDTH)) * 3),
-        tem,
-          1024 * 3);
-         }
+          memcpy (fb_base_get() + ((0 + (i * FBCON_WIDTH)) * 3), tem, 1024 * 3);
+#ifdef BOOTLOADER_MSM8909
+          arch_clean_invalidate_cache_range((unsigned long)fb_base_get() + ((0 + (i * FBCON_WIDTH)) * 3), FBCON_WIDTH * 3);
+#endif
+
+	}
 
 	  free(tem);
 
@@ -270,9 +276,12 @@ void fly_putpext(int x,int y,unsigned long  color)
 			tem[m++] = R;
 		}
 //set RGB888 DATA TO SREEN
+       memcpy (fb_base_get() + ((x + (y * FBCON_WIDTH)) * 3),tem, 1 * 3);
+#ifdef BOOTLOADER_MSM8909
+       arch_clean_invalidate_cache_range((unsigned long)fb_base_get() + ((x + (y * FBCON_WIDTH)) * 3), 1 * 3);
+#endif
+       free(tem);
 
-          memcpy (fb_base_get() + ((x + (y * FBCON_WIDTH)) * 3),tem, 1 * 3);
-	 free(tem);
 #else
 		for(i = 0,m = 0;i<1;i++)
 		{
