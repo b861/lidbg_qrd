@@ -76,13 +76,13 @@ int main(int argc, char **argv)
 
     if(checkout == 1)
     {
-    	if(is_file_exist("/system/etc/build_origin"))
-		{
-			 system("mount -o remount /flysystem");
-			 system("rm -rf /flysystem/bin");
-			 system("rm -rf /flysystem/lib");
-			 system("rm -rf /flysystem/app");
-		}
+    	if(is_file_exist("/system/etc/build_origin") && (recovery_mode == 0))
+	{
+		 system("mount -o remount /flysystem");
+		 system("rm -rf /flysystem/bin");
+		 system("rm -rf /flysystem/lib");
+		 system("rm -rf /flysystem/app");
+	}
 		
 		module_insmod("/system/lib/modules/out/lidbg_uevent.ko");
 		module_insmod("/system/lib/modules/out/lidbg_loader.ko");
