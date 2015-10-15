@@ -128,8 +128,9 @@ int fs_file_write(char *filename,bool creat, void *wbuff, loff_t offset, int len
 
     old_fs = get_fs();
     set_fs(get_ds());
-	
-    filep->f_op->llseek(filep, offset, SEEK_SET);
+
+	if(filep&&filep->f_op->llseek)
+		filep->f_op->llseek(filep, offset, SEEK_SET);
 
     if(wbuff)
         filep->f_op->write(filep, wbuff, len, &filep->f_pos);
