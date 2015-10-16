@@ -3,66 +3,146 @@
 
 #include "lidbg.h"
 
-struct fly_smem *p_fly_smem = NULL;
-
+#define REG_GRFNUM  106
+#define REG_GPIONUM 8
+#define GPIO_SWPORTA_DR  0x0000
+#define GPIO_SWPORTA_DDR 0x0004
 #define grf_readl(offset)		readl_relaxed(RK30_GRF_BASE + offset)
 #define grf_writel(v, offset)	do { writel_relaxed(v, RK30_GRF_BASE + offset); dsb(); } while (0)
-#define REG_NUM 106
-static int reg_bak[REG_NUM];
-static int reg_change[REG_NUM] = {0};
+
+#if	0
+#define  DBG		lidbg
+#else
+#define  DBG(...)	((void)0)
+#endif
+
+struct fly_smem *p_fly_smem = NULL;
+static int reg_grfbak[REG_GRFNUM];
+static int reg_grftmp[REG_GRFNUM] = {0};
+static int reg_gpiobak[REG_GPIONUM];
+static void __iomem *gpio_base[] = {RK30_GPIO0_BASE, RK30_GPIO1_BASE, RK30_GPIO2_BASE, RK30_GPIO3_BASE};
+
+static void gpio_output(u32 group, u32 gpio, bool status)
+{
+	int ret = 0;
+
+	ret = gpio_request(gpio, NULL);
+	if (ret != 0) {
+		gpio_free(gpio);
+		gpio_request(gpio, NULL);
+	}
+
+	gpio_direction_output(gpio, status);
+	gpio_set_value(gpio, status);
+	return;
+}
+
+static void gpio_input_normal(u32 gpio, u32 value)
+{
+	int ret = 0;
+
+	ret = gpio_request(gpio, NULL);
+	if (ret != 0) {
+		gpio_free(gpio);
+		gpio_request(gpio, NULL);
+	}
+
+	gpio_direction_input(gpio);
+	gpio_pull_updown(gpio, value);
+
+	return;
+}
 
 void grf_backup(void)
 {
 	
-	int i,j,reg_tmp[REG_NUM];
+	int i, j, reg_tmp[REG_GRFNUM];
 	DUMP_FUN;
-	for(i = 0; i < REG_NUM; i++ )
-		reg_bak[i] = grf_readl(4*i);
+	for(i = 0; i < REG_GRFNUM; i++ )	//GRF寄存器备份，包括GPIO的上下拉、IOMUX功能脚等
+		reg_grfbak[i] = grf_readl(4*i);
 
-	//soc_io_output(0, WIFI_PWR, 0);
-
-	for(i = 0; i < 40; i++ )
+	for(i = 0, j = 0; i < 4; i++)
 	{
-		if(4*i == 0x74)
-			grf_writel(0xFFF00000, 4*i);
-		else
-			grf_writel(0xFFFF0000, 4*i);
+		reg_gpiobak[j++] = readl_relaxed(gpio_base[i] + GPIO_SWPORTA_DDR);	//GPIO寄存器备份，包括输入输出、输出0、1等
+		reg_gpiobak[j++] = readl_relaxed(gpio_base[i] + GPIO_SWPORTA_DR);
 	}
-	for(i = 0; i < 15; i++ )
-		grf_writel(0xFFFF0000, 4*i + 0x164);
 
-	for(i = 0,j = 0; i < REG_NUM; i++ )
+	for(i = 0; i < 24; i++ )
+	{
+		if (4*i < 0x40)
+			grf_writel(0xFFFF0000, 4*i);
+		else if (4*i == 0x58)
+			grf_writel(0xFFFFCBFE, 4*i);
+		else
+			grf_writel(0xFFFFFFFF, 4*i);
+	}
+
+	gpio_output(0, RK30_PIN3_PA0, 0);	//WIFI_POWER
+	gpio_output(0, RK30_PIN3_PB2, 0);	//VIDEO_PDN
+	gpio_output(0, RK30_PIN3_PB4, 0);	//VIDEO_INT
+	gpio_output(0, RK30_PIN3_PB5, 0);	//VIDEO_RST
+
+	gpio_input_normal(RK30_PIN1_PA0, GPIO_CFG_NO_PULL);	//DVD_RXD
+	gpio_input_normal(RK30_PIN1_PA1, GPIO_CFG_NO_PULL);	//DVD_TXD
+	gpio_input_normal(RK30_PIN1_PA4, GPIO_CFG_NO_PULL);	//BT_RXD
+	gpio_input_normal(RK30_PIN1_PA5, GPIO_CFG_NO_PULL);	//BT_TXD
+	gpio_input_normal(RK30_PIN3_PB6, GPIO_CFG_NO_PULL);	//AV_SDA
+	gpio_input_normal(RK30_PIN3_PB7, GPIO_CFG_NO_PULL);	//AV_SCL
+
+
+	for(i = 0,j = 0; i < REG_GRFNUM; i++)
 	{
 		reg_tmp[i] = grf_readl(4*i);
-		if(reg_tmp[i] != reg_bak[i])
+		if(reg_tmp[i] != reg_grfbak[i])
 		{
-			lidbg("reg value diff offset[0x%x] -> REG_BAK:[0x%x] REG_TMP:[0x%x] \n", 4*i, reg_bak[i], reg_tmp[i]);
-			reg_change[j++] = i;
+			DBG("reg value diff offset[0x%x] -> reg_grfbak:[0x%x] REG_TMP:[0x%x] \n", 4*i, reg_grfbak[i], reg_tmp[i]);
+			reg_grftmp[j++] = i;
 		}
 	}
+	reg_grftmp[j] = 0;
+
 	return;
 }
 
 void grf_restore(void)
 {
 	
-	int i,j,reg_tmp[REG_NUM];
+	int i, j, reg_tmp[REG_GRFNUM];
 	DUMP_FUN;
-	for(j = 0; j < REG_NUM; j++)
+	for(j = 0; j < REG_GRFNUM; j++)
 	{
-		if(reg_change[j] == 0) break;
-		i = reg_change[j];
-		grf_writel(( reg_bak[i] | 0xFFFF0000 ), 4*i);
+		if(reg_grftmp[j] == 0) break;
+		i = reg_grftmp[j];
+		grf_writel(( reg_grfbak[i] | 0xFFFF0000 ), 4*i);
 	}
 
-	for(i = 0; i < REG_NUM; i++ )
+	for(i = 0; i < REG_GRFNUM; i++ )
 	{
 		reg_tmp[i] = grf_readl(4*i);
-		if(reg_tmp[i] != reg_bak[i])
-			lidbg("reg value diff offset[0x%x] -> REG_BAK:[0x%x] REG_TMP:[0x%x] \n", 4*i, reg_bak[i], reg_tmp[i]);
+		if(reg_tmp[i] != reg_grfbak[i])
+			DBG("reg value diff offset[0x%x] -> reg_grfbak:[0x%x] REG_TMP:[0x%x] \n", 4*i, reg_grfbak[i], reg_tmp[i]);
 	}
 
+	for(i = 0, j = 0; i < 4;i++)
+	{
+		writel_relaxed(reg_gpiobak[j++], gpio_base[i] + GPIO_SWPORTA_DDR);
+		writel_relaxed(reg_gpiobak[j++], gpio_base[i] + GPIO_SWPORTA_DR);
+	}
+
+	//释放GPIO
+	gpio_free(RK30_PIN3_PA0);	//WIFI_POWER
+	gpio_free(RK30_PIN3_PB2);	//VIDEO_PDN
+	gpio_free(RK30_PIN3_PB4);	//VIDEO_INT
+	gpio_free(RK30_PIN3_PB5);	//VIDEO_RST
+	gpio_free(RK30_PIN1_PA0);	//DVD_RXD
+	gpio_free(RK30_PIN1_PA1);	//DVD_TXD
+	gpio_free(RK30_PIN1_PA4);	//BT_RXD
+	gpio_free(RK30_PIN1_PA5);	//BT_TXD
+	gpio_free(RK30_PIN3_PB6);	//AV_SDA
+	gpio_free(RK30_PIN3_PB7);	//AV_SCL
+
 }
+
 
 int soc_temp_get(void)
 {
@@ -193,7 +273,7 @@ int rk3x88_init(void)
     return 0;
 }
 
-/*ģ��ж�غ���*/
+/*Ä£¿éÐ¶ÔØº¯Êý*/
 void rk3x88_exit(void)
 {
 

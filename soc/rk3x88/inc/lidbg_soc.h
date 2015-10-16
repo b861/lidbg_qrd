@@ -76,9 +76,8 @@ enum gpiomux_func {
 
 enum gpiomux_pull {
 	GPIOMUX_PULL_NONE = 0,
-	GPIOMUX_PULL_DOWN,
-	GPIOMUX_PULL_KEEPER,
 	GPIOMUX_PULL_UP,
+	GPIOMUX_PULL_DOWN,
 };
 
 enum gpiomux_dir {
