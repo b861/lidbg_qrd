@@ -299,7 +299,7 @@ int lidbg_flyparameter_init(void)
 {
     DUMP_BUILD_TIME;
     LIDBG_GET;
-	
+	lidbg_chmod(g_hw.fly_parameter_node);
 	FS_REGISTER_INT(update_hw_info, "update_hw_info", 0, cb_fly_hw_info_save);
 	flyparameter_init();
 	lidbg_fly_hw_info_init();//block other ko before hw_info set
