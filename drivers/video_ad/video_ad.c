@@ -9,9 +9,23 @@ LIDBG_DEFINE;
 #define NOTIFIER_MINOR_VIDEO_YUV_OPEN (2)
 #define NOTIFIER_MINOR_VIDEO_YUV_CLOSE (3)
 
+#define IMGLEVEL_MIN 0
+#define IMGLEVEL_MAX 11
+#define IMG_VAL_ERR(x) ((x)>=IMGLEVEL_MIN&&(x)<IMGLEVEL_MAX?0:1)
+
 #define VIDEO_NODE "/dev/px3_vehicle"
 
 static int video_format = 0;
+
+static unsigned char img_config[5][2] =
+{
+    {0x0a, 0xcc}, //BRIGHTNESS
+    {0x08, 0x8c}, //CONTRAST
+
+    {0x0b, 0x00}, //HUE
+    {0xe3, 0x80}, //VIDEO_SATURATION_U
+    {0xe4, 0x80}, //VIDEO_SATURATION_V
+};
 
 int video_set_brightness(int val){
 	int ret = 0;
@@ -67,7 +81,24 @@ int video_set_hue(int val){
 	return ret;
 }
 
-int video_reg_get(int reg, int *data)
+int video_reg_set(int reg, int data)
+{
+	int ret = 0;
+	unsigned char config[] = {0x0, 0x0};
+
+	config[0] = reg;
+	config[1] = data;
+
+	ret = SOC_I2C_Send(VIDEO_AD_I2C_BUS, VIDEO_AD_I2C_ADDR, config, sizeof(config) / sizeof(config[0]));
+	if(ret < 0){
+		lidbg("Error: %s failed.\n",__func__);
+		return 0;
+	}
+	else
+		return ret;
+}
+
+int video_reg_get(int reg, char *data)
 {
 	int ret = 0;
 
@@ -122,7 +153,8 @@ int video_yuv_init(void)
 
 int _video_get_format(void)
 {
-	int val = 0,ret = 0;
+	char val = 0;
+	int ret = 0;
 
 	ret = SOC_I2C_Rec(VIDEO_AD_I2C_BUS, VIDEO_AD_I2C_ADDR, 0x10, &val, 1);
 	if(ret < 0)
@@ -156,7 +188,7 @@ int video_ad_get_format(void)
 void _video_dbg(void)
 {
 	int i = 0;
-	int data = 0;
+	char data = 0;
 	int ret = 0;
 
 	lidbg("^_^ video dbg ^_^\n");
@@ -197,46 +229,146 @@ int video_chip_init(int video_type)
 	return ret;
 }
 
-int _video_ad_set(char *config, char *par1, char *par2)
+int _video_img_config(int img_type)
 {
-	int ret = -1;
+	int ret = 0;
+	unsigned char config[] = {0x00, 0x00};
 
-	if(!strcmp(config, "brightness")){
-		int brightness = simple_strtoul(par1, 0, 0);
+	switch (img_type)
+    {
+    case VIDEO_BRIGHTNESS:
+		config[0] = img_config[VIDEO_BRIGHTNESS][0];
+		config[1] = img_config[VIDEO_BRIGHTNESS][1];
+		break;
+    case VIDEO_CONTRAST:
+		config[0] = img_config[VIDEO_CONTRAST][0];
+		config[1] = img_config[VIDEO_CONTRAST][1];
+		break;
+    case VIDEO_SATURATION_U:
+		config[0] = img_config[VIDEO_SATURATION_U][0];
+		config[1] = img_config[VIDEO_SATURATION_U][1];
+		break;
+    case VIDEO_SATURATION_V:
+		config[0] = img_config[VIDEO_SATURATION_V][0];
+		config[1] = img_config[VIDEO_SATURATION_V][1];
+		break;
+    case VIDEO_HUE:
+		config[0] = img_config[VIDEO_HUE][0];
+		config[1] = img_config[VIDEO_HUE][1];
+		break;
+    default:
+        break;
+    }
 
-		ret = video_set_brightness(brightness);
-		if(ret)
-			lidbg("Error: vehicle set brightness\n");
-	}else if(!strcmp(config, "contrast")){
-		int contrast = simple_strtoul(par1, 0, 0);
-
-		ret = video_set_contrast(contrast);
-		if(ret)
-			lidbg("Error: vehicle set contrast\n");
-	}else if(!strcmp(config, "saturation")){
-		int contrast_u = simple_strtoul(par1, 0, 0);
-		int contrast_v = simple_strtoul(par2, 0, 0);
-
-		ret = video_set_saturation(contrast_u, contrast_v);
-		if(ret)
-			lidbg("Error: vehicle set saturation\n");
-	}else if(!strcmp(config, "hue")){
-		int hue = simple_strtoul(par1, 0, 0);
-
-		ret = video_set_hue(hue);
-		if(ret)
-			lidbg("Error: vehicle set hue\n");
-	}else
-		lidbg("Error: undefined[%s] vehicle value to set\n", config);
+	ret = SOC_I2C_Send(VIDEO_AD_I2C_BUS, VIDEO_AD_I2C_ADDR, config, sizeof(config) / sizeof(config[0]));
+	if(ret < 0)
+		lidbg("_video_img_config error\n");
 
 	return ret;
 }
 
-int _video_ad_get(char *reg_add, char *reg_size)
+void _video_img_set(int flag, int img_type)
+{
+	if(flag){
+		switch (img_type)
+		{
+			case VIDEO_BRIGHTNESS:
+				_video_img_config(VIDEO_BRIGHTNESS);
+				break;
+			case VIDEO_CONTRAST:
+				_video_img_config(VIDEO_CONTRAST);
+				break;
+			case VIDEO_SATURATION_U:
+				_video_img_config(VIDEO_SATURATION_U);
+				_video_img_config(VIDEO_SATURATION_V);
+				break;
+			case VIDEO_HUE:
+				_video_img_config(VIDEO_HUE);
+				break;
+			default:
+				break;
+		}
+	}
+}
+
+int _video_ad_img(char *config, char *par)
+{
+	int ret = -1;
+	int img_type = -1;
+	int set_flag = 0;
+
+	if(!strcmp(config, "brightness")){
+		int brightness_val = simple_strtoul(par, 0, 0);
+
+		if(!IMG_VAL_ERR(brightness_val)){
+			set_flag = 1;
+			img_type = VIDEO_BRIGHTNESS;
+			img_config[VIDEO_BRIGHTNESS][1] = VIDEO_IMAGE_CNFIG[VIDEO_BRIGHTNESS][brightness_val];
+			lidbg("video img level[%d], brightness[reg-0x%x]::: 0x%x \n", brightness_val, img_config[VIDEO_BRIGHTNESS][0], img_config[VIDEO_BRIGHTNESS][1]);
+		}else
+			lidbg("Error video img invalid brightness level %d\n", brightness_val);
+	}else if(!strcmp(config, "contrast")){
+		int contras_val = simple_strtoul(par, 0, 0);
+
+		if(!IMG_VAL_ERR(contras_val)){
+			set_flag = 1;
+			img_type = VIDEO_CONTRAST;
+			img_config[VIDEO_CONTRAST][1] = VIDEO_IMAGE_CNFIG[VIDEO_CONTRAST][contras_val];
+			lidbg("video img level[%d], hue[reg-0x%x]::: 0x%x \n", contras_val, img_config[VIDEO_CONTRAST][0], img_config[VIDEO_CONTRAST][1]);
+		}else
+			lidbg("Error video img invalid contrast level %d\n", contras_val);
+	}else if(!strcmp(config, "saturation")){
+		int saturation_val = simple_strtoul(par, 0, 0);
+
+		if(!IMG_VAL_ERR(saturation_val)){
+			set_flag = 1;
+			img_type = VIDEO_SATURATION_U;
+			img_config[VIDEO_SATURATION_U][1] = VIDEO_IMAGE_CNFIG[VIDEO_SATURATION_U][saturation_val];
+			img_config[VIDEO_SATURATION_V][1] = VIDEO_IMAGE_CNFIG[VIDEO_SATURATION_V][saturation_val];
+			lidbg("video img level[%d], saturation_u[reg-0x%x]::: 0x%x \n", saturation_val, img_config[VIDEO_SATURATION_U][0], img_config[VIDEO_SATURATION_U][1]);
+			lidbg("video img level[%d], saturation_v[reg-0x%x]::: 0x%x \n", saturation_val, img_config[VIDEO_SATURATION_V][0], img_config[VIDEO_SATURATION_V][1]);
+		}else
+			lidbg("Error video img invalid saturation level %d\n", saturation_val);
+	}else if(!strcmp(config, "hue")){
+		int hue_val = simple_strtoul(par, 0, 0);
+
+		if(!IMG_VAL_ERR(hue_val)){
+			set_flag = 1;
+			img_type = VIDEO_HUE;
+			img_config[VIDEO_HUE][1] = VIDEO_IMAGE_CNFIG[VIDEO_HUE][hue_val];
+			lidbg("video img level[%d], hue[reg-0x%x]::: 0x%x \n", hue_val, img_config[VIDEO_HUE][0], img_config[VIDEO_HUE][1]);
+		}else
+			lidbg("Error video img invalid hue level %d\n", hue_val);
+	}else
+		lidbg("Error: undefined[%s] vehicle value to set\n", config);
+
+	_video_img_set(set_flag, img_type);
+
+	return ret;
+}
+
+
+int _video_ad_reg_set(char *reg_add, char *data)
+{
+	int ret = -1;
+
+	int reg = simple_strtoul(reg_add, 0, 0);
+	int val = simple_strtoul(data, 0, 0);
+
+	ret = video_reg_set(reg, val);
+	if(ret < 0)
+		lidbg("Vehicle ad set errot, ret=%d \n", ret);
+	else
+		lidbg("Vehicle reg set 0x%x = 0x%x\n", reg, val);
+
+	return ret;
+}
+
+int _video_ad_reg_get(char *reg_add, char *reg_size)
 {
 	int ret = -1;
 	int i = 0;
-	int data = 0;
+	char data = 0;
 
 	int reg = simple_strtoul(reg_add, 0, 0);
 	int size = simple_strtoul(reg_size, 0, 0);
@@ -246,7 +378,7 @@ int _video_ad_get(char *reg_add, char *reg_size)
 		if(ret < 0)
 			lidbg("Vehicle ad get errot, ret=%d \n", ret);
 		else
-			lidbg("Vehicle reg get 0x%x = %d\n", reg, data);
+			lidbg("Vehicle reg get 0x%x = 0x%x\n", reg, data);
 	}
 
 	return ret;
@@ -318,7 +450,7 @@ int _video_ad_check(void)
 	return ret;
 }
 
-int video_ops(int video_ops, int video_input_format)
+void video_ops(int video_ops, int video_input_format)
 {
 	switch (video_ops)
 	{
@@ -364,7 +496,6 @@ int _video_cmds_do(char *cmd)
 		vidoe_ops = VIDEO_OPS_OPEN;
 		video_type = VIDEO_DVD;
 		video_format = VIDEO_INPUT_YUV;
-
 	}
 	else if(!strcmp(cmd, "dvd_close")){
 		vidoe_ops = VIDEO_OPS_CLOSE;
@@ -438,10 +569,13 @@ ssize_t  video_ad_write (struct file *filp, const char __user *buf, size_t size,
 		_video_ad_init(cmd[1]);
 	}
 	else if(!strcmp(cmd[0], "video_set")){
-		_video_ad_set(cmd[1], cmd[2], cmd[3]);
+		_video_ad_img(cmd[1], cmd[2]);
 	}
-	else if(!strcmp(cmd[0], "video_get")){
-		_video_ad_get(cmd[1], cmd[2]);
+	else if(!strcmp(cmd[0], "video_reg_set")){
+		_video_ad_reg_set(cmd[1], cmd[2]);
+	}
+	else if(!strcmp(cmd[0], "video_reg_get")){
+		_video_ad_reg_get(cmd[1], cmd[2]);
 	}
 	else if(!strcmp(cmd[0], "video_reset")){
 		_video_ad_hw_reset();
@@ -547,9 +681,9 @@ static struct dev_pm_ops video_ad_pm_ops =
 };
 
 static int video_ad_probe(struct platform_device *pdev)
-{       
-	DUMP_FUN;
+{
 	int ret = 0;
+	DUMP_FUN;
 
 	register_lidbg_notifier(&video_notifier);
 
