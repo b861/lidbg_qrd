@@ -40,6 +40,7 @@ static char *lmk_white_list[] =
 	"mediaserver",
 	"system_server",
 	"com.sygic.aura",
+	"oodocom.gocsdk",
 	"system",
 	"logcat",
 	NULL,
