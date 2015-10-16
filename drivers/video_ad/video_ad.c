@@ -16,15 +16,16 @@ LIDBG_DEFINE;
 #define VIDEO_NODE "/dev/px3_vehicle"
 
 static int video_format = 0;
+static int cur_video_format = VIDEO_INPUT_UNKNOW;
 
 static unsigned char img_config[5][2] =
 {
-    {0x0a, 0xcc}, //BRIGHTNESS
-    {0x08, 0x8c}, //CONTRAST
+    {0x0, 0x0},
+    {0x0, 0x0},
 
-    {0x0b, 0x00}, //HUE
-    {0xe3, 0x80}, //VIDEO_SATURATION_U
-    {0xe4, 0x80}, //VIDEO_SATURATION_V
+    {0x0, 0x0},
+    {0x0, 0x0},
+    {0x0, 0x0},
 };
 
 int video_set_brightness(int val){
@@ -291,6 +292,78 @@ void _video_img_set(int flag, int img_type)
 	}
 }
 
+void _video_img_format(int img_level, int img_type)
+{
+	switch (cur_video_format)
+	{
+		case VIDEO_INPUT_CVBS:
+			switch (img_type)
+			{
+				case VIDEO_BRIGHTNESS:
+					img_config[VIDEO_BRIGHTNESS][0] = img_cvbs[VIDEO_BRIGHTNESS][0];
+					img_config[VIDEO_BRIGHTNESS][1] = VIDEO_IMAGE_CVBS[VIDEO_BRIGHTNESS][img_level];
+					lidbg("video CVBS img level[%d], brightness[reg-0x%x]::: 0x%x \n", img_level, img_config[VIDEO_BRIGHTNESS][0], img_config[VIDEO_BRIGHTNESS][1]);
+					break;
+				case VIDEO_CONTRAST:
+					img_config[VIDEO_BRIGHTNESS][0] = img_cvbs[VIDEO_BRIGHTNESS][0];
+					img_config[VIDEO_CONTRAST][1] = VIDEO_IMAGE_CVBS[VIDEO_CONTRAST][img_level];
+					lidbg("video CVBS img level[%d], hue[reg-0x%x]::: 0x%x \n", img_level, img_config[VIDEO_CONTRAST][0], img_config[VIDEO_CONTRAST][1]);
+					break;
+				case VIDEO_SATURATION_U:
+					img_config[VIDEO_SATURATION_U][0] = img_cvbs[VIDEO_SATURATION_U][0];
+					img_config[VIDEO_SATURATION_V][0] = img_cvbs[VIDEO_SATURATION_V][0];
+					img_config[VIDEO_SATURATION_U][1] = VIDEO_IMAGE_CVBS[VIDEO_SATURATION_U][img_level];
+					img_config[VIDEO_SATURATION_V][1] = VIDEO_IMAGE_CVBS[VIDEO_SATURATION_V][img_level];
+					lidbg("video CVBS img level[%d], saturation_u[reg-0x%x]::: 0x%x \n", img_level, img_config[VIDEO_SATURATION_U][0], img_config[VIDEO_SATURATION_U][1]);
+					lidbg("video CVBS img level[%d], saturation_v[reg-0x%x]::: 0x%x \n", img_level, img_config[VIDEO_SATURATION_V][0], img_config[VIDEO_SATURATION_V][1]);
+					break;
+				case VIDEO_HUE:
+					img_config[VIDEO_HUE][0] = img_cvbs[VIDEO_HUE][0];
+					img_config[VIDEO_HUE][1] = VIDEO_IMAGE_CVBS[VIDEO_HUE][img_level];
+					lidbg("video CVBS img level[%d], hue[reg-0x%x]::: 0x%x \n", img_level, img_config[VIDEO_HUE][0], img_config[VIDEO_HUE][1]);
+					break;
+				default:
+					break;
+			}
+			break;
+		case VIDEO_INPUT_YUV:
+			switch (img_type)
+			{
+				case VIDEO_BRIGHTNESS:
+					img_config[VIDEO_BRIGHTNESS][0] = img_yuv[VIDEO_BRIGHTNESS][0];
+					img_config[VIDEO_BRIGHTNESS][1] = VIDEO_IMAGE_YUV[VIDEO_BRIGHTNESS][img_level];
+					lidbg("video YUV img level[%d], brightness[reg-0x%x]::: 0x%x \n", img_level, img_config[VIDEO_BRIGHTNESS][0], img_config[VIDEO_BRIGHTNESS][1]);
+					break;
+				case VIDEO_CONTRAST:
+					img_config[VIDEO_BRIGHTNESS][0] = img_yuv[VIDEO_BRIGHTNESS][0];
+					img_config[VIDEO_CONTRAST][1] = VIDEO_IMAGE_YUV[VIDEO_CONTRAST][img_level];
+					lidbg("video YUV img level[%d], hue[reg-0x%x]::: 0x%x \n", img_level, img_config[VIDEO_CONTRAST][0], img_config[VIDEO_CONTRAST][1]);
+					break;
+				case VIDEO_SATURATION_U:
+					img_config[VIDEO_SATURATION_U][0] = img_yuv[VIDEO_SATURATION_U][0];
+					img_config[VIDEO_SATURATION_V][0] = img_yuv[VIDEO_SATURATION_V][0];
+					img_config[VIDEO_SATURATION_U][1] = VIDEO_IMAGE_YUV[VIDEO_SATURATION_U][img_level];
+					img_config[VIDEO_SATURATION_V][1] = VIDEO_IMAGE_YUV[VIDEO_SATURATION_V][img_level];
+					lidbg("video YUV img level[%d], saturation_u[reg-0x%x]::: 0x%x \n", img_level, img_config[VIDEO_SATURATION_U][0], img_config[VIDEO_SATURATION_U][1]);
+					lidbg("video YUV img level[%d], saturation_v[reg-0x%x]::: 0x%x \n", img_level, img_config[VIDEO_SATURATION_V][0], img_config[VIDEO_SATURATION_V][1]);
+					break;
+				case VIDEO_HUE:
+					img_config[VIDEO_HUE][0] = img_yuv[VIDEO_HUE][0];
+					img_config[VIDEO_HUE][1] = VIDEO_IMAGE_YUV[VIDEO_HUE][img_level];
+					lidbg("video YUV img level[%d], hue[reg-0x%x]::: 0x%x \n", img_level, img_config[VIDEO_HUE][0], img_config[VIDEO_HUE][1]);
+					break;
+				default:
+					break;
+			}
+		break;
+		case VIDEO_INPUT_UNKNOW:
+			lidbg("video img unknown intput format \n");
+			break;
+		default:
+			break;
+	}
+}
+
 int _video_ad_img(char *config, char *par)
 {
 	int ret = -1;
@@ -303,8 +376,7 @@ int _video_ad_img(char *config, char *par)
 		if(!IMG_VAL_ERR(brightness_val)){
 			set_flag = 1;
 			img_type = VIDEO_BRIGHTNESS;
-			img_config[VIDEO_BRIGHTNESS][1] = VIDEO_IMAGE_CNFIG[VIDEO_BRIGHTNESS][brightness_val];
-			lidbg("video img level[%d], brightness[reg-0x%x]::: 0x%x \n", brightness_val, img_config[VIDEO_BRIGHTNESS][0], img_config[VIDEO_BRIGHTNESS][1]);
+			_video_img_format(brightness_val, img_type);
 		}else
 			lidbg("Error video img invalid brightness level %d\n", brightness_val);
 	}else if(!strcmp(config, "contrast")){
@@ -313,8 +385,7 @@ int _video_ad_img(char *config, char *par)
 		if(!IMG_VAL_ERR(contras_val)){
 			set_flag = 1;
 			img_type = VIDEO_CONTRAST;
-			img_config[VIDEO_CONTRAST][1] = VIDEO_IMAGE_CNFIG[VIDEO_CONTRAST][contras_val];
-			lidbg("video img level[%d], hue[reg-0x%x]::: 0x%x \n", contras_val, img_config[VIDEO_CONTRAST][0], img_config[VIDEO_CONTRAST][1]);
+			_video_img_format(contras_val, img_type);
 		}else
 			lidbg("Error video img invalid contrast level %d\n", contras_val);
 	}else if(!strcmp(config, "saturation")){
@@ -323,10 +394,7 @@ int _video_ad_img(char *config, char *par)
 		if(!IMG_VAL_ERR(saturation_val)){
 			set_flag = 1;
 			img_type = VIDEO_SATURATION_U;
-			img_config[VIDEO_SATURATION_U][1] = VIDEO_IMAGE_CNFIG[VIDEO_SATURATION_U][saturation_val];
-			img_config[VIDEO_SATURATION_V][1] = VIDEO_IMAGE_CNFIG[VIDEO_SATURATION_V][saturation_val];
-			lidbg("video img level[%d], saturation_u[reg-0x%x]::: 0x%x \n", saturation_val, img_config[VIDEO_SATURATION_U][0], img_config[VIDEO_SATURATION_U][1]);
-			lidbg("video img level[%d], saturation_v[reg-0x%x]::: 0x%x \n", saturation_val, img_config[VIDEO_SATURATION_V][0], img_config[VIDEO_SATURATION_V][1]);
+			_video_img_format(saturation_val, img_type);
 		}else
 			lidbg("Error video img invalid saturation level %d\n", saturation_val);
 	}else if(!strcmp(config, "hue")){
@@ -335,8 +403,7 @@ int _video_ad_img(char *config, char *par)
 		if(!IMG_VAL_ERR(hue_val)){
 			set_flag = 1;
 			img_type = VIDEO_HUE;
-			img_config[VIDEO_HUE][1] = VIDEO_IMAGE_CNFIG[VIDEO_HUE][hue_val];
-			lidbg("video img level[%d], hue[reg-0x%x]::: 0x%x \n", hue_val, img_config[VIDEO_HUE][0], img_config[VIDEO_HUE][1]);
+			_video_img_format(hue_val, img_type);
 		}else
 			lidbg("Error video img invalid hue level %d\n", hue_val);
 	}else
@@ -477,7 +544,7 @@ void video_ops(int video_ops, int video_input_format)
 
 int _video_cmds_do(char *cmd)
 {
-	int ret = 0;
+//	int ret = 0;
 	int vidoe_ops = VIDEO_OPS_UNKNOWN;
 	int video_type = VIDEO_UNKNOWN;
 	int video_format = VIDEO_INPUT_UNKNOW;
@@ -541,7 +608,7 @@ int _video_cmds_do(char *cmd)
 
 //	if(vidoe_ops == VIDEO_OPS_OPEN)
 //		ret = video_chip_init(video_type);
-
+	cur_video_format = video_format;
 	video_ops(vidoe_ops, video_format);
 
 	return 0;
