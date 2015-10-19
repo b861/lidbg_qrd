@@ -378,10 +378,7 @@ static int  soc_dev_suspend(struct platform_device *pdev, pm_message_t state)
 }
 static int soc_dev_resume(struct platform_device *pdev)
 {
-
-    	lidbg("soc_dev_resume usb_enumerate_limit=5\n");
-	usb_enumerate_limit=5;
-
+	lidbg("soc_dev_resume \n");
 	if(!g_var.is_fly)
 	{
 		//button_resume();
