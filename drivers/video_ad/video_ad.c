@@ -16,7 +16,13 @@ LIDBG_DEFINE;
 #define VIDEO_NODE "/dev/px3_vehicle"
 
 static int video_format = 0;
+static int cur_video_state = VIDEO_OPS_UNKNOWN;
 static int cur_video_format = VIDEO_INPUT_UNKNOW;
+struct semaphore video_ops_sem;
+static DECLARE_COMPLETION(video_stable_state);
+
+extern int video_unstable_flag;
+extern int video_ck_unmatched;
 
 static unsigned char img_config[5][2] =
 {
@@ -186,6 +192,43 @@ int video_ad_get_format(void)
 	return ret;
 }
 
+void _video_black_enable(void)
+{
+	int ret = 0;
+	unsigned char val = 0;
+
+	lidbg("*** video black enable ***\n");
+
+	//black colour
+	ret = video_reg_set(0xc0, 0x0);
+	ret &= video_reg_set(0xc1, 0x80);
+	ret &= video_reg_set(0xc2, 0x80);
+
+	ret = video_reg_get(0xbf, &val);
+
+	val |= 0x01;	//enable force display colour
+	ret &= video_reg_set(0xbf, val);
+	if(!ret)
+		lidbg("_video_black_enable error\n");
+}
+
+void _video_black_disable(void)
+{
+	int ret = 0;
+	unsigned char val = 0;
+
+	lidbg("*** video black disable ***\n");
+
+	ret = video_reg_get(0xbf, &val);
+
+	val &= 0xfe;	//disble force display colour
+	ret = video_reg_set(0xbf, val);
+	lidbg("*** video black disable: 0x%x ***\n", val);
+
+	if(!ret)
+		lidbg("_video_black_disable error\n");
+}
+
 void _video_dbg(void)
 {
 	int i = 0;
@@ -226,6 +269,8 @@ int video_chip_init(int video_type)
 
 	if(ret < 0)
 		lidbg("Vehicle chip init error\n");
+
+//	_video_black_enable();
 
 	return ret;
 }
@@ -305,7 +350,7 @@ void _video_img_format(int img_level, int img_type)
 					lidbg("video CVBS img level[%d], brightness[reg-0x%x]::: 0x%x \n", img_level, img_config[VIDEO_BRIGHTNESS][0], img_config[VIDEO_BRIGHTNESS][1]);
 					break;
 				case VIDEO_CONTRAST:
-					img_config[VIDEO_BRIGHTNESS][0] = img_cvbs[VIDEO_BRIGHTNESS][0];
+					img_config[VIDEO_CONTRAST][0] = img_cvbs[VIDEO_CONTRAST][0];
 					img_config[VIDEO_CONTRAST][1] = VIDEO_IMAGE_CVBS[VIDEO_CONTRAST][img_level];
 					lidbg("video CVBS img level[%d], hue[reg-0x%x]::: 0x%x \n", img_level, img_config[VIDEO_CONTRAST][0], img_config[VIDEO_CONTRAST][1]);
 					break;
@@ -335,9 +380,9 @@ void _video_img_format(int img_level, int img_type)
 					lidbg("video YUV img level[%d], brightness[reg-0x%x]::: 0x%x \n", img_level, img_config[VIDEO_BRIGHTNESS][0], img_config[VIDEO_BRIGHTNESS][1]);
 					break;
 				case VIDEO_CONTRAST:
-					img_config[VIDEO_BRIGHTNESS][0] = img_yuv[VIDEO_BRIGHTNESS][0];
+					img_config[VIDEO_CONTRAST][0] = img_yuv[VIDEO_CONTRAST][0];
 					img_config[VIDEO_CONTRAST][1] = VIDEO_IMAGE_YUV[VIDEO_CONTRAST][img_level];
-					lidbg("video YUV img level[%d], hue[reg-0x%x]::: 0x%x \n", img_level, img_config[VIDEO_CONTRAST][0], img_config[VIDEO_CONTRAST][1]);
+					lidbg("video YUV img level[%d], contrast[reg-0x%x]::: 0x%x \n", img_level, img_config[VIDEO_CONTRAST][0], img_config[VIDEO_CONTRAST][1]);
 					break;
 				case VIDEO_SATURATION_U:
 					img_config[VIDEO_SATURATION_U][0] = img_yuv[VIDEO_SATURATION_U][0];
@@ -522,20 +567,28 @@ void video_ops(int video_ops, int video_input_format)
 	switch (video_ops)
 	{
 	case VIDEO_OPS_OPEN:
-		if(video_input_format == VIDEO_INPUT_CVBS)
-			lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_VIDEO_EVENT, NOTIFIER_MINOR_VIDEO_CVBS_OPEN));
-		else if(video_input_format == VIDEO_INPUT_YUV)
-			lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_VIDEO_EVENT, NOTIFIER_MINOR_VIDEO_YUV_OPEN));
-		else
-			lidbg("Error: video ops[%d], format[%d]\n", video_ops, video_input_format);
+		LCD_OFF;
+		if(cur_video_format == VIDEO_INPUT_CVBS)
+			fs_file_write(VIDEO_NODE, false, "cvbs_open", 0, strlen("cvbs_open"));
+		else if(cur_video_format == VIDEO_INPUT_YUV)
+			fs_file_write(VIDEO_NODE, false, "yuv_open", 0, strlen("yuv_open"));
+		else{
+			lidbg("ERROR: Video open event unknown cur video format !!!\n");
+			break;
+		}
+		complete(&video_stable_state);
+
 		break;
 	case VIDEO_OPS_CLOSE:
-		if(video_input_format == VIDEO_INPUT_CVBS)
-			lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_VIDEO_EVENT, NOTIFIER_MINOR_VIDEO_CVBS_CLOSE));
-		else if(video_input_format == VIDEO_INPUT_YUV)
-			lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_VIDEO_EVENT, NOTIFIER_MINOR_VIDEO_YUV_CLOSE));
-		else
-			lidbg("Error: video ops[%d], format[%d]\n", video_ops, video_input_format);
+		LCD_ON;
+		if(cur_video_format == VIDEO_INPUT_CVBS)
+			fs_file_write(VIDEO_NODE, false, "cvbs_close", 0, strlen("cvbs_close"));
+		else if(cur_video_format == VIDEO_INPUT_YUV)
+			fs_file_write(VIDEO_NODE, false, "yuv_close", 0, strlen("yuv_close"));
+		else{
+			lidbg("ERROR: Video close event unknown cur video format !!!\n");
+			break;
+		}
 		break;
 	default:
 		break;
@@ -606,8 +659,11 @@ int _video_cmds_do(char *cmd)
 		return 1;
 	}
 
-//	if(vidoe_ops == VIDEO_OPS_OPEN)
+//	if(vidoe_ops == VIDEO_OPS_OPEN){
 //		ret = video_chip_init(video_type);
+//		_video_black_enable();
+//	}
+	cur_video_state = vidoe_ops;
 	cur_video_format = video_format;
 	video_ops(vidoe_ops, video_format);
 
@@ -616,20 +672,20 @@ int _video_cmds_do(char *cmd)
 
 ssize_t  video_ad_write (struct file *filp, const char __user *buf, size_t size, loff_t *ppos)
 {
-    char *cmd[8] = {NULL};
-    int cmd_num  = 0;
-    char cmd_buf[512];
-    memset(cmd_buf, '\0', 512);
-    
-    if(copy_from_user(cmd_buf, buf, size))
-    {
-        lidbg("copy_from_user ERR\n");
-    }
-    if(cmd_buf[size - 1] == '\n')
-        cmd_buf[size - 1] = '\0';
+	char *cmd[8] = {NULL};
+	int cmd_num  = 0;
+	char cmd_buf[512];
+	memset(cmd_buf, '\0', 512);
 
-    cmd_num = lidbg_token_string(cmd_buf, " ", cmd);
+	down(&video_ops_sem);
+	if(copy_from_user(cmd_buf, buf, size))
+	{
+		lidbg("copy_from_user ERR\n");
+	}
+	if(cmd_buf[size - 1] == '\n')
+		cmd_buf[size - 1] = '\0';
 
+	cmd_num = lidbg_token_string(cmd_buf, " ", cmd);
 	printk("***** video_ad_write:%s ******\n", cmd[0]);
 
 	if(!strcmp(cmd[0], "video_init")){
@@ -658,8 +714,9 @@ ssize_t  video_ad_write (struct file *filp, const char __user *buf, size_t size,
 	}
 	else
 		lidbg("Error: undefined vehicle cmd[%s]\n", cmd[0]);
+	up(&video_ops_sem);
 
-	 return size;
+	return size;
 }
 
 ssize_t  video_ad_read(struct file *filp, char __user *buffer, size_t size, loff_t *offset)
@@ -701,39 +758,60 @@ static int video_ad_ops_resume(struct device *dev)
 	return 0;
 }
 
-static int video_event(struct notifier_block *this, unsigned long event, void *ptr)
+static int thread_video_state(void *data)
 {
-	DUMP_FUN;
+	int lcd_state = 0;
+	int video_stable = 0;
+	int video_state_check_cnt = 0;
 
-	switch (event)
-	{
-		case NOTIFIER_VALUE(NOTIFIER_MAJOR_VIDEO_EVENT, NOTIFIER_MINOR_VIDEO_CVBS_OPEN):
-			fs_file_write(VIDEO_NODE, false, "cvbs_open", 0, strlen("cvbs_open"));
-			break;
+	while(!kthread_should_stop()){
+		if(!wait_for_completion_interruptible(&video_stable_state))
+			lcd_state = 0;
+			video_stable = 0;
+			video_state_check_cnt = 0;
+			lidbg(" *** video signal stability check ***\n");
+			while(1){
+				msleep(50);
+//				lidbg(" *** %d %d %d***\n", video_unstable_flag, video_state_check_cnt, video_stable);
+				if(cur_video_format == VIDEO_INPUT_YUV){
+					if((video_unstable_flag == 0) && (lcd_state == 0)){
+							video_stable++;
+							video_state_check_cnt = 0;
 
-		case NOTIFIER_VALUE(NOTIFIER_MAJOR_VIDEO_EVENT, NOTIFIER_MINOR_VIDEO_CVBS_CLOSE):
-			fs_file_write(VIDEO_NODE, false, "cvbs_close", 0, strlen("cvbs_close"));
-			break;
+							if(video_stable > 5){
+								lcd_state = 1;
+								video_stable = 0;
+								LCD_ON;
+								break;
+							}
+					}
+				}else if(cur_video_format == VIDEO_INPUT_CVBS){
+					if((video_unstable_flag == 0) && (video_ck_unmatched == 0) && (lcd_state == 0)){
+							video_stable++;
+							video_state_check_cnt = 0;
 
-		case NOTIFIER_VALUE(NOTIFIER_MAJOR_VIDEO_EVENT, NOTIFIER_MINOR_VIDEO_YUV_OPEN):
-			fs_file_write(VIDEO_NODE, false, "yuv_open", 0, strlen("yuv_open"));
-			break;
+							if(video_stable > 10){
+								lcd_state = 1;
+								video_stable = 0;
+								LCD_ON;
+								break;
+							}
+					}
+				}else
+					break;
 
-		case NOTIFIER_VALUE(NOTIFIER_MAJOR_VIDEO_EVENT, NOTIFIER_MINOR_VIDEO_YUV_CLOSE):
-			fs_file_write(VIDEO_NODE, false, "yuv_close", 0, strlen("yuv_close"));
-			break;
-
-		default:
-			break;
+				if(video_state_check_cnt > 100){
+					lidbg(" *** video signal stability check timeout ***\n");
+					video_state_check_cnt = 0;
+					LCD_ON;
+					break;
+				}
+				video_state_check_cnt ++;
+			}
 	}
 
-	return NOTIFY_DONE;
+	return 1;
 }
-
-static struct notifier_block video_notifier =
-{
-    .notifier_call = video_event,
-};
 
 static struct miscdevice video_dev = {
 	.minor		= MISC_DYNAMIC_MINOR,
@@ -752,7 +830,7 @@ static int video_ad_probe(struct platform_device *pdev)
 	int ret = 0;
 	DUMP_FUN;
 
-	register_lidbg_notifier(&video_notifier);
+	kthread_run(thread_video_state, NULL, "ftf_pmtask");
 
 	/* register misc device*/
 	ret = misc_register(&video_dev);
@@ -794,10 +872,13 @@ static int __devinit video_ad_init(void)
 { 
 	DUMP_BUILD_TIME;
 	LIDBG_GET;
-	
-    platform_device_register(&video_ad_devices);
-    platform_driver_register(&video_ad_driver);
-    return 0;
+
+	sema_init(&video_ops_sem, 1);
+	CREATE_KTHREAD(thread_video_state, NULL);
+
+	platform_device_register(&video_ad_devices);
+	platform_driver_register(&video_ad_driver);
+	return 0;
 
 }
 
