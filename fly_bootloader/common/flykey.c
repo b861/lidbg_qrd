@@ -27,7 +27,7 @@ int touch_points_get()
 			points = ctp_points_get();
 //			dprintf(INFO, "***** cnt = %d, points = %d *****\n", cnt, points);
 			//released
-			if((points == 0) && (!adc_get()) && (last_press_flag != 0)){
+			if((points == 0) && (!adc_get()) &&(!lpc_adc_get()) && (last_press_flag != 0)){
 					for(i=0; i<50; i++){
 							mdelay(10);
 							press_confirm = ctp_points_get();
@@ -43,7 +43,7 @@ int touch_points_get()
 			}
 
 			//pressed
-			if((points != 0) || adc_get()){
+			if((points != 0) || adc_get()|| lpc_adc_get()){
 					dprintf(INFO, "*****  press pressed *****\n");
 					last_press_flag = 1;
 					return 1;

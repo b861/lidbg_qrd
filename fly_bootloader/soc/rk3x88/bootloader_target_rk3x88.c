@@ -2,7 +2,10 @@
 
 struct bootloader_hw_config g_hw_info[] =
 {
-	{
+	{	
+		.adc_info[0] = {
+			.ad_vol = 3200,
+		},
 		.ctp_info = {
 			.ctp_int = 0x010f,//GPIO1_B7
 			.ctp_rst = 0x000e,//GPIO0_B6

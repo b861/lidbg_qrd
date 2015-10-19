@@ -86,7 +86,7 @@ struct bootloader_hw_config g_hw_info[] =
                .adc_info[0] = {
                        .ad_ch = -1,
                        .ad_ctrl_ch = -1,
-                       .ad_vol = 0,
+                       .ad_vol = 3200,
                },
 
                .adc_info[ADC_KEY_CHNL - 1] = {

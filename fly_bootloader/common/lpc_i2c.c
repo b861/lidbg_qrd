@@ -1,8 +1,24 @@
 #include "i2c_gpio.h"
 #include "soc.h"
 #include "fly_private.h"
+#include "fly_target.h"
 
 static struct i2c_gpio_dev *lpc_i2c_devp = NULL;
+
+int lpc_key_val;
+struct fly_hardware_info
+{
+
+    unsigned char buffFromMCU[128];
+    unsigned char buffFromMCUProcessorStatus;
+    unsigned int buffFromMCUFrameLength;
+    unsigned int buffFromMCUFrameLengthMax;
+    unsigned char buffFromMCUCRC;
+    unsigned char buffFromMCUBak[128];
+
+};
+struct fly_hardware_info *pGlobalHardwareInfo;
+struct fly_hardware_info GlobalHardwareInfo;
 
 unsigned char lpc_read(char *buf, unsigned int size)
 {
@@ -87,4 +103,120 @@ void backlight_enable()
 			lpc_write(back_light, sizeof(back_light));
 			mdelay(10);
 		}
+}
+
+static void LPCdealReadFromMCUAll(unsigned char *p, int length)
+{   
+    int  i;	
+	u32 val[4]={0};
+	u32 val_temp,ad_val_left,ad_val_right;
+   
+    if(p[0]==0x05&&p[1]==0x05)    
+    {
+		val[0]=p[2];
+		val[1]=p[3];
+		val[2]=p[4];
+		val[3]=p[5];
+        val_temp=(u32)val[1];
+		val_temp=(val_temp<<8);
+		ad_val_left=val_temp+(u32)val[0];
+        val_temp=(u32)val[3];
+		val_temp=(val_temp<<8);
+		ad_val_right=val_temp+(u32)val[2];
+        if(ad_val_left<g_bootloader_hw.adc_info[0].ad_vol||ad_val_right<g_bootloader_hw.adc_info[0].ad_vol)
+        {
+			lpc_key_val=1;
+		}
+		else
+		{
+		    lpc_key_val=0;
+		}
+               
+    }
+}
+static bool readFromMCUProcessor(char *p, int length)
+{
+    unsigned int i;
+
+    for (i = 0; i < length; i++)
+    {
+        switch (pGlobalHardwareInfo->buffFromMCUProcessorStatus)
+        {
+        case 0:
+            if (0xFF == p[i])
+            {
+                pGlobalHardwareInfo->buffFromMCUProcessorStatus = 1;
+            }
+            break;
+        case 1:
+            if (0xFF == p[i])
+            {
+                pGlobalHardwareInfo->buffFromMCUProcessorStatus = 1;
+            }
+            else if (0x55 == p[i])
+            {
+                pGlobalHardwareInfo->buffFromMCUProcessorStatus = 2;
+            }
+            else
+            {
+                pGlobalHardwareInfo->buffFromMCUProcessorStatus = 0;
+            }
+            break;
+        case 2:
+            pGlobalHardwareInfo->buffFromMCUProcessorStatus = 3;
+            pGlobalHardwareInfo->buffFromMCUFrameLength = 0;
+            pGlobalHardwareInfo->buffFromMCUFrameLengthMax = p[i];
+            pGlobalHardwareInfo->buffFromMCUCRC = p[i];
+            break;
+        case 3:
+            if (pGlobalHardwareInfo->buffFromMCUFrameLength < (pGlobalHardwareInfo->buffFromMCUFrameLengthMax - 1))
+            {
+                pGlobalHardwareInfo->buffFromMCU[pGlobalHardwareInfo->buffFromMCUFrameLength] = p[i];
+                pGlobalHardwareInfo->buffFromMCUCRC += p[i];
+                pGlobalHardwareInfo->buffFromMCUFrameLength++;
+            }
+            else
+            {
+                pGlobalHardwareInfo->buffFromMCUProcessorStatus = 0;
+                if (pGlobalHardwareInfo->buffFromMCUCRC == p[i])
+                {
+                    LPCdealReadFromMCUAll(pGlobalHardwareInfo->buffFromMCU, pGlobalHardwareInfo->buffFromMCUFrameLengthMax - 1);
+                }
+                else
+                {
+                    dprintf(INFO,"\nRead From MCU CRC Error");
+                }
+            }
+            break;
+        default:
+            pGlobalHardwareInfo->buffFromMCUProcessorStatus = 0;
+            break;
+        }
+    }
+
+    if (pGlobalHardwareInfo->buffFromMCUProcessorStatus > 1)
+    {
+        return TRUE;
+    }
+    else
+    {
+        return FALSE;
+    }
+}
+int lpc_adc_get(void)
+{   
+    char buff[13]={0};
+    int val=0,ret=0; 
+	static  int countt=0;
+    pGlobalHardwareInfo = &GlobalHardwareInfo;
+	if(lpc_read(buff,12)<0)
+    {
+    	dprintf(INFO,"lpc_read erro%d\n");
+			return 0;
+	}
+    readFromMCUProcessor(buff, 12);
+
+	return lpc_key_val;
+      
+	
 }
