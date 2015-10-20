@@ -58,6 +58,8 @@ static struct kfifo knob_data_fifo;
 spinlock_t irq_lock;
 static u8 left_irq_is_disabled,right_irq_is_disabled;
 
+static u8 old_num_left,old_num_right;
+
 
 /**
  * EncoderIDExchange - exchange data according to hw config
@@ -300,20 +302,18 @@ void irq_left_proc(u8 num)
 			//debounce(rising irq when signal fall down)
 			if((pfly_KeyEncoderInfo->curEncodeValueLeft & (1 << 2)) == 0) 
 			{
+				if(!old_num_left)	old_num_left = 3;//repair reverse issue(excluse first result)
+				else old_num_left = num;
 				enable_left_irq();
-				return;//debounce
+				return;
 			}
-			
-			//if(old_left_num == num) //debounce(same irq)
-			if(((pfly_KeyEncoderInfo->curEncodeValueLeft >> 4) & 0x0F) ==
-				(pfly_KeyEncoderInfo->curEncodeValueLeft & 0x0F)) //debounce(same irq)
+			if(old_num_left == num) //same edge:reset and wait for another irq
 			{
-				pr_debug("---------ehol1 debounce------");
+				old_num_left = 0;
 				enable_left_irq();
-				return;//debounce
+				return;
 			}
-			//old_left_num = num;
-			
+			old_num_left = 0;
 			if(!(pfly_KeyEncoderInfo->curEncodeValueLeft & (1 << 0)))
 			{
 				pr_debug("num1---L1---done");
@@ -331,20 +331,18 @@ void irq_left_proc(u8 num)
 			//debounce(falling irq when signal rise up)
 			if(pfly_KeyEncoderInfo->curEncodeValueLeft & (1 << 0))
 			{
+				if(!old_num_left)	old_num_left = 3;//repair reverse issue(excluse first result)
+				else old_num_left = num;
 				enable_left_irq();
 				return;
 			}
-			
-			//if(old_left_num == num) //debounce(same irq)
-			if(((pfly_KeyEncoderInfo->curEncodeValueLeft >> 4) & 0x0F) ==
-				(pfly_KeyEncoderInfo->curEncodeValueLeft & 0x0F)) //debounce(same irq)
+			if(old_num_left == num) //reset and wait for another irq
 			{
-				pr_debug("---------ehol2 debounce------");
+				old_num_left = 0;
 				enable_left_irq();
-				return;//debounce
+				return;
 			}
-			//old_left_num = num;
-			
+			old_num_left = 0;
 			if(!(pfly_KeyEncoderInfo->curEncodeValueLeft & (1 << 2)))
 			{
 				pr_debug("num2---L1---done");
@@ -421,20 +419,18 @@ void irq_right_proc(u8 num)
 			//debounce(rising irq when signal fall down)
 			if((pfly_KeyEncoderInfo->curEncodeValueRight & (1 << 2)) == 0)
 			{
+				if(!old_num_right)	old_num_right = 3;//repair reverse issue(excluse first result)
+				else old_num_right = num;
 				enable_right_irq();
 				return;
 			}
-			
-			//if(old_right_num == num) //debounce(same irq)
-			if(((pfly_KeyEncoderInfo->curEncodeValueRight >> 4) & 0x0F) ==
-				(pfly_KeyEncoderInfo->curEncodeValueRight & 0x0F)) //debounce(same irq)
+			if(old_num_right == num) //same edge:reset and wait for another irq
 			{
-				pr_debug("---------ehor1 debounce------");
+				old_num_right = 0;
 				enable_right_irq();
-				return;//debounce
+				return;
 			}
-			//old_right_num = num;
-			
+			old_num_right = 0;
 			if(pfly_KeyEncoderInfo->curEncodeValueRight & (1 << 0))
 			{
 				pr_debug("num1---R1---done");
@@ -452,20 +448,18 @@ void irq_right_proc(u8 num)
 			//debounce(falling irq when signal rise up)
 			if(pfly_KeyEncoderInfo->curEncodeValueRight & (1 << 0))
 			{
+				if(!old_num_right)	old_num_right = 3;//repair reverse issue(excluse first result)
+				else old_num_right = num;
 				enable_right_irq();
 				return;
 			}
-			
-			//if(old_right_num == num)//debounce(same irq)
-			if(((pfly_KeyEncoderInfo->curEncodeValueRight >> 4) & 0x0F) ==
-				(pfly_KeyEncoderInfo->curEncodeValueRight & 0x0F)) //debounce(same irq)
+			if(old_num_right == num) //same edge:reset and wait for another irq
 			{
-				pr_debug("---------eho debounce------");
+				old_num_right = 0;
 				enable_right_irq();
-				return;//debounce
+				return;
 			}
-			//old_right_num = num;
-			
+			old_num_right = 0;
 			if(pfly_KeyEncoderInfo->curEncodeValueRight & (1 << 2))
 			{
 				pr_debug("num2---R1---done");
@@ -507,6 +501,7 @@ void irq_right_proc(u8 num)
 
 irqreturn_t irq_left_knob1(int irq, void *dev_id)
 {
+	
 	if(g_hw.is_single_edge)
 	{
 		unsigned long irqflags = 0;
@@ -518,11 +513,11 @@ irqreturn_t irq_left_knob1(int irq, void *dev_id)
 			disable_irq_nosync(GPIO_TO_INT(BUTTON_LEFT_2));
 		}
 		spin_unlock_irqrestore(&irq_lock, irqflags);
+		udelay(500);//Wait for stable reference signal
 	}
     	pr_debug("irq_left_knob1: %d\n", irq);
 	irq_left_proc(1);
 	return IRQ_HANDLED;
-
 }
 irqreturn_t irq_left_knob2(int irq, void *dev_id)
 {
@@ -537,6 +532,7 @@ irqreturn_t irq_left_knob2(int irq, void *dev_id)
 			disable_irq_nosync(GPIO_TO_INT(BUTTON_LEFT_2));
 		}
 		spin_unlock_irqrestore(&irq_lock, irqflags);
+		udelay(500);//Wait for stable reference signal
 	}
 	pr_debug("irq_left_knob2: %d\n", irq);
 	irq_left_proc(2);
@@ -544,6 +540,7 @@ irqreturn_t irq_left_knob2(int irq, void *dev_id)
 }
 irqreturn_t irq_right_knob1(int irq, void *dev_id)
 {
+	
 	if(g_hw.is_single_edge)
 	{
 		unsigned long irqflags = 0;
@@ -555,6 +552,7 @@ irqreturn_t irq_right_knob1(int irq, void *dev_id)
 			disable_irq_nosync(GPIO_TO_INT(BUTTON_RIGHT_2));
 		}
 		spin_unlock_irqrestore(&irq_lock, irqflags);
+		udelay(500);//Wait for stable reference signal
 	}
 	pr_debug("irq_right_knob1: %d\n", irq);
 	irq_right_proc(1);
@@ -573,6 +571,7 @@ irqreturn_t irq_right_knob2(int irq, void *dev_id)
 			disable_irq_nosync(GPIO_TO_INT(BUTTON_RIGHT_2));
 		}
 		spin_unlock_irqrestore(&irq_lock, irqflags);
+		udelay(500);//Wait for stable reference signal
 	}
 	pr_debug("irq_right_knob2: %d\n", irq);
 	irq_right_proc(2);
