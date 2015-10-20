@@ -1,0 +1,10 @@
+ #!/usr/bin/expect
+set timeout -1
+set SRC_PATH [lindex $argv 0]
+spawn  git clone git@192.168.9.57:recovery.git $SRC_PATH/bootable/recovery/flyRecovery
+expect {
+	"password" {
+		 send "git\r"
+	}
+}
+expect eof
