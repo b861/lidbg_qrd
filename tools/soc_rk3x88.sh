@@ -37,8 +37,7 @@ function soc_build_recoveryimage()
 	else
 	 echo test_mode
         fi
-	mkdir -p $DBG_SYSTEM_DIR/bootable/recovery/flyRecovery/out
-	cp -rf $DBG_OUT_PATH  $DBG_SYSTEM_DIR/bootable/recovery/flyRecovery/out
+	cp -rf $DBG_OUT_PATH  $DBG_SYSTEM_DIR/bootable/recovery/flyRecovery
         cp $DBG_SYSTEM_DIR/bootable/recovery/flyRecovery/recovery.conf  $DBG_SYSTEM_DIR/bootable/recovery/flyRecovery/out
 	soc_prebuild && soc_build_common 'make recoveryimage -j16'
 }
