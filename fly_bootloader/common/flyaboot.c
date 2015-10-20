@@ -423,13 +423,12 @@ void flyaboot_init(unsigned *boot_into_recovery,bool *boot_into_fastboot)
 	}
 	*/
 
-	if(!*boot_into_recovery)
-			{
- 			show_logo();
-			backlight_enable();
+	if(!*boot_into_recovery){
+			memset(fb_base_get()+fly_screen_w*(fly_screen_h-30)*FBCON_BPP/8,0x00,fly_screen_w*30*FBCON_BPP/8);
+		       //show_logo();
+		       //backlight_enable();
 	}
-	else
-	{
+	else{
 		fly_setBcol(WHITE_COL);
 		fly_text_lk(8, (fly_screen_h -10),INTO_REC,BLACK_COL);
 	}
