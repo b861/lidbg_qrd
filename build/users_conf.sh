@@ -295,7 +295,7 @@ case "$USERS_ID" in
 	export DBG_PLATFORM_PATH=/home2/liangyihong/projDir
 	export DBG_PLATFORM_PATH_BASIC=/home2/liangyihong/basicGit
 	export DBG_PLATFORM_PATH_WWF=/home2/wuweifeng
-	#export DBG_PLATFORM_PATH_CCS=/home2/chenchangsheng
+	export DBG_PLATFORM_PATH_CCS=/home2/chenchangsheng
 	export PATHJAVA1P6=/opt/JDK/jdk1.6.0_31
 	export PATHJAVA1P7=/opt/JDK/java-7-openjdk-amd64
 	case "$DBG_PLATFORM_ID" in

@@ -1,3 +1,4 @@
+--------------------------------车机旋钮驱动----------------------------------------
 lidbg_button驱动已弃用，使用lidbg_knob代替。
 本驱动提供/dev/knob0设备节点以供HAL层做读操作，直接读取1个字节解析即可。
 读取数据格式：
@@ -21,3 +22,4 @@ echo -n 'file lidbg_knob.c +p' > /sys/kernel/debug/dynamic_debug/control切换�
 4，屏蔽了原来外部控制的suspend和resume函数，把两者加入驱动的platform_driver中。
 5，fifo满时只扔出一个字节数据，减少丢失。
 6，增加原生系统按键上报处理。
+7，增加单边沿中断触发处理。

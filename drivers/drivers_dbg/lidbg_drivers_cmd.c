@@ -541,6 +541,21 @@ void parse_cmd(char *pt)
         monkey_run(enable);
         monkey_config(gpio, on_en, off_en, on_ms, off_ms);
     }
+    else if(!strcmp(argv[0], "recordenable") )
+    {
+	lidbg("-------uvccam recording -----");
+	lidbg_shell_cmd("setprop persist.lidbg.uvccam.recording 1");
+	if(g_var.is_fly) lidbg_shell_cmd("./flysystem/lib/out/lidbg_testuvccam /dev/video2 -c -f H264 -r &");
+	else lidbg_shell_cmd("./system/lib/modules/out/lidbg_testuvccam /dev/video2 -c -f H264 -r &");
+    }   
+
+    else if(!strcmp(argv[0], "recorddisable") )
+    {
+	lidbg("-------uvccam stop_recording -----");
+	lidbg_shell_cmd("setprop persist.lidbg.uvccam.recording 0");
+    }
+
+    
     else if(!strcmp(argv[0], "flyparameter") )
     {
         int para_count = argc - 1;

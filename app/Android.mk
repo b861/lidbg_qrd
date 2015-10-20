@@ -60,6 +60,8 @@ ifeq ($(CONFIG_HAL_VOLD_PX3),y)
 SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,px3_vold)
 endif
 
+SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,uvccam_test)
+
 SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,lidbg_umount)
 SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,apk)
 

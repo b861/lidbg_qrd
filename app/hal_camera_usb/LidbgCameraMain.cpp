@@ -6,6 +6,7 @@
 #include "LidbgCameraCommon.h"
 #include "LidbgCameraMain.h"
 #include "LidbgCameraUsb.h"
+#include <cutils/properties.h>
 
 extern "C" {
 #include <sys/time.h>

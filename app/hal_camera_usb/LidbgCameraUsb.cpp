@@ -4,6 +4,7 @@
 
 #include "LidbgCameraCommon.h"
 #include "LidbgCameraUsb.h"
+#include <cutils/properties.h>
 
 static int is_debug = 0;
 
@@ -1682,18 +1683,25 @@ out_err:
     {
         struct camera_device *mdevice=device;
         int rc = 0;
+	char startRecording[PROPERTY_VALUE_MAX];
         ALOGE("%s: E", __func__);
-
+	property_get("persist.lidbg.uvccam.recording", startRecording, "0");
+	if(!strncmp(startRecording, "1", 1))
+	{
+		ALOGI("-------uvccam recording -----");
+		system("./flysystem/lib/out/lidbg_testuvccam /dev/video2 -c -f H264 -r &");
+		property_set("persist.lidbg.uvccam.recording","1");
+	}
         ALOGE("%s: X", __func__);
-
-        return -1;
+        return 0;
     }
 
     void usbcam_stop_recording(struct camera_device *device)
     {
         struct camera_device *mdevice=device;
         ALOGE("%s: E", __func__);
-
+	ALOGI("-------uvccam stop_recording -----");
+	property_set("persist.lidbg.uvccam.recording","0");
         ALOGE("%s: X", __func__);
     }
 
