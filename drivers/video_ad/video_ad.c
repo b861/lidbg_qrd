@@ -18,6 +18,9 @@ LIDBG_DEFINE;
 static int video_format = 0;
 static int cur_video_state = VIDEO_OPS_UNKNOWN;
 static int cur_video_format = VIDEO_INPUT_UNKNOW;
+static int video_bl_ctrl = 0;
+static int video_init_cnt = 0;
+
 struct semaphore video_ops_sem;
 static DECLARE_COMPLETION(video_stable_state);
 
@@ -189,10 +192,10 @@ int _video_source_state(void)
 	}
 	state = val & 0x01;
 
-	if(state == 1)
-		lidbg("video input source locked, reg[0x10]=0x%x \n", val);
-	else
-		lidbg("video input source unlocked, reg[0x10]=0x%x \n", val);
+//	if(state == 1)
+//		lidbg("video input source locked, reg[0x10]=0x%x \n", val);
+//	else
+//		lidbg("video input source unlocked, reg[0x10]=0x%x \n", val);
 
 	return state;
 }
@@ -273,26 +276,33 @@ int video_chip_init(int video_type)
 	int ret = 0;
 
 	lidbg("><><>< vehicle chip init ><><><\n");
+	video_init_cnt++;
 
-	switch(video_type){
-		case VIDEO_VEHICLE:
-		case VIDEO_DVR:
-		case VIDEO_AUX:
-		case VIDEO_TV:
-			ret = video_cvbs_init();
-			break;
-		case VIDEO_DVD:
-			ret = video_yuv_init();
-			break;
-		default:
-			break;
-	}
+	if(video_init_cnt > 5)
+		lidbg("px3 wait video signal timeout, init 7181 again.\n");
+
+	if((!video_bl_ctrl) || (video_init_cnt > 5)){
+		switch(video_type){
+			case VIDEO_VEHICLE:
+			case VIDEO_DVR:
+			case VIDEO_AUX:
+			case VIDEO_TV:
+				ret = video_cvbs_init();
+				break;
+			case VIDEO_DVD:
+				ret = video_yuv_init();
+				break;
+			default:
+				break;
+		}
+	}else
+		lidbg("vehicle chip init wait lcd on\n");
 
 	if(ret < 0)
 		lidbg("Vehicle chip init error\n");
 
 //	_video_black_enable();
-	ret = _video_source_state();
+//	ret = _video_source_state();
 
 	return ret;
 }
@@ -547,7 +557,7 @@ int _video_ad_hw_reset(void)
 	SOC_IO_Output(0, RK30_PIN3_PB5, 0);
 	msleep(100);
 	SOC_IO_Output(0, RK30_PIN3_PB5, 1);
-	msleep(100);
+	msleep(200);
 
 	return ret;
 }
@@ -589,6 +599,8 @@ void video_ops(int video_ops, int video_input_format)
 	switch (video_ops)
 	{
 	case VIDEO_OPS_OPEN:
+		video_bl_ctrl = 0;
+		video_init_cnt = 0;
 		lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_APP_OFF));
 		if(cur_video_format == VIDEO_INPUT_CVBS)
 			fs_file_write(VIDEO_NODE, false, "cvbs_open", 0, strlen("cvbs_open"));
@@ -602,6 +614,8 @@ void video_ops(int video_ops, int video_input_format)
 
 		break;
 	case VIDEO_OPS_CLOSE:
+		video_bl_ctrl = 0;
+		video_init_cnt = 0;
 		lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_APP_ON));
 		if(cur_video_format == VIDEO_INPUT_CVBS)
 			fs_file_write(VIDEO_NODE, false, "cvbs_close", 0, strlen("cvbs_close"));
@@ -793,28 +807,30 @@ static int thread_video_state(void *data)
 			video_state_check_cnt = 0;
 			lidbg(" *** video signal stability check ***\n");
 			while(1){
-				msleep(50);
+				msleep(10);
 //				lidbg(" *** %d %d %d***\n", video_unstable_flag, video_state_check_cnt, video_stable);
 				if(cur_video_format == VIDEO_INPUT_YUV){
 					if((video_unstable_flag == 0) && (lcd_state == 0)){
 							video_stable++;
 							video_state_check_cnt = 0;
 
-							if(video_stable > 5){
+							if(video_stable > 50){
 								lcd_state = 1;
 								video_stable = 0;
+								video_bl_ctrl = 1;
 								lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_APP_ON));
 								break;
 							}
 					}
 				}else if(cur_video_format == VIDEO_INPUT_CVBS){
-					if((video_unstable_flag == 0) && (video_ck_unmatched == 0) && (lcd_state == 0)){
+					if((_video_source_state() == 1) && (video_unstable_flag == 0) && (video_ck_unmatched == 0) && (lcd_state == 0)){
 							video_stable++;
 							video_state_check_cnt = 0;
 
-							if(video_stable > 5){
+							if(video_stable >50){
 								lcd_state = 1;
 								video_stable = 0;
+								video_bl_ctrl = 1;
 								lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_APP_ON));
 								break;
 							}
