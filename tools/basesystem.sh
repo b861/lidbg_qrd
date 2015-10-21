@@ -48,7 +48,7 @@ function git_add_push()
 	echo ==$FUNCNAME $1 $2 $3 $4
 	cd $1
 	git add .
-	git commit -am "$4"
+	git commit -am "$SYSTEM_PLATFORM平台:$4"
 	expect $DIR_TOOLS_PATH/push "$3" "$2"
 	expect $DIR_TOOLS_PATH/push "$3" "$2"
 	#gitk &
