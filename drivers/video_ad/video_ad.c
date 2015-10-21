@@ -176,6 +176,27 @@ int _video_get_format(void)
 	return VIDEO_FORMAT_NTSC;
 }
 
+int _video_source_state(void)
+{
+	int ret = 0;
+	int state = 0;
+	unsigned char val = 0;
+
+	ret = video_reg_get(0x10, &val);
+	if(ret < 0){
+		lidbg("video get source state error\n");
+		return ret;
+	}
+	state = val & 0x01;
+
+	if(state == 1)
+		lidbg("video input source locked, reg[0x10]=0x%x \n", val);
+	else
+		lidbg("video input source unlocked, reg[0x10]=0x%x \n", val);
+
+	return state;
+}
+
 int video_ad_get_format(void)
 {
 	int ret = 0;
@@ -271,6 +292,7 @@ int video_chip_init(int video_type)
 		lidbg("Vehicle chip init error\n");
 
 //	_video_black_enable();
+	ret = _video_source_state();
 
 	return ret;
 }
@@ -567,7 +589,7 @@ void video_ops(int video_ops, int video_input_format)
 	switch (video_ops)
 	{
 	case VIDEO_OPS_OPEN:
-		LCD_OFF;
+		lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_APP_OFF));
 		if(cur_video_format == VIDEO_INPUT_CVBS)
 			fs_file_write(VIDEO_NODE, false, "cvbs_open", 0, strlen("cvbs_open"));
 		else if(cur_video_format == VIDEO_INPUT_YUV)
@@ -580,7 +602,7 @@ void video_ops(int video_ops, int video_input_format)
 
 		break;
 	case VIDEO_OPS_CLOSE:
-		LCD_ON;
+		lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_APP_ON));
 		if(cur_video_format == VIDEO_INPUT_CVBS)
 			fs_file_write(VIDEO_NODE, false, "cvbs_close", 0, strlen("cvbs_close"));
 		else if(cur_video_format == VIDEO_INPUT_YUV)
@@ -781,7 +803,7 @@ static int thread_video_state(void *data)
 							if(video_stable > 5){
 								lcd_state = 1;
 								video_stable = 0;
-								LCD_ON;
+								lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_APP_ON));
 								break;
 							}
 					}
@@ -790,10 +812,10 @@ static int thread_video_state(void *data)
 							video_stable++;
 							video_state_check_cnt = 0;
 
-							if(video_stable > 10){
+							if(video_stable > 5){
 								lcd_state = 1;
 								video_stable = 0;
-								LCD_ON;
+								lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_APP_ON));
 								break;
 							}
 					}
@@ -803,7 +825,7 @@ static int thread_video_state(void *data)
 				if(video_state_check_cnt > 100){
 					lidbg(" *** video signal stability check timeout ***\n");
 					video_state_check_cnt = 0;
-					LCD_ON;
+					lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_APP_ON));
 					break;
 				}
 				video_state_check_cnt ++;
