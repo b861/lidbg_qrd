@@ -148,6 +148,8 @@ int thread_thermal(void *data)
 		while(1)
 		{
 			set_cpu_governor(0);
+			cur_temp = soc_temp_get();
+			lidbg("cpu_temp=%d,freq=%d\n",cur_temp,cpufreq_get(0));
 			ssleep(5);
 		}
 	}
