@@ -360,6 +360,7 @@ public class FlyBootService extends Service {
 
             if(originPmMode){
 	            delay(8000);
+	            mState = emState.Sleep;
             }
 
             LIDBG_PRINT(" ********** start fastboot ********** ");
@@ -644,7 +645,6 @@ public class FlyBootService extends Service {
 		LIDBG_PRINT("powerOffSystem step7");
 		if(originPmMode)
 			fbPm.goToSleep(SystemClock.uptimeMillis());
-		mState = emState.Sleep;
 		releaseWakeLock();
 		LIDBG_PRINT("powerOffSystem-");
 		// Intent iFinish = new Intent("FinishActivity");
