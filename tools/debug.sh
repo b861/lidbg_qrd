@@ -30,7 +30,7 @@ function debug_handle()
 	56)
 		soc_flash_recovery;;
 	57)
-		sudo fastboot reboot;;
+		sudo $DBG_TOOLS_PATH/fastboot reboot;;
 	58)
 		soc_flash_bootloader;;
 	*)

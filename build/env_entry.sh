@@ -312,7 +312,7 @@ case "$DBG_PLATFORM_ID" in
         export TEST_PACKAGE_PATH=//192.168.128.128/px3/升级包发布/专项测试包
         export REPOSITORY_WORK_BRANCH=PX3
         export SYSTEM_WORK_BRANCH=master
-        export MAKE_PAKG_NUM= ;;
+        export MAKE_PAKG_NUM=17;;
 
     	10)
 	export DBG_PLATFORM=msm8226

@@ -66,6 +66,7 @@ function soc_postbuild()
 	hostname > $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/etc/build_time.conf
 	date >> $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/etc/build_time.conf
 	git log --oneline | sed -n '1,5p' >> $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/etc/build_time.conf
+	#cp $DBG_OUT_PATH/su	$DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/xbin/su
 	echo "soc_build_all ok"
 	#if [ $DBG_PLATFORM = msm8226 ];then	
 	#	mmm $DBG_SYSTEM_DIR/system/core/libdiskconfig -B

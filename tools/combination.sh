@@ -62,7 +62,7 @@ function combination_handle()
         read -p "  提交说明：" commit
 	go_remote_test_branch && judge_which_combine_test && depository_make_package && remote_test_branch && new_branch_remove && copy_package_to_smb;;                
 	70)
-		soc_build_kernel && adb wait-for-devices reboot bootloader && soc_flash_kernel && sudo fastboot reboot;;
+		soc_build_kernel && adb wait-for-devices reboot bootloader && soc_flash_kernel && sudo $DBG_TOOLS_PATH/fastboot reboot;;
 	*)
 		echo
 
