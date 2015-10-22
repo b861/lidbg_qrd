@@ -278,10 +278,10 @@ int video_chip_init(int video_type)
 	lidbg("><><>< vehicle chip init ><><><\n");
 	video_init_cnt++;
 
-	if(video_init_cnt > 5)
+	if((video_init_cnt % 5) == 0)
 		lidbg("px3 wait video signal timeout, init 7181 again.\n");
 
-	if((!video_bl_ctrl) || (video_init_cnt > 5)){
+	if((!video_bl_ctrl) || ((video_init_cnt % 5) == 0)){
 		switch(video_type){
 			case VIDEO_VEHICLE:
 			case VIDEO_DVR:
