@@ -208,6 +208,12 @@ case "$USERS_ID" in
                 export BP_SOURCE_PATH=$DBG_PLATFORM_PATH/AMSS_M8974_40_R4120
                 export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/M8974AAAAANLYD4275
                 export RELEASE_REPOSITORY=$DBG_PLATFORM_PATH/8x26-release;;
+			9)
+                export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/px3
+                export RELEASE_REPOSITORY=$DBG_PLATFORM_PATH/px3-release;;
+	                11)
+                export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/msm8909
+                export RELEASE_REPOSITORY=$DBG_PLATFORM_PATH/8909-release;;
         esac;;
 	 5)  
         export DBG_PLATFORM_PATH=/home2/chenchangsheng
