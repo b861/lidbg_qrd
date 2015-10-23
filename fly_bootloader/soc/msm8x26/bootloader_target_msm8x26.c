@@ -36,7 +36,7 @@ struct bootloader_hw_config g_hw_info[] =
 			.lpc_scl = 7,
 		},
 		
-		.dbg_uart_port = "console=ttyHSL0,115200,n8 ",
+		.dbg_uart_port = "console=ttyHSL0,115200,n8 androidboot.console=ttyHSL0 ",
 	},
 	//msm8974
 	{
@@ -72,7 +72,7 @@ struct bootloader_hw_config g_hw_info[] =
 			.lpc_scl = 3,
 		},
 
-		.dbg_uart_port = "console=ttyHSL0,115200,n8 ",
+		.dbg_uart_port = "console=ttyHSL0,115200,n8 androidboot.console=ttyHSL0 ",
 	},
 	//msm8909
 	{
@@ -108,6 +108,6 @@ struct bootloader_hw_config g_hw_info[] =
 			.lpc_scl = 30,
 		},
 		
-		.dbg_uart_port = "console=ttyHSL1,115200,n8 ",
+		.dbg_uart_port = "console=ttyHSL1,115200,n8 androidboot.console=ttyHSL1 ",
 	}
 };

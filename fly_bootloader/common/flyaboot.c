@@ -424,9 +424,12 @@ void flyaboot_init(unsigned *boot_into_recovery,bool *boot_into_fastboot)
 	*/
 
 	if(!*boot_into_recovery){
+	#if ((defined BOOTLOADER_MSM8226) || (defined BOOTLOADER_MSM8974) || (defined BOOTLOADER_MSM8909))
+			show_logo();
+			backlight_enable();
+	#else
 			memset(fb_base_get()+fly_screen_w*(fly_screen_h-30)*FBCON_BPP/8,0x00,fly_screen_w*30*FBCON_BPP/8);
-		       //show_logo();
-		       //backlight_enable();
+	#endif
 	}
 	else{
 		fly_setBcol(WHITE_COL);
