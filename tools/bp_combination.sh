@@ -132,6 +132,9 @@ function bp_combination_handle()
     79)
 	source setenv.sh
 	build_all_handle;;
+    80)
+	echo "creat efs_mbn"
+	creat_efs;;
     *)
         echo
     esac
@@ -187,5 +190,6 @@ function bp_combine_menu()
     echo [77] ln out ap image'                    'ln -s AP/out bp/LINUX/android/out
     echo [78] update bp info'                     '汇总编译NON-HLOS.bin
     echo [79] build ALL'                          '编译全部
+    echo [80] creat fastboot img of qcn'          '产生发fastboot可烧写mbn镜像
 }
 

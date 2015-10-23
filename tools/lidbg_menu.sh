@@ -174,5 +174,6 @@ git config gc.auto 0
 . $DBG_TOOLS_PATH/common.sh
 . $DBG_TOOLS_PATH/branch_for_test.sh
 . $DBG_TOOLS_PATH/bp_combination.sh
+. $DBG_TOOLS_PATH/creat_efs.sh
 auto_build $1 $2 $3 $4 $5;
 
