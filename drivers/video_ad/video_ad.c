@@ -161,6 +161,175 @@ int video_yuv_init(void)
 	return ret;
 }
 
+int _video_gaina_get(void)
+{
+	int ret = 0;
+	int gain = 0;
+	unsigned char val1 = 0;
+	unsigned char val2 = 0;
+
+	ret = video_reg_get(0x73, &val1);
+	val1 = val1 & 0x3f;			//A_GAIN[9:4] - 0x73[5:0]
+	ret = video_reg_get(0x74, &val2);
+	val2 = (val2 >> 4) & 0x0f;		//A_GAIN[3:0] - 0x74[7:4]
+
+	gain = (val1 << 4) | val2;
+
+	lidbg("video gain_a = 0x%x\n", gain);
+
+	return ret;
+}
+
+int _video_gainb_get(void)
+{
+	int ret = 0;
+	int gain = 0;
+	unsigned char val1 = 0;
+	unsigned char val2 = 0;
+
+	ret = video_reg_get(0x74, &val1);
+	val1 = val1 & 0x0f;			//B_GAIN[9:6] - 0x74[3:0]
+	ret = video_reg_get(0x75, &val2);
+	val2 = (val2 >> 2) & 0x3f;		//B_GAIN[5:0] - 0x75[7:2]
+
+	gain = (val1 << 6) | val2;
+
+	lidbg("video gain_b = 0x%x\n", gain);
+
+	return ret;
+}
+
+int _video_gainc_get(void)
+{
+	int ret = 0;
+	int gain = 0;
+	unsigned char val1 = 0;
+	unsigned char val2 = 0;
+
+	ret = video_reg_get(0x75, &val1);
+	val1 = val1 & 0x03;			//C_GAIN[9:8] - 0x75[1:0]
+	ret = video_reg_get(0x76, &val2);
+	val2 = val2 & 0xff;			//C_GAIN[7:0] - 0x76[7:0]
+
+	gain = (val1 << 8) | val2;
+
+	lidbg("video gain_c = 0x%x\n", gain);
+
+	return ret;
+}
+
+int _video_cha_gain(int gain)
+{
+	int ret = 0;
+	unsigned char val1 = 0;
+	unsigned char val2 = 0;
+
+	lidbg("video gain_set gain_a = 0x%x\n", gain);
+
+	ret = video_reg_get(0x73, &val1);
+	ret = video_reg_get(0x74, &val2);
+
+	val1 &= 0xc0;		//store 0x73[7:6]
+	val2 &= 0x0f;		//store 0x74[3:0]
+
+	val1 = val1 | ((gain >> 4) & 0x3f);			//A_GAIN[9:4] - 0x73[5:0]
+	val2 = val2 | (gain & 0x0f);					//A_GAIN[3:0] - 0x74[7:4]
+
+	ret = video_reg_set(0x73, val1);
+	ret = video_reg_set(0x74, val2);
+
+	return ret;
+}
+
+int _video_chb_gain(int gain)
+{
+	int ret = 0;
+	unsigned char val1 = 0;
+	unsigned char val2 = 0;
+
+	lidbg("video gain_set gain_b = 0x%x\n", gain);
+
+	ret = video_reg_get(0x74, &val1);
+	ret = video_reg_get(0x75, &val2);
+
+	val1 &= 0xf0;		//store 0x74[7:4]
+	val2 &= 0x03;		//store 0x75[1:0]
+
+	val1 = val1 | ((gain >> 6) & 0x0f);		//B_GAIN[9:6] - 0x74[3:0]
+	val2 = val2 | (gain & 0x3f);				//B_GAIN[5:0] - 0x75[7:2]
+
+	ret = video_reg_set(0x74, val1);
+	ret = video_reg_set(0x75, val2);
+
+	return ret;
+}
+
+int _video_chc_gain(int gain)
+{
+	int ret = 0;
+	unsigned char val1 = 0;
+	unsigned char val2 = 0;
+
+	lidbg("video gain_set gain_c = 0x%x\n", gain);
+
+	ret = video_reg_get(0x74, &val1);
+	ret = video_reg_get(0x75, &val2);
+
+	val1 &= 0xfc;		//store 0x75[7:2]
+
+	val1 = val1 | ((gain >> 8) & 0x03);	//C_GAIN[9:8] - 0x75[1:0]
+	val2 = gain & 0xff;				//C_GAIN[7:0] - 0x76[7:0]
+
+	ret = video_reg_set(0x75, val1);
+	ret = video_reg_set(0x76, val2);
+
+	return ret;
+}
+
+int _video_gain_auto(void)
+{
+	int ret = 0;
+	unsigned char val;
+
+	ret = video_reg_get(VIDEO_REG_GAIN_CTRL, &val);
+	val &= 0x3f; //bit[7:6] = 00
+
+	ret = video_reg_set(VIDEO_REG_GAIN_CTRL, val);
+	if(ret < 0)
+		lidbg("video gain auto error\n");
+
+	return ret;
+}
+
+int _video_gain_manual(void)
+{
+	int ret = 0;
+	unsigned char val;
+
+	ret = video_reg_get(VIDEO_REG_GAIN_CTRL, &val);
+	val |= 0xc0; //bit[7:6] = 11
+
+	ret = video_reg_set(VIDEO_REG_GAIN_CTRL, val);
+	if(ret < 0)
+		lidbg("video gain manual error\n");
+
+	return ret;
+}
+
+int _video_gain_mode(int mode)
+{
+	int ret = 0;
+
+	if(mode == VIDEO_GAIN_AUTO)
+		ret = _video_gain_auto();
+	else if(mode == VIDEO_GAIN_MANUAL)
+		ret = _video_gain_manual();
+	else
+		lidbg("video gain mode unknown\n");
+
+	return ret;
+}
+
 int _video_get_format(void)
 {
 	char val = 0;
@@ -407,27 +576,16 @@ void _video_img_format(int img_level, int img_type)
 			switch (img_type)
 			{
 				case VIDEO_BRIGHTNESS:
-					img_config[VIDEO_BRIGHTNESS][0] = img_yuv[VIDEO_BRIGHTNESS][0];
-					img_config[VIDEO_BRIGHTNESS][1] = VIDEO_IMAGE_YUV[VIDEO_BRIGHTNESS][img_level];
-					lidbg("video YUV img level[%d], brightness[reg-0x%x]::: 0x%x \n", img_level, img_config[VIDEO_BRIGHTNESS][0], img_config[VIDEO_BRIGHTNESS][1]);
+					_video_cha_gain(VIDEO_IMAGE_YUV[VIDEO_BRIGHTNESS][img_level]);
 					break;
 				case VIDEO_CONTRAST:
-					img_config[VIDEO_CONTRAST][0] = img_yuv[VIDEO_CONTRAST][0];
-					img_config[VIDEO_CONTRAST][1] = VIDEO_IMAGE_YUV[VIDEO_CONTRAST][img_level];
-					lidbg("video YUV img level[%d], contrast[reg-0x%x]::: 0x%x \n", img_level, img_config[VIDEO_CONTRAST][0], img_config[VIDEO_CONTRAST][1]);
+					_video_cha_gain(VIDEO_IMAGE_YUV[VIDEO_CONTRAST][img_level]);
 					break;
 				case VIDEO_SATURATION_U:
-					img_config[VIDEO_SATURATION_U][0] = img_yuv[VIDEO_SATURATION_U][0];
-					img_config[VIDEO_SATURATION_V][0] = img_yuv[VIDEO_SATURATION_V][0];
-					img_config[VIDEO_SATURATION_U][1] = VIDEO_IMAGE_YUV[VIDEO_SATURATION_U][img_level];
-					img_config[VIDEO_SATURATION_V][1] = VIDEO_IMAGE_YUV[VIDEO_SATURATION_V][img_level];
-					lidbg("video YUV img level[%d], saturation_u[reg-0x%x]::: 0x%x \n", img_level, img_config[VIDEO_SATURATION_U][0], img_config[VIDEO_SATURATION_U][1]);
-					lidbg("video YUV img level[%d], saturation_v[reg-0x%x]::: 0x%x \n", img_level, img_config[VIDEO_SATURATION_V][0], img_config[VIDEO_SATURATION_V][1]);
+					_video_chb_gain(VIDEO_IMAGE_YUV[VIDEO_SATURATION_U][img_level]);
 					break;
 				case VIDEO_HUE:
-					img_config[VIDEO_HUE][0] = img_yuv[VIDEO_HUE][0];
-					img_config[VIDEO_HUE][1] = VIDEO_IMAGE_YUV[VIDEO_HUE][img_level];
-					lidbg("video YUV img level[%d], hue[reg-0x%x]::: 0x%x \n", img_level, img_config[VIDEO_HUE][0], img_config[VIDEO_HUE][1]);
+					_video_chc_gain(VIDEO_IMAGE_YUV[VIDEO_HUE][img_level]);
 					break;
 				default:
 					break;
@@ -486,7 +644,8 @@ int _video_ad_img(char *config, char *par)
 	}else
 		lidbg("Error: undefined[%s] vehicle value to set\n", config);
 
-	_video_img_set(set_flag, img_type);
+	if(cur_video_format == VIDEO_INPUT_CVBS)
+		_video_img_set(set_flag, img_type);
 
 	return ret;
 }
