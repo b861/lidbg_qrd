@@ -381,7 +381,7 @@ case "$DBG_PLATFORM_ID" in
 	export RPM_FILE_PATH=$RPM_PATH/ms/bin/AAAAANAAR
 	export SBL_FILE_PATH=$BOOT_IMAGE_PATH/bin/8x26
 	export TZ_FILE_PATH=$TZ_PATH/bin/FARAANBA
-	export MPSS_BUILD_CMD='./build.sh 8909.gen.prod -k'
+	export MPSS_BUILD_CMD='./build.sh 8909.genns.prod -k'
 	export BOOTLOADER_BUILD_CMD='./build.sh TARGET_FAMILY=8909 --prod -j1'
 	export RPM_BUILD_CMD='./rpm_proc/build/build_8909.sh -j1'
 	export TZ_BUILD_CMD='./build.sh CHIPSET=msm8909 tz sampleapp tzbsp_no_xpu playready widevine keymaster commonlib -j1'
