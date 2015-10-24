@@ -8,6 +8,7 @@
 	    static char *white_list[] =
 	    {
 		"qpnp_kpdpwr_status",
+		"play",
 		NULL,
 	    };
 	    static int irqall = 0, irqskipd = 0, j = 0;
@@ -21,13 +22,13 @@
 			printk( KERN_CRIT  "wakeupirq.name.protect:%d/%d[%s]\n", irqskipd, irqall, desc->action->name);
 			break;
 		    }
-		    else
-		    {
-		        irqskipd++;
-		        printk( KERN_CRIT  "wakeupirq.name.skip:%d/%d[%s]\n", irqskipd, irqall, desc->action->name);
-		        irq_put_desc_busunlock(desc, flags);
-		        return 0;
-		    }
+		}
+		if (white_list[j] == NULL)
+		{
+		    irqskipd++;
+		    printk( KERN_CRIT  "wakeupirq.name.skip:%d/%d[%s]\n", irqskipd, irqall, desc->action->name);
+		    irq_put_desc_busunlock(desc, flags);
+		    return 0;
 		}
 	    }
 	    else
