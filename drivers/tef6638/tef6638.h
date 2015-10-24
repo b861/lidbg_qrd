@@ -66,7 +66,7 @@
 
 #define 	TEF6638_GPIO_RST          (LPC)  //no use
 
-#define 	TEF6638_I2C_ADDR	      0xC6
+#define 	TEF6638_I2C_ADDR	      0x63
 
 #define     TEF6638_ADDR_W	      0xC6
 #define     TEF6638_ADDR_R		      0xC7

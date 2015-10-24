@@ -51,7 +51,7 @@ static char *lmk_white_list[] =
 		for(j = 0; lmk_white_list[j] != NULL; j++)
 		{
 	
-			if (strncmp(p->comm, lmk_white_list[j], sizeof(lmk_white_list[j]) - 1) == 0)
+			if (strncmp(p->comm, lmk_white_list[j], strlen(lmk_white_list[j]) - 1) == 0)
 			{
 				pr_debug("lmkp:protect %s\n",lmk_white_list[j]);
 				skip = 1;
