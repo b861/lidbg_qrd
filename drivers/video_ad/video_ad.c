@@ -16,6 +16,7 @@ LIDBG_DEFINE;
 #define VIDEO_NODE "/dev/px3_vehicle"
 
 static int video_format = 0;
+static int cur_video_ch = VIDEO_UNKNOWN;
 static int cur_video_state = VIDEO_OPS_UNKNOWN;
 static int cur_video_format = VIDEO_INPUT_UNKNOW;
 static int video_bl_ctrl = 0;
@@ -119,6 +120,207 @@ int video_reg_get(int reg, char *data)
 	}
 	else
 		return ret;
+}
+
+int _video_adc_mux_manual(int flag)
+{
+	int ret = 0;
+	unsigned char val;
+
+	ret = video_reg_get(VIDEO_REG_ADC_SWITCH2, &val);
+
+	if(flag){
+		val |= 0x10; //bit[7] = 1, enable manual
+		lidbg("Video adc mux manual enable.\n");
+	}else{
+		val &= 0x7f; //bit[7] = 0, disable manual
+		lidbg("Video adc mux manual disable.\n");
+	}
+
+	ret = video_reg_set(VIDEO_REG_GAIN_CTRL, val);
+	if(ret < 0)
+		lidbg("video gain manual error\n");
+
+	return ret;
+}
+
+int _video_adc_mode(int ad_mode)
+{
+	int ret = 0;
+
+	switch(ad_mode){
+			case VIDEO_ADC_AUTO:
+				ret = _video_adc_mux_manual(DISABLE);
+				break;
+			case VIDEO_ADC_MANUAL:
+				ret = _video_adc_mux_manual(ENABLE);
+				break;
+			default:
+				lidbg("Uknoen video adc mux mode.\n");
+				break;
+	}
+
+	return ret;
+}
+
+int _video_cvbs_ain_enable(int ain)
+{
+	int ret = 0;
+	unsigned char val = 0;
+
+	ret = video_reg_get(VIDEO_REG_AIN_SEL, &val);
+	if(ret < 0){
+		lidbg("Video ain enable get reg error .\n");
+		return ret;
+	}
+
+	switch(ain){
+		case VIDEO_INPUT_CH_AIN1:	//cvbs on AIN1
+			val = (val & 0xf0) | 0x0b;
+			break;
+		case VIDEO_INPUT_CH_AIN3:	//cvbs on AIN3
+			val = (val & 0xf0) | 0x01;
+			break;
+		case VIDEO_INPUT_CH_AIN4:	//cvbs on AIN4
+			val = (val & 0xf0) | 0x0d;
+			break;
+		case VIDEO_INPUT_CH_AIN5:	//cvbs on AIN5
+			val = (val & 0xf0) | 0x02;
+			break;
+		case VIDEO_INPUT_CH_AIN6:	//cvbs on AIN6
+			val = (val & 0xf0) | 0x03;
+			break;
+		case VIDEO_INPUT_CH_AIN7:	//cvbs on AIN7
+			val = (val & 0xf0) | 0x0f;
+			break;
+		case VIDEO_INPUT_CH_AIN8:	//cvbs on AIN8
+			val = (val & 0xf0) | 0x04;
+			break;
+		case VIDEO_INPUT_CH_AIN10:	//cvbs on AIN10
+			val = (val & 0xf0) | 0x05;
+			break;
+		default:
+			break;
+	}
+
+	ret = video_reg_set(VIDEO_REG_AIN_SEL, val);
+
+	return ret;
+}
+
+int _video_adc_map(int ain, int reg, int offset)
+{
+	int ret = 0;
+	unsigned char val = 0;
+	unsigned char ain_sel= 0;
+
+	switch(ain){
+		case VIDEO_INPUT_CH_AIN1:
+			ain_sel = VIDEO_ADC_SEL_AIN1;
+			break;
+		case VIDEO_INPUT_CH_AIN2:
+			ain_sel = VIDEO_ADC_SEL_AIN2;
+			break;
+		case VIDEO_INPUT_CH_AIN3:
+			ain_sel = VIDEO_ADC_SEL_AIN3;
+			break;
+		case VIDEO_INPUT_CH_AIN4:
+			ain_sel = VIDEO_ADC_SEL_AIN4;
+			break;
+		case VIDEO_INPUT_CH_AIN5:
+			ain_sel = VIDEO_ADC_SEL_AIN5;
+			break;
+		case VIDEO_INPUT_CH_AIN6:
+			ain_sel = VIDEO_ADC_SEL_AIN6;
+			break;
+		case VIDEO_INPUT_CH_AIN7:
+			ain_sel = VIDEO_ADC_SEL_AIN7;
+			break;
+		case VIDEO_INPUT_CH_AIN8:
+			ain_sel = VIDEO_ADC_SEL_AIN8;
+			break;
+		case VIDEO_INPUT_CH_AIN9:
+			ain_sel = VIDEO_ADC_SEL_AIN9;
+			break;
+		case VIDEO_INPUT_CH_AIN10:
+			ain_sel = VIDEO_ADC_SEL_AIN10;
+			break;
+		default:
+			break;
+	}
+
+	ret = video_reg_get(reg, &val);
+	if(ret < 0){
+		lidbg("Video adc map get reg error .\n");
+		return ret;
+	}
+
+//	lidbg("Video adc map set  ain_sel=0x%x, offset=0x%x, 0x%x=0x%x.\n", ain_sel, offset, reg ,val);
+	val = (val & (0x0f << (4 - offset))) | (ain_sel << offset);
+//	lidbg("Video adc map set reg[0x%x]: 0x%x .\n", reg, val);
+
+	ret = video_reg_set(reg, val);
+	if(ret < 0){
+		lidbg("Video adc map get reg error .\n");
+		return ret;
+	}
+
+	return ret;
+}
+
+int _video_source_mux(int ain, int ad_ch)
+{
+	int ret = 0;
+
+//	lidbg("Video mux set AIN-%d > ADC-%d .\n", (ain + 1), ad_ch);
+	switch(ad_ch){
+		case VIDEO_INPUT_MUX_ADC0:		//AIN[1,2,3,4,5,6,7,8,9,10]
+			ret = _video_adc_map(ain, VIDEO_REG_ADC0_SWITCH, VIDEO_REG_ADC0_OFFSET);
+			break;
+		case VIDEO_INPUT_MUX_ADC1:		//AIN[4,5,6,7,8,9,10]
+			ret = _video_adc_map(ain, VIDEO_REG_ADC1_SWITCH, VIDEO_REG_ADC1_OFFSET);
+			break;
+		case VIDEO_INPUT_MUX_ADC2:		//AIN[3,,6,7,8,9,10]
+			ret = _video_adc_map(ain, VIDEO_REG_ADC2_SWITCH, VIDEO_REG_ADC2_OFFSET);
+			break;
+		case VIDEO_INPUT_MUX_ADC3:		//AIN[1,6]
+			ret = _video_adc_map(ain, VIDEO_REG_ADC3_SWITCH, VIDEO_REG_ADC3_OFFSET);
+			break;
+		default:
+			break;
+	}
+
+	return ret;
+}
+
+int _video_route_set(int video_type)
+{
+	int ret = 0;
+	DUMP_FUN;
+
+	_video_adc_mode(VIDEO_ADC_MANUAL);
+
+	switch(video_type){
+		case VIDEO_VEHICLE:		//AIN1, ADC0
+			ret = _video_source_mux(VIDEO_INPUT_CH_AIN1, VIDEO_INPUT_MUX_ADC0);
+			ret = _video_cvbs_ain_enable(VIDEO_INPUT_CH_AIN1);
+			break;
+		case VIDEO_DVR:			//AIN4, ADC0
+		case VIDEO_AUX:
+		case VIDEO_TV:
+			ret = _video_source_mux(VIDEO_INPUT_CH_AIN4, VIDEO_INPUT_MUX_ADC0);
+			ret = _video_cvbs_ain_enable(VIDEO_INPUT_CH_AIN4);
+			break;
+		case VIDEO_DVD:			//Pb-AIN6,ADC2, Pr-AIN8,ADC1, Y-AIN10,ADC0
+			ret = _video_source_mux(VIDEO_INPUT_CH_AIN6, VIDEO_INPUT_MUX_ADC2);
+			ret = _video_source_mux(VIDEO_INPUT_CH_AIN8, VIDEO_INPUT_MUX_ADC1);
+			ret = _video_source_mux(VIDEO_INPUT_CH_AIN10, VIDEO_INPUT_MUX_ADC0);
+			break;
+		default:
+			break;
+	}
+
+	return ret;
 }
 
 int video_cvbs_init(void)
@@ -445,27 +647,23 @@ int video_chip_init(int video_type)
 	int ret = 0;
 
 	lidbg("><><>< vehicle chip init ><><><\n");
-	video_init_cnt++;
 
-	if((video_init_cnt % 5) == 0)
+	if((video_init_cnt > 0) && ((video_init_cnt % 5) == 0))
 		lidbg("px3 wait video signal timeout, init 7181 again.\n");
 
 	if((!video_bl_ctrl) || ((video_init_cnt % 5) == 0)){
-		switch(video_type){
-			case VIDEO_VEHICLE:
-			case VIDEO_DVR:
-			case VIDEO_AUX:
-			case VIDEO_TV:
-				ret = video_cvbs_init();
-				break;
-			case VIDEO_DVD:
-				ret = video_yuv_init();
-				break;
-			default:
-				break;
-		}
+		if((video_type == VIDEO_VEHICLE) || (video_type == VIDEO_DVR) || (video_type == VIDEO_AUX) || (video_type == VIDEO_TV)){
+			ret = video_cvbs_init();
+		}else if(video_type == VIDEO_DVD){
+			ret = video_yuv_init();
+		}else
+			lidbg("vehicle chip unknown video type.\n");
+
+		_video_route_set(cur_video_ch);
 	}else
 		lidbg("vehicle chip init wait lcd on\n");
+
+	video_init_cnt++;
 
 	if(ret < 0)
 		lidbg("Vehicle chip init error\n");
@@ -573,6 +771,7 @@ void _video_img_format(int img_level, int img_type)
 			}
 			break;
 		case VIDEO_INPUT_YUV:
+			_video_gain_mode(VIDEO_GAIN_MANUAL);
 			switch (img_type)
 			{
 				case VIDEO_BRIGHTNESS:
@@ -858,6 +1057,7 @@ int _video_cmds_do(char *cmd)
 //		ret = video_chip_init(video_type);
 //		_video_black_enable();
 //	}
+	cur_video_ch = video_type;
 	cur_video_state = vidoe_ops;
 	cur_video_format = video_format;
 	video_ops(vidoe_ops, video_format);
