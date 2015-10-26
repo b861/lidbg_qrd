@@ -103,6 +103,7 @@ static int lidbg_event(struct notifier_block *this,
 		GPS_POWER_OFF;
         break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_ANDROID_DOWN):
+		MSM_DSI83_DISABLE;
 		#ifdef DISABLE_USB_WHEN_ANDROID_DOWN
 		CREATE_KTHREAD(thread_usb_disk_disable_delay, NULL);
 		#endif

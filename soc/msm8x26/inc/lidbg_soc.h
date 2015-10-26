@@ -163,7 +163,7 @@ struct io_int_config
 #elif defined(PLATFORM_msm8909)
 #define SOC_TARGET_PATH "../../soc/msm8x26/lidbg_target_msm8909.c"
 #endif
-#define SOC_TARGET_DEFINE_PATH "lidbg_target_msm8x26.h"
+#define SOC_TARGET_DEFINE_PATH "lidbg_target_qcom.h"
 
 //#define LIDBG_GPIO_PULLDOWN  GPIO_PULLDOWN
 

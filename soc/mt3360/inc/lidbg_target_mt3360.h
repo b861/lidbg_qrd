@@ -96,6 +96,9 @@
 #define AD_KEY_PORT_R   (37)//(g_hw.ap_key_right)
 
 
+#define MSM_DSI83_DISABLE do{\
+	}while(0)
+
 #define FLY_GPS_SO  "gps.msm8226.so"
 
 
