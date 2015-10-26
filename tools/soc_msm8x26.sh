@@ -47,7 +47,7 @@ function soc_build_common()
 {
 	echo $FUNCNAME $1 $2 $3
 	cd $DBG_SYSTEM_DIR
-	soc_prebuild && $1 $2 $3
+	set_env && $1 $2 $3
 }
 
 function soc_build_all()
