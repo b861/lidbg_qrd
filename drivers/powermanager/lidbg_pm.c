@@ -713,6 +713,7 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
 }
 ssize_t  pm_read(struct file *filp, char __user *buffer, size_t size, loff_t *offset)
 {
+#if 0
     char acc_state[128 + 8] = {0};
     sprintf(acc_state, "%s%d", g_acc_history_state, sleep_counter);
     if (copy_to_user(buffer, acc_state, strlen(acc_state)))
@@ -720,6 +721,12 @@ ssize_t  pm_read(struct file *filp, char __user *buffer, size_t size, loff_t *of
         lidbg("copy_to_user ERR\n");
     }
     PM_WARN("<%s>\n", acc_state);
+#else
+    if (copy_to_user(buffer,  &g_var.system_status,  4))
+    {
+        lidbg("copy_to_user ERR\n");
+    }
+#endif
     return size;
 }
 
