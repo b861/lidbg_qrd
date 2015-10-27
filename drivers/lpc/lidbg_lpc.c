@@ -52,8 +52,10 @@ struct fly_hardware_info
 
 };
 struct lpc_device *dev;
-#define  MCU_ADDR_W  0xA0
-#define  MCU_ADDR_R  0xA1
+//#define  MCU_ADDR_W  0xA0
+//#define  MCU_ADDR_R  0xA1
+//7 bit i2c addr
+#define  MCU_ADDR ( 0x50)
 
 int lpc_ping_test = 0;
 int lpc_ctrl_by_app = 0;
@@ -158,7 +160,7 @@ void LPCCombinDataStream(BYTE *p, UINT len)
 #ifdef SEND_DATA_WITH_UART
     ret=SOC_Uart_Send(buf);
 #else
-    ret=SOC_I2C_Send(LPC_I2_ID, MCU_ADDR_W >> 1, buf, 3 + i + 1);
+    ret=SOC_I2C_Send(LPC_I2_ID, MCU_ADDR, buf, 3 + i + 1);
 #endif
 
 #ifdef LPC_DEBUG_LOG
@@ -314,7 +316,7 @@ BOOL actualReadFromMCU(BYTE *p, UINT length)
 		BYTE iReadLen = 128;
 		int read_cnt,fifo_len;
         pr_debug("-------recovery_irq-------\n");
-		read_cnt = SOC_I2C_Rec_Simple(LPC_I2_ID, MCU_ADDR_R >> 1, buff, iReadLen);
+		read_cnt = SOC_I2C_Rec_Simple(LPC_I2_ID, MCU_ADDR, buff, iReadLen);
         down(&dev->sem);		
 		kfifo_in(&lpc_data_fifo, buff,iReadLen); 
 		if(kfifo_is_full(&lpc_data_fifo))
@@ -336,7 +338,7 @@ BOOL actualReadFromMCU(BYTE *p, UINT length)
     }
     else
 	{
-    SOC_I2C_Rec_Simple(LPC_I2_ID, MCU_ADDR_R >> 1, p, length);
+    SOC_I2C_Rec_Simple(LPC_I2_ID, MCU_ADDR >> 1, p, length);
     if (readFromMCUProcessor(p, length))
     {
 
@@ -496,7 +498,7 @@ static ssize_t lpc_write(struct file *filp, const char __user *buf,
 		lidbg("copy_from_user ERR\n");
 	}
 	
-    write_cnt = SOC_I2C_Send(LPC_I2_ID, MCU_ADDR_W >> 1, mem, size);
+    write_cnt = SOC_I2C_Send(LPC_I2_ID, MCU_ADDR, mem, size);
 	kfree(mem);
 	return write_cnt;
 }
