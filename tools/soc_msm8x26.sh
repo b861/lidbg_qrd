@@ -108,7 +108,7 @@ fi
 
 	rm -rf $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system
 	rm -rf $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/root
-	rm -rf $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/obj/ETC/init.lidbg.rc_intermediates
+	rm -rf $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/obj/ETC
 	rm -rf $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/obj/EXECUTABLES/vold_intermediates
 
 	set_env
