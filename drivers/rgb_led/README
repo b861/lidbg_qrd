@@ -2,12 +2,12 @@
 本驱动提供/dev/rgb_led0设备节点以供HAL层做写操作，直接写入字符串命令解析即可。
 读取字符串命令格式：
 1. rgb [red] [blue] [green]————RGB输出（独立占空比可调，max_255）：
-	$ echo "rgb 255 0 0" > /dev/rgb_led0
+	$ echo "rgb 255 0 0" > /dev/lidbg_rgb_led0
 2. init————初始化（开启PWM控制，开启OSL）：
-	$ echo "init" > /dev/rgb_led0
+	$ echo "init" > /dev/lidbg_rgb_led0
 3. stop————休眠（关闭PWM输出，关闭OSL）：
-	$ echo "stop" > /dev/rgb_led0
+	$ echo "stop" > /dev/lidbg_rgb_led0
 4. reset————软复位：
-	$ echo "reset" > /dev/rgb_led0
+	$ echo "reset" > /dev/lidbg_rgb_led0
 5. play————七彩渐变程序：
-	$ echo "play" > /dev/rgb_led0
+	$ echo "play" > /dev/lidbg_rgb_led0

@@ -157,6 +157,8 @@ ssize_t pca9634_write (struct file *filp, const char __user *buf, size_t size, l
 
 	if(!strcmp(cmd[0], "play"))
 	{
+		play_switch = 0;
+		PCA9634_Reset();
 		play_switch = 1;
 		CREATE_KTHREAD(thread_rgb_play, NULL);
 	}
@@ -334,11 +336,11 @@ static int rgb_led_probe(struct platform_device *pdev)
 	lidbg("PCA9634 init start!\n");
 	if(PCA9634_Init())
 	{
-		lidbg_new_cdev(&pca9634_fops, "rgb_led");//add cdev
-		lidbg("rgb_led init succeed!\n");
+		lidbg_new_cdev(&pca9634_fops, "lidbg_rgb_led");//add cdev
+		lidbg("lidbg_rgb_led init succeed!\n");
 	}	
 	else
-		lidbg("rgb_led init failed!\n");
+		lidbg("lidbg_rgb_led init failed!\n");
 	
 	return 0;
 
