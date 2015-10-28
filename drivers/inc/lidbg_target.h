@@ -81,6 +81,7 @@ struct hw_version_specific
 	int i2c_bus_saf7741;
 	int i2c_bus_tef6638;
 	int i2c_bus_lpc;
+	int i2c_bus_pca9634;
 
 //ad
 	struct ad_key_remap ad_key[4];
@@ -123,6 +124,9 @@ extern struct hw_version_specific g_hw_version_specific[];
 
 //6638
 #define TEF6638_I2C_BUS  (g_hw.i2c_bus_tef6638)
+
+//PCA9634
+#define PCA9634_I2C_BUS  (g_hw.i2c_bus_pca9634)
 
 //lpc
 #define  LPC_I2_ID        (g_hw.i2c_bus_lpc)

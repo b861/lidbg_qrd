@@ -21,6 +21,7 @@ struct hw_version_specific g_hw_version_specific[] =
 	.gpio_gps_rst = RK30_PIN1_PA3,
 	.i2c_bus_ts = 2,
 	.i2c_bus_tef6638 = 3,
+	.i2c_bus_pca9634 = 2,
 	.fly_parameter_node = "/dev/block/platform/emmc/by-name/flyparameter",
 	.ad_val_mcu = 1,
 	.gpio_int_mcu_i2c_request = RK30_PIN0_PB7 ,

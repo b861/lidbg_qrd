@@ -37,6 +37,7 @@ struct hw_version_specific g_hw_version_specific[] =
 	.i2c_bus_saf7741 = 5,
 	.i2c_bus_tef6638 = -1,
 	.i2c_bus_lpc = 0,
+	.i2c_bus_pca9634 = 5,
 
 	.ad_key = 
 	{
