@@ -11,3 +11,12 @@
 	$ echo "reset" > /dev/lidbg_rgb_led0
 5. play————七彩渐变程序：
 	$ echo "play" > /dev/lidbg_rgb_led0
+
+蓝牙拨号界面密码控制：
+输入： *#*#158045[mode]#*#*
+[mode]为模式选择参数，具体参数定义如下：
+1. rgb 输出红色（255，0，0）
+2. 初始化（开启PWM控制，开启OSL）
+3. 休眠（关闭PWM输出，关闭OSL）
+4. 软复位
+5. 七彩渐变程序

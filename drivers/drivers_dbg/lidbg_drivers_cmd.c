@@ -224,6 +224,7 @@ void parse_cmd(char *pt)
 		    fs_mem_log("*158#042--disable adb\n");
 		    fs_mem_log("*158#043--enable adb\n");
 		    fs_mem_log("*158#044--start SleepTest acc test,可带参数,如*158#0448010\n");
+		    fs_mem_log("*158#045--start RGB LED test,可带参数,如*158#0451\n");
 			
             fs_mem_log("*158#051--LOG_LOGCAT2\n");
 
@@ -518,6 +519,29 @@ void parse_cmd(char *pt)
 			sprintf(s,"am start -n com.example.sleeptest/com.example.sleeptest.SleepTest --ei time %s",(argv[1]+8));	
 			lidbg_shell_cmd(s);
 			lidbg("cmd : %s",s);
+	}
+
+	else if (!strncmp(argv[1], "*158#045", 8))
+        {
+			//opt args,ex:*158#0450
+			int n;
+			n = strlen(argv[1]);
+			if(n != 9)//wrong args
+			{
+				lidbg("wrong args!");
+				return;
+			}
+			lidbg("--------RGB_LED MODE:%s-----------",argv[1]+8);
+			if(!strcmp((argv[1]+8), "1"))
+				fs_file_write2("/dev/lidbg_rgb_led0", "rgb 255 0 0");
+			else if(!strcmp((argv[1]+8), "2"))
+				fs_file_write2("/dev/lidbg_rgb_led0", "init");
+			else if(!strcmp((argv[1]+8), "3"))
+				fs_file_write2("/dev/lidbg_rgb_led0", "stop");
+			else if(!strcmp((argv[1]+8), "4"))
+				fs_file_write2("/dev/lidbg_rgb_led0", "reset");
+			else if(!strcmp((argv[1]+8), "5"))
+				fs_file_write2("/dev/lidbg_rgb_led0", "play");
 	}
 		
         else if (!strcmp(argv[1], "*168#001"))
