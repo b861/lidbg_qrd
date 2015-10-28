@@ -18,7 +18,7 @@ void judgment_list_print(void)
     size = ARRAY_SIZE(judgment_list);
     for(cunt = 0; cunt < size; cunt++)
     {
-        LIDBG_WARN("judgment:%d<%s,%d>\n", cunt, judgment_list[cunt].key , judgment_list[cunt].value);
+        LIDBG_WARN("%d<%s,%d>\n", cunt, judgment_list[cunt].key , judgment_list[cunt].value);
     }
 }
 void judgment_list_init(void)
@@ -83,7 +83,7 @@ int get_judgment_list_value(char *key)
     }
     return -2;
 }
-//return =-1 means not judgment cmd and should not skip  but else  ... 
+//return =-1 means not judgment cmd and should not skip  but else  ...
 int judgment_cmd(char *judgmentcmd, int *judgmenttimes)
 {
     //example: ?PLFID=1||Factory=1:belowCmd=3
@@ -91,7 +91,7 @@ int judgment_cmd(char *judgmentcmd, int *judgmenttimes)
     // 1:if it is enabled ,just return;
     if(*judgmenttimes > 0)
     {
-        LIDBG_WARN("judgment:judgmenttimes = %d <skip.%s>\n", *judgmenttimes, judgmentcmd);
+        LIDBG_WARN("judgmenttimes = %d <skip.%s>\n", *judgmenttimes, judgmentcmd);
         (*judgmenttimes)--;
         goto err_judgment_cmd;
     };
@@ -99,20 +99,20 @@ int judgment_cmd(char *judgmentcmd, int *judgmenttimes)
     if(*(judgmentcmd) == '?' && strstr(judgmentcmd, ":") != NULL)
     {
         char * or , * and ;
-        LIDBG_WARN("judgment:valid cmd======= <%s>============\n",  judgmentcmd);
+        LIDBG_WARN("valid cmd======= <%s>============\n",  judgmentcmd);
         lidbgstrtrim(judgmentcmd);
-        LIDBG_WARN("judgment:after lidbgstrtrim <%s>\n", judgmentcmd);
+        LIDBG_WARN("after lidbgstrtrim <%s>\n", judgmentcmd);
         judgmentcmd += 1; //skip '?'
         or = strstr(judgmentcmd, "||");
         and = strstr(judgmentcmd, "&&");
-        if( ( or != NULL && and != NULL) || ( or == NULL && and == NULL))
+        if( or != NULL && and != NULL)
         {
-            LIDBG_WARN("judgment:or ,and == NULL <%s,%d,%d>\n",  judgmentcmd, or == NULL, and == NULL);
+            LIDBG_WARN("or ,and == NULL <%s,%d,%d>\n",  judgmentcmd, or == NULL, and == NULL);
             goto err_judgment_cmd;
         }
 
         lidbg_strrpl(judgmentcmd, or != NULL ? "||" : "&&", or != NULL ? "|" : "&");
-        LIDBG_WARN("judgment:after lidbg_strrpl <%s>\n",  judgmentcmd);
+        LIDBG_WARN("after lidbg_strrpl <%s>\n",  judgmentcmd);
         //get judgmenttimes
         {
             char *arg[8] = {NULL};
@@ -121,11 +121,11 @@ int judgment_cmd(char *judgmentcmd, int *judgmenttimes)
             {
                 *str1 = '\0'; //del string below ':'
                 *judgmenttimes = simple_strtoul(arg[1], 0, 0);
-                LIDBG_WARN("judgment:set judgmenttimes<%s,%d,%d,%d>\n", judgmentcmd, *judgmenttimes, or != NULL, and != NULL);
+                LIDBG_WARN("set judgmenttimes<%s,%d,%d,%d>\n", judgmentcmd, *judgmenttimes, or != NULL, and != NULL);
             }
             else
             {
-                LIDBG_WARN("judgment:get judgmenttimes err<%s>\n", judgmentcmd);
+                LIDBG_WARN("get judgmenttimes err<%s>\n", judgmentcmd);
                 goto err_judgment_cmd;
             }
         }
@@ -138,40 +138,51 @@ int judgment_cmd(char *judgmentcmd, int *judgmenttimes)
             int cmd_num = lidbg_token_string(judgmentcmd, or != NULL ? "|" : "&" , arg) ;
             for(loops = 0; loops < cmd_num; loops++)
             {
-                LIDBG_WARN("judgment:%d/%d.start toke:<%s>\n", loops, cmd_num, arg[loops]);
+                LIDBG_WARN("%d/%d.start toke:<%s>\n", loops, cmd_num, arg[loops]);
                 if(arg[loops] && lidbg_token_string(arg[loops], "=", arg2) == 2)
                 {
                     judgmentvalue = get_judgment_list_value(arg2[0]);
                     if(judgmentvalue == -2)
                     {
-                        LIDBG_WARN("judgment:error unknown judgment <%s>\n", arg2[0]);
+                        LIDBG_WARN("error unknown judgment <%s>\n", arg2[0]);
                         goto err_judgment_cmd;
                     }
                     tokenvalue = simple_strtoul(arg2[1], 0, 0);
 
-                    LIDBG_WARN("<judgment:%d/%d. check :[%s,%d,%d]>\n", loops, cmd_num, arg2[0], tokenvalue, judgmentvalue);
+                    LIDBG_WARN("<%d/%d. check :[%s,%d,%d]>\n", loops, cmd_num, arg2[0], tokenvalue, judgmentvalue);
 
                     //check
-                    if( or != NULL)
+                    if( or != NULL || ( or == NULL && and == NULL))
                     {
                         if( tokenvalue == judgmentvalue)
                         {
-                            LIDBG_WARN("judgment:<judgment OK [||]>\n");
+                            LIDBG_WARN("<judgment OK [||]>\n");
                             goto judgment_cmd_succes;
                         }
+                        if(loops == cmd_num - 1)
+                        {
+                            LIDBG_WARN("<judgment error [||]>\n");
+                            goto err_judgment_cmd;
+                        }
                     }
-                    else
+
+                    if( and != NULL)
                     {
                         if( tokenvalue != judgmentvalue)
                         {
-                            LIDBG_WARN("judgment:<judgment error [&&]>\n");
+                            LIDBG_WARN("<judgment error [&&]>\n");
                             goto err_judgment_cmd;
+                        }
+                        if(loops == cmd_num - 1)
+                        {
+                            LIDBG_WARN("<judgment OK [&&]>\n");
+                            goto judgment_cmd_succes;
                         }
                     }
                 }
                 else if(arg[loops] != NULL)
                 {
-                    LIDBG_WARN("judgment:toke judgment string  err<%s>\n", arg[loops]);
+                    LIDBG_WARN("toke judgment string  err<%s>\n", arg[loops]);
                     goto judgment_cmd_succes;
                 }
             }
@@ -243,6 +254,7 @@ bool analyze_list_cmd(struct list_head *client_list)
             else
             {
                 msleep(100);
+                //LIDBG_WARN("exe<%s>\n", pos->yourkey);
                 lidbg_shell_cmd(pos->yourkey);
             }
 
