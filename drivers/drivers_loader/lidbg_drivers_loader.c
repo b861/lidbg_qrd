@@ -9,7 +9,7 @@ struct judgment
     int value;
 } judgment_list[] =
 {
-    {"PLFID", -1},
+    {"platform_id", -1},
     {"Factory", -1},
 };
 void judgment_list_print(void)
@@ -201,7 +201,6 @@ not_judgment_cmd:
 judgment_cmd_succes:
     *judgmenttimes = 0;
     return -2;
-
 }
 
 bool analyze_list_cmd(struct list_head *client_list)
