@@ -224,8 +224,10 @@ void parse_cmd(char *pt)
 		    fs_mem_log("*158#042--disable adb\n");
 		    fs_mem_log("*158#043--enable adb\n");
 		    fs_mem_log("*158#044--start SleepTest acc test,可带参数,如*158#0448010\n");
-		    fs_mem_log("*158#045--start RGB LED test,可带参数,如*158#0451\n");
-			
+		    fs_mem_log("*158#045x--start RGB LED test,可带参数,如*158#0451\n");
+		    fs_mem_log("*158#046--set cpu run in performance mode\n");
+		    fs_mem_log("*158#047--set cpu run in powersave mode\n");
+	
             fs_mem_log("*158#051--LOG_LOGCAT2\n");
 
             show_password_list();
@@ -543,7 +545,16 @@ void parse_cmd(char *pt)
 			else if(!strcmp((argv[1]+8), "5"))
 				fs_file_write2("/dev/lidbg_rgb_led0", "play");
 	}
-		
+        else if (!strcmp(argv[1], "*158#046"))
+        {
+			set_cpu_governor(1);
+			
+        }
+        else if (!strcmp(argv[1], "*158#047"))
+        {
+			set_cpu_governor(0);
+			
+        }	
         else if (!strcmp(argv[1], "*168#001"))
         {
             encode = true;

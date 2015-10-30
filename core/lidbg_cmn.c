@@ -72,6 +72,7 @@ void set_cpu_governor(int state)
         len = sprintf(buf, "%s", "powersave");
 
     }
+    lidbg_chmod("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor");
     lidbg_readwrite_file("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor", NULL, buf, len);
 }
 
