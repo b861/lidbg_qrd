@@ -271,7 +271,7 @@ int iSOC_Get_CpuFreq(void)
 
 int iSOC_Temp_Get(void)
 {
-	return soc_temp_get();
+	return soc_temp_get(g_hw.mem_sensor_num);
 }
 
 

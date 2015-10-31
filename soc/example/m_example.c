@@ -6,7 +6,7 @@
 struct fly_smem *p_fly_smem = NULL;
 
 
-int soc_temp_get(void)
+int soc_temp_get(int num)
 {
 	static long temp=-1;
 	return (int)temp;

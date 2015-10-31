@@ -42,6 +42,11 @@ struct hw_version_specific g_hw_version_specific[] =
 		.i2c_bus_pca9634 = 4,
 		.ad_val_mcu = 1,
 		.fly_parameter_node = "/dev/block/platform/7824900.sdhci/by-name/flyparameter",
+
+		// msm8909.dtsi  qcom,sensor-information
+		.cpu_sensor_num = 3,
+		.mem_sensor_num = 0,
+	
 		 .ad_key = 
 		{
 		{   

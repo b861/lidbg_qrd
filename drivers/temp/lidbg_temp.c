@@ -64,7 +64,7 @@ void log_temp(void)
 
     static int old_temp = 0, cur_temp = 0;
     int tmp;
-    g_var.temp = cur_temp = soc_temp_get();
+    g_var.temp = cur_temp = soc_temp_get(g_hw.mem_sensor_num);
     tmp = cur_temp - old_temp;
 
 	if(
@@ -88,7 +88,7 @@ int thread_show_temp(void *data)
 	{
 		//char cpufrq[50];
 		//int tmp = cpufreq_get(0);
-		int cur_temp = soc_temp_get();
+		int cur_temp = soc_temp_get(g_hw.mem_sensor_num);
 		//sprintf(cpufrq, "%d", tmp);
 		//lidbg_toast_show(cpufrq, cur_temp);
         lidbg( "%d,%d,%d\n", cur_temp, get_scaling_max_freq(),cpufreq_get(0));
@@ -148,7 +148,7 @@ int thread_thermal(void *data)
 		while(1)
 		{
 			set_cpu_governor(0);
-			cur_temp = soc_temp_get();
+			cur_temp = soc_temp_get(g_hw.cpu_sensor_num);
 			lidbg("cpu_temp=%d,freq=%d\n",cur_temp,cpufreq_get(0));
 			ssleep(5);
 		}
@@ -168,7 +168,7 @@ int thread_thermal(void *data)
 			set_cpu_governor(0);
 			ssleep(5);
 			cpu_freq = SOC_Get_CpuFreq();
-			cur_temp = soc_temp_get();
+			cur_temp = soc_temp_get(g_hw.mem_sensor_num);
 			lidbg("cpufreq=%d,temp=%d\n", cpu_freq,cur_temp);
 		}
 	}
@@ -184,7 +184,7 @@ int thread_thermal(void *data)
 	set_system_performance(2);
 #endif
 	msleep(1000*40);//wait boot_freq_ctrl finish
-	cur_temp = soc_temp_get();
+	cur_temp = soc_temp_get(g_hw.mem_sensor_num);
 	lidbg("lidbg freq ctrl start,%d,%d\n",cur_temp,get_scaling_max_freq());
 
 	if(cpu_temp_show == 1)
@@ -195,7 +195,7 @@ int thread_thermal(void *data)
         msleep(500);
 
         log_temp();
-        cur_temp = soc_temp_get();
+        cur_temp = soc_temp_get(g_hw.mem_sensor_num);
 		pr_debug("cpu_temp=%d,freq=%d,max_freq=%d\n",cur_temp,cpufreq_get(0),max_freq);
 
 //fan ctrl
@@ -313,7 +313,7 @@ int thread_start_cpu_tmp_test(void *data)
     {
         int cur_temp;
         int_time_count++;
-        cur_temp = soc_temp_get();
+        cur_temp = soc_temp_get(g_hw.cpu_sensor_num);
         fs_string2file(100, TEMP_FREQ_TEST_RESULT, "%d,temp=%d,time=%d,freq=%s:\n", freq_pos, cur_temp, int_time_count * 2, group[freq_pos]);
         lidbg("%d,temp=%d,time=%d,freq=%s:\n", freq_pos, cur_temp, int_time_count * 2, group[freq_pos]);
         msleep(1000);
@@ -376,8 +376,9 @@ void temp_init(void)
 
 ssize_t  temp_read(struct file *filp, char __user *buffer, size_t size, loff_t *offset)
 {
+#if 0
 	int temp_val;
-	temp_val = soc_temp_get(); 
+	temp_val = soc_temp_get(g_hw.mem_sensor_num); 
 	if(size>4)
 		size=4;
  	if (copy_to_user(buffer,&temp_val, size))
@@ -385,6 +386,16 @@ ssize_t  temp_read(struct file *filp, char __user *buffer, size_t size, loff_t *
 		lidbg("copy_to_user ERR\n");
 	}	   
 	return size;
+#else
+    char buff[16] = {0};
+    sprintf(buff, "%d %d",soc_temp_get(g_hw.mem_sensor_num),soc_temp_get(g_hw.cpu_sensor_num));
+    if (copy_to_user(buffer, buff, strlen(buff)))
+    {
+        lidbg("copy_to_user ERR\n");
+    } 
+	return size;
+
+#endif
 }
 
 ssize_t  temp_write (struct file *filp, const char __user *buf, size_t size, loff_t *ppos)

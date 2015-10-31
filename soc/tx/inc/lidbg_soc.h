@@ -234,7 +234,7 @@ int soc_io_config(u32 index, int func,u32 direction,  u32 pull, u32 drive_streng
 int soc_io_suspend_config(u32 index, u32 direction, u32 pull, u32 drive_strength);
 int soc_io_suspend(void);
 int soc_io_resume(void);
-int soc_temp_get(void);
+int soc_temp_get(int num);
 void lidbg_soc_main(int argc, char **argv);
 
 ///////////////////////////////////////

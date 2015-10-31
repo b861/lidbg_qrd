@@ -6,14 +6,27 @@
 struct fly_smem *p_fly_smem = NULL;
 
 
-int soc_temp_get(void)
+int soc_temp_get(int num)
 {
 	static long temp;
 	static struct tsens_device tsens_dev;
-	//{"tsens_tz_sensor5", "cpu0-1" },
-	//{"tsens_tz_sensor1", "cpu2-3" },
-	//{"tsens_tz_sensor3", "pop_mem" },
-	tsens_dev.sensor_num = 3;
+	
+/*    8974
+	{"tsens_tz_sensor5", "cpu0" },
+	{"tsens_tz_sensor6", "cpu1" },
+	{"tsens_tz_sensor7", "cpu2" },
+	{"tsens_tz_sensor8", "cpu3" },
+	{"tsens_tz_sensor3", "pop_mem" },
+*/
+
+/*   8x26
+	{"tsens_tz_sensor5", "cpu0-1" },
+	{"tsens_tz_sensor2", "cpu2-3" },
+	{"tsens_tz_sensor3", "pop_mem" },
+*/
+
+
+	tsens_dev.sensor_num = num;
 	tsens_get_temp(&tsens_dev, &temp);
 #if 0
 	lidbg("\n");

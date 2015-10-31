@@ -79,8 +79,9 @@ struct hw_version_specific g_hw_version_specific[] =
 	.cpu_freq_temp_node = "/sys/class/thermal/thermal_zone5/temp",
 	.gpu_max_freq_node = "/sys/class/kgsl/kgsl-3d0/max_gpuclk",
 	.cpu_freq_recovery_limit = "600000",
-	.sensor_num = 5,
-
+	.cpu_sensor_num = 5,
+	.mem_sensor_num = 3,
+	
 	.fly_parameter_node = "/dev/block/platform/msm_sdcc.1/by-name/flyparameter",
 	.system_switch_en = 1,
 
@@ -161,8 +162,8 @@ struct hw_version_specific g_hw_version_specific[] =
 	.cpu_freq_temp_node = "/sys/class/thermal/thermal_zone5/temp",
 	.gpu_max_freq_node = "/sys/class/kgsl/kgsl-3d0/max_gpuclk",
 	.cpu_freq_recovery_limit = "600000",
-	.sensor_num = 5,
-	
+	.cpu_sensor_num = 5,
+	.mem_sensor_num = 3,	
 	.fly_parameter_node = "/dev/block/platform/msm_sdcc.1/by-name/flyparameter",
 	
 	.system_switch_en = 1,
@@ -206,6 +207,7 @@ struct hw_version_specific g_hw_version_specific[] =
 	.i2c_bus_saf7741 = 5,
 	.i2c_bus_lpc = 0,
 	.i2c_bus_pca9634 = 5,
+	
 	.ad_val_mcu = 0,
 
 	.ad_key = 
@@ -275,7 +277,8 @@ struct hw_version_specific g_hw_version_specific[] =
 	.cpu_freq_temp_node = "/sys/class/thermal/thermal_zone5/temp",
 	.gpu_max_freq_node = "/sys/class/kgsl/kgsl-3d0/max_gpuclk",
 	.cpu_freq_recovery_limit = "600000",
-	.sensor_num = 5,
+	.cpu_sensor_num = 5,
+	.mem_sensor_num = 3,
 	.fan_onoff_temp = 90,
 
 	.fly_parameter_node = "/dev/block/platform/msm_sdcc.1/by-name/flyparameter",
@@ -322,7 +325,6 @@ struct hw_version_specific g_hw_version_specific[] =
 	.i2c_bus_saf7741 = 5,
 	.i2c_bus_lpc = 0,
 	.i2c_bus_pca9634 = 5,
-
 
 	.ad_key = 
 	{
@@ -378,7 +380,8 @@ struct hw_version_specific g_hw_version_specific[] =
 	.cpu_freq_temp_node = "/sys/class/thermal/thermal_zone5/temp",
 	.gpu_max_freq_node = "/sys/class/kgsl/kgsl-3d0/max_gpuclk",
 	.cpu_freq_recovery_limit = "600000",
-	.sensor_num = 5,
+	.cpu_sensor_num = 5,
+	.mem_sensor_num = 3,
 	.fan_onoff_temp = 90,
 
 	.fly_parameter_node = "/dev/block/platform/msm_sdcc.1/by-name/flyparameter",
