@@ -9,6 +9,7 @@
 	    {
 		"qpnp_kpdpwr_status",
 		"play",
+		"qcom,smd-modem",
 		NULL,
 	    };
 	    static int irqall = 0, irqskipd = 0, j = 0;

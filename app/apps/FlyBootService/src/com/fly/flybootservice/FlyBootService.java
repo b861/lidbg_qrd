@@ -265,16 +265,23 @@ public class FlyBootService extends Service {
     Runnable ealysuspend = new Runnable() {
         @Override
         public void run() {
-            // 发送广播
-            SendBroadcastToService(KeyBootState, keyEearlySusupendOFF);
-            LIDBG_PRINT("Device Off [enterAirplaneMode]");
-            sendBroadcast(new Intent(ACC_OFF_FLYUI));
-			
-            enterAirplaneMode();			
-            writeToFile(file, DEVICES_DOWN);
-            delay(500);
-            sleppHandler.postDelayed(runnable, ALERM_TIME * 1000);
-            mState = emState.DeviceOff;
+		// 发送广播
+		SendBroadcastToService(KeyBootState, keyEearlySusupendOFF);
+		LIDBG_PRINT("Device Off [enterAirplaneMode]");
+		sendBroadcast(new Intent(ACC_OFF_FLYUI));
+
+		final boolean booleanRemoteControl = SystemProperties.getBoolean("persist.lidbg.RmtCtrlenable",false);
+		if(booleanRemoteControl == true){
+			LIDBG_PRINT("Flyaudio Remote-Control enabled, booleanRemoteControl:"+booleanRemoteControl);
+		}else{
+			enterAirplaneMode();
+			LIDBG_PRINT("Flyaudio Remote-Control disabled, booleanRemoteControl:"+booleanRemoteControl);
+		}
+
+		writeToFile(file, DEVICES_DOWN);
+		delay(500);
+		sleppHandler.postDelayed(runnable, ALERM_TIME * 1000);
+		mState = emState.DeviceOff;
         }
     };
 

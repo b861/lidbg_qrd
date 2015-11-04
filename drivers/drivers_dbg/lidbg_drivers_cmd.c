@@ -555,6 +555,16 @@ void parse_cmd(char *pt)
 			set_cpu_governor(0);
 			
         }	
+        else if (!strcmp(argv[1], "*158#048"))
+        {
+		lidbg("**********set RmtCtrlenable false**********\n");
+		lidbg_shell_cmd("setprop persist.lidbg.RmtCtrlenable false");
+        }
+        else if (!strcmp(argv[1], "*158#049"))
+        {
+		lidbg("**********set RmtCtrlenable true**********\n");
+		lidbg_shell_cmd("setprop persist.lidbg.RmtCtrlenable true");
+        }
         else if (!strcmp(argv[1], "*168#001"))
         {
             encode = true;
