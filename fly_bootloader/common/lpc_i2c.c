@@ -51,6 +51,8 @@ static void lpc_i2c_config()
 
 	gpio_set_direction(g_bootloader_hw.lpc_info.lpc_sda,GPIO_OUTPUT);
 	gpio_set_direction(g_bootloader_hw.lpc_info.lpc_scl,GPIO_OUTPUT);
+        gpio_set_val(g_bootloader_hw.lpc_info.lpc_sda, 1);
+        gpio_set_val(g_bootloader_hw.lpc_info.lpc_scl, 1);
 	lpc_i2c_devp = malloc(sizeof(struct i2c_gpio_dev));
 	if (!lpc_i2c_devp) {
 		dprintf(INFO, "Malloc space for lpc_i2c_devp failed.\n");

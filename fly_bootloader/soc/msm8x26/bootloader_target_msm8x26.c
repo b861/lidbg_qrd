@@ -31,7 +31,7 @@ struct bootloader_hw_config g_hw_info[] =
 		},
 
 		.lpc_info = {
-			.lpc_slave_add = 0xa0,
+			.lpc_slave_add = 0x50,
 			.lpc_sda = 6,
 			.lpc_scl = 7,
 		},
@@ -67,7 +67,7 @@ struct bootloader_hw_config g_hw_info[] =
 		},
 
 		.lpc_info = {
-			.lpc_slave_add = 0xa0,
+			.lpc_slave_add = 0x50,
 			.lpc_sda = 2,
 			.lpc_scl = 3,
 		},
@@ -103,7 +103,7 @@ struct bootloader_hw_config g_hw_info[] =
 		},
 
 		.lpc_info = {
-			.lpc_slave_add = 0xa0,
+			.lpc_slave_add = 0x50,
 			.lpc_sda = 29,
 			.lpc_scl = 30,
 		},

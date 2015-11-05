@@ -14,7 +14,7 @@ struct bootloader_hw_config g_hw_info[] =
 		},
 
 		.lpc_info = {
-			.lpc_slave_add = 0xa0,
+			.lpc_slave_add = 0x50,
 			.lpc_sda = 0x0118,//GPIO1_D0
 			.lpc_scl = 0x0119,//GPIO1_D1
 		},
