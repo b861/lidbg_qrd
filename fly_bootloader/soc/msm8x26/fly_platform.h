@@ -65,6 +65,10 @@
 #include <arch/ops.h>
 #endif
 
+#ifdef BOOTLOADER_MSM8909
+#include <stdint.h>
+#endif
+
 #ifdef BOOTLOADER_MSM8226
 #define BOARD_VERSION 0
 #endif

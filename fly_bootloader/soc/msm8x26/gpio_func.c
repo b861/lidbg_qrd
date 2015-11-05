@@ -1,6 +1,5 @@
-#include <platform/gpio.h>
 #include "../soc.h"
-
+#include <platform/gpio.h>
 /*
 * dir: 0 in, 1 out
 */
