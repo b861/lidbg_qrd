@@ -13,6 +13,7 @@ struct uevent_dev
 LIST_HEAD(uevent_list);
 struct miscdevice lidbg_uevent_device;
 int uevent_dbg = 0;
+struct mutex lock;
 
 
 bool uevent_focus(char *focus, void(*callback)(char *focus, char *uevent))
@@ -35,8 +36,10 @@ void uevent_send(enum kobject_action action, char *envp_ext[])
 {
     if(uevent_dbg)
 		LIDBG_WARN("%s,%s\n", (envp_ext[0] == NULL ? "null" : envp_ext[0]), (envp_ext[1] == NULL ? "null" : envp_ext[1]));
+    mutex_lock(&lock);
     if(kobject_uevent_env(&lidbg_uevent_device.this_device->kobj, action, envp_ext) < 0)
         LIDBG_ERR("uevent_send\n");
+    mutex_unlock(&lock);
 }
 
 void uevent_shell(char *shell_cmd)
@@ -103,6 +106,7 @@ static int __init lidbg_uevent_init(void)
     LIDBG_WARN("lidbg_uevent_init\n");
     if (misc_register(&lidbg_uevent_device))
         LIDBG_ERR("misc_register\n");
+    mutex_init(&lock);
     return 0;
 }
 
