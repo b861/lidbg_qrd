@@ -83,52 +83,40 @@ int get_judgment_list_value(char *key)
     }
     return -2;
 }
-//return =-1 means not judgment cmd and should not skip  but else  ...
-int judgment_cmd(char *judgmentcmd, int *judgmenttimes)
-{
-    //example: ?PLFID=1||Factory=1:belowCmd=3
 
-    // 1:if it is enabled ,just return;
-    if(*judgmenttimes > 0)
+bool judgment_cmd(char *judgmentcmd, int *judgmenttimes)
+{
+    //example: ?PLFID=1||Factory=1
+    //{
+    //code...
+    //}
+
+    if( *(judgmentcmd) == '{' || *(judgmentcmd) == '}' || *judgmenttimes > 0)
     {
-        LIDBG_WARN("judgmenttimes = %d <skip.%s>\n", *judgmenttimes, judgmentcmd);
-        (*judgmenttimes)--;
-        goto err_judgment_cmd;
+        if(*(judgmentcmd) == '}' )
+            (*judgmenttimes) = 0;
+        if(*(judgmentcmd) != '{' && *(judgmentcmd) != '}' )
+            LIDBG_WARN("judgmenttimes = %d <skip.%s>\n", *judgmenttimes, judgmentcmd);
+        goto skip_current_cmd;
     };
     // 2:check the cmd
-    if(*(judgmentcmd) == '?' && strstr(judgmentcmd, ":") != NULL)
+    if(*(judgmentcmd) == '?')
     {
         char * or , * and ;
-        LIDBG_WARN("valid cmd======= <%s>============\n",  judgmentcmd);
+        //LIDBG_WARN("valid cmd======= <%s>============\n",  judgmentcmd);
         lidbgstrtrim(judgmentcmd);
-        LIDBG_WARN("after lidbgstrtrim <%s>\n", judgmentcmd);
+        //LIDBG_WARN("after lidbgstrtrim <%s>\n", judgmentcmd);
         judgmentcmd += 1; //skip '?'
         or = strstr(judgmentcmd, "||");
         and = strstr(judgmentcmd, "&&");
         if( or != NULL && and != NULL)
         {
             LIDBG_WARN("or ,and == NULL <%s,%d,%d>\n",  judgmentcmd, or == NULL, and == NULL);
-            goto err_judgment_cmd;
+            goto skip_current_cmd;
         }
 
         lidbg_strrpl(judgmentcmd, or != NULL ? "||" : "&&", or != NULL ? "|" : "&");
-        LIDBG_WARN("after lidbg_strrpl <%s>\n",  judgmentcmd);
-        //get judgmenttimes
-        {
-            char *arg[8] = {NULL};
-            char *str1 = strstr(judgmentcmd, ":");
-            if(lidbg_token_string(str1 + 1, "=", arg) == 2)
-            {
-                *str1 = '\0'; //del string below ':'
-                *judgmenttimes = simple_strtoul(arg[1], 0, 0);
-                LIDBG_WARN("set judgmenttimes<%s,%d,%d,%d>\n", judgmentcmd, *judgmenttimes, or != NULL, and != NULL);
-            }
-            else
-            {
-                LIDBG_WARN("get judgmenttimes err<%s>\n", judgmentcmd);
-                goto err_judgment_cmd;
-            }
-        }
+        LIDBG_WARN("after lidbg_strrpl ===============<%s>\n",  judgmentcmd);
 
         //toke judgment string and have a check if it is true
         {
@@ -138,14 +126,14 @@ int judgment_cmd(char *judgmentcmd, int *judgmenttimes)
             int cmd_num = lidbg_token_string(judgmentcmd, or != NULL ? "|" : "&" , arg) ;
             for(loops = 0; loops < cmd_num; loops++)
             {
-                LIDBG_WARN("%d/%d.start toke:<%s>\n", loops, cmd_num, arg[loops]);
+                //LIDBG_WARN("%d/%d.start toke:<%s>\n", loops, cmd_num, arg[loops]);
                 if(arg[loops] && lidbg_token_string(arg[loops], "=", arg2) == 2)
                 {
                     judgmentvalue = get_judgment_list_value(arg2[0]);
                     if(judgmentvalue == -2)
                     {
                         LIDBG_WARN("error unknown judgment <%s>\n", arg2[0]);
-                        goto err_judgment_cmd;
+                        goto skip_current_cmd;
                     }
                     tokenvalue = simple_strtoul(arg2[1], 0, 0);
 
@@ -157,12 +145,12 @@ int judgment_cmd(char *judgmentcmd, int *judgmenttimes)
                         if( tokenvalue == judgmentvalue)
                         {
                             LIDBG_WARN("<judgment OK [||]>\n");
-                            goto judgment_cmd_succes;
+                            goto skip_current_cmd;
                         }
                         if(loops == cmd_num - 1)
                         {
                             LIDBG_WARN("<judgment error [||]>\n");
-                            goto err_judgment_cmd;
+                            goto start_skip_below_cmd;
                         }
                     }
 
@@ -171,36 +159,36 @@ int judgment_cmd(char *judgmentcmd, int *judgmenttimes)
                         if( tokenvalue != judgmentvalue)
                         {
                             LIDBG_WARN("<judgment error [&&]>\n");
-                            goto err_judgment_cmd;
+                            goto start_skip_below_cmd;
                         }
                         if(loops == cmd_num - 1)
                         {
                             LIDBG_WARN("<judgment OK [&&]>\n");
-                            goto judgment_cmd_succes;
+                            goto skip_current_cmd;
                         }
                     }
                 }
                 else if(arg[loops] != NULL)
                 {
                     LIDBG_WARN("toke judgment string  err<%s>\n", arg[loops]);
-                    goto judgment_cmd_succes;
+                    goto skip_current_cmd;
                 }
             }
-            goto judgment_cmd_succes;
+            goto skip_current_cmd;
         }
     }
     else
-        goto not_judgment_cmd;
+        goto not_volid_judgment_cmd;
 
-err_judgment_cmd:
-    return *judgmenttimes;
-
-not_judgment_cmd:
-    *judgmenttimes = 0;
-    return -1;
-judgment_cmd_succes:
-    *judgmenttimes = 0;
-    return -2;
+start_skip_below_cmd:
+    //initrc's cmd below current cmd will be skipped until meet the cmd '}'
+    *judgmenttimes = 1;
+skip_current_cmd:
+    //current cmd have sothing err, do not exe it and just skip.
+    return true;
+not_volid_judgment_cmd:
+    //current cmd is a commen cmd not a judgment cmd likes "?platform_id=11".
+    return false;
 }
 
 bool analyze_list_cmd(struct list_head *client_list)
@@ -219,12 +207,10 @@ bool analyze_list_cmd(struct list_head *client_list)
     {
         if(pos->yourkey)
         {
+            if(judgment_cmd(pos->yourkey, &judgmenttimes) )
+                continue;
             if(strlen(pos->yourkey) < 3)
                 goto drop;
-
-            if(judgment_cmd(pos->yourkey, &judgmenttimes) != -1)
-                continue;
-
             if(strncmp(pos->yourkey, "msleep", sizeof("msleep") - 1) == 0)
             {
                 cmd_num = lidbg_token_string(pos->yourkey, " ", cmd) ;
@@ -252,7 +238,7 @@ bool analyze_list_cmd(struct list_head *client_list)
 #endif
             else
             {
-                msleep(100);
+                //msleep(100);
                 //LIDBG_WARN("exe<%s>\n", pos->yourkey);
                 lidbg_shell_cmd(pos->yourkey);
             }
