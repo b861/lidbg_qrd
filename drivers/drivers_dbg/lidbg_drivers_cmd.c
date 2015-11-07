@@ -4,14 +4,14 @@
 
 int thread_log_temp(void *data)
 {
-	int tmp,cur_temp;
-	while(1)
-	{
-		tmp = cpufreq_get(0);
-		cur_temp = soc_temp_get(g_hw.cpu_sensor_num);
-        lidbg_fs_log(TEMP_LOG_PATH,  "%d,%d\n", cur_temp,cpufreq_get(0));
-		msleep(1000);
-	}
+    int tmp, cur_temp;
+    while(1)
+    {
+        tmp = cpufreq_get(0);
+        cur_temp = soc_temp_get(g_hw.cpu_sensor_num);
+        lidbg_fs_log(TEMP_LOG_PATH,  "%d,%d\n", cur_temp, cpufreq_get(0));
+        msleep(1000);
+    }
 }
 void cb_kv_log_temp(char *key, char *value)
 {
@@ -22,28 +22,26 @@ void cb_kv_log_temp(char *key, char *value)
 
 int thread_antutu_test(void *data)
 {
-	int cnt = 0;
-	ssleep(50);
+    int cnt = 0;
+    ssleep(50);
 #ifdef SOC_msm8x26
-	set_system_performance(1);
+    set_system_performance(1);
 #endif
 
-	while(1)
-	{
-		cnt++;
-		lidbg_fs_log(TEMP_LOG_PATH,"antutu test start: %d\n",cnt);
+    while(1)
+    {
+        cnt++;
+        lidbg_fs_log(TEMP_LOG_PATH, "antutu test start: %d\n", cnt);
 
-		//lidbg_shell_cmd("pm uninstall com.antutu.ABenchMark");
-		//lidbg_pm_install("/data/antutu.apk");
-		//ssleep(5);
-		
-		lidbg_shell_cmd("am start -n com.antutu.ABenchMark/com.antutu.ABenchMark.ABenchMarkStart");
-		ssleep(5);
-		lidbg_shell_cmd("am start -n com.antutu.ABenchMark/com.antutu.benchmark.activity.ScoreBenchActivity");
-		ssleep(60*5);// 4 min loop
-		
+        //lidbg_shell_cmd("pm uninstall com.antutu.ABenchMark");
+        //lidbg_pm_install("/data/antutu.apk");
+        //ssleep(5);
 
-	}
+        lidbg_shell_cmd("am start -n com.antutu.ABenchMark/com.antutu.ABenchMark.ABenchMarkStart");
+        ssleep(5);
+        lidbg_shell_cmd("am start -n com.antutu.ABenchMark/com.antutu.benchmark.activity.ScoreBenchActivity");
+        ssleep(60 * 5); // 4 min loop
+    }
 
 }
 bool set_wifi_adb_mode(bool on)
@@ -98,6 +96,51 @@ out:
     return 0;
 }
 
+static bool top_enabled = false;
+int thread_enable_top(void *data)
+{
+    int size, sizeold = 0;
+    if(top_enabled)
+        goto out;
+    top_enabled = true;
+    lidbg("top+\n");
+    lidbg_shell_cmd("rm /sdcard/top.txt");
+    lidbg_shell_cmd("rm /sdcard/top_old.txt");
+    ssleep(2);
+
+    lidbg_shell_cmd("date >/sdcard/top.txt");
+    ssleep(1);
+    lidbg_shell_cmd("chmod 777 /sdcard/top.txt");
+    ssleep(1);
+    lidbg_shell_cmd("top -t -m 10 > /sdcard/top.txt &");
+    while(1)
+    {
+        size = fs_get_file_size("/sdcard/top.txt") ;
+        if(size >= MEM_SIZE_1_MB * 300)
+        {
+            lidbg("file_len over\n");
+            lidbg_shell_cmd("rm /sdcard/top_old.txt");
+            ssleep(1);
+            lidbg_shell_cmd("cp -rf /sdcard/top.txt /sdcard/top_old.txt");
+            ssleep(5);
+            lidbg_shell_cmd("date > /sdcard/top.txt");
+            ssleep(1);
+            lidbg_shell_cmd("chmod 777 /sdcard/top.txt");
+        }
+        ssleep(60);
+        if(size == sizeold)
+        {
+            lidbg_shell_cmd("top -t -m 10 > /sdcard/top.txt &");
+            lidbg("run top again \n");
+        }
+        sizeold = size ;
+
+    }
+    lidbg("top-\n");
+out:
+    lidbg("top.skip\n");
+    return 0;
+}
 static bool dmesg_enabled = false;
 int thread_enable_dmesg(void *data)
 {
@@ -126,33 +169,31 @@ int thread_kmsg_fifo_save(void *data)
     return 0;
 }
 
-
 int thread_monkey_test(void *data)
 {
-	u32 loop = 0;
-	lidbg("monkey test start !\n"); 
-	while(1)
-	{
-		if(te_is_ts_touched())
-		{
-			lidbg_domineering_ack();
-			lidbg("thread_monkey_test:te_is_ts_touched.pause\n"); 
-			ssleep(60);
-			continue;
-		}
-		lidbg("monkey loop = %d\n",loop); 
-		loop++;
-		lidbg_shell_cmd("monkey --ignore-crashes --ignore-timeouts --throttle 300 500 &");
-		msleep(60*1000);
-	}
-	lidbg("thread_monkey_test end\n"); 
-
+    u32 loop = 0;
+    lidbg("monkey test start !\n");
+    while(1)
+    {
+        if(te_is_ts_touched())
+        {
+            lidbg_domineering_ack();
+            lidbg("thread_monkey_test:te_is_ts_touched.pause\n");
+            ssleep(60);
+            continue;
+        }
+        lidbg("monkey loop = %d\n", loop);
+        loop++;
+        lidbg_shell_cmd("monkey --ignore-crashes --ignore-timeouts --throttle 300 500 &");
+        msleep(60 * 1000);
+    }
+    lidbg("thread_monkey_test end\n");
     return 0;
 }
 
 irqreturn_t TEST_isr(int irq, void *dev_id)
 {
-    lidbg("TEST_isr================%d ",irq);
+    lidbg("TEST_isr================%d ", irq);
     return IRQ_HANDLED;
 }
 
@@ -214,20 +255,22 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#028--delete ublox so && reboot\n");
             fs_mem_log("*158#029--log cpu temp\n");
             fs_mem_log("*158#030--cpu top performance mode\n");
-		    fs_mem_log("*158#031--pr_debug GPS_val\n");
-		    fs_mem_log("*158#032--pr_debug AD_val\n");
-		    fs_mem_log("*158#033--pr_debug TS_val\n");
-		    fs_mem_log("*158#034--pr_debug cpu_temp\n");
-		    fs_mem_log("*158#035--pr_debug lowmemorykillprotecter\n");
-		    fs_mem_log("*158#040--monkey test\n");
-		    fs_mem_log("*158#041--disable uart debug\n");
-		    fs_mem_log("*158#042--disable adb\n");
-		    fs_mem_log("*158#043--enable adb\n");
-		    fs_mem_log("*158#044--start SleepTest acc test,可带参数,如*158#0448010\n");
-		    fs_mem_log("*158#045x--start RGB LED test,可带参数,如*158#0451\n");
-		    fs_mem_log("*158#046--set cpu run in performance mode\n");
-		    fs_mem_log("*158#047--set cpu run in powersave mode\n");
-	
+            fs_mem_log("*158#031--pr_debug GPS_val\n");
+            fs_mem_log("*158#032--pr_debug AD_val\n");
+            fs_mem_log("*158#033--pr_debug TS_val\n");
+            fs_mem_log("*158#034--pr_debug cpu_temp\n");
+            fs_mem_log("*158#035--pr_debug lowmemorykillprotecter\n");
+            fs_mem_log("*158#040--monkey test\n");
+            fs_mem_log("*158#041--disable uart debug\n");
+            fs_mem_log("*158#042--disable adb\n");
+            fs_mem_log("*158#043--enable adb\n");
+            fs_mem_log("*158#044--start SleepTest acc test,????,?*158#0448010\n");
+            fs_mem_log("*158#045x--start RGB LED test,????,?*158#0451\n");
+            fs_mem_log("*158#046--set cpu run in performance mode\n");
+            fs_mem_log("*158#047--set cpu run in powersave mode\n");
+            fs_mem_log("*158#048 flybootserver airplane disable\n");
+            fs_mem_log("*158#049 flybootserver airplane enable\n");
+            fs_mem_log("*158#050 enable top -t -m 10\n");
             fs_mem_log("*158#051--LOG_LOGCAT2\n");
 
             show_password_list();
@@ -244,49 +287,28 @@ void parse_cmd(char *pt)
         if (!strcmp(argv[1], "*158#999"))
         {
             char buff[50] = {0};
-			
             lidbg_shell_cmd("setenforce 0");
             lidbg_shell_cmd("cp /flysystem/lib/out/lidbg_udisk_shell.conf /dev/log/");
             lidbg_shell_cmd("chmod 777 /dev/log/lidbg_udisk_shell.conf");
-
             lidbg_pm_install(get_lidbg_file_path(buff, "fileserver.apk"));
             lidbg_pm_install(get_lidbg_file_path(buff, "MobileRateFlow.apk"));
             lidbg_domineering_ack();
-
         }
         else if (!strcmp(argv[1], "*158#001"))
         {
-			lidbg_chmod("/sdcard");
-			CREATE_KTHREAD(thread_enable_logcat2, NULL);
-			lidbg_domineering_ack();
+            lidbg_chmod("/sdcard");
+            CREATE_KTHREAD(thread_enable_logcat2, NULL);
+            lidbg_domineering_ack();
         }
-		else if (!strcmp(argv[1], "*158#051"))
-		{
-
-			lidbg_chmod("/data");
-
-#ifdef USE_CALL_USERHELPER
-			k2u_write(LOG_LOGCAT);
-#else
-			CREATE_KTHREAD(thread_enable_logcat, NULL);
-#endif
-			lidbg_domineering_ack();
-
-			
-		}
-
-		
         else if (!strcmp(argv[1], "*158#002"))
         {
             lidbg_chmod("/data");
-
 #ifdef USE_CALL_USERHELPER
             k2u_write(LOG_DMESG);
 #else
             CREATE_KTHREAD(thread_enable_dmesg, NULL);
 #endif
             lidbg_domineering_ack();
-
         }
         else if (!strcmp(argv[1], "*158#003"))
         {
@@ -297,7 +319,7 @@ void parse_cmd(char *pt)
 #ifdef SOC_mt3360
             lidbg_shell_cmd("rm /sdcard/logcat*");
             lidbg_shell_cmd("rm /sdcard/kmsg*");
-	     logcat_enabled = false;
+            logcat_enabled = false;
 #else
             lidbg_shell_cmd("rm /data/logcat*");
             lidbg_shell_cmd("rm /data/kmsg*");
@@ -350,12 +372,10 @@ void parse_cmd(char *pt)
             lidbg_fifo_get(glidbg_msg_fifo, LIDBG_LOG_DIR"lidbg_mem_log.txt", 0);
             CREATE_KTHREAD(thread_dump_log, NULL);
         }
-
         else if (!strcmp(argv[1], "*158#014"))
             lidbg_system_switch(true);
         else if (!strcmp(argv[1], "*158#015"))
             lidbg_system_switch(false);
-
         else if (!strcmp(argv[1], "*158#016"))
             set_wifi_adb_mode(true);
         else if (!strcmp(argv[1], "*158#017"))
@@ -411,8 +431,8 @@ void parse_cmd(char *pt)
         }
         else if (!strcmp(argv[1], "*158#023"))
         {
-           // cb_kv_show_temp(NULL, NULL);
-           // lidbg_domineering_ack();
+            // cb_kv_show_temp(NULL, NULL);
+            // lidbg_domineering_ack();
         }
         else if (!strcmp(argv[1], "*158#024"))
         {
@@ -459,112 +479,121 @@ void parse_cmd(char *pt)
             lidbg_domineering_ack();
 #endif
         }
-		else if (!strcmp(argv[1], "*158#031"))
-        {	
-			lidbg("gps_debug\n");
-			lidbg_shell_cmd("echo -n 'file lidbg_gps.c +p' > /sys/kernel/debug/dynamic_debug/control");
-                 
-        }
-		else if (!strcmp(argv[1], "*158#032"))
+        else if (!strcmp(argv[1], "*158#031"))
         {
-	   	   lidbg("AD_debug\n");    
-           lidbg_shell_cmd("echo -n 'file lidbg_ad_msm8x26.c +p' > /sys/kernel/debug/dynamic_debug/control");
+            lidbg("gps_debug\n");
+            lidbg_shell_cmd("echo -n 'file lidbg_gps.c +p' > /sys/kernel/debug/dynamic_debug/control");
         }
-		else if (!strcmp(argv[1], "*158#033"))
+        else if (!strcmp(argv[1], "*158#032"))
         {
-	   		lidbg("ts_debug\n");   
+            lidbg("AD_debug\n");
+            lidbg_shell_cmd("echo -n 'file lidbg_ad_msm8x26.c +p' > /sys/kernel/debug/dynamic_debug/control");
+        }
+        else if (!strcmp(argv[1], "*158#033"))
+        {
+            lidbg("ts_debug\n");
             lidbg_shell_cmd("echo -n 'file lidbg_ts.c +p' > /sys/kernel/debug/dynamic_debug/control");
-			lidbg_shell_cmd("echo -n 'file lidbg_ts_probe_new.c +p' > /sys/kernel/debug/dynamic_debug/control");
+            lidbg_shell_cmd("echo -n 'file lidbg_ts_probe_new.c +p' > /sys/kernel/debug/dynamic_debug/control");
         }
-		else if (!strcmp(argv[1], "*158#034"))
+        else if (!strcmp(argv[1], "*158#034"))
         {
-            lidbg("temp_debug\n");  
+            lidbg("temp_debug\n");
             lidbg_shell_cmd("echo -n 'file lidbg_temp.c +p' > /sys/kernel/debug/dynamic_debug/control");
         }
-		else if (!strcmp(argv[1], "*158#035"))
+        else if (!strcmp(argv[1], "*158#035"))
         {
-            lidbg("lowmemorykill debug\n");  
+            lidbg("lowmemorykill debug\n");
             lidbg_shell_cmd("echo -n 'file lowmemorykillprotecter.c +p' > /sys/kernel/debug/dynamic_debug/control");
-        }		
-		else if (!strcmp(argv[1], "*158#040"))
-        {
-        	CREATE_KTHREAD(thread_monkey_test, NULL);
-	
         }
-		else if (!strcmp(argv[1], "*158#041"))
+        else if (!strcmp(argv[1], "*158#040"))
         {
-			lidbg_shell_cmd("echo 0 > /proc/sys/kernel/printk");
-	
+            CREATE_KTHREAD(thread_monkey_test, NULL);
+        }
+        else if (!strcmp(argv[1], "*158#041"))
+        {
+            lidbg_shell_cmd("echo 0 > /proc/sys/kernel/printk");
         }
         else if (!strcmp(argv[1], "*158#042"))
         {
-			lidbg("disable adb\n");	
-			lidbg_stop("adbd");
-			
+            lidbg("disable adb\n");
+            lidbg_stop("adbd");
         }
         else if (!strcmp(argv[1], "*158#043"))
         {
-			lidbg("enable adb\n");
-			lidbg_start("adbd");
+            lidbg("enable adb\n");
+            lidbg_start("adbd");
         }
-
         else if (!strncmp(argv[1], "*158#044", 8))
         {
-			//可带参数,如*158#0448010,前两位代表关ACC后等待时间，需大于70S，后两位为开ACC后等待时间，不传值则采用默认80，10S间隔
-			char s[100];
-			int n;
-			n = strlen(argv[1]);
-			if(n != 12)
-				strcpy(argv[1],"*158#0448010");	
-			
-			lidbg("start SleepTest acc test %s\n",(argv[1]+8));
-			sprintf(s,"am start -n com.example.sleeptest/com.example.sleeptest.SleepTest --ei time %s",(argv[1]+8));	
-			lidbg_shell_cmd(s);
-			lidbg("cmd : %s",s);
-	}
+            //????,?*158#0448010,??????ACC?????,???70S,?????ACC?????,????????80,10S??
+            char s[100];
+            int n;
+            n = strlen(argv[1]);
+            if(n != 12)
+                strcpy(argv[1], "*158#0448010");
 
-	else if (!strncmp(argv[1], "*158#045", 8))
+            lidbg("start SleepTest acc test %s\n", (argv[1] + 8));
+            sprintf(s, "am start -n com.example.sleeptest/com.example.sleeptest.SleepTest --ei time %s", (argv[1] + 8));
+            lidbg_shell_cmd(s);
+            lidbg("cmd : %s", s);
+        }
+        else if (!strncmp(argv[1], "*158#045", 8))
         {
-			//opt args,ex:*158#0450
-			int n;
-			n = strlen(argv[1]);
-			if(n != 9)//wrong args
-			{
-				lidbg("wrong args!");
-				return;
-			}
-			lidbg("--------RGB_LED MODE:%s-----------",argv[1]+8);
-			if(!strcmp((argv[1]+8), "1"))
-				fs_file_write2("/dev/lidbg_rgb_led0", "rgb 255 0 0");
-			else if(!strcmp((argv[1]+8), "2"))
-				fs_file_write2("/dev/lidbg_rgb_led0", "init");
-			else if(!strcmp((argv[1]+8), "3"))
-				fs_file_write2("/dev/lidbg_rgb_led0", "stop");
-			else if(!strcmp((argv[1]+8), "4"))
-				fs_file_write2("/dev/lidbg_rgb_led0", "reset");
-			else if(!strcmp((argv[1]+8), "5"))
-				fs_file_write2("/dev/lidbg_rgb_led0", "play");
-	}
+            //opt args,ex:*158#0450
+            int n;
+            n = strlen(argv[1]);
+            if(n != 9)//wrong args
+            {
+                lidbg("wrong args!");
+                return;
+            }
+            lidbg("--------RGB_LED MODE:%s-----------", argv[1] + 8);
+            if(!strcmp((argv[1] + 8), "1"))
+                fs_file_write2("/dev/lidbg_rgb_led0", "rgb 255 0 0");
+            else if(!strcmp((argv[1] + 8), "2"))
+                fs_file_write2("/dev/lidbg_rgb_led0", "init");
+            else if(!strcmp((argv[1] + 8), "3"))
+                fs_file_write2("/dev/lidbg_rgb_led0", "stop");
+            else if(!strcmp((argv[1] + 8), "4"))
+                fs_file_write2("/dev/lidbg_rgb_led0", "reset");
+            else if(!strcmp((argv[1] + 8), "5"))
+                fs_file_write2("/dev/lidbg_rgb_led0", "play");
+        }
         else if (!strcmp(argv[1], "*158#046"))
         {
-			set_cpu_governor(1);
-			
+            set_cpu_governor(1);
         }
         else if (!strcmp(argv[1], "*158#047"))
         {
-			set_cpu_governor(0);
-			
-        }	
+            set_cpu_governor(0);
+        }
         else if (!strcmp(argv[1], "*158#048"))
         {
-		lidbg("**********set RmtCtrlenable false**********\n");
-		lidbg_shell_cmd("setprop persist.lidbg.RmtCtrlenable false");
+            lidbg("**********set RmtCtrlenable false**********\n");
+            lidbg_shell_cmd("setprop persist.lidbg.RmtCtrlenable false");
         }
         else if (!strcmp(argv[1], "*158#049"))
         {
-		lidbg("**********set RmtCtrlenable true**********\n");
-		lidbg_shell_cmd("setprop persist.lidbg.RmtCtrlenable true");
+            lidbg("**********set RmtCtrlenable true**********\n");
+            lidbg_shell_cmd("setprop persist.lidbg.RmtCtrlenable true");
         }
+        else if (!strcmp(argv[1], "*158#050"))
+        {
+            lidbg_chmod("/sdcard");
+            CREATE_KTHREAD(thread_enable_top, NULL);
+            lidbg_domineering_ack();
+        }
+        else if (!strcmp(argv[1], "*158#051"))
+        {
+            lidbg_chmod("/data");
+#ifdef USE_CALL_USERHELPER
+            k2u_write(LOG_LOGCAT);
+#else
+            CREATE_KTHREAD(thread_enable_logcat, NULL);
+#endif
+            lidbg_domineering_ack();
+        }
+
         else if (!strcmp(argv[1], "*168#001"))
         {
             encode = true;
@@ -572,7 +601,7 @@ void parse_cmd(char *pt)
             lidbg_fifo_get(glidbg_msg_fifo, LIDBG_LOG_DIR"lidbg_mem_log.txt", 0);
             CREATE_KTHREAD(thread_dump_log, NULL);
         }
-
+        lidbg_domineering_ack();
     }
     else if(!strcmp(argv[0], "monkey") )
     {
@@ -588,28 +617,25 @@ void parse_cmd(char *pt)
     }
     else if(!strcmp(argv[0], "recordenable") )
     {
-	lidbg("-------uvccam recording -----");
-	lidbg_shell_cmd("setprop persist.lidbg.uvccam.recording 1");
-	if(g_var.is_fly) lidbg_shell_cmd("./flysystem/lib/out/lidbg_testuvccam /dev/video2 -c -f H264 -r &");
-	else lidbg_shell_cmd("./system/lib/modules/out/lidbg_testuvccam /dev/video2 -c -f H264 -r &");
-    }   
-
+        lidbg("-------uvccam recording -----");
+        lidbg_shell_cmd("setprop persist.lidbg.uvccam.recording 1");
+        if(g_var.is_fly) lidbg_shell_cmd("./flysystem/lib/out/lidbg_testuvccam /dev/video2 -c -f H264 -r &");
+        else lidbg_shell_cmd("./system/lib/modules/out/lidbg_testuvccam /dev/video2 -c -f H264 -r &");
+    }
     else if(!strcmp(argv[0], "recorddisable") )
     {
-	lidbg("-------uvccam stop_recording -----");
-	lidbg_shell_cmd("setprop persist.lidbg.uvccam.recording 0");
+        lidbg("-------uvccam stop_recording -----");
+        lidbg_shell_cmd("setprop persist.lidbg.uvccam.recording 0");
     }
-
-    
     else if(!strcmp(argv[0], "flyparameter") )
     {
         int para_count = argc - 1;
-        char pre='N';
+        char pre = 'N';
         for(i = 0; i < para_count; i++)
         {
-            pre=g_recovery_meg->hwInfo.info[i];
-            g_recovery_meg->hwInfo.info[i] = (int)simple_strtoul(argv[i + 1], 0, 0)+'0';
-            lidbg("flyparameter-char.info[%d]:old,now[%d,%d]",i,pre-'0', g_recovery_meg->hwInfo.info[i]-'0');
+            pre = g_recovery_meg->hwInfo.info[i];
+            g_recovery_meg->hwInfo.info[i] = (int)simple_strtoul(argv[i + 1], 0, 0) + '0';
+            lidbg("flyparameter-char.info[%d]:old,now[%d,%d]", i, pre - '0', g_recovery_meg->hwInfo.info[i] - '0');
         }
         if(flyparameter_info_save(g_recovery_meg))
         {
@@ -643,7 +669,6 @@ void parse_cmd(char *pt)
         fs_file_write2(argv[1], argv[2]);
         lidbg("%s:[%s]\n", argv[1], argv[2]);
     }
-
     else if (!strcmp(argv[0], "lpc"))
     {
         int para_count = argc - 1;
@@ -660,17 +685,17 @@ void parse_cmd(char *pt)
     {
         int irq;
         irq = simple_strtoul(argv[1], 0, 0);
-        SOC_IO_ISR_Add(irq, IRQF_TRIGGER_FALLING|IRQF_TRIGGER_RISING | IRQF_ONESHOT, TEST_isr, NULL);
+        SOC_IO_ISR_Add(irq, IRQF_TRIGGER_FALLING | IRQF_TRIGGER_RISING | IRQF_ONESHOT, TEST_isr, NULL);
         SOC_IO_ISR_Enable(irq);
         lidbg("SOC_IO_ISR_Add[%d]\n", irq);
     }
-	else if (!strcmp(argv[0], "vol"))
+    else if (!strcmp(argv[0], "vol"))
     {
- //   #ifndef SOC_mt3360
- //       int vol;
- //       vol = simple_strtoul(argv[1], 0, 0);
- //       SAF7741_Volume(vol);
- //   #endif
+        //   #ifndef SOC_mt3360
+        //       int vol;
+        //       vol = simple_strtoul(argv[1], 0, 0);
+        //       SAF7741_Volume(vol);
+        //   #endif
     }
     else if (!strcmp(argv[0], "screen_shot"))
     {
