@@ -185,7 +185,7 @@ static int __init servicer_init(void)
     CREATE_KTHREAD(thread_u2k, NULL);
 
     lidbg_chmod("/dev/lidbg_servicer");
-	
+
     LIDBG_MODULE_LOG;
     return ret;
 }

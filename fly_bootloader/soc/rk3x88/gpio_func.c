@@ -2,12 +2,12 @@
 
 void gpio_set_direction(int pin, int dir)
 {
-	int group = 0;
-	int index = 0;
-	int val = 1;
+    int group = 0;
+    int index = 0;
+    int val = 1;
 
-	group = (pin & 0xff00) >> 8;
-	index = pin & 0x00ff;
+    group = (pin & 0xff00) >> 8;
+    index = pin & 0x00ff;
 
     if(dir == GPIO_INPUT)
         GetPortInput(group, index);
@@ -17,22 +17,22 @@ void gpio_set_direction(int pin, int dir)
 
 void gpio_set_val(int pin, int val)
 {
-	int group = 0;
-	int index = 0;
+    int group = 0;
+    int index = 0;
 
-	group = (pin & 0xff00) >> 8;
-	index = pin & 0x00ff;
+    group = (pin & 0xff00) >> 8;
+    index = pin & 0x00ff;
 
     SetPortOutput(group, index, val);
 }
 
 int gpio_get_val(int pin)
 {
-	int group = 0;
-	int index = 0;
+    int group = 0;
+    int index = 0;
 
-	group = (pin & 0xff00) >> 8;
-	index = pin & 0x00ff;
+    group = (pin & 0xff00) >> 8;
+    index = pin & 0x00ff;
 
     static key_config io_config;
 

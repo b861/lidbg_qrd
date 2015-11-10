@@ -57,7 +57,7 @@ static short  goodix_read_version(struct goodix_ts_data *ts);
 
 #if defined(CONFIG_FB)
 static int fb_notifier_callback(struct notifier_block *self,
-				 unsigned long event, void *data);
+                                unsigned long event, void *data);
 //static void goodix_ts_early_suspend(struct early_suspend *h);
 
 
@@ -235,7 +235,7 @@ return:
 static int goodix_init_panel(struct goodix_ts_data *ts)
 {
     short ret = -1;
-   
+
 #ifdef BOARD_V2
     uint8_t config_info7[] =
     {
@@ -281,7 +281,7 @@ static int goodix_init_panel(struct goodix_ts_data *ts)
     // config_info[64] = TOUCH_MAX_HEIGHT >> 8;
     // config_info[63] = TOUCH_MAX_HEIGHT & 0xff;
 
-     lidbg("come to goodix_init_panel=======7.8heti===========futengfei=\n");
+    lidbg("come to goodix_init_panel=======7.8heti===========futengfei=\n");
     //sensor_id [0:  8cunTS;      2: 7cunTS ;   7cun for default]
     if(sensor_id == 0) //0:  8cunTS;
     {
@@ -423,12 +423,12 @@ static void goodix_ts_work_func(struct work_struct *work)
     uint8_t  point_index = 0;
     uint8_t  point_tmp = 0;
     uint8_t  point_count = 0;
-  //  uint8_t  input_w = 0;
+    //  uint8_t  input_w = 0;
     uint8_t  finger = 0;
- //   uint8_t  key = 0;
+    //   uint8_t  key = 0;
     uint16_t input_x = 0;
     uint16_t input_y = 0;
-//    static uint8_t  last_key = 0;
+    //    static uint8_t  last_key = 0;
     unsigned int  count = 0;
     unsigned int position = 0;
     int finger_up_cunt = 0;
@@ -453,7 +453,7 @@ static void goodix_ts_work_func(struct work_struct *work)
 
 #ifndef INT_PORT
 #endif
-//COORDINATE_POLL:
+    //COORDINATE_POLL:
 
     if( tmp > 9)
     {
@@ -863,8 +863,8 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
 {
     int ret = 0;
     int retry = 0;
-  //  char test_data = 1;
-   // const char irq_table[2] = {IRQ_TYPE_EDGE_FALLING, IRQ_TYPE_EDGE_RISING};
+    //  char test_data = 1;
+    // const char irq_table[2] = {IRQ_TYPE_EDGE_FALLING, IRQ_TYPE_EDGE_RISING};
     struct goodix_ts_data *ts;
     struct goodix_i2c_rmi_platform_data *pdata;
 
@@ -955,7 +955,7 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     }
 #endif
 #if 1
-//err_gpio_request_failed:
+    //err_gpio_request_failed:
     //lidbg("goodix_init_panel:come to send init_panel==============futengfei=\n");
     for(retry = 0; retry < 5; retry++)
     {
@@ -1098,12 +1098,12 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
 #endif
 #if defined(CONFIG_FB)
 #ifdef PLATFORM_ID_2
-	ts->fb_notif.notifier_call = fb_notifier_callback;
-	ret = fb_register_client(&ts->fb_notif);
-	if (ret)
-		dev_err(&ts->client->dev,
-			"Unable to register fb_notifier: %d\n",
-			ret);
+    ts->fb_notif.notifier_call = fb_notifier_callback;
+    ret = fb_register_client(&ts->fb_notif);
+    if (ret)
+        dev_err(&ts->client->dev,
+                "Unable to register fb_notifier: %d\n",
+                ret);
 #elif defined(CONFIG_HAS_EARLYSUSPEND)
     ts->early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN - 20;
     ts->early_suspend.suspend = goodix_ts_early_suspend;
@@ -1135,11 +1135,11 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     //	lidbg("Start %s in %s mode,Driver Modify Date:2012-01-05\n", ts->input_dev->name, ts->use_irq ? "interrupt" : "polling");
 
     //SOC_IO_ISR_Disable(GPIOEIT);
-    #ifdef PLATFORM_ID_2
+#ifdef PLATFORM_ID_2
     ret = gpio_direction_input(GPIOEIT);
-    #else
+#else
     SOC_IO_Input(0, GPIOEIT, GPIO_CFG_PULL_UP);
-    #endif
+#endif
     ret = SOC_IO_ISR_Add(GPIOEIT, IRQF_TRIGGER_FALLING, goodix_ts_irq_handler, ts);
     if(ret == 0)
     {
@@ -1151,7 +1151,7 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     lidbg("=OUT==============touch INFO==================%s\n\n", __func__);
     return 0;
 
-//err_init_godix_ts:
+    //err_init_godix_ts:
     i2c_end_cmd(ts);
     if(ts->use_irq)
     {
@@ -1170,12 +1170,12 @@ err_input_register_device_failed:
 
 err_input_dev_alloc_failed:
     i2c_set_clientdata(client, NULL);
-//err_gpio_request:
-//err_i2c_failed:
+    //err_gpio_request:
+    //err_i2c_failed:
     kfree(ts);
 err_alloc_data_failed:
 err_check_functionality_failed:
-//err_create_proc_entry:
+    //err_create_proc_entry:
 
     lidbg("\nerr_init_godix_ts==================futengfei=========\n");
     return ret;
@@ -1226,8 +1226,8 @@ static int goodix_ts_remove(struct i2c_client *client)
 //????
 static int goodix_ts_suspend(struct goodix_ts_data *ts, pm_message_t mesg)
 {
-  //  int ret;
- //   struct goodix_ts_data *ts = i2c_get_clientdata(client);
+    //  int ret;
+    //   struct goodix_ts_data *ts = i2c_get_clientdata(client);
 
     lidbg(" [%s]========futengfei=======\n\n\n", __func__);
     /*
@@ -1262,7 +1262,7 @@ static int goodix_ts_resume(struct goodix_ts_data *ts)
 {
     int ret = 0, retry = 0, init_err = 0;
     uint8_t GT811_check[6] = {0x55};
-   // struct goodix_ts_data *ts = i2c_get_clientdata(client);
+    // struct goodix_ts_data *ts = i2c_get_clientdata(client);
     lidbg("come into [%s]========futengfei===fukesi===0829forGT811 RESUME RESET [futengfei]=\n", __func__);
     lidbg(KERN_INFO "Build Time: %s %s  %s \n", __FUNCTION__, __DATE__, __TIME__);
 
@@ -1294,7 +1294,7 @@ static int goodix_ts_resume(struct goodix_ts_data *ts)
             SOC_IO_Output(0, 24, 1);//NOTE:GT811 SHUTDOWN PIN ,set hight to work.
             msleep(700);
 #else
-      	    SOC_IO_Output(0, 27, 0);
+            SOC_IO_Output(0, 27, 0);
             msleep(300);
             SOC_IO_Output(0, 27, 1);//NOTE:GT811 SHUTDOWN PIN ,set hight to work.
             msleep(700);
@@ -1308,7 +1308,7 @@ static int goodix_ts_resume(struct goodix_ts_data *ts)
         lidbg("[futengfei] goodix_ts_resume:if this is appear ,that is say the continue no goto for directly!\n");
 
     }
-   ret = gpio_direction_input(GPIOEIT);
+    ret = gpio_direction_input(GPIOEIT);
     if(ret != 0)
     {
         lidbg("goodix_init_panel:Initiall failed============");
@@ -1337,28 +1337,29 @@ static int goodix_ts_resume(struct goodix_ts_data *ts)
 }
 #if defined(CONFIG_FB)
 static int fb_notifier_callback(struct notifier_block *self,
-				 unsigned long event, void *data)
+                                unsigned long event, void *data)
 {
-	
-	struct fb_event *evdata = data;
-	int *blank;
-	struct goodix_ts_data *ts =
-		container_of(self, struct goodix_ts_data, fb_notif);
-	lidbg("callback_fun\n");
-	if (evdata && evdata->data && event == FB_EVENT_BLANK &&
-			ts && ts->client) {
-		blank = evdata->data;
-		if (*blank == FB_BLANK_UNBLANK)
-			goodix_ts_resume(ts);
-		else if (*blank == FB_BLANK_POWERDOWN)
-			goodix_ts_suspend(ts,PMSG_SUSPEND);
-	}
 
-	return 0;
+    struct fb_event *evdata = data;
+    int *blank;
+    struct goodix_ts_data *ts =
+        container_of(self, struct goodix_ts_data, fb_notif);
+    lidbg("callback_fun\n");
+    if (evdata && evdata->data && event == FB_EVENT_BLANK &&
+            ts && ts->client)
+    {
+        blank = evdata->data;
+        if (*blank == FB_BLANK_UNBLANK)
+            goodix_ts_resume(ts);
+        else if (*blank == FB_BLANK_POWERDOWN)
+            goodix_ts_suspend(ts, PMSG_SUSPEND);
+    }
+
+    return 0;
 }
 #elif defined(CONFIG_HAS_EARLYSUSPEND)
 #endif
-#ifdef CONFIG_HAS_EARLYSUSPEND 
+#ifdef CONFIG_HAS_EARLYSUSPEND
 static void goodix_ts_early_suspend(struct early_suspend *h)
 {
     struct goodix_ts_data *ts;
@@ -1596,7 +1597,7 @@ static int goodix_update_read( char *page, char **start, off_t off, int count, i
     unsigned char read_data[360] = {0};
     struct goodix_ts_data *ts;
     lidbg("come into [%s]", __func__);
-    
+
 
     ts = i2c_get_clientdata(i2c_connect_client);
     if(ts == NULL)
@@ -1717,7 +1718,7 @@ RETRY:
         memcpy(&page[160], read_data + 2, len);update_file_cl
 
 #ifdef DEBUG
-  
+
         for (i = 0; i < 300; i++)
         {
             lidbg("%6x", page[i]);
@@ -1727,7 +1728,7 @@ RETRY:
                 lidbg("\n");
             }
         }
-        
+
 #endif
         raw_data_ready = RAW_DATA_NON_ACTIVE;
 
@@ -2340,9 +2341,10 @@ static const struct i2c_device_id goodix_ts_id[] =
     { }
 };
 #ifdef PLATFORM_ID_2
-static struct of_device_id goodix_match_table[] = {
-	{ .compatible = "goodix,gt9xx", },
-	{ },
+static struct of_device_id goodix_match_table[] =
+{
+    { .compatible = "goodix,gt9xx", },
+    { },
 };
 #endif
 //???????
@@ -2351,18 +2353,18 @@ static struct i2c_driver goodix_ts_driver =
     .probe		= goodix_ts_probe,
     .remove		= goodix_ts_remove,
 #ifdef BOARD_V2
-else
+    else
 #ifndef CONFIG_HAS_EARLYSUSPEND
-    .suspend	= goodix_ts_suspend,
-    .resume		= goodix_ts_resume,
+        .suspend	= goodix_ts_suspend,
+        .resume		= goodix_ts_resume,
 #endif
 #endif
-    .id_table	= goodix_ts_id,
-    .driver = {
+        .id_table	= goodix_ts_id,
+        .driver = {
         .name	= GOODIX_I2C_NAME,
         .owner = THIS_MODULE,
 #ifdef PLATFORM_ID_2
-	.of_match_table = goodix_match_table,
+        .of_match_table = goodix_match_table,
 #endif
     },
 };
@@ -2412,7 +2414,7 @@ int ts_nod_open (struct inode *inode, struct file *filp)
 ssize_t ts_nod_write (struct file *filp, const char __user *buf, size_t count, loff_t *f_pos)
 {
     char data_rec[20];
- //   struct ts_device *tsdev = filp->private_data;
+    //   struct ts_device *tsdev = filp->private_data;
 
     if (copy_from_user( data_rec, buf, count))
     {
@@ -2494,17 +2496,17 @@ static int goodix_ts_init(void)
 
     //V2????,V3??
 #ifdef PLATFORM_ID_2
-            SOC_IO_Output(0, 24, 1);
-            msleep(300);
-            SOC_IO_Output(0, 24, 0);//NOTE:GT811 SHUTDOWN PIN ,set hight to work.
-            msleep(700);
+    SOC_IO_Output(0, 24, 1);
+    msleep(300);
+    SOC_IO_Output(0, 24, 0);//NOTE:GT811 SHUTDOWN PIN ,set hight to work.
+    msleep(700);
 
 #else
 
-            SOC_IO_Output(0, 27, 0);
-            msleep(300);
-            SOC_IO_Output(0, 27, 1);//NOTE:GT811 SHUTDOWN PIN ,set hight to work.
-            msleep(700);
+    SOC_IO_Output(0, 27, 0);
+    msleep(300);
+    SOC_IO_Output(0, 27, 1);//NOTE:GT811 SHUTDOWN PIN ,set hight to work.
+    msleep(700);
 #endif
 
 #if 0

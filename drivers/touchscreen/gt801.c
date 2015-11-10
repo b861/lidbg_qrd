@@ -1278,13 +1278,13 @@ static struct i2c_driver goodix_ts_driver =
 
 int thread_update(void *data)
 {
-        if(1) 
-        {
-		lidbg_insmod("/system/lib/modules/out/gt80x_update.ko");
-		lidbg_insmod("/flysystem/lib/out/gt80x_update.ko");
-        }
-        else 
-            schedule_timeout(HZ);
+    if(1)
+    {
+        lidbg_insmod("/system/lib/modules/out/gt80x_update.ko");
+        lidbg_insmod("/flysystem/lib/out/gt80x_update.ko");
+    }
+    else
+        schedule_timeout(HZ);
 
     return 0;
 }
@@ -1302,7 +1302,7 @@ static int goodix_ts_init(void)
 
     LIDBG_GET;
 
-	CREATE_KTHREAD(thread_update, NULL);
+    CREATE_KTHREAD(thread_update, NULL);
 
     is_ts_load = 1;
     printk("================into Gt801.ko=1024590==============2013.07.12==\n");

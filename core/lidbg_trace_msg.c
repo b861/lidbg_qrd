@@ -17,7 +17,7 @@ void kmsg_fifo_collect(char *buff, int buff_len)
         if(kfifo_alloc(&fifo_kmsg_collect, 1 * 1024 * 1024, GFP_KERNEL))
         {
             lidbgerr("[%s]:kfifo_alloc \n", __func__);
-			return;
+            return;
         }
         mutex_init(&mutex_kmsg_collect);
         spin_lock_init(&spinlock_kmsg_collect);
@@ -27,13 +27,13 @@ void kmsg_fifo_collect(char *buff, int buff_len)
 
     if(kfifo_is_full(p_kmsg_collect) || kfifo_avail(p_kmsg_collect) < buff_len)
     {
-    #if 0
-    	int ret;
-		char tmp_buff[buff_len];
+#if 0
+        int ret;
+        char tmp_buff[buff_len];
         ret = kfifo_out_spinlocked(p_kmsg_collect, tmp_buff, buff_len , &spinlock_kmsg_collect);
-	#else
-		kfifo_reset(p_kmsg_collect);
-	#endif
+#else
+        kfifo_reset(p_kmsg_collect);
+#endif
     }
     mutex_lock(&mutex_kmsg_collect);
     kfifo_in_spinlocked(p_kmsg_collect, buff, buff_len, &spinlock_kmsg_collect);
@@ -93,7 +93,7 @@ static struct lidbg_trace_message_device *pdev;
 void lidbg_trace_msg_disable(int flag)
 {
     pdev->disable_flag = flag;
-	lidbg("lidbg_trace_msg_disable\n");
+    lidbg("lidbg_trace_msg_disable\n");
 }
 EXPORT_SYMBOL(lidbg_trace_msg_disable);
 
@@ -162,9 +162,9 @@ static void lidbg_trace_msg_is_enough(int len)
         ret = kfifo_out(&pdev->fifo, msg_clean_buff, len);
         up(&pdev->sem);
 #else
-		down(&pdev->sem);
-		kfifo_reset(&pdev->fifo);
-		up(&pdev->sem);
+        down(&pdev->sem);
+        kfifo_reset(&pdev->fifo);
+        up(&pdev->sem);
 
 #endif
     }
@@ -186,43 +186,43 @@ static int thread_trace_msg_in(void *data)
     }
 
     filep = filp_open("/proc/kmsg", O_RDONLY, 0644);
-    if(filep&&!IS_ERR(filep)&&filep->f_op&&filep->f_op->read)
+    if(filep && !IS_ERR(filep) && filep->f_op && filep->f_op->read)
     {
-    	lidbg("thread_trace_msg_in.while\n");
+        lidbg("thread_trace_msg_in.while\n");
     }
     else
     {
         lidbg("thread_trace_msg_in.ERR.filp_open.exit\n");
         return 0;
     }
-	
-    
+
+
     memset(buff, '\0', MEM_SIZE_4_KB);
-	
-	old_fs = get_fs();
-	set_fs(get_ds());
+
+    old_fs = get_fs();
+    set_fs(get_ds());
 
     while(1)
-	{
-	    if(!pdev->disable_flag)
-	    {
-	        len = filep->f_op->read(filep, buff, MEM_SIZE_4_KB, &filep->f_pos);
-			
-	        if(len >= 0)
-	        {
-	            kmsg_fifo_collect(buff, len);
-	            lidbg_trace_msg_is_enough(len);
+    {
+        if(!pdev->disable_flag)
+        {
+            len = filep->f_op->read(filep, buff, MEM_SIZE_4_KB, &filep->f_pos);
 
-	            down(&pdev->sem);
-	            kfifo_in(&pdev->fifo, buff, len);
-	            up(&pdev->sem);
-	        }
-	    }
-		
-		msleep(500);
-	}
+            if(len >= 0)
+            {
+                kmsg_fifo_collect(buff, len);
+                lidbg_trace_msg_is_enough(len);
 
-	set_fs(old_fs);
+                down(&pdev->sem);
+                kfifo_in(&pdev->fifo, buff, len);
+                up(&pdev->sem);
+            }
+        }
+
+        msleep(500);
+    }
+
+    set_fs(old_fs);
 
     filp_close(filep, 0);
     return 0;
@@ -313,12 +313,12 @@ static  struct file_operations lidbg_trace_msg_fops =
     .open = lidbg_trace_msg_open,
     .release = lidbg_trace_msg_release,
 };
-void callback_disable_trace_msg(char * focus, char * uevent)
+void callback_disable_trace_msg(char *focus, char *uevent)
 {
     lidbg_trace_msg_disable(1);
 }
 
-static int tmp=0;
+static int tmp = 0;
 void cb_int_kmsg_fifo_save(char *key, char *value )
 {
     kmsg_fifo_save();
@@ -354,25 +354,25 @@ static int  lidbg_trace_msg_probe(struct platform_device *ppdev)
     FS_REGISTER_INT(tmp, "kmsg_fifo_save", 0, cb_int_kmsg_fifo_save);
 
 #ifdef  TRACE_MSG_FROM_KMSG
-	if(gboot_mode==MD_FLYSYSTEM)
-    	CREATE_KTHREAD(thread_trace_msg_in, NULL);
+    if(gboot_mode == MD_FLYSYSTEM)
+        CREATE_KTHREAD(thread_trace_msg_in, NULL);
 #endif
     CREATE_KTHREAD(thread_trace_msg_out, NULL);
 
     lidbg_new_cdev(&lidbg_trace_msg_fops, DEVICE_NAME);
 #ifndef USE_CALL_USERHELPER
-    lidbg_uevent_focus("USB_STATE=CONFIGURED",callback_disable_trace_msg );//USB_STATE=DISCONNECTED
+    lidbg_uevent_focus("USB_STATE=CONFIGURED", callback_disable_trace_msg ); //USB_STATE=DISCONNECTED
 #endif
 
-	{
-	    char buff[32] = {0};
-	    fs_file_read("/sys/class/android_usb/android0/state", buff, 0, sizeof(buff));
-	    lidbg("state:%s\n", buff);
-	    if(!strncmp(buff, "CONFIGURED", strlen("CONFIGURED")))
-	        lidbg_trace_msg_disable(1);
-	}
+    {
+        char buff[32] = {0};
+        fs_file_read("/sys/class/android_usb/android0/state", buff, 0, sizeof(buff));
+        lidbg("state:%s\n", buff);
+        if(!strncmp(buff, "CONFIGURED", strlen("CONFIGURED")))
+            lidbg_trace_msg_disable(1);
+    }
 
-	LIDBG_MODULE_LOG;
+    LIDBG_MODULE_LOG;
 
     return 0;
 }
@@ -417,13 +417,13 @@ static void __exit lidbg_trace_msg_exit(void)
 
 void trace_msg_main(int argc, char **argv)
 {
-	lidbg("trace_msg_main:%s\n",argv[0]);
-	if(!strncmp(argv[0], "disable",strlen("disable")))
-	    lidbg_trace_msg_disable(1);
-	else if(!strncmp(argv[0], "save",strlen("save")))
-	    kmsg_fifo_save();
-	else if(!strncmp(argv[0], "len",strlen("len")))
-		lidbg("[%s]:kfifo_len: %d\n", __func__, kfifo_len(p_kmsg_collect));
+    lidbg("trace_msg_main:%s\n", argv[0]);
+    if(!strncmp(argv[0], "disable", strlen("disable")))
+        lidbg_trace_msg_disable(1);
+    else if(!strncmp(argv[0], "save", strlen("save")))
+        kmsg_fifo_save();
+    else if(!strncmp(argv[0], "len", strlen("len")))
+        lidbg("[%s]:kfifo_len: %d\n", __func__, kfifo_len(p_kmsg_collect));
 
 }
 

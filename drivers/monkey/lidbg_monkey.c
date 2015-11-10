@@ -92,7 +92,7 @@ void cb_kv_monkey_enable(char *key, char *value)
 
 int monkey_init(void *data)
 {
-	g_monkey_dev = &private_dev;
+    g_monkey_dev = &private_dev;
 
     init_completion(&g_monkey_dev->monkey_wait);
     g_monkey_dev->callback = monkey_cmn_callback;

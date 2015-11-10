@@ -23,13 +23,13 @@ struct ts_devices g_ts_devices;
 
 
 #ifdef SOC_msm8x25
- #if (defined(BOARD_V1) || defined(BOARD_V2) || defined(BOARD_V3))
-  #define FLYHAL_CONFIG_PATH "/flydata/flyhalconfig"
- #else
-  #define FLYHAL_CONFIG_PATH "/flysystem/flyconfig/default/lidbgconfig/flylidbgconfig.txt"
- #endif
+#if (defined(BOARD_V1) || defined(BOARD_V2) || defined(BOARD_V3))
+#define FLYHAL_CONFIG_PATH "/flydata/flyhalconfig"
 #else
- #define FLYHAL_CONFIG_PATH "/flysystem/flyconfig/default/lidbgconfig/flylidbgconfig.txt"
+#define FLYHAL_CONFIG_PATH "/flysystem/flyconfig/default/lidbgconfig/flylidbgconfig.txt"
+#endif
+#else
+#define FLYHAL_CONFIG_PATH "/flysystem/flyconfig/default/lidbgconfig/flylidbgconfig.txt"
 #endif
 
 #define GTP_SWAP SWAP
@@ -37,7 +37,7 @@ struct ts_devices g_ts_devices;
          x = max_x-x;\
          y = max_y-y;\
        }while (0)
-       
+
 static LIST_HEAD(flyhal_config_list);
 static int ts_scan_delayms;
 
@@ -51,7 +51,7 @@ struct probe_device
     unsigned int sub_addr;
     char *name;
     void (*reset)(void);
-	void (*find_cb)(void);
+    void (*find_cb)(void);
 };
 
 void reset_high_active(void);
@@ -72,13 +72,13 @@ struct probe_device ts_probe_dev[] =
 
 //zone below [method]
 void gt9xx_reset_high_active(void)
-{	
+{
     SOC_IO_Output(0, GTP_RST_PORT, !GTP_RST_PORT_ACTIVE);
     msleep(200);
-	#ifndef SOC_msm8x25
-	SOC_IO_Output(0, GTP_INT_PORT, 1);
-	udelay(200);
-	#endif
+#ifndef SOC_msm8x25
+    SOC_IO_Output(0, GTP_INT_PORT, 1);
+    udelay(200);
+#endif
     SOC_IO_Output(0, GTP_RST_PORT, GTP_RST_PORT_ACTIVE);
     msleep(300);
 }
@@ -99,35 +99,35 @@ void reset_low_active(void)
 }
 void ts_gpio_free(void)
 {
-   #ifndef SOC_msm8x25
-   //gpio_free(GTP_INT_PORT);
-   //gpio_free(GTP_RST_PORT);
-   #endif
+#ifndef SOC_msm8x25
+    //gpio_free(GTP_INT_PORT);
+    //gpio_free(GTP_RST_PORT);
+#endif
 }
 
 
 void ts_gpio_free_gt911(void)
 {
-   #ifndef SOC_msm8x25
-   //gpio_free(GTP_INT_PORT);
-   //gpio_free(GTP_RST_PORT);
-   #endif
+#ifndef SOC_msm8x25
+    //gpio_free(GTP_INT_PORT);
+    //gpio_free(GTP_RST_PORT);
+#endif
 }
 
 void parse_ts_info(struct probe_device *ts_info)
 {
     char path[100];
 
-    if(gboot_mode==MD_FLYSYSTEM)
-	{
-	    sprintf(path, "/flysystem/lib/out/%s", ts_info->name);
-	    lidbg_insmod( path );
-	}
-	else
-	{
-		sprintf(path, "/system/lib/modules/out/%s", ts_info->name);
-		lidbg_insmod( path );
-	}
+    if(gboot_mode == MD_FLYSYSTEM)
+    {
+        sprintf(path, "/flysystem/lib/out/%s", ts_info->name);
+        lidbg_insmod( path );
+    }
+    else
+    {
+        sprintf(path, "/system/lib/modules/out/%s", ts_info->name);
+        lidbg_insmod( path );
+    }
     lidbg_fs_log(TS_LOG_PATH, "loadts=%s,USE_TS_NUM:%d,g_var.hw_info.ts_type:%d,ts_should_revert:%d\n", ts_info->name, USE_TS_NUM, g_var.hw_info.ts_type, ts_should_revert);
     fs_mem_log("loadts=%s,USE_TS_NUM:%d,g_var.hw_info.ts_type:%d,ts_should_revert:%d\n", ts_info->name, USE_TS_NUM, g_var.hw_info.ts_type, ts_should_revert);
 
@@ -156,18 +156,18 @@ struct probe_device *ts_scan(struct probe_device *tsdev, int size)
         else
         {
             lidbg("found:[0x%x,%s]\n", tsdev->chip_addr, tsdev->name);
-	        tsdev->find_cb();
-			return tsdev;
+            tsdev->find_cb();
+            return tsdev;
         }
         tsdev++;
     }
 #ifdef SOC_msm8x25
     if(loop == 30)
     {
-		if(g_var.is_fly)
-			lidbg_insmod("/flysystem/lib/out/gt801.ko");
-		else
-	        lidbg_insmod("/system/lib/modules/out/gt801.ko");
+        if(g_var.is_fly)
+            lidbg_insmod("/flysystem/lib/out/gt801.ko");
+        else
+            lidbg_insmod("/system/lib/modules/out/gt801.ko");
     }
 #endif
 
@@ -197,19 +197,19 @@ void ts_devices_show(char *whocalls)
 
 void ts_devices_init(void)
 {
-    char ts_config_file[64]={0},tmp[32]={0};
-    snprintf(tmp, sizeof(tmp), "ts_config/ts_config_%d.conf",g_var.hw_info.virtual_key );
+    char ts_config_file[64] = {0}, tmp[32] = {0};
+    snprintf(tmp, sizeof(tmp), "ts_config/ts_config_%d.conf", g_var.hw_info.virtual_key );
 
     get_lidbg_file_path(ts_config_file, tmp);
 
     if(g_var.hw_info.virtual_key)
     {
         char *ts_devices_key_map = NULL, *ts_description = NULL;
-        LIDBG_WARN(TS_TAG"<use:%s>\n",ts_config_file);
+        LIDBG_WARN(TS_TAG"<use:%s>\n", ts_config_file);
         fs_fill_list(ts_config_file, FS_CMD_FILE_CONFIGMODE, &lidbg_ts_config_list);
 
         if((fs_get_intvalue(&lidbg_ts_config_list, "lcd_origin_x", &g_ts_devices.lcd_origin_x, NULL) < 0) || (fs_get_intvalue(&lidbg_ts_config_list, "lcd_origin_y", &g_ts_devices.lcd_origin_y, NULL) < 0)
-        || fs_get_intvalue(&lidbg_ts_config_list, "key_nums", &g_ts_devices.key_nums, NULL) < 0)
+                || fs_get_intvalue(&lidbg_ts_config_list, "key_nums", &g_ts_devices.key_nums, NULL) < 0)
             LIDBG_WARN(TS_TAG"<err:lcd_origin_x>\n");
         else
             LIDBG_WARN(TS_TAG"suc:%d,%d,%d\n", g_ts_devices.lcd_origin_x, g_ts_devices.lcd_origin_y, g_ts_devices.key_nums);
@@ -258,71 +258,72 @@ void ts_devices_init(void)
 }
 int get_input_key(enum key_enum key_value)
 {
-switch(key_value){
-	case TS_KEY_HOME :
-		return KEY_HOME;
-	case TS_KEY_POWER:
-		return KEY_HOME;	
-	case TS_KEY_BACK:
-		return KEY_BACK;
-	case    TS_KEY_VOLUMEDOWN:
-		return KEY_VOLUMEDOWN;
-	case   TS_KEY_VOLUMEUP:
-		return KEY_VOLUMEUP;
-	case   TS_KEY_NAVI:
-		return KEY_HOME;
-	default:
-		return KEY_BACK;
-	
-}
+    switch(key_value)
+    {
+    case TS_KEY_HOME :
+        return KEY_HOME;
+    case TS_KEY_POWER:
+        return KEY_HOME;
+    case TS_KEY_BACK:
+        return KEY_BACK;
+    case    TS_KEY_VOLUMEDOWN:
+        return KEY_VOLUMEDOWN;
+    case   TS_KEY_VOLUMEUP:
+        return KEY_VOLUMEUP;
+    case   TS_KEY_NAVI:
+        return KEY_HOME;
+    default:
+        return KEY_BACK;
+
+    }
 }
 
-void ts_key_report(s32 input_x,s32 input_y,struct ts_devices_key *tskey,int size)
+void ts_key_report(s32 input_x, s32 input_y, struct ts_devices_key *tskey, int size)
 {
     int i;
-    u8 fifo_out,bytes;
+    u8 fifo_out, bytes;
     for(i = 0; i < size; i++)
-	{
-		if( (abs( input_x - tskey->key_x)<=tskey->offset_x)&&(abs( input_y - tskey->key_y)<=tskey->offset_y))
-			{
-			if(!g_var.is_fly)
-				SOC_Key_Report(get_input_key(tskey->key_value),KEY_PRESSED_RELEASED);
-			else
-				{
-					g_var.ts_active_key = tskey->key_value;
-					if(SOC_Hal_Ts_Callback)
-					{
-						pr_debug("SOC_Hal_Ts_Callbacking:%d\n",g_var.ts_active_key);
-						SOC_Hal_Ts_Callback( g_var.ts_active_key);
-					}
-					else
-					{
-						flyts_hal_data = g_var.ts_active_key;
+    {
+        if( (abs( input_x - tskey->key_x) <= tskey->offset_x) && (abs( input_y - tskey->key_y) <= tskey->offset_y))
+        {
+            if(!g_var.is_fly)
+                SOC_Key_Report(get_input_key(tskey->key_value), KEY_PRESSED_RELEASED);
+            else
+            {
+                g_var.ts_active_key = tskey->key_value;
+                if(SOC_Hal_Ts_Callback)
+                {
+                    pr_debug("SOC_Hal_Ts_Callbacking:%d\n", g_var.ts_active_key);
+                    SOC_Hal_Ts_Callback( g_var.ts_active_key);
+                }
+                else
+                {
+                    flyts_hal_data = g_var.ts_active_key;
 
-						down(&sem);
-						if(kfifo_is_full(&flyts_hal_data_fifo))
-						{
-							bytes = kfifo_out(&flyts_hal_data_fifo, &fifo_out, 1);
-							lidbg("[ts_hal]kfifo_full!!!!!\n");
-						}
-						kfifo_in(&flyts_hal_data_fifo, &flyts_hal_data, 1);
-						up(&sem);
+                    down(&sem);
+                    if(kfifo_is_full(&flyts_hal_data_fifo))
+                    {
+                        bytes = kfifo_out(&flyts_hal_data_fifo, &fifo_out, 1);
+                        lidbg("[ts_hal]kfifo_full!!!!!\n");
+                    }
+                    kfifo_in(&flyts_hal_data_fifo, &flyts_hal_data, 1);
+                    up(&sem);
 
-						wake_up_interruptible(&wait_queue);
-						lidbg("flyts_hal_data = %x\n",flyts_hal_data);
-					}
-				}
-			lidbg("tskey->key_value% d", tskey->key_value);
-			return;
-			}
-		tskey++;
-	}
+                    wake_up_interruptible(&wait_queue);
+                    lidbg("flyts_hal_data = %x\n", flyts_hal_data);
+                }
+            }
+            lidbg("tskey->key_value% d", tskey->key_value);
+            return;
+        }
+        tskey++;
+    }
 #if 0
-	 	if(SOC_Hal_Ts_Callback)
-					{
-						//lidbg("SOC_Hal_Ts_Callbacking:%d",TS_NO_KEY);
-						SOC_Hal_Ts_Callback(TS_NO_KEY);
-					}
+    if(SOC_Hal_Ts_Callback)
+    {
+        //lidbg("SOC_Hal_Ts_Callbacking:%d",TS_NO_KEY);
+        SOC_Hal_Ts_Callback(TS_NO_KEY);
+    }
 #endif
 }
 
@@ -338,12 +339,12 @@ void ts_probe_prepare(void)
         LIDBG_WARN("<TS.XY will revert>\n");
     else
         LIDBG_WARN("<TS.XY will normal>\n");
-	
-	if(fs_is_file_exist(LIDBG_LOG_DIR"no_revert.txt"))
-	{
-	LIDBG_WARN("<TS.XY will no_revert./data/lidbg/no_revert.txt>\n");
-	ts_should_revert = 0;
-	}
+
+    if(fs_is_file_exist(LIDBG_LOG_DIR"no_revert.txt"))
+    {
+        LIDBG_WARN("<TS.XY will no_revert./data/lidbg/no_revert.txt>\n");
+        ts_should_revert = 0;
+    }
 
 
     lidbg_insmod(get_lidbg_file_path(buff, "lidbg_ts_to_recov.ko"));
@@ -351,86 +352,86 @@ void ts_probe_prepare(void)
     ts_devices_init();
 }
 //zone end
-void ts_data_report(touch_type t,int id,int x,int y,int w)
+void ts_data_report(touch_type t, int id, int x, int y, int w)
 {
-	u8 fifo_out,bytes;
-	pr_debug("%s:%d,%d[%d,%d,%d]\n", __FUNCTION__,t,id, x, y,w);
-	GTP_SWAP(x, y);
-   	 if (1 == ts_should_revert)
-		GTP_REVERT(x, y);
-	if(g_var.hw_info.virtual_key>0)
-	{
-		if( ((g_ts_devices.lcd_origin_x<x)&& (x<1024+g_ts_devices.lcd_origin_x)&&(g_ts_devices.lcd_origin_y<y)&& (y<g_ts_devices.lcd_origin_y+600))||(t == TOUCH_SYNC)||(t== TOUCH_UP))
-		{
-			lidbg_touch_handle(t, id,x-g_ts_devices.lcd_origin_x, y-g_ts_devices.lcd_origin_y, w);
-			if( (t== TOUCH_UP)&&(id==0))
-			{
-				if(SOC_Hal_Ts_Callback)
-				{
-					pr_debug("SOC_Hal_Ts_Callbacking:%d\n",TS_NO_KEY);
-					SOC_Hal_Ts_Callback(TS_NO_KEY);
-				}
-				else
-				{
-					flyts_hal_data = TS_NO_KEY;
-					down(&sem);
-					if(kfifo_is_full(&flyts_hal_data_fifo))
-					{
-						bytes = kfifo_out(&flyts_hal_data_fifo, &fifo_out, 1);
-						lidbg("[ts_hal]kfifo_full!!!!!\n");
-					}
-					kfifo_in(&flyts_hal_data_fifo, &flyts_hal_data, 1);
-					up(&sem);
+    u8 fifo_out, bytes;
+    pr_debug("%s:%d,%d[%d,%d,%d]\n", __FUNCTION__, t, id, x, y, w);
+    GTP_SWAP(x, y);
+    if (1 == ts_should_revert)
+        GTP_REVERT(x, y);
+    if(g_var.hw_info.virtual_key > 0)
+    {
+        if( ((g_ts_devices.lcd_origin_x < x) && (x < 1024 + g_ts_devices.lcd_origin_x) && (g_ts_devices.lcd_origin_y < y) && (y < g_ts_devices.lcd_origin_y + 600)) || (t == TOUCH_SYNC) || (t == TOUCH_UP))
+        {
+            lidbg_touch_handle(t, id, x - g_ts_devices.lcd_origin_x, y - g_ts_devices.lcd_origin_y, w);
+            if( (t == TOUCH_UP) && (id == 0))
+            {
+                if(SOC_Hal_Ts_Callback)
+                {
+                    pr_debug("SOC_Hal_Ts_Callbacking:%d\n", TS_NO_KEY);
+                    SOC_Hal_Ts_Callback(TS_NO_KEY);
+                }
+                else
+                {
+                    flyts_hal_data = TS_NO_KEY;
+                    down(&sem);
+                    if(kfifo_is_full(&flyts_hal_data_fifo))
+                    {
+                        bytes = kfifo_out(&flyts_hal_data_fifo, &fifo_out, 1);
+                        lidbg("[ts_hal]kfifo_full!!!!!\n");
+                    }
+                    kfifo_in(&flyts_hal_data_fifo, &flyts_hal_data, 1);
+                    up(&sem);
 
-					wake_up_interruptible(&wait_queue);
-					lidbg("flyts_hal_data = %x\n",flyts_hal_data);
-				}
-			}
-		}
-		else
-			ts_key_report(x,y, g_ts_devices.key,SIZE_OF_ARRAY(g_ts_devices.key));
-	}
-	else
-		 lidbg_touch_handle(t, id,x, y, w);
-	
+                    wake_up_interruptible(&wait_queue);
+                    lidbg("flyts_hal_data = %x\n", flyts_hal_data);
+                }
+            }
+        }
+        else
+            ts_key_report(x, y, g_ts_devices.key, SIZE_OF_ARRAY(g_ts_devices.key));
+    }
+    else
+        lidbg_touch_handle(t, id, x, y, w);
+
     if(t == TOUCH_DOWN)
-	{
-		g_var.flag_for_15s_off++;
-		if(g_var.flag_for_15s_off >= 1000)
-		{
-			g_var.flag_for_15s_off = 1000;
-		}
-	}
+    {
+        g_var.flag_for_15s_off++;
+        if(g_var.flag_for_15s_off >= 1000)
+        {
+            g_var.flag_for_15s_off = 1000;
+        }
+    }
 
-	if((id == 1) && (t == TOUCH_DOWN) && (g_var.recovery_mode == 1)) // 2 fingers in recovery send power key
-		SOC_Key_Report(KEY_POWER,KEY_PRESSED_RELEASED);
+    if((id == 1) && (t == TOUCH_DOWN) && (g_var.recovery_mode == 1)) // 2 fingers in recovery send power key
+        SOC_Key_Report(KEY_POWER, KEY_PRESSED_RELEASED);
 
-	
-	if((id == 4) && (t == TOUCH_DOWN) && (!g_var.is_fly) ) // 5 fingers in origin system send back key
-	{
-		if(g_var.system_status >= FLY_KERNEL_UP)
-			SOC_Key_Report(KEY_BACK,KEY_PRESSED_RELEASED);
-	}
-	
+
+    if((id == 4) && (t == TOUCH_DOWN) && (!g_var.is_fly) ) // 5 fingers in origin system send back key
+    {
+        if(g_var.system_status >= FLY_KERNEL_UP)
+            SOC_Key_Report(KEY_BACK, KEY_PRESSED_RELEASED);
+    }
+
 #if 0
-	if((id == 4) && (t == TOUCH_DOWN) ) // 5 fingers in origin system send back key
-	{
-		if(g_var.system_status >= FLY_KERNEL_UP)
-			SOC_Key_Report(KEY_BACK,KEY_PRESSED_RELEASED);
-	}
+    if((id == 4) && (t == TOUCH_DOWN) ) // 5 fingers in origin system send back key
+    {
+        if(g_var.system_status >= FLY_KERNEL_UP)
+            SOC_Key_Report(KEY_BACK, KEY_PRESSED_RELEASED);
+    }
 #endif
-	
-	if((id == 0)&&(1 == g_var.recovery_mode))
-	{
-		static struct tspara touch = {0, 0, 0} ;
-		if(t == TOUCH_DOWN)
-			touch.press = 0;
-		else 
-			touch.press = 1;
-		touch.x = x;
-		touch.y = y;
-		//SOC_Set_Touch_Pos(&touch);  //not ready
-	}
+
+    if((id == 0) && (1 == g_var.recovery_mode))
+    {
+        static struct tspara touch = {0, 0, 0} ;
+        if(t == TOUCH_DOWN)
+            touch.press = 0;
+        else
+            touch.press = 1;
+        touch.x = x;
+        touch.y = y;
+        //SOC_Set_Touch_Pos(&touch);  //not ready
+    }
 }
 
 int ts_probe_open(struct inode *inode, struct file *filp)
@@ -453,24 +454,24 @@ static void parse_cmd(char *pt)
 
     if (!strcmp(argv[0], "revert"))
     {
-		ts_should_revert = 1;
-		lidbg_shell_cmd("rm -rf "LIDBG_LOG_DIR"no_revert.txt");
+        ts_should_revert = 1;
+        lidbg_shell_cmd("rm -rf "LIDBG_LOG_DIR"no_revert.txt");
     }
-	else if (!strcmp(argv[0], "no_revert"))
+    else if (!strcmp(argv[0], "no_revert"))
     {
-		ts_should_revert = 0;
-		lidbg_shell_cmd("echo 123 > "LIDBG_LOG_DIR"no_revert.txt");
-    }	
-     else if(!strcmp(argv[0], "flyparameter") )
+        ts_should_revert = 0;
+        lidbg_shell_cmd("echo 123 > "LIDBG_LOG_DIR"no_revert.txt");
+    }
+    else if(!strcmp(argv[0], "flyparameter") )
     {
         int para_count = argc - 1;
-        char pre='N';
-	     int i;
+        char pre = 'N';
+        int i;
         for(i = 0; i < para_count; i++)
         {
-            pre=g_recovery_meg->hwInfo.info[i];
-            g_recovery_meg->hwInfo.info[i] = (int)simple_strtoul(argv[i + 1], 0, 0)+'0';
-            lidbg("flyparameter-char.info[%d]:old,now[%d,%d]",i,pre-'0', g_recovery_meg->hwInfo.info[i]-'0');
+            pre = g_recovery_meg->hwInfo.info[i];
+            g_recovery_meg->hwInfo.info[i] = (int)simple_strtoul(argv[i + 1], 0, 0) + '0';
+            lidbg("flyparameter-char.info[%d]:old,now[%d,%d]", i, pre - '0', g_recovery_meg->hwInfo.info[i] - '0');
         }
         if(flyparameter_info_save(g_recovery_meg))
         {
@@ -483,7 +484,7 @@ static void parse_cmd(char *pt)
 
 
 static ssize_t ts_probe_write(struct file *filp, const char __user *buf,
-                         size_t size, loff_t *ppos)
+                              size_t size, loff_t *ppos)
 {
     char *p = NULL;
     int len = size;
@@ -531,7 +532,7 @@ int ts_probe_thread(void *data)
 
     if (USE_TS_NUM == 0 && g_var.hw_info.ts_type == 0 )
     {
-    	int cnt = 10;
+        int cnt = 10;
         LIDBG_WARN("<mode:scan enable[%d,%d,%d]>\n", USE_TS_NUM, g_var.hw_info.ts_type, g_var.hw_info.ts_config);
         while(cnt--)
         {
@@ -549,8 +550,8 @@ int ts_probe_thread(void *data)
         LIDBG_WARN("<mode:scan disable[%d,%d,%d]>\n", USE_TS_NUM, g_var.hw_info.ts_type, g_var.hw_info.ts_config);
         parse_ts_info(&ts_probe_dev[g_var.hw_info.ts_type > 0 ? g_var.hw_info.ts_type - 1 : USE_TS_NUM - 1 ]);
     }
-	
-	lidbg_new_cdev(&dev_fops, "ts_probe");
+
+    lidbg_new_cdev(&dev_fops, "ts_probe");
 
     LIDBG_WARN("<ts_probe_thread exited>\n");
     return 0;
@@ -608,34 +609,34 @@ static unsigned int flyts_hal_poll(struct file *filp, struct poll_table_struct *
  */
 ssize_t flyts_hal_read (struct file *filp, char __user *buf, size_t count, loff_t *f_pos)
 {
-	int read_len,fifo_len,bytes;
-	lidbg("ts_hal read start.\n");
-	if(kfifo_is_empty(&flyts_hal_data_fifo))
-	{
-	    if(wait_event_interruptible(wait_queue, !kfifo_is_empty(&flyts_hal_data_fifo)))
-	        return -ERESTARTSYS;
-	}
-	down(&sem);
+    int read_len, fifo_len, bytes;
+    lidbg("ts_hal read start.\n");
+    if(kfifo_is_empty(&flyts_hal_data_fifo))
+    {
+        if(wait_event_interruptible(wait_queue, !kfifo_is_empty(&flyts_hal_data_fifo)))
+            return -ERESTARTSYS;
+    }
+    down(&sem);
 
-	fifo_len = kfifo_len(&flyts_hal_data_fifo);
+    fifo_len = kfifo_len(&flyts_hal_data_fifo);
 
-	if(count > fifo_len)
-	    read_len = fifo_len;
-	else
-	    read_len = count;
+    if(count > fifo_len)
+        read_len = fifo_len;
+    else
+        read_len = count;
 
-	bytes = kfifo_out(&flyts_hal_data_fifo, flyts_hal_fifo_buffer, read_len);
-	up(&sem);
+    bytes = kfifo_out(&flyts_hal_data_fifo, flyts_hal_fifo_buffer, read_len);
+    up(&sem);
 
-	if(copy_to_user(buf, flyts_hal_fifo_buffer, read_len))
-	{
-	    return -1;
-	}
+    if(copy_to_user(buf, flyts_hal_fifo_buffer, read_len))
+    {
+        return -1;
+    }
 
-	if(kfifo_len(&flyts_hal_data_fifo) > 0)
-	    wake_up_interruptible(&wait_queue);
+    if(kfifo_len(&flyts_hal_data_fifo) > 0)
+        wake_up_interruptible(&wait_queue);
 
-	return read_len;
+    return read_len;
 }
 
 /**
@@ -670,17 +671,17 @@ static  struct file_operations flyts_hal_fops =
 static int  flyts_hal_init(void)
 {
     flyts_hal_fifo_buffer = (u8 *)kmalloc(FIFO_SIZE + 1, GFP_KERNEL);
-	if(flyts_hal_fifo_buffer==NULL)
+    if(flyts_hal_fifo_buffer == NULL)
     {
-		lidbg("flyts_hal_init kmalloc err\n");
-        	return 0;
+        lidbg("flyts_hal_init kmalloc err\n");
+        return 0;
     }
-	lidbg_new_cdev(&flyts_hal_fops, "flyts_hal");//add cdev
-	init_waitqueue_head(&wait_queue);
-	sema_init(&sem, 1);
-	kfifo_init(&flyts_hal_data_fifo, flyts_hal_fifo_buffer, FIFO_SIZE);
-	lidbg_chmod("/dev/flyts_hal0");
-	return 0;
+    lidbg_new_cdev(&flyts_hal_fops, "flyts_hal");//add cdev
+    init_waitqueue_head(&wait_queue);
+    sema_init(&sem, 1);
+    kfifo_init(&flyts_hal_data_fifo, flyts_hal_fifo_buffer, FIFO_SIZE);
+    lidbg_chmod("/dev/flyts_hal0");
+    return 0;
 }
 
 

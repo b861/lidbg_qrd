@@ -192,7 +192,7 @@ void mute_s(void)
 int read_proc_dev(struct file *file, char __user *buf, size_t size, loff_t *ppos)
 {
     int len = 0;
-	PROC_READ_CHECK;
+    PROC_READ_CHECK;
 
     lidbg("USB_ID_HIGH_DEV\n");
     USB_ID_HIGH_DEV;
@@ -204,7 +204,7 @@ int read_proc_dev(struct file *file, char __user *buf, size_t size, loff_t *ppos
 int read_proc_host(struct file *file, char __user *buf, size_t size, loff_t *ppos)
 {
     int len = 0;
-	PROC_READ_CHECK;
+    PROC_READ_CHECK;
 
     lidbg("USB_ID_LOW_HOST\n");
     USB_ID_LOW_HOST;
@@ -986,10 +986,10 @@ static int soc_dev_resume(struct platform_device *pdev)
         //reconfig led
         lidbg("reconfig gpio!\n");
         SOC_IO_Config(devices_resource.led_gpio, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_8MA);
-		IO_CONFIG_INPUT(0,BUTTON_LEFT_1);
-		IO_CONFIG_INPUT(0,BUTTON_LEFT_2);
-		IO_CONFIG_INPUT(0,BUTTON_RIGHT_1);
-		IO_CONFIG_INPUT(0,BUTTON_RIGHT_2);
+        IO_CONFIG_INPUT(0, BUTTON_LEFT_1);
+        IO_CONFIG_INPUT(0, BUTTON_LEFT_2);
+        IO_CONFIG_INPUT(0, BUTTON_RIGHT_1);
+        IO_CONFIG_INPUT(0, BUTTON_RIGHT_2);
 
     }
 
@@ -1036,7 +1036,7 @@ irqreturn_t irq_left_button1(int irq, void *dev_id)
 
     //lidbg("irq_left_button1: %d\n", irq);
     if(!work_pending(&work_left_button1))
-    schedule_work(&work_left_button1);
+        schedule_work(&work_left_button1);
 
 #endif
     return IRQ_HANDLED;
@@ -1059,7 +1059,7 @@ irqreturn_t irq_right_button1(int irq, void *dev_id)
     //lidbg("irq_right_button1: %d\n", irq);
     //led_on();
     if(!work_pending(&work_right_button1))
-    schedule_work(&work_right_button1);
+        schedule_work(&work_right_button1);
     return IRQ_HANDLED;
 
 }
@@ -1154,7 +1154,7 @@ static void parse_cmd(char *pt)
     lidbg("%s\n", pt);
     char *argv[32] = {NULL};
     argc = lidbg_token_string(pt, " ", argv);
-	
+
 #if (defined(BOARD_V1) || defined(BOARD_V2) || defined(BOARD_V3))
 #else
     if (!strcmp(pt, "fan_on"))
@@ -1213,14 +1213,14 @@ static void parse_cmd(char *pt)
         msleep(200);
         USB_WORK_ENABLE;
     }
-	else if (!strcmp(argv[0], "lpc"))
+    else if (!strcmp(argv[0], "lpc"))
     {
-		lidbg("%s:[%s] [%s] [%s]\n", argv[0], argv[1],argv[2],argv[3]);
-		lpc_buf[0] = simple_strtoul(argv[1], 0, 0);
-		lpc_buf[1] = simple_strtoul(argv[2], 0, 0);
-		lpc_buf[2] = simple_strtoul(argv[3], 0, 0);
-		lidbg("%s:[%d] [%d] [%d]\n", argv[0], lpc_buf[0],lpc_buf[1],lpc_buf[2]);
-		SOC_LPC_Send(lpc_buf, SIZE_OF_ARRAY(lpc_buf));
+        lidbg("%s:[%s] [%s] [%s]\n", argv[0], argv[1], argv[2], argv[3]);
+        lpc_buf[0] = simple_strtoul(argv[1], 0, 0);
+        lpc_buf[1] = simple_strtoul(argv[2], 0, 0);
+        lpc_buf[2] = simple_strtoul(argv[3], 0, 0);
+        lidbg("%s:[%d] [%d] [%d]\n", argv[0], lpc_buf[0], lpc_buf[1], lpc_buf[2]);
+        SOC_LPC_Send(lpc_buf, SIZE_OF_ARRAY(lpc_buf));
     }
 
 

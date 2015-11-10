@@ -17,9 +17,9 @@ void soc_bl_init(void)
 
 unsigned int   soc_bl_set(u32 bl_level)
 {
-//struct led_classdev *bl_cdev=backled_cdev;
-// brightness_set(bl_cdev, bl_level);
- return 0;
+    //struct led_classdev *bl_cdev=backled_cdev;
+    // brightness_set(bl_cdev, bl_level);
+    return 0;
 }
 
 EXPORT_SYMBOL(soc_bl_set);

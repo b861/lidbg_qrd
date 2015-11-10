@@ -89,7 +89,7 @@ namespace android
 
     extern "C" int usbcam_get_camera_info(int camera_id, struct camera_info *info)
     {
-        int mcamera_id=camera_id;
+        int mcamera_id = camera_id;
         int rc = -1;
         ALOGE("%s: E", __func__);
         if(info)
@@ -201,8 +201,8 @@ namespace android
         const struct hw_module_t *module, const char *id,
         struct hw_device_t **hw_device)
     {
-	const struct hw_module_t *mmodule=module;
-	const char *mid=id;
+        const struct hw_module_t *mmodule = module;
+        const char *mid = id;
         int rc = -1;
         camera_device       *device = NULL;
         camera_hardware_t   *camHal;
@@ -804,7 +804,7 @@ out_err:
     static int initUsbCamera(camera_hardware_t *camHal, int width, int height,
                              int pixelFormat)
     {
-        int mpixelFormat=pixelFormat;
+        int mpixelFormat = pixelFormat;
         int     rc = -1;
         struct  v4l2_capability     cap;
         struct  v4l2_cropcap        cropcap;
@@ -1670,8 +1670,8 @@ out_err:
 
     int usbcam_store_meta_data_in_buffers(struct camera_device *device, int enable)
     {
-        struct camera_device *mdevice=device; 
-        int menable=enable;
+        struct camera_device *mdevice = device;
+        int menable = enable;
         ALOGE("%s: E", __func__);
         int rc = 0;
 
@@ -1681,33 +1681,33 @@ out_err:
 
     int usbcam_start_recording(struct camera_device *device)
     {
-        struct camera_device *mdevice=device;
+        struct camera_device *mdevice = device;
         int rc = 0;
-	char startRecording[PROPERTY_VALUE_MAX];
+        char startRecording[PROPERTY_VALUE_MAX];
         ALOGE("%s: E", __func__);
-	property_get("persist.lidbg.uvccam.recording", startRecording, "0");
-	if(!strncmp(startRecording, "1", 1))
-	{
-		ALOGI("-------uvccam recording -----");
-		system("./flysystem/lib/out/lidbg_testuvccam /dev/video2 -c -f H264 -r &");
-		property_set("persist.lidbg.uvccam.recording","1");
-	}
+        property_get("persist.lidbg.uvccam.recording", startRecording, "0");
+        if(!strncmp(startRecording, "1", 1))
+        {
+            ALOGI("-------uvccam recording -----");
+            system("./flysystem/lib/out/lidbg_testuvccam /dev/video2 -c -f H264 -r &");
+            property_set("persist.lidbg.uvccam.recording", "1");
+        }
         ALOGE("%s: X", __func__);
         return 0;
     }
 
     void usbcam_stop_recording(struct camera_device *device)
     {
-        struct camera_device *mdevice=device;
+        struct camera_device *mdevice = device;
         ALOGE("%s: E", __func__);
-	ALOGI("-------uvccam stop_recording -----");
-	property_set("persist.lidbg.uvccam.recording","0");
+        ALOGI("-------uvccam stop_recording -----");
+        property_set("persist.lidbg.uvccam.recording", "0");
         ALOGE("%s: X", __func__);
     }
 
     int usbcam_recording_enabled(struct camera_device *device)
     {
-        struct camera_device *mdevice=device;
+        struct camera_device *mdevice = device;
         int rc = 0;
         ALOGE("%s: E", __func__);
 
@@ -1718,8 +1718,8 @@ out_err:
     void usbcam_release_recording_frame(struct camera_device *device,
                                         const void *opaque)
     {
-        struct camera_device *mdevice=device;
-        const void *mopaque=opaque;
+        struct camera_device *mdevice = device;
+        const void *mopaque = opaque;
         ALOGV("%s: E", __func__);
 
         ALOGE("%s: X", __func__);
@@ -1727,7 +1727,7 @@ out_err:
 
     int usbcam_auto_focus(struct camera_device *device)
     {
-        struct camera_device *mdevice=device;
+        struct camera_device *mdevice = device;
         ALOGE("%s: E", __func__);
         int rc = 0;
 
@@ -1737,7 +1737,7 @@ out_err:
 
     int usbcam_cancel_auto_focus(struct camera_device *device)
     {
-        struct camera_device *mdevice=device;
+        struct camera_device *mdevice = device;
         int rc = 0;
         ALOGE("%s: E", __func__);
 
@@ -1822,7 +1822,7 @@ ION_OPEN_FAILED:
     }
     int encodeJpeg(camera_hardware_t *camHal)
     {
-        camera_hardware_t *mcamHal=camHal;
+        camera_hardware_t *mcamHal = camHal;
         int                 rc = 0;
 #if 0
 
@@ -2200,7 +2200,7 @@ ION_OPEN_FAILED:
 
     int usbcam_cancel_picture(struct camera_device *device)
     {
-        struct camera_device *mdevice=device;
+        struct camera_device *mdevice = device;
         ALOGE("%s: E", __func__);
         int rc = 0;
 
@@ -2210,8 +2210,8 @@ ION_OPEN_FAILED:
 
     int usbcam_set_parameters(struct camera_device *device, const char *params)
     {
-        struct camera_device *mdevice=device;
-        const char *mparams=params;
+        struct camera_device *mdevice = device;
+        const char *mparams = params;
         ALOGE("%s: E", __func__);
         int rc = 0;
 
@@ -2254,9 +2254,9 @@ ION_OPEN_FAILED:
 
     void usbcam_put_parameters(struct camera_device *device, char *parm)
     {
-        struct camera_device *mdevice=device;
-        char *mparm=parm;
-	//       ALOGE("%s: E", __func__);
+        struct camera_device *mdevice = device;
+        char *mparm = parm;
+        //       ALOGE("%s: E", __func__);
         //      ALOGE("%s: X", __func__);
         return;
     }
@@ -2264,11 +2264,11 @@ ION_OPEN_FAILED:
     int usbcam_send_command(struct camera_device *device,
                             int32_t cmd, int32_t arg1, int32_t arg2)
     {
-	struct camera_device *mdevice=device;
-	int32_t mcmd=cmd;
-	int32_t marg1=arg1; 
-	int32_t marg2=arg2;
-	
+        struct camera_device *mdevice = device;
+        int32_t mcmd = cmd;
+        int32_t marg1 = arg1;
+        int32_t marg2 = arg2;
+
         int rc = 0;
         ALOGE("%s: E", __func__);
         ALOGE("%d", cmd);
@@ -2279,15 +2279,15 @@ ION_OPEN_FAILED:
 
     void usbcam_release(struct camera_device *device)
     {
-	struct camera_device *mdevice=device;
+        struct camera_device *mdevice = device;
         ALOGE("%s: E", __func__);
         ALOGE("%s: X", __func__);
     }
 
     int usbcam_dump(struct camera_device *device, int fd)
     {
-	struct camera_device *mdevice=device;
-	int mfd=fd;
+        struct camera_device *mdevice = device;
+        int mfd = fd;
         ALOGE("%s: E", __func__);
         int rc = 0;
 

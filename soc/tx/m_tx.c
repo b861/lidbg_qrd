@@ -8,8 +8,8 @@ struct fly_smem *p_fly_smem = NULL;
 
 int soc_temp_get(void)
 {
-	static long temp=-1;
-	return (int)temp;
+    static long temp = -1;
+    return (int)temp;
 }
 
 void lidbg_soc_main(int argc, char **argv)
@@ -49,13 +49,13 @@ static int  lidbg_soc_probe(struct platform_device *pdev)
 static int soc_suspend(struct device *dev)
 {
     DUMP_FUN;
-//	soc_io_suspend();
+    //	soc_io_suspend();
     return 0;
 }
 static int soc_resume(struct device *dev)
 {
     DUMP_FUN;
-//	soc_io_resume();
+    //	soc_io_resume();
     return 0;
 }
 

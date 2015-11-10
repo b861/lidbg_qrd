@@ -5,16 +5,16 @@ LIDBG_DEFINE;
 #define TAG "sound:"
 struct misc_device
 {
-	char *name;
-	unsigned int counter;
-	wait_queue_head_t queue;
-	struct semaphore sem;
-	
+    char *name;
+    unsigned int counter;
+    wait_queue_head_t queue;
+    struct semaphore sem;
+
 };
 struct misc_device *dev;
 static int sound_detect_dbg = 0;
 int gps_status = -1;
-volatile int flag =0;
+volatile int flag = 0;
 struct completion GPS_status_sem;
 #ifdef SOUND_DET_TEST
 void SAF7741_Volume(BYTE Volume);
@@ -27,7 +27,7 @@ int sound_detect_event(bool started)
         lidbg(TAG"music_start,%d\n", started);
         gps_status = 1;
 #ifdef SOUND_DET_TEST
-		SAF7741_Volume(0);
+        SAF7741_Volume(0);
 #endif
         complete(&GPS_status_sem);
     }
@@ -36,17 +36,17 @@ int sound_detect_event(bool started)
         lidbg(TAG"music_stop,%d\n", started);
         gps_status = 2;
 #ifdef SOUND_DET_TEST
-		SAF7741_Volume(20);
+        SAF7741_Volume(20);
 #endif
         complete(&GPS_status_sem);
     }
-	return 1;
+    return 1;
 }
 
 void cb_sound_detect(char *key, char *value )
 {
-	lidbg_setprop("persist.lidbg.sound.dbg", value);
-	lidbg(TAG"persist.lidbg.sound.dbg=%s\n", value);
+    lidbg_setprop("persist.lidbg.sound.dbg", value);
+    lidbg(TAG"persist.lidbg.sound.dbg=%s\n", value);
 }
 int sound_detect_init(void)
 {
@@ -54,7 +54,7 @@ int sound_detect_init(void)
     FS_REGISTER_INT(sound_detect_dbg, "sound_detect_dbg", 0, cb_sound_detect);
     lidbg(TAG"sound_detect_init\n");
 
-	return 1;
+    return 1;
 }
 
 int  iGPS_sound_status(void)
@@ -77,7 +77,7 @@ static void parse_cmd(char *pt)
         bool enable;
         enable = simple_strtoul(argv[1], 0, 0);
         sound_detect_event(enable);
-    }		
+    }
 }
 
 int dev_open(struct inode *inode, struct file *filp)
@@ -110,34 +110,34 @@ static ssize_t dev_write(struct file *filp, const char __user *buf,
     }
     else
         mem[len] =  '\0';
-    
+
     parse_cmd(mem);
-    flag=1;
+    flag = 1;
     wake_up_interruptible(&dev->queue);
     return size;//warn:don't forget it;
 }
 ssize_t  dev_read(struct file *filp, char __user *buffer, size_t size, loff_t *offset)
 {
-      
-	flag=0;
-	if(copy_to_user(buffer,&gps_status,4))
-	{
-		lidbg("copy_from_user ERR\n");
-	}	
-	return size;
+
+    flag = 0;
+    if(copy_to_user(buffer, &gps_status, 4))
+    {
+        lidbg("copy_from_user ERR\n");
+    }
+    return size;
 }
 
 static unsigned int dev_poll(struct file *filp, struct poll_table_struct *wait)
 {
-	unsigned int mask = 0;
-	struct misc_device *dev = filp->private_data;
-	poll_wait(filp, &dev->queue, wait);
-	if(flag)
-	{
-	  mask |= POLLIN | POLLRDNORM;
-	  pr_debug("plc poll have data!!!\n");
-	}
-	return mask;
+    unsigned int mask = 0;
+    struct misc_device *dev = filp->private_data;
+    poll_wait(filp, &dev->queue, wait);
+    if(flag)
+    {
+        mask |= POLLIN | POLLRDNORM;
+        pr_debug("plc poll have data!!!\n");
+    }
+    return mask;
 
 }
 static struct file_operations dev_fops =
@@ -153,36 +153,36 @@ static struct file_operations dev_fops =
 static int soc_dev_probe(struct platform_device *pdev)
 {
 
-	sound_detect_init();
-	dev = (struct misc_device *)kmalloc( sizeof(struct misc_device), GFP_KERNEL );
+    sound_detect_init();
+    dev = (struct misc_device *)kmalloc( sizeof(struct misc_device), GFP_KERNEL );
     init_waitqueue_head(&dev->queue);
-	lidbg_new_cdev(&dev_fops, "fly_sound");
+    lidbg_new_cdev(&dev_fops, "fly_sound");
 
-    	return 0;
+    return 0;
 
 }
 static int  soc_dev_suspend(struct platform_device *pdev, pm_message_t state)
 {
-        lidbg("soc_dev_suspend\n");
-			if(!g_var.is_fly){}
+    lidbg("soc_dev_suspend\n");
+    if(!g_var.is_fly) {}
 
-        return 0;
+    return 0;
 
 }
 static int soc_dev_remove(struct platform_device *pdev)
 {
-        lidbg("soc_dev_remove\n");	
-	        if(!g_var.is_fly){}
+    lidbg("soc_dev_remove\n");
+    if(!g_var.is_fly) {}
 
-	return 0;
+    return 0;
 
 }
 static int soc_dev_resume(struct platform_device *pdev)
 {
-        lidbg("soc_dev_resume\n");	
-	        if(!g_var.is_fly){}
+    lidbg("soc_dev_resume\n");
+    if(!g_var.is_fly) {}
 
-        return 0;
+    return 0;
 }
 
 struct platform_device soc_devices =
@@ -212,9 +212,9 @@ int dev_init(void)
 {
     lidbg("=======sound_det_init123========\n");
     LIDBG_GET;
-	set_func_tbl();
-	platform_device_register(&soc_devices);
-	platform_driver_register(&soc_devices_driver);
+    set_func_tbl();
+    platform_device_register(&soc_devices);
+    platform_driver_register(&soc_devices_driver);
     return 0;
 }
 

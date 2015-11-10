@@ -75,7 +75,7 @@
 #define SAF7741_SILICON_140     222
 #define SAF7741_SILICON_SEL     SAF7741_SILICON_125
 
-enum audio_source{Init=0,MediaCD,CDC,RADIO,AUX,IPOD,TV,MediaMP3,SRADIO,A2DP,EXT_TEL,GR_AUDIO,MediaSystem,BACK,GPS,BT_RING,BT,DVR,VAP,FRONT_CAMERA,SYSTEM_RING,AUDIO_CHANNEL_MAX};
+enum audio_source {Init = 0, MediaCD, CDC, RADIO, AUX, IPOD, TV, MediaMP3, SRADIO, A2DP, EXT_TEL, GR_AUDIO, MediaSystem, BACK, GPS, BT_RING, BT, DVR, VAP, FRONT_CAMERA, SYSTEM_RING, AUDIO_CHANNEL_MAX};
 
 #define efIsExboxChannel(iChn)			(TV == iChn || DVR == iChn)
 
@@ -90,7 +90,7 @@ enum audio_source{Init=0,MediaCD,CDC,RADIO,AUX,IPOD,TV,MediaMP3,SRADIO,A2DP,EXT_
 #define MID_LEVEL_COUNT		    11
 
 #define M_FREQ_500              0
-#define M_FREQ_1000             1 
+#define M_FREQ_1000             1
 #define M_FREQ_1500             2
 
 #define TREB_FREQ_COUNT		    2

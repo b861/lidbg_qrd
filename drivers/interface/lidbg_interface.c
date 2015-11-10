@@ -6,34 +6,34 @@ LIDBG_DEFINE;
 
 
 static int bl_event_handle(struct notifier_block *this,
-                            unsigned long event, void *ptr)
+                           unsigned long event, void *ptr)
 {
-	DUMP_FUN;
-	
-	switch(event)
-	{
-		case NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_HAL_ON): 
-		 	g_var.led_hal_status = 1;
-			break;
-		case NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_HAL_OFF):
-			g_var.led_hal_status = 0;
-			break;
-		case NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_APP_ON): 
-			g_var.led_app_status = 1;
-			break;
-		case NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_APP_OFF): 
-			g_var.led_app_status = 0;
-			break;
-		default:
-			return NOTIFY_DONE;
-	}
-	lidbg("hal=%d,app=%d\n",g_var.led_hal_status,g_var.led_app_status);
-	if(g_var.led_hal_status & g_var.led_app_status)
-		LCD_ON;
-	else
-		LCD_OFF;
-	
-	return NOTIFY_DONE;
+    DUMP_FUN;
+
+    switch(event)
+    {
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_HAL_ON):
+        g_var.led_hal_status = 1;
+        break;
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_HAL_OFF):
+        g_var.led_hal_status = 0;
+        break;
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_APP_ON):
+        g_var.led_app_status = 1;
+        break;
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_APP_OFF):
+        g_var.led_app_status = 0;
+        break;
+    default:
+        return NOTIFY_DONE;
+    }
+    lidbg("hal=%d,app=%d\n", g_var.led_hal_status, g_var.led_app_status);
+    if(g_var.led_hal_status & g_var.led_app_status)
+        LCD_ON;
+    else
+        LCD_OFF;
+
+    return NOTIFY_DONE;
 }
 
 static struct notifier_block bl_ctl_bn =
@@ -83,7 +83,7 @@ bool iSOC_IO_ISR_Del (u32 irq)
     return 1;
 }
 
-bool iSOC_IO_Config(u32 index, int func,u32 direction,  u32 pull, u32 drive_strength)
+bool iSOC_IO_Config(u32 index, int func, u32 direction,  u32 pull, u32 drive_strength)
 {
     return soc_io_config( index, func, direction, pull, drive_strength, 1);
 }
@@ -95,53 +95,53 @@ bool iSOC_IO_Suspend_Config(u32 index, u32 direction, u32 pull, u32 drive_streng
 
 void iSOC_IO_Output_Ext(u32 group, u32 index, bool status, u32 pull, u32 drive_strength)
 {
-	if(status == 1)
-    	soc_io_config( index, GPIOMUX_FUNC_GPIO, GPIOMUX_OUT_HIGH, pull, drive_strength, 1);
-	else if (status == 0)
-    	soc_io_config( index,  GPIOMUX_FUNC_GPIO,GPIOMUX_OUT_LOW, pull, drive_strength, 1);
-		
+    if(status == 1)
+        soc_io_config( index, GPIOMUX_FUNC_GPIO, GPIOMUX_OUT_HIGH, pull, drive_strength, 1);
+    else if (status == 0)
+        soc_io_config( index,  GPIOMUX_FUNC_GPIO, GPIOMUX_OUT_LOW, pull, drive_strength, 1);
+
     soc_io_output(group, index,  status);
 }
 
 void iSOC_IO_Output(u32 group, u32 index, bool status)
 {
 #ifdef PLATFORM_ID_7
-	soc_io_config( index, GPIOMUX_FUNC_GPIO, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_16MA, 0);
+    soc_io_config( index, GPIOMUX_FUNC_GPIO, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_16MA, 0);
 #else
-	if(status == 1)
-    	soc_io_config( index,  GPIOMUX_FUNC_GPIO,GPIOMUX_OUT_HIGH, GPIOMUX_PULL_NONE, GPIOMUX_DRV_8MA, 0);
-	else if (status == 0)
-    	soc_io_config( index,  GPIOMUX_FUNC_GPIO,GPIOMUX_OUT_LOW, GPIOMUX_PULL_NONE, GPIOMUX_DRV_8MA, 0);
-#endif	
+    if(status == 1)
+        soc_io_config( index,  GPIOMUX_FUNC_GPIO, GPIOMUX_OUT_HIGH, GPIOMUX_PULL_NONE, GPIOMUX_DRV_8MA, 0);
+    else if (status == 0)
+        soc_io_config( index,  GPIOMUX_FUNC_GPIO, GPIOMUX_OUT_LOW, GPIOMUX_PULL_NONE, GPIOMUX_DRV_8MA, 0);
+#endif
     soc_io_output(group, index,  status);
 }
 
 bool iSOC_IO_Input(u32 group, u32 index, u32 pull)
 {
-    soc_io_config( index,  GPIOMUX_FUNC_GPIO,GPIOMUX_IN, pull/*GPIO_CFG_NO_PULL*/, GPIOMUX_DRV_2MA, 0);
+    soc_io_config( index,  GPIOMUX_FUNC_GPIO, GPIOMUX_IN, pull/*GPIO_CFG_NO_PULL*/, GPIOMUX_DRV_2MA, 0);
     return soc_io_input(index);
 }
 
 //return mv
 bool iSOC_ADC_Get (u32 channel , u32 *value)
-{	
-	if((g_var.system_status <= FLY_KERNEL_DOWN)&&(g_var.system_status >= FLY_DEVICE_DOWN))
-	{
-		return 0;
-	}
+{
+    if((g_var.system_status <= FLY_KERNEL_DOWN) && (g_var.system_status >= FLY_DEVICE_DOWN))
+    {
+        return 0;
+    }
 
-	*value = 0xffffffff;
+    *value = 0xffffffff;
 #ifdef SOC_mt3360
-	*value = soc_ad_read(channel);
+    *value = soc_ad_read(channel);
 #else
-	*value = soc_ad_read(channel)/1000;
+    *value = soc_ad_read(channel) / 1000;
 #endif
 #if 0
-	lidbg("iSOC_ADC_Get=%d\n",*value);
+    lidbg("iSOC_ADC_Get=%d\n", *value);
 #endif
-	if(*value == 0xffffffff)
-	return 0;
-	return 1;
+    if(*value == 0xffffffff)
+        return 0;
+    return 1;
 }
 void iSOC_Key_Report(u32 key_value, u32 type)
 {
@@ -220,19 +220,19 @@ void iSOC_PWM_Set(int pwm_id, int duty_ns, int period_ns)
 //0~255
 int iSOC_BL_Set( u32 bl_level)
 {
-	lidbg("SOC_BL_Set:%d\n",bl_level);
+    lidbg("SOC_BL_Set:%d\n", bl_level);
     if(bl_level == 1)
-    {  
-     	lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_HAL_ON));
+    {
+        lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_HAL_ON));
     }
-        
+
     else if(bl_level == 0)
     {
-		lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_HAL_OFF));
+        lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_HAL_OFF));
 
     }
-    else       
-    soc_bl_set(bl_level);
+    else
+        soc_bl_set(bl_level);
     return 1;
 
 }
@@ -257,13 +257,13 @@ void iSOC_System_Status(FLY_SYSTEM_STATUS status)
 int iSOC_Get_CpuFreq(void)
 {
     int cpu_freq;
-/*
-	char buf[16];
-    lidbg_readwrite_file("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_cur_freq", buf, NULL, 16);
-    cpu_freq = simple_strtoul(buf, 0, 0);
-    g_var.cpu_freq = cpu_freq;
-*/
-	cpu_freq = cpufreq_get(0);
+    /*
+    	char buf[16];
+        lidbg_readwrite_file("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_cur_freq", buf, NULL, 16);
+        cpu_freq = simple_strtoul(buf, 0, 0);
+        g_var.cpu_freq = cpu_freq;
+    */
+    cpu_freq = cpufreq_get(0);
 
     return cpu_freq;
 }
@@ -271,7 +271,7 @@ int iSOC_Get_CpuFreq(void)
 
 int iSOC_Temp_Get(void)
 {
-	return soc_temp_get(g_hw.mem_sensor_num);
+    return soc_temp_get(g_hw.mem_sensor_num);
 }
 
 
@@ -285,7 +285,7 @@ int iSOC_Uart_Send(char *arg)
 #endif
 
     lidbg_shell_cmd(cmd);
-	return 0;
+    return 0;
 }
 
 static void set_func_tbl(void)
@@ -308,12 +308,12 @@ static void set_func_tbl(void)
     plidbg_dev->soc_func_tbl.pfnSOC_I2C_Rec_TEF7000 = iSOC_I2C_Rec_TEF7000;
 
     //spi
-/*
-    plidbg_dev->soc_func_tbl.pfnSOC_SPI_Mode_Set=iSOC_SPI_Mode_Set;
-    plidbg_dev->soc_func_tbl.pfnSOC_SPI_Send =iSOC_SPI_Send;
-    plidbg_dev->soc_func_tbl.pfnSOC_SPI_Rec =iSOC_SPI_Rec;
-    plidbg_dev->soc_func_tbl.pfnSOC_SPI_Send_Rec = iSOC_SPI_Do_Write_Then_Read;
-*/
+    /*
+        plidbg_dev->soc_func_tbl.pfnSOC_SPI_Mode_Set=iSOC_SPI_Mode_Set;
+        plidbg_dev->soc_func_tbl.pfnSOC_SPI_Send =iSOC_SPI_Send;
+        plidbg_dev->soc_func_tbl.pfnSOC_SPI_Rec =iSOC_SPI_Rec;
+        plidbg_dev->soc_func_tbl.pfnSOC_SPI_Send_Rec = iSOC_SPI_Do_Write_Then_Read;
+    */
     //io-irq
     plidbg_dev->soc_func_tbl.pfnSOC_IO_ISR_Add = iSOC_IO_ISR_Add;
     plidbg_dev->soc_func_tbl.pfnSOC_IO_ISR_Enable = iSOC_IO_ISR_Enable;
@@ -332,14 +332,14 @@ static void set_func_tbl(void)
     //display/touch
     plidbg_dev->soc_func_tbl.pfnSOC_Display_Get_Res = iSOC_Display_Get_Res;
 
- //   plidbg_dev->soc_func_tbl.pfnSOC_Get_Share_Mem = iSOC_Get_Share_Mem;
+    //   plidbg_dev->soc_func_tbl.pfnSOC_Get_Share_Mem = iSOC_Get_Share_Mem;
     plidbg_dev->soc_func_tbl.pfnSOC_System_Status = iSOC_System_Status;
     plidbg_dev->soc_func_tbl.pfnSOC_WakeLock_Stat  = lidbg_wakelock_register;
     plidbg_dev->soc_func_tbl.pfnSOC_Get_CpuFreq  = iSOC_Get_CpuFreq;
 
     plidbg_dev->soc_func_tbl.pfnSOC_Uart_Send = iSOC_Uart_Send;
     plidbg_dev->soc_func_tbl.pfnHal_Ts_Callback = NULL;
-	
+
     plidbg_dev->soc_func_tbl.pfnSOC_Temp_Get = iSOC_Temp_Get;
 
 }
@@ -398,11 +398,11 @@ static struct miscdevice misc =
 int fly_interface_init(void)
 {
     int ret;
-	int p ; 
+    int p ;
     DUMP_BUILD_TIME;
     ret = misc_register(&misc);
     plidbg_dev = kmalloc(sizeof(struct lidbg_interface), GFP_KERNEL);
-		
+
     if (plidbg_dev == NULL)
     {
 
@@ -410,13 +410,13 @@ int fly_interface_init(void)
         return 0;
     }
 
-	p = (int) & (plidbg_dev->soc_func_tbl);
+    p = (int) & (plidbg_dev->soc_func_tbl);
     {
         int i;
         for(i = 0; i < sizeof(plidbg_dev->soc_func_tbl) / 4; i++)
         {
-           // (((int *) & (plidbg_dev->soc_func_tbl))[i]) = interface_func_tbl_default;
-           *((int*)(p+i*4)) = (int)interface_func_tbl_default;
+            // (((int *) & (plidbg_dev->soc_func_tbl))[i]) = interface_func_tbl_default;
+            *((int *)(p + i * 4)) = (int)interface_func_tbl_default;
         }
     }
     memset(&(plidbg_dev->soc_pvar_tbl), (int)NULL, sizeof(struct lidbg_pvar_t));
@@ -432,22 +432,22 @@ int fly_interface_init(void)
     g_var.fake_suspend = 0;
     g_var.acc_flag = 1;
     g_var.ws_lh = NULL;
-	g_var.fb_on = true;
+    g_var.fb_on = true;
     g_var.ts_active_key = TS_NO_KEY;
-	
-	g_var.led_app_status = 1;
-	g_var.led_hal_status = 1;
-	g_var.is_udisk_needreset = 1;
-    if(gboot_mode==MD_RECOVERY)
+
+    g_var.led_app_status = 1;
+    g_var.led_hal_status = 1;
+    g_var.is_udisk_needreset = 1;
+    if(gboot_mode == MD_RECOVERY)
     {
-	    g_var.recovery_mode = 1;
-		lidbg("system mode is recovery_mode\n");
-	}
+        g_var.recovery_mode = 1;
+        lidbg("system mode is recovery_mode\n");
+    }
     else
-	{
-	    g_var.recovery_mode = 0;
-		lidbg("system mode is normal_mode\n");
-	}
+    {
+        g_var.recovery_mode = 0;
+        lidbg("system mode is normal_mode\n");
+    }
 
     if(fs_is_file_exist(HAL_SO))
     {
@@ -455,70 +455,70 @@ int fly_interface_init(void)
         g_var.is_fly = true;
     }
     else
-	{
-	    g_var.is_fly = false;
-		lidbg("is origin\n");
-	}
+    {
+        g_var.is_fly = false;
+        lidbg("is origin\n");
+    }
 
     memset(&g_var.hw_info, 0, sizeof(struct hw_info));
-	
+
     FS_REGISTER_INT(g_var.hw_info.hw_version, "hw_version", 0, NULL);
     FS_REGISTER_INT(g_var.hw_info.ts_type, "ts_type", 0, NULL);
     FS_REGISTER_INT(g_var.hw_info.ts_config, "ts_config", 0, NULL);
     FS_REGISTER_INT(g_var.hw_info.lcd_type, "lcd_type", 0, NULL);
     FS_REGISTER_INT(g_var.hw_info.virtual_key, "virtual_key", 0, NULL);
 
-	
-	if(g_var.hw_info.hw_version == 0)
-	{
+
+    if(g_var.hw_info.hw_version == 0)
+    {
 #ifdef BOARD_V1
-	g_var.hw_info.hw_version = 1;
+        g_var.hw_info.hw_version = 1;
 #endif
 #ifdef BOARD_V2
-	g_var.hw_info.hw_version = 2;
+        g_var.hw_info.hw_version = 2;
 #endif
 #ifdef BOARD_V3
-	g_var.hw_info.hw_version = 3;
+        g_var.hw_info.hw_version = 3;
 #endif
 #ifdef BOARD_V4
-	g_var.hw_info.hw_version = 4;
+        g_var.hw_info.hw_version = 4;
 #endif
 #ifdef BOARD_V5
-	g_var.hw_info.hw_version = 5;
+        g_var.hw_info.hw_version = 5;
 #endif
 #ifdef BOARD_V6
-	g_var.hw_info.hw_version = 6;
+        g_var.hw_info.hw_version = 6;
 #endif
 #ifdef BOARD_V7
-	g_var.hw_info.hw_version = 7;
+        g_var.hw_info.hw_version = 7;
 #endif
 #ifdef BOARD_V8
-	g_var.hw_info.hw_version = 8;
+        g_var.hw_info.hw_version = 8;
 #endif
 #ifdef BOARD_V9
-	g_var.hw_info.hw_version = 9;
+        g_var.hw_info.hw_version = 9;
 #endif
 
-	}
-	lidbg("hw_version=%d\n",g_var.hw_info.hw_version);
-	
-	lidbg("android_version=%d\n",ANDROID_VERSION);
+    }
+    lidbg("hw_version=%d\n", g_var.hw_info.hw_version);
+
+    lidbg("android_version=%d\n", ANDROID_VERSION);
 
 
     //if((g_var.recovery_mode == 0) && ( fs_is_file_exist(LIDBG_PATH)))
     {
-		g_var.is_first_update = is_out_updated;
-		lidbg("g_var.is_first_update=%d\n",g_var.is_first_update);
+        g_var.is_first_update = is_out_updated;
+        lidbg("g_var.is_first_update=%d\n", g_var.is_first_update);
     }
-	
-	g_var.is_debug_mode = fs_is_file_exist("/data/lidbg/set_debug_mode");
 
-	register_lidbg_notifier(&bl_ctl_bn);
-	
-	return 0;
+    g_var.is_debug_mode = fs_is_file_exist("/data/lidbg/set_debug_mode");
+
+    register_lidbg_notifier(&bl_ctl_bn);
+
+    return 0;
 }
 
-void fly_interface_deinit(void){}
+void fly_interface_deinit(void) {}
 
 module_init(fly_interface_init);
 module_exit(fly_interface_deinit);

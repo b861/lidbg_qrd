@@ -210,33 +210,33 @@ static void ft5x06_report_value(struct ft5x06_ts_data *data)
         {
             event->pressure = FT_PRESS;
             fingerdown++;
-			{
-            static u32 touch_cnt = 0;
-            touch_cnt++;
-	            if (!(touch_cnt % 50))
-	            {
-	                lidbg("ts:[%d,%d]\n", event->x[i], event->y[i]);
-	            }
+            {
+                static u32 touch_cnt = 0;
+                touch_cnt++;
+                if (!(touch_cnt % 50))
+                {
+                    lidbg("ts:[%d,%d]\n", event->x[i], event->y[i]);
+                }
             }
         }
         else
         {
             event->pressure = 0;
         }
-		input_mt_slot(data->input_dev, event->finger_id[i]);
+        input_mt_slot(data->input_dev, event->finger_id[i]);
 
         input_report_abs(data->input_dev, ABS_MT_POSITION_X,
                          event->x[i]);
         input_report_abs(data->input_dev, ABS_MT_POSITION_Y,
                          event->y[i]);
-      
+
         input_report_abs(data->input_dev, ABS_MT_PRESSURE,
                          event->pressure);
         input_report_abs(data->input_dev, ABS_MT_TRACKING_ID,
                          event->finger_id[i]);
         input_report_abs(data->input_dev, ABS_MT_TOUCH_MAJOR,
                          event->pressure);
-       // input_mt_sync(data->input_dev);
+        // input_mt_sync(data->input_dev);
         //--------------------futengfei------------------------
         g_var.flag_for_15s_off++;
         if(g_var.flag_for_15s_off >= 1000)
@@ -580,8 +580,8 @@ static int ft5x06_ts_probe(struct i2c_client *client,
     	set_bit(BTN_MISC, input_dev->keybit);
     	set_bit(BTN_TOUCH, input_dev->keybit);
     */
- data->input_dev->evbit[0] = BIT_MASK(EV_SYN) | BIT_MASK(EV_KEY) | BIT_MASK(EV_ABS) ;
-__set_bit(INPUT_PROP_DIRECT, data->input_dev->propbit);
+    data->input_dev->evbit[0] = BIT_MASK(EV_SYN) | BIT_MASK(EV_KEY) | BIT_MASK(EV_ABS) ;
+    __set_bit(INPUT_PROP_DIRECT, data->input_dev->propbit);
     input_mt_init_slots(data->input_dev, 5);
 #define SCREEN_X (1024)
 #define SCREEN_Y (600)

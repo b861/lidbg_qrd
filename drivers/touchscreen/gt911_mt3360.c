@@ -158,11 +158,11 @@ s32 gtp_i2c_write(struct i2c_client *client, u8 *buf, s32 len)
         if (ret == 1)break;
         retries++;
     }
-//    if(retries >= 5)
-//    {
-//        GTP_DEBUG("I2C retry timeout, reset chip.");
-//        gtp_reset_guitar(client, 10);
-//    }
+    //    if(retries >= 5)
+    //    {
+    //        GTP_DEBUG("I2C retry timeout, reset chip.");
+    //        gtp_reset_guitar(client, 10);
+    //    }
     return ret;
 }
 
@@ -304,7 +304,7 @@ static void gtp_touch_up(struct goodix_ts_data *ts, s32 id)
 #if GTP_ICS_SLOT_REPORT
     input_mt_slot(ts->input_dev, id);
     input_report_abs(ts->input_dev, ABS_MT_TRACKING_ID, -1);
-//    GTP_DEBUG("Touch id[%2d] release!", id);
+    //    GTP_DEBUG("Touch id[%2d] release!", id);
 #else
     input_report_abs(ts->input_dev, ABS_MT_TOUCH_MAJOR, 0);
     input_report_abs(ts->input_dev, ABS_MT_WIDTH_MAJOR, 0);
@@ -367,7 +367,7 @@ static void goodix_ts_work_func(struct work_struct *work)
 
     if (touch_num > GTP_MAX_TOUCH)
     {
-      //  lidbg("touch_num > GTP_MAX_TOUCH\n");
+        //  lidbg("touch_num > GTP_MAX_TOUCH\n");
         goto exit_work_func;
     }
 
@@ -447,31 +447,31 @@ static void goodix_ts_work_func(struct work_struct *work)
                 g_curr_tspara.y = point_data[4] | (point_data[5] << 8);
                 g_curr_tspara.press = true;
 
-//                if(1 == recovery_mode)
-//                {
-//                    if( (input_y >= 0) && (input_x >= 0) )
-//                    {
-//                        touch.x = point_data[6] | (point_data[7] << 8);
-//                        touch.y = point_data[4] | (point_data[5] << 8);
-//                        if (1 == ts_should_revert)
-//                            GTP_REVERT(touch.x, touch.y);
-//                        touch.pressed = 1;
-//                        set_touch_pos(&touch);
-//                        lidbg("[%d,%d]==========%d\n", touch.x, touch.y, touch.pressed);
-//                    }
-//                }
+                //                if(1 == recovery_mode)
+                //                {
+                //                    if( (input_y >= 0) && (input_x >= 0) )
+                //                    {
+                //                        touch.x = point_data[6] | (point_data[7] << 8);
+                //                        touch.y = point_data[4] | (point_data[5] << 8);
+                //                        if (1 == ts_should_revert)
+                //                            GTP_REVERT(touch.x, touch.y);
+                //                        touch.pressed = 1;
+                //                        set_touch_pos(&touch);
+                //                        lidbg("[%d,%d]==========%d\n", touch.x, touch.y, touch.pressed);
+                //                    }
+                //                }
 
             }
             else
             {
                 g_curr_tspara.press = false;
 
-//                if(1 == recovery_mode)
-//                {
-//                    touch.pressed = 0;
-//                    set_touch_pos(&touch);
-//                    lidbg("[%d,%d]==========%d\n", touch.x, touch.y, touch.pressed);
-//                }
+                //                if(1 == recovery_mode)
+                //                {
+                //                    touch.pressed = 0;
+                //                    set_touch_pos(&touch);
+                //                    lidbg("[%d,%d]==========%d\n", touch.x, touch.y, touch.pressed);
+                //                }
 
             }
         }
@@ -499,7 +499,7 @@ static void goodix_ts_work_func(struct work_struct *work)
                     if (1 == ts_should_revert)
                         GTP_REVERT(touch.x, touch.y);
                     touch.pressed = 1;
-//                    set_touch_pos(&touch);
+                    //                    set_touch_pos(&touch);
                 }
             }
             g_var.flag_for_15s_off++;
@@ -520,7 +520,7 @@ static void goodix_ts_work_func(struct work_struct *work)
         if(1 == recovery_mode)
         {
             touch.pressed = 0;
-//            set_touch_pos(&touch);
+            //            set_touch_pos(&touch);
         }
     }
 
@@ -529,12 +529,12 @@ static void goodix_ts_work_func(struct work_struct *work)
 #endif
 
     input_sync(ts->input_dev);
-	touch_num = 0;
+    touch_num = 0;
 exit_work_func:
     if(!ts->gtp_rawdiff_mode)
     {
         ret = gtp_i2c_write(ts->client, end_cmd, 3);
-//		lidbg("======clean 0X814E===========");
+        //		lidbg("======clean 0X814E===========");
         if (ret < 0)
         {
             GTP_INFO("I2C write end_cmd  error!");
@@ -746,15 +746,15 @@ Output:
 	Executive outcomes.0---succeed.
 *******************************************************/
 
-        u8 cfg_info_group1[] = CTP_CFG_GROUP1;
-        u8 cfg_info_group2[] = CTP_CFG_GROUP2;
-        u8 cfg_info_group3[] = CTP_CFG_GROUP3;
-        u8 cfg_info_group4[] = CTP_CFG_GROUP4;
-        u8 cfg_info_group5[] = CTP_CFG_GROUP5;
-        u8 cfg_info_group6[] = CTP_CFG_GROUP6;
-        u8 cfg_info_group7[] = CTP_CFG_GROUP7;
-	 u8 cfg_info_group8[] = CTP_CFG_GROUP8;
-static s32 gtp_init_panel(struct goodix_ts_data *ts, char *ic_type,char *Firmware_version)
+u8 cfg_info_group1[] = CTP_CFG_GROUP1;
+u8 cfg_info_group2[] = CTP_CFG_GROUP2;
+u8 cfg_info_group3[] = CTP_CFG_GROUP3;
+u8 cfg_info_group4[] = CTP_CFG_GROUP4;
+u8 cfg_info_group5[] = CTP_CFG_GROUP5;
+u8 cfg_info_group6[] = CTP_CFG_GROUP6;
+u8 cfg_info_group7[] = CTP_CFG_GROUP7;
+u8 cfg_info_group8[] = CTP_CFG_GROUP8;
+static s32 gtp_init_panel(struct goodix_ts_data *ts, char *ic_type, char *Firmware_version)
 {
     s32 ret = -1;
     s32 i;
@@ -771,7 +771,7 @@ static s32 gtp_init_panel(struct goodix_ts_data *ts, char *ic_type,char *Firmwar
     {
         lidbg("=====ic_type:911======\n");
 
-        u8 *send_cfg_buf[8] = {cfg_info_group1, cfg_info_group2, cfg_info_group3, cfg_info_group4, cfg_info_group5, cfg_info_group6, cfg_info_group7,cfg_info_group8};
+        u8 *send_cfg_buf[8] = {cfg_info_group1, cfg_info_group2, cfg_info_group3, cfg_info_group4, cfg_info_group5, cfg_info_group6, cfg_info_group7, cfg_info_group8};
         u8 cfg_info_len[8] = {sizeof(cfg_info_group1) / sizeof(cfg_info_group1[0]),
                               sizeof(cfg_info_group2) / sizeof(cfg_info_group2[0]),
                               sizeof(cfg_info_group3) / sizeof(cfg_info_group3[0]),
@@ -779,7 +779,7 @@ static s32 gtp_init_panel(struct goodix_ts_data *ts, char *ic_type,char *Firmwar
                               sizeof(cfg_info_group5) / sizeof(cfg_info_group5[0]),
                               sizeof(cfg_info_group6) / sizeof(cfg_info_group6[0]),
                               sizeof(cfg_info_group7) / sizeof(cfg_info_group7[0]),
-                               sizeof(cfg_info_group8) / sizeof(cfg_info_group8[0])
+                              sizeof(cfg_info_group8) / sizeof(cfg_info_group8[0])
 
                              };
         for(i = 0; i < 8; i++)
@@ -816,17 +816,17 @@ static s32 gtp_init_panel(struct goodix_ts_data *ts, char *ic_type,char *Firmwar
                     rd_cfg_buf[GTP_ADDR_LENGTH] = rd_cfg_buf[GTP_ADDR_LENGTH] + 6;
                 }
             }
-	if(2==rd_cfg_buf[GTP_ADDR_LENGTH])
-		{
-		if(!strcmp(Firmware_version, "1051"))
-		   {
-		   rd_cfg_buf[GTP_ADDR_LENGTH]=7;
-		   }
-		}
+            if(2 == rd_cfg_buf[GTP_ADDR_LENGTH])
+            {
+                if(!strcmp(Firmware_version, "1051"))
+                {
+                    rd_cfg_buf[GTP_ADDR_LENGTH] = 7;
+                }
+            }
         }
         else
         {
-            rd_cfg_buf[GTP_ADDR_LENGTH] = ts_config-1;
+            rd_cfg_buf[GTP_ADDR_LENGTH] = ts_config - 1;
         }
         memset(&config[GTP_ADDR_LENGTH], 0, GTP_CONFIG_MAX_LENGTH);
         memcpy(&config[GTP_ADDR_LENGTH], send_cfg_buf[rd_cfg_buf[GTP_ADDR_LENGTH]], ts->gtp_cfg_len);
@@ -958,10 +958,10 @@ static s32 gtp_init_panel(struct goodix_ts_data *ts, char *ic_type,char *Firmwar
         GTP_ERROR("Send config error.");
     }
 
-    
+
     ret = gtp_i2c_read(ts->client, configed_data, 186);
-    for(i=0; i<188; i++)
-		lidbg(" reg[%x] = %x\n",(0x8047+i), configed_data[i+2]);
+    for(i = 0; i < 188; i++)
+        lidbg(" reg[%x] = %x\n", (0x8047 + i), configed_data[i + 2]);
     GTP_DEBUG("X_MAX = %d,Y_MAX = %d,TRIGGER = 0x%02x",
               ts->abs_x_max, ts->abs_y_max, ts->int_trigger_type);
 
@@ -981,7 +981,7 @@ Input:
 Output:
 	Executive outcomes.0---succeed.
 *******************************************************/
-s32 gtp_read_version(struct i2c_client *client, u16 *version, char *ic_type,char *Firmware_version)
+s32 gtp_read_version(struct i2c_client *client, u16 *version, char *ic_type, char *Firmware_version)
 {
     s32 ret = -1;
     s32 i = 0;
@@ -1011,8 +1011,8 @@ s32 gtp_read_version(struct i2c_client *client, u16 *version, char *ic_type,char
     GTP_INFO("IC VERSION:%c%c%c%c_%02x%02x",
              buf[2], buf[3], buf[4], buf[5], buf[7], buf[6]);
     sprintf(ic_type, "%c%c%c", buf[2], buf[3], buf[4]);
-    sprintf(Firmware_version,"%02x%02x",buf[7],buf[6]);
-    lidbg("Firmware_version is %s\n",Firmware_version);
+    sprintf(Firmware_version, "%02x%02x", buf[7], buf[6]);
+    lidbg("Firmware_version is %s\n", Firmware_version);
     return ret;
 }
 
@@ -1113,19 +1113,19 @@ static s8 gtp_request_irq(struct goodix_ts_data *ts)
 
     GTP_DEBUG("INT trigger type:%x", ts->int_trigger_type);
 
-//    ret  = request_irq(ts->client->irq, goodix_ts_irq_handler, irq_table[ts->int_trigger_type], ts->client->name, ts);
+    //    ret  = request_irq(ts->client->irq, goodix_ts_irq_handler, irq_table[ts->int_trigger_type], ts->client->name, ts);
     if (ret)
-     {
-         GTP_ERROR("================Request IRQ failed!ERRNO:%d.=============\n", ret);
-//         GTP_GPIO_AS_INPUT(GTP_INT_PORT);
-//         GTP_GPIO_FREE(GTP_INT_PORT);
+    {
+        GTP_ERROR("================Request IRQ failed!ERRNO:%d.=============\n", ret);
+        //         GTP_GPIO_AS_INPUT(GTP_INT_PORT);
+        //         GTP_GPIO_FREE(GTP_INT_PORT);
 
-         hrtimer_init(&ts->timer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
-         ts->timer.function = goodix_ts_timer_handler;
-         hrtimer_start(&ts->timer, ktime_set(1, 0), HRTIMER_MODE_REL);
-         return -1;
-     }
-     else
+        hrtimer_init(&ts->timer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
+        ts->timer.function = goodix_ts_timer_handler;
+        hrtimer_start(&ts->timer, ktime_set(1, 0), HRTIMER_MODE_REL);
+        return -1;
+    }
+    else
     {
         gtp_irq_disable(ts);
         ts->use_irq = 1;
@@ -1226,7 +1226,7 @@ struct goodix_ts_data *ts_update;
 char ic_type[3];
 void cb_int_ts_choose_config(char *key, char *value )
 {
-    int ret = gtp_init_panel(ts_update, ic_type,Firmware_version);
+    int ret = gtp_init_panel(ts_update, ic_type, Firmware_version);
     if (ret < 0)
     {
         GTP_ERROR("GTP init panel failed.");
@@ -1304,7 +1304,7 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
         GTP_ERROR("I2C communication ERROR!");
     }
     lidbg("gt911_config_version:0x%02x", gt911_config_version);
-    ret = gtp_read_version(client, &version_info, ic_type,Firmware_version);
+    ret = gtp_read_version(client, &version_info, ic_type, Firmware_version);
 #if GTP_AUTO_UPDATE
     ret = gup_init_update_proc(ts);
     if (ret < 0)
@@ -1313,7 +1313,7 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     }
 #endif
 
-    ret = gtp_init_panel(ts, ic_type,Firmware_version);
+    ret = gtp_init_panel(ts, ic_type, Firmware_version);
     if (ret < 0)
     {
         GTP_ERROR("GTP init panel failed.");
@@ -1384,8 +1384,8 @@ static int goodix_ts_remove(struct i2c_client *client)
     {
         if (ts->use_irq)
         {
-//            GTP_GPIO_AS_INPUT(GTP_INT_PORT);
-//            GTP_GPIO_FREE(GTP_INT_PORT);
+            //            GTP_GPIO_AS_INPUT(GTP_INT_PORT);
+            //            GTP_GPIO_FREE(GTP_INT_PORT);
             free_irq(client->irq, ts);
         }
         else
@@ -1532,8 +1532,8 @@ static struct i2c_driver goodix_ts_driver =
     .probe      = goodix_ts_probe,
     .remove     = goodix_ts_remove,
 #ifndef CONFIG_HAS_EARLYSUSPEND
-//    .suspend    = goodix_ts_early_suspend,
-//    .resume     = goodix_ts_late_resume,
+    //    .suspend    = goodix_ts_early_suspend,
+    //    .resume     = goodix_ts_late_resume,
 #endif
     .id_table   = goodix_ts_id,
     .driver = {
@@ -1654,7 +1654,7 @@ Output:
 static int __devinit goodix_ts_init(void)
 {
     LIDBG_GET;
-//    is_ts_load = 1;
+    //    is_ts_load = 1;
 #if 0
 #ifdef BOARD_V2
     SOC_IO_Output(0, 27, 1);

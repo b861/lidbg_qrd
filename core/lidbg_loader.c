@@ -27,7 +27,7 @@ char *insmod_list[] =
     "lidbg_servicer.ko",
     "lidbg_touch.ko",
 #ifndef SOC_msm8x25
- //   "lidbg_spi.ko",
+    //   "lidbg_spi.ko",
 #endif
     "lidbg_key.ko",
     "lidbg_i2c.ko",
@@ -88,7 +88,7 @@ int thread_check_restart(void *data)
     if(load_modules_count == 0)
     {
         LIDBG_ERR("load_modules_count err,call kernel_restart!\n");
-	
+
 #ifdef SOC_msm8x25
         kernel_restart(NULL);
 #endif
@@ -103,28 +103,28 @@ int thread_loader(void *data)
     char path[128] = {0}, *kopath = NULL;
     int tmp;
     DUMP_FUN_ENTER;
-		
+
     CREATE_KTHREAD(thread_check_restart, NULL);
 #ifndef SOC_msm8x25
     while(!is_file_exist("/dev/log/userver_ok.txt"))
-			ssleep(1);
+        ssleep(1);
 #endif
 
     if(is_file_exist(RECOVERY_MODE_DIR))
-		gboot_mode=MD_RECOVERY;
+        gboot_mode = MD_RECOVERY;
     else if(is_file_exist(FLY_MODE_FILE))
-		gboot_mode=MD_FLYSYSTEM;
+        gboot_mode = MD_FLYSYSTEM;
     else
-		gboot_mode=MD_ORIGIN;
+        gboot_mode = MD_ORIGIN;
 
-		if(gboot_mode==MD_FLYSYSTEM)
+    if(gboot_mode == MD_FLYSYSTEM)
         kopath = "/flysystem/lib/out/";
-		else
+    else
         kopath = "/system/lib/modules/out/";
 
-	lidbg("thread_loader start,%d\n",gboot_mode);
+    lidbg("thread_loader start,%d\n", gboot_mode);
     for(j = 0; insmod_soc_list[j] != NULL; j++)
-    {	
+    {
         sprintf(path, "%s%s", kopath, insmod_soc_list[j]);
         lidbg_insmod(path);
     }

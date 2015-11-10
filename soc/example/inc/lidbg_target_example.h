@@ -27,14 +27,14 @@
 			msleep(20);\
 			SOC_IO_Output(0, g_hw.gpio_lcd_reset, 1);\
 }while(0)\
-
+ 
 //usb
 #define USB_SWITCH_CONNECT  do{\
 			check_gpio(g_hw.gpio_usb_switch);\
 			SOC_IO_Output(0, g_hw.gpio_usb_switch, 0);\
 	}while(0)
 
-		
+
 #define USB_SWITCH_DISCONNECT do{\
 			check_gpio(g_hw.gpio_usb_switch);\
 			SOC_IO_Output(0, g_hw.gpio_usb_switch, 1);\

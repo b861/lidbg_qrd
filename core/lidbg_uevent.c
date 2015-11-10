@@ -35,7 +35,7 @@ bool uevent_focus(char *focus, void(*callback)(char *focus, char *uevent))
 void uevent_send(enum kobject_action action, char *envp_ext[])
 {
     if(uevent_dbg)
-		LIDBG_WARN("%s,%s\n", (envp_ext[0] == NULL ? "null" : envp_ext[0]), (envp_ext[1] == NULL ? "null" : envp_ext[1]));
+        LIDBG_WARN("%s,%s\n", (envp_ext[0] == NULL ? "null" : envp_ext[0]), (envp_ext[1] == NULL ? "null" : envp_ext[1]));
     mutex_lock(&lock);
     if(kobject_uevent_env(&lidbg_uevent_device.this_device->kobj, action, envp_ext) < 0)
         LIDBG_ERR("uevent_send\n");
@@ -47,9 +47,9 @@ void uevent_shell(char *shell_cmd)
     char shellstring[256];
     char *envp[] = { "LIDBG_ACTION=shell", shellstring, NULL };
     if(strstr(shell_cmd, "insmod"))
-    	snprintf(shellstring, 256, "LIDBG_PARAMETER=%s", shell_cmd );
-	else
-    	snprintf(shellstring, 256, "LIDBG_PARAMETER=%s 2>> "SHELL_ERRS_FILE, shell_cmd );
+        snprintf(shellstring, 256, "LIDBG_PARAMETER=%s", shell_cmd );
+    else
+        snprintf(shellstring, 256, "LIDBG_PARAMETER=%s 2>> "SHELL_ERRS_FILE, shell_cmd );
     lidbg_uevent_send(KOBJ_CHANGE, envp);
 }
 
@@ -132,7 +132,7 @@ void lidbg_uevent_shell(char *shell_cmd)
 
 void lidbg_uevent_main(int argc, char **argv)
 {
-    LIDBG_WARN("lidbg_uevent_main:%d,%s\n",uevent_dbg,argv[0]);
+    LIDBG_WARN("lidbg_uevent_main:%d,%s\n", uevent_dbg, argv[0]);
     if(!strcmp(argv[0], "dbg"))
     {
         uevent_dbg = !uevent_dbg;

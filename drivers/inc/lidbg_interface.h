@@ -58,7 +58,7 @@
 
 enum key_enum
 {
-    TS_NO_KEY=0,
+    TS_NO_KEY = 0,
     TS_KEY_POWER,
     TS_KEY_BACK,
     TS_KEY_HOME,
@@ -67,7 +67,7 @@ enum key_enum
     TS_KEY_NAVI,
     TS_KEY_SEEKUP,
     TS_KEY_SEEKDOWN,
-	TS_KEY_MUTE,
+    TS_KEY_MUTE,
 
 };
 struct ts_devices_key
@@ -199,14 +199,14 @@ typedef enum
 {
     FLY_SCREEN_OFF,
     FLY_DEVICE_DOWN,
-	FLY_ANDROID_DOWN,
-	
-	FLY_GOTO_SLEEP,
-	FLY_KERNEL_DOWN,
-	FLY_KERNEL_UP,
-	
-	FLY_ANDROID_UP,
-	FLY_DEVICE_UP,
+    FLY_ANDROID_DOWN,
+
+    FLY_GOTO_SLEEP,
+    FLY_KERNEL_DOWN,
+    FLY_KERNEL_UP,
+
+    FLY_ANDROID_UP,
+    FLY_DEVICE_UP,
     FLY_SCREEN_ON,
 } FLY_SYSTEM_STATUS;
 
@@ -216,7 +216,7 @@ struct lidbg_fn_t
     void (*pfnSOC_IO_Output) (unsigned int group, unsigned int index, bool status);
     bool (*pfnSOC_IO_Input) (unsigned int group, unsigned int index, unsigned int pull);
     void (*pfnSOC_IO_Output_Ext)(unsigned int group, unsigned int index, bool status, unsigned int pull, unsigned int drive_strength);
-    bool (*pfnSOC_IO_Config)(unsigned int index, int func,u32 direction, unsigned int pull, unsigned int drive_strength);
+    bool (*pfnSOC_IO_Config)(unsigned int index, int func, u32 direction, unsigned int pull, unsigned int drive_strength);
 
     bool (*pfnSOC_IO_ISR_Add)(unsigned int irq, unsigned int interrupt_type, pinterrupt_isr func, void *dev);
     bool (*pfnSOC_IO_ISR_Enable)(unsigned int irq);
@@ -246,22 +246,22 @@ struct lidbg_fn_t
     //screan_off :0 screan_on :1 suspendon:2 suspendoff:3
     void (*pfnHal_Acc_Callback)(int para);
 
-    int (*pfnSOC_SPI_Mode_Set) (int bus_id, u8 mode,u8 bits_per_word,u32 max_speed_hz);
+    int (*pfnSOC_SPI_Mode_Set) (int bus_id, u8 mode, u8 bits_per_word, u32 max_speed_hz);
     int (*pfnSOC_SPI_Send) (int bus_id, char *buf, unsigned int size);
     int (*pfnSOC_SPI_Rec)(int bus_id, char *buf, unsigned int size);
     int (*pfnSOC_SPI_Send_Rec)(int bus_id, const u8 *txbuf, unsigned n_tx, u8 *rxbuf, unsigned n_rx);
 
-    int (*pfnSOC_Get_System_Sound_Status)(void *para,int length);
+    int (*pfnSOC_Get_System_Sound_Status)(void *para, int length);
     int (*pfnGPS_sound_status)(void);
-	
+
     void (*pfnSOC_Set_Touch_Pos)(struct tspara *touch);
     int (*pfnSOC_Get_CpuFreq)(void);
-	
+
     bool (*pfnSOC_IO_Suspend_Config)(unsigned int index, u32 direction, unsigned int pull, unsigned int drive_strength);
     int (*pfnSOC_Uart_Send)(char *arg);
     void (*pfnHal_Ts_Callback)(int para);
 
-	
+
     int (*pfnSOC_Temp_Get)(void);
     int (*pfnSOC_I2C_Rec_TEF6638)(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size);
     bool (*pfnLPC_ADC_Get)(unsigned int channel , unsigned int *value);
@@ -270,12 +270,12 @@ struct lidbg_fn_t
 
 struct hw_info
 {
-	int hw_version;
-	int ts_type;
-	int ts_config;
-	int lcd_type;
-	int virtual_key;
-	int reserve[12];
+    int hw_version;
+    int ts_type;
+    int ts_config;
+    int lcd_type;
+    int virtual_key;
+    int reserve[12];
 };
 
 struct lidbg_pvar_t
@@ -290,22 +290,23 @@ struct lidbg_pvar_t
     bool fake_suspend;
     bool acc_flag;
     struct list_head *ws_lh;
-	bool recovery_mode;
-	struct hw_info hw_info;
-	bool fb_on;
-	bool is_first_update;
-	enum key_enum ts_active_key ;
+    bool recovery_mode;
+    struct hw_info hw_info;
+    bool fb_on;
+    bool is_first_update;
+    enum key_enum ts_active_key ;
     bool led_app_status;
     bool led_hal_status;
-	bool is_debug_mode;
-	bool is_udisk_needreset;
+    bool is_debug_mode;
+    bool is_udisk_needreset;
 };
 
-typedef struct {
-	int flag_hw_info_valid;
-	int flag_need_update;
-	struct hw_info hw_info;
-}fly_hw_data;
+typedef struct
+{
+    int flag_hw_info_valid;
+    int flag_need_update;
+    struct hw_info hw_info;
+} fly_hw_data;
 
 struct lidbg_interface
 {

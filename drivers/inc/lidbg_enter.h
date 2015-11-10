@@ -403,10 +403,10 @@ struct lidbg_fn_t
 
 struct hw_info
 {
-	int hw_version;
-	int ts_type;
-	int ts_config;
-	int lcd_type;
+    int hw_version;
+    int ts_type;
+    int ts_config;
+    int lcd_type;
 };
 
 struct lidbg_pvar_t
@@ -422,17 +422,18 @@ struct lidbg_pvar_t
     bool is_usb11;
     bool fake_suspend;
     bool acc_flag;
-	bool recovery_mode;
-	
-	struct hw_info hw_info;
-	bool is_first_update;
+    bool recovery_mode;
+
+    struct hw_info hw_info;
+    bool is_first_update;
 };
 
-typedef struct {
-	int flag_hw_info_valid;
-	int flag_need_update;
-	struct hw_info hw_info;
-}fly_hw_data;
+typedef struct
+{
+    int flag_hw_info_valid;
+    int flag_need_update;
+    struct hw_info hw_info;
+} fly_hw_data;
 
 struct lidbg_hal
 {

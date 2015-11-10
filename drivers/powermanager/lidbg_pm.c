@@ -17,7 +17,7 @@ static LIST_HEAD(inactive_locks);
 #ifdef SOC_mt3360
 #define SUSPEND_KEY_POLLING_TIME   (jiffies + 100*(HZ/1000))  /* 100ms */
 void suspendkey_timer_isr(unsigned long data);
-static DEFINE_TIMER(suspendkey_timer,suspendkey_timer_isr,0,0);
+static DEFINE_TIMER(suspendkey_timer, suspendkey_timer_isr, 0, 0);
 #endif
 static DECLARE_COMPLETION(sleep_observer_wait);
 static atomic_t is_in_sleep = ATOMIC_INIT(0);
@@ -101,20 +101,20 @@ int kernel_wakelock_print(char *info)
     struct wakeup_source *ws;
 #endif
     int list_count = 0;
-    
-   if(g_var.ws_lh == NULL)
+
+    if(g_var.ws_lh == NULL)
     {
         PM_ERR("g_var.ws_lh==NULL\n");
         return -1;
     }
 
 #if defined(CONFIG_HAS_EARLYSUSPEND)
-	//add for px3 wakelog print
-	list_for_each_entry(lock, g_var.ws_lh, link)
-	{
-		PM_WARN("[%s]:%d:%s", info, list_count, lock->name);
-		list_count++;
-	}
+    //add for px3 wakelog print
+    list_for_each_entry(lock, g_var.ws_lh, link)
+    {
+        PM_WARN("[%s]:%d:%s", info, list_count, lock->name);
+        list_count++;
+    }
 #else
     PM_WARN("<%s>\n", info);
     rcu_read_lock();
@@ -130,7 +130,7 @@ int kernel_wakelock_print(char *info)
     }
     rcu_read_unlock();
 #endif
-  return 1;
+    return 1;
 }
 
 int kernel_wakelock_force_unlock(char *info)
@@ -147,17 +147,17 @@ int kernel_wakelock_force_unlock(char *info)
         return -1;
     }
 #if defined(CONFIG_HAS_EARLYSUSPEND)
-	{
-	    struct wake_lock *lock,*n;
-		list_for_each_entry_safe(lock,n, g_var.ws_lh, link)
-		{
-			PM_WARN("force unlock:[%s]:%d:%s\n", info, list_count, lock->name);	
-			lock->flags &= ~(WAKE_LOCK_ACTIVE | WAKE_LOCK_AUTO_EXPIRE);
-			list_del(&lock->link);
-			list_add(&lock->link, &inactive_locks);		
-			list_count++;
-		}
-	}
+    {
+        struct wake_lock *lock, *n;
+        list_for_each_entry_safe(lock, n, g_var.ws_lh, link)
+        {
+            PM_WARN("force unlock:[%s]:%d:%s\n", info, list_count, lock->name);
+            lock->flags &= ~(WAKE_LOCK_ACTIVE | WAKE_LOCK_AUTO_EXPIRE);
+            list_del(&lock->link);
+            list_add(&lock->link, &inactive_locks);
+            list_count++;
+        }
+    }
 #else
     PM_WARN("<%s>\n", info);
     rcu_read_lock();
@@ -279,7 +279,7 @@ void lidbg_pm_step_call(fly_pm_stat_step step, void *data)
         SOC_IO_SUSPEND;
         sleep_counter++;
 #ifdef SOC_rk3x88
-		grf_backup();
+        grf_backup();
 #endif
         PM_SLEEP_DBG("SLEEP8.suspend_enter.MCU_WP_GPIO_OFF;sleep_count:%d\n", sleep_counter);
         break;
@@ -287,7 +287,7 @@ void lidbg_pm_step_call(fly_pm_stat_step step, void *data)
         break;
     case PM_SUSPEMD_OPS_ENTER9P1:
 #ifdef SOC_rk3x88
-		grf_restore();
+        grf_restore();
 #endif
         SOC_System_Status(FLY_KERNEL_UP);
         SOC_IO_RESUME;
@@ -398,7 +398,7 @@ static int thread_gpio_app_status_delay(void *data)
 
 
 #ifdef LIDBG_PM_AUTO_ACC
-	ssleep(20);
+    ssleep(20);
     LPC_CMD_ACC_SWITCH_START;
 #endif
 
@@ -475,8 +475,8 @@ static int thread_send_power_key(void *data)
 #ifdef SOC_mt3360
 void suspendkey_timer_isr(unsigned long data)
 {
-	lidbg_key_report(KEY_POWER, KEY_RELEASED);
-	lidbg("fly power key gotosleep --\n");
+    lidbg_key_report(KEY_POWER, KEY_RELEASED);
+    lidbg("fly power key gotosleep --\n");
 }
 #endif
 ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t *ppos)
@@ -539,9 +539,9 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         {
             SOC_System_Status(FLY_ANDROID_DOWN);
             MCU_APP_GPIO_OFF;
-#ifdef SOC_mt3360	
-		extern unsigned int fly_acc_step;
-		fly_acc_step = 1;
+#ifdef SOC_mt3360
+            extern unsigned int fly_acc_step;
+            fly_acc_step = 1;
 #endif
         }
         else  if(!strcmp(cmd[1], "kill"))
@@ -561,7 +561,7 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
             //msleep(100);
             //lidbg_key_report(KEY_POWER, KEY_RELEASED);
             //lidbg("fly power key gotosleep --\n");
-            mod_timer(&suspendkey_timer,SUSPEND_KEY_POLLING_TIME);
+            mod_timer(&suspendkey_timer, SUSPEND_KEY_POLLING_TIME);
 #else
             observer_start();
             LPC_PRINT(true, sleep_counter, "PM:gotosleep");
@@ -584,13 +584,13 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
             SOC_System_Status(FLY_DEVICE_DOWN);
             PM_WARN("mediascan.en.1\n");
             lidbg_shell_cmd("setprop persist.lidbg.mediascan.en 1");
-			
-			if(ANDROID_VERSION >= 500)
-			{
-			   //only 5.0 later version can't start bootanim when ACC on
-	            PM_WARN("<bootanim.exit>\n");
-	            lidbg_shell_cmd("setprop service.bootanim.exit 0");
-			}
+
+            if(ANDROID_VERSION >= 500)
+            {
+                //only 5.0 later version can't start bootanim when ACC on
+                PM_WARN("<bootanim.exit>\n");
+                lidbg_shell_cmd("setprop service.bootanim.exit 0");
+            }
             if(SOC_Hal_Acc_Callback)
             {
                 lidbg("hal callback 3\n");
@@ -752,8 +752,8 @@ static int thread_save_acc_times(void *data)
 static int pm_suspend(struct device *dev)
 {
     DUMP_FUN;
-#ifdef SOC_mt3360	
-	MCU_WP_GPIO_OFF;
+#ifdef SOC_mt3360
+    MCU_WP_GPIO_OFF;
 #endif
     return 0;
 }
@@ -761,7 +761,7 @@ static int pm_resume(struct device *dev)
 {
     DUMP_FUN;
 #ifdef SOC_mt3360
-	MCU_WP_GPIO_ON;
+    MCU_WP_GPIO_ON;
     soc_io_resume_config(0, 0, 0, 0);
 #endif
     CREATE_KTHREAD(thread_save_acc_times, NULL);
@@ -842,14 +842,15 @@ static int thread_observer(void *data)
                 default:
                     if(have_triggerd_sleep_S >= 5 && !(have_triggerd_sleep_S % 5) && (g_var.system_status == FLY_GOTO_SLEEP))//atomic_read(&is_in_sleep) == 1
                     {
-						lidbg("+++++ Attention: %ds after gotosleep +++++\n",have_triggerd_sleep_S);
+                        lidbg("+++++ Attention: %ds after gotosleep +++++\n", have_triggerd_sleep_S);
                         sprintf(when, "start%d:", have_triggerd_sleep_S);
                         kernel_wakelock_print(when);
                         userspace_wakelock_action(0, NULL);
-						   if(have_triggerd_sleep_S >= 30){
-							   lidbg("+++++ broadcast android_secret_code 4629 %ds later +++++\n",have_triggerd_sleep_S);
-							   lidbg_shell_cmd("am broadcast -a android.provider.Telephony.SECRET_CODE -d android_secret_code://4629 &");
-						   }
+                        if(have_triggerd_sleep_S >= 30)
+                        {
+                            lidbg("+++++ broadcast android_secret_code 4629 %ds later +++++\n", have_triggerd_sleep_S);
+                            lidbg_shell_cmd("am broadcast -a android.provider.Telephony.SECRET_CODE -d android_secret_code://4629 &");
+                        }
                     }
                     break;
                 }
@@ -897,9 +898,9 @@ static int  lidbg_pm_probe(struct platform_device *pdev)
     lidbg_uevent_shell("rm	-rf /system/lib/modules/out/FlyBootService.apk");
     if(g_var.is_first_update)
     {
-		lidbg_uevent_shell("sync");
+        lidbg_uevent_shell("sync");
         ssleep(5);
-		lidbg("lidbg_pm_probe call kernel_restart\n");
+        lidbg("lidbg_pm_probe call kernel_restart\n");
         kernel_restart(NULL);
     }
 #endif
@@ -1007,11 +1008,11 @@ static int __init lidbg_pm_init(void)
 #endif
 
 #ifdef SOC_mt3360
-    	init_timer(&suspendkey_timer);
-	suspendkey_timer.data = 0;
-	suspendkey_timer.expires = 0;
-	suspendkey_timer.function = suspendkey_timer_isr;
-#endif	
+    init_timer(&suspendkey_timer);
+    suspendkey_timer.data = 0;
+    suspendkey_timer.expires = 0;
+    suspendkey_timer.function = suspendkey_timer_isr;
+#endif
     platform_device_register(&lidbg_pm);
     platform_driver_register(&lidbg_pm_driver);
     return 0;

@@ -68,7 +68,7 @@ ssize_t  msg_write(struct file *filp, const char __user *buffer, size_t size, lo
     }
 
     //for safe
-    plidbg_msg->log[plidbg_msg->w_pos][(size > LOG_BYTES ? LOG_BYTES- 1 : size)] = '\0';
+    plidbg_msg->log[plidbg_msg->w_pos][(size > LOG_BYTES ? LOG_BYTES - 1 : size)] = '\0';
 
     plidbg_msg->w_pos = (plidbg_msg->w_pos + 1)  % TOTAL_LOGS;
 
@@ -130,7 +130,7 @@ static int __init msg_init(void)
     CREATE_KTHREAD(thread_msg, NULL);
 
     lidbg_chmod("/dev/lidbg_msg");
-	
+
     LIDBG_MODULE_LOG;
 
     return ret;

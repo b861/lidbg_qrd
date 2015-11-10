@@ -32,7 +32,7 @@ int analysis_copylist(const char *copy_list)
     inode = filep->f_dentry->d_inode;
     file_len = inode->i_size;
 
-    file_ptr = (unsigned char *)kzalloc(file_len+1, GFP_KERNEL);
+    file_ptr = (unsigned char *)kzalloc(file_len + 1, GFP_KERNEL);
     if(file_ptr == NULL)
     {
         FS_ERR( "<kzalloc>\n");
@@ -91,7 +91,7 @@ int update_ko(const char *ko_list, const char *fromdir, const char *todir)
     inode = filep->f_dentry->d_inode;
     file_len = inode->i_size;
 
-    file_ptr = (unsigned char *)kzalloc(file_len+1, GFP_KERNEL);
+    file_ptr = (unsigned char *)kzalloc(file_len + 1, GFP_KERNEL);
     if(file_ptr == NULL)
     {
         FS_ERR( "<kzalloc>\n");

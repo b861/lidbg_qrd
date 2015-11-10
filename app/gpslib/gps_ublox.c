@@ -399,7 +399,7 @@ nmea_reader_update_altitude( NmeaReader  *r,
 {
     double  alt;
     Token   tok = altitude;
-    units=units;
+    units = units;
     if (tok.p >= tok.end)
         return -1;
 
@@ -787,7 +787,7 @@ gps_state_start( GpsState  *s )
 {
     char  cmd = CMD_START;
     int   ret;
-	lidbg("[ublox]gps_state_start\n");
+    lidbg("[ublox]gps_state_start\n");
 
     do
     {
@@ -806,7 +806,7 @@ gps_state_stop( GpsState  *s )
 {
     char  cmd = CMD_STOP;
     int   ret;
-	lidbg("[ublox]gps_state_start\n");
+    lidbg("[ublox]gps_state_start\n");
 
     do
     {
@@ -903,7 +903,9 @@ gps_state_thread( void  *arg )
         if (nevents < 0)
         {
             if (errno != EINTR)
-                {D("epoll_wait() unexpected error: %s", strerror(errno));}
+            {
+                D("epoll_wait() unexpected error: %s", strerror(errno));
+            }
             continue;
         }
         // D("[futengfei]===HCPUgps thread received %d events", nevents);
@@ -1003,7 +1005,7 @@ gps_state_thread( void  *arg )
     }
 }
 
-int retry=0;
+int retry = 0;
 static void
 gps_state_init( GpsState  *state, GpsCallbacks *callbacks )
 {
@@ -1012,7 +1014,7 @@ gps_state_init( GpsState  *state, GpsCallbacks *callbacks )
     state->control[0] = -1;
     state->control[1] = -1;
     state->fd         = -1;
-	lidbg("[ublox]gps_state_init\n");
+    lidbg("[ublox]gps_state_init\n");
 
 again:
     state->fd = open(GPS_DEV_NAME, O_RDONLY);
@@ -1021,11 +1023,11 @@ again:
         LOGD("[ublox]futengfei err_access.again=======[%s]", GPS_DEV_NAME);
         lidbg("[ublox]futengfei err_access.again=======[%s]\n", GPS_DEV_NAME);
         sleep(1);
-		if(++retry>10)
-			{
-			lidbg("[ublox]futengfei ublox.so stop=======[%s]\n", GPS_DEV_NAME);
-			goto Fail;
-			}
+        if(++retry > 10)
+        {
+            lidbg("[ublox]futengfei ublox.so stop=======[%s]\n", GPS_DEV_NAME);
+            goto Fail;
+        }
         goto again;
     }
     D("gps will read from '%s'", GPS_DEV_NAME);
@@ -1141,38 +1143,38 @@ ublox_gps_stop()
 
 static int
 ublox_gps_inject_time(GpsUtcTime time, int64_t timeReference, int uncertainty)
-{   
-	time=time;
-	timeReference=timeReference;
-	uncertainty=uncertainty;
+{
+    time = time;
+    timeReference = timeReference;
+    uncertainty = uncertainty;
     return 0;
 }
 
 static int
 ublox_gps_inject_location(double latitude, double longitude, float accuracy)
 {
-	latitude = latitude;
-	longitude = longitude;
-	accuracy = accuracy;
+    latitude = latitude;
+    longitude = longitude;
+    accuracy = accuracy;
     return 0;
 }
 
 static void
 ublox_gps_delete_aiding_data(GpsAidingData flags)
 {
-	flags=flags;
+    flags = flags;
 }
 
-static int ublox_gps_set_position_mode(GpsPositionMode mode, GpsPositionRecurrence recurrence,  
-            uint32_t min_interval, uint32_t preferred_accuracy, uint32_t preferred_time)
+static int ublox_gps_set_position_mode(GpsPositionMode mode, GpsPositionRecurrence recurrence,
+                                       uint32_t min_interval, uint32_t preferred_accuracy, uint32_t preferred_time)
 {
     // FIXME - support fix_frequency
-    mode=mode;
-    recurrence=recurrence;
-    min_interval=min_interval;
-    preferred_accuracy=preferred_accuracy;
-    preferred_time=preferred_time;
-   // fix_frequency=fix_frequency;
+    mode = mode;
+    recurrence = recurrence;
+    min_interval = min_interval;
+    preferred_accuracy = preferred_accuracy;
+    preferred_time = preferred_time;
+    // fix_frequency=fix_frequency;
     return 0;
 }
 
@@ -1180,7 +1182,7 @@ static const void *
 ublox_gps_get_extension(const char *name)
 {
     // no extensions supported
-    name=name;
+    name = name;
     return NULL;
 }
 
@@ -1211,7 +1213,7 @@ static const GpsInterface  ubloxGpsInterface =
 
 const GpsInterface *gps__get_gps_interface(struct gps_device_t *dev)
 {
-	 dev=dev;
+    dev = dev;
     return &ubloxGpsInterface;
 }
 
@@ -1221,7 +1223,7 @@ static int open_gps(const struct hw_module_t *module, char const *name,
     struct gps_device_t *dev = malloc(sizeof(struct gps_device_t));
     D("%s", __FUNCTION__);
     memset(dev, 0, sizeof(*dev));
-    name=name;
+    name = name;
     dev->common.tag = HARDWARE_DEVICE_TAG;
     dev->common.version = 0;
     dev->common.module = (struct hw_module_t *)module;

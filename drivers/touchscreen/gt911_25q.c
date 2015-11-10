@@ -737,15 +737,15 @@ Output:
 	Executive outcomes.0---succeed.
 *******************************************************/
 
-        u8 cfg_info_group1[] = CTP_CFG_GROUP1;
-        u8 cfg_info_group2[] = CTP_CFG_GROUP2;
-        u8 cfg_info_group3[] = CTP_CFG_GROUP3;
-        u8 cfg_info_group4[] = CTP_CFG_GROUP4;
-        u8 cfg_info_group5[] = CTP_CFG_GROUP5;
-        u8 cfg_info_group6[] = CTP_CFG_GROUP6;
-        u8 cfg_info_group7[] = CTP_CFG_GROUP7;
-	 u8 cfg_info_group8[] = CTP_CFG_GROUP8;
-static s32 gtp_init_panel(struct goodix_ts_data *ts, char *ic_type,char *Firmware_version)
+u8 cfg_info_group1[] = CTP_CFG_GROUP1;
+u8 cfg_info_group2[] = CTP_CFG_GROUP2;
+u8 cfg_info_group3[] = CTP_CFG_GROUP3;
+u8 cfg_info_group4[] = CTP_CFG_GROUP4;
+u8 cfg_info_group5[] = CTP_CFG_GROUP5;
+u8 cfg_info_group6[] = CTP_CFG_GROUP6;
+u8 cfg_info_group7[] = CTP_CFG_GROUP7;
+u8 cfg_info_group8[] = CTP_CFG_GROUP8;
+static s32 gtp_init_panel(struct goodix_ts_data *ts, char *ic_type, char *Firmware_version)
 {
     s32 ret = -1;
     s32 i;
@@ -762,7 +762,7 @@ static s32 gtp_init_panel(struct goodix_ts_data *ts, char *ic_type,char *Firmwar
     {
         lidbg("=====ic_type:911======\n");
 
-        u8 *send_cfg_buf[8] = {cfg_info_group1, cfg_info_group2, cfg_info_group3, cfg_info_group4, cfg_info_group5, cfg_info_group6, cfg_info_group7,cfg_info_group8};
+        u8 *send_cfg_buf[8] = {cfg_info_group1, cfg_info_group2, cfg_info_group3, cfg_info_group4, cfg_info_group5, cfg_info_group6, cfg_info_group7, cfg_info_group8};
         u8 cfg_info_len[8] = {sizeof(cfg_info_group1) / sizeof(cfg_info_group1[0]),
                               sizeof(cfg_info_group2) / sizeof(cfg_info_group2[0]),
                               sizeof(cfg_info_group3) / sizeof(cfg_info_group3[0]),
@@ -770,7 +770,7 @@ static s32 gtp_init_panel(struct goodix_ts_data *ts, char *ic_type,char *Firmwar
                               sizeof(cfg_info_group5) / sizeof(cfg_info_group5[0]),
                               sizeof(cfg_info_group6) / sizeof(cfg_info_group6[0]),
                               sizeof(cfg_info_group7) / sizeof(cfg_info_group7[0]),
-                               sizeof(cfg_info_group8) / sizeof(cfg_info_group8[0])
+                              sizeof(cfg_info_group8) / sizeof(cfg_info_group8[0])
 
                              };
         for(i = 0; i < 8; i++)
@@ -807,17 +807,17 @@ static s32 gtp_init_panel(struct goodix_ts_data *ts, char *ic_type,char *Firmwar
                     rd_cfg_buf[GTP_ADDR_LENGTH] = rd_cfg_buf[GTP_ADDR_LENGTH] + 6;
                 }
             }
-	if(2==rd_cfg_buf[GTP_ADDR_LENGTH])
-		{
-		if(!strcmp(Firmware_version, "1051"))
-		   {
-		   rd_cfg_buf[GTP_ADDR_LENGTH]=7;
-		   }
-		}
+            if(2 == rd_cfg_buf[GTP_ADDR_LENGTH])
+            {
+                if(!strcmp(Firmware_version, "1051"))
+                {
+                    rd_cfg_buf[GTP_ADDR_LENGTH] = 7;
+                }
+            }
         }
         else
         {
-            rd_cfg_buf[GTP_ADDR_LENGTH] = ts_config-1;
+            rd_cfg_buf[GTP_ADDR_LENGTH] = ts_config - 1;
         }
         memset(&config[GTP_ADDR_LENGTH], 0, GTP_CONFIG_MAX_LENGTH);
         memcpy(&config[GTP_ADDR_LENGTH], send_cfg_buf[rd_cfg_buf[GTP_ADDR_LENGTH]], ts->gtp_cfg_len);
@@ -968,7 +968,7 @@ Input:
 Output:
 	Executive outcomes.0---succeed.
 *******************************************************/
-s32 gtp_read_version(struct i2c_client *client, u16 *version, char *ic_type,char *Firmware_version)
+s32 gtp_read_version(struct i2c_client *client, u16 *version, char *ic_type, char *Firmware_version)
 {
     s32 ret = -1;
     s32 i = 0;
@@ -998,8 +998,8 @@ s32 gtp_read_version(struct i2c_client *client, u16 *version, char *ic_type,char
     GTP_INFO("IC VERSION:%c%c%c%c_%02x%02x",
              buf[2], buf[3], buf[4], buf[5], buf[7], buf[6]);
     sprintf(ic_type, "%c%c%c", buf[2], buf[3], buf[4]);
-    sprintf(Firmware_version,"%02x%02x",buf[7],buf[6]);
-    lidbg("Firmware_version is %s\n",Firmware_version);
+    sprintf(Firmware_version, "%02x%02x", buf[7], buf[6]);
+    lidbg("Firmware_version is %s\n", Firmware_version);
     return ret;
 }
 
@@ -1213,7 +1213,7 @@ struct goodix_ts_data *ts_update;
 char ic_type[3];
 void cb_int_ts_choose_config(char *key, char *value )
 {
-    int ret = gtp_init_panel(ts_update, ic_type,Firmware_version);
+    int ret = gtp_init_panel(ts_update, ic_type, Firmware_version);
     if (ret < 0)
     {
         GTP_ERROR("GTP init panel failed.");
@@ -1291,7 +1291,7 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
         GTP_ERROR("I2C communication ERROR!");
     }
     lidbg("gt911_config_version:0x%02x", gt911_config_version);
-    ret = gtp_read_version(client, &version_info, ic_type,Firmware_version);
+    ret = gtp_read_version(client, &version_info, ic_type, Firmware_version);
 #if GTP_AUTO_UPDATE
     ret = gup_init_update_proc(ts);
     if (ret < 0)
@@ -1300,7 +1300,7 @@ static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id
     }
 #endif
 
-    ret = gtp_init_panel(ts, ic_type,Firmware_version);
+    ret = gtp_init_panel(ts, ic_type, Firmware_version);
     if (ret < 0)
     {
         GTP_ERROR("GTP init panel failed.");

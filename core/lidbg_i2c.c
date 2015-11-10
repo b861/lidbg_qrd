@@ -61,7 +61,7 @@ static struct i2c_driver i2c_api_driver =
 #endif
     .attach_adapter = i2c_api_attach,
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,10,0)
-	.detach_adapter	= i2c_api_detach,
+    .detach_adapter	= i2c_api_detach,
 #else
 #endif
     .command        = NULL,
@@ -236,7 +236,7 @@ static int i2c_api_do_xfer(int bus_id, char chip_addr, unsigned int sub_addr, in
         msg.len = size;
         msg.buf = buf;
 #ifdef  VENDOR_ROCKCHIP
-	msg.scl_rate = RXPX3_I2C_RATE;
+        msg.scl_rate = RXPX3_I2C_RATE;
 #endif
         ret = i2c_transfer(adap, &msg, 1);
         break;
@@ -260,8 +260,8 @@ static int i2c_api_do_xfer(int bus_id, char chip_addr, unsigned int sub_addr, in
         msg[1].buf = buf;
 
 #ifdef  VENDOR_ROCKCHIP
-	msg[0].scl_rate = RXPX3_I2C_RATE;
-	msg[1].scl_rate = RXPX3_I2C_RATE;
+        msg[0].scl_rate = RXPX3_I2C_RATE;
+        msg[1].scl_rate = RXPX3_I2C_RATE;
 #endif
         ret = i2c_transfer(adap, msg, 2);
         break;
@@ -290,8 +290,8 @@ static int i2c_api_do_xfer(int bus_id, char chip_addr, unsigned int sub_addr, in
         msg[1].buf = buf;
 
 #ifdef  VENDOR_ROCKCHIP
-	msg[0].scl_rate = RXPX3_I2C_RATE;
-	msg[1].scl_rate = RXPX3_I2C_RATE;
+        msg[0].scl_rate = RXPX3_I2C_RATE;
+        msg[1].scl_rate = RXPX3_I2C_RATE;
 #endif
         ret = i2c_transfer(adap, msg, 2);
         break;
@@ -309,7 +309,7 @@ static int i2c_api_do_xfer(int bus_id, char chip_addr, unsigned int sub_addr, in
         msg[0].buf = buf;
 
 #ifdef  VENDOR_ROCKCHIP
-	msg[0].scl_rate = RXPX3_I2C_RATE;
+        msg[0].scl_rate = RXPX3_I2C_RATE;
 #endif
         ret = i2c_transfer(adap, msg, 1);
         break;
@@ -337,8 +337,8 @@ static int i2c_api_do_xfer(int bus_id, char chip_addr, unsigned int sub_addr, in
         msg[1].buf = buf;
 
 #ifdef  VENDOR_ROCKCHIP
-	msg[0].scl_rate = RXPX3_I2C_RATE;
-	msg[1].scl_rate = RXPX3_I2C_RATE;
+        msg[0].scl_rate = RXPX3_I2C_RATE;
+        msg[1].scl_rate = RXPX3_I2C_RATE;
 #endif
 
         ret = i2c_transfer(adap, msg, 2);
@@ -367,8 +367,8 @@ static int i2c_api_do_xfer(int bus_id, char chip_addr, unsigned int sub_addr, in
         msg[1].buf = buf;
 
 #ifdef  VENDOR_ROCKCHIP
-	msg[0].scl_rate = RXPX3_I2C_RATE;
-	msg[1].scl_rate = RXPX3_I2C_RATE;
+        msg[0].scl_rate = RXPX3_I2C_RATE;
+        msg[1].scl_rate = RXPX3_I2C_RATE;
 #endif
         ret = i2c_transfer(adap, msg, 2);
         break;
@@ -395,8 +395,8 @@ static int i2c_api_do_xfer(int bus_id, char chip_addr, unsigned int sub_addr, in
         msg[1].buf = buf;
 
 #ifdef  VENDOR_ROCKCHIP
-	msg[0].scl_rate = RXPX3_I2C_RATE;
-	msg[1].scl_rate = RXPX3_I2C_RATE;
+        msg[0].scl_rate = RXPX3_I2C_RATE;
+        msg[1].scl_rate = RXPX3_I2C_RATE;
 #endif
         ret = i2c_transfer(adap, msg, 2);
         break;
@@ -709,13 +709,13 @@ int i2c_api_detach(struct i2c_adapter *adap)
 }
 
 
- struct i2c_client * i2c_get_client(int bus_id)
- {
-	 struct i2c_api *i2c_api ;
-	 i2c_api = get_i2c_api(bus_id);
-	 return i2c_api->client;
+struct i2c_client *i2c_get_client(int bus_id)
+{
+    struct i2c_api *i2c_api ;
+    i2c_api = get_i2c_api(bus_id);
+    return i2c_api->client;
 
- }
+}
 
 
 static int __init i2c_api_init(void)

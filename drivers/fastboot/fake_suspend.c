@@ -114,7 +114,7 @@ static void fake_late_resume(void)
 
 int fake_suspend(struct file *file, char __user *buf, size_t size, loff_t *ppos)
 {
-	PROC_READ_CHECK;
+    PROC_READ_CHECK;
     DUMP_FUN_ENTER;
     if(is_fake_suspend == 0)
     {
@@ -145,7 +145,7 @@ void create_proc_entry_fake_suspend(void)
 
 int fake_wakeup(struct file *file, char __user *buf, size_t size, loff_t *ppos)
 {
-	PROC_READ_CHECK;
+    PROC_READ_CHECK;
     DUMP_FUN_ENTER;
     if(is_fake_suspend == 1)
     {

@@ -35,7 +35,7 @@
 	lidbg_shell_cmd("echo 0 > /sys/kernel/debug/regulator/8226_l27/enable");\
 }while(0)
 
-  
+
 #elif defined(PLATFORM_msm8974)
 #define GPS_POWER_ON do{\
 	lidbg("MSM_GPS_POWER_ON\n");\
@@ -81,7 +81,7 @@
 			msleep(20);\
 			SOC_IO_Output(0, g_hw.gpio_lcd_reset, 1);\
 }while(0)\
-
+ 
 
 
 //t123
@@ -100,7 +100,7 @@
 			SOC_IO_Output(0, g_hw.gpio_usb_switch, 0);\
 	}while(0)
 
-		
+
 #define USB_SWITCH_DISCONNECT do{\
 			check_gpio(g_hw.gpio_usb_switch);\
 			SOC_IO_Output(0, g_hw.gpio_usb_switch, 1);\
@@ -137,7 +137,7 @@
 			check_gpio(g_hw.gpio_usb_id);\
 			SOC_IO_Output(0, g_hw.gpio_usb_id, 1);\
 	}while(0)
-	
+
 #define SET_USB_ID_SUSPEND do{\
 				check_gpio(g_hw.gpio_usb_id);\
 				SOC_IO_Suspend_Config(g_hw.gpio_usb_id,GPIOMUX_OUT_HIGH,GPIO_CFG_NO_PULL,GPIOMUX_DRV_2MA);\
@@ -171,7 +171,7 @@
 			USB_SWITCH_DISCONNECT;\
 			USB_ID_HIGH_DEV;\
 			}while(0)
-			
+
 
 #define MSM_DSI83_DISABLE do{\
 		check_gpio(DSI83_GPIO_EN);\

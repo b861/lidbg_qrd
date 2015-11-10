@@ -11,12 +11,12 @@ LIDBG_THREAD_DEFINE;
 
 int __init lidbg_kernel_init(void)
 {
-	DUMP_BUILD_TIME;
+    DUMP_BUILD_TIME;
     printk(KERN_CRIT"===lidbg_kernel_init===\n");
-	freq_ctrl_start();
-	lidbg_i2c_start();
-	LIDBG_GET_THREAD;
-	return 0;
+    freq_ctrl_start();
+    lidbg_i2c_start();
+    LIDBG_GET_THREAD;
+    return 0;
 }
 
 

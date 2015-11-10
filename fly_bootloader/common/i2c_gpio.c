@@ -37,20 +37,20 @@ static struct i2c_gpio_dev *dev = NULL;
 
 static inline void sdalo(struct i2c_gpio_dev *dev)
 {
-	setsda(dev, 0);
-	udelay((dev->udelay + 1) / 2);
+    setsda(dev, 0);
+    udelay((dev->udelay + 1) / 2);
 }
 
 static inline void sdahi(struct i2c_gpio_dev *dev)
 {
-	setsda(dev, 1);
-	udelay((dev->udelay + 1) / 2);
+    setsda(dev, 1);
+    udelay((dev->udelay + 1) / 2);
 }
 
 static inline void scllo(struct i2c_gpio_dev *dev)
 {
-	setscl(dev, 0);
-	udelay(dev->udelay / 2);
+    setscl(dev, 0);
+    udelay(dev->udelay / 2);
 }
 
 /*
@@ -59,59 +59,60 @@ static inline void scllo(struct i2c_gpio_dev *dev)
  */
 static int sclhi(struct i2c_gpio_dev *dev)
 {
-	unsigned long start;
+    unsigned long start;
 
-	setscl(dev, 1);
+    setscl(dev, 1);
 #if 0
-//	start = jiffies;
-	while (!getscl(dev)) {
-		/* This hw knows how to read the clock line, so we wait
-		 * until it actually gets high.  This is safer as some
-		 * chips may hold it low ("clock stretching") while they
-		 * are processing data internally.
-		 */
-//		if (time_after(jiffies, start + dev->timeout)) {
-			/* Test one last time, as we may have been preempted
-			 * between last check and timeout test.
-			 */
-			if (getscl(dev))
-				break;
-			return -ETIMEDOUT;
-//		}
-	}
+    //	start = jiffies;
+    while (!getscl(dev))
+    {
+        /* This hw knows how to read the clock line, so we wait
+         * until it actually gets high.  This is safer as some
+         * chips may hold it low ("clock stretching") while they
+         * are processing data internally.
+         */
+        //		if (time_after(jiffies, start + dev->timeout)) {
+        /* Test one last time, as we may have been preempted
+         * between last check and timeout test.
+         */
+        if (getscl(dev))
+            break;
+        return -ETIMEDOUT;
+        //		}
+    }
 #endif
-	udelay(dev->udelay);
-	return 0;
+    udelay(dev->udelay);
+    return 0;
 }
 
 
 /* --- other auxiliary functions --------------------------------------	*/
 static void i2c_start(struct i2c_gpio_dev *dev)
 {
-	/* assert: scl, sda are high */
-	setsda(dev, 0);
-	udelay(dev->udelay);
-	scllo(dev);
+    /* assert: scl, sda are high */
+    setsda(dev, 0);
+    udelay(dev->udelay);
+    scllo(dev);
 }
 
 static void i2c_repstart(struct i2c_gpio_dev *dev)
 {
-	/* assert: scl is low */
-	sdahi(dev);
-	sclhi(dev);
-	setsda(dev, 0);
-	udelay(dev->udelay);
-	scllo(dev);
+    /* assert: scl is low */
+    sdahi(dev);
+    sclhi(dev);
+    setsda(dev, 0);
+    udelay(dev->udelay);
+    scllo(dev);
 }
 
 
 static void i2c_stop(struct i2c_gpio_dev *dev)
 {
-	/* assert: scl is low */
-	sdalo(dev);
-	sclhi(dev);
-	setsda(dev, 1);
-	udelay(dev->udelay);
+    /* assert: scl is low */
+    sdalo(dev);
+    sclhi(dev);
+    setsda(dev, 1);
+    udelay(dev->udelay);
 }
 
 
@@ -125,73 +126,78 @@ static void i2c_stop(struct i2c_gpio_dev *dev)
  */
 static int i2c_outb(struct i2c_gpio_dev *dev, unsigned char c)
 {
-	int i;
-	int sb;
-	int ack;
+    int i;
+    int sb;
+    int ack;
 
-	/* assert: scl is low */
-	for (i = 7; i >= 0; i--) {
-		sb = (c >> i) & 1;
-		setsda(dev, sb);
-		udelay((dev->udelay + 1) / 2);
-		if (sclhi(dev) < 0) { /* timed out */
-			dprintf(INFO, "i2c_outb: 0x%02x timeout at bit #%d\n", (int)c, i);
-			return -ETIMEDOUT;
-		}
-		/* FIXME do arbitration here:
-		 * if (sb && !getsda(adap)) -> ouch! Get out of here.
-		 *
-		 * Report a unique code, so higher level code can retry
-		 * the whole (combined) message and *NOT* issue STOP.
-		 */
-		scllo(dev);
-	}
-	sdahi(dev);
-	if (sclhi(dev) < 0) { /* timeout */
-		dprintf(INFO, "i2c_outb: 0x%02x, "
-			"timeout at ack\n", (int)c);
-		return -ETIMEDOUT;
-	}
+    /* assert: scl is low */
+    for (i = 7; i >= 0; i--)
+    {
+        sb = (c >> i) & 1;
+        setsda(dev, sb);
+        udelay((dev->udelay + 1) / 2);
+        if (sclhi(dev) < 0)   /* timed out */
+        {
+            dprintf(INFO, "i2c_outb: 0x%02x timeout at bit #%d\n", (int)c, i);
+            return -ETIMEDOUT;
+        }
+        /* FIXME do arbitration here:
+         * if (sb && !getsda(adap)) -> ouch! Get out of here.
+         *
+         * Report a unique code, so higher level code can retry
+         * the whole (combined) message and *NOT* issue STOP.
+         */
+        scllo(dev);
+    }
+    sdahi(dev);
+    if (sclhi(dev) < 0)   /* timeout */
+    {
+        dprintf(INFO, "i2c_outb: 0x%02x, "
+                "timeout at ack\n", (int)c);
+        return -ETIMEDOUT;
+    }
 
-	/* read ack: SDA should be pulled down by slave, or it may
-	 * NAK (usually to report problems with the data we wrote).
-	 */
-	setsda_in(dev);
-	ack = !getsda(dev);    /* ack: sda is pulled low -> success */
-//	dprintf(INFO, "i2c_outb: 0x%02x %s\n", (int)c,
-//		ack ? "A" : "NA");
+    /* read ack: SDA should be pulled down by slave, or it may
+     * NAK (usually to report problems with the data we wrote).
+     */
+    setsda_in(dev);
+    ack = !getsda(dev);    /* ack: sda is pulled low -> success */
+    //	dprintf(INFO, "i2c_outb: 0x%02x %s\n", (int)c,
+    //		ack ? "A" : "NA");
 
-	setsda_out(dev);
-	scllo(dev);
-	return ack;
-	/* assert: scl is low (sda undef) */
+    setsda_out(dev);
+    scllo(dev);
+    return ack;
+    /* assert: scl is low (sda undef) */
 }
 
 
 static int i2c_inb(struct i2c_gpio_dev *dev)
 {
-	/* read byte via i2c port, without start/stop sequence	*/
-	/* acknowledge is sent in i2c_read.			*/
-	int i;
-	unsigned char indata = 0;
+    /* read byte via i2c port, without start/stop sequence	*/
+    /* acknowledge is sent in i2c_read.			*/
+    int i;
+    unsigned char indata = 0;
 
-	/* assert: scl is low */
-	sdahi(dev);
-	for (i = 0; i < 8; i++) {
-		if (sclhi(dev) < 0) { /* timeout */
-			dprintf(INFO, "i2c_inb: timeout at bit #%d\n", 7 - i);
-			return -ETIMEDOUT;
-		}
-		setsda_in(dev);
-		indata *= 2;
-		if (getsda(dev))
-			indata |= 0x01;
-		setscl(dev, 0);
-		udelay(i == 7 ? dev->udelay / 2 : dev->udelay);
-	}
-	setsda_out(dev);
-	/* assert: scl is low */
-	return indata;
+    /* assert: scl is low */
+    sdahi(dev);
+    for (i = 0; i < 8; i++)
+    {
+        if (sclhi(dev) < 0)   /* timeout */
+        {
+            dprintf(INFO, "i2c_inb: timeout at bit #%d\n", 7 - i);
+            return -ETIMEDOUT;
+        }
+        setsda_in(dev);
+        indata *= 2;
+        if (getsda(dev))
+            indata |= 0x01;
+        setscl(dev, 0);
+        udelay(i == 7 ? dev->udelay / 2 : dev->udelay);
+    }
+    setsda_out(dev);
+    /* assert: scl is low */
+    return indata;
 }
 
 /*
@@ -200,75 +206,84 @@ static int i2c_inb(struct i2c_gpio_dev *dev)
  */
 static int test_bus(struct i2c_gpio_dev *dev)
 {
-	const char *name = dev->name;
-	int scl, sda, ret;
+    const char *name = dev->name;
+    int scl, sda, ret;
 
-	sda = getsda(dev);
-	scl =  getscl(dev);
-	if (!scl || !sda) {
-		dprintf(INFO,"%s: bus seems to be busy (scl=%d, sda=%d)\n", name, scl, sda);
-		goto bailout;
-	}
+    sda = getsda(dev);
+    scl =  getscl(dev);
+    if (!scl || !sda)
+    {
+        dprintf(INFO, "%s: bus seems to be busy (scl=%d, sda=%d)\n", name, scl, sda);
+        goto bailout;
+    }
 
-	sdalo(dev);
-	sda = getsda(dev);
-	scl = getscl(dev);
-	if (sda) {
-		dprintf(INFO, "%s: SDA stuck high!\n", name);
-		goto bailout;
-	}
-	if (!scl) {
-		dprintf(INFO, "%s: SCL unexpected low "
-		       "while pulling SDA low!\n", name);
-		goto bailout;
-	}
+    sdalo(dev);
+    sda = getsda(dev);
+    scl = getscl(dev);
+    if (sda)
+    {
+        dprintf(INFO, "%s: SDA stuck high!\n", name);
+        goto bailout;
+    }
+    if (!scl)
+    {
+        dprintf(INFO, "%s: SCL unexpected low "
+                "while pulling SDA low!\n", name);
+        goto bailout;
+    }
 
-	sdahi(dev);
-	sda = getsda(dev);
-	scl =  getscl(dev);
-	if (!sda) {
-		dprintf(INFO, "%s: SDA stuck low!\n", name);
-		goto bailout;
-	}
-	if (!scl) {
-		dprintf(INFO, "%s: SCL unexpected low "
-		       "while pulling SDA high!\n", name);
-		goto bailout;
-	}
+    sdahi(dev);
+    sda = getsda(dev);
+    scl =  getscl(dev);
+    if (!sda)
+    {
+        dprintf(INFO, "%s: SDA stuck low!\n", name);
+        goto bailout;
+    }
+    if (!scl)
+    {
+        dprintf(INFO, "%s: SCL unexpected low "
+                "while pulling SDA high!\n", name);
+        goto bailout;
+    }
 
-	scllo(dev);
-	sda = getsda(dev);
-	scl =  getscl(dev);
-	if (scl) {
-		dprintf(INFO, "%s: SCL stuck high!\n", name);
-		goto bailout;
-	}
-	if (!sda) {
-		dprintf(INFO, "%s: SDA unexpected low "
-		       "while pulling SCL low!\n", name);
-		goto bailout;
-	}
+    scllo(dev);
+    sda = getsda(dev);
+    scl =  getscl(dev);
+    if (scl)
+    {
+        dprintf(INFO, "%s: SCL stuck high!\n", name);
+        goto bailout;
+    }
+    if (!sda)
+    {
+        dprintf(INFO, "%s: SDA unexpected low "
+                "while pulling SCL low!\n", name);
+        goto bailout;
+    }
 
-	sclhi(dev);
-	sda = getsda(dev);
-	scl =  getscl(dev);
-	if (!scl) {
-		dprintf(INFO, "%s: SCL stuck low!\n", name);
-		goto bailout;
-	}
-	if (!sda) {
-		dprintf(INFO, "%s: SDA unexpected low "
-		       "while pulling SCL high!\n", name);
-		goto bailout;
-	}
+    sclhi(dev);
+    sda = getsda(dev);
+    scl =  getscl(dev);
+    if (!scl)
+    {
+        dprintf(INFO, "%s: SCL stuck low!\n", name);
+        goto bailout;
+    }
+    if (!sda)
+    {
+        dprintf(INFO, "%s: SDA unexpected low "
+                "while pulling SCL high!\n", name);
+        goto bailout;
+    }
 
-	dprintf(INFO,"%s: Test OK\n", name);
-	return 0;
+    dprintf(INFO, "%s: Test OK\n", name);
+    return 0;
 bailout:
-	sdahi(dev);
-	sclhi(dev);
+    sdahi(dev);
+    sclhi(dev);
 
-	return -ENODEV;
+    return -ENODEV;
 }
 
 /* ----- Utility functions
@@ -283,131 +298,146 @@ bailout:
  */
 static int try_address(struct i2c_gpio_dev *dev, unsigned char addr, int retries)
 {
-	int i, ret = 0;
+    int i, ret = 0;
 
-	for (i = 0; i <= retries; i++) {
-		ret = i2c_outb(dev, addr);
-		if (ret == 1 || i == retries)
-			break;
-//		dprintf(INFO, "emitting stop condition\n");
-		i2c_stop(dev);
-		udelay(dev->udelay);
-//		yield();
-//		dprintf(INFO, "emitting start condition\n");
-		i2c_start(dev);
-	}
-	if (i && ret)
-		dprintf(INFO, "Used %d tries to %s client at 0x%02x: %s\n", i + 1,
-			addr & 1 ? "read from" : "write to", addr >> 1,
-			ret == 1 ? "success" : "failed, timeout?");
-	return ret;
+    for (i = 0; i <= retries; i++)
+    {
+        ret = i2c_outb(dev, addr);
+        if (ret == 1 || i == retries)
+            break;
+        //		dprintf(INFO, "emitting stop condition\n");
+        i2c_stop(dev);
+        udelay(dev->udelay);
+        //		yield();
+        //		dprintf(INFO, "emitting start condition\n");
+        i2c_start(dev);
+    }
+    if (i && ret)
+        dprintf(INFO, "Used %d tries to %s client at 0x%02x: %s\n", i + 1,
+                addr & 1 ? "read from" : "write to", addr >> 1,
+                ret == 1 ? "success" : "failed, timeout?");
+    return ret;
 }
 
 static int sendbytes(struct i2c_gpio_dev *dev, struct i2c_msg *msg)
 {
-	const unsigned char *temp = msg->buf;
-	int count = msg->len;
-	unsigned short nak_ok = msg->flags & I2C_M_IGNORE_NAK;
-	int retval;
-	int wrcount = 0;
+    const unsigned char *temp = msg->buf;
+    int count = msg->len;
+    unsigned short nak_ok = msg->flags & I2C_M_IGNORE_NAK;
+    int retval;
+    int wrcount = 0;
 
-	while (count > 0) {
-		retval = i2c_outb(dev, *temp);
+    while (count > 0)
+    {
+        retval = i2c_outb(dev, *temp);
 
-		/* OK/ACK; or ignored NAK */
-		if ((retval > 0) || (nak_ok && (retval == 0))) {
-			count--;
-			temp++;
-			wrcount++;
+        /* OK/ACK; or ignored NAK */
+        if ((retval > 0) || (nak_ok && (retval == 0)))
+        {
+            count--;
+            temp++;
+            wrcount++;
 
-		/* A slave NAKing the master means the slave didn't like
-		 * something about the data it saw.  For example, maybe
-		 * the SMBus PEC was wrong.
-		 */
-		} else if (retval == 0) {
-			dprintf(INFO, "sendbytes: NAK bailout.\n");
-			return -EIO;
+            /* A slave NAKing the master means the slave didn't like
+             * something about the data it saw.  For example, maybe
+             * the SMBus PEC was wrong.
+             */
+        }
+        else if (retval == 0)
+        {
+            dprintf(INFO, "sendbytes: NAK bailout.\n");
+            return -EIO;
 
-		/* Timeout; or (someday) lost arbitration
-		 *
-		 * FIXME Lost ARB implies retrying the transaction from
-		 * the first message, after the "winning" master issues
-		 * its STOP.  As a rule, upper layer code has no reason
-		 * to know or care about this ... it is *NOT* an error.
-		 */
-		} else {
-			dprintf(INFO, "sendbytes: error %d\n",
-					retval);
-			return retval;
-		}
-	}
-	return wrcount;
+            /* Timeout; or (someday) lost arbitration
+             *
+             * FIXME Lost ARB implies retrying the transaction from
+             * the first message, after the "winning" master issues
+             * its STOP.  As a rule, upper layer code has no reason
+             * to know or care about this ... it is *NOT* an error.
+             */
+        }
+        else
+        {
+            dprintf(INFO, "sendbytes: error %d\n",
+                    retval);
+            return retval;
+        }
+    }
+    return wrcount;
 }
 
 static int acknak(struct i2c_gpio_dev *dev, int is_ack)
 {
-	/* assert: sda is high */
-	if (is_ack)		/* send ack */
-		setsda(dev, 0);
-	udelay((dev->udelay + 1) / 2);
-	if (sclhi(dev) < 0) {	/* timeout */
-		dprintf(INFO, "readbytes: ack/nak timeout\n");
-		return -ETIMEDOUT;
-	}
-	scllo(dev);
-	return 0;
+    /* assert: sda is high */
+    if (is_ack)		/* send ack */
+        setsda(dev, 0);
+    udelay((dev->udelay + 1) / 2);
+    if (sclhi(dev) < 0)  	/* timeout */
+    {
+        dprintf(INFO, "readbytes: ack/nak timeout\n");
+        return -ETIMEDOUT;
+    }
+    scllo(dev);
+    return 0;
 }
 
 static int readbytes(struct i2c_gpio_dev *dev, struct i2c_msg *msg)
 {
-	int inval;
-	int rdcount = 0;	/* counts bytes read */
-	unsigned char *temp = msg->buf;
-	int count = msg->len;
-	const unsigned flags = msg->flags;
+    int inval;
+    int rdcount = 0;	/* counts bytes read */
+    unsigned char *temp = msg->buf;
+    int count = msg->len;
+    const unsigned flags = msg->flags;
 
-	while (count > 0) {
-		inval = i2c_inb(dev);
-		if (inval >= 0) {
-			*temp = inval;
-			rdcount++;
-		} else {   /* read timed out */
-			break;
-		}
+    while (count > 0)
+    {
+        inval = i2c_inb(dev);
+        if (inval >= 0)
+        {
+            *temp = inval;
+            rdcount++;
+        }
+        else       /* read timed out */
+        {
+            break;
+        }
 
-		temp++;
-		count--;
+        temp++;
+        count--;
 
-		/* Some SMBus transactions require that we receive the
-		   transaction length as the first read byte. */
-		if (rdcount == 1 && (flags & I2C_M_RECV_LEN)) {
-			if (inval <= 0 || inval > I2C_SMBUS_BLOCK_MAX) {
-				if (!(flags & I2C_M_NO_RD_ACK))
-					acknak(dev, 0);
-				dprintf(INFO, "readbytes: invalid "
-					"block length (%d)\n", inval);
-				return -1;
-			}
-			/* The original count value accounts for the extra
-			   bytes, that is, either 1 for a regular transaction,
-			   or 2 for a PEC transaction. */
-			count += inval;
-			msg->len += inval;
-		}
+        /* Some SMBus transactions require that we receive the
+           transaction length as the first read byte. */
+        if (rdcount == 1 && (flags & I2C_M_RECV_LEN))
+        {
+            if (inval <= 0 || inval > I2C_SMBUS_BLOCK_MAX)
+            {
+                if (!(flags & I2C_M_NO_RD_ACK))
+                    acknak(dev, 0);
+                dprintf(INFO, "readbytes: invalid "
+                        "block length (%d)\n", inval);
+                return -1;
+            }
+            /* The original count value accounts for the extra
+               bytes, that is, either 1 for a regular transaction,
+               or 2 for a PEC transaction. */
+            count += inval;
+            msg->len += inval;
+        }
 
-//		dprintf(INFO, "readbytes: 0x%02x %s\n",
-//			inval,
-//			(flags & I2C_M_NO_RD_ACK)
-//				? "(no ack/nak)"
-//				: (count ? "A" : "NA"));
+        //		dprintf(INFO, "readbytes: 0x%02x %s\n",
+        //			inval,
+        //			(flags & I2C_M_NO_RD_ACK)
+        //				? "(no ack/nak)"
+        //				: (count ? "A" : "NA"));
 
-		if (!(flags & I2C_M_NO_RD_ACK)) {
-			inval = acknak(dev, count);
-			if (inval < 0)
-				return inval;
-		}
-	}
-	return rdcount;
+        if (!(flags & I2C_M_NO_RD_ACK))
+        {
+            inval = acknak(dev, count);
+            if (inval < 0)
+                return inval;
+        }
+    }
+    return rdcount;
 }
 
 /* doAddress initiates the transfer by generating the start condition (in
@@ -420,118 +450,133 @@ static int readbytes(struct i2c_gpio_dev *dev, struct i2c_msg *msg)
  */
 static int bit_doAddress(struct i2c_gpio_dev *dev, struct i2c_msg *msg)
 {
-	unsigned short flags = msg->flags;
-	unsigned short nak_ok = msg->flags & I2C_M_IGNORE_NAK;
+    unsigned short flags = msg->flags;
+    unsigned short nak_ok = msg->flags & I2C_M_IGNORE_NAK;
 
-	unsigned char addr;
-	int ret, retries;
+    unsigned char addr;
+    int ret, retries;
 
-	retries = nak_ok ? 0 : dev->retries;
+    retries = nak_ok ? 0 : dev->retries;
 
-	if (flags & I2C_M_TEN) {
-		/* a ten bit address */
-		addr = 0xf0 | ((msg->addr >> 7) & 0x06);
-		dprintf(INFO, "Ten bits addr0: 0x%x\n", addr);
-		/* try extended address code...*/
-		ret = try_address(dev, addr, retries);
-		if ((ret != 1) && !nak_ok)  {
-			dprintf(INFO,
-				"died at extended address code\n");
-			return -1;
-		}
-		/* the remaining 8 bit address */
-		ret = i2c_outb(dev, msg->addr & 0xff);
-		if ((ret != 1) && !nak_ok) {
-			/* the chip did not ack / xmission error occurred */
-			dprintf(INFO, "died at 2nd address code\n");
-			return -1;
-		}
-		if (flags & I2C_M_RD) {
-			dprintf(INFO, "emitting repeated "
-				"start condition\n");
-			i2c_repstart(dev);
-			/* okay, now switch into reading mode */
-			addr |= 0x01;
-			ret = try_address(dev, addr, retries);
-			if ((ret != 1) && !nak_ok) {
-				dprintf(INFO,
-					"died at repeated address code\n");
-				return -EIO;
-			}
-		}
-	} 
-	else {		/* normal 7bit address	*/
-		addr = msg->addr << 1;
-//		dprintf(INFO, "Seven bits addr: 0x%x\n", addr);
+    if (flags & I2C_M_TEN)
+    {
+        /* a ten bit address */
+        addr = 0xf0 | ((msg->addr >> 7) & 0x06);
+        dprintf(INFO, "Ten bits addr0: 0x%x\n", addr);
+        /* try extended address code...*/
+        ret = try_address(dev, addr, retries);
+        if ((ret != 1) && !nak_ok)
+        {
+            dprintf(INFO,
+                    "died at extended address code\n");
+            return -1;
+        }
+        /* the remaining 8 bit address */
+        ret = i2c_outb(dev, msg->addr & 0xff);
+        if ((ret != 1) && !nak_ok)
+        {
+            /* the chip did not ack / xmission error occurred */
+            dprintf(INFO, "died at 2nd address code\n");
+            return -1;
+        }
+        if (flags & I2C_M_RD)
+        {
+            dprintf(INFO, "emitting repeated "
+                    "start condition\n");
+            i2c_repstart(dev);
+            /* okay, now switch into reading mode */
+            addr |= 0x01;
+            ret = try_address(dev, addr, retries);
+            if ((ret != 1) && !nak_ok)
+            {
+                dprintf(INFO,
+                        "died at repeated address code\n");
+                return -EIO;
+            }
+        }
+    }
+    else  		/* normal 7bit address	*/
+    {
+        addr = msg->addr << 1;
+        //		dprintf(INFO, "Seven bits addr: 0x%x\n", addr);
 
-		if (flags & I2C_M_RD)
-			addr |= 1;
-		if (flags & I2C_M_REV_DIR_ADDR)
-			addr ^= 1;
-		ret = try_address(dev, addr, retries);
-		if ((ret != 1) && !nak_ok)
-			{
-			dprintf(INFO, "I2C=====Seven bits addr error: 0x%x\n", addr);
-			return -1;
-			}
-	}
+        if (flags & I2C_M_RD)
+            addr |= 1;
+        if (flags & I2C_M_REV_DIR_ADDR)
+            addr ^= 1;
+        ret = try_address(dev, addr, retries);
+        if ((ret != 1) && !nak_ok)
+        {
+            dprintf(INFO, "I2C=====Seven bits addr error: 0x%x\n", addr);
+            return -1;
+        }
+    }
 
-	return 0;
+    return 0;
 }
 
 int bit_xfer(struct i2c_gpio_dev *dev, struct i2c_msg msgs[], int num)
 {
-	struct i2c_msg *pmsg;
-	int i, ret;
-	unsigned short nak_ok;
+    struct i2c_msg *pmsg;
+    int i, ret;
+    unsigned short nak_ok;
 
-//	dprintf(INFO, "emitting start condition\n");
-	i2c_start(dev);
-	for (i = 0; i < num; i++) {
-		pmsg = &msgs[i];
-		nak_ok = pmsg->flags & I2C_M_IGNORE_NAK;
-		if (!(pmsg->flags & I2C_M_NOSTART)) {
-			if (i) {
-				//dprintf(INFO, "emitting repeated start condition\n");
-				i2c_repstart(dev);
-			}
-			ret = bit_doAddress(dev, pmsg);
-			if ((ret != 0) && !nak_ok) {
-				dprintf(INFO, "NAK from device addr 0x%02x msg #%d\n", msgs[i].addr, i);
-				goto bailout;
-			}
-		}
-		if (pmsg->flags & I2C_M_RD) {
-			/* read bytes into buffer*/
-			ret = readbytes(dev, pmsg);
-			if (ret >= 1)
-//				dprintf(INFO, "read %d byte%s\n",
-//					ret, ret == 1 ? "" : "s");
-				;
-			if (ret < pmsg->len) {
-				if (ret >= 0)
-					ret = -EIO;
-				goto bailout;
-			}
-		} else {
-			/* write bytes from buffer */
-			ret = sendbytes(dev, pmsg);
-			if (ret >= 1)
-//				dprintf(INFO, "wrote %d byte%s\n",
-//					ret, ret == 1 ? "" : "s");
-				;
-			if (ret < pmsg->len) {
-				if (ret >= 0)
-					ret = -EIO;
-				goto bailout;
-			}
-		}
-	}
-	ret = i;
+    //	dprintf(INFO, "emitting start condition\n");
+    i2c_start(dev);
+    for (i = 0; i < num; i++)
+    {
+        pmsg = &msgs[i];
+        nak_ok = pmsg->flags & I2C_M_IGNORE_NAK;
+        if (!(pmsg->flags & I2C_M_NOSTART))
+        {
+            if (i)
+            {
+                //dprintf(INFO, "emitting repeated start condition\n");
+                i2c_repstart(dev);
+            }
+            ret = bit_doAddress(dev, pmsg);
+            if ((ret != 0) && !nak_ok)
+            {
+                dprintf(INFO, "NAK from device addr 0x%02x msg #%d\n", msgs[i].addr, i);
+                goto bailout;
+            }
+        }
+        if (pmsg->flags & I2C_M_RD)
+        {
+            /* read bytes into buffer*/
+            ret = readbytes(dev, pmsg);
+            if (ret >= 1)
+                //				dprintf(INFO, "read %d byte%s\n",
+                //					ret, ret == 1 ? "" : "s");
+                ;
+            if (ret < pmsg->len)
+            {
+                if (ret >= 0)
+                    ret = -EIO;
+                goto bailout;
+            }
+        }
+        else
+        {
+            /* write bytes from buffer */
+            ret = sendbytes(dev, pmsg);
+            if (ret >= 1)
+                //				dprintf(INFO, "wrote %d byte%s\n",
+                //					ret, ret == 1 ? "" : "s");
+                ;
+            if (ret < pmsg->len)
+            {
+                if (ret >= 0)
+                    ret = -EIO;
+                goto bailout;
+            }
+        }
+    }
+    ret = i;
 
 bailout:
-//	dprintf(INFO, "emitting stop condition\n");
-	i2c_stop(dev);
+    //	dprintf(INFO, "emitting stop condition\n");
+    i2c_stop(dev);
 
-	return ret;
+    return ret;
 }

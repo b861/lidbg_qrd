@@ -50,13 +50,13 @@ int version_check = 0;
 static void update_early_suspend(struct early_suspend *h)
 {
     printk("\n==[wang]==in========update_early_suspend===========\n");
-	work_en = 0;
+    work_en = 0;
 }
 
 static void update_late_resume(struct early_suspend *h)
 {
     printk("\n==[wang]==in========update_late_resume===========\n");
-    work_en = 1;	
+    work_en = 1;
 }
 #endif
 //测试升级检查和升级过程用时
@@ -1231,7 +1231,7 @@ static int gt80x_iap_kthread(void *data)
         unsigned long last_time = get_jiffies_64();
 #endif
 
-	if(work_en == 0)
+        if(work_en == 0)
             goto do_nothing;
 
         work_en = 0;
@@ -1245,8 +1245,8 @@ static int gt80x_iap_kthread(void *data)
         msleep(10000);
         debug_printk(LEVEL_DEBUG, "Start to Check the GT80X's fimeware.\n");
 
-      //  if(shutdown_flag_gt811 == 1)
-     //       goto do_nothing;
+        //  if(shutdown_flag_gt811 == 1)
+        //       goto do_nothing;
 
         gt80x_code_version();
 
@@ -1390,7 +1390,7 @@ UPDATE_AGAIN:
         else
         {
             debug_printk(LEVEL_INFO, "GT80X Updating is interrupted, Update again. State:%d, return:%d.\n", kernel_state, ret);
-	    goto UPDATE_AGAIN;
+            goto UPDATE_AGAIN;
             kernel_state = STATE_FINASH;
         }
 

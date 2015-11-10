@@ -103,7 +103,7 @@ void check_conf_file(void)
     {
         FS_ALWAYS( "<overwrite:push,update?>\n");
         fs_mem_log( "<overwrite:push,update?>\n");
-//        fs_remount_system();
+        //        fs_remount_system();
         is_out_updated = true;
 #ifdef SOC_msm8x25
         analysis_copylist(get_lidbg_file_path(buff, "copylist.conf"));

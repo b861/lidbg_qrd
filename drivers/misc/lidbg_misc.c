@@ -42,7 +42,7 @@ void lidbg_enable_logcat(void)
 
 void lidbg_enable_logcat2(void)
 {
-    int size, sizeold = 0,loop = 0;
+    int size, sizeold = 0, loop = 0;
     lidbg("logcat+\n");
     lidbg_shell_cmd("rm /sdcard/logcat.txt");
     lidbg_shell_cmd("rm /sdcard/logcat_old.txt");
@@ -74,15 +74,15 @@ void lidbg_enable_logcat2(void)
         }
         sizeold = size ;
 
-	for(loop = 0; loop < 10; loop++)
-	{
-	    static char buff[64] ;
-	    int mtime = ktime_to_ms(ktime_get_boottime());
-	    snprintf(buff, 63, "log -t lidbg logcatping:%d.%d",  mtime / 1000, mtime % 1000);
-	    lidbg("[%s]\n", buff);
-	    lidbg_shell_cmd(buff);
-	    ssleep(5);
-	}
+        for(loop = 0; loop < 10; loop++)
+        {
+            static char buff[64] ;
+            int mtime = ktime_to_ms(ktime_get_boottime());
+            snprintf(buff, 63, "log -t lidbg logcatping:%d.%d",  mtime / 1000, mtime % 1000);
+            lidbg("[%s]\n", buff);
+            lidbg_shell_cmd(buff);
+            ssleep(5);
+        }
 
     }
     lidbg("logcat-\n");

@@ -3,7 +3,7 @@
 
 enum boot_mode
 {
-    MD_RECOVERY=0,
+    MD_RECOVERY = 0,
     MD_ORIGIN,
     MD_FLYSYSTEM,
 };

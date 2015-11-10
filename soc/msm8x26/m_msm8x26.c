@@ -8,40 +8,40 @@ struct fly_smem *p_fly_smem = NULL;
 
 int soc_temp_get(int num)
 {
-	static long temp;
-	static struct tsens_device tsens_dev;
-	
-/*    8974
-	{"tsens_tz_sensor5", "cpu0" },
-	{"tsens_tz_sensor6", "cpu1" },
-	{"tsens_tz_sensor7", "cpu2" },
-	{"tsens_tz_sensor8", "cpu3" },
-	{"tsens_tz_sensor3", "pop_mem" },
-*/
+    static long temp;
+    static struct tsens_device tsens_dev;
 
-/*   8x26
-	{"tsens_tz_sensor5", "cpu0-1" },
-	{"tsens_tz_sensor2", "cpu2-3" },
-	{"tsens_tz_sensor3", "pop_mem" },
-*/
+    /*    8974
+    	{"tsens_tz_sensor5", "cpu0" },
+    	{"tsens_tz_sensor6", "cpu1" },
+    	{"tsens_tz_sensor7", "cpu2" },
+    	{"tsens_tz_sensor8", "cpu3" },
+    	{"tsens_tz_sensor3", "pop_mem" },
+    */
+
+    /*   8x26
+    	{"tsens_tz_sensor5", "cpu0-1" },
+    	{"tsens_tz_sensor2", "cpu2-3" },
+    	{"tsens_tz_sensor3", "pop_mem" },
+    */
 
 
-	tsens_dev.sensor_num = num;
-	tsens_get_temp(&tsens_dev, &temp);
+    tsens_dev.sensor_num = num;
+    tsens_get_temp(&tsens_dev, &temp);
 #if 0
-	lidbg("\n");
-	lidbg("sensor5_temp=%d\n",temp);
+    lidbg("\n");
+    lidbg("sensor5_temp=%d\n", temp);
 
-	tsens_dev.sensor_num = 2;
-	tsens_get_temp(&tsens_dev, &temp);
-	lidbg("sensor2_temp=%d\n",temp);
-	
-	tsens_dev.sensor_num = 3;
-	tsens_get_temp(&tsens_dev, &temp);
-	lidbg("sensor3_temp=%d\n",temp);
-	lidbg("\n");
+    tsens_dev.sensor_num = 2;
+    tsens_get_temp(&tsens_dev, &temp);
+    lidbg("sensor2_temp=%d\n", temp);
+
+    tsens_dev.sensor_num = 3;
+    tsens_get_temp(&tsens_dev, &temp);
+    lidbg("sensor3_temp=%d\n", temp);
+    lidbg("\n");
 #endif
-	return (int)temp;
+    return (int)temp;
 }
 
 void lidbg_soc_main(int argc, char **argv)
@@ -81,13 +81,13 @@ static int  lidbg_soc_probe(struct platform_device *pdev)
 static int soc_suspend(struct device *dev)
 {
     DUMP_FUN;
-//	soc_io_suspend();
+    //	soc_io_suspend();
     return 0;
 }
 static int soc_resume(struct device *dev)
 {
     DUMP_FUN;
-//	soc_io_resume();
+    //	soc_io_resume();
     return 0;
 }
 
@@ -130,8 +130,8 @@ int lidbg_write_file(const char *filename, const char *wbuf, size_t length)
     filp = filp_open(filename, O_RDWR | O_CREAT, 0666);
     if (IS_ERR(filp) || !filp->f_op)
     {
-    
-		lidbg("kernel_write_file:filp_open Error\n");
+
+        lidbg("kernel_write_file:filp_open Error\n");
         ret = -ENOENT;
         return ret;
     }
@@ -152,55 +152,56 @@ int lidbg_write_file(const char *filename, const char *wbuf, size_t length)
 int thread_get_mac_addr(void *data)
 {
 try_get_smem:
-	if (p_fly_smem == NULL)
+    if (p_fly_smem == NULL)
 
-		#if LINUX_VERSION_CODE < KERNEL_VERSION(3,10,0)
-		p_fly_smem = (struct fly_smem *)smem_alloc(SMEM_ID_VENDOR0, sizeof(struct fly_smem));
-		#else
-		p_fly_smem = (struct fly_smem *)smem_alloc(SMEM_ID_VENDOR0, sizeof(struct fly_smem), 0, 1);
-		#endif
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,10,0)
+        p_fly_smem = (struct fly_smem *)smem_alloc(SMEM_ID_VENDOR0, sizeof(struct fly_smem));
+#else
+        p_fly_smem = (struct fly_smem *)smem_alloc(SMEM_ID_VENDOR0, sizeof(struct fly_smem), 0, 1);
+#endif
 
-	if (p_fly_smem == NULL)
-	{
-		msleep(500);
-		goto try_get_smem;
-	}
-	
-	msleep(100);
-	
-	lidbg( "SMEM_ID_VENDOR0 ok!\n");
-	
-	
-	{
-		int i; u8 *p;
-		p = (u8 *)p_fly_smem;
-		lidbg( "smem_data = ");
-		for(i = 0; i < sizeof(struct fly_smem); i ++ )
-		{
-			lidbg("%d ",p[i]);
-		}
-		lidbg("\n");
-	}
+    if (p_fly_smem == NULL)
+    {
+        msleep(500);
+        goto try_get_smem;
+    }
+
+    msleep(100);
+
+    lidbg( "SMEM_ID_VENDOR0 ok!\n");
 
 
-	/*
-		p_fly_smem->mac_addr[0] = 1;
-		p_fly_smem->mac_addr[1] = 2;
-		p_fly_smem->mac_addr[2] = 3;
-		p_fly_smem->mac_addr[3] = 4;
-		p_fly_smem->mac_addr[4] = 5;
-		p_fly_smem->mac_addr[5] = 6;
-	*/
-	lidbg_write_file("/data/lidbg/wlan_mac",p_fly_smem->mac_addr,6);
+    {
+        int i;
+        u8 *p;
+        p = (u8 *)p_fly_smem;
+        lidbg( "smem_data = ");
+        for(i = 0; i < sizeof(struct fly_smem); i ++ )
+        {
+            lidbg("%d ", p[i]);
+        }
+        lidbg("\n");
+    }
 
-	 return 0;
+
+    /*
+    	p_fly_smem->mac_addr[0] = 1;
+    	p_fly_smem->mac_addr[1] = 2;
+    	p_fly_smem->mac_addr[2] = 3;
+    	p_fly_smem->mac_addr[3] = 4;
+    	p_fly_smem->mac_addr[4] = 5;
+    	p_fly_smem->mac_addr[5] = 6;
+    */
+    lidbg_write_file("/data/lidbg/wlan_mac", p_fly_smem->mac_addr, 6);
+
+    return 0;
 }
 
 
 
 int msm8226_init(void)
 {
-	DUMP_BUILD_TIME;
+    DUMP_BUILD_TIME;
 
     CREATE_KTHREAD(thread_get_mac_addr, NULL);
 

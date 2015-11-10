@@ -29,33 +29,33 @@
 
 static inline bool is_file_exist(const char *file)
 {
-	if(access(file, F_OK) == 0)
-		return 1;
-	else
-		return 0;
+    if(access(file, F_OK) == 0)
+        return 1;
+    else
+        return 0;
 
 }
 
 static inline int get_file_size(char *file)
 {
-	if(is_file_exist(file))
-	{
-		int fd;
-		struct stat st;
-		fd = open(file, O_RDONLY);
-		if (fd < 0)
-			return 0;
-		
-		if (fstat(fd, &st) < 0)
-			return 0;
-		
-		return st.st_size;
+    if(is_file_exist(file))
+    {
+        int fd;
+        struct stat st;
+        fd = open(file, O_RDONLY);
+        if (fd < 0)
+            return 0;
 
-	}
-	else
-	{
-		return 0;
-	}
+        if (fstat(fd, &st) < 0)
+            return 0;
+
+        return st.st_size;
+
+    }
+    else
+    {
+        return 0;
+    }
 
 }
 

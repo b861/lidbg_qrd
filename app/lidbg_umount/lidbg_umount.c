@@ -174,13 +174,13 @@ void killProcessesWithOpenFiles(const char *path, int action)
         if (action == 1)
         {
             SLOGW("Sending SIGHUP to process %d", pid);
-            lidbg("Sending SIGHUP to process %d,%s", pid,name);
+            lidbg("Sending SIGHUP to process %d,%s", pid, name);
             kill(pid, SIGTERM);
         }
         else if (action == 2)
         {
             SLOGE("Sending SIGKILL to process %d", pid);
-            lidbg("Sending SIGKILL to process %d,%s", pid,name);
+            lidbg("Sending SIGKILL to process %d,%s", pid, name);
             kill(pid, SIGKILL);
         }
     }
@@ -233,8 +233,8 @@ int checkFileMaps(int pid, const char *mountPoint, char *openFilename, size_t ma
 
 int main(int argc, char **argv)
 {
-    argc=argc;
-    argv=argv;
+    argc = argc;
+    argv = argv;
     int retries = 5;
     int action = 2;//1.SIGHUP 2.SIGKILL
     const char *path = "/storage/udisk";
@@ -253,7 +253,7 @@ int main(int argc, char **argv)
             return 0;
         }
 
-        if (retries<3)
+        if (retries < 3)
         {
             action = 2; // SIGKILL
         }

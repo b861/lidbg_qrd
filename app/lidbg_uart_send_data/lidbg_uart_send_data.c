@@ -198,8 +198,8 @@ int main(int argc , char **argv)
     pUartInfo.portName = argv[1];
     pUartInfo.baudRate = strtoul(argv[2], 0, 0);
 
-    for(i=0; i<5; i++)
-		data[i] = strtoul(argv[3 + i], 0, 0);
+    for(i = 0; i < 5; i++)
+        data[i] = strtoul(argv[3 + i], 0, 0);
 
     pUartInfo.fd = -1;
 

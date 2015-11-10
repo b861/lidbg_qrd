@@ -123,10 +123,10 @@ struct goodix_ts_data
     unsigned int version;
     /////////////////////////////// UPDATE STEP 6 END /////////////////////////////////////////////////////////////////
 
-    #if defined(CONFIG_FB)
-	struct notifier_block fb_notif;
+#if defined(CONFIG_FB)
+    struct notifier_block fb_notif;
 #elif defined(CONFIG_HAS_EARLYSUSPEND)
-	struct early_suspend early_suspend;
+    struct early_suspend early_suspend;
 #endif
     int (*power)(struct goodix_ts_data *ts, int on);
 };

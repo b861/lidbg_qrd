@@ -11,23 +11,23 @@ static KEYCODE_T lidbg_keycode[] =
     KEY_DOWN,   KEY_UP,  KEY_RIGHT, KEY_LEFT,
     KEY_VOLUMEDOWN, KEY_VOLUMEUP, KEY_PAUSE, KEY_MUTE,
     KEY_POWER, KEY_SLEEP, KEY_WAKEUP,
-    KEY_ENTER, KEY_END,KEY_HOMEPAGE
+    KEY_ENTER, KEY_END, KEY_HOMEPAGE
 };
 
 void lidbg_key_report(u32 key_value, u32 type)
 {
     lidbg("key - key_value:%d\n", key_value);
-/*	
-	if(key_value == KEY_HOME)
-	{
-		lidbg_shell_cmd("am start -a android.intent.action.MAIN -c android.intent.category.HOME");
-		return ;
-	}
-*/
+    /*
+    	if(key_value == KEY_HOME)
+    	{
+    		lidbg_shell_cmd("am start -a android.intent.action.MAIN -c android.intent.category.HOME");
+    		return ;
+    	}
+    */
 #ifdef SOC_msm8x25
 #else
-if(key_value == KEY_HOME)
-	key_value = KEY_HOMEPAGE;
+    if(key_value == KEY_HOME)
+        key_value = KEY_HOMEPAGE;
 #endif
     if(type == KEY_PRESSED)
         lidbg("key - press\n");
@@ -51,34 +51,34 @@ if(key_value == KEY_HOME)
 }
 ssize_t  key_read(struct file *filp, char __user *buffer, size_t size, loff_t *offset)
 {
- 		   
-	return size;
+
+    return size;
 }
 
 ssize_t  key_write (struct file *filp, const char __user *buf, size_t size, loff_t *ppos)
 {
-    u8 key_buf[4]={0};
-    u32 key_val,key_type,val_temp;
+    u8 key_buf[4] = {0};
+    u32 key_val, key_type, val_temp;
     memset(key_buf, '\0', 4);
-    if(size>4)
-    	size=4;
+    if(size > 4)
+        size = 4;
     if(copy_from_user(key_buf, buf, size))
     {
         lidbg("copy_from_user ERR\n");
-    } 
-    val_temp=(u32)key_buf[1];
-    val_temp=(val_temp<<8);
-    key_val=val_temp+(u32)key_buf[0];
-    val_temp=(u32)key_buf[3];
-    val_temp=(val_temp<<8);
-    key_type=val_temp+(u32)key_buf[2];  
-    lidbg_key_report(key_val,key_type);
- 	return size;
-} 
+    }
+    val_temp = (u32)key_buf[1];
+    val_temp = (val_temp << 8);
+    key_val = val_temp + (u32)key_buf[0];
+    val_temp = (u32)key_buf[3];
+    val_temp = (val_temp << 8);
+    key_type = val_temp + (u32)key_buf[2];
+    lidbg_key_report(key_val, key_type);
+    return size;
+}
 
 int key_open (struct inode *inode, struct file *filp)
 {
-	return 0;
+    return 0;
 }
 
 
@@ -88,24 +88,24 @@ static  struct file_operations key_nod_fops =
     .write = key_write,
     .read = key_read,
     .open =  key_open,
-   
+
 };
 
 static int key_ops_suspend(struct device *dev)
 {
-	lidbg("-----------key_suspend------------\n");
-	DUMP_FUN;
+    lidbg("-----------key_suspend------------\n");
+    DUMP_FUN;
 
     return 0;
 }
 
 static int key_ops_resume(struct device *dev)
 {
-	
+
     lidbg("-----------key_resume------------\n");
     DUMP_FUN;
-	
-	return 0;
+
+    return 0;
 }
 static struct dev_pm_ops key_ops =
 {
@@ -113,15 +113,15 @@ static struct dev_pm_ops key_ops =
     .resume	= key_ops_resume,
 };
 static int key_probe(struct platform_device *pdev)
-{       
-	lidbg("-----------key_probe------------\n");
-	lidbg_new_cdev(&key_nod_fops, "lidbg_key");
-	
-	return 0;	 
+{
+    lidbg("-----------key_probe------------\n");
+    lidbg_new_cdev(&key_nod_fops, "lidbg_key");
+
+    return 0;
 }
 static int key_remove(struct platform_device *pdev)
 {
-	return 0;
+    return 0;
 }
 static struct platform_device key_devices =
 {
@@ -134,10 +134,10 @@ static struct platform_driver key_driver =
     .probe = key_probe,
     .remove = key_remove,
     .driver = 	{
-		        .name = "lidbg_key",
-		        .owner = THIS_MODULE,
-				.pm = &key_ops,
-    			},
+        .name = "lidbg_key",
+        .owner = THIS_MODULE,
+        .pm = &key_ops,
+    },
 };
 
 int lidbg_key_init(void)
@@ -186,10 +186,10 @@ int lidbg_key_init(void)
     }
     platform_device_register(&key_devices);
     platform_driver_register(&key_driver);
-	
+
     LIDBG_MODULE_LOG;
 
-	
+
     return 0;
 fail:
     input_free_device(input);

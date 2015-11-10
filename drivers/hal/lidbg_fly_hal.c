@@ -14,7 +14,7 @@ int SOC_Get_CpuFreq(void);
 
 char *insmod_list[] =
 {
-	"lidbg_flyparameter.ko",
+    "lidbg_flyparameter.ko",
     "lidbg_misc.ko",
     "lidbg_lpc.ko",
 #if (defined(BOARD_V1) || defined(BOARD_V2) || defined(BOARD_V3))
@@ -66,7 +66,7 @@ int loader_thread(void *data)
         g_var.recovery_mode = recovery_mode = 1;
     else
         g_var.recovery_mode = recovery_mode = 0;
-	
+
     for(i = 0; insmod_path[i] != NULL; i++)
     {
         for(j = 0; insmod_list[j] != NULL; j++)
@@ -499,7 +499,7 @@ int fly_hal_init(void)
     g_var.is_fly = 0;
     g_var.fake_suspend = 0;
     g_var.acc_flag = 1;
-	
+
     memset(&g_var.hw_info, 0, sizeof(struct hw_info));
 
     CREATE_KTHREAD(hal_init, NULL);

@@ -97,7 +97,7 @@ int fs_file_write2(char *filename, char *wbuff)
     filep = filp_open(filename,  O_CREAT | O_RDWR, 0);
     if(IS_ERR(filep))
     {
-        printk(KERN_CRIT"err:filp_open,%s\n\n\n\n",filename);
+        printk(KERN_CRIT"err:filp_open,%s\n\n\n\n", filename);
         return -1;
     }
 
@@ -113,24 +113,24 @@ int fs_file_write2(char *filename, char *wbuff)
 }
 
 //do not use this interface to write a real file,use fs_file_write2() instead.
-int fs_file_write(char *filename,bool creat, void *wbuff, loff_t offset, int len)
+int fs_file_write(char *filename, bool creat, void *wbuff, loff_t offset, int len)
 {
     struct file *filep;
     mm_segment_t old_fs;
     unsigned int file_len = 1;
 
-    filep = filp_open(filename, creat? O_CREAT | O_WRONLY:O_WRONLY, 0);
+    filep = filp_open(filename, creat ? O_CREAT | O_WRONLY : O_WRONLY, 0);
     if(IS_ERR(filep))
     {
-        printk(KERN_CRIT"err:filp_open,%s\n\n\n\n",filename);
+        printk(KERN_CRIT"err:filp_open,%s\n\n\n\n", filename);
         return -1;
     }
 
     old_fs = get_fs();
     set_fs(get_ds());
 
-	if(filep&&filep->f_op->llseek)
-		filep->f_op->llseek(filep, offset, SEEK_SET);
+    if(filep && filep->f_op->llseek)
+        filep->f_op->llseek(filep, offset, SEEK_SET);
 
     if(wbuff)
         filep->f_op->write(filep, wbuff, len, &filep->f_pos);
@@ -138,7 +138,7 @@ int fs_file_write(char *filename,bool creat, void *wbuff, loff_t offset, int len
     filp_close(filep, 0);
     return file_len;
 }
-int fs_file_read(const char *filename, char *rbuff, loff_t offset,int readlen)
+int fs_file_read(const char *filename, char *rbuff, loff_t offset, int readlen)
 {
     struct file *filep;
     mm_segment_t old_fs;
@@ -147,7 +147,7 @@ int fs_file_read(const char *filename, char *rbuff, loff_t offset,int readlen)
     filep = filp_open(filename,  O_RDONLY, 0);
     if(IS_ERR(filep))
     {
-        printk(KERN_CRIT"err:filp_open,%s\n\n\n\n",filename);
+        printk(KERN_CRIT"err:filp_open,%s\n\n\n\n", filename);
         return -1;
     }
     old_fs = get_fs();
@@ -416,8 +416,8 @@ bool fs_is_file_updated(char *filename, char *infofile)
 
     if(fs_get_file_size(infofile) > 0)
     {
-    
-        if ( (fs_file_read(infofile, pres, 0 ,sizeof(pres)) > 0) && (!strcmp(news, pres)))
+
+        if ( (fs_file_read(infofile, pres, 0 , sizeof(pres)) > 0) && (!strcmp(news, pres)))
             return false;
     }
     fs_clear_file(infofile);

@@ -10,7 +10,7 @@ static  struct file_operations knob_fops;
 #define KB_VOL_DEC	0x00
 #define KB_VOL_INC	0x01
 #define KB_TUNE_DEC	0x02
-#define KB_TUNE_INC	0x03	
+#define KB_TUNE_INC	0x03
 
 #define EncoderID_L1	0x80		//Left Dec
 #define EncoderID_L2	0x81		//Left Inc
@@ -23,21 +23,22 @@ static  struct file_operations knob_fops;
 static struct workqueue_struct *p_work_encode_queue;
 #endif
 
-struct fly_KeyEncoderInfo{
-	u8 iEncoderLeftIncCount;
-	u8 iEncoderLeftDecCount;
-	u8 iEncoderRightIncCount;
-	u8 iEncoderRightDecCount;
+struct fly_KeyEncoderInfo
+{
+    u8 iEncoderLeftIncCount;
+    u8 iEncoderLeftDecCount;
+    u8 iEncoderRightIncCount;
+    u8 iEncoderRightDecCount;
 
-	u8 curEncodeValueLeft;
-	u8 curEncodeValueRight;
+    u8 curEncodeValueLeft;
+    u8 curEncodeValueRight;
 
-	u8 bTimeOutRun;
-	u8 time_out;
-	
-	struct work_struct encoder_work;
-	struct semaphore sem;
-	wait_queue_head_t wait_queue;	
+    u8 bTimeOutRun;
+    u8 time_out;
+
+    struct work_struct encoder_work;
+    struct semaphore sem;
+    wait_queue_head_t wait_queue;
 };
 
 
@@ -56,9 +57,9 @@ u8 *knob_fifo_buffer;
 static struct kfifo knob_data_fifo;
 
 spinlock_t irq_lock;
-static u8 left_irq_is_disabled,right_irq_is_disabled;
+static u8 left_irq_is_disabled, right_irq_is_disabled;
 
-static u8 old_num_left,old_num_right;
+static u8 old_num_left, old_num_right;
 
 
 /**
@@ -70,33 +71,33 @@ static u8 old_num_left,old_num_right;
  */
 void EncoderIDExchange(BYTE index)
 {
-	if (index >= EncoderID_L1 && index <= EncoderID_R2)
-	{
-		if (KB_VOL_INC == (index - 0x80))
-		{
-			if(g_hw.is_single_edge) pfly_KeyEncoderInfo->iEncoderLeftIncCount += 2;
-			else pfly_KeyEncoderInfo->iEncoderLeftIncCount++;
-			pfly_KeyEncoderInfo->iEncoderLeftDecCount = 0;
-		}
-		else if (KB_VOL_DEC == (index - 0x80))
-		{
-			if(g_hw.is_single_edge) pfly_KeyEncoderInfo->iEncoderLeftDecCount += 2;
-			else pfly_KeyEncoderInfo->iEncoderLeftDecCount++;
-			pfly_KeyEncoderInfo->iEncoderLeftIncCount = 0;
-		}
-		else if (KB_TUNE_INC == (index - 0x80))
-		{
-			if(g_hw.is_single_edge) pfly_KeyEncoderInfo->iEncoderRightIncCount += 2;
-			else pfly_KeyEncoderInfo->iEncoderRightIncCount++;;
-			pfly_KeyEncoderInfo->iEncoderRightDecCount = 0;
-		}
-		else if (KB_TUNE_DEC == (index - 0x80) )
-		{
-			if(g_hw.is_single_edge) pfly_KeyEncoderInfo->iEncoderRightDecCount += 2;
-			else pfly_KeyEncoderInfo->iEncoderRightDecCount++;;
-			pfly_KeyEncoderInfo->iEncoderRightIncCount = 0;
-		}
-	}
+    if (index >= EncoderID_L1 && index <= EncoderID_R2)
+    {
+        if (KB_VOL_INC == (index - 0x80))
+        {
+            if(g_hw.is_single_edge) pfly_KeyEncoderInfo->iEncoderLeftIncCount += 2;
+            else pfly_KeyEncoderInfo->iEncoderLeftIncCount++;
+            pfly_KeyEncoderInfo->iEncoderLeftDecCount = 0;
+        }
+        else if (KB_VOL_DEC == (index - 0x80))
+        {
+            if(g_hw.is_single_edge) pfly_KeyEncoderInfo->iEncoderLeftDecCount += 2;
+            else pfly_KeyEncoderInfo->iEncoderLeftDecCount++;
+            pfly_KeyEncoderInfo->iEncoderLeftIncCount = 0;
+        }
+        else if (KB_TUNE_INC == (index - 0x80))
+        {
+            if(g_hw.is_single_edge) pfly_KeyEncoderInfo->iEncoderRightIncCount += 2;
+            else pfly_KeyEncoderInfo->iEncoderRightIncCount++;;
+            pfly_KeyEncoderInfo->iEncoderRightDecCount = 0;
+        }
+        else if (KB_TUNE_DEC == (index - 0x80) )
+        {
+            if(g_hw.is_single_edge) pfly_KeyEncoderInfo->iEncoderRightDecCount += 2;
+            else pfly_KeyEncoderInfo->iEncoderRightDecCount++;;
+            pfly_KeyEncoderInfo->iEncoderRightIncCount = 0;
+        }
+    }
 }
 
 /**
@@ -108,64 +109,64 @@ void EncoderIDExchange(BYTE index)
  */
 int thread_process(void *data)
 {
-	int read_len,fifo_len,bytes,i;
-	while(1)
-	{
-		wait_for_completion(&origin_completion);
-		if(isProcess)
-		{
-			//pr_debug("[knob]thread_process begin!");
-			down(&pfly_KeyEncoderInfo->sem);
-			if(kfifo_is_empty(&knob_data_fifo))
-			{
-				up(&pfly_KeyEncoderInfo->sem);
-				continue;
-			}
+    int read_len, fifo_len, bytes, i;
+    while(1)
+    {
+        wait_for_completion(&origin_completion);
+        if(isProcess)
+        {
+            //pr_debug("[knob]thread_process begin!");
+            down(&pfly_KeyEncoderInfo->sem);
+            if(kfifo_is_empty(&knob_data_fifo))
+            {
+                up(&pfly_KeyEncoderInfo->sem);
+                continue;
+            }
 
-			fifo_len = kfifo_len(&knob_data_fifo);
-			
-			if(fifo_len > HAL_BUF_SIZE )
-			    read_len = HAL_BUF_SIZE;
-			else
-			    read_len = fifo_len;
+            fifo_len = kfifo_len(&knob_data_fifo);
 
-			bytes = kfifo_out(&knob_data_fifo, knob_data_for_hal, read_len);
-			up(&pfly_KeyEncoderInfo->sem);
+            if(fifo_len > HAL_BUF_SIZE )
+                read_len = HAL_BUF_SIZE;
+            else
+                read_len = fifo_len;
 
-			for(i = 0;i < read_len;i++)
-			{
-				if (knob_data_for_hal[i] & (1 << 0))
-				{
-					if(g_var.recovery_mode == 1)
-						SOC_Key_Report(KEY_UP, KEY_PRESSED_RELEASED);
-					else
-						SOC_Key_Report(KEY_VOLUMEUP, KEY_PRESSED_RELEASED);
-					
-				}
-				if (knob_data_for_hal[i] & (1 << 1))
-				{
-					if(g_var.recovery_mode == 1)
-						SOC_Key_Report(KEY_DOWN, KEY_PRESSED_RELEASED);
-					else
-						SOC_Key_Report(KEY_VOLUMEDOWN, KEY_PRESSED_RELEASED);
-				}
-				if (knob_data_for_hal[i] & (1 << 2))
-				{
-					if(g_var.recovery_mode == 1)
-						SOC_Key_Report(KEY_UP, KEY_PRESSED_RELEASED);
-					else
-						SOC_Key_Report(KEY_VOLUMEUP, KEY_PRESSED_RELEASED);
-				}
-				if (knob_data_for_hal[i] & (1 << 3))
-				{
-					if(g_var.recovery_mode == 1)
-						SOC_Key_Report(KEY_DOWN, KEY_PRESSED_RELEASED);
-					else
-						SOC_Key_Report(KEY_VOLUMEDOWN, KEY_PRESSED_RELEASED);
-				}
-			}
-		}
-	}	
+            bytes = kfifo_out(&knob_data_fifo, knob_data_for_hal, read_len);
+            up(&pfly_KeyEncoderInfo->sem);
+
+            for(i = 0; i < read_len; i++)
+            {
+                if (knob_data_for_hal[i] & (1 << 0))
+                {
+                    if(g_var.recovery_mode == 1)
+                        SOC_Key_Report(KEY_UP, KEY_PRESSED_RELEASED);
+                    else
+                        SOC_Key_Report(KEY_VOLUMEUP, KEY_PRESSED_RELEASED);
+
+                }
+                if (knob_data_for_hal[i] & (1 << 1))
+                {
+                    if(g_var.recovery_mode == 1)
+                        SOC_Key_Report(KEY_DOWN, KEY_PRESSED_RELEASED);
+                    else
+                        SOC_Key_Report(KEY_VOLUMEDOWN, KEY_PRESSED_RELEASED);
+                }
+                if (knob_data_for_hal[i] & (1 << 2))
+                {
+                    if(g_var.recovery_mode == 1)
+                        SOC_Key_Report(KEY_UP, KEY_PRESSED_RELEASED);
+                    else
+                        SOC_Key_Report(KEY_VOLUMEUP, KEY_PRESSED_RELEASED);
+                }
+                if (knob_data_for_hal[i] & (1 << 3))
+                {
+                    if(g_var.recovery_mode == 1)
+                        SOC_Key_Report(KEY_DOWN, KEY_PRESSED_RELEASED);
+                    else
+                        SOC_Key_Report(KEY_VOLUMEDOWN, KEY_PRESSED_RELEASED);
+                }
+            }
+        }
+    }
 }
 
 /**
@@ -177,57 +178,57 @@ int thread_process(void *data)
  */
 static void work_knob_fn(struct work_struct *work)
 {
-	u8 knob_data;
-	
-	if(!((pfly_KeyEncoderInfo->iEncoderLeftIncCount >= 2) | (pfly_KeyEncoderInfo->iEncoderLeftDecCount >= 2) | 
-		(pfly_KeyEncoderInfo->iEncoderRightIncCount >= 2) | (pfly_KeyEncoderInfo->iEncoderRightDecCount >= 2)) )
-	{
-		return;
-	}
-	
-	pr_debug("\nFlyKeyEncoderThread start\n");
+    u8 knob_data;
 
-	knob_data = 0;
-	while (pfly_KeyEncoderInfo->iEncoderLeftIncCount >= 2)
-	{
-		knob_data |= (1 << 0);
-		pfly_KeyEncoderInfo->iEncoderLeftIncCount -= 2;
-	}
-	while (pfly_KeyEncoderInfo->iEncoderLeftDecCount >= 2)
-	{
-		knob_data |= (1 <<1);
-		pfly_KeyEncoderInfo->iEncoderLeftDecCount -= 2;
-	}
-	while (pfly_KeyEncoderInfo->iEncoderRightIncCount >= 2)
-	{
-		knob_data |= (1 <<2);
-		pfly_KeyEncoderInfo->iEncoderRightIncCount-=2;
-	}
-	while (pfly_KeyEncoderInfo->iEncoderRightDecCount >= 2)
-	{
-		knob_data |= (1 <<3);
-		pfly_KeyEncoderInfo->iEncoderRightDecCount-=2;
-	}
+    if(!((pfly_KeyEncoderInfo->iEncoderLeftIncCount >= 2) | (pfly_KeyEncoderInfo->iEncoderLeftDecCount >= 2) |
+            (pfly_KeyEncoderInfo->iEncoderRightIncCount >= 2) | (pfly_KeyEncoderInfo->iEncoderRightDecCount >= 2)) )
+    {
+        return;
+    }
+
+    pr_debug("\nFlyKeyEncoderThread start\n");
+
+    knob_data = 0;
+    while (pfly_KeyEncoderInfo->iEncoderLeftIncCount >= 2)
+    {
+        knob_data |= (1 << 0);
+        pfly_KeyEncoderInfo->iEncoderLeftIncCount -= 2;
+    }
+    while (pfly_KeyEncoderInfo->iEncoderLeftDecCount >= 2)
+    {
+        knob_data |= (1 << 1);
+        pfly_KeyEncoderInfo->iEncoderLeftDecCount -= 2;
+    }
+    while (pfly_KeyEncoderInfo->iEncoderRightIncCount >= 2)
+    {
+        knob_data |= (1 << 2);
+        pfly_KeyEncoderInfo->iEncoderRightIncCount -= 2;
+    }
+    while (pfly_KeyEncoderInfo->iEncoderRightDecCount >= 2)
+    {
+        knob_data |= (1 << 3);
+        pfly_KeyEncoderInfo->iEncoderRightDecCount -= 2;
+    }
 
 
-	pfly_KeyEncoderInfo->bTimeOutRun = 1;
-	//pfly_KeyEncoderInfo->time_out = GetTickCount();
+    pfly_KeyEncoderInfo->bTimeOutRun = 1;
+    //pfly_KeyEncoderInfo->time_out = GetTickCount();
 
-	down(&pfly_KeyEncoderInfo->sem);
-        if(kfifo_is_full(&knob_data_fifo))
-        {
-	        u8 temp_reset_data;
-		int tempbyte;
-		//kfifo_reset(&knob_data_fifo);
-		tempbyte = kfifo_out(&knob_data_fifo, &temp_reset_data, 1);
-		pr_debug("[knob]kfifo_reset!!!!!\n");
-        }
-        kfifo_in(&knob_data_fifo, &knob_data, 1);
-        up(&pfly_KeyEncoderInfo->sem);
+    down(&pfly_KeyEncoderInfo->sem);
+    if(kfifo_is_full(&knob_data_fifo))
+    {
+        u8 temp_reset_data;
+        int tempbyte;
+        //kfifo_reset(&knob_data_fifo);
+        tempbyte = kfifo_out(&knob_data_fifo, &temp_reset_data, 1);
+        pr_debug("[knob]kfifo_reset!!!!!\n");
+    }
+    kfifo_in(&knob_data_fifo, &knob_data, 1);
+    up(&pfly_KeyEncoderInfo->sem);
 
-	wake_up_interruptible(&pfly_KeyEncoderInfo->wait_queue);
-	complete(&origin_completion);
-	pr_debug("knob_data = %x\n",knob_data);
+    wake_up_interruptible(&pfly_KeyEncoderInfo->wait_queue);
+    complete(&origin_completion);
+    pr_debug("knob_data = %x\n", knob_data);
 }
 
 /**
@@ -238,14 +239,15 @@ static void work_knob_fn(struct work_struct *work)
  */
 void enable_left_irq(void)
 {
-	unsigned long irqflags = 0;
-	spin_lock_irqsave(&irq_lock, irqflags);
-	if (left_irq_is_disabled) {
-		enable_irq(GPIO_TO_INT(BUTTON_LEFT_1));
-		enable_irq(GPIO_TO_INT(BUTTON_LEFT_2));
-		left_irq_is_disabled = 0;
-	}
-	spin_unlock_irqrestore(&irq_lock, irqflags);
+    unsigned long irqflags = 0;
+    spin_lock_irqsave(&irq_lock, irqflags);
+    if (left_irq_is_disabled)
+    {
+        enable_irq(GPIO_TO_INT(BUTTON_LEFT_1));
+        enable_irq(GPIO_TO_INT(BUTTON_LEFT_2));
+        left_irq_is_disabled = 0;
+    }
+    spin_unlock_irqrestore(&irq_lock, irqflags);
 }
 
 /**
@@ -256,14 +258,15 @@ void enable_left_irq(void)
  */
 void enable_right_irq(void)
 {
-	unsigned long irqflags = 0;
-	spin_lock_irqsave(&irq_lock, irqflags);
-	if (right_irq_is_disabled) {
-		enable_irq(GPIO_TO_INT(BUTTON_RIGHT_1));
-		enable_irq(GPIO_TO_INT(BUTTON_RIGHT_2));
-		right_irq_is_disabled = 0;
-	}
-	spin_unlock_irqrestore(&irq_lock, irqflags);
+    unsigned long irqflags = 0;
+    spin_lock_irqsave(&irq_lock, irqflags);
+    if (right_irq_is_disabled)
+    {
+        enable_irq(GPIO_TO_INT(BUTTON_RIGHT_1));
+        enable_irq(GPIO_TO_INT(BUTTON_RIGHT_2));
+        right_irq_is_disabled = 0;
+    }
+    spin_unlock_irqrestore(&irq_lock, irqflags);
 }
 
 /**
@@ -276,111 +279,111 @@ void enable_right_irq(void)
  */
 void irq_left_proc(u8 num)
 {
-	pfly_KeyEncoderInfo->curEncodeValueLeft = pfly_KeyEncoderInfo->curEncodeValueLeft << 4;
+    pfly_KeyEncoderInfo->curEncodeValueLeft = pfly_KeyEncoderInfo->curEncodeValueLeft << 4;
 #if defined(BUTTON_LEFT_1) && defined(ENABLE_ENCODE_IRQ_PROC)
-	if (SOC_IO_Input(BUTTON_LEFT_1, BUTTON_LEFT_1, GPIO_CFG_PULL_UP))
+    if (SOC_IO_Input(BUTTON_LEFT_1, BUTTON_LEFT_1, GPIO_CFG_PULL_UP))
 #else
-	if (0)
+    if (0)
 #endif
-	{
-		pfly_KeyEncoderInfo->curEncodeValueLeft |= (1 << 2);
-	}
+    {
+        pfly_KeyEncoderInfo->curEncodeValueLeft |= (1 << 2);
+    }
 
 #if defined(BUTTON_LEFT_2) && defined(ENABLE_ENCODE_IRQ_PROC)
-	if (SOC_IO_Input(BUTTON_LEFT_2, BUTTON_LEFT_2, GPIO_CFG_PULL_UP))
+    if (SOC_IO_Input(BUTTON_LEFT_2, BUTTON_LEFT_2, GPIO_CFG_PULL_UP))
 #else
-	if (0)
+    if (0)
 #endif
-	{
-		pfly_KeyEncoderInfo->curEncodeValueLeft |= (1 << 0);
-	}
-	pr_debug("L:%x,num:%d",pfly_KeyEncoderInfo->curEncodeValueLeft,num);
-	if(g_hw.is_single_edge)
-	{
-		if(num == 1)
-		{
-			//debounce(rising irq when signal fall down)
-			if((pfly_KeyEncoderInfo->curEncodeValueLeft & (1 << 2)) == 0) 
-			{
-				if(!old_num_left)	old_num_left = 3;//repair reverse issue(excluse first result)
-				else old_num_left = num;
-				enable_left_irq();
-				return;
-			}
-			if(old_num_left == num) //same edge:reset and wait for another irq
-			{
-				old_num_left = 0;
-				enable_left_irq();
-				return;
-			}
-			old_num_left = 0;
-			if(!(pfly_KeyEncoderInfo->curEncodeValueLeft & (1 << 0)))
-			{
-				pr_debug("num1---L1---done");
-				EncoderIDExchange(EncoderID_L1);
-			}
-			else
-			{
-				pr_debug("num1---L2--done");
-				EncoderIDExchange(EncoderID_L2);
-			}
-		}
-		
-		if(num == 2)
-		{
-			//debounce(falling irq when signal rise up)
-			if(pfly_KeyEncoderInfo->curEncodeValueLeft & (1 << 0))
-			{
-				if(!old_num_left)	old_num_left = 3;//repair reverse issue(excluse first result)
-				else old_num_left = num;
-				enable_left_irq();
-				return;
-			}
-			if(old_num_left == num) //reset and wait for another irq
-			{
-				old_num_left = 0;
-				enable_left_irq();
-				return;
-			}
-			old_num_left = 0;
-			if(!(pfly_KeyEncoderInfo->curEncodeValueLeft & (1 << 2)))
-			{
-				pr_debug("num2---L1---done");
-				EncoderIDExchange(EncoderID_L1);
-			}
-			else
-			{
-				pr_debug("num2---L2--done");
-				EncoderIDExchange(EncoderID_L2);
-			}
-		}
-	}
-	else
-	{
-		if (pfly_KeyEncoderInfo->curEncodeValueLeft == 0x04 || pfly_KeyEncoderInfo->curEncodeValueLeft == 0x45
-			|| pfly_KeyEncoderInfo->curEncodeValueLeft == 0x51 || pfly_KeyEncoderInfo->curEncodeValueLeft == 0x10)
-		{
-			EncoderIDExchange(EncoderID_L1);
-		}
-		else if (pfly_KeyEncoderInfo->curEncodeValueLeft == 0x01 || pfly_KeyEncoderInfo->curEncodeValueLeft == 0x15
-			|| pfly_KeyEncoderInfo->curEncodeValueLeft == 0x54 || pfly_KeyEncoderInfo->curEncodeValueLeft == 0x40)
-		{
-			EncoderIDExchange(EncoderID_L2);
-		}
-	}
-	
-	//irq proc
+    {
+        pfly_KeyEncoderInfo->curEncodeValueLeft |= (1 << 0);
+    }
+    pr_debug("L:%x,num:%d", pfly_KeyEncoderInfo->curEncodeValueLeft, num);
+    if(g_hw.is_single_edge)
+    {
+        if(num == 1)
+        {
+            //debounce(rising irq when signal fall down)
+            if((pfly_KeyEncoderInfo->curEncodeValueLeft & (1 << 2)) == 0)
+            {
+                if(!old_num_left)	old_num_left = 3;//repair reverse issue(excluse first result)
+                else old_num_left = num;
+                enable_left_irq();
+                return;
+            }
+            if(old_num_left == num) //same edge:reset and wait for another irq
+            {
+                old_num_left = 0;
+                enable_left_irq();
+                return;
+            }
+            old_num_left = 0;
+            if(!(pfly_KeyEncoderInfo->curEncodeValueLeft & (1 << 0)))
+            {
+                pr_debug("num1---L1---done");
+                EncoderIDExchange(EncoderID_L1);
+            }
+            else
+            {
+                pr_debug("num1---L2--done");
+                EncoderIDExchange(EncoderID_L2);
+            }
+        }
+
+        if(num == 2)
+        {
+            //debounce(falling irq when signal rise up)
+            if(pfly_KeyEncoderInfo->curEncodeValueLeft & (1 << 0))
+            {
+                if(!old_num_left)	old_num_left = 3;//repair reverse issue(excluse first result)
+                else old_num_left = num;
+                enable_left_irq();
+                return;
+            }
+            if(old_num_left == num) //reset and wait for another irq
+            {
+                old_num_left = 0;
+                enable_left_irq();
+                return;
+            }
+            old_num_left = 0;
+            if(!(pfly_KeyEncoderInfo->curEncodeValueLeft & (1 << 2)))
+            {
+                pr_debug("num2---L1---done");
+                EncoderIDExchange(EncoderID_L1);
+            }
+            else
+            {
+                pr_debug("num2---L2--done");
+                EncoderIDExchange(EncoderID_L2);
+            }
+        }
+    }
+    else
+    {
+        if (pfly_KeyEncoderInfo->curEncodeValueLeft == 0x04 || pfly_KeyEncoderInfo->curEncodeValueLeft == 0x45
+                || pfly_KeyEncoderInfo->curEncodeValueLeft == 0x51 || pfly_KeyEncoderInfo->curEncodeValueLeft == 0x10)
+        {
+            EncoderIDExchange(EncoderID_L1);
+        }
+        else if (pfly_KeyEncoderInfo->curEncodeValueLeft == 0x01 || pfly_KeyEncoderInfo->curEncodeValueLeft == 0x15
+                 || pfly_KeyEncoderInfo->curEncodeValueLeft == 0x54 || pfly_KeyEncoderInfo->curEncodeValueLeft == 0x40)
+        {
+            EncoderIDExchange(EncoderID_L2);
+        }
+    }
+
+    //irq proc
 #if defined(ENABLE_ENCODE_IRQ_PROC)
-	if(!work_pending(&pfly_KeyEncoderInfo->encoder_work))
-	{
-		#if defined(EXTI_USE_DELAYED)
-		queue_delayed_work(p_work_encode_queue, &pfly_KeyEncoderInfo->encoder_work, 1);
-		#else
-		schedule_work(&pfly_KeyEncoderInfo->encoder_work);
-		#endif
-	}	
+    if(!work_pending(&pfly_KeyEncoderInfo->encoder_work))
+    {
+#if defined(EXTI_USE_DELAYED)
+        queue_delayed_work(p_work_encode_queue, &pfly_KeyEncoderInfo->encoder_work, 1);
+#else
+        schedule_work(&pfly_KeyEncoderInfo->encoder_work);
 #endif
-	if(g_hw.is_single_edge) enable_left_irq();
+    }
+#endif
+    if(g_hw.is_single_edge) enable_left_irq();
 }
 
 /**
@@ -393,189 +396,189 @@ void irq_left_proc(u8 num)
  */
 void irq_right_proc(u8 num)
 {
-	pfly_KeyEncoderInfo->curEncodeValueRight= pfly_KeyEncoderInfo->curEncodeValueRight << 4;
+    pfly_KeyEncoderInfo->curEncodeValueRight = pfly_KeyEncoderInfo->curEncodeValueRight << 4;
 #if defined(BUTTON_RIGHT_1) && defined(ENABLE_ENCODE_IRQ_PROC)
-	if (SOC_IO_Input(BUTTON_RIGHT_1, BUTTON_RIGHT_1, GPIO_CFG_PULL_UP))
+    if (SOC_IO_Input(BUTTON_RIGHT_1, BUTTON_RIGHT_1, GPIO_CFG_PULL_UP))
 #else
-	if (0)
+    if (0)
 #endif
-	{
-		pfly_KeyEncoderInfo->curEncodeValueRight|= (1 << 2);
-	}
+    {
+        pfly_KeyEncoderInfo->curEncodeValueRight |= (1 << 2);
+    }
 
 #if defined(BUTTON_RIGHT_2) && defined(ENABLE_ENCODE_IRQ_PROC)
-	if (SOC_IO_Input(BUTTON_RIGHT_2, BUTTON_RIGHT_2, GPIO_CFG_PULL_UP))
+    if (SOC_IO_Input(BUTTON_RIGHT_2, BUTTON_RIGHT_2, GPIO_CFG_PULL_UP))
 #else
-	if (0)
+    if (0)
 #endif
-	{
-		pfly_KeyEncoderInfo->curEncodeValueRight |= (1 << 0);
-	}
-	pr_debug("R:%x,num:%d",pfly_KeyEncoderInfo->curEncodeValueRight,num);
-	if(g_hw.is_single_edge)
-	{
-		if(num == 1)
-		{
-			//debounce(rising irq when signal fall down)
-			if((pfly_KeyEncoderInfo->curEncodeValueRight & (1 << 2)) == 0)
-			{
-				if(!old_num_right)	old_num_right = 3;//repair reverse issue(excluse first result)
-				else old_num_right = num;
-				enable_right_irq();
-				return;
-			}
-			if(old_num_right == num) //same edge:reset and wait for another irq
-			{
-				old_num_right = 0;
-				enable_right_irq();
-				return;
-			}
-			old_num_right = 0;
-			if(pfly_KeyEncoderInfo->curEncodeValueRight & (1 << 0))
-			{
-				pr_debug("num1---R1---done");
-				EncoderIDExchange(EncoderID_R1);
-			}
-			else
-			{
-				pr_debug("num1---R2--done");
-				EncoderIDExchange(EncoderID_R2);
-			}
-		}
-		
-		if(num == 2)
-		{
-			//debounce(falling irq when signal rise up)
-			if(pfly_KeyEncoderInfo->curEncodeValueRight & (1 << 0))
-			{
-				if(!old_num_right)	old_num_right = 3;//repair reverse issue(excluse first result)
-				else old_num_right = num;
-				enable_right_irq();
-				return;
-			}
-			if(old_num_right == num) //same edge:reset and wait for another irq
-			{
-				old_num_right = 0;
-				enable_right_irq();
-				return;
-			}
-			old_num_right = 0;
-			if(pfly_KeyEncoderInfo->curEncodeValueRight & (1 << 2))
-			{
-				pr_debug("num2---R1---done");
-				EncoderIDExchange(EncoderID_R1);
-			}
-			else
-			{
-				pr_debug("num2---R2--done");
-				EncoderIDExchange(EncoderID_R2);
-			}
-		}
-	}
-	else
-	{
-		if (pfly_KeyEncoderInfo->curEncodeValueRight == 0x04 || pfly_KeyEncoderInfo->curEncodeValueRight == 0x45
-			|| pfly_KeyEncoderInfo->curEncodeValueRight == 0x51 || pfly_KeyEncoderInfo->curEncodeValueRight == 0x10)
-		{
-			EncoderIDExchange(EncoderID_R2);
-		}
-		else if (pfly_KeyEncoderInfo->curEncodeValueRight == 0x01 || pfly_KeyEncoderInfo->curEncodeValueRight == 0x15
-			|| pfly_KeyEncoderInfo->curEncodeValueRight == 0x54 || pfly_KeyEncoderInfo->curEncodeValueRight == 0x40)
-		{
-			EncoderIDExchange(EncoderID_R1);
-		}
-	}
-	
+    {
+        pfly_KeyEncoderInfo->curEncodeValueRight |= (1 << 0);
+    }
+    pr_debug("R:%x,num:%d", pfly_KeyEncoderInfo->curEncodeValueRight, num);
+    if(g_hw.is_single_edge)
+    {
+        if(num == 1)
+        {
+            //debounce(rising irq when signal fall down)
+            if((pfly_KeyEncoderInfo->curEncodeValueRight & (1 << 2)) == 0)
+            {
+                if(!old_num_right)	old_num_right = 3;//repair reverse issue(excluse first result)
+                else old_num_right = num;
+                enable_right_irq();
+                return;
+            }
+            if(old_num_right == num) //same edge:reset and wait for another irq
+            {
+                old_num_right = 0;
+                enable_right_irq();
+                return;
+            }
+            old_num_right = 0;
+            if(pfly_KeyEncoderInfo->curEncodeValueRight & (1 << 0))
+            {
+                pr_debug("num1---R1---done");
+                EncoderIDExchange(EncoderID_R1);
+            }
+            else
+            {
+                pr_debug("num1---R2--done");
+                EncoderIDExchange(EncoderID_R2);
+            }
+        }
+
+        if(num == 2)
+        {
+            //debounce(falling irq when signal rise up)
+            if(pfly_KeyEncoderInfo->curEncodeValueRight & (1 << 0))
+            {
+                if(!old_num_right)	old_num_right = 3;//repair reverse issue(excluse first result)
+                else old_num_right = num;
+                enable_right_irq();
+                return;
+            }
+            if(old_num_right == num) //same edge:reset and wait for another irq
+            {
+                old_num_right = 0;
+                enable_right_irq();
+                return;
+            }
+            old_num_right = 0;
+            if(pfly_KeyEncoderInfo->curEncodeValueRight & (1 << 2))
+            {
+                pr_debug("num2---R1---done");
+                EncoderIDExchange(EncoderID_R1);
+            }
+            else
+            {
+                pr_debug("num2---R2--done");
+                EncoderIDExchange(EncoderID_R2);
+            }
+        }
+    }
+    else
+    {
+        if (pfly_KeyEncoderInfo->curEncodeValueRight == 0x04 || pfly_KeyEncoderInfo->curEncodeValueRight == 0x45
+                || pfly_KeyEncoderInfo->curEncodeValueRight == 0x51 || pfly_KeyEncoderInfo->curEncodeValueRight == 0x10)
+        {
+            EncoderIDExchange(EncoderID_R2);
+        }
+        else if (pfly_KeyEncoderInfo->curEncodeValueRight == 0x01 || pfly_KeyEncoderInfo->curEncodeValueRight == 0x15
+                 || pfly_KeyEncoderInfo->curEncodeValueRight == 0x54 || pfly_KeyEncoderInfo->curEncodeValueRight == 0x40)
+        {
+            EncoderIDExchange(EncoderID_R1);
+        }
+    }
+
 #if defined(ENABLE_ENCODE_IRQ_PROC)
-	if(!work_pending(&pfly_KeyEncoderInfo->encoder_work))
-	{
-		#if defined(EXTI_USE_DELAYED)
-		queue_delayed_work(p_work_encode_queue, &pfly_KeyEncoderInfo->encoder_work, 1);
-		#else
-		schedule_work(&pfly_KeyEncoderInfo->encoder_work);
-		#endif
-	}
+    if(!work_pending(&pfly_KeyEncoderInfo->encoder_work))
+    {
+#if defined(EXTI_USE_DELAYED)
+        queue_delayed_work(p_work_encode_queue, &pfly_KeyEncoderInfo->encoder_work, 1);
+#else
+        schedule_work(&pfly_KeyEncoderInfo->encoder_work);
 #endif
-	if(g_hw.is_single_edge) enable_right_irq();
+    }
+#endif
+    if(g_hw.is_single_edge) enable_right_irq();
 }
 
 irqreturn_t irq_left_knob1(int irq, void *dev_id)
 {
-	
-	if(g_hw.is_single_edge)
-	{
-		unsigned long irqflags = 0;
-		spin_lock_irqsave(&irq_lock, irqflags);//prevent irq from nesting
-		if (!left_irq_is_disabled) 
-		{
-			left_irq_is_disabled = 1;
-			disable_irq_nosync(GPIO_TO_INT(BUTTON_LEFT_1));
-			disable_irq_nosync(GPIO_TO_INT(BUTTON_LEFT_2));
-		}
-		spin_unlock_irqrestore(&irq_lock, irqflags);
-		udelay(500);//Wait for stable reference signal
-	}
-    	pr_debug("irq_left_knob1: %d\n", irq);
-	irq_left_proc(1);
-	return IRQ_HANDLED;
+
+    if(g_hw.is_single_edge)
+    {
+        unsigned long irqflags = 0;
+        spin_lock_irqsave(&irq_lock, irqflags);//prevent irq from nesting
+        if (!left_irq_is_disabled)
+        {
+            left_irq_is_disabled = 1;
+            disable_irq_nosync(GPIO_TO_INT(BUTTON_LEFT_1));
+            disable_irq_nosync(GPIO_TO_INT(BUTTON_LEFT_2));
+        }
+        spin_unlock_irqrestore(&irq_lock, irqflags);
+        udelay(500);//Wait for stable reference signal
+    }
+    pr_debug("irq_left_knob1: %d\n", irq);
+    irq_left_proc(1);
+    return IRQ_HANDLED;
 }
 irqreturn_t irq_left_knob2(int irq, void *dev_id)
 {
-	if(g_hw.is_single_edge)
-	{
-		unsigned long irqflags = 0;
-		spin_lock_irqsave(&irq_lock, irqflags);//prevent irq from nesting
-		if (!left_irq_is_disabled) 
-		{
-			left_irq_is_disabled = 1;
-			disable_irq_nosync(GPIO_TO_INT(BUTTON_LEFT_1));
-			disable_irq_nosync(GPIO_TO_INT(BUTTON_LEFT_2));
-		}
-		spin_unlock_irqrestore(&irq_lock, irqflags);
-		udelay(500);//Wait for stable reference signal
-	}
-	pr_debug("irq_left_knob2: %d\n", irq);
-	irq_left_proc(2);
-	return IRQ_HANDLED;
+    if(g_hw.is_single_edge)
+    {
+        unsigned long irqflags = 0;
+        spin_lock_irqsave(&irq_lock, irqflags);//prevent irq from nesting
+        if (!left_irq_is_disabled)
+        {
+            left_irq_is_disabled = 1;
+            disable_irq_nosync(GPIO_TO_INT(BUTTON_LEFT_1));
+            disable_irq_nosync(GPIO_TO_INT(BUTTON_LEFT_2));
+        }
+        spin_unlock_irqrestore(&irq_lock, irqflags);
+        udelay(500);//Wait for stable reference signal
+    }
+    pr_debug("irq_left_knob2: %d\n", irq);
+    irq_left_proc(2);
+    return IRQ_HANDLED;
 }
 irqreturn_t irq_right_knob1(int irq, void *dev_id)
 {
-	
-	if(g_hw.is_single_edge)
-	{
-		unsigned long irqflags = 0;
-		spin_lock_irqsave(&irq_lock, irqflags);//prevent irq from nesting
-		if (!right_irq_is_disabled) 
-		{
-			right_irq_is_disabled = 1;
-			disable_irq_nosync(GPIO_TO_INT(BUTTON_RIGHT_1));
-			disable_irq_nosync(GPIO_TO_INT(BUTTON_RIGHT_2));
-		}
-		spin_unlock_irqrestore(&irq_lock, irqflags);
-		udelay(500);//Wait for stable reference signal
-	}
-	pr_debug("irq_right_knob1: %d\n", irq);
-	irq_right_proc(1);
-	return IRQ_HANDLED;
+
+    if(g_hw.is_single_edge)
+    {
+        unsigned long irqflags = 0;
+        spin_lock_irqsave(&irq_lock, irqflags);//prevent irq from nesting
+        if (!right_irq_is_disabled)
+        {
+            right_irq_is_disabled = 1;
+            disable_irq_nosync(GPIO_TO_INT(BUTTON_RIGHT_1));
+            disable_irq_nosync(GPIO_TO_INT(BUTTON_RIGHT_2));
+        }
+        spin_unlock_irqrestore(&irq_lock, irqflags);
+        udelay(500);//Wait for stable reference signal
+    }
+    pr_debug("irq_right_knob1: %d\n", irq);
+    irq_right_proc(1);
+    return IRQ_HANDLED;
 }
 irqreturn_t irq_right_knob2(int irq, void *dev_id)
 {
-	if(g_hw.is_single_edge)
-	{
-		unsigned long irqflags = 0;
-		spin_lock_irqsave(&irq_lock, irqflags);//prevent irq from nesting
-		if (!right_irq_is_disabled) 
-		{
-			right_irq_is_disabled = 1;
-			disable_irq_nosync(GPIO_TO_INT(BUTTON_RIGHT_1));
-			disable_irq_nosync(GPIO_TO_INT(BUTTON_RIGHT_2));
-		}
-		spin_unlock_irqrestore(&irq_lock, irqflags);
-		udelay(500);//Wait for stable reference signal
-	}
-	pr_debug("irq_right_knob2: %d\n", irq);
-	irq_right_proc(2);
-	return IRQ_HANDLED;
+    if(g_hw.is_single_edge)
+    {
+        unsigned long irqflags = 0;
+        spin_lock_irqsave(&irq_lock, irqflags);//prevent irq from nesting
+        if (!right_irq_is_disabled)
+        {
+            right_irq_is_disabled = 1;
+            disable_irq_nosync(GPIO_TO_INT(BUTTON_RIGHT_1));
+            disable_irq_nosync(GPIO_TO_INT(BUTTON_RIGHT_2));
+        }
+        spin_unlock_irqrestore(&irq_lock, irqflags);
+        udelay(500);//Wait for stable reference signal
+    }
+    pr_debug("irq_right_knob2: %d\n", irq);
+    irq_right_proc(2);
+    return IRQ_HANDLED;
 }
 
 
@@ -603,10 +606,10 @@ static int knob_suspend(struct platform_device *pdev, pm_message_t state)
 static int knob_resume(struct platform_device *pdev)
 {
 
-    IO_CONFIG_INPUT(0,BUTTON_LEFT_1);
-    IO_CONFIG_INPUT(0,BUTTON_LEFT_2);
-    IO_CONFIG_INPUT(0,BUTTON_RIGHT_1);
-    IO_CONFIG_INPUT(0,BUTTON_RIGHT_2);
+    IO_CONFIG_INPUT(0, BUTTON_LEFT_1);
+    IO_CONFIG_INPUT(0, BUTTON_LEFT_2);
+    IO_CONFIG_INPUT(0, BUTTON_RIGHT_1);
+    IO_CONFIG_INPUT(0, BUTTON_RIGHT_2);
 
     SOC_IO_ISR_Enable(BUTTON_LEFT_1);
     SOC_IO_ISR_Enable(BUTTON_LEFT_2);
@@ -633,46 +636,46 @@ static struct dev_pm_ops knob_pm_ops =
  */
 void knob_init(void)
 {
-	int button_en;
+    int button_en;
 
-	lidbg("knob_init\n");
-	FS_REGISTER_INT(button_en, "button_en", 1, NULL);
-	pfly_KeyEncoderInfo->iEncoderLeftIncCount = 0;
-	pfly_KeyEncoderInfo->iEncoderLeftDecCount = 0;
-	pfly_KeyEncoderInfo->iEncoderRightIncCount = 0;
-	pfly_KeyEncoderInfo->iEncoderRightDecCount = 0;
-	if(button_en)
-	{
+    lidbg("knob_init\n");
+    FS_REGISTER_INT(button_en, "button_en", 1, NULL);
+    pfly_KeyEncoderInfo->iEncoderLeftIncCount = 0;
+    pfly_KeyEncoderInfo->iEncoderLeftDecCount = 0;
+    pfly_KeyEncoderInfo->iEncoderRightIncCount = 0;
+    pfly_KeyEncoderInfo->iEncoderRightDecCount = 0;
+    if(button_en)
+    {
 #if defined(EXTI_USE_DELAYED)
-	p_work_encode_queue = create_singlethread_workqueue("encode_knob_queue");
-	INIT_DELAYED_WORK(&pfly_KeyEncoderInfo->encoder_work, work_knob_fn);
+        p_work_encode_queue = create_singlethread_workqueue("encode_knob_queue");
+        INIT_DELAYED_WORK(&pfly_KeyEncoderInfo->encoder_work, work_knob_fn);
 #else
-	INIT_WORK(&pfly_KeyEncoderInfo->encoder_work, work_knob_fn);
+        INIT_WORK(&pfly_KeyEncoderInfo->encoder_work, work_knob_fn);
 #endif
 
 #ifdef SOC_mt3360
 #else
-	SOC_IO_Input(BUTTON_LEFT_1, BUTTON_LEFT_1, GPIO_CFG_PULL_UP);
-	SOC_IO_Input(BUTTON_LEFT_2, BUTTON_LEFT_2, GPIO_CFG_PULL_UP);
-	SOC_IO_Input(BUTTON_RIGHT_1, BUTTON_RIGHT_1, GPIO_CFG_PULL_UP);
-	SOC_IO_Input(BUTTON_RIGHT_2, BUTTON_RIGHT_2, GPIO_CFG_PULL_UP);
+        SOC_IO_Input(BUTTON_LEFT_1, BUTTON_LEFT_1, GPIO_CFG_PULL_UP);
+        SOC_IO_Input(BUTTON_LEFT_2, BUTTON_LEFT_2, GPIO_CFG_PULL_UP);
+        SOC_IO_Input(BUTTON_RIGHT_1, BUTTON_RIGHT_1, GPIO_CFG_PULL_UP);
+        SOC_IO_Input(BUTTON_RIGHT_2, BUTTON_RIGHT_2, GPIO_CFG_PULL_UP);
 #endif
-	if(g_hw.is_single_edge)
-	{
-		lidbg("---------single_edge add IO isr----------");
-		SOC_IO_ISR_Add(BUTTON_LEFT_1, IRQF_TRIGGER_RISING, irq_left_knob1, NULL);
-		SOC_IO_ISR_Add(BUTTON_LEFT_2,  IRQF_TRIGGER_FALLING, irq_left_knob2, NULL);
-		SOC_IO_ISR_Add(BUTTON_RIGHT_1, IRQF_TRIGGER_RISING , irq_right_knob1, NULL);
-		SOC_IO_ISR_Add(BUTTON_RIGHT_2,  IRQF_TRIGGER_FALLING, irq_right_knob2, NULL);
-	}
-	else
-	{
-		lidbg("---------both_edge add IO isr----------");
-		SOC_IO_ISR_Add(BUTTON_LEFT_1, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING , irq_left_knob1, NULL);
-		SOC_IO_ISR_Add(BUTTON_LEFT_2, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING, irq_left_knob2, NULL);
-		SOC_IO_ISR_Add(BUTTON_RIGHT_1, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING, irq_right_knob1, NULL);
-		SOC_IO_ISR_Add(BUTTON_RIGHT_2, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING, irq_right_knob2, NULL);
-	}
+        if(g_hw.is_single_edge)
+        {
+            lidbg("---------single_edge add IO isr----------");
+            SOC_IO_ISR_Add(BUTTON_LEFT_1, IRQF_TRIGGER_RISING, irq_left_knob1, NULL);
+            SOC_IO_ISR_Add(BUTTON_LEFT_2,  IRQF_TRIGGER_FALLING, irq_left_knob2, NULL);
+            SOC_IO_ISR_Add(BUTTON_RIGHT_1, IRQF_TRIGGER_RISING , irq_right_knob1, NULL);
+            SOC_IO_ISR_Add(BUTTON_RIGHT_2,  IRQF_TRIGGER_FALLING, irq_right_knob2, NULL);
+        }
+        else
+        {
+            lidbg("---------both_edge add IO isr----------");
+            SOC_IO_ISR_Add(BUTTON_LEFT_1, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING , irq_left_knob1, NULL);
+            SOC_IO_ISR_Add(BUTTON_LEFT_2, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING, irq_left_knob2, NULL);
+            SOC_IO_ISR_Add(BUTTON_RIGHT_1, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING, irq_right_knob1, NULL);
+            SOC_IO_ISR_Add(BUTTON_RIGHT_2, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING, irq_right_knob2, NULL);
+        }
     }
 }
 
@@ -685,16 +688,16 @@ void knob_init(void)
  */
 int thread_knob_init(void *data)
 {
-	//knob_init();
-	if(g_var.is_fly == 0)
-	{
-		knob_init();//temp for product commit
-		//INIT_WORK(&process_work, work_process);
-		//schedule_work(&process_work);
-		init_completion(&origin_completion);
-		CREATE_KTHREAD(thread_process, NULL);
-	}	
-	return 0;
+    //knob_init();
+    if(g_var.is_fly == 0)
+    {
+        knob_init();//temp for product commit
+        //INIT_WORK(&process_work, work_process);
+        //schedule_work(&process_work);
+        init_completion(&origin_completion);
+        CREATE_KTHREAD(thread_process, NULL);
+    }
+    return 0;
 }
 
 /**
@@ -731,34 +734,34 @@ static unsigned int knob_poll(struct file *filp, struct poll_table_struct *wait)
  */
 static int  knob_probe(struct platform_device *pdev)
 {
-	int ret;
-	DUMP_FUN;
-	// 1creat cdev
-	knob_fifo_buffer = (u8 *)kmalloc(FIFO_SIZE , GFP_KERNEL);
-	knob_data_for_hal = (u8 *)kmalloc(HAL_BUF_SIZE , GFP_KERNEL);
-	if((knob_data_for_hal==NULL)||(knob_fifo_buffer==NULL))
+    int ret;
+    DUMP_FUN;
+    // 1creat cdev
+    knob_fifo_buffer = (u8 *)kmalloc(FIFO_SIZE , GFP_KERNEL);
+    knob_data_for_hal = (u8 *)kmalloc(HAL_BUF_SIZE , GFP_KERNEL);
+    if((knob_data_for_hal == NULL) || (knob_fifo_buffer == NULL))
     {
-		lidbg("knob_probe kmalloc err\n");
+        lidbg("knob_probe kmalloc err\n");
         return 0;
     }
-	pfly_KeyEncoderInfo = (struct fly_KeyEncoderInfo *)kmalloc( sizeof(struct fly_KeyEncoderInfo), GFP_KERNEL );
-	if (pfly_KeyEncoderInfo == NULL)
-	{
-	    ret = -ENOMEM;
-	    lidbg("[knob]:kmalloc err\n");
-	    return ret;
-	}
-	lidbg_new_cdev(&knob_fops, "knob");//add cdev
+    pfly_KeyEncoderInfo = (struct fly_KeyEncoderInfo *)kmalloc( sizeof(struct fly_KeyEncoderInfo), GFP_KERNEL );
+    if (pfly_KeyEncoderInfo == NULL)
+    {
+        ret = -ENOMEM;
+        lidbg("[knob]:kmalloc err\n");
+        return ret;
+    }
+    lidbg_new_cdev(&knob_fops, "knob");//add cdev
 
-	// 2init all the tools
-	init_waitqueue_head(&pfly_KeyEncoderInfo->wait_queue);
-	sema_init(&pfly_KeyEncoderInfo->sem, 1);
-	kfifo_init(&knob_data_fifo, knob_fifo_buffer, FIFO_SIZE);
-	lidbg_chmod("/dev/knob0");
+    // 2init all the tools
+    init_waitqueue_head(&pfly_KeyEncoderInfo->wait_queue);
+    sema_init(&pfly_KeyEncoderInfo->sem, 1);
+    kfifo_init(&knob_data_fifo, knob_fifo_buffer, FIFO_SIZE);
+    lidbg_chmod("/dev/knob0");
 
-	// 3creat thread
-	CREATE_KTHREAD(thread_knob_init, NULL);
-	return 0;
+    // 3creat thread
+    CREATE_KTHREAD(thread_knob_init, NULL);
+    return 0;
 }
 
 /**
@@ -773,46 +776,46 @@ static int  knob_probe(struct platform_device *pdev)
  */
 ssize_t knob_read (struct file *filp, char __user *buf, size_t count, loff_t *f_pos)
 {
-	struct fly_KeyEncoderInfo *pfly_KeyEncoderInfo = filp->private_data;
-	int read_len,fifo_len,bytes;
-	pr_debug("knob read start.\n");
-	if(kfifo_is_empty(&knob_data_fifo))
-	{
-	    if(wait_event_interruptible(pfly_KeyEncoderInfo->wait_queue, !kfifo_is_empty(&knob_data_fifo)))
-	        return -ERESTARTSYS;
-	}
-	down(&pfly_KeyEncoderInfo->sem);
-	
+    struct fly_KeyEncoderInfo *pfly_KeyEncoderInfo = filp->private_data;
+    int read_len, fifo_len, bytes;
+    pr_debug("knob read start.\n");
+    if(kfifo_is_empty(&knob_data_fifo))
+    {
+        if(wait_event_interruptible(pfly_KeyEncoderInfo->wait_queue, !kfifo_is_empty(&knob_data_fifo)))
+            return -ERESTARTSYS;
+    }
+    down(&pfly_KeyEncoderInfo->sem);
 
-	fifo_len = kfifo_len(&knob_data_fifo);
-	
-	
-	if(count > HAL_BUF_SIZE )
-	    read_len = HAL_BUF_SIZE;
-	else
-	    read_len = count;
-	 
-	 /*
-	if((count > HAL_BUF_SIZE) &  (fifo_len > HAL_BUF_SIZE))
-	    read_len = HAL_BUF_SIZE;
-	else if (count > fifo_len )
-	    read_len = fifo_len;
-	else
-	    read_len = count;
-	*/
 
-	bytes = kfifo_out(&knob_data_fifo, knob_data_for_hal, read_len);
-	up(&pfly_KeyEncoderInfo->sem);
+    fifo_len = kfifo_len(&knob_data_fifo);
 
-	if(copy_to_user(buf, knob_data_for_hal, read_len))
-	{
-	    return -1;
-	}
 
-	if(fifo_len > bytes)
-	    wake_up_interruptible(&pfly_KeyEncoderInfo->wait_queue);
+    if(count > HAL_BUF_SIZE )
+        read_len = HAL_BUF_SIZE;
+    else
+        read_len = count;
 
-	return read_len;
+    /*
+    if((count > HAL_BUF_SIZE) &  (fifo_len > HAL_BUF_SIZE))
+        read_len = HAL_BUF_SIZE;
+    else if (count > fifo_len )
+        read_len = fifo_len;
+    else
+        read_len = count;
+    */
+
+    bytes = kfifo_out(&knob_data_fifo, knob_data_for_hal, read_len);
+    up(&pfly_KeyEncoderInfo->sem);
+
+    if(copy_to_user(buf, knob_data_for_hal, read_len))
+    {
+        return -1;
+    }
+
+    if(fifo_len > bytes)
+        wake_up_interruptible(&pfly_KeyEncoderInfo->wait_queue);
+
+    return read_len;
 }
 
 /**
@@ -827,28 +830,28 @@ ssize_t knob_read (struct file *filp, char __user *buf, size_t count, loff_t *f_
  */
 ssize_t knob_write (struct file *filp, const char __user *buf, size_t count, loff_t *f_pos)
 {
-	char *cmd[8] = {NULL};
-	int cmd_num  = 0;
-	char cmd_buf[512];
-	memset(cmd_buf, '\0', 512);
+    char *cmd[8] = {NULL};
+    int cmd_num  = 0;
+    char cmd_buf[512];
+    memset(cmd_buf, '\0', 512);
 
-	if(copy_from_user(cmd_buf, buf, count))
-	{
-	    lidbg("copy_from_user ERR\n");
-	}
-	if(cmd_buf[count - 1] == '\n')
-	    cmd_buf[count - 1] = '\0';
-	lidbg("-----FLYSTEP------------------[%s]---\n", cmd_buf);
+    if(copy_from_user(cmd_buf, buf, count))
+    {
+        lidbg("copy_from_user ERR\n");
+    }
+    if(cmd_buf[count - 1] == '\n')
+        cmd_buf[count - 1] = '\0';
+    lidbg("-----FLYSTEP------------------[%s]---\n", cmd_buf);
 
-	cmd_num = lidbg_token_string(cmd_buf, " ", cmd) ;
+    cmd_num = lidbg_token_string(cmd_buf, " ", cmd) ;
 
-	if(!strcmp(cmd[0], "process"))
-	{
-		lidbg("case:[%s]\n", cmd[0]);
-		isProcess = isProcess ? 0:1;
-	}
-	
-	return count;
+    if(!strcmp(cmd[0], "process"))
+    {
+        lidbg("case:[%s]\n", cmd[0]);
+        isProcess = isProcess ? 0 : 1;
+    }
+
+    return count;
 }
 
 /**
@@ -894,8 +897,8 @@ static struct platform_driver knob_driver =
     .suspend	= knob_suspend,
     .resume	= knob_resume,
     .driver         = {
-    .name = "lidbg_knob",
-    .owner = THIS_MODULE,
+        .name = "lidbg_knob",
+        .owner = THIS_MODULE,
     },
 };
 
@@ -907,17 +910,17 @@ static struct platform_device lidbg_knob_device =
 
 static int  knob_dev_init(void)
 {
-	printk(KERN_WARNING "knob chdrv_init\n");
-	lidbg("hello_knob\n");
-          
-        LIDBG_GET;
-	platform_device_register(&lidbg_knob_device);
-  	return platform_driver_register(&knob_driver);
+    printk(KERN_WARNING "knob chdrv_init\n");
+    lidbg("hello_knob\n");
+
+    LIDBG_GET;
+    platform_device_register(&lidbg_knob_device);
+    return platform_driver_register(&knob_driver);
 }
 
 static void  knob_dev_exit(void)
 {
-	printk("knob chdrv_exit\n");
+    printk("knob chdrv_exit\n");
 }
 
 //EXPORT_SYMBOL(knob_suspend);

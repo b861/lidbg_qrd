@@ -28,14 +28,14 @@ static char *uevent_ignore = "cpu,power_supply";
 //zone start [add a new item]
 void progress_action_shell(char *action_para)
 {
-	
-	if (!strncmp(action_para, "insmod",sizeof("insmod")-1))
-	{
-		lidbg( "find cmd:%s\n",action_para);
-		module_insmod((action_para + sizeof("insmod")));
-	}
+
+    if (!strncmp(action_para, "insmod", sizeof("insmod") - 1))
+    {
+        lidbg( "find cmd:%s\n", action_para);
+        module_insmod((action_para + sizeof("insmod")));
+    }
     else
-		system(action_para);
+        system(action_para);
 }
 struct parse_action_table lidbg_parse_action[] =
 {
@@ -186,11 +186,11 @@ static void lidbg_uevent_poll(bool (*uevent_callback)(int fd))
 
 int main(int argc, char **argv)
 {
-    argc=argc;
-    argv=argv;
+    argc = argc;
+    argv = argv;
     pthread_t lidbg_uevent_tid;
     DUMP_BUILD_TIME_FILE;
-	lidbg("lidbg_userver: uevent thread start\n");
+    lidbg("lidbg_userver: uevent thread start\n");
     lidbg_uevent_poll(lidbg_uevent_callback);
     return 0;
 }

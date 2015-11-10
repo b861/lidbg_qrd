@@ -15,8 +15,8 @@ int cmn_i2c_write(int i2c_bus_id, u8 dev_address_7bit, u8 *data, int len)
             .buf = data,
         },
     };
-//    for(ret = 0; ret < len; ret++)
-//        printk("=========data[%d][%x]\n", ret, *(data + ret));
+    //    for(ret = 0; ret < len; ret++)
+    //        printk("=========data[%d][%x]\n", ret, *(data + ret));
     ret = i2c_transfer(i2c_get_adapter(i2c_bus_id), msgs, 1);
     if (ret < 0)
         printk(KERN_CRIT"=========i2c_transfer.err\n");
@@ -51,10 +51,10 @@ void lcd_on(void)
 
 static int thread_wait_i2c(void *data)
 {
-    int loop=0;
+    int loop = 0;
     allow_signal(SIGKILL);
     allow_signal(SIGSTOP);
-    while(++loop<10)
+    while(++loop < 10)
     {
         ssleep(1);
         lcd_on();
@@ -63,6 +63,6 @@ static int thread_wait_i2c(void *data)
 }
 void lidbg_i2c_start(void)
 {
-	kthread_run(thread_wait_i2c, NULL, "lidbg_i2c_start");
+    kthread_run(thread_wait_i2c, NULL, "lidbg_i2c_start");
 }
 

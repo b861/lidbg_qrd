@@ -73,8 +73,8 @@ static void fifo_is_enough(struct lidbg_fifo_device *dev, int len)
 int lidbg_fifo_put( struct lidbg_fifo_device *dev, const char *fmt, ... )
 {
     int ret = 0;
-	unsigned long flags;
-	char msg_in_buff[BUFF_SIZE];
+    unsigned long flags;
+    char msg_in_buff[BUFF_SIZE];
     if(dev && dev->is_inited)
     {
         int len;
@@ -94,7 +94,7 @@ int lidbg_fifo_put( struct lidbg_fifo_device *dev, const char *fmt, ... )
 
         msg_in_buff[BUFF_SIZE - 1] = '\0';
         len = strlen(msg_in_buff);
-		
+
         spin_lock_irqsave(&dev->fifo_lock, flags);
         fifo_is_enough(dev, len);
         ret = kfifo_in(&dev->fifo, msg_in_buff, len);
@@ -113,7 +113,7 @@ int lidbg_fifo_get(struct lidbg_fifo_device *dev, char *to_file, int out_mode)
     int len = 0;
     unsigned int ret = 1;
     char *msg_out_buff = NULL;
-	unsigned long flags;
+    unsigned long flags;
 
     if(dev && dev->is_inited)
     {
@@ -123,7 +123,7 @@ int lidbg_fifo_get(struct lidbg_fifo_device *dev, char *to_file, int out_mode)
 
         LIDBG_WARN("%s:kfifo_len=%d\n", dev->owner, len);
 
-        msg_out_buff = vmalloc(len+1);
+        msg_out_buff = vmalloc(len + 1);
         if (msg_out_buff == NULL)
         {
             ret = -1;
@@ -131,7 +131,7 @@ int lidbg_fifo_get(struct lidbg_fifo_device *dev, char *to_file, int out_mode)
             return ret;
         }
 
-        memset(msg_out_buff, '\0', len+1);
+        memset(msg_out_buff, '\0', len + 1);
         spin_lock_irqsave(&dev->fifo_lock, flags);
         ret = kfifo_out(&dev->fifo, msg_out_buff, len);
         spin_unlock_irqrestore(&dev->fifo_lock, flags);
@@ -168,8 +168,8 @@ struct lidbg_fifo_device *lidbg_fifo_alloc(char *owner, int fifo_size, int buff_
     }
     dev->is_inited = false;
     dev->owner = NULL;
-	
-	spin_lock_init(&dev->fifo_lock);
+
+    spin_lock_init(&dev->fifo_lock);
 
     if(kfifo_alloc(&dev->fifo, fifo_size, GFP_KERNEL))
     {
@@ -203,17 +203,17 @@ static ssize_t lidbg_msg_read (struct file *filp, char __user *buf, size_t count
 static ssize_t lidbg_msg_write (struct file *filp, const char __user *buf, size_t count, loff_t *f_pos)
 {
     int ret = 0;
-	unsigned long flags;
-	char msg_in_buff[BUFF_SIZE];
+    unsigned long flags;
+    char msg_in_buff[BUFF_SIZE];
 
     if((count > 0) && glidbg_msg_fifo->is_inited)
     {
         int len;
-		
+
 
         lidbg_get_curr_time(msg_in_buff, NULL);
         len = strlen(msg_in_buff);
-		
+
         spin_lock_irqsave(&glidbg_msg_fifo->fifo_lock, flags);
         fifo_is_enough(glidbg_msg_fifo, len);
         ret = kfifo_in(&glidbg_msg_fifo->fifo, msg_in_buff, len);
@@ -225,7 +225,7 @@ static ssize_t lidbg_msg_write (struct file *filp, const char __user *buf, size_
 
         len = strlen(msg_in_buff);
 
-		
+
         spin_lock_irqsave(&glidbg_msg_fifo->fifo_lock, flags);
         fifo_is_enough(glidbg_msg_fifo, len);
         ret = kfifo_in(&glidbg_msg_fifo->fifo, msg_in_buff, len);
@@ -322,7 +322,7 @@ static struct platform_device lidbg_mem_log_device =
 
 static  int lidbg_msg_init(void)
 {
-    
+
     LIDBG_MODULE_LOG;
     platform_device_register(&lidbg_mem_log_device);
 

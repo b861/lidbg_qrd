@@ -3,5 +3,5 @@
 
 void *fb_base_get()
 {
-	return config->base;
+    return config->base;
 }

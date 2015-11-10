@@ -528,7 +528,7 @@ u32 GetTickCount(void)
 
 int kill_proc(struct file *file, char __user *buf, size_t size, loff_t *ppos)
 {
-	PROC_READ_CHECK;
+    PROC_READ_CHECK;
     fastboot_task_kill_exclude(NULL);
     return 1;
 }
@@ -546,7 +546,7 @@ void create_new_proc_entry(void)
 
 int pwroff_proc(struct file *file, char __user *buf, size_t size, loff_t *ppos)
 {
-	PROC_READ_CHECK;
+    PROC_READ_CHECK;
     DUMP_FUN_ENTER;
     if(PM_STATUS_LATE_RESUME_OK == fastboot_get_status())
         fastboot_pwroff();

@@ -36,7 +36,7 @@ char *get_bin_path( char *buf)
 char *get_lidbg_file_path(char *buff, char *filename)
 {
     char *path;
-    path = (gboot_mode==MD_FLYSYSTEM) ? "/flysystem/lib/out/" : "/system/lib/modules/out/";
+    path = (gboot_mode == MD_FLYSYSTEM) ? "/flysystem/lib/out/" : "/system/lib/modules/out/";
     sprintf(buff, "%s%s", path, filename);
     return buff;
 }
@@ -79,16 +79,16 @@ void set_cpu_governor(int state)
 
 int read_proc(struct file *file, char __user *buf, size_t size, loff_t *ppos)
 {
-	
+
     int len = 0;
     struct task_struct *task_list;
-	PROC_READ_CHECK;
+    PROC_READ_CHECK;
 
     for_each_process(task_list)
     {
         len  += sprintf(buf + len, "%s %d \n", task_list->comm, task_list->pid);
     }
-	*ppos += len;
+    *ppos += len;
     return len;
 }
 
@@ -191,7 +191,7 @@ int  lidbg_launch_user( char bin_path[], char argv1[], char argv2[], char argv3[
 static struct class *lidbg_cdev_class = NULL;
 loff_t node_default_lseek(struct file *file, loff_t offset, int origin)
 {
-	return 0;
+    return 0;
 }
 bool new_cdev(struct file_operations *cdev_fops, char *nodename)
 {
@@ -227,8 +227,8 @@ bool new_cdev(struct file_operations *cdev_fops, char *nodename)
     }
     major_number_ts = MAJOR(dev_number);
 
-	if(!cdev_fops->llseek)
-		cdev_fops->llseek=node_default_lseek;
+    if(!cdev_fops->llseek)
+        cdev_fops->llseek = node_default_lseek;
 
     cdev_init(new_cdev, cdev_fops);
     new_cdev->owner = cdev_fops->owner;
@@ -282,7 +282,7 @@ int  lidbg_exe(char path[], char argv1[], char argv2[], char argv3[], char argv4
 }
 int  lidbg_mount(char path[])
 {
-	lidbg("warnning,remount is unsafe!\n");
+    lidbg("warnning,remount is unsafe!\n");
     return lidbg_launch_user(MOUNT_PATH, "-o", "remount", path, NULL, NULL, NULL);
 }
 int  lidbg_chmod(char path[])
@@ -408,7 +408,7 @@ int lidbg_readdir_and_dealfile(char *insure_is_dir, void (*callback)(char *dirna
     else
     {
         struct name_list *entry;
-		int count=0;
+        int count = 0;
         LIDBG_SUC("open:<%s,%s>\n", insure_is_dir, dir_file->f_path.dentry->d_name.name);
         dir = dir_file->f_path.dentry;
         status = vfs_readdir(dir_file, readdir_build_namelist, &names);
@@ -420,7 +420,7 @@ int lidbg_readdir_and_dealfile(char *insure_is_dir, void (*callback)(char *dirna
             if (!status && entry)
             {
                 count++;
-                if(callback) 
+                if(callback)
                     callback(insure_is_dir, entry->name);
                 list_del(&entry->list);
                 kfree(entry);

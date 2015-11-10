@@ -22,14 +22,14 @@ static int devices_notifier_callback(struct notifier_block *self,
         blank = evdata->data;
         if (*blank == FB_BLANK_UNBLANK)
         {
-			if(g_var.system_status >= FLY_KERNEL_UP)
-				if(g_var.led_hal_status & g_var.led_app_status)
-        			LCD_ON;
+            if(g_var.system_status >= FLY_KERNEL_UP)
+                if(g_var.led_hal_status & g_var.led_app_status)
+                    LCD_ON;
             g_var.fb_on = 1;
         }
         else if (*blank == FB_BLANK_POWERDOWN)
         {
-        	LCD_OFF;
+            LCD_OFF;
             g_var.fb_on = 0;
         }
     }
@@ -46,14 +46,14 @@ void usb_disk_enable(bool enable)
     else
     {
 #ifdef FORCE_UMOUNT_UDISK
-    	lidbg("call lidbg_umount\n");
-    	lidbg_shell_cmd("/system/lib/modules/out/lidbg_umount &");
-		lidbg_shell_cmd("/flysystem/lib/out/lidbg_umount &");
-		msleep(4000);
+        lidbg("call lidbg_umount\n");
+        lidbg_shell_cmd("/system/lib/modules/out/lidbg_umount &");
+        lidbg_shell_cmd("/flysystem/lib/out/lidbg_umount &");
+        msleep(4000);
 #else
-		lidbg("USB_WORK_DISENABLE.200.unmount\n");
-		lidbg_shell_cmd("umount /storage/udisk");
-		msleep(200);
+        lidbg("USB_WORK_DISENABLE.200.unmount\n");
+        lidbg_shell_cmd("umount /storage/udisk");
+        msleep(200);
 #endif
         USB_WORK_DISENABLE;
     }
@@ -80,63 +80,63 @@ static int lidbg_event(struct notifier_block *this,
     switch (event)
     {
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_SCREEN_OFF):
-		//if(!g_var.is_fly)
-		{
-			LCD_OFF;
-			//lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_APP_OFF));
-			//lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_HAL_OFF));
-		}
-        break;
+        //if(!g_var.is_fly)
+    {
+        LCD_OFF;
+        //lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_APP_OFF));
+        //lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_HAL_OFF));
+    }
+    break;
 
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_DEVICE_DOWN):
-		#ifdef DISABLE_USB_WHEN_DEVICE_DOWN
-			//CREATE_KTHREAD(thread_usb_disk_disable_delay, NULL);
-			usb_disk_enable(false);
-		#endif
-#if 0//def VENDOR_QCOM
-		lidbg("set uart to gpio\n");
-		SOC_IO_Output_Ext(0, g_hw.gpio_dvd_tx, 1,GPIOMUX_PULL_NONE,GPIOMUX_DRV_8MA);
-		SOC_IO_Output_Ext(0, g_hw.gpio_dvd_rx, 1,GPIOMUX_PULL_NONE,GPIOMUX_DRV_8MA);
-		SOC_IO_Output_Ext(0, g_hw.gpio_bt_tx, 1,GPIOMUX_PULL_NONE,GPIOMUX_DRV_8MA);
-		SOC_IO_Output_Ext(0, g_hw.gpio_bt_rx, 1,GPIOMUX_PULL_NONE,GPIOMUX_DRV_8MA);
+#ifdef DISABLE_USB_WHEN_DEVICE_DOWN
+        //CREATE_KTHREAD(thread_usb_disk_disable_delay, NULL);
+        usb_disk_enable(false);
 #endif
-		GPS_POWER_OFF;
+#if 0//def VENDOR_QCOM
+        lidbg("set uart to gpio\n");
+        SOC_IO_Output_Ext(0, g_hw.gpio_dvd_tx, 1, GPIOMUX_PULL_NONE, GPIOMUX_DRV_8MA);
+        SOC_IO_Output_Ext(0, g_hw.gpio_dvd_rx, 1, GPIOMUX_PULL_NONE, GPIOMUX_DRV_8MA);
+        SOC_IO_Output_Ext(0, g_hw.gpio_bt_tx, 1, GPIOMUX_PULL_NONE, GPIOMUX_DRV_8MA);
+        SOC_IO_Output_Ext(0, g_hw.gpio_bt_rx, 1, GPIOMUX_PULL_NONE, GPIOMUX_DRV_8MA);
+#endif
+        GPS_POWER_OFF;
         break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_ANDROID_DOWN):
-		MSM_DSI83_DISABLE;
-		#ifdef DISABLE_USB_WHEN_ANDROID_DOWN
-		CREATE_KTHREAD(thread_usb_disk_disable_delay, NULL);
-		#endif
+        MSM_DSI83_DISABLE;
+#ifdef DISABLE_USB_WHEN_ANDROID_DOWN
+        CREATE_KTHREAD(thread_usb_disk_disable_delay, NULL);
+#endif
         break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_GOTO_SLEEP):
         break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_KERNEL_DOWN):
-		break;
-	case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_KERNEL_UP):
-		break;
-	case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_ANDROID_UP):
-		break;
-	case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_DEVICE_UP):
+        break;
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_KERNEL_UP):
+        break;
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_ANDROID_UP):
+        break;
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_DEVICE_UP):
 #if 0//def VENDOR_QCOM
-		lidbg("set gpio to uart\n");
-		SOC_IO_Config(g_hw.gpio_dvd_tx,GPIOMUX_FUNC_2,GPIOMUX_OUT_HIGH,GPIOMUX_PULL_NONE,GPIOMUX_DRV_16MA);
-		SOC_IO_Config(g_hw.gpio_dvd_rx,GPIOMUX_FUNC_2,GPIOMUX_OUT_HIGH,GPIOMUX_PULL_NONE,GPIOMUX_DRV_16MA);
-		SOC_IO_Config(g_hw.gpio_bt_tx,GPIOMUX_FUNC_2,GPIOMUX_OUT_HIGH,GPIOMUX_PULL_NONE,GPIOMUX_DRV_16MA);
-		SOC_IO_Config(g_hw.gpio_bt_rx,GPIOMUX_FUNC_2,GPIOMUX_OUT_HIGH,GPIOMUX_PULL_NONE,GPIOMUX_DRV_16MA);
+        lidbg("set gpio to uart\n");
+        SOC_IO_Config(g_hw.gpio_dvd_tx, GPIOMUX_FUNC_2, GPIOMUX_OUT_HIGH, GPIOMUX_PULL_NONE, GPIOMUX_DRV_16MA);
+        SOC_IO_Config(g_hw.gpio_dvd_rx, GPIOMUX_FUNC_2, GPIOMUX_OUT_HIGH, GPIOMUX_PULL_NONE, GPIOMUX_DRV_16MA);
+        SOC_IO_Config(g_hw.gpio_bt_tx, GPIOMUX_FUNC_2, GPIOMUX_OUT_HIGH, GPIOMUX_PULL_NONE, GPIOMUX_DRV_16MA);
+        SOC_IO_Config(g_hw.gpio_bt_rx, GPIOMUX_FUNC_2, GPIOMUX_OUT_HIGH, GPIOMUX_PULL_NONE, GPIOMUX_DRV_16MA);
 #endif
-		
-		GPS_POWER_ON;
-		CREATE_KTHREAD(thread_usb_disk_enable_delay, NULL);
-		break;
-	case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_SCREEN_ON):
-		//if(!g_var.is_fly)
-		{
-			if(g_var.led_hal_status & g_var.led_app_status)
-	    		LCD_ON;
-    		//lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_APP_ON));
-			//lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_HAL_ON));
-		}
-		break;
+
+        GPS_POWER_ON;
+        CREATE_KTHREAD(thread_usb_disk_enable_delay, NULL);
+        break;
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_SCREEN_ON):
+        //if(!g_var.is_fly)
+    {
+        if(g_var.led_hal_status & g_var.led_app_status)
+            LCD_ON;
+        //lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_APP_ON));
+        //lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_HAL_ON));
+    }
+    break;
 
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SIGNAL_EVENT, NOTIFIER_MINOR_SIGNAL_BAKLIGHT_ACK):
         LCD_OFF;
@@ -173,37 +173,37 @@ static void parse_cmd(char *pt)
     lidbg("%s\n", pt);
     argc = lidbg_token_string(pt, " ", argv);
 
-     if (!strcmp(argv[0], "lcd_on"))
+    if (!strcmp(argv[0], "lcd_on"))
     {
-     	lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_APP_ON));
+        lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_APP_ON));
     }
     else if (!strcmp(argv[0], "lcd_off"))
     {
-     	lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_APP_OFF));
+        lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_APP_OFF));
     }
-	else if (!strcmp(argv[0], "performance_high"))
+    else if (!strcmp(argv[0], "performance_high"))
     {
 #ifdef SOC_msm8x26
-		set_system_performance(3);
+        set_system_performance(3);
 #endif
     }
-	else if (!strcmp(argv[0], "performance_middle"))
+    else if (!strcmp(argv[0], "performance_middle"))
     {
 #ifdef SOC_msm8x26
-		set_system_performance(2);
+        set_system_performance(2);
 #endif
     }
-	else if (!strcmp(argv[0], "performance_low"))
+    else if (!strcmp(argv[0], "performance_low"))
     {
 #ifdef SOC_msm8x26
-		set_system_performance(1);
+        set_system_performance(1);
 #endif
     }
-	else if (!strcmp(argv[0], "acc_debug_mode"))
+    else if (!strcmp(argv[0], "acc_debug_mode"))
     {
-    	lidbg("acc_debug_mode enable!");
-	    g_var.is_debug_mode = 1;
-    }		
+        lidbg("acc_debug_mode enable!");
+        g_var.is_debug_mode = 1;
+    }
 }
 
 
@@ -243,39 +243,39 @@ static struct file_operations dev_fops =
     .release = dev_close,
 };
 
-int usb_enumerate_limit=5;
+int usb_enumerate_limit = 5;
 void usb_enumerate_monitor(char *key_word, void *data)
 {
-	DUMP_FUN;
-	if(!g_var.is_udisk_needreset||usb_enumerate_limit<=0)
-	{
-	    lidbg("find key word.return %d,%d\n",!g_var.is_udisk_needreset,usb_enumerate_limit);
-	    return;
-	}
-	lidbg("find key word.in %d\n",usb_enumerate_limit);
-	g_var.is_udisk_needreset=0;
-	usb_enumerate_limit--;
-	if(g_var.system_status >= FLY_ANDROID_UP)
-	{
-		usb_disk_enable(0);
-		ssleep(2);
-		usb_disk_enable(1);
-	}
+    DUMP_FUN;
+    if(!g_var.is_udisk_needreset || usb_enumerate_limit <= 0)
+    {
+        lidbg("find key word.return %d,%d\n", !g_var.is_udisk_needreset, usb_enumerate_limit);
+        return;
+    }
+    lidbg("find key word.in %d\n", usb_enumerate_limit);
+    g_var.is_udisk_needreset = 0;
+    usb_enumerate_limit--;
+    if(g_var.system_status >= FLY_ANDROID_UP)
+    {
+        usb_disk_enable(0);
+        ssleep(2);
+        usb_disk_enable(1);
+    }
 }
 
 int thread_udisk_stability_test(void *data)
 {
-	u32 cnt = 0;
-	ssleep(30);
-	while(1)
-	{
-		usb_disk_enable(1);
-		ssleep(15);
-		usb_disk_enable(0);
-		ssleep(5);
-		cnt++;
-		lidbg("udisk_stability_test times=%d\n",cnt);
-	}
+    u32 cnt = 0;
+    ssleep(30);
+    while(1)
+    {
+        usb_disk_enable(1);
+        ssleep(15);
+        usb_disk_enable(0);
+        ssleep(5);
+        cnt++;
+        lidbg("udisk_stability_test times=%d\n", cnt);
+    }
 
 }
 
@@ -318,40 +318,40 @@ static int soc_dev_probe(struct platform_device *pdev)
 
     register_lidbg_notifier(&lidbg_notifier);
 
-	CREATE_KTHREAD(thread_led, NULL);
-	//CREATE_KTHREAD(thread_thermal, NULL);
-	
-	if((g_var.is_fly == 0) || (g_var.recovery_mode == 1))
-	{
-	   // CREATE_KTHREAD(thread_button_init, NULL);
-	    //CREATE_KTHREAD(thread_key, NULL);
-		
-	    //LCD_ON;
-	}
-	LCD_ON;
+    CREATE_KTHREAD(thread_led, NULL);
+    //CREATE_KTHREAD(thread_thermal, NULL);
+
+    if((g_var.is_fly == 0) || (g_var.recovery_mode == 1))
+    {
+        // CREATE_KTHREAD(thread_button_init, NULL);
+        //CREATE_KTHREAD(thread_key, NULL);
+
+        //LCD_ON;
+    }
+    LCD_ON;
     //lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_APP_ON));
-	//lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_HAL_ON));
-	USB_WORK_ENABLE;
+    //lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_HAL_ON));
+    USB_WORK_ENABLE;
 
-	SET_USB_ID_SUSPEND;
-	GPS_POWER_ON;
-	lidbg_new_cdev(&dev_fops, "flydev");
+    SET_USB_ID_SUSPEND;
+    GPS_POWER_ON;
+    lidbg_new_cdev(&dev_fops, "flydev");
 
-	lidbg_trace_msg_cb_register("unable to enumerate USB device",NULL,usb_enumerate_monitor);
-	
+    lidbg_trace_msg_cb_register("unable to enumerate USB device", NULL, usb_enumerate_monitor);
+
     FS_REGISTER_INT(udisk_stability_test, "udisk_stability_test", 0, NULL);
 
-	if(udisk_stability_test == 1)
-	{
-		CREATE_KTHREAD(thread_udisk_stability_test, NULL);
-	}
-	
+    if(udisk_stability_test == 1)
+    {
+        CREATE_KTHREAD(thread_udisk_stability_test, NULL);
+    }
+
 #ifdef PLATFORM_ID_7
-		if(0)
-		{
-		    usb_register_notify(&usb_nb_misc);
-		    CREATE_KTHREAD(thread_udisk_en, NULL);
-		}
+    if(0)
+    {
+        usb_register_notify(&usb_nb_misc);
+        CREATE_KTHREAD(thread_udisk_en, NULL);
+    }
 #endif
     return 0;
 
@@ -359,32 +359,32 @@ static int soc_dev_probe(struct platform_device *pdev)
 static int soc_dev_remove(struct platform_device *pdev)
 {
     lidbg("soc_dev_remove\n");
-	
-	if(!g_var.is_fly){}
 
-	return 0;
+    if(!g_var.is_fly) {}
+
+    return 0;
 
 }
 static int  soc_dev_suspend(struct platform_device *pdev, pm_message_t state)
 {
     lidbg("soc_dev_suspend\n");
 
-	if(!g_var.is_fly)
-	{
-		//button_suspend();
-	}
+    if(!g_var.is_fly)
+    {
+        //button_suspend();
+    }
 
     return 0;
 
 }
 static int soc_dev_resume(struct platform_device *pdev)
 {
-	lidbg("soc_dev_resume \n");
-	if(!g_var.is_fly)
-	{
-		//button_resume();
-		led_resume();
-	}
+    lidbg("soc_dev_resume \n");
+    if(!g_var.is_fly)
+    {
+        //button_resume();
+        led_resume();
+    }
 
     return 0;
 }
@@ -416,9 +416,9 @@ int dev_init(void)
 {
     lidbg("=======misc_dev_init========\n");
     LIDBG_GET;
-	set_func_tbl();
-	platform_device_register(&soc_devices);
-	platform_driver_register(&soc_devices_driver);
+    set_func_tbl();
+    platform_device_register(&soc_devices);
+    platform_driver_register(&soc_devices_driver);
     return 0;
 }
 

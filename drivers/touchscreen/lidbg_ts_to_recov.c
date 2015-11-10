@@ -8,7 +8,7 @@
 #define TOUCH_MODE_NORMAL  22
 #define TOUCH_MODE_SEL     TOUCH_MODE_NORMAL
 #define DEVICE_NAME "fenzhi"
- touch_t *touch;
+touch_t *touch;
 
 touch_t *touchtemp;
 
@@ -32,17 +32,17 @@ void set_touch_pos(touch_t *t)
 {
     if (bPress == t->pressed)
     {
-		return;
+        return;
     }
 
-	memcpy(touch, t, sizeof(touch_t));
+    memcpy(touch, t, sizeof(touch_t));
 
-	bPress = touch->pressed;
+    bPress = touch->pressed;
 
- 	spin_lock(&touchlock);
-	bNeedRead = true;
-	spin_unlock(&touchlock);
-	wake_up_interruptible(&read_wait);
+    spin_lock(&touchlock);
+    bNeedRead = true;
+    spin_unlock(&touchlock);
+    wake_up_interruptible(&read_wait);
 }
 
 EXPORT_SYMBOL(set_touch_pos);
@@ -63,29 +63,29 @@ static void dev_timer_func(unsigned long arg)
     //input_report_abs(dev->input_dev, ABS_Y, dev->counter);
     //input_sync(dev->input_dev);
 }
-#endif 
+#endif
 
 unsigned int fenzhi_poll(struct file *filp, poll_table *wait)
 {
-	unsigned int mask = 0;
+    unsigned int mask = 0;
 
-	if (!bNeedRead)
-	{
-		//printk("\n fenzhi_poll %d",bNeedRead);
-		poll_wait(filp, &read_wait, wait);	
-		//interruptible_sleep_on(&read_wait);
-	}
+    if (!bNeedRead)
+    {
+        //printk("\n fenzhi_poll %d",bNeedRead);
+        poll_wait(filp, &read_wait, wait);
+        //interruptible_sleep_on(&read_wait);
+    }
 
-	if (bNeedRead)
-	{
+    if (bNeedRead)
+    {
 #if TOUCH_MODE_SEL == TOUCH_MODE_MMAP
-		bNeedRead = false;
+        bNeedRead = false;
 #endif
 
-		mask |= POLLIN|POLLRDNORM;
-	}
+        mask |= POLLIN | POLLRDNORM;
+    }
 
-	return mask;
+    return mask;
 }
 
 int fenzhi_open (struct inode *inode, struct file *filp)
@@ -96,17 +96,17 @@ int fenzhi_open (struct inode *inode, struct file *filp)
 
 static int fenzhi_mmap(struct file *filp, struct vm_area_struct *vma)
 {
-	vma->vm_pgoff = ((unsigned long)virt_to_phys(touch)) >> PAGE_SHIFT;  
+    vma->vm_pgoff = ((unsigned long)virt_to_phys(touch)) >> PAGE_SHIFT;
 
-	printk("vma->vm_pgoff = %lx\n",vma->vm_pgoff); 
+    printk("vma->vm_pgoff = %lx\n", vma->vm_pgoff);
 
-	if (remap_pfn_range(vma, vma->vm_start, vma->vm_pgoff, sizeof(touch_t),  vma->vm_page_prot))  
-	{
-		printk("remap_pfn_range error\n");
-		return -EAGAIN; 
-	}
+    if (remap_pfn_range(vma, vma->vm_start, vma->vm_pgoff, sizeof(touch_t),  vma->vm_page_prot))
+    {
+        printk("remap_pfn_range error\n");
+        return -EAGAIN;
+    }
 
-	return 0;
+    return 0;
 }
 
 /*
@@ -114,21 +114,21 @@ static int fenzhi_mmap(struct file *filp, struct vm_area_struct *vma)
  */
 ssize_t fenzhi_read (struct file *filp, char __user *buf, size_t count, loff_t *f_pos)
 {
-	//printk("\n fenzhi_read %d",bNeedRead);
- 	spin_lock(&touchlock);
-	if (bNeedRead)
-	{
-		bNeedRead = false;
-		spin_unlock(&touchlock);
-		if(copy_to_user(buf, touch, sizeof(touch_t)) == 0)
-			return sizeof(touch_t);
-	}
-	else
-	{
-		spin_unlock(&touchlock);
-		//return 0;
-	}
-	return 0;
+    //printk("\n fenzhi_read %d",bNeedRead);
+    spin_lock(&touchlock);
+    if (bNeedRead)
+    {
+        bNeedRead = false;
+        spin_unlock(&touchlock);
+        if(copy_to_user(buf, touch, sizeof(touch_t)) == 0)
+            return sizeof(touch_t);
+    }
+    else
+    {
+        spin_unlock(&touchlock);
+        //return 0;
+    }
+    return 0;
 }
 
 
@@ -146,9 +146,9 @@ static  struct file_operations fenzhi_fops =
     .owner =     THIS_MODULE,
     .read  =	 fenzhi_read,
     .write =     fenzhi_write,
-	.poll  =	 fenzhi_poll,
+    .poll  =	 fenzhi_poll,
     .open  =	 fenzhi_open,
-	.mmap  =	 fenzhi_mmap,
+    .mmap  =	 fenzhi_mmap,
 
 };
 
@@ -156,7 +156,7 @@ static  struct file_operations fenzhi_fops =
 int thread_recov_init(void *data)
 {
     lidbg_new_cdev(&fenzhi_fops, DEVICE_NAME);
-	
+
     return 0;
 }
 
@@ -169,28 +169,28 @@ static  int my_input_driver_init(void)
 {
     DUMP_BUILD_TIME;
     //LIDBG_GET;
-\
+    \
 
 
 
     //printk("my_input_driver_init,write by hujian 2012/2/8 16:45");
     lidbg("xxxxxlidbg_ts_to_recov.ko  my_input_driver_init. \n");
 
-	CREATE_KTHREAD(thread_recov_init, NULL);
+    CREATE_KTHREAD(thread_recov_init, NULL);
 
 
-	bNeedRead = false;
-	init_waitqueue_head(&read_wait);
+    bNeedRead = false;
+    init_waitqueue_head(&read_wait);
 
 #if TOUCH_MODE_SEL == TOUCH_MODE_MMAP
-	touchtemp = (touch_t *)kmalloc(sizeof(touch_t), GFP_KERNEL);
-	touch = (touch_t *)(PAGE_ALIGN((unsigned long)touchtemp));
-	memset(touch,0,sizeof(touch_t));
+    touchtemp = (touch_t *)kmalloc(sizeof(touch_t), GFP_KERNEL);
+    touch = (touch_t *)(PAGE_ALIGN((unsigned long)touchtemp));
+    memset(touch, 0, sizeof(touch_t));
 #elif TOUCH_MODE_SEL == TOUCH_MODE_NORMAL
-	touch = (touch_t *)kmalloc(sizeof(touch_t), GFP_KERNEL);
+    touch = (touch_t *)kmalloc(sizeof(touch_t), GFP_KERNEL);
 #endif
 
-	lidbg("lidbg_ts_to_recov.ko  my_input_driver_init. OK\n");
+    lidbg("lidbg_ts_to_recov.ko  my_input_driver_init. OK\n");
 
     return 0;
 }

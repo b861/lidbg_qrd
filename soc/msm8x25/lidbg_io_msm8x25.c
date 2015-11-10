@@ -48,7 +48,7 @@ int soc_io_irq(struct io_int_config *pio_int_config)//need set to input first?
 
 int soc_io_suspend_config(u32 index, bool direction, u32 pull, u32 drive_strength)
 {
-	return 0;
+    return 0;
 
 }
 

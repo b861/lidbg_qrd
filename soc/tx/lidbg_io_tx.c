@@ -1,35 +1,35 @@
 
 #include "lidbg.h"
 
-static bool is_first_init=0;
-static bool io_ready=1;
+static bool is_first_init = 0;
+static bool io_ready = 1;
 
 int soc_io_suspend(void)
 {
-is_first_init=0;
+    is_first_init = 0;
     return 0;
 }
 int soc_io_resume(void)
 {
-is_first_init=1;
+    is_first_init = 1;
     return 0;
 }
 
 int io_free_proc(char *buf, char **start, off_t offset, int count, int *eof, void *data )
 {
-	lidbg("%s:enter\n", __func__);
+    lidbg("%s:enter\n", __func__);
     return 1;
 }
 
 int io_request_proc(char *buf, char **start, off_t offset, int count, int *eof, void *data )
 {
-	lidbg("%s:enter\n", __func__);
+    lidbg("%s:enter\n", __func__);
     return 1;
 }
 
 void soc_io_init(void)
 {
-	
+
 }
 
 
@@ -72,9 +72,13 @@ int soc_io_config(u32 index, int func, u32 direction,  u32 pull, u32 drive_stren
 
 int soc_io_output(u32 group, u32 index, bool status)
 {
-   
-    if(io_ready == 0)  {lidbg("%d,%d io not ready\n",group,index);return 0;}
-	
+
+    if(io_ready == 0)
+    {
+        lidbg("%d,%d io not ready\n", group, index);
+        return 0;
+    }
+
     gpio_direction_output(index, status);
     gpio_set_value(index, status);
     return 1;
@@ -83,7 +87,11 @@ int soc_io_output(u32 group, u32 index, bool status)
 
 bool soc_io_input( u32 index)
 {
-	if(io_ready == 0)  {lidbg("%d io not ready\n",index);return 1;}
+    if(io_ready == 0)
+    {
+        lidbg("%d io not ready\n", index);
+        return 1;
+    }
     return gpio_get_value(index);
 }
 

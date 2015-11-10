@@ -11,7 +11,7 @@ struct cmd_item lidbg_cmd_item[] =
     {"i2c", mod_i2c_main},
     {"io", mod_io_main},
 #ifndef SOC_msm8x25
- //   {"spi",mod_spi_main},
+    //   {"spi",mod_spi_main},
 #endif
     {"display", lidbg_display_main},
     {"key", lidbg_key_main},
@@ -34,8 +34,8 @@ void parse_cmd(char *pt)
     int i = 0;
 
     char *argv[32] = {NULL};
-	argc = lidbg_token_string(pt, " ", argv);
-	
+    argc = lidbg_token_string(pt, " ", argv);
+
     if(debug_mask)
     {
         lidbg("cmd:");
@@ -46,7 +46,7 @@ void parse_cmd(char *pt)
         }
         lidbg("\n");
     }
-	
+
     if (!strcmp(argv[0], "c"))
     {
         int new_argc, i;

@@ -21,7 +21,7 @@
 #define 		BLACK_COL 		0X000000
 #define		PINK_COL 		0XFF8080
 
-//#define 		fontsize16		10	
+//#define 		fontsize16		10
 #define 		fontsize		13
 
 void display_fastboot_meg();

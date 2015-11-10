@@ -76,11 +76,11 @@ int bp_msg_init(void)
 {
     DUMP_FUN;
     lidbg("\n[futengfei]  =bp_msg_init=IN===============================\n");
-	#if LINUX_VERSION_CODE < KERNEL_VERSION(3,10,0)
-	smem_log_temp = (smem_log_deep *)smem_alloc(SMEM_ID_VENDOR1, sizeof(smem_log_deep));
-	#else
-	smem_log_temp = (smem_log_deep *)smem_alloc(SMEM_ID_VENDOR1, sizeof(smem_log_deep),0,1);
-	#endif
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,10,0)
+    smem_log_temp = (smem_log_deep *)smem_alloc(SMEM_ID_VENDOR1, sizeof(smem_log_deep));
+#else
+    smem_log_temp = (smem_log_deep *)smem_alloc(SMEM_ID_VENDOR1, sizeof(smem_log_deep), 0, 1);
+#endif
     if(smem_log_temp == NULL)
     {
         lidbg("smem_alloc fail!\n");

@@ -340,8 +340,8 @@ void lidbg_exit(void)
 ssize_t lidbg_proc_read(struct file *file, char __user *buf, size_t size, loff_t *ppos)
 {
     int len;
-	char *hello_str = "Hello, world!\n";
-	PROC_READ_CHECK
+    char *hello_str = "Hello, world!\n";
+    PROC_READ_CHECK
 
     lidbg("lidbg_proc_read\n");
     len = strlen(hello_str);
@@ -366,13 +366,13 @@ ssize_t lidbg_proc_write(struct file *filp, const char __user *userbuf, size_t c
 
 static const struct file_operations lidbg_proc_fops =
 {
-	.read  = lidbg_proc_read,
-	.write = lidbg_proc_write,
+    .read  = lidbg_proc_read,
+    .write = lidbg_proc_write,
 };
 
 void lidbg_create_proc(void)
 {
-	proc_create(LIDBG_DEVICE_PROC_NAME, 0, NULL, &lidbg_proc_fops);
+    proc_create(LIDBG_DEVICE_PROC_NAME, 0, NULL, &lidbg_proc_fops);
 }
 
 void lidbg_remove_proc(void)

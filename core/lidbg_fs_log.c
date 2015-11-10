@@ -26,7 +26,7 @@ void remount_system(void)
         lidbg_mount("/system");
         lidbg_mount("/flysystem");
 #ifdef SOC_msm8x25
-		msleep(3000);
+        msleep(3000);
 #endif
         lidbg_chmod("/system");
         lidbg_chmod("/flysystem");
@@ -130,7 +130,7 @@ int fs_mem_log( const char *fmt, ... )
     n = vsprintf ( str_append, (const char *)fmt, args );
     va_end ( args );
 
-	str_append[512-1] = '\0';
+    str_append[512 - 1] = '\0';
     len = strlen(str_append);
 
     bfs_file_amend(PATH_LIDBG_MEM_LOG_FILE, str_append, 0);

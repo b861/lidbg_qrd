@@ -67,26 +67,26 @@ static int gps_event_handle(struct notifier_block *this,
         break;
     }
 #else
-	switch (event)
-	{
-	case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_DEVICE_UP):
-		
-		clean_ublox_buf();
-	    down(&dev->sem);
-	    kfifo_reset(&gps_data_fifo);
-	    up(&dev->sem);
-		
-		lidbg("gps set work_en = 1\n");
-		work_en = 1;
-		break;
-	case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_DEVICE_DOWN):
-		lidbg("gps set work_en = 0\n");
-		work_en = 0;
-		break;
+    switch (event)
+    {
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_DEVICE_UP):
 
-	default:
-		break;
-	}
+        clean_ublox_buf();
+        down(&dev->sem);
+        kfifo_reset(&gps_data_fifo);
+        up(&dev->sem);
+
+        lidbg("gps set work_en = 1\n");
+        work_en = 1;
+        break;
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_DEVICE_DOWN):
+        lidbg("gps set work_en = 0\n");
+        work_en = 0;
+        break;
+
+    default:
+        break;
+    }
 
 
 #endif
@@ -188,12 +188,12 @@ static unsigned int gps_poll(struct file *filp, struct poll_table_struct *wait)
 
 static long gps_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 {
-	static bool flag = 1;
-	if(flag)
-	{
-		fs_mem_log("ublox_so_load=true\n");
-		flag = 0;
-	}
+    static bool flag = 1;
+    if(flag)
+    {
+        fs_mem_log("ublox_so_load=true\n");
+        flag = 0;
+    }
     switch(cmd)
     {
     case GPS_START:
@@ -262,16 +262,16 @@ int thread_gps_server(void *data)
             avi_gps_data_hl = (num_avi_gps_data[0] << 8) + num_avi_gps_data[1];
 
 
-  //      if(gps_debug_en)
-            pr_debug("[ublox]ublox_buf_len: %d\n", avi_gps_data_hl);
+        //      if(gps_debug_en)
+        pr_debug("[ublox]ublox_buf_len: %d\n", avi_gps_data_hl);
 
         if(avi_gps_data_hl > 0)
         {
             if(avi_gps_data_hl <= GPS_BUF_SIZE)
             {
                 ret = SOC_I2C_Rec_Simple(GPS_I2C_BUS, 0x42, gps_data, avi_gps_data_hl);
-	       		gps_data[avi_gps_data_hl ] = '\0';
-	        	pr_debug("gps_data=%s\n",gps_data);
+                gps_data[avi_gps_data_hl ] = '\0';
+                pr_debug("gps_data=%s\n", gps_data);
                 if (ret < 0)
                 {
                     lidbg("[ublox]get gps data err!!\n");
@@ -321,7 +321,7 @@ do_nothing:
 
 int read_proc(struct file *file, char __user *buf, size_t size, loff_t *ppos)
 {
-	PROC_READ_CHECK;
+    PROC_READ_CHECK;
     lidbg("enable ublox print\n");
     gps_debug_en = 1;
 
@@ -394,47 +394,47 @@ static int  gps_probe(struct platform_device *pdev)
     static struct class *class_install;
     static int major_number = 0;
     dev_t dev_number = MKDEV(major_number, 0);
-    gps_data = (u8 *)kmalloc(GPS_BUF_SIZE+1, GFP_KERNEL);
+    gps_data = (u8 *)kmalloc(GPS_BUF_SIZE + 1, GFP_KERNEL);
     gps_data_for_hal = (u8 *)kmalloc(HAL_BUF_SIZE, GFP_KERNEL);
     fifo_buffer = (u8 *)kmalloc(FIFO_SIZE, GFP_KERNEL);
-    if((gps_data==NULL)||(gps_data_for_hal==NULL)||(fifo_buffer==NULL))
+    if((gps_data == NULL) || (gps_data_for_hal == NULL) || (fifo_buffer == NULL))
     {
-    	lidbg("gps_probe kmalloc err\n");
-		return 0;
+        lidbg("gps_probe kmalloc err\n");
+        return 0;
     }
     DUMP_FUN;
- 	
+
     if(g_var.recovery_mode)
     {
         lidbg("gps_probe do nothing\n");
         return 0;
     }
-	
+
 #ifndef SOC_msm8x25
     if(is_ublox_exist() < 0)
     {
 #if 0
-	    if(g_var.is_first_update)
-	    {
-			lidbg_shell_cmd("mount -o remount /flysystem");	
-			lidbg_shell_cmd("rm /flysystem/lib/out/"FLY_GPS_SO);
-			lidbg_shell_cmd("mount -o remount,ro /flysystem");	
-	    }
+        if(g_var.is_first_update)
+        {
+            lidbg_shell_cmd("mount -o remount /flysystem");
+            lidbg_shell_cmd("rm /flysystem/lib/out/"FLY_GPS_SO);
+            lidbg_shell_cmd("mount -o remount,ro /flysystem");
+        }
 #endif
-		lidbg("[ublox]ublox.miss\n\n");
-		kfree(gps_data);
- 		kfree(gps_data_for_hal);
-		kfree(fifo_buffer);
-		return 0;
+        lidbg("[ublox]ublox.miss\n\n");
+        kfree(gps_data);
+        kfree(gps_data_for_hal);
+        kfree(fifo_buffer);
+        return 0;
     }
     else
     {
 #if 0
-	    if(g_var.is_first_update)
-	    {
-	    	lidbg_shell_cmd("mount -o remount /flysystem");
-			lidbg_shell_cmd("mv /flysystem/lib/hw/gps.soc.bak  /flysystem/lib/hw/"FLY_GPS_SO);
-	    }
+        if(g_var.is_first_update)
+        {
+            lidbg_shell_cmd("mount -o remount /flysystem");
+            lidbg_shell_cmd("mv /flysystem/lib/hw/gps.soc.bak  /flysystem/lib/hw/"FLY_GPS_SO);
+        }
 #endif
         lidbg("[ublox]ublox.exist\n\n");
         fs_mem_log("ublox_exist=true\n");

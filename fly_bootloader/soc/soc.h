@@ -15,7 +15,7 @@ int adc_get(void);
 void *fb_base_get(void);
 
 /*ptn operations*/
-int ptn_read(char *ptn_name,unsigned int offset, unsigned long len,unsigned char *buf);
+int ptn_read(char *ptn_name, unsigned int offset, unsigned long len, unsigned char *buf);
 
 /*hardware init*/
 void flyaudio_hw_init(void);

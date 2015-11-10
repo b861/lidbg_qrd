@@ -7,90 +7,90 @@ struct work_struct work_left_button2;
 static int val;
 static void work_left_button1_fn(struct work_struct *work)
 {
-    /* 1、判断是否是顺时针旋转 */
+    /* 1??????????? */
     if(val)
     {
-    	 if(g_var.recovery_mode == 1)
-		 	SOC_Key_Report(KEY_UP, KEY_PRESSED_RELEASED);
-		 else
-        	SOC_Key_Report(KEY_VOLUMEUP, KEY_PRESSED_RELEASED);
+        if(g_var.recovery_mode == 1)
+            SOC_Key_Report(KEY_UP, KEY_PRESSED_RELEASED);
+        else
+            SOC_Key_Report(KEY_VOLUMEUP, KEY_PRESSED_RELEASED);
 
     }
 
-    /* 2、判断是否是逆时针旋转 */
+    /* 2??????????? */
     if(val == 0)
     {
         if(g_var.recovery_mode == 1)
-		 	SOC_Key_Report(KEY_DOWN, KEY_PRESSED_RELEASED);
-		 else
-        	SOC_Key_Report(KEY_VOLUMEDOWN, KEY_PRESSED_RELEASED);
+            SOC_Key_Report(KEY_DOWN, KEY_PRESSED_RELEASED);
+        else
+            SOC_Key_Report(KEY_VOLUMEDOWN, KEY_PRESSED_RELEASED);
     }
 
 }
 
 static void work_left_button2_fn(struct work_struct *work)
 {
-    /* 1、判断是否是顺时针旋转 */
+    /* 1??????????? */
     if(val)
     {
         if(g_var.recovery_mode == 1)
-		 	SOC_Key_Report(KEY_UP, KEY_PRESSED_RELEASED);
-		 else
-        	SOC_Key_Report(KEY_VOLUMEUP, KEY_PRESSED_RELEASED);
+            SOC_Key_Report(KEY_UP, KEY_PRESSED_RELEASED);
+        else
+            SOC_Key_Report(KEY_VOLUMEUP, KEY_PRESSED_RELEASED);
     }
 
-    /* 2、判断是否是逆时针旋转 */
+    /* 2??????????? */
     if(val == 0)
     {
         if(g_var.recovery_mode == 1)
-		 	SOC_Key_Report(KEY_DOWN, KEY_PRESSED_RELEASED);
-		 else
-        	SOC_Key_Report(KEY_VOLUMEDOWN, KEY_PRESSED_RELEASED);
+            SOC_Key_Report(KEY_DOWN, KEY_PRESSED_RELEASED);
+        else
+            SOC_Key_Report(KEY_VOLUMEDOWN, KEY_PRESSED_RELEASED);
     }
 
 }
 struct work_struct work_right_button1;
 static void work_right_button1_fn(struct work_struct *work)
 {
-    /* 1、判断是否是顺时针旋转 */
+    /* 1??????????? */
     if(val)
     {
-    	 if(g_var.recovery_mode == 1)
-		 	SOC_Key_Report(KEY_UP, KEY_PRESSED_RELEASED);
-		 else
-        	SOC_Key_Report(KEY_VOLUMEUP, KEY_PRESSED_RELEASED);
+        if(g_var.recovery_mode == 1)
+            SOC_Key_Report(KEY_UP, KEY_PRESSED_RELEASED);
+        else
+            SOC_Key_Report(KEY_VOLUMEUP, KEY_PRESSED_RELEASED);
 
     }
 
-    /* 2、判断是否是逆时针旋转 */
+    /* 2??????????? */
     if(val == 0)
     {
         if(g_var.recovery_mode == 1)
-		 	SOC_Key_Report(KEY_DOWN, KEY_PRESSED_RELEASED);
-		 else
-        	SOC_Key_Report(KEY_VOLUMEDOWN, KEY_PRESSED_RELEASED);
+            SOC_Key_Report(KEY_DOWN, KEY_PRESSED_RELEASED);
+        else
+            SOC_Key_Report(KEY_VOLUMEDOWN, KEY_PRESSED_RELEASED);
     }
 }
 
 struct work_struct work_right_button2;
 static void work_right_button2_fn(struct work_struct *work)
 {
-    /* 1、判断是否是顺时针旋转 */
+    /* 1??????????? */
     if(val)
     {
         if(g_var.recovery_mode == 1)
-		 	SOC_Key_Report(KEY_UP, KEY_PRESSED_RELEASED);
-		 else
-        	SOC_Key_Report(KEY_VOLUMEUP, KEY_PRESSED_RELEASED);
+            SOC_Key_Report(KEY_UP, KEY_PRESSED_RELEASED);
+        else
+            SOC_Key_Report(KEY_VOLUMEUP, KEY_PRESSED_RELEASED);
     }
 
-    /* 2、判断是否是逆时针旋转 */
+    /* 2??????????? */
     if(val == 0)
     {
         if(g_var.recovery_mode == 1)
-		 	SOC_Key_Report(KEY_DOWN, KEY_PRESSED_RELEASED);
-		 else
-        	SOC_Key_Report(KEY_VOLUMEDOWN, KEY_PRESSED_RELEASED);
+            SOC_Key_Report(KEY_DOWN, KEY_PRESSED_RELEASED);
+        else
+            SOC_Key_Report(KEY_VOLUMEDOWN, KEY_PRESSED_RELEASED);
     }
 }
 
@@ -119,7 +119,7 @@ irqreturn_t irq_left_button2(int irq, void *dev_id)
 irqreturn_t irq_right_button1(int irq, void *dev_id)
 {
     //lidbg("irq_right_button1: %d\n", irq);
-    
+
     val = SOC_IO_Input(BUTTON_RIGHT_2, BUTTON_RIGHT_2, GPIO_CFG_PULL_UP);
     if(!work_pending(&work_right_button1))
         schedule_work(&work_right_button1);
@@ -128,7 +128,7 @@ irqreturn_t irq_right_button1(int irq, void *dev_id)
 irqreturn_t irq_right_button2(int irq, void *dev_id)
 {
     //lidbg("irq_right_button2: %d\n", irq);
-    
+
     val = SOC_IO_Input(BUTTON_RIGHT_1, BUTTON_RIGHT_1, GPIO_CFG_PULL_UP);
     if(!work_pending(&work_right_button2))
         schedule_work(&work_right_button2);
@@ -151,10 +151,10 @@ int button_suspend(void)
 int button_resume(void)
 {
 
-    IO_CONFIG_INPUT(0,BUTTON_LEFT_1);
-    IO_CONFIG_INPUT(0,BUTTON_LEFT_2);
-    IO_CONFIG_INPUT(0,BUTTON_RIGHT_1);
-    IO_CONFIG_INPUT(0,BUTTON_RIGHT_2);
+    IO_CONFIG_INPUT(0, BUTTON_LEFT_1);
+    IO_CONFIG_INPUT(0, BUTTON_LEFT_2);
+    IO_CONFIG_INPUT(0, BUTTON_RIGHT_1);
+    IO_CONFIG_INPUT(0, BUTTON_RIGHT_2);
 
     SOC_IO_ISR_Enable(BUTTON_LEFT_1);
     SOC_IO_ISR_Enable(BUTTON_LEFT_2);
@@ -173,10 +173,10 @@ void button_init(void)
     {
         INIT_WORK(&work_left_button1, work_left_button1_fn);
         INIT_WORK(&work_left_button2, work_left_button2_fn);
-		
+
         INIT_WORK(&work_right_button1, work_right_button1_fn);
         INIT_WORK(&work_right_button2, work_right_button2_fn);
-		
+
 #ifdef SOC_mt3360
 #else
         SOC_IO_Input(BUTTON_LEFT_1, BUTTON_LEFT_1, GPIO_CFG_PULL_UP);
@@ -203,26 +203,26 @@ int thread_button_init(void *data)
 
 
 
-	
+
 static int  button_dev_init(void)
 {
-	printk(KERN_WARNING "chdrv_init\n");
-	lidbg("hello_button\n");
-          
-        LIDBG_GET;
-	if((g_var.is_fly == 0) || (g_var.recovery_mode == 1))
-	{
+    printk(KERN_WARNING "chdrv_init\n");
+    lidbg("hello_button\n");
+
+    LIDBG_GET;
+    if((g_var.is_fly == 0) || (g_var.recovery_mode == 1))
+    {
         CREATE_KTHREAD(thread_button_init, NULL);
-	}
-	
-	return 0;
+    }
+
+    return 0;
 
 
 }
 
 static void  button_dev_exit(void)
 {
-	printk("chdrv_exit\n");
+    printk("chdrv_exit\n");
 
 
 

@@ -108,19 +108,19 @@ static struct miscdevice misc =
 static int __init msg_init(void)
 {
     int ret;
-	struct task_struct *task;
-	
-	DUMP_BUILD_TIME;
+    struct task_struct *task;
+
+    DUMP_BUILD_TIME;
     ret = misc_register(&misc);
 
     INIT_COMPLETION(msg_ready);
 
-	task = kthread_create(thread_msg, NULL, "thread_dbg_msg");
-	if(IS_ERR(task))
-	{
-		lidbg("Unable to start thread.\n");
-	}
-	else wake_up_process(task);
+    task = kthread_create(thread_msg, NULL, "thread_dbg_msg");
+    if(IS_ERR(task))
+    {
+        lidbg("Unable to start thread.\n");
+    }
+    else wake_up_process(task);
 
 
     return ret;

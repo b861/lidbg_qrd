@@ -8,8 +8,8 @@ struct fly_smem *p_fly_smem = NULL;
 
 int soc_temp_get(int num)
 {
-	static long temp=-1;
-	return (int)temp;
+    static long temp = -1;
+    return (int)temp;
 }
 
 void lidbg_soc_main(int argc, char **argv)
@@ -49,13 +49,13 @@ static int  lidbg_soc_probe(struct platform_device *pdev)
 static int soc_suspend(struct device *dev)
 {
     DUMP_FUN;
-//	soc_io_suspend();
+    //	soc_io_suspend();
     return 0;
 }
 static int soc_resume(struct device *dev)
 {
     DUMP_FUN;
-//	soc_io_resume();
+    //	soc_io_resume();
     return 0;
 }
 
@@ -98,8 +98,8 @@ int lidbg_write_file(const char *filename, const char *wbuf, size_t length)
     filp = filp_open(filename, O_RDWR | O_CREAT, 0666);
     if (IS_ERR(filp) || !filp->f_op)
     {
-    
-		lidbg("kernel_write_file:filp_open Error\n");
+
+        lidbg("kernel_write_file:filp_open Error\n");
         ret = -ENOENT;
         return ret;
     }
@@ -119,14 +119,14 @@ int lidbg_write_file(const char *filename, const char *wbuf, size_t length)
 
 int thread_get_mac_addr(void *data)
 {
-	 return 0;
+    return 0;
 }
 
 
 
 int example_init(void)
 {
-	DUMP_BUILD_TIME;
+    DUMP_BUILD_TIME;
 
     CREATE_KTHREAD(thread_get_mac_addr, NULL);
 

@@ -49,7 +49,7 @@ extern void fs_save_state(void);
 extern int fs_get_file_size(char *file);
 extern int get_machine_id(void);
 extern int fs_file_read(const char *filename, char *rbuff, loff_t offset, int readlen);
-int fs_file_write(char *filename,bool creat, void *wbuff, loff_t offset,int len);
+int fs_file_write(char *filename, bool creat, void *wbuff, loff_t offset, int len);
 int fs_file_write2(char *filename, char *wbuff);
 extern int fs_update(const char *ko_list, const char *fromdir, const char *todir);
 extern int analysis_copylist(const char *copy_list);
@@ -110,7 +110,7 @@ extern struct list_head lidbg_machine_info_list;
 #define FS_REGISTER_KEY(key,callback)\
 			if((fs_get_intvalue(&lidbg_drivers_list, key,NULL,callback)<0)&&(fs_get_intvalue(&lidbg_core_list, key,NULL,callback)<0)) \
 					fs_get_intvalue(&lidbg_machine_info_list, key,NULL,callback);
-			
+
 //zone end
 
 

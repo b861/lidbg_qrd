@@ -8,35 +8,35 @@
 
 typedef enum
 {
-	TOUCH_UP,
-	TOUCH_DOWN,
-	TOUCH_SYNC,
+    TOUCH_UP,
+    TOUCH_DOWN,
+    TOUCH_SYNC,
 } touch_type;
 
 
 struct lidbg_ts_data
 {
-	struct input_dev *input_dev;
+    struct input_dev *input_dev;
 
-	u32 abs_x_max;
-	u32 abs_y_max;
+    u32 abs_x_max;
+    u32 abs_y_max;
 
-	u32 x[10];
-	u32 y[10];
-	u32 w[10];
-	u32 id[10];
-	
-	u8 touch_num;
-	u16 touch_index;
+    u32 x[10];
+    u32 y[10];
+    u32 w[10];
+    u32 id[10];
 
-	u32 touch_cnt;
+    u8 touch_num;
+    u16 touch_index;
+
+    u32 touch_cnt;
 
 };
 
 void lidbg_touch_main(int argc, char **argv);
-void lidbg_touch_report(struct lidbg_ts_data * pdata);
-void lidbg_touch_handle(touch_type t ,int id, int x, int y,int w);
-void ts_data_report(touch_type t,int id,int x,int y,int w);
+void lidbg_touch_report(struct lidbg_ts_data *pdata);
+void lidbg_touch_handle(touch_type t , int id, int x, int y, int w);
+void ts_data_report(touch_type t, int id, int x, int y, int w);
 
 #endif
 

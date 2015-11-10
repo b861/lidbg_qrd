@@ -857,11 +857,11 @@ int  soc_get_screen_res(u32 *screen_x, u32 *screen_y)
 
     for(fbidx = 0; fbidx < num_registered_fb; fbidx++)
     {
-    	if(fbidx == 0)
-    	{
-        	struct fb_info *info = registered_fb[fbidx];
-        	memcpy(&fb_varinfo, &(info->var), sizeof(fb_varinfo));
-    	}
+        if(fbidx == 0)
+        {
+            struct fb_info *info = registered_fb[fbidx];
+            memcpy(&fb_varinfo, &(info->var), sizeof(fb_varinfo));
+        }
         lidbg("xres=%d\n", fb_varinfo.xres);
         lidbg("yres=%d\n", fb_varinfo.yres);
 

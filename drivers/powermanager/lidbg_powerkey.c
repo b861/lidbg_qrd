@@ -17,124 +17,124 @@ static DECLARE_COMPLETION (sleep_powerkey_wait);
 
 static int thread_powerkey_func(void *data)
 {
-	while(1)
-	{
-		wait_for_completion(&sleep_powerkey_wait);
-		switch(status)
-		{
-			case FLY_SCREEN_OFF:
-				fs_file_write(DEV_NAME, false, SCREEN_OFF, 0, strlen(SCREEN_OFF));
-				mod_timer(&timer,POWER_SUSPEND_TIME);
-				break;
-			case FLY_DEVICE_DOWN:
-				fs_file_write(DEV_NAME, false, DEVICES_DOWN, 0, strlen(DEVICES_DOWN));
-				mod_timer(&timer,POWER_SUSPEND_TIME);
-				break;
-			case FLY_ANDROID_DOWN:
-				fs_file_write(DEV_NAME, false, ANDROID_DOWN, 0, strlen(ANDROID_DOWN));
-				//AirplanMode
-				//kill process
-				mod_timer(&timer,AirplanMode_TIME);
-				break;
-			case FLY_GOTO_SLEEP:
-				lidbg_key_report(KEY_POWER, KEY_PRESSED);
-				mdelay(100);
-				fs_file_write(DEV_NAME, false, GOTO_SLEEP, 0, strlen(GOTO_SLEEP));
-				break;
-			case FLY_ANDROID_UP:
-				fs_file_write(DEV_NAME, false, ANDROID_UP, 0, strlen(ANDROID_UP));
-			case FLY_DEVICE_UP:
-				fs_file_write(DEV_NAME, false, DEVICES_ON, 0, strlen(DEVICES_ON));
-			case FLY_SCREEN_ON:
-				fs_file_write(DEV_NAME, false, SCREEN_ON, 0, strlen(SCREEN_ON));
-				status = FLY_SCREEN_ON;
-			default:
-				break;
-		}
-	}
-	return 0;
+    while(1)
+    {
+        wait_for_completion(&sleep_powerkey_wait);
+        switch(status)
+        {
+        case FLY_SCREEN_OFF:
+            fs_file_write(DEV_NAME, false, SCREEN_OFF, 0, strlen(SCREEN_OFF));
+            mod_timer(&timer, POWER_SUSPEND_TIME);
+            break;
+        case FLY_DEVICE_DOWN:
+            fs_file_write(DEV_NAME, false, DEVICES_DOWN, 0, strlen(DEVICES_DOWN));
+            mod_timer(&timer, POWER_SUSPEND_TIME);
+            break;
+        case FLY_ANDROID_DOWN:
+            fs_file_write(DEV_NAME, false, ANDROID_DOWN, 0, strlen(ANDROID_DOWN));
+            //AirplanMode
+            //kill process
+            mod_timer(&timer, AirplanMode_TIME);
+            break;
+        case FLY_GOTO_SLEEP:
+            lidbg_key_report(KEY_POWER, KEY_PRESSED);
+            mdelay(100);
+            fs_file_write(DEV_NAME, false, GOTO_SLEEP, 0, strlen(GOTO_SLEEP));
+            break;
+        case FLY_ANDROID_UP:
+            fs_file_write(DEV_NAME, false, ANDROID_UP, 0, strlen(ANDROID_UP));
+        case FLY_DEVICE_UP:
+            fs_file_write(DEV_NAME, false, DEVICES_ON, 0, strlen(DEVICES_ON));
+        case FLY_SCREEN_ON:
+            fs_file_write(DEV_NAME, false, SCREEN_ON, 0, strlen(SCREEN_ON));
+            status = FLY_SCREEN_ON;
+        default:
+            break;
+        }
+    }
+    return 0;
 }
 
 static void powerkey_suspend_timer(unsigned long data)
 {
-	status = (int)status + 1;
-	complete(&sleep_powerkey_wait);
-	return;
+    status = (int)status + 1;
+    complete(&sleep_powerkey_wait);
+    return;
 }
 
 static void powerkey_suspend(void)
 {
-	lidbg("powerkey_suspend status = %d\n", status);
+    lidbg("powerkey_suspend status = %d\n", status);
 
-	if(status == FLY_GOTO_SLEEP)
-		return;
-	else
-		status = FLY_SCREEN_OFF;
+    if(status == FLY_GOTO_SLEEP)
+        return;
+    else
+        status = FLY_SCREEN_OFF;
 
-	complete(&sleep_powerkey_wait);
-	return;
+    complete(&sleep_powerkey_wait);
+    return;
 }
 
 static void powerkey_resume(void)
 {
-	lidbg("powerkey_resume status = %d\n", status);
+    lidbg("powerkey_resume status = %d\n", status);
 
-	if(status == FLY_SCREEN_OFF)
-	{
-		del_timer(&timer);
-		status = FLY_SCREEN_ON;
-	}
-	else if(status == FLY_DEVICE_DOWN)
-	{
-		del_timer(&timer);
-		status = FLY_DEVICE_UP;
-	}
-	else if(status == FLY_ANDROID_DOWN)
-	{
-		return;
-	}
-	else
-	{
-		status = FLY_ANDROID_UP;
-	}
-	complete(&sleep_powerkey_wait);
-	return;
+    if(status == FLY_SCREEN_OFF)
+    {
+        del_timer(&timer);
+        status = FLY_SCREEN_ON;
+    }
+    else if(status == FLY_DEVICE_DOWN)
+    {
+        del_timer(&timer);
+        status = FLY_DEVICE_UP;
+    }
+    else if(status == FLY_ANDROID_DOWN)
+    {
+        return;
+    }
+    else
+    {
+        status = FLY_ANDROID_UP;
+    }
+    complete(&sleep_powerkey_wait);
+    return;
 }
 
 
 static int fb_notifier_callback(struct notifier_block *self,
-				 unsigned long event, void *data)
+                                unsigned long event, void *data)
 {
-	struct fb_event *evdata = data;
-	int *blank;
-	if (evdata && evdata->data && event == FB_EVENT_BLANK)
-	{
-		blank = evdata->data;
-		if (*blank == FB_BLANK_UNBLANK)
-			powerkey_resume();
-		else if (*blank == FB_BLANK_POWERDOWN)
-			powerkey_suspend();
-	}
+    struct fb_event *evdata = data;
+    int *blank;
+    if (evdata && evdata->data && event == FB_EVENT_BLANK)
+    {
+        blank = evdata->data;
+        if (*blank == FB_BLANK_UNBLANK)
+            powerkey_resume();
+        else if (*blank == FB_BLANK_POWERDOWN)
+            powerkey_suspend();
+    }
 
-	return 0;
+    return 0;
 }
 
 
 static int lidbg_powerkey_probe(struct platform_device *pdev)
 {
-	int ret;
+    int ret;
 
-	init_timer(&timer);
-	timer.function = &powerkey_suspend_timer;
-	timer.data = 0;
-	timer.expires = 0;
+    init_timer(&timer);
+    timer.function = &powerkey_suspend_timer;
+    timer.data = 0;
+    timer.expires = 0;
 
-	CREATE_KTHREAD(thread_powerkey_func, NULL);
-	fb_notif.notifier_call = fb_notifier_callback;
-	ret = fb_register_client(&fb_notif);
-	if (ret)
-		PM_ERR("Unable to register fb_notifier: %d\n",ret);
-	return 0;
+    CREATE_KTHREAD(thread_powerkey_func, NULL);
+    fb_notif.notifier_call = fb_notifier_callback;
+    ret = fb_register_client(&fb_notif);
+    if (ret)
+        PM_ERR("Unable to register fb_notifier: %d\n", ret);
+    return 0;
 }
 
 static struct platform_device lidbg_powerkey =

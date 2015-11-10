@@ -69,47 +69,51 @@
 //#include <mach/irqs.h>
 //#include <linux/qpnp/qpnp-adc.h>
 //#include <linux/spmi.h>
-enum gpiomux_drv {
-	GPIOMUX_DRV_2MA = 0,
-	GPIOMUX_DRV_4MA,
-	GPIOMUX_DRV_6MA,
-	GPIOMUX_DRV_8MA,
-	GPIOMUX_DRV_10MA,
-	GPIOMUX_DRV_12MA,
-	GPIOMUX_DRV_14MA,
-	GPIOMUX_DRV_16MA,
+enum gpiomux_drv
+{
+    GPIOMUX_DRV_2MA = 0,
+    GPIOMUX_DRV_4MA,
+    GPIOMUX_DRV_6MA,
+    GPIOMUX_DRV_8MA,
+    GPIOMUX_DRV_10MA,
+    GPIOMUX_DRV_12MA,
+    GPIOMUX_DRV_14MA,
+    GPIOMUX_DRV_16MA,
 };
 
-enum gpiomux_func {
-	GPIOMUX_FUNC_GPIO = 0,
-	GPIOMUX_FUNC_1,
-	GPIOMUX_FUNC_2,
-	GPIOMUX_FUNC_3,
-	GPIOMUX_FUNC_4,
-	GPIOMUX_FUNC_5,
-	GPIOMUX_FUNC_6,
-	GPIOMUX_FUNC_7,
-	GPIOMUX_FUNC_8,
-	GPIOMUX_FUNC_9,
-	GPIOMUX_FUNC_A,
-	GPIOMUX_FUNC_B,
-	GPIOMUX_FUNC_C,
-	GPIOMUX_FUNC_D,
-	GPIOMUX_FUNC_E,
-	GPIOMUX_FUNC_F,
+enum gpiomux_func
+{
+    GPIOMUX_FUNC_GPIO = 0,
+    GPIOMUX_FUNC_1,
+    GPIOMUX_FUNC_2,
+    GPIOMUX_FUNC_3,
+    GPIOMUX_FUNC_4,
+    GPIOMUX_FUNC_5,
+    GPIOMUX_FUNC_6,
+    GPIOMUX_FUNC_7,
+    GPIOMUX_FUNC_8,
+    GPIOMUX_FUNC_9,
+    GPIOMUX_FUNC_A,
+    GPIOMUX_FUNC_B,
+    GPIOMUX_FUNC_C,
+    GPIOMUX_FUNC_D,
+    GPIOMUX_FUNC_E,
+    GPIOMUX_FUNC_F,
 };
 
-enum gpiomux_pull {
-	GPIOMUX_PULL_NONE = 0,
-	GPIOMUX_PULL_DOWN,
-	GPIOMUX_PULL_KEEPER,
-	GPIOMUX_PULL_UP,
+enum gpiomux_pull
+{
+    GPIOMUX_PULL_NONE = 0,
+    GPIOMUX_PULL_DOWN,
+    GPIOMUX_PULL_KEEPER,
+    GPIOMUX_PULL_UP,
 };
 
-enum gpiomux_dir {
-	GPIOMUX_IN = 0,
-	GPIOMUX_OUT_HIGH,
-	GPIOMUX_OUT_LOW,
+enum gpiomux_dir
+{
+    GPIOMUX_IN = 0,
+    GPIOMUX_OUT_HIGH,
+    GPIOMUX_OUT_LOW,
 };
 
 enum
@@ -183,10 +187,10 @@ struct io_config
 
 struct mtk_ext_int
 {
-	int ext_int_gpio_num;
-	int ext_int_number;
-	int vector_irq_num;
-	int pinmux_function;
+    int ext_int_gpio_num;
+    int ext_int_number;
+    int vector_irq_num;
+    int pinmux_function;
 };
 
 //typedef irqreturn_t (*pinterrupt_isr)(int irq, void *dev_id);
@@ -227,7 +231,7 @@ void soc_irq_enable(unsigned int irq);
 
 int soc_io_output(u32 group, u32 index, bool status);
 bool soc_io_input(u32 index);
-int soc_io_config(u32 index, int func,bool direction, u32 pull, u32 drive_strength, bool force_reconfig);
+int soc_io_config(u32 index, int func, bool direction, u32 pull, u32 drive_strength, bool force_reconfig);
 int soc_io_suspend_config(u32 index, u32 direction, u32 pull, u32 drive_strength);
 int soc_temp_get(int num);
 void lidbg_soc_main(int argc, char **argv);

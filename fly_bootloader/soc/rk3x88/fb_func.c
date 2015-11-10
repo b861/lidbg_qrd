@@ -2,5 +2,5 @@
 
 void *fb_base_get()
 {
-	return gd->fb_base;
+    return gd->fb_base;
 }

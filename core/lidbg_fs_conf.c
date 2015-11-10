@@ -49,7 +49,7 @@ int launch_file_cmd(const char *filename)
     file_len = inode->i_size;
     lidbg("[futengfei]warn.File_length:<%d>\n", file_len);
 
-    file_ptr = (unsigned char *)vmalloc(file_len+1);
+    file_ptr = (unsigned char *)vmalloc(file_len + 1);
     if(file_ptr == NULL)
     {
         lidbg( "[futengfei]err.vmalloc:<cannot kzalloc memory!>\n");
@@ -78,7 +78,7 @@ int launch_file_cmd(const char *filename)
             p[1] = '\0';
             loop = simple_strtoul(p, 0, 0);
             for(; loop > 0; loop--)
-                fs_file_write(LIDBG_NODE,false, token + 1,0,strlen(token + 1));
+                fs_file_write(LIDBG_NODE, false, token + 1, 0, strlen(token + 1));
         }
     }
     vfree(file_ptr);
@@ -102,7 +102,8 @@ static int thread_pollfile_func(void *data)
     allow_signal(SIGKILL);
     allow_signal(SIGSTOP);
 
-    if(fs_is_file_exist(PATH_CORE_CONF)){
+    if(fs_is_file_exist(PATH_CORE_CONF))
+    {
         ssleep(20);
         update_file_tm();
     }
@@ -145,7 +146,7 @@ void set_machine_id(void)
     char string[64];
     if(fs_is_file_exist(MACHINE_ID_FILE))
     {
-        fs_file_read(MACHINE_ID_FILE, string,0,sizeof(string));
+        fs_file_read(MACHINE_ID_FILE, string, 0, sizeof(string));
         machine_id = simple_strtoul(string, 0, 0);
     }
     else
@@ -175,7 +176,7 @@ static int thread_pollstate_func(void *data)
 }
 static int usb_nc_conf(struct notifier_block *nb, unsigned long action, void *data)
 {
-    FS_WARN("get usb action:%d\n",(int)action);
+    FS_WARN("get usb action:%d\n", (int)action);
     switch (action)
     {
     case USB_DEVICE_ADD:
@@ -203,7 +204,7 @@ static int thread_udisk_conf(void *data)
             FS_WARN("start\n");
             update_list(USB_MOUNT_POINT"/conf/core.conf", &lidbg_core_list);
             update_list(USB_MOUNT_POINT"/conf/drivers.conf", &lidbg_drivers_list);
- //           update_list(USB_MOUNT_POINT"/conf/machine_info.conf", &lidbg_machine_info_list);
+            //           update_list(USB_MOUNT_POINT"/conf/machine_info.conf", &lidbg_machine_info_list);
         }
     }
     return 1;
