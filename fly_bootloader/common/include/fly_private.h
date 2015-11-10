@@ -39,7 +39,13 @@ extern void fly_text_lk(int x, int y, const char * s, unsigned long fontcol);
 extern int judge_key_state();
 extern int  get_boot_mode(void);
 extern void fbcon_flush(void);
+#if (defined BOOTLOADER_MSM8909)
+#define IS_ARM64(ptr) (ptr->magic_64 == KERNEL64_HDR_MAGIC) ? true : false
+extern void update_ker_tags_rdisk_addr(struct boot_img_hdr *hdr, bool is_arm64);
+extern bool check_format_bit();
+#else
 extern void update_ker_tags_rdisk_addr(struct boot_img_hdr *hdr);
+#endif
 extern int check_aboot_addr_range_overlap(uint32_t start, uint32_t size);
 extern void verify_signed_bootimg(uint32_t bootimg_addr, uint32_t bootimg_size);
 extern void boot_linux(void *kernel, unsigned *tags,
