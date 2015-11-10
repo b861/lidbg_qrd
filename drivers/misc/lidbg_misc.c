@@ -42,12 +42,12 @@ void lidbg_enable_logcat(void)
 
 void lidbg_enable_logcat2(void)
 {
-    int size,sizeold = 0;
+    int size, sizeold = 0,loop = 0;
     lidbg("logcat+\n");
     lidbg_shell_cmd("rm /sdcard/logcat.txt");
     lidbg_shell_cmd("rm /sdcard/logcat_old.txt");
     ssleep(2);
-	
+
     lidbg_shell_cmd("date >/sdcard/logcat.txt");
     ssleep(1);
     lidbg_shell_cmd("chmod 777 /sdcard/logcat.txt");
@@ -55,8 +55,8 @@ void lidbg_enable_logcat2(void)
     lidbg_shell_cmd("logcat -v time -f /sdcard/logcat.txt &");
     while(1)
     {
-	size = fs_get_file_size("/sdcard/logcat.txt") ;
-        if(size>= MEM_SIZE_1_MB * 300)
+        size = fs_get_file_size("/sdcard/logcat.txt") ;
+        if(size >= MEM_SIZE_1_MB * 300)
         {
             lidbg("file_len over\n");
             lidbg_shell_cmd("rm /sdcard/logcat_old.txt");
@@ -66,15 +66,24 @@ void lidbg_enable_logcat2(void)
             lidbg_shell_cmd("date > /sdcard/logcat.txt");
             ssleep(1);
             lidbg_shell_cmd("chmod 777 /sdcard/logcat.txt");
-        }  
-	ssleep(60);
-       if(size == sizeold)
+        }
+        if(size == sizeold)
+        {
+            lidbg_shell_cmd("logcat -v time -f /sdcard/logcat.txt &");
+            lidbg("run logcat again \n");
+        }
+        sizeold = size ;
+
+	for(loop = 0; loop < 10; loop++)
 	{
-		lidbg_shell_cmd("logcat -v time -f /sdcard/logcat.txt &");
-		lidbg("run logcat again \n");
+	    static char buff[64] ;
+	    int mtime = ktime_to_ms(ktime_get_boottime());
+	    snprintf(buff, 63, "log -t lidbg logcatping:%d.%d",  mtime / 1000, mtime % 1000);
+	    lidbg("[%s]\n", buff);
+	    lidbg_shell_cmd(buff);
+	    ssleep(5);
 	}
-	sizeold = size ;
-	
+
     }
     lidbg("logcat-\n");
 
@@ -370,8 +379,8 @@ static int thread_udisk_misc(void *data)
         {
             int i = 0;
 
-            if((g_var.recovery_mode == 1)&& !fs_is_file_exist("recovery.conf"))
-            	{
+            if((g_var.recovery_mode == 1) && !fs_is_file_exist("recovery.conf"))
+            {
 #if 0
                 ssleep(2);
                 lidbg("mount /usb \n");
