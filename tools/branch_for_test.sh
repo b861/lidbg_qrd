@@ -79,6 +79,7 @@ function go_remote_test_branch()
 {
     echo $FUNCNAME
     cd $RELEASE_REPOSITORY
+    expect $DBG_TOOLS_PATH/fetch $branch_name $DBG_REPO_PASSWORD
     git checkout -b $branch_name origin/$branch_name
    
 }
