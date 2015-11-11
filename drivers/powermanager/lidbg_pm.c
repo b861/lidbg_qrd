@@ -846,11 +846,6 @@ static int thread_observer(void *data)
                         sprintf(when, "start%d:", have_triggerd_sleep_S);
                         kernel_wakelock_print(when);
                         userspace_wakelock_action(0, NULL);
-                        if(have_triggerd_sleep_S >= 30)
-                        {
-                            lidbg("+++++ broadcast android_secret_code 4629 %ds later +++++\n", have_triggerd_sleep_S);
-                            lidbg_shell_cmd("am broadcast -a android.provider.Telephony.SECRET_CODE -d android_secret_code://4629 &");
-                        }
                     }
                     break;
                 }
