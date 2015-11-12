@@ -14,8 +14,11 @@ LIST_HEAD(uevent_list);
 struct miscdevice lidbg_uevent_device;
 int uevent_dbg = 0;
 struct mutex lock;
-
-
+static struct kfifo cmd_fifo;
+#define FIFO_SIZE (512)
+u8 *cmd_fifo_buffer;
+static DECLARE_COMPLETION(cmd_ready);
+struct mutex fifo_lock;
 bool uevent_focus(char *focus, void(*callback)(char *focus, char *uevent))
 {
     struct uevent_dev *add_new_dev = NULL;
@@ -85,12 +88,33 @@ ssize_t  lidbg_uevent_write(struct file *filp, const char __user *buf, size_t co
     kfree(tmp);
     return count;
 }
+ssize_t  lidbg_uevent_read(struct file *filp, char __user *buf, size_t count, loff_t *f_pos)
+{
+    char *cmd;
+    int len;
+
+    wait_for_completion(&cmd_ready);
+    if(kfifo_is_empty(&cmd_fifo))
+       return 0;
+    mutex_lock(&fifo_lock);
+    len = kfifo_out(&cmd_fifo, &cmd, 4);
+    mutex_unlock(&fifo_lock);
+    //LIDBG_WARN("lidbg_uevent_read:%s\n",cmd);
+    if(copy_to_user(buf, cmd, strlen(cmd)))
+    {
+        return -1;
+    }
+    kfree(cmd);
+    return strlen(cmd);
+}
 
 static const struct file_operations lidbg_uevent_fops =
 {
     .owner = THIS_MODULE,
     .open = lidbg_uevent_open,
     .write = lidbg_uevent_write,
+     .read = lidbg_uevent_read,
+
 };
 
 struct miscdevice lidbg_uevent_device =
@@ -107,6 +131,12 @@ static int __init lidbg_uevent_init(void)
     if (misc_register(&lidbg_uevent_device))
         LIDBG_ERR("misc_register\n");
     mutex_init(&lock);
+    mutex_init(&fifo_lock);
+    INIT_COMPLETION(cmd_ready);
+
+    cmd_fifo_buffer = (u8 *)kmalloc(FIFO_SIZE , GFP_KERNEL);
+    kfifo_init(&cmd_fifo, cmd_fifo_buffer, FIFO_SIZE);
+
     return 0;
 }
 
@@ -127,7 +157,23 @@ void lidbg_uevent_send(enum kobject_action action, char *envp_ext[])
 }
 void lidbg_uevent_shell(char *shell_cmd)
 {
-    uevent_shell(shell_cmd);
+
+    if(0)
+        uevent_shell(shell_cmd);
+    else
+    {
+	 char *cmd;
+	 while(kfifo_is_full(&cmd_fifo))
+         {
+            LIDBG_WARN("lidbg_uevent_shell:kfifo_is_full\n");
+	    msleep(10);
+         }
+        cmd = kstrdup(shell_cmd,GFP_KERNEL);
+        mutex_lock(&fifo_lock);
+	kfifo_in(&cmd_fifo, &cmd, 4);
+        mutex_unlock(&fifo_lock);
+        complete(&cmd_ready);
+    }
 }
 
 void lidbg_uevent_main(int argc, char **argv)

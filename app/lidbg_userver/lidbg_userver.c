@@ -184,14 +184,49 @@ static void lidbg_uevent_poll(bool (*uevent_callback)(int fd))
 
 }
 
+
 int main(int argc, char **argv)
 {
     argc = argc;
     argv = argv;
-    pthread_t lidbg_uevent_tid;
     DUMP_BUILD_TIME_FILE;
-    lidbg("lidbg_userver: uevent thread start\n");
-    lidbg_uevent_poll(lidbg_uevent_callback);
+    if(0)
+    {
+		pthread_t lidbg_uevent_tid;
+		lidbg("lidbg_userver: uevent thread start\n");
+		lidbg_uevent_poll(lidbg_uevent_callback);
+    }
+    #define SHELL_ERRS_FILE "/dev/dbg_msg"
+
+    if(1)
+    {
+	 int fd,read_len;
+	 char str[256];
+         char shellstring[256];
+         if(access("/dev/lidbg_uevent", X_OK) != 0)
+         {
+		system("chmod 777 /dev/lidbg_uevent");
+		sleep(1);
+	 }
+	 fd = open("/dev/lidbg_uevent", O_RDWR);
+	 if((fd == 0)||(fd == (int)0xfffffffe)|| (fd == (int)0xffffffff))
+	 {
+		lidbg("open /dev/lidbg_uevent err\n");
+	 }
+        system("echo 1 > /dev/log/userver_ok.txt");
+        system("chmod 777 /dev/log/userver_ok.txt");
+	while(1)
+	 {
+		memset(str,'\0',256);
+		read_len = read(fd, str, 256);
+		if(read_len >=0)
+		{
+		   lidbg("do:%s\n",str);
+		   snprintf(shellstring, 256, "%s 2>> "SHELL_ERRS_FILE, str );
+	           system(shellstring);
+		}
+	 }
+     }
     return 0;
 }
 
