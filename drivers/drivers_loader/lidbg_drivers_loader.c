@@ -238,7 +238,7 @@ bool analyze_list_cmd(struct list_head *client_list)
 #endif
             else
             {
-                //msleep(100);
+                msleep(100);
                 //LIDBG_WARN("exe<%s>\n", pos->yourkey);
                 lidbg_shell_cmd(pos->yourkey);
             }
