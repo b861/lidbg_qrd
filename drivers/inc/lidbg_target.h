@@ -83,6 +83,7 @@ struct hw_version_specific
     int i2c_bus_tef6638;
     int i2c_bus_lpc;
     int i2c_bus_pca9634;
+	int i2c_bus_accel;
 
     //ad
     struct ad_key_remap ad_key[4];
@@ -110,11 +111,18 @@ struct hw_version_specific
     int ad_val_mcu;
     //is_singleEdge
     bool is_single_edge;
+
+	//accel
+	int gpio_accel_int1;
 };
 extern struct hw_version_specific g_hw_version_specific[];
 
 #define FLYPARAMETER_NODE g_hw.fly_parameter_node
 #define SYSTEM_SWITCH_EN  g_hw.system_switch_en
+
+//accel
+#define ACCEL_I2C_BUS	(g_hw.i2c_bus_accel)
+#define ACCEL_INT1		(g_hw.gpio_accel_int1)
 
 //touch
 #define TS_I2C_BUS      (g_hw.i2c_bus_ts)
