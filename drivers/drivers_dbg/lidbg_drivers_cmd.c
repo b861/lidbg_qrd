@@ -272,6 +272,7 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#049 flybootserver airplane enable\n");
             fs_mem_log("*158#050 enable top -t -m 10\n");
             fs_mem_log("*158#051--LOG_LOGCAT2\n");
+            fs_mem_log("*158#052--udisk reset\n");
 
             show_password_list();
             lidbg_domineering_ack();
@@ -593,7 +594,12 @@ void parse_cmd(char *pt)
 #endif
             lidbg_domineering_ack();
         }
-
+        else if (!strcmp(argv[1], "*158#052"))
+        {
+            lidbg("-------udisk reset -----");
+            fs_file_write2("/dev/lidbg_pm0", "ws udisk_reset");
+            lidbg_domineering_ack();
+        }
         else if (!strcmp(argv[1], "*168#001"))
         {
             encode = true;
