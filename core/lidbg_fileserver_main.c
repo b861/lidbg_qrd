@@ -3,7 +3,7 @@
 
 //zone below [tools]
 #define FS_BUFF_SIZE (1 * 1024 )
-#define FS_FIFO_SIZE (64 * 1024)
+#define FS_FIFO_SIZE (1 * 1024)
 
 #define FS_VERSION "FS.VERSION:  [20131031]"
 bool is_out_updated = false;

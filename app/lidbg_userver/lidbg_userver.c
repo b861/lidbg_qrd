@@ -1,6 +1,7 @@
 
 #include "lidbg_servicer.h"
 #include "lidbg_insmod.h"
+#include <pthread.h>
 
 #define LIDBG_UEVENT_MSG_LEN  (512)
 #define LIDBG_UEVENT_NODE_NAME "lidbg_uevent"
@@ -185,17 +186,28 @@ static void lidbg_uevent_poll(bool (*uevent_callback)(int fd))
 }
 
 
+static void *thread_uevent(void *data)
+{
+
+    pthread_t lidbg_uevent_tid;
+    lidbg("lidbg_userver: uevent thread start\n"); 
+    lidbg_uevent_poll(lidbg_uevent_callback);
+
+    return ((void *) 0);
+
+}
+
 int main(int argc, char **argv)
 {
+    pthread_t ntid;
+    int ret;
     argc = argc;
     argv = argv;
     DUMP_BUILD_TIME_FILE;
+
     if(0)
-    {
-		pthread_t lidbg_uevent_tid;
-		lidbg("lidbg_userver: uevent thread start\n");
-		lidbg_uevent_poll(lidbg_uevent_callback);
-    }
+       ret = pthread_create(&ntid,NULL,thread_uevent,NULL);
+
     #define SHELL_ERRS_FILE "/dev/dbg_msg"
 
     if(1)

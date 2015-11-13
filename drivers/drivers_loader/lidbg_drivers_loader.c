@@ -2,6 +2,7 @@
 
 static LIST_HEAD(lidbg_list);
 static LIST_HEAD(flyaudio_list);
+static LIST_HEAD(flyaudio_hal_list);
 
 struct judgment
 {
@@ -257,18 +258,26 @@ static int thread_drivers_loader_analyze(void *data)
     char buff[50] = {0};
     judgment_list_init();
 
+
+    fs_fill_list(get_lidbg_file_path(buff, "lidbg.init.rc.conf"), FS_CMD_FILE_LISTMODE, &lidbg_list);
+    analyze_list_cmd(&lidbg_list);
+
     if(gboot_mode == MD_FLYSYSTEM)
     {
         LIDBG_WARN("<==gboot_mode==MD_FLYSYSTEM==>\n");
+
+	if(fs_is_file_exist("/flysystem/lib/modules/flyaudio.modules.conf"))
+            fs_fill_list( "/flysystem/lib/modules/flyaudio.modules.conf", FS_CMD_FILE_LISTMODE, &flyaudio_hal_list);
+	else
+            fs_fill_list(get_lidbg_file_path(buff, "flyaudio.modules.conf"), FS_CMD_FILE_LISTMODE, &flyaudio_hal_list);
+
+	analyze_list_cmd(&flyaudio_hal_list);
+
         fs_fill_list(get_lidbg_file_path(buff, "flyaudio.init.rc.conf"), FS_CMD_FILE_LISTMODE, &flyaudio_list);
         analyze_list_cmd(&flyaudio_list);
+
     }
-    else
-    {
-        LIDBG_WARN("<==gboot_mode==origin rc==>\n");
-        fs_fill_list(get_lidbg_file_path(buff, "lidbg.init.rc.conf"), FS_CMD_FILE_LISTMODE, &lidbg_list);
-        analyze_list_cmd(&lidbg_list);
-    }
+
 
     ssleep(30);//later,exit
     return 0;
