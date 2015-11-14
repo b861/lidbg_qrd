@@ -338,7 +338,7 @@ BOOL actualReadFromMCU(BYTE *p, UINT length)
     }
     else
     {
-        SOC_I2C_Rec_Simple(LPC_I2_ID, MCU_ADDR >> 1, p, length);
+        SOC_I2C_Rec_Simple(LPC_I2_ID, MCU_ADDR , p, length);
         if (readFromMCUProcessor(p, length))
         {
 

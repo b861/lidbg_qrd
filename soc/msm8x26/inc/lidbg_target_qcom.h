@@ -146,14 +146,22 @@
 
 
 
-#ifdef PLATFORM_ID_7
+#ifdef PLATFORM_msm8974
 #define USB_WORK_ENABLE do{\
-				lidbg("USB_WORK_ENABLE\n");\
-				USB_ID_HIGH_DEV;\
-				msleep(200);\
-				USB_SWITCH_CONNECT;\
+			lidbg("USB_WORK_ENABLE\n");\
+			USB_ID_HIGH_DEV;\
+			msleep(200);\
+			USB_SWITCH_CONNECT;\
     			USB_POWER_ENABLE;\
     			USB_ID_LOW_HOST;\
+			}while(0)
+
+#define USB_WORK_DISENABLE  do{\
+			lidbg("USB_WORK_DISENABLE\n");\
+			USB_ID_HIGH_DEV;\
+			msleep(200);\
+			USB_SWITCH_DISCONNECT;\
+			USB_POWER_DISABLE;\
 			}while(0)
 #else
 #define USB_WORK_ENABLE do{\
@@ -162,7 +170,6 @@
     			USB_POWER_ENABLE;\
     			USB_ID_LOW_HOST;\
 			}while(0)
-#endif
 
 #define USB_WORK_DISENABLE  do{\
 			lidbg("USB_WORK_DISENABLE\n");\
@@ -171,6 +178,9 @@
 			USB_SWITCH_DISCONNECT;\
 			USB_ID_HIGH_DEV;\
 			}while(0)
+#endif
+
+
 
 
 #define MSM_DSI83_DISABLE do{\
