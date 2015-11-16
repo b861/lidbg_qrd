@@ -526,6 +526,10 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         }
         else  if(!strcmp(cmd[1], "android_up"))
         {
+#ifdef PLATFORM_msm8909
+			lidbg_shell_cmd("/system/bin/r 0x1014000 0x1cc");
+			lidbg_shell_cmd("/system/bin/r 0x1015000 0x1cc");
+#endif
             PM_WARN("PM:g_var.system_status.%d,%d\n", g_var.system_status, (g_var.system_status == FLY_GOTO_SLEEP));
 #ifdef LIDBG_PM_CHECK_SLEEPED
             if(g_var.system_status == FLY_GOTO_SLEEP)
@@ -537,6 +541,10 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         }
         else  if(!strcmp(cmd[1], "android_down"))
         {
+#ifdef PLATFORM_msm8909
+			lidbg_shell_cmd("/system/bin/r 0x1014000 0x1c0");
+			lidbg_shell_cmd("/system/bin/r 0x1015000 0x1c0");
+#endif
             SOC_System_Status(FLY_ANDROID_DOWN);
             MCU_APP_GPIO_OFF;
 #ifdef SOC_mt3360
