@@ -1,7 +1,6 @@
 
 #include "lidbg_servicer.h"
 #include "lidbg_insmod.h"
-#include <pthread.h>
 
 #define LIDBG_UEVENT_MSG_LEN  (512)
 #define LIDBG_UEVENT_NODE_NAME "lidbg_uevent"
@@ -190,12 +189,35 @@ static void *thread_uevent(void *data)
 {
 
     pthread_t lidbg_uevent_tid;
+    data = data;
     lidbg("lidbg_userver: uevent thread start\n"); 
     lidbg_uevent_poll(lidbg_uevent_callback);
 
     return ((void *) 0);
 
 }
+
+static int
+epoll_register( int  epoll_fd, int  fd )
+{
+    struct epoll_event  ev;
+    int ret, flags;
+
+    /* important: make the fd non-blocking */
+    flags = fcntl(fd, F_GETFL);
+    fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+
+    ev.events  = EPOLLIN;
+    ev.data.fd = fd;
+    do
+    {
+        ret = epoll_ctl( epoll_fd, EPOLL_CTL_ADD, fd, &ev );
+    }
+    while (ret < 0 && errno == EINTR);
+    return ret;
+}
+
+
 
 int main(int argc, char **argv)
 {
@@ -227,6 +249,7 @@ int main(int argc, char **argv)
 	 }
         system("echo 1 > /dev/log/userver_ok.txt");
         system("chmod 777 /dev/log/userver_ok.txt");
+#if 0
 	while(1)
 	 {
 		memset(str,'\0',256);
@@ -238,6 +261,38 @@ int main(int argc, char **argv)
 	           system(shellstring);
 		}
 	 }
+#else
+{
+	struct epoll_event  events[1];
+	int  nevents;
+        int  epoll_fd = epoll_create(1);
+ 	epoll_register( epoll_fd, fd );
+	while(1)
+	{
+
+		nevents = epoll_wait( epoll_fd, events, 1, -1 );
+		if (nevents < 0)
+		{
+		    if (errno != EINTR)
+		    {
+			lidbg("epoll_wait() unexpected error: %s", strerror(errno));
+		    }
+		    continue;
+		}
+                if ((events[0].events & EPOLLIN) != 0)
+		{
+			memset(str,'\0',256);
+			read_len = read(fd, str, 256);
+			if(read_len >=0)
+			{
+			   lidbg("do:%s\n",str);
+			   snprintf(shellstring, 256, "%s 2>> "SHELL_ERRS_FILE, str );
+			   system(shellstring);
+			}
+		}
+	}
+}
+#endif
      }
     return 0;
 }

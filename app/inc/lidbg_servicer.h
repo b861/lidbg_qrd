@@ -16,7 +16,10 @@
 #include <cutils/properties.h>
 #include <sys/poll.h>
 #include <time.h>
-
+#include <sys/epoll.h>
+#include <sys/ioctl.h>
+#include <math.h>
+#include <cutils/log.h>
 //#undef printf
 #define lidbg  LIDBG_PRINT
 #define DUMP_BUILD_TIME    do{ lidbg( "Build Time: %s, %s, %s \n", __FUNCTION__, __DATE__, __TIME__);}while(0)

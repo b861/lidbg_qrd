@@ -17,8 +17,11 @@ struct mutex lock;
 static struct kfifo cmd_fifo;
 #define FIFO_SIZE (512)
 u8 *cmd_fifo_buffer;
-static DECLARE_COMPLETION(cmd_ready);
+//static DECLARE_COMPLETION(cmd_ready);
 struct mutex fifo_lock;
+static wait_queue_head_t wait_queue;
+
+
 bool uevent_focus(char *focus, void(*callback)(char *focus, char *uevent))
 {
     struct uevent_dev *add_new_dev = NULL;
@@ -93,7 +96,7 @@ ssize_t  lidbg_uevent_read(struct file *filp, char __user *buf, size_t count, lo
     char *cmd;
     int len;
 
-    wait_for_completion(&cmd_ready);
+    //wait_for_completion(&cmd_ready);
     if(kfifo_is_empty(&cmd_fifo))
        return 0;
     mutex_lock(&fifo_lock);
@@ -108,12 +111,33 @@ ssize_t  lidbg_uevent_read(struct file *filp, char __user *buf, size_t count, lo
     return strlen(cmd);
 }
 
+
+
+static unsigned int lidbg_uevent_poll(struct file *filp, struct poll_table_struct *wait)
+{
+
+    unsigned int mask = 0;
+     //LIDBG_WARN("[lidbg_uevent_poll]wait begin\n");
+    poll_wait(filp, &wait_queue, wait);
+     //LIDBG_WARN("[lidbg_uevent_poll]wait done\n");
+    mutex_lock(&fifo_lock);
+    if(!kfifo_is_empty(&cmd_fifo))
+    {
+        mask |= POLLIN | POLLRDNORM;
+    }
+    mutex_unlock(&fifo_lock);
+    return mask;
+}
+
+
 static const struct file_operations lidbg_uevent_fops =
 {
     .owner = THIS_MODULE,
     .open = lidbg_uevent_open,
     .write = lidbg_uevent_write,
      .read = lidbg_uevent_read,
+    .poll = lidbg_uevent_poll,
+
 
 };
 
@@ -132,7 +156,8 @@ static int __init lidbg_uevent_init(void)
         LIDBG_ERR("misc_register\n");
     mutex_init(&lock);
     mutex_init(&fifo_lock);
-    INIT_COMPLETION(cmd_ready);
+    //INIT_COMPLETION(cmd_ready);
+    init_waitqueue_head(&wait_queue);
 
     cmd_fifo_buffer = (u8 *)kmalloc(FIFO_SIZE , GFP_KERNEL);
     kfifo_init(&cmd_fifo, cmd_fifo_buffer, FIFO_SIZE);
@@ -172,7 +197,8 @@ void lidbg_uevent_shell(char *shell_cmd)
         mutex_lock(&fifo_lock);
 	kfifo_in(&cmd_fifo, &cmd, 4);
         mutex_unlock(&fifo_lock);
-        complete(&cmd_ready);
+        //complete(&cmd_ready);
+	wake_up_interruptible(&wait_queue);
     }
 }
 
