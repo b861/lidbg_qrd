@@ -1,3 +1,4 @@
+// #include <../drivers/flyaudio/lowmemorykillprotecter.c>
 /*
 "com.android.flyaudioui",
 "cn.flyaudio.android.flyaudioservice",

@@ -96,6 +96,22 @@ out:
     return 0;
 }
 
+int thread_system_trace(void *data)
+{
+    lidbg_shell_cmd("top -t -m 15 >> /sdcard/logcat.txt &");
+
+    while(1)
+    {
+	     lidbg_shell_cmd("procrank -u >> /sdcard/logcat.txt");
+	     lidbg_shell_cmd("dumpsys meminfo >> /sdcard/logcat.txt");
+            ssleep(5);
+    }
+
+    return 0;
+}
+
+
+
 static bool top_enabled = false;
 int thread_enable_top(void *data)
 {
@@ -273,6 +289,7 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#050 enable top -t -m 10\n");
             fs_mem_log("*158#051--LOG_LOGCAT2\n");
             fs_mem_log("*158#052--udisk reset\n");
+            fs_mem_log("*158#053--system trace\n");
 
             show_password_list();
             lidbg_domineering_ack();
@@ -299,6 +316,12 @@ void parse_cmd(char *pt)
         {
             lidbg_chmod("/sdcard");
             CREATE_KTHREAD(thread_enable_logcat2, NULL);
+            lidbg_domineering_ack();
+        }
+        else if (!strcmp(argv[1], "*158#053"))
+        {
+            lidbg_chmod("/sdcard");
+            CREATE_KTHREAD(thread_system_trace, NULL);
             lidbg_domineering_ack();
         }
         else if (!strcmp(argv[1], "*158#002"))
