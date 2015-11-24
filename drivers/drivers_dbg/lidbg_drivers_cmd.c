@@ -102,8 +102,9 @@ int thread_system_trace(void *data)
 
     while(1)
     {
-	     lidbg_shell_cmd("procrank -u >> /sdcard/logcat.txt");
-	     lidbg_shell_cmd("dumpsys meminfo >> /sdcard/logcat.txt");
+	     lidbg_shell_cmd("procrank -u >> /sdcard/logcat.txt &");
+	     ssleep(5);
+	     lidbg_shell_cmd("dumpsys meminfo >> /sdcard/logcat.txt &");
             ssleep(5);
     }
 

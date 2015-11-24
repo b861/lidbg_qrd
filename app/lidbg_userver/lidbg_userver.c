@@ -285,9 +285,10 @@ int main(int argc, char **argv)
 			read_len = read(fd, str, 256);
 			if(read_len >=0)
 			{
-			   lidbg("do:%s\n",str);
+			   lidbg("do+:%s\n",str);
 			   snprintf(shellstring, 256, "%s 2>> "SHELL_ERRS_FILE, str );
 			   system(shellstring);
+			   lidbg("do-:%s\n",str);
 			}
 		}
 	}

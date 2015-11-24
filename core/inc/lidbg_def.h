@@ -70,7 +70,7 @@ typedef unsigned int			uchar;
 #define DUMP_FUN_ENTER     DUMP_FUN
 #define DUMP_FUN_LEAVE     do{lidbg( "%s-\n", __FUNCTION__);}while(0)
 #define WHILE_ENTER     do{lidbg( "%s:while blocking...\n", __FUNCTION__);}while(0)
-#define DUMP_POS     do{lidbg( "come to %s,line %d\n", __FILE__,__LINE__);}while(0)
+#define DUMP_POS     do{lidbg( "come to %s,%s,line %d\n", __FILE__,__FUNCTION__,__LINE__);}while(0)
 
 
 #define HIGH			(1)

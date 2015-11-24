@@ -541,12 +541,13 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         }
         else  if(!strcmp(cmd[1], "android_down"))
         {
+        	MCU_APP_GPIO_OFF;
 #ifdef PLATFORM_msm8909
 			lidbg_shell_cmd("/system/bin/r 0x1014000 0x1c0");
 			lidbg_shell_cmd("/system/bin/r 0x1015000 0x1c0");
 #endif
             SOC_System_Status(FLY_ANDROID_DOWN);
-            MCU_APP_GPIO_OFF;
+            
 #ifdef SOC_mt3360
             extern unsigned int fly_acc_step;
             fly_acc_step = 1;
@@ -819,11 +820,11 @@ static int thread_observer(void *data)
         have_triggerd_sleep_S = 0;
         if( !wait_for_completion_interruptible(&sleep_observer_wait))
         {
-            find_task_by_name_or_kill(true, false, true, "c2739.mainframe");
+            //find_task_by_name_or_kill(true, false, true, "c2739.mainframe");
             //kernel_wakelock_print("start:");
             //userspace_wakelock_action(0, NULL);
-            lidbg_shell_cmd("echo msg airplane_mode_on:$(getprop persist.radio.airplane_mode_on) > /dev/lidbg_pm0");
-            lidbg_shell_cmd("echo msg wlan.driver.status:$(getprop wlan.driver.status) > /dev/lidbg_pm0");
+            //lidbg_shell_cmd("echo msg airplane_mode_on:$(getprop persist.radio.airplane_mode_on) > /dev/lidbg_pm0");
+            //lidbg_shell_cmd("echo msg wlan.driver.status:$(getprop wlan.driver.status) > /dev/lidbg_pm0");
             //find_task_by_name_or_kill(true, true, false, NULL);
             while(1) //atomic_read(&is_in_sleep) == 1
             {

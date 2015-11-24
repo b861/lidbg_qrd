@@ -191,7 +191,7 @@ void lidbg_uevent_shell(char *shell_cmd)
 	 while(kfifo_is_full(&cmd_fifo))
          {
             LIDBG_WARN("lidbg_uevent_shell:kfifo_is_full\n");
-	    msleep(10);
+	    msleep(100);
          }
         cmd = kstrdup(shell_cmd,GFP_KERNEL);
         mutex_lock(&fifo_lock);

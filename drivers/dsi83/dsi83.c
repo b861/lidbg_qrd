@@ -220,7 +220,7 @@ int dsi83_check(void)
 void dsi83_suspend(void)
 {
 #ifdef PLATFORM_msm8226
-    is_dsi83_inited = false;
+  //  is_dsi83_inited = false;
 #endif
 }
 
@@ -266,7 +266,7 @@ void dsi83_gpio_init(void)
     T123_reset();
 }
 
-
+ 
 void dsi83_config(void)
 {
     int ret = 0;
