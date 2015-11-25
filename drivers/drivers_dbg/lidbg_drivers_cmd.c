@@ -291,6 +291,7 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#051--LOG_LOGCAT2\n");
             fs_mem_log("*158#052--udisk reset\n");
             fs_mem_log("*158#053--system trace\n");
+	    fs_mem_log("*158#054--uvccam recording control(1 or 0)\n");
 
             show_password_list();
             lidbg_domineering_ack();
@@ -623,6 +624,31 @@ void parse_cmd(char *pt)
             lidbg("-------udisk reset -----");
             fs_file_write2("/dev/lidbg_pm0", "ws udisk_reset");
             lidbg_domineering_ack();
+        }
+	else if (!strncmp(argv[1], "*158#054", 8))
+        {
+            //opt args,ex:*158#0540
+            int n;
+            n = strlen(argv[1]);
+            if(n != 9)//wrong args
+            {
+                lidbg("wrong args!");
+                return;
+            }
+            lidbg("--------UVCCAM MODE:%s-----------", argv[1] + 8); 
+            if(!strcmp((argv[1] + 8), "1"))//start recording
+            {
+                 lidbg("-------uvccam recording -----");
+	        lidbg_shell_cmd("setprop persist.lidbg.uvccam.recording 1");
+	        if(g_var.is_fly) lidbg_shell_cmd("./flysystem/lib/out/lidbg_testuvccam /dev/video2 -c -f H264 -r &");
+	        else lidbg_shell_cmd("./system/lib/modules/out/lidbg_testuvccam /dev/video2 -c -f H264 -r &");
+            }
+            else if(!strcmp((argv[1] + 8), "0"))//stop recording
+	    {
+		lidbg("-------uvccam stop_recording -----");
+	        lidbg_shell_cmd("setprop persist.lidbg.uvccam.recording 0");
+	    }
+                
         }
         else if (!strcmp(argv[1], "*168#001"))
         {
