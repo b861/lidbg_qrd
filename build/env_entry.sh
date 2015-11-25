@@ -425,31 +425,69 @@ case "$DBG_PLATFORM_ID" in
 	export TZ_BUILD_CMD='./build.sh CHIPSET=msm8x26 tz -j1'
 	export UPDATE_BUILD_CMD='python update_common_info.py';;
     13)
-    export DBG_PLATFORM=kylin_hummingbird
-    export BOARD_VERSION=V1
-    export ANDROID_VERSION=444
-    export DBG_CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilts/gcc/linux-x86/arm/arm-eabi-4.7/bin/arm-eabi-
-    export JAVA_HOME=$PATHJAVA1P6
-    export JRE_HOME=$JAVA_HOME/jre
-    export CLASSPATH=$JAVA_HOME/lib:$JRE_HOME/lib:$CLASSPATH
-    export PATH=$JAVA_HOME/bin:$JRE_HOME/bin:$PATH
-    export SYSTEM_BUILD_TYPE=eng
-    export KERNEL_DEFCONFIG=sun7i_defconfig
-    export DBG_BOOTLOADER_DIR=$DBG_SYSTEM_DIR/../lichee/brandy/u-boot-2011.09
-    export DBG_KERNEL_SRC_DIR=$DBG_SYSTEM_DIR/../lichee/linux-3.4
-    export DBG_KERNEL_OBJ_DIR=$DBG_SYSTEM_DIR/../lichee/linux-3.4
-    export UPDATA_BIN_PLATFORM_DIR=$RELEASE_REPOSITORY/others/tx
-    export UPDATA_BIN_DIR=$UPDATA_BIN_PLATFORM_DIR/driver
-    export UPDATA_BASESYSTEM_DIR=$UPDATA_BIN_PLATFORM_DIR/basesystem
-    export DBG_PASSWORD=git
-    export DBG_REPO_PASSWORD=git
-    export DBG_VENDOR=VENDOR_WINNER
-    export OTA_PACKAGE_NAME=msm8974-ota-eng.*.zip
-    export DBG_SOC=tx
-    export TEST_PACKAGE_PATH=//192.168.128.128/tx/升级包发布/专项测试包
-    export REPOSITORY_WORK_BRANCH=master
-    export SYSTEM_WORK_BRANCH=master
-    export MAKE_PAKG_NUM= ;;
+	export DBG_PLATFORM=kylin_hummingbird
+	export BOARD_VERSION=V1
+	export ANDROID_VERSION=444
+	export DBG_CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilts/gcc/linux-x86/arm/arm-eabi-4.7/bin/arm-eabi-
+	export JAVA_HOME=$PATHJAVA1P6
+	export JRE_HOME=$JAVA_HOME/jre
+	export CLASSPATH=$JAVA_HOME/lib:$JRE_HOME/lib:$CLASSPATH
+	export PATH=$JAVA_HOME/bin:$JRE_HOME/bin:$PATH
+	export SYSTEM_BUILD_TYPE=eng
+	export KERNEL_DEFCONFIG=sun7i_defconfig
+	export DBG_BOOTLOADER_DIR=$DBG_SYSTEM_DIR/../lichee/brandy/u-boot-2011.09
+	export DBG_KERNEL_SRC_DIR=$DBG_SYSTEM_DIR/../lichee/linux-3.4
+	export DBG_KERNEL_OBJ_DIR=$DBG_SYSTEM_DIR/../lichee/linux-3.4
+	export UPDATA_BIN_PLATFORM_DIR=$RELEASE_REPOSITORY/others/tx
+	export UPDATA_BIN_DIR=$UPDATA_BIN_PLATFORM_DIR/driver
+	export UPDATA_BASESYSTEM_DIR=$UPDATA_BIN_PLATFORM_DIR/basesystem
+	export DBG_PASSWORD=git
+	export DBG_REPO_PASSWORD=git
+	export DBG_VENDOR=VENDOR_WINNER
+	export OTA_PACKAGE_NAME=msm8974-ota-eng.*.zip
+	export DBG_SOC=tx
+	export TEST_PACKAGE_PATH=//192.168.128.128/tx/升级包发布/专项测试包
+	export REPOSITORY_WORK_BRANCH=master
+	export SYSTEM_WORK_BRANCH=master
+	export MAKE_PAKG_NUM= ;;
+    14)
+        export DBG_PLATFORM=msm8974
+        export BOARD_VERSION=V2
+        export ANDROID_VERSION=600
+        export DBG_CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilts/gcc/linux-x86/arm/arm-eabi-4.8/bin/arm-eabi-
+        export JAVA_HOME=$PATHJAVA1P7
+        export JRE_HOME=$JAVA_HOME/jre
+        export CLASSPATH=$JAVA_HOME/lib:$JRE_HOME/lib:$CLASSPATH
+        export PATH=$JAVA_HOME/bin:$JRE_HOME/bin:$PATH
+        export SYSTEM_BUILD_TYPE=userdebug
+        export DBG_BOOTLOADER_DIR=$DBG_SYSTEM_DIR/bootable/bootloader/lk
+        export DBG_KERNEL_SRC_DIR=$DBG_SYSTEM_DIR/kernel
+        export DBG_KERNEL_OBJ_DIR=$DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/obj/KERNEL_OBJ
+        export UPDATA_BIN_PLATFORM_DIR=$RELEASE_REPOSITORY/others/8974_5.1
+        export UPDATA_BIN_DIR=$UPDATA_BIN_PLATFORM_DIR/driver
+        export UPDATA_BASESYSTEM_DIR=$UPDATA_BIN_PLATFORM_DIR/basesystem
+        export DBG_PASSWORD=git
+        export DBG_REPO_PASSWORD=git
+        export DBG_VENDOR=VENDOR_QCOM
+        export OTA_PACKAGE_NAME=msm8974-ota-eng.*.zip
+        export DBG_SOC=msm8x26
+        export TEST_PACKAGE_PATH=//192.168.128.128/8974/升级包发布/专项测试包
+        export REPOSITORY_WORK_BRANCH=master
+        export SYSTEM_WORK_BRANCH=master
+        export MAKE_PAKG_NUM=19
+        export NON_HLOS_FILE_PATH=$BP_SOURCE_PATH/common/build/bin/asic
+        export RPM_FILE_PATH=$RPM_PATH/ms/bin/AAAAANAAR
+        export SBL_FILE_PATH=$BOOT_IMAGE_PATH/bin/8974
+        export TZ_FILE_PATH=$TZ_PATH/bin/AAAAANAA
+        #for bp
+        export MPSS_BUILD_CMD='./build.sh 8974.gen.prod BUILD_VER=00161 –k'
+        export BOOTLOADER_BUILD_CMD=' ./build.sh TARGET_FAMILY=8974 BUILD_ID=AAAAANAZ -j1'
+        export ADSP_BUILD_CMD='python build.py'
+        export RPM_BUILD_CMD='./rpm_proc/build/build_8974.sh -j1'
+        export WCNSS_BUILD_CMD='./wcnss_build.sh 8974 pronto BUILD_ID=SCAQBAZ -j1'
+        export TZ_BUILD_CMD='./build.sh CHIPSET=msm8974 tz sampleapp tzbsp_no_xpu playready widevine isdbtmm securitytest keymaster commonlib mobicore sse -j1'
+	export DEBUG_IMAGE_CMD='./build.sh TARGET_FAMILY=8974 sdi BUILD_ID=AAAAANAZ BUILD_VER=8 BUILD_MIN=1 -j1'
+        export UPDATE_BUILD_CMD='python update_common_info.py';;
 esac 
 
 
