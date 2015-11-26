@@ -53,7 +53,7 @@ static int thread_powerkey_func(void *data)
 				break;
 			case FLY_GOTO_SLEEP:
 				fs_file_write(DEV_NAME, false, GOTO_SLEEP, 0, strlen(GOTO_SLEEP));
-				mod_timer(&timer,AirplanMode_TIME);
+				mod_timer(&timer,POWERKEY_DELAY_TIME);
 				break;
 			case FLY_ANDROID_UP:
 				fs_file_write(DEV_NAME, false, ANDROID_UP, 0, strlen(ANDROID_UP));

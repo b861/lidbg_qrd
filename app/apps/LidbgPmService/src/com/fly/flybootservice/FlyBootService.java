@@ -161,10 +161,8 @@ public class FlyBootService extends Service {
 									break;
 								case FBS_ANDROID_UP:
 									LIDBG_PRINT("FlyBootService get pm state: FBS_ANDROID_UP");
-									SendBroadcastToService(KeyBootState, keyScreenOn);
 									SendBroadcastToService(KeyBootState, keyFastSusupendON);
 									sendBroadcast(new Intent(SYSTEM_RESUME));
-									restoreAirplaneMode(mFlyBootService);
 									Intent intentBoot = new Intent(Intent.ACTION_BOOT_COMPLETED);
 									intentBoot.putExtra("flyauduio_accon", "accon");
 									sendBroadcast(intentBoot);  
@@ -174,12 +172,10 @@ public class FlyBootService extends Service {
 									restoreAirplaneMode(mFlyBootService);
 									sendBroadcast(new Intent(ACC_ON_FLYUI));
 									SendBroadcastToService(KeyBootState, keyEearlySusupendON);
-									SendBroadcastToService(KeyBootState, keyScreenOn);
 									break;
 								case FBS_SCREEN_ON:
 									LIDBG_PRINT("FlyBootService get pm state: FBS_SCREEN_ON");
 									acquireWakeLock();
-									restoreAirplaneMode(mFlyBootService);
 									SendBroadcastToService(KeyBootState, keyScreenOn);
 									break;
 								default:
