@@ -8,16 +8,16 @@
 #define ANDROID_UP	 "flyaudio android_up"
 #define ANDROID_DOWN "flyaudio android_down"
 #define GOTO_SLEEP   "flyaudio gotosleep"
-#define POWER_SUSPEND_TIME   (jiffies + 10*HZ)//delay between screenoff->devicedown->androiddown
-#define AirplanMode_TIME     (jiffies + 10*HZ)//wakelock hold time between androiddown->wakelock release
+#define POWER_SUSPEND_TIME   (jiffies + 5*HZ)//delay between screenoff->devicedown->androiddown
+#define AirplanMode_TIME     (jiffies + 0*HZ)//wakelock hold time between androiddown->wakelock release
 #define POWERKEY_DELAY_TIME     (jiffies + 0*HZ)//wakelock hold time between androiddown->wakelock release
 #define POWERKEY_FIFO_SIZE (512)
 
 static struct notifier_block fb_notif;
 static struct timer_list timer;
 static atomic_t status = ATOMIC_INIT(FLY_SCREEN_ON);
+static wait_queue_head_t wait_queue;
 static DECLARE_COMPLETION (sleep_powerkey_wait);
-static DECLARE_COMPLETION (read_powerkey_wait);
 static struct semaphore powerkey_sem;
 static struct kfifo powerkey_state_fifo;
 static unsigned int *powerkey_state_buffer;
@@ -36,7 +36,7 @@ static int thread_powerkey_func(void *data)
 		wait_for_completion(&sleep_powerkey_wait);
 		lidbg("%s = %d\n", __FUNCTION__,atomic_read(&status));
 		powerkey_fifo_in();
-		complete(&read_powerkey_wait);
+		wake_up_interruptible(&wait_queue);
 		switch(atomic_read(&status))
 		{
 			case FLY_SCREEN_OFF:
@@ -53,6 +53,7 @@ static int thread_powerkey_func(void *data)
 				break;
 			case FLY_GOTO_SLEEP:
 				fs_file_write(DEV_NAME, false, GOTO_SLEEP, 0, strlen(GOTO_SLEEP));
+				mod_timer(&timer,AirplanMode_TIME);
 				break;
 			case FLY_ANDROID_UP:
 				fs_file_write(DEV_NAME, false, ANDROID_UP, 0, strlen(ANDROID_UP));
@@ -109,14 +110,15 @@ static void powerkey_resume(void)
 		del_timer(&timer);
 		atomic_set(&status, FLY_DEVICE_UP);
 	}
-	else if(atomic_read(&status) == FLY_ANDROID_DOWN)
-	{
+	else if((atomic_read(&status) == FLY_ANDROID_DOWN) || (g_var.system_status == FLY_GOTO_SLEEP))
+    	{
 		return;
-	}
+    	}
 	else
-	{
+    	{
 		atomic_set(&status, FLY_ANDROID_UP);
-	}
+    	}		
+
 	complete(&sleep_powerkey_wait);
 	return;
 }
@@ -147,12 +149,11 @@ ssize_t  powerkey_read(struct file *filp, char __user *buffer, size_t size, loff
 {
 	int bytes;
 	int powerkey_state;
-	if(atomic_read(&status) != FLY_GOTO_SLEEP)
-		wait_for_completion(&read_powerkey_wait);
-	else
+	
+	if(kfifo_is_empty(&powerkey_state_fifo))
 	{
-	       lidbg("kfifo_len=%d\n",kfifo_len(&powerkey_state_fifo));
-		powerkey_fifo_in();
+	    if(wait_event_interruptible(wait_queue, !kfifo_is_empty(&powerkey_state_fifo)))
+	        return -ERESTARTSYS;
 	}
 
 	if( kfifo_len(&powerkey_state_fifo) == 0)
@@ -204,13 +205,33 @@ static int lidbg_powerkey_probe(struct platform_device *pdev)
 	    lidbg("powerkey kmalloc state buffer error.\n");
 	    return 0;
 	}
-
+	init_waitqueue_head(&wait_queue);
 	sema_init(&powerkey_sem, 1);
 	kfifo_init(&powerkey_state_fifo, powerkey_state_buffer, POWERKEY_FIFO_SIZE);
 	lidbg_new_cdev(&powerkey_fops, "flyaudio_pm");
 	CREATE_KTHREAD(thread_powerkey_func, NULL);
 	return 0;
 }
+
+#ifdef CONFIG_PM
+static int pk_suspend(struct device *dev)
+{
+    DUMP_FUN;
+
+    return 0;
+}
+static int pk_resume(struct device *dev)
+{
+    DUMP_FUN;
+
+    return 0;
+}
+static struct dev_pm_ops lidbg_powerkey_ops =
+{
+    .suspend	= pk_suspend,
+    .resume	= pk_resume,
+};
+#endif
 
 static struct platform_device lidbg_powerkey =
 {
@@ -224,6 +245,9 @@ static struct platform_driver lidbg_powerkey_driver =
     .driver     = {
         .name = "lidbg_powerkey",
         .owner = THIS_MODULE,
+ #ifdef CONFIG_PM
+        .pm = &lidbg_powerkey_ops,
+ #endif
     },
 };
 

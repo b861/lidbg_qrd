@@ -160,8 +160,7 @@ public class LidbgPmService extends Service {
 									start_fastboot();
 									break;
 								case FBS_GOTO_SLEEP:
-									LIDBG_PRINT("FlyBootService get pm state: FBS_GOTO_SLEEP delay(1000)");
-									delay(1000);
+									LIDBG_PRINT("FlyBootService get pm state: FBS_GOTO_SLEEP");
 									break;
 								case FBS_KERNEL_DOWN:
 									LIDBG_PRINT("FlyBootService get pm state: FBS_KERNEL_DOWN");
