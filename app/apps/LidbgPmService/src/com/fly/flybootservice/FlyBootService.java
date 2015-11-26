@@ -1,4 +1,4 @@
-package com.fly.lidbgpmservice;
+package com.fly.flybootservice;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -9,7 +9,6 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.WallpaperInfo;
 import android.app.WallpaperManager;
-import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -56,7 +55,7 @@ import java.util.List;
  * ScreenOn ScreenOff DeviceOff Going2Sleep 四种状态分别表示：1.表示正常开屏状态2.表示关屏，但没关外设的状态
  * 0'~30'的阶段3.表示关屏关外设，但没到点进入深度休眠 30'~60'的阶段4.表示发出休眠请求到执行快速休眠 60'后,即进入深度休眠
  */
-public class LidbgPmService extends Service {
+public class FlyBootService extends Service {
 
     // public static int NORMAL = 0;
     // public static int SUSPEND = 1;
@@ -89,7 +88,7 @@ public class LidbgPmService extends Service {
     private static String ACC_OFF_FLYUI = "cn.flyaudio.action.ACCOFF";
     private static String SYSTEM_RESUME = "com.flyaudio.system.resume";
 
-    private static LidbgPmService mFlyBootService;
+    private static FlyBootService mFlyBootService;
 
     private Handler mmHandler;
     private HandlerThread mHandlerThread;
@@ -122,7 +121,6 @@ public class LidbgPmService extends Service {
 
         mFlyBootService = this;
         acquireWakeLock();
-        delay(5000);
 
         new Thread() {
             @Override
@@ -142,14 +140,7 @@ public class LidbgPmService extends Service {
 									break;
 								case FBS_DEVICE_DOWN:
 									LIDBG_PRINT("FlyBootService get pm state: FBS_DEVICE_DOWN");
-
-									booleanRemoteControl = SystemProperties.getBoolean("persist.lidbg.RmtCtrlenable",false);
-									if(booleanRemoteControl == true){
-										LIDBG_PRINT("Flyaudio Remote-Control enabled, booleanRemoteControl:"+booleanRemoteControl);
-									}else{
-										enterAirplaneMode();
-										LIDBG_PRINT("Flyaudio Remote-Control disabled, booleanRemoteControl:"+booleanRemoteControl);
-									}
+									enterAirplaneMode();
 									SendBroadcastToService(KeyBootState, keyEearlySusupendOFF);
 									LIDBG_PRINT("FlyBootService sent device_down to hal");
 									sendBroadcast(new Intent(ACC_OFF_FLYUI));
@@ -187,6 +178,7 @@ public class LidbgPmService extends Service {
 									break;
 								case FBS_SCREEN_ON:
 									LIDBG_PRINT("FlyBootService get pm state: FBS_SCREEN_ON");
+									acquireWakeLock();
 									restoreAirplaneMode(mFlyBootService);
 									SendBroadcastToService(KeyBootState, keyScreenOn);
 									break;
@@ -555,20 +547,29 @@ public class LidbgPmService extends Service {
     }
     
     private void enterAirplaneMode() {
-        if (isAirplaneModeOn(this)) {
+	booleanRemoteControl = SystemProperties.getBoolean("persist.lidbg.RmtCtrlenable",false);
+
+	if(booleanRemoteControl == true){
+		LIDBG_PRINT("Flyaudio Remote-Control enabled, booleanRemoteControl:::"+booleanRemoteControl);
+		return;
+	}else{
+		LIDBG_PRINT("Flyaudio Remote-Control disabled, booleanRemoteControl:::"+booleanRemoteControl);
+		if (isAirplaneModeOn(this)) {
 			LIDBG_PRINT("isAirplaneModeOn return.");
 			return;
-        }
-        Settings.Global.putInt(getContentResolver(), "fastboot_airplane_mode", 0);
+		}
+		Settings.Global.putInt(getContentResolver(), "fastboot_airplane_mode", 0);
 
-        // Change the system setting
-        Settings.Global.putInt(getContentResolver(), Settings.Global.AIRPLANE_MODE_ON,1);
+		// Change the system setting
+		Settings.Global.putInt(getContentResolver(), Settings.Global.AIRPLANE_MODE_ON,1);
 
-        // Update the UI to reflect system setting
-        // Post the intent
-        Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        intent.putExtra("state", true);
-        sendBroadcastAsUser(intent, UserHandle.ALL);
+		// Update the UI to reflect system setting
+		// Post the intent
+		Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+		intent.putExtra("state", true);
+		sendBroadcastAsUser(intent, UserHandle.ALL);
+	}
+
     }
 
 
