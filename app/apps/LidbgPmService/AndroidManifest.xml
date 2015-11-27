@@ -47,11 +47,6 @@
                 <action android:name="com.fly.flybootservice.Flybootservice" />
             </intent-filter>
         </service>
-		<receiver android:name="FbAirplanModeReceiver">
-			<intent-filter android:priority="2147483647">
-			<action android:name="android.intent.action.BOOT_COMPLETED" ></action>
-			</intent-filter>
-		</receiver>
     </application>
 
 </manifest>

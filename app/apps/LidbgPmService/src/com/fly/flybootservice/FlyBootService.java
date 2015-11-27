@@ -70,8 +70,6 @@ public class FlyBootService extends Service {
     private final static int FBS_ANDROID_UP = 6;
     private final static int FBS_DEVICE_UP = 7;
     private final static int FBS_SCREEN_ON = 8;
-    private static final int SEND_AIRPLANE_MODE_BROADCAST = 1;
-    private static final int SEND_BOOT_COMPLETED_BROADCAST = 2;
     public static String action = "com.flyaudio.power";
     public static String PowerBundle = "POWERBUNDLE";
     public static String keyScreenOn = "KEY_SCREEN_ON";
@@ -177,6 +175,7 @@ public class FlyBootService extends Service {
 									LIDBG_PRINT("FlyBootService get pm state: FBS_SCREEN_ON");
 									acquireWakeLock();
 									SendBroadcastToService(KeyBootState, keyScreenOn);
+									system_resume();
 									break;
 								default:
 									return;
@@ -270,80 +269,18 @@ public class FlyBootService extends Service {
 		delay(8000);
 
 		LIDBG_PRINT(" ********** start fastboot ********** ");
-		mHandlerThread = new HandlerThread("fastboot");
-		mHandlerThread.start();
-
-		mmHandler = new Handler(mHandlerThread.getLooper(), mHandlerCallback);
-		registerReceiver(systemResumeBroadcast, new IntentFilter(SYSTEM_RESUME));
 
 		powerOffSystem();
 	}
 
-    private Handler.Callback mHandlerCallback = new Handler.Callback() {
-        /**
-         * {@inheritDoc}
-         * 
-         * @return
-         */
-        public boolean handleMessage(Message msg) {
-            Log.d(TAG,
-                    "handleMessage begin in "
-                            + SystemClock.elapsedRealtime());
-            LIDBG_PRINT("begin handleMessage.");
-
-            switch (msg.what) {
-                case SEND_AIRPLANE_MODE_BROADCAST:
-                    LIDBG_PRINT("Send Set airplane mode broadcast.");
-
-                    Log.d(TAG,
-                            "Set airplane mode begin in**** "
-                                    + SystemClock.elapsedRealtime()
-                                    + ", airplane mode : " + msg.arg1);
-                    Intent intentAirplane = new Intent(
-                            Intent.ACTION_AIRPLANE_MODE_CHANGED);
-                    intentAirplane
-                            .addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
-                    intentAirplane.putExtra("state", msg.arg1 == 1);
-                    sendOrderedBroadcast(intentAirplane, null,
-                            sendBroadcasResult, mmHandler, 0, null, null);
-                    LIDBG_PRINT("end Send Set airplane mode broadcast.");
-                    break;
-                case SEND_BOOT_COMPLETED_BROADCAST:
-                    break;
-                default:
-                    sendBroadcastDone = true;
-                    return false;
-            }
-            return true;
-        }
-    };
-
-	BroadcastReceiver systemResumeBroadcast = new BroadcastReceiver() {
-	        @Override
-	        public void onReceive(Context context, Intent intent) {
-	            Log.d(TAG, "Send Broadcast finish in " + SystemClock.elapsedRealtime());
-	            String action = intent.getAction();
-	            if ((action.equals(SYSTEM_RESUME)) && (firstBootFlag)) {
-	                // receiver the system resume msg ,show logo and finish fastboot.
-	                LIDBG_PRINT("systemResumeBroadcast  resume, fast power on.");
-	                enableShowLogo(true);
-	                SystemClock.sleep(3000);
-	                // enableShowLogo(false);
-	                // SystemClock.sleep(700);
-	                LIDBG_PRINT("enableShowLogo");
-	                powerOnSystem(mFlyBootService);
-
-	        
-//	                Intent iFinish = new Intent("FinishActivity");
-//	                sendBroadcastAsUser(iFinish,UserHandle.ALL);
-	                mHandlerThread.quit();
-	                LIDBG_PRINT("quit fastboot thread.");
-	                unregisterReceiver(systemResumeBroadcast);
-	                LIDBG_PRINT("unregisterReceiver sendBroadcasResult-");
-	    }
-	        }
-	};
-
+	private void system_resume(){
+		if(firstBootFlag){
+			LIDBG_PRINT("FlyBootService system resume...");
+			enableShowLogo(true);
+			SystemClock.sleep(3000);
+			powerOnSystem(mFlyBootService);
+		}
+	}
 
     BroadcastReceiver sendBroadcasResult = new BroadcastReceiver() {
         @Override
@@ -522,71 +459,40 @@ public class FlyBootService extends Service {
         return true;
     }
 
-    private void sendBootCompleted(boolean wait) {
-    LIDBG_PRINT(" sendBootCompleted :" + wait);
-        synchronized (this) {
-            sendBroadcastDone = false;
-            mmHandler.sendMessage(Message.obtain(mmHandler,
-                    SEND_BOOT_COMPLETED_BROADCAST));
-            while (wait && !sendBroadcastDone) {
-                SystemClock.sleep(100);
-                LIDBG_PRINT("sendBootCompleted sleep-");
-            }
-            sendBroadcastDone = false;
-        }
-   		LIDBG_PRINT("sendBootCompleted-");
-    }
-
     public static boolean isAirplaneModeOn(Context context) {
         return Settings.Global.getInt(context.getContentResolver(),
                 Settings.Global.AIRPLANE_MODE_ON, 0) != 0;
     }
     
     private void enterAirplaneMode() {
-	booleanRemoteControl = SystemProperties.getBoolean("persist.lidbg.RmtCtrlenable",false);
+		booleanRemoteControl = SystemProperties.getBoolean("persist.lidbg.RmtCtrlenable",false);
 
-	if(booleanRemoteControl == true){
-		LIDBG_PRINT("Flyaudio Remote-Control enabled, booleanRemoteControl:::"+booleanRemoteControl);
-		return;
-	}else{
-		LIDBG_PRINT("Flyaudio Remote-Control disabled, booleanRemoteControl:::"+booleanRemoteControl);
-		if (isAirplaneModeOn(this)) {
-			LIDBG_PRINT("isAirplaneModeOn return.");
+		if(booleanRemoteControl == true){
+			LIDBG_PRINT("Flyaudio Remote-Control enabled, booleanRemoteControl:::"+booleanRemoteControl);
 			return;
+		}else{
+			LIDBG_PRINT("Flyaudio Remote-Control disabled, booleanRemoteControl:::"+booleanRemoteControl);
+			if (isAirplaneModeOn(this)) {
+				LIDBG_PRINT("isAirplaneModeOn return.");
+				return;
+			}
+			Settings.Global.putInt(getContentResolver(), "fastboot_airplane_mode", 0);
+
+			// Change the system setting
+			Settings.Global.putInt(getContentResolver(), Settings.Global.AIRPLANE_MODE_ON,1);
+
+			// Update the UI to reflect system setting
+			// Post the intent
+			Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+			intent.putExtra("state", true);
+			sendBroadcastAsUser(intent, UserHandle.ALL);
 		}
-		Settings.Global.putInt(getContentResolver(), "fastboot_airplane_mode", 0);
-
-		// Change the system setting
-		Settings.Global.putInt(getContentResolver(), Settings.Global.AIRPLANE_MODE_ON,1);
-
-		// Update the UI to reflect system setting
-		// Post the intent
-		Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-		intent.putExtra("state", true);
-		sendBroadcastAsUser(intent, UserHandle.ALL);
-	}
-
     }
 
 
     private void enableShowLogo(boolean on) {
         String disableStr = (on ? "1" : "0");
         SystemProperties.set("hw.showlogo.enable", disableStr);
-    }
-
-    private void procSecretCode(Intent intent) {
-        Log.d(TAG, "  SECRET_CODE_ACTION  " + intent.getData().getHost());
-        String secretHost = intent.getData().getHost();
-        if (secretHost.equals("4629")) {
-			mActivityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-			delay(100);
-			KillProcess();
-        }else if (secretHost.equals("4700")) {
-			LIDBG_PRINT("Debug mode starting ...");
-			mActivityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-			delay(100);
-			KillProcess();
-        }
     }
 
 	public int readFromFile(String fileName)
