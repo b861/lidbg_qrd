@@ -377,13 +377,13 @@ public class FlyBootService extends Service {
 		KillProcess();
 		LIDBG_PRINT("powerOffSystem step5");
 		//goToSleep前通知内核,作用关外设
-		//msgTokenal("flyaudio gotosleep");
 
 		LIDBG_PRINT("powerOffSystem step6");
 		SystemClock.sleep(1000);
 		LIDBG_PRINT("powerOffSystem step7");
 
 		fbPm.goToSleep(SystemClock.uptimeMillis());
+		msgTokenal("flyaudio gotosleep");
 		releaseWakeLock();
 		LIDBG_PRINT("powerOffSystem-");
 		// Intent iFinish = new Intent("FinishActivity");
