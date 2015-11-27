@@ -30,7 +30,7 @@
  *
  *
  *****************************************************************************/ 
-
+/*
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/i2c.h>
@@ -47,8 +47,9 @@
 
 //#include <mach/system.h>
 #include <mach/hardware.h>
-#include <linux/fs.h>
+#include <linux/fs.h>*/
 #include	<linux/sensors.h>
+#include "lidbg.h"
 
 //=== CONFIGURATIONS ==========================================================
 #define DOT_CALI
@@ -312,6 +313,52 @@ static int load_cali_flg = 0;
 #define IS_MCFM12()    ((0xC0 <= s_bHWID) && (s_bHWID <= 0xCF))
 #define IS_MCFM3X()    ((0x20 == s_bHWID) || ((0x22 <= s_bHWID) && (s_bHWID <= 0x2F)))
 
+#define SYN_REPORT		0
+#define SYN_CONFIG		1
+#define SYN_MT_REPORT		2
+#define SYN_DROPPED		3
+#define SYN_TIME_SEC		4
+#define SYN_TIME_NSEC		5
+
+static struct i2c_client *client;
+
+static s32 my_i2c_smbus_read_byte_data(const struct i2c_client *client, u8 command)
+{
+	//_baDataBuf[0] = i2c_smbus_read_byte_data(client, 0x04);
+	char buf;
+	int status;
+	status =  SOC_I2C_Rec(ACCEL_I2C_BUS, client->addr, command, &buf, 1);
+
+	return (status < 0) ? status : buf;
+
+}
+
+static s32 my_i2c_smbus_write_byte_data(const struct i2c_client *client, u8 command,
+			      u8 value)
+{
+	//i2c_smbus_write_byte_data(client, 0x17, _baBuf[0]);
+	u8 buf[2];
+	buf[0] = command;
+	buf[1] = value;
+	return SOC_I2C_Send(ACCEL_I2C_BUS, client->addr, buf, 2);
+}
+
+static s32 my_i2c_smbus_read_i2c_block_data(const struct i2c_client *client, u8 command,
+				  u8 length, u8 *values)
+{
+	//i2c_smbus_read_i2c_block_data(client, 0x21, 9, offset_buf);
+	return SOC_I2C_Rec(ACCEL_I2C_BUS, client->addr, command, values, length);
+}
+
+static int my_i2c_master_send(const struct i2c_client *client, char *buf, int count)
+{
+	return SOC_I2C_Send(ACCEL_I2C_BUS, client->addr, buf, count);
+}
+
+static int my_i2c_master_recv(const struct i2c_client *client, char *buf, int count)
+{
+	return SOC_I2C_Rec(ACCEL_I2C_BUS, client->addr, buf[0], &buf[0], count);
+}
 
 struct dev_data {
 	struct i2c_client *client;
@@ -344,8 +391,10 @@ struct mc3xxx_data {
 	unsigned int map[3];
 	int inv[3];
 
-#ifdef CONFIG_HAS_EARLYSUSPEND
-	struct early_suspend early_suspend;
+#if defined(CONFIG_FB)
+    struct notifier_block fb_notif;
+#elif defined(CONFIG_HAS_EARLYSUSPEND)
+    struct early_suspend early_suspend;
 #endif
 };
 
@@ -637,8 +686,8 @@ static void mc3xxx_set_sample_rate(struct i2c_client *pt_i2c_client)
         unsigned char    _baData2Buf[2] = { 0 };
 
         _baData2Buf[0] = 0x2A;
-        i2c_master_send(pt_i2c_client, &(_baData2Buf[0]), 1);
-        i2c_master_recv(pt_i2c_client, &(_baData2Buf[0]), 1);
+        my_i2c_master_send(pt_i2c_client, &(_baData2Buf[0]), 1);
+        my_i2c_master_recv(pt_i2c_client, &(_baData2Buf[0]), 1);
 
         GSE_LOG("[%s] REG(0x2A) = 0x%02X\n", __FUNCTION__, _baData2Buf[0]);
 
@@ -655,7 +704,7 @@ static void mc3xxx_set_sample_rate(struct i2c_client *pt_i2c_client)
         }
     }
 
-    i2c_master_send(pt_i2c_client, _baDataBuf, 0x2);
+    my_i2c_master_send(pt_i2c_client, _baDataBuf, 0x2);
 }
 
 /*****************************************
@@ -679,7 +728,7 @@ static void mc3xxx_config_range(struct i2c_client *pt_i2c_client)
             _baDataBuf[1] = 0x25;
     }
 
-    i2c_master_send(pt_i2c_client, _baDataBuf, 0x2);
+    my_i2c_master_send(pt_i2c_client, _baDataBuf, 0x2);
 
     GSE_LOG("[%s] set 0x%X\n", __FUNCTION__, _baDataBuf[1]);
 }
@@ -784,7 +833,7 @@ static ssize_t mc3xxx_chip_id_show(struct device *dev, struct device_attribute *
     unsigned char baChipID[4] = { 0 };
     struct i2c_client *client = container_of(mc3xxx_device.parent, struct i2c_client, dev);
 
-    i2c_smbus_read_i2c_block_data(client, 0x3C, 4, baChipID);
+    my_i2c_smbus_read_i2c_block_data(client, 0x3C, 4, baChipID);
 
     return sprintf(buf, "%02X-%02X-%02X-%02X\n", baChipID[3], baChipID[2], baChipID[1], baChipID[0]);
 }
@@ -925,7 +974,7 @@ static int mc3xxx_chip_init(struct i2c_client *client)
     
     _baDataBuf[0] = MC3XXX_MODE_FEATURE_REG;
     _baDataBuf[1] = 0x43;
-    ret = i2c_smbus_write_byte_data(client, _baDataBuf[0], _baDataBuf[1]);
+    ret = my_i2c_smbus_write_byte_data(client, _baDataBuf[0], _baDataBuf[1]);
     if (ret < 0)
     {
         printk(KERN_ERR"%s: write i2c error, ret=%d\n", __func__, ret);
@@ -939,15 +988,15 @@ static int mc3xxx_chip_init(struct i2c_client *client)
     
     _baDataBuf[0] = MC3XXX_TAP_DETECTION_ENABLE_REG;
     _baDataBuf[1] = 0x00;
-    i2c_master_send(client, _baDataBuf, 0x2);
+    my_i2c_master_send(client, _baDataBuf, 0x2);
     
     _baDataBuf[0] = MC3XXX_INTERRUPT_ENABLE_REG;
     _baDataBuf[1] = 0x00;
-    i2c_master_send(client, _baDataBuf, 0x2);
+    my_i2c_master_send(client, _baDataBuf, 0x2);
 
     _baDataBuf[0] = 0x2A;
-    i2c_master_send(client, &(_baDataBuf[0]), 1);
-    i2c_master_recv(client, &(_baDataBuf[0]), 1);
+    my_i2c_master_send(client, &(_baDataBuf[0]), 1);
+    my_i2c_master_recv(client, &(_baDataBuf[0]), 1);
     s_bMPOL = (_baDataBuf[0] & 0x03);
 
     printk("[%s] init ok.\n", __FUNCTION__);
@@ -964,7 +1013,7 @@ int mc3xxx_set_mode(struct i2c_client *client, unsigned char mode)
 	if (mode < 4)
 	{
 		data = (0x40 | mode);
-		comres = i2c_smbus_write_byte_data(client, MC3XXX_MODE_FEATURE_REG, data);
+		comres = my_i2c_smbus_write_byte_data(client, MC3XXX_MODE_FEATURE_REG, data);
 	} 
 
 	return comres;
@@ -1056,9 +1105,9 @@ int MC3XXX_WriteCalibration(struct i2c_client *client, int dat[MC3XXX_AXES_NUM])
 	GSE_LOG("UPDATE dat: (%+3d %+3d %+3d)\n", dat[MC3XXX_AXIS_X], dat[MC3XXX_AXIS_Y], dat[MC3XXX_AXIS_Z]);
 
     // read register 0x21~0x29
-	err  = i2c_smbus_read_i2c_block_data(client, 0x21, 3, &buf[0]);
-	err |= i2c_smbus_read_i2c_block_data(client, 0x24, 3, &buf[3]);
-	err |= i2c_smbus_read_i2c_block_data(client, 0x27, 3, &buf[6]);
+	err  = my_i2c_smbus_read_i2c_block_data(client, 0x21, 3, &buf[0]);
+	err |= my_i2c_smbus_read_i2c_block_data(client, 0x24, 3, &buf[3]);
+	err |= my_i2c_smbus_read_i2c_block_data(client, 0x27, 3, &buf[6]);
 
     if (IS_MCFM12() || IS_MCFM3X())
     {
@@ -1123,7 +1172,7 @@ int MC3XXX_WriteCalibration(struct i2c_client *client, int dat[MC3XXX_AXES_NUM])
 	GSE_LOG("%d %d ======================\n\n ", gain_data[0], x_gain);
 
 	buf[0] = 0x43;
-	i2c_smbus_write_byte_data(client, 0x07, buf[0]);
+	my_i2c_smbus_write_byte_data(client, 0x07, buf[0]);
 
 	buf[0] = x_off & 0xff;
 	buf[1] = ((x_off >> 8) & bMsbFilter) | (x_gain & 0x0100 ? 0x80 : 0);
@@ -1137,7 +1186,7 @@ int MC3XXX_WriteCalibration(struct i2c_client *client, int dat[MC3XXX_AXES_NUM])
 	i2c_smbus_write_i2c_block_data(client, 0x21+4, 2, &buf[4]);
 	
 	buf[0] = 0x41;
-	i2c_smbus_write_byte_data(client, 0x07,buf[0]);
+	my_i2c_smbus_write_byte_data(client, 0x07,buf[0]);
 
     msleep(50);
 
@@ -1248,19 +1297,19 @@ void MC3XXX_rbm(struct i2c_client *client, int enable)
     char    _baDataBuf[3] = { 0 };
     
     _baDataBuf[0] = 0x43; 
-    i2c_smbus_write_byte_data(client, 0x07, _baDataBuf[0]);
+    my_i2c_smbus_write_byte_data(client, 0x07, _baDataBuf[0]);
 
-    _baDataBuf[0] = i2c_smbus_read_byte_data(client, 0x04);
+    _baDataBuf[0] = my_i2c_smbus_read_byte_data(client, 0x04);
 
     GSE_LOG("[%s] REG(0x04): 0x%X, enable: %d\n", __FUNCTION__, _baDataBuf[0], enable);
     
     if (0x00 == (_baDataBuf[0] & 0x40))
     {
         _baDataBuf[0] = 0x6D;
-        i2c_smbus_write_byte_data(client, 0x1B, _baDataBuf[0]);
+        my_i2c_smbus_write_byte_data(client, 0x1B, _baDataBuf[0]);
         
         _baDataBuf[0] = 0x43;
-        i2c_smbus_write_byte_data(client, 0x1B, _baDataBuf[0]);
+        my_i2c_smbus_write_byte_data(client, 0x1B, _baDataBuf[0]);
     }
 
     GSE_LOG("BEGIN - REG(0x04): 0x%X\n", _baDataBuf[0]);
@@ -1268,10 +1317,10 @@ void MC3XXX_rbm(struct i2c_client *client, int enable)
     if (1 == enable)
     {
         _baDataBuf[0] = 0x00;
-        i2c_smbus_write_byte_data(client, 0x3B, _baDataBuf[0]);
+        my_i2c_smbus_write_byte_data(client, 0x3B, _baDataBuf[0]);
 
         _baDataBuf[0] = 0x02; 
-        i2c_smbus_write_byte_data(client, 0x14, _baDataBuf[0]);
+        my_i2c_smbus_write_byte_data(client, 0x14, _baDataBuf[0]);
         
         if (MC3XXX_RESOLUTION_LOW == s_bResolution)
         {
@@ -1285,10 +1334,10 @@ void MC3XXX_rbm(struct i2c_client *client, int enable)
     else if (0 == enable)
     {
         _baDataBuf[0] = 0x00; 
-        i2c_smbus_write_byte_data(client, 0x14, _baDataBuf[0]);
+        my_i2c_smbus_write_byte_data(client, 0x14, _baDataBuf[0]);
 
         _baDataBuf[0] = s_bPCODER; 
-        i2c_smbus_write_byte_data(client, 0x3B, _baDataBuf[0]);
+        my_i2c_smbus_write_byte_data(client, 0x3B, _baDataBuf[0]);
         
         mc3xxx_set_gain();
 
@@ -1297,23 +1346,23 @@ void MC3XXX_rbm(struct i2c_client *client, int enable)
         GSE_LOG("clear rbm!!\n");
     }
     
-    _baDataBuf[0] = i2c_smbus_read_byte_data(client, 0x04);
+    _baDataBuf[0] = my_i2c_smbus_read_byte_data(client, 0x04);
 
     GSE_LOG("RBM CONTROL DONE - REG(0x04): 0x%X\n", _baDataBuf[0]);
     
     if (_baDataBuf[0] & 0x40)
     {
         _baDataBuf[0] = 0x6D;
-        i2c_smbus_write_byte_data(client, 0x1B, _baDataBuf[0]);
+        my_i2c_smbus_write_byte_data(client, 0x1B, _baDataBuf[0]);
         
         _baDataBuf[0] = 0x43;
-        i2c_smbus_write_byte_data(client, 0x1B, _baDataBuf[0]);
+        my_i2c_smbus_write_byte_data(client, 0x1B, _baDataBuf[0]);
     }
     
     GSE_LOG("END - REG(0x04): 0x%X\n", _baDataBuf[0]);
     
     _baDataBuf[0] = 0x41; 
-    i2c_smbus_write_byte_data(client, 0x07, _baDataBuf[0]);
+    my_i2c_smbus_write_byte_data(client, 0x07, _baDataBuf[0]);
 
     msleep(220);
 }
@@ -1326,7 +1375,7 @@ int MC3XXX_ReadOffset(struct i2c_client *client,s16 ofs[MC3XXX_AXES_NUM])
 
 	if(MC3XXX_RESOLUTION_HIGH == s_bResolution)
 	{
-		err = i2c_smbus_read_i2c_block_data(client, MC3XXX_XOUT_EX_L_REG, MC3XXX_DATA_LEN, off_data);
+		err = my_i2c_smbus_read_i2c_block_data(client, MC3XXX_XOUT_EX_L_REG, MC3XXX_DATA_LEN, off_data);
 
 		ofs[MC3XXX_AXIS_X] = ((s16)(off_data[0]))|((s16)(off_data[1])<<8);
 		ofs[MC3XXX_AXIS_Y] = ((s16)(off_data[2]))|((s16)(off_data[3])<<8);
@@ -1334,7 +1383,7 @@ int MC3XXX_ReadOffset(struct i2c_client *client,s16 ofs[MC3XXX_AXES_NUM])
 	}
 	else if(MC3XXX_RESOLUTION_LOW == s_bResolution)
 	{
-		err = i2c_smbus_read_i2c_block_data(client, 0, 3, off_data);
+		err = my_i2c_smbus_read_i2c_block_data(client, 0, 3, off_data);
 
 		ofs[MC3XXX_AXIS_X] = (s8)off_data[0];
 		ofs[MC3XXX_AXIS_Y] = (s8)off_data[1];
@@ -1360,7 +1409,7 @@ int MC3XXX_ResetCalibration(struct i2c_client *client)
     s16 wSignPaddingBits = 0xC000;
 
 	buf[0] = 0x43;
-	err = i2c_smbus_write_byte_data(client, 0x07, buf[0]);
+	err = my_i2c_smbus_write_byte_data(client, 0x07, buf[0]);
 	if(err)
 	{
 		GSE_ERR("error 0x07: %d\n", err);
@@ -1373,7 +1422,7 @@ int MC3XXX_ResetCalibration(struct i2c_client *client)
 	}
 	
 	buf[0] = 0x41;
-	err = i2c_smbus_write_byte_data(client, 0x07, buf[0]);
+	err = my_i2c_smbus_write_byte_data(client, 0x07, buf[0]);
 	if(err)
 	{
 		GSE_ERR("error: %d\n", err);
@@ -1446,9 +1495,9 @@ int MC3XXX_ReadData(struct i2c_client *client, s16 buffer[MC3XXX_AXES_NUM])
 	else if (enable_RBM_calibration == 1)
 	{		
 		memset(rbm_buf, 0, 6);
-        i2c_smbus_read_i2c_block_data(client, 0x0d  , 2, &rbm_buf[0]);
-        i2c_smbus_read_i2c_block_data(client, 0x0d+2, 2, &rbm_buf[2]);
-        i2c_smbus_read_i2c_block_data(client, 0x0d+4, 2, &rbm_buf[4]);
+        my_i2c_smbus_read_i2c_block_data(client, 0x0d  , 2, &rbm_buf[0]);
+        my_i2c_smbus_read_i2c_block_data(client, 0x0d+2, 2, &rbm_buf[2]);
+        my_i2c_smbus_read_i2c_block_data(client, 0x0d+4, 2, &rbm_buf[4]);
 	}
 
 	if (enable_RBM_calibration == 0)
@@ -1456,7 +1505,7 @@ int MC3XXX_ReadData(struct i2c_client *client, s16 buffer[MC3XXX_AXES_NUM])
 		if(MC3XXX_RESOLUTION_HIGH == s_bResolution)
 		
 		{
-			ret = i2c_smbus_read_i2c_block_data(client, MC3XXX_XOUT_EX_L_REG, 6, buf);
+			ret = my_i2c_smbus_read_i2c_block_data(client, MC3XXX_XOUT_EX_L_REG, 6, buf);
 			
 			buffer[0] = (signed short)((buf[0])|(buf[1]<<8));
 			buffer[1] = (signed short)((buf[2])|(buf[3]<<8));
@@ -1465,7 +1514,7 @@ int MC3XXX_ReadData(struct i2c_client *client, s16 buffer[MC3XXX_AXES_NUM])
 
 		else if(MC3XXX_RESOLUTION_LOW == s_bResolution)
 		{
-			ret = i2c_smbus_read_i2c_block_data(client, MC3XXX_XOUT_REG, 3, buf1);
+			ret = my_i2c_smbus_read_i2c_block_data(client, MC3XXX_XOUT_REG, 3, buf1);
 				
 			buffer[0] = (signed short)buf1[0];
 			buffer[1] = (signed short)buf1[1];
@@ -1561,7 +1610,7 @@ static int MC3XXX_ReadRegMap(struct i2c_client *p_i2c_client, u8 *pbUserBuf)
 
     for(_nIndex = 0; _nIndex < MC3XXX_REGMAP_LENGTH; _nIndex++)
     {
-        _baData[_nIndex] = i2c_smbus_read_byte_data(p_i2c_client, _nIndex);
+        _baData[_nIndex] = my_i2c_smbus_read_byte_data(p_i2c_client, _nIndex);
 
         if (NULL != pbUserBuf)
             pbUserBuf[_nIndex] = _baData[_nIndex];
@@ -1589,49 +1638,49 @@ void MC3XXX_Reset(struct i2c_client *client)
     s16 wSignPaddingBits = 0xC000;
 
     _baBuf[0] = 0x43;
-    i2c_smbus_write_byte_data(client, 0x07, _baBuf[0]);
+    my_i2c_smbus_write_byte_data(client, 0x07, _baBuf[0]);
     
-    _baBuf[0] = i2c_smbus_read_byte_data(client, 0x04);
+    _baBuf[0] = my_i2c_smbus_read_byte_data(client, 0x04);
     
     if (0x00 == (_baBuf[0] & 0x40))
     {
         _baBuf[0] = 0x6D;
-        i2c_smbus_write_byte_data(client, 0x1B, _baBuf[0]);
+        my_i2c_smbus_write_byte_data(client, 0x1B, _baBuf[0]);
         
         _baBuf[0] = 0x43;
-        i2c_smbus_write_byte_data(client, 0x1B, _baBuf[0]);
+        my_i2c_smbus_write_byte_data(client, 0x1B, _baBuf[0]);
     }
     
     _baBuf[0] = 0x43;
-    i2c_smbus_write_byte_data(client, 0x07, _baBuf[0]);
+    my_i2c_smbus_write_byte_data(client, 0x07, _baBuf[0]);
     
     _baBuf[0] = 0x80;
-    i2c_smbus_write_byte_data(client, 0x1C, _baBuf[0]);
+    my_i2c_smbus_write_byte_data(client, 0x1C, _baBuf[0]);
 
     _baBuf[0] = 0x80;
-    i2c_smbus_write_byte_data(client, 0x17, _baBuf[0]);
+    my_i2c_smbus_write_byte_data(client, 0x17, _baBuf[0]);
 
     msleep(5);
     
     _baBuf[0] = 0x00;
-    i2c_smbus_write_byte_data(client, 0x1C, _baBuf[0]);
+    my_i2c_smbus_write_byte_data(client, 0x1C, _baBuf[0]);
 
     _baBuf[0] = 0x00;
-    i2c_smbus_write_byte_data(client, 0x17, _baBuf[0]);
+    my_i2c_smbus_write_byte_data(client, 0x17, _baBuf[0]);
 
     msleep(5);
     
-    i2c_smbus_read_i2c_block_data(client, 0x21, 9, offset_buf);
+    my_i2c_smbus_read_i2c_block_data(client, 0x21, 9, offset_buf);
 
-    _baBuf[0] = i2c_smbus_read_byte_data(client, 0x04);
+    _baBuf[0] = my_i2c_smbus_read_byte_data(client, 0x04);
 
     if (_baBuf[0] & 0x40)
     {
         _baBuf[0] = 0x6D;
-        i2c_smbus_write_byte_data(client, 0x1B, _baBuf[0]);
+        my_i2c_smbus_write_byte_data(client, 0x1B, _baBuf[0]);
         
         _baBuf[0] = 0x43;
-        i2c_smbus_write_byte_data(client, 0x1B, _baBuf[0]);
+        my_i2c_smbus_write_byte_data(client, 0x1B, _baBuf[0]);
     }
 
     if (IS_MCFM12() || IS_MCFM3X())
@@ -1679,8 +1728,8 @@ static void MC3XXX_SaveDefaultOffset(struct i2c_client *p_i2c_client)
 {
     GSE_LOG("[%s]\n", __func__);
 
-    i2c_smbus_read_i2c_block_data(p_i2c_client, 0x21, 3, &s_baOTP_OffsetData[0]);
-    i2c_smbus_read_i2c_block_data(p_i2c_client, 0x24, 3, &s_baOTP_OffsetData[3]);
+    my_i2c_smbus_read_i2c_block_data(p_i2c_client, 0x21, 3, &s_baOTP_OffsetData[0]);
+    my_i2c_smbus_read_i2c_block_data(p_i2c_client, 0x24, 3, &s_baOTP_OffsetData[3]);
 
     GSE_LOG("s_baOTP_OffsetData: 0x%02X - 0x%02X - 0x%02X - 0x%02X - 0x%02X - 0x%02X\n",
             s_baOTP_OffsetData[0], s_baOTP_OffsetData[1], s_baOTP_OffsetData[2],
@@ -1704,7 +1753,7 @@ int mc3xxx_read_accel_xyz(struct i2c_client *client, s16 *acc)
     
         if(MC3XXX_RESOLUTION_HIGH == s_bResolution)
         {
-            comres = i2c_smbus_read_i2c_block_data(client, MC3XXX_XOUT_EX_L_REG, 6, raw_buf);
+            comres = my_i2c_smbus_read_i2c_block_data(client, MC3XXX_XOUT_EX_L_REG, 6, raw_buf);
             
             acc[0] = (signed short)((raw_buf[0])|(raw_buf[1]<<8));
             acc[1] = (signed short)((raw_buf[2])|(raw_buf[3]<<8));
@@ -1712,7 +1761,7 @@ int mc3xxx_read_accel_xyz(struct i2c_client *client, s16 *acc)
         }
         else if(MC3XXX_RESOLUTION_LOW == s_bResolution)
         {
-            comres = i2c_smbus_read_i2c_block_data(client, MC3XXX_XOUT_REG, 3, raw_buf1);
+            comres = my_i2c_smbus_read_i2c_block_data(client, MC3XXX_XOUT_REG, 3, raw_buf1);
             
             acc[0] = (signed short)raw_buf1[0];
             acc[1] = (signed short)raw_buf1[1];
@@ -1734,7 +1783,7 @@ int mc3xxx_read_accel_xyz(struct i2c_client *client, s16 *acc)
     acc[MC3XXX_AXIS_Y] = pCvt->sign[MC3XXX_AXIS_Y] * raw_data[pCvt->map[MC3XXX_AXIS_Y]];
     acc[MC3XXX_AXIS_Z] = pCvt->sign[MC3XXX_AXIS_Z] * raw_data[pCvt->map[MC3XXX_AXIS_Z]];
 
-    printk(KERN_ERR"MC3XXX_DataAferMap: %d %d %d\n", acc[MC3XXX_AXIS_X], acc[MC3XXX_AXIS_Y] , acc[MC3XXX_AXIS_Z]);
+    //printk(KERN_ERR"MC3XXX_DataAferMap: %d %d %d\n", acc[MC3XXX_AXIS_X], acc[MC3XXX_AXIS_Y] , acc[MC3XXX_AXIS_Z]);
     
     return comres;
 }
@@ -1779,9 +1828,9 @@ static void mc3xxx_work_func(struct work_struct *work)
 	ts = ktime_get_boottime();
 	mc3xxx_measure(data->client, &accel);
 	
-	input_report_abs(data->input_dev, ABS_X, accel.x);
+	input_report_abs(data->input_dev, ABS_X, -(accel.x));
 	input_report_abs(data->input_dev, ABS_Y, accel.y);
-	input_report_abs(data->input_dev, ABS_Z, accel.z);
+	input_report_abs(data->input_dev, ABS_Z, -(accel.z));
 
 	input_event(data->input_dev, EV_SYN, SYN_TIME_SEC, ktime_to_timespec(ts).tv_sec);
 	input_event(data->input_dev, EV_SYN, SYN_TIME_NSEC,ktime_to_timespec(ts).tv_nsec);
@@ -2062,7 +2111,7 @@ static struct file_operations sensor_fops =
     .unlocked_ioctl = mc3xxx_ioctl,
 };
 
-#if 0 //#ifdef CONFIG_HAS_EARLYSUSPEND
+#if defined(CONFIG_HAS_EARLYSUSPEND)
 //=============================================================================
 static void mc3xxx_early_suspend(struct early_suspend *handler)
 {
@@ -2094,10 +2143,11 @@ static void mc3xxx_early_resume(struct early_suspend *handler)
 	hrtimer_start(&data->timer, ktime_set(1, 0), HRTIMER_MODE_REL);
 }
 #else
-static int mc3xxx_acc_resume(struct device *dev)
+static int mc3xxx_acc_resume(struct mc3xxx_data *data)
 {
-	char buf[1] = {0};
-    struct mc3xxx_data *data = dev_get_drvdata(dev);
+	//char buf[1] = {0};
+	printk("%s\n", __func__);
+    //struct mc3xxx_data *data = dev_get_drvdata(dev);
     hrtimer_cancel(&data->timer);
     mutex_lock(&data->lock);
     mc3xxx_set_mode(data->client, MC3XXX_WAKE); //MC3XXX_STANDBY
@@ -2108,17 +2158,40 @@ static int mc3xxx_acc_resume(struct device *dev)
     return 0;
 }
 
-static int mc3xxx_acc_suspend(struct device *dev)
+static int mc3xxx_acc_suspend(struct mc3xxx_data *data)
 {
-	char buf[1] = {0};
-    struct mc3xxx_data *data = dev_get_drvdata(dev);
+	//char buf[1] = {0};
+	printk("%s\n", __func__);
+    //struct mc3xxx_data *data = dev_get_drvdata(dev);
     hrtimer_cancel(&data->timer);
+	//input_sync(data->input_dev);
     mutex_lock(&data->lock);
     mc3xxx_set_mode(data->client, MC3XXX_STANDBY);
     mutex_unlock(&data->lock);
 
     return 0;
 }
+
+static int fb_notifier_callback(struct notifier_block *self,
+                                unsigned long event, void *data)
+{
+    struct fb_event *evdata = data;
+    int *blank;
+	struct mc3xxx_data *mc_data =
+        container_of(self, struct mc3xxx_data, fb_notif);
+
+    if (evdata && evdata->data && event == FB_EVENT_BLANK)
+    {
+        blank = evdata->data;
+        if (*blank == FB_BLANK_UNBLANK)
+            mc3xxx_acc_resume(mc_data);
+        else if (*blank == FB_BLANK_POWERDOWN)
+            mc3xxx_acc_suspend(mc_data);
+    }
+
+    return 0;
+}
+
 #endif
 
 //=============================================================================
@@ -2171,13 +2244,13 @@ _I2C_AUTO_PROBE_RECHECK_:
         GSE_LOG("[%s][%d] probing addr: 0x%X\n", __FUNCTION__, _nCount, client->addr);
 
         _baData1Buf[0] = 0x3B;
-        if (0 > i2c_master_send(client, &(_baData1Buf[0]), 1))
+        if (0 > my_i2c_master_send(client, &(_baData1Buf[0]), 1))
         {
             GSE_ERR("ERR: addr: 0x%X fail to communicate-2!\n", client->addr);
             continue;
         }
     
-        if (0 > i2c_master_recv(client, &(_baData1Buf[0]), 1))
+        if (0 > my_i2c_master_recv(client, &(_baData1Buf[0]), 1))
         {
             GSE_ERR("ERR: addr: 0x%X fail to communicate-3!\n", client->addr);
             continue;
@@ -2202,8 +2275,8 @@ _I2C_AUTO_PROBE_RECHECK_:
         }
 
         _baData2Buf[0] = 0x18;
-        i2c_master_send(client, &(_baData2Buf[0]), 1);
-        i2c_master_recv(client, &(_baData2Buf[0]), 1);
+        my_i2c_master_send(client, &(_baData2Buf[0]), 1);
+        my_i2c_master_recv(client, &(_baData2Buf[0]), 1);
 
         s_bPCODER = _baData1Buf[0];
 
@@ -2255,29 +2328,19 @@ static int mc3xxx_acc_enable_set(struct sensors_classdev *sensors_cdev,
 }
 
 //=============================================================================
-static int mc3xxx_probe(struct i2c_client *client,
-		const struct i2c_device_id *id)
+static int mc3xxx_probe(struct platform_device *pdev)
 {
 	int ret = 0;
 	struct mc3xxx_data *data = NULL;
 	printk("%s mc3xxx probe start... \n", __func__);
-    if (MC3XXX_RETCODE_SUCCESS != mc3xxx_i2c_auto_probe(client))
-    {
-        GSE_ERR("ERR: fail to probe mCube sensor!\n");
-        goto exit;
-    }
 
-	if (!i2c_check_functionality(client->adapter, I2C_FUNC_I2C)) 
-	{
-		ret = -ENODEV;
-		goto err_check_functionality_failed;
+	client = (struct i2c_client*)kzalloc( sizeof(struct i2c_client), GFP_KERNEL);
+	if (!client) {
+			dev_err(&client->dev, "GTP not enough memory for client\n");
+			ret = ENOMEM;
+			goto exit;
 	}
-
-	GSE_LOG("[%s] confirmed i2c addr: 0x%X\n", __FUNCTION__, client->addr);
-	
-    #ifdef DOT_CALI
-        load_cali_flg = 30;
-    #endif
+	client->dev = pdev->dev;
 
 	data = kzalloc(sizeof(struct mc3xxx_data), GFP_KERNEL);
 	if(data == NULL)
@@ -2286,6 +2349,18 @@ static int mc3xxx_probe(struct i2c_client *client,
 		goto err_alloc_data_failed;
 	}
 
+    if (MC3XXX_RETCODE_SUCCESS != mc3xxx_i2c_auto_probe(client))
+    {
+        GSE_ERR("ERR: fail to probe mCube sensor!\n");
+        goto exit;
+    }
+
+	GSE_LOG("[%s] confirmed i2c addr: 0x%X\n", __FUNCTION__, client->addr);
+	
+    #ifdef DOT_CALI
+        load_cali_flg = 30;
+    #endif
+	
 	data->mc3xxx_wq = create_singlethread_workqueue("mc3xxx_wq");
 	if (!data->mc3xxx_wq)
 	{
@@ -2297,7 +2372,6 @@ static int mc3xxx_probe(struct i2c_client *client,
 
 	sensor_duration = SENSOR_DURATION_DEFAULT;
 	sensor_state_flag = 1;
-
 	data->client = client;
 	dev.client = client;
 
@@ -2362,15 +2436,23 @@ static int mc3xxx_probe(struct i2c_client *client,
 		goto exit_remove_sysfs_int;
 	}
 
-#if 0 //#ifdef CONFIG_HAS_EARLYSUSPEND
-  data->early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN + 1;
+#if defined(CONFIG_FB)
+    data->fb_notif.notifier_call = fb_notifier_callback;
+    ret = fb_register_client(&data->fb_notif);
+    if (ret) {
+        dev_err(&data->client->dev, "Unable to register fb_notifier: %d\n", ret);
+		goto exit_remove_sysfs_int;
+	}
+
+#elif defined(CONFIG_HAS_EARLYSUSPEND)
+	data->early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN + 1;
 	data->early_suspend.suspend = mc3xxx_early_suspend;
 	data->early_suspend.resume = mc3xxx_early_resume;
 	register_early_suspend(&data->early_suspend);
 #endif
 
 	data->enabled = 1;
-	printk(KERN_ERR"%s mc3xxx probe ok \n", __func__);
+	//printk(KERN_ERR"%s mc3xxx probe ok \n", __func__);
 
 	return 0;
 
@@ -2386,14 +2468,13 @@ exit_input_dev_alloc_failed:
 err_create_workqueue_failed:
 	kfree(data);	
 err_alloc_data_failed:
-err_check_functionality_failed:
 exit:
 	printk("mc3xxx probe failed \n");
 	return ret;
 }
 
 //=============================================================================
-static int mc3xxx_remove(struct i2c_client *client)
+static int mc3xxx_remove(struct platform_device *pdev)
 {
 	struct mc3xxx_data *data = i2c_get_clientdata(client);
 
@@ -2406,7 +2487,7 @@ static int mc3xxx_remove(struct i2c_client *client)
 }
 
 //=============================================================================
-static void mc3xxx_shutdown(struct i2c_client *client)
+static void mc3xxx_shutdown(struct platform_device *pdev)
 {
 	struct mc3xxx_data *data = i2c_get_clientdata(client);
 
@@ -2415,7 +2496,7 @@ static void mc3xxx_shutdown(struct i2c_client *client)
 }
 
 //=============================================================================
-static const struct i2c_device_id mc3xxx_id[] =
+static const struct platform_device_id mc3xxx_id[] =
 {
 	{ SENSOR_NAME, 0 },
 	{ }
@@ -2424,36 +2505,42 @@ static const struct i2c_device_id mc3xxx_id[] =
 MODULE_DEVICE_TABLE(i2c, mc3xxx_id);
 
 static struct of_device_id mc3xxx_acc_match_table[] = {
-	{ .compatible = "Mcube,mc3xxx", },
+	{ .compatible = "mcube, mc3xxx",},
 	{ },
 };
-static const struct dev_pm_ops mc3xxx_pm_ops = {
+/*static const struct dev_pm_ops mc3xxx_pm_ops = {
 	.suspend	= mc3xxx_acc_suspend,
 	.resume 	= mc3xxx_acc_resume,
-};
+};*/
 
-static struct i2c_driver mc3xxx_driver =
+static struct platform_driver mc3xxx_driver =
 {
-    .class = I2C_CLASS_HWMON,
+    //.class = I2C_CLASS_HWMON,
 
     .driver = {
                   .owner = THIS_MODULE,
                   .name	 = SENSOR_NAME,
         	    .of_match_table = mc3xxx_acc_match_table,
-        	    .pm = &mc3xxx_pm_ops,
+        	    //.pm = &mc3xxx_pm_ops,
               },
 
     .id_table	  = mc3xxx_id,
     .probe		  = mc3xxx_probe,
     .remove		  = mc3xxx_remove,
     .shutdown	  = mc3xxx_shutdown,
-    .address_list = u_i2c_addr.normal_i2c,
+    //.address_list = u_i2c_addr.normal_i2c,
+};
+
+static struct platform_device mc3xxx_devices =
+{
+    .name			= SENSOR_NAME,
+    .id 			= 0,
 };
 
 //=============================================================================
 static int __init mc3xxx_init(void)
 {
-	int ret = -1;
+	int ret = 0;
 
 	printk("mc3xxx: init\n");
 
@@ -2465,15 +2552,16 @@ static int __init mc3xxx_init(void)
 
 	GSE_LOG("%s: after fetch_sysconfig_para:  normal_i2c: 0x%hx. normal_i2c[1]: 0x%hx \n", __func__, u_i2c_addr.normal_i2c[0], u_i2c_addr.normal_i2c[1]);
 
-	ret = i2c_add_driver(&mc3xxx_driver);
 
+	ret |= platform_device_register(&mc3xxx_devices);
+	ret |= platform_driver_register(&mc3xxx_driver);
 	return ret;
 }
 
 //=============================================================================
 static void __exit mc3xxx_exit(void)
 {
-	i2c_del_driver(&mc3xxx_driver);
+	platform_driver_unregister(&mc3xxx_driver);
 }
 
 //=============================================================================
