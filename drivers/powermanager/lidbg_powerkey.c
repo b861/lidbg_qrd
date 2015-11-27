@@ -209,6 +209,7 @@ static int lidbg_powerkey_probe(struct platform_device *pdev)
 	sema_init(&powerkey_sem, 1);
 	kfifo_init(&powerkey_state_fifo, powerkey_state_buffer, POWERKEY_FIFO_SIZE);
 	lidbg_new_cdev(&powerkey_fops, "flyaudio_pm");
+	lidbg_chmod("/dev/flyaudio_pm0");
 	CREATE_KTHREAD(thread_powerkey_func, NULL);
 	return 0;
 }

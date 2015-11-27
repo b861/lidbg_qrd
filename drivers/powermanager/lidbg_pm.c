@@ -611,6 +611,12 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
             lidbg_shell_cmd("rm -r "PM_DIR"*");
             g_acc_history_state[0] = '\0';
         }
+         else  if(!strcmp(cmd[1], "PmServiceStar"))
+         {
+                lidbg_shell_cmd("insmod /system/lib/modules/out/lidbg_powerkey.ko");
+		  lidbg_shell_cmd("insmod /flysystem/lib/out/lidbg_powerkey.ko");
+	  }
+
     }
 #if 1 //pm debug
     if(!strcmp(cmd[0], "ws"))

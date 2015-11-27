@@ -116,6 +116,7 @@ public class FlyBootService extends Service {
     public void onCreate() {
         super.onCreate();
         LIDBG_PRINT("flybootservice onCreate......");
+	writeToFile("/dev/lidbg_pm0","flyaudio PmServiceStar");
 
         mFlyBootService = this;
         acquireWakeLock();
