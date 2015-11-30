@@ -27,12 +27,10 @@ import android.content.SharedPreferences;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.SystemClock;
-import android.os.HandlerThread;
 import android.os.Message;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -56,20 +54,18 @@ import java.util.List;
  * 0'~30'的阶段3.表示关屏关外设，但没到点进入深度休眠 30'~60'的阶段4.表示发出休眠请求到执行快速休眠 60'后,即进入深度休眠
  */
 public class FlyBootService extends Service {
-
-    // public static int NORMAL = 0;
-    // public static int SUSPEND = 1;
     private static final String TAG = "boot";
 
     private final static int FBS_SCREEN_OFF = 0;
     private final static int FBS_DEVICE_DOWN = 1;
-    private final static int FBS_ANDROID_DOWN = 2;
-    private final static int FBS_GOTO_SLEEP = 3;
-    private final static int FBS_KERNEL_DOWN = 4;
-    private final static int FBS_KERNEL_UP = 5;
-    private final static int FBS_ANDROID_UP = 6;
-    private final static int FBS_DEVICE_UP = 7;
-    private final static int FBS_SCREEN_ON = 8;
+    private final static int FBS_FASTBOOT_REQUEST = 2;
+    private final static int FBS_ANDROID_DOWN = 3;
+    private final static int FBS_GOTO_SLEEP = 4;
+    private final static int FBS_KERNEL_DOWN = 5;
+    private final static int FBS_KERNEL_UP = 6;
+    private final static int FBS_ANDROID_UP = 7;
+    private final static int FBS_DEVICE_UP = 8;
+    private final static int FBS_SCREEN_ON = 9;
     public static String action = "com.flyaudio.power";
     public static String PowerBundle = "POWERBUNDLE";
     public static String keyScreenOn = "KEY_SCREEN_ON";
@@ -88,8 +84,6 @@ public class FlyBootService extends Service {
 
     private static FlyBootService mFlyBootService;
 
-    private Handler mmHandler;
-    private HandlerThread mHandlerThread;
     public PowerManager pm;
     private PowerManager fbPm = null;
     public static WakeLock mWakeLock = null;
@@ -143,6 +137,9 @@ public class FlyBootService extends Service {
 									SendBroadcastToService(KeyBootState, keyEearlySusupendOFF);
 									LIDBG_PRINT("FlyBootService sent device_down to hal");
 									sendBroadcast(new Intent(ACC_OFF_FLYUI));
+									break;
+								case FBS_FASTBOOT_REQUEST:
+									LIDBG_PRINT("FlyBootService get pm state: FBS_FASTBOOT_REQUEST");
 									break;
 								case FBS_ANDROID_DOWN:
 									LIDBG_PRINT("FlyBootService get pm state: FBS_ANDROID_DOWN");
@@ -199,10 +196,6 @@ public class FlyBootService extends Service {
         if (mWakeLock == null) {
             LIDBG_PRINT(" +++++ acquire flybootservice wakelock +++++ ");
             pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-            // mWakeLock = (WakeLock) pm.newWakeLock(
-            // PowerManager.PARTIAL_WAKE_LOCK
-            // | PowerManager.ACQUIRE_CAUSES_WAKEUP
-            // | PowerManager.ON_AFTER_RELEASE, "flytag");
 
             mWakeLock = (WakeLock) pm.newWakeLock(
                     PowerManager.PARTIAL_WAKE_LOCK, "flytag");
@@ -229,13 +222,7 @@ public class FlyBootService extends Service {
         if (Settings.Global.getInt(context.getContentResolver(), "fastboot_airplane_mode", -1) != 0) {
             return;
         }
-	/*
-	final ContentResolver cr = context.getContentResolver();
-        Settings.Secure.putInt(cr, Settings.Secure.LOCATION_MODE, Settings.Secure.LOCATION_MODE_HIGH_ACCURACY);
-        LIDBG_PRINT("ON  LOCATION_MODE: " + Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.LOCATION_MODE,
-                        -100));
-	*/
-	
+
         boolean b = Settings.Global.putInt(context.getContentResolver(),
                 Settings.Global.AIRPLANE_MODE_ON, 0);
 
@@ -249,7 +236,6 @@ public class FlyBootService extends Service {
         Settings.Global.putInt(context.getContentResolver(), "fastboot_airplane_mode", -1);
 
         LIDBG_PRINT("restoreAirplaneMode end");
-        
     }
 
     public void SendBroadcastToService(String key, String value) {
@@ -264,12 +250,9 @@ public class FlyBootService extends Service {
 	private void start_fastboot(){
 		firstBootFlag = true;
 
+		LIDBG_PRINT(" ********** start fastboot ********** ");
 		fbPm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 		mActivityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-
-		delay(8000);
-
-		LIDBG_PRINT(" ********** start fastboot ********** ");
 
 		powerOffSystem();
 	}
@@ -291,7 +274,6 @@ public class FlyBootService extends Service {
                 sendBroadcastDone = true;
         }
     };
-
 
     public boolean IsKLDrunning() {
         ActivityManager am = (ActivityManager) this
@@ -351,8 +333,6 @@ public class FlyBootService extends Service {
     }
 
     private void powerOffSystem() {
-		// notify music application to pause music before kill the
-		// application
 		LIDBG_PRINT("powerOffSystem+");
 		sendBecomingNoisyIntent();
 		LIDBG_PRINT("powerOffSystem step 1");
@@ -360,14 +340,11 @@ public class FlyBootService extends Service {
 		SystemProperties.set("ctl.start", "bootanim");
 		LIDBG_PRINT("powerOffSystem step 2");
 
-//		enterAirplaneMode();
 		LIDBG_PRINT("powerOffSystem step 3");
 		getLastPackage();
-		// flyaudio
 		bIsKLDRunning = IsKLDrunning();
 
 		if (bIsKLDRunning) {
-		// FlyPowerOnWithKLD();
 		SystemProperties.set("fly.gps.run", "1");
 			Log.d(TAG, "-----fly.gps.run----1----");
 		} else {
@@ -377,7 +354,6 @@ public class FlyBootService extends Service {
 		LIDBG_PRINT("powerOffSystem step 4");
 		KillProcess();
 		LIDBG_PRINT("powerOffSystem step5");
-		//goToSleep前通知内核,作用关外设
 
 		LIDBG_PRINT("powerOffSystem step6");
 		SystemClock.sleep(1000);
@@ -387,17 +363,11 @@ public class FlyBootService extends Service {
 		msgTokenal("flyaudio gotosleep");
 		releaseWakeLock();
 		LIDBG_PRINT("powerOffSystem-");
-		// Intent iFinish = new Intent("FinishActivity");
-		// sendBroadcast(iFinish);
     }
 
     private void powerOnSystem(Context context) {
-        LIDBG_PRINT("qf powerOnSystem+");
-    	 //msgTokenal("bootcompleted");
-        //sendBootCompleted(false);
-        LIDBG_PRINT("powerOnSystem step 1");
+		 LIDBG_PRINT("powerOnSystem-");
         restoreAirplaneMode(context);
-        LIDBG_PRINT("powerOnSystem step 2");
         SystemProperties.set("ctl.stop", "bootanim");
         LIDBG_PRINT("powerOnSystem-");
     }
@@ -418,14 +388,8 @@ public class FlyBootService extends Service {
             int uid = appProcessInfo.uid;
             String processName = appProcessInfo.processName;
             if (isKillableProcess(processName)) {
-                // mActivityManager.killBackgroundProcesses(processName);
                 LIDBG_PRINT(processName +"."+pid +" will be killed");
                 mActivityManager.forceStopPackage(processName);
-	    /*if(processName.equals("cld.navi.c2739.mainframe")){
-		msgTokenal("flyaudio kill "+pid);
-		LIDBG_PRINT(pid + " cld.navi.c2739.mainframe"+" will be kill by the kenal");	
-		}*/
-
             }
         }
     }

@@ -62,6 +62,7 @@ struct hw_version_specific
     int gpio_int_mcu_i2c_request;
     int gpio_mcu_wp;
     int gpio_mcu_app;
+    int gpio_request_fastboot;
     int gpio_gps_rst;
     int gpio_ts_int;
     int gpio_ts_rst;
@@ -166,6 +167,9 @@ extern struct hw_version_specific g_hw_version_specific[];
 
 //wifi
 #define WIFI_PWR (g_hw.gpio_wifi_pwr)
+
+//
+#define GPIO_FASTBOOT_REQUEST (g_hw.gpio_request_fastboot)
 
 #include SOC_TARGET_DEFINE_PATH
 

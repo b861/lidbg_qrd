@@ -5,6 +5,7 @@
 #define SCREEN_OFF   "flyaudio screen_off"
 #define DEVICES_ON   "flyaudio devices_up"
 #define DEVICES_DOWN "flyaudio devices_down"
+#define REQUEST_FASTBOOT "flyaudio request_fastboot"
 #define ANDROID_UP	 "flyaudio android_up"
 #define ANDROID_DOWN "flyaudio android_down"
 #define GOTO_SLEEP   "flyaudio gotosleep"
@@ -18,6 +19,7 @@ static struct timer_list timer;
 static atomic_t status = ATOMIC_INIT(FLY_SCREEN_ON);
 static wait_queue_head_t wait_queue;
 static DECLARE_COMPLETION (sleep_powerkey_wait);
+static DECLARE_COMPLETION (request_fastboot_wait);
 static struct semaphore powerkey_sem;
 static struct kfifo powerkey_state_fifo;
 static unsigned int *powerkey_state_buffer;
@@ -27,6 +29,39 @@ void powerkey_fifo_in(void)
 	down(&powerkey_sem);
 	kfifo_in(&powerkey_state_fifo, (const void *)&atomic_read(&status), 4);
 	up(&powerkey_sem);
+}
+
+static int thread_gpio_powerkey_status(void *data)
+{
+	int io_state = 0;
+	int io_state_cnt = 0;
+	while(1)
+	{
+		wait_for_completion(&request_fastboot_wait);
+		while(1)
+		{
+			io_state = SOC_IO_Input(0, GPIO_FASTBOOT_REQUEST, LIDBG_GPIO_PULLUP);
+			if(io_state == 0){
+				lidbg("Request fastboot, FASTBOOT_REQUEST_IO(%d) is set to %d, io_state_cnt = %d.\n", GPIO_FASTBOOT_REQUEST, io_state, io_state_cnt);
+				mod_timer(&timer,POWERKEY_DELAY_TIME);
+				break;	//break to start fastboot
+			}else{
+				io_state_cnt++;
+				if(io_state_cnt > 40){
+					lidbg("Request fastboot timeout.\n");
+					break;	//break with timeout
+				}
+
+				if(atomic_read(&status) != FLY_FASTBOOT_REQUEST){
+					lidbg("Request fastboot received acc_on state, acc_state = %d\n", atomic_read(&status));
+					break;	//break with state changed
+				}
+
+				mdelay(200);
+			}
+		}
+	}
+	return 1;
 }
 
 static int thread_powerkey_func(void *data)
@@ -47,13 +82,17 @@ static int thread_powerkey_func(void *data)
 				fs_file_write(DEV_NAME, false, DEVICES_DOWN, 0, strlen(DEVICES_DOWN));
 				mod_timer(&timer,POWER_SUSPEND_TIME);
 				break;
+			case FLY_FASTBOOT_REQUEST:
+				fs_file_write(DEV_NAME, false, REQUEST_FASTBOOT, 0, strlen(REQUEST_FASTBOOT));
+				complete(&request_fastboot_wait);
+				break;
 			case FLY_ANDROID_DOWN:
 				fs_file_write(DEV_NAME, false, ANDROID_DOWN, 0, strlen(ANDROID_DOWN));
 				mod_timer(&timer,AirplanMode_TIME);
 				break;
 			case FLY_GOTO_SLEEP:
 				//fs_file_write(DEV_NAME, false, GOTO_SLEEP, 0, strlen(GOTO_SLEEP));
-				mod_timer(&timer,POWERKEY_DELAY_TIME);
+				//mod_timer(&timer,POWERKEY_DELAY_TIME);
 				break;
 			case FLY_ANDROID_UP:
 				fs_file_write(DEV_NAME, false, ANDROID_UP, 0, strlen(ANDROID_UP));
@@ -105,12 +144,13 @@ static void powerkey_resume(void)
 		del_timer(&timer);
 		atomic_set(&status, FLY_SCREEN_ON);
 	}
-	else if(atomic_read(&status) == FLY_DEVICE_DOWN)
+	else if((atomic_read(&status) == FLY_DEVICE_DOWN) || (atomic_read(&status) == FLY_FASTBOOT_REQUEST))
 	{
 		del_timer(&timer);
 		atomic_set(&status, FLY_DEVICE_UP);
 	}
-	else if((atomic_read(&status) == FLY_ANDROID_DOWN) || (g_var.system_status == FLY_GOTO_SLEEP))
+	else if((atomic_read(&status) == FLY_ANDROID_DOWN)
+		|| (g_var.system_status == FLY_ANDROID_DOWN) || (g_var.system_status == FLY_GOTO_SLEEP))
     	{
 		return;
     	}
@@ -211,6 +251,7 @@ static int lidbg_powerkey_probe(struct platform_device *pdev)
 	lidbg_new_cdev(&powerkey_fops, "flyaudio_pm");
 	lidbg_chmod("/dev/flyaudio_pm0");
 	CREATE_KTHREAD(thread_powerkey_func, NULL);
+	CREATE_KTHREAD(thread_gpio_powerkey_status, NULL);
 	return 0;
 }
 

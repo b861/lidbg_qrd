@@ -552,6 +552,9 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
             extern unsigned int fly_acc_step;
             fly_acc_step = 1;
 #endif
+        }else if(!strcmp(cmd[1], "request_fastboot")){
+		lidbg("request_fastboot pull down gpio_app.\n");
+		MCU_APP_GPIO_OFF;
         }
         else  if(!strcmp(cmd[1], "kill"))
         {
@@ -579,6 +582,7 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         }
         else if(!strcmp(cmd[1], "devices_up"))
         {
+            MCU_APP_GPIO_ON;
             SOC_System_Status(FLY_DEVICE_UP);
             PM_WARN("mediascan.en.0\n");
             lidbg_shell_cmd("setprop persist.lidbg.mediascan.en 0");
