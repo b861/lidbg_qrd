@@ -39,6 +39,9 @@
 #include "debug.h"
 #include "cap_desc_parser.h"
 #include "cap_desc.h"
+#include <cutils/properties.h>
+#include "lidbg_servicer.h"
+#include<time.h> 
 
 #define TESTAP_VERSION		"v1.0.21_SONiX_UVC_TestAP_Multi"
 
@@ -82,6 +85,10 @@
 
 struct H264Format *gH264fmt = NULL;
 int Dbg_Param = 0x1f;
+
+//lidbg_parm
+char startRecording[PROPERTY_VALUE_MAX];
+//char startCapture[PROPERTY_VALUE_MAX];
 
 struct thread_parameter
 {
@@ -224,7 +231,7 @@ static int video_set_format(int dev, unsigned int w, unsigned int h, unsigned in
 	ret = ioctl(dev, VIDIOC_S_FMT, &fmt);
 	if (ret < 0) {
 		TestAp_Printf(TESTAP_DBG_ERR, "Unable to set format: %d.\n", errno);
-		return ret;
+		//return ret;
 	}
 
 	TestAp_Printf(TESTAP_DBG_FLOW, "Video format set: width: %u height: %u buffer size: %u\n",
@@ -1149,7 +1156,7 @@ void *thread_capture(void *par)
 	{
 		skip = 6;
 	}
-	
+	TestAp_Printf(TESTAP_DBG_ERR, "-----------eho-----thread_capture-------.\n");
 	for (i = 0; i < *thread_par.nframes; ++i) 
 	{
 		unknow_size = 0;
@@ -1162,7 +1169,7 @@ void *thread_capture(void *par)
 		if (ret < 0) {
 			TestAp_Printf(TESTAP_DBG_ERR, "Unable to dequeue -thread- buffer (%d).\n", errno);
 			close(*thread_par.dev);
-			return;
+			return -1;
 		}
 		
 		/* Save the image. */
@@ -1216,21 +1223,108 @@ void *thread_capture(void *par)
 		if (ret < 0) {
 			TestAp_Printf(TESTAP_DBG_ERR, "Unable to requeue -thread- buffer (%d).\n", errno);
 			close(*thread_par.dev);			
-			return;
+			return -1;
 		}
 	}
 
 	pthread_exit(NULL);
+	return 0;
 }
+
+void *thread_switch(void *par)
+{
+    lidbg("-------eho--------%s----start\n",__func__); 
+    while(1)
+    { 
+    	property_get("persist.lidbg.uvccam.recording", startRecording, "0");
+	//property_get("persist.lidbg.uvccam.capture", startCapture, "0");
+	sleep(1);
+	if(!strncmp(startRecording, "0", 1)) break;
+    } 
+    lidbg("-------eho--------%s----exit\n",__func__);
+    return 0;
+}
+
+void *thread_checkdev(void *par)
+{
+    lidbg("-------eho--------%s----start\n",__func__); 
+    while(1)
+    { 
+		sleep(1);
+    } 
+    lidbg("-------eho--------%s----exit\n",__func__);
+    return 0;
+}
+
+  static int get_uvc_device(char *devname,char do_save,char do_record)
+    {
+        char    temp_devname[256];
+        int     i = 0, ret = 0, fd;
+        struct  v4l2_capability     cap;
+
+        lidbg("%s: E", __func__);
+        *devname = '\0';
+        while(1)
+        {
+            sprintf(temp_devname, "/dev/video%d", i);
+            fd = open(temp_devname, O_RDWR  | O_NONBLOCK, 0);
+            if(-1 != fd)
+            {
+                ret = ioctl(fd, VIDIOC_QUERYCAP, &cap);
+                if((0 == ret) || (ret && (ENOENT == errno)))
+                {
+                    lidbg("%s: Found UVC node: %s\n", __func__, temp_devname);
+					if((do_save) && (!do_record)) 
+					{
+						lidbg("----%s:-------capture----------",__func__);
+						strncpy(devname, temp_devname, 256);//capture
+					}
+                    else if((!do_save) && (do_record))//recording
+                  	{
+                  		lidbg("----%s:-------recording----------",__func__);
+						sprintf(temp_devname, "/dev/video%d", i + 1);
+						strncpy(devname, temp_devname, 256);
+                  	}
+					else
+					{
+						lidbg("----%s:-------XU ctrl----------",__func__);
+						strncpy(devname, temp_devname, 256);
+					}
+                    break;
+                }
+                close(fd);
+            }
+            else
+                lidbg("%s.%d: Probing.%s: ret: %d, errno: %d,%s", __func__, i, temp_devname, ret, errno, strerror(errno));
+
+            if(i++ > 20)
+            {
+                strncpy(devname, "/dev/video1", 256);
+                lidbg("%s.%d: Probing fail:%s \n", __func__, i, devname);
+                break;
+            }
+        }
+
+        lidbg("%s: X,%s", __func__, devname);
+        return 0;
+    }
 
 int main(int argc, char *argv[])
 {
-	char filename[] = "quickcam-0000.jpg";
-	char rec_filename[30] = "RecordH264.h264";			/*"H264.ts"*/
-	char rec_filename1[30] = "RecordH264HD.h264";		/*"H264.ts"*/
-	char rec_filename2[30] = "RecordH264QVGA.h264";	/*"H264.ts"*/
-	char rec_filename3[30] = "RecordH264QQVGA.h264";	/*"H264.ts"*/
-	char rec_filename4[30] = "RecordH264VGA.h264";		/*"H264.ts"*/
+	char filename[40] = "/sdcard/quickcam-0000.jpg";
+	char rec_filename[30] = "/sdcard/RecordH264.h264";			/*"H264.ts"*/
+	char rec_filename1[30] = "/sdcard/RecordH264HD.h264";		/*"H264.ts"*/
+	char rec_filename2[30] = "/sdcard/RecordH264QVGA.h264";	/*"H264.ts"*/
+	char rec_filename3[30] = "/sdcard/RecordH264QQVGA.h264";	/*"H264.ts"*/
+	char rec_filename4[30] = "/sdcard/RecordH264VGA.h264";		/*"H264.ts"*/
+
+	char flyh264_filename[5][30] = {  "/sdcard/flytmp1.h264",
+								"/sdcard/flytmp2.h264",
+								"/sdcard/flytmp3.h264",
+								"/sdcard/flytmp4.h264",
+								"/sdcard/flytmp5.h264"};
+							    
+	
 	int dev, ret;
 	int fake_dev; // chris
 	int freeram;
@@ -1458,6 +1552,10 @@ int main(int argc, char *argv[])
 	unsigned char stream2_frame_drop_ctrl = 0;
 	char osd_string[12] = {"0"};
 	pthread_t thread_capture_id;
+	pthread_t thread_switch_id;
+	pthread_t thread_checkdev_id;
+	unsigned char flytmpcnt = 0,rc;
+	char devName[256];
  //cjc -
 #if(CARCAM_PROJECT == 1)
 	printf("%s   ******  for Carcam  ******\n",TESTAP_VERSION);
@@ -2188,7 +2286,17 @@ int main(int argc, char *argv[])
     //yiling --
 
 	/* Open the video device. */
-	dev = video_open(argv[optind]);
+	//dev = video_open(argv[optind]);
+	
+	//auto find camera device
+	rc = get_uvc_device(devName,do_save,do_record);
+    if(rc || *devName == '\0')
+    {
+        lidbg("%s: No UVC node found \n", __func__);
+		return 1;
+    }
+	dev = video_open(devName);
+	
 	if (dev < 0)
 		return 1;
 
@@ -3268,8 +3376,33 @@ int main(int argc, char *argv[])
         sprintf(rec_filename2, "RecordH264_180P.h264");
         sprintf(rec_filename4, "RecordH264_360P.h264");
     }
+	if(!do_save)//recording
+	{
+		ret = pthread_create(&thread_switch_id,NULL,thread_switch,NULL);
+		if(ret != 0)
+		{
+			lidbg( "-----eho-----uvc switch pthread error!\n");
+			return 1;
+		}
+	}
+	property_get("persist.lidbg.uvccam.recording", startRecording, "1");
+	//property_get("persist.lidbg.uvccam.capture", startCapture, "1");
+/*
+	ret = pthread_create(&thread_switch_id,NULL,thread_checkdev,NULL);
+	if(ret != 0)
+	{
+		lidbg( "-----eho-----checkdev pthread error!\n");
+		return 1;
+	}
+*/
 	for (i = 0; i < nframes; ++i) {
 
+		if((!strncmp(startRecording, "0", 1)) && (!do_save) )//close
+		{
+			lidbg("-------eho---------uvccam stop recording -----------\n");
+			return 0;
+		}
+		
 		if(do_get_still_image)
 		{
 			if(i==nframes*2/3)
@@ -3351,12 +3484,18 @@ int main(int argc, char *argv[])
 		/* Save the image. */
 		if ((do_save && !skip)&&(pixelformat == V4L2_PIX_FMT_MJPEG))
 		{
-			sprintf(filename, "frame-%06u.jpg", i);
+			time_t timep; 
+			struct tm *p; 
+			time(&timep); 
+			p=gmtime(&timep); 
+			sprintf(filename, "/sdcard/FA%04d%02d%02d%02d%02d%02d.jpg",
+				(1900+p->tm_year),(1+p->tm_mon),p->tm_mday,p->tm_hour,p->tm_min,p->tm_sec);
 			file = fopen(filename, "wb");
 			if (file != NULL) {
 				fwrite(mem0[buf0.index], buf0.bytesused, 1, file);
 				fclose(file);
 			}
+			return 0;//exit
 		}
 		if (skip)
 			--skip;
@@ -3406,8 +3545,13 @@ int main(int argc, char *argv[])
 			else
 			{
 				if(rec_fp1 == NULL)
-					rec_fp1 = fopen(rec_filename, "a+b");
-
+					rec_fp1 = fopen(flyh264_filename[flytmpcnt], "wb");
+				if((i % 1800 == 0) && (i > 0))//1min per section(1800 frames)
+				{
+					if(flytmpcnt < 4) flytmpcnt++;
+					else flytmpcnt = 0;
+					rec_fp1 = fopen(flyh264_filename[flytmpcnt], "wb");
+				}
 				if(rec_fp1 != NULL)
 				{
 					fwrite(mem0[buf0.index], buf0.bytesused, 1, rec_fp1);

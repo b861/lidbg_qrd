@@ -186,7 +186,11 @@ namespace android
 
     struct ion_flush_data
     {
-        struct ion_handle *handle;
+#ifdef PLATFORM_msm8909
+	ion_user_handle_t handle;
+#else
+        struct ion_handle      *handle;
+#endif
         int fd;
         void *vaddr;
         unsigned int offset;
@@ -224,7 +228,11 @@ namespace android
     {
         int                     fd;
         int                     main_ion_fd;
+#ifdef PLATFORM_msm8909
+	ion_user_handle_t handle;
+#else
         struct ion_handle      *handle;
+#endif
         uint32_t                size;
     } QCameraHalMemInfo_t;
 

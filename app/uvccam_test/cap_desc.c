@@ -129,7 +129,7 @@ int GetInterface(int fd,struct InterfaceDesc *Interface_Desc)
 
     }
 #endif
-
+	return 0;
 }
 
 

@@ -1,6 +1,6 @@
 
 #include "lidbg.h"
-
+//#include "LidbgCameraUsb.h"
 LIDBG_DEFINE;
 /*
 static int get_uvc_device(char *devname)
@@ -60,8 +60,10 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
         lidbg("copy_from_user ERR\n");
     }
     if(cmd_buf[size - 1] == '\n')
+		cmd_buf[size - 1] = '\0';
     cmd_num = lidbg_token_string(cmd_buf, " ", cmd) ;
-
+	lidbg("-----FLYSTEP------------------[%s]---\n", cmd_buf);
+	lidbg("-----cmd_num------------[%d]---\n", cmd_num);
 	for(i = 0;i < cmd_num; i++)
 	{
 		lidbg_token_string(cmd[i], "=", keyval) ;

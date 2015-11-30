@@ -12,6 +12,10 @@ extern "C" {
 #include <sys/time.h>
 }
 
+#ifdef PLATFORM_msm8909
+//#undef USE_ION
+#endif
+
 camera_device_ops_t usbcam_camera_ops =
 {
 set_preview_window:
@@ -159,7 +163,7 @@ namespace android
         return rc;
     }
 
-    static int get_uvc_device(char *devname)
+   static int get_uvc_device(char *devname)
     {
         char    temp_devname[FILENAME_LENGTH];
         int     i = 0, ret = 0, fd;
@@ -245,7 +249,6 @@ namespace android
         else
         {
             ALOGE("%s:  open.success '%s',%d", __func__, dev_name, camHal->fd);
-            rc = 0;
         }
 
         device                  = &camHal->hw_dev;
@@ -260,7 +263,7 @@ namespace android
         return 0;
 out_err:
         ALOGE("%s: X.out_err  %d", __func__, rc);
-        return 0;
+        return rc;
     }
 
     extern "C"  int usbcam_close_camera_device( hw_device_t *hw_dev)
@@ -416,7 +419,7 @@ out_err:
                       camHal->previewMem.camera_memory[cnt]->data,
                       camHal->previewMem.camera_memory[cnt]->size,
                       camHal->previewMem.camera_memory[cnt]->handle);
-
+#ifdef USE_ION
                 camHal->previewMem.mem_info[cnt].main_ion_fd =
                     open("/dev/ion", O_RDONLY);
                 if (camHal->previewMem.mem_info[cnt].main_ion_fd < 0)
@@ -439,6 +442,7 @@ out_err:
                 camHal->previewMem.mem_info[cnt].size =
                     camHal->previewMem.private_buffer_handle[cnt]->size;
                 camHal->previewMem.mem_info[cnt].handle = ion_info_fd.handle;
+#endif
             }
             else
                 ALOGE("%s: dequeue buf %d failed \n", __func__, cnt);
@@ -489,7 +493,7 @@ out_err:
             /* Release all buffers that were acquired using get_memory */
             camHal->previewMem.camera_memory[cnt]->release(
                 camHal->previewMem.camera_memory[cnt]);
-
+#ifdef USE_ION
             /* If using ION memory, free ION related resources */
             struct ion_handle_data ion_handle;
             memset(&ion_handle, 0, sizeof(ion_handle));
@@ -500,7 +504,7 @@ out_err:
                 ALOGE("%s: ion free failed\n", __func__);
             }
             close(camHal->previewMem.mem_info[cnt].main_ion_fd);
-
+#endif
             //note: I do not know why it is caused the system crash,so I drop it temprarily.
             /*
             	        rc = previewWindow->cancel_buffer(previewWindow,
@@ -1502,14 +1506,14 @@ out_err:
         if(camHal->fd < 0)
         {
             ALOGI("%s: no uvc device:return", __func__);
-            return 0;
+            return -1;
         }
 
         /* If preivew is already running, nothing to be done */
         if(camHal->previewEnabledFlag)
         {
             ALOGI("%s: Preview is already running", __func__);
-            return 0;
+            return -1;
         }
 
         rc = initUsbCamera(camHal, camHal->prevWidth,
@@ -1767,7 +1771,11 @@ out_err:
         alloc.len = (alloc.len + 4095) & (~4095);
         alloc.align = 4096;
         alloc.flags = ION_FLAG_CACHED;
-        alloc.heap_mask = ion_type;
+#ifdef PLATFORM_msm8909
+        alloc.heap_id_mask = ion_type;
+#else
+	alloc.heap_mask = ion_type;
+#endif
         rc = ioctl(main_ion_fd, ION_IOC_ALLOC, &alloc);
         if (rc < 0)
         {
@@ -2164,6 +2172,11 @@ ION_OPEN_FAILED:
         ALOGI("%s: E", __func__);
         int rc = 0;
         camera_hardware_t *camHal;
+	char startRecording[PROPERTY_VALUE_MAX];
+	
+        ALOGI("-------uvccam capture -----");
+        system("echo 'captureenable' > /dev/lidbg_drivers_dbg0");
+	
         return -1;
         VALIDATE_DEVICE_HDL(camHal, device, -1);
 

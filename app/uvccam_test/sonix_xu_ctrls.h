@@ -8,7 +8,7 @@
 //#include <linux/uvcvideo.h>
 //#endif
 
-#define CARCAM_PROJECT				0
+#define CARCAM_PROJECT				1
 
 /*
  * Dynamic controls

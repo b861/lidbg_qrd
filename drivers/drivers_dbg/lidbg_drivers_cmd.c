@@ -683,6 +683,12 @@ void parse_cmd(char *pt)
         lidbg("-------uvccam stop_recording -----");
         lidbg_shell_cmd("setprop persist.lidbg.uvccam.recording 0");
     }
+    else if(!strcmp(argv[0], "captureenable") )
+    {
+        lidbg("-------uvccam capture-----");
+	if(g_var.is_fly) lidbg_shell_cmd("./flysystem/lib/out/lidbg_testuvccam /dev/video1 -c -f mjpg -S &");
+        else lidbg_shell_cmd("./system/lib/modules/out/lidbg_testuvccam /dev/video1 -c -f mjpg -S &");
+    }
     else if(!strcmp(argv[0], "flyparameter") )
     {
         int para_count = argc - 1;
