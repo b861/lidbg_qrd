@@ -3,6 +3,7 @@
 
 #include <linux/videodev2.h>
 #include <linux/version.h>
+
 //#if LINUX_VERSION_CODE > KERNEL_VERSION (3, 0, 36)
 //#include <linux/uvcvideo.h>
 //#endif
@@ -117,7 +118,7 @@ struct uvc_xu_control_mapping_3 {
 	__u32 v4l2_type;
 	__u32 data_type;
 
-	struct uvc_menu_info __user *menu_info;
+	struct uvc_menu_info *menu_info;
 	__u32 menu_count;
 
 	__u32 reserved[4];
@@ -156,7 +157,7 @@ struct uvc_xu_control_query_3 {
 	__u8 query;		/* Video Class-Specific Request Code, */				
 					/* defined in linux/usb/video.h A.8.  */	
 	__u16 size;	
-	__u8 __user *data;
+	__u8  *data;
 };
 
 
@@ -256,7 +257,7 @@ typedef enum{
 #endif
 */
 
-int GetKernelVersion(void);
+
 extern unsigned int  chip_id;
 
 int XU_Init_Ctrl(int fd);

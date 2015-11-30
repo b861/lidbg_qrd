@@ -22,7 +22,7 @@ int ParseMultiStreamConfig(unsigned char *pConfig,  struct MultiStreamCfg *Cfg_D
          memcpy((unsigned char *)&Cfg_Desc->MS_Cap[i], (unsigned char *)pMultistreamCap+2 ,12);
          pMultistreamCap += pMultistreamCap[0];
      }
-     return 0;
+ 
  }
  
  int ParseCapability(unsigned char *pData, int Length, struct CapabilityDescriptor *Cap_Desc)

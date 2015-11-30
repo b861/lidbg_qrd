@@ -31,7 +31,7 @@
 #include <linux/videodev2.h>
 #include <linux/version.h>
 #include <sys/utsname.h>
-#include <pthread.h> 
+#include <pthread.h>
 
 #include "v4l2uvc.h"
 #include "sonix_xu_ctrls.h"
@@ -39,18 +39,15 @@
 #include "debug.h"
 #include "cap_desc_parser.h"
 #include "cap_desc.h"
-#include <cutils/properties.h>
-#include "lidbg_servicer.h"
 
-
-#define TESTAP_VERSION		"v1.0.19_SONiX_UVC_TestAP_Multi"
+#define TESTAP_VERSION		"v1.0.21_SONiX_UVC_TestAP_Multi"
 
 #ifndef min
 #define min(x,y) (((x)<(y))?(x):(y))
 #endif
 
 
-//#define V4L2_PIX_FMT_H264 v4l2_fourcc('H','2','6','4') /* H264 */
+#define V4L2_PIX_FMT_H264 v4l2_fourcc('H','2','6','4') /* H264 */
 #define V4L2_PIX_FMT_MP2T v4l2_fourcc('M','P','2','T') /* MPEG-2 TS */
 
 #ifndef KERNEL_VERSION
@@ -85,9 +82,6 @@
 
 struct H264Format *gH264fmt = NULL;
 int Dbg_Param = 0x1f;
-
-//lidbg_parm
-char startRecording[PROPERTY_VALUE_MAX];
 
 struct thread_parameter
 {
@@ -229,8 +223,8 @@ static int video_set_format(int dev, unsigned int w, unsigned int h, unsigned in
 
 	ret = ioctl(dev, VIDIOC_S_FMT, &fmt);
 	if (ret < 0) {
-		TestAp_Printf(TESTAP_DBG_ERR, "Unable to set format: %d.\n but not return", errno);
-		//return ret;
+		TestAp_Printf(TESTAP_DBG_ERR, "Unable to set format: %d.\n", errno);
+		return ret;
 	}
 
 	TestAp_Printf(TESTAP_DBG_FLOW, "Video format set: width: %u height: %u buffer size: %u\n",
@@ -291,8 +285,8 @@ static int video_set_framerate(int dev, int framerate, unsigned int *MaxPayloadT
 
 	ret = ioctl(dev, VIDIOC_S_PARM, &parm);
 	if (ret < 0) {
-		TestAp_Printf(TESTAP_DBG_ERR, "Unable to set frame rate: %d.but no return\n", errno);
-		//return ret;
+		TestAp_Printf(TESTAP_DBG_ERR, "Unable to set frame rate: %d.\n", errno);
+		return ret;
 	}
 
     //yiling: get MaxPayloadTransferSize from sonix driver
@@ -1168,7 +1162,7 @@ void *thread_capture(void *par)
 		if (ret < 0) {
 			TestAp_Printf(TESTAP_DBG_ERR, "Unable to dequeue -thread- buffer (%d).\n", errno);
 			close(*thread_par.dev);
-			return 1;
+			return;
 		}
 		
 		/* Save the image. */
@@ -1222,36 +1216,21 @@ void *thread_capture(void *par)
 		if (ret < 0) {
 			TestAp_Printf(TESTAP_DBG_ERR, "Unable to requeue -thread- buffer (%d).\n", errno);
 			close(*thread_par.dev);			
-			return 1;
+			return;
 		}
 	}
 
 	pthread_exit(NULL);
-	return 0;
 }
-
-void *thread_switch(void *par)
-{
-    lidbg("-------eho--------thread_switch----start\n"); 
-    while(1)
-    { 
-    	property_get("persist.lidbg.uvccam.recording", startRecording, "0");
-	sleep(1);
-	if(!strncmp(startRecording, "0", 1)) break;
-    } 
-    lidbg("-------eho--------thread_switch----exit\n");
-    return 0;
-}
-
 
 int main(int argc, char *argv[])
 {
-	char filename[] = "/sdcard/quickcam-0000.jpg";
-	char rec_filename[30] = "/sdcard/RecordH264.h264";			/*"H264.ts"*/
-	char rec_filename1[30] = "/sdcard/RecordH264HD.h264";		/*"H264.ts"*/
-	char rec_filename2[30] = "/sdcard/RecordH264QVGA.h264";	/*"H264.ts"*/
-	char rec_filename3[30] = "/sdcard/RecordH264QQVGA.h264";	/*"H264.ts"*/
-	char rec_filename4[30] = "/sdcard/RecordH264VGA.h264";		/*"H264.ts"*/
+	char filename[] = "quickcam-0000.jpg";
+	char rec_filename[30] = "RecordH264.h264";			/*"H264.ts"*/
+	char rec_filename1[30] = "RecordH264HD.h264";		/*"H264.ts"*/
+	char rec_filename2[30] = "RecordH264QVGA.h264";	/*"H264.ts"*/
+	char rec_filename3[30] = "RecordH264QQVGA.h264";	/*"H264.ts"*/
+	char rec_filename4[30] = "RecordH264VGA.h264";		/*"H264.ts"*/
 	int dev, ret;
 	int fake_dev; // chris
 	int freeram;
@@ -1479,10 +1458,6 @@ int main(int argc, char *argv[])
 	unsigned char stream2_frame_drop_ctrl = 0;
 	char osd_string[12] = {"0"};
 	pthread_t thread_capture_id;
-	pthread_t thread_switch_id;
-
-	
-	
  //cjc -
 #if(CARCAM_PROJECT == 1)
 	printf("%s   ******  for Carcam  ******\n",TESTAP_VERSION);
@@ -3217,6 +3192,15 @@ int main(int argc, char *argv[])
 				}
 			}
 		}
+		else
+		{
+			//add buffer to avoid vb2_streamon fail when video stream_on in kernel 3.18.0 
+			if ((int)(nbufs = video_reqbufs(fake_dev, 6)) < 0) {
+				close(fake_dev);
+				return 1;
+			}
+		}
+		
 		/* Start streaming. */
 		video_enable(fake_dev, 1);
 	}
@@ -3284,22 +3268,8 @@ int main(int argc, char *argv[])
         sprintf(rec_filename2, "RecordH264_180P.h264");
         sprintf(rec_filename4, "RecordH264_360P.h264");
     }
-	ret = pthread_create(&thread_switch_id,NULL,thread_switch,NULL);
-	if(ret != 0)
-	{
-		lidbg( "-----eho-----recording_switch pthread error!\n");
-		return 1;
-	}
-	property_get("persist.lidbg.uvccam.recording", startRecording, "1");
-	
 	for (i = 0; i < nframes; ++i) {
 
-		if(!strncmp(startRecording, "0", 1))//close
-		{
-			lidbg("-------eho---------uvccam stop recording-----------\n");
-			return 0;
-		}
-		
 		if(do_get_still_image)
 		{
 			if(i==nframes*2/3)

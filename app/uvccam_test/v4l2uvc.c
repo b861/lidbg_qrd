@@ -178,8 +178,8 @@ init_v4l2 (struct vdIn *vd)
   vd->fmt.fmt.pix.field = V4L2_FIELD_ANY;
   ret = ioctl (vd->fd, VIDIOC_S_FMT, &vd->fmt);
   if (ret < 0) {
-    TestAp_Printf(TESTAP_DBG_ERR, "Unable to set format:-----eho %d.\n", errno);
-    //goto fatal;
+    TestAp_Printf(TESTAP_DBG_ERR, "Unable to set format: %d.\n", errno);
+    goto fatal;
   }
   if ((vd->fmt.fmt.pix.width != vd->width) ||
       (vd->fmt.fmt.pix.height != vd->height)) {
