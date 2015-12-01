@@ -9,7 +9,7 @@
 #define ANDROID_UP	 "flyaudio android_up"
 #define ANDROID_DOWN "flyaudio android_down"
 #define GOTO_SLEEP   "flyaudio gotosleep"
-#define POWER_SUSPEND_TIME   (jiffies + 5*HZ)//delay between screenoff->devicedown->androiddown
+#define POWER_SUSPEND_TIME   (jiffies + 30*HZ)//delay between screenoff->devicedown->androiddown
 #define AirplanMode_TIME     (jiffies + 0*HZ)//wakelock hold time between androiddown->wakelock release
 #define POWERKEY_DELAY_TIME     (jiffies + 0*HZ)//wakelock hold time between androiddown->wakelock release
 #define POWERKEY_FIFO_SIZE (512)
