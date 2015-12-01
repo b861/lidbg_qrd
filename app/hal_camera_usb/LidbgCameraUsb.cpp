@@ -180,6 +180,12 @@ namespace android
                 ret = ioctl(fd, VIDIOC_QUERYCAP, &cap);
                 if((0 == ret) || (ret && (ENOENT == errno)))
                 {
+                    if (!(cap.capabilities & V4L2_CAP_VIDEO_CAPTURE))//not usb cam node
+		    {
+			    ALOGE("%s: This is not video capture device\n", __func__);
+			    i++;
+			    continue;
+		    }
                     ALOGD("%s: Found UVC node: %s\n", __func__, temp_devname);
                     strncpy(devname, temp_devname, FILENAME_LENGTH);
                     break;
@@ -189,7 +195,7 @@ namespace android
             else
                 ALOGD("%s.%d: Probing.%s: ret: %d, errno: %d,%s", __func__, i, temp_devname, ret, errno, strerror(errno));
 
-            if(i++ > 10)
+            if(i++ > 1000)
             {
                 strncpy(devname, "/dev/video1", FILENAME_LENGTH);
                 ALOGD("%s.%d: Probing fail:%s \n", __func__, i, devname);
