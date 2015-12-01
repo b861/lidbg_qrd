@@ -2,6 +2,11 @@
 #include "lidbg.h"
 //#include "LidbgCameraUsb.h"
 LIDBG_DEFINE;
+
+static wait_queue_head_t wait_queue;
+char isBackChange = 0;
+char isBack = 0;
+
 /*
 static int get_uvc_device(char *devname)
     {
@@ -41,6 +46,23 @@ static int get_uvc_device(char *devname)
         return 0;
     }
 */
+
+ssize_t  flycam_read(struct file *filp, char __user *buffer, size_t size, loff_t *offset)
+{
+	if(!isBackChange)
+	{
+	    if(wait_event_interruptible(wait_queue, isBackChange))
+	        return -ERESTARTSYS;
+	}
+	isBack = SOC_IO_Input(BACK_DET, BACK_DET, GPIO_CFG_PULL_UP);
+	
+	if (copy_to_user(buffer, &isBack,  1))
+	{
+		lidbg("copy_to_user ERR\n");
+	}
+	isBackChange = 0;
+	return size;
+}
 
 int flycam_open (struct inode *inode, struct file *filp)
 {
@@ -115,6 +137,12 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 		{
 			return size;
 		}
+
+		else if(!strcmp(keyval[0], "test") )
+		{
+			isBackChange = 1;
+			wake_up_interruptible(&wait_queue);
+		}
 	}
   
     return size;
@@ -126,11 +154,43 @@ static  struct file_operations flycam_nod_fops =
     .owner = THIS_MODULE,
     .write = flycam_write,
     .open = flycam_open,
+    .read = flycam_read,
 };
+
+irqreturn_t irq_back_det(int irq, void *dev_id)
+{
+	lidbg("----%s----",__func__);
+	isBackChange = 1;
+	wake_up_interruptible(&wait_queue);
+    return IRQ_HANDLED;
+}
+
+int thread_flycam_test(void *data)
+{
+    while(1)
+  	{
+		wake_up_interruptible(&wait_queue);
+		ssleep(5);
+		lidbg("-------ehossleep-------");
+		if(!isBackChange)
+		{
+		    if(wait_event_interruptible(wait_queue, isBackChange))  return -ERESTARTSYS;
+		}
+
+		lidbg("BACK_DET--------%d",SOC_IO_Input(BACK_DET, BACK_DET, GPIO_CFG_PULL_UP));
+  	}
+    return 0;
+}
 
 int thread_flycam_init(void *data)
 {
     lidbg_new_cdev(&flycam_nod_fops, "lidbg_flycam");
+	lidbg("%s:------------start------------",__func__);
+	SOC_IO_Input(BACK_DET, BACK_DET, GPIO_CFG_PULL_UP);
+	SOC_IO_ISR_Add(BACK_DET, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING , irq_back_det, NULL);
+	init_waitqueue_head(&wait_queue);
+
+	//CREATE_KTHREAD(thread_flycam_test, NULL);
 	/*
     if((!g_var.is_fly) && (g_var.recovery_mode == 0)))
     {
