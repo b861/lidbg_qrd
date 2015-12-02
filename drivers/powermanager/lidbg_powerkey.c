@@ -47,17 +47,20 @@ static int thread_gpio_powerkey_status(void *data)
 				break;	//break to start fastboot
 			}else{
 				io_state_cnt++;
-				if(io_state_cnt > 40){
-					lidbg("Request fastboot timeout.\n");
+				if(io_state_cnt > 10){
+					lidbg("Request fastboot timeout, but continue ANDROID_DOWN\n");
+					mod_timer(&timer,POWERKEY_DELAY_TIME);
+					io_state_cnt = 0;
 					break;	//break with timeout
 				}
 
 				if(atomic_read(&status) != FLY_FASTBOOT_REQUEST){
 					lidbg("Request fastboot received acc_on state, acc_state = %d\n", atomic_read(&status));
+					io_state_cnt = 0;
 					break;	//break with state changed
 				}
 
-				mdelay(200);
+				msleep(200);
 			}
 		}
 	}

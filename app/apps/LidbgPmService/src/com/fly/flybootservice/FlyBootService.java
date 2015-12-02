@@ -145,9 +145,11 @@ public class FlyBootService extends Service {
 									LIDBG_PRINT("FlyBootService get pm state: FBS_ANDROID_DOWN");
 									SendBroadcastToService(KeyBootState, keyFastSusupendOFF);
 									start_fastboot();
+									delay(1000);
 									break;
 								case FBS_GOTO_SLEEP:
 									LIDBG_PRINT("FlyBootService get pm state: FBS_GOTO_SLEEP");
+									system_gotosleep();
 									break;
 								case FBS_KERNEL_DOWN:
 									LIDBG_PRINT("FlyBootService get pm state: FBS_KERNEL_DOWN");
@@ -246,6 +248,14 @@ public class FlyBootService extends Service {
         intent.putExtra(PowerBundle, bundle);
         sendBroadcast(intent);
     }
+
+	private void system_gotosleep(){
+
+		LIDBG_PRINT(" ********** system gotosleep ********** ");
+		fbPm.goToSleep(SystemClock.uptimeMillis());
+		msgTokenal("flyaudio gotosleep");
+		releaseWakeLock();
+	}
 
 	private void start_fastboot(){
 		firstBootFlag = true;
@@ -353,15 +363,7 @@ public class FlyBootService extends Service {
 		}
 		LIDBG_PRINT("powerOffSystem step 4");
 		KillProcess();
-		LIDBG_PRINT("powerOffSystem step5");
-
-		LIDBG_PRINT("powerOffSystem step6");
-		SystemClock.sleep(1000);
-		LIDBG_PRINT("powerOffSystem step7");
-
-		fbPm.goToSleep(SystemClock.uptimeMillis());
-		msgTokenal("flyaudio gotosleep");
-		releaseWakeLock();
+		msgTokenal("flyaudio pre_gotosleep");
 		LIDBG_PRINT("powerOffSystem-");
     }
 

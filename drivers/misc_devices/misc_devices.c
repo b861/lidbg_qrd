@@ -67,7 +67,7 @@ static int thread_usb_disk_enable_delay(void *data)
 
 static int thread_usb_disk_disable_delay(void *data)
 {
-    msleep(1000);
+    //msleep(1000);
     usb_disk_enable(false);
     return 1;
 }
@@ -105,7 +105,7 @@ static int lidbg_event(struct notifier_block *this,
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_ANDROID_DOWN):
         MSM_DSI83_DISABLE;
 #ifdef DISABLE_USB_WHEN_ANDROID_DOWN
-        CREATE_KTHREAD(thread_usb_disk_disable_delay, NULL);
+        //CREATE_KTHREAD(thread_usb_disk_disable_delay, NULL);
 #endif
         break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_GOTO_SLEEP):
