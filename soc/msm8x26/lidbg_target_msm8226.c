@@ -30,7 +30,6 @@ struct hw_version_specific g_hw_version_specific[] =
         .gpio_ts_int = 69,
         .gpio_ts_rst = 24,
 
-	.gpio_back_det = 56,
 
         .i2c_bus_dsi83 = 2,
         .i2c_bus_bx5b3a = 2,
@@ -115,7 +114,6 @@ struct hw_version_specific g_hw_version_specific[] =
         .gpio_ts_int = 69,
         .gpio_ts_rst = 24,
 
-		.gpio_back_det = 56,
 
         .i2c_bus_dsi83 = 2,
         .i2c_bus_bx5b3a = 2,
@@ -207,7 +205,6 @@ struct hw_version_specific g_hw_version_specific[] =
         .gpio_bt_rx = 21,
 		.gpio_accel_int1 = 64,
 
-		.gpio_back_det = 56,
 
 		.i2c_bus_accel = 2,
         .i2c_bus_dsi83 = 2,
@@ -329,7 +326,6 @@ struct hw_version_specific g_hw_version_specific[] =
         .gpio_bt_tx = 20,
         .gpio_bt_rx = 21,
 
-		.gpio_back_det = 56,
 
         .i2c_bus_dsi83 = 2,
         .i2c_bus_bx5b3a = 2,
