@@ -54,7 +54,7 @@ ssize_t  flycam_read(struct file *filp, char __user *buffer, size_t size, loff_t
 	    if(wait_event_interruptible(wait_queue, isBackChange))
 	        return -ERESTARTSYS;
 	}
-	//isBack = SOC_IO_Input(BACK_DET, BACK_DET, GPIO_CFG_PULL_UP);
+	isBack = SOC_IO_Input(BACK_DET, BACK_DET, GPIO_CFG_PULL_UP);
 	
 	if (copy_to_user(buffer, &isBack,  1))
 	{
@@ -186,8 +186,8 @@ int thread_flycam_init(void *data)
 {
     lidbg_new_cdev(&flycam_nod_fops, "lidbg_flycam");
 	lidbg("%s:------------start------------",__func__);
-	//SOC_IO_Input(BACK_DET, BACK_DET, GPIO_CFG_PULL_UP);
-	//SOC_IO_ISR_Add(BACK_DET, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING , irq_back_det, NULL);
+	SOC_IO_Input(BACK_DET, BACK_DET, GPIO_CFG_PULL_UP);
+	SOC_IO_ISR_Add(BACK_DET, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING , irq_back_det, NULL);
 	init_waitqueue_head(&wait_queue);
 
 	//CREATE_KTHREAD(thread_flycam_test, NULL);

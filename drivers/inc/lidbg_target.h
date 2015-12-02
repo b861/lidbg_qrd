@@ -75,6 +75,7 @@ struct hw_version_specific
 
     int gpio_wifi_pwr;
 
+	int gpio_back_det;
 
     //i2c
     int i2c_bus_dsi83;
@@ -173,6 +174,7 @@ extern struct hw_version_specific g_hw_version_specific[];
 //
 #define GPIO_FASTBOOT_REQUEST (g_hw.gpio_request_fastboot)
 
+#define BACK_DET (g_hw.gpio_back_det)
 
 
 #include SOC_TARGET_DEFINE_PATH
