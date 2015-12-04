@@ -55,6 +55,15 @@
         SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\
 				}while(0)
 
+#define LPC_CMD_RADIORST_L  do{    \
+		u8 buff[] = {0x02, 0x0a, 0x00};\
+        SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\
+				}while(0)
+
+#define LPC_CMD_RADIORST_H  do{    \
+		u8 buff[] = {0x02, 0x0a, 0x01};\
+        SOC_LPC_Send(buff, SIZE_OF_ARRAY(buff));\
+				}while(0)
 
 #define LPC_PRINT(x,y,z)  do{lpc_linux_sync(x,y,z);}while(0)
 void lpc_linux_sync(bool print, int mint, char *extra_info);
