@@ -473,8 +473,8 @@ ssize_t misc_write (struct file *filp, const char __user *buf, size_t size, loff
     if(cmd_buf[size - 1] == '\n')
         cmd_buf[size - 1] = '\0';
 
-    argc = lidbg_token_string(cmd_buf, "*", argv);
-    if(argc >= 2 && argv[1] != NULL && (!strcmp(argv[0], "apk")))
+    argc = lidbg_token_string(cmd_buf, ":", argv);
+    if(argc >= 2 && argv[1] != NULL && (!strcmp(argv[0], "flyaudio")))
     {
         lidbg_shell_cmd(argv[1]);
     }
