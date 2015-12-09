@@ -291,7 +291,9 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#051--LOG_LOGCAT2\n");
             fs_mem_log("*158#052--udisk reset\n");
             fs_mem_log("*158#053--system trace\n");
-	    fs_mem_log("*158#054--uvccam recording control(1 or 0)\n");
+            fs_mem_log("*158#054--uvccam recording control(1 or 0)\n");
+            fs_mem_log("*158#055--disable logcat server\n");
+            fs_mem_log("*158#056--ensable logcat server\n");
 
             show_password_list();
             lidbg_domineering_ack();
@@ -319,12 +321,6 @@ void parse_cmd(char *pt)
         {
             lidbg_chmod("/sdcard");
             CREATE_KTHREAD(thread_enable_logcat2, NULL);
-            lidbg_domineering_ack();
-        }
-        else if (!strcmp(argv[1], "*158#053"))
-        {
-            lidbg_chmod("/sdcard");
-            CREATE_KTHREAD(thread_system_trace, NULL);
             lidbg_domineering_ack();
         }
         else if (!strcmp(argv[1], "*158#002"))
@@ -626,6 +622,12 @@ void parse_cmd(char *pt)
             fs_file_write2("/dev/lidbg_pm0", "ws udisk_reset");
             lidbg_domineering_ack();
         }
+        else if (!strcmp(argv[1], "*158#053"))
+        {
+            lidbg_chmod("/sdcard");
+            CREATE_KTHREAD(thread_system_trace, NULL);
+            lidbg_domineering_ack();
+        }
 	else if (!strncmp(argv[1], "*158#054", 8))
         {
             //opt args,ex:*158#0540
@@ -650,6 +652,18 @@ void parse_cmd(char *pt)
 	        lidbg_shell_cmd("setprop persist.lidbg.uvccam.recording 0");
 	    }
                 
+        }
+        else if (!strcmp(argv[1], "*158#055"))
+        {
+            lidbg("-------disable logcat server -----");
+            lidbg_shell_cmd("setprop ctl.stop logd");
+            lidbg_domineering_ack();
+        }
+        else if (!strcmp(argv[1], "*158#056"))
+        {
+            lidbg("-------enable logcat server -----");
+            lidbg_shell_cmd("setprop ctl.start logd");
+            lidbg_domineering_ack();
         }
         else if (!strcmp(argv[1], "*168#001"))
         {
