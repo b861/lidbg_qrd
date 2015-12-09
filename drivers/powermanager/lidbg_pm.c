@@ -553,9 +553,10 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
             fly_acc_step = 1;
 #endif
 		}else if(!strcmp(cmd[1], "pre_gotosleep")){
-			lidbg("pre_gotosleep disable disk.\n");
-			usb_disk_enable(false);
-		}else if(!strcmp(cmd[1], "request_fastboot")){
+			lidbg("pre_gotosleep .\n");
+			//usb_disk_enable(false);
+		}
+        else if(!strcmp(cmd[1], "request_fastboot")){
 		lidbg("request_fastboot pull down gpio_app.\n");
 		MCU_APP_GPIO_OFF;
         }
@@ -833,7 +834,7 @@ static int thread_observer(void *data)
         have_triggerd_sleep_S = 0;
         if( !wait_for_completion_interruptible(&sleep_observer_wait))
         {
-            //find_task_by_name_or_kill(true, false, true, "c2739.mainframe");
+            find_task_by_name_or_kill(true, false, true, "c2739.mainframe");
             //kernel_wakelock_print("start:");
             //userspace_wakelock_action(0, NULL);
             //lidbg_shell_cmd("echo msg airplane_mode_on:$(getprop persist.radio.airplane_mode_on) > /dev/lidbg_pm0");
@@ -861,9 +862,30 @@ static int thread_observer(void *data)
                     }
                     break;
 
+                case 11:
+			    lidbg_shell_cmd("date  >> /data/lidbg/pm_info/ps.txt");				
+			    lidbg_shell_cmd("ps -t >> /data/lidbg/pm_info/ps.txt");
+				
+			    lidbg_shell_cmd("date  >> /data/lidbg/pm_info/wakeup_sources.txt");				
+			    lidbg_shell_cmd("cat /sys/kernel/debug/wakeup_sources >> /data/lidbg/pm_info/wakeup_sources.txt");
+			    lidbg_shell_cmd("cat /proc/wakelocks >> /data/lidbg/pm_info/wakeup_sources.txt");
+
+			    lidbg_shell_cmd("date  >> /data/lidbg/pm_info/dumpsys_media.player.txt");				
+			    lidbg_shell_cmd("dumpsys media.player >> /data/lidbg/pm_info/dumpsys_media.player.txt");		
+			    lidbg_shell_cmd("date  >> /data/lidbg/pm_info/dumpsys_power.txt");				
+			    lidbg_shell_cmd("dumpsys power >> /data/lidbg/pm_info/dumpsys_power.txt");	
+			    lidbg_shell_cmd("date  >> /data/lidbg/pm_info/dumpsys_audio.txt");				
+			    lidbg_shell_cmd("dumpsys audio >> /data/lidbg/pm_info/dumpsys_audio.txt");
+			    lidbg_shell_cmd("date  >> /data/lidbg/pm_info/dumpsys_alarm.txt");				
+			    lidbg_shell_cmd("dumpsys alarm >> /data/lidbg/pm_info/dumpsys_alarm.txt");
+			    lidbg_shell_cmd("date  >> /data/lidbg/pm_info/location.txt");				
+			    lidbg_shell_cmd("dumpsys location >> /data/lidbg/pm_info/location.txt");
+				
+                    break;
                 default:
                     if(have_triggerd_sleep_S >= 5 && !(have_triggerd_sleep_S % 5) && (g_var.system_status == FLY_GOTO_SLEEP))//atomic_read(&is_in_sleep) == 1
                     {
+			   find_task_by_name_or_kill(true, false, true, "c2739.mainframe");
                         lidbg("+++++ Attention: %ds after gotosleep +++++\n", have_triggerd_sleep_S);
                         sprintf(when, "start%d:", have_triggerd_sleep_S);
                         kernel_wakelock_print(when);

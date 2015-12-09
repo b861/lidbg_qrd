@@ -109,7 +109,7 @@ void check_conf_file(void)
         analysis_copylist(get_lidbg_file_path(buff, "copylist.conf"));
 #endif
         copy_all_conf_file();
-        lidbg_rm(MACHINE_ID_FILE);
+       //lidbg_rm(MACHINE_ID_FILE);
         lidbg_rm("/data/kmsg.txt");
         lidbg_rm(LIDBG_KMSG_FILE_PATH);
         lidbg_rm(LIDBG_LOG_DIR"lidbg_mem_log.txt");

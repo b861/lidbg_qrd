@@ -1,7 +1,7 @@
 
 #include "lidbg.h"
-//#define DISABLE_USB_WHEN_DEVICE_DOWN
-#define DISABLE_USB_WHEN_ANDROID_DOWN
+#define DISABLE_USB_WHEN_DEVICE_DOWN
+//#define DISABLE_USB_WHEN_ANDROID_DOWN
 //#define FORCE_UMOUNT_UDISK
 
 LIDBG_DEFINE;
@@ -65,9 +65,10 @@ static int thread_usb_disk_enable_delay(void *data)
     return 1;
 }
 
+
 static int thread_usb_disk_disable_delay(void *data)
 {
-    //msleep(1000);
+    msleep(2000);
     usb_disk_enable(false);
     return 1;
 }
@@ -90,8 +91,7 @@ static int lidbg_event(struct notifier_block *this,
 
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_DEVICE_DOWN):
 #ifdef DISABLE_USB_WHEN_DEVICE_DOWN
-        //CREATE_KTHREAD(thread_usb_disk_disable_delay, NULL);
-        usb_disk_enable(false);
+        CREATE_KTHREAD(thread_usb_disk_disable_delay, NULL);
 #endif
 #if 0//def VENDOR_QCOM
         lidbg("set uart to gpio\n");
@@ -105,7 +105,7 @@ static int lidbg_event(struct notifier_block *this,
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_ANDROID_DOWN):
         MSM_DSI83_DISABLE;
 #ifdef DISABLE_USB_WHEN_ANDROID_DOWN
-        //CREATE_KTHREAD(thread_usb_disk_disable_delay, NULL);
+        CREATE_KTHREAD(thread_usb_disk_disable_delay, NULL);
 #endif
         break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_GOTO_SLEEP):
@@ -124,9 +124,8 @@ static int lidbg_event(struct notifier_block *this,
         SOC_IO_Config(g_hw.gpio_bt_tx, GPIOMUX_FUNC_2, GPIOMUX_OUT_HIGH, GPIOMUX_PULL_NONE, GPIOMUX_DRV_16MA);
         SOC_IO_Config(g_hw.gpio_bt_rx, GPIOMUX_FUNC_2, GPIOMUX_OUT_HIGH, GPIOMUX_PULL_NONE, GPIOMUX_DRV_16MA);
 #endif
-
-        GPS_POWER_ON;
         CREATE_KTHREAD(thread_usb_disk_enable_delay, NULL);
+        GPS_POWER_ON;
         break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_SCREEN_ON):
         //if(!g_var.is_fly)

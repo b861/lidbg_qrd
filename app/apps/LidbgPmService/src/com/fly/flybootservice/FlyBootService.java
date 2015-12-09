@@ -145,7 +145,6 @@ public class FlyBootService extends Service {
 									LIDBG_PRINT("FlyBootService get pm state: FBS_ANDROID_DOWN");
 									SendBroadcastToService(KeyBootState, keyFastSusupendOFF);
 									start_fastboot();
-									delay(1000);
 									break;
 								case FBS_GOTO_SLEEP:
 									LIDBG_PRINT("FlyBootService get pm state: FBS_GOTO_SLEEP");

@@ -24,6 +24,14 @@ static struct semaphore powerkey_sem;
 static struct kfifo powerkey_state_fifo;
 static unsigned int *powerkey_state_buffer;
 
+typedef enum
+{
+	FLY_ACC_OFF,
+	FLY_ACC_ON,
+}FLY_ACC_STATUS;
+
+FLY_ACC_STATUS lpc_acc_state = FLY_ACC_ON;
+
 void powerkey_fifo_in(void)
 {
 	down(&powerkey_sem);
@@ -40,8 +48,8 @@ static int thread_gpio_powerkey_status(void *data)
 		wait_for_completion(&request_fastboot_wait);
 		while(1)
 		{
-			io_state = SOC_IO_Input(0, GPIO_FASTBOOT_REQUEST, LIDBG_GPIO_PULLUP);
-			if(io_state == 0){
+			io_state = SOC_IO_Input(0, GPIO_FASTBOOT_REQUEST, GPIO_CFG_NO_PULL);
+			if(io_state == 1){
 				lidbg("Request fastboot, FASTBOOT_REQUEST_IO(%d) is set to %d, io_state_cnt = %d.\n", GPIO_FASTBOOT_REQUEST, io_state, io_state_cnt);
 				mod_timer(&timer,POWERKEY_DELAY_TIME);
 				break;	//break to start fastboot
@@ -141,7 +149,14 @@ static void powerkey_suspend(void)
 static void powerkey_resume(void)
 {
 	lidbg("powerkey_resume status = %d\n", atomic_read(&status));
-
+	#if 0
+	lpc_acc_state = SOC_IO_Input(0, GPIO_FASTBOOT_REQUEST, GPIO_CFG_NO_PULL);
+	if(lpc_acc_state == FLY_ACC_OFF)
+	{
+	     lidbg("resume when accoff,return!\n");
+	     return;
+	}
+       #endif
 	if(atomic_read(&status) == FLY_SCREEN_OFF)
 	{
 		del_timer(&timer);
