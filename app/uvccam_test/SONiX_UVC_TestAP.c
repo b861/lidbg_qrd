@@ -1341,8 +1341,8 @@ int main(int argc, char *argv[])
 	void *mem0[V4L_BUFFERS_MAX];
 	void *mem1[V4L_BUFFERS_MAX];
 	unsigned int pixelformat = V4L2_PIX_FMT_MJPEG;
-	unsigned int width = 1280;
-	unsigned int height = 720;
+	unsigned int width = 1920;
+	unsigned int height = 1080;
 	unsigned int nbufs = V4L_BUFFERS_DEFAULT;
 	unsigned int input = 0;
 	unsigned int skip = 0;
