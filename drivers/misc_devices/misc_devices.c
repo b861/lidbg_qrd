@@ -352,6 +352,10 @@ static int soc_dev_probe(struct platform_device *pdev)
         CREATE_KTHREAD(thread_udisk_en, NULL);
     }
 #endif
+#ifdef PLATFORM_ID_11
+            lidbg("-------disable logcat server -----");
+            lidbg_shell_cmd("setprop ctl.stop logd");
+#endif
     return 0;
 
 }
