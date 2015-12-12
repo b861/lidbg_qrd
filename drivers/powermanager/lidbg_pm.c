@@ -835,6 +835,7 @@ static int thread_observer(void *data)
         if( !wait_for_completion_interruptible(&sleep_observer_wait))
         {
             find_task_by_name_or_kill(true, false, true, "c2739.mainframe");
+	     lidbg_shell_cmd("pm disable cld.navi.c2739.mainframe");				
             //kernel_wakelock_print("start:");
             //userspace_wakelock_action(0, NULL);
             //lidbg_shell_cmd("echo msg airplane_mode_on:$(getprop persist.radio.airplane_mode_on) > /dev/lidbg_pm0");
@@ -894,6 +895,7 @@ static int thread_observer(void *data)
                     break;
                 }
             }
+	     lidbg_shell_cmd("pm enable cld.navi.c2739.mainframe");	
             PM_WARN("\n<stop>\n");
         }
     }
