@@ -588,8 +588,8 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         {
             MCU_APP_GPIO_ON;
             SOC_System_Status(FLY_DEVICE_UP);
-            PM_WARN("mediascan.en.0\n");
-            lidbg_shell_cmd("setprop persist.lidbg.mediascan.en 0");
+            PM_WARN("mediascan.en.1\n");
+            lidbg_shell_cmd("setprop persist.lidbg.mediascan.en 1");
             if(SOC_Hal_Acc_Callback)
             {
                 lidbg("hal callback 2\n");
@@ -599,8 +599,8 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         else if(!strcmp(cmd[1], "devices_down"))
         {
             SOC_System_Status(FLY_DEVICE_DOWN);
-            PM_WARN("mediascan.en.1\n");
-            lidbg_shell_cmd("setprop persist.lidbg.mediascan.en 1");
+            PM_WARN("mediascan.en.0\n");
+            lidbg_shell_cmd("setprop persist.lidbg.mediascan.en 0");
 
             if(ANDROID_VERSION >= 500)
             {
