@@ -220,7 +220,7 @@ case "$USERS_ID" in
                 export RELEASE_REPOSITORY=$DBG_PLATFORM_PATH/8909-release;;
         esac;;
 	 5)  
-        export DBG_PLATFORM_PATH=/home2/chenchangsheng
+        export DBG_PLATFORM_PATH=/home/ccs/work
         export PATHJAVA1P6=/usr/lib/jvm/jdk1.6.0_45
         export PATHJAVA1P7=/opt/JDK/java-7-openjdk-amd64
         case "$DBG_PLATFORM_ID" in
@@ -259,6 +259,8 @@ case "$USERS_ID" in
 		11)
 		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/M8974AAAAANLYD4275
 		export BP_SOURCE_PATH=~/lwy/msm8909-la-1-1_amss_oem_milestone-major;;
+                15)
+		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/Freescale-imx6
         esac;;
 	6)
 	export DBG_PLATFORM_PATH=/home2/luoweiye

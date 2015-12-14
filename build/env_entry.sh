@@ -488,6 +488,32 @@ case "$DBG_PLATFORM_ID" in
         export TZ_BUILD_CMD='./build.sh CHIPSET=msm8974 tz sampleapp tzbsp_no_xpu playready widevine isdbtmm securitytest keymaster commonlib mobicore sse -j1'
 	export DEBUG_IMAGE_CMD='./build.sh TARGET_FAMILY=8974 sdi BUILD_ID=AAAAANAZ BUILD_VER=8 BUILD_MIN=1 -j1'
         export UPDATE_BUILD_CMD='python update_common_info.py';;
+     15)
+    	export DBG_PLATFORM=sabresd_6dq
+	export BOARD_VERSION=V1
+	export ANDROID_VERSION=502
+	export DBG_CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilts/gcc/linux-x86/arm/arm-eabi-4.6/bin/arm-eabi-
+	export JAVA_HOME=$PATHJAVA1P7
+	export JRE_HOME=$JAVA_HOME/jre
+	export CLASSPATH=$JAVA_HOME/lib:$JRE_HOME/lib:$CLASSPATH
+	export PATH=$JAVA_HOME/bin:$JRE_HOME/bin:$PATH
+	export SYSTEM_BUILD_TYPE=eng
+	export KERNEL_DEFCONFIG=imx_v7_android_defconfig
+	export DBG_BOOTLOADER_DIR=$DBG_SYSTEM_DIR/bootable/bootloader/uboot-imx
+	export DBG_KERNEL_SRC_DIR=$DBG_SYSTEM_DIR/kernel_imx
+	export DBG_KERNEL_OBJ_DIR=$DBG_SYSTEM_DIR/kernel_imx
+	export UPDATA_BIN_PLATFORM_DIR=$RELEASE_REPOSITORY/others/imx6q
+	export UPDATA_BIN_DIR=$UPDATA_BIN_PLATFORM_DIR/driver
+	export UPDATA_BASESYSTEM_DIR=$UPDATA_BIN_PLATFORM_DIR/basesystem
+	export DBG_PASSWORD=git
+	export DBG_REPO_PASSWORD=git
+	export DBG_VENDOR=VENDOR_WINNER
+	export OTA_PACKAGE_NAME=msm8974-ota-eng.*.zip
+	export DBG_SOC=imx6q
+	export TEST_PACKAGE_PATH=//192.168.128.128/tx/升级包发布/专项测试包
+	export REPOSITORY_WORK_BRANCH=master
+	export SYSTEM_WORK_BRANCH=master
+	export MAKE_PAKG_NUM= ;;
 esac 
 
 
