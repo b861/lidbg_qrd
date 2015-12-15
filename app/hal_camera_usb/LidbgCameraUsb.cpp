@@ -703,6 +703,7 @@ out_err:
                 h264Supported = 0;
                 ALOGI("%s: V4L2_PIX_FMT_H264 is supported", __func__ );
             }
+	 	    ALOGI("%s: Capture format supported: 0x%x.",__func__,fmtdesc.pixelformat);
 
         }
 
@@ -947,7 +948,7 @@ out_err:
 			ALOGE("%s: 2--VIDIOC_S_FMT success,width=%d,height=%d,pixelformat=0x%x,buffer size: %u", __func__,
 				v4l2format.fmt.pix.width,v4l2format.fmt.pix.height,v4l2format.fmt.pix.pixelformat ,v4l2format.fmt.pix.sizeimage);
         }
-
+				
         rc = initV4L2mmap(camHal);
         ALOGI("%s: X", __func__);
         return rc;
@@ -1406,7 +1407,13 @@ out_err:
                     ALOGD("%s: get_buf_from_cam success", __func__);
             }
             else
-                ALOGE("%s: get_buf_from_cam error", __func__);
+			{
+			    camHal->lock.unlock();
+			    camHal->notify_cb(CAMERA_MSG_ERROR, 0, 0, camHal->cb_ctxt);
+			    camHal->lock.lock();
+				ALOGE("%s: get_buf_from_cam error", __func__);
+				return (void *)0;
+			}              
 
             convert_data_frm_cam_to_disp(camHal, buffer_id);
             if(is_debug)
@@ -1426,7 +1433,14 @@ out_err:
                     ALOGD("%s: put_buf_to_cam success", __func__);
             }
             else
-                ALOGE("%s: put_buf_to_cam error", __func__);
+			//if (camHal->msgEnabledFlag & CAMERA_MSG_SHUTTER)
+			{
+			    camHal->lock.unlock();
+			    camHal->notify_cb(CAMERA_MSG_ERROR, 1, 0, camHal->cb_ctxt);
+			    camHal->lock.lock();
+				ALOGE("%s: put_buf_to_cam error", __func__);
+				return (void *)0;
+			}
 
             /* TBD: change the 1.5 hardcoding to Bytes Per Pixel */
             int previewBufSize = camHal->prevWidth * camHal->prevHeight * 1.5;
