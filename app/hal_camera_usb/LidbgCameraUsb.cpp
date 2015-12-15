@@ -5,6 +5,7 @@
 #include "LidbgCameraCommon.h"
 #include "LidbgCameraUsb.h"
 #include <cutils/properties.h>
+#include <stdlib.h>
 
 static int is_debug = 0;
 
@@ -83,10 +84,11 @@ dump:
 
 namespace android
 {
+    static int ioctlLoop(int fd, int ioctlCmd, void *args);
 
     extern "C" int usbcam_get_number_of_cameras()
     {
-        int numCameras = 1;
+        int numCameras = 2;
         ALOGE("%s: futenghfei2.E", __func__);
         return numCameras;
     }
@@ -162,50 +164,85 @@ namespace android
 
         return rc;
     }
+	
+static int get_uvc_device(const char *id,char *devname)
+{
+    char    temp_devname[FILENAME_LENGTH];
+    int     i = 0, ret = 0, fd = -1, cam_id = -1, uvc_count = -1;
+    struct  v4l2_capability     cap;
 
-   static int get_uvc_device(char *devname)
+    if(id)
+        cam_id = atoi(id);
+
+    ALOGE("%s: E,======[%d]", __func__, cam_id);
+    *devname = '\0';
+    while(1)
     {
-        char    temp_devname[FILENAME_LENGTH];
-        int     i = 0, ret = 0, fd;
-        struct  v4l2_capability     cap;
-
-        ALOGE("%s: E", __func__);
-        *devname = '\0';
-        while(1)
+        sprintf(temp_devname, "/dev/video%d", i);
+        ALOGI("%s: trying open ==%d==[%s]", __func__, i, temp_devname);
+        i++;
+        fd = open(temp_devname, O_RDWR  | O_NONBLOCK, 0);
+        if(-1 != fd)
         {
-            sprintf(temp_devname, "/dev/video%d", i);
-            fd = open(temp_devname, O_RDWR  | O_NONBLOCK, 0);
-            if(-1 != fd)
+            ret = ioctl(fd, VIDIOC_QUERYCAP, &cap);
+            if((0 == ret) || (ret && (ENOENT == errno)))
             {
-                ret = ioctl(fd, VIDIOC_QUERYCAP, &cap);
-                if((0 == ret) || (ret && (ENOENT == errno)))
+                if (!(cap.capabilities & V4L2_CAP_VIDEO_CAPTURE))//not usb cam node
                 {
-                    if (!(cap.capabilities & V4L2_CAP_VIDEO_CAPTURE))//not usb cam node
-				    {
-					    ALOGE("%s: This is not video capture device\n", __func__);
-					    i++;
-					    continue;
-				    }
-                    ALOGD("%s: Found UVC node: %s\n", __func__, temp_devname);
-                    strncpy(devname, temp_devname, FILENAME_LENGTH);
-                    break;
+                    ALOGE("%s: This is not video capture device\n", __func__);
+                    close(fd);
+                    continue;
                 }
-                close(fd);
-            }
-            else if(2 != errno)
-                ALOGD("%s.%d: Probing.%s: ret: %d, errno: %d,%s", __func__, i, temp_devname, ret, errno, strerror(errno));
-
-            if(i++ > 1000)
-            {
-                strncpy(devname, "/dev/video1", FILENAME_LENGTH);
-                ALOGD("%s.%d: Probing fail:%s \n", __func__, i, devname);
+                {
+                    struct v4l2_fmtdesc fmt;
+                    int isH264sup = -1;
+                    memset(&fmt, 0, sizeof(fmt));
+                    fmt.index = 0;
+                    fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+                    while ((ret = ioctl(fd, VIDIOC_ENUM_FMT, &fmt)) == 0)
+                    {
+                        fmt.index++;
+                        if(V4L2_PIX_FMT_H264 == fmt.pixelformat)
+                        {
+                            isH264sup = 1;
+                            break;
+                        }
+                    }
+                    if(isH264sup == 1)
+                    {
+                        ALOGI("%s: V4L2_PIX_FMT_H264 is supported,find next node", __func__ );
+                        close(fd);
+                        continue;
+                    }
+                }
+                uvc_count++;
+                ALOGD("%s: Found UVC node: ======%s,[%d,%d]\n", __func__, temp_devname, cam_id, uvc_count);
+                if(cam_id != -1 && cam_id != uvc_count)
+                {
+                    ALOGI("%s: need to find another======", __func__);
+                    close(fd);
+                    continue;
+                }
+                strncpy(devname, temp_devname, FILENAME_LENGTH);
+                ALOGD("%s: Found UVC node,OK: ======%s,[%d,%d]\n", __func__, temp_devname, cam_id, uvc_count);
                 break;
             }
+            close(fd);
         }
+        else if(2 != errno)
+            ALOGD("%s.%d: Probing.%s: ret: %d, errno: %d,%s", __func__, i, temp_devname, ret, errno, strerror(errno));
 
-        ALOGE("%s: X,%s", __func__, devname);
-        return 0;
+        if(i > 1000)
+        {
+            strncpy(devname, "/dev/video1", FILENAME_LENGTH);
+            ALOGD("%s.%d: Probing fail:%s \n", __func__, i, devname);
+            break;
+        }
     }
+
+    ALOGE("%s: X,%s", __func__, devname);
+    return 0;
+}
 
     extern "C" int  usbcam_camera_device_open(
         const struct hw_module_t *module, const char *id,
@@ -238,7 +275,7 @@ namespace android
         }
 
         dev_name = camHal->dev_name;
-        rc = get_uvc_device(dev_name);
+        rc = get_uvc_device(mid,dev_name);
         if(rc || *dev_name == '\0')
         {
             ALOGE("%s: No UVC node found \n", __func__);
