@@ -375,7 +375,7 @@ case "$DBG_PLATFORM_ID" in
 	export TEST_PACKAGE_PATH=//192.168.128.128/share/8909/升级包/测试升级包
 	export REPOSITORY_WORK_BRANCH=master
 	export SYSTEM_WORK_BRANCH=msm8909-master
-        export MAKE_PAKG_NUM=18
+        export MAKE_PAKG_NUM=21
 
 	export NON_HLOS_FILE_PATH=$BP_SOURCE_PATH/common/build/bin/asic
 	export RPM_FILE_PATH=$RPM_PATH/ms/bin/AAAAANAAR

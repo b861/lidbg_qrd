@@ -835,7 +835,7 @@ static int thread_observer(void *data)
         if( !wait_for_completion_interruptible(&sleep_observer_wait))
         {
             find_task_by_name_or_kill(true, false, true, "c2739.mainframe");
-	     lidbg_shell_cmd("pm disable cld.navi.c2739.mainframe");				
+	   			
             //kernel_wakelock_print("start:");
             //userspace_wakelock_action(0, NULL);
             //lidbg_shell_cmd("echo msg airplane_mode_on:$(getprop persist.radio.airplane_mode_on) > /dev/lidbg_pm0");
@@ -881,12 +881,17 @@ static int thread_observer(void *data)
 			    lidbg_shell_cmd("dumpsys alarm >> /data/lidbg/pm_info/dumpsys_alarm.txt");
 			    lidbg_shell_cmd("date  >> /data/lidbg/pm_info/location.txt");				
 			    lidbg_shell_cmd("dumpsys location >> /data/lidbg/pm_info/location.txt");
-				
-                    break;
+ 			    break;
+                  case 13:
+			    lidbg_shell_cmd("pm disable cld.navi.c2739.mainframe");
+                    	    break;
                 default:
                     if(have_triggerd_sleep_S >= 5 && !(have_triggerd_sleep_S % 5) && (g_var.system_status == FLY_GOTO_SLEEP))//atomic_read(&is_in_sleep) == 1
                     {
 			   find_task_by_name_or_kill(true, false, true, "c2739.mainframe");
+			   find_task_by_name_or_kill(true, false, true, "tencent.qqmusic");
+			   find_task_by_name_or_kill(true, false, true, ".flyaudio.media");
+			   find_task_by_name_or_kill(true, false, true, "m.android.phone");
                         lidbg("+++++ Attention: %ds after gotosleep +++++\n", have_triggerd_sleep_S);
                         sprintf(when, "start%d:", have_triggerd_sleep_S);
                         kernel_wakelock_print(when);
