@@ -181,18 +181,18 @@ namespace android
                 if((0 == ret) || (ret && (ENOENT == errno)))
                 {
                     if (!(cap.capabilities & V4L2_CAP_VIDEO_CAPTURE))//not usb cam node
-		    {
-			    ALOGE("%s: This is not video capture device\n", __func__);
-			    i++;
-			    continue;
-		    }
+				    {
+					    ALOGE("%s: This is not video capture device\n", __func__);
+					    i++;
+					    continue;
+				    }
                     ALOGD("%s: Found UVC node: %s\n", __func__, temp_devname);
                     strncpy(devname, temp_devname, FILENAME_LENGTH);
                     break;
                 }
                 close(fd);
             }
-            else
+            else if(2 != errno)
                 ALOGD("%s.%d: Probing.%s: ret: %d, errno: %d,%s", __func__, i, temp_devname, ret, errno, strerror(errno));
 
             if(i++ > 1000)
@@ -250,7 +250,8 @@ namespace android
         if (camHal->fd <  0)
         {
             ALOGE("%s: Cannot open '%s'", __func__, dev_name);
-            rc = 0;
+            rc = -1;
+			goto out_err;
         }
         else
         {
@@ -929,17 +930,22 @@ out_err:
 
         v4l2format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         {
-            v4l2format.fmt.pix.field       = V4L2_FIELD_INTERLACED;
+            v4l2format.fmt.pix.field       = V4L2_FIELD_ANY;
             v4l2format.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
             v4l2format.fmt.pix.width       = width;
             v4l2format.fmt.pix.height      = height;
+
+			ALOGE("%s: 1--VIDIOC_S_FMT ,width=%d,height=%d,pixelformat=0x%x,buffer size: %u", __func__,
+				v4l2format.fmt.pix.width,v4l2format.fmt.pix.height,v4l2format.fmt.pix.pixelformat ,v4l2format.fmt.pix.sizeimage);
 
             if (-1 == ioctlLoop(camHal->fd, VIDIOC_S_FMT, &v4l2format))
             {
                 ALOGE("%s: VIDIOC_S_FMT failed", __func__);
                 return -1;
             }
-            ALOGD("%s: VIDIOC_S_FMT success", __func__);
+						
+			ALOGE("%s: 2--VIDIOC_S_FMT success,width=%d,height=%d,pixelformat=0x%x,buffer size: %u", __func__,
+				v4l2format.fmt.pix.width,v4l2format.fmt.pix.height,v4l2format.fmt.pix.pixelformat ,v4l2format.fmt.pix.sizeimage);
         }
 
         rc = initV4L2mmap(camHal);

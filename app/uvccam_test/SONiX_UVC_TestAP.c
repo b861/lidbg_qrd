@@ -228,13 +228,16 @@ static int video_set_format(int dev, unsigned int w, unsigned int h, unsigned in
 	fmt.fmt.pix.pixelformat = format;
 	fmt.fmt.pix.field = V4L2_FIELD_ANY;
 
+	lidbg("eho1--Video format set: width: %u height: %u buffer size: %u",
+		fmt.fmt.pix.width, fmt.fmt.pix.height, fmt.fmt.pix.sizeimage);
+
 	ret = ioctl(dev, VIDIOC_S_FMT, &fmt);
 	if (ret < 0) {
-		TestAp_Printf(TESTAP_DBG_ERR, "Unable to set format: %d.\n", errno);
-		//return ret;
+		lidbg( "Unable to set format: %d.", errno);
+		return ret;
 	}
 
-	TestAp_Printf(TESTAP_DBG_FLOW, "Video format set: width: %u height: %u buffer size: %u\n",
+	lidbg("eho2--Video format set: width: %u height: %u buffer size: %u",
 		fmt.fmt.pix.width, fmt.fmt.pix.height, fmt.fmt.pix.sizeimage);
 	return 0;
 }
@@ -1273,6 +1276,12 @@ void *thread_checkdev(void *par)
                 ret = ioctl(fd, VIDIOC_QUERYCAP, &cap);
                 if((0 == ret) || (ret && (ENOENT == errno)))
                 {
+                	if (!(cap.capabilities & V4L2_CAP_VIDEO_CAPTURE))//not usb cam node
+				    {
+					    lidbg("%s: This is not video capture device\n", __func__);
+					    i++;
+					    continue;
+				    }
                     lidbg("%s: Found UVC node: %s\n", __func__, temp_devname);
 					if((do_save) && (!do_record)) 
 					{
@@ -1287,17 +1296,18 @@ void *thread_checkdev(void *par)
                   	}
 					else
 					{
-						lidbg("----%s:-------XU ctrl----------",__func__);
+						lidbg("----%s:-------user ctrl----------",__func__);
+						sprintf(temp_devname, "/dev/video%d", i + 1);
 						strncpy(devname, temp_devname, 256);
 					}
                     break;
                 }
                 close(fd);
             }
-            else
+            else if(2 != errno)
                 lidbg("%s.%d: Probing.%s: ret: %d, errno: %d,%s", __func__, i, temp_devname, ret, errno, strerror(errno));
 
-            if(i++ > 20)
+            if(i++ > 1000)
             {
                 strncpy(devname, "/dev/video1", 256);
                 lidbg("%s.%d: Probing fail:%s \n", __func__, i, devname);
@@ -3116,7 +3126,7 @@ int main(int argc, char *argv[])
 	if (video_set_format(dev, width, height, pixelformat) < 0) {
 // cjc +		
 		if(pixelformat == V4L2_PIX_FMT_H264) {
-			TestAp_Printf(TESTAP_DBG_ERR, " === Set Format Failed : skip for H264 ===  \n");
+			lidbg(" === Set Format Failed : skip for H264 === ");
 		}
 		else {
 // cjc -
