@@ -133,9 +133,79 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 				else lidbg_shell_cmd("./system/lib/modules/out/lidbg_testuvccam /dev/video1 -c -f mjpg -S &");
 			}
 		}
-		else if(!strcmp(keyval[0], "framesize") )
+		else if(!strcmp(keyval[0], "gain") )
 		{
-			return size;
+			int gainVal;
+			char temp_cmd[256];
+			gainVal = simple_strtoul(keyval[1], 0, 0);
+			if(gainVal > 100)
+			{
+		        lidbg("gain args error![0-100]");
+		        return size;
+		    }
+			lidbg("gainVal = %d",gainVal);
+			sprintf(temp_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video1 --ef-set gain=%d &", gainVal);
+			lidbg_shell_cmd(temp_cmd);
+		}
+
+		else if(!strcmp(keyval[0], "sharp") )
+		{
+			int sharpVal;
+			char temp_cmd[256];
+			sharpVal = simple_strtoul(keyval[1], 0, 0);
+			if(sharpVal > 6)
+			{
+		        lidbg("sharp args error![0-6]");
+		        return size;
+		    }
+			lidbg("sharpVal = %d",sharpVal);
+			sprintf(temp_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video1 --ef-set sharp=%d &", sharpVal);
+			lidbg_shell_cmd(temp_cmd);
+		}
+
+		else if(!strcmp(keyval[0], "gamma") )
+		{
+			int gammaVal;
+			char temp_cmd[256];
+			gammaVal = simple_strtoul(keyval[1], 0, 0);
+			if(gammaVal > 500)
+			{
+		        lidbg("gamma args error![0-500]");
+		        return size;
+		    }
+			lidbg("gammaVal = %d",gammaVal);
+			sprintf(temp_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video1 --ef-set gamma=%d &", gammaVal);
+			lidbg_shell_cmd(temp_cmd);
+		}
+
+		else if(!strcmp(keyval[0], "bright") )
+		{
+			int brightVal;
+			char temp_cmd[256];
+			brightVal = simple_strtoul(keyval[1], 0, 0);
+			if(brightVal > 128)
+			{
+		        lidbg("bright args error![0-128]");
+		        return size;
+		    }
+			lidbg("brightVal = %d",brightVal);
+			sprintf(temp_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video1 --ef-set bright=%d &", brightVal);
+			lidbg_shell_cmd(temp_cmd);
+		}
+
+		else if(!strcmp(keyval[0], "vmirror") )
+		{
+			int vmirrorVal;
+			char temp_cmd[256];
+			vmirrorVal = simple_strtoul(keyval[1], 0, 0);
+			if(vmirrorVal > 1)
+			{
+		        lidbg("vmirror args error![0|1]");
+		        return size;
+		    }
+			lidbg("vmirrorVal = %d",vmirrorVal);
+			sprintf(temp_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video1 --ef-set vmirror=%d &", vmirrorVal);
+			lidbg_shell_cmd(temp_cmd);
 		}
 
 		else if(!strcmp(keyval[0], "test") )

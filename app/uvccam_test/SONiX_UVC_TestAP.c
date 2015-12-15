@@ -1025,6 +1025,7 @@ static void usage(const char *argv0)
 #define OPT_DEBUG_LEVEL			OPT_ENUM_INPUTS + 91
 #define OPT_STILL_IMAGE			OPT_ENUM_INPUTS + 92
 #define OPT_VENDOR_VERSION_GET	OPT_ENUM_INPUTS + 93
+#define OPT_EFFECT_SET	OPT_ENUM_INPUTS + 94
 
 
 static struct option opts[] = {
@@ -1130,6 +1131,7 @@ static struct option opts[] = {
 	{"xuget-fdc", 0, 0, OPT_FRAME_DROP_CTRL_GET},
 	{"dbg", 1, 0, OPT_DEBUG_LEVEL},
 	{"vnd-get", 0, 0, OPT_VENDOR_VERSION_GET},
+	{"ef-set", 1, 0, OPT_EFFECT_SET},
 	{0, 0, 0, 0}
 };
 
@@ -1257,6 +1259,24 @@ void *thread_checkdev(void *par)
     } 
     lidbg("-------eho--------%s----exit\n",__func__);
     return 0;
+}
+
+int lidbg_token_string(char *buf, char *separator, char **token)
+{
+    char *token_tmp;
+    int pos = 0;
+    if(!buf || !separator)
+    {
+        lidbg("buf||separator NULL?\n");
+        return pos;
+    }
+    while((token_tmp = strsep(&buf, separator)) != NULL )
+    {
+        *token = token_tmp;
+        token++;
+        pos++;
+    }
+    return pos;
 }
 
   static int get_uvc_device(char *devname,char do_save,char do_record)
@@ -1409,6 +1429,19 @@ int main(int argc, char *argv[])
 	unsigned char rAsicData = 0x0;
 	unsigned int wAsicAddr = 0x0;
 	unsigned char wAsicData = 0x0;
+
+	//eho
+	char do_ef_set = 0;
+	int gainVal = 0;
+	int sharpVal = 0;
+	int gammaVal = 0;
+	int brightVal = 0;
+	int vmirrorVal = 0;
+	char do_gain = 0;
+	char do_sharp = 0;
+	char do_gamma = 0;
+	char do_bright= 0;
+	char do_vmirror = 0;
 
  // chris +
 	/* multi-stream */
@@ -2275,6 +2308,41 @@ int main(int argc, char *argv[])
 		case OPT_VENDOR_VERSION_GET:
 			do_vendor_version_get = 1;
 			break;
+		case OPT_EFFECT_SET:
+			do_ef_set = 1;
+			lidbg("OPT_EFFECT_SET111=----E--");
+			lidbg("optarg = %s",optarg);
+			char *keyval[2] = {NULL};//key-vals
+			lidbg_token_string(optarg, "=", keyval) ;
+			if (strcmp(keyval[0], "gain") == 0)
+			{
+				do_gain = 1;
+				gainVal = strtol(keyval[1], &endptr, 10);
+			}	
+			else if (strcmp(keyval[0], "sharp") == 0)
+			{
+				do_sharp = 1;
+				sharpVal = strtol(keyval[1], &endptr, 10);
+			}	
+			else if (strcmp(keyval[0], "gamma") == 0)
+			{
+				do_gamma = 1;
+				gammaVal = strtol(keyval[1], &endptr, 10);
+			}	
+			else if (strcmp(keyval[0], "bright") == 0)
+			{
+				do_bright = 1;
+				lidbg("eho------bright2 %s , %s",keyval[0],keyval[1]);
+				brightVal = strtol(keyval[1], &endptr, 10);
+				lidbg("eho------bright3");
+			}	
+			else if (strcmp(keyval[0], "vmirror") == 0)
+			{
+				do_vmirror = 1;
+				vmirrorVal = strtol(keyval[1], &endptr, 10);
+			}	
+			lidbg("OPT_EFFECT_SET=----X--");
+			break;
 		default:
 			TestAp_Printf(TESTAP_DBG_ERR, "Invalid option -%c\n", c);
 			TestAp_Printf(TESTAP_DBG_ERR, "Run %s -h for help.\n", argv[0]);
@@ -2317,6 +2385,39 @@ int main(int argc, char *argv[])
 		TestAp_Printf(TESTAP_DBG_FLOW, "Vendor Version : %s\n",vendor_version);
 		
 	}
+
+	if(do_ef_set)
+	{
+		lidbg("do_ef_set=----E--");
+		if (do_gain)
+		{
+			if (v4l2SetControl (dev, V4L2_CID_GAIN, gainVal)<0)
+			lidbg("----eho---- : do_gain (%d) Failed", gainVal);
+		}	
+		else if (do_sharp)
+		{
+			if (v4l2SetControl (dev, V4L2_CID_SHARPNESS, sharpVal)<0)
+			lidbg("----eho---- : do_sharp (%d) Failed", sharpVal);
+		}	
+		else if (do_gamma)
+		{
+			if (v4l2SetControl (dev, V4L2_CID_GAMMA, gammaVal)<0)
+			lidbg("----eho---- : do_gamma (%d) Failed", gammaVal);
+		}	
+		else if (do_bright)
+		{
+			if (v4l2SetControl (dev, V4L2_CID_BRIGHTNESS, brightVal - 64)<0)
+			lidbg("----eho---- : do_bright (%d) Failed", brightVal);
+		}	
+		else if (do_vmirror)
+		{
+			if (v4l2SetControl (dev, V4L2_CID_VFLIP, vmirrorVal)<0)
+			lidbg("----eho---- : do_vmirror (%d) Failed", vmirrorVal);
+		}	
+		lidbg("do_ef_set=----X--");
+		return 0;
+	}
+	
 	// SONiX XU Ctrl ++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 	// cjc +
