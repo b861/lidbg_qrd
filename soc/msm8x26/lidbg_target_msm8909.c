@@ -25,7 +25,7 @@ struct hw_version_specific g_hw_version_specific[] =
         .gpio_int_mcu_i2c_request = 94,
         .gpio_mcu_wp = 33,
         .gpio_mcu_app = 34,
-	.gpio_request_fastboot = 69,
+	.gpio_request_fastboot = 35,
 
         .gpio_ts_int = 13,
         .gpio_ts_rst = 12,
@@ -52,7 +52,7 @@ struct hw_version_specific g_hw_version_specific[] =
         // msm8909.dtsi  qcom,sensor-information
         .cpu_sensor_num = 3,
         .mem_sensor_num = 0,
-
+ 
         .ad_key =
         {
             {
