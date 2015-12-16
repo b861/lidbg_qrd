@@ -2411,8 +2411,11 @@ int main(int argc, char *argv[])
 		}	
 		else if (do_vmirror)
 		{
-			if (v4l2SetControl (dev, V4L2_CID_VFLIP, vmirrorVal)<0)
-			lidbg("----eho---- : do_vmirror (%d) Failed", vmirrorVal);
+			//if (v4l2SetControl (dev, V4L2_CID_VFLIP, vmirrorVal)<0)
+			char  temp_devname[256];
+			sprintf(temp_devname, "./flysystem/lib/out/lidbg_testuvccam /dev/video0 --xuset-flip %d", vmirrorVal);
+			system(temp_devname);
+			lidbg("----eho---- : do_vmirror (%d) ", vmirrorVal);
 		}	
 		lidbg("do_ef_set=----X--");
 		return 0;

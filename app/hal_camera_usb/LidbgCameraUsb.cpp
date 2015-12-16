@@ -964,6 +964,8 @@ out_err:
         v4l2_vidio_g_ctrl(camHal->fd, "V4L2_CID_EXPOSURE", V4L2_CID_EXPOSURE);
         v4l2_vidio_g_ctrl(camHal->fd, "V4L2_CID_EXPOSURE_ABSOLUTE", V4L2_CID_EXPOSURE_ABSOLUTE);
 
+		system("./flysystem/lib/out/lidbg_testuvccam /dev/video0 --xuset-mir 0 &");
+
         memset(&v4l2format, 0, sizeof(v4l2format));
 
         v4l2format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
