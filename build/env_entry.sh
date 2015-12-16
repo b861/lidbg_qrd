@@ -62,7 +62,7 @@ case "$DBG_PLATFORM_ID" in
 	export CLASSPATH=$JAVA_HOME/lib:$JRE_HOME/lib:$CLASSPATH
 	export PATH=$JAVA_HOME/bin:$JRE_HOME/bin:$PATH
 	export SYSTEM_BUILD_TYPE=userdebug
-    export DBG_BOOTLOADER_DIR=$DBG_SYSTEM_DIR/bootable/bootloader/lk
+        export DBG_BOOTLOADER_DIR=$DBG_SYSTEM_DIR/bootable/bootloader/lk
 	export DBG_KERNEL_SRC_DIR=$DBG_SYSTEM_DIR/kernel
 	export DBG_KERNEL_OBJ_DIR=$DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/obj/KERNEL_OBJ
 	export UPDATA_BIN_PLATFORM_DIR=$RELEASE_REPOSITORY
@@ -74,7 +74,7 @@ case "$DBG_PLATFORM_ID" in
 	export OTA_PACKAGE_NAME=msm8226-ota-eng.*.zip
 	export DBG_SOC=msm8x26
 	export TEST_PACKAGE_PATH=//192.168.128.128/8x28/升级包发布/专项测试包
-	export REPOSITORY_WORK_BRANCH=master
+	export REPOSITORY_WORK_BRANCH=8x28_release
 	export SYSTEM_WORK_BRANCH=master
         export MAKE_PAKG_NUM=1
 	export NON_HLOS_FILE_PATH=$BP_SOURCE_PATH/common/build/bin/asic

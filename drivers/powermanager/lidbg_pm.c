@@ -472,6 +472,15 @@ static int thread_send_power_key(void *data)
     return 1;
 }
 #endif
+
+static int thread_gps_handle(void *data)
+{
+       msleep(50*1000);   
+       lidbg_shell_cmd("settings put  secure location_providers_allowed network,gps");
+       return 1;
+}
+
+
 #ifdef SOC_mt3360
 void suspendkey_timer_isr(unsigned long data)
 {
@@ -587,9 +596,13 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         else if(!strcmp(cmd[1], "devices_up"))
         {
             MCU_APP_GPIO_ON;
+#ifdef PLATFORM_msm8226
+            lidbg_shell_cmd("settings put  secure location_providers_allowed network,gps");
+#endif
             SOC_System_Status(FLY_DEVICE_UP);
             PM_WARN("mediascan.en.1\n");
             lidbg_shell_cmd("setprop persist.lidbg.mediascan.en 1");
+
             if(SOC_Hal_Acc_Callback)
             {
                 lidbg("hal callback 2\n");
@@ -598,10 +611,14 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         }
         else if(!strcmp(cmd[1], "devices_down"))
         {
+#ifdef PLATFORM_msm8226
+            lidbg_shell_cmd("settings put  secure location_providers_allowed \"\"");
+#endif
             SOC_System_Status(FLY_DEVICE_DOWN);
             PM_WARN("mediascan.en.0\n");
             lidbg_shell_cmd("setprop persist.lidbg.mediascan.en 0");
 
+	
             if(ANDROID_VERSION >= 500)
             {
                 //only 5.0 later version can't start bootanim when ACC on
@@ -883,7 +900,7 @@ static int thread_observer(void *data)
 			    lidbg_shell_cmd("dumpsys location >> /data/lidbg/pm_info/location.txt");
  			    break;
                   case 13:
-			    lidbg_shell_cmd("pm disable cld.navi.c2739.mainframe");
+			   // lidbg_shell_cmd("pm disable cld.navi.c2739.mainframe");
                     	    break;
                 default:
                     if(have_triggerd_sleep_S >= 5 && !(have_triggerd_sleep_S % 5) && (g_var.system_status == FLY_GOTO_SLEEP))//atomic_read(&is_in_sleep) == 1
@@ -900,7 +917,7 @@ static int thread_observer(void *data)
                     break;
                 }
             }
-	     lidbg_shell_cmd("pm enable cld.navi.c2739.mainframe");	
+	    // lidbg_shell_cmd("pm enable cld.navi.c2739.mainframe");	
             PM_WARN("\n<stop>\n");
         }
     }
@@ -1045,9 +1062,14 @@ static int __init lidbg_pm_init(void)
     PM_WARN("<set MCU_WP_GPIO_ON>\n");
 
     CREATE_KTHREAD(thread_gpio_app_status_delay, NULL);
+
+#ifdef PLATFORM_msm8226
+    CREATE_KTHREAD(thread_gps_handle, NULL);
+#endif
+	
     lidbg_shell_cmd("echo 8  > /proc/sys/kernel/printk");
     PM_WARN("mediascan.en.0\n");
-    lidbg_shell_cmd("setprop persist.lidbg.mediascan.en 0");
+    lidbg_shell_cmd("setprop persist.lidbg.mediascan.en 1");
 
 #ifdef PLATFORM_msm8226
     lidbg_trace_msg_cb_register("mdss_mdp_overlay_on: Failed to turn on fb0", NULL, find_fb_open_err);

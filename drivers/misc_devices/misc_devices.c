@@ -69,7 +69,7 @@ static int thread_usb_disk_enable_delay(void *data)
 static int thread_usb_disk_disable_delay(void *data)
 {
 #ifdef DISABLE_USB_WHEN_DEVICE_DOWN
-    msleep(2000);
+    //msleep(2000);
 #else
     //msleep(1000);
 #endif
