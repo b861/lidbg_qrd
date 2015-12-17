@@ -1,7 +1,7 @@
 
 #include "lidbg.h"
-#define DISABLE_USB_WHEN_DEVICE_DOWN
-//#define DISABLE_USB_WHEN_ANDROID_DOWN
+//#define DISABLE_USB_WHEN_DEVICE_DOWN
+#define DISABLE_USB_WHEN_ANDROID_DOWN
 //#define FORCE_UMOUNT_UDISK
 
 LIDBG_DEFINE;
@@ -119,6 +119,9 @@ static int lidbg_event(struct notifier_block *this,
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_KERNEL_UP):
         break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_ANDROID_UP):
+#ifdef DISABLE_USB_WHEN_ANDROID_DOWN
+ 	  CREATE_KTHREAD(thread_usb_disk_enable_delay, NULL);
+#endif
         break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_DEVICE_UP):
 #if 0//def VENDOR_QCOM
@@ -128,7 +131,9 @@ static int lidbg_event(struct notifier_block *this,
         SOC_IO_Config(g_hw.gpio_bt_tx, GPIOMUX_FUNC_2, GPIOMUX_OUT_HIGH, GPIOMUX_PULL_NONE, GPIOMUX_DRV_16MA);
         SOC_IO_Config(g_hw.gpio_bt_rx, GPIOMUX_FUNC_2, GPIOMUX_OUT_HIGH, GPIOMUX_PULL_NONE, GPIOMUX_DRV_16MA);
 #endif
+#ifdef DISABLE_USB_WHEN_DEVICE_DOWN
         CREATE_KTHREAD(thread_usb_disk_enable_delay, NULL);
+#endif
         GPS_POWER_ON;
         break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_SCREEN_ON):
