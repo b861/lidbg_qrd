@@ -1056,6 +1056,7 @@ u8 cfg_info_group26[] = CTP_CFG_GROUP20;
 u8 cfg_info_group27[] = CTP_CFG_GROUP21;
 u8 cfg_info_group28[] = CTP927_CFG_GROUP7;
 u8 cfg_info_group29[] = CTP927_CFG_GROUP8;
+u8 cfg_info_group30[] = CTP927_CFG_GROUP9;
 
 static int gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
 {
@@ -1078,7 +1079,7 @@ static int gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
                           cfg_info_group12, cfg_info_group13, cfg_info_group14, cfg_info_group15, cfg_info_group16,
                           cfg_info_group17, cfg_info_group18, cfg_info_group19, cfg_info_group20, cfg_info_group21,
                           cfg_info_group22, cfg_info_group23, cfg_info_group24, cfg_info_group25, cfg_info_group26, cfg_info_group27,
-                          cfg_info_group28, cfg_info_group29
+                          cfg_info_group28, cfg_info_group29,cfg_info_group30
                          };
 
     u8 cfg_info_len[] = {CFG_GROUP_LEN(cfg_info_group1),
@@ -1110,6 +1111,8 @@ static int gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
                          CFG_GROUP_LEN(cfg_info_group27),
                          CFG_GROUP_LEN(cfg_info_group28),
                          CFG_GROUP_LEN(cfg_info_group29),
+                         CFG_GROUP_LEN(cfg_info_group30),
+                     
                         };
 
 #ifdef SOC_msm8x26
@@ -1242,6 +1245,17 @@ static int gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
         memcpy(&config_data[GTP_ADDR_LENGTH], send_cfg_buf[sensor_id],
                ts->gtp_cfg_len);
     }
+
+{
+	int i = 0;
+ 	lidbg("send_cfg_buf=");
+	while(i < 20)
+	{
+ 		lidbg("0x%x ", send_cfg_buf[sensor_id][i]);
+		i++;
+	}
+	lidbg("\n");
+}
 
 #if GTP_CUSTOM_CFG
     config_data[RESOLUTION_LOC] =
