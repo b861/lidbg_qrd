@@ -3660,7 +3660,7 @@ int main(int argc, char *argv[])
 			{
 				if(rec_fp1 == NULL)
 					rec_fp1 = fopen(flyh264_filename[flytmpcnt], "wb");
-				if((i % 1800 == 0) && (i > 0))//1min per section(1800 frames)
+				if((i % 9000 == 0) && (i > 0))//5 min per section(1800 frames)
 				{
 					if(flytmpcnt < 4) flytmpcnt++;
 					else flytmpcnt = 0;
