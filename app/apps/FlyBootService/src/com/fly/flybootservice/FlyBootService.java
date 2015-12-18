@@ -85,9 +85,6 @@ public class FlyBootService extends Service {
     private static String DEVICES_ON = "flyaudio devices_up";// 开外设
     private static String DEVICES_DOWN = "flyaudio devices_down";// 关外设
 
-    private static String ACC_ON_FLYUI = "cn.flyaudio.action.ACCON";
-    private static String ACC_OFF_FLYUI = "cn.flyaudio.action.ACCOFF";
-
     private static String FLYFASTBOOTSTART = "com.flyaudio.ap.broadcast";
 
     private PowerBroadcastReceiver powerBroadcastReceiver = null;
@@ -309,7 +306,6 @@ public class FlyBootService extends Service {
 		// 发送广播
 		SendBroadcastToService(KeyBootState, keyEearlySusupendOFF);
 		LIDBG_PRINT("Device Off [enterAirplaneMode]");
-		sendBroadcast(new Intent(ACC_OFF_FLYUI));
 
 		final boolean booleanRemoteControl = SystemProperties.getBoolean("persist.lidbg.RmtCtrlenable",false);
 		if(booleanRemoteControl == true){
@@ -358,7 +354,6 @@ public class FlyBootService extends Service {
             writeToFile(file, DEVICES_ON);// 唤醒
             writeToFile(file, SCREEN_ON);// 开背光
             LIDBG_PRINT("writeToFile Device On");
-            sendBroadcast(new Intent(ACC_ON_FLYUI));
             SendBroadcastToService(KeyBootState, keyEearlySusupendON);
             SendBroadcastToService(KeyBootState, keyScreenOn);
             mState = emState.ScreenOn;

@@ -79,8 +79,6 @@ public class FlyBootService extends Service {
     private static String file = "/dev/lidbg_pm0";
     private static String pmFile = "/dev/flyaudio_pm0";
 
-    private static String ACC_ON_FLYUI = "cn.flyaudio.action.ACCON";
-    private static String ACC_OFF_FLYUI = "cn.flyaudio.action.ACCOFF";
     private static String SYSTEM_RESUME = "com.flyaudio.system.resume";
 
     private static FlyBootService mFlyBootService;
@@ -145,7 +143,6 @@ public class FlyBootService extends Service {
 									enterAirplaneMode();
 									SendBroadcastToService(KeyBootState, keyEearlySusupendOFF);
 									LIDBG_PRINT("FlyBootService sent device_down to hal");
-									sendBroadcast(new Intent(ACC_OFF_FLYUI));
 									break;
 								case FBS_FASTBOOT_REQUEST:
 									LIDBG_PRINT("FlyBootService get pm state: FBS_FASTBOOT_REQUEST");
@@ -176,7 +173,6 @@ public class FlyBootService extends Service {
 								case FBS_DEVICE_UP:
 									LIDBG_PRINT("FlyBootService get pm state: FBS_DEVICE_UP");
 									restoreAirplaneMode(mFlyBootService);
-									sendBroadcast(new Intent(ACC_ON_FLYUI));
 									SendBroadcastToService(KeyBootState, keyEearlySusupendON);
 									break;
 								case FBS_SCREEN_ON:
