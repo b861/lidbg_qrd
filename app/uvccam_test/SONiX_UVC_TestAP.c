@@ -81,6 +81,18 @@
 #define MULTI_STREAM_HD_180P_360P	0x40
 #define MULTI_STREAM_360P_180P	    0x80
 
+//eho
+#define	NIGHT_GAINVAL					18
+#define	NIGHT_CONTRASTVAL			64
+#define	NIGHT_SATURATIONVAL		39
+#define	NIGHT_BRIGHTVAL				95
+#define	NIGHT_EXPOSUREVAL			619
+
+#define	DAY_GAINVAL					0
+#define	DAY_CONTRASTVAL			50
+#define	DAY_SATURATIONVAL		71
+#define	DAY_BRIGHTVAL				53
+
 // chris -
 
 struct H264Format *gH264fmt = NULL;
@@ -88,7 +100,10 @@ int Dbg_Param = 0x1f;
 
 //lidbg_parm
 char startRecording[PROPERTY_VALUE_MAX];
+char startNight[PROPERTY_VALUE_MAX];
 //char startCapture[PROPERTY_VALUE_MAX];
+
+int dev;
 
 struct thread_parameter
 {
@@ -1243,19 +1258,53 @@ void *thread_switch(void *par)
     { 
     	property_get("persist.lidbg.uvccam.recording", startRecording, "0");
 	//property_get("persist.lidbg.uvccam.capture", startCapture, "0");
-	sleep(1);
-	if(!strncmp(startRecording, "0", 1)) break;
+		sleep(1);
+		if(!strncmp(startRecording, "0", 1)) break;
     } 
     lidbg("-------eho--------%s----exit\n",__func__);
     return 0;
 }
 
-void *thread_checkdev(void *par)
+void *thread_nightmode(void *par)
 {
+	char on = 1;
     lidbg("-------eho--------%s----start\n",__func__); 
     while(1)
     { 
+    	property_get("lidbg.uvccam.nightmode", startNight, "1");
 		sleep(1);
+		if((on != 1) && (!strncmp(startNight, "1", 1)))
+		{
+			on = 1;
+			lidbg("========startNight==========");
+			if (v4l2SetControl (dev, V4L2_CID_GAIN, NIGHT_GAINVAL)<0)
+				lidbg("----eho---- : do_gain (%d) Failed", NIGHT_GAINVAL);
+			if (v4l2SetControl (dev, V4L2_CID_CONTRAST, NIGHT_CONTRASTVAL)<0)
+				lidbg("----eho---- : do_contrast (%d) Failed", NIGHT_CONTRASTVAL);
+			if (v4l2SetControl (dev, V4L2_CID_SATURATION, NIGHT_SATURATIONVAL)<0)
+				lidbg("----eho---- : do_saturation (%d) Failed", NIGHT_SATURATIONVAL);
+			if (v4l2SetControl (dev, V4L2_CID_BRIGHTNESS, NIGHT_BRIGHTVAL - 64)<0)
+				lidbg("----eho---- : do_bright (%d) Failed", NIGHT_BRIGHTVAL);
+			if (v4l2SetControl (dev, V4L2_CID_EXPOSURE_AUTO, V4L2_EXPOSURE_MANUAL)<0)
+				lidbg("----eho---- : do_exposure (%d) Failed", NIGHT_EXPOSUREVAL);
+			if (v4l2SetControl (dev, V4L2_CID_EXPOSURE_ABSOLUTE, NIGHT_EXPOSUREVAL)<0)
+				lidbg("----eho---- : do_exposure (%d) Failed", NIGHT_EXPOSUREVAL);
+		}
+		else if((on != 0) && (!strncmp(startNight, "0", 1)))
+		{
+			on = 0;
+			lidbg("========startDay==========");
+			if (v4l2SetControl (dev, V4L2_CID_GAIN, DAY_GAINVAL)<0)
+				lidbg("----eho---- : do_gain (%d) Failed", DAY_GAINVAL);
+			if (v4l2SetControl (dev, V4L2_CID_CONTRAST, DAY_CONTRASTVAL)<0)
+				lidbg("----eho---- : do_contrast (%d) Failed", DAY_CONTRASTVAL);
+			if (v4l2SetControl (dev, V4L2_CID_SATURATION, DAY_SATURATIONVAL)<0)
+				lidbg("----eho---- : do_saturation (%d) Failed", DAY_SATURATIONVAL);
+			if (v4l2SetControl (dev, V4L2_CID_BRIGHTNESS, DAY_BRIGHTVAL - 64)<0)
+				lidbg("----eho---- : do_bright (%d) Failed", DAY_BRIGHTVAL);
+			if (v4l2SetControl (dev, V4L2_CID_EXPOSURE_AUTO, V4L2_EXPOSURE_AUTO)<0)
+				lidbg("----eho---- : do_exposure (%d) Failed", NIGHT_EXPOSUREVAL);
+		}
     } 
     lidbg("-------eho--------%s----exit\n",__func__);
     return 0;
@@ -1355,7 +1404,7 @@ int main(int argc, char *argv[])
 								"/sdcard/flytmp5.h264"};
 							    
 	
-	int dev, ret;
+	int ret;
 	int fake_dev; // chris
 	int freeram;
 
@@ -1451,6 +1500,9 @@ int main(int argc, char *argv[])
 	char do_saturation = 0;
 	char do_autogain = 0;
 	char do_exposure = 0;
+	char do_nightthread = 0;
+
+	char do_night_thread = 0;
 
  // chris +
 	/* multi-stream */
@@ -1605,7 +1657,7 @@ int main(int argc, char *argv[])
 	char osd_string[12] = {"0"};
 	pthread_t thread_capture_id;
 	pthread_t thread_switch_id;
-	pthread_t thread_checkdev_id;
+	pthread_t thread_nightMode_id;
 	unsigned char flytmpcnt = 0,rc;
 	char devName[256];
  //cjc -
@@ -2370,6 +2422,10 @@ int main(int argc, char *argv[])
 				do_exposure = 1;
 				exposureVal = strtol(keyval[1], &endptr, 10);
 			}	
+			else if (strcmp(keyval[0], "nightthread") == 0)
+			{
+				do_nightthread = 1;
+			}	
 			lidbg("OPT_EFFECT_SET=----X--");
 			break;
 		default:
@@ -2458,15 +2514,25 @@ int main(int argc, char *argv[])
 		}	
 		else if (do_autogain)
 		{
-			if (v4l2SetControl (dev, V4L2_CID_EXPOSURE_AUTO, V4L2_EXPOSURE_MANUAL)<0)
+			if (v4l2SetControl (dev, V4L2_CID_EXPOSURE_AUTO, autogainVal)<0)
 			lidbg("----eho---- : do_autogain (%d) Failed", autogainVal);
 		}	
 		else if (do_exposure)
 		{
 			//if (v4l2SetControl (dev, V4L2_CID_EXPOSURE, exposureVal)<0)
 			//lidbg("----eho---- : do_exposure (%d) Failed", exposureVal);
-			if (v4l2SetControl (dev, V4L2_CID_EXPOSURE_ABSOLUTE, exposureVal)<0)
+			if (v4l2SetControl (dev, V4L2_CID_EXPOSURE_ABSOLUTE, V4L2_EXPOSURE_AUTO)<0)
 			lidbg("----eho---- : do_exposure (%d) Failed", exposureVal);
+		}	
+		else if (do_nightthread)
+		{
+			lidbg("nightthread create ----E----");
+			ret = pthread_create(&thread_nightMode_id,NULL,thread_nightmode,NULL);
+			if(ret != 0)
+			{
+				lidbg( "-----eho-----nightthread pthread error!\n");
+				return 1;
+			}
 		}	
 		lidbg("do_ef_set=----X--");
 		return 0;
