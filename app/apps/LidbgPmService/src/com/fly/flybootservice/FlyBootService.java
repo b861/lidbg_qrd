@@ -50,6 +50,8 @@ import java.io.IOException;
 
 import java.util.List;
 import org.apache.http.util.EncodingUtils;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 /*
  * ScreenOn ScreenOff DeviceOff Going2Sleep 四种状态分别表示：1.表示正常开屏状态2.表示关屏，但没关外设的状态
  * 0'~30'的阶段3.表示关屏关外设，但没到点进入深度休眠 30'~60'的阶段4.表示发出休眠请求到执行快速休眠 60'后,即进入深度休眠
