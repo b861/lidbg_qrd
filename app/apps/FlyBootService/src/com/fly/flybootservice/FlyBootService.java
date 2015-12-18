@@ -49,6 +49,7 @@ import java.util.List;
 import java.io.IOException;
 
 import java.util.List;
+import org.apache.http.util.EncodingUtils;
 /*
  * ScreenOn ScreenOff DeviceOff Going2Sleep 四种状态分别表示：1.表示正常开屏状态2.表示关屏，但没关外设的状态
  * 0'~30'的阶段3.表示关屏关外设，但没到点进入深度休眠 30'~60'的阶段4.表示发出休眠请求到执行快速休眠 60'后,即进入深度休眠
@@ -116,6 +117,7 @@ public class FlyBootService extends Service {
     Thread sendBroadcastThread = null;
     private static boolean firstBootFlag = false;
     private static boolean originPmMode = true;
+    private String[] mWhiteList = null;
 
     // add launcher in protected list
     String systemLevelProcess[] = {
@@ -169,11 +171,50 @@ public class FlyBootService extends Service {
         fbHandler = new Handler(fbHandlerThread.getLooper(), fbHandlerCallback);
 
         acquireWakeLock();
+	String tempString = FileRead("/flysystem/lib/out/appProtectList.conf");
+	if (tempString != null && tempString.length() > 2)
+	{
+		mWhiteList = tempString.trim().split("\n");
+		for (int i = 0; i < mWhiteList.length; i++)
+		{
+			LIDBG_PRINT(i +"->"+ mWhiteList[i]);
+		}
+	}
         delay(5000);
         //setAndroidState(true);
 
     }
 
+	public String FileRead(String fileName)
+	{
+		String res = null;
+		File mFile = new File(fileName);
+		if (!mFile.exists() || !mFile.canRead())
+		{
+			return res;
+		}
+
+		try
+		{
+			FileInputStream inputStream = new FileInputStream(mFile);
+			int len = inputStream.available();
+			byte[] buffer = new byte[len];
+			inputStream.read(buffer);
+			res = EncodingUtils.getString(buffer, "UTF-8");
+			// toast_show("resString="+fineString);
+			inputStream.close();
+		} catch (FileNotFoundException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return res;
+	}
     @Override
     public void onDestroy() {
         // TODO Auto-generated method stub
@@ -679,7 +720,7 @@ public class FlyBootService extends Service {
 
         appProcessList = mActivityManager.getRunningAppProcesses();
 
-        LIDBG_PRINT("begin to KillProcess.");
+        LIDBG_PRINT("begin to KillProcess."+(mWhiteList == null));
         for (ActivityManager.RunningAppProcessInfo appProcessInfo : appProcessList) {
             int pid = appProcessInfo.pid;
             int uid = appProcessInfo.uid;
@@ -698,11 +739,23 @@ public class FlyBootService extends Service {
     }
 
     private boolean isKillableProcess(String packageName) {
-        for (String processName : systemLevelProcess) {
-            if (processName.equals(packageName)) {
-                return false;
-            }
-        }
+	if (mWhiteList != null)
+	{
+	        for (String processName : mWhiteList) {
+	            if (processName.equals(packageName)) {
+	                return false;
+	            }
+	        }
+	}
+	else
+	{
+	        for (String processName : systemLevelProcess) {
+	            if (processName.equals(packageName)) {
+	                return false;
+	            }
+	        }
+	}
+
         String currentProcess = getApplicationInfo().processName;
         if (currentProcess.equals(packageName)) {
             return false;
@@ -752,7 +805,7 @@ public class FlyBootService extends Service {
         if (isAirplaneModeOn(this)) {
 			LIDBG_PRINT("isAirplaneModeOn return.");
 			return;
-        }
+        } 
         Settings.Global.putInt(getContentResolver(), "fastboot_airplane_mode", 0);
 
         // Change the system setting
