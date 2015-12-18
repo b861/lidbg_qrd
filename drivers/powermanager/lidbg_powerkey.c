@@ -9,7 +9,12 @@
 #define ANDROID_UP	 "flyaudio android_up"
 #define ANDROID_DOWN "flyaudio android_down"
 #define GOTO_SLEEP   "flyaudio gotosleep"
-#define POWER_SUSPEND_TIME   (jiffies + 30*HZ)//delay between screenoff->devicedown->androiddown
+#ifdef PLATFORM_msm8909
+#define POWER_SUSPEND_TIME1   (jiffies + 60*HZ)//delay between screenoff->devicedown->androiddown
+#else
+#define POWER_SUSPEND_TIME1   (jiffies + 30*HZ)//delay between screenoff->devicedown->androiddown
+#endif
+#define POWER_SUSPEND_TIME2   (jiffies + 30*HZ)//delay between screenoff->devicedown->androiddown
 #define AirplanMode_TIME     (jiffies + 0*HZ)//wakelock hold time between androiddown->wakelock release
 #define POWERKEY_DELAY_TIME     (jiffies + 0*HZ)//wakelock hold time between androiddown->wakelock release
 #define POWERKEY_FIFO_SIZE (512)
@@ -87,11 +92,11 @@ static int thread_powerkey_func(void *data)
 		{
 			case FLY_SCREEN_OFF:
 				fs_file_write(DEV_NAME, false, SCREEN_OFF, 0, strlen(SCREEN_OFF));
-				mod_timer(&timer,POWER_SUSPEND_TIME);
+				mod_timer(&timer,POWER_SUSPEND_TIME1);
 				break;
 			case FLY_DEVICE_DOWN:
 				fs_file_write(DEV_NAME, false, DEVICES_DOWN, 0, strlen(DEVICES_DOWN));
-				mod_timer(&timer,POWER_SUSPEND_TIME);
+				mod_timer(&timer,POWER_SUSPEND_TIME2);
 				break;
 			case FLY_FASTBOOT_REQUEST:
 				fs_file_write(DEV_NAME, false, REQUEST_FASTBOOT, 0, strlen(REQUEST_FASTBOOT));
