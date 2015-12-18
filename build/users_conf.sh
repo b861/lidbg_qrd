@@ -319,7 +319,7 @@ case "$USERS_ID" in
 	    	2)
 		export BP_SOURCE_PATH=$DBG_PLATFORM_PATH/8228_bp_v103
 		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/msm8226
-		export RELEASE_REPOSITORY=$DBG_PLATFORM_PATH/8x26-release;;
+		export RELEASE_REPOSITORY=$DBG_PLATFORM_PATH/../8x26-release;;
 	    	3)
 		export BP_SOURCE_PATH=$DBG_PLATFORM_PATH/msm8926-la-2-1-2_amss_qrd_no-l1-tds
 		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/M8926AAAAANLYD212005
@@ -344,7 +344,8 @@ case "$USERS_ID" in
 		export BP_SOURCE_PATH=~/swlee/msm8626-la-1-0-4_amss_oem-xtra_no-l1-tds;;
 		11)
 		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/msm8909
-		export BP_SOURCE_PATH=~/swlee/msm8626-la-1-0-4_amss_oem-xtra_no-l1-tds;;
+		export BP_SOURCE_PATH=~/swlee/msm8626-la-1-0-4_amss_oem-xtra_no-l1-tds
+		export RELEASE_REPOSITORY=$DBG_PLATFORM_PATH/../8x26-release;;
 		13)
 		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH_BASIC/AllwinnerA80/android;;
 	esac;;

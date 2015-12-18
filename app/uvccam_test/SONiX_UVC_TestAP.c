@@ -1437,11 +1437,20 @@ int main(int argc, char *argv[])
 	int gammaVal = 0;
 	int brightVal = 0;
 	int vmirrorVal = 0;
+	int contrastVal = 0;
+	int saturationVal = 0;
+	int autogainVal = 0;
+	int exposureVal = 0;
+	
 	char do_gain = 0;
 	char do_sharp = 0;
 	char do_gamma = 0;
 	char do_bright= 0;
 	char do_vmirror = 0;
+	char do_contrast = 0;
+	char do_saturation = 0;
+	char do_autogain = 0;
+	char do_exposure = 0;
 
  // chris +
 	/* multi-stream */
@@ -2340,6 +2349,26 @@ int main(int argc, char *argv[])
 			{
 				do_vmirror = 1;
 				vmirrorVal = strtol(keyval[1], &endptr, 10);
+			}
+			else if (strcmp(keyval[0], "contrast") == 0)
+			{
+				do_contrast = 1;
+				contrastVal = strtol(keyval[1], &endptr, 10);
+			}	
+			else if (strcmp(keyval[0], "saturation") == 0)
+			{
+				do_saturation = 1;
+				saturationVal = strtol(keyval[1], &endptr, 10);
+			}	
+			else if (strcmp(keyval[0], "autogain") == 0)
+			{
+				do_autogain = 1;
+				autogainVal = strtol(keyval[1], &endptr, 10);
+			}	
+			else if (strcmp(keyval[0], "exposure") == 0)
+			{
+				do_exposure = 1;
+				exposureVal = strtol(keyval[1], &endptr, 10);
 			}	
 			lidbg("OPT_EFFECT_SET=----X--");
 			break;
@@ -2416,6 +2445,28 @@ int main(int argc, char *argv[])
 			sprintf(temp_devname, "./flysystem/lib/out/lidbg_testuvccam /dev/video0 --xuset-flip %d", vmirrorVal);
 			system(temp_devname);
 			lidbg("----eho---- : do_vmirror (%d) ", vmirrorVal);
+		}	
+		else if (do_contrast)
+		{
+			if (v4l2SetControl (dev, V4L2_CID_CONTRAST, contrastVal)<0)
+			lidbg("----eho---- : do_contrast (%d) Failed", contrastVal);
+		}	
+		else if (do_saturation)
+		{
+			if (v4l2SetControl (dev, V4L2_CID_SATURATION, saturationVal)<0)
+			lidbg("----eho---- : do_saturation (%d) Failed", saturationVal);
+		}	
+		else if (do_autogain)
+		{
+			if (v4l2SetControl (dev, V4L2_CID_EXPOSURE_AUTO, V4L2_EXPOSURE_MANUAL)<0)
+			lidbg("----eho---- : do_autogain (%d) Failed", autogainVal);
+		}	
+		else if (do_exposure)
+		{
+			//if (v4l2SetControl (dev, V4L2_CID_EXPOSURE, exposureVal)<0)
+			//lidbg("----eho---- : do_exposure (%d) Failed", exposureVal);
+			if (v4l2SetControl (dev, V4L2_CID_EXPOSURE_ABSOLUTE, exposureVal)<0)
+			lidbg("----eho---- : do_exposure (%d) Failed", exposureVal);
 		}	
 		lidbg("do_ef_set=----X--");
 		return 0;
