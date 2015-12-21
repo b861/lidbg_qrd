@@ -93,6 +93,7 @@ public class FlyBootService extends Service {
     private static boolean sendBroadcastDone = false;
     private static boolean firstBootFlag = false;
     private boolean booleanRemoteControl = false;
+	private int intSmdMdmFlag = 0;
     private static int pmState = -1;
     private String[] mWhiteList = null;
     // add launcher in protected list
@@ -111,7 +112,7 @@ public class FlyBootService extends Service {
     public void onCreate() {
         super.onCreate();
         LIDBG_PRINT("flybootservice onCreate......");
-	writeToFile("/dev/lidbg_pm0","flyaudio PmServiceStar");
+        writeToFile("/dev/lidbg_pm0","flyaudio PmServiceStar");
 
         mFlyBootService = this;
         acquireWakeLock();
@@ -166,11 +167,17 @@ public class FlyBootService extends Service {
 									break;
 								case FBS_ANDROID_UP:
 									LIDBG_PRINT("FlyBootService get pm state: FBS_ANDROID_UP");
-									SendBroadcastToService(KeyBootState, keyFastSusupendON);
-									sendBroadcast(new Intent(SYSTEM_RESUME));
-									Intent intentBoot = new Intent(Intent.ACTION_BOOT_COMPLETED);
-									intentBoot.putExtra("flyauduio_accon", "accon");
-									sendBroadcast(intentBoot);  
+									intSmdMdmFlag = SystemProperties.getInt("persist.lidbg.SmdMdmFlag", 0);
+									LIDBG_PRINT("procScreenOn prop SmdMdmFlag:" + intSmdMdmFlag);
+									if(intSmdMdmFlag == 1){
+										SystemProperties.set("persist.lidbg.SmdMdmFlag", "0");
+									}else{
+										SendBroadcastToService(KeyBootState, keyFastSusupendON);
+										sendBroadcast(new Intent(SYSTEM_RESUME));
+										Intent intentBoot = new Intent(Intent.ACTION_BOOT_COMPLETED);
+										intentBoot.putExtra("flyauduio_accon", "accon");
+										sendBroadcast(intentBoot);
+									}
 									break;
 								case FBS_DEVICE_UP:
 									LIDBG_PRINT("FlyBootService get pm state: FBS_DEVICE_UP");
@@ -483,6 +490,11 @@ public class FlyBootService extends Service {
 
 		if(booleanRemoteControl == true){
 			LIDBG_PRINT("Flyaudio Remote-Control enabled, booleanRemoteControl:::"+booleanRemoteControl);
+			if(isAirplaneModeOn(this)){
+				LIDBG_PRINT("AirplaneMode is: ON, restore it.");
+				restoreAirplaneMode(mFlyBootService);
+			}else
+				LIDBG_PRINT("AirplaneMode is: OFF.");
 			return;
 		}else{
 			LIDBG_PRINT("Flyaudio Remote-Control disabled, booleanRemoteControl:::"+booleanRemoteControl);

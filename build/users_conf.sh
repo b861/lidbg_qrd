@@ -94,9 +94,9 @@ case "$USERS_ID" in
 	esac;;
 
 	2)
-	export DBG_PLATFORM_PATH=/media/D/flyaudio
-	export PATHJAVA1P6=/usr/lib/java-6/jdk1.6.0_31
-	export PATHJAVA1P7=/usr/lib/java-7/java-7-openjdk-amd64
+	export DBG_PLATFORM_PATH=/home2/gaobenneng/msm8974
+	export PATHJAVA1P6=/opt/JDK/jdk1.6.0_31
+	export PATHJAVA1P7=/opt/JDK/java-7-openjdk-amd64
 	case "$DBG_PLATFORM_ID" in
 			0)
 		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/R8625SSNSKQLYA10145451;;
@@ -130,7 +130,7 @@ case "$USERS_ID" in
 		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/M8974AAAAANLYD4120
 		export BP_SOURCE_PATH=~/swlee/msm8626-la-1-0-4_amss_oem-xtra_no-l1-tds;;
 		11)
-		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/M8974AAAAANLYD4120
+		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/M8974AAAAANLYD4275
 		export BP_SOURCE_PATH=~/swlee/msm8626-la-1-0-4_amss_oem-xtra_no-l1-tds;;
 	    	12)
 		export BP_SOURCE_PATH=$DBG_PLATFORM_PATH/8228_bp_v103

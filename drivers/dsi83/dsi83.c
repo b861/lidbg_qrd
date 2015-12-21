@@ -239,6 +239,31 @@ static int dsi83_fb_notifier_callback(struct notifier_block *self,
     {
         blank = evdata->data;
 
+#ifdef __RMT_CTRL_FUNC__
+		if(smd_modem_triggered_flag == 1){
+		    if (*blank == FB_BLANK_UNBLANK)
+		    {
+		        lidbg( "dsi83:FB_BLANK_UNBLANK, smd_modem_triggered_flag = %d\n", smd_modem_triggered_flag);
+		    }
+		    else if (*blank == FB_BLANK_POWERDOWN)
+		    {
+		        lidbg( "dsi83:FB_BLANK_POWERDOWN, smd_modem_triggered_flag = %d\n", smd_modem_triggered_flag);
+		    }
+		}else{
+		    if (*blank == FB_BLANK_UNBLANK)
+		    {
+		        lidbg( "dsi83:FB_BLANK_UNBLANK\n");
+		        g_var.fb_on = true;
+		        dsi83_resume();
+		    }
+		    else if (*blank == FB_BLANK_POWERDOWN)
+		    {
+		        lidbg( "dsi83:FB_BLANK_POWERDOWN\n");
+		        g_var.fb_on = false;
+		        dsi83_suspend();
+		    }
+		}
+#else
         if (*blank == FB_BLANK_UNBLANK)
         {
             lidbg( "dsi83:FB_BLANK_UNBLANK\n");
@@ -251,6 +276,7 @@ static int dsi83_fb_notifier_callback(struct notifier_block *self,
             g_var.fb_on = false;
             dsi83_suspend();
         }
+#endif
     }
 
     return 0;
@@ -561,7 +587,15 @@ static int thread_dsi83_ops_resume(void *data)
 static int dsi83_ops_resume(struct device *dev)
 {
     DUMP_FUN;
+#ifdef __RMT_CTRL_FUNC__
+	if(smd_modem_triggered_flag == 1){
+		lidbg("dsi83 resume, smd_modem_triggered_flag = %d, but don't enable\n", smd_modem_triggered_flag);
+	}
+	else
+		CREATE_KTHREAD(thread_dsi83_ops_resume, NULL);
+#else
     CREATE_KTHREAD(thread_dsi83_ops_resume, NULL);
+#endif
     return 0;
 }
 static struct dev_pm_ops dsi83_ops =

@@ -55,6 +55,14 @@
 
 #ifdef PLATFORM_msm8909
 #include <soc/qcom/smem.h>
+
+#ifndef __RMT_CTRL_FUNC__
+//#define __RMT_CTRL_FUNC__
+#endif
+
+#ifdef __RMT_CTRL_FUNC__
+extern int smd_modem_triggered_flag;
+#endif
 #else
 
 #include <linux/mfd/marimba.h>

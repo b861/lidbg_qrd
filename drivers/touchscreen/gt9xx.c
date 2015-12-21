@@ -2285,10 +2285,26 @@ static int fb_notifier_callback(struct notifier_block *self,
             ts && ts->client)
     {
         blank = evdata->data;
+#ifdef __RMT_CTRL_FUNC__
+		if(smd_modem_triggered_flag == 1){
+		    if (*blank == FB_BLANK_UNBLANK){
+				lidbg( "gt9xx: FB_BLANK_UNBLANK, smd_modem_triggered_flag = %d\n", smd_modem_triggered_flag);
+			}
+		    else if (*blank == FB_BLANK_POWERDOWN){
+				lidbg( "gt9xx: FB_BLANK_POWERDOWN, smd_modem_triggered_flag = %d\n", smd_modem_triggered_flag);
+			}
+		}else{
+		    if (*blank == FB_BLANK_UNBLANK)
+		        goodix_ts_resume(ts);
+		    else if (*blank == FB_BLANK_POWERDOWN)
+		        goodix_ts_suspend(ts);
+		}
+#else
         if (*blank == FB_BLANK_UNBLANK)
             goodix_ts_resume(ts);
         else if (*blank == FB_BLANK_POWERDOWN)
             goodix_ts_suspend(ts);
+#endif
     }
 
     return 0;

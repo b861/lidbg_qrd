@@ -596,7 +596,15 @@ static int lpc_suspend(struct device *dev)
 static int lpc_resume(struct device *dev)
 {
     DUMP_FUN;
+
+#ifdef __RMT_CTRL_FUNC__
+	if(smd_modem_triggered_flag == 1)
+		lidbg("lpc resume, but don't enable\n");
+	else
+		lpc_work_en = true;
+#else
     lpc_work_en = true;
+#endif
     return 0;
 }
 
