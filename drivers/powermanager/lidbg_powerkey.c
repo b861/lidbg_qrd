@@ -196,26 +196,10 @@ static int fb_notifier_callback(struct notifier_block *self,
 	{
 		blank = evdata->data;
 
-#ifdef __RMT_CTRL_FUNC__
-		if(smd_modem_triggered_flag == 1){
-			if (*blank == FB_BLANK_UNBLANK)
-				printk("*** powerkey_resume: FB_BLANK_UNBLANK, smd_modem_triggered_flag = %d ***\n", smd_modem_triggered_flag);
-			else if (*blank == FB_BLANK_POWERDOWN){
-				printk("*** powerkey_suspend: FB_BLANK_POWERDOWN, smd_modem_triggered_flag = %d, set to 0***\n", smd_modem_triggered_flag);
-				smd_modem_triggered_flag = 0;
-			}
-		}else{
-			if (*blank == FB_BLANK_UNBLANK)
-				powerkey_resume();
-			else if (*blank == FB_BLANK_POWERDOWN)
-				powerkey_suspend();
-		}
-#else
 		if (*blank == FB_BLANK_UNBLANK)
 			powerkey_resume();
 		else if (*blank == FB_BLANK_POWERDOWN)
 			powerkey_suspend();
-#endif
 	}
 
 	return 0;

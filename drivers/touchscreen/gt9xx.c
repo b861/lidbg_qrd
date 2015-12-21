@@ -2291,7 +2291,8 @@ static int fb_notifier_callback(struct notifier_block *self,
 				lidbg( "gt9xx: FB_BLANK_UNBLANK, smd_modem_triggered_flag = %d\n", smd_modem_triggered_flag);
 			}
 		    else if (*blank == FB_BLANK_POWERDOWN){
-				lidbg( "gt9xx: FB_BLANK_POWERDOWN, smd_modem_triggered_flag = %d\n", smd_modem_triggered_flag);
+				lidbg( "gt9xx: FB_BLANK_POWERDOWN, smd_modem_triggered_flag = %d, set to 0\n", smd_modem_triggered_flag);
+				smd_modem_triggered_flag = 0;
 			}
 		}else{
 		    if (*blank == FB_BLANK_UNBLANK)
