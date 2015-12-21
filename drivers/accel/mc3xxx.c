@@ -1829,8 +1829,8 @@ static void mc3xxx_work_func(struct work_struct *work)
 	mc3xxx_measure(data->client, &accel);
 	
 	input_report_abs(data->input_dev, ABS_X, -(accel.x));
-	input_report_abs(data->input_dev, ABS_Y, accel.y);
-	input_report_abs(data->input_dev, ABS_Z, -(accel.z));
+	input_report_abs(data->input_dev, ABS_Y, -(accel.y));
+	input_report_abs(data->input_dev, ABS_Z, accel.z);
 
 	input_event(data->input_dev, EV_SYN, SYN_TIME_SEC, ktime_to_timespec(ts).tv_sec);
 	input_event(data->input_dev, EV_SYN, SYN_TIME_NSEC,ktime_to_timespec(ts).tv_nsec);
@@ -2146,6 +2146,7 @@ static void mc3xxx_early_resume(struct early_suspend *handler)
 static int mc3xxx_acc_resume(struct mc3xxx_data *data)
 {
 	//char buf[1] = {0};
+	MSM_ACCEL_POWER_ON;
 	printk("%s\n", __func__);
     //struct mc3xxx_data *data = dev_get_drvdata(dev);
     hrtimer_cancel(&data->timer);
@@ -2161,6 +2162,7 @@ static int mc3xxx_acc_resume(struct mc3xxx_data *data)
 static int mc3xxx_acc_suspend(struct mc3xxx_data *data)
 {
 	//char buf[1] = {0};
+	MSM_ACCEL_POWER_OFF;
 	printk("%s\n", __func__);
     //struct mc3xxx_data *data = dev_get_drvdata(dev);
     hrtimer_cancel(&data->timer);
@@ -2542,6 +2544,11 @@ static int __init mc3xxx_init(void)
 {
 	int ret = 0;
 
+#if defined(PLATFORM_msm8974)
+	lidbg_shell_cmd("chmod 777 /sys/kernel/debug/regulator/8941_l18/enable");
+#endif
+
+	MSM_ACCEL_POWER_ON;
 	printk("mc3xxx: init\n");
 
 	if (gsensor_fetch_sysconfig_para())

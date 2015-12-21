@@ -35,6 +35,11 @@
 	lidbg_shell_cmd("echo 0 > /sys/kernel/debug/regulator/8226_l27/enable");\
 }while(0)
 
+#define MSM_ACCEL_POWER_ON do{\
+}while(0)
+
+#define MSM_ACCEL_POWER_OFF do{\
+}while(0)
 
 #elif defined(PLATFORM_msm8974)
 #define GPS_POWER_ON do{\
@@ -57,6 +62,16 @@
 	lidbg_shell_cmd("echo 0 > /sys/kernel/debug/regulator/8941_l23/enable");\
 }while(0)
 
+#define MSM_ACCEL_POWER_ON do{\
+	lidbg("MSM_ACCEL_POWER_ON");\
+	lidbg_shell_cmd("echo 1 > /sys/kernel/debug/regulator/8941_l18/enable");\
+}while(0)
+
+#define MSM_ACCEL_POWER_OFF do{\
+	lidbg("MSM_ACCEL_POWER_OFF");\
+	lidbg_shell_cmd("echo 0 > /sys/kernel/debug/regulator/8941_l18/enable");\
+}while(0)
+
 #else
 #define GPS_POWER_ON do{\
 }while(0)
@@ -68,6 +83,12 @@
 }while(0)
 
 #define MSM_DSI83_POWER_OFF do{\
+}while(0)
+
+#define MSM_ACCEL_POWER_ON do{\
+}while(0)
+
+#define MSM_ACCEL_POWER_OFF do{\
 }while(0)
 
 #endif

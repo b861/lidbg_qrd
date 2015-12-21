@@ -29,6 +29,7 @@ void mc3x_find_cb(void)
 {
 	msleep(10);
 	lidbg_shell_cmd("chmod 777 /sys/class/sensors/mc3xxx-accel/*");
+	MSM_ACCEL_POWER_OFF;
 	return;
 }
 
@@ -70,10 +71,16 @@ void radio_reset_lpc(void)
 	msleep(1000);
 }
 
+void accel_power_enable(void)
+{
+	MSM_ACCEL_POWER_ON;
+	msleep(10);
+}
+
 struct probe_device i2c_probe_dev[] =
 {
     {DEV_ACCEL, accel_i2c_bus, 0x18, 0x00, "bma2x2.ko", NULL, NULL},
-    {DEV_ACCEL, accel_i2c_bus, 0x4c, 0x00, "mc3xxx.ko", NULL, mc3x_find_cb},
+    {DEV_ACCEL, accel_i2c_bus, 0x4c, 0x00, "mc3xxx.ko", accel_power_enable, mc3x_find_cb},
 
     {DEV_GPS, gps_i2c_bus, 0x42, 0x00, "lidbg_gps.ko", NULL, NULL},	
 
