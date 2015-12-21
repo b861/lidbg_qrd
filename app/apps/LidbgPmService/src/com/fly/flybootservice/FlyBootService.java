@@ -93,7 +93,6 @@ public class FlyBootService extends Service {
     private static boolean sendBroadcastDone = false;
     private static boolean firstBootFlag = false;
     private boolean booleanRemoteControl = false;
-	private int intSmdMdmFlag = 0;
     private static int pmState = -1;
     private String[] mWhiteList = null;
     // add launcher in protected list
@@ -167,17 +166,11 @@ public class FlyBootService extends Service {
 									break;
 								case FBS_ANDROID_UP:
 									LIDBG_PRINT("FlyBootService get pm state: FBS_ANDROID_UP");
-									intSmdMdmFlag = SystemProperties.getInt("persist.lidbg.SmdMdmFlag", 0);
-									LIDBG_PRINT("procScreenOn prop SmdMdmFlag:" + intSmdMdmFlag);
-									if(intSmdMdmFlag == 1){
-										SystemProperties.set("persist.lidbg.SmdMdmFlag", "0");
-									}else{
-										SendBroadcastToService(KeyBootState, keyFastSusupendON);
-										sendBroadcast(new Intent(SYSTEM_RESUME));
-										Intent intentBoot = new Intent(Intent.ACTION_BOOT_COMPLETED);
-										intentBoot.putExtra("flyauduio_accon", "accon");
-										sendBroadcast(intentBoot);
-									}
+									SendBroadcastToService(KeyBootState, keyFastSusupendON);
+									sendBroadcast(new Intent(SYSTEM_RESUME));
+									Intent intentBoot = new Intent(Intent.ACTION_BOOT_COMPLETED);
+									intentBoot.putExtra("flyauduio_accon", "accon");
+									sendBroadcast(intentBoot);
 									break;
 								case FBS_DEVICE_UP:
 									LIDBG_PRINT("FlyBootService get pm state: FBS_DEVICE_UP");
