@@ -7,6 +7,10 @@
 #include <cutils/properties.h>
 #include <stdlib.h>
 #include <cutils/properties.h>
+#include "lidbg_servicer.h"
+#include <dirent.h>  
+#include <sys/stat.h>  
+#include <sys/types.h> 
 
 //eho
 #define	NIGHT_GAINVAL					18
@@ -19,6 +23,10 @@
 #define	DAY_CONTRASTVAL			50
 #define	DAY_SATURATIONVAL		71
 #define	DAY_BRIGHTVAL				53
+
+//for hub
+#define	FRONT_NODE		"1-1.4"	
+#define	BACK_NODE		"1-1.3"
 
 static int is_debug = 0;
 
@@ -192,9 +200,9 @@ static int get_uvc_device(const char *id,char *devname)
     while(1)
     {
         sprintf(temp_devname, "/dev/video%d", i);
-        ALOGI("%s: trying open ==%d==[%s]", __func__, i, temp_devname);
-        i++;
+        //ALOGI("%s: trying open ==%d==[%s]", __func__, i, temp_devname);        
         fd = open(temp_devname, O_RDWR  | O_NONBLOCK, 0);
+		i++;
         if(-1 != fd)
         {
             ret = ioctl(fd, VIDIOC_QUERYCAP, &cap);
@@ -257,6 +265,135 @@ static int get_uvc_device(const char *id,char *devname)
     return 0;
 }
 
+static int get_hub_uvc_device(const char *id,char *devname)
+{
+	char temp_devname[FILENAME_LENGTH], temp_devname2[FILENAME_LENGTH],hub_path[FILENAME_LENGTH];
+    int  ret = 0, fd = -1, cam_id = -1;
+    struct  v4l2_capability     cap;
+	DIR *pDir ;  
+	struct dirent *ent  ;  
+	int fcnt = 0  ;  
+
+    if(id)
+        cam_id = atoi(id);
+
+    ALOGE("%s: E,======[%d]", __func__, cam_id);
+    *devname = '\0';
+
+	memset(hub_path,0,sizeof(hub_path));  
+	memset(temp_devname,0,sizeof(temp_devname));  
+	
+	//check Front | Back Cam
+	if(cam_id == 1)
+		sprintf(hub_path, "/sys/bus/usb/drivers/usb/%s/%s:1.0/video4linux/", FRONT_NODE,FRONT_NODE);//front cam
+	else if(cam_id == 0)
+		sprintf(hub_path, "/sys/bus/usb/drivers/usb/%s/%s:1.0/video4linux/", BACK_NODE,BACK_NODE);//back cam
+	else
+	{
+		ALOGE("%s: cam_id wrong!==== %d ", __func__ , cam_id);
+		goto failproc;
+	}
+
+	if(access(hub_path, R_OK) != 0)
+	{
+		ALOGE("%s: hub path access wrong! ", __func__ );
+		goto failproc;
+	}
+	
+	pDir=opendir(hub_path);  
+	while((ent=readdir(pDir))!=NULL)  
+	{  
+			fcnt++;
+	        if(ent->d_type & DT_DIR)  
+	        {  
+	                if((strcmp(ent->d_name,".") == 0) || (strcmp(ent->d_name,"..") == 0) || (strncmp(ent->d_name, "video", 5)))  
+	                        continue;  
+					if(fcnt == 4)//also save 2nd node name
+					{
+						sprintf(temp_devname2,"/dev/%s", ent->d_name);  
+						break;
+					}
+	                sprintf(temp_devname,"/dev/%s", ent->d_name);  
+	                ALOGE("%s:Path:%s",__func__ ,temp_devname);  
+	        }  
+	}
+
+	ALOGE("%s: This Camera has %d video node.", __func__ , fcnt - 2);
+	if((fcnt == 3) && (cam_id == 1))	
+	{
+		ALOGE("%s: Front Camera does not support Sonix Recording!", __func__);
+	}
+	
+	if((fcnt == 0) && (ent == NULL))
+	{
+		ALOGE("%s: Hub node is not exist ! ", __func__);
+		goto failproc;
+	}
+	
+openDev:
+	  ALOGI("%s: trying open ====[%s]", __func__, temp_devname);
+      fd = open(temp_devname, O_RDWR  | O_NONBLOCK, 0);
+      if(-1 != fd)
+      {
+          ret = ioctl(fd, VIDIOC_QUERYCAP, &cap);
+          if((0 == ret) || (ret && (ENOENT == errno)))
+          {
+          	  //not usb cam node
+              if (!(cap.capabilities & V4L2_CAP_VIDEO_CAPTURE))
+              {
+					ALOGE("%s: This is not video capture device\n", __func__);
+					close(fd);
+					if(fcnt == 4)	
+					{
+						sprintf(temp_devname,temp_devname2); 
+						fcnt--;
+						goto openDev;
+					}
+					else goto failproc;
+              }
+			  //for sonix cam:do not preview on H264 recording node
+			  if(fcnt == 4)
+              {
+                  struct v4l2_fmtdesc fmt;
+                  int isH264sup = -1;
+                  memset(&fmt, 0, sizeof(fmt));
+                  fmt.index = 0;
+                  fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+                  while ((ret = ioctl(fd, VIDIOC_ENUM_FMT, &fmt)) == 0)
+                  {
+                      fmt.index++;
+                      if(V4L2_PIX_FMT_H264 == fmt.pixelformat)
+                      {
+                          isH264sup = 1;
+                          break;
+                      }
+                  }
+                  if(isH264sup == 1)
+                  {
+						close(fd);
+						ALOGI("%s: V4L2_PIX_FMT_H264 is supported,find next node", __func__ );
+						sprintf(temp_devname,temp_devname2); 
+						fcnt--;
+						goto openDev;
+                  }
+              }        
+              strncpy(devname, temp_devname, FILENAME_LENGTH);
+              ALOGD("%s: Found UVC node,OK: ======%s,[camid = %d]\n", __func__, temp_devname, cam_id);
+          }
+          close(fd);
+      }
+      else if(2 != errno)
+          ALOGD("%s: Probing.%s: ret: %d, errno: %d,%s", __func__, temp_devname, ret, errno, strerror(errno));
+    ALOGE("%s: X,%s", __func__, devname);
+    return 0;
+
+failproc:
+	strncpy(devname, "/dev/video1", FILENAME_LENGTH);
+	ALOGD("%s: Probing fail:%s , run normal proc", __func__, devname);
+	//return get_uvc_device(id , devname);
+	return -1;
+}
+
     extern "C" int  usbcam_camera_device_open(
         const struct hw_module_t *module, const char *id,
         struct hw_device_t **hw_device)
@@ -288,11 +425,10 @@ static int get_uvc_device(const char *id,char *devname)
         }
 
         dev_name = camHal->dev_name;
-        rc = get_uvc_device(mid,dev_name);
-        if(rc || *dev_name == '\0')
+        rc = get_hub_uvc_device(mid,dev_name);
+        if((rc == -1) || (*dev_name == '\0'))
         {
             ALOGE("%s: No UVC node found \n", __func__);
-            rc = -1;
             goto out_err;
         }
 

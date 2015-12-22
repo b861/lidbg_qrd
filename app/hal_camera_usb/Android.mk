@@ -5,6 +5,7 @@ include $(DBG_BUILD_PATH)/build_cfg.mk
 LOCAL_SRC_FILES := LidbgCameraMain.cpp LidbgCameraUsb.cpp
 
 LOCAL_C_INCLUDES := \
+	$(LOCAL_PATH)/../inc \
         frameworks/native/include/media/openmax \
         hardware/qcom/display/libgralloc \
         hardware/qcom/media/libstagefrighthw \

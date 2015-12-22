@@ -43,6 +43,10 @@
 #include "lidbg_servicer.h"
 #include<time.h> 
 
+#include <dirent.h>  
+#include <sys/stat.h>  
+#include <sys/types.h> 
+
 #define TESTAP_VERSION		"v1.0.21_SONiX_UVC_TestAP_Multi"
 
 #ifndef min
@@ -92,6 +96,10 @@
 #define	DAY_CONTRASTVAL			50
 #define	DAY_SATURATIONVAL		71
 #define	DAY_BRIGHTVAL				53
+
+//for hub
+#define	FRONT_NODE		"1-1.4"	
+#define	BACK_NODE		"1-1.3"
 
 // chris -
 
@@ -1328,6 +1336,118 @@ int lidbg_token_string(char *buf, char *separator, char **token)
     return pos;
 }
 
+static int get_hub_uvc_device(char *devname,char do_save,char do_record)
+{
+	char temp_devname[256], temp_devname2[256],hub_path[256];
+    int     i = 0, ret = 0, fd = -1, cam_id = -1, uvc_count = -1;
+    struct  v4l2_capability     cap;
+	DIR *pDir ;  
+	struct dirent *ent  ;  
+	int fcnt = 0  ;  
+
+	cam_id = 1;
+
+    ALOGE("%s: E,======[%d]", __func__, cam_id);
+    *devname = '\0';
+
+	memset(hub_path,0,sizeof(hub_path));  
+	memset(temp_devname,0,sizeof(temp_devname));  
+	
+	//check Front | Back Cam
+	if(cam_id == 1)
+		sprintf(hub_path, "/sys/bus/usb/drivers/usb/%s/%s:1.0/video4linux/", FRONT_NODE,FRONT_NODE);//front cam
+	else if(cam_id == 0)
+		sprintf(hub_path, "/sys/bus/usb/drivers/usb/%s/%s:1.0/video4linux/", BACK_NODE,BACK_NODE);//back cam
+	else
+	{
+		ALOGE("%s: cam_id wrong!==== %d ", __func__ , cam_id);
+		goto failproc;
+	}
+
+	if(access(hub_path, R_OK) != 0)
+	{
+		ALOGE("%s: hub path access wrong! ", __func__ );
+	}
+	
+	pDir=opendir(hub_path);  
+	while((ent=readdir(pDir))!=NULL)  
+	{  
+			fcnt++;
+	        if(ent->d_type & DT_DIR)  
+	        {  
+	                if((strcmp(ent->d_name,".") == 0) || (strcmp(ent->d_name,"..") == 0) || (strncmp(ent->d_name, "video", 5)))  
+	                        continue;  
+					if(fcnt == 4)//also save 2nd node name
+					{
+						sprintf(temp_devname2,"/dev/%s", ent->d_name);  
+						break;
+					}
+	                sprintf(temp_devname,"/dev/%s", ent->d_name);  
+	                ALOGE("%s:Path:%s",__func__ ,temp_devname);  
+	        }  
+	}
+
+	ALOGE("%s: This Camera has %d video node.", __func__ , fcnt - 2);
+	if((fcnt == 3) && (cam_id == 1))	
+	{
+		ALOGE("%s: Front Camera does not support Sonix Recording!", __func__);
+		goto failproc;
+	}
+	
+	if((fcnt == 0) && (ent == NULL))
+	{
+		ALOGE("%s: Hub node is not exist ! ", __func__);
+		goto failproc;
+	}
+
+	if((do_save) && (!do_record)) //capture
+	{
+		lidbg("----%s:-------capture----------",__func__);
+		strncpy(devname, temp_devname, 256);
+	}
+	else if((!do_save) && (do_record))//recording
+	{
+		lidbg("----%s:-------recording----------",__func__);
+		strncpy(devname, temp_devname2, 256);
+	}
+	else
+	{
+		lidbg("----%s:-------user ctrl----------",__func__);
+		strncpy(devname, temp_devname2, 256);
+	}  
+	
+openDev:
+	  ALOGI("%s: trying open ====[%s]", __func__, devname);
+      fd = open(devname, O_RDWR  | O_NONBLOCK, 0);
+      if(-1 != fd)
+      {
+          ret = ioctl(fd, VIDIOC_QUERYCAP, &cap);
+          if((0 == ret) || (ret && (ENOENT == errno)))
+          {
+          	  //not usb cam node
+              if (!(cap.capabilities & V4L2_CAP_VIDEO_CAPTURE))
+              {
+					ALOGE("%s: This is not video capture device\n", __func__);
+					close(fd);
+					goto failproc;
+              }      
+              ALOGD("%s: Found UVC node,OK: ======%s,[camid = %d]\n", __func__, devname, cam_id);
+          }
+          close(fd);
+      }
+      else if(2 != errno)
+          ALOGD("%s: Probing.%s: ret: %d, errno: %d,%s", __func__, devname, ret, errno, strerror(errno));
+    ALOGE("%s: X,%s", __func__, devname);
+    return 0;
+
+failproc:
+	strncpy(devname, "/dev/video1", 256);
+	ALOGD("%s: Probing fail:%s , run normal proc", __func__, devname);
+	//return get_uvc_device(id , devname);
+	return -1;
+}
+
+
   static int get_uvc_device(char *devname,char do_save,char do_record)
     {
         char    temp_devname[256];
@@ -1352,10 +1472,10 @@ int lidbg_token_string(char *buf, char *separator, char **token)
 					    continue;
 				    }
                     lidbg("%s: Found UVC node: %s\n", __func__, temp_devname);
-					if((do_save) && (!do_record)) 
+					if((do_save) && (!do_record)) //capture
 					{
 						lidbg("----%s:-------capture----------",__func__);
-						strncpy(devname, temp_devname, 256);//capture
+						strncpy(devname, temp_devname, 256);
 					}
                     else if((!do_save) && (do_record))//recording
                   	{
@@ -2452,7 +2572,7 @@ int main(int argc, char *argv[])
 	//dev = video_open(argv[optind]);
 	
 	//auto find camera device
-	rc = get_uvc_device(devName,do_save,do_record);
+	rc = get_hub_uvc_device(devName,do_save,do_record);
     if(rc || *devName == '\0')
     {
         lidbg("%s: No UVC node found \n", __func__);
