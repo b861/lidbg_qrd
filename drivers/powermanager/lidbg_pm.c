@@ -31,6 +31,33 @@ extern int soc_io_resume_config(u32 index, u32 direction, u32 pull, u32 drive_st
 extern void grf_backup(void);
 extern void grf_restore(void);
 
+#ifdef __RMT_CTRL_FUNC__
+static DECLARE_COMPLETION(modem_wakeup_wait);
+
+static int thread_rmtctrl_func(void *data)
+{
+	while(1)
+	{
+		wait_for_completion(&modem_wakeup_wait);
+		msleep(60 * 1000);
+		lidbg("RmtCtrl send powerkey after 60s, smd_modem_triggered_flag = %d\n", smd_modem_triggered_flag);
+		if((smd_modem_triggered_flag == 1) && (atomic_read(&is_in_sleep) == 0)){
+			lidbg("RmtCtrl power state off, send powerkey actually...\n");
+			SOC_System_Status(FLY_GOTO_SLEEP);
+			wake_unlock(&pm_wakelock);
+			lidbg_key_report(KEY_POWER, KEY_PRESSED_RELEASED);
+			observer_start();
+		}else{
+			lidbg("RmtCtrl power state mem, don't send powerkey...\n");
+		}
+
+//		if(smd_modem_triggered_flag != 0)
+//			smd_modem_triggered_flag = 0;
+	}
+    return 1;
+}
+#endif
+
 bool is_safety_apk(char *apkname)
 {
     if(strncmp(apkname, "com.fly.flybootservice", sizeof("com.fly.flybootservice") - 1) == 0)
@@ -809,6 +836,7 @@ static int pm_resume(struct device *dev)
 	if(smd_modem_triggered_flag == 1){
 		lidbg("*** Set SmdMdmFlag to 1\n");
 		lidbg_shell_cmd("setprop persist.lidbg.SmdMdmFlag 1");
+		complete(&modem_wakeup_wait);
 	}else{
 		lidbg("*** Set SmdMdmFlag to 0\n");
 		lidbg_shell_cmd("setprop persist.lidbg.SmdMdmFlag 0");
@@ -1072,6 +1100,9 @@ static int __init lidbg_pm_init(void)
 #endif
     PM_WARN("<set MCU_WP_GPIO_ON>\n");
 
+#ifdef __RMT_CTRL_FUNC__
+	CREATE_KTHREAD(thread_rmtctrl_func, NULL);
+#endif
     CREATE_KTHREAD(thread_gpio_app_status_delay, NULL);
 
 #ifdef PLATFORM_msm8226
