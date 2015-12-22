@@ -1057,6 +1057,11 @@ u8 cfg_info_group27[] = CTP_CFG_GROUP21;
 u8 cfg_info_group28[] = CTP927_CFG_GROUP7;
 u8 cfg_info_group29[] = CTP927_CFG_GROUP8;
 u8 cfg_info_group30[] = CTP927_CFG_GROUP9;
+u8 cfg_info_group31[] = CTP_CFG_GROUP22;
+u8 cfg_info_group32[] = CTP_CFG_GROUP23;
+u8 cfg_info_group33[] = CTP927_CFG_GROUP10;
+u8 cfg_info_group34[] = CTP927_CFG_GROUP11;
+u8 cfg_info_group35[] = CTP927_CFG_GROUP12;
 
 static int gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
 {
@@ -1079,7 +1084,8 @@ static int gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
                           cfg_info_group12, cfg_info_group13, cfg_info_group14, cfg_info_group15, cfg_info_group16,
                           cfg_info_group17, cfg_info_group18, cfg_info_group19, cfg_info_group20, cfg_info_group21,
                           cfg_info_group22, cfg_info_group23, cfg_info_group24, cfg_info_group25, cfg_info_group26, cfg_info_group27,
-                          cfg_info_group28, cfg_info_group29,cfg_info_group30
+                          cfg_info_group28, cfg_info_group29,cfg_info_group30,
+						  cfg_info_group31, cfg_info_group32,cfg_info_group33,cfg_info_group34,cfg_info_group35,
                          };
 
     u8 cfg_info_len[] = {CFG_GROUP_LEN(cfg_info_group1),
@@ -1112,7 +1118,11 @@ static int gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
                          CFG_GROUP_LEN(cfg_info_group28),
                          CFG_GROUP_LEN(cfg_info_group29),
                          CFG_GROUP_LEN(cfg_info_group30),
-                     
+						 CFG_GROUP_LEN(cfg_info_group31),
+						 CFG_GROUP_LEN(cfg_info_group32),
+						 CFG_GROUP_LEN(cfg_info_group33),
+						 CFG_GROUP_LEN(cfg_info_group34),
+						 CFG_GROUP_LEN(cfg_info_group35),
                         };
 
 #ifdef SOC_msm8x26
