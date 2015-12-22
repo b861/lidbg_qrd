@@ -1108,7 +1108,7 @@ out_err:
             }
         }
 
-        //        v4l2_vidio_s_ctrl(camHal->fd, "V4L2_CID_EXPOSURE_AUTO", V4L2_CID_EXPOSURE_AUTO,V4L2_EXPOSURE_AUTO );
+        //v4l2_vidio_s_ctrl(camHal->fd, "V4L2_CID_EXPOSURE_AUTO", V4L2_CID_EXPOSURE_AUTO,V4L2_EXPOSURE_AUTO );
         v4l2_vidio_g_ctrl(camHal->fd, "V4L2_CID_EXPOSURE_AUTO_PRIORITY", V4L2_CID_EXPOSURE_AUTO_PRIORITY);
         v4l2_vidio_s_ctrl(camHal->fd, "V4L2_CID_EXPOSURE_AUTO_PRIORITY", V4L2_CID_EXPOSURE_AUTO_PRIORITY, 0);
         v4l2_vidio_g_ctrl(camHal->fd, "V4L2_CID_EXPOSURE", V4L2_CID_EXPOSURE);
@@ -1116,9 +1116,9 @@ out_err:
 
 		system("./flysystem/lib/out/lidbg_testuvccam /dev/video0 --xuset-mir 0 &");
 		system("./flysystem/lib/out/lidbg_testuvccam /dev/video0 --xuset-flip 0 &");
-		system("./flysystem/lib/out/lidbg_testuvccam /dev/video1 --ef-set nightthread=1 &");
+		//system("./flysystem/lib/out/lidbg_testuvccam /dev/video1 --ef-set nightthread=1 &");
 
-	property_get("lidbg.uvccam.nightmode", startNight, "1");
+	property_get("lidbg.uvccam.nightmode", startNight, "0");
 
 	if( !strncmp(startNight, "1", 1))
 	{
@@ -1131,10 +1131,12 @@ out_err:
 			ALOGE("----eho---- : do_saturation (%d) Failed", NIGHT_SATURATIONVAL);
 		if (v4l2_vidio_s_ctrl (camHal->fd,  "V4L2_CID_BRIGHTNESS" ,V4L2_CID_BRIGHTNESS, NIGHT_BRIGHTVAL - 64)<0)
 			ALOGE("----eho---- : do_bright (%d) Failed", NIGHT_BRIGHTVAL);
+		#if 0
 		if (v4l2_vidio_s_ctrl (camHal->fd,  "V4L2_CID_EXPOSURE_AUTO" ,V4L2_CID_EXPOSURE_AUTO, V4L2_EXPOSURE_MANUAL)<0)
 			ALOGE("----eho---- : do_exposure (%d) Failed", NIGHT_EXPOSUREVAL);
 		if (v4l2_vidio_s_ctrl (camHal->fd,  "V4L2_CID_EXPOSURE_ABSOLUTE" ,V4L2_CID_EXPOSURE_ABSOLUTE, NIGHT_EXPOSUREVAL)<0)
 			ALOGE("----eho---- : do_exposure (%d) Failed", NIGHT_EXPOSUREVAL);
+		#endif
 	}
 	else if( !strncmp(startNight, "0", 1))
 	{
@@ -1147,8 +1149,10 @@ out_err:
 			ALOGE("----eho---- : do_saturation (%d) Failed", DAY_SATURATIONVAL);
 		if (v4l2_vidio_s_ctrl (camHal->fd,  "V4L2_CID_BRIGHTNESS" ,V4L2_CID_BRIGHTNESS, DAY_BRIGHTVAL - 64)<0)
 			ALOGE("----eho---- : do_bright (%d) Failed", DAY_BRIGHTVAL);
+		#if 0
 		if (v4l2_vidio_s_ctrl (camHal->fd,  "V4L2_CID_EXPOSURE_AUTO" ,V4L2_CID_EXPOSURE_AUTO, V4L2_EXPOSURE_AUTO)<0)
 			ALOGE("----eho---- : do_exposure (%d) Failed", NIGHT_EXPOSUREVAL);
+		#endif
 	}
 
         memset(&v4l2format, 0, sizeof(v4l2format));
