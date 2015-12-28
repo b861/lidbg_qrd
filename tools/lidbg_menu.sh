@@ -17,6 +17,11 @@ function lidbg_pushfly_out()
 {
 	echo $FUNCNAME
 	echo push驱动模块到产品系统
+	if [ $WORK_REMOTE = 1 ];then
+		rm -rf $WORK_LOCAL_PATH/out
+		mkdir $WORK_LOCAL_PATH/out
+		scp $WORK_REMOTE_USERNAME@192.168.9.57:$DBG_OUT_PATH $WORK_LOCAL_PATH/out
+	fi
 	cd  $DBG_TOOLS_PATH && ./pushfly.sh
 }
 
@@ -24,6 +29,11 @@ function lidbg_push_out()
 {
 	echo $FUNCNAME
 	echo push到原生系统
+	if [ $WORK_REMOTE = 1 ];then
+		rm -rf $WORK_LOCAL_PATH/out
+		mkdir $WORK_LOCAL_PATH/out
+		scp $WORK_REMOTE_USERNAME@192.168.9.57:$DBG_OUT_PATH $WORK_LOCAL_PATH/out
+	fi
 	cd  $DBG_TOOLS_PATH && ./push.sh
 }
 

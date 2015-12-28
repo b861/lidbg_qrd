@@ -6,6 +6,7 @@ case "$USERS_ID" in
 	export DBG_PLATFORM_PATH=/home/swlee/flyaudio
 	export PATHJAVA1P6=/home/flyaudio/jdk1.6.0_31
 	export PATHJAVA1P7=/home/flyaudio/java-7-openjdk-amd64
+	export WORK_REMOTE=0
 	case "$DBG_PLATFORM_ID" in
 	   	0)
 		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/R8625SSNSKQLYA10145451;;
@@ -266,6 +267,9 @@ case "$USERS_ID" in
 	export DBG_PLATFORM_PATH=/home2/luoweiye
 	export PATHJAVA1P6=/opt/JDK/jdk1.6.0_31
 	export PATHJAVA1P7=/opt/JDK/java-7-openjdk-amd64
+	export WORK_REMOTE=1
+	export WORK_REMOTE_USERNAME=luoweiyu
+	export WORK_LOCAL_PATH=/home/luoweiye/lidbg_qrd
 	case "$DBG_PLATFORM_ID" in
 	   	0)
 		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/R8625SSNSKQLYA10145451;;

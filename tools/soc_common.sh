@@ -1,6 +1,7 @@
 function soc_flash_kernel()
 {
 	echo $FUNCNAME
+if [ $WORK_REMOTE = 0 ];then
 	if [ $DBG_PLATFORM = msm7627a ];then
 		echo $DBG_PLATFORM&& sudo $DBG_TOOLS_PATH/fastboot flash boot $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/2kpagenand_images/boot.2knand.img
 	elif [ $DBG_VENDOR = VENDOR_ROCKCHIP ];then
@@ -8,11 +9,18 @@ function soc_flash_kernel()
 	else
 		echo $DBG_PLATFORM&& sudo $DBG_TOOLS_PATH/fastboot flash boot $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/boot.img
 	fi
+else
+	rm -rf $WORK_LOCAL_PATH/out
+	mkdir $WORK_LOCAL_PATH/out
+	scp $WORK_REMOTE_USERNAME@192.168.9.57:$DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/boot.img $WORK_LOCAL_PATH/out/boot.img
+	echo $DBG_PLATFORM&& sudo $DBG_TOOLS_PATH/fastboot flash boot $WORK_LOCAL_PATH/out/boot.img
+fi
 }
 
 function soc_flash_system()
 {
 	echo $FUNCNAME
+if [ $WORK_REMOTE = 0 ];then
 	if [ $DBG_PLATFORM = msm7627a ];then
 		echo $DBG_PLATFORM&& sudo $DBG_TOOLS_PATH/fastboot flash system $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/2kpagenand_images/system.2knand.img
 	elif [ $DBG_VENDOR = VENDOR_ROCKCHIP ];then
@@ -20,24 +28,43 @@ function soc_flash_system()
 	else
 		echo $DBG_PLATFORM&& sudo $DBG_TOOLS_PATH/fastboot flash system $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system.img
 	fi
+else
+	rm -rf $WORK_LOCAL_PATH/out
+	mkdir $WORK_LOCAL_PATH/out
+	scp $WORK_REMOTE_USERNAME@192.168.9.57:$DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system.img $WORK_LOCAL_PATH/out/system.img
+	echo $DBG_PLATFORM&& sudo $DBG_TOOLS_PATH/fastboot flash system $WORK_LOCAL_PATH/out/system.img
+fi
 
 }
 
 function soc_flash_recovery()
 {
 	echo $FUNCNAME
+if [ $WORK_REMOTE = 0 ];then
 	if [ $DBG_VENDOR = VENDOR_ROCKCHIP ];then
 		echo $DBG_PLATFORM && sudo $DBG_SYSTEM_DIR/RKTools/linux/Linux_Upgrade_Tool_v1.16/upgrade_tool di recovery $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/recovery.img
 	else
 		echo $DBG_PLATFORM&& sudo $DBG_TOOLS_PATH/fastboot flash recovery $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/recovery.img
 	fi
+else
+	rm -rf $WORK_LOCAL_PATH/out
+	mkdir $WORK_LOCAL_PATH/out
+	scp $WORK_REMOTE_USERNAME@192.168.9.57:$DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/recovery.img $WORK_LOCAL_PATH/out/recovery.img
+	echo $DBG_PLATFORM&& sudo $DBG_TOOLS_PATH/fastboot flash recovery $WORK_LOCAL_PATH/out/recovery.img
+fi
 }
 
 function soc_flash_bootloader()
 {
 	echo $FUNCNAME
+if [ $WORK_REMOTE = 0 ];then
 	echo $DBG_PLATFORM&& sudo $DBG_TOOLS_PATH/fastboot flash aboot $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/emmc_appsboot.mbn
-
+else
+	rm -rf $WORK_LOCAL_PATH/out
+	mkdir $WORK_LOCAL_PATH/out
+	scp $WORK_REMOTE_USERNAME@192.168.9.57:$DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/emmc_appsboot.img $WORK_LOCAL_PATH/out/emmc_appsboot.img
+	echo $DBG_PLATFORM&& sudo $DBG_TOOLS_PATH/fastboot aboot recovery $WORK_LOCAL_PATH/out/emmc_appsboot.img
+fi
 }
 
 function soc_menu()
