@@ -119,11 +119,21 @@ namespace android
     {
         int mcamera_id = camera_id;
         int rc = -1;
-        ALOGE("%s: E", __func__);
+        ALOGE("%s___camera_id = %d: E", __func__,camera_id);
         if(info)
         {
-            info->facing = CAMERA_FACING_BACK;
-            info->orientation = 0;
+        	if(camera_id == 1)//front cam:origin
+			{
+				ALOGE("%s: front cam:origin", __func__);
+				info->facing = CAMERA_FACING_BACK;
+	        	info->orientation = 0;
+			}
+			else if(camera_id == 0)//back cam:mirror
+			{
+				ALOGE("%s: back cam:mirror", __func__);
+				info->facing = CAMERA_FACING_FRONT;
+	        	info->orientation = 0;
+			}
             rc = 0;
         }
         ALOGE("%s: X", __func__);
@@ -1128,7 +1138,7 @@ out_err:
         v4l2_vidio_s_ctrl(camHal->fd, "V4L2_CID_EXPOSURE_AUTO_PRIORITY", V4L2_CID_EXPOSURE_AUTO_PRIORITY, 0);
         v4l2_vidio_g_ctrl(camHal->fd, "V4L2_CID_EXPOSURE", V4L2_CID_EXPOSURE);
         v4l2_vidio_g_ctrl(camHal->fd, "V4L2_CID_EXPOSURE_ABSOLUTE", V4L2_CID_EXPOSURE_ABSOLUTE);
-
+#if 0
 		if(cam_id == 1)
 		{
 			system("./flysystem/lib/out/lidbg_testuvccam /dev/video0 --xuset-mir 0 ");//front cam
@@ -1141,6 +1151,7 @@ out_err:
 		}
 		
 		system("./flysystem/lib/out/lidbg_testuvccam /dev/video0 --xuset-flip 0 ");
+#endif
 		system("./flysystem/lib/out/lidbg_testuvccam /dev/video1 --xuset-oe 0 0 ");
 		
 		//system("./flysystem/lib/out/lidbg_testuvccam /dev/video1 --ef-set nightthread=1 &");
