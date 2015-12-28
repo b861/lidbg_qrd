@@ -20,7 +20,7 @@ function lidbg_pushfly_out()
 	if [ $WORK_REMOTE = 1 ];then
 		rm -rf $WORK_LOCAL_PATH/out
 		mkdir $WORK_LOCAL_PATH/out
-		scp $WORK_REMOTE_USERNAME@192.168.9.57:$DBG_OUT_PATH $WORK_LOCAL_PATH/out
+		expect $DBG_TOOLS_PATH/scp $WORK_REMOTE_USERNAME $WORK_REMOTE_PASSWORD $WORK_REMOTE_PATH $WORK_LOCAL_PATH
 	fi
 	cd  $DBG_TOOLS_PATH && ./pushfly.sh
 }
