@@ -2,12 +2,12 @@
 #define ALOG_NIDEBUG 1
 #define LOG_TAG "lidbgUsbCamera"
 
+#include "lidbg_servicer.h"
 #include "LidbgCameraCommon.h"
 #include "LidbgCameraUsb.h"
 #include <cutils/properties.h>
 #include <stdlib.h>
 #include <cutils/properties.h>
-#include "lidbg_servicer.h"
 #include <dirent.h>  
 #include <sys/stat.h>  
 #include <sys/types.h> 
@@ -399,6 +399,7 @@ failproc:
 	strncpy(devname, "/dev/video1", FILENAME_LENGTH);
 	ALOGD("%s: Probing fail:%s , run normal proc", __func__, devname);
 #if NONE_HUB_SUPPORT
+	system("echo flyaudio:touch /dev/log/CameraScan1.txt > /dev/lidbg_misc0");
 	return get_uvc_device(id , devname);
 #else
 	return -1;

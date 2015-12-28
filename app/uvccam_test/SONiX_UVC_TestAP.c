@@ -102,7 +102,7 @@
 #define	BACK_NODE		"1-1.3"
 
 //flyaudio
-#define NONE_HUB_SUPPORT	0
+#define NONE_HUB_SUPPORT	1
 
 // chris -
 
@@ -1517,6 +1517,7 @@ failproc:
 	strncpy(devname, "/dev/video1", 256);
 	lidbg("%s: Probing fail:%s , run normal proc", __func__, devname);
 #if NONE_HUB_SUPPORT
+	system("echo flyaudio:touch /dev/log/CameraScan2.txt > /dev/lidbg_misc0");
 	return get_uvc_device(devname,do_save,do_record);
 #else
 	return -1;
