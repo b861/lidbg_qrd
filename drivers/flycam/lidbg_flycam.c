@@ -144,7 +144,7 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 		        return size;
 		    }
 			lidbg("gainVal = %d",gainVal);
-			sprintf(temp_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video1 --ef-set gain=%d &", gainVal);
+			sprintf(temp_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video1 --ef-set gain=%d ", gainVal);
 			lidbg_shell_cmd(temp_cmd);
 		}
 
@@ -159,7 +159,7 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 		        return size;
 		    }
 			lidbg("sharpVal = %d",sharpVal);
-			sprintf(temp_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video1 --ef-set sharp=%d &", sharpVal);
+			sprintf(temp_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video1 --ef-set sharp=%d ", sharpVal);
 			lidbg_shell_cmd(temp_cmd);
 		}
 
@@ -174,7 +174,7 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 		        return size;
 		    }
 			lidbg("gammaVal = %d",gammaVal);
-			sprintf(temp_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video1 --ef-set gamma=%d &", gammaVal);
+			sprintf(temp_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video1 --ef-set gamma=%d ", gammaVal);
 			lidbg_shell_cmd(temp_cmd);
 		}
 
@@ -189,7 +189,7 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 		        return size;
 		    }
 			lidbg("brightVal = %d",brightVal);
-			sprintf(temp_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video1 --ef-set bright=%d &", brightVal);
+			sprintf(temp_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video1 --ef-set bright=%d ", brightVal);
 			lidbg_shell_cmd(temp_cmd);
 		}
 
@@ -204,7 +204,7 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 		        return size;
 		    }
 			lidbg("vmirrorVal = %d",vmirrorVal);
-			sprintf(temp_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video1 --ef-set vmirror=%d &", vmirrorVal);
+			sprintf(temp_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video1 --ef-set vmirror=%d ", vmirrorVal);
 			lidbg_shell_cmd(temp_cmd);
 		}
 
@@ -214,8 +214,8 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 			char temp_cmd[256];
 			autogainVal = simple_strtoul(keyval[1], 0, 0);
 			lidbg("autogainVal = %d",autogainVal);
-			sprintf(temp_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video1 --ef-set autogain=%d &", autogainVal);
-			lidbg_shell_cmd(temp_cmd);
+			sprintf(temp_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video1 --ef-set autogain=%d ", autogainVal);
+			//lidbg_shell_cmd(temp_cmd);
 		}
 
 		else if(!strcmp(keyval[0], "exposure") )
@@ -224,8 +224,8 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 			char temp_cmd[256];
 			exposureVal = simple_strtoul(keyval[1], 0, 0);
 			lidbg("exposureVal = %d",exposureVal);
-			sprintf(temp_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video1 --ef-set exposure=%d &", exposureVal);
-			lidbg_shell_cmd(temp_cmd);
+			sprintf(temp_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video1 --ef-set exposure=%d ", exposureVal);
+			//lidbg_shell_cmd(temp_cmd);
 		}
 
 		else if(!strcmp(keyval[0], "contrast") )
@@ -234,7 +234,7 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 			char temp_cmd[256];
 			contrastVal = simple_strtoul(keyval[1], 0, 0);
 			lidbg("autogainVal = %d",contrastVal);
-			sprintf(temp_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video1 --ef-set contrast=%d &", contrastVal);
+			sprintf(temp_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video1 --ef-set contrast=%d ", contrastVal);
 			lidbg_shell_cmd(temp_cmd);
 		}
 
@@ -244,7 +244,7 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 			char temp_cmd[256];
 			saturationVal = simple_strtoul(keyval[1], 0, 0);
 			lidbg("exposureVal = %d",saturationVal);
-			sprintf(temp_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video1 --ef-set saturation=%d &", saturationVal);
+			sprintf(temp_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video1 --ef-set saturation=%d ", saturationVal);
 			lidbg_shell_cmd(temp_cmd);
 		}
 

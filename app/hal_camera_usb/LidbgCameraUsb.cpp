@@ -29,6 +29,7 @@
 #define	BACK_NODE		"1-1.3"
 
 static int is_debug = 0;
+static int cam_id = -1;
 
 extern "C" {
 #include <sys/time.h>
@@ -189,11 +190,13 @@ namespace android
 static int get_uvc_device(const char *id,char *devname)
 {
     char    temp_devname[FILENAME_LENGTH];
-    int     i = 0, ret = 0, fd = -1, cam_id = -1, uvc_count = -1;
+    int     i = 0, ret = 0, fd = -1, uvc_count = -1;
     struct  v4l2_capability     cap;
+	cam_id = -1;
 
     if(id)
         cam_id = atoi(id);
+
 
     ALOGE("%s: E,======[%d]", __func__, cam_id);
     *devname = '\0';
@@ -268,7 +271,8 @@ static int get_uvc_device(const char *id,char *devname)
 static int get_hub_uvc_device(const char *id,char *devname)
 {
 	char temp_devname[FILENAME_LENGTH], temp_devname2[FILENAME_LENGTH],hub_path[FILENAME_LENGTH];
-    int  ret = 0, fd = -1, cam_id = -1;
+    int  ret = 0, fd = -1;
+	cam_id = -1;
     struct  v4l2_capability     cap;
 	DIR *pDir ;  
 	struct dirent *ent  ;  
@@ -277,7 +281,9 @@ static int get_hub_uvc_device(const char *id,char *devname)
     if(id)
         cam_id = atoi(id);
 
-    ALOGE("%s: E,======[%d]", __func__, cam_id);
+	property_set("fly.uvccam.camid", id);
+
+    ALOGE("%s: E,=======[%d]", __func__, cam_id);
     *devname = '\0';
 
 	memset(hub_path,0,sizeof(hub_path));  
@@ -345,7 +351,8 @@ openDev:
 					close(fd);
 					if(fcnt == 4)	
 					{
-						sprintf(temp_devname,temp_devname2); 
+						//sprintf(temp_devname,temp_devname2); 
+						strncpy(temp_devname, temp_devname2, FILENAME_LENGTH);
 						fcnt--;
 						goto openDev;
 					}
@@ -372,7 +379,8 @@ openDev:
                   {
 						close(fd);
 						ALOGI("%s: V4L2_PIX_FMT_H264 is supported,find next node", __func__ );
-						sprintf(temp_devname,temp_devname2); 
+						//sprintf(temp_devname,temp_devname2); 
+						strncpy(temp_devname, temp_devname2, FILENAME_LENGTH);
 						fcnt--;
 						goto openDev;
                   }
@@ -390,8 +398,11 @@ openDev:
 failproc:
 	strncpy(devname, "/dev/video1", FILENAME_LENGTH);
 	ALOGD("%s: Probing fail:%s , run normal proc", __func__, devname);
-	//return get_uvc_device(id , devname);
+#if NONE_HUB_SUPPORT
+	return get_uvc_device(id , devname);
+#else
 	return -1;
+#endif
 }
 
     extern "C" int  usbcam_camera_device_open(
@@ -719,6 +730,9 @@ out_err:
                                   struct preview_stream_ops *window)
     {
         ALOGI("%s: E", __func__);
+
+		ALOGE("%s: ================window = %p========", __func__ , window);
+		
         int rc = 0;
         camera_hardware_t *camHal;
 
@@ -1114,10 +1128,22 @@ out_err:
         v4l2_vidio_g_ctrl(camHal->fd, "V4L2_CID_EXPOSURE", V4L2_CID_EXPOSURE);
         v4l2_vidio_g_ctrl(camHal->fd, "V4L2_CID_EXPOSURE_ABSOLUTE", V4L2_CID_EXPOSURE_ABSOLUTE);
 
-		system("./flysystem/lib/out/lidbg_testuvccam /dev/video0 --xuset-mir 0 &");
-		system("./flysystem/lib/out/lidbg_testuvccam /dev/video0 --xuset-flip 0 &");
+		if(cam_id == 1)
+		{
+			system("./flysystem/lib/out/lidbg_testuvccam /dev/video0 --xuset-mir 0 ");//front cam
+			v4l2_vidio_s_ctrl(camHal->fd, "V4L2_CID_HFLIP", V4L2_CID_HFLIP, 0);
+		}
+		else if(cam_id == 0)
+		{
+			system("./flysystem/lib/out/lidbg_testuvccam /dev/video0 --xuset-mir 1 ");//back cam
+			v4l2_vidio_s_ctrl(camHal->fd, "V4L2_CID_HFLIP", V4L2_CID_HFLIP, 1);
+		}
+		
+		system("./flysystem/lib/out/lidbg_testuvccam /dev/video0 --xuset-flip 0 ");
+		system("./flysystem/lib/out/lidbg_testuvccam /dev/video1 --xuset-oe 0 0 ");
+		
 		//system("./flysystem/lib/out/lidbg_testuvccam /dev/video1 --ef-set nightthread=1 &");
-
+#if 0
 	property_get("lidbg.uvccam.nightmode", startNight, "0");
 
 	if( !strncmp(startNight, "1", 1))
@@ -1131,12 +1157,12 @@ out_err:
 			ALOGE("----eho---- : do_saturation (%d) Failed", NIGHT_SATURATIONVAL);
 		if (v4l2_vidio_s_ctrl (camHal->fd,  "V4L2_CID_BRIGHTNESS" ,V4L2_CID_BRIGHTNESS, NIGHT_BRIGHTVAL - 64)<0)
 			ALOGE("----eho---- : do_bright (%d) Failed", NIGHT_BRIGHTVAL);
-		#if 0
+		/*
 		if (v4l2_vidio_s_ctrl (camHal->fd,  "V4L2_CID_EXPOSURE_AUTO" ,V4L2_CID_EXPOSURE_AUTO, V4L2_EXPOSURE_MANUAL)<0)
 			ALOGE("----eho---- : do_exposure (%d) Failed", NIGHT_EXPOSUREVAL);
 		if (v4l2_vidio_s_ctrl (camHal->fd,  "V4L2_CID_EXPOSURE_ABSOLUTE" ,V4L2_CID_EXPOSURE_ABSOLUTE, NIGHT_EXPOSUREVAL)<0)
 			ALOGE("----eho---- : do_exposure (%d) Failed", NIGHT_EXPOSUREVAL);
-		#endif
+		*/
 	}
 	else if( !strncmp(startNight, "0", 1))
 	{
@@ -1149,12 +1175,12 @@ out_err:
 			ALOGE("----eho---- : do_saturation (%d) Failed", DAY_SATURATIONVAL);
 		if (v4l2_vidio_s_ctrl (camHal->fd,  "V4L2_CID_BRIGHTNESS" ,V4L2_CID_BRIGHTNESS, DAY_BRIGHTVAL - 64)<0)
 			ALOGE("----eho---- : do_bright (%d) Failed", DAY_BRIGHTVAL);
-		#if 0
+		/*
 		if (v4l2_vidio_s_ctrl (camHal->fd,  "V4L2_CID_EXPOSURE_AUTO" ,V4L2_CID_EXPOSURE_AUTO, V4L2_EXPOSURE_AUTO)<0)
 			ALOGE("----eho---- : do_exposure (%d) Failed", NIGHT_EXPOSUREVAL);
-		#endif
+		*/
 	}
-
+#endif
         memset(&v4l2format, 0, sizeof(v4l2format));
 
         v4l2format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -2483,7 +2509,7 @@ ION_OPEN_FAILED:
         int rc = 0;
 
         ALOGE("%s: X", __func__);
-        return -1;
+        return 0;
     }
 
 

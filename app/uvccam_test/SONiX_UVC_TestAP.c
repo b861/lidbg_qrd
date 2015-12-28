@@ -101,6 +101,9 @@
 #define	FRONT_NODE		"1-1.4"	
 #define	BACK_NODE		"1-1.3"
 
+//flyaudio
+#define NONE_HUB_SUPPORT	0
+
 // chris -
 
 struct H264Format *gH264fmt = NULL;
@@ -1336,117 +1339,6 @@ int lidbg_token_string(char *buf, char *separator, char **token)
     return pos;
 }
 
-static int get_hub_uvc_device(char *devname,char do_save,char do_record)
-{
-	char temp_devname[256], temp_devname2[256],hub_path[256];
-    int     i = 0, ret = 0, fd = -1, cam_id = -1, uvc_count = -1;
-    struct  v4l2_capability     cap;
-	DIR *pDir ;  
-	struct dirent *ent  ;  
-	int fcnt = 0  ;  
-
-	cam_id = 1;
-
-    ALOGE("%s: E,======[%d]", __func__, cam_id);
-    *devname = '\0';
-
-	memset(hub_path,0,sizeof(hub_path));  
-	memset(temp_devname,0,sizeof(temp_devname));  
-	
-	//check Front | Back Cam
-	if(cam_id == 1)
-		sprintf(hub_path, "/sys/bus/usb/drivers/usb/%s/%s:1.0/video4linux/", FRONT_NODE,FRONT_NODE);//front cam
-	else if(cam_id == 0)
-		sprintf(hub_path, "/sys/bus/usb/drivers/usb/%s/%s:1.0/video4linux/", BACK_NODE,BACK_NODE);//back cam
-	else
-	{
-		ALOGE("%s: cam_id wrong!==== %d ", __func__ , cam_id);
-		goto failproc;
-	}
-
-	if(access(hub_path, R_OK) != 0)
-	{
-		ALOGE("%s: hub path access wrong! ", __func__ );
-	}
-	
-	pDir=opendir(hub_path);  
-	while((ent=readdir(pDir))!=NULL)  
-	{  
-			fcnt++;
-	        if(ent->d_type & DT_DIR)  
-	        {  
-	                if((strcmp(ent->d_name,".") == 0) || (strcmp(ent->d_name,"..") == 0) || (strncmp(ent->d_name, "video", 5)))  
-	                        continue;  
-					if(fcnt == 4)//also save 2nd node name
-					{
-						sprintf(temp_devname2,"/dev/%s", ent->d_name);  
-						break;
-					}
-	                sprintf(temp_devname,"/dev/%s", ent->d_name);  
-	                ALOGE("%s:Path:%s",__func__ ,temp_devname);  
-	        }  
-	}
-
-	ALOGE("%s: This Camera has %d video node.", __func__ , fcnt - 2);
-	if((fcnt == 3) && (cam_id == 1))	
-	{
-		ALOGE("%s: Front Camera does not support Sonix Recording!", __func__);
-		goto failproc;
-	}
-	
-	if((fcnt == 0) && (ent == NULL))
-	{
-		ALOGE("%s: Hub node is not exist ! ", __func__);
-		goto failproc;
-	}
-
-	if((do_save) && (!do_record)) //capture
-	{
-		lidbg("----%s:-------capture----------",__func__);
-		strncpy(devname, temp_devname, 256);
-	}
-	else if((!do_save) && (do_record))//recording
-	{
-		lidbg("----%s:-------recording----------",__func__);
-		strncpy(devname, temp_devname2, 256);
-	}
-	else
-	{
-		lidbg("----%s:-------user ctrl----------",__func__);
-		strncpy(devname, temp_devname2, 256);
-	}  
-	
-openDev:
-	  ALOGI("%s: trying open ====[%s]", __func__, devname);
-      fd = open(devname, O_RDWR  | O_NONBLOCK, 0);
-      if(-1 != fd)
-      {
-          ret = ioctl(fd, VIDIOC_QUERYCAP, &cap);
-          if((0 == ret) || (ret && (ENOENT == errno)))
-          {
-          	  //not usb cam node
-              if (!(cap.capabilities & V4L2_CAP_VIDEO_CAPTURE))
-              {
-					ALOGE("%s: This is not video capture device\n", __func__);
-					close(fd);
-					goto failproc;
-              }      
-              ALOGD("%s: Found UVC node,OK: ======%s,[camid = %d]\n", __func__, devname, cam_id);
-          }
-          close(fd);
-      }
-      else if(2 != errno)
-          ALOGD("%s: Probing.%s: ret: %d, errno: %d,%s", __func__, devname, ret, errno, strerror(errno));
-    ALOGE("%s: X,%s", __func__, devname);
-    return 0;
-
-failproc:
-	strncpy(devname, "/dev/video1", 256);
-	ALOGD("%s: Probing fail:%s , run normal proc", __func__, devname);
-	//return get_uvc_device(id , devname);
-	return -1;
-}
-
 
   static int get_uvc_device(char *devname,char do_save,char do_record)
     {
@@ -1508,20 +1400,146 @@ failproc:
         return 0;
     }
 
+static int get_hub_uvc_device(char *devname,char do_save,char do_record)
+{
+	char temp_devname[256], temp_devname2[256],hub_path[256];
+    int     i = 0, ret = 0, fd = -1, cam_id = -1, uvc_count = -1;
+    struct  v4l2_capability     cap;
+	DIR *pDir ;  
+	struct dirent *ent  ;  
+	int fcnt = 0  ;  
+	char camID[PROPERTY_VALUE_MAX];
+
+	
+	if((do_save) || (do_record))  cam_id = 1;  //capture or recording force to camid 1
+	else
+	{
+		property_get("fly.uvccam.camid", camID, "0");//according to last preview camid
+		cam_id = atoi(camID);
+	}
+
+    lidbg("%s: E,======[%d]", __func__, cam_id);
+    *devname = '\0';
+
+	memset(hub_path,0,sizeof(hub_path));  
+	memset(temp_devname,0,sizeof(temp_devname));  
+	
+	//check Front | Back Cam
+	if(cam_id == 1)
+		sprintf(hub_path, "/sys/bus/usb/drivers/usb/%s/%s:1.0/video4linux/", FRONT_NODE,FRONT_NODE);//front cam
+	else if(cam_id == 0)
+		sprintf(hub_path, "/sys/bus/usb/drivers/usb/%s/%s:1.0/video4linux/", BACK_NODE,BACK_NODE);//back cam
+	else
+	{
+		lidbg("%s: cam_id wrong!==== %d ", __func__ , cam_id);
+		goto failproc;
+	}
+
+	if(access(hub_path, R_OK) != 0)
+	{
+		lidbg("%s: hub path access wrong! ", __func__ );
+		goto failproc;
+	}
+	
+	pDir=opendir(hub_path);  
+	while((ent=readdir(pDir))!=NULL)  
+	{  
+			fcnt++;
+	        if(ent->d_type & DT_DIR)  
+	        {  
+	                if((strcmp(ent->d_name,".") == 0) || (strcmp(ent->d_name,"..") == 0) || (strncmp(ent->d_name, "video", 5)))  
+	                        continue;  
+					if(fcnt == 4)//also save 2nd node name
+					{
+						sprintf(temp_devname2,"/dev/%s", ent->d_name);  
+						sprintf(temp_devname,"/dev/%s", ent->d_name); 
+						break;
+					}
+	                sprintf(temp_devname,"/dev/%s", ent->d_name);  
+	                lidbg("%s:Path:%s",__func__ ,temp_devname);  
+	        }  
+	}
+
+	lidbg("%s: This Camera has %d video node.", __func__ , fcnt - 2);
+	if((fcnt == 3) && (cam_id == 1))	
+	{
+		lidbg("%s: Front Camera does not support Sonix Recording!", __func__);
+		goto failproc;
+	}
+	
+	if((fcnt == 0) && (ent == NULL))
+	{
+		lidbg("%s: Hub node is not exist ! ", __func__);
+		goto failproc;
+	}
+
+	if((do_save) && (!do_record)) //capture
+	{
+		lidbg("----%s:-------capture----------",__func__);
+		strncpy(devname, temp_devname, 256);
+	}
+	else if((!do_save) && (do_record))//recording
+	{
+		lidbg("----%s:-------recording----------",__func__);
+		strncpy(devname, temp_devname, 256);
+	}
+	else
+	{
+		lidbg("----%s:-------user ctrl----------",__func__);
+		strncpy(devname, temp_devname, 256);
+	}  
+	
+openDev:
+	  lidbg("%s: trying open ====[%s]", __func__, devname);
+      fd = open(devname, O_RDWR  | O_NONBLOCK, 0);
+      if(-1 != fd)
+      {
+          ret = ioctl(fd, VIDIOC_QUERYCAP, &cap);
+          if((0 == ret) || (ret && (ENOENT == errno)))
+          {
+          	  //not usb cam node
+              if (!(cap.capabilities & V4L2_CAP_VIDEO_CAPTURE))
+              {
+					lidbg("%s: This is not video capture device\n", __func__);
+					close(fd);
+					goto failproc;
+              }      
+              lidbg("%s: Found UVC node,OK: ======%s,[camid = %d]\n", __func__, devname, cam_id);
+          }
+          close(fd);
+      }
+      else if(2 != errno)
+          lidbg("%s: Probing.%s: ret: %d, errno: %d,%s", __func__, devname, ret, errno, strerror(errno));
+    lidbg("%s: X,%s", __func__, devname);
+    return 0;
+
+failproc:
+	strncpy(devname, "/dev/video1", 256);
+	lidbg("%s: Probing fail:%s , run normal proc", __func__, devname);
+#if NONE_HUB_SUPPORT
+	return get_uvc_device(devname,do_save,do_record);
+#else
+	return -1;
+#endif
+}
+
+
+
+
 int main(int argc, char *argv[])
 {
-	char filename[40] = "/sdcard/quickcam-0000.jpg";
+	char filename[100] = "/sdcard/quickcam-0000.jpg";
 	char rec_filename[30] = "/sdcard/RecordH264.h264";			/*"H264.ts"*/
 	char rec_filename1[30] = "/sdcard/RecordH264HD.h264";		/*"H264.ts"*/
 	char rec_filename2[30] = "/sdcard/RecordH264QVGA.h264";	/*"H264.ts"*/
 	char rec_filename3[30] = "/sdcard/RecordH264QQVGA.h264";	/*"H264.ts"*/
 	char rec_filename4[30] = "/sdcard/RecordH264VGA.h264";		/*"H264.ts"*/
 
-	char flyh264_filename[5][30] = {  "/sdcard/flytmp1.h264",
-								"/sdcard/flytmp2.h264",
-								"/sdcard/flytmp3.h264",
-								"/sdcard/flytmp4.h264",
-								"/sdcard/flytmp5.h264"};
+	char flyh264_filename[5][100] = {  "/storage/sdcard0/camera_rec/flytmp1.h264",
+								"/storage/sdcard0/camera_rec/flytmp2.h264",
+								"/storage/sdcard0/camera_rec/flytmp3.h264",
+								"/storage/sdcard0/camera_rec/flytmp4.h264",
+								"/storage/sdcard0/camera_rec/flytmp5.h264"};
 							    
 	
 	int ret;
@@ -3839,7 +3857,7 @@ int main(int argc, char *argv[])
 			struct tm *p; 
 			time(&timep); 
 			p=gmtime(&timep); 
-			sprintf(filename, "/sdcard/FA%04d%02d%02d%02d%02d%02d.jpg",
+			sprintf(filename, "/storage/sdcard0/camera_rec/FA%04d%02d%02d%02d%02d%02d.jpg",
 				(1900+p->tm_year),(1+p->tm_mon),p->tm_mday,p->tm_hour,p->tm_min,p->tm_sec);
 			file = fopen(filename, "wb");
 			if (file != NULL) {
@@ -3897,7 +3915,7 @@ int main(int argc, char *argv[])
 			{
 				if(rec_fp1 == NULL)
 					rec_fp1 = fopen(flyh264_filename[flytmpcnt], "wb");
-				if((i % 9000 == 0) && (i > 0))//5 min per section(1800 frames)
+				if((i % 9000 == 0) && (i > 0))//5 min per section(9000 frames)
 				{
 					if(flytmpcnt < 4) flytmpcnt++;
 					else flytmpcnt = 0;

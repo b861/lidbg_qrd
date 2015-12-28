@@ -55,6 +55,9 @@
 #define CAPTURE                 1
 #define USE_ION
 
+//flyaudio
+#define NONE_HUB_SUPPORT	0
+
 static const int PICTURE_FORMAT_JPEG = 1;
 static const int PICTURE_FORMAT_RAW = 2;
 
