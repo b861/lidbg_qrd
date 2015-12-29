@@ -2528,7 +2528,7 @@ ION_OPEN_FAILED:
     char *usbcam_get_parameters(struct camera_device *device)
     {
         char *parms;
-        //ALOGI("%s: E", __func__);
+        ALOGI("%s: E", __func__);
 
         camera_hardware_t *camHal;
         VALIDATE_DEVICE_HDL(camHal, device, NULL);
@@ -2548,12 +2548,30 @@ ION_OPEN_FAILED:
             mParams.setPreviewSize(640, 480);
             mParams.set(CameraParameters::KEY_PREVIEW_FORMAT, CameraParameters::PIXEL_FORMAT_YUV420SP);
             mParams.set(CameraParameters::KEY_SUPPORTED_PREVIEW_FORMATS, CameraParameters::PIXEL_FORMAT_YUV420SP);
+
+	        mParams.set(CameraParameters::KEY_SUPPORTED_VIDEO_SIZES,  
+	                "640x480");  
+	       mParams.set(CameraParameters::KEY_PREFERRED_PREVIEW_SIZE_FOR_VIDEO,  
+	                "640x480");  
+			mParams.set(CameraParameters::KEY_SUPPORTED_SCENE_MODES, "auto");  
+		    mParams.set(CameraParameters::KEY_SUPPORTED_PICTURE_FORMATS, "jpeg");  
+		    mParams.set(CameraParameters::KEY_SUPPORTED_FLASH_MODES, "auto");  
+		    mParams.set(CameraParameters::KEY_SUPPORTED_PREVIEW_FRAME_RATES, "30");  
+		    mParams.set(CameraParameters::KEY_SUPPORTED_JPEG_THUMBNAIL_SIZES, "160x120,0x0");  
+		    mParams.set(CameraParameters::KEY_SUPPORTED_WHITE_BALANCE, "auto");  
+		    mParams.set(CameraParameters::KEY_SUPPORTED_EFFECTS, "none");  
+		    mParams.set(CameraParameters::KEY_SUPPORTED_FOCUS_MODES, "auto");  
+		    mParams.set(CameraParameters::KEY_SUPPORTED_PREVIEW_FPS_RANGE, "(1000,45000)"); //(1000,33000)  
+		    mParams.set(CameraParameters::KEY_PREVIEW_FPS_RANGE, "1000,45000"); //"1000,33000"  
+		    mParams.set(CameraParameters::KEY_HORIZONTAL_VIEW_ANGLE, "51.2");  
+		    mParams.set(CameraParameters::KEY_VERTICAL_VIEW_ANGLE, "39.4");  
+					
             params_str8 = mParams.flatten();
             parms = (char *) malloc(sizeof(char) * (params_str8.length() + 1));
             strcpy(parms, params_str8.string());
         }
 
-        //ALOGI("%s: X,%s", __func__, parms);
+        ALOGI("%s: X,%s", __func__, parms);
         return parms;
     }
 
