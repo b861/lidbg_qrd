@@ -23,6 +23,12 @@ u32 *ad_fifo_buff;
 #define HAL_BUF_SIZE (1024*4)
 u8 *lpc_data_for_hal;
 #define LPC_SYSTEM_TYPE 0x00
+
+#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+static int lpc_resume(struct device *dev);
+static int lpc_suspend(struct device *dev);
+#endif
+
 struct lpc_device
 {
     char *name;
@@ -358,7 +364,10 @@ BOOL actualReadFromMCU(BYTE *p, UINT length)
 //MCUµÄIIC¶Á´¦Àí
 irqreturn_t MCUIIC_isr(int irq, void *dev_id)
 {
-
+#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+    if(!lpc_work_en)
+        return IRQ_HANDLED;
+#endif
     schedule_work(&pGlobalHardwareInfo->FlyIICInfo.iic_work);
     return IRQ_HANDLED;
 }
@@ -368,11 +377,19 @@ static void workFlyMCUIIC(struct work_struct *work)
     BYTE buff[16];
     BYTE iReadLen = 12;
 
+#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+    while ((SOC_IO_Input(MCU_IIC_REQ_GPIO, MCU_IIC_REQ_GPIO, 0) == 0) && (lpc_work_en == 1))
+    {
+        actualReadFromMCU(buff, iReadLen);
+        iReadLen = 16;
+    }
+#else
     while (SOC_IO_Input(MCU_IIC_REQ_GPIO, MCU_IIC_REQ_GPIO, 0) == 0)
     {
         actualReadFromMCU(buff, iReadLen);
         iReadLen = 16;
     }
+#endif
 }
 
 
@@ -529,6 +546,38 @@ static struct file_operations lpc_fops =
     .release = lpc_close,
 };
 
+#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+static int lidbg_event(struct notifier_block *this,
+                       unsigned long event, void *ptr)
+{
+    DUMP_FUN;
+	struct device *dev;
+
+	lidbg("lpc event: %d\n", event);
+
+    switch (event)
+    {
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_ON):
+	lidbg("lpc event:resume %d\n", event);
+        lpc_resume(dev);
+		break;
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_OFF):
+	lidbg("lpc event:suspend %d\n", event);
+		lpc_suspend(dev);
+		break;
+    default:
+        break;
+    }
+
+    return NOTIFY_DONE;
+}
+
+static struct notifier_block lidbg_notifier =
+{
+    .notifier_call = lidbg_event,
+};
+#endif
+
 #define FLY_HAL_FILE "/flysystem/lib/modules/FlyHardware.ko"
 
 static int lpc_ping_en = 0;
@@ -553,6 +602,10 @@ static int  lpc_probe(struct platform_device *pdev)
 
 #ifdef SOC_mt3360
     return 0;
+#endif
+
+#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+	register_lidbg_notifier(&lidbg_notifier);
 #endif
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
@@ -629,8 +682,11 @@ static struct platform_driver lpc_driver =
     .driver         = {
         .name = "lidbg_lpc",
         .owner = THIS_MODULE,
+#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+#else
 #ifdef CONFIG_PM
         .pm = &lpc_pm_ops,
+#endif
 #endif
     },
 };

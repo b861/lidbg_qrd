@@ -98,6 +98,11 @@ case "$USERS_ID" in
 	export DBG_PLATFORM_PATH=/home2/gaobenneng/msm8974
 	export PATHJAVA1P6=/opt/JDK/jdk1.6.0_31
 	export PATHJAVA1P7=/opt/JDK/java-7-openjdk-amd64
+	export WORK_REMOTE=0
+	export WORK_REMOTE_USERNAME=gaobenneng
+	export WORK_REMOTE_PASSWORD=gaobenneng
+	export WORK_REMOTE_PATH=/home2/gaobenneng/lidbg_qrd
+	export WORK_LOCAL_PATH=/home/jesonjoy/workspace/lildbg_new/lidbg_qrd
 	case "$DBG_PLATFORM_ID" in
 			0)
 		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/R8625SSNSKQLYA10145451;;

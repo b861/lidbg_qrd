@@ -139,6 +139,12 @@ enum doze_status
 static enum doze_status = DOZE_DISABLED;
 static s8 gtp_enter_doze(struct goodix_ts_data *ts);
 #endif
+
+#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+static void goodix_ts_resume(struct goodix_ts_data *ts);
+static void goodix_ts_suspend(struct goodix_ts_data *ts);
+#endif
+
 bool init_done;
 static u8 chip_gt9xxs;  /* true if ic is gt9xxs, like gt915s */
 u8 grp_cfg_version;
@@ -1886,6 +1892,38 @@ static int goodix_parse_dt(struct device *dev,
 	return 0;
 }
 */
+
+#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+static int lidbg_event(struct notifier_block *this,
+                       unsigned long event, void *ptr)
+{
+    DUMP_FUN;
+	struct goodix_ts_data *ts =
+        container_of(this, struct goodix_ts_data, fb_notif);
+
+    switch (event)
+    {
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_ON):
+		ts->gtp_is_suspend = 0;
+		goodix_ts_resume(ts);
+		break;
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_OFF):
+		ts->gtp_is_suspend = 1;
+		goodix_ts_suspend(ts);
+		break;
+    default:
+        break;
+    }
+
+    return NOTIFY_DONE;
+}
+
+static struct notifier_block lidbg_notifier =
+{
+    .notifier_call = lidbg_event,
+};
+#endif
+
 /*******************************************************
 Function:
 	I2c probe.
@@ -2012,6 +2050,11 @@ static int goodix_ts_probe(struct platform_device *pdev)
         goto exit_free_inputdev;
     }
 
+#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+	ts->fb_notif = lidbg_notifier;
+	register_lidbg_notifier(&ts->fb_notif);
+#else
+
 #if defined(CONFIG_FB)
     ts->fb_notif.notifier_call = fb_notifier_callback;
     ret = fb_register_client(&ts->fb_notif);
@@ -2024,6 +2067,8 @@ static int goodix_ts_probe(struct platform_device *pdev)
     ts->early_suspend.suspend = goodix_ts_early_suspend;
     ts->early_suspend.resume = goodix_ts_late_resume;
     register_early_suspend(&ts->early_suspend);
+#endif
+
 #endif
 
     ts->goodix_wq = create_singlethread_workqueue("goodix_wq");
@@ -2143,7 +2188,11 @@ static int goodix_ac_ts_suspend(struct device *dev)
      */
     msleep(58);
     //	mutex_unlock(&ts->lock);
+#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+#else
     ts->gtp_is_suspend = 1;
+#endif
+
     printk("[TP] goodix_ts_suspend ret=%d\n", ret);
     return ret;
 }
@@ -2185,7 +2234,11 @@ static int goodix_ac_ts_resume(struct device *dev)
     gtp_esd_switch(ts->client, SWITCH_ON);
 #endif
     //	mutex_unlock(&ts->lock);
+
+#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+#else
     ts->gtp_is_suspend = 0;
+#endif
 
     printk("[TP] goodix_ts_resume ret=%d\n", ret);
     return ret;
@@ -2220,7 +2273,12 @@ static void goodix_ts_suspend(struct goodix_ts_data *ts)
     GTP_DEBUG_FUNC();
 
 #if GTP_ESD_PROTECT
+
+#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+#else
     ts->gtp_is_suspend = 1;
+#endif
+
     gtp_esd_switch(ts->client, SWITCH_OFF);
 #endif
 
@@ -2277,7 +2335,12 @@ static void goodix_ts_resume(struct goodix_ts_data *ts)
                       ktime_set(1, 0), HRTIMER_MODE_REL);
 
 #if GTP_ESD_PROTECT
+
+#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+#else
     ts->gtp_is_suspend = 0;
+#endif
+
     gtp_esd_switch(ts->client, SWITCH_ON);
 #endif
 }

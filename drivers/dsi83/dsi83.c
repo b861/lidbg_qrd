@@ -319,11 +319,19 @@ static void dsi83_work_func(struct work_struct *work)
 
     lidbg( "dsi83_work_func:enter %d,%d\n", g_var.system_status, is_dsi83_inited);
 
-    if(((g_var.system_status == FLY_ANDROID_DOWN) || (g_var.system_status == FLY_GOTO_SLEEP)) || is_dsi83_inited)
+#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+    if(((g_var.system_status == FLY_ANDROID_DOWN) || (g_var.system_status == FLY_SLEEP_TIMEOUT) || (g_var.system_status == FLY_GOTO_SLEEP)) || is_dsi83_inited)
+    {
+        lidbg( "dsi83_work_func:skip %d,%d\n", g_var.system_status, is_dsi83_inited);
+        //return;
+    }
+#else
+	if(((g_var.system_status == FLY_ANDROID_DOWN) || (g_var.system_status == FLY_GOTO_SLEEP)) || is_dsi83_inited)
     {
         lidbg( "dsi83_work_func:skip %d,%d\n", g_var.system_status, is_dsi83_inited);
         return;
     }
+#endif
 
     is_dsi83_inited = true;
     dsi83_gpio_init();
@@ -499,6 +507,36 @@ void disable_dsi83(char *key_word, void *data)
         kernel_restart(NULL);
      */
 }
+
+#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+static int lidbg_event(struct notifier_block *this,
+                       unsigned long event, void *ptr)
+{
+    DUMP_FUN;
+
+    switch (event)
+    {
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_ON):
+		g_var.fb_on = true;
+        dsi83_resume();
+		break;
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_OFF):
+		g_var.fb_on = false;
+		dsi83_suspend();
+		break;
+    default:
+        break;
+    }
+
+    return NOTIFY_DONE;
+}
+
+static struct notifier_block lidbg_notifier =
+{
+    .notifier_call = lidbg_event,
+};
+#endif
+
 static int dsi83_probe(struct platform_device *pdev)
 {
     int ret = 0;
@@ -542,12 +580,18 @@ static int dsi83_probe(struct platform_device *pdev)
         is_dsi83_inited = 1;
         CREATE_KTHREAD(thread_dsi83_check, NULL);
     }
+
+#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+	register_lidbg_notifier(&lidbg_notifier);
+#else
+
 #if defined(CONFIG_FB)
     dsi83_fb_notif.notifier_call = dsi83_fb_notifier_callback;
     ret = fb_register_client(&dsi83_fb_notif);
     if (ret)
         lidbg("Unable to register dsi83_fb_notif: %d\n", ret);
 #elif defined(CONFIG_HAS_EARLYSUSPEND)
+#endif
 
 #endif
     lidbg_new_cdev(&dsi83_nod_fops, "lidbg_dsi83");
@@ -619,7 +663,12 @@ static struct platform_driver dsi83_driver =
         .name = "dsi83",
         .owner = THIS_MODULE,
 #ifdef CONFIG_PM
+
+#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+#else
         .pm = &dsi83_ops,
+#endif
+
 #endif
     },
 };

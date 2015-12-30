@@ -69,8 +69,11 @@ static int gps_event_handle(struct notifier_block *this,
 #else
     switch (event)
     {
-    case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_DEVICE_UP):
-
+#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+	case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_ON):
+#else
+	case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_DEVICE_UP):
+#endif
         clean_ublox_buf();
         down(&dev->sem);
         kfifo_reset(&gps_data_fifo);
@@ -89,7 +92,11 @@ static int gps_event_handle(struct notifier_block *this,
         work_en = 1;
 #endif
         break;
-    case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_DEVICE_DOWN):
+#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+	case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_OFF):
+#else
+	case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_DEVICE_DOWN):
+#endif
         lidbg("gps set work_en = 0\n");
         work_en = 0;
         break;

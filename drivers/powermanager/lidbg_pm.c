@@ -418,7 +418,10 @@ static int thread_gpio_app_status_delay(void *data)
     ssleep(10);
     LPC_PRINT(true, sleep_counter, "PM:MCU_WP_GPIO_ON1");
     ssleep(40);
+#ifdef CFG_SUSPEND_UNAIRPLANEMODE
     MCU_APP_GPIO_ON;
+#endif
+
 #ifdef CONTROL_PM_IO_BY_BP
     MCU_SET_APP_GPIO_SUSPEND;
 #endif
@@ -583,14 +586,19 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
 			lidbg_shell_cmd("/system/bin/r 0x1015000 0x1c0");
 #endif
             SOC_System_Status(FLY_ANDROID_DOWN);
-            
+
+#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+            observer_start();
+            LPC_PRINT(true, sleep_counter, "PM:android_down");
+            wake_unlock(&pm_wakelock);
+#endif
+
 #ifdef SOC_mt3360
             extern unsigned int fly_acc_step;
             fly_acc_step = 1;
 #endif
 		}else if(!strcmp(cmd[1], "pre_gotosleep")){
 			lidbg("pre_gotosleep .\n");
-			//usb_disk_enable(false);
 		}
         else if(!strcmp(cmd[1], "request_fastboot")){
 		lidbg("request_fastboot pull down gpio_app.\n");
@@ -615,10 +623,16 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
             //lidbg("fly power key gotosleep --\n");
             mod_timer(&suspendkey_timer, SUSPEND_KEY_POLLING_TIME);
 #else
+#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+#else
             observer_start();
             LPC_PRINT(true, sleep_counter, "PM:gotosleep");
 #endif
+#endif
+
+#ifdef CFG_SUSPEND_UNAIRPLANEMODE
             wake_unlock(&pm_wakelock);
+#endif
         }
         else if(!strcmp(cmd[1], "devices_up"))
         {
@@ -665,8 +679,13 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         }
          else  if(!strcmp(cmd[1], "PmServiceStar"))
          {
-                lidbg_shell_cmd("insmod /system/lib/modules/out/lidbg_powerkey.ko");
-		  lidbg_shell_cmd("insmod /flysystem/lib/out/lidbg_powerkey.ko");
+#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+			lidbg_shell_cmd("insmod /system/lib/modules/out/lidbg_rmtctrl.ko");
+			lidbg_shell_cmd("insmod /flysystem/lib/out/lidbg_rmtctrl.ko");
+#else
+			lidbg_shell_cmd("insmod /system/lib/modules/out/lidbg_powerkey.ko");
+			lidbg_shell_cmd("insmod /flysystem/lib/out/lidbg_powerkey.ko");
+#endif
 	  }
 
     }
@@ -900,12 +919,21 @@ static int thread_observer(void *data)
             while(1) //atomic_read(&is_in_sleep) == 1
             {
                 ssleep(1);
-                if(g_var.system_status != FLY_GOTO_SLEEP)
+#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+                if((g_var.system_status != FLY_ANDROID_DOWN) && (g_var.system_status != FLY_SLEEP_TIMEOUT) && (g_var.system_status != FLY_GOTO_SLEEP))
                     break;
+#else
+				if(g_var.system_status != FLY_GOTO_SLEEP)
+                    break;
+#endif
                 have_triggerd_sleep_S++;
                 switch (have_triggerd_sleep_S)
                 {
                 case 60:
+#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+					lidbg("Sleep timeout, bserver thread start to kill process...\n");
+					SOC_System_Status(FLY_SLEEP_TIMEOUT);
+#endif
                 case 120:
                 case 150:
                     sprintf(when, "unlock%d,%d:", have_triggerd_sleep_S, sleep_counter);
@@ -918,8 +946,11 @@ static int thread_observer(void *data)
 
                     }
                     break;
-
                 case 11:
+#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+#else
+					break;
+#endif
 			    lidbg_shell_cmd("date  >> /data/lidbg/pm_info/ps.txt");				
 			    lidbg_shell_cmd("ps -t >> /data/lidbg/pm_info/ps.txt");
 				
@@ -941,19 +972,35 @@ static int thread_observer(void *data)
                   case 13:
 			   // lidbg_shell_cmd("pm disable cld.navi.c2739.mainframe");
                     	    break;
+#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+                default:
+                    if(have_triggerd_sleep_S >= 5 && !(have_triggerd_sleep_S % 5) && ((g_var.system_status == FLY_ANDROID_DOWN) || (g_var.system_status == FLY_SLEEP_TIMEOUT) ||(g_var.system_status != FLY_GOTO_SLEEP)))//atomic_read(&is_in_sleep) == 1
+                    {
+						//find_task_by_name_or_kill(true, false, true, "c2739.mainframe");
+						//find_task_by_name_or_kill(true, false, true, "tencent.qqmusic");
+						//find_task_by_name_or_kill(true, false, true, ".flyaudio.media");
+						//find_task_by_name_or_kill(true, false, true, "m.android.phone");
+						lidbg("+++++ Attention: %ds after gotosleep +++++\n", have_triggerd_sleep_S);
+						sprintf(when, "start%d:", have_triggerd_sleep_S);
+						kernel_wakelock_print(when);
+						userspace_wakelock_action(0, NULL);
+                    }
+                    break;
+#else
                 default:
                     if(have_triggerd_sleep_S >= 5 && !(have_triggerd_sleep_S % 5) && (g_var.system_status == FLY_GOTO_SLEEP))//atomic_read(&is_in_sleep) == 1
                     {
-			   find_task_by_name_or_kill(true, false, true, "c2739.mainframe");
-			   find_task_by_name_or_kill(true, false, true, "tencent.qqmusic");
-			   find_task_by_name_or_kill(true, false, true, ".flyaudio.media");
-			   find_task_by_name_or_kill(true, false, true, "m.android.phone");
-                        lidbg("+++++ Attention: %ds after gotosleep +++++\n", have_triggerd_sleep_S);
-                        sprintf(when, "start%d:", have_triggerd_sleep_S);
-                        kernel_wakelock_print(when);
-                        userspace_wakelock_action(0, NULL);
+						find_task_by_name_or_kill(true, false, true, "c2739.mainframe");
+						find_task_by_name_or_kill(true, false, true, "tencent.qqmusic");
+						find_task_by_name_or_kill(true, false, true, ".flyaudio.media");
+						find_task_by_name_or_kill(true, false, true, "m.android.phone");
+						lidbg("+++++ Attention: %ds after gotosleep +++++\n", have_triggerd_sleep_S);
+						sprintf(when, "start%d:", have_triggerd_sleep_S);
+						kernel_wakelock_print(when);
+						userspace_wakelock_action(0, NULL);
                     }
                     break;
+#endif
                 }
             }
 	    // lidbg_shell_cmd("pm enable cld.navi.c2739.mainframe");	

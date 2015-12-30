@@ -53,6 +53,12 @@
 #include <linux/spmi.h>
 #include <linux/msm_tsens.h>
 
+#if (defined PLATFORM_msm8909) || (defined PLATFORM_msm8974)
+#ifndef CFG_SUSPEND_UNAIRPLANEMODE
+//#define CFG_SUSPEND_UNAIRPLANEMODE
+#endif
+#endif
+
 #ifdef PLATFORM_msm8909
 #include <soc/qcom/smem.h>
 

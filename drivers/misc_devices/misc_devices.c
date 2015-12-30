@@ -1,13 +1,20 @@
 
 #include "lidbg.h"
 //#define DISABLE_USB_WHEN_DEVICE_DOWN
+#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+#define DISABLE_USB_WHEN_GOTO_SLEEP
+#else
 #define DISABLE_USB_WHEN_ANDROID_DOWN
+#endif
 //#define FORCE_UMOUNT_UDISK
 
 LIDBG_DEFINE;
 
 int udisk_stability_test = 0;
 
+#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+int usb_still_used_flag = 0;
+#endif
 
 #if defined(CONFIG_FB)
 struct notifier_block devices_notif;
@@ -73,7 +80,18 @@ static int thread_usb_disk_disable_delay(void *data)
 #else
     //msleep(1000);
 #endif
-    usb_disk_enable(false);
+
+#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+	if(usb_still_used_flag == 1)
+		lidbg("Usb still being used, don't disable it actually...\n");
+	else{
+		lidbg("Usb be not used,disable it...\n");
+		usb_disk_enable(false);
+	}
+#else
+	usb_disk_enable(false);
+#endif
+
     return 1;
 }
 
@@ -113,13 +131,16 @@ static int lidbg_event(struct notifier_block *this,
 #endif
         break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_GOTO_SLEEP):
+#ifdef DISABLE_USB_WHEN_GOTO_SLEEP
+		CREATE_KTHREAD(thread_usb_disk_disable_delay, NULL);
+#endif
         break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_KERNEL_DOWN):
         break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_KERNEL_UP):
         break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_ANDROID_UP):
-#ifdef DISABLE_USB_WHEN_ANDROID_DOWN
+#if (defined DISABLE_USB_WHEN_ANDROID_DOWN) || (defined DISABLE_USB_WHEN_GOTO_SLEEP)
  	  CREATE_KTHREAD(thread_usb_disk_enable_delay, NULL);
 #endif
         break;
@@ -212,6 +233,18 @@ static void parse_cmd(char *pt)
         lidbg("acc_debug_mode enable!");
         g_var.is_debug_mode = 1;
     }
+#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+    else if (!strcmp(argv[0], "udisk_enable"))
+    {
+        lidbg("Misc devices ctrl: udisk_enable");
+		usb_still_used_flag= 1;
+    }
+    else if (!strcmp(argv[0], "udisk_disable"))
+    {
+        lidbg("Misc devices ctrl: udisk_disable");
+		usb_still_used_flag= 0;
+    }
+#endif
 }
 
 

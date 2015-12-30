@@ -108,8 +108,6 @@ static inline int write_node(char *filename, char *wbuff)
     return file_len;
 }
 #define NOTIFIER_MAJOR_ACC_EVENT (111)
-#define NOTIFIER_MINOR_ACC_ON (0)
-#define NOTIFIER_MINOR_ACC_OFF (1)
 #define NOTIFIER_MINOR_SUSPEND_PREPARE  (2)
 #define NOTIFIER_MINOR_SUSPEND_UNPREPARE (3)
 #define NOTIFIER_MINOR_POWER_OFF  (4)
@@ -157,9 +155,13 @@ typedef enum
 #if (defined(BUILD_SOC) || defined(BUILD_CORE) || defined(BUILD_DRIVERS))
 #define NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE (110)
 
+#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+#define NOTIFIER_MINOR_ACC_ON (20)
+#define NOTIFIER_MINOR_ACC_OFF (21)
+#else
 #define NOTIFIER_MINOR_ACC_ON (0)
 #define NOTIFIER_MINOR_ACC_OFF (1)
-
+#endif
 
 
 #define PM_WARN(fmt, args...) do{printk(KERN_CRIT"[ftf_pm]warn.%s: " fmt,__func__,##args);}while(0)
@@ -195,14 +197,15 @@ typedef irqreturn_t (*pinterrupt_isr)(int irq, void *dev_id);
 
 #endif
 
+#ifdef CFG_SUSPEND_UNAIRPLANEMODE
 typedef enum
 {
     FLY_SCREEN_OFF,
+	FLY_GOTO_SLEEP,
     FLY_DEVICE_DOWN,
     FLY_FASTBOOT_REQUEST,
     FLY_ANDROID_DOWN,
-
-    FLY_GOTO_SLEEP,
+	FLY_SLEEP_TIMEOUT,
     FLY_KERNEL_DOWN,
     FLY_KERNEL_UP,
 
@@ -210,6 +213,22 @@ typedef enum
     FLY_DEVICE_UP,
     FLY_SCREEN_ON,
 } FLY_SYSTEM_STATUS;
+#else
+typedef enum
+{
+    FLY_SCREEN_OFF,
+    FLY_DEVICE_DOWN,
+    FLY_FASTBOOT_REQUEST,
+    FLY_ANDROID_DOWN,
+	FLY_GOTO_SLEEP,
+    FLY_KERNEL_DOWN,
+    FLY_KERNEL_UP,
+
+    FLY_ANDROID_UP,
+    FLY_DEVICE_UP,
+    FLY_SCREEN_ON,
+} FLY_SYSTEM_STATUS;
+#endif
 
 struct lidbg_fn_t
 {
