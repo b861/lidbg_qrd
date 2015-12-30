@@ -237,11 +237,13 @@ static void parse_cmd(char *pt)
     else if (!strcmp(argv[0], "udisk_enable"))
     {
         lidbg("Misc devices ctrl: udisk_enable");
+		usb_disk_enable(true);
 		usb_still_used_flag= 1;
     }
     else if (!strcmp(argv[0], "udisk_disable"))
     {
         lidbg("Misc devices ctrl: udisk_disable");
+		usb_disk_enable(false);
 		usb_still_used_flag= 0;
     }
 #endif
