@@ -49,7 +49,6 @@ import java.util.List;
 import java.io.IOException;
 
 import java.util.List;
-import org.apache.http.util.EncodingUtils;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 /*
@@ -199,7 +198,7 @@ public class FlyBootService extends Service {
 			int len = inputStream.available();
 			byte[] buffer = new byte[len];
 			inputStream.read(buffer);
-			res = EncodingUtils.getString(buffer, "UTF-8");
+			res = new String(buffer, "UTF-8");
 			// toast_show("resString="+fineString);
 			inputStream.close();
 		} catch (FileNotFoundException e)
