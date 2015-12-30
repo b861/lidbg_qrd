@@ -1292,7 +1292,7 @@ void *thread_switch(void *par)
     { 
     	property_get("persist.lidbg.uvccam.recording", startRecording, "0");
 	//property_get("persist.lidbg.uvccam.capture", startCapture, "0");
-		sleep(1);
+		usleep(500);
 		if(!strncmp(startRecording, "0", 1)) break;
     } 
     lidbg("-------eho--------%s----exit\n",__func__);
