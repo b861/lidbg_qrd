@@ -98,6 +98,12 @@
 #define MSM_DSI83_DISABLE do{\
 	}while(0)
 
+#define MSM_ACCEL_POWER_ON do{\
+}while(0)
+
+#define MSM_ACCEL_POWER_OFF do{\
+}while(0)
+
 #define FLY_GPS_SO  "gps.msm8226.so"
 
 
