@@ -54,6 +54,12 @@ import java.io.FileNotFoundException;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.BroadcastReceiver;
+import android.content.Intent;
+import android.content.IntentFilter;
+import java.util.ArrayList;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 /*
  * ScreenOn ScreenOff DeviceOff Going2Sleep 四种状态分别表示：1.表示正常开屏状态2.表示关屏，但没关外设的状态
  * 0'~30'的阶段3.表示关屏关外设，但没到点进入深度休眠 30'~60'的阶段4.表示发出休眠请求到执行快速休眠 60'后,即进入深度休眠
@@ -96,8 +102,17 @@ public class FlyBootService extends Service {
     private static boolean firstBootFlag = false;
     private boolean booleanRemoteControl = false;
     private static int pmState = -1;
+	
+    //do not force-stop apps in list
     private String[] mWhiteList = null;
+    //list who can access Internet
     private String[] mInternelWhiteList = null;
+    //list about all apps'uid who request Internet permission	
+    private List<Integer> mInternelAllAppListUID= new ArrayList<Integer>();
+    //list about all white list app'uid 
+    private List<Integer> mInterneWhiteListAppUID= new ArrayList<Integer>();
+
+
     // add launcher in protected list
     String systemLevelProcess[] = {
             "com.android.flyaudioui",
@@ -140,6 +155,10 @@ public class FlyBootService extends Service {
 	else
 		LIDBG_PRINT("mInternelWhiteList = null");
 
+	IntentFilter filter = new IntentFilter();
+	filter.addAction("com.lidbg.flybootserver.action");
+	filter.setPriority(Integer.MAX_VALUE);
+	registerReceiver(myReceiver, filter);
 	
         new Thread() {
             @Override
@@ -209,6 +228,38 @@ public class FlyBootService extends Service {
         }.start();
 
     }
+
+
+	//am broadcast -a com.lidbg.flybootserver.action --ei action 0
+	private BroadcastReceiver myReceiver = new BroadcastReceiver()
+	{
+		@Override
+		public void onReceive(Context context, Intent intent)
+		{
+			if (intent == null || !intent.hasExtra("action"))
+			{
+				LIDBG_PRINT("err.return:intent == null || !intent.hasExtra(\"action\")\n");
+				return;
+			}
+			int action = intent.getExtras().getInt("action");
+			LIDBG_PRINT("BroadcastReceiver.action:"+action+"\n");
+			switch (action)
+			{
+			case 0:
+			FlyaudioInternetDisable();
+			break;
+			case 1:
+			FlyaudioInternetEnable();
+			break;
+
+			default:
+			LIDBG_PRINT("BroadcastReceiver.action:unkown"+action+"\n");
+			break;
+			}
+			// TODO Auto-generated method stub
+		}
+
+	};
 	public String[] FileReadList(String fileName, String split)
 	{
 		// TODO Auto-generated method stub
@@ -569,8 +620,6 @@ public class FlyBootService extends Service {
         File mFile = new File(filePath);
         if (mFile.exists()) {
             try {
-                LIDBG_PRINT(" writeToFile   new fileoutputstream+ accstate:"
-                        + str);
                 FileOutputStream fout = new FileOutputStream(
                         mFile.getAbsolutePath());
                 byte[] bytes = str.getBytes();
@@ -646,66 +695,112 @@ public class FlyBootService extends Service {
     }
 	public void FlyaudioInternetEnable()
 	{
-		LIDBG_PRINT("FlyaudioInternetEnable");
-		InternetEnable();
-		if (mInternelWhiteList != null)
-		{
-			for (int i = 0; i < mInternelWhiteList.length; i++)
-			{
-				appInternetControl(false, mInternelWhiteList[i]);
-			}
-		} else
-		{
-			LIDBG_PRINT("mInternelWhiteList = null");
-		}
+	    LIDBG_PRINT("FlyaudioInternetEnable");
+	    appInternetControl(true);
 	}
 	public void FlyaudioInternetDisable()
 	{
-		LIDBG_PRINT("FlyaudioInternetDisable");
-		InternetDisable();
-		if (mInternelWhiteList != null)
-		{
-			for (int i = 0; i < mInternelWhiteList.length; i++)
-			{
-				appInternetControl(true, mWhiteList[i]);
-			}
-		} else
-		{
-			LIDBG_PRINT("mInternelWhiteList = null");
-		}
+	    LIDBG_PRINT("FlyaudioInternetDisable");
+	    appInternetControl(false);
 	}
-	public void appInternetControl(boolean en, String appname)
+	public List<Integer> getInternelAllAppUids(List<Integer> mlist)
 	{
-		// TODO Auto-generated method stub
-		try
-		{
-			PackageManager pm = this.getPackageManager();
-			ApplicationInfo ai = pm.getApplicationInfo(appname,
-					PackageManager.GET_ACTIVITIES);
-			writeToFile("/dev/lidbg_misc0", "flyaudio:iptables "
-					+ (en ? "-I" : "-D")
-					+ " OUTPUT -o rmnet+ -m owner --uid-owner " + ai.uid
-					+ " -j ACCEPT");
-		} catch (NameNotFoundException e)
-		{
-			e.printStackTrace();
-		}
+	    PackageManager pm = getPackageManager();
+	    List<PackageInfo> packinfos = pm
+	                                  .getInstalledPackages(PackageManager.GET_UNINSTALLED_PACKAGES
+	                                          | PackageManager.GET_PERMISSIONS);
+	for (PackageInfo info : packinfos)
+	    {
+	        String[] premissions = info.requestedPermissions;
+	        if (premissions != null && premissions.length > 0)
+	        {
+	for (String premission : premissions)
+	            {
+	                if ("android.permission.INTERNET".equals(premission))
+	                {
+	                    int uid = info.applicationInfo.uid;
+	                    if (mlist != null && !mlist.contains(uid))
+	                    {
+	                        mlist.add(uid);
+	                    }
+	                }
+	            }
+	        }
+	    }
+	    return mlist;
 	}
+	public List<Integer> getWhiteListAppUids(List<Integer> mlist)
+	{
+	    if (mInternelWhiteList != null)
+	    {
+	        for (int i = 0; i < mInternelWhiteList.length; i++)
+	        {
+	            try
+	            {
+	                PackageManager pm = this.getPackageManager();
+	                ApplicationInfo ai = pm.getApplicationInfo(mInternelWhiteList[i],
+	                                     PackageManager.GET_ACTIVITIES);
+	                if (mlist != null && !mlist.contains(ai.uid))
+	                {
+	                    mlist.add(ai.uid);
+	                }
+	            }
+	            catch (NameNotFoundException e)
+	            {
+	                e.printStackTrace();
+	            }
+	        }
+	    }
+	    else
+	    {
+	        LIDBG_PRINT("mInternelWhiteList = null");
+	    }
+	    return mlist;
+	}
+	public void appInternetControl(boolean enable)
+	{
+	    // TODO Auto-generated method stub
+	    PackageManager pm = this.getPackageManager();
+	    mInternelAllAppListUID = getInternelAllAppUids(mInternelAllAppListUID);
+	    mInterneWhiteListAppUID = getWhiteListAppUids(mInterneWhiteListAppUID);
 
-	public void InternetDisable()
-	{
-		// TODO Auto-generated method stub
-		writeToFile("/dev/lidbg_misc0","flyaudio:iptables -t filter -P OUTPUT DROP");
-		writeToFile("/dev/lidbg_misc0","flyaudio:iptables -t filter -P INPUT DROP");
-		writeToFile("/dev/lidbg_misc0","flyaudio:iptables -t filter -P FORWARD DROP");
-	}
+	    LIDBG_PRINT("appInternetControl:" + mInternelAllAppListUID.size() + "|" + mInterneWhiteListAppUID.size() + "\n");
+	    if (mInternelAllAppListUID != null && mInternelAllAppListUID.size() > 0)
+	    {
+	        for (int i = 0; i < mInternelAllAppListUID.size(); i++)
+	        {
+	            Integer uid = mInternelAllAppListUID.get(i);
+		// have a check with white list uid
+	            if (mInterneWhiteListAppUID != null && mInterneWhiteListAppUID.size() > 0)
+	            {
+	                boolean find = false;
+	                for (int j = 0; j < mInterneWhiteListAppUID.size(); j++)
+	                {
+	                    Integer uid2 = mInterneWhiteListAppUID.get(j);
+	                    if (uid.intValue() == uid2.intValue())
+	                    {
+	                        //LIDBG_PRINT("appInternetControl:com" +j+"-->["+ uid + "/" +uid2+"]["+  pm.getNameForUid(uid) +"/"+pm.getNameForUid(uid2)+ "]\n");
+	                        find = true;
+	                        break;
+	                    }
+	                }
+	                if (find )
+	                {
+	                    LIDBG_PRINT("appInternetControl:protect" + i + "-->" + uid + "/" +  pm.getNameForUid(uid) + "\n");
+	                    continue;
+	                }
+	            }
 
-	public void InternetEnable()
-	{
-		// TODO Auto-generated method stub
-		writeToFile("/dev/lidbg_misc0", "flyaudio:iptables -t filter -P OUTPUT ACCEPT");
-		writeToFile("/dev/lidbg_misc0","flyaudio:iptables -t filter -P INPUT ACCEPT");
-		writeToFile("/dev/lidbg_misc0","flyaudio:iptables -t filter -P FORWARD ACCEPT");
+	            LIDBG_PRINT("appInternetControl:" + i + "-->" + uid + "/" +  pm.getNameForUid(uid) + "\n");
+	            // -o rmnet+
+	            writeToFile("/dev/lidbg_misc0", "flyaudio:iptables " + (enable ? "-D" : "-I") + " FORWARD  -m owner --uid-owner " + uid	+ " -j REJECT");
+	            writeToFile("/dev/lidbg_misc0", "flyaudio:iptables " + (enable ? "-D" : "-I") + " OUTPUT  -m owner --uid-owner " + uid + " -j REJECT");
+	            writeToFile("/dev/lidbg_misc0", "flyaudio:iptables " + (enable ? "-D" : "-I") + " INPUT  -m owner --uid-owner " + uid + " -j REJECT");
+	        }
+
+	    }
+	    else
+	        LIDBG_PRINT("mInternelAllAppList == null || mInternelAllAppList.size() < 0");
 	}
 
 }
