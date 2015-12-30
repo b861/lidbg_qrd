@@ -12,7 +12,7 @@ if [ $WORK_REMOTE = 0 ];then
 else
 	rm -rf $WORK_LOCAL_PATH/out
 	mkdir $WORK_LOCAL_PATH/out
-	scp $WORK_REMOTE_USERNAME@192.168.9.57:$DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/boot.img $WORK_LOCAL_PATH/out/boot.img
+	expect $DBG_TOOLS_PATH/scp $WORK_REMOTE_USERNAME $WORK_REMOTE_PASSWORD $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/boot.img $WORK_LOCAL_PATH/out/boot.img
 	echo $DBG_PLATFORM&& sudo $DBG_TOOLS_PATH/fastboot flash boot $WORK_LOCAL_PATH/out/boot.img
 fi
 }
@@ -31,7 +31,7 @@ if [ $WORK_REMOTE = 0 ];then
 else
 	rm -rf $WORK_LOCAL_PATH/out
 	mkdir $WORK_LOCAL_PATH/out
-	scp $WORK_REMOTE_USERNAME@192.168.9.57:$DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system.img $WORK_LOCAL_PATH/out/system.img
+	expect $DBG_TOOLS_PATH/scp $WORK_REMOTE_USERNAME $WORK_REMOTE_PASSWORD $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system.img $WORK_LOCAL_PATH/out/system.img
 	echo $DBG_PLATFORM&& sudo $DBG_TOOLS_PATH/fastboot flash system $WORK_LOCAL_PATH/out/system.img
 fi
 
@@ -49,7 +49,7 @@ if [ $WORK_REMOTE = 0 ];then
 else
 	rm -rf $WORK_LOCAL_PATH/out
 	mkdir $WORK_LOCAL_PATH/out
-	scp $WORK_REMOTE_USERNAME@192.168.9.57:$DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/recovery.img $WORK_LOCAL_PATH/out/recovery.img
+	expect $DBG_TOOLS_PATH/scp $WORK_REMOTE_USERNAME $WORK_REMOTE_PASSWORD $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/recovery.img $WORK_LOCAL_PATH/out/recovery.img
 	echo $DBG_PLATFORM&& sudo $DBG_TOOLS_PATH/fastboot flash recovery $WORK_LOCAL_PATH/out/recovery.img
 fi
 }
@@ -62,7 +62,7 @@ if [ $WORK_REMOTE = 0 ];then
 else
 	rm -rf $WORK_LOCAL_PATH/out
 	mkdir $WORK_LOCAL_PATH/out
-	scp $WORK_REMOTE_USERNAME@192.168.9.57:$DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/emmc_appsboot.img $WORK_LOCAL_PATH/out/emmc_appsboot.img
+	expect $DBG_TOOLS_PATH/scp $WORK_REMOTE_USERNAME $WORK_REMOTE_PASSWORD $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/emmc_appsboot.img $WORK_LOCAL_PATH/out/emmc_appsboot.img
 	echo $DBG_PLATFORM&& sudo $DBG_TOOLS_PATH/fastboot aboot recovery $WORK_LOCAL_PATH/out/emmc_appsboot.img
 fi
 }

@@ -68,7 +68,7 @@ void lidbg_enable_logcat2(void)
             ssleep(1);
             lidbg_shell_cmd("chmod 777 /sdcard/logcat.txt");
         }
-        if(size == sizeold)
+        if((size == sizeold)&&( g_var.is_fly == 1))
         {
             lidbg_shell_cmd("logcat -v threadtime -f /sdcard/logcat.txt &");
             lidbg("run logcat again \n");
