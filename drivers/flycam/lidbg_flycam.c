@@ -247,7 +247,30 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 			sprintf(temp_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video1 --ef-set saturation=%d ", saturationVal);
 			lidbg_shell_cmd(temp_cmd);
 		}
-
+		else if(!strcmp(keyval[0], "res") )
+		{
+			if(!strncmp(keyval[1], "1080", 4))
+			{
+				lidbg_shell_cmd("setprop fly.uvccam.res 1080");
+			}
+			else if(!strncmp(keyval[1], "720", 3))
+			{
+				lidbg_shell_cmd("setprop fly.uvccam.res 720");
+			}
+			else
+			{
+				lidbg("-------res wrong arg:%s-----",keyval[1]);
+			}
+		}
+		else if(!strcmp(keyval[0], "rectime") )
+		{
+			int rectimeVal;
+			char temp_cmd[256];
+			rectimeVal = simple_strtoul(keyval[1], 0, 0);
+			lidbg("rectimeVal = %d",rectimeVal);
+			sprintf(temp_cmd, "setprop fly.uvccam.rectime %d", rectimeVal);
+			lidbg_shell_cmd(temp_cmd);
+		}
 		else if(!strcmp(keyval[0], "test") )
 		{
 			isBackChange = 1;

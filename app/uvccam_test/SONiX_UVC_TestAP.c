@@ -46,6 +46,7 @@
 #include <dirent.h>  
 #include <sys/stat.h>  
 #include <sys/types.h> 
+#include <linux/rtc.h>
 
 #define TESTAP_VERSION		"v1.0.21_SONiX_UVC_TestAP_Multi"
 
@@ -103,6 +104,9 @@
 
 //flyaudio
 #define NONE_HUB_SUPPORT	1
+#define REC_SAVE_DIR	"/storage/sdcard0/camera_rec/"
+int Max_Rec_Num = 5;
+int Rec_Sec = 300;
 
 // chris -
 
@@ -111,6 +115,10 @@ int Dbg_Param = 0x1f;
 
 //lidbg_parm
 char startRecording[PROPERTY_VALUE_MAX];
+char Res_String[PROPERTY_VALUE_MAX];
+char Rec_Sec_String[PROPERTY_VALUE_MAX];
+char Max_Rec_Num_String[PROPERTY_VALUE_MAX];
+
 char startNight[PROPERTY_VALUE_MAX];
 //char startCapture[PROPERTY_VALUE_MAX];
 
@@ -170,7 +178,7 @@ static int GetFreeRam(int* freeram)
 	char line[256];
     if(meminfo == NULL)
 	{
-		TestAp_Printf(TESTAP_DBG_ERR, "/proc/meminfo can't open\n");
+		lidbg( "/proc/meminfo can't open\n");
         return 0;
 	}
     while(fgets(line, sizeof(line), meminfo))
@@ -200,14 +208,14 @@ static int video_open(const char *devname)
 
 	dev = open(devname, O_RDWR);
 	if (dev < 0) {
-		TestAp_Printf(TESTAP_DBG_ERR, "Error opening device %s: %d.\n", devname, errno);
+		lidbg( "Error opening device %s: %d.\n", devname, errno);
 		return dev;
 	}
 
 	memset(&cap, 0, sizeof cap);
 	ret = ioctl(dev, VIDIOC_QUERYCAP, &cap);
 	if (ret < 0) {
-		TestAp_Printf(TESTAP_DBG_ERR, "Error opening device %s: unable to query device.\n",
+		lidbg( "Error opening device %s: unable to query device.\n",
 			devname);
 		close(dev);
 		return ret;
@@ -215,7 +223,7 @@ static int video_open(const char *devname)
 
 #if 0
 	if ((cap.capabilities & V4L2_CAP_VIDEO_CAPTURE) == 0) {
-		TestAp_Printf(TESTAP_DBG_ERR, "Error opening device %s: video capture not supported.\n",
+		lidbg( "Error opening device %s: video capture not supported.\n",
 			devname);
 		close(dev);
 		return -EINVAL;
@@ -236,7 +244,7 @@ static void uvc_set_control(int dev, unsigned int id, int value)
 
 	ret = ioctl(dev, VIDIOC_S_CTRL, &ctrl);
 	if (ret < 0) {
-		TestAp_Printf(TESTAP_DBG_ERR, "unable to set gain control: %s (%d).\n",
+		lidbg( "unable to set gain control: %s (%d).\n",
 			strerror(errno), errno);
 		return;
 	}
@@ -247,6 +255,21 @@ static int video_set_format(int dev, unsigned int w, unsigned int h, unsigned in
 	struct v4l2_format fmt;
 	int ret;
 
+	//flyaudio
+	property_get("fly.uvccam.res", Res_String, "0");
+	if(!strncmp(Res_String, "720", 3))
+	{
+		lidbg("%s: select 720P!",__func__);
+		w = 1280;
+		h = 720;
+	}
+	else if(!strncmp(Res_String, "1080", 4))
+	{
+		lidbg("%s: select 1080P!",__func__);
+		w = 1920;
+		h = 1080;
+	}
+	
 	memset(&fmt, 0, sizeof fmt);
 	fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	fmt.fmt.pix.width = w;
@@ -286,9 +309,9 @@ static int video_set_still_format(int dev, unsigned int w, unsigned int h, unsig
 		ret = ioctl(dev, UVCIOC_STILL_S_FMT_KNL2, &fmt);
 
 	if (ret < 0) {
-		TestAp_Printf(TESTAP_DBG_ERR, "Unable to set still format: %d.\n", errno);
+		lidbg( "Unable to set still format: %d.\n", errno);
 		if(errno == EINVAL)
-		TestAp_Printf(TESTAP_DBG_ERR, "still function doesn't support?\n", errno);	
+		lidbg( "still function doesn't support?\n", errno);	
 		return ret;
 	}
 
@@ -308,7 +331,7 @@ static int video_set_framerate(int dev, int framerate, unsigned int *MaxPayloadT
 
 	ret = ioctl(dev, VIDIOC_G_PARM, &parm);
 	if (ret < 0) {
-		TestAp_Printf(TESTAP_DBG_ERR, "Unable to get frame rate: %d.\n", errno);
+		lidbg( "Unable to get frame rate: %d.\n", errno);
 		return ret;
 	}
 
@@ -321,7 +344,7 @@ static int video_set_framerate(int dev, int framerate, unsigned int *MaxPayloadT
 
 	ret = ioctl(dev, VIDIOC_S_PARM, &parm);
 	if (ret < 0) {
-		TestAp_Printf(TESTAP_DBG_ERR, "Unable to set frame rate: %d.\n", errno);
+		lidbg( "Unable to set frame rate: %d.\n", errno);
 		return ret;
 	}
 
@@ -331,7 +354,7 @@ static int video_set_framerate(int dev, int framerate, unsigned int *MaxPayloadT
 
 	ret = ioctl(dev, VIDIOC_G_PARM, &parm);
 	if (ret < 0) {
-		TestAp_Printf(TESTAP_DBG_ERR, "Unable to get frame rate: %d.\n", errno);
+		lidbg( "Unable to get frame rate: %d.\n", errno);
 		return ret;
 	}
 
@@ -351,7 +374,7 @@ int video_get_framerate(int dev, int *framerate)
 
 	ret = ioctl(dev, VIDIOC_G_PARM, &parm);
 	if (ret < 0) {
-		TestAp_Printf(TESTAP_DBG_ERR, "Unable to get frame rate: %d.\n", errno);
+		lidbg( "Unable to get frame rate: %d.\n", errno);
 		return ret;
 	}
 
@@ -376,7 +399,7 @@ static int video_reqbufs(int dev, int nbufs)
 
 	ret = ioctl(dev, VIDIOC_REQBUFS, &rb);
 	if (ret < 0) {
-		TestAp_Printf(TESTAP_DBG_ERR, "Unable to allocate buffers: %d.\n", errno);
+		lidbg( "Unable to allocate buffers: %d.\n", errno);
 		return ret;
 	}
 
@@ -401,7 +424,7 @@ static int video_req_still_buf(int dev)
 
 	
 	if (ret < 0) {
-		TestAp_Printf(TESTAP_DBG_ERR, "Unable to allocate still buffers: %d.\n", errno);
+		lidbg( "Unable to allocate still buffers: %d.\n", errno);
 		return ret;
 	}
 
@@ -416,7 +439,7 @@ static int video_enable(int dev, int enable)
 
 	ret = ioctl(dev, enable ? VIDIOC_STREAMON : VIDIOC_STREAMOFF, &type);
 	if (ret < 0) {
-		TestAp_Printf(TESTAP_DBG_ERR, "Unable to %s capture: %d.\n",
+		lidbg( "Unable to %s capture: %d.\n",
 			enable ? "start" : "stop", errno);
 		return ret;
 	}
@@ -510,7 +533,7 @@ static int video_get_input(int dev)
 
 	ret = ioctl(dev, VIDIOC_G_INPUT, &input);
 	if (ret < 0) {
-		TestAp_Printf(TESTAP_DBG_ERR, "Unable to get current input: %s.\n", strerror(errno));
+		lidbg( "Unable to get current input: %s.\n", strerror(errno));
 		return ret;
 	}
 
@@ -524,7 +547,7 @@ static int video_set_input(int dev, unsigned int input)
 
 	ret = ioctl(dev, VIDIOC_S_INPUT, &_input);
 	if (ret < 0)
-		TestAp_Printf(TESTAP_DBG_ERR, "Unable to select input %u: %s.\n", input,
+		lidbg( "Unable to select input %u: %s.\n", input,
 			strerror(errno));
 
 	return ret;
@@ -778,7 +801,7 @@ int get_still_image(int dev, unsigned int w, unsigned int h, unsigned int format
 		//request still buffer
 		ret = video_req_still_buf(dev);
 		if (ret < 0) {
-			TestAp_Printf(TESTAP_DBG_ERR, "Unable to request still buffer(%d).\n", errno);			
+			lidbg( "Unable to request still buffer(%d).\n", errno);			
 			return ret;
 		}
 	}
@@ -792,7 +815,7 @@ int get_still_image(int dev, unsigned int w, unsigned int h, unsigned int format
 		ret = ioctl(dev, UVCIOC_STILL_QUERYBUF_KNL2, &buf);
 	
 	if (ret < 0) {
-		TestAp_Printf(TESTAP_DBG_ERR, "Unable to query still buffer(%d).\n", errno);			
+		lidbg( "Unable to query still buffer(%d).\n", errno);			
 		return ret;
 	}
 	TestAp_Printf(TESTAP_DBG_FLOW, "length: %u offset: %10u     --  ", buf.length, buf.m.offset);
@@ -801,7 +824,7 @@ int get_still_image(int dev, unsigned int w, unsigned int h, unsigned int format
 	mem = mmap(0, buf.length, PROT_READ, MAP_SHARED, dev, buf.m.offset);
 
 	if (mem == MAP_FAILED) {
-		TestAp_Printf(TESTAP_DBG_ERR, "Unable to map still buffer(%d)\n", errno);		
+		lidbg( "Unable to map still buffer(%d)\n", errno);		
 		return -1;
 	}
 	TestAp_Printf(TESTAP_DBG_FLOW, "still Buffer mapped at address %p.\n", mem);
@@ -812,7 +835,7 @@ int get_still_image(int dev, unsigned int w, unsigned int h, unsigned int format
 	else
 		ret = ioctl(dev, UVCIOC_STILL_GET_FRAME_KNL2, &buf);	
 	if (ret < 0) {
-		TestAp_Printf(TESTAP_DBG_ERR, "Unable to get still image(%d).\n", errno);			
+		lidbg( "Unable to get still image(%d).\n", errno);			
 		return ret;
 	}
 	TestAp_Printf(TESTAP_DBG_FLOW, "buf.bytesused = %d\n", buf.bytesused);
@@ -1187,7 +1210,7 @@ void *thread_capture(void *par)
 	{
 		skip = 6;
 	}
-	TestAp_Printf(TESTAP_DBG_ERR, "-----------eho-----thread_capture-------.\n");
+	lidbg( "-----------eho-----thread_capture-------.\n");
 	for (i = 0; i < *thread_par.nframes; ++i) 
 	{
 		unknow_size = 0;
@@ -1198,7 +1221,7 @@ void *thread_capture(void *par)
 		thread_par.buf->memory = V4L2_MEMORY_MMAP;
 		ret = ioctl(*thread_par.dev, VIDIOC_DQBUF, thread_par.buf);
 		if (ret < 0) {
-			TestAp_Printf(TESTAP_DBG_ERR, "Unable to dequeue -thread- buffer (%d).\n", errno);
+			lidbg( "Unable to dequeue -thread- buffer (%d).\n", errno);
 			close(*thread_par.dev);
 			return -1;
 		}
@@ -1252,7 +1275,7 @@ void *thread_capture(void *par)
 	
 		ret = ioctl(*thread_par.dev, VIDIOC_QBUF, thread_par.buf);
 		if (ret < 0) {
-			TestAp_Printf(TESTAP_DBG_ERR, "Unable to requeue -thread- buffer (%d).\n", errno);
+			lidbg( "Unable to requeue -thread- buffer (%d).\n", errno);
 			close(*thread_par.dev);			
 			return -1;
 		}
@@ -1337,6 +1360,17 @@ int lidbg_token_string(char *buf, char *separator, char **token)
         pos++;
     }
     return pos;
+}
+
+char *lidbg_get_current_time(char *time_string, struct rtc_time *ptm)
+{
+	time_t timep; 
+	struct tm *p; 
+	time(&timep); 
+	p=gmtime(&timep); 
+    if(time_string)
+        sprintf(time_string, "%d-%02d-%02d__%02d.%02d.%02d", (1900+p->tm_year), (1+p->tm_mon), p->tm_mday,p->tm_hour , p->tm_min,p->tm_sec);
+    return time_string;
 }
 
 
@@ -1535,13 +1569,14 @@ int main(int argc, char *argv[])
 	char rec_filename2[30] = "/sdcard/RecordH264QVGA.h264";	/*"H264.ts"*/
 	char rec_filename3[30] = "/sdcard/RecordH264QQVGA.h264";	/*"H264.ts"*/
 	char rec_filename4[30] = "/sdcard/RecordH264VGA.h264";		/*"H264.ts"*/
-
-	char flyh264_filename[5][100] = {  "/storage/sdcard0/camera_rec/flytmp1.h264",
-								"/storage/sdcard0/camera_rec/flytmp2.h264",
-								"/storage/sdcard0/camera_rec/flytmp3.h264",
-								"/storage/sdcard0/camera_rec/flytmp4.h264",
-								"/storage/sdcard0/camera_rec/flytmp5.h264"};
-							    
+/*
+	char flyh264_filename[5][100] = {  "/storage/sdcard0/flytmp1.h264",
+								"/storage/sdcard0/flytmp2.h264",
+								"/storage/sdcard0/flytmp3.h264",
+								"/storage/sdcard0/flytmp4.h264",
+								"/storage/sdcard0/flytmp5.h264"};
+*/						    
+	char flyh264_filename[100] = {0};
 	
 	int ret;
 	int fake_dev; // chris
@@ -1799,6 +1834,8 @@ int main(int argc, char *argv[])
 	pthread_t thread_nightMode_id;
 	unsigned char flytmpcnt = 0,rc;
 	char devName[256];
+	char time_buf[100] = {0};
+	char tmpCMD[100] = {0};
  //cjc -
 #if(CARCAM_PROJECT == 1)
 	printf("%s   ******  for Carcam  ******\n",TESTAP_VERSION);
@@ -1832,7 +1869,7 @@ int main(int argc, char *argv[])
 			else if (strcmp(optarg, "MP2T") == 0)
 				pixelformat = V4L2_PIX_FMT_MP2T;
 			else {
-				TestAp_Printf(TESTAP_DBG_ERR, "Unsupported video format '%s'\n", optarg);
+				lidbg( "Unsupported video format '%s'\n", optarg);
 				return 1;
 			}
 			break;
@@ -1854,12 +1891,12 @@ int main(int argc, char *argv[])
 		case 's':
 			width = strtol(optarg, &endptr, 10);
 			if (*endptr != 'x' || endptr == optarg) {
-				TestAp_Printf(TESTAP_DBG_ERR, "Invalid size '%s'\n", optarg);
+				lidbg( "Invalid size '%s'\n", optarg);
 				return 1;
 			}
 			height = strtol(endptr + 1, &endptr, 10);
 			if (*endptr != 0) {
-				TestAp_Printf(TESTAP_DBG_ERR, "Invalid size '%s'\n", optarg);
+				lidbg( "Invalid size '%s'\n", optarg);
 				return 1;
 			}
 			break;
@@ -1903,12 +1940,12 @@ int main(int argc, char *argv[])
 
 			cur_H264fmt.FmtId = strtol(optarg, &endptr, 10) - 1;
 			if (*endptr != '-' || endptr == optarg) {
-				TestAp_Printf(TESTAP_DBG_ERR, "Invalid arguments '%s'\n", optarg);
+				lidbg( "Invalid arguments '%s'\n", optarg);
 				return 1;
 			}
 			cur_H264fmt.FrameRateId = strtol(endptr + 1, &endptr, 10) - 1;
 			if (*endptr != 0) {
-				TestAp_Printf(TESTAP_DBG_ERR, "Invalid arguments '%s'\n", optarg);
+				lidbg( "Invalid arguments '%s'\n", optarg);
 				return 1;
 			}
 			
@@ -2011,7 +2048,7 @@ int main(int argc, char *argv[])
             }
 			if(bit_num>=2)
 			{
-				TestAp_Printf(TESTAP_DBG_ERR, "Invalid arguments '%s'\n", optarg);
+				lidbg( "Invalid arguments '%s'\n", optarg);
 				return 1;
 			}
 			do_multi_stream_set_type = 1;
@@ -2023,7 +2060,7 @@ int main(int argc, char *argv[])
 
 			if(streamID_set > 2)
 			{
-				TestAp_Printf(TESTAP_DBG_ERR, "Invalid arguments '%s'\n", optarg);
+				lidbg( "Invalid arguments '%s'\n", optarg);
 				return 1;
 			}
 			
@@ -2035,7 +2072,7 @@ int main(int argc, char *argv[])
 
 			if(streamID_get > 2)
 			{
-				TestAp_Printf(TESTAP_DBG_ERR, "Invalid arguments '%s'\n", optarg);
+				lidbg( "Invalid arguments '%s'\n", optarg);
 				return 1;
 			}
 
@@ -2048,7 +2085,7 @@ int main(int argc, char *argv[])
 
 			if(streamID_set > 2)
 			{
-				TestAp_Printf(TESTAP_DBG_ERR, "Invalid arguments '%s'\n", optarg);
+				lidbg( "Invalid arguments '%s'\n", optarg);
 				return 1;
 			}
 			
@@ -2060,7 +2097,7 @@ int main(int argc, char *argv[])
 
 			if(streamID_get > 2)
 			{
-				TestAp_Printf(TESTAP_DBG_ERR, "Invalid arguments '%s'\n", optarg);
+				lidbg( "Invalid arguments '%s'\n", optarg);
 				return 1;
 			}
 
@@ -2073,7 +2110,7 @@ int main(int argc, char *argv[])
             
                 if(streamID_set > 2)
                 {
-                    TestAp_Printf(TESTAP_DBG_ERR, "Invalid arguments '%s'\n", optarg);
+                    lidbg( "Invalid arguments '%s'\n", optarg);
                     return 1;
                 }
                 
@@ -2085,7 +2122,7 @@ int main(int argc, char *argv[])
             
                 if(streamID_get > 2)
                 {
-                    TestAp_Printf(TESTAP_DBG_ERR, "Invalid arguments '%s'\n", optarg);
+                    lidbg( "Invalid arguments '%s'\n", optarg);
                     return 1;
                 }
             
@@ -2122,7 +2159,7 @@ int main(int argc, char *argv[])
 			multi_stream_enable = atoi(optarg);
 			if((multi_stream_enable != 0)&&(multi_stream_enable != 1)&&(multi_stream_enable != 3))
 			{
-				TestAp_Printf(TESTAP_DBG_ERR, "Invalid arguments '%s'\n", optarg);
+				lidbg( "Invalid arguments '%s'\n", optarg);
 				return 1;
 			}
 
@@ -2137,7 +2174,7 @@ int main(int argc, char *argv[])
 			osd_timer_count = atoi(optarg);
 			if(osd_timer_count > 1)
 			{
-				TestAp_Printf(TESTAP_DBG_ERR, "Invalid arguments '%s'\n", optarg);
+				lidbg( "Invalid arguments '%s'\n", optarg);
 				return 1;
 			}
 			do_osd_timer_ctrl_set = 1;
@@ -2152,7 +2189,7 @@ int main(int argc, char *argv[])
 			osd_rtc_second = strtol(endptr+1, &endptr, 10);
 			if((osd_rtc_year > 9999)||(osd_rtc_month > 12)||(osd_rtc_day > 31)||(osd_rtc_hour > 24)||(osd_rtc_minute > 59)||(osd_rtc_second > 59))
 			{
-				TestAp_Printf(TESTAP_DBG_ERR, "Invalid arguments '%s'\n", optarg);
+				lidbg( "Invalid arguments '%s'\n", optarg);
 				return 1;
 			}			
 			do_osd_rtc_set = 1;
@@ -2167,7 +2204,7 @@ int main(int argc, char *argv[])
 			osd_size_block = strtol(endptr+1, &endptr, 10);
 			if((osd_size_line > 4)||(osd_size_block > 4))
 			{
-				TestAp_Printf(TESTAP_DBG_ERR, "Invalid arguments '%s'\n", optarg);
+				lidbg( "Invalid arguments '%s'\n", optarg);
 				return 1;
 			}
 			do_osd_size_set = 1;
@@ -2182,7 +2219,7 @@ int main(int argc, char *argv[])
 			osd_color_border = strtol(endptr+1, &endptr, 10);
 			if((osd_color_font > 4)||(osd_color_border > 4))
 			{
-				TestAp_Printf(TESTAP_DBG_ERR, "Invalid arguments '%s'\n", optarg);
+				lidbg( "Invalid arguments '%s'\n", optarg);
 				return 1;
 			}
 			do_osd_color_set = 1;
@@ -2197,7 +2234,7 @@ int main(int argc, char *argv[])
 			osd_show_block = strtol(endptr+1, &endptr, 10);
 			if((osd_show_line > 1)||(osd_show_block > 1))
 			{
-				TestAp_Printf(TESTAP_DBG_ERR, "Invalid arguments '%s'\n", optarg);
+				lidbg( "Invalid arguments '%s'\n", optarg);
 				return 1;
 			}
 			do_osd_show_set = 1;
@@ -2212,7 +2249,7 @@ int main(int argc, char *argv[])
 			osd_autoscale_block = strtol(endptr+1, &endptr, 10);
 			if((osd_autoscale_line > 1)||(osd_autoscale_block > 1))
 			{
-				TestAp_Printf(TESTAP_DBG_ERR, "Invalid arguments '%s'\n", optarg);
+				lidbg( "Invalid arguments '%s'\n", optarg);
 				return 1;
 			}
 			do_osd_autoscale_set = 1;
@@ -2228,7 +2265,7 @@ int main(int argc, char *argv[])
 			osd_ms_size_stream2 = strtol(endptr+1, &endptr, 10);
 			if((osd_ms_size_stream0 > 4)||(osd_ms_size_stream1 > 4)||(osd_ms_size_stream2 > 4))
 			{
-				TestAp_Printf(TESTAP_DBG_ERR, "Invalid arguments '%s'\n", optarg);
+				lidbg( "Invalid arguments '%s'\n", optarg);
 				return 1;
 			}
 			do_osd_ms_size_set = 1;
@@ -2243,7 +2280,7 @@ int main(int argc, char *argv[])
 			
 			if(osd_2nd_string_group > 2)
 			{
-				TestAp_Printf(TESTAP_DBG_ERR, "Invalid arguments '%s'\n", optarg);
+				lidbg( "Invalid arguments '%s'\n", optarg);
 				return 1;
 			}
 			
@@ -2267,7 +2304,7 @@ int main(int argc, char *argv[])
 			osd_start_col = strtol(endptr+1, &endptr, 10);
 			if((osd_type <= 0)|(osd_type > 3))
 			{
-				TestAp_Printf(TESTAP_DBG_ERR, "Invalid arguments '%s'\n", optarg);
+				lidbg( "Invalid arguments '%s'\n", optarg);
 				return 1;
 			}
 			do_osd_position_set = 1;
@@ -2292,7 +2329,7 @@ int main(int argc, char *argv[])
 			md_mode = atoi(optarg);
 			if(md_mode > 1)
 			{
-				TestAp_Printf(TESTAP_DBG_ERR, "Invalid arguments '%s'\n", optarg);
+				lidbg( "Invalid arguments '%s'\n", optarg);
 				return 1;
 			}
 			do_md_mode_set = 1;
@@ -2306,7 +2343,7 @@ int main(int argc, char *argv[])
 			md_threshold = atoi(optarg);
 			if(md_threshold > 65535)
 			{
-				TestAp_Printf(TESTAP_DBG_ERR, "Invalid arguments '%s'\n", optarg);
+				lidbg( "Invalid arguments '%s'\n", optarg);
 				return 1;
 			}
 			do_md_threshold_set = 1;
@@ -2371,7 +2408,7 @@ int main(int argc, char *argv[])
 			h264_gop = atoi(optarg);
 			if(h264_gop > 4095)
 			{
-				TestAp_Printf(TESTAP_DBG_ERR, "Invalid arguments '%s'\n", optarg);
+				lidbg( "Invalid arguments '%s'\n", optarg);
 				return 1;
 			}			
 			do_h264_gop_set = 1;
@@ -2385,7 +2422,7 @@ int main(int argc, char *argv[])
 			h264_mode = atoi(optarg);
 			if(h264_mode<1 || h264_mode>2)
 			{
-				TestAp_Printf(TESTAP_DBG_ERR, "Invalid arguments '%s'\n", optarg);
+				lidbg( "Invalid arguments '%s'\n", optarg);
 				return 1;
 			}	
 			do_h264_mode_set = 1;
@@ -2568,8 +2605,8 @@ int main(int argc, char *argv[])
 			lidbg("OPT_EFFECT_SET=----X--");
 			break;
 		default:
-			TestAp_Printf(TESTAP_DBG_ERR, "Invalid option -%c\n", c);
-			TestAp_Printf(TESTAP_DBG_ERR, "Run %s -h for help.\n", argv[0]);
+			lidbg( "Invalid option -%c\n", c);
+			lidbg( "Run %s -h for help.\n", argv[0]);
 			return 1;
 		}
 	}
@@ -2601,6 +2638,18 @@ int main(int argc, char *argv[])
 	
 	if (dev < 0)
 		return 1;
+
+	property_get("fly.uvccam.rectime", Rec_Sec_String, "300");
+	Rec_Sec = atoi(Rec_Sec_String);
+	lidbg("=======test1=======%s -> %d===",Rec_Sec_String,Rec_Sec);
+	if(Rec_Sec == 0) Rec_Sec = 300;
+	lidbg("=======test2=======%s -> %d===",Rec_Sec_String,Rec_Sec);
+#if 0
+	property_get("fly.uvccam.rectime", Max_Rec_Num_String, "5");
+	Max_Rec_Num = atoi(Max_Rec_Num_String);
+	lidbg("=======test=======%s -> %d===",Max_Rec_Num_String,Max_Rec_Num);
+	if(Max_Rec_Num == 0) Max_Rec_Num = 5;
+#endif
 
 	if(do_vendor_version_get)
 	{
@@ -2682,7 +2731,7 @@ int main(int argc, char *argv[])
 	// cjc +
 	ret = XU_Ctrl_ReadChipID(dev);
 	if(ret<0)
-		TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_Ctrl_ReadChipID Failed\n");
+		lidbg( "SONiX_UVC_TestAP @main : XU_Ctrl_ReadChipID Failed\n");
 	// cjc -
 
 	/* Add XU ctrls */
@@ -2693,13 +2742,13 @@ int main(int argc, char *argv[])
 		{
 			if(ret == -EEXIST)
 			{
-				TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : Initial XU Ctrls");
+				lidbg( "SONiX_UVC_TestAP @main : Initial XU Ctrls");
 			}
 			else
 			{
-				TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : Initial XU Ctrls Failed (%i)\n",ret);
+				lidbg( "SONiX_UVC_TestAP @main : Initial XU Ctrls Failed (%i)\n",ret);
 			}
-			//TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : ");//Initial XU Ctrls ignored, uvc driver had already supported\n");//\t\t\t No need to Add Extension Unit Ctrls into Driver\n");
+			//lidbg( "SONiX_UVC_TestAP @main : ");//Initial XU Ctrls ignored, uvc driver had already supported\n");//\t\t\t No need to Add Extension Unit Ctrls into Driver\n");
 
 		}
 	}
@@ -2711,19 +2760,19 @@ int main(int argc, char *argv[])
 	{
 		ret = XU_Ctrl_ReadChipID(dev);
 		if(ret<0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_Ctrl_ReadChipID Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_Ctrl_ReadChipID Failed\n");
 	}
 
 	if(do_xu_get_fmt)
 	{
 		if(!H264_GetFormat(dev))
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : H264 Get Format Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : H264 Get Format Failed\n");
 	}
 
 	if(do_xu_set_fmt)
 	{
 		if(XU_H264_SetFormat(dev, cur_H264fmt) < 0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : H264 Set Format Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : H264 Set Format Failed\n");
 	}
 	
 	//yiling ++ bit rate can only work in CBR mode, QP value can only work in VBR mode
@@ -2741,27 +2790,27 @@ int main(int argc, char *argv[])
 	if(do_xu_set_qp)
 	{
 		if(XU_H264_Set_QP(dev, m_QP_Val) < 0 )
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_H264_Set_QP Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_H264_Set_QP Failed\n");
 	}
 
 	if(do_xu_get_qp)
 	{
 		if(XU_H264_Get_QP(dev, &m_QP_Val))
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_H264_Get_QP Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_H264_Get_QP Failed\n");
 	}
 
 	if(do_xu_get_br)
 	{
 		XU_H264_Get_BitRate(dev, &m_BitRate);
 		if(m_BitRate < 0 )
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_H264_Get_BitRate Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_H264_Get_BitRate Failed\n");
 		TestAp_Printf(TESTAP_DBG_FLOW, "Current bit rate: %.2f Kbps\n",m_BitRate);
 	}
 
 	if(do_xu_set_br)
 	{
 		if(XU_H264_Set_BitRate(dev, m_BitRate) < 0 )
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_H264_Set_BitRate Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_H264_Set_BitRate Failed\n");
 	}
 
 	if(do_xu_set)
@@ -2772,7 +2821,7 @@ int main(int argc, char *argv[])
 		TestAp_Printf(TESTAP_DBG_FLOW, "  Cmd Data Number  = %d \n", SetCmdDataNum);
 			
 		if(XU_Set_Cur(dev, SetXU_ID, SetCS, SetCmdDataNum, SetData) < 0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_Set Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_Set Failed\n");
 	}
 
 	if(do_xu_get)
@@ -2786,7 +2835,7 @@ int main(int argc, char *argv[])
 			TestAp_Printf(TESTAP_DBG_FLOW, "  Cmd Data[%d] = 0x%x\n", i, GetData[i]);		
 
 		if(XU_Get_Cur(dev, GetXU_ID, GetCS, GetCmdDataNum, GetData) < 0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_Get Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_Get Failed\n");
 	}
 
 // cjc +	
@@ -2795,125 +2844,125 @@ int main(int argc, char *argv[])
 	    struct Multistream_Info Multi_Info;
 		if((chip_id != CHIP_SNC291B)&&(chip_id != CHIP_SNC292A))
 		{
-			TestAp_Printf(TESTAP_DBG_ERR, "This command only for 291B & 292'\n");
+			lidbg( "This command only for 291B & 292'\n");
 			return 1;			
 		}
 
         XU_Multi_Get_Info(dev, &Multi_Info);
         if(multi_stream_format && (Multi_Info.format&multi_stream_format) == 0)
         {
-            TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : Multistream format doesn't support(%x)\n", multi_stream_format);
+            lidbg( "SONiX_UVC_TestAP @main : Multistream format doesn't support(%x)\n", multi_stream_format);
             return 1;
         }
 
 
 		// Set multi stream format to device
 		if(XU_Multi_Set_Type(dev, multi_stream_format) < 0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_Multi_Set_Type Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_Multi_Set_Type Failed\n");
 	}
 
 	if(do_multi_stream_set_bitrate)
 	{
 		if((chip_id != CHIP_SNC291B)&&(chip_id != CHIP_SNC292A))
 		{
-			TestAp_Printf(TESTAP_DBG_ERR, "This command only for 291B & 292'\n");
+			lidbg( "This command only for 291B & 292'\n");
 			return 1;			
 		}
 		
 		// Set multi stream bitRate
 		if(XU_Multi_Set_BitRate(dev, streamID_set, MS_bitrate) < 0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_Multi_Set_Bitrate Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_Multi_Set_Bitrate Failed\n");
 	}
 	
 	if(do_multi_stream_get_bitrate)
 	{
 		if((chip_id != CHIP_SNC291B)&&(chip_id != CHIP_SNC292A))
 		{
-			TestAp_Printf(TESTAP_DBG_ERR, "This command only for 291B & 292'\n");
+			lidbg( "This command only for 291B & 292'\n");
 			return 1;			
 		}
 		
 		// Get multi stream bitRate
 		if(XU_Multi_Get_BitRate(dev, streamID_get, &MS_bitrate) < 0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_Multi_Get_Bitrate Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_Multi_Get_Bitrate Failed\n");
 	}
 
 	if(do_multi_stream_set_qp)
 	{
 		if((chip_id != CHIP_SNC291B)&&(chip_id != CHIP_SNC292A))
 		{
-			TestAp_Printf(TESTAP_DBG_ERR, "This command only for 291B & 292'\n");
+			lidbg( "This command only for 291B & 292'\n");
 			return 1;			
 		}
 		
 		// Set multi stream QP
 		if(XU_Multi_Set_QP(dev, streamID_set, MS_qp) < 0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_Multi_Set_QP Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_Multi_Set_QP Failed\n");
 	}
 	
 	if(do_multi_stream_get_qp)
 	{
 		if((chip_id != CHIP_SNC291B)&&(chip_id != CHIP_SNC292A))
 		{
-			TestAp_Printf(TESTAP_DBG_ERR, "This command only for 291B & 292'\n");
+			lidbg( "This command only for 291B & 292'\n");
 			return 1;			
 		}
 		
 		// Get multi stream QP
 		if(XU_Multi_Get_QP(dev, streamID_get, &MS_qp) < 0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_Multi_Get_QP Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_Multi_Get_QP Failed\n");
 	}
     
 	if(do_multi_stream_set_H264Mode)
 	{
 		if((chip_id != CHIP_SNC291B)&&(chip_id != CHIP_SNC292A))
 		{
-			TestAp_Printf(TESTAP_DBG_ERR, "This command only for 291B & 292'\n");
+			lidbg( "This command only for 291B & 292'\n");
 			return 1;			
 		}
 		
 		// Set multi stream H264 Mode
 		if(XU_Multi_Set_H264Mode(dev, streamID_set, MS_H264_mode) < 0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_Multi_Set_H264Mode Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_Multi_Set_H264Mode Failed\n");
 	}
 	
 	if(do_multi_stream_get_H264Mode)
 	{
 		if((chip_id != CHIP_SNC291B)&&(chip_id != CHIP_SNC292A))
 		{
-			TestAp_Printf(TESTAP_DBG_ERR, "This command only for 291B & 292'\n");
+			lidbg( "This command only for 291B & 292'\n");
 			return 1;			
 		}
 		
 		// Get multi stream H264 Mode
 		if(XU_Multi_Get_H264Mode(dev, streamID_get, &MS_H264_mode) < 0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_Multi_Get_H264Mode Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_Multi_Get_H264Mode Failed\n");
 	}
 
 	if(do_multi_stream_set_sub_gop)
 	{
 		if((chip_id != CHIP_SNC291B)&&(chip_id != CHIP_SNC292A))
 		{
-			TestAp_Printf(TESTAP_DBG_ERR, "This command only for 291B & 292'\n");
+			lidbg( "This command only for 291B & 292'\n");
 			return 1;			
 		}
 		
 		// Set multi stream substream gop
 		if(XU_Multi_Set_SubStream_GOP(dev, MS_sub_gop) < 0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_Multi_Set_SubStream_GOP Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_Multi_Set_SubStream_GOP Failed\n");
 	}
 	
 	if(do_multi_stream_get_sub_gop)
 	{
 		if((chip_id != CHIP_SNC291B)&&(chip_id != CHIP_SNC292A))
 		{
-			TestAp_Printf(TESTAP_DBG_ERR, "This command only for 291B & 292'\n");
+			lidbg( "This command only for 291B & 292'\n");
 			return 1;			
 		}
 		
 		// Get multi stream substream gop
 		if(XU_Multi_Get_SubStream_GOP(dev, &MS_sub_gop) < 0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_Multi_Get_SubStream_GOP Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_Multi_Get_SubStream_GOP Failed\n");
 	}
 
 
@@ -2921,360 +2970,360 @@ int main(int argc, char *argv[])
 	{
 		if((chip_id != CHIP_SNC291B)&&(chip_id != CHIP_SNC292A))
 		{
-			TestAp_Printf(TESTAP_DBG_ERR, "This command only for 291B & 292'\n");
+			lidbg( "This command only for 291B & 292'\n");
 			return 1;			
 		}
 		
 		// Get multi stream status
 		if(XU_Multi_Get_status(dev, &TestInfo) < 0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_Multi_Get_status Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_Multi_Get_status Failed\n");
 	}
 
 	if(do_multi_stream_get_info)
 	{
 		if((chip_id != CHIP_SNC291B)&&(chip_id != CHIP_SNC292A))
 		{
-			TestAp_Printf(TESTAP_DBG_ERR, "This command only for 291B & 292'\n");
+			lidbg( "This command only for 291B & 292'\n");
 			return 1;			
 		}
 		
 		// Get multi stream info
 		if(XU_Multi_Get_Info(dev, &TestInfo) < 0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_Multi_Get_Info Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_Multi_Get_Info Failed\n");
 	}
 
 	if(do_multi_stream_get_enable)
 	{
 		if((chip_id != CHIP_SNC291B)&&(chip_id != CHIP_SNC292A))
 		{
-			TestAp_Printf(TESTAP_DBG_ERR, "This command only for 291B & 292'\n");
+			lidbg( "This command only for 291B & 292'\n");
 			return 1;			
 		}
 		
 		// Get multi stream enable
 		if(XU_Multi_Get_Enable(dev, &multi_stream_enable) < 0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_Multi_Get_Enable Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_Multi_Get_Enable Failed\n");
 	}
 	
 	if(do_multi_stream_set_enable)
 	{
 		if((chip_id != CHIP_SNC291B)&&(chip_id != CHIP_SNC292A))
 		{
-			TestAp_Printf(TESTAP_DBG_ERR, "This command only for 291B & 292'\n");
+			lidbg( "This command only for 291B & 292'\n");
 			return 1;			
 		}
 		
 		// Set multi stream enable
 		if(XU_Multi_Set_Enable(dev, multi_stream_enable) < 0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_Multi_Set_Enable Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_Multi_Set_Enable Failed\n");
 	}
 	else
 	{
 		// Set multi stream disable
 		//if(XU_Multi_Set_Enable(dev, 0) < 0)
-			//TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_Multi_Set_Enable Failed\n");
+			//lidbg( "SONiX_UVC_TestAP @main : XU_Multi_Set_Enable Failed\n");
 		if(XU_Multi_Get_Enable(dev, &multi_stream_enable) < 0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_Multi_Get_Enable Failed\n");			
+			lidbg( "SONiX_UVC_TestAP @main : XU_Multi_Get_Enable Failed\n");			
 	}
 	
 	if(do_osd_timer_ctrl_set)
 	{
 		if((chip_id != CHIP_SNC291B)&&(chip_id != CHIP_SNC292A))
 		{
-			TestAp_Printf(TESTAP_DBG_ERR, "This command only for 291B & 292'\n");
+			lidbg( "This command only for 291B & 292'\n");
 			return 1;			
 		}
 		
 		if(XU_OSD_Timer_Ctrl(dev, osd_timer_count) <0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_OSD_Timer_Ctrl Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_OSD_Timer_Ctrl Failed\n");
 	}
 
 	if(do_osd_rtc_set)
 	{
 		if((chip_id != CHIP_SNC291B)&&(chip_id != CHIP_SNC292A))
 		{
-			TestAp_Printf(TESTAP_DBG_ERR, "This command only for 291B & 292'\n");
+			lidbg( "This command only for 291B & 292'\n");
 			return 1;			
 		}
 		
 		if(XU_OSD_Set_RTC(dev, osd_rtc_year, osd_rtc_month, osd_rtc_day, osd_rtc_hour, osd_rtc_minute, osd_rtc_second) <0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_OSD_Set_RTC Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_OSD_Set_RTC Failed\n");
 	}
 
 	if(do_osd_rtc_get)
 	{
 		if((chip_id != CHIP_SNC291B)&&(chip_id != CHIP_SNC292A))
 		{
-			TestAp_Printf(TESTAP_DBG_ERR, "This command only for 291B & 292'\n");
+			lidbg( "This command only for 291B & 292'\n");
 			return 1;			
 		}
 		
 		if(XU_OSD_Get_RTC(dev, &osd_rtc_year, &osd_rtc_month, &osd_rtc_day, &osd_rtc_hour, &osd_rtc_minute, &osd_rtc_second) <0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_OSD_Get_RTC Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_OSD_Get_RTC Failed\n");
 	}
 
 	if(do_osd_size_set)
 	{
 		if((chip_id != CHIP_SNC291B)&&(chip_id != CHIP_SNC292A))
 		{
-			TestAp_Printf(TESTAP_DBG_ERR, "This command only for 291B & 292'\n");
+			lidbg( "This command only for 291B & 292'\n");
 			return 1;			
 		}
 		
 		if(XU_OSD_Set_Size(dev, osd_size_line, osd_size_block) <0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_OSD_Set_Size Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_OSD_Set_Size Failed\n");
 	}
 
 	if(do_osd_size_get)
 	{
 		if((chip_id != CHIP_SNC291B)&&(chip_id != CHIP_SNC292A))
 		{
-			TestAp_Printf(TESTAP_DBG_ERR, "This command only for 291B & 292'\n");
+			lidbg( "This command only for 291B & 292'\n");
 			return 1;			
 		}
 		
 		if(XU_OSD_Get_Size(dev, &osd_size_line, &osd_size_block) <0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_OSD_Get_Size Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_OSD_Get_Size Failed\n");
 	}
 
 	if(do_osd_color_set)
 	{
 		if((chip_id != CHIP_SNC291B)&&(chip_id != CHIP_SNC292A))
 		{
-			TestAp_Printf(TESTAP_DBG_ERR, "This command only for 291B & 292'\n");
+			lidbg( "This command only for 291B & 292'\n");
 			return 1;			
 		}
 		
 		if(XU_OSD_Set_Color(dev, osd_color_font, osd_color_border) <0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_OSD_Set_Color Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_OSD_Set_Color Failed\n");
 	}
 
 	if(do_osd_color_get)
 	{
 		if((chip_id != CHIP_SNC291B)&&(chip_id != CHIP_SNC292A))
 		{
-			TestAp_Printf(TESTAP_DBG_ERR, "This command only for 291B & 292'\n");
+			lidbg( "This command only for 291B & 292'\n");
 			return 1;			
 		}
 		
 		if(XU_OSD_Get_Color(dev, &osd_color_font, &osd_color_border) <0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_OSD_Get_Color Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_OSD_Get_Color Failed\n");
 	}
 
 	if(do_osd_show_set)
 	{
 		if((chip_id != CHIP_SNC291B)&&(chip_id != CHIP_SNC292A))
 		{
-			TestAp_Printf(TESTAP_DBG_ERR, "This command only for 291B & 292'\n");
+			lidbg( "This command only for 291B & 292'\n");
 			return 1;			
 		}
 		
 		if(XU_OSD_Set_Enable(dev, osd_show_line, osd_show_block) <0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_OSD_Set_Enable Failed\n");	
+			lidbg( "SONiX_UVC_TestAP @main : XU_OSD_Set_Enable Failed\n");	
 	}
 
 	if(do_osd_show_get)
 	{
 		if((chip_id != CHIP_SNC291B)&&(chip_id != CHIP_SNC292A))
 		{
-			TestAp_Printf(TESTAP_DBG_ERR, "This command only for 291B & 292'\n");
+			lidbg( "This command only for 291B & 292'\n");
 			return 1;			
 		}
 		
 		if(XU_OSD_Get_Enable(dev, &osd_show_line, &osd_show_block) <0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_OSD_Get_Enable Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_OSD_Get_Enable Failed\n");
 	}
 
 	if(do_osd_autoscale_set)
 	{
 		if((chip_id != CHIP_SNC291B)&&(chip_id != CHIP_SNC292A))
 		{
-			TestAp_Printf(TESTAP_DBG_ERR, "This command only for 291B & 292'\n");
+			lidbg( "This command only for 291B & 292'\n");
 			return 1;			
 		}
 		
 		if(XU_OSD_Set_AutoScale(dev, osd_autoscale_line, osd_autoscale_block) <0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_OSD_Set_AutoScale Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_OSD_Set_AutoScale Failed\n");
 	}
 
 	if(do_osd_autoscale_get)
 	{
 		if((chip_id != CHIP_SNC291B)&&(chip_id != CHIP_SNC292A))
 		{
-			TestAp_Printf(TESTAP_DBG_ERR, "This command only for 291B & 292'\n");
+			lidbg( "This command only for 291B & 292'\n");
 			return 1;			
 		}
 		
 		if(XU_OSD_Get_AutoScale(dev, &osd_autoscale_line, &osd_autoscale_block) <0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_OSD_Get_AutoScale Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_OSD_Get_AutoScale Failed\n");
 	}
 
 	if(do_osd_ms_size_set)
 	{
 		if((chip_id != CHIP_SNC291B)&&(chip_id != CHIP_SNC292A))
 		{
-			TestAp_Printf(TESTAP_DBG_ERR, "This command only for 291B & 292'\n");
+			lidbg( "This command only for 291B & 292'\n");
 			return 1;			
 		}
 		
 		if(XU_OSD_Set_Multi_Size(dev, osd_ms_size_stream0, osd_ms_size_stream1, osd_ms_size_stream2) <0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_OSD_Set_Multi_Size Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_OSD_Set_Multi_Size Failed\n");
 	}
 
 	if(do_osd_ms_size_get)
 	{
 		if((chip_id != CHIP_SNC291B)&&(chip_id != CHIP_SNC292A))
 		{
-			TestAp_Printf(TESTAP_DBG_ERR, "This command only for 291B & 292'\n");
+			lidbg( "This command only for 291B & 292'\n");
 			return 1;			
 		}
 		
 		if(XU_OSD_Get_Multi_Size(dev, &osd_ms_size_stream0, &osd_ms_size_stream1, &osd_ms_size_stream2) <0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_OSD_Get_Multi_Size Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_OSD_Get_Multi_Size Failed\n");
 	}
 
 	if(do_osd_position_set)
 	{
 		if((chip_id != CHIP_SNC291B)&&(chip_id != CHIP_SNC292A))
 		{
-			TestAp_Printf(TESTAP_DBG_ERR, "This command only for 291B & 292'\n");
+			lidbg( "This command only for 291B & 292'\n");
 			return 1;			
 		}
 		
 		if(XU_OSD_Set_Start_Position(dev, osd_type, osd_start_row, osd_start_col) <0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_OSD_Set_Start_Position Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_OSD_Set_Start_Position Failed\n");
 	}
 
 	if(do_osd_position_get)
 	{
 		if((chip_id != CHIP_SNC291B)&&(chip_id != CHIP_SNC292A))
 		{
-			TestAp_Printf(TESTAP_DBG_ERR, "This command only for 291B & 292'\n");
+			lidbg( "This command only for 291B & 292'\n");
 			return 1;			
 		}
 		
 		if(XU_OSD_Get_Start_Position(dev, &osd_line_start_row, &osd_line_start_col, &osd_block_start_row, &osd_block_start_col) <0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_OSD_Get_Start_Position Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_OSD_Get_Start_Position Failed\n");
 	}
 
 	if((do_osd_ms_position_set)&&(!do_capture))
 	{
 		if((chip_id != CHIP_SNC291B)&&(chip_id != CHIP_SNC292A))
 		{
-			TestAp_Printf(TESTAP_DBG_ERR, "This command only for 291B & 292'\n");
+			lidbg( "This command only for 291B & 292'\n");
 			return 1;			
 		}
 
 		if(XU_OSD_Set_MS_Start_Position(dev, osd_ms_position_streamid, osd_ms_start_row, osd_ms_start_col) <0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_OSD_Set_Start_Position Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_OSD_Set_Start_Position Failed\n");
 	}
 
 	if(do_osd_ms_position_get)
 	{
 		if((chip_id != CHIP_SNC291B)&&(chip_id != CHIP_SNC292A))
 		{
-			TestAp_Printf(TESTAP_DBG_ERR, "This command only for 291B & 292'\n");
+			lidbg( "This command only for 291B & 292'\n");
 			return 1;			
 		}
 		
 		if(XU_OSD_Get_MS_Start_Position(dev, &osd_ms_s0_start_row, &osd_ms_s0_start_col, &osd_ms_s1_start_row, &osd_ms_s1_start_col, &osd_ms_s2_start_row, &osd_ms_s2_start_col) <0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_OSD_Get_Start_Position Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_OSD_Get_Start_Position Failed\n");
 	}
 
 	if(do_md_mode_set)
 	{
 		if((chip_id != CHIP_SNC291B)&&(chip_id != CHIP_SNC292A))
 		{
-			TestAp_Printf(TESTAP_DBG_ERR, "This command only for 291B & 292'\n");
+			lidbg( "This command only for 291B & 292'\n");
 			return 1;			
 		}
 		
 		if(XU_MD_Set_Mode(dev, md_mode) <0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_MD_Set_Mode Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_MD_Set_Mode Failed\n");
 	}
 	
 	if(do_md_mode_get)
 	{
 		if((chip_id != CHIP_SNC291B)&&(chip_id != CHIP_SNC292A))
 		{
-			TestAp_Printf(TESTAP_DBG_ERR, "This command only for 291B & 292'\n");
+			lidbg( "This command only for 291B & 292'\n");
 			return 1;			
 		}
 		
 		if(XU_MD_Get_Mode(dev, &md_mode) <0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_MD_Get_Mode Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_MD_Get_Mode Failed\n");
 	}
 
 	if(do_md_threshold_set)
 	{
 		if((chip_id != CHIP_SNC291B)&&(chip_id != CHIP_SNC292A))
 		{
-			TestAp_Printf(TESTAP_DBG_ERR, "This command only for 291B & 292'\n");
+			lidbg( "This command only for 291B & 292'\n");
 			return 1;			
 		}
 		
 		if(XU_MD_Set_Threshold(dev, md_threshold) <0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_MD_Set_Threshold Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_MD_Set_Threshold Failed\n");
 	}
 
 	if(do_md_threshold_get)
 	{
 		if((chip_id != CHIP_SNC291B)&&(chip_id != CHIP_SNC292A))
 		{
-			TestAp_Printf(TESTAP_DBG_ERR, "This command only for 291B & 292'\n");
+			lidbg( "This command only for 291B & 292'\n");
 			return 1;			
 		}
 		
 		if(XU_MD_Get_Threshold(dev, &md_threshold) <0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_MD_Get_Threshold Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_MD_Get_Threshold Failed\n");
 	}
 
 	if(do_md_mask_set)
 	{
 		if((chip_id != CHIP_SNC291B)&&(chip_id != CHIP_SNC292A))
 		{
-			TestAp_Printf(TESTAP_DBG_ERR, "This command only for 291B & 292'\n");
+			lidbg( "This command only for 291B & 292'\n");
 			return 1;			
 		}
 		
 		if(XU_MD_Set_Mask(dev, md_mask) <0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_MD_Set_Mask Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_MD_Set_Mask Failed\n");
 	}
 
 	if(do_md_mask_get)
 	{
 		if((chip_id != CHIP_SNC291B)&&(chip_id != CHIP_SNC292A))
 		{
-			TestAp_Printf(TESTAP_DBG_ERR, "This command only for 291B & 292'\n");
+			lidbg( "This command only for 291B & 292'\n");
 			return 1;			
 		}
 		
 		if(XU_MD_Get_Mask(dev, md_mask) <0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_MD_Get_Mask Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_MD_Get_Mask Failed\n");
 	}
 
 	if(do_md_result_set)
 	{
 		if((chip_id != CHIP_SNC291B)&&(chip_id != CHIP_SNC292A))
 		{
-			TestAp_Printf(TESTAP_DBG_ERR, "This command only for 291B & 292'\n");
+			lidbg( "This command only for 291B & 292'\n");
 			return 1;			
 		}
 		
 		if(XU_MD_Set_RESULT(dev, md_mask) <0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_MD_Set_RESULT Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_MD_Set_RESULT Failed\n");
 	}
 
 	if(do_mjpg_bitrate_set)
 	{
 		if(XU_MJPG_Set_Bitrate(dev, mjpg_bitrate) <0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_MJPG_Set_Bitrate Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_MJPG_Set_Bitrate Failed\n");
 	}
 
 	if(do_mjpg_bitrate_get)
 	{
 		if(XU_MJPG_Get_Bitrate(dev, &mjpg_bitrate) <0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_MJPG_Get_Bitrate Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_MJPG_Get_Bitrate Failed\n");
 	}
 	
 	if(do_h264_sei_set)
@@ -3417,28 +3466,28 @@ int main(int argc, char *argv[])
 	if (do_bri_set) 
 	{
 	    if (v4l2SetControl (dev, V4L2_CID_BRIGHTNESS, m_bri_val)<0)
-		TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : Set Brightness (%d) Failed\n", m_bri_val);
+		lidbg( "SONiX_UVC_TestAP @main : Set Brightness (%d) Failed\n", m_bri_val);
 	} 
 
 	if (do_bri_get) 
 	{
 		m_bri_val = v4l2GetControl (dev, V4L2_CID_BRIGHTNESS);
 		if(m_bri_val < 0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : Get Brightness Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : Get Brightness Failed\n");
 		TestAp_Printf(TESTAP_DBG_FLOW, "SONiX_UVC_TestAP @main : Get Brightness (%d)\n", m_bri_val);
 	}
 
 	if (do_shrp_set) 
 	{
 	    if (v4l2SetControl (dev, V4L2_CID_SHARPNESS, m_shrp_val)<0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : Set Sharpness (%d) Failed\n", m_shrp_val);
+			lidbg( "SONiX_UVC_TestAP @main : Set Sharpness (%d) Failed\n", m_shrp_val);
 	} 
 
 	if (do_shrp_get) 
 	{
 		m_shrp_val = v4l2GetControl (dev, V4L2_CID_SHARPNESS);
 		if(m_shrp_val < 0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : Get Sharpness Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : Get Sharpness Failed\n");
 		TestAp_Printf(TESTAP_DBG_FLOW, "SONiX_UVC_TestAP @main : Get Sharpness (%d)\n", m_shrp_val);
 	}
 	// Standard UVC image properties setting -------------------------------
@@ -3447,13 +3496,13 @@ int main(int argc, char *argv[])
 	if(do_asic_r)
 	{
 		if(XU_Asic_Read(dev, rAsicAddr, &rAsicData)<0)		
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_Asic_Read(0x%x) Failed\n", rAsicAddr);
+			lidbg( "SONiX_UVC_TestAP @main : XU_Asic_Read(0x%x) Failed\n", rAsicAddr);
 	}
 
 	if(do_asic_w)
 	{
 		if(XU_Asic_Write(dev, wAsicAddr, wAsicData)<0 )
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_Asic_Write(0x%x) Failed\n",wAsicAddr);
+			lidbg( "SONiX_UVC_TestAP @main : XU_Asic_Write(0x%x) Failed\n",wAsicAddr);
 	}
 	// Houston 2011/10/14 Asic R/W ---
 	
@@ -3508,33 +3557,33 @@ int main(int argc, char *argv[])
 	{
 		if((chip_id != CHIP_SNC291B)&&(chip_id != CHIP_SNC292A))
 		{
-			TestAp_Printf(TESTAP_DBG_ERR, "This command only for 291B & 292'\n");
+			lidbg( "This command only for 291B & 292'\n");
 			return 1;			
 		}
 		
 		// Set multi stream substream frame rate
 		if(XU_Multi_Set_SubStream_FrameRate(dev, MS_sub_fr) < 0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_Multi_Set_SubStream_FrameRate Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_Multi_Set_SubStream_FrameRate Failed\n");
 	}
 	
 	if(do_multi_stream_get_sub_fr)
 	{
 		if((chip_id != CHIP_SNC291B)&&(chip_id != CHIP_SNC292A))
 		{
-			TestAp_Printf(TESTAP_DBG_ERR, "This command only for 291B & 292'\n");
+			lidbg( "This command only for 291B & 292'\n");
 			return 1;			
 		}
 		
 		// Get multi stream substream frame rate
 		if(XU_Multi_Get_SubStream_FrameRate(dev, &MS_sub_fr) < 0)
-			TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_Multi_Get_H264Mode Failed\n");
+			lidbg( "SONiX_UVC_TestAP @main : XU_Multi_Get_H264Mode Failed\n");
 	}
     //yiling --
 
 	
 	if(GetFreeRam(&freeram) && freeram<1843200*nbufs+4194304)
 	{
-		TestAp_Printf(TESTAP_DBG_ERR, "free memory isn't enough(%d)\n",freeram);		
+		lidbg( "free memory isn't enough(%d)\n",freeram);		
 		return 1;
 	}
 
@@ -3552,7 +3601,7 @@ int main(int argc, char *argv[])
 		buf0.memory = V4L2_MEMORY_MMAP;
 		ret = ioctl(dev, VIDIOC_QUERYBUF, &buf0);
 		if (ret < 0) {
-			TestAp_Printf(TESTAP_DBG_ERR, "Unable to query buffer %u (%d).\n", i, errno);
+			lidbg( "Unable to query buffer %u (%d).\n", i, errno);
 			close(dev);			
 			return 1;
 		}
@@ -3560,7 +3609,7 @@ int main(int argc, char *argv[])
 
 		mem0[i] = mmap(0, buf0.length, PROT_READ, MAP_SHARED, dev, buf0.m.offset);
 		if (mem0[i] == MAP_FAILED) {
-			TestAp_Printf(TESTAP_DBG_ERR, "Unable to map buffer %u (%d)\n", i, errno);
+			lidbg( "Unable to map buffer %u (%d)\n", i, errno);
 			close(dev);			
 			return 1;
 		}
@@ -3575,7 +3624,7 @@ int main(int argc, char *argv[])
 		buf0.memory = V4L2_MEMORY_MMAP;
 		ret = ioctl(dev, VIDIOC_QBUF, &buf0);
 		if (ret < 0) {
-			TestAp_Printf(TESTAP_DBG_ERR, "Unable to queue buffer0(%d).\n", errno);
+			lidbg( "Unable to queue buffer0(%d).\n", errno);
 			close(dev);			
 			return 1;
 		}
@@ -3620,7 +3669,7 @@ int main(int argc, char *argv[])
 			/* Allocate buffers. */
 			if(GetFreeRam(&freeram) && freeram<307200*nbufs+4+4194304)
 			{
-				TestAp_Printf(TESTAP_DBG_ERR, "do_save:free memory isn't enough(%d)\n",freeram);
+				lidbg( "do_save:free memory isn't enough(%d)\n",freeram);
 				close(fake_dev);
 				return 1;
 			}
@@ -3638,7 +3687,7 @@ int main(int argc, char *argv[])
 				buf1.memory = V4L2_MEMORY_MMAP;
 				ret = ioctl(fake_dev, VIDIOC_QUERYBUF, &buf1);
 				if (ret < 0) {
-					TestAp_Printf(TESTAP_DBG_ERR, "Unable to query buffer %u (%d).\n", i, errno);
+					lidbg( "Unable to query buffer %u (%d).\n", i, errno);
 					close(dev);
 					close(fake_dev);
 					return 1;
@@ -3647,7 +3696,7 @@ int main(int argc, char *argv[])
 
 				mem1[i] = mmap(0, buf1.length, PROT_READ, MAP_SHARED, fake_dev, buf1.m.offset);
 				if (mem1[i] == MAP_FAILED) {
-					TestAp_Printf(TESTAP_DBG_ERR, "Unable to map buffer %u (%d)\n", i, errno);
+					lidbg( "Unable to map buffer %u (%d)\n", i, errno);
 					close(dev);
 					close(fake_dev);
 					return 1;
@@ -3663,7 +3712,7 @@ int main(int argc, char *argv[])
 				buf1.memory = V4L2_MEMORY_MMAP;
 				ret = ioctl(fake_dev, VIDIOC_QBUF, &buf1);
 				if (ret < 0) {
-					TestAp_Printf(TESTAP_DBG_ERR, "Unable to queue buffer (%d).\n", errno);
+					lidbg( "Unable to queue buffer (%d).\n", errno);
 					close(dev);
 					close(fake_dev);
 					return 1;
@@ -3694,29 +3743,29 @@ int main(int argc, char *argv[])
 		{
 			close(dev);
 			close(fake_dev);			
-			TestAp_Printf(TESTAP_DBG_ERR, "This command only for 291B & 292'\n");
+			lidbg( "This command only for 291B & 292'\n");
 			return 1;			
 		}
 		
 		//set multi stream osd start position
 		//if(XU_OSD_Get_MS_Start_Position(dev, &osd_ms_s0_start_row, &osd_ms_s0_start_col, &osd_ms_s1_start_row, &osd_ms_s1_start_col, &osd_ms_s2_start_row, &osd_ms_s2_start_col) <0)
-			//TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_OSD_Get_Start_Position Failed\n");
+			//lidbg( "SONiX_UVC_TestAP @main : XU_OSD_Get_Start_Position Failed\n");
 
 		//if(XU_OSD_Set_MS_Start_Position(dev, 0, osd_ms_s0_start_row, osd_ms_s0_start_col) <0)
-			//TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_OSD_Set_Start_Position Failed\n");
+			//lidbg( "SONiX_UVC_TestAP @main : XU_OSD_Set_Start_Position Failed\n");
 
 		//if(XU_OSD_Set_MS_Start_Position(dev, 1, osd_ms_s1_start_row, osd_ms_s1_start_col) <0)
-			//TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_OSD_Set_Start_Position Failed\n");
+			//lidbg( "SONiX_UVC_TestAP @main : XU_OSD_Set_Start_Position Failed\n");
 			
 		//if(XU_OSD_Set_MS_Start_Position(dev, 2, osd_ms_s2_start_row, osd_ms_s2_start_col) <0)
-			//TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_OSD_Set_Start_Position Failed\n");
+			//lidbg( "SONiX_UVC_TestAP @main : XU_OSD_Set_Start_Position Failed\n");
 
 		//set multi stream osd size
 		//if(XU_OSD_Get_Multi_Size(dev, &osd_ms_size_stream0, &osd_ms_size_stream1, &osd_ms_size_stream2) <0)
-			//TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_OSD_Get_Multi_Size Failed\n");
+			//lidbg( "SONiX_UVC_TestAP @main : XU_OSD_Get_Multi_Size Failed\n");
 
 		//if(XU_OSD_Set_Multi_Size(dev, osd_ms_size_stream0, osd_ms_size_stream1, osd_ms_size_stream2) <0)
-			//TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_OSD_Set_Multi_Size Failed\n");
+			//lidbg( "SONiX_UVC_TestAP @main : XU_OSD_Set_Multi_Size Failed\n");
 	}	
 
 	if((do_record)&&(do_save)&&(multi_stream_enable!=0)&&(pixelformat == V4L2_PIX_FMT_H264))
@@ -3735,7 +3784,7 @@ int main(int argc, char *argv[])
 		{
 			close(dev);
 			close(fake_dev);
-			TestAp_Printf(TESTAP_DBG_ERR, "Create pthread error!\n");
+			lidbg( "Create pthread error!\n");
 			return 1;
 		}
 	}
@@ -3793,7 +3842,7 @@ int main(int argc, char *argv[])
 		buf0.memory = V4L2_MEMORY_MMAP;
 		ret = ioctl(dev, VIDIOC_DQBUF, &buf0);
 		if (ret < 0) {
-			TestAp_Printf(TESTAP_DBG_ERR, "Unable to dequeue buffer0 (%d).\n", errno);
+			lidbg( "Unable to dequeue buffer0 (%d).\n", errno);
 			close(dev);
 			if(multi_stream_enable)
 				close(fake_dev);
@@ -3845,7 +3894,7 @@ int main(int argc, char *argv[])
 		if(do_md_result_get)
 		{
 			if(XU_MD_Get_RESULT(dev, md_mask) <0)
-				TestAp_Printf(TESTAP_DBG_ERR, "SONiX_UVC_TestAP @main : XU_MD_Get_RESULT Failed\n");
+				lidbg( "SONiX_UVC_TestAP @main : XU_MD_Get_RESULT Failed\n");
 		}
 
 		if (i == 0)
@@ -3914,13 +3963,112 @@ int main(int argc, char *argv[])
 			}
 			else
 			{
+				/*
 				if(rec_fp1 == NULL)
-					rec_fp1 = fopen(flyh264_filename[flytmpcnt], "wb");
-				if((i % 9000 == 0) && (i > 0))//5 min per section(9000 frames)
 				{
-					if(flytmpcnt < 4) flytmpcnt++;
-					else flytmpcnt = 0;
+					lidbg_get_current_time(time_buf, NULL);
+					sprintf(flyh264_filename[flytmpcnt], "%s%s_%d.h264", REC_SAVE_DIR, time_buf,flytmpcnt);
 					rec_fp1 = fopen(flyh264_filename[flytmpcnt], "wb");
+				}
+				*/
+				
+				if(i % (Rec_Sec*30)  == 0)//frames = sec * 30f/s
+				{
+					DIR *pDir ;
+					struct dirent *ent; 
+					int ret;
+					char *date_time_key[5] = {NULL};
+					char *date_key[3] = {NULL};
+					char *time_key[3] = {NULL};
+					int cur_date[3] = {0,0,0};
+					int cur_time[3] = {0,0,0};
+					int min_date[3] = {5000,13,50};
+					int min_time[3] = {13,100,100};
+					char minRecName[100] = "/storage/sdcard0/camera_rec/1111.h264";//error for del
+					char tmpDName[100] = {0};
+					unsigned char filecnt = 0;
+					unsigned char memcpyFlag = 0;
+					if(i > 0)
+					{
+						if(flytmpcnt < Max_Rec_Num - 1) flytmpcnt++;
+						else flytmpcnt = 0;
+					}
+					
+					//find the earliest rec file and del
+					pDir=opendir(REC_SAVE_DIR);  
+					while((ent=readdir(pDir))!=NULL)  
+					{  
+					        if(!(ent->d_type & DT_DIR))  
+					        {  
+					                if((strcmp(ent->d_name,".") == 0) || (strcmp(ent->d_name,"..") == 0) || (ent->d_reclen != 48) ) 
+					                        continue;  
+									filecnt++;
+					                lidbg("ent->d_name:%s====ent->d_reclen:%d=====\n", ent->d_name,ent->d_reclen); 
+									#if 0
+									char *p;char *buff;
+									buff = ent->d_name;
+									p = strsep(&buff, "__");
+									lidbg("strsep__");
+									while(p)
+									{
+								        lidbg("%s=====test strsep=====", p);
+								        p = strsep(&buff, "__");
+								    }
+									#endif
+									strcpy(tmpDName, ent->d_name);
+									lidbg_token_string(ent->d_name, "__", date_time_key);
+									//lidbg("date_time_key0:%s====date_time_key1:%s=====", date_time_key[0],date_time_key[2]);	
+									lidbg_token_string(date_time_key[0], "-", date_key);
+									//lidbg("date_key:%s====%s===%s==", date_key[0],date_key[1],date_key[2]);	
+									lidbg_token_string(date_time_key[2], ".", time_key);
+									//lidbg("time_key:%s====%s===%s==", time_key[0],time_key[1],time_key[2]);									
+									int i;
+									memcpyFlag = 0;
+									for(i = 0;i < 3;i++)//date serach
+									{
+										cur_date[i] = atoi(date_key[i]);
+										if(cur_time[i] > min_time[i])  goto nextsearch;
+										else if(cur_date[i]  == min_date[i] ||memcpyFlag)	continue;
+										else if(cur_date[i] < min_date[i])
+										{
+											strcpy(minRecName, tmpDName);
+											lidbg("minRecName1------>%s\n",minRecName);
+											memcpyFlag = 1;
+										}
+									}	
+									for(i = 0;i < 3;i++)//time serach
+									{
+										cur_time[i] = atoi(time_key[i]);
+										//lidbg("cur_time[i]-->%d  min_time[i]-->%d\n",cur_time[i],min_time[i]);
+										if(cur_time[i] > min_time[i]) goto nextsearch;
+										else if(cur_time[i] == min_time[i] ||memcpyFlag)	continue;
+										else if(cur_time[i] < min_time[i])
+										{
+											strcpy(minRecName, tmpDName);
+											lidbg("minRecName2------>%s\n",minRecName);
+											memcpyFlag = 1;
+										}	
+									}
+nextsearch:
+									//lidbg("memcpyFlag-->%d\n",memcpyFlag);
+									if(memcpyFlag)
+									{
+										memcpy(min_date,cur_date,3*sizeof(int));
+										memcpy(min_time,cur_time,3*sizeof(int));
+									}
+					        }  
+					}
+					if(filecnt == Max_Rec_Num)
+					{
+						lidbg("current cnt------>%d\n",filecnt);
+						lidbg("minRecName------>%s\n",minRecName);
+						sprintf(tmpCMD , "rm -f %s%s",REC_SAVE_DIR,minRecName);
+						system(tmpCMD);
+					}
+					lidbg_get_current_time(time_buf, NULL);
+					sprintf(flyh264_filename, "%s%s.h264", REC_SAVE_DIR, time_buf);
+					lidbg("=========flyh264_filename : %s===========", flyh264_filename);
+					rec_fp1 = fopen(flyh264_filename, "wb");
 				}
 				if(rec_fp1 != NULL)
 				{
@@ -3935,7 +4083,7 @@ int main(int argc, char *argv[])
 
 		ret = ioctl(dev, VIDIOC_QBUF, &buf0);
 		if (ret < 0) {
-			TestAp_Printf(TESTAP_DBG_ERR, "Unable to requeue buffer0 (%d).\n", errno);
+			lidbg( "Unable to requeue buffer0 (%d).\n", errno);
 			close(dev);
 			if(multi_stream_enable)
 				close(fake_dev);			
