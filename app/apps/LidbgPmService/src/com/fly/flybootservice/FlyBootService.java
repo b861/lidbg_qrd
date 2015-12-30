@@ -51,6 +51,9 @@ import java.io.IOException;
 import java.util.List;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 /*
  * ScreenOn ScreenOff DeviceOff Going2Sleep 四种状态分别表示：1.表示正常开屏状态2.表示关屏，但没关外设的状态
  * 0'~30'的阶段3.表示关屏关外设，但没到点进入深度休眠 30'~60'的阶段4.表示发出休眠请求到执行快速休眠 60'后,即进入深度休眠
@@ -94,6 +97,7 @@ public class FlyBootService extends Service {
     private boolean booleanRemoteControl = false;
     private static int pmState = -1;
     private String[] mWhiteList = null;
+    private String[] mInternelWhiteList = null;
     // add launcher in protected list
     String systemLevelProcess[] = {
             "com.android.flyaudioui",
@@ -124,6 +128,17 @@ public class FlyBootService extends Service {
 	}
 	else
 		LIDBG_PRINT("mWhiteList = null");
+
+	mInternelWhiteList = FileReadList("/flysystem/lib/out/appInternetProtectList.conf","\n");
+	if (mInternelWhiteList != null)
+	{
+		for (int i = 0; i < mInternelWhiteList.length; i++)
+		{
+			LIDBG_PRINT(i +"->"+ mInternelWhiteList[i]);
+		}
+	}
+	else
+		LIDBG_PRINT("mInternelWhiteList = null");
 
 	
         new Thread() {
@@ -629,6 +644,69 @@ public class FlyBootService extends Service {
             e.printStackTrace();
         }
     }
+	public void FlyaudioInternetEnable()
+	{
+		LIDBG_PRINT("FlyaudioInternetEnable");
+		InternetEnable();
+		if (mInternelWhiteList != null)
+		{
+			for (int i = 0; i < mInternelWhiteList.length; i++)
+			{
+				appInternetControl(false, mInternelWhiteList[i]);
+			}
+		} else
+		{
+			LIDBG_PRINT("mInternelWhiteList = null");
+		}
+	}
+	public void FlyaudioInternetDisable()
+	{
+		LIDBG_PRINT("FlyaudioInternetDisable");
+		InternetDisable();
+		if (mInternelWhiteList != null)
+		{
+			for (int i = 0; i < mInternelWhiteList.length; i++)
+			{
+				appInternetControl(true, mWhiteList[i]);
+			}
+		} else
+		{
+			LIDBG_PRINT("mInternelWhiteList = null");
+		}
+	}
+	public void appInternetControl(boolean en, String appname)
+	{
+		// TODO Auto-generated method stub
+		try
+		{
+			PackageManager pm = this.getPackageManager();
+			ApplicationInfo ai = pm.getApplicationInfo(appname,
+					PackageManager.GET_ACTIVITIES);
+			writeToFile("/dev/lidbg_misc0", "flyaudio:iptables "
+					+ (en ? "-I" : "-D")
+					+ " OUTPUT -o rmnet+ -m owner --uid-owner " + ai.uid
+					+ " -j ACCEPT");
+		} catch (NameNotFoundException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	public void InternetDisable()
+	{
+		// TODO Auto-generated method stub
+		writeToFile("/dev/lidbg_misc0","flyaudio:iptables -t filter -P OUTPUT DROP");
+		writeToFile("/dev/lidbg_misc0","flyaudio:iptables -t filter -P INPUT DROP");
+		writeToFile("/dev/lidbg_misc0","flyaudio:iptables -t filter -P FORWARD DROP");
+	}
+
+	public void InternetEnable()
+	{
+		// TODO Auto-generated method stub
+		writeToFile("/dev/lidbg_misc0", "flyaudio:iptables -t filter -P OUTPUT ACCEPT");
+		writeToFile("/dev/lidbg_misc0","flyaudio:iptables -t filter -P INPUT ACCEPT");
+		writeToFile("/dev/lidbg_misc0","flyaudio:iptables -t filter -P FORWARD ACCEPT");
+	}
 
 }
 
