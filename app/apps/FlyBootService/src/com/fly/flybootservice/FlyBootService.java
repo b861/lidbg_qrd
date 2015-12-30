@@ -169,20 +169,34 @@ public class FlyBootService extends Service {
         fbHandler = new Handler(fbHandlerThread.getLooper(), fbHandlerCallback);
 
         acquireWakeLock();
-	String tempString = FileRead("/flysystem/lib/out/appProtectList.conf");
-	if (tempString != null && tempString.length() > 2)
+	mWhiteList = FileReadList("/flysystem/lib/out/appProtectList.conf","\n");
+	if (mWhiteList != null)
 	{
-		mWhiteList = tempString.trim().split("\n");
 		for (int i = 0; i < mWhiteList.length; i++)
 		{
 			LIDBG_PRINT(i +"->"+ mWhiteList[i]);
 		}
 	}
+	else
+		LIDBG_PRINT("mWhiteList = null");
+
+	
         delay(5000);
         //setAndroidState(true);
 
     }
 
+	public String[] FileReadList(String fileName, String split)
+	{
+		// TODO Auto-generated method stub
+		String[] mList = null;
+		String tempString = FileRead(fileName);
+		if (tempString != null && tempString.length() > 2)
+		{
+			mList = tempString.trim().split(split);
+		}
+		return mList;
+	}
 	public String FileRead(String fileName)
 	{
 		String res = null;

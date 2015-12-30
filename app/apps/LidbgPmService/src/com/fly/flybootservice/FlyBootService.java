@@ -114,15 +114,18 @@ public class FlyBootService extends Service {
 
         mFlyBootService = this;
         acquireWakeLock();
-	String tempString = FileRead("/flysystem/lib/out/appProtectList.conf");
-	if (tempString != null && tempString.length() > 2)
+	mWhiteList = FileReadList("/flysystem/lib/out/appProtectList.conf","\n");
+	if (mWhiteList != null)
 	{
-		mWhiteList = tempString.trim().split("\n");
 		for (int i = 0; i < mWhiteList.length; i++)
 		{
 			LIDBG_PRINT(i +"->"+ mWhiteList[i]);
 		}
 	}
+	else
+		LIDBG_PRINT("mWhiteList = null");
+
+	
         new Thread() {
             @Override
             public void run() {
@@ -191,6 +194,17 @@ public class FlyBootService extends Service {
         }.start();
 
     }
+	public String[] FileReadList(String fileName, String split)
+	{
+		// TODO Auto-generated method stub
+		String[] mList = null;
+		String tempString = FileRead(fileName);
+		if (tempString != null && tempString.length() > 2)
+		{
+			mList = tempString.trim().split(split);
+		}
+		return mList;
+	}
 	public String FileRead(String fileName)
 	{
 		String res = null;
