@@ -1152,7 +1152,16 @@ out_err:
 		
 		system("./flysystem/lib/out/lidbg_testuvccam /dev/video0 --xuset-flip 0 ");
 #endif
+	//car record enable time osd
+	if(cam_id == 1)
+	{
+		system("./flysystem/lib/out/lidbg_testuvccam /dev/video1 --xuset-oe 1 1 ");
+		system("./flysystem/lib/out/lidbg_testuvccam /dev/video1 --xuset-car 0 0 0");
+	}
+	else if(cam_id == 0)
+	{
 		system("./flysystem/lib/out/lidbg_testuvccam /dev/video1 --xuset-oe 0 0 ");
+	}
 		
 		//system("./flysystem/lib/out/lidbg_testuvccam /dev/video1 --ef-set nightthread=1 &");
 #if 0

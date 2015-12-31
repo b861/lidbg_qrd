@@ -271,6 +271,35 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 			sprintf(temp_cmd, "setprop fly.uvccam.rectime %d", rectimeVal);
 			lidbg_shell_cmd(temp_cmd);
 		}
+		#if 0
+		else if(!strcmp(keyval[0], "recnum") )
+		{
+			int recnumVal;
+			char temp_cmd[256];
+			recnumVal = simple_strtoul(keyval[1], 0, 0);
+			lidbg("recnumVal = %d",recnumVal);
+			sprintf(temp_cmd, "setprop fly.uvccam.recnum %d", recnumVal);
+			lidbg_shell_cmd(temp_cmd);
+		}
+		#endif
+		else if(!strcmp(keyval[0], "recpath") )
+		{
+			int recpathVal;
+			char temp_cmd[256];
+			//recpathVal = simple_strtoul(keyval[1], 0, 0);
+			lidbg("recpathVal = %s",keyval[1]);
+			sprintf(temp_cmd, "setprop fly.uvccam.recpath %s", keyval[1]);
+			lidbg_shell_cmd(temp_cmd);
+		}
+		else if(!strcmp(keyval[0], "recfilesize") )
+		{
+			int recfilesizeVal;
+			char temp_cmd[256];
+			recfilesizeVal = simple_strtoul(keyval[1], 0, 0);
+			lidbg("recfilesizeVal = %d",recfilesizeVal);
+			sprintf(temp_cmd, "setprop fly.uvccam.recfilesize %d", recfilesizeVal);
+			lidbg_shell_cmd(temp_cmd);
+		}
 		else if(!strcmp(keyval[0], "test") )
 		{
 			isBackChange = 1;

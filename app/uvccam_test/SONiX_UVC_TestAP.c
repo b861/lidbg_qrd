@@ -104,9 +104,11 @@
 
 //flyaudio
 #define NONE_HUB_SUPPORT	1
-#define REC_SAVE_DIR	"/storage/sdcard0/camera_rec/"
+//#define REC_SAVE_DIR	"/storage/sdcard0/camera_rec/"
+char Rec_Save_Dir[100] = "/storage/sdcard0/camera_rec/";
 int Max_Rec_Num = 5;
-int Rec_Sec = 300;
+int Rec_Sec = 300;//s
+int Rec_File_Size = 300;//MB
 
 // chris -
 
@@ -117,7 +119,8 @@ int Dbg_Param = 0x1f;
 char startRecording[PROPERTY_VALUE_MAX];
 char Res_String[PROPERTY_VALUE_MAX];
 char Rec_Sec_String[PROPERTY_VALUE_MAX];
-char Max_Rec_Num_String[PROPERTY_VALUE_MAX];
+//char Max_Rec_Num_String[PROPERTY_VALUE_MAX];
+char Rec_File_Size_String[PROPERTY_VALUE_MAX];
 
 char startNight[PROPERTY_VALUE_MAX];
 //char startCapture[PROPERTY_VALUE_MAX];
@@ -1298,7 +1301,7 @@ void *thread_switch(void *par)
     lidbg("-------eho--------%s----exit\n",__func__);
     return 0;
 }
-
+#if 0
 void *thread_nightmode(void *par)
 {
 	char on = 1;
@@ -1343,7 +1346,7 @@ void *thread_nightmode(void *par)
     lidbg("-------eho--------%s----exit\n",__func__);
     return 0;
 }
-
+#endif
 int lidbg_token_string(char *buf, char *separator, char **token)
 {
     char *token_tmp;
@@ -1367,7 +1370,7 @@ char *lidbg_get_current_time(char *time_string, struct rtc_time *ptm)
 	time_t timep; 
 	struct tm *p; 
 	time(&timep); 
-	p=gmtime(&timep); 
+	p=localtime(&timep); 
     if(time_string)
         sprintf(time_string, "%d-%02d-%02d__%02d.%02d.%02d", (1900+p->tm_year), (1+p->tm_mon), p->tm_mday,p->tm_hour , p->tm_min,p->tm_sec);
     return time_string;
@@ -1836,6 +1839,9 @@ int main(int argc, char *argv[])
 	char devName[256];
 	char time_buf[100] = {0};
 	char tmpCMD[100] = {0};
+	unsigned char isExceed = 0;
+	unsigned char isReplace = 0;
+	unsigned long totalSize = 0;
  //cjc -
 #if(CARCAM_PROJECT == 1)
 	printf("%s   ******  for Carcam  ******\n",TESTAP_VERSION);
@@ -2638,18 +2644,46 @@ int main(int argc, char *argv[])
 	
 	if (dev < 0)
 		return 1;
-
-	property_get("fly.uvccam.rectime", Rec_Sec_String, "300");
-	Rec_Sec = atoi(Rec_Sec_String);
-	lidbg("=======test1=======%s -> %d===",Rec_Sec_String,Rec_Sec);
-	if(Rec_Sec == 0) Rec_Sec = 300;
-	lidbg("=======test2=======%s -> %d===",Rec_Sec_String,Rec_Sec);
+	if((do_save) || (do_record)) 
+	{
+		//set each file recording time
+		property_get("fly.uvccam.rectime", Rec_Sec_String, "300");
+		Rec_Sec = atoi(Rec_Sec_String);
+		lidbg("========set each file recording time-> %d s=======",Rec_Sec);
+		if(Rec_Sec == 0) 
+		{
+			lidbg("not allow recording time = 0s !!reset to 300s.\n");
+			Rec_Sec = 300;
+		}
+		
 #if 0
-	property_get("fly.uvccam.rectime", Max_Rec_Num_String, "5");
-	Max_Rec_Num = atoi(Max_Rec_Num_String);
-	lidbg("=======test=======%s -> %d===",Max_Rec_Num_String,Max_Rec_Num);
-	if(Max_Rec_Num == 0) Max_Rec_Num = 5;
+		property_get("fly.uvccam.recnum", Max_Rec_Num_String, "5");
+		Max_Rec_Num = atoi(Max_Rec_Num_String);
+		lidbg("=======test=======%s -> %d===",Max_Rec_Num_String,Max_Rec_Num);
+		if(Max_Rec_Num == 0) Max_Rec_Num = 5;
 #endif
+
+		//set record file savePath
+		property_get("fly.uvccam.recpath", Rec_Save_Dir, "/storage/sdcard0/camera_rec/");
+		lidbg("==========recording dir -> %s===========",Rec_Save_Dir);
+		if(access(Rec_Save_Dir, R_OK) != 0)
+		{
+			lidbg("record file path access wrong! " );
+			//return 0;
+			strcpy(Rec_Save_Dir,  "/storage/sdcard0/camera_rec/");
+		}
+		
+		//set record file total size
+		property_get("fly.uvccam.recfilesize", Rec_File_Size_String, "300");
+		Rec_File_Size = atoi(Rec_File_Size_String);
+		lidbg("======== video file total size-> %d MB=======",Rec_File_Size);
+		if(Rec_File_Size == 0) 
+		{
+			lidbg("not allow video file size = 0MB !!reset to 300MB.\n");
+			Rec_File_Size = 300;
+		}
+	}
+
 
 	if(do_vendor_version_get)
 	{
@@ -2711,7 +2745,8 @@ int main(int argc, char *argv[])
 			//lidbg("----eho---- : do_exposure (%d) Failed", exposureVal);
 			if (v4l2SetControl (dev, V4L2_CID_EXPOSURE_ABSOLUTE, V4L2_EXPOSURE_AUTO)<0)
 			lidbg("----eho---- : do_exposure (%d) Failed", exposureVal);
-		}	
+		}
+		#if 0
 		else if (do_nightthread)
 		{
 			lidbg("nightthread create ----E----");
@@ -2721,7 +2756,8 @@ int main(int argc, char *argv[])
 				lidbg( "-----eho-----nightthread pthread error!\n");
 				return 1;
 			}
-		}	
+		}
+		#endif
 		lidbg("do_ef_set=----X--");
 		return 0;
 	}
@@ -3971,8 +4007,39 @@ int main(int argc, char *argv[])
 					rec_fp1 = fopen(flyh264_filename[flytmpcnt], "wb");
 				}
 				*/
+				if(i % 15 == 0)
+				{
+					DIR *pDir ;
+					struct dirent *ent;
+					struct stat buf; 
+					char path[100] = {0};
+					totalSize = 0;
+					pDir=opendir(Rec_Save_Dir);  
+					while((ent=readdir(pDir))!=NULL)  
+					{
+						 if(!(ent->d_type & DT_DIR))  
+				         {  
+				                if((strcmp(ent->d_name,".") == 0) || (strcmp(ent->d_name,"..") == 0) || (ent->d_reclen != 48) ) 
+				                        continue; 
+								sprintf(path , "%s%s",Rec_Save_Dir,ent->d_name);
+								if (stat(path,&buf) == -1)
+							    {
+								      lidbg ("Get stat on %s Error?%s\n", ent->d_name, strerror (errno));
+								      //return (-1);
+							    }
+								//lidbg("%s -> size = %d/n",ent->d_name,buf.st_size); 
+								totalSize += buf.st_size;
+					 	 }
+					}
+					if(((totalSize/1000000)%50) == 0) lidbg("total file size = %dMB\n",totalSize/1000000); 
+					if((totalSize/1000000) >= Rec_File_Size)	
+					{
+						isExceed = 1;
+						isReplace = 1;
+					}
+				}
 				
-				if(i % (Rec_Sec*30)  == 0)//frames = sec * 30f/s
+				if((i % (Rec_Sec*30)  == 0) || isReplace)//frames = sec * 30f/s
 				{
 					DIR *pDir ;
 					struct dirent *ent; 
@@ -3988,14 +4055,21 @@ int main(int argc, char *argv[])
 					char tmpDName[100] = {0};
 					unsigned char filecnt = 0;
 					unsigned char memcpyFlag = 0;
+
+					struct tm prevTm,curTm;
+					time_t prevtimep,curtimep;
+					prevtimep = 0;
+					isReplace = 0;
+					#if 0
 					if(i > 0)
 					{
 						if(flytmpcnt < Max_Rec_Num - 1) flytmpcnt++;
 						else flytmpcnt = 0;
 					}
-					
+					#endif
+			
 					//find the earliest rec file and del
-					pDir=opendir(REC_SAVE_DIR);  
+					pDir=opendir(Rec_Save_Dir);  
 					while((ent=readdir(pDir))!=NULL)  
 					{  
 					        if(!(ent->d_type & DT_DIR))  
@@ -4003,72 +4077,64 @@ int main(int argc, char *argv[])
 					                if((strcmp(ent->d_name,".") == 0) || (strcmp(ent->d_name,"..") == 0) || (ent->d_reclen != 48) ) 
 					                        continue;  
 									filecnt++;
-					                lidbg("ent->d_name:%s====ent->d_reclen:%d=====\n", ent->d_name,ent->d_reclen); 
-									#if 0
-									char *p;char *buff;
-									buff = ent->d_name;
-									p = strsep(&buff, "__");
-									lidbg("strsep__");
-									while(p)
-									{
-								        lidbg("%s=====test strsep=====", p);
-								        p = strsep(&buff, "__");
-								    }
-									#endif
+					                //lidbg("ent->d_name:%s====ent->d_reclen:%d=====\n", ent->d_name,ent->d_reclen); 
+
 									strcpy(tmpDName, ent->d_name);
 									lidbg_token_string(ent->d_name, "__", date_time_key);
 									//lidbg("date_time_key0:%s====date_time_key1:%s=====", date_time_key[0],date_time_key[2]);	
 									lidbg_token_string(date_time_key[0], "-", date_key);
 									//lidbg("date_key:%s====%s===%s==", date_key[0],date_key[1],date_key[2]);	
 									lidbg_token_string(date_time_key[2], ".", time_key);
-									//lidbg("time_key:%s====%s===%s==", time_key[0],time_key[1],time_key[2]);									
-									int i;
-									memcpyFlag = 0;
-									for(i = 0;i < 3;i++)//date serach
+									//lidbg("time_key:%s====%s===%s==", time_key[0],time_key[1],time_key[2]);	
+									
+									curTm.tm_year = atoi(date_key[0]) -1900;
+									curTm.tm_mon = atoi(date_key[1]) -1;
+									curTm.tm_mday = atoi(date_key[2]);
+									curTm.tm_hour = atoi(time_key[0]);
+									curTm.tm_min = atoi(time_key[1]);
+									curTm.tm_sec	 = atoi(time_key[2]);	
+									curtimep = mktime(&curTm);
+									#if 0
+									lidbg("prevtimep=======%d========",  prevtimep);
+									lidbg("curtimep=======%d========",  curtimep);
+									lidbg("difftime=======%d========", difftime(curtimep, prevtimep));
+									#endif
+									if((curtimep < prevtimep) || (prevtimep == 0))
 									{
-										cur_date[i] = atoi(date_key[i]);
-										if(cur_time[i] > min_time[i])  goto nextsearch;
-										else if(cur_date[i]  == min_date[i] ||memcpyFlag)	continue;
-										else if(cur_date[i] < min_date[i])
-										{
-											strcpy(minRecName, tmpDName);
-											lidbg("minRecName1------>%s\n",minRecName);
-											memcpyFlag = 1;
-										}
-									}	
-									for(i = 0;i < 3;i++)//time serach
-									{
-										cur_time[i] = atoi(time_key[i]);
-										//lidbg("cur_time[i]-->%d  min_time[i]-->%d\n",cur_time[i],min_time[i]);
-										if(cur_time[i] > min_time[i]) goto nextsearch;
-										else if(cur_time[i] == min_time[i] ||memcpyFlag)	continue;
-										else if(cur_time[i] < min_time[i])
-										{
-											strcpy(minRecName, tmpDName);
-											lidbg("minRecName2------>%s\n",minRecName);
-											memcpyFlag = 1;
-										}	
+										prevtimep = curtimep;
+										strcpy(minRecName, tmpDName);
+										//lidbg("minRecName---%d--->%s\n",filecnt,minRecName);
 									}
-nextsearch:
-									//lidbg("memcpyFlag-->%d\n",memcpyFlag);
-									if(memcpyFlag)
-									{
-										memcpy(min_date,cur_date,3*sizeof(int));
-										memcpy(min_time,cur_time,3*sizeof(int));
-									}
+											
 					        }  
 					}
-					if(filecnt == Max_Rec_Num)
+
+					//lidbg("minRecName end------>%s\n",minRecName);
+
+					struct stat filebuf; 
+					char filepath[100] = {0};
+					if(isExceed)
 					{
-						lidbg("current cnt------>%d\n",filecnt);
-						lidbg("minRecName------>%s\n",minRecName);
-						sprintf(tmpCMD , "rm -f %s%s",REC_SAVE_DIR,minRecName);
+						//lidbg("current cnt------>%d\n",filecnt);
+						sprintf(filepath , "%s%s",Rec_Save_Dir,minRecName);
+						if (stat(filepath,&filebuf) == -1)
+					    {
+						      lidbg ("Get stat on %s Error?%s\n", filepath, strerror (errno));
+					    }
+						lidbg("=========oldest rec file will be del : %s (%d MB)===========\n",minRecName,filebuf.st_size /1000000);
+						sprintf(tmpCMD , "rm -f %s&",filepath);
 						system(tmpCMD);
+						isExceed = 0;
 					}
-					lidbg_get_current_time(time_buf, NULL);
-					sprintf(flyh264_filename, "%s%s.h264", REC_SAVE_DIR, time_buf);
-					lidbg("=========flyh264_filename : %s===========", flyh264_filename);
-					rec_fp1 = fopen(flyh264_filename, "wb");
+					//only if within Rec_File_Size,otherwise replace oldest file.
+					if(((totalSize - filebuf.st_size) /1000000) < Rec_File_Size)
+					{
+						lidbg_get_current_time(time_buf, NULL);
+						sprintf(flyh264_filename, "%s%s.h264", Rec_Save_Dir, time_buf);
+						lidbg("=========new flyh264_filename : %s===========\n", flyh264_filename);
+						rec_fp1 = fopen(flyh264_filename, "wb");
+					}
+					else lidbg("rec file exceed!still has %d MB .\n",((totalSize - filebuf.st_size) /1000000));
 				}
 				if(rec_fp1 != NULL)
 				{
