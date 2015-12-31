@@ -269,8 +269,11 @@ static int get_uvc_device(const char *id,char *devname)
         if(i > 1000)
         {
             strncpy(devname, "/dev/video1", FILENAME_LENGTH);
+            //*devname = '\0';
             ALOGD("%s.%d: Probing fail:%s \n", __func__, i, devname);
-            break;
+            //break;
+            ALOGE("%s: X,%s", __func__, devname);
+			return -1;
         }
     }
 
@@ -407,6 +410,7 @@ openDev:
 
 failproc:
 	strncpy(devname, "/dev/video1", FILENAME_LENGTH);
+	//*devname = '\0';
 	ALOGD("%s: Probing fail:%s , run normal proc", __func__, devname);
 #if NONE_HUB_SUPPORT
 	system("echo flyaudio:touch /dev/log/CameraScan1.txt > /dev/lidbg_misc0");
@@ -445,15 +449,15 @@ failproc:
             rc = -1;
             goto out_err;
         }
-
+getuvcdevice:
         dev_name = camHal->dev_name;
         rc = get_hub_uvc_device(mid,dev_name);
         if((rc == -1) || (*dev_name == '\0'))
         {
             ALOGE("%s: No UVC node found \n", __func__);
-            goto out_err;
+            goto try_open_again;
         }
-
+openfd:
         camHal->fd = open(dev_name, O_RDWR | O_NONBLOCK, 0);
         if (camHal->fd <  0)
         {
@@ -479,6 +483,16 @@ failproc:
 out_err:
         ALOGE("%s: X.out_err  %d", __func__, rc);
         return rc;
+try_open_again:
+		system("echo 'udisk_enable' > /dev/flydev0");
+		usleep(500*1000);
+		rc = get_hub_uvc_device(mid,dev_name);
+		if((rc == -1) || (*dev_name == '\0'))
+        {
+            ALOGE("%s: No UVC node found again\n", __func__);
+            goto out_err;
+        }
+		else goto openfd;
     }
 
     extern "C"  int usbcam_close_camera_device( hw_device_t *hw_dev)
@@ -505,6 +519,7 @@ out_err:
                 ALOGE("%s: camHal is NULL pointer ", __func__);
             }
         }
+		system("echo 'udisk_disable' > /dev/flydev0");	
         ALOGI("%s: X device =%p, rc = %d", __func__, hw_dev, rc);
         return rc;
     }

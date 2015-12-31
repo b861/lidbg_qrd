@@ -1429,7 +1429,9 @@ char *lidbg_get_current_time(char *time_string, struct rtc_time *ptm)
             {
                 strncpy(devname, "/dev/video1", 256);
                 lidbg("%s.%d: Probing fail:%s \n", __func__, i, devname);
-                break;
+                //break;
+                lidbg("%s: X,%s", __func__, devname);
+				return -1;
             }
         }
 
@@ -2632,14 +2634,16 @@ int main(int argc, char *argv[])
 
 	/* Open the video device. */
 	//dev = video_open(argv[optind]);
-	
+getuvcdevice:
 	//auto find camera device
 	rc = get_hub_uvc_device(devName,do_save,do_record);
     if(rc || *devName == '\0')
     {
         lidbg("%s: No UVC node found \n", __func__);
-		return 1;
+		//return 1;
+		goto try_open_again; 
     }
+openfd:
 	dev = video_open(devName);
 	
 	if (dev < 0)
@@ -4202,5 +4206,18 @@ int main(int argc, char *argv[])
 	close(dev);
 	if(multi_stream_enable)
 		close(fake_dev);	
+
+	system("echo 'udisk_disable' > /dev/flydev0");
 	return 0;
+	
+try_open_again:
+		system("echo 'udisk_enable' > /dev/flydev0");
+		usleep(500*1000);
+		rc = get_hub_uvc_device(devName,do_save,do_record);
+		if((rc == -1) || (*devName == '\0'))
+        {
+            ALOGE("%s: No UVC node found again\n", __func__);
+            return 1;
+        }
+		else goto openfd;
 }
