@@ -39,7 +39,7 @@ typedef enum
 }FLY_ACC_STATUS;
 
 
-static int acc_io_state = FLY_ACC_ON;
+FLY_ACC_STATUS acc_io_state = FLY_ACC_ON;
 
 void rmtctrl_fifo_in(void)
 {
@@ -72,15 +72,14 @@ static void rmtctrl_timer_func(unsigned long data)
 	return;
 }
 
-static void acc_state_work_func(struct work_struct *work)
+void acc_status_handle(FLY_ACC_STATUS val)
 {
-	int val = -1;
-
-	val = SOC_IO_Input(MCU_ACC_STATE_IO, MCU_ACC_STATE_IO, GPIO_CFG_PULL_UP);
 	if(val == FLY_ACC_ON){
 		lidbg("acc_state_work_func: FLY_ACC_ON\n");
 		g_var.acc_flag = 1;
 
+		lidbg("*** Set acc.status to 0\n");
+		lidbg_shell_cmd("setprop persist.lidbg.acc.status 0");
 		lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_ON));
 		acc_io_state = FLY_ACC_ON;
 		wake_lock(&rmtctrl_wakelock);
@@ -96,6 +95,8 @@ static void acc_state_work_func(struct work_struct *work)
 		lidbg("acc_state_work_func: FLY_ACC_OFF\n");
 		g_var.acc_flag = 0;
 
+		lidbg("*** Set acc.status to 1\n");
+		lidbg_shell_cmd("setprop persist.lidbg.acc.status 1");
 		//USB_WORK_DISENABLE;
 		//LCD_OFF;
 		lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_OFF));
@@ -107,6 +108,14 @@ static void acc_state_work_func(struct work_struct *work)
 		lidbg("acc_state_work_func: FLY_ACC_OFF, add rmtctrl timer.\n");
 		mod_timer(&rmtctrl_timer,SCREE_OFF_TIME_S);
 	}
+}
+
+static void acc_state_work_func(struct work_struct *work)
+{
+	int val = -1;
+
+	val = SOC_IO_Input(MCU_ACC_STATE_IO, MCU_ACC_STATE_IO, GPIO_CFG_PULL_UP);
+	acc_status_handle(val);
 }
 
 static void rmtctrl_suspend(void)
@@ -284,8 +293,9 @@ static int lidbg_rmtctrl_probe(struct platform_device *pdev)
 	lidbg_chmod("/dev/flyaudio_pm0");
 
 	// boot when acc off
-       mod_timer(&rmtctrl_timer,0);
-
+	if(acc_io_state == FLY_ACC_OFF)
+		acc_status_handle(acc_io_state);
+		
 	return 0;
 }
 
