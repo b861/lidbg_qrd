@@ -38,7 +38,6 @@ typedef enum
 	FLY_ACC_ON,
 }FLY_ACC_STATUS;
 
-FLY_ACC_STATUS lpc_acc_state = FLY_ACC_ON;
 
 static int acc_io_state = FLY_ACC_ON;
 
@@ -82,8 +81,6 @@ static void acc_state_work_func(struct work_struct *work)
 		lidbg("acc_state_work_func: FLY_ACC_ON\n");
 		g_var.acc_flag = 1;
 
-		lidbg("*** Set SmdMdmFlag to 0\n");
-		lidbg_shell_cmd("setprop persist.lidbg.SmdMdmFlag 0");
 		lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_ON));
 		acc_io_state = FLY_ACC_ON;
 		wake_lock(&rmtctrl_wakelock);
@@ -99,8 +96,6 @@ static void acc_state_work_func(struct work_struct *work)
 		lidbg("acc_state_work_func: FLY_ACC_OFF\n");
 		g_var.acc_flag = 0;
 
-		lidbg("*** Set SmdMdmFlag to 1\n");
-		lidbg_shell_cmd("setprop persist.lidbg.SmdMdmFlag 1");
 		//USB_WORK_DISENABLE;
 		//LCD_OFF;
 		lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_OFF));
@@ -131,7 +126,6 @@ static void rmtctrl_suspend(void)
 	send_app_status(FLY_ANDROID_DOWN);
 	fs_file_write(DEV_NAME, false, ANDROID_DOWN, 0, strlen(ANDROID_DOWN));
 
-	//MCU_APP_GPIO_OFF;
 	return;
 }
 
@@ -156,7 +150,6 @@ static void rmtctrl_resume(void)
 		lidbg("rmtctrl_resume, acc_io_state is FLY_ACC_OFF, add rmtctrl timer.\n");
 		mod_timer(&rmtctrl_timer,AUTO_SLEEP_TIME_S);
 	}
-	//MCU_APP_GPIO_ON;
 	return;
 }
 
@@ -261,7 +254,6 @@ static int lidbg_rmtctrl_probe(struct platform_device *pdev)
 	    lidbg("rmtctrl kmalloc state buffer error.\n");
 	    return 0;
 	}
-
 	INIT_WORK(&acc_state_work, acc_state_work_func);
 
 	MCU_APP_GPIO_ON;
@@ -279,17 +271,20 @@ static int lidbg_rmtctrl_probe(struct platform_device *pdev)
 
 	wake_lock_init(&rmtctrl_wakelock, WAKE_LOCK_SUSPEND, "lidbg_rmtctrl");
 
-	SOC_IO_Input(MCU_ACC_STATE_IO, MCU_ACC_STATE_IO, GPIO_CFG_PULL_UP);
+	acc_io_state = SOC_IO_Input(MCU_ACC_STATE_IO, MCU_ACC_STATE_IO, GPIO_CFG_PULL_UP);
 	SOC_IO_ISR_Add(MCU_ACC_STATE_IO, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING, acc_state_isr, NULL);
 	lidbg("rmtctrl probe: enable_irq_wake %d\n",GPIO_TO_INT(MCU_ACC_STATE_IO));
 	enable_irq_wake(GPIO_TO_INT(MCU_ACC_STATE_IO));
 
-	lidbg_shell_cmd("svc data disable &");
+	//lidbg_shell_cmd("svc data disable &");
 	init_waitqueue_head(&wait_queue);
 	sema_init(&rmtctrl_sem, 1);
 	kfifo_init(&rmtctrl_state_fifo, rmtctrl_state_buffer, rmtctrl_FIFO_SIZE);
 	lidbg_new_cdev(&rmtctrl_fops, "flyaudio_pm");
 	lidbg_chmod("/dev/flyaudio_pm0");
+
+	// boot when acc off
+       mod_timer(&rmtctrl_timer,0);
 
 	return 0;
 }
