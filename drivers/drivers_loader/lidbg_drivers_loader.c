@@ -12,6 +12,7 @@ struct judgment
 {
     {"platform_id", -1},
     {"Factory", -1},
+    {"gboot_mode", -1},
 };
 void judgment_list_print(void)
 {
@@ -70,6 +71,7 @@ void judgment_list_init(void)
     judgment_list[0].value = 15 ;
 #endif
     judgment_list[1].value = is_out_updated ;
+    judgment_list[2].value = gboot_mode ;
 
     judgment_list_print();
 }
