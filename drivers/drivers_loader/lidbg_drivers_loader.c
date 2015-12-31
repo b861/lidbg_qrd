@@ -262,8 +262,6 @@ static int thread_drivers_loader_analyze(void *data)
     fs_fill_list(get_lidbg_file_path(buff, "lidbg.init.rc.conf"), FS_CMD_FILE_LISTMODE, &lidbg_list);
     analyze_list_cmd(&lidbg_list);
 
-	msleep(1000);
-
     if(gboot_mode == MD_FLYSYSTEM)
     {
         LIDBG_WARN("<==gboot_mode==MD_FLYSYSTEM==>\n");

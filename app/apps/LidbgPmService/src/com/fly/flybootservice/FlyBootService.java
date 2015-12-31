@@ -111,7 +111,7 @@ public class FlyBootService extends Service {
     private List<Integer> mInternelAllAppListUID= new ArrayList<Integer>();
     //list about all white list app'uid 
     private List<Integer> mInterneWhiteListAppUID= new ArrayList<Integer>();
-
+    private boolean dbgMode = false;
 
     // add launcher in protected list
     String systemLevelProcess[] = {
@@ -131,29 +131,11 @@ public class FlyBootService extends Service {
         LIDBG_PRINT("flybootservice onCreate......");
         writeToFile("/dev/lidbg_pm0","flyaudio PmServiceStar");
 
-        mFlyBootService = this;
-        acquireWakeLock();
+	mFlyBootService = this;
+	acquireWakeLock();
 	mWhiteList = FileReadList("/flysystem/lib/out/appProtectList.conf","\n");
-	if (mWhiteList != null)
-	{
-		for (int i = 0; i < mWhiteList.length; i++)
-		{
-			LIDBG_PRINT(i +"->"+ mWhiteList[i]);
-		}
-	}
-	else
-		LIDBG_PRINT("mWhiteList = null");
-
 	mInternelWhiteList = FileReadList("/flysystem/lib/out/appInternetProtectList.conf","\n");
-	if (mInternelWhiteList != null)
-	{
-		for (int i = 0; i < mInternelWhiteList.length; i++)
-		{
-			LIDBG_PRINT(i +"->"+ mInternelWhiteList[i]);
-		}
-	}
-	else
-		LIDBG_PRINT("mInternelWhiteList = null");
+	DUMP();
 
 	IntentFilter filter = new IntentFilter();
 	filter.addAction("com.lidbg.flybootserver.action");
@@ -246,10 +228,17 @@ public class FlyBootService extends Service {
 			switch (action)
 			{
 			case 0:
-			FlyaudioInternetDisable();
+				FlyaudioInternetDisable();
 			break;
 			case 1:
-			FlyaudioInternetEnable();
+				FlyaudioInternetEnable();
+			break;
+			case 2:
+				dbgMode=!dbgMode;
+				LIDBG_PRINT("dbgMode->"+ dbgMode+"\n");
+			break;
+			case 3:
+				DUMP();
 			break;
 
 			default:
@@ -498,13 +487,13 @@ public class FlyBootService extends Service {
 
         appProcessList = mActivityManager.getRunningAppProcesses();
 
-        LIDBG_PRINT("begin to KillProcess."+(mWhiteList == null));
+        LIDBG_PRINT("begin to KillProcess."+(mWhiteList == null)+"\n");
         for (ActivityManager.RunningAppProcessInfo appProcessInfo : appProcessList) {
             int pid = appProcessInfo.pid;
             int uid = appProcessInfo.uid;
             String processName = appProcessInfo.processName;
             if (isKillableProcess(processName)) {
-                LIDBG_PRINT(processName +"."+pid +" will be killed");
+                LIDBG_PRINT(processName +"."+pid +" will be killed\n");
                 mActivityManager.forceStopPackage(processName);
             }
         }
@@ -791,6 +780,7 @@ public class FlyBootService extends Service {
 	                }
 	            }
 
+	            if (dbgMode)
 	            LIDBG_PRINT("appInternetControl:" + i + "-->" + uid + "/" +  pm.getNameForUid(uid) + "\n");
 	            // -o rmnet+
 	            writeToFile("/dev/lidbg_misc0", "flyaudio:iptables " + (enable ? "-D" : "-I") + " FORWARD  -m owner --uid-owner " + uid	+ " -j REJECT");
@@ -802,6 +792,26 @@ public class FlyBootService extends Service {
 	    else
 	        LIDBG_PRINT("mInternelAllAppList == null || mInternelAllAppList.size() < 0");
 	}
-
+	public void DUMP()
+	{
+		if (mWhiteList != null)
+		{
+			for (int i = 0; i < mWhiteList.length; i++)
+			{
+				LIDBG_PRINT(i +"->"+ mWhiteList[i]+"\n");
+			}
+		}
+		else
+			LIDBG_PRINT("mWhiteList = null\n");
+		if (mInternelWhiteList != null)
+		{
+			for (int i = 0; i < mInternelWhiteList.length; i++)
+			{
+				LIDBG_PRINT(i +"->"+ mInternelWhiteList[i]+"\n");
+			}
+		}
+		else
+			LIDBG_PRINT("mInternelWhiteList = null\n");
+	}
 }
 
