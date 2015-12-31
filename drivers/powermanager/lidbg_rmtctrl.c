@@ -275,6 +275,7 @@ static int lidbg_rmtctrl_probe(struct platform_device *pdev)
 
 	register_lidbg_notifier(&lidbg_rmtctrl_notifier);
 
+	lidbg_shell_cmd("setprop persist.lidbg.acc.status 0");
 	lidbg("rmtctrl probe: init prop AccWakedupState\n");
 	lidbg_shell_cmd("setprop persist.lidbg.AccWakedupState false");
 
