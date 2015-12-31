@@ -188,8 +188,12 @@ public class FlyBootService extends Service {
 								SendBroadcastToService(KeyBootState, keyScreenOFF);
 							}else if(pmState == FBS_DEVICE_DOWN){
 								LIDBG_PRINT("FlyBootService get pm state: FBS_DEVICE_DOWN");
-								if(!blSuspendUnairplaneFlag)
+								final boolean booleanRemoteControl = SystemProperties.getBoolean("persist.lidbg.RmtCtrlenable",false);
+								if((booleanRemoteControl) || (!blSuspendUnairplaneFlag)){
+									LIDBG_PRINT("FlyBootService device down enable AirplaneMode");
 									enterAirplaneMode();
+								}else
+									LIDBG_PRINT("FlyBootService device down disable AirplaneMode");
 								SendBroadcastToService(KeyBootState, keyEearlySusupendOFF);
 								LIDBG_PRINT("FlyBootService sent device_down to hal");
 							}else if(pmState == FBS_FASTBOOT_REQUEST){
