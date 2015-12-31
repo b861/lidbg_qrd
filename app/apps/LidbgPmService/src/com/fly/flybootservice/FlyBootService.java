@@ -67,16 +67,17 @@ import android.content.pm.PackageManager;
 public class FlyBootService extends Service {
     private static final String TAG = "boot";
 
-    private final static int FBS_SCREEN_OFF = 0;
-    private final static int FBS_DEVICE_DOWN = 1;
-    private final static int FBS_FASTBOOT_REQUEST = 2;
-    private final static int FBS_ANDROID_DOWN = 3;
-    private final static int FBS_GOTO_SLEEP = 4;
-    private final static int FBS_KERNEL_DOWN = 5;
-    private final static int FBS_KERNEL_UP = 6;
-    private final static int FBS_ANDROID_UP = 7;
-    private final static int FBS_DEVICE_UP = 8;
-    private final static int FBS_SCREEN_ON = 9;
+    private static int FBS_SCREEN_OFF = 0;
+    private static int FBS_DEVICE_DOWN = 1;
+    private static int FBS_FASTBOOT_REQUEST = 2;
+    private static int FBS_ANDROID_DOWN = 3;
+    private static int FBS_GOTO_SLEEP = 4;
+    private static int FBS_KERNEL_DOWN = 5;
+    private static int FBS_KERNEL_UP = 6;
+    private static int FBS_ANDROID_UP = 7;
+    private static int FBS_DEVICE_UP = 8;
+    private static int FBS_SCREEN_ON = 9;
+    private static int FBS_SLEEP_TIMEOUT = 10;
     public static String action = "com.flyaudio.power";
     public static String PowerBundle = "POWERBUNDLE";
     public static String keyScreenOn = "KEY_SCREEN_ON";
@@ -101,8 +102,11 @@ public class FlyBootService extends Service {
     private static boolean sendBroadcastDone = false;
     private static boolean firstBootFlag = false;
     private boolean booleanRemoteControl = false;
+    private boolean booleanAccWakedupState = false;
     private static int pmState = -1;
-	
+    private int intPlatformId = 0;
+    private boolean blSuspendUnairplaneFlag = false;
+
     //do not force-stop apps in list
     private String[] mWhiteList = null;
     //list who can access Internet
@@ -141,7 +145,33 @@ public class FlyBootService extends Service {
 	filter.addAction("com.lidbg.flybootserver.action");
 	filter.setPriority(Integer.MAX_VALUE);
 	registerReceiver(myReceiver, filter);
-	
+
+	intPlatformId = SystemProperties.getInt("persist.lidbg.intPlatformId", 0);
+	switch (intPlatformId) {
+		case 0:	//msm7627a
+		case 1:	//msm8625
+		case 2:	//msm8226 Android_4.4.2
+		case 3:	//msm8926 Android_4.4.4
+		case 4:	//msm8974 Android_4.4.4
+		case 5:	//mt3360  Android_4.2
+		case 6:	//msm8226 M8626AAAAANLYD1431 Android_5.0
+		case 7:	//msm8974 M8974AAAAANLYD4275 Android_5.1
+		case 8:	//rk3188 Radxa Rock Pro 4.4.2
+		case 9:	//rk3188 PX3 Pro 4.4.4
+		case 10:	//msm8226 Android_5.1.1
+		case 12:	//msm8226 Android_4.4.4
+		case 13:	//A80 Android_4.4
+			blSuspendUnairplaneFlag = false;
+			break;
+		case 11:	//msm8909 Android_5.1.1
+			blSuspendUnairplaneFlag = true;
+			reSetPmState();
+			break;
+		default:
+			break;
+	}
+	LIDBG_PRINT("flybootservice get platform_id: " + intPlatformId + ", SuspendUnairplane: " + blSuspendUnairplaneFlag);
+
         new Thread() {
             @Override
             public void run() {
@@ -153,57 +183,55 @@ public class FlyBootService extends Service {
 							delay(500);
 						}
 						else{
-							switch (pmState) {
-								case FBS_SCREEN_OFF:
-									LIDBG_PRINT("FlyBootService get pm state: FBS_SCREEN_OFF");
-									SendBroadcastToService(KeyBootState, keyScreenOFF);
-									break;
-								case FBS_DEVICE_DOWN:
-									LIDBG_PRINT("FlyBootService get pm state: FBS_DEVICE_DOWN");
+							if(pmState == FBS_SCREEN_OFF){
+								LIDBG_PRINT("FlyBootService get pm state: FBS_SCREEN_OFF");
+								SendBroadcastToService(KeyBootState, keyScreenOFF);
+							}else if(pmState == FBS_DEVICE_DOWN){
+								LIDBG_PRINT("FlyBootService get pm state: FBS_DEVICE_DOWN");
+								if(!blSuspendUnairplaneFlag)
 									enterAirplaneMode();
-									SendBroadcastToService(KeyBootState, keyEearlySusupendOFF);
-									LIDBG_PRINT("FlyBootService sent device_down to hal");
-									break;
-								case FBS_FASTBOOT_REQUEST:
-									LIDBG_PRINT("FlyBootService get pm state: FBS_FASTBOOT_REQUEST");
-									break;
-								case FBS_ANDROID_DOWN:
-									LIDBG_PRINT("FlyBootService get pm state: FBS_ANDROID_DOWN");
-									SendBroadcastToService(KeyBootState, keyFastSusupendOFF);
-									start_fastboot();
-									break;
-								case FBS_GOTO_SLEEP:
-									LIDBG_PRINT("FlyBootService get pm state: FBS_GOTO_SLEEP");
-									system_gotosleep();
-									break;
-								case FBS_KERNEL_DOWN:
-									LIDBG_PRINT("FlyBootService get pm state: FBS_KERNEL_DOWN");
-									break;
-								case FBS_KERNEL_UP:
-									LIDBG_PRINT("FlyBootService get pm state: FBS_KERNEL_UP");
-									break;
-								case FBS_ANDROID_UP:
-									LIDBG_PRINT("FlyBootService get pm state: FBS_ANDROID_UP");
-									SendBroadcastToService(KeyBootState, keyFastSusupendON);
-									sendBroadcast(new Intent(SYSTEM_RESUME));
-									Intent intentBoot = new Intent(Intent.ACTION_BOOT_COMPLETED);
-									intentBoot.putExtra("flyauduio_accon", "accon");
-									sendBroadcast(intentBoot);
-									break;
-								case FBS_DEVICE_UP:
-									LIDBG_PRINT("FlyBootService get pm state: FBS_DEVICE_UP");
+								SendBroadcastToService(KeyBootState, keyEearlySusupendOFF);
+								LIDBG_PRINT("FlyBootService sent device_down to hal");
+							}else if(pmState == FBS_FASTBOOT_REQUEST){
+								LIDBG_PRINT("FlyBootService get pm state: FBS_FASTBOOT_REQUEST");
+							}else if(pmState == FBS_ANDROID_DOWN){
+								LIDBG_PRINT("FlyBootService get pm state: FBS_ANDROID_DOWN");
+								SendBroadcastToService(KeyBootState, keyFastSusupendOFF);
+								start_fastboot();
+							}else if(pmState == FBS_GOTO_SLEEP){
+								LIDBG_PRINT("FlyBootService get pm state: FBS_GOTO_SLEEP");
+								system_gotosleep();
+							}else if(pmState == FBS_KERNEL_DOWN){
+								LIDBG_PRINT("FlyBootService get pm state: FBS_KERNEL_DOWN");
+							}else if(pmState == FBS_KERNEL_UP){
+								LIDBG_PRINT("FlyBootService get pm state: FBS_KERNEL_UP");
+								if(blSuspendUnairplaneFlag){
+									fbPm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+									fbPm.wakeUp(SystemClock.uptimeMillis());
+								}
+							}else if(pmState == FBS_ANDROID_UP){
+								LIDBG_PRINT("FlyBootService get pm state: FBS_ANDROID_UP");
+								SendBroadcastToService(KeyBootState, keyFastSusupendON);
+								sendBroadcast(new Intent(SYSTEM_RESUME));
+								Intent intentBoot = new Intent(Intent.ACTION_BOOT_COMPLETED);
+								intentBoot.putExtra("flyauduio_accon", "accon");
+								sendBroadcast(intentBoot);
+							}else if(pmState == FBS_DEVICE_UP){
+								LIDBG_PRINT("FlyBootService get pm state: FBS_DEVICE_UP");
+								if(!blSuspendUnairplaneFlag)
 									restoreAirplaneMode(mFlyBootService);
-									SendBroadcastToService(KeyBootState, keyEearlySusupendON);
-									break;
-								case FBS_SCREEN_ON:
-									LIDBG_PRINT("FlyBootService get pm state: FBS_SCREEN_ON");
-									acquireWakeLock();
-									SendBroadcastToService(KeyBootState, keyScreenOn);
-									system_resume();
-									break;
-								default:
-									return;
-							}
+								SendBroadcastToService(KeyBootState, keyEearlySusupendON);
+							}else if(pmState == FBS_SCREEN_ON){
+								LIDBG_PRINT("FlyBootService get pm state: FBS_SCREEN_ON");
+								acquireWakeLock();
+								SendBroadcastToService(KeyBootState, keyScreenOn);
+								system_resume();
+							}else if(pmState == FBS_SLEEP_TIMEOUT){
+								LIDBG_PRINT("FlyBootService get pm state: FBS_SLEEP_TIMEOUT");
+								if(blSuspendUnairplaneFlag)
+									KillProcess();
+							}else
+								LIDBG_PRINT("FlyBootService undefined pm state: " + pmState);
 						}
 					}
             }
@@ -211,6 +239,20 @@ public class FlyBootService extends Service {
 
     }
 
+	public void reSetPmState () {
+		LIDBG_PRINT("flybootservice reset PM state.");
+		FBS_SCREEN_OFF = 0;
+		FBS_GOTO_SLEEP = 1;
+		FBS_DEVICE_DOWN = 2;
+		FBS_FASTBOOT_REQUEST = 3;
+		FBS_ANDROID_DOWN = 4;
+		FBS_SLEEP_TIMEOUT = 5;
+		FBS_KERNEL_DOWN = 6;
+		FBS_KERNEL_UP = 7;
+		FBS_ANDROID_UP = 8;
+		FBS_DEVICE_UP = 9;
+		FBS_SCREEN_ON = 10;
+	}
 
 	//am broadcast -a com.lidbg.flybootserver.action --ei action 0
 	private BroadcastReceiver myReceiver = new BroadcastReceiver()
@@ -355,8 +397,15 @@ public class FlyBootService extends Service {
 	private void system_gotosleep(){
 
 		LIDBG_PRINT(" ********** system gotosleep ********** ");
-		fbPm.goToSleep(SystemClock.uptimeMillis());
-		msgTokenal("flyaudio gotosleep");
+		if(blSuspendUnairplaneFlag){
+			fbPm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+			mActivityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+			msgTokenal("flyaudio gotosleep");
+			fbPm.goToSleep(SystemClock.uptimeMillis());
+		}else{
+			fbPm.goToSleep(SystemClock.uptimeMillis());
+			msgTokenal("flyaudio gotosleep");
+		}
 		releaseWakeLock();
 	}
 
@@ -465,16 +514,18 @@ public class FlyBootService extends Service {
 			Log.d(TAG, "-----fly.gps.run-----0---");
 		}
 		LIDBG_PRINT("powerOffSystem step 4");
-		KillProcess();
+		if(!blSuspendUnairplaneFlag)
+			KillProcess();
 		msgTokenal("flyaudio pre_gotosleep");
 		LIDBG_PRINT("powerOffSystem-");
     }
 
     private void powerOnSystem(Context context) {
-		 LIDBG_PRINT("powerOnSystem-");
-        restoreAirplaneMode(context);
-        SystemProperties.set("ctl.stop", "bootanim");
-        LIDBG_PRINT("powerOnSystem-");
+		LIDBG_PRINT("powerOnSystem-");
+		if(!blSuspendUnairplaneFlag)
+			restoreAirplaneMode(context);
+		SystemProperties.set("ctl.stop", "bootanim");
+		LIDBG_PRINT("powerOnSystem-");
     }
 
     // send broadcast to music application to pause music
@@ -492,6 +543,13 @@ public class FlyBootService extends Service {
             int pid = appProcessInfo.pid;
             int uid = appProcessInfo.uid;
             String processName = appProcessInfo.processName;
+            if(blSuspendUnairplaneFlag){
+	            booleanAccWakedupState = SystemProperties.getBoolean("persist.lidbg.AccWakedupState",false);
+	            if(booleanAccWakedupState){
+	                LIDBG_PRINT("Prop AccWakedupState be set:" + booleanAccWakedupState + ", stop kill process.");
+	                break;
+	            }
+            }
             if (isKillableProcess(processName)) {
                 LIDBG_PRINT(processName +"."+pid +" will be killed\n");
                 mActivityManager.forceStopPackage(processName);
