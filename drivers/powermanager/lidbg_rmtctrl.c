@@ -341,12 +341,13 @@ static struct platform_driver lidbg_rmtctrl_driver =
 
 static int __init lidbg_rmtctrl_init(void)
 {
+    DUMP_BUILD_TIME;
     DUMP_FUN;
     platform_device_register(&lidbg_rmtctrl_device);
     platform_driver_register(&lidbg_rmtctrl_driver);
     return 0;
 }
-
+  
 static void __exit lidbg_rmtctrl_exit(void)
 {
 }
