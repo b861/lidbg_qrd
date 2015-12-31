@@ -35,6 +35,12 @@ extern "C" {
 #include <sys/time.h>
 }
 
+#undef ALOGE
+#define ALOGE(msg...) do{\
+	lidbg(msg); \
+	ALOGD(msg); \
+}while(0)
+
 #ifdef PLATFORM_msm8909
 //#undef USE_ION
 #endif
@@ -111,7 +117,7 @@ namespace android
     extern "C" int usbcam_get_number_of_cameras()
     {
         int numCameras = 2;
-        ALOGE("%s: futenghfei2.E", __func__);
+        ALOGD("%s: futenghfei2.E", __func__);
         return numCameras;
     }
 
@@ -119,24 +125,24 @@ namespace android
     {
         int mcamera_id = camera_id;
         int rc = -1;
-        ALOGE("%s___camera_id = %d: E", __func__,camera_id);
+        ALOGD("%s___camera_id = %d: E", __func__,camera_id);
         if(info)
         {
         	if(camera_id == 1)//front cam:origin
 			{
-				ALOGE("%s: front cam:origin", __func__);
+				ALOGD("%s: front cam:origin", __func__);
 				info->facing = CAMERA_FACING_BACK;
 	        	info->orientation = 0;
 			}
 			else if(camera_id == 0)//back cam:mirror
 			{
-				ALOGE("%s: back cam:mirror", __func__);
+				ALOGD("%s: back cam:mirror", __func__);
 				info->facing = CAMERA_FACING_FRONT;
 	        	info->orientation = 0;
 			}
             rc = 0;
         }
-        ALOGE("%s: X", __func__);
+        ALOGD("%s: X", __func__);
         return rc;
     }
 
@@ -168,7 +174,7 @@ namespace android
 
     int usbCamInitDefaultParameters(camera_hardware_t *camHal)
     {
-        ALOGE("%s: E", __func__);
+        ALOGD("%s: E", __func__);
         int rc = 0;
         char tempStr[FILENAME_LENGTH];
 
@@ -192,7 +198,7 @@ namespace android
 
         camHal->pictSizeValues = create_sizes_str(
                                      picture_sizes, sizeof(picture_sizes) / sizeof(camera_size_type));
-        ALOGE("%s: X", __func__);
+        ALOGD("%s: X", __func__);
 
         return rc;
     }
@@ -208,7 +214,7 @@ static int get_uvc_device(const char *id,char *devname)
         cam_id = atoi(id);
 
 
-    ALOGE("%s: E,======[%d]", __func__, cam_id);
+    ALOGD("%s: E,======[%d]", __func__, cam_id);
     *devname = '\0';
     while(1)
     {
@@ -244,7 +250,7 @@ static int get_uvc_device(const char *id,char *devname)
                     }
                     if(isH264sup == 1)
                     {
-                        ALOGI("%s: V4L2_PIX_FMT_H264 is supported,find next node", __func__ );
+                        ALOGD("%s: V4L2_PIX_FMT_H264 is supported,find next node", __func__ );
                         close(fd);
                         continue;
                     }
@@ -253,7 +259,7 @@ static int get_uvc_device(const char *id,char *devname)
                 ALOGD("%s: Found UVC node: ======%s,[%d,%d]\n", __func__, temp_devname, cam_id, uvc_count);
                 if(cam_id != -1 && cam_id != uvc_count)
                 {
-                    ALOGI("%s: need to find another======", __func__);
+                    ALOGD("%s: need to find another======", __func__);
                     close(fd);
                     continue;
                 }
@@ -264,20 +270,20 @@ static int get_uvc_device(const char *id,char *devname)
             close(fd);
         }
         else if(2 != errno)
-            ALOGD("%s.%d: Probing.%s: ret: %d, errno: %d,%s", __func__, i, temp_devname, ret, errno, strerror(errno));
+            ALOGE("%s.%d: Probing.%s: ret: %d, errno: %d,%s", __func__, i, temp_devname, ret, errno, strerror(errno));
 
         if(i > 1000)
         {
             strncpy(devname, "/dev/video1", FILENAME_LENGTH);
             //*devname = '\0';
-            ALOGD("%s.%d: Probing fail:%s \n", __func__, i, devname);
+            ALOGE("%s.%d: Probing fail:%s \n", __func__, i, devname);
             //break;
-            ALOGE("%s: X,%s", __func__, devname);
+            ALOGD("%s: X,%s", __func__, devname);
 			return -1;
         }
     }
 
-    ALOGE("%s: X,%s", __func__, devname);
+    ALOGD("%s: X,%s", __func__, devname);
     return 0;
 }
 
@@ -296,7 +302,7 @@ static int get_hub_uvc_device(const char *id,char *devname)
 
 	property_set("fly.uvccam.camid", id);
 
-    ALOGE("%s: E,=======[%d]", __func__, cam_id);
+    ALOGD("%s: E,=======[%d]", __func__, cam_id);
     *devname = '\0';
 
 	memset(hub_path,0,sizeof(hub_path));  
@@ -333,11 +339,11 @@ static int get_hub_uvc_device(const char *id,char *devname)
 						break;
 					}
 	                sprintf(temp_devname,"/dev/%s", ent->d_name);  
-	                ALOGE("%s:Path:%s",__func__ ,temp_devname);  
+	                ALOGD("%s:Path:%s",__func__ ,temp_devname);  
 	        }  
 	}
 
-	ALOGE("%s: This Camera has %d video node.", __func__ , fcnt - 2);
+	ALOGD("%s: This Camera has %d video node.", __func__ , fcnt - 2);
 	if((fcnt == 3) && (cam_id == 1))	
 	{
 		ALOGE("%s: Front Camera does not support Sonix Recording!", __func__);
@@ -404,8 +410,8 @@ openDev:
           close(fd);
       }
       else if(2 != errno)
-          ALOGD("%s: Probing.%s: ret: %d, errno: %d,%s", __func__, temp_devname, ret, errno, strerror(errno));
-    ALOGE("%s: X,%s", __func__, devname);
+          ALOGE("%s: Probing.%s: ret: %d, errno: %d,%s", __func__, temp_devname, ret, errno, strerror(errno));
+    ALOGD("%s: X,%s", __func__, devname);
     return 0;
 
 failproc:
@@ -431,7 +437,7 @@ failproc:
         camera_hardware_t   *camHal;
         char                *dev_name;
         *hw_device = NULL;
-        ALOGE("%s: E", __func__);
+        ALOGD("%s: E", __func__);
 
         camHal = new camera_hardware_t();
         if(!camHal)
@@ -467,7 +473,7 @@ openfd:
         }
         else
         {
-            ALOGE("%s:  open.success '%s',%d", __func__, dev_name, camHal->fd);
+            ALOGD("%s:  open.success '%s',%d", __func__, dev_name, camHal->fd);
         }
 
         device                  = &camHal->hw_dev;
@@ -476,7 +482,7 @@ openfd:
         device->priv            = (void *)camHal;
         *hw_device              = &(device->common);
 
-        ALOGE("%s: camHal: %p", __func__, camHal);
+        ALOGD("%s: camHal: %p", __func__, camHal);
         ALOGE("%s: X %d", __func__, rc);
 
         return 0;
@@ -755,9 +761,9 @@ try_open_again:
     int usbcam_set_preview_window(struct camera_device *device,
                                   struct preview_stream_ops *window)
     {
-        ALOGI("%s: E", __func__);
+        ALOGD("%s: E", __func__);
 
-		ALOGE("%s: ================window = %p========", __func__ , window);
+		ALOGD("%s: ================window = %p========", __func__ , window);
 		
         int rc = 0;
         camera_hardware_t *camHal;
@@ -911,7 +917,7 @@ try_open_again:
             {
                 if (EINVAL == errno)
                 {
-                    ALOGI("%s: Queried all formats till index %d\n", __func__, i);
+                    ALOGD("%s: Queried all formats till index %d\n", __func__, i);
                     break;
                 }
                 else
@@ -922,14 +928,14 @@ try_open_again:
             if(V4L2_PIX_FMT_MJPEG == fmtdesc.pixelformat)
             {
                 mjpegSupported = 0;
-                ALOGI("%s: V4L2_PIX_FMT_MJPEG is supported", __func__ );
+                ALOGD("%s: V4L2_PIX_FMT_MJPEG is supported", __func__ );
             }
             if(V4L2_PIX_FMT_H264 == fmtdesc.pixelformat)
             {
                 h264Supported = 0;
-                ALOGI("%s: V4L2_PIX_FMT_H264 is supported", __func__ );
+                ALOGD("%s: V4L2_PIX_FMT_H264 is supported", __func__ );
             }
-	 	    ALOGI("%s: Capture format supported: 0x%x.",__func__,fmtdesc.pixelformat);
+	 	    ALOGD("%s: Capture format supported: 0x%x.",__func__,fmtdesc.pixelformat);
 
         }
 
@@ -1992,10 +1998,10 @@ try_open_again:
     {
         struct camera_device *mdevice = device;
         int menable = enable;
-        ALOGE("%s: E", __func__);
+        ALOGD("%s: E", __func__);
         int rc = 0;
 
-        ALOGE("%s: X", __func__);
+        ALOGD("%s: X", __func__);
         return rc;
     }
 
@@ -2004,7 +2010,7 @@ try_open_again:
         struct camera_device *mdevice = device;
         int rc = 0;
         char startRecording[PROPERTY_VALUE_MAX];
-        ALOGE("%s: E", __func__);
+        ALOGD("%s: E", __func__);
         property_get("persist.lidbg.uvccam.recording", startRecording, "0");
         if(!strncmp(startRecording, "1", 1))
         {
@@ -2012,26 +2018,26 @@ try_open_again:
             system("./flysystem/lib/out/lidbg_testuvccam /dev/video2 -c -f H264 -r &");
             property_set("persist.lidbg.uvccam.recording", "1");
         }
-        ALOGE("%s: X", __func__);
+        ALOGD("%s: X", __func__);
         return 0;
     }
 
     void usbcam_stop_recording(struct camera_device *device)
     {
         struct camera_device *mdevice = device;
-        ALOGE("%s: E", __func__);
+        ALOGD("%s: E", __func__);
         ALOGI("-------uvccam stop_recording -----");
         property_set("persist.lidbg.uvccam.recording", "0");
-        ALOGE("%s: X", __func__);
+        ALOGD("%s: X", __func__);
     }
 
     int usbcam_recording_enabled(struct camera_device *device)
     {
         struct camera_device *mdevice = device;
         int rc = 0;
-        ALOGE("%s: E", __func__);
+        ALOGD("%s: E", __func__);
 
-        ALOGE("%s: X", __func__);
+        ALOGD("%s: X", __func__);
         return 0;
     }
 
@@ -2040,18 +2046,18 @@ try_open_again:
     {
         struct camera_device *mdevice = device;
         const void *mopaque = opaque;
-        ALOGV("%s: E", __func__);
+        ALOGD("%s: E", __func__);
 
-        ALOGE("%s: X", __func__);
+        ALOGD("%s: X", __func__);
     }
 
     int usbcam_auto_focus(struct camera_device *device)
     {
         struct camera_device *mdevice = device;
-        ALOGE("%s: E", __func__);
+        ALOGD("%s: E", __func__);
         int rc = 0;
 
-        ALOGE("%s: X", __func__);
+        ALOGD("%s: X", __func__);
         return rc;
     }
 
@@ -2059,9 +2065,9 @@ try_open_again:
     {
         struct camera_device *mdevice = device;
         int rc = 0;
-        ALOGE("%s: E", __func__);
+        ALOGD("%s: E", __func__);
 
-        ALOGE("%s: X", __func__);
+        ALOGD("%s: X", __func__);
         return -1;
     }
 
@@ -2523,17 +2529,17 @@ ION_OPEN_FAILED:
         if(!rc)
             camHal->takePictInProgress = 1;
 
-        ALOGI("%s: X", __func__);
+        ALOGD("%s: X", __func__);
         return rc;
     }
 
     int usbcam_cancel_picture(struct camera_device *device)
     {
         struct camera_device *mdevice = device;
-        ALOGE("%s: E", __func__);
+        ALOGD("%s: E", __func__);
         int rc = 0;
 
-        ALOGE("%s: X", __func__);
+        ALOGD("%s: X", __func__);
         return -1;
     }
 
@@ -2541,10 +2547,10 @@ ION_OPEN_FAILED:
     {
         struct camera_device *mdevice = device;
         const char *mparams = params;
-        ALOGE("%s: E", __func__);
+        ALOGD("%s: E", __func__);
         int rc = 0;
 
-        ALOGE("%s: X", __func__);
+        ALOGD("%s: X", __func__);
         return 0;
     }
 
@@ -2617,17 +2623,17 @@ ION_OPEN_FAILED:
         int32_t marg2 = arg2;
 
         int rc = 0;
-        ALOGE("%s: E", __func__);
-        ALOGE("%d", cmd);
+        ALOGD("%s: E", __func__);
+        ALOGD("%d", cmd);
 
-        ALOGE("%s: X", __func__);
+        ALOGD("%s: X", __func__);
         return rc;
     }
 
     void usbcam_release(struct camera_device *device)
     {
         struct camera_device *mdevice = device;
-        ALOGE("%s: E", __func__);
+        ALOGD("%s: E", __func__);
         ALOGE("%s: X", __func__);
     }
 
@@ -2635,10 +2641,10 @@ ION_OPEN_FAILED:
     {
         struct camera_device *mdevice = device;
         int mfd = fd;
-        ALOGE("%s: E", __func__);
+        ALOGD("%s: E", __func__);
         int rc = 0;
 
-        ALOGE("%s: X", __func__);
+        ALOGD("%s: X", __func__);
         return rc;
     }
 
