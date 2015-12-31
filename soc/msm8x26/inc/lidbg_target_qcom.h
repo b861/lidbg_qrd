@@ -164,6 +164,7 @@
 #ifdef PLATFORM_ID_14
 #define USB_WORK_ENABLE do{\
 				lidbg("USB_WORK_ENABLE\n");\
+				g_var.usb_status = 1;\
 				USB_ID_HIGH_DEV;\
 				msleep(200);\
 				USB_SWITCH_CONNECT;\
@@ -174,6 +175,7 @@
 #ifdef PLATFORM_ID_7
 #define USB_WORK_ENABLE do{\
 				lidbg("USB_WORK_ENABLE\n");\
+				g_var.usb_status = 1;\
 				USB_ID_HIGH_DEV;\
 				msleep(200);\
 				USB_SWITCH_CONNECT;\
@@ -184,6 +186,7 @@
 #ifdef PLATFORM_ID_4
 #define USB_WORK_ENABLE do{\
 					lidbg("USB_WORK_ENABLE\n");\
+					g_var.usb_status = 1;\
 					USB_SWITCH_CONNECT;\
 	    			USB_POWER_ENABLE;\
 	    			USB_ID_LOW_HOST;\
@@ -191,6 +194,7 @@
 #endif
 #define USB_WORK_DISENABLE  do{\
 			lidbg("USB_WORK_DISENABLE\n");\
+			g_var.usb_status = 0;\
 			USB_ID_HIGH_DEV;\
 			msleep(200);\
 			USB_SWITCH_DISCONNECT;\
@@ -199,6 +203,7 @@
 #else
 #define USB_WORK_ENABLE do{\
 				lidbg("USB_WORK_ENABLE\n");\
+				g_var.usb_status = 1;\
 				USB_SWITCH_CONNECT;\
     			USB_POWER_ENABLE;\
     			USB_ID_LOW_HOST;\
@@ -206,6 +211,7 @@
 
 #define USB_WORK_DISENABLE  do{\
 			lidbg("USB_WORK_DISENABLE\n");\
+			g_var.usb_status = 0;\
 			USB_POWER_DISABLE;\
 			msleep(500);\
 			USB_SWITCH_DISCONNECT;\

@@ -4207,11 +4207,11 @@ openfd:
 	if(multi_stream_enable)
 		close(fake_dev);	
 
-	system("echo 'udisk_disable' > /dev/flydev0");
+	system("echo 'udisk_unrequest' > /dev/flydev0");
 	return 0;
 	
 try_open_again:
-		system("echo 'udisk_enable' > /dev/flydev0");
+		system("echo 'udisk_request' > /dev/flydev0");
 		usleep(500*1000);
 		rc = get_hub_uvc_device(devName,do_save,do_record);
 		if((rc == -1) || (*devName == '\0'))

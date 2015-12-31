@@ -1892,12 +1892,12 @@ static int goodix_parse_dt(struct device *dev,
 */
 
 #ifdef CFG_SUSPEND_UNAIRPLANEMODE
-static int lidbg_event(struct notifier_block *this,
+static int lidbg_ts_event(struct notifier_block *this,
                        unsigned long event, void *ptr)
 {
-    DUMP_FUN;
 	struct goodix_ts_data *ts =
         container_of(this, struct goodix_ts_data, fb_notif);
+    DUMP_FUN;
 
     switch (event)
     {
@@ -1918,7 +1918,7 @@ static int lidbg_event(struct notifier_block *this,
 
 static struct notifier_block lidbg_notifier =
 {
-    .notifier_call = lidbg_event,
+    .notifier_call = lidbg_ts_event,
 };
 #endif
 
@@ -2051,8 +2051,9 @@ static int goodix_ts_probe(struct platform_device *pdev)
 #ifdef CFG_SUSPEND_UNAIRPLANEMODE
 	ts->fb_notif = lidbg_notifier;
 	register_lidbg_notifier(&ts->fb_notif);
-#else
-
+	if(0)
+#endif
+{
 #if defined(CONFIG_FB)
     ts->fb_notif.notifier_call = fb_notifier_callback;
     ret = fb_register_client(&ts->fb_notif);
@@ -2066,8 +2067,8 @@ static int goodix_ts_probe(struct platform_device *pdev)
     ts->early_suspend.resume = goodix_ts_late_resume;
     register_early_suspend(&ts->early_suspend);
 #endif
+}
 
-#endif
 
     ts->goodix_wq = create_singlethread_workqueue("goodix_wq");
     INIT_WORK(&ts->work, goodix_ts_work_func);

@@ -475,13 +475,14 @@ static int thread_send_power_key(void *data)
 }
 #endif
 
+#ifdef PLATFORM_msm8226
 static int thread_gps_handle(void *data)
 {
        msleep(50*1000);   
        lidbg_shell_cmd("settings put  secure location_providers_allowed network,gps");
        return 1;
 }
-
+#endif
 
 #ifdef SOC_mt3360
 void suspendkey_timer_isr(unsigned long data)

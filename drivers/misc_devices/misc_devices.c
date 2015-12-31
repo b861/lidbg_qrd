@@ -12,7 +12,7 @@ LIDBG_DEFINE;
 
 int udisk_stability_test = 0;
 
-int usb_still_used_flag = 0;
+int usb_request = 0;
 
 #if defined(CONFIG_FB)
 struct notifier_block devices_notif;
@@ -45,6 +45,14 @@ static int devices_notifier_callback(struct notifier_block *self,
 
 void usb_disk_enable(bool enable)
 {
+    DUMP_FUN;
+    lidbg("%d,%d\n", g_var.usb_status,enable);
+
+   if(g_var.usb_status == enable)
+   {
+   	lidbg("usb_disk_enable skip\n");
+   	return;
+   }
     lidbg("60.[%s]\n", enable ? "usb_enable" : "usb_disable");
     if(enable)
         USB_WORK_ENABLE;
@@ -79,7 +87,7 @@ static int thread_usb_disk_disable_delay(void *data)
     //msleep(1000);
 #endif
 
-	if(usb_still_used_flag == 1)
+	if(usb_request == 1)
 		lidbg("Usb still being used, don't disable it actually...\n");
 	else{
 		lidbg("Usb be not used,disable it...\n");
@@ -89,7 +97,7 @@ static int thread_usb_disk_disable_delay(void *data)
     return 1;
 }
 
-static int lidbg_event(struct notifier_block *this,
+static int lidbg_dev_event(struct notifier_block *this,
                        unsigned long event, void *ptr)
 {
     DUMP_FUN;
@@ -100,6 +108,7 @@ static int lidbg_event(struct notifier_block *this,
         //if(!g_var.is_fly)
     {
         LCD_OFF;
+	 usb_request= 0;
         //lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_APP_OFF));
         //lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_HAL_OFF));
     }
@@ -119,7 +128,7 @@ static int lidbg_event(struct notifier_block *this,
         GPS_POWER_OFF;
         break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_ANDROID_DOWN):
-        MSM_DSI83_DISABLE;
+        //MSM_DSI83_DISABLE;
 #ifdef DISABLE_USB_WHEN_ANDROID_DOWN
         CREATE_KTHREAD(thread_usb_disk_disable_delay, NULL);
 #endif
@@ -176,7 +185,7 @@ static int lidbg_event(struct notifier_block *this,
 
 static struct notifier_block lidbg_notifier =
 {
-    .notifier_call = lidbg_event,
+    .notifier_call = lidbg_dev_event,
 };
 
 int dev_open(struct inode *inode, struct file *filp)
@@ -227,17 +236,27 @@ static void parse_cmd(char *pt)
         lidbg("acc_debug_mode enable!");
         g_var.is_debug_mode = 1;
     }
+
     else if (!strcmp(argv[0], "udisk_enable"))
     {
         lidbg("Misc devices ctrl: udisk_enable");
-		usb_disk_enable(true);
-		usb_still_used_flag= 1;
+	 usb_disk_enable(true);
     }
     else if (!strcmp(argv[0], "udisk_disable"))
     {
         lidbg("Misc devices ctrl: udisk_disable");
-		usb_disk_enable(false);
-		usb_still_used_flag= 0;
+        usb_disk_enable(false);
+    }
+    else if (!strcmp(argv[0], "udisk_request"))
+    {
+        	lidbg("Misc devices ctrl: udisk_request");
+		usb_disk_enable(true);
+		usb_request= 1;
+    }
+    else if (!strcmp(argv[0], "udisk_unrequest"))
+    {
+        	lidbg("Misc devices ctrl: udisk_unrequest");
+		usb_request= 0;
     }
 }
 

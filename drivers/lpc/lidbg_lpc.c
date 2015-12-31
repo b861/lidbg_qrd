@@ -132,7 +132,7 @@ void LPCCombinDataStream(BYTE *p, UINT len)
     BYTE *buf;
     bool bMalloc = FALSE;
 
-    if((!lpc_work_en) | (g_hw.lpc_disable))
+    if((!lpc_work_en) || (g_hw.lpc_disable))
         return;
 
     if (3 + len + 1 > 16)
@@ -535,23 +535,22 @@ static struct file_operations lpc_fops =
 };
 
 #ifdef CFG_SUSPEND_UNAIRPLANEMODE
-static int lidbg_event(struct notifier_block *this,
+static int lidbg_lpc_event(struct notifier_block *this,
                        unsigned long event, void *ptr)
 {
-    DUMP_FUN;
-	struct device *dev;
+      DUMP_FUN;
 
-	lidbg("lpc event: %d\n", event);
+	lidbg("lpc event: %ld\n", event);
 
     switch (event)
     {
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_ON):
-	lidbg("lpc event:resume %d\n", event);
-        lpc_resume(dev);
+	lidbg("lpc event:resume %ld\n", event);
+              lpc_work_en = true;
 		break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_OFF):
-	lidbg("lpc event:suspend %d\n", event);
-		lpc_suspend(dev);
+	lidbg("lpc event:suspend %ld\n", event);
+		//lpc_work_en = false;
 		break;
     default:
         break;
@@ -562,7 +561,7 @@ static int lidbg_event(struct notifier_block *this,
 
 static struct notifier_block lidbg_notifier =
 {
-    .notifier_call = lidbg_event,
+    .notifier_call = lidbg_lpc_event,
 };
 #endif
 
@@ -574,11 +573,7 @@ static int  lpc_probe(struct platform_device *pdev)
 
     DUMP_FUN;
     FS_REGISTER_INT(lpc_ping_en, "lpc_ping_en", 0, NULL);
-    if((!g_var.recovery_mode && g_var.is_fly) || g_hw.lpc_disable) //origin system and fly mode when lpc_ping_en enable,lpc driver will go on;
-    {
-        lidbg("lpc_init do nothing.disable,[%d,%d,%d,%d]\n", g_var.is_fly, lpc_ping_en, g_var.recovery_mode, fs_is_file_exist(FLY_HAL_FILE));
-        return 0;
-    }
+
     lpc_data_for_hal = (u8 *)kmalloc(HAL_BUF_SIZE, GFP_KERNEL);
     fifo_buffer = (u8 *)kmalloc(FIFO_SIZE, GFP_KERNEL);
     ad_fifo_buff = (u32 *)kmalloc(AD_FIFO_SIZE, GFP_KERNEL);
@@ -607,8 +602,14 @@ static int  lpc_probe(struct platform_device *pdev)
     init_waitqueue_head(&dev->queue);
     kfifo_init(&lpc_data_fifo, fifo_buffer, FIFO_SIZE);
     kfifo_init(&lpc_ad_fifo, ad_fifo_buff, AD_FIFO_SIZE);
-    mcuFirstInit();
     lidbg_new_cdev(&lpc_fops, "fly_lpc");
+
+    if((!g_var.recovery_mode && g_var.is_fly) || g_hw.lpc_disable) //origin system and fly mode when lpc_ping_en enable,lpc driver will go on;
+    {
+        lidbg("lpc_init do nothing.disable,[%d,%d,%d,%d]\n", g_var.is_fly, lpc_ping_en, g_var.recovery_mode, fs_is_file_exist(FLY_HAL_FILE));
+        return 0;
+    }
+    mcuFirstInit();
 
     return 0;
 }
@@ -637,9 +638,10 @@ static int lpc_suspend(struct device *dev)
 static int lpc_resume(struct device *dev)
 {
     DUMP_FUN;
-
-
+#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+#else
     lpc_work_en = true;
+#endif
     return 0;
 }
 
@@ -664,11 +666,9 @@ static struct platform_driver lpc_driver =
     .driver         = {
         .name = "lidbg_lpc",
         .owner = THIS_MODULE,
-#ifdef CFG_SUSPEND_UNAIRPLANEMODE
-#else
+
 #ifdef CONFIG_PM
         .pm = &lpc_pm_ops,
-#endif
 #endif
     },
 };

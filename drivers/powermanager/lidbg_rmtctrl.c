@@ -4,10 +4,10 @@
 #define rmtctrl_FIFO_SIZE (512)
 #define MCU_ACC_STATE_IO GPIO_FASTBOOT_REQUEST
 
-#define SCREE_OFF_JIFF (15)
+#define SCREE_OFF_JIFF (5)
 #define SCREE_OFF_TIME_S (jiffies + SCREE_OFF_JIFF*HZ)
 
-#define GOTO_SLEEP_JIFF (10)
+#define GOTO_SLEEP_JIFF (5)
 #define GOTO_SLEEP_TIME_S (jiffies + GOTO_SLEEP_JIFF*HZ)
 
 #define AUTO_SLEEP_JIFF (5)

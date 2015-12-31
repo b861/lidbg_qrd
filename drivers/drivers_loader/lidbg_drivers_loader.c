@@ -72,11 +72,12 @@ void judgment_list_init(void)
 #endif
     judgment_list[1].value = is_out_updated ;
     judgment_list[2].value = gboot_mode ;
-
+{
     char temp_cmd[256];
     sprintf(temp_cmd, "setprop persist.lidbg.intPlatformId %d", judgment_list[0].value);
     lidbg_shell_cmd(temp_cmd);
     judgment_list_print();
+}
 }
 int get_judgment_list_value(char *key)
 {

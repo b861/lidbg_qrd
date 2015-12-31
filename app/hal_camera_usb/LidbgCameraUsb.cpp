@@ -490,7 +490,7 @@ out_err:
         ALOGE("%s: X.out_err  %d", __func__, rc);
         return rc;
 try_open_again:
-		system("echo 'udisk_enable' > /dev/flydev0");
+		system("echo 'udisk_request' > /dev/flydev0");
 		usleep(500*1000);
 		rc = get_hub_uvc_device(mid,dev_name);
 		if((rc == -1) || (*dev_name == '\0'))
@@ -525,7 +525,7 @@ try_open_again:
                 ALOGE("%s: camHal is NULL pointer ", __func__);
             }
         }
-		system("echo 'udisk_disable' > /dev/flydev0");	
+		system("echo 'udisk_unrequest' > /dev/flydev0");	
         ALOGI("%s: X device =%p, rc = %d", __func__, hw_dev, rc);
         return rc;
     }

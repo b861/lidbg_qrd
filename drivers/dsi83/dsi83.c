@@ -480,7 +480,7 @@ void disable_dsi83(char *key_word, void *data)
 }
 
 #ifdef CFG_SUSPEND_UNAIRPLANEMODE
-static int lidbg_event(struct notifier_block *this,
+static int lidbg_dsi_event(struct notifier_block *this,
                        unsigned long event, void *ptr)
 {
     DUMP_FUN;
@@ -502,13 +502,13 @@ static int lidbg_event(struct notifier_block *this,
 
 static struct notifier_block lidbg_notifier =
 {
-    .notifier_call = lidbg_event,
+    .notifier_call = lidbg_dsi_event,
 };
 #endif
 
 static int dsi83_probe(struct platform_device *pdev)
 {
-    int ret = 0;
+    int ret;
     lidbg("%s:enter\n", __func__);
 
     MSM_DSI83_POWER_ON;
@@ -552,17 +552,18 @@ static int dsi83_probe(struct platform_device *pdev)
 
 #ifdef CFG_SUSPEND_UNAIRPLANEMODE
 	register_lidbg_notifier(&lidbg_notifier);
-#else
-
+       if(0)
+#endif
+	{
 #if defined(CONFIG_FB)
-    dsi83_fb_notif.notifier_call = dsi83_fb_notifier_callback;
-    ret = fb_register_client(&dsi83_fb_notif);
-    if (ret)
-        lidbg("Unable to register dsi83_fb_notif: %d\n", ret);
+	    dsi83_fb_notif.notifier_call = dsi83_fb_notifier_callback;
+	    ret = fb_register_client(&dsi83_fb_notif);
+	    if (ret)
+	        lidbg("Unable to register dsi83_fb_notif: %d\n", ret);
 #elif defined(CONFIG_HAS_EARLYSUSPEND)
 #endif
+}
 
-#endif
     lidbg_new_cdev(&dsi83_nod_fops, "lidbg_dsi83");
     if(0)
         lidbg_trace_msg_cb_register("ShutdownThread-cpu", NULL, disable_dsi83);
@@ -601,9 +602,10 @@ static int dsi83_ops_resume(struct device *dev)
 {
     DUMP_FUN;
 #ifdef CFG_SUSPEND_UNAIRPLANEMODE
-#else
-    CREATE_KTHREAD(thread_dsi83_ops_resume, NULL);
+	if(0)
 #endif
+	CREATE_KTHREAD(thread_dsi83_ops_resume, NULL);
+
     return 0;
 }
 static struct dev_pm_ops dsi83_ops =

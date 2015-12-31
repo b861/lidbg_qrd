@@ -319,6 +319,8 @@ struct lidbg_pvar_t
     bool led_hal_status;
     bool is_debug_mode;
     bool is_udisk_needreset;
+    bool usb_status;
+
 };
 
 typedef struct
