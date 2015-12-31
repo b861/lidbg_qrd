@@ -12,9 +12,7 @@ LIDBG_DEFINE;
 
 int udisk_stability_test = 0;
 
-#ifdef CFG_SUSPEND_UNAIRPLANEMODE
 int usb_still_used_flag = 0;
-#endif
 
 #if defined(CONFIG_FB)
 struct notifier_block devices_notif;
@@ -81,16 +79,12 @@ static int thread_usb_disk_disable_delay(void *data)
     //msleep(1000);
 #endif
 
-#ifdef CFG_SUSPEND_UNAIRPLANEMODE
 	if(usb_still_used_flag == 1)
 		lidbg("Usb still being used, don't disable it actually...\n");
 	else{
 		lidbg("Usb be not used,disable it...\n");
 		usb_disk_enable(false);
 	}
-#else
-	usb_disk_enable(false);
-#endif
 
     return 1;
 }
@@ -233,7 +227,6 @@ static void parse_cmd(char *pt)
         lidbg("acc_debug_mode enable!");
         g_var.is_debug_mode = 1;
     }
-#ifdef CFG_SUSPEND_UNAIRPLANEMODE
     else if (!strcmp(argv[0], "udisk_enable"))
     {
         lidbg("Misc devices ctrl: udisk_enable");
@@ -246,7 +239,6 @@ static void parse_cmd(char *pt)
 		usb_disk_enable(false);
 		usb_still_used_flag= 0;
     }
-#endif
 }
 
 

@@ -140,10 +140,8 @@ static enum doze_status = DOZE_DISABLED;
 static s8 gtp_enter_doze(struct goodix_ts_data *ts);
 #endif
 
-#ifdef CFG_SUSPEND_UNAIRPLANEMODE
 static void goodix_ts_resume(struct goodix_ts_data *ts);
 static void goodix_ts_suspend(struct goodix_ts_data *ts);
-#endif
 
 bool init_done;
 static u8 chip_gt9xxs;  /* true if ic is gt9xxs, like gt915s */
@@ -2358,27 +2356,11 @@ static int fb_notifier_callback(struct notifier_block *self,
             ts && ts->client)
     {
         blank = evdata->data;
-#ifdef __RMT_CTRL_FUNC__
-		if(smd_modem_triggered_flag == 1){
-		    if (*blank == FB_BLANK_UNBLANK){
-				lidbg( "gt9xx: FB_BLANK_UNBLANK, smd_modem_triggered_flag = %d\n", smd_modem_triggered_flag);
-			}
-		    else if (*blank == FB_BLANK_POWERDOWN){
-				lidbg( "gt9xx: FB_BLANK_POWERDOWN, smd_modem_triggered_flag = %d, set to 0\n", smd_modem_triggered_flag);
-				smd_modem_triggered_flag = 0;
-			}
-		}else{
-		    if (*blank == FB_BLANK_UNBLANK)
-		        goodix_ts_resume(ts);
-		    else if (*blank == FB_BLANK_POWERDOWN)
-		        goodix_ts_suspend(ts);
-		}
-#else
+
         if (*blank == FB_BLANK_UNBLANK)
             goodix_ts_resume(ts);
         else if (*blank == FB_BLANK_POWERDOWN)
             goodix_ts_suspend(ts);
-#endif
     }
 
     return 0;

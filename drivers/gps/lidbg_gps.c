@@ -79,18 +79,8 @@ static int gps_event_handle(struct notifier_block *this,
         kfifo_reset(&gps_data_fifo);
         up(&dev->sem);
 
-#ifdef __RMT_CTRL_FUNC__
-		if(smd_modem_triggered_flag == 1){
-			lidbg("gps_event_handle: smd_modem_triggered_flag = %d, disable gps\n", smd_modem_triggered_flag);
-			work_en = 0;
-		}else{
-		    lidbg("gps_event_handle: smd_modem_triggered_flag = %d, enable gps\n", smd_modem_triggered_flag);
-		    work_en = 1;
-		}
-#else
         lidbg("gps set work_en = 1\n");
         work_en = 1;
-#endif
         break;
 #ifdef CFG_SUSPEND_UNAIRPLANEMODE
 	case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_OFF):

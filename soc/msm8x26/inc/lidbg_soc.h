@@ -53,22 +53,13 @@
 #include <linux/spmi.h>
 #include <linux/msm_tsens.h>
 
-#if (defined PLATFORM_msm8909) || (defined PLATFORM_msm8974)
-#ifndef CFG_SUSPEND_UNAIRPLANEMODE
-//#define CFG_SUSPEND_UNAIRPLANEMODE
-#endif
+#ifdef PLATFORM_msm8909
+#define CFG_SUSPEND_UNAIRPLANEMODE
 #endif
 
 #ifdef PLATFORM_msm8909
 #include <soc/qcom/smem.h>
 
-#ifndef __RMT_CTRL_FUNC__
-//#define __RMT_CTRL_FUNC__
-#endif
-
-#ifdef __RMT_CTRL_FUNC__
-extern int smd_modem_triggered_flag;
-#endif
 #else
 
 #include <linux/mfd/marimba.h>

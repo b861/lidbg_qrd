@@ -239,31 +239,6 @@ static int dsi83_fb_notifier_callback(struct notifier_block *self,
     {
         blank = evdata->data;
 
-#ifdef __RMT_CTRL_FUNC__
-		if(smd_modem_triggered_flag == 1){
-		    if (*blank == FB_BLANK_UNBLANK)
-		    {
-		        lidbg( "dsi83:FB_BLANK_UNBLANK, smd_modem_triggered_flag = %d\n", smd_modem_triggered_flag);
-		    }
-		    else if (*blank == FB_BLANK_POWERDOWN)
-		    {
-		        lidbg( "dsi83:FB_BLANK_POWERDOWN, smd_modem_triggered_flag = %d\n", smd_modem_triggered_flag);
-		    }
-		}else{
-		    if (*blank == FB_BLANK_UNBLANK)
-		    {
-		        lidbg( "dsi83:FB_BLANK_UNBLANK\n");
-		        g_var.fb_on = true;
-		        dsi83_resume();
-		    }
-		    else if (*blank == FB_BLANK_POWERDOWN)
-		    {
-		        lidbg( "dsi83:FB_BLANK_POWERDOWN\n");
-		        g_var.fb_on = false;
-		        dsi83_suspend();
-		    }
-		}
-#else
         if (*blank == FB_BLANK_UNBLANK)
         {
             lidbg( "dsi83:FB_BLANK_UNBLANK\n");
@@ -276,7 +251,6 @@ static int dsi83_fb_notifier_callback(struct notifier_block *self,
             g_var.fb_on = false;
             dsi83_suspend();
         }
-#endif
     }
 
     return 0;
@@ -320,18 +294,15 @@ static void dsi83_work_func(struct work_struct *work)
     lidbg( "dsi83_work_func:enter %d,%d\n", g_var.system_status, is_dsi83_inited);
 
 #ifdef CFG_SUSPEND_UNAIRPLANEMODE
-    if(((g_var.system_status == FLY_ANDROID_DOWN) || (g_var.system_status == FLY_SLEEP_TIMEOUT) || (g_var.system_status == FLY_GOTO_SLEEP)) || is_dsi83_inited)
-    {
-        lidbg( "dsi83_work_func:skip %d,%d\n", g_var.system_status, is_dsi83_inited);
-        //return;
-    }
+    if(is_dsi83_inited)
 #else
 	if(((g_var.system_status == FLY_ANDROID_DOWN) || (g_var.system_status == FLY_GOTO_SLEEP)) || is_dsi83_inited)
+#endif
     {
         lidbg( "dsi83_work_func:skip %d,%d\n", g_var.system_status, is_dsi83_inited);
         return;
     }
-#endif
+
 
     is_dsi83_inited = true;
     dsi83_gpio_init();
@@ -517,12 +488,10 @@ static int lidbg_event(struct notifier_block *this,
     switch (event)
     {
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_ON):
-		g_var.fb_on = true;
-        dsi83_resume();
+        	//dsi83_resume();
+        	 queue_delayed_work(dsi83_workqueue, &dsi83_work, DSI83_DELAY_TIME);
 		break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_OFF):
-		g_var.fb_on = false;
-		dsi83_suspend();
 		break;
     default:
         break;
@@ -631,12 +600,7 @@ static int thread_dsi83_ops_resume(void *data)
 static int dsi83_ops_resume(struct device *dev)
 {
     DUMP_FUN;
-#ifdef __RMT_CTRL_FUNC__
-	if(smd_modem_triggered_flag == 1){
-		lidbg("dsi83 resume, smd_modem_triggered_flag = %d, but don't enable\n", smd_modem_triggered_flag);
-	}
-	else
-		CREATE_KTHREAD(thread_dsi83_ops_resume, NULL);
+#ifdef CFG_SUSPEND_UNAIRPLANEMODE
 #else
     CREATE_KTHREAD(thread_dsi83_ops_resume, NULL);
 #endif
@@ -663,12 +627,7 @@ static struct platform_driver dsi83_driver =
         .name = "dsi83",
         .owner = THIS_MODULE,
 #ifdef CONFIG_PM
-
-#ifdef CFG_SUSPEND_UNAIRPLANEMODE
-#else
         .pm = &dsi83_ops,
-#endif
-
 #endif
     },
 };

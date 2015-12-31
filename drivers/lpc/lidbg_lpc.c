@@ -24,10 +24,8 @@ u32 *ad_fifo_buff;
 u8 *lpc_data_for_hal;
 #define LPC_SYSTEM_TYPE 0x00
 
-#ifdef CFG_SUSPEND_UNAIRPLANEMODE
 static int lpc_resume(struct device *dev);
 static int lpc_suspend(struct device *dev);
-#endif
 
 struct lpc_device
 {
@@ -364,10 +362,8 @@ BOOL actualReadFromMCU(BYTE *p, UINT length)
 //MCUµÄIIC¶Á´¦Àí
 irqreturn_t MCUIIC_isr(int irq, void *dev_id)
 {
-#ifdef CFG_SUSPEND_UNAIRPLANEMODE
     if(!lpc_work_en)
         return IRQ_HANDLED;
-#endif
     schedule_work(&pGlobalHardwareInfo->FlyIICInfo.iic_work);
     return IRQ_HANDLED;
 }
@@ -377,19 +373,11 @@ static void workFlyMCUIIC(struct work_struct *work)
     BYTE buff[16];
     BYTE iReadLen = 12;
 
-#ifdef CFG_SUSPEND_UNAIRPLANEMODE
     while ((SOC_IO_Input(MCU_IIC_REQ_GPIO, MCU_IIC_REQ_GPIO, 0) == 0) && (lpc_work_en == 1))
     {
         actualReadFromMCU(buff, iReadLen);
         iReadLen = 16;
     }
-#else
-    while (SOC_IO_Input(MCU_IIC_REQ_GPIO, MCU_IIC_REQ_GPIO, 0) == 0)
-    {
-        actualReadFromMCU(buff, iReadLen);
-        iReadLen = 16;
-    }
-#endif
 }
 
 
@@ -650,14 +638,8 @@ static int lpc_resume(struct device *dev)
 {
     DUMP_FUN;
 
-#ifdef __RMT_CTRL_FUNC__
-	if(smd_modem_triggered_flag == 1)
-		lidbg("lpc resume, but don't enable\n");
-	else
-		lpc_work_en = true;
-#else
+
     lpc_work_en = true;
-#endif
     return 0;
 }
 

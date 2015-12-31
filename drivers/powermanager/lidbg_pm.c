@@ -31,32 +31,6 @@ extern int soc_io_resume_config(u32 index, u32 direction, u32 pull, u32 drive_st
 extern void grf_backup(void);
 extern void grf_restore(void);
 
-#ifdef __RMT_CTRL_FUNC__
-static DECLARE_COMPLETION(modem_wakeup_wait);
-
-static int thread_rmtctrl_func(void *data)
-{
-	while(1)
-	{
-		wait_for_completion(&modem_wakeup_wait);
-		msleep(60 * 1000);
-		lidbg("RmtCtrl send powerkey after 60s, smd_modem_triggered_flag = %d\n", smd_modem_triggered_flag);
-		if((smd_modem_triggered_flag == 1) && (atomic_read(&is_in_sleep) == 0)){
-			lidbg("RmtCtrl power state off, send powerkey actually...\n");
-			SOC_System_Status(FLY_GOTO_SLEEP);
-			wake_unlock(&pm_wakelock);
-			lidbg_key_report(KEY_POWER, KEY_PRESSED_RELEASED);
-			observer_start();
-		}else{
-			lidbg("RmtCtrl power state mem, don't send powerkey...\n");
-		}
-
-//		if(smd_modem_triggered_flag != 0)
-//			smd_modem_triggered_flag = 0;
-	}
-    return 1;
-}
-#endif
 
 bool is_safety_apk(char *apkname)
 {
@@ -418,9 +392,7 @@ static int thread_gpio_app_status_delay(void *data)
     ssleep(10);
     LPC_PRINT(true, sleep_counter, "PM:MCU_WP_GPIO_ON1");
     ssleep(40);
-#ifdef CFG_SUSPEND_UNAIRPLANEMODE
     MCU_APP_GPIO_ON;
-#endif
 
 #ifdef CONTROL_PM_IO_BY_BP
     MCU_SET_APP_GPIO_SUSPEND;
@@ -631,6 +603,7 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
 #endif
 
 #ifdef CFG_SUSPEND_UNAIRPLANEMODE
+#else
             wake_unlock(&pm_wakelock);
 #endif
         }
@@ -851,17 +824,6 @@ static int pm_resume(struct device *dev)
     soc_io_resume_config(0, 0, 0, 0);
 #endif
 
-#ifdef __RMT_CTRL_FUNC__
-	if(smd_modem_triggered_flag == 1){
-		lidbg("*** Set SmdMdmFlag to 1\n");
-		lidbg_shell_cmd("setprop persist.lidbg.SmdMdmFlag 1");
-		complete(&modem_wakeup_wait);
-	}else{
-		lidbg("*** Set SmdMdmFlag to 0\n");
-		lidbg_shell_cmd("setprop persist.lidbg.SmdMdmFlag 0");
-	}
-#endif
-
     CREATE_KTHREAD(thread_save_acc_times, NULL);
     return 0;
 }
@@ -948,8 +910,9 @@ static int thread_observer(void *data)
                     break;
                 case 11:
 #ifdef CFG_SUSPEND_UNAIRPLANEMODE
-#else
 					break;
+#else
+
 #endif
 			    lidbg_shell_cmd("date  >> /data/lidbg/pm_info/ps.txt");				
 			    lidbg_shell_cmd("ps -t >> /data/lidbg/pm_info/ps.txt");
@@ -1147,9 +1110,6 @@ static int __init lidbg_pm_init(void)
 #endif
     PM_WARN("<set MCU_WP_GPIO_ON>\n");
 
-#ifdef __RMT_CTRL_FUNC__
-	CREATE_KTHREAD(thread_rmtctrl_func, NULL);
-#endif
     CREATE_KTHREAD(thread_gpio_app_status_delay, NULL);
 
 #ifdef PLATFORM_msm8226
