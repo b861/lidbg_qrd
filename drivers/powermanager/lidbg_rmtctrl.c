@@ -86,7 +86,8 @@ void acc_status_handle(FLY_ACC_STATUS val)
 		send_app_status(FLY_KERNEL_UP);
 		send_app_status(FLY_SCREEN_ON);
 		fs_file_write(DEV_NAME, false, SCREEN_ON, 0, strlen(SCREEN_ON));
-		//USB_WORK_ENABLE;
+		if(g_var.is_fly == 0)
+		    USB_WORK_ENABLE;
 		//LCD_ON;
 
 		lidbg("acc_state_work_func: FLY_ACC_ON del rmtctrl timer.\n");
@@ -97,7 +98,8 @@ void acc_status_handle(FLY_ACC_STATUS val)
 
 		lidbg("*** Set acc.status to 1\n");
 		lidbg_shell_cmd("setprop persist.lidbg.acc.status 1");
-		//USB_WORK_DISENABLE;
+		if(g_var.is_fly == 0)
+			USB_WORK_DISENABLE;
 		//LCD_OFF;
 		lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_OFF));
 		acc_io_state = FLY_ACC_OFF;
