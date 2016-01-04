@@ -4212,7 +4212,8 @@ openfd:
 	
 try_open_again:
 		system("echo 'udisk_request' > /dev/flydev0");
-		usleep(500*1000);
+		//usleep(500*1000);
+		sleep(2);
 		rc = get_hub_uvc_device(devName,do_save,do_record);
 		if((rc == -1) || (*devName == '\0'))
         {

@@ -491,7 +491,9 @@ out_err:
         return rc;
 try_open_again:
 		system("echo 'udisk_request' > /dev/flydev0");
-		usleep(500*1000);
+		ALOGE("%s: echo 'udisk_request' > /dev/flydev0 success\n", __func__);
+		//usleep(500*1000);
+		sleep(2);
 		rc = get_hub_uvc_device(mid,dev_name);
 		if((rc == -1) || (*dev_name == '\0'))
         {
