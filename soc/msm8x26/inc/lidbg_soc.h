@@ -54,7 +54,7 @@
 #include <linux/msm_tsens.h>
 
 #ifdef PLATFORM_msm8909
-#define CFG_SUSPEND_UNAIRPLANEMODE
+#define SUSPEND_ONLINE
 #endif
 
 #ifdef PLATFORM_msm8909

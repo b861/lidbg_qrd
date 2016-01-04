@@ -1891,7 +1891,7 @@ static int goodix_parse_dt(struct device *dev,
 }
 */
 
-#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+#ifdef SUSPEND_ONLINE
 static int lidbg_ts_event(struct notifier_block *this,
                        unsigned long event, void *ptr)
 {
@@ -2048,7 +2048,7 @@ static int goodix_ts_probe(struct platform_device *pdev)
         goto exit_free_inputdev;
     }
 
-#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+#ifdef SUSPEND_ONLINE
 	ts->fb_notif = lidbg_notifier;
 	register_lidbg_notifier(&ts->fb_notif);
 	if(0)
@@ -2187,7 +2187,7 @@ static int goodix_ac_ts_suspend(struct device *dev)
      */
     msleep(58);
     //	mutex_unlock(&ts->lock);
-#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+#ifdef SUSPEND_ONLINE
 #else
     ts->gtp_is_suspend = 1;
 #endif
@@ -2234,7 +2234,7 @@ static int goodix_ac_ts_resume(struct device *dev)
 #endif
     //	mutex_unlock(&ts->lock);
 
-#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+#ifdef SUSPEND_ONLINE
 #else
     ts->gtp_is_suspend = 0;
 #endif
@@ -2273,7 +2273,7 @@ static void goodix_ts_suspend(struct goodix_ts_data *ts)
 
 #if GTP_ESD_PROTECT
 
-#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+#ifdef SUSPEND_ONLINE
 #else
     ts->gtp_is_suspend = 1;
 #endif
@@ -2335,7 +2335,7 @@ static void goodix_ts_resume(struct goodix_ts_data *ts)
 
 #if GTP_ESD_PROTECT
 
-#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+#ifdef SUSPEND_ONLINE
 #else
     ts->gtp_is_suspend = 0;
 #endif

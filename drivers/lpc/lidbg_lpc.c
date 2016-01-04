@@ -534,7 +534,7 @@ static struct file_operations lpc_fops =
     .release = lpc_close,
 };
 
-#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+#ifdef SUSPEND_ONLINE
 static int lidbg_lpc_event(struct notifier_block *this,
                        unsigned long event, void *ptr)
 {
@@ -587,7 +587,7 @@ static int  lpc_probe(struct platform_device *pdev)
     return 0;
 #endif
 
-#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+#ifdef SUSPEND_ONLINE
 	register_lidbg_notifier(&lidbg_notifier);
 #endif
 
@@ -638,7 +638,7 @@ static int lpc_suspend(struct device *dev)
 static int lpc_resume(struct device *dev)
 {
     DUMP_FUN;
-#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+#ifdef SUSPEND_ONLINE
 #else
     lpc_work_en = true;
 #endif

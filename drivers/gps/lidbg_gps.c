@@ -69,7 +69,7 @@ static int gps_event_handle(struct notifier_block *this,
 #else
     switch (event)
     {
-#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+#ifdef SUSPEND_ONLINE
 	case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_ON):
 #else
 	case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_DEVICE_UP):
@@ -82,7 +82,7 @@ static int gps_event_handle(struct notifier_block *this,
         lidbg("gps set work_en = 1\n");
         work_en = 1;
         break;
-#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+#ifdef SUSPEND_ONLINE
 	case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_OFF):
 #else
 	case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_DEVICE_DOWN):

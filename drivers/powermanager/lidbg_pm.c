@@ -31,7 +31,7 @@ extern int soc_io_resume_config(u32 index, u32 direction, u32 pull, u32 drive_st
 extern void grf_backup(void);
 extern void grf_restore(void);
 
-#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+#ifdef SUSPEND_ONLINE
 //#define SUSPEND_TIME_OUT_KILL_PROCESS
 //#define SUSPEND_TIME_OUT_FORCE_UNLOCK
 #else
@@ -567,7 +567,7 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
 #endif
             SOC_System_Status(FLY_ANDROID_DOWN);
 
-#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+#ifdef SUSPEND_ONLINE
             observer_start();
             LPC_PRINT(true, sleep_counter, "PM:android_down");
             wake_unlock(&pm_wakelock);
@@ -603,14 +603,14 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
             //lidbg("fly power key gotosleep --\n");
             mod_timer(&suspendkey_timer, SUSPEND_KEY_POLLING_TIME);
 #else
-#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+#ifdef SUSPEND_ONLINE
 #else
             observer_start();
             LPC_PRINT(true, sleep_counter, "PM:gotosleep");
 #endif
 #endif
 
-#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+#ifdef SUSPEND_ONLINE
 #else
             wake_unlock(&pm_wakelock);
 #endif
@@ -660,7 +660,7 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         }
          else  if(!strcmp(cmd[1], "PmServiceStar"))
          {
-#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+#ifdef SUSPEND_ONLINE
 			lidbg_shell_cmd("insmod /system/lib/modules/out/lidbg_rmtctrl.ko");
 			lidbg_shell_cmd("insmod /flysystem/lib/out/lidbg_rmtctrl.ko");
 #else
@@ -879,7 +879,7 @@ static int thread_observer(void *data)
         have_triggerd_sleep_S = 0;
         if( !wait_for_completion_interruptible(&sleep_observer_wait))
         {
-#ifndef CFG_SUSPEND_UNAIRPLANEMODE
+#ifndef SUSPEND_ONLINE
             find_task_by_name_or_kill(true, false, true, "c2739.mainframe");
 #endif	   			
             //kernel_wakelock_print("start:");
@@ -890,7 +890,7 @@ static int thread_observer(void *data)
             while(1) //atomic_read(&is_in_sleep) == 1
             {
                 ssleep(1);
-#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+#ifdef SUSPEND_ONLINE
                 if((g_var.system_status != FLY_ANDROID_DOWN) && (g_var.system_status != FLY_SLEEP_TIMEOUT) && (g_var.system_status != FLY_GOTO_SLEEP))
                     break;
 #else
@@ -901,7 +901,7 @@ static int thread_observer(void *data)
                 switch (have_triggerd_sleep_S)
                 {
                 case 60:
-#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+#ifdef SUSPEND_ONLINE
 #ifdef SUSPEND_TIME_OUT_KILL_PROCESS
 
 					lidbg("Sleep timeout, bserver thread start to kill process...\n");
@@ -923,7 +923,7 @@ static int thread_observer(void *data)
 #endif
                     break;
                 case 11:
-#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+#ifdef SUSPEND_ONLINE
 					break;
 #else
 
@@ -949,7 +949,7 @@ static int thread_observer(void *data)
                   case 13:
 			   // lidbg_shell_cmd("pm disable cld.navi.c2739.mainframe");
                     	    break;
-#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+#ifdef SUSPEND_ONLINE
                 default:
                     if(have_triggerd_sleep_S >= 5 && !(have_triggerd_sleep_S % 5) && ((g_var.system_status == FLY_ANDROID_DOWN) || (g_var.system_status == FLY_SLEEP_TIMEOUT) ||(g_var.system_status != FLY_GOTO_SLEEP)))//atomic_read(&is_in_sleep) == 1
                     {

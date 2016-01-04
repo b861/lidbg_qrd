@@ -293,7 +293,7 @@ static void dsi83_work_func(struct work_struct *work)
 
     lidbg( "dsi83_work_func:enter %d,%d\n", g_var.system_status, is_dsi83_inited);
 
-#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+#ifdef SUSPEND_ONLINE
     if(is_dsi83_inited)
 #else
 	if(((g_var.system_status == FLY_ANDROID_DOWN) || (g_var.system_status == FLY_GOTO_SLEEP)) || is_dsi83_inited)
@@ -479,7 +479,7 @@ void disable_dsi83(char *key_word, void *data)
      */
 }
 
-#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+#ifdef SUSPEND_ONLINE
 static int lidbg_dsi_event(struct notifier_block *this,
                        unsigned long event, void *ptr)
 {
@@ -550,7 +550,7 @@ static int dsi83_probe(struct platform_device *pdev)
         CREATE_KTHREAD(thread_dsi83_check, NULL);
     }
 
-#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+#ifdef SUSPEND_ONLINE
 	register_lidbg_notifier(&lidbg_notifier);
        if(0)
 #endif
@@ -601,7 +601,7 @@ static int thread_dsi83_ops_resume(void *data)
 static int dsi83_ops_resume(struct device *dev)
 {
     DUMP_FUN;
-#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+#ifdef SUSPEND_ONLINE
 	if(0)
 #endif
 	CREATE_KTHREAD(thread_dsi83_ops_resume, NULL);

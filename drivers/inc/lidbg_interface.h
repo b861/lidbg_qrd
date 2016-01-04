@@ -155,7 +155,7 @@ typedef enum
 #if (defined(BUILD_SOC) || defined(BUILD_CORE) || defined(BUILD_DRIVERS))
 #define NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE (110)
 
-#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+#ifdef SUSPEND_ONLINE
 #define NOTIFIER_MINOR_ACC_ON (20)
 #define NOTIFIER_MINOR_ACC_OFF (21)
 #else
@@ -197,7 +197,7 @@ typedef irqreturn_t (*pinterrupt_isr)(int irq, void *dev_id);
 
 #endif
 
-#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+#ifdef SUSPEND_ONLINE
 typedef enum
 {
     FLY_SCREEN_OFF,
