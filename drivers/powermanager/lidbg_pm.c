@@ -951,7 +951,7 @@ static int thread_observer(void *data)
                     	    break;
 #ifdef SUSPEND_ONLINE
                 default:
-                    if(have_triggerd_sleep_S >= 5 && !(have_triggerd_sleep_S % 5) && ((g_var.system_status == FLY_ANDROID_DOWN) || (g_var.system_status == FLY_SLEEP_TIMEOUT) ||(g_var.system_status != FLY_GOTO_SLEEP)))//atomic_read(&is_in_sleep) == 1
+                    if(have_triggerd_sleep_S >= 5 && !(have_triggerd_sleep_S % 5) && ((g_var.system_status == FLY_ANDROID_DOWN) || (g_var.system_status == FLY_SLEEP_TIMEOUT) ||(g_var.system_status == FLY_GOTO_SLEEP)))//atomic_read(&is_in_sleep) == 1
                     {
 						//find_task_by_name_or_kill(true, false, true, "c2739.mainframe");
 						//find_task_by_name_or_kill(true, false, true, "tencent.qqmusic");
