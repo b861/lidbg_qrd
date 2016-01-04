@@ -31,6 +31,13 @@ extern int soc_io_resume_config(u32 index, u32 direction, u32 pull, u32 drive_st
 extern void grf_backup(void);
 extern void grf_restore(void);
 
+#ifdef CFG_SUSPEND_UNAIRPLANEMODE
+//#define SUSPEND_TIME_OUT_KILL_PROCESS
+//#define SUSPEND_TIME_OUT_FORCE_UNLOCK
+#else
+#define SUSPEND_TIME_OUT_KILL_PROCESS
+#define SUSPEND_TIME_OUT_FORCE_UNLOCK
+#endif
 
 bool is_safety_apk(char *apkname)
 {
@@ -872,8 +879,9 @@ static int thread_observer(void *data)
         have_triggerd_sleep_S = 0;
         if( !wait_for_completion_interruptible(&sleep_observer_wait))
         {
+#ifndef CFG_SUSPEND_UNAIRPLANEMODE
             find_task_by_name_or_kill(true, false, true, "c2739.mainframe");
-	   			
+#endif	   			
             //kernel_wakelock_print("start:");
             //userspace_wakelock_action(0, NULL);
             //lidbg_shell_cmd("echo msg airplane_mode_on:$(getprop persist.radio.airplane_mode_on) > /dev/lidbg_pm0");
@@ -894,11 +902,15 @@ static int thread_observer(void *data)
                 {
                 case 60:
 #ifdef CFG_SUSPEND_UNAIRPLANEMODE
+#ifdef SUSPEND_TIME_OUT_KILL_PROCESS
+
 					lidbg("Sleep timeout, bserver thread start to kill process...\n");
 					SOC_System_Status(FLY_SLEEP_TIMEOUT);
 #endif
+#endif
                 case 120:
                 case 150:
+#ifdef SUSPEND_TIME_OUT_FORCE_UNLOCK
                     sprintf(when, "unlock%d,%d:", have_triggerd_sleep_S, sleep_counter);
                     kernel_wakelock_save_wakelock(when, PM_INFO_FILE);
                     kernel_wakelock_force_unlock(when);
@@ -908,6 +920,7 @@ static int thread_observer(void *data)
                         lidbg_loop_warning();
 
                     }
+#endif
                     break;
                 case 11:
 #ifdef CFG_SUSPEND_UNAIRPLANEMODE
