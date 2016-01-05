@@ -117,6 +117,7 @@ public class FlyBootService extends Service {
     private List<Integer> mInterneWhiteListAppUID= new ArrayList<Integer>();
     private boolean dbgMode = true;
     private boolean mInterneWhiteListAppProtectEn = true;
+    private boolean mFlyaudioInternetActionEn = true;
 
     // add launcher in protected list
     String systemLevelProcess[] = {
@@ -296,6 +297,14 @@ public class FlyBootService extends Service {
 			case 5:
 				mInterneWhiteListAppProtectEn=true;
 				LIDBG_PRINT("mInterneWhiteListAppProtectEn->"+ mInterneWhiteListAppProtectEn+"\n");
+			break;
+			case 6:
+				mFlyaudioInternetActionEn=false;
+				LIDBG_PRINT("mInterneWhiteListAppProtectEn->"+ mFlyaudioInternetActionEn+"\n");
+			break;
+			case 7:
+				mFlyaudioInternetActionEn=true;
+				LIDBG_PRINT("mInterneWhiteListAppProtectEn->"+ mFlyaudioInternetActionEn+"\n");
 			break;
 			default:
 			LIDBG_PRINT("BroadcastReceiver.action:unkown"+action+"\n");
@@ -756,12 +765,16 @@ public class FlyBootService extends Service {
     }
 	public void FlyaudioInternetEnable()
 	{
-	    LIDBG_PRINT("FlyaudioInternetEnable");
+	    LIDBG_PRINT("FlyaudioInternetEnable"+mFlyaudioInternetActionEn+"\n");
+	    if(!mFlyaudioInternetActionEn)
+	    	    return;
 	    appInternetControl(true);
 	}
 	public void FlyaudioInternetDisable()
 	{
-	    LIDBG_PRINT("FlyaudioInternetDisable");
+	    LIDBG_PRINT("FlyaudioInternetDisable"+mFlyaudioInternetActionEn+"\n");
+	    if(!mFlyaudioInternetActionEn)
+	    	    return;
 	    appInternetControl(false);
 	}
 	public List<Integer> getInternelAllAppUids(List<Integer> mlist)
