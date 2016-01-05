@@ -492,6 +492,7 @@ static int lidbg_dsi_event(struct notifier_block *this,
         	 queue_delayed_work(dsi83_workqueue, &dsi83_work, DSI83_DELAY_TIME);
 		break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_OFF):
+	       is_dsi83_inited = false;
 		break;
     default:
         break;
