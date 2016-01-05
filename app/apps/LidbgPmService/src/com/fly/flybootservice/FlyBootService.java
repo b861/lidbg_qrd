@@ -568,6 +568,7 @@ public class FlyBootService extends Service {
 		LIDBG_PRINT("skip KillProcess.mKillProcessEn=false\n");
 		return;
 	}
+	acquireWakeLock();
         List<ActivityManager.RunningAppProcessInfo> appProcessList = null;
 
         appProcessList = mActivityManager.getRunningAppProcesses();
@@ -589,6 +590,7 @@ public class FlyBootService extends Service {
                 mActivityManager.forceStopPackage(processName);
             }
         }
+    releaseWakeLock();
     }
 
     private boolean isKillableProcess(String packageName) {
