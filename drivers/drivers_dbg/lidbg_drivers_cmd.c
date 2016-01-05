@@ -1,6 +1,6 @@
 
 #define TEMP_LOG_PATH 	 LIDBG_LOG_DIR"log_ct.txt"
-
+void  fake_acc_off(void);
 
 int thread_log_temp(void *data)
 {
@@ -294,6 +294,7 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#054--uvccam recording control(1 or 0)\n");
             fs_mem_log("*158#055--disable logcat server\n");
             fs_mem_log("*158#056--ensable logcat server\n");
+            fs_mem_log("*158#057--do fake acc off\n");
 
             show_password_list();
             lidbg_domineering_ack();
@@ -669,6 +670,11 @@ void parse_cmd(char *pt)
             lidbg("-------enable logcat server -----");
             lidbg_shell_cmd("setprop ctl.start logd");
             lidbg_domineering_ack();
+        }
+        else if (!strcmp(argv[1], "*158#057"))
+        {
+            lidbg("-------fake_acc_off -----");
+           fake_acc_off();
         }
         else if (!strcmp(argv[1], "*168#001"))
         {

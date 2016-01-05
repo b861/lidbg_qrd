@@ -328,9 +328,12 @@ static int __init lidbg_powerkey_init(void)
 static void __exit lidbg_powerkey_exit(void)
 {
 }
+ 
+void  fake_acc_off(void){}
 
 module_init(lidbg_powerkey_init);
 module_exit(lidbg_powerkey_exit);
+EXPORT_SYMBOL(fake_acc_off);
 
 MODULE_DESCRIPTION("lidbg.powerkey");
 MODULE_LICENSE("GPL");

@@ -358,8 +358,16 @@ static void __exit lidbg_rmtctrl_exit(void)
 {
 }
 
+ void  fake_acc_off(void)
+{
+	acc_io_state = FLY_ACC_OFF;
+	acc_status_handle(acc_io_state);
+}
+
 module_init(lidbg_rmtctrl_init);
 module_exit(lidbg_rmtctrl_exit);
+
+EXPORT_SYMBOL(fake_acc_off);
 
 MODULE_DESCRIPTION("lidbg.rmtctrl");
 MODULE_LICENSE("GPL");
