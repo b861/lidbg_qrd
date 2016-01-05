@@ -321,6 +321,10 @@ static int rmtctrl_pm_resume(struct device *dev)
     DUMP_FUN;
 //	if(g_var.system_status == FLY_KERNEL_DOWN)
 //		send_app_status(FLY_KERNEL_UP);
+	if(is_fake_acc_off)
+	{
+		lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_ON));
+	}
 	if(acc_io_state == FLY_ACC_OFF){
 		lidbg("rmtctrl_pm_resume, acc_io_state is FLY_ACC_OFF, add rmtctrl timer.\n");
 		mod_timer(&rmtctrl_timer,AUTO_SLEEP_TIME_S);
