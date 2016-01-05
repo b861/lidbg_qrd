@@ -4,13 +4,13 @@
 #define rmtctrl_FIFO_SIZE (512)
 #define MCU_ACC_STATE_IO GPIO_FASTBOOT_REQUEST
 
-#define SCREE_OFF_JIFF (5)
+#define SCREE_OFF_JIFF (10)
 #define SCREE_OFF_TIME_S (jiffies + SCREE_OFF_JIFF*HZ)
 
 #define GOTO_SLEEP_JIFF (5)
 #define GOTO_SLEEP_TIME_S (jiffies + GOTO_SLEEP_JIFF*HZ)
 
-#define AUTO_SLEEP_JIFF (5)
+#define AUTO_SLEEP_JIFF (8)
 #define AUTO_SLEEP_TIME_S (jiffies + AUTO_SLEEP_JIFF*HZ)
 
 #define SCREEN_ON    "flyaudio screen_on"
@@ -40,6 +40,7 @@ typedef enum
 
 
 FLY_ACC_STATUS acc_io_state = FLY_ACC_ON;
+bool is_fake_acc_off = 0;
 
 void rmtctrl_fifo_in(void)
 {
@@ -142,7 +143,7 @@ static void rmtctrl_suspend(void)
 
 static void rmtctrl_resume(void)
 {
-	lidbg("rmtctrl_resume set MCU_APP_GPIO_ON\n");
+	lidbg("rmtctrl_resume fb\n");
 
 	lidbg("acc_state_work_func: FLY_ACC_ON, set prop AccWakedupState true\n");
 	lidbg_shell_cmd("setprop persist.lidbg.AccWakedupState true"); //prop for stopping kill_process when ACC_ON
@@ -156,7 +157,13 @@ static void rmtctrl_resume(void)
 	fs_file_write(DEV_NAME, false, ANDROID_UP, 0, strlen(ANDROID_UP));
 	send_app_status(FLY_DEVICE_UP);
 	fs_file_write(DEV_NAME, false, DEVICES_ON, 0, strlen(DEVICES_ON));
-
+	
+	if(is_fake_acc_off)
+	{
+		lidbg_shell_cmd("cat /proc/dsi83_rst &");
+		LCD_ON;
+	}
+	
 	if(acc_io_state == FLY_ACC_OFF){
 		lidbg("rmtctrl_resume, acc_io_state is FLY_ACC_OFF, add rmtctrl timer.\n");
 		mod_timer(&rmtctrl_timer,AUTO_SLEEP_TIME_S);
@@ -349,6 +356,9 @@ static int __init lidbg_rmtctrl_init(void)
 {
     DUMP_BUILD_TIME;
     DUMP_FUN;
+#ifndef SUSPEND_ONLINE
+    return 0;
+#endif
     platform_device_register(&lidbg_rmtctrl_device);
     platform_driver_register(&lidbg_rmtctrl_driver);
     return 0;
@@ -360,6 +370,7 @@ static void __exit lidbg_rmtctrl_exit(void)
  void  fake_acc_off(void)
 {
 	acc_io_state = FLY_ACC_OFF;
+	is_fake_acc_off = 1;
 	acc_status_handle(acc_io_state);
 }
 

@@ -601,11 +601,6 @@ void parse_cmd(char *pt)
             lidbg("**********set RmtCtrlenable true**********\n");
             lidbg_shell_cmd("setprop persist.lidbg.RmtCtrlenable true");
         }
-        else if (!strcmp(argv[1], "*158#057"))
-        {
-            lidbg("**********set RmtCtrlenable false**********\n");
-            lidbg_shell_cmd("setprop persist.lidbg.RmtCtrlenable false");
-        }
         else if (!strcmp(argv[1], "*158#050"))
         {
             lidbg_chmod("/sdcard");

@@ -660,6 +660,7 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         }
          else  if(!strcmp(cmd[1], "PmServiceStar"))
          {
+         /*
 #ifdef SUSPEND_ONLINE
 			lidbg_shell_cmd("insmod /system/lib/modules/out/lidbg_rmtctrl.ko");
 			lidbg_shell_cmd("insmod /flysystem/lib/out/lidbg_rmtctrl.ko");
@@ -667,6 +668,7 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
 			lidbg_shell_cmd("insmod /system/lib/modules/out/lidbg_powerkey.ko");
 			lidbg_shell_cmd("insmod /flysystem/lib/out/lidbg_powerkey.ko");
 #endif
+*/
 	  }
 
     }
