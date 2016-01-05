@@ -556,6 +556,12 @@ void parse_cmd(char *pt)
             char s[100];
             int n;
             n = strlen(argv[1]);
+
+			char buff[50] = {0};
+			lidbg_pm_install(get_lidbg_file_path(buff, "SleepTest.apk"));
+			lidbg_pm_install(get_lidbg_file_path(buff, "SleepTest/SleepTest.apk"));
+			msleep(5000);
+
             if(n != 12)
                 strcpy(argv[1], "*158#0448010");
 

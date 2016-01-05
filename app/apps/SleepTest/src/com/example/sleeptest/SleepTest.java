@@ -54,8 +54,8 @@ public class SleepTest extends Activity {
 	}
 	
 	private void startTest(Context context) {
-		LIDBG_PRINT("====== [SleepTest] GotoSleep =======");
-		fbPm.goToSleep(SystemClock.uptimeMillis());
+		//LIDBG_PRINT("====== [SleepTest] GotoSleep =======");
+		//fbPm.goToSleep(SystemClock.uptimeMillis());
 		//设置闹钟
 		LIDBG_PRINT("====== [SleepTest] Set Alarm =======");
 		setAlarm(context, mSleepTime, true);	
