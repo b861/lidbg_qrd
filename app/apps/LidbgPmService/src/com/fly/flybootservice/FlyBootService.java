@@ -139,6 +139,7 @@ public class FlyBootService extends Service {
 
 	mFlyBootService = this;
 	acquireWakeLock();
+	mActivityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
 	mWhiteList = FileReadList("/flysystem/lib/out/appProtectList.conf","\n");
 	mInternelWhiteList = FileReadList("/flysystem/lib/out/appInternetProtectList.conf","\n");
 	DUMP();
@@ -207,6 +208,8 @@ public class FlyBootService extends Service {
 								start_fastboot();
 							}else if(pmState == FBS_GOTO_SLEEP){
 								LIDBG_PRINT("FlyBootService get pm state: FBS_GOTO_SLEEP");
+								//if(blSuspendUnairplaneFlag)
+								//	KillProcess();
 								system_gotosleep();
 							}else if(pmState == FBS_KERNEL_DOWN){
 								LIDBG_PRINT("FlyBootService get pm state: FBS_KERNEL_DOWN");
@@ -422,7 +425,6 @@ public class FlyBootService extends Service {
 		LIDBG_PRINT(" ********** system gotosleep ********** ");
 		if(blSuspendUnairplaneFlag){
 			fbPm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-			mActivityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
 			msgTokenal("flyaudio gotosleep");
 			fbPm.goToSleep(SystemClock.uptimeMillis());
 		}else{
@@ -437,7 +439,6 @@ public class FlyBootService extends Service {
 
 		LIDBG_PRINT(" ********** start fastboot ********** ");
 		fbPm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-		mActivityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
 
 		powerOffSystem();
 	}
@@ -537,7 +538,7 @@ public class FlyBootService extends Service {
 			Log.d(TAG, "-----fly.gps.run-----0---");
 		}
 		LIDBG_PRINT("powerOffSystem step 4");
-		if(!blSuspendUnairplaneFlag)
+		//if(!blSuspendUnairplaneFlag)
 			KillProcess();
 		msgTokenal("flyaudio pre_gotosleep");
 		LIDBG_PRINT("powerOffSystem-");
