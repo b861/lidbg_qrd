@@ -299,6 +299,7 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#059--disable internet white list protect\n");
             fs_mem_log("*158#060--enable internet off\n");
             fs_mem_log("*158#061--disable internet off\n");
+            fs_mem_log("*158#062--do not kill process in flybootserver.apk\n");
 
             show_password_list();
             lidbg_domineering_ack();
@@ -704,6 +705,12 @@ void parse_cmd(char *pt)
             lidbg("*158#061--disable internet off\n");
             lidbg_shell_cmd("am broadcast -a com.lidbg.flybootserver.action --ei action 6 &");
         }
+        else if (!strcmp(argv[1], "*158#062"))
+        {
+            lidbg("*158#062--do not kill process in flybootserver.apk\n");
+            lidbg_shell_cmd("am broadcast -a com.lidbg.flybootserver.action --ei action 8 &");
+        }
+
 
         else if (!strcmp(argv[1], "*168#001"))
         {

@@ -118,6 +118,7 @@ public class FlyBootService extends Service {
     private boolean dbgMode = true;
     private boolean mInterneWhiteListAppProtectEn = true;
     private boolean mFlyaudioInternetActionEn = true;
+    private boolean mKillProcessEn = true;
 
     // add launcher in protected list
     String systemLevelProcess[] = {
@@ -303,11 +304,15 @@ public class FlyBootService extends Service {
 			break;
 			case 6:
 				mFlyaudioInternetActionEn=false;
-				LIDBG_PRINT("mInterneWhiteListAppProtectEn->"+ mFlyaudioInternetActionEn+"\n");
+				LIDBG_PRINT("mFlyaudioInternetActionEn->"+ mFlyaudioInternetActionEn+"\n");
 			break;
 			case 7:
 				mFlyaudioInternetActionEn=true;
-				LIDBG_PRINT("mInterneWhiteListAppProtectEn->"+ mFlyaudioInternetActionEn+"\n");
+				LIDBG_PRINT("mFlyaudioInternetActionEn->"+ mFlyaudioInternetActionEn+"\n");
+			break;
+			case 8:
+				mKillProcessEn=false;
+				LIDBG_PRINT("mKillProcessEn->"+ mKillProcessEn+"\n");
 			break;
 			default:
 			LIDBG_PRINT("BroadcastReceiver.action:unkown"+action+"\n");
@@ -558,6 +563,11 @@ public class FlyBootService extends Service {
     }
 
     private void KillProcess() {
+	if(!mKillProcessEn)
+	{
+		LIDBG_PRINT("skip KillProcess.mKillProcessEn=false\n");
+		return;
+	}
         List<ActivityManager.RunningAppProcessInfo> appProcessList = null;
 
         appProcessList = mActivityManager.getRunningAppProcesses();
