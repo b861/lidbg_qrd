@@ -355,8 +355,7 @@ static int __init lidbg_rmtctrl_init(void)
 }
   
 static void __exit lidbg_rmtctrl_exit(void)
-{
-}
+{}
 
  void  fake_acc_off(void)
 {

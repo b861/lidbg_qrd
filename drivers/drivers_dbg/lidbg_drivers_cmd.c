@@ -673,8 +673,10 @@ void parse_cmd(char *pt)
         }
         else if (!strcmp(argv[1], "*158#057"))
         {
+#ifdef SUSPEND_ONLINE
             lidbg("-------fake_acc_off -----");
            fake_acc_off();
+#endif
         }
         else if (!strcmp(argv[1], "*168#001"))
         {
