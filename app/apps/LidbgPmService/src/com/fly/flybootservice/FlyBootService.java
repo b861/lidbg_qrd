@@ -115,7 +115,7 @@ public class FlyBootService extends Service {
     private List<Integer> mInternelAllAppListUID= new ArrayList<Integer>();
     //list about all white list app'uid 
     private List<Integer> mInterneWhiteListAppUID= new ArrayList<Integer>();
-    private boolean dbgMode = false;
+    private boolean dbgMode = true;
     private boolean mInterneWhiteListAppProtectEn = true;
 
     // add launcher in protected list
@@ -768,16 +768,10 @@ public class FlyBootService extends Service {
 	{
 	    PackageManager pm = getPackageManager();
 	    List<PackageInfo> packinfos = pm
-	                                  .getInstalledPackages(PackageManager.GET_UNINSTALLED_PACKAGES
-	                                          | PackageManager.GET_PERMISSIONS);
+	                                  .getInstalledPackages(0);
 	for (PackageInfo info : packinfos)
 	    {
-	        String[] premissions = info.requestedPermissions;
-	        if (premissions != null && premissions.length > 0)
-	        {
-	for (String premission : premissions)
-	            {
-	                if ("android.permission.INTERNET".equals(premission))
+	    	if ((info.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) <= 0)
 	                {
 	                    int uid = info.applicationInfo.uid;
 	                    if (mlist != null && !mlist.contains(uid))
@@ -785,8 +779,6 @@ public class FlyBootService extends Service {
 	                        mlist.add(uid);
 	                    }
 	                }
-	            }
-	        }
 	    }
 	    return mlist;
 	}
