@@ -295,6 +295,8 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#055--disable logcat server\n");
             fs_mem_log("*158#056--ensable logcat server\n");
             fs_mem_log("*158#057--do fake acc off\n");
+            fs_mem_log("*158#058--enable internet white list protect\n");
+            fs_mem_log("*158#059--disable internet white list protect\n");
 
             show_password_list();
             lidbg_domineering_ack();
@@ -673,6 +675,17 @@ void parse_cmd(char *pt)
            fake_acc_off();
 #endif
         }
+        else if (!strcmp(argv[1], "*158#058"))
+        {
+            lidbg("*158#058--enable internet white list protect\n");
+            lidbg_shell_cmd("am broadcast -a com.lidbg.flybootserver.action --ei action 5 &");
+        }
+        else if (!strcmp(argv[1], "*158#059"))
+        {
+            lidbg("*158#058--disable internet white list protect\n");
+            lidbg_shell_cmd("am broadcast -a com.lidbg.flybootserver.action --ei action 4 &");
+        }
+
         else if (!strcmp(argv[1], "*168#001"))
         {
             encode = true;

@@ -116,6 +116,7 @@ public class FlyBootService extends Service {
     //list about all white list app'uid 
     private List<Integer> mInterneWhiteListAppUID= new ArrayList<Integer>();
     private boolean dbgMode = false;
+    private boolean mInterneWhiteListAppProtectEn = true;
 
     // add launcher in protected list
     String systemLevelProcess[] = {
@@ -286,7 +287,14 @@ public class FlyBootService extends Service {
 			case 3:
 				DUMP();
 			break;
-
+			case 4:
+				mInterneWhiteListAppProtectEn=false;
+				LIDBG_PRINT("mInterneWhiteListAppProtectEn->"+ mInterneWhiteListAppProtectEn+"\n");
+			break;
+			case 5:
+				mInterneWhiteListAppProtectEn=true;
+				LIDBG_PRINT("mInterneWhiteListAppProtectEn->"+ mInterneWhiteListAppProtectEn+"\n");
+			break;
 			default:
 			LIDBG_PRINT("BroadcastReceiver.action:unkown"+action+"\n");
 			break;
@@ -815,14 +823,14 @@ public class FlyBootService extends Service {
 	    mInternelAllAppListUID = getInternelAllAppUids(mInternelAllAppListUID);
 	    mInterneWhiteListAppUID = getWhiteListAppUids(mInterneWhiteListAppUID);
 
-	    LIDBG_PRINT("appInternetControl:" + mInternelAllAppListUID.size() + "|" + mInterneWhiteListAppUID.size() + "\n");
+	    LIDBG_PRINT("appInternetControl:" + mInternelAllAppListUID.size() + "|" + mInterneWhiteListAppUID.size() +  "|" + mInterneWhiteListAppProtectEn+"\n");
 	    if (mInternelAllAppListUID != null && mInternelAllAppListUID.size() > 0)
 	    {
 	        for (int i = 0; i < mInternelAllAppListUID.size(); i++)
 	        {
 	            Integer uid = mInternelAllAppListUID.get(i);
 		// have a check with white list uid
-	            if (mInterneWhiteListAppUID != null && mInterneWhiteListAppUID.size() > 0)
+	            if (mInterneWhiteListAppProtectEn&&mInterneWhiteListAppUID != null && mInterneWhiteListAppUID.size() > 0)
 	            {
 	                boolean find = false;
 	                for (int j = 0; j < mInterneWhiteListAppUID.size(); j++)
