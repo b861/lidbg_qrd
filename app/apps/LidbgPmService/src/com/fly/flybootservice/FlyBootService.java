@@ -187,6 +187,7 @@ public class FlyBootService extends Service {
 							if(pmState == FBS_SCREEN_OFF){
 								LIDBG_PRINT("FlyBootService get pm state: FBS_SCREEN_OFF");
 								SendBroadcastToService(KeyBootState, keyScreenOFF);
+								FlyaudioInternetDisable();
 							}else if(pmState == FBS_DEVICE_DOWN){
 								LIDBG_PRINT("FlyBootService get pm state: FBS_DEVICE_DOWN");
 								final boolean booleanRemoteControl = SystemProperties.getBoolean("persist.lidbg.RmtCtrlenable",false);
@@ -229,6 +230,7 @@ public class FlyBootService extends Service {
 							}else if(pmState == FBS_SCREEN_ON){
 								LIDBG_PRINT("FlyBootService get pm state: FBS_SCREEN_ON");
 								acquireWakeLock();
+								FlyaudioInternetEnable();
 								SendBroadcastToService(KeyBootState, keyScreenOn);
 								system_resume();
 							}else if(pmState == FBS_SLEEP_TIMEOUT){
