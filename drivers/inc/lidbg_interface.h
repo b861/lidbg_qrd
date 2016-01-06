@@ -320,6 +320,7 @@ struct lidbg_pvar_t
     bool is_debug_mode;
     bool is_udisk_needreset;
     bool usb_status;
+    bool usb_request;
 
 };
 

@@ -439,6 +439,8 @@ int fly_interface_init(void)
     g_var.led_hal_status = 1;
     g_var.is_udisk_needreset = 1;
     g_var.usb_status = 0;
+    g_var.usb_request = 0;
+	
     if(gboot_mode == MD_RECOVERY)
     {
         g_var.recovery_mode = 1;

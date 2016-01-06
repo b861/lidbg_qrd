@@ -4,7 +4,7 @@
 #define rmtctrl_FIFO_SIZE (512)
 #define MCU_ACC_STATE_IO GPIO_FASTBOOT_REQUEST
 
-#define SCREE_OFF_JIFF (10)
+#define SCREE_OFF_JIFF (15)
 #define SCREE_OFF_TIME_S (jiffies + SCREE_OFF_JIFF*HZ)
 
 #define GOTO_SLEEP_JIFF (5)
@@ -67,7 +67,8 @@ static void rmtctrl_timer_func(unsigned long data)
 {
 	if(acc_io_state == FLY_ACC_OFF){
        lidbg("rmtctrl_timer_func: goto_sleep %ds later...\n", GOTO_SLEEP_JIFF);
-       send_app_status(FLY_GOTO_SLEEP);
+	if( g_var.usb_request == 0)
+       	send_app_status(FLY_GOTO_SLEEP);
        mod_timer(&rmtctrl_timer,GOTO_SLEEP_TIME_S);
 	}
 	return;

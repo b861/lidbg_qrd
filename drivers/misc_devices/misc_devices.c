@@ -12,7 +12,7 @@ LIDBG_DEFINE;
 
 int udisk_stability_test = 0;
 
-int usb_request = 0;
+//int usb_request = 0;
 
 #if defined(CONFIG_FB)
 struct notifier_block devices_notif;
@@ -87,7 +87,7 @@ static int thread_usb_disk_disable_delay(void *data)
     //msleep(1000);
 #endif
 
-	if(usb_request == 1)
+	if( g_var.usb_request == 1)
 		lidbg("Usb still being used, don't disable it actually...\n");
 	else{
 		lidbg("Usb be not used,disable it...\n");
@@ -108,7 +108,7 @@ static int lidbg_dev_event(struct notifier_block *this,
         //if(!g_var.is_fly)
     {
         LCD_OFF;
-	 usb_request= 0;
+	  g_var.usb_request= 0;
         //lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_APP_OFF));
         //lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_HAL_OFF));
     }
@@ -251,12 +251,12 @@ static void parse_cmd(char *pt)
     {
         	lidbg("Misc devices ctrl: udisk_request");
 		usb_disk_enable(true);
-		usb_request= 1;
+		 g_var.usb_request= 1;
     }
     else if (!strcmp(argv[0], "udisk_unrequest"))
     {
         	lidbg("Misc devices ctrl: udisk_unrequest");
-		usb_request= 0;
+		 g_var.usb_request= 0;
     }
 }
 
@@ -363,6 +363,17 @@ int thread_udisk_en(void *data)
 }
 #endif
 
+#ifdef PLATFORM_ID_11
+int thread_udisk_en(void *data)
+{
+    DUMP_FUN_ENTER;
+    ssleep(30);
+    USB_WORK_ENABLE;
+    lidbg("thread_udisk_en===exit=\n");
+    return 0;
+}
+#endif
+
 static int soc_dev_probe(struct platform_device *pdev)
 {
 #if defined(CONFIG_FB)
@@ -385,9 +396,7 @@ static int soc_dev_probe(struct platform_device *pdev)
     LCD_ON;
     //lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_APP_ON));
     //lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_HAL_ON));
-    USB_WORK_ENABLE;
 
-    SET_USB_ID_SUSPEND;
     GPS_POWER_ON;
     lidbg_new_cdev(&dev_fops, "flydev");
 
@@ -399,6 +408,13 @@ static int soc_dev_probe(struct platform_device *pdev)
     {
         CREATE_KTHREAD(thread_udisk_stability_test, NULL);
     }
+#ifndef PLATFORM_ID_11
+    USB_WORK_ENABLE;
+    SET_USB_ID_SUSPEND;
+#else
+	USB_WORK_DISENABLE;
+	CREATE_KTHREAD(thread_udisk_en, NULL);
+#endif
 
 #ifdef PLATFORM_ID_7
     if(0)
