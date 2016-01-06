@@ -461,7 +461,8 @@ getuvcdevice:
         if((rc == -1) || (*dev_name == '\0'))
         {
             ALOGE("%s: No UVC node found \n", __func__);
-            goto try_open_again;
+            //goto try_open_again;
+            goto out_err;
         }
 openfd:
         camHal->fd = open(dev_name, O_RDWR | O_NONBLOCK, 0);
@@ -489,6 +490,7 @@ openfd:
 out_err:
         ALOGE("%s: X.out_err  %d", __func__, rc);
         return rc;
+#if 0
 try_open_again:
 		system("echo 'udisk_request' > /dev/flydev0");
 		ALOGE("%s: echo 'udisk_request' > /dev/flydev0 success\n", __func__);
@@ -501,6 +503,7 @@ try_open_again:
             goto out_err;
         }
 		else goto openfd;
+#endif
     }
 
     extern "C"  int usbcam_close_camera_device( hw_device_t *hw_dev)
@@ -527,7 +530,7 @@ try_open_again:
                 ALOGE("%s: camHal is NULL pointer ", __func__);
             }
         }
-		system("echo 'udisk_unrequest' > /dev/flydev0");	
+		//system("echo 'udisk_unrequest' > /dev/flydev0");	
         ALOGI("%s: X device =%p, rc = %d", __func__, hw_dev, rc);
         return rc;
     }

@@ -2640,8 +2640,8 @@ getuvcdevice:
     if(rc || *devName == '\0')
     {
         lidbg("%s: No UVC node found \n", __func__);
-		//return 1;
-		goto try_open_again; 
+		return 1;
+		//goto try_open_again; 
     }
 openfd:
 	dev = video_open(devName);
@@ -4209,7 +4209,7 @@ openfd:
 
 	system("echo 'udisk_unrequest' > /dev/flydev0");
 	return 0;
-	
+#if 0
 try_open_again:
 		system("echo 'udisk_request' > /dev/flydev0");
 		//usleep(500*1000);
@@ -4221,4 +4221,5 @@ try_open_again:
             return 1;
         }
 		else goto openfd;
+#endif
 }
