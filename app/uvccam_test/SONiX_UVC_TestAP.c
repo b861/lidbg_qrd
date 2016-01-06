@@ -2670,12 +2670,21 @@ openfd:
 		//set record file savePath
 		property_get("fly.uvccam.recpath", Rec_Save_Dir, "/storage/sdcard0/camera_rec/");
 		lidbg("==========recording dir -> %s===========",Rec_Save_Dir);
+
+		if(!strncmp(Rec_Save_Dir, "/storage/udisk", 14) )
+		{
+			char tmp_usb_mkdir[100] = "mkdir /storage/udisk/camera_rec/";
+			lidbg("======== try create udisk rec dir -> %s =======",Rec_Save_Dir);
+			sprintf(tmp_usb_mkdir, "mkdir %s", Rec_Save_Dir);
+			system(tmp_usb_mkdir);
+		}
 		if(access(Rec_Save_Dir, R_OK) != 0)
 		{
 			lidbg("record file path access wrong! " );
 			//return 0;
 			strcpy(Rec_Save_Dir,  "/storage/sdcard0/camera_rec/");
 		}
+		
 		
 		//set record file total size
 		property_get("fly.uvccam.recfilesize", Rec_File_Size_String, "300");
