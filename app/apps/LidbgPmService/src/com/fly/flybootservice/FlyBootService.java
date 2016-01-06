@@ -579,6 +579,7 @@ public class FlyBootService extends Service {
             int uid = appProcessInfo.uid;
             String processName = appProcessInfo.processName;
             if(blSuspendUnairplaneFlag){
+				delay(200);
 	            booleanAccWakedupState = SystemProperties.getBoolean("persist.lidbg.AccWakedupState",false);
 	            if(booleanAccWakedupState){
 	                LIDBG_PRINT("Prop AccWakedupState be set:" + booleanAccWakedupState + ", stop kill process.");
