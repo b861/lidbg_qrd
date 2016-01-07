@@ -229,10 +229,11 @@ static int get_uvc_device(const char *id,char *devname)
             {
                 if (!(cap.capabilities & V4L2_CAP_VIDEO_CAPTURE))//not usb cam node
                 {
-                    ALOGE("%s: This is not video capture device\n", __func__);
+                    ALOGE("%s: This is not video capture device -> %s\n", __func__,temp_devname);
                     close(fd);
                     continue;
                 }
+#if 0
                 {
                     struct v4l2_fmtdesc fmt;
                     int isH264sup = -1;
@@ -250,26 +251,27 @@ static int get_uvc_device(const char *id,char *devname)
                     }
                     if(isH264sup == 1)
                     {
-                        ALOGD("%s: V4L2_PIX_FMT_H264 is supported,find next node", __func__ );
+                        ALOGE("%s: V4L2_PIX_FMT_H264 is supported,find next node", __func__ );
                         close(fd);
                         continue;
                     }
                 }
                 uvc_count++;
-                ALOGD("%s: Found UVC node: ======%s,[%d,%d]\n", __func__, temp_devname, cam_id, uvc_count);
+                ALOGE("%s: Found UVC node: ======%s,[%d,%d]\n", __func__, temp_devname, cam_id, uvc_count);
                 if(cam_id != -1 && cam_id != uvc_count)
                 {
-                    ALOGD("%s: need to find another======", __func__);
+                    ALOGE("%s: need to find another======", __func__);
                     close(fd);
                     continue;
                 }
+#endif
                 strncpy(devname, temp_devname, FILENAME_LENGTH);
-                ALOGD("%s: Found UVC node,OK: ======%s,[%d,%d]\n", __func__, temp_devname, cam_id, uvc_count);
+                ALOGE("%s: Found UVC node,OK: ======%s,[%d,%d]\n", __func__, temp_devname, cam_id, uvc_count);
                 break;
             }
             close(fd);
         }
-        else if(2 != errno)
+        else if(i < 10)
             ALOGE("%s.%d: Probing.%s: ret: %d, errno: %d,%s", __func__, i, temp_devname, ret, errno, strerror(errno));
 
         if(i > 1000)
@@ -366,7 +368,7 @@ openDev:
           	  //not usb cam node
               if (!(cap.capabilities & V4L2_CAP_VIDEO_CAPTURE))
               {
-					ALOGE("%s: This is not video capture device\n", __func__);
+					ALOGE("%s: This is not video capture device -> %s\n", __func__,temp_devname);
 					close(fd);
 					if(fcnt == 4)	
 					{
