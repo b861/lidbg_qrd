@@ -443,7 +443,7 @@ static int  soc_dev_suspend(struct platform_device *pdev, pm_message_t state)
     {
         //button_suspend();
     }
-
+    led_suspend();
     return 0;
 
 }

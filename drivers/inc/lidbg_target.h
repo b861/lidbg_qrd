@@ -158,8 +158,8 @@ extern struct hw_version_specific g_hw_version_specific[];
 
 //led
 #define LED_GPIO (g_hw.gpio_led1)
-#define LED_ON  do{check_gpio(g_hw.gpio_led1);SOC_IO_Output(0, g_hw.gpio_led1, 0); }while(0)
-#define LED_OFF  do{check_gpio(g_hw.gpio_led1);SOC_IO_Output(0, g_hw.gpio_led1, 1); }while(0)
+#define LED_ON  do{/*check_gpio(g_hw.gpio_led1);*/SOC_IO_Output(0, g_hw.gpio_led1, 0); }while(0)
+#define LED_OFF  do{/*check_gpio(g_hw.gpio_led1);*/SOC_IO_Output(0, g_hw.gpio_led1, 1); }while(0)
 
 //button
 #define BUTTON_LEFT_1 (g_hw.gpio_int_button_left1)//k1

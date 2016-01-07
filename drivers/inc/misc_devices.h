@@ -8,6 +8,7 @@ int thread_button_init(void *data);
 int thread_led(void *data);
 int thread_thermal(void *data);
 void led_resume(void);
+void led_suspend(void);
 void temp_init(void);
 //int button_suspend(void);
 //int button_resume(void);

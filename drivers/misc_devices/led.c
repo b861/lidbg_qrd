@@ -25,5 +25,11 @@ int thread_led(void *data)
 void led_resume(void)
 {
     IO_CONFIG_OUTPUT(0, LED_GPIO);
+    LED_ON;
+}
+
+void led_suspend(void)
+{
+    LED_OFF;
 }
 
