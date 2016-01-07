@@ -46,17 +46,29 @@ typedef unsigned int			uchar;
 #define WRITE_REGISTER_UCHAR(reg,val)  (*(volatile UCHAR * const)(reg) = (UCHAR)(val))
 
 
+static inline void print_current_time(void)
+{
+#if 1
+    static char time_string[32];
+    struct timex  txc;
+    struct rtc_time tm;
+    do_gettimeofday(&(txc.time));
+    rtc_time_to_tm(txc.time.tv_sec,&tm);
+    sprintf(time_string, "%02d-%02d@%02d:%02d:%02d", tm.tm_mon + 1, tm.tm_mday, tm.tm_hour + 8, tm.tm_min, tm.tm_sec);
+    printk( "%s] ",time_string);
+#endif
+}
 
 
 // For Debug
 #define MSG_ERROR        (1)
 #define MSG_DEBUG        (1)
 #ifdef NOT_USE_MEM_LOG
-#define lidbg(msg...)  do { printk( KERN_CRIT "[lidbg] " msg);}while(0)
-#define lidbgerr(msg...)  do { printk( KERN_CRIT "[lidbgerr] " msg); }while(0)
+#define lidbg(msg...)  do { printk(  "[lidbg] " msg);}while(0)
+#define lidbgerr(msg...)  do { printk(  "[lidbgerr] " msg); }while(0)
 #else
-#define lidbg(msg...)  do { printk( KERN_CRIT "[lidbg] " msg);lidbg_fifo_put(glidbg_msg_fifo,msg);}while(0)
-#define lidbgerr(msg...)  do { printk( KERN_CRIT "[lidbgerr] " msg);lidbg_fifo_put(glidbg_msg_fifo,msg);}while(0)
+#define lidbg(msg...)  do {     printk( "[lidbg ");print_current_time();printk(  "  " msg);lidbg_fifo_put(glidbg_msg_fifo,msg);}while(0)
+#define lidbgerr(msg...)  do {  printk( "[lidbgerr ");print_current_time();printk(  "  " msg);lidbg_fifo_put(glidbg_msg_fifo,msg);}while(0)
 #endif
 
 #define LIDBG_WARN(fmt, args...) do { printk(KERN_CRIT"[lidbg]warn.%s: " fmt,__func__,##args);}while(0)
