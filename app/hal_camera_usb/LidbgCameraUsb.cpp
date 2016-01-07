@@ -2579,22 +2579,22 @@ ION_OPEN_FAILED:
         {
             String8 params_str8;
             CameraParameters mParams ;
-            mParams.set(CameraParameters::KEY_SUPPORTED_PICTURE_SIZES,  "640x480");
-            mParams.setPictureSize(640, 480);
-            mParams.set(CameraParameters::KEY_SUPPORTED_PREVIEW_SIZES, "640x480");
-            mParams.setPreviewSize(640, 480);
+            mParams.set(CameraParameters::KEY_SUPPORTED_PICTURE_SIZES,  "320x240");
+            mParams.setPictureSize(320, 240);
+            mParams.set(CameraParameters::KEY_SUPPORTED_PREVIEW_SIZES, "320x240");
+            mParams.setPreviewSize(320, 240);
             mParams.set(CameraParameters::KEY_PREVIEW_FORMAT, CameraParameters::PIXEL_FORMAT_YUV420SP);
             mParams.set(CameraParameters::KEY_SUPPORTED_PREVIEW_FORMATS, CameraParameters::PIXEL_FORMAT_YUV420SP);
 
 	        mParams.set(CameraParameters::KEY_SUPPORTED_VIDEO_SIZES,  
-	                "640x480");  
+	                "320x240");  
 	       mParams.set(CameraParameters::KEY_PREFERRED_PREVIEW_SIZE_FOR_VIDEO,  
-	                "640x480");  
+	                "320x240");  
 			mParams.set(CameraParameters::KEY_SUPPORTED_SCENE_MODES, "auto");  
 		    mParams.set(CameraParameters::KEY_SUPPORTED_PICTURE_FORMATS, "jpeg");  
 		    mParams.set(CameraParameters::KEY_SUPPORTED_FLASH_MODES, "auto");  
 		    mParams.set(CameraParameters::KEY_SUPPORTED_PREVIEW_FRAME_RATES, "30");  
-		    mParams.set(CameraParameters::KEY_SUPPORTED_JPEG_THUMBNAIL_SIZES, "160x120,0x0");  
+		    mParams.set(CameraParameters::KEY_SUPPORTED_JPEG_THUMBNAIL_SIZES, "320x240,0x0");  
 		    mParams.set(CameraParameters::KEY_SUPPORTED_WHITE_BALANCE, "auto");  
 		    mParams.set(CameraParameters::KEY_SUPPORTED_EFFECTS, "none");  
 		    mParams.set(CameraParameters::KEY_SUPPORTED_FOCUS_MODES, "auto");  
