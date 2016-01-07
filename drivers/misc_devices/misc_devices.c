@@ -92,6 +92,11 @@ static int thread_usb_disk_disable_delay(void *data)
 	else{
 		lidbg("Usb be not used,disable it...\n");
 		usb_disk_enable(false);
+		if( g_var.usb_request == 1)
+		{
+		lidbg("\n\n\n===========disable usb but request so. enable it================\n");
+		usb_disk_enable(true);
+		}
 	}
 
     return 1;
