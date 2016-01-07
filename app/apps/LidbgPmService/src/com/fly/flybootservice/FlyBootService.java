@@ -117,6 +117,7 @@ public class FlyBootService extends Service {
     private boolean mInterneWhiteListAppProtectEn = true;
     private boolean mFlyaudioInternetActionEn = true;
     private boolean mKillProcessEn = true;
+    private boolean mInterneDisableAll = false;
 
     // add launcher in protected list
     String systemLevelProcess[] = {
@@ -311,6 +312,14 @@ public class FlyBootService extends Service {
 			case 8:
 				mKillProcessEn=false;
 				LIDBG_PRINT("mKillProcessEn->"+ mKillProcessEn+"\n");
+			break;
+			case 9:
+				mInterneDisableAll=true;
+				LIDBG_PRINT("mInterneDisableAll->"+ mInterneDisableAll+"\n");
+			break;
+			case 10:
+				mInterneDisableAll=false;
+				LIDBG_PRINT("mInterneDisableAll->"+ mInterneDisableAll+"\n");
 			break;
 			default:
 			LIDBG_PRINT("BroadcastReceiver.action:unkown"+action+"\n");
@@ -777,17 +786,38 @@ public class FlyBootService extends Service {
     }
 	public void FlyaudioInternetEnable()
 	{
-	    LIDBG_PRINT("FlyaudioInternetEnable"+mFlyaudioInternetActionEn+"\n");
+	    LIDBG_PRINT("FlyaudioInternetEnable:"+mFlyaudioInternetActionEn+"/"+mInterneDisableAll+"\n");
 	    if(!mFlyaudioInternetActionEn)
 	    	    return;
-	    appInternetControl(true);
+	    if(mInterneDisableAll)
+	    	    InternetEnable();
+	    else
+	    	    appInternetControl(true);
 	}
 	public void FlyaudioInternetDisable()
 	{
-	    LIDBG_PRINT("FlyaudioInternetDisable"+mFlyaudioInternetActionEn+"\n");
+	    LIDBG_PRINT("FlyaudioInternetDisable:"+mFlyaudioInternetActionEn+"/"+mInterneDisableAll+"\n");
 	    if(!mFlyaudioInternetActionEn)
 	    	    return;
-	    appInternetControl(false);
+	    if(mInterneDisableAll)
+	    	    InternetDisable();
+	    else
+	    	    appInternetControl(false);
+	}
+	public void InternetDisable()
+	{
+		LIDBG_PRINT("InternetDisable\n");
+		writeToFile("/dev/lidbg_misc0","flyaudio:iptables -t filter -P OUTPUT DROP");
+		writeToFile("/dev/lidbg_misc0","flyaudio:iptables -t filter -P INPUT DROP");
+		writeToFile("/dev/lidbg_misc0","flyaudio:iptables -t filter -P FORWARD DROP");
+	}
+
+	public void InternetEnable()
+	{
+		LIDBG_PRINT("InternetEnable\n");
+		writeToFile("/dev/lidbg_misc0", "flyaudio:iptables -t filter -P OUTPUT ACCEPT");
+		writeToFile("/dev/lidbg_misc0","flyaudio:iptables -t filter -P INPUT ACCEPT");
+		writeToFile("/dev/lidbg_misc0","flyaudio:iptables -t filter -P FORWARD ACCEPT");
 	}
 	public List<Integer> getInternelAllAppUids(List<Integer> mlist)
 	{

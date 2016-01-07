@@ -295,11 +295,13 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#055--disable logcat server\n");
             fs_mem_log("*158#056--ensable logcat server\n");
             fs_mem_log("*158#057--do fake acc off\n");
-            fs_mem_log("*158#058--enable internet white list protect\n");
-            fs_mem_log("*158#059--disable internet white list protect\n");
-            fs_mem_log("*158#060--enable internet off\n");
-            fs_mem_log("*158#061--disable internet off\n");
+            fs_mem_log("*158#058--enable iptable white list protect\n");
+            fs_mem_log("*158#059--disable iptable white list protect\n");
+            fs_mem_log("*158#060--enable iptable\n");
+            fs_mem_log("*158#061--disable iptable\n");
             fs_mem_log("*158#062--do not kill process in flybootserver.apk\n");
+            fs_mem_log("*158#063--iptable all apps\n");
+            fs_mem_log("*158#064--! iptable all apps\n");
 
             show_password_list();
             lidbg_domineering_ack();
@@ -710,6 +712,16 @@ void parse_cmd(char *pt)
         {
             lidbg("*158#062--do not kill process in flybootserver.apk\n");
             lidbg_shell_cmd("am broadcast -a com.lidbg.flybootserver.action --ei action 8 &");
+        }
+        else if (!strcmp(argv[1], "*158#063"))
+        {
+            lidbg("*158#063--iptable all apps\n");
+            lidbg_shell_cmd("am broadcast -a com.lidbg.flybootserver.action --ei action 9 &");
+        }
+        else if (!strcmp(argv[1], "*158#064"))
+        {
+            lidbg("*158#064--! iptable all apps\n");
+            lidbg_shell_cmd("am broadcast -a com.lidbg.flybootserver.action --ei action 10 &");
         }
 
 
