@@ -29,11 +29,7 @@ static struct semaphore powerkey_sem;
 static struct kfifo powerkey_state_fifo;
 static unsigned int *powerkey_state_buffer;
 
-typedef enum
-{
-	FLY_ACC_OFF,
-	FLY_ACC_ON,
-}FLY_ACC_STATUS;
+
 
 FLY_ACC_STATUS lpc_acc_state = FLY_ACC_ON;
 

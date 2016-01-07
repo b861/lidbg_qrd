@@ -10,7 +10,7 @@
 #define GOTO_SLEEP_JIFF (5)
 #define GOTO_SLEEP_TIME_S (jiffies + GOTO_SLEEP_JIFF*HZ)
 
-#define AUTO_SLEEP_JIFF (8)
+#define AUTO_SLEEP_JIFF (10)
 #define AUTO_SLEEP_TIME_S (jiffies + AUTO_SLEEP_JIFF*HZ)
 
 #define SCREEN_ON    "flyaudio screen_on"
@@ -31,13 +31,6 @@ static unsigned int *rmtctrl_state_buffer;
 struct work_struct acc_state_work;
 static struct timer_list rmtctrl_timer;
 static struct wake_lock rmtctrl_wakelock;
-
-typedef enum
-{
-	FLY_ACC_OFF,
-	FLY_ACC_ON,
-}FLY_ACC_STATUS;
-
 
 FLY_ACC_STATUS acc_io_state = FLY_ACC_ON;
 bool is_fake_acc_off = 0;

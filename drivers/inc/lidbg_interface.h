@@ -230,6 +230,12 @@ typedef enum
 } FLY_SYSTEM_STATUS;
 #endif
 
+typedef enum
+{
+	FLY_ACC_OFF,
+	FLY_ACC_ON,
+}FLY_ACC_STATUS;
+
 struct lidbg_fn_t
 {
 
