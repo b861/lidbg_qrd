@@ -113,8 +113,6 @@ public class FlyBootService extends Service {
     private String[] mInternelWhiteList = null;
     //list about all apps'uid who request Internet permission	
     private List<Integer> mInternelAllAppListUID= new ArrayList<Integer>();
-    //list about all white list app'uid 
-    private List<Integer> mInterneWhiteListAppUID= new ArrayList<Integer>();
     private boolean dbgMode = true;
     private boolean mInterneWhiteListAppProtectEn = true;
     private boolean mFlyaudioInternetActionEn = true;
@@ -794,13 +792,22 @@ public class FlyBootService extends Service {
 	public List<Integer> getInternelAllAppUids(List<Integer> mlist)
 	{
 	    PackageManager pm = getPackageManager();
-	    List<PackageInfo> packinfos = pm
-	                                  .getInstalledPackages(0);
+	    List<PackageInfo> packinfos = pm.getInstalledPackages(0);
+	    int i = 0,j=0;
 	for (PackageInfo info : packinfos)
 	    {
-	    	if ((info.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) <= 0)
+	    	if ((info.applicationInfo.packageName.contains("flyaudio"))||((info.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) <= 0))
 	                {
 	                    int uid = info.applicationInfo.uid;
+	                    if (isPackageInWhiteList(info.applicationInfo.packageName))
+	                    {
+				i++;
+				LIDBG_PRINT("appInternetControl.protect:" + i + "-->" + uid + "/" +  info.applicationInfo.packageName + "\n");
+				continue;
+	                    }
+	                    j++;
+	           	 //if (dbgMode)
+	           	 //LIDBG_PRINT("appInternetControl.prepare:" + j + "-->" + uid + "/" +  info.applicationInfo.packageName + "\n");
 	                    if (mlist != null && !mlist.contains(uid))
 	                    {
 	                        mlist.add(uid);
@@ -809,70 +816,37 @@ public class FlyBootService extends Service {
 	    }
 	    return mlist;
 	}
-	public List<Integer> getWhiteListAppUids(List<Integer> mlist)
+	
+	public Boolean isPackageInWhiteList(String pkg)
 	{
-	    if (mInternelWhiteList != null)
-	    {
-	        for (int i = 0; i < mInternelWhiteList.length; i++)
-	        {
-	            try
-	            {
-	                PackageManager pm = this.getPackageManager();
-	                ApplicationInfo ai = pm.getApplicationInfo(mInternelWhiteList[i],
-	                                     PackageManager.GET_ACTIVITIES);
-	                if (mlist != null && !mlist.contains(ai.uid))
-	                {
-	                    mlist.add(ai.uid);
-	                }
-	            }
-	            catch (NameNotFoundException e)
-	            {
-	                e.printStackTrace();
-	            }
-	        }
-	    }
-	    else
-	    {
-	        LIDBG_PRINT("mInternelWhiteList = null");
-	    }
-	    return mlist;
+		if (mInternelWhiteList != null)
+		{
+			for (int i = 0; i < mInternelWhiteList.length; i++)
+			{
+				if (pkg.equals(mInternelWhiteList[i]))
+				{
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 	public void appInternetControl(boolean enable)
 	{
 	    // TODO Auto-generated method stub
 	    PackageManager pm = this.getPackageManager();
 	    mInternelAllAppListUID = getInternelAllAppUids(mInternelAllAppListUID);
-	    mInterneWhiteListAppUID = getWhiteListAppUids(mInterneWhiteListAppUID);
 
-	    LIDBG_PRINT("appInternetControl:" + mInternelAllAppListUID.size() + "|" + mInterneWhiteListAppUID.size() +  "|" + mInterneWhiteListAppProtectEn+"\n");
+	    LIDBG_PRINT("appInternetControl:" + mInternelAllAppListUID.size()  +  "|" + mInterneWhiteListAppProtectEn+"\n");
 	    if (mInternelAllAppListUID != null && mInternelAllAppListUID.size() > 0)
 	    {
 	        for (int i = 0; i < mInternelAllAppListUID.size(); i++)
 	        {
-	            Integer uid = mInternelAllAppListUID.get(i);
-		// have a check with white list uid
-	            if (mInterneWhiteListAppProtectEn&&mInterneWhiteListAppUID != null && mInterneWhiteListAppUID.size() > 0)
-	            {
-	                boolean find = false;
-	                for (int j = 0; j < mInterneWhiteListAppUID.size(); j++)
-	                {
-	                    Integer uid2 = mInterneWhiteListAppUID.get(j);
-	                    if (uid.intValue() == uid2.intValue())
-	                    {
-	                        //LIDBG_PRINT("appInternetControl:com" +j+"-->["+ uid + "/" +uid2+"]["+  pm.getNameForUid(uid) +"/"+pm.getNameForUid(uid2)+ "]\n");
-	                        find = true;
-	                        break;
-	                    }
-	                }
-	                if (find )
-	                {
-	                    LIDBG_PRINT("appInternetControl:protect" + i + "-->" + uid + "/" +  pm.getNameForUid(uid) + "\n");
-	                    continue;
-	                }
-	            }
-
+	            Integer uid = mInternelAllAppListUID.get(i);	            
+	            if (uid==1000)
+		   continue;
 	            if (dbgMode)
-	            LIDBG_PRINT("appInternetControl:" + i + "-->" + uid + "/" +  pm.getNameForUid(uid) + "\n");
+	            LIDBG_PRINT("appInternetControl.exe:" + i + "-->" + uid + "/" +  pm.getNameForUid(uid) + "\n");
 	            // -o rmnet+
 	            writeToFile("/dev/lidbg_misc0", "flyaudio:iptables " + (enable ? "-D" : "-I") + " FORWARD  -m owner --uid-owner " + uid	+ " -j REJECT");
 	            writeToFile("/dev/lidbg_misc0", "flyaudio:iptables " + (enable ? "-D" : "-I") + " OUTPUT  -m owner --uid-owner " + uid + " -j REJECT");
