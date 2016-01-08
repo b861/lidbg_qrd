@@ -892,13 +892,15 @@ static int thread_observer(void *data)
             while(1) //atomic_read(&is_in_sleep) == 1
             {
                 ssleep(1);
+				
 #ifdef SUSPEND_ONLINE
-                if((g_var.system_status != FLY_ANDROID_DOWN) && (g_var.system_status != FLY_SLEEP_TIMEOUT) && (g_var.system_status != FLY_GOTO_SLEEP))
-                    break;
+                //if((g_var.system_status != FLY_ANDROID_DOWN) && (g_var.system_status != FLY_SLEEP_TIMEOUT) && (g_var.system_status != FLY_GOTO_SLEEP))
+                    if(g_var.acc_flag == FLY_ACC_ON)
 #else
-				if(g_var.system_status != FLY_GOTO_SLEEP)
-                    break;
+		      if(g_var.system_status != FLY_GOTO_SLEEP)
 #endif
+                    break;
+
                 have_triggerd_sleep_S++;
                 switch (have_triggerd_sleep_S)
                 {
