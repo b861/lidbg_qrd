@@ -2563,13 +2563,27 @@ ION_OPEN_FAILED:
 
     int usbcam_set_parameters(struct camera_device *device, const char *params)
     {
-        struct camera_device *mdevice = device;
-        const char *mparams = params;
-        ALOGD("%s: E", __func__);
+    	ALOGD("%s: E", __func__);
+        String8 str = String8(params);
+		CameraParameters lParam;
+		int width,height;
+		camera_hardware_t *camHal;
+		VALIDATE_DEVICE_HDL(camHal, device, -1);
+        Mutex::Autolock autoLock(camHal->lock);
+				
         int rc = 0;
 		if(params)
    		     PRINT_PARAM_STR(params);
-		
+		lParam.unflatten(str);
+		lParam.getPreviewSize(&width, &height);
+		ALOGE("%s: width -> %d,height -> %d", __func__,width,height);
+		if((width > 0) && (height > 0))
+		{
+			camHal->prevWidth   = width;
+	        camHal->prevHeight  = height;
+	        camHal->dispWidth   = width;
+	        camHal->dispHeight  = height;
+		}	
         ALOGD("%s: X", __func__);
         return 0;
     }
