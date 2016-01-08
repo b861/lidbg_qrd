@@ -2550,13 +2550,26 @@ ION_OPEN_FAILED:
         return -1;
     }
 
+	#define PRINT_PARAM_STR(parms)    {\
+        char temp[701] = {0};\
+        int n=0;\
+        while(1) {\
+            strlcpy(temp,parms+n,700);\
+            ALOGD("parms = %s", temp);\
+            if (strlen(temp) < 700) break;\
+            n += 700;\
+        }\
+    }
+
     int usbcam_set_parameters(struct camera_device *device, const char *params)
     {
         struct camera_device *mdevice = device;
         const char *mparams = params;
         ALOGD("%s: E", __func__);
         int rc = 0;
-
+		if(params)
+   		     PRINT_PARAM_STR(params);
+		
         ALOGD("%s: X", __func__);
         return 0;
     }
@@ -2579,10 +2592,11 @@ ION_OPEN_FAILED:
         {
             String8 params_str8;
             CameraParameters mParams ;
-            mParams.set(CameraParameters::KEY_SUPPORTED_PICTURE_SIZES,  "320x240");
-            mParams.setPictureSize(320, 240);
-            mParams.set(CameraParameters::KEY_SUPPORTED_PREVIEW_SIZES, "320x240");
-            mParams.setPreviewSize(320, 240);
+			
+            mParams.set(CameraParameters::KEY_SUPPORTED_PICTURE_SIZES,  "1920x1080,1280x720,640x480,320x240");
+            //mParams.setPictureSize(320, 240);
+            mParams.set(CameraParameters::KEY_SUPPORTED_PREVIEW_SIZES, "1920x1080,1280x720,640x480,320x240");
+            //mParams.setPreviewSize(320, 240);
             mParams.set(CameraParameters::KEY_PREVIEW_FORMAT, CameraParameters::PIXEL_FORMAT_YUV420SP);
             mParams.set(CameraParameters::KEY_SUPPORTED_PREVIEW_FORMATS, CameraParameters::PIXEL_FORMAT_YUV420SP);
 
@@ -2591,10 +2605,12 @@ ION_OPEN_FAILED:
 	       mParams.set(CameraParameters::KEY_PREFERRED_PREVIEW_SIZE_FOR_VIDEO,  
 	                "320x240");  
 			mParams.set(CameraParameters::KEY_SUPPORTED_SCENE_MODES, "auto");  
-		    mParams.set(CameraParameters::KEY_SUPPORTED_PICTURE_FORMATS, "jpeg");  
+		    mParams.set(CameraParameters::KEY_SUPPORTED_PICTURE_FORMATS, CameraParameters::PIXEL_FORMAT_JPEG);  
 		    mParams.set(CameraParameters::KEY_SUPPORTED_FLASH_MODES, "auto");  
-		    mParams.set(CameraParameters::KEY_SUPPORTED_PREVIEW_FRAME_RATES, "30");  
-		    mParams.set(CameraParameters::KEY_SUPPORTED_JPEG_THUMBNAIL_SIZES, "320x240,0x0");  
+		    //mParams.set(CameraParameters::KEY_SUPPORTED_PREVIEW_FRAME_RATES, "30");  
+			mParams.set(CameraParameters::KEY_JPEG_THUMBNAIL_WIDTH, "320");  
+			mParams.set(CameraParameters::KEY_JPEG_THUMBNAIL_HEIGHT, "240");  
+		    mParams.set(CameraParameters::KEY_SUPPORTED_JPEG_THUMBNAIL_SIZES, "320x240");  
 		    mParams.set(CameraParameters::KEY_SUPPORTED_WHITE_BALANCE, "auto");  
 		    mParams.set(CameraParameters::KEY_SUPPORTED_EFFECTS, "none");  
 		    mParams.set(CameraParameters::KEY_SUPPORTED_FOCUS_MODES, "auto");  
@@ -2602,7 +2618,7 @@ ION_OPEN_FAILED:
 		    mParams.set(CameraParameters::KEY_PREVIEW_FPS_RANGE, "1000,45000"); //"1000,33000"  
 		    mParams.set(CameraParameters::KEY_HORIZONTAL_VIEW_ANGLE, "51.2");  
 		    mParams.set(CameraParameters::KEY_VERTICAL_VIEW_ANGLE, "39.4");  
-					
+
             params_str8 = mParams.flatten();
             parms = (char *) malloc(sizeof(char) * (params_str8.length() + 1));
             strcpy(parms, params_str8.string());
