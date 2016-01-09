@@ -201,6 +201,7 @@ int dev_close(struct inode *inode, struct file *filp)
 {
     return 0;
 }
+ void send_app_status(FLY_SYSTEM_STATUS state);
 
 static void parse_cmd(char *pt)
 {
@@ -257,7 +258,9 @@ static void parse_cmd(char *pt)
         	lidbg("Misc devices ctrl: udisk_request");
 		usb_disk_enable(true);
 		 g_var.usb_request= 1;
-    }
+		if(g_var.acc_flag == FLY_ACC_OFF)
+			send_app_status(FLY_KERNEL_UP);
+     }
     else if (!strcmp(argv[0], "udisk_unrequest"))
     {
         	lidbg("Misc devices ctrl: udisk_unrequest");
