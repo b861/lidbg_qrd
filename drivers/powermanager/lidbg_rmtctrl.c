@@ -50,7 +50,7 @@ irqreturn_t acc_state_isr(int irq, void *dev_id)
 
     return IRQ_HANDLED;
 }
- void send_app_status(FLY_SYSTEM_STATUS state)
+static void send_app_status(FLY_SYSTEM_STATUS state)
 {
 		atomic_set(&status, state);
 		rmtctrl_fifo_in();
@@ -71,7 +71,7 @@ void acc_status_handle(FLY_ACC_STATUS val)
 {
 	if(val == FLY_ACC_ON){
 		lidbg("acc_state_work_func: FLY_ACC_ON\n");
-		g_var.acc_flag = FLY_ACC_ON;
+		g_var.acc_flag = 1;
 
 		lidbg("*** Set acc.status to 0\n");
 		lidbg_shell_cmd("setprop persist.lidbg.acc.status 0");
@@ -89,7 +89,7 @@ void acc_status_handle(FLY_ACC_STATUS val)
 		del_timer(&rmtctrl_timer);
 	}else{
 		lidbg("acc_state_work_func: FLY_ACC_OFF\n");
-		g_var.acc_flag = FLY_ACC_OFF;
+		g_var.acc_flag = 0;
 
 		lidbg("*** Set acc.status to 1\n");
 		lidbg_shell_cmd("setprop persist.lidbg.acc.status 1");
@@ -376,7 +376,6 @@ module_init(lidbg_rmtctrl_init);
 module_exit(lidbg_rmtctrl_exit);
 
 EXPORT_SYMBOL(fake_acc_off);
-EXPORT_SYMBOL(send_app_status);
+
 MODULE_DESCRIPTION("lidbg.rmtctrl");
 MODULE_LICENSE("GPL");
-
