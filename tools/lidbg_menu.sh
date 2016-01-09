@@ -10,7 +10,7 @@ function lidbg_build()
 {
 	echo $FUNCNAME
 	echo 编译模块
-if [ $WORK_REMOTE = 1 ];then
+if [ "$WORK_REMOTE" = 1 ];then
 	expect $DBG_TOOLS_PATH/scp $WORK_REMOTE_USERNAME $WORK_REMOTE_PASSWORD $WORK_LOCAL_PATH $WORK_REMOTE_PATH/..
 fi
 	cd $DBG_BUILD_PATH && ./build.sh
@@ -20,10 +20,10 @@ function lidbg_pushfly_out()
 {
 	echo $FUNCNAME
 	echo push驱动模块到产品系统
-	if [ $WORK_REMOTE = 1 ];then
+	if [ "$WORK_REMOTE" = 1 ];then
 		rm -rf $WORK_LOCAL_PATH/out
 		mkdir $WORK_LOCAL_PATH/out
-if [ $WORK_REMOTE = 1 ];then
+if [ "$WORK_REMOTE" = 1 ];then
 		expect $DBG_TOOLS_PATH/scp $WORK_REMOTE_USERNAME $WORK_REMOTE_PASSWORD $WORK_REMOTE_PATH/out $WORK_LOCAL_PATH
 fi
 	fi
@@ -34,10 +34,10 @@ function lidbg_push_out()
 {
 	echo $FUNCNAME
 	echo push到原生系统
-	if [ $WORK_REMOTE = 1 ];then
+	if [ "$WORK_REMOTE" = 1 ];then
 		rm -rf $WORK_LOCAL_PATH/out
 		mkdir $WORK_LOCAL_PATH/out
-if [ $WORK_REMOTE = 1 ];then
+if [ "$WORK_REMOTE" = 1 ];then
 		expect $DBG_TOOLS_PATH/scp $WORK_REMOTE_USERNAME $WORK_REMOTE_PASSWORD $WORK_REMOTE_PATH/out $WORK_LOCAL_PATH
 fi
 	fi
@@ -47,7 +47,7 @@ fi
 function lidbg_build_all()
 {
 	echo $FUNCNAME
-if [ $WORK_REMOTE = 1 ];then
+if [ "$WORK_REMOTE" = 1 ];then
 	expect $DBG_TOOLS_PATH/scp $WORK_REMOTE_USERNAME $WORK_REMOTE_PASSWORD $WORK_LOCAL_PATH $WORK_REMOTE_PATH/..
 fi
 	cd $DBG_BUILD_PATH
