@@ -313,6 +313,7 @@ void parse_cmd(char *pt)
             lidbg_pm_install(get_lidbg_file_path(buff, "ST.ko"));
             lidbg_pm_install(get_lidbg_file_path(buff, "GPS.ko"));
             lidbg_pm_install(get_lidbg_file_path(buff, "camera4hal.ko"));
+            lidbg_pm_install(get_lidbg_file_path(buff, "LiveSessionDemo.ko"));
             lidbg_pm_install(get_lidbg_file_path(buff, "CallMessage.ko"));
             lidbg_domineering_ack();
         }
