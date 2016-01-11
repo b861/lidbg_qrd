@@ -913,8 +913,34 @@ try_open_again:
     {
         int     i = 0, mjpegSupported = 0, h264Supported = 0;
         struct v4l2_fmtdesc fmtdesc;
+		struct v4l2_frmsizeenum	frmsize;
 
         memset(&fmtdesc, 0, sizeof(v4l2_fmtdesc));
+
+		for(i = 0; ; i++)
+        {
+        	frmsize.pixel_format = V4L2_PIX_FMT_YUYV;
+            frmsize.index = i;
+            if (-1 == ioctlLoop(camHal->fd, VIDIOC_ENUM_FRAMESIZES , &frmsize))
+            {
+                  ALOGE("%s: VIDIOC_ENUM_FRAMESIZES failed--%d", __func__, i);
+				  break;
+            }
+			if (frmsize.type == V4L2_FRMSIZE_TYPE_DISCRETE)
+			{
+				  ALOGE("%s: ==DISCRETE==%dx%d\n", __func__, frmsize.discrete.width, frmsize.discrete.height);
+			}
+			/*
+			if (frmsize.type == V4L2_FRMSIZE_TYPE_CONTINUOUS)
+			{
+				  ALOGE("%s: ==CONTINUOUS==%dx%d\n", __func__, frmsize.continuous.width, frmsize.continuous.height);
+			}
+			*/
+			if (frmsize.type == V4L2_FRMSIZE_TYPE_STEPWISE)
+			{
+                ALOGE("%s: ==STEPWISE==%dx%d\n", __func__,frmsize.stepwise.max_width,frmsize.stepwise.max_height);
+            }
+        }
 
         for(i = 0; ; i++)
         {
@@ -2075,7 +2101,7 @@ try_open_again:
         ALOGD("%s: E", __func__);
 
         ALOGD("%s: X", __func__);
-        return -1;
+        return 0;
     }
 
 
@@ -2579,10 +2605,23 @@ ION_OPEN_FAILED:
 		ALOGE("%s: width -> %d,height -> %d", __func__,width,height);
 		if((width > 0) && (height > 0))
 		{
-			camHal->prevWidth   = width;
-	        camHal->prevHeight  = height;
-	        camHal->dispWidth   = width;
-	        camHal->dispHeight  = height;
+			/*
+			if((width == 480)&& (height == 270))
+			{
+				ALOGE("%s: 480x270 ==>set to 320x240", __func__);
+				camHal->prevWidth   = 320;
+		        camHal->prevHeight  = 240;
+		        camHal->dispWidth   = 320;
+		        camHal->dispHeight  = 240;
+			}
+			else
+			*/
+			{
+				camHal->prevWidth   = width;
+		        camHal->prevHeight  = height;
+		        camHal->dispWidth   = width;
+		        camHal->dispHeight  = height;
+			}	
 		}	
         ALOGD("%s: X", __func__);
         return 0;
@@ -2607,9 +2646,9 @@ ION_OPEN_FAILED:
             String8 params_str8;
             CameraParameters mParams ;
 			
-            mParams.set(CameraParameters::KEY_SUPPORTED_PICTURE_SIZES,  "1920x1080,1280x720,640x480,320x240");
+            mParams.set(CameraParameters::KEY_SUPPORTED_PICTURE_SIZES,  "1920x1080,1280x720,640x480,320x240,640x360");
             //mParams.setPictureSize(320, 240);
-            mParams.set(CameraParameters::KEY_SUPPORTED_PREVIEW_SIZES, "1920x1080,1280x720,640x480,320x240");
+            mParams.set(CameraParameters::KEY_SUPPORTED_PREVIEW_SIZES, "1920x1080,1280x720,640x480,320x240,640x360");
             //mParams.setPreviewSize(320, 240);
             mParams.set(CameraParameters::KEY_PREVIEW_FORMAT, CameraParameters::PIXEL_FORMAT_YUV420SP);
             mParams.set(CameraParameters::KEY_SUPPORTED_PREVIEW_FORMATS, CameraParameters::PIXEL_FORMAT_YUV420SP);
