@@ -58,7 +58,7 @@ static void send_app_status(FLY_SYSTEM_STATUS state)
 }
 static void rmtctrl_timer_func(unsigned long data)
 {
-	if(acc_io_state == FLY_ACC_OFF){
+	if((acc_io_state == FLY_ACC_OFF)&&(is_fake_acc_off == 0)){
        lidbg("rmtctrl_timer_func: goto_sleep %ds later...\n", GOTO_SLEEP_JIFF);
 	if( g_var.usb_request == 0)
        	send_app_status(FLY_GOTO_SLEEP);
@@ -96,14 +96,20 @@ void acc_status_handle(FLY_ACC_STATUS val)
 		if(g_var.is_fly == 0)
 			USB_WORK_DISENABLE;
 		//LCD_OFF;
-		lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_OFF));
+		if(is_fake_acc_off == 0)
+			lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_OFF));
 		acc_io_state = FLY_ACC_OFF;
 		wake_unlock(&rmtctrl_wakelock);	//ensure KERNEL_UP FB be called before sleep
 //		send_app_status(FLY_GOTO_SLEEP);
 		send_app_status(FLY_SCREEN_OFF);
 		fs_file_write(DEV_NAME, false, SCREEN_OFF, 0, strlen(SCREEN_OFF));
-		lidbg("acc_state_work_func: FLY_ACC_OFF, add rmtctrl timer.\n");
-		mod_timer(&rmtctrl_timer,SCREE_OFF_TIME_S);
+		if(is_fake_acc_off)
+			send_app_status(FLY_GOTO_SLEEP);
+		else
+		{
+			lidbg("acc_state_work_func: FLY_ACC_OFF, add rmtctrl timer.\n");
+			mod_timer(&rmtctrl_timer,SCREE_OFF_TIME_S);
+		}
 	}
 }
 
@@ -158,7 +164,7 @@ static void rmtctrl_resume(void)
 		LCD_ON;
 	}
 	
-	if(acc_io_state == FLY_ACC_OFF){
+	if((acc_io_state == FLY_ACC_OFF)&&(is_fake_acc_off == 0)){
 		lidbg("rmtctrl_resume, acc_io_state is FLY_ACC_OFF, add rmtctrl timer.\n");
 		mod_timer(&rmtctrl_timer,AUTO_SLEEP_TIME_S);
 	}
@@ -319,7 +325,7 @@ static int rmtctrl_pm_resume(struct device *dev)
 	{
 		lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_ON));
 	}
-	if(acc_io_state == FLY_ACC_OFF){
+	if((acc_io_state == FLY_ACC_OFF)&&(is_fake_acc_off == 0)){
 		lidbg("rmtctrl_pm_resume, acc_io_state is FLY_ACC_OFF, add rmtctrl timer.\n");
 		mod_timer(&rmtctrl_timer,AUTO_SLEEP_TIME_S);
 	}
