@@ -1,3 +1,5 @@
+. $DBG_TOOLS_PATH/make_ota_package.sh
+
 function depository_request()
 {
 	echo $FUNCNAME
@@ -151,11 +153,11 @@ function depository_make_package()
 	nautilus $RELEASE_REPOSITORY/out
 }
 
-function make_msm8909_full_package()
+function make_ota_package()
 {
-	echo "start make msm8909-full-package"
-	cd $DBG_TOOLS_PATH
-	./make_8909_full_package.sh
+	echo "start make ota-package"
+	do_make_ota_package
+	
 }
 
 function push_flyFastBoot_apk
@@ -189,7 +191,7 @@ function depository_handle()
 	43)
 		depository_make_package;;
 	44)
-		make_msm8909_full_package;;
+		make_ota_package;;
 #	44)
 #		push_flyFastBoot_apk;;
 	*)
