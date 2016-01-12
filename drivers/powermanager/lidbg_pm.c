@@ -906,7 +906,7 @@ static int thread_observer(void *data)
                 have_triggerd_sleep_S++;
                 switch (have_triggerd_sleep_S)
                 {
-                case 60:
+                case 120:
 #ifdef SUSPEND_ONLINE
 #ifdef SUSPEND_TIME_OUT_KILL_PROCESS
 
@@ -914,7 +914,6 @@ static int thread_observer(void *data)
 					SOC_System_Status(FLY_SLEEP_TIMEOUT);
 #endif
 #endif
-                case 120:
                 case 150:
 #ifdef SUSPEND_TIME_OUT_FORCE_UNLOCK
                     sprintf(when, "unlock%d,%d:", have_triggerd_sleep_S, sleep_counter);
