@@ -151,6 +151,12 @@ function depository_make_package()
 	nautilus $RELEASE_REPOSITORY/out
 }
 
+function make_msm8909_full_package()
+{
+	echo "start make msm8909-full-package"
+	cd $DBG_TOOLS_PATH
+	./make_8909_full_package.sh
+}
 
 function push_flyFastBoot_apk
 {
@@ -168,6 +174,7 @@ if [[ $RELEASE_REPOSITORY != "" ]];then
 	echo [41] copy lidbg out to depository
 	echo [42] copy basesystem to depository
 	echo [43] make update package
+	echo [44] make msm8909 full package
 fi
 }
 
@@ -181,6 +188,8 @@ function depository_handle()
 		depository_copy_basesystem;;
 	43)
 		depository_make_package;;
+	44)
+		make_msm8909_full_package;;
 #	44)
 #		push_flyFastBoot_apk;;
 	*)
