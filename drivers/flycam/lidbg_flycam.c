@@ -34,9 +34,9 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 	char *cmd[30] = {NULL};//cmds array
 	char *keyval[2] = {NULL};//key-vals
 	char cmd_num  = 0;//cmd amount
-    char cmd_buf[512];
+    char cmd_buf[256];
 	int i;
-    memset(cmd_buf, '\0', 512);
+    memset(cmd_buf, '\0', 256);
     if(copy_from_user(cmd_buf, buf, size))
     {
         lidbg("copy_from_user ERR\n");

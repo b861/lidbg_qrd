@@ -32,12 +32,14 @@ extern void grf_backup(void);
 extern void grf_restore(void);
 
 #ifdef SUSPEND_ONLINE
-//#define SUSPEND_TIME_OUT_KILL_PROCESS
-//#define SUSPEND_TIME_OUT_FORCE_UNLOCK
+#define SUSPEND_TIME_OUT_KILL_PROCESS
+#define SUSPEND_TIME_OUT_FORCE_UNLOCK
 #else
 #define SUSPEND_TIME_OUT_KILL_PROCESS
 #define SUSPEND_TIME_OUT_FORCE_UNLOCK
 #endif
+
+int have_triggerd_sleep_S = 0;
 
 bool is_safety_apk(char *apkname)
 {
@@ -282,6 +284,7 @@ void lidbg_pm_step_call(fly_pm_stat_step step, void *data)
         break;
     case PM_SUSPEND_ENTER8:
         SOC_System_Status(FLY_KERNEL_DOWN);
+	 have_triggerd_sleep_S = 0;
         //if(g_var.is_debug_mode == 1)
         MCU_WP_GPIO_OFF;
         SOC_IO_SUSPEND;
@@ -871,7 +874,6 @@ void observer_stop(void)
 
 static int thread_observer(void *data)
 {
-    int have_triggerd_sleep_S = 0;
     char when[64] = {0};
 
     observer_prepare();
@@ -894,7 +896,7 @@ static int thread_observer(void *data)
                 ssleep(1);
 				
 #ifdef SUSPEND_ONLINE
-                //if((g_var.system_status != FLY_ANDROID_DOWN) && (g_var.system_status != FLY_SLEEP_TIMEOUT) && (g_var.system_status != FLY_GOTO_SLEEP))
+              //  if((g_var.system_status != FLY_ANDROID_DOWN) && (g_var.system_status != FLY_SLEEP_TIMEOUT) && (g_var.system_status != FLY_GOTO_SLEEP))
                     if(g_var.acc_flag == FLY_ACC_ON)
 #else
 		      if(g_var.system_status != FLY_GOTO_SLEEP)
@@ -906,7 +908,6 @@ static int thread_observer(void *data)
                 {
                 case 60:
 #ifdef SUSPEND_ONLINE
-					SOC_System_Status(FLY_WAKEUP_UNORMAL);
 #ifdef SUSPEND_TIME_OUT_KILL_PROCESS
 
 					lidbg("Sleep timeout, bserver thread start to kill process...\n");

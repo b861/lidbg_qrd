@@ -13,8 +13,8 @@
 #define AUTO_SLEEP_JIFF (10)
 #define AUTO_SLEEP_TIME_S (jiffies + AUTO_SLEEP_JIFF*HZ)
 
-#define UNORMAL_WAKEUP_TIME_MINU (5)
-#define UNORMAL_WAKEUP_CNT (50)
+#define UNORMAL_WAKEUP_TIME_MINU (3)
+#define UNORMAL_WAKEUP_CNT (30)
 
 #define SCREEN_ON    "flyaudio screen_on"
 #define SCREEN_OFF   "flyaudio screen_off"
@@ -244,9 +244,6 @@ static int lidbg_rmtctrl_event(struct notifier_block *this,
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_SLEEP_TIMEOUT):
 		send_app_status(FLY_SLEEP_TIMEOUT);
         break;
-    case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_WAKEUP_UNORMAL):
-		send_app_status(FLY_WAKEUP_UNORMAL);
-        break;
     default:
         break;
     }
@@ -272,7 +269,7 @@ static int unormal_wakeup_handle(void)
 			if(system_tics < (UNORMAL_WAKEUP_TIME_MINU * 60 * 1000)){
 				lidbgerr("System wakeup %d times in %d(%u) msec,system tics %u, unormal\n", system_unormal_wakeup_cnt, system_tics, (UNORMAL_WAKEUP_TIME_MINU * 60 * 1000), get_tick_count());
 				if(acc_io_state == FLY_ACC_OFF)
-					send_app_status(FLY_WAKEUP_UNORMAL);
+					send_app_status(FLY_SLEEP_TIMEOUT);
 			}else
 				lidbg("System wakeup %d times in %d(%u) msec,system tics %u, normal\n", system_unormal_wakeup_cnt, system_tics, (UNORMAL_WAKEUP_TIME_MINU * 60 * 1000), get_tick_count());
 
