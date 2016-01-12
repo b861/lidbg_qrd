@@ -7,46 +7,6 @@ static wait_queue_head_t wait_queue;
 char isBackChange = 0;
 char isBack = 0;
 
-/*
-static int get_uvc_device(char *devname)
-    {
-        char    temp_devname[FILENAME_LENGTH];
-        int     i = 0, ret = 0, fd;
-        struct  v4l2_capability     cap;
-
-        ALOGE("%s: E", __func__);
-        *devname = '\0';
-        while(1)
-        {
-            sprintf(temp_devname, "/dev/video%d", i);
-            fd = open(temp_devname, O_RDWR  | O_NONBLOCK, 0);
-            if(-1 != fd)
-            {
-                ret = ioctl(fd, VIDIOC_QUERYCAP, &cap);
-                if((0 == ret) || (ret && (ENOENT == errno)))
-                {
-                    ALOGD("%s: Found UVC node: %s\n", __func__, temp_devname);
-                    strncpy(devname, temp_devname, FILENAME_LENGTH);
-                    break;
-                }
-                close(fd);
-            }
-            else
-                ALOGD("%s.%d: Probing.%s: ret: %d, errno: %d,%s", __func__, i, temp_devname, ret, errno, strerror(errno));
-
-            if(i++ > 10)
-            {
-                strncpy(devname, "/dev/video1", FILENAME_LENGTH);
-                ALOGD("%s.%d: Probing fail:%s \n", __func__, i, devname);
-                break;
-            }
-        }
-
-        ALOGE("%s: X,%s", __func__, devname);
-        return 0;
-    }
-*/
-
 ssize_t  flycam_read(struct file *filp, char __user *buffer, size_t size, loff_t *offset)
 {
 	if(!isBackChange)
@@ -89,22 +49,6 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 	for(i = 0;i < cmd_num; i++)
 	{
 		lidbg_token_string(cmd[i], "=", keyval) ;
-		/*
-		if(!strcmp(keyval[0], "rgb"))
-		{
-		    int red, green, blue;
-		    lidbg("case:[%s]\n", cmd[0]);
-		    if(cmd_num < 4)
-		    {
-		        lidbg("RGB args error!");
-		        return size;
-		    }
-		    red = simple_strtoul(cmd[1], 0, 0);
-		    green = simple_strtoul(cmd[2], 0, 0);
-		    blue = simple_strtoul(cmd[3], 0, 0);
-		    PCA9634_RGB_Output(red, green, blue);
-		}
-		*/
 		if(!strcmp(keyval[0], "record") )
 		{
 			if(!strncmp(keyval[1], "1", 1))//start
@@ -284,7 +228,7 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 		#endif
 		else if(!strcmp(keyval[0], "recpath") )
 		{
-			int recpathVal;
+			//int recpathVal;
 			char temp_cmd[256];
 			//recpathVal = simple_strtoul(keyval[1], 0, 0);
 			lidbg("recpathVal = %s",keyval[1]);

@@ -224,6 +224,7 @@ static struct vb2_ops uvc_still_queue_qops = {
 void uvc_queue_init(struct uvc_video_queue *queue, enum v4l2_buf_type type,
 		    int drop_corrupted)
 {
+	int ret;
 	queue->queue.type = type;
 	queue->queue.io_modes = VB2_MMAP;
 	queue->queue.drv_priv = queue;
@@ -238,7 +239,7 @@ void uvc_queue_init(struct uvc_video_queue *queue, enum v4l2_buf_type type,
 	queue->queue.io_modes |= VB2_USERPTR | VB2_DMABUF;	
 	queue->queue.timestamp_type = V4L2_BUF_FLAG_TIMESTAMP_MONOTONIC;	
 #endif
-	vb2_queue_init(&queue->queue);
+	ret = vb2_queue_init(&queue->queue);
 
 	mutex_init(&queue->mutex);
 	spin_lock_init(&queue->irqlock);
@@ -249,6 +250,7 @@ void uvc_queue_init(struct uvc_video_queue *queue, enum v4l2_buf_type type,
 void uvc_still_queue_init(struct uvc_still_image_queue *still_queue, enum v4l2_buf_type type,
 		    int drop_corrupted)
 {
+	int ret;
 	still_queue->queue.type = type;
 	still_queue->queue.io_modes = VB2_MMAP;
 	still_queue->queue.drv_priv = still_queue;
@@ -268,7 +270,7 @@ void uvc_still_queue_init(struct uvc_still_image_queue *still_queue, enum v4l2_b
 
 
 
-	vb2_queue_init(&still_queue->queue);
+	ret = vb2_queue_init(&still_queue->queue);
 
 	mutex_init(&still_queue->mutex);
 	spin_lock_init(&still_queue->irqlock);
