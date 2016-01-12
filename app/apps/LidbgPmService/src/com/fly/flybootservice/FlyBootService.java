@@ -78,6 +78,8 @@ public class FlyBootService extends Service {
     private static int FBS_DEVICE_UP = 8;
     private static int FBS_SCREEN_ON = 9;
     private static int FBS_SLEEP_TIMEOUT = 10;
+    private static int FBS_INTERNET_WHITELIST_DISABLE = 11;
+    private static int FBS_INTERNET_WHITELIST_ENABLE = 12;
     public static String action = "com.flyaudio.power";
     public static String PowerBundle = "POWERBUNDLE";
     public static String keyScreenOn = "KEY_SCREEN_ON";
@@ -113,6 +115,7 @@ public class FlyBootService extends Service {
     private String[] mInternelWhiteList = null;
     //list about all apps'uid who request Internet permission	
     private List<Integer> mInternelAllAppListUID= new ArrayList<Integer>();
+    private List<Integer> mInternelWhiteAppListUID= new ArrayList<Integer>();
     private boolean dbgMode = true;
     private boolean mInterneWhiteListAppProtectEn = true;
     private boolean mFlyaudioInternetActionEn = true;
@@ -143,7 +146,9 @@ public class FlyBootService extends Service {
 	mWhiteList = FileReadList("/flysystem/lib/out/appProtectList.conf","\n");
 	mInternelWhiteList = FileReadList("/flysystem/lib/out/appInternetProtectList.conf","\n");
 	DUMP();
-
+        LIDBG_PRINT("flybootservice start [getInternelAllAppUids]");
+	getInternelAllAppUids(mInternelAllAppListUID);
+        LIDBG_PRINT("flybootservice stop [getInternelAllAppUids]");
 	IntentFilter filter = new IntentFilter();
 	filter.addAction("com.lidbg.flybootserver.action");
 	filter.setPriority(Integer.MAX_VALUE);
@@ -241,6 +246,12 @@ public class FlyBootService extends Service {
 								LIDBG_PRINT("FlyBootService get pm state: FBS_SLEEP_TIMEOUT");
 								if(blSuspendUnairplaneFlag)
 									KillProcess();
+							}else if(pmState == FBS_INTERNET_WHITELIST_DISABLE){
+								LIDBG_PRINT("FlyBootService get pm state: FBS_INTERNET_WHITELIST_DISABLE");
+								FlyaudioWhiteListInternetDisable();
+							}else if(pmState == FBS_INTERNET_WHITELIST_ENABLE){
+								LIDBG_PRINT("FlyBootService get pm state: FBS_INTERNET_WHITELIST_ENABLE");
+								FlyaudioWhiteListInternetEnable();
 							}else
 								LIDBG_PRINT("FlyBootService undefined pm state: " + pmState);
 						}
@@ -320,6 +331,12 @@ public class FlyBootService extends Service {
 			case 10:
 				mInterneDisableAll=false;
 				LIDBG_PRINT("mInterneDisableAll->"+ mInterneDisableAll+"\n");
+			break;
+			case 11:
+				FlyaudioWhiteListInternetDisable();
+			break;
+			case 12:
+				FlyaudioWhiteListInternetEnable();
 			break;
 			default:
 			LIDBG_PRINT("BroadcastReceiver.action:unkown"+action+"\n");
@@ -804,6 +821,33 @@ public class FlyBootService extends Service {
 	    else
 	    	    appInternetControl(false);
 	}
+	public void FlyaudioWhiteListInternetEnable()
+	{
+	    LIDBG_PRINT("FlyaudioWhiteListInternetEnable\n");
+	    WhiteListInternetControl(true);
+	}
+	public void FlyaudioWhiteListInternetDisable()
+	{
+	    LIDBG_PRINT("FlyaudioWhiteListInternetDisable\n");
+	    WhiteListInternetControl(false);
+	}
+	public void WhiteListInternetControl(boolean enable)
+	{
+	    LIDBG_PRINT("WhiteListInternetControl:"+enable+"/"+mInternelWhiteAppListUID.size()+"\n");
+	    PackageManager pm = getPackageManager();
+		if (mInternelWhiteAppListUID!= null)
+		{
+			for (int i = 0; i < mInternelWhiteAppListUID.size(); i++)
+			{
+				Integer uid = mInternelWhiteAppListUID.get(i);	            
+				LIDBG_PRINT("appInternetControl.exe.whitelist:" +(enable ? "enable/" : "disable/")+ i + "-->" + uid + "/" +  pm.getNameForUid(uid) + "\n");
+				// -o rmnet+
+				writeToFile("/dev/lidbg_misc0", "flyaudio:iptables " + (enable ? "-D" : "-I") + " FORWARD  -m owner --uid-owner " + uid	+ " -j REJECT");
+				writeToFile("/dev/lidbg_misc0", "flyaudio:iptables " + (enable ? "-D" : "-I") + " OUTPUT  -m owner --uid-owner " + uid + " -j REJECT");
+				writeToFile("/dev/lidbg_misc0", "flyaudio:iptables " + (enable ? "-D" : "-I") + " INPUT  -m owner --uid-owner " + uid + " -j REJECT");
+			}
+		}
+	}
 	public void InternetDisable()
 	{
 		LIDBG_PRINT("InternetDisable\n");
@@ -833,6 +877,10 @@ public class FlyBootService extends Service {
 	                    {
 				i++;
 				LIDBG_PRINT("appInternetControl.protect:" + i + "-->" + uid + "/" +  info.applicationInfo.packageName + "\n");
+				if (mInternelWhiteAppListUID!= null && !mInternelWhiteAppListUID.contains(uid))
+				{
+					mInternelWhiteAppListUID.add(uid);
+				}
 				continue;
 	                    }
 	                    j++;
