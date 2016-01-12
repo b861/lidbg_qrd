@@ -69,8 +69,9 @@ static void rmtctrl_timer_func(unsigned long data)
 
 void acc_status_handle(FLY_ACC_STATUS val)
 {
+	static u32 acc_count = 0;
 	if(val == FLY_ACC_ON){
-		lidbg("acc_state_work_func: FLY_ACC_ON\n");
+		lidbg("acc_state_work_func: FLY_ACC_ON:acc_count=%d\n",acc_count++);
 		g_var.acc_flag = 1;
 
 		lidbg("*** Set acc.status to 0\n");
