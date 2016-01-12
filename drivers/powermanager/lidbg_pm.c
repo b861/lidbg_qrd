@@ -906,6 +906,7 @@ static int thread_observer(void *data)
                 {
                 case 60:
 #ifdef SUSPEND_ONLINE
+					SOC_System_Status(FLY_WAKEUP_UNORMAL);
 #ifdef SUSPEND_TIME_OUT_KILL_PROCESS
 
 					lidbg("Sleep timeout, bserver thread start to kill process...\n");

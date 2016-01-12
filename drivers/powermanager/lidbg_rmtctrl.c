@@ -13,6 +13,9 @@
 #define AUTO_SLEEP_JIFF (10)
 #define AUTO_SLEEP_TIME_S (jiffies + AUTO_SLEEP_JIFF*HZ)
 
+#define UNORMAL_WAKEUP_TIME_MINU (5)
+#define UNORMAL_WAKEUP_CNT (50)
+
 #define SCREEN_ON    "flyaudio screen_on"
 #define SCREEN_OFF   "flyaudio screen_off"
 #define DEVICES_ON   "flyaudio devices_up"
@@ -31,6 +34,7 @@ static unsigned int *rmtctrl_state_buffer;
 struct work_struct acc_state_work;
 static struct timer_list rmtctrl_timer;
 static struct wake_lock rmtctrl_wakelock;
+static u32 system_unormal_wakeuped_tics = 0;
 
 FLY_ACC_STATUS acc_io_state = FLY_ACC_ON;
 bool is_fake_acc_off = 0;
@@ -91,6 +95,8 @@ void acc_status_handle(FLY_ACC_STATUS val)
 	}else{
 		lidbg("acc_state_work_func: FLY_ACC_OFF\n");
 		g_var.acc_flag = 0;
+
+		system_unormal_wakeuped_tics = get_tick_count();
 
 		lidbg("*** Set acc.status to 1\n");
 		lidbg_shell_cmd("setprop persist.lidbg.acc.status 1");
@@ -238,12 +244,47 @@ static int lidbg_rmtctrl_event(struct notifier_block *this,
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_SLEEP_TIMEOUT):
 		send_app_status(FLY_SLEEP_TIMEOUT);
         break;
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_WAKEUP_UNORMAL):
+		send_app_status(FLY_WAKEUP_UNORMAL);
+        break;
     default:
         break;
     }
 
     return NOTIFY_DONE;
 }
+
+static int unormal_wakeup_handle(void)
+{
+		static u32 system_tics = 0;
+		static u32 system_unormal_wakeup_cnt = 0;
+
+		if(acc_io_state == FLY_ACC_ON){
+			system_tics = 0;
+			system_unormal_wakeup_cnt = 0;
+			system_unormal_wakeuped_tics = 0;
+		}
+
+		system_unormal_wakeup_cnt++;
+		system_tics = get_tick_count() - system_unormal_wakeuped_tics;  //tics ms after acc_off
+
+		if(system_unormal_wakeup_cnt > UNORMAL_WAKEUP_CNT){
+			if(system_tics < (UNORMAL_WAKEUP_TIME_MINU * 60 * 1000)){
+				lidbgerr("System wakeup %d times in %d(%u) msec,system tics %u, unormal\n", system_unormal_wakeup_cnt, system_tics, (UNORMAL_WAKEUP_TIME_MINU * 60 * 1000), get_tick_count());
+				if(acc_io_state == FLY_ACC_OFF)
+					send_app_status(FLY_WAKEUP_UNORMAL);
+			}else
+				lidbg("System wakeup %d times in %d(%u) msec,system tics %u, normal\n", system_unormal_wakeup_cnt, system_tics, (UNORMAL_WAKEUP_TIME_MINU * 60 * 1000), get_tick_count());
+
+			//count again
+			system_tics = 0;
+			system_unormal_wakeup_cnt = 0;
+			system_unormal_wakeuped_tics = get_tick_count();
+		}
+
+	return 0;
+}
+
 
 static struct notifier_block lidbg_rmtctrl_notifier =
 {
@@ -322,6 +363,9 @@ static int rmtctrl_pm_resume(struct device *dev)
     DUMP_FUN;
 //	if(g_var.system_status == FLY_KERNEL_DOWN)
 //		send_app_status(FLY_KERNEL_UP);
+	if(acc_io_state == FLY_ACC_OFF)
+		unormal_wakeup_handle();
+
 	if(is_fake_acc_off)
 	{
 		lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_ON));
