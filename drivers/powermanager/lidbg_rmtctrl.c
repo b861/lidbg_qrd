@@ -255,16 +255,25 @@ static int unormal_wakeup_handle(void)
 {
 		static u32 system_tics = 0;
 		static u32 system_unormal_wakeup_cnt = 0;
-
+		static u32 repeat_times = 0;;
+			
 		if(acc_io_state == FLY_ACC_ON){
 			system_tics = 0;
 			system_unormal_wakeup_cnt = 0;
 			system_unormal_wakeuped_tics = 0;
+			repeat_times = 0;
 		}
 
 		system_unormal_wakeup_cnt++;
 
 		if(system_unormal_wakeup_cnt > UNORMAL_WAKEUP_CNT){
+			repeat_times++;
+			if(repeat_times >= 5)
+			{
+				lidbgerr("%s suspend timeout,reboot!!\n",__FUNCTION__);
+				ssleep(10);
+				lidbg_shell_cmd("reboot");
+			}
 			system_tics = get_tick_count() - system_unormal_wakeuped_tics;  //tics ms after acc_off
 			if(system_tics < (UNORMAL_WAKEUP_TIME_MINU * 60 * 1000)){
 				lidbgerr("System wakeup %d times in %d(%u) msec,system tics %u, unormal\n", system_unormal_wakeup_cnt, system_tics, (UNORMAL_WAKEUP_TIME_MINU * 60 * 1000), get_tick_count());
