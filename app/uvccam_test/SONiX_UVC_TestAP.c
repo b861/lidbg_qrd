@@ -2687,13 +2687,13 @@ openfd:
 		
 		
 		//set record file total size
-		property_get("fly.uvccam.recfilesize", Rec_File_Size_String, "300");
+		property_get("fly.uvccam.recfilesize", Rec_File_Size_String, "1000");
 		Rec_File_Size = atoi(Rec_File_Size_String);
 		lidbg("======== video file total size-> %d MB=======",Rec_File_Size);
 		if(Rec_File_Size == 0) 
 		{
-			lidbg("not allow video file size = 0MB !!reset to 300MB.\n");
-			Rec_File_Size = 300;
+			lidbg("not allow video file size = 0MB !!reset to 1000MB.\n");
+			Rec_File_Size = 1000;
 		}
 	}
 
