@@ -267,7 +267,7 @@ static int unormal_wakeup_handle(void)
 		system_unormal_wakeup_cnt++;
 
 		system_tics = get_tick_count() - system_unormal_wakeuped_tics;  //tics ms after acc_off
-		lidbg("*** ystem wakeup %u(%u) times in %d(%u) msec ***\n", system_unormal_wakeup_cnt, UNORMAL_WAKEUP_CNT, system_tics, (UNORMAL_WAKEUP_TIME_MINU * 60 * 1000));
+		lidbg("*** system wakeup %u(%u) times in %d(%u) msec ***\n", system_unormal_wakeup_cnt, UNORMAL_WAKEUP_CNT, system_tics, (UNORMAL_WAKEUP_TIME_MINU * 60 * 1000));
 		if(system_unormal_wakeup_cnt > UNORMAL_WAKEUP_CNT){
 			repeat_times++;
 			if(repeat_times >= 5)
