@@ -98,6 +98,7 @@ public class FlyBootService extends Service {
     private PowerManager fbPm = null;
     public static WakeLock mWakeLock = null;
     private ActivityManager mActivityManager = null;
+    private PackageManager mPackageManager = null;
     private static boolean bIsKLDRunning = true;
     private static boolean sendBroadcastDone = false;
     private static boolean firstBootFlag = false;
@@ -120,6 +121,9 @@ public class FlyBootService extends Service {
     private boolean mKillProcessEn = true;
     private boolean mInterneDisableAll = false;
 
+    String mInternelBlackList[] = {
+            "com.qti.cbwidget"
+    };
     // add launcher in protected list
     String systemLevelProcess[] = {
             "com.android.flyaudioui",
@@ -140,6 +144,7 @@ public class FlyBootService extends Service {
 
 	mFlyBootService = this;
 	acquireWakeLock();
+	mPackageManager = this.getPackageManager();
 	mActivityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
 	mWhiteList = FileReadList("/flysystem/lib/out/appProtectList.conf","\n");
 	mInternelWhiteList = FileReadList("/flysystem/lib/out/appInternetProtectList.conf","\n");
@@ -147,6 +152,7 @@ public class FlyBootService extends Service {
         LIDBG_PRINT("flybootservice start [getInternelAllAppUids]");
 	getInternelAllAppUids(mInternelAllAppListUID);
         LIDBG_PRINT("flybootservice stop [getInternelAllAppUids]");
+        FlyaudioBlackListInternetControl(false);
 	IntentFilter filter = new IntentFilter();
 	filter.addAction("com.lidbg.flybootserver.action");
 	filter.setPriority(Integer.MAX_VALUE);
@@ -236,9 +242,9 @@ public class FlyBootService extends Service {
 								SendBroadcastToService(KeyBootState, keyEearlySusupendON);
 							}else if(pmState == FBS_SCREEN_ON){
 								LIDBG_PRINT("FlyBootService get pm state: FBS_SCREEN_ON");
-								//FlyaudioWhiteListInternetEnable();
-								InternetEnable();
 								acquireWakeLock();
+								//FlyaudioWhiteListInternetControl(true);
+								InternetEnable();
 								FlyaudioInternetEnable();
 								SendBroadcastToService(KeyBootState, keyScreenOn);
 								system_resume();
@@ -246,7 +252,7 @@ public class FlyBootService extends Service {
 								LIDBG_PRINT("FlyBootService get pm state: FBS_SLEEP_TIMEOUT");
 								if(blSuspendUnairplaneFlag)
 									KillProcess(true);
-								//FlyaudioWhiteListInternetDisable();
+								//FlyaudioWhiteListInternetControl(false);
 								InternetDisable();
 							}else
 								LIDBG_PRINT("FlyBootService undefined pm state: " + pmState);
@@ -329,11 +335,15 @@ public class FlyBootService extends Service {
 				LIDBG_PRINT("mInterneDisableAll->"+ mInterneDisableAll+"\n");
 			break;
 			case 11:
-				FlyaudioWhiteListInternetDisable();
+				FlyaudioWhiteListInternetControl(false);
 			break;
 			case 12:
-				FlyaudioWhiteListInternetEnable();
+				FlyaudioWhiteListInternetControl(true);
 			break;
+			case 13:
+				FlyaudioBlackListInternetControl(true);
+			break;
+
 			default:
 			LIDBG_PRINT("BroadcastReceiver.action:unkown"+action+"\n");
 			break;
@@ -822,30 +832,33 @@ public class FlyBootService extends Service {
 	    else
 	    	    appInternetControl(false);
 	}
-	public void FlyaudioWhiteListInternetEnable()
+	public void FlyaudioWhiteListInternetControl(boolean enable)
 	{
-	    LIDBG_PRINT("FlyaudioWhiteListInternetEnable\n");
-	    WhiteListInternetControl(true);
-	}
-	public void FlyaudioWhiteListInternetDisable()
-	{
-	    LIDBG_PRINT("FlyaudioWhiteListInternetDisable\n");
-	    WhiteListInternetControl(false);
-	}
-	public void WhiteListInternetControl(boolean enable)
-	{
-	    LIDBG_PRINT("WhiteListInternetControl:"+enable+"/"+mInternelWhiteAppListUID.size()+"\n");
-	    PackageManager pm = getPackageManager();
+	    LIDBG_PRINT("FlyaudioWhiteListInternetControl:"+enable+"\n");
 		if (mInternelWhiteAppListUID!= null)
 		{
 			for (int i = 0; i < mInternelWhiteAppListUID.size(); i++)
 			{
 				Integer uid = mInternelWhiteAppListUID.get(i);	            
-				LIDBG_PRINT("appInternetControl.exe.whitelist:" +(enable ? "enable/" : "disable/")+ i + "-->" + uid + "/" +  pm.getNameForUid(uid) + "\n");
+				LIDBG_PRINT("appInternetControl.exe.whitelist:" +(enable ? "enable/" : "disable/")+ i + "-->" + uid + "/" +  mPackageManager.getNameForUid(uid) + "\n");
 				// -o rmnet+
-				writeToFile("/dev/lidbg_misc0", "flyaudio:iptables " + (enable ? "-D" : "-I") + " FORWARD  -m owner --uid-owner " + uid	+ " -j REJECT");
-				writeToFile("/dev/lidbg_misc0", "flyaudio:iptables " + (enable ? "-D" : "-I") + " OUTPUT  -m owner --uid-owner " + uid + " -j REJECT");
-				writeToFile("/dev/lidbg_misc0", "flyaudio:iptables " + (enable ? "-D" : "-I") + " INPUT  -m owner --uid-owner " + uid + " -j REJECT");
+				InternetControlUID(enable,uid);
+			}
+		}
+	}
+	public void FlyaudioBlackListInternetControl(boolean enable)
+	{
+	    LIDBG_PRINT("FlyaudioBlackListInternetControl:"+enable+"\n");
+		if (mInternelBlackList!= null)
+		{
+			for (int i = 0; i < mInternelBlackList.length; i++)
+			{
+			ApplicationInfo info =getApplicationInfo(mInternelBlackList[i]);
+				if (info!=null)
+				{
+					LIDBG_PRINT("appInternetControl.exe.BlackList:" +(enable ? "enable/" : "disable/")+ i + "-->" + info.uid + "/" +  info.packageName + "\n");
+					InternetControlUID(false,info.uid);
+				}
 			}
 		}
 	}
@@ -864,10 +877,16 @@ public class FlyBootService extends Service {
 		writeToFile("/dev/lidbg_misc0","flyaudio:iptables -t filter -P INPUT ACCEPT");
 		writeToFile("/dev/lidbg_misc0","flyaudio:iptables -t filter -P FORWARD ACCEPT");
 	}
+
+	public void InternetControlUID(boolean enable,Integer uid )
+	{
+		writeToFile("/dev/lidbg_misc0", "flyaudio:iptables " + (enable ? "-D" : "-I") + " FORWARD  -m owner --uid-owner " + uid	+ " -j REJECT");
+		writeToFile("/dev/lidbg_misc0", "flyaudio:iptables " + (enable ? "-D" : "-I") + " OUTPUT  -m owner --uid-owner " + uid + " -j REJECT");
+		writeToFile("/dev/lidbg_misc0", "flyaudio:iptables " + (enable ? "-D" : "-I") + " INPUT  -m owner --uid-owner " + uid + " -j REJECT");
+	}
 	public List<Integer> getInternelAllAppUids(List<Integer> mlist)
 	{
-	    PackageManager pm = getPackageManager();
-	    List<PackageInfo> packinfos = pm.getInstalledPackages(0);
+	    List<PackageInfo> packinfos = mPackageManager.getInstalledPackages(0);
 	    int i = 0,j=0;
 	for (PackageInfo info : packinfos)
 	    {
@@ -913,7 +932,6 @@ public class FlyBootService extends Service {
 	public void appInternetControl(boolean enable)
 	{
 	    // TODO Auto-generated method stub
-	    PackageManager pm = this.getPackageManager();
 	    mInternelAllAppListUID = getInternelAllAppUids(mInternelAllAppListUID);
 
 	    LIDBG_PRINT("appInternetControl:" + mInternelAllAppListUID.size()  +  "|" + mInterneWhiteListAppProtectEn+"\n");
@@ -925,16 +943,27 @@ public class FlyBootService extends Service {
 	            if (uid==1000)
 		   continue;
 	            if (dbgMode)
-	            LIDBG_PRINT("appInternetControl.exe:" + i + "-->" + uid + "/" +  pm.getNameForUid(uid) + "\n");
+	            LIDBG_PRINT("appInternetControl.exe:" + i + "-->" + uid + "/" +  mPackageManager.getNameForUid(uid) + "\n");
 	            // -o rmnet+
-	            writeToFile("/dev/lidbg_misc0", "flyaudio:iptables " + (enable ? "-D" : "-I") + " FORWARD  -m owner --uid-owner " + uid	+ " -j REJECT");
-	            writeToFile("/dev/lidbg_misc0", "flyaudio:iptables " + (enable ? "-D" : "-I") + " OUTPUT  -m owner --uid-owner " + uid + " -j REJECT");
-	            writeToFile("/dev/lidbg_misc0", "flyaudio:iptables " + (enable ? "-D" : "-I") + " INPUT  -m owner --uid-owner " + uid + " -j REJECT");
+	            InternetControlUID(enable,uid);
 	        }
 
 	    }
 	    else
 	        LIDBG_PRINT("mInternelAllAppList == null || mInternelAllAppList.size() < 0");
+	}
+	private ApplicationInfo getApplicationInfo(String pkg)
+	{
+		ApplicationInfo ai = null;
+		// TODO Auto-generated method stub
+		try
+		{
+			ai = mPackageManager.getApplicationInfo(pkg, 0);
+		} catch (NameNotFoundException e)
+		{
+			e.printStackTrace();
+		}
+		return ai;
 	}
 	public void DUMP()
 	{
