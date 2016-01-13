@@ -278,8 +278,8 @@ static int unormal_wakeup_handle(void)
 			}
 			if(system_tics < (UNORMAL_WAKEUP_TIME_MINU * 60 * 1000)){
 				lidbgerr("System wakeup %d times in %d(%u) msec,system tics %u, unormal\n", system_unormal_wakeup_cnt, system_tics, (UNORMAL_WAKEUP_TIME_MINU * 60 * 1000), get_tick_count());
-				if(acc_io_state == FLY_ACC_OFF)
-					send_app_status(FLY_SLEEP_TIMEOUT);
+				//if(acc_io_state == FLY_ACC_OFF)
+				//	send_app_status(FLY_SLEEP_TIMEOUT);
 			}else
 				lidbg("System wakeup %d times in %d(%u) msec,system tics %u, normal\n", system_unormal_wakeup_cnt, system_tics, (UNORMAL_WAKEUP_TIME_MINU * 60 * 1000), get_tick_count());
 
