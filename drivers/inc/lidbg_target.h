@@ -48,7 +48,9 @@ struct hw_version_specific
     int gpio_usb_id;
     int gpio_usb_power;
     int gpio_usb_switch;
-
+    int gpio_usb_udisk_en;
+    int gpio_usb_front_en;
+    int gpio_usb_backcam_en;
     int gpio_int_gps;
 
     int gpio_int_button_left1;
@@ -64,6 +66,8 @@ struct hw_version_specific
     int gpio_mcu_app;
     int gpio_request_fastboot;
     int gpio_gps_rst;
+    int gpio_gps_en;
+
     int gpio_ts_int;
     int gpio_ts_rst;
 

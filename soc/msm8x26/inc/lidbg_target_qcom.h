@@ -71,25 +71,13 @@
 	lidbg("MSM_ACCEL_POWER_OFF");\
 	lidbg_shell_cmd("echo 0 > /sys/kernel/debug/regulator/8941_l18/enable");\
 }while(0)
-
 #else
-#define GPS_POWER_ON do{\
-}while(0)
-
-#define GPS_POWER_OFF do{\
-}while(0)
-
-#define MSM_DSI83_POWER_ON do{\
-}while(0)
-
-#define MSM_DSI83_POWER_OFF do{\
-}while(0)
-
-#define MSM_ACCEL_POWER_ON do{\
-}while(0)
-
-#define MSM_ACCEL_POWER_OFF do{\
-}while(0)
+#define GPS_POWER_ON do{check_gpio(g_hw.gpio_gps_en);SOC_IO_Output(0, g_hw.gpio_gps_en, 1);}while(0)
+#define GPS_POWER_OFF do{check_gpio(g_hw.gpio_gps_en);SOC_IO_Output(0, g_hw.gpio_gps_en, 0);}while(0)
+#define MSM_DSI83_POWER_ON do{}while(0)
+#define MSM_DSI83_POWER_OFF do{}while(0)
+#define MSM_ACCEL_POWER_ON do{}while(0)
+#define MSM_ACCEL_POWER_OFF do{}while(0)
 
 #endif
 
@@ -127,7 +115,32 @@
 			SOC_IO_Output(0, g_hw.gpio_usb_switch, 1);\
 	}while(0)
 
+#ifdef PLATFORM_msm8909
+#define USB_POWER_ENABLE do{\
+			LPC_CMD_USB5V_ON;\
+			check_gpio(g_hw.gpio_usb_power);\
+			SOC_IO_Output(0, g_hw.gpio_usb_power, 1);\
+			check_gpio(g_hw.gpio_usb_udisk_en);\
+			SOC_IO_Output(0, g_hw.gpio_usb_udisk_en, 1);\
+			check_gpio(g_hw.gpio_usb_front_en);\
+			SOC_IO_Output(0, g_hw.gpio_usb_front_en, 1);\
+			check_gpio(g_hw.gpio_usb_backcam_en);\
+			SOC_IO_Output(0, g_hw.gpio_usb_backcam_en, 1);\
+	}while(0)
 
+
+#define USB_POWER_DISABLE do{\
+			LPC_CMD_USB5V_OFF;\
+			check_gpio(g_hw.gpio_usb_power);\
+			SOC_IO_Output(0, g_hw.gpio_usb_power, 0);\
+			check_gpio(g_hw.gpio_usb_udisk_en);\
+			SOC_IO_Output(0, g_hw.gpio_usb_udisk_en, 0);\
+			check_gpio(g_hw.gpio_usb_front_en);\
+			SOC_IO_Output(0, g_hw.gpio_usb_front_en, 0);\
+			check_gpio(g_hw.gpio_usb_backcam_en);\
+			SOC_IO_Output(0, g_hw.gpio_usb_backcam_en, 0);\
+	}while(0)
+#else
 #define USB_POWER_ENABLE do{\
 			LPC_CMD_USB5V_ON;\
 			check_gpio(g_hw.gpio_usb_power);\
@@ -140,7 +153,7 @@
 			check_gpio(g_hw.gpio_usb_power);\
 			SOC_IO_Output(0, g_hw.gpio_usb_power, 0);\
 	}while(0)
-
+#endif
 
 #define USB_ID_LOW_HOST do{\
 			check_gpio(g_hw.gpio_usb_id);\

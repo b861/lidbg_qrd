@@ -98,12 +98,14 @@ struct hw_version_specific g_hw_version_specific[] =
         .gpio_t123_reset = -1,
         .gpio_dsi83_en = 8,
 
-        .gpio_usb_power = 31,
+        .gpio_usb_power = 11,
         .gpio_usb_id = 32,
         .gpio_usb_switch = -1,
-
-        .gpio_int_gps = 96,
-
+        .gpio_usb_udisk_en = 3,
+        .gpio_usb_front_en = 17,
+        .gpio_usb_backcam_en = 28,
+        //.gpio_int_gps = 96,
+	 .gpio_gps_en = 2,
         .gpio_int_button_left1 = 25,
         .gpio_int_button_left2 = 26,
         .gpio_int_button_right1 = 23,
@@ -124,11 +126,11 @@ struct hw_version_specific g_hw_version_specific[] =
 
         .gpio_bt_tx = 4,
         .gpio_bt_rx = 5,
-		.gpio_accel_int1 = 95,
+	.gpio_accel_int1 = 65,
 
-		.gpio_back_det = 35,
+		//.gpio_back_det = 35,
 
-		.i2c_bus_accel = 1,
+	.i2c_bus_accel = 1,
         .i2c_bus_dsi83 = 1,
         .i2c_bus_ts = 4,
         .i2c_bus_gps = 5,
