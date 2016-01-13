@@ -24,8 +24,6 @@ copy_source()
 	cd $RELEASE_REPOSITORY
 	expect ./tools/pull
 	./make.sh
-	cp -rf $RELEASE_REPOSITORY/systemlib/.   $TARGET_OUT_DIR/system/lib/
-	cp -rf $SOURCE_OUT_DIR/flyupdate/flyaudio/. $TARGET_FLYAUDIO_DIR/
 	cp $SOURCE_OUT_DIR/flyapdata.flp $FLYTMP_OUT_DIR/flyupdate/
 }
 
@@ -35,6 +33,10 @@ make_full_package()
 {
 	cd $DBG_SYSTEM_DIR
 	soc_build_all
+	cd $RELEASE_REPOSITORY
+	cp -rf $RELEASE_REPOSITORY/systemlib/.   $TARGET_OUT_DIR/system/lib/
+	cp -rf $SOURCE_OUT_DIR/flyupdate/flyaudio/. $TARGET_FLYAUDIO_DIR/
+	cd $DBG_SYSTEM_DIR
 	soc_make_otapackage
 	cp $TARGET_OUT_DIR/msm8909-ota-eng.*.zip $FLYTMP_OUT_DIR/flyupdate/baseqcom.flb
 	cd $FLYTMP_OUT_DIR/flyupdate
@@ -49,7 +51,6 @@ do_make_ota_package()
 	get_ready
 	copy_source
 	make_full_package
-	#make_full_diff_package
 	echo ""
 	echo "done."
 }
