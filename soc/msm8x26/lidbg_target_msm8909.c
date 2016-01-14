@@ -23,6 +23,7 @@ struct hw_version_specific g_hw_version_specific[] =
         .gpio_led2 = 3,
 
         .gpio_int_mcu_i2c_request = 94,
+         .gpio_mcu_i2c_wakeup = 95,
         .gpio_mcu_wp = 33,
         .gpio_mcu_app = 34,
 	.gpio_request_fastboot = 35,
@@ -114,6 +115,8 @@ struct hw_version_specific g_hw_version_specific[] =
         .gpio_led1 = 0,
 
         .gpio_int_mcu_i2c_request = 94,
+         .gpio_mcu_i2c_wakeup = 95,
+
         .gpio_mcu_wp = 33,
         .gpio_mcu_app = 34,
 	.gpio_request_fastboot = 35,

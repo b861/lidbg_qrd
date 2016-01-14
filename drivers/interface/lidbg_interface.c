@@ -151,7 +151,11 @@ void iSOC_Key_Report(u32 key_value, u32 type)
 // 7bit i2c sub_addr
 int iSOC_I2C_Send(int bus_id, char chip_addr, char *buf, unsigned int size)
 {
-    return  i2c_api_do_send( bus_id,  chip_addr,  0,  buf,  size);
+    int ret;
+    if(bus_id == g_hw.i2c_bus_lpc) WAKEUP_MCU_BEGIN;
+    ret = i2c_api_do_send( bus_id,  chip_addr,  0,  buf,  size);
+    if(bus_id == g_hw.i2c_bus_lpc) WAKEUP_MCU_END;
+    return  ret;
 }
 int iSOC_I2C_Rec(int bus_id, char chip_addr, unsigned int sub_addr, char *buf, unsigned int size)
 {

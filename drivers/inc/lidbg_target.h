@@ -62,6 +62,7 @@ struct hw_version_specific
     int gpio_led2;
 
     int gpio_int_mcu_i2c_request;
+    int gpio_mcu_i2c_wakeup;
     int gpio_mcu_wp;
     int gpio_mcu_app;
     int gpio_request_fastboot;
