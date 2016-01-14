@@ -12,7 +12,7 @@
 #define AUTO_SLEEP_JIFF (10)
 #define AUTO_SLEEP_TIME_S (jiffies + AUTO_SLEEP_JIFF*HZ)
 
-#define UNORMAL_WAKEUP_TIME_MINU (15)
+#define UNORMAL_WAKEUP_TIME_MINU (30)
 #define UNORMAL_WAKEUP_CNT (UNORMAL_WAKEUP_TIME_MINU*10)
 
 #define SCREEN_ON    "flyaudio screen_on"
@@ -274,13 +274,20 @@ static int unormal_wakeup_handle(void)
 
 				if(acc_io_state == FLY_ACC_OFF)
 				{
-					send_app_status(FLY_SLEEP_TIMEOUT);
-					repeat_times++;
-					if(repeat_times >= 5)
+					if( g_var.suspend_timeout_protect  == 0)
 					{
 						lidbgerr("%s suspend timeout,reboot!!\n",__FUNCTION__);
-						ssleep(10);
-						lidbg_shell_cmd("reboot");
+					}
+					else
+					{
+						send_app_status(FLY_SLEEP_TIMEOUT);
+						repeat_times++;
+						if(repeat_times >= 5)
+						{
+							lidbgerr("%s suspend timeout,reboot!!\n",__FUNCTION__);
+							ssleep(10);
+							lidbg_shell_cmd("reboot");
+						}
 					}
 				}
 			}else

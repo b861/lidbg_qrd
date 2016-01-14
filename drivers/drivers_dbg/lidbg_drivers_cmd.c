@@ -302,6 +302,7 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#062--do not kill process in flybootserver.apk\n");
             fs_mem_log("*158#063--iptable all apps\n");
             fs_mem_log("*158#064--! iptable all apps\n");
+            fs_mem_log("*158#065--disable suspend timeout protect\n");
 
             show_password_list();
             lidbg_domineering_ack();
@@ -725,7 +726,11 @@ void parse_cmd(char *pt)
             lidbg("*158#064--! iptable all apps\n");
             lidbg_shell_cmd("am broadcast -a com.lidbg.flybootserver.action --ei action 10 &");
         }
-
+        else if (!strcmp(argv[1], "*158#065"))
+        {
+            lidbg("disable suspend timeout protect\n");
+           g_var.suspend_timeout_protect = 0;
+        }
 
         else if (!strcmp(argv[1], "*168#001"))
         {

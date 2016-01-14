@@ -329,6 +329,7 @@ struct lidbg_pvar_t
     bool is_udisk_needreset;
     bool usb_status;
     bool usb_request;
+    bool suspend_timeout_protect;
 
 };
 

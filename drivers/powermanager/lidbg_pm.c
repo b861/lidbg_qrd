@@ -906,16 +906,18 @@ static int thread_observer(void *data)
                 have_triggerd_sleep_S++;
                 switch (have_triggerd_sleep_S)
                 {
-                case 120:
+                case 60*5:
 #ifdef SUSPEND_ONLINE
 #ifdef SUSPEND_TIME_OUT_KILL_PROCESS
-
+					if( g_var.suspend_timeout_protect  == 0) break;
 					lidbg("Sleep timeout, bserver thread start to kill process...\n");
 					SOC_System_Status(FLY_SLEEP_TIMEOUT);
+					break;
 #endif
 #endif
                 case 60*10:
 #ifdef SUSPEND_TIME_OUT_FORCE_UNLOCK
+			if( g_var.suspend_timeout_protect  == 0) break;
                     sprintf(when, "unlock%d,%d:", have_triggerd_sleep_S, sleep_counter);
                     kernel_wakelock_save_wakelock(when, PM_INFO_FILE);
                     kernel_wakelock_force_unlock(when);
@@ -956,6 +958,7 @@ static int thread_observer(void *data)
                     	    break;
 #ifdef SUSPEND_ONLINE
                 case 60*15:
+			if( g_var.suspend_timeout_protect  == 0) break;
 			lidbgerr("%s suspend timeout,reboot!!\n",__FUNCTION__);
 			ssleep(10);
 			lidbg_shell_cmd("reboot");
