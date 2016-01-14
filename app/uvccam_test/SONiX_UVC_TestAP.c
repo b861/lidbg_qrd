@@ -272,6 +272,7 @@ static int video_set_format(int dev, unsigned int w, unsigned int h, unsigned in
 		w = 1920;
 		h = 1080;
 	}
+
 	
 	memset(&fmt, 0, sizeof fmt);
 	fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -1434,7 +1435,7 @@ char *lidbg_get_current_time(char *time_string, struct rtc_time *ptm)
                 lidbg("%s.%d: Probing fail:%s \n", __func__, i, devname);
                 //break;
                 lidbg("%s: X,%s", __func__, devname);
-				return -1;
+				return 1;
             }
         }
 
@@ -1562,7 +1563,7 @@ failproc:
 	system("echo flyaudio:touch /dev/log/CameraScan2.txt > /dev/lidbg_misc0");
 	return get_uvc_device(devname,do_save,do_record);
 #else
-	return -1;
+	return 1;
 #endif
 }
 
@@ -1847,6 +1848,7 @@ int main(int argc, char *argv[])
 	unsigned char isExceed = 0;
 	unsigned char isReplace = 0;
 	unsigned long totalSize = 0;
+	unsigned char tryopencnt = 20;
  //cjc -
 #if(CARCAM_PROJECT == 1)
 	printf("%s   ******  for Carcam  ******\n",TESTAP_VERSION);
@@ -2640,7 +2642,7 @@ int main(int argc, char *argv[])
 getuvcdevice:
 	//auto find camera device
 	rc = get_hub_uvc_device(devName,do_save,do_record);
-    if(rc || *devName == '\0')
+    if((rc == 1)  || (*devName == '\0'))
     {
         lidbg("%s: No UVC node found \n", __func__);
 		return 1;
@@ -4165,11 +4167,14 @@ openfd:
 
 		ret = ioctl(dev, VIDIOC_QBUF, &buf0);
 		if (ret < 0) {
-			lidbg( "Unable to requeue buffer0 (%d).\n", errno);
+			lidbg( "Unable to requeue buffer0 (%d).But try again.\n", errno);
+			goto try_open_again;
+#if 0
 			close(dev);
 			if(multi_stream_enable)
 				close(fake_dev);			
 			return 1;
+#endif
 		}
 
 		fflush(stdout);
@@ -4221,16 +4226,28 @@ openfd:
 
 	system("echo 'udisk_unrequest' > /dev/flydev0");
 	return 0;
-#if 0
+#if 1
 try_open_again:
-		system("echo 'udisk_request' > /dev/flydev0");
-		//usleep(500*1000);
-		sleep(2);
+		//system("echo 'udisk_request' > /dev/flydev0");
+		usleep(500*1000);
+		//sleep(2);
+		if((!strncmp(startRecording, "0", 1)) && (!do_save) )//close
+		{
+			lidbg("-------eho---------uvccam stop recording! -----------\n");
+			return 0;
+		}
+		if(!(tryopencnt--))
+		{
+			lidbg("-------eho---------uvccam try open timeout! -----------\n");
+			return 1;
+		}
+		lidbg("%s: Camera may extract unexpected!try open again!-> %d\n", __func__,tryopencnt);
 		rc = get_hub_uvc_device(devName,do_save,do_record);
-		if((rc == -1) || (*devName == '\0'))
+		if((rc == 1) || (*devName == '\0'))
         {
-            ALOGE("%s: No UVC node found again\n", __func__);
-            return 1;
+            lidbg("%s: No UVC node found again\n", __func__);
+            //return 1;
+            goto try_open_again;
         }
 		else goto openfd;
 #endif
