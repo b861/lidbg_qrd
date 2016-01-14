@@ -155,6 +155,14 @@ void i2c_devices_scan(struct probe_device *i2cdev, int size)
 int i2c_devices_probe_thread(void *data)
 {
     int cnt = 3;
+#ifdef SUSPEND_ONLINE	
+    LIDBG_WARN("<g_var.acc_flag1:%d>\n",g_var.acc_flag);
+    while(g_var.acc_flag==0)
+    {
+        msleep(200);
+    }
+    LIDBG_WARN("<g_var.acc_flag2:%d>\n",g_var.acc_flag);
+#endif
     while(cnt--)
     {
 		i2c_devices_scan(i2c_probe_dev, SIZE_OF_ARRAY(i2c_probe_dev));

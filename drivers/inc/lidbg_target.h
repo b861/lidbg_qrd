@@ -177,6 +177,8 @@ extern struct hw_version_specific g_hw_version_specific[];
 
 //
 #define GPIO_FASTBOOT_REQUEST (g_hw.gpio_request_fastboot)
+#define MCU_ACC_STATE_IO GPIO_FASTBOOT_REQUEST
+
 
 #define BACK_DET (g_hw.gpio_back_det)
 

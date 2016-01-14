@@ -525,7 +525,14 @@ static struct file_operations dev_fops =
 int ts_probe_thread(void *data)
 {
     struct probe_device *ts = NULL;
-
+#ifdef SUSPEND_ONLINE	
+    LIDBG_WARN("<g_var.acc_flag1:%d>\n",g_var.acc_flag);
+    while(g_var.acc_flag==0)
+    {
+        msleep(200);
+    }
+    LIDBG_WARN("<g_var.acc_flag2:%d>\n",g_var.acc_flag);
+#endif
     SOC_Display_Get_Res(&max_x, &max_y);
 
     ts_probe_prepare();

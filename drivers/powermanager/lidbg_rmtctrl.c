@@ -2,7 +2,6 @@
 
 #define DEV_NAME	 "/dev/lidbg_pm0"
 #define rmtctrl_FIFO_SIZE (512)
-#define MCU_ACC_STATE_IO GPIO_FASTBOOT_REQUEST
 
 #define SCREE_OFF_JIFF (15)
 #define SCREE_OFF_TIME_S (jiffies + SCREE_OFF_JIFF*HZ)
@@ -310,6 +309,16 @@ static  struct file_operations rmtctrl_fops =
     .write = rmtctrl_write,
 };
 
+static int thread_response_acc_state_delay(void *data)
+{
+    PM_WARN("<current acc state1:%d,%d >\n",acc_io_state,(acc_io_state == FLY_ACC_OFF));
+    ssleep(50);
+    acc_io_state = SOC_IO_Input(MCU_ACC_STATE_IO, MCU_ACC_STATE_IO, GPIO_CFG_PULL_UP);
+    PM_WARN("<current acc state2:%d,%d >\n",acc_io_state,(acc_io_state == FLY_ACC_OFF));
+    if(acc_io_state == FLY_ACC_OFF)
+            acc_status_handle(acc_io_state);
+    return 1;
+}
 static int lidbg_rmtctrl_probe(struct platform_device *pdev)
 {
 	int ret;
@@ -357,8 +366,8 @@ static int lidbg_rmtctrl_probe(struct platform_device *pdev)
 
 	// boot when acc off
 	if(acc_io_state == FLY_ACC_OFF)
-		acc_status_handle(acc_io_state);
-		
+	    CREATE_KTHREAD(thread_response_acc_state_delay, NULL);
+	
 	return 0;
 }
 
