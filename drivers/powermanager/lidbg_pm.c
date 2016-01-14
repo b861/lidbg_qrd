@@ -956,9 +956,9 @@ static int thread_observer(void *data)
                     	    break;
 #ifdef SUSPEND_ONLINE
                 case 300:
-			lidbgerr("%s suspend timeout,reboot!!\n",__FUNCTION__);
-			ssleep(10);
-			lidbg_shell_cmd("reboot");
+			//lidbgerr("%s suspend timeout,reboot!!\n",__FUNCTION__);
+			//ssleep(10);
+			//lidbg_shell_cmd("reboot");
 			 break;
                 default:
                     //if(have_triggerd_sleep_S >= 5 && !(have_triggerd_sleep_S % 5) && ((g_var.system_status == FLY_ANDROID_DOWN) || (g_var.system_status == FLY_SLEEP_TIMEOUT) ||(g_var.system_status == FLY_GOTO_SLEEP)))//atomic_read(&is_in_sleep) == 1
