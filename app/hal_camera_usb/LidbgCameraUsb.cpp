@@ -202,7 +202,19 @@ namespace android
 
         return rc;
     }
-	
+
+void lidbg_set_sonix_osd_time()
+{
+	time_t timep; 
+	struct tm *p; 
+	char rtc_cmd[100] = {0};
+	time(&timep); 
+	p=localtime(&timep); 
+	sprintf(rtc_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video1 --xuset-rtc %d %d %d %d %d %d", (1900+p->tm_year), (1+p->tm_mon), p->tm_mday,p->tm_hour , p->tm_min,p->tm_sec);
+	system(rtc_cmd);
+	return;
+}
+
 static int get_uvc_device(const char *id,char *devname)
 {
     char    temp_devname[FILENAME_LENGTH];
@@ -1187,6 +1199,9 @@ try_open_again:
             }
         }
 
+		ALOGE("%s:Camera driver: %s   Driver version: %d.%d.%d ", __func__ ,cap.driver,
+	        (cap.version>>16) & 0xff,(cap.version>>8) & 0xff);
+
         //v4l2_vidio_s_ctrl(camHal->fd, "V4L2_CID_EXPOSURE_AUTO", V4L2_CID_EXPOSURE_AUTO,V4L2_EXPOSURE_AUTO );
         v4l2_vidio_g_ctrl(camHal->fd, "V4L2_CID_EXPOSURE_AUTO_PRIORITY", V4L2_CID_EXPOSURE_AUTO_PRIORITY);
         v4l2_vidio_s_ctrl(camHal->fd, "V4L2_CID_EXPOSURE_AUTO_PRIORITY", V4L2_CID_EXPOSURE_AUTO_PRIORITY, 0);
@@ -1211,6 +1226,7 @@ try_open_again:
 	{
 		system("./flysystem/lib/out/lidbg_testuvccam /dev/video1 --xuset-oe 1 1 ");
 		system("./flysystem/lib/out/lidbg_testuvccam /dev/video1 --xuset-car 0 0 0");
+		lidbg_set_sonix_osd_time();
 	}
 	else if(cam_id == 0)
 	{

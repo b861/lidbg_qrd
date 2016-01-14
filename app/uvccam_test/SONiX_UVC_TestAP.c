@@ -1369,10 +1369,13 @@ char *lidbg_get_current_time(char *time_string, struct rtc_time *ptm)
 {
 	time_t timep; 
 	struct tm *p; 
+	char rtc_cmd[100] = {0};
 	time(&timep); 
 	p=localtime(&timep); 
     if(time_string)
         sprintf(time_string, "%d-%02d-%02d__%02d.%02d.%02d", (1900+p->tm_year), (1+p->tm_mon), p->tm_mday,p->tm_hour , p->tm_min,p->tm_sec);
+	sprintf(rtc_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video1 --xuset-rtc %d %d %d %d %d %d", (1900+p->tm_year), (1+p->tm_mon), p->tm_mday,p->tm_hour , p->tm_min,p->tm_sec);
+	system(rtc_cmd);
     return time_string;
 }
 
