@@ -65,7 +65,7 @@ void userspace_wakelock_action(int action_enum, char *file_path)
             if (pos->name && pos->cunt)
             {
                 index++;
-                printk(KERN_CRIT"[ftf_pm.wl]%d,MAX%d<THE%d:[%d,%d][%s][%s,%s]>\n", pos->cunt, pos->cunt_max, index, pos->pid, pos->uid, lock_type(pos->is_count_wakelock), pos->name, pos->package_name);
+                PM_WARN("%d,MAX%d<THE%d:[%d,%d][%s][%s,%s]>\n", pos->cunt, pos->cunt_max, index, pos->pid, pos->uid, lock_type(pos->is_count_wakelock), pos->name, pos->package_name);
                 switch (action_enum)
                 {
                 case 0:

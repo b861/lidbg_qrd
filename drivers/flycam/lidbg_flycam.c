@@ -291,7 +291,7 @@ int thread_flycam_test(void *data)
 int thread_flycam_init(void *data)
 {
     lidbg_new_cdev(&flycam_nod_fops, "lidbg_flycam");
-	lidbg("%s:------------start------------",__func__);
+	lidbg("%s:------------start------------\n",__func__);
 #if 0
 	SOC_IO_Input(BACK_DET, BACK_DET, GPIO_CFG_PULL_UP);
 	SOC_IO_ISR_Add(BACK_DET, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING , irq_back_det, NULL);

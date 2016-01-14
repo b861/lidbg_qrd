@@ -75,7 +75,6 @@ int thread_bp_msg(void *data)
 int bp_msg_init(void)
 {
     DUMP_FUN;
-    lidbg("\n[futengfei]  =bp_msg_init=IN===============================\n");
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,10,0)
     smem_log_temp = (smem_log_deep *)smem_alloc(SMEM_ID_VENDOR1, sizeof(smem_log_deep));
 #else
@@ -88,13 +87,11 @@ int bp_msg_init(void)
     }
 
     CREATE_KTHREAD(thread_bp_msg, NULL);
-    lidbg("[futengfei]  =bp_msg_init=OUT===============================\n");
     return 0;
 }
 
 void bp_msg_exit(void)
 {
-    lidbg("[futengfei]  ==OUT=================bp_msg_exit==============\n");
 #if 0
     if(bp_msg_task)
     {

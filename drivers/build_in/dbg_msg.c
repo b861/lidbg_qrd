@@ -44,7 +44,7 @@ int thread_msg(void *data)
         {
             wait_for_completion(&msg_ready);
 
-            lidbg("[lidbg_kernel_msg] %s", plidbg_msg->log[plidbg_msg->r_pos]);
+            lidbg("[lidbg_kernel_msg] %s\n", plidbg_msg->log[plidbg_msg->r_pos]);
             plidbg_msg->r_pos = (plidbg_msg->r_pos + 1)  % TOTAL_LOGS;
 
         }

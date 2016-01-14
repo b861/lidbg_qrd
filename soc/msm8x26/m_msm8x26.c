@@ -178,9 +178,8 @@ try_get_smem:
         lidbg( "smem_data = ");
         for(i = 0; i < sizeof(struct fly_smem); i ++ )
         {
-            lidbg("%d ", p[i]);
+            lidbg("%d=%d \n",i, p[i]);
         }
-        lidbg("\n");
     }
 
 

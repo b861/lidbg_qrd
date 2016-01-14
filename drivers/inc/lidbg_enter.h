@@ -461,7 +461,7 @@ struct lidbg_hal
  	do{\
 	 mm_segment_t old_fs;\
 	 struct file *fd = NULL;\
-	 printk("lidbg:call LIDBG_GET by %s\n",__FUNCTION__);\
+	 printk("[lidbg]  [call LIDBG_GET] by %s\n",__FUNCTION__);\
 	 while(1){\
 	 	printk("lidbg: %s:%s try open lidbg_hal!\n",__FILE__,__FUNCTION__);\
 	 	fd = filp_open("/dev/lidbg_hal", O_RDWR, 0);\

@@ -543,7 +543,7 @@ static int read_file(const char *filename, char *rbuff, int readlen)
     filep = filp_open(filename,  O_RDONLY, 0);
     if(IS_ERR(filep))
     {
-        printk(KERN_CRIT"err:filp_open\n\n\n\n");
+        LIDBG_ERR("filp_open.%s\n",filename);
         return -1;
     }
     old_fs = get_fs();

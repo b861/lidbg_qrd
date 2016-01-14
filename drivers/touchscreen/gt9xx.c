@@ -1140,7 +1140,7 @@ static int gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
     }
 #endif
 
-    lidbg("Config Groups\' Lengths: %d, %d, %d, %d, %d, %d",
+    lidbg("Config Groups\' Lengths: %d, %d, %d, %d, %d, %d\n",
           cfg_info_len[0], cfg_info_len[1], cfg_info_len[2],
           cfg_info_len[3], cfg_info_len[4], cfg_info_len[5]);
 
@@ -1265,10 +1265,9 @@ static int gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
  	lidbg("send_cfg_buf=");
 	while(i < 20)
 	{
- 		lidbg("0x%x ", send_cfg_buf[sensor_id][i]);
+ 		lidbg("%d=0x%x \n", i ,send_cfg_buf[sensor_id][i]);
 		i++;
 	}
-	lidbg("\n");
 }
 
 #if GTP_CUSTOM_CFG

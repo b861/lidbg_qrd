@@ -163,19 +163,17 @@ typedef enum
 #define NOTIFIER_MINOR_ACC_OFF (1)
 #endif
 
-
-#define PM_WARN(fmt, args...) do{printk(KERN_CRIT"[ftf_pm]warn.%s: " fmt,__func__,##args);}while(0)
-#define PM_ERR(fmt, args...) do{printk(KERN_CRIT"[ftf_pm]err.%s: " fmt,__func__,##args);}while(0)
-#define PM_SUC(fmt, args...) do{printk(KERN_CRIT"[ftf_pm]suceed.%s: " fmt,__func__,##args);}while(0)
-#define PM_SLEEP_DBG(fmt, args...) do{printk(KERN_CRIT"[ftf_pm]sleep_step: ++++++++++++++" fmt,##args);}while(0)
-#define PM_WAKE_DBG(fmt, args...) do{printk(KERN_CRIT"[ftf_pm]wake_step: ===" fmt,##args);}while(0)
-
+#define PM_WARN(fmt, args...) do { printk(KERN_CRIT"[lidbg]   [pm] .warn.%s: " fmt,__func__,##args);}while(0)
+#define PM_ERR(fmt, args...) do { printk(KERN_CRIT"[lidbg]   [pm] .erro.%s: " fmt,__func__,##args);}while(0)
+#define PM_SUC(fmt, args...) do { printk(KERN_CRIT"[lidbg]   [pm] .succ.%s: " fmt,__func__,##args);}while(0)
+#define PM_SLEEP_DBG(fmt, args...) do{printk(KERN_CRIT"[lidbg]   [pm]sleep_step: ++++++++++++++" fmt,##args);}while(0)
+#define PM_WAKE_DBG(fmt, args...) do{printk(KERN_CRIT"[lidbg]   [pm]wake_step: ===" fmt,##args);}while(0)
 #else
-#define PM_WARN(fmt, args...) do{printk(KERN_CRIT"[ftf_pm]warn.%s: " fmt,__func__,##args);}while(0)
-#define PM_ERR(fmt, args...) do{printk(KERN_CRIT"[ftf_pm]err.%s: " fmt,__func__,##args);}while(0)
-#define PM_SUC(fmt, args...) do{printk(KERN_CRIT"[ftf_pm]suceed.%s: " fmt,__func__,##args);}while(0)
-#define PM_SLEEP_DBG(fmt, args...) do{printk(KERN_CRIT"[ftf_pm]sleep_step: ++++++++++++++" fmt,##args);}while(0)
-#define PM_WAKE_DBG(fmt, args...) do{printk(KERN_CRIT"[ftf_pm]wake_step: ===" fmt,##args);}while(0)
+#define PM_WARN(fmt, args...) do { printk(KERN_CRIT"[lidbg]   [pm] .warn.%s: " fmt,__func__,##args);}while(0)
+#define PM_ERR(fmt, args...) do { printk(KERN_CRIT"[lidbg]   [pm] .erro.%s: " fmt,__func__,##args);}while(0)
+#define PM_SUC(fmt, args...) do { printk(KERN_CRIT"[lidbg]   [pm] .succ.%s: " fmt,__func__,##args);}while(0)
+#define PM_SLEEP_DBG(fmt, args...) do{printk(KERN_CRIT"[lidbg]   [pm]sleep_step: ++++++++++++++" fmt,##args);}while(0)
+#define PM_WAKE_DBG(fmt, args...) do{printk(KERN_CRIT"[lidbg]   [pm]wake_step: ===" fmt,##args);}while(0)
 
 #define NOTIFIER_VALUE(major,minor)  (((major)&0xffff)<<16 | ((minor)&0xffff))
 
@@ -363,7 +361,7 @@ struct lidbg_interface
  	do{\
 	 mm_segment_t old_fs;\
 	 struct file *fd = NULL;\
-	 printk("lidbg:call LIDBG_GET by %s\n",__FUNCTION__);\
+	 printk("[lidbg]  [call LIDBG_GET] by %s\n",__FUNCTION__);\
 	 while(1){\
 	 	printk("lidbg: %s:%s try open lidbg_interface!\n",__FILE__,__FUNCTION__);\
 	 	fd = filp_open("/dev/lidbg_interface", O_RDWR, 0);\

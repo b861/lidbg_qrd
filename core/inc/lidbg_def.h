@@ -63,30 +63,18 @@ static inline char * get_current_time(void)
 // For Debug
 #define MSG_ERROR        (1)
 #define MSG_DEBUG        (1)
-#if 0
-#ifdef NOT_USE_MEM_LOG
-#define lidbg(msg...)  do {  printk(KERN_CRIT "[lidbg ");print_current_time();printk(  "  " msg);}while(0)
-#define lidbgerr(msg...)  do { printk(KERN_CRIT "[lidbgerr ");print_current_time();printk(  "  " msg); }while(0)
-#else
-#define lidbg(msg...)  do {     printk(KERN_CRIT "[lidbg ");print_current_time();printk(  "  " msg);lidbg_fifo_put(glidbg_msg_fifo,msg);}while(0)
-#define lidbgerr(msg...)  do {  printk(KERN_CRIT "[lidbgerr ");print_current_time();printk(  "  " msg);lidbg_fifo_put(glidbg_msg_fifo,msg);}while(0)
-#endif
-#define LIDBG_WARN(fmt, args...) do { print_current_time();printk(KERN_CRIT"  warn.%s: " fmt,__func__,##args);}while(0)
-#define LIDBG_ERR(fmt, args...) do { print_current_time();printk(KERN_CRIT"  err.%s: " fmt,__func__,##args);}while(0)
-#define LIDBG_SUC(fmt, args...) do { print_current_time();printk(KERN_CRIT"  suceed.%s: " fmt,__func__,##args);}while(0)
-#endif
 
 #ifdef NOT_USE_MEM_LOG
-#define lidbg(fmt, args...)  do { printk( KERN_CRIT "[%s]  [lidbg].%s " fmt,get_current_time(),__func__,##args);}while(0)
-#define lidbgerr(fmt, args...)  do { printk( KERN_CRIT "[%s]  [lidbgerr].%s " fmt,get_current_time(),__func__,##args); }while(0)
+#define lidbg(fmt, args...)  do { printk( KERN_CRIT "[lidbg]   [%s] " fmt,get_current_time(),##args);}while(0)
+#define lidbgerr(fmt, args...)  do { printk( KERN_CRIT "[lidbg]   [%s].lidbgerr. " fmt,get_current_time(),##args); }while(0)
 #else
-#define lidbg(fmt, args...)  do { printk( KERN_CRIT "[%s]  [lidbg].%s " fmt,get_current_time(),__func__,##args);}while(0)//lidbg_fifo_put(glidbg_msg_fifo,fmt, args...);
-#define lidbgerr(fmt, args...)  do { printk( KERN_CRIT "[%s]  [lidbgerr].%s " fmt,get_current_time(),__func__,##args);}while(0)
+#define lidbg(fmt, args...)  do { printk( KERN_CRIT "[lidbg]   [%s] " fmt,get_current_time(),##args);lidbg_fifo_put(glidbg_msg_fifo,fmt, ##args);}while(0)
+#define lidbgerr(fmt, args...)  do { printk( KERN_CRIT "[lidbg]   [%s].lidbgerr. " fmt,get_current_time(),##args);lidbg_fifo_put(glidbg_msg_fifo,fmt, ##args);}while(0)
 #endif
 
-#define LIDBG_WARN(fmt, args...) do { printk(KERN_CRIT"[%s]  [lidbg.warn].%s: " fmt,get_current_time(),__func__,##args);}while(0)
-#define LIDBG_ERR(fmt, args...) do { printk(KERN_CRIT"[%s]  [lidbgerr].%s: " fmt,get_current_time(),__func__,##args);}while(0)
-#define LIDBG_SUC(fmt, args...) do { printk(KERN_CRIT"[%s]  [lidbg].%s: " fmt,get_current_time(),__func__,##args);}while(0)
+#define LIDBG_WARN(fmt, args...) do { printk(KERN_CRIT"[lidbg]   [%s] .warn.%s: " fmt,get_current_time(),__func__,##args);}while(0)
+#define LIDBG_ERR(fmt, args...) do { printk(KERN_CRIT"[lidbg]   [%s] .erro.%s: " fmt,get_current_time(),__func__,##args);}while(0)
+#define LIDBG_SUC(fmt, args...) do { printk(KERN_CRIT"[lidbg]   [%s] .succ.%s: " fmt,get_current_time(),__func__,##args);}while(0)
 
 
 #define FUNCTION_IN       do{lidbg("%d: %s() In", __LINE__, __FUNCTION__);}while(0)
