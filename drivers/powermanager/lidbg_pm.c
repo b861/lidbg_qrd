@@ -914,7 +914,7 @@ static int thread_observer(void *data)
 					SOC_System_Status(FLY_SLEEP_TIMEOUT);
 #endif
 #endif
-                case 150:
+                case 60*10:
 #ifdef SUSPEND_TIME_OUT_FORCE_UNLOCK
                     sprintf(when, "unlock%d,%d:", have_triggerd_sleep_S, sleep_counter);
                     kernel_wakelock_save_wakelock(when, PM_INFO_FILE);
@@ -955,10 +955,10 @@ static int thread_observer(void *data)
 			   // lidbg_shell_cmd("pm disable cld.navi.c2739.mainframe");
                     	    break;
 #ifdef SUSPEND_ONLINE
-                case 300:
-			//lidbgerr("%s suspend timeout,reboot!!\n",__FUNCTION__);
-			//ssleep(10);
-			//lidbg_shell_cmd("reboot");
+                case 60*15:
+			lidbgerr("%s suspend timeout,reboot!!\n",__FUNCTION__);
+			ssleep(10);
+			lidbg_shell_cmd("reboot");
 			 break;
                 default:
                     //if(have_triggerd_sleep_S >= 5 && !(have_triggerd_sleep_S % 5) && ((g_var.system_status == FLY_ANDROID_DOWN) || (g_var.system_status == FLY_SLEEP_TIMEOUT) ||(g_var.system_status == FLY_GOTO_SLEEP)))//atomic_read(&is_in_sleep) == 1

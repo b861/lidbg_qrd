@@ -13,8 +13,8 @@
 #define AUTO_SLEEP_JIFF (10)
 #define AUTO_SLEEP_TIME_S (jiffies + AUTO_SLEEP_JIFF*HZ)
 
-#define UNORMAL_WAKEUP_TIME_MINU (3)
-#define UNORMAL_WAKEUP_CNT (30)
+#define UNORMAL_WAKEUP_TIME_MINU (15)
+#define UNORMAL_WAKEUP_CNT (UNORMAL_WAKEUP_TIME_MINU*10)
 
 #define SCREEN_ON    "flyaudio screen_on"
 #define SCREEN_OFF   "flyaudio screen_off"
@@ -269,17 +269,21 @@ static int unormal_wakeup_handle(void)
 		system_tics = get_tick_count() - system_unormal_wakeuped_tics;  //tics ms after acc_off
 		lidbg("*** system wakeup %u(%u) times in %d(%u) msec ***\n", system_unormal_wakeup_cnt, UNORMAL_WAKEUP_CNT, system_tics, (UNORMAL_WAKEUP_TIME_MINU * 60 * 1000));
 		if(system_unormal_wakeup_cnt > UNORMAL_WAKEUP_CNT){
-			repeat_times++;
-			if(repeat_times >= 5)
-			{
-				lidbgerr("%s suspend timeout,reboot!!\n",__FUNCTION__);
-				ssleep(10);
-				lidbg_shell_cmd("reboot");
-			}
+
 			if(system_tics < (UNORMAL_WAKEUP_TIME_MINU * 60 * 1000)){
 				lidbgerr("System wakeup %d times in %d(%u) msec,system tics %u, unormal\n", system_unormal_wakeup_cnt, system_tics, (UNORMAL_WAKEUP_TIME_MINU * 60 * 1000), get_tick_count());
+				if(0)
 				//if(acc_io_state == FLY_ACC_OFF)
-				//	send_app_status(FLY_SLEEP_TIMEOUT);
+				{
+					send_app_status(FLY_SLEEP_TIMEOUT);
+					repeat_times++;
+					if(repeat_times >= 5)
+					{
+						lidbgerr("%s suspend timeout,reboot!!\n",__FUNCTION__);
+						ssleep(10);
+						lidbg_shell_cmd("reboot");
+					}
+				}
 			}else
 				lidbg("System wakeup %d times in %d(%u) msec,system tics %u, normal\n", system_unormal_wakeup_cnt, system_tics, (UNORMAL_WAKEUP_TIME_MINU * 60 * 1000), get_tick_count());
 
