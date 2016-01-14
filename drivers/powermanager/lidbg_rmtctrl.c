@@ -34,6 +34,9 @@ struct work_struct acc_state_work;
 static struct timer_list rmtctrl_timer;
 static struct wake_lock rmtctrl_wakelock;
 static u32 system_unormal_wakeuped_tics = 0;
+static u32 system_tics = 0;
+static u32 repeat_times = 0;
+static u32 system_unormal_wakeup_cnt = 0;
 
 FLY_ACC_STATUS acc_io_state = FLY_ACC_ON;
 bool is_fake_acc_off = 0;
@@ -74,13 +77,20 @@ void acc_status_handle(FLY_ACC_STATUS val)
 {
 	static u32 acc_count = 0;
 	if(val == FLY_ACC_ON){
-		lidbg("acc_state_work_func: FLY_ACC_ON:acc_count=%d\n",acc_count++);
+		lidbg("acc_status_handle: FLY_ACC_ON:acc_count=%d\n",acc_count++);
 		g_var.acc_flag = 1;
+		acc_io_state = FLY_ACC_ON;
 
-		lidbg("*** Set acc.status to 0\n");
+		lidbg("acc_status_handle: clear unormal wakeup count.\n");
+		system_tics = 0;
+		repeat_times = 0;
+		system_unormal_wakeup_cnt = 0;
+		system_unormal_wakeuped_tics = 0;
+
+		lidbg("acc_status_handle: set acc.status to 0\n");
 		lidbg_shell_cmd("setprop persist.lidbg.acc.status 0");
 		lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_ON));
-		acc_io_state = FLY_ACC_ON;
+
 		wake_lock(&rmtctrl_wakelock);
 		send_app_status(FLY_KERNEL_UP);
 		send_app_status(FLY_SCREEN_ON);
@@ -89,22 +99,23 @@ void acc_status_handle(FLY_ACC_STATUS val)
 		    USB_WORK_ENABLE;
 		//LCD_ON;
 
-		lidbg("acc_state_work_func: FLY_ACC_ON del rmtctrl timer.\n");
+		lidbg("acc_status_handle: FLY_ACC_ON del rmtctrl timer.\n");
 		del_timer(&rmtctrl_timer);
 	}else{
-		lidbg("acc_state_work_func: FLY_ACC_OFF\n");
+		lidbg("acc_status_handle: FLY_ACC_OFF\n");
 		g_var.acc_flag = 0;
+		acc_io_state = FLY_ACC_OFF;
 
 		system_unormal_wakeuped_tics = get_tick_count();
 
-		lidbg("*** Set acc.status to 1\n");
+		lidbg("acc_status_handle: set acc.status to 1\n");
 		lidbg_shell_cmd("setprop persist.lidbg.acc.status 1");
 		if(g_var.is_fly == 0)
 			USB_WORK_DISENABLE;
 		//LCD_OFF;
 		if(is_fake_acc_off == 0)
 			lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_OFF));
-		acc_io_state = FLY_ACC_OFF;
+
 		wake_unlock(&rmtctrl_wakelock);	//ensure KERNEL_UP FB be called before sleep
 //		send_app_status(FLY_GOTO_SLEEP);
 		send_app_status(FLY_SCREEN_OFF);
@@ -113,7 +124,7 @@ void acc_status_handle(FLY_ACC_STATUS val)
 			send_app_status(FLY_GOTO_SLEEP);
 		else
 		{
-			lidbg("acc_state_work_func: FLY_ACC_OFF, add rmtctrl timer.\n");
+			lidbg("acc_status_handle: FLY_ACC_OFF, add rmtctrl timer.\n");
 			mod_timer(&rmtctrl_timer,SCREE_OFF_TIME_S);
 		}
 	}
@@ -252,27 +263,16 @@ static int lidbg_rmtctrl_event(struct notifier_block *this,
 
 static int unormal_wakeup_handle(void)
 {
-		static u32 system_tics = 0;
-		static u32 system_unormal_wakeup_cnt = 0;
-		static u32 repeat_times = 0;;
-			
-		if(acc_io_state == FLY_ACC_ON){
-			system_tics = 0;
-			system_unormal_wakeup_cnt = 0;
-			system_unormal_wakeuped_tics = 0;
-			repeat_times = 0;
-		}
-
 		system_unormal_wakeup_cnt++;
 
 		system_tics = get_tick_count() - system_unormal_wakeuped_tics;  //tics ms after acc_off
-		lidbg("*** system wakeup %u(%u) times in %d(%u) msec ***\n", system_unormal_wakeup_cnt, UNORMAL_WAKEUP_CNT, system_tics, (UNORMAL_WAKEUP_TIME_MINU * 60 * 1000));
+		lidbg("*** system wakeup %u(%u) times in %d(%u) msec, repeat_times %d***\n", system_unormal_wakeup_cnt, UNORMAL_WAKEUP_CNT, system_tics, (UNORMAL_WAKEUP_TIME_MINU * 60 * 1000), repeat_times);
 		if(system_unormal_wakeup_cnt > UNORMAL_WAKEUP_CNT){
 
 			if(system_tics < (UNORMAL_WAKEUP_TIME_MINU * 60 * 1000)){
 				lidbgerr("System wakeup %d times in %d(%u) msec,system tics %u, unormal\n", system_unormal_wakeup_cnt, system_tics, (UNORMAL_WAKEUP_TIME_MINU * 60 * 1000), get_tick_count());
-				if(0)
-				//if(acc_io_state == FLY_ACC_OFF)
+
+				if(acc_io_state == FLY_ACC_OFF)
 				{
 					send_app_status(FLY_SLEEP_TIMEOUT);
 					repeat_times++;
@@ -381,6 +381,8 @@ static int rmtctrl_pm_suspend(struct device *dev)
 static int rmtctrl_pm_resume(struct device *dev)
 {
     DUMP_FUN;
+
+	lidbg("rmtctrl_pm_resume, acc_io_state is %s\n", (acc_io_state == FLY_ACC_ON)?"FLY_ACC_ON":"FLY_ACC_OFF");
 //	if(g_var.system_status == FLY_KERNEL_DOWN)
 //		send_app_status(FLY_KERNEL_UP);
 	if(acc_io_state == FLY_ACC_OFF)
