@@ -6,10 +6,10 @@
 #define SCREE_OFF_JIFF (15)
 #define SCREE_OFF_TIME_S (jiffies + SCREE_OFF_JIFF*HZ)
 
-#define GOTO_SLEEP_JIFF (5)
+#define GOTO_SLEEP_JIFF (15)
 #define GOTO_SLEEP_TIME_S (jiffies + GOTO_SLEEP_JIFF*HZ)
 
-#define AUTO_SLEEP_JIFF (10)
+#define AUTO_SLEEP_JIFF (15)
 #define AUTO_SLEEP_TIME_S (jiffies + AUTO_SLEEP_JIFF*HZ)
 
 #define UNORMAL_WAKEUP_TIME_MINU (30)

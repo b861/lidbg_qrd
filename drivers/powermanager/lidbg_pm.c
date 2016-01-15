@@ -907,16 +907,16 @@ static int thread_observer(void *data)
                 have_triggerd_sleep_S++;
                 switch (have_triggerd_sleep_S)
                 {
-                case 60*5:
+                case 60*15:
 #ifdef SUSPEND_ONLINE
 #ifdef SUSPEND_TIME_OUT_KILL_PROCESS
 					if( g_var.suspend_timeout_protect  == 0) break;
-					lidbg("Sleep timeout, bserver thread start to kill process...\n");
+					lidbgerr("Sleep timeout,  start to kill process...\n");
 					SOC_System_Status(FLY_SLEEP_TIMEOUT);
 					break;
 #endif
 #endif
-                case 60*10:
+                case 60*17:
 #ifdef SUSPEND_TIME_OUT_FORCE_UNLOCK
 			if( g_var.suspend_timeout_protect  == 0) break;
                     sprintf(when, "unlock%d,%d:", have_triggerd_sleep_S, sleep_counter);
@@ -958,7 +958,7 @@ static int thread_observer(void *data)
 			   // lidbg_shell_cmd("pm disable cld.navi.c2739.mainframe");
                     	    break;
 #ifdef SUSPEND_ONLINE
-                case 60*15:
+                case 60*19:
 			if( g_var.suspend_timeout_protect  == 0) break;
 			lidbgerr("%s suspend timeout,reboot!!\n",__FUNCTION__);
 			ssleep(10);

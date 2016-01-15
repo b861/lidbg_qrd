@@ -615,14 +615,13 @@ public class FlyBootService extends Service {
         List<ActivityManager.RunningAppProcessInfo> appProcessList = null;
 
         appProcessList = mActivityManager.getRunningAppProcesses();
-
+	delay(200);
         LIDBG_PRINT("begin to KillProcess."+(mWhiteList == null)+"/"+mWhiteListKillEn+"\n");
         for (ActivityManager.RunningAppProcessInfo appProcessInfo : appProcessList) {
             int pid = appProcessInfo.pid;
             int uid = appProcessInfo.uid;
             String processName = appProcessInfo.processName;
             if(blSuspendUnairplaneFlag){
-				delay(200);
 	            booleanAccWakedupState = SystemProperties.getBoolean("persist.lidbg.AccWakedupState",false);
 	            if(booleanAccWakedupState){
 	                LIDBG_PRINT("Prop AccWakedupState be set:" + booleanAccWakedupState + ", stop kill process.");
