@@ -90,7 +90,7 @@ void acc_status_handle(FLY_ACC_STATUS val)
 		lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_ON));
 
 		wake_lock(&rmtctrl_wakelock);
-		send_app_status(FLY_KERNEL_UP);
+		send_app_status(FLY_KERNEL_UP);//wakeup
 		send_app_status(FLY_SCREEN_ON);
 		fs_file_write(DEV_NAME, false, SCREEN_ON, 0, strlen(SCREEN_ON));
 		if(g_var.is_fly == 0)
@@ -176,6 +176,7 @@ static void rmtctrl_resume(void)
 	{
 		lidbg_shell_cmd("cat /proc/dsi83_rst &");
 		LCD_ON;
+		send_app_status(FLY_SCREEN_ON);
 	}
 	
 	if((g_var.acc_flag == FLY_ACC_OFF)&&(is_fake_acc_off == 0)){

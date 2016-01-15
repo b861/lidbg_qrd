@@ -683,11 +683,11 @@ static int  flyts_hal_init(void)
         lidbg("flyts_hal_init kmalloc err\n");
         return 0;
     }
-    lidbg_new_cdev(&flyts_hal_fops, "flyts_hal");//add cdev
+    lidbg_new_cdev(&flyts_hal_fops, "lidbg_ts_probe");//add cdev
     init_waitqueue_head(&wait_queue);
     sema_init(&sem, 1);
     kfifo_init(&flyts_hal_data_fifo, flyts_hal_fifo_buffer, FIFO_SIZE);
-    lidbg_chmod("/dev/flyts_hal0");
+    lidbg_chmod("/dev/lidbg_ts_probe0");
     return 0;
 }
 
