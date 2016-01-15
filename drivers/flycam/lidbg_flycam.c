@@ -201,6 +201,10 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 			{
 				lidbg_shell_cmd("setprop fly.uvccam.res 720");
 			}
+			else if(!strncmp(keyval[1], "640x360", 7))
+			{
+				lidbg_shell_cmd("setprop fly.uvccam.res 640x360");
+			}
 			else
 			{
 				lidbg("-------res wrong arg:%s-----",keyval[1]);
@@ -213,6 +217,15 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 			rectimeVal = simple_strtoul(keyval[1], 0, 0);
 			lidbg("rectimeVal = %d",rectimeVal);
 			sprintf(temp_cmd, "setprop fly.uvccam.rectime %d", rectimeVal);
+			lidbg_shell_cmd(temp_cmd);
+		}
+		else if(!strcmp(keyval[0], "recbitrate") )
+		{
+			int recbitrateVal;
+			char temp_cmd[256];
+			recbitrateVal = simple_strtoul(keyval[1], 0, 0);
+			lidbg("recbitrateVal = %d",recbitrateVal);
+			sprintf(temp_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video2  --xuset-br %d", recbitrateVal);
 			lidbg_shell_cmd(temp_cmd);
 		}
 		#if 0

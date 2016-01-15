@@ -272,7 +272,12 @@ static int video_set_format(int dev, unsigned int w, unsigned int h, unsigned in
 		w = 1920;
 		h = 1080;
 	}
-
+	else if(!strncmp(Res_String, "640x360", 7))
+	{
+		lidbg("%s: select 640x360!",__func__);
+		w = 640;
+		h = 360;
+	}
 	
 	memset(&fmt, 0, sizeof fmt);
 	fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -1849,6 +1854,7 @@ int main(int argc, char *argv[])
 	unsigned char isReplace = 0;
 	unsigned long totalSize = 0;
 	unsigned char tryopencnt = 20;
+	unsigned char isPreview = 0;
  //cjc -
 #if(CARCAM_PROJECT == 1)
 	printf("%s   ******  for Carcam  ******\n",TESTAP_VERSION);
@@ -2683,7 +2689,17 @@ openfd:
 			sprintf(tmp_usb_mkdir, "mkdir %s", Rec_Save_Dir);
 			system(tmp_usb_mkdir);
 		}
-		if(access(Rec_Save_Dir, R_OK) != 0)
+		if(!strncmp(Rec_Save_Dir, "/storage/sdcard0/preview_cache", 30) )
+		{
+			/*
+			char tmp_preview_mkdir[100] = "mkdir /storage/sdcard0/preview_cache";
+			lidbg("======== try create preview cache dir -> %s =======",Rec_Save_Dir);
+			sprintf(tmp_preview_mkdir, "mkdir %s", Rec_Save_Dir);
+			system(tmp_preview_mkdir);
+			*/
+			isPreview = 1;
+		}
+		if(access(Rec_Save_Dir, R_OK) != 0 && !isPreview)
 		{
 			lidbg("record file path access wrong! " );
 			//return 0;
@@ -3873,6 +3889,11 @@ openfd:
 		if((!strncmp(startRecording, "0", 1)) && (!do_save) )//close
 		{
 			lidbg("-------eho---------uvccam stop recording -----------\n");
+			if(isPreview) 
+			{
+				sprintf(tmpCMD , "rm -f %s&",Rec_Save_Dir);
+				system(tmpCMD);
+			}
 			return 0;
 		}
 		
@@ -4025,7 +4046,7 @@ openfd:
 					rec_fp1 = fopen(flyh264_filename[flytmpcnt], "wb");
 				}
 				*/
-				if(i % 15 == 0)
+				if((i % 15 == 0) && !isPreview)
 				{
 					DIR *pDir ;
 					struct dirent *ent;
@@ -4056,8 +4077,17 @@ openfd:
 						isReplace = 1;
 					}
 				}
-				
-				if((i % (Rec_Sec*30)  == 0) || isReplace)//frames = sec * 30f/s
+
+				if(isPreview)//preview : not going to change file name.
+				{
+					//lidbg("======isPreview======");
+					if(rec_fp1 == NULL)
+					{
+						sprintf(flyh264_filename, "%s", Rec_Save_Dir);
+						rec_fp1 = fopen(flyh264_filename, "wb");
+					}	
+				}
+				else if((i % (Rec_Sec*30)  == 0) || isReplace)//frames = sec * 30f/s
 				{
 					DIR *pDir ;
 					struct dirent *ent; 
@@ -4076,6 +4106,7 @@ openfd:
 
 					struct tm prevTm,curTm;
 					time_t prevtimep,curtimep;
+					
 					prevtimep = 0;
 					isReplace = 0;
 					#if 0
