@@ -63,6 +63,16 @@ bool iSOC_IO_ISR_Add(u32 irq, u32  interrupt_type, pinterrupt_isr func, void *de
     lidbg("ext_int_num:%d \n", irq);
 
     ret =  soc_io_irq(&io_int_config1);
+
+#if 0
+#ifdef PLATFORM_msm8909
+	if(irq == MCU_IIC_REQ_GPIO){
+       lidbg("Enable IO(%d), irq[%d] as wakeup source\n", irq, io_int_config1.ext_int_num);
+       enable_irq_wake(GPIO_TO_INT(MCU_IIC_REQ_GPIO));
+	}
+#endif
+#endif
+
     return ret;
 }
 
