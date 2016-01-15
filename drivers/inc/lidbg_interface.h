@@ -164,13 +164,13 @@ typedef enum
 #endif
 
 #define PM_WARN(fmt, args...) do { printk(KERN_CRIT"[lidbg]   [pm] .warn.%s: " fmt,__func__,##args);}while(0)
-#define PM_ERR(fmt, args...) do { printk(KERN_CRIT"[lidbg]   [pm] .erro.%s: " fmt,__func__,##args);}while(0)
+#define PM_ERR(fmt, args...) do { printk(KERN_CRIT"[lidbg]   [pm] .lidbgerr.%s: " fmt,__func__,##args);}while(0)
 #define PM_SUC(fmt, args...) do { printk(KERN_CRIT"[lidbg]   [pm] .succ.%s: " fmt,__func__,##args);}while(0)
 #define PM_SLEEP_DBG(fmt, args...) do{printk(KERN_CRIT"[lidbg]   [pm]sleep_step: ++++++++++++++" fmt,##args);}while(0)
 #define PM_WAKE_DBG(fmt, args...) do{printk(KERN_CRIT"[lidbg]   [pm]wake_step: ===" fmt,##args);}while(0)
 #else
 #define PM_WARN(fmt, args...) do { printk(KERN_CRIT"[lidbg]   [pm] .warn.%s: " fmt,__func__,##args);}while(0)
-#define PM_ERR(fmt, args...) do { printk(KERN_CRIT"[lidbg]   [pm] .erro.%s: " fmt,__func__,##args);}while(0)
+#define PM_ERR(fmt, args...) do { printk(KERN_CRIT"[lidbg]   [pm] .lidbgerr.%s: " fmt,__func__,##args);}while(0)
 #define PM_SUC(fmt, args...) do { printk(KERN_CRIT"[lidbg]   [pm] .succ.%s: " fmt,__func__,##args);}while(0)
 #define PM_SLEEP_DBG(fmt, args...) do{printk(KERN_CRIT"[lidbg]   [pm]sleep_step: ++++++++++++++" fmt,##args);}while(0)
 #define PM_WAKE_DBG(fmt, args...) do{printk(KERN_CRIT"[lidbg]   [pm]wake_step: ===" fmt,##args);}while(0)

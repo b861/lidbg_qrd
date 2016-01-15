@@ -38,7 +38,6 @@ static u32 system_tics = 0;
 static u32 repeat_times = 0;
 static u32 system_unormal_wakeup_cnt = 0;
 
-FLY_ACC_STATUS acc_io_state = FLY_ACC_ON;
 bool is_fake_acc_off = 0;
 
 void rmtctrl_fifo_in(void)
@@ -64,7 +63,7 @@ static void send_app_status(FLY_SYSTEM_STATUS state)
 }
 static void rmtctrl_timer_func(unsigned long data)
 {
-	if((acc_io_state == FLY_ACC_OFF)&&(is_fake_acc_off == 0)){
+	if((g_var.acc_flag == FLY_ACC_OFF)&&(is_fake_acc_off == 0)){
        lidbg("rmtctrl_timer_func: goto_sleep %ds later...\n", GOTO_SLEEP_JIFF);
 	if( g_var.usb_request == 0)
        	send_app_status(FLY_GOTO_SLEEP);
@@ -79,7 +78,6 @@ void acc_status_handle(FLY_ACC_STATUS val)
 	if(val == FLY_ACC_ON){
 		lidbg("acc_status_handle: FLY_ACC_ON:acc_count=%d\n",acc_count++);
 		g_var.acc_flag = 1;
-		acc_io_state = FLY_ACC_ON;
 
 		lidbg("acc_status_handle: clear unormal wakeup count.\n");
 		system_tics = 0;
@@ -104,7 +102,6 @@ void acc_status_handle(FLY_ACC_STATUS val)
 	}else{
 		lidbg("acc_status_handle: FLY_ACC_OFF\n");
 		g_var.acc_flag = 0;
-		acc_io_state = FLY_ACC_OFF;
 
 		system_unormal_wakeuped_tics = get_tick_count();
 
@@ -181,8 +178,8 @@ static void rmtctrl_resume(void)
 		LCD_ON;
 	}
 	
-	if((acc_io_state == FLY_ACC_OFF)&&(is_fake_acc_off == 0)){
-		lidbg("rmtctrl_resume, acc_io_state is FLY_ACC_OFF, add rmtctrl timer.\n");
+	if((g_var.acc_flag == FLY_ACC_OFF)&&(is_fake_acc_off == 0)){
+		lidbg("rmtctrl_resume, g_var.acc_flag is FLY_ACC_OFF, add rmtctrl timer.\n");
 		mod_timer(&rmtctrl_timer,AUTO_SLEEP_TIME_S);
 	}
 	return;
@@ -272,7 +269,7 @@ static int unormal_wakeup_handle(void)
 			if(system_tics < (UNORMAL_WAKEUP_TIME_MINU * 60 * 1000)){
 				lidbgerr("System wakeup %d times in %d(%u) msec,system tics %u, unormal\n", system_unormal_wakeup_cnt, system_tics, (UNORMAL_WAKEUP_TIME_MINU * 60 * 1000), get_tick_count());
 
-				if(acc_io_state == FLY_ACC_OFF)
+				if(g_var.acc_flag == FLY_ACC_OFF)
 				{
 					if( g_var.suspend_timeout_protect  == 0)
 					{
@@ -318,29 +315,31 @@ static  struct file_operations rmtctrl_fops =
 
 static int thread_check_acc_and_response_acc_off_delay(void *data)
 {
-    FLY_ACC_STATUS acc_io_old = FLY_ACC_ON;
+    bool acc_io_old = FLY_ACC_ON;
     while(0==g_var.android_boot_completed)
     {
-        acc_io_state = SOC_IO_Input(MCU_ACC_STATE_IO, MCU_ACC_STATE_IO, GPIO_CFG_PULL_UP);
-        if(acc_io_state != acc_io_old)
+        	g_var.acc_flag = SOC_IO_Input(MCU_ACC_STATE_IO, MCU_ACC_STATE_IO, GPIO_CFG_PULL_UP);
+        if(g_var.acc_flag != acc_io_old)
         	{
-                acc_io_old=acc_io_state;
-                PM_WARN("<current acc state.check:%d,%d >\n",acc_io_state,(acc_io_state == FLY_ACC_OFF));
+                acc_io_old=g_var.acc_flag;
+                PM_WARN("<current acc state.check:%d,%d >\n",	g_var.acc_flag,(g_var.acc_flag == FLY_ACC_OFF));
 	}
         ssleep(1);
     };
-    PM_WARN("<current acc state.stop:%d,%d >\n",acc_io_state,(acc_io_state == FLY_ACC_OFF));
-    if(acc_io_state == FLY_ACC_OFF)
+    PM_WARN("<current acc state.stop:%d,%d >\n",g_var.acc_flag,(g_var.acc_flag == FLY_ACC_OFF));
+    if(g_var.acc_flag == FLY_ACC_OFF)
     {
-        PM_WARN("<response_acc_off,more delay 20S :%d,%d >\n",acc_io_state,(acc_io_state == FLY_ACC_OFF));
+        PM_WARN("<response_acc_off,more delay 20S :%d,%d >\n",g_var.acc_flag,(g_var.acc_flag == FLY_ACC_OFF));
         ssleep(20);
-        acc_status_handle(acc_io_state);
+        acc_status_handle(g_var.acc_flag);
     }
     return 1;
 }
 static int lidbg_rmtctrl_probe(struct platform_device *pdev)
 {
 	int ret;
+
+        PM_ERR("<have a deep check,is enum FLY_ACC_OFF == 0  :%d,[g_var.acc_flag:%d ,  FLY_ACC_OFF:%d] >\n",(g_var.acc_flag == FLY_ACC_OFF),g_var.acc_flag,FLY_ACC_OFF);
 
 	fb_notif.notifier_call = fb_notifier_callback;
 	ret = fb_register_client(&fb_notif);
@@ -400,17 +399,17 @@ static int rmtctrl_pm_resume(struct device *dev)
 {
     DUMP_FUN;
 
-	lidbg("rmtctrl_pm_resume, acc_io_state is %s\n", (acc_io_state == FLY_ACC_ON)?"FLY_ACC_ON":"FLY_ACC_OFF");
+	lidbg("rmtctrl_pm_resume, acc_io_state is %s\n", (g_var.acc_flag == FLY_ACC_ON)?"FLY_ACC_ON":"FLY_ACC_OFF");
 //	if(g_var.system_status == FLY_KERNEL_DOWN)
 //		send_app_status(FLY_KERNEL_UP);
-	if(acc_io_state == FLY_ACC_OFF)
+	if(g_var.acc_flag == FLY_ACC_OFF)
 		unormal_wakeup_handle();
 
 	if(is_fake_acc_off)
 	{
 		lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_ON));
 	}
-	if((acc_io_state == FLY_ACC_OFF)&&(is_fake_acc_off == 0)){
+	if((g_var.acc_flag == FLY_ACC_OFF)&&(is_fake_acc_off == 0)){
 		lidbg("rmtctrl_pm_resume, acc_io_state is FLY_ACC_OFF, add rmtctrl timer.\n");
 		mod_timer(&rmtctrl_timer,AUTO_SLEEP_TIME_S);
 	}
@@ -458,9 +457,9 @@ static void __exit lidbg_rmtctrl_exit(void)
 
  void  fake_acc_off(void)
 {
-	acc_io_state = FLY_ACC_OFF;
+	g_var.acc_flag= FLY_ACC_OFF;
 	is_fake_acc_off = 1;
-	acc_status_handle(acc_io_state);
+	acc_status_handle(g_var.acc_flag);
 }
 
 module_init(lidbg_rmtctrl_init);
