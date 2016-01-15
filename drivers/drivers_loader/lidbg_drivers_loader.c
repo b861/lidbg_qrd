@@ -123,7 +123,7 @@ bool judgment_cmd(char *judgmentcmd, int *judgmenttimes)
         }
 
         lidbg_strrpl(judgmentcmd, or != NULL ? "||" : "&&", or != NULL ? "|" : "&");
-        LIDBG_WARN("after lidbg_strrpl ===============<%s>\n",  judgmentcmd);
+        LIDBG_WARN("after lidbg_strrpl <%s>\n",  judgmentcmd);
 
         //toke judgment string and have a check if it is true
         {
@@ -278,6 +278,12 @@ static int thread_drivers_loader_analyze(void *data)
             fs_fill_list(get_lidbg_file_path(buff, "flyaudio.modules.conf"), FS_CMD_FILE_LISTMODE, &flyaudio_hal_list);
 
 	analyze_list_cmd(&flyaudio_hal_list);
+
+	while(0==g_var.android_boot_completed)
+	{
+	    LIDBG_WARN("<flyaudio.init.rc.conf: waiting for g_var.android_boot_completed....>\n");
+	    ssleep(5);
+	};
 
         fs_fill_list(get_lidbg_file_path(buff, "flyaudio.init.rc.conf"), FS_CMD_FILE_LISTMODE, &flyaudio_list);
         analyze_list_cmd(&flyaudio_list);
