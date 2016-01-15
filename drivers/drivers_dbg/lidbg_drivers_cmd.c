@@ -303,6 +303,7 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#063--iptable all apps\n");
             fs_mem_log("*158#064--! iptable all apps\n");
             fs_mem_log("*158#065--disable suspend timeout protect\n");
+            fs_mem_log("*158#066--disable alarmmanager protect\n");
 
             show_password_list();
             lidbg_domineering_ack();
@@ -730,6 +731,11 @@ void parse_cmd(char *pt)
         {
             lidbg("disable suspend timeout protect\n");
            g_var.suspend_timeout_protect = 0;
+        }
+        else if (!strcmp(argv[1], "*158#066"))
+        {
+            lidbg("*158#066--disable alarmmanager protect\n");
+            lidbg_shell_cmd("am broadcast -a com.lidbg.alarmmanager.action --ei action 0 &");
         }
 
         else if (!strcmp(argv[1], "*168#001"))
