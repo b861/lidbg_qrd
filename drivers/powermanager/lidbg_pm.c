@@ -878,12 +878,12 @@ static int thread_observer(void *data)
     char when[64] = {0};
 
     observer_prepare();
-
     while(!kthread_should_stop())
     {
         have_triggerd_sleep_S = 0;
         if( !wait_for_completion_interruptible(&sleep_observer_wait))
         {
+
 #ifndef SUSPEND_ONLINE
             find_task_by_name_or_kill(true, false, true, "c2739.mainframe");
 #endif	   			
@@ -961,7 +961,6 @@ static int thread_observer(void *data)
                 case 60*19:
 			if( g_var.suspend_timeout_protect  == 0) break;
 			lidbgerr("%s suspend timeout,reboot!!\n",__FUNCTION__);
-			ssleep(10);
 			lidbg_shell_cmd("reboot");
 			 break;
                 default:
