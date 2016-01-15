@@ -401,25 +401,26 @@ static int thread_gpio_app_status_delay(void *data)
 {
     ssleep(10);
     LPC_PRINT(true, sleep_counter, "PM:MCU_WP_GPIO_ON1");
-    ssleep(40);
+    while(0==g_var.android_boot_completed)
+    {
+        ssleep(10);
+        PM_WARN("<wait android_boot_completed : %d>\n",g_var.android_boot_completed);
+    };
+    PM_WARN("<set MCU_APP_GPIO_ON >\n");
+    LPC_PRINT(true, sleep_counter, "PM:MCU_APP_GPIO_ON2");
     MCU_APP_GPIO_ON;
 
 #ifdef CONTROL_PM_IO_BY_BP
     MCU_SET_APP_GPIO_SUSPEND;
 #endif
 
-
 #ifdef LIDBG_PM_AUTO_ACC
-    ssleep(20);
     LPC_CMD_ACC_SWITCH_START;
 #endif
 
 #ifdef LIDBG_PM_MONITOR
     CREATE_KTHREAD(thread_lidbg_pm_monitor, NULL);
 #endif
-
-    PM_WARN("<set MCU_APP_GPIO_ON >\n");
-    LPC_PRINT(true, sleep_counter, "PM:MCU_APP_GPIO_ON2");
 
     return 1;
 }

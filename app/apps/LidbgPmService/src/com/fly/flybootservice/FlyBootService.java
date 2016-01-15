@@ -154,6 +154,7 @@ public class FlyBootService extends Service {
         LIDBG_PRINT("flybootservice stop [getInternelAllAppUids]");
         FlyaudioBlackListInternetControl(false);
 	IntentFilter filter = new IntentFilter();
+	filter.addAction("android.intent.action.BOOT_COMPLETED");
 	filter.addAction("com.lidbg.flybootserver.action");
 	filter.setPriority(Integer.MAX_VALUE);
 	registerReceiver(myReceiver, filter);
@@ -284,9 +285,21 @@ public class FlyBootService extends Service {
 		@Override
 		public void onReceive(Context context, Intent intent)
 		{
-			if (intent == null || !intent.hasExtra("action"))
+			if ( intent == null)
 			{
-				LIDBG_PRINT("err.return:intent == null || !intent.hasExtra(\"action\")\n");
+				LIDBG_PRINT("err.return:intent == null \n");
+				return;
+			}
+
+			LIDBG_PRINT("flybootserver.BroadcastReceiver:"+intent.getAction()+"\n");
+			if (intent.getAction().equals("android.intent.action.BOOT_COMPLETED"))
+			{
+				writeToFile("/dev/lidbg_interface", "BOOT_COMPLETED");
+				return;
+			}
+			if ( !intent.hasExtra("action"))
+			{
+				LIDBG_PRINT("err.return:!intent.hasExtra(\"action\")\n");
 				return;
 			}
 			int action = intent.getExtras().getInt("action");

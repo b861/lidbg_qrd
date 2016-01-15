@@ -316,14 +316,26 @@ static  struct file_operations rmtctrl_fops =
     .write = rmtctrl_write,
 };
 
-static int thread_response_acc_state_delay(void *data)
+static int thread_check_acc_and_response_acc_off_delay(void *data)
 {
-    PM_WARN("<current acc state1:%d,%d >\n",acc_io_state,(acc_io_state == FLY_ACC_OFF));
-    ssleep(50);
-    acc_io_state = SOC_IO_Input(MCU_ACC_STATE_IO, MCU_ACC_STATE_IO, GPIO_CFG_PULL_UP);
-    PM_WARN("<current acc state2:%d,%d >\n",acc_io_state,(acc_io_state == FLY_ACC_OFF));
+    FLY_ACC_STATUS acc_io_old = FLY_ACC_ON;
+    while(0==g_var.android_boot_completed)
+    {
+        acc_io_state = SOC_IO_Input(MCU_ACC_STATE_IO, MCU_ACC_STATE_IO, GPIO_CFG_PULL_UP);
+        if(acc_io_state != acc_io_old)
+        	{
+                acc_io_old=acc_io_state;
+                PM_WARN("<current acc state.check:%d,%d >\n",acc_io_state,(acc_io_state == FLY_ACC_OFF));
+	}
+        ssleep(1);
+    };
+    PM_WARN("<current acc state.stop:%d,%d >\n",acc_io_state,(acc_io_state == FLY_ACC_OFF));
     if(acc_io_state == FLY_ACC_OFF)
-            acc_status_handle(acc_io_state);
+    {
+        PM_WARN("<response_acc_off,more delay 20S :%d,%d >\n",acc_io_state,(acc_io_state == FLY_ACC_OFF));
+        ssleep(20);
+        acc_status_handle(acc_io_state);
+    }
     return 1;
 }
 static int lidbg_rmtctrl_probe(struct platform_device *pdev)
@@ -359,7 +371,7 @@ static int lidbg_rmtctrl_probe(struct platform_device *pdev)
 
 	wake_lock_init(&rmtctrl_wakelock, WAKE_LOCK_SUSPEND, "lidbg_rmtctrl");
 
-	acc_io_state = SOC_IO_Input(MCU_ACC_STATE_IO, MCU_ACC_STATE_IO, GPIO_CFG_PULL_UP);
+	SOC_IO_Input(MCU_ACC_STATE_IO, MCU_ACC_STATE_IO, GPIO_CFG_PULL_UP);
 	SOC_IO_ISR_Add(MCU_ACC_STATE_IO, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING, acc_state_isr, NULL);
 	lidbg("rmtctrl probe: enable_irq_wake %d\n",GPIO_TO_INT(MCU_ACC_STATE_IO));
 	enable_irq_wake(GPIO_TO_INT(MCU_ACC_STATE_IO));
@@ -372,8 +384,7 @@ static int lidbg_rmtctrl_probe(struct platform_device *pdev)
 	lidbg_chmod("/dev/flyaudio_pm0");
 
 	// boot when acc off
-	if(acc_io_state == FLY_ACC_OFF)
-	    CREATE_KTHREAD(thread_response_acc_state_delay, NULL);
+	CREATE_KTHREAD(thread_check_acc_and_response_acc_off_delay, NULL);
 	
 	return 0;
 }

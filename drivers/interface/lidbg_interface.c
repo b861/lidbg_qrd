@@ -377,6 +377,24 @@ ssize_t interface_read(struct file *filp, char __user *buf, size_t size, loff_t 
 }
 static ssize_t interface_write(struct file *filp, const char __user *buf, size_t size, loff_t *ppos)
 {
+    char cmd_buf[512];
+    memset(cmd_buf, '\0', 512);
+
+    if(copy_from_user(cmd_buf, buf, size))
+    {
+        PM_ERR("copy_from_user ERR\n");
+    }
+    if(cmd_buf[size - 1] == '\n')
+        cmd_buf[size - 1] = '\0';
+    PM_WARN("interface_write:[%s]\n", cmd_buf);
+
+
+    //flyaudio logic
+    if(!strcmp(cmd_buf, "BOOT_COMPLETED"))
+    {
+        g_var.android_boot_completed = 1;
+        PM_WARN("g_var.android_boot_completed = 1\n");
+    }
     return size;
 }
 
@@ -435,7 +453,7 @@ int fly_interface_init(void)
     g_var.is_fly = 0;
     g_var.fake_suspend = 0;
 #ifdef SUSPEND_ONLINE	
-    g_var.acc_flag =  SOC_IO_Input(MCU_ACC_STATE_IO, MCU_ACC_STATE_IO, GPIO_CFG_PULL_UP);
+    g_var.acc_flag =  0;
 #endif
     g_var.ws_lh = NULL;
     g_var.fb_on = true;
@@ -447,6 +465,7 @@ int fly_interface_init(void)
     g_var.usb_status = 0;
     g_var.usb_request = 0;
     g_var.suspend_timeout_protect = 1;
+    g_var.android_boot_completed = 0;
 	
     if(gboot_mode == MD_RECOVERY)
     {

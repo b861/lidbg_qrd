@@ -156,13 +156,12 @@ int i2c_devices_probe_thread(void *data)
 {
     int cnt = 3;
 #ifdef SUSPEND_ONLINE	
-    g_var.acc_flag =  SOC_IO_Input(MCU_ACC_STATE_IO, MCU_ACC_STATE_IO, GPIO_CFG_PULL_UP);
-    LIDBG_WARN("<g_var.acc_flag1:%d>\n",g_var.acc_flag);
+    LIDBG_WARN("<g_var.acc_flag.1:%d>\n",g_var.acc_flag);
     while(g_var.acc_flag==0)
     {
         msleep(200);
     }
-    LIDBG_WARN("<g_var.acc_flag2:%d>\n",g_var.acc_flag);
+    LIDBG_WARN("<g_var.acc_flag.2:%d>\n",g_var.acc_flag);
 #endif
     while(cnt--)
     {
