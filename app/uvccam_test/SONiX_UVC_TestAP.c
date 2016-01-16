@@ -119,11 +119,13 @@ int Dbg_Param = 0x1f;
 char startRecording[PROPERTY_VALUE_MAX];
 char Res_String[PROPERTY_VALUE_MAX];
 char Rec_Sec_String[PROPERTY_VALUE_MAX];
-//char Max_Rec_Num_String[PROPERTY_VALUE_MAX];
+char Max_Rec_Num_String[PROPERTY_VALUE_MAX];
 char Rec_File_Size_String[PROPERTY_VALUE_MAX];
 
 char startNight[PROPERTY_VALUE_MAX];
 //char startCapture[PROPERTY_VALUE_MAX];
+
+unsigned char isPreview = 0;
 
 int dev;
 
@@ -277,6 +279,7 @@ static int video_set_format(int dev, unsigned int w, unsigned int h, unsigned in
 		lidbg("%s: select 640x360!",__func__);
 		w = 640;
 		h = 360;
+		isPreview = 1;
 	}
 	
 	memset(&fmt, 0, sizeof fmt);
@@ -1591,6 +1594,8 @@ int main(int argc, char *argv[])
 								"/storage/sdcard0/flytmp5.h264"};
 */						    
 	char flyh264_filename[100] = {0};
+	char flypreview_filename[100] = {0};
+	char flypreview_prevcnt[20] = {0};
 	
 	int ret;
 	int fake_dev; // chris
@@ -1854,7 +1859,7 @@ int main(int argc, char *argv[])
 	unsigned char isReplace = 0;
 	unsigned long totalSize = 0;
 	unsigned char tryopencnt = 20;
-	unsigned char isPreview = 0;
+	
  //cjc -
 #if(CARCAM_PROJECT == 1)
 	printf("%s   ******  for Carcam  ******\n",TESTAP_VERSION);
@@ -2671,10 +2676,10 @@ openfd:
 			Rec_Sec = 300;
 		}
 		
-#if 0
+#if 1
 		property_get("fly.uvccam.recnum", Max_Rec_Num_String, "5");
 		Max_Rec_Num = atoi(Max_Rec_Num_String);
-		lidbg("=======test=======%s -> %d===",Max_Rec_Num_String,Max_Rec_Num);
+		lidbg("====Max_rec_num-> %d===",Max_Rec_Num);
 		if(Max_Rec_Num == 0) Max_Rec_Num = 5;
 #endif
 
@@ -2689,6 +2694,7 @@ openfd:
 			sprintf(tmp_usb_mkdir, "mkdir %s", Rec_Save_Dir);
 			system(tmp_usb_mkdir);
 		}
+#if 0
 		if(!strncmp(Rec_Save_Dir, "/storage/sdcard0/preview_cache", 30) )
 		{
 			/*
@@ -2699,7 +2705,8 @@ openfd:
 			*/
 			isPreview = 1;
 		}
-		if(access(Rec_Save_Dir, R_OK) != 0 && !isPreview)
+#endif
+		if(access(Rec_Save_Dir, R_OK) != 0)
 		{
 			lidbg("record file path access wrong! " );
 			//return 0;
@@ -3889,11 +3896,13 @@ openfd:
 		if((!strncmp(startRecording, "0", 1)) && (!do_save) )//close
 		{
 			lidbg("-------eho---------uvccam stop recording -----------\n");
+#if 0
 			if(isPreview) 
 			{
 				sprintf(tmpCMD , "rm -f %s&",Rec_Save_Dir);
 				system(tmpCMD);
 			}
+#endif
 			return 0;
 		}
 		
@@ -4083,9 +4092,21 @@ openfd:
 					//lidbg("======isPreview======");
 					if(rec_fp1 == NULL)
 					{
-						sprintf(flyh264_filename, "%s", Rec_Save_Dir);
-						rec_fp1 = fopen(flyh264_filename, "wb");
+						sprintf(flypreview_filename, "%stmp%d.h264", Rec_Save_Dir,flytmpcnt);
+						rec_fp1 = fopen(flypreview_filename, "wb");
+						sprintf(flypreview_prevcnt, "%d", flytmpcnt);
+						property_set("fly.uvccam.curprevnum", flypreview_prevcnt);
 					}	
+					if((i % (Rec_Sec*30)  == 0) && (i > 0))//frames = sec * 30f/s
+					{
+							lidbg("preview change file name to write!");
+							if(flytmpcnt < Max_Rec_Num - 1) flytmpcnt++;
+							else flytmpcnt = 0;
+							sprintf(flypreview_filename, "%stmp%d.h264", Rec_Save_Dir,flytmpcnt);
+							rec_fp1 = fopen(flypreview_filename, "wb");
+							sprintf(flypreview_prevcnt, "%d", flytmpcnt);
+							property_set("fly.uvccam.curprevnum", flypreview_prevcnt);
+					}
 				}
 				else if((i % (Rec_Sec*30)  == 0) || isReplace)//frames = sec * 30f/s
 				{
@@ -4255,7 +4276,7 @@ openfd:
 	if(multi_stream_enable)
 		close(fake_dev);	
 
-	system("echo 'udisk_unrequest' > /dev/flydev0");
+	//system("echo 'udisk_unrequest' > /dev/flydev0");
 	return 0;
 #if 1
 try_open_again:

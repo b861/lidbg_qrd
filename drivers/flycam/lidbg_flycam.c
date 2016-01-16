@@ -228,7 +228,7 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 			sprintf(temp_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video2  --xuset-br %d", recbitrateVal);
 			lidbg_shell_cmd(temp_cmd);
 		}
-		#if 0
+		#if 1
 		else if(!strcmp(keyval[0], "recnum") )
 		{
 			int recnumVal;
