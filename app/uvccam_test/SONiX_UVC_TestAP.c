@@ -3894,9 +3894,6 @@ openfd:
 		return 1;
 	}
 */
-	DIR *pDir ;
-	pDir=opendir(Rec_Save_Dir);  
-
 	for (i = 0; i < nframes; ++i) {
 
 		if((!strncmp(startRecording, "0", 1)) && (!do_save) )//close
@@ -4063,10 +4060,12 @@ openfd:
 				*/
 				if((i % 15 == 0) && !isPreview)
 				{
+					DIR *pDir ;
 					struct dirent *ent;
 					struct stat buf; 
 					char path[100] = {0};
 					totalSize = 0;
+					pDir=opendir(Rec_Save_Dir);  
 					while((ent=readdir(pDir))!=NULL)  
 					{
 						 if(!(ent->d_type & DT_DIR))  
