@@ -1510,7 +1510,7 @@ static int get_hub_uvc_device(char *devname,char do_save,char do_record)
 	                lidbg("%s:Path:%s",__func__ ,temp_devname);  
 	        }  
 	}
-	closedir(pDir);
+
 	lidbg("%s: This Camera has %d video node.", __func__ , fcnt - 2);
 	if((fcnt == 3) && (cam_id == 1))	
 	{
@@ -3901,7 +3901,6 @@ openfd:
 			{
 				sprintf(tmpCMD , "rm -f %s&",Rec_Save_Dir);
 				system(tmpCMD);
-				property_set("fly.uvccam.curprevnum", "0");
 			}
 #endif
 			return 0;
@@ -4094,9 +4093,9 @@ openfd:
 					//lidbg("======isPreview======");
 					if(rec_fp1 == NULL)
 					{
-						sprintf(flypreview_filename, "%stmp%d.h264", Rec_Save_Dir,flytmpcnt + 1);
+						sprintf(flypreview_filename, "%stmp%d.h264", Rec_Save_Dir,flytmpcnt);
 						rec_fp1 = fopen(flypreview_filename, "wb");
-						sprintf(flypreview_prevcnt, "%d", flytmpcnt + 1);
+						sprintf(flypreview_prevcnt, "%d", flytmpcnt);
 						property_set("fly.uvccam.curprevnum", flypreview_prevcnt);
 					}	
 					if((i % (Rec_Sec*30)  == 0) && (i > 0))//frames = sec * 30f/s
@@ -4104,9 +4103,9 @@ openfd:
 							lidbg("preview change file name to write!");
 							if(flytmpcnt < Max_Rec_Num - 1) flytmpcnt++;
 							else flytmpcnt = 0;
-							sprintf(flypreview_filename, "%stmp%d.h264", Rec_Save_Dir,flytmpcnt + 1);
+							sprintf(flypreview_filename, "%stmp%d.h264", Rec_Save_Dir,flytmpcnt);
 							rec_fp1 = fopen(flypreview_filename, "wb");
-							sprintf(flypreview_prevcnt, "%d", flytmpcnt + 1);
+							sprintf(flypreview_prevcnt, "%d", flytmpcnt);
 							property_set("fly.uvccam.curprevnum", flypreview_prevcnt);
 					}
 				}
