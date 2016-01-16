@@ -276,13 +276,10 @@ static int video_set_format(int dev, unsigned int w, unsigned int h, unsigned in
 	}
 	else if(!strncmp(Res_String, "640x360", 7))
 	{
-		char tmpCMD[100] = {0};
 		lidbg("%s: select 640x360!",__func__);
 		w = 640;
 		h = 360;
 		isPreview = 1;
-		sprintf(tmpCMD , "rm -f %s/tmp*.h264&",Rec_Save_Dir);
-		system(tmpCMD);
 	}
 	
 	memset(&fmt, 0, sizeof fmt);
@@ -3899,10 +3896,10 @@ openfd:
 		if((!strncmp(startRecording, "0", 1)) && (!do_save) )//close
 		{
 			lidbg("-------eho---------uvccam stop recording -----------\n");
-#if 1
+#if 0
 			if(isPreview) 
 			{
-				sprintf(tmpCMD , "rm -f %s/tmp*.h264&",Rec_Save_Dir);
+				sprintf(tmpCMD , "rm -f %s&",Rec_Save_Dir);
 				system(tmpCMD);
 				property_set("fly.uvccam.curprevnum", "0");
 			}
