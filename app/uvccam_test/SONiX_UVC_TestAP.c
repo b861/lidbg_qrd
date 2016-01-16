@@ -4088,6 +4088,7 @@ openfd:
 						isExceed = 1;
 						isReplace = 1;
 					}
+					closedir(pDir);
 				}
 
 				if(isPreview)//preview : not going to change file name.
@@ -4181,7 +4182,7 @@ openfd:
 											
 					        }  
 					}
-
+					closedir(pDir);
 					//lidbg("minRecName end------>%s\n",minRecName);
 
 					struct stat filebuf; 
