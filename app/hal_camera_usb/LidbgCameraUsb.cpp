@@ -1222,7 +1222,7 @@ try_open_again:
 		system("./flysystem/lib/out/lidbg_testuvccam /dev/video0 --xuset-flip 0 ");
 #endif
 	//car record enable time osd
-#if 0
+#if 1
 	if(cam_id == 1)
 	{
 		system("./flysystem/lib/out/lidbg_testuvccam /dev/video1 --xuset-oe 1 1 ");
