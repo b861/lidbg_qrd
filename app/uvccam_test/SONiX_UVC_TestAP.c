@@ -1431,12 +1431,12 @@ char *lidbg_get_current_time(char *time_string, struct rtc_time *ptm)
 						strncpy(devname, temp_devname, 256);
 					}
                     break;
-                }
-                close(fd);
+                }   
             }
             else if(2 != errno)
                 lidbg("%s.%d: Probing.%s: ret: %d, errno: %d,%s", __func__, i, temp_devname, ret, errno, strerror(errno));
-
+			close(fd);
+			
             if(i++ > 1000)
             {
                 strncpy(devname, "/dev/video1", 256);
@@ -1510,7 +1510,7 @@ static int get_hub_uvc_device(char *devname,char do_save,char do_record)
 	                lidbg("%s:Path:%s",__func__ ,temp_devname);  
 	        }  
 	}
-
+	closedir(pDir);
 	lidbg("%s: This Camera has %d video node.", __func__ , fcnt - 2);
 	if((fcnt == 3) && (cam_id == 1))	
 	{
@@ -1557,12 +1557,12 @@ openDev:
               }      
               lidbg("%s: Found UVC node,OK: ======%s,[camid = %d]\n", __func__, devname, cam_id);
           }
-          close(fd);
       }
       else if(2 != errno)
           lidbg("%s: Probing.%s: ret: %d, errno: %d,%s", __func__, devname, ret, errno, strerror(errno));
-    lidbg("%s: X,%s", __func__, devname);
-    return 0;
+	  close(fd);
+      lidbg("%s: X,%s", __func__, devname);
+      return 0;
 
 failproc:
 	strncpy(devname, "/dev/video1", 256);
@@ -2656,8 +2656,8 @@ getuvcdevice:
     if((rc == 1)  || (*devName == '\0'))
     {
         lidbg("%s: No UVC node found \n", __func__);
-		return 1;
-		//goto try_open_again; 
+		//return 1;
+		goto try_open_again; 
     }
 openfd:
 	dev = video_open(devName);
@@ -4221,11 +4221,12 @@ openfd:
 		ret = ioctl(dev, VIDIOC_QBUF, &buf0);
 		if (ret < 0) {
 			lidbg( "Unable to requeue buffer0 (%d).But try again.\n", errno);
-			goto try_open_again;
-#if 0
+			//goto try_open_again;
+#if 1
 			close(dev);
 			if(multi_stream_enable)
-				close(fake_dev);			
+				close(fake_dev);		
+			system("echo 'udisk_unrequest' > /dev/flydev0");
 			return 1;
 #endif
 		}
@@ -4277,11 +4278,11 @@ openfd:
 	if(multi_stream_enable)
 		close(fake_dev);	
 
-	//system("echo 'udisk_unrequest' > /dev/flydev0");
+	system("echo 'udisk_unrequest' > /dev/flydev0");
 	return 0;
 #if 1
 try_open_again:
-		//system("echo 'udisk_request' > /dev/flydev0");
+		system("echo 'udisk_request' > /dev/flydev0");
 		usleep(500*1000);
 		//sleep(2);
 		if((!strncmp(startRecording, "0", 1)) && (!do_save) )//close
@@ -4292,9 +4293,11 @@ try_open_again:
 		if(!(tryopencnt--))
 		{
 			lidbg("-------eho---------uvccam try open timeout! -----------\n");
+			system("echo 'udisk_unrequest' > /dev/flydev0");
 			return 1;
 		}
-		lidbg("%s: Camera may extract unexpected!try open again!-> %d\n", __func__,tryopencnt);
+		//lidbg("%s: Camera may extract unexpected!try open again!-> %d\n", __func__,tryopencnt);
+		lidbg("%s: Camera open fail!try open again!-> %d\n", __func__,tryopencnt);
 		rc = get_hub_uvc_device(devName,do_save,do_record);
 		if((rc == 1) || (*devName == '\0'))
         {
