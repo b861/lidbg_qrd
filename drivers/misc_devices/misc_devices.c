@@ -405,16 +405,6 @@ int thread_udisk_en(void *data)
 }
 #endif
 
-#ifdef PLATFORM_ID_11
-int thread_udisk_en(void *data)
-{
-    DUMP_FUN_ENTER;
-    ssleep(30);
-    USB_WORK_ENABLE;
-    lidbg("thread_udisk_en===exit=\n");
-    return 0;
-}
-#endif
 
 static int soc_dev_probe(struct platform_device *pdev)
 {
@@ -450,13 +440,9 @@ static int soc_dev_probe(struct platform_device *pdev)
     {
         CREATE_KTHREAD(thread_udisk_stability_test, NULL);
     }
-#ifndef PLATFORM_ID_11
     USB_WORK_ENABLE;
     SET_USB_ID_SUSPEND;
-#else
-	USB_WORK_DISENABLE;
-	CREATE_KTHREAD(thread_udisk_en, NULL);
-#endif
+
 
 #ifdef PLATFORM_ID_7
     if(0)
