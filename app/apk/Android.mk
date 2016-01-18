@@ -50,13 +50,13 @@ LOCAL_MODULE_TAGS := optional debug eng tests samples
 LOCAL_MODULE_PATH := $(DBG_OUT_PATH)
 include $(BUILD_PREBUILT)
 
-include $(CLEAR_VARS)
-LOCAL_MODULE := LiveSessionDemo.ko
-LOCAL_SRC_FILES := LiveSessionDemo.apk
-LOCAL_MODULE_CLASS := bin
-LOCAL_MODULE_TAGS := optional debug eng tests samples
-LOCAL_MODULE_PATH := $(DBG_OUT_PATH)
-include $(BUILD_PREBUILT)
+#include $(CLEAR_VARS)
+#LOCAL_MODULE := LiveSessionDemo.ko
+#LOCAL_SRC_FILES := LiveSessionDemo.apk
+#LOCAL_MODULE_CLASS := bin
+#LOCAL_MODULE_TAGS := optional debug eng tests samples
+#LOCAL_MODULE_PATH := $(DBG_OUT_PATH)
+#include $(BUILD_PREBUILT)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := CallMessage.ko
@@ -66,13 +66,13 @@ LOCAL_MODULE_TAGS := optional debug eng tests samples
 LOCAL_MODULE_PATH := $(DBG_OUT_PATH)
 include $(BUILD_PREBUILT)
 
-include $(CLEAR_VARS)
-LOCAL_MODULE := ftpd
-LOCAL_SRC_FILES := ftpd
-LOCAL_MODULE_CLASS := bin
-LOCAL_MODULE_TAGS := optional debug eng tests samples
-LOCAL_MODULE_PATH := $(DBG_OUT_PATH)
-include $(BUILD_PREBUILT)
+#include $(CLEAR_VARS)
+#LOCAL_MODULE := ftpd
+#LOCAL_SRC_FILES := ftpd
+#LOCAL_MODULE_CLASS := bin
+#LOCAL_MODULE_TAGS := optional debug eng tests samples
+#LOCAL_MODULE_PATH := $(DBG_OUT_PATH)
+#include $(BUILD_PREBUILT)
 
 
 #include $(CLEAR_VARS)
