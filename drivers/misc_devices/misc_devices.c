@@ -43,6 +43,27 @@ static int devices_notifier_callback(struct notifier_block *self,
 }
 #endif
 
+
+void usb_front_cam_enable(bool enable)
+{
+    DUMP_FUN;
+    lidbg("%d,%d\n", g_var.usb_status,enable);
+
+   if(g_var.usb_status == enable)
+   {
+   	lidbg("usb_front_cam_enable skip\n");
+   	return;
+   }
+    lidbg("[%s]\n", enable ? "usb_enable" : "usb_disable");
+    if(enable)
+        USB_POWER_FRONT_ENABLE;
+    else
+    {
+        USB_POWER_FRONT_DISABLE;
+    }
+}
+
+
 void usb_disk_enable(bool enable)
 {
     DUMP_FUN;
@@ -255,7 +276,11 @@ static void parse_cmd(char *pt)
     else if (!strcmp(argv[0], "udisk_request"))
     {
         	lidbg("Misc devices ctrl: udisk_request");
+#if defined(PLATFORM_msm8909) && defined(BOARD_V1)
 		usb_disk_enable(true);
+#else
+		usb_front_cam_enable(true);
+#endif
 		 g_var.usb_request= 1;
     }
     else if (!strcmp(argv[0], "udisk_unrequest"))
@@ -263,6 +288,18 @@ static void parse_cmd(char *pt)
         	lidbg("Misc devices ctrl: udisk_unrequest");
 		 g_var.usb_request= 0;
     }
+    else if (!strcmp(argv[0], "gps_request"))
+    {
+        	lidbg("Misc devices ctrl: gps_request");
+		GPS_POWER_ON;
+    }
+    else if (!strcmp(argv[0], "gps_unrequest"))
+    {
+        	lidbg("Misc devices ctrl: gps_unrequest");
+		GPS_POWER_OFF;
+    }
+
+	
 }
 
 

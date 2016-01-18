@@ -474,7 +474,7 @@ int fly_interface_init(void)
     g_var.is_udisk_needreset = 1;
     g_var.usb_status = 0;
     g_var.usb_request = 0;
-    g_var.suspend_timeout_protect = 1;
+    g_var.suspend_timeout_protect = 0;
     g_var.android_boot_completed = 0;
 	
     if(gboot_mode == MD_RECOVERY)

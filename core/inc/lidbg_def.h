@@ -54,7 +54,7 @@ static inline char * get_current_time(void)
     struct rtc_time tm;
     do_gettimeofday(&(txc.time));
     rtc_time_to_tm(txc.time.tv_sec,&tm);
-    sprintf(time_string, "%02d-%02d@%02d:%02d:%02d", tm.tm_mon + 1, tm.tm_mday, tm.tm_hour + 8, tm.tm_min, tm.tm_sec);
+    sprintf(time_string, "%02d-%02d@%02d:%02d:%02d", tm.tm_mon + 1, tm.tm_mday, (((tm.tm_hour + 8)<24)?(tm.tm_hour + 8):(tm.tm_hour + 8 - 24)), tm.tm_min, tm.tm_sec);
     return time_string;
 #endif
 }
