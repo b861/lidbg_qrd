@@ -284,6 +284,7 @@ static int video_set_format(int dev, unsigned int w, unsigned int h, unsigned in
 		sprintf(tmpCMD , "rm -f %s/tmp*.h264&",Rec_Save_Dir);
 		system(tmpCMD);
 	}
+	property_set("fly.uvccam.curprevnum", "-1");
 	
 	memset(&fmt, 0, sizeof fmt);
 	fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -3906,6 +3907,7 @@ openfd:
 				system(tmpCMD);
 			}
 #endif
+			property_set("fly.uvccam.curprevnum", "-1");
 			return 0;
 		}
 		
@@ -4229,6 +4231,7 @@ openfd:
 			close(dev);
 			if(multi_stream_enable)
 				close(fake_dev);		
+			property_set("fly.uvccam.curprevnum", "-1");
 			system("echo 'udisk_unrequest' > /dev/flydev0");
 			return 1;
 #endif
@@ -4291,12 +4294,14 @@ try_open_again:
 		if((!strncmp(startRecording, "0", 1)) && (!do_save) )//close
 		{
 			lidbg("-------eho---------uvccam stop recording! -----------\n");
+			property_set("fly.uvccam.curprevnum", "-1");
 			return 0;
 		}
 		if(!(tryopencnt--))
 		{
 			lidbg("-------eho---------uvccam try open timeout! -----------\n");
 			system("echo 'udisk_unrequest' > /dev/flydev0");
+			property_set("fly.uvccam.curprevnum", "-1");
 			return 1;
 		}
 		//lidbg("%s: Camera may extract unexpected!try open again!-> %d\n", __func__,tryopencnt);
