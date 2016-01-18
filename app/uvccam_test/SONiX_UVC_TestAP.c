@@ -108,7 +108,8 @@
 char Rec_Save_Dir[100] = "/storage/sdcard0/camera_rec/";
 int Max_Rec_Num = 5;
 int Rec_Sec = 300;//s
-int Rec_File_Size = 300;//MB
+unsigned int Rec_File_Size = 300;//MB
+unsigned int Rec_Bitrate = 8000000;//b/s
 
 // chris -
 
@@ -121,6 +122,7 @@ char Res_String[PROPERTY_VALUE_MAX];
 char Rec_Sec_String[PROPERTY_VALUE_MAX];
 char Max_Rec_Num_String[PROPERTY_VALUE_MAX];
 char Rec_File_Size_String[PROPERTY_VALUE_MAX];
+char Rec_Bitrate_String[PROPERTY_VALUE_MAX];
 
 char startNight[PROPERTY_VALUE_MAX];
 //char startCapture[PROPERTY_VALUE_MAX];
@@ -2749,12 +2751,25 @@ openfd:
 		//set record file total size
 		property_get("fly.uvccam.recfilesize", Rec_File_Size_String, "1000");
 		Rec_File_Size = atoi(Rec_File_Size_String);
-		lidbg("======== video file total size-> %d MB=======",Rec_File_Size);
+		lidbg("======== video file total size-> %ld MB=======",Rec_File_Size);
 		if(Rec_File_Size == 0) 
 		{
 			lidbg("not allow video file size = 0MB !!reset to 1000MB.\n");
 			Rec_File_Size = 1000;
 		}
+
+		//set record file bitrate
+		property_get("fly.uvccam.recbitrate", Rec_Bitrate_String, "8000000");
+		Rec_Bitrate = atoi(Rec_Bitrate_String);
+		lidbg("======== video bitrate-> %ld b/s=======",Rec_Bitrate);
+		if(Rec_Bitrate == 0) 
+		{
+			lidbg("not allow video bitrate = 0MB !!reset to 8000000b/s.\n");
+			Rec_Bitrate = 8000000;
+		}
+		XU_Init_Ctrl(dev);
+		if(XU_H264_Set_BitRate(dev, Rec_Bitrate) < 0 )
+			lidbg( "XU_H264_Set_BitRate Failed\n");
 	}
 
 	if(XU_OSD_Set_Enable(dev, 1, 1) <0)
