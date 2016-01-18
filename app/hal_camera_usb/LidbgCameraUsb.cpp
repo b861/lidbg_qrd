@@ -321,7 +321,35 @@ static int get_hub_uvc_device(const char *id,char *devname)
 
 	memset(hub_path,0,sizeof(hub_path));  
 	memset(temp_devname,0,sizeof(temp_devname));  
+
+	//fix for attenuation hub.find the deepest one.
+	int back_charcnt = 0,front_charcnt = 0;
+	pDir=opendir("/sys/bus/usb/drivers/usb/");  
+	while((ent=readdir(pDir))!=NULL)  
+	{  
+			if((!strncmp(ent->d_name,  BACK_NODE , 5)) &&
+				(strlen(ent->d_name) >= back_charcnt) && (cam_id == 0))
+			{
+				front_charcnt = strlen(ent->d_name);
+				sprintf(hub_path, "/sys/bus/usb/drivers/usb/%s/%s:1.0/video4linux/", ent->d_name,ent->d_name);//back cam
+			}
+			else if((!strncmp(ent->d_name,  FRONT_NODE , 5)) &&
+				(strlen(ent->d_name) >= front_charcnt) && (cam_id == 1))
+			{
+				front_charcnt = strlen(ent->d_name);
+				sprintf(hub_path, "/sys/bus/usb/drivers/usb/%s/%s:1.0/video4linux/", ent->d_name,ent->d_name);//front cam
+			} 
+	}
+	closedir(pDir);
+
+	if((front_charcnt == 0) && (back_charcnt == 0))
+	{
+		lidbg("%s: can not found suitable hubpath! ", __func__ );	
+		goto failproc;
+	}
 	
+	ALOGE("%s:hubPath:%s",__func__ ,hub_path);  
+#if 0
 	//check Front | Back Cam
 	if(cam_id == 1)
 		sprintf(hub_path, "/sys/bus/usb/drivers/usb/%s/%s:1.0/video4linux/", FRONT_NODE,FRONT_NODE);//front cam
@@ -332,7 +360,7 @@ static int get_hub_uvc_device(const char *id,char *devname)
 		ALOGE("%s: cam_id wrong!==== %d ", __func__ , cam_id);
 		goto failproc;
 	}
-
+#endif
 	if(access(hub_path, R_OK) != 0)
 	{
 		ALOGE("%s: hub path access wrong! ", __func__ );
