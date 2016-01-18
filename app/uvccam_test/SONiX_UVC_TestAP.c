@@ -276,10 +276,13 @@ static int video_set_format(int dev, unsigned int w, unsigned int h, unsigned in
 	}
 	else if(!strncmp(Res_String, "640x360", 7))
 	{
+		char tmpCMD[100] = {0};
 		lidbg("%s: select 640x360!",__func__);
 		w = 640;
 		h = 360;
 		isPreview = 1;
+		sprintf(tmpCMD , "rm -f %s/tmp*.h264&",Rec_Save_Dir);
+		system(tmpCMD);
 	}
 	
 	memset(&fmt, 0, sizeof fmt);
