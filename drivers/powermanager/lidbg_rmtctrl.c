@@ -1,4 +1,5 @@
 #include "lidbg.h"
+LIDBG_DEFINE;
 
 #define DEV_NAME	 "/dev/lidbg_pm0"
 #define rmtctrl_FIFO_SIZE (512)
@@ -449,6 +450,7 @@ static int __init lidbg_rmtctrl_init(void)
 #ifndef SUSPEND_ONLINE
     return 0;
 #endif
+    LIDBG_GET;
     platform_device_register(&lidbg_rmtctrl_device);
     platform_driver_register(&lidbg_rmtctrl_driver);
     return 0;

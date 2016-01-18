@@ -554,7 +554,7 @@ int fly_interface_init(void)
     g_var.is_debug_mode = fs_is_file_exist("/data/lidbg/set_debug_mode");
 
     register_lidbg_notifier(&bl_ctl_bn);
-
+    LIDBG_MODULE_LOG;
     return 0;
 }
 

@@ -26,19 +26,14 @@ char *insmod_list[] =
     "lidbg_msg.ko",
     "lidbg_servicer.ko",
     "lidbg_touch.ko",
-#ifndef SOC_msm8x25
     //   "lidbg_spi.ko",
-#endif
     "lidbg_key.ko",
     "lidbg_i2c.ko",
     "lidbg_io.ko",
     "lidbg_uart.ko",
     "lidbg_main.ko",
-#ifdef SOC_msm8x25
-    INTERFACE_KO,
-#else
+    "lidbg_interface.ko",
     "lidbg_drivers_loader.ko",
-#endif
     NULL,
 };
 

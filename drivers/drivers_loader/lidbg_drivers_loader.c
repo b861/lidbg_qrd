@@ -3,6 +3,7 @@
 static LIST_HEAD(lidbg_list);
 static LIST_HEAD(flyaudio_list);
 static LIST_HEAD(flyaudio_hal_list);
+LIDBG_DEFINE;
 
 struct judgment
 {
@@ -298,6 +299,7 @@ static int __init lidbg_drivers_loader_init(void)
 {
 
     DUMP_FUN;
+    LIDBG_GET;
     LIDBG_WARN("<==IN==>\n");
     CREATE_KTHREAD(thread_drivers_loader_analyze, NULL);
     LIDBG_MODULE_LOG;

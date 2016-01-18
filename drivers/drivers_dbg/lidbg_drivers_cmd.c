@@ -285,9 +285,9 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#045x--start RGB LED test,????,?*158#0451\n");
             fs_mem_log("*158#046--set cpu run in performance mode\n");
             fs_mem_log("*158#047--set cpu run in powersave mode\n");
-            fs_mem_log("*158#048 flybootserver airplane disable\n");
-            fs_mem_log("*158#049 flybootserver airplane enable\n");
-            fs_mem_log("*158#050 enable top -t -m 10\n");
+            fs_mem_log("*158#048--flybootserver airplane disable\n");
+            fs_mem_log("*158#049--flybootserver airplane enable\n");
+            fs_mem_log("*158#050--enable top -t -m 10\n");
             fs_mem_log("*158#051--LOG_LOGCAT2\n");
             fs_mem_log("*158#052--udisk reset\n");
             fs_mem_log("*158#053--system trace\n");

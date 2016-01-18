@@ -1,4 +1,5 @@
 #include "lidbg.h"
+LIDBG_DEFINE;
 
 #define DEV_NAME	 "/dev/lidbg_pm0"
 #define SCREEN_ON    "flyaudio screen_on"
@@ -319,6 +320,7 @@ static int __init lidbg_powerkey_init(void)
 #ifdef SUSPEND_ONLINE
     return 0;
 #endif
+    LIDBG_GET;
     platform_device_register(&lidbg_powerkey);
     platform_driver_register(&lidbg_powerkey_driver);
     return 0;
