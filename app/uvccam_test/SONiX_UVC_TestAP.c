@@ -4291,6 +4291,7 @@ try_open_again:
 		system("echo 'udisk_request' > /dev/flydev0");
 		usleep(500*1000);
 		//sleep(2);
+		property_get("persist.lidbg.uvccam.recording", startRecording, "0");
 		if((!strncmp(startRecording, "0", 1)) && (!do_save) )//close
 		{
 			lidbg("-------eho---------uvccam stop recording! -----------\n");
