@@ -133,7 +133,7 @@ struct hw_version_specific g_hw_version_specific[] =
 
 		//.gpio_back_det = 35,
 
-	.i2c_bus_accel = 1,
+	.i2c_bus_accel = 5,
         .i2c_bus_dsi83 = 1,
         .i2c_bus_ts = 4,
         .i2c_bus_gps = 5,
