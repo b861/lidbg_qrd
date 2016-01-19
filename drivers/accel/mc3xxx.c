@@ -82,6 +82,7 @@ static union{
 	const unsigned short normal_i2c[2];
 }u_i2c_addr = {{0x00},};
 
+LIDBG_DEFINE;
 //=============================================================================
 #define G_0            ABS_X
 #define G_1            ABS_Y
@@ -2543,7 +2544,8 @@ static struct platform_device mc3xxx_devices =
 static int __init mc3xxx_init(void)
 {
 	int ret = 0;
-
+	DUMP_BUILD_TIME;
+	LIDBG_GET;
 #if defined(PLATFORM_msm8974)
 	lidbg_shell_cmd("chmod 777 /sys/kernel/debug/regulator/8941_l18/enable");
 #endif

@@ -509,7 +509,7 @@ static int  gps_probe(struct platform_device *pdev)
     lidbg_chmod("/dev/ubloxgps0");
 
     register_lidbg_notifier(&gps_notifier);
-
+    GPS_POWER_ON;
     return 0;
 }
 

@@ -53,6 +53,7 @@
 #include "bstclass.h"
 #include "lidbg.h"
 
+LIDBG_DEFINE;
 #define ACCEL_INT_EN 		1
 #define ACCEL_PLACE 		1
 #define ACCEL_INIT_INTERVAL	200
@@ -8009,6 +8010,8 @@ static struct platform_device bma2x2_devices =
 static int __init BMA2X2_init(void)
 {
 	int ret = 0;
+	DUMP_BUILD_TIME;
+	LIDBG_GET;
 	ret |= platform_device_register(&bma2x2_devices);
 	ret |= platform_driver_register(&bma2x2_driver);
 	return ret;

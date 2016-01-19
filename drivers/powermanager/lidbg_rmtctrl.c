@@ -317,25 +317,28 @@ static  struct file_operations rmtctrl_fops =
 
 static int thread_check_acc_and_response_acc_off_delay(void *data)
 {
-    bool acc_io_old = FLY_ACC_ON;
-    while(0==g_var.android_boot_completed)
+   while(0==g_var.android_boot_completed)
     {
-        	g_var.acc_flag = SOC_IO_Input(MCU_ACC_STATE_IO, MCU_ACC_STATE_IO, GPIO_CFG_PULL_UP);
-        if(g_var.acc_flag != acc_io_old)
-        	{
-                acc_io_old=g_var.acc_flag;
-                PM_WARN("<current acc state.check:%d,%d >\n",	g_var.acc_flag,(g_var.acc_flag == FLY_ACC_OFF));
-	}
         ssleep(1);
-    };
+    }
+
+    ssleep(20);
+
+    g_var.acc_flag = SOC_IO_Input(MCU_ACC_STATE_IO, MCU_ACC_STATE_IO, GPIO_CFG_PULL_UP);
+
     PM_WARN("<current acc state.stop:%d,%d >\n",g_var.acc_flag,(g_var.acc_flag == FLY_ACC_OFF));
     if(g_var.acc_flag == FLY_ACC_OFF)
     {
         PM_WARN("<response_acc_off,more delay 20S :%d,%d >\n",g_var.acc_flag,(g_var.acc_flag == FLY_ACC_OFF));
-        ssleep(20);
         acc_status_handle(g_var.acc_flag);
     }
-    return 1;
+
+	SOC_IO_Input(MCU_ACC_STATE_IO, MCU_ACC_STATE_IO, GPIO_CFG_PULL_UP);
+	SOC_IO_ISR_Add(MCU_ACC_STATE_IO, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING, acc_state_isr, NULL);
+	lidbg("rmtctrl probe: enable_irq_wake %d\n",GPIO_TO_INT(MCU_ACC_STATE_IO));
+	enable_irq_wake(GPIO_TO_INT(MCU_ACC_STATE_IO));
+	
+     return 1;
 }
 static int lidbg_rmtctrl_probe(struct platform_device *pdev)
 {
@@ -373,11 +376,6 @@ static int lidbg_rmtctrl_probe(struct platform_device *pdev)
 
 	wake_lock_init(&rmtctrl_wakelock, WAKE_LOCK_SUSPEND, "lidbg_rmtctrl");
 
-	SOC_IO_Input(MCU_ACC_STATE_IO, MCU_ACC_STATE_IO, GPIO_CFG_PULL_UP);
-	SOC_IO_ISR_Add(MCU_ACC_STATE_IO, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING, acc_state_isr, NULL);
-	lidbg("rmtctrl probe: enable_irq_wake %d\n",GPIO_TO_INT(MCU_ACC_STATE_IO));
-	enable_irq_wake(GPIO_TO_INT(MCU_ACC_STATE_IO));
-
 	//lidbg_shell_cmd("svc data disable &");
 	init_waitqueue_head(&wait_queue);
 	sema_init(&rmtctrl_sem, 1);
@@ -385,9 +383,8 @@ static int lidbg_rmtctrl_probe(struct platform_device *pdev)
 	lidbg_new_cdev(&rmtctrl_fops, "flyaudio_pm");
 	lidbg_chmod("/dev/flyaudio_pm0");
 
-	// boot when acc off
 	CREATE_KTHREAD(thread_check_acc_and_response_acc_off_delay, NULL);
-	
+
 	return 0;
 }
 
