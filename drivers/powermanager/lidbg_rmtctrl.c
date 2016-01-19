@@ -58,6 +58,7 @@ irqreturn_t acc_state_isr(int irq, void *dev_id)
 }
 static void send_app_status(FLY_SYSTEM_STATUS state)
 {
+	       lidbg("send_app_status:%d\n", state);
 		atomic_set(&status, state);
 		rmtctrl_fifo_in();
 		wake_up_interruptible(&wait_queue);
@@ -77,6 +78,7 @@ void acc_status_handle(FLY_ACC_STATUS val)
 {
 	static u32 acc_count = 0;
 	if(val == FLY_ACC_ON){
+		wake_lock(&rmtctrl_wakelock);
 		lidbg("acc_status_handle: FLY_ACC_ON:acc_count=%d\n",acc_count++);
 		g_var.acc_flag = 1;
 
@@ -89,8 +91,6 @@ void acc_status_handle(FLY_ACC_STATUS val)
 		lidbg("acc_status_handle: set acc.status to 0\n");
 		lidbg_shell_cmd("setprop persist.lidbg.acc.status 0");
 		lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_ON));
-
-		wake_lock(&rmtctrl_wakelock);
 		send_app_status(FLY_KERNEL_UP);//wakeup
 		send_app_status(FLY_SCREEN_ON);
 		fs_file_write(DEV_NAME, false, SCREEN_ON, 0, strlen(SCREEN_ON));
@@ -114,7 +114,6 @@ void acc_status_handle(FLY_ACC_STATUS val)
 		if(is_fake_acc_off == 0)
 			lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_OFF));
 
-		wake_unlock(&rmtctrl_wakelock);	//ensure KERNEL_UP FB be called before sleep
 //		send_app_status(FLY_GOTO_SLEEP);
 		send_app_status(FLY_SCREEN_OFF);
 		fs_file_write(DEV_NAME, false, SCREEN_OFF, 0, strlen(SCREEN_OFF));
@@ -125,6 +124,7 @@ void acc_status_handle(FLY_ACC_STATUS val)
 			lidbg("acc_status_handle: FLY_ACC_OFF, add rmtctrl timer.\n");
 			mod_timer(&rmtctrl_timer,SCREE_OFF_TIME_S);
 		}
+		wake_unlock(&rmtctrl_wakelock);	//ensure KERNEL_UP FB be called before sleep
 	}
 }
 
