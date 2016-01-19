@@ -34,12 +34,23 @@ static unsigned int *rmtctrl_state_buffer;
 struct work_struct acc_state_work;
 static struct timer_list rmtctrl_timer;
 static struct wake_lock rmtctrl_wakelock;
-static u32 system_unormal_wakeuped_tics = 0;
-static u32 system_tics = 0;
+static u32 system_unormal_wakeuped_ms = 0;
+static u32 system_wakeup_ms = 0;
 static u32 repeat_times = 0;
 static u32 system_unormal_wakeup_cnt = 0;
 
 bool is_fake_acc_off = 0;
+
+static long long ktime_get_ms(void)
+{
+	static ktime_t k_time;
+	long long time_ms;
+
+	k_time = ktime_get_real();
+	time_ms = ktime_to_ms(k_time);
+
+	return time_ms;
+}
 
 void rmtctrl_fifo_in(void)
 {
@@ -58,7 +69,7 @@ irqreturn_t acc_state_isr(int irq, void *dev_id)
 }
 static void send_app_status(FLY_SYSTEM_STATUS state)
 {
-	       lidbg("send_app_status:%d\n", state);
+		lidbg("send_app_status:%d\n", state);
 		atomic_set(&status, state);
 		rmtctrl_fifo_in();
 		wake_up_interruptible(&wait_queue);
@@ -83,14 +94,16 @@ void acc_status_handle(FLY_ACC_STATUS val)
 		g_var.acc_flag = 1;
 
 		lidbg("acc_status_handle: clear unormal wakeup count.\n");
-		system_tics = 0;
+		system_wakeup_ms = 0;
 		repeat_times = 0;
 		system_unormal_wakeup_cnt = 0;
-		system_unormal_wakeuped_tics = 0;
+		system_unormal_wakeuped_ms = 0;
 
 		lidbg("acc_status_handle: set acc.status to 0\n");
 		lidbg_shell_cmd("setprop persist.lidbg.acc.status 0");
 		lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_ON));
+
+
 		send_app_status(FLY_KERNEL_UP);//wakeup
 		send_app_status(FLY_SCREEN_ON);
 		fs_file_write(DEV_NAME, false, SCREEN_ON, 0, strlen(SCREEN_ON));
@@ -104,7 +117,7 @@ void acc_status_handle(FLY_ACC_STATUS val)
 		lidbg("acc_status_handle: FLY_ACC_OFF\n");
 		g_var.acc_flag = 0;
 
-		system_unormal_wakeuped_tics = get_tick_count();
+		system_unormal_wakeuped_ms = ktime_get_ms();
 
 		lidbg("acc_status_handle: set acc.status to 1\n");
 		lidbg_shell_cmd("setprop persist.lidbg.acc.status 1");
@@ -264,12 +277,12 @@ static int unormal_wakeup_handle(void)
 {
 		system_unormal_wakeup_cnt++;
 
-		system_tics = get_tick_count() - system_unormal_wakeuped_tics;  //tics ms after acc_off
-		lidbg("*** system wakeup %u(%u) times in %d(%u) msec, repeat_times %d***\n", system_unormal_wakeup_cnt, UNORMAL_WAKEUP_CNT, system_tics, (UNORMAL_WAKEUP_TIME_MINU * 60 * 1000), repeat_times);
+		system_wakeup_ms = ktime_get_ms() - system_unormal_wakeuped_ms;  //tics ms after acc_off
+		lidbg("*** system wakeup %u(%u) times in %d(%u) msec, repeat_times %d***\n", system_unormal_wakeup_cnt, UNORMAL_WAKEUP_CNT, system_wakeup_ms, (UNORMAL_WAKEUP_TIME_MINU * 60 * 1000), repeat_times);
 		if(system_unormal_wakeup_cnt > UNORMAL_WAKEUP_CNT){
 
-			if(system_tics < (UNORMAL_WAKEUP_TIME_MINU * 60 * 1000)){
-				lidbgerr("System wakeup %d times in %d(%u) msec,system tics %u, unormal\n", system_unormal_wakeup_cnt, system_tics, (UNORMAL_WAKEUP_TIME_MINU * 60 * 1000), get_tick_count());
+			if(system_wakeup_ms < (UNORMAL_WAKEUP_TIME_MINU * 60 * 1000)){
+				lidbgerr("System wakeup %d times in %d(%u) msec,system tics %u, unormal\n", system_unormal_wakeup_cnt, system_wakeup_ms, (UNORMAL_WAKEUP_TIME_MINU * 60 * 1000), ktime_get_ms());
 
 				if(g_var.acc_flag == FLY_ACC_OFF)
 				{
@@ -290,12 +303,12 @@ static int unormal_wakeup_handle(void)
 					}
 				}
 			}else
-				lidbg("System wakeup %d times in %d(%u) msec,system tics %u, normal\n", system_unormal_wakeup_cnt, system_tics, (UNORMAL_WAKEUP_TIME_MINU * 60 * 1000), get_tick_count());
+				lidbg("System wakeup %d times in %d(%u) msec,system tics %u, normal\n", system_unormal_wakeup_cnt, system_wakeup_ms, (UNORMAL_WAKEUP_TIME_MINU * 60 * 1000), ktime_get_ms());
 
 			//count again
-			system_tics = 0;
+			system_wakeup_ms = 0;
 			system_unormal_wakeup_cnt = 0;
-			system_unormal_wakeuped_tics = get_tick_count();
+			system_unormal_wakeuped_ms = ktime_get_ms();
 		}
 
 	return 0;
