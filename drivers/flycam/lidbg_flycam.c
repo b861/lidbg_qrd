@@ -6,6 +6,7 @@ LIDBG_DEFINE;
 static wait_queue_head_t wait_queue;
 char isBackChange = 0;
 char isBack = 0;
+char isPreview = 0;
 
 ssize_t  flycam_read(struct file *filp, char __user *buffer, size_t size, loff_t *offset)
 {
@@ -55,6 +56,17 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 			{
 			    lidbg("-------uvccam recording -----");
 				lidbg_shell_cmd("echo 'udisk_request' > /dev/flydev0");
+				if(isPreview)
+				{
+					lidbg("======fix screen blurred issue==E=====");
+					lidbg_shell_cmd("setprop persist.lidbg.uvccam.recording 1");
+					lidbg_shell_cmd("./flysystem/lib/out/lidbg_testuvccam /dev/video2 -c -f H264 -r &");
+					msleep(1700);
+					lidbg_shell_cmd("setprop persist.lidbg.uvccam.recording 0");
+					msleep(2);
+					lidbg("======fix screen blurred issue==X=====");
+					isPreview = 0;
+				}
 			    lidbg_shell_cmd("setprop persist.lidbg.uvccam.recording 1");
 			    if(g_var.is_fly) lidbg_shell_cmd("./flysystem/lib/out/lidbg_testuvccam /dev/video2 -c -f H264 -r &");
 			    else lidbg_shell_cmd("./system/lib/modules/out/lidbg_testuvccam /dev/video2 -c -f H264 -r &");
@@ -206,6 +218,7 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 			else if(!strncmp(keyval[1], "640x360", 7))
 			{
 				lidbg_shell_cmd("setprop fly.uvccam.res 640x360");
+				isPreview = 1;
 			}
 			else
 			{

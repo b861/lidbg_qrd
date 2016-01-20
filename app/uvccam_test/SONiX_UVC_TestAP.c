@@ -280,8 +280,8 @@ static int video_set_format(int dev, unsigned int w, unsigned int h, unsigned in
 	{
 		char tmpCMD[100] = {0};
 		lidbg("%s: select 640x360!",__func__);
-		w = 640;
-		h = 360;
+		w = 320;
+		h = 240;
 		isPreview = 1;
 		sprintf(tmpCMD , "rm -f %s/tmp*.h264&",Rec_Save_Dir);
 		system(tmpCMD);
@@ -2767,11 +2767,31 @@ openfd:
 			lidbg("not allow video bitrate = 0MB !!reset to 8000000b/s.\n");
 			Rec_Bitrate = 8000000;
 		}
-		XU_Init_Ctrl(dev);
+		/*
+		char i = 10;
+		Rec_Bitrate = 512000;
+		*/
+		if(XU_Ctrl_ReadChipID(dev) < 0)
+			lidbg( "XU_Ctrl_ReadChipID Failed\n");
 		if(XU_H264_Set_BitRate(dev, Rec_Bitrate) < 0 )
 			lidbg( "XU_H264_Set_BitRate Failed\n");
+		XU_H264_Get_BitRate(dev, &m_BitRate);
+		if(m_BitRate < 0 )
+			lidbg( "SONiX_UVC_TestAP @main : XU_H264_Get_BitRate Failed\n");
+		lidbg("Current bit rate1: %.2f Kbps\n",m_BitRate);
+		/*
+		while((i--) && (m_BitRate != Rec_Bitrate))
+		{
+			if(XU_H264_Set_BitRate(dev, Rec_Bitrate) < 0 )
+				lidbg( "XU_H264_Set_BitRate Failed\n");
+			usleep(500*1000);
+		}
+		lidbg("Current bit rate2: %.2f Kbps\n",m_BitRate);
+		*/
 	}
 
+	if(XU_OSD_Set_Enable(dev, 0, 0) <0)
+			lidbg( "XU_OSD_Set_Enable Failed\n");	
 
 	if(do_vendor_version_get)
 	{
@@ -3704,7 +3724,9 @@ openfd:
 	}
     //yiling --
 
-	
+	XU_H264_Set_IFRAME(dev);
+	XU_H264_Set_Mode(dev, 2);
+		
 	if(GetFreeRam(&freeram) && freeram<1843200*nbufs+4194304)
 	{
 		lidbg( "free memory isn't enough(%d)\n",freeram);		
@@ -3938,6 +3960,7 @@ openfd:
 		return 1;
 	}
 */
+
 	for (i = 0; i < nframes; ++i) {
 
 		if((!strncmp(startRecording, "0", 1)) && (!do_save) )//close
@@ -3968,7 +3991,7 @@ openfd:
 		{
 			XU_H264_Set_IFRAME(dev);
 		}
-
+		
 		/* Dequeue a buffer. */
 		memset(&buf0, 0, sizeof buf0);
 		buf0.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
