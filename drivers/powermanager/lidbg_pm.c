@@ -833,6 +833,7 @@ static int pm_suspend(struct device *dev)
 static int pm_resume(struct device *dev)
 {
     DUMP_FUN;
+    DUMP_BUILD_TIME;
 #ifdef SOC_mt3360
     MCU_WP_GPIO_ON;
     soc_io_resume_config(0, 0, 0, 0);
