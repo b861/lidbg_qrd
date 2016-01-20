@@ -3950,7 +3950,7 @@ openfd:
 				system(tmpCMD);
 			}
 #endif
-			system("echo 'udisk_unrequest' > /dev/flydev0");
+			//system("echo 'udisk_unrequest' > /dev/flydev0");
 			property_set("fly.uvccam.curprevnum", "-1");
 			return 0;
 		}
@@ -4276,7 +4276,7 @@ openfd:
 			if(multi_stream_enable)
 				close(fake_dev);		
 			property_set("fly.uvccam.curprevnum", "-1");
-			system("echo 'udisk_unrequest' > /dev/flydev0");
+			//system("echo 'udisk_unrequest' > /dev/flydev0");
 			return 1;
 #endif
 		}
@@ -4328,25 +4328,25 @@ openfd:
 	if(multi_stream_enable)
 		close(fake_dev);	
 
-	system("echo 'udisk_unrequest' > /dev/flydev0");
+	//system("echo 'udisk_unrequest' > /dev/flydev0");
 	return 0;
 #if 1
 try_open_again:
-		system("echo 'udisk_request' > /dev/flydev0");
+		//system("echo 'udisk_request' > /dev/flydev0");
 		usleep(500*1000);
 		//sleep(2);
 		property_get("persist.lidbg.uvccam.recording", startRecording, "0");
 		if((!strncmp(startRecording, "0", 1)) && (!do_save) )//close
 		{
 			lidbg("-------eho---------uvccam stop recording! -----------\n");
-			system("echo 'udisk_unrequest' > /dev/flydev0");
+			//system("echo 'udisk_unrequest' > /dev/flydev0");
 			property_set("fly.uvccam.curprevnum", "-1");
 			return 0;
 		}
 		if(!(tryopencnt--))
 		{
 			lidbg("-------eho---------uvccam try open timeout! -----------\n");
-			system("echo 'udisk_unrequest' > /dev/flydev0");
+			//system("echo 'udisk_unrequest' > /dev/flydev0");
 			property_set("fly.uvccam.curprevnum", "-1");
 			return 1;
 		}

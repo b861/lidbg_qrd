@@ -54,6 +54,7 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 			if(!strncmp(keyval[1], "1", 1))//start
 			{
 			    lidbg("-------uvccam recording -----");
+				lidbg_shell_cmd("echo 'udisk_request' > /dev/flydev0");
 			    lidbg_shell_cmd("setprop persist.lidbg.uvccam.recording 1");
 			    if(g_var.is_fly) lidbg_shell_cmd("./flysystem/lib/out/lidbg_testuvccam /dev/video2 -c -f H264 -r &");
 			    else lidbg_shell_cmd("./system/lib/modules/out/lidbg_testuvccam /dev/video2 -c -f H264 -r &");
@@ -61,6 +62,7 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 			else if(!strncmp(keyval[1], "0", 1))//stop
 			{
 				lidbg("-------uvccam stop_recording -----");
+				lidbg_shell_cmd("echo 'udisk_unrequest' > /dev/flydev0");
 			    lidbg_shell_cmd("setprop persist.lidbg.uvccam.recording 0");
 			}
 			else
