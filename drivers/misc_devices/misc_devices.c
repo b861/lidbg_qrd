@@ -56,10 +56,14 @@ void usb_front_cam_enable(bool enable)
    }
     lidbg("[%s]\n", enable ? "usb_enable" : "usb_disable");
     if(enable)
+    	{ 
+    	 wake_lock(&device_wakelock);
         USB_POWER_FRONT_ENABLE;
+    	}
     else
     {
         USB_POWER_FRONT_DISABLE;
+	 wake_unlock(&device_wakelock);	
     }
 }
 
@@ -76,7 +80,10 @@ void usb_disk_enable(bool enable)
    }
     lidbg("60.[%s]\n", enable ? "usb_enable" : "usb_disable");
     if(enable)
+    {
+    	 wake_lock(&device_wakelock);
         USB_WORK_ENABLE;
+    }
     else
     {
 #ifdef FORCE_UMOUNT_UDISK
@@ -90,6 +97,7 @@ void usb_disk_enable(bool enable)
         msleep(200);
 #endif
         USB_WORK_DISENABLE;
+	 wake_unlock(&device_wakelock);
     }
 }
 static int thread_usb_disk_enable_delay(void *data)
@@ -275,7 +283,6 @@ static void parse_cmd(char *pt)
     }
     else if (!strcmp(argv[0], "udisk_request"))
     {
-    		wake_lock(&device_wakelock);
         	lidbg("Misc devices ctrl: udisk_request");
 #if defined(PLATFORM_msm8909) && defined(BOARD_V1)
 		usb_disk_enable(true);
@@ -288,24 +295,29 @@ static void parse_cmd(char *pt)
     {
         	lidbg("Misc devices ctrl: udisk_unrequest");
 		 g_var.usb_request= 0;
-    		wake_unlock(&device_wakelock);
+		 if(g_var.acc_flag == FLY_ACC_OFF)
+		 	usb_disk_enable(false);
 
     }
     else if (!strcmp(argv[0], "gps_request"))
     {
         	lidbg("Misc devices ctrl: gps_request");
-    		wake_lock(&device_wakelock);
-		GPS_POWER_ON;
+		if(g_var.acc_flag == FLY_ACC_OFF)
+		{
+	    		wake_lock(&device_wakelock);
+			GPS_POWER_ON;
+		}
     }
     else if (!strcmp(argv[0], "gps_unrequest"))
     {
         	lidbg("Misc devices ctrl: gps_unrequest");
-		GPS_POWER_OFF;
-    		wake_unlock(&device_wakelock);
-
+		if(g_var.acc_flag == FLY_ACC_OFF)
+		{
+			GPS_POWER_OFF;
+    			wake_unlock(&device_wakelock);
+		}
     }
 
-	
 }
 
 
@@ -446,7 +458,7 @@ static int soc_dev_probe(struct platform_device *pdev)
     {
         CREATE_KTHREAD(thread_udisk_stability_test, NULL);
     }
-    USB_WORK_ENABLE;
+    usb_disk_enable(true);
     SET_USB_ID_SUSPEND;
 
 
