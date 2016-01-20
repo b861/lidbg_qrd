@@ -2772,11 +2772,7 @@ openfd:
 			lidbg( "XU_H264_Set_BitRate Failed\n");
 	}
 
-	if(XU_OSD_Set_Enable(dev, 1, 1) <0)
-			lidbg( "XU_OSD_Set_Enable Failed\n");	
-	if(XU_OSD_Set_CarcamCtrl(dev, 0, 0, 0) < 0)
-			lidbg( "XU_OSD_Set_CarcamCtrl Failed\n");	
-	
+
 	if(do_vendor_version_get)
 	{
 	 	char vendor_version[12];
