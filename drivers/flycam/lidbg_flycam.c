@@ -61,9 +61,9 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 					lidbg("======fix screen blurred issue==E=====");
 					lidbg_shell_cmd("setprop persist.lidbg.uvccam.recording 1");
 					lidbg_shell_cmd("./flysystem/lib/out/lidbg_testuvccam /dev/video2 -c -f H264 -r &");
-					msleep(1700);
+					msleep(1500);
 					lidbg_shell_cmd("setprop persist.lidbg.uvccam.recording 0");
-					msleep(2);
+					msleep(10);
 					lidbg("======fix screen blurred issue==X=====");
 					isPreview = 0;
 				}
