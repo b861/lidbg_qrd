@@ -172,6 +172,7 @@ function make_lidbg_udisk_shell_update_package
 {
 	echo $FUNCNAME
 	cd $RELEASE_REPOSITORY
+	./make.sh
 	mkdir -p $RELEASE_REPOSITORY/out/lidbg_update
 	cp -rf $RELEASE_REPOSITORY/out/8909-usbcamera-alpha/flysystem $RELEASE_REPOSITORY/out/lidbg_update/
 	cp -rf $RELEASE_REPOSITORY/others/recovery $RELEASE_REPOSITORY/out/lidbg_update/

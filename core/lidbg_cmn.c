@@ -162,7 +162,7 @@ char *lidbg_get_current_time(char *time_string, struct rtc_time *ptm)
     getnstimeofday(&ts);
     rtc_time_to_tm(ts.tv_sec, &tm);
     if(time_string)
-        sprintf(time_string, "%d-%02d-%02d__%02d.%02d.%02d", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour , tm.tm_min, tm.tm_sec);
+        sprintf(time_string, "%d-%02d-%02d__%02d.%02d.%02d", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, (((tm.tm_hour + 8)<24)?(tm.tm_hour + 8):(tm.tm_hour + 8 - 24)) , tm.tm_min, tm.tm_sec);
     if(ptm)
         *ptm = tm;
     return time_string;
