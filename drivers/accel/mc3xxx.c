@@ -2197,6 +2197,37 @@ static int fb_notifier_callback(struct notifier_block *self,
 
 #endif
 
+#ifdef SUSPEND_ONLINE
+
+static int mc3xxx_event(struct notifier_block *this,
+                       unsigned long event, void *ptr)
+{
+	struct mc3xxx_data *mc_data =
+	container_of(this, struct mc3xxx_data, fb_notif);
+	DUMP_FUN;
+
+    switch (event)
+    {
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_ON):
+		mc3xxx_acc_resume(mc_data);
+		break;
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_OFF):
+		mc3xxx_acc_suspend(mc_data);
+		break;
+    default:
+        break;
+    }
+
+    return NOTIFY_DONE;
+}
+
+static struct notifier_block lidbg_notifier =
+{
+    .notifier_call = mc3xxx_event,
+};
+#endif
+
+
 //=============================================================================
 static struct miscdevice mc3xxx_device =
 {
@@ -2439,6 +2470,12 @@ static int mc3xxx_probe(struct platform_device *pdev)
 		goto exit_remove_sysfs_int;
 	}
 
+#ifdef SUSPEND_ONLINE
+	data->fb_notif = lidbg_notifier;
+	register_lidbg_notifier(&data->fb_notif);
+	if(0)
+#endif
+{
 #if defined(CONFIG_FB)
     data->fb_notif.notifier_call = fb_notifier_callback;
     ret = fb_register_client(&data->fb_notif);
@@ -2453,7 +2490,7 @@ static int mc3xxx_probe(struct platform_device *pdev)
 	data->early_suspend.resume = mc3xxx_early_resume;
 	register_early_suspend(&data->early_suspend);
 #endif
-
+}
 	data->enabled = 1;
 	//printk(KERN_ERR"%s mc3xxx probe ok \n", __func__);
 
