@@ -3954,6 +3954,7 @@ openfd:
 				system(tmpCMD);
 			}
 #endif
+			system("echo 'udisk_unrequest' > /dev/flydev0");
 			property_set("fly.uvccam.curprevnum", "-1");
 			return 0;
 		}
@@ -4342,6 +4343,7 @@ try_open_again:
 		if((!strncmp(startRecording, "0", 1)) && (!do_save) )//close
 		{
 			lidbg("-------eho---------uvccam stop recording! -----------\n");
+			system("echo 'udisk_unrequest' > /dev/flydev0");
 			property_set("fly.uvccam.curprevnum", "-1");
 			return 0;
 		}
