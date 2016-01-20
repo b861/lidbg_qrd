@@ -103,7 +103,7 @@
 #define	BACK_NODE		"1-1.3"
 
 //flyaudio
-#define NONE_HUB_SUPPORT	1
+#define NONE_HUB_SUPPORT	0
 //#define REC_SAVE_DIR	"/storage/sdcard0/camera_rec/"
 char Rec_Save_Dir[100] = "/storage/sdcard0/camera_rec/";
 int Max_Rec_Num = 5;
