@@ -11,7 +11,7 @@
 LIDBG_DEFINE;
 
 int udisk_stability_test = 0;
-
+static struct wake_lock device_wakelock;
 //int usb_request = 0;
 
 #if defined(CONFIG_FB)
@@ -275,6 +275,7 @@ static void parse_cmd(char *pt)
     }
     else if (!strcmp(argv[0], "udisk_request"))
     {
+    		wake_lock(&device_wakelock);
         	lidbg("Misc devices ctrl: udisk_request");
 #if defined(PLATFORM_msm8909) && defined(BOARD_V1)
 		usb_disk_enable(true);
@@ -287,16 +288,21 @@ static void parse_cmd(char *pt)
     {
         	lidbg("Misc devices ctrl: udisk_unrequest");
 		 g_var.usb_request= 0;
+    		wake_unlock(&device_wakelock);
+
     }
     else if (!strcmp(argv[0], "gps_request"))
     {
         	lidbg("Misc devices ctrl: gps_request");
+    		wake_lock(&device_wakelock);
 		GPS_POWER_ON;
     }
     else if (!strcmp(argv[0], "gps_unrequest"))
     {
         	lidbg("Misc devices ctrl: gps_unrequest");
 		GPS_POWER_OFF;
+    		wake_unlock(&device_wakelock);
+
     }
 
 	
@@ -515,6 +521,7 @@ int dev_init(void)
     lidbg("=======misc_dev_init========\n");
     LIDBG_GET;
     set_func_tbl();
+    wake_lock_init(&device_wakelock, WAKE_LOCK_SUSPEND, "lidbg_device_wakelock");
     platform_device_register(&soc_devices);
     platform_driver_register(&soc_devices_driver);
     return 0;

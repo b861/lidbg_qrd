@@ -88,7 +88,7 @@ static int SN65_Sequence_seq7(void)
                 is_dsi83_inited = 0;
                 break;
             }
-            msleep(50);
+            msleep(100);
         }
     }
     return ret;

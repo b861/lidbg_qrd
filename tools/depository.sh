@@ -168,6 +168,19 @@ function push_flyFastBoot_apk
 	adb shell chmod 777 /system/app/FastBoot.apk
 	adb shell chmod 777 /system/app/FlyBootService.apk
 }
+function make_lidbg_udisk_shell_update_package
+{
+	echo $FUNCNAME
+	cd $RELEASE_REPOSITORY
+	mkdir -p $RELEASE_REPOSITORY/out/lidbg_update
+	cp -rf $RELEASE_REPOSITORY/out/8909-usbcamera-alpha/flysystem $RELEASE_REPOSITORY/out/lidbg_update/
+	cp -rf $RELEASE_REPOSITORY/others/recovery $RELEASE_REPOSITORY/out/lidbg_update/
+	cp -rf $RELEASE_REPOSITORY/radio/* $RELEASE_REPOSITORY/out/lidbg_update/
+	cp -rf $RELEASE_REPOSITORY/lk/* $RELEASE_REPOSITORY/out/lidbg_update/
+        unzip -o $RELEASE_REPOSITORY/basesystem/baseqcom.flb -d $RELEASE_REPOSITORY/out/
+	cp -rf $RELEASE_REPOSITORY/out/boot.img $RELEASE_REPOSITORY/out/lidbg_update/
+}
+
 
 function depository_menu()
 {
@@ -177,6 +190,7 @@ if [[ $RELEASE_REPOSITORY != "" ]];then
 	echo [42] copy basesystem to depository
 	echo [43] make update package
 	echo [44] make msm8909 full package
+	echo [45] make lidbg_udisk_shell update package
 fi
 }
 
@@ -192,6 +206,8 @@ function depository_handle()
 		depository_make_package;;
 	44)
 		make_ota_package;;
+	45)
+		make_lidbg_udisk_shell_update_package;;
 #	44)
 #		push_flyFastBoot_apk;;
 	*)
