@@ -282,7 +282,7 @@ static int unormal_wakeup_handle(void)
 		if(system_unormal_wakeup_cnt > UNORMAL_WAKEUP_CNT){
 
 			if(system_wakeup_ms < (UNORMAL_WAKEUP_TIME_MINU * 60 * 1000)){
-				lidbgerr("System wakeup %d times in %d(%u) msec,system tics %u, unormal\n", system_unormal_wakeup_cnt, system_wakeup_ms, (UNORMAL_WAKEUP_TIME_MINU * 60 * 1000), ktime_get_ms());
+				lidbgerr("System wakeup %d times in %d(%u) msec,system tics %lld, unormal\n", system_unormal_wakeup_cnt, system_wakeup_ms, (UNORMAL_WAKEUP_TIME_MINU * 60 * 1000), ktime_get_ms());
 
 				if(g_var.acc_flag == FLY_ACC_OFF)
 				{
@@ -303,7 +303,7 @@ static int unormal_wakeup_handle(void)
 					}
 				}
 			}else
-				lidbg("System wakeup %d times in %d(%u) msec,system tics %u, normal\n", system_unormal_wakeup_cnt, system_wakeup_ms, (UNORMAL_WAKEUP_TIME_MINU * 60 * 1000), ktime_get_ms());
+				lidbg("System wakeup %d times in %d(%u) msec,system tics %lld, normal\n", system_unormal_wakeup_cnt, system_wakeup_ms, (UNORMAL_WAKEUP_TIME_MINU * 60 * 1000), ktime_get_ms());
 
 			//count again
 			system_wakeup_ms = 0;
