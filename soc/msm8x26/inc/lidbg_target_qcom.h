@@ -126,7 +126,6 @@
 			SOC_IO_Output(0, g_hw.gpio_usb_front_en, 1);\
 			check_gpio(g_hw.gpio_usb_backcam_en);\
 			SOC_IO_Output(0, g_hw.gpio_usb_backcam_en, 1);\
-			SOC_IO_Output(0, 31, 1);\
 	}while(0)
 
 
@@ -140,7 +139,6 @@
 			SOC_IO_Output(0, g_hw.gpio_usb_front_en, 0);\
 			check_gpio(g_hw.gpio_usb_backcam_en);\
 			SOC_IO_Output(0, g_hw.gpio_usb_backcam_en, 0);\
-			SOC_IO_Output(0, 31, 0);\
 	}while(0)
 #else
 #define USB_POWER_ENABLE do{\

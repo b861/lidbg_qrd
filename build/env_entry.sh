@@ -353,7 +353,7 @@ case "$DBG_PLATFORM_ID" in
 
     	11)
 	export DBG_PLATFORM=msm8909
-	export BOARD_VERSION=V2
+	export BOARD_VERSION=V1
 	export ANDROID_VERSION=511
 	export DBG_CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilts/gcc/linux-x86/arm/arm-eabi-4.8/bin/arm-eabi-
 	export JAVA_HOME=$PATHJAVA1P7
