@@ -2771,6 +2771,7 @@ openfd:
 		char i = 10;
 		Rec_Bitrate = 512000;
 		*/
+#if 0
 		if(XU_Ctrl_ReadChipID(dev) < 0)
 			lidbg( "XU_Ctrl_ReadChipID Failed\n");
 		if(XU_H264_Set_BitRate(dev, Rec_Bitrate) < 0 )
@@ -2779,6 +2780,7 @@ openfd:
 		if(m_BitRate < 0 )
 			lidbg( "SONiX_UVC_TestAP @main : XU_H264_Get_BitRate Failed\n");
 		lidbg("Current bit rate1: %.2f Kbps\n",m_BitRate);
+#endif
 		/*
 		while((i--) && (m_BitRate != Rec_Bitrate))
 		{
