@@ -233,7 +233,7 @@
 			USB_SWITCH_DISCONNECT;\
 			USB_POWER_DISABLE;\
 			}while(0)
-#else
+#else // end PLATFORM_msm8974
 #define USB_WORK_ENABLE do{\
 				lidbg("USB_WORK_ENABLE\n");\
 				g_var.usb_status = 1;\

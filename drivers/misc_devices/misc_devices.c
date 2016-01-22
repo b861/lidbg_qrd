@@ -44,16 +44,10 @@ static int devices_notifier_callback(struct notifier_block *self,
 #endif
 
 
-void usb_front_cam_enable(bool enable)
+void usb_camera_enable(bool enable)
 {
     DUMP_FUN;
-    lidbg("%d,%d\n", g_var.usb_status,enable);
 
-   if(g_var.usb_status == enable)
-   {
-   	lidbg("usb_front_cam_enable skip\n");
-   	return;
-   }
     lidbg("[%s]\n", enable ? "usb_enable" : "usb_disable");
     if(enable)
     	{ 
@@ -116,7 +110,7 @@ static int thread_usb_disk_disable_delay(void *data)
     //msleep(1000);
 #endif
 
-	if( g_var.usb_request == 1)
+	if(( g_var.usb_request == 1)||(g_var.usb_cam_request== 1))
 		lidbg("Usb still being used, don't disable it actually...\n");
 	else{
 		lidbg("Usb be not used,disable it...\n");
@@ -125,6 +119,11 @@ static int thread_usb_disk_disable_delay(void *data)
 		{
 		lidbg("\n\n\n===========disable usb but request so. enable it================\n");
 		usb_disk_enable(true);
+		}
+		if( g_var.usb_cam_request == 1)
+		{
+		lidbg("\n\n\n===========disable usb but request so. enable it================\n");
+		usb_camera_enable(true);
 		}
 	}
 
@@ -142,7 +141,6 @@ static int lidbg_dev_event(struct notifier_block *this,
         //if(!g_var.is_fly)
     {
         LCD_OFF;
-	  g_var.usb_request= 0;
         //lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_APP_OFF));
         //lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_HAL_OFF));
     }
@@ -286,17 +284,27 @@ static void parse_cmd(char *pt)
         	lidbg("Misc devices ctrl: udisk_request");
 #if defined(PLATFORM_msm8909) && defined(BOARD_V1)
 		usb_disk_enable(true);
+ 		g_var.usb_request= 1;
 #else
-		usb_front_cam_enable(true);
+		 g_var.usb_cam_request = 1;
+		if(g_var.acc_flag == FLY_ACC_OFF)
+		    usb_camera_enable(true);
 #endif
-		 g_var.usb_request= 1;
+		
     }
     else if (!strcmp(argv[0], "udisk_unrequest"))
     {
         	lidbg("Misc devices ctrl: udisk_unrequest");
+#if defined(PLATFORM_msm8909) && defined(BOARD_V1)
 		 g_var.usb_request= 0;
 		 if(g_var.acc_flag == FLY_ACC_OFF)
 		 	usb_disk_enable(false);
+#else
+		  g_var.usb_cam_request= 0;
+		  if(g_var.acc_flag == FLY_ACC_OFF)
+		 	usb_camera_enable(false);
+#endif
+
 
     }
     else if (!strcmp(argv[0], "gps_request"))
