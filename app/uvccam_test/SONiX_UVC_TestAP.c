@@ -3728,7 +3728,20 @@ openfd:
     //yiling --
 
 	XU_H264_Set_IFRAME(dev);
-	XU_H264_Set_Mode(dev, 2);
+	if(isPreview)
+		XU_H264_Set_Mode(dev, 2);
+	else
+	{
+		if(XU_Ctrl_ReadChipID(dev) < 0)
+			lidbg( "XU_Ctrl_ReadChipID Failed\n");
+		if(XU_H264_Set_BitRate(dev, 4000000) < 0 )
+			lidbg( "XU_H264_Set_BitRate Failed\n");
+		XU_H264_Get_BitRate(dev, &m_BitRate);
+		if(m_BitRate < 0 )
+			lidbg( "SONiX_UVC_TestAP @main : XU_H264_Get_BitRate Failed\n");
+		lidbg("Current bit rate1: %.2f Kbps\n",m_BitRate);
+	}
+		
 		
 	if(GetFreeRam(&freeram) && freeram<1843200*nbufs+4194304)
 	{
