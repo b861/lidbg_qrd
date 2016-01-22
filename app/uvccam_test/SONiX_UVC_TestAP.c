@@ -1302,7 +1302,7 @@ void *thread_capture(void *par)
 	pthread_exit(NULL);
 	return 0;
 }
-
+#if 0
 void *thread_switch(void *par)
 {
     lidbg("-------eho--------%s----start\n",__func__); 
@@ -1316,6 +1316,7 @@ void *thread_switch(void *par)
     lidbg("-------eho--------%s----exit\n",__func__);
     return 0;
 }
+#endif
 #if 0
 void *thread_nightmode(void *par)
 {
@@ -3943,6 +3944,7 @@ openfd:
         sprintf(rec_filename2, "RecordH264_180P.h264");
         sprintf(rec_filename4, "RecordH264_360P.h264");
     }
+	#if 0
 	if(!do_save)//recording
 	{
 		ret = pthread_create(&thread_switch_id,NULL,thread_switch,NULL);
@@ -3953,6 +3955,7 @@ openfd:
 		}
 	}
 	property_get("persist.lidbg.uvccam.recording", startRecording, "1");
+	#endif
 	//property_get("persist.lidbg.uvccam.capture", startCapture, "1");
 /*
 	ret = pthread_create(&thread_switch_id,NULL,thread_checkdev,NULL);
@@ -3964,6 +3967,8 @@ openfd:
 */
 
 	for (i = 0; i < nframes; ++i) {
+		
+    	property_get("persist.lidbg.uvccam.recording", startRecording, "0");
 
 		if((!strncmp(startRecording, "0", 1)) && (!do_save) )//close
 		{
@@ -3977,6 +3982,7 @@ openfd:
 #endif
 			//system("echo 'udisk_unrequest' > /dev/flydev0");
 			property_set("fly.uvccam.curprevnum", "-1");
+			close(dev);
 			return 0;
 		}
 		
