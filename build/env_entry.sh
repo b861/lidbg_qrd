@@ -353,7 +353,7 @@ case "$DBG_PLATFORM_ID" in
 
     	11)
 	export DBG_PLATFORM=msm8909
-	export BOARD_VERSION=V1
+	export BOARD_VERSION=V2
 	export ANDROID_VERSION=511
 	export DBG_CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilts/gcc/linux-x86/arm/arm-eabi-4.8/bin/arm-eabi-
 	export JAVA_HOME=$PATHJAVA1P7
@@ -373,7 +373,7 @@ case "$DBG_PLATFORM_ID" in
 	export OTA_PACKAGE_NAME=msm8909-ota-eng.*.zip
 	export DBG_SOC=msm8x26
 	export TEST_PACKAGE_PATH=//192.168.128.128/share/8909/升级包/测试升级包
-	export REPOSITORY_WORK_BRANCH=master
+	export REPOSITORY_WORK_BRANCH=v2
 	export SYSTEM_WORK_BRANCH=msm8909-master
         export MAKE_PAKG_NUM=21
 
