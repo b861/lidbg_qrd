@@ -1490,7 +1490,7 @@ static int get_hub_uvc_device(char *devname,char do_save,char do_record)
 			if((!strncmp(ent->d_name,  BACK_NODE , 5)) &&
 				(strlen(ent->d_name) >= back_charcnt) && (cam_id == 0))
 			{
-				front_charcnt = strlen(ent->d_name);
+				back_charcnt = strlen(ent->d_name);
 				sprintf(hub_path, "/sys/bus/usb/drivers/usb/%s/%s:1.0/video4linux/", ent->d_name,ent->d_name);//back cam
 			}
 			else if((!strncmp(ent->d_name,  FRONT_NODE , 5)) &&

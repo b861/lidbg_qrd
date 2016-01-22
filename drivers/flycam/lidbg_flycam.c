@@ -74,8 +74,9 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 			else if(!strncmp(keyval[1], "0", 1))//stop
 			{
 				lidbg("-------uvccam stop_recording -----");
+				lidbg_shell_cmd("setprop persist.lidbg.uvccam.recording 0");
+				msleep(500);
 				lidbg_shell_cmd("echo 'udisk_unrequest' > /dev/flydev0");
-			    lidbg_shell_cmd("setprop persist.lidbg.uvccam.recording 0");
 			}
 			else
 			{
