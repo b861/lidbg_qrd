@@ -99,7 +99,7 @@
 #define	DAY_BRIGHTVAL				53
 
 //for hub
-#define	FRONT_NODE		"1-1.4"	
+#define	FRONT_NODE		"1-1.2"	
 #define	BACK_NODE		"1-1.3"
 
 //flyaudio
