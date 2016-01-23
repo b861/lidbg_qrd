@@ -7,6 +7,7 @@ static wait_queue_head_t wait_queue;
 char isBackChange = 0;
 char isBack = 0;
 char isPreview = 0;
+char isFirstresume = 0;
 
 ssize_t  flycam_read(struct file *filp, char __user *buffer, size_t size, loff_t *offset)
 {
@@ -56,17 +57,21 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 			{
 			    lidbg("-------uvccam recording -----");
 				lidbg_shell_cmd("echo 'udisk_request' > /dev/flydev0");
-				if(isPreview)
+				//fix screen blurred issue
+				
+				if((++isPreview == 2) || (isPreview && isFirstresume))
 				{
-					lidbg("======fix screen blurred issue==E=====");
+					lidbg("======fix screen blurred issue==E=====%d",isPreview);
 					lidbg_shell_cmd("setprop persist.lidbg.uvccam.recording 1");
 					lidbg_shell_cmd("./flysystem/lib/out/lidbg_testuvccam /dev/video2 -c -f H264 -r &");
 					msleep(3500);
 					lidbg_shell_cmd("setprop persist.lidbg.uvccam.recording 0");
 					msleep(500);
 					lidbg("======fix screen blurred issue==X=====");
-					isPreview = 0;
 				}
+				lidbg("isPreview => %d ",isPreview);
+				if(isPreview >= 20) isPreview = 20;
+				isFirstresume = 0;
 			    lidbg_shell_cmd("setprop persist.lidbg.uvccam.recording 1");
 			    if(g_var.is_fly) lidbg_shell_cmd("./flysystem/lib/out/lidbg_testuvccam /dev/video2 -c -f H264 -r &");
 			    else lidbg_shell_cmd("./system/lib/modules/out/lidbg_testuvccam /dev/video2 -c -f H264 -r &");
@@ -219,7 +224,7 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 			else if(!strncmp(keyval[1], "640x360", 7))
 			{
 				lidbg_shell_cmd("setprop fly.uvccam.res 640x360");
-				isPreview = 1;
+				isPreview++;
 			}
 			else
 			{
@@ -318,6 +323,61 @@ int thread_flycam_test(void *data)
     return 0;
 }
 
+
+static int flycam_ops_suspend(struct device *dev)
+{
+    lidbg("-----------flycam_ops_suspend------------\n");
+    DUMP_FUN;
+	
+    return 0;
+}
+
+static int flycam_ops_resume(struct device *dev)
+{
+
+    lidbg("-----------flycam_ops_resume------------\n");
+    DUMP_FUN;
+	//lidbg("g_var.acc_flag => %d",g_var.acc_flag);
+	if(g_var.acc_flag == FLY_ACC_ON)
+	{
+		isFirstresume = 1;
+	}
+    return 0;
+}
+
+static struct dev_pm_ops flycam_ops =
+{
+    .suspend	= flycam_ops_suspend,
+    .resume	= flycam_ops_resume,
+};
+
+static int flycam_probe(struct platform_device *pdev)
+{
+    return 0;
+}
+
+static int flycam_remove(struct platform_device *pdev)
+{
+    return 0;
+}
+
+static struct platform_device flycam_devices =
+{
+    .name			= "lidbg_flycam",
+    .id 			= 0,
+};
+
+static struct platform_driver flycam_driver =
+{
+    .probe = flycam_probe,
+    .remove = flycam_remove,
+    .driver = 	{
+        .name = "lidbg_flycam",
+        .owner = THIS_MODULE,
+        .pm = &flycam_ops,
+    },
+};
+
 int thread_flycam_init(void *data)
 {
     lidbg_new_cdev(&flycam_nod_fops, "lidbg_flycam");
@@ -344,7 +404,8 @@ static __init int lidbg_flycam_init(void)
     LIDBG_GET;
 
     CREATE_KTHREAD(thread_flycam_init, NULL);
-
+	platform_device_register(&flycam_devices);
+    platform_driver_register(&flycam_driver);
     return 0;
 
 }
