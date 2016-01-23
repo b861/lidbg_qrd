@@ -177,13 +177,15 @@
 			SOC_IO_Output(0, g_hw.gpio_usb_power, 1);\
 			check_gpio(g_hw.gpio_usb_front_en);\
 			SOC_IO_Output(0, g_hw.gpio_usb_front_en, 1);\
+			USB_ID_LOW_HOST;\
 	}while(0)
 #define USB_POWER_FRONT_DISABLE do{\
-			LPC_CMD_USB5V_ON;\
+			LPC_CMD_USB5V_OFF;\
 			check_gpio(g_hw.gpio_usb_power);\
 			SOC_IO_Output(0, g_hw.gpio_usb_power, 0);\
 			check_gpio(g_hw.gpio_usb_front_en);\
 			SOC_IO_Output(0, g_hw.gpio_usb_front_en, 0);\
+			USB_ID_HIGH_DEV;\
 	}while(0)
 
 #define USB_POWER_BACK_ENABLE do{\
@@ -192,13 +194,15 @@
 			SOC_IO_Output(0, g_hw.gpio_usb_power, 1);\
 			check_gpio(g_hw.gpio_usb_backcam_en);\
 			SOC_IO_Output(0, g_hw.gpio_usb_backcam_en, 1);\
+			USB_ID_LOW_HOST;\
 	}while(0)
 #define USB_POWER_BACK_DISABLE do{\
-			LPC_CMD_USB5V_ON;\
+			LPC_CMD_USB5V_OFF;\
 			check_gpio(g_hw.gpio_usb_power);\
 			SOC_IO_Output(0, g_hw.gpio_usb_power, 0);\
 			check_gpio(g_hw.gpio_usb_backcam_en);\
 			SOC_IO_Output(0, g_hw.gpio_usb_backcam_en, 0);\
+			USB_ID_HIGH_DEV;\
 	}while(0)
 
 #ifdef PLATFORM_msm8974
