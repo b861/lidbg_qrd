@@ -79,8 +79,8 @@ void accel_power_enable(void)
 
 struct probe_device i2c_probe_dev[] =
 {
-    {DEV_ACCEL, accel_i2c_bus, 0x18, 0x00, "bma2x2.ko", NULL, NULL},
-    {DEV_ACCEL, accel_i2c_bus, 0x4c, 0x00, "mc3xxx.ko", accel_power_enable, mc3x_find_cb},
+   // {DEV_ACCEL, accel_i2c_bus, 0x18, 0x00, "bma2x2.ko", NULL, NULL},
+   // {DEV_ACCEL, accel_i2c_bus, 0x4c, 0x00, "mc3xxx.ko", accel_power_enable, mc3x_find_cb},
 
     {DEV_GPS, gps_i2c_bus, 0x42, 0x00, "lidbg_gps.ko", NULL, NULL},	
 
