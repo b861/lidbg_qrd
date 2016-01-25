@@ -14,6 +14,7 @@ struct judgment
     {"platform_id", -1},
     {"Factory", -1},
     {"gboot_mode", -1},
+    {"is_uart_print_enable", -1},
 };
 void judgment_list_print(void)
 {
@@ -65,14 +66,33 @@ void judgment_list_init(void)
 #ifdef PLATFORM_ID_12
     judgment_list[0].value = 12;
 #endif
+#ifdef PLATFORM_ID_13
+    judgment_list[0].value = 13;
+#endif
 #ifdef PLATFORM_ID_14
     judgment_list[0].value = 14;
 #endif
 #ifdef PLATFORM_ID_15
     judgment_list[0].value = 15 ;
 #endif
+#ifdef PLATFORM_ID_16
+    judgment_list[0].value = 16 ;
+#endif
+#ifdef PLATFORM_ID_17
+    judgment_list[0].value = 17 ;
+#endif
+#ifdef PLATFORM_ID_18
+    judgment_list[0].value = 18 ;
+#endif
+#ifdef PLATFORM_ID_19
+    judgment_list[0].value = 19 ;
+#endif
+#ifdef PLATFORM_ID_20
+    judgment_list[0].value = 20 ;
+#endif
     judgment_list[1].value = is_out_updated ;
     judgment_list[2].value = gboot_mode ;
+    judgment_list[3].value = g_recovery_meg->bootParam.upName.val ;
 {
     char temp_cmd[256];
     sprintf(temp_cmd, "setprop persist.lidbg.intPlatformId %d", judgment_list[0].value);

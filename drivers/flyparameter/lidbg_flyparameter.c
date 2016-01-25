@@ -306,6 +306,7 @@ int lidbg_flyparameter_init(void)
     lidbg_fly_hw_info_init();//block other ko before hw_info set
     lidbg_new_cdev(&fly_upate_info_fops, "fly_upate_info");
     CREATE_KTHREAD(thread_fix_fly_update_info, NULL);
+    LIDBG_MODULE_LOG;
     return 0;
 
 }
