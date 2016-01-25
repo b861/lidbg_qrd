@@ -4396,7 +4396,8 @@ try_open_again:
 		}
 		if(tryopencnt == 8)//fix usb R/W error
 		{
-			system("echo 'ws udisk_reset' > /dev/lidbg_pm0");
+			//system("echo 'ws udisk_reset' > /dev/lidbg_pm0");
+			lidbg("%s: Can not found camera till 8!!Camera may burst R/W error unexpected!\n", __func__);
 		}
 		//lidbg("%s: Camera may extract unexpected!try open again!-> %d\n", __func__,tryopencnt);
 		lidbg("%s: Camera open fail!try open again!-> %d\n", __func__,tryopencnt);
