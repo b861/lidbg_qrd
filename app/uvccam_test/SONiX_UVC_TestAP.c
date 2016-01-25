@@ -4394,6 +4394,10 @@ try_open_again:
 			property_set("fly.uvccam.curprevnum", "-1");
 			return 1;
 		}
+		if(tryopencnt == 8)//fix usb R/W error
+		{
+			system("echo 'ws udisk_reset' > /dev/lidbg_pm0");
+		}
 		//lidbg("%s: Camera may extract unexpected!try open again!-> %d\n", __func__,tryopencnt);
 		lidbg("%s: Camera open fail!try open again!-> %d\n", __func__,tryopencnt);
 		rc = get_hub_uvc_device(devName,do_save,do_record);
