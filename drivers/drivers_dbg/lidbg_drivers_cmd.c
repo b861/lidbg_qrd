@@ -281,7 +281,7 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#041--disable uart debug\n");
             fs_mem_log("*158#042--disable adb\n");
             fs_mem_log("*158#043--enable adb\n");
-            fs_mem_log("*158#044--start SleepTest acc test,????,?*158#0448010\n");
+            fs_mem_log("*158#044x--start SleepTest acc test,????,?*158#0448010\n");
             fs_mem_log("*158#045x--start RGB LED test,????,?*158#0451\n");
             fs_mem_log("*158#046--set cpu run in performance mode\n");
             fs_mem_log("*158#047--set cpu run in powersave mode\n");
@@ -304,6 +304,7 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#064--! iptable all apps\n");
             fs_mem_log("*158#065--disable suspend timeout protect\n");
             fs_mem_log("*158#066--disable alarmmanager protect\n");
+            fs_mem_log("*158#067xx--set alarmtimer wakeup time\n");
 
             show_password_list();
             lidbg_domineering_ack();
@@ -734,6 +735,11 @@ void parse_cmd(char *pt)
         {
             lidbg("*158#066--disable alarmmanager protect\n");
             lidbg_shell_cmd("am broadcast -a com.lidbg.alarmmanager.action --ei action 0 &");
+        }
+        else if (!strncmp(argv[1], "*158#067", 8))
+        {
+            g_var.alarmtimer_interval = simple_strtoul((argv[1] + 8), 0, 0);
+	     lidbg("set alarmtimer wakeup time:%d\n",g_var.alarmtimer_interval);
         }
 
         else if (!strcmp(argv[1], "*168#001"))
