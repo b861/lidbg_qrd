@@ -10,6 +10,34 @@ char previewCnt = 0;
 char isPreview = 0;
 char isFirstresume = 0;
 
+
+static int lidbg_flycam_event(struct notifier_block *this,
+                       unsigned long event, void *ptr)
+{
+    DUMP_FUN;
+	lidbg("flycam event: %ld\n", event);
+    switch (event)
+    {
+	    case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_ON):
+		lidbg("flycam event:resume %ld\n", event);
+			isFirstresume = 1;
+			break;
+	    case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_OFF):
+		lidbg("flycam event:suspend %ld\n", event);
+			break;
+	    default:
+	        break;
+    }
+
+    return NOTIFY_DONE;
+}
+
+static struct notifier_block lidbg_notifier =
+{
+    .notifier_call = lidbg_flycam_event,
+};
+
+
 ssize_t  flycam_read(struct file *filp, char __user *buffer, size_t size, loff_t *offset)
 {
 	if(!isBackChange)
@@ -340,10 +368,12 @@ static int flycam_ops_resume(struct device *dev)
     lidbg("-----------flycam_ops_resume------------\n");
     DUMP_FUN;
 	//lidbg("g_var.acc_flag => %d",g_var.acc_flag);
+#if 0
 	if(g_var.acc_flag == FLY_ACC_ON)
 	{
 		isFirstresume = 1;
 	}
+#endif
     return 0;
 }
 
@@ -389,7 +419,7 @@ int thread_flycam_init(void *data)
 	SOC_IO_ISR_Add(BACK_DET, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING , irq_back_det, NULL);
 #endif
 	init_waitqueue_head(&wait_queue);
-
+	register_lidbg_notifier(&lidbg_notifier);
 	//CREATE_KTHREAD(thread_flycam_test, NULL);
 	/*
     if((!g_var.is_fly) && (g_var.recovery_mode == 0)))
