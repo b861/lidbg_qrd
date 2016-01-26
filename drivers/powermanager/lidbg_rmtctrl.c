@@ -393,7 +393,8 @@ static int lidbg_rmtctrl_probe(struct platform_device *pdev)
 	lidbg_new_cdev(&rmtctrl_fops, "flyaudio_pm");
 	lidbg_chmod("/dev/flyaudio_pm0");
 
-	CREATE_KTHREAD(thread_check_acc_and_response_acc_off_delay, NULL);
+        if(g_var.recovery_mode == 0)
+                CREATE_KTHREAD(thread_check_acc_and_response_acc_off_delay, NULL);
 
 	return 0;
 }

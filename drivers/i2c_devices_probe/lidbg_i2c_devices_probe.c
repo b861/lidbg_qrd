@@ -158,7 +158,7 @@ int i2c_devices_probe_thread(void *data)
 #ifdef SUSPEND_ONLINE
     g_var.acc_flag = SOC_IO_Input(MCU_ACC_STATE_IO, MCU_ACC_STATE_IO, GPIO_CFG_PULL_UP);
     LIDBG_WARN("<g_var.acc_flag.1:%d>\n",g_var.acc_flag);
-    while(g_var.acc_flag==FLY_ACC_OFF)
+    while(g_var.recovery_mode == 0&&g_var.acc_flag==FLY_ACC_OFF)
     {
         msleep(200);
     }
