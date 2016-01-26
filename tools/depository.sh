@@ -160,6 +160,13 @@ function make_ota_package()
 	
 }
 
+function make_origin_ota_package()
+{
+	echo "start make ota-package"
+	do_make_origin_ota_package
+	
+}
+
 function push_flyFastBoot_apk
 {
 	expect $DBG_TOOLS_PATH/remount
@@ -191,7 +198,8 @@ if [[ $RELEASE_REPOSITORY != "" ]];then
 	echo [42] copy basesystem to depository
 	echo [43] make update package
 	echo [44] make msm8909 full package
-	echo [45] make lidbg_udisk_shell update package
+	echo [45] make msm8909 origin full package
+	echo [46] make lidbg_udisk_shell update package
 fi
 }
 
@@ -208,6 +216,8 @@ function depository_handle()
 	44)
 		make_ota_package;;
 	45)
+		make_origin_ota_package;;
+	46)
 		make_lidbg_udisk_shell_update_package;;
 #	44)
 #		push_flyFastBoot_apk;;
