@@ -94,9 +94,9 @@ public class FlyBootService extends Service {
 
     private static FlyBootService mFlyBootService;
 
-    public PowerManager pm;
     private PowerManager fbPm = null;
     public static WakeLock mWakeLock = null;
+    public static WakeLock mBrightWakeLock = null;
     private ActivityManager mActivityManager = null;
     private PackageManager mPackageManager = null;
     private static boolean bIsKLDRunning = true;
@@ -145,6 +145,7 @@ public class FlyBootService extends Service {
 	mFlyBootService = this;
 	acquireWakeLock();
 	mPackageManager = this.getPackageManager();
+	fbPm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 	mActivityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
 	mWhiteList = FileReadList("/flysystem/lib/out/appProtectList.conf","\n");
 	mInternelWhiteList = FileReadList("/flysystem/lib/out/appInternetProtectList.conf","\n");
@@ -156,6 +157,8 @@ public class FlyBootService extends Service {
 	IntentFilter filter = new IntentFilter();
 	filter.addAction("android.intent.action.BOOT_COMPLETED");
 	filter.addAction("com.lidbg.flybootserver.action");
+	filter.addAction(Intent.ACTION_SCREEN_OFF);
+	filter.addAction(Intent.ACTION_SCREEN_ON);
 	filter.setPriority(Integer.MAX_VALUE);
 	registerReceiver(myReceiver, filter);
 
@@ -291,12 +294,26 @@ public class FlyBootService extends Service {
 				return;
 			}
 
-			LIDBG_PRINT("flybootserver.BroadcastReceiver:"+intent.getAction()+"\n");
+			LIDBG_PRINT("flybootserver.BroadcastReceiver:["+intent.getAction()+"]\n");
 			if (intent.getAction().equals("android.intent.action.BOOT_COMPLETED"))
 			{
+				acquireBrightWakeLock();
 				writeToFile("/dev/lidbg_interface", "BOOT_COMPLETED");
 				return;
 			}
+			else  if (intent.getAction().equals(Intent.ACTION_SCREEN_ON))
+			{
+				acquireBrightWakeLock();
+				return;
+			}
+			else  if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF))
+			{
+				releaseBrightWakeLock();
+				return;
+			}
+
+
+
 			if ( !intent.hasExtra("action"))
 			{
 				LIDBG_PRINT("err.return:!intent.hasExtra(\"action\")\n");
@@ -416,9 +433,9 @@ public class FlyBootService extends Service {
     public void acquireWakeLock() {
         if (mWakeLock == null) {
             LIDBG_PRINT(" +++++ acquire flybootservice wakelock +++++ ");
-            pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+            fbPm= (PowerManager) getSystemService(Context.POWER_SERVICE);
 
-            mWakeLock = (WakeLock) pm.newWakeLock(
+            mWakeLock = (WakeLock) fbPm.newWakeLock(
                     PowerManager.PARTIAL_WAKE_LOCK, "flytag");
             if (mWakeLock != null && !mWakeLock.isHeld())
                 mWakeLock.acquire();
@@ -436,6 +453,33 @@ public class FlyBootService extends Service {
             mWakeLock = null;
         }
     }
+
+public void acquireBrightWakeLock()
+{
+    if (mBrightWakeLock == null)
+    {
+        fbPm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+	mBrightWakeLock = (WakeLock) fbPm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "lidbg.bright.wakelock");
+        if (mBrightWakeLock != null)
+        {
+            LIDBG_PRINT(" ----- acquireBrightWakeLock ----- ");
+            mBrightWakeLock.acquire();
+        }
+        else
+            LIDBG_PRINT(" Error: acquireBrightWakeLock");
+    }
+}
+public static void releaseBrightWakeLock()
+{
+    if (mBrightWakeLock != null )
+    {
+        LIDBG_PRINT(" ----- releaseBrightWakeLock ----- ");
+        mBrightWakeLock.release();
+        if(mBrightWakeLock.isHeld())
+            LIDBG_PRINT(" Error: releaseBrightWakeLock !");
+        mBrightWakeLock = null;
+    }
+}
 
 
     public static void restoreAirplaneMode(Context context) {
