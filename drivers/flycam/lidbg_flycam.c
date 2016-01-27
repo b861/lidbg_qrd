@@ -3,6 +3,12 @@
 //#include "LidbgCameraUsb.h"
 LIDBG_DEFINE;
 
+//for hub
+#define	FRONT_NODE		"1-1.2"	
+#define	BACK_NODE		"1-1.3"
+
+static DECLARE_COMPLETION (timer_stop_rec_wait);
+
 static wait_queue_head_t wait_queue;
 char isBackChange = 0;
 char isBack = 0;
@@ -11,8 +17,12 @@ char isPreview = 0;
 char isFirstresume = 0;
 char isSuspend = 0;
 char isRec = 0;
+int back_charcnt = 0,front_charcnt = 0;
+char back_hub_path[256],front_hub_path[256];
 
-static DECLARE_COMPLETION (timer_stop_rec_wait);
+#define FLY_CAM_ISVALID	0x01
+#define FLY_CAM_ISSONIX	0x02
+#define FLY_CAM_ISUSED		0x04
 
 static struct timer_list suspend_stoprec_timer;
 #define SUSPEND_STOPREC_ONLINE_TIME   (jiffies + 180*HZ)  /* 3min */
@@ -48,7 +58,7 @@ static struct notifier_block lidbg_notifier =
     .notifier_call = lidbg_flycam_event,
 };
 
-void suspend_stoprec_timer_isr(unsigned long data)
+static void suspend_stoprec_timer_isr(unsigned long data)
 {
 	if(isRec)
 	{
@@ -56,6 +66,7 @@ void suspend_stoprec_timer_isr(unsigned long data)
 		complete(&timer_stop_rec_wait);
 	}
 }
+
 
 static int thread_stop_rec_func(void *data)
 {
@@ -67,6 +78,196 @@ static int thread_stop_rec_func(void *data)
 	}
 	return 0;
 }
+
+struct name_list
+{
+    char name[33];
+    struct list_head list;
+};
+
+static int readdir_build_namelist(void *arg, const char *name, int namlen,	loff_t offset, u64 ino, unsigned int d_type)
+{
+    if(!(name[0] == '.' || (name[0] == '.' && name[1] == '.'))) // ignore "." and ".."
+    {
+        struct list_head *names = arg;
+        struct name_list *entry;
+        entry = kzalloc(sizeof(struct name_list), GFP_KERNEL);
+        if (entry == NULL)
+            return -ENOMEM;
+        memcpy(entry->name, name, namlen);
+        entry->name[namlen] = '\0';
+        list_add(&entry->list, names);
+    }
+    return 0;
+}
+
+static int lidbg_checkCam(void)
+{
+    LIST_HEAD(names);
+    struct file *dir_file, *f_dir, *b_dir;
+    int status;
+	char insure_is_dir[50] = "/sys/bus/usb/drivers/usb/";
+	char f_videocnt = 0,b_videocnt = 0;
+	unsigned char retcode = 0;
+#if 0
+    if(!insure_is_dir )
+   	{
+   		lidbg("dir err!");
+		return -1;
+	}
+#endif
+    //lidbg("insure_is_dir => %s",insure_is_dir);
+	//obtain hub node path
+    dir_file = filp_open(insure_is_dir, O_RDONLY | O_DIRECTORY, 0);
+    if (IS_ERR(dir_file))
+    {
+        LIDBG_ERR("open%s,%ld\n", insure_is_dir, PTR_ERR(dir_file));
+        return -1;
+    }
+    else
+    {
+        struct name_list *entry;
+        int count = 0;
+        //LIDBG_SUC("open:<%s,%s>\n", insure_is_dir, dir_file->f_path.dentry->d_name.name);
+        status = vfs_readdir(dir_file, readdir_build_namelist, &names);
+        if (dir_file)
+            fput(dir_file);
+        while (!list_empty(&names))
+        {
+            entry = list_entry(names.next, struct name_list, list);
+            if (!status && entry)
+            {
+                count++;
+				//lidbg("======5===%s==1==",entry->name);
+				if((!strncmp(entry->name,  BACK_NODE , 5)) && (strlen(entry->name) >= back_charcnt) )
+				{
+					back_charcnt = strlen(entry->name);
+					sprintf(back_hub_path, "/sys/bus/usb/drivers/usb/%s/%s:1.0/video4linux/", entry->name,entry->name);//back cam
+				}
+				else if((!strncmp(entry->name,  FRONT_NODE , 5)) && (strlen(entry->name) >= front_charcnt))
+				{
+					front_charcnt = strlen(entry->name);
+					sprintf(front_hub_path, "/sys/bus/usb/drivers/usb/%s/%s:1.0/video4linux/", entry->name,entry->name);//front cam
+				} 
+                list_del(&entry->list);
+                kfree(entry);
+            }
+            entry = NULL;
+        }
+				
+		//check front Cam status:isPlugIn? isSonix?
+		if(front_charcnt == 0)
+		{
+			//lidbg("%s: can not found front cam plug in! ", __func__ );	
+		}
+		else
+		{
+			if(IS_ERR(f_dir = filp_open(front_hub_path, O_RDONLY | O_DIRECTORY, 0)))
+			{
+				lidbg("%s: front_hub_path access wrong! ", __func__ );
+			}
+			else
+			{
+				status = vfs_readdir(f_dir, readdir_build_namelist, &names);
+				while (!list_empty(&names))
+      		    {
+					entry = list_entry(names.next, struct name_list, list);
+					if(!strncmp(entry->name,  "video" , 5))
+					{
+						f_videocnt++;
+						//lidbg("f_video found");
+					}
+					list_del(&entry->list);
+               		kfree(entry);
+				}
+			}
+		}
+		//check back Cam status:isPlugIn? isSonix?
+		if(back_charcnt == 0)
+		{
+			//lidbg("%s: can not found back cam plug in! ", __func__ );	
+		}
+		else
+		{
+			if(IS_ERR(b_dir = filp_open(back_hub_path, O_RDONLY | O_DIRECTORY, 0)))
+			{
+				lidbg("%s: back_hub_path access wrong! ", __func__ );
+			}
+			else
+			{
+				status = vfs_readdir(b_dir, readdir_build_namelist, &names);
+				while (!list_empty(&names))
+      		    {
+					entry = list_entry(names.next, struct name_list, list);
+					if(!strncmp(entry->name,  "video" , 5))
+					{
+						b_videocnt++;
+						//lidbg("b_video found");
+					}
+					list_del(&entry->list);
+               		kfree(entry);
+				}
+			}
+		}
+		if(f_videocnt == 2)
+		{
+			lidbg("front isSonixCam\n");
+			retcode |= FLY_CAM_ISSONIX;
+		}
+		else if(f_videocnt == 1)  
+		{
+			lidbg("front is not SonixCam\n");
+			retcode &= ~FLY_CAM_ISSONIX;
+		}
+		else
+		{
+			lidbg("front not found\n");
+			retcode &= ~FLY_CAM_ISSONIX;
+			retcode &= ~FLY_CAM_ISVALID;
+		}
+		if(b_videocnt == 2)
+		{
+			lidbg("back isSonixCam\n");
+			retcode |= (FLY_CAM_ISSONIX << 4);
+		}
+		else if(b_videocnt == 1)
+		{
+			lidbg("back is not SonixCam\n");
+			retcode &= (~(FLY_CAM_ISSONIX << 4));
+		}
+		else
+		{
+			lidbg("back not found\n");
+			retcode &= (~(FLY_CAM_ISSONIX << 4));
+			retcode &= (~(FLY_CAM_ISVALID << 4));
+		}
+        return retcode;
+    }
+}
+
+static int usb_nb_cam_func(struct notifier_block *nb, unsigned long action, void *data)
+{
+	//struct usb_device *dev = data;
+	char temp_cmd[100];
+	unsigned char retcode = -1;
+	switch (action)
+	{
+	case USB_DEVICE_ADD:
+	case USB_DEVICE_REMOVE:
+		retcode = lidbg_checkCam();
+		lidbg("=====Camera retcode => 0x%x======",retcode);
+		sprintf(temp_cmd, "setprop fly.uvccam.retcode %d ", retcode);
+		lidbg_shell_cmd(temp_cmd);	
+	    break;
+	}
+	return NOTIFY_OK;
+}
+
+static struct notifier_block usb_nb_cam =
+{
+    .notifier_call = usb_nb_cam_func,
+};
+
 
 ssize_t  flycam_read(struct file *filp, char __user *buffer, size_t size, loff_t *offset)
 {
@@ -454,6 +655,7 @@ int thread_flycam_init(void *data)
 #endif
 	init_waitqueue_head(&wait_queue);
 	register_lidbg_notifier(&lidbg_notifier);
+	usb_register_notify(&usb_nb_cam);
 	init_timer(&suspend_stoprec_timer);
     suspend_stoprec_timer.data = 0;
     suspend_stoprec_timer.expires = 0;
