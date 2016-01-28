@@ -49,6 +49,7 @@ static int SN65_Sequence_seq4(void)
                    buf_piont[i], buf_piont[i + 1], buf2[1]);
         }
     }
+	    lidbg( "dsi83:Sequence 4.1\n");
     return ret;
 }
 
@@ -595,7 +596,10 @@ static int thread_dsi83_ops_resume(void *data)
 {
     MSM_DSI83_POWER_ON;
 
+#ifndef SUSPEND_ONLINE
     msleep(200);
+#endif
+
     dsi83_resume();
     return 1;
 }
