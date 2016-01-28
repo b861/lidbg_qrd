@@ -124,8 +124,8 @@ void acc_status_handle(FLY_ACC_STATUS val)
 		send_app_status(FLY_KERNEL_UP);//wakeup
 		lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_ON));
 
-		if(g_var.is_fly == 0)
-		    USB_WORK_ENABLE;
+		//if(g_var.is_fly == 0)
+		//    USB_WORK_ENABLE;
 		//LCD_ON;
 		send_app_status(FLY_SCREEN_ON);
 		fs_file_write(DEV_NAME, false, SCREEN_ON, 0, strlen(SCREEN_ON));
@@ -139,8 +139,8 @@ void acc_status_handle(FLY_ACC_STATUS val)
 
 		lidbg("acc_status_handle: set acc.status to 1\n");
 		lidbg_shell_cmd("setprop persist.lidbg.acc.status 1");
-		if(g_var.is_fly == 0)
-			USB_WORK_DISENABLE;
+		//if(g_var.is_fly == 0)
+		//	USB_WORK_DISENABLE;
 		//LCD_OFF;
 		if(is_fake_acc_off == 0)
 			lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_OFF));
