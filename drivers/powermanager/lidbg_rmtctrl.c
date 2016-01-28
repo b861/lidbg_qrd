@@ -16,6 +16,11 @@ LIDBG_DEFINE;
 #define UNORMAL_WAKEUP_TIME_MINU (30)
 #define UNORMAL_WAKEUP_CNT (UNORMAL_WAKEUP_TIME_MINU*10)
 
+#define ACC_OFF_DETECT_TIME (1)
+#define ACC_OFF_DETECT_TIME_S (jiffies + ACC_OFF_DETECT_TIME*HZ)
+#define ACC_ON_DETECT_TIME (0)
+#define ACC_ON_DETECT_TIME_S (jiffies + ACC_ON_DETECT_TIME*HZ)
+
 #define SCREEN_ON    "flyaudio screen_on"
 #define SCREEN_OFF   "flyaudio screen_off"
 #define DEVICES_ON   "flyaudio devices_up"
@@ -33,6 +38,7 @@ static struct kfifo rmtctrl_state_fifo;
 static unsigned int *rmtctrl_state_buffer;
 struct work_struct acc_state_work;
 static struct timer_list rmtctrl_timer;
+static struct timer_list acc_detect_timer;
 static struct wake_lock rmtctrl_wakelock;
 static u32 system_unormal_wakeuped_ms = 0;
 static u32 system_wakeup_ms = 0;
@@ -61,9 +67,14 @@ void rmtctrl_fifo_in(void)
 
 irqreturn_t acc_state_isr(int irq, void *dev_id)
 {
+	int val = -1;
 	lidbg(">>>>> Acc state irq is coming =======>>>\n");
-    if(!work_pending(&acc_state_work))
-        schedule_work(&acc_state_work);
+
+	val = SOC_IO_Input(MCU_ACC_STATE_IO, MCU_ACC_STATE_IO, GPIO_CFG_PULL_UP);
+	if(val == FLY_ACC_OFF)
+		mod_timer(&acc_detect_timer, ACC_OFF_DETECT_TIME_S);
+	else
+		mod_timer(&acc_detect_timer, ACC_ON_DETECT_TIME_S);
 
     return IRQ_HANDLED;
 }
@@ -82,6 +93,15 @@ static void rmtctrl_timer_func(unsigned long data)
        	send_app_status(FLY_GOTO_SLEEP);
        mod_timer(&rmtctrl_timer,GOTO_SLEEP_TIME_S);
 	}
+	return;
+}
+
+static void acc_detect_timer_func(unsigned long data)
+{
+	lidbg("acc_detect_timer completed\n");
+	if(!work_pending(&acc_state_work))
+	schedule_work(&acc_state_work);
+
 	return;
 }
 
@@ -144,7 +164,8 @@ static void acc_state_work_func(struct work_struct *work)
 	int val = -1;
 
 	val = SOC_IO_Input(MCU_ACC_STATE_IO, MCU_ACC_STATE_IO, GPIO_CFG_PULL_UP);
-	acc_status_handle(val);
+	if(val != g_var.acc_flag)
+		acc_status_handle(val);
 }
 
 static void rmtctrl_suspend(void)
@@ -372,6 +393,11 @@ static int lidbg_rmtctrl_probe(struct platform_device *pdev)
 
 	MCU_APP_GPIO_ON;
 	lidbg("rmtctrl probe: MCU_APP_GPIO_ON\n");
+
+	init_timer(&acc_detect_timer);
+	acc_detect_timer.function = &acc_detect_timer_func;
+	acc_detect_timer.data = 0;
+	acc_detect_timer.expires = 0;
 
 	init_timer(&rmtctrl_timer);
 	rmtctrl_timer.function = &rmtctrl_timer_func;
