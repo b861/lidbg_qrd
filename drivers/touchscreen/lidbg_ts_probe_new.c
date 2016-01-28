@@ -530,7 +530,7 @@ int ts_probe_thread(void *data)
 #ifdef SUSPEND_ONLINE
     g_var.acc_flag = SOC_IO_Input(MCU_ACC_STATE_IO, MCU_ACC_STATE_IO, GPIO_CFG_PULL_UP);
     LIDBG_WARN("<g_var.acc_flag.1:%d>\n",g_var.acc_flag);
-    while(g_var.acc_flag==0)
+    while(g_var.acc_flag==FLY_ACC_OFF)
     {
         msleep(200);
     }

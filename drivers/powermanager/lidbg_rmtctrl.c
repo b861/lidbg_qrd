@@ -91,7 +91,7 @@ void acc_status_handle(FLY_ACC_STATUS val)
 	if(val == FLY_ACC_ON){
 		wake_lock(&rmtctrl_wakelock);
 		lidbg("acc_status_handle: FLY_ACC_ON:acc_count=%d\n",acc_count++);
-		g_var.acc_flag = 1;
+		g_var.acc_flag = FLY_ACC_ON;
 
 		lidbg("acc_status_handle: clear unormal wakeup count.\n");
 		system_wakeup_ms = 0;
@@ -113,7 +113,7 @@ void acc_status_handle(FLY_ACC_STATUS val)
 		del_timer(&rmtctrl_timer);
 	}else{
 		lidbg("acc_status_handle: FLY_ACC_OFF\n");
-		g_var.acc_flag = 0;
+		g_var.acc_flag = FLY_ACC_OFF;
 
 		system_unormal_wakeuped_ms = ktime_get_ms();
 
