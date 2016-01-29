@@ -1,0 +1,23 @@
+How to compile BurnAp_Standard for linux:
+1. install libusb 
+	$sudo apt-get install libusb-dev
+2. find libusb.a and set correct path to Makefile
+	$vim <BurnAp_Standard root>/burner_console/Makefile
+		...
+		LIB = /usr/lib/i386-linux-gnu/libusb.a \	
+		...
+		
+3. build BurnAp_Standard	
+	$cd <BurnAp_Standard root>/BurnerApLib
+	$make	
+	$cd <BurnAp_Standard root>/BurnerApLib	
+	$cd <BurnAp_Standard root>/burner_console	
+	$mkdir SONiX_BurnerAP	
+	$make
+4. put fw bin file in <BurnAp_Standard root>/burner_console/SONiX_BurnerAP and edit FilePath.ini(ex:fw file is fw.bin)
+	$cd <BurnAp_Standard root>/burner_console/SONiX_BurnerAP 
+	$sudo vim FilePath.ini
+		fw.bin
+5. usage
+	./fw_update -h
+	
