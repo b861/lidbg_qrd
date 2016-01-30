@@ -609,6 +609,10 @@ static int  lpc_probe(struct platform_device *pdev)
         lidbg("lpc_init do nothing.disable,[%d,%d,%d,%d]\n", g_var.is_fly, lpc_ping_en, g_var.recovery_mode, fs_is_file_exist(FLY_HAL_FILE));
         return 0;
     }
+#if defined(PLATFORM_msm8974) || defined(PLATFORM_msm8228)
+	  if(g_var.recovery_mode)
+	 		return 0;
+#endif
     mcuFirstInit();
 
     return 0;
