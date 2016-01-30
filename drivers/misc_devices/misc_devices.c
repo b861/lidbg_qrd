@@ -199,8 +199,8 @@ static int lidbg_dev_event(struct notifier_block *this,
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_SCREEN_ON):
         //if(!g_var.is_fly)
     {
-        //if(g_var.led_hal_status & g_var.led_app_status)
-        //    LCD_ON;
+        if((g_var.led_hal_status & g_var.led_app_status)&&(g_var.fb_on == 1))
+            LCD_ON;
         //lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_APP_ON));
         //lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_HAL_ON));
     }
