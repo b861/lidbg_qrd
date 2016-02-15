@@ -41,5 +41,6 @@ else
 obj-$(CONFIG_TOUCHSCREEN)       += lidbg_ts_probe_new.o
 obj-$(CONFIG_TOUCHSCREEN)       += lidbg_ts_to_recov.o
 obj-$(CONFIG_TOUCHSCREEN)       += gt911.o
+obj-$(CONFIG_TOUCHSCREEN)       += ts_config.o
 gt911-objs :=gt9xx.o
 endif
