@@ -23,6 +23,8 @@ struct probe_device
     char *name;
     void (*reset)(void);
     void (*find_cb)(void);
+    bool origin_system_probe_only;
+
 };
 
 void mc3x_find_cb(void)
@@ -82,14 +84,12 @@ struct probe_device i2c_probe_dev[] =
    // {DEV_ACCEL, accel_i2c_bus, 0x18, 0x00, "bma2x2.ko", NULL, NULL},
    // {DEV_ACCEL, accel_i2c_bus, 0x4c, 0x00, "mc3xxx.ko", accel_power_enable, mc3x_find_cb},
 
-    {DEV_GPS, gps_i2c_bus, 0x42, 0x00, "lidbg_gps.ko", NULL, NULL},	
-
-	{DEV_DISPLAY, display_i2c_bus, 0x2d, 0x00, "dsi83.ko", NULL, NULL},
-
-	{DEV_LED, pca9634_i2c_bus, 0x70, 0x00, "lidbg_rgb_led.ko", NULL, NULL},
-
-    {DEV_RADIO, saf7741_i2c_bus, 0x1c, 0x00, "saf7741.ko", radio_reset_lpc, NULL},
-    {DEV_RADIO, tef6638_i2c_bus, 0x63, 0x00, "tef6638.ko", radio_reset_lpc, NULL},
+	{DEV_GPS, gps_i2c_bus, 0x42, 0x00, "lidbg_gps.ko", NULL, NULL ,0},	
+	{DEV_DISPLAY, display_i2c_bus, 0x2d, 0x00, "dsi83.ko", NULL, NULL ,0},
+	{DEV_LED, pca9634_i2c_bus, 0x70, 0x00, "lidbg_rgb_led.ko", NULL, NULL ,0},
+	{DEV_RADIO, saf7741_i2c_bus, 0x1c, 0x00, "saf7741.ko", radio_reset_lpc, NULL ,1},
+	{DEV_RADIO, tef6638_i2c_bus, 0x63, 0x00, "tef6638.ko", radio_reset_lpc, NULL ,1},
+	
 };
 
 void parse_ts_info(struct probe_device *i2cdev_info)
@@ -117,6 +117,10 @@ void i2c_devices_scan(struct probe_device *i2cdev, int size)
 
     for(i = 0; i < size; i++)
     {
+    		if(i2cdev->origin_system_probe_only )
+				if(g_var.is_fly)
+					continue;
+				
 		if(	(i2cdev->i2c_bus() != LPC_I2_ID) && (i2cdev->i2c_bus() >= 0) && (((1<<(int)i2cdev->type) & scanflag) == 0))
 		{
 			if(i2cdev->reset != NULL)
