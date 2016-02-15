@@ -47,6 +47,7 @@
 #include <sys/stat.h>  
 #include <sys/types.h> 
 #include <linux/rtc.h>
+#include <sys/vfs.h>
 
 #define TESTAP_VERSION		"v1.0.21_SONiX_UVC_TestAP_Multi"
 
@@ -4155,6 +4156,26 @@ openfd:
 					struct stat buf; 
 					char path[100] = {0};
 					totalSize = 0;
+					
+					//reserve 300MB for storage 
+					if(!strncmp(Rec_Save_Dir, "/storage/sdcard0", 16) )
+					{
+						struct statfs diskInfo;  
+						statfs("/storage/sdcard0", &diskInfo);  
+						unsigned long long totalBlocks = diskInfo.f_bsize;  
+						unsigned long long stotalSize = totalBlocks * diskInfo.f_blocks;  
+						size_t mbTotalsize = stotalSize>>20;  
+						unsigned long long freeDisk = diskInfo.f_bfree*totalBlocks;  
+						size_t mbFreedisk = freeDisk>>20;  
+						//lidbg("/storage/sdcard0  total=%dMB, free=%dMB\n", mbTotalsize, mbFreedisk);  
+						if(mbFreedisk < 300)
+						{
+							lidbg("======Free space less than 300MB!Force quit!======");
+							return 0;
+						}
+					}
+					
+					//query video filesize => whether change file name
 					pDir=opendir(Rec_Save_Dir);  
 					while((ent=readdir(pDir))!=NULL)  
 					{
