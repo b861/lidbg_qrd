@@ -1150,6 +1150,40 @@ static int gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
                 "Failed to get ic config version!No config sent!");
         return -EINVAL;
     }
+
+{
+	int i = 0;
+ 	lidbg("send_cfg_buf=");
+	while(i < 20)
+	{
+ 		lidbg("%d=0x%x \n", i ,send_cfg_buf[sensor_id][i]);
+		i++;
+	}
+ 	lidbg("x=%d,y=%d,switch=%d\n",(send_cfg_buf[sensor_id][1]|send_cfg_buf[sensor_id][2]<<8),
+								  (send_cfg_buf[sensor_id][3]|send_cfg_buf[sensor_id][4]<<8),
+								 ((send_cfg_buf[sensor_id][6])&(0x01<<3)) );
+#if 0
+	if(((send_cfg_buf[sensor_id][6])&(0x01<<3)) == 0)
+	{
+		send_cfg_buf[sensor_id][1] = 1024&0xff;
+		send_cfg_buf[sensor_id][2] = (1024&(0xff<<8))>>8;
+		send_cfg_buf[sensor_id][3] = 600&0xff;
+		send_cfg_buf[sensor_id][4] = (600&(0xff<<8))>>8;	
+	}
+	else
+	{
+		send_cfg_buf[sensor_id][3] = 1024&0xff;
+		send_cfg_buf[sensor_id][4] = (1024&(0xff<<8))>>8;
+		send_cfg_buf[sensor_id][1] = 600&0xff;
+		send_cfg_buf[sensor_id][2] = (600&(0xff<<8))>>8;	
+	}	
+ 	lidbg("x=%d,y=%d,switch=%d\n",(send_cfg_buf[sensor_id][1]|send_cfg_buf[sensor_id][2]<<8),
+								  (send_cfg_buf[sensor_id][3]|send_cfg_buf[sensor_id][4]<<8),
+								  ((send_cfg_buf[sensor_id][6])&(0x01<<3)) );
+#endif	
+}
+
+	
     /*
     	if (ts->pdata->gtp_cfg_len) {// use config from dts
     		config_data = ts->pdata->config_data;
@@ -1179,15 +1213,6 @@ static int gtp_init_panel(struct goodix_ts_data *ts, char *ic_type)
                ts->gtp_cfg_len);
     }
 
-{
-	int i = 0;
- 	lidbg("send_cfg_buf=");
-	while(i < 20)
-	{
- 		lidbg("%d=0x%x \n", i ,send_cfg_buf[sensor_id][i]);
-		i++;
-	}
-}
 
 #if GTP_CUSTOM_CFG
     config_data[RESOLUTION_LOC] =
