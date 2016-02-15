@@ -4171,6 +4171,8 @@ openfd:
 						if(mbFreedisk < 300)
 						{
 							lidbg("======Free space less than 300MB!Force quit!======");
+							system("echo 'udisk_unrequest' > /dev/flydev0");
+							property_set("fly.uvccam.curprevnum", "-1");
 							return 0;
 						}
 					}
