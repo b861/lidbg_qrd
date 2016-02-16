@@ -179,9 +179,13 @@ int thread_thermal(void *data)
         ssleep(10);
     }
 
+#if defined(PLATFORM_msm8226) || defined(PLATFORM_msm8974)
     set_system_performance(1);
 #ifdef PLATFORM_ID_6
     set_system_performance(2);
+#endif
+#else
+  temp_offset = 0;
 #endif
     msleep(1000 * 40); //wait boot_freq_ctrl finish
     cur_temp = soc_temp_get(g_hw.mem_sensor_num);
@@ -253,7 +257,7 @@ thermal_ctrl:
         max_freq = get_scaling_max_freq();
         //lidbg("MSM_THERM: %d\n",cur_temp);
         for(i = 0; i < SIZE_OF_ARRAY(g_hw.cpu_freq_thermal); i++)
-        {
+        {        
             if((g_hw.cpu_freq_thermal[i].temp_low == 0) || (g_hw.cpu_freq_thermal[i].temp_high == 0))
                 break;
 
