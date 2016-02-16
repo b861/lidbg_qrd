@@ -129,8 +129,9 @@ char startNight[PROPERTY_VALUE_MAX];
 //char startCapture[PROPERTY_VALUE_MAX];
 
 unsigned char isPreview = 0;
-
 int dev;
+unsigned int originRecsec = 0;
+unsigned int oldRecsec = 1;
 
 struct thread_parameter
 {
@@ -4026,7 +4027,7 @@ openfd:
 				close(fake_dev);
 			return 1;
 		}
-
+		if(i == 0) originRecsec = buf0.timestamp.tv_sec;
 		gettimeofday(&ts, NULL);
 
 // cjc +
@@ -4232,7 +4233,9 @@ openfd:
 							property_set("fly.uvccam.curprevnum", flypreview_prevcnt);
 					}
 				}
-				else if((i % (Rec_Sec*30)  == 0) || isReplace)//frames = sec * 30f/s
+				//else if((i % (Rec_Sec*30)  == 0) || isReplace)//frames = sec * 30f/s
+				else if(((buf0.timestamp.tv_sec - originRecsec) % Rec_Sec == 0)
+					&&(oldRecsec != (buf0.timestamp.tv_sec - originRecsec)) || isReplace)
 				{
 					DIR *pDir ;
 					struct dirent *ent; 
@@ -4251,6 +4254,8 @@ openfd:
 
 					struct tm prevTm,curTm;
 					time_t prevtimep,curtimep;
+
+					if(!isReplace) oldRecsec = buf0.timestamp.tv_sec - originRecsec;
 					
 					prevtimep = 0;
 					isReplace = 0;
