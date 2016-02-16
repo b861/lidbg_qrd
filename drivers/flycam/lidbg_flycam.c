@@ -6,6 +6,7 @@ LIDBG_DEFINE;
 static wait_queue_head_t wait_queue;
 char isBackChange = 0;
 char isBack = 0;
+char previewCnt = 0;
 char isPreview = 0;
 char isFirstresume = 0;
 
@@ -46,7 +47,7 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
     if(cmd_buf[size - 1] == '\n')
 		cmd_buf[size - 1] = '\0';
     cmd_num = lidbg_token_string(cmd_buf, " ", cmd) ;
-	lidbg("-----FLYSTEP------------------[%s]---\n", cmd_buf);
+	lidbg("-----cmd_buf------------------[%s]---\n", cmd_buf);
 	lidbg("-----cmd_num------------[%d]---\n", cmd_num);
 	for(i = 0;i < cmd_num; i++)
 	{
@@ -57,11 +58,11 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 			{
 			    lidbg("-------uvccam recording -----");
 				lidbg_shell_cmd("echo 'udisk_request' > /dev/flydev0");
-				//fix screen blurred issue
-				
-				if((++isPreview == 2) || (isPreview && isFirstresume))
+				//fix screen blurred issue(only in preview scene)
+				if(isPreview) previewCnt++;
+				if(isPreview && ((previewCnt == 1) || (previewCnt && isFirstresume)))
 				{
-					lidbg("======fix screen blurred issue==E=====%d",isPreview);
+					lidbg("======fix screen blurred issue==E=====%d",previewCnt);
 					lidbg_shell_cmd("setprop persist.lidbg.uvccam.recording 1");
 					lidbg_shell_cmd("./flysystem/lib/out/lidbg_testuvccam /dev/video2 -c -f H264 -r &");
 					msleep(3500);
@@ -69,8 +70,8 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 					msleep(500);
 					lidbg("======fix screen blurred issue==X=====");
 				}
-				lidbg("isPreview => %d ",isPreview);
-				//if(isPreview >= 20) isPreview = 20;
+				lidbg("previewCnt => %d ",previewCnt);
+				//if(previewCnt >= 20) previewCnt = 20;
 				isFirstresume = 0;
 			    lidbg_shell_cmd("setprop persist.lidbg.uvccam.recording 1");
 			    if(g_var.is_fly) lidbg_shell_cmd("./flysystem/lib/out/lidbg_testuvccam /dev/video2 -c -f H264 -r &");
@@ -213,6 +214,7 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 		}
 		else if(!strcmp(keyval[0], "res") )
 		{
+			isPreview = 0;//defalut:DVR
 			if(!strncmp(keyval[1], "1080", 4))
 			{
 				lidbg_shell_cmd("setprop fly.uvccam.res 1080");
@@ -224,7 +226,7 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 			else if(!strncmp(keyval[1], "640x360", 7))
 			{
 				lidbg_shell_cmd("setprop fly.uvccam.res 640x360");
-				isPreview++;
+				isPreview = 1;//preview
 			}
 			else
 			{

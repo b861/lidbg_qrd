@@ -4150,7 +4150,8 @@ openfd:
 					rec_fp1 = fopen(flyh264_filename[flytmpcnt], "wb");
 				}
 				*/
-				if((i % 15 == 0) && !isPreview)
+				//DVR Check save Dir size:whether change file name
+				if((i % 30 == 0) && !isPreview)
 				{
 					DIR *pDir ;
 					struct dirent *ent;
@@ -4212,6 +4213,7 @@ openfd:
 					}
 				}
 
+				//video file writing process
 				if(isPreview)//preview : not going to change file name.
 				{
 					//lidbg("======isPreview======");
@@ -4233,7 +4235,6 @@ openfd:
 							property_set("fly.uvccam.curprevnum", flypreview_prevcnt);
 					}
 				}
-				//else if((i % (Rec_Sec*30)  == 0) || isReplace)//frames = sec * 30f/s
 				else if(((buf0.timestamp.tv_sec - originRecsec) % Rec_Sec == 0)
 					&&(oldRecsec != (buf0.timestamp.tv_sec - originRecsec)) || isReplace)
 				{
