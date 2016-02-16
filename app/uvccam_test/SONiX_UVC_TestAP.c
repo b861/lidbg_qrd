@@ -1893,7 +1893,6 @@ int main(int argc, char *argv[])
 	char time_buf[100] = {0};
 	char tmpCMD[100] = {0};
 	unsigned char isExceed = 0;
-	unsigned char isReplace = 0;
 	unsigned long totalSize = 0;
 	unsigned char tryopencnt = 20;
 	
@@ -2717,7 +2716,7 @@ openfd:
 		/*set max file num*/
 		property_get("fly.uvccam.recnum", Max_Rec_Num_String, "5");
 		Max_Rec_Num = atoi(Max_Rec_Num_String);
-		lidbg("====Max_rec_num-> %d===",Max_Rec_Num);
+		lidbg("====Max_rec_num-> %d===\n",Max_Rec_Num);
 		if(Max_Rec_Num == 0) Max_Rec_Num = 5;
 #endif
 
@@ -4184,7 +4183,6 @@ openfd:
 					if((totalSize/1000000) >= Rec_File_Size)	
 					{
 						isExceed = 1;
-						isReplace = 1;
 					}
 					closedir(pDir);
 				}
@@ -4211,7 +4209,6 @@ openfd:
 								return 0;
 							}
 							isExceed = 1;
-							isReplace = 1;
 						}
 					}
 				}
@@ -4249,7 +4246,7 @@ openfd:
 					change file name.(current time)
 				*/
 				else if(((buf0.timestamp.tv_sec - originRecsec) % Rec_Sec == 0)
-					&&(oldRecsec != (buf0.timestamp.tv_sec - originRecsec)) || isReplace)
+					&&(oldRecsec != (buf0.timestamp.tv_sec - originRecsec)) || isExceed)
 				{
 					DIR *pDir ;
 					struct dirent *ent; 
@@ -4270,7 +4267,7 @@ openfd:
 					time_t prevtimep = 0,curtimep;
 
 					/*get last timeval: prevent from repetition*/
-					if(!isReplace) oldRecsec = buf0.timestamp.tv_sec - originRecsec;
+					if(!isExceed) oldRecsec = buf0.timestamp.tv_sec - originRecsec;
 					
 					#if 0
 					if(i > 0)
@@ -4323,9 +4320,13 @@ openfd:
 					closedir(pDir);
 					//lidbg("minRecName end------>%s\n",minRecName);
 
-					/*exceed process:del the oldest rec file*/
+					/*
+						1.storage exceed process:del the oldest rec file,keep writing last file;if filecnt < 2,create new file.
+						2.time exceed process:write a new file.
+					*/
 					struct stat filebuf; 
 					char filepath[100] = {0};
+					lidbg("====== totally %d files.======\n",filecnt);
 					if(isExceed)
 					{
 						//lidbg("current cnt------>%d\n",filecnt);
@@ -4334,10 +4335,28 @@ openfd:
 					    {
 						      lidbg ("Get stat on %s Error?%s\n", filepath, strerror (errno));
 					    }
-						lidbg("=========oldest rec file will be del : %s (%d MB)===========\n",minRecName,filebuf.st_size /1000000);
+						if(strcmp(filepath,flyh264_filename) == 0)
+						{
+							lidbg("======Can not del processing file!Write new file!======\n");
+							lidbg_get_current_time(time_buf, NULL);
+							sprintf(flyh264_filename, "%s%s.h264", Rec_Save_Dir, time_buf);
+							lidbg("=========new flyh264_filename : %s===========\n", flyh264_filename);
+							rec_fp1 = fopen(flyh264_filename, "wb");
+						}
+						lidbg("====== oldest rec file will be del:%s (%d MB).======\n",minRecName,filebuf.st_size/1000000);
 						sprintf(tmpCMD , "rm -f %s&",filepath);
 						system(tmpCMD);
+						if(((totalSize - filebuf.st_size) /1000000) > Rec_File_Size)
+							lidbg("rec file exceed!still has %d MB .\n",((totalSize - filebuf.st_size) /1000000));
 					}
+					else
+					{
+						lidbg_get_current_time(time_buf, NULL);
+						sprintf(flyh264_filename, "%s%s.h264", Rec_Save_Dir, time_buf);
+						lidbg("=========new flyh264_filename : %s===========\n", flyh264_filename);
+						rec_fp1 = fopen(flyh264_filename, "wb");
+					}
+					#if 0
 					/*only if within Rec_File_Size,otherwise del oldest file again.*/
 					if(((totalSize - filebuf.st_size) /1000000) < Rec_File_Size)
 					{
@@ -4347,12 +4366,13 @@ openfd:
 						rec_fp1 = fopen(flyh264_filename, "wb");
 					}
 					else lidbg("rec file exceed!still has %d MB .\n",((totalSize - filebuf.st_size) /1000000));
+					#endif
+					
 				}
 				if(rec_fp1 != NULL)
 				{
 					fwrite(mem0[buf0.index], buf0.bytesused, 1, rec_fp1);//write data to the output file
 				}
-				isReplace = 0;
 				isExceed = 0;
 			}
 		}

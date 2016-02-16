@@ -1705,7 +1705,7 @@ try_open_again:
                 clock_gettime(CLOCK_MONOTONIC, &stop);
                 diff = (stop.tv_sec * 1000 + stop.tv_nsec / 1000000) - (start.tv_sec * 1000 + start.tv_nsec / 1000000);
                 FPS = 1000 * loop_count / diff;
-                ALOGE("%s.%d: FPS.%d,[%d,%d ms]", __func__, threadPriority, FPS, loop_count, diff);
+                ALOGE("%s.%d: FPS.%d,[%d,%d ms]\n", __func__, threadPriority, FPS, loop_count, diff);
                 loop_count = 0;
                 clock_gettime(CLOCK_MONOTONIC, &start);
                 //usleep(670 * 1000);
