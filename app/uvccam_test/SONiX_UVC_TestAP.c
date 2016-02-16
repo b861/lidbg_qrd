@@ -268,20 +268,20 @@ static int video_set_format(int dev, unsigned int w, unsigned int h, unsigned in
 	property_get("fly.uvccam.res", Res_String, "0");
 	if(!strncmp(Res_String, "720", 3))
 	{
-		lidbg("%s: select 720P!",__func__);
+		lidbg("%s: select 720P!\n",__func__);
 		w = 1280;
 		h = 720;
 	}
 	else if(!strncmp(Res_String, "1080", 4))
 	{
-		lidbg("%s: select 1080P!",__func__);
+		lidbg("%s: select 1080P!\n",__func__);
 		w = 1920;
 		h = 1080;
 	}
 	else if(!strncmp(Res_String, "640x360", 7))
 	{
 		char tmpCMD[100] = {0};
-		lidbg("%s: select 640x360!",__func__);
+		lidbg("%s: select 640x360!\n",__func__);
 		w = 320;
 		h = 240;
 		isPreview = 1;
@@ -297,7 +297,7 @@ static int video_set_format(int dev, unsigned int w, unsigned int h, unsigned in
 	fmt.fmt.pix.pixelformat = format;
 	fmt.fmt.pix.field = V4L2_FIELD_ANY;
 
-	lidbg("eho1--Video format set: width: %u height: %u buffer size: %u",
+	lidbg("eho1--Video format set: width: %u height: %u buffer size: %u\n",
 		fmt.fmt.pix.width, fmt.fmt.pix.height, fmt.fmt.pix.sizeimage);
 
 	ret = ioctl(dev, VIDIOC_S_FMT, &fmt);
@@ -306,7 +306,7 @@ static int video_set_format(int dev, unsigned int w, unsigned int h, unsigned in
 		return ret;
 	}
 
-	lidbg("eho2--Video format set: width: %u height: %u buffer size: %u",
+	lidbg("eho2--Video format set: width: %u height: %u buffer size: %u\n",
 		fmt.fmt.pix.width, fmt.fmt.pix.height, fmt.fmt.pix.sizeimage);
 	return 0;
 }
@@ -1404,7 +1404,7 @@ char *lidbg_get_current_time(char *time_string, struct rtc_time *ptm)
         int     i = 0, ret = 0, fd;
         struct  v4l2_capability     cap;
 
-        lidbg("%s: E", __func__);
+        lidbg("%s: E\n", __func__);
         *devname = '\0';
         while(1)
         {
@@ -1424,18 +1424,18 @@ char *lidbg_get_current_time(char *time_string, struct rtc_time *ptm)
                     lidbg("%s: Found UVC node: %s\n", __func__, temp_devname);
 					if((do_save) && (!do_record)) //capture
 					{
-						lidbg("----%s:-------capture----------",__func__);
+						lidbg("----%s:-------capture----------\n",__func__);
 						strncpy(devname, temp_devname, 256);
 					}
                     else if((!do_save) && (do_record))//recording
                   	{
-                  		lidbg("----%s:-------recording----------",__func__);
+                  		lidbg("----%s:-------recording----------\n",__func__);
 						sprintf(temp_devname, "/dev/video%d", i + 1);
 						strncpy(devname, temp_devname, 256);
                   	}
 					else
 					{
-						lidbg("----%s:-------user ctrl----------",__func__);
+						lidbg("----%s:-------user ctrl----------\n",__func__);
 						sprintf(temp_devname, "/dev/video%d", i + 1);
 						strncpy(devname, temp_devname, 256);
 					}
@@ -1451,12 +1451,12 @@ char *lidbg_get_current_time(char *time_string, struct rtc_time *ptm)
                 strncpy(devname, "/dev/video1", 256);
                 lidbg("%s.%d: Probing fail:%s \n", __func__, i, devname);
                 //break;
-                lidbg("%s: X,%s", __func__, devname);
+                lidbg("%s: X,%s\n", __func__, devname);
 				return 1;
             }
         }
 
-        lidbg("%s: X,%s", __func__, devname);
+        lidbg("%s: X,%s\n", __func__, devname);
         return 0;
     }
 
@@ -1478,7 +1478,7 @@ static int get_hub_uvc_device(char *devname,char do_save,char do_record)
 		cam_id = atoi(camID);
 	}
 
-    lidbg("%s: E,======[%d]", __func__, cam_id);
+    lidbg("%s: E,======[%d]\n", __func__, cam_id);
     *devname = '\0';
 
 	memset(hub_path,0,sizeof(hub_path));  
@@ -1506,11 +1506,11 @@ static int get_hub_uvc_device(char *devname,char do_save,char do_record)
 
 	if((front_charcnt == 0) && (back_charcnt == 0))
 	{
-		lidbg("%s: can not found suitable hubpath! ", __func__ );	
+		lidbg("%s: can not found suitable hubpath!\n ", __func__ );	
 		goto failproc;
 	}
 	
-	lidbg("%s:hubPath:%s",__func__ ,hub_path);  
+	lidbg("%s:hubPath:%s\n",__func__ ,hub_path);  
 #if 0
 	//check Front | Back Cam
 	if(cam_id == 1)
@@ -1525,7 +1525,7 @@ static int get_hub_uvc_device(char *devname,char do_save,char do_record)
 #endif
 	if(access(hub_path, R_OK) != 0)
 	{
-		lidbg("%s: hub path access wrong! ", __func__ );
+		lidbg("%s: hub path access wrong!\n ", __func__ );
 		goto failproc;
 	}
 	
@@ -1544,41 +1544,41 @@ static int get_hub_uvc_device(char *devname,char do_save,char do_record)
 						break;
 					}
 	                sprintf(temp_devname,"/dev/%s", ent->d_name);  
-	                lidbg("%s:Path:%s",__func__ ,temp_devname);  
+	                lidbg("%s:Path:%s\n",__func__ ,temp_devname);  
 	        }  
 	}
 	closedir(pDir);
-	lidbg("%s: This Camera has %d video node.", __func__ , fcnt - 2);
+	lidbg("%s: This Camera has %d video node.\n", __func__ , fcnt - 2);
 	if((fcnt == 3) && (cam_id == 1))	
 	{
-		lidbg("%s: Front Camera does not support Sonix Recording!", __func__);
+		lidbg("%s: Front Camera does not support Sonix Recording!\n", __func__);
 		goto failproc;
 	}
 	
 	if((fcnt == 0) && (ent == NULL))
 	{
-		lidbg("%s: Hub node is not exist ! ", __func__);
+		lidbg("%s: Hub node is not exist !\n", __func__);
 		goto failproc;
 	}
 
 	if((do_save) && (!do_record)) //capture
 	{
-		lidbg("----%s:-------capture----------",__func__);
+		lidbg("----%s:-------capture----------\n",__func__);
 		strncpy(devname, temp_devname, 256);
 	}
 	else if((!do_save) && (do_record))//recording
 	{
-		lidbg("----%s:-------recording----------",__func__);
+		lidbg("----%s:-------recording----------\n",__func__);
 		strncpy(devname, temp_devname, 256);
 	}
 	else
 	{
-		lidbg("----%s:-------user ctrl----------",__func__);
+		lidbg("----%s:-------user ctrl----------\n",__func__);
 		strncpy(devname, temp_devname, 256);
 	}  
 	
 openDev:
-	  lidbg("%s: trying open ====[%s]", __func__, devname);
+	  lidbg("%s: trying open ====[%s]\n", __func__, devname);
       fd = open(devname, O_RDWR  | O_NONBLOCK, 0);
       if(-1 != fd)
       {
@@ -1596,14 +1596,14 @@ openDev:
           }
       }
       else if(2 != errno)
-          lidbg("%s: Probing.%s: ret: %d, errno: %d,%s", __func__, devname, ret, errno, strerror(errno));
+          lidbg("%s: Probing.%s: ret: %d, errno: %d,%s\n", __func__, devname, ret, errno, strerror(errno));
 	  close(fd);
-      lidbg("%s: X,%s", __func__, devname);
+      lidbg("%s: X,%s\n", __func__, devname);
       return 0;
 
 failproc:
 	strncpy(devname, "/dev/video1", 256);
-	lidbg("%s: Probing fail:%s , run normal proc", __func__, devname);
+	lidbg("%s: Probing fail:%s , run normal proc\n", __func__, devname);
 #if NONE_HUB_SUPPORT
 	system("echo flyaudio:touch /dev/log/CameraScan2.txt > /dev/lidbg_misc0");
 	return get_uvc_device(devname,do_save,do_record);
@@ -2688,7 +2688,7 @@ int main(int argc, char *argv[])
 	/* Open the video device. */
 	//dev = video_open(argv[optind]);
 getuvcdevice:
-	//auto find camera device
+	/*auto find camera device*/
 	rc = get_hub_uvc_device(devName,do_save,do_record);
     if((rc == 1)  || (*devName == '\0'))
     {
@@ -2703,10 +2703,10 @@ openfd:
 		return 1;
 	if((do_save) || (do_record)) 
 	{
-		//set each file recording time
+		/*set each file recording time*/
 		property_get("fly.uvccam.rectime", Rec_Sec_String, "300");
 		Rec_Sec = atoi(Rec_Sec_String);
-		lidbg("========set each file recording time-> %d s=======",Rec_Sec);
+		lidbg("========set each file recording time-> %d s=======\n",Rec_Sec);
 		if(Rec_Sec == 0) 
 		{
 			lidbg("not allow recording time = 0s !!reset to 300s.\n");
@@ -2714,24 +2714,26 @@ openfd:
 		}
 		
 #if 1
+		/*set max file num*/
 		property_get("fly.uvccam.recnum", Max_Rec_Num_String, "5");
 		Max_Rec_Num = atoi(Max_Rec_Num_String);
 		lidbg("====Max_rec_num-> %d===",Max_Rec_Num);
 		if(Max_Rec_Num == 0) Max_Rec_Num = 5;
 #endif
 
-		//set record file savePath
+		/*set record file savePath*/
 		property_get("fly.uvccam.recpath", Rec_Save_Dir, "/storage/sdcard0/camera_rec/");
-		lidbg("==========recording dir -> %s===========",Rec_Save_Dir);
+		lidbg("==========recording dir -> %s===========\n",Rec_Save_Dir);
 
 		if(!strncmp(Rec_Save_Dir, "/storage/udisk", 14) )
 		{
 			char tmp_usb_mkdir[100] = "mkdir /storage/udisk/camera_rec/";
-			lidbg("======== try create udisk rec dir -> %s =======",Rec_Save_Dir);
+			lidbg("======== try create udisk rec dir -> %s =======\n",Rec_Save_Dir);
 			sprintf(tmp_usb_mkdir, "mkdir %s", Rec_Save_Dir);
 			system(tmp_usb_mkdir);
 		}
 #if 0
+		/*create preview cache dir*/
 		if(!strncmp(Rec_Save_Dir, "/storage/sdcard0/preview_cache", 30) )
 		{
 			/*
@@ -2745,26 +2747,26 @@ openfd:
 #endif
 		if(access(Rec_Save_Dir, R_OK) != 0)
 		{
-			lidbg("record file path access wrong! " );
+			lidbg("record file path access wrong!\n" );
 			//return 0;
 			strcpy(Rec_Save_Dir,  "/storage/sdcard0/camera_rec/");
 		}
 		
 		
-		//set record file total size
+		/*set record file total size*/
 		property_get("fly.uvccam.recfilesize", Rec_File_Size_String, "1000");
 		Rec_File_Size = atoi(Rec_File_Size_String);
-		lidbg("======== video file total size-> %ld MB=======",Rec_File_Size);
+		lidbg("======== video file total size-> %ld MB=======\n",Rec_File_Size);
 		if(Rec_File_Size == 0) 
 		{
 			lidbg("not allow video file size = 0MB !!reset to 1000MB.\n");
 			Rec_File_Size = 1000;
 		}
 
-		//set record file bitrate
+		/*set record file bitrate*/
 		property_get("fly.uvccam.recbitrate", Rec_Bitrate_String, "8000000");
 		Rec_Bitrate = atoi(Rec_Bitrate_String);
-		lidbg("======== video bitrate-> %ld b/s=======",Rec_Bitrate);
+		lidbg("======== video bitrate-> %ld b/s=======\n",Rec_Bitrate);
 		if(Rec_Bitrate == 0) 
 		{
 			lidbg("not allow video bitrate = 0MB !!reset to 8000000b/s.\n");
@@ -2794,7 +2796,8 @@ openfd:
 		lidbg("Current bit rate2: %.2f Kbps\n",m_BitRate);
 		*/
 	}
-
+	
+	/*enable OSD*/
 	if(XU_OSD_Set_Enable(dev, 0, 0) <0)
 			lidbg( "XU_OSD_Set_Enable Failed\n");	
 
@@ -3729,6 +3732,7 @@ openfd:
 	}
     //yiling --
 
+	/*Preview: H264 VBR Mode; DVR: CBR 4Mbps*/
 	XU_H264_Set_IFRAME(dev);
 	if(isPreview)
 		XU_H264_Set_Mode(dev, 2);
@@ -3982,10 +3986,10 @@ openfd:
 */
 
 	for (i = 0; i < nframes; ++i) {
-		
-    	property_get("persist.lidbg.uvccam.recording", startRecording, "0");
 
-		if((!strncmp(startRecording, "0", 1)) && (!do_save) )//close
+		/*read prop:whether stop recoding*/
+    	property_get("persist.lidbg.uvccam.recording", startRecording, "0");
+		if((!strncmp(startRecording, "0", 1)) && (!do_save) )
 		{
 			lidbg("-------eho---------uvccam stop recording -----------\n");
 #if 0
@@ -4150,7 +4154,7 @@ openfd:
 					rec_fp1 = fopen(flyh264_filename[flytmpcnt], "wb");
 				}
 				*/
-				//DVR Check save Dir size:whether change file name
+				/*DVR Check save Dir size:whether change file name*/
 				if((i % 30 == 0) && !isPreview)
 				{
 					DIR *pDir ;
@@ -4159,7 +4163,6 @@ openfd:
 					char path[100] = {0};
 					totalSize = 0;
 					
-					//query video filesize => whether change file name
 					pDir=opendir(Rec_Save_Dir);  
 					while((ent=readdir(pDir))!=NULL)  
 					{
@@ -4186,8 +4189,8 @@ openfd:
 					closedir(pDir);
 				}
 				
-				//reserve 300MB for storage 
-				if(i % 300 == 0)
+				/*reserve 300MB for storage*/
+				if(i % 150 == 0)
 				{
 					if(!strncmp(Rec_Save_Dir, "/storage/sdcard0", 16) )
 					{
@@ -4201,10 +4204,10 @@ openfd:
 						//lidbg("/storage/sdcard0  total=%dMB, free=%dMB\n", mbTotalsize, mbFreedisk);  
 						if(mbFreedisk < 300)
 						{
-							lidbg("======Free space less than 300MB!!======");
+							lidbg("======Free space less than 300MB!!======\n");
 							if(i == 0)
 							{
-								lidbg("======Init Free space less than 300MB!!Force quit!======");
+								lidbg("======Init Free space less than 300MB!!Force quit!======\n");
 								return 0;
 							}
 							isExceed = 1;
@@ -4213,8 +4216,11 @@ openfd:
 					}
 				}
 
-				//video file writing process
-				if(isPreview)//preview : not going to change file name.
+				/*
+					preview :
+					not going to change file name.(tmpX.h264)
+				*/
+				if(isPreview)
 				{
 					//lidbg("======isPreview======");
 					if(rec_fp1 == NULL)
@@ -4235,6 +4241,13 @@ openfd:
 							property_set("fly.uvccam.curprevnum", flypreview_prevcnt);
 					}
 				}
+				/*
+					DVR:
+					two condition:
+					1.exceed [Rec_Sec] time;
+					2.total size large than [Rec_File_Size] or sdcard0 less than 300MB.
+					change file name.(current time)
+				*/
 				else if(((buf0.timestamp.tv_sec - originRecsec) % Rec_Sec == 0)
 					&&(oldRecsec != (buf0.timestamp.tv_sec - originRecsec)) || isReplace)
 				{
@@ -4254,12 +4267,11 @@ openfd:
 					unsigned char memcpyFlag = 0;
 
 					struct tm prevTm,curTm;
-					time_t prevtimep,curtimep;
+					time_t prevtimep = 0,curtimep;
 
+					/*get last timeval: prevent from repetition*/
 					if(!isReplace) oldRecsec = buf0.timestamp.tv_sec - originRecsec;
 					
-					prevtimep = 0;
-					isReplace = 0;
 					#if 0
 					if(i > 0)
 					{
@@ -4268,7 +4280,7 @@ openfd:
 					}
 					#endif
 			
-					//find the earliest rec file and del
+					/*find the earliest rec file and del*/
 					pDir=opendir(Rec_Save_Dir);  
 					while((ent=readdir(pDir))!=NULL)  
 					{  
@@ -4311,6 +4323,7 @@ openfd:
 					closedir(pDir);
 					//lidbg("minRecName end------>%s\n",minRecName);
 
+					/*exceed process:del the oldest rec file*/
 					struct stat filebuf; 
 					char filepath[100] = {0};
 					if(isExceed)
@@ -4324,9 +4337,8 @@ openfd:
 						lidbg("=========oldest rec file will be del : %s (%d MB)===========\n",minRecName,filebuf.st_size /1000000);
 						sprintf(tmpCMD , "rm -f %s&",filepath);
 						system(tmpCMD);
-						isExceed = 0;
 					}
-					//only if within Rec_File_Size,otherwise replace oldest file.
+					/*only if within Rec_File_Size,otherwise del oldest file again.*/
 					if(((totalSize - filebuf.st_size) /1000000) < Rec_File_Size)
 					{
 						lidbg_get_current_time(time_buf, NULL);
@@ -4338,8 +4350,10 @@ openfd:
 				}
 				if(rec_fp1 != NULL)
 				{
-					fwrite(mem0[buf0.index], buf0.bytesused, 1, rec_fp1);
+					fwrite(mem0[buf0.index], buf0.bytesused, 1, rec_fp1);//write data to the output file
 				}
+				isReplace = 0;
+				isExceed = 0;
 			}
 		}
 
@@ -4410,19 +4424,23 @@ openfd:
 
 	//system("echo 'udisk_unrequest' > /dev/flydev0");
 	return 0;
+
 #if 1
+/*when open fail,go to try_open_again (suspend adaptation) */
 try_open_again:
 		//system("echo 'udisk_request' > /dev/flydev0");
 		usleep(500*1000);
 		//sleep(2);
+		/*check on-off cmd */
 		property_get("persist.lidbg.uvccam.recording", startRecording, "0");
-		if((!strncmp(startRecording, "0", 1)) && (!do_save) )//close
+		if((!strncmp(startRecording, "0", 1)) && (!do_save) )
 		{
 			lidbg("-------eho---------uvccam stop recording! -----------\n");
 			//system("echo 'udisk_unrequest' > /dev/flydev0");
 			property_set("fly.uvccam.curprevnum", "-1");
 			return 0;
 		}
+		/*exit when timeout*/
 		if(!(tryopencnt--))
 		{
 			lidbg("-------eho---------uvccam try open timeout! -----------\n");
@@ -4430,7 +4448,8 @@ try_open_again:
 			property_set("fly.uvccam.curprevnum", "-1");
 			return 1;
 		}
-		if(tryopencnt == 8)//fix usb R/W error
+		/*fix usb R/W error(reverse 8*500ms for initialization)*/
+		if(tryopencnt == 8)
 		{
 			//system("echo 'ws udisk_reset' > /dev/lidbg_pm0");
 			lidbg("%s: Can not found camera till 8!!Camera may burst R/W error unexpected!\n", __func__);
