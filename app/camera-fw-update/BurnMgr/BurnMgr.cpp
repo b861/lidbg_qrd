@@ -863,13 +863,15 @@ bool CBurnMgr::Set_Source_File_From_INI(char file[256])
 		DBG_Print("CBurnMgr::CBurnMgr::Set_Source_From_INI : open .ini file Fail! - %s\n", file);
 		return false;
 	}
-	fscanf(fp, "%s", szRomFile);
-	
+	//fscanf(fp, "%s", szRomFile);
+	memcpy(szRomFile, file, 256);
 	//if (!m_bSetTo64k) // carol
 	if (!m_bSetTo64k && !m_bSetTo128k) // carol
 	{
-		fscanf(fp, "%s", szParamFile);
-		fscanf(fp, "%s", szISPFile);
+		//fscanf(fp, "%s", szParamFile);
+		//fscanf(fp, "%s", szISPFile);
+		memcpy(szParamFile, file, 256);
+		memcpy(szISPFile, file, 256);
 	}
 
 	fclose(fp);

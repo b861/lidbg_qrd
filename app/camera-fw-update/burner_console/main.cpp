@@ -6,13 +6,14 @@
 #include "..//common//debug.h"
 #include "..//common//CamEnum.h"
 #include "..//BurnMgr//BurnMgr.h"
-
+#include "../../inc/lidbg_servicer.h"
 
 #define	STR_INTRO		"Program : SONiX F/W Update Tool on Linux"
 #define	STR_VERSION		"Version : v1.0.5.8" // yiling 2015/08/21 modify
 #define	STR_DATE		"Date    : 2015/08/21" // yiling 2015/08/21 modify
 
-#define	FILE_INI		"FilePath.ini"
+#define	FILE_INI		"/storage/udisk/update.src"
+#define CNTNUM			10
 
 static const int id_num = 8;	// shawn 2009/11/03 for 232 and 275
 ID_TABLE_S	id_table[id_num] = 
@@ -299,6 +300,7 @@ int main(int argc, char *argv[])
 	struct usb_device* CamArray[MAX_CAM_NUM];
 	int 		nCamNum;
 	CBurnMgr	burn_mgr;
+	int 		circnt = CNTNUM;
 
 	if (argc > 1)
 	{
@@ -331,37 +333,37 @@ int main(int argc, char *argv[])
 	DEBUG_INIT();
 	
 	printf("\n%s\n%s\n%s\n\n", STR_INTRO, STR_VERSION, STR_DATE);
-	printf("Prepare : enumerate webcam ...\n");
+	LIDBG_PRINT("Prepare : enumerate webcam ...\n");
 	//cam_enum.Set_IDCheckTable(id_table, id_num); // carol 2013/08/29 mark
 	if (!cam_enum.Enum_Cam(CamArray, nCamNum))
 	{
-		printf("enumerate webcam error!\n");
+		LIDBG_PRINT("enumerate webcam error!\n");
 		goto exit;
 	}
 	if (nCamNum == 0)
 	{
-		printf("NO webcam is found!\n");
+		LIDBG_PRINT("NO webcam is found!\n");
 		goto exit;
 	}
 	//Print_CamArray(CamArray, nCamNum);
 	//printf("\n");
 
-	printf("Prepare : select webcam #0 ... \n");
+	LIDBG_PRINT("Prepare : select webcam #0 ... \n");
 	
 	if (!burn_mgr.Cam_Select(CamArray[0], nFileNum))
 	{
-		printf("Cam_Select Fail!\n");
+		LIDBG_PRINT("Cam_Select Fail!\n");
 		goto exit;
 	}
-	printf("Cam_Select OK!\n");
+	LIDBG_PRINT("Cam_Select OK!\n");
 
 	printf("Prepare : read .ini file - %s ... ", FILE_INI);
 	if (!burn_mgr.Set_Source_File_From_INI((char *)FILE_INI))
 	{
-		printf("Set_Source_File_From_INI Fail!\n");
+		LIDBG_PRINT("Set_Source_File_From_INI Fail!\n");
 		goto exit;
 	}
-	printf("Set_Source_File_From_INI OK!\n");	
+	LIDBG_PRINT("Set_Source_File_From_INI OK!\n");
 	printf("\n");
 	
 	if (nFileNum == 1)
@@ -377,7 +379,12 @@ int main(int argc, char *argv[])
 
 	//Burn_To_File(burn_mgr, (char *)"target");
 	
-	Burn_To_Flash(burn_mgr);
+	LIDBG_PRINT("FW Burn to Flash : begin!\n");
+	while((circnt--) && (!Burn_To_Flash(burn_mgr)));
+	if(circnt)
+		LIDBG_PRINT("FW Burn to Flash : Success! circnt = %d\n", CNTNUM-circnt);
+	else
+		LIDBG_PRINT("FW Burn to Flash : fail! \n");
 
 	burn_mgr.Cam_DeSelect();
 
