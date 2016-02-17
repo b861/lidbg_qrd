@@ -9,7 +9,10 @@ char isBack = 0;
 char previewCnt = 0;
 char isPreview = 0;
 char isFirstresume = 0;
+char isSuspend = 0;
 
+static struct timer_list suspend_stoprec_timer;
+#define SUSPEND_STOPREC_TIME   (jiffies + 180*HZ)  /* 3min */
 
 static int lidbg_flycam_event(struct notifier_block *this,
                        unsigned long event, void *ptr)
@@ -19,11 +22,15 @@ static int lidbg_flycam_event(struct notifier_block *this,
     switch (event)
     {
 	    case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_ON):
-		lidbg("flycam event:resume %ld\n", event);
+			lidbg("flycam event:resume %ld\n", event);
+			isSuspend = 0;
+			del_timer(&suspend_stoprec_timer);
 			isFirstresume = 1;
 			break;
 	    case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_OFF):
-		lidbg("flycam event:suspend %ld\n", event);
+			lidbg("flycam event:suspend %ld\n", event);
+			isSuspend = 1;
+			mod_timer(&suspend_stoprec_timer,SUSPEND_STOPREC_TIME);//stop rec process after 3min
 			break;
 	    default:
 	        break;
@@ -36,6 +43,13 @@ static struct notifier_block lidbg_notifier =
 {
     .notifier_call = lidbg_flycam_event,
 };
+
+void suspend_stoprec_timer_isr(unsigned long data)
+{
+    lidbg("-------[TIMER]uvccam stop_recording -----\n");
+	lidbg_shell_cmd("setprop persist.lidbg.uvccam.recording 0");
+	lidbg_shell_cmd("echo 'udisk_unrequest' > /dev/flydev0");
+}
 
 
 ssize_t  flycam_read(struct file *filp, char __user *buffer, size_t size, loff_t *offset)
@@ -85,6 +99,7 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 			if(!strncmp(keyval[1], "1", 1))//start
 			{
 			    lidbg("-------uvccam recording -----");
+				if(isSuspend) mod_timer(&suspend_stoprec_timer,SUSPEND_STOPREC_TIME);//stop rec process after 3min
 				lidbg_shell_cmd("echo 'udisk_request' > /dev/flydev0");
 				//fix screen blurred issue(only in preview scene)
 				if(isPreview) previewCnt++;
@@ -108,6 +123,7 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 			else if(!strncmp(keyval[1], "0", 1))//stop
 			{
 				lidbg("-------uvccam stop_recording -----");
+				if(isSuspend) del_timer(&suspend_stoprec_timer);
 				lidbg_shell_cmd("setprop persist.lidbg.uvccam.recording 0");
 				msleep(500);
 				lidbg_shell_cmd("echo 'udisk_unrequest' > /dev/flydev0");
@@ -420,6 +436,11 @@ int thread_flycam_init(void *data)
 #endif
 	init_waitqueue_head(&wait_queue);
 	register_lidbg_notifier(&lidbg_notifier);
+	init_timer(&suspend_stoprec_timer);
+    suspend_stoprec_timer.data = 0;
+    suspend_stoprec_timer.expires = 0;
+    suspend_stoprec_timer.function = suspend_stoprec_timer_isr;
+#if 0
 	//CREATE_KTHREAD(thread_flycam_test, NULL);
 	/*
     if((!g_var.is_fly) && (g_var.recovery_mode == 0)))
@@ -427,6 +448,7 @@ int thread_flycam_init(void *data)
        
     }
 	*/
+#endif
     return 0;
 }
 
