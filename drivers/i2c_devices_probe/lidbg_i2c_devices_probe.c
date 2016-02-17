@@ -82,7 +82,7 @@ void accel_power_enable(void)
 void gps_power_enable(void)
 {
 	GPS_POWER_ON;
-	msleep(10);
+	msleep(100);
 }
 
 struct probe_device i2c_probe_dev[] =

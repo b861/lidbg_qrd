@@ -81,6 +81,7 @@ static int gps_event_handle(struct notifier_block *this,
 
         lidbg("gps set work_en = 1\n");
         work_en = 1;
+	 GPS_POWER_ON;
         break;
 #ifdef SUSPEND_ONLINE
 	case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_OFF):
@@ -89,6 +90,7 @@ static int gps_event_handle(struct notifier_block *this,
 #endif
         lidbg("gps set work_en = 0\n");
         work_en = 0;
+	 //GPS_POWER_OFF;
         break;
 
     default:
