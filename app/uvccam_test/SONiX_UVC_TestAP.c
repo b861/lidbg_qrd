@@ -4188,7 +4188,7 @@ openfd:
 				}
 				
 				/*reserve 300MB for storage*/
-				if(i % 150 == 0)
+				if((i % 150 == 0) && !isPreview)
 				{
 					if(!strncmp(Rec_Save_Dir, "/storage/sdcard0", 16) )
 					{
