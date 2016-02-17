@@ -12,7 +12,8 @@ char isFirstresume = 0;
 char isSuspend = 0;
 
 static struct timer_list suspend_stoprec_timer;
-#define SUSPEND_STOPREC_TIME   (jiffies + 180*HZ)  /* 3min */
+#define SUSPEND_STOPREC_ONLINE_TIME   (jiffies + 180*HZ)  /* 3min */
+#define SUSPEND_STOPREC_ACCOFF_TIME   (jiffies + 60*HZ)  /* 1min */
 
 static int lidbg_flycam_event(struct notifier_block *this,
                        unsigned long event, void *ptr)
@@ -30,7 +31,7 @@ static int lidbg_flycam_event(struct notifier_block *this,
 	    case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_OFF):
 			lidbg("flycam event:suspend %ld\n", event);
 			isSuspend = 1;
-			mod_timer(&suspend_stoprec_timer,SUSPEND_STOPREC_TIME);//stop rec process after 3min
+			mod_timer(&suspend_stoprec_timer,SUSPEND_STOPREC_ACCOFF_TIME);
 			break;
 	    default:
 	        break;
@@ -99,7 +100,7 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 			if(!strncmp(keyval[1], "1", 1))//start
 			{
 			    lidbg("-------uvccam recording -----");
-				if(isSuspend) mod_timer(&suspend_stoprec_timer,SUSPEND_STOPREC_TIME);//stop rec process after 3min
+				if(isSuspend) mod_timer(&suspend_stoprec_timer,SUSPEND_STOPREC_ONLINE_TIME);
 				lidbg_shell_cmd("echo 'udisk_request' > /dev/flydev0");
 				//fix screen blurred issue(only in preview scene)
 				if(isPreview) previewCnt++;
