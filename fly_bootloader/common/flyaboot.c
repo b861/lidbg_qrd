@@ -19,6 +19,8 @@
 #define EMMC_BOOT_IMG_HEADER_ADDR 0xFF000
 #endif
 
+//#define RECOVER_MANUUAL_HIGH_LEVEL
+
 #if FLY_SCREEN_SIZE_1024
 int fly_screen_w = 1024;
 int fly_screen_h = 600;
@@ -352,7 +354,10 @@ void flyaboot_init(unsigned *boot_into_recovery, bool *boot_into_fastboot)
     /*
     *don't show static logo before displaying green screen when auto-up
     */
+#ifdef RECOVER_MANUUAL_HIGH_LEVEL
+#else
     if(arg == FlySystemModel)
+#endif
     {
         if(*boot_into_fastboot == 0)
             show_logo();
@@ -360,7 +365,11 @@ void flyaboot_init(unsigned *boot_into_recovery, bool *boot_into_fastboot)
     mdelay(1000);
     mdelay(500);
     backlight_enable();
+
+#ifdef RECOVER_MANUUAL_HIGH_LEVEL
+#else
     if((arg == FlySystemModel))
+#endif
     {
         if(*boot_into_fastboot == 0)
         {
