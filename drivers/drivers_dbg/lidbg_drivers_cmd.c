@@ -305,6 +305,7 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#065--disable suspend timeout protect\n");
             fs_mem_log("*158#066--disable alarmmanager protect\n");
             fs_mem_log("*158#067xx--set alarmtimer wakeup time\n");
+            fs_mem_log("*158#068----update firmware for usb camera\n");
 
             show_password_list();
             lidbg_domineering_ack();
@@ -744,7 +745,7 @@ void parse_cmd(char *pt)
         else if (!strcmp(argv[1], "*158#068"))
         {
             lidbg("*158#068--update firmware for camera\n");
-            lidbg_shell_cmd("/flysystem/lib/out/fw_update -2");
+            lidbg_shell_cmd("/flysystem/lib/out/fw_update -2 &");
         }
 
         else if (!strcmp(argv[1], "*168#001"))
