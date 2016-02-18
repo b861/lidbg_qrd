@@ -138,26 +138,26 @@ bool Burn_To_Flash(CBurnMgr	&burn_mgr)
 	// shawn 2010/11/12 for fixing "No such device" issue -----
 	
 	burn_mgr.Set_Target_Flash(true);
-	printf("Target : Burn to FLASH\n");
+	LIDBG_PRINT("Target : Burn to FLASH\n");
 
 	// carol 2013/12/16 add +++++
 	if(!burn_mgr.Get_CodeVersion(szFlashCodeVer))
 	{
 		DBG_Print("Get FW version Fail!\n");
-		printf("Get FW version Fail!\n");
+		LIDBG_PRINT("Get FW version Fail!\n");
 	}
 	szFlashCodeVer[24] = '\0';
-	printf("Current FW version: %s\n", szFlashCodeVer);
+	LIDBG_PRINT("Current FW version: %s\n", szFlashCodeVer);
 	// carol 2013/12/16 add -----
     
     // wayne 2014/06/13 add +++++
 	if(!burn_mgr.Get_VendorVersion(szFlashVendorVer))
 	{
 		DBG_Print("Get Vendor version Fail!\n");
-		printf("Get Vendor version Fail!\n");
+		LIDBG_PRINT("Get Vendor version Fail!\n");
 	}
 	szFlashVendorVer[13] = '\0';
-	printf("Current Vendor version: %s\n", szFlashVendorVer);
+	LIDBG_PRINT("Current Vendor version: %s\n", szFlashVendorVer);
     // wayne 2014/06/13 add +++++
 
 
@@ -282,10 +282,10 @@ bool Burn_To_Flash(CBurnMgr	&burn_mgr)
 		goto fail_quit;
 	}	
 	printf("Pass!\n");
-	printf("Burn to Flash : Success!\n");
+	LIDBG_PRINT("Burn to Flash : Success!\n");
 
-	printf("\nNew FW version: %s\n", szFlashCodeVer);
-	printf("New Vendor version: %s\n", szFlashVendorVer);
+	LIDBG_PRINT("New FW version: %s\n", szFlashCodeVer);
+	LIDBG_PRINT("New Vendor version: %s\n", szFlashVendorVer);
 	
 	return true;
 
@@ -357,7 +357,7 @@ int main(int argc, char *argv[])
 	}
 	LIDBG_PRINT("Cam_Select OK!\n");
 
-	printf("Prepare : read .ini file - %s ... ", FILE_INI);
+	LIDBG_PRINT("Prepare : read .ini file - %s ... ", FILE_INI);
 	if (!burn_mgr.Set_Source_File_From_INI((char *)FILE_INI))
 	{
 		LIDBG_PRINT("Set_Source_File_From_INI Fail!\n");
@@ -380,15 +380,15 @@ int main(int argc, char *argv[])
 	//Burn_To_File(burn_mgr, (char *)"target");
 	
 	LIDBG_PRINT("FW Burn to Flash : begin!\n");
-	while((circnt--) && (!Burn_To_Flash(burn_mgr)));
-	if(circnt)
-		LIDBG_PRINT("FW Burn to Flash : Success! circnt = %d\n", CNTNUM-circnt);
-	else
-		LIDBG_PRINT("FW Burn to Flash : fail! \n");
+	while((circnt--) && (!Burn_To_Flash(burn_mgr)))
+	{
+		LIDBG_PRINT("FW Burn to Flash fail! circnt = %d\n", CNTNUM-circnt);
+	}
+
 
 	burn_mgr.Cam_DeSelect();
 
-	printf("Exit program!\n");
+	LIDBG_PRINT("FW update Exit program!\n");
 	printf("\nPlease restart the computer to make the new FW become effective !\n");
 	return 0;
 	
