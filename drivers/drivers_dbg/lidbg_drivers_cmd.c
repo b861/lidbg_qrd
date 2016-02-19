@@ -440,7 +440,7 @@ void parse_cmd(char *pt)
         }
         else if (!strcmp(argv[1], "*158#020"))
         {
-            g_recovery_meg->bootParam.upName.val = 0;
+            g_recovery_meg->bootParam.upName.val = 2;
             if(flyparameter_info_save(g_recovery_meg))
             {
                 lidbg_domineering_ack();
