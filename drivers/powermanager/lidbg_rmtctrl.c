@@ -378,7 +378,7 @@ static int lidbg_rmtctrl_probe(struct platform_device *pdev)
 {
 	int ret;
 
-        PM_ERR("<have a deep check,is enum FLY_ACC_OFF == 0  :%d,[g_var.acc_flag:%d ,  FLY_ACC_OFF:%d] >\n",(g_var.acc_flag == FLY_ACC_OFF),g_var.acc_flag,FLY_ACC_OFF);
+       fs_mem_log("<have a deep check,is enum FLY_ACC_OFF == 0  :%d,[g_var.acc_flag:%d ,  FLY_ACC_OFF:%d] >\n",(g_var.acc_flag == FLY_ACC_OFF),g_var.acc_flag,FLY_ACC_OFF);
        FS_REGISTER_INT(g_var.alarmtimer_interval, "alarmtimer_wakeup_time", 5, NULL);
 	fb_notif.notifier_call = fb_notifier_callback;
 	ret = fb_register_client(&fb_notif);

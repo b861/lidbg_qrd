@@ -73,7 +73,7 @@ static inline char * get_current_time(void)
 #endif
 
 #define LIDBG_WARN(fmt, args...) do { printk(KERN_CRIT"[lidbg]   [%s] .warn.%s: " fmt,get_current_time(),__func__,##args);}while(0)
-#define LIDBG_ERR(fmt, args...) do { printk(KERN_CRIT"[lidbg]   [%s] .lidbgerr.%s: " fmt,get_current_time(),__func__,##args);}while(0)
+#define LIDBG_ERR(fmt, args...) do { printk(KERN_CRIT"[lidbg]   [%s] .lidbg_err.%s: " fmt,get_current_time(),__func__,##args);}while(0)
 #define LIDBG_SUC(fmt, args...) do { printk(KERN_CRIT"[lidbg]   [%s] .succ.%s: " fmt,get_current_time(),__func__,##args);}while(0)
 
 
