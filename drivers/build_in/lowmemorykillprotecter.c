@@ -40,6 +40,7 @@
         "io.proxyservice",
         "mobile.rateflow",
         "goodocom.gocsdk",
+	"tonavi.amapauto",
         "com.sygic.aura",
         "mediaserver",
         "system_server",
