@@ -282,8 +282,8 @@ static int video_set_format(int dev, unsigned int w, unsigned int h, unsigned in
 	{
 		char tmpCMD[100] = {0};
 		lidbg("%s: select 640x360!\n",__func__);
-		w = 320;
-		h = 240;
+		w = 480;
+		h = 272;
 		isPreview = 1;
 		sprintf(tmpCMD , "rm -f %s/tmp*.h264&",Rec_Save_Dir);
 		system(tmpCMD);
@@ -4224,6 +4224,7 @@ openfd:
 					//lidbg("======isPreview======");
 					if(rec_fp1 == NULL)
 					{
+						lidbg_get_current_time(time_buf, NULL);
 						sprintf(flypreview_filename, "%stmp%d.h264", Rec_Save_Dir,flytmpcnt);
 						rec_fp1 = fopen(flypreview_filename, "wb");
 						sprintf(flypreview_prevcnt, "%d", flytmpcnt);
@@ -4234,6 +4235,7 @@ openfd:
 							lidbg("preview change file name to write!");
 							if(flytmpcnt < Max_Rec_Num - 1) flytmpcnt++;
 							else flytmpcnt = 0;
+							lidbg_get_current_time(time_buf, NULL);
 							sprintf(flypreview_filename, "%stmp%d.h264", Rec_Save_Dir,flytmpcnt);
 							rec_fp1 = fopen(flypreview_filename, "wb");
 							sprintf(flypreview_prevcnt, "%d", flytmpcnt);
