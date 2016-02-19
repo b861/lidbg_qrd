@@ -306,6 +306,7 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#066--disable alarmmanager protect\n");
             fs_mem_log("*158#067xx--set alarmtimer wakeup time\n");
             fs_mem_log("*158#068----update firmware for usb camera\n");
+			fs_mem_log("*158#069----shut BT power\n");
 
             show_password_list();
             lidbg_domineering_ack();
@@ -747,7 +748,11 @@ void parse_cmd(char *pt)
             lidbg("*158#068--update firmware for camera\n");
             lidbg_shell_cmd("/flysystem/lib/out/fw_update -2 &");
         }
-
+		else if (!strcmp(argv[1], "*158#069"))
+        {
+            lidbg("*158#069----shut BT power\n");
+            lidbg_shell_cmd("echo lpc 0x02 0x5 0x00 > /dev/lidbg_drivers_dbg0 &");
+        }
         else if (!strcmp(argv[1], "*168#001"))
         {
             encode = true;
