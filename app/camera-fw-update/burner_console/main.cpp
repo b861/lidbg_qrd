@@ -29,6 +29,8 @@ ID_TABLE_S	id_table[id_num] =
 };
 
 int nFileNum = 0;	// shawn 2010/11/12 add for fixing "No such device" issue
+unsigned char camCnt = 0;//current update Camera num
+char tmpCmd[100] = {0};
 
 
 void Print_CamArray(struct usb_device* CamArray[MAX_CAM_NUM], int &nCamNum);
@@ -44,7 +46,7 @@ void Print_CamArray(struct usb_device* CamArray[MAX_CAM_NUM], int &nCamNum)
 	int		vid, pid;
 	char	szMfg[64];
 	
-	printf("# of webcam found = %d\n", nCamNum);
+	LIDBG_PRINT("# of webcam found = %d\n", nCamNum);
 	for (i=0; i<nCamNum; i++)
 	{
 		pDev = CamArray[i];
@@ -56,7 +58,7 @@ void Print_CamArray(struct usb_device* CamArray[MAX_CAM_NUM], int &nCamNum)
 		vid = des->idVendor;
 		pid = des->idProduct;
 		usb_get_string_simple(udev, des->iManufacturer, szMfg, 64*sizeof(char));
-		printf("%3d: vid = 0x%.4x, pid = 0x%.4x, Manufacturer = %s\n", 
+		LIDBG_PRINT("%3d: vid = 0x%.4x, pid = 0x%.4x, Manufacturer = %s\n", 
 				i, vid, pid, szMfg);
 
 		usb_close(udev);
@@ -73,51 +75,51 @@ bool Burn_To_File(CBurnMgr	&burn_mgr, char szTarget[256])
 	burn_mgr.Set_Save_Param(true);
 	burn_mgr.Set_Save_ISP(true);
 	 
-	printf("Target : Burn to FILE - %s\n\n", szTarget);
+	LIDBG_PRINT("Target : Burn to FILE - %s\n\n", szTarget);
 	
-	printf("Start the burning process ...\n");	
+	LIDBG_PRINT("Start the burning process ...\n");	
 
-	printf("Step : Init -----------------> ");
+	LIDBG_PRINT("Step : Init -----------------> ");
 	if (!burn_mgr.Load_Source_Data())
 	{
 		DBG_Print("Burn_To_File : Load_Source_Data() - Fail!\n");
-		printf("Fail!\n");
+		LIDBG_PRINT("Fail!\n");
 		return false;
 	}
-	printf("Pass!\n");
+	LIDBG_PRINT("Pass!\n");
 	
-	printf("Step : Save Des -------------> ");
+	LIDBG_PRINT("Step : Save Des -------------> ");
 	if (!burn_mgr.Burn_Save_Des())
 	{
-		printf("Fail!\n");
+		LIDBG_PRINT("Fail!\n");
 		goto fail_quit;
 	}
-	printf("Pass!\n");
+	LIDBG_PRINT("Pass!\n");
 	
-	printf("step : Save Param -----------> ");
+	LIDBG_PRINT("step : Save Param -----------> ");
 	if (!burn_mgr.Burn_Save_Param())
 	{
-		printf("Fail!\n");
+		LIDBG_PRINT("Fail!\n");
 		goto fail_quit;
 	}
-	printf("Pass!\n");
+	LIDBG_PRINT("Pass!\n");
 	
-	printf("Step : Save ISP -------------> ");
+	LIDBG_PRINT("Step : Save ISP -------------> ");
 	if (!burn_mgr.Burn_Save_ISP())
 	{
-		printf("Fail!\n");
+		LIDBG_PRINT("Fail!\n");
 		goto fail_quit;
 	}
-	printf("Pass!\n");
+	LIDBG_PRINT("Pass!\n");
 	
-	printf("Step : Save All -------------> ");
+	LIDBG_PRINT("Step : Save All -------------> ");
 	if (!burn_mgr.Burn_Save_All())
 	{
-		printf("Fail!\n");
+		LIDBG_PRINT("Fail!\n");
 		goto fail_quit;
 	}
-	printf("Pass!\n");
-	printf("Burn to File : Success!\n");
+	LIDBG_PRINT("Pass!\n");
+	LIDBG_PRINT("Burn to File : Success!\n");
 	return true;
 	
 fail_quit:
@@ -128,7 +130,7 @@ bool Burn_To_Flash(CBurnMgr	&burn_mgr)
 {
 	char szFlashCodeVer[25] = {0};	// carol 2013/12/16 add
 	char szFlashVendorVer[13] = {0};
-
+	
 	// shawn 2010/11/12 for fixing "No such device" issue +++++
 #if defined _REINIT_	
 	CCamEnum	cam_enum;
@@ -161,32 +163,32 @@ bool Burn_To_Flash(CBurnMgr	&burn_mgr)
     // wayne 2014/06/13 add +++++
 
 
-	printf("Start the burning process ...\n");
+	LIDBG_PRINT("Start the burning process ...\n");
 	// ----------------- Step 0 : INIT -----------------
-	printf("Step 0 : INIT ---------------> ");
+	LIDBG_PRINT("Step 0 : INIT ---------------> ");
 	// shawn 2009/08/14 fix WP issue +++++
 	if (!burn_mgr.Load_Source_Data())
 	{
 		DBG_Print("Burn_To_Flash : Load_Source_Data() - Fail!\n");
-		printf("Fail!\n");
+		LIDBG_PRINT("Fail!\n");
 		goto fail_quit;
 	}
 	if (!burn_mgr.Burn_Init())
 	{
-		printf("Fail!\n");
+		LIDBG_PRINT("Fail!\n");
 		goto fail_quit;
 	}
 	// shawn 2009/08/14 fix WP issue -----
-	printf("Pass!\n");
+	LIDBG_PRINT("Pass!\n");
 	
 	// ----------------- Step 1 : ERASE -----------------	
-	printf("Step 1 : ERASE --------------> ");
+	LIDBG_PRINT("Step 1 : ERASE --------------> ");
 	if (!burn_mgr.Burn_Erase())
 	{
-		printf("Fail!\n");
+		LIDBG_PRINT("Fail!\n");
 		goto fail_quit;
 	}
-	printf("Pass!\n");
+	LIDBG_PRINT("Pass!\n");
 
 	// shawn 2010/11/12 for fixing "No such device" issue +++++
 #if defined _REINIT_
@@ -195,72 +197,72 @@ bool Burn_To_Flash(CBurnMgr	&burn_mgr)
 	cam_enum.Set_IDCheckTable(id_table, id_num);
 	if (!cam_enum.Enum_Cam(CamArray, nCamNum))
 	{
-		printf("enumerate webcam error!\n");
+		LIDBG_PRINT("enumerate webcam error!\n");
 		goto fail_quit;
 	}
 	if (nCamNum == 0)
 	{
-		printf("NO webcam is found!\n");
+		LIDBG_PRINT("NO webcam is found!\n");
 		goto fail_quit;
 	}
 	
 	if (!burn_mgr.Cam_Select(CamArray[0], nFileNum))
 	{
-		printf("Fail!\n");
+		LIDBG_PRINT("Fail!\n");
 		goto fail_quit;
 	}
 	
 	if (!burn_mgr.Set_Source_File_From_INI((char *)FILE_INI))
 	{
-		printf("Fail!\n");
+		LIDBG_PRINT("Fail!\n");
 		goto fail_quit;
 	}
 
 	if (!burn_mgr.Load_Source_Data())
 	{
 		DBG_Print("Burn_To_Flash : Load_Source_Data() - Fail!\n");
-		printf("Fail!\n");
+		LIDBG_PRINT("Fail!\n");
 		goto fail_quit;
 	}
 
 	if (!burn_mgr.Burn_Init())
 	{
-		printf("Fail!\n");
+		LIDBG_PRINT("Fail!\n");
 		goto fail_quit;
 	}
 #endif
 	// shawn 2010/11/12 for fixing "No such device" issue -----
 
 	// ----------------- Step 2 : CHECK -----------------
-	printf("Step 2 : CHECK --------------> ");
+	LIDBG_PRINT("Step 2 : CHECK --------------> ");
 	if (!burn_mgr.Burn_Check())
 	{
-		printf("Fail!\n");
+		LIDBG_PRINT("Fail!\n");
 		goto fail_quit;
 	}
-	printf("Pass!\n");
+	LIDBG_PRINT("Pass!\n");
 	// ----------------- Step 3 : PROGRAM -----------------	
-	printf("Step 3 : PROGRAM ------------> ");
+	LIDBG_PRINT("Step 3 : PROGRAM ------------> ");
 	if (!burn_mgr.Burn_Program())
 	{
-		printf("Fail!\n");
+		LIDBG_PRINT("Fail!\n");
 		goto fail_quit;
 	}
-	printf("Pass!\n");
+	LIDBG_PRINT("Pass!\n");
 	// ----------------- Step 4 : VERIFY -----------------	
-	printf("Step 4 : VERIFY -------------> ");
+	LIDBG_PRINT("Step 4 : VERIFY -------------> ");
 	if (!burn_mgr.Burn_Verify())
 	{
-		printf("Fail!\n");
+		LIDBG_PRINT("Fail!\n");
 		goto fail_quit;
 	}	
-	printf("Pass!\n");
+	LIDBG_PRINT("Pass!\n");
 
 	// carol 2013/12/16 add +++++
 	if(!burn_mgr.Get_CodeVersion(szFlashCodeVer))
 	{
 		DBG_Print("Get FW version Fail!\n");
-		printf("Get FW version Fail!\n");
+		LIDBG_PRINT("Get FW version Fail!\n");
 	}
 	szFlashCodeVer[24] = '\0';
 	// carol 2013/12/16 add -----
@@ -268,29 +270,30 @@ bool Burn_To_Flash(CBurnMgr	&burn_mgr)
 	if(!burn_mgr.Get_VendorVersion(szFlashVendorVer))
 	{
 		DBG_Print("Get Vendor version Fail!\n");
-		printf("Get Vendor version Fail!\n");
+		LIDBG_PRINT("Get Vendor version Fail!\n");
 	}
 	szFlashVendorVer[13] = '\0';
-	printf("Current Vendor version: %s\n", szFlashVendorVer);
+	LIDBG_PRINT("Current Vendor version: %s\n", szFlashVendorVer);
     // wayne 2014/06/13 add +++++
 
 	// ----------------- Step 5 : END PROCESS -----------------
-	printf("Step 5 : END PROCESS --------> ");
+	LIDBG_PRINT("Step 5 : END PROCESS --------> ");
 	if (!burn_mgr.Burn_EndProc(true))
 	{
-		printf("Fail!\n");
+		LIDBG_PRINT("Fail!\n");
 		goto fail_quit;
 	}	
-	printf("Pass!\n");
+	LIDBG_PRINT("Pass!\n");
 	LIDBG_PRINT("Burn to Flash : Success!\n");
 
 	LIDBG_PRINT("New FW version: %s\n", szFlashCodeVer);
 	LIDBG_PRINT("New Vendor version: %s\n", szFlashVendorVer);
-	
+	sprintf(tmpCmd, "echo flyaudio:touch /dev/log/FWUpdateSuccess%d.txt > /dev/lidbg_misc0",camCnt + 1);
+	system(tmpCmd);
 	return true;
 
 fail_quit:	
-	printf("END PROCESS ...");
+	LIDBG_PRINT("END PROCESS ...");
 	burn_mgr.Burn_EndProc(false);
 	return false;
 }
@@ -312,12 +315,12 @@ int main(int argc, char *argv[])
 			nFileNum = 3;
 		else if ( strcmp(argv[1], "-h") == 0)
 		{
-			//printf("./fw_update [-1] [-2] [-3] [-h]\n\n"); // carol 2013/10/30 temp mark for not show -3
-			printf("./fw_update [-1] [-2] [-h]\n\n"); // carol 2013/10/30 add
-			printf("\n-1     Burn 64k single file.\n");
-			printf("\n-2     Burn 128k single file.\n"); // carol 2013/08/29 add
-			//printf("\n-3     Burn three files (ROM, Parameter and Sensor Table).\n"); // carol 2013/10/30 temp mark for never try
-			printf("\n-h     Help.\n");
+			//LIDBG_PRINT("./fw_update [-1] [-2] [-3] [-h]\n\n"); // carol 2013/10/30 temp mark for not show -3
+			LIDBG_PRINT("./fw_update [-1] [-2] [-h]\n\n"); // carol 2013/10/30 add
+			LIDBG_PRINT("\n-1     Burn 64k single file.\n");
+			LIDBG_PRINT("\n-2     Burn 128k single file.\n"); // carol 2013/08/29 add
+			//LIDBG_PRINT("\n-3     Burn three files (ROM, Parameter and Sensor Table).\n"); // carol 2013/10/30 temp mark for never try
+			LIDBG_PRINT("\n-h     Help.\n");
 			goto exit;
 		}
 		else
@@ -326,13 +329,14 @@ int main(int argc, char *argv[])
 	
 	if (nFileNum == 0)
 	{
-		printf("Input argument is wrong!\n");
+		LIDBG_PRINT("Input argument is wrong!\n");
 		goto exit;
 	}
 	
 	DEBUG_INIT();
+	system("rm -f /dev/log/FWUpdate*.txt");
 	
-	printf("\n%s\n%s\n%s\n\n", STR_INTRO, STR_VERSION, STR_DATE);
+	LIDBG_PRINT("\n%s\n%s\n%s\n\n", STR_INTRO, STR_VERSION, STR_DATE);
 	LIDBG_PRINT("Prepare : enumerate webcam ...\n");
 	//cam_enum.Set_IDCheckTable(id_table, id_num); // carol 2013/08/29 mark
 	if (!cam_enum.Enum_Cam(CamArray, nCamNum))
@@ -345,55 +349,68 @@ int main(int argc, char *argv[])
 		LIDBG_PRINT("NO webcam is found!\n");
 		goto exit;
 	}
-	//Print_CamArray(CamArray, nCamNum);
-	//printf("\n");
+	Print_CamArray(CamArray, nCamNum);
+	LIDBG_PRINT("\n");
 
 	LIDBG_PRINT("Prepare : select webcam #0 ... \n");
 	
-	if (!burn_mgr.Cam_Select(CamArray[0], nFileNum))
+	/*burn FW to all Camera flash*/
+	for(camCnt = 0;camCnt < nCamNum;camCnt++)
 	{
-		LIDBG_PRINT("Cam_Select Fail!\n");
-		goto exit;
+		LIDBG_PRINT("=========start [%d] Camera update===========\n",camCnt);
+		if (!burn_mgr.Cam_Select(CamArray[camCnt], nFileNum))
+		{
+			LIDBG_PRINT("Cam_Select Fail!\n");
+			goto exit;
+		}
+		LIDBG_PRINT("Cam_Select OK!\n");
+
+		LIDBG_PRINT("Prepare : read .ini file - %s ... ", FILE_INI);
+		if (!burn_mgr.Set_Source_File_From_INI((char *)FILE_INI))
+		{
+			LIDBG_PRINT("Set_Source_File_From_INI Fail!\n");
+			goto exit;
+		}
+		LIDBG_PRINT("Set_Source_File_From_INI OK!\n");
+		LIDBG_PRINT("\n");
+		
+		if (nFileNum == 1)
+			LIDBG_PRINT("Source : 64K from FILE                   - %s\n", burn_mgr.Get_RomFile());
+		else if(nFileNum == 2) // carol 2013/08/29 add
+			LIDBG_PRINT("Source : 128K from FILE                   - %s\n", burn_mgr.Get_RomFile());
+		else
+		{
+			LIDBG_PRINT("Source : ROM from FILE                   - %s\n", burn_mgr.Get_RomFile());
+			LIDBG_PRINT("Source : Parameter from FILE             - %s\n", burn_mgr.Get_ParamFile());
+			LIDBG_PRINT("Source : Init Sensor Parameter from FILE - %s\n", burn_mgr.Get_ISPFile());
+		}
+
+		//Burn_To_File(burn_mgr, (char *)"target");
+		
+		LIDBG_PRINT("FW Burn to Flash : begin!\n");
+		while((circnt--) && (!Burn_To_Flash(burn_mgr)))
+		{
+			LIDBG_PRINT("FW Burn to Flash fail! circnt = %d\n", CNTNUM-circnt);
+			sprintf(tmpCmd, "echo flyaudio:touch /dev/log/FWUpdateFail%d.txt > /dev/lidbg_misc0",camCnt + 1);
+			system(tmpCmd);
+		}
+
+
+		burn_mgr.Cam_DeSelect();
+
+		LIDBG_PRINT("FW update Exit program!\n");
+		LIDBG_PRINT("\nPlease restart the computer to make the new FW become effective !\n");
 	}
-	LIDBG_PRINT("Cam_Select OK!\n");
-
-	LIDBG_PRINT("Prepare : read .ini file - %s ... ", FILE_INI);
-	if (!burn_mgr.Set_Source_File_From_INI((char *)FILE_INI))
-	{
-		LIDBG_PRINT("Set_Source_File_From_INI Fail!\n");
-		goto exit;
-	}
-	LIDBG_PRINT("Set_Source_File_From_INI OK!\n");
-	printf("\n");
-	
-	if (nFileNum == 1)
-		printf("Source : 64K from FILE                   - %s\n", burn_mgr.Get_RomFile());
-	else if(nFileNum == 2) // carol 2013/08/29 add
-		printf("Source : 128K from FILE                   - %s\n", burn_mgr.Get_RomFile());
-	else
-	{
-		printf("Source : ROM from FILE                   - %s\n", burn_mgr.Get_RomFile());
-		printf("Source : Parameter from FILE             - %s\n", burn_mgr.Get_ParamFile());
-		printf("Source : Init Sensor Parameter from FILE - %s\n", burn_mgr.Get_ISPFile());
-	}
-
-	//Burn_To_File(burn_mgr, (char *)"target");
-	
-	LIDBG_PRINT("FW Burn to Flash : begin!\n");
-	while((circnt--) && (!Burn_To_Flash(burn_mgr)))
-	{
-		LIDBG_PRINT("FW Burn to Flash fail! circnt = %d\n", CNTNUM-circnt);
-	}
-
-
-	burn_mgr.Cam_DeSelect();
-
-	LIDBG_PRINT("FW update Exit program!\n");
-	printf("\nPlease restart the computer to make the new FW become effective !\n");
+	sprintf(tmpCmd, "echo flyaudio:touch /dev/log/FWUpdateDone.txt > /dev/lidbg_misc0");
+	system(tmpCmd);
 	return 0;
 	
 exit:
-	printf("Exit program!\n");
+	LIDBG_PRINT("Exit program!\n");
+	sprintf(tmpCmd, "echo flyaudio:touch /dev/log/FWUpdateFailAll.txt > /dev/lidbg_misc0");
+	system(tmpCmd);
+	sprintf(tmpCmd, "echo flyaudio:touch /dev/log/FWUpdateDone.txt > /dev/lidbg_misc0");
+	system(tmpCmd);
 	return 0;
 }
 
