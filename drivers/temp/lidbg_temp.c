@@ -147,7 +147,7 @@ int thread_thermal(void *data)
     {
         while(1)
         {
-            set_cpu_governor(0);
+            set_cpu_governor(1);
             cur_temp = soc_temp_get(g_hw.cpu_sensor_num);
             lidbg("cpu_temp=%d,freq=%d\n", cur_temp, cpufreq_get(0));
             ssleep(5);

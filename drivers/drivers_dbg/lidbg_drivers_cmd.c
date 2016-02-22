@@ -306,7 +306,7 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#066--disable alarmmanager protect\n");
             fs_mem_log("*158#067xx--set alarmtimer wakeup time\n");
             fs_mem_log("*158#068----update firmware for usb camera\n");
-			fs_mem_log("*158#069----shut BT power\n");
+	     fs_mem_log("*158#069----shut BT power\n");
 
             show_password_list();
             lidbg_domineering_ack();
