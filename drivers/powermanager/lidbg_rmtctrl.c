@@ -421,7 +421,9 @@ static int lidbg_rmtctrl_probe(struct platform_device *pdev)
 	kfifo_init(&rmtctrl_state_fifo, rmtctrl_state_buffer, rmtctrl_FIFO_SIZE);
 	lidbg_new_cdev(&rmtctrl_fops, "flyaudio_pm");
 	lidbg_chmod("/dev/flyaudio_pm0");
-
+	
+	//enable_irq_wake(GPIO_TO_INT(MCU_IIC_REQ_GPIO));
+	
         if(g_var.recovery_mode == 0)
                 CREATE_KTHREAD(thread_check_acc_and_response_acc_off_delay, NULL);
 
