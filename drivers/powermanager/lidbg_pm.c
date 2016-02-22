@@ -5,7 +5,6 @@ LIDBG_DEFINE;
 #define PM_DIR LIDBG_LOG_DIR"pm_info/"
 #define PM_INFO_FILE PM_DIR"pm_info.txt"
 #define PM_ACC_FILE PM_DIR"pm_acc.txt"
-#define PM_ACC_HISTORY_FILE PM_DIR"pm_acc_history.txt"
 
 #if defined(CONFIG_HAS_EARLYSUSPEND)
 #define WAKE_LOCK_ACTIVE                 (1U << 9)
@@ -21,8 +20,6 @@ static DEFINE_TIMER(suspendkey_timer, suspendkey_timer_isr, 0, 0);
 #endif
 static DECLARE_COMPLETION(sleep_observer_wait);
 static atomic_t is_in_sleep = ATOMIC_INIT(0);
-static int sleep_counter = 0;
-static char g_acc_history_state[512];
 int power_on_off_test = 0;
 static struct wake_lock pm_wakelock;
 void observer_start(void);
@@ -252,7 +249,7 @@ void lidbg_pm_step_call(fly_pm_stat_step step, void *data)
         {
             atomic_set(&is_in_sleep, 0);
         }
-        PM_WARN("PM_AUTOSLEEP_STORE1:[%d,%s,%d]\n", sleep_counter, buff, atomic_read(&is_in_sleep));
+        PM_WARN("PM_AUTOSLEEP_STORE1:[%d,%s,%d]\n", g_var.sleep_counter, buff, atomic_read(&is_in_sleep));
     }
     break;
     case PM_AUTOSLEEP_SET_STATE2:
@@ -288,11 +285,11 @@ void lidbg_pm_step_call(fly_pm_stat_step step, void *data)
         //if(g_var.is_debug_mode == 1)
         MCU_WP_GPIO_OFF;
         SOC_IO_SUSPEND;
-        sleep_counter++;
+        g_var.sleep_counter++;
 #ifdef SOC_rk3x88
         grf_backup();
 #endif
-        PM_SLEEP_DBG("SLEEP8.suspend_enter.MCU_WP_GPIO_OFF;sleep_count:%d\n", sleep_counter);
+        PM_SLEEP_DBG("SLEEP8.suspend_enter.MCU_WP_GPIO_OFF;sleep_count:%d\n", g_var.sleep_counter);
         break;
     case PM_SUSPEMD_OPS_ENTER9:
         break;
@@ -400,14 +397,14 @@ static int thread_lidbg_pm_monitor(void *data)
 static int thread_gpio_app_status_delay(void *data)
 {
     ssleep(10);
-    LPC_PRINT(true, sleep_counter, "PM:MCU_WP_GPIO_ON1");
+    LPC_PRINT(true, g_var.sleep_counter, "PM:MCU_WP_GPIO_ON1");
     while(0==g_var.android_boot_completed)
     {
         ssleep(10);
         PM_WARN("<wait android_boot_completed : %d>\n",g_var.android_boot_completed);
     };
     PM_WARN("<set MCU_APP_GPIO_ON >\n");
-    LPC_PRINT(true, sleep_counter, "PM:MCU_APP_GPIO_ON2");
+    LPC_PRINT(true, g_var.sleep_counter, "PM:MCU_APP_GPIO_ON2");
     MCU_APP_GPIO_ON;
 
 #ifdef CONTROL_PM_IO_BY_BP
@@ -534,7 +531,7 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
             }
             if(!g_var.is_fly && fs_is_file_exist("/system/app/NfcNci.apk"))
                 lidbg_rm("/system/app/NfcNci.apk");
-            LPC_PRINT(true, sleep_counter, "PM:screen_off");
+            LPC_PRINT(true, g_var.sleep_counter, "PM:screen_off");
         }
         else  if(!strcmp(cmd[1], "screen_on"))
         {
@@ -545,7 +542,7 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
                 lidbg("hal callback 1\n");
                 SOC_Hal_Acc_Callback(1);
             }
-            LPC_PRINT(true, sleep_counter, "PM:screen_on");
+            LPC_PRINT(true,g_var. sleep_counter, "PM:screen_on");
         }
         else  if(!strcmp(cmd[1], "android_up"))
         {
@@ -573,7 +570,7 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
 
 #ifdef SUSPEND_ONLINE
             observer_start();
-            LPC_PRINT(true, sleep_counter, "PM:android_down");
+            LPC_PRINT(true, g_var.sleep_counter, "PM:android_down");
             wake_unlock(&pm_wakelock);
 #endif
 
@@ -610,7 +607,7 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
 #ifdef SUSPEND_ONLINE
 #else
             observer_start();
-            LPC_PRINT(true, sleep_counter, "PM:gotosleep");
+            LPC_PRINT(true, g_var.sleep_counter, "PM:gotosleep");
 #endif
 #endif
 
@@ -660,7 +657,6 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         else if(!strcmp(cmd[1], "acc_history"))
         {
             lidbg_shell_cmd("rm -r "PM_DIR"*");
-            g_acc_history_state[0] = '\0';
         }
          else  if(!strcmp(cmd[1], "PmServiceStar"))
          {
@@ -786,20 +782,10 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
 }
 ssize_t  pm_read(struct file *filp, char __user *buffer, size_t size, loff_t *offset)
 {
-#if 0
-    char acc_state[128 + 8] = {0};
-    sprintf(acc_state, "%s%d", g_acc_history_state, sleep_counter);
-    if (copy_to_user(buffer, acc_state, strlen(acc_state)))
-    {
-        lidbg("copy_to_user ERR\n");
-    }
-    PM_WARN("<%s>\n", acc_state);
-#else
     if (copy_to_user(buffer,  &g_var.system_status,  4))
     {
         lidbg("copy_to_user ERR\n");
     }
-#endif
     return size;
 }
 
@@ -811,14 +797,65 @@ static  struct file_operations pm_nod_fops =
     .write = pm_write,
 };
 
-void log_resume_times(int sleep_counter)
+
+int pm_state_open (struct inode *inode, struct file *filp)
 {
-    fs_clear_file(PM_ACC_FILE);
-    fs_string2file(0, PM_ACC_FILE, "%d/", sleep_counter);
+    return 0;
+}
+ssize_t pm_state_write (struct file *filp, const char __user *buf, size_t size, loff_t *ppos)
+{
+    char *cmd[8] = {NULL};
+    int cmd_num  = 0;
+    char cmd_buf[512];
+    memset(cmd_buf, '\0', 512);
+
+    if(copy_from_user(cmd_buf, buf, size))
+    {
+        PM_ERR("copy_from_user ERR\n");
+    }
+    if(cmd_buf[size - 1] == '\n')
+        cmd_buf[size - 1] = '\0';
+    cmd_num = lidbg_token_string(cmd_buf, " ", cmd) ;
+
+    //flyaudio logic
+    if(!strcmp(cmd[0], "flyaudio"))
+    {
+    }
+
+    return size;
+}
+ssize_t  pm_state_read(struct file *filp, char __user *buffer, size_t size, loff_t *offset)
+{
+    char acc_state[128 + 8] = {0};
+    sprintf(acc_state, "%d/%d",g_var.acc_counter/2, g_var.sleep_counter);
+    if (copy_to_user(buffer, acc_state, strlen(acc_state)))
+    {
+        lidbg("copy_to_user ERR\n");
+    }
+	PM_WARN("%s",acc_state);
+    return size;
+}
+static  struct file_operations pm_state_fops =
+{
+    .owner = THIS_MODULE,
+    .open = pm_state_open,
+    .read = pm_state_read,
+    .write = pm_state_write,
+};
+
+void clear_pm_log(void)
+{
+    if((fs_get_file_size(PM_ACC_FILE)+fs_get_file_size(PM_INFO_FILE))> 5 * 1024 )
+    {
+        lidbg_shell_cmd("rm -r "PM_DIR"*");
+        PM_WARN("clear acc history\n");
+    }
 }
 static int thread_save_acc_times(void *data)
 {
-    log_resume_times(sleep_counter);
+    clear_pm_log();
+    fs_clear_file(PM_ACC_FILE);
+    fs_string2file(0, PM_ACC_FILE, "acc_counter:%d  sleep_counter:%d",g_var.acc_counter/2, g_var.sleep_counter);
     return 1;
 }
 #ifdef CONFIG_PM
@@ -920,7 +957,7 @@ static int thread_observer(void *data)
                 case 60*17:
 #ifdef SUSPEND_TIME_OUT_FORCE_UNLOCK
 			if( g_var.suspend_timeout_protect  == 0) break;
-                    sprintf(when, "unlock%d,%d:", have_triggerd_sleep_S, sleep_counter);
+                    sprintf(when, "unlock%d,%d:", have_triggerd_sleep_S, g_var.sleep_counter);
                     kernel_wakelock_save_wakelock(when, PM_INFO_FILE);
                     kernel_wakelock_force_unlock(when);
                     userspace_wakelock_action(2, PM_INFO_FILE);
@@ -1047,30 +1084,9 @@ static int  lidbg_pm_probe(struct platform_device *pdev)
     }
 #endif
 
-    if(is_out_updated)
-    {
-        lidbg_shell_cmd("rm -r "PM_DIR"*");
-        PM_WARN("clear acc history\n");
-    }
-    else
-    {
-        char buff[32] = {0};
-        int file_len = 0;
-        lidbg_shell_cmd("chmod 777  "PM_DIR"*");
-        if((file_len = fs_file_read(PM_ACC_FILE, buff, 0, sizeof(buff))) > 0)
-        {
-            fs_file_write2(PM_ACC_HISTORY_FILE, buff);
-            PM_WARN("save acc history:%d,%s\n", file_len, buff);
-        }
-        fs_clear_file(PM_ACC_FILE);
-
-        if(fs_file_read(PM_ACC_HISTORY_FILE, g_acc_history_state, 0, sizeof(g_acc_history_state)) > 5 * 1024)
-            fs_clear_file(PM_ACC_HISTORY_FILE);
-
-        PM_WARN("acc history:%s\n", g_acc_history_state);
-    }
-
+    clear_pm_log();
     lidbg_new_cdev(&pm_nod_fops, "lidbg_pm");
+    lidbg_new_cdev(&pm_state_fops, "lidbg_pm_states");
     kthread_run(thread_observer, NULL, "ftf_pmtask");
     LIDBG_MODULE_LOG;
 

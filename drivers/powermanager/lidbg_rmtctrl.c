@@ -68,7 +68,8 @@ void rmtctrl_fifo_in(void)
 irqreturn_t acc_state_isr(int irq, void *dev_id)
 {
 	int val = -1;
-	lidbg(">>>>> Acc state irq is coming =======>>>\n");
+	g_var.acc_counter++;
+	lidbg(">>>>> Acc state irq is coming =======>>>[ACC:%d | SLEEP:%d]\n",g_var.acc_counter/2,g_var.sleep_counter);
 
 	val = SOC_IO_Input(MCU_ACC_STATE_IO, MCU_ACC_STATE_IO, GPIO_CFG_PULL_UP);
 	if(val == FLY_ACC_OFF)

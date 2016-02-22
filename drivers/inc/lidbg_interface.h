@@ -329,8 +329,10 @@ struct lidbg_pvar_t
     bool usb_request;
     bool suspend_timeout_protect;
     bool android_boot_completed;
-	int alarmtimer_interval;
+    int alarmtimer_interval;
     bool usb_cam_request;
+    int sleep_counter;
+    int acc_counter;	
 };
 
 typedef struct
