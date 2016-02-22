@@ -4,7 +4,7 @@ LIDBG_DEFINE;
 #define DEV_NAME	 "/dev/lidbg_pm0"
 #define rmtctrl_FIFO_SIZE (512)
 
-#define SCREE_OFF_JIFF (15)
+#define SCREE_OFF_JIFF (30)
 #define SCREE_OFF_TIME_S (jiffies + SCREE_OFF_JIFF*HZ)
 
 #define GOTO_SLEEP_JIFF (15)
