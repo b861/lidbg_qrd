@@ -10,6 +10,9 @@ char previewCnt = 0;
 char isPreview = 0;
 char isFirstresume = 0;
 char isSuspend = 0;
+char isRec = 0;
+
+static DECLARE_COMPLETION (timer_stop_rec_wait);
 
 static struct timer_list suspend_stoprec_timer;
 #define SUSPEND_STOPREC_ONLINE_TIME   (jiffies + 180*HZ)  /* 3min */
@@ -47,11 +50,22 @@ static struct notifier_block lidbg_notifier =
 
 void suspend_stoprec_timer_isr(unsigned long data)
 {
-    lidbg("-------[TIMER]uvccam stop_recording -----\n");
-	lidbg_shell_cmd("setprop persist.lidbg.uvccam.recording 0");
-	lidbg_shell_cmd("echo 'udisk_unrequest' > /dev/flydev0");
+	if(isRec)
+	{
+	    lidbg("-------[TIMER]uvccam stop_recording -----\n");
+		complete(&timer_stop_rec_wait);
+	}
 }
 
+static int thread_stop_rec_func(void *data)
+{
+	while(1)
+	{
+		wait_for_completion(&timer_stop_rec_wait);
+		lidbg_shell_cmd("setprop persist.lidbg.uvccam.recording 0");
+		lidbg_shell_cmd("echo 'udisk_unrequest' > /dev/flydev0");
+	}
+}
 
 ssize_t  flycam_read(struct file *filp, char __user *buffer, size_t size, loff_t *offset)
 {
@@ -100,6 +114,7 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 			if(!strncmp(keyval[1], "1", 1))//start
 			{
 			    lidbg("-------uvccam recording -----");
+				isRec = 1;
 				if(isSuspend) mod_timer(&suspend_stoprec_timer,SUSPEND_STOPREC_ONLINE_TIME);
 				lidbg_shell_cmd("echo 'udisk_request' > /dev/flydev0");
 				//fix screen blurred issue(only in preview scene)
@@ -124,6 +139,7 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 			else if(!strncmp(keyval[1], "0", 1))//stop
 			{
 				lidbg("-------uvccam stop_recording -----");
+				isRec = 0;
 				if(isSuspend) del_timer(&suspend_stoprec_timer);
 				lidbg_shell_cmd("setprop persist.lidbg.uvccam.recording 0");
 				msleep(500);
@@ -459,6 +475,7 @@ static __init int lidbg_flycam_init(void)
     LIDBG_GET;
 
     CREATE_KTHREAD(thread_flycam_init, NULL);
+	CREATE_KTHREAD(thread_stop_rec_func, NULL);
 	platform_device_register(&flycam_devices);
     platform_driver_register(&flycam_driver);
     return 0;
