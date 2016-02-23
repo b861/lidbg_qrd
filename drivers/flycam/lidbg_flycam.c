@@ -65,6 +65,7 @@ static int thread_stop_rec_func(void *data)
 		lidbg_shell_cmd("setprop persist.lidbg.uvccam.recording 0");
 		lidbg_shell_cmd("echo 'udisk_unrequest' > /dev/flydev0");
 	}
+	return 0;
 }
 
 ssize_t  flycam_read(struct file *filp, char __user *buffer, size_t size, loff_t *offset)
