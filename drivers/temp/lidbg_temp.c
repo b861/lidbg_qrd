@@ -59,6 +59,14 @@ u32 get_scaling_max_freq(void)
     return tmp;
 }
 
+char* get_cpu_status(void)
+{
+    static char cpu_status[16];
+    lidbg_readwrite_file("/sys/devices/system/cpu/online", cpu_status, NULL, 16);
+    return cpu_status;
+}
+
+
 void log_temp(void)
 {
 
@@ -149,7 +157,7 @@ int thread_thermal(void *data)
         {
             set_cpu_governor(1);
             cur_temp = soc_temp_get(g_hw.cpu_sensor_num);
-            lidbg("cpu_temp=%d,freq=%d\n", cur_temp, cpufreq_get(0));
+            lidbg("cpu_temp=%d,freq=%d,%s\n", cur_temp, cpufreq_get(0),get_cpu_status());
             ssleep(5);
         }
     }
