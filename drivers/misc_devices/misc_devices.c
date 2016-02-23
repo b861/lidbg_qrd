@@ -1,7 +1,7 @@
 
 #include "lidbg.h"
 //#define DISABLE_USB_WHEN_DEVICE_DOWN
-#ifdef SUSPEND_ONLINE
+#if 0//def SUSPEND_ONLINE
 #define DISABLE_USB_WHEN_GOTO_SLEEP
 #else
 #define DISABLE_USB_WHEN_ANDROID_DOWN
