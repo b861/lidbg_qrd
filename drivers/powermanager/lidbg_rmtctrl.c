@@ -154,7 +154,11 @@ void acc_status_handle(FLY_ACC_STATUS val)
 		else
 		{
 			lidbg("acc_status_handle: FLY_ACC_OFF, add rmtctrl timer.\n");
-			mod_timer(&rmtctrl_timer,SCREE_OFF_TIME_S);
+			if(g_var.acc_goto_sleep_time == 0)
+				mod_timer(&rmtctrl_timer,SCREE_OFF_TIME_S);
+			else
+				mod_timer(&rmtctrl_timer, (jiffies + g_var.acc_goto_sleep_time*HZ));
+
 		}
 		wake_unlock(&rmtctrl_wakelock);	//ensure KERNEL_UP FB be called before sleep
 	}

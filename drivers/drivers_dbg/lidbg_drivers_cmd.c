@@ -307,6 +307,7 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#067xx--set alarmtimer wakeup time\n");
             fs_mem_log("*158#068----update firmware for usb camera\n");
 	     fs_mem_log("*158#069----shut BT power\n");
+	     fs_mem_log("*158#070xx--set goto sleep time\n");
 
             show_password_list();
             lidbg_domineering_ack();
@@ -752,6 +753,11 @@ void parse_cmd(char *pt)
         {
             lidbg("*158#069----shut BT power\n");
             lidbg_shell_cmd("echo lpc 0x02 0x5 0x00 > /dev/lidbg_drivers_dbg0 &");
+        }
+        else if (!strncmp(argv[1], "*158#070", 8))
+        {
+            g_var.acc_goto_sleep_time = simple_strtoul((argv[1] + 8), 0, 0);
+	     lidbg("set acc_goto_sleep_time:%d\n",g_var.acc_goto_sleep_time);
         }
         else if (!strcmp(argv[1], "*168#001"))
         {

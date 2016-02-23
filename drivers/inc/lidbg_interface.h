@@ -332,7 +332,9 @@ struct lidbg_pvar_t
     int alarmtimer_interval;
     bool usb_cam_request;
     int sleep_counter;
-    int acc_counter;	
+    int acc_counter;
+    int acc_goto_sleep_time;	
+
 };
 
 typedef struct

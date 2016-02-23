@@ -475,7 +475,7 @@ int fly_interface_init(void)
     g_var.usb_status = 0;
     g_var.usb_request = 0;
     g_var.usb_cam_request = 0;
-
+    g_var.acc_goto_sleep_time = 0;
     g_var.suspend_timeout_protect = 0;
     g_var.android_boot_completed = 0;
 	
