@@ -1392,8 +1392,10 @@ char *lidbg_get_current_time(char *time_string, struct rtc_time *ptm)
 	p=localtime(&timep); 
     if(time_string)
         sprintf(time_string, "%d-%02d-%02d__%02d.%02d.%02d", (1900+p->tm_year), (1+p->tm_mon), p->tm_mday,p->tm_hour , p->tm_min,p->tm_sec);
-	sprintf(rtc_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video1 --xuset-rtc %d %d %d %d %d %d", (1900+p->tm_year), (1+p->tm_mon), p->tm_mday,p->tm_hour , p->tm_min,p->tm_sec);
-	system(rtc_cmd);
+	//sprintf(rtc_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video1 --xuset-rtc %d %d %d %d %d %d", (1900+p->tm_year), (1+p->tm_mon), p->tm_mday,p->tm_hour , p->tm_min,p->tm_sec);
+	//system(rtc_cmd);
+	if(XU_OSD_Set_RTC(dev, 1900+p->tm_year, 1+p->tm_mon, p->tm_mday, p->tm_hour, p->tm_min, p->tm_sec) <0)
+			lidbg( "SONiX_UVC_TestAP @main : XU_OSD_Set_RTC Failed\n");
     return time_string;
 }
 
@@ -2801,6 +2803,9 @@ openfd:
 			lidbg( "XU_OSD_Set_Enable Failed\n");	
 	if(XU_OSD_Set_CarcamCtrl(dev, 0, 0, 0) < 0)
 			lidbg( "XU_OSD_Set_CarcamCtrl Failed\n");	
+
+	/*set OSD time*/
+	lidbg_get_current_time(time_buf, NULL);
 	
 	if(do_vendor_version_get)
 	{
