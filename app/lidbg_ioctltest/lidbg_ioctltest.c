@@ -137,7 +137,7 @@ open_dev:
 #endif
 	while(count--)
 	{
-		ret = ioctl(fd,_IO(FLYCAM_FRONT_REC_IOC_MAGIC, NR_PATH), "/storage/sdcard0/cama_rec/");
+		ret = ioctl(fd,_IO(FLYCAM_FRONT_REC_IOC_MAGIC, NR_PATH), "/storage/sdcard0/camera_rec/");
 		if (ret != 0)
         {
         	lidbg("@@NR_PATH ioctl fail===%d===\n",ret);
@@ -147,7 +147,7 @@ open_dev:
         {
         	lidbg("@@NR_RESOLUTION ioctl fail====%d===\n",ret);
 		}
-		ret = ioctl(fd,_IO(FLYCAM_FRONT_REC_IOC_MAGIC, NR_TIME), 4000); 
+		ret = ioctl(fd,_IO(FLYCAM_FRONT_REC_IOC_MAGIC, NR_TIME), 300); 
 		if (ret != 0)
         {
         	lidbg("@@NR_TIME ioctl fail====%d===\n",ret);
@@ -157,7 +157,7 @@ open_dev:
 		startRec();
 		lidbg("@@ioctl => %d\n", i++);
 		//check_status();
-		sleep(5);
+		sleep(1);
 		/*stop recording*/
 		if (ioctl(fd,_IO(FLYCAM_FRONT_REC_IOC_MAGIC, NR_STOP_REC), NULL) < 0)
 	    {
