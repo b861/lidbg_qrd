@@ -99,6 +99,44 @@
 #define	DAY_SATURATIONVAL		71
 #define	DAY_BRIGHTVAL				53
 
+typedef enum {
+  NR_BITRATE,
+  NR_RESOLUTION,
+  NR_PATH,
+  NR_TIME,
+  NR_FILENUM,
+  NR_TOTALSIZE,
+  NR_START_REC,
+  NR_STOP_REC,
+  NR_STATUS,
+}cam_ctrl_t;
+
+#define FLYCAM_FRONT_REC_IOC_MAGIC  'F'
+#define FLYCAM_FRONT_ONLINE_IOC_MAGIC  'f'
+#define FLYCAM_BACK_REC_IOC_MAGIC  'B'
+#define FLYCAM_BACK_ONLINE_IOC_MAGIC  'b'
+#define FLYCAM_STATUS_IOC_MAGIC  's'
+
+typedef enum {
+  RET_SUCCESS,
+  RET_NOTVALID,
+  RET_NOTSONIX,
+  RET_PAR_FAIL,
+  RET_IGNORE,
+  RET_REPEATREQ,
+}cam_ioctl_ret_t;
+
+typedef enum {
+  RET_DEFALUT,
+  RET_START,
+  RET_STOP,
+  RET_EXCEED_UPPER_LIMIT,
+  RET_DISCONNECT,
+  RET_INSUFFICIENT_SPACE_CIRC,
+  RET_INSUFFICIENT_SPACE_STOP,
+  RET_INIT_INSUFFICIENT_SPACE_STOP,
+}cam_read_ret_t;
+
 //for hub
 #define	FRONT_NODE		"1-1.2"	
 #define	BACK_NODE		"1-1.3"
@@ -129,7 +167,7 @@ char startNight[PROPERTY_VALUE_MAX];
 //char startCapture[PROPERTY_VALUE_MAX];
 
 unsigned char isPreview = 0;
-int dev;
+int dev,flycam_fd;
 unsigned int originRecsec = 0;
 unsigned int oldRecsec = 1;
 
@@ -2702,6 +2740,19 @@ openfd:
 	
 	if (dev < 0)
 		return 1;
+
+	flycam_fd = open("/dev/lidbg_flycam0", O_RDWR);
+	if((flycam_fd == 0xfffffffe) || (flycam_fd == 0) || (flycam_fd == 0xffffffff))
+	{
+	    lidbg("open lidbg_flycam0 fail\n");
+	    return 0;
+	}
+
+	if (ioctl(flycam_fd,_IO(FLYCAM_STATUS_IOC_MAGIC, NR_STATUS), RET_START) < 0)
+    {
+      	lidbg("RET_START ioctl fail=======\n");
+	}
+	
 	if((do_save) || (do_record)) 
 	{
 		/*set each file recording time*/
@@ -4008,6 +4059,10 @@ openfd:
 			//system("echo 'udisk_unrequest' > /dev/flydev0");
 			property_set("fly.uvccam.curprevnum", "-1");
 			close(dev);
+			if (ioctl(flycam_fd,_IO(FLYCAM_STATUS_IOC_MAGIC, NR_STATUS), RET_STOP) < 0)
+	        {
+	        	lidbg("RET_STOP ioctl fail=======\n");
+			}
 			return 0;
 		}
 		
@@ -4190,6 +4245,10 @@ openfd:
 					if((totalSize/1000000) >= Rec_File_Size)	
 					{
 						isExceed = 1;
+						if (ioctl(flycam_fd,_IO(FLYCAM_STATUS_IOC_MAGIC, NR_STATUS), RET_EXCEED_UPPER_LIMIT) < 0)
+				        {
+				        	lidbg("RET_EXCEED_UPPER_LIMIT ioctl fail=======\n");
+						}
 					}
 					closedir(pDir);
 				}
@@ -4213,9 +4272,17 @@ openfd:
 							if(i == 0)
 							{
 								lidbg("======Init Free space less than 300MB!!Force quit!======\n");
+								if (ioctl(flycam_fd,_IO(FLYCAM_STATUS_IOC_MAGIC, NR_STATUS), RET_INIT_INSUFFICIENT_SPACE_STOP) < 0)
+						        {
+						        	lidbg("RET_EXCEED_UPPER_LIMIT ioctl fail=======\n");
+								}
 								return 0;
 							}
 							isExceed = 1;
+							if (ioctl(flycam_fd,_IO(FLYCAM_STATUS_IOC_MAGIC, NR_STATUS), RET_INSUFFICIENT_SPACE_CIRC) < 0)
+					        {
+					        	lidbg("RET_INSUFFICIENT_SPACE_CIRC ioctl fail=======\n");
+							}
 						}
 					}
 				}
@@ -4346,11 +4413,18 @@ openfd:
 					    }
 						if(strcmp(filepath,flyh264_filename) == 0)
 						{
-							lidbg("======Can not del processing file!Write new file!======\n");
+							lidbg("======Can not del processing file!Stop!======\n");
+#if 0
 							lidbg_get_current_time(time_buf, NULL);
 							sprintf(flyh264_filename, "%s%s.h264", Rec_Save_Dir, time_buf);
 							lidbg("=========new flyh264_filename : %s===========\n", flyh264_filename);
 							rec_fp1 = fopen(flyh264_filename, "wb");
+#endif
+							if (ioctl(flycam_fd,_IO(FLYCAM_STATUS_IOC_MAGIC, NR_STATUS), RET_INSUFFICIENT_SPACE_STOP) < 0)
+					        {
+					        	lidbg("RET_INSUFFICIENT_SPACE_STOP ioctl fail=======\n");
+							}
+							return 0;
 						}
 						lidbg("====== oldest rec file will be del:%s (%d MB).======\n",minRecName,filebuf.st_size/1000000);
 						sprintf(tmpCMD , "rm -f %s&",filepath);
@@ -4400,6 +4474,7 @@ openfd:
 				close(fake_dev);		
 			property_set("fly.uvccam.curprevnum", "-1");
 			//system("echo 'udisk_unrequest' > /dev/flydev0");
+
 			return 1;
 #endif
 		}
@@ -4467,6 +4542,10 @@ try_open_again:
 			lidbg("-------eho---------uvccam stop recording! -----------\n");
 			//system("echo 'udisk_unrequest' > /dev/flydev0");
 			property_set("fly.uvccam.curprevnum", "-1");
+			if (ioctl(flycam_fd,_IO(FLYCAM_STATUS_IOC_MAGIC, NR_STATUS), RET_STOP) < 0)
+	        {
+	        	lidbg("RET_STOP ioctl fail=======\n");
+			}
 			return 0;
 		}
 		/*exit when timeout*/
@@ -4475,6 +4554,7 @@ try_open_again:
 			lidbg("-------eho---------uvccam try open timeout! -----------\n");
 			//system("echo 'udisk_unrequest' > /dev/flydev0");
 			property_set("fly.uvccam.curprevnum", "-1");
+
 			return 1;
 		}
 		/*fix usb R/W error(reverse 8*500ms for initialization)*/
