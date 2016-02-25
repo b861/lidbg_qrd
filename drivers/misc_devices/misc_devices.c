@@ -29,8 +29,12 @@ static int devices_notifier_callback(struct notifier_block *self,
         {
             lidbg( "misc:FB_BLANK_UNBLANK\n");
             if(g_var.system_status >= FLY_KERNEL_UP)
-                if((g_var.led_hal_status & g_var.led_app_status)&&(g_var.acc_flag==FLY_ACC_ON))
-                    LCD_ON;
+                if((g_var.led_hal_status & g_var.led_app_status)&&(g_var.acc_flag==FLY_ACC_ON)&&(g_var.flyaudio_reboot==0))
+                {
+        		lidbg("LCD_ON2\n");
+        		LCD_ON;
+                }
+
             g_var.fb_on = 1;
         }
         else if (*blank == FB_BLANK_POWERDOWN)
@@ -199,8 +203,12 @@ static int lidbg_dev_event(struct notifier_block *this,
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_SCREEN_ON):
         //if(!g_var.is_fly)
     {
-        if((g_var.led_hal_status & g_var.led_app_status)&&(g_var.fb_on == 1))
-            LCD_ON;
+        if((g_var.led_hal_status & g_var.led_app_status)&&(g_var.fb_on == 1)&&(g_var.flyaudio_reboot==0))
+        {
+        		lidbg("LCD_ON3\n");
+        		LCD_ON;
+        }
+
         //lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_APP_ON));
         //lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_HAL_ON));
     }
@@ -329,7 +337,11 @@ static void parse_cmd(char *pt)
     			wake_unlock(&device_wakelock);
 		}
     }
-
+    else if (!strcmp(argv[0], "flyaudio_reboot"))
+    {
+        g_var.flyaudio_reboot=1;
+        lidbg("Misc devices ctrl: g_var.flyaudio_reboot=1\n");
+    }
 }
 
 

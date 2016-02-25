@@ -334,7 +334,7 @@ struct lidbg_pvar_t
     int sleep_counter;
     int acc_counter;
     int acc_goto_sleep_time;	
-
+    int flyaudio_reboot;
 };
 
 typedef struct

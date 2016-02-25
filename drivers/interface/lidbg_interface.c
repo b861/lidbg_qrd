@@ -28,8 +28,11 @@ static int bl_event_handle(struct notifier_block *this,
         return NOTIFY_DONE;
     }
     lidbg("hal=%d,app=%d\n", g_var.led_hal_status, g_var.led_app_status);
-    if(g_var.led_hal_status & g_var.led_app_status)
-        LCD_ON;
+    if((g_var.led_hal_status & g_var.led_app_status)&&(g_var.flyaudio_reboot==0))
+    	{
+        		lidbg("LCD_ON1\n");
+        		LCD_ON;
+	}
     else
         LCD_OFF;
 
@@ -469,6 +472,7 @@ int fly_interface_init(void)
     g_var.fb_on = true;
     g_var.ts_active_key = TS_NO_KEY;
 
+    g_var.flyaudio_reboot=0;
     g_var.led_app_status = 1;
     g_var.led_hal_status = 1;
     g_var.is_udisk_needreset = 1;
