@@ -157,7 +157,7 @@ open_dev:
 		startRec();
 		lidbg("@@ioctl => %d\n", i++);
 		//check_status();
-		sleep(1);
+		sleep(3);
 		/*stop recording*/
 		if (ioctl(fd,_IO(FLYCAM_FRONT_REC_IOC_MAGIC, NR_STOP_REC), NULL) < 0)
 	    {

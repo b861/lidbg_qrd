@@ -74,6 +74,8 @@ typedef enum {
   RET_INSUFFICIENT_SPACE_CIRC,
   RET_INSUFFICIENT_SPACE_STOP,
   RET_INIT_INSUFFICIENT_SPACE_STOP,
+  RET_SONIX,
+  RET_NOT_SONIX,
 }cam_read_ret_t;
 
 static int f_rec_bitrate,f_rec_time,f_rec_filenum,f_rec_totalsize;
@@ -339,6 +341,18 @@ static int usb_nb_cam_func(struct notifier_block *nb, unsigned long action, void
 		{
 			schedule_delayed_work(&work_t_fixScreenBlurred, 0);
 		}
+		if(!(oldCamStatus & FLY_CAM_ISSONIX) && (camStatus & FLY_CAM_ISSONIX))
+		{
+			lidbg("=====RET_SONIX======\n");
+			read_status = RET_SONIX;
+			wake_up_interruptible(&camStatus_wait_queue);
+		}
+		else if(!(oldCamStatus & FLY_CAM_ISSONIX) && !(camStatus & FLY_CAM_ISSONIX) &&(camStatus & FLY_CAM_ISVALID) )
+		{
+			lidbg("=====RET_NOT_SONIX======\n");
+			read_status = RET_NOT_SONIX;
+			wake_up_interruptible(&camStatus_wait_queue);
+		}
 		
 	    break;
 	}
@@ -355,7 +369,7 @@ static int start_rec(void)
 	lidbg_shell_cmd("echo 'udisk_request' > /dev/flydev0");
     lidbg_shell_cmd("setprop persist.lidbg.uvccam.recording 1");
  	lidbg_shell_cmd("./flysystem/lib/out/lidbg_testuvccam /dev/video2 -c -f H264 -r &");
-	if(!wait_event_interruptible_timeout(camStatus_wait_queue, (read_status == RET_START), 6*HZ))
+	if(!wait_event_interruptible_timeout(camStatus_wait_queue, (read_status == RET_START), 2*HZ))
 		return 1; 
 	complete(&rec_handle_completion);//then poll/read
 	return 0;
