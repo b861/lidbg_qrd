@@ -49,6 +49,8 @@
 #include <linux/rtc.h>
 #include <sys/vfs.h>
 
+#include "../../drivers/inc/lidbg_flycam_par.h" /*flycam parameter*/
+
 #define TESTAP_VERSION		"v1.0.21_SONiX_UVC_TestAP_Multi"
 
 #ifndef min
@@ -98,48 +100,6 @@
 #define	DAY_CONTRASTVAL			50
 #define	DAY_SATURATIONVAL		71
 #define	DAY_BRIGHTVAL				53
-
-typedef enum {
-  NR_BITRATE,
-  NR_RESOLUTION,
-  NR_PATH,
-  NR_TIME,
-  NR_FILENUM,
-  NR_TOTALSIZE,
-  NR_START_REC,
-  NR_STOP_REC,
-  NR_STATUS,
-}cam_ctrl_t;
-
-#define FLYCAM_FRONT_REC_IOC_MAGIC  'F'
-#define FLYCAM_FRONT_ONLINE_IOC_MAGIC  'f'
-#define FLYCAM_BACK_REC_IOC_MAGIC  'B'
-#define FLYCAM_BACK_ONLINE_IOC_MAGIC  'b'
-#define FLYCAM_STATUS_IOC_MAGIC  's'
-
-typedef enum {
-  RET_SUCCESS,
-  RET_NOTVALID,
-  RET_NOTSONIX,
-  RET_PAR_FAIL,
-  RET_IGNORE,
-  RET_REPEATREQ,
-}cam_ioctl_ret_t;
-
-typedef enum {
-  RET_DEFALUT,
-  RET_START,
-  RET_STOP,
-  RET_EXCEED_UPPER_LIMIT,
-  RET_DISCONNECT,
-  RET_INSUFFICIENT_SPACE_CIRC,
-  RET_INSUFFICIENT_SPACE_STOP,
-  RET_INIT_INSUFFICIENT_SPACE_STOP,
-}cam_read_ret_t;
-
-//for hub
-#define	FRONT_NODE		"1-1.2"	
-#define	BACK_NODE		"1-1.3"
 
 //flyaudio
 #define NONE_HUB_SUPPORT	0
@@ -304,13 +264,13 @@ static int video_set_format(int dev, unsigned int w, unsigned int h, unsigned in
 
 	//flyaudio
 	property_get("fly.uvccam.res", Res_String, "0");
-	if(!strncmp(Res_String, "720", 3))
+	if(!strncmp(Res_String, "1280x720", 8))
 	{
 		lidbg("%s: select 720P!\n",__func__);
 		w = 1280;
 		h = 720;
 	}
-	else if(!strncmp(Res_String, "1080", 4))
+	else if(!strncmp(Res_String, "1920x1080", 9))
 	{
 		lidbg("%s: select 1080P!\n",__func__);
 		w = 1920;
@@ -2745,6 +2705,8 @@ openfd:
 	if((flycam_fd == 0xfffffffe) || (flycam_fd == 0) || (flycam_fd == 0xffffffff))
 	{
 	    lidbg("open lidbg_flycam0 fail\n");
+		close(dev);
+		close(flycam_fd);
 	    return 0;
 	}
 
@@ -4058,11 +4020,12 @@ openfd:
 #endif
 			//system("echo 'udisk_unrequest' > /dev/flydev0");
 			property_set("fly.uvccam.curprevnum", "-1");
-			close(dev);
 			if (ioctl(flycam_fd,_IO(FLYCAM_STATUS_IOC_MAGIC, NR_STATUS), RET_STOP) < 0)
 	        {
 	        	lidbg("RET_STOP ioctl fail=======\n");
 			}
+			close(dev);
+			close(flycam_fd);
 			return 0;
 		}
 		
@@ -4276,6 +4239,8 @@ openfd:
 						        {
 						        	lidbg("RET_EXCEED_UPPER_LIMIT ioctl fail=======\n");
 								}
+								close(dev);
+								close(flycam_fd);
 								return 0;
 							}
 							isExceed = 1;
@@ -4424,6 +4389,8 @@ openfd:
 					        {
 					        	lidbg("RET_INSUFFICIENT_SPACE_STOP ioctl fail=======\n");
 							}
+							close(dev);
+							close(flycam_fd);
 							return 0;
 						}
 						lidbg("====== oldest rec file will be del:%s (%d MB).======\n",minRecName,filebuf.st_size/1000000);
@@ -4546,6 +4513,8 @@ try_open_again:
 	        {
 	        	lidbg("RET_STOP ioctl fail=======\n");
 			}
+			close(dev);
+			close(flycam_fd);
 			return 0;
 		}
 		/*exit when timeout*/
