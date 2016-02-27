@@ -110,7 +110,7 @@ static struct notifier_block lidbg_notifier =
 
 static void suspend_stoprec_timer_isr(unsigned long data)
 {
-	if(isRec)
+	if(isDVRRec | isOnlineRec)
 	{
 	    lidbg("-------[TIMER]uvccam stop_recording -----\n");
 		complete(&timer_stop_rec_wait);
@@ -449,7 +449,7 @@ static int checkSDCardStatus(char *path)
 	int ret;
 	if(!strncmp(path, "/storage/sdcard0", 16))
 	{
-		if(IS_ERR(filp_open("/storage/sdcard1", O_RDONLY | O_DIRECTORY, 0)))
+		if(IS_ERR(filp_open("/storage/sdcard0", O_RDONLY | O_DIRECTORY, 0)))
 		{
 			lidbg("%s:EMMC ERR!!\n",__func__);
 			ret = 1;
@@ -459,7 +459,7 @@ static int checkSDCardStatus(char *path)
 			lidbg("%s: New Rec Dir => %s\n",__func__,path);
 			sprintf(temp_cmd, "mkdir %s", path);
 			lidbg_shell_cmd(temp_cmd);
-			ret = 0;
+			ret = 3;
 		}
 		else lidbg("%s: Check Rec Dir OK => %s\n",__func__,path);
 	}
@@ -476,7 +476,7 @@ static int checkSDCardStatus(char *path)
 			lidbg("%s: New Rec Dir => %s\n",__func__,path);
 			sprintf(temp_cmd, "mkdir %s", path);
 			lidbg_shell_cmd(temp_cmd);
-			ret = 0;
+			ret = 3;
 		}
 		else lidbg("%s: Check Rec Dir OK => %s\n",__func__,path);
 	}
@@ -486,6 +486,7 @@ static int checkSDCardStatus(char *path)
 static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 {
 	char ret = 0;
+	unsigned char ret_st = 0;
 	//lidbg("=====camStatus => %d======\n",camStatus);
 	if(_IOC_TYPE(cmd) == FLYCAM_FRONT_REC_IOC_MAGIC)//front cam recording mode
 	{
@@ -518,12 +519,12 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		        break;
 			case NR_PATH:
 				lidbg("%s:DVR NR_REC_PATH  = [%s]\n",__func__,(char*)arg);
-				if(checkSDCardStatus((char*)arg) != 1) strcpy(f_rec_path,(char*)arg);
+				ret_st = checkSDCardStatus((char*)arg);
+				if(ret_st != 1) 
+					strcpy(f_rec_path,(char*)arg);
 				else
-				{
-					lidbg("%s: f_rec_path access wrong! %d", __func__ ,EFAULT);
-					ret = RET_FAIL;
-				}
+					lidbg("%s: f_rec_path access wrong! %d", __func__ ,EFAULT);//not happend
+				if(ret_st > 0) ret = RET_FAIL;
 		        break;
 			case NR_TIME:
 				lidbg("%s:DVR NR_REC_TIME = [%ld]\n",__func__,arg);
@@ -550,14 +551,14 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 				{
 					lidbg("%s:====DVR restart rec====\n",__func__);
 					isDVRRec = 1;
-					if(stop_rec()) return RET_FAIL;
-					if(start_rec()) return RET_FAIL;
+					if(stop_rec()) goto failproc;
+					if(start_rec()) goto failproc;
 				}
 				else 
 				{
 					lidbg("%s:====DVR start rec====\n",__func__);
 					isDVRRec = 1;
-					if(start_rec()) return RET_FAIL;
+					if(start_rec()) goto failproc;
 				}
 		        break;
 			case NR_STOP_REC:
@@ -565,7 +566,7 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 				if(isDVRRec)
 				{
 					lidbg("%s:====DVR stop rec====\n",__func__);
-					if(stop_rec()) return RET_FAIL;
+					if(stop_rec()) goto failproc;
 					isDVRRec = 0;
 				}
 				else if(isOnlineRec) 
@@ -583,9 +584,9 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 				lidbg("%s:DVR NR_SET_PAR\n",__func__);
 				if(isDVRRec)
 				{
-					if(stop_rec()) return RET_FAIL;
+					if(stop_rec()) goto failproc;
 					setDVRProp();
-					if(start_rec()) return RET_FAIL;
+					if(start_rec()) goto failproc;
 				}
 		        break;
 		    default:
@@ -617,12 +618,12 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		        break;
 			case NR_PATH:
 				lidbg("%s:Online NR_REC_PATH  = [%s]\n",__func__,(char*)arg);
-				if(checkSDCardStatus((char*)arg) != 1) strcpy(f_online_path,(char*)arg);
+				ret_st = checkSDCardStatus((char*)arg);
+				if(ret_st != 1) 
+					strcpy(f_online_path,(char*)arg);
 				else
-				{
-					lidbg("%s: f_online_path access wrong! %d", __func__ ,EFAULT);
-					ret = RET_FAIL;
-				}
+					lidbg("%s: f_rec_path access wrong! %d", __func__ ,EFAULT);//not happend
+				if(ret_st > 0) ret = RET_FAIL;
 		        break;
 			case NR_TIME:
 				lidbg("%s:Online NR_REC_TIME = [%ld]\n",__func__,arg);
@@ -654,7 +655,7 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 				{
 					lidbg("%s:====Online start rec====\n",__func__);
 					isOnlineRec = 1;
-					if(start_rec()) return RET_FAIL;
+					if(start_rec()) goto failproc;
 				}
 		        break;
 			case NR_STOP_REC:
@@ -667,7 +668,7 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 				else if(isOnlineRec) 
 				{
 					lidbg("%s:====Online stop rec====\n",__func__);
-					if(stop_rec()) return RET_FAIL;
+					if(stop_rec()) goto failproc;
 					isOnlineRec = 0;
 				}
 				else
@@ -706,6 +707,9 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 	}
 	else return -EINVAL;
     return ret;
+failproc:
+	stop_rec();
+	return RET_FAIL;
 }
 
 static unsigned int  flycam_poll(struct file *filp, struct poll_table_struct *wait)
@@ -777,6 +781,19 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
     cmd_num = lidbg_token_string(cmd_buf, " ", cmd) ;
 	lidbg("-----cmd_buf------------------[%s]---\n", cmd_buf);
 	lidbg("-----cmd_num------------[%d]---\n", cmd_num);
+
+	/*check camera status before doing ioctl*/
+	if(!(camStatus & FLY_CAM_ISVALID))
+	{
+		lidbg("%s:DVR[online] not found,ioctl fail!\n",__func__);
+		return RET_NOTVALID;
+	}
+	if(!(camStatus & FLY_CAM_ISSONIX))
+	{
+		lidbg("%s:is not SonixCam ,ioctl fail!\n",__func__);
+		return RET_NOTSONIX;
+	}
+	
 	for(i = 0;i < cmd_num; i++)
 	{
 		lidbg_token_string(cmd[i], "=", keyval) ;
