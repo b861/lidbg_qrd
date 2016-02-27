@@ -13,7 +13,6 @@ static wait_queue_head_t wait_queue;
 char isBackChange = 0;
 char isBack = 0;
 unsigned int previewCnt = 0;
-char isPreview = 0;
 char isFirstresume = 0;
 char isFirstInit = 0;
 char isSuspend = 0;
@@ -643,7 +642,7 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 				checkSDCardStatus(f_online_path);
 				if(isDVRRec)
 				{
-					lidbg("%s:====Online stop cmd neglected====\n",__func__);
+					lidbg("%s:====Online start cmd neglected====\n",__func__);
 					ret = RET_IGNORE;
 				}
 				else if(isOnlineRec) 
@@ -709,6 +708,8 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
     return ret;
 failproc:
 	stop_rec();
+	isDVRRec = 0;
+	isOnlineRec = 0;
 	return RET_FAIL;
 }
 
@@ -771,6 +772,7 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 	char cmd_num  = 0;//cmd amount
     char cmd_buf[256];
 	int i;
+	char ret = 0;
     memset(cmd_buf, '\0', 256);
     if(copy_from_user(cmd_buf, buf, size))
     {
@@ -788,7 +790,7 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 		lidbg("%s:DVR[online] not found,ioctl fail!\n",__func__);
 		return RET_NOTVALID;
 	}
-	if(!(camStatus & FLY_CAM_ISSONIX))
+	if(!(camStatus & FLY_CAM_ISSONIX) && !isAfterFix)
 	{
 		lidbg("%s:is not SonixCam ,ioctl fail!\n",__func__);
 		return RET_NOTSONIX;
@@ -801,38 +803,45 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 		{
 			if(!strncmp(keyval[1], "1", 1))//start
 			{
-			    lidbg("-------uvccam recording -----");
-				isRec = 1;
-				if(isSuspend) mod_timer(&suspend_stoprec_timer,SUSPEND_STOPREC_ONLINE_TIME);
-				lidbg_shell_cmd("echo 'udisk_request' > /dev/flydev0");
-				//fix screen blurred issue(only in preview scene)
-				if(isPreview) previewCnt++;
-				if(isPreview && ((previewCnt == 1) || (previewCnt && isFirstresume)))
+			    lidbg("%s:==write==Online NR_START_REC\n",__func__);
+				setOnlineProp();
+				checkSDCardStatus(f_online_path);
+				if(isDVRRec)
 				{
-					lidbg("======fix screen blurred issue==E=====%d",previewCnt);
-					lidbg_shell_cmd("setprop persist.lidbg.uvccam.recording 1");
-					lidbg_shell_cmd("./flysystem/lib/out/lidbg_testuvccam /dev/video2 -c -f H264 -r &");
-					msleep(3500);
-					lidbg_shell_cmd("setprop persist.lidbg.uvccam.recording 0");
-					msleep(500);
-					lidbg("======fix screen blurred issue==X=====");
+					lidbg("%s:==write==Online start cmd neglected====\n",__func__);
+					ret = RET_IGNORE;
 				}
-				lidbg("previewCnt => %d ",previewCnt);
-				//if(previewCnt >= 20) previewCnt = 20;
-				isFirstresume = 0;
-			    lidbg_shell_cmd("setprop persist.lidbg.uvccam.recording 1");
-			    if(g_var.is_fly) lidbg_shell_cmd("./flysystem/lib/out/lidbg_testuvccam /dev/video2 -c -f H264 -r &");
-			    else lidbg_shell_cmd("./system/lib/modules/out/lidbg_testuvccam /dev/video2 -c -f H264 -r &");
-
+				else if(isOnlineRec) 
+				{
+					lidbg("%s:==write==Online start cmd repeatedly====\n",__func__);
+					ret = RET_REPEATREQ;
+				}
+				else
+				{
+					lidbg("%s:==write==Online start rec====\n",__func__);
+					isOnlineRec = 1;
+					if(start_rec()) goto failproc;
+				}
 			}
 			else if(!strncmp(keyval[1], "0", 1))//stop
 			{
-				lidbg("-------uvccam stop_recording -----");
-				isRec = 0;
-				if(isSuspend) del_timer(&suspend_stoprec_timer);
-				lidbg_shell_cmd("setprop persist.lidbg.uvccam.recording 0");
-				msleep(500);
-				lidbg_shell_cmd("echo 'udisk_unrequest' > /dev/flydev0");
+				lidbg("%s:==write==Online NR_STOP_REC\n",__func__);
+				if(isDVRRec)
+				{
+					lidbg("%s:==write==Online stop cmd neglected====\n",__func__);
+					ret = RET_IGNORE;
+				}
+				else if(isOnlineRec) 
+				{
+					lidbg("%s:==write==Online stop rec====\n",__func__);
+					if(stop_rec()) goto failproc;
+					isOnlineRec = 0;
+				}
+				else
+				{
+					lidbg("%s:==write==Online stop cmd repeatedly====\n",__func__);
+					ret = RET_REPEATREQ;
+				}
 			}
 			else
 			{
@@ -964,19 +973,27 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 		}
 		else if(!strcmp(keyval[0], "res") )
 		{
-			isPreview = 0;//defalut:DVR
+#if 0
 			if(!strncmp(keyval[1], "1080", 4))
 			{
-				lidbg_shell_cmd("setprop fly.uvccam.res 1080");
+				strcpy(f_online_path,"1920x1080");
 			}
 			else if(!strncmp(keyval[1], "720", 3))
 			{
-				lidbg_shell_cmd("setprop fly.uvccam.res 720");
+				strcpy(f_online_path,"1280x720");
 			}
 			else if(!strncmp(keyval[1], "640x360", 7))
 			{
-				lidbg_shell_cmd("setprop fly.uvccam.res 640x360");
-				isPreview = 1;//preview
+				strcpy(f_online_path,"640x360");
+			}
+			else
+			{
+				lidbg("-------res wrong arg:%s-----",keyval[1]);
+			}
+#endif
+			if(!strncmp(keyval[1], "640x360", 7))
+			{
+				strcpy(f_online_res,keyval[1]);
 			}
 			else
 			{
@@ -986,50 +1003,43 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 		else if(!strcmp(keyval[0], "rectime") )
 		{
 			int rectimeVal;
-			char temp_cmd[256];
 			rectimeVal = simple_strtoul(keyval[1], 0, 0);
 			lidbg("rectimeVal = %d",rectimeVal);
-			sprintf(temp_cmd, "setprop fly.uvccam.rectime %d", rectimeVal);
-			lidbg_shell_cmd(temp_cmd);
+			f_online_time = rectimeVal;
 		}
 		else if(!strcmp(keyval[0], "recbitrate") )
 		{
 			int recbitrateVal;
-			char temp_cmd[256];
 			recbitrateVal = simple_strtoul(keyval[1], 0, 0);
 			lidbg("recbitrateVal = %d",recbitrateVal);
-			//sprintf(temp_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video2  --xuset-br %d", recbitrateVal);
-			sprintf(temp_cmd, "setprop fly.uvccam.recbitrate %d", recbitrateVal);
-			lidbg_shell_cmd(temp_cmd);
+			f_online_bitrate = recbitrateVal;
 		}
 		#if 1
 		else if(!strcmp(keyval[0], "recnum") )
 		{
 			int recnumVal;
-			char temp_cmd[256];
 			recnumVal = simple_strtoul(keyval[1], 0, 0);
 			lidbg("recnumVal = %d",recnumVal);
-			sprintf(temp_cmd, "setprop fly.uvccam.recnum %d", recnumVal);
-			lidbg_shell_cmd(temp_cmd);
+			f_online_filenum = recnumVal;
 		}
 		#endif
 		else if(!strcmp(keyval[0], "recpath") )
 		{
-			//int recpathVal;
-			char temp_cmd[256];
-			//recpathVal = simple_strtoul(keyval[1], 0, 0);
+			char ret_st;
 			lidbg("recpathVal = %s",keyval[1]);
-			sprintf(temp_cmd, "setprop fly.uvccam.recpath %s", keyval[1]);
-			lidbg_shell_cmd(temp_cmd);
+			ret_st = checkSDCardStatus(keyval[1]);
+			if(ret_st != 1) 
+				strcpy(f_online_path,keyval[1]);
+			else
+				lidbg("%s: f_online_path access wrong! %d", __func__ ,EFAULT);//not happend
+			if(ret_st > 0) ret = RET_FAIL;
 		}
 		else if(!strcmp(keyval[0], "recfilesize") )
 		{
 			int recfilesizeVal;
-			char temp_cmd[256];
 			recfilesizeVal = simple_strtoul(keyval[1], 0, 0);
 			lidbg("recfilesizeVal = %d",recfilesizeVal);
-			sprintf(temp_cmd, "setprop fly.uvccam.recfilesize %d", recfilesizeVal);
-			lidbg_shell_cmd(temp_cmd);
+			f_online_totalsize = recfilesizeVal;
 		}
 		else if(!strcmp(keyval[0], "test") )
 		{
@@ -1039,13 +1049,17 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 	}
   
     return size;
-
+failproc:
+	stop_rec();
+	isDVRRec = 0;
+	isOnlineRec = 0;
+	return size;
 }
 
 static  struct file_operations flycam_nod_fops =
 {
     .owner = THIS_MODULE,
-    //.write = flycam_write,
+    .write = flycam_write,
     .open = flycam_open,
     .read = flycam_read,
     .unlocked_ioctl = flycam_ioctl,
