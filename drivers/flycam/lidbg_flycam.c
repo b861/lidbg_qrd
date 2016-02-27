@@ -321,10 +321,13 @@ static int usb_nb_cam_func(struct notifier_block *nb, unsigned long action, void
 			Sonix:fix ScreenBlurred issue & start exposure adaptation & notify RET_SONIX;
 			Not Sonix:notify RET_NOT_SONIX.
 		*/
-		if(!(oldCamStatus & FLY_CAM_ISVALID) && (camStatus & FLY_CAM_ISSONIX) && !isFirstInit)
-			schedule_delayed_work(&work_t_fixScreenBlurred, 0);
-		else if(!(oldCamStatus & FLY_CAM_ISVALID) && !(camStatus & FLY_CAM_ISSONIX) &&(camStatus & FLY_CAM_ISVALID) )
-			status_fifo_in(RET_NOT_SONIX);
+		if(!isSuspend)
+		{
+			if(!(oldCamStatus & FLY_CAM_ISVALID) && (camStatus & FLY_CAM_ISSONIX) && !isFirstInit)
+				schedule_delayed_work(&work_t_fixScreenBlurred, 0);
+			else if(!(oldCamStatus & FLY_CAM_ISVALID) && !(camStatus & FLY_CAM_ISSONIX) &&(camStatus & FLY_CAM_ISVALID) )
+				status_fifo_in(RET_NOT_SONIX);
+		}
 		
 	    break;
 	}
@@ -784,16 +787,19 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 	lidbg("-----cmd_buf------------------[%s]---\n", cmd_buf);
 	lidbg("-----cmd_num------------[%d]---\n", cmd_num);
 
-	/*check camera status before doing ioctl*/
-	if(!(camStatus & FLY_CAM_ISVALID))
+	if(!isSuspend)
 	{
-		lidbg("%s:DVR[online] not found,ioctl fail!\n",__func__);
-		return RET_NOTVALID;
-	}
-	if(!(camStatus & FLY_CAM_ISSONIX) && !isAfterFix)
-	{
-		lidbg("%s:is not SonixCam ,ioctl fail!\n",__func__);
-		return RET_NOTSONIX;
+		/*check camera status before doing ioctl*/
+		if(!(camStatus & FLY_CAM_ISVALID))
+		{
+			lidbg("%s:DVR[online] not found,ioctl fail!\n",__func__);
+			return RET_NOTVALID;
+		}
+		if(!(camStatus & FLY_CAM_ISSONIX) && !isAfterFix)
+		{
+			lidbg("%s:is not SonixCam ,ioctl fail!\n",__func__);
+			return RET_NOTSONIX;
+		}
 	}
 	
 	for(i = 0;i < cmd_num; i++)
@@ -804,6 +810,7 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 			if(!strncmp(keyval[1], "1", 1))//start
 			{
 			    lidbg("%s:==write==Online NR_START_REC\n",__func__);
+				lidbg_shell_cmd("echo 'udisk_request' > /dev/flydev0");
 				setOnlineProp();
 				checkSDCardStatus(f_online_path);
 				if(isDVRRec)
