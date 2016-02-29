@@ -564,7 +564,7 @@ static void setOnlineProp(void)
  *   	2	-	SDCARD it's not exist.Change to EMMC default path.
  *   	3	-	Storage device is OK but the path you specify it's not exsit,so create one.
  * Notes:  1.Check storage whether it is valid;
- *				2.Create file path if it is not exist.(just support one level path) 
+ *				2.Create file path if it is not exist.
  *****************************************************************************/
 static int checkSDCardStatus(char *path)
 {
@@ -581,7 +581,7 @@ static int checkSDCardStatus(char *path)
 		else if(IS_ERR(file_path = filp_open(path, O_RDONLY | O_DIRECTORY, 0)))
 		{
 			lidbg("%s: New Rec Dir => %s\n",__func__,path);
-			sprintf(temp_cmd, "mkdir %s", path);
+			sprintf(temp_cmd, "mkdir -p %s", path);
 			lidbg_shell_cmd(temp_cmd);
 			ret = 3;
 		}
@@ -598,7 +598,7 @@ static int checkSDCardStatus(char *path)
 		else if(IS_ERR(file_path = filp_open(path, O_RDONLY | O_DIRECTORY, 0)))
 		{
 			lidbg("%s: New Rec Dir => %s\n",__func__,path);
-			sprintf(temp_cmd, "mkdir %s", path);
+			sprintf(temp_cmd, "mkdir -p %s", path);
 			lidbg_shell_cmd(temp_cmd);
 			ret = 3;
 		}
