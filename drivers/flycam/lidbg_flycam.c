@@ -171,6 +171,7 @@ static int lidbg_checkCam(void)
     if (IS_ERR(dir_file))
     {
         LIDBG_ERR("open%s,%ld\n", insure_is_dir, PTR_ERR(dir_file));
+		filp_close(dir_file, 0);
         return -1;
     }
     else
@@ -229,6 +230,7 @@ static int lidbg_checkCam(void)
 					list_del(&entry->list);
                		kfree(entry);
 				}
+				filp_close(f_dir, 0);
 			}
 		}
 		//check back Cam status:isPlugIn? isSonix?
@@ -256,6 +258,7 @@ static int lidbg_checkCam(void)
 					list_del(&entry->list);
                		kfree(entry);
 				}
+				filp_close(b_dir, 0);
 			}
 		}
 		if(f_videocnt == 2)
@@ -449,14 +452,15 @@ static int checkSDCardStatus(char *path)
 {
 	char temp_cmd[256];	
 	int ret;
+	struct file *storage_path, *file_path;
 	if(!strncmp(path, "/storage/sdcard0", 16))
 	{
-		if(IS_ERR(filp_open("/storage/sdcard0", O_RDONLY | O_DIRECTORY, 0)))
+		if(IS_ERR(storage_path = filp_open("/storage/sdcard0", O_RDONLY | O_DIRECTORY, 0)))
 		{
 			lidbg("%s:EMMC ERR!!\n",__func__);
 			ret = 1;
 		}
-		else if(IS_ERR(filp_open(path, O_RDONLY | O_DIRECTORY, 0)))
+		else if(IS_ERR(file_path = filp_open(path, O_RDONLY | O_DIRECTORY, 0)))
 		{
 			lidbg("%s: New Rec Dir => %s\n",__func__,path);
 			sprintf(temp_cmd, "mkdir %s", path);
@@ -467,13 +471,13 @@ static int checkSDCardStatus(char *path)
 	}
 	else if(!strncmp(path, "/storage/sdcard1", 16))
 	{
-		if(IS_ERR(filp_open("/storage/sdcard1", O_RDONLY | O_DIRECTORY, 0)))
+		if(IS_ERR(storage_path = filp_open("/storage/sdcard1", O_RDONLY | O_DIRECTORY, 0)))
 		{
 			lidbg("%s:SDCARD1 ERR!!Reset to /storage/sdcard0/camera_rec/\n",__func__);
 			strcpy(path,"/storage/sdcard0/camera_rec/");
 			ret = 2;
 		}
-		else if(IS_ERR(filp_open(path, O_RDONLY | O_DIRECTORY, 0)))
+		else if(IS_ERR(file_path = filp_open(path, O_RDONLY | O_DIRECTORY, 0)))
 		{
 			lidbg("%s: New Rec Dir => %s\n",__func__,path);
 			sprintf(temp_cmd, "mkdir %s", path);
@@ -482,6 +486,8 @@ static int checkSDCardStatus(char *path)
 		}
 		else lidbg("%s: Check Rec Dir OK => %s\n",__func__,path);
 	}
+	if(!IS_ERR(storage_path)) filp_close(storage_path, 0);
+	if(!IS_ERR(file_path)) filp_close(file_path, 0);
 	return ret;
 }
 
