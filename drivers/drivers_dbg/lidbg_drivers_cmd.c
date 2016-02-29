@@ -295,13 +295,13 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#055--disable logcat server\n");
             fs_mem_log("*158#056--ensable logcat server\n");
             fs_mem_log("*158#057--do fake acc off\n");
-            fs_mem_log("*158#058--enable iptable white list protect\n");
-            fs_mem_log("*158#059--disable iptable white list protect\n");
-            fs_mem_log("*158#060--enable iptable\n");
-            fs_mem_log("*158#061--disable iptable\n");
-            fs_mem_log("*158#062--do not kill process in flybootserver.apk\n");
-            fs_mem_log("*158#063--iptable all apps\n");
-            fs_mem_log("*158#064--! iptable all apps\n");
+            fs_mem_log("*158#058--FlyaudioWhiteListInternetEnable(true)\n");
+            fs_mem_log("*158#059--FlyaudioWhiteListInternetEnable(false)\n");
+            fs_mem_log("*158#060--enable iptable logic \n");
+            fs_mem_log("*158#061--disable iptable logic \n");
+            fs_mem_log("*158#062--do not kill any process in flybootserver.apk\n");
+            fs_mem_log("*158#063--reserve\n");
+            fs_mem_log("*158#064--reserve\n");
             fs_mem_log("*158#065--disable suspend timeout protect\n");
             fs_mem_log("*158#066--disable alarmmanager protect\n");
             fs_mem_log("*158#067xx--set alarmtimer wakeup time\n");
@@ -696,38 +696,36 @@ void parse_cmd(char *pt)
         }
         else if (!strcmp(argv[1], "*158#058"))
         {
-            lidbg("*158#058--enable internet white list protect\n");
+            lidbg("*158#058--FlyaudioWhiteListInternetEnable(true)\n");
             lidbg_shell_cmd("am broadcast -a com.lidbg.flybootserver.action --ei action 5 &");
         }
         else if (!strcmp(argv[1], "*158#059"))
         {
-            lidbg("*158#058--disable internet white list protect\n");
+            lidbg("*158#059--FlyaudioWhiteListInternetEnable(false)\n");
             lidbg_shell_cmd("am broadcast -a com.lidbg.flybootserver.action --ei action 4 &");
         }
         else if (!strcmp(argv[1], "*158#060"))
         {
-            lidbg("*158#060--enable internet off\n");
+            lidbg("*158#060--enable iptable logic \n");
             lidbg_shell_cmd("am broadcast -a com.lidbg.flybootserver.action --ei action 7 &");
         }
         else if (!strcmp(argv[1], "*158#061"))
         {
-            lidbg("*158#061--disable internet off\n");
+            lidbg("*158#061--disable iptable logic \n");
             lidbg_shell_cmd("am broadcast -a com.lidbg.flybootserver.action --ei action 6 &");
         }
         else if (!strcmp(argv[1], "*158#062"))
         {
-            lidbg("*158#062--do not kill process in flybootserver.apk\n");
+            lidbg("*158#062--do not kill any process in flybootserver.apk\n");
             lidbg_shell_cmd("am broadcast -a com.lidbg.flybootserver.action --ei action 8 &");
         }
         else if (!strcmp(argv[1], "*158#063"))
         {
-            lidbg("*158#063--iptable all apps\n");
-            lidbg_shell_cmd("am broadcast -a com.lidbg.flybootserver.action --ei action 9 &");
+            lidbg("*158#063--reserve\n");
         }
         else if (!strcmp(argv[1], "*158#064"))
         {
-            lidbg("*158#064--! iptable all apps\n");
-            lidbg_shell_cmd("am broadcast -a com.lidbg.flybootserver.action --ei action 10 &");
+            lidbg("*158#064--reserve\n");
         }
         else if (!strcmp(argv[1], "*158#065"))
         {

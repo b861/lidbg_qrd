@@ -181,11 +181,6 @@ static void rmtctrl_suspend(void)
 	lidbg("acc_state_work_func: FLY_ACC_OFF, set prop AccWakedupState false\n");
 	lidbg_shell_cmd("setprop persist.lidbg.AccWakedupState false");
 
-//	lidbg("acc_state_work_func: FLY_ACC_OFF, disable mobiledata.\n");
-//	lidbg_shell_cmd("iptables -t filter -P OUTPUT DROP");
-//	lidbg_shell_cmd("iptables -t filter -P FORWARD DROP");
-//	lidbg_shell_cmd("iptables -t filter -P INPUT DROP");
-
 	send_app_status(FLY_DEVICE_DOWN);
 	fs_file_write(DEV_NAME, false, DEVICES_DOWN, 0, strlen(DEVICES_DOWN));
 	send_app_status(FLY_ANDROID_DOWN);
@@ -200,11 +195,6 @@ static void rmtctrl_resume(void)
 
 	lidbg("acc_state_work_func: FLY_ACC_ON, set prop AccWakedupState true\n");
 	lidbg_shell_cmd("setprop persist.lidbg.AccWakedupState true"); //prop for stopping kill_process when ACC_ON
-
-//	lidbg("acc_state_work_func: FLY_ACC_OFF, enable mobiledata.\n");
-//	lidbg_shell_cmd("iptables -t filter -P OUTPUT ACCEPT");
-//	lidbg_shell_cmd("iptables -t filter -P FORWARD ACCEPT");
-//	lidbg_shell_cmd("iptables -t filter -P INPUT ACCEPT");
 
 	send_app_status(FLY_ANDROID_UP);
 	fs_file_write(DEV_NAME, false, ANDROID_UP, 0, strlen(ANDROID_UP));

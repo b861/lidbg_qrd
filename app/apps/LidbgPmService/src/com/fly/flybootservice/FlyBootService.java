@@ -116,10 +116,8 @@ public class FlyBootService extends Service {
     private List<Integer> mInternelAllAppListUID= new ArrayList<Integer>();
     private List<Integer> mInternelWhiteAppListUID= new ArrayList<Integer>();
     private boolean dbgMode = true;
-    private boolean mInterneWhiteListAppProtectEn = true;
     private boolean mFlyaudioInternetActionEn = true;
     private boolean mKillProcessEn = true;
-    private boolean mInterneDisableAll = false;
 
     String mInternelBlackList[] = {
             "com.qti.cbwidget"
@@ -247,7 +245,6 @@ public class FlyBootService extends Service {
 							}else if(pmState == FBS_SCREEN_ON){
 								LIDBG_PRINT("FlyBootService get pm state: FBS_SCREEN_ON");
 								acquireWakeLock();
-								//FlyaudioWhiteListInternetControl(true);
 								InternetEnable();
 								FlyaudioInternetEnable();
 								SendBroadcastToService(KeyBootState, keyScreenOn);
@@ -256,7 +253,6 @@ public class FlyBootService extends Service {
 								LIDBG_PRINT("FlyBootService get pm state: FBS_SLEEP_TIMEOUT");
 								if(blSuspendUnairplaneFlag)
 									KillProcess(true);
-								//FlyaudioWhiteListInternetControl(false);
 								InternetDisable();
 							}else
 								LIDBG_PRINT("FlyBootService undefined pm state: " + pmState);
@@ -337,12 +333,12 @@ public class FlyBootService extends Service {
 				DUMP();
 			break;
 			case 4:
-				mInterneWhiteListAppProtectEn=false;
-				LIDBG_PRINT("mInterneWhiteListAppProtectEn->"+ mInterneWhiteListAppProtectEn+"\n");
+				FlyaudioWhiteListInternetEnable(false);
+				LIDBG_PRINT("FlyaudioWhiteListInternetEnable(false)\n");
 			break;
 			case 5:
-				mInterneWhiteListAppProtectEn=true;
-				LIDBG_PRINT("mInterneWhiteListAppProtectEn->"+ mInterneWhiteListAppProtectEn+"\n");
+				FlyaudioWhiteListInternetEnable(true);
+				LIDBG_PRINT("FlyaudioWhiteListInternetEnable(true)\n");
 			break;
 			case 6:
 				mFlyaudioInternetActionEn=false;
@@ -357,18 +353,16 @@ public class FlyBootService extends Service {
 				LIDBG_PRINT("mKillProcessEn->"+ mKillProcessEn+"\n");
 			break;
 			case 9:
-				mInterneDisableAll=true;
-				LIDBG_PRINT("mInterneDisableAll->"+ mInterneDisableAll+"\n");
+				InternetDisable();
+				LIDBG_PRINT("InternetDisable()\n");
 			break;
 			case 10:
-				mInterneDisableAll=false;
-				LIDBG_PRINT("mInterneDisableAll->"+ mInterneDisableAll+"\n");
+				InternetEnable();
+				LIDBG_PRINT("InternetEnable()\n");
 			break;
 			case 11:
-				FlyaudioWhiteListInternetControl(false);
 			break;
 			case 12:
-				FlyaudioWhiteListInternetControl(true);
 			break;
 			case 13:
 				FlyaudioBlackListInternetControl(true);
@@ -870,27 +864,21 @@ public static void releaseBrightWakeLock()
     }
 	public void FlyaudioInternetEnable()
 	{
-	    LIDBG_PRINT("FlyaudioInternetEnable:"+mFlyaudioInternetActionEn+"/"+mInterneDisableAll+"\n");
+	    LIDBG_PRINT("FlyaudioInternetEnable:"+mFlyaudioInternetActionEn+"\n");
 	    if(!mFlyaudioInternetActionEn)
 	    	    return;
-	    if(mInterneDisableAll)
-	    	    InternetEnable();
-	    else
-	    	    appInternetControl(true);
+	    appInternetControl(true);
 	}
 	public void FlyaudioInternetDisable()
 	{
-	    LIDBG_PRINT("FlyaudioInternetDisable:"+mFlyaudioInternetActionEn+"/"+mInterneDisableAll+"\n");
+	    LIDBG_PRINT("FlyaudioInternetDisable:"+mFlyaudioInternetActionEn+"\n");
 	    if(!mFlyaudioInternetActionEn)
 	    	    return;
-	    if(mInterneDisableAll)
-	    	    InternetDisable();
-	    else
-	    	    appInternetControl(false);
+	    appInternetControl(false);
 	}
-	public void FlyaudioWhiteListInternetControl(boolean enable)
+	public void FlyaudioWhiteListInternetEnable(boolean enable)
 	{
-	    LIDBG_PRINT("FlyaudioWhiteListInternetControl:"+enable+"\n");
+	    LIDBG_PRINT("FlyaudioWhiteListInternetEnable:"+enable+"\n");
 		if (mInternelWhiteAppListUID!= null)
 		{
 			for (int i = 0; i < mInternelWhiteAppListUID.size(); i++)
@@ -920,7 +908,9 @@ public static void releaseBrightWakeLock()
 	}
 	public void InternetDisable()
 	{
-		LIDBG_PRINT("InternetDisable\n");
+		LIDBG_PRINT("InternetDisable:"+mFlyaudioInternetActionEn+"\n");
+		if(!mFlyaudioInternetActionEn)
+		return;
 		writeToFile("/dev/lidbg_misc0","flyaudio:iptables -t filter -P OUTPUT DROP");
 		writeToFile("/dev/lidbg_misc0","flyaudio:iptables -t filter -P INPUT DROP");
 		writeToFile("/dev/lidbg_misc0","flyaudio:iptables -t filter -P FORWARD DROP");
@@ -928,7 +918,9 @@ public static void releaseBrightWakeLock()
 
 	public void InternetEnable()
 	{
-		LIDBG_PRINT("InternetEnable\n");
+		LIDBG_PRINT("InternetEnable:"+mFlyaudioInternetActionEn+"\n");
+		if(!mFlyaudioInternetActionEn)
+		return;
 		writeToFile("/dev/lidbg_misc0", "flyaudio:iptables -t filter -P OUTPUT ACCEPT");
 		writeToFile("/dev/lidbg_misc0","flyaudio:iptables -t filter -P INPUT ACCEPT");
 		writeToFile("/dev/lidbg_misc0","flyaudio:iptables -t filter -P FORWARD ACCEPT");
@@ -990,7 +982,7 @@ public static void releaseBrightWakeLock()
 	    // TODO Auto-generated method stub
 	    mInternelAllAppListUID = getInternelAllAppUids(mInternelAllAppListUID);
 
-	    LIDBG_PRINT("appInternetControl:" + mInternelAllAppListUID.size()  +  "|" + mInterneWhiteListAppProtectEn+"\n");
+	    LIDBG_PRINT("appInternetControl:" + mInternelAllAppListUID.size() +"\n");
 	    if (mInternelAllAppListUID != null && mInternelAllAppListUID.size() > 0)
 	    {
 	        for (int i = 0; i < mInternelAllAppListUID.size(); i++)
