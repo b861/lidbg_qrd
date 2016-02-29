@@ -36,7 +36,7 @@ int main(int argc, char **argv)
     printf("enter %s\n", __FILE__);
     //system("su");
     //system("chmod 777 /sys/class/leds/button-backlight/brightness");
-    system("chmod 777 /sys/class/leds/kpdbl-pwm-1/brightness");
+    system("chmod 777 /sys/class/leds/button-backlight/brightness");
     system("chmod 777 /sys/power/wake_lock");
     system("chmod 777 /sys/power/wake_unlock");
     system("chmod 777 /dev");
@@ -45,23 +45,23 @@ int main(int argc, char **argv)
 
     printf("build time: %s\n", __TIME__);
 
-    pthread_create(&tid, NULL, thrd_monitor_app, NULL);
+    //pthread_create(&tid, NULL, thrd_monitor_app, NULL);
 
     while(1)
     {
         system("echo lidbg > /sys/power/wake_lock");
         //system("echo 1 > /sys/class/leds/button-backlight/brightness");
-        system("echo 255 > /sys/class/leds/kpdbl-pwm-1/brightness");
+        system("echo 255 > /sys/class/leds/button-backlight/brightness");
         sleep(1);
 
 
         //system("echo 0 > /sys/class/leds/button-backlight/brightness");
-        system("echo 0 > /sys/class/leds/kpdbl-pwm-1/brightness");
+        system("echo 0 > /sys/class/leds/button-backlight/brightness");
         system("echo lidbg > /sys/power/wake_unlock");
         sleep(2);
 
 
-        if(is_file_exist("/sdcard/lidbg_vibrator_warning"))
+        if(is_file_exist("/dev/lidbg"))//lidbg_vibrator_warning
         {
             memset(buff, '\0', sizeof(buff));
 
