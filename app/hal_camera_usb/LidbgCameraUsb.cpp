@@ -501,7 +501,8 @@ failproc:
 getuvcdevice:
         dev_name = camHal->dev_name;
         //rc = get_hub_uvc_device(mid,dev_name);
-        rc = lidbg_get_hub_uvc_device(PREVIEW_MODE,dev_name,atoi(mid),0);
+        cam_id = atoi(mid);
+        rc = lidbg_get_hub_uvc_device(PREVIEW_MODE,dev_name,cam_id,0);
         if((rc == -1) || (*dev_name == '\0'))
         {
             ALOGE("%s: No UVC node found \n", __func__);
@@ -1253,15 +1254,16 @@ try_open_again:
 #endif
 	//car record enable time osd
 #if 1
+	lidbg("*****preview cam_id => %d*******",cam_id);
 	if(cam_id == 1)
 	{
-		system("./flysystem/lib/out/lidbg_testuvccam /dev/video1 --xuset-oe 1 1 ");
-		system("./flysystem/lib/out/lidbg_testuvccam /dev/video1 --xuset-car 0 0 0");
+		system("./flysystem/lib/out/lidbg_testuvccam /dev/video1 -b 1 --xuset-oe 1 1 ");
+		system("./flysystem/lib/out/lidbg_testuvccam /dev/video1 -b 1 --xuset-car 0 0 0");
 		lidbg_set_sonix_osd_time();
 	}
 	else if(cam_id == 0)
 	{
-		system("./flysystem/lib/out/lidbg_testuvccam /dev/video1 --xuset-oe 0 0 ");
+		system("./flysystem/lib/out/lidbg_testuvccam /dev/video1 -b 0 --xuset-oe 0 0 ");
 	}
 #else
 	system("./flysystem/lib/out/lidbg_testuvccam /dev/video1 --xuset-oe 0 0 ");
