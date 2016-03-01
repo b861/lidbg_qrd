@@ -74,9 +74,19 @@ static void parse_cmd(char *pt)
 
     if (!strcmp(argv[0], "sound"))
     {
-        bool enable;
-        enable = simple_strtoul(argv[1], 0, 0);
-        sound_detect_event(enable);
+        bool value;
+        value = simple_strtoul(argv[1], 0, 0);
+        sound_detect_event(value);
+    }
+    else if (!strcmp(argv[0], "phoneCallState"))
+    {
+        int value;
+        value = simple_strtoul(argv[1], 0, 0);
+        if(value >= 1 && value <= 3)
+            g_var.is_phone_in_call_state = 1;
+        else
+            g_var.is_phone_in_call_state = 0;
+        lidbg("[is_phone_in_call_state:%d,value:%d]\n", g_var.is_phone_in_call_state, value);
     }
 }
 

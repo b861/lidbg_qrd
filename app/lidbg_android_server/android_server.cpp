@@ -23,8 +23,19 @@ bool dbg = false;
 int loop_count = 0;
 bool playing_old = false;
 bool playing = false;
+int phoneCallState_old = AUDIO_MODE_IN_COMMUNICATION;
+int phoneCallState = AUDIO_MODE_INVALID;
 static sp<IAudioPolicyService> gAudioPolicyService = 0;
 
+
+bool sendDriverState(char *type, int value)
+{
+    char cmd[64];
+    snprintf(cmd, sizeof(cmd), "%s %d", type, value);
+    lidbg(TAG"write.[%s]\n", cmd);
+    LIDBG_WRITE("/dev/fly_sound0", cmd);
+    return true;
+}
 sp<IBinder> getService(char *name)
 {
     sp<IServiceManager> sm = defaultServiceManager();
@@ -64,8 +75,9 @@ void handleAudioPolicyServiceEvent()
                   aps->isStreamActive((audio_stream_type_t)2, 0) |
                   aps->isStreamActive((audio_stream_type_t)1, 0) |
                   aps->isStreamActive((audio_stream_type_t)5, 0);
+        phoneCallState = aps->getPhoneState();
         if(dbg)
-            lidbg(TAG"playing=%d\n", playing);
+            lidbg(TAG"playing=%d,getPhoneState=%d\n", playing, phoneCallState);
     }
     else
     {
@@ -75,13 +87,15 @@ void handleAudioPolicyServiceEvent()
 
     if(playing != playing_old)
     {
-        char cmd[16];
         playing_old = playing;
-
-        sprintf(cmd, "sound %d", playing);
-        lidbg(TAG"write.[%d,%s]\n", playing, cmd);
-        LIDBG_WRITE("/dev/fly_sound0", cmd);
+        sendDriverState("sound", playing);
     }
+    if(phoneCallState != phoneCallState_old)
+    {
+        phoneCallState_old = phoneCallState;
+        sendDriverState("phoneCallState", phoneCallState);
+    }
+
 }
 
 
