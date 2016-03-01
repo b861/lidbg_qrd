@@ -1,6 +1,9 @@
 #ifndef __LIDBG_FLYCAM_PAR_
 #define __LIDBG_FLYCAM_PAR_
 
+#define REARVIEW_ID	0
+#define DVR_ID				1
+
 typedef enum {
   NR_BITRATE,
   NR_RESOLUTION,
