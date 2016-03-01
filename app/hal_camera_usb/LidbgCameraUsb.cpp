@@ -11,6 +11,7 @@
 #include <dirent.h>  
 #include <sys/stat.h>  
 #include <sys/types.h> 
+#include "../inc/lidbg_flycam_app.h"
 
 //eho
 #define	NIGHT_GAINVAL					18
@@ -214,7 +215,7 @@ void lidbg_set_sonix_osd_time()
 	system(rtc_cmd);
 	return;
 }
-
+#if 0
 static int get_uvc_device(const char *id,char *devname)
 {
     char    temp_devname[FILENAME_LENGTH];
@@ -467,7 +468,7 @@ failproc:
 	return -1;
 #endif
 }
-
+#endif
     extern "C" int  usbcam_camera_device_open(
         const struct hw_module_t *module, const char *id,
         struct hw_device_t **hw_device)
@@ -499,7 +500,8 @@ failproc:
         }
 getuvcdevice:
         dev_name = camHal->dev_name;
-        rc = get_hub_uvc_device(mid,dev_name);
+        //rc = get_hub_uvc_device(mid,dev_name);
+        rc = lidbg_get_hub_uvc_device(PREVIEW_MODE,dev_name,atoi(mid),0);
         if((rc == -1) || (*dev_name == '\0'))
         {
             ALOGE("%s: No UVC node found \n", __func__);

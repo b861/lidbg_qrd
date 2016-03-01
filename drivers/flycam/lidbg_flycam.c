@@ -562,7 +562,7 @@ static void setOnlineProp(void)
  *		0	-	File path it's exist.
  *   	1	-	EMMC it's not exist.(unusual case)
  *   	2	-	SDCARD it's not exist.Change to EMMC default path.
- *   	3	-	Storage device is OK but the path you specify it's not exsit,so create one.
+ *   	3	-	Storage device is OK but the path you specify it's not exist,so create one.
  * Notes:  1.Check storage whether it is valid;
  *				2.Create file path if it is not exist.
  *****************************************************************************/

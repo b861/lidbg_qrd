@@ -49,7 +49,7 @@
 #include <linux/rtc.h>
 #include <sys/vfs.h>
 
-#include "../../drivers/inc/lidbg_flycam_par.h" /*flycam parameter*/
+#include "../inc/lidbg_flycam_app.h"
 
 #define TESTAP_VERSION		"v1.0.21_SONiX_UVC_TestAP_Multi"
 
@@ -1397,7 +1397,7 @@ char *lidbg_get_current_time(char *time_string, struct rtc_time *ptm)
     return time_string;
 }
 
-
+#if 0
   static int get_uvc_device(char *devname,char do_save,char do_record)
     {
         char    temp_devname[256];
@@ -1612,7 +1612,7 @@ failproc:
 #endif
 }
 
-
+#endif
 
 
 int main(int argc, char *argv[])
@@ -1888,7 +1888,7 @@ int main(int argc, char *argv[])
 	pthread_t thread_capture_id;
 	pthread_t thread_switch_id;
 	pthread_t thread_nightMode_id;
-	unsigned char flytmpcnt = 0,rc;
+	int flytmpcnt = 0,rc;
 	char devName[256];
 	char time_buf[100] = {0};
 	char tmpCMD[100] = {0};
@@ -2688,8 +2688,10 @@ int main(int argc, char *argv[])
 	//dev = video_open(argv[optind]);
 getuvcdevice:
 	/*auto find camera device*/
-	rc = get_hub_uvc_device(devName,do_save,do_record);
-    if((rc == 1)  || (*devName == '\0'))
+	//rc = get_hub_uvc_device(devName,do_save,do_record);
+	//lidbg("************argv[0] -> %s************\n",argv[0]);
+	rc = lidbg_get_hub_uvc_device(RECORD_MODE,devName,1,1);
+    if((rc == -1)  || (*devName == '\0'))
     {
         lidbg("%s: No UVC node found \n", __func__);
 		//return 1;
@@ -4534,8 +4536,9 @@ try_open_again:
 		}
 		//lidbg("%s: Camera may extract unexpected!try open again!-> %d\n", __func__,tryopencnt);
 		lidbg("%s: Camera open fail!try open again!-> %d\n", __func__,tryopencnt);
-		rc = get_hub_uvc_device(devName,do_save,do_record);
-		if((rc == 1) || (*devName == '\0'))
+		//rc = get_hub_uvc_device(devName,do_save,do_record);
+		rc = lidbg_get_hub_uvc_device(RECORD_MODE,devName,1,1);
+		if((rc == -1) || (*devName == '\0'))
         {
             lidbg("%s: No UVC node found again\n", __func__);
             //return 1;
