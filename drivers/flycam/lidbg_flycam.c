@@ -573,12 +573,14 @@ static int checkSDCardStatus(char *path)
 	struct file *storage_path, *file_path;
 	if(!strncmp(path, "/storage/sdcard0", 16))
 	{
-		if(IS_ERR(storage_path = filp_open("/storage/sdcard0", O_RDONLY | O_DIRECTORY, 0)))
+		storage_path = filp_open("/storage/sdcard0", O_RDONLY | O_DIRECTORY, 0);
+		file_path = filp_open(path, O_RDONLY | O_DIRECTORY, 0);
+		if(IS_ERR(storage_path))
 		{
 			lidbg("%s:EMMC ERR!!\n",__func__);
 			ret = 1;
 		}
-		else if(IS_ERR(file_path = filp_open(path, O_RDONLY | O_DIRECTORY, 0)))
+		else if(IS_ERR(file_path))
 		{
 			lidbg("%s: New Rec Dir => %s\n",__func__,path);
 			sprintf(temp_cmd, "mkdir -p %s", path);
@@ -589,13 +591,15 @@ static int checkSDCardStatus(char *path)
 	}
 	else if(!strncmp(path, "/storage/sdcard1", 16))
 	{
-		if(IS_ERR(storage_path = filp_open("/storage/sdcard1", O_RDONLY | O_DIRECTORY, 0)))
+		storage_path = filp_open("/storage/sdcard1", O_RDONLY | O_DIRECTORY, 0);
+		file_path = filp_open(path, O_RDONLY | O_DIRECTORY, 0);
+		if(IS_ERR(storage_path))
 		{
 			lidbg("%s:SDCARD1 ERR!!Reset to /storage/sdcard0/camera_rec/\n",__func__);
 			strcpy(path,"/storage/sdcard0/camera_rec/");
 			ret = 2;
 		}
-		else if(IS_ERR(file_path = filp_open(path, O_RDONLY | O_DIRECTORY, 0)))
+		else if(IS_ERR(file_path))
 		{
 			lidbg("%s: New Rec Dir => %s\n",__func__,path);
 			sprintf(temp_cmd, "mkdir -p %s", path);
