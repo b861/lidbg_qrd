@@ -226,9 +226,15 @@ static int fb_notifier_callback(struct notifier_block *self,
 		blank = evdata->data;
 
 		if (*blank == FB_BLANK_UNBLANK)
+		{
+			lidbg( "rmtctrl:FB_BLANK_UNBLANK.rmtctrl_resume\n");
 			rmtctrl_resume();
+		}
 		else if (*blank == FB_BLANK_POWERDOWN)
+		{
+			lidbg( "rmtctrl:FB_BLANK_POWERDOWN.rmtctrl_suspend\n");
 			rmtctrl_suspend();
+		}
 	}
 
 	return 0;
