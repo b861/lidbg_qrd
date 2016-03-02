@@ -4238,7 +4238,7 @@ openfd:
 				}
 				
 				/*reserve 300MB for storage*/
-				if((i % 150 == 0) && !isPreview)
+				if((i % 30 == 0) && !isPreview)
 				{
 					if(!strncmp(Rec_Save_Dir, "/storage/sdcard0", 16) )
 					{
@@ -4252,7 +4252,7 @@ openfd:
 						//lidbg("/storage/sdcard0  total=%dMB, free=%dMB\n", mbTotalsize, mbFreedisk);  
 						if(mbFreedisk < 300)
 						{
-							lidbg("======Free space less than 300MB!!======\n");
+							lidbg("======EMMC Free space less than 300MB!!======\n");
 							if(i == 0)
 							{
 								lidbg("======Init Free space less than 300MB!!Force quit!======\n");
@@ -4263,6 +4263,37 @@ openfd:
 							}
 							isExceed = 1;
 							send_driver_msg(FLYCAM_STATUS_IOC_MAGIC, NR_STATUS, RET_INSUFFICIENT_SPACE_CIRC);
+						}
+					}
+					else if(!strncmp(Rec_Save_Dir, "/storage/sdcard1", 16) )
+					{
+						struct statfs diskInfo;  
+						statfs("/storage/sdcard1", &diskInfo);  
+						unsigned long long totalBlocks = diskInfo.f_bsize;  
+						unsigned long long stotalSize = totalBlocks * diskInfo.f_blocks;  
+						size_t mbTotalsize = stotalSize>>20;  
+						unsigned long long freeDisk = diskInfo.f_bfree*totalBlocks;  
+						size_t mbFreedisk = freeDisk>>20;  
+						//lidbg("/storage/sdcard0  total=%dMB, free=%dMB\n", mbTotalsize, mbFreedisk);  
+						if(mbFreedisk < 10)
+						{
+							lidbg("======SDCARD Free space less than 10MB!!======\n");
+							if(i == 0)
+							{
+								lidbg("======Init Free space less than 10MB!!Force quit!======\n");
+								if (ioctl(flycam_fd,_IO(FLYCAM_STATUS_IOC_MAGIC, NR_STATUS), RET_INIT_INSUFFICIENT_SPACE_STOP) < 0)
+						        {
+						        	lidbg("RET_EXCEED_UPPER_LIMIT ioctl fail=======\n");
+								}
+								close(dev);
+								close(flycam_fd);
+								return 0;
+							}
+							isExceed = 1;
+							if (ioctl(flycam_fd,_IO(FLYCAM_STATUS_IOC_MAGIC, NR_STATUS), RET_INSUFFICIENT_SPACE_CIRC) < 0)
+					        {
+					        	lidbg("RET_INSUFFICIENT_SPACE_CIRC ioctl fail=======\n");
+							}
 						}
 					}
 				}
