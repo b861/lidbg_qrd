@@ -384,7 +384,7 @@ static int usb_nb_cam_func(struct notifier_block *nb, unsigned long action, void
 			Sonix:fix ScreenBlurred issue & start exposure adaptation & notify RET_SONIX;
 			Not Sonix:notify RET_NOT_SONIX.
 		*/
-		if(!isSuspend)
+		if(!isSuspend && (g_var.recovery_mode == 0))
 		{
 			/*RearView*/
 			if(!((oldCamStatus>>4) & FLY_CAM_ISVALID) && ((pfly_UsbCamInfo->camStatus>>4) & FLY_CAM_ISSONIX)&& !isRearViewFirstInit)
@@ -1475,44 +1475,37 @@ int thread_flycam_init(void *data)
 
 	//init_waitqueue_head(&wait_queue);
 	init_waitqueue_head(&pfly_UsbCamInfo->camStatus_wait_queue);/*camera status wait queue*/
-	
-	register_lidbg_notifier(&lidbg_notifier);/*ACCON/OFF notifier*/
 	usb_register_notify(&usb_nb_cam);/*USB notifier*/
-	
-	/*Stop recording timer(in ACCOFF scene)*/
-	init_timer(&suspend_stoprec_timer);
-    suspend_stoprec_timer.data = 0;
-    suspend_stoprec_timer.expires = 0;
-    suspend_stoprec_timer.function = suspend_stoprec_timer_isr;
-    
+
+	if(g_var.recovery_mode == 0)/*do not process when in recovery mode*/
+	{
+		register_lidbg_notifier(&lidbg_notifier);/*ACCON/OFF notifier*/
+		
+		/*Stop recording timer(in ACCOFF scene)*/
+		init_timer(&suspend_stoprec_timer);
+	    suspend_stoprec_timer.data = 0;
+	    suspend_stoprec_timer.expires = 0;
+	    suspend_stoprec_timer.function = suspend_stoprec_timer_isr;
+	    
 #if 0
-	INIT_WORK(&work_t_start_rec, work_startRec);
-    INIT_WORK(&work_t_stop_rec, work_stopRec);
+		INIT_WORK(&work_t_start_rec, work_startRec);
+	    INIT_WORK(&work_t_stop_rec, work_stopRec);
 #endif 
-	//INIT_WORK(&work_t_fixScreenBlurred, work_DVR_fixScreenBlurred);
+		//INIT_WORK(&work_t_fixScreenBlurred, work_DVR_fixScreenBlurred);
 
-	/*usb camera first plug in (fix lidbgshell delay issue)*/
-	isDVRFirstInit = 1;
-	pfly_UsbCamInfo->camStatus = lidbg_checkCam();
-	lidbg("********camStatus => %d***********",pfly_UsbCamInfo->camStatus);
-	if(pfly_UsbCamInfo->camStatus & FLY_CAM_ISSONIX)
-		schedule_delayed_work(&work_t_DVR_fixScreenBlurred,10*HZ);/*at about kernel 30s, lidbgshell it's ready*/
-	else isDVRFirstInit = 0;
+		/*usb camera first plug in (fix lidbgshell delay issue)*/
+		isDVRFirstInit = 1;
+		pfly_UsbCamInfo->camStatus = lidbg_checkCam();
+		lidbg("********camStatus => %d***********",pfly_UsbCamInfo->camStatus);
+		if(pfly_UsbCamInfo->camStatus & FLY_CAM_ISSONIX)
+			schedule_delayed_work(&work_t_DVR_fixScreenBlurred,10*HZ);/*at about kernel 30s, lidbgshell it's ready*/
+		else isDVRFirstInit = 0;
 
-	isRearViewFirstInit = 1;
-	if((pfly_UsbCamInfo->camStatus>>4) & FLY_CAM_ISSONIX)
-		schedule_delayed_work(&work_t_RearView_fixScreenBlurred,15*HZ);/*at about kernel 35s, lidbgshell it's ready*/
-	else isRearViewFirstInit = 0;
-	
-#if 0
-	//CREATE_KTHREAD(thread_flycam_test, NULL);
-	/*
-    if((!g_var.is_fly) && (g_var.recovery_mode == 0)))
-    {
-       
-    }
-	*/
-#endif
+		isRearViewFirstInit = 1;
+		if((pfly_UsbCamInfo->camStatus>>4) & FLY_CAM_ISSONIX)
+			schedule_delayed_work(&work_t_RearView_fixScreenBlurred,15*HZ);/*at about kernel 35s, lidbgshell it's ready*/
+		else isRearViewFirstInit = 0;
+	}
     return 0;
 }
 
