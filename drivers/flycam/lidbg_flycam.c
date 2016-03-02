@@ -422,11 +422,13 @@ static int start_rec(char cam_id)
 	lidbg("%s:====E====\n",__func__);
 	pfly_UsbCamInfo->read_status = RET_DEFALUT;
 	if(isSuspend) mod_timer(&suspend_stoprec_timer,SUSPEND_STOPREC_ONLINE_TIME);
-	lidbg_shell_cmd("echo 'udisk_request' > /dev/flydev0");
     if(cam_id == DVR_ID)
-		lidbg_shell_cmd("setprop fly.lidbg.uvccam.dvr.recording 1");
+    {
+		lidbg_shell_cmd("echo 'udisk_request' > /dev/flydev0");//don't control HUB power in rearview
+		lidbg_shell_cmd("setprop fly.uvccam.dvr.recording 1");
+    }
 	else if(cam_id == REARVIEW_ID)
-		lidbg_shell_cmd("setprop fly.lidbg.uvccam.rearview.recording 1");
+		lidbg_shell_cmd("setprop fly.uvccam.rearview.recording 1");
 	sprintf(temp_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video2 -b %d -c -f H264 -r &", cam_id);
  	lidbg_shell_cmd(temp_cmd);
 	/*don't wait status pop in Rearview*/
@@ -446,7 +448,7 @@ static int start_rec(char cam_id)
  * Function: stop_rec
  * Description: stop sonix AP recording
  * Input parameters:
- *  	none
+ *  	cam_id	-	camera ID (0 : RearView , 1: DVR)
  * Return values:
  *		0	-	stop recording success
  *   	1	-	await sonix AP return timeout
@@ -459,9 +461,9 @@ static int stop_rec(char cam_id)
 	pfly_UsbCamInfo->read_status = RET_DEFALUT;
 	if(isSuspend) del_timer(&suspend_stoprec_timer);
 	if(cam_id == DVR_ID)
-		lidbg_shell_cmd("setprop fly.lidbg.uvccam.dvr.recording 0");
+		lidbg_shell_cmd("setprop fly.uvccam.dvr.recording 0");
 	else if(cam_id == REARVIEW_ID)
-		lidbg_shell_cmd("setprop fly.lidbg.uvccam.rearview.recording 0");
+		lidbg_shell_cmd("setprop fly.uvccam.rearview.recording 0");
 	//msleep(500);
 	/*don't wait status pop in Rearview*/
 	if(cam_id == DVR_ID)
@@ -471,8 +473,8 @@ static int stop_rec(char cam_id)
 			lidbg("%s:====read_status wait timeout => %d====\n",__func__,pfly_UsbCamInfo->read_status);
 			ret = 1; 
 		}
+		lidbg_shell_cmd("echo 'udisk_unrequest' > /dev/flydev0");//don't control HUB power in rearview
 	}
-	lidbg_shell_cmd("echo 'udisk_unrequest' > /dev/flydev0");
 	lidbg("%s:====X====\n",__func__);
 	return ret;
 }
@@ -488,19 +490,30 @@ static int stop_rec(char cam_id)
  *****************************************************************************/
 static void fixScreenBlurred(char cam_id)
 {
-	lidbg_shell_cmd("setprop fly.uvccam.res 640x360");
 	if(cam_id == DVR_ID)
-		lidbg_shell_cmd("setprop fly.uvccam.recpath /storage/sdcard0/camera_rec/");
+	{
+		lidbg_shell_cmd("setprop fly.uvccam.dvr.res 640x360");
+		lidbg_shell_cmd("setprop fly.uvccam.dvr.recpath /storage/sdcard0/camera_rec/");
+	}
 	else if(cam_id == REARVIEW_ID)
-		lidbg_shell_cmd("setprop fly.uvccam.recpath /storage/sdcard0/");//must different path
+	{
+		lidbg_shell_cmd("setprop fly.uvccam.rearview.res 640x360");
+		lidbg_shell_cmd("setprop fly.uvccam.rearview.recpath /storage/sdcard0/");//must different path
+	}
 	if(start_rec(cam_id))lidbg("%s:====return fail====\n",__func__);
 	msleep(2000);
 	if(stop_rec(cam_id))lidbg("%s:====return fail====\n",__func__);
-	lidbg_shell_cmd("setprop fly.uvccam.res 720");
+	
 	if(cam_id == DVR_ID)
+	{
+		lidbg_shell_cmd("setprop fly.uvccam.dvr.res 720");
 		lidbg_shell_cmd("rm -f /storage/sdcard0/camera_rec/tmp*.h264&");
+	}
 	else if(cam_id == REARVIEW_ID)
+	{
+		lidbg_shell_cmd("setprop fly.uvccam.rearview.res 720");
 		lidbg_shell_cmd("rm -f /storage/sdcard0/tmp*.h264&");
+	}
 	return;
 }
 
@@ -567,52 +580,88 @@ static void work_stopRec(struct work_struct *work)
  * Function: setDVRProp
  * Description: Set DVR property for recording.
  * Input parameters:
- *   	none
+ *   	camID	-	camera ID (0 : RearView , 1: DVR)
  * Return values:
  *		none
  * Notes: none
  *****************************************************************************/
-static void setDVRProp(void)
+static void setDVRProp(int camID)
 {
 	char temp_cmd[256];	
-	sprintf(temp_cmd, "setprop fly.uvccam.recbitrate %d", f_rec_bitrate);
-	lidbg_shell_cmd(temp_cmd);
-	sprintf(temp_cmd, "setprop fly.uvccam.res %s", f_rec_res);
-	lidbg_shell_cmd(temp_cmd);
-	sprintf(temp_cmd, "setprop fly.uvccam.recpath %s", f_rec_path);
-	lidbg_shell_cmd(temp_cmd);
-	sprintf(temp_cmd, "setprop fly.uvccam.rectime %d", f_rec_time);
-	lidbg_shell_cmd(temp_cmd);
-	sprintf(temp_cmd, "setprop fly.uvccam.recnum %d", f_rec_filenum);
-	lidbg_shell_cmd(temp_cmd);
-	sprintf(temp_cmd, "setprop fly.uvccam.recfilesize %d", f_rec_totalsize);
-	lidbg_shell_cmd(temp_cmd);
+	if(camID == DVR_ID)
+	{
+		sprintf(temp_cmd, "setprop fly.uvccam.dvr.recbitrate %d", f_rec_bitrate);
+		lidbg_shell_cmd(temp_cmd);
+		sprintf(temp_cmd, "setprop fly.uvccam.dvr.res %s", f_rec_res);
+		lidbg_shell_cmd(temp_cmd);
+		sprintf(temp_cmd, "setprop fly.uvccam.dvr.recpath %s", f_rec_path);
+		lidbg_shell_cmd(temp_cmd);
+		sprintf(temp_cmd, "setprop fly.uvccam.dvr.rectime %d", f_rec_time);
+		lidbg_shell_cmd(temp_cmd);
+		sprintf(temp_cmd, "setprop fly.uvccam.dvr.recnum %d", f_rec_filenum);
+		lidbg_shell_cmd(temp_cmd);
+		sprintf(temp_cmd, "setprop fly.uvccam.dvr.recfilesize %d", f_rec_totalsize);
+		lidbg_shell_cmd(temp_cmd);
+	}
+	else if(camID == REARVIEW_ID)
+	{
+		sprintf(temp_cmd, "setprop fly.uvccam.rearview.recbitrate %d", f_rec_bitrate);
+		lidbg_shell_cmd(temp_cmd);
+		sprintf(temp_cmd, "setprop fly.uvccam.rearview.res %s", f_rec_res);
+		lidbg_shell_cmd(temp_cmd);
+		sprintf(temp_cmd, "setprop fly.uvccam.rearview.recpath %s", f_rec_path);
+		lidbg_shell_cmd(temp_cmd);
+		sprintf(temp_cmd, "setprop fly.uvccam.rearview.rectime %d", f_rec_time);
+		lidbg_shell_cmd(temp_cmd);
+		sprintf(temp_cmd, "setprop fly.uvccam.rearview.recnum %d", f_rec_filenum);
+		lidbg_shell_cmd(temp_cmd);
+		sprintf(temp_cmd, "setprop fly.uvccam.rearview.recfilesize %d", f_rec_totalsize);
+		lidbg_shell_cmd(temp_cmd);
+	}
 }
 
 /******************************************************************************
  * Function: setOnlineProp
  * Description: Set Online property for recording.
  * Input parameters:
- *   	none
+ *   	camID	-	camera ID (0 : RearView , 1: DVR)
  * Return values:
  *		none
  * Notes: none
  *****************************************************************************/
-static void setOnlineProp(void)
+static void setOnlineProp(int camID)
 {
 	char temp_cmd[256];	
-	sprintf(temp_cmd, "setprop fly.uvccam.recbitrate %d", f_online_bitrate);
-	lidbg_shell_cmd(temp_cmd);
-	sprintf(temp_cmd, "setprop fly.uvccam.res %s", f_online_res);
-	lidbg_shell_cmd(temp_cmd);
-	sprintf(temp_cmd, "setprop fly.uvccam.recpath %s", f_online_path);
-	lidbg_shell_cmd(temp_cmd);
-	sprintf(temp_cmd, "setprop fly.uvccam.rectime %d", f_online_time);
-	lidbg_shell_cmd(temp_cmd);
-	sprintf(temp_cmd, "setprop fly.uvccam.recnum %d", f_online_filenum);
-	lidbg_shell_cmd(temp_cmd);
-	sprintf(temp_cmd, "setprop fly.uvccam.recfilesize %d", f_online_totalsize);
-	lidbg_shell_cmd(temp_cmd);
+	if(camID == DVR_ID)
+	{
+		sprintf(temp_cmd, "setprop fly.uvccam.dvr.recbitrate %d", f_online_bitrate);
+		lidbg_shell_cmd(temp_cmd);
+		sprintf(temp_cmd, "setprop fly.uvccam.dvr.res %s", f_online_res);
+		lidbg_shell_cmd(temp_cmd);
+		sprintf(temp_cmd, "setprop fly.uvccam.dvr.recpath %s", f_online_path);
+		lidbg_shell_cmd(temp_cmd);
+		sprintf(temp_cmd, "setprop fly.uvccam.dvr.rectime %d", f_online_time);
+		lidbg_shell_cmd(temp_cmd);
+		sprintf(temp_cmd, "setprop fly.uvccam.dvr.recnum %d", f_online_filenum);
+		lidbg_shell_cmd(temp_cmd);
+		sprintf(temp_cmd, "setprop fly.uvccam.dvr.recfilesize %d", f_online_totalsize);
+		lidbg_shell_cmd(temp_cmd);
+	}
+	else if(camID == REARVIEW_ID)
+	{
+		sprintf(temp_cmd, "setprop fly.uvccam.rearview.recbitrate %d", f_online_bitrate);
+		lidbg_shell_cmd(temp_cmd);
+		sprintf(temp_cmd, "setprop fly.uvccam.rearview.res %s", f_online_res);
+		lidbg_shell_cmd(temp_cmd);
+		sprintf(temp_cmd, "setprop fly.uvccam.rearview.recpath %s", f_online_path);
+		lidbg_shell_cmd(temp_cmd);
+		sprintf(temp_cmd, "setprop fly.uvccam.rearview.rectime %d", f_online_time);
+		lidbg_shell_cmd(temp_cmd);
+		sprintf(temp_cmd, "setprop fly.uvccam.rearview.recnum %d", f_online_filenum);
+		lidbg_shell_cmd(temp_cmd);
+		sprintf(temp_cmd, "setprop fly.uvccam.rearview.recfilesize %d", f_online_totalsize);
+		lidbg_shell_cmd(temp_cmd);
+	}
 }
 
 /******************************************************************************
@@ -745,7 +794,7 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		        break;
 			case NR_START_REC:
 		        lidbg("%s:DVR NR_START_REC\n",__func__);
-				setDVRProp();
+				setDVRProp(DVR_ID);
 				checkSDCardStatus(f_rec_path);
 				if(isDVRRec)
 				{
@@ -790,7 +839,7 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 				if(isDVRRec)
 				{
 					if(stop_rec(DVR_ID)) goto failproc;
-					setDVRProp();
+					setDVRProp(DVR_ID);
 					if(start_rec(DVR_ID)) goto failproc;
 				}
 		        break;
@@ -844,7 +893,7 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		        break;
 			case NR_START_REC:
 		        lidbg("%s:Online NR_START_REC\n",__func__);
-				setOnlineProp();
+				setOnlineProp(DVR_ID);
 				checkSDCardStatus(f_online_path);
 				if(isDVRRec)
 				{
@@ -1049,7 +1098,7 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 			{
 			    lidbg("%s:==write==Online NR_START_REC\n",__func__);
 				lidbg_shell_cmd("echo 'udisk_request' > /dev/flydev0");
-				setOnlineProp();
+				setOnlineProp(DVR_ID);
 				checkSDCardStatus(f_online_path);
 				if(isDVRRec)
 				{

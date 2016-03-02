@@ -264,21 +264,21 @@ static int video_set_format(int dev, unsigned int w, unsigned int h, unsigned in
 	struct v4l2_format fmt;
 	int ret;
 
+	lidbg("*****Res_String => %s******\n",Res_String);
 	//flyaudio
-	property_get("fly.uvccam.res", Res_String, "0");
-	if(!strncmp(Res_String, "1280x720", 8))
+	if(!strncmp(Res_String, "1280x720", 8) || !strncmp(Res_String, "1280*720", 8) )
 	{
 		lidbg("%s: select 720P!\n",__func__);
 		w = 1280;
 		h = 720;
 	}
-	else if(!strncmp(Res_String, "1920x1080", 9))
+	else if(!strncmp(Res_String, "1920x1080", 9) || !strncmp(Res_String, "1920*1080", 9))
 	{
 		lidbg("%s: select 1080P!\n",__func__);
 		w = 1920;
 		h = 1080;
 	}
-	else if(!strncmp(Res_String, "640x360", 7))
+	else if(!strncmp(Res_String, "640x360", 7) || !strncmp(Res_String, "640*360", 7) )
 	{
 		char tmpCMD[100] = {0};
 		lidbg("%s: select 640x360!\n",__func__);
@@ -1618,23 +1618,143 @@ failproc:
 
 static void switch_scan(void)
 {
-	if(cam_id == 1)
-		property_get("fly.lidbg.uvccam.dvr.recording", startRecording, "0");
-	else if(cam_id == 0)
-		property_get("fly.lidbg.uvccam.rearview.recording", startRecording, "0");
+	if(cam_id == DVR_ID)
+		property_get("fly.uvccam.dvr.recording", startRecording, "0");
+	else if(cam_id == REARVIEW_ID)
+		property_get("fly.uvccam.rearview.recording", startRecording, "0");
 	return;
 }
 
 static void send_driver_msg(char magic ,char nr,char arg)
 {
-	if(cam_id == 0)
+	/*Do not send msg while in RearView mode:still not have dedicate StatusCode*/
+	if(cam_id == REARVIEW_ID)
 	{
-		lidbg("%s:stop send msg.",__func__);
+		lidbg("%s:stop send msg.\n",__func__);
+		return;
 	}
 	if (ioctl(flycam_fd,_IO(magic, nr), arg) < 0)
     {
       	lidbg("%s:nr => %d ioctl fail=======\n",__func__,nr);
 	}	
+	return;
+}
+
+static void get_driver_prop(int camID)
+{
+		/*set each file recording time*/
+		if(cam_id == DVR_ID)
+			property_get("fly.uvccam.dvr.rectime", Rec_Sec_String, "300");
+		else if(cam_id == REARVIEW_ID)
+			property_get("fly.uvccam.rearview.rectime", Rec_Sec_String, "300");
+		Rec_Sec = atoi(Rec_Sec_String);
+		lidbg("========set each file recording time-> %d s=======\n",Rec_Sec);
+		if(Rec_Sec == 0) 
+		{
+			lidbg("not allow recording time = 0s !!reset to 300s.\n");
+			Rec_Sec = 300;
+		}
+		
+#if 1
+		/*set max file num*/
+		if(cam_id == DVR_ID)
+			property_get("fly.uvccam.dvr.recnum", Max_Rec_Num_String, "5");
+		else if(cam_id == REARVIEW_ID)
+			property_get("fly.uvccam.rearview.recnum", Max_Rec_Num_String, "5");
+		Max_Rec_Num = atoi(Max_Rec_Num_String);
+		lidbg("====Max_rec_num-> %d===\n",Max_Rec_Num);
+		if(Max_Rec_Num == 0) Max_Rec_Num = 5;
+#endif
+
+		/*set record file savePath*/
+		if(cam_id == DVR_ID)
+			property_get("fly.uvccam.dvr.recpath", Rec_Save_Dir, "/storage/sdcard0/camera_rec/");
+		else if(cam_id == REARVIEW_ID)
+			property_get("fly.uvccam.rearview.recpath", Rec_Save_Dir, "/storage/sdcard0/");
+		lidbg("==========recording dir -> %s===========\n",Rec_Save_Dir);
+		if(!strncmp(Rec_Save_Dir, "/storage/udisk", 14) )
+		{
+			char tmp_usb_mkdir[100] = "mkdir /storage/udisk/camera_rec/";
+			lidbg("======== try create udisk rec dir -> %s =======\n",Rec_Save_Dir);
+			sprintf(tmp_usb_mkdir, "mkdir %s", Rec_Save_Dir);
+			system(tmp_usb_mkdir);
+		}
+#if 0
+		/*create preview cache dir*/
+		if(!strncmp(Rec_Save_Dir, "/storage/sdcard0/preview_cache", 30) )
+		{
+			/*
+			char tmp_preview_mkdir[100] = "mkdir /storage/sdcard0/preview_cache";
+			lidbg("======== try create preview cache dir -> %s =======",Rec_Save_Dir);
+			sprintf(tmp_preview_mkdir, "mkdir %s", Rec_Save_Dir);
+			system(tmp_preview_mkdir);
+			*/
+			isPreview = 1;
+		}
+#endif
+		if(access(Rec_Save_Dir, R_OK) != 0)
+		{
+			lidbg("record file path access wrong!\n" );
+			//return 0;
+			strcpy(Rec_Save_Dir,  "/storage/sdcard0/camera_rec/");
+		}
+		
+		
+		/*set record file total size*/
+		if(cam_id == DVR_ID)
+			property_get("fly.uvccam.dvr.recfilesize", Rec_File_Size_String, "1000");
+		else if(cam_id == REARVIEW_ID)
+			property_get("fly.uvccam.rearview.recfilesize", Rec_File_Size_String, "1000");
+		Rec_File_Size = atoi(Rec_File_Size_String);
+		lidbg("======== video file total size-> %ld MB=======\n",Rec_File_Size);
+		if(Rec_File_Size == 0) 
+		{
+			lidbg("not allow video file size = 0MB !!reset to 1000MB.\n");
+			Rec_File_Size = 1000;
+		}
+
+		/*set record file bitrate*/
+		if(cam_id == DVR_ID)
+			property_get("fly.uvccam.dvr.recbitrate", Rec_Bitrate_String, "8000000");
+		else if(cam_id == REARVIEW_ID)
+			property_get("fly.uvccam.rearview.recbitrate", Rec_Bitrate_String, "8000000");
+		Rec_Bitrate = atoi(Rec_Bitrate_String);
+		lidbg("======== video bitrate-> %ld b/s=======\n",Rec_Bitrate);
+		if(Rec_Bitrate == 0) 
+		{
+			lidbg("not allow video bitrate = 0MB !!reset to 8000000b/s.\n");
+			Rec_Bitrate = 8000000;
+		}
+
+		if(cam_id == DVR_ID)
+			property_get("fly.uvccam.dvr.res", Res_String, "0");
+		else if(cam_id == REARVIEW_ID)
+			property_get("fly.uvccam.rearview.res", Res_String, "0");
+
+		/*
+		char i = 10;
+		Rec_Bitrate = 512000;
+		*/
+#if 0
+		if(XU_Ctrl_ReadChipID(dev) < 0)
+			lidbg( "XU_Ctrl_ReadChipID Failed\n");
+		if(XU_H264_Set_BitRate(dev, Rec_Bitrate) < 0 )
+			lidbg( "XU_H264_Set_BitRate Failed\n");
+		XU_H264_Get_BitRate(dev, &m_BitRate);
+		if(m_BitRate < 0 )
+			lidbg( "SONiX_UVC_TestAP @main : XU_H264_Get_BitRate Failed\n");
+		lidbg("Current bit rate1: %.2f Kbps\n",m_BitRate);
+#endif
+		/*
+		while((i--) && (m_BitRate != Rec_Bitrate))
+		{
+			if(XU_H264_Set_BitRate(dev, Rec_Bitrate) < 0 )
+				lidbg( "XU_H264_Set_BitRate Failed\n");
+			usleep(500*1000);
+		}
+		lidbg("Current bit rate2: %.2f Kbps\n",m_BitRate);
+		*/
+		return;
 }
 
 int main(int argc, char *argv[])
@@ -2742,100 +2862,7 @@ openfd:
 	send_driver_msg(FLYCAM_STATUS_IOC_MAGIC,NR_STATUS,RET_START);
 	
 	if((do_save) || (do_record)) 
-	{
-		/*set each file recording time*/
-		property_get("fly.uvccam.rectime", Rec_Sec_String, "300");
-		Rec_Sec = atoi(Rec_Sec_String);
-		lidbg("========set each file recording time-> %d s=======\n",Rec_Sec);
-		if(Rec_Sec == 0) 
-		{
-			lidbg("not allow recording time = 0s !!reset to 300s.\n");
-			Rec_Sec = 300;
-		}
-		
-#if 1
-		/*set max file num*/
-		property_get("fly.uvccam.recnum", Max_Rec_Num_String, "5");
-		Max_Rec_Num = atoi(Max_Rec_Num_String);
-		lidbg("====Max_rec_num-> %d===\n",Max_Rec_Num);
-		if(Max_Rec_Num == 0) Max_Rec_Num = 5;
-#endif
-
-		/*set record file savePath*/
-		property_get("fly.uvccam.recpath", Rec_Save_Dir, "/storage/sdcard0/camera_rec/");
-		lidbg("==========recording dir -> %s===========\n",Rec_Save_Dir);
-
-		if(!strncmp(Rec_Save_Dir, "/storage/udisk", 14) )
-		{
-			char tmp_usb_mkdir[100] = "mkdir /storage/udisk/camera_rec/";
-			lidbg("======== try create udisk rec dir -> %s =======\n",Rec_Save_Dir);
-			sprintf(tmp_usb_mkdir, "mkdir %s", Rec_Save_Dir);
-			system(tmp_usb_mkdir);
-		}
-#if 0
-		/*create preview cache dir*/
-		if(!strncmp(Rec_Save_Dir, "/storage/sdcard0/preview_cache", 30) )
-		{
-			/*
-			char tmp_preview_mkdir[100] = "mkdir /storage/sdcard0/preview_cache";
-			lidbg("======== try create preview cache dir -> %s =======",Rec_Save_Dir);
-			sprintf(tmp_preview_mkdir, "mkdir %s", Rec_Save_Dir);
-			system(tmp_preview_mkdir);
-			*/
-			isPreview = 1;
-		}
-#endif
-		if(access(Rec_Save_Dir, R_OK) != 0)
-		{
-			lidbg("record file path access wrong!\n" );
-			//return 0;
-			strcpy(Rec_Save_Dir,  "/storage/sdcard0/camera_rec/");
-		}
-		
-		
-		/*set record file total size*/
-		property_get("fly.uvccam.recfilesize", Rec_File_Size_String, "1000");
-		Rec_File_Size = atoi(Rec_File_Size_String);
-		lidbg("======== video file total size-> %ld MB=======\n",Rec_File_Size);
-		if(Rec_File_Size == 0) 
-		{
-			lidbg("not allow video file size = 0MB !!reset to 1000MB.\n");
-			Rec_File_Size = 1000;
-		}
-
-		/*set record file bitrate*/
-		property_get("fly.uvccam.recbitrate", Rec_Bitrate_String, "8000000");
-		Rec_Bitrate = atoi(Rec_Bitrate_String);
-		lidbg("======== video bitrate-> %ld b/s=======\n",Rec_Bitrate);
-		if(Rec_Bitrate == 0) 
-		{
-			lidbg("not allow video bitrate = 0MB !!reset to 8000000b/s.\n");
-			Rec_Bitrate = 8000000;
-		}
-		/*
-		char i = 10;
-		Rec_Bitrate = 512000;
-		*/
-#if 0
-		if(XU_Ctrl_ReadChipID(dev) < 0)
-			lidbg( "XU_Ctrl_ReadChipID Failed\n");
-		if(XU_H264_Set_BitRate(dev, Rec_Bitrate) < 0 )
-			lidbg( "XU_H264_Set_BitRate Failed\n");
-		XU_H264_Get_BitRate(dev, &m_BitRate);
-		if(m_BitRate < 0 )
-			lidbg( "SONiX_UVC_TestAP @main : XU_H264_Get_BitRate Failed\n");
-		lidbg("Current bit rate1: %.2f Kbps\n",m_BitRate);
-#endif
-		/*
-		while((i--) && (m_BitRate != Rec_Bitrate))
-		{
-			if(XU_H264_Set_BitRate(dev, Rec_Bitrate) < 0 )
-				lidbg( "XU_H264_Set_BitRate Failed\n");
-			usleep(500*1000);
-		}
-		lidbg("Current bit rate2: %.2f Kbps\n",m_BitRate);
-		*/
-	}
+		get_driver_prop(cam_id);
 	
 	/*enable OSD*/
 	if(XU_OSD_Set_Enable(dev, 1, 1) <0)
@@ -4546,7 +4573,7 @@ try_open_again:
 		usleep(500*1000);
 		//sleep(2);
 		/*check on-off cmd */
-		//property_get("fly.lidbg.uvccam.dvr.recording", startRecording, "0");
+		//property_get("fly.uvccam.dvr.recording", startRecording, "0");
 		switch_scan();
 		if((!strncmp(startRecording, "0", 1)) && (!do_save) )
 		{

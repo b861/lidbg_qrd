@@ -2096,12 +2096,12 @@ try_open_again:
         int rc = 0;
         char startRecording[PROPERTY_VALUE_MAX];
         ALOGD("%s: E", __func__);
-        property_get("fly.lidbg.uvccam.dvr.recording", startRecording, "0");
+        property_get("fly.uvccam.dvr.recording", startRecording, "0");
         if(!strncmp(startRecording, "1", 1))
         {
             ALOGI("-------uvccam recording -----");
             system("./flysystem/lib/out/lidbg_testuvccam /dev/video2 -b 1 -c -f H264 -r &");
-            property_set("fly.lidbg.uvccam.dvr.recording", "1");
+            property_set("fly.uvccam.dvr.recording", "1");
         }
         ALOGD("%s: X", __func__);
         return 0;
@@ -2112,7 +2112,7 @@ try_open_again:
         struct camera_device *mdevice = device;
         ALOGD("%s: E", __func__);
         ALOGI("-------uvccam stop_recording -----");
-        property_set("fly.lidbg.uvccam.dvr.recording", "0");
+        property_set("fly.uvccam.dvr.recording", "0");
         ALOGD("%s: X", __func__);
     }
 
