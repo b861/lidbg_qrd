@@ -466,7 +466,7 @@ int fly_interface_init(void)
     g_var.is_fly = 0;
     g_var.fake_suspend = 0;
 #ifdef SUSPEND_ONLINE	
-    g_var.acc_flag =  SOC_IO_Input(MCU_ACC_STATE_IO, MCU_ACC_STATE_IO, GPIO_CFG_PULL_UP);
+    g_var.acc_flag =  FLY_ACC_ON;//SOC_IO_Input(MCU_ACC_STATE_IO, MCU_ACC_STATE_IO, GPIO_CFG_PULL_UP);
 #endif
     g_var.ws_lh = NULL;
     g_var.fb_on = true;
@@ -487,6 +487,7 @@ int fly_interface_init(void)
     {
         g_var.recovery_mode = 1;
         g_var.android_boot_completed = 1;
+	 g_var.acc_flag =  FLY_ACC_ON;
         lidbg("system mode is recovery_mode,and set g_var.android_boot_completed = 1\n");
     }
     else

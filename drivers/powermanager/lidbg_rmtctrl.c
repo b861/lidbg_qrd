@@ -421,6 +421,8 @@ static int lidbg_rmtctrl_probe(struct platform_device *pdev)
 	
         if(g_var.recovery_mode == 0)
                 CREATE_KTHREAD(thread_check_acc_and_response_acc_off_delay, NULL);
+	else
+		g_var.acc_flag =  FLY_ACC_ON;
 
 	return 0;
 }
