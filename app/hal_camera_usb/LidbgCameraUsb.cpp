@@ -34,6 +34,7 @@ static int cam_id = -1;
 
 extern "C" {
 #include <sys/time.h>
+#include "jpeg2yuv/LidbgJpeg2Yuv.c"
 }
 
 #undef ALOGE
@@ -954,7 +955,7 @@ try_open_again:
     }
     static int getPreviewCaptureFmt(camera_hardware_t *camHal)
     {
-        int     i = 0, mjpegSupported = 0, h264Supported = 0;
+        int     i = 0, mjpegSupported = -1, h264Supported = -1;
         struct v4l2_fmtdesc fmtdesc;
 		struct v4l2_frmsizeenum	frmsize;
 
@@ -1027,8 +1028,21 @@ try_open_again:
               __func__, camHal->captureFormat, V4L2_PIX_FMT_YUYV,
               V4L2_PIX_FMT_MJPEG, V4L2_PIX_FMT_H264);
 
-        // return camHal->captureFormat;
-        return V4L2_PIX_FMT_YUYV;
+		char chooseMJEPG[PROPERTY_VALUE_MAX];
+	    property_get("persist.lidbg.uvccam.mjpeg", chooseMJEPG, "0");
+	    if((!strncmp(chooseMJEPG, "1", 1)) && (0 == mjpegSupported))
+		{
+			camHal->captureFormat = V4L2_PIX_FMT_MJPEG;
+			ALOGD("-------uvccam captureFormat use MJEPG -----");
+		}
+		else
+		{
+			camHal->captureFormat = V4L2_PIX_FMT_YUYV;
+			ALOGD("-------uvccam captureFormat use YUYV -----");
+		}
+
+		return camHal->captureFormat;
+        //return V4L2_PIX_FMT_YUYV;
     }
     static int initV4L2mmap(camera_hardware_t *camHal)
     {
@@ -1313,7 +1327,8 @@ try_open_again:
         v4l2format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         {
             v4l2format.fmt.pix.field       = V4L2_FIELD_ANY;
-            v4l2format.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
+            //v4l2format.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
+			v4l2format.fmt.pix.pixelformat = mpixelFormat;
             v4l2format.fmt.pix.width       = width;
             v4l2format.fmt.pix.height      = height;
 
@@ -1545,22 +1560,44 @@ try_open_again:
         }
         if(is_debug)
             ALOGD("%s: E", __func__);
-        if( (V4L2_PIX_FMT_YUYV == camHal->captureFormat) &&
-                (HAL_PIXEL_FORMAT_YCrCb_420_SP == camHal->dispFormat))
+
+        if(HAL_PIXEL_FORMAT_YCrCb_420_SP == camHal->dispFormat)
         {
-            if(is_debug)
-                ALOGD("%s: E.convert_YUYV_to_420_NV12", __func__);
-            convert_YUYV_to_420_NV12(
-                (char *)camHal->buffers[camHal->curCaptureBuf.index].data,
-                (char *)camHal->previewMem.camera_memory[buffer_id]->data,
-                camHal->prevWidth,
-                camHal->prevHeight);
-            if(is_debug)
-                ALOGD("%s: Copied %d bytes from camera buffer %d to display buffer: %d",
-                      __func__, camHal->curCaptureBuf.bytesused,
-                      camHal->curCaptureBuf.index, buffer_id);
-            rc = 0;
-        }
+			if(V4L2_PIX_FMT_YUYV == camHal->captureFormat)
+			{
+				if(is_debug)
+					ALOGD("%s: E.convert_YUYV_to_420_NV12", __func__);
+				convert_YUYV_to_420_NV12(
+					(char *)camHal->buffers[camHal->curCaptureBuf.index].data,
+					(char *)camHal->previewMem.camera_memory[buffer_id]->data,
+					camHal->prevWidth,
+					camHal->prevHeight);
+
+			}
+			if(V4L2_PIX_FMT_MJPEG == camHal->captureFormat)
+			{
+				if(is_debug)
+					ALOGD("%s: E.convert_JPEG_to_420_NV12", __func__);
+				char *ptmp = (char *)calloc(camHal->buffers[camHal->curCaptureBuf.index].len, sizeof(char));
+				memcpy(ptmp, camHal->buffers[camHal->curCaptureBuf.index].data, camHal->buffers[camHal->curCaptureBuf.index].len);
+				jpeg_init_decoder(camHal->prevWidth, camHal->prevHeight);
+				jpeg_decode(
+					(uint8_t *)camHal->buffers[camHal->curCaptureBuf.index].data,
+					(uint8_t *)ptmp,
+					camHal->curCaptureBuf.bytesused);
+				convert_YUYV_to_420_NV12(
+					(char *)ptmp,
+					(char *)camHal->previewMem.camera_memory[buffer_id]->data,
+					camHal->prevWidth,
+					camHal->prevHeight);
+					free(ptmp);
+			}
+			if(is_debug)
+				ALOGD("%s: Copied %d bytes from camera buffer %d to display buffer: %d",
+					__func__, camHal->curCaptureBuf.bytesused,
+					camHal->curCaptureBuf.index, buffer_id);
+			rc = 0;
+		}
         if(is_debug)
             ALOGD("%s: X", __func__);
         return rc;
