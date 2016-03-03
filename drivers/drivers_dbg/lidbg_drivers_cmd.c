@@ -310,6 +310,7 @@ void parse_cmd(char *pt)
 	     fs_mem_log("*158#070xx--set goto sleep time\n");
 	     fs_mem_log("*158#071--udisk stable test\n");
 	     fs_mem_log("*158#072--acc on/off udisk stable test\n");
+	     fs_mem_log("*158#073--log kmsg no screen flash\n");
 
             show_password_list();
             lidbg_domineering_ack();
@@ -349,6 +350,11 @@ void parse_cmd(char *pt)
             CREATE_KTHREAD(thread_enable_dmesg, NULL);
 #endif
             lidbg_domineering_ack();
+        }
+        else if (!strcmp(argv[1], "*158#073"))
+        {
+            lidbg_chmod("/data");
+            CREATE_KTHREAD(thread_enable_dmesg, NULL);
         }
         else if (!strcmp(argv[1], "*158#003"))
         {
