@@ -308,6 +308,8 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#068----update firmware for usb camera\n");
 	     fs_mem_log("*158#069----shut BT power\n");
 	     fs_mem_log("*158#070xx--set goto sleep time\n");
+	     fs_mem_log("*158#071--udisk stable test\n");
+	     fs_mem_log("*158#072--acc on/off udisk stable test\n");
 
             show_password_list();
             lidbg_domineering_ack();
@@ -757,15 +759,21 @@ void parse_cmd(char *pt)
             g_var.acc_goto_sleep_time = simple_strtoul((argv[1] + 8), 0, 0);
 	     lidbg("set acc_goto_sleep_time:%d\n",g_var.acc_goto_sleep_time);
         }
-        else if (!strcmp(argv[1], "*168#001"))
+        else if (!strcmp(argv[1], "*158#071"))
         {
-            encode = true;
-            lidbg_chmod("/data");
-            lidbg_fifo_get(glidbg_msg_fifo, LIDBG_LOG_DIR"lidbg_mem_log.txt", 0);
-            CREATE_KTHREAD(thread_dump_log, NULL);
+           lidbg("udisk stable test\n");
+	    g_var.udisk_stable_test = 1;
+	    lidbg_fs_log(USB_MOUNT_POINT"/udisk_stable_test", "udisk_stable_test\n");
+           lidbg_domineering_ack();
         }
-        lidbg_domineering_ack();
-    }
+        else if (!strcmp(argv[1], "*158#072"))
+        {
+           lidbg("acc on/off udisk stable test\n");
+	    lidbg_fs_log(USB_MOUNT_POINT"/udisk_stable_test", "udisk_stable_test\n");
+           g_var.udisk_stable_test = 2;
+           lidbg_domineering_ack();
+       }
+    	}
     else if(!strcmp(argv[0], "monkey") )
     {
         int enable, gpio, on_en, off_en, on_ms, off_ms;

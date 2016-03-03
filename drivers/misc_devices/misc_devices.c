@@ -67,6 +67,27 @@ void usb_camera_enable(bool enable)
     }
 }
 
+#define UDISK_LOG_PATH 	 LIDBG_LOG_DIR"udisk_stable_test.txt"
+static int thread_udisk_stable(void *data)
+{
+    static int cnt = 0;
+    static int err_cnt = 0;
+    cnt ++;
+    msleep(1000*10);
+    lidbg_domineering_ack();
+    if(g_var.usb_status == true)
+    {
+   	if(!fs_is_file_exist(USB_MOUNT_POINT"/udisk_stable_test"))
+   	{
+   		 err_cnt++;
+		 lidbg_fs_log(UDISK_LOG_PATH, "udisk_not_found:%d,%d\n", cnt,err_cnt);
+		 //lidbg_loop_warning();
+   	}
+	else
+	        lidbg("thread_udisk_stable:%d,%d\n", cnt,err_cnt);
+    }
+    return 1;
+}
 
 void usb_disk_enable(bool enable)
 {
@@ -83,6 +104,8 @@ void usb_disk_enable(bool enable)
     {
     	 wake_lock(&device_wakelock);
         USB_WORK_ENABLE;
+	 if(g_var.udisk_stable_test != 0)
+	 	 CREATE_KTHREAD(thread_udisk_stable, NULL);
     }
     else
     {
@@ -404,7 +427,8 @@ void usb_enumerate_monitor(char *key_word, void *data)
 int thread_udisk_stability_test(void *data)
 {
     u32 cnt = 0;
-    ssleep(30);
+    while(g_var.udisk_stable_test != 1)
+    	ssleep(1);
     while(1)
     {
         usb_disk_enable(1);
@@ -478,7 +502,7 @@ static int soc_dev_probe(struct platform_device *pdev)
 
     FS_REGISTER_INT(udisk_stability_test, "udisk_stability_test", 0, NULL);
 
-    if(udisk_stability_test == 1)
+  //  if(udisk_stability_test == 1)
     {
         CREATE_KTHREAD(thread_udisk_stability_test, NULL);
     }
@@ -579,6 +603,7 @@ void lidbg_device_main(int argc, char **argv)
     }
 }
 EXPORT_SYMBOL(lidbg_device_main);
+
 MODULE_AUTHOR("fly, <fly@gmail.com>");
 MODULE_DESCRIPTION("Devices Driver");
 MODULE_LICENSE("GPL");

@@ -482,7 +482,7 @@ int fly_interface_init(void)
     g_var.acc_goto_sleep_time = 0;
     g_var.suspend_timeout_protect = 0;
     g_var.android_boot_completed = 0;
-	
+    g_var.udisk_stable_test = 0;
     if(gboot_mode == MD_RECOVERY)
     {
         g_var.recovery_mode = 1;

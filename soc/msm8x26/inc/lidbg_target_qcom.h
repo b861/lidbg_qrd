@@ -172,7 +172,7 @@
 				SOC_IO_Suspend_Config(g_hw.gpio_usb_id,GPIOMUX_OUT_HIGH,GPIO_CFG_NO_PULL,GPIOMUX_DRV_2MA);\
 		}while(0)
 
-
+#ifdef PLATFORM_msm8909
 #define USB_POWER_FRONT_ENABLE do{\
 			LPC_CMD_USB5V_ON;\
 			check_gpio(g_hw.gpio_usb_power);\
@@ -206,6 +206,12 @@
 			SOC_IO_Output(0, g_hw.gpio_usb_backcam_en, 0);\
 			USB_ID_HIGH_DEV;\
 	}while(0)
+#else
+#define USB_POWER_FRONT_ENABLE
+#define USB_POWER_FRONT_DISABLE
+#define USB_POWER_BACK_ENABLE
+#define USB_POWER_BACK_DISABLE
+#endif
 
 #ifdef PLATFORM_msm8974
 #ifdef PLATFORM_ID_14

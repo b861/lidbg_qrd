@@ -336,6 +336,8 @@ struct lidbg_pvar_t
     int acc_goto_sleep_time;	
     int flyaudio_reboot;
     int is_phone_in_call_state;
+    int udisk_stable_test;
+
 };
 
 typedef struct

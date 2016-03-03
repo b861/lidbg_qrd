@@ -398,11 +398,11 @@ static int thread_gpio_app_status_delay(void *data)
 {
     ssleep(10);
     LPC_PRINT(true, g_var.sleep_counter, "PM:MCU_WP_GPIO_ON1");
-    while(0==g_var.android_boot_completed)
-    {
-        ssleep(10);
-        PM_WARN("<wait android_boot_completed : %d>\n",g_var.android_boot_completed);
-    };
+    //while(0==g_var.android_boot_completed)
+    //{
+    //    ssleep(10);
+    //   PM_WARN("<wait android_boot_completed : %d>\n",g_var.android_boot_completed);
+    //};
     PM_WARN("<set MCU_APP_GPIO_ON >\n");
     LPC_PRINT(true, g_var.sleep_counter, "PM:MCU_APP_GPIO_ON2");
     MCU_APP_GPIO_ON;
