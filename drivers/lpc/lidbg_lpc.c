@@ -63,7 +63,7 @@ struct lpc_device *dev;
 
 int lpc_ping_test = 0;
 int lpc_ctrl_by_app = 0;
-#define LPC_DEBUG_LOG
+//#define LPC_DEBUG_LOG
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
 static void lpc_early_suspend(struct early_suspend *handler);
@@ -167,7 +167,7 @@ void LPCCombinDataStream(BYTE *p, UINT len)
     ret = SOC_I2C_Send(LPC_I2_ID, MCU_ADDR, buf, 3 + i + 1);
 #endif
 
-#ifdef LPC_DEBUG_LOG
+#if 1 //def LPC_DEBUG_LOG
     lidbg("ToMCU.%d:%x %x %x\n", ret, p[0], p[1], p[2]);
 #endif
 
@@ -182,10 +182,11 @@ void LPCCombinDataStream(BYTE *p, UINT len)
 static void LPCdealReadFromMCUAll(BYTE *p, UINT length)
 {
 #if 1
-#ifdef LPC_DEBUG_LOG
     {
         u32 i;
         u8 val[4] = {0};
+		
+#ifdef LPC_DEBUG_LOG
         lidbg("From LPC:");//mode ,command,para
         for(i = 0; i < length; i++)
         {
@@ -193,6 +194,8 @@ static void LPCdealReadFromMCUAll(BYTE *p, UINT length)
 
         }
         lidbg("\n");
+#endif
+
         if(p[0] == 0x05 && p[1] == 0x05)
         {
             val[0] = p[2];
@@ -211,7 +214,6 @@ static void LPCdealReadFromMCUAll(BYTE *p, UINT length)
 
 
     }
-#endif
 
     switch (p[0])
     {
