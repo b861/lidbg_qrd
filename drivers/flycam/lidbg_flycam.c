@@ -1420,10 +1420,6 @@ static struct dev_pm_ops flycam_ops =
 
 static int flycam_probe(struct platform_device *pdev)
 {
-	camStatus_fifo_buffer = (u8 *)kmalloc(FIFO_SIZE , GFP_KERNEL);
-    camStatus_data_for_hal = (u8 *)kmalloc(HAL_BUF_SIZE , GFP_KERNEL);
-	sema_init(&pfly_UsbCamInfo->sem, 1);
-    kfifo_init(&camStatus_data_fifo, camStatus_fifo_buffer, FIFO_SIZE);
     return 0;
 }
 
@@ -1451,7 +1447,6 @@ static struct platform_driver flycam_driver =
 
 int thread_flycam_init(void *data)
 {
-    lidbg_new_cdev(&flycam_nod_fops, "lidbg_flycam");
 	lidbg("%s:------------start------------\n",__func__);
 #if 0
 	SOC_IO_Input(BACK_DET, BACK_DET, GPIO_CFG_PULL_UP);
@@ -1472,21 +1467,25 @@ int thread_flycam_init(void *data)
         lidbg("[cam]:kmalloc err\n");
         return -ENOMEM;
     }
+	
+	camStatus_fifo_buffer = (u8 *)kmalloc(FIFO_SIZE , GFP_KERNEL);
+    camStatus_data_for_hal = (u8 *)kmalloc(HAL_BUF_SIZE , GFP_KERNEL);
+	sema_init(&pfly_UsbCamInfo->sem, 1);
+    kfifo_init(&camStatus_data_fifo, camStatus_fifo_buffer, FIFO_SIZE);
 
 	//init_waitqueue_head(&wait_queue);
 	init_waitqueue_head(&pfly_UsbCamInfo->camStatus_wait_queue);/*camera status wait queue*/
 	usb_register_notify(&usb_nb_cam);/*USB notifier*/
-
+	
 	if(g_var.recovery_mode == 0)/*do not process when in recovery mode*/
 	{
+		CREATE_KTHREAD(thread_stop_rec_func, NULL);
 		register_lidbg_notifier(&lidbg_notifier);/*ACCON/OFF notifier*/
-		
 		/*Stop recording timer(in ACCOFF scene)*/
 		init_timer(&suspend_stoprec_timer);
 	    suspend_stoprec_timer.data = 0;
 	    suspend_stoprec_timer.expires = 0;
 	    suspend_stoprec_timer.function = suspend_stoprec_timer_isr;
-	    
 #if 0
 		INIT_WORK(&work_t_start_rec, work_startRec);
 	    INIT_WORK(&work_t_stop_rec, work_stopRec);
@@ -1506,6 +1505,7 @@ int thread_flycam_init(void *data)
 			schedule_delayed_work(&work_t_RearView_fixScreenBlurred,15*HZ);/*at about kernel 35s, lidbgshell it's ready*/
 		else isRearViewFirstInit = 0;
 	}
+	lidbg_new_cdev(&flycam_nod_fops, "lidbg_flycam");
     return 0;
 }
 
@@ -1514,7 +1514,6 @@ static __init int lidbg_flycam_init(void)
     DUMP_BUILD_TIME;
     LIDBG_GET;
     CREATE_KTHREAD(thread_flycam_init, NULL);
-	CREATE_KTHREAD(thread_stop_rec_func, NULL);
 	platform_device_register(&flycam_devices);
     platform_driver_register(&flycam_driver);
     return 0;
