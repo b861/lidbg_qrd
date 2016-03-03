@@ -15,7 +15,7 @@ struct miscdevice lidbg_uevent_device;
 int uevent_dbg = 0;
 struct mutex lock;
 static struct kfifo cmd_fifo;
-#define FIFO_SIZE (1024)
+#define FIFO_SIZE (1024*3)
 u8 *cmd_fifo_buffer;
 //static DECLARE_COMPLETION(cmd_ready);
 struct mutex fifo_lock;
