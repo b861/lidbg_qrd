@@ -203,7 +203,6 @@ public class FlyBootService extends Service {
 							if(pmState == FBS_SCREEN_OFF){
 								LIDBG_PRINT("FlyBootService get pm state: FBS_SCREEN_OFF");
 								SendBroadcastToService(KeyBootState, keyScreenOFF);
-								FlyaudioInternetDisable();
 							}else if(pmState == FBS_DEVICE_DOWN){
 								LIDBG_PRINT("FlyBootService get pm state: FBS_DEVICE_DOWN");
 								final boolean booleanRemoteControl = SystemProperties.getBoolean("persist.lidbg.RmtCtrlenable",false);
@@ -218,6 +217,7 @@ public class FlyBootService extends Service {
 								LIDBG_PRINT("FlyBootService get pm state: FBS_FASTBOOT_REQUEST");
 							}else if(pmState == FBS_ANDROID_DOWN){
 								LIDBG_PRINT("FlyBootService get pm state: FBS_ANDROID_DOWN");
+								FlyaudioInternetDisable();
 								SendBroadcastToService(KeyBootState, keyFastSusupendOFF);
 								start_fastboot();
 							}else if(pmState == FBS_GOTO_SLEEP){
@@ -235,6 +235,8 @@ public class FlyBootService extends Service {
 								}
 							}else if(pmState == FBS_ANDROID_UP){
 								LIDBG_PRINT("FlyBootService get pm state: FBS_ANDROID_UP");
+								InternetEnable();
+								FlyaudioInternetEnable();
 								SendBroadcastToService(KeyBootState, keyFastSusupendON);
 								sendBroadcast(new Intent(SYSTEM_RESUME));
 								Intent intentBoot = new Intent(Intent.ACTION_BOOT_COMPLETED);
@@ -248,8 +250,6 @@ public class FlyBootService extends Service {
 							}else if(pmState == FBS_SCREEN_ON){
 								LIDBG_PRINT("FlyBootService get pm state: FBS_SCREEN_ON");
 								acquireWakeLock();
-								InternetEnable();
-								FlyaudioInternetEnable();
 								SendBroadcastToService(KeyBootState, keyScreenOn);
 								system_resume();
 							}else if(pmState == FBS_SLEEP_TIMEOUT){
