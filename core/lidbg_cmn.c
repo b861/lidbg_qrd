@@ -332,8 +332,8 @@ int  lidbg_force_stop_apk(char packagename[])
 int  lidbg_toast_show(char *string, int int_value)
 {
     char para[128] = {0};
-    sprintf(para, "--es action \"%s\" --ei int %d &", string ? string : "null", int_value);
-    return lidbg_launch_user(get_bin_path("am"), "broadcast", "-a", "com.lidbg.broadcast", para, NULL, NULL);
+    sprintf(para, "am broadcast -a com.lidbg.flybootserver.action --es toast  %s &", string ? string : "null");
+    return lidbg_shell_cmd(para);
 }
 
 void pm_install_apk(char apkpath[])

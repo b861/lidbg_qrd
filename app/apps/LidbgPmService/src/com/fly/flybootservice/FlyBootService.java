@@ -60,6 +60,7 @@ import android.content.IntentFilter;
 import java.util.ArrayList;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.widget.Toast;
 /*
  * ScreenOn ScreenOff DeviceOff Going2Sleep 四种状态分别表示：1.表示正常开屏状态2.表示关屏，但没关外设的状态
  * 0'~30'的阶段3.表示关屏关外设，但没到点进入深度休眠 30'~60'的阶段4.表示发出休眠请求到执行快速休眠 60'后,即进入深度休眠
@@ -118,6 +119,8 @@ public class FlyBootService extends Service {
     private boolean dbgMode = true;
     private boolean mFlyaudioInternetActionEn = true;
     private boolean mKillProcessEn = true;
+    private Toast toast = null;
+
 
     String mInternelBlackList[] = {
             "com.qti.cbwidget"
@@ -278,6 +281,23 @@ public class FlyBootService extends Service {
 		FBS_SCREEN_ON = 10;
 	}
 
+	public void showToastQuick(String toast_string)
+	{
+		// TODO Auto-generated method stub
+		if (toast_string != null)
+		{
+			if (toast == null)
+			{
+				toast = Toast.makeText(this, toast_string,
+						Toast.LENGTH_LONG);
+			} else
+			{
+				toast.setText(toast_string);
+			}
+			toast.show();
+		}
+	}
+
 	//am broadcast -a com.lidbg.flybootserver.action --ei action 0
 	private BroadcastReceiver myReceiver = new BroadcastReceiver()
 	{
@@ -309,7 +329,14 @@ public class FlyBootService extends Service {
 			}
 
 
-
+			if (intent.hasExtra("toast"))
+			{
+				String toastString = intent.getExtras().getString("toast");
+				showToastQuick(toastString);
+				LIDBG_PRINT("BroadcastReceiver.toast:["+toastString+"].return\n");
+				return;
+			}
+			
 			if ( !intent.hasExtra("action"))
 			{
 				LIDBG_PRINT("err.return:!intent.hasExtra(\"action\")\n");
