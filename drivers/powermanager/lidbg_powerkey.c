@@ -251,7 +251,7 @@ static int lidbg_powerkey_probe(struct platform_device *pdev)
 	int ret;
 
 	init_timer(&timer);
-	timer.function = &powerkey_suspend_timer;
+	timer.function = powerkey_suspend_timer;
 	timer.data = 0;
 	timer.expires = 0;
 

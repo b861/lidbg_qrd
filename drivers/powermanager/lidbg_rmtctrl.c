@@ -399,12 +399,12 @@ static int lidbg_rmtctrl_probe(struct platform_device *pdev)
 	lidbg("rmtctrl probe: MCU_APP_GPIO_ON\n");
 
 	init_timer(&acc_detect_timer);
-	acc_detect_timer.function = &acc_detect_timer_func;
+	acc_detect_timer.function = acc_detect_timer_func;
 	acc_detect_timer.data = 0;
 	acc_detect_timer.expires = 0;
 
 	init_timer(&rmtctrl_timer);
-	rmtctrl_timer.function = &rmtctrl_timer_func;
+	rmtctrl_timer.function = rmtctrl_timer_func;
 	rmtctrl_timer.data = 0;
 	rmtctrl_timer.expires = 0;
 
