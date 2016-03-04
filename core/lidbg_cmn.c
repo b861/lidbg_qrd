@@ -333,7 +333,8 @@ int  lidbg_toast_show(char *string, int int_value)
 {
     char para[128] = {0};
     sprintf(para, "am broadcast -a com.lidbg.flybootserver.action --es toast  %s &", string ? string : "null");
-    return lidbg_shell_cmd(para);
+    lidbg_shell_cmd(para);
+    return 1;
 }
 
 void pm_install_apk(char apkpath[])
