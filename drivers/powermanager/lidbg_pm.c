@@ -752,7 +752,7 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         else  if(!strcmp(cmd[1], "toast"))
         {
             int  enum_value = simple_strtoul(cmd[3], 0, 0);
-            lidbg_toast_show(cmd[2], enum_value);
+            lidbg_toast_show("lidbg_pm:",cmd[2]);
         }
         else  if(!strcmp(cmd[1], "udisk_reset"))
         {

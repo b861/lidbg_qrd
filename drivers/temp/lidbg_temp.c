@@ -94,11 +94,7 @@ int thread_show_temp(void *data)
 {
     while(1)
     {
-        //char cpufrq[50];
-        //int tmp = cpufreq_get(0);
         int cur_temp = soc_temp_get(g_hw.mem_sensor_num);
-        //sprintf(cpufrq, "%d", tmp);
-        //lidbg_toast_show(cpufrq, cur_temp);
         lidbg( "%d,%d,%d\n", cur_temp, get_scaling_max_freq(), cpufreq_get(0));
         msleep(1000);
     }
@@ -319,7 +315,7 @@ int thread_start_cpu_tmp_test(void *data)
     fs_file_separator(TEMP_FREQ_TEST_RESULT);
 
     sprintf(buff, "[%s]%d,%d", group[freq_pos], freq_pos, group_num);
-    lidbg_toast_show(buff, 0);
+    lidbg_toast_show("temp:",buff);
 
     while(1)
     {
@@ -337,7 +333,7 @@ int thread_start_cpu_tmp_test(void *data)
 err:
     is_cpu_temp_enabled = false;
     sprintf(buff, "cpu_tmp_test.stop:%d,%d", freq_pos, group_num);
-    lidbg_toast_show(buff, 0);
+    lidbg_toast_show("temp:",buff);
     lidbg_rm(TEMP_FREQ_COUNTER);
     fs_string2file(100, TEMP_FREQ_TEST_RESULT, "-------stop-------\n");
     return 0;

@@ -846,7 +846,7 @@ void parse_cmd(char *pt)
         int len = fs_file_read(argv[1], buff, 0, sizeof(buff));
         buff[len - 1] = '\0';
         lidbg("%d,%s:[%s]\n", len, argv[1], buff);
-	lidbg_toast_show(buff, 0);
+	lidbg_toast_show("fread:",buff);
     }
     else if(!strcmp(argv[0], "fwrite") )
     {
