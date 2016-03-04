@@ -233,7 +233,9 @@ static int lidbg_dev_event(struct notifier_block *this,
         		lidbg("LCD_ON3\n");
         		LCD_ON;
         }
-
+#ifdef FLY_USB_CAMERA_SUPPORT
+		CREATE_KTHREAD(thread_usb_disk_enable_delay, NULL);
+#endif
         //lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_APP_ON));
         //lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_HAL_ON));
     }
