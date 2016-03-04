@@ -2830,6 +2830,34 @@ int main(int argc, char *argv[])
     }
     //yiling --
 
+	flycam_fd = open("/dev/lidbg_flycam0", O_RDWR);
+	if((flycam_fd == 0xfffffffe) || (flycam_fd == 0) || (flycam_fd == 0xffffffff))
+	{
+	    lidbg("open lidbg_flycam0 fail\n");
+		close(flycam_fd);
+	    return 0;
+	}
+
+
+	/*
+		ACCON Block mode
+		W:	return [0-OK;1-Timout]	W[0-Rear;1-DVR] -> Wait for 10s
+	*/
+	if(cam_id > 1)
+	{
+		int ret_acc;
+		lidbg("********ACC FIRST RESUME*********\n");
+		ret_acc = ioctl(flycam_fd,_IO(FLYCAM_STATUS_IOC_MAGIC, NR_ACCON_CAM_READY), cam_id -2);
+		lidbg("********ACC ret => %d*********\n",ret_acc);
+		if (ret_acc != 0)
+	    {
+	      	lidbg("%s:===Wait ACCON Camera PLUG IN Timeout!!End Wait proc!====\n",__func__);
+			close(flycam_fd);
+			return 0;
+		}	
+		cam_id -= 2;
+	}
+
 	/* Open the video device. */
 	//dev = video_open(argv[optind]);
 getuvcdevice:
@@ -2849,15 +2877,6 @@ openfd:
 	
 	if (dev < 0)
 		return 1;
-
-	flycam_fd = open("/dev/lidbg_flycam0", O_RDWR);
-	if((flycam_fd == 0xfffffffe) || (flycam_fd == 0) || (flycam_fd == 0xffffffff))
-	{
-	    lidbg("open lidbg_flycam0 fail\n");
-		close(dev);
-		close(flycam_fd);
-	    return 0;
-	}
 
 	send_driver_msg(FLYCAM_STATUS_IOC_MAGIC,NR_STATUS,RET_START);
 	

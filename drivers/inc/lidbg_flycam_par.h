@@ -18,6 +18,7 @@ typedef enum {
 
 typedef enum {
   NR_STATUS,
+  NR_ACCON_CAM_READY,
 }status_ctrl_t;
 
 typedef enum {
