@@ -6,8 +6,8 @@ LIDBG_DEFINE;
 
 static void work_DVR_fixScreenBlurred(struct work_struct *work);
 static void work_RearView_fixScreenBlurred(struct work_struct *work);
-static int start_rec(char cam_id);
-static int stop_rec(char cam_id);
+static int start_rec(char cam_id,char isPowerCtl);
+static int stop_rec(char cam_id,char isPowerCtl);
 
 /*camStatus mask*/
 #define FLY_CAM_ISVALID	0x01
@@ -168,7 +168,7 @@ static int thread_stop_rec_func(void *data)
 	while(1)
 	{
 		wait_for_completion(&timer_stop_rec_wait);
-		if(stop_rec(DVR_ID))lidbg("%s:====return fail====\n",__func__);
+		if(stop_rec(DVR_ID,1))lidbg("%s:====return fail====\n",__func__);
 	}
 	return 0;
 }
@@ -401,16 +401,24 @@ static int usb_nb_cam_func(struct notifier_block *nb, unsigned long action, void
 			{
 				//if(isRearViewFirstInit) schedule_delayed_work(&work_t_RearView_fixScreenBlurred, 11);
 				//else schedule_delayed_work(&work_t_RearView_fixScreenBlurred, 0);
+#if 0
 				if(isRearFirstResume) complete(&Rear_ready_wait);
 				else schedule_delayed_work(&work_t_RearView_fixScreenBlurred, 0);	
+#endif
+				complete(&Rear_ready_wait);
+				if(!isRearFirstResume) schedule_delayed_work(&work_t_RearView_fixScreenBlurred, 0);
 			}	
 			/*DVR*/
 			if(!(oldCamStatus & FLY_CAM_ISVALID) && (pfly_UsbCamInfo->camStatus & FLY_CAM_ISSONIX) && !isDVRFirstInit)
 			{
 				//if(isDVRFirstInit) schedule_delayed_work(&work_t_DVR_fixScreenBlurred, 10);
 				//else schedule_delayed_work(&work_t_DVR_fixScreenBlurred, 0);
+#if 0
 				if(isDVRFirstResume) complete(&DVR_ready_wait);
   			    else schedule_delayed_work(&work_t_DVR_fixScreenBlurred, 0);
+#endif
+				complete(&DVR_ready_wait);
+				if(!isDVRFirstResume) schedule_delayed_work(&work_t_DVR_fixScreenBlurred, 0);
 			}
 			else if(!(oldCamStatus & FLY_CAM_ISVALID) && !(pfly_UsbCamInfo->camStatus & FLY_CAM_ISSONIX) &&(pfly_UsbCamInfo->camStatus & FLY_CAM_ISVALID) )
 				status_fifo_in(RET_NOT_SONIX);
@@ -436,18 +444,16 @@ static struct notifier_block usb_nb_cam =
  *   	1	-	await sonix AP return timeout
  * Notes: none
  *****************************************************************************/
-static int start_rec(char cam_id)
+static int start_rec(char cam_id,char isPowerCtl)
 {
 	char temp_cmd[256];	
 	char cam_id_mode = cam_id;
 	lidbg("%s:====E====\n",__func__);
 	pfly_UsbCamInfo->read_status = RET_DEFALUT;
 	if(isSuspend) mod_timer(&suspend_stoprec_timer,SUSPEND_STOPREC_ONLINE_TIME);
+	if(isPowerCtl) lidbg_shell_cmd("echo 'udisk_request' > /dev/flydev0");//don't control HUB power in rearview
     if(cam_id == DVR_ID)
-    {
-		lidbg_shell_cmd("echo 'udisk_request' > /dev/flydev0");//don't control HUB power in rearview
 		lidbg_shell_cmd("setprop fly.uvccam.dvr.recording 1");
-    }
 	else if(cam_id == REARVIEW_ID)
 		lidbg_shell_cmd("setprop fly.uvccam.rearview.recording 1");
 	if(((isDVRFirstResume) && (cam_id == DVR_ID)) || ((isRearFirstResume) && (cam_id == REARVIEW_ID)))
@@ -477,7 +483,7 @@ static int start_rec(char cam_id)
  *   	1	-	await sonix AP return timeout
  * Notes: none
  *****************************************************************************/
-static int stop_rec(char cam_id)
+static int stop_rec(char cam_id,char isPowerCtl)
 {
 	char ret = 0;
 	lidbg("%s:====E====\n",__func__);
@@ -496,7 +502,7 @@ static int stop_rec(char cam_id)
 			lidbg("%s:====read_status wait timeout => %d====\n",__func__,pfly_UsbCamInfo->read_status);
 			ret = 1; 
 		}
-		lidbg_shell_cmd("echo 'udisk_unrequest' > /dev/flydev0");//don't control HUB power in rearview
+		if(isPowerCtl) lidbg_shell_cmd("echo 'udisk_unrequest' > /dev/flydev0");//don't control HUB power in rearview
 	}
 	lidbg("%s:====X====\n",__func__);
 	return ret;
@@ -511,15 +517,23 @@ static int stop_rec(char cam_id)
  *		none
  * Notes: none
  *****************************************************************************/
-static void fixScreenBlurred(char cam_id)
+static void fixScreenBlurred(char cam_id , char isOnline)
 {
 	if(cam_id == DVR_ID)
 	{
 		lidbg_shell_cmd("setprop fly.uvccam.dvr.res 640x360");
 		lidbg_shell_cmd("setprop fly.uvccam.dvr.recpath /storage/sdcard0/camera_rec/");
-		if(start_rec(cam_id))lidbg("%s:====return fail====\n",__func__);
-		msleep(3500);
-		if(stop_rec(cam_id))lidbg("%s:====return fail====\n",__func__);
+		if(start_rec(cam_id,1))lidbg("%s:====return fail====\n",__func__);
+		if(isOnline) 
+		{
+			msleep(3000);
+			if(stop_rec(cam_id,0))lidbg("%s:====return fail====\n",__func__);
+		}
+		else 
+		{
+			msleep(3500);
+			if(stop_rec(cam_id,1))lidbg("%s:====return fail====\n",__func__);
+		}
 		lidbg_shell_cmd("setprop fly.uvccam.dvr.res 1280x720");
 		lidbg_shell_cmd("rm -f /storage/sdcard0/camera_rec/tmp*.h264&");
 	}
@@ -527,9 +541,17 @@ static void fixScreenBlurred(char cam_id)
 	{
 		lidbg_shell_cmd("setprop fly.uvccam.rearview.res 640x360");
 		lidbg_shell_cmd("setprop fly.uvccam.rearview.recpath /storage/sdcard0/");//must different path
-		if(start_rec(cam_id))lidbg("%s:====return fail====\n",__func__);
-		msleep(5000);
-		if(stop_rec(cam_id))lidbg("%s:====return fail====\n",__func__);
+		if(start_rec(cam_id,1))lidbg("%s:====return fail====\n",__func__);
+		if(isOnline) 
+		{
+			msleep(2000);
+			if(stop_rec(cam_id,0))lidbg("%s:====return fail====\n",__func__);
+		}
+		else 
+		{
+			msleep(5000);
+			if(stop_rec(cam_id,1))lidbg("%s:====return fail====\n",__func__);
+		}
 		lidbg_shell_cmd("setprop fly.uvccam.rearview.res 1280x720");
 		lidbg_shell_cmd("rm -f /storage/sdcard0/tmp*.h264&");
 	}
@@ -560,7 +582,7 @@ static void work_DVR_fixScreenBlurred(struct work_struct *work)
 			return;
 		}
 	}
-	fixScreenBlurred(DVR_ID);
+	fixScreenBlurred(DVR_ID,0);
 	isDVRFirstInit = 0;
 	isDVRAfterFix = 1;
 	isDVRFirstResume = 0;
@@ -592,7 +614,7 @@ static void work_RearView_fixScreenBlurred(struct work_struct *work)
 			return;
 		}
 	}
-	fixScreenBlurred(REARVIEW_ID);
+	fixScreenBlurred(REARVIEW_ID,0);
 	isRearViewFirstInit = 0;
 	isRearViewAfterFix = 1;
 	isRearFirstResume = 0;
@@ -848,14 +870,14 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 				{
 					lidbg("%s:====DVR restart rec====\n",__func__);
 					isDVRRec = 1;
-					if(stop_rec(DVR_ID)) goto failproc;
-					if(start_rec(DVR_ID)) goto failproc;
+					if(stop_rec(DVR_ID,1)) goto failproc;
+					if(start_rec(DVR_ID,1)) goto failproc;
 				}
 				else 
 				{
 					lidbg("%s:====DVR start rec====\n",__func__);
 					isDVRRec = 1;
-					if(start_rec(DVR_ID)) goto failproc;
+					if(start_rec(DVR_ID,1)) goto failproc;
 				}
 		        break;
 			case NR_STOP_REC:
@@ -863,7 +885,7 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 				if(isDVRRec)
 				{
 					lidbg("%s:====DVR stop rec====\n",__func__);
-					if(stop_rec(DVR_ID)) goto failproc;
+					if(stop_rec(DVR_ID,1)) goto failproc;
 					isDVRRec = 0;
 				}
 				else if(isOnlineRec) 
@@ -881,9 +903,9 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 				lidbg("%s:DVR NR_SET_PAR\n",__func__);
 				if(isDVRRec)
 				{
-					if(stop_rec(DVR_ID)) goto failproc;
+					if(stop_rec(DVR_ID,1)) goto failproc;
 					setDVRProp(DVR_ID);
-					if(start_rec(DVR_ID)) goto failproc;
+					if(start_rec(DVR_ID,1)) goto failproc;
 				}
 		        break;
 		    default:
@@ -952,7 +974,7 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 				{
 					lidbg("%s:====Online start rec====\n",__func__);
 					isOnlineRec = 1;
-					if(start_rec(DVR_ID)) goto failproc;
+					if(start_rec(DVR_ID,1)) goto failproc;
 				}
 		        break;
 			case NR_STOP_REC:
@@ -965,7 +987,7 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 				else if(isOnlineRec) 
 				{
 					lidbg("%s:====Online stop rec====\n",__func__);
-					if(stop_rec(DVR_ID)) goto failproc;
+					if(stop_rec(DVR_ID,1)) goto failproc;
 					isOnlineRec = 0;
 				}
 				else
@@ -1017,7 +1039,7 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 	else return -EINVAL;
     return ret;
 failproc:
-	stop_rec(DVR_ID);
+	stop_rec(DVR_ID,1);
 	isDVRRec = 0;
 	isOnlineRec = 0;
 	return RET_FAIL;
@@ -1153,8 +1175,25 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 			{
 			    lidbg("%s:==write==Online NR_START_REC\n",__func__);
 				lidbg_shell_cmd("echo 'udisk_request' > /dev/flydev0");
-				setOnlineProp(DVR_ID);
+				//setOnlineProp(DVR_ID);
 				checkSDCardStatus(f_online_path);
+				if(!(pfly_UsbCamInfo->camStatus & FLY_CAM_ISVALID))/*Camera not valid*/
+				{
+					if( isSuspend)
+					{
+						lidbg("%s:==write==ACCOFF wait Camera Begin!====\n",__func__);
+						if(!wait_for_completion_timeout(&DVR_ready_wait , 6*HZ)) /*ACCOFF wait for 6sec*/
+						{
+							lidbg("%s:==write==ACCOFF wait Camera Timeout!====\n",__func__);
+							goto failproc;
+						}
+					}
+					else 
+					{
+						lidbg("%s:==write==ACCON can not found Camera!Force exit!====\n",__func__);/*ACCON don't wait*/
+						goto failproc;
+					}
+				}
 				if(isDVRRec)
 				{
 					lidbg("%s:==write==Online start cmd neglected====\n",__func__);
@@ -1169,7 +1208,9 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 				{
 					lidbg("%s:==write==Online start rec====\n",__func__);
 					isOnlineRec = 1;
-					if(start_rec(DVR_ID)) goto failproc;
+					if(isSuspend) fixScreenBlurred(DVR_ID,1);
+					setOnlineProp(DVR_ID);
+					if(start_rec(DVR_ID,1)) goto failproc;
 				}
 			}
 			else if(!strncmp(keyval[1], "0", 1))//stop
@@ -1183,7 +1224,7 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 				else if(isOnlineRec) 
 				{
 					lidbg("%s:==write==Online stop rec====\n",__func__);
-					if(stop_rec(DVR_ID)) goto failproc;
+					if(stop_rec(DVR_ID,1)) goto failproc;
 					isOnlineRec = 0;
 				}
 				else
@@ -1401,7 +1442,8 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
   
     return size;
 failproc:
-	stop_rec(DVR_ID);
+	lidbg("=====Flycam Write operation error!======\n");
+	stop_rec(DVR_ID,1);
 	isDVRRec = 0;
 	isOnlineRec = 0;
 	return size;
