@@ -2139,10 +2139,12 @@ static int goodix_ac_ts_suspend(struct device *dev)
     return ret;
 }
 
-static int goodix_ac_ts_resume(struct device *dev)
+
+static int goodix_ac_ts_resume_thread(void *data)
 {
-    struct goodix_ts_data *ts = dev_get_drvdata(dev);
-    int ret = 0;
+    int ret = -1;
+    struct goodix_ts_data *ts = data;
+    FUNCTION_IN;
 
     if (!ts->gtp_is_suspend)
     {
@@ -2183,7 +2185,16 @@ static int goodix_ac_ts_resume(struct device *dev)
 #endif
 
     printk("[TP] goodix_ts_resume ret=%d\n", ret);
-    return ret;
+    return 0;
+}
+
+
+
+static int goodix_ac_ts_resume(struct device *dev)
+{
+    struct goodix_ts_data *ts = dev_get_drvdata(dev);
+    CREATE_KTHREAD(goodix_ac_ts_resume_thread, (void *)ts);
+    return 0;
 }
 
 static const struct dev_pm_ops goodix_ts_dev_pm_ops =
@@ -2255,12 +2266,13 @@ Input:
 Output:
 	None.
 *******************************************************/
-static void goodix_ts_resume(struct goodix_ts_data *ts)
+
+
+static int goodix_ts_resume_thread(void *data)
 {
     int ret = -1;
-
-    GTP_DEBUG_FUNC();
-
+    struct goodix_ts_data *ts = data;
+    FUNCTION_IN;
     ret = gtp_wakeup_sleep(ts);
 
 #if GTP_SLIDE_WAKEUP
@@ -2285,6 +2297,13 @@ static void goodix_ts_resume(struct goodix_ts_data *ts)
 
     gtp_esd_switch(ts->client, SWITCH_ON);
 #endif
+    return 1;
+
+}
+static void goodix_ts_resume(struct goodix_ts_data *ts)
+{
+    GTP_DEBUG_FUNC();
+    CREATE_KTHREAD(goodix_ts_resume_thread, (void *)ts);
 }
 
 #if defined(CONFIG_FB)
