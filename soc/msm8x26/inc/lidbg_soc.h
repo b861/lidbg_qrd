@@ -58,6 +58,10 @@
 #endif
 
 #ifdef PLATFORM_msm8909
+#define FLY_USB_CAMERA_SUPPORT
+#endif
+
+#ifdef PLATFORM_msm8909
 #include <soc/qcom/smem.h>
 
 #else

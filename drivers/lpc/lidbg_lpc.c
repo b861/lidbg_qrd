@@ -183,10 +183,11 @@ static void LPCdealReadFromMCUAll(BYTE *p, UINT length)
 {
 #if 1
     {
-        u32 i;
+       
         u8 val[4] = {0};
 		
 #ifdef LPC_DEBUG_LOG
+ 	u32 i;
         lidbg("From LPC:");//mode ,command,para
         for(i = 0; i < length; i++)
         {

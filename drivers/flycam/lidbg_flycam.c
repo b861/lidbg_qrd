@@ -1473,6 +1473,11 @@ static struct platform_driver flycam_driver =
 
 int thread_flycam_init(void *data)
 {
+
+#ifndef	FLY_USB_CAMERA_SUPPORT
+	lidbg("%s:FLY_USB_CAMERA_SUPPORT not define,exit\n",__func__);
+  	return 0;
+#endif
 	lidbg("%s:------------start------------\n",__func__);
 #if 0
 	SOC_IO_Input(BACK_DET, BACK_DET, GPIO_CFG_PULL_UP);

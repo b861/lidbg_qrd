@@ -125,7 +125,9 @@ void usb_disk_enable(bool enable)
 }
 static int thread_usb_disk_enable_delay(void *data)
 {
+#ifndef FLY_USB_CAMERA_SUPPORT
     msleep(1000);
+#endif
     usb_disk_enable(true);
     return 1;
 }
