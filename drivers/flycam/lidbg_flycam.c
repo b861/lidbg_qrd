@@ -394,7 +394,7 @@ static int usb_nb_cam_func(struct notifier_block *nb, unsigned long action, void
 			Sonix:fix ScreenBlurred issue & start exposure adaptation & notify RET_SONIX;
 			Not Sonix:notify RET_NOT_SONIX.
 		*/
-		if(!isSuspend && (g_var.recovery_mode == 0))
+		if(g_var.recovery_mode == 0)
 		{
 			/*RearView*/
 			if(!((oldCamStatus>>4) & FLY_CAM_ISVALID) && ((pfly_UsbCamInfo->camStatus>>4) & FLY_CAM_ISSONIX) && !isRearViewFirstInit)
@@ -406,7 +406,7 @@ static int usb_nb_cam_func(struct notifier_block *nb, unsigned long action, void
 				else schedule_delayed_work(&work_t_RearView_fixScreenBlurred, 0);	
 #endif
 				complete(&Rear_ready_wait);
-				if(!isRearFirstResume) schedule_delayed_work(&work_t_RearView_fixScreenBlurred, 0);
+				if(!isRearFirstResume && !isSuspend ) schedule_delayed_work(&work_t_RearView_fixScreenBlurred, 0);
 			}	
 			/*DVR*/
 			if(!(oldCamStatus & FLY_CAM_ISVALID) && (pfly_UsbCamInfo->camStatus & FLY_CAM_ISSONIX) && !isDVRFirstInit)
@@ -418,7 +418,7 @@ static int usb_nb_cam_func(struct notifier_block *nb, unsigned long action, void
   			    else schedule_delayed_work(&work_t_DVR_fixScreenBlurred, 0);
 #endif
 				complete(&DVR_ready_wait);
-				if(!isDVRFirstResume) schedule_delayed_work(&work_t_DVR_fixScreenBlurred, 0);
+				if(!isDVRFirstResume && !isSuspend) schedule_delayed_work(&work_t_DVR_fixScreenBlurred, 0);
 			}
 			else if(!(oldCamStatus & FLY_CAM_ISVALID) && !(pfly_UsbCamInfo->camStatus & FLY_CAM_ISSONIX) &&(pfly_UsbCamInfo->camStatus & FLY_CAM_ISVALID) )
 				status_fifo_in(RET_NOT_SONIX);
@@ -1157,12 +1157,12 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 		if(!(pfly_UsbCamInfo->camStatus & FLY_CAM_ISVALID))
 		{
 			lidbg("%s:DVR[online] not found,ioctl fail!\n",__func__);
-			return RET_NOTVALID;
+			return size;
 		}
 		if(!(pfly_UsbCamInfo->camStatus & FLY_CAM_ISSONIX) && !isDVRAfterFix)
 		{
 			lidbg("%s:is not SonixCam ,ioctl fail!\n",__func__);
-			return RET_NOTSONIX;
+			return size;
 		}
 	}
 	
