@@ -61,6 +61,12 @@
 #define FLY_USB_CAMERA_SUPPORT
 #endif
 
+#ifdef PLATFORM_msm8974
+#ifdef PLATFORM_ID_14
+#define FLY_USB_CAMERA_SUPPORT
+#endif
+#endif
+
 #ifdef PLATFORM_msm8909
 #include <soc/qcom/smem.h>
 
@@ -135,6 +141,13 @@ enum
 
 #define TRACE_MSG_FROM_KMSG
 
+#if ANDROID_VERSION >= 600
+#define EMMC_MOUNT_POINT0  "/storage/emulated/0"
+#define EMMC_MOUNT_POINT1  "/storage/emulated/1"
+#else
+#define EMMC_MOUNT_POINT0  "/storage/sdcard0"
+#define EMMC_MOUNT_POINT1  "/storage/sdcard1"
+#endif
 struct io_config
 {
     __u32 index;

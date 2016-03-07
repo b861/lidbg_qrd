@@ -101,10 +101,18 @@
 #define	DAY_SATURATIONVAL		71
 #define	DAY_BRIGHTVAL				53
 
+#if ANDROID_VERSION >= 600
+#define EMMC_MOUNT_POINT0  "/storage/emulated/0"
+#define EMMC_MOUNT_POINT1  "/storage/emulated/1"
+#else
+#define EMMC_MOUNT_POINT0  "/storage/sdcard0"
+#define EMMC_MOUNT_POINT1  "/storage/sdcard1"
+#endif
+
 //flyaudio
 #define NONE_HUB_SUPPORT	0
-//#define REC_SAVE_DIR	"/storage/sdcard0/camera_rec/"
-char Rec_Save_Dir[100] = "/storage/sdcard0/camera_rec/";
+//#define REC_SAVE_DIR	EMMC_MOUNT_POINT0"/camera_rec/"
+char Rec_Save_Dir[100] = EMMC_MOUNT_POINT0"/camera_rec/";
 int Max_Rec_Num = 5;
 int Rec_Sec = 300;//s
 unsigned int Rec_File_Size = 300;//MB
@@ -1668,9 +1676,9 @@ static void get_driver_prop(int camID)
 
 		/*set record file savePath*/
 		if(cam_id == DVR_ID)
-			property_get("fly.uvccam.dvr.recpath", Rec_Save_Dir, "/storage/sdcard0/camera_rec/");
+			property_get("fly.uvccam.dvr.recpath", Rec_Save_Dir, EMMC_MOUNT_POINT0"/camera_rec/");
 		else if(cam_id == REARVIEW_ID)
-			property_get("fly.uvccam.rearview.recpath", Rec_Save_Dir, "/storage/sdcard0/");
+			property_get("fly.uvccam.rearview.recpath", Rec_Save_Dir, EMMC_MOUNT_POINT0"/");
 		lidbg("==========recording dir -> %s===========\n",Rec_Save_Dir);
 		if(!strncmp(Rec_Save_Dir, "/storage/udisk", 14) )
 		{
@@ -1681,10 +1689,10 @@ static void get_driver_prop(int camID)
 		}
 #if 0
 		/*create preview cache dir*/
-		if(!strncmp(Rec_Save_Dir, "/storage/sdcard0/preview_cache", 30) )
+		if(!strncmp(Rec_Save_Dir, EMMC_MOUNT_POINT0"/preview_cache", 30) )
 		{
 			/*
-			char tmp_preview_mkdir[100] = "mkdir /storage/sdcard0/preview_cache";
+			char tmp_preview_mkdir[100] = "mkdir "EMMC_MOUNT_POINT0"/preview_cache";
 			lidbg("======== try create preview cache dir -> %s =======",Rec_Save_Dir);
 			sprintf(tmp_preview_mkdir, "mkdir %s", Rec_Save_Dir);
 			system(tmp_preview_mkdir);
@@ -1696,7 +1704,7 @@ static void get_driver_prop(int camID)
 		{
 			lidbg("record file path access wrong!\n" );
 			//return 0;
-			strcpy(Rec_Save_Dir,  "/storage/sdcard0/camera_rec/");
+			strcpy(Rec_Save_Dir,  EMMC_MOUNT_POINT0"/camera_rec/");
 		}
 		
 		
@@ -1759,18 +1767,18 @@ static void get_driver_prop(int camID)
 
 int main(int argc, char *argv[])
 {
-	char filename[100] = "/sdcard/quickcam-0000.jpg";
-	char rec_filename[30] = "/sdcard/RecordH264.h264";			/*"H264.ts"*/
-	char rec_filename1[30] = "/sdcard/RecordH264HD.h264";		/*"H264.ts"*/
-	char rec_filename2[30] = "/sdcard/RecordH264QVGA.h264";	/*"H264.ts"*/
-	char rec_filename3[30] = "/sdcard/RecordH264QQVGA.h264";	/*"H264.ts"*/
-	char rec_filename4[30] = "/sdcard/RecordH264VGA.h264";		/*"H264.ts"*/
+	char filename[100] = EMMC_MOUNT_POINT0"/quickcam-0000.jpg";
+	char rec_filename[30] = EMMC_MOUNT_POINT0"/RecordH264.h264";			/*"H264.ts"*/
+	char rec_filename1[30] = EMMC_MOUNT_POINT0"/RecordH264HD.h264";		/*"H264.ts"*/
+	char rec_filename2[30] = EMMC_MOUNT_POINT0"/RecordH264QVGA.h264";	/*"H264.ts"*/
+	char rec_filename3[30] = EMMC_MOUNT_POINT0"/RecordH264QQVGA.h264";	/*"H264.ts"*/
+	char rec_filename4[30] = EMMC_MOUNT_POINT0"/RecordH264VGA.h264";		/*"H264.ts"*/
 /*
-	char flyh264_filename[5][100] = {  "/storage/sdcard0/flytmp1.h264",
-								"/storage/sdcard0/flytmp2.h264",
-								"/storage/sdcard0/flytmp3.h264",
-								"/storage/sdcard0/flytmp4.h264",
-								"/storage/sdcard0/flytmp5.h264"};
+	char flyh264_filename[5][100] = {  EMMC_MOUNT_POINT0"/flytmp1.h264",
+								EMMC_MOUNT_POINT0"/flytmp2.h264",
+								EMMC_MOUNT_POINT0"/flytmp3.h264",
+								EMMC_MOUNT_POINT0"/flytmp4.h264",
+								EMMC_MOUNT_POINT0"/flytmp5.h264"};
 */						    
 	char flyh264_filename[100] = {0};
 	char flypreview_filename[100] = {0};
@@ -4235,7 +4243,7 @@ openfd:
 			struct tm *p; 
 			time(&timep); 
 			p=gmtime(&timep); 
-			sprintf(filename, "/storage/sdcard0/camera_rec/FA%04d%02d%02d%02d%02d%02d.jpg",
+			sprintf(filename, EMMC_MOUNT_POINT0"/camera_rec/FA%04d%02d%02d%02d%02d%02d.jpg",
 				(1900+p->tm_year),(1+p->tm_mon),p->tm_mday,p->tm_hour,p->tm_min,p->tm_sec);
 			file = fopen(filename, "wb");
 			if (file != NULL) {
@@ -4337,16 +4345,16 @@ openfd:
 				/*reserve 300MB for storage*/
 				if((i % 30 == 0) && !isPreview)
 				{
-					if(!strncmp(Rec_Save_Dir, "/storage/sdcard0", 16) )
+					if(!strncmp(Rec_Save_Dir, EMMC_MOUNT_POINT0, sizeof(EMMC_MOUNT_POINT0)) )
 					{
 						struct statfs diskInfo;  
-						statfs("/storage/sdcard0", &diskInfo);  
+						statfs(EMMC_MOUNT_POINT0, &diskInfo);  
 						unsigned long long totalBlocks = diskInfo.f_bsize;  
 						unsigned long long stotalSize = totalBlocks * diskInfo.f_blocks;  
 						size_t mbTotalsize = stotalSize>>20;  
 						unsigned long long freeDisk = diskInfo.f_bfree*totalBlocks;  
 						size_t mbFreedisk = freeDisk>>20;  
-						//lidbg("/storage/sdcard0  total=%dMB, free=%dMB\n", mbTotalsize, mbFreedisk);  
+						//lidbg(EMMC_MOUNT_POINT0"  total=%dMB, free=%dMB\n", mbTotalsize, mbFreedisk);  
 						if(mbFreedisk < 300)
 						{
 							lidbg("======EMMC Free space less than 300MB!!======\n");
@@ -4362,16 +4370,16 @@ openfd:
 							send_driver_msg(FLYCAM_STATUS_IOC_MAGIC, NR_STATUS, RET_INSUFFICIENT_SPACE_CIRC);
 						}
 					}
-					else if(!strncmp(Rec_Save_Dir, "/storage/sdcard1", 16) )
+					else if(!strncmp(Rec_Save_Dir, EMMC_MOUNT_POINT1, strlen(EMMC_MOUNT_POINT1)) )
 					{
 						struct statfs diskInfo;  
-						statfs("/storage/sdcard1", &diskInfo);  
+						statfs(EMMC_MOUNT_POINT1, &diskInfo);  
 						unsigned long long totalBlocks = diskInfo.f_bsize;  
 						unsigned long long stotalSize = totalBlocks * diskInfo.f_blocks;  
 						size_t mbTotalsize = stotalSize>>20;  
 						unsigned long long freeDisk = diskInfo.f_bfree*totalBlocks;  
 						size_t mbFreedisk = freeDisk>>20;  
-						//lidbg("/storage/sdcard0  total=%dMB, free=%dMB\n", mbTotalsize, mbFreedisk);  
+						//lidbg(EMMC_MOUNT_POINT1"  total=%dMB, free=%dMB\n", mbTotalsize, mbFreedisk);  
 						if(mbFreedisk < 10)
 						{
 							lidbg("======SDCARD Free space less than 10MB!!======\n");
@@ -4442,7 +4450,7 @@ openfd:
 					int cur_time[3] = {0,0,0};
 					int min_date[3] = {5000,13,50};
 					int min_time[3] = {13,100,100};
-					char minRecName[100] = "/storage/sdcard0/camera_rec/1111.h264";//error for del
+					char minRecName[100] = EMMC_MOUNT_POINT0"/camera_rec/1111.h264";//error for del
 					char tmpDName[100] = {0};
 					unsigned char filecnt = 0;
 					unsigned char memcpyFlag = 0;

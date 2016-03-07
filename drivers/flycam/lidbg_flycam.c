@@ -37,8 +37,8 @@ static DECLARE_COMPLETION (DVR_res_get_wait);
 /*Camera DVR & Online recording parameters*/
 static int f_rec_bitrate = 8000000,f_rec_time = 300,f_rec_filenum = 5,f_rec_totalsize = 4096;
 static int f_online_bitrate = 500000,f_online_time = 60,f_online_filenum = 1,f_online_totalsize = 500;
-char f_rec_res[100] = "1280x720",f_rec_path[100] = "/storage/sdcard1/camera_rec/";
-char f_online_res[100] = "480x272",f_online_path[100] = "/storage/sdcard0/preview_cache/";
+char f_rec_res[100] = "1280x720",f_rec_path[100] = EMMC_MOUNT_POINT1"/camera_rec/";
+char f_online_res[100] = "480x272",f_online_path[100] = EMMC_MOUNT_POINT0"/preview_cache/";
 
 static struct timer_list suspend_stoprec_timer;
 #define SUSPEND_STOPREC_ONLINE_TIME   (jiffies + 180*HZ)  /* 3min stop Rec after online*/
@@ -566,7 +566,7 @@ static void fixScreenBlurred(char cam_id , char isOnline)
 		}
 		
 		lidbg_shell_cmd("setprop fly.uvccam.dvr.res 640x360");
-		lidbg_shell_cmd("setprop fly.uvccam.dvr.recpath /storage/sdcard0/camera_rec/");
+		lidbg_shell_cmd("setprop fly.uvccam.dvr.recpath "EMMC_MOUNT_POINT0"/camera_rec/");
 		if(start_rec(cam_id,1))lidbg("%s:====return fail====\n",__func__);
 		if(isOnline) 
 		{
@@ -579,7 +579,8 @@ static void fixScreenBlurred(char cam_id , char isOnline)
 			if(stop_rec(cam_id,1))lidbg("%s:====return fail====\n",__func__);
 		}
 		lidbg_shell_cmd("setprop fly.uvccam.dvr.res 1280x720");
-		lidbg_shell_cmd("rm -f /storage/sdcard0/camera_rec/tmp*.h264&");
+
+		lidbg_shell_cmd("rm -f "EMMC_MOUNT_POINT0"/camera_rec/tmp*.h264&");
 		if(!isDVRFirstResume) isDVRCheck = 1;
 	}
 	else if(cam_id == REARVIEW_ID)
@@ -593,7 +594,7 @@ static void fixScreenBlurred(char cam_id , char isOnline)
 		}
 		
 		lidbg_shell_cmd("setprop fly.uvccam.rearview.res 640x360");
-		lidbg_shell_cmd("setprop fly.uvccam.rearview.recpath /storage/sdcard0/");//must different path
+		lidbg_shell_cmd("setprop fly.uvccam.rearview.recpath "EMMC_MOUNT_POINT0"/");//must different path
 		if(start_rec(cam_id,1))lidbg("%s:====return fail====\n",__func__);
 		if(isOnline) 
 		{
@@ -606,7 +607,8 @@ static void fixScreenBlurred(char cam_id , char isOnline)
 			if(stop_rec(cam_id,1))lidbg("%s:====return fail====\n",__func__);
 		}
 		lidbg_shell_cmd("setprop fly.uvccam.rearview.res 1280x720");
-		lidbg_shell_cmd("rm -f /storage/sdcard0/tmp*.h264&");
+
+		lidbg_shell_cmd("rm -f "EMMC_MOUNT_POINT0"/tmp*.h264&");
 		if(!isRearFirstResume) isRearCheck = 1;
 	}
 	return;
@@ -801,9 +803,9 @@ static int checkSDCardStatus(char *path)
 	char temp_cmd[256];	
 	int ret;
 	struct file *storage_path, *file_path;
-	if(!strncmp(path, "/storage/sdcard0", 16))
+	if(!strncmp(path, EMMC_MOUNT_POINT0, strlen(EMMC_MOUNT_POINT0)))
 	{
-		storage_path = filp_open("/storage/sdcard0", O_RDONLY | O_DIRECTORY, 0);
+		storage_path = filp_open(EMMC_MOUNT_POINT0, O_RDONLY | O_DIRECTORY, 0);
 		file_path = filp_open(path, O_RDONLY | O_DIRECTORY, 0);
 		if(IS_ERR(storage_path))
 		{
@@ -819,14 +821,14 @@ static int checkSDCardStatus(char *path)
 		}
 		else lidbg("%s: Check Rec Dir OK => %s\n",__func__,path);
 	}
-	else if(!strncmp(path, "/storage/sdcard1", 16))
+	else if(!strncmp(path, EMMC_MOUNT_POINT1, strlen(EMMC_MOUNT_POINT1)))
 	{
-		storage_path = filp_open("/storage/sdcard1", O_RDONLY | O_DIRECTORY, 0);
+		storage_path = filp_open(EMMC_MOUNT_POINT1, O_RDONLY | O_DIRECTORY, 0);
 		file_path = filp_open(path, O_RDONLY | O_DIRECTORY, 0);
 		if(IS_ERR(storage_path))
 		{
-			lidbg("%s:SDCARD1 ERR!!Reset to /storage/sdcard0/camera_rec/\n",__func__);
-			strcpy(path,"/storage/sdcard0/camera_rec/");
+			lidbg("%s:SDCARD1 ERR!!Reset to %s/camera_rec/\n",__func__, EMMC_MOUNT_POINT0);
+			strcpy(path, EMMC_MOUNT_POINT0"/camera_rec/");
 			ret = 2;
 		}
 		else if(IS_ERR(file_path))

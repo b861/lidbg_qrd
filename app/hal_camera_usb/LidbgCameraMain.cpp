@@ -55,6 +55,12 @@ get_vendor_tag_ops:
 open_legacy:
     NULL,
 #endif
+#if ANDROID_VERSION>=600
+set_torch_mode:
+	NULL,
+init:
+	NULL,
+#endif
 reserved:
     {0},
 };
