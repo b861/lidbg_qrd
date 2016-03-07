@@ -89,7 +89,7 @@
 			SOC_IO_Output(0, g_hw.gpio_lcd_reset, 0);\
 			msleep(20);\
 			SOC_IO_Output(0, g_hw.gpio_lcd_reset, 1);\
-}while(0)\
+}while(0)
  
 
 
@@ -130,7 +130,7 @@
 			msleep(1000);\
 			lidbg("gpio_usb_udisk_en\n");\
 			check_gpio(g_hw.gpio_usb_udisk_en);\
-			SOC_IO_Output(0, g_hw.gpio_usb_udisk_en, 1);\			
+			SOC_IO_Output(0, g_hw.gpio_usb_udisk_en, 1);\
 	}while(0)
 
 
