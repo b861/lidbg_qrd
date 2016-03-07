@@ -4,6 +4,7 @@ extern char **lmk_white_list;
 
 char *lmk_protect_list[] =
 {
+	"o.clientservice",
 	"d.process.acore",
 	"ndroid.launcher",
 	"d.process.media",
