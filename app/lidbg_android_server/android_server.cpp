@@ -75,7 +75,9 @@ void handleAudioPolicyServiceEvent()
                   aps->isStreamActive((audio_stream_type_t)2, 0) |
                   aps->isStreamActive((audio_stream_type_t)1, 0) |
                   aps->isStreamActive((audio_stream_type_t)5, 0);
+#ifdef ANDROID_AT_LEAST_50
         phoneCallState = aps->getPhoneState();
+#endif
         if(dbg)
             lidbg(TAG"playing=%d,getPhoneState=%d\n", playing, phoneCallState);
     }
