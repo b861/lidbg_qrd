@@ -320,6 +320,9 @@ case "$USERS_ID" in
 		11)
 		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/M8974AAAAANLYD4275
 		export BP_SOURCE_PATH=~/lwy/msm8909-la-1-1_amss_oem_milestone-major;;
+		14)
+        export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/M8974AAAAANLYD4275
+        export RELEASE_REPOSITORY=$DBG_PLATFORM_PATH/8909-release;;
 	esac;;
 	7)
 	export DBG_PLATFORM_PATH=/home2/liangyihong/projDir
