@@ -124,13 +124,13 @@
 			check_gpio(g_hw.gpio_usb_backcam_en);\
 			SOC_IO_Output(0, g_hw.gpio_usb_backcam_en, 1);\
 			msleep(1000);\
-			lidbg("gpio_usb_udisk_en\n");\
-			check_gpio(g_hw.gpio_usb_udisk_en);\
-			SOC_IO_Output(0, g_hw.gpio_usb_udisk_en, 1);\
-			msleep(1000);\
 			lidbg("gpio_usb_front_en\n");\
 			check_gpio(g_hw.gpio_usb_front_en);\
 			SOC_IO_Output(0, g_hw.gpio_usb_front_en, 1);\
+			msleep(1000);\
+			lidbg("gpio_usb_udisk_en\n");\
+			check_gpio(g_hw.gpio_usb_udisk_en);\
+			SOC_IO_Output(0, g_hw.gpio_usb_udisk_en, 1);\			
 	}while(0)
 
 
