@@ -7,6 +7,7 @@
 #include "..//common//CamEnum.h"
 #include "..//BurnMgr//BurnMgr.h"
 #include "../../inc/lidbg_servicer.h"
+#include "../../../drivers/inc/lidbg_flycam_par.h" /*flycam parameter*/
 
 #define	STR_INTRO		"Program : SONiX F/W Update Tool on Linux"
 #define	STR_VERSION		"Version : v1.0.5.8" // yiling 2015/08/21 modify
@@ -14,6 +15,8 @@
 
 #define	FILE_INI		"/storage/udisk/update.src"
 #define CNTNUM			10
+
+#define FILENAME_LENGTH	(256)
 
 static const int id_num = 8;	// shawn 2009/11/03 for 232 and 275
 ID_TABLE_S	id_table[id_num] = 
@@ -29,13 +32,60 @@ ID_TABLE_S	id_table[id_num] =
 };
 
 int nFileNum = 0;	// shawn 2010/11/12 add for fixing "No such device" issue
-unsigned char camCnt = 0;//current update Camera num
 char tmpCmd[100] = {0};
+int flycam_fd;
 
 
 void Print_CamArray(struct usb_device* CamArray[MAX_CAM_NUM], int &nCamNum);
 bool Burn_To_Flash(CBurnMgr	&burn_mgr);
 bool Burn_To_File(CBurnMgr	&burn_mgr, char szTarget[256]);
+
+static void send_driver_msg(int flycam_fd,char magic ,char nr,unsigned long  arg)
+{
+	if (ioctl(flycam_fd,_IO(magic, nr), arg) < 0)
+    {
+      	lidbg("%s:nr => %d ioctl fail=======\n",__func__,nr);
+	}	
+	return;
+}
+
+int Choose_CamArray(struct usb_device* CamArray[MAX_CAM_NUM], int &nCamNum, int cmd)
+{
+	int 	i;
+	FILE*	fp = NULL;
+	struct	usb_device *pDev;
+	char 	devnum[10], hub_path[FILENAME_LENGTH];
+
+	memset(hub_path, 0, sizeof(hub_path));
+	switch(cmd)
+	{
+		case DVR_ID:
+			sprintf(hub_path, "/sys/bus/usb/drivers/usb/%s/devnum", FRONT_NODE);
+			break;
+		case REARVIEW_ID:
+			sprintf(hub_path, "/sys/bus/usb/drivers/usb/%s/devnum", BACK_NODE);
+			break;
+		default:
+			break;
+	}
+
+	for (i=0; i<nCamNum; i++)
+	{
+		pDev = CamArray[i];
+
+		fp = fopen(hub_path, "r");
+		if(fp)
+		{
+			fread(devnum, sizeof(char), 10, fp);
+			printf("devnum = %d \n", atoi(devnum));
+			fclose(fp);
+		}
+
+		if(atoi(pDev->filename) == atoi(devnum))
+			return i;
+	}
+	return -1;
+}
 
 void Print_CamArray(struct usb_device* CamArray[MAX_CAM_NUM], int &nCamNum)
 {
@@ -63,6 +113,7 @@ void Print_CamArray(struct usb_device* CamArray[MAX_CAM_NUM], int &nCamNum)
 
 		usb_close(udev);
 	}
+
 }
 
 bool Burn_To_File(CBurnMgr	&burn_mgr, char szTarget[256])
@@ -126,7 +177,7 @@ fail_quit:
 	return false;
 }
 
-bool Burn_To_Flash(CBurnMgr	&burn_mgr)
+bool Burn_To_Flash(CBurnMgr	&burn_mgr,int cam_id)
 {
 	char szFlashCodeVer[25] = {0};	// carol 2013/12/16 add
 	char szFlashVendorVer[13] = {0};
@@ -288,8 +339,6 @@ bool Burn_To_Flash(CBurnMgr	&burn_mgr)
 
 	LIDBG_PRINT("New FW version: %s\n", szFlashCodeVer);
 	LIDBG_PRINT("New Vendor version: %s\n", szFlashVendorVer);
-	sprintf(tmpCmd, "echo flyaudio:touch /dev/log/FWUpdateSuccess%d.txt > /dev/lidbg_misc0",camCnt + 1);
-	system(tmpCmd);
 	return true;
 
 fail_quit:	
@@ -297,13 +346,108 @@ fail_quit:
 	burn_mgr.Burn_EndProc(false);
 	return false;
 }
+
+static int get_FW_version(int camchoose,struct usb_device* CamArray[MAX_CAM_NUM],int cam_id,char * Fwversion)
+{
+	CBurnMgr	burn_mgr;
+	
+	LIDBG_PRINT("=========get [%d] Camera FW version===========\n",cam_id);
+	if (!burn_mgr.Cam_Select(CamArray[camchoose], nFileNum))
+	{
+		LIDBG_PRINT("Cam_Select Fail!\n");
+		return -1;
+	}
+	LIDBG_PRINT("Cam_Select OK!\n");
+	
+	if(!burn_mgr.Get_CodeVersion(Fwversion))
+	{
+		DBG_Print("Get FW version Fail!\n");
+		LIDBG_PRINT("Get FW version Fail!\n");
+	}
+	
+	if (!burn_mgr.Burn_EndProc(true))
+	{
+		LIDBG_PRINT("Burn_EndProc Fail!\n");
+	}	
+	
+	burn_mgr.Cam_DeSelect();
+
+	LIDBG_PRINT("\nGet FW Version complete !\n");
+	return 0;
+}
+
+static int burn_process(int camchoose,struct usb_device* CamArray[MAX_CAM_NUM],int cam_id)
+{
+	CBurnMgr	burn_mgr;
+	int circnt = CNTNUM;
+	
+	LIDBG_PRINT("Prepare : select webcam #0 ... \n");
+	LIDBG_PRINT("=========start [%d] Camera update===========\n",cam_id);
+	if(cam_id == DVR_ID)
+		system("am broadcast -a com.lidbg.flybootserver.action --es toast Begin_Front_Camera_FW_update!");
+	else if(cam_id == REARVIEW_ID)
+		system("am broadcast -a com.lidbg.flybootserver.action --es toast Begin_Rear_Camera_FW_update!");
+	if (!burn_mgr.Cam_Select(CamArray[camchoose], nFileNum))
+	{
+		LIDBG_PRINT("Cam_Select Fail!\n");
+		return -1;
+	}
+	LIDBG_PRINT("Cam_Select OK!\n");
+
+	LIDBG_PRINT("Prepare : read .ini file - %s ... ", FILE_INI);
+	if (!burn_mgr.Set_Source_File_From_INI((char *)FILE_INI))
+	{
+		LIDBG_PRINT("Set_Source_File_From_INI Fail!\n");
+		return -2;
+	}
+	LIDBG_PRINT("Set_Source_File_From_INI OK!\n");
+	LIDBG_PRINT("\n");
+	
+	if (nFileNum == 1)
+		LIDBG_PRINT("Source : 64K from FILE                   - %s\n", burn_mgr.Get_RomFile());
+	else if(nFileNum == 2) // carol 2013/08/29 add
+		LIDBG_PRINT("Source : 128K from FILE                   - %s\n", burn_mgr.Get_RomFile());
+	else
+	{
+		LIDBG_PRINT("Source : ROM from FILE                   - %s\n", burn_mgr.Get_RomFile());
+		LIDBG_PRINT("Source : Parameter from FILE             - %s\n", burn_mgr.Get_ParamFile());
+		LIDBG_PRINT("Source : Init Sensor Parameter from FILE - %s\n", burn_mgr.Get_ISPFile());
+	}
+
+	//Burn_To_File(burn_mgr, (char *)"target");
+	
+	LIDBG_PRINT("FW Burn to Flash : begin!\n");
+	//while((circnt--) && (!Burn_To_Flash(burn_mgr,cam_id)))
+	if(!Burn_To_Flash(burn_mgr,cam_id))
+	{
+		LIDBG_PRINT("FW Burn to Flash fail! circnt = %d\n", CNTNUM-circnt);
+		return -1;
+	}
+	burn_mgr.Cam_DeSelect();
+	LIDBG_PRINT("FW update Exit program!\n");
+	LIDBG_PRINT("\nPlease restart the computer to make the new FW become effective !\n");
+	return 0;
+}
+
+
 int main(int argc, char *argv[])
 {
 	CCamEnum	cam_enum;
 	struct usb_device* CamArray[MAX_CAM_NUM];
 	int 		nCamNum;
-	CBurnMgr	burn_mgr;
-	int 		circnt = CNTNUM;
+	int 		camchoose;
+	int 		ret = -1;
+	int			cam_id;
+	char 		codeVer[25] = {0};
+	char 		isCheckVer = 0;
+
+	flycam_fd = open("/dev/lidbg_flycam0", O_RDWR);
+	if((flycam_fd == 0xfffffffe) || (flycam_fd == 0) || (flycam_fd == 0xffffffff))
+	{
+	    lidbg("open lidbg_flycam0 fail\n");
+		close(flycam_fd);
+	    return 0;
+	}
 
 	if (argc > 1)
 	{
@@ -352,65 +496,113 @@ int main(int argc, char *argv[])
 	Print_CamArray(CamArray, nCamNum);
 	LIDBG_PRINT("\n");
 
-	LIDBG_PRINT("Prepare : select webcam #0 ... \n");
-	
-	/*burn FW to all Camera flash*/
-	for(camCnt = 0;camCnt < nCamNum;camCnt++)
+	cam_id = atoi(argv[2]);
+
+	if (argc > 2)
 	{
-		LIDBG_PRINT("=========start [%d] Camera update===========\n",camCnt);
-		if (!burn_mgr.Cam_Select(CamArray[camCnt], nFileNum))
+		if ( strcmp(argv[2], "-0") == 0)
+			cam_id = REARVIEW_ID;
+		else if ( strcmp(argv[2], "-1") == 0) 
+			cam_id = DVR_ID;
+		else if ( strcmp(argv[2], "-2") == 0) 
 		{
-			LIDBG_PRINT("Cam_Select Fail!\n");
-			goto exit;
+			cam_id = REARVIEW_ID;
+			isCheckVer = 1;
 		}
-		LIDBG_PRINT("Cam_Select OK!\n");
-
-		LIDBG_PRINT("Prepare : read .ini file - %s ... ", FILE_INI);
-		if (!burn_mgr.Set_Source_File_From_INI((char *)FILE_INI))
+		else if ( strcmp(argv[2], "-3") == 0) 
 		{
-			LIDBG_PRINT("Set_Source_File_From_INI Fail!\n");
-			goto exit;
+			cam_id = DVR_ID;
+			isCheckVer = 1;
 		}
-		LIDBG_PRINT("Set_Source_File_From_INI OK!\n");
-		LIDBG_PRINT("\n");
-		
-		if (nFileNum == 1)
-			LIDBG_PRINT("Source : 64K from FILE                   - %s\n", burn_mgr.Get_RomFile());
-		else if(nFileNum == 2) // carol 2013/08/29 add
-			LIDBG_PRINT("Source : 128K from FILE                   - %s\n", burn_mgr.Get_RomFile());
-		else
-		{
-			LIDBG_PRINT("Source : ROM from FILE                   - %s\n", burn_mgr.Get_RomFile());
-			LIDBG_PRINT("Source : Parameter from FILE             - %s\n", burn_mgr.Get_ParamFile());
-			LIDBG_PRINT("Source : Init Sensor Parameter from FILE - %s\n", burn_mgr.Get_ISPFile());
-		}
-
-		//Burn_To_File(burn_mgr, (char *)"target");
-		
-		LIDBG_PRINT("FW Burn to Flash : begin!\n");
-		while((circnt--) && (!Burn_To_Flash(burn_mgr)))
-		{
-			LIDBG_PRINT("FW Burn to Flash fail! circnt = %d\n", CNTNUM-circnt);
-			sprintf(tmpCmd, "echo flyaudio:touch /dev/log/FWUpdateFail%d.txt > /dev/lidbg_misc0",camCnt + 1);
-			system(tmpCmd);
-		}
-
-
-		burn_mgr.Cam_DeSelect();
-
-		LIDBG_PRINT("FW update Exit program!\n");
-		LIDBG_PRINT("\nPlease restart the computer to make the new FW become effective !\n");
 	}
-	sprintf(tmpCmd, "echo flyaudio:touch /dev/log/FWUpdateDone.txt > /dev/lidbg_misc0");
-	system(tmpCmd);
+	else cam_id = DVR_ID;
+	
+	LIDBG_PRINT("Cam_ID => %d\n",cam_id);
+
+	if(isCheckVer)
+	{
+		LIDBG_PRINT("Check Camera FW Version!\n");
+		camchoose = Choose_CamArray(CamArray, nCamNum, cam_id);
+		if(camchoose != -1) 
+		{
+			get_FW_version(camchoose,CamArray, cam_id, codeVer);
+			LIDBG_PRINT("Camera FW Version => %s\n",codeVer);
+			send_driver_msg(flycam_fd,FLYCAM_STATUS_IOC_MAGIC,NR_FW_VERSION,(unsigned long)codeVer);
+		}
+		else 
+		{
+			LIDBG_PRINT("Get Camera FW Version Fail : Camera it's not exsit\n",codeVer);
+			send_driver_msg(flycam_fd,FLYCAM_STATUS_IOC_MAGIC,NR_FW_VERSION,-1);
+		}
+	}
+	else if((cam_id == REARVIEW_ID) || (cam_id == DVR_ID))/*Get specify camera index and burn to flash*/
+	{
+		camchoose = Choose_CamArray(CamArray, nCamNum, cam_id);
+		if(camchoose != -1) ret = burn_process(camchoose,CamArray, cam_id);
+		if(ret == 0)
+		{
+			LIDBG_PRINT("[CameraFWUD]Camera FW update success!\n");
+			if(cam_id == DVR_ID)
+			{
+				send_driver_msg(flycam_fd,FLYCAM_STATUS_IOC_MAGIC,NR_STATUS,(unsigned long)codeVer);
+				system("am broadcast -a com.lidbg.flybootserver.action --es toast Front_Camera_FW_update_success!");
+			}
+			else if(cam_id == REARVIEW_ID)
+			{
+				send_driver_msg(flycam_fd,FLYCAM_STATUS_IOC_MAGIC,NR_STATUS,RET_REAR_UD_SUCCESS);
+				system("am broadcast -a com.lidbg.flybootserver.action --es toast Rear_Camera_FW_update_success!");
+			}
+		}
+		else if(ret == -1)
+			goto exit;
+		else if(ret == -2)
+		{
+			LIDBG_PRINT("[CameraFWUD]Camera FW file is not exist!!!\n");
+			if(cam_id== DVR_ID)
+			{
+				send_driver_msg(flycam_fd,FLYCAM_STATUS_IOC_MAGIC,NR_STATUS,RET_DVR_FW_ACCESS_FAIL);
+				system("am broadcast -a com.lidbg.flybootserver.action --es toast Front_Camera_FW_file_is_not_exist!!");
+			}
+			else if(cam_id == REARVIEW_ID)
+			{
+				send_driver_msg(flycam_fd,FLYCAM_STATUS_IOC_MAGIC,NR_STATUS,RET_REAR_FW_ACCESS_FAIL);
+				system("am broadcast -a com.lidbg.flybootserver.action --es toast Rear_Camera_FW_file_is_not_exist!!");
+			}
+		}
+	}
+
+	
+#if 0
+	else if(atoi(argv[2]) == 2)/*all camera*/
+	{
+		camchoose = Choose_CamArray(CamArray, nCamNum, REARVIEW_ID);
+		if(camchoose != -1) burn_process(camchoose,CamArray,REARVIEW_ID);
+		camchoose = Choose_CamArray(CamArray, nCamNum, DVR_ID);
+		if(camchoose != -1) burn_process(camchoose,CamArray,DVR_ID);
+	}
+#endif
+	
+	/*
+	if(camchoose == -1)
+	{
+		printf("camchoose wrong!\n");
+		goto exit;
+	}
+	*/
 	return 0;
 	
 exit:
-	LIDBG_PRINT("Exit program!\n");
-	sprintf(tmpCmd, "echo flyaudio:touch /dev/log/FWUpdateFailAll.txt > /dev/lidbg_misc0");
-	system(tmpCmd);
-	sprintf(tmpCmd, "echo flyaudio:touch /dev/log/FWUpdateDone.txt > /dev/lidbg_misc0");
-	system(tmpCmd);
+	LIDBG_PRINT("[CameraFWUD]Exit program!Camera FW update fail\n");
+	if(cam_id== DVR_ID)
+	{
+		send_driver_msg(flycam_fd,FLYCAM_STATUS_IOC_MAGIC,NR_STATUS,RET_DVR_UD_FAIL);
+		system("am broadcast -a com.lidbg.flybootserver.action --es toast Front_Camera_FW_update_fail.");
+	}
+	else if(cam_id== REARVIEW_ID)
+	{
+		send_driver_msg(flycam_fd,FLYCAM_STATUS_IOC_MAGIC,NR_STATUS,RET_REAR_UD_FAIL);
+		system("am broadcast -a com.lidbg.flybootserver.action --es toast Rear_Camera_FW_update_fail.");
+	}
 	return 0;
 }
 
