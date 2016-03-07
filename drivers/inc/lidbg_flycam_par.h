@@ -19,7 +19,8 @@ typedef enum {
 typedef enum {
   NR_STATUS,
   NR_ACCON_CAM_READY,
-  NR_FW_VERSION,
+  NR_DVR_FW_VERSION,
+  NR_REAR_FW_VERSION,
 }status_ctrl_t;
 
 typedef enum {
@@ -55,6 +56,7 @@ typedef enum {
   RET_DVR_SONIX,
   RET_DVR_NOT_SONIX,
   RET_REAR_SONIX,
+  RET_REAR_DISCONNECT,
   RET_REAR_NOT_SONIX,
   RET_DVR_UD_SUCCESS,
   RET_DVR_UD_FAIL,

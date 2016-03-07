@@ -527,12 +527,18 @@ int main(int argc, char *argv[])
 		{
 			get_FW_version(camchoose,CamArray, cam_id, codeVer);
 			LIDBG_PRINT("Camera FW Version => %s\n",codeVer);
-			send_driver_msg(flycam_fd,FLYCAM_STATUS_IOC_MAGIC,NR_FW_VERSION,(unsigned long)codeVer);
+			if(cam_id == DVR_ID)
+				send_driver_msg(flycam_fd,FLYCAM_STATUS_IOC_MAGIC,NR_DVR_FW_VERSION,(unsigned long)codeVer);
+			else if(cam_id == REARVIEW_ID)
+				send_driver_msg(flycam_fd,FLYCAM_STATUS_IOC_MAGIC,NR_REAR_FW_VERSION,(unsigned long)codeVer);
 		}
 		else 
 		{
 			LIDBG_PRINT("Get Camera FW Version Fail : Camera it's not exsit\n",codeVer);
-			send_driver_msg(flycam_fd,FLYCAM_STATUS_IOC_MAGIC,NR_FW_VERSION,-1);
+			if(cam_id == DVR_ID)
+				send_driver_msg(flycam_fd,FLYCAM_STATUS_IOC_MAGIC,NR_DVR_FW_VERSION,-1);
+			else if(cam_id == REARVIEW_ID)
+				send_driver_msg(flycam_fd,FLYCAM_STATUS_IOC_MAGIC,NR_REAR_FW_VERSION,-1);
 		}
 	}
 	else if((cam_id == REARVIEW_ID) || (cam_id == DVR_ID))/*Get specify camera index and burn to flash*/
@@ -544,7 +550,7 @@ int main(int argc, char *argv[])
 			LIDBG_PRINT("[CameraFWUD]Camera FW update success!\n");
 			if(cam_id == DVR_ID)
 			{
-				send_driver_msg(flycam_fd,FLYCAM_STATUS_IOC_MAGIC,NR_STATUS,(unsigned long)codeVer);
+				send_driver_msg(flycam_fd,FLYCAM_STATUS_IOC_MAGIC,NR_STATUS,RET_DVR_UD_SUCCESS);
 				system("am broadcast -a com.lidbg.flybootserver.action --es toast Front_Camera_FW_update_success!");
 			}
 			else if(cam_id == REARVIEW_ID)
@@ -592,7 +598,7 @@ int main(int argc, char *argv[])
 	return 0;
 	
 exit:
-	LIDBG_PRINT("[CameraFWUD]Exit program!Camera FW update fail\n");
+	LIDBG_PRINT("[CameraFWUD]Exit program!Camera FW control fail\n");
 	if(cam_id== DVR_ID)
 	{
 		send_driver_msg(flycam_fd,FLYCAM_STATUS_IOC_MAGIC,NR_STATUS,RET_DVR_UD_FAIL);

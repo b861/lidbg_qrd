@@ -29,7 +29,8 @@ static DECLARE_DELAYED_WORK(work_t_RearView_fixScreenBlurred, work_RearView_fixS
 static DECLARE_COMPLETION (timer_stop_rec_wait);
 static DECLARE_COMPLETION (Rear_ready_wait);
 static DECLARE_COMPLETION (DVR_ready_wait);
-static DECLARE_COMPLETION (fw_get_wait);
+static DECLARE_COMPLETION (Rear_fw_get_wait);
+static DECLARE_COMPLETION (DVR_fw_get_wait);
 
 /*Camera DVR & Online recording parameters*/
 static int f_rec_bitrate = 8000000,f_rec_time = 300,f_rec_filenum = 5,f_rec_totalsize = 4096;
@@ -43,7 +44,7 @@ static struct timer_list suspend_stoprec_timer;
 
 /*bool var*/
 static char isDVRRec,isOnlineRec,isDVRFirstInit,isRearViewFirstInit,isRearCheck = 1,isDVRCheck = 1;
-static char isSuspend,isDVRAfterFix,isRearViewAfterFix,isDVRFirstResume,isRearFirstResume;
+static char isSuspend,isDVRAfterFix,isRearViewAfterFix,isDVRFirstResume,isRearFirstResume,isUpdating;
 
 //struct work_struct work_t_fixScreenBlurred;
 
@@ -54,7 +55,8 @@ u8 *camStatus_data_for_hal;
 u8 *camStatus_fifo_buffer;
 static struct kfifo camStatus_data_fifo;
 
-u8 camera_fw_version[20] = {0};	
+u8 camera_DVR_fw_version[20] = {0};	
+u8 camera_rear_fw_version[20] = {0};	
 
 
 #if 0
@@ -125,6 +127,8 @@ static int lidbg_flycam_event(struct notifier_block *this,
 			del_timer(&suspend_stoprec_timer);
 			isDVRFirstResume = 1;
 			isRearFirstResume = 1;
+			init_completion(&Rear_ready_wait);
+			init_completion(&DVR_ready_wait);
 			schedule_delayed_work(&work_t_RearView_fixScreenBlurred, 0);/*Rec Block mode(First ACCON)*/
 			schedule_delayed_work(&work_t_DVR_fixScreenBlurred, 0);/*Rec Block mode(First ACCON)*/
 			break;
@@ -536,6 +540,14 @@ static void fixScreenBlurred(char cam_id , char isOnline)
 {
 	if(cam_id == DVR_ID)
 	{
+		if(!isDVRFirstResume)
+		{
+			isDVRCheck = 0;
+			init_completion(&DVR_fw_get_wait);
+			lidbg_shell_cmd("/flysystem/lib/out/fw_update -2 -3&");
+			if(!wait_for_completion_timeout(&DVR_fw_get_wait , 3*HZ)) lidbg("%s:====DVR_fw_get_wait return fail====\n",__func__);
+		}
+		
 		lidbg_shell_cmd("setprop fly.uvccam.dvr.res 640x360");
 		lidbg_shell_cmd("setprop fly.uvccam.dvr.recpath /storage/sdcard0/camera_rec/");
 		if(start_rec(cam_id,1))lidbg("%s:====return fail====\n",__func__);
@@ -551,9 +563,18 @@ static void fixScreenBlurred(char cam_id , char isOnline)
 		}
 		lidbg_shell_cmd("setprop fly.uvccam.dvr.res 1280x720");
 		lidbg_shell_cmd("rm -f /storage/sdcard0/camera_rec/tmp*.h264&");
+		if(!isDVRFirstResume) isDVRCheck = 1;
 	}
 	else if(cam_id == REARVIEW_ID)
 	{
+		if(!isRearFirstResume)
+		{
+			isRearCheck = 0;
+			init_completion(&Rear_fw_get_wait);
+			lidbg_shell_cmd("/flysystem/lib/out/fw_update -2 -2&");
+			if(!wait_for_completion_timeout(&Rear_fw_get_wait , 3*HZ)) lidbg("%s:====Rear_fw_get_wait return fail====\n",__func__);
+		}
+		
 		lidbg_shell_cmd("setprop fly.uvccam.rearview.res 640x360");
 		lidbg_shell_cmd("setprop fly.uvccam.rearview.recpath /storage/sdcard0/");//must different path
 		if(start_rec(cam_id,1))lidbg("%s:====return fail====\n",__func__);
@@ -569,6 +590,7 @@ static void fixScreenBlurred(char cam_id , char isOnline)
 		}
 		lidbg_shell_cmd("setprop fly.uvccam.rearview.res 1280x720");
 		lidbg_shell_cmd("rm -f /storage/sdcard0/tmp*.h264&");
+		if(!isRearFirstResume) isRearCheck = 1;
 	}
 	return;
 }
@@ -1021,24 +1043,43 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		{
 			case NR_STATUS:
 		        lidbg("%s:NR_STATUS\n",__func__);
+				/*Check Update proc*/
+				if(arg == RET_DVR_UD_SUCCESS || arg == RET_DVR_UD_FAIL ||arg == RET_DVR_FW_ACCESS_FAIL ||
+					arg == RET_REAR_UD_SUCCESS ||arg == RET_REAR_UD_FAIL ||arg == RET_REAR_FW_ACCESS_FAIL )
+					isUpdating = 0;
 				status_fifo_in(arg);
 		        break;
 			case NR_ACCON_CAM_READY:/*R/W:	R[0-OK;1-Timout]	W[0-Rear;1-DVR] -> Wait for 10s*/
 		        lidbg("%s:NR_ACCON_CAM_READY  E cam_id=> %ld\n",__func__,arg);
 				if(arg == DVR_ID)
 				{
-					if(!wait_for_completion_timeout(&DVR_ready_wait , 10*HZ)) ret = 1;
+					lidbg("DVR_ready_wait waiting\n");
+					if(!(pfly_UsbCamInfo->camStatus & FLY_CAM_ISSONIX))
+					{
+						if(!wait_for_completion_timeout(&DVR_ready_wait , 10*HZ)) ret = 1;
+					}
+					else lidbg("DVR Camera already ready.\n");
 				}
 				else if(arg == REARVIEW_ID)
 				{
-					if(!wait_for_completion_timeout(&Rear_ready_wait , 10*HZ)) ret = 1;
+					lidbg("Rear_ready_wait waiting\n");
+					if(!((pfly_UsbCamInfo->camStatus>>4) & FLY_CAM_ISSONIX))
+					{
+						if(!wait_for_completion_timeout(&Rear_ready_wait , 10*HZ)) ret = 1;
+					}
+					else lidbg("Rear Camera already ready.\n");
 				}
 				 lidbg("%s:NR_ACCON_CAM_READY  X \n",__func__);
 		        break;
-			case NR_FW_VERSION:
-		        lidbg("%s:NR_FW_VERSION\n",__func__);
-				strcpy(camera_fw_version,(char*)arg);
-				complete(&fw_get_wait);
+			case NR_DVR_FW_VERSION:
+		        lidbg("%s:NR_DVR_FW_VERSION\n",__func__);
+				strcpy(camera_DVR_fw_version,(char*)arg);
+				complete(&Rear_fw_get_wait);/*HAL get version*/
+		        break;
+			case NR_REAR_FW_VERSION:
+		        lidbg("%s:NR_REAR_FW_VERSION\n",__func__);
+				strcpy(camera_rear_fw_version,(char*)arg);
+				complete(&DVR_fw_get_wait);/*HAL get version*/
 		        break;
 			default:
 		        return -ENOTTY;
@@ -1050,6 +1091,14 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		{
 			case NR_VERSION:
 		        lidbg("%s:NR_VERSION arg=> %d\n",__func__,(int)arg);
+				strcpy((char*)arg,"123456");
+						
+				if(arg == DVR_ID)
+					strcpy((char*)arg,camera_DVR_fw_version);
+				else if(arg == REARVIEW_ID)
+					strcpy((char*)arg,camera_rear_fw_version);
+				else strcpy((char*)arg,camera_DVR_fw_version);
+#if 0
 				if(arg == 0)
 				{
 					isRearCheck = 0;
@@ -1070,9 +1119,16 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 				msleep(1500);
 				isRearCheck = 1;
 				isDVRCheck = 1;
+#endif
 		        break;
 			case NR_UPDATE:
 		        lidbg("%s:NR_UPDATE\n",__func__);
+				if(isUpdating) 
+				{
+					lidbg("%s:Camera it's updating!Rejective.\n",__func__);
+					return RET_IGNORE;
+				}
+				isUpdating = 1;
 				if(arg == 0)
 					lidbg_shell_cmd("/flysystem/lib/out/fw_update -2 -0&");
 				else if(arg == 1)
