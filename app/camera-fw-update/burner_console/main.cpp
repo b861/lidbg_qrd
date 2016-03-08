@@ -380,6 +380,7 @@ static int burn_process(int camchoose,struct usb_device* CamArray[MAX_CAM_NUM],i
 {
 	CBurnMgr	burn_mgr;
 	int circnt = CNTNUM;
+	int ret = 0;
 	
 	LIDBG_PRINT("Prepare : select webcam #0 ... \n");
 	LIDBG_PRINT("=========start [%d] Camera update===========\n",cam_id);
@@ -390,7 +391,8 @@ static int burn_process(int camchoose,struct usb_device* CamArray[MAX_CAM_NUM],i
 	if (!burn_mgr.Cam_Select(CamArray[camchoose], nFileNum))
 	{
 		LIDBG_PRINT("Cam_Select Fail!\n");
-		return -1;
+		ret =  -1;
+		goto fail_entry;
 	}
 	LIDBG_PRINT("Cam_Select OK!\n");
 
@@ -398,7 +400,8 @@ static int burn_process(int camchoose,struct usb_device* CamArray[MAX_CAM_NUM],i
 	if (!burn_mgr.Set_Source_File_From_INI((char *)FILE_INI))
 	{
 		LIDBG_PRINT("Set_Source_File_From_INI Fail!\n");
-		return -2;
+		ret = -2;
+		goto fail_entry;
 	}
 	LIDBG_PRINT("Set_Source_File_From_INI OK!\n");
 	LIDBG_PRINT("\n");
@@ -421,12 +424,16 @@ static int burn_process(int camchoose,struct usb_device* CamArray[MAX_CAM_NUM],i
 	if(!Burn_To_Flash(burn_mgr,cam_id))
 	{
 		LIDBG_PRINT("FW Burn to Flash fail! circnt = %d\n", CNTNUM-circnt);
-		return -1;
+		ret = -1;
+		goto fail_entry;
 	}
 	burn_mgr.Cam_DeSelect();
 	LIDBG_PRINT("FW update Exit program!\n");
 	LIDBG_PRINT("\nPlease restart the computer to make the new FW become effective !\n");
-	return 0;
+	return ret;
+fail_entry:
+	burn_mgr.Burn_EndProc(false);
+	return ret;
 }
 
 
