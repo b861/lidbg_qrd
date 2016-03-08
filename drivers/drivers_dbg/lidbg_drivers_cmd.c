@@ -750,10 +750,22 @@ void parse_cmd(char *pt)
             g_var.alarmtimer_interval = simple_strtoul((argv[1] + 8), 0, 0);
 	     lidbg("set alarmtimer wakeup time:%d\n",g_var.alarmtimer_interval);
         }
-        else if (!strcmp(argv[1], "*158#068"))
+        else if (!strncmp(argv[1], "*158#068", 8))
         {
+        	//opt args,ex:*158#0680
+            int n;
             lidbg("*158#068--update firmware for camera\n");
-            lidbg_shell_cmd("/flysystem/lib/out/fw_update -2 &");
+            n = strlen(argv[1]);
+            if(n != 9)//wrong args
+            {
+                lidbg("wrong args!");
+                return;
+            }
+            lidbg("--------CAMERA UPDATE MODE:%s-----------", argv[1] + 8);
+            if(!strcmp((argv[1] + 8), "0"))
+                lidbg_shell_cmd("/flysystem/lib/out/fw_update -2 -0&");
+            else if(!strcmp((argv[1] + 8), "1"))
+                lidbg_shell_cmd("/flysystem/lib/out/fw_update -2 -1&");
         }
 		else if (!strcmp(argv[1], "*158#069"))
         {

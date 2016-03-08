@@ -438,7 +438,7 @@ int main(int argc, char *argv[])
 	int 		camchoose;
 	int 		ret = -1;
 	int			cam_id;
-	char 		codeVer[25] = {0};
+	char 		codeVer[25] = "NONE";
 	char 		isCheckVer = 0;
 
 	flycam_fd = open("/dev/lidbg_flycam0", O_RDWR);
@@ -536,9 +536,9 @@ int main(int argc, char *argv[])
 		{
 			LIDBG_PRINT("Get Camera FW Version Fail : Camera it's not exsit\n",codeVer);
 			if(cam_id == DVR_ID)
-				send_driver_msg(flycam_fd,FLYCAM_STATUS_IOC_MAGIC,NR_DVR_FW_VERSION,-1);
+				send_driver_msg(flycam_fd,FLYCAM_STATUS_IOC_MAGIC,NR_DVR_FW_VERSION,(unsigned long)codeVer);
 			else if(cam_id == REARVIEW_ID)
-				send_driver_msg(flycam_fd,FLYCAM_STATUS_IOC_MAGIC,NR_REAR_FW_VERSION,-1);
+				send_driver_msg(flycam_fd,FLYCAM_STATUS_IOC_MAGIC,NR_REAR_FW_VERSION,(unsigned long)codeVer);
 		}
 	}
 	else if((cam_id == REARVIEW_ID) || (cam_id == DVR_ID))/*Get specify camera index and burn to flash*/
