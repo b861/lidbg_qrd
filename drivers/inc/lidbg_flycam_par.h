@@ -19,6 +19,10 @@ typedef enum {
   NR_STOP_REC,
   NR_SET_PAR,
   NR_GET_RES,
+  NR_SATURATION,
+  NR_TONE,
+  NR_BRIGHT,
+  NR_CONTRAST,
 }cam_ctrl_t;
 
 typedef enum {
