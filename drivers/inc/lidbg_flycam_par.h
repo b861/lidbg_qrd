@@ -3,6 +3,10 @@
 
 #define REARVIEW_ID	0
 #define DVR_ID				1
+#define REAR_BLOCK_ID_MODE				2
+#define DVR_BLOCK_ID_MODE				3
+#define REAR_GET_RES_ID_MODE				4
+#define DVR_GET_RES_ID_MODE				5
 
 typedef enum {
   NR_BITRATE,
@@ -14,6 +18,7 @@ typedef enum {
   NR_START_REC,
   NR_STOP_REC,
   NR_SET_PAR,
+  NR_GET_RES,
 }cam_ctrl_t;
 
 typedef enum {
@@ -21,6 +26,8 @@ typedef enum {
   NR_ACCON_CAM_READY,
   NR_DVR_FW_VERSION,
   NR_REAR_FW_VERSION,
+  NR_DVR_RES,
+  NR_REAR_RES,
 }status_ctrl_t;
 
 typedef enum {

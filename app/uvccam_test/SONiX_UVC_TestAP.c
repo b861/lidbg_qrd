@@ -1625,7 +1625,7 @@ static void switch_scan(void)
 	return;
 }
 
-static void send_driver_msg(char magic ,char nr,char arg)
+static void send_driver_msg(char magic ,char nr,unsigned long arg)
 {
 	/*Do not send msg while in RearView mode:still not have dedicate StatusCode*/
 	if(cam_id == REARVIEW_ID)
@@ -2843,7 +2843,7 @@ int main(int argc, char *argv[])
 		ACCON Block mode
 		W:	return [0-OK;1-Timout]	W[0-Rear;1-DVR] -> Wait for 10s
 	*/
-	if(cam_id > 1)
+	if((cam_id == REAR_BLOCK_ID_MODE) || (cam_id == DVR_BLOCK_ID_MODE))
 	{
 		int ret_acc;
 		lidbg("********ACC FIRST RESUME*********\n");
@@ -2858,13 +2858,64 @@ int main(int argc, char *argv[])
 		cam_id -= 2;
 	}
 
+	/*Query Camera supportResolutions */
+	if(cam_id == DVR_GET_RES_ID_MODE || cam_id == REAR_GET_RES_ID_MODE)
+	{
+		cam_id -= 4;
+		lidbg("********GET RESOULUTION :cam_id => %d*********\n",cam_id);
+		
+		rc = lidbg_get_hub_uvc_device(RECORD_MODE,devName,cam_id,0);
+	    if((rc == -1)  || (*devName == '\0'))
+	    {
+	        lidbg("%s: No UVC node found \n", __func__);
+			//return 1;
+			goto try_open_again; 
+	    }
+			
+		dev = video_open(devName);
+	
+		if (dev < 0)
+			return 1;
+		
+		struct v4l2_frmsizeenum	res_frmsize;
+		int res_i = 0;
+		char res_all[100] = {0};
+		char res_final[100] = {0};
+		char res_each[10] = {0};
+		for(res_i = 0; ; res_i++)
+        {
+        	res_frmsize.pixel_format = V4L2_PIX_FMT_YUYV;
+            res_frmsize.index = res_i;
+            if (ioctl(dev, VIDIOC_ENUM_FRAMESIZES , &res_frmsize) < 0)
+            {
+                  //lidbg("%s: VIDIOC_ENUM_FRAMESIZES failed--%d\n", __func__, res_i);
+				  break;
+            }
+			if (res_frmsize.type == V4L2_FRMSIZE_TYPE_DISCRETE)
+			{
+				  //lidbg("%s: RES => %dx%d\n", __func__, res_frmsize.discrete.width, res_frmsize.discrete.height);
+				  sprintf(res_each , "%dx%d,",res_frmsize.discrete.width, res_frmsize.discrete.height);
+				  strcat(res_all,res_each);
+			}
+        }
+		 strncpy(res_final ,res_all ,strlen(res_all) - 1);
+		 lidbg("%s: RESALL => %s \n", __func__, res_final);
+		 if(cam_id == DVR_ID)
+			send_driver_msg(FLYCAM_STATUS_IOC_MAGIC,NR_DVR_RES,(unsigned long)res_final);
+		else if(cam_id == REARVIEW_ID)
+			send_driver_msg(FLYCAM_STATUS_IOC_MAGIC,NR_REAR_RES,(unsigned long)res_final);
+		 close(dev);
+		 close(flycam_fd);
+		 return 0;
+	}
+
 	/* Open the video device. */
 	//dev = video_open(argv[optind]);
 getuvcdevice:
 	/*auto find camera device*/
 	//rc = get_hub_uvc_device(devName,do_save,do_record);
 	lidbg("************cam_id -> %d************\n",cam_id);
-	if(cam_id == -1)	cam_id = 1;
+	if(cam_id == -1)	cam_id = DVR_ID;
 	rc = lidbg_get_hub_uvc_device(RECORD_MODE,devName,cam_id,1);
     if((rc == -1)  || (*devName == '\0'))
     {

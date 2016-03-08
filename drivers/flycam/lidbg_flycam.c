@@ -31,6 +31,8 @@ static DECLARE_COMPLETION (Rear_ready_wait);
 static DECLARE_COMPLETION (DVR_ready_wait);
 static DECLARE_COMPLETION (Rear_fw_get_wait);
 static DECLARE_COMPLETION (DVR_fw_get_wait);
+static DECLARE_COMPLETION (Rear_res_get_wait);
+static DECLARE_COMPLETION (DVR_res_get_wait);
 
 /*Camera DVR & Online recording parameters*/
 static int f_rec_bitrate = 8000000,f_rec_time = 300,f_rec_filenum = 5,f_rec_totalsize = 4096;
@@ -58,6 +60,8 @@ static struct kfifo camStatus_data_fifo;
 u8 camera_DVR_fw_version[20] = {0};	
 u8 camera_rear_fw_version[20] = {0};	
 
+u8 camera_rear_res[100] = {0};
+u8 camera_DVR_res[100] = {0};
 
 #if 0
 static wait_queue_head_t wait_queue;
@@ -452,6 +456,16 @@ static struct notifier_block usb_nb_cam =
     .notifier_call = usb_nb_cam_func,
 };
 
+static int get_camera_res(char cam_id)
+{
+	char temp_cmd[256];	
+	char cam_id_mode = cam_id + 4;
+	sprintf(temp_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video2 -b %d -c -f H264 -r &", cam_id_mode);
+	lidbg_shell_cmd(temp_cmd);
+	return 0;
+}
+
+
 /******************************************************************************
  * Function: start_rec
  * Description: start sonix AP recording
@@ -474,10 +488,13 @@ static int start_rec(char cam_id,char isPowerCtl)
 		lidbg_shell_cmd("setprop fly.uvccam.dvr.recording 1");
 	else if(cam_id == REARVIEW_ID)
 		lidbg_shell_cmd("setprop fly.uvccam.rearview.recording 1");
+	
+	/*Rec Block mode(First ACCON) : REAR_BLOCK_ID_MODE & DVR_BLOCK_ID_MODE*/
 	if(((isDVRFirstResume) && (cam_id == DVR_ID)) || ((isRearFirstResume) && (cam_id == REARVIEW_ID)))
-		cam_id_mode += 2;/*Rec Block mode(First ACCON)*/
+		cam_id_mode += 2;
 	sprintf(temp_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video2 -b %d -c -f H264 -r &", cam_id_mode);
  	lidbg_shell_cmd(temp_cmd);
+	
 	/*don't wait status pop in Rearview*/
 	if(cam_id == DVR_ID)
 	{
@@ -945,6 +962,13 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 					if(start_rec(DVR_ID,1)) goto failproc;
 				}
 		        break;
+			case NR_GET_RES:
+				lidbg("%s:DVR NR_GET_RES\n",__func__);
+				get_camera_res(DVR_ID);
+				if(!wait_for_completion_timeout(&DVR_res_get_wait , 3*HZ)) ret = RET_FAIL;
+				strcpy((char*)arg,camera_DVR_res);
+				lidbg("%s:DVR NR_GET_RES => %s\n",__func__,(char*)arg);
+		        break;
 		    default:
 		        return -ENOTTY;
 		}
@@ -1074,12 +1098,22 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 			case NR_DVR_FW_VERSION:
 		        lidbg("%s:NR_DVR_FW_VERSION\n",__func__);
 				strcpy(camera_DVR_fw_version,(char*)arg);
-				complete(&Rear_fw_get_wait);/*HAL get version*/
+				complete(&DVR_fw_get_wait);/*HAL get version*/
 		        break;
 			case NR_REAR_FW_VERSION:
 		        lidbg("%s:NR_REAR_FW_VERSION\n",__func__);
 				strcpy(camera_rear_fw_version,(char*)arg);
-				complete(&DVR_fw_get_wait);/*HAL get version*/
+				complete(&Rear_fw_get_wait);/*HAL get version*/
+		        break;
+			case NR_DVR_RES:
+		        lidbg("%s:NR_DVR_RES\n",__func__);
+				strcpy(camera_DVR_res,(char*)arg);
+				complete(&DVR_res_get_wait);/*HAL get version*/
+		        break;
+			case NR_REAR_RES:
+		        lidbg("%s:NR_REAR_RES\n",__func__);
+				strcpy(camera_rear_res,(char*)arg);
+				complete(&Rear_res_get_wait);/*HAL get version*/
 		        break;
 			default:
 		        return -ENOTTY;
@@ -1682,6 +1716,9 @@ int thread_flycam_init(void *data)
 
 	//init_waitqueue_head(&wait_queue);
 	init_waitqueue_head(&pfly_UsbCamInfo->camStatus_wait_queue);/*camera status wait queue*/
+
+	init_completion(&DVR_res_get_wait);
+	init_completion(&Rear_res_get_wait);
 	
 	if(g_var.recovery_mode == 0)/*do not process when in recovery mode*/
 	{
