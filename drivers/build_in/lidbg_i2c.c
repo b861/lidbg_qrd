@@ -1,7 +1,7 @@
 #include <linux/i2c.h>
 #include <linux/delay.h>
 #include <linux/kthread.h>
-
+#include "lidbg_target.h"
 
 int cmn_i2c_write(int i2c_bus_id, u8 dev_address_7bit, u8 *data, int len)
 {
@@ -49,15 +49,29 @@ void lcd_on(void)
 }
 
 
+
+void soc_io_output(u32 group, u32 index, bool status)
+{
+    int err;
+    printk(KERN_CRIT"===soc_io_output===\n");
+    index += GPIO_MAP_OFFSET;
+    err = gpio_request(index, "lidbg_io_output");
+    gpio_direction_output(index, status);
+    gpio_set_value(index, status);
+}
+
+
 static int thread_wait_i2c(void *data)
 {
     int loop = 0;
     allow_signal(SIGKILL);
     allow_signal(SIGSTOP);
+    
     while(++loop < 10)
     {
         ssleep(1);
         lcd_on();
+	soc_io_output(0,GPIO_WP,0);
     }
     return 1;
 }

@@ -35,7 +35,7 @@ struct bootloader_hw_config g_hw_info[] =
             .lpc_sda = 6,
             .lpc_scl = 7,
         },
-
+	.gpio_mcu_wp = 35,
         .dbg_uart_port = "console=ttyHSL0,115200,n8 androidboot.console=ttyHSL0 ",
     },
     //msm8974
@@ -71,7 +71,7 @@ struct bootloader_hw_config g_hw_info[] =
             .lpc_sda = 2,
             .lpc_scl = 3,
         },
-
+	.gpio_mcu_wp = 79,
         .dbg_uart_port = "console=ttyHSL0,115200,n8 androidboot.console=ttyHSL0 ",
     },
     //msm8909
@@ -109,7 +109,7 @@ struct bootloader_hw_config g_hw_info[] =
         },
 
         .lk_wakeup_lpc_io = 95,
-
+	.gpio_mcu_wp = 33,
         .dbg_uart_port = "console=ttyHSL1,115200,n8 androidboot.console=ttyHSL1 ",
     }
 };

@@ -1,7 +1,5 @@
-#define PLATFORM_MSM8226 1
-//#define PLATFORM_MSM8974 1
-#define ANDROID_5_LATER
 
+#include "lidbg_target.h"
 #define  RECOVERY_MODE_DIR "/sbin/recovery"
 
 

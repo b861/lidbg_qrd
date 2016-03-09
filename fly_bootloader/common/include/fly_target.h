@@ -50,7 +50,7 @@ struct bootloader_hw_config
     struct ctp_config ctp_info;
     struct lpc_config lpc_info;
     int lk_wakeup_lpc_io;
-
+    int gpio_mcu_wp;
     char *dbg_uart_port;
 };
 
