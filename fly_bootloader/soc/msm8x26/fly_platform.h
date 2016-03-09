@@ -77,6 +77,7 @@
 #endif
 #ifdef BOOTLOADER_MSM8909
 #define BOARD_VERSION 2
+#define NEW_SUSPEND 1
 #endif
 
 #define ADC_KEY_CHNL 2
