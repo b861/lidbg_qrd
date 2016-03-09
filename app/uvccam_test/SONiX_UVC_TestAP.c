@@ -4681,7 +4681,7 @@ try_open_again:
 		//lidbg("%s: Camera may extract unexpected!try open again!-> %d\n", __func__,tryopencnt);
 		lidbg("%s: Camera open fail!try open again!-> %d\n", __func__,tryopencnt);
 		//rc = get_hub_uvc_device(devName,do_save,do_record);
-		rc = lidbg_get_hub_uvc_device(RECORD_MODE,devName,1,1);
+		rc = lidbg_get_hub_uvc_device(RECORD_MODE,devName,cam_id,1);
 		if((rc == -1) || (*devName == '\0'))
         {
             lidbg("%s: No UVC node found again\n", __func__);
