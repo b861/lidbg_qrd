@@ -980,18 +980,20 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		        break;
 			case NR_TONE:
 				lidbg("%s:DVR NR_TONE\n",__func__);
-				
+				lidbg("hueVal = %ld\n",arg);
+				sprintf(temp_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video1 -b 1 --ef-set hue=%ld ", arg);
+				lidbg_shell_cmd(temp_cmd);
 		        break;
 			case NR_BRIGHT:
 				lidbg("%s:DVR NR_BRIGHT\n",__func__);
 				lidbg("brightVal = %ld\n",arg);
-				sprintf(temp_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video1 --ef-set bright=%ld ", arg);
+				sprintf(temp_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video1 -b 1 --ef-set bright=%ld ", arg);
 				lidbg_shell_cmd(temp_cmd);
 		        break;
 			case NR_CONTRAST:
 				lidbg("%s:DVR NR_CONTRAST\n",__func__);
 				lidbg("contrastVal = %ld\n",arg);
-				sprintf(temp_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video1 --ef-set contrast=%ld ", arg);
+				sprintf(temp_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video1 -b 1 --ef-set contrast=%ld ", arg);
 				lidbg_shell_cmd(temp_cmd);
 		        break;
 		    default:

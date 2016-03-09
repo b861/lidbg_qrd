@@ -1870,6 +1870,7 @@ int main(int argc, char *argv[])
 	int saturationVal = 0;
 	int autogainVal = 0;
 	int exposureVal = 0;
+	int hueVal = 0;
 	
 	char do_gain = 0;
 	char do_sharp = 0;
@@ -1881,6 +1882,7 @@ int main(int argc, char *argv[])
 	char do_autogain = 0;
 	char do_exposure = 0;
 	char do_nightthread = 0;
+	char do_hue = 0;
 
 	char do_night_thread = 0;
 
@@ -2812,6 +2814,11 @@ int main(int argc, char *argv[])
 				do_exposure = 1;
 				exposureVal = strtol(keyval[1], &endptr, 10);
 			}	
+			else if (strcmp(keyval[0], "hue") == 0)
+			{
+				do_hue = 1;
+				hueVal = strtol(keyval[1], &endptr, 10);
+			}
 			else if (strcmp(keyval[0], "nightthread") == 0)
 			{
 				do_nightthread = 1;
@@ -3011,6 +3018,11 @@ openfd:
 			//lidbg("----eho---- : do_exposure (%d) Failed", exposureVal);
 			if (v4l2SetControl (dev, V4L2_CID_EXPOSURE_ABSOLUTE, V4L2_EXPOSURE_AUTO)<0)
 			lidbg("----eho---- : do_exposure (%d) Failed", exposureVal);
+		}
+		else if (do_hue)
+		{
+			if (v4l2SetControl (dev, V4L2_CID_HUE, hueVal -40)<0)
+			lidbg("----eho---- : do_hue (%d) Failed", hueVal);
 		}
 		#if 0
 		else if (do_nightthread)
