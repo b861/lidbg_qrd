@@ -95,15 +95,15 @@ int soc_io_config(u32 index, int func, u32 direction, u32 pull, u32 drive_streng
             return 0;
 
 
-        lidbg("gpio_request:index %d\n" , index);
+    //    lidbg("gpio_request:index %d\n" , index);
 
         err = gpio_request(index, "lidbg_io");
         if (err)
         {
-            lidbg("\n\nerr: gpio request failed1!!!!!!\n\n\n");
+            lidbg("\n\nerr: gpio request failed1 %d!!!!!!\n\n\n",index);
             gpio_free(index);
             err = gpio_request(index, "lidbg_io");
-            lidbg("\n\nerr: gpio request failed2!!!!!!\n\n\n");
+            lidbg("\n\nerr: gpio request failed2 %d!!!!!!\n\n\n",index);
         }
 
 
@@ -145,7 +145,7 @@ int soc_io_output(u32 group, u32 index, bool status)
 bool soc_io_input( u32 index)
 {
 	if(io_ready == 0)  {lidbg("%d io not ready\n",index);return 1;}
-	lidbg("get imx6q gpio\n");
+	//lidbg("get imx6q gpio\n");
 	gpio_direction_input(index);
     return gpio_get_value(index);
 }
