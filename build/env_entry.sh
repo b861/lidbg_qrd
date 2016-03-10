@@ -246,7 +246,7 @@ case "$DBG_PLATFORM_ID" in
         export TEST_PACKAGE_PATH=//192.168.128.128/8974/升级包发布/专项测试包
         export REPOSITORY_WORK_BRANCH=master
         export SYSTEM_WORK_BRANCH=master
-        export MAKE_PAKG_NUM=19
+        export MAKE_PAKG_NUM=15
         export NON_HLOS_FILE_PATH=$BP_SOURCE_PATH/common/build/bin/asic
         export RPM_FILE_PATH=$RPM_PATH/ms/bin/AAAAANAAR
         export SBL_FILE_PATH=$BOOT_IMAGE_PATH/bin/8974
