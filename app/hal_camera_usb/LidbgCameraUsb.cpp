@@ -2682,6 +2682,7 @@ ION_OPEN_FAILED:
         String8 str = String8(params);
 		CameraParameters lParam;
 		int width,height;
+		int tmpval;
 		camera_hardware_t *camHal;
 		VALIDATE_DEVICE_HDL(camHal, device, -1);
         Mutex::Autolock autoLock(camHal->lock);
@@ -2712,6 +2713,33 @@ ION_OPEN_FAILED:
 		        camHal->dispHeight  = height;
 			}	
 		}	
+		/*set preview par*/
+		tmpval = lParam.getInt("contrast");
+		if(tmpval >= 0)
+		{
+			ALOGE("%s: contrast -> %d\n", __func__,tmpval);
+			v4l2_vidio_s_ctrl(camHal->fd, "V4L2_CID_CONTRAST",V4L2_CID_CONTRAST, tmpval);
+		}
+		tmpval = lParam.getInt("saturation");
+		if(tmpval >= 0)
+		{
+			ALOGE("%s: saturation -> %d\n", __func__,tmpval);
+			v4l2_vidio_s_ctrl(camHal->fd, "V4L2_CID_SATURATION",V4L2_CID_SATURATION, tmpval);
+		}
+		tmpval = lParam.getInt("bright");
+		if(tmpval >= 0)
+		{
+			ALOGE("%s: bright -> %d\n", __func__,tmpval);
+			v4l2_vidio_s_ctrl(camHal->fd, "V4L2_CID_BRIGHTNESS", V4L2_CID_BRIGHTNESS,tmpval);
+		}
+		tmpval = lParam.getInt("hue");
+		if(tmpval >= 0)
+		{
+			ALOGE("%s: hue -> %d\n", __func__,tmpval);
+			v4l2_vidio_s_ctrl(camHal->fd, "V4L2_CID_HUE", V4L2_CID_HUE,tmpval);
+		}
+		
+		
         ALOGD("%s: X", __func__);
         return 0;
     }
