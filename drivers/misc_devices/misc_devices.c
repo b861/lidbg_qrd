@@ -16,6 +16,19 @@ static struct wake_lock device_wakelock;
 
 #if defined(CONFIG_FB)
 struct notifier_block devices_notif;
+int thread_lcd_on_delay(void *data)
+{
+    DUMP_FUN_ENTER;
+    msleep(960);
+	if(g_var.acc_flag==FLY_ACC_ON)
+	{
+        		lidbg("LCD_ON2.in\n");
+        		LCD_ON;
+	}
+	else
+        		lidbg("LCD_ON2.skip\n");
+    return 0;
+}
 static int devices_notifier_callback(struct notifier_block *self,
                                      unsigned long event, void *data)
 {
@@ -31,8 +44,8 @@ static int devices_notifier_callback(struct notifier_block *self,
             if(g_var.system_status >= FLY_KERNEL_UP)
                 if((g_var.led_hal_status & g_var.led_app_status)&&(g_var.acc_flag==FLY_ACC_ON)&&(g_var.flyaudio_reboot==0))
                 {
-        		lidbg("LCD_ON2\n");
-        		LCD_ON;
+        		lidbg("LCD_ON2.thread\n");
+        		CREATE_KTHREAD(thread_lcd_on_delay, NULL);
                 }
 
             g_var.fb_on = 1;
