@@ -523,7 +523,7 @@ static int soc_dev_probe(struct platform_device *pdev)
     {
         CREATE_KTHREAD(thread_udisk_stability_test, NULL);
     }
-    usb_disk_enable(true);
+     CREATE_KTHREAD(thread_usb_disk_enable_delay, NULL);
     SET_USB_ID_SUSPEND;
 
 
