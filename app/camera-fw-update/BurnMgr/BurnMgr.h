@@ -34,6 +34,7 @@ public:
 	bool 	Get_CodeVersion(char szFlashCodeVer[32]);
     bool    Get_VendorVersion(char szFlashVendorVer[16]);
 	bool	Get_RomVersion(char szRomVer[8]);
+	bool	Get_FWVersion(char szFwVer[10]);
 
 	char*	Get_RomFile();
 	char*	Get_ParamFile();

@@ -827,6 +827,13 @@ bool CBurnMgr::Get_RomVersion(char szRomVer[8])
 	return get_rom_version(szRomVer);	
 }
 
+bool CBurnMgr::Get_FWVersion(char szFwVer[10])
+{
+	TRACE("CBurnMgr::Get_FWVersion()\n");
+	
+	return get_fw_version(szFwVer);	
+}
+
 char* CBurnMgr::Get_RomFile()
 {
 	TRACE("CBurnMgr::Get_RomFile()\n");

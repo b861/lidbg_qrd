@@ -1448,6 +1448,25 @@ bool 	get_vendor_version(char szFlashVendorVer[LEN_VENDOR_VER])
 	return true;
 }
 
+bool 	get_fw_version(char szFwVer[LEN_FW_VER])
+{
+	ENUM_ROM_ID	id;
+
+	if (s_udev == NULL)
+	{
+		DBG_Print("get_fw_version : s_udev = NULL - return!\n");
+		return false;
+	}	
+	
+	if (!get_rom_id(id))
+	{
+		DBG_Print("get_fw_version : get_rom_id() - Fail!");
+		return false;
+	}
+    sf_read(0x201C, (unsigned char *)szFwVer, 10);
+	return true;
+}
+
 bool 	get_rom_version(char szRomVer[LEN_ROM_VER])
 {
 	bool	bRet = false;

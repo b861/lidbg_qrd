@@ -27,6 +27,7 @@
 #define LEN_ROM_VER		8
 #define LEN_CODE_VER	32
 #define LEN_VENDOR_VER	16
+#define LEN_FW_VER	10
 
 #define ROM_VER_COUNT	11
 
@@ -116,6 +117,7 @@ bool 	uninit_xfer(void);
 bool 	get_code_version(char szFlashCodeVer[LEN_CODE_VER]);
 bool 	get_vendor_version(char szFlashVendorVer[LEN_VENDOR_VER]);
 bool 	get_rom_version(char szRomVer[LEN_ROM_VER]);
+bool 	get_fw_version(char szFwVer[LEN_FW_VER]);
 bool	get_rom_id(ENUM_ROM_ID &nID);
 int		rom_str_to_id(char *RomString);
 bool 	get_bypass_length(unsigned long &ulBypass);

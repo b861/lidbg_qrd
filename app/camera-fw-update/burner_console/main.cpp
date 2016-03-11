@@ -359,7 +359,7 @@ static int get_FW_version(int camchoose,struct usb_device* CamArray[MAX_CAM_NUM]
 	}
 	LIDBG_PRINT("Cam_Select OK!\n");
 	
-	if(!burn_mgr.Get_CodeVersion(Fwversion))
+	if(!burn_mgr.Get_FWVersion(Fwversion))
 	{
 		DBG_Print("Get FW version Fail!\n");
 		LIDBG_PRINT("Get FW version Fail!\n");
