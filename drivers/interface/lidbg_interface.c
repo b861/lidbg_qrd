@@ -67,7 +67,7 @@ bool iSOC_IO_ISR_Add(u32 irq, u32  interrupt_type, pinterrupt_isr func, void *de
 
     ret =  soc_io_irq(&io_int_config1);
 
-#if 0
+#if 1
 #ifdef SUSPEND_ONLINE
 	if(irq == MCU_IIC_REQ_GPIO){
        lidbg("Enable IO(%d), irq[%d] as wakeup source\n", irq, io_int_config1.ext_int_num);
