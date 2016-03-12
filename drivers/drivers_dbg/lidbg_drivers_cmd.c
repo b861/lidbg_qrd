@@ -311,6 +311,7 @@ void parse_cmd(char *pt)
 	     fs_mem_log("*158#071--udisk stable test\n");
 	     fs_mem_log("*158#072--acc on/off udisk stable test\n");
 	     fs_mem_log("*158#073--log kmsg no screen flash\n");
+	     fs_mem_log("*158#074--disable cn.flyaudio.media\n");
 
             show_password_list();
             lidbg_domineering_ack();
@@ -789,6 +790,12 @@ void parse_cmd(char *pt)
            lidbg("acc on/off udisk stable test\n");
 	    lidbg_fs_log(USB_MOUNT_POINT"/udisk_stable_test", "udisk_stable_test\n");
            g_var.udisk_stable_test = 2;
+           lidbg_domineering_ack();
+       }
+        else if (!strcmp(argv[1], "*158#074"))
+        {
+           lidbg("pm disable cn.flyaudio.media\n");
+           lidbg_shell_cmd("pm disable cn.flyaudio.media"); 
            lidbg_domineering_ack();
        }
     	}
