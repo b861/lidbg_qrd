@@ -71,11 +71,11 @@ void usb_camera_enable(bool enable)
     if(enable)
     	{ 
     	 wake_lock(&device_wakelock);
-        USB_POWER_FRONT_ENABLE;
+        USB_FRONT_WORK_ENABLE;
     	}
     else
     {
-        USB_POWER_FRONT_DISABLE;
+        USB_WORK_DISENABLE;
 	 wake_unlock(&device_wakelock);	
     }
 }
@@ -183,6 +183,12 @@ static int lidbg_dev_event(struct notifier_block *this,
 
     switch (event)
     {
+
+    case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_ON):
+    {
+        g_var.usb_status = 0;
+	 break;
+    }
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_SCREEN_OFF):
         //if(!g_var.is_fly)
     {
@@ -341,8 +347,8 @@ static void parse_cmd(char *pt)
     {
         	lidbg("Misc devices ctrl: udisk_request");
 #if defined(PLATFORM_msm8909) && defined(BOARD_V1)
-		usb_disk_enable(true);
  		g_var.usb_request= 1;
+		usb_disk_enable(true);
 #else
 		 g_var.usb_cam_request = 1;
 		if(g_var.acc_flag == FLY_ACC_OFF)
@@ -354,9 +360,8 @@ static void parse_cmd(char *pt)
     {
         	lidbg("Misc devices ctrl: udisk_unrequest");
 #if defined(PLATFORM_msm8909) && defined(BOARD_V1)
-		 g_var.usb_request= 0;
-		 if(g_var.acc_flag == FLY_ACC_OFF)
-		 	usb_disk_enable(false);
+		 g_var.usb_request = 0;
+		 usb_disk_enable(false);
 #else
 		  g_var.usb_cam_request= 0;
 		  if(g_var.acc_flag == FLY_ACC_OFF)
