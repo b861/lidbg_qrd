@@ -11,6 +11,8 @@ common_src_files := \
 	fs/Ext4.cpp \
 	fs/F2fs.cpp \
 	fs/Vfat.cpp \
+	fs/Exfat.cpp \
+	fs/Ntfs.cpp \
 	Loop.cpp \
 	Devmapper.cpp \
 	ResponseCode.cpp \
@@ -65,22 +67,7 @@ vold_conlyflags := -std=c11
 vold_cflags := -Werror -Wall -Wno-missing-field-initializers -Wno-unused-variable -Wno-unused-parameter
 
 include $(CLEAR_VARS)
-
-LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
-LOCAL_MODULE := libvold
-LOCAL_CLANG := true
-LOCAL_SRC_FILES := $(common_src_files)
-LOCAL_C_INCLUDES := $(common_c_includes)
-LOCAL_SHARED_LIBRARIES := $(common_shared_libraries)
-LOCAL_STATIC_LIBRARIES := $(common_static_libraries)
-LOCAL_MODULE_TAGS := eng tests
-LOCAL_CFLAGS := $(vold_cflags)
-LOCAL_CONLYFLAGS := $(vold_conlyflags)
-
-include $(BUILD_STATIC_LIBRARY)
-
-include $(CLEAR_VARS)
-
+LOCAL_MODULE_PATH := $(DBG_OUT_PATH)
 LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
 LOCAL_MODULE:= vold
 LOCAL_CLANG := true
@@ -104,7 +91,7 @@ LOCAL_STATIC_LIBRARIES := $(common_static_libraries)
 include $(BUILD_EXECUTABLE)
 
 include $(CLEAR_VARS)
-
+LOCAL_MODULE_PATH := $(DBG_OUT_PATH)
 LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
 LOCAL_CLANG := true
 LOCAL_SRC_FILES:= vdc.c
