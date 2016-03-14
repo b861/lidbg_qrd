@@ -15,10 +15,10 @@ struct hw_version_specific g_hw_version_specific[] =
 
         .gpio_int_gps = 1,
 
-        //.gpio_int_button_left1 = 0,
-        //.gpio_int_button_left2 = 0,
-        //.gpio_int_button_right1 = 0,
-        //.gpio_int_button_right2 = 0,
+        .gpio_int_button_left1 = 102,
+        .gpio_int_button_left2 = 103,
+        .gpio_int_button_right1 = 104,
+        .gpio_int_button_right2 = 105,
 
         .gpio_led1 = 2,
         //.gpio_led2 = 0,

@@ -115,6 +115,24 @@ enum audio_source {Init = 0, MediaCD, CDC, RADIO, AUX, IPOD, TV, MediaMP3, SRADI
 
 #define NOTUSED_CASE		254	//or -1(suppress warning)
 
+#ifdef SOC_imx6q
+#define INIT_INPUT_ADDR		I2S1_SUBADDR
+#define IIS1_INPUT_CASE		case IPOD:\
+							case TV:\
+							case VAP:\
+							case MediaMP3:\
+							case MediaSystem:\
+							case SYSTEM_RING:\
+							case BT_RING:
+#define AIN0_INPUT_CASE		case AUX:
+#define AIN1_INPUT_CASE		case A2DP:\
+							case BT:
+#define AIN2_3_INPUT_CASE	case EXT_TEL:\
+							case GR_AUDIO:
+#define SPDIF0_INPUT_CASE	case MediaCD:
+#define RADIO_INPUT_CASE		case RADIO:
+#endif
+
 #ifdef SOC_rk3x88
 #define INIT_INPUT_ADDR		I2S1_SUBADDR
 #define IIS1_INPUT_CASE		case IPOD:\

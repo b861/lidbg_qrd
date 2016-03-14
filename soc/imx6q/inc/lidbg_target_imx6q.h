@@ -1,13 +1,17 @@
-#ifndef  __TARGET_MT3360__DEFINE_
-#define __TARGET_MT3360__DEFINE_
+#ifndef __TARGET_IMX6Q__DEFINE_
+#define __TARGET_IMX6Q__DEFINE_
 
-#ifdef PLATFORM_mt3360
-#define UART_SEND_DATA_TO_LPC
+//#ifdef PLATFORM_mt3360
+/*#define UART_SEND_DATA_TO_LPC
 #define UART_SEND_DATA "/system/bin/lidbg_uart_send_data"
 #define UART_BAUD_REATE "115200"
 #define LPC_UART_PORT "/dev/ttyMT0"
-#define SEND_DATA_WITH_UART
-#endif
+#define SEND_DATA_WITH_UART*/
+//add for build erro
+#define WAKEUP_MCU_BEGIN  do{	}while(0)
+#define WAKEUP_MCU_END  do{   }while(0)
+#define USB_POWER_FRONT_DISABLE do{	}while(0)
+#define USB_POWER_FRONT_ENABLE do{}while(0)
 
 #define  SOC_IO_SUSPEND  do{soc_io_suspend();}while(0)
 #define  SOC_IO_RESUME	 do{soc_io_resume();}while(0)
@@ -98,7 +102,13 @@
 #define MSM_DSI83_DISABLE do{\
 	}while(0)
 
-#define FLY_GPS_SO  "gps.msm8226.so"
+
+#define MSM_ACCEL_POWER_ON do{\
+}while(0)
+ 
+#define MSM_ACCEL_POWER_OFF do{\
+}while(0)
+#define FLY_GPS_SO  "gps.sabresd_6dq.so"
 
 
 #endif
