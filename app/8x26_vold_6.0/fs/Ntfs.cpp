@@ -31,6 +31,9 @@ namespace android {
 namespace vold {
 namespace ntfs {
 
+static const char *FLY_PRODUCT_PATH = "/flysystem/lib/out/mkfs.ntfs";
+static const char *NATIVE_SYSTEM_PATH = "/system/lib/modules/out/mkfs.ntfs";
+
 static const char* kMkfsPath = "/system/bin/mkfs.ntfs";
 static const char* kFsckPath = "/system/bin/fsck.ntfs";
 #ifdef CONFIG_KERNEL_HAVE_NTFS
@@ -38,6 +41,25 @@ static const char* kMountPath = "/system/bin/mount";
 #else
 static const char* kMountPath = "/system/bin/mount.ntfs";
 #endif
+
+int selectPath(){
+	if(!access(FLY_PRODUCT_PATH, X_OK))
+	{
+		kMkfsPath = "/flysystem/lib/out/mkfs.ntfs";
+		kFsckPath = "/flysystem/lib/out/fsck.ntfs";
+		kMountPath = "/flysystem/lib/out/mount.ntfs";
+		return 0;
+	}
+	else if(!access(NATIVE_SYSTEM_PATH, X_OK))
+	{
+		kMkfsPath = "/system/lib/modules/out/mkfs.ntfs";
+		kFsckPath = "/system/lib/modules/out/fsck.ntfs";
+		kMountPath = "/system/lib/modules/out/mount.ntfs";
+		return 0;
+	}
+	else
+		return -1;
+}
 
 bool IsSupported() {
     return access(kMkfsPath, X_OK) == 0

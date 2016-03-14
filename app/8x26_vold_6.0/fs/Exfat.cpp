@@ -31,6 +31,9 @@ namespace android {
 namespace vold {
 namespace exfat {
 
+static const char *FLY_PRODUCT_PATH = "/flysystem/lib/out/mkfs.exfat";
+static const char *NATIVE_SYSTEM_PATH = "/system/lib/modules/out/mkfs.exfat";
+
 static const char* kMkfsPath = "/system/bin/mkfs.exfat";
 static const char* kFsckPath = "/system/bin/fsck.exfat";
 #ifdef CONFIG_KERNEL_HAVE_EXFAT
@@ -38,6 +41,25 @@ static const char* kMountPath = "/system/bin/mount";
 #else
 static const char* kMountPath = "/system/bin/mount.exfat";
 #endif
+
+int selectPath(){
+	if(!access(FLY_PRODUCT_PATH, X_OK))
+	{
+		kMkfsPath = "/flysystem/lib/out/mkfs.exfat";
+		kFsckPath = "/flysystem/lib/out/fsck.exfat";
+		kMountPath = "/flysystem/lib/out/mount.exfat";
+		return 0;
+	}
+	else if(!access(NATIVE_SYSTEM_PATH, X_OK))
+	{
+		kMkfsPath = "/system/lib/modules/out/mkfs.exfat";
+		kFsckPath = "/system/lib/modules/out/fsck.exfat";
+		kMountPath = "/system/lib/modules/out/mount.exfat";
+		return 0;
+	}
+	else
+		return -1;
+}
 
 bool IsSupported() {
     return access(kMkfsPath, X_OK) == 0

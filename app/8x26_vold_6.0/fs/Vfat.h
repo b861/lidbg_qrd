@@ -25,6 +25,7 @@ namespace android {
 namespace vold {
 namespace vfat {
 
+int selectPath();
 bool IsSupported();
 
 status_t Check(const std::string& source);

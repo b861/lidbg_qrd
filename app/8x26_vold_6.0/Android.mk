@@ -101,3 +101,5 @@ LOCAL_CFLAGS := $(vold_cflags)
 LOCAL_CONLYFLAGS := $(vold_conlyflags)
 
 include $(BUILD_EXECUTABLE)
+
+include $(call all-makefiles-under, $(LOCAL_PATH))

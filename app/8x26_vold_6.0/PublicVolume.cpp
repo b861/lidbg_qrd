@@ -131,6 +131,22 @@ status_t PublicVolume::doMount() {
     }
 
     int ret = 0;
+
+	if (mFsType == "exfat") {
+        ret = exfat::selectPath();
+    } else if (mFsType == "ntfs") {
+        ret = ntfs::selectPath();
+    } else if (mFsType == "vfat") {
+        ret = vfat::selectPath();
+    } else {
+        LOG(WARNING) << getId() << " unsupported filesystem selectPath, skipping";
+    }
+    if (ret) {
+        LOG(ERROR) << getId() << " failed to find mount-tools";
+        return -EIO;
+    }
+
+
     if (mFsType == "exfat") {
         ret = exfat::Check(mDevPath);
     } else if (mFsType == "ntfs") {
