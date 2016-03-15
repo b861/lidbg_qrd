@@ -337,6 +337,8 @@ struct lidbg_pvar_t
     int flyaudio_reboot;
     int is_phone_in_call_state;
     int udisk_stable_test;
+    char* car_type;
+    int suspend_airplane_mode;
 
 };
 

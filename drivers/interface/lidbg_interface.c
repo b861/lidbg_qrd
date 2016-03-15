@@ -69,9 +69,13 @@ bool iSOC_IO_ISR_Add(u32 irq, u32  interrupt_type, pinterrupt_isr func, void *de
 
 #if 1
 #ifdef SUSPEND_ONLINE
-	if(irq == MCU_IIC_REQ_GPIO){
-       lidbg("Enable IO(%d), irq[%d] as wakeup source\n", irq, io_int_config1.ext_int_num);
-       enable_irq_wake(GPIO_TO_INT(MCU_IIC_REQ_GPIO));
+	//if(g_var.suspend_airplane_mode == 0)
+	{
+		if(irq == MCU_IIC_REQ_GPIO)
+		{
+	      		 lidbg("Enable IO(%d), irq[%d] as wakeup source\n", irq, io_int_config1.ext_int_num);
+	       	enable_irq_wake(GPIO_TO_INT(MCU_IIC_REQ_GPIO));
+		}
 	}
 #endif
 #endif
@@ -483,6 +487,7 @@ int fly_interface_init(void)
     g_var.suspend_timeout_protect = 0;
     g_var.android_boot_completed = 0;
     g_var.udisk_stable_test = 0;
+    g_var.suspend_airplane_mode = 0;
     if(gboot_mode == MD_RECOVERY)
     {
         g_var.recovery_mode = 1;

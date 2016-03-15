@@ -625,13 +625,13 @@ void parse_cmd(char *pt)
         }
         else if (!strcmp(argv[1], "*158#048"))
         {
-            lidbg("**********set RmtCtrlenable false**********\n");
-            lidbg_shell_cmd("setprop persist.lidbg.RmtCtrlenable false");
+            lidbg("**********set AirplaneEnable false**********\n");
+            lidbg_shell_cmd("setprop persist.lidbg.AirplaneEnable 0");
         }
         else if (!strcmp(argv[1], "*158#049"))
         {
-            lidbg("**********set RmtCtrlenable true**********\n");
-            lidbg_shell_cmd("setprop persist.lidbg.RmtCtrlenable true");
+            lidbg("**********set AirplaneEnable true**********\n");
+            lidbg_shell_cmd("setprop persist.lidbg.AirplaneEnable 1");
         }
         else if (!strcmp(argv[1], "*158#050"))
         {

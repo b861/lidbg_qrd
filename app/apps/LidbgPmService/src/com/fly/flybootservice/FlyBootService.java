@@ -103,7 +103,7 @@ public class FlyBootService extends Service {
     private static boolean bIsKLDRunning = true;
     private static boolean sendBroadcastDone = false;
     private static boolean firstBootFlag = false;
-    private boolean booleanRemoteControl = false;
+    private boolean AirplaneEnable = false;
     private boolean booleanAccWakedupState = false;
     private static int pmState = -1;
     private int intPlatformId = 0;
@@ -205,8 +205,8 @@ public class FlyBootService extends Service {
 								SendBroadcastToService(KeyBootState, keyScreenOFF);
 							}else if(pmState == FBS_DEVICE_DOWN){
 								LIDBG_PRINT("FlyBootService get pm state: FBS_DEVICE_DOWN");
-								final boolean booleanRemoteControl = SystemProperties.getBoolean("persist.lidbg.RmtCtrlenable",false);
-								if((booleanRemoteControl) || (!blSuspendUnairplaneFlag)){
+								AirplaneEnable = SystemProperties.getBoolean("persist.lidbg.AirplaneEnable",false);
+								if((AirplaneEnable) || (!blSuspendUnairplaneFlag)){
 									LIDBG_PRINT("FlyBootService device down enable AirplaneMode");
 									enterAirplaneMode();
 								}else
@@ -244,7 +244,7 @@ public class FlyBootService extends Service {
 								sendBroadcast(intentBoot);
 							}else if(pmState == FBS_DEVICE_UP){
 								LIDBG_PRINT("FlyBootService get pm state: FBS_DEVICE_UP");
-								if(!blSuspendUnairplaneFlag)
+								if((AirplaneEnable) || (!blSuspendUnairplaneFlag))
 									restoreAirplaneMode(mFlyBootService);
 								SendBroadcastToService(KeyBootState, keyEearlySusupendON);
 							}else if(pmState == FBS_SCREEN_ON){
@@ -659,8 +659,8 @@ public static void releaseBrightWakeLock()
 
     private void powerOnSystem(Context context) {
 		LIDBG_PRINT("powerOnSystem-");
-		if(!blSuspendUnairplaneFlag)
-			restoreAirplaneMode(context);
+		//if(!blSuspendUnairplaneFlag)
+		//	restoreAirplaneMode(context);
 		SystemProperties.set("ctl.stop", "bootanim");
 		LIDBG_PRINT("powerOnSystem-");
     }
@@ -753,34 +753,24 @@ public static void releaseBrightWakeLock()
                 Settings.Global.AIRPLANE_MODE_ON, 0) != 0;
     }
     
-    private void enterAirplaneMode() {
-		booleanRemoteControl = SystemProperties.getBoolean("persist.lidbg.RmtCtrlenable",false);
+    private void enterAirplaneMode() 
+   {
+	LIDBG_PRINT("Flyaudio Remote-Control disabled, AirplaneEnable:::"+AirplaneEnable);
+	if (isAirplaneModeOn(this)) {
+		LIDBG_PRINT("isAirplaneModeOn return.");
+		return;
+	}
+	Settings.Global.putInt(getContentResolver(), "fastboot_airplane_mode", 0);
 
-		if(booleanRemoteControl == true){
-			LIDBG_PRINT("Flyaudio Remote-Control enabled, booleanRemoteControl:::"+booleanRemoteControl);
-			if(isAirplaneModeOn(this)){
-				LIDBG_PRINT("AirplaneMode is: ON, restore it.");
-				restoreAirplaneMode(mFlyBootService);
-			}else
-				LIDBG_PRINT("AirplaneMode is: OFF.");
-			return;
-		}else{
-			LIDBG_PRINT("Flyaudio Remote-Control disabled, booleanRemoteControl:::"+booleanRemoteControl);
-			if (isAirplaneModeOn(this)) {
-				LIDBG_PRINT("isAirplaneModeOn return.");
-				return;
-			}
-			Settings.Global.putInt(getContentResolver(), "fastboot_airplane_mode", 0);
+	// Change the system setting
+	Settings.Global.putInt(getContentResolver(), Settings.Global.AIRPLANE_MODE_ON,1);
 
-			// Change the system setting
-			Settings.Global.putInt(getContentResolver(), Settings.Global.AIRPLANE_MODE_ON,1);
+	// Update the UI to reflect system setting
+	// Post the intent
+	Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+	intent.putExtra("state", true);
+	sendBroadcastAsUser(intent, UserHandle.ALL);
 
-			// Update the UI to reflect system setting
-			// Post the intent
-			Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-			intent.putExtra("state", true);
-			sendBroadcastAsUser(intent, UserHandle.ALL);
-		}
     }
 
 

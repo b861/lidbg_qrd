@@ -359,7 +359,12 @@ static int thread_check_acc_and_response_acc_off_delay(void *data)
     }
 
     ssleep(20);
-
+	
+    if(g_var.suspend_airplane_mode == true)
+    {
+	   lidbg_shell_cmd("setprop persist.lidbg.AirplaneEnable 1");
+    }
+	
     g_var.acc_flag = SOC_IO_Input(MCU_ACC_STATE_IO, MCU_ACC_STATE_IO, GPIO_CFG_PULL_UP);
 
     PM_WARN("<current acc state.stop:%d,%d >\n",g_var.acc_flag,(g_var.acc_flag == FLY_ACC_OFF));

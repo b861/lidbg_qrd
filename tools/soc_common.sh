@@ -83,7 +83,7 @@ function soc_menu()
 	echo [23] make
 	echo [24] make otapackage
 	echo [25] make release basesystem
-	echo [26] make origin system image
+	echo [26] make originsystem image
 	echo [27] make recovery
 	echo [28] make recoveryimage
 	echo [29] make bootloader

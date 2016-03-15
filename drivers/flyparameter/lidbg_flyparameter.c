@@ -149,7 +149,12 @@ bool flyparameter_info_get(void)
                 lidbg_shell_cmd("rm /flysystem/lib/out/"FLY_GPS_SO);
                 lidbg_shell_cmd("mount -o remount,ro /flysystem");
             }
-
+	     g_var.car_type = g_recovery_meg->bootParam.upName.flags;
+	     lidbg("car_type=%s\n",g_var.car_type);
+#if 0
+	     if()
+		 	g_var.suspend_airplane_mode = true;
+#endif
             return true;
         }
     }
