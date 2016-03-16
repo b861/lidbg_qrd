@@ -380,6 +380,7 @@ static void parse_cmd(char *pt)
     else if (!strcmp(argv[0], "flyaudio_reboot"))
     {
         g_var.flyaudio_reboot=1;
+	 LCD_OFF;
         lidbg("Misc devices ctrl: g_var.flyaudio_reboot=1\n");
     }
 }
