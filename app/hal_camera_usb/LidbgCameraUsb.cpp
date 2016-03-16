@@ -1029,7 +1029,7 @@ try_open_again:
               V4L2_PIX_FMT_MJPEG, V4L2_PIX_FMT_H264);
 
 		char chooseMJEPG[PROPERTY_VALUE_MAX];
-	    property_get("persist.lidbg.uvccam.mjpeg", chooseMJEPG, "0");
+	    property_get("lidbg.uvccam.mjpeg", chooseMJEPG, "0");
 	    if((!strncmp(chooseMJEPG, "1", 1)) && (0 == mjpegSupported))
 		{
 			camHal->captureFormat = V4L2_PIX_FMT_MJPEG;
