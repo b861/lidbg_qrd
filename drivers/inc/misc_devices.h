@@ -22,7 +22,7 @@ void cb_kv_show_temp(char *key, char *value);
 void cb_kv_log_temp(char *key, char *value);
 int thread_antutu_test(void *data);
 void set_system_performance(int type);
-
+int thread_sound_dsp_init(void *data);
 
 // PANNE_PEN
 #define LCD_ON  do{lidbg("LCD_ON\n");LPC_CMD_LCD_ON;}while(0)

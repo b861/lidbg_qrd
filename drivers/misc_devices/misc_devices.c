@@ -499,6 +499,10 @@ static int soc_dev_probe(struct platform_device *pdev)
     register_lidbg_notifier(&lidbg_notifier);
 
     CREATE_KTHREAD(thread_led, NULL);
+#ifdef MUC_CONTROL_DSP
+  if(!g_var.recovery_mode && !g_var.is_fly)
+    	CREATE_KTHREAD(thread_sound_dsp_init, NULL);
+#endif
     //CREATE_KTHREAD(thread_thermal, NULL);
 
     if((g_var.is_fly == 0) || (g_var.recovery_mode == 1))

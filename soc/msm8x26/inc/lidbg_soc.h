@@ -55,6 +55,7 @@
 
 #ifdef PLATFORM_msm8909
 #define SUSPEND_ONLINE
+#define MUC_CONTROL_DSP
 #endif
 
 #ifdef PLATFORM_msm8909
