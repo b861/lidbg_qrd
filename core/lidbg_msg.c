@@ -124,8 +124,11 @@ static int __init msg_init(void)
 
 
     ret = misc_register(&misc);
+#ifdef SOC_imx6q
     reinit_completion(&msg_ready);
-//    INIT_COMPLETION(msg_ready);
+#else
+    INIT_COMPLETION(msg_ready);
+#endif
     CREATE_KTHREAD(thread_msg, NULL);
 
     lidbg_chmod("/dev/lidbg_msg");
