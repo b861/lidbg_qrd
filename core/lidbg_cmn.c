@@ -2,11 +2,19 @@
  *
  */
 #include "lidbg.h"
+#include "cmn_func.c"
+
 
 char g_binpath[50];
 
 
-#include "cmn_func.c"
+#if(LINUX_VERSION_CODE > KERNEL_VERSION(3, 11, 0))
+struct lidbg_dir_ctx {
+        struct dir_context ctx;
+        struct list_head names;
+};
+#endif
+
 
 void lidbg_shell_cmd(char *shell_cmd)
 {
@@ -378,25 +386,34 @@ static int readdir_build_namelist(void *arg, const char *name, int namlen,	loff_
 {
     if(!(name[0] == '.' || (name[0] == '.' && name[1] == '.'))) // ignore "." and ".."
     {
+        #if(LINUX_VERSION_CODE > KERNEL_VERSION(3, 11, 0))
+	struct lidbg_dir_ctx *ctx = arg;
+	#else
         struct list_head *names = arg;
+	#endif
         struct name_list *entry;
         entry = kzalloc(sizeof(struct name_list), GFP_KERNEL);
         if (entry == NULL)
             return -ENOMEM;
         memcpy(entry->name, name, namlen);
         entry->name[namlen] = '\0';
+	
+        #if(LINUX_VERSION_CODE > KERNEL_VERSION(3, 11, 0))
+        list_add(&entry->list, &ctx->names);
+	#else
         list_add(&entry->list, names);
+	#endif
     }
     return 0;
 }
 
 int lidbg_readdir_and_dealfile(char *insure_is_dir, void (*callback)(char *dirname, char *filename))
 {
-    LIST_HEAD(names);
+
+
     struct file *dir_file;
     struct dentry *dir;
     int status;
-
     if(!insure_is_dir || !callback)
         return -1;
 
@@ -412,12 +429,29 @@ int lidbg_readdir_and_dealfile(char *insure_is_dir, void (*callback)(char *dirna
         int count = 0;
         LIDBG_SUC("open:<%s,%s>\n", insure_is_dir, dir_file->f_path.dentry->d_name.name);
         dir = dir_file->f_path.dentry;
+
+        #if(LINUX_VERSION_CODE > KERNEL_VERSION(3, 11, 0))
+	struct lidbg_dir_ctx ctx = {
+		.ctx.actor = readdir_build_namelist,
+		.names = LIST_HEAD_INIT(ctx.names)
+	};
+	status = iterate_dir(dir_file,&ctx.ctx);
+        #else
         status = vfs_readdir(dir_file, readdir_build_namelist, &names);
+	#endif
+
         if (dir_file)
             fput(dir_file);
+	
+        #if(LINUX_VERSION_CODE > KERNEL_VERSION(3, 11, 0))
+        while (!list_empty(&ctx.names))
+        {
+            entry = list_entry(ctx.names.next, struct name_list, list);
+	#else
         while (!list_empty(&names))
         {
             entry = list_entry(names.next, struct name_list, list);
+	#endif	
             if (!status && entry)
             {
                 count++;

@@ -124,9 +124,8 @@ static int __init msg_init(void)
 
 
     ret = misc_register(&misc);
-
-    INIT_COMPLETION(msg_ready);
-
+    reinit_completion(&msg_ready);
+//    INIT_COMPLETION(msg_ready);
     CREATE_KTHREAD(thread_msg, NULL);
 
     lidbg_chmod("/dev/lidbg_msg");

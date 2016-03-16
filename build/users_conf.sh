@@ -371,7 +371,7 @@ case "$USERS_ID" in
 		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH_BASIC/AllwinnerA80/android;;
 	esac;;
 	8)
-	export DBG_PLATFORM_PATH=/home2/wangyihong
+	export DBG_PLATFORM_PATH=/home/ctb/cks
 	export PATHJAVA1P6=/opt/JDK/jdk1.6.0_31
 	export PATHJAVA1P7=/opt/JDK/java-7-openjdk-amd64
 	case "$DBG_PLATFORM_ID" in
@@ -413,7 +413,7 @@ case "$USERS_ID" in
 		13)
 		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH_BASIC/AllwinnerA80/android;;
                 15)
-		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/Freescale-imx6;;
+		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/imx6qdl-sabresd;;
 	esac;;
 	
 esac

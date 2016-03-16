@@ -23,12 +23,20 @@
 //#undef printf
 #define lidbg  LIDBG_PRINT
 #define DUMP_BUILD_TIME    do{ lidbg( "Build Time: %s, %s, %s \n", __FUNCTION__, __DATE__, __TIME__);}while(0)
+
+#ifdef SOC_imx6q
+#define DUMP_BUILD_TIME_FILE do{\
+	char string[256];\
+	sprintf(string, "echo %s build time:%s,%s >> /dev/lidbg_log.txt", __FILE__,__DATE__,__TIME__);\
+	system(string);\
+}while(0)
+#else
 #define DUMP_BUILD_TIME_FILE do{\
 	char string[256];\
 	sprintf(string, "echo %s build time:%s,%s >> /dev/log/lidbg_log.txt", __FILE__,__DATE__,__TIME__);\
 	system(string);\
 }while(0)
-
+#endif
 
 static inline bool is_file_exist(const char *file)
 {

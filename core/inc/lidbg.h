@@ -77,7 +77,7 @@
 #include <linux/cpufreq.h>
 //px3 add pm
 #include <linux/wakelock.h>
-
+#include <linux/completion.h>
 //////lidbg//////
 #include "lidbg_loader.h"
 #include "lidbg_io.h"

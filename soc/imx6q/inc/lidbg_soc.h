@@ -1,7 +1,7 @@
 #ifndef _LIGDBG_MSM8226__
 #define _LIGDBG_MSM8226__
 
-
+#include <linux/version.h>
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -14,8 +14,7 @@
 
 //#include "mach/hardware.h"
 //#include "mach/irqs.h"
-
-
+#include <linux/wait.h>
 
 #include <linux/module.h>
 #include <linux/init.h>
@@ -23,7 +22,6 @@
 #include <linux/interrupt.h>
 #include <linux/irq.h>
 #include <linux/i2c.h>
-#include <linux/i2c/pca953x.h>
 #include <linux/slab.h>
 #include <linux/of_platform.h>
 #include <linux/of_gpio.h>
@@ -286,6 +284,11 @@ extern struct fly_smem *p_fly_smem ;
 #endif
 
 #define RXPX3_I2C_RATE 100000
+
+
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(3, 13, 0))
+#define reinit_completion(x) INIT_COMPLETION(*(x))
+#endif
 
 #endif
 
