@@ -3900,6 +3900,7 @@ openfd:
 		XU_H264_Set_Mode(dev, 2);
 	else
 	{
+		XU_H264_Set_Mode(dev, 1);
 		if(XU_Ctrl_ReadChipID(dev) < 0)
 			lidbg( "XU_Ctrl_ReadChipID Failed\n");
 		if(XU_H264_Set_BitRate(dev, 4000000) < 0 )
