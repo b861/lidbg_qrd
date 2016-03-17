@@ -312,7 +312,7 @@ void parse_cmd(char *pt)
 	     fs_mem_log("*158#072--acc on/off udisk stable test\n");
 	     fs_mem_log("*158#073--log kmsg no screen flash\n");
 	     fs_mem_log("*158#074--disable cn.flyaudio.media\n");
-
+		 fs_mem_log("*158#075--enable crash detect & debug by gsensor\n");
             show_password_list();
             lidbg_domineering_ack();
         }
@@ -803,6 +803,13 @@ void parse_cmd(char *pt)
            lidbg_shell_cmd("pm disable cn.flyaudio.media"); 
            lidbg_domineering_ack();
        }
+		else if (!strcmp(argv[1], "*158#075"))
+        {
+           lidbg("enable crash detect & debug by gsensor\n");
+           lidbg_shell_cmd("echo 1 > /sys/class/sensors/mc3xxx-accel/enable");
+		   lidbg_shell_cmd("echo -n 'file mc3xxx.c +p' > /sys/kernel/debug/dynamic_debug/control");
+       }
+
     	}
     else if(!strcmp(argv[0], "monkey") )
     {
