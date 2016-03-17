@@ -164,7 +164,7 @@ static int SN65_devices_read_id(void)
 static void dsi83_enable(void)
 {
     SOC_IO_Output(0, DSI83_GPIO_EN, 0);
-    msleep(50);
+    msleep(100);
     SOC_IO_Output(0, DSI83_GPIO_EN, 1);
 }
 

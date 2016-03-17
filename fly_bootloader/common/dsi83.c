@@ -232,7 +232,7 @@ static void dsi83_reset(void)
 {
     gpio_set_direction(DSI83_GPIO_EN, GPIO_OUTPUT);
     gpio_set_val(DSI83_GPIO_EN, 0);
-    mdelay(50);
+    mdelay(100);
     gpio_set_val(DSI83_GPIO_EN, 1);
     mdelay(50);
 }
