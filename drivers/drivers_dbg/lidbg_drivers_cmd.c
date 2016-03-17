@@ -807,7 +807,7 @@ void parse_cmd(char *pt)
         {
            lidbg("enable crash detect & debug by gsensor\n");
            lidbg_shell_cmd("echo 1 > /sys/class/sensors/mc3xxx-accel/enable");
-		   lidbg_shell_cmd("echo -n 'file mc3xxx.c +p' > /sys/kernel/debug/dynamic_debug/control");
+		   lidbg_shell_cmd("echo -n 'file lidbg_crash_detect.c +p' > /sys/kernel/debug/dynamic_debug/control");
        }
 
     	}

@@ -50,6 +50,7 @@
 #include <linux/fs.h>*/
 #include	<linux/sensors.h>
 #include "lidbg.h"
+#include "lidbg_crash_detect.c"
 
 //=== CONFIGURATIONS ==========================================================
 #define DOT_CALI
@@ -322,27 +323,6 @@ static int load_cali_flg = 0;
 #define SYN_TIME_NSEC		5
 
 static struct i2c_client *client;
-
-#define DETECT_THRESHOLD	(1000)			//a = 10.00
-#define MCONVERT_PARA		981 / 1024		//g = 9.81
-static int x_data_bak = 0;
-static int y_data_bak = 0;
-static int z_data_bak = 0;
-static int cnt_exceed_threshold = -1;
-static DECLARE_COMPLETION (completion_for_notifier);
-
-#define NOTIFIER_MAJOR_GSENSOR_STATUS_CHANGE	(130)
-#define NOTIFIER_MINOR_EXCEED_THRESHOLD 		(10)
-
-static int thread_notifier_func(void *data)
-{
-	while(1)
-	{
-		wait_for_completion(&completion_for_notifier);
-		lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_GSENSOR_STATUS_CHANGE, NOTIFIER_MINOR_EXCEED_THRESHOLD));
-	}
-	return 0;
-}
 
 static s32 my_i2c_smbus_read_byte_data(const struct i2c_client *client, u8 command)
 {
@@ -1858,44 +1838,7 @@ static void mc3xxx_work_func(struct work_struct *work)
 	input_event(data->input_dev, EV_SYN, SYN_TIME_NSEC,ktime_to_timespec(ts).tv_nsec);
 	
 	input_sync(data->input_dev);
-
-	pr_debug("gsensor data, x = %-4d , y = %-4d, z = %-4d\n",
-			-accel.x * MCONVERT_PARA,
-			-accel.y * MCONVERT_PARA,
-			-accel.z * MCONVERT_PARA);
-	pr_debug("gsensor delta data---------------------------, x = %-4ld , y = %-4ld, z = %-4ld\n",
-			abs(accel.x - x_data_bak)* MCONVERT_PARA,
-			abs(accel.y - y_data_bak)* MCONVERT_PARA,
-			abs(accel.z - z_data_bak)* MCONVERT_PARA);
-
-	if(cnt_exceed_threshold == -1)
-	{
-		cnt_exceed_threshold = 0;
-		x_data_bak = accel.x;
-		y_data_bak = accel.y;
-		z_data_bak = accel.z;
-	}
-	else
-	{
-		if ((abs(accel.x - x_data_bak)* MCONVERT_PARA > DETECT_THRESHOLD) ||
-			(abs(accel.y - y_data_bak)* MCONVERT_PARA > DETECT_THRESHOLD) ||
-			(abs(accel.z - z_data_bak)* MCONVERT_PARA > DETECT_THRESHOLD))
-		{
-			cnt_exceed_threshold++;
-			fs_mem_log("gsensor previous data, x = %d , y = %d, z = %d\n", -accel.x * MCONVERT_PARA, -accel.y * MCONVERT_PARA, -accel.z * MCONVERT_PARA);
-			fs_mem_log("gsensor current  data, x = %d , y = %d, z = %d\n", -x_data_bak * MCONVERT_PARA, -y_data_bak * MCONVERT_PARA, -z_data_bak * MCONVERT_PARA);
-			fs_mem_log("gsensor delta    data, x = %d , y = %d, z = %d, cnt = %d\n\n",
-						abs(accel.x - x_data_bak)* MCONVERT_PARA,
-						abs(accel.y - y_data_bak)* MCONVERT_PARA,
-						abs(accel.z - z_data_bak)* MCONVERT_PARA,
-						cnt_exceed_threshold);
-
-			complete(&completion_for_notifier);
-		}
-		x_data_bak = accel.x;
-		y_data_bak = accel.y;
-		z_data_bak = accel.z;
-	}
+	get_gsensor_data(accel.x, accel.y, accel.z);
 }
 
 //=============================================================================
@@ -2553,7 +2496,7 @@ static int mc3xxx_probe(struct platform_device *pdev)
 	data->enabled = 1;
 	//printk(KERN_ERR"%s mc3xxx probe ok \n", __func__);
 
-	CREATE_KTHREAD(thread_notifier_func, NULL);
+	crash_detect_init();
 
 	return 0;
 
