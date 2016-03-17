@@ -95,6 +95,7 @@ static int thread_udisk_stable(void *data)
    		 err_cnt++;
 		 lidbg_fs_log(UDISK_LOG_PATH, "udisk_not_found:%d,%d\n", cnt,err_cnt);
 		 //lidbg_loop_warning();
+		 lidbg_toast_show("udisk_stable_test", "udisk_not_found");
    	}
 	else
 	        lidbg("thread_udisk_stable:%d,%d\n", cnt,err_cnt);
@@ -445,16 +446,19 @@ void usb_enumerate_monitor(char *key_word, void *data)
 int thread_udisk_stability_test(void *data)
 {
     u32 cnt = 0;
-    while(g_var.udisk_stable_test != 1)
-    	ssleep(1);
     while(1)
     {
-        usb_disk_enable(1);
-        ssleep(15);
-        usb_disk_enable(0);
-        ssleep(5);
-        cnt++;
-        lidbg("udisk_stability_test times=%d\n", cnt);
+	ssleep(1);
+
+	while(g_var.udisk_stable_test == 1)
+	{
+		usb_disk_enable(1);
+		ssleep(15);
+		usb_disk_enable(0);
+		ssleep(5);
+		cnt++;
+		lidbg("udisk_stability_test times=%d\n", cnt);
+	}
     }
 
 }
