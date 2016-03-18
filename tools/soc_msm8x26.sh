@@ -201,7 +201,8 @@ fi
 function soc_build_bootloader()
 {
 	echo $FUNCNAME
-
+        cd $DBG_SYSTEM_DIR
+	git checkout origin/$BOOTLOADER_BUILD_BRANCH
 	if [ ! -d "$DBG_BOOTLOADER_DIR/flyaudio" ]; then
 		mkdir "$DBG_BOOTLOADER_DIR/flyaudio"
 	else
@@ -216,6 +217,7 @@ function soc_build_bootloader()
 
 	set_env
 	make aboot -j16
+	#git checkout $SYSTEM_WORK_BRANCH
 }
 
 
