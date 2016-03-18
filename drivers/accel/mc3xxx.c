@@ -1827,6 +1827,9 @@ static void mc3xxx_work_func(struct work_struct *work)
 	struct acceleration accel = { 0 };
 	ktime_t ts; 
 	
+	if (0==g_var.android_boot_completed)
+		return ;
+
 	ts = ktime_get_boottime();
 	mc3xxx_measure(data->client, &accel);
 	
