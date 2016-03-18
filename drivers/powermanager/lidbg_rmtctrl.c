@@ -44,6 +44,7 @@ static u32 system_unormal_wakeuped_ms = 0;
 static u32 system_wakeup_ms = 0;
 static u32 repeat_times = 0;
 static u32 system_unormal_wakeup_cnt = 0;
+struct work_struct work_acc_status;
 
 bool is_fake_acc_off = 0;
 
@@ -67,19 +68,36 @@ void rmtctrl_fifo_in(void)
 
 irqreturn_t acc_state_isr(int irq, void *dev_id)
 {
+    lidbg("Acc state irq is coming \n");
+    if(!work_pending(&work_acc_status))
+        schedule_work(&work_acc_status);
+    return IRQ_HANDLED;
+}
+
+
+static void work_acc_status_handle(struct work_struct *work)
+{
 	int val = -1;
 	g_var.acc_counter++;
 
 	val = SOC_IO_Input(MCU_ACC_STATE_IO, MCU_ACC_STATE_IO, GPIO_CFG_PULL_UP);
-	lidbg(">>>>> Acc state irq is coming =======>>>[%s]-(acc_counter:%d |sleep_counter:%d)\n",(val == FLY_ACC_OFF)?"ACC_OFF":"ACC_ON",g_var.acc_counter/2,g_var.sleep_counter);
+	lidbg(">>>>> work_acc_status_handle =======>>>[%s]-(acc_counter:%d |sleep_counter:%d)\n",(val == FLY_ACC_OFF)?"ACC_OFF":"ACC_ON",g_var.acc_counter/2,g_var.sleep_counter);
 
 	if(val == FLY_ACC_OFF)
+	{
+		LCD_OFF;
 		mod_timer(&acc_detect_timer, ACC_OFF_DETECT_TIME_S);
+	}
 	else
+	{     
+              if((g_var.acc_flag == FLY_ACC_ON)&& (g_var.flyaudio_reboot == 0))
+			LCD_ON;
 		mod_timer(&acc_detect_timer, ACC_ON_DETECT_TIME_S);
+	}
 
-    return IRQ_HANDLED;
 }
+
+
 static void send_app_status(FLY_SYSTEM_STATUS state)
 {
 		lidbg("send_app_status:%d\n", state);
@@ -429,7 +447,8 @@ static int lidbg_rmtctrl_probe(struct platform_device *pdev)
 	lidbg_chmod("/dev/flyaudio_pm0");
 	
 	//enable_irq_wake(GPIO_TO_INT(MCU_IIC_REQ_GPIO));
-	
+	 INIT_WORK(&work_acc_status, work_acc_status_handle);
+
         if(g_var.recovery_mode == 0)
                 CREATE_KTHREAD(thread_check_acc_and_response_acc_off_delay, NULL);
 	else
