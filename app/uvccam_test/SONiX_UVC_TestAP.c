@@ -235,6 +235,7 @@ static int video_open(const char *devname)
 		lidbg( "Error opening device %s: unable to query device.\n",
 			devname);
 		close(dev);
+		close(flycam_fd);
 		return ret;
 	}
 
@@ -3832,6 +3833,7 @@ openfd:
 
 	if (!do_capture) {
 		close(dev);	
+		close(flycam_fd);
 		return 0;
 	}
 
@@ -3854,13 +3856,15 @@ openfd:
 		else {
 // cjc -
 			close(dev);		
+			close(flycam_fd);
 			return 1;
 		}
 	}
 
 	/* Set the frame rate. */
 	if (video_set_framerate(dev, framerate, NULL) < 0) {
-		close(dev);		
+		close(dev);	
+		close(flycam_fd);
 		return 1;
 	}
 
@@ -3903,7 +3907,7 @@ openfd:
 		XU_H264_Set_Mode(dev, 1);
 		if(XU_Ctrl_ReadChipID(dev) < 0)
 			lidbg( "XU_Ctrl_ReadChipID Failed\n");
-		if(XU_H264_Set_BitRate(dev, 4000000) < 0 )
+		if(XU_H264_Set_BitRate(dev, 6000000) < 0 )
 			lidbg( "XU_H264_Set_BitRate Failed\n");
 		XU_H264_Get_BitRate(dev, &m_BitRate);
 		if(m_BitRate < 0 )
@@ -3920,7 +3924,8 @@ openfd:
 
 	/* Allocate buffers. */
 	if ((int)(nbufs = video_reqbufs(dev, nbufs)) < 0) {
-		close(dev);		
+		close(dev);
+		close(flycam_fd);
 		return 1;
 	}
 
@@ -3933,7 +3938,8 @@ openfd:
 		ret = ioctl(dev, VIDIOC_QUERYBUF, &buf0);
 		if (ret < 0) {
 			lidbg( "Unable to query buffer %u (%d).\n", i, errno);
-			close(dev);			
+			close(dev);		
+			close(flycam_fd);
 			return 1;
 		}
 		TestAp_Printf(TESTAP_DBG_FLOW, "length: %u offset: %10u     --  ", buf0.length, buf0.m.offset);
@@ -3941,7 +3947,8 @@ openfd:
 		mem0[i] = mmap(0, buf0.length, PROT_READ, MAP_SHARED, dev, buf0.m.offset);
 		if (mem0[i] == MAP_FAILED) {
 			lidbg( "Unable to map buffer %u (%d)\n", i, errno);
-			close(dev);			
+			close(dev);		
+			close(flycam_fd);
 			return 1;
 		}
 		TestAp_Printf(TESTAP_DBG_FLOW, "Buffer %u mapped at address %p.\n", i, mem0[i]);
@@ -3956,7 +3963,8 @@ openfd:
 		ret = ioctl(dev, VIDIOC_QBUF, &buf0);
 		if (ret < 0) {
 			lidbg( "Unable to queue buffer0(%d).\n", errno);
-			close(dev);			
+			close(dev);		
+			close(flycam_fd);
 			return 1;
 		}
 	}
@@ -4020,6 +4028,7 @@ openfd:
 				if (ret < 0) {
 					lidbg( "Unable to query buffer %u (%d).\n", i, errno);
 					close(dev);
+					close(flycam_fd);
 					close(fake_dev);
 					return 1;
 				}
@@ -4029,6 +4038,7 @@ openfd:
 				if (mem1[i] == MAP_FAILED) {
 					lidbg( "Unable to map buffer %u (%d)\n", i, errno);
 					close(dev);
+					close(flycam_fd);
 					close(fake_dev);
 					return 1;
 				}
@@ -4045,6 +4055,7 @@ openfd:
 				if (ret < 0) {
 					lidbg( "Unable to queue buffer (%d).\n", errno);
 					close(dev);
+					close(flycam_fd);
 					close(fake_dev);
 					return 1;
 				}
@@ -4114,6 +4125,7 @@ openfd:
 		if(ret != 0)
 		{
 			close(dev);
+			close(flycam_fd);
 			close(fake_dev);
 			lidbg( "Create pthread error!\n");
 			return 1;
@@ -4165,7 +4177,8 @@ openfd:
 			//system("echo 'udisk_unrequest' > /dev/flydev0");
 			property_set("fly.uvccam.curprevnum", "-1");
 			send_driver_msg(FLYCAM_STATUS_IOC_MAGIC, NR_STATUS, RET_STOP);
-
+			
+			if(rec_fp1 != NULL) fclose(rec_fp1);
 			close(dev);
 			close(flycam_fd);
 			return 0;
@@ -4193,6 +4206,7 @@ openfd:
 		if (ret < 0) {
 			lidbg( "Unable to dequeue buffer0 (%d).\n", errno);
 			close(dev);
+			close(flycam_fd);
 			if(multi_stream_enable)
 				close(fake_dev);
 			return 1;
@@ -4565,6 +4579,7 @@ openfd:
 						lidbg_get_current_time(time_buf, NULL);
 						sprintf(flyh264_filename, "%s%s.h264", Rec_Save_Dir, time_buf);
 						lidbg("=========new flyh264_filename : %s===========\n", flyh264_filename);
+						if(rec_fp1 != NULL) fclose(rec_fp1);
 						rec_fp1 = fopen(flyh264_filename, "wb");
 					}
 					#if 0
@@ -4597,6 +4612,7 @@ openfd:
 			lidbg( "Unable to requeue buffer0 (%d).But try again.\n", errno);
 			//goto try_open_again;
 #if 1
+			close(flycam_fd);
 			close(dev);
 			if(multi_stream_enable)
 				close(fake_dev);		
@@ -4651,6 +4667,7 @@ openfd:
 	}
 
 	close(dev);
+	close(flycam_fd);
 	if(multi_stream_enable)
 		close(fake_dev);	
 
@@ -4672,6 +4689,7 @@ try_open_again:
 			//system("echo 'udisk_unrequest' > /dev/flydev0");
 			property_set("fly.uvccam.curprevnum", "-1");
 			send_driver_msg(FLYCAM_STATUS_IOC_MAGIC, NR_STATUS, RET_STOP);
+			if(rec_fp1 != NULL) fclose(rec_fp1);
 			close(dev);
 			close(flycam_fd);
 			return 0;
