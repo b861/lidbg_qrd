@@ -140,6 +140,8 @@ static int lidbg_flycam_event(struct notifier_block *this,
 			lidbg("flycam event:suspend %ld\n", event);
 			isSuspend = 1;
 			mod_timer(&suspend_stoprec_timer,SUSPEND_STOPREC_ACCOFF_TIME);
+			complete(&DVR_ready_wait);
+			complete(&Rear_ready_wait);
 			isDVRFirstResume = 0;
 			isRearFirstResume = 0;
 			break;
@@ -1107,6 +1109,7 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 					lidbg("DVR_ready_wait waiting\n");
 					if(!(pfly_UsbCamInfo->camStatus & FLY_CAM_ISSONIX))
 					{
+						init_completion(&DVR_ready_wait);
 						if(!wait_for_completion_timeout(&DVR_ready_wait , 10*HZ)) ret = 1;
 					}
 					else lidbg("DVR Camera already ready.\n");
@@ -1116,6 +1119,7 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 					lidbg("Rear_ready_wait waiting\n");
 					if(!((pfly_UsbCamInfo->camStatus>>4) & FLY_CAM_ISSONIX))
 					{
+						init_completion(&Rear_ready_wait);
 						if(!wait_for_completion_timeout(&Rear_ready_wait , 10*HZ)) ret = 1;
 					}
 					else lidbg("Rear Camera already ready.\n");
