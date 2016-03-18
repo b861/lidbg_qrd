@@ -331,7 +331,7 @@ int Volume::mountVol() {
     char decrypt_state[PROPERTY_VALUE_MAX];
     char crypto_state[PROPERTY_VALUE_MAX];
     char encrypt_progress[PROPERTY_VALUE_MAX];
-    LIDBG_PRINT("Start volume mount ..........\n");
+    LIDBG_PRINT("Start volume mount:mountVol+ ..........\n");
 
     property_get("vold.decrypt", decrypt_state, "");
     property_get("vold.encrypt_progress", encrypt_progress, "");
@@ -476,8 +476,9 @@ int Volume::mountVol() {
 			setState(Volume::State_Idle);
 			return -1;
 		}
-
+		LIDBG_PRINT("extractMetadata+ ..........\n");
 		extractMetadata(devicePath);
+		LIDBG_PRINT("extractMetadata- ..........\n");
 
 		if (providesAsec && mountAsecExternal() != 0) {
 			SLOGE("Failed to mount secure area (%s)", strerror(errno));
@@ -498,7 +499,7 @@ int Volume::mountVol() {
 		}
 
         if (providesAsec && mountAsecExternal() != 0) {
-            SLOGE("Failed to mount secure area (%s)", strerror(errno));
+            LIDBG_PRINT("Failed to mount secure area (%s)", strerror(errno));
             umount(getMountpoint());
             setState(Volume::State_Idle);
             return -1;
@@ -510,12 +511,13 @@ int Volume::mountVol() {
 
         setState(Volume::State_Mounted);
         mCurrentlyMountedKdev = deviceNodes[i];
+	LIDBG_PRINT("Stop volume mount:mountVol- ..........\n");
         return 0;
     }
 
-    SLOGE("Volume %s found no suitable devices for mounting :(\n", getLabel());
+    LIDBG_PRINT("Volume %s found no suitable devices for mounting :(\n", getLabel());
     setState(Volume::State_Idle);
-
+    LIDBG_PRINT("Stop volume mount:mountVol- ..........\n");
     return -1;
 }
 
