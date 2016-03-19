@@ -46,7 +46,7 @@ static struct timer_list suspend_stoprec_timer;
 
 /*bool var*/
 static char isDVRRec,isOnlineRec,isDVRFirstInit,isRearViewFirstInit,isRearCheck = 1,isDVRCheck = 1;
-static char isSuspend,isDVRAfterFix,isRearViewAfterFix,isDVRFirstResume,isRearFirstResume,isUpdating;
+static char isSuspend,isDVRAfterFix,isRearViewAfterFix,isDVRFirstResume,isRearFirstResume,isUpdating,isKSuspend;
 
 //struct work_struct work_t_fixScreenBlurred;
 
@@ -129,19 +129,21 @@ static int lidbg_flycam_event(struct notifier_block *this,
 			lidbg("flycam event:resume %ld\n", event);
 			isSuspend = 0;
 			del_timer(&suspend_stoprec_timer);
-			isDVRFirstResume = 1;
-			isRearFirstResume = 1;
-			init_completion(&Rear_ready_wait);
-			init_completion(&DVR_ready_wait);
-			schedule_delayed_work(&work_t_RearView_fixScreenBlurred, 0);/*Rec Block mode(First ACCON)*/
-			schedule_delayed_work(&work_t_DVR_fixScreenBlurred, 0);/*Rec Block mode(First ACCON)*/
+			if(isKSuspend)
+			{
+				isDVRFirstResume = 1;
+				isRearFirstResume = 1;
+				init_completion(&Rear_ready_wait);
+				init_completion(&DVR_ready_wait);
+				schedule_delayed_work(&work_t_RearView_fixScreenBlurred, 0);/*Rec Block mode(First ACCON)*/
+				schedule_delayed_work(&work_t_DVR_fixScreenBlurred, 0);/*Rec Block mode(First ACCON)*/
+				isKSuspend = 0;
+			}
 			break;
 	    case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_OFF):
 			lidbg("flycam event:suspend %ld\n", event);
 			isSuspend = 1;
 			mod_timer(&suspend_stoprec_timer,SUSPEND_STOPREC_ACCOFF_TIME);
-			complete(&DVR_ready_wait);
-			complete(&Rear_ready_wait);
 			isDVRFirstResume = 0;
 			isRearFirstResume = 0;
 			break;
@@ -1658,7 +1660,7 @@ static int flycam_ops_suspend(struct device *dev)
 {
     lidbg("-----------flycam_ops_suspend------------\n");
     DUMP_FUN;
-	
+	isKSuspend = 1;
     return 0;
 }
 
