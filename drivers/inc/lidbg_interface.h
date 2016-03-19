@@ -339,6 +339,7 @@ struct lidbg_pvar_t
     int udisk_stable_test;
     char* car_type;
     int suspend_airplane_mode;
+	bool enable_gsensor_data_for_android;
 
 };
 

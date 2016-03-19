@@ -313,6 +313,7 @@ void parse_cmd(char *pt)
 	     fs_mem_log("*158#073--log kmsg no screen flash\n");
 	     fs_mem_log("*158#074--disable cn.flyaudio.media\n");
 		 fs_mem_log("*158#075--enable crash detect & debug by gsensor\n");
+		 fs_mem_log("*158#076--enable gsensor data for android\n");
             show_password_list();
             lidbg_domineering_ack();
         }
@@ -809,7 +810,11 @@ void parse_cmd(char *pt)
            lidbg_shell_cmd("echo 1 > /sys/class/sensors/mc3xxx-accel/enable");
 		   lidbg_shell_cmd("echo -n 'file lidbg_crash_detect.c +p' > /sys/kernel/debug/dynamic_debug/control");
        }
-
+		else if (!strcmp(argv[1], "*158#076"))
+        {
+           lidbg("enable gsensor data for android\n");
+           g_var.enable_gsensor_data_for_android = 1;
+       }
     	}
     else if(!strcmp(argv[0], "monkey") )
     {

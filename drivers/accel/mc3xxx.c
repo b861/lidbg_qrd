@@ -1826,21 +1826,21 @@ static void mc3xxx_work_func(struct work_struct *work)
 	struct mc3xxx_data *data = container_of(work, struct mc3xxx_data, work);
 	struct acceleration accel = { 0 };
 	ktime_t ts; 
-	
-	if (0==g_var.android_boot_completed)
-		return ;
 
 	ts = ktime_get_boottime();
 	mc3xxx_measure(data->client, &accel);
 	
-	input_report_abs(data->input_dev, ABS_X, -(accel.x));
-	input_report_abs(data->input_dev, ABS_Y, -(accel.y));
-	input_report_abs(data->input_dev, ABS_Z, accel.z);
+	if (1 == g_var.enable_gsensor_data_for_android)
+	{
+		input_report_abs(data->input_dev, ABS_X, -(accel.x));
+		input_report_abs(data->input_dev, ABS_Y, -(accel.y));
+		input_report_abs(data->input_dev, ABS_Z, accel.z);
 
-	input_event(data->input_dev, EV_SYN, SYN_TIME_SEC, ktime_to_timespec(ts).tv_sec);
-	input_event(data->input_dev, EV_SYN, SYN_TIME_NSEC,ktime_to_timespec(ts).tv_nsec);
+		input_event(data->input_dev, EV_SYN, SYN_TIME_SEC, ktime_to_timespec(ts).tv_sec);
+		input_event(data->input_dev, EV_SYN, SYN_TIME_NSEC,ktime_to_timespec(ts).tv_nsec);
 	
-	input_sync(data->input_dev);
+		input_sync(data->input_dev);
+	}
 	get_gsensor_data(accel.x, accel.y, accel.z);
 }
 

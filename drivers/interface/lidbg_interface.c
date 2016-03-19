@@ -488,6 +488,7 @@ int fly_interface_init(void)
     g_var.android_boot_completed = 0;
     g_var.udisk_stable_test = 0;
     g_var.suspend_airplane_mode = 0;
+	g_var.enable_gsensor_data_for_android = 0;
     if(gboot_mode == MD_RECOVERY)
     {
         g_var.recovery_mode = 1;
