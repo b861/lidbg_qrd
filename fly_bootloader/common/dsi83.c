@@ -221,7 +221,7 @@ static int SN65_devices_read_id(void)
         if(SN65_register_read(i, &chip_id[j]) < 0)
             return -1;
         else
-            dprintf(INFO, "%s():reg 0x%x = 0x%x", __func__, i, chip_id[j]);
+            dprintf(INFO, "%s():reg 0x%x = 0x%x\n", __func__, i, chip_id[j]);
     }
 
     return memcmp(id, chip_id, 9);
@@ -230,6 +230,7 @@ static int SN65_devices_read_id(void)
 
 static void dsi83_reset(void)
 {
+    dprintf(INFO, "dsi83_reset\n");
     gpio_set_direction(DSI83_GPIO_EN, GPIO_OUTPUT);
     gpio_set_val(DSI83_GPIO_EN, 0);
     mdelay(100);
@@ -243,11 +244,12 @@ static void dsi83_enable(void)
     //gpio_tlmm_config(DSI83_GPIO_EN, 0, GPIO_OUTPUT, GPIO_NO_PULL,
     //GPIO_8MA, GPIO_ENABLE);
     // gpio_set_value(DSI83_GPIO_EN,1);
-    gpio_set_direction(DSI83_GPIO_EN, GPIO_OUTPUT);
-    gpio_set_val(DSI83_GPIO_EN, 0);
-    mdelay(50);
-    gpio_set_val(DSI83_GPIO_EN, 1);
-    mdelay(50);
+    //gpio_set_direction(DSI83_GPIO_EN, GPIO_OUTPUT);
+    //gpio_set_val(DSI83_GPIO_EN, 0);
+    //mdelay(100);
+    //gpio_set_val(DSI83_GPIO_EN, 1);
+    //mdelay(50);
+    //dsi83_reset();
 }
 
 void dsi83_gpio_init()
@@ -286,7 +288,7 @@ void dsi83_init()
     int cnt = 0;
 
     dprintf(INFO, "dsi83_init.\n");
-
+    dsi83_reset();
     dsi83_i2c_config();
     dsi83_gpio_init();
     mdelay(200);
