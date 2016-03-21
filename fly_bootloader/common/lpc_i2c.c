@@ -125,6 +125,28 @@ void backlight_enable()
     }
 }
 
+void backlight_disable()
+{
+    u8 Check_Sum = 0;
+    u8 back_light[7] = {0xff, 0x55, 0x4, 0x02, 0x0d, 0x0};
+    int i, j;
+
+    dprintf(CRITICAL, "TurnOff backlight !\n");
+
+    for(i = 2; i < 6; i++)
+    {
+        Check_Sum += back_light[i];
+    }
+
+    back_light[6] = Check_Sum;
+
+    for(j = 0; j < 3; j++)
+    {
+        lpc_write(back_light, sizeof(back_light));
+        mdelay(10);
+    }
+}
+
 static void LPCdealReadFromMCUAll(unsigned char *p, int length)
 {
     int  i;

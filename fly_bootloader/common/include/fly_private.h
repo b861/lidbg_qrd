@@ -34,6 +34,7 @@ extern int ctp_points_get(void);
 
 extern int show_logo();
 void backlight_enable();
+void backlight_disable();
 extern void fly_setBcol(unsigned long int backcolor);
 extern void fly_text_lk(int x, int y, const char *s, unsigned long fontcol);
 extern int judge_key_state();
