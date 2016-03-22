@@ -78,7 +78,7 @@ SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,libusb01/android/jni)
 endif
 
 ifeq ($(CONFIG_HAL_USB_CAMERA),y)
-SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,camera-fw-update/burner_console)
+SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,camera-fw-update)
 endif
 
 include $(SUBDIR_MAKEFILES)

@@ -3,6 +3,7 @@
 #include "CamEnum.h"
 #include "debug.h"
 #include "..//BurnerApLib//BurnerApLib.h"	// shawn 2009/11/06 add
+#include "../../inc/lidbg_servicer.h"
 
 CCamEnum::CCamEnum()
 {
@@ -52,6 +53,23 @@ exit:
 void CCamEnum::bus_find_cam(struct usb_device *pDev, int level)
 {
 	int	i;
+
+#define	UDISK_NODE		"1-1.1"
+	FILE*	fp = NULL;
+	char devnum[10], hub_path[256];
+	memset(hub_path, 0, sizeof(hub_path));
+	sprintf(hub_path, "/sys/bus/usb/drivers/usb/%s/devnum", UDISK_NODE);
+	fp = fopen(hub_path, "r");
+	if(fp)
+	{
+		fread(devnum, sizeof(char), 10, fp);
+		fclose(fp);
+	}
+
+	if(atoi(pDev->filename) == atoi(devnum))
+		return;
+
+	//LIDBG_PRINT("devnum = %d, filename = %d\n",atoi(devnum), atoi(pDev->filename));
 
 	if (is_valid_id(pDev))
 	{
