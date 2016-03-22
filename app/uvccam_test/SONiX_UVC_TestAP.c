@@ -287,10 +287,10 @@ static int video_set_format(int dev, unsigned int w, unsigned int h, unsigned in
 		w = 1920;
 		h = 1080;
 	}
-	else if(!strncmp(Res_String, "640x360", 7) || !strncmp(Res_String, "640*360", 7) )
+	else if(!strncmp(Res_String, "640x360", 7) || !strncmp(Res_String, "640*360", 7) || !strncmp(Res_String, "480x272", 7) )
 	{
 		char tmpCMD[100] = {0};
-		lidbg("%s: select 640x360!\n",__func__);
+		lidbg("%s: select 480x272!\n",__func__);
 		w = 480;
 		h = 272;
 		isPreview = 1;

@@ -816,7 +816,7 @@ static void setOnlineProp(int camID)
 static int checkSDCardStatus(char *path)
 {
 	char temp_cmd[256];	
-	int ret;
+	int ret = 0;
 	struct file *storage_path, *file_path;
 	if(!strncmp(path, EMMC_MOUNT_POINT0, strlen(EMMC_MOUNT_POINT0)))
 	{
@@ -824,7 +824,7 @@ static int checkSDCardStatus(char *path)
 		file_path = filp_open(path, O_RDONLY | O_DIRECTORY, 0);
 		if(IS_ERR(storage_path))
 		{
-			lidbg("%s:EMMC ERR!!\n",__func__);
+			lidbg("%s:EMMC ERR!!%ld\n",__func__,PTR_ERR(storage_path));
 			ret = 1;
 		}
 		else if(IS_ERR(file_path))
@@ -1040,12 +1040,15 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		        break;
 			case NR_PATH:
 				lidbg("%s:Online NR_REC_PATH  = [%s]\n",__func__,(char*)arg);
+				/*
 				ret_st = checkSDCardStatus((char*)arg);
 				if(ret_st != 1) 
 					strcpy(f_online_path,(char*)arg);
 				else
-					lidbg("%s: f_rec_path access wrong! %d", __func__ ,EFAULT);//not happend
+					lidbg("%s: f_online_path access wrong! %d", __func__ ,EFAULT);//not happend
 				if(ret_st > 0) ret = RET_FAIL;
+				*/
+				strcpy(f_online_path,(char*)arg);
 		        break;
 			case NR_TIME:
 				lidbg("%s:Online NR_REC_TIME = [%ld]\n",__func__,arg);
@@ -1062,7 +1065,7 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 			case NR_START_REC:
 		        lidbg("%s:Online NR_START_REC\n",__func__);
 				setOnlineProp(DVR_ID);
-				checkSDCardStatus(f_online_path);
+				//checkSDCardStatus(f_online_path);
 				if(isDVRRec)
 				{
 					lidbg("%s:====Online start cmd neglected====\n",__func__);
