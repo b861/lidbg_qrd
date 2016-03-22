@@ -143,6 +143,7 @@ static int thread_usb_disk_enable_delay(void *data)
     msleep(5000);
 #endif
     usb_disk_enable(true);
+    SET_USB_ID_SUSPEND;
     return 1;
 }
 
@@ -533,7 +534,7 @@ static int soc_dev_probe(struct platform_device *pdev)
         CREATE_KTHREAD(thread_udisk_stability_test, NULL);
     }
      CREATE_KTHREAD(thread_usb_disk_enable_delay, NULL);
-    SET_USB_ID_SUSPEND;
+   
 
 
 #ifdef PLATFORM_ID_7

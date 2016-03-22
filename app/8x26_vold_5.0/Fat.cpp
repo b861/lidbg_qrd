@@ -52,12 +52,13 @@ extern "C" int mount(const char *, const char *, const char *, unsigned long, co
 int Fat::check(const char *fsPath) {
     bool rw = true;
     if (access(FSCK_MSDOS_PATH, X_OK)) {
-        SLOGW("Skipping fs checks\n");
+        LIDBG_PRINT("Skipping fs checks\n");
         return 0;
     }
-
+    
     int pass = 1;
     int rc = 0;
+    LIDBG_PRINT("Fat::check+\n");
     do {
         const char *args[4];
         int status;
@@ -65,17 +66,17 @@ int Fat::check(const char *fsPath) {
         args[1] = "-p";
         args[2] = "-f";
         args[3] = fsPath;
-
+        LIDBG_PRINT("Fat::android_fork_execvp+\n");
         rc = android_fork_execvp(ARRAY_SIZE(args), (char **)args, &status,
                 false, true);
         if (rc != 0) {
-            SLOGE("Filesystem check failed due to logwrap error");
+            LIDBG_PRINT("Filesystem check failed due to logwrap error");
             errno = EIO;
             return -1;
         }
-
+        LIDBG_PRINT("Fat::android_fork_execvp-\n");
         if (!WIFEXITED(status)) {
-            SLOGE("Filesystem check did not exit properly");
+            LIDBG_PRINT("Filesystem check did not exit properly");
             errno = EIO;
             return -1;
         }
@@ -84,31 +85,31 @@ int Fat::check(const char *fsPath) {
 
         switch(status) {
         case 0:
-            SLOGI("Filesystem check completed OK");
+            LIDBG_PRINT("Filesystem check completed OK");
             return 0;
 
         case 2:
-            SLOGE("Filesystem check failed (not a FAT filesystem)");
+            LIDBG_PRINT("Filesystem check failed (not a FAT filesystem)");
             errno = ENODATA;
             return -1;
 
         case 4:
             if (pass++ <= 3) {
-                SLOGW("Filesystem modified - rechecking (pass %d)",
+                LIDBG_PRINT("Filesystem modified - rechecking (pass %d)",
                         pass);
                 continue;
             }
-            SLOGE("Failing check after too many rechecks");
+            LIDBG_PRINT("Failing check after too many rechecks");
             errno = EIO;
             return -1;
 
         default:
-            SLOGE("Filesystem check failed (unknown exit code %d)", status);
+            LIDBG_PRINT("Filesystem check failed (unknown exit code %d)", status);
             errno = EIO;
             return -1;
         }
     } while (0);
-
+    LIDBG_PRINT("Fat::check-\n");
     return 0;
 }
 
@@ -134,7 +135,7 @@ int Fat::doMount(const char *fsPath, const char *mountPoint,
     char value[PROPERTY_VALUE_MAX];
     property_get("persist.sampling_profiler", value, "");
     if (value[0] == '1') {
-        SLOGW("The SD card is world-writable because the"
+        LIDBG_PRINT("The SD card is world-writable because the"
             " 'persist.sampling_profiler' system property is set to '1'.");
         permMask = 0;
     }
@@ -147,7 +148,7 @@ int Fat::doMount(const char *fsPath, const char *mountPoint,
     rc = mount(fsPath, mountPoint, "vfat", flags, mountData);
 
     if (rc && errno == EROFS) {
-        SLOGE("%s appears to be a read only filesystem - retrying mount RO", fsPath);
+        LIDBG_PRINT("%s appears to be a read only filesystem - retrying mount RO", fsPath);
         flags |= MS_RDONLY;
         rc = mount(fsPath, mountPoint, "vfat", flags, mountData);
     }
@@ -161,7 +162,7 @@ int Fat::doMount(const char *fsPath, const char *mountPoint,
              * lost cluster chains (fsck_msdos doesn't currently do this)
              */
             if (mkdir(lost_path, 0755)) {
-                SLOGE("Unable to create LOST.DIR (%s)", strerror(errno));
+                LIDBG_PRINT("Unable to create LOST.DIR (%s)", strerror(errno));
             }
         }
         free(lost_path);
