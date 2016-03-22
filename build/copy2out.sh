@@ -16,6 +16,8 @@ src_dir=$DBG_CORE_PATH
 cp -u $src_dir/*.ko	$dest_dir/	&> /dev/null
 cp $src_dir/*.conf	$dest_dir/	&> /dev/null
 
+cd $DBG_HAL_PATH
+cp -u ./halAndJni/inc/hal_lidbg_commen.h $dest_dir/hal_lidbg_commen.h
 
 cd $DBG_DRIVERS_PATH
 cp -u ./inc/lidbg_interface.h $dest_dir/lidbg_interface.conf
