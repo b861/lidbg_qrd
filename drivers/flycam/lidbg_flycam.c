@@ -1,7 +1,6 @@
 
 #include "lidbg.h"
 #include "lidbg_flycam_par.h"
-//#include "LidbgCameraUsb.h"
 LIDBG_DEFINE;
 
 static void work_DVR_fixScreenBlurred(struct work_struct *work);
@@ -29,8 +28,6 @@ struct fly_UsbCamInfo *pfly_UsbCamInfo;
 static DECLARE_DELAYED_WORK(work_t_DVR_fixScreenBlurred, work_DVR_fixScreenBlurred);
 static DECLARE_DELAYED_WORK(work_t_RearView_fixScreenBlurred, work_RearView_fixScreenBlurred);
 static DECLARE_COMPLETION (timer_stop_rec_wait);
-static DECLARE_COMPLETION (Rear_ready_wait);
-static DECLARE_COMPLETION (DVR_ready_wait);
 static DECLARE_COMPLETION (Rear_fw_get_wait);
 static DECLARE_COMPLETION (DVR_fw_get_wait);
 static DECLARE_COMPLETION (Rear_res_get_wait);
@@ -67,16 +64,6 @@ u8 camera_rear_res[100] = {0};
 u8 camera_DVR_res[100] = {0};
 
 #if 0
-static wait_queue_head_t wait_queue;
-char isBackChange = 0;
-char isBack = 0;
-unsigned int previewCnt = 0;
-char isFirstresume = 0;
-char isRec = 0;
-
-struct work_struct work_t_start_rec;
-struct work_struct work_t_stop_rec;
-
 //ioctl
 #define READ_CAM_PROP(magic , nr) _IOR(magic, nr ,int) 
 #define WRITE_CAM_PROP(magic , nr) _IOW(magic, nr ,int)
@@ -145,8 +132,6 @@ static int lidbg_flycam_event(struct notifier_block *this,
 			lidbg("flycam event:suspend %ld\n", event);
 			isSuspend = 1;
 			mod_timer(&suspend_stoprec_timer,SUSPEND_STOPREC_ACCOFF_TIME);
-			//complete(&DVR_ready_wait);
-			//complete(&Rear_ready_wait);
 			isDVRFirstResume = 0;
 			isRearFirstResume = 0;
 			break;
@@ -418,13 +403,6 @@ static int usb_nb_cam_func(struct notifier_block *nb, unsigned long action, void
 				/*usb camera plug in */
 				if(!((oldCamStatus>>4) & FLY_CAM_ISVALID) && ((pfly_UsbCamInfo->camStatus>>4) & FLY_CAM_ISSONIX) && !isRearViewFirstInit)
 				{
-					//if(isRearViewFirstInit) schedule_delayed_work(&work_t_RearView_fixScreenBlurred, 11);
-					//else schedule_delayed_work(&work_t_RearView_fixScreenBlurred, 0);
-#if 0
-					if(isRearFirstResume) complete(&Rear_ready_wait);
-					else schedule_delayed_work(&work_t_RearView_fixScreenBlurred, 0);	
-#endif
-					//complete(&Rear_ready_wait);
 					isRearReady = 1;
 					wake_up_interruptible(&pfly_UsbCamInfo->Rear_ready_wait_queue);
 					if(!isRearFirstResume && !isSuspend ) schedule_delayed_work(&work_t_RearView_fixScreenBlurred, 0);
@@ -575,7 +553,6 @@ static void fixScreenBlurred(char cam_id , char isOnline)
 		if(!isDVRFirstResume)
 		{
 			isDVRCheck = 0;
-			init_completion(&DVR_fw_get_wait);
 			lidbg_shell_cmd("/flysystem/lib/out/fw_update -2 -3&");
 			if(!wait_for_completion_timeout(&DVR_fw_get_wait , 3*HZ)) lidbg("%s:====DVR_fw_get_wait return fail====\n",__func__);
 		}
@@ -603,7 +580,6 @@ static void fixScreenBlurred(char cam_id , char isOnline)
 		if(!isRearFirstResume)
 		{
 			isRearCheck = 0;
-			init_completion(&Rear_fw_get_wait);
 			lidbg_shell_cmd("/flysystem/lib/out/fw_update -2 -2&");
 			if(!wait_for_completion_timeout(&Rear_fw_get_wait , 3*HZ)) lidbg("%s:====Rear_fw_get_wait return fail====\n",__func__);
 		}
@@ -1136,7 +1112,6 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 					lidbg("Rear_ready_wait waiting\n");
 					if(!((pfly_UsbCamInfo->camStatus>>4) & FLY_CAM_ISSONIX))
 					{
-						//if(!wait_for_completion_timeout(&Rear_ready_wait , 10*HZ)) ret = 1;
 						if(!wait_event_interruptible_timeout(pfly_UsbCamInfo->Rear_ready_wait_queue, (isRearReady == 1), 10*HZ))
 							ret = 1;
 					}
@@ -1370,11 +1345,8 @@ ssize_t flycam_write (struct file *filp, const char __user *buf, size_t size, lo
 					if( isSuspend)
 					{
 						lidbg("%s:==write==ACCOFF wait Camera Begin!====\n",__func__);
-						if(!wait_for_completion_timeout(&DVR_ready_wait , 6*HZ)) /*ACCOFF wait for 6sec*/
-						{
-							lidbg("%s:==write==ACCOFF wait Camera Timeout!====\n",__func__);
+						if(!wait_event_interruptible_timeout(pfly_UsbCamInfo->DVR_ready_wait_queue, (isDVRReady == 1), 10*HZ))
 							goto failproc;
-						}
 					}
 					else 
 					{
@@ -1647,33 +1619,6 @@ static  struct file_operations flycam_nod_fops =
     .poll = flycam_poll,
 };
 
-#if 0
-irqreturn_t irq_back_det(int irq, void *dev_id)
-{
-	lidbg("----%s----",__func__);
-	isBackChange = 1;
-	wake_up_interruptible(&wait_queue);
-    return IRQ_HANDLED;
-}
-
-int thread_flycam_test(void *data)
-{
-    while(1)
-  	{
-		wake_up_interruptible(&wait_queue);
-		ssleep(5);
-		lidbg("-------ehossleep-------");
-		if(!isBackChange)
-		{
-		    if(wait_event_interruptible(wait_queue, isBackChange))  return -ERESTARTSYS;
-		}
-
-		lidbg("BACK_DET--------%d",SOC_IO_Input(BACK_DET, BACK_DET, GPIO_CFG_PULL_UP));
-  	}
-    return 0;
-}
-#endif
-
 static int flycam_ops_suspend(struct device *dev)
 {
     lidbg("-----------flycam_ops_suspend------------\n");
@@ -1738,18 +1683,7 @@ int thread_flycam_init(void *data)
   	return 0;
 #endif
 	lidbg("%s:------------start------------\n",__func__);
-#if 0
-	SOC_IO_Input(BACK_DET, BACK_DET, GPIO_CFG_PULL_UP);
-	SOC_IO_ISR_Add(BACK_DET, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING , irq_back_det, NULL);
-#endif
-/*
-	pflycam_Info= (struct flycam_Info *)kmalloc( sizeof(struct flycam_Info), GFP_KERNEL );
-    if (pflycam_Info == NULL)
-    {
-        lidbg("flycam mem err\n");
-        return -ENOMEM;
-    }
-*/
+
 	/*init pfly_UsbCamInfo*/
 	pfly_UsbCamInfo = (struct fly_UsbCamInfo *)kmalloc( sizeof(struct fly_UsbCamInfo), GFP_KERNEL);
     if (pfly_UsbCamInfo == NULL)
@@ -1770,9 +1704,9 @@ int thread_flycam_init(void *data)
 
 	init_completion(&DVR_res_get_wait);
 	init_completion(&Rear_res_get_wait);
-
-	//init_completion(&Rear_ready_wait);
-	//init_completion(&DVR_ready_wait);
+	init_completion(&timer_stop_rec_wait);
+	init_completion(&Rear_fw_get_wait);
+	init_completion(&DVR_fw_get_wait);
 	
 	if(g_var.recovery_mode == 0)/*do not process when in recovery mode*/
 	{
