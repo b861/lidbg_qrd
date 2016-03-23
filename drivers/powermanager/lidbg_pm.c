@@ -954,9 +954,9 @@ static int thread_observer(void *data)
 					break;
 #endif
 #endif
-                case 60*17:
+                case 60*5:
 #ifdef SUSPEND_TIME_OUT_FORCE_UNLOCK
-			if( g_var.suspend_timeout_protect  == 0) break;
+			//if( g_var.suspend_timeout_protect  == 0) break;
                     sprintf(when, "unlock%d,%d:", have_triggerd_sleep_S, g_var.sleep_counter);
                     kernel_wakelock_save_wakelock(when, PM_INFO_FILE);
                     kernel_wakelock_force_unlock(when);
@@ -994,6 +994,7 @@ static int thread_observer(void *data)
  			    break;
                   case 13:
 			   // lidbg_shell_cmd("pm disable cld.navi.c2739.mainframe");
+			   //   lidbg_shell_cmd("pm disable cn.flyaudio.media");
                     	    break;
 #ifdef SUSPEND_ONLINE
                 case 60*19:
@@ -1033,7 +1034,8 @@ static int thread_observer(void *data)
 
                 }
             }
-	    // lidbg_shell_cmd("pm enable cld.navi.c2739.mainframe");	
+	    // lidbg_shell_cmd("pm enable cld.navi.c2739.mainframe");
+	     //lidbg_shell_cmd("pm enable cn.flyaudio.media");
             PM_WARN("\n<stop>\n");
         }
     }
