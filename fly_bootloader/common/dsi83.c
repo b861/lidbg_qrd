@@ -11,6 +11,8 @@ static void dsi83_i2c_config()
 
     gpio_set_direction(DSI83_SDA, GPIO_OUTPUT);
     gpio_set_direction(DSI83_SCL, GPIO_OUTPUT);
+    gpio_set_val(DSI83_SDA, 1);
+    gpio_set_val(DSI83_SCL, 1);
     dsi83_dev = malloc(sizeof(struct i2c_gpio_dev));
     if (!dsi83_dev)
     {
@@ -233,9 +235,9 @@ static void dsi83_reset(void)
     dprintf(INFO, "dsi83_reset\n");
     gpio_set_direction(DSI83_GPIO_EN, GPIO_OUTPUT);
     gpio_set_val(DSI83_GPIO_EN, 0);
-    mdelay(100);
+    mdelay(200);
     gpio_set_val(DSI83_GPIO_EN, 1);
-    mdelay(50);
+    mdelay(200);
 }
 
 static void dsi83_enable(void)
@@ -288,10 +290,11 @@ void dsi83_init()
     int cnt = 0;
 
     dprintf(INFO, "dsi83_init.\n");
-    dsi83_reset();
+
     dsi83_i2c_config();
     dsi83_gpio_init();
-    mdelay(200);
+    dsi83_reset();
+    
 dsi83_config_start:
     for(i = 0; i < 3; ++i)
     {
