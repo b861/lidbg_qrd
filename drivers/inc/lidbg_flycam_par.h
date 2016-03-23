@@ -78,6 +78,7 @@ typedef enum {
 }cam_read_ret_t;
 
 //for hub
+#define	UDISK_NODE		"1-1.1"
 #define	FRONT_NODE		"1-1.2"	
 #define	BACK_NODE		"1-1.3"
 

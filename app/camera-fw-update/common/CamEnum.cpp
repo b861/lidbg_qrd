@@ -4,6 +4,7 @@
 #include "debug.h"
 #include "..//BurnerApLib//BurnerApLib.h"	// shawn 2009/11/06 add
 #include "../../inc/lidbg_servicer.h"
+#include "../../inc/lidbg_flycam_app.h"
 
 CCamEnum::CCamEnum()
 {
@@ -53,8 +54,6 @@ exit:
 void CCamEnum::bus_find_cam(struct usb_device *pDev, int level)
 {
 	int	i;
-
-#define	UDISK_NODE		"1-1.1"
 	FILE*	fp = NULL;
 	char devnum[10], hub_path[256];
 	memset(hub_path, 0, sizeof(hub_path));

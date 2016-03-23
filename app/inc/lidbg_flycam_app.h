@@ -21,6 +21,7 @@
 #include <math.h>
 #include <cutils/log.h>
 #include "lidbg_servicer.h"
+#include <linux/videodev2.h>
 #include "../../drivers/inc/lidbg_flycam_par.h" /*flycam parameter*/
 
 #define RECORD_MODE		0
