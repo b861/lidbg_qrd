@@ -374,6 +374,7 @@ static int thread_check_acc_and_response_acc_off_delay(void *data)
    while(0==g_var.android_boot_completed)
     {
         ssleep(1);
+		lidbg("wait for android_boot_completed.\n");
     }
 
     ssleep(20);

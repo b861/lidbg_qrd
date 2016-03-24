@@ -64,6 +64,7 @@
 
 #ifdef PLATFORM_msm8974
 #ifdef PLATFORM_ID_14
+#define SUSPEND_ONLINE
 #define FLY_USB_CAMERA_SUPPORT
 #endif
 #endif

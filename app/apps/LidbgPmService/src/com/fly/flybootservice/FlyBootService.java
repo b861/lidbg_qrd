@@ -108,6 +108,7 @@ public class FlyBootService extends Service {
     private static int pmState = -1;
     private int intPlatformId = 0;
     private boolean blSuspendUnairplaneFlag = false;
+    private boolean blDozeModeFlag = false;
 
     //do not force-stop apps in list
     private String[] mWhiteList = null;
@@ -184,6 +185,11 @@ public class FlyBootService extends Service {
 			blSuspendUnairplaneFlag = true;
 			reSetPmState();
 			break;
+		case 14:	//msm8974 Android_6.0
+			blDozeModeFlag = true;
+			blSuspendUnairplaneFlag = true;
+			reSetPmState();
+			break;
 		default:
 			break;
 	}
@@ -217,7 +223,8 @@ public class FlyBootService extends Service {
 								LIDBG_PRINT("FlyBootService get pm state: FBS_FASTBOOT_REQUEST");
 							}else if(pmState == FBS_ANDROID_DOWN){
 								LIDBG_PRINT("FlyBootService get pm state: FBS_ANDROID_DOWN");
-								FlyaudioInternetDisable();
+								if(!blDozeModeFlag)
+									FlyaudioInternetDisable();
 								SendBroadcastToService(KeyBootState, keyFastSusupendOFF);
 								start_fastboot();
 							}else if(pmState == FBS_GOTO_SLEEP){
@@ -236,7 +243,8 @@ public class FlyBootService extends Service {
 							}else if(pmState == FBS_ANDROID_UP){
 								LIDBG_PRINT("FlyBootService get pm state: FBS_ANDROID_UP");
 								InternetEnable();
-								FlyaudioInternetEnable();
+								if(!blDozeModeFlag)
+									FlyaudioInternetEnable();
 								SendBroadcastToService(KeyBootState, keyFastSusupendON);
 								sendBroadcast(new Intent(SYSTEM_RESUME));
 								Intent intentBoot = new Intent(Intent.ACTION_BOOT_COMPLETED);

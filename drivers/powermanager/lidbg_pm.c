@@ -568,6 +568,13 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
 #endif
             SOC_System_Status(FLY_ANDROID_DOWN);
 
+#if ANDROID_VERSION >= 600
+			lidbg_shell_cmd("dumpsys battery unplug");
+			lidbg_shell_cmd("dumpsys deviceidle enable");
+			lidbg_shell_cmd("dumpsys deviceidle force-idle");
+			lidbg("run as doze mode.\n");
+#endif
+
 #ifdef SUSPEND_ONLINE
             observer_start();
             LPC_PRINT(true, g_var.sleep_counter, "PM:android_down");
@@ -1066,6 +1073,48 @@ int thread_power_press_test(void *data)
 
 }
 
+int thread_add_whitelist_to_doze(void *data)
+{
+	struct string_dev *pos;
+	char buff[100];
+
+	lidbg_shell_cmd("rm /data/system/deviceidle.xml");
+
+	while(0==g_var.android_boot_completed)
+	{
+		ssleep(1);
+	}
+
+	if(fs_is_file_exist("/flysystem/lib/out/appInternetProtectList.conf"))
+	{
+		LIST_HEAD(lidbg_appInternetProtect_list);
+		fs_fill_list("/flysystem/lib/out/appInternetProtectList.conf", FS_CMD_FILE_LISTMODE, &lidbg_appInternetProtect_list);
+
+		list_for_each_entry(pos, &lidbg_appInternetProtect_list, tmp_list)
+		{
+			if(pos->yourkey)
+			{
+				sprintf(buff, "%s%s", "dumpsys deviceidle whitelist +", pos->yourkey);
+				lidbg_shell_cmd(buff);
+			}
+		}
+	}
+	if(fs_is_file_exist("/flysystem/lib/out/alarmProtectIntervalList.conf"))
+	{
+		LIST_HEAD(lidbg_alarmProtectInterval_list);
+		fs_fill_list("/flysystem/lib/out/alarmProtectIntervalList.conf", FS_CMD_FILE_LISTMODE, &lidbg_alarmProtectInterval_list);
+		list_for_each_entry(pos, &lidbg_alarmProtectInterval_list, tmp_list)
+		{
+			if(pos->yourkey)
+			{
+				sprintf(buff, "%s%s", "dumpsys deviceidle whitelist +", pos->yourkey);
+				lidbg_shell_cmd(buff);
+			}
+		}
+	}
+	return 0;
+}
+
 static int  lidbg_pm_probe(struct platform_device *pdev)
 {
     DUMP_FUN;
@@ -1098,6 +1147,10 @@ static int  lidbg_pm_probe(struct platform_device *pdev)
     {
         CREATE_KTHREAD(thread_power_press_test, NULL);
     }
+
+#if ANDROID_VERSION >= 600
+	CREATE_KTHREAD(thread_add_whitelist_to_doze, NULL);
+#endif
 
     PM_WARN("<==OUT==>\n");
     return 0;
