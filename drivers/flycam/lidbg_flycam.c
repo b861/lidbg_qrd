@@ -993,6 +993,13 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 	}
 	else if(_IOC_TYPE(cmd) == FLYCAM_FRONT_ONLINE_IOC_MAGIC)//front cam online mode
 	{
+		if(isSuspend && (_IOC_NR(cmd) == NR_START_REC))
+		{
+			lidbg_shell_cmd("echo 'udisk_request' > /dev/flydev0");
+			if(!wait_event_interruptible_timeout(pfly_UsbCamInfo->DVR_ready_wait_queue, (isDVRReady == 1), 10*HZ))
+				return RET_NOTVALID;
+			fixScreenBlurred(DVR_ID,1);
+		}
 		/*check camera status before doing ioctl*/
 		if(!(pfly_UsbCamInfo->camStatus & FLY_CAM_ISVALID))
 		{
