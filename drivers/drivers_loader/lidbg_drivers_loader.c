@@ -300,16 +300,16 @@ static int thread_drivers_loader_analyze(void *data)
 
 	analyze_list_cmd(&flyaudio_hal_list);
 
+    }
+
 	while(0==g_var.android_boot_completed)
 	{
 	    LIDBG_WARN("<flyaudio.init.rc.conf: waiting for g_var.android_boot_completed....>\n");
-	    ssleep(5);
+	    ssleep(1);
 	};
 
-        fs_fill_list(get_lidbg_file_path(buff, "flyaudio.init.rc.conf"), FS_CMD_FILE_LISTMODE, &flyaudio_list);
-        analyze_list_cmd(&flyaudio_list);
-
-    }
+	fs_fill_list(get_lidbg_file_path(buff, "flyaudio.init.rc.conf"), FS_CMD_FILE_LISTMODE, &flyaudio_list);
+	analyze_list_cmd(&flyaudio_list);
 
 
     ssleep(30);//later,exit

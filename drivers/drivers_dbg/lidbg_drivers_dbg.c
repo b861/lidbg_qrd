@@ -37,50 +37,53 @@ static  struct file_operations drivers_dbg_nod_fops =
 int thread_drivers_dbg_init(void *data)
 {
     lidbg_new_cdev(&drivers_dbg_nod_fops, "lidbg_drivers_dbg");
+   if((!g_var.is_fly) && (g_var.recovery_mode == 0) )
+   {
+   	    set_wifi_adb_mode(true);
+		
+	    if( !fs_is_file_exist("/system/app/GPS.apk"))
+	    {
+	        lidbg("enable system print\n");
+	        g_recovery_meg->bootParam.upName.val = 1;
+	        flyparameter_info_save(g_recovery_meg);
 
-    if((!g_var.is_fly) && (g_var.recovery_mode == 0) && ( !fs_is_file_exist("/system/app/GPS.apk")))
-    {
-        lidbg("enable system print\n");
-        g_recovery_meg->bootParam.upName.val = 1;
-        flyparameter_info_save(g_recovery_meg);
+	        //lidbg("enable wifi adb\n");
+	        //set_wifi_adb_mode(true);
 
-        //lidbg("enable wifi adb\n");
-        //set_wifi_adb_mode(true);
+	        //if(g_var.is_first_update)
+	        {
+	            char buff[50] = {0};
+	            //lidbg_pm_install(get_lidbg_file_path(buff, "fileserver.apk"));
+	            //lidbg_pm_install(get_lidbg_file_path(buff, "MobileRateFlow.apk"));
+	            //lidbg_pm_install(get_lidbg_file_path(buff, "ES.ko"));
 
-        //if(g_var.is_first_update)
-        {
-            char buff[50] = {0};
-            //lidbg_pm_install(get_lidbg_file_path(buff, "fileserver.apk"));
-            //lidbg_pm_install(get_lidbg_file_path(buff, "MobileRateFlow.apk"));
-            //lidbg_pm_install(get_lidbg_file_path(buff, "ES.ko"));
+	            //lidbg_pm_install(get_lidbg_file_path(buff, "GPS.ko"));
+	            //lidbg_pm_install(get_lidbg_file_path(buff, "FastBoot.apk"));
+	            //lidbg_pm_install(get_lidbg_file_path(buff, "FlyBootService.apk"));
+	            lidbg_shell_cmd("mount -o remount /system");
 
-            //lidbg_pm_install(get_lidbg_file_path(buff, "GPS.ko"));
-            //lidbg_pm_install(get_lidbg_file_path(buff, "FastBoot.apk"));
-            //lidbg_pm_install(get_lidbg_file_path(buff, "FlyBootService.apk"));
-            lidbg_shell_cmd("mount -o remount /system");
-
-            lidbg_shell_cmd("cp /system/lib/modules/out/fileserver.apk /system/app/fileserver.apk");
-            lidbg_shell_cmd("cp /system/lib/modules/out/MobileRateFlow.apk /system/app/MobileRateFlow.apk");
-            lidbg_shell_cmd("cp /system/lib/modules/out/ES.ko /system/app/ES.apk");
-            //lidbg_shell_cmd("cp /system/lib/modules/out/ST.ko /system/app/ST.apk");
-            lidbg_shell_cmd("cp /system/lib/modules/out/GPS.ko /system/app/GPS.apk");
+	            lidbg_shell_cmd("cp /system/lib/modules/out/fileserver.apk /system/app/fileserver.apk");
+	            lidbg_shell_cmd("cp /system/lib/modules/out/MobileRateFlow.apk /system/app/MobileRateFlow.apk");
+	            lidbg_shell_cmd("cp /system/lib/modules/out/ES.ko /system/app/ES.apk");
+	            //lidbg_shell_cmd("cp /system/lib/modules/out/ST.ko /system/app/ST.apk");
+	            lidbg_shell_cmd("cp /system/lib/modules/out/GPS.ko /system/app/GPS.apk");
 #ifndef LIDBG_PM_MONITOR
-            if( !fs_is_file_exist("/system/app/FastBoot.apk"))
-                lidbg_shell_cmd("cp /system/lib/modules/out/FastBoot.apk /system/app/FastBoot.apk");
+	            if( !fs_is_file_exist("/system/app/FastBoot.apk"))
+	                lidbg_shell_cmd("cp /system/lib/modules/out/FastBoot.apk /system/app/FastBoot.apk");
 
-            if( !fs_is_file_exist("/system/app/FlyBootService.apk"))
-                lidbg_shell_cmd("cp /system/lib/modules/out/FlyBootService.apk /system/app/FlyBootService.apk");
+	            if( !fs_is_file_exist("/system/app/FlyBootService.apk"))
+	                lidbg_shell_cmd("cp /system/lib/modules/out/FlyBootService.apk /system/app/FlyBootService.apk");
 #endif
-            lidbg_shell_cmd("chmod 777 /system/app/*");
-            lidbg_shell_cmd("chmod 777 /data");
+	            lidbg_shell_cmd("chmod 777 /system/app/*");
+	            lidbg_shell_cmd("chmod 777 /data");
 #if 0
-            lidbg_stop("adbd");//for baidu carlife
+	            lidbg_stop("adbd");//for baidu carlife
 #endif
-            msleep(10 * 1000);
-            lidbg_pm_install(get_lidbg_file_path(buff, "ST.ko"));
-        }
-    }
-
+	            msleep(10 * 1000);
+	            lidbg_pm_install(get_lidbg_file_path(buff, "ST.ko"));
+	        }
+	    }
+   	}
 #if 0
     msleep(60 * 1000);
     //else if (!strcmp(argv[1], "*158#025"))
