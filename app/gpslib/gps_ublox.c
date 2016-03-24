@@ -33,11 +33,11 @@
 #include <cutils/log.h>
 #include "lidbg_servicer.h"
 
-/*
+
 #define LOG_NDEBUG 0
 #define  LOG_TAG  "gps_ublox"
 #include <cutils/log.h>
-*/
+
 
 #include <cutils/sockets.h>
 
@@ -48,7 +48,7 @@
 
 #define  GPS_DEV_NAME  "/dev/ubloxgps0"
 
-#define  GPS_DEBUG  (0)
+#define  GPS_DEBUG  (1)
 
 #if GPS_DEBUG
 #define  D(...)   LOGD(__VA_ARGS__)
@@ -557,6 +557,21 @@ static void nmea_reader_parse_gsv(NmeaReader *r, NmeaTokenizer *t)
     }
 }
 
+static void nmea_call_nmea_cb( NmeaReader  *r )
+{
+    struct timeval tv;
+    gettimeofday(&tv, (struct timezone *) NULL);
+    int64_t now = tv.tv_sec * 1000LL + tv.tv_usec / 1000;
+
+    if (r != NULL  && r->in != NULL && r->callbacks.nmea_cb != NULL)
+    {
+        D("[gpsdata]Received==2222=====:%d[%.*s]",  r->pos-1,r->pos-1,r->in);
+        r->callbacks.nmea_cb(now, r->in, r->pos-1);
+    }
+    else
+        D("[gpsdata]skip: =======nmea_call_nmea_cb=========");
+}
+
 static void
 nmea_reader_parse( NmeaReader  *r )
 {
@@ -566,6 +581,7 @@ nmea_reader_parse( NmeaReader  *r )
     NmeaTokenizer  tzer[1];
     Token          tok;
     unsigned int info;
+    bool is_unkonwn=false;
 
     D("[gpsdata]Received: '%.*s'", r->pos, r->in);
     if (r->pos < 9)
@@ -653,10 +669,18 @@ nmea_reader_parse( NmeaReader  *r )
     else
     {
         tok.p -= 2;
+	is_unkonwn=true;
         D("unknown sentence '%.*s", tok.end - tok.p, tok.p);
     }
     info = GPS_LOCATION_HAS_LAT_LONG | GPS_LOCATION_HAS_ALTITUDE |
            GPS_LOCATION_HAS_BEARING | GPS_LOCATION_HAS_SPEED | GPS_LOCATION_HAS_ACCURACY;
+
+	if(!is_unkonwn)
+	{
+        D("[gpsdata]Received==111=====:%d[%.*s]",  r->pos-1,r->pos-1,r->in);
+	    nmea_call_nmea_cb(r );
+	}
+
     if ((r->fix.flags & info) == info)
     {
 #if GPS_DEBUG
