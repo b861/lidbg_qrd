@@ -113,7 +113,7 @@
 #define NONE_HUB_SUPPORT	0
 //#define REC_SAVE_DIR	EMMC_MOUNT_POINT0"/camera_rec/"
 char Rec_Save_Dir[100] = EMMC_MOUNT_POINT0"/camera_rec/";
-int Max_Rec_Num = 5;
+int Max_Rec_Num = 1;
 int Rec_Sec = 300;//s
 unsigned int Rec_File_Size = 300;//MB
 unsigned int Rec_Bitrate = 8000000;//b/s
@@ -4445,7 +4445,7 @@ openfd:
 						sprintf(flypreview_prevcnt, "%d", flytmpcnt);
 						property_set("fly.uvccam.curprevnum", flypreview_prevcnt);
 					}	
-					if((i % (Rec_Sec*30)  == 0) && (i > 0))//frames = sec * 30f/s
+					if((i % (Rec_Sec*30)  == 0) && (i > 0) && (Max_Rec_Num != 1))//frames = sec * 30f/s
 					{
 							lidbg("preview change file name to write!");
 							if(flytmpcnt < Max_Rec_Num - 1) flytmpcnt++;
