@@ -228,6 +228,10 @@ static int lidbg_dev_event(struct notifier_block *this,
 #endif
         break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_DEVICE_UP):
+	#ifdef MUC_CONTROL_DSP
+	  if(!g_var.recovery_mode && !g_var.is_fly)
+	    	CREATE_KTHREAD(thread_sound_dsp_init, NULL);
+	#endif
 #if 0//def VENDOR_QCOM
         lidbg("set gpio to uart\n");
         SOC_IO_Config(g_hw.gpio_dvd_tx, GPIOMUX_FUNC_2, GPIOMUX_OUT_HIGH, GPIOMUX_PULL_NONE, GPIOMUX_DRV_16MA);
