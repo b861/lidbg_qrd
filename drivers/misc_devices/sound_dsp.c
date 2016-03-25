@@ -11,5 +11,9 @@ int thread_sound_dsp_init(void *data)
     LPC_CMD_RADIO_INIT;
     msleep(3000);
     LPC_CMD_RADIO_SET;
+    msleep(3000);
+    LPC_CMD_RADIO_INIT2;
+    msleep(3000);
+    LPC_CMD_RADIO_INIT3;
     return 0;
 }
