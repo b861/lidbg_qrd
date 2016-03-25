@@ -159,7 +159,7 @@ static struct notifier_block lidbg_notifier =
  *****************************************************************************/
 static void suspend_stoprec_timer_isr(unsigned long data)
 {
-	if(isDVRRec | isOnlineRec)
+	if(isDVRRec ||  isOnlineRec)
 	{
 	    lidbg("-------[TIMER]uvccam stop_recording -----\n");
 		complete(&timer_stop_rec_wait);
@@ -998,9 +998,12 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		if(isSuspend && (_IOC_NR(cmd) == NR_START_REC))
 		{
 			lidbg_shell_cmd("echo 'udisk_request' > /dev/flydev0");
+			lidbg("%s:====ACCOFF CHECK====\n",__func__);
 			if(!wait_event_interruptible_timeout(pfly_UsbCamInfo->DVR_ready_wait_queue, (isDVRReady == 1), 10*HZ))
+			{
+				lidbg_shell_cmd("echo 'udisk_unrequest' > /dev/flydev0");
 				return RET_NOTVALID;
-			fixScreenBlurred(DVR_ID,1);
+			}
 		}
 		/*check camera status before doing ioctl*/
 		if(!(pfly_UsbCamInfo->camStatus & FLY_CAM_ISVALID))
@@ -1049,7 +1052,6 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		        break;
 			case NR_START_REC:
 		        lidbg("%s:Online NR_START_REC\n",__func__);
-				setOnlineProp(DVR_ID);
 				//checkSDCardStatus(f_online_path);
 				if(isDVRRec)
 				{
@@ -1065,6 +1067,8 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 				{
 					lidbg("%s:====Online start rec====\n",__func__);
 					isOnlineRec = 1;
+					fixScreenBlurred(DVR_ID,1);
+					setOnlineProp(DVR_ID);
 					if(start_rec(DVR_ID,1)) goto failproc;
 				}
 		        break;
@@ -1073,6 +1077,7 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 				if(isDVRRec)
 				{
 					lidbg("%s:====Online stop cmd neglected====\n",__func__);
+					if(isSuspend) lidbg_shell_cmd("echo 'udisk_unrequest' > /dev/flydev0");
 					ret = RET_IGNORE;
 				}
 				else if(isOnlineRec) 
@@ -1084,6 +1089,7 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 				else
 				{
 					lidbg("%s:====Online stop cmd repeatedly====\n",__func__);
+					if(isSuspend) lidbg_shell_cmd("echo 'udisk_unrequest' > /dev/flydev0");
 					ret = RET_REPEATREQ;
 				}
 		        break;
