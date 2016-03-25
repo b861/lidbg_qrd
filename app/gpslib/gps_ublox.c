@@ -34,10 +34,12 @@
 #include "lidbg_servicer.h"
 
 
+/*
 #define LOG_NDEBUG 0
 #define  LOG_TAG  "gps_ublox"
 #include <cutils/log.h>
-
+#define  GPS_DEBUG  (1)
+*/
 
 #include <cutils/sockets.h>
 
@@ -47,8 +49,6 @@
 #include <hardware/gps.h>
 
 #define  GPS_DEV_NAME  "/dev/ubloxgps0"
-
-#define  GPS_DEBUG  (1)
 
 #if GPS_DEBUG
 #define  D(...)   LOGD(__VA_ARGS__)
