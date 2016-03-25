@@ -35,22 +35,26 @@
 static char FSCK_EXFAT_PATH[] = "/flysystem/lib/out/fsck.exfat";
 static char MK_EXFAT_PATH[] = "/flysystem/lib/out/mkfs.exfat";
 
+static char ORIGIN_FSCK_EXFAT_PATH[] = "/system/lib/modules/out/fsck.exfat";
+static char ORIGIN_MK_EXFAT_PATH[] = "/system/lib/modules/out/mkfs.exfat";
+
 
 extern "C" int logwrap(int argc, const char **argv, int background);
 extern "C" int mount(const char *, const char *, const char *, unsigned long, const void *);
 
 int Exfat::check(const char *fsPath)
 {
+	char * path=FSCK_EXFAT_PATH;
 	SLOGI("Exfat::check");
-	if (access(FSCK_EXFAT_PATH, X_OK)) {
-        lidbg("Skipping fs checks\n");
-        return 0;
+	if (access(path, X_OK)) {
+        path=ORIGIN_FSCK_EXFAT_PATH;
+        lidbg("use origin fs checks\n");
     }
 
     int rc = 0;
 
     const char *args[5];
-    args[0] = FSCK_EXFAT_PATH;
+    args[0] = path;
     args[1] = fsPath;
     args[2] = NULL;
     int status;
@@ -112,6 +116,7 @@ int Exfat::doMount(const char *fsPath, const char *mountPoint,
     unsigned long flags;
     char mountData[255];
     const char *args[4];
+char * path=MK_EXFAT_PATH;
     createLost = createLost;
     flags = MS_NODEV | MS_NOSUID | MS_DIRSYNC;
 
@@ -138,7 +143,12 @@ int Exfat::doMount(const char *fsPath, const char *mountPoint,
     if (!remount) {
         lidbg("Trying to use exfat program to mount %s", fsPath);
 
-        args[0] = MK_EXFAT_PATH;
+    if (access(path, X_OK)) 
+    {
+        path=ORIGIN_MK_EXFAT_PATH;
+        lidbg("use origin mkfs.exfat %s\n",path);
+    }
+        args[0] = path;
         args[1] = fsPath;
 	args[2] = mountPoint;
         args[3] = NULL;
