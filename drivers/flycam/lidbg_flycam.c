@@ -172,6 +172,8 @@ static int thread_stop_rec_func(void *data)
 	{
 		wait_for_completion(&timer_stop_rec_wait);
 		if(stop_rec(DVR_ID,1))lidbg("%s:====return fail====\n",__func__);
+		isDVRRec = 0;
+		isOnlineRec = 0;
 	}
 	return 0;
 }
