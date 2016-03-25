@@ -35,6 +35,7 @@ char *lmk_protect_list[] =
 	"ample.sleeptest",
 	"_android_server",
 	"idbg_testuvccam",
+	"kware.thinknavi",
 
 	"com.sygic.aura",
 	"mediaserver",
