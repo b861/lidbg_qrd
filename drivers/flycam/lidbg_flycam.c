@@ -1067,7 +1067,7 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 				{
 					lidbg("%s:====Online start rec====\n",__func__);
 					isOnlineRec = 1;
-					fixScreenBlurred(DVR_ID,1);
+					if(isSuspend) fixScreenBlurred(DVR_ID,1);
 					setOnlineProp(DVR_ID);
 					if(start_rec(DVR_ID,1)) goto failproc;
 				}
