@@ -920,6 +920,7 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 				{
 					lidbg("%s:====DVR restart rec====\n",__func__);
 					isDVRRec = 1;
+					isOnlineRec = 0;
 					if(stop_rec(DVR_ID,1)) goto failproc;
 					if(start_rec(DVR_ID,1)) goto failproc;
 				}
