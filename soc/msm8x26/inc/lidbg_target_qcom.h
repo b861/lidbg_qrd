@@ -288,6 +288,7 @@
 #define WAKEUP_MCU_BEGIN  do{check_gpio(g_hw.gpio_mcu_i2c_wakeup);SOC_IO_Output(0, g_hw.gpio_mcu_i2c_wakeup, 1); }while(0)
 #define WAKEUP_MCU_END  do{check_gpio(g_hw.gpio_mcu_i2c_wakeup);SOC_IO_Output(0, g_hw.gpio_mcu_i2c_wakeup, 0); }while(0)
 
-
+#define GPIO_IS_READY   do{check_gpio(g_hw.gpio_ready);SOC_IO_Output(0, g_hw.gpio_ready, 1); }while(0)
+#define GPIO_NOT_READY   do{check_gpio(g_hw.gpio_ready);SOC_IO_Output(0, g_hw.gpio_ready, 0); }while(0)
 
 #endif

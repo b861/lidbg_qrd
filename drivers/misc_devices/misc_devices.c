@@ -392,6 +392,8 @@ static void parse_cmd(char *pt)
     {
         g_var.flyaudio_reboot=1;
 	 LCD_OFF;
+	 GPIO_NOT_READY;
+	 MCU_WP_GPIO_OFF;
         lidbg("Misc devices ctrl: g_var.flyaudio_reboot=1\n");
     }
 }
@@ -544,7 +546,7 @@ static int soc_dev_probe(struct platform_device *pdev)
     }
      CREATE_KTHREAD(thread_usb_disk_enable_delay, NULL);
    
-
+    GPIO_IS_READY;
 
 #ifdef PLATFORM_ID_7
     if(0)
@@ -574,6 +576,7 @@ static int  soc_dev_suspend(struct platform_device *pdev, pm_message_t state)
         //button_suspend();
     }
     led_suspend();
+    GPIO_NOT_READY;
     return 0;
 
 }
@@ -585,7 +588,7 @@ static int soc_dev_resume(struct platform_device *pdev)
         //button_resume();
         led_resume();
     }
-
+    GPIO_IS_READY;
     return 0;
 }
 struct platform_device soc_devices =

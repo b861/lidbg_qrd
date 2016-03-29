@@ -57,6 +57,7 @@ struct hw_version_specific
     int gpio_int_button_left2;
     int gpio_int_button_right1;
     int gpio_int_button_right2;
+    int gpio_ready;
 
     int gpio_led1;
     int gpio_led2;

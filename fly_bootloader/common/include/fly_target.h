@@ -51,6 +51,8 @@ struct bootloader_hw_config
     struct lpc_config lpc_info;
     int lk_wakeup_lpc_io;
     int gpio_mcu_wp;
+    int gpio_ready;
+    int gpio_hal_ready;
     char *dbg_uart_port;
 };
 
