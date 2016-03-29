@@ -124,7 +124,8 @@ static int lidbg_flycam_event(struct notifier_block *this,
 				isDVRFirstResume = 1;
 				isRearFirstResume = 1;
 				schedule_delayed_work(&work_t_RearView_fixScreenBlurred, 0);/*Rec Block mode(First ACCON)*/
-				schedule_delayed_work(&work_t_DVR_fixScreenBlurred, 0);/*Rec Block mode(First ACCON)*/
+				if(!isOnlineRec && !isDVRRec) 
+					schedule_delayed_work(&work_t_DVR_fixScreenBlurred, 0);/*Rec Block mode(First ACCON)*/
 				isKSuspend = 0;
 			}
 			break;
