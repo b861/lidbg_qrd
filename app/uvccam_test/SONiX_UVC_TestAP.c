@@ -4372,7 +4372,7 @@ openfd:
 				/*reserve 300MB for storage*/
 				if((i % 30 == 0) && !isPreview)
 				{
-					if(!strncmp(Rec_Save_Dir, EMMC_MOUNT_POINT0, sizeof(EMMC_MOUNT_POINT0)) )
+					if(!strncmp(Rec_Save_Dir, EMMC_MOUNT_POINT0, strlen(EMMC_MOUNT_POINT0)) )
 					{
 						struct statfs diskInfo;  
 						statfs(EMMC_MOUNT_POINT0, &diskInfo);  
