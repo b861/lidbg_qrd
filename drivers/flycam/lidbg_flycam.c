@@ -873,8 +873,9 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		}
 		else if((pfly_UsbCamInfo->camStatus & FLY_CAM_ISSONIX) && !isDVRAfterFix)
 		{
-			lidbg("%s:Fix proc running!Please wait !\n",__func__);
-			return RET_NOTVALID;
+			lidbg("%s:Fix proc running!But ignore !\n",__func__);
+			//return RET_NOTVALID;
+			isDVRAfterFix = 1;//force to 1 tmp
 		}
 		
 		switch(_IOC_NR(cmd))
@@ -1007,16 +1008,19 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 				return RET_NOTVALID;
 			}
 		}
-		/*check camera status before doing ioctl*/
-		if(!(pfly_UsbCamInfo->camStatus & FLY_CAM_ISVALID))
+		if(!isSuspend)
 		{
-			lidbg("%s:DVR[online] not found,ioctl fail!\n",__func__);
-			return RET_NOTVALID;
-		}
-		if(!(pfly_UsbCamInfo->camStatus & FLY_CAM_ISSONIX))
-		{
-			lidbg("%s:is not SonixCam ,ioctl fail!\n",__func__);
-			return RET_NOTSONIX;
+			/*check camera status before doing ioctl*/
+			if(!(pfly_UsbCamInfo->camStatus & FLY_CAM_ISVALID))
+			{
+				lidbg("%s:DVR[online] not found,ioctl fail!\n",__func__);
+				return RET_NOTVALID;
+			}
+			if(!(pfly_UsbCamInfo->camStatus & FLY_CAM_ISSONIX))
+			{
+				lidbg("%s:is not SonixCam ,ioctl fail!\n",__func__);
+				return RET_NOTSONIX;
+			}
 		}
 		switch(_IOC_NR(cmd))
 		{
