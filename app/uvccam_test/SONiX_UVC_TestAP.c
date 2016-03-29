@@ -138,6 +138,7 @@ unsigned char isPreview = 0;
 int dev,flycam_fd;
 unsigned int originRecsec = 0;
 unsigned int oldRecsec = 1;
+int isIframe = 0;
 
 int cam_id = -1;
 
@@ -4576,6 +4577,10 @@ openfd:
 					}
 					else
 					{
+#ifdef PLATFORM_ID_14
+						isIframe = 1;
+						XU_H264_Set_IFRAME(dev);
+#endif
 						lidbg_get_current_time(time_buf, NULL);
 						sprintf(flyh264_filename, "%s%s.h264", Rec_Save_Dir, time_buf);
 						lidbg("=========new flyh264_filename : %s===========\n", flyh264_filename);
@@ -4597,7 +4602,10 @@ openfd:
 				}
 				if(rec_fp1 != NULL)
 				{
-					fwrite(mem0[buf0.index], buf0.bytesused, 1, rec_fp1);//write data to the output file
+					if (isIframe == 1)
+						isIframe = 0;
+					else
+						fwrite(mem0[buf0.index], buf0.bytesused, 1, rec_fp1);//write data to the output file
 				}
 				isExceed = 0;
 			}
