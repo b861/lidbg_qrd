@@ -1,5 +1,6 @@
 SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,halAndJni/hal)
 SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,halAndJni/jni)
+SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,halAndJni/inc)
 
 ifeq ($(CONFIG_HAL_GPSLIB),y)
 SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,gpslib)
