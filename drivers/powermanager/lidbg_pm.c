@@ -1206,7 +1206,7 @@ static int __init lidbg_pm_init(void)
     wake_lock(&pm_wakelock);
 
     MCU_WP_GPIO_ON;
-#ifdef CONTROL_PM_IO_BY_BP
+#if 1//def CONTROL_PM_IO_BY_BP
     MCU_SET_WP_GPIO_SUSPEND;
 #endif
     PM_WARN("<set MCU_WP_GPIO_ON>\n");

@@ -6,7 +6,7 @@
 
 #define  MCU_WP_GPIO_ON  do{check_gpio(g_hw.gpio_mcu_wp);SOC_IO_Output(0, g_hw.gpio_mcu_wp, 0);lidbg("MCU_WP_GPIO_0\n");}while(0)
 #define  MCU_WP_GPIO_OFF  do{check_gpio(g_hw.gpio_mcu_wp);SOC_IO_Output(0, g_hw.gpio_mcu_wp, 1);lidbg("MCU_WP_GPIO_1\n");}while(0)
-#define  MCU_SET_WP_GPIO_SUSPEND  do{check_gpio(g_hw.gpio_mcu_wp);SOC_IO_Suspend_Config(g_hw.gpio_mcu_wp,GPIOMUX_OUT_LOW,GPIO_CFG_NO_PULL,GPIOMUX_DRV_2MA);}while(0)
+#define  MCU_SET_WP_GPIO_SUSPEND  do{check_gpio(g_hw.gpio_mcu_wp);SOC_IO_Suspend_Config(g_hw.gpio_mcu_wp,GPIOMUX_OUT_HIGH,GPIO_CFG_NO_PULL,GPIOMUX_DRV_2MA);}while(0)
 
 #ifdef SUSPEND_ONLINE
 #define  MCU_APP_GPIO_ON
@@ -290,5 +290,10 @@
 
 #define GPIO_IS_READY   do{check_gpio(g_hw.gpio_ready);SOC_IO_Output(0, g_hw.gpio_ready, 1); }while(0)
 #define GPIO_NOT_READY   do{check_gpio(g_hw.gpio_ready);SOC_IO_Output(0, g_hw.gpio_ready, 0); }while(0)
+#define  SET_GPIO_READY_SUSPEND  do{check_gpio(g_hw.gpio_ready);SOC_IO_Suspend_Config(g_hw.gpio_ready,GPIOMUX_OUT_LOW,GPIO_CFG_NO_PULL,GPIOMUX_DRV_2MA);}while(0)
+
+#define HAL_IS_READY   do{check_gpio(g_hw.gpio_mcu_app);SOC_IO_Output(0, g_hw.gpio_mcu_app, 0); }while(0)
+#define HAL_NOT_READY   do{check_gpio(g_hw.gpio_mcu_app);SOC_IO_Output(0, g_hw.gpio_mcu_app, 1); }while(0)
+#define  SET_HAL_READY_SUSPEND  do{check_gpio(g_hw.gpio_mcu_app);SOC_IO_Suspend_Config(g_hw.gpio_mcu_app,GPIOMUX_OUT_HIGH,GPIO_CFG_NO_PULL,GPIOMUX_DRV_2MA);}while(0)
 
 #endif
