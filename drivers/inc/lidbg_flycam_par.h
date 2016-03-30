@@ -32,6 +32,8 @@ typedef enum {
   NR_REAR_FW_VERSION,
   NR_DVR_RES,
   NR_REAR_RES,
+  NR_ONLINE_NOTIFY,
+  NR_ONLINE_INVOKE_NOTIFY,
 }status_ctrl_t;
 
 typedef enum {
@@ -54,6 +56,13 @@ typedef enum {
   RET_IGNORE,
   RET_REPEATREQ,
 }cam_ioctl_ret_t;
+
+typedef enum {
+  RET_ONLINE_INSUFFICIENT_SPACE_STOP = 1,
+  RET_ONLINE_DISCONNECT,
+  RET_ONLINE_FOUND_SONIX,
+  RET_ONLINE_FOUND_NOTSONIX,
+}onlineNotify_ret_t;
 
 typedef enum {
   RET_DEFALUT,

@@ -18,7 +18,9 @@ struct fly_UsbCamInfo
 {
 	unsigned char camStatus;/*Camera status(DVR&RearView)*/
 	unsigned char read_status;/*Camera status for HAL to read(notify poll)*/
+	unsigned char onlineNotify_status;
 	wait_queue_head_t camStatus_wait_queue;/*notify wait queue*/
+	wait_queue_head_t onlineNotify_wait_queue;/*notify wait queue*/
 	wait_queue_head_t DVR_ready_wait_queue;
 	wait_queue_head_t Rear_ready_wait_queue;
 	struct semaphore sem;
@@ -44,7 +46,7 @@ static struct timer_list suspend_stoprec_timer;
 #define SUSPEND_STOPREC_ACCOFF_TIME   (jiffies + 60*HZ)  /* 1min stop Rec after accoff*/
 
 /*bool var*/
-static char isDVRRec,isOnlineRec,isDVRFirstInit,isRearViewFirstInit,isRearCheck = 1,isDVRCheck = 1;
+static char isDVRRec,isOnlineRec,isDVRFirstInit,isRearViewFirstInit,isRearCheck = 1,isDVRCheck = 1,isOnlineNotifyReady;
 static char isSuspend,isDVRAfterFix,isRearViewAfterFix,isDVRFirstResume,isRearFirstResume,isUpdating,isKSuspend,isDVRReady,isRearReady;
 
 
@@ -1160,6 +1162,20 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 				strcpy(camera_rear_res,(char*)arg);
 				complete(&Rear_res_get_wait);/*HAL get version*/
 		        break;
+			case NR_ONLINE_NOTIFY:
+		        lidbg("%s:NR_ONLINE_NOTIFY\n",__func__);
+				wait_event_interruptible(pfly_UsbCamInfo->onlineNotify_wait_queue, isOnlineNotifyReady == 1);
+          		//arg = pfly_UsbCamInfo->onlineNotify_status;
+				//lidbg("%s:NR_ONLINE_NOTIFY=ss==2=%ld\n",__func__,arg);
+				isOnlineNotifyReady = 0;
+				return pfly_UsbCamInfo->onlineNotify_status;
+		        break;
+			case NR_ONLINE_INVOKE_NOTIFY:
+		        lidbg("%s:NR_ONLINE_INVOKE_NOTIFY arg = %ld\n",__func__,arg);
+				pfly_UsbCamInfo->onlineNotify_status = arg;
+				isOnlineNotifyReady = 1;
+				wake_up_interruptible(&pfly_UsbCamInfo->onlineNotify_wait_queue);
+		        break;
 			default:
 		        return -ENOTTY;
 		}
@@ -1722,6 +1738,7 @@ int thread_flycam_init(void *data)
 	init_waitqueue_head(&pfly_UsbCamInfo->camStatus_wait_queue);/*camera status wait queue*/
 	init_waitqueue_head(&pfly_UsbCamInfo->DVR_ready_wait_queue);/*DVR wait queue*/
 	init_waitqueue_head(&pfly_UsbCamInfo->Rear_ready_wait_queue);/*Rear wait queue*/
+	init_waitqueue_head(&pfly_UsbCamInfo->onlineNotify_wait_queue);/*onlineNotify wait queue*/
 
 	init_completion(&DVR_res_get_wait);
 	init_completion(&Rear_res_get_wait);

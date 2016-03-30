@@ -4370,8 +4370,8 @@ openfd:
 					closedir(pDir);
 				}
 				
-				/*reserve 300MB for storage*/
-				if((i % 30 == 0) && !isPreview)
+				/*reserve for storage*/
+				if((i % 30 == 0) )
 				{
 					if(!strncmp(Rec_Save_Dir, EMMC_MOUNT_POINT0, strlen(EMMC_MOUNT_POINT0)) )
 					{
@@ -4383,19 +4383,33 @@ openfd:
 						unsigned long long freeDisk = diskInfo.f_bfree*totalBlocks;  
 						size_t mbFreedisk = freeDisk>>20;  
 						//lidbg(EMMC_MOUNT_POINT0"  total=%dMB, free=%dMB\n", mbTotalsize, mbFreedisk);  
-						if(mbFreedisk < 300)
+						if(!isPreview)
 						{
-							lidbg("======EMMC Free space less than 300MB!!======\n");
-							if(i == 0)
+							if(mbFreedisk < 300)
 							{
-								lidbg("======Init Free space less than 300MB!!Force quit!======\n");
-								send_driver_msg(FLYCAM_STATUS_IOC_MAGIC, NR_STATUS, RET_INIT_INSUFFICIENT_SPACE_STOP);
+								lidbg("======DVR:EMMC Free space less than 300MB!!======\n");
+								if(i == 0)
+								{
+									lidbg("======Init Free space less than 300MB!!Force quit!======\n");
+									send_driver_msg(FLYCAM_STATUS_IOC_MAGIC, NR_STATUS, RET_INIT_INSUFFICIENT_SPACE_STOP);
+									close(dev);
+									close(flycam_fd);
+									return 0;
+								}
+								isExceed = 1;
+								send_driver_msg(FLYCAM_STATUS_IOC_MAGIC, NR_STATUS, RET_INSUFFICIENT_SPACE_CIRC);
+							}
+						}
+						else
+						{
+							if(mbFreedisk < 50)
+							{
+								lidbg("======ONLINE:EMMC Free space less than 50MB!!Force quit!======\n");
+								send_driver_msg(FLYCAM_STATUS_IOC_MAGIC, NR_ONLINE_INVOKE_NOTIFY, RET_ONLINE_INSUFFICIENT_SPACE_STOP);
 								close(dev);
 								close(flycam_fd);
 								return 0;
 							}
-							isExceed = 1;
-							send_driver_msg(FLYCAM_STATUS_IOC_MAGIC, NR_STATUS, RET_INSUFFICIENT_SPACE_CIRC);
 						}
 					}
 					else if(!strncmp(Rec_Save_Dir, EMMC_MOUNT_POINT1, strlen(EMMC_MOUNT_POINT1)) )
@@ -4408,24 +4422,38 @@ openfd:
 						unsigned long long freeDisk = diskInfo.f_bfree*totalBlocks;  
 						size_t mbFreedisk = freeDisk>>20;  
 						//lidbg(EMMC_MOUNT_POINT1"  total=%dMB, free=%dMB\n", mbTotalsize, mbFreedisk);  
-						if(mbFreedisk < 10)
+						if(!isPreview)
 						{
-							lidbg("======SDCARD Free space less than 10MB!!======\n");
-							if(i == 0)
+							if(mbFreedisk < 10)
 							{
-								lidbg("======Init Free space less than 10MB!!Force quit!======\n");
-								if (ioctl(flycam_fd,_IO(FLYCAM_STATUS_IOC_MAGIC, NR_STATUS), RET_INIT_INSUFFICIENT_SPACE_STOP) < 0)
-						        {
-						        	lidbg("RET_EXCEED_UPPER_LIMIT ioctl fail=======\n");
+								lidbg("======DVR: Free space less than 10MB!!======\n");
+								if(i == 0)
+								{
+									lidbg("======Init Free space less than 10MB!!Force quit!======\n");
+									if (ioctl(flycam_fd,_IO(FLYCAM_STATUS_IOC_MAGIC, NR_STATUS), RET_INIT_INSUFFICIENT_SPACE_STOP) < 0)
+							        {
+							        	lidbg("RET_EXCEED_UPPER_LIMIT ioctl fail=======\n");
+									}
+									close(dev);
+									close(flycam_fd);
+									return 0;
 								}
+								isExceed = 1;
+								if (ioctl(flycam_fd,_IO(FLYCAM_STATUS_IOC_MAGIC, NR_STATUS), RET_INSUFFICIENT_SPACE_CIRC) < 0)
+						        {
+						        	lidbg("RET_INSUFFICIENT_SPACE_CIRC ioctl fail=======\n");
+								}
+							}
+						}
+						else
+						{
+							if(mbFreedisk < 10)
+							{
+								lidbg("======ONLINE: Free space less than 10MB!!======\n");
+								send_driver_msg(FLYCAM_STATUS_IOC_MAGIC, NR_ONLINE_INVOKE_NOTIFY, RET_ONLINE_INSUFFICIENT_SPACE_STOP);
 								close(dev);
 								close(flycam_fd);
 								return 0;
-							}
-							isExceed = 1;
-							if (ioctl(flycam_fd,_IO(FLYCAM_STATUS_IOC_MAGIC, NR_STATUS), RET_INSUFFICIENT_SPACE_CIRC) < 0)
-					        {
-					        	lidbg("RET_INSUFFICIENT_SPACE_CIRC ioctl fail=======\n");
 							}
 						}
 					}
