@@ -4605,7 +4605,7 @@ openfd:
 					}
 					else
 					{
-#ifdef PLATFORM_ID_14
+#if 1
 						isIframe = 1;
 						XU_H264_Set_IFRAME(dev);
 #endif
