@@ -1,6 +1,6 @@
 
-#ifndef ANDROID_LIDBG_HAL_H
-#define ANDROID_LIDBG_HAL_H
+#ifndef ANDROID_LIDBG_INTERFACE_H
+#define ANDROID_LIDBG_INTERFACE_H
 
 #include <stdint.h>
 #include <sys/cdefs.h>
@@ -8,38 +8,30 @@
 #include <hardware/hardware.h>
 
 __BEGIN_DECLS
+
 #define DEFAULT_ERR_VALUE (-999)
+
 #define LIDBG_HARDWARE_MODULE_ID "lidbg_hal"
 
-typedef void (* reserve)(char *reserve);
-typedef pthread_t (* jni_create_thread)(const char *name, void (*start)(void *), void *arg);
-typedef void (* jni_test_callback)(char *msg);
-typedef void (* jni_driver_abnormal_callback)(int value);
-
-typedef struct
+enum cmd2kernel_action
 {
-    size_t		size;
-    jni_create_thread	create_thread_cb;
-    jni_test_callback	test_cb;
-    jni_driver_abnormal_callback driver_abnormal_cb;
-} JniCallbacks;
+    cmd2kernel_set_path =	1,
+    cmd2kernel_start_record =	2,
+    cmd2kernel_stop_record =	4,
+} ;
 
-typedef struct
+struct lidbg_state_t
 {
-    size_t	size;
-    int   (*set_debug_level)(int level);
-    int   (*hal_init)(int id, JniCallbacks *callbacks);
-    int   (*set_path)(int id, char *path);
-    int   (*start_record)(int id);
-    int   (*stop_record)(int id);
-} HalInterface;
-
+    enum cmd2kernel_action cmd_type;
+    char *data;
+};
 struct lidbg_device_t
 {
     struct hw_device_t common;
-    const  HalInterface *(*get_hal_interface)(struct lidbg_device_t *dev);
+    int (*cmd2kernel)(struct lidbg_device_t *dev, struct  lidbg_state_t  state);
 };
 
 __END_DECLS
+
 #endif
 

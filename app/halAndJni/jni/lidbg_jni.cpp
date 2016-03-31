@@ -1,18 +1,12 @@
-
-#include "jni.h"
-#include "JNIHelp.h"
-#include "android_runtime/AndroidRuntime.h"
-#include "android_runtime/Log.h"
+#include "lidbg_servicer.h"
 
 #include <stdio.h>
 #include <utils/Log.h>
 #include <utils/misc.h>
 #include <utils/Log.h>
 #include <hardware/hardware.h>
-#include <errno.h>
 
-
-#include "lidbg_servicer.h"
+#include "jni.h"
 #include "hal_lidbg_commen.h"
 
 #define DEBG_TAG "jni_futengfei."
@@ -26,57 +20,7 @@ struct Devices
 {
     lidbg_device_t *dev;
 };
-
-Devices *g_lidbg_devices = NULL;
-static const HalInterface *sHalInterface = NULL;
-static jobject mCallbacksObj = NULL;
-static jmethodID method_call_java_test;
-static jmethodID method_call_java_drivers_abnormal_event;
-
-using namespace android;
-
-static void checkAndClearExceptionFromCallback(JNIEnv *env, const char *methodName)
-{
-    if (env->ExceptionCheck())
-    {
-        lidbg(DEBG_TAG"An exception was thrown by callback '%s'\n.", methodName);
-        LOGE_EX(env);
-        env->ExceptionClear();
-    }
-}
-static void test_callback(char *msg)
-{
-    JNIEnv *env = AndroidRuntime::getJNIEnv();
-    jstring extras = env->NewStringUTF(msg);
-    if (extras)
-    {
-        env->CallVoidMethod(mCallbacksObj, method_call_java_test, extras);
-        lidbg(DEBG_TAG"[%s].from hal.[%s]\n", __FUNCTION__, msg);
-    }
-    else
-        lidbg(DEBG_TAG"[%s].fail.CallVoidMethod.out of memory\n", __FUNCTION__);
-    if (extras)
-        env->DeleteLocalRef(extras);
-    checkAndClearExceptionFromCallback(env, __FUNCTION__);
-}
-static pthread_t create_thread_callback(const char *name, void (*start)(void *), void *arg)
-{
-    return (pthread_t)AndroidRuntime::createJavaThread(name, start, arg);
-}
-void driver_abnormal_callback(int value)
-{
-    JNIEnv *env = AndroidRuntime::getJNIEnv();
-    env->CallVoidMethod(mCallbacksObj, method_call_java_drivers_abnormal_event, value);
-    checkAndClearExceptionFromCallback(env, __FUNCTION__);
-};
-
-JniCallbacks sJniCallbacks =
-{
-    sizeof(JniCallbacks),
-    create_thread_callback,
-    test_callback,
-    driver_abnormal_callback,
-};
+Devices *g_lidbg_devices;
 
 static lidbg_device_t *get_device(hw_module_t *module, char const *name)
 {
@@ -85,7 +29,7 @@ static lidbg_device_t *get_device(hw_module_t *module, char const *name)
     err = module->methods->open(module, name, &device);
     if (err == 0)
     {
-        //lidbg(DEBG_TAG"[%s].open.suc\n", __FUNCTION__);
+        lidbg(DEBG_TAG"[%s].open.suc\n", __FUNCTION__);
         return (lidbg_device_t *)device;
     }
     else
@@ -94,31 +38,22 @@ static lidbg_device_t *get_device(hw_module_t *module, char const *name)
         return NULL;
     }
 }
-static jlong native_init(JNIEnv *env, jobject clazz, jint id)
+static jlong native_init(JNIEnv * /*env*/, jobject /*clazz*/)
 {
     int err;
     hw_module_t *module;
-    if (!mCallbacksObj)
-        mCallbacksObj = env->NewGlobalRef(clazz);
-
     g_lidbg_devices = (Devices *)malloc(sizeof(Devices));
+    lidbg(DEBG_TAG"[%s].in,%s\n", __FUNCTION__, LIDBG_HARDWARE_MODULE_ID);
     err = hw_get_module(LIDBG_HARDWARE_MODULE_ID, (hw_module_t const **)&module);
-    if (!err)
+    if (err)
     {
-        g_lidbg_devices->dev = get_device(module, NULL);
-        sHalInterface = g_lidbg_devices->dev ->get_hal_interface(g_lidbg_devices->dev);
-        if(sHalInterface)
-        {
-            lidbg(DEBG_TAG"[%s].get_hal_interface.suc,%s\n", __FUNCTION__, LIDBG_HARDWARE_MODULE_ID);
-            sHalInterface->hal_init(id, &sJniCallbacks);
-        }
-        else
-            lidbg(DEBG_TAG"[%s].get_hal_interface.fail,%s\n", __FUNCTION__, LIDBG_HARDWARE_MODULE_ID);
+        lidbg(DEBG_TAG"[%s].hw_get_module.fail.%s\n", __FUNCTION__, strerror(-err));
+        memset(g_lidbg_devices, 0, sizeof(Devices));
     }
     else
     {
-        memset(g_lidbg_devices, 0, sizeof(Devices));
-        lidbg(DEBG_TAG"[%s].hw_get_module.fail.%s,strerror:%s\n", __FUNCTION__, LIDBG_HARDWARE_MODULE_ID, strerror(-err));
+        lidbg(DEBG_TAG"[%s].hw_get_module.suc\n", __FUNCTION__);
+        g_lidbg_devices->dev = get_device(module, NULL);
     }
     return (jlong)g_lidbg_devices;
 }
@@ -135,131 +70,87 @@ static jint native_destroy(JNIEnv * /*env*/, jobject /*clazz*/, jlong /*ptr*/)
     return 0;
 }
 
-static jint Camera_setPath(JNIEnv *env, jobject /*clazz*/, jint id, jstring path )
+static jint Camera_setPath(JNIEnv *env, jobject /*clazz*/, jstring path )
 {
+    struct lidbg_state_t  state;
+    if ( g_lidbg_devices->dev == NULL)
+    {
+        lidbg(DEBG_TAG"[%s].g_lidbg_devices->dev == NULL\n", __FUNCTION__);
+        return -1;
+    }
+    memset(&state, 0, sizeof(lidbg_state_t));
     char *mpath = (char *)env->GetStringUTFChars(path, NULL);
+    state.cmd_type = cmd2kernel_set_path;
+    state.data = mpath;
     lidbg(DEBG_TAG"[%s].mpath=%s\n", __FUNCTION__, mpath);
-
-    if(sHalInterface != NULL)
-    {
-        int ret = sHalInterface->set_path(id, mpath);
-        env->ReleaseStringUTFChars(path, mpath);
-        return ret;
-    }
-    else
-    {
-        lidbg(DEBG_TAG"[%s].sHalInterface,g_lidbg_devices->dev[%s,%s]\n", __FUNCTION__, sHalInterface, g_lidbg_devices->dev);
-        return -1;
-    }
+    return g_lidbg_devices->dev->cmd2kernel( g_lidbg_devices->dev, state);
 }
-static jint Camera_start_record(JNIEnv * /*env*/, jobject /*clazz*/, jint id)
+static jint Camera_start_record(JNIEnv * /*env*/, jobject /*clazz*/, jint /*num*/)
 {
-    if(sHalInterface != NULL)
+    struct lidbg_state_t  state;
+    if ( g_lidbg_devices->dev == NULL)
     {
-        return sHalInterface->start_record(id);
-    }
-    else
-    {
-        lidbg(DEBG_TAG"[%s].sHalInterface:%s\n", __FUNCTION__, sHalInterface);
+        lidbg(DEBG_TAG"[%s].g_lidbg_devices->dev == NULL\n", __FUNCTION__);
         return -1;
     }
+    memset(&state, 0, sizeof(lidbg_state_t));
+    state.cmd_type = cmd2kernel_start_record;
+    lidbg(DEBG_TAG"[%s].\n", __FUNCTION__);
+    return g_lidbg_devices->dev->cmd2kernel( g_lidbg_devices->dev, state);
 }
-static jint Camera_stop_record(JNIEnv * /*env*/, jobject /*clazz*/, jint id)
+static jint Camera_stop_record(JNIEnv * /*env*/, jobject /*clazz*/, jint /*num*/)
 {
-    if(sHalInterface != NULL)
+    struct lidbg_state_t  state;
+    if ( g_lidbg_devices->dev == NULL)
     {
-        return sHalInterface->stop_record(id);
-    }
-    else
-    {
-        lidbg(DEBG_TAG"[%s].sHalInterface:%s\n", __FUNCTION__, sHalInterface);
+        lidbg(DEBG_TAG"[%s].g_lidbg_devices->dev == NULL\n", __FUNCTION__);
         return -1;
     }
+    memset(&state, 0, sizeof(lidbg_state_t));
+    state.cmd_type = cmd2kernel_stop_record;
+    lidbg(DEBG_TAG"[%s].\n", __FUNCTION__);
+    return g_lidbg_devices->dev->cmd2kernel( g_lidbg_devices->dev, state);
 }
 
-static jint set_debug_level(JNIEnv * /*env*/, jobject /*clazz*/,  jint level)
-{
-    if(sHalInterface != NULL)
-    {
-        return sHalInterface->set_debug_level(level);
-    }
-    else
-    {
-        lidbg(DEBG_TAG"[%s].sHalInterface:%s\n", __FUNCTION__, sHalInterface);
-        return -1;
-    }
-}
+
 static JNINativeMethod methods[] =
 {
-    { "nativeInit", "(I)J", (void *)native_init },
+    { "nativeInit", "()J", (void *)native_init },
     { "nativeDestroy", "(J)I", (void *)native_destroy },
-    { "setDebugLevel", "(I)I", (void *)set_debug_level },
-    { "CameraSetPath", "(ILjava/lang/String;)I", (void *)Camera_setPath },
+    { "CameraSetPath", "(Ljava/lang/String;)I", (void *)Camera_setPath },
     { "CameraStartRecord", "(I)I", (void *)Camera_start_record },
     { "CameraStopRecord", "(I)I", (void *)Camera_stop_record },
 };
 //add up below:
-static jclass registerNativeMethods(JNIEnv *env, const char *className, JNINativeMethod *gMethods, int numMethods)
+static int registerNativeMethods(JNIEnv *env, const char *className,
+                                 JNINativeMethod *gMethods, int numMethods)
 {
     jclass clazz;
-    //lidbg(DEBG_TAG"[%s].\n", __FUNCTION__);
+    lidbg(DEBG_TAG"[%s].\n", __FUNCTION__);
     clazz = env->FindClass(className);
     if (clazz == NULL)
     {
-        env->ExceptionClear();
-        lidbg(DEBG_TAG"[%s].unable to find class '%s'\n", __FUNCTION__, className);
-        return clazz;
+        lidbg(DEBG_TAG"Native registration unable to find class '%s'", className);
+        return JNI_FALSE;
     }
     if (env->RegisterNatives(clazz, gMethods, numMethods) < 0)
     {
-        lidbg(DEBG_TAG"[%s].RegisterNatives failed for '%s'\n", __FUNCTION__, className);
-        return clazz;
+        lidbg(DEBG_TAG"RegisterNatives failed for '%s'", className);
+        return JNI_FALSE;
     }
 
-    return clazz;
+    return JNI_TRUE;
 }
 
 static int registerNatives(JNIEnv *env)
 {
-    int ret = JNI_FALSE, ret2 = JNI_FALSE;
-    //.1
+    if (!registerNativeMethods(env, "com/android/mypftf99/app4hal/LidbgJniNative", methods, sizeof(methods) / sizeof(methods[0])))
     {
-        static const char *classPathName = "com/android/mypftf99/app4haljni/LidbgJniNative";
-        jclass clazz = registerNativeMethods(env, classPathName, methods, sizeof(methods) / sizeof(methods[0]));
-        if (clazz)
-        {
-            lidbg(DEBG_TAG"[%s].suc.%s\n", __FUNCTION__, classPathName);
-            method_call_java_test = env->GetMethodID(clazz, "hal2jni2appCallBack", "(Ljava/lang/String;)V");
-            method_call_java_drivers_abnormal_event = env->GetMethodID(clazz, "driverAbnormalEvent", "(I)V");
-            ret = JNI_TRUE;
-        }
-        else
-        {
-            lidbg(DEBG_TAG"[%s].fail.%s\n", __FUNCTION__, classPathName);
-        }
-    }
-    //.2
-    {
-        static const char *classPathName = "cn/flyaudio/clientservice/video/LidbgJniNative";
-        jclass clazz = registerNativeMethods(env, classPathName, methods, sizeof(methods) / sizeof(methods[0]));
-        if (clazz)
-        {
-            lidbg(DEBG_TAG"[%s].suc.%s\n", __FUNCTION__, classPathName);
-            method_call_java_test = env->GetMethodID(clazz, "hal2jni2appCallBack", "(Ljava/lang/String;)V");
-            method_call_java_drivers_abnormal_event = env->GetMethodID(clazz, "driverAbnormalEvent", "(I)V");
-            ret2 = JNI_TRUE;
-        }
-        else
-        {
-            lidbg(DEBG_TAG"[%s].fail.%s\n", __FUNCTION__, classPathName);
-        }
-    }
-    //result
-    if(ret || ret)
-        return JNI_TRUE;
-    else
+        lidbg(DEBG_TAG"[%s].fail\n", __FUNCTION__);
         return JNI_FALSE;
-
+    }
+    lidbg(DEBG_TAG"[%s].suc\n", __FUNCTION__);
+    return JNI_TRUE;
 }
 jint JNI_OnLoad(JavaVM *vm, void * /*reserved*/)
 {
@@ -272,14 +163,14 @@ jint JNI_OnLoad(JavaVM *vm, void * /*reserved*/)
 
     if (vm->GetEnv(&uenv.venv, JNI_VERSION_1_4) != JNI_OK)
     {
-        lidbg(DEBG_TAG"ERROR: GetEnv failed\n");
+        lidbg(DEBG_TAG"ERROR: GetEnv failed");
         goto bail;
     }
     env = uenv.env;
 
     if (registerNatives(env) != JNI_TRUE)
     {
-        lidbg(DEBG_TAG"ERROR: registerNatives failed\n");
+        lidbg(DEBG_TAG"ERROR: registerNatives failed");
         goto bail;
     }
     result = JNI_VERSION_1_4;
