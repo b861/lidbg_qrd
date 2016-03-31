@@ -2534,6 +2534,7 @@ static int mc3xxx_remove(struct platform_device *pdev)
 }
 
 //=============================================================================
+/*
 static void mc3xxx_shutdown(struct platform_device *pdev)
 {
 	struct mc3xxx_data *data = i2c_get_clientdata(client);
@@ -2541,7 +2542,7 @@ static void mc3xxx_shutdown(struct platform_device *pdev)
 	if(data->enabled)
 		mc3xxx_enable(data, 0);
 }
-
+*/
 //=============================================================================
 static const struct platform_device_id mc3xxx_id[] =
 {
@@ -2574,7 +2575,7 @@ static struct platform_driver mc3xxx_driver =
     .id_table	  = mc3xxx_id,
     .probe		  = mc3xxx_probe,
     .remove		  = mc3xxx_remove,
-    .shutdown	  = mc3xxx_shutdown,
+    //.shutdown	  = mc3xxx_shutdown,
     //.address_list = u_i2c_addr.normal_i2c,
 };
 

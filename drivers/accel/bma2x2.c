@@ -7921,7 +7921,7 @@ static int bma2x2_remove(struct platform_device *pdev)
 
 	return 0;
 }
-
+/*
 void bma2x2_shutdown(struct platform_device *pdev)
 {
 	struct bma2x2_data *data = i2c_get_clientdata(client);
@@ -7930,7 +7930,7 @@ void bma2x2_shutdown(struct platform_device *pdev)
 	bma2x2_set_mode(data->bma2x2_client, BMA2X2_MODE_DEEP_SUSPEND);
 	mutex_unlock(&data->enable_mutex);
 }
-
+*/
 static int bma2x2_store_state(struct i2c_client *client,
 				struct bma2x2_data *data)
 {
@@ -7998,7 +7998,7 @@ static struct platform_driver bma2x2_driver = {
 	.id_table   = bma2x2_id,
 	.probe      = bma2x2_probe,
 	.remove     = bma2x2_remove,
-	.shutdown   = bma2x2_shutdown,
+	//.shutdown   = bma2x2_shutdown,
 };
 
 static struct platform_device bma2x2_devices =
