@@ -71,6 +71,14 @@ u8 camera_DVR_res[100] = {0};
 #define WRITE_CAM_PROP(magic , nr) _IOW(magic, nr ,int)
 #endif
 
+static void notify_online(int arg)
+{
+	pfly_UsbCamInfo->onlineNotify_status = arg;
+	isOnlineNotifyReady = 1;
+	wake_up_interruptible(&pfly_UsbCamInfo->onlineNotify_wait_queue);
+	return;
+}
+
 /******************************************************************************
  * Function: status_fifo_in
  * Description: Put status in fifo(for HAL),
@@ -420,6 +428,7 @@ static int usb_nb_cam_func(struct notifier_block *nb, unsigned long action, void
 				if((oldCamStatus & FLY_CAM_ISVALID) && !(pfly_UsbCamInfo->camStatus & FLY_CAM_ISVALID))
 				{
 					status_fifo_in(RET_DISCONNECT);
+					notify_online(RET_ONLINE_DISCONNECT);
 					isDVRRec = 0;
 					isOnlineRec= 0;
 					isDVRAfterFix = 0;
@@ -440,7 +449,10 @@ static int usb_nb_cam_func(struct notifier_block *nb, unsigned long action, void
 					if(!isDVRFirstResume && !isSuspend) schedule_delayed_work(&work_t_DVR_fixScreenBlurred, 0);
 				}
 				else if(!(oldCamStatus & FLY_CAM_ISVALID) && !(pfly_UsbCamInfo->camStatus & FLY_CAM_ISSONIX) &&(pfly_UsbCamInfo->camStatus & FLY_CAM_ISVALID) )
+				{
 					status_fifo_in(RET_DVR_NOT_SONIX);
+					notify_online(RET_ONLINE_FOUND_NOTSONIX);
+				}
 			}
 		}
 		
@@ -639,6 +651,7 @@ static void work_DVR_fixScreenBlurred(struct work_struct *work)
 	isDVRAfterFix = 1;
 	isDVRFirstResume = 0;
 	status_fifo_in(RET_DVR_SONIX);
+	notify_online(RET_ONLINE_FOUND_SONIX);
 	lidbg("%s:====X====\n",__func__);
 	return;
 }
@@ -927,6 +940,7 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 					isOnlineRec = 0;
 					if(stop_rec(DVR_ID,1)) goto failproc;
 					if(start_rec(DVR_ID,1)) goto failproc;
+					notify_online(RET_ONLINE_INTERRUPTED);
 				}
 				else 
 				{
@@ -1172,9 +1186,7 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		        break;
 			case NR_ONLINE_INVOKE_NOTIFY:
 		        lidbg("%s:NR_ONLINE_INVOKE_NOTIFY arg = %ld\n",__func__,arg);
-				pfly_UsbCamInfo->onlineNotify_status = arg;
-				isOnlineNotifyReady = 1;
-				wake_up_interruptible(&pfly_UsbCamInfo->onlineNotify_wait_queue);
+				notify_online(arg);
 		        break;
 			default:
 		        return -ENOTTY;

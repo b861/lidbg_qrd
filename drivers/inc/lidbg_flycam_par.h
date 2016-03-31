@@ -62,6 +62,7 @@ typedef enum {
   RET_ONLINE_DISCONNECT,
   RET_ONLINE_FOUND_SONIX,
   RET_ONLINE_FOUND_NOTSONIX,
+  RET_ONLINE_INTERRUPTED,
 }onlineNotify_ret_t;
 
 typedef enum {
