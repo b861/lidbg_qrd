@@ -59,7 +59,7 @@ void lidbg_enable_logcat2(void)
         size = fs_get_file_size("/sdcard/logcat.txt") ;
         if(size >= MEM_SIZE_1_MB * 300)
         {
-            lidbg("file_len over\n");
+            lidbg("logcat file_len over\n");
             lidbg_shell_cmd("rm /sdcard/logcat_old.txt");
             ssleep(1);
             lidbg_shell_cmd("cp -rf /sdcard/logcat.txt /sdcard/logcat_old.txt");
@@ -93,15 +93,17 @@ void lidbg_enable_logcat2(void)
 
 void lidbg_enable_kmsg(void)
 {
-    char cmd[128] = {0};
+    char cmd[256] = {0};
     char dmesg_file_name[256] = {0};
+    char dmesg_file_path[256] = {0};
     char time_buf[32] = {0};
-
+    int size;
     lidbg("\n\n\nthread_enable_dmesg:kmsg+\n");
 
     lidbg_trace_msg_disable(1);
     lidbg_get_current_time(time_buf, NULL);
     sprintf(dmesg_file_name, "kmsg_%d_%s.txt", get_machine_id(), time_buf);
+    sprintf(dmesg_file_path, "/sdcard/%s",dmesg_file_name);
 
     sprintf(cmd, "date >/sdcard/%s", dmesg_file_name);
     lidbg_shell_cmd(cmd);
@@ -112,6 +114,25 @@ void lidbg_enable_kmsg(void)
     sprintf(cmd, "cat /proc/kmsg >> /sdcard/%s &", dmesg_file_name);
 
     lidbg_shell_cmd(cmd);
+    while(1)
+    {
+        size = fs_get_file_size(dmesg_file_path) ;
+        if(size >= MEM_SIZE_1_MB * 300)
+        {
+            lidbg("kmsg file_len over\n");
+	     sprintf(cmd, "rm /sdcard/%s.old", dmesg_file_name);
+   	     lidbg_shell_cmd(cmd);
+            ssleep(1);
+	     sprintf(cmd, "cp -rf /sdcard/%s /sdcard/%s.old", dmesg_file_name,dmesg_file_name);
+   	     lidbg_shell_cmd(cmd);
+            ssleep(5);
+	     sprintf(cmd, "date > /sdcard/%s", dmesg_file_name);
+   	     lidbg_shell_cmd(cmd);
+            ssleep(1);
+	     sprintf(cmd, "chmod 777 /sdcard/%s", dmesg_file_name);
+   	     lidbg_shell_cmd(cmd);
+        }
+    }
     lidbg("kmsg-\n");
 }
 void cb_password_chmod(char *password )
