@@ -447,6 +447,11 @@ static int usb_nb_cam_func(struct notifier_block *nb, unsigned long action, void
 					isDVRReady = 1;
 					wake_up_interruptible(&pfly_UsbCamInfo->DVR_ready_wait_queue);
 					if(!isDVRFirstResume && !isSuspend) schedule_delayed_work(&work_t_DVR_fixScreenBlurred, 0);
+					else 
+					{
+						status_fifo_in(RET_DVR_SONIX);
+						notify_online(RET_ONLINE_FOUND_SONIX);
+					}
 				}
 				else if(!(oldCamStatus & FLY_CAM_ISVALID) && !(pfly_UsbCamInfo->camStatus & FLY_CAM_ISSONIX) &&(pfly_UsbCamInfo->camStatus & FLY_CAM_ISVALID) )
 				{
