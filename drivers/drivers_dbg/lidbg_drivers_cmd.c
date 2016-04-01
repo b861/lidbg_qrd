@@ -19,7 +19,24 @@ void cb_kv_log_temp(char *key, char *value)
 }
 
 
-
+int thread_dumpsys_meminfo(void *data)
+{
+    int cnt = 0;
+    lidbg_shell_cmd("rm /sdcard/meminfo.txt");
+    ssleep(10);
+    while(1)
+    {
+        if(fs_get_file_size("/sdcard/meminfo.txt") < 800 * 1024 )
+        {
+            fs_file_separator("meminfo");
+            lidbg_shell_cmd("dumpsys meminfo >>/sdcard/meminfo.txt &");
+        }
+        else
+            lidbg("stop meminfo ,file size:%d\n", fs_get_file_size("/sdcard/meminfo.txt"));
+        ssleep( 5 * 60 );
+        cnt++;
+    }
+}
 int thread_antutu_test(void *data)
 {
     int cnt = 0;
@@ -102,10 +119,10 @@ int thread_system_trace(void *data)
 
     while(1)
     {
-	     lidbg_shell_cmd("procrank -u >> /sdcard/logcat.txt &");
-	     ssleep(5);
-	     lidbg_shell_cmd("dumpsys meminfo >> /sdcard/logcat.txt &");
-            ssleep(5);
+        lidbg_shell_cmd("procrank -u >> /sdcard/logcat.txt &");
+        ssleep(5);
+        lidbg_shell_cmd("dumpsys meminfo >> /sdcard/logcat.txt &");
+        ssleep(5);
     }
 
     return 0;
@@ -306,14 +323,15 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#066--disable alarmmanager protect\n");
             fs_mem_log("*158#067xx--set alarmtimer wakeup time\n");
             fs_mem_log("*158#068----update firmware for usb camera\n");
-	     fs_mem_log("*158#069----shut BT power\n");
-	     fs_mem_log("*158#070xx--set goto sleep time\n");
-	     fs_mem_log("*158#071--udisk stable test start/stop\n");
-	     fs_mem_log("*158#072--acc on/off udisk stable test\n");
-	     fs_mem_log("*158#073--log kmsg no screen flash\n");
-	     fs_mem_log("*158#074--disable cn.flyaudio.media\n");
-		 fs_mem_log("*158#075--enable crash detect & debug by gsensor\n");
-		 fs_mem_log("*158#076--enable gsensor data for android\n");
+            fs_mem_log("*158#069----shut BT power\n");
+            fs_mem_log("*158#070xx--set goto sleep time\n");
+            fs_mem_log("*158#071--udisk stable test start/stop\n");
+            fs_mem_log("*158#072--acc on/off udisk stable test\n");
+            fs_mem_log("*158#073--log kmsg no screen flash\n");
+            fs_mem_log("*158#074--disable cn.flyaudio.media\n");
+            fs_mem_log("*158#075--enable crash detect & debug by gsensor\n");
+            fs_mem_log("*158#076--enable gsensor data for android\n");
+            fs_mem_log("*158#077--dumpsys meminfo\n");
             show_password_list();
             lidbg_domineering_ack();
         }
@@ -578,13 +596,13 @@ void parse_cmd(char *pt)
             //????,?*158#0448010,??????ACC?????,???70S,?????ACC?????,????????80,10S??
             char s[100];
             int n;
-	     char buff[50] = {0};
+            char buff[50] = {0};
             n = strlen(argv[1]);
 
 
-		lidbg_pm_install(get_lidbg_file_path(buff, "SleepTest.apk"));
-		lidbg_pm_install(get_lidbg_file_path(buff, "SleepTest/SleepTest.apk"));
-		msleep(5000);
+            lidbg_pm_install(get_lidbg_file_path(buff, "SleepTest.apk"));
+            lidbg_pm_install(get_lidbg_file_path(buff, "SleepTest/SleepTest.apk"));
+            msleep(5000);
 
             if(n != 12)
                 strcpy(argv[1], "*158#0448010");
@@ -662,7 +680,7 @@ void parse_cmd(char *pt)
             CREATE_KTHREAD(thread_system_trace, NULL);
             lidbg_domineering_ack();
         }
-	else if (!strncmp(argv[1], "*158#054", 8))
+        else if (!strncmp(argv[1], "*158#054", 8))
         {
             //opt args,ex:*158#0540
             int n;
@@ -672,20 +690,20 @@ void parse_cmd(char *pt)
                 lidbg("wrong args!");
                 return;
             }
-            lidbg("--------UVCCAM MODE:%s-----------", argv[1] + 8); 
+            lidbg("--------UVCCAM MODE:%s-----------", argv[1] + 8);
             if(!strcmp((argv[1] + 8), "1"))//start recording
             {
-                 lidbg("-------uvccam recording -----");
-	        lidbg_shell_cmd("setprop fly.uvccam.dvr.recording 1");
-	        if(g_var.is_fly) lidbg_shell_cmd("./flysystem/lib/out/lidbg_testuvccam /dev/video2 -b 1 -c -f H264 -r &");
-	        else lidbg_shell_cmd("./system/lib/modules/out/lidbg_testuvccam /dev/video2 -b 1 -c -f H264 -r &");
+                lidbg("-------uvccam recording -----");
+                lidbg_shell_cmd("setprop fly.uvccam.dvr.recording 1");
+                if(g_var.is_fly) lidbg_shell_cmd("./flysystem/lib/out/lidbg_testuvccam /dev/video2 -b 1 -c -f H264 -r &");
+                else lidbg_shell_cmd("./system/lib/modules/out/lidbg_testuvccam /dev/video2 -b 1 -c -f H264 -r &");
             }
             else if(!strcmp((argv[1] + 8), "0"))//stop recording
-	    {
-		lidbg("-------uvccam stop_recording -----");
-	        lidbg_shell_cmd("setprop fly.uvccam.dvr.recording 0");
-	    }
-                
+            {
+                lidbg("-------uvccam stop_recording -----");
+                lidbg_shell_cmd("setprop fly.uvccam.dvr.recording 0");
+            }
+
         }
         else if (!strcmp(argv[1], "*158#055"))
         {
@@ -703,7 +721,7 @@ void parse_cmd(char *pt)
         {
 #ifdef SUSPEND_ONLINE
             lidbg("-------fake_acc_off -----");
-           fake_acc_off();
+            fake_acc_off();
 #endif
         }
         else if (!strcmp(argv[1], "*158#058"))
@@ -742,7 +760,7 @@ void parse_cmd(char *pt)
         else if (!strcmp(argv[1], "*158#065"))
         {
             lidbg("disable suspend timeout protect\n");
-           g_var.suspend_timeout_protect = 0;
+            g_var.suspend_timeout_protect = 0;
         }
         else if (!strcmp(argv[1], "*158#066"))
         {
@@ -752,11 +770,11 @@ void parse_cmd(char *pt)
         else if (!strncmp(argv[1], "*158#067", 8))
         {
             g_var.alarmtimer_interval = simple_strtoul((argv[1] + 8), 0, 0);
-	     lidbg("set alarmtimer wakeup time:%d\n",g_var.alarmtimer_interval);
+            lidbg("set alarmtimer wakeup time:%d\n", g_var.alarmtimer_interval);
         }
         else if (!strncmp(argv[1], "*158#068", 8))
         {
-        	//opt args,ex:*158#0680
+            //opt args,ex:*158#0680
             int n;
             lidbg("*158#068--update firmware for camera\n");
             n = strlen(argv[1]);
@@ -771,7 +789,7 @@ void parse_cmd(char *pt)
             else if(!strcmp((argv[1] + 8), "1"))
                 lidbg_shell_cmd("/flysystem/lib/out/fw_update -2 -1&");
         }
-		else if (!strcmp(argv[1], "*158#069"))
+        else if (!strcmp(argv[1], "*158#069"))
         {
             lidbg("*158#069----shut BT power\n");
             lidbg_shell_cmd("echo lpc 0x02 0x5 0x00 > /dev/lidbg_drivers_dbg0 &");
@@ -779,43 +797,49 @@ void parse_cmd(char *pt)
         else if (!strncmp(argv[1], "*158#070", 8))
         {
             g_var.acc_goto_sleep_time = simple_strtoul((argv[1] + 8), 0, 0);
-	     lidbg("set acc_goto_sleep_time:%d\n",g_var.acc_goto_sleep_time);
+            lidbg("set acc_goto_sleep_time:%d\n", g_var.acc_goto_sleep_time);
         }
         else if (!strcmp(argv[1], "*158#071"))
         {
-           lidbg("udisk stable test\n");
-	    if(g_var.udisk_stable_test == 0)
-	    	g_var.udisk_stable_test = 1;
-	    else
-		g_var.udisk_stable_test = 0;
-	    lidbg_fs_log(USB_MOUNT_POINT"/udisk_stable_test", "udisk_stable_test\n");
-           lidbg_domineering_ack();
+            lidbg("udisk stable test\n");
+            if(g_var.udisk_stable_test == 0)
+                g_var.udisk_stable_test = 1;
+            else
+                g_var.udisk_stable_test = 0;
+            lidbg_fs_log(USB_MOUNT_POINT"/udisk_stable_test", "udisk_stable_test\n");
+            lidbg_domineering_ack();
         }
         else if (!strcmp(argv[1], "*158#072"))
         {
-           lidbg("acc on/off udisk stable test\n");
-	    lidbg_fs_log(USB_MOUNT_POINT"/udisk_stable_test", "udisk_stable_test\n");
-           g_var.udisk_stable_test = 2;
-           lidbg_domineering_ack();
-       }
+            lidbg("acc on/off udisk stable test\n");
+            lidbg_fs_log(USB_MOUNT_POINT"/udisk_stable_test", "udisk_stable_test\n");
+            g_var.udisk_stable_test = 2;
+            lidbg_domineering_ack();
+        }
         else if (!strcmp(argv[1], "*158#074"))
         {
-           lidbg("pm disable cn.flyaudio.media\n");
-           lidbg_shell_cmd("pm disable cn.flyaudio.media"); 
-           lidbg_domineering_ack();
-       }
-		else if (!strcmp(argv[1], "*158#075"))
+            lidbg("pm disable cn.flyaudio.media\n");
+            lidbg_shell_cmd("pm disable cn.flyaudio.media");
+            lidbg_domineering_ack();
+        }
+        else if (!strcmp(argv[1], "*158#075"))
         {
-           lidbg("enable crash detect & debug by gsensor\n");
-           lidbg_shell_cmd("echo 1 > /sys/class/sensors/mc3xxx-accel/enable");
-		   lidbg_shell_cmd("echo -n 'file lidbg_crash_detect.c +p' > /sys/kernel/debug/dynamic_debug/control");
-       }
-		else if (!strcmp(argv[1], "*158#076"))
+            lidbg("enable crash detect & debug by gsensor\n");
+            lidbg_shell_cmd("echo 1 > /sys/class/sensors/mc3xxx-accel/enable");
+            lidbg_shell_cmd("echo -n 'file lidbg_crash_detect.c +p' > /sys/kernel/debug/dynamic_debug/control");
+        }
+        else if (!strcmp(argv[1], "*158#076"))
         {
-           lidbg("enable gsensor data for android\n");
-           g_var.enable_gsensor_data_for_android = 1;
-       }
-    	}
+            lidbg("enable gsensor data for android\n");
+            g_var.enable_gsensor_data_for_android = 1;
+        }
+        else if (!strcmp(argv[1], "*158#077"))
+        {
+            fs_mem_log("*158#077--dumpsys meminfo\n");
+            CREATE_KTHREAD(thread_dumpsys_meminfo, NULL);
+            lidbg_domineering_ack();
+        }
+    }
     else if(!strcmp(argv[0], "monkey") )
     {
         int enable, gpio, on_en, off_en, on_ms, off_ms;
@@ -843,7 +867,7 @@ void parse_cmd(char *pt)
     else if(!strcmp(argv[0], "captureenable") )
     {
         lidbg("-------uvccam capture-----");
-	if(g_var.is_fly) lidbg_shell_cmd("./flysystem/lib/out/lidbg_testuvccam /dev/video1 -b 1 -c -f mjpg -S &");
+        if(g_var.is_fly) lidbg_shell_cmd("./flysystem/lib/out/lidbg_testuvccam /dev/video1 -b 1 -c -f mjpg -S &");
         else lidbg_shell_cmd("./system/lib/modules/out/lidbg_testuvccam /dev/video1 -b 1-c -f mjpg -S &");
     }
     else if(!strcmp(argv[0], "flyparameter") )
@@ -882,7 +906,7 @@ void parse_cmd(char *pt)
         int len = fs_file_read(argv[1], buff, 0, sizeof(buff));
         buff[len - 1] = '\0';
         lidbg("%d,%s:[%s]\n", len, argv[1], buff);
-	lidbg_toast_show("fread:",buff);
+        lidbg_toast_show("fread:", buff);
     }
     else if(!strcmp(argv[0], "fwrite") )
     {
