@@ -184,11 +184,6 @@ static int lidbg_dev_event(struct notifier_block *this,
     switch (event)
     {
 
-    case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_ON):
-    {
-        g_var.usb_status = 0;
-	 break;
-    }
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_SCREEN_OFF):
         //if(!g_var.is_fly)
     {
@@ -253,6 +248,7 @@ static int lidbg_dev_event(struct notifier_block *this,
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_SCREEN_ON):
         //if(!g_var.is_fly)
     {
+        g_var.usb_status = 0;
         if((g_var.led_hal_status & g_var.led_app_status)&&(g_var.fb_on == 1)&&(g_var.flyaudio_reboot==0))
         {
         		lidbg("LCD_ON3\n");

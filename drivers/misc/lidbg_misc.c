@@ -132,6 +132,7 @@ void lidbg_enable_kmsg(void)
 	     sprintf(cmd, "chmod 777 /sdcard/%s", dmesg_file_name);
    	     lidbg_shell_cmd(cmd);
         }
+         ssleep(60);
     }
     lidbg("kmsg-\n");
 }
