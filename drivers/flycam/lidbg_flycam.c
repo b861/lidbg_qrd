@@ -43,7 +43,7 @@ char f_online_res[100] = "480x272",f_online_path[100] = EMMC_MOUNT_POINT0"/previ
 
 static struct timer_list suspend_stoprec_timer;
 #define SUSPEND_STOPREC_ONLINE_TIME   (jiffies + 180*HZ)  /* 3min stop Rec after online*/
-#define SUSPEND_STOPREC_ACCOFF_TIME   (jiffies + 60*HZ)  /* 1min stop Rec after accoff*/
+#define SUSPEND_STOPREC_ACCOFF_TIME   (jiffies + 180*HZ)  /* 3min stop Rec after accoff,fix online then accoff*/
 
 /*bool var*/
 static char isDVRRec,isOnlineRec,isDVRFirstInit,isRearViewFirstInit,isRearCheck = 1,isDVRCheck = 1,isOnlineNotifyReady;
