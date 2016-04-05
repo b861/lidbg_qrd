@@ -1419,8 +1419,6 @@ static const struct interrupt_map_t int_map[] = {
 
 #define BMA_CAL_BUF_SIZE	99
 
-static struct i2c_client *client;
-
 struct bma2x2_type_map_t {
 
 	/*! bma2x2 sensor chip id */
@@ -7443,7 +7441,8 @@ static void bma2x2_pinctrl_state(struct bma2x2_data *data,
 	dev_dbg(&dev, "Select pinctrl state=%d\n", active);*/
 }
 
-static int bma2x2_probe(struct platform_device *pdev)
+static int bma2x2_probe(struct i2c_client *client,
+		const struct i2c_device_id *id)
 {
 	int err = 0;
 	struct bma2x2_data *data;
@@ -7453,14 +7452,12 @@ static int bma2x2_probe(struct platform_device *pdev)
 
 	struct input_dev *dev_interrupt;
 
-	client = (struct i2c_client*)kzalloc( sizeof(struct i2c_client), GFP_KERNEL);
-	if (!client) {
-			dev_err(&client->dev, "GTP not enough memory for client\n");
-			err = ENOMEM;
-			goto exit;
+	if (!i2c_check_functionality(client->adapter, I2C_FUNC_I2C)) {
+		dev_err(&client->dev, "i2c_check_functionality error\n");
+		err = -EPERM;
+		goto exit;
 	}
 	client->addr= 0x18;
-	client->dev = pdev->dev;
 
 	data = kzalloc(sizeof(struct bma2x2_data), GFP_KERNEL);
 	if (!data) {
@@ -7887,7 +7884,7 @@ static void bma2x2_late_resume(struct early_suspend *h)
 }
 #endif
 
-static int bma2x2_remove(struct platform_device *pdev)
+static int bma2x2_remove(struct i2c_client *client)
 {
 	struct bma2x2_data *data = i2c_get_clientdata(client);
 
@@ -7922,7 +7919,7 @@ static int bma2x2_remove(struct platform_device *pdev)
 	return 0;
 }
 /*
-void bma2x2_shutdown(struct platform_device *pdev)
+void bma2x2_shutdown(struct i2c_client *client)
 {
 	struct bma2x2_data *data = i2c_get_clientdata(client);
 
@@ -7949,7 +7946,7 @@ static int bma2x2_store_state(struct i2c_client *client,
 }
 
 #ifdef CONFIG_PM
-static int bma2x2_suspend(struct platform_device *pdev, pm_message_t mesg)
+static int bma2x2_suspend(struct i2c_client *client, pm_message_t mesg)
 {
 	struct bma2x2_data *data = i2c_get_clientdata(client);
 
@@ -7958,7 +7955,7 @@ static int bma2x2_suspend(struct platform_device *pdev, pm_message_t mesg)
 	return 0;
 }
 
-static int bma2x2_resume(struct platform_device *pdev)
+static int bma2x2_resume(struct i2c_client *client)
 {
 	struct bma2x2_data *data = i2c_get_clientdata(client);
 
@@ -7975,7 +7972,7 @@ static int bma2x2_resume(struct platform_device *pdev)
 
 #endif /* CONFIG_PM */
 
-static const struct platform_device_id bma2x2_id[] = {
+static const struct i2c_device_id bma2x2_id[] = {
 	{ SENSOR_NAME, 0 },
 	{ }
 };
@@ -7983,11 +7980,11 @@ static const struct platform_device_id bma2x2_id[] = {
 MODULE_DEVICE_TABLE(i2c, bma2x2_id);
 
 static const struct of_device_id bma2x2_of_match[] = {
-	{ .compatible = "bosch,bma2x2", },
+	{ .compatible = "bosch, bma2x2", },
 	{ },
 };
 
-static struct platform_driver bma2x2_driver = {
+static struct i2c_driver bma2x2_driver = {
 	.driver = {
 		.owner  = THIS_MODULE,
 		.name   = SENSOR_NAME,
@@ -8001,25 +7998,14 @@ static struct platform_driver bma2x2_driver = {
 	//.shutdown   = bma2x2_shutdown,
 };
 
-static struct platform_device bma2x2_devices =
-{
-    .name			= SENSOR_NAME,
-    .id 			= 0,
-};
-
 static int __init BMA2X2_init(void)
 {
-	int ret = 0;
-	DUMP_BUILD_TIME;
-	LIDBG_GET;
-	ret |= platform_device_register(&bma2x2_devices);
-	ret |= platform_driver_register(&bma2x2_driver);
-	return ret;
+	return i2c_add_driver(&bma2x2_driver);
 }
 
 static void __exit BMA2X2_exit(void)
 {
-	platform_driver_unregister(&bma2x2_driver);
+	i2c_del_driver(&bma2x2_driver);
 }
 
 MODULE_AUTHOR("contact@bosch-sensortec.com");

@@ -1,0 +1,15 @@
+&soc {
+		i2c@78b9000 {
+			mcube@4c {
+				compatible = "mcube, mc3xxx";
+				reg = <0x4c>;
+			};
+		};
+
+		/*i2c@78b9000 {
+			bosch@18 {
+				compatible = "bosch, bma2x2";
+				reg = <0x18>;
+			};
+		};*/
+};

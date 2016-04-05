@@ -322,8 +322,6 @@ static int load_cali_flg = 0;
 #define SYN_TIME_SEC		4
 #define SYN_TIME_NSEC		5
 
-static struct i2c_client *client;
-
 static s32 my_i2c_smbus_read_byte_data(const struct i2c_client *client, u8 command)
 {
 	//_baDataBuf[0] = i2c_smbus_read_byte_data(client, 0x04);
@@ -2367,19 +2365,29 @@ static int mc3xxx_acc_enable_set(struct sensors_classdev *sensors_cdev,
 }
 
 //=============================================================================
-static int mc3xxx_probe(struct platform_device *pdev)
+static int mc3xxx_probe(struct i2c_client *client,
+		const struct i2c_device_id *id)
 {
 	int ret = 0;
 	struct mc3xxx_data *data = NULL;
-	printk("%s mc3xxx probe start... \n", __func__);
+	//printk(KERN_ERR"%s mc3xxx probe start... \n", __func__);
+    if (MC3XXX_RETCODE_SUCCESS != mc3xxx_i2c_auto_probe(client))
+    {
+        GSE_ERR("ERR: fail to probe mCube sensor!\n");
+        goto exit;
+    }
 
-	client = (struct i2c_client*)kzalloc( sizeof(struct i2c_client), GFP_KERNEL);
-	if (!client) {
-			dev_err(&client->dev, "GTP not enough memory for client\n");
-			ret = ENOMEM;
-			goto exit;
+	if (!i2c_check_functionality(client->adapter, I2C_FUNC_I2C))
+	{
+		ret = -ENODEV;
+		goto err_check_functionality_failed;
 	}
-	client->dev = pdev->dev;
+
+	GSE_LOG("[%s] confirmed i2c addr: 0x%X\n", __FUNCTION__, client->addr);
+	
+    #ifdef DOT_CALI
+        load_cali_flg = 30;
+    #endif
 
 	data = kzalloc(sizeof(struct mc3xxx_data), GFP_KERNEL);
 	if(data == NULL)
@@ -2388,18 +2396,6 @@ static int mc3xxx_probe(struct platform_device *pdev)
 		goto err_alloc_data_failed;
 	}
 
-    if (MC3XXX_RETCODE_SUCCESS != mc3xxx_i2c_auto_probe(client))
-    {
-        GSE_ERR("ERR: fail to probe mCube sensor!\n");
-        goto exit;
-    }
-
-	GSE_LOG("[%s] confirmed i2c addr: 0x%X\n", __FUNCTION__, client->addr);
-	
-    #ifdef DOT_CALI
-        load_cali_flg = 30;
-    #endif
-	
 	data->mc3xxx_wq = create_singlethread_workqueue("mc3xxx_wq");
 	if (!data->mc3xxx_wq)
 	{
@@ -2497,9 +2493,9 @@ static int mc3xxx_probe(struct platform_device *pdev)
 #endif
 }
 	data->enabled = 1;
-	//printk(KERN_ERR"%s mc3xxx probe ok \n", __func__);
 
 	crash_detect_init();
+	printk(KERN_ERR"%s mc3xxx probe ok \n", __func__);
 
 	return 0;
 
@@ -2515,13 +2511,14 @@ exit_input_dev_alloc_failed:
 err_create_workqueue_failed:
 	kfree(data);	
 err_alloc_data_failed:
+err_check_functionality_failed:
 exit:
 	printk("mc3xxx probe failed \n");
 	return ret;
 }
 
 //=============================================================================
-static int mc3xxx_remove(struct platform_device *pdev)
+static int mc3xxx_remove(struct i2c_client *client)
 {
 	struct mc3xxx_data *data = i2c_get_clientdata(client);
 
@@ -2535,7 +2532,7 @@ static int mc3xxx_remove(struct platform_device *pdev)
 
 //=============================================================================
 /*
-static void mc3xxx_shutdown(struct platform_device *pdev)
+static void mc3xxx_shutdown(struct i2c_client *client)
 {
 	struct mc3xxx_data *data = i2c_get_clientdata(client);
 
@@ -2544,7 +2541,7 @@ static void mc3xxx_shutdown(struct platform_device *pdev)
 }
 */
 //=============================================================================
-static const struct platform_device_id mc3xxx_id[] =
+static const struct i2c_device_id mc3xxx_id[] =
 {
 	{ SENSOR_NAME, 0 },
 	{ }
@@ -2561,9 +2558,9 @@ static struct of_device_id mc3xxx_acc_match_table[] = {
 	.resume 	= mc3xxx_acc_resume,
 };*/
 
-static struct platform_driver mc3xxx_driver =
+static struct i2c_driver mc3xxx_driver =
 {
-    //.class = I2C_CLASS_HWMON,
+    .class = I2C_CLASS_HWMON,
 
     .driver = {
                   .owner = THIS_MODULE,
@@ -2576,13 +2573,7 @@ static struct platform_driver mc3xxx_driver =
     .probe		  = mc3xxx_probe,
     .remove		  = mc3xxx_remove,
     //.shutdown	  = mc3xxx_shutdown,
-    //.address_list = u_i2c_addr.normal_i2c,
-};
-
-static struct platform_device mc3xxx_devices =
-{
-    .name			= SENSOR_NAME,
-    .id 			= 0,
+    .address_list = u_i2c_addr.normal_i2c,
 };
 
 //=============================================================================
@@ -2606,16 +2597,15 @@ static int __init mc3xxx_init(void)
 
 	GSE_LOG("%s: after fetch_sysconfig_para:  normal_i2c: 0x%hx. normal_i2c[1]: 0x%hx \n", __func__, u_i2c_addr.normal_i2c[0], u_i2c_addr.normal_i2c[1]);
 
+	ret = i2c_add_driver(&mc3xxx_driver);
 
-	ret |= platform_device_register(&mc3xxx_devices);
-	ret |= platform_driver_register(&mc3xxx_driver);
 	return ret;
 }
 
 //=============================================================================
 static void __exit mc3xxx_exit(void)
 {
-	platform_driver_unregister(&mc3xxx_driver);
+	i2c_del_driver(&mc3xxx_driver);
 }
 
 //=============================================================================
