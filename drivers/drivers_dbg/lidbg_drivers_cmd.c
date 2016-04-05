@@ -21,20 +21,19 @@ void cb_kv_log_temp(char *key, char *value)
 
 int thread_dumpsys_meminfo(void *data)
 {
-    int cnt = 0;
     lidbg_shell_cmd("rm /sdcard/meminfo.txt");
     ssleep(10);
     while(1)
     {
-        if(fs_get_file_size("/sdcard/meminfo.txt") < 800 * 1024 )
+        if(fs_get_file_size("/sdcard/meminfo.txt") < 800 * 1024 * 1024 )
         {
-            fs_file_separator("meminfo");
+            fs_file_separator("/sdcard/meminfo.txt");
             lidbg_shell_cmd("dumpsys meminfo >>/sdcard/meminfo.txt &");
+            lidbg("meminfo size:%d\n", fs_get_file_size("/sdcard/meminfo.txt"));
         }
         else
             lidbg("stop meminfo ,file size:%d\n", fs_get_file_size("/sdcard/meminfo.txt"));
-        ssleep( 5 * 60 );
-        cnt++;
+        ssleep( 10 * 60 );
     }
 }
 int thread_antutu_test(void *data)
