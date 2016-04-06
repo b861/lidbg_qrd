@@ -158,9 +158,9 @@ function soc_build_origin_image()
 #	soc_build_recoveryimage
 	soc_build_all
 if [ $ANDROID_VERSION -ge 600 ];then
-	cp $DBG_SOC_PATH/$DBG_SOC/lidbgrc/init.lidbg.rc        $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/root/init.lidbg.rc
+	cp $DBG_ROOT_PATH/conf/init.lidbg.new.rc        $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/root/init.lidbg.rc
 else
-	cp $DBG_SOC_PATH/$DBG_SOC/init.lidbg.rc        $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/root/init.lidbg.rc
+	cp $DBG_ROOT_PATH/conf/init.lidbg.rc        $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/root/init.lidbg.rc
 fi
 	cp $DBG_OUT_PATH/lidbg_load		       $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/bin/lidbg_load
 	cp $DBG_OUT_PATH/vold		       	       $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/bin/vold
@@ -186,11 +186,11 @@ function soc_build_origin_bootimage()
 	echo $FUNCNAME
 
 	mv $DBG_SYSTEM_DIR/system/core/rootdir/init.lidbg.rc  $DBG_SYSTEM_DIR/system/core/rootdir/init.lidbg.rc.backup   
-	#cp $DBG_SOC_PATH/$DBG_SOC/init.lidbg.rc        $DBG_SYSTEM_DIR/system/core/rootdir/init.lidbg.rc
+	#cp $DBG_ROOT_PATH/conf/init.lidbg.rc        $DBG_SYSTEM_DIR/system/core/rootdir/init.lidbg.rc
 if [ $ANDROID_VERSION -ge 600 ];then
-	cp $DBG_SOC_PATH/$DBG_SOC/lidbgrc/init.lidbg.rc			$DBG_SYSTEM_DIR/system/core/rootdir/init.lidbg.rc
+	cp $DBG_ROOT_PATH/conf/init.lidbg.new.rc			$DBG_SYSTEM_DIR/system/core/rootdir/init.lidbg.rc
 else
-	cp $DBG_SOC_PATH/$DBG_SOC/init.lidbg.rc        			$DBG_SYSTEM_DIR/system/core/rootdir/init.lidbg.rc
+	cp $DBG_ROOT_PATH/conf/init.lidbg.rc        			$DBG_SYSTEM_DIR/system/core/rootdir/init.lidbg.rc
 fi
 	soc_build_kernel
 	rm $DBG_SYSTEM_DIR/system/core/rootdir/init.lidbg.rc
