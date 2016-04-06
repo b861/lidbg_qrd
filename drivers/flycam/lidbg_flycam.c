@@ -187,6 +187,9 @@ static int thread_stop_rec_func(void *data)
 	while(1)
 	{
 		wait_for_completion(&timer_stop_rec_wait);
+		/*notify DVR&Online*/
+		if(isDVRRec) status_fifo_in(RET_FORCE_STOP);
+		else if(isOnlineRec) notify_online(RET_ONLINE_FORCE_STOP);
 		if(stop_rec(DVR_ID,1))lidbg("%s:====return fail====\n",__func__);
 		isDVRRec = 0;
 		isOnlineRec = 0;

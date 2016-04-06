@@ -63,6 +63,7 @@ typedef enum {
   RET_ONLINE_FOUND_SONIX,
   RET_ONLINE_FOUND_NOTSONIX,
   RET_ONLINE_INTERRUPTED,
+  RET_ONLINE_FORCE_STOP,
 }onlineNotify_ret_t;
 
 typedef enum {
@@ -85,6 +86,7 @@ typedef enum {
   RET_REAR_UD_SUCCESS,
   RET_REAR_UD_FAIL,
   RET_REAR_FW_ACCESS_FAIL,
+  RET_FORCE_STOP,
 }cam_read_ret_t;
 
 //for hub
