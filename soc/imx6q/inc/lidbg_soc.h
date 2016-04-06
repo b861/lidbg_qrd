@@ -140,7 +140,7 @@ enum
 
 
 #endif
-
+#define SUSPEND_ONLINE
 #define SOC_KO  "lidbg_soc_imx6q.ko"
 #define INTERFACE_KO  "lidbg_interface.ko"
 #define USB_MOUNT_POINT  "/mnt/usb_storage"
@@ -289,6 +289,13 @@ extern struct fly_smem *p_fly_smem ;
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(3, 13, 0))
 #define reinit_completion(x) INIT_COMPLETION(*(x))
 #endif
+#define GPIO_IS_READY   do{}while(0)
+#define GPIO_NOT_READY   do{}while(0)
+#define  SET_GPIO_READY_SUSPEND  do{}while(0)
+
+#define HAL_IS_READY   do{}while(0)
+#define HAL_NOT_READY   do{}while(0)
+#define  SET_HAL_READY_SUSPEND  do{}while(0)
 
 #endif
 

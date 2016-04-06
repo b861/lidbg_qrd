@@ -18,6 +18,8 @@
 
 #define  MCU_WP_GPIO_ON  do{check_gpio(g_hw.gpio_mcu_wp);SOC_IO_Output(0, g_hw.gpio_mcu_wp, 0);lidbg("===== gpio wp = 0\n");}while(0)
 #define  MCU_WP_GPIO_OFF  do{check_gpio(g_hw.gpio_mcu_wp);SOC_IO_Output(0, g_hw.gpio_mcu_wp, 1);lidbg("===== gpio wp = 1\n");}while(0)
+#define  MCU_SET_WP_GPIO_SUSPEND  do{check_gpio(g_hw.gpio_mcu_wp);SOC_IO_Suspend_Config(g_hw.gpio_mcu_wp,GPIOMUX_OUT_HIGH,GPIO_CFG_NO_PULL,GPIOMUX_DRV_2MA);}while(0)
+
 
 #define  MCU_APP_GPIO_ON  do{check_gpio(g_hw.gpio_mcu_app);SOC_IO_Output(0, g_hw.gpio_mcu_app, 0);lidbg("===== gpio app = 0\n");}while(0)
 #define  MCU_APP_GPIO_OFF  do{check_gpio(g_hw.gpio_mcu_app);SOC_IO_Output(0, g_hw.gpio_mcu_app, 1);lidbg("===== gpio app = 1\n");}while(0)
@@ -48,6 +50,7 @@
 
 #define USB_POWER_ENABLE do{\
 		LPC_CMD_USB5V_ON;\
+		g_var.usb_status = 1;\
 		if(g_hw.gpio_usb_power == -1 )\
 			break ;\
 			if(g_var.hw_info.hw_version == 1)\
@@ -59,6 +62,7 @@
 
 #define USB_POWER_DISABLE do{\
 			LPC_CMD_USB5V_OFF;\
+			g_var.usb_status = 0;\
 			check_gpio(g_hw.gpio_usb_power);\
 			if(g_var.hw_info.hw_version == 1)\
 				SOC_IO_Output(0, g_hw.gpio_usb_power, 1);\
@@ -94,6 +98,8 @@
 			USB_POWER_DISABLE;\
 			USB_ID_HIGH_DEV;\
 			}while(0)
+#define USB_FRONT_WORK_ENABLE  do{\
+}while(0)
 //ad
 #define AD_KEY_PORT_L   (35)//(g_hw.ap_key_left)
 #define AD_KEY_PORT_R   (37)//(g_hw.ap_key_right)

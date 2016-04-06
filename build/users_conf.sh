@@ -189,6 +189,8 @@ case "$USERS_ID" in
                 export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/M8974AAAAANLYD4275
 		export BP_SOURCE_PATH=$DBG_PLATFORM_PATH/8974-6.0/bp
                 export RELEASE_REPOSITORY=$DBG_PLATFORM_PATH/8909-release;;
+			15)
+		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/imx6qdl-sabresd;;
 	esac;;
 
         4)  

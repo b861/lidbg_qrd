@@ -202,6 +202,9 @@ public class FlyBootService extends Service {
 			blSuspendUnairplaneFlag = true;
 			reSetPmState();
 			break;
+		case 15:
+			blSuspendUnairplaneFlag = true;
+                        reSetPmState();
 		default:
 			break;
 	}
