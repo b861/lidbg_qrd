@@ -69,6 +69,8 @@ import java.util.Date;
 import java.util.TimeZone;
 import android.app.AlarmManager;
 
+import android.os.Build;
+
 /*
  * ScreenOn ScreenOff DeviceOff Going2Sleep 四种状态分别表示：1.表示正常开屏状态2.表示关屏，但没关外设的状态
  * 0'~30'的阶段3.表示关屏关外设，但没到点进入深度休眠 30'~60'的阶段4.表示发出休眠请求到执行快速休眠 60'后,即进入深度休眠
@@ -193,22 +195,20 @@ public class FlyBootService extends Service {
 		case 13:	//A80 Android_4.4
 			blSuspendUnairplaneFlag = false;
 			break;
-		case 11:	//msm8909 Android_5.1.1
-			blSuspendUnairplaneFlag = true;
-			reSetPmState();
-			break;
-		case 14:	//msm8974 Android_6.0
-			blDozeModeFlag = true;
-			blSuspendUnairplaneFlag = true;
-			reSetPmState();
-			break;
-		case 15:
-			blSuspendUnairplaneFlag = true;
-                        reSetPmState();
 		default:
+                        blSuspendUnairplaneFlag = true;
+                        reSetPmState();
 			break;
 	}
-	LIDBG_PRINT("flybootservice get platform_id: " + intPlatformId + ", SuspendUnairplane: " + blSuspendUnairplaneFlag);
+
+	if (android.os.Build.VERSION.SDK_INT >= 23)//greater then Android_6.0
+		blDozeModeFlag = true;
+
+	LIDBG_PRINT("flybootservice get:\nplatform_id: " + intPlatformId
+			+ "\n SuspendUnairplane: " + blSuspendUnairplaneFlag
+			+ "\n blDozeModeFlag: " + blDozeModeFlag
+			+ "\n Build.VERSION.SDK_INT: " + android.os.Build.VERSION.SDK_INT
+			+ "\n Build.VERSION.RELEASE: " + android.os.Build.VERSION.RELEASE);
 
         new Thread() {
             @Override
