@@ -223,6 +223,7 @@ public class FlyBootService extends Service {
 						else{
 							if(pmState == FBS_SCREEN_OFF){
 								LIDBG_PRINT("FlyBootService get pm state: FBS_SCREEN_OFF");
+								previousACCOffTime = SystemClock.elapsedRealtime();
 								SendBroadcastToService(KeyBootState, keyScreenOFF);
 							}else if(pmState == FBS_DEVICE_DOWN){
 								LIDBG_PRINT("FlyBootService get pm state: FBS_DEVICE_DOWN");
@@ -423,6 +424,7 @@ public class FlyBootService extends Service {
 				setAndaddAlarmAtTtime(cmdPara[cmdParabase][0], cmdPara[cmdParabase][1],
 				cmdPara[cmdParabase][2], cmdPara[cmdParabase][3],
 				cmdPara[cmdParabase][4], cmdPara[cmdParabase][5]);
+				handleRebootEvent();
 			break;
 
 			default:
@@ -1095,6 +1097,7 @@ public static void releaseBrightWakeLock()
 	protected long oldTimes;
 	private int cmdParabase = 0;
 	protected int loopCount = 0;
+	private long previousACCOffTime = SystemClock.elapsedRealtime();
 	private PendingIntent peration;
 	private AlarmManager mAlarmManager;
 	private BroadcastReceiver mAlarmBroadcast = new BroadcastReceiver()
@@ -1179,11 +1182,18 @@ public static void releaseBrightWakeLock()
 	protected void handleRebootEvent()
 	{
 		// TODO Auto-generated method stub
+		long intervalTimesS = (SystemClock.elapsedRealtime() - previousACCOffTime) / 1000;
 		Date curDate = new Date(System.currentTimeMillis());
 		int curHours = curDate.getHours();
 		int accState = SystemProperties.getInt("persist.lidbg.acc.status", 0);// o:ACC on , 1:ACC off
-		LIDBG_PRINT("salarm.handleRebootEvent.curHours:"+ curHours+"/purposeHours:"+cmdPara[cmdParabase + 1][2]+"/accState:"+accState+"/cmdParabase:"+cmdParabase);
-		if (curHours == cmdPara[cmdParabase + 1][2]&&accState==1)// 
+		String logString ="salarm.handleRebootEvent"
+			+"\ncurHours:"+ curHours
+			+"\npurposeHours:"+cmdPara[cmdParabase + 1][2]
+			+"\naccState:"+accState
+			+"\ncmdParabase:"+cmdParabase
+			+ "\nintervalTimesS:" + intervalTimesS	+ "\n";
+		LIDBG_PRINT(logString);
+		if (curHours == cmdPara[cmdParabase + 1][2]&&accState==1&& intervalTimesS > 2 * 60 * 60)// 
 		{
 			writeToFile("/dev/lidbg_misc0","flyaudio:reboot lidbg_sevendays_timeout");
 		}
@@ -1215,7 +1225,7 @@ public static void releaseBrightWakeLock()
 
 		String logString = "\nsalarm.currentTime:" + currentTime + "\nfutureTime:"
 				+ futureTime + "\nintervalTime:" + intervalTime / 1000
-				+ "\ncurDate.getHours():" + curDate.getHours();
+				+ "\ncurDate.getHours():" + curDate.getHours()+"\n";
 		LIDBG_PRINT(logString);
 		return intervalTime;
 	}
