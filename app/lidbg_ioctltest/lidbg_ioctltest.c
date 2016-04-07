@@ -13,7 +13,7 @@ struct pollfd fds;
 void startRec(void)
 {
 	int ret;
-	ret = ioctl(fd,_IO(FLYCAM_FRONT_REC_IOC_MAGIC, NR_START_REC), NULL);
+	ret = ioctl(fd,_IO(FLYCAM_REAR_REC_IOC_MAGIC, NR_START_REC), NULL);
 	if (ret == RET_NOTVALID)
       	lidbg("@@=========Camera not valid !!=======\n");
 	else if (ret == RET_NOTSONIX)
@@ -88,33 +88,34 @@ open_dev:
 
 	while(count--)
 	{
-		ret = ioctl(fd,_IO(FLYCAM_FRONT_REC_IOC_MAGIC, NR_PATH), "/storage/sdcard0/cam_rec/");
+		ret = ioctl(fd,_IO(FLYCAM_REAR_REC_IOC_MAGIC, NR_PATH), "/storage/sdcard0/camera_rec/");
 		if (ret != 0)
         {
         	lidbg("@@NR_PATH ioctl fail===%d===\n",ret);
 		}
-		ret = ioctl(fd,_IO(FLYCAM_FRONT_REC_IOC_MAGIC, NR_RESOLUTION), "1280x720");
+		ret = ioctl(fd,_IO(FLYCAM_REAR_REC_IOC_MAGIC, NR_RESOLUTION), "1280x720");
 		if (ret != 0)
         {
         	lidbg("@@NR_RESOLUTION ioctl fail====%d===\n",ret);
 		}
-		ret = ioctl(fd,_IO(FLYCAM_FRONT_REC_IOC_MAGIC, NR_TIME), 300); 
+		ret = ioctl(fd,_IO(FLYCAM_REAR_REC_IOC_MAGIC, NR_TIME), 300); 
 		if (ret != 0)
         {
         	lidbg("@@NR_TIME ioctl fail====%d===\n",ret);
 		}
-		/*start recording*/
-		lidbg("@@========START========\n");
-		startRec();
-		sleep(5);
-		ret = ioctl(fd,_IO(FLYCAM_FRONT_REC_IOC_MAGIC, NR_SET_PAR), NULL); 
+		
+		ret = ioctl(fd,_IO(FLYCAM_REAR_REC_IOC_MAGIC, NR_SET_PAR), NULL); 
 		if (ret != 0)
         {
         	lidbg("@@NR_SET_PAR ioctl fail====%d===\n",ret);
 		}
-		sleep(5);
+		
+		/*start recording*/
+		lidbg("@@========START========\n");
+		startRec();
+		sleep(500);
 		/*stop recording*/
-		if (ioctl(fd,_IO(FLYCAM_FRONT_REC_IOC_MAGIC, NR_STOP_REC), NULL) < 0)
+		if (ioctl(fd,_IO(FLYCAM_REAR_REC_IOC_MAGIC, NR_STOP_REC), NULL) < 0)
 	    {
 	      	lidbg("@@NR_STOP_REC ioctl fail=======\n");
 		}

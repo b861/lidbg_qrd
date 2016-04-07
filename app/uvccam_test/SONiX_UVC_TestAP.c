@@ -57,7 +57,6 @@
 #define min(x,y) (((x)<(y))?(x):(y))
 #endif
 
-
 #define V4L2_PIX_FMT_H264 v4l2_fourcc('H','2','6','4') /* H264 */
 #define V4L2_PIX_FMT_MP2T v4l2_fourcc('M','P','2','T') /* MPEG-2 TS */
 
@@ -141,6 +140,11 @@ unsigned int oldRecsec = 1;
 int isIframe = 0;
 
 int cam_id = -1;
+
+//lidbg("CAMID[%d] :",cam_id);
+#define camdbg(msg...) do{\
+	lidbg(msg);\
+}while(0)
 
 struct thread_parameter
 {
@@ -1637,12 +1641,15 @@ static void switch_scan(void)
 
 static void send_driver_msg(char magic ,char nr,unsigned long arg)
 {
+#if 0
 	/*Do not send msg while in RearView mode:still not have dedicate StatusCode*/
 	if(cam_id == REARVIEW_ID)
 	{
 		lidbg("%s:stop send msg.\n",__func__);
 		return;
 	}
+#endif
+	if(cam_id == REARVIEW_ID) arg = arg | 0x80;
 	if (ioctl(flycam_fd,_IO(magic, nr), arg) < 0)
     {
       	lidbg("%s:nr => %d ioctl fail=======\n",__func__,nr);
@@ -2946,7 +2953,7 @@ openfd:
 	if (dev < 0)
 		return 1;
 
-	send_driver_msg(FLYCAM_STATUS_IOC_MAGIC,NR_STATUS,RET_START);
+	send_driver_msg(FLYCAM_STATUS_IOC_MAGIC,NR_STATUS,RET_DVR_START);
 	
 	if((do_save) || (do_record)) 
 		get_driver_prop(cam_id);
@@ -4177,7 +4184,7 @@ openfd:
 #endif
 			//system("echo 'udisk_unrequest' > /dev/flydev0");
 			property_set("fly.uvccam.curprevnum", "-1");
-			send_driver_msg(FLYCAM_STATUS_IOC_MAGIC, NR_STATUS, RET_STOP);
+			send_driver_msg(FLYCAM_STATUS_IOC_MAGIC, NR_STATUS, RET_DVR_STOP);
 			
 			if(rec_fp1 != NULL) fclose(rec_fp1);
 			close(dev);
@@ -4349,23 +4356,26 @@ openfd:
 					{
 						 if(!(ent->d_type & DT_DIR))  
 				         {  
-				                if((strcmp(ent->d_name,".") == 0) || (strcmp(ent->d_name,"..") == 0) || (ent->d_reclen != 48) ) 
-				                        continue; 
-								sprintf(path , "%s%s",Rec_Save_Dir,ent->d_name);
-								if (stat(path,&buf) == -1)
-							    {
-								      lidbg ("Get stat on %s Error?%s\n", ent->d_name, strerror (errno));
-								      //return (-1);
-							    }
-								//lidbg("%s -> size = %d/n",ent->d_name,buf.st_size); 
-								totalSize += buf.st_size;
+				                //if((strcmp(ent->d_name,".") == 0) || (strcmp(ent->d_name,"..") == 0) || (ent->d_reclen != 48) ) 
+				                //        continue; 
+								if((!strncmp(ent->d_name, "F", 1) && (cam_id == DVR_ID)) ||(!strncmp(ent->d_name, "R", 1) && (cam_id == REARVIEW_ID)) )
+								{
+									sprintf(path , "%s%s",Rec_Save_Dir,ent->d_name);
+									if (stat(path,&buf) == -1)
+								    {
+									      lidbg ("Get stat on %s Error?%s\n", ent->d_name, strerror (errno));
+									      //return (-1);
+								    }
+									//lidbg("%s -> size = %d , ent->d_reclen = %ld/n",ent->d_name,buf.st_size,ent->d_reclen); 
+									totalSize += buf.st_size;
+								}
 					 	 }
 					}
 					if(((totalSize/1000000)%50) == 0) lidbg("total file size = %dMB\n",totalSize/1000000); 
 					if((totalSize/1000000) >= Rec_File_Size)	
 					{
 						isExceed = 1;
-						send_driver_msg(FLYCAM_STATUS_IOC_MAGIC, NR_STATUS, RET_EXCEED_UPPER_LIMIT);
+						send_driver_msg(FLYCAM_STATUS_IOC_MAGIC, NR_STATUS, RET_DVR_EXCEED_UPPER_LIMIT);
 					}
 					closedir(pDir);
 				}
@@ -4391,13 +4401,13 @@ openfd:
 								if(i == 0)
 								{
 									lidbg("======Init Free space less than 300MB!!Force quit!======\n");
-									send_driver_msg(FLYCAM_STATUS_IOC_MAGIC, NR_STATUS, RET_INIT_INSUFFICIENT_SPACE_STOP);
+									send_driver_msg(FLYCAM_STATUS_IOC_MAGIC, NR_STATUS, RET_DVR_INIT_INSUFFICIENT_SPACE_STOP);
 									close(dev);
 									close(flycam_fd);
 									return 0;
 								}
 								isExceed = 1;
-								send_driver_msg(FLYCAM_STATUS_IOC_MAGIC, NR_STATUS, RET_INSUFFICIENT_SPACE_CIRC);
+								send_driver_msg(FLYCAM_STATUS_IOC_MAGIC, NR_STATUS, RET_DVR_INSUFFICIENT_SPACE_CIRC);
 							}
 						}
 						else
@@ -4430,19 +4440,13 @@ openfd:
 								if(i == 0)
 								{
 									lidbg("======Init Free space less than 10MB!!Force quit!======\n");
-									if (ioctl(flycam_fd,_IO(FLYCAM_STATUS_IOC_MAGIC, NR_STATUS), RET_INIT_INSUFFICIENT_SPACE_STOP) < 0)
-							        {
-							        	lidbg("RET_EXCEED_UPPER_LIMIT ioctl fail=======\n");
-									}
+									send_driver_msg(FLYCAM_STATUS_IOC_MAGIC, NR_STATUS, RET_DVR_INIT_INSUFFICIENT_SPACE_STOP);
 									close(dev);
 									close(flycam_fd);
 									return 0;
 								}
 								isExceed = 1;
-								if (ioctl(flycam_fd,_IO(FLYCAM_STATUS_IOC_MAGIC, NR_STATUS), RET_INSUFFICIENT_SPACE_CIRC) < 0)
-						        {
-						        	lidbg("RET_INSUFFICIENT_SPACE_CIRC ioctl fail=======\n");
-								}
+								send_driver_msg(FLYCAM_STATUS_IOC_MAGIC, NR_STATUS, RET_DVR_INSUFFICIENT_SPACE_CIRC);
 							}
 						}
 						else
@@ -4531,38 +4535,41 @@ openfd:
 					{  
 					        if(!(ent->d_type & DT_DIR))  
 					        {  
-					                if((strcmp(ent->d_name,".") == 0) || (strcmp(ent->d_name,"..") == 0) || (ent->d_reclen != 48) ) 
-					                        continue;  
-									filecnt++;
-					                //lidbg("ent->d_name:%s====ent->d_reclen:%d=====\n", ent->d_name,ent->d_reclen); 
-
-									strcpy(tmpDName, ent->d_name);
-									lidbg_token_string(ent->d_name, "__", date_time_key);
-									//lidbg("date_time_key0:%s====date_time_key1:%s=====", date_time_key[0],date_time_key[2]);	
-									lidbg_token_string(date_time_key[0], "-", date_key);
-									//lidbg("date_key:%s====%s===%s==", date_key[0],date_key[1],date_key[2]);	
-									lidbg_token_string(date_time_key[2], ".", time_key);
-									//lidbg("time_key:%s====%s===%s==", time_key[0],time_key[1],time_key[2]);	
-									
-									curTm.tm_year = atoi(date_key[0]) -1900;
-									curTm.tm_mon = atoi(date_key[1]) -1;
-									curTm.tm_mday = atoi(date_key[2]);
-									curTm.tm_hour = atoi(time_key[0]);
-									curTm.tm_min = atoi(time_key[1]);
-									curTm.tm_sec	 = atoi(time_key[2]);	
-									curtimep = mktime(&curTm);
-									#if 0
-									lidbg("prevtimep=======%d========",  prevtimep);
-									lidbg("curtimep=======%d========",  curtimep);
-									lidbg("difftime=======%d========", difftime(curtimep, prevtimep));
-									#endif
-									if((curtimep < prevtimep) || (prevtimep == 0))
+					                //if((strcmp(ent->d_name,".") == 0) || (strcmp(ent->d_name,"..") == 0) || (ent->d_reclen != 48) ) 
+					                //        continue;  
+									if((!strncmp(ent->d_name, "F", 1) && (cam_id == DVR_ID)) ||(!strncmp(ent->d_name, "R", 1) && (cam_id == REARVIEW_ID)) )
 									{
-										prevtimep = curtimep;
-										strcpy(minRecName, tmpDName);
-										//lidbg("minRecName---%d--->%s\n",filecnt,minRecName);
+										filecnt++;
+						                //lidbg("ent->d_name:%s====ent->d_reclen:%d=====\n", ent->d_name,ent->d_reclen); 
+
+										strcpy(tmpDName, ent->d_name + 1);
+										lidbg_token_string(tmpDName, "__", date_time_key);
+										//lidbg("date_time_key0:%s====date_time_key1:%s=====", date_time_key[0],date_time_key[2]);	
+										lidbg_token_string(date_time_key[0], "-", date_key);
+										//lidbg("date_key:%s====%s===%s==", date_key[0],date_key[1],date_key[2]);	
+										lidbg_token_string(date_time_key[2], ".", time_key);
+										//lidbg("time_key:%s====%s===%s==", time_key[0],time_key[1],time_key[2]);	
+										
+										curTm.tm_year = atoi(date_key[0]) -1900;
+										curTm.tm_mon = atoi(date_key[1]) -1;
+										curTm.tm_mday = atoi(date_key[2]);
+										curTm.tm_hour = atoi(time_key[0]);
+										curTm.tm_min = atoi(time_key[1]);
+										curTm.tm_sec	 = atoi(time_key[2]);	
+										curtimep = mktime(&curTm);
+										
+										#if 0
+										lidbg("prevtimep=======%d========",  prevtimep);
+										lidbg("curtimep=======%d========",  curtimep);
+										lidbg("difftime=======%d========", difftime(curtimep, prevtimep));
+										#endif
+										if((curtimep < prevtimep) || (prevtimep == 0))
+										{
+											prevtimep = curtimep;
+											strcpy(minRecName, ent->d_name);
+											//lidbg("minRecName---%d--->%s\n",filecnt,minRecName);
+										}
 									}
-											
 					        }  
 					}
 					closedir(pDir);
@@ -4592,7 +4599,7 @@ openfd:
 							lidbg("=========new flyh264_filename : %s===========\n", flyh264_filename);
 							rec_fp1 = fopen(flyh264_filename, "wb");
 #endif
-							send_driver_msg(FLYCAM_STATUS_IOC_MAGIC, NR_STATUS, RET_INSUFFICIENT_SPACE_STOP);
+							send_driver_msg(FLYCAM_STATUS_IOC_MAGIC, NR_STATUS, RET_DVR_INSUFFICIENT_SPACE_STOP);
 							close(dev);
 							close(flycam_fd);
 							return 0;
@@ -4610,7 +4617,12 @@ openfd:
 						XU_H264_Set_IFRAME(dev);
 #endif
 						lidbg_get_current_time(time_buf, NULL);
-						sprintf(flyh264_filename, "%s%s.h264", Rec_Save_Dir, time_buf);
+
+						if(cam_id == DVR_ID)
+							sprintf(flyh264_filename, "%sF%s.h264", Rec_Save_Dir, time_buf);
+						else if(cam_id == REARVIEW_ID)
+							sprintf(flyh264_filename, "%sR%s.h264", Rec_Save_Dir, time_buf);
+						
 						lidbg("=========new flyh264_filename : %s===========\n", flyh264_filename);
 						if(rec_fp1 != NULL) fclose(rec_fp1);
 						rec_fp1 = fopen(flyh264_filename, "wb");
@@ -4724,7 +4736,7 @@ try_open_again:
 			lidbg("-------eho---------uvccam stop recording! -----------\n");
 			//system("echo 'udisk_unrequest' > /dev/flydev0");
 			property_set("fly.uvccam.curprevnum", "-1");
-			send_driver_msg(FLYCAM_STATUS_IOC_MAGIC, NR_STATUS, RET_STOP);
+			send_driver_msg(FLYCAM_STATUS_IOC_MAGIC, NR_STATUS, RET_DVR_STOP);
 			if(rec_fp1 != NULL) fclose(rec_fp1);
 			close(dev);
 			close(flycam_fd);

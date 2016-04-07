@@ -1027,7 +1027,7 @@ try_open_again:
         ALOGI("%s: Capture format chosen: 0x%x. 0x%x:YUYV. 0x%x:MJPEG. 0x%x: H264",
               __func__, camHal->captureFormat, V4L2_PIX_FMT_YUYV,
               V4L2_PIX_FMT_MJPEG, V4L2_PIX_FMT_H264);
-
+#if 0
 		char chooseMJEPG[PROPERTY_VALUE_MAX];
 	    property_get("lidbg.uvccam.mjpeg", chooseMJEPG, "0");
 	    if((!strncmp(chooseMJEPG, "1", 1)) && (0 == mjpegSupported))
@@ -1040,7 +1040,18 @@ try_open_again:
 			camHal->captureFormat = V4L2_PIX_FMT_YUYV;
 			ALOGD("-------uvccam captureFormat use YUYV -----");
 		}
-
+#else
+		if(0 == mjpegSupported)
+		{
+			camHal->captureFormat = V4L2_PIX_FMT_MJPEG;
+			ALOGE("-------uvccam captureFormat use MJEPG -----");
+		}
+		else
+		{
+			camHal->captureFormat = V4L2_PIX_FMT_YUYV;
+			ALOGE("-------uvccam captureFormat use YUYV -----");
+		}
+#endif
 		return camHal->captureFormat;
         //return V4L2_PIX_FMT_YUYV;
     }
