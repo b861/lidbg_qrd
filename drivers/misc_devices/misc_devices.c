@@ -176,6 +176,14 @@ static int thread_usb_disk_disable_delay(void *data)
     return 1;
 }
 
+int thread_shutdown_bt_power(void *data)
+{
+    DUMP_FUN;
+    ssleep(10);
+    lidbg_shell_cmd("echo appcmd *158#069 > /dev/lidbg_drivers_dbg0 &");
+    return 0;
+}
+
 static int lidbg_dev_event(struct notifier_block *this,
                        unsigned long event, void *ptr)
 {
@@ -260,6 +268,8 @@ static int lidbg_dev_event(struct notifier_block *this,
         //lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_APP_ON));
         //lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_HAL_ON));
     }
+    if(g_var.platformid==ID11_MSM8909_511&&g_recovery_meg->bootParam.upName.val==1)
+        CREATE_KTHREAD(thread_shutdown_bt_power, NULL);
     break;
 
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SIGNAL_EVENT, NOTIFIER_MINOR_SIGNAL_BAKLIGHT_ACK):

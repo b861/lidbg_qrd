@@ -236,6 +236,25 @@ typedef enum
 	FLY_ACC_ON,
 }FLY_ACC_STATUS;
 
+typedef enum
+{
+	ID0_MSM7627A,
+	ID1_MSM8625,
+	ID2_MSM8226_442,
+	ID3_MSM8926_444,
+	ID4_MSM8974_444,
+	ID5_MT3360_42,
+	ID6_MSM8226_50,
+	ID7_MSM8974_51,
+	ID8_RK3188_RADXA_442,
+	ID9_RK3188_PX3_444,
+	ID10_MSM8226_511,
+	ID11_MSM8909_511,
+	ID12_MSM8226_444,
+	ID13_A80_44,
+	ID14_MSM8974_600,
+}PLATFORMID;
+
 struct lidbg_fn_t
 {
 
@@ -339,8 +358,8 @@ struct lidbg_pvar_t
     int udisk_stable_test;
     char* car_type;
     int suspend_airplane_mode;
-	bool enable_gsensor_data_for_android;
-
+    bool enable_gsensor_data_for_android;
+    int platformid;
 };
 
 typedef struct

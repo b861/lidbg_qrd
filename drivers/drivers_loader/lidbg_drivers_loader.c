@@ -93,12 +93,14 @@ void judgment_list_init(void)
     judgment_list[1].value = is_out_updated ;
     judgment_list[2].value = gboot_mode ;
     judgment_list[3].value = g_recovery_meg->bootParam.upName.val ;
-{
-    char temp_cmd[256];
-    sprintf(temp_cmd, "setprop persist.lidbg.intPlatformId %d", judgment_list[0].value);
-    lidbg_shell_cmd(temp_cmd);
-    judgment_list_print();
-}
+    {
+        char temp_cmd[256];
+        sprintf(temp_cmd, "setprop persist.lidbg.intPlatformId %d", judgment_list[0].value);
+        lidbg_shell_cmd(temp_cmd);
+        judgment_list_print();
+    }
+    g_var.platformid=judgment_list[0].value;
+    LIDBG_WARN("g_var.platformid:%d\n",g_var.platformid);
 }
 int get_judgment_list_value(char *key)
 {
