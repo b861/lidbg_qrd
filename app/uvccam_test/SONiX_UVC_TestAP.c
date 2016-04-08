@@ -1322,7 +1322,7 @@ void *thread_capture(void *par)
 	return 0;
 }
 
-void osd_set()
+void osd_set(int cam_id)
 {
 	char time_buf[100] = {0};
 	char devName[50] = {0};
@@ -1331,13 +1331,14 @@ void osd_set()
     lidbg("%s:E\n",__func__); 
     while(1)
     { 
-    	property_get("fly.uvccam.osdset", OSDSet_Str, "0");
+    	if(cam_id == DVR_ID) property_get("fly.uvccam.dvr.osdset", OSDSet_Str, "0");
+		else if(cam_id == REARVIEW_ID) property_get("fly.uvccam.rear.osdset", OSDSet_Str, "0");
 		if(!strncmp(OSDSet_Str, "1", 1))
 		{
 			if((dev == NULL) ||  (lidbg_get_current_time(1,time_buf, NULL) < 0))
 			{
 				lidbg("%s: ===OSD Open dev===\n", __func__);
-		    	rc = lidbg_get_hub_uvc_device(RECORD_MODE,devName,DVR_ID,1);
+		    	rc = lidbg_get_hub_uvc_device(RECORD_MODE,devName,cam_id,1);
 			    if((rc == -1)  || (*devName == '\0'))
 			    {
 			        lidbg("%s: No UVC node found \n", __func__);
@@ -1446,7 +1447,7 @@ static int lidbg_get_current_time(char isXUSet , char *time_string, struct rtc_t
         sprintf(time_string, "%d-%02d-%02d__%02d.%02d.%02d", (1900+p->tm_year), (1+p->tm_mon), p->tm_mday,p->tm_hour , p->tm_min,p->tm_sec);
 	//sprintf(rtc_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video1 --xuset-rtc %d %d %d %d %d %d", (1900+p->tm_year), (1+p->tm_mon), p->tm_mday,p->tm_hour , p->tm_min,p->tm_sec);
 	//system(rtc_cmd);
-	lidbg("\n===OSDSETTIME => %d-%02d-%02d__%02d.%02d.%02d===\n", (1900+p->tm_year), (1+p->tm_mon), p->tm_mday,p->tm_hour , p->tm_min,p->tm_sec);
+	lidbg("\n===OSDSETTIME[%d] => %d-%02d-%02d__%02d.%02d.%02d===\n", cam_id ,(1900+p->tm_year), (1+p->tm_mon), p->tm_mday,p->tm_hour , p->tm_min,p->tm_sec);
 	if(isXUSet)
 	{
 		if(XU_OSD_Set_RTC(dev, 1900+p->tm_year, 1+p->tm_mon, p->tm_mday, p->tm_hour, p->tm_min, p->tm_sec) <0)
@@ -2978,10 +2979,16 @@ int main(int argc, char *argv[])
 		 return 0;
 	}
 
-	if(cam_id == SET_OSD_ID_MODE)
+	if(cam_id == SET_DVR_OSD_ID_MODE)
 	{
 		lidbg("%s: SET_OSD_ID_MODE \n", __func__);
-		osd_set();//loop
+		osd_set(DVR_ID);//loop
+		return 0;
+	}
+	else if(cam_id == SET_REAR_OSD_ID_MODE)
+	{
+		lidbg("%s: SET_REAR_OSD_ID_MODE \n", __func__);
+		osd_set(REARVIEW_ID);//loop
 		return 0;
 	}
 

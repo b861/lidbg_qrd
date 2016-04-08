@@ -1289,6 +1289,7 @@ try_open_again:
 	else if(cam_id == 0)
 	{
 		system("./flysystem/lib/out/lidbg_testuvccam /dev/video1 -b 0 --xuset-oe 0 0 ");
+		system("setprop fly.uvccam.rear.osdset 0&");
 	}
 #else
 	system("./flysystem/lib/out/lidbg_testuvccam /dev/video1 --xuset-oe 0 0 ");
@@ -2839,6 +2840,7 @@ ION_OPEN_FAILED:
         struct camera_device *mdevice = device;
         ALOGD("%s: E", __func__);
 		system("./flysystem/lib/out/lidbg_testuvccam /dev/video1 -b 0 --xuset-oe 1 1 ");/*open rear osd*/
+		system("setprop fly.uvccam.rear.osdset 1&");
         ALOGE("%s: X", __func__);
     }
 
