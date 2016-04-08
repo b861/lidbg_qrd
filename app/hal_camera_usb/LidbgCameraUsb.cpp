@@ -2838,6 +2838,7 @@ ION_OPEN_FAILED:
     {
         struct camera_device *mdevice = device;
         ALOGD("%s: E", __func__);
+		system("./flysystem/lib/out/lidbg_testuvccam /dev/video1 -b 0 --xuset-oe 1 1 ");/*open rear osd*/
         ALOGE("%s: X", __func__);
     }
 
