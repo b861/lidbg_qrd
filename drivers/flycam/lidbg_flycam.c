@@ -1449,7 +1449,7 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		        return -ENOTTY;
 		}
 	}
-	else return -EINVAL;
+	//else return -EINVAL;
     return ret;
 
 dvrfailproc:
