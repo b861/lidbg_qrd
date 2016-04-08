@@ -1093,7 +1093,7 @@ public static void releaseBrightWakeLock()
 			{ 1, 1, 3, 0, 0, 24 * 60 * 60 * 1000 },
 			// debug para below up,cmdParabase = 2
 			{ 1, 0, 22, 0, 0, 24 * 60 * 60 * 1000 },
-			{ 1, 1, 10, 0, 0, 1 * 60 * 60 * 1000 }, };
+			{ 1, 1, 6, 0, 0, 1 * 60 * 60 * 1000 }, };
 	protected long oldTimes;
 	private int cmdParabase = 0;
 	protected int loopCount = 0;
@@ -1195,7 +1195,10 @@ public static void releaseBrightWakeLock()
 		LIDBG_PRINT(logString);
 		if (curHours == cmdPara[cmdParabase + 1][2]&&accState==1&& intervalTimesS > 2 * 60 * 60)// 
 		{
-			writeToFile("/dev/lidbg_misc0","flyaudio:reboot lidbg_sevendays_timeout");
+			if(cmdParabase==0)
+				writeToFile("/dev/lidbg_misc0","flyaudio:reboot lidbg_sevendays_timeout");
+			else
+				LIDBG_PRINT("salarm:should be reboot but in debug mode.");
 		}
 	}
 

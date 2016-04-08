@@ -331,7 +331,7 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#075--enable crash detect & debug by gsensor\n");
             fs_mem_log("*158#076--enable gsensor data for android\n");
             fs_mem_log("*158#077--dumpsys meminfo\n");
-            fs_mem_log("*158#078--test seven day timeout :will reboot at tomorow 10:00\n");
+            fs_mem_log("*158#078--test seven day timeout :will reboot at tomorow 6:00,Reset once per hour\n");
             show_password_list();
             lidbg_domineering_ack();
         }
@@ -841,7 +841,7 @@ void parse_cmd(char *pt)
         }
         else if (!strcmp(argv[1], "*158#078"))
         {
-            lidbg("*158#078--test seven day timeout :will reboot at tomorow 10:00\n");
+            lidbg("*158#078--test seven day timeout :will reboot at tomorow 6:00,Reset once per hour\n");
             lidbg_shell_cmd("am broadcast -a com.lidbg.flybootserver.action --ei action 14 &");
             lidbg_domineering_ack();
         }
