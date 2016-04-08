@@ -14,6 +14,7 @@
 # 12--msm8226 Android_4.4.4
 # 13--A80 Android_4.4
 # 14--msm8974 Android_6.0.0
+# 15--imx6q Android_5.1.1
 
 ## USERS_ID ###
 # 0--root@192.168.9.222
