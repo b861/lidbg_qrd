@@ -125,14 +125,19 @@ static jlong native_init(JNIEnv *env, jobject clazz, jint id)
 
 static jint native_destroy(JNIEnv * /*env*/, jobject /*clazz*/, jlong /*ptr*/)
 {
-    lidbg(DEBG_TAG"[%s].in\n", __FUNCTION__);
-
-    if (g_lidbg_devices == NULL)
+    if (g_lidbg_devices != NULL)
     {
+        if( g_lidbg_devices->dev && g_lidbg_devices->dev->common.close)
+            g_lidbg_devices->dev->common.close(&g_lidbg_devices->dev->common);
+        lidbg(DEBG_TAG"[%s].in.free(g_lidbg_devices)\n", __FUNCTION__);
+        free(g_lidbg_devices);
+        return 0;
+    }
+    else
+    {
+        lidbg(DEBG_TAG"[%s].in.g_lidbg_devices = NULL\n", __FUNCTION__);
         return -1;
     }
-    free(g_lidbg_devices);
-    return 0;
 }
 
 static jint Camera_setPath(JNIEnv *env, jobject /*clazz*/, jint id, jstring path )
@@ -202,7 +207,6 @@ static JNINativeMethod methods[] =
 static jclass registerNativeMethods(JNIEnv *env, const char *className, JNINativeMethod *gMethods, int numMethods)
 {
     jclass clazz;
-    //lidbg(DEBG_TAG"[%s].\n", __FUNCTION__);
     clazz = env->FindClass(className);
     if (clazz == NULL)
     {
@@ -255,7 +259,7 @@ static int registerNatives(JNIEnv *env)
         }
     }
     //result
-    if(ret || ret)
+    if(ret || ret2)
         return JNI_TRUE;
     else
         return JNI_FALSE;

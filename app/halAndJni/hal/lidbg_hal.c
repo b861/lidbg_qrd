@@ -25,8 +25,9 @@ static int g_havelidbgNode = 0;
 static JniCallbacks jni_call_backs;
 static int dbg_level = 0;
 static int flycam_fd = -1;
+static int thread_exit = 0;
 
-static int send_driver_ioctl(char magic , char nr, unsigned long  arg)
+static int send_driver_ioctl(char *who, char magic , char nr, unsigned long  arg)
 {
     int ret = DEFAULT_ERR_VALUE;
 
@@ -40,7 +41,7 @@ static int send_driver_ioctl(char magic , char nr, unsigned long  arg)
         }
     }
     ret = ioctl(flycam_fd, _IO(magic, nr), arg);
-    lidbg(DEBG_TAG"[%s].sucess2open[%s,(%c,%d)ret=%d,errno=%s]\n", __FUNCTION__, OUR_LIDBG_FILE, magic, nr, ret, strerror(errno));
+    lidbg(DEBG_TAG"[%s].%s.suc.[(%c,%d),ret=%d,errno=%s]\n", who, __FUNCTION__  , magic, nr, ret, strerror(errno));
     return ret;
 }
 
@@ -49,7 +50,7 @@ static void lidbg_hal_thread( void *arg)
     char msg[256] = {0};
     int cnt = 0;
     arg = arg;
-    for (;;)
+    while(thread_exit == 0)
     {
         sleep(3);
 
@@ -57,8 +58,8 @@ static void lidbg_hal_thread( void *arg)
         {
         case 0 :
         {
-            int ret = send_driver_ioctl(FLYCAM_STATUS_IOC_MAGIC, 0x06, -1);
-            if ( jni_call_backs.driver_abnormal_cb)
+            int ret = send_driver_ioctl(__FUNCTION__, FLYCAM_STATUS_IOC_MAGIC, 0x06, NULL);
+            if ((thread_exit == 0) && jni_call_backs.driver_abnormal_cb)
             {
                 jni_call_backs.driver_abnormal_cb(ret);
                 lidbg(DEBG_TAG"[%s].call driver_abnormal_cb:ret=%d\n", __FUNCTION__, ret );
@@ -67,7 +68,7 @@ static void lidbg_hal_thread( void *arg)
         continue;
         case 1 :
         {
-            if (  jni_call_backs.test_cb )
+            if ((thread_exit == 0) && jni_call_backs.test_cb )
             {
                 sprintf(msg, "hal2jni2apk thread: %d\n", cnt);
                 jni_call_backs.test_cb(msg);
@@ -81,6 +82,7 @@ static void lidbg_hal_thread( void *arg)
         }
         cnt++;
     }
+    lidbg(DEBG_TAG"[%s].exit\n", __FUNCTION__ );
 }
 
 int   lidbg_hal_set_debg_level(int level)
@@ -88,11 +90,12 @@ int   lidbg_hal_set_debg_level(int level)
     dbg_level = level;
     return 1;
 };
-int   lidbg_hal_init(int id, JniCallbacks *callbacks)
+int   lidbg_hal_init(int camera_id, JniCallbacks *callbacks)
 {
+    thread_exit = 0;
     jni_call_backs = *callbacks;
     flycam_fd = open(OUR_LIDBG_FILE, O_RDWR);
-    lidbg(DEBG_TAG"[%s].in.%d,flycam_fd:%d\n", __FUNCTION__, id , flycam_fd);
+    lidbg(DEBG_TAG"[%s].in.camera_id:%d,flycam_fd:%d\n", __FUNCTION__, camera_id , flycam_fd);
 
     if ( !jni_call_backs.create_thread_cb || !(jni_call_backs.create_thread_cb( "lidbg_hal", lidbg_hal_thread, NULL )) )
     {
@@ -100,20 +103,20 @@ int   lidbg_hal_init(int id, JniCallbacks *callbacks)
     }
     return 1;
 };
-int   lidbg_hal_set_path(int id, char *path)
+int   lidbg_hal_set_path(int camera_id, char *path)
 {
-    lidbg(DEBG_TAG"[%s].in.[%d,%s]\n", __FUNCTION__, id, path);
-    return send_driver_ioctl(FLYCAM_FRONT_ONLINE_IOC_MAGIC, NR_PATH, (unsigned long) path);
+    lidbg(DEBG_TAG"[%s].in.[camera_id:%d,%s]\n", __FUNCTION__, camera_id, path);
+    return send_driver_ioctl(__FUNCTION__, FLYCAM_FRONT_ONLINE_IOC_MAGIC, NR_PATH, (unsigned long) path);
 };
-int   lidbg_hal_start_record(int id)
+int   lidbg_hal_start_record(int camera_id)
 {
-    lidbg(DEBG_TAG"[%s].in.[%d,%s]\n", __FUNCTION__, id, "null");
-    return  send_driver_ioctl(FLYCAM_FRONT_ONLINE_IOC_MAGIC, NR_START_REC, -1);
+    lidbg(DEBG_TAG"[%s].in.[camera_id:%d,%s]\n", __FUNCTION__, camera_id, "null");
+    return  send_driver_ioctl(__FUNCTION__, FLYCAM_FRONT_ONLINE_IOC_MAGIC, NR_START_REC, NULL);
 };
-int   lidbg_hal_stop_record(int id)
+int   lidbg_hal_stop_record(int camera_id)
 {
-    lidbg(DEBG_TAG"[%s].in.[%d,%s]\n", __FUNCTION__, id, "null");
-    return  send_driver_ioctl(FLYCAM_FRONT_ONLINE_IOC_MAGIC, NR_STOP_REC, -1);
+    lidbg(DEBG_TAG"[%s].in.[camera_id:%d,%s]\n", __FUNCTION__, camera_id, "null");
+    return  send_driver_ioctl(__FUNCTION__, FLYCAM_FRONT_ONLINE_IOC_MAGIC, NR_STOP_REC, NULL);
 };
 
 static const HalInterface sLidbgHalInterface =
@@ -145,19 +148,22 @@ void lidbg_init_globals(void)
 
 static int close_lidbg(struct lidbg_device_t *dev)
 {
-    lidbg(DEBG_TAG"[%s].\n", __FUNCTION__ );
+    thread_exit = 1;
     if (dev)
     {
+        lidbg(DEBG_TAG"[%s].free(dev)\n", __FUNCTION__ );
         free(dev);
     }
+    lidbg(DEBG_TAG"[%s].close(flycam_fd)\n", __FUNCTION__ );
     close(flycam_fd);
+    pthread_mutex_destroy(&g_lock);
     return 0;
 }
 static int lidbg_module_open(const struct hw_module_t *module, char const *name, struct hw_device_t **device)
 {
     struct lidbg_device_t *dev = malloc(sizeof(struct lidbg_device_t));
 
-    lidbg(DEBG_TAG"[%s].[%s]\n", __FUNCTION__ , name == NULL ? "null" : name);
+    lidbg(DEBG_TAG"[%s].[%s]\n", __FUNCTION__ , name == NULL ? "default" : name);
 
     pthread_once(&g_init, lidbg_init_globals);
 
