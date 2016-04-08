@@ -1284,7 +1284,7 @@ try_open_again:
 	{
 		system("./flysystem/lib/out/lidbg_testuvccam /dev/video1 -b 1 --xuset-oe 1 1 ");
 		system("./flysystem/lib/out/lidbg_testuvccam /dev/video1 -b 1 --xuset-car 0 0 0");
-		lidbg_set_sonix_osd_time();
+		//lidbg_set_sonix_osd_time();
 	}
 	else if(cam_id == 0)
 	{

@@ -51,6 +51,9 @@
 
 #include "../inc/lidbg_flycam_app.h"
 
+static int lidbg_get_current_time(char isXUSet , char *time_string, struct rtc_time *ptm);
+
+
 #define TESTAP_VERSION		"v1.0.21_SONiX_UVC_TestAP_Multi"
 
 #ifndef min
@@ -1318,6 +1321,41 @@ void *thread_capture(void *par)
 	pthread_exit(NULL);
 	return 0;
 }
+
+void osd_set()
+{
+	char time_buf[100] = {0};
+	char devName[50] = {0};
+	char OSDSet_Str[PROPERTY_VALUE_MAX];
+	int rc = -1;
+    lidbg("%s:E\n",__func__); 
+    while(1)
+    { 
+    	property_get("fly.uvccam.osdset", OSDSet_Str, "0");
+		if(!strncmp(OSDSet_Str, "1", 1))
+		{
+			if((dev == NULL) ||  (lidbg_get_current_time(1,time_buf, NULL) < 0))
+			{
+				lidbg("%s: ===OSD Open dev===\n", __func__);
+		    	rc = lidbg_get_hub_uvc_device(RECORD_MODE,devName,DVR_ID,1);
+			    if((rc == -1)  || (*devName == '\0'))
+			    {
+			        lidbg("%s: No UVC node found \n", __func__);
+			    }
+				else
+				{
+					dev = video_open(devName);
+				}
+				//XU_OSD_Timer_Ctrl(dev, 0);
+			}
+			sleep(9);
+		}
+		sleep(1);
+    } 
+    lidbg("%s:X\n",__func__); 
+    return 0;
+}
+
 #if 0
 void *thread_switch(void *par)
 {
@@ -1397,7 +1435,7 @@ int lidbg_token_string(char *buf, char *separator, char **token)
     return pos;
 }
 
-char *lidbg_get_current_time(char *time_string, struct rtc_time *ptm)
+static int lidbg_get_current_time(char isXUSet , char *time_string, struct rtc_time *ptm)
 {
 	time_t timep; 
 	struct tm *p; 
@@ -1408,9 +1446,16 @@ char *lidbg_get_current_time(char *time_string, struct rtc_time *ptm)
         sprintf(time_string, "%d-%02d-%02d__%02d.%02d.%02d", (1900+p->tm_year), (1+p->tm_mon), p->tm_mday,p->tm_hour , p->tm_min,p->tm_sec);
 	//sprintf(rtc_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video1 --xuset-rtc %d %d %d %d %d %d", (1900+p->tm_year), (1+p->tm_mon), p->tm_mday,p->tm_hour , p->tm_min,p->tm_sec);
 	//system(rtc_cmd);
-	if(XU_OSD_Set_RTC(dev, 1900+p->tm_year, 1+p->tm_mon, p->tm_mday, p->tm_hour, p->tm_min, p->tm_sec) <0)
+	lidbg("\n===OSDSETTIME => %d-%02d-%02d__%02d.%02d.%02d===\n", (1900+p->tm_year), (1+p->tm_mon), p->tm_mday,p->tm_hour , p->tm_min,p->tm_sec);
+	if(isXUSet)
+	{
+		if(XU_OSD_Set_RTC(dev, 1900+p->tm_year, 1+p->tm_mon, p->tm_mday, p->tm_hour, p->tm_min, p->tm_sec) <0)
+		{	
 			lidbg( "SONiX_UVC_TestAP @main : XU_OSD_Set_RTC Failed\n");
-    return time_string;
+			return -1;
+		}
+	}
+    return 0;
 }
 
 #if 0
@@ -2047,8 +2092,8 @@ int main(int argc, char *argv[])
 	unsigned char stream2_frame_drop_ctrl = 0;
 	char osd_string[12] = {"0"};
 	pthread_t thread_capture_id;
-	pthread_t thread_switch_id;
-	pthread_t thread_nightMode_id;
+	//pthread_t thread_switch_id;
+	//pthread_t thread_nightMode_id;
 	int flytmpcnt = 0,rc;
 	char devName[256];
 	char time_buf[100] = {0};
@@ -2933,6 +2978,13 @@ int main(int argc, char *argv[])
 		 return 0;
 	}
 
+	if(cam_id == SET_OSD_ID_MODE)
+	{
+		lidbg("%s: SET_OSD_ID_MODE \n", __func__);
+		osd_set();//loop
+		return 0;
+	}
+
 	/* Open the video device. */
 	//dev = video_open(argv[optind]);
 getuvcdevice:
@@ -2965,7 +3017,7 @@ openfd:
 			lidbg( "XU_OSD_Set_CarcamCtrl Failed\n");	
 
 	/*set OSD time*/
-	lidbg_get_current_time(time_buf, NULL);
+	lidbg_get_current_time(0, time_buf, NULL);
 	
 	if(do_vendor_version_get)
 	{
@@ -3368,9 +3420,9 @@ openfd:
 			lidbg( "This command only for 291B & 292'\n");
 			return 1;			
 		}
-		
-		if(XU_OSD_Set_RTC(dev, osd_rtc_year, osd_rtc_month, osd_rtc_day, osd_rtc_hour, osd_rtc_minute, osd_rtc_second) <0)
-			lidbg( "SONiX_UVC_TestAP @main : XU_OSD_Set_RTC Failed\n");
+		lidbg_get_current_time(1,time_buf, NULL);
+		//if(XU_OSD_Set_RTC(dev, osd_rtc_year, osd_rtc_month, osd_rtc_day, osd_rtc_hour, osd_rtc_minute, osd_rtc_second) <0)
+		//	lidbg( "SONiX_UVC_TestAP @main : XU_OSD_Set_RTC Failed\n");
 	}
 
 	if(do_osd_rtc_get)
@@ -4472,7 +4524,7 @@ openfd:
 					//lidbg("======isPreview======");
 					if(rec_fp1 == NULL)
 					{
-						lidbg_get_current_time(time_buf, NULL);
+						lidbg_get_current_time(0,time_buf, NULL);
 						sprintf(flypreview_filename, "%stmp%d.h264", Rec_Save_Dir,flytmpcnt);
 						rec_fp1 = fopen(flypreview_filename, "wb");
 						sprintf(flypreview_prevcnt, "%d", flytmpcnt);
@@ -4483,7 +4535,7 @@ openfd:
 							lidbg("preview change file name to write!");
 							if(flytmpcnt < Max_Rec_Num - 1) flytmpcnt++;
 							else flytmpcnt = 0;
-							lidbg_get_current_time(time_buf, NULL);
+							lidbg_get_current_time(0,time_buf, NULL);
 							sprintf(flypreview_filename, "%stmp%d.h264", Rec_Save_Dir,flytmpcnt);
 							rec_fp1 = fopen(flypreview_filename, "wb");
 							sprintf(flypreview_prevcnt, "%d", flytmpcnt);
@@ -4616,7 +4668,7 @@ openfd:
 						isIframe = 1;
 						XU_H264_Set_IFRAME(dev);
 #endif
-						lidbg_get_current_time(time_buf, NULL);
+						lidbg_get_current_time(0 , time_buf, NULL);
 
 						if(cam_id == DVR_ID)
 							sprintf(flyh264_filename, "%sF%s.h264", Rec_Save_Dir, time_buf);

@@ -7,6 +7,7 @@
 #define DVR_BLOCK_ID_MODE				3
 #define REAR_GET_RES_ID_MODE				4
 #define DVR_GET_RES_ID_MODE				5
+#define SET_OSD_ID_MODE				6
 
 typedef enum {
   NR_BITRATE,

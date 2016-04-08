@@ -460,6 +460,7 @@ static int usb_nb_cam_func(struct notifier_block *nb, unsigned long action, void
 				{
 					status_fifo_in(RET_DVR_DISCONNECT);
 					notify_online(RET_ONLINE_DISCONNECT);
+					lidbg_shell_cmd("setprop fly.uvccam.osdset 0&");
 					isDVRRec = 0;
 					isOnlineRec= 0;
 					isDVRAfterFix = 0;
@@ -477,6 +478,7 @@ static int usb_nb_cam_func(struct notifier_block *nb, unsigned long action, void
 					//complete(&DVR_ready_wait);
 					isDVRReady = 1;
 					wake_up_interruptible(&pfly_UsbCamInfo->DVR_ready_wait_queue);
+					lidbg_shell_cmd("setprop fly.uvccam.osdset 1&");
 					if(!isSuspend)
 					{
 						if(!isDVRFirstResume) schedule_delayed_work(&work_t_DVR_fixScreenBlurred, 0);
@@ -1976,6 +1978,10 @@ int thread_flycam_init(void *data)
 	    suspend_stoprec_timer.data = 0;
 	    suspend_stoprec_timer.expires = 0;
 	    suspend_stoprec_timer.function = suspend_stoprec_timer_isr;
+
+		lidbg("%s:====start osd set====\n",__func__);
+		lidbg_shell_cmd("setprop fly.uvccam.osdset 0");
+		lidbg_shell_cmd("./flysystem/lib/out/lidbg_testuvccam /dev/video1 -b 6&");
 #if 0
 		INIT_WORK(&work_t_start_rec, work_startRec);
 	    INIT_WORK(&work_t_stop_rec, work_stopRec);
