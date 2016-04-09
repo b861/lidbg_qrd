@@ -495,7 +495,7 @@ case "$DBG_PLATFORM_ID" in
      15)
     	export DBG_PLATFORM=sabresd_6dq
 	export BOARD_VERSION=V1
-	export ANDROID_VERSION=502
+	export ANDROID_VERSION=511
 	export DBG_CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilts/gcc/linux-x86/arm/arm-eabi-4.6/bin/arm-eabi-
 	export JAVA_HOME=$PATHJAVA1P7
 	export JRE_HOME=$JAVA_HOME/jre

@@ -30,12 +30,27 @@ function soc_build_recovery()
 function soc_build_recoveryimage()
 {
 	echo $FUNCNAME
-	cd $DBG_SYSTEM_DIR
-	rm $DBG_OUT_PATH/*.apk $DBG_OUT_PATH/ES.ko $DBG_OUT_PATH/ST.ko $DBG_OUT_PATH/mkfs.exfat $DBG_OUT_PATH/GPS.ko
 	rm -rf $DBG_SYSTEM_DIR/bootable/recovery/flyRecovery/out
-	mkdir -p $DBG_SYSTEM_DIR/bootable/recovery/flyRecovery
-	cp -rf $DBG_OUT_PATH  $DBG_SYSTEM_DIR/bootable/recovery/flyRecovery/out
-	cp $DBG_SYSTEM_DIR/bootable/recovery/flyRecovery/recovery.conf  $DBG_SYSTEM_DIR/bootable/recovery/flyRecovery/out
+	rm -rf $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/recovery
+	rm -rf $DBG_OUT_PATH/*.apk $DBG_OUT_PATH/ES.ko $DBG_OUT_PATH/ST.ko $DBG_OUT_PATH/mkfs.exfat $DBG_OUT_PATH/GPS.ko $DBG_OUT_PATH/*.so $DBG_OUT_PATH/FlyBootService
+        rm -rf $DBG_OUT_PATH/LidbgPmService $DBG_OUT_PATH/SleepTest $DBG_OUT_PATH/build_time.conf $DBG_OUT_PATH/bma2x2.ko $DBG_OUT_PATH/lidbg_rgb_led.ko
+	cd $DBG_SYSTEM_DIR
+	if [ ! -d "$DBG_SYSTEM_DIR/bootable/recovery/flyRecovery/.git/" ]; then
+	  echo flyrecovery_file_no_found  start_clone
+	  rm -rf $DBG_SYSTEM_DIR/bootable/recovery/flyRecovery
+          expect $DBG_TOOLS_PATH/pull_recovery  $DBG_SYSTEM_DIR
+	elif [[ -e "$DBG_SYSTEM_DIR/bootable/recovery/flyRecovery/.git/" && ! -f "$DBG_SYSTEM_DIR/bootable/recovery/flyRecovery/test_mode" ]]; then
+	  echo flyrecovery_file_found start_pull
+	  cd $DBG_SYSTEM_DIR/bootable/recovery/flyRecovery
+	  git clean -d -df
+	  git reset --hard
+	  expect $DBG_TOOLS_PATH/pull master git
+	else
+	 echo test_mode
+        fi
+	cp -rf $DBG_OUT_PATH  $DBG_SYSTEM_DIR/bootable/recovery/flyRecovery
+	#echo "$(expr $ANDROID_VERSION / 100 )"
+	cp $DBG_SYSTEM_DIR/bootable/recovery/flyRecovery/Android$(expr $ANDROID_VERSION / 100 )/msm8909/recovery.conf  $DBG_SYSTEM_DIR/bootable/recovery/flyRecovery/out
 	soc_prebuild && soc_build_common 'make recoveryimage -j16'
 }
 

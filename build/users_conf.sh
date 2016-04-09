@@ -327,6 +327,8 @@ case "$USERS_ID" in
 		14)
         export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/M8974AAAAANLYD4275
         export RELEASE_REPOSITORY=$DBG_PLATFORM_PATH/8909-release;;
+		15)
+		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/imx6qdl-sabresd;;
 	esac;;
 	7)
 	export DBG_PLATFORM_PATH=/home2/liangyihong/projDir
