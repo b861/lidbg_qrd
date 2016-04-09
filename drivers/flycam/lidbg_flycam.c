@@ -805,17 +805,17 @@ static void setDVRProp(int camID)
 	}
 	else if(camID == REARVIEW_ID)
 	{
-		sprintf(temp_cmd, "setprop fly.uvccam.rearview.recbitrate %d", r_rec_bitrate);
+		sprintf(temp_cmd, "setprop fly.uvccam.rearview.recbitrate %d", f_rec_bitrate);
 		lidbg_shell_cmd(temp_cmd);
-		sprintf(temp_cmd, "setprop fly.uvccam.rearview.res %s", r_rec_res);
+		sprintf(temp_cmd, "setprop fly.uvccam.rearview.res %s", f_rec_res);
 		lidbg_shell_cmd(temp_cmd);
-		sprintf(temp_cmd, "setprop fly.uvccam.rearview.recpath %s", r_rec_path);
+		sprintf(temp_cmd, "setprop fly.uvccam.rearview.recpath %s", f_rec_path);
 		lidbg_shell_cmd(temp_cmd);
-		sprintf(temp_cmd, "setprop fly.uvccam.rearview.rectime %d", r_rec_time);
+		sprintf(temp_cmd, "setprop fly.uvccam.rearview.rectime %d", f_rec_time);
 		lidbg_shell_cmd(temp_cmd);
-		sprintf(temp_cmd, "setprop fly.uvccam.rearview.recnum %d", r_rec_filenum);
+		sprintf(temp_cmd, "setprop fly.uvccam.rearview.recnum %d", f_rec_filenum);
 		lidbg_shell_cmd(temp_cmd);
-		sprintf(temp_cmd, "setprop fly.uvccam.rearview.recfilesize %d", r_rec_totalsize);
+		sprintf(temp_cmd, "setprop fly.uvccam.rearview.recfilesize %d", f_rec_totalsize);
 		lidbg_shell_cmd(temp_cmd);
 	}
 }
