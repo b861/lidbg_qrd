@@ -1404,16 +1404,17 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		switch(_IOC_NR(cmd))
 		{
 			case NR_VERSION:
-		        lidbg("%s:NR_VERSION arg=> %d\n",__func__,(int)arg);
-				strcpy((char*)arg,"123456");			
-				if(arg == DVR_ID)
-					strcpy((char*)arg,camera_DVR_fw_version);
-				else if(arg == REARVIEW_ID)
-					strcpy((char*)arg,camera_rear_fw_version);
-				else strcpy((char*)arg,camera_DVR_fw_version);
+		        lidbg("%s:NR_VERSION cam_id = [%d]\n",__func__,((char*)arg)[0]);
+				strcpy((char*)arg + 1,"123456");
+				if(((char*)arg)[0] == DVR_ID)
+					strcpy((char*)arg + 1,camera_DVR_fw_version);
+				else if(((char*)arg)[0]== REARVIEW_ID)
+					strcpy((char*)arg + 1,camera_rear_fw_version);
+				else strcpy((char*)arg + 1,camera_DVR_fw_version);
 
-				if(!strncmp((char*)arg, "NONE", 4))
+				if(!strncmp((char*)arg + 1, "NONE", 4))
 					ret = RET_FAIL;
+
 #if 0
 				if(arg == 0)
 				{
