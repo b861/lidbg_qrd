@@ -2839,8 +2839,11 @@ ION_OPEN_FAILED:
     {
         struct camera_device *mdevice = device;
         ALOGD("%s: E", __func__);
-		system("./flysystem/lib/out/lidbg_testuvccam /dev/video1 -b 0 --xuset-oe 1 1 ");/*open rear osd*/
-		system("setprop fly.uvccam.rear.osdset 1&");
+		if(cam_id == REARVIEW_ID) 
+		{
+			system("./flysystem/lib/out/lidbg_testuvccam /dev/video1 -b 0 --xuset-oe 1 1 ");/*open rear osd*/
+			system("setprop fly.uvccam.rear.osdset 1&");
+		}
         ALOGE("%s: X", __func__);
     }
 
