@@ -199,8 +199,10 @@ static int thread_stop_rec_func(void *data)
 		wait_for_completion(&timer_stop_rec_wait);
 		/*notify DVR&Online*/
 		if(isDVRRec) status_fifo_in(RET_DVR_FORCE_STOP);
-		else if(isOnlineRec) notify_online(RET_ONLINE_FORCE_STOP);
+		if(isOnlineRec) notify_online(RET_ONLINE_FORCE_STOP);
+		if(isRearRec) notify_online(RET_REAR_FORCE_STOP);
 		if(stop_rec(DVR_ID,1))lidbg("%s:====return fail====\n",__func__);
+		if(stop_rec(REARVIEW_ID,1))lidbg("%s:====return fail====\n",__func__);
 		isDVRRec = 0;
 		isOnlineRec = 0;
 	}
@@ -443,10 +445,12 @@ static int usb_nb_cam_func(struct notifier_block *nb, unsigned long action, void
 					if(!isSuspend)
 					{
 						if(!isRearFirstResume ) schedule_delayed_work(&work_t_RearView_fixScreenBlurred, 0);
+#if 0
 						else
 						{
 							status_fifo_in(RET_REAR_SONIX);//firstResume:directly pop sonix status
 						}
+#endif
 					}
 				}
 				else if(!((oldCamStatus>>4) & FLY_CAM_ISVALID) && !((pfly_UsbCamInfo->camStatus>>4)  & FLY_CAM_ISSONIX) &&((pfly_UsbCamInfo->camStatus>>4)  & FLY_CAM_ISVALID) )
@@ -484,11 +488,13 @@ static int usb_nb_cam_func(struct notifier_block *nb, unsigned long action, void
 					if(!isSuspend)
 					{
 						if(!isDVRFirstResume) schedule_delayed_work(&work_t_DVR_fixScreenBlurred, 0);
+#if 0
 						else
 						{
 							status_fifo_in(RET_DVR_SONIX);//firstResume:directly pop sonix status
 							notify_online(RET_ONLINE_FOUND_SONIX);
 						}
+#endif
 					}
 				}
 				else if(!(oldCamStatus & FLY_CAM_ISVALID) && !(pfly_UsbCamInfo->camStatus & FLY_CAM_ISSONIX) &&(pfly_UsbCamInfo->camStatus & FLY_CAM_ISVALID) )
@@ -1044,7 +1050,15 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 				{
 					if(stop_rec(DVR_ID,1)) goto dvrfailproc;
 					setDVRProp(DVR_ID);
+					msleep(500);
 					if(start_rec(DVR_ID,1)) goto dvrfailproc;
+				}
+				if(isRearRec)
+				{
+					if(stop_rec(REARVIEW_ID,1)) goto rearfailproc;
+					setDVRProp(REARVIEW_ID);
+					msleep(500);
+					if(start_rec(REARVIEW_ID,1)) goto rearfailproc;
 				}
 		        break;
 			case NR_GET_RES:
@@ -1414,6 +1428,8 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 
 				if(!strncmp((char*)arg + 1, "NONE", 4))
 					ret = RET_FAIL;
+
+				lidbg("%s:NR_VERSION FwVer:[%s]\n",__func__,(char*)arg + 1);
 
 #if 0
 				if(arg == 0)
