@@ -36,6 +36,7 @@ make_full_package()
 	cd $RELEASE_REPOSITORY
 	cp -rf $RELEASE_REPOSITORY/systemlib/.   $TARGET_OUT_DIR/system/lib/
 	cp -rf $SOURCE_OUT_DIR/flyupdate/flyaudio/. $TARGET_FLYAUDIO_DIR/
+	cp $RELEASE_REPOSITORY/flyapdata/carlife/bdcl   $TARGET_OUT_DIR/system/bin/
 	cd $DBG_SYSTEM_DIR
 	soc_make_otapackage
 	cp $TARGET_OUT_DIR/msm8909-ota-eng.*.zip $FLYTMP_OUT_DIR/flyupdate/baseqcom.flb
@@ -63,6 +64,7 @@ make_origin_full_package()
 
 	cp -rf $RELEASE_REPOSITORY/systemlib/.   $TARGET_OUT_DIR/system/lib/
 	cp -rf $SOURCE_OUT_DIR/flyupdate/flyaudio/. $TARGET_FLYAUDIO_DIR/
+	#cp  $RELEASE_REPOSITORY/flyapdata/carlife/bdcl   $TARGET_OUT_DIR/system/bin/
 	rm -rf $TARGET_FLYAUDIO_DIR/
 	cd $DBG_SYSTEM_DIR
 	soc_make_otapackage
