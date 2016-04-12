@@ -271,6 +271,7 @@ public class FlyBootService extends Service {
 								if((AirplaneEnable) || (!blSuspendUnairplaneFlag))
 									restoreAirplaneMode(mFlyBootService);
 								SendBroadcastToService(KeyBootState, keyEearlySusupendON);
+								powerOnSystem(mFlyBootService);
 							}else if(pmState == FBS_SCREEN_ON){
 								LIDBG_PRINT("FlyBootService get pm state: FBS_SCREEN_ON");
 								acquireWakeLock();
@@ -593,7 +594,7 @@ public static void releaseBrightWakeLock()
 			LIDBG_PRINT("FlyBootService system resume...");
 			enableShowLogo(true);
 			SystemClock.sleep(3000);
-			powerOnSystem(mFlyBootService);
+			//powerOnSystem(mFlyBootService);
 		}
 	}
 
@@ -693,6 +694,10 @@ public static void releaseBrightWakeLock()
 		LIDBG_PRINT("powerOnSystem-");
 		//if(!blSuspendUnairplaneFlag)
 		//	restoreAirplaneMode(context);
+		while(SystemProperties.getBoolean("ctl.lidbg.hold_bootanim", false))
+		{
+			SystemClock.sleep(100);
+		}
 		SystemProperties.set("ctl.stop", "bootanim");
 		LIDBG_PRINT("powerOnSystem-");
     }
