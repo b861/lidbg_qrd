@@ -330,11 +330,18 @@ void ts_key_report(s32 input_x, s32 input_y, struct ts_devices_key *tskey, int s
 void ts_probe_prepare(void)
 {
     char buff[50] = {0};
-    fs_fill_list(FLYHAL_CONFIG_PATH, FS_CMD_FILE_LISTMODE, &flyhal_config_list);
+
+    if(fs_fill_list(FLYHAL_CONFIG_PATH, FS_CMD_FILE_LISTMODE, &flyhal_config_list)<0)
+        fs_fill_list("/flysystem/vendor/flyaudio/flysystem/flyconfig/default/lidbgconfig/flylidbgconfig.txt", FS_CMD_FILE_LISTMODE, &flyhal_config_list);
     FS_REGISTER_INT(ts_scan_delayms, "ts_scan_delayms", 500, NULL);
 
 
     ts_should_revert = fs_find_string(&flyhal_config_list, "TSMODE_XYREVERT");
+ //   if(g_recovery_meg->hwInfo.info[6]=='1')
+//    {
+//        LIDBG_WARN("<hwInfo.info[6]=1,ts_should_revertsss=1>\n");
+//        ts_should_revert=1;
+//    }
     if(ts_should_revert > 0)
         LIDBG_WARN("<TS.XY will revert>\n");
     else
@@ -345,7 +352,6 @@ void ts_probe_prepare(void)
         LIDBG_WARN("<TS.XY will no_revert./data/lidbg/no_revert.txt>\n");
         ts_should_revert = 0;
     }
-
 
     lidbg_insmod(get_lidbg_file_path(buff, "lidbg_ts_to_recov.ko"));
     fs_register_filename_list(TS_LOG_PATH, true);
