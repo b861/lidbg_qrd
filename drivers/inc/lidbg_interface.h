@@ -15,6 +15,8 @@
 #include <lidbg_monkey.h>
 #include <lidbg_lpc.h>
 #else
+#include <linux/interrupt.h>
+#include <linux/irq.h>
 #include <linux/miscdevice.h>
 #include <asm/irq.h>
 #include <linux/kernel.h>

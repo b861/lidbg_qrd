@@ -426,14 +426,16 @@ int lidbg_readdir_and_dealfile(char *insure_is_dir, void (*callback)(char *dirna
     {
         struct name_list *entry;
         int count = 0;
-        LIDBG_SUC("open:<%s,%s>\n", insure_is_dir, dir_file->f_path.dentry->d_name.name);
-        dir = dir_file->f_path.dentry;
-
-        #if(LINUX_VERSION_CODE > KERNEL_VERSION(3, 11, 0))
+       #if(LINUX_VERSION_CODE > KERNEL_VERSION(3, 11, 0))
 	struct lidbg_dir_ctx ctx = {
 		.ctx.actor = readdir_build_namelist,
 		.names = LIST_HEAD_INIT(ctx.names)
 	};
+	#endif
+        LIDBG_SUC("open:<%s,%s>\n", insure_is_dir, dir_file->f_path.dentry->d_name.name);
+        dir = dir_file->f_path.dentry;
+
+        #if(LINUX_VERSION_CODE > KERNEL_VERSION(3, 11, 0))
 	status = iterate_dir(dir_file,&ctx.ctx);
         #else
         status = vfs_readdir(dir_file, readdir_build_namelist, &names);
