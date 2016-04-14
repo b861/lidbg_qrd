@@ -596,10 +596,8 @@ int misc_init(void *data)
 
     lidbg_new_cdev(&misc_nod_fops, "lidbg_misc");
 
-    if(g_var.recovery_mode == 1)
+    while(0==g_var.android_boot_completed)
         ssleep(5);
-    else
-        ssleep(30);
 
     complete(&udisk_misc_wait);
     return 0;
