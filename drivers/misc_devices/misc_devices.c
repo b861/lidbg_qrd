@@ -19,7 +19,8 @@ struct notifier_block devices_notif;
 int thread_lcd_on_delay(void *data)
 {
     DUMP_FUN_ENTER;
-    msleep(960);
+    lidbg( "misc:1000\n");
+    msleep(960+1000);
 	if(g_var.acc_flag==FLY_ACC_ON)
 	{
         		lidbg("LCD_ON2.in\n");
