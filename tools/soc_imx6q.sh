@@ -96,12 +96,10 @@ function soc_build_all()
 function soc_postbuild()
 {
 	echo $FUNCNAME
-	./mkimage.sh ota
 	hostname > $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/etc/build_time.conf
 	date >> $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/etc/build_time.conf
 	git log --oneline | sed -n '1,5p' >> $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/etc/build_time.conf
 	echo "soc_build_all ok"
-	
 }
 
 
