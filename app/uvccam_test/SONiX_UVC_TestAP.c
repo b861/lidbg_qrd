@@ -3024,7 +3024,7 @@ openfd:
 			lidbg( "XU_OSD_Set_CarcamCtrl Failed\n");	
 
 	/*set OSD time*/
-	lidbg_get_current_time(0, time_buf, NULL);
+	lidbg_get_current_time(1, time_buf, NULL);
 	
 	if(do_vendor_version_get)
 	{
