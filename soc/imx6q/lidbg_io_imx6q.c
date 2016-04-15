@@ -18,12 +18,32 @@ static struct io_status io_config[IO_LOG_NUM];
 
 int soc_io_suspend(void)
 {
-is_first_init=0;
+    int i;
+    DUMP_FUN;
+    for( i = 0; i < IO_LOG_NUM; i++)
+        if(io_config[i].gpio != 0)
+        {
+            gpio_direction_input(io_config[i].gpio);
+           // gpio_pull_updown(io_config[i].gpio, GPIO_CFG_NO_PULL);
+        }
     return 0;
 }
+
 int soc_io_resume(void)
 {
-is_first_init=1;
+    int i;
+    DUMP_FUN;
+    for(i = 0; i  < IO_LOG_NUM; i++)
+        if(io_config[i].gpio != 0)
+        {
+            if(io_config[i].direction == GPIO_CFG_OUTPUT)
+                soc_io_output(0, io_config[i].gpio, io_config[i].out_mod);
+            else
+            {
+                gpio_direction_input(io_config[i].gpio);
+             //   gpio_pull_updown(io_config[i].gpio, io_config[i].pull);
+            }
+        }
     return 0;
 }
 
