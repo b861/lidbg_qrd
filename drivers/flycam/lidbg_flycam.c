@@ -1627,10 +1627,10 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 	else if(_IOC_TYPE(cmd) == FLYCAM_REC_MAGIC)//front cam online mode
 	{
 		int rc = -1;
-		char dvrRespond[100] = {0};
-		char rearRespond[100] = {0};
-		char returnRespond[200] = {0};
-		char initMsg[400] = {0};
+		unsigned char dvrRespond[100] = {0};
+		unsigned char rearRespond[100] = {0};
+		unsigned char returnRespond[200] = {0};
+		unsigned char initMsg[400] = {0};
 		int length = 0;
 		
 		dvrRespond[0] = ((char*)arg)[0];
@@ -1862,7 +1862,7 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 								rear_stop_recording();
 							}
 						}
-						else if(isDualCam && ((pfly_UsbCamInfo->camStatus >> 4)  & FLY_CAM_ISSONIX))
+						else if(isDualCam && ((pfly_UsbCamInfo->camStatus >> 4)  & FLY_CAM_ISSONIX) && isDVRRec)
 						{
 							lidbg("%s:Dual => start Rear recording\n",__func__);
 							rear_start_recording();
@@ -1904,7 +1904,6 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 						lidbg("%s:CMD_AUTO_DETECT\n",__func__);
 						initMsg[length] = 0xB0;
 						length++;
-						
 						dvrRespond[0] = CMD_RECORD;
 						rearRespond[0] = CMD_RECORD;
 						dvrRespond[3] = isDVRRec;
@@ -1961,13 +1960,13 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 						memcpy(dvrRespond + 3,camera_DVR_fw_version,10);
 						memcpy(rearRespond + 3,camera_DVR_fw_version,10);
 						
-						memcpy(initMsg + length,dvrRespond,5);
+						memcpy(initMsg + length,dvrRespond,13);
 						length += 13;
 						/*------msgTAIL------*/
 						initMsg[length] = ';';
 						length++;
 						
-						memcpy(initMsg + length,rearRespond,5);
+						memcpy(initMsg + length,rearRespond,13);
 						length += 13;
 						/*------msgTAIL------*/
 						initMsg[length] = ';';
@@ -1998,6 +1997,7 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 
 						dvrRespond[0] = CMD_PATH;
 						rearRespond[0] = CMD_PATH;
+						checkSDCardStatus(f_rec_path);
 						memcpy(dvrRespond + 3,f_rec_path,60);
 						memcpy(rearRespond + 3,f_rec_path,60);
 						
@@ -2012,7 +2012,26 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 						/*------msgTAIL------*/
 						initMsg[length] = ';';
 						length++;
+
+						initMsg[length] = CMD_DUAL_CAM;
+						length++;
+						initMsg[length] = isDualCam;
+						length++;
+						/*------msgTAIL------*/
+						initMsg[length] = ';';
+						length++;
 						
+#if 0
+						invoke_AP_ID_Mode(DVR_GET_RES_ID_MODE);
+						wait_for_completion_timeout(&DVR_res_get_wait , 3*HZ);
+						memcpy(dvrRespond + 3,camera_DVR_res,70);
+						length += 73;
+						memcpy(initMsg + length,dvrRespond,73);
+						/*------msgTAIL------*/
+						initMsg[length] = ';';
+						length++;
+#endif
+						lidbg("%s:CMD_AUTO_DETECT ;1:0x%x,2:0x%x,3:0x%x,4:0x%x,5:0x%x,6:0x%x,7:0x%x,\n",__func__,initMsg[0],initMsg[1],initMsg[2],initMsg[3],initMsg[4],initMsg[5],initMsg[6]);
 						lidbg("%s:length = %d\n",__func__,length);
 						if(copy_to_user((char*)arg,initMsg,length))
 						{
