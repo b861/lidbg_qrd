@@ -43,12 +43,32 @@ typedef enum {
   NR_UPDATE,
 }fw_ctrl_t;
 
+typedef enum {
+  NR_CMD,
+}rec_ctrl_t;
+
+typedef enum {
+  CMD_AUTO_DETECT = 0x1,
+  CMD_RECORD = 0x40,
+  CMD_CAPTURE,
+  CMD_SET_RESOLUTION,
+  CMD_TIME_SEC,
+  CMD_FW_VER,
+  CMD_TOTALSIZE,
+  CMD_PATH,
+  CMD_SET_PAR,
+  CMD_GET_RES,
+  CMD_SET_EFFECT = 0x60,
+  CMD_DUAL_CAM,
+}rec_cmd_t;
+
 #define FLYCAM_FRONT_REC_IOC_MAGIC  'F'
 #define FLYCAM_FRONT_ONLINE_IOC_MAGIC  'f'
 #define FLYCAM_REAR_REC_IOC_MAGIC  'R'
 #define FLYCAM_REAR_ONLINE_IOC_MAGIC  'r'
 #define FLYCAM_STATUS_IOC_MAGIC  's'
 #define FLYCAM_FW_IOC_MAGIC  'w'
+#define FLYCAM_REC_MAGIC  'c'
 
 typedef enum {
   RET_SUCCESS,

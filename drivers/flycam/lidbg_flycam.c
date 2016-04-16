@@ -49,7 +49,7 @@ static struct timer_list suspend_stoprec_timer;
 #define SUSPEND_STOPREC_ACCOFF_TIME   (jiffies + 180*HZ)  /* 3min stop Rec after accoff,fix online then accoff*/
 
 /*bool var*/
-static char isDVRRec,isOnlineRec,isRearRec,isDVRFirstInit,isRearViewFirstInit,isRearCheck = 1,isDVRCheck = 1,isOnlineNotifyReady;
+static char isDVRRec,isOnlineRec,isRearRec,isDVRFirstInit,isRearViewFirstInit,isRearCheck = 1,isDVRCheck = 1,isOnlineNotifyReady,isDualCam;
 static char isSuspend,isDVRAfterFix,isRearViewAfterFix,isDVRFirstResume,isRearFirstResume,isUpdating,isKSuspend,isDVRReady,isRearReady;
 
 
@@ -185,7 +185,7 @@ static struct notifier_block lidbg_notifier =
  *****************************************************************************/
 static void suspend_stoprec_timer_isr(unsigned long data)
 {
-	if(isDVRRec ||  isOnlineRec)
+	if(isDVRRec ||  isOnlineRec || isRearRec)
 	{
 	    lidbg("-------[TIMER]uvccam stop_recording -----\n");
 		complete(&timer_stop_rec_wait);
@@ -198,13 +198,25 @@ static int thread_stop_rec_func(void *data)
 	{
 		wait_for_completion(&timer_stop_rec_wait);
 		/*notify DVR&Online*/
-		if(isDVRRec) status_fifo_in(RET_DVR_FORCE_STOP);
-		if(isOnlineRec) notify_online(RET_ONLINE_FORCE_STOP);
-		if(isRearRec) notify_online(RET_REAR_FORCE_STOP);
-		if(stop_rec(DVR_ID,1))lidbg("%s:====return fail====\n",__func__);
-		if(stop_rec(REARVIEW_ID,1))lidbg("%s:====return fail====\n",__func__);
+		if(isDVRRec) 
+		{	
+			if(stop_rec(DVR_ID,1))lidbg("%s:====return fail====\n",__func__);
+			status_fifo_in(RET_DVR_FORCE_STOP);
+		}
+		if(isOnlineRec) 
+		{
+			if(stop_rec(DVR_ID,1))lidbg("%s:====return fail====\n",__func__);
+			notify_online(RET_ONLINE_FORCE_STOP);
+		}
+		if(isRearRec) 
+		{
+			if(stop_rec(REARVIEW_ID,1))lidbg("%s:====return fail====\n",__func__);
+			notify_online(RET_REAR_FORCE_STOP);
+		}
+		
 		isDVRRec = 0;
 		isOnlineRec = 0;
+		isRearRec = 0;
 	}
 	return 0;
 }
@@ -515,10 +527,9 @@ static struct notifier_block usb_nb_cam =
     .notifier_call = usb_nb_cam_func,
 };
 
-static int get_camera_res(char cam_id)
+static int invoke_AP_ID_Mode(char cam_id_mode)
 {
 	char temp_cmd[256];	
-	char cam_id_mode = cam_id + 4;
 	sprintf(temp_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video2 -b %d -c -f H264 -r &", cam_id_mode);
 	lidbg_shell_cmd(temp_cmd);
 	return 0;
@@ -537,8 +548,6 @@ static int get_camera_res(char cam_id)
  *****************************************************************************/
 static int start_rec(char cam_id,char isPowerCtl)
 {
-	char temp_cmd[256];	
-	char cam_id_mode = cam_id;
 	lidbg("%s:====E====\n",__func__);
 	pfly_UsbCamInfo->read_status = RET_DEFALUT;
 	if(isSuspend) mod_timer(&suspend_stoprec_timer,SUSPEND_STOPREC_ONLINE_TIME);
@@ -552,12 +561,7 @@ static int start_rec(char cam_id,char isPowerCtl)
 	else if(cam_id == REARVIEW_ID)
 		lidbg_shell_cmd("setprop fly.uvccam.rearview.recording 1");
 	
-	/*Rec Block mode(First ACCON) : REAR_BLOCK_ID_MODE & DVR_BLOCK_ID_MODE*/
-	if(((isDVRFirstResume) && (cam_id == DVR_ID)) || ((isRearFirstResume) && (cam_id == REARVIEW_ID)))
-		cam_id_mode += 2;
-	sprintf(temp_cmd, "./flysystem/lib/out/lidbg_testuvccam /dev/video2 -b %d -c -f H264 -r &", cam_id_mode);
- 	lidbg_shell_cmd(temp_cmd);
-	
+ 	invoke_AP_ID_Mode(cam_id);
 	
 	if(cam_id == DVR_ID)
 	{
@@ -720,7 +724,11 @@ static void work_DVR_fixScreenBlurred(struct work_struct *work)
 		}
 		lidbg_shell_cmd("setprop fly.uvccam.dvr.osdset 1&");
 	}
-	fixScreenBlurred(DVR_ID,0);
+	/*Rec Block mode(First ACCON) : REAR_BLOCK_ID_MODE & DVR_BLOCK_ID_MODE*/
+	if(isDVRFirstResume) 
+		fixScreenBlurred(DVR_BLOCK_ID_MODE,0);
+	else 
+		fixScreenBlurred(DVR_ID,0);
 	isDVRFirstInit = 0;
 	isDVRAfterFix = 1;
 	isDVRFirstResume = 0;
@@ -754,7 +762,12 @@ static void work_RearView_fixScreenBlurred(struct work_struct *work)
 		}
 		lidbg_shell_cmd("setprop fly.uvccam.rear.osdset 1&");
 	}
-	fixScreenBlurred(REARVIEW_ID,0);
+	/*Rec Block mode(First ACCON) : REAR_BLOCK_ID_MODE & DVR_BLOCK_ID_MODE*/
+	if(isRearFirstResume)
+		fixScreenBlurred(REAR_BLOCK_ID_MODE,0);
+	else 
+		fixScreenBlurred(REARVIEW_ID,0);
+	
 	isRearViewFirstInit = 0;
 	isRearViewAfterFix = 1;
 	isRearFirstResume = 0;
@@ -935,6 +948,108 @@ static int checkSDCardStatus(char *path)
 	return ret;
 }
 
+static int dvr_start_recording(void)
+{
+	lidbg("%s:DVR CMD_START_REC\n",__func__);
+	setDVRProp(DVR_ID);
+	checkSDCardStatus(f_rec_path);
+	if(isDVRRec)
+	{
+		lidbg("%s:====DVR start cmd repeatedly====\n",__func__);
+		return RET_REPEATREQ;
+	}
+	else if(isOnlineRec) 
+	{
+		lidbg("%s:====DVR restart rec====\n",__func__);
+		isDVRRec = 1;
+		isOnlineRec = 0;
+		if(stop_rec(DVR_ID,1)) return -1;
+		if(start_rec(DVR_ID,1)) return -1;
+		notify_online(RET_ONLINE_INTERRUPTED);
+	}
+	else 
+	{
+		lidbg("%s:====DVR start rec====\n",__func__);
+		isDVRRec = 1;
+		if(start_rec(DVR_ID,1)) return -1;
+	}
+	return RET_SUCCESS;
+}
+
+static int dvr_stop_recording(void)
+{
+	lidbg("%s:DVR CMD_STOP_REC\n",__func__);
+	if(isDVRRec)
+	{
+		lidbg("%s:====DVR stop rec====\n",__func__);
+		if(stop_rec(DVR_ID,1)) return -1;
+		isDVRRec = 0;
+	}
+	else if(isOnlineRec) 
+	{
+		lidbg("%s:====DVR stop cmd neglected====\n",__func__);
+		return RET_IGNORE;
+	}
+	else
+	{
+		lidbg("%s:====DVR stop cmd repeatedly====\n",__func__);
+		return RET_REPEATREQ;
+	}
+	return RET_SUCCESS;
+}
+
+static int rear_start_recording(void)
+{
+	lidbg("%s:Rear CMD_START_REC\n",__func__);
+	setDVRProp(REARVIEW_ID);
+	checkSDCardStatus(f_rec_path);
+	if(isRearRec)
+	{
+		lidbg("%s:====Rear start cmd repeatedly====\n",__func__);
+		return RET_REPEATREQ;
+	}
+	else 
+	{
+		lidbg("%s:====Rear start rec====\n",__func__);
+		isRearRec = 1;
+		if(start_rec(REARVIEW_ID,1)) return -1;
+	}
+	return RET_SUCCESS;
+}
+
+static int rear_stop_recording(void)
+{
+	lidbg("%s:Rear CMD_STOP_REC\n",__func__);
+	if(isRearRec)
+	{
+		lidbg("%s:====Rear stop rec====\n",__func__);
+		if(stop_rec(REARVIEW_ID,1)) return -1;
+		isRearRec = 0;
+	}
+	else
+	{
+		lidbg("%s:====Rear stop cmd repeatedly====\n",__func__);
+		return RET_REPEATREQ;
+	}
+	return RET_SUCCESS;
+}
+
+static void dvr_fail_proc(void)
+{
+	lidbg("%s:===E===\n",__func__);
+	stop_rec(DVR_ID,1);
+	isDVRRec = 0;
+	isOnlineRec = 0;
+	return;
+}
+
+static void rear_fail_proc(void)
+{
+	lidbg("%s:===E===\n",__func__);
+	stop_rec(REARVIEW_ID,1);
+	isRearRec = 0;
+	return;
+}
 
 /******************************************************************************
  * Function: flycam_ioctl
@@ -1070,7 +1185,7 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		        break;
 			case NR_GET_RES:
 				lidbg("%s:DVR NR_GET_RES\n",__func__);
-				get_camera_res(DVR_ID);
+				invoke_AP_ID_Mode(DVR_GET_RES_ID_MODE);
 				if(!wait_for_completion_timeout(&DVR_res_get_wait , 3*HZ)) ret = RET_FAIL;
 				strcpy((char*)arg,camera_DVR_res);
 				lidbg("%s:DVR NR_GET_RES => %s\n",__func__,(char*)arg);
@@ -1314,7 +1429,7 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		        break;
 			case NR_GET_RES:
 				lidbg("%s:Rear NR_GET_RES\n",__func__);
-				get_camera_res(REARVIEW_ID);
+				invoke_AP_ID_Mode(REAR_GET_RES_ID_MODE);
 				if(!wait_for_completion_timeout(&DVR_res_get_wait , 3*HZ)) ret = RET_FAIL;
 				strcpy((char*)arg,camera_rear_res);
 				lidbg("%s:Rear NR_GET_RES => %s\n",__func__,(char*)arg);
@@ -1475,6 +1590,345 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 				else if(arg == 1)
 					lidbg_shell_cmd("/flysystem/lib/out/fw_update -2 -1&");
 				else ret = RET_FAIL;
+		        break;
+			default:
+		        return -ENOTTY;
+		}
+	}
+	else if(_IOC_TYPE(cmd) == FLYCAM_REC_MAGIC)//front cam online mode
+	{
+		int rc = -1;
+		char dvrRespond[100] = {0};
+		char rearRespond[100] = {0};
+		char returnRespond[200] = {0};
+		
+		dvrRespond[0] = ((char*)arg)[0];
+		rearRespond[0] = ((char*)arg)[0];
+		dvrRespond[1] = DVR_ID;
+		rearRespond[1] = REARVIEW_ID;		
+		switch(_IOC_NR(cmd))
+		{
+			case NR_CMD:
+		        lidbg("%s:NR_CMD__cmd=>[0x%x]__camID=>[0x%x]\n",__func__,((char*)arg)[0],((char*)arg)[1]);
+				/*check dvr camera status before doing ioctl*/
+				if(!(pfly_UsbCamInfo->camStatus & FLY_CAM_ISVALID))
+				{
+					lidbg("%s:DVR not found,ioctl fail!\n",__func__);
+					dvrRespond[2] = RET_NOTVALID;
+				}
+				else if(!(pfly_UsbCamInfo->camStatus & FLY_CAM_ISSONIX))
+				{
+					lidbg("%s:Is not SonixCam ,ioctl fail!\n",__func__);
+					dvrRespond[2] = RET_NOTSONIX;
+				}
+				else if((pfly_UsbCamInfo->camStatus & FLY_CAM_ISSONIX) && !isDVRAfterFix)
+				{
+					lidbg("%s:Fix proc running!But ignore !\n",__func__);
+					//return RET_NOTVALID;
+					isDVRAfterFix = 1;//force to 1 tmp
+				}
+
+				/*check rear camera status before doing ioctl*/
+				if(!((pfly_UsbCamInfo->camStatus >> 4) & FLY_CAM_ISVALID))
+				{
+					lidbg("%s:Rear not found,ioctl fail!\n",__func__);
+					rearRespond[2] = RET_NOTVALID;
+				}
+				else if(!((pfly_UsbCamInfo->camStatus >> 4)  & FLY_CAM_ISSONIX))
+				{
+					lidbg("%s:Rear Is not SonixCam ,ioctl fail!\n",__func__);
+					rearRespond[2] = RET_NOTSONIX;
+				}
+				else if(((pfly_UsbCamInfo->camStatus >> 4)  & FLY_CAM_ISSONIX) && !isRearViewAfterFix)
+				{
+					lidbg("%s:Rear Fix proc running!But ignore !\n",__func__);
+					//return RET_NOTVALID;
+					isRearViewAfterFix = 1;//force to 1 tmp
+				}
+				switch(((char*)arg)[0])
+				{
+					case CMD_RECORD:
+						if(isDualCam)//(char*)arg)[1] == DVR_ID
+						{
+							lidbg("%s:CMD_RECORD => DualCam\n",__func__);
+							if(((pfly_UsbCamInfo->camStatus)  & FLY_CAM_ISSONIX) 
+								 && ((pfly_UsbCamInfo->camStatus >> 4)  & FLY_CAM_ISSONIX))
+							{
+								if(((char*)arg)[1] == 1)//start
+								{
+									/*DVR start recording*/
+									rc = dvr_start_recording();
+									if(rc == -1)
+									{
+										dvr_fail_proc();
+										dvrRespond[2] = RET_FAIL;
+									}
+									else dvrRespond[2] = rc;
+
+									/*Rear start recording*/
+									rc = rear_start_recording();
+									if(rc == -1)
+									{
+										rear_fail_proc();
+										rearRespond[2] = RET_FAIL;
+									}
+									else rearRespond[2] = rc;
+								}
+								else if(((char*)arg)[1] == 0)//stop
+								{
+									/*DVR stop recording*/
+									rc = dvr_stop_recording();
+									if(rc == -1)
+									{
+										dvr_fail_proc();
+										dvrRespond[2] = RET_FAIL;
+									}
+									else dvrRespond[2] = rc;
+
+									/*Rear stop recording*/
+									rc = rear_stop_recording();
+									if(rc == -1)
+									{
+										rear_fail_proc();
+										rearRespond[2] = RET_FAIL;
+									}
+									else rearRespond[2] = rc;
+								}
+							}
+							else lidbg("%s:DualCam start Fail\n",__func__);
+						}
+						else
+						{
+							lidbg("%s:CMD_RECORD => SingleCam\n",__func__);
+							if((pfly_UsbCamInfo->camStatus)  & FLY_CAM_ISSONIX)
+							{
+								if(((char*)arg)[1] == 1)
+								{
+									/*DVR start recording*/
+									rc = dvr_start_recording();
+									if(rc == -1)
+									{
+										dvr_fail_proc();
+										dvrRespond[2] = RET_FAIL;
+									}
+									else dvrRespond[2] = rc;
+								}
+								else if(((char*)arg)[1] == 0)
+								{
+									/*DVR stop recording*/
+									rc = dvr_stop_recording();
+									if(rc == -1)
+									{
+										dvr_fail_proc();
+										dvrRespond[2] = RET_FAIL;
+									}
+									else dvrRespond[2] = rc;
+								}
+							}
+							else lidbg("%s:SingleCam start Fail\n",__func__);
+						}
+						dvrRespond[3] = isDVRRec;
+						rearRespond[3] = isRearRec;
+						memcpy(returnRespond,dvrRespond,4);
+						memcpy(returnRespond + 4,rearRespond,4);
+						if(copy_to_user((char*)arg,returnRespond,8))
+						{
+							lidbg("%s:copy_to_user ERR\n",__func__);
+						}
+						break;
+
+					case CMD_CAPTURE:
+						lidbg("%s:====CMD_CAPTURE====\n",__func__);
+						break;
+
+					case CMD_SET_RESOLUTION:
+						lidbg("%s:CMD_SET_RESOLUTION  = [%s]\n",__func__,(char*)arg + 1);
+						strcpy(f_rec_res,(char*)arg + 1);
+						memcpy(dvrRespond + 3,(char*)arg + 1,100);
+						if(copy_to_user((char*)arg,dvrRespond,100))
+						{
+							lidbg("%s:copy_to_user ERR\n",__func__);
+						}
+						break;
+
+					case CMD_TIME_SEC:
+						lidbg("%s:CMD_TIME_SEC = [%d]\n",__func__,(((char*)arg)[1] << 8) + ((char*)arg)[2]);
+						f_rec_time = (((char*)arg)[1] << 8) + ((char*)arg)[2];
+						memcpy(dvrRespond + 3,(char*)arg + 1,2);
+						if(copy_to_user((char*)arg,dvrRespond,5))
+						{
+							lidbg("%s:copy_to_user ERR\n",__func__);
+						}
+						break;
+
+					case CMD_FW_VER:
+						lidbg("%s:CMD_FW_VER dvr_Fw=> %s\n",__func__,camera_DVR_fw_version);
+						strcpy(dvrRespond + 3,camera_DVR_fw_version);
+						if(copy_to_user((char*)arg,dvrRespond,100))
+						{
+							lidbg("%s:copy_to_user ERR\n",__func__);
+						}
+						break;
+
+					case CMD_TOTALSIZE:
+						lidbg("%s:CMD_TOTALSIZE\n",__func__);
+						f_rec_totalsize= ((((char*)arg)[1] << 24) + (((char*)arg)[2] << 16) + (((char*)arg)[3] << 8) + ((char*)arg)[4]);
+						lidbg("%s:CMD_TOTALSIZE => %dMB\n",__func__,f_rec_totalsize);
+						memcpy(dvrRespond + 3,(char*)arg + 1,4);
+						if(copy_to_user((char*)arg,dvrRespond,7))
+						{
+							lidbg("%s:copy_to_user ERR\n",__func__);
+						}
+						break;
+
+					case CMD_PATH:
+						lidbg("%s:CMD_PATH\n",__func__);
+						ret_st = checkSDCardStatus((char*)arg + 1);
+						if(ret_st != 1) 
+							strcpy(f_rec_path,(char*)arg + 1);
+						else
+							lidbg("%s: f_rec_path access wrong! %d", __func__ ,EFAULT);//not happend
+						if(ret_st > 0) dvrRespond[2] = RET_FAIL;
+						strcpy(dvrRespond + 3,f_rec_path);
+						if(copy_to_user((char*)arg,dvrRespond,100))
+						{
+							lidbg("%s:copy_to_user ERR\n",__func__);
+						}
+						break;
+
+					case CMD_SET_PAR:
+						lidbg("%s:CMD_SET_PAR\n",__func__);
+						if(isDVRRec)
+						{
+							lidbg("%s:restart DVR recording\n",__func__);
+							stop_rec(DVR_ID,1);
+							setDVRProp(DVR_ID);
+							msleep(500);
+							start_rec(DVR_ID,1);
+						}
+						if(isRearRec)
+						{
+							if(isDualCam)
+							{
+								lidbg("%s:Dual => restart Rear recording\n",__func__);
+								lidbg("%s:CMD_SET_PAR\n",__func__);
+								stop_rec(REARVIEW_ID,1);
+								setDVRProp(REARVIEW_ID);
+								msleep(500);
+								start_rec(REARVIEW_ID,1);
+							}
+							else
+							{
+								lidbg("%s:Singal => stop Rear recording\n",__func__);
+								rear_stop_recording();
+							}
+						}
+						else if(isDualCam && ((pfly_UsbCamInfo->camStatus >> 4)  & FLY_CAM_ISSONIX))
+						{
+							lidbg("%s:Dual => start Rear recording\n",__func__);
+							rear_start_recording();
+						}
+						
+						if(copy_to_user((char*)arg,dvrRespond,2))
+						{
+							lidbg("%s:copy_to_user ERR\n",__func__);
+						}
+						break;
+
+					case CMD_GET_RES:
+						lidbg("%s:CMD_GET_RES\n",__func__);
+						invoke_AP_ID_Mode(DVR_GET_RES_ID_MODE);
+						if(!wait_for_completion_timeout(&DVR_res_get_wait , 3*HZ)) dvrRespond[2] = RET_FAIL;
+						strcpy(dvrRespond + 3,camera_DVR_res);
+						lidbg("%s:DVR NR_GET_RES => %s\n",__func__,dvrRespond + 3);
+						if(copy_to_user((char*)arg,dvrRespond,100))
+						{
+							lidbg("%s:copy_to_user ERR\n",__func__);
+						}
+						break;
+
+					case CMD_SET_EFFECT:
+						lidbg("%s:CMD_SET_EFFECT\n",__func__);
+						break;
+
+					case CMD_DUAL_CAM:
+						lidbg("%s:CMD_DUAL_CAM\n",__func__);
+						if(((char*)arg)[1] == 1) isDualCam = 1;
+						else isDualCam = 0;
+						break;
+					case CMD_AUTO_DETECT:
+						lidbg("%s:CMD_AUTO_DETECT\n",__func__);
+						char initMsg[300] = {0};
+						int length = 0;
+						dvrRespond[0] = CMD_RECORD;
+						rearRespond[0] = CMD_RECORD;
+						dvrRespond[3] = isDVRRec;
+						rearRespond[3] = isRearRec;
+						memcpy(initMsg + length,dvrRespond,4);
+						length += 4;
+						memcpy(initMsg + length,rearRespond,4);
+						length += 4;
+
+						dvrRespond[0] = CMD_SET_RESOLUTION;
+						rearRespond[0] = CMD_SET_RESOLUTION;
+						memcpy(dvrRespond + 3,f_rec_res,10);
+						memcpy(rearRespond + 3,f_rec_res,10);
+						memcpy(initMsg + length,dvrRespond,13);
+						length += 13;
+						memcpy(initMsg + length,rearRespond,13);
+						length += 13;
+
+						dvrRespond[0] = CMD_TIME_SEC;
+						rearRespond[0] = CMD_TIME_SEC;
+						dvrRespond[3] = f_rec_time >> 8;
+						rearRespond[3] = f_rec_time;
+						memcpy(initMsg + length,dvrRespond,5);
+						length += 5;
+						memcpy(initMsg + length,rearRespond,5);
+						length += 5;
+
+						dvrRespond[0] = CMD_FW_VER;
+						rearRespond[0] = CMD_FW_VER;
+						memcpy(dvrRespond + 3,camera_DVR_fw_version,10);
+						memcpy(rearRespond + 3,camera_DVR_fw_version,10);
+						memcpy(initMsg + length,dvrRespond,5);
+						length += 13;
+						memcpy(initMsg + length,rearRespond,5);
+						length += 13;
+
+						dvrRespond[0] = CMD_TOTALSIZE;
+						rearRespond[0] = CMD_TOTALSIZE;
+						dvrRespond[3] = f_rec_totalsize >> 24;
+						dvrRespond[4] = f_rec_totalsize >> 16;
+						dvrRespond[5] = f_rec_totalsize >> 8;
+						dvrRespond[6] = f_rec_totalsize;
+						rearRespond[3] = f_rec_totalsize >> 24;
+						rearRespond[4] = f_rec_totalsize >> 16;
+						rearRespond[5] = f_rec_totalsize >> 8;
+						rearRespond[6] = f_rec_totalsize;
+						memcpy(initMsg + length,dvrRespond,7);
+						length += 7;
+						memcpy(initMsg + length,rearRespond,7);
+						length += 7;
+
+						dvrRespond[0] = CMD_PATH;
+						rearRespond[0] = CMD_PATH;
+						memcpy(dvrRespond + 3,f_rec_path,60);
+						memcpy(rearRespond + 3,f_rec_path,60);
+						memcpy(initMsg + length,dvrRespond,63);
+						length += 63;
+						memcpy(initMsg + length,rearRespond,63);
+						length += 63;
+						
+						lidbg("%s:length = %d\n",__func__,length);
+						if(copy_to_user((char*)arg,initMsg,length))
+						{
+							lidbg("%s:copy_to_user ERR\n",__func__);
+						}
+						return length;
+						break;
+				}
+				return 100;
 		        break;
 			default:
 		        return -ENOTTY;

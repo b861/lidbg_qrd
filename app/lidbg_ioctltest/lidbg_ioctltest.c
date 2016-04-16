@@ -54,6 +54,7 @@ int main(int argc, char **argv)
 	int i = 0,count = 5;
   	int ret;
 	char fw_version[256];
+	char testCMD[200];
 	lidbg("@@lidbg_ioctl start\n");
 
 open_dev:
@@ -71,7 +72,7 @@ open_dev:
 
 	fds.fd     = fd;
    	fds.events = POLLIN;
-#if 1
+#if 0
 	ret = pthread_create(&thread_checkStatus_id,NULL,thread_checkStatus,NULL);
 	if(ret != 0)
 	{
@@ -79,13 +80,72 @@ open_dev:
 		return 1;
 	}
 #endif
-	ret = ioctl(fd,_IO(FLYCAM_FW_IOC_MAGIC, NR_VERSION), fw_version);
+	testCMD[0] = CMD_DUAL_CAM;
+	testCMD[1] = 0x0;
+	ret = ioctl(fd,_IO(FLYCAM_REC_MAGIC, NR_CMD), testCMD);
+
+	testCMD[0] = CMD_SET_RESOLUTION;
+	strcpy(testCMD + 1,"1280x720");
+	ret = ioctl(fd,_IO(FLYCAM_REC_MAGIC, NR_CMD), testCMD);
+	lidbg("@@==CMD_PATH==0:0x%x,1:%d,2:%d,3:%s\n",testCMD[0],testCMD[1],testCMD[2],testCMD + 3);
+
+	testCMD[0] = CMD_TIME_SEC;
+	testCMD[1] = 0x1;
+	testCMD[2] = 0x90;
+	ret = ioctl(fd,_IO(FLYCAM_REC_MAGIC, NR_CMD), testCMD);
+	lidbg("@@==CMD_TIME_SEC==0:0x%x,1:%d,2:%d,3:%d,4:%d\n",testCMD[0],testCMD[1],testCMD[2],testCMD[3],testCMD[4]);
+
+	testCMD[0] = CMD_FW_VER;
+	testCMD[1] = 0x00;
+	ret = ioctl(fd,_IO(FLYCAM_REC_MAGIC, NR_CMD), testCMD);
+	lidbg("@@==CMD_FW_VER==0:0x%x,1:%d,2:%d,3:%s\n",testCMD[0],testCMD[1],testCMD[2],testCMD + 3);
+
+	testCMD[0] = CMD_TOTALSIZE;
+	testCMD[1] = 0x0;
+	testCMD[2] = 0x0;
+	testCMD[3] = 0x14;
+	testCMD[4] = 0x1;
+	ret = ioctl(fd,_IO(FLYCAM_REC_MAGIC, NR_CMD), testCMD);
+	lidbg("@@==CMD_TOTALSIZE==0:0x%x,1:%d,2:%d,3:%d,4:%d,5:%d,6:%d\n",testCMD[0],testCMD[1],testCMD[2],testCMD[3],testCMD[4],testCMD[5],testCMD[6]);
+
+	testCMD[0] = CMD_PATH;
+	strcpy(testCMD + 1,"/storage/sdcard0/era_rec/");
+	ret = ioctl(fd,_IO(FLYCAM_REC_MAGIC, NR_CMD), testCMD);
+	lidbg("@@==CMD_PATH==0:0x%x,1:%d,2:%d,3:%s\n",testCMD[0],testCMD[1],testCMD[2],testCMD + 3);
+
+	testCMD[0] = CMD_GET_RES;
+	testCMD[1] = 0x00;
+	ret = ioctl(fd,_IO(FLYCAM_REC_MAGIC, NR_CMD), testCMD);
+	lidbg("@@==CMD_GET_RES==0:0x%x,1:%d,2:%d,3:%s\n",testCMD[0],testCMD[1],testCMD[2],testCMD + 3);
+
+	testCMD[0] = CMD_RECORD;
+	testCMD[1] = 0x1;
+	ret = ioctl(fd,_IO(FLYCAM_REC_MAGIC, NR_CMD), testCMD);
+
+	lidbg("@@==CMD_RECORD==0:0x%x,1:%d,2:%d,3:%d\n",testCMD[0],testCMD[1],testCMD[2],testCMD[3]);
+	lidbg("@@==CMD_RECORD==4:0x%x,5:%d,6:%d,7:%d\n",testCMD[4],testCMD[5],testCMD[6],testCMD[7]);
+
+	sleep(10);
+	testCMD[0] = CMD_DUAL_CAM;
+	testCMD[1] = 0x1;
+	ret = ioctl(fd,_IO(FLYCAM_REC_MAGIC, NR_CMD), testCMD);
+	
+	testCMD[0] = CMD_SET_PAR;
+	ret = ioctl(fd,_IO(FLYCAM_REC_MAGIC, NR_CMD), testCMD);
+
+	sleep(30);
+	/*
 	if (ret != 0)
       {
       	lidbg("@@NR_PATH ioctl fail===%d===\n",ret);
 	}
 	lidbg("@@FW Version ===> %s\n" , fw_version);
+	*/
+	testCMD[0] = CMD_RECORD;
+	testCMD[1] = 0x0;
+	ret = ioctl(fd,_IO(FLYCAM_REC_MAGIC, NR_CMD), testCMD);
 
+#if 0
 	while(count--)
 	{
 		ret = ioctl(fd,_IO(FLYCAM_REAR_REC_IOC_MAGIC, NR_PATH), "/storage/sdcard0/camera_rec/");
@@ -123,6 +183,7 @@ open_dev:
 		//check_status();
 		//sleep(1);
 	}
+#endif
 	lidbg("@@=======DONE=========");
 	return 0;
 }
