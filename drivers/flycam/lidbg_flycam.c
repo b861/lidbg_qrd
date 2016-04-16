@@ -975,8 +975,13 @@ static int checkSDCardStatus(char *path)
 		file_path = filp_open(path, O_RDONLY | O_DIRECTORY, 0);
 		if(IS_ERR(storage_path))
 		{
+#if 0
 			lidbg("%s:SDCARD1 ERR!!Reset to %s/camera_rec/\n",__func__, EMMC_MOUNT_POINT0);
 			strcpy(path, EMMC_MOUNT_POINT0"/camera_rec/");
+#else
+			lidbg("%s:SDCARD1 ERR!!\n",__func__);
+			strcpy(path, EMMC_MOUNT_POINT1"/camera_rec/");
+#endif
 			ret = 2;
 		}
 		else if(IS_ERR(file_path))
@@ -1176,7 +1181,9 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 			case NR_START_REC:
 		        lidbg("%s:DVR NR_START_REC\n",__func__);
 				setDVRProp(DVR_ID);
-				checkSDCardStatus(f_rec_path);
+				ret_st = checkSDCardStatus(f_rec_path);
+				if(ret_st == 2 || ret_st == 1) return RET_FAIL;
+				
 				if(isDVRRec)
 				{
 					lidbg("%s:====DVR start cmd repeatedly====\n",__func__);
@@ -1443,7 +1450,8 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 			case NR_START_REC:
 		        lidbg("%s:Rear NR_START_REC\n",__func__);
 				setDVRProp(REARVIEW_ID);
-				checkSDCardStatus(r_rec_path);
+				ret_st = checkSDCardStatus(r_rec_path);
+				if(ret_st == 2 || ret_st == 1) return RET_FAIL;
 				if(isRearRec)
 				{
 					lidbg("%s:====Rear start cmd repeatedly====\n",__func__);
