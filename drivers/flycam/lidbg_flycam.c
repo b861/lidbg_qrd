@@ -7,6 +7,11 @@ static void work_DVR_fixScreenBlurred(struct work_struct *work);
 static void work_RearView_fixScreenBlurred(struct work_struct *work);
 static int start_rec(char cam_id,char isPowerCtl);
 static int stop_rec(char cam_id,char isPowerCtl);
+static int dvr_start_recording(void);
+static int dvr_stop_recording(void);
+static int rear_start_recording(void);
+static int rear_stop_recording(void);
+
 
 /*camStatus mask*/
 #define FLY_CAM_ISVALID	0x01
@@ -160,6 +165,11 @@ static int lidbg_flycam_event(struct notifier_block *this,
 			mod_timer(&suspend_stoprec_timer,SUSPEND_STOPREC_ACCOFF_TIME);
 			isDVRFirstResume = 0;
 			isRearFirstResume = 0;
+
+			/*Auto stop*/
+			if(isDVRRec) dvr_stop_recording();
+			if(isRearRec) rear_stop_recording();
+			
 			break;
 	    default:
 	        break;
@@ -729,6 +739,15 @@ static void work_DVR_fixScreenBlurred(struct work_struct *work)
 		fixScreenBlurred(DVR_BLOCK_ID_MODE,0);
 	else 
 		fixScreenBlurred(DVR_ID,0);
+
+	/*Auto start*/
+	if(isDVRFirstInit | isDVRFirstResume)
+	{
+		lidbg("%s:==AUTO start==\n",__func__);
+		if(!isDVRRec)
+			dvr_start_recording();
+	}
+	
 	isDVRFirstInit = 0;
 	isDVRAfterFix = 1;
 	isDVRFirstResume = 0;
@@ -767,6 +786,16 @@ static void work_RearView_fixScreenBlurred(struct work_struct *work)
 		fixScreenBlurred(REAR_BLOCK_ID_MODE,0);
 	else 
 		fixScreenBlurred(REARVIEW_ID,0);
+
+	/*Auto start*/
+	if(isRearViewFirstInit | isRearViewFirstInit)
+	{
+		lidbg("%s:==AUTO start==\n",__func__);
+		if(isDualCam && !isRearRec)
+		{
+			rear_start_recording();
+		}
+	}
 	
 	isRearViewFirstInit = 0;
 	isRearViewAfterFix = 1;
@@ -1601,6 +1630,8 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		char dvrRespond[100] = {0};
 		char rearRespond[100] = {0};
 		char returnRespond[200] = {0};
+		char initMsg[400] = {0};
+		int length = 0;
 		
 		dvrRespond[0] = ((char*)arg)[0];
 		rearRespond[0] = ((char*)arg)[0];
@@ -1729,9 +1760,11 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 						}
 						dvrRespond[3] = isDVRRec;
 						rearRespond[3] = isRearRec;
-						memcpy(returnRespond,dvrRespond,4);
-						memcpy(returnRespond + 4,rearRespond,4);
-						if(copy_to_user((char*)arg,returnRespond,8))
+						memcpy(returnRespond + length,dvrRespond,4);
+						length += 4;
+						memcpy(returnRespond + length,rearRespond,4);
+						length += 4;
+						if(copy_to_user((char*)arg,returnRespond,length))
 						{
 							lidbg("%s:copy_to_user ERR\n",__func__);
 						}
@@ -1739,13 +1772,15 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 
 					case CMD_CAPTURE:
 						lidbg("%s:====CMD_CAPTURE====\n",__func__);
+						length += 2;
 						break;
 
 					case CMD_SET_RESOLUTION:
 						lidbg("%s:CMD_SET_RESOLUTION  = [%s]\n",__func__,(char*)arg + 1);
 						strcpy(f_rec_res,(char*)arg + 1);
-						memcpy(dvrRespond + 3,(char*)arg + 1,100);
-						if(copy_to_user((char*)arg,dvrRespond,100))
+						length += 100;
+						memcpy(dvrRespond + 3,(char*)arg + 1,length);
+						if(copy_to_user((char*)arg,dvrRespond,length))
 						{
 							lidbg("%s:copy_to_user ERR\n",__func__);
 						}
@@ -1755,7 +1790,8 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 						lidbg("%s:CMD_TIME_SEC = [%d]\n",__func__,(((char*)arg)[1] << 8) + ((char*)arg)[2]);
 						f_rec_time = (((char*)arg)[1] << 8) + ((char*)arg)[2];
 						memcpy(dvrRespond + 3,(char*)arg + 1,2);
-						if(copy_to_user((char*)arg,dvrRespond,5))
+						length += 5;
+						if(copy_to_user((char*)arg,dvrRespond,length))
 						{
 							lidbg("%s:copy_to_user ERR\n",__func__);
 						}
@@ -1764,7 +1800,8 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 					case CMD_FW_VER:
 						lidbg("%s:CMD_FW_VER dvr_Fw=> %s\n",__func__,camera_DVR_fw_version);
 						strcpy(dvrRespond + 3,camera_DVR_fw_version);
-						if(copy_to_user((char*)arg,dvrRespond,100))
+						length += 100;
+						if(copy_to_user((char*)arg,dvrRespond,length))
 						{
 							lidbg("%s:copy_to_user ERR\n",__func__);
 						}
@@ -1775,7 +1812,8 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 						f_rec_totalsize= ((((char*)arg)[1] << 24) + (((char*)arg)[2] << 16) + (((char*)arg)[3] << 8) + ((char*)arg)[4]);
 						lidbg("%s:CMD_TOTALSIZE => %dMB\n",__func__,f_rec_totalsize);
 						memcpy(dvrRespond + 3,(char*)arg + 1,4);
-						if(copy_to_user((char*)arg,dvrRespond,7))
+						length += 7;
+						if(copy_to_user((char*)arg,dvrRespond,length))
 						{
 							lidbg("%s:copy_to_user ERR\n",__func__);
 						}
@@ -1790,7 +1828,8 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 							lidbg("%s: f_rec_path access wrong! %d", __func__ ,EFAULT);//not happend
 						if(ret_st > 0) dvrRespond[2] = RET_FAIL;
 						strcpy(dvrRespond + 3,f_rec_path);
-						if(copy_to_user((char*)arg,dvrRespond,100))
+						length += 100;
+						if(copy_to_user((char*)arg,dvrRespond,length))
 						{
 							lidbg("%s:copy_to_user ERR\n",__func__);
 						}
@@ -1829,7 +1868,8 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 							rear_start_recording();
 						}
 						
-						if(copy_to_user((char*)arg,dvrRespond,2))
+						length += 2;
+						if(copy_to_user((char*)arg,dvrRespond,length))
 						{
 							lidbg("%s:copy_to_user ERR\n",__func__);
 						}
@@ -1841,7 +1881,9 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 						if(!wait_for_completion_timeout(&DVR_res_get_wait , 3*HZ)) dvrRespond[2] = RET_FAIL;
 						strcpy(dvrRespond + 3,camera_DVR_res);
 						lidbg("%s:DVR NR_GET_RES => %s\n",__func__,dvrRespond + 3);
-						if(copy_to_user((char*)arg,dvrRespond,100))
+						
+						length += 100;
+						if(copy_to_user((char*)arg,dvrRespond,length))
 						{
 							lidbg("%s:copy_to_user ERR\n",__func__);
 						}
@@ -1849,17 +1891,17 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 
 					case CMD_SET_EFFECT:
 						lidbg("%s:CMD_SET_EFFECT\n",__func__);
+						length += 2;
 						break;
 
 					case CMD_DUAL_CAM:
 						lidbg("%s:CMD_DUAL_CAM\n",__func__);
 						if(((char*)arg)[1] == 1) isDualCam = 1;
 						else isDualCam = 0;
+						length += 2;
 						break;
 					case CMD_AUTO_DETECT:
 						lidbg("%s:CMD_AUTO_DETECT\n",__func__);
-						char initMsg[300] = {0};
-						int length = 0;
 						dvrRespond[0] = CMD_RECORD;
 						rearRespond[0] = CMD_RECORD;
 						dvrRespond[3] = isDVRRec;
@@ -1925,10 +1967,9 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 						{
 							lidbg("%s:copy_to_user ERR\n",__func__);
 						}
-						return length;
 						break;
 				}
-				return 100;
+				return length;
 		        break;
 			default:
 		        return -ENOTTY;
@@ -2474,6 +2515,8 @@ int thread_flycam_init(void *data)
 		//INIT_WORK(&work_t_fixScreenBlurred, work_DVR_fixScreenBlurred);
 
 		/*usb camera first plug in (fix lidbgshell delay issue)*/
+		isDVRFirstInit = 1;
+		isRearViewFirstInit = 1;
 #if 0
 		isDVRFirstInit = 1;
 		pfly_UsbCamInfo->camStatus = lidbg_checkCam();
