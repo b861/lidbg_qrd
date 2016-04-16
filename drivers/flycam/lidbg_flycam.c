@@ -1941,7 +1941,9 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 						dvrRespond[0] = CMD_TIME_SEC;
 						rearRespond[0] = CMD_TIME_SEC;
 						dvrRespond[3] = f_rec_time >> 8;
-						rearRespond[3] = f_rec_time;
+						dvrRespond[4] = f_rec_time;
+						rearRespond[3] = f_rec_time >> 8;
+						rearRespond[4] = f_rec_time;
 						
 						memcpy(initMsg + length,dvrRespond,5);
 						length += 5;
@@ -1981,7 +1983,7 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 						rearRespond[3] = f_rec_totalsize >> 24;
 						rearRespond[4] = f_rec_totalsize >> 16;
 						rearRespond[5] = f_rec_totalsize >> 8;
-						rearRespond[6] = f_rec_totalsize;\
+						rearRespond[6] = f_rec_totalsize;
 						
 						memcpy(initMsg + length,dvrRespond,7);
 						length += 7;
