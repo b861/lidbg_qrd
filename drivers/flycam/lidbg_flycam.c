@@ -1902,41 +1902,76 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 						break;
 					case CMD_AUTO_DETECT:
 						lidbg("%s:CMD_AUTO_DETECT\n",__func__);
+						initMsg[length] = 0xB0;
+						length++;
+						
 						dvrRespond[0] = CMD_RECORD;
 						rearRespond[0] = CMD_RECORD;
 						dvrRespond[3] = isDVRRec;
 						rearRespond[3] = isRearRec;
+						
 						memcpy(initMsg + length,dvrRespond,4);
 						length += 4;
+						/*------msgTAIL------*/
+						initMsg[length] = ';';
+						length++;
+						
 						memcpy(initMsg + length,rearRespond,4);
 						length += 4;
+						/*------msgTAIL------*/
+						initMsg[length] = ';';
+						length++;
 
 						dvrRespond[0] = CMD_SET_RESOLUTION;
 						rearRespond[0] = CMD_SET_RESOLUTION;
 						memcpy(dvrRespond + 3,f_rec_res,10);
 						memcpy(rearRespond + 3,f_rec_res,10);
+						
 						memcpy(initMsg + length,dvrRespond,13);
 						length += 13;
+						/*------msgTAIL------*/
+						initMsg[length] = ';';
+						length++;
+						
 						memcpy(initMsg + length,rearRespond,13);
 						length += 13;
+						/*------msgTAIL------*/
+						initMsg[length] = ';';
+						length++;
 
 						dvrRespond[0] = CMD_TIME_SEC;
 						rearRespond[0] = CMD_TIME_SEC;
 						dvrRespond[3] = f_rec_time >> 8;
 						rearRespond[3] = f_rec_time;
+						
 						memcpy(initMsg + length,dvrRespond,5);
 						length += 5;
+						/*------msgTAIL------*/
+						initMsg[length] = ';';
+						length++;
+						
 						memcpy(initMsg + length,rearRespond,5);
 						length += 5;
+						/*------msgTAIL------*/
+						initMsg[length] = ';';
+						length++;
 
 						dvrRespond[0] = CMD_FW_VER;
 						rearRespond[0] = CMD_FW_VER;
 						memcpy(dvrRespond + 3,camera_DVR_fw_version,10);
 						memcpy(rearRespond + 3,camera_DVR_fw_version,10);
+						
 						memcpy(initMsg + length,dvrRespond,5);
 						length += 13;
+						/*------msgTAIL------*/
+						initMsg[length] = ';';
+						length++;
+						
 						memcpy(initMsg + length,rearRespond,5);
 						length += 13;
+						/*------msgTAIL------*/
+						initMsg[length] = ';';
+						length++;
 
 						dvrRespond[0] = CMD_TOTALSIZE;
 						rearRespond[0] = CMD_TOTALSIZE;
@@ -1947,20 +1982,36 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 						rearRespond[3] = f_rec_totalsize >> 24;
 						rearRespond[4] = f_rec_totalsize >> 16;
 						rearRespond[5] = f_rec_totalsize >> 8;
-						rearRespond[6] = f_rec_totalsize;
+						rearRespond[6] = f_rec_totalsize;\
+						
 						memcpy(initMsg + length,dvrRespond,7);
 						length += 7;
+						/*------msgTAIL------*/
+						initMsg[length] = ';';
+						length++;
+						
 						memcpy(initMsg + length,rearRespond,7);
 						length += 7;
+						/*------msgTAIL------*/
+						initMsg[length] = ';';
+						length++;
 
 						dvrRespond[0] = CMD_PATH;
 						rearRespond[0] = CMD_PATH;
 						memcpy(dvrRespond + 3,f_rec_path,60);
 						memcpy(rearRespond + 3,f_rec_path,60);
+						
 						memcpy(initMsg + length,dvrRespond,63);
 						length += 63;
+						/*------msgTAIL------*/
+						initMsg[length] = ';';
+						length++;
+						
 						memcpy(initMsg + length,rearRespond,63);
 						length += 63;
+						/*------msgTAIL------*/
+						initMsg[length] = ';';
+						length++;
 						
 						lidbg("%s:length = %d\n",__func__,length);
 						if(copy_to_user((char*)arg,initMsg,length))
