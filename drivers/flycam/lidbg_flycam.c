@@ -571,9 +571,9 @@ static int start_rec(char cam_id,char isPowerCtl)
 		lidbg_shell_cmd("echo 'udisk_request' > /dev/flydev0");//don't control HUB power in rearview
 	}
     if(cam_id == DVR_ID)
-		lidbg_shell_cmd("setprop fly.uvccam.dvr.recording 1");
+		lidbg_shell_cmd("setprop lidbg.uvccam.dvr.recording 1");
 	else if(cam_id == REARVIEW_ID)
-		lidbg_shell_cmd("setprop fly.uvccam.rearview.recording 1");
+		lidbg_shell_cmd("setprop lidbg.uvccam.rearview.recording 1");
 	
  	invoke_AP_ID_Mode(cam_id);
 	
@@ -614,9 +614,9 @@ static int stop_rec(char cam_id,char isPowerCtl)
 	pfly_UsbCamInfo->read_status = RET_DEFALUT;
 	if(isSuspend) del_timer(&suspend_stoprec_timer);
 	if(cam_id == DVR_ID)
-		lidbg_shell_cmd("setprop fly.uvccam.dvr.recording 0");
+		lidbg_shell_cmd("setprop lidbg.uvccam.dvr.recording 0");
 	else if(cam_id == REARVIEW_ID)
-		lidbg_shell_cmd("setprop fly.uvccam.rearview.recording 0");
+		lidbg_shell_cmd("setprop lidbg.uvccam.rearview.recording 0");
 	//msleep(500);
 	
 	if(cam_id == DVR_ID)

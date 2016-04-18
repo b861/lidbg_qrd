@@ -696,14 +696,14 @@ void parse_cmd(char *pt)
             if(!strcmp((argv[1] + 8), "1"))//start recording
             {
                 lidbg("-------uvccam recording -----");
-                lidbg_shell_cmd("setprop fly.uvccam.dvr.recording 1");
+                lidbg_shell_cmd("setprop lidbg.uvccam.dvr.recording 1");
                 if(g_var.is_fly) lidbg_shell_cmd("./flysystem/lib/out/lidbg_testuvccam /dev/video2 -b 1 -c -f H264 -r &");
                 else lidbg_shell_cmd("./system/lib/modules/out/lidbg_testuvccam /dev/video2 -b 1 -c -f H264 -r &");
             }
             else if(!strcmp((argv[1] + 8), "0"))//stop recording
             {
                 lidbg("-------uvccam stop_recording -----");
-                lidbg_shell_cmd("setprop fly.uvccam.dvr.recording 0");
+                lidbg_shell_cmd("setprop lidbg.uvccam.dvr.recording 0");
             }
 
         }
@@ -873,14 +873,14 @@ void parse_cmd(char *pt)
     else if(!strcmp(argv[0], "recordenable") )
     {
         lidbg("-------uvccam recording -----");
-        lidbg_shell_cmd("setprop fly.uvccam.dvr.recording 1");
+        lidbg_shell_cmd("setprop lidbg.uvccam.dvr.recording 1");
         if(g_var.is_fly) lidbg_shell_cmd("./flysystem/lib/out/lidbg_testuvccam /dev/video2 -b 1 -c -f H264 -r &");
         else lidbg_shell_cmd("./system/lib/modules/out/lidbg_testuvccam /dev/video2 -b 1 -c -f H264 -r &");
     }
     else if(!strcmp(argv[0], "recorddisable") )
     {
         lidbg("-------uvccam stop_recording -----");
-        lidbg_shell_cmd("setprop fly.uvccam.dvr.recording 0");
+        lidbg_shell_cmd("setprop lidbg.uvccam.dvr.recording 0");
     }
     else if(!strcmp(argv[0], "captureenable") )
     {

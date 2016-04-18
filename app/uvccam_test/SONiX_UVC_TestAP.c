@@ -1683,9 +1683,9 @@ failproc:
 static void switch_scan(void)
 {
 	if(cam_id == DVR_ID)
-		property_get("fly.uvccam.dvr.recording", startRecording, "0");
+		property_get("lidbg.uvccam.dvr.recording", startRecording, "0");
 	else if(cam_id == REARVIEW_ID)
-		property_get("fly.uvccam.rearview.recording", startRecording, "0");
+		property_get("lidbg.uvccam.rearview.recording", startRecording, "0");
 	return;
 }
 
@@ -4240,7 +4240,7 @@ openfd:
 			return 1;
 		}
 	}
-	property_get("persist.lidbg.uvccam.recording", startRecording, "1");
+	property_get("lidbg.lidbg.uvccam.recording", startRecording, "1");
 	#endif
 	//property_get("persist.lidbg.uvccam.capture", startCapture, "1");
 /*
@@ -4813,7 +4813,7 @@ try_open_again:
 		usleep(500*1000);
 		//sleep(2);
 		/*check on-off cmd */
-		//property_get("fly.uvccam.dvr.recording", startRecording, "0");
+		//property_get("lidbg.uvccam.dvr.recording", startRecording, "0");
 		switch_scan();
 		if((!strncmp(startRecording, "0", 1)) && (!do_save) )
 		{
