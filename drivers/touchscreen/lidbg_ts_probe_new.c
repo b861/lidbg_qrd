@@ -335,9 +335,9 @@ void ts_probe_prepare(void)
     FS_REGISTER_INT(ts_scan_delayms, "ts_scan_delayms", 500, NULL);
 
     ts_should_revert = fs_find_string(&flyhal_config_list, "TSMODE_XYREVERT");
-   if(g_recovery_meg->hwInfo.info[6]=='1')
+   if(g_recovery_meg->hwInfo.info[7]=='1')
     {
-        LIDBG_WARN("<hwInfo.info[6]=1,ts_should_revert=1,[%d]>\n",ts_should_revert);
+        LIDBG_WARN("<hwInfo.info[7]=1,ts_should_revert=1,[%d]>\n",ts_should_revert);
         ts_should_revert=1;
     }
     if(ts_should_revert > 0)
