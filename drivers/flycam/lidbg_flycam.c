@@ -640,6 +640,7 @@ static int stop_rec(char cam_id,char isPowerCtl)
 			return 1; 
 		}
 	}
+	usleep(200*1000);
 	lidbg("%s:====X====\n",__func__);
 	return ret;
 }
@@ -679,6 +680,7 @@ static void fixScreenBlurred(char cam_id , char isOnline)
 			if(stop_rec(cam_id,1))lidbg("%s:====return fail====\n",__func__);
 		}
 		setDVRProp(cam_id);
+		msleep(100);
 
 		lidbg_shell_cmd("rm -f "EMMC_MOUNT_POINT0"/camera_rec/tmp*.h264&");
 		if(!isDVRFirstResume) isDVRCheck = 1;
@@ -706,6 +708,7 @@ static void fixScreenBlurred(char cam_id , char isOnline)
 			if(stop_rec(cam_id,1))lidbg("%s:====return fail====\n",__func__);
 		}
 		setDVRProp(cam_id);
+		msleep(100);
 
 		lidbg_shell_cmd("rm -f "EMMC_MOUNT_POINT0"/tmp*.h264&");
 		if(!isRearFirstResume) isRearCheck = 1;
@@ -1342,6 +1345,8 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 					if(isSuspend) fixScreenBlurred(DVR_ID,1);
 					setOnlineProp(DVR_ID);
 					if(start_rec(DVR_ID,1)) goto dvrfailproc;
+					msleep(10);
+					setDVRProp(DVR_ID);
 				}
 		        break;
 			case NR_STOP_REC:
