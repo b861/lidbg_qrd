@@ -144,7 +144,7 @@ struct hw_version_specific g_hw_version_specific[] =
         .ad_val_mcu = 1,
         .fly_parameter_node = "/dev/block/platform/7824900.sdhci/by-name/flyparameter",
 
-        .thermal_ctrl_en = 0,
+        .thermal_ctrl_en = 1,
         // msm8909.dtsi  qcom,sensor-information
         .cpu_sensor_num = 3,
         .mem_sensor_num = 0,
