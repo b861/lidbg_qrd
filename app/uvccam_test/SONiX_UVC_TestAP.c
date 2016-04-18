@@ -119,6 +119,8 @@ int Max_Rec_Num = 1;
 int Rec_Sec = 300;//s
 unsigned int Rec_File_Size = 300;//MB
 unsigned int Rec_Bitrate = 8000000;//b/s
+int isDualCam = 0;
+int isColdBootRec = 0;
 
 // chris -
 
@@ -132,6 +134,8 @@ char Rec_Sec_String[PROPERTY_VALUE_MAX];
 char Max_Rec_Num_String[PROPERTY_VALUE_MAX];
 char Rec_File_Size_String[PROPERTY_VALUE_MAX];
 char Rec_Bitrate_String[PROPERTY_VALUE_MAX];
+char isDualCam_String[PROPERTY_VALUE_MAX];
+char isColdBootRec_String[PROPERTY_VALUE_MAX];
 
 char startNight[PROPERTY_VALUE_MAX];
 //char startCapture[PROPERTY_VALUE_MAX];
@@ -1706,9 +1710,9 @@ static void send_driver_msg(char magic ,char nr,unsigned long arg)
 static void get_driver_prop(int camID)
 {
 		/*set each file recording time*/
-		if(cam_id == DVR_ID)
+		if(camID == DVR_ID)
 			property_get("fly.uvccam.dvr.rectime", Rec_Sec_String, "300");
-		else if(cam_id == REARVIEW_ID)
+		else if(camID == REARVIEW_ID)
 			property_get("fly.uvccam.rearview.rectime", Rec_Sec_String, "300");
 		Rec_Sec = atoi(Rec_Sec_String);
 		lidbg("========set each file recording time-> %d s=======\n",Rec_Sec);
@@ -1720,9 +1724,9 @@ static void get_driver_prop(int camID)
 		
 #if 1
 		/*set max file num*/
-		if(cam_id == DVR_ID)
+		if(camID == DVR_ID)
 			property_get("fly.uvccam.dvr.recnum", Max_Rec_Num_String, "5");
-		else if(cam_id == REARVIEW_ID)
+		else if(camID == REARVIEW_ID)
 			property_get("fly.uvccam.rearview.recnum", Max_Rec_Num_String, "5");
 		Max_Rec_Num = atoi(Max_Rec_Num_String);
 		lidbg("====Max_rec_num-> %d===\n",Max_Rec_Num);
@@ -1730,9 +1734,9 @@ static void get_driver_prop(int camID)
 #endif
 
 		/*set record file savePath*/
-		if(cam_id == DVR_ID)
+		if(camID == DVR_ID)
 			property_get("fly.uvccam.dvr.recpath", Rec_Save_Dir, EMMC_MOUNT_POINT0"/camera_rec/");
-		else if(cam_id == REARVIEW_ID)
+		else if(camID == REARVIEW_ID)
 			property_get("fly.uvccam.rearview.recpath", Rec_Save_Dir, EMMC_MOUNT_POINT0"/");
 		lidbg("==========recording dir -> %s===========\n",Rec_Save_Dir);
 		if(!strncmp(Rec_Save_Dir, "/storage/udisk", 14) )
@@ -1764,9 +1768,9 @@ static void get_driver_prop(int camID)
 		
 		
 		/*set record file total size*/
-		if(cam_id == DVR_ID)
+		if(camID == DVR_ID)
 			property_get("fly.uvccam.dvr.recfilesize", Rec_File_Size_String, "1000");
-		else if(cam_id == REARVIEW_ID)
+		else if(camID == REARVIEW_ID)
 			property_get("fly.uvccam.rearview.recfilesize", Rec_File_Size_String, "1000");
 		Rec_File_Size = atoi(Rec_File_Size_String);
 		lidbg("======== video file total size-> %ld MB=======\n",Rec_File_Size);
@@ -1777,9 +1781,9 @@ static void get_driver_prop(int camID)
 		}
 
 		/*set record file bitrate*/
-		if(cam_id == DVR_ID)
+		if(camID == DVR_ID)
 			property_get("fly.uvccam.dvr.recbitrate", Rec_Bitrate_String, "8000000");
-		else if(cam_id == REARVIEW_ID)
+		else if(camID == REARVIEW_ID)
 			property_get("fly.uvccam.rearview.recbitrate", Rec_Bitrate_String, "8000000");
 		Rec_Bitrate = atoi(Rec_Bitrate_String);
 		lidbg("======== video bitrate-> %ld b/s=======\n",Rec_Bitrate);
@@ -1789,10 +1793,21 @@ static void get_driver_prop(int camID)
 			Rec_Bitrate = 8000000;
 		}
 
-		if(cam_id == DVR_ID)
+		if(camID == DVR_ID)
 			property_get("fly.uvccam.dvr.res", Res_String, "0");
-		else if(cam_id == REARVIEW_ID)
+		else if(camID == REARVIEW_ID)
 			property_get("fly.uvccam.rearview.res", Res_String, "0");
+
+		if(camID == DVR_ID) 
+		{
+			property_get("fly.uvccam.isDualCam", isDualCam_String, "0");
+			isDualCam = atoi(isDualCam_String);
+			lidbg("======== isDualCam-> %d=======\n",isDualCam);
+
+			property_get("fly.uvccam.coldboot.isRec", isColdBootRec_String, "0");
+			isColdBootRec = atoi(isColdBootRec_String);
+			lidbg("======== isColdBootRec-> %d=======\n",isColdBootRec);
+		}
 
 		/*
 		char i = 10;
@@ -2982,12 +2997,22 @@ int main(int argc, char *argv[])
 	if(cam_id == SET_DVR_OSD_ID_MODE)
 	{
 		lidbg("%s: SET_OSD_ID_MODE \n", __func__);
+		get_driver_prop(DVR_ID);
+		ioctl(flycam_fd,_IO(FLYCAM_FRONT_REC_IOC_MAGIC, NR_TIME), Rec_Sec);
+		ioctl(flycam_fd,_IO(FLYCAM_FRONT_REC_IOC_MAGIC, NR_TOTALSIZE), Rec_File_Size);
+		ioctl(flycam_fd,_IO(FLYCAM_FRONT_REC_IOC_MAGIC, NR_PATH), Rec_Save_Dir);
+		ioctl(flycam_fd,_IO(FLYCAM_FRONT_REC_IOC_MAGIC, NR_ISDUALCAM), isDualCam);
+		ioctl(flycam_fd,_IO(FLYCAM_FRONT_REC_IOC_MAGIC, NR_ISCOLDBOOTREC), isColdBootRec);
 		osd_set(DVR_ID);//loop
 		return 0;
 	}
 	else if(cam_id == SET_REAR_OSD_ID_MODE)
 	{
 		lidbg("%s: SET_REAR_OSD_ID_MODE \n", __func__);
+		get_driver_prop(REARVIEW_ID);
+		ioctl(flycam_fd,_IO(FLYCAM_REAR_REC_IOC_MAGIC, NR_TIME), Rec_Sec);
+		ioctl(flycam_fd,_IO(FLYCAM_REAR_REC_IOC_MAGIC, NR_TOTALSIZE), Rec_File_Size);
+		ioctl(flycam_fd,_IO(FLYCAM_REAR_REC_IOC_MAGIC, NR_PATH), Rec_Save_Dir);
 		osd_set(REARVIEW_ID);//loop
 		return 0;
 	}

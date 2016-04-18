@@ -11,6 +11,7 @@ static int dvr_start_recording(void);
 static int dvr_stop_recording(void);
 static int rear_start_recording(void);
 static int rear_stop_recording(void);
+static void setDVRProp(int camID);
 
 
 /*camStatus mask*/
@@ -54,7 +55,7 @@ static struct timer_list suspend_stoprec_timer;
 #define SUSPEND_STOPREC_ACCOFF_TIME   (jiffies + 180*HZ)  /* 3min stop Rec after accoff,fix online then accoff*/
 
 /*bool var*/
-static char isDVRRec,isOnlineRec,isRearRec,isDVRFirstInit,isRearViewFirstInit,isRearCheck = 1,isDVRCheck = 1,isOnlineNotifyReady,isDualCam;
+static char isDVRRec,isOnlineRec,isRearRec,isDVRFirstInit,isRearViewFirstInit,isRearCheck = 1,isDVRCheck = 1,isOnlineNotifyReady,isDualCam,isColdBootRec,isACCRec;
 static char isSuspend,isDVRAfterFix,isRearViewAfterFix,isDVRFirstResume,isRearFirstResume,isUpdating,isKSuspend,isDVRReady,isRearReady;
 
 
@@ -72,6 +73,8 @@ u8 camera_rear_fw_version[20] = {0};
 
 u8 camera_rear_res[100] = {0};
 u8 camera_DVR_res[100] = {0};
+
+char tm_cmd[100] = {0};
 
 #if 0
 //ioctl
@@ -167,6 +170,7 @@ static int lidbg_flycam_event(struct notifier_block *this,
 			isRearFirstResume = 0;
 
 			/*Auto stop*/
+			isACCRec = isDVRRec;
 			if(isDVRRec) dvr_stop_recording();
 			if(isRearRec) rear_stop_recording();
 			
@@ -674,7 +678,7 @@ static void fixScreenBlurred(char cam_id , char isOnline)
 			msleep(3500);
 			if(stop_rec(cam_id,1))lidbg("%s:====return fail====\n",__func__);
 		}
-		lidbg_shell_cmd("setprop fly.uvccam.dvr.res 1280x720");
+		setDVRProp(cam_id);
 
 		lidbg_shell_cmd("rm -f "EMMC_MOUNT_POINT0"/camera_rec/tmp*.h264&");
 		if(!isDVRFirstResume) isDVRCheck = 1;
@@ -701,7 +705,7 @@ static void fixScreenBlurred(char cam_id , char isOnline)
 			msleep(5000);
 			if(stop_rec(cam_id,1))lidbg("%s:====return fail====\n",__func__);
 		}
-		lidbg_shell_cmd("setprop fly.uvccam.rearview.res 1280x720");
+		setDVRProp(cam_id);
 
 		lidbg_shell_cmd("rm -f "EMMC_MOUNT_POINT0"/tmp*.h264&");
 		if(!isRearFirstResume) isRearCheck = 1;
@@ -741,12 +745,17 @@ static void work_DVR_fixScreenBlurred(struct work_struct *work)
 		fixScreenBlurred(DVR_ID,0);
 
 	/*Auto start*/
-	if(isDVRFirstInit | isDVRFirstResume)
+	if((isDVRFirstInit && isColdBootRec) | (isDVRFirstResume && isACCRec))
 	{
-		lidbg("%s:==AUTO start==\n",__func__);
+		lidbg("%s:==FirstInit==\n",__func__);
 		if(!isDVRRec)
+		{
+			lidbg("%s:==AUTO start==\n",__func__);
 			dvr_start_recording();
+		}
 	}
+
+	
 	
 	isDVRFirstInit = 0;
 	isDVRAfterFix = 1;
@@ -788,11 +797,12 @@ static void work_RearView_fixScreenBlurred(struct work_struct *work)
 		fixScreenBlurred(REARVIEW_ID,0);
 
 	/*Auto start*/
-	if(isRearViewFirstInit | isRearViewFirstInit)
+	if((isRearViewFirstInit && isColdBootRec) | (isRearFirstResume && isACCRec))
 	{
-		lidbg("%s:==AUTO start==\n",__func__);
+		lidbg("%s:==FirstInit==\n",__func__);
 		if(isDualCam && !isRearRec)
 		{
+			lidbg("%s:==AUTO start==\n",__func__);
 			rear_start_recording();
 		}
 	}
@@ -866,6 +876,8 @@ static void setDVRProp(int camID)
 		sprintf(temp_cmd, "setprop fly.uvccam.rearview.recfilesize %d", f_rec_totalsize);
 		lidbg_shell_cmd(temp_cmd);
 	}
+	sprintf(temp_cmd, "setprop fly.uvccam.isDualCam %d", isDualCam);
+	lidbg_shell_cmd(temp_cmd);
 }
 
 /******************************************************************************
@@ -1143,6 +1155,14 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 			case NR_TOTALSIZE:
 				lidbg("%s:DVR NR_REC_TOTALSIZE = [%ld]\n",__func__,arg);
 				f_rec_totalsize= arg;
+		        break;
+			case NR_ISDUALCAM:
+				lidbg("%s:DVR NR_ISDUALCAM\n",__func__);
+				isDualCam = arg;
+		        break;
+			case NR_ISCOLDBOOTREC:
+				lidbg("%s:DVR NR_ISCOLDBOOTREC\n",__func__);
+				isColdBootRec= arg;
 		        break;
 			case NR_START_REC:
 		        lidbg("%s:DVR NR_START_REC\n",__func__);
@@ -1750,6 +1770,10 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 							}
 							else lidbg("%s:SingleCam start Fail\n",__func__);
 						}
+						
+						sprintf(tm_cmd, "setprop fly.uvccam.coldboot.isRec %d", isDVRRec);
+						lidbg_shell_cmd(tm_cmd);
+						
 						dvrRespond[3] = isDVRRec;
 						rearRespond[3] = isRearRec;
 						memcpy(returnRespond + length,dvrRespond,4);
@@ -1829,11 +1853,12 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 
 					case CMD_SET_PAR:
 						lidbg("%s:CMD_SET_PAR\n",__func__);
+						setDVRProp(DVR_ID);
+						setDVRProp(REARVIEW_ID);
 						if(isDVRRec)
 						{
 							lidbg("%s:restart DVR recording\n",__func__);
 							stop_rec(DVR_ID,1);
-							setDVRProp(DVR_ID);
 							msleep(500);
 							start_rec(DVR_ID,1);
 						}
@@ -1844,7 +1869,6 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 								lidbg("%s:Dual => restart Rear recording\n",__func__);
 								lidbg("%s:CMD_SET_PAR\n",__func__);
 								stop_rec(REARVIEW_ID,1);
-								setDVRProp(REARVIEW_ID);
 								msleep(500);
 								start_rec(REARVIEW_ID,1);
 							}
