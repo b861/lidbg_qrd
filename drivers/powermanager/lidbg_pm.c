@@ -961,7 +961,7 @@ static int thread_observer(void *data)
 					break;
 #endif
 #endif
-                case 60*5:
+                case 60*10:
 #ifdef SUSPEND_TIME_OUT_FORCE_UNLOCK
 			//if( g_var.suspend_timeout_protect  == 0) break;
                     sprintf(when, "unlock%d,%d:", have_triggerd_sleep_S, g_var.sleep_counter);
