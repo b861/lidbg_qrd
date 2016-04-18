@@ -313,11 +313,11 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#057--do fake acc off\n");
             fs_mem_log("*158#058--FlyaudioWhiteListInternetEnable(true)\n");
             fs_mem_log("*158#059--FlyaudioWhiteListInternetEnable(false)\n");
-            fs_mem_log("*158#060--enable iptable logic \n");
-            fs_mem_log("*158#061--disable iptable logic \n");
+            fs_mem_log("*158#060--enable iptable action \n");
+            fs_mem_log("*158#061--disable iptable action \n");
             fs_mem_log("*158#062--do not kill any process in flybootserver.apk\n");
-            fs_mem_log("*158#063--reserve\n");
-            fs_mem_log("*158#064--reserve\n");
+            fs_mem_log("*158#063--disable all app's internet\n");
+            fs_mem_log("*158#064--enable all app's internet\n");
             fs_mem_log("*158#065--disable suspend timeout protect\n");
             fs_mem_log("*158#066--disable alarmmanager protect\n");
             fs_mem_log("*158#067xx--set alarmtimer wakeup time\n");
@@ -738,12 +738,12 @@ void parse_cmd(char *pt)
         }
         else if (!strcmp(argv[1], "*158#060"))
         {
-            lidbg("*158#060--enable iptable logic \n");
+            lidbg("*158#060--enable iptable action \n");
             lidbg_shell_cmd("am broadcast -a com.lidbg.flybootserver.action --ei action 7 &");
         }
         else if (!strcmp(argv[1], "*158#061"))
         {
-            lidbg("*158#061--disable iptable logic \n");
+            lidbg("*158#061--disable iptable action \n");
             lidbg_shell_cmd("am broadcast -a com.lidbg.flybootserver.action --ei action 6 &");
         }
         else if (!strcmp(argv[1], "*158#062"))
@@ -753,11 +753,13 @@ void parse_cmd(char *pt)
         }
         else if (!strcmp(argv[1], "*158#063"))
         {
-            lidbg("*158#063--reserve\n");
+            lidbg("*158#063--disable all app's internet\n");
+            lidbg_shell_cmd("am broadcast -a com.lidbg.flybootserver.action --ei action 9 &");
         }
         else if (!strcmp(argv[1], "*158#064"))
         {
-            lidbg("*158#064--reserve\n");
+            lidbg("*158#064--enable all app's internet\n");
+            lidbg_shell_cmd("am broadcast -a com.lidbg.flybootserver.action --ei action 10 &");
         }
         else if (!strcmp(argv[1], "*158#065"))
         {
