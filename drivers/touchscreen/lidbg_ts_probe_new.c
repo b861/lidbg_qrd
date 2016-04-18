@@ -331,17 +331,15 @@ void ts_probe_prepare(void)
 {
     char buff[50] = {0};
 
-    if(fs_fill_list(FLYHAL_CONFIG_PATH, FS_CMD_FILE_LISTMODE, &flyhal_config_list)<0)
-        fs_fill_list("/flysystem/vendor/flyaudio/flysystem/flyconfig/default/lidbgconfig/flylidbgconfig.txt", FS_CMD_FILE_LISTMODE, &flyhal_config_list);
+    fs_fill_list(FLYHAL_CONFIG_PATH, FS_CMD_FILE_LISTMODE, &flyhal_config_list);
     FS_REGISTER_INT(ts_scan_delayms, "ts_scan_delayms", 500, NULL);
 
-
     ts_should_revert = fs_find_string(&flyhal_config_list, "TSMODE_XYREVERT");
- //   if(g_recovery_meg->hwInfo.info[6]=='1')
-//    {
-//        LIDBG_WARN("<hwInfo.info[6]=1,ts_should_revertsss=1>\n");
-//        ts_should_revert=1;
-//    }
+   if(g_recovery_meg->hwInfo.info[6]=='1')
+    {
+        LIDBG_WARN("<hwInfo.info[6]=1,ts_should_revert=1,[%d]>\n",ts_should_revert);
+        ts_should_revert=1;
+    }
     if(ts_should_revert > 0)
         LIDBG_WARN("<TS.XY will revert>\n");
     else
@@ -469,24 +467,6 @@ static void parse_cmd(char *pt)
     {
         ts_should_revert = 0;
         lidbg_shell_cmd("echo 123 > "LIDBG_LOG_DIR"no_revert.txt");
-    }
-    else if(!strcmp(argv[0], "flyparameter") )
-    {
-        int para_count = argc - 1;
-        char pre = 'N';
-        int i;
-        for(i = 0; i < para_count; i++)
-        {
-            pre = g_recovery_meg->hwInfo.info[i];
-            g_recovery_meg->hwInfo.info[i] = (int)simple_strtoul(argv[i + 1], 0, 0) + '0';
-            lidbg("flyparameter-char.info[%d]:old,now[%d,%d]", i, pre - '0', g_recovery_meg->hwInfo.info[i] - '0');
-        }
-        if(flyparameter_info_save(g_recovery_meg))
-        {
-            lidbg_domineering_ack();
-            msleep(3000);
-            lidbg_reboot();
-        }
     }
 }
 
