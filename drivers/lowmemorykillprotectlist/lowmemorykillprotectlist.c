@@ -37,7 +37,11 @@ char *lmk_protect_list[] =
 	"_android_server",
 	"idbg_testuvccam",
 	"kware.thinknavi",
+	"ndroid.keyguard",
+	"o.flyaudiovideo",
 
+
+	"android.policy",
 	"com.sygic.aura",
 	"mediaserver",
 	"system_server",
