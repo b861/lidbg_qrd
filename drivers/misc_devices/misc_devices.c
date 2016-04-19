@@ -19,12 +19,16 @@ struct notifier_block devices_notif;
 int thread_lcd_on_delay(void *data)
 {
     DUMP_FUN_ENTER;
-    lidbg( "misc:1000\n");
-    msleep(960+1000);
+    lidbg( "misc:1500\n");
+    msleep(960+1500);
 	if(g_var.acc_flag==FLY_ACC_ON)
 	{
         		lidbg("LCD_ON2.in\n");
         		LCD_ON;
+		msleep(1000);
+        		lidbg("LCD_ON2.in.hold_bootanim2.false\n");
+		lidbg_shell_cmd("setprop lidbg.hold_bootanim2 false");
+        		lidbg_shell_cmd("echo echoLCD_ON2.hold_bootanim2.false > /dev/lidbg_msg");
 	}
 	else
         		lidbg("LCD_ON2.skip\n");
@@ -222,6 +226,8 @@ static int lidbg_dev_event(struct notifier_block *this,
 #ifdef DISABLE_USB_WHEN_ANDROID_DOWN
         CREATE_KTHREAD(thread_usb_disk_disable_delay, NULL);
 #endif
+        		lidbg("hold_bootanim2.true\n");
+		lidbg_shell_cmd("setprop lidbg.hold_bootanim2 true");
         break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_GOTO_SLEEP):
 #ifdef DISABLE_USB_WHEN_GOTO_SLEEP

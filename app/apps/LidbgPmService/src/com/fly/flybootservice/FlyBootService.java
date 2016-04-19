@@ -227,6 +227,8 @@ public class FlyBootService extends Service {
 								SendBroadcastToService(KeyBootState, keyScreenOFF);
 							}else if(pmState == FBS_DEVICE_DOWN){
 								LIDBG_PRINT("FlyBootService get pm state: FBS_DEVICE_DOWN");
+								if(!blDozeModeFlag)
+									FlyaudioInternetDisable();
 								AirplaneEnable = SystemProperties.getBoolean("persist.lidbg.AirplaneEnable",false);
 								if((AirplaneEnable) || (!blSuspendUnairplaneFlag)){
 									LIDBG_PRINT("FlyBootService device down enable AirplaneMode");
@@ -239,8 +241,6 @@ public class FlyBootService extends Service {
 								LIDBG_PRINT("FlyBootService get pm state: FBS_FASTBOOT_REQUEST");
 							}else if(pmState == FBS_ANDROID_DOWN){
 								LIDBG_PRINT("FlyBootService get pm state: FBS_ANDROID_DOWN");
-								if(!blDozeModeFlag)
-									FlyaudioInternetDisable();
 								SendBroadcastToService(KeyBootState, keyFastSusupendOFF);
 								start_fastboot();
 							}else if(pmState == FBS_GOTO_SLEEP){
@@ -258,9 +258,6 @@ public class FlyBootService extends Service {
 								}
 							}else if(pmState == FBS_ANDROID_UP){
 								LIDBG_PRINT("FlyBootService get pm state: FBS_ANDROID_UP");
-								InternetEnable();
-								if(!blDozeModeFlag)
-									FlyaudioInternetEnable();
 								SendBroadcastToService(KeyBootState, keyFastSusupendON);
 								sendBroadcast(new Intent(SYSTEM_RESUME));
 								Intent intentBoot = new Intent(Intent.ACTION_BOOT_COMPLETED);
@@ -272,6 +269,10 @@ public class FlyBootService extends Service {
 									restoreAirplaneMode(mFlyBootService);
 								SendBroadcastToService(KeyBootState, keyEearlySusupendON);
 								powerOnSystem(mFlyBootService);
+								InternetEnable();
+								if(!blDozeModeFlag)
+									FlyaudioInternetEnable();
+
 							}else if(pmState == FBS_SCREEN_ON){
 								LIDBG_PRINT("FlyBootService get pm state: FBS_SCREEN_ON");
 								acquireWakeLock();
@@ -691,15 +692,16 @@ public static void releaseBrightWakeLock()
     }
 
     private void powerOnSystem(Context context) {
-		LIDBG_PRINT("powerOnSystem-");
+		LIDBG_PRINT("powerOnSystem+\n");
 		//if(!blSuspendUnairplaneFlag)
 		//	restoreAirplaneMode(context);
-		while(SystemProperties.getBoolean("ctl.lidbg.hold_bootanim", false))
+		while(SystemProperties.getBoolean("lidbg.hold_bootanim", false)||SystemProperties.getBoolean("lidbg.hold_bootanim2", false))
 		{
+			//LIDBG_PRINT("hold_bootanim2.stop,["+SystemProperties.getBoolean("lidbg.hold_bootanim", false)+"/"+SystemProperties.getBoolean("lidbg.hold_bootanim2", false)+"]\n");
 			SystemClock.sleep(100);
 		}
 		SystemProperties.set("ctl.stop", "bootanim");
-		LIDBG_PRINT("powerOnSystem-");
+		LIDBG_PRINT("powerOnSystem-hold_bootanim2.stop\n");
     }
 
     // send broadcast to music application to pause music

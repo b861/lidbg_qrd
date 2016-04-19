@@ -4,6 +4,8 @@
 
 LIDBG_DEFINE;
 
+static int thread_dsi83_check(void *data);
+
 static bool is_dsi83_inited = false;
 static struct delayed_work dsi83_work;
 static struct workqueue_struct *dsi83_workqueue;
@@ -203,7 +205,7 @@ int dsi83_check(void)
         lidbg( "[dsi83.check.err]reg-0xe5=0x%x,ret=%d,check_times=%d\n", reg, ret, check_times);
         is_dsi83_inited = 0;
 
-        if(check_times <= 5)
+        if(0&&check_times <= 5)
             queue_delayed_work(dsi83_workqueue, &dsi83_work, DSI83_DELAY_TIME);
         else
             lidbgerr( "[dsi83.check.err.fail]reg-0xe5=0x%x,ret=%d,check_times=%d\n", reg, ret, check_times);
@@ -329,8 +331,9 @@ static void dsi83_work_func(struct work_struct *work)
 
     dsi83_config();
 
-    msleep(200);//wait for sigal/reg stable
-    dsi83_check();
+  //  msleep(200);//wait for sigal/reg stable
+    //dsi83_check();
+        CREATE_KTHREAD(thread_dsi83_check, NULL);
 }
 
 int is_dsi83_exist(void)
@@ -541,7 +544,7 @@ static int dsi83_probe(struct platform_device *pdev)
     dsi83_workqueue = create_workqueue("dsi83");
 
 
-    if(g_var.is_fly == 0)
+    if((g_var.is_fly == 0)&&(g_var.recovery_mode == 0))
     {
         is_dsi83_inited = 0;
         queue_delayed_work(dsi83_workqueue, &dsi83_work, DSI83_DELAY_TIME);
