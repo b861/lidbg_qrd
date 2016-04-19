@@ -487,6 +487,7 @@ void parse_cmd(char *pt)
             lidbg_chmod("/data");
             lidbg_fifo_get(glidbg_msg_fifo, LIDBG_LOG_DIR"lidbg_mem_log.txt", 0);
             CREATE_KTHREAD(thread_kmsg_fifo_save, NULL);
+	     lidbg_shell_cmd("chmod 777 /data/lidbg/*");
             lidbg_domineering_ack();
         }
         else if (!strcmp(argv[1], "*158#022"))
