@@ -156,6 +156,12 @@ static int lidbg_flycam_event(struct notifier_block *this,
 					schedule_delayed_work(&work_t_DVR_fixScreenBlurred, 0);/*Rec Block mode(First ACCON)*/
 				else 
 				{
+					/*Online Rec when ACCON,stop online & start dvr*/
+					if(isOnlineRec && isACCRec)
+					{
+						lidbg("%s:==Online Rec when ACCON==\n",__func__);
+						dvr_start_recording();
+					}
 					status_fifo_in(RET_DVR_SONIX);//camera already working
 					//notify_online(RET_ONLINE_FOUND_SONIX);
 				}
@@ -748,7 +754,7 @@ static void work_DVR_fixScreenBlurred(struct work_struct *work)
 		fixScreenBlurred(DVR_ID,0);
 
 	/*Auto start*/
-	if((isDVRFirstInit && isColdBootRec) | (isDVRFirstResume && isACCRec))
+	if((isDVRFirstInit && isColdBootRec) || (isDVRFirstResume && isACCRec))
 	{
 		lidbg("%s:==FirstInit==\n",__func__);
 		if(!isDVRRec)
@@ -800,7 +806,7 @@ static void work_RearView_fixScreenBlurred(struct work_struct *work)
 		fixScreenBlurred(REARVIEW_ID,0);
 
 	/*Auto start*/
-	if((isRearViewFirstInit && isColdBootRec) | (isRearFirstResume && isACCRec))
+	if((isRearViewFirstInit && isColdBootRec) || (isRearFirstResume && isACCRec))
 	{
 		lidbg("%s:==FirstInit==\n",__func__);
 		if(isDualCam && !isRearRec)
