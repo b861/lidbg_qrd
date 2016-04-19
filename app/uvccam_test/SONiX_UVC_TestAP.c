@@ -1335,8 +1335,8 @@ void osd_set(int cam_id)
     lidbg("%s:E\n",__func__); 
     while(1)
     { 
-    	if(cam_id == DVR_ID) property_get("fly.uvccam.dvr.osdset", OSDSet_Str, "0");
-		else if(cam_id == REARVIEW_ID) property_get("fly.uvccam.rear.osdset", OSDSet_Str, "0");
+    	if(cam_id == DVR_ID) property_get("lidbg.uvccam.dvr.osdset", OSDSet_Str, "0");
+		else if(cam_id == REARVIEW_ID) property_get("lidbg.uvccam.rear.osdset", OSDSet_Str, "0");
 		if(!strncmp(OSDSet_Str, "1", 1))
 		{
 			if((dev == NULL) ||  (lidbg_get_current_time(1,time_buf, NULL) < 0))

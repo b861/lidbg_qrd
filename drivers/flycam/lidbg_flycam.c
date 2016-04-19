@@ -456,7 +456,7 @@ static int usb_nb_cam_func(struct notifier_block *nb, unsigned long action, void
 				/*usb camera plug out */
 				if(((oldCamStatus>>4) & FLY_CAM_ISVALID) && !((pfly_UsbCamInfo->camStatus>>4) & FLY_CAM_ISVALID))
 				{
-					lidbg_shell_cmd("setprop fly.uvccam.rear.osdset 0&");
+					lidbg_shell_cmd("setprop lidbg.uvccam.rear.osdset 0&");
 					status_fifo_in(RET_REAR_DISCONNECT);
 					isRearRec = 0;
 					isRearViewAfterFix = 0;
@@ -466,7 +466,7 @@ static int usb_nb_cam_func(struct notifier_block *nb, unsigned long action, void
 				if(!((oldCamStatus>>4) & FLY_CAM_ISVALID) && ((pfly_UsbCamInfo->camStatus>>4) & FLY_CAM_ISSONIX) && !isRearViewFirstInit)
 				{
 					isRearReady = 1;
-					lidbg_shell_cmd("setprop fly.uvccam.rear.osdset 1&");
+					lidbg_shell_cmd("setprop lidbg.uvccam.rear.osdset 1&");
 					wake_up_interruptible(&pfly_UsbCamInfo->Rear_ready_wait_queue);
 					if(!isSuspend)
 					{
@@ -492,7 +492,7 @@ static int usb_nb_cam_func(struct notifier_block *nb, unsigned long action, void
 				{
 					status_fifo_in(RET_DVR_DISCONNECT);
 					notify_online(RET_ONLINE_DISCONNECT);
-					lidbg_shell_cmd("setprop fly.uvccam.dvr.osdset 0&");
+					lidbg_shell_cmd("setprop lidbg.uvccam.dvr.osdset 0&");
 					isDVRRec = 0;
 					isOnlineRec= 0;
 					isDVRAfterFix = 0;
@@ -510,7 +510,7 @@ static int usb_nb_cam_func(struct notifier_block *nb, unsigned long action, void
 					//complete(&DVR_ready_wait);
 					isDVRReady = 1;
 					wake_up_interruptible(&pfly_UsbCamInfo->DVR_ready_wait_queue);
-					lidbg_shell_cmd("setprop fly.uvccam.dvr.osdset 1&");
+					lidbg_shell_cmd("setprop lidbg.uvccam.dvr.osdset 1&");
 					if(!isSuspend)
 					{
 						if(!isDVRFirstResume) schedule_delayed_work(&work_t_DVR_fixScreenBlurred, 0);
@@ -739,7 +739,7 @@ static void work_DVR_fixScreenBlurred(struct work_struct *work)
 			isDVRAfterFix = 1;
 			return;
 		}
-		lidbg_shell_cmd("setprop fly.uvccam.dvr.osdset 1&");
+		lidbg_shell_cmd("setprop lidbg.uvccam.dvr.osdset 1&");
 	}
 	/*Rec Block mode(First ACCON) : REAR_BLOCK_ID_MODE & DVR_BLOCK_ID_MODE*/
 	if(isDVRFirstResume) 
@@ -791,7 +791,7 @@ static void work_RearView_fixScreenBlurred(struct work_struct *work)
 			isRearViewAfterFix = 1;
 			return;
 		}
-		lidbg_shell_cmd("setprop fly.uvccam.rear.osdset 1&");
+		lidbg_shell_cmd("setprop lidbg.uvccam.rear.osdset 1&");
 	}
 	/*Rec Block mode(First ACCON) : REAR_BLOCK_ID_MODE & DVR_BLOCK_ID_MODE*/
 	if(isRearFirstResume)
@@ -2597,9 +2597,9 @@ int thread_flycam_init(void *data)
 	    suspend_stoprec_timer.function = suspend_stoprec_timer_isr;
 
 		lidbg("%s:====start osd set====\n",__func__);
-		lidbg_shell_cmd("setprop fly.uvccam.dvr.osdset 0");
+		lidbg_shell_cmd("setprop lidbg.uvccam.rear.osdset 0");
 		lidbg_shell_cmd("./flysystem/lib/out/lidbg_testuvccam /dev/video1 -b 6&");
-		lidbg_shell_cmd("setprop fly.uvccam.rear.osdset 0");
+		lidbg_shell_cmd("setprop lidbg.uvccam.dvr.osdset 0");
 		lidbg_shell_cmd("./flysystem/lib/out/lidbg_testuvccam /dev/video1 -b 7&");
 #if 0
 		INIT_WORK(&work_t_start_rec, work_startRec);
