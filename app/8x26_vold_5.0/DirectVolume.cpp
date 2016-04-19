@@ -32,6 +32,9 @@
 #include "ResponseCode.h"
 #include "cryptfs.h"
 
+#include "../inc/lidbg_servicer.h"
+#include "lidbg_vold/Lidbg_vold.h"
+
 // #define PARTITION_DEBUG
 
 PathInfo::PathInfo(const char *p)
@@ -258,11 +261,13 @@ void DirectVolume::handlePartitionAdded(const char *devpath, NetlinkEvent *evt) 
         part_num = atoi(tmp);
     } else {
         SLOGW("Kernel block uevent missing 'PARTN'");
+        LIDBG_PRINT("fuerr,Kernel block uevent missing 'PARTN'");
         part_num = 1;
     }
 
     if (part_num > MAX_PARTITIONS || part_num < 1) {
         SLOGE("Invalid 'PARTN' value");
+	LIDBG_PRINT("fuerr,Invalid 'PARTN' value");
         return;
     }
 
@@ -272,13 +277,16 @@ void DirectVolume::handlePartitionAdded(const char *devpath, NetlinkEvent *evt) 
 
     if (major != mDiskMajor) {
         SLOGE("Partition '%s' has a different major than its disk!", devpath);
+       LIDBG_PRINT("fuerr,Partition '%s' has a different major than its disk!", devpath);
         return;
     }
 #ifdef PARTITION_DEBUG
     SLOGD("Dv:partAdd: part_num = %d, minor = %d\n", part_num, minor);
 #endif
+    LIDBG_PRINT("fuerr,Dv:partAdd: part_num = %d, minor = %d\n", part_num, minor);
     if (part_num >= MAX_PARTITIONS) {
         SLOGE("Dv:partAdd: ignoring part_num = %d (max: %d)\n", part_num, MAX_PARTITIONS-1);
+        LIDBG_PRINT("fuerr,Dv:partAdd: ignoring part_num = %d (max: %d)\n", part_num, MAX_PARTITIONS-1);
     } else {
         if ((mPartMinors[part_num - 1] == -1) && mPendingPartCount)
             mPendingPartCount--;
@@ -295,11 +303,17 @@ void DirectVolume::handlePartitionAdded(const char *devpath, NetlinkEvent *evt) 
                 mRetryMount = false;
                 mountVol();
             }
+        else
+            	LIDBG_PRINT("fuerr,mRetryMount == false");
         }
+            else
+            	LIDBG_PRINT("fuerr,getState() == Volume::State_Formatting");
+			
     } else {
 #ifdef PARTITION_DEBUG
         SLOGD("Dv:partAdd: pending %d disk", mPendingPartCount);
 #endif
+        LIDBG_PRINT("fuerr,Dv:partAdd: pending %d disk", mPendingPartCount);
     }
 }
 

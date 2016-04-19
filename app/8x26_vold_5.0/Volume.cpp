@@ -344,6 +344,7 @@ int Volume::mountVol() {
         snprintf(errmsg, sizeof(errmsg),
                  "Volume %s %s mount failed - no media",
                  getLabel(), getFuseMountpoint());
+        LIDBG_PRINT("fuerr,mountVol:%s\n",errmsg);
         mVm->getBroadcaster()->sendBroadcast(
                                          ResponseCode::VolumeMountFailedNoMedia,
                                          errmsg, false);
@@ -354,19 +355,23 @@ int Volume::mountVol() {
         if (getState() == Volume::State_Pending) {
             mRetryMount = true;
         }
+        LIDBG_PRINT("fuerr,mountVol:errno = EBUSY mRetryMount:%d\n",mRetryMount);
         return -1;
     }
 
     if (isMountpointMounted(getMountpoint())) {
         SLOGW("Volume is idle but appears to be mounted - fixing");
-        setState(Volume::State_Mounted);
+        LIDBG_PRINT("fuerr,mountVol:Volume is idle but appears to be mounted - fixing");
+       // setState(Volume::State_Mounted);
         // mCurrentlyMountedKdev = XXX
-        return 0;
+        //return 0;
+        doUnmount(getMountpoint(), true);
     }
 
     n = getDeviceNodes((dev_t *) &deviceNodes, 4);
     if (!n) {
         SLOGE("Failed to get device nodes (%s)\n", strerror(errno));
+        LIDBG_PRINT("fuerr,mountVol:Failed to get device nodes (%s)\n", strerror(errno));
         return -1;
     }
 
@@ -394,6 +399,7 @@ int Volume::mountVol() {
                                 new_sys_path, sizeof(new_sys_path),
                                 &new_major, &new_minor)) {
            SLOGE("Cannot setup encryption mapping for %s\n", getMountpoint());
+        LIDBG_PRINT("fuerr,mountVol:Cannot setup encryption mapping for %s\n", getMountpoint());
            return -1;
        }
        /* We now have the new sysfs path for the decrypted block device, and the
@@ -406,6 +412,8 @@ int Volume::mountVol() {
         if (createDeviceNode(nodepath, new_major, new_minor)) {
             SLOGE("Error making device node '%s' (%s)", nodepath,
                                                        strerror(errno));
+        LIDBG_PRINT("fuerr,mountVol:Error making device node '%s' (%s)", nodepath,
+                                                       strerror(errno));
         }
 
         // Todo: Either create sys filename from nodepath, or pass in bogus path so
@@ -416,6 +424,7 @@ int Volume::mountVol() {
         n = getDeviceNodes((dev_t *) &deviceNodes, 4);
         if (!n) {
             SLOGE("Failed to get device nodes (%s)\n", strerror(errno));
+        LIDBG_PRINT("fuerr,mountVol:Failed to get device nodes (%s)\n", strerror(errno));
             return -1;
         }
     }
