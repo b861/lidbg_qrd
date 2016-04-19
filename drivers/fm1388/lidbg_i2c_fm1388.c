@@ -669,6 +669,7 @@ static void fm1388_dsp_load_fw(void) {
 	rtc_time_to_tm(txc.time.tv_sec,&tm);
 	pr_err("%s: start time: %d-%d-%d %d:%d:%d \n", __func__, tm.tm_year+1900,tm.tm_mon, tm.tm_mday,tm.tm_hour,tm.tm_min,tm.tm_sec);
 #endif
+
 	request_firmware(&fw, "FM1388_50000000.dat", &fm1388_i2c->dev);
 	if (fw) {
 		pr_err("%s: firmware FM1388_50000000.dat.\n", __func__);
@@ -928,7 +929,7 @@ int load_fm1388_init_vec(char* file_src)
           } else {
               //parse addr, value,
               if (parser_reg_mem(s, &payload)>=2) {
-				pr_err("payload.reg_addr=0x%08x, payload.val=0x%08x\n", (unsigned int)payload.reg_addr, (unsigned int)payload.val);
+				pr_err("111payload.reg_addr=0x%08x, payload.val=0x%08x\n", (unsigned int)payload.reg_addr, (unsigned int)payload.val);
 				//write to device
 				fm1388_write(fm1388_i2c, (unsigned int)payload.reg_addr, (unsigned int)payload.val);
 				msleep(2);
@@ -1035,15 +1036,16 @@ int load_fm1388_mode_cfg(char* file_src, unsigned int choosed_mode)
     }
 }
 
-static void fm1388_fw_loaded(const struct firmware *fw, void *context)
+static void fm1388_fw_loaded(void *data)
 {
 	unsigned int val;
 
     pr_err("%s: entering...\n", __func__);
-    release_firmware(fw);
+   // release_firmware(fw);
 
     load_fm1388_init_vec(combine_path_name(filepath_name, "FM1388_init.vec"));
-	fm1388_is_dsp_on = true;	// set falg due to the last command of init VEC file will power on DSP
+    fm1388_is_dsp_on = true;	// set falg due to the last command of init VEC file will power on DSP
+
 
     msleep(100);	// wait HW ready to load firmware
     fm1388_dsp_load_fw();
@@ -1499,7 +1501,7 @@ static int fm1388_i2c_probe(struct i2c_client *i2c,
 	pr_err("%s: FM1388 Driver Version %s\n", __func__, VERSION);
 	mutex_init(&fm1388_index_lock);
 	mutex_init(&fm1388_dsp_lock);
-
+#if 0
 	pr_err("%s: device_create_file - dev_attr_fm1388_reg.\n", __func__);
 	ret = device_create_file(&i2c->dev, &dev_attr_fm1388_reg);
 	if (ret != 0) {
@@ -1523,16 +1525,17 @@ static int fm1388_i2c_probe(struct i2c_client *i2c,
 			"Failed to create fm1388_addr sysfs files: %d\n", ret);
 		return ret;
 	}
-
+#endif
 	pr_err("%s: fm1388_reset.\n", __func__);
 	fm1388_reset(i2c);
 
 	fm1388_i2c = i2c;
-
+#if 0
 	request_firmware_nowait(THIS_MODULE, FW_ACTION_HOTPLUG,
 		"fm1388_fw", &i2c->dev, GFP_KERNEL, i2c,
 		fm1388_fw_loaded);
-
+#endif
+	CREATE_KTHREAD(fm1388_fw_loaded, NULL);
 	pr_err("%s: misc_register.\n", __func__);
 	ret = misc_register(&fm1388_dev);
 	if (ret)
@@ -1611,11 +1614,17 @@ static const struct i2c_device_id fm1388_i2c_id[] = {
 };
 MODULE_DEVICE_TABLE(i2c, fm1388_i2c_id);
 
+static struct of_device_id fm1388_dt_ids[] = {
+	{ .compatible = "fm1388,fm1388_i2c" },
+	{ /* sentinel */ }
+};
+
 static struct i2c_driver fm1388_i2c_driver = {
 	.driver = {
 		.name = "fm1388",
 		.owner = THIS_MODULE,
 		.pm = FM1388_I2C_DEV_PM_OPS,
+		.of_match_table	= of_match_ptr(fm1388_dt_ids),
 	},
 	.probe = fm1388_i2c_probe,
 	.shutdown = fm1388_i2c_shutdown,

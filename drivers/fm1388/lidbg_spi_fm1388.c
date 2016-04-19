@@ -63,10 +63,12 @@ int fm1388_spi_read(unsigned int addr, unsigned int *val, size_t len)
 	x[2].rx_buf = read_buf;
 	spi_message_add_tail(&x[2], &message);
 #endif
+#if 1
 	x[0].len = 9+len;
 	x[0].tx_buf = write_buf;
 	x[0].rx_buf = read_buf;
 	spi_message_add_tail(&x[0], &message);
+#endif
 	status = spi_sync(spi, &message);
 
 	if (len == 4)
@@ -204,6 +206,7 @@ EXPORT_SYMBOL_GPL(fm1388_spi_burst_read);
  *
  * Returns true for success.
  */
+
 int fm1388_spi_burst_write(u32 addr, const u8 *txbuf, size_t len)
 {
 
@@ -264,6 +267,7 @@ int fm1388_spi_burst_write(u32 addr, const u8 *txbuf, size_t len)
 }
 
 EXPORT_SYMBOL_GPL(fm1388_spi_burst_write);
+
 //add by flyaudio
 void spi_test(void)
 {
@@ -290,7 +294,7 @@ void spi_test(void)
 }
 EXPORT_SYMBOL_GPL(spi_test);
 
-
+#if 0
 //Henry add for try
 static const struct spi_device_id fm1388_spi_id[] = {
 	{ "fm1388_spi", 0 },
@@ -298,28 +302,36 @@ static const struct spi_device_id fm1388_spi_id[] = {
 };
 MODULE_DEVICE_TABLE(spi, fm1388_spi_id);
 //End
-
-static int __devinit fm1388_spi_probe(struct spi_device *spi)
+#endif
+static const struct of_device_id fm1388_dt_ids[] = {
+	{ .compatible = "fm,fm1388",},
+	{},
+};
+MODULE_DEVICE_TABLE(of, fm1388_dt_ids);
+static int fm1388_spi_probe(struct spi_device *spi)
 {
-	pr_err("%s: max_speed = %d, chip_select = %d, mode = %d, modalias = %s\n", __func__, spi->max_speed_hz, spi->chip_select, spi->mode, spi->modalias);
+	//spi->max_speed_hz=500*1000;
+	//spi->bits_per_word=8;
+	pr_err("%s: max_speed = %d, chip_select = %d, mode = %d, modalias = %s,bits_per_word = %d\n", __func__, spi->max_speed_hz, spi->chip_select, spi->mode, spi->modalias,spi->bits_per_word);
 	fm1388_spi = spi;
 	return 0;
 }
 
-static int __devexit fm1388_spi_remove(struct spi_device *spi)
+static int fm1388_spi_remove(struct spi_device *spi)
 {
 	return 0;
 }
 
 static struct spi_driver fm1388_spi_driver = {
 	.driver = {
-			.name = "fm1388_spi",
+			.name = "fm1388",
+			.of_match_table = of_match_ptr(fm1388_dt_ids),
 			.owner = THIS_MODULE,
 	},
-	.probe = fm1388_spi_probe,
-	.remove =	__devexit_p(fm1388_spi_remove),
+	.probe  = fm1388_spi_probe,
+	.remove = fm1388_spi_remove,
 	//Henry add for try
-	.id_table = fm1388_spi_id,
+	//.id_table = fm1388_spi_id,
 	//End of try
 };
 //module_spi_driver(fm1388_spi_driver);
