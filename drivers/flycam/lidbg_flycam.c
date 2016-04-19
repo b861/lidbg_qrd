@@ -696,8 +696,8 @@ static void fixScreenBlurred(char cam_id , char isOnline)
 		if(!isRearFirstResume)
 		{
 			isRearCheck = 0;
-			lidbg_shell_cmd("/flysystem/lib/out/fw_update -2 -2&");
-			if(!wait_for_completion_timeout(&Rear_fw_get_wait , 3*HZ)) lidbg("%s:====Rear_fw_get_wait return fail====\n",__func__);
+			//lidbg_shell_cmd("/flysystem/lib/out/fw_update -2 -2&");
+			//if(!wait_for_completion_timeout(&Rear_fw_get_wait , 3*HZ)) lidbg("%s:====Rear_fw_get_wait return fail====\n",__func__);
 		}
 		
 		lidbg_shell_cmd("setprop fly.uvccam.rearview.res 640x360");
