@@ -1,7 +1,7 @@
 #include <linux/i2c.h>
 #include <linux/delay.h>
 #include <linux/kthread.h>
-#include "lidbg_target.h"
+
 
 int cmn_i2c_write(int i2c_bus_id, u8 dev_address_7bit, u8 *data, int len)
 {
@@ -37,7 +37,7 @@ int lpc_send_cmd(u8 *writebuf, int writelen)
 
     for(i = 2; i < cmdlen - 1; i++)
         cmd[cmdlen - 1] += cmd[i];
-    return cmn_i2c_write(0, 0xa0 >> 1, cmd, cmdlen);
+    return cmn_i2c_write(LPC_I2C_BUS, 0xa0 >> 1, cmd, cmdlen);
 }
 
 
@@ -48,7 +48,12 @@ void lcd_on(void)
     lpc_send_cmd(buff, sizeof(buff));
 }
 
-
+void lcd_off(void)
+{
+    u8 buff[] = {0x02, 0x0d, 0x0};
+    printk(KERN_CRIT"===lcd_off===\n");
+    lpc_send_cmd(buff, sizeof(buff));
+}
 
 void soc_io_output(u32 group, u32 index, bool status)
 {
@@ -67,7 +72,7 @@ static int thread_wait_i2c(void *data)
     allow_signal(SIGKILL);
     allow_signal(SIGSTOP);
     
-    while(++loop < 10)
+    while(++loop < 3)
     {
         ssleep(1);
         lcd_on();
@@ -79,4 +84,35 @@ void lidbg_i2c_start(void)
 {
     kthread_run(thread_wait_i2c, NULL, "lidbg_i2c_start");
 }
+
+static int thread_lcd_off(void *data)
+{
+    printk(KERN_CRIT"thread_lcd_off+\n");
+    lcd_off();
+    msleep(1500);
+    lcd_on();
+    printk(KERN_CRIT"thread_lcd_off-\n");
+    return 1;
+}
+
+
+#define PROC_READ_CHECK {static int len_check = 0;if ((len_check++)%2) return 0;}
+int lcd_set_pattern_proc(struct file *file, char __user *buf, size_t size, loff_t *ppos)
+{
+
+    PROC_READ_CHECK;
+    kthread_run(thread_lcd_off, NULL, "lidbg_lcd_off");
+    return 1;
+}
+static const struct file_operations lcd_p_fops =
+{
+    .read  = lcd_set_pattern_proc,
+};
+
+
+
+
+
+
+
 

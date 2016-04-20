@@ -26,6 +26,6 @@ int thread_sound_dsp_init(void *data);
 
 // PANNE_PEN
 #define LCD_ON  do{lidbg("LCD_ON\n");LPC_CMD_LCD_ON;}while(0)
-#define LCD_OFF do{lidbg("LCD_OFF\n");LPC_CMD_LCD_OFF;}while(0)
+#define LCD_OFF //do{lidbg("LCD_OFF\n");LPC_CMD_LCD_OFF;}while(0)
 
 #endif
