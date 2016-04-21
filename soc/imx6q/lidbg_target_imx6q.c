@@ -40,6 +40,9 @@ struct hw_version_specific g_hw_version_specific[] =
         //.i2c_bus_saf7741 = 0,
         .i2c_bus_tef6638 = 0,
         .i2c_bus_lpc = 2,
+
+        .i2c_bus_fm1388=0,
+	    .spi_bus_fm1388=0,
         //.ad_val_mcu = 0,
         //.thermal_ctrl_en = 0,
         .cpu_freq_thermal =

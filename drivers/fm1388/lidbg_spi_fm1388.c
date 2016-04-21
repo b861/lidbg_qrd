@@ -360,7 +360,7 @@ static int  fm1388_spi_init(void)
 		pr_err("%s: spi_register_driver fm1388_spi_driver failure. status = %d\n", __func__, status);
 	}
 	pr_err("%s: spi_register_driver fm1388_spi_driver success. status = %d\n", __func__, status);
-	master = spi_busnum_to_master(0);
+	master = spi_busnum_to_master(FM1388_SPI_BUS);
     if (!master)
     {
         status = -ENODEV;

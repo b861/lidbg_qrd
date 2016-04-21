@@ -10,6 +10,7 @@ typedef enum
 	DEV_DISPLAY,
 	DEV_LED,
 	DEV_RADIO,
+	DEV_CARPLAY,
 } i2cdev_type;
 
 static int scanflag;
@@ -65,6 +66,10 @@ int pca9634_i2c_bus(void)
 	return PCA9634_I2C_BUS;
 }
 
+int fm1388_i2c_bus(void)
+{
+	return FM1388_I2C_BUS;
+}
 void radio_reset_lpc(void)
 {
 	LPC_CMD_RADIORST_L;
@@ -97,6 +102,7 @@ struct probe_device i2c_probe_dev[] =
 	{DEV_RADIO, saf7741_i2c_bus, 0x1c, 0x00, "saf7741.ko", radio_reset_lpc, NULL ,1},
 	{DEV_RADIO, tef6638_i2c_bus, 0x63, 0x00, "tef6638.ko", radio_reset_lpc, NULL ,1},
 #endif
+	{DEV_CARPLAY, fm1388_i2c_bus, 0x2c, 0x00, "lidbg_i2c_fm1388.ko", NULL, NULL ,1},
 };
 
 void parse_ts_info(struct probe_device *i2cdev_info)
@@ -105,11 +111,16 @@ void parse_ts_info(struct probe_device *i2cdev_info)
 
     if(gboot_mode == MD_FLYSYSTEM)
     {
+		if(strcmp(i2cdev_info->name,"lidbg_i2c_fm1388.ko")==0)
+		lidbg_insmod("/flysystem/lib/out/lidbg_spi_fm1388.ko");
         sprintf(path, "/flysystem/lib/out/%s", i2cdev_info->name);
         lidbg_insmod( path );
+
     }
     else
     {
+		if(strcmp(i2cdev_info->name,"lidbg_i2c_fm1388.ko")==0)
+		lidbg_insmod("/system/lib/modules/out/lidbg_spi_fm1388.ko");
         sprintf(path, "/system/lib/modules/out/%s", i2cdev_info->name);
         lidbg_insmod( path );
     }

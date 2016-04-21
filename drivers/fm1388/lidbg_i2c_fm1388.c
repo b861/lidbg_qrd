@@ -35,7 +35,7 @@
 #include "i2c-fm1388.h"
 #include "lidbg.h"
 LIDBG_DEFINE;
-#define FM1388_I2C_BUS 0
+
 #define FM1388_I2C_ADDR 0x2c
 
 
