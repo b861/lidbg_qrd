@@ -114,7 +114,7 @@ static int lidbg_get_current_time(char isXUSet , char *time_string, struct rtc_t
 //flyaudio
 #define NONE_HUB_SUPPORT	0
 //#define REC_SAVE_DIR	EMMC_MOUNT_POINT0"/camera_rec/"
-char Rec_Save_Dir[100] = EMMC_MOUNT_POINT0"/camera_rec/";
+char Rec_Save_Dir[100] = EMMC_MOUNT_POINT1"/camera_rec/";
 int Max_Rec_Num = 1;
 int Rec_Sec = 300;//s
 unsigned int Rec_File_Size = 300;//MB
@@ -1735,7 +1735,7 @@ static void get_driver_prop(int camID)
 
 		/*set record file savePath*/
 		if(camID == DVR_ID)
-			property_get("fly.uvccam.dvr.recpath", Rec_Save_Dir, EMMC_MOUNT_POINT0"/camera_rec/");
+			property_get("fly.uvccam.dvr.recpath", Rec_Save_Dir, EMMC_MOUNT_POINT1"/camera_rec/");
 		else if(camID == REARVIEW_ID)
 			property_get("fly.uvccam.rearview.recpath", Rec_Save_Dir, EMMC_MOUNT_POINT0"/");
 		lidbg("==========recording dir -> %s===========\n",Rec_Save_Dir);
@@ -1759,12 +1759,15 @@ static void get_driver_prop(int camID)
 			isPreview = 1;
 		}
 #endif
+
+#if 0
 		if(access(Rec_Save_Dir, R_OK) != 0)
 		{
 			lidbg("record file path access wrong!\n" );
 			//return 0;
 			strcpy(Rec_Save_Dir,  EMMC_MOUNT_POINT0"/camera_rec/");
 		}
+#endif
 		
 		
 		/*set record file total size*/
