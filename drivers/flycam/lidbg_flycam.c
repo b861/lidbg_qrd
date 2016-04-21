@@ -1000,9 +1000,11 @@ static int checkSDCardStatus(char *path)
 
 static int dvr_start_recording(void)
 {
+	int ret_st = -1;
 	lidbg("%s:DVR CMD_START_REC\n",__func__);
 	setDVRProp(DVR_ID);
-	checkSDCardStatus(f_rec_path);
+	ret_st = checkSDCardStatus(f_rec_path);
+	if(ret_st == 2 || ret_st == 1) return RET_FAIL;
 	if(isDVRRec)
 	{
 		lidbg("%s:====DVR start cmd repeatedly====\n",__func__);
@@ -1050,9 +1052,11 @@ static int dvr_stop_recording(void)
 
 static int rear_start_recording(void)
 {
+	int ret_st = -1;
 	lidbg("%s:Rear CMD_START_REC\n",__func__);
 	setDVRProp(REARVIEW_ID);
-	checkSDCardStatus(f_rec_path);
+	ret_st = checkSDCardStatus(f_rec_path);
+	if(ret_st == 2 || ret_st == 1) return RET_FAIL;
 	if(isRearRec)
 	{
 		lidbg("%s:====Rear start cmd repeatedly====\n",__func__);
@@ -1450,7 +1454,7 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 			case NR_START_REC:
 		        lidbg("%s:Rear NR_START_REC\n",__func__);
 				setDVRProp(REARVIEW_ID);
-				ret_st = checkSDCardStatus(r_rec_path);
+				ret_st = checkSDCardStatus(f_rec_path);
 				if(ret_st == 2 || ret_st == 1) return RET_FAIL;
 				if(isRearRec)
 				{
@@ -1902,9 +1906,97 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 							lidbg("%s:Dual => start Rear recording\n",__func__);
 							rear_start_recording();
 						}
+
+						initMsg[length] = 0xB0;
+						length++;
+						dvrRespond[0] = CMD_RECORD;
+						rearRespond[0] = CMD_RECORD;
+						dvrRespond[3] = isDVRRec;
+						rearRespond[3] = isRearRec;
 						
-						length += 2;
-						if(copy_to_user((char*)arg,dvrRespond,length))
+						memcpy(initMsg + length,dvrRespond,4);
+						length += 4;
+						/*------msgTAIL------*/
+						initMsg[length] = ';';
+						length++;
+						
+						memcpy(initMsg + length,rearRespond,4);
+						length += 4;
+						/*------msgTAIL------*/
+						initMsg[length] = ';';
+						length++;
+
+						dvrRespond[0] = CMD_TIME_SEC;
+						rearRespond[0] = CMD_TIME_SEC;
+						dvrRespond[3] = f_rec_time >> 8;
+						dvrRespond[4] = f_rec_time;
+						rearRespond[3] = f_rec_time >> 8;
+						rearRespond[4] = f_rec_time;
+						
+						memcpy(initMsg + length,dvrRespond,5);
+						length += 5;
+						/*------msgTAIL------*/
+						initMsg[length] = ';';
+						length++;
+						
+						memcpy(initMsg + length,rearRespond,5);
+						length += 5;
+						/*------msgTAIL------*/
+						initMsg[length] = ';';
+						length++;
+
+						dvrRespond[0] = CMD_TOTALSIZE;
+						rearRespond[0] = CMD_TOTALSIZE;
+						dvrRespond[3] = f_rec_totalsize >> 24;
+						dvrRespond[4] = f_rec_totalsize >> 16;
+						dvrRespond[5] = f_rec_totalsize >> 8;
+						dvrRespond[6] = f_rec_totalsize;
+						rearRespond[3] = f_rec_totalsize >> 24;
+						rearRespond[4] = f_rec_totalsize >> 16;
+						rearRespond[5] = f_rec_totalsize >> 8;
+						rearRespond[6] = f_rec_totalsize;
+						
+						memcpy(initMsg + length,dvrRespond,7);
+						length += 7;
+						/*------msgTAIL------*/
+						initMsg[length] = ';';
+						length++;
+						
+						memcpy(initMsg + length,rearRespond,7);
+						length += 7;
+						/*------msgTAIL------*/
+						initMsg[length] = ';';
+						length++;
+
+						dvrRespond[0] = CMD_PATH;
+						rearRespond[0] = CMD_PATH;
+						checkSDCardStatus(f_rec_path);
+						memcpy(dvrRespond + 3,f_rec_path,60);
+						memcpy(rearRespond + 3,f_rec_path,60);
+						
+						memcpy(initMsg + length,dvrRespond,63);
+						length += 63;
+						/*------msgTAIL------*/
+						initMsg[length] = ';';
+						length++;
+						
+						memcpy(initMsg + length,rearRespond,63);
+						length += 63;
+						/*------msgTAIL------*/
+						initMsg[length] = ';';
+						length++;
+
+						initMsg[length] = CMD_DUAL_CAM;
+						length++;
+						initMsg[length] = isDualCam;
+						length++;
+						/*------msgTAIL------*/
+						initMsg[length] = ';';
+						length++;
+						
+						lidbg("%s:CMD_SET_PAR ;1:0x%x,2:0x%x,3:0x%x,4:0x%x,5:0x%x,6:0x%x,7:0x%x,\n",__func__,initMsg[0],initMsg[1],initMsg[2],initMsg[3],initMsg[4],initMsg[5],initMsg[6]);
+						lidbg("%s:length = %d\n",__func__,length);
+						if(copy_to_user((char*)arg,initMsg,length))
 						{
 							lidbg("%s:copy_to_user ERR\n",__func__);
 						}
@@ -1937,6 +2029,8 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 						break;
 					case CMD_AUTO_DETECT:
 						lidbg("%s:CMD_AUTO_DETECT\n",__func__);
+						if(isDVRFirstResume)	msleep(1500);
+						
 						initMsg[length] = 0xB0;
 						length++;
 						dvrRespond[0] = CMD_RECORD;
