@@ -28,7 +28,7 @@ struct thermal_ctrl cpu_thermal[] =
 };
 
 #elif defined(PLATFORM_MSM8974)
-#ifdef ANDROID_5_LATER
+
 struct thermal_ctrl cpu_thermal[] =
 {
     { -500,  50,  2265600, "2265600"},
@@ -42,21 +42,16 @@ struct thermal_ctrl cpu_thermal[] =
     {96, 500, 300000, "300000"},
     {0, 0, 0, "0"} //end flag
 };
-#else
+
+#elif defined(PLATFORM_MSM8909)
 struct thermal_ctrl cpu_thermal[] =
 {
-    { -500,  50,  2265600, "2265600"},
-    {51, 55,  1958400, "1958400"},
-    {56, 60,  1728000, "1728000"},
-    {61, 65,  1497600, "1497600"},
-    {66, 70,  1267200, "1267200"},
-    {71, 75,  1190400, "1190400"},
-    {76, 80,  960000, "960000"},
-    {81, 90,  729600, "729600"},
-    {91, 500, 300000, "300000"},
-    {0, 0, 0, "0"} //end flag
+    {-500,  90,  1267200, "1267200"},
+    {91,    95,  1094400, "1094400"},
+    {96,    100, 800000,  "800000"},
+    {101,   500, 533333,  "533333"},      
+    {0,     0, 0, "0"} //end flag
 };
-#endif
 
 #endif
 
@@ -75,6 +70,13 @@ u32 get_scaling_max_freq(void)
     return tmp;
 }
 
+#define CPU_STATUS_NODE "/sys/devices/system/cpu/online"
+char* get_cpu_status(void)
+{
+    static char cpu_status[32];
+    lidbg_readwrite_file(CPU_STATUS_NODE, cpu_status, NULL, 32);
+    return cpu_status;
+}
 
 static int thread_freq_limit(void *data)
 {
@@ -83,21 +85,24 @@ static int thread_freq_limit(void *data)
 
     struct tsens_device tsens_dev;
     //cpu0 temp_sensor_id
+#if defined(PLATFORM_MSM8226) || defined(PLATFORM_MSM8974)
     tsens_dev.sensor_num = 5;
-
+#elif defined(PLATFORM_MSM8909)
+    tsens_dev.sensor_num = 3;
+#endif
     lidbg("create kthread \n");
 
-    while(1)
+    while(ctrl_en)
     {
         int tmp;
         long temp;
         u32 max_freq = 0;
         tmp = cpufreq_get(0); //cpufreq.c
-#ifndef ANDROID_5_LATER
+
         max_freq = get_scaling_max_freq();
-#endif
+
         tsens_get_temp(&tsens_dev, &temp);//cpu0 temp
-        lidbg("cpufreq=%d,maxfreq=%d,cpu0_temp = %ld\n", tmp, max_freq, temp);
+        lidbg("cpufreq=%d,maxfreq=%d,cpu0_temp = %ld,status=%s", tmp, max_freq, temp, get_cpu_status());
         for(i = 0; i < SIZE_OF_ARRAY(cpu_thermal); i++)
         {
             if((cpu_thermal[i].temp_low == 0) || (cpu_thermal[i].temp_high == 0))
@@ -106,10 +111,10 @@ static int thread_freq_limit(void *data)
             if((temp >= cpu_thermal[i].temp_low ) && (temp <= cpu_thermal[i].temp_high )
                     && (max_freq != cpu_thermal[i].limit_freq))
             {
-#ifndef ANDROID_5_LATER
+
                 lidbg_readwrite_file(FREQ_MAX_NODE, NULL, cpu_thermal[i].limit_freq_string, strlen(cpu_thermal[i].limit_freq_string));
                 lidbg("kernel:set max freq to: %d,temp:%ld\n", cpu_thermal[i].limit_freq, temp);
-#endif
+
                 ctrl_max_freq = cpu_thermal[i].limit_freq;
                 cpufreq_update_policy(0);
                 break;
@@ -134,10 +139,10 @@ static int thread_freq_limit(void *data)
             //lidbg_readwrite_file(FREQ_MAX_NODE, NULL, "1593600", strlen("1593600"));
             ctrl_max_freq = 300000;
             cpufreq_update_policy(0);
-#else
-#ifndef ANDROID_5_LATER
-            lidbg_readwrite_file(FREQ_MAX_NODE, NULL, "2265600", strlen("2265600"));
-#endif
+#elif defined(PLATFORM_MSM8974)
+
+            //lidbg_readwrite_file(FREQ_MAX_NODE, NULL, "2265600", strlen("2265600"));
+
             if(temp > 100)
                 ctrl_max_freq = 300000;
             else
@@ -152,6 +157,7 @@ static int thread_freq_limit(void *data)
         msleep(250);
 
     }
+    lidbg("thread_freq_limit stoped\n");
     return 1;
 }
 
@@ -169,12 +175,8 @@ static int  cpufreq_callback(struct notifier_block *nfb,
             policy->max = ctrl_max_freq;
             policy->min = 300000;
 
-#ifdef ANDROID_5_LATER
-#ifdef PLATFORM_MSM8974
             if(is_recovery_mode == 1)
                 policy->min = ctrl_max_freq;
-#endif
-#endif
 
             //lidbg("%s: mitigating cpu %d to freq max: %u min: %u\n",
             //KBUILD_MODNAME, policy->cpu, policy->max, policy->min);
@@ -189,13 +191,30 @@ static struct notifier_block cpufreq_notifier =
     .notifier_call = cpufreq_callback,
 };
 
+
+#define PROC_READ_CHECK {static int len_check = 0;if ((len_check++)%2) return 0;}
+static int  freq_ctrl_stop_proc(struct file *file, char __user *buf, size_t size, loff_t *ppos)
+{
+
+    PROC_READ_CHECK;
+    lidbg("freq_ctrl_stop_proc\n");
+    ctrl_en = 0;
+    return 1;
+}
+static const struct file_operations freq_ctrl_fops =
+{
+    .read  = freq_ctrl_stop_proc,
+};
+
+
+
 void freq_ctrl_start(void)
 {
     struct task_struct *task;
 
     int ret = 0;
     is_recovery_mode = 0;
-
+    proc_create("freq_ctrl_stop", 0, NULL, &freq_ctrl_fops);
     ret = cpufreq_register_notifier(&cpufreq_notifier,
                                     CPUFREQ_POLICY_NOTIFIER);
     if (ret)

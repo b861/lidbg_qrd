@@ -140,6 +140,7 @@ void set_system_performance(int type)
     }
 }
 
+
 int thread_thermal(void *data)
 {
     int cur_temp, i, max_freq;
@@ -191,21 +192,23 @@ int thread_thermal(void *data)
 #else
   temp_offset = 0;
 #endif
-    msleep(1000 * 40); //wait boot_freq_ctrl finish
+    //msleep(1000 * 40); //wait boot_freq_ctrl finish
+    lidbg_shell_cmd("cat /proc/freq_ctrl_stop &");
+
     cur_temp = soc_temp_get(g_hw.mem_sensor_num);
     lidbg("lidbg freq ctrl start,%d,%d\n", cur_temp, get_scaling_max_freq());
 
     if(cpu_temp_show == 1)
         CREATE_KTHREAD(thread_show_temp, NULL);
-
+	
     while(!kthread_should_stop())
     {
         msleep(500);
 
         log_temp();
         cur_temp = soc_temp_get(g_hw.mem_sensor_num);
-        pr_debug("cpu_temp=%d,freq=%d,max_freq=%d\n", cur_temp, cpufreq_get(0), max_freq);
-
+        pr_debug("cpu_temp=%d,freq=%d,max_freq=%d,status=%s", cur_temp, cpufreq_get(0), max_freq, get_cpu_status());
+	
         //fan ctrl
         {
             if( (cur_temp > g_hw.fan_onoff_temp)  &&
@@ -272,7 +275,7 @@ thermal_ctrl:
                 lidbg_readwrite_file(FREQ_MAX_NODE, NULL, g_hw.cpu_freq_thermal[i].limit_freq_string, strlen(g_hw.cpu_freq_thermal[i].limit_freq_string));
                 if(g_hw.gpu_max_freq_node != NULL)
                     lidbg_readwrite_file(g_hw.gpu_max_freq_node, NULL, g_hw.cpu_freq_thermal[i].limit_gpu_freq_string, strlen(g_hw.cpu_freq_thermal[i].limit_gpu_freq_string));
-                lidbg("set max freq to: %d,temp:%d,temp_offset:%d\n", g_hw.cpu_freq_thermal[i].limit_freq, cur_temp, temp_offset);
+                lidbg("set max freq to: %d,temp:%d,temp_offset:%d,cpufreq=%d\n", g_hw.cpu_freq_thermal[i].limit_freq, cur_temp, temp_offset,cpufreq_get(0));
                 break;
             }
         }

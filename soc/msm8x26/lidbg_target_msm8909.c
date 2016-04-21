@@ -152,12 +152,14 @@ struct hw_version_specific g_hw_version_specific[] =
         .cpu_freq_thermal =
         {
             {-500,  90,  1267200, "1267200", "456000000"},
-            {91, 95,  1248000,    "1094400", "456000000"},
-            {96, 500,  800000,    "800000",   "200000000"},
+            {91, 95,  1094400,    "1094400", "456000000"},
+            {96, 100,  800000,    "800000",   "200000000"},
+            {101, 500,  533333,   "533333",   "200000000"},     
+            
             {0, 0, 0, "0"}, //end flag
         },
         //cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_frequencies
-         .cpu_freq_list = "800000,998400,1094400,1190400,1248000,1267200",
+         .cpu_freq_list = "533333,800000,998400,1094400,1190400,1248000,1267200",
          .cpu_freq_recovery_limit = "1267200",
          .cpu_freq_temp_node = "/sys/class/thermal/thermal_zone3/temp",
          .gpu_max_freq_node = "/sys/class/kgsl/kgsl-3d0/max_gpuclk",//cat /sys/class/kgsl/kgsl-3d0/max_gpuclk/gpu_available_frequencies   456000000 307200000 200000000

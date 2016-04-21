@@ -1,7 +1,8 @@
 //#define PLATFORM_MSM8226 1
 //#define PLATFORM_MSM8974 1
 #define PLATFORM_MSM8909 1
-#define ANDROID_5_LATER
+
+
 
 #ifdef PLATFORM_MSM8226
 #define GPIO_WP (35)
