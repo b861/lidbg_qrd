@@ -2029,7 +2029,34 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 						break;
 					case CMD_AUTO_DETECT:
 						lidbg("%s:CMD_AUTO_DETECT\n",__func__);
-						if(isDVRFirstResume)	msleep(1500);
+						//if(isDVRFirstResume)	msleep(1500);
+						msleep(3000);
+
+						/*check dvr camera status before doing ioctl*/
+						if(!(pfly_UsbCamInfo->camStatus & FLY_CAM_ISVALID))
+						{
+							lidbg("%s:DVR not found,ioctl fail!\n",__func__);
+							dvrRespond[2] = RET_NOTVALID;
+						}
+						else if(!(pfly_UsbCamInfo->camStatus & FLY_CAM_ISSONIX))
+						{
+							lidbg("%s:Is not SonixCam ,ioctl fail!\n",__func__);
+							dvrRespond[2] = RET_NOTSONIX;
+						}
+						else dvrRespond[2] = RET_SUCCESS;
+
+						/*check rear camera status before doing ioctl*/
+						if(!((pfly_UsbCamInfo->camStatus >> 4) & FLY_CAM_ISVALID))
+						{
+							lidbg("%s:Rear not found,ioctl fail!\n",__func__);
+							rearRespond[2] = RET_NOTVALID;
+						}
+						else if(!((pfly_UsbCamInfo->camStatus >> 4)  & FLY_CAM_ISSONIX))
+						{
+							lidbg("%s:Rear Is not SonixCam ,ioctl fail!\n",__func__);
+							rearRespond[2] = RET_NOTSONIX;
+						}
+						else dvrRespond[2] = RET_SUCCESS;
 						
 						initMsg[length] = 0xB0;
 						length++;
