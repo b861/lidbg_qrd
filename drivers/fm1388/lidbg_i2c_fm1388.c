@@ -35,12 +35,21 @@
 #include "i2c-fm1388.h"
 #include "lidbg.h"
 LIDBG_DEFINE;
+#define FM1388_I2C_BUS 0
+#define FM1388_I2C_ADDR 0x2c
+
 
 //
 // Following address may be changed by different firmware release
 //
+#if defined(FRAME_CNT)
+#undef FRAME_CNT
 #define FRAME_CNT 0x5ffdffcc
+#endif
+#if defined(CRC_STATUS)
+#undef CRC_STATUS
 #define CRC_STATUS 0x5ffdffe8
+#endif
 #define DSP_PARAMETER_READY 0x5ffdffea
 
 char filepath[] = "/system/etc/firmware/";
@@ -55,7 +64,7 @@ char filepath_name[255];
 //#define MCLK 24576000
 //#define LRCK 48000
 
-static struct i2c_client *fm1388_i2c;
+static struct platform_device *fm1388_pdev;
 static bool fm1388_is_dsp_on = false;	// is dsp power on? dsp is off in init time
 //static unsigned int fm1388_dsp_mode = FM_SMVD_CFG_BARGE_IN;
 static int fm1388_dsp_mode = -1;	// DSP working mode, user define mode in .cfg file
@@ -63,8 +72,8 @@ static struct mutex fm1388_index_lock, fm1388_dsp_lock;
 static struct delayed_work dsp_start_vr;
 
 //#define FM1388_IRQ
-static struct work_struct fm1388_irq_work;
-static struct workqueue_struct *fm1388_irq_wq;
+//static struct work_struct fm1388_irq_work;
+//static struct workqueue_struct *fm1388_irq_wq;
 u32 fm1388_irq;
 static int is_host_slept = 0;
 
@@ -113,8 +122,7 @@ int load_fm1388_vec(char* file_src);
 char* combine_path_name(char* s, char* append);
 
 
-static int fm1388_i2c_write(struct i2c_client *i2c, unsigned int reg,
-	unsigned int value)
+static int fm1388_i2c_write(unsigned int reg,unsigned int value)
 {
 	u8 data[3];
 	int ret;
@@ -122,54 +130,23 @@ static int fm1388_i2c_write(struct i2c_client *i2c, unsigned int reg,
 	data[0] = (reg & 0x000000ff);
 	data[1] = (value & 0x0000ff00) >> 8;
 	data[2] = (value & 0x000000ff);
-
-	//pr_err("%s %02x = %04x\n", __FUNCTION__, reg, value);
-
-	ret = i2c_master_send(i2c, data, ARRAY_SIZE(data));
-	if (ret == ARRAY_SIZE(data))
-		return 0;
-	if (ret < 0)
-		return ret;
-	else
-		return -EIO;
+    ret = SOC_I2C_Send(FM1388_I2C_BUS, FM1388_I2C_ADDR, data, 3);
+    return ret;
 }
 
-static int fm1388_i2c_read(struct i2c_client *i2c, unsigned int r,
-	unsigned int *v)
+static int fm1388_i2c_read(unsigned int r,unsigned int *v)
 {
-	struct i2c_msg xfer[2];
-	u8 reg[1];
 	u8 data[2];
 	int ret;
-
-	/* Write register */
-	reg[0] = (r & 0x000000ff);
-	xfer[0].addr = i2c->addr;
-	xfer[0].flags = 0;
-	xfer[0].len = ARRAY_SIZE(reg);
-	xfer[0].buf = reg;
-
+	char sub_addr;
+	sub_addr=(r & 0x000000ff);
+    ret = SOC_I2C_Rec(FM1388_I2C_BUS, FM1388_I2C_ADDR, sub_addr, data, 2);
 	/* Read data */
-	xfer[1].addr = i2c->addr;
-	xfer[1].flags = I2C_M_RD;
-	xfer[1].len = ARRAY_SIZE(data);
-	xfer[1].buf = data;
-
-	ret = i2c_transfer(i2c->adapter, xfer, ARRAY_SIZE(xfer));
-	if (ret != ARRAY_SIZE(xfer)) {
-		dev_err(&i2c->dev, "i2c_transfer() returned %d\n", ret);
-		return -EIO;
-	}
-
 	*v = (data[0] << 8) | data[1];
-
-	//pr_err("%s %02x => %04x\n", __FUNCTION__, r, *v);
-
-	return ret;
+    return ret;
 }
 
-static int fm1388_dsp_mode_i2c_write_addr(struct i2c_client *i2c,
-	unsigned int addr, unsigned int value, unsigned int opcode)
+static int fm1388_dsp_mode_i2c_write_addr(unsigned int addr, unsigned int value, unsigned int opcode)
 {
 	int ret;
 
@@ -179,42 +156,42 @@ static int fm1388_dsp_mode_i2c_write_addr(struct i2c_client *i2c,
 	mutex_lock(&fm1388_dsp_lock);
 
 //	pr_err("%s: addr = %08x, value = %04x, opcode = %d\n", __func__, addr, value, opcode);
-	ret = fm1388_i2c_write(i2c, FM1388_DSP_I2C_ADDR_LSB, addr & 0xffff);
+	ret = fm1388_i2c_write(FM1388_DSP_I2C_ADDR_LSB, addr & 0xffff);
 	if (ret < 0) {
-		dev_err(&i2c->dev, "Failed to set addr lsb value: %d\n", ret);
+		dev_err(&fm1388_pdev->dev,"Failed to set addr lsb value: %d\n", ret);
 		goto err;
 	}
 
-	ret = fm1388_i2c_write(i2c, FM1388_DSP_I2C_ADDR_MSB, addr >> 16);
+	ret = fm1388_i2c_write(FM1388_DSP_I2C_ADDR_MSB, addr >> 16);
 	if (ret < 0) {
-		dev_err(&i2c->dev, "Failed to set addr msb value: %d\n", ret);
+		dev_err(&fm1388_pdev->dev,"Failed to set addr msb value: %d\n", ret);
 		goto err;
 	}
 
-	ret = fm1388_i2c_write(i2c, FM1388_DSP_I2C_DATA_LSB, value & 0xffff);
+	ret = fm1388_i2c_write(FM1388_DSP_I2C_DATA_LSB, value & 0xffff);
 	if (ret < 0) {
-		dev_err(&i2c->dev, "Failed to set data lsb value: %d\n", ret);
+		dev_err(&fm1388_pdev->dev,"Failed to set data lsb value: %d\n", ret);
 		goto err;
 	}
 
 	//low and high to the same for 16-bit write by Henry for debug
 	if (opcode == FM1388_I2C_CMD_16_WRITE) {
-		ret = fm1388_i2c_write(i2c, FM1388_DSP_I2C_DATA_MSB, value & 0xffff);
+		ret = fm1388_i2c_write(FM1388_DSP_I2C_DATA_MSB, value & 0xffff);
 		if (ret < 0) {
-			dev_err(&i2c->dev, "Failed to set data msb value: %d\n", ret);
+			dev_err(&fm1388_pdev->dev,"Failed to set data msb value: %d\n", ret);
 			goto err;
 		}
 	} else {
-		ret = fm1388_i2c_write(i2c, FM1388_DSP_I2C_DATA_MSB, value >> 16);
+		ret = fm1388_i2c_write(FM1388_DSP_I2C_DATA_MSB, value >> 16);
 		if (ret < 0) {
-			dev_err(&i2c->dev, "Failed to set data msb value: %d\n", ret);
+			dev_err(&fm1388_pdev->dev,"Failed to set data msb value: %d\n", ret);
 			goto err;
 		}
 	}
 
-	ret = fm1388_i2c_write(i2c, FM1388_DSP_I2C_OP_CODE, opcode);
+	ret = fm1388_i2c_write(FM1388_DSP_I2C_OP_CODE, opcode);
 	if (ret < 0) {
-		dev_err(&i2c->dev, "Failed to set op code value: %d\n", ret);
+		dev_err(&fm1388_pdev->dev,"Failed to set op code value: %d\n", ret);
 		goto err;
 	}
 err:
@@ -222,10 +199,9 @@ err:
 
 	return ret;
 }
-
+#if 0
 // address read, 4 bytes
-static int fm1388_dsp_mode_i2c_read_addr(struct i2c_client *i2c,
-	unsigned int addr, unsigned int *value)
+static int fm1388_dsp_mode_i2c_read_addr(unsigned int addr, unsigned int *value)
 {
 	int ret;
 	unsigned int msb, lsb;
@@ -235,26 +211,26 @@ static int fm1388_dsp_mode_i2c_read_addr(struct i2c_client *i2c,
 
 	mutex_lock(&fm1388_dsp_lock);
 
-	ret = fm1388_i2c_write(i2c, FM1388_DSP_I2C_ADDR_MSB, addr >> 16);
+	ret = fm1388_i2c_write(FM1388_DSP_I2C_ADDR_MSB, addr >> 16);
 	if (ret < 0) {
-		dev_err(&i2c->dev, "Failed to set addr msb value: %d\n", ret);
+		dev_err(&fm1388_pdev->dev,"Failed to set addr msb value: %d\n", ret);
 		goto err;
 	}
 
-	ret = fm1388_i2c_write(i2c, FM1388_DSP_I2C_ADDR_LSB, addr & 0xffff);
+	ret = fm1388_i2c_write(FM1388_DSP_I2C_ADDR_LSB, addr & 0xffff);
 	if (ret < 0) {
-		dev_err(&i2c->dev, "Failed to set addr lsb value: %d\n", ret);
+		dev_err(&fm1388_pdev->dev,"Failed to set addr lsb value: %d\n", ret);
 		goto err;
 	}
 
-	ret = fm1388_i2c_write(i2c, FM1388_DSP_I2C_OP_CODE, FM1388_I2C_CMD_32_READ);
+	ret = fm1388_i2c_write(FM1388_DSP_I2C_OP_CODE, FM1388_I2C_CMD_32_READ);
 	if (ret < 0) {
-		dev_err(&i2c->dev, "Failed to set op code value: %d\n", ret);
+		dev_err(&fm1388_pdev->dev,"Failed to set op code value: %d\n", ret);
 		goto err;
 	}
 
-	fm1388_i2c_read(i2c, FM1388_DSP_I2C_DATA_MSB, &msb);
-	fm1388_i2c_read(i2c, FM1388_DSP_I2C_DATA_LSB, &lsb);
+	fm1388_i2c_read(FM1388_DSP_I2C_DATA_MSB, &msb);
+	fm1388_i2c_read(FM1388_DSP_I2C_DATA_LSB, &lsb);
 	*value = (msb << 16) | lsb;
 	pr_err("%s: addr = %04x, value = %04x\n", __func__, addr, *value);
 
@@ -263,10 +239,9 @@ err:
 
 	return ret;
 }
-
+#endif
 // address read, 2 bytes
-static int fm1388_dsp_mode_i2c_read_addr_2(struct i2c_client *i2c,
-	unsigned int addr, unsigned int *value)
+static int fm1388_dsp_mode_i2c_read_addr_2(unsigned int addr, unsigned int *value)
 {
 	int ret;
 //	unsigned int msb, lsb;
@@ -276,28 +251,28 @@ static int fm1388_dsp_mode_i2c_read_addr_2(struct i2c_client *i2c,
 
 	mutex_lock(&fm1388_dsp_lock);
 
-	ret = fm1388_i2c_write(i2c, FM1388_DSP_I2C_ADDR_MSB, addr >> 16);
+	ret = fm1388_i2c_write(FM1388_DSP_I2C_ADDR_MSB, addr >> 16);
 	if (ret < 0) {
-		dev_err(&i2c->dev, "Failed to set addr msb value: %d\n", ret);
+		dev_err(&fm1388_pdev->dev,"Failed to set addr msb value: %d\n", ret);
 		goto err;
 	}
 
-	ret = fm1388_i2c_write(i2c, FM1388_DSP_I2C_ADDR_LSB, addr & 0xffff);
+	ret = fm1388_i2c_write(FM1388_DSP_I2C_ADDR_LSB, addr & 0xffff);
 	if (ret < 0) {
-		dev_err(&i2c->dev, "Failed to set addr lsb value: %d\n", ret);
+		dev_err(&fm1388_pdev->dev,"Failed to set addr lsb value: %d\n", ret);
 		goto err;
 	}
 
-	ret = fm1388_i2c_write(i2c, FM1388_DSP_I2C_OP_CODE, FM1388_I2C_CMD_32_READ);
+	ret = fm1388_i2c_write(FM1388_DSP_I2C_OP_CODE, FM1388_I2C_CMD_32_READ);
 	if (ret < 0) {
-		dev_err(&i2c->dev, "Failed to set op code value: %d\n", ret);
+		dev_err(&fm1388_pdev->dev,"Failed to set op code value: %d\n", ret);
 		goto err;
 	}
 
 	if ((addr & 0x3) == 0) {
-		fm1388_i2c_read(i2c, FM1388_DSP_I2C_DATA_LSB, value);
+		fm1388_i2c_read(FM1388_DSP_I2C_DATA_LSB, value);
 	} else {
-		fm1388_i2c_read(i2c, FM1388_DSP_I2C_DATA_MSB, value);
+		fm1388_i2c_read(FM1388_DSP_I2C_DATA_MSB, value);
 	}
 	//pr_err("%s: addr = %x, value = %x, lsb = %x\n", __func__, addr, *value);
 
@@ -306,22 +281,21 @@ err:
 
 	return ret;
 }
-
-static int fm1388_dsp_mode_update_bits_addr(struct i2c_client *i2c,
-	unsigned int addr, unsigned int mask, unsigned int value)
+#if 0
+static int fm1388_dsp_mode_update_bits_addr(unsigned int addr, unsigned int mask, unsigned int value)
 {
 	bool change;
 	unsigned int old, new;
 	int ret;
 
-	ret = fm1388_dsp_mode_i2c_read_addr(i2c, addr, &old);
+	ret = fm1388_dsp_mode_i2c_read_addr(addr, &old);
 	if (ret < 0)
 		return ret;
 
 	new = (old & ~mask) | (value & mask);
 	change = old != new;
 	if (change)
-		ret = fm1388_dsp_mode_i2c_write_addr(i2c, addr, new, FM1388_I2C_CMD_32_WRITE);
+		ret = fm1388_dsp_mode_i2c_write_addr(addr, new, FM1388_I2C_CMD_32_WRITE);
 
 	if (ret < 0)
 		return ret;
@@ -329,20 +303,18 @@ static int fm1388_dsp_mode_update_bits_addr(struct i2c_client *i2c,
 	//pr_err("%s: addr = %04x, value = %04x, mask = %d\n", __func__, addr, value, mask);
 	return change;
 }
-
+#endif
 // register write
-static int fm1388_dsp_mode_i2c_write(struct i2c_client *i2c,
-		unsigned int reg, unsigned int value)
+static int fm1388_dsp_mode_i2c_write(unsigned int reg, unsigned int value)
 {
 	//pr_err("%s: reg = %04x, value = %04x\n", __func__, reg, value);
-	return fm1388_dsp_mode_i2c_write_addr(i2c, 0x18020000 + reg * 2, value, FM1388_I2C_CMD_16_WRITE);
+	return fm1388_dsp_mode_i2c_write_addr(0x18020000 + reg * 2, value, FM1388_I2C_CMD_16_WRITE);
 }
 
 // register read
-static int fm1388_dsp_mode_i2c_read( struct i2c_client *i2c,
-	unsigned int reg, unsigned int *value)
+static int fm1388_dsp_mode_i2c_read(unsigned int reg, unsigned int *value)
 {
-	int ret = fm1388_dsp_mode_i2c_read_addr_2(i2c, 0x18020000 + reg * 2, value);
+	int ret = fm1388_dsp_mode_i2c_read_addr_2(0x18020000 + reg * 2, value);
 
 	//pr_err("%s: reg = %04x, value = %04x\n", __func__, reg, *value);
 
@@ -350,37 +322,36 @@ static int fm1388_dsp_mode_i2c_read( struct i2c_client *i2c,
 }
 
 // register write
-static int fm1388_write(struct i2c_client *i2c, unsigned int reg,
+static int fm1388_write(unsigned int reg,
 	unsigned int value)
 {
 	//pr_err("%s %02x = %04x\n", __FUNCTION__, reg, value);
 
-	return fm1388_is_dsp_on ? fm1388_dsp_mode_i2c_write(i2c, reg, value) :
-		fm1388_i2c_write(i2c, reg, value);
+	return fm1388_is_dsp_on ? fm1388_dsp_mode_i2c_write(reg, value) :
+		fm1388_i2c_write(reg, value);
 }
 
 // register read
-static int fm1388_read(struct i2c_client *i2c, unsigned int reg,
+static int fm1388_read(unsigned int reg,
 	unsigned int *value)
 {
 	int ret;
 
-	ret = fm1388_is_dsp_on ? fm1388_dsp_mode_i2c_read(i2c, reg, value) :
-		fm1388_i2c_read(i2c, reg, value);
+	ret = fm1388_is_dsp_on ? fm1388_dsp_mode_i2c_read(reg, value) :
+		fm1388_i2c_read(reg, value);
 
 	//pr_err("%s %02x = %04x\n", __FUNCTION__, reg, *value);
 
 	return ret;
 }
-
-static int fm1388_update_bits(struct i2c_client *i2c, unsigned int reg,
-	unsigned int mask, unsigned int value)
+#if 0
+static int fm1388_update_bits(unsigned int reg,unsigned int mask, unsigned int value)
 {
 	bool change;
 	unsigned int old, new;
 	int ret;
 
-	ret = fm1388_read(i2c, reg, &old);
+	ret = fm1388_read(reg, &old);
 	if (ret < 0)
 		return ret;
 
@@ -390,30 +361,29 @@ static int fm1388_update_bits(struct i2c_client *i2c, unsigned int reg,
 	//pr_err("%s: reg = %04x, mask = %04x, value = %04x, old = %04x, new =%04x, change = %d\n", __func__, reg, mask, value, old, new, change);
 
 	if (change)
-		ret = fm1388_write(i2c, reg, new);
+		ret = fm1388_write(reg, new);
 
 	if (ret < 0)
 		return ret;
 
 	return change;
 }
-
-static int fm1388_index_write(struct i2c_client *i2c, unsigned int reg,
-	unsigned int value)
+#endif
+static int fm1388_index_write(unsigned int reg,unsigned int value)
 {
 	int ret;
 
 	mutex_lock(&fm1388_index_lock);
 
 	pr_err("%s: reg = %04x, value = %04x\n", __func__, reg, value);
-	ret = fm1388_write(i2c, 0x6a, reg);
+	ret = fm1388_write(0x6a, reg);
 	if (ret < 0) {
-		dev_err(&i2c->dev, "Failed to set private addr: %d\n", ret);
+		dev_err(&fm1388_pdev->dev,"Failed to set private addr: %d\n", ret);
 		goto err;
 	}
-	ret = fm1388_write(i2c, 0x6c, value);
+	ret = fm1388_write(0x6c, value);
 	if (ret < 0) {
-		dev_err(&i2c->dev, "Failed to set private value: %d\n", ret);
+		dev_err(&fm1388_pdev->dev,"Failed to set private value: %d\n", ret);
 		goto err;
 	}
 
@@ -427,34 +397,34 @@ err:
 	return ret;
 }
 
-static unsigned int fm1388_index_read(struct i2c_client *i2c, unsigned int reg)
+static unsigned int fm1388_index_read(unsigned int reg)
 {
 	int ret;
 
 	mutex_lock(&fm1388_index_lock);
 
-	ret = fm1388_write(i2c, 0x6a, reg);
+	ret = fm1388_write(0x6a, reg);
 	if (ret < 0) {
-		dev_err(&i2c->dev, "Failed to set private addr: %d\n", ret);
+		dev_err(&fm1388_pdev->dev,"Failed to set private addr: %d\n", ret);
 		mutex_unlock(&fm1388_index_lock);
 		return ret;
 	}
 
-	fm1388_read(i2c, 0x6c, &ret);
+	fm1388_read(0x6c, &ret);
 
 	mutex_unlock(&fm1388_index_lock);
 	pr_err("%s: reg = %04x, value = %04x\n", __func__, reg, ret);
 
 	return ret;
 }
-
-static void fm1388_set_dsp_on(struct i2c_client *i2c, bool on)
+#if 0
+static void fm1388_set_dsp_on(bool on)
 {
 	if (on) {
-		fm1388_update_bits(i2c, 0x65, 0x2, 0x2);
+		fm1388_update_bits(0x65, 0x2, 0x2);
 		fm1388_is_dsp_on = true;
 	} else {
-		fm1388_update_bits(i2c, 0x65, 0x2, 0x0);
+		fm1388_update_bits(0x65, 0x2, 0x0);
 		fm1388_is_dsp_on = false;
 	}
 }
@@ -463,25 +433,26 @@ static int fm1388_run_list(struct fm1388_reg_list *list, size_t list_size)
 {
 	return 0;
 }
-
+#endif
+#if 0
 static int fm1388_run_dsp_addr_list(struct  fm1388_dsp_addr_list *list, size_t list_size)
 {
 	int i;
 
 	//pr_err("%s\n", __func__);
 	for (i = 0; i < list_size; i++) {
-		fm1388_dsp_mode_i2c_write_addr(fm1388_i2c, (unsigned int)list[i].addr, list[i].val, FM1388_I2C_CMD_16_WRITE);
+		fm1388_dsp_mode_i2c_write_addr((unsigned int)list[i].addr, list[i].val, FM1388_I2C_CMD_16_WRITE);
 	}
 	return 0;
 }
-
-static void fm1388_reset(struct i2c_client *i2c)
+#endif
+static void fm1388_reset(void)
 {
 	//pr_err("%s\n", __func__);
-	fm1388_write(i2c, 0x00, 0x10ec);
+	fm1388_write(0x00, 0x10ec);
 }
 
-static void fm1388_set_default_mode(struct i2c_client *i2c, unsigned int mode)
+static void fm1388_set_default_mode(unsigned int mode)
 {
 	fm1388_dsp_mode = mode;
 
@@ -491,7 +462,7 @@ static void fm1388_set_default_mode(struct i2c_client *i2c, unsigned int mode)
 	}
 }
 
-static void fm1388_dsp_mode_change(struct i2c_client *i2c, unsigned int mode)
+static void fm1388_dsp_mode_change(unsigned int mode)
 {
 	unsigned int addr, val, times=10;
 
@@ -503,7 +474,7 @@ static void fm1388_dsp_mode_change(struct i2c_client *i2c, unsigned int mode)
 		// wait for DSP default setting ready
 		while(1){
 			addr = DSP_PARAMETER_READY;
-			fm1388_dsp_mode_i2c_read_addr_2(fm1388_i2c, addr, &val);
+			fm1388_dsp_mode_i2c_read_addr_2(addr, &val);
 
 			//pr_err("*** reg_addr=0x%08x, val=0x%04x\n", DSP_PARAMETER_READY, val);
 			if((val & 0x100)==0x100){	// ready: bit 8 = 1
@@ -540,11 +511,11 @@ bool DSP_Write16(u32 addr, u16 data16)
 	addr_lsb = (u16)addr;
 
 	//pr_err("%s: addr = %04x, data = %02x\n", __func__, addr, data16);
-	fm1388_i2c_write(fm1388_i2c, 0x01, addr_lsb);
-	fm1388_i2c_write(fm1388_i2c, 0x02, addr_msb);
-	fm1388_i2c_write(fm1388_i2c, 0x03, data16);
-	fm1388_i2c_write(fm1388_i2c, 0x04, data16);
-	fm1388_i2c_write(fm1388_i2c, 0x00, 0x0001);
+	fm1388_i2c_write( 0x01, addr_lsb);
+	fm1388_i2c_write( 0x02, addr_msb);
+	fm1388_i2c_write( 0x03, data16);
+	fm1388_i2c_write( 0x04, data16);
+	fm1388_i2c_write( 0x00, 0x0001);
 
 	return true;
 }
@@ -561,11 +532,11 @@ bool DSP_Write32(u32 addr, u32 data32)
 	addr_msb = (u16)(addr >> 16);
 	addr_lsb = (u16)addr;
 
-	fm1388_i2c_write(fm1388_i2c, 0x01, addr_lsb);
-	fm1388_i2c_write(fm1388_i2c, 0x02, addr_msb);
-	fm1388_i2c_write(fm1388_i2c, 0x03, (u16)data32);
-	fm1388_i2c_write(fm1388_i2c, 0x04, (u16)(data32 >> 16));
-	fm1388_i2c_write(fm1388_i2c, 0x00, 0x0003);
+	fm1388_i2c_write( 0x01, addr_lsb);
+	fm1388_i2c_write( 0x02, addr_msb);
+	fm1388_i2c_write( 0x03, (u16)data32);
+	fm1388_i2c_write( 0x04, (u16)(data32 >> 16));
+	fm1388_i2c_write( 0x00, 0x0003);
 
 	return true;
 }
@@ -641,10 +612,10 @@ static void fm1388_dsp_load_fw(void) {
 	//fm1388_set_dsp_on(fm1388_i2c, true);
 
 	pr_err("%s: with I2C\n", __func__);
-	request_firmware(&fw, "FM1388_50000000.dat", &fm1388_i2c->dev);
-	request_firmware(&fw1, "FM1388_5FFC0000.dat", &fm1388_i2c->dev);
-	request_firmware(&fw2, "FM1388_5FFE0000.dat", &fm1388_i2c->dev);
-	request_firmware(&fw3, "FM1388_60000000.dat", &fm1388_i2c->dev);
+	request_firmware(&fw, "FM1388_50000000.dat", &fm1388_pdev->dev);
+	request_firmware(&fw1, "FM1388_5FFC0000.dat", &fm1388_pdev->dev);
+	request_firmware(&fw2, "FM1388_5FFE0000.dat", &fm1388_pdev->dev);
+	request_firmware(&fw3, "FM1388_60000000.dat", &fm1388_pdev->dev);
 	pfEEProm[0] = fw->data;
 	pfEEPromLen[0] = fw->size;
 	pfEEProm[1] = fw1->data;
@@ -670,7 +641,7 @@ static void fm1388_dsp_load_fw(void) {
 	pr_err("%s: start time: %d-%d-%d %d:%d:%d \n", __func__, tm.tm_year+1900,tm.tm_mon, tm.tm_mday,tm.tm_hour,tm.tm_min,tm.tm_sec);
 #endif
 
-	request_firmware(&fw, "FM1388_50000000.dat", &fm1388_i2c->dev);
+	request_firmware(&fw, "FM1388_50000000.dat", &fm1388_pdev->dev);
 	if (fw) {
 		pr_err("%s: firmware FM1388_50000000.dat.\n", __func__);
 		fm1388_spi_burst_write(0x50000000, fw->data,
@@ -679,7 +650,7 @@ static void fm1388_dsp_load_fw(void) {
 		release_firmware(fw);
 		fw = NULL;
 	}
-	request_firmware(&fw, "FM1388_5FFC0000.dat", &fm1388_i2c->dev);
+	request_firmware(&fw, "FM1388_5FFC0000.dat", &fm1388_pdev->dev);
 	if (fw) {
 		pr_err("%s: firmware FM1388_5FFC0000.dat.\n", __func__);
 
@@ -689,7 +660,7 @@ static void fm1388_dsp_load_fw(void) {
 		release_firmware(fw);
 		fw = NULL;
 	}
-	request_firmware(&fw, "FM1388_5FFE0000.dat", &fm1388_i2c->dev);
+	request_firmware(&fw, "FM1388_5FFE0000.dat", &fm1388_pdev->dev);
 	if (fw) {
 		pr_err("%s: firmware FM1388_5FFE0000.dat.\n", __func__);
 
@@ -699,7 +670,7 @@ static void fm1388_dsp_load_fw(void) {
 		release_firmware(fw);
 		fw = NULL;
 	}
-	request_firmware(&fw, "FM1388_60000000.dat", &fm1388_i2c->dev);
+	request_firmware(&fw, "FM1388_60000000.dat", &fm1388_pdev->dev);
 	if (fw) {
 		pr_err("%s: firmware FM1388_60000000.dat.\n", __func__);
 
@@ -929,9 +900,9 @@ int load_fm1388_init_vec(char* file_src)
           } else {
               //parse addr, value,
               if (parser_reg_mem(s, &payload)>=2) {
-				pr_err("111payload.reg_addr=0x%08x, payload.val=0x%08x\n", (unsigned int)payload.reg_addr, (unsigned int)payload.val);
+				pr_err("payload.reg_addr=0x%08x, payload.val=0x%08x\n", (unsigned int)payload.reg_addr, (unsigned int)payload.val);
 				//write to device
-				fm1388_write(fm1388_i2c, (unsigned int)payload.reg_addr, (unsigned int)payload.val);
+				fm1388_write((unsigned int)payload.reg_addr, (unsigned int)payload.val);
 				msleep(2);
 			  }
           }
@@ -973,7 +944,7 @@ int load_fm1388_vec(char* file_src)
               if (parser_reg_mem(s, &payload)>=2) {
 				//pr_err("payload.reg_addr=0x%08x, payload.val=0x%08x\n", (unsigned int)payload.reg_addr, (unsigned int)payload.val);
 				//write to device
-				fm1388_dsp_mode_i2c_write_addr(fm1388_i2c, (unsigned int)payload.reg_addr, payload.val, FM1388_I2C_CMD_16_WRITE);      
+				fm1388_dsp_mode_i2c_write_addr((unsigned int)payload.reg_addr, payload.val, FM1388_I2C_CMD_16_WRITE);
 			  }
           }
 	   }
@@ -1036,7 +1007,7 @@ int load_fm1388_mode_cfg(char* file_src, unsigned int choosed_mode)
     }
 }
 
-static void fm1388_fw_loaded(void *data)
+static int fm1388_fw_loaded(void *data)
 {
 	unsigned int val;
 
@@ -1054,13 +1025,14 @@ static void fm1388_fw_loaded(void *data)
 	// TODO:
 	//   example to set default mode to mode 0
 	//   user may change preferred default mode here
-	fm1388_set_default_mode(fm1388_i2c, 0);	// set default mode, parse from .cfg
+	fm1388_set_default_mode(0);	// set default mode, parse from .cfg
 
     load_fm1388_vec(combine_path_name(filepath_name, "FM1388_run.vec"));
     msleep(10);
-	fm1388_dsp_mode_i2c_read_addr_2(fm1388_i2c, 0x180200CA, &val);	// check register 0x65 to make sure DSP is running
+	fm1388_dsp_mode_i2c_read_addr_2(0x180200CA, &val);	// check register 0x65 to make sure DSP is running
 	pr_err("addr=0x180200CA, val=0x%x (value must be 0x7fe)\n", val);
 	spi_test();
+	return 1;
 }
 
 static bool fm1388_readable_register(unsigned int reg)
@@ -1110,7 +1082,7 @@ static ssize_t fm1388_reg_show(struct device *dev,
 	pr_err("%s: fm1388_reg_show\n", __func__);
 	for (i = 0x0; i <= 0xff; i++) {
 		if (fm1388_readable_register(i)) {
-			ret = fm1388_read(fm1388_i2c, i, &value);
+			ret = fm1388_read(i, &value);
 			if (ret < 0)
 				count += sprintf(buf + count, "%02x: XXXX\n",
 					i);
@@ -1160,9 +1132,9 @@ static ssize_t fm1388_reg_store(struct device *dev,
 
 	if (i == count) {
 		pr_info("%s: 0x%02x = 0x%04x\n", __func__, addr, val);
-		fm1388_read(fm1388_i2c, addr, &val);
+		fm1388_read(addr, &val);
 	} else {
-		fm1388_write(fm1388_i2c, addr, val);
+		fm1388_write(addr, val);
 	}
 	return count;
 }
@@ -1178,7 +1150,7 @@ static ssize_t fm1388_index_show(struct device *dev,
 	for (i = 0; i < 0xff; i++) {
 		if (cnt + 10 >= PAGE_SIZE)
 			break;
-		val = fm1388_index_read(fm1388_i2c, i);
+		val = fm1388_index_read(i);
 		if (!val)
 			continue;
 		cnt += snprintf(buf + cnt, 10,
@@ -1226,13 +1198,18 @@ static ssize_t fm1388_index_store(struct device *dev,
 
 	if (i == count)
 		pr_info("0x%02x = 0x%04x\n", addr,
-		fm1388_index_read(fm1388_i2c, addr));
+		fm1388_index_read(addr));
 	else
-		fm1388_index_write(fm1388_i2c, addr, val);
+		fm1388_index_write(addr, val);
 
 	return count;
 }
 static DEVICE_ATTR(index_reg, 0666, fm1388_index_show, fm1388_index_store);
+
+static ssize_t fm1388_addr_show(struct device *dev,struct device_attribute *attr, char *buf)
+{
+	return 1;
+}
 
 static ssize_t fm1388_addr_store(struct device *dev,
 	struct device_attribute *attr, const char *buf, size_t count)
@@ -1275,7 +1252,7 @@ static ssize_t fm1388_addr_store(struct device *dev,
 				pr_info("0x%08x = 0x%08x\n", addr, val);
 			}
 */
-			fm1388_dsp_mode_i2c_read_addr_2(fm1388_i2c, addr, &val);
+			fm1388_dsp_mode_i2c_read_addr_2(addr, &val);
 		} else {
 /*
 			if ((addr & 0xffff0000) == 0x18020000)
@@ -1283,13 +1260,13 @@ static ssize_t fm1388_addr_store(struct device *dev,
 			else
 				fm1388_spi_write(addr, val, 4);
 */
-			fm1388_dsp_mode_i2c_write_addr(fm1388_i2c, addr, val, FM1388_I2C_CMD_16_WRITE);
+			fm1388_dsp_mode_i2c_write_addr(addr, val, FM1388_I2C_CMD_16_WRITE);
 		}
 	}
 
 	return count;
 }
-static DEVICE_ATTR(fm1388_addr, 0666, NULL, fm1388_addr_store);
+static DEVICE_ATTR(fm1388_addr, 0666, fm1388_addr_show, fm1388_addr_store);
 
 
 static ssize_t fm1388_device_read(struct file *file, char __user * buffer,
@@ -1312,20 +1289,22 @@ static ssize_t fm1388_device_read(struct file *file, char __user * buffer,
 		pr_err("%s: local_buffer allocation failure.\n", __func__);
 		goto out;
 	}
-	copy_from_user(local_buffer, buffer, length);
-
+	if(copy_from_user(local_buffer, buffer, length))
+	{
+        printk("copy_from_user ERR\n");
+    }
     //pr_err("local_buffer = %d:, length = %d\n", local_buffer[0], length);
 
 	switch(local_buffer[0]) {
 	case FM_SMVD_REG_READ:
         get_reg_ret_data = (dev_cmd_reg_rw*)local_buffer;
-        fm1388_read(fm1388_i2c, get_reg_ret_data->reg_addr, &get_reg_ret_data->reg_val);
+        fm1388_read(get_reg_ret_data->reg_addr, &get_reg_ret_data->reg_val);
         ret = sizeof(dev_cmd_reg_rw);
         //pr_err("get_reg_ret_data->reg_addr = %d:, get_reg_ret_data->reg_val = 0x%4x, ret=%d\n", get_reg_ret_data->reg_addr, get_reg_ret_data->reg_val, ret);
 		break;
 	case FM_SMVD_DSP_ADDR_READ:
         get_addr_ret_data = (dev_cmd_long*)local_buffer;
-		fm1388_dsp_mode_i2c_read_addr_2(fm1388_i2c, get_addr_ret_data->addr, &get_addr_ret_data->val);
+		fm1388_dsp_mode_i2c_read_addr_2(get_addr_ret_data->addr, &get_addr_ret_data->val);
         ret = sizeof(dev_cmd_long);
         //pr_err("get_addr_ret_data->addr = %d:, get_addr_ret_data->val = 0x%4x, ret=%d\n", get_addr_ret_data->addr, get_addr_ret_data->val, ret);
         break;
@@ -1368,7 +1347,10 @@ static ssize_t fm1388_device_write(struct file *file,
 		pr_err("%s: local_dev_cmd allocation failure.\n", __func__);
 		goto out;
 	}
-	copy_from_user(local_dev_cmd, buffer, length);
+	if(copy_from_user(local_dev_cmd, buffer, length))
+	{
+        printk("copy_from_user ERR\n");
+    }
 
     pr_err("local_dev_cmd->cmd_name = %d, length = %d\n", local_dev_cmd->cmd_name, length);
 	cmd_name = local_dev_cmd->cmd_name;
@@ -1381,7 +1363,7 @@ static ssize_t fm1388_device_write(struct file *file,
 		cmd_addr = local_dev_cmd->addr;
 		cmd_val = local_dev_cmd->val;
         //pr_err("cmd_addr = 0x%02x, cmd_val = 0x%04x\n", cmd_addr, cmd_val);
-		fm1388_dsp_mode_i2c_write(fm1388_i2c, cmd_addr, cmd_val);
+		fm1388_dsp_mode_i2c_write(cmd_addr, cmd_val);
 		break;
 	case FM_SMVD_DSP_ADDR_READ:	//Command #2
 		break;
@@ -1389,12 +1371,12 @@ static ssize_t fm1388_device_write(struct file *file,
 		cmd_addr = local_dev_cmd->addr;
 		cmd_val = local_dev_cmd->val;
         //pr_err("cmd_addr = 0x%08x:, cmd_val = 0x%04x\n", cmd_addr, cmd_val);
-		fm1388_dsp_mode_i2c_write_addr(fm1388_i2c, cmd_addr, cmd_val, FM1388_I2C_CMD_16_WRITE);
+		fm1388_dsp_mode_i2c_write_addr(cmd_addr, cmd_val, FM1388_I2C_CMD_16_WRITE);
 		break;
 	case FM_SMVD_MODE_SET:		//Command #4
 		pr_err("%s: FM_SMVD_MODE_SET dsp_mode = %d\n", __func__, local_dev_cmd->addr);
 		dsp_mode = local_dev_cmd->addr;
-		fm1388_dsp_mode_change(fm1388_i2c, dsp_mode);
+		fm1388_dsp_mode_change(dsp_mode);
 		break;
 	case FM_SMVD_MODE_GET:		//Command #5
 	//The long commands
@@ -1466,11 +1448,11 @@ static void fm1388_framecnt_handling_work(struct work_struct *work)
 		msleep(20000);
 
 		addr = FRAME_CNT;
-		fm1388_dsp_mode_i2c_read_addr_2(fm1388_i2c, addr, &val);
+		fm1388_dsp_mode_i2c_read_addr_2(addr, &val);
 		pr_err("%s: FRAME COUNTER 0x%x = 0x%x\n", __func__, addr, val);
 
 		addr = CRC_STATUS;
-		fm1388_dsp_mode_i2c_read_addr_2(fm1388_i2c, addr, &val);
+		fm1388_dsp_mode_i2c_read_addr_2(addr, &val);
 		if (val == 0x8888) {
 			pr_err("%s: CRC_STAUS 0x%x = 0x%x, CRC OK!\n", __func__, addr, val);
 		} else {
@@ -1492,44 +1474,65 @@ static struct miscdevice fm1388_dev = {
 	.fops = &fm1388_fops
 };
 
-static int fm1388_i2c_probe(struct i2c_client *i2c,
-				      const struct i2c_device_id *i2c_id)
+
+#ifdef CONFIG_PM
+static int fm1388_i2c_suspend(struct device *dev)
+{
+	pr_err("%s: entering...\n", __func__);
+	//Todo: something before driver's suspend.
+	is_host_slept = 1;
+
+	return 0;
+}
+
+static int fm1388_i2c_resume(struct device *dev)
+{
+	pr_err("%s: entering\n", __func__);
+	//Todo: something after driver's resume
+	is_host_slept = 0;
+
+	return 0;
+}
+#endif
+
+static const struct dev_pm_ops fm1388_ops = {
+	.suspend = fm1388_i2c_suspend,
+	.resume  = fm1388_i2c_resume,
+};
+
+static int fm1388_probe(struct platform_device *pdev)
 {
 	int ret;
 	DUMP_FUN;
 	LIDBG_GET;
 	pr_err("%s: FM1388 Driver Version %s\n", __func__, VERSION);
+	fm1388_pdev=pdev;
 	mutex_init(&fm1388_index_lock);
 	mutex_init(&fm1388_dsp_lock);
-#if 0
+#if 1
 	pr_err("%s: device_create_file - dev_attr_fm1388_reg.\n", __func__);
-	ret = device_create_file(&i2c->dev, &dev_attr_fm1388_reg);
+	ret = device_create_file(&pdev->dev, &dev_attr_fm1388_reg);
 	if (ret != 0) {
-		dev_err(&i2c->dev,
-			"Failed to create fm1388_reg sysfs files: %d\n", ret);
+		dev_err(&fm1388_pdev->dev,"Failed to create fm1388_reg sysfs files: %d\n", ret);
 		return ret;
 	}
-
+	
 	pr_err("%s: device_create_file - dev_attr_index_reg.\n", __func__);
-	ret = device_create_file(&i2c->dev, &dev_attr_index_reg);
+	ret = device_create_file(&pdev->dev, &dev_attr_index_reg);
 	if (ret != 0) {
-		dev_err(&i2c->dev,
-			"Failed to create index_reg sysfs files: %d\n", ret);
+		dev_err(&fm1388_pdev->dev,"Failed to create index_reg sysfs files: %d\n", ret);
 		return ret;
 	}
 
 	pr_err("%s: device_create_file - dev_attr_fm1388_addr.\n", __func__);
-	ret = device_create_file(&i2c->dev, &dev_attr_fm1388_addr);
+	ret = device_create_file(&pdev->dev, &dev_attr_fm1388_addr);
 	if (ret != 0) {
-		dev_err(&i2c->dev,
-			"Failed to create fm1388_addr sysfs files: %d\n", ret);
+		dev_err(&fm1388_pdev->dev,"Failed to create fm1388_addr sysfs files: %d\n", ret);
 		return ret;
 	}
 #endif
 	pr_err("%s: fm1388_reset.\n", __func__);
-	fm1388_reset(i2c);
-
-	fm1388_i2c = i2c;
+	fm1388_reset();
 #if 0
 	request_firmware_nowait(THIS_MODULE, FW_ACTION_HOTPLUG,
 		"fm1388_fw", &i2c->dev, GFP_KERNEL, i2c,
@@ -1539,7 +1542,7 @@ static int fm1388_i2c_probe(struct i2c_client *i2c,
 	pr_err("%s: misc_register.\n", __func__);
 	ret = misc_register(&fm1388_dev);
 	if (ret)
-		dev_err(&i2c->dev, "Couldn't register control device\n");
+		dev_err(&pdev->dev, "Couldn't register control device\n");
 
 	INIT_DELAYED_WORK(&dsp_start_vr, dsp_start_vr_work);
 
@@ -1567,72 +1570,51 @@ static int fm1388_i2c_probe(struct i2c_client *i2c,
 	return 0;
 }
 
-static void fm1388_i2c_shutdown(struct i2c_client *i2c)
-{
-	if (fm1388_is_dsp_on)
-		fm1388_write(fm1388_i2c, 0x00, 0x10ec);
 
-#ifdef FM1388_IRQ
-	sw_gpio_irq_free(fm1388_irq);
-	flush_workqueue(fm1388_irq_wq);
-	destroy_workqueue(fm1388_irq_wq);
+static int fm1388_remove(struct platform_device *pdev)
+{
+    return 0;
+}
+
+
+static struct platform_device fm1388_devices =
+{
+    .name			= "fm1388",
+    .id 			= 0,
+};
+
+static struct platform_driver fm1388_driver =
+{
+    .probe  = fm1388_probe,
+    .remove = fm1388_remove,
+    .driver = {
+        .name = "fm1388",
+        .owner = THIS_MODULE,
+#ifdef CONFIG_PM
+        .pm = &fm1388_ops,
 #endif
+    },
+};
 
-#ifdef SHOW_FRAMECNT
-	flush_workqueue(fm1388_framecnt_wq);
-	destroy_workqueue(fm1388_framecnt_wq);
-#endif
-}
-
-static int fm1388_i2c_suspend(struct i2c_client *i2c)
+static int fm1388_init(void)
 {
-	pr_err("%s: entering...\n", __func__);
-	//Todo: something before driver's suspend.
-	is_host_slept = 1;
-
-	return 0;
+    DUMP_BUILD_TIME;
+    LIDBG_GET;
+    platform_device_register(&fm1388_devices);
+    platform_driver_register(&fm1388_driver);
+    return 0;
 }
 
-static int fm1388_i2c_resume(struct i2c_client *i2c)
+static void __exit fm1388_exit(void)
 {
-	pr_err("%s: entering\n", __func__);
-	//Todo: something after driver's resume
-	is_host_slept = 0;
-
-	return 0;
+	platform_device_unregister(&fm1388_devices);
+    platform_driver_unregister(&fm1388_driver);
 }
 
-static const struct dev_pm_ops fm1388_i2c_dev_pm_ops = {
-	.suspend = fm1388_i2c_suspend,
-	.resume = fm1388_i2c_resume,
-};
-#define FM1388_I2C_DEV_PM_OPS (&fm1388_i2c_dev_pm_ops)
+module_init(fm1388_init);
+module_exit(fm1388_exit);
 
-static const struct i2c_device_id fm1388_i2c_id[] = {
-	{ "fm1388", 0 },
-	{}
-};
-MODULE_DEVICE_TABLE(i2c, fm1388_i2c_id);
-
-static struct of_device_id fm1388_dt_ids[] = {
-	{ .compatible = "fm1388,fm1388_i2c" },
-	{ /* sentinel */ }
-};
-
-static struct i2c_driver fm1388_i2c_driver = {
-	.driver = {
-		.name = "fm1388",
-		.owner = THIS_MODULE,
-		.pm = FM1388_I2C_DEV_PM_OPS,
-		.of_match_table	= of_match_ptr(fm1388_dt_ids),
-	},
-	.probe = fm1388_i2c_probe,
-	.shutdown = fm1388_i2c_shutdown,
-	.id_table = fm1388_i2c_id,
-};
-module_i2c_driver(fm1388_i2c_driver);
 
 MODULE_DESCRIPTION("FM1388 I2C Driver");
 MODULE_AUTHOR(" sample code <dannylan@fortemedia.com>");
 MODULE_LICENSE("GPL v2");
-

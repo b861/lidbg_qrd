@@ -29,6 +29,10 @@
 #include <linux/clk.h>
 //#include "fm1388.h"
 #include "spi-fm1388.h"
+#include "lidbg.h"
+LIDBG_DEFINE;
+
+
 
 static struct spi_device *fm1388_spi;
 
@@ -212,7 +216,7 @@ int fm1388_spi_burst_write(u32 addr, const u8 *txbuf, size_t len)
 
 	u8 spi_cmd = FM1388_SPI_CMD_BURST_WRITE;
 	u8 *write_buf;
-	unsigned int i, j, end, offset = 0;
+	unsigned int i , end, offset = 0;
 	int status;
 
 	pr_err("%s: begin...\n", __func__);
@@ -325,34 +329,76 @@ static int fm1388_spi_remove(struct spi_device *spi)
 static struct spi_driver fm1388_spi_driver = {
 	.driver = {
 			.name = "fm1388",
-			.of_match_table = of_match_ptr(fm1388_dt_ids),
+//			.of_match_table = of_match_ptr(fm1388_dt_ids),
 			.owner = THIS_MODULE,
 	},
 	.probe  = fm1388_spi_probe,
 	.remove = fm1388_spi_remove,
-	//Henry add for try
 	//.id_table = fm1388_spi_id,
-	//End of try
 };
+
 //module_spi_driver(fm1388_spi_driver);
 
-static int __init fm1388_spi_init(void)
+static int  fm1388_spi_init(void)
 {
-	int status;
 
+	int status;
+	struct spi_master *master;
+	struct spi_device *spi;
+	struct spi_board_info chip =
+    {
+        .modalias	= "fm1388",
+        .mode       = 0x00,
+        .bus_num	= 0,
+        .chip_select = 0,
+        .max_speed_hz = 20000000,
+    };
+	DUMP_BUILD_TIME;
+    LIDBG_GET;
 	status = spi_register_driver(&fm1388_spi_driver);
 	if (status < 0) {
 		pr_err("%s: spi_register_driver fm1388_spi_driver failure. status = %d\n", __func__, status);
 	}
 	pr_err("%s: spi_register_driver fm1388_spi_driver success. status = %d\n", __func__, status);
+	master = spi_busnum_to_master(0);
+    if (!master)
+    {
+        status = -ENODEV;
+        goto error_busnum;
+    }
+    spi = spi_new_device(master, &chip);
+    if (!spi)
+    {
+        status = -EBUSY;
+        goto error_mem;
+    }
+    if (status)
+    {
+        lidbg(KERN_ERR "[%s] Driver registration failed, module not inserted.\n", __func__);
+        return status;
+	}
+
 	return status;
+	
+error_mem:
+error_busnum:
+    spi_unregister_driver(&fm1388_spi_driver);
+    return status;
 }
-module_init(fm1388_spi_init);
+
 
 static void __exit fm1388_spi_exit(void)
 {
+	 if (fm1388_spi)
+    {
+        spi_unregister_device(fm1388_spi);
+        fm1388_spi = NULL;
+    }
 	spi_unregister_driver(&fm1388_spi_driver);
 }
+
+module_init(fm1388_spi_init);
+
 module_exit(fm1388_spi_exit);
 
 MODULE_DESCRIPTION("FM1388 SPI driver");
