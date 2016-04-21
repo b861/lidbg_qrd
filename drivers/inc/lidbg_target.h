@@ -35,7 +35,7 @@ struct thermal_ctrl
     u32 limit_freq;
     char *limit_freq_string;
     char *limit_gpu_freq_string;
-
+    int max_cpu;
 };
 
 struct hw_version_specific

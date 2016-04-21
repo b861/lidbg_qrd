@@ -16,6 +16,7 @@ int normal_temp_offset = 0;
 bool fan_run_status = false;
 
 #define FREQ_MAX_NODE    "/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq"
+#define CPU_MAX_NODE    "/sys/devices/system/cpu/cpu0/core_ctl/max_cpus"
 #define TEMP_LOG_PATH 	 LIDBG_LOG_DIR"log_ct.txt"
 #define TEMP_FREQ_TEST_RESULT LIDBG_LOG_DIR"lidbg_temp_freq.txt"
 #define TEMP_FREQ_COUNTER LIDBG_LOG_DIR"freq_tmp.txt"
@@ -207,6 +208,8 @@ int thread_thermal(void *data)
 
         log_temp();
         cur_temp = soc_temp_get(g_hw.mem_sensor_num);
+	if(0==g_var.android_boot_completed)
+       		lidbg("cpu_temp=%d,freq=%d,max_freq=%d,status=%s", cur_temp, cpufreq_get(0), max_freq, get_cpu_status());
         pr_debug("cpu_temp=%d,freq=%d,max_freq=%d,status=%s", cur_temp, cpufreq_get(0), max_freq, get_cpu_status());
 	
         //fan ctrl
@@ -275,7 +278,14 @@ thermal_ctrl:
                 lidbg_readwrite_file(FREQ_MAX_NODE, NULL, g_hw.cpu_freq_thermal[i].limit_freq_string, strlen(g_hw.cpu_freq_thermal[i].limit_freq_string));
                 if(g_hw.gpu_max_freq_node != NULL)
                     lidbg_readwrite_file(g_hw.gpu_max_freq_node, NULL, g_hw.cpu_freq_thermal[i].limit_gpu_freq_string, strlen(g_hw.cpu_freq_thermal[i].limit_gpu_freq_string));
-                lidbg("set max freq to: %d,temp:%d,temp_offset:%d,cpufreq=%d\n", g_hw.cpu_freq_thermal[i].limit_freq, cur_temp, temp_offset,cpufreq_get(0));
+                lidbg("set max freq to: %d,temp:%d,temp_offset:%d,cpufreq=%d,max_cpus=%d\n", g_hw.cpu_freq_thermal[i].limit_freq, cur_temp, temp_offset,cpufreq_get(0),get_file_int(CPU_MAX_NODE));
+
+		if(g_hw.cpu_freq_thermal[i].max_cpu>0)
+		{
+		char max_cpu[10];
+		sprintf(max_cpu,"%d",g_hw.cpu_freq_thermal[i].max_cpu);
+		lidbg_readwrite_file(CPU_MAX_NODE, NULL, max_cpu, strlen(max_cpu));
+		}
                 break;
             }
         }
