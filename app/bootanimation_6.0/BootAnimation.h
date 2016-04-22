@@ -26,6 +26,8 @@
 #include <EGL/egl.h>
 #include <GLES/gl.h>
 
+#define UNUSED(x) (void)x
+
 class SkBitmap;
 
 namespace android {
@@ -35,11 +37,39 @@ class Surface;
 class SurfaceComposerClient;
 class SurfaceControl;
 
+typedef struct                                          //logo¸ÃÎÄ¼þ´æ´¢½á¹¹
+{
+        unsigned short          x_position;             //logoÏÔÊ¾Î»ÖÃµÄx×ø±ê
+        unsigned short          y_position;             //logoÏÔÊ¾Î»ÖÃµÄy×ø±ê
+        unsigned short          width;                  //logoµÄ¿í¶È
+        unsigned short          height;                 //logoµÄ¸ß¶È
+        unsigned short          back_color;             //±³¾°É«£¨RGB565Öµ£©
+        unsigned short          reserved;               //±£Áô2B
+        unsigned long           data_len;               //Êý¾Ý³¤¶È
+        unsigned char           *pdata;                 //Êý¾ÝÇø
+}sLogo;
+// ---------------------------------------------------------------------------
+struct frect
+{
+        float left,buttom,right,top;
+};
+struct Texture {
+        GLint   w;
+        GLint   h;
+        GLuint  name;
+        frect srcrect;
+    };
 // ---------------------------------------------------------------------------
 
 class BootAnimation : public Thread, public IBinder::DeathRecipient
 {
 public:
+    enum {
+        eOrientationDefault     = 0,
+        eOrientation90          = 1,
+        eOrientation180         = 2,
+        eOrientation270         = 3,
+    };
                 BootAnimation();
     virtual     ~BootAnimation();
 
@@ -51,12 +81,6 @@ private:
     virtual void        onFirstRef();
     virtual void        binderDied(const wp<IBinder>& who);
 
-    enum {
-        eOrientationDefault     = 0,
-        eOrientation90          = 1,
-        eOrientation180         = 2,
-        eOrientation270         = 3,
-    };
     struct Texture {
         GLint   w;
         GLint   h;
@@ -87,18 +111,35 @@ private:
         Vector<Part> parts;
     };
 
+    ////////////////////
+    //edited by yeguanping
+        int read_raw_data_from_part(char *buf, size_t len,char *partition);
+        int read_pic(char *buf,unsigned int buflen);
+
+        status_t initTexture();
+        bool initGL();
+    ////////////////////
+        void DrawTextrueOrigin(Texture texobj,int halfw,int halfh,frect* src_rect);
+        void DrawTextrueColor(Texture imgobj,int part,GLfloat colors[],int halfw,int halfh);
+
     status_t initTexture(Texture* texture, AssetManager& asset, const char* name);
-    status_t initTexture(const Animation::Frame& frame);
+    status_t initTexture(void* buffer, size_t len);
     bool android();
     bool readFile(const char* name, String8& outString);
     bool movie();
 
+    enum ImageID { IMG_DATA = 0, IMG_SYS = 1, IMG_ENC = 2 };
+    char *getAnimationFileName(ImageID image);
+    char *getBootRingtoneFileName(ImageID image);
+    void playBackgroundMusic();
+    bool checkBootState();
     void checkExit();
+    void checkShowAndroid();
 
     sp<SurfaceComposerClient>       mSession;
     sp<AudioPlayer>                 mAudioPlayer;
     AssetManager mAssets;
-    Texture     mAndroid[2];
+    Texture     mAndroid[3];
     int         mWidth;
     int         mHeight;
     EGLDisplay  mDisplay;
@@ -109,6 +150,7 @@ private:
     ZipFileRO   *mZip;
 };
 
+//static void* playMusic(void* arg);
 // ---------------------------------------------------------------------------
 
 }; // namespace android

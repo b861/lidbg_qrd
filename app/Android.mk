@@ -82,4 +82,11 @@ ifeq ($(CONFIG_HAL_USB_CAMERA),y)
 SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,camera-fw-update)
 endif
 
+ifeq ($(CONFIG_HAL_BOOTANIMATION),y)
+SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,bootanimation)
+endif
+
+ifeq ($(CONFIG_HAL_BOOTANIMATION_6),y)
+SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,bootanimation_6.0)
+endif
 include $(SUBDIR_MAKEFILES)

@@ -20,6 +20,7 @@
 #include <binder/ProcessState.h>
 #include <binder/IServiceManager.h>
 #include <cutils/properties.h>
+#include <pthread.h>
 #include <sys/resource.h>
 #include <utils/Log.h>
 #include <utils/threads.h>
