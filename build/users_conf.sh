@@ -47,6 +47,8 @@ case "$USERS_ID" in
 		export BP_SOURCE_PATH=$DBG_PLATFORM_PATH/8228_bp_v103
 		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/msm8226
 		export RELEASE_REPOSITORY=$DBG_PLATFORM_PATH/8x26-release;;
+                14)
+		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/M8974AAAAANLYD4275;;
                 15)
 		export DBG_SYSTEM_DIR=$DBG_PLATFORM_PATH/imx6qdl-sabresd;;
 	esac;;
