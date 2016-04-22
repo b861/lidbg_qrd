@@ -19,19 +19,19 @@ struct notifier_block devices_notif;
 int thread_lcd_on_delay(void *data)
 {
     DUMP_FUN_ENTER;
-    lidbg( "misc:1500\n");
-    msleep(960+1500);
+    lidbg( "misc:1000\n");
+    msleep(960+1000);
 	if(g_var.acc_flag==FLY_ACC_ON)
 	{
-        		lidbg("LCD_ON2.in\n");
-        		LCD_ON;
+		lidbg("LCD_ON2.in\n");
+		LCD_ON;
 		msleep(1000);
-        		lidbg("LCD_ON2.in.hold_bootanim2.false\n");
+		lidbg("LCD_ON2.in.hold_bootanim2.false\n");
 		lidbg_shell_cmd("setprop lidbg.hold_bootanim2 false");
-        		lidbg_shell_cmd("echo echoLCD_ON2.hold_bootanim2.false > /dev/lidbg_msg");
+		lidbg_shell_cmd("echo echoLCD_ON2.hold_bootanim2.false > /dev/lidbg_msg");
 	}
 	else
-        		lidbg("LCD_ON2.skip\n");
+        	lidbg("LCD_ON2.skip\n");
     return 0;
 }
 static int devices_notifier_callback(struct notifier_block *self,

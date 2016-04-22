@@ -428,7 +428,7 @@ void cb_dsi83_rst(char *key, char *value )
 
 static int thread_dsi83_check(void *data)
 {
-    dsi83_dump_reg();
+    //dsi83_dump_reg();
     dsi83_check();
     return 0;
 }
