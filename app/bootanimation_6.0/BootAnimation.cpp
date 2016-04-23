@@ -947,6 +947,8 @@ bool BootAnimation::checkBootState(void)
 
 static void* playMusic(void* arg)
 {
+    arg = arg;
+/*
     int index = 0;
     char *fileName = (char *)arg;
     sp<MediaPlayer> mp = new MediaPlayer();
@@ -983,6 +985,7 @@ static void* playMusic(void* arg)
             ALOGW("current volume is zero.");
         }
     }
+*/
     return NULL;
 }
 // ---------------------------------------------------------------------------
