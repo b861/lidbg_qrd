@@ -333,6 +333,8 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#077--dumpsys meminfo\n");
             fs_mem_log("*158#078--test seven day timeout :will reboot at tomorow 6:00,Reset once per hour\n");
             fs_mem_log("*158#079--open binder debug\n");
+            fs_mem_log("*158#080--disable third part apk\n");
+            fs_mem_log("*158#081--enable third part apk\n");
             show_password_list();
             lidbg_domineering_ack();
         }
@@ -856,7 +858,18 @@ void parse_cmd(char *pt)
             lidbg_shell_cmd("echo -n 'file binder.c +p' > /sys/kernel/debug/dynamic_debug/control");
             lidbg_domineering_ack();
         }
-
+        else if (!strcmp(argv[1], "*158#080"))
+        {
+            lidbg("*158#080--disable third part apk\n");
+            lidbg_shell_cmd("echo ws 3rd pm disable > /dev/lidbg_pm0");
+            lidbg_domineering_ack();
+        }
+        else if (!strcmp(argv[1], "*158#081"))
+        {
+            lidbg("*158#081--enable third part apk\n");
+            lidbg_shell_cmd("echo ws 3rd pm enable > /dev/lidbg_pm0");
+            lidbg_domineering_ack();
+        }
 
     }
     else if(!strcmp(argv[0], "monkey") )

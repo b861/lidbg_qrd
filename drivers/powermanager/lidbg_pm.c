@@ -38,6 +38,9 @@ extern void grf_restore(void);
 
 int have_triggerd_sleep_S = 0;
 
+static DECLARE_COMPLETION(pm_3rd_package_wait);
+static char shell_head[32];
+
 bool is_safety_apk(char *apkname)
 {
     if(strncmp(apkname, "com.fly.flybootservice", sizeof("com.fly.flybootservice") - 1) == 0)
@@ -782,6 +785,12 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
             else
                 PM_WARN("< echo ws task c2739.mainframe 1 1 1 > /dev/lidbg_pm0 >\n");
         }
+        else  if(!strcmp(cmd[1], "3rd"))
+        {
+		snprintf(shell_head, sizeof(shell_head), "%s %s %s %s", cmd[2], cmd_num > 3 ? cmd[3] : "", cmd_num > 4 ? cmd[4] : "", cmd_num > 5 ? cmd[5] : "");
+		PM_WARN("<3rd.shell_head:%s>\n", shell_head);
+		complete(&pm_3rd_package_wait);
+        }
     }
 #endif
 
@@ -1173,6 +1182,54 @@ static struct platform_driver lidbg_pm_driver =
     },
 };
 
+
+static LIST_HEAD(pm_3rd_package_list);
+void pm_list_action(void)
+{
+    char cmd[128];
+    int count = 0;
+    struct string_dev *pos;
+    char *p = NULL;
+
+    list_for_each_entry(pos, &pm_3rd_package_list, tmp_list)
+    {
+        if(pos->yourkey && (p = strchr(pos->yourkey, ':')))
+        {
+            ++p;
+            count++;
+            snprintf(cmd, sizeof(cmd), "%s %s &", shell_head, p );
+            lidbg_shell_cmd(cmd);
+            LIDBG_WARN("%d -->%s\n", count, cmd);
+            msleep(10);
+        }
+        p = NULL;
+    }
+}
+static int thread_get_3rd_package_name_list_delay(void *data)
+{
+    DUMP_FUN;
+    while(0 == g_var.android_boot_completed)
+    {
+        ssleep(1);
+    };
+    ssleep(10);
+    lidbg_shell_cmd("pm list packages -3 > "LIDBG_LOG_DIR"pm_3.txt");
+    ssleep(5);
+    if(fs_fill_list(LIDBG_LOG_DIR"pm_3.txt", FS_CMD_FILE_LISTMODE, &pm_3rd_package_list) < 0)
+    {
+        lidbg("pm_3rd_package_list,error\n");
+        return 1;
+    };
+    while(1)
+    {
+        if( !wait_for_completion_interruptible(&pm_3rd_package_wait))
+        {
+            pm_list_action();
+        }
+    }
+    return 1;
+}
+
 static void set_func_tbl(void)
 {
     plidbg_dev->soc_func_tbl.pfnLINUX_TO_LIDBG_TRANSFER = linux_to_lidbg_receiver;
@@ -1212,6 +1269,7 @@ static int __init lidbg_pm_init(void)
     PM_WARN("<set MCU_WP_GPIO_ON>\n");
 
     CREATE_KTHREAD(thread_gpio_app_status_delay, NULL);
+    CREATE_KTHREAD(thread_get_3rd_package_name_list_delay, NULL);
 
 #ifdef PLATFORM_msm8226
     CREATE_KTHREAD(thread_gps_handle, NULL);
