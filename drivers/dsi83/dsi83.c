@@ -333,6 +333,8 @@ static void dsi83_work_func(struct work_struct *work)
 
   //  msleep(200);//wait for sigal/reg stable
     //dsi83_check();
+    //LCD_ON;
+    //lidbg( "dsi83:LCD_ON\n");
         CREATE_KTHREAD(thread_dsi83_check, NULL);
 }
 
