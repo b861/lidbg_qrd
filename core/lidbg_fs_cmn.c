@@ -147,7 +147,7 @@ int fs_file_read(const char *filename, char *rbuff, loff_t offset, int readlen)
     filep = filp_open(filename,  O_RDONLY, 0);
     if(IS_ERR(filep))
     {
-        LIDBG_ERR("filp_open.%s\n",filename);
+//        LIDBG_ERR("filp_open.%s\n",filename);
         return -1;
     }
     old_fs = get_fs();

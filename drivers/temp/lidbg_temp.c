@@ -17,6 +17,7 @@ bool fan_run_status = false;
 
 #define FREQ_MAX_NODE    "/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq"
 #define CPU_MAX_NODE    "/sys/devices/system/cpu/cpu0/core_ctl/max_cpus"
+#define CPU_MIN_NODE    "/sys/devices/system/cpu/cpu0/core_ctl/min_cpus"
 #define TEMP_LOG_PATH 	 LIDBG_LOG_DIR"log_ct.txt"
 #define TEMP_FREQ_TEST_RESULT LIDBG_LOG_DIR"lidbg_temp_freq.txt"
 #define TEMP_FREQ_COUNTER LIDBG_LOG_DIR"freq_tmp.txt"
@@ -144,7 +145,7 @@ void set_system_performance(int type)
 
 int thread_thermal(void *data)
 {
-    int cur_temp, i, max_freq;
+    int cur_temp, i, max_freq,maxcpu,mincpu;
     DUMP_FUN;
     lidbg_shell_cmd("chmod 444 /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq &");
     set_cpu_governor(0);
@@ -208,9 +209,11 @@ int thread_thermal(void *data)
 
         log_temp();
         cur_temp = soc_temp_get(g_hw.mem_sensor_num);
+        maxcpu= get_file_int(CPU_MAX_NODE);
+        mincpu= get_file_int(CPU_MIN_NODE);
 	if(0==g_var.android_boot_completed)
-       		lidbg("cpu_temp=%d,freq=%d,max_freq=%d,status=%s", cur_temp, cpufreq_get(0), max_freq, get_cpu_status());
-        pr_debug("cpu_temp=%d,freq=%d,max_freq=%d,status=%s", cur_temp, cpufreq_get(0), max_freq, get_cpu_status());
+        		lidbg("cpu_temp=%d,freq=%d,max_freq=%d,maxcpu=%d,mincpu=%d,status=%s", cur_temp, cpufreq_get(0), max_freq,maxcpu,mincpu,get_cpu_status());
+        pr_debug("cpu_temp=%d,freq=%d,max_freq=%d,maxcpu=%d,mincpu=%d,status=%s", cur_temp, cpufreq_get(0), max_freq,maxcpu,mincpu,get_cpu_status());
 	
         //fan ctrl
         {
@@ -271,20 +274,32 @@ thermal_ctrl:
             if((g_hw.cpu_freq_thermal[i].temp_low == 0) || (g_hw.cpu_freq_thermal[i].temp_high == 0))
                 break;
 
-            if((cur_temp >= (g_hw.cpu_freq_thermal[i].temp_low + temp_offset) ) && (cur_temp <= (g_hw.cpu_freq_thermal[i].temp_high + temp_offset) )
-                    && (max_freq != g_hw.cpu_freq_thermal[i].limit_freq))
+            if((cur_temp >= (g_hw.cpu_freq_thermal[i].temp_low + temp_offset) ) && (cur_temp <= (g_hw.cpu_freq_thermal[i].temp_high + temp_offset) ))
             {
-
-                lidbg_readwrite_file(FREQ_MAX_NODE, NULL, g_hw.cpu_freq_thermal[i].limit_freq_string, strlen(g_hw.cpu_freq_thermal[i].limit_freq_string));
-                if(g_hw.gpu_max_freq_node != NULL)
-                    lidbg_readwrite_file(g_hw.gpu_max_freq_node, NULL, g_hw.cpu_freq_thermal[i].limit_gpu_freq_string, strlen(g_hw.cpu_freq_thermal[i].limit_gpu_freq_string));
-                lidbg("set max freq to: %d,temp:%d,temp_offset:%d,cpufreq=%d,max_cpus=%d\n", g_hw.cpu_freq_thermal[i].limit_freq, cur_temp, temp_offset,cpufreq_get(0),get_file_int(CPU_MAX_NODE));
-
+		if(max_freq != g_hw.cpu_freq_thermal[i].limit_freq)
+		{
+		                lidbg_readwrite_file(FREQ_MAX_NODE, NULL, g_hw.cpu_freq_thermal[i].limit_freq_string, strlen(g_hw.cpu_freq_thermal[i].limit_freq_string));
+		                if(g_hw.gpu_max_freq_node != NULL)
+		                    lidbg_readwrite_file(g_hw.gpu_max_freq_node, NULL, g_hw.cpu_freq_thermal[i].limit_gpu_freq_string, strlen(g_hw.cpu_freq_thermal[i].limit_gpu_freq_string));
+		                lidbg("set max freq to: %d,temp:%d,temp_offset:%d,cpufreq=%d\n", g_hw.cpu_freq_thermal[i].limit_freq, cur_temp, temp_offset,cpufreq_get(0));
+		}
 		if(g_hw.cpu_freq_thermal[i].max_cpu>0)
 		{
-		char max_cpu[10];
-		sprintf(max_cpu,"%d",g_hw.cpu_freq_thermal[i].max_cpu);
-		lidbg_readwrite_file(CPU_MAX_NODE, NULL, max_cpu, strlen(max_cpu));
+			if(maxcpu!=g_hw.cpu_freq_thermal[i].max_cpu)
+			{
+				char max_cpu[10];
+				sprintf(max_cpu,"%d",g_hw.cpu_freq_thermal[i].max_cpu);
+				lidbg_readwrite_file(CPU_MAX_NODE, NULL, max_cpu, strlen(max_cpu));
+				lidbg("set cpus max to:%d/%d\n",g_hw.cpu_freq_thermal[i].max_cpu,get_file_int(CPU_MAX_NODE));
+			}
+			if(mincpu!=g_hw.cpu_freq_thermal[i].max_cpu)
+			{
+				char max_cpu[10];
+				sprintf(max_cpu,"%d",g_hw.cpu_freq_thermal[i].max_cpu);
+				lidbg_readwrite_file(CPU_MIN_NODE, NULL, max_cpu, strlen(max_cpu));
+				lidbg("set cpus min to:%d/%d\n",g_hw.cpu_freq_thermal[i].max_cpu,get_file_int(CPU_MIN_NODE));
+			}
+
 		}
                 break;
             }
