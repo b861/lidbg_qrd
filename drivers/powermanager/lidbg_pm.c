@@ -5,6 +5,7 @@ LIDBG_DEFINE;
 #define PM_DIR LIDBG_LOG_DIR"pm_info/"
 #define PM_INFO_FILE PM_DIR"pm_info.txt"
 #define PM_ACC_FILE PM_DIR"pm_acc.txt"
+#define PM_WAKEUP_LOG_FILE PM_DIR"pm_wakeup_log.txt"
 
 #if defined(CONFIG_HAS_EARLYSUSPEND)
 #define WAKE_LOCK_ACTIVE                 (1U << 9)
@@ -872,6 +873,7 @@ static int thread_save_acc_times(void *data)
     clear_pm_log();
     fs_clear_file(PM_ACC_FILE);
     fs_string2file(0, PM_ACC_FILE, "acc_counter:%d  sleep_counter:%d",g_var.acc_counter/2, g_var.sleep_counter);
+    lidbg_fs_log(PM_WAKEUP_LOG_FILE, "acc_counter:%d  sleep_counter:%d\n",g_var.acc_counter/2, g_var.sleep_counter);
     return 1;
 }
 #ifdef CONFIG_PM
