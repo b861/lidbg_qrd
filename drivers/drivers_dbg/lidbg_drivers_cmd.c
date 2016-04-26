@@ -336,6 +336,7 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#080--disable third part apk\n");
             fs_mem_log("*158#081--enable third part apk\n");
             fs_mem_log("*158#082--disable network ping alarm\n");
+            fs_mem_log("*158#083--enable network ping alarm\n");
             show_password_list();
             lidbg_domineering_ack();
         }
@@ -876,6 +877,12 @@ void parse_cmd(char *pt)
         {
             lidbg("*158#082--disable network ping alarm\n");
             lidbg_shell_cmd("am broadcast -a com.fly.lidbg.LidbgCommenLogic --ei action 0 &");
+            lidbg_domineering_ack();
+        }
+        else if (!strcmp(argv[1], "*158#083"))
+        {
+            lidbg("*158#083--enable network ping alarm\n");
+            lidbg_shell_cmd("am broadcast -a com.fly.lidbg.LidbgCommenLogic --ei action 1 &");
             lidbg_domineering_ack();
         }
 

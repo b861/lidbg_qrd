@@ -62,7 +62,6 @@ public class LidbgCommenLogicService extends Service
 		filter.addAction(Intent.ACTION_SCREEN_ON);
 		filter.setPriority(Integer.MAX_VALUE);
 		mLidbgCommenLogicService.registerReceiver(myReceiver, filter);
-		addRepeatAlarm();
 	}
 
 	private void addRepeatAlarm()
@@ -390,6 +389,11 @@ public class LidbgCommenLogicService extends Service
 				printKernelMsg("mAlarmManager.cancel\n");
 				mAlarmManager.cancel(peration);
 				break;
+			case 1:
+				printKernelMsg("addRepeatAlarm\n");
+				addRepeatAlarm();
+				break;
+
 			default:
 				printKernelMsg("unkown" + action + "\n");
 				break;
