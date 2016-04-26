@@ -151,10 +151,13 @@ public class FlyBootService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        LIDBG_PRINT("flybootservice onCreate......");
+	mFlyBootService = this;
+        LIDBG_PRINT("flybootservice onCreate-->start LidbgCommenLogic\n");
+        Intent mIntent = new Intent();
+        mIntent.setComponent(new ComponentName("com.fly.lidbg.LidbgCommenLogic","com.fly.lidbg.LidbgCommenLogic.LidbgCommenLogicService"));
+        this.startService(mIntent);
         writeToFile("/dev/lidbg_pm0","flyaudio PmServiceStar");
 
-	mFlyBootService = this;
 	acquireWakeLock();
 	mPackageManager = this.getPackageManager();
 	fbPm = (PowerManager) getSystemService(Context.POWER_SERVICE);
@@ -162,9 +165,9 @@ public class FlyBootService extends Service {
 	mWhiteList = FileReadList("/flysystem/lib/out/appProtectList.conf","\n");
 	mInternelWhiteList = FileReadList("/flysystem/lib/out/appInternetProtectList.conf","\n");
 	DUMP();
-        LIDBG_PRINT("flybootservice start [getInternelAllAppUids]");
+        LIDBG_PRINT("flybootservice start [getInternelAllAppUids]\n");
 	getInternelAllAppUids(mInternelAllAppListUID);
-        LIDBG_PRINT("flybootservice stop [getInternelAllAppUids]");
+        LIDBG_PRINT("flybootservice stop [getInternelAllAppUids]\n");
         FlyaudioBlackListInternetControl(false);
 	IntentFilter filter = new IntentFilter();
 	filter.addAction("android.intent.action.BOOT_COMPLETED");

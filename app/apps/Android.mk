@@ -1,5 +1,6 @@
 
 #SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,FastPowerOn)
+SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,LidbgCommenLogic)
 ifeq ($(CONFIG_APP_LIDBGPMSERVICE),y)
 SUBDIR_MAKEFILES += $(call all-named-subdir-makefiles,LidbgPmService)
 else
