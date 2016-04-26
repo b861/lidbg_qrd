@@ -145,7 +145,7 @@ void set_system_performance(int type)
 
 int thread_thermal(void *data)
 {
-    int cur_temp, i, max_freq,maxcpu,mincpu;
+    int cur_temp, i, max_freq,maxcpu,mincpu,cpu_temp;
     DUMP_FUN;
     lidbg_shell_cmd("chmod 444 /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq &");
     set_cpu_governor(0);
@@ -176,7 +176,7 @@ int thread_thermal(void *data)
             ssleep(5);
             cpu_freq = SOC_Get_CpuFreq();
             cur_temp = soc_temp_get(g_hw.mem_sensor_num);
-            lidbg("cpufreq=%d,temp=%d\n", cpu_freq, cur_temp);
+            lidbg("cpufreq=%d,mem_temp=%d\n", cpu_freq, cur_temp);
         }
     }
 
@@ -209,12 +209,14 @@ int thread_thermal(void *data)
 
         log_temp();
         cur_temp = soc_temp_get(g_hw.mem_sensor_num);
+	 cpu_temp = soc_temp_get(g_hw.cpu_sensor_num);
         maxcpu= get_file_int(CPU_MAX_NODE);
         mincpu= get_file_int(CPU_MIN_NODE);
 	if(0==g_var.android_boot_completed)
-        		lidbg("cpu_temp=%d,freq=%d,max_freq=%d,maxcpu=%d,mincpu=%d,status=%s", cur_temp, cpufreq_get(0), max_freq,maxcpu,mincpu,get_cpu_status());
-        pr_debug("cpu_temp=%d,freq=%d,max_freq=%d,maxcpu=%d,mincpu=%d,status=%s", cur_temp, cpufreq_get(0), max_freq,maxcpu,mincpu,get_cpu_status());
-	
+        		lidbg("mem_temp=%d,cpu_temp=%d,freq=%d,max_freq=%d,maxcpu=%d,mincpu=%d,status=%s",cur_temp, cur_temp, cpufreq_get(0), max_freq,maxcpu,mincpu,get_cpu_status());
+        pr_debug("mem_temp=%d,cpu_temp=%d,freq=%d,max_freq=%d,maxcpu=%d,mincpu=%d,status=%s",cur_temp, cpu_temp, cpufreq_get(0), max_freq,maxcpu,mincpu,get_cpu_status());
+		
+	if(0)
         //fan ctrl
         {
             if( (cur_temp > g_hw.fan_onoff_temp)  &&
@@ -246,14 +248,6 @@ int thread_thermal(void *data)
         }
 
         //temp_offset = -25;
-
-        if(g_var.recovery_mode == 1)
-        {
-            temp_offset = -30;
-            lidbg("temp:%d,freq:%d\n", cur_temp, cpufreq_get(0));
-            msleep(500);
-            //goto thermal_ctrl;
-        }
 
         if(g_hw.thermal_ctrl_en == 0)
         {
