@@ -695,16 +695,18 @@ public static void releaseBrightWakeLock()
     }
 
     private void powerOnSystem(Context context) {
+		int cnt = 0;
 		LIDBG_PRINT("powerOnSystem+\n");
 		//if(!blSuspendUnairplaneFlag)
 		//	restoreAirplaneMode(context);
-		while(SystemProperties.getBoolean("lidbg.hold_bootanim", false)||SystemProperties.getBoolean("lidbg.hold_bootanim2", false))
+		while((SystemProperties.getBoolean("lidbg.hold_bootanim", false)||SystemProperties.getBoolean("lidbg.hold_bootanim2", false)) && (cnt < 50))
 		{
 			//LIDBG_PRINT("hold_bootanim2.stop,["+SystemProperties.getBoolean("lidbg.hold_bootanim", false)+"/"+SystemProperties.getBoolean("lidbg.hold_bootanim2", false)+"]\n");
 			SystemClock.sleep(100);
+			cnt ++;
 		}
 		SystemProperties.set("ctl.stop", "bootanim");
-		LIDBG_PRINT("powerOnSystem-hold_bootanim2.stop\n");
+		LIDBG_PRINT("powerOnSystem-hold_bootanim2.stop,cnt="+ cnt + "\n");
     }
 
     // send broadcast to music application to pause music
