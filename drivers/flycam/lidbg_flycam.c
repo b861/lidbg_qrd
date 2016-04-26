@@ -632,11 +632,6 @@ static int stop_rec(char cam_id,char isPowerCtl)
 			lidbg("%s:====read_status wait timeout => %d====\n",__func__,pfly_UsbCamInfo->read_status);
 			ret = 1; 
 		}
-		if(isPowerCtl) 
-		{	
-			lidbg("%s:====udisk_unrequest====\n",__func__);
-			lidbg_shell_cmd("echo 'udisk_unrequest' > /dev/flydev0");//don't control HUB power in rearview
-		}
 	}
 	else if(cam_id == REARVIEW_ID)
 	{
@@ -645,6 +640,11 @@ static int stop_rec(char cam_id,char isPowerCtl)
 			lidbg("%s:====read_status wait timeout => %d====\n",__func__,pfly_UsbCamInfo->read_status);
 			return 1; 
 		}
+	}
+	if(isPowerCtl) 
+	{	
+		lidbg("%s:====udisk_unrequest====\n",__func__);
+		lidbg_shell_cmd("echo 'udisk_unrequest' > /dev/flydev0");//don't control HUB power in rearview
 	}
 	usleep(200*1000);
 	lidbg("%s:====X====\n",__func__);
