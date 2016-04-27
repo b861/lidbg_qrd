@@ -1,6 +1,9 @@
 //package com.mypftf.callmessage;
 
 package com.fly.lidbg.LidbgCommenLogic;
+
+import android.os.PowerManager;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import java.io.BufferedReader;
 import java.io.File;
@@ -32,12 +35,12 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.IBinder;
-import android.os.SystemClock;
 import android.telephony.TelephonyManager;
 
 public class LidbgCommenLogicService extends Service
 {
 
+	protected static final String ACCProperties = "persist.lidbg.acc.status";
 	private LidbgCommenLogicService mLidbgCommenLogicService;
 	private PendingIntent peration;
 	private AlarmManager mAlarmManager;
@@ -140,8 +143,8 @@ public class LidbgCommenLogicService extends Service
 		HttpGet get = new HttpGet(msgString);
 		try
 		{
-			HttpConnectionParams.setConnectionTimeout(cliet.getParams(), 6000);
-			HttpConnectionParams.setSoTimeout(cliet.getParams(), 6000);
+			HttpConnectionParams.setConnectionTimeout(cliet.getParams(), 3000);
+			HttpConnectionParams.setSoTimeout(cliet.getParams(), 3000);
 			HttpResponse response = cliet.execute(get);
 			HttpEntity entity = response.getEntity();
 			InputStream is = entity.getContent();
@@ -188,7 +191,6 @@ public class LidbgCommenLogicService extends Service
 				{
 					stringBuffer.append(line + "-");
 				}
-				// 这里返回执行结果，并打印。
 				reponse = stringBuffer.toString();
 
 			} catch (InterruptedException e)
@@ -212,18 +214,17 @@ public class LidbgCommenLogicService extends Service
 				+ getHttpClientResponseCode("https://www.baidu.com/") + "\n";
 		String response2 = "response2:"
 				+ getHttpClientResponseCode("https://www.1688.com/") + "\n";
-		String pingString1 = ("ping baidu:" + runShellCommend("ping -c 2 202.108.22.5"))
-				+ "\n";
-		String pingString2 = ("ping ali:" + runShellCommend("ping -c 2 120.76.43.12"))
-				+ "\n";
+		// String pingString1 = ("ping baidu:" +
+		// runShellCommend("ping -c 1 202.108.22.5"))
+		// + "\n";
+		// String pingString2 = ("ping ali:" +
+		// runShellCommend("ping -c 1 120.76.43.12"))
+		// + "\n";
 		ret = (response1.contains("success") || response2.contains("success"));
 
-		String log = ("\n" + getCurrentTimeString() + "\nret:" + ret
-				+ "\ngetNetworkAviName:" + getNetworkAviName() + "\n"
-				+ response1 + response2 + pingString1 + pingString2);
+		String log = ("\n" + getCurrentTimeString() + "\nret:" + ret + "\n"
+				+ response1 + response2);
 		printKernelMsg(log);
-		printKernelMsg(pingString1);
-		printKernelMsg(pingString2);
 		return ret;
 	}
 
@@ -270,24 +271,31 @@ public class LidbgCommenLogicService extends Service
 					printKernelMsg("====START======" + testCount + "/"
 							+ testCountError + "==========\n");
 					boolean isCanResetNetWork = isCanResetNetWork();
-					int accState = SystemProperties.getInt("persist.lidbg.acc.status", 0);// o:ACC on , 1:ACC off
-					printKernelMsg("isCanResetNetWork:" + isCanResetNetWork);
-					printKernelMsg("accState:" + accState);
-					if (accState==1&&isCanResetNetWork)
+					// 0:ACC on/1:ACC off
+					int accState = SystemProperties.getInt(ACCProperties, 0);
+					printKernelMsg("isCanResetNetWork:" + isCanResetNetWork
+							+ "\naccState:" + accState + "\ngetNetworkAviName:"
+							+ getNetworkAviName());
+					if (accState == 1 && isCanResetNetWork)
 					{
 						testCount++;
 						if (!isNetworkResponseOk())
 						{
 							testCountError++;
-							printKernelMsg("network err:reset");
-							FileWrite("/dev/lidbg_misc0", false, false,
-									"flyaudio:svc data disable &");
-							msleep(2000);
-							FileWrite("/dev/lidbg_misc0", false, false,
-									"flyaudio:svc data enable &");
-							msleep(10000);
-							printKernelMsg("after reset:"
-									+ isNetworkResponseOk());
+							wakeUpSystem();
+							printKernelMsg("msleep(5000)");
+							msleep(5000);
+							boolean ret = isNetworkResponseOk();
+							printKernelMsg("after wakeUpSystem:" + ret);
+							if (!ret)
+							{
+								resetNetWork();
+								printKernelMsg("msleep(10000)");
+								msleep(10000);
+								printKernelMsg("after reset:"
+										+ isNetworkResponseOk());
+							}
+							//goToSleep();
 						}
 					}
 					printKernelMsg("====STOP======" + testCount + "/"
@@ -314,11 +322,39 @@ public class LidbgCommenLogicService extends Service
 		}
 	}
 
+	protected void wakeUpSystem()
+	{
+		// TODO Auto-generated method stub
+		PowerManager fbPm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+		printKernelMsg("wakeUpSystem");
+		fbPm.wakeUp(SystemClock.uptimeMillis());
+	}
+
+	protected void goToSleep()
+	{
+		// TODO Auto-generated method stub
+		PowerManager fbPm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+		printKernelMsg("goToSleep");
+		fbPm.goToSleep(SystemClock.uptimeMillis());
+	}
+
+	protected void resetNetWork()
+	{
+		// TODO Auto-generated method stub
+		printKernelMsg("network err:reset");
+		FileWrite("/dev/lidbg_misc0", false, false,
+				"flyaudio:svc data disable &");
+		msleep(5000);
+		FileWrite("/dev/lidbg_misc0", false, false,
+				"flyaudio:svc data enable &");
+		printKernelMsg("data enable");
+	}
+
 	protected String getCurrentTimeString()
 	{
 		// TODO Auto-generated method stub
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		Date curDate = new Date(System.currentTimeMillis());// 获取当前时间
+		Date curDate = new Date(System.currentTimeMillis());
 		return df.format(curDate);
 	}
 
@@ -327,7 +363,7 @@ public class LidbgCommenLogicService extends Service
 	{
 		// TODO Auto-generated method stub
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		Date curDate = new Date(System.currentTimeMillis());// 获取当前时间
+		Date curDate = new Date(System.currentTimeMillis());
 
 		Calendar calendar = Calendar.getInstance();
 		TimeZone tm = TimeZone.getTimeZone("GMT");
@@ -393,9 +429,26 @@ public class LidbgCommenLogicService extends Service
 				printKernelMsg("addRepeatAlarm\n");
 				addRepeatAlarm();
 				break;
+			case 2:
+				printKernelMsg("addRepeatAlarm,per one mins\n");
+				absolMinu = 1;
+				addRepeatAlarm();
+				break;
+			case 3:
+				printKernelMsg("wakeUpSystem\n");
+				wakeUpSystem();
+				break;
+			case 4:
+				printKernelMsg("goToSleep\n");
+				goToSleep();
+				break;
+			case 5:
+				printKernelMsg("handleAlarmEvent\n");
+				handleAlarmEvent(null);
+				break;
 
 			default:
-				printKernelMsg("unkown" + action + "\n");
+				printKernelMsg("unkown:" + action + "\n");
 				break;
 			}
 		}
@@ -463,4 +516,3 @@ public class LidbgCommenLogicService extends Service
 		return true;
 	}
 }
-
