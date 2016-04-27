@@ -2,28 +2,25 @@
 function soc_build_system()
 {
 	echo $FUNCNAME
-        soc_prebuild && make systemimage -j16 && soc_postbuild
+	cd $DBG_SYSTEM_DIR
+	soc_prebuild && make systemimage -j16 && soc_postbuild
 }
 
 function soc_build_kernel()
 {
-        echo $FUNCNAME
-        export ARCH=arm
+	echo $FUNCNAME
+	export ARCH=arm
 	export CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilts/gcc/linux-x86/arm/arm-eabi-4.6/bin/arm-eabi-
-        cd $DBG_SYSTEM_DIR/kernel_imx
-        make -j16 uImage LOADADDR=0x10008000
 
-        cd $DBG_SYSTEM_DIR
-        source build/envsetup.sh
-        lunch $DBG_PLATFORM-$SYSTEM_BUILD_TYPE
-     
-        soc_prebuild && make bootimage -j16
+	cd $DBG_SYSTEM_DIR
+	soc_prebuild && soc_build_common 'make bootimage -j16'
 }
 
 
 function soc_build_recovery()
 {
 	echo $FUNCNAME
+	cd $DBG_SYSTEM_DIR
 	soc_prebuild && soc_build_common 'make recovery -j16'
 }
 
@@ -50,31 +47,8 @@ function soc_build_recoveryimage()
         fi
 	cp -rf $DBG_OUT_PATH  $DBG_SYSTEM_DIR/bootable/recovery/flyRecovery
 	#echo "$(expr $ANDROID_VERSION / 100 )"
-	cp $DBG_SYSTEM_DIR/bootable/recovery/flyRecovery/Android$(expr $ANDROID_VERSION / 100 )/msm8909/recovery.conf  $DBG_SYSTEM_DIR/bootable/recovery/flyRecovery/out
+	cp $DBG_SYSTEM_DIR/bootable/recovery/flyRecovery/Android$(expr $ANDROID_VERSION / 100 )/$DBG_PLATFORM/recovery.conf  $DBG_SYSTEM_DIR/bootable/recovery/flyRecovery/out
 	soc_prebuild && soc_build_common 'make recoveryimage -j16'
-}
-
-function soc_build_bootloader()
-{
-	echo $FUNCNAME
-
-	if [ ! -d "$DBG_BOOTLOADER_DIR/flyaudio" ]; then
-		mkdir "$DBG_BOOTLOADER_DIR/flyaudio"
-	else
-		rm -rf "$DBG_BOOTLOADER_DIR/flyaudio"
-		mkdir "$DBG_BOOTLOADER_DIR/flyaudio"
-	fi
-
-	cp -rf $DBG_ROOT_PATH/fly_bootloader/* $DBG_SYSTEM_DIR/bootable/bootloader/uboot-imx/flyaudio
-	cp -f $DBG_ROOT_PATH/build/build_cfg.mk $DBG_BOOTLOADER_DIR/flyaudio/common/build_cfg.mk
-	cd $DBG_SYSTEM_DIR/bootable/bootloader/uboot-imx
-        export ARCH=arm
-        export CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilts/gcc/linux-x86/arm/arm-eabi-4.6/bin/arm-eabi-
-        make distclean
-        make mx6qsabresdandroid_config
-	make 
-        cp u-boot.imx $DBG_SYSTEM_DIR/out/target/product/sabresd_6dq/u-boot-imx6q.imx
-
 }
 
 function soc_build_common()
@@ -87,9 +61,9 @@ function soc_build_common()
 function soc_build_all()
 {
 	echo $FUNCNAME
-        soc_build_bootloader
-	soc_build_kernel
-	set_env && make -j16 2>&1 | tee build-log.txt
+	cd $DBG_SYSTEM_DIR
+
+	soc_prebuild && make -j16 && soc_postbuild
 }
 
 
@@ -102,21 +76,25 @@ function soc_postbuild()
 	echo "soc_build_all ok"
 }
 
-
 function set_env()
 {
-	echo $FUNCNAME
+	echo $FUNCNAME $TARGET_PRODUCT $DBG_PLATFORM $SYSTEM_BUILD_TYPE
 	cd $DBG_SYSTEM_DIR
-        source build/envsetup.sh && lunch $DBG_PLATFORM-$SYSTEM_BUILD_TYPE
+	source build/envsetup.sh && lunch $DBG_PLATFORM-$SYSTEM_BUILD_TYPE
 }
 
 function soc_prebuild()
 {
 	echo $FUNCNAME
 	echo $DBG_PLATFORM
-        cd $DBG_SYSTEM_DIR
-        rm -rf $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system
+	cd $DBG_SYSTEM_DIR
+
+	rm -rf $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system
 	rm -rf $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/root
+	rm -rf $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/obj/ETC
+	rm -rf $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/obj/EXECUTABLES/vold_intermediates
+
+	set_env
 }
 
 
@@ -137,10 +115,14 @@ function soc_make_otapackage()
 	echo $FUNCNAME
 	cd $DBG_SYSTEM_DIR
 
-	if [[ $TARGET_PRODUCT = "" ]];then
-		source build/envsetup.sh&&choosecombo release $DBG_PLATFORM $SYSTEM_BUILD_TYPE
+	if [ -d "$DBG_BOOTLOADER_DIR/flyaudio" ]; then
+		rm -rf "$DBG_BOOTLOADER_DIR/flyaudio"
 	fi
-        soc_build_all
+
+	if [[ $TARGET_PRODUCT = "" ]];then
+		source build/envsetup.sh && lunch $DBG_PLATFORM-$SYSTEM_BUILD_TYPE
+	fi
+
 	make otapackage -j16
 }
 
@@ -169,10 +151,9 @@ fi
 	echo "build_origin" > $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/etc/build_origin
 
 	cd $DBG_SYSTEM_DIR
-	make otapackage -j16 && soc_postbuild
+	make otapackage -j16
 
 }
-
 
 function soc_build_origin_bootimage()
 {
@@ -188,6 +169,33 @@ fi
 	soc_build_kernel
 	rm $DBG_SYSTEM_DIR/system/core/rootdir/init.lidbg.rc
 	mv $DBG_SYSTEM_DIR/system/core/rootdir/init.lidbg.rc.backup   $DBG_SYSTEM_DIR/system/core/rootdir/init.lidbg.rc	
+
+}
+
+function soc_build_bootloader()
+{
+	echo $FUNCNAME
+
+	if [ ! -d "$DBG_BOOTLOADER_DIR/flyaudio" ]; then
+		mkdir "$DBG_BOOTLOADER_DIR/flyaudio"
+	else
+		rm -rf "$DBG_BOOTLOADER_DIR/flyaudio"
+		mkdir "$DBG_BOOTLOADER_DIR/flyaudio"
+	fi
+
+	cp -rf $DBG_ROOT_PATH/fly_bootloader/* $DBG_BOOTLOADER_DIR/flyaudio
+	cp -f $DBG_ROOT_PATH/build/build_cfg.mk $DBG_BOOTLOADER_DIR/flyaudio/common/build_cfg.mk
+	rm -rf $DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/obj/EMMC_BOOTLOADER_OBJ/
+
+	echo DEFINES += $(echo BOOTLOADER_$DBG_PLATFORM | tr '[a-z]' '[A-Z]') >> $DBG_BOOTLOADER_DIR/flyaudio/common/build_cfg.mk
+
+	cd $DBG_SYSTEM_DIR/bootable/bootloader/uboot-imx
+	export ARCH=arm
+	export CROSS_COMPILE=$DBG_SYSTEM_DIR/prebuilts/gcc/linux-x86/arm/arm-eabi-4.6/bin/arm-eabi-
+	make distclean
+	make mx6qsabresdandroid_config
+	make 
+	cp u-boot.imx $DBG_SYSTEM_DIR/out/target/product/sabresd_6dq/u-boot-imx6q.imx
 
 }
 

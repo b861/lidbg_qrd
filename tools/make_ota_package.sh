@@ -1,12 +1,20 @@
 #!/bin/bash
 DATE=$(date +%Y%m%d_%H%M)
 VERSION_DATE=$(date +-%Y-%m-%d-%H-%M)
-BUILD_TYPE=700s_usbcamera
 
-SOURCE_OUT_DIR=$RELEASE_REPOSITORY/out/8909-usbcamera-alpha
+if [ $DBG_PLATFORM = msm8909 ];then
+	BUILD_TYPE=700s_usbcamera
+	SOURCE_OUT_DIR=$RELEASE_REPOSITORY/out/8909-usbcamera-alpha
+
+elif [ $DBG_PLATFORM = sabresd_6dq ];then
+	BUILD_TYPE=700s_usbcamera
+	SOURCE_OUT_DIR=$RELEASE_REPOSITORY/out/8909-usbcamera-alpha
+
+fi
+
 FLYTMP_OUT_DIR=$DBG_SYSTEM_DIR/flyaudio/out
-TARGET_OUT_DIR=$DBG_SYSTEM_DIR/out/target/product/msm8909
-TARGET_FLYAUDIO_DIR=$DBG_SYSTEM_DIR/out/target/product/msm8909/system/vendor/flyaudio
+TARGET_OUT_DIR=$DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM
+TARGET_FLYAUDIO_DIR=$DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/system/vendor/flyaudio
 
 
 get_ready()
@@ -39,11 +47,11 @@ make_full_package()
 	cp $RELEASE_REPOSITORY/flyapdata/carlife/bdcl   $TARGET_OUT_DIR/system/bin/
 	cd $DBG_SYSTEM_DIR
 	soc_make_otapackage
-	cp $TARGET_OUT_DIR/msm8909-ota-eng.*.zip $FLYTMP_OUT_DIR/flyupdate/baseqcom.flb
+	cp $TARGET_OUT_DIR/$OTA_PACKAGE_NAME $FLYTMP_OUT_DIR/flyupdate/baseqcom.flb
 	cd $FLYTMP_OUT_DIR/flyupdate
 	zip -r  $TARGET_OUT_DIR/flyupdate-$BUILD_TYPE-$DATE.fup .
 	echo "output:"
-	echo -e "\t\033[49;32;1m./out/target/product/msm8909/flyupdate-$BUILD_TYPE-$DATE.fup\033[0m"
+	echo -e "\t\033[49;32;1m./out/target/product/$DBG_PLATFORM/flyupdate-$BUILD_TYPE-$DATE.fup\033[0m"
 }
 
 make_origin_full_package()
@@ -68,11 +76,11 @@ make_origin_full_package()
 	rm -rf $TARGET_FLYAUDIO_DIR/
 	cd $DBG_SYSTEM_DIR
 	soc_make_otapackage
-	cp $TARGET_OUT_DIR/msm8909-ota-eng.*.zip $FLYTMP_OUT_DIR/flyupdate/baseqcom.flb
+	cp $TARGET_OUT_DIR/$OTA_PACKAGE_NAME $FLYTMP_OUT_DIR/flyupdate/baseqcom.flb
 	cd $FLYTMP_OUT_DIR/flyupdate
 	zip -r  $TARGET_OUT_DIR/flyupdate-$BUILD_TYPE-$DATE.fup .
 	echo "output:"
-	echo -e "\t\033[49;32;1m./out/target/product/msm8909/flyupdate-$BUILD_TYPE-$DATE.fup\033[0m"
+	echo -e "\t\033[49;32;1m./out/target/product/$DBG_PLATFORM/flyupdate-$BUILD_TYPE-$DATE.fup\033[0m"
 }
 
 do_make_ota_package()

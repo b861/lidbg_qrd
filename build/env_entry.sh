@@ -506,13 +506,13 @@ case "$DBG_PLATFORM_ID" in
 	export DBG_BOOTLOADER_DIR=$DBG_SYSTEM_DIR/bootable/bootloader/uboot-imx
 	export DBG_KERNEL_SRC_DIR=$DBG_SYSTEM_DIR/kernel_imx
 	export DBG_KERNEL_OBJ_DIR=$DBG_SYSTEM_DIR/kernel_imx
-	export UPDATA_BIN_PLATFORM_DIR=$RELEASE_REPOSITORY/others/imx6q
+	export UPDATA_BIN_PLATFORM_DIR=$RELEASE_REPOSITORY
 	export UPDATA_BIN_DIR=$UPDATA_BIN_PLATFORM_DIR/driver
 	export UPDATA_BASESYSTEM_DIR=$UPDATA_BIN_PLATFORM_DIR/basesystem
 	export DBG_PASSWORD=git
 	export DBG_REPO_PASSWORD=git
 	export DBG_VENDOR=VENDOR_WINNER
-	export OTA_PACKAGE_NAME=msm8974-ota-eng.*.zip
+	export OTA_PACKAGE_NAME=sabresd_6dq-ota-20151218-imx6q.zip
 	export DBG_SOC=imx6q
 	export TEST_PACKAGE_PATH=//192.168.128.128/tx/升级包发布/专项测试包
 	export REPOSITORY_WORK_BRANCH=master

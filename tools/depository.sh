@@ -207,8 +207,8 @@ if [[ $RELEASE_REPOSITORY != "" ]];then
 	echo [41] copy lidbg out to depository
 	echo [42] copy basesystem to depository
 	echo [43] make update package
-	echo [44] make msm8909 full package
-	echo [45] make msm8909 origin full package
+	echo [44] make $DBG_PLATFORM full package
+	echo [45] make $DBG_PLATFORM origin full package
 	echo [46] make lidbg_udisk_shell update package
 fi
 }
