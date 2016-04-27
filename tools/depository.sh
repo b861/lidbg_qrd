@@ -72,6 +72,17 @@ function depository_copy_lidbg()
 	echo $FUNCNAME $DBG_OUT_PATH $UPDATA_BIN_DIR $UPDATA_BIN_PLATFORM_DIR
 	git checkout $REPOSITORY_WORK_BRANCH
 	cp -ruv $DBG_OUT_PATH  $UPDATA_BIN_DIR
+	if [ -s $DBG_OUT_PATH/LidbgCommenLogic.apk ]
+	    then
+		echo $FUNCNAME  $UPDATA_BIN_PLATFORM_DIR
+		cp -ruv $DBG_OUT_PATH/LidbgCommenLogic.apk  $UPDATA_BIN_PLATFORM_DIR/app/
+	fi
+
+	if [ -s $DBG_OUT_PATH/LidbgCommenLogic/LidbgCommenLogic.apk ]
+	    then
+		echo $FUNCNAME  $UPDATA_BIN_PLATFORM_DIR
+		cp -ruv $DBG_OUT_PATH/LidbgCommenLogic/LidbgCommenLogic.apk  $UPDATA_BIN_PLATFORM_DIR/app/
+	fi
 	if [ -s $DBG_OUT_PATH/FlyBootService.apk ]
 	    then
 		echo $FUNCNAME  $UPDATA_BIN_PLATFORM_DIR
@@ -83,7 +94,6 @@ function depository_copy_lidbg()
 		echo $FUNCNAME  $UPDATA_BIN_PLATFORM_DIR
 		cp -ruv $DBG_OUT_PATH/FlyBootService/FlyBootService.apk  $UPDATA_BIN_PLATFORM_DIR/app/
 	fi
-
 	if [ -s $DBG_OUT_PATH/FastBoot.apk ]
 	    then
 		echo $FUNCNAME  $UPDATA_BIN_PLATFORM_DIR
