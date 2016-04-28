@@ -11,7 +11,7 @@
 LIDBG_DEFINE;
 
 int udisk_stability_test = 0;
-int lcd_on_delay = 0;
+#define LCD_ON_DELAY (960+500)
 static struct wake_lock device_wakelock;
 //int usb_request = 0;
 
@@ -20,8 +20,8 @@ struct notifier_block devices_notif;
 int thread_lcd_on_delay(void *data)
 {
     DUMP_FUN_ENTER;
-    lidbg( "misc:%d\n",lcd_on_delay);
-    msleep(lcd_on_delay);
+    lidbg( "misc:%d\n",LCD_ON_DELAY);
+    msleep(LCD_ON_DELAY);
 
 	if(g_var.acc_flag==FLY_ACC_ON)
 	{
@@ -53,7 +53,6 @@ static int devices_notifier_callback(struct notifier_block *self,
                 if((g_var.led_hal_status & g_var.led_app_status)&&(g_var.acc_flag==FLY_ACC_ON)&&(g_var.flyaudio_reboot==0))
                 {
         		lidbg("dsi83.LCD_ON2.thread\n");
-		lcd_on_delay=(960+500);
         		CREATE_KTHREAD(thread_lcd_on_delay,NULL);
                 }
                 else
@@ -274,7 +273,6 @@ static int lidbg_dev_event(struct notifier_block *this,
         if((g_var.led_hal_status & g_var.led_app_status)&&(g_var.fb_on == 1)&&(g_var.flyaudio_reboot==0))
         {
         		lidbg("LCD_ON3\n");
-		lcd_on_delay=(10);
         		CREATE_KTHREAD(thread_lcd_on_delay,NULL);
         }
 #ifdef FLY_USB_CAMERA_SUPPORT
