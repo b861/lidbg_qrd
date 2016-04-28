@@ -45,13 +45,17 @@ static int devices_notifier_callback(struct notifier_block *self,
         blank = evdata->data;
         if (*blank == FB_BLANK_UNBLANK)
         {
-            lidbg( "misc:FB_BLANK_UNBLANK\n");
+            lidbg( "misc:FB_BLANK_UNBLANK,%d/%d\n",g_var.system_status,FLY_KERNEL_UP);
             if(g_var.system_status >= FLY_KERNEL_UP)
+            {
                 if((g_var.led_hal_status & g_var.led_app_status)&&(g_var.acc_flag==FLY_ACC_ON)&&(g_var.flyaudio_reboot==0))
                 {
         		lidbg("dsi83.LCD_ON2.thread\n");
         		CREATE_KTHREAD(thread_lcd_on_delay, NULL);
                 }
+                else
+        		lidbg("dsi83.LCD_ON2.skip.%d,%d,%d,%d\n",g_var.led_hal_status,g_var.led_app_status,g_var.acc_flag,g_var.flyaudio_reboot);
+            }
 
             g_var.fb_on = 1;
         }
