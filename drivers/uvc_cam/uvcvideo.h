@@ -125,7 +125,7 @@ typedef enum{
 /* Number of isochronous URBs. */
 //set the value smaller can spent less memory space but may cause data loss when capturing stream 
 //e.g.video capture has lower priority in MT7620
-#define UVC_URBS		16	//yiling
+#define UVC_URBS		24	//yiling
 /* Maximum number of packets per URB. */
 #define UVC_MAX_PACKETS		32
 /* Maximum number of video buffers. */

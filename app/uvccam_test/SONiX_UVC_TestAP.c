@@ -68,7 +68,7 @@ static int lidbg_get_current_time(char isXUSet , char *time_string, struct rtc_t
 #endif
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION (2,6,32)
-#define V4L_BUFFERS_DEFAULT	20//6,16
+#define V4L_BUFFERS_DEFAULT	16//6,16
 #define V4L_BUFFERS_MAX		32//16,32
 #else
 #define V4L_BUFFERS_DEFAULT	3
@@ -4002,7 +4002,7 @@ openfd:
 		XU_H264_Set_Mode(dev, 1);
 		if(XU_Ctrl_ReadChipID(dev) < 0)
 			lidbg( "XU_Ctrl_ReadChipID Failed\n");
-		if(XU_H264_Set_BitRate(dev, 8000000) < 0 )
+		if(XU_H264_Set_BitRate(dev, 12000000) < 0 )
 			lidbg( "XU_H264_Set_BitRate Failed\n");
 		XU_H264_Get_BitRate(dev, &m_BitRate);
 		if(m_BitRate < 0 )
