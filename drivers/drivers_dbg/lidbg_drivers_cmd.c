@@ -338,6 +338,7 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#082--disable network ping alarm\n");
             fs_mem_log("*158#083--enable network ping alarm\n");
             fs_mem_log("*158#084--enable network ping alarm,per one mins\n");
+            fs_mem_log("*158#085--enable network ping alarm,err times >3  times: wake up system\n");
             show_password_list();
             lidbg_domineering_ack();
         }
@@ -890,6 +891,12 @@ void parse_cmd(char *pt)
         {
             lidbg("*158#084--enable network ping alarm,per one mins\n");
             lidbg_shell_cmd("am broadcast -a com.fly.lidbg.LidbgCommenLogic --ei action 2 &");
+            lidbg_domineering_ack();
+        }
+        else if (!strcmp(argv[1], "*158#085"))
+        {
+            lidbg("*158#085--enable network ping alarm,err times >3  times: wake up system\n");
+            lidbg_shell_cmd("am broadcast -a com.fly.lidbg.LidbgCommenLogic --ei action 6 --ei para 3 &");
             lidbg_domineering_ack();
         }
 

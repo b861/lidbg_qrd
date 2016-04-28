@@ -50,6 +50,7 @@ public class LidbgCommenLogicService extends Service
 	private long oldTimes;
 	private static int testCount = 0;
 	private static int testCountError = 0;
+	protected int Errorthreshold = 10;
 
 	@Override
 	public void onCreate()
@@ -269,7 +270,8 @@ public class LidbgCommenLogicService extends Service
 				{
 					// TODO Auto-generated method stub
 					printKernelMsg("====START======" + testCount + "/"
-							+ testCountError + "==========\n");
+							+ testCountError + "/" + Errorthreshold
+							+ "==========\n");
 					boolean isCanResetNetWork = isCanResetNetWork();
 					// 0:ACC on/1:ACC off
 					int accState = SystemProperties.getInt(ACCProperties, 0);
@@ -282,24 +284,26 @@ public class LidbgCommenLogicService extends Service
 						if (!isNetworkResponseOk())
 						{
 							testCountError++;
-							wakeUpSystem();
-							printKernelMsg("msleep(5000)");
-							msleep(5000);
-							boolean ret = isNetworkResponseOk();
-							printKernelMsg("after wakeUpSystem:" + ret);
-							if (!ret)
+							if (testCountError >= Errorthreshold)
 							{
 								resetNetWork();
 								printKernelMsg("msleep(10000)");
 								msleep(10000);
 								printKernelMsg("after reset:"
 										+ isNetworkResponseOk());
+
+								wakeUpSystem();
+								printKernelMsg("msleep(5000)");
+								msleep(5000);
+								boolean ret = isNetworkResponseOk();
+								printKernelMsg("after wakeUpSystem:" + ret);
+								// goToSleep();
 							}
-							//goToSleep();
 						}
 					}
 					printKernelMsg("====STOP======" + testCount + "/"
-							+ testCountError + "==========\n");
+							+ testCountError + "/" + Errorthreshold
+							+ "==========\n");
 				}
 			}).start();
 			break;
@@ -341,7 +345,7 @@ public class LidbgCommenLogicService extends Service
 	protected void resetNetWork()
 	{
 		// TODO Auto-generated method stub
-		printKernelMsg("network err:reset");
+		printKernelMsg("data disable");
 		FileWrite("/dev/lidbg_misc0", false, false,
 				"flyaudio:svc data disable &");
 		msleep(5000);
@@ -445,6 +449,13 @@ public class LidbgCommenLogicService extends Service
 			case 5:
 				printKernelMsg("handleAlarmEvent\n");
 				handleAlarmEvent(null);
+				break;
+			case 6:
+				if (intent.hasExtra("para"))
+				{
+					Errorthreshold = intent.getExtras().getInt("para");
+				}
+				printKernelMsg("Errorthreshold:" + Errorthreshold);
 				break;
 
 			default:
