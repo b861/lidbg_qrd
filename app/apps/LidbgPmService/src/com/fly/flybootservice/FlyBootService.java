@@ -271,7 +271,6 @@ public class FlyBootService extends Service {
 								if((AirplaneEnable) || (!blSuspendUnairplaneFlag))
 									restoreAirplaneMode(mFlyBootService);
 								SendBroadcastToService(KeyBootState, keyEearlySusupendON);
-								powerOnSystem(mFlyBootService);
 								InternetEnable();
 								if(!blDozeModeFlag)
 									FlyaudioInternetEnable();
@@ -597,8 +596,7 @@ public static void releaseBrightWakeLock()
 		if(firstBootFlag){
 			LIDBG_PRINT("FlyBootService system resume...");
 			enableShowLogo(true);
-			SystemClock.sleep(3000);
-			//powerOnSystem(mFlyBootService);
+			powerOnSystem(mFlyBootService);
 		}
 	}
 
@@ -695,18 +693,27 @@ public static void releaseBrightWakeLock()
     }
 
     private void powerOnSystem(Context context) {
-		int cnt = 0;
-		LIDBG_PRINT("powerOnSystem+\n");
-		//if(!blSuspendUnairplaneFlag)
-		//	restoreAirplaneMode(context);
-		while((SystemProperties.getBoolean("lidbg.hold_bootanim", false)||SystemProperties.getBoolean("lidbg.hold_bootanim2", false)) && (cnt < 50))
+	new Thread(new Runnable()
+	{
+
+		@Override
+		public void run()
 		{
-			//LIDBG_PRINT("hold_bootanim2.stop,["+SystemProperties.getBoolean("lidbg.hold_bootanim", false)+"/"+SystemProperties.getBoolean("lidbg.hold_bootanim2", false)+"]\n");
-			SystemClock.sleep(100);
-			cnt ++;
+			// TODO Auto-generated method stub
+			int cnt = 0;
+			LIDBG_PRINT("powerOnSystem+\n");
+			//if(!blSuspendUnairplaneFlag)
+			//	restoreAirplaneMode(context);
+			while((SystemProperties.getBoolean("lidbg.hold_bootanim", false)||SystemProperties.getBoolean("lidbg.hold_bootanim2", false)) && (cnt < 50))
+			{
+				//LIDBG_PRINT("hold_bootanim2.stop,["+SystemProperties.getBoolean("lidbg.hold_bootanim", false)+"/"+SystemProperties.getBoolean("lidbg.hold_bootanim2", false)+"]\n");
+				SystemClock.sleep(100);
+				cnt ++;
+			}
+			SystemProperties.set("ctl.stop", "bootanim");
+			LIDBG_PRINT("powerOnSystem-hold_bootanim2.stop,cnt="+ cnt + "\n");
 		}
-		SystemProperties.set("ctl.stop", "bootanim");
-		LIDBG_PRINT("powerOnSystem-hold_bootanim2.stop,cnt="+ cnt + "\n");
+	}, "waitBootanima").start();
     }
 
     // send broadcast to music application to pause music
