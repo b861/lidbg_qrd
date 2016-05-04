@@ -52,8 +52,6 @@ static void lidbg_hal_thread( void *arg)
     arg = arg;
     while(thread_exit == 0)
     {
-        sleep(3);
-
         switch(dbg_level)
         {
         case 0 :
@@ -73,6 +71,7 @@ static void lidbg_hal_thread( void *arg)
                 sprintf(msg, "hal2jni2apk thread: %d\n", cnt);
                 jni_call_backs.test_cb(msg);
                 lidbg(DEBG_TAG"[%s].call test_cb:msg=%s\n", __FUNCTION__, msg );
+                sleep(3);
             }
         }
         break;
