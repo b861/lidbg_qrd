@@ -4622,10 +4622,10 @@ openfd:
 					{  
 					        if(!(ent->d_type & DT_DIR))  
 					        {  
-					                //if((strcmp(ent->d_name,".") == 0) || (strcmp(ent->d_name,"..") == 0) || (ent->d_reclen != 48) ) 
-					                //        continue;  
-									if((!strncmp(ent->d_name, "F", 1) && (cam_id == DVR_ID)) ||(!strncmp(ent->d_name, "R", 1) && (cam_id == REARVIEW_ID)) )
-									{
+					                if((strcmp(ent->d_name,".") == 0) || (strcmp(ent->d_name,"..") == 0) || (ent->d_reclen != 48) ) 
+					                        continue;  
+									//if((!strncmp(ent->d_name, "F", 1) && (cam_id == DVR_ID)) ||(!strncmp(ent->d_name, "R", 1) && (cam_id == REARVIEW_ID)) )
+									//{
 										filecnt++;
 						                //lidbg("ent->d_name:%s====ent->d_reclen:%d=====\n", ent->d_name,ent->d_reclen); 
 
@@ -4656,7 +4656,7 @@ openfd:
 											strcpy(minRecName, ent->d_name);
 											//lidbg("minRecName---%d--->%s\n",filecnt,minRecName);
 										}
-									}
+									//}
 					        }  
 					}
 					closedir(pDir);
