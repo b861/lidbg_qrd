@@ -1,0 +1,2 @@
+BASE_INCLUDE_DIRS += $(DBG_BOOTLOADER_DIR)/flyaudio/common
+BASE_INCLUDE_DIRS += $(DBG_BOOTLOADER_DIR)/flyaudio/soc

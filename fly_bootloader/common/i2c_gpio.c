@@ -164,9 +164,13 @@ static int i2c_outb(struct i2c_gpio_dev *dev, unsigned char c)
     ack = !getsda(dev);    /* ack: sda is pulled low -> success */
     //	dprintf(INFO, "i2c_outb: 0x%02x %s\n", (int)c,
     //		ack ? "A" : "NA");
-
+#ifdef BOOTLOADER_IMX6Q
+	scllo(dev);
+	setsda_out(dev);
+#else
     setsda_out(dev);
     scllo(dev);
+#endif
     return ack;
     /* assert: scl is low (sda undef) */
 }

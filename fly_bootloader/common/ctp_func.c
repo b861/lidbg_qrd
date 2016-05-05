@@ -159,6 +159,10 @@ int ctp_points_get(void)
 
     ctp_read(ctp_addr, touch_points_reg, points_data, 2);
     points = points_data[0] & 0xf;
+#ifdef BOOTLOADER_IMX6Q
+	if(points==0xf)
+		points=0;
+#endif
     ctp_write(ctp_addr, clear_data, sizeof(clear_data) / sizeof(clear_data[0]));
     //	dprintf(INFO, "<++ points = %d ++>\n", points);
 

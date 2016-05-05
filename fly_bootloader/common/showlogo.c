@@ -1,4 +1,9 @@
+#include "fly_platform.h"
+#if defined(BOOTLOADER_IMX6Q)
+#include "fsl_fastboot.h"
+#else
 #include "fastboot.h"
+#endif
 
 #include "soc.h"
 #include "fly_private.h"

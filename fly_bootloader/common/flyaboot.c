@@ -1,4 +1,9 @@
+#include "fly_platform.h"
+#if defined(BOOTLOADER_IMX6Q)
+#include "fsl_fastboot.h"
+#else
 #include "fastboot.h"
+#endif
 #include "fly_private.h"
 #include "fly_common.h"
 /*
@@ -167,7 +172,7 @@ void display_enter_recovery_count(int count)
 
     return ;
 }
-void display_count(int model, int count)
+static void display_count(int model, int count)
 {
     switch(model)
     {
@@ -445,7 +450,7 @@ void flyaboot_init(unsigned *boot_into_recovery, bool *boot_into_fastboot)
 
     if(!*boot_into_recovery)
     {
-#if ((defined BOOTLOADER_MSM8226) || (defined BOOTLOADER_MSM8974) || (defined BOOTLOADER_MSM8909))
+#if ((defined BOOTLOADER_MSM8226) || (defined BOOTLOADER_MSM8974) || (defined BOOTLOADER_MSM8909) || (defined BOOTLOADER_IMX6q))
         show_logo();
         backlight_enable();
 #else

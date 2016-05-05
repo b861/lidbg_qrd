@@ -2,6 +2,8 @@
 #include "fly_private.h"
 #include "ascii24.h"
 #include "fly_ascii16.h"
+#include <common.h>
+
 
 char flyrecord[flyblk_a][flyblk_b];
 #define   script_y   450
@@ -114,6 +116,9 @@ void display_logo_on_screen(sLogo *plogoparameter)
                         pImageBuffer + (i * image_base_wdpi * bytes_per_bpp) ,
                         image_base_wdpi * bytes_per_bpp);
             }
+#ifdef BOOTLOADER_IMX6Q
+	flush_memery
+#endif
         }
         else
         {
@@ -138,13 +143,17 @@ void display_logo_on_screen(sLogo *plogoparameter)
 }
 
 /* TODO: take stride into account */
+
 void fly_fbcon_clear(void)
 {
     unsigned count = 0;
 
     count = FBCON_WIDTH * FBCON_HEIGHT;
     dprintf(INFO, "Fbcon clear, width[%d] height[%d] base[0x%x]\n", FBCON_WIDTH, FBCON_HEIGHT, fb_base_get());
-    memset(fb_base_get(), 0x000000, count * (FBCON_BPP / 8));
+    memset(fb_base_get(), 0x00, count * (FBCON_BPP / 8));
+#ifdef BOOTLOADER_IMX6Q
+	flush_memery
+#endif
 }
 
 void fly_setBcol(unsigned long int backcolor)
@@ -207,11 +216,12 @@ void fly_setBcol(unsigned long int backcolor)
     unsigned char B = backcolor & 0xff;
 
     ptr = gd->fb_base;
-
-    ptr = gd->fb_base;
     for(i = 0; i < 1024; i++)
         for(j = 0; j < 600; j++)
             *ptr++ = GET_COLOR_RGB565(R, G, B);
+#ifdef BOOTLOADER_IMX6Q
+	flush_memery
+#endif
 #endif
 }
 
@@ -290,6 +300,9 @@ void fly_putpext(int x, int y, unsigned long  color)
         tem[m++] = GET_COLOR_RGB565(R, G, B) >> 8;
     }
     memcpy (fb_base_get() + ((x + (y * FBCON_WIDTH)) * 2), tem, 1 * 2);
+#ifdef BOOTLOADER_IMX6Q
+	flush_cache(fb_base_get() + ((x + (y * FBCON_WIDTH)) * 2),1 * 2);
+#endif
     free(tem);
 #endif
 }
