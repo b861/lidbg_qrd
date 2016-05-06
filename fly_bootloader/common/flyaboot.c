@@ -450,7 +450,7 @@ void flyaboot_init(unsigned *boot_into_recovery, bool *boot_into_fastboot)
 
     if(!*boot_into_recovery)
     {
-#if ((defined BOOTLOADER_MSM8226) || (defined BOOTLOADER_MSM8974) || (defined BOOTLOADER_MSM8909) || (defined BOOTLOADER_IMX6q))
+#if (defined BOOTLOADER_VENDOR_QCOM || (defined BOOTLOADER_VENDOR_NXP)
         show_logo();
         backlight_enable();
 #else

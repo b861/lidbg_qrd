@@ -511,7 +511,7 @@ case "$DBG_PLATFORM_ID" in
 	export UPDATA_BASESYSTEM_DIR=$UPDATA_BIN_PLATFORM_DIR/basesystem
 	export DBG_PASSWORD=git
 	export DBG_REPO_PASSWORD=git
-	export DBG_VENDOR=VENDOR_WINNER
+	export DBG_VENDOR=VENDOR_NXP
 	export OTA_PACKAGE_NAME=sabresd_6dq-ota-20151218-imx6q.zip
 	export DBG_SOC=imx6q
 	export TEST_PACKAGE_PATH=//192.168.128.128/tx/升级包发布/专项测试包

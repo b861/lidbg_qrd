@@ -326,6 +326,12 @@ dsi83_config_start:
             dprintf(INFO, "dsi83:DSI83 config failed, something wrong, cnt = %d !\n", cnt);
     }
 
+#ifdef BOOTLOADER_VENDOR_QCOM	
+	dprintf(INFO, "Display Init: +\n");
+    	target_display_init(device.display_panel);
+	dprintf(INFO, "Display Init: -\n");
+#endif
+
     ret = SN65_Sequence_seq6();
     if(ret < 0)
         dprintf(INFO, "dsi83:SN65_Sequence_seq6(),err,ret = %d.\n", ret);
