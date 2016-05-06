@@ -665,7 +665,8 @@ static void fixScreenBlurred(char cam_id , char isOnline)
 {
 	if(cam_id == DVR_ID)
 	{
-		if(!isDVRFirstResume)
+		//if(!isDVRFirstResume)
+		if(isDVRFirstInit)
 		{
 			isDVRCheck = 0;
 			lidbg_shell_cmd("/flysystem/lib/out/fw_update -2 -3&");
@@ -753,6 +754,19 @@ static void work_DVR_fixScreenBlurred(struct work_struct *work)
 	else 
 		fixScreenBlurred(DVR_ID,0);
 
+	/*For Block mode*/
+	if(isDVRFirstResume)
+	{
+		pfly_UsbCamInfo->camStatus = lidbg_checkCam();
+		if(!((pfly_UsbCamInfo->camStatus) & FLY_CAM_ISSONIX))
+		{
+			lidbg("%s:====FirstResume None camera found!====\n",__func__);
+			isDVRFirstResume = 0;
+			isDVRAfterFix = 1;
+			return;
+		}
+	}
+
 	/*Auto start*/
 	if((isDVRFirstInit && isColdBootRec) || (isDVRFirstResume && isACCRec))
 	{
@@ -764,8 +778,6 @@ static void work_DVR_fixScreenBlurred(struct work_struct *work)
 		}
 	}
 
-	
-	
 	isDVRFirstInit = 0;
 	isDVRAfterFix = 1;
 	isDVRFirstResume = 0;
@@ -805,6 +817,19 @@ static void work_RearView_fixScreenBlurred(struct work_struct *work)
 	else 
 		fixScreenBlurred(REARVIEW_ID,0);
 
+	/*For Block mode*/
+	if(isRearFirstResume)
+	{
+		pfly_UsbCamInfo->camStatus = lidbg_checkCam();
+		if(!((pfly_UsbCamInfo->camStatus>>4) & FLY_CAM_ISSONIX))
+		{
+			lidbg("%s:====FirstResume None camera found!====\n",__func__);
+			isRearFirstResume = 0;
+			isRearViewAfterFix = 1;
+			return;
+		}
+	}
+
 	/*Auto start*/
 	if((isRearViewFirstInit && isColdBootRec) || (isRearFirstResume && isACCRec))
 	{
@@ -819,7 +844,7 @@ static void work_RearView_fixScreenBlurred(struct work_struct *work)
 	isRearViewFirstInit = 0;
 	isRearViewAfterFix = 1;
 	isRearFirstResume = 0;
-	status_fifo_in(RET_REAR_SONIX);
+	status_fifo_in(RET_REAR_SONIX);	
 	lidbg("%s:====X====\n",__func__);
 	return;
 }
