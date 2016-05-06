@@ -225,7 +225,6 @@ static int lidbg_dev_event(struct notifier_block *this,
         SOC_IO_Output_Ext(0, g_hw.gpio_bt_tx, 1, GPIOMUX_PULL_NONE, GPIOMUX_DRV_8MA);
         SOC_IO_Output_Ext(0, g_hw.gpio_bt_rx, 1, GPIOMUX_PULL_NONE, GPIOMUX_DRV_8MA);
 #endif
-        GPS_POWER_OFF;
         break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_ANDROID_DOWN):
         //MSM_DSI83_DISABLE;
@@ -264,7 +263,6 @@ static int lidbg_dev_event(struct notifier_block *this,
 #ifdef DISABLE_USB_WHEN_DEVICE_DOWN
         CREATE_KTHREAD(thread_usb_disk_enable_delay, NULL);
 #endif
-        GPS_POWER_ON;
         break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_SCREEN_ON):
         //if(!g_var.is_fly)
@@ -553,7 +551,6 @@ static int soc_dev_probe(struct platform_device *pdev)
     //lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_APP_ON));
     //lidbg_notifier_call_chain(NOTIFIER_VALUE(NOTIFIER_MAJOR_BL_LCD_STATUS_CHANGE, NOTIFIER_MINOR_BL_HAL_ON));
 
-    GPS_POWER_ON;
     lidbg_new_cdev(&dev_fops, "flydev");
 
     lidbg_trace_msg_cb_register("unable to enumerate USB device", NULL, usb_enumerate_monitor);
@@ -568,7 +565,7 @@ static int soc_dev_probe(struct platform_device *pdev)
    
     GPIO_IS_READY;
     SET_GPIO_READY_SUSPEND;
-    SET_HAL_READY_SUSPEND;
+    //SET_HAL_READY_SUSPEND;
 #ifdef PLATFORM_ID_7
     if(0)
     {
