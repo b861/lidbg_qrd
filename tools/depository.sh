@@ -166,7 +166,11 @@ function depository_make_package()
 function make_ota_package()
 {
 	echo "start make ota-package"
-	do_make_ota_package
+	#do_make_ota_package
+	mkdir -p $DBG_SYSTEM_DIR/flyaudio/out
+	cp -f $DBG_TOOLS_PATH/parameters.sh $DBG_SYSTEM_DIR/flyaudio/out/parameters.sh
+	cd $DBG_SYSTEM_DIR
+        ./make_new.sh
 	
 }
 
