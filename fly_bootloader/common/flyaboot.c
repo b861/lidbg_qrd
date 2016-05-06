@@ -450,7 +450,7 @@ void flyaboot_init(unsigned *boot_into_recovery, bool *boot_into_fastboot)
 
     if(!*boot_into_recovery)
     {
-#if (defined BOOTLOADER_VENDOR_QCOM || (defined BOOTLOADER_VENDOR_NXP)
+#if (defined BOOTLOADER_VENDOR_QCOM || defined BOOTLOADER_VENDOR_NXP)
         show_logo();
         backlight_enable();
 #else

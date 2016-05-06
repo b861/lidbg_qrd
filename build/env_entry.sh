@@ -302,6 +302,7 @@ case "$DBG_PLATFORM_ID" in
         export SYSTEM_BUILD_TYPE=userdebug
 	export KERNEL_DEFCONFIG=rkpx3_sdk_android-4.4_defconfig
         export DBG_BOOTLOADER_DIR=$DBG_SYSTEM_DIR/uboot
+	export DBG_BOOTLOADER_TYPE=UBOOT
         export DBG_KERNEL_SRC_DIR=$DBG_SYSTEM_DIR/kernel
         export DBG_KERNEL_OBJ_DIR=$DBG_SYSTEM_DIR/kernel
         export UPDATA_BIN_PLATFORM_DIR=$RELEASE_REPOSITORY/others/PX3
@@ -366,6 +367,7 @@ case "$DBG_PLATFORM_ID" in
 	export SYSTEM_BUILD_TYPE=userdebug
 	export BOOTLOADER_BUILD_BRANCH=for_new_bp
 	export DBG_BOOTLOADER_DIR=$DBG_SYSTEM_DIR/bootable/bootloader/lk
+	export DBG_BOOTLOADER_TYPE=LK
 	export DBG_KERNEL_SRC_DIR=$DBG_SYSTEM_DIR/kernel
 	export DBG_KERNEL_OBJ_DIR=$DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/obj/KERNEL_OBJ
 	export UPDATA_BIN_PLATFORM_DIR=$RELEASE_REPOSITORY
@@ -465,6 +467,7 @@ case "$DBG_PLATFORM_ID" in
         export PATH=$JAVA_HOME/bin:$JRE_HOME/bin:$PATH
         export SYSTEM_BUILD_TYPE=userdebug
         export DBG_BOOTLOADER_DIR=$DBG_SYSTEM_DIR/bootable/bootloader/lk
+	export DBG_BOOTLOADER_TYPE=LK
         export DBG_KERNEL_SRC_DIR=$DBG_SYSTEM_DIR/kernel
         export DBG_KERNEL_OBJ_DIR=$DBG_SYSTEM_DIR/out/target/product/$DBG_PLATFORM/obj/KERNEL_OBJ
         export UPDATA_BIN_PLATFORM_DIR=$RELEASE_REPOSITORY/others/8974_5.1
@@ -504,6 +507,7 @@ case "$DBG_PLATFORM_ID" in
 	export SYSTEM_BUILD_TYPE=eng
 	export KERNEL_DEFCONFIG=imx_v7_android_defconfig
 	export DBG_BOOTLOADER_DIR=$DBG_SYSTEM_DIR/bootable/bootloader/uboot-imx
+	export DBG_BOOTLOADER_TYPE=UBOOT
 	export DBG_KERNEL_SRC_DIR=$DBG_SYSTEM_DIR/kernel_imx
 	export DBG_KERNEL_OBJ_DIR=$DBG_SYSTEM_DIR/kernel_imx
 	export UPDATA_BIN_PLATFORM_DIR=$RELEASE_REPOSITORY

@@ -2,8 +2,9 @@
 #include "fly_private.h"
 #include "ascii24.h"
 #include "fly_ascii16.h"
+#ifdef BOOTLOADER_TYPE_UBOOT
 #include <common.h>
-
+#endif
 
 char flyrecord[flyblk_a][flyblk_b];
 #define   script_y   450
@@ -131,7 +132,7 @@ void display_logo_on_screen(sLogo *plogoparameter)
         }
     }
 #endif
-#ifdef BOOTLOADER_MSM8909
+#ifdef BOOTLOADER_TYPE_LK
     arch_clean_invalidate_cache_range((unsigned long)fb_base_get(), FBCON_WIDTH * FBCON_HEIGHT * 3);
 #endif
 
@@ -251,7 +252,7 @@ void FlySetLogoBcol(unsigned short  backcolor)
     for (i = 0; i < 600; i++)
     {
         memcpy (fb_base_get() + ((0 + (i * FBCON_WIDTH)) * 3), tem, 1024 * 3);
-#ifdef BOOTLOADER_MSM8909
+#ifdef BOOTLOADER_TYPE_LK
         arch_clean_invalidate_cache_range((unsigned long)fb_base_get() + ((0 + (i * FBCON_WIDTH)) * 3), FBCON_WIDTH * 3);
 #endif
 
@@ -288,7 +289,7 @@ void fly_putpext(int x, int y, unsigned long  color)
     }
     //set RGB888 DATA TO SREEN
     memcpy (fb_base_get() + ((x + (y * FBCON_WIDTH)) * 3), tem, 1 * 3);
-#ifdef BOOTLOADER_MSM8909
+#ifdef BOOTLOADER_TYPE_LK
     arch_clean_invalidate_cache_range((unsigned long)fb_base_get() + ((x + (y * FBCON_WIDTH)) * 3), 1 * 3);
 #endif
     free(tem);
@@ -300,7 +301,7 @@ void fly_putpext(int x, int y, unsigned long  color)
         tem[m++] = GET_COLOR_RGB565(R, G, B) >> 8;
     }
     memcpy (fb_base_get() + ((x + (y * FBCON_WIDTH)) * 2), tem, 1 * 2);
-#ifdef BOOTLOADER_IMX6Q
+#ifdef BOOTLOADER_TYPE_UBOOT
 	flush_cache(fb_base_get() + ((x + (y * FBCON_WIDTH)) * 2),1 * 2);
 #endif
     free(tem);
