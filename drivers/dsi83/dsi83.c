@@ -87,7 +87,7 @@ static int SN65_Sequence_seq7(void)
             i++;
             if(i > 20)
             {
-                lidbg( "dsi83:Warning wait time out .. break\n");
+                lidbgerr( "dsi83:Warning wait time out .. break\n");
                 is_dsi83_inited = 0;
                 break;
             }

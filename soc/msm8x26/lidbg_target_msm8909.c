@@ -162,7 +162,7 @@ struct hw_version_specific g_hw_version_specific[] =
          .cpu_freq_list = "533333,800000,998400,1094400,1190400,1248000,1267200",
          .cpu_freq_recovery_limit = "1267200",
          .cpu_freq_temp_node = "/sys/class/thermal/thermal_zone3/temp",
-         .gpu_max_freq_node = "/sys/class/kgsl/kgsl-3d0/max_gpuclk",//cat /sys/class/kgsl/kgsl-3d0/max_gpuclk/gpu_available_frequencies   456000000 307200000 200000000
+         .gpu_max_freq_node = "/sys/class/kgsl/kgsl-3d0/max_gpuclk",//cat /sys/class/kgsl/kgsl-3d0/gpu_available_frequencies   456000000 307200000 200000000
         .fan_onoff_temp = 200,
 
         .ad_key =

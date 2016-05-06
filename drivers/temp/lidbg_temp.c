@@ -275,7 +275,7 @@ thermal_ctrl:
 		                lidbg_readwrite_file(FREQ_MAX_NODE, NULL, g_hw.cpu_freq_thermal[i].limit_freq_string, strlen(g_hw.cpu_freq_thermal[i].limit_freq_string));
 		                if(g_hw.gpu_max_freq_node != NULL)
 		                    lidbg_readwrite_file(g_hw.gpu_max_freq_node, NULL, g_hw.cpu_freq_thermal[i].limit_gpu_freq_string, strlen(g_hw.cpu_freq_thermal[i].limit_gpu_freq_string));
-		                lidbg("set max freq to: %d,temp:%d,temp_offset:%d,cpufreq=%d\n", g_hw.cpu_freq_thermal[i].limit_freq, cur_temp, temp_offset,cpufreq_get(0));
+		                lidbg("set max freq to: %d,mem_temp:%d,cpu_temp:%d,temp_offset:%d,cpufreq=%d\n", g_hw.cpu_freq_thermal[i].limit_freq, cur_temp,cpu_temp, temp_offset,cpufreq_get(0));
 		}
 		if(g_hw.cpu_freq_thermal[i].max_cpu>0)
 		{

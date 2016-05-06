@@ -63,7 +63,7 @@ bool iSOC_IO_ISR_Add(u32 irq, u32  interrupt_type, pinterrupt_isr func, void *de
     io_int_config1.pisr = func;
     io_int_config1.dev = dev;
 
-    lidbg("ext_int_num:%d \n", irq);
+    lidbg("ext_int_num:%d,%d\n", irq,GPIO_TO_INT(irq));
 
     ret =  soc_io_irq(&io_int_config1);
 
@@ -85,12 +85,14 @@ bool iSOC_IO_ISR_Add(u32 irq, u32  interrupt_type, pinterrupt_isr func, void *de
 
 bool iSOC_IO_ISR_Enable(u32 irq)
 {
+    lidbg("SOC_IO_ISR_Enable:%d,%d\n",irq,GPIO_TO_INT(irq));
     soc_irq_enable(GPIO_TO_INT(irq));
     return 1;
 }
 
 bool iSOC_IO_ISR_Disable(u32 irq)
 {
+    lidbg("SOC_IO_ISR_Disable:%d,%d\n",irq,GPIO_TO_INT(irq));
     soc_irq_disable(GPIO_TO_INT(irq));
     return 1;
 }

@@ -260,7 +260,8 @@ void parse_cmd(char *pt)
         {
             //*#*#158999#*#*
             lidbg_chmod("/data");
-
+            lidbg_chmod("/data/lidbg");
+	     lidbg_shell_cmd("chmod 777 /data/lidbg/*");
             fs_mem_log("*158#998--install third apk\n");
             fs_mem_log("*158#999--install debug apk\n");
             fs_mem_log("*158#001--LOG_LOGCAT\n");
