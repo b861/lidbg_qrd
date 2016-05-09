@@ -768,6 +768,7 @@ static void work_DVR_fixScreenBlurred(struct work_struct *work)
 	}
 
 	/*Auto start*/
+	lidbg("%s:isDVRFirstInit=%d,isColdBootRec=%d\n",__func__,isDVRFirstInit,isColdBootRec);
 	if((isDVRFirstInit && isColdBootRec) || (isDVRFirstResume && isACCRec))
 	{
 		lidbg("%s:==FirstInit==\n",__func__);
@@ -831,6 +832,7 @@ static void work_RearView_fixScreenBlurred(struct work_struct *work)
 	}
 
 	/*Auto start*/
+	lidbg("%s:isRearViewFirstInit=%d,isColdBootRec=%d\n",__func__,isRearViewFirstInit,isColdBootRec);
 	if((isRearViewFirstInit && isColdBootRec) || (isRearFirstResume && isACCRec))
 	{
 		lidbg("%s:==FirstInit==\n",__func__);
@@ -1150,22 +1152,25 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 	//lidbg("=====camStatus => %d======\n",pfly_UsbCamInfo->camStatus);
 	if(_IOC_TYPE(cmd) == FLYCAM_FRONT_REC_IOC_MAGIC)//front cam recording mode
 	{
-		/*check camera status before doing ioctl*/
-		if(!(pfly_UsbCamInfo->camStatus & FLY_CAM_ISVALID))
+		if((_IOC_NR(cmd) == NR_START_REC) || (_IOC_NR(cmd) == NR_STOP_REC) )
 		{
-			lidbg("%s:DVR not found,ioctl fail!\n",__func__);
-			return RET_NOTVALID;
-		}
-		else if(!(pfly_UsbCamInfo->camStatus & FLY_CAM_ISSONIX))
-		{
-			lidbg("%s:Is not SonixCam ,ioctl fail!\n",__func__);
-			return RET_NOTSONIX;
-		}
-		else if((pfly_UsbCamInfo->camStatus & FLY_CAM_ISSONIX) && !isDVRAfterFix)
-		{
-			lidbg("%s:Fix proc running!But ignore !\n",__func__);
-			//return RET_NOTVALID;
-			isDVRAfterFix = 1;//force to 1 tmp
+			/*check camera status before doing ioctl*/
+			if(!(pfly_UsbCamInfo->camStatus & FLY_CAM_ISVALID))
+			{
+				lidbg("%s:DVR not found,ioctl fail!\n",__func__);
+				return RET_NOTVALID;
+			}
+			else if(!(pfly_UsbCamInfo->camStatus & FLY_CAM_ISSONIX))
+			{
+				lidbg("%s:Is not SonixCam ,ioctl fail!\n",__func__);
+				return RET_NOTSONIX;
+			}
+			else if((pfly_UsbCamInfo->camStatus & FLY_CAM_ISSONIX) && !isDVRAfterFix)
+			{
+				lidbg("%s:Fix proc running!But ignore !\n",__func__);
+				//return RET_NOTVALID;
+				isDVRAfterFix = 1;//force to 1 tmp
+			}
 		}
 		
 		switch(_IOC_NR(cmd))
@@ -1427,22 +1432,25 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 
 	if(_IOC_TYPE(cmd) == FLYCAM_REAR_REC_IOC_MAGIC)//front cam recording mode
 	{
-		/*check camera status before doing ioctl*/
-		if(!((pfly_UsbCamInfo->camStatus >> 4) & FLY_CAM_ISVALID))
+		if((_IOC_NR(cmd) == NR_START_REC) || (_IOC_NR(cmd) == NR_STOP_REC) )
 		{
-			lidbg("%s:Rear not found,ioctl fail!\n",__func__);
-			return RET_NOTVALID;
-		}
-		else if(!((pfly_UsbCamInfo->camStatus >> 4)  & FLY_CAM_ISSONIX))
-		{
-			lidbg("%s:Rear Is not SonixCam ,ioctl fail!\n",__func__);
-			return RET_NOTSONIX;
-		}
-		else if(((pfly_UsbCamInfo->camStatus >> 4)  & FLY_CAM_ISSONIX) && !isRearViewAfterFix)
-		{
-			lidbg("%s:Rear Fix proc running!But ignore !\n",__func__);
-			//return RET_NOTVALID;
-			isRearViewAfterFix = 1;//force to 1 tmp
+			/*check camera status before doing ioctl*/
+			if(!((pfly_UsbCamInfo->camStatus >> 4) & FLY_CAM_ISVALID))
+			{
+				lidbg("%s:Rear not found,ioctl fail!\n",__func__);
+				return RET_NOTVALID;
+			}
+			else if(!((pfly_UsbCamInfo->camStatus >> 4)  & FLY_CAM_ISSONIX))
+			{
+				lidbg("%s:Rear Is not SonixCam ,ioctl fail!\n",__func__);
+				return RET_NOTSONIX;
+			}
+			else if(((pfly_UsbCamInfo->camStatus >> 4)  & FLY_CAM_ISSONIX) && !isRearViewAfterFix)
+			{
+				lidbg("%s:Rear Fix proc running!But ignore !\n",__func__);
+				//return RET_NOTVALID;
+				isRearViewAfterFix = 1;//force to 1 tmp
+			}
 		}
 		
 		switch(_IOC_NR(cmd))
