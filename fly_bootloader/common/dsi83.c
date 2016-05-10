@@ -260,42 +260,55 @@ void dsi83_gpio_init()
 }
 
 
-void check_dsi83_init(void)
+int check_dsi83_init(void)
 {
     int ret = 0;
     unsigned char reg = 0;
 
     char buf[2];
-    buf[0] = 0xe5;
-    buf[1] = 0xff;
-
-    ret = SN65_register_write(buf);
-    if(ret < 0)
-        lidbgerr( "[dsi83.check]:write reg 0xe5 error.\n");
-    else
-        mdelay(100);
+    //dsi83_err_clean();
 
     ret = SN65_register_read(0xe5, &reg);
-    if(((reg != 0x00) || (ret < 0) ))
+
+    if(((reg != 0x31) && (reg != 0x3d) && (reg != 0x01) && (reg != 0x00)) || ( (ret < 0)))
+    {
         dprintf(INFO, "Error::: dis83 check error, reg[0xe5]=0x%x\n", reg);
+        return 0;
+    }
     else
+    {
         dprintf(INFO, "Dis83 check successfully, reg[0xe5]=0x%x\n", reg);
+        return 1;
+    }
 
 }
+
+
+void dsi83_err_clean(void)
+{
+    int ret = 0;
+    char buf[2];
+    buf[0] = 0xe5;
+    buf[1] = 0xff;
+    ret = SN65_register_write(buf);
+}
+
+
 
 void dsi83_init()
 {
     int ret = 0;
     int i;
     int cnt = 0;
-
+    int init_cnt = 0;
     dprintf(INFO, "dsi83_init.\n");
 
     dsi83_i2c_config();
     dsi83_gpio_init();
+
+dsi83_config_start:
     dsi83_reset();
     
-dsi83_config_start:
     for(i = 0; i < 3; ++i)
     {
         ret = SN65_devices_read_id();
@@ -313,6 +326,10 @@ dsi83_config_start:
     else
         dprintf(INFO, "dsi83:DSI83 match ID success!\n");
 
+    dsi83_err_clean();
+    mdelay(100);
+
+    check_dsi83_init();
     ret = SN65_Sequence_seq4();
     if(ret < 0)
     {
@@ -325,24 +342,27 @@ dsi83_config_start:
         else
             dprintf(INFO, "dsi83:DSI83 config failed, something wrong, cnt = %d !\n", cnt);
     }
-
+    mdelay(100);
 #ifdef BOOTLOADER_VENDOR_QCOM	
 	dprintf(INFO, "Display Init: +\n");
     	target_display_init(device.display_panel);
 	dprintf(INFO, "Display Init: -\n");
 #endif
-
+    mdelay(100);
+    check_dsi83_init();
     ret = SN65_Sequence_seq6();
     if(ret < 0)
         dprintf(INFO, "dsi83:SN65_Sequence_seq6(),err,ret = %d.\n", ret);
 
+    check_dsi83_init();
     SN65_Sequence_seq7();
-
+    mdelay(100);
     ret = SN65_Sequence_seq8();
     if(ret < 0)
         dprintf(INFO, "dsi83:SN65_Sequence_seq8(),err,ret = %d.\n", ret);
 
     check_dsi83_init();
-
+    dsi83_err_clean();
+    check_dsi83_init();
 }
 
