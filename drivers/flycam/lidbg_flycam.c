@@ -12,6 +12,7 @@ static int dvr_stop_recording(void);
 static int rear_start_recording(void);
 static int rear_stop_recording(void);
 static void setDVRProp(int camID);
+static int checkSDCardStatus(char *path);
 
 
 /*camStatus mask*/
@@ -734,6 +735,7 @@ static void fixScreenBlurred(char cam_id , char isOnline)
  *****************************************************************************/
 static void work_DVR_fixScreenBlurred(struct work_struct *work)
 {
+	char ret = -1;
 	lidbg("%s:====E====\n",__func__);
 	//if(isSuspend) mod_timer(&suspend_stoprec_timer,SUSPEND_STOPREC_ONLINE_TIME);
 	if(isDVRFirstInit)
@@ -768,14 +770,24 @@ static void work_DVR_fixScreenBlurred(struct work_struct *work)
 	}
 
 	/*Auto start*/
-	lidbg("%s:isDVRFirstInit=%d,isColdBootRec=%d\n",__func__,isDVRFirstInit,isColdBootRec);
 	if((isDVRFirstInit && isColdBootRec) || (isDVRFirstResume && isACCRec))
 	{
 		lidbg("%s:==FirstInit==\n",__func__);
-		if(!isDVRRec)
+		/*Wait for SDCard ready*/
+		checkSDCardStatus(f_rec_path);
+		while((ret =checkSDCardStatus(f_rec_path)) == 3)
+	    {
+	       if(1==g_var.android_boot_completed) break;
+	       ssleep(1);
+	       lidbg("%s:====Wait for SDCard ready!====\n",__func__);
+	    }
+		if(ret != 3)
 		{
-			lidbg("%s:==AUTO start==\n",__func__);
-			dvr_start_recording();
+			if(!isDVRRec)
+			{
+				lidbg("%s:==AUTO start==\n",__func__);
+				dvr_start_recording();
+			}
 		}
 	}
 
@@ -784,6 +796,7 @@ static void work_DVR_fixScreenBlurred(struct work_struct *work)
 	isDVRFirstResume = 0;
 	status_fifo_in(RET_DVR_SONIX);
 	notify_online(RET_ONLINE_FOUND_SONIX);
+	
 	lidbg("%s:====X====\n",__func__);
 	return;
 }
@@ -799,6 +812,7 @@ static void work_DVR_fixScreenBlurred(struct work_struct *work)
  *****************************************************************************/
 static void work_RearView_fixScreenBlurred(struct work_struct *work)
 {
+	char ret = -1;
 	lidbg("%s:====E====\n",__func__);
 	if(isRearViewFirstInit)
 	{
@@ -832,14 +846,24 @@ static void work_RearView_fixScreenBlurred(struct work_struct *work)
 	}
 
 	/*Auto start*/
-	lidbg("%s:isRearViewFirstInit=%d,isColdBootRec=%d\n",__func__,isRearViewFirstInit,isColdBootRec);
 	if((isRearViewFirstInit && isColdBootRec) || (isRearFirstResume && isACCRec))
 	{
 		lidbg("%s:==FirstInit==\n",__func__);
-		if(isDualCam && !isRearRec)
+		/*Wait for SDCard ready*/
+		checkSDCardStatus(f_rec_path);
+		while((ret =checkSDCardStatus(f_rec_path)) == 3)
+	    {
+	       if(1==g_var.android_boot_completed) break;
+	       ssleep(1);
+	       lidbg("%s:====Wait for SDCard ready!====\n",__func__);
+	    }
+		if(ret != 3)
 		{
-			lidbg("%s:==AUTO start==\n",__func__);
-			rear_start_recording();
+			if( isDualCam && !isRearRec)
+			{
+				lidbg("%s:==AUTO start==\n",__func__);
+				rear_start_recording();
+			}
 		}
 	}
 	
@@ -847,6 +871,7 @@ static void work_RearView_fixScreenBlurred(struct work_struct *work)
 	isRearViewAfterFix = 1;
 	isRearFirstResume = 0;
 	status_fifo_in(RET_REAR_SONIX);	
+	
 	lidbg("%s:====X====\n",__func__);
 	return;
 }

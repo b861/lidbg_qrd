@@ -4437,34 +4437,36 @@ openfd:
 					struct stat buf; 
 					char path[100] = {0};
 					totalSize = 0;
-					
 					pDir=opendir(Rec_Save_Dir);  
-					while((ent=readdir(pDir))!=NULL)  
+					if(pDir != NULL) 
 					{
-						 if(!(ent->d_type & DT_DIR))  
-				         {  
-				                //if((strcmp(ent->d_name,".") == 0) || (strcmp(ent->d_name,"..") == 0) || (ent->d_reclen != 48) ) 
-				                //        continue; 
-								if((!strncmp(ent->d_name, "F", 1) && (cam_id == DVR_ID)) ||(!strncmp(ent->d_name, "R", 1) && (cam_id == REARVIEW_ID)) )
-								{
-									sprintf(path , "%s%s",Rec_Save_Dir,ent->d_name);
-									if (stat(path,&buf) == -1)
-								    {
-									      lidbg ("Get stat on %s Error?%s\n", ent->d_name, strerror (errno));
-									      //return (-1);
-								    }
-									//lidbg("%s -> size = %d , ent->d_reclen = %ld/n",ent->d_name,buf.st_size,ent->d_reclen); 
-									totalSize += buf.st_size;
-								}
-					 	 }
+						while((ent=readdir(pDir))!=NULL)  
+						{
+							 if(!(ent->d_type & DT_DIR))  
+					         {  
+					                //if((strcmp(ent->d_name,".") == 0) || (strcmp(ent->d_name,"..") == 0) || (ent->d_reclen != 48) ) 
+					                //        continue; 
+									if((!strncmp(ent->d_name, "F", 1) && (cam_id == DVR_ID)) ||(!strncmp(ent->d_name, "R", 1) && (cam_id == REARVIEW_ID)) )
+									{
+										sprintf(path , "%s%s",Rec_Save_Dir,ent->d_name);
+										if (stat(path,&buf) == -1)
+									    {
+										      lidbg ("Get stat on %s Error?%s\n", ent->d_name, strerror (errno));
+										      //return (-1);
+									    }
+										//lidbg("%s -> size = %d , ent->d_reclen = %ld/n",ent->d_name,buf.st_size,ent->d_reclen); 
+										totalSize += buf.st_size;
+									}
+						 	 }
+						}
+						if(((totalSize/1000000)%50) == 0) lidbg("total file size = %dMB\n",totalSize/1000000); 
+						if((totalSize/1000000) >= Rec_File_Size)	
+						{
+							isExceed = 1;
+							send_driver_msg(FLYCAM_STATUS_IOC_MAGIC, NR_STATUS, RET_DVR_EXCEED_UPPER_LIMIT);
+						}
+						closedir(pDir);
 					}
-					if(((totalSize/1000000)%50) == 0) lidbg("total file size = %dMB\n",totalSize/1000000); 
-					if((totalSize/1000000) >= Rec_File_Size)	
-					{
-						isExceed = 1;
-						send_driver_msg(FLYCAM_STATUS_IOC_MAGIC, NR_STATUS, RET_DVR_EXCEED_UPPER_LIMIT);
-					}
-					closedir(pDir);
 				}
 				
 				/*reserve for storage*/
