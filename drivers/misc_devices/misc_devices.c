@@ -265,6 +265,7 @@ static int lidbg_dev_event(struct notifier_block *this,
 #endif
         break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_SCREEN_ON):
+	if(g_var.keep_lcd_on) LCD_ON;
         //if(!g_var.is_fly)
     {
         g_var.usb_status = 0;

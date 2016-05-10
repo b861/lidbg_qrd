@@ -362,6 +362,8 @@ struct lidbg_pvar_t
     int suspend_airplane_mode;
     bool enable_gsensor_data_for_android;
     int platformid;
+    int keep_lcd_on;
+
 };
 
 typedef struct

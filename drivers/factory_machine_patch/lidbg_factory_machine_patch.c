@@ -4,7 +4,7 @@ LIDBG_DEFINE;
 
 #define TAG "faclog:"
 static int is_wlan_open = 0;
-
+static int wlan_ctrl_en = 1;
 
 static int lidbg_factory_event(struct notifier_block *this,unsigned long event, void *ptr)
 {
@@ -17,7 +17,7 @@ static int lidbg_factory_event(struct notifier_block *this,unsigned long event, 
         lidbg_shell_cmd("echo getprop wlan.driver.status $(getprop wlan.driver.status) > /dev/lidbg_factory_patch0");
         break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_DEVICE_DOWN):
-        if(is_wlan_open)
+        if((is_wlan_open)&&(wlan_ctrl_en))
         {
             lidbg_shell_cmd("svc wifi disable &");
             lidbg(TAG"wifi disable\n");
@@ -34,7 +34,7 @@ static int lidbg_factory_event(struct notifier_block *this,unsigned long event, 
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_ANDROID_UP):
         break;
     case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_DEVICE_UP):
-        if(is_wlan_open)
+        if((is_wlan_open)&&(wlan_ctrl_en))
         {
             lidbg_shell_cmd("svc wifi enable &");
             lidbg(TAG"wifi enable\n");
@@ -89,6 +89,11 @@ void parse_factory_patch_cmd(char *pt)
                 is_wlan_open = 0;
             lidbg(TAG"getprop:[%s=%d]\n", argv[1], is_wlan_open);
         }
+    }
+    else if  (!strcmp(argv[0], "no_wlan_ctrl"))
+    {
+	lidbg("no_wlan_ctrl\n");
+	wlan_ctrl_en = 0;
     }
 
 }

@@ -340,6 +340,9 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#083--enable network ping alarm\n");
             fs_mem_log("*158#084--enable network ping alarm,per one mins\n");
             fs_mem_log("*158#085--enable network ping alarm,err times >3  times: wake up system\n");
+            fs_mem_log("*158#086--origin suspend\n");
+            fs_mem_log("*158#087--keep lcd on\n");
+
             show_password_list();
             lidbg_domineering_ack();
         }
@@ -900,7 +903,30 @@ void parse_cmd(char *pt)
             lidbg_shell_cmd("am broadcast -a com.fly.lidbg.LidbgCommenLogic --ei action 6 --ei para 3 &");
             lidbg_domineering_ack();
         }
+        else if (!strcmp(argv[1], "*158#086"))
+			
+        {
+            lidbg("suspend no kill,disable iptable,disable alarmmanager protect,no turnoff wifi,3s goto sleep\n");
+			
+            lidbg_shell_cmd("am broadcast -a com.lidbg.flybootserver.action --ei action 8 &");//no kill apk
+	     msleep(200);
+            lidbg_shell_cmd("am broadcast -a com.lidbg.flybootserver.action --ei action 6 &");//disable iptable
+	     msleep(200);
+            lidbg_shell_cmd("am broadcast -a com.lidbg.alarmmanager.action --ei action 0 &");//disable alarmmanager protect
+            g_var.alarmtimer_interval = 0;
+			
+	     lidbg_shell_cmd("echo no_wlan_ctrl > /dev/lidbg_factory_patch0");//no turnoff wifi
+	     g_var.acc_goto_sleep_time = 1;
+            lidbg_domineering_ack();
+        }
+        else if (!strcmp(argv[1], "*158#087"))
+        {
+		g_var.keep_lcd_on = 1;
+        }
 
+
+
+		
     }
     else if(!strcmp(argv[0], "monkey") )
     {
