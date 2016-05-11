@@ -577,14 +577,14 @@ static int start_rec(char cam_id,char isPowerCtl)
 		lidbg("%s:====udisk_request====\n",__func__);
 		lidbg_shell_cmd("echo 'udisk_request' > /dev/flydev0");//don't control HUB power in rearview
 	}
-    if(cam_id == DVR_ID)
+    if((cam_id == DVR_ID) || (cam_id == DVR_BLOCK_ID_MODE))
 		lidbg_shell_cmd("setprop lidbg.uvccam.dvr.recording 1");
-	else if(cam_id == REARVIEW_ID)
+	else if((cam_id == REARVIEW_ID)  || (cam_id == REAR_BLOCK_ID_MODE))
 		lidbg_shell_cmd("setprop lidbg.uvccam.rearview.recording 1");
 	
  	invoke_AP_ID_Mode(cam_id);
 	
-	if(cam_id == DVR_ID)
+	if((cam_id == DVR_ID) || (cam_id == DVR_BLOCK_ID_MODE))
 	{
 		if(!wait_event_interruptible_timeout(pfly_UsbCamInfo->camStatus_wait_queue, (pfly_UsbCamInfo->read_status == RET_DVR_START), 6*HZ))
 		{
@@ -592,7 +592,7 @@ static int start_rec(char cam_id,char isPowerCtl)
 			return 1; 
 		}
 	}
-	else if(cam_id == REARVIEW_ID)
+	else if((cam_id == REARVIEW_ID)  || (cam_id == REAR_BLOCK_ID_MODE))
 	{
 		if(!wait_event_interruptible_timeout(pfly_UsbCamInfo->camStatus_wait_queue, (pfly_UsbCamInfo->read_status == RET_REAR_START), 6*HZ))
 		{
@@ -620,13 +620,13 @@ static int stop_rec(char cam_id,char isPowerCtl)
 	lidbg("%s:====E====\n",__func__);
 	pfly_UsbCamInfo->read_status = RET_DEFALUT;
 	if(isSuspend) del_timer(&suspend_stoprec_timer);
-	if(cam_id == DVR_ID)
+	if((cam_id == DVR_ID) || (cam_id == DVR_BLOCK_ID_MODE))
 		lidbg_shell_cmd("setprop lidbg.uvccam.dvr.recording 0");
-	else if(cam_id == REARVIEW_ID)
+	else if((cam_id == REARVIEW_ID)  || (cam_id == REAR_BLOCK_ID_MODE))
 		lidbg_shell_cmd("setprop lidbg.uvccam.rearview.recording 0");
 	//msleep(500);
 	
-	if(cam_id == DVR_ID)
+	if((cam_id == DVR_ID) || (cam_id == DVR_BLOCK_ID_MODE))
 	{
 		if(!wait_event_interruptible_timeout(pfly_UsbCamInfo->camStatus_wait_queue, (pfly_UsbCamInfo->read_status == RET_DVR_STOP), 3*HZ))
 		{
@@ -634,7 +634,7 @@ static int stop_rec(char cam_id,char isPowerCtl)
 			ret = 1; 
 		}
 	}
-	else if(cam_id == REARVIEW_ID)
+	else if((cam_id == REARVIEW_ID)  || (cam_id == REAR_BLOCK_ID_MODE))
 	{
 		if(!wait_event_interruptible_timeout(pfly_UsbCamInfo->camStatus_wait_queue, (pfly_UsbCamInfo->read_status == RET_REAR_STOP), 6*HZ))
 		{
@@ -664,7 +664,7 @@ static int stop_rec(char cam_id,char isPowerCtl)
  *****************************************************************************/
 static void fixScreenBlurred(char cam_id , char isOnline)
 {
-	if(cam_id == DVR_ID)
+	if((cam_id == DVR_ID) || (cam_id == DVR_BLOCK_ID_MODE))
 	{
 		//if(!isDVRFirstResume)
 		if(isDVRFirstInit)
@@ -693,7 +693,7 @@ static void fixScreenBlurred(char cam_id , char isOnline)
 		lidbg_shell_cmd("rm -f "EMMC_MOUNT_POINT0"/camera_rec/tmp*.h264&");
 		if(!isDVRFirstResume) isDVRCheck = 1;
 	}
-	else if(cam_id == REARVIEW_ID)
+	else if((cam_id == REARVIEW_ID) ||  (cam_id == REAR_BLOCK_ID_MODE))
 	{
 		if(!isRearFirstResume)
 		{
@@ -1950,7 +1950,7 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 								lidbg("%s:Dual => restart Rear recording\n",__func__);
 								lidbg("%s:CMD_SET_PAR\n",__func__);
 								stop_rec(REARVIEW_ID,1);
-								msleep(500);
+								msleep(800);
 								start_rec(REARVIEW_ID,1);
 							}
 							else
