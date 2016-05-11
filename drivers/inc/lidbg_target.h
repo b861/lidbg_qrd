@@ -98,6 +98,9 @@ struct hw_version_specific
 	int i2c_bus_fm1388;
 	int spi_bus_fm1388;
 
+	//ymu836
+	int spi_bus_ymu836;
+
     //ad
     struct ad_key_remap ad_key[4];
     struct ad_key ad_key_map[32];
@@ -192,6 +195,8 @@ extern struct hw_version_specific g_hw_version_specific[];
 //fm1388
 #define FM1388_I2C_BUS (g_hw.i2c_bus_fm1388)
 #define FM1388_SPI_BUS (g_hw.spi_bus_fm1388)
+#define YMU836_SPI_BUS (g_hw.spi_bus_ymu836)
+
 
 
 #include SOC_TARGET_DEFINE_PATH
