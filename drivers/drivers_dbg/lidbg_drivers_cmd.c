@@ -79,13 +79,12 @@ int thread_dump_log(void *data)
     fs_cp_data_to_udisk(true);
 #else
     char shell_cmd[128] = {0}, tbuff[128] = {0};
-    msleep(7000);
     lidbg_get_current_time(tbuff, NULL);
     sprintf(shell_cmd, "mkdir "USB_MOUNT_POINT"/ID-%d-%s", get_machine_id() , tbuff);
     lidbg_shell_cmd(shell_cmd);
     sprintf(shell_cmd, "cp -rf "LIDBG_LOG_DIR"* "USB_MOUNT_POINT"/ID-%d-%s", get_machine_id() , tbuff);
     lidbg_shell_cmd(shell_cmd);
-    ssleep(2);
+    ssleep(5);
 #endif
     lidbg_domineering_ack();
     return 0;
@@ -255,7 +254,9 @@ void parse_cmd(char *pt)
     if (!strcmp(argv[0], "appcmd"))
     {
         lidbg("%s:[%s]\n", argv[0], argv[1]);
-
+        lidbg_chmod("/data");
+        lidbg_chmod("/data/lidbg");
+        lidbg_shell_cmd("chmod 777 /data/lidbg/*");
         if (!strcmp(argv[1], "*158#000"))
         {
             //*#*#158999#*#*
@@ -448,10 +449,46 @@ void parse_cmd(char *pt)
         }
         else if (!strcmp(argv[1], "*158#013"))
         {
-            encode = false;
-            lidbg_chmod("/data");
-            lidbg_fifo_get(glidbg_msg_fifo, LIDBG_LOG_DIR"lidbg_mem_log.txt", 0);
-            CREATE_KTHREAD(thread_dump_log, NULL);
+		encode = false;
+		lidbg_chmod("/data");
+		lidbg_fifo_get(glidbg_msg_fifo, LIDBG_LOG_DIR"lidbg_mem_log.txt", 0);
+		CREATE_KTHREAD(thread_kmsg_fifo_save, NULL);
+		
+		lidbg_shell_cmd("chmod 777 /data/lidbg/*");
+		lidbg_shell_cmd("mkdir -p /data/lidbg/machine");
+		lidbg_shell_cmd("chmod 777 /data/lidbg/machine");
+		lidbg_shell_cmd("logcat -v time > /data/lidbg/machine/logcat.txt &");
+		lidbg_shell_cmd("date > /data/lidbg/machine/machine.txt");
+		lidbg_shell_cmd("cat /proc/cmdline >> /data/lidbg/machine/machine.txt");
+		lidbg_shell_cmd("getprop fly.version.mcu >> /data/lidbg/machine/machine.txt");
+		lidbg_shell_cmd("top -n 15 -t >/data/lidbg/machine/top.txt &");
+		lidbg_shell_cmd("procrank > /data/lidbg/machine/procrank.txt &");
+		lidbg_shell_cmd("screencap -p /data/lidbg/screenshot.png &");
+		lidbg_shell_cmd("ps > /data/lidbg/machine/ps.txt");
+		lidbg_shell_cmd("df > /data/lidbg/machine/df.txt");
+		lidbg_shell_cmd("getprop > /data/lidbg/machine/getprop.txt");
+		lidbg_shell_cmd("lsmod > /data/lidbg/machine/lsmod.txt");
+
+		//power
+		lidbg_shell_cmd("date  >> /data/lidbg/pm_info/wakeup_sources.txt");
+		lidbg_shell_cmd("cat /sys/kernel/debug/wakeup_sources >> /data/lidbg/pm_info/wakeup_sources.txt");
+		lidbg_shell_cmd("cat /proc/wakelocks >> /data/lidbg/pm_info/wakeup_sources.txt");
+
+		lidbg_shell_cmd("date  >> /data/lidbg/pm_info/dumpsys_media.player.txt");
+		lidbg_shell_cmd("dumpsys media.player >> /data/lidbg/pm_info/dumpsys_media.player.txt");
+		lidbg_shell_cmd("date  >> /data/lidbg/pm_info/dumpsys_power.txt");
+		lidbg_shell_cmd("dumpsys power >> /data/lidbg/pm_info/dumpsys_power.txt");
+		lidbg_shell_cmd("date  >> /data/lidbg/pm_info/dumpsys_audio.txt");
+		lidbg_shell_cmd("dumpsys audio >> /data/lidbg/pm_info/dumpsys_audio.txt");
+		lidbg_shell_cmd("date  >> /data/lidbg/pm_info/dumpsys_alarm.txt");
+		lidbg_shell_cmd("dumpsys alarm >> /data/lidbg/pm_info/dumpsys_alarm.txt");
+		lidbg_shell_cmd("date  >> /data/lidbg/pm_info/location.txt");
+		lidbg_shell_cmd("dumpsys location >> /data/lidbg/pm_info/location.txt");
+		
+		lidbg_shell_cmd("chmod 777 /data/lidbg/machine/*");
+		msleep(1000*20);
+              CREATE_KTHREAD(thread_dump_log, NULL);
+
         }
         else if (!strcmp(argv[1], "*158#014"))
             lidbg_system_switch(true);
