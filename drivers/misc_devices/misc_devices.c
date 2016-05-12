@@ -11,7 +11,7 @@
 LIDBG_DEFINE;
 
 int udisk_stability_test = 0;
-#define LCD_ON_DELAY (2500)//acc_on-->lcd_on
+#define LCD_ON_DELAY (1500)//acc_on-->lcd_on
 static struct wake_lock device_wakelock;
 //int usb_request = 0;
 
