@@ -11,7 +11,7 @@
 LIDBG_DEFINE;
 
 int udisk_stability_test = 0;
-#define LCD_ON_DELAY (960+500)
+#define LCD_ON_DELAY (2500)//acc_on-->lcd_on
 static struct wake_lock device_wakelock;
 //int usb_request = 0;
 
@@ -53,7 +53,7 @@ static int devices_notifier_callback(struct notifier_block *self,
                 if((g_var.led_hal_status & g_var.led_app_status)&&(g_var.acc_flag==FLY_ACC_ON)&&(g_var.flyaudio_reboot==0))
                 {
         		lidbg("dsi83.LCD_ON2.thread\n");
-        		CREATE_KTHREAD(thread_lcd_on_delay,NULL);
+        		//CREATE_KTHREAD(thread_lcd_on_delay,NULL);
                 }
                 else
         		lidbg("dsi83.LCD_ON2.skip.%d,%d,%d,%d\n",g_var.led_hal_status,g_var.led_app_status,g_var.acc_flag,g_var.flyaudio_reboot);
@@ -269,7 +269,7 @@ static int lidbg_dev_event(struct notifier_block *this,
         //if(!g_var.is_fly)
     {
         g_var.usb_status = 0;
-        if((g_var.led_hal_status & g_var.led_app_status)&&(g_var.fb_on == 1)&&(g_var.flyaudio_reboot==0))
+        if((g_var.led_hal_status & g_var.led_app_status)/*&&(g_var.fb_on == 1)*/&&(g_var.flyaudio_reboot==0))
         {
         		lidbg("LCD_ON3\n");
         		CREATE_KTHREAD(thread_lcd_on_delay,NULL);
