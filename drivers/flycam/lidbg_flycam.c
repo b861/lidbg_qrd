@@ -13,6 +13,7 @@ static int rear_start_recording(void);
 static int rear_stop_recording(void);
 static void setDVRProp(int camID);
 static int checkSDCardStatus(char *path);
+static int thread_accon_start_rec(void *data);
 
 
 /*camStatus mask*/
@@ -41,6 +42,7 @@ static DECLARE_COMPLETION (Rear_fw_get_wait);
 static DECLARE_COMPLETION (DVR_fw_get_wait);
 static DECLARE_COMPLETION (Rear_res_get_wait);
 static DECLARE_COMPLETION (DVR_res_get_wait);
+static DECLARE_COMPLETION (accon_start_rec_wait);
 
 /*Camera DVR & Online recording parameters*/
 static int f_rec_bitrate = 8000000,f_rec_time = 300,f_rec_filenum = 5,f_rec_totalsize = 4096;
@@ -56,8 +58,8 @@ static struct timer_list suspend_stoprec_timer;
 #define SUSPEND_STOPREC_ACCOFF_TIME   (jiffies + 180*HZ)  /* 3min stop Rec after accoff,fix online then accoff*/
 
 /*bool var*/
-static char isDVRRec,isOnlineRec,isRearRec,isDVRFirstInit,isRearViewFirstInit,isRearCheck = 1,isDVRCheck = 1,isOnlineNotifyReady,isDualCam,isColdBootRec,isACCRec;
-static char isSuspend,isDVRAfterFix,isRearViewAfterFix,isDVRFirstResume,isRearFirstResume,isUpdating,isKSuspend,isDVRReady,isRearReady;
+static char isDVRRec,isOnlineRec,isRearRec,isDVRFirstInit,isRearViewFirstInit,isRearCheck = 1,isDVRCheck = 1,isOnlineNotifyReady,isDualCam,isColdBootRec,isDVRACCRec,isRearACCRec;
+static char isSuspend,isDVRAfterFix,isRearViewAfterFix,isDVRFirstResume,isRearFirstResume,isUpdating,isKSuspend,isDVRReady,isRearReady,isDVRACCResume,isRearACCResume;
 
 
 //struct work_struct work_t_fixScreenBlurred;
@@ -141,6 +143,8 @@ static int lidbg_flycam_event(struct notifier_block *this,
 	    case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_ON):
 			lidbg("flycam event:resume %ld\n", event);
 			isSuspend = 0;
+			isDVRACCResume = 1;
+			isRearACCResume = 1;
 			del_timer(&suspend_stoprec_timer);
 			if(isKSuspend)
 			{
@@ -158,15 +162,24 @@ static int lidbg_flycam_event(struct notifier_block *this,
 				else 
 				{
 					/*Online Rec when ACCON,stop online & start dvr*/
-					if(isOnlineRec && isACCRec)
+					if(isOnlineRec && isDVRACCRec)
 					{
 						lidbg("%s:==Online Rec when ACCON==\n",__func__);
-						dvr_start_recording();
+						complete(&accon_start_rec_wait);
 					}
 					status_fifo_in(RET_DVR_SONIX);//camera already working
 					//notify_online(RET_ONLINE_FOUND_SONIX);
 				}
 				isKSuspend = 0;
+			}
+			else 
+			{
+				if(isOnlineRec && isDVRACCRec)
+				{
+					lidbg("%s:==Online Rec when ACCON==\n",__func__);
+					complete(&accon_start_rec_wait);
+					status_fifo_in(RET_DVR_SONIX);
+				}
 			}
 			break;
 	    case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_OFF):
@@ -175,9 +188,12 @@ static int lidbg_flycam_event(struct notifier_block *this,
 			mod_timer(&suspend_stoprec_timer,SUSPEND_STOPREC_ACCOFF_TIME);
 			isDVRFirstResume = 0;
 			isRearFirstResume = 0;
+			isDVRACCResume = 0;
+			isRearACCResume = 0;
 
 			/*Auto stop*/
-			isACCRec = isDVRRec;
+			isDVRACCRec = isDVRRec;
+			isRearACCRec = isRearRec;
 			if(isDVRRec) dvr_stop_recording();
 			if(isRearRec) rear_stop_recording();
 			
@@ -238,6 +254,27 @@ static int thread_stop_rec_func(void *data)
 		isDVRRec = 0;
 		isOnlineRec = 0;
 		isRearRec = 0;
+	}
+	return 0;
+}
+
+static int thread_accon_start_rec(void *data)
+{
+	while(1)
+	{
+		wait_for_completion(&accon_start_rec_wait);
+		if(!isDVRRec &&  isDVRACCRec)
+		{
+			lidbg("%s:==ACCON AUTO start DVR==\n",__func__);
+			dvr_start_recording();
+		}
+		/*
+		if( isDualCam && !isRearRec &&  isRearACCRec)
+		{
+			lidbg("%s:==ACCON AUTO start Rear==\n",__func__);
+			rear_start_recording();
+		}
+		*/
 	}
 	return 0;
 }
@@ -636,18 +673,18 @@ static int stop_rec(char cam_id,char isPowerCtl)
 	}
 	else if((cam_id == REARVIEW_ID)  || (cam_id == REAR_BLOCK_ID_MODE))
 	{
-		if(!wait_event_interruptible_timeout(pfly_UsbCamInfo->camStatus_wait_queue, (pfly_UsbCamInfo->read_status == RET_REAR_STOP), 6*HZ))
+		if(!wait_event_interruptible_timeout(pfly_UsbCamInfo->camStatus_wait_queue, (pfly_UsbCamInfo->read_status == RET_REAR_STOP), 3*HZ))
 		{
 			lidbg("%s:====read_status wait timeout => %d====\n",__func__,pfly_UsbCamInfo->read_status);
 			return 1; 
 		}
 	}
+	msleep(500);
 	if(isPowerCtl) 
 	{	
 		lidbg("%s:====udisk_unrequest====\n",__func__);
 		lidbg_shell_cmd("echo 'udisk_unrequest' > /dev/flydev0");//don't control HUB power in rearview
 	}
-	usleep(200*1000);
 	lidbg("%s:====X====\n",__func__);
 	return ret;
 }
@@ -770,7 +807,8 @@ static void work_DVR_fixScreenBlurred(struct work_struct *work)
 	}
 
 	/*Auto start*/
-	if((isDVRFirstInit && isColdBootRec) || (isDVRFirstResume && isACCRec))
+	lidbg("%s:==isDVRACCResume:%d,isDVRFirstResume:%d==\n",__func__,isDVRACCResume,isDVRFirstResume);
+	if((isDVRFirstInit && isColdBootRec) || (isDVRACCResume && isDVRACCRec))
 	{
 		lidbg("%s:==FirstInit==\n",__func__);
 		/*Wait for SDCard ready*/
@@ -794,6 +832,7 @@ static void work_DVR_fixScreenBlurred(struct work_struct *work)
 	isDVRFirstInit = 0;
 	isDVRAfterFix = 1;
 	isDVRFirstResume = 0;
+	isDVRACCResume = 0;
 	status_fifo_in(RET_DVR_SONIX);
 	notify_online(RET_ONLINE_FOUND_SONIX);
 	
@@ -846,7 +885,7 @@ static void work_RearView_fixScreenBlurred(struct work_struct *work)
 	}
 
 	/*Auto start*/
-	if((isRearViewFirstInit && isColdBootRec) || (isRearFirstResume && isACCRec))
+	if((isRearViewFirstInit && isColdBootRec) || (isRearACCResume && isRearACCRec))
 	{
 		lidbg("%s:==FirstInit==\n",__func__);
 		/*Wait for SDCard ready*/
@@ -870,6 +909,7 @@ static void work_RearView_fixScreenBlurred(struct work_struct *work)
 	isRearViewFirstInit = 0;
 	isRearViewAfterFix = 1;
 	isRearFirstResume = 0;
+	isRearACCResume = 0;
 	status_fifo_in(RET_REAR_SONIX);	
 	
 	lidbg("%s:====X====\n",__func__);
@@ -1068,6 +1108,7 @@ static int dvr_start_recording(void)
 		isDVRRec = 1;
 		isOnlineRec = 0;
 		if(stop_rec(DVR_ID,1)) return -1;
+		//msleep(700);
 		if(start_rec(DVR_ID,1)) return -1;
 		notify_online(RET_ONLINE_INTERRUPTED);
 	}
@@ -1289,14 +1330,14 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 				{
 					if(stop_rec(DVR_ID,1)) goto dvrfailproc;
 					setDVRProp(DVR_ID);
-					msleep(500);
+					//msleep(500);
 					if(start_rec(DVR_ID,1)) goto dvrfailproc;
 				}
 				if(isRearRec)
 				{
 					if(stop_rec(REARVIEW_ID,1)) goto rearfailproc;
 					setDVRProp(REARVIEW_ID);
-					msleep(500);
+					//msleep(500);
 					if(start_rec(REARVIEW_ID,1)) goto rearfailproc;
 				}
 		        break;
@@ -1940,7 +1981,7 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 						{
 							lidbg("%s:restart DVR recording\n",__func__);
 							stop_rec(DVR_ID,1);
-							msleep(500);
+							//msleep(500);
 							start_rec(DVR_ID,1);
 						}
 						if(isRearRec)
@@ -2088,6 +2129,7 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 					case CMD_AUTO_DETECT:
 						lidbg("%s:CMD_AUTO_DETECT\n",__func__);
 						//if(isDVRFirstResume)	msleep(1500);
+						if(isDVRFirstResume) ssleep(10);
 						msleep(3000);
 
 						/*check dvr camera status before doing ioctl*/
@@ -2778,10 +2820,12 @@ int thread_flycam_init(void *data)
 	init_completion(&timer_stop_rec_wait);
 	init_completion(&Rear_fw_get_wait);
 	init_completion(&DVR_fw_get_wait);
+	init_completion(&accon_start_rec_wait);
 	
 	if(g_var.recovery_mode == 0)/*do not process when in recovery mode*/
 	{
 		CREATE_KTHREAD(thread_stop_rec_func, NULL);
+		CREATE_KTHREAD(thread_accon_start_rec, NULL);
 		register_lidbg_notifier(&lidbg_notifier);/*ACCON/OFF notifier*/
 		/*Stop recording timer(in ACCOFF scene)*/
 		init_timer(&suspend_stoprec_timer);
