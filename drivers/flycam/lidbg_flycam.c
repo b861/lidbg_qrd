@@ -43,6 +43,7 @@ static DECLARE_COMPLETION (DVR_fw_get_wait);
 static DECLARE_COMPLETION (Rear_res_get_wait);
 static DECLARE_COMPLETION (DVR_res_get_wait);
 static DECLARE_COMPLETION (accon_start_rec_wait);
+//static DECLARE_COMPLETION (auto_detect_wait);
 
 /*Camera DVR & Online recording parameters*/
 static int f_rec_bitrate = 8000000,f_rec_time = 300,f_rec_filenum = 5,f_rec_totalsize = 4096;
@@ -167,6 +168,7 @@ static int lidbg_flycam_event(struct notifier_block *this,
 						lidbg("%s:==Online Rec when ACCON==\n",__func__);
 						complete(&accon_start_rec_wait);
 					}
+					//else complete(&auto_detect_wait);
 					status_fifo_in(RET_DVR_SONIX);//camera already working
 					//notify_online(RET_ONLINE_FOUND_SONIX);
 				}
@@ -180,12 +182,15 @@ static int lidbg_flycam_event(struct notifier_block *this,
 					complete(&accon_start_rec_wait);
 					status_fifo_in(RET_DVR_SONIX);
 				}
+				//else complete(&auto_detect_wait);
 			}
 			break;
 	    case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, NOTIFIER_MINOR_ACC_OFF):
 			lidbg("flycam event:suspend %ld\n", event);
 			isSuspend = 1;
-			mod_timer(&suspend_stoprec_timer,SUSPEND_STOPREC_ACCOFF_TIME);
+			mod_timer(&suspend_stoprec_timer,SUSPEND_STOPREC_ACCOFF_TIME);		
+			break;
+		case NOTIFIER_VALUE(NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE, FLY_DEVICE_DOWN):
 			isDVRFirstResume = 0;
 			isRearFirstResume = 0;
 			isDVRACCResume = 0;
@@ -196,7 +201,6 @@ static int lidbg_flycam_event(struct notifier_block *this,
 			isRearACCRec = isRearRec;
 			if(isDVRRec) dvr_stop_recording();
 			if(isRearRec) rear_stop_recording();
-			
 			break;
 	    default:
 	        break;
@@ -268,6 +272,7 @@ static int thread_accon_start_rec(void *data)
 			lidbg("%s:==ACCON AUTO start DVR==\n",__func__);
 			dvr_start_recording();
 		}
+		//complete(&auto_detect_wait);
 		/*
 		if( isDualCam && !isRearRec &&  isRearACCRec)
 		{
@@ -788,23 +793,39 @@ static void work_DVR_fixScreenBlurred(struct work_struct *work)
 		lidbg_shell_cmd("setprop lidbg.uvccam.dvr.osdset 1&");
 	}
 	/*Rec Block mode(First ACCON) : REAR_BLOCK_ID_MODE & DVR_BLOCK_ID_MODE*/
-	if(isDVRFirstResume) 
-		fixScreenBlurred(DVR_BLOCK_ID_MODE,0);
-	else 
-		fixScreenBlurred(DVR_ID,0);
-
-	/*For Block mode*/
-	if(isDVRFirstResume)
+	if(isDVRACCRec && isDVRACCResume) 
 	{
+		lidbg("%s:====Don't need to fix Blurred!====\n",__func__);
+		if(!(pfly_UsbCamInfo->camStatus & FLY_CAM_ISSONIX))
+		{
+			if(!wait_event_interruptible_timeout(pfly_UsbCamInfo->DVR_ready_wait_queue, (isDVRReady == 1), 3*HZ))
+			{
+				lidbg("%s:====ACCON None camera found!====\n",__func__);
+				isDVRFirstResume = 0;
+				isDVRACCResume = 0;
+				isDVRAfterFix = 1;
+				//complete(&auto_detect_wait);
+				return;
+			}
+		}
+	}
+	else if(isDVRFirstResume)
+	{
+		fixScreenBlurred(DVR_BLOCK_ID_MODE,0);
+		/*For Block mode*/
 		pfly_UsbCamInfo->camStatus = lidbg_checkCam();
 		if(!((pfly_UsbCamInfo->camStatus) & FLY_CAM_ISSONIX))
 		{
 			lidbg("%s:====FirstResume None camera found!====\n",__func__);
 			isDVRFirstResume = 0;
+			isDVRACCResume = 0;
 			isDVRAfterFix = 1;
+			//complete(&auto_detect_wait);
 			return;
 		}
 	}
+	else 
+		fixScreenBlurred(DVR_ID,0);
 
 	/*Auto start*/
 	lidbg("%s:==isDVRACCResume:%d,isDVRFirstResume:%d==\n",__func__,isDVRACCResume,isDVRFirstResume);
@@ -829,6 +850,7 @@ static void work_DVR_fixScreenBlurred(struct work_struct *work)
 		}
 	}
 
+	//complete(&auto_detect_wait);
 	isDVRFirstInit = 0;
 	isDVRAfterFix = 1;
 	isDVRFirstResume = 0;
@@ -866,23 +888,37 @@ static void work_RearView_fixScreenBlurred(struct work_struct *work)
 		lidbg_shell_cmd("setprop lidbg.uvccam.rear.osdset 1&");
 	}
 	/*Rec Block mode(First ACCON) : REAR_BLOCK_ID_MODE & DVR_BLOCK_ID_MODE*/
-	if(isRearFirstResume)
-		fixScreenBlurred(REAR_BLOCK_ID_MODE,0);
-	else 
-		fixScreenBlurred(REARVIEW_ID,0);
-
-	/*For Block mode*/
-	if(isRearFirstResume)
+	if(isRearACCRec && isRearACCResume) 
 	{
+		lidbg("%s:====Don't need to fix Blurred!====\n",__func__);
+		if(!((pfly_UsbCamInfo->camStatus>>4) & FLY_CAM_ISSONIX))
+		{
+			if(!wait_event_interruptible_timeout(pfly_UsbCamInfo->Rear_ready_wait_queue, (isRearReady == 1), 10*HZ))
+			{
+				lidbg("%s:====ACCON None camera found!====\n",__func__);
+				isRearFirstResume = 0;
+				isRearACCResume = 0;
+				isRearViewAfterFix = 1;
+				return;
+			}
+		}
+	}
+	else if(isRearFirstResume)
+	{
+		fixScreenBlurred(REAR_BLOCK_ID_MODE,0);
+		/*For Block mode*/
 		pfly_UsbCamInfo->camStatus = lidbg_checkCam();
 		if(!((pfly_UsbCamInfo->camStatus>>4) & FLY_CAM_ISSONIX))
 		{
 			lidbg("%s:====FirstResume None camera found!====\n",__func__);
 			isRearFirstResume = 0;
+			isRearACCResume = 0;
 			isRearViewAfterFix = 1;
 			return;
 		}
 	}
+	else 
+		fixScreenBlurred(REARVIEW_ID,0);
 
 	/*Auto start*/
 	if((isRearViewFirstInit && isColdBootRec) || (isRearACCResume && isRearACCRec))
@@ -1386,7 +1422,7 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 			if(!wait_event_interruptible_timeout(pfly_UsbCamInfo->DVR_ready_wait_queue, (isDVRReady == 1), 10*HZ))
 			{
 				lidbg("%s:====udisk_unrequest==suspend online timeout==\n",__func__);
-				lidbg_shell_cmd("echo 'udisk_unrequest' > /dev/flydev0");
+				if(!isDVRRec) lidbg_shell_cmd("echo 'udisk_unrequest' > /dev/flydev0");
 				return RET_NOTVALID;
 			}
 		}
@@ -1467,11 +1503,13 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 				if(isDVRRec)
 				{
 					lidbg("%s:====Online stop cmd neglected====\n",__func__);
+#if 1
 					if(isSuspend) 
 					{
 						lidbg("%s:====udisk_unrequest===neglected=\n",__func__);
-						lidbg_shell_cmd("echo 'udisk_unrequest' > /dev/flydev0");
+						if(!isDVRRec) lidbg_shell_cmd("echo 'udisk_unrequest' > /dev/flydev0");
 					}
+#endif
 					ret = RET_IGNORE;
 				}
 				else if(isOnlineRec) 
@@ -1483,11 +1521,13 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 				else
 				{
 					lidbg("%s:====Online stop cmd repeatedly====\n",__func__);
+#if 1
 					if(isSuspend)
 					{
 						lidbg("%s:====udisk_unrequest===repeatedly=\n",__func__);
-						lidbg_shell_cmd("echo 'udisk_unrequest' > /dev/flydev0");
+						if(!isDVRRec) lidbg_shell_cmd("echo 'udisk_unrequest' > /dev/flydev0");
 					}
+#endif
 					ret = RET_REPEATREQ;
 				}
 		        break;
@@ -2129,8 +2169,11 @@ static long flycam_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 					case CMD_AUTO_DETECT:
 						lidbg("%s:CMD_AUTO_DETECT\n",__func__);
 						//if(isDVRFirstResume)	msleep(1500);
-						if(isDVRFirstResume) ssleep(10);
-						msleep(3000);
+						//if(isDVRACCResume) ssleep(10);
+						//else msleep(3000);
+						//wait_for_completion_timeout(&auto_detect_wait , 12*HZ);
+						//if(isDVRFirstResume) ssleep(8);
+						ssleep(4);
 
 						/*check dvr camera status before doing ioctl*/
 						if(!(pfly_UsbCamInfo->camStatus & FLY_CAM_ISVALID))
@@ -2821,6 +2864,7 @@ int thread_flycam_init(void *data)
 	init_completion(&Rear_fw_get_wait);
 	init_completion(&DVR_fw_get_wait);
 	init_completion(&accon_start_rec_wait);
+	//init_completion(&auto_detect_wait);
 	
 	if(g_var.recovery_mode == 0)/*do not process when in recovery mode*/
 	{
