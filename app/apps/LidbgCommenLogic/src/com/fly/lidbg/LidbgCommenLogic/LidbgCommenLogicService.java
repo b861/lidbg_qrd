@@ -5,6 +5,7 @@ package com.fly.lidbg.LidbgCommenLogic;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -30,6 +31,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
@@ -51,11 +53,13 @@ public class LidbgCommenLogicService extends Service
 	private static int testCount = 0;
 	private static int testCountError = 0;
 	protected int Errorthreshold = 10;
+	private Context mContext;
 
 	@Override
 	public void onCreate()
 	{
 		super.onCreate();
+		mContext = getApplication();
 		printKernelMsg("onCreate");
 
 		mLidbgCommenLogicService = this;
@@ -395,6 +399,8 @@ public class LidbgCommenLogicService extends Service
 	// am broadcast -a com.fly.lidbg.LidbgCommenLogic --ei action 0
 	private BroadcastReceiver myReceiver = new BroadcastReceiver()
 	{
+		private String mparaString;
+
 		@Override
 		public void onReceive(Context context, Intent intent)
 		{
@@ -457,6 +463,16 @@ public class LidbgCommenLogicService extends Service
 				}
 				printKernelMsg("Errorthreshold:" + Errorthreshold);
 				break;
+			case 7:
+				if (intent.hasExtra("paraString"))
+				{
+					mparaString = intent.getExtras().getString("paraString");
+					printKernelMsg("start app :" + startAPP(mparaString));
+				} else
+				{
+					printKernelMsg("start app fail");
+				}
+				break;
 
 			default:
 				printKernelMsg("unkown:" + action + "\n");
@@ -464,6 +480,21 @@ public class LidbgCommenLogicService extends Service
 			}
 		}
 	};
+
+	public String startAPP(String appPackageName)
+	{
+		try
+		{
+			Intent intent = mContext.getPackageManager()
+					.getLaunchIntentForPackage(appPackageName);
+			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			mContext.startActivity(intent);
+			return "success:"+appPackageName;
+		} catch (Exception e)
+		{
+			return "error:"+e.getMessage();
+		}
+	}
 
 	@Override
 	public void onDestroy()

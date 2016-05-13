@@ -127,6 +127,22 @@ int thread_system_trace(void *data)
 }
 
 
+static bool start_stop_third_apk_enabled = false;
+int thread_start_stop_all_third_apk(void *data)
+{
+    int cnt = 0;
+    while(start_stop_third_apk_enabled)
+    {
+        cnt++;
+        LIDBG_WARN("--->%d\n", cnt);
+        lidbg_shell_cmd("echo appcmd *158#087 > /dev/lidbg_drivers_dbg0");
+        ssleep(2 * 60);
+        lidbg_shell_cmd("echo appcmd *158#086 > /dev/lidbg_drivers_dbg0");
+        ssleep(30);
+    }
+    lidbg("start_stop_third_apk_enabled.exit\n");
+    return 0;
+}
 
 static bool top_enabled = false;
 int thread_enable_top(void *data)
@@ -343,7 +359,9 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#085--enable network ping alarm,err times >3  times: wake up system\n");
             fs_mem_log("*158#086--origin suspend\n");
             fs_mem_log("*158#087--keep lcd on\n");
-
+            fs_mem_log("*158#088--force stop third part apk\n");
+            fs_mem_log("*158#089--start all third part apk\n");
+            fs_mem_log("*158#090--start then stop all third part apk\n");
             show_password_list();
             lidbg_domineering_ack();
         }
@@ -907,13 +925,13 @@ void parse_cmd(char *pt)
         else if (!strcmp(argv[1], "*158#080"))
         {
             lidbg("*158#080--disable third part apk\n");
-            lidbg_shell_cmd("echo ws 3rd pm disable > /dev/lidbg_pm0");
+            lidbg_shell_cmd("echo ws 3rd 10 pm disable > /dev/lidbg_pm0");
             lidbg_domineering_ack();
         }
         else if (!strcmp(argv[1], "*158#081"))
         {
             lidbg("*158#081--enable third part apk\n");
-            lidbg_shell_cmd("echo ws 3rd pm enable > /dev/lidbg_pm0");
+            lidbg_shell_cmd("echo ws 3rd 10 pm enable > /dev/lidbg_pm0");
             lidbg_domineering_ack();
         }
         else if (!strcmp(argv[1], "*158#082"))
@@ -960,10 +978,26 @@ void parse_cmd(char *pt)
         {
 		g_var.keep_lcd_on = 1;
         }
-
-
-
-		
+        else if (!strcmp(argv[1], "*158#088"))
+        {
+            lidbg("*158#088--force stop third part apk\n");
+            lidbg_shell_cmd("echo ws 3rd 10 am force-stop > /dev/lidbg_pm0");
+            lidbg_domineering_ack();
+        }
+        else if (!strcmp(argv[1], "*158#089"))
+        {
+            lidbg("*158#089--start all third part apk\n");
+            lidbg_shell_cmd("echo ws 3rd 5000 am broadcast -a com.fly.lidbg.LidbgCommenLogic --ei action 7 --es paraString > /dev/lidbg_pm0");
+            lidbg_domineering_ack();
+        }
+        else if (!strcmp(argv[1], "*158#090"))
+        {
+            start_stop_third_apk_enabled = !start_stop_third_apk_enabled;
+            CREATE_KTHREAD(thread_start_stop_all_third_apk, NULL);
+            lidbg_domineering_ack();
+            lidbg("*158#090--start then stop all third part apk,%d\n", start_stop_third_apk_enabled);
+        }
+	
     }
     else if(!strcmp(argv[0], "monkey") )
     {

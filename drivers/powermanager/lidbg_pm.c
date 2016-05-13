@@ -40,7 +40,8 @@ extern void grf_restore(void);
 int have_triggerd_sleep_S = 0;
 
 static DECLARE_COMPLETION(pm_3rd_package_wait);
-static char shell_head[32];
+static int delay_ms_3rd=1000;
+static char shell_head[128];
 
 bool is_safety_apk(char *apkname)
 {
@@ -505,7 +506,7 @@ void suspendkey_timer_isr(unsigned long data)
 #endif
 ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t *ppos)
 {
-    char *cmd[8] = {NULL};
+    char *cmd[32] = {NULL};
     int cmd_num  = 0;
     char cmd_buf[512];
     memset(cmd_buf, '\0', 512);
@@ -788,8 +789,10 @@ ssize_t pm_write (struct file *filp, const char __user *buf, size_t size, loff_t
         }
         else  if(!strcmp(cmd[1], "3rd"))
         {
-		snprintf(shell_head, sizeof(shell_head), "%s %s %s %s", cmd[2], cmd_num > 3 ? cmd[3] : "", cmd_num > 4 ? cmd[4] : "", cmd_num > 5 ? cmd[5] : "");
-		PM_WARN("<3rd.shell_head:%s>\n", shell_head);
+		delay_ms_3rd= simple_strtoul(cmd[2], 0, 0);
+		snprintf(shell_head, sizeof(shell_head), "%s %s %s %s %s %s %s %s %s", cmd[3], cmd_num > 4 ? cmd[4] : "", cmd_num > 5 ? cmd[5] : ""
+			, cmd_num > 6 ? cmd[6] : "", cmd_num > 7 ? cmd[7] : "", cmd_num > 8 ? cmd[8] : "", cmd_num > 9 ? cmd[9] : "", cmd_num > 10 ? cmd[10] : "", cmd_num > 11 ? cmd[11] : "");
+		PM_WARN("<3rd.delay:%d  shell_head:%s>\n", delay_ms_3rd,shell_head);
 		complete(&pm_3rd_package_wait);
         }
     }
@@ -1201,8 +1204,8 @@ void pm_list_action(void)
             count++;
             snprintf(cmd, sizeof(cmd), "%s %s &", shell_head, p );
             lidbg_shell_cmd(cmd);
-            LIDBG_WARN("%d -->%s\n", count, cmd);
-            msleep(10);
+            LIDBG_WARN("%d/%d -->%s\n", count,delay_ms_3rd, cmd);
+            msleep(delay_ms_3rd);
         }
         p = NULL;
     }
