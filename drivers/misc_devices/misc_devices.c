@@ -74,6 +74,8 @@ static int devices_notifier_callback(struct notifier_block *self,
 #endif
 
 
+static u32 last_usb_off_time = 0;
+
 void usb_camera_enable(bool enable)
 {
     DUMP_FUN;
@@ -82,11 +84,18 @@ void usb_camera_enable(bool enable)
     if(enable)
     	{ 
     	 wake_lock(&device_wakelock);
+	 while(get_tick_count() - last_usb_off_time < 500 ) 
+	 {
+		 lidbg("%d,%d\n",get_tick_count(),last_usb_off_time);
+		 msleep(100);
+	 }
+	 lidbg("%d,%d\n",get_tick_count(),last_usb_off_time);
         USB_FRONT_WORK_ENABLE;
     	}
     else
     {
         USB_WORK_DISENABLE;
+	 last_usb_off_time = get_tick_count();
 	 wake_unlock(&device_wakelock);	
     }
 }
@@ -128,6 +137,12 @@ void usb_disk_enable(bool enable)
     if(enable)
     {
     	 wake_lock(&device_wakelock);
+        while(get_tick_count() - last_usb_off_time < 500 ) 
+	 {
+		 lidbg("%d,%d\n",get_tick_count(),last_usb_off_time);
+		 msleep(100);
+	 }
+	 lidbg("%d,%d\n",get_tick_count(),last_usb_off_time);
         USB_WORK_ENABLE;
 	 if(g_var.udisk_stable_test != 0)
 	 	 CREATE_KTHREAD(thread_udisk_stable, NULL);
@@ -145,6 +160,7 @@ void usb_disk_enable(bool enable)
         msleep(200);
 #endif
         USB_WORK_DISENABLE;
+	 last_usb_off_time = get_tick_count();
 	 wake_unlock(&device_wakelock);
     }
 }
