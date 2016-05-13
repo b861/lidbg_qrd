@@ -1012,6 +1012,22 @@ void parse_cmd(char *pt)
             lidbg_reboot();
         }
     }
+    else if(!strcmp(argv[0], "flyparameter_bit") )
+    {
+        char pre = 'N';
+        int i = simple_strtoul(argv[1], 0, 0);
+        i-=1;
+        {
+            pre = g_recovery_meg->hwInfo.info[i];
+            g_recovery_meg->hwInfo.info[i] = (int)simple_strtoul(argv[2], 0, 0) + '0';
+            lidbg("flyparameter-char.info[%d]:old,now[%d,%d]", i, pre - '0', g_recovery_meg->hwInfo.info[i] - '0');
+        }
+        if(flyparameter_info_save(g_recovery_meg))
+        {
+            lidbg_domineering_ack();
+        }
+    }
+
 #ifndef SOC_msm8x25
     else if(!strcmp(argv[0], "pm") )
     {

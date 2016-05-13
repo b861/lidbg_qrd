@@ -9,8 +9,13 @@ hwInfo.info
 第8位 代表触摸板是否需要倒置，1表示需要
 
 NOTE:
+(1):一次设置全部硬件
 如下，已建立adb shell指令快速设置硬件信息。
 echo flyparameter 0 0 0 0 1 1 1 > /dev/lidbg_drivers_dbg0
 设置前需要先查看当前机器的硬件信息，在/dev/log/lidbg_log.txt
 里面查看flyparameter=*****.
+
+(2):单独更改某一个位置的硬件信息
+echo flyparameter_bit 8 1 > /dev/lidbg_drivers_dbg0
+比如使能触摸屏倒置,把第八位设置为1.
 
