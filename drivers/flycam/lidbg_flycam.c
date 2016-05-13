@@ -798,7 +798,7 @@ static void work_DVR_fixScreenBlurred(struct work_struct *work)
 		lidbg("%s:====Don't need to fix Blurred!====\n",__func__);
 		if(!(pfly_UsbCamInfo->camStatus & FLY_CAM_ISSONIX))
 		{
-			if(!wait_event_interruptible_timeout(pfly_UsbCamInfo->DVR_ready_wait_queue, (isDVRReady == 1), 3*HZ))
+			if(!wait_event_interruptible_timeout(pfly_UsbCamInfo->DVR_ready_wait_queue, (isDVRReady == 1), 10*HZ))
 			{
 				lidbg("%s:====ACCON None camera found!====\n",__func__);
 				isDVRFirstResume = 0;
