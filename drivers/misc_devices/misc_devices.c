@@ -123,6 +123,31 @@ static int thread_udisk_stable(void *data)
     return 1;
 }
 
+#ifdef USB_HUB_SUPPORT
+static int thread_usb_hub_check(void *data)
+{
+    //msleep(2000);
+     if(g_var.usb_status == 1)
+     {
+	    if(!fs_is_file_exist("/sys/bus/usb/drivers/usb/1-1"))
+	    {
+	        lidbg("thread_usb_hub_check fail!\n");
+	        USB_POWER_DISABLE;
+		 USB_ID_HIGH_DEV;
+	        ssleep(2);
+		 USB_ID_LOW_HOST;
+		 USB_POWER_ENABLE;
+	    }
+	    else
+	    {
+	       lidbg("thread_usb_hub_check success\n");
+	    }
+     }
+    return 1;
+}
+#endif
+
+
 void usb_disk_enable(bool enable)
 {
     DUMP_FUN;
@@ -144,6 +169,9 @@ void usb_disk_enable(bool enable)
 	 }
 	 lidbg("%d,%d\n",get_tick_count(),last_usb_off_time);
         USB_WORK_ENABLE;
+#ifdef USB_HUB_SUPPORT
+	CREATE_KTHREAD(thread_usb_hub_check, NULL);
+#endif
 	 if(g_var.udisk_stable_test != 0)
 	 	 CREATE_KTHREAD(thread_udisk_stable, NULL);
     }
@@ -482,12 +510,14 @@ void usb_enumerate_monitor(char *key_word, void *data)
     lidbg("find key word.in %d\n", usb_enumerate_limit);
     g_var.is_udisk_needreset = 0;
     usb_enumerate_limit--;
+#ifndef FLY_USB_CAMERA_SUPPORT
     if(g_var.system_status >= FLY_ANDROID_UP)
     {
         usb_disk_enable(0);
         ssleep(2);
         usb_disk_enable(1);
     }
+#endif
 }
 
 int thread_udisk_stability_test(void *data)

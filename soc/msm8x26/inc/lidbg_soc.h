@@ -56,6 +56,8 @@
 #ifdef PLATFORM_msm8909
 #define SUSPEND_ONLINE
 #define MUC_CONTROL_DSP
+#define USB_HUB_SUPPORT
+
 #endif
 
 #ifdef PLATFORM_msm8909
