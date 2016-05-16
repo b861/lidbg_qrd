@@ -122,6 +122,11 @@ static void status_fifo_in(unsigned char status)
 		wake_up_interruptible(&pfly_UsbCamInfo->camStatus_wait_queue);
 		return;
 	}
+	else if(status == RET_DVR_INIT_INSUFFICIENT_SPACE_STOP || status == RET_REAR_INIT_INSUFFICIENT_SPACE_STOP)
+	{
+		dvr_fail_proc();
+		rear_fail_proc();
+	}
 	lidbg("%s:====fifo in => %d====\n",__func__,status);
 	down(&pfly_UsbCamInfo->sem);
 	//if(kfifo_is_full(&camStatus_data_fifo));
