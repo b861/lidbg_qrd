@@ -71,22 +71,61 @@ bool set_wifi_adb_mode(bool on)
     lidbg_start("adbd");
     return true;
 }
-static bool encode = false;
-int thread_dump_log(void *data)
+int thread_dump_log_cp2_udisk(void *data)
 {
+	lidbg_shell_cmd("chmod 777 /data/lidbg/*");
+	lidbg_shell_cmd("mkdir -p /data/lidbg/machine");
+	lidbg_shell_cmd("chmod 777 /data/lidbg/machine");
+	lidbg_shell_cmd("date > /data/lidbg/machine/machine.txt");
+	lidbg_shell_cmd("cat /proc/cmdline >> /data/lidbg/machine/machine.txt");
+	lidbg_shell_cmd("getprop fly.version.mcu >> /data/lidbg/machine/machine.txt");
+	lidbg_shell_cmd("getprop ro.release.version >> /data/lidbg/machine/machine.txt");
+	lidbg_shell_cmd("top -n 15 -t -d 1 >/data/lidbg/machine/top.txt &");
+	lidbg_shell_cmd("procrank > /data/lidbg/machine/procrank.txt &");
+	lidbg_shell_cmd("ps > /data/lidbg/machine/ps.txt");
+	lidbg_shell_cmd("df > /data/lidbg/machine/df.txt");
+	lidbg_shell_cmd("getprop > /data/lidbg/machine/getprop.txt");
+	lidbg_shell_cmd("lsmod > /data/lidbg/machine/lsmod.txt");
+
+	//power
+	lidbg_shell_cmd("date  >> /data/lidbg/pm_info/wakeup_sources.txt");
+	lidbg_shell_cmd("cat /sys/kernel/debug/wakeup_sources >> /data/lidbg/pm_info/wakeup_sources.txt");
+	lidbg_shell_cmd("cat /proc/wakelocks >> /data/lidbg/pm_info/wakeup_sources.txt");
+
+	lidbg_shell_cmd("date  >> /data/lidbg/pm_info/dumpsys_media.player.txt");
+	lidbg_shell_cmd("dumpsys media.player >> /data/lidbg/pm_info/dumpsys_media.player.txt");
+	lidbg_shell_cmd("date  >> /data/lidbg/pm_info/dumpsys_power.txt");
+	lidbg_shell_cmd("dumpsys power >> /data/lidbg/pm_info/dumpsys_power.txt");
+	lidbg_shell_cmd("date  >> /data/lidbg/pm_info/dumpsys_audio.txt");
+	lidbg_shell_cmd("dumpsys audio >> /data/lidbg/pm_info/dumpsys_audio.txt");
+	lidbg_shell_cmd("date  >> /data/lidbg/pm_info/dumpsys_alarm.txt");
+	lidbg_shell_cmd("dumpsys alarm >> /data/lidbg/pm_info/dumpsys_alarm.txt");
+	lidbg_shell_cmd("date  >> /data/lidbg/pm_info/location.txt");
+	lidbg_shell_cmd("dumpsys location >> /data/lidbg/pm_info/location.txt");
+	lidbg_shell_cmd("chmod 777 /data/lidbg/* -R");
+	lidbg_shell_cmd("chmod 777 /data/lidbg/*");
+	ssleep(50);
+	lidbg_shell_cmd("screencap -p /data/lidbg/screenshot.png &");
+	ssleep(2);
 #ifdef SOC_msm8x25
-    msleep(7000);
     fs_cp_data_to_udisk(true);
 #else
+{
     char shell_cmd[128] = {0}, tbuff[128] = {0};
     lidbg_get_current_time(tbuff, NULL);
     sprintf(shell_cmd, "mkdir "USB_MOUNT_POINT"/ID-%d-%s", get_machine_id() , tbuff);
     lidbg_shell_cmd(shell_cmd);
     sprintf(shell_cmd, "cp -rf "LIDBG_LOG_DIR"* "USB_MOUNT_POINT"/ID-%d-%s", get_machine_id() , tbuff);
     lidbg_shell_cmd(shell_cmd);
-    ssleep(5);
+    sprintf(shell_cmd, "cp -rf /sdcard/logcat*.txt "USB_MOUNT_POINT"/ID-%d-%s", get_machine_id() , tbuff);
+    lidbg_shell_cmd(shell_cmd);
+    ssleep(10);
+    lidbg_shell_cmd("sync");
+    ssleep(1);
+}
 #endif
     lidbg_domineering_ack();
+    lidbg_toast_show("158013--", "remove_udisk!");
     return 0;
 }
 static bool logcat_enabled = false;
@@ -378,7 +417,6 @@ void parse_cmd(char *pt)
             lidbg_pm_install(get_lidbg_file_path(buff, "sslcapture.ko"));
             lidbg_pm_install(get_lidbg_file_path(buff, "Firewall.ko"));
             lidbg_pm_install(get_lidbg_file_path(buff, "app4haljni.ko"));
-            lidbg_toast_show("158998:", "install-->ok");
             lidbg_domineering_ack();
         }
         if (!strcmp(argv[1], "*158#999"))
@@ -466,47 +504,11 @@ void parse_cmd(char *pt)
             lidbg_domineering_ack();
         }
         else if (!strcmp(argv[1], "*158#013"))
-        {
-		encode = false;
-		lidbg_chmod("/data");
-		lidbg_fifo_get(glidbg_msg_fifo, LIDBG_LOG_DIR"lidbg_mem_log.txt", 0);
-		CREATE_KTHREAD(thread_kmsg_fifo_save, NULL);
-		
-		lidbg_shell_cmd("chmod 777 /data/lidbg/*");
-		lidbg_shell_cmd("mkdir -p /data/lidbg/machine");
-		lidbg_shell_cmd("chmod 777 /data/lidbg/machine");
-		lidbg_shell_cmd("logcat -v time > /data/lidbg/machine/logcat.txt &");
-		lidbg_shell_cmd("date > /data/lidbg/machine/machine.txt");
-		lidbg_shell_cmd("cat /proc/cmdline >> /data/lidbg/machine/machine.txt");
-		lidbg_shell_cmd("getprop fly.version.mcu >> /data/lidbg/machine/machine.txt");
-		lidbg_shell_cmd("top -n 15 -t >/data/lidbg/machine/top.txt &");
-		lidbg_shell_cmd("procrank > /data/lidbg/machine/procrank.txt &");
-		lidbg_shell_cmd("screencap -p /data/lidbg/screenshot.png &");
-		lidbg_shell_cmd("ps > /data/lidbg/machine/ps.txt");
-		lidbg_shell_cmd("df > /data/lidbg/machine/df.txt");
-		lidbg_shell_cmd("getprop > /data/lidbg/machine/getprop.txt");
-		lidbg_shell_cmd("lsmod > /data/lidbg/machine/lsmod.txt");
-
-		//power
-		lidbg_shell_cmd("date  >> /data/lidbg/pm_info/wakeup_sources.txt");
-		lidbg_shell_cmd("cat /sys/kernel/debug/wakeup_sources >> /data/lidbg/pm_info/wakeup_sources.txt");
-		lidbg_shell_cmd("cat /proc/wakelocks >> /data/lidbg/pm_info/wakeup_sources.txt");
-
-		lidbg_shell_cmd("date  >> /data/lidbg/pm_info/dumpsys_media.player.txt");
-		lidbg_shell_cmd("dumpsys media.player >> /data/lidbg/pm_info/dumpsys_media.player.txt");
-		lidbg_shell_cmd("date  >> /data/lidbg/pm_info/dumpsys_power.txt");
-		lidbg_shell_cmd("dumpsys power >> /data/lidbg/pm_info/dumpsys_power.txt");
-		lidbg_shell_cmd("date  >> /data/lidbg/pm_info/dumpsys_audio.txt");
-		lidbg_shell_cmd("dumpsys audio >> /data/lidbg/pm_info/dumpsys_audio.txt");
-		lidbg_shell_cmd("date  >> /data/lidbg/pm_info/dumpsys_alarm.txt");
-		lidbg_shell_cmd("dumpsys alarm >> /data/lidbg/pm_info/dumpsys_alarm.txt");
-		lidbg_shell_cmd("date  >> /data/lidbg/pm_info/location.txt");
-		lidbg_shell_cmd("dumpsys location >> /data/lidbg/pm_info/location.txt");
-		
-		lidbg_shell_cmd("chmod 777 /data/lidbg/machine/*");
-		msleep(1000*20);
-              CREATE_KTHREAD(thread_dump_log, NULL);
-
+        	{
+            lidbg_toast_show("158013--", "wait_60S_until_next_info...");
+            lidbg_shell_cmd("echo appcmd *158#001 > /dev/lidbg_drivers_dbg0");
+            lidbg_shell_cmd("echo appcmd *158#021 > /dev/lidbg_drivers_dbg0");
+            CREATE_KTHREAD(thread_dump_log_cp2_udisk, NULL);
         }
         else if (!strcmp(argv[1], "*158#014"))
             lidbg_system_switch(true);
@@ -549,7 +551,6 @@ void parse_cmd(char *pt)
         }
         else if (!strcmp(argv[1], "*158#021"))
         {
-            encode = false;
             lidbg_chmod("/data");
             lidbg_fifo_get(glidbg_msg_fifo, LIDBG_LOG_DIR"lidbg_mem_log.txt", 0);
             CREATE_KTHREAD(thread_kmsg_fifo_save, NULL);

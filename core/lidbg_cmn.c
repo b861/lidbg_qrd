@@ -340,7 +340,7 @@ int  lidbg_force_stop_apk(char packagename[])
 int  lidbg_toast_show(char *who,char *what)
 {
     char para[128] = {0};
-    sprintf(para, "am broadcast -a com.lidbg.flybootserver.action --es toast  %s%s &", who ? who : "",what ? what : "null");
+    sprintf(para, "am broadcast -a com.lidbg.flybootserver.action --es toast  \"%s%s\" &", who ? who : "",what ? what : "null");
     lidbg_shell_cmd(para);
     return 1;
 }
