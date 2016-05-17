@@ -131,7 +131,7 @@ static int thread_usb_hub_check(void *data)
      {
 	    if(!fs_is_file_exist("/sys/bus/usb/drivers/usb/1-1"))
 	    {
-	        lidbg("thread_usb_hub_check fail!\n");
+	        lidbgerr("thread_usb_hub_check fail!\n");
 	        USB_POWER_DISABLE;
 		 USB_ID_HIGH_DEV;
 	        ssleep(2);
@@ -455,8 +455,8 @@ static void parse_cmd(char *pt)
         g_var.flyaudio_reboot=1;
 	 LCD_OFF;
 	 GPIO_NOT_READY;
-	 HAL_NOT_READY;
-	 MCU_WP_GPIO_OFF;
+	 //HAL_NOT_READY;
+	 //MCU_WP_GPIO_OFF;
         lidbg("Misc devices ctrl: g_var.flyaudio_reboot=1\n");
     }
 }
