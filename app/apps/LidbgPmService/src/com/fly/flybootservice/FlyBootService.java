@@ -140,6 +140,7 @@ public class FlyBootService extends Service {
     private boolean mKillProcessEn = true;
     private Toast toast = null;
     private boolean isWifiApEnabled=false;
+    private boolean isWifiEnabled=false;
 
     String mInternelBlackList[] = {
             "com.qti.cbwidget"
@@ -249,10 +250,15 @@ public class FlyBootService extends Service {
 								SendBroadcastToService(KeyBootState, keyEearlySusupendOFF);
 								LIDBG_PRINT("FlyBootService sent device_down to hal\n");
 								isWifiApEnabled = isWifiApEnabled();
-								LIDBG_PRINT("FlyBootService isWifiApEnabled:"+isWifiApEnabled+"\n");
+								isWifiEnabled = isWifiEnabled();
+								LIDBG_PRINT("FlyBootService isWifiApEnabled:"+isWifiApEnabled+"/isWifiEnabled:"+isWifiEnabled+"\n");
 								if (isWifiApEnabled)
 								{
 									setWifiApState(false);
+								}
+								if (isWifiEnabled)
+								{
+									setWifiState(false);
 								}
 							}else if(pmState == FBS_FASTBOOT_REQUEST){
 								LIDBG_PRINT("FlyBootService get pm state: FBS_FASTBOOT_REQUEST");
@@ -291,6 +297,10 @@ public class FlyBootService extends Service {
 								if (isWifiApEnabled)
 								{
 									setWifiApState(true);
+								}
+								if (isWifiEnabled)
+								{
+									setWifiState(true);
 								}
 							}else if(pmState == FBS_SCREEN_ON){
 								LIDBG_PRINT("FlyBootService get pm state: FBS_SCREEN_ON");
@@ -455,6 +465,15 @@ public class FlyBootService extends Service {
 			break;
 			case 17:
 				LIDBG_PRINT("FlyBootService disableWifiApState:"+setWifiApState(false)+"\n");
+			break;
+			case 18:
+				LIDBG_PRINT("FlyBootService isWifiEnabled:"+isWifiEnabled()+"\n");
+			break;
+			case 19:
+				LIDBG_PRINT("FlyBootService enableWiFi:"+setWifiState(true)+"\n");
+			break;
+			case 20:
+				LIDBG_PRINT("FlyBootService disableWiFi:"+setWifiState(false)+"\n");
 			break;
 								
 			default:
@@ -1190,6 +1209,28 @@ public static void releaseBrightWakeLock()
 		}
 		LIDBG_PRINT("FlyBootService isWifiApEnabled:exe error:"+msg+"\n");
 		return false;
+	}
+	private boolean isWifiEnabled()
+	{
+		// TODO Auto-generated method stub
+		WifiManager mWifiManager = (WifiManager) mFlyBootService
+				.getSystemService(Context.WIFI_SERVICE);
+		return mWifiManager.isWifiEnabled();
+	}
+
+	public boolean setWifiState(boolean enable)
+	{
+		// TODO Auto-generated method stub
+		WifiManager mWifiManager = (WifiManager) mFlyBootService
+				.getSystemService(Context.WIFI_SERVICE);
+		LIDBG_PRINT("FlyBootService setWifiState:"+enable+"\n");
+		if (enable)
+		{
+			return mWifiManager.setWifiEnabled(true);
+		} else
+		{
+			return mWifiManager.setWifiEnabled(false);
+		}
 	}
 /////////////////////////////alarm added below/////////////////////////////////////////
 	protected long[][] cmdPara =
