@@ -291,9 +291,9 @@ static int thread_drivers_loader_analyze(void *data)
     fs_fill_list(get_lidbg_file_path(buff, "lidbg.init.rc.conf"), FS_CMD_FILE_LISTMODE, &lidbg_list);
     analyze_list_cmd(&lidbg_list);
 
-    if(gboot_mode == MD_FLYSYSTEM)
+    if((gboot_mode == MD_FLYSYSTEM)||(gboot_mode == MD_DEBUG))
     {
-        LIDBG_WARN("<==gboot_mode==MD_FLYSYSTEM==>\n");
+        LIDBG_WARN("<==gboot_mode==%d==>\n",gboot_mode);
 
 	if(fs_is_file_exist("/flysystem/lib/modules/flyaudio.modules.conf"))
             fs_fill_list( "/flysystem/lib/modules/flyaudio.modules.conf", FS_CMD_FILE_LISTMODE, &flyaudio_hal_list);

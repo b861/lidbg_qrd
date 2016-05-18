@@ -30,6 +30,20 @@ fi
 	cd  $DBG_TOOLS_PATH && ./pushfly.sh
 }
 
+function lidbg_pushfly_data()
+{
+	echo $FUNCNAME
+	echo push驱动模块到/data
+	if [ "$WORK_REMOTE" = 1 ];then
+		rm -rf $WORK_LOCAL_PATH/out
+		mkdir $WORK_LOCAL_PATH/out
+if [ "$WORK_REMOTE" = 1 ];then
+		expect $DBG_TOOLS_PATH/scp $WORK_REMOTE_USERNAME $WORK_REMOTE_PASSWORD $WORK_REMOTE_PATH/out $WORK_LOCAL_PATH
+fi
+	fi
+	cd  $DBG_TOOLS_PATH && ./pushdebug.sh
+}
+
 function lidbg_push_out()
 {
 	echo $FUNCNAME
@@ -90,6 +104,7 @@ function lidbg_menu()
 	echo [5] push out to fly'              'push驱动模块到产品系统
 	echo [6] del lidbg loader'             '删除lidbg_loader.ko驱动
 	echo [7] open dbg_cfg.sh
+	echo [8] push out to /data'            'push驱动模块到/data加载,不影响ota
 
 	echo
 	soc_menu
@@ -125,6 +140,8 @@ function lidbg_handle()
 			lidbg_disable;;
 		7)
 			gedit $DBG_ROOT_PATH/dbg_cfg.sh &;;
+		8)
+			lidbg_pushfly_data;;
 		*)
 			echo
 		esac

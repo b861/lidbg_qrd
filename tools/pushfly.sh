@@ -7,6 +7,7 @@ adb wait-for-device remount
 adb shell sync
 adb shell rm -rf /data/lidbg
 adb shell rm -rf /system/lib/modules/out
+adb shell rm -rf /data/out
 adb push $DBG_OUT_PATH /flysystem/lib/out
 adb push $DBG_OUT_PATH/vold /system/bin/
 adb push $DBG_OUT_PATH/lidbg_load /system/bin/

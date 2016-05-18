@@ -318,6 +318,20 @@ static int fm1388_spi_probe(struct spi_device *spi)
 	//spi->bits_per_word=8;
 	pr_err("%s: max_speed = %d, chip_select = %d, mode = %d, modalias = %s,bits_per_word = %d\n", __func__, spi->max_speed_hz, spi->chip_select, spi->mode, spi->modalias,spi->bits_per_word);
 	fm1388_spi = spi;
+    if(gboot_mode == MD_FLYSYSTEM)
+    {
+        lidbg_insmod( "/flysystem/lib/out/lidbg_i2c_fm1388.ko" );
+
+    }
+    else if(gboot_mode == MD_DEBUG)
+    {
+        lidbg_insmod( "/data/out/lidbg_i2c_fm1388.ko" );
+    }
+    else
+    {
+        lidbg_insmod( "/system/lib/modules/out/lidbg_i2c_fm1388.ko" );
+    }
+
 	return 0;
 }
 

@@ -354,7 +354,7 @@ static int  lidbg_trace_msg_probe(struct platform_device *ppdev)
     FS_REGISTER_INT(tmp, "kmsg_fifo_save", 0, cb_int_kmsg_fifo_save);
 
 #ifdef  TRACE_MSG_FROM_KMSG
-    if(gboot_mode == MD_FLYSYSTEM)
+    if((gboot_mode == MD_FLYSYSTEM)||(gboot_mode == MD_DEBUG))
         CREATE_KTHREAD(thread_trace_msg_in, NULL);
 #endif
     CREATE_KTHREAD(thread_trace_msg_out, NULL);

@@ -401,6 +401,8 @@ void parse_cmd(char *pt)
             fs_mem_log("*158#088--force stop third part apk\n");
             fs_mem_log("*158#089--start all third part apk\n");
             fs_mem_log("*158#090--start then stop all third part apk\n");
+            fs_mem_log("*158#091--rm /data/out\n");
+
             show_password_list();
             lidbg_domineering_ack();
         }
@@ -998,7 +1000,12 @@ void parse_cmd(char *pt)
             lidbg_domineering_ack();
             lidbg("*158#090--start then stop all third part apk,%d\n", start_stop_third_apk_enabled);
         }
-	
+        else if (!strcmp(argv[1], "*158#091"))
+        {
+            lidbg("-------rm /data/out ----\n");
+            lidbg_shell_cmd("rm -rf /data/out");
+            lidbg_domineering_ack();
+        }
     }
     else if(!strcmp(argv[0], "monkey") )
     {

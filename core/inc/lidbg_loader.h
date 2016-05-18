@@ -6,6 +6,8 @@ enum boot_mode
     MD_RECOVERY = 0,
     MD_ORIGIN,
     MD_FLYSYSTEM,
+    MD_DEBUG,
+
 };
 
 extern int load_modules_count;

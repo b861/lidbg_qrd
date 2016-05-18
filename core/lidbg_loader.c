@@ -5,6 +5,7 @@
 
 #define  RECOVERY_MODE_DIR "/sbin/recovery"
 #define  FLY_MODE_FILE "/flysystem/lib/out/lidbg_loader.ko"
+#define  DEBUG_MODE_FILE "/data/out/lidbg_loader.ko"
 
 
 int load_modules_count = 0;
@@ -123,6 +124,12 @@ int thread_loader(void *data)
     else
         kopath = "/system/lib/modules/out/";
 
+    if(is_file_exist(DEBUG_MODE_FILE))
+    {
+        gboot_mode = MD_DEBUG;
+        kopath = "/data/out/";
+    }
+	
     lidbg("thread_loader start,%d\n", gboot_mode);
     for(j = 0; insmod_soc_list[j] != NULL; j++)
     {

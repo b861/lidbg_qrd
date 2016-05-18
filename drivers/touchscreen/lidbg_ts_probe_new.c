@@ -123,11 +123,16 @@ void parse_ts_info(struct probe_device *ts_info)
         sprintf(path, "/flysystem/lib/out/%s", ts_info->name);
         lidbg_insmod( path );
     }
+    else  if(gboot_mode == MD_DEBUG)
+    {
+        sprintf(path, "/data/out/%s", ts_info->name);
+        lidbg_insmod( path );
+    }
     else
     {
         sprintf(path, "/system/lib/modules/out/%s", ts_info->name);
         lidbg_insmod( path );
-    }
+    }		
     lidbg_fs_log(TS_LOG_PATH, "loadts=%s,USE_TS_NUM:%d,g_var.hw_info.ts_type:%d,ts_should_revert:%d\n", ts_info->name, USE_TS_NUM, g_var.hw_info.ts_type, ts_should_revert);
     fs_mem_log("loadts=%s,USE_TS_NUM:%d,g_var.hw_info.ts_type:%d,ts_should_revert:%d\n", ts_info->name, USE_TS_NUM, g_var.hw_info.ts_type, ts_should_revert);
 
