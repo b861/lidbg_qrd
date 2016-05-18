@@ -751,12 +751,13 @@ public static void releaseBrightWakeLock()
 			//	restoreAirplaneMode(context);
 			while((SystemProperties.getBoolean("lidbg.hold_bootanim", false)||SystemProperties.getBoolean("lidbg.hold_bootanim2", false)) && (cnt < 50))
 			{
-				//LIDBG_PRINT("hold_bootanim2.stop,["+SystemProperties.getBoolean("lidbg.hold_bootanim", false)+"/"+SystemProperties.getBoolean("lidbg.hold_bootanim2", false)+"]\n");
 				SystemClock.sleep(100);
 				cnt ++;
+				if(cnt%10==0)
+					LIDBG_PRINT(cnt+"hold_bootanim2.stop,["+SystemProperties.getBoolean("lidbg.hold_bootanim", false)+"/"+SystemProperties.getBoolean("lidbg.hold_bootanim2", false)+"]\n");
 			}
 			SystemProperties.set("ctl.stop", "bootanim");
-			LIDBG_PRINT("powerOnSystem-hold_bootanim2.stop,cnt="+ cnt + "\n");
+			LIDBG_PRINT(cnt+"real.hold_bootanim2.stop,["+SystemProperties.getBoolean("lidbg.hold_bootanim", false)+"/"+SystemProperties.getBoolean("lidbg.hold_bootanim2", false)+"]\n");
 		}
 	}, "waitBootanima").start();
     }
