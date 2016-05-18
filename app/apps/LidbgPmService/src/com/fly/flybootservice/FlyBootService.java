@@ -71,6 +71,14 @@ import android.app.AlarmManager;
 
 import android.os.Build;
 
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
+import android.content.Context;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiManager;
+
 /*
  * ScreenOn ScreenOff DeviceOff Going2Sleep 四种状态分别表示：1.表示正常开屏状态2.表示关屏，但没关外设的状态
  * 0'~30'的阶段3.表示关屏关外设，但没到点进入深度休眠 30'~60'的阶段4.表示发出休眠请求到执行快速休眠 60'后,即进入深度休眠
@@ -131,7 +139,7 @@ public class FlyBootService extends Service {
     private boolean mFlyaudioInternetActionEn = true;
     private boolean mKillProcessEn = true;
     private Toast toast = null;
-
+    private boolean isWifiApEnabled=false;
 
     String mInternelBlackList[] = {
             "com.qti.cbwidget"
@@ -239,7 +247,13 @@ public class FlyBootService extends Service {
 								}else
 									LIDBG_PRINT("FlyBootService device down disable AirplaneMode");
 								SendBroadcastToService(KeyBootState, keyEearlySusupendOFF);
-								LIDBG_PRINT("FlyBootService sent device_down to hal");
+								LIDBG_PRINT("FlyBootService sent device_down to hal\n");
+								isWifiApEnabled = isWifiApEnabled();
+								LIDBG_PRINT("FlyBootService isWifiApEnabled:"+isWifiApEnabled+"\n");
+								if (isWifiApEnabled)
+								{
+									setWifiApState(false);
+								}
 							}else if(pmState == FBS_FASTBOOT_REQUEST){
 								LIDBG_PRINT("FlyBootService get pm state: FBS_FASTBOOT_REQUEST");
 							}else if(pmState == FBS_ANDROID_DOWN){
@@ -274,7 +288,10 @@ public class FlyBootService extends Service {
 								InternetEnable();
 								if(!blDozeModeFlag)
 									FlyaudioInternetEnable();
-
+								if (isWifiApEnabled)
+								{
+									setWifiApState(true);
+								}
 							}else if(pmState == FBS_SCREEN_ON){
 								LIDBG_PRINT("FlyBootService get pm state: FBS_SCREEN_ON");
 								acquireWakeLock();
@@ -430,7 +447,16 @@ public class FlyBootService extends Service {
 				cmdPara[cmdParabase][4], cmdPara[cmdParabase][5]);
 				handleRebootEvent();
 			break;
-
+			case 15:
+				LIDBG_PRINT("FlyBootService isWifiApEnabled:"+isWifiApEnabled()+"\n");
+			break;
+			case 16:
+				LIDBG_PRINT("FlyBootService enableWifiApState:"+setWifiApState(true)+"\n");
+			break;
+			case 17:
+				LIDBG_PRINT("FlyBootService disableWifiApState:"+setWifiApState(false)+"\n");
+			break;
+								
 			default:
 			LIDBG_PRINT("BroadcastReceiver.action:unkown"+action+"\n");
 			break;
@@ -1102,7 +1128,69 @@ public static void releaseBrightWakeLock()
 		else
 			LIDBG_PRINT("mInternelWhiteList = null\n");
 	}
+	public boolean setWifiApState(boolean enable)
+	{
+		String msg = "info:";
+		// TODO Auto-generated method stub
+		LIDBG_PRINT("FlyBootService setWifiApState:"+enable+"\n");
+		try
+		{
+			WifiManager mWifiManager = (WifiManager) mFlyBootService
+					.getSystemService(Context.WIFI_SERVICE);
+			Method method = mWifiManager.getClass().getMethod(
+					"getWifiApConfiguration");
+			method.setAccessible(true);
+			WifiConfiguration config = (WifiConfiguration) method
+					.invoke(mWifiManager);
+			Method method2 = mWifiManager.getClass().getMethod(
+					"setWifiApEnabled", WifiConfiguration.class, boolean.class);
+			method2.invoke(mWifiManager, config, enable);
+			LIDBG_PRINT("FlyBootService setWifiApState:exe suncess\n");
+			return true;
+		} catch (NoSuchMethodException e)
+		{
+			// TODO Auto-generated catch block
+			msg = e.getMessage();
+		} catch (IllegalArgumentException e)
+		{
+			// TODO Auto-generated catch block
+			msg = e.getMessage();
+		} catch (IllegalAccessException e)
+		{
+			// TODO Auto-generated catch block
+			msg = e.getMessage();
+		} catch (InvocationTargetException e)
+		{
+			// TODO Auto-generated catch block
+			msg = e.getMessage();
+		}
+		LIDBG_PRINT("FlyBootService setWifiApState:exe error:"+msg+"\n");
+		return false;
+	}
 
+	public boolean isWifiApEnabled()
+	{
+		String msg = "info:";
+		// TODO Auto-generated method stub
+		try
+		{
+			WifiManager mWifiManager = (WifiManager) mFlyBootService
+					.getSystemService(Context.WIFI_SERVICE);
+			Method method = mWifiManager.getClass()
+					.getMethod("isWifiApEnabled");
+			method.setAccessible(true);
+			LIDBG_PRINT("FlyBootService isWifiApEnabled:exe suncess\n");
+			return (Boolean) method.invoke(mWifiManager);
+		} catch (NoSuchMethodException e)
+		{
+			msg = e.getMessage();
+		} catch (Exception e)
+		{
+			msg = e.getMessage();
+		}
+		LIDBG_PRINT("FlyBootService isWifiApEnabled:exe error:"+msg+"\n");
+		return false;
+	}
 /////////////////////////////alarm added below/////////////////////////////////////////
 	protected long[][] cmdPara =
 	{
