@@ -43,6 +43,7 @@ u8 cfg_info_group34[] = CTP927_CFG_GROUP11;
 u8 cfg_info_group35[] = CTP927_CFG_GROUP12;
 u8 cfg_info_group36[] = CTP927_CFG_GROUP13;
 u8 cfg_info_group37[] = CTP_CFG_GROUP14;
+u8 cfg_info_group38[] = CTP_CFG_GROUP12;
 
 u8 *send_cfg_buf[] = {cfg_info_group1, cfg_info_group2,
                   cfg_info_group3, cfg_info_group4, cfg_info_group5, cfg_info_group6,
@@ -52,7 +53,7 @@ u8 *send_cfg_buf[] = {cfg_info_group1, cfg_info_group2,
                   cfg_info_group22, cfg_info_group23, cfg_info_group24, cfg_info_group25, cfg_info_group26, cfg_info_group27,
                   cfg_info_group28, cfg_info_group29,cfg_info_group30,
 		  cfg_info_group31, cfg_info_group32,cfg_info_group33,cfg_info_group34,cfg_info_group35,cfg_info_group36,
-		  cfg_info_group37
+		  cfg_info_group37, cfg_info_group38
                  };
 EXPORT_SYMBOL(send_cfg_buf);
 
@@ -93,6 +94,7 @@ u8 cfg_info_len[] = {CFG_GROUP_LEN(cfg_info_group1),
 		 CFG_GROUP_LEN(cfg_info_group35),
 		 CFG_GROUP_LEN(cfg_info_group36),
 		 CFG_GROUP_LEN(cfg_info_group37),
+		 CFG_GROUP_LEN(cfg_info_group38),
                 };
 
 EXPORT_SYMBOL(cfg_info_len);
@@ -104,7 +106,7 @@ EXPORT_SYMBOL(cfg_info_len);
 static int ts_config_init(void)
 {
     DUMP_BUILD_TIME;
-    //g_var.hw_info.ts_config = 0;
+    g_var.hw_info.ts_config = 38;
     //g_var.hw_info.virtual_key = 0;
     return 0;
 }
