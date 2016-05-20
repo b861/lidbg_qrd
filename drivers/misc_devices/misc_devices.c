@@ -126,13 +126,14 @@ static int thread_udisk_stable(void *data)
 #ifdef USB_HUB_SUPPORT
 static int thread_usb_hub_check(void *data)
 {
-    //msleep(2000);
+    msleep(2000);
      if(g_var.usb_status == 1)
      {
 	    if(!fs_is_file_exist("/sys/bus/usb/drivers/usb/1-1"))
 	    {
 	        lidbgerr("thread_usb_hub_check fail!\n");
 	        USB_POWER_DISABLE;
+		 msleep(500);
 		 USB_ID_HIGH_DEV;
 	        ssleep(2);
 		 USB_ID_LOW_HOST;
