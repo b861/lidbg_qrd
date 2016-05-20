@@ -157,13 +157,9 @@ typedef enum
 #if (defined(BUILD_SOC) || defined(BUILD_CORE) || defined(BUILD_DRIVERS))
 #define NOTIFIER_MAJOR_SYSTEM_STATUS_CHANGE (110)
 
-#ifdef SUSPEND_ONLINE
 #define NOTIFIER_MINOR_ACC_ON (20)
 #define NOTIFIER_MINOR_ACC_OFF (21)
-#else
-#define NOTIFIER_MINOR_ACC_ON (0)
-#define NOTIFIER_MINOR_ACC_OFF (1)
-#endif
+
 
 #define PM_WARN(fmt, args...) do { printk(KERN_CRIT"[lidbg]   [pm] .warn.%s: " fmt,__func__,##args);}while(0)
 #define PM_ERR(fmt, args...) do { printk(KERN_CRIT"[lidbg]   [pm] .lidbgerr.%s: " fmt,__func__,##args);}while(0)
