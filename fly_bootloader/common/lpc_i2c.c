@@ -147,6 +147,28 @@ void backlight_disable()
     }
 }
 
+void lpc_reboot()
+{
+    u8 Check_Sum = 0;
+    u8 back_light[8] = {0xff, 0x55, 0x5, 0x00, 0x03, 0x01, 0x00};
+    int i, j;
+
+    dprintf(CRITICAL, "lpc_reboot !\n");
+
+    for(i = 2; i < 7; i++)
+    {
+        Check_Sum += back_light[i];
+    }
+
+    back_light[7] = Check_Sum;
+
+    for(j = 0; j < 3; j++)
+    {
+        lpc_write(back_light, sizeof(back_light));
+        mdelay(10);
+    }
+}
+
 static void LPCdealReadFromMCUAll(unsigned char *p, int length)
 {
     int  i;

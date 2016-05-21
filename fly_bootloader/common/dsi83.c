@@ -150,10 +150,10 @@ static int SN65_Sequence_seq8(void)  /*seq 8 the bit must be set after the CSR`s
 #if 0
     dsi83_dump_reg();
 #endif
-    dprintf(INFO, "dsi83:Sequence 8\n");
+    dprintf(INFO, "dsi83:Sequence 8 SKIP SOFT RESET\n");
     buf2[0] = 0x09;
     buf2[1] = 0x01;
-    ret = SN65_register_write(buf2);
+//    ret = SN65_register_write(buf2);
     //dprintf(INFO,"write(0x09) = 0x%.2x\n",buf2[1]);
 
 #ifdef DSI83_DEBUG
