@@ -106,7 +106,7 @@ EXPORT_SYMBOL(cfg_info_len);
 static int ts_config_init(void)
 {
     DUMP_BUILD_TIME;
-    g_var.hw_info.ts_config = 38;
+//    g_var.hw_info.ts_config = 38;
     //g_var.hw_info.virtual_key = 0;
     return 0;
 }
