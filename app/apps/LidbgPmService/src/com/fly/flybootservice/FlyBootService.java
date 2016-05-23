@@ -79,6 +79,7 @@ import android.content.Context;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 
+import android.telephony.TelephonyManager;
 /*
  * ScreenOn ScreenOff DeviceOff Going2Sleep 四种状态分别表示：1.表示正常开屏状态2.表示关屏，但没关外设的状态
  * 0'~30'的阶段3.表示关屏关外设，但没到点进入深度休眠 30'~60'的阶段4.表示发出休眠请求到执行快速休眠 60'后,即进入深度休眠
@@ -141,6 +142,7 @@ public class FlyBootService extends Service {
     private Toast toast = null;
     private boolean isWifiApEnabled=false;
     private boolean isWifiEnabled=false;
+    private boolean isSimCardReady=false;
 
     String mInternelBlackList[] = {
             "com.qti.cbwidget"
@@ -234,7 +236,8 @@ public class FlyBootService extends Service {
 						}
 						else{
 							if(pmState == FBS_SCREEN_OFF){
-								LIDBG_PRINT("FlyBootService get pm state: FBS_SCREEN_OFF");
+								isSimCardReady=isSimCardReady();
+								LIDBG_PRINT("FlyBootService get pm state: FBS_SCREEN_OFF/isSimCardReady:"+isSimCardReady+"\n");
 								previousACCOffTime = SystemClock.elapsedRealtime();
 								SendBroadcastToService(KeyBootState, keyScreenOFF);
 							}else if(pmState == FBS_DEVICE_DOWN){
@@ -1148,6 +1151,15 @@ public static void releaseBrightWakeLock()
 		else
 			LIDBG_PRINT("mInternelWhiteList = null\n");
 	}
+	
+	protected boolean isSimCardReady()
+	{
+		// TODO Auto-generated method stub
+		TelephonyManager mTelephonyManager = (TelephonyManager) mFlyBootService
+				.getSystemService(Context.TELEPHONY_SERVICE);
+		return (mTelephonyManager.getSimState() == TelephonyManager.SIM_STATE_READY);
+	}
+///////////////////////////////////
 	public boolean setWifiApState(boolean enable)
 	{
 		String msg = "info:";
