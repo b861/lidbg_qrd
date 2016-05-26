@@ -127,6 +127,8 @@ static void status_fifo_in(unsigned char status)
 		dvr_fail_proc();
 		rear_fail_proc();
 	}
+	else if(status == RET_DVR_DISCONNECT) dvr_fail_proc();
+	else if(status == RET_REAR_DISCONNECT) rear_fail_proc();
 	lidbg("%s:====fifo in => %d====\n",__func__,status);
 	down(&pfly_UsbCamInfo->sem);
 	//if(kfifo_is_full(&camStatus_data_fifo));
@@ -239,11 +241,11 @@ static struct notifier_block lidbg_notifier =
  *****************************************************************************/
 static void suspend_stoprec_timer_isr(unsigned long data)
 {
-	if(isDVRRec ||  isOnlineRec || isRearRec)
-	{
+	//if(isDVRRec ||  isOnlineRec || isRearRec)
+	//{
 	    lidbg("-------[TIMER]uvccam stop_recording -----\n");
 		complete(&timer_stop_rec_wait);
-	}
+	//}
 }
 
 static void set_par_timer_isr(unsigned long data)
@@ -279,7 +281,7 @@ static int thread_stop_rec_func(void *data)
 			if(stop_rec(REARVIEW_ID,1))lidbg("%s:====return fail====\n",__func__);
 			notify_online(RET_REAR_FORCE_STOP);
 		}
-		
+		lidbg_shell_cmd("echo 'udisk_unrequest' > /dev/flydev0");
 		isDVRRec = 0;
 		isOnlineRec = 0;
 		isRearRec = 0;
@@ -847,7 +849,7 @@ static int stop_rec(char cam_id,char isPowerCtl)
 		if(!wait_event_interruptible_timeout(pfly_UsbCamInfo->camStatus_wait_queue, (pfly_UsbCamInfo->read_status == RET_REAR_STOP), 3*HZ))
 		{
 			lidbg("%s:====read_status wait timeout => %d====\n",__func__,pfly_UsbCamInfo->read_status);
-			return 1; 
+			ret = 1; 
 		}
 	}
 	msleep(500);
